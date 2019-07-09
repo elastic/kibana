@@ -27,6 +27,7 @@ interface GetDataFrameTransformsResponse {
 }
 
 interface GetDataFrameTransformsStatsResponseOk {
+  node_failures?: object;
   count: number;
   transforms: DataFrameJobStateStats[];
 }

@@ -25,6 +25,7 @@ export interface DataFrameJobState {
     percent_complete: number;
     total_docs: number;
   };
+  reason?: string;
   // task_state is the attribute to check against if a job
   // is running or not.
   task_state: DATA_FRAME_TASK_STATE;

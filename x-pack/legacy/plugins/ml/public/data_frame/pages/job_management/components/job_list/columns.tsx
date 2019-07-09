@@ -13,12 +13,19 @@ import {
   EuiFlexItem,
   EuiProgress,
   EuiText,
+  EuiToolTip,
   RIGHT_ALIGNMENT,
 } from '@elastic/eui';
 
 import { JobId } from '../../../../common';
-import { DataFrameJobListColumn, DataFrameJobListRow } from './common';
+import { DATA_FRAME_TASK_STATE, DataFrameJobListColumn, DataFrameJobListRow } from './common';
 import { getActions } from './actions';
+
+enum TASK_STATE_COLOR {
+  failed = 'danger',
+  started = 'primary',
+  stopped = 'hollow',
+}
 
 export const getColumns = (
   expandedRowItemIds: JobId[],
@@ -93,7 +100,16 @@ export const getColumns = (
       sortable: (item: DataFrameJobListRow) => item.state.task_state,
       truncateText: true,
       render(item: DataFrameJobListRow) {
-        const color = item.state.task_state === 'started' ? 'primary' : 'hollow';
+        const color = TASK_STATE_COLOR[item.state.task_state];
+
+        if (item.state.task_state === DATA_FRAME_TASK_STATE.FAILED) {
+          return (
+            <EuiToolTip content={item.state.reason}>
+              <EuiBadge color={color}>{item.state.task_state}</EuiBadge>
+            </EuiToolTip>
+          );
+        }
+
         return <EuiBadge color={color}>{item.state.task_state}</EuiBadge>;
       },
       width: '100px',
@@ -141,8 +157,10 @@ export const getColumns = (
             {!isBatchTransform && (
               <Fragment>
                 <EuiFlexItem style={{ width: '40px' }} grow={false}>
-                  {item.state.task_state === 'started' && <EuiProgress color="primary" size="m" />}
-                  {item.state.task_state !== 'started' && (
+                  {item.state.task_state === DATA_FRAME_TASK_STATE.STARTED && (
+                    <EuiProgress color="primary" size="m" />
+                  )}
+                  {item.state.task_state !== DATA_FRAME_TASK_STATE.STOPPED && (
                     <EuiProgress value={0} max={100} color="primary" size="m" />
                   )}
                 </EuiFlexItem>
