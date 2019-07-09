@@ -63,7 +63,7 @@ export class HoverWidget extends React.PureComponent<HoverWidgetProps> {
       ),
       code: ({ value, language }: { value: string; language: string }) => {
         const support = TokenizationRegistry.get(language);
-        const code = tokenizeToString(value, support);
+        const code = tokenizeToString(value || '', support);
         return <div className="code" dangerouslySetInnerHTML={{ __html: code }} />;
       },
     };
