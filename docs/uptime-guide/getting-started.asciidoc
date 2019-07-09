@@ -48,16 +48,23 @@ Install Kibana, start it up, and open up the web interface:
 [[install-heartbeat]]
 === Step 3: Install and configure Heartbeat
 
-IMPORTANT: Make sure you're using the same major versions of Heartbeat and Kibana.
+Uptime requires the setup of monitors in Heartbeat.
+These monitors provide the data you'll be visualizing in the Uptime UI.
 
-The *Setup Instructions* in Kibana will get you started with installing and configuring Heartbeat.
+See the *Setup Instructions* in Kibana for instructions on installing and configuring Heartbeat.
+Additional information is available in {heartbeat-ref}/heartbeat-configuration.html[Configure Heartbeat].
 
 [role="screenshot"]
-image::uptime-guide/images/uptime-setup.png[Installation instructions on the Uptime page in Kibana]
+image::images/uptime-setup.png[Installation instructions on the Uptime page in Kibana]
 
-Index patterns tell Kibana which Elasticsearch indices you want to explore.
-The Uptime UI requires a `heartbeat-7*`` index pattern.
+[float]
+==== Important considerations
+
+* Make sure you're using the same major versions of Heartbeat and Kibana.
+
+* Index patterns tell Kibana which Elasticsearch indices you want to explore.
+The Uptime UI requires a `heartbeat-7*` index pattern.
 If you have configured a different index pattern, you can use field aliases to ensure data is recognized by the UI.
 
 After you install and configure Heartbeat,
-the {uptime-guide}/overview.html[Uptime UI] will automatically populate with the Heartbeat monitors.
+the {kibana-ref}/xpack-uptime.html[Uptime UI] will automatically populate with the Heartbeat monitors.

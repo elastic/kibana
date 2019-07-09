@@ -1,8 +1,6 @@
 [[uptime-guide]]
 = Uptime monitoring guide
 
-// remove these??
-// Anything needed on the docs repo side of things?
 include::{asciidoc-dir}/../../shared/versions.asciidoc[]
 
 include::{asciidoc-dir}/../../shared/attributes.asciidoc[]
