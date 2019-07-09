@@ -94,7 +94,7 @@ const providerMap = new Map<
 ]);
 
 function assertRequest(request: KibanaRequest) {
-  if (!request || !(request instanceof KibanaRequest)) {
+  if (!(request instanceof KibanaRequest)) {
     throw new Error(`Request should be a valid "KibanaRequest" instance, was [${typeof request}].`);
   }
 }
@@ -269,8 +269,7 @@ export class Authenticator {
         providerType,
         isSystemAPIRequest: this.options.isSystemAPIRequest(request),
         authenticationResult,
-        existingSession:
-          existingSession && existingSession.provider === providerType ? existingSession : null,
+        existingSession: ownsSession ? existingSession : null,
       });
 
       if (
@@ -316,25 +315,20 @@ export class Authenticator {
   /**
    * Returns provider iterator where providers are sorted in the order of priority (based on the session ownership).
    * @param sessionValue Current session value.
-   * @param [loginAttempt] Optional provider login attempt. If present, login attempt always has a higher
-   * priority comparing to the existing session.
    */
   private *providerIterator(
-    sessionValue: ProviderSession | null,
-    loginAttempt?: ProviderLoginAttempt
+    sessionValue: ProviderSession | null
   ): IterableIterator<[string, BaseAuthenticationProvider]> {
-    // If there is no session or login attempt to predict which provider to use first, let's use the order
-    // providers are configured in. Otherwise return provider that owns login attempt/session first, and
-    // only then the rest of providers. Login attempt always takes precedence over session.
-    const preferredProvider =
-      (loginAttempt && loginAttempt.provider) || (sessionValue && sessionValue.provider);
-    if (!preferredProvider) {
+    // If there is no session to predict which provider to use first, let's use the order
+    // providers are configured in. Otherwise return provider that owns session first, and only then the rest
+    // of providers.
+    if (!sessionValue) {
       yield* this.providers;
     } else {
-      yield [preferredProvider, this.providers.get(preferredProvider)!];
+      yield [sessionValue.provider, this.providers.get(sessionValue.provider)!];
 
-      for (const [providerType, provider] of this.providers.entries()) {
-        if (providerType !== preferredProvider) {
+      for (const [providerType, provider] of this.providers) {
+        if (providerType !== sessionValue.provider) {
           yield [providerType, provider];
         }
       }

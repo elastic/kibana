@@ -21,9 +21,7 @@ const providerOptionsSchema = (providerType: string, optionsSchema: Type<any>) =
       validate: providers => (!providers.includes(providerType) ? 'error' : undefined),
     }),
     optionsSchema,
-    schema.maybe(
-      schema.any({ validate: () => `[authc.providers] should include "${providerType}".` })
-    )
+    schema.never()
   );
 
 export const ConfigSchema = schema.object(

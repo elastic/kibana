@@ -42,7 +42,7 @@ export interface PluginSetupContract {
   config: RecursiveReadonly<{
     sessionTimeout: number | null;
     secureCookies: boolean;
-    authc: { providers: ReadonlyArray<string> };
+    authc: { providers: string[] };
   }>;
 
   registerLegacyAPI: (legacyAPI: LegacyAPI) => void;

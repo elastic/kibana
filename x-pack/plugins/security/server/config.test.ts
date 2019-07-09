@@ -129,9 +129,7 @@ Object {
     it(`realm is not allowed when authc.providers is "['basic']"`, async () => {
       expect(() =>
         ConfigSchema.validate({ authc: { providers: ['basic'], oidc: { realm: 'realm-1' } } })
-      ).toThrowErrorMatchingInlineSnapshot(
-        `"[authc.oidc]: [authc.providers] should include \\"oidc\\"."`
-      );
+      ).toThrowErrorMatchingInlineSnapshot(`"[authc.oidc]: a value wasn't expected to be present"`);
     });
   });
 
@@ -168,9 +166,7 @@ Object {
     it('`realm` is not allowed if saml provider is not enabled', async () => {
       expect(() =>
         ConfigSchema.validate({ authc: { providers: ['basic'], saml: { realm: 'realm-1' } } })
-      ).toThrowErrorMatchingInlineSnapshot(
-        `"[authc.saml]: [authc.providers] should include \\"saml\\"."`
-      );
+      ).toThrowErrorMatchingInlineSnapshot(`"[authc.saml]: a value wasn't expected to be present"`);
     });
   });
 });
