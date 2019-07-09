@@ -12,8 +12,7 @@ import { DatasourcePublicAPI, DatasourceDimensionPanelProps, Operation } from '.
 import { State, SeriesType } from './types';
 import { Position } from '@elastic/charts';
 import { NativeRendererProps } from '../native_renderer';
-import * as generator from '../id_generator';
-import { mockGeneratedIds } from '../id_generator/mock';
+import { generateId } from '../id_generator';
 
 jest.mock('../id_generator');
 
@@ -333,7 +332,7 @@ describe('XYConfigPanel', () => {
   });
 
   test('allows adding y dimensions', () => {
-    mockGeneratedIds(generator, 'zed');
+    (generateId as jest.Mock).mockReturnValueOnce('zed');
     const setState = jest.fn();
     const state = testState();
     const component = mount(
@@ -354,7 +353,7 @@ describe('XYConfigPanel', () => {
   });
 
   test('allows adding split dimensions', () => {
-    mockGeneratedIds(generator, 'foo');
+    (generateId as jest.Mock).mockReturnValueOnce('foo');
     const setState = jest.fn();
     const state = testState();
     const component = mount(

@@ -8,8 +8,7 @@ import { getSuggestions } from './xy_suggestions';
 import { TableColumn, VisualizationSuggestion } from '../types';
 import { State } from './types';
 import { Ast } from '@kbn/interpreter/target/common';
-import * as generator from '../id_generator';
-import { mockGeneratedIds } from '../id_generator/mock';
+import { generateId } from '../id_generator';
 
 jest.mock('../id_generator');
 
@@ -92,7 +91,7 @@ describe('xy_suggestions', () => {
   });
 
   test('suggests a basic x y chart with date on x', () => {
-    mockGeneratedIds(generator, 'aaa');
+    (generateId as jest.Mock).mockReturnValueOnce('aaa');
     const [suggestion, ...rest] = getSuggestions({
       tables: [
         {
@@ -148,7 +147,7 @@ Object {
   });
 
   test('supports multiple suggestions', () => {
-    mockGeneratedIds(generator, 'bbb', 'ccc');
+    (generateId as jest.Mock).mockReturnValueOnce('bbb').mockReturnValueOnce('ccc');
     const [s1, s2, ...rest] = getSuggestions({
       tables: [
         {
@@ -194,7 +193,7 @@ Array [
   });
 
   test('handles two numeric values', () => {
-    mockGeneratedIds(generator, 'ddd');
+    (generateId as jest.Mock).mockReturnValueOnce('ddd');
     const [suggestion] = getSuggestions({
       tables: [
         {
@@ -221,7 +220,7 @@ Object {
   });
 
   test('handles unbucketed suggestions', () => {
-    mockGeneratedIds(generator, 'eee');
+    (generateId as jest.Mock).mockReturnValueOnce('eee');
     const [suggestion] = getSuggestions({
       tables: [
         {

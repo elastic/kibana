@@ -10,8 +10,7 @@ import { Ast } from '@kbn/interpreter/target/common';
 import { Operation } from '../types';
 import { State } from './types';
 import { createMockDatasource } from '../editor_frame_plugin/mocks';
-import { mockGeneratedIds } from '../id_generator/mock';
-import * as generator from '../id_generator';
+import { generateId } from '../id_generator';
 
 jest.mock('../id_generator');
 
@@ -39,7 +38,10 @@ function exampleState(): State {
 describe('xy_visualization', () => {
   describe('#initialize', () => {
     it('loads default state', () => {
-      mockGeneratedIds(generator, 'test-id1', 'test-id2', 'test-id3');
+      (generateId as jest.Mock)
+        .mockReturnValueOnce('test-id1')
+        .mockReturnValueOnce('test-id2')
+        .mockReturnValue('test-id3');
       const mockDatasource = createMockDatasource();
       const initialState = xyVisualization.initialize(mockDatasource.publicAPIMock);
 

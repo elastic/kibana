@@ -14,8 +14,7 @@ import {
 import { mount } from 'enzyme';
 import { act } from 'react-dom/test-utils';
 import { Operation, DataType } from '../types';
-import * as generator from '../id_generator';
-import { mockGeneratedIds } from '../id_generator/mock';
+import { generateId } from '../id_generator';
 
 jest.mock('../id_generator');
 
@@ -23,7 +22,7 @@ describe('Datatable Visualization', () => {
   describe('#initialize', () => {
     it('should initialize from the empty state', () => {
       const datasource = createMockDatasource();
-      mockGeneratedIds(generator, 'id');
+      (generateId as jest.Mock).mockReturnValueOnce('id');
       expect(datatableVisualization.initialize(datasource.publicAPIMock)).toEqual({
         columns: [{ id: 'id', label: '' }],
       });
@@ -141,7 +140,7 @@ describe('Datatable Visualization', () => {
         />
       );
 
-      mockGeneratedIds(generator, 'newId');
+      (generateId as jest.Mock).mockReturnValueOnce('newId');
 
       act(() => {
         wrapper

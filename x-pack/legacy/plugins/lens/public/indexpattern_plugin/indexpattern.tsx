@@ -10,12 +10,12 @@ import { render } from 'react-dom';
 import { Chrome } from 'ui/chrome';
 import { ToastNotifications } from 'ui/notify/toasts/toast_notifications';
 import { EuiComboBox } from '@elastic/eui';
-import uuid from 'uuid';
 import {
   DatasourceDimensionPanelProps,
   DatasourceDataPanelProps,
   DimensionPriority,
   DatasourceSuggestion,
+  Operation,
 } from '../types';
 import { getIndexPatterns } from './loader';
 import { ChildDragDropProvider, DragDrop } from '../drag_drop';
@@ -165,7 +165,7 @@ export function IndexPatternDataPanel(props: DatasourceDataPanelProps<IndexPatte
   );
 }
 
-export function columnToOperation(column: IndexPatternColumn) {
+export function columnToOperation(column: IndexPatternColumn): Operation {
   const { dataType, label, isBucketed, operationId } = column;
   return {
     id: operationId,
@@ -209,6 +209,12 @@ function addRestrictionsToFields(
     timeFieldName: timeFieldName || undefined,
     fields: newFields,
   };
+}
+
+function removeProperty<T>(prop: string, object: Record<string, T>): Record<string, T> {
+  const result = { ...object };
+  delete result[prop];
+  return result;
 }
 
 export function getIndexPatternDatasource(chrome: Chrome, toastNotifications: ToastNotifications) {
@@ -273,7 +279,13 @@ export function getIndexPatternDatasource(chrome: Chrome, toastNotifications: To
           );
         },
 
-        removeColumnInTableSpec: (columnId: string) => [],
+        removeColumnInTableSpec: (columnId: string) => {
+          setState({
+            ...state,
+            columnOrder: state.columnOrder.filter(id => id !== columnId),
+            columns: removeProperty(columnId, state.columns),
+          });
+        },
         moveColumnTo: (columnId: string, targetIndex: number) => {},
         duplicateColumn: (columnId: string) => [],
       };

@@ -13,14 +13,12 @@ import {
   EuiForm,
   EuiFormRow,
   EuiSwitch,
-  EuiButtonIcon,
-  EuiButton,
   IconType,
 } from '@elastic/eui';
 import { State, SeriesType } from './types';
-import { VisualizationProps, Operation } from '../types';
+import { VisualizationProps } from '../types';
 import { NativeRenderer } from '../native_renderer';
-import { generateId } from '../id_generator';
+import { MultiColumnEditor } from './multi_column_editor';
 
 const chartTypeIcons: Array<{ id: SeriesType; label: string; iconType: IconType }> = [
   {
@@ -149,30 +147,23 @@ export function XYConfigPanel(props: VisualizationProps<State>) {
           defaultMessage: 'Split series',
         })}
       >
-        <>
-          {state.splitSeriesAccessors.map(columnId => (
-            <NativeRenderer
-              data-test-subj="lnsXY_splitDimensionPanel"
-              render={datasource.renderDimensionPanel}
-              nativeProps={{
-                columnId,
-                dragDropContext: props.dragDropContext,
-                filterOperations: (op: Operation) => op.isBucketed === true,
-                suggestedPriority: 0,
-              }}
-            />
-          ))}
-          <EuiButton
-            data-test-subj="lnsXY_splitSeriesDimensionPanel_add"
-            onClick={() =>
-              setState({
-                ...state,
-                splitSeriesAccessors: [...state.splitSeriesAccessors, generateId()],
-              })
-            }
-            iconType="plusInCircle"
-          />
-        </>
+        <MultiColumnEditor
+          accessors={state.splitSeriesAccessors}
+          datasource={datasource}
+          dragDropContext={props.dragDropContext}
+          onAdd={accessor =>
+            setState({ ...state, splitSeriesAccessors: [...state.splitSeriesAccessors, accessor] })
+          }
+          onRemove={accessor =>
+            setState({
+              ...state,
+              splitSeriesAccessors: state.splitSeriesAccessors.filter(col => col !== accessor),
+            })
+          }
+          filterOperations={op => op.isBucketed}
+          suggestedPriority={0}
+          testSubj="splitSeriesDimensionPanel"
+        />
       </EuiFormRow>
 
       <EuiFormRow
@@ -260,54 +251,31 @@ export function XYConfigPanel(props: VisualizationProps<State>) {
               defaultMessage: 'Value',
             })}
           >
-            <>
-              {state.y.accessors.map(accessor => (
-                <div key={accessor}>
-                  <NativeRenderer
-                    data-test-subj={`lnsXY_yDimensionPanel_${accessor}`}
-                    render={datasource.renderDimensionPanel}
-                    nativeProps={{
-                      columnId: accessor,
-                      dragDropContext: props.dragDropContext,
-                      filterOperations: (op: Operation) =>
-                        !op.isBucketed && op.dataType === 'number',
-                    }}
-                  />
-                  <EuiButtonIcon
-                    size="s"
-                    color="warning"
-                    data-test-subj={`lnsXY_yDimensionPanel_remove_${accessor}`}
-                    iconType="trash"
-                    onClick={() => {
-                      datasource.removeColumnInTableSpec(accessor);
-                      setState({
-                        ...state,
-                        y: {
-                          ...state.y,
-                          accessors: state.y.accessors.filter(col => col !== accessor),
-                        },
-                      });
-                    }}
-                    aria-label={i18n.translate('xpack.lens.xyChart.yRemoveAriaLabel', {
-                      defaultMessage: 'Remove',
-                    })}
-                  />
-                </div>
-              ))}
-              <EuiButton
-                data-test-subj="lnsXY_yDimensionPanel_add"
-                onClick={() =>
-                  setState({
-                    ...state,
-                    y: {
-                      ...state.y,
-                      accessors: [...state.y.accessors, generateId()],
-                    },
-                  })
-                }
-                iconType="plusInCircle"
-              />
-            </>
+            <MultiColumnEditor
+              accessors={state.y.accessors}
+              datasource={datasource}
+              dragDropContext={props.dragDropContext}
+              onAdd={accessor =>
+                setState({
+                  ...state,
+                  y: {
+                    ...state.y,
+                    accessors: [...state.y.accessors, accessor],
+                  },
+                })
+              }
+              onRemove={accessor =>
+                setState({
+                  ...state,
+                  y: {
+                    ...state.y,
+                    accessors: state.y.accessors.filter(col => col !== accessor),
+                  },
+                })
+              }
+              filterOperations={op => !op.isBucketed && op.dataType === 'number'}
+              testSubj="yDimensionPanel"
+            />
           </EuiFormRow>
 
           <EuiFormRow>
