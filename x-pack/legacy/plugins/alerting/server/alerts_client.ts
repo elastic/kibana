@@ -200,7 +200,7 @@ export class AlertsClient {
           enabled: false,
           scheduledTaskId: null,
         },
-        { references: existingObject.references },
+        { references: existingObject.references }
       );
     }
   }
