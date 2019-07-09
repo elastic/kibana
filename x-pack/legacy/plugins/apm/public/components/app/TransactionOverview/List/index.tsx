@@ -16,6 +16,8 @@ import { ImpactBar } from '../../../shared/ImpactBar';
 import { APMLink } from '../../../shared/Links/APMLink';
 import { legacyEncodeURIComponent } from '../../../shared/Links/url_helpers';
 import { ITableColumn, ManagedTable } from '../../../shared/ManagedTable';
+import { LoadingStatePrompt } from '../../../shared/LoadingStatePrompt';
+import { EmptyMessage } from '../../../shared/EmptyMessage';
 
 const TransactionNameLink = styled(APMLink)`
   ${truncate('100%')};
@@ -25,9 +27,10 @@ const TransactionNameLink = styled(APMLink)`
 interface Props {
   items: ITransactionGroup[];
   serviceName: string;
+  isLoading: boolean;
 }
 
-export function TransactionList({ items, serviceName, ...rest }: Props) {
+export function TransactionList({ items, serviceName, isLoading }: Props) {
   const columns: Array<ITableColumn<ITransactionGroup>> = useMemo(
     () => [
       {
@@ -111,14 +114,22 @@ export function TransactionList({ items, serviceName, ...rest }: Props) {
     [serviceName]
   );
 
+  const noItemsMessage = (
+    <EmptyMessage
+      heading={i18n.translate('xpack.apm.tracesTable.notFoundLabel', {
+        defaultMessage: 'No transactions were found.'
+      })}
+    />
+  );
+
   return (
     <ManagedTable
+      noItemsMessage={isLoading ? <LoadingStatePrompt /> : noItemsMessage}
       columns={columns}
       items={items}
       initialSortField="impact"
       initialSortDirection="desc"
       initialPageSize={25}
-      {...rest}
     />
   );
 }

@@ -80,7 +80,10 @@ export function TransactionOverview({
     return null;
   }
 
-  const { data: transactionListData } = useTransactionList(urlParams);
+  const {
+    data: transactionListData,
+    status: transactionListStatus
+  } = useTransactionList(urlParams);
   const { data: hasMLJob = false } = useFetcher(
     () => getHasMLJob({ serviceName, transactionType }),
     [serviceName, transactionType]
@@ -136,6 +139,7 @@ export function TransactionOverview({
         </EuiTitle>
         <EuiSpacer size="s" />
         <TransactionList
+          isLoading={transactionListStatus === 'loading'}
           items={transactionListData}
           serviceName={serviceName}
         />

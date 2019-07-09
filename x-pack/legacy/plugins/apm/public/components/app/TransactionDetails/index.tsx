@@ -61,7 +61,7 @@ export function TransactionDetails() {
       <EuiPanel>
         <TransactionDistribution
           distribution={distributionData}
-          loading={
+          isLoading={
             distributionStatus === FETCH_STATUS.LOADING ||
             distributionStatus === undefined
           }
