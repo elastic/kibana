@@ -55,7 +55,7 @@ export function fireRoute({ server, actionTypeRegistry, getServices }: FireRoute
       const savedObjectsClient = request.getSavedObjectsClient();
       // Ensure user can read the action and has access to it
       await savedObjectsClient.get('action', id);
-      await execute({
+      const result = await execute({
         params,
         actionTypeRegistry,
         actionId: id,
@@ -63,7 +63,7 @@ export function fireRoute({ server, actionTypeRegistry, getServices }: FireRoute
         services: getServices(request.getBasePath(), { savedObjectsClient }),
         encryptedSavedObjectsPlugin: server.plugins.encrypted_saved_objects!,
       });
-      return h.response();
+      return result;
     },
   });
 }

@@ -61,14 +61,11 @@ function ExtendedBoundsParamEditor({
     });
   }
 
-  useEffect(
-    () => {
-      setValidity(isValid);
+  useEffect(() => {
+    setValidity(isValid);
 
-      return () => setValidity(true);
-    },
-    [isValid]
-  );
+    return () => setValidity(true);
+  }, [isValid]);
 
   const handleChange = (ev: ChangeEvent<HTMLInputElement>, name: string) => {
     setValue({
@@ -78,7 +75,12 @@ function ExtendedBoundsParamEditor({
   };
 
   return (
-    <EuiFormRow fullWidth={true} isInvalid={showValidation ? !isValid : false} error={error}>
+    <EuiFormRow
+      fullWidth={true}
+      isInvalid={showValidation ? !isValid : false}
+      error={error}
+      compressed
+    >
       <EuiFlexGroup gutterSize="s">
         <EuiFlexItem>
           <EuiFieldNumber
@@ -93,6 +95,7 @@ function ExtendedBoundsParamEditor({
                 <strong>{minLabel}</strong>
               </EuiText>
             }
+            compressed
           />
         </EuiFlexItem>
         <EuiFlexItem>
@@ -108,6 +111,7 @@ function ExtendedBoundsParamEditor({
                 <strong>{maxLabel}</strong>
               </EuiText>
             }
+            compressed
           />
         </EuiFlexItem>
       </EuiFlexGroup>

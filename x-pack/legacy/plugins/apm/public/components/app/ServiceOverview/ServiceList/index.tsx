@@ -8,16 +8,16 @@ import { EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import styled from 'styled-components';
-import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
 import { ServiceListAPIResponse } from '../../../../../server/lib/services/get_services';
+import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
 import { fontSizes, truncate } from '../../../../style/variables';
 import { asDecimal, asMillis } from '../../../../utils/formatters';
 import { APMLink } from '../../../shared/Links/APMLink';
-import { ITableColumn, ManagedTable } from '../../../shared/ManagedTable';
+import { ManagedTable } from '../../../shared/ManagedTable';
 import { EnvironmentBadge } from '../../../shared/EnvironmentBadge';
 
 interface Props {
-  items?: ServiceListAPIResponse['items'];
+  items: ServiceListAPIResponse['items'];
   noItemsMessage?: React.ReactNode;
 }
 
@@ -40,9 +40,7 @@ const AppLink = styled(APMLink)`
   ${truncate('100%')};
 `;
 
-export const SERVICE_COLUMNS: Array<
-  ITableColumn<ServiceListAPIResponse['items'][0]>
-> = [
+export const SERVICE_COLUMNS = [
   {
     field: 'serviceName',
     name: i18n.translate('xpack.apm.servicesTable.nameColumnLabel', {
@@ -121,13 +119,13 @@ export const SERVICE_COLUMNS: Array<
   }
 ];
 
-export function ServiceList({ items = [], noItemsMessage }: Props) {
+export function ServiceList({ items, noItemsMessage }: Props) {
   return (
     <ManagedTable
       columns={SERVICE_COLUMNS}
       items={items}
       noItemsMessage={noItemsMessage}
-      initialSort={{ field: 'serviceName', direction: 'asc' }}
+      initialSortField="serviceName"
       initialPageSize={50}
     />
   );

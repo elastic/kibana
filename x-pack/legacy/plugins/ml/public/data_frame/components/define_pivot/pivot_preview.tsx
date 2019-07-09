@@ -5,6 +5,7 @@
  */
 
 import React, { SFC, useContext, useEffect, useRef, useState } from 'react';
+import moment from 'moment-timezone';
 
 import { i18n } from '@kbn/i18n';
 
@@ -23,7 +24,9 @@ import {
   SortDirection,
 } from '@elastic/eui';
 
-import { dictionaryToArray } from '../../../../common/types/common';
+import { Dictionary, dictionaryToArray } from '../../../../common/types/common';
+import { ES_FIELD_TYPES } from '../../../../common/constants/field_types';
+import { formatHumanReadableDateTimeSeconds } from '../../../util/date_utils';
 
 import {
   DataFramePreviewRequest,
@@ -144,12 +147,13 @@ export const PivotPreview: SFC<PivotPreviewProps> = React.memo(({ aggs, groupBy,
   }
 
   const indexPattern = kibanaContext.currentIndexPattern;
-  const { dataFramePreviewData, errorMessage, previewRequest, status } = usePivotPreviewData(
-    indexPattern,
-    query,
-    aggs,
-    groupBy
-  );
+  const {
+    dataFramePreviewData,
+    dataFramePreviewMappings,
+    errorMessage,
+    previewRequest,
+    status,
+  } = usePivotPreviewData(indexPattern, query, aggs, groupBy);
 
   const groupByArr = dictionaryToArray(groupBy);
 
@@ -236,14 +240,47 @@ export const PivotPreview: SFC<PivotPreviewProps> = React.memo(({ aggs, groupBy,
   const columnKeys = getFlattenedFields(dataFramePreviewData[0]);
   columnKeys.sort(sortColumns(groupByArr));
 
-  const columns = columnKeys.map(k => {
-    return {
-      field: k,
-      name: k,
-      sortable: true,
-      truncateText: true,
-    };
-  });
+  const columns = columnKeys
+    .filter(k => typeof dataFramePreviewMappings.properties[k] !== 'undefined')
+    .map(k => {
+      const column: Dictionary<any> = {
+        field: k,
+        name: k,
+        sortable: true,
+        truncateText: true,
+      };
+      if (typeof dataFramePreviewMappings.properties[k] !== 'undefined') {
+        const esFieldType = dataFramePreviewMappings.properties[k].type;
+        switch (esFieldType) {
+          case ES_FIELD_TYPES.BOOLEAN:
+            column.dataType = 'boolean';
+            break;
+          case ES_FIELD_TYPES.DATE:
+            column.align = 'right';
+            column.render = (d: any) => formatHumanReadableDateTimeSeconds(moment(d).unix() * 1000);
+            break;
+          case ES_FIELD_TYPES.BYTE:
+          case ES_FIELD_TYPES.DOUBLE:
+          case ES_FIELD_TYPES.FLOAT:
+          case ES_FIELD_TYPES.HALF_FLOAT:
+          case ES_FIELD_TYPES.INTEGER:
+          case ES_FIELD_TYPES.LONG:
+          case ES_FIELD_TYPES.SCALED_FLOAT:
+          case ES_FIELD_TYPES.SHORT:
+            column.dataType = 'number';
+            break;
+          case ES_FIELD_TYPES.KEYWORD:
+          case ES_FIELD_TYPES.TEXT:
+            column.dataType = 'string';
+            break;
+        }
+      }
+      return column;
+    });
+
+  if (columns.length === 0) {
+    return null;
+  }
 
   const sorting = {
     sort: {
