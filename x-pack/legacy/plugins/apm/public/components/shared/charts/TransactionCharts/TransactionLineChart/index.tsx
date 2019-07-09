@@ -22,7 +22,7 @@ interface Props {
     type: string;
   }>;
   truncateLegends?: boolean;
-  tickFormatY: (y: number | null | undefined) => React.ReactNode;
+  tickFormatY: (y: number) => React.ReactNode;
   formatTooltipValue: (c: Coordinate) => React.ReactNode;
   yMax?: string | number;
   height?: number;

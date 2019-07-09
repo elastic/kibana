@@ -54,22 +54,22 @@ const msTimeUnitLabel = i18n.translate(
 );
 
 export class TransactionCharts extends Component<TransactionChartProps> {
-  public getResponseTimeTickFormatter = (t: number | null | undefined) => {
-    return isValidCoordinateValue(t) ? asMillis(t) : `- ${msTimeUnitLabel}`;
+  public getResponseTimeTickFormatter = (t: number) => {
+    return asMillis(t);
   };
 
   public getResponseTimeTooltipFormatter = (p: Coordinate) => {
-    return isValidCoordinateValue(p.y) ? asMillis(p.y) : `- ${msTimeUnitLabel}`;
+    return asMillis('y' in p ? p.y : null);
   };
 
-  public getTPMFormatter = (t: number | null | undefined) => {
+  public getTPMFormatter = (t: number) => {
     const { urlParams } = this.props;
     const unit = tpmUnit(urlParams.transactionType);
-    return isValidCoordinateValue(t) ? `${asInteger(t)} ${unit}` : `- ${unit}`;
+    return `${asInteger(t)} ${unit}`;
   };
 
   public getTPMTooltipFormatter = (p: Coordinate) => {
-    return this.getTPMFormatter(p.y);
+    return isValidCoordinateValue(p.y) ? this.getTPMFormatter(p.y) : '-';
   };
 
   public renderMLHeader(hasValidMlLicense: boolean) {
