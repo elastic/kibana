@@ -283,6 +283,7 @@ describe('TaskManagerRunner', () => {
     const id = _.random(1, 20).toString();
     const initialAttempts = _.random(0, 2);
     const backpressureDelay = _.random(15, 100);
+    const timeoutMinutes = 1;
     const getRetryDelayStub = sinon.stub().returns(backpressureDelay);
     const { runner, store } = testOpts({
       instance: {
@@ -292,6 +293,7 @@ describe('TaskManagerRunner', () => {
       },
       definitions: {
         bar: {
+          timeout: `${timeoutMinutes}m`,
           getRetryDelay: getRetryDelayStub,
           createTaskRunner: () => ({
             run: async () => undefined,
@@ -307,8 +309,73 @@ describe('TaskManagerRunner', () => {
     const instance = store.update.args[0][0];
 
     expect(
-      Math.abs(secondsFromNow(backpressureDelay).getTime() - instance.retryAt.getTime())
+      Math.abs(
+        secondsFromNow(backpressureDelay).getTime() +
+          timeoutMinutes * 60 * 1000 -
+          instance.retryAt.getTime()
+      )
     ).toBeLessThan(100);
+  });
+
+  test('Fails non-recurring task when maxAttempts reached', async () => {
+    const id = _.random(1, 20).toString();
+    const initialAttempts = 3;
+    const { runner, store } = testOpts({
+      instance: {
+        id,
+        attempts: initialAttempts,
+        interval: undefined,
+      },
+      definitions: {
+        bar: {
+          maxAttempts: 3,
+          createTaskRunner: () => ({
+            run: async () => {
+              throw new Error();
+            },
+          }),
+        },
+      },
+    });
+
+    await runner.run();
+
+    sinon.assert.calledOnce(store.update);
+    const instance = store.update.args[0][0];
+    expect(instance.attempts).toEqual(3);
+    expect(instance.status).toEqual('failed');
+    expect(instance.retryAt).toBeNull();
+    expect(instance.runAt.getTime()).toBeLessThanOrEqual(Date.now());
+  });
+
+  test(`Doesn't fail recurring tasks when maxAttempts reached`, async () => {
+    const id = _.random(1, 20).toString();
+    const initialAttempts = 3;
+    const { runner, store } = testOpts({
+      instance: {
+        id,
+        attempts: initialAttempts,
+        interval: '10s',
+      },
+      definitions: {
+        bar: {
+          maxAttempts: 3,
+          createTaskRunner: () => ({
+            run: async () => {
+              throw new Error();
+            },
+          }),
+        },
+      },
+    });
+
+    await runner.run();
+
+    sinon.assert.calledOnce(store.update);
+    const instance = store.update.args[0][0];
+    expect(instance.attempts).toEqual(3);
+    expect(instance.status).toEqual('idle');
+    expect(Math.abs(minutesFromNow(15).getTime() - instance.runAt.getTime())).toBeLessThan(100);
   });
 
   interface TestOpts {
