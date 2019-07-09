@@ -26,7 +26,7 @@ import { WithWaffleFilterUrlState } from '../../../containers/waffle/with_waffle
 import { WithWaffleOptionsUrlState } from '../../../containers/waffle/with_waffle_options';
 import { WithWaffleTimeUrlState } from '../../../containers/waffle/with_waffle_time';
 import { WithKibanaChrome } from '../../../containers/with_kibana_chrome';
-import { useTrackVisit } from '../../../hooks/use_track_visit';
+import { useTrackPageview } from '../../../hooks/use_track_metric';
 
 interface SnapshotPageProps {
   intl: InjectedIntl;
@@ -46,8 +46,8 @@ export const SnapshotPage = injectUICapabilities(
       metricIndicesExist,
     } = useContext(Source.Context);
 
-    useTrackVisit({ app: 'infra_metrics', path: 'inventory' });
-    useTrackVisit({ app: 'infra_metrics', path: 'inventory', delay: 15000 });
+    useTrackPageview({ app: 'infra_metrics', path: 'inventory' });
+    useTrackPageview({ app: 'infra_metrics', path: 'inventory', delay: 15000 });
 
     return (
       <ColumnarPage>

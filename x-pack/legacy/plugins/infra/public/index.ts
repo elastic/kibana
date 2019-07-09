@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { useTrackVisit } from './hooks/use_track_visit';
+export { useTrackPageview } from './hooks/use_track_metric';

@@ -30,7 +30,7 @@ import { DetailView } from './DetailView';
 import { ErrorDistribution } from './Distribution';
 import { useLocation } from '../../../hooks/useLocation';
 import { useUrlParams } from '../../../hooks/useUrlParams';
-import { useTrackVisit } from '../../../../../infra/public';
+import { useTrackPageview } from '../../../../../infra/public';
 
 const Titles = styled.div`
   margin-bottom: ${px(units.plus)};
@@ -90,8 +90,8 @@ export function ErrorGroupDetails() {
     }
   }, [serviceName, start, end, errorGroupId, uiFilters]);
 
-  useTrackVisit({ app: 'apm', path: 'error_group_details' });
-  useTrackVisit({ app: 'apm', path: 'error_group_details', delay: 15000 });
+  useTrackPageview({ app: 'apm', path: 'error_group_details' });
+  useTrackPageview({ app: 'apm', path: 'error_group_details', delay: 15000 });
 
   if (!errorGroupData || !errorDistributionData) {
     return null;

@@ -13,7 +13,7 @@ import { MetricsExplorerToolbar } from '../../../components/metrics_explorer/too
 import { SourceQuery } from '../../../../common/graphql/types';
 import { NoData } from '../../../components/empty_states';
 import { useMetricsExplorerState } from './use_metric_explorer_state';
-import { useTrackVisit } from '../../../hooks/use_track_visit';
+import { useTrackPageview } from '../../../hooks/use_track_metric';
 
 interface MetricsExplorerPageProps {
   intl: InjectedIntl;
@@ -42,8 +42,8 @@ export const MetricsExplorerPage = injectI18n(
       handleLoadMore,
     } = useMetricsExplorerState(source, derivedIndexPattern);
 
-    useTrackVisit({ app: 'infra_metrics', path: 'metrics_explorer' });
-    useTrackVisit({ app: 'infra_metrics', path: 'metrics_explorer', delay: 15000 });
+    useTrackPageview({ app: 'infra_metrics', path: 'metrics_explorer' });
+    useTrackPageview({ app: 'infra_metrics', path: 'metrics_explorer', delay: 15000 });
 
     return (
       <React.Fragment>

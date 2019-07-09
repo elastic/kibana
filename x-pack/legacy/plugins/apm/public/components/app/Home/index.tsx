@@ -18,7 +18,6 @@ import { SetupInstructionsLink } from '../../shared/Links/SetupInstructionsLink'
 import { ServiceOverview } from '../ServiceOverview';
 import { TraceOverview } from '../TraceOverview';
 import { APMLink } from '../../shared/Links/APMLink';
-import { useTrackVisit } from '../../../../../infra/public';
 
 const homeTabs: IHistoryTab[] = [
   {
@@ -44,8 +43,6 @@ const SETTINGS_LINK_LABEL = i18n.translate('xpack.apm.settingsLinkLabel', {
 });
 
 export function Home() {
-  useTrackVisit({ app: 'apm', path: 'home' });
-  useTrackVisit({ app: 'apm', path: 'home', delay: 15000 });
   return (
     <div>
       <ApmHeader>

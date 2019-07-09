@@ -15,16 +15,32 @@ import { trackUiMetric } from '../../../../../../src/legacy/core_plugins/ui_metr
 
 type ObservabilityApp = 'infra_metrics' | 'infra_logs' | 'apm' | 'uptime';
 
-interface TrackVisitProps {
+interface TrackProps {
   app: ObservabilityApp;
-  path: string;
-  delay?: number;
+  delay?: number; // in ms
+  effectDependencies?: unknown[];
 }
 
-export function useTrackVisit({ app, path, delay = 0 }: TrackVisitProps) {
+type TrackMetricProps = TrackProps & { metric: string };
+
+export function useTrackMetric({
+  app,
+  metric,
+  delay = 0,
+  effectDependencies = [],
+}: TrackMetricProps) {
   useEffect(() => {
-    const prefix = delay ? `visit_delay_${delay}ms` : 'visit';
-    const id = setTimeout(() => trackUiMetric(app, `${prefix}__${path}`), delay);
+    let decoratedMetric = metric;
+    if (delay > 0) {
+      decoratedMetric += `__delayed_${delay}ms`;
+    }
+    const id = setTimeout(() => trackUiMetric(app, decoratedMetric), Math.max(delay, 0));
     return () => clearTimeout(id);
-  }, []);
+  }, effectDependencies);
+}
+
+type TrackPageviewProps = TrackProps & { path: string };
+
+export function useTrackPageview({ path, ...rest }: TrackPageviewProps) {
+  useTrackMetric({ ...rest, metric: `pageview__${path}` });
 }
