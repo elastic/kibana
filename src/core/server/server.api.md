@@ -143,8 +143,7 @@ export class ElasticsearchErrorHelpers {
 export interface ElasticsearchServiceSetup {
     // (undocumented)
     readonly adminClient$: Observable<ClusterClient>;
-    // (undocumented)
-    readonly createClient: (type: string, config: ElasticsearchClientConfig) => ClusterClient;
+    readonly createClient: (type: string, clientConfig?: Partial<ElasticsearchClientConfig>) => ClusterClient;
     // (undocumented)
     readonly dataClient$: Observable<ClusterClient>;
     // (undocumented)
