@@ -6207,7 +6207,6 @@
     "xpack.ml.dataframe.definePivotForm.indexPatternLabel": "索引模式",
     "xpack.ml.dataframe.definePivotForm.queryHelpText": "使用查询字符串筛选源数据（可选）。",
     "xpack.ml.dataframe.definePivotForm.queryLabel": "查询",
-    "xpack.ml.dataframe.definePivotForm.queryPlaceholder": "搜索......",
     "xpack.ml.dataframe.definePivotForm.savedSearchLabel": "已保存搜索",
     "xpack.ml.dataframe.definePivotSummary.aggregationsLabel": "聚合",
     "xpack.ml.dataframe.definePivotSummary.groupByLabel": "分组依据",
