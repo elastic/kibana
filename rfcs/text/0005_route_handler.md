@@ -120,10 +120,10 @@ Server signals that request cannot be handled and explains details of the error 
 ```typescript
 // Supports attaching additional data to send to the client
 interface ResponseError extends Error {
-  meta: {
+  meta?: {
     data?: JSONValue;
-    code?: string; // error code to simplify search, translations in i18n, etc.
-    link?: string; // link to the docs
+    errorCode?: string; // error code to simplify search, translations in i18n, etc.
+    docLink?: string; // link to the docs
   }
 }
 
