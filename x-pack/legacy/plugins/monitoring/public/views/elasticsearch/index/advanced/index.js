@@ -79,6 +79,7 @@ uiRoutes.when('/elasticsearch/indices/:index/advanced', {
               indexSummary={data.indexSummary}
               metrics={data.metrics}
               onBrush={this.onBrush}
+              zoomInfo={this.zoomInfo}
             />
           </I18nContext>
         );
