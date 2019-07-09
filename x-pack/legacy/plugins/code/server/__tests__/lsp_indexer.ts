@@ -20,7 +20,7 @@ import { Logger } from '../log';
 import { InstallManager } from '../lsp/install_manager';
 import { LspService } from '../lsp/lsp_service';
 import { RepositoryConfigController } from '../repository_config_controller';
-import { createTestServerOption, emptyAsyncFunc } from '../test_utils';
+import { createTestHapiServer, createTestServerOption, emptyAsyncFunc } from '../test_utils';
 import { ConsoleLoggerFactory } from '../utils/console_logger_factory';
 
 const log: Logger = new ConsoleLoggerFactory().getLogger(['test']);
@@ -61,6 +61,7 @@ function prepareProject(url: string, p: string) {
 const repoUri = 'github.com/elastic/TypeScript-Node-Starter';
 
 const serverOptions = createTestServerOption();
+const server = createTestHapiServer();
 const gitOps = new GitOperations(serverOptions.repoPath);
 
 function cleanWorkspace() {
@@ -127,8 +128,7 @@ function setupLsServiceSendRequestSpy(): sinon.SinonSpy {
   );
 }
 
-// FLAKY: https://github.com/elastic/kibana/issues/36478 and https://github.com/elastic/kibana/issues/39574
-describe.skip('lsp_indexer unit tests', function(this: any) {
+describe('lsp_indexer unit tests', function(this: any) {
   this.timeout(20000);
 
   // @ts-ignore
@@ -170,7 +170,7 @@ describe.skip('lsp_indexer unit tests', function(this: any) {
       serverOptions,
       gitOps,
       esClient as EsClient,
-      {} as InstallManager,
+      new InstallManager(server, serverOptions),
       new ConsoleLoggerFactory(),
       new RepositoryConfigController(esClient as EsClient)
     );
@@ -235,7 +235,7 @@ describe.skip('lsp_indexer unit tests', function(this: any) {
       serverOptions,
       gitOps,
       esClient as EsClient,
-      {} as InstallManager,
+      new InstallManager(server, serverOptions),
       new ConsoleLoggerFactory(),
       new RepositoryConfigController(esClient as EsClient)
     );
@@ -284,7 +284,7 @@ describe.skip('lsp_indexer unit tests', function(this: any) {
       serverOptions,
       gitOps,
       esClient as EsClient,
-      {} as InstallManager,
+      new InstallManager(server, serverOptions),
       new ConsoleLoggerFactory(),
       new RepositoryConfigController(esClient as EsClient)
     );
@@ -301,7 +301,7 @@ describe.skip('lsp_indexer unit tests', function(this: any) {
 
     const indexer = new LspIndexer(
       repoUri,
-      '261557d',
+      'HEAD',
       lspservice,
       serverOptions,
       gitOps,
@@ -313,7 +313,7 @@ describe.skip('lsp_indexer unit tests', function(this: any) {
     await indexer.start(undefined, {
       repoUri: '',
       filePath: 'src/public/js/main.ts',
-      revision: '261557d',
+      revision: 'HEAD',
       localRepoPath: '',
     });
 

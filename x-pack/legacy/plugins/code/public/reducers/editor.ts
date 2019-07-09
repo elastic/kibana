@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import produce from 'immer';
-import { handleActions } from 'redux-actions';
+import { handleActions, Action } from 'redux-actions';
 import { Hover, TextDocumentPositionParams } from 'vscode-languageserver';
 import {
   closeReferences,
@@ -14,6 +14,7 @@ import {
   GroupedRepoReferences,
   hoverResult,
   revealPosition,
+  ReferenceResults,
 } from '../actions';
 
 export interface EditorState {
@@ -33,10 +34,12 @@ const initialState: EditorState = {
   referencesTitle: '',
 };
 
-export const editor = handleActions(
+type EditorPayload = ReferenceResults & Hover & TextDocumentPositionParams & Position & string;
+
+export const editor = handleActions<EditorState, EditorPayload>(
   {
-    [String(findReferences)]: (state: EditorState, action: any) =>
-      produce<EditorState>(state, (draft: EditorState) => {
+    [String(findReferences)]: (state, action: Action<TextDocumentPositionParams>) =>
+      produce<EditorState>(state, draft => {
         draft.refPayload = action.payload;
         draft.showing = true;
         draft.loading = true;
@@ -44,31 +47,31 @@ export const editor = handleActions(
         draft.hover = state.currentHover;
         draft.referencesTitle = initialState.referencesTitle;
       }),
-    [String(findReferencesSuccess)]: (state: EditorState, action: any) =>
+    [String(findReferencesSuccess)]: (state, action: any) =>
       produce<EditorState>(state, draft => {
         const { title, repos } = action.payload;
         draft.references = repos;
         draft.referencesTitle = title;
         draft.loading = false;
       }),
-    [String(findReferencesFailed)]: (state: EditorState) =>
+    [String(findReferencesFailed)]: state =>
       produce<EditorState>(state, draft => {
         draft.references = [];
         draft.loading = false;
         draft.refPayload = undefined;
       }),
-    [String(closeReferences)]: (state: EditorState) =>
+    [String(closeReferences)]: state =>
       produce<EditorState>(state, draft => {
         draft.showing = false;
         draft.loading = false;
         draft.refPayload = undefined;
         draft.references = [];
       }),
-    [String(hoverResult)]: (state: EditorState, action: any) =>
+    [String(hoverResult)]: (state, action: Action<Hover>) =>
       produce<EditorState>(state, draft => {
         draft.currentHover = action.payload;
       }),
-    [String(revealPosition)]: (state: EditorState, action: any) =>
+    [String(revealPosition)]: (state, action: Action<Position>) =>
       produce<EditorState>(state, draft => {
         draft.revealPosition = action.payload;
       }),

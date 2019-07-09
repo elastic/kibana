@@ -23,3 +23,19 @@ export interface LanguageServer {
   downloadUrl?: any;
   pluginName?: string;
 }
+
+export const CTAGS_SUPPORT_LANGS = [
+  'c',
+  'cpp',
+  'csharp',
+  'lua',
+  'pascal',
+  'perl',
+  'php',
+  'python',
+  'ruby',
+  'scheme',
+  'shell',
+  'sql',
+  'tcl',
+];

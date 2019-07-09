@@ -44,7 +44,6 @@ export const networkSchema = gql`
 
   type NetworkTopNFlowItem {
     _id: String
-    timestamp: Date
     source: TopNFlowItem
     destination: TopNFlowItem
     client: TopNFlowItem
@@ -61,6 +60,7 @@ export const networkSchema = gql`
     edges: [NetworkTopNFlowEdges!]!
     totalCount: Float!
     pageInfo: PageInfo!
+    inspect: Inspect
   }
 
   enum NetworkDnsFields {
@@ -82,7 +82,6 @@ export const networkSchema = gql`
     dnsBytesOut: Float
     dnsName: String
     queryCount: Float
-    timestamp: Date
     uniqueDomains: Float
   }
 
@@ -95,6 +94,7 @@ export const networkSchema = gql`
     edges: [NetworkDnsEdges!]!
     totalCount: Float!
     pageInfo: PageInfo!
+    inspect: Inspect
   }
 
   extend type Source {

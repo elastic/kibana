@@ -126,8 +126,6 @@ export interface Source {
 
   Domains: DomainsData;
 
-  DomainFirstLastSeen: FirstLastSeenDomain;
-
   Tls: TlsData;
 
   Users: UsersData;
@@ -135,6 +133,8 @@ export interface Source {
   KpiNetwork?: KpiNetworkData | null;
 
   KpiHosts: KpiHostsData;
+
+  KpiHostDetails: KpiHostDetailsData;
   /** Gets Hosts based on timerange and specified criteria, or all events in the timerange if no criteria is specified */
   NetworkTopNFlow: NetworkTopNFlowData;
 
@@ -201,6 +201,8 @@ export interface AuthenticationsData {
   totalCount: number;
 
   pageInfo: PageInfo;
+
+  inspect?: Inspect | null;
 }
 
 export interface AuthenticationsEdges {
@@ -323,20 +325,20 @@ export interface PageInfo {
   hasNextPage?: boolean | null;
 }
 
-export interface EventsData {
-  kpiEventType?: KpiItem[] | null;
+export interface Inspect {
+  dsl: string[];
 
+  response: string[];
+}
+
+export interface EventsData {
   edges: EcsEdges[];
 
   totalCount: number;
 
   pageInfo: PageInfo;
-}
 
-export interface KpiItem {
-  value?: string | null;
-
-  count: number;
+  inspect?: Inspect | null;
 }
 
 export interface EcsEdges {
@@ -803,6 +805,8 @@ export interface TimelineData {
   totalCount: number;
 
   pageInfo: PageInfo;
+
+  inspect?: Inspect | null;
 }
 
 export interface TimelineEdges {
@@ -829,6 +833,8 @@ export interface TimelineNonEcsData {
 
 export interface TimelineDetailsData {
   data?: DetailItem[] | null;
+
+  inspect?: Inspect | null;
 }
 
 export interface DetailItem {
@@ -849,6 +855,8 @@ export interface DetailItem {
 
 export interface LastEventTimeData {
   lastSeen?: Date | null;
+
+  inspect?: Inspect | null;
 }
 
 export interface HostsData {
@@ -857,6 +865,8 @@ export interface HostsData {
   totalCount: number;
 
   pageInfo: PageInfo;
+
+  inspect?: Inspect | null;
 }
 
 export interface HostsEdges {
@@ -873,6 +883,8 @@ export interface HostItem {
   host?: HostEcsFields | null;
 
   cloud?: CloudFields | null;
+
+  inspect?: Inspect | null;
 }
 
 export interface CloudFields {
@@ -894,6 +906,8 @@ export interface CloudMachine {
 }
 
 export interface FirstLastSeenHost {
+  inspect?: Inspect | null;
+
   firstSeen?: Date | null;
 
   lastSeen?: Date | null;
@@ -909,6 +923,8 @@ export interface IpOverviewData {
   server?: Overview | null;
 
   source?: Overview | null;
+
+  inspect?: Inspect | null;
 }
 
 export interface Overview {
@@ -935,6 +951,8 @@ export interface DomainsData {
   totalCount: number;
 
   pageInfo: PageInfo;
+
+  inspect?: Inspect | null;
 }
 
 export interface DomainsEdges {
@@ -979,18 +997,14 @@ export interface DomainsNetworkField {
   direction?: NetworkDirectionEcs[] | null;
 }
 
-export interface FirstLastSeenDomain {
-  firstSeen?: Date | null;
-
-  lastSeen?: Date | null;
-}
-
 export interface TlsData {
   edges: TlsEdges[];
 
   totalCount: number;
 
   pageInfo: PageInfo;
+
+  inspect?: Inspect | null;
 }
 
 export interface TlsEdges {
@@ -1021,6 +1035,8 @@ export interface UsersData {
   totalCount: number;
 
   pageInfo: PageInfo;
+
+  inspect?: Inspect | null;
 }
 
 export interface UsersEdges {
@@ -1065,6 +1081,8 @@ export interface KpiNetworkData {
   dnsQueries?: number | null;
 
   tlsHandshakes?: number | null;
+
+  inspect?: Inspect | null;
 }
 
 export interface KpiNetworkHistogramData {
@@ -1093,6 +1111,8 @@ export interface KpiHostsData {
   uniqueDestinationIps?: number | null;
 
   uniqueDestinationIpsHistogram?: KpiHostHistogramData[] | null;
+
+  inspect?: Inspect | null;
 }
 
 export interface KpiHostHistogramData {
@@ -1101,12 +1121,34 @@ export interface KpiHostHistogramData {
   y?: number | null;
 }
 
+export interface KpiHostDetailsData {
+  authSuccess?: number | null;
+
+  authSuccessHistogram?: KpiHostHistogramData[] | null;
+
+  authFailure?: number | null;
+
+  authFailureHistogram?: KpiHostHistogramData[] | null;
+
+  uniqueSourceIps?: number | null;
+
+  uniqueSourceIpsHistogram?: KpiHostHistogramData[] | null;
+
+  uniqueDestinationIps?: number | null;
+
+  uniqueDestinationIpsHistogram?: KpiHostHistogramData[] | null;
+
+  inspect?: Inspect | null;
+}
+
 export interface NetworkTopNFlowData {
   edges: NetworkTopNFlowEdges[];
 
   totalCount: number;
 
   pageInfo: PageInfo;
+
+  inspect?: Inspect | null;
 }
 
 export interface NetworkTopNFlowEdges {
@@ -1117,8 +1159,6 @@ export interface NetworkTopNFlowEdges {
 
 export interface NetworkTopNFlowItem {
   _id?: string | null;
-
-  timestamp?: Date | null;
 
   source?: TopNFlowItem | null;
 
@@ -1155,6 +1195,8 @@ export interface NetworkDnsData {
   totalCount: number;
 
   pageInfo: PageInfo;
+
+  inspect?: Inspect | null;
 }
 
 export interface NetworkDnsEdges {
@@ -1173,8 +1215,6 @@ export interface NetworkDnsItem {
   dnsName?: string | null;
 
   queryCount?: number | null;
-
-  timestamp?: Date | null;
 
   uniqueDomains?: number | null;
 }
@@ -1197,6 +1237,8 @@ export interface OverviewNetworkData {
   packetbeatFlow?: number | null;
 
   packetbeatTLS?: number | null;
+
+  inspect?: Inspect | null;
 }
 
 export interface OverviewHostData {
@@ -1215,6 +1257,8 @@ export interface OverviewHostData {
   filebeatSystemModule?: number | null;
 
   winlogbeat?: number | null;
+
+  inspect?: Inspect | null;
 }
 
 export interface UncommonProcessesData {
@@ -1223,6 +1267,8 @@ export interface UncommonProcessesData {
   totalCount: number;
 
   pageInfo: PageInfo;
+
+  inspect?: Inspect | null;
 }
 
 export interface UncommonProcessesEdges {
@@ -1812,17 +1858,6 @@ export interface DomainsSourceArgs {
 
   defaultIndex: string[];
 }
-export interface DomainFirstLastSeenSourceArgs {
-  id?: string | null;
-
-  ip: string;
-
-  domainName: string;
-
-  flowTarget: FlowTarget;
-
-  defaultIndex: string[];
-}
 export interface TlsSourceArgs {
   filterQuery?: string | null;
 
@@ -1867,6 +1902,15 @@ export interface KpiNetworkSourceArgs {
   defaultIndex: string[];
 }
 export interface KpiHostsSourceArgs {
+  id?: string | null;
+
+  timerange: TimerangeInput;
+
+  filterQuery?: string | null;
+
+  defaultIndex: string[];
+}
+export interface KpiHostDetailsSourceArgs {
   id?: string | null;
 
   timerange: TimerangeInput;
@@ -1949,8 +1993,6 @@ export interface PersistNoteMutationArgs {
 }
 export interface DeleteNoteMutationArgs {
   id: string[];
-
-  version?: string | null;
 }
 export interface DeleteNoteByTimelineIdMutationArgs {
   timelineId: string;
@@ -2086,6 +2128,7 @@ export namespace GetAuthenticationsQuery {
     pagination: PaginationInput;
     filterQuery?: string | null;
     defaultIndex: string[];
+    inspect: boolean;
   };
 
   export type Query = {
@@ -2110,6 +2153,8 @@ export namespace GetAuthenticationsQuery {
     edges: Edges[];
 
     pageInfo: PageInfo;
+
+    inspect?: Inspect | null;
   };
 
   export type Edges = {
@@ -2209,37 +2254,13 @@ export namespace GetAuthenticationsQuery {
 
     value?: string | null;
   };
-}
 
-export namespace GetDomainFirstLastSeenQuery {
-  export type Variables = {
-    sourceId: string;
-    ip: string;
-    domainName: string;
-    flowTarget: FlowTarget;
-    defaultIndex: string[];
-  };
+  export type Inspect = {
+    __typename?: 'Inspect';
 
-  export type Query = {
-    __typename?: 'Query';
+    dsl: string[];
 
-    source: Source;
-  };
-
-  export type Source = {
-    __typename?: 'Source';
-
-    id: string;
-
-    DomainFirstLastSeen: DomainFirstLastSeen;
-  };
-
-  export type DomainFirstLastSeen = {
-    __typename?: 'FirstLastSeenDomain';
-
-    firstSeen?: Date | null;
-
-    lastSeen?: Date | null;
+    response: string[];
   };
 }
 
@@ -2254,6 +2275,7 @@ export namespace GetDomainsQuery {
     sort: DomainsSortField;
     timerange: TimerangeInput;
     defaultIndex: string[];
+    inspect: boolean;
   };
 
   export type Query = {
@@ -2278,6 +2300,8 @@ export namespace GetDomainsQuery {
     edges: Edges[];
 
     pageInfo: PageInfo;
+
+    inspect?: Inspect | null;
   };
 
   export type Edges = {
@@ -2351,6 +2375,14 @@ export namespace GetDomainsQuery {
 
     value?: string | null;
   };
+
+  export type Inspect = {
+    __typename?: 'Inspect';
+
+    dsl: string[];
+
+    response: string[];
+  };
 }
 
 export namespace GetEventsQuery {
@@ -2361,6 +2393,7 @@ export namespace GetEventsQuery {
     sortField: SortField;
     filterQuery?: string | null;
     defaultIndex: string[];
+    inspect: boolean;
   };
 
   export type Query = {
@@ -2384,6 +2417,8 @@ export namespace GetEventsQuery {
 
     pageInfo: PageInfo;
 
+    inspect?: Inspect | null;
+
     edges: Edges[];
   };
 
@@ -2401,6 +2436,14 @@ export namespace GetEventsQuery {
     value?: string | null;
 
     tiebreaker?: string | null;
+  };
+
+  export type Inspect = {
+    __typename?: 'Inspect';
+
+    dsl: string[];
+
+    response: string[];
   };
 
   export type Edges = {
@@ -2581,6 +2624,7 @@ export namespace GetHostsTableQuery {
     sort: HostsSortField;
     filterQuery?: string | null;
     defaultIndex: string[];
+    inspect: boolean;
   };
 
   export type Query = {
@@ -2605,6 +2649,8 @@ export namespace GetHostsTableQuery {
     edges: Edges[];
 
     pageInfo: PageInfo;
+
+    inspect?: Inspect | null;
   };
 
   export type Edges = {
@@ -2662,6 +2708,14 @@ export namespace GetHostsTableQuery {
 
     value?: string | null;
   };
+
+  export type Inspect = {
+    __typename?: 'Inspect';
+
+    dsl: string[];
+
+    response: string[];
+  };
 }
 
 export namespace GetHostOverviewQuery {
@@ -2670,6 +2724,7 @@ export namespace GetHostOverviewQuery {
     hostName: string;
     timerange: TimerangeInput;
     defaultIndex: string[];
+    inspect: boolean;
   };
 
   export type Query = {
@@ -2694,6 +2749,8 @@ export namespace GetHostOverviewQuery {
     host?: Host | null;
 
     cloud?: Cloud | null;
+
+    inspect?: Inspect | null;
   };
 
   export type Host = {
@@ -2749,6 +2806,14 @@ export namespace GetHostOverviewQuery {
 
     type?: (string | null)[] | null;
   };
+
+  export type Inspect = {
+    __typename?: 'Inspect';
+
+    dsl: string[];
+
+    response: string[];
+  };
 }
 
 export namespace GetIpOverviewQuery {
@@ -2757,6 +2822,7 @@ export namespace GetIpOverviewQuery {
     filterQuery?: string | null;
     ip: string;
     defaultIndex: string[];
+    inspect: boolean;
   };
 
   export type Query = {
@@ -2781,6 +2847,8 @@ export namespace GetIpOverviewQuery {
     destination?: Destination | null;
 
     host: Host;
+
+    inspect?: Inspect | null;
   };
 
   export type _Source = {
@@ -2908,6 +2976,76 @@ export namespace GetIpOverviewQuery {
 
     version?: ToStringArray | null;
   };
+
+  export type Inspect = {
+    __typename?: 'Inspect';
+
+    dsl: string[];
+
+    response: string[];
+  };
+}
+
+export namespace GetKpiHostDetailsQuery {
+  export type Variables = {
+    sourceId: string;
+    timerange: TimerangeInput;
+    filterQuery?: string | null;
+    defaultIndex: string[];
+    inspect: boolean;
+  };
+
+  export type Query = {
+    __typename?: 'Query';
+
+    source: Source;
+  };
+
+  export type Source = {
+    __typename?: 'Source';
+
+    id: string;
+
+    KpiHostDetails: KpiHostDetails;
+  };
+
+  export type KpiHostDetails = {
+    __typename?: 'KpiHostDetailsData';
+
+    authSuccess?: number | null;
+
+    authSuccessHistogram?: AuthSuccessHistogram[] | null;
+
+    authFailure?: number | null;
+
+    authFailureHistogram?: AuthFailureHistogram[] | null;
+
+    uniqueSourceIps?: number | null;
+
+    uniqueSourceIpsHistogram?: UniqueSourceIpsHistogram[] | null;
+
+    uniqueDestinationIps?: number | null;
+
+    uniqueDestinationIpsHistogram?: UniqueDestinationIpsHistogram[] | null;
+
+    inspect?: Inspect | null;
+  };
+
+  export type AuthSuccessHistogram = KpiHostDetailsChartFields.Fragment;
+
+  export type AuthFailureHistogram = KpiHostDetailsChartFields.Fragment;
+
+  export type UniqueSourceIpsHistogram = KpiHostDetailsChartFields.Fragment;
+
+  export type UniqueDestinationIpsHistogram = KpiHostDetailsChartFields.Fragment;
+
+  export type Inspect = {
+    __typename?: 'Inspect';
+
+    dsl: string[];
+
+    response: string[];
+  };
 }
 
 export namespace GetKpiHostsQuery {
@@ -2916,6 +3054,7 @@ export namespace GetKpiHostsQuery {
     timerange: TimerangeInput;
     filterQuery?: string | null;
     defaultIndex: string[];
+    inspect: boolean;
   };
 
   export type Query = {
@@ -2954,6 +3093,8 @@ export namespace GetKpiHostsQuery {
     uniqueDestinationIps?: number | null;
 
     uniqueDestinationIpsHistogram?: UniqueDestinationIpsHistogram[] | null;
+
+    inspect?: Inspect | null;
   };
 
   export type HostsHistogram = KpiHostChartFields.Fragment;
@@ -2965,6 +3106,14 @@ export namespace GetKpiHostsQuery {
   export type UniqueSourceIpsHistogram = KpiHostChartFields.Fragment;
 
   export type UniqueDestinationIpsHistogram = KpiHostChartFields.Fragment;
+
+  export type Inspect = {
+    __typename?: 'Inspect';
+
+    dsl: string[];
+
+    response: string[];
+  };
 }
 
 export namespace GetKpiNetworkQuery {
@@ -2973,6 +3122,7 @@ export namespace GetKpiNetworkQuery {
     timerange: TimerangeInput;
     filterQuery?: string | null;
     defaultIndex: string[];
+    inspect: boolean;
   };
 
   export type Query = {
@@ -3007,11 +3157,21 @@ export namespace GetKpiNetworkQuery {
     dnsQueries?: number | null;
 
     tlsHandshakes?: number | null;
+
+    inspect?: Inspect | null;
   };
 
   export type UniqueSourcePrivateIpsHistogram = KpiNetworkChartFields.Fragment;
 
   export type UniqueDestinationPrivateIpsHistogram = KpiNetworkChartFields.Fragment;
+
+  export type Inspect = {
+    __typename?: 'Inspect';
+
+    dsl: string[];
+
+    response: string[];
+  };
 }
 
 export namespace GetNetworkDnsQuery {
@@ -3023,6 +3183,7 @@ export namespace GetNetworkDnsQuery {
     pagination: PaginationInput;
     filterQuery?: string | null;
     defaultIndex: string[];
+    inspect: boolean;
   };
 
   export type Query = {
@@ -3047,6 +3208,8 @@ export namespace GetNetworkDnsQuery {
     edges: Edges[];
 
     pageInfo: PageInfo;
+
+    inspect?: Inspect | null;
   };
 
   export type Edges = {
@@ -3092,6 +3255,14 @@ export namespace GetNetworkDnsQuery {
 
     value?: string | null;
   };
+
+  export type Inspect = {
+    __typename?: 'Inspect';
+
+    dsl: string[];
+
+    response: string[];
+  };
 }
 
 export namespace GetNetworkTopNFlowQuery {
@@ -3104,6 +3275,7 @@ export namespace GetNetworkTopNFlowQuery {
     flowTarget: FlowTarget;
     timerange: TimerangeInput;
     defaultIndex: string[];
+    inspect: boolean;
   };
 
   export type Query = {
@@ -3128,6 +3300,8 @@ export namespace GetNetworkTopNFlowQuery {
     edges: Edges[];
 
     pageInfo: PageInfo;
+
+    inspect?: Inspect | null;
   };
 
   export type Edges = {
@@ -3221,6 +3395,14 @@ export namespace GetNetworkTopNFlowQuery {
 
     value?: string | null;
   };
+
+  export type Inspect = {
+    __typename?: 'Inspect';
+
+    dsl: string[];
+
+    response: string[];
+  };
 }
 
 export namespace GetOverviewHostQuery {
@@ -3229,6 +3411,7 @@ export namespace GetOverviewHostQuery {
     timerange: TimerangeInput;
     filterQuery?: string | null;
     defaultIndex: string[];
+    inspect: boolean;
   };
 
   export type Query = {
@@ -3263,6 +3446,16 @@ export namespace GetOverviewHostQuery {
     filebeatSystemModule?: number | null;
 
     winlogbeat?: number | null;
+
+    inspect?: Inspect | null;
+  };
+
+  export type Inspect = {
+    __typename?: 'Inspect';
+
+    dsl: string[];
+
+    response: string[];
   };
 }
 
@@ -3272,6 +3465,7 @@ export namespace GetOverviewNetworkQuery {
     timerange: TimerangeInput;
     filterQuery?: string | null;
     defaultIndex: string[];
+    inspect: boolean;
   };
 
   export type Query = {
@@ -3308,6 +3502,16 @@ export namespace GetOverviewNetworkQuery {
     packetbeatFlow?: number | null;
 
     packetbeatTLS?: number | null;
+
+    inspect?: Inspect | null;
+  };
+
+  export type Inspect = {
+    __typename?: 'Inspect';
+
+    dsl: string[];
+
+    response: string[];
   };
 }
 
@@ -3570,6 +3774,7 @@ export namespace GetTimelineQuery {
     sortField: SortField;
     filterQuery?: string | null;
     defaultIndex: string[];
+    inspect: boolean;
   };
 
   export type Query = {
@@ -3591,9 +3796,19 @@ export namespace GetTimelineQuery {
 
     totalCount: number;
 
+    inspect?: Inspect | null;
+
     pageInfo: PageInfo;
 
     edges: Edges[];
+  };
+
+  export type Inspect = {
+    __typename?: 'Inspect';
+
+    dsl: string[];
+
+    response: string[];
   };
 
   export type PageInfo = {
@@ -4783,6 +4998,7 @@ export namespace GetTlsQuery {
     sort: TlsSortField;
     timerange: TimerangeInput;
     defaultIndex: string[];
+    inspect: boolean;
   };
 
   export type Query = {
@@ -4807,6 +5023,8 @@ export namespace GetTlsQuery {
     edges: Edges[];
 
     pageInfo: PageInfo;
+
+    inspect?: Inspect | null;
   };
 
   export type Edges = {
@@ -4852,6 +5070,14 @@ export namespace GetTlsQuery {
 
     value?: string | null;
   };
+
+  export type Inspect = {
+    __typename?: 'Inspect';
+
+    dsl: string[];
+
+    response: string[];
+  };
 }
 
 export namespace GetUncommonProcessesQuery {
@@ -4861,6 +5087,7 @@ export namespace GetUncommonProcessesQuery {
     pagination: PaginationInput;
     filterQuery?: string | null;
     defaultIndex: string[];
+    inspect: boolean;
   };
 
   export type Query = {
@@ -4885,6 +5112,8 @@ export namespace GetUncommonProcessesQuery {
     edges: Edges[];
 
     pageInfo: PageInfo;
+
+    inspect?: Inspect | null;
   };
 
   export type Edges = {
@@ -4950,6 +5179,14 @@ export namespace GetUncommonProcessesQuery {
 
     value?: string | null;
   };
+
+  export type Inspect = {
+    __typename?: 'Inspect';
+
+    dsl: string[];
+
+    response: string[];
+  };
 }
 
 export namespace GetUsersQuery {
@@ -4962,6 +5199,7 @@ export namespace GetUsersQuery {
     sort: UsersSortField;
     timerange: TimerangeInput;
     defaultIndex: string[];
+    inspect: boolean;
   };
 
   export type Query = {
@@ -4986,6 +5224,8 @@ export namespace GetUsersQuery {
     edges: Edges[];
 
     pageInfo: PageInfo;
+
+    inspect?: Inspect | null;
   };
 
   export type Edges = {
@@ -5034,6 +5274,24 @@ export namespace GetUsersQuery {
     __typename?: 'CursorType';
 
     value?: string | null;
+  };
+
+  export type Inspect = {
+    __typename?: 'Inspect';
+
+    dsl: string[];
+
+    response: string[];
+  };
+}
+
+export namespace KpiHostDetailsChartFields {
+  export type Fragment = {
+    __typename?: 'KpiHostHistogramData';
+
+    x?: number | null;
+
+    y?: number | null;
   };
 }
 

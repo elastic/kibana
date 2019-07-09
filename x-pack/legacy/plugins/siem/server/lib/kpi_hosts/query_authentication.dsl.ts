@@ -4,29 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { createQueryFilterClauses } from '../../utils/build_query';
-import { RequestBasicOptions } from '../framework';
-
 import { KpiHostsESMSearchBody } from './types';
-
-const getAuthQueryFilter = () => [
-  {
-    bool: {
-      should: [
-        {
-          match: {
-            'event.type': 'authentication_success',
-          },
-        },
-        {
-          match: {
-            'event.type': 'authentication_failure',
-          },
-        },
-      ],
-      minimum_should_match: 1,
-    },
-  },
-];
+import { RequestBasicOptions } from '../framework';
 
 export const buildAuthQuery = ({
   filterQuery,
@@ -38,7 +17,17 @@ export const buildAuthQuery = ({
 }: RequestBasicOptions): KpiHostsESMSearchBody[] => {
   const filter = [
     ...createQueryFilterClauses(filterQuery),
-    ...getAuthQueryFilter(),
+    {
+      bool: {
+        filter: [
+          {
+            term: {
+              'event.category': 'authentication',
+            },
+          },
+        ],
+      },
+    },
     {
       range: {
         [timestamp]: {
@@ -111,6 +100,5 @@ export const buildAuthQuery = ({
       track_total_hits: false,
     },
   ];
-
   return dslQuery;
 };

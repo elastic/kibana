@@ -138,6 +138,7 @@ describe('<EditRolePage />', () => {
 
       const wrapper = mountWithIntl(
         <EditRolePage
+          action={'edit'}
           role={role}
           runAsUsers={[]}
           allowDocumentLevelSecurity={true}
@@ -185,6 +186,7 @@ describe('<EditRolePage />', () => {
 
       const wrapper = mountWithIntl(
         <EditRolePage
+          action={'edit'}
           role={role}
           runAsUsers={[]}
           allowDocumentLevelSecurity={true}
@@ -226,6 +228,65 @@ describe('<EditRolePage />', () => {
 
       const wrapper = mountWithIntl(
         <EditRolePage
+          action={'edit'}
+          role={role}
+          runAsUsers={[]}
+          allowDocumentLevelSecurity={true}
+          allowFieldLevelSecurity={true}
+          features={features}
+          httpClient={mockHttpClient}
+          indexPatterns={indexPatterns}
+          privileges={privileges}
+          spaces={spaces}
+          spacesEnabled={true}
+          uiCapabilities={uiCapabilities}
+        />
+      );
+
+      expect(wrapper.find(SpaceAwarePrivilegeSection)).toHaveLength(1);
+      expect(wrapper.find('[data-test-subj="userCannotManageSpacesCallout"]')).toHaveLength(0);
+      expectSaveFormButtons(wrapper);
+    });
+
+    it('can render when cloning an existing role', () => {
+      const role: Role = {
+        metadata: {
+          _reserved: false,
+        },
+        name: '',
+        elasticsearch: {
+          cluster: ['all', 'manage'],
+          indices: [
+            {
+              names: ['foo*'],
+              privileges: ['all'],
+              field_security: {
+                except: ['f'],
+                grant: ['b*'],
+              },
+            },
+          ],
+          run_as: ['elastic'],
+        },
+        kibana: [
+          {
+            spaces: ['*'],
+            base: ['all'],
+            feature: {},
+          },
+        ],
+      };
+
+      const features: Feature[] = buildFeatures();
+      const mockHttpClient = jest.fn();
+      const indexPatterns: string[] = ['foo*', 'bar*'];
+      const privileges: RawKibanaPrivileges = buildRawKibanaPrivileges();
+      const spaces: Space[] = buildSpaces();
+      const uiCapabilities: UICapabilities = buildUICapabilities();
+
+      const wrapper = mountWithIntl(
+        <EditRolePage
+          action={'clone'}
           role={role}
           runAsUsers={[]}
           allowDocumentLevelSecurity={true}
@@ -272,6 +333,7 @@ describe('<EditRolePage />', () => {
 
       const wrapper = mountWithIntl(
         <EditRolePage
+          action={'edit'}
           role={role}
           runAsUsers={[]}
           allowDocumentLevelSecurity={true}
@@ -318,6 +380,7 @@ describe('<EditRolePage />', () => {
 
       const wrapper = mountWithIntl(
         <EditRolePage
+          action={'edit'}
           role={role}
           runAsUsers={[]}
           allowDocumentLevelSecurity={true}
@@ -366,6 +429,7 @@ describe('<EditRolePage />', () => {
 
       const wrapper = mountWithIntl(
         <EditRolePage
+          action={'edit'}
           role={role}
           runAsUsers={[]}
           allowDocumentLevelSecurity={true}
@@ -412,6 +476,7 @@ describe('<EditRolePage />', () => {
 
       const wrapper = mountWithIntl(
         <EditRolePage
+          action={'edit'}
           role={role}
           runAsUsers={[]}
           allowDocumentLevelSecurity={true}
@@ -452,6 +517,63 @@ describe('<EditRolePage />', () => {
 
       const wrapper = mountWithIntl(
         <EditRolePage
+          action={'edit'}
+          role={role}
+          runAsUsers={[]}
+          allowDocumentLevelSecurity={true}
+          allowFieldLevelSecurity={true}
+          features={features}
+          httpClient={mockHttpClient}
+          indexPatterns={indexPatterns}
+          privileges={privileges}
+          spaces={[]}
+          spacesEnabled={false}
+          uiCapabilities={uiCapabilities}
+        />
+      );
+
+      expect(wrapper.find(SimplePrivilegeSection)).toHaveLength(1);
+      expectSaveFormButtons(wrapper);
+    });
+
+    it('can render when cloning an existing role', () => {
+      const role: Role = {
+        metadata: {
+          _reserved: false,
+        },
+        name: '',
+        elasticsearch: {
+          cluster: ['all', 'manage'],
+          indices: [
+            {
+              names: ['foo*'],
+              privileges: ['all'],
+              field_security: {
+                except: ['f'],
+                grant: ['b*'],
+              },
+            },
+          ],
+          run_as: ['elastic'],
+        },
+        kibana: [
+          {
+            spaces: ['*'],
+            base: ['all'],
+            feature: {},
+          },
+        ],
+      };
+
+      const features: Feature[] = buildFeatures();
+      const mockHttpClient = jest.fn();
+      const indexPatterns: string[] = ['foo*', 'bar*'];
+      const privileges: RawKibanaPrivileges = buildRawKibanaPrivileges();
+      const uiCapabilities: UICapabilities = buildUICapabilities();
+
+      const wrapper = mountWithIntl(
+        <EditRolePage
+          action={'clone'}
           role={role}
           runAsUsers={[]}
           allowDocumentLevelSecurity={true}
@@ -496,6 +618,7 @@ describe('<EditRolePage />', () => {
 
       const wrapper = mountWithIntl(
         <EditRolePage
+          action={'edit'}
           role={role}
           runAsUsers={[]}
           allowDocumentLevelSecurity={true}
@@ -541,6 +664,7 @@ describe('<EditRolePage />', () => {
 
       const wrapper = mountWithIntl(
         <EditRolePage
+          action={'edit'}
           role={role}
           runAsUsers={[]}
           allowDocumentLevelSecurity={true}

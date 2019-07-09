@@ -19,9 +19,9 @@
 
 import { Request, Server } from 'hapi';
 
-import { Logger } from '../logging';
+import { Logger, LoggerFactory } from '../logging';
 import { HttpConfig } from './http_config';
-import { createServer, getServerOptions } from './http_tools';
+import { createServer, getListenerOptions, getServerOptions } from './http_tools';
 import { adoptToHapiAuthFormat, AuthenticationHandler } from './lifecycle/auth';
 import { adoptToHapiOnPostAuthFormat, OnPostAuthHandler } from './lifecycle/on_post_auth';
 import { adoptToHapiOnPreAuthFormat, OnPreAuthHandler } from './lifecycle/on_pre_auth';
@@ -83,12 +83,14 @@ export class HttpServer {
   private registeredRouters = new Set<Router>();
   private authRegistered = false;
 
+  private readonly log: Logger;
   private readonly authState: AuthStateStorage;
   private readonly authHeaders: AuthHeadersStorage;
 
-  constructor(private readonly log: Logger) {
+  constructor(private readonly logger: LoggerFactory, private readonly name: string) {
     this.authState = new AuthStateStorage(() => this.authRegistered);
     this.authHeaders = new AuthHeadersStorage();
+    this.log = logger.get('http', 'server', name);
   }
 
   public isListening() {
@@ -106,7 +108,8 @@ export class HttpServer {
 
   public setup(config: HttpConfig): HttpServerSetup {
     const serverOptions = getServerOptions(config);
-    this.server = createServer(serverOptions);
+    const listenerOptions = getListenerOptions(config);
+    this.server = createServer(serverOptions, listenerOptions);
     this.config = config;
 
     const basePathService = new BasePath(config.basePath);
@@ -221,6 +224,7 @@ export class HttpServer {
     this.authRegistered = true;
 
     const sessionStorageFactory = await createCookieSessionStorageFactory<T>(
+      this.logger.get('http', 'server', this.name, 'cookie-session-storage'),
       this.server,
       cookieOptions,
       basePath

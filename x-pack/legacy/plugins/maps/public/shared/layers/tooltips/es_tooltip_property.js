@@ -11,8 +11,8 @@ import _ from 'lodash';
 
 export class ESTooltipProperty extends TooltipProperty {
 
-  constructor(propertyName, rawValue, indexPattern) {
-    super(propertyName, rawValue);
+  constructor(propertyKey, propertyName, rawValue, indexPattern) {
+    super(propertyKey, propertyName, rawValue);
     this._indexPattern = indexPattern;
   }
 

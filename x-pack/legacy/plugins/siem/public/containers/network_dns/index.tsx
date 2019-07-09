@@ -17,14 +17,17 @@ import {
   NetworkDnsSortField,
   PageInfo,
 } from '../../graphql/types';
-import { inputsModel, networkModel, networkSelectors, State } from '../../store';
+import { inputsModel, networkModel, networkSelectors, State, inputsSelectors } from '../../store';
 import { createFilter } from '../helpers';
 import { QueryTemplate, QueryTemplateProps } from '../query_template';
 
 import { networkDnsQuery } from './index.gql_query';
 
+const ID = 'networkDnsQuery';
+
 export interface NetworkDnsArgs {
   id: string;
+  inspect: inputsModel.InspectQuery;
   networkDns: NetworkDnsEdges[];
   totalCount: number;
   pageInfo: PageInfo;
@@ -39,6 +42,7 @@ export interface OwnProps extends QueryTemplateProps {
 }
 
 export interface NetworkDnsComponentReduxProps {
+  isInspected: boolean;
   limit: number;
   dnsSortField: NetworkDnsSortField;
   isPtrIncluded: boolean;
@@ -53,7 +57,8 @@ class NetworkDnsComponentQuery extends QueryTemplate<
 > {
   public render() {
     const {
-      id = 'networkDnsQuery',
+      id = ID,
+      isInspected,
       children,
       dnsSortField,
       filterQuery,
@@ -86,6 +91,7 @@ class NetworkDnsComponentQuery extends QueryTemplate<
           },
           filterQuery: createFilter(filterQuery),
           defaultIndex: chrome.getUiSettingsClient().get(DEFAULT_INDEX_KEY),
+          inspect: isInspected,
         }}
       >
         {({ data, loading, fetchMore, refetch }) => {
@@ -119,6 +125,7 @@ class NetworkDnsComponentQuery extends QueryTemplate<
           }));
           return children({
             id,
+            inspect: getOr(null, 'source.NetworkDns.inspect', data),
             refetch,
             loading,
             totalCount: getOr(0, 'source.NetworkDns.totalCount', data),
@@ -134,7 +141,14 @@ class NetworkDnsComponentQuery extends QueryTemplate<
 
 const makeMapStateToProps = () => {
   const getNetworkDnsSelector = networkSelectors.dnsSelector();
-  const mapStateToProps = (state: State) => getNetworkDnsSelector(state);
+  const getQuery = inputsSelectors.globalQueryByIdSelector();
+  const mapStateToProps = (state: State, { id = ID }: OwnProps) => {
+    const { isInspected } = getQuery(state, id);
+    return {
+      ...getNetworkDnsSelector(state),
+      isInspected,
+    };
+  };
 
   return mapStateToProps;
 };

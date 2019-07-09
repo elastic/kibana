@@ -79,8 +79,9 @@ describe('resolveImportErrors()', () => {
 
   test('works with empty parameters', async () => {
     const readStream = new Readable({
+      objectMode: true,
       read() {
-        savedObjects.forEach(obj => this.push(JSON.stringify(obj) + '\n'));
+        savedObjects.forEach(obj => this.push(obj));
         this.push(null);
       },
     });
@@ -105,8 +106,9 @@ Object {
 
   test('works with retries', async () => {
     const readStream = new Readable({
+      objectMode: true,
       read() {
-        savedObjects.forEach(obj => this.push(JSON.stringify(obj) + '\n'));
+        savedObjects.forEach(obj => this.push(obj));
         this.push(null);
       },
     });
@@ -162,8 +164,9 @@ Object {
 
   test('works with overwrites', async () => {
     const readStream = new Readable({
+      objectMode: true,
       read() {
-        savedObjects.forEach(obj => this.push(JSON.stringify(obj) + '\n'));
+        savedObjects.forEach(obj => this.push(obj));
         this.push(null);
       },
     });
@@ -222,8 +225,9 @@ Object {
 
   test('works wtih replaceReferences', async () => {
     const readStream = new Readable({
+      objectMode: true,
       read() {
-        savedObjects.forEach(obj => this.push(JSON.stringify(obj) + '\n'));
+        savedObjects.forEach(obj => this.push(obj));
         this.push(null);
       },
     });
@@ -291,8 +295,9 @@ Object {
 
   test('extracts errors for conflicts', async () => {
     const readStream = new Readable({
+      objectMode: true,
       read() {
-        savedObjects.forEach(obj => this.push(JSON.stringify(obj) + '\n'));
+        savedObjects.forEach(obj => this.push(obj));
         this.push(null);
       },
     });
@@ -362,39 +367,36 @@ Object {
 
   test('validates references', async () => {
     const readStream = new Readable({
+      objectMode: true,
       read() {
-        this.push(
-          JSON.stringify({
-            id: '1',
-            type: 'search',
-            attributes: {
-              title: 'My Search',
+        this.push({
+          id: '1',
+          type: 'search',
+          attributes: {
+            title: 'My Search',
+          },
+          references: [
+            {
+              name: 'ref_0',
+              type: 'index-pattern',
+              id: '2',
             },
-            references: [
-              {
-                name: 'ref_0',
-                type: 'index-pattern',
-                id: '2',
-              },
-            ],
-          }) + '\n'
-        );
-        this.push(
-          JSON.stringify({
-            id: '3',
-            type: 'visualization',
-            attributes: {
-              title: 'My Visualization',
+          ],
+        });
+        this.push({
+          id: '3',
+          type: 'visualization',
+          attributes: {
+            title: 'My Visualization',
+          },
+          references: [
+            {
+              name: 'ref_0',
+              type: 'search',
+              id: '1',
             },
-            references: [
-              {
-                name: 'ref_0',
-                type: 'search',
-                id: '1',
-              },
-            ],
-          }) + '\n'
-        );
+          ],
+        });
         this.push(null);
       },
     });
@@ -485,9 +487,10 @@ Object {
 
   test('validates object types', async () => {
     const readStream = new Readable({
+      objectMode: true,
       read() {
-        savedObjects.forEach(obj => this.push(JSON.stringify(obj) + '\n'));
-        this.push('{"id":"1","type":"wigwags","attributes":{"title":"my title"},"references":[]}');
+        savedObjects.forEach(obj => this.push(obj));
+        this.push({ id: '1', type: 'wigwags', attributes: { title: 'my title' }, references: [] });
         this.push(null);
       },
     });

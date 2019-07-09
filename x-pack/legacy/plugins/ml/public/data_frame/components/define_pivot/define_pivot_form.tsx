@@ -8,16 +8,24 @@ import React, { ChangeEvent, Fragment, SFC, useContext, useEffect, useState } fr
 
 import { i18n } from '@kbn/i18n';
 
+import { metadata } from 'ui/metadata';
 import { toastNotifications } from 'ui/notify';
 
 import {
+  EuiButton,
+  EuiCodeEditor,
+  EuiConfirmModal,
   EuiFieldSearch,
   EuiFlexGroup,
   EuiFlexItem,
   EuiForm,
   EuiFormHelpText,
   EuiFormRow,
+  EuiLink,
+  EuiOverlayMask,
+  EuiPanel,
   EuiSpacer,
+  EuiSwitch,
 } from '@elastic/eui';
 
 import { dictionaryToArray } from '../../../../common/types/common';
@@ -31,15 +39,18 @@ import {
   AggName,
   DropDownLabel,
   getPivotQuery,
-  isGroupByDateHistogram,
-  isGroupByHistogram,
+  getDataFramePreviewRequest,
   isKibanaContext,
   KibanaContext,
   KibanaContextValue,
+  PivotAggDict,
   PivotAggsConfig,
   PivotAggsConfigDict,
+  PivotGroupByDict,
   PivotGroupByConfig,
   PivotGroupByConfigDict,
+  PivotSupportedGroupByAggs,
+  PIVOT_SUPPORTED_AGGS,
   SavedSearchQuery,
 } from '../../common';
 
@@ -48,6 +59,7 @@ import { getPivotDropdownOptions } from './common';
 export interface DefinePivotExposedState {
   aggList: PivotAggsConfigDict;
   groupByList: PivotGroupByConfigDict;
+  isAdvancedEditorEnabled: boolean;
   search: string | SavedSearchQuery;
   valid: boolean;
 }
@@ -59,6 +71,7 @@ export function getDefaultPivotState(kibanaContext: KibanaContextValue): DefineP
   return {
     aggList: {} as PivotAggsConfigDict,
     groupByList: {} as PivotGroupByConfigDict,
+    isAdvancedEditorEnabled: false,
     search:
       kibanaContext.currentSavedSearch.id !== undefined
         ? kibanaContext.combinedQuery
@@ -268,25 +281,120 @@ export const DefinePivotForm: SFC<Props> = React.memo(({ overrides = {}, onChang
   const pivotGroupByArr = dictionaryToArray(groupByList);
   const pivotQuery = getPivotQuery(search);
 
+  // Advanced editor state
+  const [isAdvancedEditorSwitchModalVisible, setAdvancedEditorSwitchModalVisible] = useState(false);
+  const [isAdvancedEditorApplyButtonEnabled, setAdvancedEditorApplyButtonEnabled] = useState(false);
+  const [isAdvancedEditorEnabled, setAdvancedEditorEnabled] = useState(
+    defaults.isAdvancedEditorEnabled
+  );
+
+  const previewRequest = getDataFramePreviewRequest(
+    indexPattern.title,
+    pivotQuery,
+    pivotGroupByArr,
+    pivotAggsArr
+  );
+  const stringifiedPivotConfig = JSON.stringify(previewRequest.pivot, null, 2);
+  const [advancedEditorConfigLastApplied, setAdvancedEditorConfigLastApplied] = useState(
+    stringifiedPivotConfig
+  );
+  const [advancedEditorConfig, setAdvancedEditorConfig] = useState(stringifiedPivotConfig);
+
+  const applyAdvancedEditorChanges = () => {
+    const pivotConfig = JSON.parse(advancedEditorConfig);
+
+    const newGroupByList: PivotGroupByConfigDict = {};
+    if (pivotConfig !== undefined && pivotConfig.group_by !== undefined) {
+      Object.entries(pivotConfig.group_by).forEach(d => {
+        const aggName = d[0];
+        const aggConfig = d[1] as PivotGroupByDict;
+        const aggConfigKeys = Object.keys(aggConfig);
+        const agg = aggConfigKeys[0] as PivotSupportedGroupByAggs;
+        newGroupByList[aggName] = {
+          agg,
+          aggName,
+          dropDownName: '',
+          ...aggConfig[agg],
+        };
+      });
+    }
+    setGroupByList(newGroupByList);
+
+    const newAggList: PivotAggsConfigDict = {};
+    if (pivotConfig !== undefined && pivotConfig.aggregations !== undefined) {
+      Object.entries(pivotConfig.aggregations).forEach(d => {
+        const aggName = d[0];
+        const aggConfig = d[1] as PivotAggDict;
+        const aggConfigKeys = Object.keys(aggConfig);
+        const agg = aggConfigKeys[0] as PIVOT_SUPPORTED_AGGS;
+        newAggList[aggName] = {
+          agg,
+          aggName,
+          dropDownName: '',
+          ...aggConfig[agg],
+        };
+      });
+    }
+    setAggList(newAggList);
+
+    const prettyPivotConfig = JSON.stringify(pivotConfig, null, 2);
+    setAdvancedEditorConfig(prettyPivotConfig);
+    setAdvancedEditorConfigLastApplied(prettyPivotConfig);
+    setAdvancedEditorApplyButtonEnabled(false);
+  };
+
+  const toggleAdvancedEditor = () => {
+    setAdvancedEditorConfig(advancedEditorConfig);
+    setAdvancedEditorEnabled(!isAdvancedEditorEnabled);
+    setAdvancedEditorApplyButtonEnabled(false);
+    if (isAdvancedEditorEnabled === false) {
+      setAdvancedEditorConfigLastApplied(advancedEditorConfig);
+    }
+  };
+
+  // metadata.branch corresponds to the version used in documentation links.
+  const docsUrl = `https://www.elastic.co/guide/en/elasticsearch/reference/${metadata.branch}/data-frame-transform-pivot.html`;
+  const advancedEditorHelpText = (
+    <Fragment>
+      {i18n.translate('xpack.ml.dataframe.definePivotForm.advancedEditorHelpText', {
+        defaultMessage:
+          'The advanced editor allows you to edit the pivot configuration of the data frame transform.',
+      })}{' '}
+      <EuiLink href={docsUrl} target="_blank">
+        {i18n.translate('xpack.ml.dataframe.definePivotForm.advancedEditorHelpTextLink', {
+          defaultMessage: 'Learn more about available options.',
+        })}
+      </EuiLink>
+    </Fragment>
+  );
+
   const valid = pivotGroupByArr.length > 0 && pivotAggsArr.length > 0;
-  useEffect(
-    () => {
-      onChange({ aggList, groupByList, search, valid });
-    },
-    [
-      pivotAggsArr.map(d => `${d.agg} ${d.field} ${d.aggName}`).join(' '),
-      pivotGroupByArr
-        .map(
-          d =>
-            `${d.agg} ${d.field} ${isGroupByHistogram(d) ? d.interval : ''} ${
-              isGroupByDateHistogram(d) ? d.calendar_interval : ''
-            } ${d.aggName}`
-        )
-        .join(' '),
+
+  useEffect(() => {
+    const previewRequestUpdate = getDataFramePreviewRequest(
+      indexPattern.title,
+      pivotQuery,
+      pivotGroupByArr,
+      pivotAggsArr
+    );
+
+    const stringifiedPivotConfigUpdate = JSON.stringify(previewRequestUpdate.pivot, null, 2);
+    setAdvancedEditorConfig(stringifiedPivotConfigUpdate);
+
+    onChange({
+      aggList,
+      groupByList,
+      isAdvancedEditorEnabled,
       search,
       valid,
-    ]
-  );
+    });
+  }, [
+    JSON.stringify(pivotAggsArr),
+    JSON.stringify(pivotGroupByArr),
+    isAdvancedEditorEnabled,
+    search,
+    valid,
+  ]);
 
   // TODO This should use the actual value of `indices.query.bool.max_clause_count`
   const maxIndexFields = 1024;
@@ -352,62 +460,196 @@ export const DefinePivotForm: SFC<Props> = React.memo(({ overrides = {}, onChang
             </EuiFormRow>
           )}
 
-          <EuiFormRow
-            label={i18n.translate('xpack.ml.dataframe.definePivotForm.groupByLabel', {
-              defaultMessage: 'Group by',
-            })}
-          >
+          {!isAdvancedEditorEnabled && (
             <Fragment>
-              <GroupByListForm
-                list={groupByList}
-                options={groupByOptionsData}
-                onChange={updateGroupBy}
-                deleteHandler={deleteGroupBy}
-              />
-              <DropDown
-                changeHandler={addGroupBy}
-                options={groupByOptions}
-                placeholder={i18n.translate(
-                  'xpack.ml.dataframe.definePivotForm.groupByPlaceholder',
-                  {
-                    defaultMessage: 'Add a group by field ...',
-                  }
-                )}
-              />
-            </Fragment>
-          </EuiFormRow>
+              <EuiFormRow
+                label={i18n.translate('xpack.ml.dataframe.definePivotForm.groupByLabel', {
+                  defaultMessage: 'Group by',
+                })}
+              >
+                <Fragment>
+                  <GroupByListForm
+                    list={groupByList}
+                    options={groupByOptionsData}
+                    onChange={updateGroupBy}
+                    deleteHandler={deleteGroupBy}
+                  />
+                  <DropDown
+                    changeHandler={addGroupBy}
+                    options={groupByOptions}
+                    placeholder={i18n.translate(
+                      'xpack.ml.dataframe.definePivotForm.groupByPlaceholder',
+                      {
+                        defaultMessage: 'Add a group by field ...',
+                      }
+                    )}
+                  />
+                </Fragment>
+              </EuiFormRow>
 
-          <EuiFormRow
-            label={i18n.translate('xpack.ml.dataframe.definePivotForm.aggregationsLabel', {
-              defaultMessage: 'Aggregations',
-            })}
-          >
-            <Fragment>
-              <AggListForm
-                list={aggList}
-                options={aggOptionsData}
-                onChange={updateAggregation}
-                deleteHandler={deleteAggregation}
-              />
-              <DropDown
-                changeHandler={addAggregation}
-                options={aggOptions}
-                placeholder={i18n.translate(
-                  'xpack.ml.dataframe.definePivotForm.aggregationsPlaceholder',
-                  {
-                    defaultMessage: 'Add an aggregation ...',
-                  }
-                )}
-              />
+              <EuiFormRow
+                label={i18n.translate('xpack.ml.dataframe.definePivotForm.aggregationsLabel', {
+                  defaultMessage: 'Aggregations',
+                })}
+              >
+                <Fragment>
+                  <AggListForm
+                    list={aggList}
+                    options={aggOptionsData}
+                    onChange={updateAggregation}
+                    deleteHandler={deleteAggregation}
+                  />
+                  <DropDown
+                    changeHandler={addAggregation}
+                    options={aggOptions}
+                    placeholder={i18n.translate(
+                      'xpack.ml.dataframe.definePivotForm.aggregationsPlaceholder',
+                      {
+                        defaultMessage: 'Add an aggregation ...',
+                      }
+                    )}
+                  />
+                </Fragment>
+              </EuiFormRow>
             </Fragment>
+          )}
+
+          {isAdvancedEditorEnabled && (
+            <Fragment>
+              <EuiFormRow
+                label={i18n.translate('xpack.ml.dataframe.definePivotForm.advancedEditorLabel', {
+                  defaultMessage: 'Pivot configuration object',
+                })}
+                helpText={advancedEditorHelpText}
+              >
+                <EuiPanel grow={false} paddingSize="none">
+                  <EuiCodeEditor
+                    mode="json"
+                    width="100%"
+                    value={advancedEditorConfig}
+                    onChange={(d: string) => {
+                      setAdvancedEditorConfig(d);
+
+                      // Disable the "Apply"-Button if the config hasn't changed.
+                      if (advancedEditorConfigLastApplied === d) {
+                        setAdvancedEditorApplyButtonEnabled(false);
+                        return;
+                      }
+
+                      // Try to parse the string passed on from the editor.
+                      // If parsing fails, the "Apply"-Button will be disabled
+                      try {
+                        JSON.parse(d);
+                        setAdvancedEditorApplyButtonEnabled(true);
+                      } catch (e) {
+                        setAdvancedEditorApplyButtonEnabled(false);
+                      }
+                    }}
+                    setOptions={{
+                      fontSize: '12px',
+                    }}
+                    aria-label={i18n.translate(
+                      'xpack.ml.dataframe.definePivotForm.advancedEditorAriaLabel',
+                      {
+                        defaultMessage: 'Advanced editor',
+                      }
+                    )}
+                  />
+                </EuiPanel>
+              </EuiFormRow>
+            </Fragment>
+          )}
+          <EuiFormRow>
+            <EuiFlexGroup gutterSize="none">
+              <EuiFlexItem>
+                <EuiSwitch
+                  label={i18n.translate(
+                    'xpack.ml.dataframe.definePivotForm.advancedEditorSwitchLabel',
+                    {
+                      defaultMessage: 'Advanced editor',
+                    }
+                  )}
+                  checked={isAdvancedEditorEnabled}
+                  onChange={() => {
+                    if (
+                      isAdvancedEditorEnabled &&
+                      (isAdvancedEditorApplyButtonEnabled ||
+                        advancedEditorConfig !== advancedEditorConfigLastApplied)
+                    ) {
+                      setAdvancedEditorSwitchModalVisible(true);
+                      return;
+                    }
+
+                    toggleAdvancedEditor();
+                  }}
+                />
+                {isAdvancedEditorSwitchModalVisible && (
+                  <EuiOverlayMask>
+                    <EuiConfirmModal
+                      title={i18n.translate(
+                        'xpack.ml.dataframe.definePivotForm.advancedEditorSwitchModalTitle',
+                        {
+                          defaultMessage: 'Unapplied changes',
+                        }
+                      )}
+                      onCancel={() => setAdvancedEditorSwitchModalVisible(false)}
+                      onConfirm={() => {
+                        setAdvancedEditorSwitchModalVisible(false);
+                        toggleAdvancedEditor();
+                      }}
+                      cancelButtonText={i18n.translate(
+                        'xpack.ml.dataframe.definePivotForm.advancedEditorSwitchModalCancelButtonText',
+                        {
+                          defaultMessage: 'Cancel',
+                        }
+                      )}
+                      confirmButtonText={i18n.translate(
+                        'xpack.ml.dataframe.definePivotForm.advancedEditorSwitchModalConfirmButtonText',
+                        {
+                          defaultMessage: 'Disable advanced editor',
+                        }
+                      )}
+                      buttonColor="danger"
+                      defaultFocusedButton="confirm"
+                    >
+                      <p>
+                        {i18n.translate(
+                          'xpack.ml.dataframe.definePivotForm.advancedEditorSwitchModalBodyText',
+                          {
+                            defaultMessage: `The changes in the advanced editor haven't been applied yet. By disabling the advanced editor you will lose your edits.`,
+                          }
+                        )}
+                      </p>
+                    </EuiConfirmModal>
+                  </EuiOverlayMask>
+                )}
+              </EuiFlexItem>
+              {isAdvancedEditorEnabled && (
+                <EuiButton
+                  size="s"
+                  fill
+                  onClick={applyAdvancedEditorChanges}
+                  disabled={!isAdvancedEditorApplyButtonEnabled}
+                >
+                  {i18n.translate(
+                    'xpack.ml.dataframe.definePivotForm.advancedEditorApplyButtonText',
+                    {
+                      defaultMessage: 'Apply changes',
+                    }
+                  )}
+                </EuiButton>
+              )}
+            </EuiFlexGroup>
           </EuiFormRow>
           {!valid && (
-            <EuiFormHelpText style={{ maxWidth: '320px' }}>
-              {i18n.translate('xpack.ml.dataframe.definePivotForm.formHelp', {
-                defaultMessage:
-                  'Data frame transforms are scalable and automated processes for pivoting. Choose at least one group-by and aggregation to get started.',
-              })}
-            </EuiFormHelpText>
+            <Fragment>
+              <EuiFormHelpText style={{ maxWidth: '320px' }}>
+                {i18n.translate('xpack.ml.dataframe.definePivotForm.formHelp', {
+                  defaultMessage:
+                    'Data frame transforms are scalable and automated processes for pivoting. Choose at least one group-by and aggregation to get started.',
+                })}
+              </EuiFormHelpText>
+            </Fragment>
           )}
         </EuiForm>
       </EuiFlexItem>

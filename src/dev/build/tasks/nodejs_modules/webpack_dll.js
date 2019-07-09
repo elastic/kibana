@@ -17,12 +17,17 @@
  * under the License.
  */
 
-import { deleteAll, read, write } from '../../lib';
-import { dirname, sep, relative } from 'path';
+import { deleteAll, isFileAccessible, read, write } from '../../lib';
+import { dirname, sep, relative, resolve } from 'path';
 import pkgUp from 'pkg-up';
 import globby from 'globby';
 
-export async function getDllEntries(manifestPath, whiteListedModules) {
+function checkDllEntryAccess(entry, baseDir = '') {
+  const resolvedPath = baseDir ? resolve(baseDir, entry) : entry;
+  return isFileAccessible(resolvedPath);
+}
+
+export async function getDllEntries(manifestPath, whiteListedModules, baseDir = '') {
   const manifest = JSON.parse(await read(manifestPath));
 
   if (!manifest || !manifest.content) {
@@ -46,7 +51,17 @@ export async function getDllEntries(manifestPath, whiteListedModules) {
     const isWhiteListed = whiteListedModules.some(nonEntry => entry.includes(`node_modules${sep}${nonEntry}${sep}`));
     const isNodeModule = entry.includes('node_modules');
 
-    return !isWhiteListed && isNodeModule;
+    // NOTE: when using dynamic imports on webpack the entry paths could be created
+    // with special context module (ex: lazy recursive) values over directories that are not real files
+    // and only exists in runtime, so we need to check if the entry is a real file.
+    // We found that problem through the issue https://github.com/elastic/kibana/issues/38481
+    //
+    // More info:
+    // https://github.com/webpack/webpack/blob/master/examples/code-splitting-harmony/README.md
+    // https://webpack.js.org/guides/dependency-management/#require-with-expression
+    const isAccessible = checkDllEntryAccess(entry, baseDir);
+
+    return !isWhiteListed && isNodeModule && isAccessible;
   });
 }
 
