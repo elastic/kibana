@@ -20,6 +20,21 @@ you'll be prompted to do so as you follow the steps for creating a dashboard.
 Or, you can use one of the prebuilt sample data sets, available from the
 Kibana home page.
 
+[float]
+[[dashboard-read-only-access]]
+=== [xpack]#Read only access#
+When you have insufficient privileges to create or save dashboards, the following 
+indicator in Kibana will be displayed. The buttons to create new dashboards or edit
+existing dashboard won't be visible. For more information on granting access to
+Kibana see <<xpack-security-authorization>>.
+
+[role="screenshot"]
+image::images/dashboard-read-only-badge.png[Example of Dashboard's read only access indicator in Kibana's header]
+
+[float]
+[[dashboard-create-new-dashboard]]
+=== Creating a new Dashboard
+
 . In the side navigation, click *Dashboard*.
 . Click *Create new dashboard.*
 . Click *Add*.

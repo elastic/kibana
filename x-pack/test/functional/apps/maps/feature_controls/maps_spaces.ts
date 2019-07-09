@@ -14,7 +14,8 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
   const PageObjects = getPageObjects(['common', 'maps', 'security']);
   const appsMenu = getService('appsMenu');
 
-  describe('spaces feature controls', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/38414
+  describe.skip('spaces feature controls', () => {
     before(async () => {
       await esArchiver.loadIfNeeded('maps/data');
       await esArchiver.load('maps/kibana');

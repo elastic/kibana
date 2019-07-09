@@ -171,13 +171,12 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
       await this.clickVisType('markdown');
     }
 
-    async clickAddMetric() {
-      await find.clickByCssSelector('[group-name="metrics"] [data-test-subj="visualizeEditorAddAggregationButton"]');
+    // clickBucket(bucketName) 'X-axis', 'Split area', 'Split chart'
+    async clickBucket(bucketName, type = 'buckets') {
+      await testSubjects.click(`visEditorAdd_${type}`);
+      await find.clickByCssSelector(`[data-test-subj="visEditorAdd_${type}_${bucketName}"`);
     }
 
-    async clickAddBucket() {
-      await find.clickByCssSelector('[group-name="buckets"] [data-test-subj="visualizeEditorAddAggregationButton"]');
-    }
 
     async clickMetric() {
       await this.clickVisType('metric');
@@ -401,6 +400,13 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
       await find.clickByCssSelector('button[data-test-subj="toggleEditor"]');
     }
 
+    async clickMetricByIndex(index) {
+      log.debug(`clickMetricByIndex(${index})`);
+      const metrics = await find.allByCssSelector('[data-test-subj="visualizationLoader"] .mtrVis .mtrVis__container');
+      expect(metrics.length).greaterThan(index);
+      await metrics[index].click();
+    }
+
     async clickNewSearch(indexPattern = this.index.LOGSTASH_TIME_BASED) {
       await testSubjects.click(`savedObjectTitle${indexPattern.split(' ').join('-')}`);
       await PageObjects.header.waitUntilLoadingHasFinished();
@@ -431,18 +437,12 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
       return await element.getVisibleText();
     }
 
-    // clickBucket(bucketType) 'X-Axis', 'Split Area', 'Split Chart'
-    async clickBucket(bucketName, type = 'bucket') {
-      const testSubject = type === 'bucket' ? 'bucketsAggGroup' : 'metricsAggGroup';
-      const locator = `[data-test-subj="${testSubject}"] .list-group-menu-item[data-test-subj="${bucketName}"]`;
-      await find.clickByCssSelector(locator);
-    }
-
     async selectAggregation(myString, groupName = 'buckets', childAggregationType = null) {
       const comboBoxElement = await find.byCssSelector(`
         [group-name="${groupName}"]
         vis-editor-agg-params:not(.ng-hide)
-        ${childAggregationType ? `vis-editor-agg-params[group-name="'${childAggregationType}'"]:not(.ng-hide)` : ''}
+        [data-test-subj="visAggEditorParams"]
+        ${childAggregationType ? '.visEditorAgg__subAgg' : ''}
         [data-test-subj="defaultEditorAggSelect"]
       `);
 
@@ -487,10 +487,12 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
 
       // select our agg
       const aggSelect = await find
-        .byCssSelector(`#visAggEditorParams${index} [data-test-subj="defaultEditorAggSelect"]`);
+        .byCssSelector(`[data-test-subj="aggregationEditor${index}"]
+          vis-editor-agg-params:not(.ng-hide) [data-test-subj="defaultEditorAggSelect"]`);
       await comboBox.setElement(aggSelect, agg);
 
-      const fieldSelect = await find.byCssSelector(`#visAggEditorParams${index} [data-test-subj="visDefaultEditorField"]`);
+      const fieldSelect = await find.byCssSelector(`[data-test-subj="aggregationEditor${index}"]
+        vis-editor-agg-params:not(.ng-hide) [data-test-subj="visDefaultEditorField"]`);
       // select our field
       await comboBox.setElement(fieldSelect, field);
       // enter custom label
@@ -542,7 +544,8 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
       const selector = `
         [group-name="${groupName}"]
         vis-editor-agg-params:not(.ng-hide)
-        ${childAggregationType ? `vis-editor-agg-params[group-name="'${childAggregationType}'"]:not(.ng-hide)` : ''}
+        [data-test-subj="visAggEditorParams"]
+        ${childAggregationType ? '.visEditorAgg__subAgg' : ''}
         [data-test-subj="visDefaultEditorField"]
       `;
       const fieldEl = await find.byCssSelector(selector);
@@ -568,8 +571,7 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
     }
 
     async getNumericInterval(agg = 2) {
-      const intervalElement = await testSubjects.find(`visEditorInterval${agg}`);
-      return await intervalElement.getProperty('value');
+      return await testSubjects.getAttribute(`visEditorInterval${agg}`, 'value');
     }
 
     async setNumericInterval(newValue, { append } = {}, agg = 2) {
@@ -742,11 +744,6 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
       await retry.waitFor('last breadcrumb to have new vis name', async () => (
         await globalNav.getLastBreadcrumb() === vizName
       ));
-    }
-
-    async expectNoSaveOption() {
-      const saveButtonExists = await testSubjects.exists('visualizeSaveButton');
-      expect(saveButtonExists).to.be(false);
     }
 
     async clickLoadSavedVisButton() {
@@ -1005,10 +1002,6 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
       return await markdown.getVisibleText();
     }
 
-    async clickColumns() {
-      await find.clickByCssSelector('div.schemaEditors > div > div > button:nth-child(2)');
-    }
-
     async getVisualizationRenderingCount() {
       const visualizationLoader = await testSubjects.find('visualizationLoader');
       const renderingCount = await visualizationLoader.getAttribute('data-rendering-count');
@@ -1219,8 +1212,8 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
     }
 
     async getBucketErrorMessage() {
-      const error = await find.byCssSelector('.visEditorAggParam__error');
-      const errorMessage = await error.getProperty('innerText');
+      const error = await find.byCssSelector('[group-name="buckets"] [data-test-subj="defaultEditorAggSelect"] + .euiFormErrorText');
+      const errorMessage = await error.getAttribute('innerText');
       log.debug(errorMessage);
       return errorMessage;
     }
@@ -1233,14 +1226,14 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
 
     async selectCustomSortMetric(agg, metric, field) {
       await this.selectOrderByMetric(agg, 'custom');
-      await this.selectAggregation(metric, 'groupName');
-      await this.selectField(field, 'groupName');
+      await this.selectAggregation(metric, 'buckets', true);
+      await this.selectField(field, 'buckets', true);
     }
 
     async clickSplitDirection(direction) {
-      const activeParamPanel = await find.byCssSelector('vis-editor-agg-params[aria-hidden="false"]');
-      const button = await testSubjects.findDescendant(`splitBy-${direction}`, activeParamPanel);
-      await button.click();
+      const control = await testSubjects.find('visEditorSplitBy');
+      const radioBtn = await control.findByCssSelector(`[title="${direction}"]`);
+      await radioBtn.click();
     }
 
     async countNestedTables() {

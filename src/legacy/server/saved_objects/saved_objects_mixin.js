@@ -17,16 +17,21 @@
  * under the License.
  */
 
-import { KibanaMigrator } from './migrations';
-import { SavedObjectsSchema } from './schema';
-import { SavedObjectsSerializer } from './serialization';
+// Disable lint errors for imports from src/core/server/saved_objects until SavedObjects migration is complete
+/* eslint-disable @kbn/eslint/no-restricted-paths */
+
+import { KibanaMigrator } from '../../../core/server/saved_objects/migrations';
+import { SavedObjectsSchema } from '../../../core/server/saved_objects/schema';
+import { SavedObjectsSerializer } from '../../../core/server/saved_objects/serialization';
 import {
   SavedObjectsClient,
   SavedObjectsRepository,
   ScopedSavedObjectsClientProvider,
-} from './service';
-import { getRootPropertiesObjects } from '../mappings';
-import { SavedObjectsManagement } from './management';
+  getSortedObjectsForExport,
+  importSavedObjects,
+} from '../../../core/server/saved_objects/service';
+import { getRootPropertiesObjects } from '../../../core/server/saved_objects/mappings';
+import { SavedObjectsManagement } from '../../../core/server/saved_objects/management';
 
 import {
   createBulkCreateRoute,
@@ -41,9 +46,6 @@ import {
   createResolveImportErrorsRoute,
   createLogLegacyImportRoute,
 } from './routes';
-
-import { getSortedObjectsForExport, objectsToNdJson } from './export';
-import { importSavedObjects } from './import';
 
 function getImportableAndExportableTypes({ kbnServer, visibleTypes }) {
   const { savedObjectsManagement = {} } = kbnServer.uiExports;
@@ -147,7 +149,6 @@ export function savedObjectsMixin(kbnServer, server) {
     importExport: {
       importSavedObjects,
       getSortedObjectsForExport,
-      objectsToNdJson,
     },
     schema,
   };

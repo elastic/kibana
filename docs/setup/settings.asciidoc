@@ -128,6 +128,14 @@ store saved searches, visualizations and dashboards. Kibana creates a new index
 if the index doesn’t already exist. If you configure a custom index, the name must
 be lowercase, and conform to {es} {ref}/indices-create-index.html[index name limitations].
 
+`kibana.autocompleteTimeout:`:: *Default: "1000"* Time in milliseconds to wait
+for autocomplete suggestions from Elasticsearch. This value must be a whole number
+greater than zero.
+
+`kibana.autocompleteTerminateAfter:`:: *Default: "100000"* Maximum number of
+documents loaded by each shard to generate autocomplete suggestions. This value
+must be a whole number greater than zero.
+
 `logging.dest:`:: *Default: `stdout`* Enables you specify a file where Kibana
 stores log output.
 
@@ -257,6 +265,9 @@ modify the landing page when opening Kibana. Supported on {ece}.
 `server.host:`:: *Default: "localhost"* This setting specifies the host of the
 back end server.
 
+`server.keepaliveTimeout:`:: *Default: "120000"* The number of milliseconds to wait for additional data before restarting
+the `server.socketTimeout` counter.
+
 `server.maxPayloadBytes:`:: *Default: 1048576* The maximum payload size in bytes
 for incoming server requests.
 
@@ -270,6 +281,9 @@ setting specifies the port to use.
 rewrite requests that are prefixed with `server.basePath` or require that they
 are rewritten by your reverse proxy. This setting was effectively always `false`
 before Kibana 6.3 and will default to `true` starting in Kibana 7.0.
+
+`server.socketTimeout:`:: *Default: "120000"* The number of milliseconds to wait before closing an
+inactive socket.
 
 `server.ssl.certificate:` and `server.ssl.key:`:: Paths to the PEM-format SSL
 certificate and SSL key files, respectively.
@@ -308,6 +322,7 @@ Rollup user interface.
 
 
 include::{docdir}/settings/apm-settings.asciidoc[]
+include::{docdir}/settings/code-settings.asciidoc[]
 include::{docdir}/settings/dev-settings.asciidoc[]
 include::{docdir}/settings/graph-settings.asciidoc[]
 include::{docdir}/settings/infrastructure-ui-settings.asciidoc[]

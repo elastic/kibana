@@ -18,7 +18,7 @@
  */
 
 import React from 'react';
-import { EuiFieldText, EuiFlexItem } from '@elastic/eui';
+import { EuiFieldText, EuiFlexItem, EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import Ipv4Address from '../../../utils/ipv4_address';
 import { InputList, InputListConfig, InputModel, InputObject, InputItem } from './input_list';
@@ -86,6 +86,7 @@ function FromToList({ showValidation, onBlur, ...rest }: FromToListProps) {
               defaultMessage: 'IP range from: {value}',
               values: { value: item.from.value || '*' },
             })}
+            compressed
             isInvalid={showValidation ? item.from.isInvalid : false}
             placeholder="*"
             onChange={ev => {
@@ -95,12 +96,16 @@ function FromToList({ showValidation, onBlur, ...rest }: FromToListProps) {
             onBlur={onBlur}
           />
         </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiIcon type="sortRight" color="subdued" />
+        </EuiFlexItem>
         <EuiFlexItem>
           <EuiFieldText
             aria-label={i18n.translate('common.ui.aggTypes.ipRanges.ipRangeToAriaLabel', {
               defaultMessage: 'IP range to: {value}',
               values: { value: item.to.value || '*' },
             })}
+            compressed
             isInvalid={showValidation ? item.to.isInvalid : false}
             placeholder="*"
             onChange={ev => {

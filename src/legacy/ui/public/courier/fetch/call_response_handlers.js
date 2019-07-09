@@ -23,7 +23,7 @@ import { RequestStatus } from './req_status';
 import { SearchError } from '../search_strategy/search_error';
 import { i18n } from '@kbn/i18n';
 
-export function CallResponseHandlersProvider(Private, Promise) {
+export function CallResponseHandlersProvider(Promise) {
   const ABORTED = RequestStatus.ABORTED;
   const INCOMPLETE = RequestStatus.INCOMPLETE;
 

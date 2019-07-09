@@ -12,12 +12,14 @@ export default ({ getPageObjects, getService }: KibanaFunctionalTestDefaultProvi
   const pageObjects = getPageObjects(['uptime']);
   const archive = 'uptime/full_heartbeat';
 
-  describe('monitor page', () => {
+  describe('monitor page', async function() {
+    this.tags(['skipFirefox']);
     before(async () => {
       await esArchiver.load(archive);
     });
     after(async () => await esArchiver.unload(archive));
-    it('loads and displays uptime data based on date range', async () => {
+    // TODO: update this test when states index is finalized
+    it.skip('loads and displays uptime data based on date range', async () => {
       await pageObjects.uptime.loadDataAndGoToMonitorPage(
         '2019-01-28 12:40:08.078',
         '2019-01-29 12:40:08.078',

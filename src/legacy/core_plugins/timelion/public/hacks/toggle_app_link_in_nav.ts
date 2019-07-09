@@ -17,11 +17,9 @@
  * under the License.
  */
 
-import { onStart } from 'ui/new_platform';
+import { npStart } from 'ui/new_platform';
 
-onStart(({ core }) => {
-  const timelionUiEnabled = core.injectedMetadata.getInjectedVar('timelionUiEnabled');
-  if (timelionUiEnabled === false) {
-    core.chrome.navLinks.update('timelion', { hidden: true });
-  }
-});
+const timelionUiEnabled = npStart.core.injectedMetadata.getInjectedVar('timelionUiEnabled');
+if (timelionUiEnabled === false) {
+  npStart.core.chrome.navLinks.update('timelion', { hidden: true });
+}

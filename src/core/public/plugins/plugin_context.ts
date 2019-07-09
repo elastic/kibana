@@ -17,7 +17,9 @@
  * under the License.
  */
 
-import { DiscoveredPlugin } from '../../server';
+import { omit } from 'lodash';
+
+import { DiscoveredPlugin, PluginName } from '../../server';
 import { CoreContext } from '../core_system';
 import { PluginWrapper } from './plugin';
 import { PluginsServiceSetupDeps, PluginsServiceStartDeps } from './plugins_service';
@@ -56,16 +58,19 @@ export function createPluginInitializerContext(
  * @param plugin
  * @internal
  */
-export function createPluginSetupContext<TSetup, TStart, TPluginsSetup, TPluginsStart>(
+export function createPluginSetupContext<
+  TSetup,
+  TStart,
+  TPluginsSetup extends Record<PluginName, unknown>,
+  TPluginsStart extends Record<PluginName, unknown>
+>(
   coreContext: CoreContext,
   deps: PluginsServiceSetupDeps,
   plugin: PluginWrapper<TSetup, TStart, TPluginsSetup, TPluginsStart>
 ): CoreSetup {
   return {
     http: deps.http,
-    chrome: deps.chrome,
     fatalErrors: deps.fatalErrors,
-    i18n: deps.i18n,
     notifications: deps.notifications,
     uiSettings: deps.uiSettings,
   };
@@ -81,7 +86,12 @@ export function createPluginSetupContext<TSetup, TStart, TPluginsSetup, TPlugins
  * @param plugin
  * @internal
  */
-export function createPluginStartContext<TSetup, TStart, TPluginsSetup, TPluginsStart>(
+export function createPluginStartContext<
+  TSetup,
+  TStart,
+  TPluginsSetup extends Record<PluginName, unknown>,
+  TPluginsStart extends Record<PluginName, unknown>
+>(
   coreContext: CoreContext,
   deps: PluginsServiceStartDeps,
   plugin: PluginWrapper<TSetup, TStart, TPluginsSetup, TPluginsStart>
@@ -90,10 +100,12 @@ export function createPluginStartContext<TSetup, TStart, TPluginsSetup, TPlugins
     application: {
       capabilities: deps.application.capabilities,
     },
+    docLinks: deps.docLinks,
     http: deps.http,
-    chrome: deps.chrome,
+    chrome: omit(deps.chrome, 'getComponent'),
     i18n: deps.i18n,
     notifications: deps.notifications,
     overlays: deps.overlays,
+    uiSettings: deps.uiSettings,
   };
 }

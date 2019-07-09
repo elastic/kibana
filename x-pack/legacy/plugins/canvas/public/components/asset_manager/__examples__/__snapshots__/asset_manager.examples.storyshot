@@ -1,0 +1,37 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Storyshots components/Assets/AssetManager no assets 1`] = `
+<button
+  className="euiButtonEmpty euiButtonEmpty--primary"
+  onClick={[Function]}
+  type="button"
+>
+  <span
+    className="euiButtonEmpty__content"
+  >
+    <span
+      className="euiButtonEmpty__text"
+    >
+      Manage assets
+    </span>
+  </span>
+</button>
+`;
+
+exports[`Storyshots components/Assets/AssetManager two assets 1`] = `
+<button
+  className="euiButtonEmpty euiButtonEmpty--primary"
+  onClick={[Function]}
+  type="button"
+>
+  <span
+    className="euiButtonEmpty__content"
+  >
+    <span
+      className="euiButtonEmpty__text"
+    >
+      Manage assets
+    </span>
+  </span>
+</button>
+`;

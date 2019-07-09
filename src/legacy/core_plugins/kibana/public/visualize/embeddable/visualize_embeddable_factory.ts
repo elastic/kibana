@@ -29,11 +29,15 @@ import {
   OnEmbeddableStateChanged,
 } from 'ui/embeddable/embeddable_factory';
 import { VisTypesRegistry } from 'ui/registry/vis_types';
+import { SavedObjectAttributes } from 'src/core/server';
 import { VisualizeEmbeddable } from './visualize_embeddable';
-import { VisualizationAttributes } from '../../../../../server/saved_objects/service/saved_objects_client';
 import { SavedVisualizations } from '../types';
 import { DisabledLabEmbeddable } from './disabled_lab_embeddable';
 import { getIndexPattern } from './get_index_pattern';
+
+export interface VisualizationAttributes extends SavedObjectAttributes {
+  visState: string;
+}
 
 export class VisualizeEmbeddableFactory extends EmbeddableFactory<VisualizationAttributes> {
   private savedVisualizations: SavedVisualizations;
@@ -55,15 +59,19 @@ export class VisualizeEmbeddableFactory extends EmbeddableFactory<VisualizationA
           );
         },
         getTooltipForSavedObject: savedObject => {
-          const visType = visTypes.byName[JSON.parse(savedObject.attributes.visState).type].title;
-          return `${savedObject.attributes.title} (${visType})`;
+          return `${savedObject.attributes.title} (${visTypes.byName[JSON.parse(savedObject.attributes.visState).type].title})`;
         },
         showSavedObject: savedObject => {
+          const typeName: string = JSON.parse(savedObject.attributes.visState).type;
+          const visType = visTypes.byName[typeName];
+          if (!visType) {
+            return false;
+          }
+
           if (chrome.getUiSettingsClient().get('visualize:enableLabs')) {
             return true;
           }
-          const typeName: string = JSON.parse(savedObject.attributes.visState).type;
-          const visType = visTypes.byName[typeName];
+
           return visType.stage !== 'experimental';
         },
       },

@@ -17,32 +17,35 @@
  * under the License.
  */
 
-export function IndexPatternsPatternCacheProvider() {
+export function createIndexPatternCache() {
 
   const vals = {};
+  const cache = {};
 
   const validId = function (id) {
     return typeof id !== 'object';
   };
 
-  this.get = function (id) {
+  cache.get = function (id) {
     if (validId(id)) return vals[id];
   };
 
-  this.set = function (id, prom) {
+  cache.set = function (id, prom) {
     if (validId(id)) vals[id] = prom;
     return prom;
   };
 
-  this.clear = this.delete = function (id) {
+  cache.clear = cache.delete = function (id) {
     if (validId(id)) delete vals[id];
   };
 
-  this.clearAll = function () {
+  cache.clearAll = function () {
     for (const id in vals) {
       if (vals.hasOwnProperty(id)) {
         delete vals[id];
       }
     }
   };
+
+  return cache;
 }

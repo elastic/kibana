@@ -17,7 +17,12 @@
  * under the License.
  */
 
-import { ErrorToastOptions, Toast, ToastInput, ToastsApi } from '../../../../../core/public';
+import {
+  ErrorToastOptions,
+  NotificationsSetup,
+  Toast,
+  ToastInput,
+} from '../../../../../core/public';
 
 export { Toast, ToastInput };
 
@@ -26,7 +31,7 @@ export class ToastNotifications {
 
   private onChangeCallback?: () => void;
 
-  constructor(private readonly toasts: ToastsApi) {
+  constructor(private readonly toasts: NotificationsSetup['toasts']) {
     toasts.get$().subscribe(list => {
       this.list = list;
 

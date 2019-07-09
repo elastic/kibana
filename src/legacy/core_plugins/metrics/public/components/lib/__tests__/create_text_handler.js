@@ -22,7 +22,6 @@ import { expect } from 'chai';
 import { createTextHandler } from '../create_text_handler';
 
 describe('createTextHandler()', () => {
-
   let handleChange;
   let changeHandler;
   let event;
@@ -39,9 +38,7 @@ describe('createTextHandler()', () => {
     expect(event.preventDefault.calledOnce).to.equal(true);
     expect(handleChange.calledOnce).to.equal(true);
     expect(handleChange.firstCall.args[0]).to.eql({
-      test: 'foo'
+      test: 'foo',
     });
   });
-
 });
-

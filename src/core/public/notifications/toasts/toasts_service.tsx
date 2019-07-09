@@ -20,16 +20,15 @@
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 
-import { Toast } from '@elastic/eui';
-import { I18nSetup, I18nStart } from '../../i18n';
-import { UiSettingsSetup } from '../../ui_settings';
+import { EuiGlobalToastListToast as Toast } from '@elastic/eui';
+import { I18nStart } from '../../i18n';
+import { UiSettingsClientContract } from '../../ui_settings';
 import { GlobalToastList } from './global_toast_list';
 import { ToastsApi } from './toasts_api';
 import { OverlayStart } from '../../overlays';
 
 interface SetupDeps {
-  i18n: I18nSetup;
-  uiSettings: UiSettingsSetup;
+  uiSettings: UiSettingsClientContract;
 }
 
 interface StartDeps {
@@ -48,8 +47,8 @@ export class ToastsService {
   private api?: ToastsApi;
   private targetDomElement?: HTMLElement;
 
-  public setup({ i18n, uiSettings }: SetupDeps) {
-    this.api = new ToastsApi({ i18n, uiSettings });
+  public setup({ uiSettings }: SetupDeps) {
+    this.api = new ToastsApi({ uiSettings });
     return this.api!;
   }
 

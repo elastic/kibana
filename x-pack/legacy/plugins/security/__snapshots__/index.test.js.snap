@@ -1,0 +1,54 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`config schema authc oidc realm realm is not allowed when authc.providers is "['basic']" 1`] = `[ValidationError: child "authc" fails because [child "oidc" fails because ["oidc" is not allowed]]]`;
+
+exports[`config schema authc oidc realm returns a validation error when authc.providers is "['oidc', 'basic']" and realm is unspecified 1`] = `[ValidationError: child "authc" fails because [child "oidc" fails because ["oidc" is required]]]`;
+
+exports[`config schema authc oidc realm returns a validation error when authc.providers is "['oidc']" and realm is unspecified 1`] = `[ValidationError: child "authc" fails because [child "oidc" fails because ["oidc" is required]]]`;
+
+exports[`config schema authc oidc realm returns a validation error when authc.providers is "['oidc']" and realm is unspecified 2`] = `[ValidationError: child "authc" fails because [child "oidc" fails because [child "realm" fails because ["realm" is required]]]]`;
+
+exports[`config schema with context {"dist":false} produces correct config 1`] = `
+Object {
+  "audit": Object {
+    "enabled": false,
+  },
+  "authc": Object {
+    "providers": Array [
+      "basic",
+    ],
+  },
+  "authorization": Object {
+    "legacyFallback": Object {
+      "enabled": true,
+    },
+  },
+  "cookieName": "sid",
+  "enabled": true,
+  "encryptionKey": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "secureCookies": false,
+  "sessionTimeout": null,
+}
+`;
+
+exports[`config schema with context {"dist":true} produces correct config 1`] = `
+Object {
+  "audit": Object {
+    "enabled": false,
+  },
+  "authc": Object {
+    "providers": Array [
+      "basic",
+    ],
+  },
+  "authorization": Object {
+    "legacyFallback": Object {
+      "enabled": true,
+    },
+  },
+  "cookieName": "sid",
+  "enabled": true,
+  "secureCookies": false,
+  "sessionTimeout": null,
+}
+`;

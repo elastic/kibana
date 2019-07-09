@@ -17,9 +17,13 @@
  * under the License.
  */
 
-import { EmbeddableMetadata, Filters, Query, RefreshConfig, TimeRange } from 'ui/embeddable';
+import { EmbeddableMetadata } from 'ui/embeddable';
+import { Filter } from '@kbn/es-query';
+import { RefreshInterval } from 'ui/timefilter/timefilter';
+import { TimeRange } from 'ui/timefilter/time_history';
+import { Query } from 'src/legacy/core_plugins/data/public';
 import { DashboardViewMode } from '../dashboard_view_mode';
-import { GridData } from '../types';
+import { SavedDashboardPanelMap } from '../types';
 
 export type DashboardViewMode = DashboardViewMode;
 export interface ViewState {
@@ -28,25 +32,15 @@ export interface ViewState {
   readonly maximizedPanelId?: string;
   readonly visibleContextMenuPanelId?: string;
   readonly timeRange: TimeRange;
-  readonly refreshConfig: RefreshConfig;
+  readonly refreshConfig: RefreshInterval;
   readonly hidePanelTitles: boolean;
   readonly useMargins: boolean;
   readonly query: Query;
-  readonly filters: Filters;
+  readonly filters: Filter[];
 }
 
 export type PanelId = string;
 export type SavedObjectId = string;
-
-export interface PanelState {
-  readonly id: SavedObjectId;
-  readonly version: string;
-  readonly type: string;
-  panelIndex: PanelId;
-  readonly embeddableConfig: any;
-  readonly gridData: GridData;
-  readonly title?: string;
-}
 
 export interface EmbeddableReduxState {
   readonly metadata?: EmbeddableMetadata;
@@ -57,23 +51,6 @@ export interface EmbeddableReduxState {
    * Timestamp of the last time this embeddable was requested to reload.
    */
   readonly lastReloadRequestTime: number;
-}
-
-export interface Pre61PanelState {
-  size_x: number;
-  size_y: number;
-  row: number;
-  col: number;
-  panelIndex: any; // earlier versions allowed this to be number or string
-  id: string;
-  type: string;
-  // Embeddableconfig didn't actually exist on older panel states but `migrate_app_state.js` handles
-  // stuffing it on.
-  embeddableConfig: any;
-}
-
-export interface PanelStateMap {
-  [panelId: string]: PanelState | Pre61PanelState;
 }
 
 export interface EmbeddablesMap {
@@ -87,7 +64,7 @@ export interface DashboardMetadata {
 
 export interface DashboardState {
   readonly view: ViewState;
-  readonly panels: PanelStateMap;
+  readonly panels: SavedDashboardPanelMap;
   readonly embeddables: EmbeddablesMap;
   readonly metadata: DashboardMetadata;
 }

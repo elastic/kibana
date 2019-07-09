@@ -20,18 +20,16 @@
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
 import html from './vislib_vis_legend.html';
-import { VislibLibDataProvider } from '../../vislib/lib/data';
+import { Data } from '../../vislib/lib/data';
 import { uiModules } from '../../modules';
-import { VisFiltersProvider } from '../vis_filters';
+import { createFiltersFromEvent } from '../vis_filters';
 import { htmlIdGenerator, keyCodes } from '@elastic/eui';
 import { getTableAggs } from '../../visualize/loader/pipeline_helpers/utilities';
 
 export const CUSTOM_LEGEND_VIS_TYPES = ['heatmap', 'gauge'];
 
 uiModules.get('kibana')
-  .directive('vislibLegend', function (Private, $timeout) {
-    const Data = Private(VislibLibDataProvider);
-    const visFilters = Private(VisFiltersProvider);
+  .directive('vislibLegend', function ($timeout) {
 
     return {
       restrict: 'E',
@@ -98,7 +96,7 @@ uiModules.get('kibana')
           if (CUSTOM_LEGEND_VIS_TYPES.includes($scope.vis.vislibVis.visConfigArgs.type)) {
             return false;
           }
-          const filters = visFilters.filter({ aggConfigs: $scope.tableAggs, data: legendData.values }, { simulate: true });
+          const filters = createFiltersFromEvent({ aggConfigs: $scope.tableAggs, data: legendData.values });
           return filters.length;
         };
 

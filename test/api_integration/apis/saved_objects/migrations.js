@@ -26,9 +26,9 @@ import { assert } from 'chai';
 import {
   DocumentMigrator,
   IndexMigrator,
-} from '../../../../src/legacy/server/saved_objects/migrations/core';
-import { SavedObjectsSerializer } from '../../../../src/legacy/server/saved_objects/serialization';
-import { SavedObjectsSchema } from '../../../../src/legacy/server/saved_objects/schema';
+} from '../../../../src/core/server/saved_objects/migrations/core';
+import { SavedObjectsSerializer } from '../../../../src/core/server/saved_objects/serialization';
+import { SavedObjectsSchema } from '../../../../src/core/server/saved_objects/schema';
 
 export default ({ getService }) => {
   const es = getService('es');

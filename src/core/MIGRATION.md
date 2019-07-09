@@ -26,6 +26,7 @@
   * [When does code go into a plugin, core, or packages?](#when-does-code-go-into-a-plugin-core-or-packages)
 * [How to](#how-to)
   * [Configure plugin](#configure-plugin)
+  * [Mock core services in tests](#mock-core-services-in-tests)
 
 Make no mistake, it is going to take a lot of work to move certain plugins to the new platform. Our target is to migrate the entire repo over to the new platform throughout 7.x and to remove the legacy plugin system no later than 8.0, and this is only possible if teams start on the effort now.
 
@@ -37,7 +38,7 @@ We'll start with an overview of how plugins work in the new platform, and we'll 
 
 Plugins in the new platform are not especially novel or complicated to describe. Our intention wasn't to build some clever system that magically solved problems through abstractions and layers of obscurity, and we wanted to make sure plugins could continue to use most of the same technologies they use today, at least from a technical perspective.
 
-New platform plugins exist in the `src/plugins` and `x-pack/plugins` directories.
+New platform plugins exist in the `src/plugins` and `x-pack/legacy/plugins` directories.
 
 ### Architecture
 
@@ -62,6 +63,7 @@ src/plugins
 ```json
 {
   "id": "demo",
+  "version": "kibana",
   "server": true,
   "ui": true
 }
@@ -751,7 +753,7 @@ Examples of code that could **not** be shared statically and how to fix it:
     class MyPlugin {
       constructor() { this.visTypes = [] }
       setup() {
-        return { 
+        return {
           registerVisType: (visType) => this.visTypes.push(visType)
         }
       }
@@ -831,20 +833,50 @@ Kibana provides ConfigService if a plugin developer may want to support adjustab
 In order to have access to a config, plugin *should*:
 - Declare plugin specific "configPath" (will fallback to plugin "id" if not specified) in `kibana.json` file.
 - Export schema validation for config from plugin's main file. Schema is mandatory. If a plugin reads from the config without schema declaration, ConfigService will throw an error.
-```js
+```typescript
 // my_plugin/server/index.ts
-import { schema } from '@kbn/config-schema';
+import { schema, TypeOf } from '@kbn/config-schema';
 export const plugin = ...
 export const config = {
   schema: schema.object(...),
 };
+export type MyPluginConfigType = TypeOf<typeof config.schema>;
 ```
 - Read config value exposed via initializerContext. No config path is required.
-```js
+```typescript
 class MyPlugin {
   constructor(initializerContext: PluginInitializerContext) {
-    this.config$ = initializerContext.config.create();
+    this.config$ = initializerContext.config.create<MyPluginConfigType>();
     // or if config is optional:
-    this.config$ = initializerContext.config.createIfExists();
+    this.config$ = initializerContext.config.createIfExists<MyPluginConfigType>();
   }
+```
+
+### Mock core services in tests
+Core services already provide mocks to simplify testing and make sure plugins always rely on valid public contracts.
+```typescript
+// my_plugin/server/plugin.test.ts
+Import { configServiceMock } from 'src/core/server/mocks.ts'
+
+const configService = configServiceMock.create();
+configService.atPath.mockReturnValue(config$);
+…
+const plugin = new MyPlugin({ configService }, …)
+```
+However it's not mandatory, we strongly recommended to export your plugin mocks as well, in order for dependent plugins to use them in tests. Your plugin mocks should be exported from the root level of the plugin. Plugin mocks should consist of mocks for *public API only*: setup/start/stop contracts. Mocks aren't necessary for pure functions as other plugins can call original implementation in tests.
+```typescript
+// my_plugin/server/mocks.ts
+const createSetupContractMock = () => {
+  const startContract: jest.Mocked<MyPluginStartContract>= {
+    isValid: jest.fn();
+  }
+  // here we already type check as TS infers to the correct type declared above
+  startContract.isValid.mockReturnValue(true);
+  return startContract;
+}
+
+export const myPluginMocks = {
+  createSetup: createSetupContractMock,
+  createStart: ...
+}
 ```
