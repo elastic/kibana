@@ -22,9 +22,18 @@ import { TopNavMenu } from './top_nav_menu';
 import { TopNavMenuData } from './top_nav_menu_data';
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 
+jest.mock('../../../../core_plugins/data/public', () => {
+  return {
+    SearchBar: () => <div className="searchBar"></div>,
+    SearchBarProps: {},
+  };
+});
+
 jest.mock('ui/new_platform');
 
 describe('TopNavMenu', () => {
+  const TOP_NAV_ITEM_SELECTOR = 'TopNavMenuItem';
+  const SEARCH_BAR_SELECTOR = 'SearchBar';
   const menuItems: TopNavMenuData[] = [
     {
       key: 'test',
@@ -47,19 +56,32 @@ describe('TopNavMenu', () => {
 
   it('Should render nothing', () => {
     const component = shallowWithIntl(<TopNavMenu name="test" />);
-
-    expect(component.find('InjectIntl(TopNavMenuItem)').length).toBe(0);
+    expect(component.find(TOP_NAV_ITEM_SELECTOR).length).toBe(0);
   });
 
   it('Should render 1 menu item', () => {
     const component = shallowWithIntl(<TopNavMenu name="test" config={[menuItems[0]]} />);
-
-    expect(component.find('InjectIntl(TopNavMenuItem)').length).toBe(1);
+    expect(component.find(TOP_NAV_ITEM_SELECTOR).length).toBe(1);
   });
 
   it('Should render multiple menu items', () => {
     const component = shallowWithIntl(<TopNavMenu name="test" config={menuItems} />);
+    expect(component.find(TOP_NAV_ITEM_SELECTOR).length).toBe(menuItems.length);
+  });
 
-    expect(component.find('InjectIntl(TopNavMenuItem)').length).toBe(menuItems.length);
+  it('Should render search bar', () => {
+    const component = shallowWithIntl(<TopNavMenu name="test" showSearchBar={true} />);
+
+    expect(component.find(TOP_NAV_ITEM_SELECTOR).length).toBe(0);
+    expect(component.find(`span > ${SEARCH_BAR_SELECTOR}`).length).toBe(1);
+  });
+
+  it('Should render search bar inline', () => {
+    const component = shallowWithIntl(
+      <TopNavMenu name="test" showSearchBar={true} showSearchBarInline={true} />
+    );
+
+    expect(component.find(TOP_NAV_ITEM_SELECTOR).length).toBe(0);
+    expect(component.find(`EuiFlexItem > ${SEARCH_BAR_SELECTOR}`).length).toBe(1);
   });
 });
