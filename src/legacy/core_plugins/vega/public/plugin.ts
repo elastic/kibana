@@ -37,10 +37,10 @@ export class VegaPlugin implements Plugin<any, any> {
     core: CoreSetup,
     { data, visualizations, __LEGACY }: VegaPluginSetupDependencies
   ) {
-    const visualizationDependencies = {
+    const visualizationDependencies: Required<VegaVisualizationDependencies> = {
       uiSettings: core.uiSettings,
       ...(await __LEGACY.setup()),
-    } as VegaVisualizationDependencies;
+    };
 
     data.expressions.registerFunction(() => createVegaFn(visualizationDependencies));
 
