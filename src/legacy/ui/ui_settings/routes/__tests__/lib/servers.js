@@ -22,8 +22,8 @@ import { createTestServers } from '../../../../../../test_utils/kbn_server';
 let kbnServer;
 let services;
 let servers;
-let kbnRootServer;
 let esServer;
+let kbn;
 
 export async function startServers() {
   servers = createTestServers({
@@ -39,8 +39,7 @@ export async function startServers() {
     },
   });
   esServer = await servers.startES();
-  const kbn = await servers.startKibana();
-  kbnRootServer = kbn.root;
+  kbn = await servers.startKibana();
   kbnServer = kbn.kbnServer;
 }
 
@@ -88,6 +87,6 @@ export async function stopServers() {
   kbnServer = null;
   if (servers) {
     esServer.stop();
-    kbnRootServer.stop();
+    kbn.stop();
   }
 }
