@@ -157,7 +157,6 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage
       event.returnValue = 'foobar';//this is required for Chrome
     }
   }
-  window.removeEventListener('beforeunload', beforeUnload);
   window.addEventListener('beforeunload', beforeUnload);
 
   function renderMap() {
@@ -252,6 +251,9 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage
   }
 
   $scope.$on('$destroy', () => {
+
+    window.removeEventListener('beforeunload', beforeUnload);
+
     if (unsubscribe) {
       unsubscribe();
     }
