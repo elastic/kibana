@@ -54,7 +54,7 @@ export function bucketFetcher(
         distribution: {
           histogram: {
             field: TRANSACTION_DURATION,
-            fixed_interval: bucketSize,
+            interval: bucketSize,
             min_doc_count: 0,
             extended_bounds: {
               min: 0,
