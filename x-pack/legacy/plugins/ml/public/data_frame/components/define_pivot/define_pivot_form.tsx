@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { ChangeEvent, Fragment, SFC, useContext, useEffect, useState } from 'react';
+import React, { Fragment, SFC, useContext, useEffect, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
@@ -15,7 +15,6 @@ import {
   EuiButton,
   EuiCodeEditor,
   EuiConfirmModal,
-  EuiFieldSearch,
   EuiFlexGroup,
   EuiFlexItem,
   EuiForm,
@@ -24,6 +23,8 @@ import {
   EuiLink,
   EuiOverlayMask,
   EuiPanel,
+  // @ts-ignore
+  EuiSearchBar,
   EuiSpacer,
   EuiSwitch,
 } from '@elastic/eui';
@@ -199,8 +200,8 @@ export const DefinePivotForm: SFC<Props> = React.memo(({ overrides = {}, onChang
     setSearch(`${currentDisplaySearch} ${newSearch}`.trim());
   };
 
-  const searchHandler = (d: ChangeEvent<HTMLInputElement>) => {
-    const newSearch = d.currentTarget.value === emptySearch ? defaultSearch : d.currentTarget.value;
+  const searchHandler = (d: Record<string, any>) => {
+    const newSearch = d.queryText === emptySearch ? defaultSearch : d.queryText;
     setSearch(newSearch);
   };
 
@@ -435,15 +436,19 @@ export const DefinePivotForm: SFC<Props> = React.memo(({ overrides = {}, onChang
                     defaultMessage: 'Use a query string to filter the source data (optional).',
                   })}
                 >
-                  <EuiFieldSearch
-                    placeholder={i18n.translate(
-                      'xpack.ml.dataframe.definePivotForm.queryPlaceholder',
-                      {
-                        defaultMessage: 'Search...',
-                      }
-                    )}
+                  <EuiSearchBar
+                    defaultQuery={search === defaultSearch ? emptySearch : search}
+                    box={{
+                      placeholder: i18n.translate(
+                        'xpack.ml.dataframe.definePivotForm.queryPlaceholder',
+                        {
+                          defaultMessage: 'e.g. {example}',
+                          values: { example: 'method:GET -is:active' },
+                        }
+                      ),
+                      incremental: false,
+                    }}
                     onChange={searchHandler}
-                    value={search === defaultSearch ? emptySearch : search}
                   />
                 </EuiFormRow>
               )}
