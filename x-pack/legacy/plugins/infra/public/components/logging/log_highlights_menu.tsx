@@ -138,14 +138,14 @@ const clearTermsButtonLabel = i18n.translate(
 );
 
 const goToPreviousHighlightLabel = i18n.translate(
-  'xpack.infra.logs.highlights.goToPreviousHighlightLabel',
+  'xpack.infra.logs.highlights.goToPreviousHighlightButtonLabel',
   {
     defaultMessage: 'Jump to previous highlight',
   }
 );
 
 const goToNextHighlightLabel = i18n.translate(
-  'xpack.infra.logs.highlights.goToNextHighlightLabel',
+  'xpack.infra.logs.highlights.goToNextHighlightButtonLabel',
   {
     defaultMessage: 'Jump to next highlight',
   }
