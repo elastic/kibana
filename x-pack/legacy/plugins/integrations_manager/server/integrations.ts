@@ -6,6 +6,7 @@
 
 import {
   SavedObject,
+  SavedObjectReference,
   SavedObjectsBulkGetObject,
   SavedObjectsClientContract,
 } from 'src/core/server/saved_objects';
@@ -15,7 +16,6 @@ import {
   InstallationSavedObject,
   IntegrationInfo,
   IntegrationListItem,
-  IntegrationList,
   RegistryList,
   RegistryListItem,
   RegistryPackage,
@@ -46,7 +46,7 @@ export async function handleGetList(req: Request) {
   const client = getClient(req);
   const results = await client.bulkGet(searchObjects);
   const savedObjects: InstallationSavedObject[] = results.saved_objects.filter(o => !o.error); // ignore errors for now
-  const integrationList: IntegrationList = createIntegrationList(registryItems, savedObjects);
+  const integrationList = createIntegrationList(registryItems, savedObjects);
 
   return integrationList;
 }
@@ -128,9 +128,13 @@ function getAsset(key: string) {
   }
 }
 
+interface CollectReferencesOptions {
+  path: string;
+  desiredType: string; // TODO: from enum or similar of acceptable asset types
+}
 function collectReferences(
   toBeSavedObjects: Map<string, SavedObject> = new Map(),
-  { path, desiredType = 'dashboard' }
+  { path, desiredType = 'dashboard' }: CollectReferencesOptions
 ) {
   const [pkgkey, service, type, file] = path.split('/');
   if (type !== desiredType) return;
@@ -142,7 +146,8 @@ function collectReferences(
   if (!asset.id) asset.id = file.replace('.json', '');
   toBeSavedObjects.set(path, asset);
 
-  return asset.references.reduce((map, reference) => {
+  const references: SavedObjectReference[] = asset.references;
+  return references.reduce((map, reference) => {
     collectReferences(toBeSavedObjects, {
       path: `${pkgkey}/${service}/${reference.type}/${reference.id}.json`,
       desiredType: reference.type,
@@ -173,7 +178,7 @@ function createIntegrationList(
   registryItems: RegistryList,
   integrationObjects: InstallationSavedObject[]
 ) {
-  const integrationList: IntegrationList = registryItems.map(item =>
+  const integrationList = registryItems.map(item =>
     createInstallationObject(
       item,
       integrationObjects.find(({ id }) => id === `${item.name}-${item.version}`)
