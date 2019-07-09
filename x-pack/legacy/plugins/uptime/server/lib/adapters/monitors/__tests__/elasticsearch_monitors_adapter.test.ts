@@ -102,7 +102,7 @@ describe('ElasticsearchMonitorsAdapter', () => {
       10
     );
     expect(fixedInterval).not.toBeNaN();
-    expect(fixedInterval).toBeCloseTo(36000, 3);
+    expect(Math.abs(36000 - fixedInterval)).toBeLessThan(100);
     set(
       searchMock.mock.calls[0][1],
       'body.aggs.timeseries.date_histogram.fixed_interval',
@@ -133,7 +133,7 @@ describe('ElasticsearchMonitorsAdapter', () => {
       10
     );
     expect(fixedInterval).not.toBeNaN();
-    expect(fixedInterval).toBeCloseTo(36000, 3);
+    expect(Math.abs(36000 - fixedInterval)).toBeLessThan(100);
     set(
       searchMock.mock.calls[0][1],
       'body.aggs.timeseries.date_histogram.fixed_interval',
