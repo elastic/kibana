@@ -4,6 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { HostsType } from '../../store/hosts/model';
+import { NetworkType } from '../../store/network/model';
+
 export interface Influencer {
   influencer_field_name: string;
   influencer_field_values: string[];
@@ -73,14 +76,22 @@ export interface AnomaliesByNetwork {
   anomaly: Anomaly;
 }
 
-export interface AnomaliesTableProps {
+export interface HostOrNetworkProps {
   startDate: number;
   endDate: number;
   narrowDateRange: NarrowDateRange;
   skip: boolean;
-  hostName?: string;
-  ip?: string;
 }
+
+export type AnomaliesHostTableProps = HostOrNetworkProps & {
+  hostName?: string;
+  type: HostsType;
+};
+
+export type AnomaliesNetworkTableProps = HostOrNetworkProps & {
+  ip?: string;
+  type: NetworkType;
+};
 
 export interface MlCapabilities {
   capabilities: {
