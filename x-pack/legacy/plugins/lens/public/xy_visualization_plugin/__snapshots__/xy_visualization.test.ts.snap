@@ -5,9 +5,6 @@ Object {
   "chain": Array [
     Object {
       "arguments": Object {
-        "isStacked": Array [
-          undefined,
-        ],
         "legend": Array [
           Object {
             "chain": Array [

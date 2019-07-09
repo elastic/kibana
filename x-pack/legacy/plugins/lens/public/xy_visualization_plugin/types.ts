@@ -146,7 +146,14 @@ export const xConfig: ExpressionFunction<'lens_xy_xConfig', null, XConfig, XConf
   },
 };
 
-export type SeriesType = 'bar' | 'horizontal_bar' | 'line' | 'area';
+export type SeriesType =
+  | 'bar'
+  | 'horizontal_bar'
+  | 'line'
+  | 'area'
+  | 'bar_stacked'
+  | 'horizontal_bar_stacked'
+  | 'area_stacked';
 
 export interface XYArgs {
   seriesType: SeriesType;
@@ -154,7 +161,6 @@ export interface XYArgs {
   y: YConfig;
   x: XConfig;
   splitSeriesAccessors: string[];
-  isStacked: boolean;
 }
 
 export interface XYState {
@@ -163,7 +169,6 @@ export interface XYState {
   y: YState;
   x: XConfig;
   splitSeriesAccessors: string[];
-  isStacked: boolean;
 }
 
 export type State = XYState;

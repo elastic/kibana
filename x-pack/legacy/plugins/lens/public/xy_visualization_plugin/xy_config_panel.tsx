@@ -24,22 +24,51 @@ import { NativeRenderer } from '../native_renderer';
 const chartTypeIcons: Array<{ id: SeriesType; label: string; iconType: IconType }> = [
   {
     id: 'line',
-    label: 'Line',
+    label: i18n.translate('xpack.lens.xyVisualization.lineChartLabel', {
+      defaultMessage: 'Line',
+    }),
     iconType: 'visLine',
   },
   {
     id: 'area',
-    label: 'Area',
+    label: i18n.translate('xpack.lens.xyVisualization.areaChartLabel', {
+      defaultMessage: 'Area',
+    }),
     iconType: 'visArea',
   },
   {
     id: 'bar',
-    label: 'Bar',
+    label: i18n.translate('xpack.lens.xyVisualization.barChartLabel', {
+      defaultMessage: 'Bar',
+    }),
     iconType: 'visBarVertical',
   },
   {
     id: 'horizontal_bar',
-    label: 'Horizontal Bar',
+    label: i18n.translate('xpack.lens.xyVisualization.horizontalBarChartLabel', {
+      defaultMessage: 'Horizontal Bar',
+    }),
+    iconType: 'visBarHorizontal',
+  },
+  {
+    id: 'area_stacked',
+    label: i18n.translate('xpack.lens.xyVisualization.stackedAreaChartLabel', {
+      defaultMessage: 'Stacked Area',
+    }),
+    iconType: 'visArea',
+  },
+  {
+    id: 'bar_stacked',
+    label: i18n.translate('xpack.lens.xyVisualization.stackedBarChartLabel', {
+      defaultMessage: 'Stacked Bar',
+    }),
+    iconType: 'visBarVertical',
+  },
+  {
+    id: 'horizontal_bar_stacked',
+    label: i18n.translate('xpack.lens.xyVisualization.stackedHorizontalBarChartLabel', {
+      defaultMessage: 'Stacked Horizontal Bar',
+    }),
     iconType: 'visBarHorizontal',
   },
 ];
@@ -84,7 +113,11 @@ export function XYConfigPanel(props: VisualizationProps<State>) {
           name="chartType"
           className="eui-displayInlineBlock"
           data-test-subj="lnsXY_seriesType"
-          options={chartTypeIcons}
+          options={chartTypeIcons.map(type =>
+            type.id.includes('stacked') && state.splitSeriesAccessors.length === 0
+              ? { ...type, isDisabled: true }
+              : type
+          )}
           idSelected={state.seriesType}
           onChange={seriesType => {
             const isHorizontal = seriesType === 'horizontal_bar';
@@ -102,22 +135,6 @@ export function XYConfigPanel(props: VisualizationProps<State>) {
             });
           }}
           isIconOnly
-        />
-      </EuiFormRow>
-
-      <EuiFormRow>
-        <EuiSwitch
-          label={i18n.translate('xpack.lens.xyChart.showStackedLabel', {
-            defaultMessage: 'Display as stacked chart',
-          })}
-          checked={state.isStacked}
-          data-test-subj="lnsXY_isStacked"
-          onChange={() =>
-            setState({
-              ...state,
-              isStacked: !state.isStacked,
-            })
-          }
         />
       </EuiFormRow>
 

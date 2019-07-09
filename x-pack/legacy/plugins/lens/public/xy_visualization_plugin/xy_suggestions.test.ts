@@ -49,14 +49,13 @@ describe('xy_suggestions', () => {
   // Helper that plucks out the important part of a suggestion for
   // most test assertions
   function suggestionSubset(suggestion: VisualizationSuggestion<State>) {
-    const { seriesType, splitSeriesAccessors, x, y, isStacked } = suggestion.state;
+    const { seriesType, splitSeriesAccessors, x, y } = suggestion.state;
 
     return {
       seriesType,
       splitSeriesAccessors,
       x: x.accessor,
       y: y.accessors,
-      isStacked,
     };
   }
 
@@ -101,8 +100,7 @@ describe('xy_suggestions', () => {
     expect(rest).toHaveLength(0);
     expect(suggestionSubset(suggestion)).toMatchInlineSnapshot(`
       Object {
-        "isStacked": false,
-        "seriesType": "line",
+        "seriesType": "bar",
         "splitSeriesAccessors": Array [],
         "x": "date",
         "y": Array [
@@ -125,19 +123,18 @@ describe('xy_suggestions', () => {
 
     expect(rest).toHaveLength(0);
     expect(suggestionSubset(suggestion)).toMatchInlineSnapshot(`
-      Object {
-        "isStacked": false,
-        "seriesType": "line",
-        "splitSeriesAccessors": Array [
-          "product",
-        ],
-        "x": "date",
-        "y": Array [
-          "price",
-          "quantity",
-        ],
-      }
-    `);
+            Object {
+              "seriesType": "line",
+              "splitSeriesAccessors": Array [
+                "product",
+              ],
+              "x": "date",
+              "y": Array [
+                "price",
+                "quantity",
+              ],
+            }
+        `);
   });
 
   test('supports multiple suggestions', () => {
@@ -160,8 +157,7 @@ describe('xy_suggestions', () => {
     expect([suggestionSubset(s1), suggestionSubset(s2)]).toMatchInlineSnapshot(`
       Array [
         Object {
-          "isStacked": false,
-          "seriesType": "line",
+          "seriesType": "bar",
           "splitSeriesAccessors": Array [],
           "x": "date",
           "y": Array [
@@ -169,7 +165,6 @@ describe('xy_suggestions', () => {
           ],
         },
         Object {
-          "isStacked": false,
           "seriesType": "bar",
           "splitSeriesAccessors": Array [],
           "x": "country",
@@ -193,16 +188,15 @@ describe('xy_suggestions', () => {
     });
 
     expect(suggestionSubset(suggestion)).toMatchInlineSnapshot(`
-      Object {
-        "isStacked": false,
-        "seriesType": "bar",
-        "splitSeriesAccessors": Array [],
-        "x": "quantity",
-        "y": Array [
-          "price",
-        ],
-      }
-    `);
+            Object {
+              "seriesType": "bar",
+              "splitSeriesAccessors": Array [],
+              "x": "quantity",
+              "y": Array [
+                "price",
+              ],
+            }
+        `);
   });
 
   test('handles unbucketed suggestions', () => {
@@ -228,16 +222,15 @@ describe('xy_suggestions', () => {
     });
 
     expect(suggestionSubset(suggestion)).toMatchInlineSnapshot(`
-      Object {
-        "isStacked": false,
-        "seriesType": "bar",
-        "splitSeriesAccessors": Array [],
-        "x": "mybool",
-        "y": Array [
-          "num votes",
-        ],
-      }
-    `);
+            Object {
+              "seriesType": "bar",
+              "splitSeriesAccessors": Array [],
+              "x": "mybool",
+              "y": Array [
+                "num votes",
+              ],
+            }
+        `);
   });
 
   test('adds a preview expression with disabled axes and legend', () => {
