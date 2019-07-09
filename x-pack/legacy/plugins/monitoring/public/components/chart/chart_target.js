@@ -40,7 +40,7 @@ export class ChartTarget extends React.Component {
   filterByShow(seriesToShow) {
     if (seriesToShow) {
       return (metric) => {
-        return seriesToShow.some(id => _.startsWith(id, metric.id));
+        return seriesToShow.some(id => id.toLowerCase() === metric.id.toLowerCase());
       };
     }
     return (_metric) => true;
