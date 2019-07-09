@@ -7,11 +7,26 @@
 // This component extends EuiInMemoryTable with some
 // fixes and TS specs until the changes become available upstream.
 
-import { Component } from 'react';
+import React, { Component, Fragment } from 'react';
 
-import { EuiInMemoryTable, EuiInMemoryTableProps } from '@elastic/eui';
+import { EuiInMemoryTable, EuiInMemoryTableProps, EuiProgress } from '@elastic/eui';
 
 import { ItemIdToExpandedRowMap } from './common';
+
+// The built in loading progress bar of EuiInMemoryTable causes a full DOM replacement
+// of the table and doesn't play well with auto-refreshing. That's why we're displaying
+// our own progress bar on top of the table. `EuiProgress` after `isLoading` displays
+// the loading indicator. The variation after `!isLoading` displays an empty progress
+// bar fixed to 0%. Without it, the display would vertically jump when showing/hiding
+// the progress bar.
+export const ProgressBar = ({ isLoading = false }) => {
+  return (
+    <Fragment>
+      {isLoading && <EuiProgress size="xs" color="primary" />}
+      {!isLoading && <EuiProgress value={0} max={100} size="xs" />}
+    </Fragment>
+  );
+};
 
 // copied from EUI to be available to the extended getDerivedStateFromProps()
 function findColumnByProp(columns: any, prop: any, value: any) {
