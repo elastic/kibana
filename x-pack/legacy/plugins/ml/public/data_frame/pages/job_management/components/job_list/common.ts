@@ -14,17 +14,12 @@ export enum DATA_FRAME_TASK_STATE {
   STOPPED = 'stopped',
 }
 
-type DataFrameTaskState =
-  | DATA_FRAME_TASK_STATE.FAILED
-  | DATA_FRAME_TASK_STATE.STARTED
-  | DATA_FRAME_TASK_STATE.STOPPED;
-
 export interface DataFrameJobState {
   checkpoint: number;
   current_position: Dictionary<any>;
   // indexer_state is a backend internal attribute
   // and should not be considered in the UI.
-  indexer_state: DataFrameTaskState;
+  indexer_state: DATA_FRAME_TASK_STATE;
   progress?: {
     docs_remaining: number;
     percent_complete: number;
@@ -32,7 +27,7 @@ export interface DataFrameJobState {
   };
   // task_state is the attribute to check against if a job
   // is running or not.
-  task_state: DataFrameTaskState;
+  task_state: DATA_FRAME_TASK_STATE;
 }
 
 export interface DataFrameJobStats {
