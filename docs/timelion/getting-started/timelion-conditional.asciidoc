@@ -1,9 +1,28 @@
 [[timelion-conditional]]
 === Using conditional logic and tracking trends
 
-In this section you will learn how to modify time series data with conditional logic and create a trend with a moving average. This is helpful to easily detect outliers and patterns over time.
+Modify time series data with conditional logic and create a trend with a moving average, which is helpful to easily detect outliers and patterns over time.
 
-For the purposes of this tutorial, you will continue to use https://www.elastic.co/downloads/beats/metricbeat[Metricbeat data] to add another visualization that monitors memory consumption. To start, use the following expression to chart the maximum value of  `system.memory.actual.used.bytes`.
+[[timelion-math-before-you-begin]]
+==== Before you begin
+
+In this tutorial, you'll continue to use the time series data from https://www.elastic.co/guide/en/beats/metricbeat/current/index.html[Metricbeat].
+
+[[math-add-timelion-visualization]]
+==== Add a Timelion visualization to the sheet
+
+. Click *Visualize*.
+
+. On the *Visualizations* page, click *Create new visualization*.
+
+. On the *New Visualization* window, click *Timelion*.
++
+You’ll notice that the query bar has been replaced with the default `.es(*)` expression. 
+
+image::images/timelion-math01.png[]
+{nbsp}
+
+. To chart the maximum value of `system.memory.actual.used.bytes`, enter the following in the *Timelion Expression* field:
 
 [source,text]
 ----------------------------------
@@ -13,11 +32,13 @@ For the purposes of this tutorial, you will continue to use https://www.elastic.
 image::images/timelion-conditional01.png[]
 {nbsp}
 
-Let’s create two thresholds to keep an eye on the amount of used memory. For the purposes of this tutorial, your warning threshold will be 12.5GB and your severe threshold will be 15GB. When the maximum amount of used memory exceeds either of these thresholds, the series will be colored accordingly.
+. Create two thresholds to keep an eye on the amount of used memory. 
++
+For the purposes of this tutorial, your warning threshold will be 12.5GB and your severe threshold will be 15GB. When the maximum amount of used memory exceeds either of these thresholds, the series will be colored accordingly.
 
 NOTE: If the threshold values are too high or low for your machine, please adjust accordingly.
 
-To configure these two threshold values, you can utilize Timelion's conditional logic. In this tutorial you will use `if()` to compare each point to a number, adjust the styling if the condition evaluates to `true` and use the default styling if the condition evaluates to `false`. Timelion offers the following six operator values for comparison.
+To configure these two threshold values, you can utilize Timelion's conditional logic. In this tutorial you will use `if()` to compare each point to a number, adjust the styling if the condition evaluates to `true` and use the default styling if the condition evaluates to `false`. Timelion offers the following operator values for comparison.
 
 [horizontal]
 `eq`:: equal
