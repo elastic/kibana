@@ -17,8 +17,9 @@ describe('example integration test with kbn server', async () => {
       settings: TestKbnServerConfig,
     });
     esServer = await servers.startES();
-    kbnRootServer = await servers.startKibana();
-    kbnServer = kbnRootServer.kbnServer;
+    const kbn = await servers.startKibana();
+    kbnRootServer = kbn.root;
+    kbnServer = kbn.kbnServer;
 
     expect(servers).toBeDefined();
     expect(kbnServer).toBeDefined();

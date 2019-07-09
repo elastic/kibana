@@ -35,8 +35,9 @@ describe('createOrUpgradeSavedConfig()', () => {
       adjustTimeout: (t) => this.timeout(t),
     });
     esServer = await servers.startES();
-    kbnRootServer = await servers.startKibana();
-    kbnServer = kbnRootServer.kbnServer;
+    const kbn = await servers.startKibana();
+    kbnRootServer = kbn.root;
+    kbnServer = kbn.kbnServer;
 
     const savedObjects = kbnServer.server.savedObjects;
     savedObjectsClient = savedObjects.getScopedSavedObjectsClient({});

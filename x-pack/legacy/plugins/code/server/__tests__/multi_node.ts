@@ -73,7 +73,7 @@ describe('code in multiple nodes', () => {
   let kbnRootServer: any;
   let esServer: any;
   const pluginPaths = resolve(__dirname, '../../../../../');
- 
+
   async function startServers() {
     const servers = createTestServers({
       adjustTimeout: t => {
@@ -93,7 +93,8 @@ describe('code in multiple nodes', () => {
     });
 
     esServer = await servers.startES();
-    kbnRootServer = await servers.startKibana();
+    const kbn = await servers.startKibana();
+    kbnRootServer = kbn.root;
   }
 
   async function startNonCodeNodeKibana() {

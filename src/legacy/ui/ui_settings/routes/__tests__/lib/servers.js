@@ -39,8 +39,9 @@ export async function startServers() {
     },
   });
   esServer = await servers.startES();
-  kbnRootServer = await servers.startKibana();
-  kbnServer = kbnRootServer.kbnServer;
+  const kbn = await servers.startKibana();
+  kbnRootServer = kbn.root;
+  kbnServer = kbn.kbnServer;
 }
 
 async function deleteKibanaIndex(callCluster) {

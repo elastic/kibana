@@ -25,8 +25,9 @@ contractTests('Kibana  Framework Adapter', {
       settings: TestKbnServerConfig,
     });
     esServer = await servers.startES();
-    kbnRootServer = await servers.startKibana();
-    kbnServer = kbnRootServer.kbnServer;
+    const kbn = await servers.startKibana();
+    kbnRootServer = kbn.root;
+    kbnServer = kbn.kbnServer;
   },
   async after() {
     await kbnRootServer.stop();
