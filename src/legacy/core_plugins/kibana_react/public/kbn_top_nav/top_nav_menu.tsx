@@ -50,9 +50,7 @@ export function TopNavMenu(props: Props) {
     // Validate presense of all required fields
     if (
       !props.showSearchBar ||
-      !props.appName ||
       !props.query ||
-      !props.screenTitle ||
       !props.onQuerySubmit ||
       !props.indexPatterns ||
       !props.store
@@ -68,8 +66,8 @@ export function TopNavMenu(props: Props) {
         showQueryInput={props.showQueryInput}
         showFilterBar={props.showFilterBar}
         showDatePicker={props.showDatePicker}
-        appName={props.appName}
-        screenTitle={props.screenTitle}
+        appName={props.appName!}
+        screenTitle={props.screenTitle!}
         onQuerySubmit={props.onQuerySubmit}
         onFiltersUpdated={props.onFiltersUpdated}
         dateRangeFrom={props.dateRangeFrom}
