@@ -123,9 +123,9 @@ function parseInterval(interval: string) {
 }
 
 function isMinutes(interval: string) {
-  return /^[0-9]+m$/.test(interval);
+  return /^[1-9][0-9]*m$/.test(interval);
 }
 
 function isSeconds(interval: string) {
-  return /^[0-9]+s$/.test(interval);
+  return /^[1-9][0-9]*s$/.test(interval);
 }

@@ -25,6 +25,15 @@ describe('taskIntervals', () => {
       expect(() => assertValidInterval(`${_.random(1000)}s`)).not.toThrow();
     });
 
+    test('it rejects 0 based intervals', () => {
+      expect(() => assertValidInterval('0m')).toThrow(
+        /Invalid interval "0m"\. Intervals must be of the form {number}m. Example: 5m/
+      );
+      expect(() => assertValidInterval('0s')).toThrow(
+        /Invalid interval "0s"\. Intervals must be of the form {number}m. Example: 5m/
+      );
+    });
+
     test('it rejects intervals are not of the form `Nm` or `Ns`', () => {
       expect(() => assertValidInterval(`5m 2s`)).toThrow(
         /Invalid interval "5m 2s"\. Intervals must be of the form {number}m. Example: 5m/
@@ -58,6 +67,15 @@ describe('taskIntervals', () => {
         /Invalid interval "hello"\. Intervals must be of the form {number}m. Example: 5m/
       );
     });
+
+    test('it rejects 0 based intervals', () => {
+      expect(() => intervalFromNow('0m')).toThrow(
+        /Invalid interval "0m"\. Intervals must be of the form {number}m. Example: 5m/
+      );
+      expect(() => intervalFromNow('0s')).toThrow(
+        /Invalid interval "0s"\. Intervals must be of the form {number}m. Example: 5m/
+      );
+    });
   });
 
   describe('intervalFromDate', () => {
@@ -84,6 +102,16 @@ describe('taskIntervals', () => {
       );
       expect(() => intervalFromDate(date, `hello`)).toThrow(
         /Invalid interval "hello"\. Intervals must be of the form {number}m. Example: 5m/
+      );
+    });
+
+    test('it rejects 0 based intervals', () => {
+      const date = new Date();
+      expect(() => intervalFromDate(date, '0m')).toThrow(
+        /Invalid interval "0m"\. Intervals must be of the form {number}m. Example: 5m/
+      );
+      expect(() => intervalFromDate(date, '0s')).toThrow(
+        /Invalid interval "0s"\. Intervals must be of the form {number}m. Example: 5m/
       );
     });
   });
