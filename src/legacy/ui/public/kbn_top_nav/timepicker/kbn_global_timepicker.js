@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { uiModules } from '../modules';
+import { uiModules } from '../../modules';
 
 import toggleHtml from './kbn_global_timepicker.html';
 import { timefilter } from 'ui/timefilter';
