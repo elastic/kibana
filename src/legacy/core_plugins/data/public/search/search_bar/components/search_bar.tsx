@@ -33,7 +33,6 @@ import classNames from 'classnames';
 import React, { Component } from 'react';
 import ResizeObserver from 'resize-observer-polyfill';
 import chrome from 'ui/chrome';
-import rison from 'rison-node';
 import { IndexPattern } from 'ui/index_patterns';
 import { Storage } from 'ui/storage';
 import { get, isEqual } from 'lodash';
