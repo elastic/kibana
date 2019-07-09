@@ -11,7 +11,6 @@ import { routePreCheckLicense } from '../../../lib/route_pre_check_license';
 import { initInternalSpacesApi } from './spaces';
 import { SpacesServiceSetup } from '../../../new_platform/spaces_service/spaces_service';
 import { SpacesHttpServiceSetup } from '../../../new_platform/plugin';
-import { initExampleApi } from './example';
 
 type Omit<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>;
 
@@ -36,5 +35,4 @@ export function initInternalApis({ xpackMain, ...rest }: RouteDeps) {
   };
 
   initInternalSpacesApi(deps);
-  initExampleApi(deps);
 }
