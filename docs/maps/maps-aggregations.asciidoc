@@ -43,9 +43,9 @@ This field will be used to sort your documents in the top hits aggregation.
 
 [role="xpack"]
 [[terms-join]]
-=== Terms join
+=== Term join
 
-Use terms joins to augment vector features with additional properties for <<maps-vector-style-data-driven, data driven styling>> and richer tooltip content.
+Use term joins to augment vector features with properties for <<maps-vector-style-data-driven, data driven styling>> and richer tooltip content.
 
 Terms joins are available for <<vector-layer, vector layers>> with the following sources:
 
@@ -55,7 +55,7 @@ Terms joins are available for <<vector-layer, vector layers>> with the following
 
 ==== How joins work
 
-The <<maps-add-choropleth-layer, choropleth layer example>> uses a terms join to shade world countries by web log traffic.
+The <<maps-add-choropleth-layer, choropleth layer example>> uses a term join to shade world countries by web log traffic.
 Darker shades symbolize countries with more web log traffic, and lighter shades symbolize countries with less traffic.
 
 Terms joins use a shared key to combine vector features, your left source, with the results of an {es} terms aggregation, your right source.
