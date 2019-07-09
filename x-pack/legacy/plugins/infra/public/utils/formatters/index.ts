@@ -12,10 +12,14 @@ import { formatPercent } from './percent';
 
 export const FORMATTERS = {
   [InfraFormatterType.number]: formatNumber,
+  // Because the implimentation for formatting large numbers is the same as formatting
+  // bytes we are re-using the same code, we just format the number using the abbreviated number format.
   [InfraFormatterType.abbreviatedNumber]: createBytesFormatter(
     InfraWaffleMapDataFormat.abbreviatedNumber
   ),
+  // bytes in bytes formatted string out
   [InfraFormatterType.bytes]: createBytesFormatter(InfraWaffleMapDataFormat.bytesDecimal),
+  // bytes in bits formatted string out
   [InfraFormatterType.bits]: createBytesFormatter(InfraWaffleMapDataFormat.bitsDecimal),
   [InfraFormatterType.percent]: formatPercent,
 };
