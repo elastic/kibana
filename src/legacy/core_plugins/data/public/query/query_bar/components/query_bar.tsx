@@ -55,7 +55,7 @@ interface Props {
   disableAutoFocus?: boolean;
   appName: string;
   screenTitle?: string;
-  indexPatterns: Array<IndexPattern | string>;
+  indexPatterns?: Array<IndexPattern | string>;
   store: Storage;
   intl: InjectedIntl;
   prepend?: any;
@@ -267,15 +267,15 @@ export class QueryBarUI extends Component<Props, State> {
   }
 
   private renderQueryInput() {
-    if (!this.props.showQueryInput || !this.state.query) return;
+    if (!this.props.showQueryInput) return;
     return (
       <EuiFlexItem>
         <QueryBarInput
           appName={this.props.appName}
           disableAutoFocus={this.props.disableAutoFocus}
-          indexPatterns={this.props.indexPatterns}
+          indexPatterns={this.props.indexPatterns!}
           prepend={this.props.prepend}
-          query={this.state.query}
+          query={this.state.query!}
           screenTitle={this.props.screenTitle}
           store={this.props.store}
           onChange={this.onChange}

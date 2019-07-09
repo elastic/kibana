@@ -42,7 +42,7 @@ interface DateRange {
 export interface SearchBarProps {
   appName: string;
   intl: InjectedIntl;
-  indexPatterns: IndexPattern[];
+  indexPatterns?: IndexPattern[];
   // Query bar
   showQueryBar?: boolean;
   showQueryInput?: boolean;
@@ -166,15 +166,15 @@ class SearchBarUI extends Component<SearchBarProps, State> {
     });
 
     let queryBar;
-    if (this.props.showQueryBar && this.props.onQuerySubmit && this.props.store) {
+    if (this.props.showQueryBar) {
       queryBar = (
         <QueryBar
           query={this.props.query}
           screenTitle={this.props.screenTitle}
-          onSubmit={this.props.onQuerySubmit}
+          onSubmit={this.props.onQuerySubmit!}
           appName={this.props.appName}
           indexPatterns={this.props.indexPatterns}
-          store={this.props.store}
+          store={this.props.store!}
           prepend={this.props.showFilterBar ? filterTriggerButton : ''}
           showDatePicker={this.props.showDatePicker}
           showQueryInput={this.props.showQueryInput}
@@ -189,7 +189,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
     }
 
     let filterBar;
-    if (this.props.showFilterBar && this.props.filters) {
+    if (this.props.showFilterBar) {
       filterBar = (
         <div
           id="GlobalFilterGroup"
@@ -205,9 +205,9 @@ class SearchBarUI extends Component<SearchBarProps, State> {
           >
             <FilterBar
               className="globalFilterGroup__filterBar"
-              filters={this.props.filters}
+              filters={this.props.filters!}
               onFiltersUpdated={this.getFilterUpdateFunction()}
-              indexPatterns={this.props.indexPatterns}
+              indexPatterns={this.props.indexPatterns!}
             />
           </div>
         </div>

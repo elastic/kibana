@@ -48,15 +48,7 @@ export function TopNavMenu(props: Props) {
 
   function renderSearchBar() {
     // Validate presense of all required fields
-    if (
-      !props.showSearchBar ||
-      !props.query ||
-      !props.onQuerySubmit ||
-      !props.indexPatterns ||
-      !props.store
-    ) {
-      return;
-    }
+    if (!props.showSearchBar) return;
 
     return (
       <SearchBar
