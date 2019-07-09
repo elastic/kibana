@@ -139,6 +139,12 @@
 
 .codeTopBar__toolbar {
   padding: $euiSizeS;
+  flex-wrap: wrap;
+}
+
+.codeTopBar__left {
+  min-width: 12rem;
+  width: calc(100% - 29rem);
 }
 
 .codeSearch__suggestion-item {
