@@ -68,7 +68,7 @@ const BIT_BASES = [
   InfraWaffleMapDataFormat.bitsDecimal,
 ];
 
-export const createDataFormatter = (format: InfraWaffleMapDataFormat) => (bytes: number) => {
+export const createBytesFormatter = (format: InfraWaffleMapDataFormat) => (bytes: number) => {
   const labels = LABELS[format];
   const base = BASES[format];
   const value = BIT_BASES.includes(format) ? bytes * 8 : bytes;
