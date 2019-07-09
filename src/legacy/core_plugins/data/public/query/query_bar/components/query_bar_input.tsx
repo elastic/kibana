@@ -560,7 +560,10 @@ export class QueryBarInputUI extends Component<Props, State> {
             onMouseEnter={this.onMouseEnterSuggestion}
             loadMore={this.increaseLimit}
             append={
-              this.props.onSave && this.props.onSaveNew && this.props.isDirty !== undefined ? (
+              this.props.onSave &&
+              this.props.onSaveNew &&
+              this.props.isDirty !== undefined &&
+              this.props.onClose ? (
                 <SavedQueryRow
                   query={this.props.query}
                   savedQuery={this.props.savedQuery}
