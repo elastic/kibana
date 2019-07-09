@@ -16,7 +16,7 @@ When you create a workpad, you'll start with a blank page, or you can choose a w
 
 For advanced workpad examples, add a {kibana-ref}/add-sample-data.html[sample Kibana data set], then select *Canvas* from the *View Data* dropdown list.
 
-For more workpad inspiration, go to the link:elastic.co/blog/[Elastic Blog]. 
+For more workpad inspiration, go to the link:https://www.elastic.co/blog/[Elastic Blog]. 
 
 [float]
 === Personalize your workpad
@@ -39,7 +39,7 @@ image::images/canvas-background-color-picker.gif[]
 
 .. Expand *Global CCS overrides*.
 
-.. Enter your text, then click *Apply stylesheet*.
+.. Enter the CCS, then click *Apply stylesheet*.
 
 [float]
 === Share your workpad
@@ -60,7 +60,7 @@ To view your workpad outside of Kibana, generate a PDF.
 image::images/canvas-generate-pdf.gif[]
 
 [float]
-==== Share your workpad
+==== Export your workpad
 
 To share your workpads with another author, export your workpads as JSON files.
 
