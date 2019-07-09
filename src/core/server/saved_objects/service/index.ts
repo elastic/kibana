@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { Readable } from 'stream';
 import { ScopedSavedObjectsClientProvider } from './lib';
 import { SavedObjectsClient, SavedObject } from './saved_objects_client';
 import { ExportObjectsOptions } from '../export';
@@ -38,7 +39,7 @@ export interface SavedObjectsService<Request = any> {
   getSavedObjectsRepository(...rest: any[]): any;
   importExport: {
     importSavedObjects(options: ImportSavedObjectsOptions): Promise<ImportResponse>;
-    getSortedObjectsForExport(options: ExportObjectsOptions): Promise<SavedObject[]>;
+    getSortedObjectsForExport(options: ExportObjectsOptions): Promise<Readable>;
     objectsToNdJson(objects: SavedObject[]): string;
   };
 }

@@ -31,7 +31,6 @@ import { createExportRoute } from './export';
 import { createListStream } from '../../../utils/streams';
 
 const getSortedObjectsForExport = exportMock.getSortedObjectsForExport as jest.Mock;
-const objectsToNdJson = exportMock.objectsToNdJson as jest.Mock;
 
 describe('POST /api/saved_objects/_export', () => {
   let server: Hapi.Server;

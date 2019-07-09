@@ -18,4 +18,3 @@
  */
 
 export { getSortedObjectsForExport, ExportObjectsOptions } from './get_sorted_objects_for_export';
-export { objectsToNdJson } from './objects_to_ndjson';

@@ -6,8 +6,8 @@
 
 import Joi from 'joi';
 import { Legacy } from 'kibana';
-import { SpacesClient } from '../../../lib/spaces_client';
 import { copySavedObjectsToSpacesFactory } from '../../../lib/copy_to_spaces';
+import { ExternalRouteDeps } from '.';
 
 interface CopyPayload {
   spaces: string[];
@@ -16,20 +16,21 @@ interface CopyPayload {
   overwrite: boolean;
 }
 
-export function initCopyToSpacesApi(server: Legacy.Server, routePreCheckLicenseFn: any) {
-  server.route({
+export function initCopyToSpacesApi(deps: ExternalRouteDeps) {
+  const { http, spacesService, savedObjects, routePreCheckLicenseFn } = deps;
+
+  http.route({
     method: 'POST',
     path: '/api/spaces/copySavedObjects',
     async handler(request: Legacy.Request, h: Legacy.ResponseToolkit) {
-      const spacesClient = server.plugins.spaces.spacesClient;
-      const scopedSpacesClient: SpacesClient = spacesClient.getScopedClient(request);
+      const spacesClient = await spacesService.scopedClient(request);
 
       const savedObjectsClient = request.getSavedObjectsClient();
 
       const copySavedObjectsToSpaces = copySavedObjectsToSpacesFactory(
-        scopedSpacesClient,
+        spacesClient,
         savedObjectsClient,
-        server.savedObjects
+        savedObjects
       );
 
       const { spaces, objects, includeReferences, overwrite } = request.payload as CopyPayload;
