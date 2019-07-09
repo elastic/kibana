@@ -7,12 +7,15 @@
 import { SpacesServiceSetup } from './spaces_service';
 import { spacesClientMock } from '../../lib/spaces_client/spaces_client.mock';
 import { DEFAULT_SPACE_ID } from '../../../common/constants';
+import { namespaceToSpaceId, spaceIdToNamespace } from '../../lib/utils/namespace';
 
 const createSetupContractMock = (spaceId = DEFAULT_SPACE_ID) => {
   const setupContract: SpacesServiceSetup = {
     getSpaceId: jest.fn().mockReturnValue(spaceId),
     isInDefaultSpace: jest.fn().mockReturnValue(spaceId === DEFAULT_SPACE_ID),
     scopedClient: jest.fn().mockResolvedValue(spacesClientMock.create()),
+    namespaceToSpaceId: jest.fn().mockImplementation(namespaceToSpaceId),
+    spaceIdToNamespace: jest.fn().mockImplementation(spaceIdToNamespace),
   };
   return setupContract;
 };

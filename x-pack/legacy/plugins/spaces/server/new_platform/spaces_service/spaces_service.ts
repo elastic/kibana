@@ -20,6 +20,7 @@ import { SecurityPlugin } from '../../../../security';
 import { SpacesClient } from '../../lib/spaces_client';
 import { getSpaceIdFromPath } from '../../lib/spaces_url_parser';
 import { SpacesConfigType } from '../config';
+import { namespaceToSpaceId, spaceIdToNamespace } from '../../lib/utils/namespace';
 
 type RequestFacade = KibanaRequest | Legacy.Request;
 
@@ -29,6 +30,10 @@ export interface SpacesServiceSetup {
   getSpaceId(request: RequestFacade): string;
 
   isInDefaultSpace(request: RequestFacade): boolean;
+
+  spaceIdToNamespace(spaceId: string): string | undefined;
+
+  namespaceToSpaceId(namespace: string | undefined): string;
 }
 
 interface SpacesServiceDeps {
@@ -73,6 +78,8 @@ export class SpacesService {
 
         return spaceId === DEFAULT_SPACE_ID;
       },
+      spaceIdToNamespace,
+      namespaceToSpaceId,
       scopedClient: async (request: RequestFacade) => {
         return combineLatest(elasticsearch.adminClient$, config$)
           .pipe(

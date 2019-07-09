@@ -93,4 +93,18 @@ describe('SpacesService', () => {
       expect(spacesServiceSetup.isInDefaultSpace(request)).toEqual(false);
     });
   });
+
+  describe('#spaceIdToNamespace', () => {
+    it('returns the namespace for the given space', async () => {
+      const spacesServiceSetup = await createService();
+      expect(spacesServiceSetup.spaceIdToNamespace('foo')).toEqual('foo');
+    });
+  });
+
+  describe('#namespaceToSpaceId', () => {
+    it('returns the space id for the given namespace', async () => {
+      const spacesServiceSetup = await createService();
+      expect(spacesServiceSetup.namespaceToSpaceId('foo')).toEqual('foo');
+    });
+  });
 });
