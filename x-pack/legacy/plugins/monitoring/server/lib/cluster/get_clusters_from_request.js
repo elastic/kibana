@@ -17,7 +17,7 @@ import { alertsClustersAggregation } from '../../cluster_alerts/alerts_clusters_
 import { alertsClusterSearch } from '../../cluster_alerts/alerts_cluster_search';
 import { checkLicense as checkLicenseForAlerts } from '../../cluster_alerts/check_license';
 import { getClustersSummary } from './get_clusters_summary';
-import { CLUSTER_ALERTS_SEARCH_SIZE, STANDALONE_CLUSTER_CLUSTER_UUID } from '../../../common/constants';
+import { CLUSTER_ALERTS_SEARCH_SIZE, STANDALONE_CLUSTER_CLUSTER_UUID, LOGGING_TAG } from '../../../common/constants';
 import { getApmsForClusters } from '../apm/get_apms_for_clusters';
 import { i18n } from '@kbn/i18n';
 import { checkCcrEnabled } from '../elasticsearch/ccr';
@@ -160,5 +160,17 @@ export async function getClustersFromRequest(req, indexPatterns, { clusterUuid, 
 
   const config = req.server.config();
   const kibanaUuid = config.get('server.uuid');
+
+  // check for any missing licenses
+  clusters.forEach(cluster => {
+    if (!cluster.license) {
+      req.server.log(
+        ['error', LOGGING_TAG],
+        `Cluster (${cluster.cluster_uuid}) missing necessary licensing information. ` +
+        `Please consult the Elasticsearch master node log for more information.`
+      );
+    }
+  });
+
   return getClustersSummary(clusters, kibanaUuid, isCcrEnabled);
 }
