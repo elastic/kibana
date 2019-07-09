@@ -4,16 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiBadge, EuiBasicTable, EuiToolTip } from '@elastic/eui';
+import { EuiBadge, EuiToolTip } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
-import { Location } from 'history';
 import moment from 'moment';
-import React, { Component } from 'react';
+import React, { useMemo } from 'react';
 import styled from 'styled-components';
 import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
 import { ErrorGroupListAPIResponse } from '../../../../../server/lib/errors/get_error_groups';
-import { IUrlParams } from '../../../../context/UrlParamsContext/types';
 import {
   fontFamilyCode,
   fontSizes,
@@ -22,20 +20,8 @@ import {
   unit
 } from '../../../../style/variables';
 import { APMLink } from '../../../shared/Links/APMLink';
-import { fromQuery, toQuery } from '../../../shared/Links/url_helpers';
-import { history } from '../../../../utils/history';
-
-function paginateItems({
-  items,
-  pageIndex,
-  pageSize
-}: {
-  items: any[];
-  pageIndex: number;
-  pageSize: number;
-}) {
-  return items.slice(pageIndex * pageSize, (pageIndex + 1) * pageSize);
-}
+import { useUrlParams } from '../../../../hooks/useUrlParams';
+import { ManagedTable } from '../../../shared/ManagedTable';
 
 const GroupIdLink = styled(APMLink)`
   font-family: ${fontFamilyCode};
@@ -56,57 +42,17 @@ const Culprit = styled.div`
 `;
 
 interface Props {
-  location: Location;
-  urlParams: IUrlParams;
   items: ErrorGroupListAPIResponse;
 }
 
-interface ITableChange {
-  page: { index?: number; size?: number };
-  sort: {
-    field?: string;
-    direction?: string;
-  };
-}
+const ErrorGroupList: React.FC<Props> = props => {
+  const { items } = props;
+  const {
+    urlParams: { serviceName }
+  } = useUrlParams();
 
-interface State {
-  page: { index?: number; size?: number };
-}
-
-export class ErrorGroupList extends Component<Props, State> {
-  public state = {
-    page: {
-      index: 0,
-      size: 25
-    }
-  };
-
-  public onTableChange = ({ page = {}, sort = {} }: ITableChange) => {
-    this.setState({ page });
-
-    const { location } = this.props;
-
-    history.push({
-      ...location,
-      search: fromQuery({
-        ...toQuery(location.search),
-        sortField: sort.field,
-        sortDirection: sort.direction
-      })
-    });
-  };
-
-  public render() {
-    const { items } = this.props;
-    const { serviceName, sortDirection, sortField } = this.props.urlParams;
-
-    const paginatedItems = paginateItems({
-      items,
-      pageIndex: this.state.page.index,
-      pageSize: this.state.page.size
-    });
-
-    const columns = [
+  const columns = useMemo(
+    () => [
       {
         name: i18n.translate('xpack.apm.errorsTable.groupIdColumnLabel', {
           defaultMessage: 'Group ID'
@@ -191,28 +137,24 @@ export class ErrorGroupList extends Component<Props, State> {
         render: (value?: number) =>
           value ? moment(value).fromNow() : NOT_AVAILABLE_LABEL
       }
-    ];
+    ],
+    [serviceName]
+  );
 
-    return (
-      <EuiBasicTable
-        noItemsMessage={i18n.translate('xpack.apm.errorsTable.noErrorsLabel', {
-          defaultMessage: 'No errors were found'
-        })}
-        items={paginatedItems}
-        columns={columns}
-        pagination={{
-          pageIndex: this.state.page.index,
-          pageSize: this.state.page.size,
-          totalItemCount: this.props.items.length
-        }}
-        sorting={{
-          sort: {
-            field: sortField || 'latestOccurrenceAt',
-            direction: sortDirection || 'desc'
-          }
-        }}
-        onChange={this.onTableChange}
-      />
-    );
-  }
-}
+  return (
+    <ManagedTable
+      noItemsMessage={i18n.translate('xpack.apm.errorsTable.noErrorsLabel', {
+        defaultMessage: 'No errors were found'
+      })}
+      items={items}
+      columns={columns}
+      initialPageSize={25}
+      initialSortField="latestOccurrenceAt"
+      initialSortDirection="desc"
+      sortItems={false}
+      hidePerPageOptions={false}
+    />
+  );
+};
+
+export { ErrorGroupList };
