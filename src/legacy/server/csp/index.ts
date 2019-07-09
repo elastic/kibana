@@ -22,11 +22,7 @@ import { promisify } from 'util';
 
 const randomBytesAsync = promisify(randomBytes);
 
-export const DEFAULT_CSP_RULES = Object.freeze([
-  `script-src 'unsafe-eval' 'nonce-{nonce}'`,
-  'worker-src blob:',
-  'child-src blob:',
-]);
+export const DEFAULT_CSP_RULES = Object.freeze([]);
 
 export async function generateCSPNonce() {
   return (await randomBytesAsync(12)).toString('base64');

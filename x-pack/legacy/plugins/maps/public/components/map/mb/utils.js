@@ -5,9 +5,12 @@
  */
 
 import _ from 'lodash';
-import mapboxgl from 'mapbox-gl';
+import mapboxgl from 'mapbox-gl/dist/mapbox-gl-csp';
+import mbWorkerUrl from '!!file-loader!mapbox-gl/dist/mapbox-gl-csp-worker';
 import chrome from 'ui/chrome';
 import { MAKI_SPRITE_PATH } from '../../../../common/constants';
+
+mapboxgl.workerUrl = mbWorkerUrl;
 
 function relativeToAbsolute(url) {
   const a = document.createElement('a');
