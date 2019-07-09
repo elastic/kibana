@@ -30,10 +30,10 @@ interface PackageRequest extends Request {
   };
 }
 
-interface InstallFeatureRequest extends PackageRequest {
+interface InstallAssetRequest extends PackageRequest {
   params: {
     pkgkey: string;
-    feature: string;
+    asset: string;
   };
 }
 
@@ -60,11 +60,11 @@ export async function handleGetInfo(req: PackageRequest) {
   return installation;
 }
 
-export async function handleRequestInstall(req: InstallFeatureRequest) {
-  const { pkgkey, feature } = req.params;
+export async function handleRequestInstall(req: InstallAssetRequest) {
+  const { pkgkey, asset } = req.params;
 
-  if (feature === 'dashboard') {
-    const toBeSavedObjects = await getObjects(pkgkey, feature);
+  if (asset === 'dashboard') {
+    const toBeSavedObjects = await getObjects(pkgkey, asset);
     const client = getClient(req);
     const createResults = await client.bulkCreate(toBeSavedObjects, { overwrite: true });
     const installed = createResults.saved_objects.map(({ id, type }) => ({ id, type }));
@@ -79,13 +79,13 @@ export async function handleRequestInstall(req: InstallFeatureRequest) {
 
   return {
     pkgkey,
-    feature,
+    asset,
     created: [],
   };
 }
 
-export async function handleRequestDelete(req: InstallFeatureRequest) {
-  const { pkgkey, feature } = req.params;
+export async function handleRequestDelete(req: InstallAssetRequest) {
+  const { pkgkey, asset } = req.params;
   const client = getClient(req);
 
   const installation = await getInstallationObject(client, pkgkey);
@@ -97,7 +97,7 @@ export async function handleRequestDelete(req: InstallFeatureRequest) {
 
   // ASK: should the manager uninstall the assets it installed
   // or just the references in SAVED_OBJECT_TYPE?
-  if (feature === 'dashboard') {
+  if (asset === 'dashboard') {
     // Delete the installed assets
     const deletePromises = installedObjects.map(async ({ id, type }) => client.delete(type, id));
     await Promise.all(deletePromises);
@@ -105,7 +105,7 @@ export async function handleRequestDelete(req: InstallFeatureRequest) {
 
   return {
     pkgkey,
-    feature,
+    asset,
     deleted: installedObjects,
   };
 }
