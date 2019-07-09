@@ -88,7 +88,12 @@ export class AlertsClient {
     if (data.enabled) {
       let scheduledTask;
       try {
-        scheduledTask = await this.scheduleAlert(createdAlert.id, rawAlert, this.basePath);
+        scheduledTask = await this.scheduleAlert(
+          createdAlert.id,
+          rawAlert.alertTypeId,
+          rawAlert.interval,
+          this.basePath
+        );
       } catch (e) {
         // Cleanup data, something went wrong scheduling the task
         try {
@@ -151,6 +156,13 @@ export class AlertsClient {
     if (existingObject.attributes.enabled === true && data.enabled === false) {
       await this.taskManager.remove(existingObject.attributes.scheduledTaskId);
       scheduledTaskId = null;
+    } else if (existingObject.attributes.enabled === false && data.enabled === true) {
+      ({ id: scheduledTaskId } = await this.scheduleAlert(
+        id,
+        existingObject.attributes.alertTypeId,
+        data.interval,
+        this.basePath
+      ));
     }
 
     const { actions, references } = this.extractReferences(data.actions);
@@ -171,9 +183,9 @@ export class AlertsClient {
     return this.getAlertFromRaw(id, updatedObject.attributes, updatedObject.references);
   }
 
-  private async scheduleAlert(id: string, alert: RawAlert, basePath: string) {
+  private async scheduleAlert(id: string, alertTypeId: string, interval: number, basePath: string) {
     return await this.taskManager.schedule({
-      taskType: `alerting:${alert.alertTypeId}`,
+      taskType: `alerting:${alertTypeId}`,
       params: {
         alertId: id,
         basePath,
@@ -181,7 +193,7 @@ export class AlertsClient {
       state: {
         // This is here because we can't rely on the task manager's internal runAt.
         // It changes it for timeout, etc when a task is running.
-        scheduledRunAt: new Date(Date.now() + alert.interval),
+        scheduledRunAt: new Date(Date.now() + interval),
         previousScheduledRunAt: null,
         alertTypeState: {},
         alertInstances: {},
