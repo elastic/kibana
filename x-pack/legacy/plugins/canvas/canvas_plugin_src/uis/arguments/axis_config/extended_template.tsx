@@ -4,11 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment } from 'react';
+import React, { Fragment, ChangeEvent, PureComponent } from 'react';
 import PropTypes from 'prop-types';
 import { EuiSelect, EuiFormRow, EuiText } from '@elastic/eui';
-import { set } from 'object-path-immutable';
+import immutable from 'object-path-immutable';
 import { get } from 'lodash';
+
+const { set } = immutable;
 
 const defaultExpression = {
   type: 'expression',
@@ -21,7 +23,16 @@ const defaultExpression = {
   ],
 };
 
-export class ExtendedTemplate extends React.PureComponent {
+export interface Props {
+  onValueChange: (newValue: string[]) => void;
+  argValue: boolean | { chain: string[] };
+  typeInstance: {
+    name: 'xaxis' | 'yaxis';
+  };
+  argId: string;
+}
+
+export class ExtendedTemplate extends PureComponent<Props> {
   static propTypes = {
     onValueChange: PropTypes.func.isRequired,
     argValue: PropTypes.oneOfType([
@@ -34,17 +45,24 @@ export class ExtendedTemplate extends React.PureComponent {
     argId: PropTypes.string.isRequired,
   };
 
+  static displayName = 'AxisConfigExtendedInput';
+
   // TODO: this should be in a helper, it's the same code from container_style
-  getArgValue = (name, alt) => {
+  getArgValue = (name: string, alt) => {
     return get(this.props.argValue, ['chain', 0, 'arguments', name, 0], alt);
   };
 
   // TODO: this should be in a helper, it's the same code from container_style
-  setArgValue = name => ev => {
+  setArgValue = (name: string) => (ev: ChangeEvent<HTMLSelectElement>) => {
+    if (!ev || !ev.target) {
+      return;
+    }
+
     const val = ev.target.value;
     const { argValue, onValueChange } = this.props;
     const oldVal = typeof argValue === 'boolean' ? defaultExpression : argValue;
-    const newValue = set(oldVal, ['chain', 0, 'arguments', name, 0], val);
+    const newValue = set(oldVal, `chain.0.arguments.${name}.0`, val);
+    console.log(newValue);
     onValueChange(newValue);
   };
 
@@ -73,5 +91,3 @@ export class ExtendedTemplate extends React.PureComponent {
     );
   }
 }
-
-ExtendedTemplate.displayName = 'AxisConfigExtendedInput';

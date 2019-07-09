@@ -16160,6 +16160,13 @@ is-plain-object@2.0.4, is-plain-object@^2.0.1, is-plain-object@^2.0.3, is-plain-
   dependencies:
     isobject "^3.0.1"
 
+is-plain-object@3.0.0:
+  version "3.0.0"
+  resolved "https://registry.yarnpkg.com/is-plain-object/-/is-plain-object-3.0.0.tgz#47bfc5da1b5d50d64110806c199359482e75a928"
+  integrity sha512-tZIpofR+P05k8Aocp7UI/2UTa9lTJSebCXpFFoR9aibpokDj/uXBsJ8luUu0tTVYKkMU6URDUuOfJZ7koewXvg==
+  dependencies:
+    isobject "^4.0.0"
+
 is-posix-bracket@^0.1.0:
   version "0.1.1"
   resolved "https://registry.yarnpkg.com/is-posix-bracket/-/is-posix-bracket-0.1.1.tgz#3334dc79774368e92f016e6fbc0a88f5cd6e6bc4"
@@ -16393,6 +16400,11 @@ isobject@^3.0.0, isobject@^3.0.1:
   version "3.0.1"
   resolved "https://registry.yarnpkg.com/isobject/-/isobject-3.0.1.tgz#4e431e92b11a9731636aa1f9c8d1ccbcfdab78df"
   integrity sha1-TkMekrEalzFjaqH5yNHMvP2reN8=
+
+isobject@^4.0.0:
+  version "4.0.0"
+  resolved "https://registry.yarnpkg.com/isobject/-/isobject-4.0.0.tgz#3f1c9155e73b192022a80819bacd0343711697b0"
+  integrity sha512-S/2fF5wH8SJA/kmwr6HYhK/RI/OkhD84k8ntalo0iJjZikgq1XFvR5M8NPT1x5F7fBwCG3qHfnzeP/Vh/ZxCUA==
 
 isomorphic-fetch@^2.1.1:
   version "2.2.1"
@@ -20413,10 +20425,12 @@ object-keys@~0.4.0:
   resolved "https://registry.yarnpkg.com/object-keys/-/object-keys-0.4.0.tgz#28a6aae7428dd2c3a92f3d95f21335dd204e0336"
   integrity sha1-KKaq50KN0sOpLz2V8hM13SBOAzY=
 
-object-path-immutable@^0.5.3:
-  version "0.5.3"
-  resolved "https://registry.yarnpkg.com/object-path-immutable/-/object-path-immutable-0.5.3.tgz#57a874bdfa98147907ea1b9b0c570940a0f45ae0"
-  integrity sha512-MKKU8uPX+Xa2PlQw7ibOh6Qh8GUxQVd2g/19Ym8bVa04XXSoPebzXoiV+a4298tnDtjDtSwDfcHLjoYmKHSz8Q==
+object-path-immutable@^3.1.1:
+  version "3.1.1"
+  resolved "https://registry.yarnpkg.com/object-path-immutable/-/object-path-immutable-3.1.1.tgz#93668def1fd70c82d8fc3aad5caf2d7dd55b97b5"
+  integrity sha512-NZDdPo/DEufre4+CyYZ7j6YQnWvKWnnGS+VS7dVd9M6WNcvFfnR4mW1lmakg9eCABAeE+PZW3bN/ZUTL8063IQ==
+  dependencies:
+    is-plain-object "3.0.0"
 
 object-values@^1.0.0:
   version "1.0.0"
