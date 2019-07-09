@@ -3,6 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+
 import { SAVED_OBJECT_TYPE } from '../common/constants';
 import { Request } from '../common/types';
 
@@ -11,11 +12,12 @@ export const getClient = (req: Request) => req.getSavedObjectsClient();
 export const mappings = {
   [SAVED_OBJECT_TYPE]: {
     properties: {
-      is_working: {
-        type: 'boolean',
-      },
-      other: {
-        type: 'keyword',
+      installed: {
+        type: 'nested',
+        properties: {
+          id: { type: 'keyword' },
+          type: { type: 'keyword' },
+        },
       },
     },
   },
