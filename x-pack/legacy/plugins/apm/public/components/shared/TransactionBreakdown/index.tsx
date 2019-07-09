@@ -112,7 +112,7 @@ const TransactionBreakdown: React.FC<{
           />
         </EuiFlexItem>
         {hasHits && sortedAndColoredKpis ? (
-          <EuiFlexItem>
+          <EuiFlexItem grow={false}>
             {sortedAndColoredKpis && (
               <TransactionBreakdownKpiList kpis={sortedAndColoredKpis} />
             )}
@@ -120,7 +120,7 @@ const TransactionBreakdown: React.FC<{
         ) : (
           !loading && (
             <>
-              <EuiFlexItem>
+              <EuiFlexItem grow={false}>
                 <EuiFlexGroup justifyContent="center">
                   <EuiFlexItem grow={false}>
                     <EuiText>
@@ -149,7 +149,7 @@ const TransactionBreakdown: React.FC<{
           )
         )}
         {showChart && hasHits ? (
-          <EuiFlexItem>
+          <EuiFlexItem grow={false}>
             <TransactionBreakdownGraph timeseries={timeseries} />
           </EuiFlexItem>
         ) : null}
