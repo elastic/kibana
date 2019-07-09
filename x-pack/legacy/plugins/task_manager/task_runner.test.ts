@@ -281,9 +281,7 @@ describe('TaskManagerRunner', () => {
     sinon.assert.calledWith(getRetryDelayStub, initialAttempts, error);
     const instance = store.update.args[0][0];
 
-    expect(Math.abs(secondsFromNow(retryDelay).getTime() - instance.runAt.getTime())).toBeLessThan(
-      100
-    );
+    expect(instance.runAt.getTime()).toEqual(secondsFromNow(retryDelay).getTime());
   });
 
   test('uses getRetryDelay to set retryAt when defined', async () => {
