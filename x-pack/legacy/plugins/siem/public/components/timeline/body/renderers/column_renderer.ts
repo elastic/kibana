@@ -9,19 +9,17 @@ import { ColumnHeader } from '../column_headers/column_header';
 
 export interface ColumnRenderer {
   isInstance: (columnName: string, data: TimelineNonEcsData[]) => boolean;
-  renderColumn: (
-    {
-      columnName,
-      eventId,
-      values,
-      field,
-      width,
-    }: {
-      columnName: string;
-      eventId: string;
-      values: string[] | null | undefined;
-      field: ColumnHeader;
-      width?: string;
-    }
-  ) => React.ReactNode;
+  renderColumn: ({
+    columnName,
+    eventId,
+    values,
+    field,
+    width,
+  }: {
+    columnName: string;
+    eventId: string;
+    values: string[] | null | undefined;
+    field: ColumnHeader;
+    width?: string;
+  }) => React.ReactNode;
 }

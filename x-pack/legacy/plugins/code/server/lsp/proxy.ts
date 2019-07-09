@@ -240,10 +240,7 @@ export class LanguageServerProxy implements ILanguageServerHandler {
     this.socket.on('error', () => void 0);
     this.socket.on('timeout', () => void 0);
     this.socket.on('drain', () => void 0);
-    this.socket.connect(
-      this.targetPort,
-      this.targetHost
-    );
+    this.socket.connect(this.targetPort, this.targetHost);
   }
 
   public unloadWorkspace(workspaceDir: string): Promise<void> {

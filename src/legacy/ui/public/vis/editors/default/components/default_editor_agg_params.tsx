@@ -115,60 +115,48 @@ function DefaultEditorAggParams({
   // reset validity before component destroyed
   useUnmount(() => setValidity(true));
 
-  useEffect(
-    () => {
-      Object.entries(editorConfig).forEach(([param, paramConfig]) => {
-        const paramOptions = agg.type.params.find(
-          (paramOption: AggParam) => paramOption.name === param
-        );
+  useEffect(() => {
+    Object.entries(editorConfig).forEach(([param, paramConfig]) => {
+      const paramOptions = agg.type.params.find(
+        (paramOption: AggParam) => paramOption.name === param
+      );
 
-        const hasFixedValue = paramConfig.hasOwnProperty(FIXED_VALUE_PROP);
-        const hasDefault = paramConfig.hasOwnProperty(DEFAULT_PROP);
-        // If the parameter has a fixed value in the config, set this value.
-        // Also for all supported configs we should freeze the editor for this param.
-        if (hasFixedValue || hasDefault) {
-          let newValue;
-          let property = FIXED_VALUE_PROP;
-          let typedParamConfig: EditorParamConfigType = paramConfig as FixedParam;
+      const hasFixedValue = paramConfig.hasOwnProperty(FIXED_VALUE_PROP);
+      const hasDefault = paramConfig.hasOwnProperty(DEFAULT_PROP);
+      // If the parameter has a fixed value in the config, set this value.
+      // Also for all supported configs we should freeze the editor for this param.
+      if (hasFixedValue || hasDefault) {
+        let newValue;
+        let property = FIXED_VALUE_PROP;
+        let typedParamConfig: EditorParamConfigType = paramConfig as FixedParam;
 
-          if (hasDefault) {
-            property = DEFAULT_PROP;
-            typedParamConfig = paramConfig as TimeIntervalParam;
-          }
-
-          if (paramOptions && paramOptions.deserialize) {
-            newValue = paramOptions.deserialize(typedParamConfig[property]);
-          } else {
-            newValue = typedParamConfig[property];
-          }
-          onAggParamsChange(agg.params, param, newValue);
+        if (hasDefault) {
+          property = DEFAULT_PROP;
+          typedParamConfig = paramConfig as TimeIntervalParam;
         }
-      });
-    },
-    [agg.type]
-  );
 
-  useEffect(
-    () => {
-      setTouched(false);
-    },
-    [agg.type]
-  );
+        if (paramOptions && paramOptions.deserialize) {
+          newValue = paramOptions.deserialize(typedParamConfig[property]);
+        } else {
+          newValue = typedParamConfig[property];
+        }
+        onAggParamsChange(agg.params, param, newValue);
+      }
+    });
+  }, [agg.type]);
 
-  useEffect(
-    () => {
-      setValidity(isFormValid);
-    },
-    [isFormValid, agg.type]
-  );
+  useEffect(() => {
+    setTouched(false);
+  }, [agg.type]);
 
-  useEffect(
-    () => {
-      // when all invalid controls were touched or they are untouched
-      setTouched(isAllInvalidParamsTouched);
-    },
-    [isAllInvalidParamsTouched]
-  );
+  useEffect(() => {
+    setValidity(isFormValid);
+  }, [isFormValid, agg.type]);
+
+  useEffect(() => {
+    // when all invalid controls were touched or they are untouched
+    setTouched(isAllInvalidParamsTouched);
+  }, [isAllInvalidParamsTouched]);
 
   const renderParam = (paramInstance: ParamInstance, model: AggParamsItem) => {
     return (
@@ -247,6 +235,7 @@ function DefaultEditorAggParams({
             )}
             paddingSize="none"
           >
+            <EuiSpacer size="m" />
             {params.advanced.map((param: ParamInstance) => {
               const model = paramsState[param.aggParam.name] || {
                 touched: false,

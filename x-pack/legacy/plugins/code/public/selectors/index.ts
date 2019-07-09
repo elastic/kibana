@@ -7,6 +7,7 @@ import { FileTree, RepositoryUri } from '../../model';
 import { RootState } from '../reducers';
 
 export const getTree = (state: RootState) => state.fileTree.tree;
+export const getTreeRevision = (state: RootState) => state.fileTree.revision;
 
 export const lastRequestPathSelector: (state: RootState) => string = (state: RootState) =>
   state.symbol.lastRequestPath || '';
