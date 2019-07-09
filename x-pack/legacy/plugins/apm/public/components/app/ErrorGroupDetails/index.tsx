@@ -65,35 +65,29 @@ export function ErrorGroupDetails() {
   const { urlParams, uiFilters } = useUrlParams();
   const { serviceName, start, end, errorGroupId } = urlParams;
 
-  const { data: errorGroupData } = useFetcher(
-    () => {
-      if (serviceName && start && end && errorGroupId) {
-        return loadErrorGroupDetails({
-          serviceName,
-          start,
-          end,
-          errorGroupId,
-          uiFilters
-        });
-      }
-    },
-    [serviceName, start, end, errorGroupId, uiFilters]
-  );
+  const { data: errorGroupData } = useFetcher(() => {
+    if (serviceName && start && end && errorGroupId) {
+      return loadErrorGroupDetails({
+        serviceName,
+        start,
+        end,
+        errorGroupId,
+        uiFilters
+      });
+    }
+  }, [serviceName, start, end, errorGroupId, uiFilters]);
 
-  const { data: errorDistributionData } = useFetcher(
-    () => {
-      if (serviceName && start && end && errorGroupId) {
-        return loadErrorDistribution({
-          serviceName,
-          start,
-          end,
-          errorGroupId,
-          uiFilters
-        });
-      }
-    },
-    [serviceName, start, end, errorGroupId, uiFilters]
-  );
+  const { data: errorDistributionData } = useFetcher(() => {
+    if (serviceName && start && end && errorGroupId) {
+      return loadErrorDistribution({
+        serviceName,
+        start,
+        end,
+        errorGroupId,
+        uiFilters
+      });
+    }
+  }, [serviceName, start, end, errorGroupId, uiFilters]);
 
   if (!errorGroupData || !errorDistributionData) {
     return null;

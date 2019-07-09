@@ -78,38 +78,32 @@ export function WorkspacePanel({
     const activeVisualization = activeVisualizationId
       ? visualizationMap[activeVisualizationId]
       : null;
-    const expression = useMemo(
-      () => {
-        try {
-          return buildExpression(
-            activeVisualization,
-            visualizationState,
-            activeDatasource,
-            datasourceState,
-            datasourcePublicAPI
-          );
-        } catch (e) {
-          setExpressionError(e.toString());
-        }
-      },
-      [
-        activeVisualization,
-        visualizationState,
-        activeDatasource,
-        datasourceState,
-        datasourcePublicAPI,
-      ]
-    );
+    const expression = useMemo(() => {
+      try {
+        return buildExpression(
+          activeVisualization,
+          visualizationState,
+          activeDatasource,
+          datasourceState,
+          datasourcePublicAPI
+        );
+      } catch (e) {
+        setExpressionError(e.toString());
+      }
+    }, [
+      activeVisualization,
+      visualizationState,
+      activeDatasource,
+      datasourceState,
+      datasourcePublicAPI,
+    ]);
 
-    useEffect(
-      () => {
-        // reset expression error if component attempts to run it again
-        if (expressionError) {
-          setExpressionError(undefined);
-        }
-      },
-      [expression]
-    );
+    useEffect(() => {
+      // reset expression error if component attempts to run it again
+      if (expressionError) {
+        setExpressionError(undefined);
+      }
+    }, [expression]);
 
     if (expression === null) {
       return renderEmptyWorkspace();

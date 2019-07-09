@@ -58,67 +58,58 @@ export function EditorFrame(props: EditorFrameProps) {
     ]
   );
 
-  useEffect(
-    () => {
-      if (props.doc) {
-        dispatch({
-          type: 'VISUALIZATION_LOADED',
-          doc: props.doc,
-        });
-      } else {
-        dispatch({
-          type: 'RESET',
-          state: getInitialState(props),
-        });
-      }
-    },
-    [props.doc]
-  );
+  useEffect(() => {
+    if (props.doc) {
+      dispatch({
+        type: 'VISUALIZATION_LOADED',
+        doc: props.doc,
+      });
+    } else {
+      dispatch({
+        type: 'RESET',
+        state: getInitialState(props),
+      });
+    }
+  }, [props.doc]);
 
   // Initialize current datasource
-  useEffect(
-    () => {
-      let datasourceGotSwitched = false;
-      if (state.datasource.isLoading && state.datasource.activeId) {
-        props.datasourceMap[state.datasource.activeId]
-          .initialize(props.doc && props.doc.state.datasource)
-          .then(datasourceState => {
-            if (!datasourceGotSwitched) {
-              dispatch({
-                type: 'UPDATE_DATASOURCE_STATE',
-                newState: datasourceState,
-              });
-            }
-          })
-          .catch(onError);
+  useEffect(() => {
+    let datasourceGotSwitched = false;
+    if (state.datasource.isLoading && state.datasource.activeId) {
+      props.datasourceMap[state.datasource.activeId]
+        .initialize(props.doc && props.doc.state.datasource)
+        .then(datasourceState => {
+          if (!datasourceGotSwitched) {
+            dispatch({
+              type: 'UPDATE_DATASOURCE_STATE',
+              newState: datasourceState,
+            });
+          }
+        })
+        .catch(onError);
 
-        return () => {
-          datasourceGotSwitched = true;
-        };
-      }
-    },
-    [props.doc, state.datasource.activeId, state.datasource.isLoading]
-  );
+      return () => {
+        datasourceGotSwitched = true;
+      };
+    }
+  }, [props.doc, state.datasource.activeId, state.datasource.isLoading]);
 
   // Initialize visualization as soon as datasource is ready
-  useEffect(
-    () => {
-      if (
-        datasourcePublicAPI &&
-        state.visualization.state === null &&
-        state.visualization.activeId !== null
-      ) {
-        const initialVisualizationState = props.visualizationMap[
-          state.visualization.activeId
-        ].initialize(datasourcePublicAPI);
-        dispatch({
-          type: 'UPDATE_VISUALIZATION_STATE',
-          newState: initialVisualizationState,
-        });
-      }
-    },
-    [datasourcePublicAPI, state.visualization.activeId, state.visualization.state]
-  );
+  useEffect(() => {
+    if (
+      datasourcePublicAPI &&
+      state.visualization.state === null &&
+      state.visualization.activeId !== null
+    ) {
+      const initialVisualizationState = props.visualizationMap[
+        state.visualization.activeId
+      ].initialize(datasourcePublicAPI);
+      dispatch({
+        type: 'UPDATE_VISUALIZATION_STATE',
+        newState: initialVisualizationState,
+      });
+    }
+  }, [datasourcePublicAPI, state.visualization.activeId, state.visualization.state]);
 
   const datasource =
     state.datasource.activeId && !state.datasource.isLoading

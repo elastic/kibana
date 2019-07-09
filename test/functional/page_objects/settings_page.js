@@ -63,7 +63,7 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
     async getAdvancedSettings(propertyName) {
       log.debug('in getAdvancedSettings');
       const setting = await testSubjects.find(`advancedSetting-editField-${propertyName}`);
-      return await setting.getProperty('value');
+      return await setting.getAttribute('value');
     }
 
     async expectDisabledAdvancedSetting(propertyName) {
@@ -73,7 +73,7 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
 
     async getAdvancedSettingCheckbox(propertyName) {
       log.debug('in getAdvancedSettingCheckbox');
-      return await testSubjects.getProperty(`advancedSetting-editField-${propertyName}`, 'checked');
+      return await testSubjects.getAttribute(`advancedSetting-editField-${propertyName}`, 'checked');
     }
 
     async clearAdvancedSettings(propertyName) {
@@ -267,7 +267,7 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
     }
 
     async getPopularity() {
-      return await testSubjects.getProperty('editorFieldCount', 'value');
+      return await testSubjects.getAttribute('editorFieldCount', 'value');
     }
 
     async controlChangeCancel() {

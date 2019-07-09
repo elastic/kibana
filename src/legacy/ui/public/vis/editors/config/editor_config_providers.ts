@@ -78,7 +78,7 @@ class EditorConfigProviderRegistry {
     current: EditorParamConfig,
     merged: EditorParamConfig,
     paramName: string
-  ): { fixedValue?: any; base?: number } {
+  ): { fixedValue: unknown } | { base: number } | {} {
     if (
       this.isFixedParam(current) &&
       this.isFixedParam(merged) &&
@@ -128,37 +128,26 @@ class EditorConfigProviderRegistry {
     current: TimeIntervalParam,
     merged: EditorParamConfig,
     paramName: string
-  ): { timeBase?: string; default?: string } {
+  ): { timeBase: string; default: string } {
     if (current.default !== current.timeBase) {
       throw new Error(`Tried to provide differing default and timeBase values for ${paramName}.`);
     }
 
-    if (this.isTimeBaseParam(current) && this.isTimeBaseParam(merged)) {
+    if (this.isTimeBaseParam(merged)) {
       // In case both had where interval values, just use the least common multiple between both intervals
-      try {
-        const timeBase = leastCommonInterval(current.timeBase, merged.timeBase);
-        return {
-          default: timeBase,
-          timeBase,
-        };
-      } catch (e) {
-        throw e;
-      }
+      const timeBase = leastCommonInterval(current.timeBase, merged.timeBase);
+      return {
+        default: timeBase,
+        timeBase,
+      };
     }
 
-    if (this.isTimeBaseParam(current)) {
-      try {
-        parseEsInterval(current.timeBase);
-        return {
-          default: current.timeBase,
-          timeBase: current.timeBase,
-        };
-      } catch (e) {
-        throw e;
-      }
-    }
-
-    return {};
+    // This code is simply here to throw an error in case the `timeBase` is not a valid ES interval
+    parseEsInterval(current.timeBase);
+    return {
+      default: current.timeBase,
+      timeBase: current.timeBase,
+    };
   }
 
   private mergeConfigs(configs: EditorConfig[]): EditorConfig {

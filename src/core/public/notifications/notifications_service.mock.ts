@@ -22,20 +22,21 @@ import {
   NotificationsStart,
 } from './notifications_service';
 import { toastsServiceMock } from './toasts/toasts_service.mock';
-import { ToastsApi } from './toasts/toasts_api';
+
+type DeeplyMocked<T> = { [P in keyof T]: jest.Mocked<T[P]> };
 
 const createSetupContractMock = () => {
-  const setupContract: jest.Mocked<NotificationsSetup> = {
+  const setupContract: DeeplyMocked<NotificationsSetup> = {
     // we have to suppress type errors until decide how to mock es6 class
-    toasts: (toastsServiceMock.createSetupContract() as unknown) as ToastsApi,
+    toasts: toastsServiceMock.createSetupContract(),
   };
   return setupContract;
 };
 
 const createStartContractMock = () => {
-  const startContract: jest.Mocked<NotificationsStart> = {
+  const startContract: DeeplyMocked<NotificationsStart> = {
     // we have to suppress type errors until decide how to mock es6 class
-    toasts: (toastsServiceMock.createStartContract() as unknown) as ToastsApi,
+    toasts: toastsServiceMock.createStartContract(),
   };
   return startContract;
 };

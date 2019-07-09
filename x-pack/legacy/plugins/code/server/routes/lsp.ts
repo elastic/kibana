@@ -40,6 +40,7 @@ export function lspRoute(
   serverOptions: ServerOptions
 ) {
   const log = new Logger(server.server);
+
   server.route({
     path: '/api/code/lsp/textDocument/{method}',
     async handler(req, h: hapi.ResponseToolkit) {

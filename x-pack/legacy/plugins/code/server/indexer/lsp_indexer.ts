@@ -6,6 +6,7 @@
 
 import fs from 'fs';
 import util from 'util';
+import path from 'path';
 
 import { ResponseError } from 'vscode-jsonrpc';
 
@@ -17,7 +18,7 @@ import {
 } from '../../common/lsp_error_codes';
 import { toCanonicalUrl } from '../../common/uri_util';
 import { Document, IndexStats, IndexStatsKey, LspIndexRequest, RepositoryUri } from '../../model';
-import { GitOperations } from '../git_operations';
+import { GitOperations, HEAD } from '../git_operations';
 import { EsClient } from '../lib/esqueue';
 import { Logger } from '../log';
 import { LspService } from '../lsp/lsp_service';
@@ -101,22 +102,23 @@ export class LspIndexer extends AbstractIndexer {
   }
 
   protected async *getIndexRequestIterator(): AsyncIterableIterator<LspIndexRequest> {
-    let repo;
     try {
-      const {
-        workspaceRepo,
-        workspaceRevision,
-      } = await this.lspService.workspaceHandler.openWorkspace(this.repoUri, 'head');
-      repo = workspaceRepo;
-      const workspaceDir = workspaceRepo.workdir();
-      const fileIterator = await this.gitOps.iterateRepo(this.repoUri, 'head');
+      const { workspaceDir } = await this.lspService.workspaceHandler.openWorkspace(
+        this.repoUri,
+        HEAD
+      );
+      const fileIterator = await this.gitOps.iterateRepo(this.repoUri, HEAD);
       for await (const file of fileIterator) {
         const filePath = file.path!;
         const req: LspIndexRequest = {
           repoUri: this.repoUri,
           localRepoPath: workspaceDir,
           filePath,
-          revision: workspaceRevision,
+          // Always use HEAD for now until we have multi revision.
+          // Also, since the workspace might get updated during the index, we always
+          // want the revision to keep updated so that lsp proxy could pass the revision
+          // check per discussion here: https://github.com/elastic/code/issues/1317#issuecomment-504615833
+          revision: HEAD,
         };
         yield req;
       }
@@ -124,16 +126,12 @@ export class LspIndexer extends AbstractIndexer {
       this.log.error(`Prepare lsp indexing requests error.`);
       this.log.error(error);
       throw error;
-    } finally {
-      if (repo) {
-        repo.cleanup();
-      }
     }
   }
 
   protected async getIndexRequestCount(): Promise<number> {
     try {
-      return await this.gitOps.countRepoFiles(this.repoUri, 'head');
+      return await this.gitOps.countRepoFiles(this.repoUri, HEAD);
     } catch (error) {
       if (this.isCancelled()) {
         this.log.debug(`Indexer got cancelled. Skip get index count error.`);
@@ -213,7 +211,7 @@ export class LspIndexer extends AbstractIndexer {
     const lspDocUri = toCanonicalUrl({ repoUri, revision, file: filePath, schema: 'git:' });
     const symbolNames = new Set<string>();
 
-    const localFilePath = `${localRepoPath}${filePath}`;
+    const localFilePath = path.join(localRepoPath, filePath);
     const lstat = util.promisify(fs.lstat);
     const stat = await lstat(localFilePath);
 

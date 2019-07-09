@@ -6,6 +6,7 @@
 
 import fs from 'fs';
 import util from 'util';
+import path from 'path';
 
 import { ProgressReporter } from '.';
 import { Diff, DiffKind } from '../../common/git_diff';
@@ -17,7 +18,7 @@ import {
   LspIncIndexRequest,
   RepositoryUri,
 } from '../../model';
-import { GitOperations } from '../git_operations';
+import { GitOperations, HEAD } from '../git_operations';
 import { EsClient } from '../lib/esqueue';
 import { Logger } from '../log';
 import { LspService } from '../lsp/lsp_service';
@@ -124,11 +125,10 @@ export class LspIncrementalIndexer extends LspIndexer {
 
   protected async *getIndexRequestIterator(): AsyncIterableIterator<LspIncIndexRequest> {
     try {
-      const { workspaceRepo } = await this.lspService.workspaceHandler.openWorkspace(
+      const { workspaceDir } = await this.lspService.workspaceHandler.openWorkspace(
         this.repoUri,
-        'head'
+        HEAD
       );
-      const workspaceDir = workspaceRepo.workdir();
       if (this.diff) {
         for (const f of this.diff.files) {
           yield {
@@ -136,7 +136,11 @@ export class LspIncrementalIndexer extends LspIndexer {
             localRepoPath: workspaceDir,
             filePath: f.path,
             originPath: f.originPath,
-            revision: this.revision,
+            // Always use HEAD for now until we have multi revision.
+            // Also, since the workspace might get updated during the index, we always
+            // want the revision to keep updated so that lsp proxy could pass the revision
+            // check per discussion here: https://github.com/elastic/code/issues/1317#issuecomment-504615833
+            revision: HEAD,
             kind: f.kind,
             originRevision: this.originRevision,
           };
@@ -204,7 +208,7 @@ export class LspIncrementalIndexer extends LspIndexer {
       this.log.error(error);
     }
 
-    const localFilePath = `${localRepoPath}${filePath}`;
+    const localFilePath = path.join(localRepoPath, filePath);
     const lstat = util.promisify(fs.lstat);
     const stat = await lstat(localFilePath);
 

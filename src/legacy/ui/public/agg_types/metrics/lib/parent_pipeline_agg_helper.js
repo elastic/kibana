@@ -17,12 +17,11 @@
  * under the License.
  */
 
-import metricAggTemplate from '../../controls/sub_agg.html';
 import { MetricAggParamEditor } from '../../controls/metric_agg';
+import { SubAggParamEditor } from '../../controls/sub_agg';
 import _ from 'lodash';
 import { AggConfig } from '../../../vis/agg_config';
 import { Schemas } from '../../../vis/editors/default/schemas';
-import { parentPipelineAggController } from './parent_pipeline_agg_controller';
 import { parentPipelineAggWriter } from './parent_pipeline_agg_writer';
 import { forwardModifyAggConfigOnSearchRequestStart } from './nested_agg_helpers';
 import { i18n } from '@kbn/i18n';
@@ -55,7 +54,7 @@ const parentPipelineAggHelper = {
       },
       {
         name: 'customMetric',
-        editor: metricAggTemplate,
+        editorComponent: SubAggParamEditor,
         type: AggConfig,
         default: null,
         serialize: function (customMetric) {
@@ -72,8 +71,7 @@ const parentPipelineAggHelper = {
           return metricAgg;
         },
         modifyAggConfigOnSearchRequestStart: forwardModifyAggConfigOnSearchRequestStart('customMetric'),
-        write: _.noop,
-        controller: parentPipelineAggController
+        write: _.noop
       },
       {
         name: 'buckets_path',

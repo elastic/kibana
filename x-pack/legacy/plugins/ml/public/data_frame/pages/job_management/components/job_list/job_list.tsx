@@ -4,27 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FunctionComponent, SFC, useState } from 'react';
+import React, { SFC, useState } from 'react';
 
-import {
-  EuiButtonEmpty,
-  EuiEmptyPrompt,
-  EuiInMemoryTable,
-  EuiInMemoryTableProps,
-  SortDirection,
-} from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
-import { moveToDataFrameWizard } from '../../../../common';
+import { EuiButtonEmpty, EuiEmptyPrompt, SortDirection } from '@elastic/eui';
 
-import {
-  DataFrameJobListColumn,
-  DataFrameJobListRow,
-  ItemIdToExpandedRowMap,
-  JobId,
-} from './common';
+import { JobId, moveToDataFrameWizard, useRefreshTransformList } from '../../../../common';
+import { checkPermission } from '../../../../../privilege/check_privilege';
+
+import { DataFrameJobListColumn, DataFrameJobListRow, ItemIdToExpandedRowMap } from './common';
 import { getJobsFactory } from './job_service';
 import { getColumns } from './columns';
 import { ExpandedRow } from './expanded_row';
+import { TransformTable } from './transform_table';
 import { useRefreshInterval } from './use_refresh_interval';
 
 function getItemIdToExpandedRowMap(
@@ -43,31 +36,43 @@ function getItemIdToExpandedRowMap(
   );
 }
 
-// TODO EUI's types for EuiInMemoryTable is missing these props
-interface ExpandableTableProps extends EuiInMemoryTableProps {
-  itemIdToExpandedRowMap: ItemIdToExpandedRowMap;
-  isExpandable: boolean;
-}
-
-const ExpandableTable = (EuiInMemoryTable as any) as FunctionComponent<ExpandableTableProps>;
-
 export const DataFrameJobList: SFC = () => {
   const [dataFrameJobs, setDataFrameJobs] = useState<DataFrameJobListRow[]>([]);
   const [blockRefresh, setBlockRefresh] = useState(false);
   const [expandedRowItemIds, setExpandedRowItemIds] = useState<JobId[]>([]);
+  const [pageIndex, setPageIndex] = useState(0);
+  const [pageSize, setPageSize] = useState(10);
+  const [sortField, setSortField] = useState<string>(DataFrameJobListColumn.id);
+  const [sortDirection, setSortDirection] = useState<string>(SortDirection.ASC);
+  const disabled =
+    !checkPermission('canCreateDataFrameJob') ||
+    !checkPermission('canPreviewDataFrameJob') ||
+    !checkPermission('canStartStopDataFrameJob');
 
   const getJobs = getJobsFactory(setDataFrameJobs, blockRefresh);
-  useRefreshInterval(getJobs, setBlockRefresh);
+  // Subscribe to the refresh observable to trigger reloading the jobs list.
+  useRefreshTransformList({ onRefresh: () => getJobs(true) });
+  // Call useRefreshInterval() after the subscription above is set up.
+  useRefreshInterval(setBlockRefresh);
 
   if (dataFrameJobs.length === 0) {
     return (
       <EuiEmptyPrompt
-        title={<h2>No data frame jobs found</h2>}
+        title={
+          <h2>
+            {i18n.translate('xpack.ml.dataFrame.list.emptyPromptTitle', {
+              defaultMessage: 'No data frame transforms found',
+            })}
+          </h2>
+        }
         actions={[
-          <EuiButtonEmpty onClick={moveToDataFrameWizard}>
-            Create your first data frame job
+          <EuiButtonEmpty onClick={moveToDataFrameWizard} isDisabled={disabled}>
+            {i18n.translate('xpack.ml.dataFrame.list.emptyPromptButtonText', {
+              defaultMessage: 'Create your first data frame transform',
+            })}
           </EuiButtonEmpty>,
         ]}
+        data-test-subj="mlNoDataFrameJobsFound"
       />
     );
   }
@@ -76,15 +81,40 @@ export const DataFrameJobList: SFC = () => {
 
   const sorting = {
     sort: {
-      field: DataFrameJobListColumn.id,
-      direction: SortDirection.ASC,
+      field: sortField,
+      direction: sortDirection,
     },
   };
 
   const itemIdToExpandedRowMap = getItemIdToExpandedRowMap(expandedRowItemIds, dataFrameJobs);
 
+  const pagination = {
+    initialPageIndex: pageIndex,
+    initialPageSize: pageSize,
+    totalItemCount: dataFrameJobs.length,
+    pageSizeOptions: [10, 20, 50],
+    hidePerPageOptions: false,
+  };
+
+  const onTableChange = ({
+    page = { index: 0, size: 10 },
+    sort = { field: DataFrameJobListColumn.id, direction: SortDirection.ASC },
+  }: {
+    page: { index: number; size: number };
+    sort: { field: string; direction: string };
+  }) => {
+    const { index, size } = page;
+    setPageIndex(index);
+    setPageSize(size);
+
+    const { field, direction } = sort;
+    setSortField(field);
+    setSortDirection(direction);
+  };
+
   return (
-    <ExpandableTable
+    <TransformTable
+      className="mlTransformTable"
       columns={columns}
       hasActions={false}
       isExpandable={true}
@@ -92,8 +122,10 @@ export const DataFrameJobList: SFC = () => {
       items={dataFrameJobs}
       itemId={DataFrameJobListColumn.id}
       itemIdToExpandedRowMap={itemIdToExpandedRowMap}
-      pagination={true}
+      onChange={onTableChange}
+      pagination={pagination}
       sorting={sorting}
+      data-test-subj="mlDataFramesTableJobs"
     />
   );
 };

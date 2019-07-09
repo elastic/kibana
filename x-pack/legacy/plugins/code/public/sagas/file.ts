@@ -61,6 +61,7 @@ function* handleFetchRepoTree(action: Action<FetchRepoTreePayload>) {
     tree.repoUri = action.payload!.uri;
     yield put(
       fetchRepoTreeSuccess({
+        revision: action.payload!.revision,
         tree,
         path: action.payload!.path,
         withParents: action.payload!.parents,
@@ -106,7 +107,7 @@ function* handleFetchRootRepoTree(action: Action<FetchRepoPayloadWithRevision>) 
   try {
     const { uri, revision } = action.payload!;
     const tree = yield call(requestRepoTree, { uri, revision, path: '', isDir: true });
-    yield put(fetchRootRepoTreeSuccess(tree));
+    yield put(fetchRootRepoTreeSuccess({ tree, revision }));
   } catch (err) {
     yield put(fetchRootRepoTreeFailed(err));
   }
@@ -199,7 +200,7 @@ export async function requestFile(
     const contentType = response.headers.get('Content-Type');
 
     if (contentType && contentType.startsWith('text/')) {
-      const lang = contentType.split(';')[0].substring('text/'.length);
+      const lang = response.headers.get('lang') || undefined;
       if (lang === 'big') {
         return {
           payload,

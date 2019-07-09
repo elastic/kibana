@@ -28,13 +28,16 @@ import { LspRequest } from '../../model';
 import { Logger } from '../log';
 import { LspOptions } from '../server_options';
 import { InternalError, RequestCancelled } from '../../common/lsp_error_codes';
-import { InitializeOptions } from './request_expander';
+import { InitializeOptions, WorkspaceStatus } from './request_expander';
 
 export interface ILanguageServerHandler {
   lastAccess?: number;
   handleRequest(request: LspRequest): Promise<ResponseMessage>;
   exit(): Promise<any>;
   unloadWorkspace(workspaceDir: string): Promise<void>;
+  initializeState?(
+    workspaceDir: string
+  ): Promise<{ [lang: string]: WorkspaceStatus }> | WorkspaceStatus;
 }
 
 export class LanguageServerProxy implements ILanguageServerHandler {
@@ -78,7 +81,6 @@ export class LanguageServerProxy implements ILanguageServerHandler {
     } else {
       conn.sendNotification(request.method, ...params);
     }
-
     return response;
   }
 
@@ -238,10 +240,7 @@ export class LanguageServerProxy implements ILanguageServerHandler {
     this.socket.on('error', () => void 0);
     this.socket.on('timeout', () => void 0);
     this.socket.on('drain', () => void 0);
-    this.socket.connect(
-      this.targetPort,
-      this.targetHost
-    );
+    this.socket.connect(this.targetPort, this.targetHost);
   }
 
   public unloadWorkspace(workspaceDir: string): Promise<void> {

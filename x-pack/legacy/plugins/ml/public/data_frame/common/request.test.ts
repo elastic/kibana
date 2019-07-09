@@ -96,12 +96,17 @@ describe('Data Frame: Common', () => {
     const pivotState: DefinePivotExposedState = {
       aggList: { 'the-agg-name': agg },
       groupByList: { 'the-group-by-name': groupBy },
+      isAdvancedEditorEnabled: false,
       search: 'the-query',
       valid: true,
     };
     const jobDetailsState: JobDetailsExposedState = {
+      continuousModeDateField: 'the-continuous-mode-date-field',
+      continuousModeDelay: 'the-continuous-mode-delay',
       createIndexPattern: false,
+      isContinuousModeEnabled: false,
       jobId: 'the-job-id',
+      jobDescription: 'the-job-description',
       destinationIndex: 'the-destination-index',
       touched: true,
       valid: true,
@@ -110,6 +115,7 @@ describe('Data Frame: Common', () => {
     const request = getDataFrameRequest('the-index-pattern-title', pivotState, jobDetailsState);
 
     expect(request).toEqual({
+      description: 'the-job-description',
       dest: { index: 'the-destination-index' },
       pivot: {
         aggregations: { 'the-agg-agg-name': { avg: { field: 'the-agg-field' } } },

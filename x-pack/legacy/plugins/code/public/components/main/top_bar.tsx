@@ -9,10 +9,11 @@ import React, { ChangeEvent } from 'react';
 import { SearchOptions, SearchScope } from '../../../model';
 import { ReferenceInfo } from '../../../model/commit';
 import { MainRouteParams } from '../../common/types';
-import { encodeRevisionString } from '../../utils/url';
+import { encodeRevisionString, decodeRevisionString } from '../../../common/uri_util';
 import { history } from '../../utils/url';
 import { Breadcrumb } from './breadcrumb';
 import { SearchBar } from '../search_bar';
+import { StatusIndicator } from '../status_indicator/status_indicator';
 
 interface Props {
   routeParams: MainRouteParams;
@@ -24,22 +25,51 @@ interface Props {
 }
 
 export class TopBar extends React.Component<Props, { value: string }> {
+  static getDerivedStateFromProps(props: Props) {
+    return { value: decodeRevisionString(props.routeParams.revision) };
+  }
   public state = {
-    value: 'master',
+    value: decodeRevisionString(this.props.routeParams.revision),
   };
+
+  get branch() {
+    return this.getBranch(this.state.value);
+  }
+
+  getBranch = (revision: string) => {
+    const r = decodeRevisionString(revision);
+    const branch = this.props.branches.find(b => b.name === r);
+    if (branch) {
+      return branch.name;
+    } else {
+      return '';
+    }
+  };
+
+  get branchOptions() {
+    return this.props.branches.map(b => ({
+      value: b.name,
+      text: b.name,
+      ['data-test-subj']: `codeBranchSelectOption-${b.name}${
+        this.branch === b.name ? 'Active' : ''
+      }`,
+    }));
+  }
 
   public onChange = (e: ChangeEvent<HTMLSelectElement>) => {
     const { resource, org, repo, path = '', pathType } = this.props.routeParams;
+    const { value } = e.target;
     this.setState({
-      value: e.target.value,
+      value,
     });
-    const revision = this.props.branches.find(b => b.name === e.target.value)!.commit.id;
+    const revision = this.props.branches.find(b => b.name === value)!.name;
     history.push(
       `/${resource}/${org}/${repo}/${pathType}/${encodeRevisionString(revision)}/${path}`
     );
   };
 
   public render() {
+    const { branch } = this;
     return (
       <div className="code-top-bar__container">
         <SearchBar
@@ -54,18 +84,19 @@ export class TopBar extends React.Component<Props, { value: string }> {
           className="codeTopBar__toolbar"
         >
           <EuiFlexItem>
-            <EuiFlexGroup gutterSize="none">
-              <EuiFlexItem
-                className="codeContainer__select"
-                grow={false}
-                style={{ display: 'none' }}
-              >
+            <EuiFlexGroup gutterSize="l" alignItems="center">
+              <EuiFlexItem className="codeContainer__select" grow={false}>
                 <EuiSelect
-                  options={this.props.branches.map(b => ({ value: b.name, text: b.name }))}
+                  options={this.branchOptions}
+                  value={branch}
                   onChange={this.onChange}
+                  data-test-subj="codeBranchSelector"
                 />
               </EuiFlexItem>
               <Breadcrumb routeParams={this.props.routeParams} />
+              <EuiFlexItem grow={false}>
+                <StatusIndicator />
+              </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>{this.props.buttons}</EuiFlexItem>

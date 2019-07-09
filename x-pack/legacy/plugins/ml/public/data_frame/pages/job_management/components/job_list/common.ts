@@ -6,14 +6,7 @@
 
 import { Dictionary } from '../../../../../../common/types/common';
 
-export type JobId = string;
-
-export interface DataFrameJob {
-  dest: string;
-  id: JobId;
-  source: string;
-  sync?: object;
-}
+import { JobId, DataFrameTransformWithId } from '../../../../common';
 
 export enum DATA_FRAME_RUNNING_STATE {
   STARTED = 'started',
@@ -52,15 +45,17 @@ export interface DataFrameJobStats {
 
 export interface DataFrameJobListRow {
   id: JobId;
+  checkpointing: object;
   state: DataFrameJobState;
   stats: DataFrameJobStats;
-  config: DataFrameJob;
+  config: DataFrameTransformWithId;
 }
 
 // Used to pass on attribute names to table columns
 export enum DataFrameJobListColumn {
   configDestIndex = 'config.dest.index',
   configSourceIndex = 'config.source.index',
+  description = 'config.description',
   id = 'id',
 }
 

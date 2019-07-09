@@ -51,8 +51,7 @@ export default function ({ getService, updateBaselines }) {
           {"id":"2","enabled":true,"type":"terms","schema":"segment","params":
             {"field":"response.raw","size":4,"order":"desc","orderBy":"1"}
           }]'  | 
-        kibana_metric 
-          visConfig='{"dimensions":{"metrics":[{"accessor":1,"format":{"id":"number"},"params":{}}],"bucket":{"accessor":0}}}'
+        metricVis metric={visdimension 1 format="number"} bucket={visdimension 0}
       `;
 
       // we can execute an expression and validate the result manually:
@@ -95,12 +94,11 @@ export default function ({ getService, updateBaselines }) {
 
         // we reuse that response to render 3 different charts and compare screenshots with baselines
         const tagCloudExpr =
-          `tagcloud visConfig='{"metric":{"accessor":1,"format":{"id":"number"}},"bucket":{"accessor":0}}'`;
+          `tagcloud metric={visdimension 1 format="number"} bucket={visdimension 0}'`;
         await expectExpression('partial_test_1', tagCloudExpr, context).toMatchScreenshot();
 
         const metricExpr =
-          `kibana_metric 
-          visConfig='{"dimensions":{"metrics":[{"accessor":1,"format":{"id":"number"}}],"bucket":{"accessor":0}}}'`;
+          `metricVis metric={visdimension 1 format="number"} bucket={visdimension 0}'`;
         await expectExpression('partial_test_2', metricExpr, context).toMatchScreenshot();
 
         const regionMapExpr =
