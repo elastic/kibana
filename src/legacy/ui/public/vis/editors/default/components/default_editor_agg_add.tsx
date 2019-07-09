@@ -84,7 +84,7 @@ function DefaultEditorAggAdd({
   };
 
   return stats.max > stats.count ? (
-    <EuiFlexGroup justifyContent="center">
+    <EuiFlexGroup justifyContent="center" responsive={false}>
       <EuiFlexItem grow={false}>
         <EuiPopover
           id={`addGroupButtonPopover_${groupName}`}
