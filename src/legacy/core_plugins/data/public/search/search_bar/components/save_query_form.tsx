@@ -38,7 +38,7 @@ interface Props {
   savedQuery?: SavedQueryAttributes;
   onSave: (savedQueryMeta: SavedQueryMeta) => void;
   onClose: () => void;
-  showFilterOption: boolean;
+  showFilterOption: boolean | undefined;
   showTimeFilterOption: boolean | undefined;
 }
 
@@ -64,8 +64,6 @@ export const SaveQueryForm: FunctionComponent<Props> = ({
   const [shouldIncludeTimefilter, setIncludeTimefilter] = useState(
     !!(savedQuery && savedQuery.timefilter)
   );
-  const [shouldShowFiltersOption] = useState(!!showFilterOption);
-  const [shouldShowTimeFilterOption] = useState(!!showTimeFilterOption);
 
   const saveQueryForm = (
     <EuiForm>
@@ -88,7 +86,7 @@ export const SaveQueryForm: FunctionComponent<Props> = ({
           }}
         />
       </EuiFormRow>
-      {shouldShowFiltersOption && (
+      {!!showFilterOption && (
         <EuiFormRow>
           <EuiSwitch
             name="shouldIncludeFilters"
@@ -101,7 +99,7 @@ export const SaveQueryForm: FunctionComponent<Props> = ({
         </EuiFormRow>
       )}
 
-      {shouldShowTimeFilterOption && (
+      {!!showTimeFilterOption && (
         <EuiFormRow>
           <EuiSwitch
             name="shouldIncludeTimefilter"

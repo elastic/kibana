@@ -19,6 +19,7 @@
 
 import React, { FunctionComponent, Fragment } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiButtonEmpty } from '@elastic/eui';
+import chrome from 'ui/chrome';
 import { SavedQueryAttributes } from '../../../search/search_bar';
 import { Query } from '../index';
 
@@ -83,7 +84,11 @@ export const SavedQueryRow: FunctionComponent<Props> = ({
   } else {
     rowContent = (
       <EuiFlexItem grow={false}>
-        <EuiButtonEmpty href={`#/management/kibana/objects`}>Manage Saved Queries</EuiButtonEmpty>
+        <EuiButtonEmpty
+          href={chrome.addBasePath(`/app/kibana#/management/kibana/objects?type=query`)}
+        >
+          Manage Saved Queries
+        </EuiButtonEmpty>
       </EuiFlexItem>
     );
   }

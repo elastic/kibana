@@ -32,6 +32,8 @@ import { InjectedIntl, injectI18n, FormattedMessage } from '@kbn/i18n/react';
 import classNames from 'classnames';
 import React, { Component } from 'react';
 import ResizeObserver from 'resize-observer-polyfill';
+import chrome from 'ui/chrome';
+import rison from 'rison-node';
 import { IndexPattern } from 'ui/index_patterns';
 import { Storage } from 'ui/storage';
 import { get, isEqual } from 'lodash';
@@ -418,7 +420,10 @@ class SearchBarUI extends Component<Props, State> {
             </EuiButton>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty flush="right" onClick={() => {}} href={`#/management/kibana/objects`}>
+            <EuiButtonEmpty
+              flush="right"
+              href={chrome.addBasePath(`/app/kibana#/management/kibana/objects?type=query`)}
+            >
               <FormattedMessage
                 id="data.search.searchBar.savedQueryPopoverManageQueriesButtonText"
                 defaultMessage="Manage queries"
