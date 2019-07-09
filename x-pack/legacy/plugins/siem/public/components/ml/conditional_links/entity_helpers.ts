@@ -7,6 +7,6 @@
 export const emptyEntity = (entity: string): boolean =>
   entity.trim() === '' || (entity.startsWith('$') && entity.endsWith('$'));
 
-export const multipleEntities = (entity: string): boolean => entity.split(',').length > 0;
+export const multipleEntities = (entity: string): boolean => entity.split(',').length > 1;
 
 export const getMultipleEntities = (entity: string): string[] => entity.split(',');
