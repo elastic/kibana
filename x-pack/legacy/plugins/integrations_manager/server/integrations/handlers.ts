@@ -4,17 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SavedObjectsBulkGetObject } from 'src/core/server/saved_objects';
 import { Request, InstallationSavedObject } from '../../common/types';
-import { SAVED_OBJECT_TYPE } from '../../common/constants';
-import {
-  createInstallationObject,
-  createIntegrationList,
-  getInstallationObject,
-  getObjects,
-} from './index';
-import * as Registry from '../registry';
 import { getClient } from '../saved_objects';
+import { getIntegrations, getIntegrationInfo, installAssets, removeInstallation } from './data';
 
 interface PackageRequest extends Request {
   params: {
@@ -29,74 +21,46 @@ interface InstallAssetRequest extends PackageRequest {
 }
 
 export async function handleGetList(req: Request) {
-  const registryItems = await Registry.fetchList();
-  const searchObjects: SavedObjectsBulkGetObject[] = registryItems.map(({ name, version }) => ({
-    type: SAVED_OBJECT_TYPE,
-    id: `${name}-${version}`,
-  }));
   const client = getClient(req);
-  const results = await client.bulkGet(searchObjects);
-  const savedObjects: InstallationSavedObject[] = results.saved_objects.filter(o => !o.error); // ignore errors for now
-  const integrationList = createIntegrationList(registryItems, savedObjects);
+  const integrationList = await getIntegrations(client);
 
   return integrationList;
 }
 
 export async function handleGetInfo(req: PackageRequest) {
   const { pkgkey } = req.params;
-  const item = await Registry.fetchInfo(pkgkey);
-  const savedObject = await getInstallationObject(getClient(req), pkgkey);
-  const installation = createInstallationObject(item, savedObject);
+  const client = getClient(req);
+  const installation = await getIntegrationInfo(client, pkgkey);
 
   return installation;
 }
 
 export async function handleRequestInstall(req: InstallAssetRequest) {
   const { pkgkey, asset } = req.params;
+  const created: InstallationSavedObject[] = [];
 
   if (asset === 'dashboard') {
-    const toBeSavedObjects = await getObjects(pkgkey, asset);
     const client = getClient(req);
-    const createResults = await client.bulkCreate(toBeSavedObjects, { overwrite: true });
-    const installed = createResults.saved_objects.map(({ id, type }) => ({ id, type }));
-    const mgrResults = await client.create(
-      SAVED_OBJECT_TYPE,
-      { installed },
-      { id: pkgkey, overwrite: true }
-    );
+    const object = await installAssets(client, pkgkey, asset);
 
-    return mgrResults;
+    created.push(object);
   }
 
   return {
     pkgkey,
     asset,
-    created: [],
+    created,
   };
 }
 
 export async function handleRequestDelete(req: InstallAssetRequest) {
   const { pkgkey, asset } = req.params;
   const client = getClient(req);
-
-  const installation = await getInstallationObject(client, pkgkey);
-  const installedObjects = (installation && installation.attributes.installed) || [];
-
-  // Delete the manager saved object with references to the asset objects
-  // could also update with [] or some other state
-  await client.delete(SAVED_OBJECT_TYPE, pkgkey);
-
-  // ASK: should the manager uninstall the assets it installed
-  // or just the references in SAVED_OBJECT_TYPE?
-  if (asset === 'dashboard') {
-    // Delete the installed assets
-    const deletePromises = installedObjects.map(async ({ id, type }) => client.delete(type, id));
-    await Promise.all(deletePromises);
-  }
+  const deleted = await removeInstallation(client, pkgkey);
 
   return {
     pkgkey,
     asset,
-    deleted: installedObjects,
+    deleted,
   };
 }
