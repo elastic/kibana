@@ -77,12 +77,9 @@ function useStateWithLocalStorage<State>(
 ): [State, Dispatch<SetStateAction<State>>] {
   const storageState = localStorage.getItem(key);
   const [state, setState] = useState<State>(parseJsonOrDefault<State>(storageState, defaultState));
-  useEffect(
-    () => {
-      localStorage.setItem(key, JSON.stringify(state));
-    },
-    [state]
-  );
+  useEffect(() => {
+    localStorage.setItem(key, JSON.stringify(state));
+  }, [state]);
   return [state, setState];
 }
 
