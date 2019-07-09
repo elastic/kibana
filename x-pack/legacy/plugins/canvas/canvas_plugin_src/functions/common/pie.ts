@@ -13,7 +13,7 @@ import { getColorsFromPalette } from '../../../common/lib/get_colors_from_palett
 // @ts-ignore untyped local
 import { getLegendConfig } from '../../../common/lib/get_legend_config';
 import { getFunctionHelp } from '../../strings';
-import { Legend, Palette, PointSeries, Render, SeriesStyle, Style } from '../types';
+import { Legend, Palette, PointSeries, Render, SeriesStyle, Style } from '../../../types';
 
 interface PieSeriesOptions {
   show: boolean;
