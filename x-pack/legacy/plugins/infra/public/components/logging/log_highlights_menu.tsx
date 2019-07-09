@@ -115,6 +115,7 @@ export const LogHighlightsMenu: React.FC<LogHighlightsMenuProps> = ({
             <EuiButtonIcon
               aria-label={clearTermsButtonLabel}
               color="danger"
+              isDisabled={highlightTerm === ''}
               iconType="trash"
               onClick={clearHighlightTerm}
               title={clearTermsButtonLabel}
