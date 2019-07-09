@@ -23,8 +23,7 @@ interface PackageRequest extends Request {
 }
 
 interface InstallFeatureRequest extends PackageRequest {
-  params: {
-    pkgkey: string;
+  params: PackageRequest['params'] & {
     feature: string;
   };
 }
