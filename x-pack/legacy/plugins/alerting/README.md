@@ -233,10 +233,26 @@ Payload:
 
 |Property|Description|Type|
 |---|---|---|
-|enabled|Indicate if the alert should continue executing on an interval basis or not.|boolean|
 |interval|The interval in seconds, minutes, hours or days the alert should execute. Example: `10s`, `5m`, `1h`, `1d`.|string|
 |alertTypeParams|The parameters to pass in to the alert type executor `params` value. This will also validate against the alert type params validator if defined.|object|
 |actions|Array of the following:<br> - `group` (string): We support grouping actions in the scenario of escalations or different types of alert instances. If you don't need this, feel free to use `default` as a value.<br>- `id` (string): The id of the action saved object to fire.<br>- `params` (object): There map to the `params` the action type will receive. In order to help apply context to strings, we handle them as mustache templates and pass in a default set of context. (see templating actions).|array|
+
+#### `POST /api/alert/{id}/_enable`: Enable an alert
+
+Params:
+
+|Property|Description|Type|
+|---|---|---|
+|id|The id of the alert you're trying to enable.|string|
+
+#### `POST /api/alert/{id}/_disable`: Disable an alert
+
+Params:
+
+|Property|Description|Type|
+|---|---|---|
+|id|The id of the alert you're trying to disable.|string|
+
 
 ## Alert instance factory
 

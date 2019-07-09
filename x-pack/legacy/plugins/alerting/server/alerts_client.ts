@@ -44,7 +44,6 @@ interface CreateOptions {
 interface UpdateOptions {
   id: string;
   data: {
-    enabled: boolean;
     interval: string;
     actions: AlertAction[];
     alertTypeParams: Record<string, any>;
@@ -148,22 +147,9 @@ export class AlertsClient {
     const existingObject = await this.savedObjectsClient.get('alert', id);
     const { alertTypeId } = existingObject.attributes;
     const alertType = this.alertTypeRegistry.get(alertTypeId);
-    let scheduledTaskId = existingObject.attributes.scheduledTaskId;
 
     // Validate
     const validatedAlertTypeParams = validateAlertTypeParams(alertType, data.alertTypeParams);
-
-    if (existingObject.attributes.enabled === true && data.enabled === false) {
-      await this.taskManager.remove(existingObject.attributes.scheduledTaskId);
-      scheduledTaskId = null;
-    } else if (existingObject.attributes.enabled === false && data.enabled === true) {
-      ({ id: scheduledTaskId } = await this.scheduleAlert(
-        id,
-        existingObject.attributes.alertTypeId,
-        data.interval,
-        this.basePath
-      ));
-    }
 
     const { actions, references } = this.extractReferences(data.actions);
     const updatedObject = await this.savedObjectsClient.update(
@@ -171,7 +157,6 @@ export class AlertsClient {
       id,
       {
         ...data,
-        scheduledTaskId,
         alertTypeParams: validatedAlertTypeParams,
         actions,
       },
@@ -181,6 +166,43 @@ export class AlertsClient {
       }
     );
     return this.getAlertFromRaw(id, updatedObject.attributes, updatedObject.references);
+  }
+
+  public async enable({ id }: { id: string }) {
+    const existingObject = await this.savedObjectsClient.get('alert', id);
+    if (existingObject.attributes.enabled === false) {
+      const scheduledTask = await this.scheduleAlert(
+        id,
+        existingObject.attributes.alertTypeId,
+        existingObject.attributes.interval,
+        this.basePath
+      );
+      await this.savedObjectsClient.update(
+        'alert',
+        id,
+        {
+          enabled: true,
+          scheduledTaskId: scheduledTask.id,
+        },
+        { references: existingObject.references }
+      );
+    }
+  }
+
+  public async disable({ id }: { id: string }) {
+    const existingObject = await this.savedObjectsClient.get('alert', id);
+    if (existingObject.attributes.enabled === true) {
+      await this.taskManager.remove(existingObject.attributes.scheduledTaskId);
+      await this.savedObjectsClient.update(
+        'alert',
+        id,
+        {
+          enabled: false,
+          scheduledTaskId: null,
+        },
+        { references: existingObject.references },
+      );
+    }
   }
 
   private async scheduleAlert(id: string, alertTypeId: string, interval: string, basePath: string) {

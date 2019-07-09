@@ -119,99 +119,99 @@ describe('create()', () => {
     });
     const result = await alertsClient.create({ data });
     expect(result).toMatchInlineSnapshot(`
-      Object {
-        "actions": Array [
-          Object {
-            "group": "default",
-            "id": "1",
-            "params": Object {
-              "foo": true,
-            },
-          },
-        ],
-        "alertTypeId": "123",
-        "alertTypeParams": Object {
-          "bar": true,
-        },
-        "id": "1",
-        "interval": "10s",
-        "scheduledTaskId": "task-123",
-      }
-    `);
+                  Object {
+                    "actions": Array [
+                      Object {
+                        "group": "default",
+                        "id": "1",
+                        "params": Object {
+                          "foo": true,
+                        },
+                      },
+                    ],
+                    "alertTypeId": "123",
+                    "alertTypeParams": Object {
+                      "bar": true,
+                    },
+                    "id": "1",
+                    "interval": "10s",
+                    "scheduledTaskId": "task-123",
+                  }
+            `);
     expect(savedObjectsClient.create).toHaveBeenCalledTimes(1);
     expect(savedObjectsClient.create.mock.calls[0]).toHaveLength(3);
     expect(savedObjectsClient.create.mock.calls[0][0]).toEqual('alert');
     expect(savedObjectsClient.create.mock.calls[0][1]).toMatchInlineSnapshot(`
-      Object {
-        "actions": Array [
-          Object {
-            "actionRef": "action_0",
-            "group": "default",
-            "params": Object {
-              "foo": true,
-            },
-          },
-        ],
-        "alertTypeId": "123",
-        "alertTypeParams": Object {
-          "bar": true,
-        },
-        "enabled": true,
-        "interval": "10s",
-      }
-    `);
-    expect(savedObjectsClient.create.mock.calls[0][2]).toMatchInlineSnapshot(`
                   Object {
-                    "references": Array [
+                    "actions": Array [
                       Object {
-                        "id": "1",
-                        "name": "action_0",
-                        "type": "action",
+                        "actionRef": "action_0",
+                        "group": "default",
+                        "params": Object {
+                          "foo": true,
+                        },
                       },
                     ],
+                    "alertTypeId": "123",
+                    "alertTypeParams": Object {
+                      "bar": true,
+                    },
+                    "enabled": true,
+                    "interval": "10s",
                   }
             `);
+    expect(savedObjectsClient.create.mock.calls[0][2]).toMatchInlineSnapshot(`
+                              Object {
+                                "references": Array [
+                                  Object {
+                                    "id": "1",
+                                    "name": "action_0",
+                                    "type": "action",
+                                  },
+                                ],
+                              }
+                    `);
     expect(taskManager.schedule).toHaveBeenCalledTimes(1);
     expect(taskManager.schedule.mock.calls[0]).toMatchInlineSnapshot(`
-                  Array [
-                    Object {
-                      "params": Object {
-                        "alertId": "1",
-                        "basePath": "/s/default",
-                      },
-                      "scope": Array [
-                        "alerting",
-                      ],
-                      "state": Object {
-                        "alertInstances": Object {},
-                        "alertTypeState": Object {},
-                        "previousScheduledRunAt": null,
-                        "scheduledRunAt": 2019-02-12T21:01:22.479Z,
-                      },
-                      "taskType": "alerting:123",
-                    },
-                  ]
-            `);
+                              Array [
+                                Object {
+                                  "params": Object {
+                                    "alertId": "1",
+                                    "basePath": "/s/default",
+                                  },
+                                  "scope": Array [
+                                    "alerting",
+                                  ],
+                                  "state": Object {
+                                    "alertInstances": Object {},
+                                    "alertTypeState": Object {},
+                                    "previousScheduledRunAt": null,
+                                    "scheduledRunAt": 2019-02-12T21:01:22.479Z,
+                                  },
+                                  "taskType": "alerting:123",
+                                },
+                              ]
+                    `);
     expect(savedObjectsClient.update).toHaveBeenCalledTimes(1);
     expect(savedObjectsClient.update.mock.calls[0]).toHaveLength(4);
     expect(savedObjectsClient.update.mock.calls[0][0]).toEqual('alert');
     expect(savedObjectsClient.update.mock.calls[0][1]).toEqual('1');
     expect(savedObjectsClient.update.mock.calls[0][2]).toMatchInlineSnapshot(`
-                  Object {
-                    "scheduledTaskId": "task-123",
-                  }
-            `);
+                              Object {
+                                "scheduledTaskId": "task-123",
+                              }
+                    `);
     expect(savedObjectsClient.update.mock.calls[0][3]).toMatchInlineSnapshot(`
-                  Object {
-                    "references": Array [
-                      Object {
-                        "id": "1",
-                        "name": "action_0",
-                        "type": "action",
-                      },
-                    ],
-                  }
-            `);
+                              Object {
+                                "references": Array [
+                                  Object {
+                                    "id": "1",
+                                    "name": "action_0",
+                                    "type": "action",
+                                  },
+                                ],
+                              }
+                    `);
   });
 
   test('creates a disabled alert', async () => {
@@ -252,25 +252,25 @@ describe('create()', () => {
     });
     const result = await alertsClient.create({ data });
     expect(result).toMatchInlineSnapshot(`
-                  Object {
-                    "actions": Array [
-                      Object {
-                        "group": "default",
-                        "id": "1",
-                        "params": Object {
-                          "foo": true,
-                        },
-                      },
-                    ],
-                    "alertTypeId": "123",
-                    "alertTypeParams": Object {
-                      "bar": true,
-                    },
-                    "enabled": false,
-                    "id": "1",
-                    "interval": 10000,
-                  }
-            `);
+                              Object {
+                                "actions": Array [
+                                  Object {
+                                    "group": "default",
+                                    "id": "1",
+                                    "params": Object {
+                                      "foo": true,
+                                    },
+                                  },
+                                ],
+                                "alertTypeId": "123",
+                                "alertTypeParams": Object {
+                                  "bar": true,
+                                },
+                                "enabled": false,
+                                "id": "1",
+                                "interval": 10000,
+                              }
+                    `);
     expect(savedObjectsClient.create).toHaveBeenCalledTimes(1);
     expect(taskManager.schedule).toHaveBeenCalledTimes(0);
   });
@@ -352,11 +352,11 @@ describe('create()', () => {
     );
     expect(savedObjectsClient.delete).toHaveBeenCalledTimes(1);
     expect(savedObjectsClient.delete.mock.calls[0]).toMatchInlineSnapshot(`
-                  Array [
-                    "alert",
-                    "1",
-                  ]
-            `);
+                              Array [
+                                "alert",
+                                "1",
+                              ]
+                    `);
   });
 
   test('returns task manager error if cleanup fails, logs to console', async () => {
@@ -401,14 +401,14 @@ describe('create()', () => {
     );
     expect(alertsClientParams.log).toHaveBeenCalledTimes(1);
     expect(alertsClientParams.log.mock.calls[0]).toMatchInlineSnapshot(`
-                  Array [
-                    Array [
-                      "alerting",
-                      "error",
-                    ],
-                    "Failed to cleanup alert \\"1\\" after scheduling task failed. Error: Saved object delete error",
-                  ]
-            `);
+                              Array [
+                                Array [
+                                  "alerting",
+                                  "error",
+                                ],
+                                "Failed to cleanup alert \\"1\\" after scheduling task failed. Error: Saved object delete error",
+                              ]
+                    `);
   });
 
   test('throws an error if alert type not registerd', async () => {
@@ -420,6 +420,129 @@ describe('create()', () => {
     await expect(alertsClient.create({ data })).rejects.toThrowErrorMatchingInlineSnapshot(
       `"Invalid type"`
     );
+  });
+});
+
+describe('enable()', () => {
+  test('enables an alert', async () => {
+    const alertsClient = new AlertsClient(alertsClientParams);
+    savedObjectsClient.get.mockResolvedValueOnce({
+      id: '1',
+      type: 'alert',
+      attributes: {
+        interval: '10s',
+        alertTypeId: '2',
+        enabled: false,
+      },
+      references: [],
+    });
+    taskManager.schedule.mockResolvedValueOnce({
+      id: 'task-123',
+      sequenceNumber: 1,
+      primaryTerm: 1,
+      scheduledAt: new Date(),
+      attempts: 0,
+      status: 'idle',
+      runAt: new Date(),
+      state: {},
+      params: {},
+      taskType: '',
+    });
+
+    await alertsClient.enable({ id: '1' });
+    expect(savedObjectsClient.update).toHaveBeenCalledWith(
+      'alert',
+      '1',
+      {
+        enabled: true,
+        scheduledTaskId: 'task-123',
+      },
+      {
+        references: [],
+      }
+    );
+    expect(taskManager.schedule).toHaveBeenCalledWith({
+      taskType: `alerting:2`,
+      params: {
+        alertId: '1',
+        basePath: '/s/default',
+      },
+      state: {
+        alertInstances: {},
+        alertTypeState: {},
+        previousScheduledRunAt: null,
+        scheduledRunAt: mockedDate,
+      },
+      scope: ['alerting'],
+    });
+  });
+
+  test(`doesn't enable already enabled alerts`, async () => {
+    const alertsClient = new AlertsClient(alertsClientParams);
+    savedObjectsClient.get.mockResolvedValueOnce({
+      id: '1',
+      type: 'alert',
+      attributes: {
+        interval: '10s',
+        alertTypeId: '2',
+        enabled: true,
+      },
+      references: [],
+    });
+
+    await alertsClient.enable({ id: '1' });
+    expect(taskManager.schedule).toHaveBeenCalledTimes(0);
+    expect(savedObjectsClient.update).toHaveBeenCalledTimes(0);
+  });
+});
+
+describe('disable()', () => {
+  test('disables an alert', async () => {
+    const alertsClient = new AlertsClient(alertsClientParams);
+    savedObjectsClient.get.mockResolvedValueOnce({
+      id: '1',
+      type: 'alert',
+      attributes: {
+        interval: '10s',
+        alertTypeId: '2',
+        enabled: true,
+        scheduledTaskId: 'task-123',
+      },
+      references: [],
+    });
+
+    await alertsClient.disable({ id: '1' });
+    expect(savedObjectsClient.update).toHaveBeenCalledWith(
+      'alert',
+      '1',
+      {
+        enabled: false,
+        scheduledTaskId: null,
+      },
+      {
+        references: [],
+      }
+    );
+    expect(taskManager.remove).toHaveBeenCalledWith('task-123');
+  });
+
+  test(`doesn't disable already disabled alerts`, async () => {
+    const alertsClient = new AlertsClient(alertsClientParams);
+    savedObjectsClient.get.mockResolvedValueOnce({
+      id: '1',
+      type: 'alert',
+      attributes: {
+        interval: '10s',
+        alertTypeId: '2',
+        enabled: false,
+        scheduledTaskId: 'task-123',
+      },
+      references: [],
+    });
+
+    await alertsClient.disable({ id: '1' });
+    expect(savedObjectsClient.update).toHaveBeenCalledTimes(0);
+    expect(taskManager.remove).toHaveBeenCalledTimes(0);
   });
 });
 
@@ -455,31 +578,31 @@ describe('get()', () => {
     });
     const result = await alertsClient.get({ id: '1' });
     expect(result).toMatchInlineSnapshot(`
-      Object {
-        "actions": Array [
-          Object {
-            "group": "default",
-            "id": "1",
-            "params": Object {
-              "foo": true,
-            },
-          },
-        ],
-        "alertTypeId": "123",
-        "alertTypeParams": Object {
-          "bar": true,
-        },
-        "id": "1",
-        "interval": "10s",
-      }
-    `);
+                  Object {
+                    "actions": Array [
+                      Object {
+                        "group": "default",
+                        "id": "1",
+                        "params": Object {
+                          "foo": true,
+                        },
+                      },
+                    ],
+                    "alertTypeId": "123",
+                    "alertTypeParams": Object {
+                      "bar": true,
+                    },
+                    "id": "1",
+                    "interval": "10s",
+                  }
+            `);
     expect(savedObjectsClient.get).toHaveBeenCalledTimes(1);
     expect(savedObjectsClient.get.mock.calls[0]).toMatchInlineSnapshot(`
-                  Array [
-                    "alert",
-                    "1",
-                  ]
-            `);
+                              Array [
+                                "alert",
+                                "1",
+                              ]
+                    `);
   });
 
   test(`throws an error when references aren't found`, async () => {
@@ -550,34 +673,34 @@ describe('find()', () => {
     });
     const result = await alertsClient.find();
     expect(result).toMatchInlineSnapshot(`
-      Array [
-        Object {
-          "actions": Array [
-            Object {
-              "group": "default",
-              "id": "1",
-              "params": Object {
-                "foo": true,
-              },
-            },
-          ],
-          "alertTypeId": "123",
-          "alertTypeParams": Object {
-            "bar": true,
-          },
-          "id": "1",
-          "interval": "10s",
-        },
-      ]
-    `);
-    expect(savedObjectsClient.find).toHaveBeenCalledTimes(1);
-    expect(savedObjectsClient.find.mock.calls[0]).toMatchInlineSnapshot(`
                   Array [
                     Object {
-                      "type": "alert",
+                      "actions": Array [
+                        Object {
+                          "group": "default",
+                          "id": "1",
+                          "params": Object {
+                            "foo": true,
+                          },
+                        },
+                      ],
+                      "alertTypeId": "123",
+                      "alertTypeParams": Object {
+                        "bar": true,
+                      },
+                      "id": "1",
+                      "interval": "10s",
                     },
                   ]
             `);
+    expect(savedObjectsClient.find).toHaveBeenCalledTimes(1);
+    expect(savedObjectsClient.find.mock.calls[0]).toMatchInlineSnapshot(`
+                              Array [
+                                Object {
+                                  "type": "alert",
+                                },
+                              ]
+                    `);
   });
 });
 
@@ -624,23 +747,23 @@ describe('delete()', () => {
     });
     const result = await alertsClient.delete({ id: '1' });
     expect(result).toMatchInlineSnapshot(`
-                  Object {
-                    "success": true,
-                  }
-            `);
+                              Object {
+                                "success": true,
+                              }
+                    `);
     expect(savedObjectsClient.delete).toHaveBeenCalledTimes(1);
     expect(savedObjectsClient.delete.mock.calls[0]).toMatchInlineSnapshot(`
-                  Array [
-                    "alert",
-                    "1",
-                  ]
-            `);
+                              Array [
+                                "alert",
+                                "1",
+                              ]
+                    `);
     expect(taskManager.remove).toHaveBeenCalledTimes(1);
     expect(taskManager.remove.mock.calls[0]).toMatchInlineSnapshot(`
-                  Array [
-                    "task-123",
-                  ]
-            `);
+                              Array [
+                                "task-123",
+                              ]
+                    `);
   });
 });
 
@@ -693,7 +816,6 @@ describe('update()', () => {
     const result = await alertsClient.update({
       id: '1',
       data: {
-        enabled: true,
         interval: '10s',
         alertTypeParams: {
           bar: true,
@@ -713,25 +835,25 @@ describe('update()', () => {
       },
     });
     expect(result).toMatchInlineSnapshot(`
-      Object {
-        "actions": Array [
-          Object {
-            "group": "default",
-            "id": "1",
-            "params": Object {
-              "foo": true,
-            },
-          },
-        ],
-        "alertTypeParams": Object {
-          "bar": true,
-        },
-        "enabled": true,
-        "id": "1",
-        "interval": "10s",
-        "scheduledTaskId": "task-123",
-      }
-    `);
+                  Object {
+                    "actions": Array [
+                      Object {
+                        "group": "default",
+                        "id": "1",
+                        "params": Object {
+                          "foo": true,
+                        },
+                      },
+                    ],
+                    "alertTypeParams": Object {
+                      "bar": true,
+                    },
+                    "enabled": true,
+                    "id": "1",
+                    "interval": "10s",
+                    "scheduledTaskId": "task-123",
+                  }
+            `);
     expect(savedObjectsClient.update).toHaveBeenCalledTimes(1);
     expect(savedObjectsClient.update.mock.calls[0]).toHaveLength(4);
     expect(savedObjectsClient.update.mock.calls[0][0]).toEqual('alert');
@@ -750,94 +872,21 @@ describe('update()', () => {
         "alertTypeParams": Object {
           "bar": true,
         },
-        "enabled": true,
         "interval": "10s",
-        "scheduledTaskId": "task-123",
       }
     `);
     expect(savedObjectsClient.update.mock.calls[0][3]).toMatchInlineSnapshot(`
-                  Object {
-                    "references": Array [
-                      Object {
-                        "id": "1",
-                        "name": "action_0",
-                        "type": "action",
-                      },
-                    ],
-                    "version": "123",
-                  }
-            `);
-  });
-
-  it('disables a task', async () => {
-    const alertsClient = new AlertsClient(alertsClientParams);
-    alertTypeRegistry.get.mockReturnValueOnce({
-      id: '123',
-      name: 'Test',
-      async executor() {},
-    });
-    savedObjectsClient.get.mockResolvedValueOnce({
-      id: '1',
-      type: 'alert',
-      attributes: {
-        enabled: true,
-        alertTypeId: '123',
-        scheduledTaskId: 'task-123',
-      },
-      references: [],
-    });
-    savedObjectsClient.update.mockResolvedValueOnce({
-      id: '1',
-      type: 'alert',
-      attributes: {
-        enabled: false,
-        interval: 10000,
-        alertTypeParams: {
-          bar: true,
-        },
-        actions: [
-          {
-            group: 'default',
-            actionRef: 'action_0',
-            params: {
-              foo: true,
-            },
-          },
-        ],
-      },
-      references: [
-        {
-          name: 'action_0',
-          type: 'action',
-          id: '1',
-        },
-      ],
-    });
-    await alertsClient.update({
-      id: '1',
-      data: {
-        enabled: false,
-        interval: '10s',
-        alertTypeParams: {
-          bar: true,
-        },
-        actions: [
-          {
-            group: 'default',
-            id: '1',
-            params: {
-              foo: true,
-            },
-          },
-        ],
-      },
-      options: {
-        version: '123',
-      },
-    });
-    expect(savedObjectsClient.update).toHaveBeenCalledTimes(1);
-    expect(taskManager.remove).toHaveBeenCalledTimes(1);
-    expect(taskManager.remove).toHaveBeenCalledWith('task-123');
+                              Object {
+                                "references": Array [
+                                  Object {
+                                    "id": "1",
+                                    "name": "action_0",
+                                    "type": "action",
+                                  },
+                                ],
+                                "version": "123",
+                              }
+                    `);
   });
 
   it('should validate alertTypeParams', async () => {
@@ -866,7 +915,6 @@ describe('update()', () => {
       alertsClient.update({
         id: '1',
         data: {
-          enabled: true,
           interval: '10s',
           alertTypeParams: {
             bar: true,
