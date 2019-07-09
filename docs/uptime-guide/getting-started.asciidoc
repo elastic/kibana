@@ -1,0 +1,59 @@
+[[uptime-getting-started]]
+== Getting started
+
+The easiest way to get started with Elastic Uptime is by using our
+https://www.elastic.co/cloud/elasticsearch-service[hosted {es} Service] on
+Elastic Cloud. The {es} Service is available on both AWS and GCP.
+and automatically configures APM Server to work with {es} and {kib}.
+
+[float]
+=== Hosted Elasticsearch Service
+
+Skip managing your own {es}, and {kib} instance by using our
+https://www.elastic.co/cloud/elasticsearch-service[hosted {es} Service] on
+Elastic Cloud.
+
+https://www.elastic.co/cloud/elasticsearch-service/signup[Try out the {es} Service for free],
+then jump straight to <<install-uptime>>.
+
+[float]
+[[before-installation]]
+=== Install the stack yourself
+
+If you'd rather install the stack yourself, follow these instructions.
+
+// image::images/apm-architecture-diy.png[Install Elastic APM yourself]
+
+To install the stack yourself, first see the https://www.elastic.co/support/matrix[Elastic Support Matrix] for information about supported operating systems and product compatibility.
+We recommend you use the same version of Elasticsearch, Kibana, and APM Server.
+
+* <<install-elasticsearch>>
+* <<install-kibana>>
+* <<install-uptime>>
+
+[[install-elasticsearch]]
+=== Step 1: Install Elasticsearch
+
+Install an Elasticsearch cluster, start it up, and make sure it's running.
+
+. Verify that your system meets the
+https://www.elastic.co/support/matrix#matrix_jvm[minimum JVM requirements] for {es}.
+. {stack-gs}/get-started-elastic-stack.html#install-elasticsearch[Install Elasticsearch].
+. {stack-gs}/get-started-elastic-stack.html#_make_sure_elasticsearch_is_up_and_running[Make sure elasticsearch is up and running].
+
+[[install-kibana]]
+=== Step 2: Install Kibana
+
+Install Kibana, start it up, and open up the web interface:
+
+. {stack-gs}/get-started-elastic-stack.html#install-kibana[Install Kibana].
+. {stack-gs}/get-started-elastic-stack.html#_launch_the_kibana_web_interface[Launch the Kibana Web Interface].
+
+[[install-uptime]]
+=== Step 3: Install and configure Uptime
+
+IMPORTANT: Make sure you're using the same major versions of Heartbeat and Kibana.
+
+
+
+// information on installation goes here
