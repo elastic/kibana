@@ -122,7 +122,7 @@ export interface CoreSetup {
     registerOnPostAuth: HttpServiceSetup['registerOnPostAuth'];
     basePath: HttpServiceSetup['basePath'];
     createNewServer: HttpServiceSetup['createNewServer'];
-    isTLSEnabled: HttpServiceSetup['isTLSEnabled'];
+    isTlsEnabled: HttpServiceSetup['isTlsEnabled'];
   };
 }
 

@@ -45,7 +45,7 @@ const createSetupContractMock = () => {
       getAuthHeaders: jest.fn(),
     },
     createNewServer: jest.fn(),
-    isTLSEnabled: false,
+    isTlsEnabled: false,
   };
   setupContract.createNewServer.mockResolvedValue({} as HttpServerSetup);
   return setupContract;

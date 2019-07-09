@@ -988,14 +988,14 @@ describe('setup contract', () => {
     });
   });
 
-  describe('#isTLSEnabled', () => {
+  describe('#isTlsEnabled', () => {
     it('returns "true" if TLS enabled', async () => {
-      const { isTLSEnabled } = await server.setup(configWithSSL);
-      expect(isTLSEnabled).toBe(true);
+      const { isTlsEnabled } = await server.setup(configWithSSL);
+      expect(isTlsEnabled).toBe(true);
     });
     it('returns "false" if TLS not enabled', async () => {
-      const { isTLSEnabled } = await server.setup(config);
-      expect(isTLSEnabled).toBe(false);
+      const { isTlsEnabled } = await server.setup(config);
+      expect(isTlsEnabled).toBe(false);
     });
   });
 });
