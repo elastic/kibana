@@ -10,7 +10,7 @@ and easily view a high-level snapshot of your environment at any point in time.
 
 [float]
 == Get Started
-See {uptime-guide}/getting-started.html[Uptime getting started] for instructions on getting started with Elastic Uptime.
+See the {uptime-guide}/getting-started.html[getting started] guide for instructions on getting started with Elastic Uptime.
 --
 
 include::overview.asciidoc[]

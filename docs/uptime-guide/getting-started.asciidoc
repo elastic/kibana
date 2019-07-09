@@ -3,8 +3,8 @@
 
 The easiest way to get started with Elastic Uptime is by using our
 https://www.elastic.co/cloud/elasticsearch-service[hosted {es} Service] on
-Elastic Cloud. The {es} Service is available on both AWS and GCP.
-and automatically configures APM Server to work with {es} and {kib}.
+Elastic Cloud. The {es} Service is available on both AWS and GCP,
+and automatically configures {es} and {kib}.
 
 [float]
 === Hosted Elasticsearch Service
@@ -21,7 +21,7 @@ then jump straight to <<install-heartbeat>>.
 === Install the stack yourself
 
 If you'd rather install the stack yourself,
-first see the https://www.elastic.co/support/matrix[Elastic Support Matrix] for information about supported operating systems and product compatibility.
+first see the https://www.elastic.co/support/matrix[Elastic Support Matrix] for information about supported operating systems and product compatibility. Then, follow the steps below.
 
 * <<install-elasticsearch>>
 * <<install-kibana>>
@@ -49,7 +49,7 @@ Install Kibana, start it up, and open up the web interface:
 === Step 3: Install and configure Heartbeat
 
 Uptime requires the setup of monitors in Heartbeat.
-These monitors provide the data you'll be visualizing in the Uptime UI.
+These monitors provide the data you'll be visualizing in the {kibana-ref}/xpack-uptime.html[Uptime UI].
 
 See the *Setup Instructions* in Kibana for instructions on installing and configuring Heartbeat.
 Additional information is available in {heartbeat-ref}/heartbeat-configuration.html[Configure Heartbeat].
