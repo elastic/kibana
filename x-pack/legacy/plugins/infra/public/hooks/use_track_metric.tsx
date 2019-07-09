@@ -9,8 +9,10 @@ import { trackUiMetric } from '../../../../../../src/legacy/core_plugins/ui_metr
 
 /**
  * Note: The UI Metric plugin will take care of sending this data to the telemetry server.
- * You can find this data at stack_stats.kibana.plugins.ui_metric.{app} which will be an array
- * of objects containing a key, representing the visit/path, and a value, which will be a counter
+ * You can find these metrics stored at:
+ * stack_stats.kibana.plugins.ui_metric.{app}.{metric}(__delayed_{n}ms)?
+ * which will be an array of objects each containing a key, representing the metric, and
+ * a value, which will be a counter
  */
 
 type ObservabilityApp = 'infra_metrics' | 'infra_logs' | 'apm' | 'uptime';
@@ -39,6 +41,11 @@ export function useTrackMetric({
   }, effectDependencies);
 }
 
+/**
+ * useTrackPageview is a convenience wrapper for tracking a pageview
+ * Its metrics will be found at:
+ * stack_stats.kibana.plugins.ui_metric.{app}.pageview__{path}(__delayed_{n}ms)?
+ */
 type TrackPageviewProps = TrackProps & { path: string };
 
 export function useTrackPageview({ path, ...rest }: TrackPageviewProps) {
