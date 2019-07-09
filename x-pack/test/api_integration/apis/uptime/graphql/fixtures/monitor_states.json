@@ -108,7 +108,7 @@
           "monitor": { "id": null, "name": null, "status": "up", "type": null },
           "summary": { "up": 9, "down": 0, "geo": null },
           "url": { "full": "https://www.google.com/", "domain": "www.google.com" },
-          "timestamp": 2019
+          "timestamp": 1548700995077
         }
       },
       {
@@ -153,7 +153,7 @@
           "monitor": { "id": null, "name": null, "status": "down", "type": null },
           "summary": { "up": 0, "down": 1, "geo": null },
           "url": { "full": "http://localhost:12349/", "domain": "localhost" },
-          "timestamp": 2019
+          "timestamp": 1548700995077
         }
       },
       {
@@ -262,7 +262,7 @@
           "monitor": { "id": null, "name": null, "status": "up", "type": null },
           "summary": { "up": 9, "down": 0, "geo": null },
           "url": { "full": "http://www.google.com/", "domain": "www.google.com" },
-          "timestamp": 2019
+          "timestamp": 1548700995077
         }
       },
       {
@@ -315,7 +315,7 @@
           "monitor": { "id": null, "name": null, "status": "up", "type": null },
           "summary": { "up": 2, "down": 0, "geo": null },
           "url": { "full": "https://www.github.com/", "domain": "www.github.com" },
-          "timestamp": 2019
+          "timestamp": 1548700995077
         }
       },
       {
@@ -368,7 +368,7 @@
           "monitor": { "id": null, "name": null, "status": "down", "type": null },
           "summary": { "up": 0, "down": 2, "geo": null },
           "url": { "full": "http://www.example.com/", "domain": "www.example.com" },
-          "timestamp": 2019
+          "timestamp": 1548700987078
         }
       },
       {
@@ -413,7 +413,7 @@
           "monitor": { "id": null, "name": null, "status": "up", "type": null },
           "summary": { "up": 1, "down": 0, "geo": null },
           "url": { "full": "https://www.wikipedia.org/", "domain": "www.wikipedia.org" },
-          "timestamp": 2019
+          "timestamp": 1548700915076
         }
       },
       {
@@ -482,7 +482,7 @@
           "monitor": { "id": null, "name": null, "status": "mixed", "type": null },
           "summary": { "up": 3, "down": 1, "geo": null },
           "url": { "full": "http://www.reddit.com/", "domain": "www.reddit.com" },
-          "timestamp": 2019
+          "timestamp": 1548700993074
         }
       },
       {
@@ -543,7 +543,7 @@
           "monitor": { "id": null, "name": null, "status": "up", "type": null },
           "summary": { "up": 3, "down": 0, "geo": null },
           "url": { "full": "https://www.elastic.co", "domain": "www.elastic.co" },
-          "timestamp": 2019
+          "timestamp": 1548700993074
         }
       },
       {
@@ -660,7 +660,7 @@
           "monitor": { "id": null, "name": null, "status": "up", "type": null },
           "summary": { "up": 10, "down": 0, "geo": null },
           "url": { "full": "https://news.google.com/", "domain": "news.google.com" },
-          "timestamp": 2019
+          "timestamp": 1548700915076
         }
       },
       {
@@ -705,7 +705,7 @@
           "monitor": { "id": null, "name": null, "status": "up", "type": null },
           "summary": { "up": 1, "down": 0, "geo": null },
           "url": { "full": "tcp://localhost:9200", "domain": "localhost" },
-          "timestamp": 2019
+          "timestamp": 1548700996078
         }
       }
     ]
