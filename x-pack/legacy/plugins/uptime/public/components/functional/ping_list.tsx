@@ -113,34 +113,43 @@ export const PingListComponent = ({
       ),
     },
     {
-      field: 'observer.geo.name',
+      align: 'left',
       dataType: 'number',
+      field: 'observer.geo.name',
       name: i18n.translate('xpack.uptime.pingList.locationNameColumnLabel', {
         defaultMessage: 'Location',
       }),
       render: (location: string) => <LocationName location={location} />,
     },
     {
-      field: 'monitor.ip',
+      align: 'left',
       dataType: 'number',
+      field: 'monitor.ip',
       name: i18n.translate('xpack.uptime.pingList.ipAddressColumnLabel', {
         defaultMessage: 'IP',
       }),
     },
     {
+      align: 'right',
       field: 'monitor.duration.us',
       name: i18n.translate('xpack.uptime.pingList.durationMsColumnLabel', {
         defaultMessage: 'Duration',
       }),
-      render: (duration: number) => microsToMillis(duration),
+      render: (duration: number) =>
+        i18n.translate('xpack.uptime.pingList.durationMsColumnFormatting', {
+          values: { millis: microsToMillis(duration) },
+          defaultMessage: '{millis} ms',
+        }),
     },
     {
+      align: 'left',
       field: 'error.type',
       name: i18n.translate('xpack.uptime.pingList.errorTypeColumnLabel', {
         defaultMessage: 'Error type',
       }),
     },
     {
+      align: 'left',
       field: 'error.message',
       name: i18n.translate('xpack.uptime.pingList.errorMessageColumnLabel', {
         defaultMessage: 'Error message',
