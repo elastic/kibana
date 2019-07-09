@@ -65,8 +65,8 @@ export default function createUpdateTests({ getService }: KibanaFunctionalTestDe
               foo: true,
             },
             interval: '12s',
-      enabled: true,
-      scheduledTaskId: resp.body.scheduledTaskId,
+            enabled: true,
+            scheduledTaskId: resp.body.scheduledTaskId,
             actions: [
               {
                 group: 'default',
@@ -178,7 +178,7 @@ export default function createUpdateTests({ getService }: KibanaFunctionalTestDe
         .put(`/api/alert/${customAlert.id}`)
         .set('kbn-xsrf', 'foo')
         .send({
-     enabled: true,
+          enabled: true,
           interval: '10s',
           alertTypeParams: {},
           actions: [],

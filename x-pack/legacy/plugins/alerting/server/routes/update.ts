@@ -33,7 +33,7 @@ export function updateAlertRoute(server: Hapi.Server) {
         },
         payload: Joi.object()
           .keys({
-      enabled: Joi.boolean().required(),
+            enabled: Joi.boolean().required(),
             interval: Joi.alternatives()
               .try(
                 Joi.string()
