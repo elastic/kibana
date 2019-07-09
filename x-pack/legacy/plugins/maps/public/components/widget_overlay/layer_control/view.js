@@ -98,6 +98,7 @@ export function LayerControl({ isReadOnly, isLayerTOCOpen, showAddLayerWizard, c
                   aria-label={i18n.translate('xpack.maps.layerControl.closeLayerTOCButtonAriaLabel', {
                     defaultMessage: 'Collapse layers panel'
                   })}
+                  data-test-subj="mapToggleLegendButton"
                 />
               </EuiToolTip>
             </EuiFlexItem>
