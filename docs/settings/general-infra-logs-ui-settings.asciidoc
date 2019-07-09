@@ -1,8 +1,8 @@
 `xpack.infra.enabled`:: Set to `false` to disable the Logs and Infrastructure UI plugin {kib}. Defaults to `true`.
 
-`xpack.infra.sources.default.logAlias`:: Index pattern for matching indices that contain log data. Defaults to `filebeat-*,kibana_sample_data_logs*`.
+`xpack.infra.sources.default.logAlias`:: Index pattern for matching indices that contain log data. Defaults to `filebeat-*,kibana_sample_data_logs*`. To match multiple wildcard patterns, use a comma to separate the names, with no space after the comma. For example, `logstash-app1-*,default-logs-*`.
 
-`xpack.infra.sources.default.metricAlias`:: Index pattern for matching indices that contain Metricbeat data. Defaults to `metricbeat-*`.
+`xpack.infra.sources.default.metricAlias`:: Index pattern for matching indices that contain Metricbeat data. Defaults to `metricbeat-*`. To match multiple wildcard patterns, use a comma to separate the names, with no space after the comma. For example, `logstash-app1-*,default-logs-*`.
 
 `xpack.infra.sources.default.fields.timestamp`:: Timestamp used to sort log entries. Defaults to `@timestamp`.
 

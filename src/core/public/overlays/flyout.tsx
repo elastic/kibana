@@ -23,7 +23,8 @@ import { EuiFlyout } from '@elastic/eui';
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { Subject } from 'rxjs';
-import { I18nSetup } from '../i18n';
+import { I18nStart } from '../i18n';
+import { OverlayRef } from './overlay_service';
 
 /**
  * A FlyoutRef is a reference to an opened flyout panel. It offers methods to
@@ -36,7 +37,7 @@ import { I18nSetup } from '../i18n';
  *
  * @public
  */
-export class FlyoutRef {
+export class FlyoutRef implements OverlayRef {
   /**
    * An Promise that will resolve once this flyout is closed.
    *
@@ -79,7 +80,7 @@ export class FlyoutService {
    * @return {FlyoutRef} A reference to the opened flyout panel.
    */
   public openFlyout = (
-    i18n: I18nSetup,
+    i18n: I18nStart,
     flyoutChildren: React.ReactNode,
     flyoutProps: {
       closeButtonAriaLabel?: string;

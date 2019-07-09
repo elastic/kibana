@@ -18,10 +18,6 @@
  */
 
 module.exports = {
-  legacyKuery: {
-    src: 'packages/kbn-es-query/src/kuery/ast/legacy_kuery.peg',
-    dest: 'packages/kbn-es-query/src/kuery/ast/legacy_kuery.js'
-  },
   kuery: {
     src: 'packages/kbn-es-query/src/kuery/ast/kuery.peg',
     dest: 'packages/kbn-es-query/src/kuery/ast/kuery.js',

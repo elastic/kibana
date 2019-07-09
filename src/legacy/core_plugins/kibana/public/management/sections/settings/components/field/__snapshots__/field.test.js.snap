@@ -89,7 +89,6 @@ exports[`Field for array setting should render as read only with help text if ov
               size="s"
             />
             <EuiText
-              grow={true}
               size="xs"
             >
               <React.Fragment>
@@ -132,7 +131,6 @@ exports[`Field for array setting should render as read only with help text if ov
         hasEmptyLabelSpace={false}
         helpText={
           <EuiText
-            grow={true}
             size="xs"
           >
             <FormattedMessage
@@ -332,7 +330,6 @@ exports[`Field for array setting should render user value if there is user value
               size="s"
             />
             <EuiText
-              grow={true}
               size="xs"
             >
               <React.Fragment>
@@ -510,7 +507,6 @@ exports[`Field for boolean setting should render as read only with help text if 
               size="s"
             />
             <EuiText
-              grow={true}
               size="xs"
             >
               <React.Fragment>
@@ -553,7 +549,6 @@ exports[`Field for boolean setting should render as read only with help text if 
         hasEmptyLabelSpace={false}
         helpText={
           <EuiText
-            grow={true}
             size="xs"
           >
             <FormattedMessage
@@ -765,7 +760,6 @@ exports[`Field for boolean setting should render user value if there is user val
               size="s"
             />
             <EuiText
-              grow={true}
               size="xs"
             >
               <React.Fragment>
@@ -941,7 +935,6 @@ exports[`Field for image setting should render as read only with help text if ov
               size="s"
             />
             <EuiText
-              grow={true}
               size="xs"
             >
               <React.Fragment>
@@ -984,7 +977,6 @@ exports[`Field for image setting should render as read only with help text if ov
         hasEmptyLabelSpace={false}
         helpText={
           <EuiText
-            grow={true}
             size="xs"
           >
             <FormattedMessage
@@ -1177,7 +1169,6 @@ exports[`Field for image setting should render user value if there is user value
               size="s"
             />
             <EuiText
-              grow={true}
               size="xs"
             >
               <React.Fragment>
@@ -1297,7 +1288,6 @@ exports[`Field for json setting should render as read only if saving is disabled
               size="s"
             />
             <EuiText
-              grow={true}
               size="xs"
             >
               <React.Fragment>
@@ -1407,7 +1397,6 @@ exports[`Field for json setting should render as read only with help text if ove
               size="s"
             />
             <EuiText
-              grow={true}
               size="xs"
             >
               <React.Fragment>
@@ -1454,7 +1443,6 @@ exports[`Field for json setting should render as read only with help text if ove
         hasEmptyLabelSpace={false}
         helpText={
           <EuiText
-            grow={true}
             size="xs"
           >
             <FormattedMessage
@@ -1622,7 +1610,6 @@ exports[`Field for json setting should render default value if there is no user 
               size="s"
             />
             <EuiText
-              grow={true}
               size="xs"
             >
               <React.Fragment>
@@ -1751,7 +1738,6 @@ exports[`Field for json setting should render user value if there is user value 
               size="s"
             />
             <EuiText
-              grow={true}
               size="xs"
             >
               <React.Fragment>
@@ -1963,7 +1949,6 @@ exports[`Field for markdown setting should render as read only with help text if
               size="s"
             />
             <EuiText
-              grow={true}
               size="xs"
             >
               <React.Fragment>
@@ -2006,7 +1991,6 @@ exports[`Field for markdown setting should render as read only with help text if
         hasEmptyLabelSpace={false}
         helpText={
           <EuiText
-            grow={true}
             size="xs"
           >
             <FormattedMessage
@@ -2257,7 +2241,6 @@ exports[`Field for markdown setting should render user value if there is user va
               size="s"
             />
             <EuiText
-              grow={true}
               size="xs"
             >
               <React.Fragment>
@@ -2448,7 +2431,6 @@ exports[`Field for number setting should render as read only with help text if o
               size="s"
             />
             <EuiText
-              grow={true}
               size="xs"
             >
               <React.Fragment>
@@ -2491,7 +2473,6 @@ exports[`Field for number setting should render as read only with help text if o
         hasEmptyLabelSpace={false}
         helpText={
           <EuiText
-            grow={true}
             size="xs"
           >
             <FormattedMessage
@@ -2691,7 +2672,6 @@ exports[`Field for number setting should render user value if there is user valu
               size="s"
             />
             <EuiText
-              grow={true}
               size="xs"
             >
               <React.Fragment>
@@ -2882,7 +2862,6 @@ exports[`Field for select setting should render as read only with help text if o
               size="s"
             />
             <EuiText
-              grow={true}
               size="xs"
             >
               <React.Fragment>
@@ -2925,7 +2904,6 @@ exports[`Field for select setting should render as read only with help text if o
         hasEmptyLabelSpace={false}
         helpText={
           <EuiText
-            grow={true}
             size="xs"
           >
             <FormattedMessage
@@ -3176,7 +3154,6 @@ exports[`Field for select setting should render user value if there is user valu
               size="s"
             />
             <EuiText
-              grow={true}
               size="xs"
             >
               <React.Fragment>
@@ -3367,7 +3344,6 @@ exports[`Field for string setting should render as read only with help text if o
               size="s"
             />
             <EuiText
-              grow={true}
               size="xs"
             >
               <React.Fragment>
@@ -3410,7 +3386,6 @@ exports[`Field for string setting should render as read only with help text if o
         hasEmptyLabelSpace={false}
         helpText={
           <EuiText
-            grow={true}
             size="xs"
           >
             <FormattedMessage
@@ -3610,7 +3585,6 @@ exports[`Field for string setting should render user value if there is user valu
               size="s"
             />
             <EuiText
-              grow={true}
               size="xs"
             >
               <React.Fragment>

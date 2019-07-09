@@ -18,7 +18,7 @@
  */
 
 import { expect } from 'chai';
-import getAggValue from '../../helpers/get_agg_value';
+import { getAggValue } from '../../helpers/get_agg_value';
 
 function testAgg(row, metric, expected) {
   let name = metric.type;
@@ -51,16 +51,8 @@ describe('getAggValue', () => {
     testAgg(row, { id: 'test', type: 'std_deviation' }, 7.180219742846005);
     testAgg(row, { id: 'test', type: 'variance' }, 51.55555555555556);
     testAgg(row, { id: 'test', type: 'sum_of_squares' }, 67028);
-    testAgg(
-      row,
-      { id: 'test', type: 'std_deviation', mode: 'upper' },
-      100.36043948569201
-    );
-    testAgg(
-      row,
-      { id: 'test', type: 'std_deviation', mode: 'lower' },
-      71.63956051430799
-    );
+    testAgg(row, { id: 'test', type: 'std_deviation', mode: 'upper' }, 100.36043948569201);
+    testAgg(row, { id: 'test', type: 'std_deviation', mode: 'lower' }, 71.63956051430799);
   });
 
   describe('percentile', () => {
@@ -96,26 +88,10 @@ describe('getAggValue', () => {
         },
       },
     };
-    testAgg(
-      row,
-      { id: 'test', type: 'top_hit', agg_with: 'avg', field: 'example.value' },
-      25
-    );
-    testAgg(
-      row,
-      { id: 'test', type: 'top_hit', agg_with: 'sum', field: 'example.value' },
-      75
-    );
-    testAgg(
-      row,
-      { id: 'test', type: 'top_hit', agg_with: 'max', field: 'example.value' },
-      25
-    );
-    testAgg(
-      row,
-      { id: 'test', type: 'top_hit', agg_with: 'min', field: 'example.value' },
-      25
-    );
+    testAgg(row, { id: 'test', type: 'top_hit', agg_with: 'avg', field: 'example.value' }, 25);
+    testAgg(row, { id: 'test', type: 'top_hit', agg_with: 'sum', field: 'example.value' }, 75);
+    testAgg(row, { id: 'test', type: 'top_hit', agg_with: 'max', field: 'example.value' }, 25);
+    testAgg(row, { id: 'test', type: 'top_hit', agg_with: 'min', field: 'example.value' }, 25);
   });
 
   const basicWithDerv = {
@@ -131,21 +107,12 @@ describe('getAggValue', () => {
     },
   };
 
-
   describe('count', () => {
-    testAgg(
-      basicWithDerv,
-      { id: 'test', type: 'count' },
-      2
-    );
+    testAgg(basicWithDerv, { id: 'test', type: 'count' }, 2);
   });
 
   describe('derivative', () => {
-    testAgg(
-      basicWithDerv,
-      { id: 'test_deriv', type: 'derivative' },
-      -15.806451612903226
-    );
+    testAgg(basicWithDerv, { id: 'test_deriv', type: 'derivative' }, -15.806451612903226);
   });
 
   describe('basic metric', () => {

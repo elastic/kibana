@@ -37,6 +37,7 @@ import {
   createJsAgentInstructions,
   createGoAgentInstructions,
   createJavaAgentInstructions,
+  createDotNetAgentInstructions,
 } from '../instructions/apm_agent_instructions';
 
 export function onPremInstructions(config) {
@@ -145,6 +146,10 @@ export function onPremInstructions(config) {
           {
             id: INSTRUCTION_VARIANT.GO,
             instructions: createGoAgentInstructions(),
+          },
+          {
+            id: INSTRUCTION_VARIANT.DOTNET,
+            instructions: createDotNetAgentInstructions(),
           },
         ],
         statusCheck: {

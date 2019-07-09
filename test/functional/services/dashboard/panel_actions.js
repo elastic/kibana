@@ -45,7 +45,13 @@ export function DashboardPanelActionsProvider({ getService, getPageObjects }) {
 
     async toggleContextMenu(parent) {
       log.debug('toggleContextMenu');
-      await (parent ? browser.moveMouseTo(parent) : testSubjects.moveMouseTo('dashboardPanelTitle'));
+      // Sometimes Geckodriver throws MoveTargetOutOfBoundsError here
+      // https://github.com/mozilla/geckodriver/issues/776
+      try {
+        await (parent ? browser.moveMouseTo(parent) : testSubjects.moveMouseTo('dashboardPanelTitle'));
+      } catch(err) {
+        log.error(err);
+      }
       const toggleMenuItem = await this.findContextMenu(parent);
       await toggleMenuItem.click();
     }
@@ -140,7 +146,17 @@ export function DashboardPanelActionsProvider({ getService, getPageObjects }) {
         panelOptions = await this.getPanelHeading(originalTitle);
       }
       await this.customizePanel(panelOptions);
-      await testSubjects.setValue('customDashboardPanelTitleInput', customTitle);
+      if (customTitle.length === 0) {
+        if (browser.isW3CEnabled) {
+          const input = await testSubjects.find('customDashboardPanelTitleInput');
+          await input.clearValueWithKeyboard();
+        } else {
+          // to clean in Chrome we trigger a change: put letter and delete it
+          await testSubjects.setValue('customDashboardPanelTitleInput', 'h\b');
+        }
+      } else {
+        await testSubjects.setValue('customDashboardPanelTitleInput', customTitle);
+      }
       await this.toggleContextMenu(panelOptions);
     }
 

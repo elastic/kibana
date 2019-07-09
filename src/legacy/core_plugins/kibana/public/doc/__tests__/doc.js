@@ -46,7 +46,7 @@ const init = function (index, type, id) {
       };
     });
 
-    $provide.service('es', function (Private, $q) {
+    $provide.service('es', function ($q) {
       this.search = function (config) {
         const deferred = $q.defer();
 

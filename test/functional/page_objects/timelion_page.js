@@ -73,6 +73,8 @@ export function TimelionPageProvider({ getService, getPageObjects }) {
       await testSubjects.click('timelionSaveButton');
       await testSubjects.click('timelionSaveAsSheetButton');
       await testSubjects.click('timelionFinishSaveButton');
+      await testSubjects.existOrFail('timelionSaveSuccessToast');
+      await testSubjects.waitForDeleted('timelionSaveSuccessToast');
     }
 
     async expectWriteControls() {

@@ -17,7 +17,6 @@
  * under the License.
  */
 
-
 /**
  * These patterns are used to identify files that are not supposed
  * to be snake_case because their names are determined by other
@@ -31,22 +30,25 @@ export const IGNORE_FILE_GLOBS = [
   'docs/**/*',
   '**/bin/**/*',
   '**/+([A-Z_]).md',
+  '**/LICENSE',
   '**/*.txt',
   '**/Gruntfile.js',
   'tasks/config/**/*',
   '**/{Dockerfile,docker-compose.yml}',
-  'x-pack/plugins/apm/**/*',
-  'x-pack/plugins/canvas/tasks/**/*',
-  'x-pack/plugins/canvas/canvas_plugin_src/**/*',
+  'x-pack/legacy/plugins/apm/**/*',
+  'x-pack/legacy/plugins/canvas/tasks/**/*',
+  'x-pack/legacy/plugins/canvas/canvas_plugin_src/**/*',
   '**/.*',
   '**/{webpackShims,__mocks__}/**/*',
   'x-pack/docs/**/*',
   'src/legacy/ui/public/assets/fonts/**/*',
 
-  // filename must match language code which requires capital letters
-  '**/translations/*.json'
-];
+  // Files in this directory must match a pre-determined name in some cases.
+  'x-pack/legacy/plugins/canvas/.storybook/*',
 
+  // filename must match language code which requires capital letters
+  '**/translations/*.json',
+];
 
 /**
  * These patterns are matched against directories and indicate
@@ -54,11 +56,7 @@ export const IGNORE_FILE_GLOBS = [
  *
  * @type {Array}
  */
-export const KEBAB_CASE_DIRECTORY_GLOBS = [
-  'packages/*',
-  'x-pack',
-];
-
+export const KEBAB_CASE_DIRECTORY_GLOBS = ['packages/*', 'x-pack'];
 
 /**
  * These patterns are matched against directories and indicate
@@ -87,7 +85,6 @@ export const IGNORE_DIRECTORY_GLOBS = [
   'packages/kbn-pm/src/utils/__fixtures__/*',
   'x-pack/dev-tools',
 ];
-
 
 /**
  * DO NOT ADD FILES TO THIS LIST!!
@@ -162,23 +159,23 @@ export const TEMPORARILY_IGNORED_PATHS = [
   'webpackShims/elasticsearch-browser.js',
   'webpackShims/moment-timezone.js',
   'webpackShims/ui-bootstrap.js',
-  'x-pack/plugins/graph/public/graphClientWorkspace.js',
-  'x-pack/plugins/graph/public/angular-venn-simple.js',
-  'x-pack/plugins/index_management/public/lib/editSettings.js',
-  'x-pack/plugins/license_management/public/store/reducers/licenseManagement.js',
-  'x-pack/plugins/monitoring/public/components/sparkline/__mocks__/plugins/xpack_main/jquery_flot.js',
-  'x-pack/plugins/ml/public/jobs/new_job/simple/components/watcher/email-influencers.html',
-  'x-pack/plugins/monitoring/public/icons/alert-blue.svg',
-  'x-pack/plugins/monitoring/public/icons/health-gray.svg',
-  'x-pack/plugins/monitoring/public/icons/health-green.svg',
-  'x-pack/plugins/monitoring/public/icons/health-red.svg',
-  'x-pack/plugins/monitoring/public/icons/health-yellow.svg',
-  'x-pack/plugins/reporting/export_types/printable_pdf/server/lib/pdf/assets/fonts/noto/NotoSansCJKtc-Medium.ttf',
-  'x-pack/plugins/reporting/export_types/printable_pdf/server/lib/pdf/assets/fonts/noto/NotoSansCJKtc-Regular.ttf',
-  'x-pack/plugins/reporting/export_types/printable_pdf/server/lib/pdf/assets/fonts/roboto/Roboto-Italic.ttf',
-  'x-pack/plugins/reporting/export_types/printable_pdf/server/lib/pdf/assets/fonts/roboto/Roboto-Medium.ttf',
-  'x-pack/plugins/reporting/export_types/printable_pdf/server/lib/pdf/assets/fonts/roboto/Roboto-Regular.ttf',
-  'x-pack/plugins/reporting/export_types/printable_pdf/server/lib/pdf/assets/img/logo-grey.png',
+  'x-pack/legacy/plugins/graph/public/graphClientWorkspace.js',
+  'x-pack/legacy/plugins/graph/public/angular-venn-simple.js',
+  'x-pack/legacy/plugins/index_management/public/lib/editSettings.js',
+  'x-pack/legacy/plugins/license_management/public/store/reducers/licenseManagement.js',
+  'x-pack/legacy/plugins/monitoring/public/components/sparkline/__mocks__/plugins/xpack_main/jquery_flot.js',
+  'x-pack/legacy/plugins/ml/public/jobs/new_job/simple/components/watcher/email-influencers.html',
+  'x-pack/legacy/plugins/monitoring/public/icons/alert-blue.svg',
+  'x-pack/legacy/plugins/monitoring/public/icons/health-gray.svg',
+  'x-pack/legacy/plugins/monitoring/public/icons/health-green.svg',
+  'x-pack/legacy/plugins/monitoring/public/icons/health-red.svg',
+  'x-pack/legacy/plugins/monitoring/public/icons/health-yellow.svg',
+  'x-pack/legacy/plugins/reporting/export_types/printable_pdf/server/lib/pdf/assets/fonts/noto/NotoSansCJKtc-Medium.ttf',
+  'x-pack/legacy/plugins/reporting/export_types/printable_pdf/server/lib/pdf/assets/fonts/noto/NotoSansCJKtc-Regular.ttf',
+  'x-pack/legacy/plugins/reporting/export_types/printable_pdf/server/lib/pdf/assets/fonts/roboto/Roboto-Italic.ttf',
+  'x-pack/legacy/plugins/reporting/export_types/printable_pdf/server/lib/pdf/assets/fonts/roboto/Roboto-Medium.ttf',
+  'x-pack/legacy/plugins/reporting/export_types/printable_pdf/server/lib/pdf/assets/fonts/roboto/Roboto-Regular.ttf',
+  'x-pack/legacy/plugins/reporting/export_types/printable_pdf/server/lib/pdf/assets/img/logo-grey.png',
   'x-pack/test/functional/es_archives/monitoring/beats-with-restarted-instance/data.json.gz',
   'x-pack/test/functional/es_archives/monitoring/beats-with-restarted-instance/mappings.json',
   'x-pack/test/functional/es_archives/monitoring/logstash-pipelines/data.json.gz',

@@ -26,6 +26,7 @@
  */
 
 import _ from 'lodash';
+import { i18n } from '@kbn/i18n';
 import angular from 'angular';
 import rison from 'rison-node';
 import { applyDiff } from '../utils/diff_object';
@@ -41,7 +42,7 @@ import {
   isStateHash,
 } from './state_storage';
 
-export function StateProvider(Private, $rootScope, $location, stateManagementConfig, config, kbnUrl, i18n) {
+export function StateProvider(Private, $rootScope, $location, stateManagementConfig, config, kbnUrl) {
   const Events = Private(EventsProvider);
 
   createLegacyClass(State).inherits(Events);
@@ -103,7 +104,7 @@ export function StateProvider(Private, $rootScope, $location, stateManagementCon
     }
 
     if (unableToParse) {
-      toastNotifications.addDanger(i18n('common.ui.stateManagement.unableToParseUrlErrorMessage', {
+      toastNotifications.addDanger(i18n.translate('common.ui.stateManagement.unableToParseUrlErrorMessage', {
         defaultMessage: 'Unable to parse URL'
       }));
       search[this._urlParam] = this.toQueryParam(this._defaults);
@@ -244,7 +245,7 @@ export function StateProvider(Private, $rootScope, $location, stateManagementCon
   State.prototype._parseStateHash = function (stateHash) {
     const json = this._hashedItemStore.getItem(stateHash);
     if (json === null) {
-      toastNotifications.addDanger(i18n('common.ui.stateManagement.unableToRestoreUrlErrorMessage', {
+      toastNotifications.addDanger(i18n.translate('common.ui.stateManagement.unableToRestoreUrlErrorMessage', {
         defaultMessage: 'Unable to completely restore the URL, be sure to use the share functionality.'
       }));
     }
@@ -293,7 +294,7 @@ export function StateProvider(Private, $rootScope, $location, stateManagementCon
     }
 
     // If we ran out of space trying to persist the state, notify the user.
-    const message = i18n('common.ui.stateManagement.unableToStoreHistoryInSessionErrorMessage', {
+    const message = i18n.translate('common.ui.stateManagement.unableToStoreHistoryInSessionErrorMessage', {
       defaultMessage: 'Kibana is unable to store history items in your session ' +
         `because it is full and there don't seem to be items any items safe ` +
         'to delete.\n\n' +

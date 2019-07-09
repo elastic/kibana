@@ -33,6 +33,8 @@ import { RenderCompleteHelper } from '../../render_complete';
 import { AppState } from '../../state_management/app_state';
 import { timefilter } from '../../timefilter';
 import { RequestHandlerParams, Vis } from '../../vis';
+// @ts-ignore untyped dependency
+import { VisFiltersProvider } from '../../vis/vis_filters';
 import { PipelineDataLoader } from './pipeline_data_loader';
 import { visualizationLoader } from './visualization_loader';
 import { VisualizeDataLoader } from './visualize_data_loader';
@@ -56,6 +58,7 @@ interface EmbeddedVisualizeHandlerParams extends VisualizeLoaderParams {
 }
 
 const RENDER_COMPLETE_EVENT = 'render_complete';
+const DATA_SHARED_ITEM = 'data-shared-item';
 const LOADING_ATTRIBUTE = 'data-loading';
 const RENDERING_COUNT_ATTRIBUTE = 'data-rendering-count';
 
@@ -140,7 +143,9 @@ export class EmbeddedVisualizeHandler {
     });
 
     element.setAttribute(LOADING_ATTRIBUTE, '');
+    element.setAttribute(DATA_SHARED_ITEM, '');
     element.setAttribute(RENDERING_COUNT_ATTRIBUTE, '0');
+
     element.addEventListener('renderComplete', this.onRenderCompleteListener);
 
     this.autoFetch = autoFetch;
@@ -177,6 +182,7 @@ export class EmbeddedVisualizeHandler {
     this.dataLoader = pipelineDataLoader
       ? new PipelineDataLoader(vis)
       : new VisualizeDataLoader(vis, Private);
+    const visFilters: any = Private(VisFiltersProvider);
     this.renderCompleteHelper = new RenderCompleteHelper(element);
     this.inspectorAdapters = this.getActiveInspectorAdapters();
     this.vis.openInspector = this.openInspector;
@@ -197,7 +203,8 @@ export class EmbeddedVisualizeHandler {
     this.events$.subscribe(event => {
       if (this.actions[event.name]) {
         event.data.aggConfigs = getTableAggs(this.vis);
-        this.actions[event.name](event.data);
+        const newFilters = this.actions[event.name](event.data) || [];
+        visFilters.pushFilters(newFilters);
       }
     });
 

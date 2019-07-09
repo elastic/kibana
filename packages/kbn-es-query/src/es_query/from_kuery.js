@@ -17,20 +17,15 @@
  * under the License.
  */
 
-import { fromLegacyKueryExpression, fromKueryExpression, toElasticsearchQuery, nodeTypes } from '../kuery';
+import {
+  fromKueryExpression,
+  toElasticsearchQuery,
+  nodeTypes,
+} from '../kuery';
 
 export function buildQueryFromKuery(indexPattern, queries = [], allowLeadingWildcards, dateFormatTZ = null) {
   const queryASTs = queries.map(query => {
-    try {
-      return fromKueryExpression(query.query, { allowLeadingWildcards });
-    } catch (parseError) {
-      try {
-        fromLegacyKueryExpression(query.query);
-      } catch (legacyParseError) {
-        throw parseError;
-      }
-      throw Error('OutdatedKuerySyntaxError');
-    }
+    return fromKueryExpression(query.query, { allowLeadingWildcards });
   });
   return buildQuery(indexPattern, queryASTs, { dateFormatTZ });
 }

@@ -17,14 +17,14 @@
  * under the License.
  */
 
-import createSelectHandler from '../lib/create_select_handler';
+import { createSelectHandler } from '../lib/create_select_handler';
 import { GroupBySelect } from './group_by_select';
 import PropTypes from 'prop-types';
 import React from 'react';
 import { htmlIdGenerator, EuiFlexGroup, EuiFlexItem, EuiFormRow } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-export const SplitByEverything = (props) => {
+export const SplitByEverything = props => {
   const { onChange, model, uiRestrictions } = props;
   const htmlId = htmlIdGenerator();
   const handleSelectChange = createSelectHandler(onChange);
@@ -33,10 +33,9 @@ export const SplitByEverything = (props) => {
       <EuiFlexItem>
         <EuiFormRow
           id={htmlId('group')}
-          label={(<FormattedMessage
-            id="tsvb.splits.everything.groupByLabel"
-            defaultMessage="Group by"
-          />)}
+          label={
+            <FormattedMessage id="tsvb.splits.everything.groupByLabel" defaultMessage="Group by" />
+          }
         >
           <GroupBySelect
             value={model.split_mode}
@@ -54,5 +53,3 @@ SplitByEverything.propTypes = {
   onChange: PropTypes.func,
   uiRestrictions: PropTypes.object,
 };
-
-

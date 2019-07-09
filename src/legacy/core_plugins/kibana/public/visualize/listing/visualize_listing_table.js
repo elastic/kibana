@@ -21,7 +21,7 @@ import React, { Component, Fragment } from 'react';
 import PropTypes from 'prop-types';
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import { uiCapabilities } from 'ui/capabilities';
+import { capabilities } from 'ui/capabilities';
 import { TableListView } from './../../table_list_view';
 
 import {
@@ -46,10 +46,10 @@ class VisualizeListingTableUi extends Component {
         // for data exploration purposes
         createItem={this.props.createItem}
         findItems={this.props.findItems}
-        deleteItems={uiCapabilities.visualize.delete ? this.props.deleteItems : null}
-        editItem={uiCapabilities.visualize.save ? this.props.editItem : null}
+        deleteItems={capabilities.get().visualize.delete ? this.props.deleteItems : null}
+        editItem={capabilities.get().visualize.save ? this.props.editItem : null}
         tableColumns={this.getTableColumns()}
-        listingLimit={100}
+        listingLimit={this.props.listingLimit}
         initialFilter={''}
         noItemsFragment={this.getNoItemsMessage()}
         entityName={
@@ -222,6 +222,7 @@ VisualizeListingTableUi.propTypes = {
   createItem: PropTypes.func.isRequired,
   getViewUrl: PropTypes.func.isRequired,
   editItem: PropTypes.func.isRequired,
+  listingLimit: PropTypes.number.isRequired,
 };
 
 export const VisualizeListingTable = injectI18n(VisualizeListingTableUi);

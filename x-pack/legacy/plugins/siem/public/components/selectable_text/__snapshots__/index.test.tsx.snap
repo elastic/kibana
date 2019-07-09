@@ -1,0 +1,16 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`SelectableText renders correctly against snapshot 1`] = `
+.c0 {
+  -webkit-user-select: text;
+  -moz-user-select: text;
+  -ms-user-select: text;
+  user-select: text;
+}
+
+<span
+  className="c0"
+>
+  You may select this text
+</span>
+`;

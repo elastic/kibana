@@ -23,7 +23,7 @@ import { I18nContext } from 'ui/i18n';
 import chrome from 'ui/chrome';
 import { fetchIndexPatternFields } from '../lib/fetch_fields';
 
-function ReactEditorControllerProvider(Private, config) {
+function ReactEditorControllerProvider(config) {
   class ReactEditorController {
     constructor(el, savedObj) {
       this.el = el;
@@ -37,13 +37,19 @@ function ReactEditorControllerProvider(Private, config) {
 
     fetchDefaultIndexPattern = async () => {
       const savedObjectsClient = chrome.getSavedObjectsClient();
-      const indexPattern = await savedObjectsClient.get('index-pattern', config.get('defaultIndex'));
+      const indexPattern = await savedObjectsClient.get(
+        'index-pattern',
+        config.get('defaultIndex')
+      );
 
-      return indexPattern.attributes.title;
+      return indexPattern.attributes;
     };
 
     fetchDefaultParams = async () => {
-      this.state.vis.params.default_index_pattern = await this.fetchDefaultIndexPattern();
+      const { title, timeFieldName } = await this.fetchDefaultIndexPattern();
+
+      this.state.vis.params.default_index_pattern = title;
+      this.state.vis.params.default_timefield = timeFieldName;
       this.state.vis.fields = await fetchIndexPatternFields(this.state.vis);
 
       this.state.isLoaded = true;
@@ -56,7 +62,7 @@ function ReactEditorControllerProvider(Private, config) {
     async render(params) {
       const Component = this.getComponent();
 
-      !this.state.isLoaded && await this.fetchDefaultParams();
+      !this.state.isLoaded && (await this.fetchDefaultParams());
 
       render(
         <I18nContext>
@@ -72,7 +78,8 @@ function ReactEditorControllerProvider(Private, config) {
             appState={params.appState}
           />
         </I18nContext>,
-        this.el);
+        this.el
+      );
     }
 
     destroy() {

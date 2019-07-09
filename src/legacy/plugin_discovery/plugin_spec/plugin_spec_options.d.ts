@@ -17,17 +17,23 @@
  * under the License.
  */
 import { Server } from '../../server/kbn_server';
+import { Capabilities } from '../../../core/public';
 
 export type InitPluginFunction = (server: Server) => void;
 export interface UiExports {
-  injectDefaultVars: (server: Server) => { [key: string]: any };
+  injectDefaultVars?: (server: Server) => { [key: string]: any };
+  styleSheetPaths?: string;
+  visTypes?: string[];
+  interpreter?: string[];
+  hacks?: string[];
 }
 
 export interface PluginSpecOptions {
   id: string;
-  require: string[];
-  publicDir: string;
+  require?: string[];
+  publicDir?: string;
   uiExports?: UiExports;
-  init: InitPluginFunction;
-  config: any;
+  uiCapabilities?: Capabilities;
+  init?: InitPluginFunction;
+  config?: any;
 }

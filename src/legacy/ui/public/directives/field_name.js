@@ -18,8 +18,9 @@
  */
 
 import $ from 'jquery';
+import { i18n } from '@kbn/i18n';
 import { template } from 'lodash';
-import '../filters/short_dots';
+import { shortenDottedString } from '../../../core_plugins/kibana/common/utils/shorten_dotted_string';
 import booleanFieldNameIcon from './field_name_icons/boolean_field_name_icon.html';
 import conflictFieldNameIcon from './field_name_icons/conflict_field_name_icon.html';
 import dateFieldNameIcon from './field_name_icons/date_field_name_icon.html';
@@ -45,7 +46,7 @@ const compiledSourceFieldNameIcon = template(sourceFieldNameIcon);
 const compiledStringFieldNameIcon = template(stringFieldNameIcon);
 const compiledUnknownFieldNameIcon = template(unknownFieldNameIcon);
 
-module.directive('fieldName', function ($compile, $rootScope, $filter, i18n) {
+module.directive('fieldName', function ($rootScope, config) {
   return {
     restrict: 'AE',
     scope: {
@@ -56,47 +57,47 @@ module.directive('fieldName', function ($compile, $rootScope, $filter, i18n) {
     link: function ($scope, $el) {
       const typeToIconMap = {
         boolean: compiledBooleanFieldNameIcon({
-          booleanFieldAriaLabel: i18n('common.ui.directives.fieldNameIcons.booleanAriaLabel', {
+          booleanFieldAriaLabel: i18n.translate('common.ui.directives.fieldNameIcons.booleanAriaLabel', {
             defaultMessage: 'Boolean field'
           }),
         }),
         conflict: compiledConflictFieldNameIcon({
-          conflictingFieldAriaLabel: i18n('common.ui.directives.fieldNameIcons.conflictFieldAriaLabel', {
+          conflictingFieldAriaLabel: i18n.translate('common.ui.directives.fieldNameIcons.conflictFieldAriaLabel', {
             defaultMessage: 'Conflicting field'
           }),
         }),
         date: compiledDateFieldNameIcon({
-          dateFieldAriaLabel: i18n('common.ui.directives.fieldNameIcons.dateFieldAriaLabel', {
+          dateFieldAriaLabel: i18n.translate('common.ui.directives.fieldNameIcons.dateFieldAriaLabel', {
             defaultMessage: 'Date field'
           }),
         }),
         geo_point: compiledGeoPointFieldNameIcon({
-          geoPointFieldAriaLabel: i18n('common.ui.directives.fieldNameIcons.geoPointFieldAriaLabel', {
+          geoPointFieldAriaLabel: i18n.translate('common.ui.directives.fieldNameIcons.geoPointFieldAriaLabel', {
             defaultMessage: 'Date field'
           }),
         }),
         ip: compiledIpFieldNameIcon({
-          ipAddressFieldAriaLabel: i18n('common.ui.directives.fieldNameIcons.ipAddressFieldAriaLabel', {
+          ipAddressFieldAriaLabel: i18n.translate('common.ui.directives.fieldNameIcons.ipAddressFieldAriaLabel', {
             defaultMessage: 'IP address field'
           }),
         }),
         murmur3: compiledMurmur3FieldNameIcon({
-          murmur3FieldAriaLabel: i18n('common.ui.directives.fieldNameIcons.murmur3FieldAriaLabel', {
+          murmur3FieldAriaLabel: i18n.translate('common.ui.directives.fieldNameIcons.murmur3FieldAriaLabel', {
             defaultMessage: 'Murmur3 field'
           }),
         }),
         number: compiledNumberFieldNameIcon({
-          numberFieldAriaLabel: i18n('common.ui.directives.fieldNameIcons.numberFieldAriaLabel', {
+          numberFieldAriaLabel: i18n.translate('common.ui.directives.fieldNameIcons.numberFieldAriaLabel', {
             defaultMessage: 'Number field'
           }),
         }),
         source: compiledSourceFieldNameIcon({
-          sourceFieldAriaLabel: i18n('common.ui.directives.fieldNameIcons.sourceFieldAriaLabel', {
+          sourceFieldAriaLabel: i18n.translate('common.ui.directives.fieldNameIcons.sourceFieldAriaLabel', {
             defaultMessage: 'Source field'
           }),
         }),
         string: compiledStringFieldNameIcon({
-          stringFieldAriaLabel: i18n('common.ui.directives.fieldNameIcons.stringFieldAriaLabel', {
+          stringFieldAriaLabel: i18n.translate('common.ui.directives.fieldNameIcons.stringFieldAriaLabel', {
             defaultMessage: 'String field'
           }),
         }),
@@ -108,7 +109,7 @@ module.directive('fieldName', function ($compile, $rootScope, $filter, i18n) {
         }
 
         return compiledUnknownFieldNameIcon({
-          unknownFieldAriaLabel: i18n('common.ui.directives.fieldNameIcons.unknownFieldAriaLabel', {
+          unknownFieldAriaLabel: i18n.translate('common.ui.directives.fieldNameIcons.unknownFieldAriaLabel', {
             defaultMessage: 'Unknown field'
           }),
         });
@@ -126,7 +127,9 @@ module.directive('fieldName', function ($compile, $rootScope, $filter, i18n) {
         const results = $scope.field ? !$scope.field.rowCount && !$scope.field.scripted : false;
         const scripted = $scope.field ? $scope.field.scripted : false;
 
-        const displayName = $filter('shortDots')(name);
+
+        const isShortDots = config.get('shortDots:enable');
+        const displayName = isShortDots ? shortenDottedString(name) : name;
 
         $el
           .attr('title', name)

@@ -18,13 +18,14 @@
  */
 
 import _ from 'lodash';
-import 'ui/filters/short_dots';
+import { i18n } from '@kbn/i18n';
+import { shortenDottedString } from '../../../../common/utils/shorten_dotted_string';
 import headerHtml from './table_header.html';
 import { uiModules } from 'ui/modules';
 const module = uiModules.get('app/discover');
 
 
-module.directive('kbnTableHeader', function (shortDotsFilter, i18n) {
+module.directive('kbnTableHeader', function () {
   return {
     restrict: 'A',
     scope: {
@@ -38,6 +39,11 @@ module.directive('kbnTableHeader', function (shortDotsFilter, i18n) {
     template: headerHtml,
     controller: function ($scope, config) {
       $scope.hideTimeColumn = config.get('doc_table:hideTimeColumn');
+      $scope.isShortDots = config.get('shortDots:enable');
+
+      $scope.getShortDotsName = function getShortDotsName(columnName) {
+        return $scope.isShortDots ? shortenDottedString(columnName) : columnName;
+      };
 
       $scope.isSortableColumn = function isSortableColumn(columnName) {
         return (
@@ -49,9 +55,10 @@ module.directive('kbnTableHeader', function (shortDotsFilter, i18n) {
 
       $scope.tooltip = function (column) {
         if (!$scope.isSortableColumn(column)) return '';
-        return i18n('kbn.docTable.tableHeader.sortByColumnTooltip', {
+        const name = $scope.isShortDots ? shortenDottedString(column) : column;
+        return i18n.translate('kbn.docTable.tableHeader.sortByColumnTooltip', {
           defaultMessage: 'Sort by {columnName}',
-          values: { columnName: shortDotsFilter(column) },
+          values: { columnName: name },
         });
       };
 
@@ -126,12 +133,12 @@ module.directive('kbnTableHeader', function (shortDotsFilter, i18n) {
 
         const [currentColumnName, currentDirection = 'asc'] = $scope.sortOrder;
         if(name === currentColumnName && currentDirection === 'asc') {
-          return i18n('kbn.docTable.tableHeader.sortByColumnDescendingAriaLabel', {
+          return i18n.translate('kbn.docTable.tableHeader.sortByColumnDescendingAriaLabel', {
             defaultMessage: 'Sort {columnName} descending',
             values: { columnName: name },
           });
         }
-        return i18n('kbn.docTable.tableHeader.sortByColumnAscendingAriaLabel', {
+        return i18n.translate('kbn.docTable.tableHeader.sortByColumnAscendingAriaLabel', {
           defaultMessage: 'Sort {columnName} ascending',
           values: { columnName: name },
         });

@@ -362,7 +362,6 @@ class TableListViewUi extends React.Component {
         values={{ entityNamePlural: this.props.entityNamePlural }}
       />
     );
-
     return (
       <EuiInMemoryTable
         itemId="id"
@@ -374,7 +373,6 @@ class TableListViewUi extends React.Component {
         selection={selection}
         search={search}
         sorting={true}
-        hasActions={this.props.editItem}
         data-test-subj="itemsInMemTable"
       />
     );

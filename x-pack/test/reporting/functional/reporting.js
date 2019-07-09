@@ -17,7 +17,6 @@ const REPORTS_FOLDER = path.resolve(__dirname, 'reports');
 
 export default function ({ getService, getPageObjects }) {
   const retry = getService('retry');
-  const kibanaServer = getService('kibanaServer');
   const config = getService('config');
   const PageObjects = getPageObjects(['reporting', 'common', 'dashboard', 'header', 'discover', 'visualize']);
   const log = getService('log');
@@ -25,23 +24,22 @@ export default function ({ getService, getPageObjects }) {
   describe('Reporting', () => {
 
     before('initialize tests', async () => {
-      await kibanaServer.uiSettings.disableToastAutohide();
       await PageObjects.reporting.initTests();
     });
 
     const expectDisabledGenerateReportButton = async () => {
       const generateReportButton = await PageObjects.reporting.getGenerateReportButton();
       await retry.try(async () => {
-        const isDisabled = await generateReportButton.getProperty('disabled');
-        expect(isDisabled).to.be(true);
+        const isDisabled = await generateReportButton.getAttribute('disabled');
+        expect(isDisabled).to.be('true');
       });
     };
 
     const expectEnabledGenerateReportButton = async () => {
       const generateReportButton = await PageObjects.reporting.getGenerateReportButton();
       await retry.try(async () => {
-        const isDisabled = await generateReportButton.getProperty('disabled');
-        expect(isDisabled).to.be(false);
+        const isDisabled = await generateReportButton.getAttribute('disabled');
+        expect(isDisabled).to.be(null);
       });
     };
 
@@ -296,7 +294,7 @@ export default function ({ getService, getPageObjects }) {
 
         it('becomes available when saved', async () => {
           await PageObjects.reporting.setTimepickerInDataRange();
-          await PageObjects.visualize.clickBucket('X-Axis');
+          await PageObjects.visualize.clickBucket('X-axis');
           await PageObjects.visualize.selectAggregation('Date Histogram');
           await PageObjects.visualize.clickGo();
           await PageObjects.visualize.saveVisualization('my viz');

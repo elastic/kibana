@@ -47,7 +47,9 @@ describe('POST /api/saved_objects/_import', () => {
       },
     };
 
-    server.route(createImportRoute(prereqs, server));
+    server.route(
+      createImportRoute(prereqs, server, ['index-pattern', 'visualization', 'dashboard'])
+    );
   });
 
   test('formats successful response', async () => {
@@ -118,7 +120,7 @@ describe('POST /api/saved_objects/_import', () => {
     expect(firstBulkCreateCallArray[0].migrationVersion).toEqual({});
   });
 
-  test('imports an index pattern and dashboard', async () => {
+  test('imports an index pattern and dashboard, ignoring empty lines in the file', async () => {
     // NOTE: changes to this scenario should be reflected in the docs
     const request = {
       method: 'POST',
@@ -129,6 +131,9 @@ describe('POST /api/saved_objects/_import', () => {
         'Content-Type: application/ndjson',
         '',
         '{"type":"index-pattern","id":"my-pattern","attributes":{"title":"my-pattern-*"}}',
+        '',
+        '',
+        '',
         '{"type":"dashboard","id":"my-dashboard","attributes":{"title":"Look at my dashboard"}}',
         '--EXAMPLE--',
       ].join('\r\n'),

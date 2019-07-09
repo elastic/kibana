@@ -19,24 +19,24 @@
 
 import PropTypes from 'prop-types';
 import React from 'react';
-import AggSelect from './agg_select';
-import FieldSelect from './field_select';
-import AggRow from './agg_row';
-import createChangeHandler from '../lib/create_change_handler';
-import createSelectHandler from '../lib/create_select_handler';
+import { AggSelect } from './agg_select';
+import { FieldSelect } from './field_select';
+import { AggRow } from './agg_row';
+import { createChangeHandler } from '../lib/create_change_handler';
+import { createSelectHandler } from '../lib/create_select_handler';
 import { htmlIdGenerator, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiFormLabel } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { ES_TYPES } from '../../../common/es_types';
+import { METRIC_TYPES } from '../../../common/metric_types';
 
-function StandardAgg(props) {
+export function StandardAgg(props) {
   const { model, panel, series, fields, uiRestrictions } = props;
   const handleChange = createChangeHandler(props.onChange, model);
   const handleSelectChange = createSelectHandler(handleChange);
-  let restrict = 'numeric';
-  if (model.type === 'cardinality') {
-    restrict = 'none';
-  }
+  const restrictFields = model.type === METRIC_TYPES.CARDINALITY ? [] : [ES_TYPES.NUMBER];
 
-  const indexPattern = series.override_index_pattern && series.series_index_pattern || panel.index_pattern;
+  const indexPattern =
+    (series.override_index_pattern && series.series_index_pattern) || panel.index_pattern;
   const htmlId = htmlIdGenerator();
 
   return (
@@ -46,14 +46,12 @@ function StandardAgg(props) {
       onAdd={props.onAdd}
       onDelete={props.onDelete}
       siblings={props.siblings}
+      dragHandleProps={props.dragHandleProps}
     >
       <EuiFlexGroup gutterSize="s">
         <EuiFlexItem>
           <EuiFormLabel htmlFor={htmlId('aggregation')}>
-            <FormattedMessage
-              id="tsvb.stdAgg.aggregationLabel"
-              defaultMessage="Aggregation"
-            />
+            <FormattedMessage id="tsvb.stdAgg.aggregationLabel" defaultMessage="Aggregation" />
           </EuiFormLabel>
           <AggSelect
             id={htmlId('aggregation')}
@@ -66,33 +64,26 @@ function StandardAgg(props) {
           />
         </EuiFlexItem>
 
-        {
-          model.type !== 'count'
-            ? (
-              <EuiFlexItem>
-                <EuiFormRow
-                  id={htmlId('field')}
-                  label={(<FormattedMessage
-                    id="tsvb.stdAgg.fieldLabel"
-                    defaultMessage="Field"
-                  />)}
-                  fullWidth
-                >
-                  <FieldSelect
-                    fields={fields}
-                    type={model.type}
-                    restrict={restrict}
-                    indexPattern={indexPattern}
-                    value={model.field}
-                    onChange={handleSelectChange('field')}
-                    uiRestrictions={uiRestrictions}
-                    fullWidth
-                  />
-                </EuiFormRow>
-              </EuiFlexItem>
-            ) : null
-        }
-
+        {model.type !== 'count' ? (
+          <EuiFlexItem>
+            <EuiFormRow
+              id={htmlId('field')}
+              label={<FormattedMessage id="tsvb.stdAgg.fieldLabel" defaultMessage="Field" />}
+              fullWidth
+            >
+              <FieldSelect
+                fields={fields}
+                type={model.type}
+                restrict={restrictFields}
+                indexPattern={indexPattern}
+                value={model.field}
+                onChange={handleSelectChange('field')}
+                uiRestrictions={uiRestrictions}
+                fullWidth
+              />
+            </EuiFormRow>
+          </EuiFlexItem>
+        ) : null}
       </EuiFlexGroup>
     </AggRow>
   );
@@ -110,5 +101,3 @@ StandardAgg.propTypes = {
   siblings: PropTypes.array,
   uiRestrictions: PropTypes.object,
 };
-
-export default StandardAgg;

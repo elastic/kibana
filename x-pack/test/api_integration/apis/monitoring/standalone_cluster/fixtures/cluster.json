@@ -1,1 +1,51 @@
-[{"cluster_uuid":"__standalone_cluster__","license":{},"elasticsearch":{"cluster_stats":{"indices":{},"nodes":{"count":{},"jvm":{}}}},"logstash":{},"kibana":{},"beats":{"totalEvents":348,"bytesSent":319913,"beats":{"total":1,"types":[{"type":"Packetbeat","count":1}]}},"apm":{"totalEvents":0,"memRss":0,"memTotal":0,"apms":{"total":0}},"alerts":{"message":"Cluster Alerts are not displayed because the [production] cluster's license could not be determined."},"isPrimary":false}]
+[{
+  "cluster_uuid": "__standalone_cluster__",
+  "license": {},
+  "elasticsearch": {
+    "cluster_stats": {
+      "indices": {},
+      "nodes": {
+        "count": {},
+        "jvm": {}
+      }
+    },
+    "logs": {
+      "enabled": false,
+      "reason": {
+        "clusterExists": null,
+        "indexPatternExists": false,
+        "indexPatternInTimeRangeExists": false,
+        "typeExistsAtAnyTime": false,
+        "nodeExists": null,
+        "indexExists": null,
+        "typeExists": false
+      },
+      "types": []
+    }
+  },
+  "logstash": {},
+  "kibana": {},
+  "beats": {
+    "totalEvents": 348,
+    "bytesSent": 319913,
+    "beats": {
+      "total": 1,
+      "types": [{
+        "type": "Packetbeat",
+        "count": 1
+      }]
+    }
+  },
+  "apm": {
+    "totalEvents": 0,
+    "memRss": 0,
+    "memTotal": 0,
+    "apms": {
+      "total": 0
+    }
+  },
+  "alerts": {
+    "message": "Cluster Alerts are not displayed because the [production] cluster's license could not be determined."
+  },
+  "isPrimary": false
+}]

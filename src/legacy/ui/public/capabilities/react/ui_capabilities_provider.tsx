@@ -18,8 +18,8 @@
  */
 
 import React, { ReactNode } from 'react';
-import { uiCapabilities } from '..';
 import { UICapabilitiesContext } from './ui_capabilities_context';
+import { capabilities } from '..';
 
 interface Props {
   children: ReactNode;
@@ -30,7 +30,7 @@ export class UICapabilitiesProvider extends React.Component<Props, {}> {
 
   public render() {
     return (
-      <UICapabilitiesContext.Provider value={uiCapabilities}>
+      <UICapabilitiesContext.Provider value={capabilities.get()}>
         {this.props.children}
       </UICapabilitiesContext.Provider>
     );

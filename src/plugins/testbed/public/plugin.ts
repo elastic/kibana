@@ -17,13 +17,24 @@
  * under the License.
  */
 
-import { Plugin, PluginSetupContext } from 'kibana/public';
+import { Plugin, CoreSetup } from 'kibana/public';
 
-export class TestbedPlugin implements Plugin<TestbedPluginSetup> {
-  public setup(core: PluginSetupContext, deps: {}) {
+export class TestbedPlugin implements Plugin<TestbedPluginSetup, TestbedPluginStart> {
+  public setup(core: CoreSetup, deps: {}) {
     // eslint-disable-next-line no-console
-    console.log(`Testbed plugin loaded`);
+    console.log(`Testbed plugin set up`);
+    return {
+      foo: 'bar',
+    };
   }
+
+  public start() {
+    // eslint-disable-next-line no-console
+    console.log(`Testbed plugin started`);
+  }
+
+  public stop() {}
 }
 
 export type TestbedPluginSetup = ReturnType<TestbedPlugin['setup']>;
+export type TestbedPluginStart = ReturnType<TestbedPlugin['start']>;

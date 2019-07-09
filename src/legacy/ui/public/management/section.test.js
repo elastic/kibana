@@ -17,14 +17,16 @@
  * under the License.
  */
 jest.mock('ui/capabilities', () => ({
-  uiCapabilities: {
-    navLinks: {},
-    management: {
-      kibana: {
-        sampleFeature1: true,
-        sampleFeature2: false,
+  capabilities: {
+    get: () => ({
+      navLinks: {},
+      management: {
+        kibana: {
+          sampleFeature1: true,
+          sampleFeature2: false,
+        }
       }
-    }
+    })
   }
 }));
 

@@ -188,7 +188,7 @@ export class AdvancedSettings extends Component {
           showNoResultsMessage={!footerQueryMatched}
           enableSaving={this.props.enableSaving}
         />
-        <PageFooter query={query} onQueryMatchChange={this.onFooterQueryMatchChange} />
+        <PageFooter query={query} onQueryMatchChange={this.onFooterQueryMatchChange} enableSaving={this.props.enableSaving} />
       </div>
     );
   }

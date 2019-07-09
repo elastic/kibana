@@ -13,10 +13,7 @@ exports[`render 1`] = `
   <EuiFlexItem
     grow={false}
   >
-    <EuiTitle
-      size="m"
-      textTransform="none"
-    >
+    <EuiTitle>
       <h2>
         <FormattedMessage
           defaultMessage="Kibana status is {kibanaStatus}"
@@ -25,7 +22,6 @@ exports[`render 1`] = `
             Object {
               "kibanaStatus": <EuiBadge
                 color="secondary"
-                iconSide="left"
               >
                 Green
               </EuiBadge>,
@@ -38,10 +34,7 @@ exports[`render 1`] = `
   <EuiFlexItem
     grow={false}
   >
-    <EuiText
-      grow={true}
-      size="m"
-    >
+    <EuiText>
       <p>
         My Computer
       </p>

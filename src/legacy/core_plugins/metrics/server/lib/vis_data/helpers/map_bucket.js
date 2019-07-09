@@ -17,7 +17,8 @@
  * under the License.
  */
 
-import getAggValue from './get_agg_value';
-export default function mapBucket(metric) {
-  return bucket => [ bucket.key, getAggValue(bucket, metric)];
+import { getAggValue } from './get_agg_value';
+
+export function mapBucket(metric) {
+  return bucket => [bucket.key, getAggValue(bucket, metric)];
 }

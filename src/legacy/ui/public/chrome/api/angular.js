@@ -29,9 +29,7 @@ export function initAngularApi(chrome, internals) {
 
     configureAppAngularModule(kibana);
 
-    kibana
-      .value('chrome', chrome)
-      .run(internals.$initNavLinksDeepWatch);
+    kibana.value('chrome', chrome);
 
     registerSubUrlHooks(kibana, internals);
     directivesProvider(chrome, internals);

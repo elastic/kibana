@@ -17,23 +17,51 @@
  * under the License.
  */
 
-import { ObjectType, TypeOf } from '@kbn/config-schema';
+import { Url } from 'url';
 import { Request } from 'hapi';
 
-import { filterHeaders, Headers } from './headers';
-import { RouteSchemas } from './route';
+import { ObjectType, TypeOf } from '@kbn/config-schema';
 
-export class KibanaRequest<Params, Query, Body> {
+import { deepFreeze, RecursiveReadonly } from '../../../utils';
+import { Headers } from './headers';
+import { RouteMethod, RouteSchemas, RouteConfigOptions } from './route';
+
+const requestSymbol = Symbol('request');
+
+/**
+ * Request specific route information exposed to a handler.
+ * @public
+ * */
+export interface KibanaRequestRoute {
+  path: string;
+  method: RouteMethod | 'patch' | 'options';
+  options: Required<RouteConfigOptions>;
+}
+
+/**
+ * Kibana specific abstraction for an incoming request.
+ * @public
+ * */
+export class KibanaRequest<Params = unknown, Query = unknown, Body = unknown> {
   /**
    * Factory for creating requests. Validates the request before creating an
    * instance of a KibanaRequest.
+   * @internal
+   *
    */
   public static from<P extends ObjectType, Q extends ObjectType, B extends ObjectType>(
     req: Request,
-    routeSchemas: RouteSchemas<P, Q, B> | undefined
+    routeSchemas?: RouteSchemas<P, Q, B>,
+    withoutSecretHeaders: boolean = true
   ) {
     const requestParts = KibanaRequest.validate(req, routeSchemas);
-    return new KibanaRequest(req, requestParts.params, requestParts.query, requestParts.body);
+    return new KibanaRequest(
+      req,
+      requestParts.params,
+      requestParts.query,
+      requestParts.body,
+      withoutSecretHeaders
+    );
   }
 
   /**
@@ -67,13 +95,75 @@ export class KibanaRequest<Params, Query, Body> {
     return { query, params, body };
   }
 
+  public readonly url: Url;
+  public readonly route: RecursiveReadonly<KibanaRequestRoute>;
+  /**
+   * Readonly copy of incoming request headers.
+   * @remarks
+   * This property will contain a `filtered` copy of request headers.
+   */
   public readonly headers: Headers;
 
-  constructor(req: Request, readonly params: Params, readonly query: Query, readonly body: Body) {
-    this.headers = req.headers;
+  /** @internal */
+  protected readonly [requestSymbol]: Request;
+
+  constructor(
+    request: Request,
+    readonly params: Params,
+    readonly query: Query,
+    readonly body: Body,
+    // @ts-ignore we will use this flag as soon as http request proxy is supported in the core
+    // until that time we have to expose all the headers
+    private readonly withoutSecretHeaders: boolean
+  ) {
+    this.url = request.url;
+    this.headers = deepFreeze({ ...request.headers });
+
+    // prevent Symbol exposure via Object.getOwnPropertySymbols()
+    Object.defineProperty(this, requestSymbol, {
+      value: request,
+      enumerable: false,
+    });
+
+    this.route = deepFreeze(this.getRouteInfo());
   }
 
-  public getFilteredHeaders(headersToKeep: string[]) {
-    return filterHeaders(this.headers, headersToKeep);
+  private getRouteInfo() {
+    const request = this[requestSymbol];
+    return {
+      path: request.path,
+      method: request.method,
+      options: {
+        authRequired: request.route.settings.auth !== false,
+        tags: request.route.settings.tags || [],
+      },
+    };
   }
+}
+
+/**
+ * Returns underlying Hapi Request
+ * @internal
+ */
+export const ensureRawRequest = (request: KibanaRequest | Request) =>
+  isKibanaRequest(request) ? request[requestSymbol] : request;
+
+function isKibanaRequest(request: unknown): request is KibanaRequest {
+  return request instanceof KibanaRequest;
+}
+
+function isRequest(request: any): request is Request {
+  try {
+    return request.raw.req && typeof request.raw.req === 'object';
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Checks if an incoming request either KibanaRequest or Legacy.Request
+ * @internal
+ */
+export function isRealRequest(request: unknown): request is KibanaRequest | Request {
+  return isKibanaRequest(request) || isRequest(request);
 }

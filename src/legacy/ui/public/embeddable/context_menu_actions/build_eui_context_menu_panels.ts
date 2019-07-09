@@ -141,7 +141,7 @@ function convertPanelActionToContextMenuItem({
   embeddable?: Embeddable;
 }): EuiContextMenuPanelItemDescriptor {
   const menuPanelItem: EuiContextMenuPanelItemDescriptor = {
-    name: action.displayName,
+    name: action.getDisplayName({ embeddable, containerState }),
     icon: action.icon,
     panel: _.get(action, 'childContextMenuPanel.id'),
     disabled: action.isDisabled({ embeddable, containerState }),

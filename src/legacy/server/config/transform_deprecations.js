@@ -45,6 +45,18 @@ const rewriteBasePath = (settings, log) => {
   }
 };
 
+const configPath = (settings, log) => {
+  if (_.has(process, 'env.CONFIG_PATH')) {
+    log(`Environment variable CONFIG_PATH is deprecated. It has been replaced with KIBANA_PATH_CONF pointing to a config folder`);
+  }
+};
+
+const dataPath = (settings, log) => {
+  if (_.has(process, 'env.DATA_PATH')) {
+    log(`Environment variable "DATA_PATH" will be removed.  It has been replaced with kibana.yml setting "path.data"`);
+  }
+};
+
 const deprecations = [
   //server
   unused('server.xsrf.token'),
@@ -56,6 +68,8 @@ const deprecations = [
   rename('optimize.lazyProxyTimeout', 'optimize.watchProxyTimeout'),
   savedObjectsIndexCheckTimeout,
   rewriteBasePath,
+  configPath,
+  dataPath
 ];
 
 export const transformDeprecations = createTransform(deprecations);

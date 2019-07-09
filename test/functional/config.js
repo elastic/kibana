@@ -19,7 +19,6 @@
 
 import { pageObjects } from './page_objects';
 import { services } from './services';
-import { services as commonServiceProviders } from '../common/services';
 
 export default async function ({ readConfigFile }) {
   const commonConfig = await readConfigFile(require.resolve('../common/config'));
@@ -39,10 +38,7 @@ export default async function ({ readConfigFile }) {
       require.resolve('./apps/xpack'),
     ],
     pageObjects,
-    services: {
-      ...commonServiceProviders,
-      ...services
-    },
+    services,
     servers: commonConfig.get('servers'),
 
     esTestCluster: commonConfig.get('esTestCluster'),
@@ -107,7 +103,10 @@ export default async function ({ readConfigFile }) {
       },
     },
     junit: {
-      reportName: 'UI Functional Tests'
+      reportName: 'Chrome UI Functional Tests'
+    },
+    browser: {
+      type: 'chrome'
     }
   };
 }

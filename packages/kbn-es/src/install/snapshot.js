@@ -45,7 +45,7 @@ exports.downloadSnapshot = async function installSnapshot({
   log.info('install path: %s', chalk.bold(installPath));
   log.info('license: %s', chalk.bold(license));
 
-  const artifact = await Artifact.get(license, version, log);
+  const artifact = await Artifact.getSnapshot(license, version, log);
   const dest = path.resolve(basePath, 'cache', artifact.getFilename());
   await artifact.download(dest);
 
@@ -72,6 +72,7 @@ exports.installSnapshot = async function installSnapshot({
   basePath = BASE_PATH,
   installPath = path.resolve(basePath, version),
   log = defaultLog,
+  bundledJDK = true,
 }) {
   const { downloadPath } = await exports.downloadSnapshot({
     license,
@@ -87,5 +88,6 @@ exports.installSnapshot = async function installSnapshot({
     basePath,
     installPath,
     log,
+    bundledJDK,
   });
 };

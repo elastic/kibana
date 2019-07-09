@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { prepareJson, prepareString, buildPipelineVisFunction } from './build_pipeline';
+import { prepareJson, prepareString, buildPipelineVisFunction, buildPipeline } from './build_pipeline';
 
 jest.mock('ui/agg_types/buckets/date_histogram', () => ({}));
 
@@ -92,6 +92,12 @@ describe('visualize loader pipeline helpers: build pipeline', () => {
       expect(actual).toMatchSnapshot();
     });
 
+    it('handles undefined markdown function', () => {
+      const params = { fontSize: 12, openLinksInNewTab: true, foo: 'bar' };
+      const actual = buildPipelineVisFunction.markdown({ params });
+      expect(actual).toMatchSnapshot();
+    });
+
     describe('handles table function', () => {
       it('without splits or buckets', () => {
         const params = { foo: 'bar' };
@@ -151,15 +157,15 @@ describe('visualize loader pipeline helpers: build pipeline', () => {
     describe('handles metric function', () => {
       const params = { metric: {} };
       it('without buckets', () => {
-        const schemas = { metric: [0, 1] };
+        const schemas = { metric: [{ accessor: 0 }, { accessor: 1 }] };
         const actual = buildPipelineVisFunction.metric({ params }, schemas);
         expect(actual).toMatchSnapshot();
       });
 
       it('with buckets', () => {
         const schemas = {
-          metric: [0, 1],
-          group: [2]
+          metric: [{ accessor: 0 }, { accessor: 1 }],
+          group: [{ accessor: 2 }]
         };
         const actual = buildPipelineVisFunction.metric({ params }, schemas);
         expect(actual).toMatchSnapshot();
@@ -183,6 +189,14 @@ describe('visualize loader pipeline helpers: build pipeline', () => {
         const actual = buildPipelineVisFunction.tagcloud({ params }, schemas);
         expect(actual).toMatchSnapshot();
       });
+
+      it('with boolean param showLabel', () => {
+        const schemas = { metric: [{ accessor: 0 }] };
+        const params = { showLabel: false };
+        const actual = buildPipelineVisFunction.tagcloud({ params }, schemas);
+        expect(actual).toMatchSnapshot();
+      });
+
     });
 
     describe('handles region_map function', () => {
@@ -222,6 +236,27 @@ describe('visualize loader pipeline helpers: build pipeline', () => {
       };
       const actual = buildPipelineVisFunction.pie({ params }, schemas);
       expect(actual).toMatchSnapshot();
+    });
+  });
+
+  describe('buildPipeline', () => {
+    it('calls toExpression on vis_type if it exists', async () => {
+      const vis = {
+        getCurrentState: () => {},
+        getUiState: () => null,
+        isHierarchical: () => false,
+        aggs: {
+          getResponseAggs: () => [],
+        },
+        type: {
+          toExpression: () => 'testing custom expressions',
+        }
+      };
+      const searchSource = {
+        getField: () => null,
+      };
+      const expression = await buildPipeline(vis, { searchSource });
+      expect(expression).toMatchSnapshot();
     });
   });
 });

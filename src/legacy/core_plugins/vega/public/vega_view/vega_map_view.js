@@ -22,6 +22,7 @@ import * as vega from 'vega-lib';
 import { VegaBaseView } from './vega_base_view';
 import { VegaMapLayer } from './vega_map_layer';
 import { i18n }  from '@kbn/i18n';
+import chrome from 'ui/chrome';
 
 export class VegaMapView extends VegaBaseView {
 
@@ -35,11 +36,13 @@ export class VegaMapView extends VegaBaseView {
       const tmsServices = await this._serviceSettings.getTMSServices();
       // In some cases, Vega may be initialized twice, e.g. after awaiting...
       if (!this._$container) return;
-      const mapStyle = mapConfig.mapStyle === 'default' ? 'road_map' : mapConfig.mapStyle;
+      const emsTileLayerId = chrome.getInjected('emsTileLayerId', true);
+      const mapStyle = mapConfig.mapStyle === 'default' ? emsTileLayerId.bright : mapConfig.mapStyle;
+      const isDarkMode = chrome.getUiSettingsClient().get('theme:darkMode');
       baseMapOpts = tmsServices.find((s) => s.id === mapStyle);
       baseMapOpts = {
-        url: await this._serviceSettings.getUrlTemplateForTMSLayer(baseMapOpts),
-        ...baseMapOpts
+        ...baseMapOpts,
+        ...await this._serviceSettings.getAttributesForTMSLayer(baseMapOpts, true, isDarkMode),
       };
       if (!baseMapOpts) {
         this.onWarn(i18n.translate('vega.mapView.mapStyleNotFoundWarningMessage', {

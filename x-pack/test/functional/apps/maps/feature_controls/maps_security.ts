@@ -13,11 +13,10 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
   const PageObjects = getPageObjects(['common', 'settings', 'security', 'maps']);
   const appsMenu = getService('appsMenu');
   const testSubjects = getService('testSubjects');
-  const find = getService('find');
+  const globalNav = getService('globalNav');
 
-  const getMessageText = async () => await (await find.byCssSelector('body>pre')).getVisibleText();
-
-  describe('security feature controls', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/38414
+  describe.skip('security feature controls', () => {
     before(async () => {
       await esArchiver.loadIfNeeded('maps/data');
       await esArchiver.load('maps/kibana');
@@ -80,6 +79,10 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
       it(`allows a map to be deleted`, async () => {
         await PageObjects.maps.deleteSavedMaps('my test map');
       });
+
+      it(`doesn't show read-only badge`, async () => {
+        await globalNav.badgeMissingOrFail();
+      });
     });
 
     describe('global maps read-only privileges', () => {
@@ -133,6 +136,10 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
       it(`does not allow a map to be deleted`, async () => {
         await PageObjects.maps.gotoMapListingPage();
         await testSubjects.missingOrFail('checkboxSelectAll');
+      });
+
+      it(`shows read-only badge`, async () => {
+        await globalNav.badgeExistsOrFail('Read only');
       });
 
       describe('existing map', () => {
@@ -198,7 +205,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
         });
-        const messageText = await getMessageText();
+        const messageText = await PageObjects.common.getBodyText();
         expect(messageText).to.eql(
           JSON.stringify({
             statusCode: 404,

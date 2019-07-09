@@ -17,19 +17,13 @@
  * under the License.
  */
 
-import { ChromeBreadcrumb, ChromeSetup } from '../../../../../core/public';
+import { npStart } from 'ui/new_platform';
+import { ChromeBreadcrumb } from '../../../../../core/public';
 export type Breadcrumb = ChromeBreadcrumb;
 
 export type BreadcrumbsApi = ReturnType<typeof createBreadcrumbsApi>['breadcrumbs'];
 
-let newPlatformChrome: ChromeSetup;
-export function __newPlatformInit__(instance: ChromeSetup) {
-  if (newPlatformChrome) {
-    throw new Error('ui/chrome/api/breadcrumbs is already initialized');
-  }
-
-  newPlatformChrome = instance;
-}
+const newPlatformChrome = npStart.core.chrome;
 
 function createBreadcrumbsApi(chrome: { [key: string]: any }) {
   let currentBreadcrumbs: Breadcrumb[] = [];
@@ -71,6 +65,13 @@ function createBreadcrumbsApi(chrome: { [key: string]: any }) {
        */
       filter(fn: (breadcrumb: Breadcrumb, i: number, all: Breadcrumb[]) => boolean) {
         newPlatformChrome.setBreadcrumbs(currentBreadcrumbs.filter(fn));
+      },
+
+      /**
+       * Remove last element of the breadcrumb
+       */
+      pop() {
+        newPlatformChrome.setBreadcrumbs(currentBreadcrumbs.slice(0, -1));
       },
     },
   };

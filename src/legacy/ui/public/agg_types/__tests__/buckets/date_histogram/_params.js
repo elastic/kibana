@@ -31,10 +31,11 @@ import { timefilter } from 'ui/timefilter';
 
 const config = chrome.getUiSettingsClient();
 
-describe('params', function () {
+describe('date_histogram params', function () {
 
   let paramWriter;
   let writeInterval;
+  let write;
 
   let getTimeBounds;
   let timeField;
@@ -50,6 +51,9 @@ describe('params', function () {
     writeInterval = function (interval, timeRange) {
       return paramWriter.write({ interval: interval, field: timeField, timeRange: timeRange });
     };
+    write = (params) => {
+      return paramWriter.write({ interval: '10s', ...params });
+    };
 
     const now = moment();
     getTimeBounds = function (n, units) {
@@ -63,26 +67,30 @@ describe('params', function () {
   }));
 
   describe('interval', function () {
-    it('accepts a valid interval', function () {
+    it('accepts a valid calendar interval', function () {
       const output = writeInterval('d');
-      expect(output.params).to.have.property('interval', '1d');
+      expect(output.params).to.have.property('calendar_interval', '1d');
     });
 
-    it('ignores invalid intervals', function () {
-      const output = writeInterval('foo');
-      expect(output.params).to.have.property('interval', '0ms');
+    it('accepts a valid fixed interval', () => {
+      const output = writeInterval('100s');
+      expect(output.params).to.have.property('fixed_interval', '100s');
+    });
+
+    it('throws error when interval is invalid', function () {
+      expect(() => writeInterval('foo')).to.throw('TypeError: "foo" is not a valid interval.');
     });
 
     it('automatically picks an interval', function () {
       const timeBounds = getTimeBounds(15, 'm');
       const output = writeInterval('auto', timeBounds);
-      expect(output.params.interval).to.be('30s');
+      expect(output.params).to.have.property('fixed_interval', '30s');
     });
 
     it('scales up the interval if it will make too many buckets', function () {
       const timeBounds = getTimeBounds(30, 'm');
       const output = writeInterval('s', timeBounds);
-      expect(output.params.interval).to.be('10s');
+      expect(output.params).to.have.property('fixed_interval', '10s');
       expect(output.metricScaleText).to.be('second');
       expect(output.metricScale).to.be(0.1);
     });
@@ -90,7 +98,7 @@ describe('params', function () {
     it('does not scale down the interval', function () {
       const timeBounds = getTimeBounds(1, 'm');
       const output = writeInterval('h', timeBounds);
-      expect(output.params.interval).to.be('1h');
+      expect(output.params).to.have.property('calendar_interval', '1h');
       expect(output.metricScaleText).to.be(undefined);
       expect(output.metricScale).to.be(undefined);
     });
@@ -141,15 +149,21 @@ describe('params', function () {
     });
 
     it('should use the specified time_zone', () => {
-      const output = paramWriter.write({ time_zone: 'Europe/Kiev' });
+      const output = write({ time_zone: 'Europe/Kiev' });
       expect(output.params).to.have.property('time_zone', 'Europe/Kiev');
     });
 
     it('should use the Kibana time_zone if no parameter specified', () => {
       config.isDefault.withArgs('dateFormat:tz').returns(false);
       config.get.withArgs('dateFormat:tz').returns('Europe/Riga');
-      const output = paramWriter.write({});
+      const output = write({});
       expect(output.params).to.have.property('time_zone', 'Europe/Riga');
+    });
+
+    it('should use the fixed time_zone from the index pattern typeMeta', () => {
+      _.set(paramWriter.indexPattern, ['typeMeta', 'aggs', 'date_histogram', timeField, 'time_zone'], 'Europe/Rome');
+      const output = write({ field: timeField });
+      expect(output.params).to.have.property('time_zone', 'Europe/Rome');
     });
 
     afterEach(() => {
@@ -162,7 +176,7 @@ describe('params', function () {
     it('should write a long value if a moment passed in', function () {
       const then = moment(0);
       const now = moment(500);
-      const output = paramWriter.write({
+      const output = write({
         extended_bounds: {
           min: then,
           max: now
@@ -180,7 +194,7 @@ describe('params', function () {
     it('should write a long if a long is passed', function () {
       const then = 0;
       const now = 500;
-      const output = paramWriter.write({
+      const output = write({
         extended_bounds: {
           min: then,
           max: now

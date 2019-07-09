@@ -19,6 +19,7 @@
 
 export const mockPlugin = {
   setup: jest.fn(),
+  start: jest.fn(),
   stop: jest.fn(),
 };
 export const mockInitializer = jest.fn(() => mockPlugin);

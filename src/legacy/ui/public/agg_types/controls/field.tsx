@@ -30,16 +30,23 @@ import { FieldParamType } from '../param_types';
 
 const label = i18n.translate('common.ui.aggTypes.field.fieldLabel', { defaultMessage: 'Field' });
 
+interface FieldParamEditorProps extends AggParamEditorProps<FieldParamType> {
+  customError?: string;
+  customLabel?: string;
+}
+
 function FieldParamEditor({
   agg,
   aggParam,
+  customError,
+  customLabel,
   indexedFields = [],
-  isInvalid,
+  showValidation,
   value,
   setTouched,
   setValidity,
   setValue,
-}: AggParamEditorProps<FieldParamType>) {
+}: FieldParamEditorProps) {
   const selectedOptions: ComboBoxGroupedOption[] = value
     ? [{ label: value.displayName, value }]
     : [];
@@ -54,7 +61,7 @@ function FieldParamEditor({
       aggParam.onChange(agg);
     }
   };
-  const errors = [];
+  const errors = customError ? [customError] : [];
 
   if (!indexedFields.length) {
     errors.push(
@@ -67,23 +74,40 @@ function FieldParamEditor({
         },
       })
     );
-    setTouched();
   }
 
-  useEffect(
-    () => {
-      setValidity(!!value);
-    },
-    [value]
-  );
+  const isValid = !!value && !errors.length;
+
+  useEffect(() => {
+    setValidity(isValid);
+
+    if (!!errors.length) {
+      setTouched();
+    }
+  }, [isValid]);
+
+  useEffect(() => {
+    // set field if only one available
+    if (indexedFields.length !== 1) {
+      return;
+    }
+
+    const options = indexedFields[0].options;
+
+    if (!options) {
+      setValue(indexedFields[0].value);
+    } else if (options.length === 1) {
+      setValue(options[0].value);
+    }
+  }, []);
 
   return (
     <EuiFormRow
-      label={label}
-      isInvalid={isInvalid}
+      label={customLabel || label}
+      isInvalid={showValidation ? !isValid : false}
       fullWidth={true}
       error={errors}
-      className="visEditorSidebar__aggParamFormRow"
+      compressed
     >
       <EuiComboBox
         placeholder={i18n.translate('common.ui.aggTypes.field.selectFieldPlaceholder', {
@@ -94,7 +118,7 @@ function FieldParamEditor({
         selectedOptions={selectedOptions}
         singleSelection={{ asPlainText: true }}
         isClearable={false}
-        isInvalid={isInvalid}
+        isInvalid={showValidation ? !isValid : false}
         onChange={onChange}
         onBlur={setTouched}
         data-test-subj="visDefaultEditorField"

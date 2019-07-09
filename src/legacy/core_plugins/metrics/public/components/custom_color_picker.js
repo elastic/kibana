@@ -20,7 +20,13 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 
-import { ColorWrap as colorWrap, Saturation, Hue, Alpha, Checkboard } from 'react-color/lib/components/common';
+import {
+  ColorWrap as colorWrap,
+  Saturation,
+  Hue,
+  Alpha,
+  Checkboard,
+} from 'react-color/lib/components/common';
 import ChromeFields from 'react-color/lib/components/chrome/ChromeFields';
 import ChromePointer from 'react-color/lib/components/chrome/ChromePointer';
 import ChromePointerCircle from 'react-color/lib/components/chrome/ChromePointerCircle';
@@ -28,7 +34,7 @@ import CompactColor from 'react-color/lib/components/compact/CompactColor';
 import color from 'react-color/lib/helpers/color';
 import shallowCompare from 'react-addons-shallow-compare';
 
-export class CustomColorPicker extends Component {
+class CustomColorPickerUI extends Component {
   constructor(props) {
     super(props);
     this.handleChange = this.handleChange.bind(this);
@@ -47,42 +53,37 @@ export class CustomColorPicker extends Component {
 
     const styles = {
       active: {
-        background: `rgba(${ rgb.r }, ${ rgb.g }, ${ rgb.b }, ${ rgb.a })`,
+        background: `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${rgb.a})`,
       },
       Saturation: {
-        radius: '2px 2px 0 0 '
+        radius: '2px 2px 0 0 ',
       },
       Hue: {
         radius: '2px',
       },
       Alpha: {
         radius: '2px',
-      }
+      },
     };
 
-    const handleSwatchChange = (data) => {
+    const handleSwatchChange = data => {
       if (data.hex) {
-        color.isValidHex(data.hex) && this.props.onChange({
-          hex: data.hex,
-          source: 'hex',
-        });
+        color.isValidHex(data.hex) &&
+          this.props.onChange({
+            hex: data.hex,
+            source: 'hex',
+          });
       } else {
         this.props.onChange(data);
       }
     };
 
-    const swatches = this.props.colors.map((c) => {
-      return (
-        <CompactColor
-          key={c}
-          color={c}
-          onClick={handleSwatchChange}
-        />
-      );
+    const swatches = this.props.colors.map(c => {
+      return <CompactColor key={c} color={c} onClick={handleSwatchChange} />;
     });
 
     return (
-      <div className="tvbColorPickerPopUp">
+      <div className="tvbColorPickerPopUp" data-test-subj="tvbColorPickerPopUp">
         <div className="tvbColorPickerPopUp__saturation">
           <Saturation
             style={styles.Saturation}
@@ -93,14 +94,32 @@ export class CustomColorPicker extends Component {
         </div>
         <div className="tvbColorPickerPopUp__body">
           <div className="tvbColorPickerPopUp__controls">
-            <div className={this.props.disableAlpha ? 'tvbColorPickerPopUp__color-disableAlpha' : 'tvbColorPickerPopUp__color'}>
-              <div className={this.props.disableAlpha ? 'tvbColorPickerPopUp__swatch-disableAlpha' : 'tvbColorPickerPopUp__swatch'}>
+            <div
+              className={
+                this.props.disableAlpha
+                  ? 'tvbColorPickerPopUp__color-disableAlpha'
+                  : 'tvbColorPickerPopUp__color'
+              }
+            >
+              <div
+                className={
+                  this.props.disableAlpha
+                    ? 'tvbColorPickerPopUp__swatch-disableAlpha'
+                    : 'tvbColorPickerPopUp__swatch'
+                }
+              >
                 <div className="tvbColorPickerPopUp__active" />
                 <Checkboard />
               </div>
             </div>
             <div className="tvbColorPickerPopUp__toggles">
-              <div className={this.props.disableAlpha ? 'tvbColorPickerPopUp__hue-disableAlpha' : 'tvbColorPickerPopUp__hue'}>
+              <div
+                className={
+                  this.props.disableAlpha
+                    ? 'tvbColorPickerPopUp__hue-disableAlpha'
+                    : 'tvbColorPickerPopUp__hue'
+                }
+              >
                 <Hue
                   style={styles.Hue}
                   {...this.props}
@@ -108,7 +127,13 @@ export class CustomColorPicker extends Component {
                   onChange={this.handleChange}
                 />
               </div>
-              <div className={this.props.disableAlpha ? 'tvbColorPickerPopUp__alpha-disableAlpha' : 'tvbColorPickerPopUp__alpha'}>
+              <div
+                className={
+                  this.props.disableAlpha
+                    ? 'tvbColorPickerPopUp__alpha-disableAlpha'
+                    : 'tvbColorPickerPopUp__alpha'
+                }
+              >
                 <Alpha
                   style={styles.Alpha}
                   {...this.props}
@@ -123,30 +148,58 @@ export class CustomColorPicker extends Component {
             onChange={this.handleChange}
             disableAlpha={this.props.disableAlpha}
           />
-          <div className="tvbColorPickerPopUp__swatches">
-            {swatches}
-          </div>
+          <div className="tvbColorPickerPopUp__swatches">{swatches}</div>
         </div>
       </div>
     );
   }
 }
 
-CustomColorPicker.defaultProps = {
+CustomColorPickerUI.defaultProps = {
   colors: [
-    '#4D4D4D', '#999999', '#FFFFFF', '#F44E3B', '#FE9200', '#FCDC00',
-    '#DBDF00', '#A4DD00', '#68CCCA', '#73D8FF', '#AEA1FF', '#FDA1FF',
-    '#333333', '#808080', '#cccccc', '#D33115', '#E27300', '#FCC400',
-    '#B0BC00', '#68BC00', '#16A5A5', '#009CE0', '#7B64FF', '#FA28FF',
-    '#0F1419', '#666666', '#B3B3B3', '#9F0500', '#C45100', '#FB9E00',
-    '#808900', '#194D33', '#0C797D', '#0062B1', '#653294', '#AB149E',
+    '#4D4D4D',
+    '#999999',
+    '#FFFFFF',
+    '#F44E3B',
+    '#FE9200',
+    '#FCDC00',
+    '#DBDF00',
+    '#A4DD00',
+    '#68CCCA',
+    '#73D8FF',
+    '#AEA1FF',
+    '#FDA1FF',
+    '#333333',
+    '#808080',
+    '#cccccc',
+    '#D33115',
+    '#E27300',
+    '#FCC400',
+    '#B0BC00',
+    '#68BC00',
+    '#16A5A5',
+    '#009CE0',
+    '#7B64FF',
+    '#FA28FF',
+    '#0F1419',
+    '#666666',
+    '#B3B3B3',
+    '#9F0500',
+    '#C45100',
+    '#FB9E00',
+    '#808900',
+    '#194D33',
+    '#0C797D',
+    '#0062B1',
+    '#653294',
+    '#AB149E',
   ],
 };
 
-CustomColorPicker.propTypes = {
+CustomColorPickerUI.propTypes = {
   color: PropTypes.oneOfType([PropTypes.string, PropTypes.object]),
   onChangeComplete: PropTypes.func,
-  onChange: PropTypes.func
+  onChange: PropTypes.func,
 };
 
-export default colorWrap(CustomColorPicker);
+export const CustomColorPicker = colorWrap(CustomColorPickerUI);

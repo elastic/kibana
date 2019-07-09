@@ -27,6 +27,7 @@ import { createRoot } from '../../../../../test_utils/kbn_server';
   // to allow the process to exit naturally
   try {
     await root.setup();
+    await root.start();
   } finally {
     await root.shutdown();
   }

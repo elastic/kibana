@@ -17,63 +17,78 @@
  * under the License.
  */
 
-import { Observable, Subject, Subscription } from 'rxjs';
-import { I18nSetup } from '../i18n';
-import { ToastsService } from './toasts';
+import { i18n } from '@kbn/i18n';
 
-interface NotificationServiceParams {
-  targetDomElement$: Observable<HTMLElement>;
+import { Subscription } from 'rxjs';
+import { I18nStart } from '../i18n';
+import { ToastsService, ToastsSetup, ToastsStart } from './toasts';
+import { UiSettingsClientContract } from '../ui_settings';
+import { OverlayStart } from '../overlays';
+
+interface SetupDeps {
+  uiSettings: UiSettingsClientContract;
 }
 
-interface NotificationsServiceDeps {
-  i18n: I18nSetup;
+interface StartDeps {
+  i18n: I18nStart;
+  overlays: OverlayStart;
+  targetDomElement: HTMLElement;
 }
 
 /** @public */
 export class NotificationsService {
   private readonly toasts: ToastsService;
-
-  private readonly toastsContainer$: Subject<HTMLElement>;
-  private domElemSubscription?: Subscription;
+  private uiSettingsErrorSubscription?: Subscription;
   private targetDomElement?: HTMLElement;
 
-  constructor(private readonly params: NotificationServiceParams) {
-    this.toastsContainer$ = new Subject<HTMLElement>();
-    this.toasts = new ToastsService({
-      targetDomElement$: this.toastsContainer$.asObservable(),
-    });
+  constructor() {
+    this.toasts = new ToastsService();
   }
 
-  public setup({ i18n }: NotificationsServiceDeps) {
-    this.domElemSubscription = this.params.targetDomElement$.subscribe({
-      next: targetDomElement => {
-        this.cleanupTargetDomElement();
-        this.targetDomElement = targetDomElement;
+  public setup({ uiSettings }: SetupDeps): NotificationsSetup {
+    const notificationSetup = { toasts: this.toasts.setup({ uiSettings }) };
 
-        const toastsContainer = document.createElement('div');
-        targetDomElement.appendChild(toastsContainer);
-        this.toastsContainer$.next(toastsContainer);
-      },
+    this.uiSettingsErrorSubscription = uiSettings.getUpdateErrors$().subscribe(error => {
+      notificationSetup.toasts.addDanger({
+        title: i18n.translate('core.notifications.unableUpdateUISettingNotificationMessageTitle', {
+          defaultMessage: 'Unable to update UI setting',
+        }),
+        text: error.message,
+      });
     });
 
-    return { toasts: this.toasts.setup({ i18n }) };
+    return notificationSetup;
+  }
+
+  public start({ i18n: i18nDep, overlays, targetDomElement }: StartDeps): NotificationsStart {
+    this.targetDomElement = targetDomElement;
+    const toastsContainer = document.createElement('div');
+    targetDomElement.appendChild(toastsContainer);
+
+    return {
+      toasts: this.toasts.start({ i18n: i18nDep, overlays, targetDomElement: toastsContainer }),
+    };
   }
 
   public stop() {
     this.toasts.stop();
-    this.cleanupTargetDomElement();
 
-    if (this.domElemSubscription) {
-      this.domElemSubscription.unsubscribe();
-    }
-  }
-
-  private cleanupTargetDomElement() {
     if (this.targetDomElement) {
       this.targetDomElement.textContent = '';
+    }
+
+    if (this.uiSettingsErrorSubscription) {
+      this.uiSettingsErrorSubscription.unsubscribe();
     }
   }
 }
 
 /** @public */
-export type NotificationsSetup = ReturnType<NotificationsService['setup']>;
+export interface NotificationsSetup {
+  toasts: ToastsSetup;
+}
+
+/** @public */
+export interface NotificationsStart {
+  toasts: ToastsStart;
+}

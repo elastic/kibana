@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { Plugin, PluginSetupContext } from 'kibana/public';
+import { Plugin, CoreSetup } from 'kibana/public';
 import { CorePluginAPluginSetup } from '../../core_plugin_a/public/plugin';
 
 declare global {
@@ -30,10 +30,15 @@ export interface CorePluginBDeps {
   core_plugin_a: CorePluginAPluginSetup;
 }
 
-export class CorePluginBPlugin implements Plugin<CorePluginBPluginSetup, CorePluginBDeps> {
-  public setup(core: PluginSetupContext, deps: CorePluginBDeps) {
+export class CorePluginBPlugin
+  implements Plugin<CorePluginBPluginSetup, CorePluginBPluginStart, CorePluginBDeps> {
+  public setup(core: CoreSetup, deps: CorePluginBDeps) {
     window.corePluginB = `Plugin A said: ${deps.core_plugin_a.getGreeting()}`;
   }
+
+  public start() {}
+  public stop() {}
 }
 
 export type CorePluginBPluginSetup = ReturnType<CorePluginBPlugin['setup']>;
+export type CorePluginBPluginStart = ReturnType<CorePluginBPlugin['start']>;

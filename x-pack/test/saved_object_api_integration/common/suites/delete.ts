@@ -6,7 +6,7 @@
 
 import expect from '@kbn/expect';
 import { SuperTest } from 'supertest';
-import { DEFAULT_SPACE_ID } from '../../../../plugins/spaces/common/constants';
+import { DEFAULT_SPACE_ID } from '../../../../legacy/plugins/spaces/common/constants';
 import { getIdPrefix, getUrlPrefix } from '../lib/space_test_utils';
 import { DescribeFn, TestDefinitionAuthentication } from '../lib/types';
 
@@ -90,9 +90,7 @@ export function deleteTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
           .expect(tests.spaceAware.statusCode)
           .then(tests.spaceAware.response));
 
-      it(`should return ${
-        tests.notSpaceAware.statusCode
-      } when deleting a non-space-aware doc`, async () =>
+      it(`should return ${tests.notSpaceAware.statusCode} when deleting a non-space-aware doc`, async () =>
         await supertest
           .delete(
             `${getUrlPrefix(

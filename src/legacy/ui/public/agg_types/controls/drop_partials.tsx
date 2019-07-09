@@ -18,44 +18,23 @@
  */
 
 import React from 'react';
-import { get } from 'lodash';
-import { EuiSpacer, EuiSwitch, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { AggParamEditorProps } from 'ui/vis/editors/default';
-import { AggConfig } from 'ui/vis';
+import { SwitchParamEditor } from './switch';
 
-function shouldShow(agg: AggConfig): boolean {
-  const fieldName = get(agg, 'params.field.name');
-
-  return fieldName && fieldName === agg.getIndexPattern().timeFieldName;
-}
-
-function DropPartialsParamEditor({ agg, aggParam, value, setValue }: AggParamEditorProps<boolean>) {
-  if (!shouldShow(agg)) {
-    return null;
-  }
-
-  const content = i18n.translate('common.ui.aggTypes.dropPartialBucketsTooltip', {
-    defaultMessage:
-      "Remove buckets that span time outside the time range so the histogram doesn't start and end with incomplete buckets.",
-  });
-
-  const label = i18n.translate('common.ui.aggTypes.dropPartialBucketsLabel', {
-    defaultMessage: 'Drop partial buckets',
-  });
-
+function DropPartialsParamEditor(props: AggParamEditorProps<boolean>) {
   return (
-    <>
-      <EuiToolTip content={content} delay="long" position="right">
-        <EuiSwitch
-          label={label}
-          checked={value}
-          data-test-subj="dropPartialBucketsCheckbox"
-          onChange={ev => setValue(ev.target.checked)}
-        />
-      </EuiToolTip>
-      <EuiSpacer size="s" />
-    </>
+    <SwitchParamEditor
+      dataTestSubj="dropPartialBucketsCheckbox"
+      displayLabel={i18n.translate('common.ui.aggTypes.dropPartialBucketsLabel', {
+        defaultMessage: 'Drop partial buckets',
+      })}
+      displayToolTip={i18n.translate('common.ui.aggTypes.dropPartialBucketsTooltip', {
+        defaultMessage:
+          "Remove buckets that span time outside the time range so the histogram doesn't start and end with incomplete buckets.",
+      })}
+      {...props}
+    />
   );
 }
 

@@ -15,6 +15,7 @@ exports[`EmbeddedVisualizeHandler update should add provided data- attributes to
   data-loading=""
   data-render-complete="false"
   data-rendering-count="0"
+  data-shared-item=""
 />
 `;
 
@@ -24,5 +25,6 @@ exports[`EmbeddedVisualizeHandler update should remove null data- attributes fro
   data-loading=""
   data-render-complete="false"
   data-rendering-count="0"
+  data-shared-item=""
 />
 `;

@@ -56,10 +56,6 @@
  * 4. Fix an IE bug which causes the last child to overflow the container.
  * 5. Fixing this bug means we now need to align the children to the right.
  */
-:focus:not([class^="eui"]) {
-  -webkit-animation: 350ms cubic-bezier(0.694, 0.0482, 0.335, 1) 1 normal forwards focusRingAnimate;
-          animation: 350ms cubic-bezier(0.694, 0.0482, 0.335, 1) 1 normal forwards focusRingAnimate; }
-
 /**
  * 1. Required for IE11.
  */

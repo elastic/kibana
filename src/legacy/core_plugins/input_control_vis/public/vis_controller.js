@@ -31,7 +31,9 @@ class VisController {
     this.controls = [];
 
     this.queryBarUpdateHandler = this.updateControlsFromKbn.bind(this);
-    this.vis.API.queryFilter.on('update', this.queryBarUpdateHandler);
+
+    this.updateSubsciption = this.vis.API.queryFilter.getUpdates$()
+      .subscribe(this.queryBarUpdateHandler);
   }
 
   async render(visData, visParams, status) {
@@ -46,7 +48,7 @@ class VisController {
   }
 
   destroy() {
-    this.vis.API.queryFilter.off('update', this.queryBarUpdateHandler);
+    this.updateSubsciption.unsubscribe();
     unmountComponentAtNode(this.el);
   }
 

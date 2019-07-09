@@ -17,11 +17,11 @@
  * under the License.
  */
 
-import parseSettings from './parse_settings';
-import getBucketsPath from './get_buckets_path';
+import { getBucketsPath } from './get_buckets_path';
 import { parseInterval } from './parse_interval';
 import { set, isEmpty } from 'lodash';
 import { i18n } from '@kbn/i18n';
+import { MODEL_SCRIPTS } from './moving_fn_scripts';
 
 function checkMetric(metric, fields) {
   fields.forEach(field => {
@@ -29,7 +29,7 @@ function checkMetric(metric, fields) {
       throw new Error(
         i18n.translate('tsvb.metricMissingErrorMessage', {
           defaultMessage: 'Metric missing {field}',
-          values: { field }
+          values: { field },
         })
       );
     }
@@ -63,7 +63,7 @@ function extendStatsBucket(bucket, metrics) {
   return body;
 }
 
-export default {
+export const bucketTransform = {
   count: () => {
     return {
       bucket_script: {
@@ -78,11 +78,13 @@ export default {
   },
   static: bucket => {
     checkMetric(bucket, ['value']);
+    // Anything containing a decimal point or an exponent is considered decimal value
+    const isDecimalValue = Boolean(bucket.value.match(/[.e]/i));
     return {
       bucket_script: {
         buckets_path: { count: '_count' },
         script: {
-          source: bucket.value,
+          source: isDecimalValue ? bucket.value : `${bucket.value}L`,
           lang: 'painless',
         },
         gap_policy: 'skip',
@@ -115,9 +117,7 @@ export default {
       },
     };
     if (bucket.order_by) {
-      set(body, 'aggs.docs.top_hits.sort', [
-        { [bucket.order_by]: { order: bucket.order } },
-      ]);
+      set(body, 'aggs.docs.top_hits.sort', [{ [bucket.order_by]: { order: bucket.order } }]);
     }
     return body;
   },
@@ -132,7 +132,7 @@ export default {
 
   percentile: bucket => {
     checkMetric(bucket, ['type', 'field', 'percentiles']);
-    let percents = bucket.percentiles.map(p => p.value ? Number(p.value) : 0);
+    let percents = bucket.percentiles.map(p => (p.value ? Number(p.value) : 0));
     if (bucket.percentiles.some(p => p.mode === 'band')) {
       percents = percents.concat(
         bucket.percentiles.filter(p => p.percentile).map(p => p.percentile)
@@ -153,12 +153,10 @@ export default {
     return {
       percentile_ranks: {
         field: bucket.field,
-        values: (bucket.values || [])
-          .map(value => isEmpty(value) ? 0 : value),
+        values: (bucket.values || []).map(value => (isEmpty(value) ? 0 : value)),
       },
     };
   },
-
 
   derivative: (bucket, metrics, bucketSize) => {
     checkMetric(bucket, ['type', 'field']);
@@ -171,9 +169,7 @@ export default {
     };
     if (bucket.gap_policy) body.derivative.gap_policy = bucket.gap_policy;
     if (bucket.unit) {
-      body.derivative.unit = /^([\d]+)([shmdwMy]|ms)$/.test(bucket.unit)
-        ? bucket.unit
-        : bucketSize;
+      body.derivative.unit = /^([\d]+)([shmdwMy]|ms)$/.test(bucket.unit) ? bucket.unit : bucketSize;
     }
     return body;
   },
@@ -205,21 +201,14 @@ export default {
 
   moving_average: (bucket, metrics) => {
     checkMetric(bucket, ['type', 'field']);
-    const body = {
-      moving_avg: {
+
+    return {
+      moving_fn: {
         buckets_path: getBucketsPath(bucket.field, metrics),
-        model: bucket.model || 'simple',
-        gap_policy: 'skip', // seems sane
+        window: bucket.window,
+        script: MODEL_SCRIPTS[bucket.model_type](bucket),
       },
     };
-    if (bucket.gap_policy) body.moving_avg.gap_policy = bucket.gap_policy;
-    if (bucket.window) body.moving_avg.window = Number(bucket.window);
-    if (bucket.minimize) body.moving_avg.minimize = Boolean(bucket.minimize);
-    if (bucket.predict) body.moving_avg.predict = Number(bucket.predict);
-    if (bucket.settings) {
-      body.moving_avg.settings = parseSettings(bucket.settings);
-    }
-    return body;
   },
 
   calculation: (bucket, metrics, bucketSize) => {

@@ -18,11 +18,7 @@
  */
 
 import PropTypes from 'prop-types';
-import React from 'react';
-import FieldSelect from './aggs/field_select';
-import createSelectHandler from './lib/create_select_handler';
-import createTextHandler from './lib/create_text_handler';
-import YesNo from './yes_no';
+import React, { useContext } from 'react';
 import {
   htmlIdGenerator,
   EuiFieldText,
@@ -34,6 +30,32 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
+import { FieldSelect } from './aggs/field_select';
+import { createSelectHandler } from './lib/create_select_handler';
+import { createTextHandler } from './lib/create_text_handler';
+import { YesNo } from './yes_no';
+import { ES_TYPES } from '../../common/es_types';
+import { FormValidationContext } from '../contexts/form_validation_context';
+import {
+  isGteInterval,
+  validateReInterval,
+  isAutoInterval,
+  AUTO_INTERVAL,
+} from './lib/get_interval';
+
+const RESTRICT_FIELDS = [ES_TYPES.DATE];
+
+const validateIntervalValue = intervalValue => {
+  const isAutoOrGteInterval = isGteInterval(intervalValue) || isAutoInterval(intervalValue);
+
+  if (isAutoOrGteInterval) {
+    return {
+      isValid: true,
+    };
+  }
+  return validateReInterval(intervalValue);
+};
+
 export const IndexPattern = props => {
   const { fields, prefix } = props;
   const handleSelectChange = createSelectHandler(props.onChange);
@@ -42,31 +64,37 @@ export const IndexPattern = props => {
   const indexPatternName = `${prefix}index_pattern`;
   const intervalName = `${prefix}interval`;
   const dropBucketName = `${prefix}drop_last_bucket`;
+  const updateControlValidity = useContext(FormValidationContext);
 
   const defaults = {
     default_index_pattern: '',
     [indexPatternName]: '*',
-    [intervalName]: 'auto',
-    [dropBucketName]: 1
+    [intervalName]: AUTO_INTERVAL,
+    [dropBucketName]: 1,
   };
 
   const htmlId = htmlIdGenerator();
-
   const model = { ...defaults, ...props.model };
+  const isDefaultIndexPatternUsed = model.default_index_pattern && !model[indexPatternName];
+  const intervalValidation = validateIntervalValue(model[intervalName]);
+
+  updateControlValidity(intervalName, intervalValidation.isValid);
+
   return (
     <div className={props.className}>
       <EuiFlexGroup responsive={false} wrap={true}>
         <EuiFlexItem>
           <EuiFormRow
             id={htmlId('indexPattern')}
-            label={(<FormattedMessage
-              id="tsvb.indexPatternLabel"
-              defaultMessage="Index pattern"
-            />)}
-            helpText={(model.default_index_pattern && !model[indexPatternName] && <FormattedMessage
-              id="tsvb.indexPattern.searchByDefaultIndex"
-              defaultMessage="Default index pattern is used. To query all indexes use *"
-            />)}
+            label={<FormattedMessage id="tsvb.indexPatternLabel" defaultMessage="Index pattern" />}
+            helpText={
+              isDefaultIndexPatternUsed && (
+                <FormattedMessage
+                  id="tsvb.indexPattern.searchByDefaultIndex"
+                  defaultMessage="Default index pattern is used. To query all indexes use *"
+                />
+              )
+            }
             fullWidth
           >
             <EuiFieldText
@@ -82,42 +110,46 @@ export const IndexPattern = props => {
         <EuiFlexItem>
           <EuiFormRow
             id={htmlId('timeField')}
-            label={(<FormattedMessage
-              id="tsvb.indexPattern.timeFieldLabel"
-              defaultMessage="Time field"
-            />)}
+            label={
+              <FormattedMessage id="tsvb.indexPattern.timeFieldLabel" defaultMessage="Time field" />
+            }
             fullWidth
           >
             <FieldSelect
               data-test-subj="metricsIndexPatternFieldsSelect"
-              restrict="date"
+              restrict={RESTRICT_FIELDS}
               value={model[timeFieldName]}
               disabled={props.disabled}
               onChange={handleSelectChange(timeFieldName)}
               indexPattern={model[indexPatternName]}
               fields={fields}
+              placeholder={isDefaultIndexPatternUsed ? model.default_timefield : undefined}
               fullWidth
             />
           </EuiFormRow>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiFormRow
+            isInvalid={!intervalValidation.isValid}
+            error={intervalValidation.errorMessage}
             id={htmlId('interval')}
-            label={(<FormattedMessage
-              id="tsvb.indexPattern.intervalLabel"
-              defaultMessage="Interval"
-            />)}
-            helpText={(<FormattedMessage
-              id="tsvb.indexPattern.intervalHelpText"
-              defaultMessage="Examples: auto, 1m, 1d, 7d, 1y, >=1m"
-              description="auto, 1m, 1d, 7d, 1y, >=1m are required values and must not be translated."
-            />)}
+            label={
+              <FormattedMessage id="tsvb.indexPattern.intervalLabel" defaultMessage="Interval" />
+            }
+            helpText={
+              <FormattedMessage
+                id="tsvb.indexPattern.intervalHelpText"
+                defaultMessage="Examples: auto, 1m, 1d, 7d, 1y, >=1m"
+                description="auto, 1m, 1d, 7d, 1y, >=1m are required values and must not be translated."
+              />
+            }
           >
             <EuiFieldText
+              isInvalid={!intervalValidation.isValid}
               disabled={props.disabled}
-              onChange={handleTextChange(intervalName, 'auto')}
+              onChange={handleTextChange(intervalName, AUTO_INTERVAL)}
               value={model[intervalName]}
-              placeholder={'auto'}
+              placeholder={AUTO_INTERVAL}
             />
           </EuiFormRow>
         </EuiFlexItem>
@@ -129,11 +161,7 @@ export const IndexPattern = props => {
             />
           </EuiFormLabel>
           <EuiSpacer size="s" />
-          <YesNo
-            value={model[dropBucketName]}
-            name={dropBucketName}
-            onChange={props.onChange}
-          />
+          <YesNo value={model[dropBucketName]} name={dropBucketName} onChange={props.onChange} />
         </EuiFlexItem>
       </EuiFlexGroup>
     </div>
@@ -151,5 +179,5 @@ IndexPattern.propTypes = {
   onChange: PropTypes.func.isRequired,
   prefix: PropTypes.string,
   disabled: PropTypes.bool,
-  className: PropTypes.string
+  className: PropTypes.string,
 };

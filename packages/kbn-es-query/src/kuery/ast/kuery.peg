@@ -66,8 +66,11 @@ Expression
   / FieldValueExpression
   / ValueExpression
 
+Field "fieldName"
+  = Literal
+
 FieldRangeExpression
-  = field:Literal Space* operator:RangeOperator Space* value:Literal {
+  = field:Field Space* operator:RangeOperator Space* value:Literal {
     if (value.type === 'cursor') {
       return {
         ...value,
@@ -79,7 +82,7 @@ FieldRangeExpression
   }
 
 FieldValueExpression
-  = field:Literal Space* ':' Space* partial:ListOfValues {
+  = field:Field Space* ':' Space* partial:ListOfValues {
     if (partial.type === 'cursor') {
       return {
         ...partial,
@@ -154,7 +157,7 @@ NotListOfValues
   }
   / ListOfValues
 
-Value
+Value "value"
   = value:QuotedString {
     if (value.type === 'cursor') return value;
     const isPhrase = buildLiteralNode(true);
@@ -171,19 +174,19 @@ Value
     return (field) => buildFunctionNode('is', [field, value, isPhrase]);
   }
 
-Or
+Or "OR"
   = Space+ 'or'i Space+
   / &{ return errorOnLuceneSyntax; } LuceneOr
 
-And
+And "AND"
   = Space+ 'and'i Space+
   / &{ return errorOnLuceneSyntax; } LuceneAnd
 
-Not
+Not "NOT"
   = 'not'i Space+
   / &{ return errorOnLuceneSyntax; } LuceneNot
 
-Literal
+Literal "literal"
   = QuotedString / UnquotedLiteral
 
 QuotedString
@@ -277,7 +280,7 @@ RangeOperator
   / '<' { return 'lt'; }
   / '>' { return 'gt'; }
 
-Space
+Space "whitespace"
   = [\ \t\r\n]
 
 Cursor

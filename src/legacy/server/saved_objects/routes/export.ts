@@ -20,15 +20,20 @@
 import Hapi from 'hapi';
 import Joi from 'joi';
 import stringify from 'json-stable-stringify';
-import { SavedObjectsClient } from '../';
-import { getSortedObjectsForExport } from '../export';
+import { SavedObjectsClientContract } from 'src/core/server';
+import {
+  createPromiseFromStreams,
+  createMapStream,
+  createConcatStream,
+} from '../../../utils/streams';
+// Disable lint errors for imports from src/core/server/saved_objects until SavedObjects migration is complete
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { getSortedObjectsForExport } from '../../../../core/server/saved_objects/export';
 import { Prerequisites } from './types';
-
-const ALLOWED_TYPES = ['index-pattern', 'search', 'visualization', 'dashboard'];
 
 interface ExportRequest extends Hapi.Request {
   pre: {
-    savedObjectsClient: SavedObjectsClient;
+    savedObjectsClient: SavedObjectsClientContract;
   };
   payload: {
     type?: string[];
@@ -40,7 +45,11 @@ interface ExportRequest extends Hapi.Request {
   };
 }
 
-export const createExportRoute = (prereqs: Prerequisites, server: Hapi.Server) => ({
+export const createExportRoute = (
+  prereqs: Prerequisites,
+  server: Hapi.Server,
+  supportedTypes: string[]
+) => ({
   path: '/api/saved_objects/_export',
   method: 'POST',
   config: {
@@ -49,13 +58,13 @@ export const createExportRoute = (prereqs: Prerequisites, server: Hapi.Server) =
       payload: Joi.object()
         .keys({
           type: Joi.array()
-            .items(Joi.string().valid(ALLOWED_TYPES))
+            .items(Joi.string().valid(supportedTypes))
             .single()
             .optional(),
           objects: Joi.array()
             .items({
               type: Joi.string()
-                .valid(ALLOWED_TYPES)
+                .valid(supportedTypes)
                 .required(),
               id: Joi.string().required(),
             })
@@ -68,15 +77,24 @@ export const createExportRoute = (prereqs: Prerequisites, server: Hapi.Server) =
     },
     async handler(request: ExportRequest, h: Hapi.ResponseToolkit) {
       const { savedObjectsClient } = request.pre;
-      const docsToExport = await getSortedObjectsForExport({
+      const exportStream = await getSortedObjectsForExport({
         savedObjectsClient,
         types: request.payload.type,
         objects: request.payload.objects,
         exportSizeLimit: server.config().get('savedObjects.maxImportExportSize'),
         includeReferencesDeep: request.payload.includeReferencesDeep,
       });
+
+      const docsToExport: string[] = await createPromiseFromStreams([
+        exportStream,
+        createMapStream((obj: unknown) => {
+          return stringify(obj);
+        }),
+        createConcatStream([]),
+      ]);
+
       return h
-        .response(docsToExport.map(doc => stringify(doc)).join('\n'))
+        .response(docsToExport.join('\n'))
         .header('Content-Disposition', `attachment; filename="export.ndjson"`)
         .header('Content-Type', 'application/ndjson');
     },

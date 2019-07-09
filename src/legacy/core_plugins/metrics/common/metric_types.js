@@ -26,10 +26,11 @@ export const METRIC_TYPES = {
   STD_DEVIATION: 'std_deviation',
   VARIANCE: 'variance',
   SUM_OF_SQUARES: 'sum_of_squares',
+  CARDINALITY: 'cardinality',
 };
 
 export const EXTENDED_STATS_TYPES = [
   METRIC_TYPES.STD_DEVIATION,
   METRIC_TYPES.VARIANCE,
-  METRIC_TYPES.SUM_OF_SQUARES
+  METRIC_TYPES.SUM_OF_SQUARES,
 ];

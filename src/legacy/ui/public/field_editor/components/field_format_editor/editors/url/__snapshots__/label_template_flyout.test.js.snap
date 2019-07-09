@@ -12,10 +12,7 @@ exports[`LabelTemplateFlyout should render normally 1`] = `
   size="m"
 >
   <EuiFlyoutBody>
-    <EuiText
-      grow={true}
-      size="m"
-    >
+    <EuiText>
       <h3>
         <FormattedMessage
           defaultMessage="Label Template"

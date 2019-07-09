@@ -54,6 +54,9 @@ export default function (kibana) {
         defaultAppId: Joi.string().default('home'),
         index: Joi.string().default('.kibana'),
         disableWelcomeScreen: Joi.boolean().default(false),
+        autocompleteTerminateAfter: Joi.number().integer().min(1).default(100000),
+        // TODO Also allow units here like in elasticsearch config once this is moved to the new platform
+        autocompleteTimeout: Joi.number().integer().min(1).default(1000),
       }).default();
     },
 
@@ -76,25 +79,27 @@ export default function (kibana) {
         {
           id: 'kibana:discover',
           title: i18n.translate('kbn.discoverTitle', {
-            defaultMessage: 'Discover'
+            defaultMessage: 'Discover',
           }),
           order: -1003,
           url: `${kbnBaseUrl}#/discover`,
           icon: 'plugins/kibana/assets/discover.svg',
           euiIconType: 'discoverApp',
-        }, {
+        },
+        {
           id: 'kibana:visualize',
           title: i18n.translate('kbn.visualizeTitle', {
-            defaultMessage: 'Visualize'
+            defaultMessage: 'Visualize',
           }),
           order: -1002,
           url: `${kbnBaseUrl}#/visualize`,
           icon: 'plugins/kibana/assets/visualize.svg',
           euiIconType: 'visualizeApp',
-        }, {
+        },
+        {
           id: 'kibana:dashboard',
           title: i18n.translate('kbn.dashboardTitle', {
-            defaultMessage: 'Dashboard'
+            defaultMessage: 'Dashboard',
           }),
           order: -1001,
           url: `${kbnBaseUrl}#/dashboards`,
@@ -106,93 +111,133 @@ export default function (kibana) {
           subUrlBase: `${kbnBaseUrl}#/dashboard`,
           icon: 'plugins/kibana/assets/dashboard.svg',
           euiIconType: 'dashboardApp',
-        }, {
+        },
+        {
           id: 'kibana:dev_tools',
           title: i18n.translate('kbn.devToolsTitle', {
-            defaultMessage: 'Dev Tools'
+            defaultMessage: 'Dev Tools',
           }),
           order: 9001,
           url: '/app/kibana#/dev_tools',
           icon: 'plugins/kibana/assets/wrench.svg',
           euiIconType: 'devToolsApp',
-        }, {
+        },
+        {
           id: 'kibana:management',
           title: i18n.translate('kbn.managementTitle', {
-            defaultMessage: 'Management'
+            defaultMessage: 'Management',
           }),
           order: 9003,
           url: `${kbnBaseUrl}#/management`,
           icon: 'plugins/kibana/assets/settings.svg',
           euiIconType: 'managementApp',
-          linkToLastSubUrl: false
+          linkToLastSubUrl: false,
         },
       ],
 
+      savedObjectsManagement: {
+        'index-pattern': {
+          icon: 'indexPatternApp',
+          defaultSearchField: 'title',
+          isImportableAndExportable: true,
+          getTitle(obj) {
+            return obj.attributes.title;
+          },
+          getEditUrl(obj) {
+            return `/management/kibana/index_patterns/${encodeURIComponent(obj.id)}`;
+          },
+          getInAppUrl(obj) {
+            return {
+              path: `/app/kibana#/management/kibana/index_patterns/${encodeURIComponent(obj.id)}`,
+              uiCapabilitiesPath: 'management.kibana.index_patterns',
+            };
+          },
+        },
+        visualization: {
+          icon: 'visualizeApp',
+          defaultSearchField: 'title',
+          isImportableAndExportable: true,
+          getTitle(obj) {
+            return obj.attributes.title;
+          },
+          getEditUrl(obj) {
+            return `/management/kibana/objects/savedVisualizations/${encodeURIComponent(obj.id)}`;
+          },
+          getInAppUrl(obj) {
+            return {
+              path: `/app/kibana#/visualize/edit/${encodeURIComponent(obj.id)}`,
+              uiCapabilitiesPath: 'visualize.show',
+            };
+          },
+        },
+        search: {
+          icon: 'search',
+          defaultSearchField: 'title',
+          isImportableAndExportable: true,
+          getTitle(obj) {
+            return obj.attributes.title;
+          },
+          getEditUrl(obj) {
+            return `/management/kibana/objects/savedSearches/${encodeURIComponent(obj.id)}`;
+          },
+          getInAppUrl(obj) {
+            return {
+              path: `/app/kibana#/discover/${encodeURIComponent(obj.id)}`,
+              uiCapabilitiesPath: 'discover.show',
+            };
+          },
+        },
+        dashboard: {
+          icon: 'dashboardApp',
+          defaultSearchField: 'title',
+          isImportableAndExportable: true,
+          getTitle(obj) {
+            return obj.attributes.title;
+          },
+          getEditUrl(obj) {
+            return `/management/kibana/objects/savedDashboards/${encodeURIComponent(obj.id)}`;
+          },
+          getInAppUrl(obj) {
+            return {
+              path: `/app/kibana#/dashboard/${encodeURIComponent(obj.id)}`,
+              uiCapabilitiesPath: 'dashboard.show',
+            };
+          },
+        },
+        url: {
+          defaultSearchField: 'url',
+          isImportableAndExportable: true,
+          getTitle(obj) {
+            return `/goto/${encodeURIComponent(obj.id)}`;
+          },
+        },
+        config: {
+          isImportableAndExportable: true,
+          getInAppUrl() {
+            return {
+              path: `/app/kibana#/management/kibana/settings`,
+              uiCapabilitiesPath: 'advancedSettings.show',
+            };
+          },
+          getTitle(obj) {
+            return `Advanced Settings [${obj.id}]`;
+          },
+        },
+      },
+
       savedObjectSchemas: {
-        'kql-telemetry': {
+        'sample-data-telemetry': {
           isNamespaceAgnostic: true,
         },
-        'sample-data-telemetry': {
+        'kql-telemetry': {
           isNamespaceAgnostic: true,
         },
       },
 
       injectDefaultVars(server, options) {
-        const { savedObjects } = server;
-
         return {
           kbnIndex: options.index,
           kbnBaseUrl,
-          uiCapabilities: {
-            discover: {
-              show: true,
-              createShortUrl: true,
-              save: true,
-            },
-            visualize: {
-              show: true,
-              createShortUrl: true,
-              delete: true,
-              save: true,
-            },
-            dashboard: {
-              createNew: true,
-              show: true,
-              showWriteControls: true,
-            },
-            catalogue: {
-              discover: true,
-              dashboard: true,
-              visualize: true,
-              console: true,
-              advanced_settings: true,
-              index_patterns: true,
-            },
-            advancedSettings: {
-              save: true
-            },
-            indexPatterns: {
-              createNew: true,
-            },
-            savedObjectsManagement: savedObjects.types.reduce((acc, type) => ({
-              ...acc,
-              [type]: {
-                delete: true,
-                edit: true,
-                read: true,
-              }
-            }), {}),
-            management: {
-              /*
-               * Management settings correspond to management section/link ids, and should not be changed
-               * without also updating those definitions.
-               */
-              kibana: {
-                settings: true,
-                index_patterns: true,
-              },
-            }
-          }
         };
       },
 
@@ -200,6 +245,58 @@ export default function (kibana) {
       uiSettingDefaults: getUiSettingDefaults(),
 
       migrations,
+    },
+
+    uiCapabilities: async function () {
+      return {
+        discover: {
+          show: true,
+          createShortUrl: true,
+          save: true,
+        },
+        visualize: {
+          show: true,
+          createShortUrl: true,
+          delete: true,
+          save: true,
+        },
+        dashboard: {
+          createNew: true,
+          show: true,
+          showWriteControls: true,
+        },
+        catalogue: {
+          discover: true,
+          dashboard: true,
+          visualize: true,
+          console: true,
+          advanced_settings: true,
+          index_patterns: true,
+        },
+        advancedSettings: {
+          show: true,
+          save: true,
+        },
+        indexPatterns: {
+          save: true,
+        },
+        savedObjectsManagement: {
+          delete: true,
+          edit: true,
+          read: true,
+        },
+        management: {
+          /*
+           * Management settings correspond to management section/link ids, and should not be changed
+           * without also updating those definitions.
+           */
+          kibana: {
+            settings: true,
+            index_patterns: true,
+            objects: true,
+          },
+        },
+      };
     },
 
     preInit: async function (server) {
@@ -233,6 +330,6 @@ export default function (kibana) {
       server.expose('systemApi', systemApi);
       server.expose('handleEsError', handleEsError);
       server.injectUiAppVars('kibana', () => injectVars(server));
-    }
+    },
   });
 }

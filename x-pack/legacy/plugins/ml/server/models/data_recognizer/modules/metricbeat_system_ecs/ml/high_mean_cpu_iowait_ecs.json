@@ -1,0 +1,54 @@
+{
+    "job_type": "anomaly_detector",
+    "description": "Metricbeat CPU: Detect unusual increases in cpu time spent in iowait (ECS)",
+    "groups": ["metricbeat"],
+    "analysis_config": {
+      "bucket_span": "10m",
+      "detectors": [
+        {
+          "detector_description": "high mean system.cpu.iowait.pct",
+          "function": "high_mean",
+          "field_name": "system.cpu.iowait.pct",
+          "partition_field_name": "host.name",
+          "custom_rules": [
+            {
+              "actions": [
+                "skip_result"
+              ],
+              "conditions": [
+                {
+                  "applies_to": "actual",
+                  "operator": "lt",
+                  "value": 0.25
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "influencers": [
+        "host.name"
+      ]
+    },
+    "analysis_limits": {
+      "model_memory_limit": "256mb"
+    },
+    "data_description": {
+      "time_field": "@timestamp",
+      "time_format": "epoch_ms"
+    },
+    "custom_settings": {
+      "created_by": "ml-module-metricbeat-system",
+      "custom_urls": [
+        {
+            "url_name": "Host overview",
+            "time_range": "3h",
+            "url_value": "kibana#/dashboard/79ffd6e0-faa0-11e6-947f-177f697178b8-ecs?_g=(time:(from:\u0027$earliest$\u0027,mode:absolute,to:\u0027$latest$\u0027))&_a=(filters:!(),query:(language:kuery,query:\u0027host.name:\u0022$host.name$\u0022\u0027))"
+        },
+        {
+          "url_name": "Raw data",
+          "url_value": "kibana#/discover/?_g=(refreshInterval:(pause:!t,value:0),time:(from:\u0027$earliest$\u0027,mode:absolute,to:\u0027$latest$\u0027))&_a=(columns:!(_source),index:\u0027INDEX_PATTERN_ID\u0027,interval:auto,query:(language:kuery,query:'event.dataset:\u0022system.cpu\u0022'),sort:!('@timestamp',desc))"
+        }
+      ]
+    }
+  }
