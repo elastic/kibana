@@ -18,6 +18,7 @@ import { Location } from 'history';
 import React, { Component } from 'react';
 import { isEmpty } from 'lodash';
 import styled from 'styled-components';
+import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
 import { Coordinate } from '../../../../../typings/timeseries';
 import { ITransactionChartData } from '../../../../selectors/chartSelectors';
 import { IUrlParams } from '../../../../context/UrlParamsContext/types';
@@ -46,20 +47,13 @@ const ShiftedEuiText = styled(EuiText)`
   top: 5px;
 `;
 
-const msTimeUnitLabel = i18n.translate(
-  'xpack.apm.metrics.transactionChart.msTimeUnitLabel',
-  {
-    defaultMessage: 'ms'
-  }
-);
-
 export class TransactionCharts extends Component<TransactionChartProps> {
   public getResponseTimeTickFormatter = (t: number) => {
     return asMillis(t);
   };
 
   public getResponseTimeTooltipFormatter = (p: Coordinate) => {
-    return asMillis('y' in p ? p.y : null);
+    return isValidCoordinateValue(p.y) ? asMillis(p.y) : NOT_AVAILABLE_LABEL;
   };
 
   public getTPMFormatter = (t: number) => {
@@ -69,7 +63,9 @@ export class TransactionCharts extends Component<TransactionChartProps> {
   };
 
   public getTPMTooltipFormatter = (p: Coordinate) => {
-    return isValidCoordinateValue(p.y) ? this.getTPMFormatter(p.y) : '-';
+    return isValidCoordinateValue(p.y)
+      ? this.getTPMFormatter(p.y)
+      : NOT_AVAILABLE_LABEL;
   };
 
   public renderMLHeader(hasValidMlLicense: boolean) {

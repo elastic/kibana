@@ -52,9 +52,6 @@ export function getPlotValues(
     visibleSeries,
     enabledSeries
   );
-  if (isEmpty(flattenedCoordinates)) {
-    return null;
-  }
 
   const xMin = d3.min(flattenedCoordinates, d => d.x);
 
