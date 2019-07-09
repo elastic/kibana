@@ -90,3 +90,54 @@ test(`invokes and uses wrappers in specified order`, () => {
     client: defaultClient,
   });
 });
+
+test(`does not invoke or use excluded wrappers`, () => {
+  const defaultClient = Symbol();
+  const defaultClientFactoryMock = jest.fn().mockReturnValue(defaultClient);
+  const clientProvider = new ScopedSavedObjectsClientProvider({
+    defaultClientFactory: defaultClientFactoryMock,
+  });
+  const firstWrappedClient = Symbol('first client');
+  const firstClientWrapperFactoryMock = jest.fn().mockReturnValue(firstWrappedClient);
+  const secondWrapperClient = Symbol('second client');
+  const secondClientWrapperFactoryMock = jest.fn().mockReturnValue(secondWrapperClient);
+  const request = Symbol();
+
+  clientProvider.addClientWrapperFactory(1, 'foo', secondClientWrapperFactoryMock);
+  clientProvider.addClientWrapperFactory(0, 'bar', firstClientWrapperFactoryMock);
+
+  const actualClient = clientProvider.getClient(request, {
+    excludedWrappers: ['foo']
+  });
+
+  expect(actualClient).toBe(firstWrappedClient);
+  expect(firstClientWrapperFactoryMock).toHaveBeenCalledWith({
+    request,
+    client: defaultClient,
+  });
+  expect(secondClientWrapperFactoryMock).not.toHaveBeenCalled();
+});
+
+test(`allows all wrappers to be excluded`, () => {
+  const defaultClient = Symbol();
+  const defaultClientFactoryMock = jest.fn().mockReturnValue(defaultClient);
+  const clientProvider = new ScopedSavedObjectsClientProvider({
+    defaultClientFactory: defaultClientFactoryMock,
+  });
+  const firstWrappedClient = Symbol('first client');
+  const firstClientWrapperFactoryMock = jest.fn().mockReturnValue(firstWrappedClient);
+  const secondWrapperClient = Symbol('second client');
+  const secondClientWrapperFactoryMock = jest.fn().mockReturnValue(secondWrapperClient);
+  const request = Symbol();
+
+  clientProvider.addClientWrapperFactory(1, 'foo', secondClientWrapperFactoryMock);
+  clientProvider.addClientWrapperFactory(0, 'bar', firstClientWrapperFactoryMock);
+
+  const actualClient = clientProvider.getClient(request, {
+    excludedWrappers: ['foo', 'bar']
+  });
+
+  expect(actualClient).toBe(defaultClient);
+  expect(firstClientWrapperFactoryMock).not.toHaveBeenCalled();
+  expect(secondClientWrapperFactoryMock).not.toHaveBeenCalled();
+});
