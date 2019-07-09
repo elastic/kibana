@@ -61,7 +61,7 @@ export const TransformMessagesPane: React.SFC<Props> = ({ transformId }) => {
     };
   };
 
-  useRefreshTransformList({ onRefresh: () => getMessagesFactory() });
+  useRefreshTransformList({ onRefresh: getMessagesFactory() });
 
   const columns = [
     {
