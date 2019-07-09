@@ -93,7 +93,7 @@ export class LanguageServerProxy implements ILanguageServerHandler {
       return Promise.resolve(this.clientConnection);
     } else {
       return new Promise<MessageConnection>((resolve, reject) => {
-        this.eventEmitter.on('error', error =>
+        this.eventEmitter.on('err', error =>
           reject(new ResponseError(InternalError, 'Server error', error))
         );
         this.eventEmitter.on('exit', () =>
@@ -297,6 +297,6 @@ export class LanguageServerProxy implements ILanguageServerHandler {
 
   public setError(error: any) {
     this.error = error;
-    this.eventEmitter.emit('error', error);
+    this.eventEmitter.emit('err', error);
   }
 }

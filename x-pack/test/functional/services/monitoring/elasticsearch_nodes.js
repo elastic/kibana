@@ -106,7 +106,7 @@ export function MonitoringElasticsearchNodesProvider({ getService, getPageObject
 
     async getNodesAll() {
       const names = await testSubjects.getVisibleTextAll(SUBJ_NODES_NAMES);
-      const statuses = await testSubjects.getPropertyAll(SUBJ_NODES_STATUSES, 'alt');
+      const statuses = await testSubjects.getAttributeAll(SUBJ_NODES_STATUSES, 'alt');
       const cpus = await testSubjects.getVisibleTextAll(SUBJ_NODES_CPUS);
       const loads = await testSubjects.getVisibleTextAll(SUBJ_NODES_LOADS);
       const memories = await testSubjects.getVisibleTextAll(SUBJ_NODES_MEMS);
