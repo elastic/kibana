@@ -253,9 +253,9 @@ describe('TaskManagerRunner', () => {
 
   test('uses getRetryDelay function on error when defined', async () => {
     const initialAttempts = _.random(0, 2);
-    const backpressureDelay = _.random(15, 100);
+    const retryDelay = _.random(15, 100);
     const id = Date.now().toString();
-    const getRetryDelayStub = sinon.stub().returns(backpressureDelay);
+    const getRetryDelayStub = sinon.stub().returns(retryDelay);
     const error = new Error('Dangit!');
     const { runner, store } = testOpts({
       instance: {
@@ -280,17 +280,17 @@ describe('TaskManagerRunner', () => {
     sinon.assert.calledWith(getRetryDelayStub, initialAttempts, error);
     const instance = store.update.args[0][0];
 
-    expect(
-      Math.abs(secondsFromNow(backpressureDelay).getTime() - instance.runAt.getTime())
-    ).toBeLessThan(100);
+    expect(Math.abs(secondsFromNow(retryDelay).getTime() - instance.runAt.getTime())).toBeLessThan(
+      100
+    );
   });
 
   test('uses getRetryDelay to set retryAt when defined', async () => {
     const id = _.random(1, 20).toString();
     const initialAttempts = _.random(0, 2);
-    const backpressureDelay = _.random(15, 100);
+    const retryDelay = _.random(15, 100);
     const timeoutMinutes = 1;
-    const getRetryDelayStub = sinon.stub().returns(backpressureDelay);
+    const getRetryDelayStub = sinon.stub().returns(retryDelay);
     const { runner, store } = testOpts({
       instance: {
         id,
@@ -316,7 +316,7 @@ describe('TaskManagerRunner', () => {
 
     expect(
       Math.abs(
-        secondsFromNow(backpressureDelay).getTime() +
+        secondsFromNow(retryDelay).getTime() +
           timeoutMinutes * 60 * 1000 -
           instance.retryAt.getTime()
       )
