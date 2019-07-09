@@ -29,8 +29,6 @@ jest.mock('../../../../core_plugins/data/public', () => {
   };
 });
 
-jest.mock('ui/new_platform');
-
 describe('TopNavMenu', () => {
   const TOP_NAV_ITEM_SELECTOR = 'TopNavMenuItem';
   const SEARCH_BAR_SELECTOR = 'SearchBar';
