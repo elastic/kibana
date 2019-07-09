@@ -44,6 +44,14 @@ interface LogMinimapState {
   svgPosition: ClientRect;
 }
 
+function calculateYScale(target: number | null, height: number, intervalSize: number) {
+  const domainStart = target ? target - intervalSize / 2 : 0;
+  const domainEnd = target ? target + intervalSize / 2 : 0;
+  return scaleLinear()
+    .domain([domainStart, domainEnd])
+    .range([0, height]);
+}
+
 export class LogMinimap extends React.Component<LogMinimapProps, LogMinimapState> {
   constructor(props: LogMinimapProps) {
     super(props);
@@ -128,11 +136,7 @@ export class LogMinimap extends React.Component<LogMinimapProps, LogMinimapState
   public getYScale = () => {
     const { target } = this.state;
     const { height, intervalSize } = this.props;
-    const domainStart = target ? target - intervalSize / 2 : 0;
-    const domainEnd = target ? target + intervalSize / 2 : 0;
-    return scaleLinear()
-      .domain([domainStart, domainEnd])
-      .range([0, height]);
+    return calculateYScale(target, height, intervalSize);
   };
 
   public getPositionOfTime = (time: number) => {
@@ -152,11 +156,20 @@ export class LogMinimap extends React.Component<LogMinimapProps, LogMinimapState
       summaryBuckets,
       // searchSummaryBuckets,
       width,
+      intervalSize,
     } = this.props;
-    const { drag } = this.state;
+    const { drag, target } = this.state;
     const [minTime, maxTime] = this.getYScale().domain();
     const minimapTransform = !drag || !drag.currentY ? null : drag.currentY - drag.startY;
-
+    const overscanHeight = Math.round(window.screen.availHeight * 2.5) || height * 3;
+    const [overscanMinTime, overscanMaxTime] = calculateYScale(
+      target,
+      overscanHeight,
+      intervalSize
+    ).domain();
+    const tickCount = height ? Math.round((overscanHeight / height) * 12) : 12;
+    const overscanTranslate = height ? -(overscanHeight - height) / 2 : 0;
+    console.log(overscanTranslate);
     return (
       <svg
         className={className}
