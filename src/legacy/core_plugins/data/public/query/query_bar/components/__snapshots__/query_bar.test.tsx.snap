@@ -2,9 +2,9 @@
 
 exports[`QueryBar Should render the given query 1`] = `
 <EuiFlexGroup
-  className="kbnQueryBar"
+  className="kbnQueryBar kbnQueryBar--withDatePicker"
   gutterSize="s"
-  responsive={false}
+  responsive={true}
 >
   <EuiFlexItem>
     <InjectIntl(QueryBarInputUI)
@@ -59,13 +59,53 @@ exports[`QueryBar Should render the given query 1`] = `
   <EuiFlexItem
     grow={false}
   >
-    <EuiSuperUpdateButton
-      data-test-subj="querySubmitButton"
-      isDisabled={false}
-      isLoading={false}
-      needsUpdate={false}
-      onClick={[Function]}
-    />
+    <EuiFlexGroup
+      gutterSize="s"
+      responsive={false}
+    >
+      <EuiFlexItem
+        className="kbnQueryBar__datePickerWrapper"
+      >
+        <EuiSuperDatePicker
+          commonlyUsedRanges={
+            Array [
+              Object {
+                "end": "now/d",
+                "label": "Today",
+                "start": "now/d",
+              },
+            ]
+          }
+          dateFormat="YY"
+          end="now"
+          isAutoRefreshOnly={false}
+          isPaused={true}
+          onTimeChange={[Function]}
+          recentlyUsedRanges={
+            Array [
+              Object {
+                "end": undefined,
+                "start": undefined,
+              },
+            ]
+          }
+          refreshInterval={0}
+          showUpdateButton={false}
+          start="now-15m"
+        />
+      </EuiFlexItem>
+      <EuiFlexItem
+        grow={false}
+      >
+        <EuiSuperUpdateButton
+          data-test-subj="querySubmitButton"
+          isDisabled={false}
+          isLoading={false}
+          needsUpdate={true}
+          onClick={[Function]}
+        />
+      </EuiFlexItem>
+    </EuiFlexGroup>
   </EuiFlexItem>
 </EuiFlexGroup>
 `;

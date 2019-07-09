@@ -82,7 +82,7 @@ interface State {
 export class QueryBarUI extends Component<Props, State> {
   public static defaultProps = {
     showQueryInput: true,
-    showDatePicker: false,
+    showDatePicker: true,
     showAutoRefreshOnly: false,
   };
 
@@ -267,7 +267,7 @@ export class QueryBarUI extends Component<Props, State> {
   }
 
   private renderQueryInput() {
-    if (!this.props.showQueryInput) return;
+    if (!this.shouldRenderQueryInput()) return;
     return (
       <EuiFlexItem>
         <QueryBarInput
@@ -287,9 +287,11 @@ export class QueryBarUI extends Component<Props, State> {
   }
 
   private shouldRenderDatePicker() {
-    return (
-      (this.props.showDatePicker && this.props.dateRangeFrom) || this.props.showAutoRefreshOnly
-    );
+    return this.props.showDatePicker || this.props.showAutoRefreshOnly;
+  }
+
+  private shouldRenderQueryInput() {
+    return this.props.showQueryInput && this.props.indexPatterns && this.props.query;
   }
 
   private renderUpdateButton() {
