@@ -5,26 +5,22 @@
  */
 
 import React, { useContext } from 'react';
-import { EuiInMemoryTable, EuiPanel } from '@elastic/eui';
-import styled from 'styled-components';
+import { EuiPanel } from '@elastic/eui';
 import { useAnomaliesTableData } from '../anomaly/use_anomalies_table_data';
 import { HeaderPanel } from '../../header_panel';
 
 import * as i18n from './translations';
-import { getAnomaliesHostTableColumns } from './get_anomalies_host_table_columns';
+import { getAnomaliesHostTableColumnsCurated } from './get_anomalies_host_table_columns';
 import { convertAnomaliesToHosts } from './convert_anomalies_to_hosts';
-import { BackgroundRefetch } from '../../load_more_table';
+import { BackgroundRefetch, BasicTableContainer } from '../../load_more_table';
 import { LoadingPanel } from '../../loading';
 import { getIntervalFromAnomalies } from '../anomaly/get_interval_from_anomalies';
 import { getSizeFromAnomalies } from '../anomaly/get_size_from_anomalies';
 import { dateTimesAreEqual } from './date_time_equality';
-import { AnomaliesTableProps } from '../types';
+import { AnomaliesHostTableProps } from '../types';
 import { hasMlUserPermissions } from '../permissions/has_ml_user_permissions';
 import { MlCapabilitiesContext } from '../permissions/ml_capabilities_provider';
-
-const BasicTableContainer = styled.div`
-  position: relative;
-`;
+import { BasicTable } from './basic_table';
 
 const sorting = {
   sort: {
@@ -33,20 +29,25 @@ const sorting = {
   },
 };
 
-export const AnomaliesHostTable = React.memo<AnomaliesTableProps>(
-  ({ startDate, endDate, narrowDateRange, skip }): JSX.Element | null => {
+export const AnomaliesHostTable = React.memo<AnomaliesHostTableProps>(
+  ({ startDate, endDate, narrowDateRange, hostName, skip, type }): JSX.Element | null => {
     const capabilities = useContext(MlCapabilitiesContext);
     const [loading, tableData] = useAnomaliesTableData({
       influencers: [],
       startDate,
       endDate,
-      threshold: 0,
       skip,
     });
 
-    const hosts = convertAnomaliesToHosts(tableData);
+    const hosts = convertAnomaliesToHosts(tableData, hostName);
     const interval = getIntervalFromAnomalies(tableData);
-    const columns = getAnomaliesHostTableColumns(startDate, endDate, interval, narrowDateRange);
+    const columns = getAnomaliesHostTableColumnsCurated(
+      type,
+      startDate,
+      endDate,
+      interval,
+      narrowDateRange
+    );
     const pagination = {
       pageIndex: 0,
       pageSize: 10,
@@ -77,12 +78,7 @@ export const AnomaliesHostTable = React.memo<AnomaliesTableProps>(
               subtitle={`${i18n.SHOWING}: ${hosts.length.toLocaleString()} ${i18n.ANOMALIES}`}
               title={i18n.ANOMALIES}
             />
-            <EuiInMemoryTable
-              items={hosts}
-              columns={columns}
-              pagination={pagination}
-              sorting={sorting}
-            />
+            <BasicTable items={hosts} columns={columns} pagination={pagination} sorting={sorting} />
           </BasicTableContainer>
         </EuiPanel>
       );

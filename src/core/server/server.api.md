@@ -97,6 +97,7 @@ export interface CoreSetup {
         registerOnPostAuth: HttpServiceSetup['registerOnPostAuth'];
         basePath: HttpServiceSetup['basePath'];
         createNewServer: HttpServiceSetup['createNewServer'];
+        isTlsEnabled: HttpServiceSetup['isTlsEnabled'];
     };
 }
 
@@ -122,12 +123,27 @@ export type ElasticsearchClientConfig = Pick<ConfigOptions, 'keepAlive' | 'log' 
     ssl?: Partial<ElasticsearchConfig['ssl']>;
 };
 
+// Warning: (ae-missing-release-tag) "ElasticsearchError" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+// 
+// @public (undocumented)
+export interface ElasticsearchError extends Boom {
+    // (undocumented)
+    [code]?: string;
+}
+
+// @public
+export class ElasticsearchErrorHelpers {
+    // (undocumented)
+    static decorateNotAuthorizedError(error: Error, reason?: string): ElasticsearchError;
+    // (undocumented)
+    static isNotAuthorizedError(error: any): error is ElasticsearchError;
+}
+
 // @public (undocumented)
 export interface ElasticsearchServiceSetup {
     // (undocumented)
     readonly adminClient$: Observable<ClusterClient>;
-    // (undocumented)
-    readonly createClient: (type: string, config: ElasticsearchClientConfig) => ClusterClient;
+    readonly createClient: (type: string, clientConfig?: Partial<ElasticsearchClientConfig>) => ClusterClient;
     // (undocumented)
     readonly dataClient$: Observable<ClusterClient>;
     // (undocumented)
@@ -138,7 +154,7 @@ export interface ElasticsearchServiceSetup {
 
 // @public
 export interface FakeRequest {
-    headers: Record<string, string>;
+    headers: Headers;
 }
 
 // @public
