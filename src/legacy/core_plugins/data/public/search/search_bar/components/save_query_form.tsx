@@ -39,7 +39,7 @@ interface Props {
   onSave: (savedQueryMeta: SavedQueryMeta) => void;
   onClose: () => void;
   showFilterOption: boolean;
-  showTimeFilterOption: boolean;
+  showTimeFilterOption: boolean | undefined;
 }
 
 export interface SavedQueryMeta {
