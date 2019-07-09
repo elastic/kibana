@@ -64,6 +64,7 @@ interface Props {
   onSave?: () => void;
   onSaveNew?: () => void;
   isDirty?: boolean;
+  onClose?: () => void;
 }
 
 interface State {
@@ -481,6 +482,7 @@ export class QueryBarInputUI extends Component<Props, State> {
       'onSaveNew',
       'onLoadSavedQuery',
       'isDirty',
+      'onClose',
     ]);
 
     return (
@@ -565,6 +567,7 @@ export class QueryBarInputUI extends Component<Props, State> {
                   onSave={this.props.onSave}
                   onSaveNew={this.props.onSaveNew}
                   isDirty={this.props.isDirty}
+                  onClose={this.props.onClose}
                 />
               ) : null
             }

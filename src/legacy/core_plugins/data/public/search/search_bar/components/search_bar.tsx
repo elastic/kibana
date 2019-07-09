@@ -77,6 +77,7 @@ interface Props {
   onSaved?: (savedQuery: SavedQuery) => void;
   onSavedQueryUpdated: (savedQuery: SavedQuery) => void;
   customSubmitButton?: any;
+  onClose?: () => void;
 }
 
 interface State {
@@ -286,6 +287,15 @@ class SearchBarUI extends Component<Props, State> {
     });
   };
 
+  public onCloseSavedQuery = () => {
+    this.setState({ query: { query: '', language: this.state.query.language } });
+    if (this.state.isFiltersVisible && this.props.filters.length > 0) {
+      // I want to trigger the filter's removeAll method but it is private.
+      alert('clear the filters');
+    }
+    // we also need to clear the saved query from the saved query row.
+  };
+
   public onQueryBarChange = (queryAndDateRange: { dateRange: DateRange; query: Query }) => {
     this.setState({
       query: queryAndDateRange.query,
@@ -465,6 +475,7 @@ class SearchBarUI extends Component<Props, State> {
             customSubmitButton={
               this.props.customSubmitButton ? this.props.customSubmitButton : undefined
             }
+            onClose={this.onCloseSavedQuery}
           />
         ) : (
           ''

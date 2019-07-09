@@ -18,7 +18,7 @@
  */
 
 import React, { FunctionComponent, Fragment } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiButtonEmpty } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiButtonEmpty, EuiIcon } from '@elastic/eui';
 import chrome from 'ui/chrome';
 import { SavedQueryAttributes } from '../../../search/search_bar';
 import { Query } from '../index';
@@ -29,6 +29,7 @@ interface Props {
   onSave: () => void;
   onSaveNew: () => void;
   isDirty: boolean;
+  onClose: () => void;
 }
 
 export interface SavedQueryDetails {
@@ -45,17 +46,25 @@ export const SavedQueryRow: FunctionComponent<Props> = ({
   onSave,
   onSaveNew,
   isDirty,
+  onClose,
 }) => {
   let rowContent;
   if (savedQuery) {
     if (isDirty) {
       rowContent = (
         <Fragment>
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty onClick={onSave}>
-              Save changes to query: {savedQuery.title}
-            </EuiButtonEmpty>
-          </EuiFlexItem>
+          <EuiFlexGroup>
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty onClick={onSave}>
+                Save changes to query: {savedQuery.title}
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty onClick={onClose} color="text">
+                <EuiIcon type="crossInACircleFilled" />
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+          </EuiFlexGroup>
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty onClick={onSaveNew}>Save as new</EuiButtonEmpty>
           </EuiFlexItem>
@@ -64,11 +73,18 @@ export const SavedQueryRow: FunctionComponent<Props> = ({
     } else {
       rowContent = (
         <Fragment>
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty href={''} color="text">
-              {savedQuery.title}
-            </EuiButtonEmpty>
-          </EuiFlexItem>
+          <EuiFlexGroup>
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty href={''} color="text">
+                {savedQuery.title}
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty onClick={onClose} color="text">
+                <EuiIcon type="crossInACircleFilled" />
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+          </EuiFlexGroup>
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty onClick={onSaveNew}>Save as new</EuiButtonEmpty>
           </EuiFlexItem>
@@ -94,8 +110,8 @@ export const SavedQueryRow: FunctionComponent<Props> = ({
   }
 
   return (
-    <Fragment>
-      <EuiFlexGroup justifyContent="spaceBetween">{rowContent}</EuiFlexGroup>
-    </Fragment>
+    <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+      {rowContent}
+    </EuiFlexGroup>
   );
 };
