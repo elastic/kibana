@@ -79,7 +79,7 @@ export const DurationChart = ({
   });
 
   return (
-    <React.Fragment>
+    <EuiPanel>
       <EuiTitle size="xs">
         <h4>
           <FormattedMessage
@@ -89,34 +89,32 @@ export const DurationChart = ({
           />
         </h4>
       </EuiTitle>
-      <EuiPanel style={{ height: '170px' }}>
-        <Chart>
-          <Settings
-            xDomain={{ min: absoluteStartDate, max: absoluteEndDate }}
-            showLegend={true}
-            legendPosition={Position.Bottom}
-          />
-          <Axis
-            id={getAxisId('bottom')}
-            position={Position.Bottom}
-            showOverlappingTicks={true}
-            tickFormat={timeFormatter(getChartDateLabel(absoluteStartDate, absoluteEndDate))}
-            title={i18n.translate('xpack.uptime.monitorCharts.durationChart.bottomAxis.title', {
-              defaultMessage: 'Timestamp',
-            })}
-          />
-          <Axis
-            domain={{ min: 0 }}
-            id={getAxisId('left')}
-            position={Position.Left}
-            tickFormat={d => Number(d).toFixed(0)}
-            title={i18n.translate('xpack.uptime.monitorCharts.durationChart.leftAxis.title', {
-              defaultMessage: 'Duration ms',
-            })}
-          />
-          {lineSeries}
-        </Chart>
-      </EuiPanel>
-    </React.Fragment>
+      <Chart>
+        <Settings
+          xDomain={{ min: absoluteStartDate, max: absoluteEndDate }}
+          showLegend={true}
+          legendPosition={Position.Bottom}
+        />
+        <Axis
+          id={getAxisId('bottom')}
+          position={Position.Bottom}
+          showOverlappingTicks={true}
+          tickFormat={timeFormatter(getChartDateLabel(absoluteStartDate, absoluteEndDate))}
+          title={i18n.translate('xpack.uptime.monitorCharts.durationChart.bottomAxis.title', {
+            defaultMessage: 'Timestamp',
+          })}
+        />
+        <Axis
+          domain={{ min: 0 }}
+          id={getAxisId('left')}
+          position={Position.Left}
+          tickFormat={d => Number(d).toFixed(0)}
+          title={i18n.translate('xpack.uptime.monitorCharts.durationChart.leftAxis.title', {
+            defaultMessage: 'Duration ms',
+          })}
+        />
+        {lineSeries}
+      </Chart>
+    </EuiPanel>
   );
 };

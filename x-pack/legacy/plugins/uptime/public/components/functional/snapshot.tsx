@@ -25,69 +25,67 @@ interface SnapshotQueryResult {
  */
 export const SnapshotComponent = ({ data }: UptimeGraphQLQueryProps<SnapshotQueryResult>) =>
   data && data.snapshot ? (
-    <React.Fragment>
+    <EuiPanel paddingSize="s">
       <EuiTitle size="xs">
-        <h5>
+        <h3>
           <FormattedMessage
             id="xpack.uptime.snapshot.endpointStatusTitle"
             defaultMessage="Current status"
           />
-        </h5>
+        </h3>
       </EuiTitle>
-      <EuiPanel paddingSize="s">
-        <EuiFlexGroup direction="column">
-          <EuiFlexItem grow={false}>
-            <EuiSpacer size="s" />
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiFlexGroup justifyContent="spaceEvenly" gutterSize="s">
+      <EuiFlexGroup direction="column">
+        <EuiFlexItem grow={false}>
+          <EuiSpacer size="s" />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiFlexGroup justifyContent="spaceEvenly" gutterSize="s">
+            <EuiFlexItem>
+              <EuiStat
+                description={i18n.translate('xpack.uptime.snapshot.stats.upDescription', {
+                  defaultMessage: 'Up',
+                })}
+                textAlign="center"
+                title={data.snapshot.counts.up}
+                titleColor="secondary"
+              />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiStat
+                description={i18n.translate('xpack.uptime.snapshot.stats.downDescription', {
+                  defaultMessage: 'Down',
+                })}
+                textAlign="center"
+                title={data.snapshot.counts.down}
+                titleColor="danger"
+              />
+            </EuiFlexItem>
+            {data.snapshot.counts.mixed > 0 ? (
               <EuiFlexItem>
                 <EuiStat
-                  description={i18n.translate('xpack.uptime.snapshot.stats.upDescription', {
-                    defaultMessage: 'Up',
+                  description={i18n.translate('xpack.uptime.snapshot.stats.mixedDescription', {
+                    defaultMessage: 'Mixed',
                   })}
                   textAlign="center"
-                  title={data.snapshot.counts.up}
-                  titleColor="secondary"
-                />
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <EuiStat
-                  description={i18n.translate('xpack.uptime.snapshot.stats.downDescription', {
-                    defaultMessage: 'Down',
-                  })}
-                  textAlign="center"
-                  title={data.snapshot.counts.down}
-                  titleColor="danger"
-                />
-              </EuiFlexItem>
-              {data.snapshot.counts.mixed > 0 ? (
-                <EuiFlexItem>
-                  <EuiStat
-                    description={i18n.translate('xpack.uptime.snapshot.stats.mixedDescription', {
-                      defaultMessage: 'Mixed',
-                    })}
-                    textAlign="center"
-                    title={data.snapshot.counts.mixed}
-                    titleColor="subdued"
-                  />
-                </EuiFlexItem>
-              ) : null}
-              <EuiFlexItem>
-                <EuiStat
-                  description={i18n.translate('xpack.uptime.snapshot.stats.totalDescription', {
-                    defaultMessage: 'Total',
-                  })}
-                  textAlign="center"
-                  title={data.snapshot.counts.total}
+                  title={data.snapshot.counts.mixed}
                   titleColor="subdued"
                 />
               </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiPanel>
-    </React.Fragment>
+            ) : null}
+            <EuiFlexItem>
+              <EuiStat
+                description={i18n.translate('xpack.uptime.snapshot.stats.totalDescription', {
+                  defaultMessage: 'Total',
+                })}
+                textAlign="center"
+                title={data.snapshot.counts.total}
+                titleColor="subdued"
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiPanel>
   ) : (
     <SnapshotLoading />
   );

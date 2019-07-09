@@ -60,7 +60,7 @@ export const ChecksChart = ({ dangerColor, status, successColor }: ChecksChartPr
   );
 
   return (
-    <React.Fragment>
+    <EuiPanel>
       <EuiTitle size="xs">
         <h4>
           <FormattedMessage
@@ -69,58 +69,56 @@ export const ChecksChart = ({ dangerColor, status, successColor }: ChecksChartPr
           />
         </h4>
       </EuiTitle>
-      <EuiPanel>
-        <Chart>
-          <Settings xDomain={{ min: absoluteStartDate, max: absoluteEndDate }} showLegend={false} />
-          <Axis
-            id={getAxisId('checksBottom')}
-            position={Position.Bottom}
-            showOverlappingTicks={true}
-            tickFormat={timeFormatter(getChartDateLabel(absoluteStartDate, absoluteEndDate))}
-            title={i18n.translate('xpack.uptime.monitorChart.checksChart.bottomAxis.title', {
-              defaultMessage: 'Timestamp',
-              description: 'The heading of the x-axis of a chart of timeseries data.',
-            })}
-          />
-          <Axis
-            id={getAxisId('left')}
-            position={Position.Left}
-            tickFormat={d => Number(d).toFixed(0)}
-            title={i18n.translate('xpack.uptime.monitorChart.checksChart.leftAxis.title', {
-              defaultMessage: 'Number of checks',
-              description: 'The heading of the y-axis of a chart of timeseries data',
-            })}
-          />
-          <AreaSeries
-            customSeriesColors={getColorsMap(successColor, upSeriesSpecId)}
-            data={status.map(({ x, up }) => ({
-              x,
-              [upString]: up || 0,
-            }))}
-            id={upSeriesSpecId}
-            stackAccessors={['x']}
-            timeZone="local"
-            xAccessor="x"
-            xScaleType={ScaleType.Time}
-            yAccessors={[upString]}
-            yScaleType={ScaleType.Linear}
-          />
-          <AreaSeries
-            customSeriesColors={getColorsMap(dangerColor, downSeriesSpecId)}
-            data={status.map(({ x, down }) => ({
-              x,
-              [downString]: down || 0,
-            }))}
-            id={downSeriesSpecId}
-            stackAccessors={['x']}
-            timeZone="local"
-            xAccessor="x"
-            xScaleType={ScaleType.Time}
-            yAccessors={[downString]}
-            yScaleType={ScaleType.Linear}
-          />
-        </Chart>
-      </EuiPanel>
-    </React.Fragment>
+      <Chart>
+        <Settings xDomain={{ min: absoluteStartDate, max: absoluteEndDate }} showLegend={false} />
+        <Axis
+          id={getAxisId('checksBottom')}
+          position={Position.Bottom}
+          showOverlappingTicks={true}
+          tickFormat={timeFormatter(getChartDateLabel(absoluteStartDate, absoluteEndDate))}
+          title={i18n.translate('xpack.uptime.monitorChart.checksChart.bottomAxis.title', {
+            defaultMessage: 'Timestamp',
+            description: 'The heading of the x-axis of a chart of timeseries data.',
+          })}
+        />
+        <Axis
+          id={getAxisId('left')}
+          position={Position.Left}
+          tickFormat={d => Number(d).toFixed(0)}
+          title={i18n.translate('xpack.uptime.monitorChart.checksChart.leftAxis.title', {
+            defaultMessage: 'Number of checks',
+            description: 'The heading of the y-axis of a chart of timeseries data',
+          })}
+        />
+        <AreaSeries
+          customSeriesColors={getColorsMap(successColor, upSeriesSpecId)}
+          data={status.map(({ x, up }) => ({
+            x,
+            [upString]: up || 0,
+          }))}
+          id={upSeriesSpecId}
+          stackAccessors={['x']}
+          timeZone="local"
+          xAccessor="x"
+          xScaleType={ScaleType.Time}
+          yAccessors={[upString]}
+          yScaleType={ScaleType.Linear}
+        />
+        <AreaSeries
+          customSeriesColors={getColorsMap(dangerColor, downSeriesSpecId)}
+          data={status.map(({ x, down }) => ({
+            x,
+            [downString]: down || 0,
+          }))}
+          id={downSeriesSpecId}
+          stackAccessors={['x']}
+          timeZone="local"
+          xAccessor="x"
+          xScaleType={ScaleType.Time}
+          yAccessors={[downString]}
+          yScaleType={ScaleType.Linear}
+        />
+      </Chart>
+    </EuiPanel>
   );
 };
