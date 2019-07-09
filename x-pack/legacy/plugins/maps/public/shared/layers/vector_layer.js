@@ -180,7 +180,16 @@ export class VectorLayer extends AbstractLayer {
   }
 
   getLegendDetails() {
-    return this._style.getLegendDetails();
+    const getFieldLabel = async fieldName => {
+      const ordinalFields = await this.getOrdinalFields();
+      const field = ordinalFields.find(({ name }) => {
+        return name === fieldName;
+      });
+
+      return field ? field.label : fieldName;
+    };
+
+    return this._style.getLegendDetails(getFieldLabel);
   }
 
   _getBoundsBasedOnData() {
@@ -515,18 +524,15 @@ export class VectorLayer extends AbstractLayer {
       return;
     }
 
-    if (featureCollection !== featureCollectionOnMap) {
-      mbGeoJSONSource.setData(featureCollection);
-    }
-
-    const hasGeoJsonProperties = this._style.setFeatureState(featureCollection, mbMap, this.getId());
 
     // "feature-state" data expressions are not supported with layout properties.
     // To work around this limitation,
     // scaled layout properties (like icon-size) must fall back to geojson property values :(
-    if (hasGeoJsonProperties) {
+    const hasGeoJsonProperties = this._style.setFeatureState(featureCollection, mbMap, this.getId());
+    if (featureCollection !== featureCollectionOnMap || hasGeoJsonProperties) {
       mbGeoJSONSource.setData(featureCollection);
     }
+
   }
 
   _setMbPointsProperties(mbMap) {
