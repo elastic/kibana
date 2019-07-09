@@ -67,13 +67,7 @@ import {
   ViewMode,
   openAddPanelFlyout,
 } from '../../../embeddable_api/public';
-import {
-  DashboardAppState,
-  NavAction,
-  ConfirmModalFn,
-  AddFilterFn,
-  SavedDashboardPanel,
-} from './types';
+import { DashboardAppState, NavAction, ConfirmModalFn, SavedDashboardPanel } from './types';
 
 import { showOptionsPopover } from './top_nav/show_options_popover';
 import { DashboardSaveModal } from './top_nav/save_modal';
@@ -107,7 +101,6 @@ export class DashboardAppController {
     indexPatterns,
     config,
     confirmModal,
-    addFilter,
     courier,
   }: {
     courier: { fetch: () => void };
@@ -129,7 +122,6 @@ export class DashboardAppController {
     AppStateClass: TAppStateClass<DashboardAppState>;
     config: any;
     confirmModal: ConfirmModalFn;
-    addFilter: AddFilterFn;
   }) {
     const queryFilter = Private(FilterBarQueryFilterProvider);
     const getUnhashableStates = Private(getUnhashableStatesProvider);
@@ -146,7 +138,6 @@ export class DashboardAppController {
       savedDashboard: dash,
       AppStateClass,
       hideWriteControls: dashboardConfig.getHideWriteControls(),
-      addFilter,
     });
 
     $scope.appState = dashboardStateManager.getAppState();

@@ -36,12 +36,7 @@ import { convertPanelStateToSavedDashboardPanel } from './lib/embeddable_saved_o
 import { FilterUtils } from './lib/filter_utils';
 import { SavedObjectDashboard } from './saved_dashboard/saved_dashboard';
 
-import {
-  AddFilterFn,
-  SavedDashboardPanel,
-  DashboardAppState,
-  DashboardAppStateDefaults,
-} from './types';
+import { SavedDashboardPanel, DashboardAppState, DashboardAppStateDefaults } from './types';
 
 /**
  * Dashboard state manager handles connecting angular and redux state between the angular and react portions of the
@@ -69,7 +64,6 @@ export class DashboardStateManager {
    * @param savedDashboard
    * @param AppState The AppState class to use when instantiating a new AppState instance.
    * @param hideWriteControls true if write controls should be hidden.
-   * @param addFilter a function that can be used to add a filter bar filter
    */
   constructor({
     savedDashboard,
@@ -79,7 +73,6 @@ export class DashboardStateManager {
     savedDashboard: SavedObjectDashboard;
     AppStateClass: TAppStateClass<DashboardAppState>;
     hideWriteControls: boolean;
-    addFilter: AddFilterFn;
   }) {
     this.savedDashboard = savedDashboard;
     this.hideWriteControls = hideWriteControls;

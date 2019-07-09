@@ -83,29 +83,26 @@ export class SearchEmbeddableFactory extends EmbeddableFactory<
     const Private = $injector.get<IPrivate>('Private');
 
     const queryFilter = Private(FilterBarQueryFilterProvider);
-    // can't change this to be async / awayt, because an Anglular promise is expected to be returned.
-    return searchLoader
-      .get(savedObjectId)
-      .then(savedObject => {
-        return new SearchEmbeddable(
-          {
-            courier,
-            savedSearch: savedObject,
-            $rootScope,
-            $compile,
-            editUrl,
-            queryFilter,
-            editable: capabilities.get().discover.save as boolean,
-            indexPatterns: _.compact([savedObject.searchSource.getField('index')]),
-          },
-          input,
-          parent
-        );
-      })
-      .catch((e: Error) => {
-        console.error(e); // eslint-disable-line no-console
-        return new ErrorEmbeddable(e, input, parent);
-      });
+    try {
+      const savedObject = await searchLoader.get(savedObjectId);
+      return new SearchEmbeddable(
+        {
+          courier,
+          savedSearch: savedObject,
+          $rootScope,
+          $compile,
+          editUrl,
+          queryFilter,
+          editable: capabilities.get().discover.save as boolean,
+          indexPatterns: _.compact([savedObject.searchSource.getField('index')]),
+        },
+        input,
+        parent
+      );
+    } catch (e) {
+      console.error(e); // eslint-disable-line no-console
+      return new ErrorEmbeddable(e, input, parent);
+    }
   }
 
   public async create(input: SearchInput) {

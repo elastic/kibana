@@ -65,6 +65,27 @@ test('convertSavedDashboardPanelToPanelState', () => {
   });
 });
 
+test('convertSavedDashboardPanelToPanelState does not include undefined id', () => {
+  const savedDashboardPanel: SavedDashboardPanel = {
+    type: 'search',
+    embeddableConfig: {
+      something: 'hi!',
+    },
+    panelIndex: '123',
+    gridData: {
+      x: 0,
+      y: 0,
+      h: 15,
+      w: 15,
+      i: '123',
+    },
+    version: '7.0.0',
+  };
+
+  const converted = convertSavedDashboardPanelToPanelState(savedDashboardPanel, false);
+  expect(converted.hasOwnProperty('savedObjectId')).toBe(false);
+});
+
 test('convertPanelStateToSavedDashboardPanel', () => {
   const dashboardPanel: DashboardPanelState<CustomInput> = {
     gridData: {
@@ -100,7 +121,7 @@ test('convertPanelStateToSavedDashboardPanel', () => {
   });
 });
 
-test('convertPanelStateToSavedDashboardPanel does not include undefined savedObjectId', () => {
+test('convertPanelStateToSavedDashboardPanel will not add an undefined id when not needed', () => {
   const dashboardPanel: DashboardPanelState<CustomInput> = {
     gridData: {
       x: 0,
@@ -116,19 +137,6 @@ test('convertPanelStateToSavedDashboardPanel does not include undefined savedObj
     type: 'search',
   };
 
-  expect(convertPanelStateToSavedDashboardPanel(dashboardPanel)).toEqual({
-    type: 'search',
-    embeddableConfig: {
-      something: 'hi!',
-    },
-    panelIndex: '123',
-    gridData: {
-      x: 0,
-      y: 0,
-      h: 15,
-      w: 15,
-      i: '123',
-    },
-    version: '6.3.0',
-  });
+  const converted = convertPanelStateToSavedDashboardPanel(dashboardPanel);
+  expect(converted.hasOwnProperty('id')).toBe(false);
 });

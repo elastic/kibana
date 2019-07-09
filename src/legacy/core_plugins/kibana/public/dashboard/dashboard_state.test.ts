@@ -50,7 +50,6 @@ describe('DashboardState', function() {
       savedDashboard,
       AppStateClass: getAppStateMock() as AppStateClass<DashboardAppState>,
       hideWriteControls: false,
-      addFilter: () => {},
     });
   }
 

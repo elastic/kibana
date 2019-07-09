@@ -28,7 +28,6 @@ import * as filterActions from 'plugins/kibana/discover/doc_table/actions/filter
 
 // @ts-ignore
 import { getFilterGenerator } from 'ui/filter_manager';
-import { FilterBarQueryFilterProvider } from 'ui/filter_manager/query_filter';
 
 import {
   AppStateClass as TAppStateClass,
@@ -45,7 +44,7 @@ import { StaticIndexPattern, Query } from '../../../data/public';
 
 import { ViewMode } from '../../../embeddable_api/public';
 import { SavedObjectDashboard } from './saved_dashboard/saved_dashboard';
-import { DashboardAppState, SavedDashboardPanel, ConfirmModalFn, AddFilterFn } from './types';
+import { DashboardAppState, SavedDashboardPanel, ConfirmModalFn } from './types';
 
 import { DashboardAppController } from './dashboard_app_controller';
 
@@ -109,12 +108,6 @@ app.directive('dashboardApp', function($injector: IInjector) {
 
   const Private = $injector.get<IPrivate>('Private');
 
-  const queryFilter = Private(FilterBarQueryFilterProvider);
-  const filterGen = getFilterGenerator(queryFilter);
-  const addFilter: AddFilterFn = ({ field, value, operator, index }, appState: TAppState) => {
-    filterActions.addFilter(field, value, operator, index, appState, filterGen);
-  };
-
   const indexPatterns = $injector.get<{
     getDefault: () => Promise<IndexPattern>;
   }>('indexPatterns');
@@ -151,7 +144,6 @@ app.directive('dashboardApp', function($injector: IInjector) {
         indexPatterns,
         config,
         confirmModal,
-        addFilter,
         courier,
       }),
   };
