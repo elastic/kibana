@@ -187,8 +187,10 @@ export class PrivilegeSpaceTable extends Component<Props, State> {
           const effectivePrivilege = effectivePrivileges[record.spacesIndex];
           const basePrivilege = effectivePrivilege.base;
 
-          const isAllowedCustomizations =
-            allowedPrivileges[record.spacesIndex].base.privileges.length > 1;
+          const featureEntries = Object.values(allowedPrivileges[record.spacesIndex].feature);
+          const isAllowedCustomizations = featureEntries.some(entry => {
+            return entry != null && (entry.canUnassign || entry.privileges.length > 1);
+          });
 
           const showCustomize = hasCustomizations && isAllowedCustomizations;
 
@@ -203,7 +205,7 @@ export class PrivilegeSpaceTable extends Component<Props, State> {
           } else {
             return (
               <PrivilegeDisplay
-                explanation={basePrivilege}
+                explanation={showCustomize ? undefined : basePrivilege}
                 privilege={showCustomize ? CUSTOM_PRIVILEGE_VALUE : basePrivilege.actualPrivilege}
               />
             );
