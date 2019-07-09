@@ -35,7 +35,7 @@ export class Plugin {
   public setup(core: CoreSetup, plugins: TsvbSetupPlugins) {
     plugins.data.expressions.functionsRegistry.register(tsvb);
     // register the provider with the visTypes registry so that other know it exists
-    plugins.visualizations.types.VisTypesRegistryProvider.register(() => MetricsVis);
+    plugins.visualizations.types.VisTypesRegistryProvider.register(MetricsVis);
   }
 
   public start() {}

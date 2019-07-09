@@ -24,8 +24,6 @@ import { PersistedState } from 'ui/persisted_state';
 
 import chrome from 'ui/chrome';
 
-const uiSettings = chrome.getUiSettingsClient();
-
 export const tsvb = () => ({
   name: 'tsvb',
   type: 'render',
@@ -46,8 +44,8 @@ export const tsvb = () => ({
     },
   },
   async fn(context, args) {
+    const uiSettings = chrome.getUiSettingsClient();
     const metricsRequestHandler = createMetricsRequestHandler(uiSettings);
-
     const params = JSON.parse(args.params);
     const uiStateParams = JSON.parse(args.uiState);
     const uiState = new PersistedState(uiStateParams);

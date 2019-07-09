@@ -26,65 +26,66 @@ import { visFactory } from '../../visualizations/public';
 
 import { PANEL_TYPES } from '../common/panel_types';
 
-const uiSettings = chrome.getUiSettingsClient();
-const savedObjectsClient = chrome.getSavedObjectsClient();
+export const MetricsVis = () => {
+  const uiSettings = chrome.getUiSettingsClient();
+  const savedObjectsClient = chrome.getSavedObjectsClient();
+  const EditorController = createEditorController(uiSettings, savedObjectsClient);
+  const metricsRequestHandler = createMetricsRequestHandler(uiSettings);
 
-const EditorController = createEditorController(uiSettings, savedObjectsClient);
-const metricsRequestHandler = createMetricsRequestHandler(uiSettings);
-
-export const MetricsVis = visFactory.createReactVisualization({
-  name: 'metrics',
-  title: i18n.translate('tsvb.kbnVisTypes.metricsTitle', { defaultMessage: 'TSVB' }),
-  description: i18n.translate('tsvb.kbnVisTypes.metricsDescription', {
-    defaultMessage: 'Build time-series using a visual pipeline interface',
-  }),
-  icon: 'visVisualBuilder',
-  feedbackMessage: defaultFeedbackMessage,
-  visConfig: {
-    defaults: {
-      id: '61ca57f0-469d-11e7-af02-69e470af7417',
-      type: PANEL_TYPES.TIMESERIES,
-      series: [
-        {
-          id: '61ca57f1-469d-11e7-af02-69e470af7417',
-          color: '#68BC00',
-          split_mode: 'everything',
-          metrics: [
-            {
-              id: '61ca57f2-469d-11e7-af02-69e470af7417',
-              type: 'count',
-            },
-          ],
-          separate_axis: 0,
-          axis_position: 'right',
-          formatter: 'number',
-          chart_type: 'line',
-          line_width: 1,
-          point_size: 1,
-          fill: 0.5,
-          stacked: 'none',
-        },
-      ],
-      time_field: '',
-      index_pattern: '',
-      interval: '',
-      axis_position: 'left',
-      axis_formatter: 'number',
-      axis_scale: 'normal',
-      show_legend: 1,
-      show_grid: 1,
+  return visFactory.createReactVisualization({
+    name: 'metrics',
+    title: i18n.translate('tsvb.kbnVisTypes.metricsTitle', { defaultMessage: 'TSVB' }),
+    description: i18n.translate('tsvb.kbnVisTypes.metricsDescription', {
+      defaultMessage: 'Build time-series using a visual pipeline interface',
+    }),
+    icon: 'visVisualBuilder',
+    feedbackMessage: defaultFeedbackMessage,
+    visConfig: {
+      defaults: {
+        id: '61ca57f0-469d-11e7-af02-69e470af7417',
+        type: PANEL_TYPES.TIMESERIES,
+        series: [
+          {
+            id: '61ca57f1-469d-11e7-af02-69e470af7417',
+            color: '#68BC00',
+            split_mode: 'everything',
+            metrics: [
+              {
+                id: '61ca57f2-469d-11e7-af02-69e470af7417',
+                type: 'count',
+              },
+            ],
+            separate_axis: 0,
+            axis_position: 'right',
+            formatter: 'number',
+            chart_type: 'line',
+            line_width: 1,
+            point_size: 1,
+            fill: 0.5,
+            stacked: 'none',
+          },
+        ],
+        time_field: '',
+        index_pattern: '',
+        interval: '',
+        axis_position: 'left',
+        axis_formatter: 'number',
+        axis_scale: 'normal',
+        show_legend: 1,
+        show_grid: 1,
+      },
+      component: require('./components/vis_editor').VisEditor,
     },
-    component: require('./components/vis_editor').VisEditor,
-  },
-  editor: EditorController,
-  editorConfig: {
-    component: require('./components/vis_editor').VisEditor,
-  },
-  options: {
-    showQueryBar: false,
-    showFilterBar: false,
-    showIndexSelection: false,
-  },
-  requestHandler: metricsRequestHandler,
-  responseHandler: 'none',
-});
+    editor: EditorController,
+    editorConfig: {
+      component: require('./components/vis_editor').VisEditor,
+    },
+    options: {
+      showQueryBar: false,
+      showFilterBar: false,
+      showIndexSelection: false,
+    },
+    requestHandler: metricsRequestHandler,
+    responseHandler: 'none',
+  });
+};
