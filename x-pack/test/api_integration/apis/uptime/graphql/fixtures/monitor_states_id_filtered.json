@@ -60,7 +60,7 @@
           "monitor": { "id": null, "name": null, "status": "up", "type": null },
           "summary": { "up": 3, "down": 0, "geo": null },
           "url": { "full": "https://www.elastic.co", "domain": "www.elastic.co" },
-          "timestamp": 2019
+          "timestamp": 1548700993074
         }
       }
     ]
