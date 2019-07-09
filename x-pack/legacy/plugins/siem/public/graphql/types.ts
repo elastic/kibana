@@ -126,8 +126,6 @@ export interface Source {
 
   Domains: DomainsData;
 
-  DomainFirstLastSeen: FirstLastSeenDomain;
-
   Tls: TlsData;
 
   Users: UsersData;
@@ -334,8 +332,6 @@ export interface Inspect {
 }
 
 export interface EventsData {
-  kpiEventType?: KpiItem[] | null;
-
   edges: EcsEdges[];
 
   totalCount: number;
@@ -343,12 +339,6 @@ export interface EventsData {
   pageInfo: PageInfo;
 
   inspect?: Inspect | null;
-}
-
-export interface KpiItem {
-  value?: string | null;
-
-  count: number;
 }
 
 export interface EcsEdges {
@@ -1007,14 +997,6 @@ export interface DomainsNetworkField {
   direction?: NetworkDirectionEcs[] | null;
 }
 
-export interface FirstLastSeenDomain {
-  firstSeen?: Date | null;
-
-  lastSeen?: Date | null;
-
-  inspect?: Inspect | null;
-}
-
 export interface TlsData {
   edges: TlsEdges[];
 
@@ -1178,8 +1160,6 @@ export interface NetworkTopNFlowEdges {
 export interface NetworkTopNFlowItem {
   _id?: string | null;
 
-  timestamp?: Date | null;
-
   source?: TopNFlowItem | null;
 
   destination?: TopNFlowItem | null;
@@ -1235,8 +1215,6 @@ export interface NetworkDnsItem {
   dnsName?: string | null;
 
   queryCount?: number | null;
-
-  timestamp?: Date | null;
 
   uniqueDomains?: number | null;
 }
@@ -1880,17 +1858,6 @@ export interface DomainsSourceArgs {
 
   defaultIndex: string[];
 }
-export interface DomainFirstLastSeenSourceArgs {
-  id?: string | null;
-
-  ip: string;
-
-  domainName: string;
-
-  flowTarget: FlowTarget;
-
-  defaultIndex: string[];
-}
 export interface TlsSourceArgs {
   filterQuery?: string | null;
 
@@ -2294,38 +2261,6 @@ export namespace GetAuthenticationsQuery {
     dsl: string[];
 
     response: string[];
-  };
-}
-
-export namespace GetDomainFirstLastSeenQuery {
-  export type Variables = {
-    sourceId: string;
-    ip: string;
-    domainName: string;
-    flowTarget: FlowTarget;
-    defaultIndex: string[];
-  };
-
-  export type Query = {
-    __typename?: 'Query';
-
-    source: Source;
-  };
-
-  export type Source = {
-    __typename?: 'Source';
-
-    id: string;
-
-    DomainFirstLastSeen: DomainFirstLastSeen;
-  };
-
-  export type DomainFirstLastSeen = {
-    __typename?: 'FirstLastSeenDomain';
-
-    firstSeen?: Date | null;
-
-    lastSeen?: Date | null;
   };
 }
 
