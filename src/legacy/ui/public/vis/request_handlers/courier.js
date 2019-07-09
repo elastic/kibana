@@ -40,9 +40,9 @@ const CourierRequestHandlerProvider = function () {
       partialRows,
       metricsAtAllLevels,
       inspectorAdapters,
-      queryFilter
+      queryFilter,
+      abortSignal
     }) {
-
       // Create a new search source that inherits the original search source
       // but has the appropriate timeRange applied via a filter.
       // This is a temporary solution until we properly pass down all required
@@ -102,6 +102,11 @@ const CourierRequestHandlerProvider = function () {
         request.stats(getRequestInspectorStats(requestSearchSource));
 
         try {
+          if (abortSignal) {
+            abortSignal.addEventListener('abort', () => {
+              requestSearchSource.cancelQueued();
+            });
+          }
           const response = await requestSearchSource.fetch();
 
           searchSource.lastQuery = queryHash;

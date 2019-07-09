@@ -55,7 +55,6 @@ interface EmbeddedVisualizeHandlerParams extends VisualizeLoaderParams {
   queryFilter: any;
   autoFetch?: boolean;
   pipelineDataLoader?: boolean;
-  abortSignal?: AbortSignal;
 }
 
 const RENDER_COMPLETE_EVENT = 'render_complete';
@@ -94,6 +93,12 @@ export class EmbeddedVisualizeHandler {
 
     const forceFetch = this.shouldForceNextFetch;
     this.shouldForceNextFetch = false;
+
+    // Abort any in-progress requests
+    if (this.abortController) this.abortController.abort();
+    this.abortController = new AbortController();
+    this.dataLoaderParams.abortSignal = this.abortController.signal;
+
     this.fetch(forceFetch).then(this.render);
   }, 100);
 
@@ -105,6 +110,7 @@ export class EmbeddedVisualizeHandler {
   private actions: any = {};
   private events$: Rx.Observable<any>;
   private autoFetch: boolean;
+  private abortController?: AbortController;
 
   constructor(
     private readonly element: HTMLElement,
@@ -123,7 +129,6 @@ export class EmbeddedVisualizeHandler {
       autoFetch = true,
       pipelineDataLoader = false,
       Private,
-      abortSignal,
     } = params;
 
     this.dataLoaderParams = {
@@ -135,7 +140,6 @@ export class EmbeddedVisualizeHandler {
       uiState,
       aggs: vis.getAggConfig(),
       forceFetch: false,
-      abortSignal,
     };
 
     this.pipelineDataLoader = pipelineDataLoader;
@@ -226,7 +230,7 @@ export class EmbeddedVisualizeHandler {
    */
   public update(params: VisualizeUpdateParams = {}) {
     // Apply data- attributes to the element if specified
-    const dataAttrs = params.dataAttrs;
+    const { dataAttrs, ...otherParams } = params;
     if (dataAttrs) {
       Object.keys(dataAttrs).forEach(key => {
         if (dataAttrs[key] === null) {
@@ -238,19 +242,8 @@ export class EmbeddedVisualizeHandler {
       });
     }
 
-    let fetchRequired = false;
-    if (params.hasOwnProperty('timeRange')) {
-      fetchRequired = true;
-      this.dataLoaderParams.timeRange = params.timeRange;
-    }
-    if (params.hasOwnProperty('filters')) {
-      fetchRequired = true;
-      this.dataLoaderParams.filters = params.filters;
-    }
-    if (params.hasOwnProperty('query')) {
-      fetchRequired = true;
-      this.dataLoaderParams.query = params.query;
-    }
+    const fetchRequired = ['timeRange', 'filters', 'query'].some(key => params.hasOwnProperty(key));
+    this.dataLoaderParams = { ...this.dataLoaderParams, ...otherParams };
 
     if (fetchRequired) {
       this.fetchAndRender();
@@ -263,6 +256,7 @@ export class EmbeddedVisualizeHandler {
    */
   public destroy(): void {
     this.destroyed = true;
+    if (this.abortController) this.abortController.abort();
     this.debouncedFetchAndRender.cancel();
     if (this.autoFetch) {
       timefilter.off('autoRefreshFetch', this.reload);

@@ -103,7 +103,6 @@ export interface DashboardAppScope extends ng.IScope {
   getEmbeddableFactory: (type: string) => EmbeddableFactory;
   getDashboardState: () => DashboardStateManager;
   refresh: () => void;
-  abortSignal?: AbortSignal;
 }
 
 const app = uiModules.get('app/dashboard', [
