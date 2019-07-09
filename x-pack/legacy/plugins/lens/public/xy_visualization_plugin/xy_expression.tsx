@@ -68,14 +68,6 @@ export const xyChart: ExpressionFunction<'lens_xy_chart', KibanaDatatable, XYArg
       multi: true,
       help: 'The columns used to split the series.',
     },
-    isStacked: {
-      types: ['boolean'],
-      help: 'Whether to display the series as stacked along the X dimension',
-    },
-    isStackedPercentage: {
-      types: ['boolean'],
-      help: 'If stacked, whether to convert each Y axis into a percentage of the total',
-    },
   },
   context: {
     types: ['kibana_datatable'],

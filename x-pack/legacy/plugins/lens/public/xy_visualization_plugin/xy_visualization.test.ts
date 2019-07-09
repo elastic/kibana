@@ -47,7 +47,6 @@ describe('xy_visualization', () => {
 
       expect(initialState).toMatchInlineSnapshot(`
         Object {
-          "isStacked": true,
           "legend": Object {
             "isVisible": true,
             "position": "right",

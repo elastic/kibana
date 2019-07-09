@@ -36,7 +36,6 @@ export const xyVisualization: Visualization<State, PersistableState> = {
           title: 'Y',
         },
         splitSeriesAccessors: [],
-        isStacked: true,
       }
     );
   },
