@@ -2,13 +2,10 @@
 [[uptime-overview]]
 == Overview
 
-Uptime allows you to monitor the status of network endpoints via HTTP/S, TCP, and ICMP.
-You can explore endpoint status over time, drill down into specific monitors,
-and easily view a high-level snapshot of your environment at any point in time.
+The Elastic Uptime solution built on the Elastic Stack.
+It allows you to monitor the availability and response time of software services and applications in real time.
 
-Uptime requires the setup of monitors in {heartbeat-ref}/index.html[Heartbeat].
-Once monitors have been set up, you can visualize the data they provide in the
-{uptime-guide}/overview.html[Uptime UI].
-
-[role="screenshot"]
-// image::apm/images/apm-setup.png[Installation instructions on the Uptime page in Kibana]
+Based on {heartbeat-ref}/index.html[Heartbeat], an open source uptime monitor, Elastic Uptime is transparent,
+flexible, and developer-friendly.
+It can be deployed both inside and outside your organization's network to understand service uptime and
+response time characteristics from multiple network vantage points.

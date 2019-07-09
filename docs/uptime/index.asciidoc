@@ -25,4 +25,3 @@ while Kibana 7.0 requires an index of `heartbeat-7*` (containing documents from 
 
 include::overview.asciidoc[]
 include::monitor.asciidoc[]
-include::security.asciidoc[]

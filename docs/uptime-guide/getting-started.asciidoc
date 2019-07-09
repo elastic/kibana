@@ -14,22 +14,18 @@ https://www.elastic.co/cloud/elasticsearch-service[hosted {es} Service] on
 Elastic Cloud.
 
 https://www.elastic.co/cloud/elasticsearch-service/signup[Try out the {es} Service for free],
-then jump straight to <<install-uptime>>.
+then jump straight to <<install-heartbeat>>.
 
 [float]
 [[before-installation]]
 === Install the stack yourself
 
-If you'd rather install the stack yourself, follow these instructions.
-
-// image::images/apm-architecture-diy.png[Install Elastic APM yourself]
-
-To install the stack yourself, first see the https://www.elastic.co/support/matrix[Elastic Support Matrix] for information about supported operating systems and product compatibility.
-We recommend you use the same version of Elasticsearch, Kibana, and APM Server.
+If you'd rather install the stack yourself,
+first see the https://www.elastic.co/support/matrix[Elastic Support Matrix] for information about supported operating systems and product compatibility.
 
 * <<install-elasticsearch>>
 * <<install-kibana>>
-* <<install-uptime>>
+* <<install-heartbeat>>
 
 [[install-elasticsearch]]
 === Step 1: Install Elasticsearch
@@ -49,11 +45,19 @@ Install Kibana, start it up, and open up the web interface:
 . {stack-gs}/get-started-elastic-stack.html#install-kibana[Install Kibana].
 . {stack-gs}/get-started-elastic-stack.html#_launch_the_kibana_web_interface[Launch the Kibana Web Interface].
 
-[[install-uptime]]
-=== Step 3: Install and configure Uptime
+[[install-heartbeat]]
+=== Step 3: Install and configure Heartbeat
 
 IMPORTANT: Make sure you're using the same major versions of Heartbeat and Kibana.
 
+The *Setup Instructions* in Kibana will get you started with installing and configuring Heartbeat.
 
+[role="screenshot"]
+image::uptime-guide/images/uptime-setup.png[Installation instructions on the Uptime page in Kibana]
 
-// information on installation goes here
+Index patterns tell Kibana which Elasticsearch indices you want to explore.
+The Uptime UI requires a `heartbeat-7*`` index pattern.
+If you have configured a different index pattern, you can use field aliases to ensure data is recognized by the UI.
+
+After you install and configure Heartbeat,
+the {uptime-guide}/overview.html[Uptime UI] will automatically populate with the Heartbeat monitors.
