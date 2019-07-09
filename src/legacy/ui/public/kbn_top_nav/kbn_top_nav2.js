@@ -82,6 +82,7 @@ module.directive('kbnTopNav2Helper', (reactDirective) => {
       ['query', { watchDepth: 'reference' }],
       ['store', { watchDepth: 'reference' }],
       ['intl', { watchDepth: 'reference' }],
+      ['store', { watchDepth: 'reference' }],
 
       ['onQuerySubmit', { watchDepth: 'reference' }],
       ['onFiltersUpdated', { watchDepth: 'reference' }],
@@ -102,7 +103,6 @@ module.directive('kbnTopNav2Helper', (reactDirective) => {
 
       'appName',
       'screenTitle',
-      'store',
       'dateRangeFrom',
       'dateRangeTo',
       'isRefreshPaused',
