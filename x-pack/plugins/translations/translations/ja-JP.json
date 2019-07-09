@@ -6235,7 +6235,6 @@
     "xpack.ml.dataframe.jobsList.deleteModalCancelButton": "キャンセル",
     "xpack.ml.dataframe.jobsList.deleteModalDeleteButton": "削除",
     "xpack.ml.dataframe.jobsList.deleteModalTitle": "{jobId} を削除",
-    "xpack.ml.dataframe.jobsList.errorGettingDataFrameJobsList": "データフレームジョブリストの取得中にエラーが発生しました: {error}",
     "xpack.ml.dataframe.jobsList.jobDetails.tabs.jobSettingsLabel": "ジョブの詳細",
     "xpack.ml.dataframe.jobsList.rowCollapse": "{jobId} の詳細を非表示",
     "xpack.ml.dataframe.jobsList.rowExpand": "{jobId} の詳細を表示",
