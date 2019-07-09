@@ -17,7 +17,11 @@
  * under the License.
  */
 import '../../../../ui_capabilities.test.mocks';
-import { coreStartMock } from '../../../../../../../../core/public/ui_new_platform.test.mocks';
+import { npStart } from 'ui/new_platform';
+
+jest.mock('ui/new_platform', () =>
+  require('ui/new_platform/__mocks__/helpers').createUiNewPlatformMock()
+);
 
 import React from 'react';
 import {
@@ -79,8 +83,8 @@ test('create new calls factory.adds a panel to the container', async done => {
 
   await nextTick();
 
-  const overlayMock = coreStartMock.overlays;
-  ((overlayMock.openModal.mock.calls[0][0] as any).props as ContactCardInitializerProps).onCreate({
+  const overlayMock = npStart.core.overlays;
+  ((overlayMock.openModal as any).mock.calls[0][0].props as ContactCardInitializerProps).onCreate({
     firstName: 'Dany',
     lastName: 'Targaryan',
   });

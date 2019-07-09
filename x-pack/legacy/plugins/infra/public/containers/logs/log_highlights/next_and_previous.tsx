@@ -31,45 +31,33 @@ export const useNextAndPrevious = ({
     [logEntryHighlights]
   );
 
-  useEffect(
-    () => {
-      setCurrentTimeKey(null);
-    },
-    [highlightTerms]
-  );
+  useEffect(() => {
+    setCurrentTimeKey(null);
+  }, [highlightTerms]);
 
-  useEffect(
-    () => {
-      if (currentTimeKey) {
-        jumpToTarget(currentTimeKey);
-      }
-    },
-    [currentTimeKey, jumpToTarget]
-  );
+  useEffect(() => {
+    if (currentTimeKey) {
+      jumpToTarget(currentTimeKey);
+    }
+  }, [currentTimeKey, jumpToTarget]);
 
-  useEffect(
-    () => {
-      if (currentTimeKey === null && entries.length > 0) {
-        const initialIndex = visibleMidpoint
-          ? clampValue(getLogEntryIndexBeforeTime(entries, visibleMidpoint), 0, entries.length - 1)
-          : 0;
-        const initialTimeKey = entries[initialIndex].key;
-        setCurrentTimeKey(initialTimeKey);
-      }
-    },
-    [currentTimeKey, entries, setCurrentTimeKey]
-  );
+  useEffect(() => {
+    if (currentTimeKey === null && entries.length > 0) {
+      const initialIndex = visibleMidpoint
+        ? clampValue(getLogEntryIndexBeforeTime(entries, visibleMidpoint), 0, entries.length - 1)
+        : 0;
+      const initialTimeKey = entries[initialIndex].key;
+      setCurrentTimeKey(initialTimeKey);
+    }
+  }, [currentTimeKey, entries, setCurrentTimeKey]);
 
-  const indexOfCurrentTimeKey = useMemo(
-    () => {
-      if (currentTimeKey && entries.length > 0) {
-        return getLogEntryIndexAtTime(entries, currentTimeKey);
-      } else {
-        return null;
-      }
-    },
-    [currentTimeKey, entries]
-  );
+  const indexOfCurrentTimeKey = useMemo(() => {
+    if (currentTimeKey && entries.length > 0) {
+      return getLogEntryIndexAtTime(entries, currentTimeKey);
+    } else {
+      return null;
+    }
+  }, [currentTimeKey, entries]);
 
   const hasPreviousHighlight = useMemo(
     () => isNumber(indexOfCurrentTimeKey) && indexOfCurrentTimeKey > 0,
@@ -84,27 +72,21 @@ export const useNextAndPrevious = ({
     [indexOfCurrentTimeKey, entries]
   );
 
-  const goToPreviousHighlight = useCallback(
-    () => {
-      if (entries.length && isNumber(indexOfCurrentTimeKey)) {
-        const previousIndex = indexOfCurrentTimeKey - 1;
-        const entryTimeKey = entries[previousIndex].key;
-        setCurrentTimeKey(entryTimeKey);
-      }
-    },
-    [indexOfCurrentTimeKey, entries]
-  );
+  const goToPreviousHighlight = useCallback(() => {
+    if (entries.length && isNumber(indexOfCurrentTimeKey)) {
+      const previousIndex = indexOfCurrentTimeKey - 1;
+      const entryTimeKey = entries[previousIndex].key;
+      setCurrentTimeKey(entryTimeKey);
+    }
+  }, [indexOfCurrentTimeKey, entries]);
 
-  const goToNextHighlight = useCallback(
-    () => {
-      if (entries.length > 0 && isNumber(indexOfCurrentTimeKey)) {
-        const nextIndex = indexOfCurrentTimeKey + 1;
-        const entryTimeKey = entries[nextIndex].key;
-        setCurrentTimeKey(entryTimeKey);
-      }
-    },
-    [indexOfCurrentTimeKey, entries]
-  );
+  const goToNextHighlight = useCallback(() => {
+    if (entries.length > 0 && isNumber(indexOfCurrentTimeKey)) {
+      const nextIndex = indexOfCurrentTimeKey + 1;
+      const entryTimeKey = entries[nextIndex].key;
+      setCurrentTimeKey(entryTimeKey);
+    }
+  }, [indexOfCurrentTimeKey, entries]);
 
   return {
     hasPreviousHighlight,

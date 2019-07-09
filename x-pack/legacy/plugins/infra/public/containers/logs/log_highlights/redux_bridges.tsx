@@ -17,13 +17,10 @@ import { LogHighlightsState } from './log_highlights';
 export const LogHighlightsStreamItemsBridge = withStreamItems(
   ({ entriesStart, entriesEnd }: { entriesStart: TimeKey | null; entriesEnd: TimeKey | null }) => {
     const { setStartKey, setEndKey } = useContext(LogHighlightsState.Context);
-    useEffect(
-      () => {
-        setStartKey(entriesStart);
-        setEndKey(entriesEnd);
-      },
-      [entriesStart, entriesEnd]
-    );
+    useEffect(() => {
+      setStartKey(entriesStart);
+      setEndKey(entriesEnd);
+    }, [entriesStart, entriesEnd]);
 
     return null;
   }
@@ -38,19 +35,13 @@ export const LogHighlightsPositionBridge = withLogPosition(
     jumpToTargetPosition: (target: TimeKey) => void;
   }) => {
     const { setJumpToTarget, setVisibleMidpoint } = useContext(LogHighlightsState.Context);
-    useEffect(
-      () => {
-        setVisibleMidpoint(visibleMidpoint);
-      },
-      [visibleMidpoint]
-    );
+    useEffect(() => {
+      setVisibleMidpoint(visibleMidpoint);
+    }, [visibleMidpoint]);
 
-    useEffect(
-      () => {
-        setJumpToTarget(() => jumpToTargetPosition);
-      },
-      [jumpToTargetPosition]
-    );
+    useEffect(() => {
+      setJumpToTarget(() => jumpToTargetPosition);
+    }, [jumpToTargetPosition]);
 
     return null;
   }
@@ -60,12 +51,9 @@ export const LogHighlightsFilterQueryBridge = withLogFilter(
   ({ serializedFilterQuery }: { serializedFilterQuery: string | null }) => {
     const { setFilterQuery } = useContext(LogHighlightsState.Context);
 
-    useEffect(
-      () => {
-        setFilterQuery(serializedFilterQuery);
-      },
-      [serializedFilterQuery]
-    );
+    useEffect(() => {
+      setFilterQuery(serializedFilterQuery);
+    }, [serializedFilterQuery]);
 
     return null;
   }

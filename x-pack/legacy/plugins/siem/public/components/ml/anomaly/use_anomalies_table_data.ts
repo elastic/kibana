@@ -40,31 +40,48 @@ export const getTimeZone = (config: Partial<AppKibanaFrameworkAdapter>): string 
   }
 };
 
+export const getThreshold = (
+  config: Partial<AppKibanaFrameworkAdapter>,
+  threshold: number
+): number => {
+  if (threshold !== -1) {
+    return threshold;
+  } else if (config.anomalyScore == null) {
+    return 50;
+  } else if (config.anomalyScore < 0) {
+    return 0;
+  } else if (config.anomalyScore > 100) {
+    return 100;
+  } else {
+    return Math.floor(config.anomalyScore);
+  }
+};
+
 export const useAnomaliesTableData = ({
   influencers,
   startDate,
   endDate,
-  threshold = 0,
+  threshold = -1,
   skip = false,
 }: Args): Return => {
   const [tableData, setTableData] = useState<Anomalies | null>(null);
   const [loading, setLoading] = useState(true);
   const config = useContext(KibanaConfigContext);
   const capabilities = useContext(MlCapabilitiesContext);
+  const userPermissions = hasMlUserPermissions(capabilities);
 
   const fetchFunc = async (
     influencersInput: InfluencerInput[] | null,
     earliestMs: number,
     latestMs: number
   ) => {
-    const userPermissions = hasMlUserPermissions(capabilities);
     if (userPermissions && influencersInput != null && !skip) {
       const data = await anomaliesTableData(
         {
           jobIds: [],
           criteriaFields: [],
           aggregationInterval: 'auto',
-          threshold,
+          threshold: getThreshold(config, threshold),
           earliestMs,
           latestMs,
           influencers: influencersInput,
@@ -86,13 +103,10 @@ export const useAnomaliesTableData = ({
     }
   };
 
-  useEffect(
-    () => {
-      setLoading(true);
-      fetchFunc(influencers, startDate, endDate);
-    },
-    [influencersToString(influencers), startDate, endDate, skip]
-  );
+  useEffect(() => {
+    setLoading(true);
+    fetchFunc(influencers, startDate, endDate);
+  }, [influencersToString(influencers), startDate, endDate, skip, userPermissions]);
 
   return [loading, tableData];
 };
