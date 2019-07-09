@@ -168,7 +168,7 @@ export class TaskManagerRunner implements TaskRunner {
   public async claimOwnership(): Promise<boolean> {
     const VERSION_CONFLICT_STATUS = 409;
     const attempts = this.instance.attempts + 1;
-    const now = new Date();
+    const now = new Date(Date.now());
 
     const timeoutDate = intervalFromNow(this.definition.timeout!)!;
 

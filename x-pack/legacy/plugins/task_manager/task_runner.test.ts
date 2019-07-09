@@ -10,6 +10,13 @@ import { minutesFromNow, secondsFromNow } from './lib/intervals';
 import { ConcreteTaskInstance } from './task';
 import { TaskManagerRunner } from './task_runner';
 
+const mockedNow = new Date('2019-06-03T18:55:25.982Z');
+(global as any).Date = class Date extends global.Date {
+  static now() {
+    return mockedNow.getTime();
+  }
+};
+
 describe('TaskManagerRunner', () => {
   test('provides details about the task that is running', () => {
     const { runner } = testOpts({
@@ -69,9 +76,7 @@ describe('TaskManagerRunner', () => {
     const instance = store.update.args[0][0];
 
     expect(instance.id).toEqual(id);
-    expect(
-      Math.abs(minutesFromNow(initialAttempts * 5).getTime() - instance.runAt.getTime())
-    ).toBeLessThan(100);
+    expect(instance.runAt.getTime()).toEqual(minutesFromNow(initialAttempts * 5).getTime());
     expect(instance.params).toEqual({ a: 'b' });
     expect(instance.state).toEqual({ hey: 'there' });
   });
@@ -81,7 +86,7 @@ describe('TaskManagerRunner', () => {
       instance: {
         interval: '10m',
         status: 'running',
-        startedAt: new Date(),
+        startedAt: new Date(Date.now()),
       },
       definitions: {
         bar: {
@@ -241,14 +246,10 @@ describe('TaskManagerRunner', () => {
 
     expect(instance.attempts).toEqual(initialAttempts + 1);
     expect(instance.status).toBe('running');
-    expect(Math.abs(Date.now() - instance.startedAt.getTime())).toBeLessThan(100);
-    expect(
-      Math.abs(
-        minutesFromNow((initialAttempts + 1) * 5).getTime() +
-          timeoutMinutes * 60 * 1000 -
-          instance.retryAt.getTime()
-      )
-    ).toBeLessThan(100);
+    expect(instance.startedAt.getTime()).toEqual(Date.now());
+    expect(instance.retryAt.getTime()).toEqual(
+      minutesFromNow((initialAttempts + 1) * 5).getTime() + timeoutMinutes * 60 * 1000
+    );
   });
 
   test('uses getRetryDelay function on error when defined', async () => {
@@ -314,13 +315,9 @@ describe('TaskManagerRunner', () => {
     sinon.assert.calledWith(getRetryDelayStub, initialAttempts + 1);
     const instance = store.update.args[0][0];
 
-    expect(
-      Math.abs(
-        secondsFromNow(retryDelay).getTime() +
-          timeoutMinutes * 60 * 1000 -
-          instance.retryAt.getTime()
-      )
-    ).toBeLessThan(100);
+    expect(instance.retryAt.getTime()).toEqual(
+      secondsFromNow(retryDelay).getTime() + timeoutMinutes * 60 * 1000
+    );
   });
 
   test('Fails non-recurring task when maxAttempts reached', async () => {
@@ -381,7 +378,7 @@ describe('TaskManagerRunner', () => {
     const instance = store.update.args[0][0];
     expect(instance.attempts).toEqual(3);
     expect(instance.status).toEqual('idle');
-    expect(Math.abs(minutesFromNow(15).getTime() - instance.runAt.getTime())).toBeLessThan(100);
+    expect(instance.runAt.getTime()).toEqual(minutesFromNow(15).getTime());
   });
 
   interface TestOpts {
@@ -414,8 +411,8 @@ describe('TaskManagerRunner', () => {
           taskType: 'bar',
           sequenceNumber: 32,
           primaryTerm: 32,
-          runAt: new Date(),
-          scheduledAt: new Date(),
+          runAt: new Date(Date.now()),
+          scheduledAt: new Date(Date.now()),
           startedAt: null,
           retryAt: null,
           attempts: 0,

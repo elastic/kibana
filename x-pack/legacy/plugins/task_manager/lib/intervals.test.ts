@@ -15,6 +15,16 @@ import {
   secondsFromDate,
 } from './intervals';
 
+const mockedNow = new Date('2019-06-03T18:55:25.982Z');
+(global as any).Date = class Date extends global.Date {
+  static now() {
+    return mockedNow.getTime();
+  }
+  valueOf() {
+    return mockedNow.valueOf();
+  }
+};
+
 describe('taskIntervals', () => {
   describe('assertValidInterval', () => {
     test('it accepts intervals in the form `Nm`', () => {
@@ -49,14 +59,14 @@ describe('taskIntervals', () => {
       const mins = _.random(1, 100);
       const expected = Date.now() + mins * 60 * 1000;
       const nextRun = intervalFromNow(`${mins}m`)!.getTime();
-      expect(Math.abs(nextRun - expected)).toBeLessThan(100);
+      expect(nextRun).toEqual(expected);
     });
 
     test('it returns the current date plus n seconds', () => {
       const secs = _.random(1, 100);
       const expected = Date.now() + secs * 1000;
       const nextRun = intervalFromNow(`${secs}s`)!.getTime();
-      expect(Math.abs(nextRun - expected)).toBeLessThan(100);
+      expect(nextRun).toEqual(expected);
     });
 
     test('it rejects intervals are not of the form `Nm` or `Ns`', () => {
@@ -121,7 +131,7 @@ describe('taskIntervals', () => {
       const mins = _.random(1, 100);
       const expected = Date.now() + mins * 60 * 1000;
       const nextRun = minutesFromNow(mins).getTime();
-      expect(Math.abs(nextRun - expected)).toBeLessThan(100);
+      expect(nextRun).toEqual(expected);
     });
   });
 
@@ -140,7 +150,7 @@ describe('taskIntervals', () => {
       const secs = _.random(1, 100);
       const expected = Date.now() + secs * 1000;
       const nextRun = secondsFromNow(secs).getTime();
-      expect(Math.abs(nextRun - expected)).toBeLessThan(100);
+      expect(nextRun).toEqual(expected);
     });
   });
 
