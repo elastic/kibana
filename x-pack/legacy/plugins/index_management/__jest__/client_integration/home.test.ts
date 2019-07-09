@@ -6,7 +6,13 @@
 
 import { act } from 'react-dom/test-utils';
 import * as fixtures from '../../test/fixtures';
-import { setupEnvironment, pageHelpers, nextTick, getRandomString } from './helpers';
+import {
+  setupEnvironment,
+  pageHelpers,
+  nextTick,
+  getRandomString,
+  findTestSubject,
+} from './helpers';
 import { IdxMgmtHomeTestBed } from './helpers/home.helpers';
 
 const API_PATH = '/api/index_management';
@@ -156,10 +162,12 @@ describe.skip('<IndexManagementHome />', () => {
             const { name, indexPatterns, order, version } = template;
 
             expect(removeWhiteSpaceOnArrayValues(row)).toEqual([
+              '',
               name,
               indexPatterns.join(', '),
               order.toString(),
               version.toString(),
+              '',
               '',
               '',
               '',
@@ -182,6 +190,68 @@ describe.skip('<IndexManagementHome />', () => {
 
           expect(server.requests.length).toBe(totalRequests + 1);
           expect(server.requests[server.requests.length - 1].url).toBe(`${API_PATH}/templates`);
+        });
+
+        test('should have action buttons on each row to delete an index template', () => {
+          const { table } = testBed;
+          const { rows } = table.getMetaData('templatesTable');
+          const lastColumn = rows[0].columns[rows[0].columns.length - 1].reactWrapper;
+
+          expect(findTestSubject(lastColumn, 'deleteTemplateButton').length).toBe(1);
+        });
+
+        describe('delete index template', () => {
+          test('should show a confirmation when clicking the delete template button', async () => {
+            const { actions } = testBed;
+
+            await actions.clickTemplateActionAt(0, 'delete');
+
+            // We need to read the document "body" as the modal is added there and not inside
+            // the component DOM tree.
+            expect(
+              document.body.querySelector('[data-test-subj="deleteTemplatesConfirmation"]')
+            ).not.toBe(null);
+
+            expect(
+              document.body.querySelector('[data-test-subj="deleteTemplatesConfirmation"]')!
+                .textContent
+            ).toContain('Delete template');
+          });
+
+          test('should send the correct HTTP request to delete an index template', async () => {
+            const { component, actions, table } = testBed;
+            const { rows } = table.getMetaData('templatesTable');
+
+            const watchId = rows[0].columns[2].value;
+
+            await actions.clickTemplateActionAt(0, 'delete');
+
+            const modal = document.body.querySelector(
+              '[data-test-subj="deleteTemplatesConfirmation"]'
+            );
+            const confirmButton: HTMLButtonElement | null = modal!.querySelector(
+              '[data-test-subj="confirmModalConfirmButton"]'
+            );
+
+            httpRequestsMockHelpers.setDeleteTemplateResponse({
+              results: {
+                successes: [watchId],
+                errors: [],
+              },
+            });
+
+            // @ts-ignore (remove when react 16.9.0 is released)
+            await act(async () => {
+              confirmButton!.click();
+              await nextTick();
+              component.update();
+            });
+
+            const latestRequest = server.requests[server.requests.length - 1];
+
+            expect(latestRequest.method).toBe('DELETE');
+            expect(latestRequest.url).toBe(`${API_PATH}/templates/${template1.name}`);
+          });
         });
       });
     });

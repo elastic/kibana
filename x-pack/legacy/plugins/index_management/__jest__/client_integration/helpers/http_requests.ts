@@ -28,9 +28,18 @@ const registerHttpRequestMockHelpers = (server: SinonFakeServer) => {
     ]);
   };
 
+  const setDeleteTemplateResponse = (response: HttpResponse = []) => {
+    server.respondWith('DELETE', `${API_PATH}/templates`, [
+      200,
+      { 'Content-Type': 'application/json' },
+      JSON.stringify(response),
+    ]);
+  };
+
   return {
     setLoadTemplatesResponse,
     setLoadIndicesResponse,
+    setDeleteTemplateResponse,
   };
 };
 

@@ -6,11 +6,13 @@
 
 import { useEffect, useState } from 'react';
 import { getHttpClient } from './api';
+import { trackUiMetric } from './track_ui_metric';
 
 interface SendRequest {
   path?: string;
   method: string;
   body?: any;
+  uimActionType?: string;
 }
 
 interface SendRequestResponse {
@@ -22,12 +24,18 @@ export const sendRequest = async ({
   path,
   method,
   body,
+  uimActionType,
 }: SendRequest): Promise<Partial<SendRequestResponse>> => {
   try {
     const response = await (getHttpClient() as any)[method](path, body);
 
     if (typeof response.data === 'undefined') {
       throw new Error(response.statusText);
+    }
+
+    // Track successful request
+    if (uimActionType) {
+      trackUiMetric(uimActionType);
     }
 
     return {

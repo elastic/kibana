@@ -33,4 +33,6 @@ export const UIM_DETAIL_PANEL_MAPPING_TAB = 'detail_panel_mapping_tab';
 export const UIM_DETAIL_PANEL_SETTINGS_TAB = 'detail_panel_settings_tab';
 export const UIM_DETAIL_PANEL_STATS_TAB = 'detail_panel_stats_tab';
 export const UIM_DETAIL_PANEL_SUMMARY_TAB = 'detail_panel_summary_tab';
-export const UIM_TEMPLATES_LIST_LOAD = 'templates_list_load';
+export const UIM_TEMPLATE_LIST_LOAD = 'template_list_load';
+export const UIM_TEMPLATE_DELETE = 'template_delete';
+export const UIM_TEMPLATE_DELETE_MANY = 'template_delete_many';

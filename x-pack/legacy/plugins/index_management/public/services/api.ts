@@ -26,12 +26,15 @@ import {
   UIM_INDEX_REFRESH_MANY,
   UIM_INDEX_UNFREEZE,
   UIM_INDEX_UNFREEZE_MANY,
+  UIM_TEMPLATE_DELETE,
+  UIM_TEMPLATE_DELETE_MANY,
 } from '../../common/constants';
 
 import { TAB_SETTINGS, TAB_MAPPING, TAB_STATS } from '../constants';
 
 import { trackUiMetric } from './track_ui_metric';
-import { useRequest } from './use_request';
+import { useRequest, sendRequest } from './use_request';
+import { Template } from '../../common/types';
 
 let httpClient: ng.IHttpService;
 
@@ -197,3 +200,13 @@ export function loadIndexTemplates() {
     method: 'get',
   });
 }
+
+export const deleteTemplates = async (names: Array<Template['name']>) => {
+  const uimActionType = names.length > 1 ? UIM_TEMPLATE_DELETE_MANY : UIM_TEMPLATE_DELETE;
+
+  return sendRequest({
+    path: `${apiPrefix}/templates/${names.map(name => encodeURIComponent(name)).join(',')}`,
+    method: 'delete',
+    uimActionType,
+  });
+};

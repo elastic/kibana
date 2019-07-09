@@ -8,3 +8,4 @@ export { SectionError } from './section_error';
 export { SectionLoading } from './section_loading';
 export { NoMatch } from './no_match';
 export { PageErrorForbidden } from './page_error';
+export { DeleteTemplatesModal } from './delete_templates_modal';
