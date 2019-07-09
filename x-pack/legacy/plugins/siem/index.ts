@@ -11,7 +11,7 @@ import { Server } from 'hapi';
 import { initServerWithKibana } from './server/kibana.index';
 import { savedObjectMappings } from './server/saved_objects';
 
-import { APP_ID, APP_NAME, DEFAULT_INDEX_KEY } from './common/constants';
+import { APP_ID, APP_NAME, DEFAULT_INDEX_KEY, DEFAULT_ANOMALY_SCORE } from './common/constants';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function siem(kibana: any) {
@@ -52,6 +52,19 @@ export function siem(kibana: any) {
           value: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
           description: i18n.translate('xpack.siem.uiSettings.defaultIndexDescription', {
             defaultMessage: 'Default Elasticsearch index to search',
+          }),
+          category: ['siem'],
+          requiresPageReload: true,
+        },
+        [DEFAULT_ANOMALY_SCORE]: {
+          name: i18n.translate('xpack.siem.uiSettings.defaultAnomalyScoreLabel', {
+            defaultMessage: 'Default anomaly threshold',
+          }),
+          value: 50,
+          type: 'number',
+          description: i18n.translate('xpack.siem.uiSettings.defaultAnomalyScoreDescription', {
+            defaultMessage:
+              'Default anomaly score threshold to exceed before showing anomalies. Valid values are between 0 and 100',
           }),
           category: ['siem'],
           requiresPageReload: true,

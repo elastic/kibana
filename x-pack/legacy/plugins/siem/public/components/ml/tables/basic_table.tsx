@@ -4,4 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const getScoreString = (score: number): string => String(Math.ceil(score));
+import styled from 'styled-components';
+import { EuiInMemoryTable } from '@elastic/eui';
+
+export const BasicTable = styled(EuiInMemoryTable)`
+  tbody {
+    th,
+    td {
+      vertical-align: top;
+    }
+  }
+`;
