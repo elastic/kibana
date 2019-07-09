@@ -1,16 +1,9 @@
 [[timelion-customize]]
 === Customize and format visualizations
 
-Timelion has plenty of options for customization. You can personalize nearly every aspect of a chart with the functions available. For this tutorial, you will perform the following modifications.
+Personalize nearly every aspect of a chart with the available customization functions.
 
-* Add a title
-* Change a series type
-* Change the color and opacity of a series
-* Modify the legend
-
-In the <<timelion-create, previous section>>, you created a Timelion chart with two series. Let’s continue to customize this visualization.
-
-Before making any other modifications, append the `title()` function to the end of an expression to add a title with a meaningful name. This will make it much easier for unfamiliar users to understand the visualizations purpose. For this example, add `title('CPU usage over time')` to the original series. Use the following expression in your Timelion querybar:
+. To add a title with a meaningful name, append the `title()` function to the end of an expression:
 
 [source,text]
 ----------------------------------
@@ -20,7 +13,7 @@ Before making any other modifications, append the `title()` function to the end 
 image::images/timelion-customize01.png[]
 {nbsp}
 
-To differentiate the last hour series a bit more, you are going to change the chart type to an area chart. In order do so, you'll need to use the `.lines()` function to customize the line chart. You'll be setting the `fill` and `width` arguments to set the fill of the line chart and line width respectively. In this example, you will set the fill level to 1 and the width of the border to 0.5 by appending  `.lines(fill=1,width=0.5)`. Use the following expression in the Timelion query bar:
+. To differentiate the last hour series a bit more, change the chart type to an area chart:
 
 [source,text]
 ----------------------------------
@@ -30,7 +23,7 @@ To differentiate the last hour series a bit more, you are going to change the ch
 image::images/timelion-customize02.png[]
 {nbsp}
 
-Let’s color these series so that the current hour series pops a bit more than the last hour series. The `color()` function can be used to change the color of any series and accepts standard color names, hexadecimal values or a color schema for grouped series. For this example you will use `.color(gray)` for the last hour and `.color(#1E90FF)` for the current hour. Enter the following expression into the Timelion query bar to make the adjustments:
+. Change the color of the series so that the current hour series pops a bit more than the last hour series:
 
 [source,text]
 ----------------------------------
@@ -40,7 +33,7 @@ Let’s color these series so that the current hour series pops a bit more than 
 image::images/timelion-customize03.png[]
 {nbsp}
 
-Last but not least, adjust the legend so that it takes up as little space as possible. You can utilize the `.legend()` function to set the position and style of the legend. For this example, place the legend in the north west position of the visualization with two columns by appending `.legend(columns=2, position=nw)` to the original series. Use the following expression to make the adjustments:
+. Adjust the legend so that it takes up as little space as possible:
 
 [source,text]
 ----------------------------------
@@ -49,5 +42,3 @@ Last but not least, adjust the legend so that it takes up as little space as pos
 
 image::images/timelion-customize04.png[]
 {nbsp}
-
-Continue on to the next section to learn about mathematical functions.
