@@ -51,19 +51,17 @@ function RadiusRatioOptionControl({ editorStateParams, setValue }: AggControlPro
 
   return (
     <EuiFormRow fullWidth={true} label={label}>
-      {
-        <EuiRange
-          compressed
-          fullWidth={true}
-          min={1}
-          max={100}
-          value={editorStateParams.radiusRatio || DEFAULT_VALUE}
-          onChange={e => setValue(editorStateParams, PARAM_NAME, parseFloat(e.target.value))}
-          showRange
-          showValue
-          valueAppend="%"
-        />
-      }
+      <EuiRange
+        compressed
+        fullWidth={true}
+        min={1}
+        max={100}
+        value={editorStateParams.radiusRatio || DEFAULT_VALUE}
+        onChange={e => setValue(editorStateParams, PARAM_NAME, parseFloat(e.target.value))}
+        showRange
+        showValue
+        valueAppend="%"
+      />
     </EuiFormRow>
   );
 }
