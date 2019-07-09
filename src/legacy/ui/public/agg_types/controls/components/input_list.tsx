@@ -172,19 +172,13 @@ function InputList({ config, list, onChange, setValidity }: InputListProps) {
   };
 
   // responsible for discarding changes
-  useEffect(
-    () => {
-      setModels(getUpdatedModels(list, models));
-    },
-    [list]
-  );
+  useEffect(() => {
+    setModels(getUpdatedModels(list, models));
+  }, [list]);
 
-  useEffect(
-    () => {
-      setValidity(!hasInvalidValues(models));
-    },
-    [models]
-  );
+  useEffect(() => {
+    setValidity(!hasInvalidValues(models));
+  }, [models]);
 
   // resposible for setting up an initial value when there is no default value
   useEffect(() => {

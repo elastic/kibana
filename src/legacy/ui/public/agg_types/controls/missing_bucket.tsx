@@ -26,14 +26,11 @@ import { isStringType } from '../buckets/migrate_include_exclude_format';
 function MissingBucketParamEditor(props: AggParamEditorProps<boolean>) {
   const fieldTypeIsNotString = !isStringType(props.agg);
 
-  useEffect(
-    () => {
-      if (fieldTypeIsNotString) {
-        props.setValue(false);
-      }
-    },
-    [fieldTypeIsNotString]
-  );
+  useEffect(() => {
+    if (fieldTypeIsNotString) {
+      props.setValue(false);
+    }
+  }, [fieldTypeIsNotString]);
 
   return (
     <SwitchParamEditor
