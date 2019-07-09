@@ -33,6 +33,7 @@ export class NoDataController {
   getDefaultModel() {
     return {
       hasData: false, // control flag to control a redirect
+      noSupportedClusters: false,
       errors: [], // errors can happen from trying to check or set ES settings
       checkMessage: null, // message to show while waiting for api response
       isLoading: true, // flag for in-progress state of checking for no data reason
@@ -92,9 +93,11 @@ export class NoDataController {
     // register the monitoringClusters service.
     $executor.register({
       execute: () => monitoringClusters(),
-      handleResponse: clusters => {
-        if (clusters.length) {
+      handleResponse: ({ clusters, supportedClusters }) => {
+        if (supportedClusters.length) {
           model.hasData = true; // use the control flag because we can't redirect from inside here
+        } else if (clusters.length) {
+          model.noSupportedClusters = true;
         }
       }
     });

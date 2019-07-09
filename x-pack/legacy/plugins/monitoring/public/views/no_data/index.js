@@ -15,8 +15,8 @@ uiRoutes
         const monitoringClusters = $injector.get('monitoringClusters');
         const kbnUrl = $injector.get('kbnUrl');
 
-        return monitoringClusters().then(clusters => {
-          if (clusters && clusters.length) {
+        return monitoringClusters().then(({ supportedClusters }) => {
+          if (supportedClusters && supportedClusters.length) {
             kbnUrl.changePath('/home');
             return Promise.reject();
           }

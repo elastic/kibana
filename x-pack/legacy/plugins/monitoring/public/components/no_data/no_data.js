@@ -15,10 +15,11 @@ import {
 } from '@elastic/eui';
 import { CheckingSettings } from './checking_settings';
 import { ReasonFound, WeTried } from './reasons';
+import { NoSupportedClusters } from './no_supported_clusters';
 import { CheckerErrors } from './checker_errors';
 
 function NoDataMessage(props) {
-  const { isLoading, reason, checkMessage } = props;
+  const { isLoading, reason, checkMessage, noSupportedClusters } = props;
 
   if (isLoading && checkMessage !== null) {
     return <CheckingSettings checkMessage={checkMessage} />;
@@ -28,11 +29,14 @@ function NoDataMessage(props) {
     return <ReasonFound {...props} />;
   }
 
+  if (noSupportedClusters) {
+    return <NoSupportedClusters {...props} />;
+  }
+
   return <WeTried />;
 }
 
 export function NoData(props) {
-
   return (
     <EuiPage>
       <EuiPageBody restrictWidth={600}>

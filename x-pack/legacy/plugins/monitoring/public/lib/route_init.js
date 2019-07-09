@@ -20,8 +20,8 @@ export function routeInitProvider(Private, monitoringClusters, globalState, lice
    * the data just has a single cluster or
    * all the clusters are basic and this is the primary cluster
    */
-  return function routeInit() {
-    return monitoringClusters()
+  return function routeInit(onlyReturnSupportedClusters = false) {
+    return monitoringClusters(undefined, undefined, onlyReturnSupportedClusters)
     // Set the clusters collection and current cluster in globalState
       .then((clusters) => {
         const cluster = (() => {

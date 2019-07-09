@@ -10,7 +10,11 @@ import { timefilter } from 'ui/timefilter';
 import { STANDALONE_CLUSTER_CLUSTER_UUID } from '../../common/constants';
 
 function formatClusters(clusters) {
-  return clusters.map(formatCluster);
+  const all = clusters.map(formatCluster);
+  return {
+    clusters: all,
+    supportedClusters: all.filter(cluster => cluster.isSupported)
+  };
 }
 
 function formatCluster(cluster) {

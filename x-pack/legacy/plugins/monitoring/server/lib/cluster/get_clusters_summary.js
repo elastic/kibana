@@ -32,7 +32,7 @@ export function getClustersSummary(clusters, kibanaUuid, isCcrEnabled) {
       status: licenseStatus,
       type: licenseType,
       expiry_date_in_millis: licenseExpiry
-    } = license;
+    } = license || {};
 
     const indices = pick(clusterStats.indices, ['count', 'docs', 'shards', 'store']);
 
