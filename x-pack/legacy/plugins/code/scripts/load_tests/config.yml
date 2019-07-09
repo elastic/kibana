@@ -1,0 +1,24 @@
+config:
+  # TODO: use environment variables $processEnvironment to set the target.
+  target: "http://localhost:5601/api/code"
+  phases:
+    - duration: 30
+      arrivalRate: 10
+      rampTo: 50
+  # Uncomment the follow config to test multiple instances
+  # environments:
+  #   production:
+  #     target: "https://code-demo.app.elstc.co/api/code"
+  #     phases:
+  #       - duration: 120
+  #         arrivalRate: 10
+  #   staging:
+  #     target: "http://localhost:5601/api/code"
+  #     phases:
+  #       - duration: 1200
+  #         arrivalRate: 20
+  defaults:
+    headers:
+      Authorization: "Basic ZWxhc3RpYzpjaGFuZ2VtZQ=="
+
+

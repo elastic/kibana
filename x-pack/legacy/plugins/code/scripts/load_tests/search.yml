@@ -1,0 +1,21 @@
+scenarios:
+  - name: "File typeahead request"
+    flow:
+      - get:
+          url: "/suggestions/doc?q=str"
+  - name: "Symbol typeahead request"
+    flow:
+      - get:
+          url: "/suggestions/symbol?q=str"
+  - name: "Repo typeahead request"
+    flow:
+      - get:
+          url: "/suggestions/symbol?q=apm"
+  - name: "Code search request"
+    flow:
+      - get:
+          url: "/search/doc?q=str"
+  - name: "Repository search request"
+    flow:
+      - get:
+          url: "/search/repo?q=apm"
