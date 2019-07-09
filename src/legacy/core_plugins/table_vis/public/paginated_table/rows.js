@@ -19,12 +19,9 @@
 
 import $ from 'jquery';
 import _ from 'lodash';
-import { uiModules } from 'ui/modules';
 import tableCellFilterHtml from './table_cell_filter.html';
 
-const module = uiModules.get('kibana');
-
-module.directive('kbnRows', function ($compile) {
+export function KbnRows($compile) {
   return {
     restrict: 'A',
     link: function ($scope, $el, attr) {
@@ -45,12 +42,14 @@ module.directive('kbnRows', function ($compile) {
               return;
             }
 
-            $scope.filter({ data: [{
-              table: $scope.table,
-              row: $scope.rows.findIndex(r => r === row),
-              column: $scope.table.columns.findIndex(c => c.id === column.id),
-              value
-            }], negate });
+            $scope.filter({
+              data: [{
+                table: $scope.table,
+                row: $scope.rows.findIndex(r => r === row),
+                column: $scope.table.columns.findIndex(c => c.id === column.id),
+                value,
+              }], negate,
+            });
           };
 
           return $compile($template)(scope);
@@ -103,7 +102,7 @@ module.directive('kbnRows', function ($compile) {
 
       $scope.$watchMulti([
         attr.kbnRows,
-        attr.kbnRowsMin
+        attr.kbnRowsMin,
       ], function (vals) {
         let rows = vals[0];
         const min = vals[1];
@@ -118,7 +117,9 @@ module.directive('kbnRows', function ($compile) {
           // crate the empty row which will be pushed into the row list over and over
           const emptyRow = {};
           // push as many empty rows into the row array as needed
-          _.times(min - rows.length, function () { rows.push(emptyRow); });
+          _.times(min - rows.length, function () {
+            rows.push(emptyRow);
+          });
         }
 
         rows.forEach(function (row) {
@@ -129,6 +130,6 @@ module.directive('kbnRows', function ($compile) {
           });
         });
       });
-    }
+    },
   };
-});
+}

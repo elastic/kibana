@@ -17,28 +17,12 @@
  * under the License.
  */
 
-import tableVisParamsTemplate from './table_vis_params.html';
+import { UiSettingsClientContract } from 'kibana/public';
 
-export function TableVisParams() {
-  return {
-    restrict: 'E',
-    template: tableVisParamsTemplate,
-    link: function ($scope) {
-      $scope.totalAggregations = ['sum', 'avg', 'min', 'max', 'count'];
+export * from './legacy_dependencies_plugin';
 
-      $scope.$watchMulti([
-        'editorState.params.showPartialRows',
-        'editorState.params.showMetricsAtAllLevels',
-      ], function () {
-        if (!$scope.vis) return;
-
-        const params = $scope.editorState.params;
-        if (params.showPartialRows || params.showMetricsAtAllLevels) {
-          $scope.metricsAtAllLevels = true;
-        } else {
-          $scope.metricsAtAllLevels = false;
-        }
-      });
-    },
-  };
+// @public
+export interface TableVisualizationDependencies {
+  uiSettings: UiSettingsClientContract;
+  createAngularVisualization: Function;
 }

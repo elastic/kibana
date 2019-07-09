@@ -17,11 +17,10 @@
  * under the License.
  */
 
-import { functionsRegistry } from 'plugins/interpreter/registries';
-import { legacyResponseHandlerProvider } from 'ui/vis/response_handlers/legacy';
 import { i18n } from '@kbn/i18n';
+import { createTableVisResponseHandler } from './table_vis_request_handler';
 
-export const kibanaTable = () => ({
+export const createTableVisFn  = (dependencies) => ({
   name: 'kibana_table',
   type: 'render',
   context: {
@@ -40,8 +39,7 @@ export const kibanaTable = () => ({
   },
   async fn(context, args) {
     const visConfig = JSON.parse(args.visConfig);
-
-    const responseHandler = legacyResponseHandlerProvider().handler;
+    const responseHandler = createTableVisResponseHandler(dependencies);
     const convertedData = await responseHandler(context, visConfig.dimensions);
 
     return {
@@ -58,5 +56,3 @@ export const kibanaTable = () => ({
     };
   },
 });
-
-functionsRegistry.register(kibanaTable);

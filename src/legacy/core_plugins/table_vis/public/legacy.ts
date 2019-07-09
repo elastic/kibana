@@ -17,5 +17,12 @@
  * under the License.
  */
 
-import './rows';
-import './paginated_table';
+import { PluginInitializerContext } from 'kibana/public';
+import { npSetup, npStart } from 'ui/new_platform';
+import { plugins } from './setup';
+import { plugin } from '.';
+
+const pluginInstance = plugin({} as PluginInitializerContext);
+
+export const setup = pluginInstance.setup(npSetup.core, plugins);
+export const start = pluginInstance.start(npStart.core);

@@ -17,28 +17,25 @@
  * under the License.
  */
 
-import tableVisParamsTemplate from './table_vis_params.html';
+import chrome from 'ui/chrome';
+// @ts-ignore
+import { VisFactoryProvider } from 'ui/vis/vis_factory';
+import { CoreStart, Plugin } from 'kibana/public';
+import { initTableVisLegacyModule } from './table_vis_legacy_module';
 
-export function TableVisParams() {
-  return {
-    restrict: 'E',
-    template: tableVisParamsTemplate,
-    link: function ($scope) {
-      $scope.totalAggregations = ['sum', 'avg', 'min', 'max', 'count'];
+export class LegacyDependenciesPlugin implements Plugin<any, any> {
+  public async setup() {
+    initTableVisLegacyModule();
 
-      $scope.$watchMulti([
-        'editorState.params.showPartialRows',
-        'editorState.params.showMetricsAtAllLevels',
-      ], function () {
-        if (!$scope.vis) return;
+    const $injector = await chrome.dangerouslyGetActiveInjector();
+    const Private = $injector.get('Private');
 
-        const params = $scope.editorState.params;
-        if (params.showPartialRows || params.showMetricsAtAllLevels) {
-          $scope.metricsAtAllLevels = true;
-        } else {
-          $scope.metricsAtAllLevels = false;
-        }
-      });
-    },
-  };
+    return {
+      createAngularVisualization: VisFactoryProvider(Private).createAngularVisualization,
+    };
+  }
+
+  public start(core: CoreStart) {
+    // nothing to do here yet
+  }
 }

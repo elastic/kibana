@@ -17,4 +17,11 @@
  * under the License.
  */
 
-import './agg_table';
+import { PluginInitializerContext } from 'kibana/public';
+import { TableVisPlugin } from './plugin';
+
+export function plugin(initializerContext: PluginInitializerContext) {
+  return new TableVisPlugin(initializerContext);
+}
+
+export { TableVisPlugin as Plugin };

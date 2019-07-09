@@ -18,39 +18,15 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import './table_vis_controller';
-import './table_vis_params';
-import './agg_table';
-import './agg_table/agg_table_group';
-import { VisFactoryProvider } from 'ui/vis/vis_factory';
+import { createTableVisResponseHandler } from './table_vis_request_handler';
 import { Schemas } from 'ui/vis/editors/default/schemas';
+
 import tableVisTemplate from './table_vis.html';
-import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
-import { legacyResponseHandlerProvider } from 'ui/vis/response_handlers/legacy';
 
-// we need to load the css ourselves
+export const createTableVisTypeDefinition = (dependencies) => {
+  const responseHandler = createTableVisResponseHandler(dependencies);
 
-// we also need to load the controller and used by the template
-
-// our params are a bit complex so we will manage them with a directive
-
-// require the directives that we use as well
-
-// register the provider with the visTypes registry
-VisTypesRegistryProvider.register(TableVisTypeProvider);
-
-const legacyTableResponseHandler = legacyResponseHandlerProvider().handler;
-
-// define the TableVisType
-function TableVisTypeProvider(Private) {
-  const VisFactory = Private(VisFactoryProvider);
-
-  // define the TableVisController which is used in the template
-  // by angular's ng-controller directive
-
-  // return the visType object, which kibana will use to display and configure new
-  // Vis object of this type.
-  return VisFactory.createAngularVisualization({
+  return dependencies.createAngularVisualization({
     type: 'table',
     name: 'table',
     title: i18n.translate('tableVis.tableVisTitle', {
@@ -114,11 +90,10 @@ function TableVisTypeProvider(Private) {
         }
       ])
     },
-    responseHandler: legacyTableResponseHandler,
+    responseHandler,
     hierarchicalData: function (vis) {
       return Boolean(vis.params.showPartialRows || vis.params.showMetricsAtAllLevels);
     }
   });
-}
+};
 
-export default TableVisTypeProvider;

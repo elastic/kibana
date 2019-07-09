@@ -18,44 +18,39 @@
  */
 
 import 'angular';
-import 'angular-recursion';
-import './';
-import { uiModules } from 'ui/modules';
 import aggTableGroupTemplate from './agg_table_group.html';
 
-uiModules
-  .get('kibana', ['RecursionHelper'])
-  .directive('kbnAggTableGroup', function (RecursionHelper) {
-    return {
-      restrict: 'E',
-      template: aggTableGroupTemplate,
-      scope: {
-        group: '=',
-        dimensions: '=',
-        perPage: '=?',
-        sort: '=?',
-        exportTitle: '=?',
-        showTotal: '=',
-        totalFunc: '=',
-        filter: '=',
-      },
-      compile: function ($el) {
+export function KbnAggTableGroup(RecursionHelper) {
+  return {
+    restrict: 'E',
+    template: aggTableGroupTemplate,
+    scope: {
+      group: '=',
+      dimensions: '=',
+      perPage: '=?',
+      sort: '=?',
+      exportTitle: '=?',
+      showTotal: '=',
+      totalFunc: '=',
+      filter: '=',
+    },
+    compile: function ($el) {
       // Use the compile function from the RecursionHelper,
       // And return the linking function(s) which it returns
-        return RecursionHelper.compile($el, {
-          post: function ($scope) {
-            $scope.$watch('group', function (group) {
+      return RecursionHelper.compile($el, {
+        post: function ($scope) {
+          $scope.$watch('group', function (group) {
             // clear the previous "state"
-              $scope.rows = $scope.columns = false;
+            $scope.rows = $scope.columns = false;
 
-              if (!group || !group.tables.length) return;
+            if (!group || !group.tables.length) return;
 
-              const childLayout = (group.direction === 'row') ? 'rows' : 'columns';
+            const childLayout = (group.direction === 'row') ? 'rows' : 'columns';
 
-              $scope[childLayout] = group.tables;
-            });
-          }
-        });
-      }
-    };
-  });
+            $scope[childLayout] = group.tables;
+          });
+        },
+      });
+    },
+  };
+}

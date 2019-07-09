@@ -17,28 +17,6 @@
  * under the License.
  */
 
-import tableVisParamsTemplate from './table_vis_params.html';
+import { legacyResponseHandlerProvider } from 'ui/vis/response_handlers/legacy';
 
-export function TableVisParams() {
-  return {
-    restrict: 'E',
-    template: tableVisParamsTemplate,
-    link: function ($scope) {
-      $scope.totalAggregations = ['sum', 'avg', 'min', 'max', 'count'];
-
-      $scope.$watchMulti([
-        'editorState.params.showPartialRows',
-        'editorState.params.showMetricsAtAllLevels',
-      ], function () {
-        if (!$scope.vis) return;
-
-        const params = $scope.editorState.params;
-        if (params.showPartialRows || params.showMetricsAtAllLevels) {
-          $scope.metricsAtAllLevels = true;
-        } else {
-          $scope.metricsAtAllLevels = false;
-        }
-      });
-    },
-  };
-}
+export const createTableVisResponseHandler = () => legacyResponseHandlerProvider().handler;
