@@ -18,6 +18,7 @@
  */
 
 import chrome from '../chrome';
+import { AggGroupNames } from './editors/default';
 
 // eslint-disable-next-line import/no-default-export
 export default function AggConfigResult(aggConfig, parent, value, key, filters) {
@@ -27,7 +28,7 @@ export default function AggConfigResult(aggConfig, parent, value, key, filters) 
   this.filters = filters;
   this.$parent = parent;
 
-  if (aggConfig.type.type === 'buckets') {
+  if (aggConfig.type.type === AggGroupNames.Buckets) {
     this.type = 'bucket';
   } else {
     this.type = 'metric';

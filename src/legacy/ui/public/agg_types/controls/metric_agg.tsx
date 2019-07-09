@@ -22,7 +22,7 @@ import { findLast } from 'lodash';
 import { EuiFormRow, EuiSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { AggConfig } from 'ui/vis';
-import { AggParamEditorProps } from 'ui/vis/editors/default';
+import { AggParamEditorProps, AggGroupNames } from 'ui/vis/editors/default';
 import { safeMakeLabel, isCompatibleAggregation } from '../agg_utils';
 
 const aggFilter = ['!top_hits', '!percentiles', '!percentile_ranks', '!median', '!std_dev'];
@@ -66,7 +66,7 @@ function MetricAggParamEditor({
     // check buckets
     const lastBucket: AggConfig = findLast(
       state.aggs,
-      aggr => aggr.type && aggr.type.type === 'buckets'
+      aggr => aggr.type && aggr.type.type === AggGroupNames.Buckets
     );
     const bucketHasType = lastBucket && lastBucket.type;
     const bucketIsHistogram =

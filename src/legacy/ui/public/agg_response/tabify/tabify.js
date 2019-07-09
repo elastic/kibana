@@ -18,6 +18,7 @@
  */
 
 import _ from 'lodash';
+import { AggGroupNames } from '../../vis/editors/default';
 import { TabbedAggResponseWriter } from './_response_writer';
 import { TabifyBuckets } from './_buckets';
 
@@ -59,7 +60,7 @@ function collectBucket(write, bucket, key, aggScale) {
   aggScale *= aggInfo.metricScale || 1;
 
   switch (agg.type.type) {
-    case 'buckets':
+    case AggGroupNames.Buckets:
       const buckets = new TabifyBuckets(bucket[agg.id], agg.params, write.timeRange);
       if (buckets.length) {
         buckets.forEach(function (subBucket, key) {
@@ -88,7 +89,7 @@ function collectBucket(write, bucket, key, aggScale) {
         write.row();
       }
       break;
-    case 'metrics':
+    case AggGroupNames.Metrics:
       let value = agg.getValue(bucket);
       // since the aggregation could be a non integer (such as a max date)
       // only do the scaling calculation if it is needed.
@@ -120,13 +121,13 @@ function passEmptyBuckets(write, bucket, key, aggScale) {
   const agg = column.aggConfig;
 
   switch (agg.type.type) {
-    case 'metrics':
+    case AggGroupNames.Metrics:
       // pass control back to collectBucket()
       write.aggStack.unshift(column);
       collectBucket(write, bucket, key, aggScale);
       return;
 
-    case 'buckets':
+    case AggGroupNames.Buckets:
       passEmptyBuckets(write, bucket, key, aggScale);
   }
 

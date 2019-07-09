@@ -32,7 +32,7 @@ import { DefaultEditorSize } from '../../editor_size';
 
 import { VisEditorTypesRegistryProvider } from '../../../registry/vis_editor_types';
 import { getVisualizeLoader } from '../../../visualize/loader/visualize_loader';
-
+import { AggGroupNames } from './agg_groups';
 
 const defaultEditor = function ($rootScope, $compile) {
   return class DefaultEditor {
@@ -126,7 +126,7 @@ const defaultEditor = function ($rootScope, $compile) {
             $scope.responseValueAggs = null;
             try {
               $scope.responseValueAggs = $scope.state.aggs.getResponseAggs().filter(function (agg) {
-                return _.get(agg, 'schema.group') === 'metrics';
+                return _.get(agg, 'schema.group') === AggGroupNames.Metrics;
               });
             }
             // this can fail when the agg.type is changed but the

@@ -46,6 +46,7 @@ import { FixedParam, TimeIntervalParam, EditorParamConfig } from '../../config/t
 // TODO: Below import is temporary, use `react-use` lib instead.
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { useUnmount } from '../../../../../../../plugins/kibana_react/public/util/use_unmount';
+import { AggGroupNames } from '../';
 
 const FIXED_VALUE_PROP = 'fixedValue';
 const DEFAULT_PROP = 'default';
@@ -203,7 +204,7 @@ function DefaultEditorAggParams({
         indexPattern={indexPattern}
         value={agg.type}
         aggTypeOptions={groupedAggTypeOptions}
-        isSubAggregation={aggIndex >= 1 && groupName === 'buckets'}
+        isSubAggregation={aggIndex >= 1 && groupName === AggGroupNames.Buckets}
         showValidation={formIsTouched || aggType.touched}
         setValue={value => {
           onAggTypeChange(agg, value);

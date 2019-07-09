@@ -19,9 +19,10 @@
 
 import _ from 'lodash';
 import moment from 'moment';
+import { AggGroupNames } from '../../vis/editors/default';
 
 function TabifyBuckets(aggResp, aggParams, timeRange) {
-  if (_.has(aggResp, 'buckets')) {
+  if (_.has(aggResp, AggGroupNames.Buckets)) {
     this.buckets = aggResp.buckets;
   } else if (aggResp) {
     // Some Bucket Aggs only return a single bucket (like filter).
