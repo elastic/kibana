@@ -489,7 +489,7 @@ export class PrivilegeSpaceForm extends Component<Props, State> {
 
       if (
         hasAssignedFeaturePrivileges(form) ||
-        explanation.actualPrivilege === NO_PRIVILEGE_VALUE ||
+        form.base.length === 0 ||
         this.state.isCustomizingFeaturePrivileges
       ) {
         displayedBasePrivilege = CUSTOM_PRIVILEGE_VALUE;
