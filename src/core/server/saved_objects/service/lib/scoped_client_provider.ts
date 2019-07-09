@@ -28,9 +28,11 @@ export type SavedObjectsClientWrapperFactory<Request = unknown> = (
   options: SavedObjectsClientWrapperOptions<Request>
 ) => SavedObjectsClientContract;
 
-export type SavedObjectsClientFactory<Request = unknown> = (
-  { request }: { request: Request }
-) => SavedObjectsClientContract;
+export type SavedObjectsClientFactory<Request = unknown> = ({
+  request,
+}: {
+  request: Request;
+}) => SavedObjectsClientContract;
 
 export interface SavedObjectsClientProviderOptions {
   excludedWrappers?: string[];
