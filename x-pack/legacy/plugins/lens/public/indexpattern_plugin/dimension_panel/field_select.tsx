@@ -55,34 +55,22 @@ export function FieldSelect({
   }
 
   const fieldOptions = [];
-  const bestFieldLessColumn = filteredColumns.find(
-    column => !hasField(column) && isCompatibleWithCurrentOperation(column)
-  );
-  if (bestFieldLessColumn) {
+  const fieldlessColumn =
+    filteredColumns.find(column => !hasField(column) && isCompatibleWithCurrentOperation(column)) ||
+    filteredColumns.find(column => !hasField(column));
+
+  if (fieldlessColumn) {
     fieldOptions.push({
       label: i18n.translate('xpack.lens.indexPattern.documentField', {
         defaultMessage: 'Document',
       }),
-      value: bestFieldLessColumn.operationId,
+      value: fieldlessColumn.operationId,
       className: classNames({
         'lnsConfigPanel__fieldOption--incompatible': !isCompatibleWithCurrentOperation(
-          bestFieldLessColumn
+          fieldlessColumn
         ),
       }),
     });
-  } else {
-    const anyFieldLessColumn = filteredColumns.find(column => !hasField(column));
-    if (anyFieldLessColumn) {
-      fieldOptions.push({
-        label: i18n.translate('xpack.lens.indexPattern.documentField', {
-          defaultMessage: 'Document',
-        }),
-        value: anyFieldLessColumn.operationId,
-        className: classNames({
-          'lnsConfigPanel__fieldOption--incompatible': true,
-        }),
-      });
-    }
   }
 
   if (uniqueColumnsByField.length > 0) {

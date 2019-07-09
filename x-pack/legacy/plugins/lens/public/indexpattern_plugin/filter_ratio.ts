@@ -41,8 +41,13 @@ export const calculateFilterRatio: ExpressionFunction<
       return data;
     }
 
-    const entries = Object.entries(data.rows[0]);
-    const [[valueKey]] = entries.filter(([key]) => key.includes('filter-ratio'));
+    if (data.rows.length % 2 === 1) {
+      throw new Error('Cannot divide an odd number of rows');
+    }
+
+    const [[valueKey]] = Object.entries(data.rows[0]).filter(([key]) =>
+      key.includes('filter-ratio')
+    );
 
     for (let i = 0; i < data.rows.length; i += 2) {
       const row1 = data.rows[i];

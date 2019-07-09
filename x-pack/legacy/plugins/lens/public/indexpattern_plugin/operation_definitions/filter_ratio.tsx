@@ -36,7 +36,7 @@ export const filterRatioOperation: OperationDefinition<FilterRatioIndexPatternCo
       isBucketed: false,
       params: {
         numerator: { language: 'kuery', query: '' },
-        denominator: { language: 'kuery', query: '*' },
+        denominator: { language: 'kuery', query: '' },
       },
     };
   },
@@ -61,11 +61,7 @@ export const filterRatioOperation: OperationDefinition<FilterRatioIndexPatternCo
   paramEditor: ({ state, setState, columnId: currentColumnId, dataPlugin, storage }) => {
     const [hasDenominator, setDenominator] = useState(false);
 
-    if (!dataPlugin || !storage) {
-      return null;
-    }
-
-    const { QueryBarInput } = dataPlugin.query.ui;
+    const { QueryBarInput } = dataPlugin!.query.ui;
 
     return (
       <div>
