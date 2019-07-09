@@ -4,7 +4,25 @@
 ### Branch
 We're using a long-running feature branch [`feature-integrations-manager`](https://github.com/elastic/kibana/tree/feature-integrations-manager). 
 
+<details>
+  <summary>Keeping up to date with upstream kibana</summary>
+  
 [jfsiii](http://github.com/jfsiii) will keep the branch up-to-date with `master` by periodically running `git merge master` locally and pushing. [This PR](https://github.com/elastic/kibana/pull/38255#issuecomment-499839073) has more information.
+
+```bash
+# checkout the elastic/kibana feature branch locally; overwriting any existing feature-integrations-manager
+git checkout -B feature-integrations-manager upstream/feature-integrations-manager
+
+# fetch & merge latest
+git pull upstream master
+
+# push back to elastic/kibana
+git push upstream
+
+# switch back to feature-integrations-manager on your fork
+git checkout -B feature-integrations-manager origin/feature-integrations-manager
+```
+</details>
 
 ### Feature development
 In your own fork of `elastic/kibana`, create a feature branch based on `feature-integrations-manager`.
