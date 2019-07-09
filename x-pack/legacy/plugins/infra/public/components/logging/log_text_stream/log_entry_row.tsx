@@ -156,9 +156,7 @@ export const LogEntryRow = ({
 
           return (
             <LogEntryColumn
-              data-test-subj={`logColumn fieldLogColumn fieldLogColumn:${
-                columnConfiguration.fieldColumn.field
-              }`}
+              data-test-subj={`logColumn fieldLogColumn fieldLogColumn:${columnConfiguration.fieldColumn.field}`}
               key={columnConfiguration.fieldColumn.id}
               {...columnWidth}
             >
