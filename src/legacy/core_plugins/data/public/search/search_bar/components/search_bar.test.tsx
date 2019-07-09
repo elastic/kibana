@@ -83,7 +83,7 @@ describe('SearchBar', () => {
     jest.clearAllMocks();
   });
 
-  it('Should render an empty search bar', () => {
+  it('Should render query bar when no options provided (in reality - timepicker)', () => {
     const component = mountWithIntl(
       <SearchBar.WrappedComponent
         appName={'test'}
@@ -94,17 +94,16 @@ describe('SearchBar', () => {
 
     expect(component.find(SEARCH_BAR_ROOT).length).toBe(1);
     expect(component.find(FILTER_BAR).length).toBe(0);
-    expect(component.find(QUERY_BAR).length).toBe(0);
+    expect(component.find(QUERY_BAR).length).toBe(1);
   });
 
-  it('Should render an empty search bar, if options are not provided', () => {
+  it('Should render empty when timepicker disabled and no options provided', () => {
     const component = mountWithIntl(
       <SearchBar.WrappedComponent
         appName={'test'}
         indexPatterns={[mockIndexPattern]}
         intl={null as any}
-        showFilterBar={true}
-        showQueryBar={true}
+        showDatePicker={false}
       />
     );
 
@@ -121,10 +120,10 @@ describe('SearchBar', () => {
         intl={null as any}
         filters={[]}
         onFiltersUpdated={noop}
+        showDatePicker={false}
       />
     );
 
-    expect(component).toMatchSnapshot();
     expect(component.find(SEARCH_BAR_ROOT).length).toBe(1);
     expect(component.find(FILTER_BAR).length).toBe(1);
     expect(component.find(QUERY_BAR).length).toBe(0);
@@ -139,6 +138,7 @@ describe('SearchBar', () => {
         showFilterBar={false}
         filters={[]}
         onFiltersUpdated={noop}
+        showDatePicker={false}
       />
     );
 

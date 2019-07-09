@@ -97,6 +97,17 @@ class SearchBarUI extends Component<SearchBarProps, State> {
     return (filters: Filter[]) => {};
   }
 
+  private shouldRenderQueryBar() {
+    const showDatePicker = this.props.showDatePicker || this.props.showAutoRefreshOnly;
+    const showQueryInput =
+      this.props.showQueryInput && this.props.indexPatterns && this.props.query;
+    return this.props.showQueryBar && (showDatePicker || showQueryInput);
+  }
+
+  private shouldRenderFilterBar() {
+    return this.props.showFilterBar && this.props.filters && this.props.indexPatterns;
+  }
+
   public setFilterBarHeight = () => {
     requestAnimationFrame(() => {
       const height =
@@ -166,7 +177,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
     });
 
     let queryBar;
-    if (this.props.showQueryBar) {
+    if (this.shouldRenderQueryBar()) {
       queryBar = (
         <QueryBar
           query={this.props.query}
@@ -189,7 +200,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
     }
 
     let filterBar;
-    if (this.props.showFilterBar) {
+    if (this.shouldRenderFilterBar()) {
       filterBar = (
         <div
           id="GlobalFilterGroup"
