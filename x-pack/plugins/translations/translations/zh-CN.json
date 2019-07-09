@@ -6267,7 +6267,6 @@
     "xpack.ml.dataframe.jobsList.deleteModalCancelButton": "取消",
     "xpack.ml.dataframe.jobsList.deleteModalDeleteButton": "删除",
     "xpack.ml.dataframe.jobsList.deleteModalTitle": "删除 {jobId}",
-    "xpack.ml.dataframe.jobsList.errorGettingDataFrameJobsList": "获取数据帧作业列表时发生错误：{error}",
     "xpack.ml.dataframe.jobsList.jobDetails.tabs.jobSettingsLabel": "作业详情",
     "xpack.ml.dataframe.jobsList.rowCollapse": "隐藏 {jobId} 的详情",
     "xpack.ml.dataframe.jobsList.rowExpand": "显示 {jobId} 的详情",
