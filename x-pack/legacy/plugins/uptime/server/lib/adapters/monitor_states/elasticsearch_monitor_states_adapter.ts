@@ -127,8 +127,8 @@ export class ElasticsearchMonitorStatesAdapter implements UMMonitorStatesAdapter
     const result = await this.database.search(request, params);
 
     const checkGroups = result.aggregations.monitors.buckets.flatMap((b: any) => {
-      const topHits =  get<any[]>(b, 'top.hits.hits', []);
-      return flatten(topHits.map( (t: any) => get<string>(t, '_source.monitor.check_group')));
+      const topHits = get<any[]>(b, 'top.hits.hits', []);
+      return flatten(topHits.map((t: any) => get<string>(t, '_source.monitor.check_group')));
     });
     const afterKey = get<any | null>(result, 'aggregations.monitors.after_key', null);
     return {
