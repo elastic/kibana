@@ -7,7 +7,7 @@
 import { i18n } from '@kbn/i18n';
 import { demodata } from '../../functions/server/demodata';
 import { FunctionHelp } from '.';
-import { FunctionFactory } from '../../functions/types';
+import { FunctionFactory } from '../../../types';
 import { DemoRows } from '../../functions/server/demodata/get_demo_rows';
 
 export const help: FunctionHelp<FunctionFactory<typeof demodata>> = {

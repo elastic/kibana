@@ -97,6 +97,7 @@ uiRoutes.when('/logstash/node/:uuid/advanced', {
                         <MonitoringTimeseriesContainer
                           series={metric}
                           onBrush={this.onBrush}
+                          zoomInfo={this.zoomInfo}
                           {...data}
                         />
                         <EuiSpacer />
