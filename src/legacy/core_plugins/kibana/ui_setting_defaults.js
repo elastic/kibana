@@ -576,11 +576,12 @@ export function getUiSettingDefaults() {
       name: i18n.translate('kbn.advancedSettings.visualization.heatmap.maxBucketsTitle', {
         defaultMessage: 'Heatmap maximum buckets',
       }),
-      value: 250,
+      value: 50,
       type: 'number',
       description: i18n.translate('kbn.advancedSettings.visualization.heatmap.maxBucketsText', {
         defaultMessage:
-          'The maximum number of buckets a single datasource can return.'
+          'The maximum number of buckets a single datasource can return. ' +
+          'A higher number might have negative impact on browser rendering performance'
       }),
       category: ['visualization'],
     },
