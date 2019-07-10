@@ -6,6 +6,7 @@
 
 import { IndexPatternWithType } from '../../common/types/kibana';
 import { Field, Aggregation, AggId, FieldId, NewJobCaps } from '../../common/types/fields';
+import { ES_FIELD_TYPES } from '../../common/constants/field_types';
 import { ml } from './ml_api_service';
 
 // called in the angular routing resolve block to initialize the
@@ -23,6 +24,8 @@ export function loadNewJobCapabilities(indexPatterns: any, $route: Record<string
       });
   });
 }
+
+const categoryFieldTypes = [ES_FIELD_TYPES.TEXT, ES_FIELD_TYPES.KEYWORD, ES_FIELD_TYPES.IP];
 
 class NewJobCapsService {
   private _fields: Field[];
@@ -46,6 +49,10 @@ class NewJobCapsService {
       fields: this._fields,
       aggs: this._aggs,
     };
+  }
+
+  get categoryFields(): Field[] {
+    return this._fields.filter(f => categoryFieldTypes.includes(f.type));
   }
 
   public async initializeFromIndexPattern(indexPattern: IndexPatternWithType) {

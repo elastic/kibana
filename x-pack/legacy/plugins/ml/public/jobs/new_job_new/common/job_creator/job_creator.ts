@@ -7,11 +7,14 @@
 import { SavedSearch } from 'src/legacy/core_plugins/kibana/public/discover/types';
 import { IndexPatternWithType, IndexPatternTitle } from '../../../../../common/types/kibana';
 import { Job, Datafeed, Detector, JobId, DatafeedId, BucketSpan } from './configs';
-import { createEmptyJob, createEmptyDatafeed } from './util';
+import { Aggregation } from '../../../../../common/types/fields';
+import { createEmptyJob, createEmptyDatafeed } from './util/default_configs';
 import { mlJobService } from '../../../../services/job_service';
 import { JobRunner, ProgressSubscriber } from '../job_runner';
+import { JOB_TYPE } from './util/constants';
 
 export class JobCreator {
+  protected _type: JOB_TYPE = JOB_TYPE.SINGLE_METRIC;
   protected _indexPattern: IndexPatternWithType;
   protected _savedSearch: SavedSearch;
   protected _indexPatternTitle: IndexPatternTitle = '';
@@ -23,6 +26,10 @@ export class JobCreator {
   protected _start: number = 0;
   protected _end: number = 0;
   protected _subscribers: ProgressSubscriber[];
+  protected _aggs: Aggregation[] = [];
+  private _stopAllRefreshPolls: {
+    stop: boolean;
+  };
 
   constructor(indexPattern: IndexPatternWithType, savedSearch: SavedSearch, query: object) {
     this._indexPattern = indexPattern;
@@ -40,24 +47,45 @@ export class JobCreator {
 
     this._datafeed_config.query = query;
     this._subscribers = [];
+    this._stopAllRefreshPolls = { stop: false };
   }
 
-  protected _addDetector(detector: Detector) {
+  public get type(): JOB_TYPE {
+    return this._type;
+  }
+
+  protected _addDetector(detector: Detector, agg: Aggregation) {
     this._detectors.push(detector);
+    this._aggs.push(agg);
   }
 
-  protected _editDetector(detector: Detector, index: number) {
+  protected _editDetector(detector: Detector, agg: Aggregation, index: number) {
     if (this._detectors[index] !== undefined) {
       this._detectors[index] = detector;
+      this._aggs[index] = agg;
     }
   }
 
   protected _removeDetector(index: number) {
     this._detectors.splice(index, 1);
+    this._aggs.splice(index, 1);
+  }
+
+  public removeAllDetectors() {
+    this._detectors.length = 0;
   }
 
   public get detectors(): Detector[] {
     return this._detectors;
+  }
+
+  public get aggregationsInDetectors(): Aggregation[] {
+    return this._aggs;
+  }
+
+  public getAggregation(index: number): Aggregation | null {
+    const agg = this._aggs[index];
+    return agg !== undefined ? agg : null;
   }
 
   public set bucketSpan(bucketSpan: BucketSpan) {
@@ -72,6 +100,17 @@ export class JobCreator {
     if (this._influencers.includes(influencer) === false) {
       this._influencers.push(influencer);
     }
+  }
+
+  public removeInfluencer(influencer: string) {
+    const idx = this._influencers.indexOf(influencer);
+    if (idx !== -1) {
+      this._influencers.splice(idx, 1);
+    }
+  }
+
+  public removeAllInfluencers() {
+    this._influencers.length = 0;
   }
 
   public get influencers(): string[] {
@@ -112,6 +151,10 @@ export class JobCreator {
 
   public get groups(): string[] {
     return this._job_config.groups;
+  }
+
+  public set groups(groups: string[]) {
+    this._job_config.groups = groups;
   }
 
   public set modelPlot(enable: boolean) {
@@ -222,5 +265,21 @@ export class JobCreator {
 
   public subscribeToProgress(func: ProgressSubscriber) {
     this._subscribers.push(func);
+  }
+
+  public get jobConfig(): Job {
+    return this._job_config;
+  }
+
+  public get datafeedConfig(): Datafeed {
+    return this._datafeed_config;
+  }
+
+  public get stopAllRefreshPolls(): { stop: boolean } {
+    return this._stopAllRefreshPolls;
+  }
+
+  public forceStopRefreshPolls() {
+    this._stopAllRefreshPolls.stop = true;
   }
 }

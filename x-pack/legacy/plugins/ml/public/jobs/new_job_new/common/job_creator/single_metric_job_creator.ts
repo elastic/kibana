@@ -10,10 +10,11 @@ import { Field, Aggregation } from '../../../../../common/types/fields';
 import { Detector, BucketSpan } from './configs';
 import { createBasicDetector } from './util/default_configs';
 import { KIBANA_AGGREGATION } from '../../../../../common/constants/aggregation_types';
+import { JOB_TYPE } from './util/constants';
 
 export class SingleMetricJobCreator extends JobCreator {
   private _field: Field | null = null;
-  private _agg: Aggregation | null = null;
+  protected _type: JOB_TYPE = JOB_TYPE.SINGLE_METRIC;
 
   // only a single detector exists for this job type
   // therefore _addDetector and _editDetector merge into this
@@ -22,33 +23,38 @@ export class SingleMetricJobCreator extends JobCreator {
     const dtr: Detector = createBasicDetector(agg, field);
 
     if (this._detectors.length === 0) {
-      this._addDetector(dtr);
+      this._addDetector(dtr, agg);
     } else {
-      this._editDetector(dtr, 0);
+      this._editDetector(dtr, agg, 0);
     }
 
     this._field = field;
-    this._agg = agg;
 
-    this._createAggregations();
+    this._createDatafeedAggregations();
   }
 
   public set bucketSpan(bucketSpan: BucketSpan) {
     this._job_config.analysis_config.bucket_span = bucketSpan;
-    this._createAggregations();
+    this._createDatafeedAggregations();
+  }
+
+  // overriding set means we need to override get too
+  // JS doesn't do inheritance very well
+  public get bucketSpan(): BucketSpan {
+    return this._job_config.analysis_config.bucket_span;
   }
 
   // aggregations need to be recreated whenever the detector or bucket_span change
-  private _createAggregations() {
+  private _createDatafeedAggregations() {
     if (
       this._detectors.length &&
       typeof this._job_config.analysis_config.bucket_span === 'string' &&
-      this._agg !== null
+      this._aggs.length > 0
     ) {
       delete this._job_config.analysis_config.summary_count_field_name;
       delete this._datafeed_config.aggregations;
 
-      const functionName = this._agg.dslName;
+      const functionName = this._aggs[0].dslName;
       const timeField = this._job_config.data_description.time_field;
 
       const duration = parseInterval(this._job_config.analysis_config.bucket_span);

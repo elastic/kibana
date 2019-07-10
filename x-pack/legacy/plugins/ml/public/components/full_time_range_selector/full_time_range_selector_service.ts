@@ -11,7 +11,13 @@ import { IndexPattern } from 'ui/index_patterns';
 import { toastNotifications } from 'ui/notify';
 import { timefilter } from 'ui/timefilter';
 import { Query } from 'src/legacy/core_plugins/data/public';
+import dateMath from '@elastic/datemath';
 import { ml } from '../../services/ml_api_service';
+
+export interface TimeRange {
+  from: number;
+  to: number;
+}
 
 export function setFullTimeRange(indexPattern: IndexPattern, query: Query) {
   return ml
@@ -33,4 +39,25 @@ export function setFullTimeRange(indexPattern: IndexPattern, query: Query) {
         })
       );
     });
+}
+
+export function getTimeFilterRange(): TimeRange {
+  let from = 0;
+  let to = 0;
+  const fromString = timefilter.getTime().from;
+  const toString = timefilter.getTime().to;
+  if (typeof fromString === 'string' && typeof toString === 'string') {
+    const fromMoment = dateMath.parse(fromString);
+    const toMoment = dateMath.parse(toString);
+    if (typeof fromMoment !== 'undefined' && typeof toMoment !== 'undefined') {
+      const fromMs = fromMoment.valueOf();
+      const toMs = toMoment.valueOf();
+      from = fromMs;
+      to = toMs;
+    }
+  }
+  return {
+    to,
+    from,
+  };
 }

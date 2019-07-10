@@ -25,8 +25,8 @@ export class ChartSettings {
     this._interval.setMaxBars(this.MAX_BARS);
     this._interval.setInterval('auto');
 
-    // @ts-ignore: incomplete kibana types
-    const bounds = timefilter.getActiveBounds();
+    const tf = timefilter as any;
+    const bounds = tf.getActiveBounds();
     this._interval.setBounds(bounds);
   }
 

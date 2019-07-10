@@ -13,6 +13,7 @@ import { resultsServiceProvider } from '../results_service';
 import { CalendarManager } from '../calendar';
 import { fillResultsWithTimeouts, isRequestTimeout } from './error_utils';
 import { getLatestDataOrBucketTimestamp, isTimeSeriesViewJob } from '../../../common/util/job_utils';
+import { groupsProvider } from './groups';
 import { uniq } from 'lodash';
 
 export function jobsProvider(callWithRequest) {
@@ -339,6 +340,50 @@ export function jobsProvider(callWithRequest) {
     return results;
   }
 
+  async function getAllJobAndGroupIds() {
+    const { getAllGroups } = groupsProvider(callWithRequest);
+    const jobs = await callWithRequest('ml.jobs');
+    const allJobIds = jobs.jobs.map(job => job.job_id);
+    const groups = await getAllGroups();
+    const allGroupIds = groups.map(group => group.id);
+
+    return {
+      jobs: allJobIds,
+      groups: allGroupIds,
+    };
+  }
+
+  async function getLookBackProgress(jobId, start, end) {
+    const datafeedId = `datafeed-${jobId}`;
+    const [jobStats, isRunning] = await Promise.all([
+      callWithRequest('ml.jobStats', { jobId: [jobId] }),
+      isDatafeedRunning(datafeedId)
+    ]);
+
+    if (jobStats.jobs.length) {
+      const time = jobStats.jobs[0].data_counts.latest_record_timestamp;
+      const progress = (time - start) / (end - start);
+      return {
+        progress: (progress > 0 ? Math.round(progress * 100) : 0),
+        isRunning
+      };
+    }
+    return { progress: 0, isRunning: false };
+  }
+
+  async function isDatafeedRunning(datafeedId) {
+    const stats = await callWithRequest('ml.datafeedStats', { datafeedId: [datafeedId] });
+    if (stats.datafeeds.length) {
+      const state = stats.datafeeds[0].state;
+      return (
+        state === DATAFEED_STATE.STARTED ||
+        state === DATAFEED_STATE.STARTING ||
+        state === DATAFEED_STATE.STOPPING
+      );
+    }
+    return false;
+  }
+
   return {
     forceDeleteJob,
     deleteJobs,
@@ -348,5 +393,7 @@ export function jobsProvider(callWithRequest) {
     createFullJobsList,
     deletingJobTasks,
     jobsExist,
+    getAllJobAndGroupIds,
+    getLookBackProgress,
   };
 }

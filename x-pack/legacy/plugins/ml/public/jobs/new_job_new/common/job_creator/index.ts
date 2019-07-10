@@ -8,3 +8,9 @@ export { JobCreator } from './job_creator';
 export { SingleMetricJobCreator } from './single_metric_job_creator';
 export { MultiMetricJobCreator } from './multi_metric_job_creator';
 export { PopulationJobCreator } from './population_job_creator';
+export {
+  isSingleMetricJobCreator,
+  isMultiMetricJobCreator,
+  isPopulationJobCreator,
+} from './type_guards';
+export { jobCreatorFactory } from './job_creator_factory';

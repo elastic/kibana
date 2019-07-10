@@ -15,6 +15,8 @@ import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { CONDITIONS_NOT_SUPPORTED_FUNCTIONS } from '../constants/detector_rule';
 import { MULTI_BUCKET_IMPACT } from '../constants/multi_bucket_impact';
+import { ANOMALY_SEVERITY } from '../constants/anomalies';
+
 
 // List of function descriptions for which actual values from record level results should be displayed.
 const DISPLAY_ACTUAL_FUNCTIONS = ['count', 'distinct_count', 'lat_long', 'mean', 'max', 'min', 'sum',
@@ -68,6 +70,22 @@ export function getSeverity(normalizedScore) {
     return severityTypesList.warning;
   } else {
     return severityTypesList.unknown;
+  }
+}
+
+export function getSeverityType(normalizedScore) {
+  if (normalizedScore >= 75) {
+    return ANOMALY_SEVERITY.CRITICAL;
+  } else if (normalizedScore >= 50) {
+    return ANOMALY_SEVERITY.MAJOR;
+  } else if (normalizedScore >= 25) {
+    return ANOMALY_SEVERITY.MINOR;
+  } else if (normalizedScore >= 3) {
+    return ANOMALY_SEVERITY.WARNING;
+  } else if (normalizedScore >= 0) {
+    return ANOMALY_SEVERITY.LOW;
+  } else {
+    return ANOMALY_SEVERITY.UNKNOWN;
   }
 }
 

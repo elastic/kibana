@@ -6,6 +6,7 @@
 
 import { Annotation } from '../../../common/types/annotations';
 import { Privileges } from '../../../common/types/privileges';
+import { DslName, AggFieldNamePair } from '../../../common/types/fields';
 
 // TODO This is not a complete representation of all methods of `ml.*`.
 // It just satisfies needs for other parts of the code area which use
@@ -58,6 +59,33 @@ declare interface Ml {
     jobAuditMessages(jobId: string, from: string): Promise<object>;
     deletingJobTasks(): Promise<object>;
     newJobCaps(indexPatternTitle: string, isRollup: boolean): Promise<object>;
+    newJobLineChart(
+      indexPatternTitle: string,
+      timeField: string,
+      start: number,
+      end: number,
+      intervalMs: number,
+      query: object,
+      aggFieldNamePairs: AggFieldNamePair[],
+      splitFieldName: string | null,
+      splitFieldValue: string | null
+    ): Promise<any>;
+    newJobPopulationsChart(
+      indexPatternTitle: string,
+      timeField: string,
+      start: number,
+      end: number,
+      intervalMs: number,
+      query: object,
+      aggFieldNamePairs: AggFieldNamePair[],
+      splitFieldName: string
+    ): Promise<any>;
+    getAllJobAndGroupIds(): Promise<any>;
+    getLookBackProgress(
+      jobId: string,
+      start: number,
+      end: number
+    ): Promise<{ progress: number; isRunning: boolean }>;
   };
 }
 
