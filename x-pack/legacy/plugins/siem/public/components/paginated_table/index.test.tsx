@@ -14,6 +14,7 @@ import { BasicTableProps, PaginatedTable } from './index';
 import { getHostsColumns, mockData, rowItems, sortedHosts } from './index.mock';
 import { ThemeProvider } from 'styled-components';
 import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
+import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../common/constants';
 
 jest.mock('react', () => {
   const r = jest.requireActual('react');
@@ -240,6 +241,36 @@ describe('Paginated Table Component', () => {
 
       expect(wrapper.find('.euiTable thead tr th button svg')).toBeTruthy();
     });
+
+    test('Should display toast when user reaches end of results max', () => {
+      const wrapper = mount(
+        <ThemeProvider theme={theme}>
+          <PaginatedTable
+            columns={getHostsColumns()}
+            headerCount={1}
+            headerSupplement={<p>{'My test supplement.'}</p>}
+            headerTitle="Hosts"
+            headerTooltip="My test tooltip"
+            headerUnit="Test Unit"
+            itemsPerRow={rowItems}
+            limit={DEFAULT_MAX_TABLE_QUERY_SIZE}
+            loading={false}
+            loadingTitle="Hosts"
+            loadPage={newActivePage => loadPage(newActivePage)}
+            pageOfItems={mockData.Hosts.edges}
+            showMorePagesIndicator={true}
+            totalCount={DEFAULT_MAX_TABLE_QUERY_SIZE * 3}
+            updateActivePage={activePage => updateActivePage(activePage)}
+            updateLimitPagination={limit => updateLimitPagination({ limit })}
+          />
+        </ThemeProvider>
+      );
+      wrapper
+        .find('[data-test-subj="pagination-button-next"]')
+        .first()
+        .simulate('click');
+      expect(updateActivePage.mock.calls.length).toEqual(0);
+    });
   });
 
   describe('Events', () => {
@@ -329,7 +360,6 @@ describe('Paginated Table Component', () => {
         loadPage: newActivePage => loadPage(newActivePage),
         pageOfItems: mockData.Hosts.edges,
         showMorePagesIndicator: true,
-        showTooManyResults: false,
         totalCount: 10,
         updateActivePage: activePage => updateActivePage(activePage),
         updateLimitPagination: limit => updateLimitPagination({ limit }),

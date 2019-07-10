@@ -10,10 +10,10 @@ import {
   EuiContextMenuPanel,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiGlobalToastListToast as Toast,
   EuiPagination,
   EuiPanel,
   EuiPopover,
-  Toast,
 } from '@elastic/eui';
 import { isEmpty, noop, getOr } from 'lodash/fp';
 import React, { memo, useState, useEffect } from 'react';

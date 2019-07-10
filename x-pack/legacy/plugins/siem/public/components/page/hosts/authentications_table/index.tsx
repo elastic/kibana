@@ -22,7 +22,6 @@ import { HostDetailsLink, IPDetailsLink } from '../../../links';
 import { Columns, ItemsPerRow, PaginatedTable } from '../../../paginated_table';
 import { IS_OPERATOR } from '../../../timeline/data_providers/data_provider';
 import { Provider } from '../../../timeline/data_providers/provider';
-import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../../../common/constants';
 
 import * as i18n from './translations';
 import { getRowItemDraggables } from '../../../tables/helpers';
