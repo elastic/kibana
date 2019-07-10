@@ -83,7 +83,7 @@ export class TopBar extends React.Component<Props, { value: string }> {
           justifyContent="spaceBetween"
           className="codeTopBar__toolbar"
         >
-          <EuiFlexItem>
+          <EuiFlexItem className="codeTopBar__left">
             <EuiFlexGroup gutterSize="l" alignItems="center">
               <EuiFlexItem className="codeContainer__select" grow={false}>
                 <EuiSelect

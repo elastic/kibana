@@ -79,9 +79,8 @@ function getSuggestion(
   const title = `${yTitle} ${preposition} ${xTitle}`;
   const state: State = {
     legend: { isVisible: true, position: Position.Right },
-    seriesType: isDate ? 'line' : 'bar',
+    seriesType: splitBy && isDate ? 'line' : 'bar',
     splitSeriesAccessors: splitBy && isDate ? [splitBy.columnId] : [generateId()],
-    stackAccessors: splitBy && !isDate ? [splitBy.columnId] : [],
     x: {
       accessor: xValue.columnId,
       position: Position.Bottom,

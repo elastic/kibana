@@ -10,14 +10,14 @@ import { Anomaly } from '../types';
 import { IS_OPERATOR } from '../../timeline/data_providers/data_provider';
 import { Provider } from '../../timeline/data_providers/provider';
 import { Spacer } from '../../page';
-import { getScoreString } from './get_score_string';
+import { getScoreString } from './score_health';
 
 export const DraggableScore = React.memo<{
   id: string;
-  index: number;
+  index?: number;
   score: Anomaly;
 }>(
-  ({ id, index, score }): JSX.Element => (
+  ({ id, index = 0, score }): JSX.Element => (
     <DraggableWrapper
       key={id}
       dataProvider={{

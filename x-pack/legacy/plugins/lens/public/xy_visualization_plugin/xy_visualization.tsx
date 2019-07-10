@@ -21,7 +21,7 @@ export const xyVisualization: Visualization<State, PersistableState> = {
   initialize(datasource, state) {
     return (
       state || {
-        seriesType: 'line',
+        seriesType: 'bar',
         title: 'Empty XY Chart',
         legend: { isVisible: true, position: Position.Right },
         x: {
@@ -37,7 +37,6 @@ export const xyVisualization: Visualization<State, PersistableState> = {
           title: 'Y',
         },
         splitSeriesAccessors: [generateId()],
-        stackAccessors: [],
       }
     );
   },
