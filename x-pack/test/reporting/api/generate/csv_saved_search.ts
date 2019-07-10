@@ -215,7 +215,7 @@ export default function({ getService }: { getService: any }) {
     describe('Merge user state into the query', () => {
       it('for query', async () => {
         // load test data that contains a saved search and documents
-        await esArchiver.load('reporting/scripted');
+        await esArchiver.load('reporting/scripted_small');
 
         const params = {
           searchId: 'search:f34bf440-5014-11e9-bce7-4dabcb8bef24',
@@ -239,7 +239,7 @@ export default function({ getService }: { getService: any }) {
         expect(resType).to.eql('text/csv');
         expect(resText).to.eql(CSV_RESULT_SCRIPTED_REQUERY);
 
-        await esArchiver.unload('reporting/scripted');
+        await esArchiver.unload('reporting/scripted_small');
       });
 
       it('for sort', async () => {
@@ -270,11 +270,10 @@ export default function({ getService }: { getService: any }) {
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/37471
-    describe.skip('Non-Immediate', () => {
+    describe('Non-Immediate', () => {
       it('using queries in job params', async () => {
         // load test data that contains a saved search and documents
-        await esArchiver.load('reporting/scripted');
+        await esArchiver.load('reporting/scripted_small');
 
         const params = {
           searchId: 'search:f34bf440-5014-11e9-bce7-4dabcb8bef24',
@@ -362,7 +361,7 @@ export default function({ getService }: { getService: any }) {
           }, 5000); // x-pack/test/functional/config settings are inherited, uses 3 seconds for polling interval.
         });
 
-        await esArchiver.unload('reporting/scripted');
+        await esArchiver.unload('reporting/scripted_small');
       });
     });
   });
