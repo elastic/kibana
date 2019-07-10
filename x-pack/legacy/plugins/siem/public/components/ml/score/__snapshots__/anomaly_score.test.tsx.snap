@@ -179,7 +179,7 @@ exports[`anomaly_scores renders correctly against snapshot 1`] = `
                 <EuiFlexItem
                   grow={false}
                 >
-                  process.name: “du”
+                  process.name: "du"
                 </EuiFlexItem>
               </EuiFlexGroup>,
               "title": "Top Anomaly Suspect",
@@ -194,17 +194,17 @@ exports[`anomaly_scores renders correctly against snapshot 1`] = `
                   <EuiFlexItem
                     grow={false}
                   >
-                    host.name: “zeek-iowa”
+                    host.name: "zeek-iowa"
                   </EuiFlexItem>
                   <EuiFlexItem
                     grow={false}
                   >
-                    process.name: “du”
+                    process.name: "du"
                   </EuiFlexItem>
                   <EuiFlexItem
                     grow={false}
                   >
-                    user.name: “root”
+                    user.name: "root"
                   </EuiFlexItem>
                 </React.Fragment>
               </EuiFlexGroup>,

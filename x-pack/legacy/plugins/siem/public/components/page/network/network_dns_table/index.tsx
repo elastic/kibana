@@ -22,6 +22,7 @@ interface OwnProps {
   data: NetworkDnsEdges[];
   loading: boolean;
   hasNextPage: boolean;
+  id: string;
   nextCursor: string;
   loadMore: (cursor: string) => void;
   totalCount: number;
@@ -80,6 +81,7 @@ class NetworkDnsTableComponent extends React.PureComponent<NetworkDnsTableProps>
       limit,
       loading,
       loadMore,
+      id,
       nextCursor,
       totalCount,
       type,
@@ -96,6 +98,7 @@ class NetworkDnsTableComponent extends React.PureComponent<NetworkDnsTableProps>
         headerTitle={i18n.TOP_DNS_DOMAINS}
         headerTooltip={i18n.TOOLTIP}
         headerUnit={i18n.UNIT(totalCount)}
+        id={id}
         itemsPerRow={rowItems}
         limit={limit}
         loading={loading}

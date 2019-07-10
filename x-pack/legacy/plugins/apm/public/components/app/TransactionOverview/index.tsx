@@ -16,7 +16,7 @@ import { Location } from 'history';
 import { first } from 'lodash';
 import React from 'react';
 import { useTransactionList } from '../../../hooks/useTransactionList';
-import { useTransactionOverviewCharts } from '../../../hooks/useTransactionOverviewCharts';
+import { useTransactionCharts } from '../../../hooks/useTransactionCharts';
 import { IUrlParams } from '../../../context/UrlParamsContext/types';
 import { TransactionCharts } from '../../shared/charts/TransactionCharts';
 import { TransactionBreakdown } from '../../shared/TransactionBreakdown';
@@ -27,6 +27,7 @@ import { useFetcher } from '../../../hooks/useFetcher';
 import { getHasMLJob } from '../../../services/rest/ml';
 import { history } from '../../../utils/history';
 import { useLocation } from '../../../hooks/useLocation';
+import { ChartsSyncContextProvider } from '../../../context/ChartsSyncContext';
 
 interface Props {
   urlParams: IUrlParams;
@@ -69,9 +70,7 @@ export function TransactionOverview({
     })
   );
 
-  const { data: transactionOverviewCharts } = useTransactionOverviewCharts(
-    urlParams
-  );
+  const { data: transactionCharts } = useTransactionCharts();
 
   // TODO: improve urlParams typings.
   // `serviceName` or `transactionType` will never be undefined here, and this check should not be needed
@@ -79,7 +78,10 @@ export function TransactionOverview({
     return null;
   }
 
-  const { data: transactionListData } = useTransactionList(urlParams);
+  const {
+    data: transactionListData,
+    status: transactionListStatus
+  } = useTransactionList(urlParams);
   const { data: hasMLJob = false } = useFetcher(
     () => getHasMLJob({ serviceName, transactionType }),
     [serviceName, transactionType]
@@ -114,16 +116,18 @@ export function TransactionOverview({
         </EuiFormRow>
       ) : null}
 
-      <TransactionBreakdown />
+      <ChartsSyncContextProvider>
+        <TransactionBreakdown initialIsOpen={true} />
 
-      <EuiSpacer size="s" />
+        <EuiSpacer size="s" />
 
-      <TransactionCharts
-        hasMLJob={hasMLJob}
-        charts={transactionOverviewCharts}
-        location={location}
-        urlParams={urlParams}
-      />
+        <TransactionCharts
+          hasMLJob={hasMLJob}
+          charts={transactionCharts}
+          location={location}
+          urlParams={urlParams}
+        />
+      </ChartsSyncContextProvider>
 
       <EuiSpacer size="s" />
 
@@ -133,6 +137,7 @@ export function TransactionOverview({
         </EuiTitle>
         <EuiSpacer size="s" />
         <TransactionList
+          isLoading={transactionListStatus === 'loading'}
           items={transactionListData}
           serviceName={serviceName}
         />

@@ -72,13 +72,10 @@ export const RepositoryDetails: React.FunctionComponent<Props> = ({
 
   // Reset verification state when repository name changes, either from adjust URL or clicking
   // into a different repository in table list.
-  useEffect(
-    () => {
-      setVerification(undefined);
-      setIsLoadingVerification(false);
-    },
-    [repositoryName]
-  );
+  useEffect(() => {
+    setVerification(undefined);
+    setIsLoadingVerification(false);
+  }, [repositoryName]);
 
   const renderBody = () => {
     if (repositoryDetails) {
