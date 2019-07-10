@@ -22,7 +22,9 @@ export const getAllHandler: RouterRouteHandler = async (
   // Get policies
   const policiesByName: {
     [key: string]: SlmPolicyEs;
-  } = await callWithRequest('slm.policies');
+  } = await callWithRequest('slm.policies', {
+    human: true,
+  });
 
   // Deserialize policies
   return {
@@ -44,6 +46,7 @@ export const getOneHandler: RouterRouteHandler = async (
     [key: string]: SlmPolicyEs;
   } = await callWithRequest('slm.policy', {
     name,
+    human: true,
   });
 
   if (!policiesByName[name]) {
