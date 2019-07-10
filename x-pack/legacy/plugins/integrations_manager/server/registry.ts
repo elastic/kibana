@@ -54,11 +54,12 @@ export async function getObjects(
   // Get paths which match the given filter
   const paths = await getArchiveInfo(`${pkgkey}.tar.gz`, filter);
 
-  // Add all objects which matched filter to the Map
-  paths.map(getObject).forEach(obj => objects.set(obj.id, obj));
+  // Get all objects which matched filter. Add them to the Map
+  const rootObjects = paths.map(getObject);
+  rootObjects.forEach(obj => objects.set(obj.id, obj));
 
   // Each of those objects might have `references` property like [{id, type, name}]
-  for (const object of objects.values()) {
+  for (const object of rootObjects) {
     // For each of those objects
     for (const reference of object.references) {
       // Get the objects they reference. Call same function with a new filter
