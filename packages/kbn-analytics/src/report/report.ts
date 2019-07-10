@@ -32,16 +32,11 @@ class UnreachableCaseError extends Error {
   }
 }
 
-export type ReportTypes = keyof Reports;
-export interface Reports {
-  navigation: NagivationReport;
-  // memory: MemoryReport;
-  load: LoadReport;
-  click: ClickReport;
-  // error: StatsMetric<'error', 'sum'>;
-}
+export type Reports = ClickReport | LoadReport | NagivationReport;
+export type ReportTypes = Reports['type'];
 
-export function createReport(type: ReportTypes, appName: string, eventName: string): Reports[ReportTypes] {
+
+export function createReport(type: ReportTypes, appName: string, eventName: string) {
   switch (type) {
     case 'click': return createClickReport(appName, eventName);
     case 'load': return createLoadReport(appName, eventName);

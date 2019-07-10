@@ -1,14 +1,14 @@
 {
   "name": "@kbn/analytics",
   "private": true,
-  "version": "0.0.0",
+  "version": "1.0.0",
   "description": "Kibana Analytics tool",
-  "main": "lib/index.js",
-  "types": "./lib/index.d.ts",
+  "main": "target/index.js",
+  "types": "./index.d.ts",
   "author": "Ahmad Bamieh <ahmadbamieh@gmail.com>",
   "license": "Apache-2.0",
   "scripts": {
-    "build": "babel src --out-dir target",
+    "build": "babel src --config-file ./.babelrc --out-dir target --delete-dir-on-start --extensions .ts,.js,.tsx",
     "kbn:bootstrap": "yarn build --quiet",
     "kbn:watch": "yarn build --watch"
   },
@@ -19,5 +19,6 @@
     "typescript": "^3.3.3333"
   },
   "dependencies": {
+    "@babel/plugin-proposal-export-default-from": "^7.2.0"
   }
 }

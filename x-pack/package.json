@@ -178,6 +178,7 @@
     "@elastic/nodegit": "0.25.0-alpha.22",
     "@elastic/numeral": "2.3.3",
     "@elastic/request-crypto": "^1.0.2",
+    "@kbn/analytics": "1.0.0",
     "@kbn/babel-preset": "1.0.0",
     "@kbn/elastic-idx": "1.0.0",
     "@kbn/es-query": "1.0.0",

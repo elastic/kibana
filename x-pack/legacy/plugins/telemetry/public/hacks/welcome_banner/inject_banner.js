@@ -25,6 +25,9 @@ async function asyncInjectBanner($injector) {
   const telemetryOptInProvider = Private(TelemetryOptInProvider);
   const config = $injector.get('config');
 
+
+  telemetryOptInProvider.reporter.report('click', 'telemetry', 'banner');
+
   // and no banner for non-logged in users
   if (Path.isUnauthenticated()) {
     return;

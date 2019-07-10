@@ -17,63 +17,99 @@
  * under the License.
  */
 
-import { Reports } from './report';
+import { Reports, ReportTypes, createReport } from './report';
 
 export interface ReporterConfig {
   debug: boolean;
   http: ReportHTTP;
+  storage?: Map;
   checkInterval?: number;
 }
 
 export interface ReportHTTP {
-  (reports: Reports[keyof Reports][]): Promise<void>
+  (reports: Reports[]): Promise<void>
 }
 
 export class Reporter {
+  storageKey = 'analytics';
   checkInterval: number;
   interval: any;
   http: ReportHTTP;
-  reports: Reports[keyof Reports][]
-  debug: boolean;
+  reports: Reports[]
+  private debug: boolean;
+  private storage?: Map<string, any>;
 
   constructor(config: ReporterConfig) {
     this.http =  config.http;
     this.checkInterval = config.checkInterval || 1000;
     this.interval = null;
+    this.storage = config.storage;
+    if (this.storage) {
+
+    }
+
     this.reports = [];
     this.debug = config.debug;
   }
 
-  start() {
+  getStorage() {
+    if (!this.storage) return [];
+    return this.storage.get(this.storageKey);
+  }
+
+  storeReports() {
+    if (!this.storage) return;
+    this.storage.set(this.storageKey, this.reports);
+  }
+
+  public start() {
     if (!this.interval) {
       this.interval = setTimeout(() => {
         this.interval = null;
-        this.sendReports();
+        if (this.reports.length) {
+          this.sendReports();
+        }
       }, this.checkInterval);
     }
   }
+  flushStorage() {
+    if (this.storage) {
+      this.storage.set(this.storageKey, []);
+    }
+    this.reports = [];
+  }
 
-  stop() {
+  public stop() {
     clearTimeout(this.interval);
   }
 
-  insertReport<K extends keyof Reports>(report: Reports[K]) {
-    this.reports.push(report);
+  public report(type: ReportTypes, appName: string, eventName: string) {
+    if (this.debug) {
+      console.debug(`${type} Report -> (${appName}:${eventName})`);
+    }
+    const report = createReport(type, appName, eventName);
+    this.insertReport(report);
   }
 
-  async sendReports() {
+  protected insertReport(report: Reports) {
+    this.reports.push(report);
+    this.storeReports();
+  }
+
+  public async sendReports() {
     try {
       await this.http(this.reports);
+      this.flushStorage();
     } catch (err) {
       if (this.debug) {
-        console.log('Error Sending Reports', err);
+        console.debug('Error Sending Reports', err);
       }
     }
     this.start();
   }
 }
 
-export function createReporter(reportedConf: ReporterConfig): Reporter {
+export function createReporter(reportedConf: ReporterConfig) {
   const reporter = new Reporter(reportedConf);
   reporter.start();
   return reporter;

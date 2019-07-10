@@ -31,3 +31,13 @@ function createMemoryReport() {
 
   }
 }
+
+---
+
+Batching
+
+
+submit report -> save into localstorage -> flush every interval
+
+
+

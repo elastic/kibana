@@ -1,16 +1,4 @@
 {
-  "presets": [
-    ["@babel/preset-env", {
-      "targets": {
-        "node": "current",
-        "browsers": [
-          "last 2 versions",
-          "> 5%",
-          "Safari 7"
-        ]
-      }
-    }
-    ]
-  ],
-  "plugins": ["add-module-exports"]
+  "presets": ["@babel/typescript", "@kbn/babel-preset/webpack_preset"],
+  "plugins": ["@babel/plugin-proposal-export-default-from"]
 }
