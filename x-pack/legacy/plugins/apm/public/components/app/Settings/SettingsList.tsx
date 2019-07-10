@@ -28,11 +28,15 @@ import { ITableColumn, ManagedTable } from '../../shared/ManagedTable';
 import { AgentConfigurationListAPIResponse } from '../../../../server/lib/settings/agent_configuration/list_configurations';
 import { AddSettingsFlyout } from './AddSettings/AddSettingFlyout';
 import { APMLink } from '../../shared/Links/APMLink';
+import { LoadingStatePrompt } from '../../shared/LoadingStatePrompt';
 
 export type Config = AgentConfigurationListAPIResponse[0];
 
 export function SettingsList() {
-  const { data = [], refresh } = useFetcher(loadAgentConfigurationList, []);
+  const { data = [], status, refresh } = useFetcher(
+    loadAgentConfigurationList,
+    []
+  );
   const [selectedConfig, setSelectedConfig] = useState<Config | null>(null);
   const [isFlyoutOpen, setIsFlyoutOpen] = useState(false);
 
@@ -129,7 +133,7 @@ export function SettingsList() {
 
   const hasConfigurations = !isEmpty(data);
 
-  const emptyState = (
+  const emptyStatePrompt = (
     <EuiEmptyPrompt
       iconType="controlsHorizontal"
       title={
@@ -288,16 +292,17 @@ export function SettingsList() {
 
         <EuiSpacer size="m" />
 
-        {hasConfigurations ? (
+        {status === 'success' && !hasConfigurations ? (
+          emptyStatePrompt
+        ) : (
           <ManagedTable
+            noItemsMessage={<LoadingStatePrompt />}
             columns={COLUMNS}
             items={data}
             initialSortField="service.name"
             initialSortDirection="asc"
             initialPageSize={50}
           />
-        ) : (
-          emptyState
         )}
       </EuiPanel>
     </>
