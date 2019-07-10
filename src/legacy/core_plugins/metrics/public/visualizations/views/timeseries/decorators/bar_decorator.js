@@ -20,8 +20,8 @@
 import React from 'react';
 import { getSpecId, getGroupId, ScaleType, BarSeries } from '@elastic/charts';
 import { getSeriesColors, getBarStyles } from '../utils/series_styles';
-import { getStackAccessors } from '../utils/stack_format';
 import { PanelEntities } from '../model/panel';
+import { X_ACCESSOR_INDEX, Y_ACCESSOR_INDEXES } from '../../../constants';
 
 export function BarSeriesDecorator({
   seriesId,
@@ -31,7 +31,8 @@ export function BarSeriesDecorator({
   hideInLegend,
   bars,
   color,
-  stack,
+  stackAccessors,
+  stackAsPercentage,
   xScaleType,
   yScaleType,
 }) {
@@ -39,7 +40,6 @@ export function BarSeriesDecorator({
   const groupId = getGroupId(seriesGroupId);
   const customSeriesColors = getSeriesColors(color, id);
   const barSeriesStyle = getBarStyles(bars, color);
-  const stackAccessors = getStackAccessors(stack);
 
   const seriesSettings = {
     id,
@@ -48,9 +48,10 @@ export function BarSeriesDecorator({
     data,
     customSeriesColors,
     hideInLegend,
-    xAccessor: 0, // todo: Magic number
-    yAccessors: [1], // todo: Magic number
+    xAccessor: X_ACCESSOR_INDEX,
+    yAccessors: Y_ACCESSOR_INDEXES,
     stackAccessors,
+    stackAsPercentage,
     xScaleType,
     yScaleType,
     ...barSeriesStyle,

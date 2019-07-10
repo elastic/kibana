@@ -30,7 +30,8 @@ const Chart = {
   data: PropTypes.arrayOf(PropTypes.arrayOf(PropTypes.number)).isRequired,
   hideInLegend: PropTypes.bool.isRequired,
   color: PropTypes.string.isRequired,
-  stack: PropTypes.bool.isRequired,
+  stackAsPercentage: PropTypes.bool.isRequired,
+  stackAccessors: PropTypes.arrayOf(PropTypes.number),
   xScaleType: PropTypes.string,
   yScaleType: PropTypes.string,
 };

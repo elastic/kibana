@@ -21,7 +21,7 @@ import React from 'react';
 import { getSpecId, getGroupId, ScaleType, AreaSeries } from '@elastic/charts';
 import { getSeriesColors, getAreaStyles } from '../utils/series_styles';
 import { PanelEntities } from '../model/panel';
-import { getStackAccessors } from '../utils/stack_format';
+import { X_ACCESSOR_INDEX, Y_ACCESSOR_INDEXES } from '../../../constants';
 
 export function AreaSeriesDecorator({
   seriesId,
@@ -31,7 +31,8 @@ export function AreaSeriesDecorator({
   hideInLegend,
   lines,
   color,
-  stack,
+  stackAccessors,
+  stackAsPercentage,
   points,
   xScaleType,
   yScaleType,
@@ -40,7 +41,6 @@ export function AreaSeriesDecorator({
   const groupId = getGroupId(seriesGroupId);
   const customSeriesColors = getSeriesColors(color, id);
   const areaSeriesStyle = getAreaStyles({ points, lines, color });
-  const stackAccessors = getStackAccessors(stack);
 
   const seriesSettings = {
     id,
@@ -49,9 +49,10 @@ export function AreaSeriesDecorator({
     data,
     customSeriesColors,
     hideInLegend,
-    xAccessor: 0, // todo: Magic number
-    yAccessors: [1], // todo: Magic number
+    xAccessor: X_ACCESSOR_INDEX,
+    yAccessors: Y_ACCESSOR_INDEXES,
     stackAccessors,
+    stackAsPercentage,
     xScaleType,
     yScaleType,
     ...areaSeriesStyle,

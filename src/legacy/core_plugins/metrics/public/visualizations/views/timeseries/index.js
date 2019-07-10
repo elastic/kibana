@@ -19,7 +19,6 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-
 import {
   Axis,
   Chart,
@@ -34,9 +33,10 @@ import {
   LineAnnotation,
 } from '@elastic/charts';
 import { EuiIcon } from '@elastic/eui';
+import { GRID_LINE_CONFIG, ICON_TYPES_MAP, STACKED_OPTIONS } from '../../constants';
 import { AreaSeriesDecorator } from './decorators/area_decorator';
 import { BarSeriesDecorator } from './decorators/bar_decorator';
-import { GRID_LINE_CONFIG, ICON_TYPES_MAP } from '../../constants';
+import { getStackAccessors } from './utils/stack_format';
 
 const generateAnnotationData = (values, formatter) =>
   values.map(({ key, docs }) => ({
@@ -54,7 +54,7 @@ export const TimeSeries = ({
   legendPosition,
   xAxisLabel,
   series,
-  yaxes,
+  yAxis,
   onBrush,
   xAxisFormatter,
   annotations,
@@ -105,6 +105,9 @@ export const TimeSeries = ({
           stack,
           points,
         }) => {
+          const stackAccessors = getStackAccessors(stack);
+          const isPercentage = stack === STACKED_OPTIONS.PERCENT;
+
           if (bars.show) {
             return (
               <BarSeriesDecorator
@@ -116,7 +119,8 @@ export const TimeSeries = ({
                 hideInLegend={hideInLegend}
                 bars={bars}
                 color={color}
-                stack={stack}
+                stackAccessors={stackAccessors}
+                stackAsPercentage={isPercentage}
                 xScaleType={xScaleType}
                 yScaleType={yScaleType}
               />
@@ -134,7 +138,8 @@ export const TimeSeries = ({
                 hideInLegend={hideInLegend}
                 lines={lines}
                 color={color}
-                stack={stack}
+                stackAccessors={stackAccessors}
+                stackAsPercentage={isPercentage}
                 points={points}
                 xScaleType={xScaleType}
                 yScaleType={yScaleType}
@@ -146,9 +151,9 @@ export const TimeSeries = ({
         }
       )}
 
-      {yaxes.map(({ id, groupId, position, tickFormatter, min, max }) => (
+      {yAxis.map(({ id, groupId, position, tickFormatter, min, max }) => (
         <Axis
-          key={id}
+          key={groupId}
           groupId={getGroupId(groupId)}
           id={getAxisId(id)}
           position={position}
@@ -184,7 +189,7 @@ TimeSeries.propTypes = {
   legendPosition: PropTypes.string,
   xAxisLabel: PropTypes.string,
   series: PropTypes.array,
-  yaxes: PropTypes.array,
+  yAxis: PropTypes.array,
   onBrush: PropTypes.func,
   xAxisFormatter: PropTypes.func,
   annotations: PropTypes.array,

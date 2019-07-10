@@ -28,3 +28,11 @@ export const COLORS = {
 export const GRID_LINE_CONFIG = {
   stroke: 'rgba(125,125,125,0.1)',
 };
+
+export const X_ACCESSOR_INDEX = 0;
+export const Y_ACCESSOR_INDEXES = [1];
+
+export const STACKED_OPTIONS = {
+  STACKED: 'stacked',
+  PERCENT: 'percent',
+};

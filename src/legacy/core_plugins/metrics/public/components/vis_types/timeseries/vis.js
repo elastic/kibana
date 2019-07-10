@@ -125,7 +125,7 @@ export class TimeseriesVisualization extends Component {
     if (model.axis_min) mainAxis.min = Number(model.axis_min);
     if (model.axis_max) mainAxis.max = Number(model.axis_max);
 
-    const yaxes = [mainAxis];
+    const yAxis = [mainAxis];
 
     seriesModel.forEach(seriesGroup => {
       const seriesGroupId = seriesGroup.id;
@@ -143,26 +143,6 @@ export class TimeseriesVisualization extends Component {
         seriesDataRow.hideInLegend = Boolean(seriesGroup.hide_in_legend);
       });
 
-      /* Temporarily disable support of stacking by percent*/
-      // if (seriesGroup.stacked === 'percent') {
-      //   seriesGroup.separate_axis = true;
-      //   seriesGroup.axisFormatter = 'percent';
-      //   seriesGroup.axis_min = 0;
-      //   seriesGroup.axis_max = 1;
-      //   seriesGroup.axis_position = model.axis_position;
-      //   const first = seriesData[0];
-      //   if (first) {
-      //     first.data.forEach((row, index) => {
-      //       const rowSum = seriesData.reduce((acc, item) => {
-      //         return item.data[index][1] + acc;
-      //       }, 0);
-      //       seriesData.forEach(item => {
-      //         item.data[index][1] = rowSum && item.data[index][1] / rowSum || 0;
-      //       });
-      //     });
-      //   }
-      // }
-
       if (seriesGroup.separate_axis) {
         const yaxis = {
           id: yAxisIdGenerator(),
@@ -174,13 +154,13 @@ export class TimeseriesVisualization extends Component {
         if (seriesGroup.axis_min != null) yaxis.min = Number(seriesGroup.axis_min);
         if (seriesGroup.axis_max != null) yaxis.max = Number(seriesGroup.axis_max);
 
-        yaxes.push(yaxis);
+        yAxis.push(yaxis);
       }
     });
 
     // check if each series group has a separate y-axis -> remove the main y-axis
-    if (yaxes.length > seriesModel.length) {
-      yaxes.shift();
+    if (yAxis.length > seriesModel.length) {
+      yAxis.shift();
     }
 
     const style = { backgroundColor: model.background_color };
@@ -192,7 +172,7 @@ export class TimeseriesVisualization extends Component {
       legendPosition: model.legend_position,
       xAxisLabel: interval ? getAxisLabelString(interval) : '',
       series,
-      yaxes,
+      yAxis,
       annotations,
       onBrush,
       xAxisFormatter: this.xAxisFormatter(interval),

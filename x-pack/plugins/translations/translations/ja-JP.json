@@ -3644,7 +3644,6 @@
     "tsvb.timeSeries.separateAxisLabel": "軸を分けますか？",
     "tsvb.timeSeries.splitColorThemeLabel": "カラーテーマを分割",
     "tsvb.timeSeries.stackedLabel": "スタック",
-    "tsvb.timeSeries.stackedWithinSeriesLabel": "数列内でスタック",
     "tsvb.timeSeries.tab.metricsLabel": "メトリック",
     "tsvb.timeSeries.tab.optionsLabel": "オプション",
     "tsvb.timeSeries.templateHelpText": "例: {templateExample}",

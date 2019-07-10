@@ -3644,7 +3644,6 @@
     "tsvb.timeSeries.separateAxisLabel": "分离轴？",
     "tsvb.timeSeries.splitColorThemeLabel": "拆分颜色主题",
     "tsvb.timeSeries.stackedLabel": "堆叠",
-    "tsvb.timeSeries.stackedWithinSeriesLabel": "序列内堆叠",
     "tsvb.timeSeries.tab.metricsLabel": "指标",
     "tsvb.timeSeries.tab.optionsLabel": "选项",
     "tsvb.timeSeries.templateHelpText": "例如，{templateExample}",
