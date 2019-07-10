@@ -34,11 +34,11 @@ image::images/timelion-conditional01.png[]
 
 . Create two thresholds to keep an eye on the amount of used memory. 
 +
-For the purposes of this tutorial, your warning threshold will be 12.5GB and your severe threshold will be 15GB. When the maximum amount of used memory exceeds either of these thresholds, the series will be colored accordingly.
+For the purposes of this tutorial, your warning threshold is 12.5GB, and your severe threshold is 15GB. When the maximum amount of used memory exceeds these thresholds, the series is colored accordingly.
 
-NOTE: If the threshold values are too high or low for your machine, please adjust accordingly.
+NOTE: If the threshold values are too high or low for your machine, adjust the values accordingly.
 
-To configure these two threshold values, you can utilize Timelion's conditional logic. In this tutorial you will use `if()` to compare each point to a number, adjust the styling if the condition evaluates to `true` and use the default styling if the condition evaluates to `false`. Timelion offers the following operator values for comparison.
+To configure these two threshold values, utilize the Timelion conditional logic. In this tutorial you will use `if()` to compare each point to a number, adjust the styling if the condition evaluates to `true` and use the default styling if the condition evaluates to `false`. Timelion offers the following operator values for comparison.
 
 [horizontal]
 `eq`:: equal
