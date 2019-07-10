@@ -260,6 +260,7 @@ export const IPDetailsComponent = pure<IPDetailsComponentProps>(
                         endDate={to}
                         skip={isInitializing}
                         ip={ip}
+                        type={networkModel.NetworkType.details}
                         narrowDateRange={(score, interval) => {
                           const fromTo = scoreIntervalToDateTime(score, interval);
                           setAbsoluteRangeDatePicker({
