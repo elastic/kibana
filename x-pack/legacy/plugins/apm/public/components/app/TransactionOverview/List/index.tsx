@@ -116,7 +116,7 @@ export function TransactionList({ items, serviceName, isLoading }: Props) {
 
   const noItemsMessage = (
     <EmptyMessage
-      heading={i18n.translate('xpack.apm.tracesTable.notFoundLabel', {
+      heading={i18n.translate('xpack.apm.transactionsTable.notFoundLabel', {
         defaultMessage: 'No transactions were found.'
       })}
     />
