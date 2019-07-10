@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React from 'react';
-import { setAngularState, getSetupModeState, initSetupModeState, updateSetupModeData } from '../../lib/setup_mode';
+import { getSetupModeState, initSetupModeState, updateSetupModeData } from '../../lib/setup_mode';
 import { Flyout } from '../metricbeat_migration/flyout';
 import { ELASTICSEARCH_CUSTOM_ID } from '../../../common/constants';
 
@@ -17,8 +17,7 @@ export class SetupModeRenderer extends React.Component {
 
   componentWillMount() {
     const { scope, injector } = this.props;
-    setAngularState(scope, injector);
-    initSetupModeState(() => this.setState({ renderState: true }));
+    initSetupModeState(scope, injector, () => this.setState({ renderState: true }));
   }
 
   getFlyout(data, meta) {

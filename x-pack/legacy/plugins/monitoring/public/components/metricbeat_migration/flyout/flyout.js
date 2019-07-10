@@ -22,7 +22,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { getInstructionSteps } from '../instruction_steps';
-import { Storage } from '../../../../../../../../src/legacy/ui/public/storage';
+import { Storage } from 'ui/storage';
 import { STORAGE_KEY, ELASTICSEARCH_CUSTOM_ID } from '../../../../common/constants';
 import { ensureMinimumTime } from '../../../lib/ensure_minimum_time';
 import { i18n } from '@kbn/i18n';
@@ -277,7 +277,7 @@ export class Flyout extends Component {
   }
 
   render() {
-    const { onClose, instance, productName } = this.props;
+    const { onClose, instance, productName, product } = this.props;
 
     let instanceType = null;
     let instanceName = instance ? instance.name : null;
@@ -300,6 +300,24 @@ export class Flyout extends Component {
       }
     }
 
+    let title = i18n.translate('xpack.monitoring.metricbeatMigration.flyout.flyoutTitle', {
+      defaultMessage: 'Migrate {instanceName} {instanceType} to Metricbeat',
+      values: {
+        instanceName,
+        instanceType
+      }
+    });
+
+    if (product.isNetNewUser) {
+      title = i18n.translate('xpack.monitoring.metricbeatMigration.flyout.flyoutTitleNewUser', {
+        defaultMessage: 'Monitor {instanceName} {instanceType} with Metricbeat',
+        values: {
+          instanceName,
+          instanceType
+        }
+      });
+    }
+
     return (
       <EuiFlyout
         onClose={onClose}
@@ -308,13 +326,7 @@ export class Flyout extends Component {
         <EuiFlyoutHeader hasBorder>
           <EuiTitle size="m">
             <h2 id="flyoutTitle">
-              {i18n.translate('xpack.monitoring.metricbeatMigration.flyout.flyoutTitle', {
-                defaultMessage: 'Migrate {instanceName} {instanceType} to Metricbeat',
-                values: {
-                  instanceName,
-                  instanceType
-                }
-              })}
+              {title}
             </h2>
           </EuiTitle>
           {this.getDocumentationTitle()}

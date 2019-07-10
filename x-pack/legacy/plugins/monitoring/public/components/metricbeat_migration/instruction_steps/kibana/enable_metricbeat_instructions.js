@@ -17,7 +17,7 @@ import {
 } from '@elastic/eui';
 import { Monospace } from '../components/monospace';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { statusTitle } from './common_kibana_instructions';
+import { statusTitle, statusTitleNewUser } from './common_kibana_instructions';
 import { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } from 'ui/documentation_links';
 
 export function getKibanaInstructionsForEnablingMetricbeat(product, _meta, {
@@ -206,7 +206,7 @@ export function getKibanaInstructionsForEnablingMetricbeat(product, _meta, {
     }
 
     migrationStatusStep = {
-      title: statusTitle,
+      title: product.isNetNewUser ? statusTitleNewUser : statusTitle,
       status: 'incomplete',
       children: (
         <Fragment>

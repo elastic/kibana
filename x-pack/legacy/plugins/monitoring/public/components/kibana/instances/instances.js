@@ -23,25 +23,35 @@ import { formatMetric, formatNumber } from '../../../lib/format_number';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-const getColumns = (kbnUrl, scope) => {
+const getColumns = (kbnUrl, scope, setupMode) => {
   const columns = [
     {
       name: i18n.translate('xpack.monitoring.kibana.listing.nameColumnTitle', {
         defaultMessage: 'Name'
       }),
       field: 'name',
-      render: (name, kibana) => (
-        <EuiLink
-          onClick={() => {
-            scope.$evalAsync(() => {
-              kbnUrl.changePath(`/kibana/instances/${kibana.kibana.uuid}`);
-            });
-          }}
-          data-test-subj={`kibanaLink-${name}`}
-        >
-          { name }
-        </EuiLink>
-      )
+      render: (name, kibana) => {
+        if (setupMode && setupMode.enabled) {
+          const list = get(setupMode, 'data.byUuid', {});
+          const status = list[get(kibana, 'kibana.uuid')] || {};
+          if (status.isNetNewUser) {
+            return name;
+          }
+        }
+
+        return (
+          <EuiLink
+            onClick={() => {
+              scope.$evalAsync(() => {
+                kbnUrl.changePath(`/kibana/instances/${kibana.kibana.uuid}`);
+              });
+            }}
+            data-test-subj={`kibanaLink-${name}`}
+          >
+            { name }
+          </EuiLink>
+        );
+      }
     },
     {
       name: i18n.translate('xpack.monitoring.kibana.listing.statusColumnTitle', {
@@ -149,9 +159,9 @@ export class KibanaInstances extends PureComponent {
       // We want to create a seamless experience for the user by merging in the setup data
       // and the node data from monitoring indices in the likely scenario where some instances
       // are using MB collection and some are using no collection
-      const instancesByUuid = instances.reduce((byUuid, node) => ({
+      const instancesByUuid = instances.reduce((byUuid, instance) => ({
         ...byUuid,
-        [get(node, 'kibana.uuid')]: node
+        [get(instance, 'kibana.uuid')]: instance
       }), {});
 
       instances.push(...Object.entries(setupMode.data.byUuid)
@@ -211,7 +221,7 @@ export class KibanaInstances extends PureComponent {
             <EuiMonitoringTable
               className="kibanaInstancesTable"
               rows={dataFlattened}
-              columns={getColumns(angular.kbnUrl, angular.$scope)}
+              columns={getColumns(angular.kbnUrl, angular.$scope, setupMode)}
               sorting={sorting}
               pagination={pagination}
               setupMode={setupMode}

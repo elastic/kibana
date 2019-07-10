@@ -26,7 +26,7 @@ import { i18n } from '@kbn/i18n';
 import _ from 'lodash';
 
 const getSortHandler = (type) => (item) => _.get(item, [type, 'summary', 'lastVal']);
-const getColumns = showCgroupMetricsElasticsearch => {
+const getColumns = (showCgroupMetricsElasticsearch, setupMode) => {
   const cols = [];
 
   const cpuUsageColumnTitle = i18n.translate('xpack.monitoring.elasticsearch.nodes.cpuUsageColumnTitle', {
@@ -40,32 +40,46 @@ const getColumns = showCgroupMetricsElasticsearch => {
     width: '20%',
     field: 'name',
     sortable: true,
-    render: (value, node) => (
-      <div>
-        <div className="monTableCell__name">
-          <EuiText size="m">
-            <EuiToolTip
-              position="bottom"
-              content={node.nodeTypeLabel}
-            >
-              <span className={`fa ${node.nodeTypeClass}`} />
-            </EuiToolTip>
-            &nbsp;
-            <span data-test-subj="name">
-              <EuiLink
-                href={`#/elasticsearch/nodes/${node.resolver}`}
-                data-test-subj={`nodeLink-${node.resolver}`}
+    render: (value, node) => {
+      let nameLink = (
+        <EuiLink
+          href={`#/elasticsearch/nodes/${node.resolver}`}
+          data-test-subj={`nodeLink-${node.resolver}`}
+        >
+          {value}
+        </EuiLink>
+      );
+
+      if (setupMode && setupMode.enabled) {
+        const list = _.get(setupMode, 'data.byUuid', {});
+        const status = list[node.resolver] || {};
+        if (status.isNetNewUser) {
+          nameLink = value;
+        }
+      }
+
+      return (
+        <div>
+          <div className="monTableCell__name">
+            <EuiText size="m">
+              <EuiToolTip
+                position="bottom"
+                content={node.nodeTypeLabel}
               >
-                {value}
-              </EuiLink>
-            </span>
-          </EuiText>
+                <span className={`fa ${node.nodeTypeClass}`} />
+              </EuiToolTip>
+              &nbsp;
+              <span data-test-subj="name">
+                {nameLink}
+              </span>
+            </EuiText>
+          </div>
+          <div className="monTableCell__transportAddress">
+            {extractIp(node.transport_address)}
+          </div>
         </div>
-        <div className="monTableCell__transportAddress">
-          {extractIp(node.transport_address)}
-        </div>
-      </div>
-    )
+      );
+    }
   });
 
   cols.push({
@@ -208,8 +222,8 @@ const getColumns = showCgroupMetricsElasticsearch => {
 };
 
 export function ElasticsearchNodes({ clusterStatus, showCgroupMetricsElasticsearch, ...props }) {
-  const columns = getColumns(showCgroupMetricsElasticsearch);
   const { sorting, pagination, onTableChange, setupMode } = props;
+  const columns = getColumns(showCgroupMetricsElasticsearch, setupMode);
 
   // Merge the nodes data with the setup data if enabled
   const nodes = props.nodes || [];

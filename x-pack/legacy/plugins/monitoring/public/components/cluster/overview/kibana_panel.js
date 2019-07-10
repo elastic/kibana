@@ -19,7 +19,8 @@ import {
   EuiDescriptionListTitle,
   EuiDescriptionListDescription,
   EuiHorizontalRule,
-  EuiNotificationBadge
+  EuiBadge,
+  EuiToolTip
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
@@ -44,11 +45,24 @@ export function KibanaPanel(props) {
     const migratedNodesCount = Object.values(kibanaData).filter(node => node.isFullyMigrated).length;
     const totalNodesCount = Object.values(kibanaData).length;
 
+    const badgeColor = migratedNodesCount === totalNodesCount
+      ? 'secondary'
+      : 'danger';
+
     setupModeInstancesData = (
       <EuiFlexItem grow={false}>
-        <EuiNotificationBadge>
-          {formatNumber(migratedNodesCount, 'int_commas')}/{formatNumber(totalNodesCount, 'int_commas')}
-        </EuiNotificationBadge>
+        <EuiToolTip
+          position="top"
+          content={i18n.translate('xpack.monitoring.cluster.overview.kibanaPanel.setupModeNodesTooltip', {
+            defaultMessage: `These numbers indicate how many detected monitored instances versus how many
+            detected total instances. If there are more detected instances than monitored instances, click
+            the instances link and you will be guided in how to setup monitoring for the missing node.`
+          })}
+        >
+          <EuiBadge color={badgeColor}>
+            {formatNumber(migratedNodesCount, 'int_commas')}/{formatNumber(totalNodesCount, 'int_commas')}
+          </EuiBadge>
+        </EuiToolTip>
       </EuiFlexItem>
     );
   }

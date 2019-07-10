@@ -120,7 +120,7 @@ export class MonitoringMainController {
     return this._licenseService.mlIsSupported();
   }
 
-  isDisabledTab(product, _tab) {
+  isDisabledTab(product) {
     const setupMode = getSetupModeState();
     if (!setupMode.enabled || !setupMode.data) {
       return false;

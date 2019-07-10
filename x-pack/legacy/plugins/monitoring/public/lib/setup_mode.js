@@ -11,14 +11,10 @@ const angularState = {
   scope: null,
 };
 
-export const setAngularState = ($scope, $injector) => {
-  angularState.scope = $scope;
-  angularState.injector = $injector;
-};
 const checkAngularState = () => {
   if (!angularState.injector || !angularState.scope) {
     throw 'Unable to interact with setup mode because the angular injector was not previously set.'
-      + ' This needs to be set by calling `setAngularState`.';
+      + ' This needs to be set by calling `initSetupModeState`.';
   }
 };
 
@@ -129,8 +125,9 @@ const setSetupModeMenuItem = () => {
   // angularState.scope.topNavMenu = [...navItems];
 };
 
-export const initSetupModeState = (callback) => {
-  checkAngularState();
+export const initSetupModeState = ($scope, $injector, callback) => {
+  angularState.scope = $scope;
+  angularState.injector = $injector;
   setSetupModeMenuItem();
   callback && setupModeState.callbacks.push(callback);
 

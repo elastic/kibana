@@ -17,7 +17,7 @@ import {
 } from '@elastic/eui';
 import { Monospace } from '../components/monospace';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { statusTitle } from './common_elasticsearch_instructions';
+import { statusTitle, statusTitleNewUser } from './common_elasticsearch_instructions';
 import { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } from 'ui/documentation_links';
 
 export function getElasticsearchInstructionsForEnablingMetricbeat(product, _meta, {
@@ -210,7 +210,7 @@ export function getElasticsearchInstructionsForEnablingMetricbeat(product, _meta
     }
 
     migrationStatusStep = {
-      title: statusTitle,
+      title: product.isNetNewUser ? statusTitleNewUser : statusTitle,
       status: 'incomplete',
       children: (
         <Fragment>

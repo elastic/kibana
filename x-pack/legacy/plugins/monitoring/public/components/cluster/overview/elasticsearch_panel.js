@@ -12,7 +12,6 @@ import {
   EuiFlexGrid,
   EuiFlexItem,
   EuiLink,
-  EuiNotificationBadge,
   EuiTitle,
   EuiPanel,
   EuiDescriptionList,
@@ -183,11 +182,24 @@ export function ElasticsearchPanel(props) {
     const migratedNodesCount = Object.values(elasticsearchData).filter(node => node.isFullyMigrated).length;
     const totalNodesCount = Object.values(elasticsearchData).length;
 
+    const badgeColor = migratedNodesCount === totalNodesCount
+      ? 'secondary'
+      : 'danger';
+
     setupModeNodesData = (
       <EuiFlexItem grow={false}>
-        <EuiNotificationBadge>
-          {formatNumber(migratedNodesCount, 'int_commas')}/{formatNumber(totalNodesCount, 'int_commas')}
-        </EuiNotificationBadge>
+        <EuiToolTip
+          position="top"
+          content={i18n.translate('xpack.monitoring.cluster.overview.esPanel.setupModeNodesTooltip', {
+            defaultMessage: `These numbers indicate how many detected monitored nodes versus how many
+            detected total nodes. If there are more detected nodes than monitored nodes, click the Nodes
+            link and you will be guided in how to setup monitoring for the missing node.`
+          })}
+        >
+          <EuiBadge color={badgeColor}>
+            {formatNumber(migratedNodesCount, 'int_commas')}/{formatNumber(totalNodesCount, 'int_commas')}
+          </EuiBadge>
+        </EuiToolTip>
       </EuiFlexItem>
     );
   }
