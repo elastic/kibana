@@ -9,7 +9,7 @@ The interface that should be returned by a `PluginInitializer`<!-- -->.
 <b>Signature:</b>
 
 ```typescript
-export interface Plugin<TSetup = void, TStart = void, TPluginsSetup extends Record<string, any> = {}, TPluginsStart extends Record<string, any> = {}> 
+export interface Plugin<TSetup = void, TStart = void, TPluginsSetup extends Record<PluginName, any> = {}, TPluginsStart extends Record<PluginName, any> = {}> 
 ```
 
 ## Methods

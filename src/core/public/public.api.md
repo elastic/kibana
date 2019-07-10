@@ -474,8 +474,10 @@ export interface OverlayStart {
     }) => OverlayRef;
 }
 
+// Warning: (ae-forgotten-export) The symbol "PluginName" needs to be exported by the entry point index.d.ts
+// 
 // @public
-export interface Plugin<TSetup = void, TStart = void, TPluginsSetup extends Record<string, any> = {}, TPluginsStart extends Record<string, any> = {}> {
+export interface Plugin<TSetup = void, TStart = void, TPluginsSetup extends Record<PluginName, any> = {}, TPluginsStart extends Record<PluginName, any> = {}> {
     // (undocumented)
     setup(core: CoreSetup, plugins: TPluginsSetup): TSetup | Promise<TSetup>;
     // (undocumented)
@@ -485,7 +487,7 @@ export interface Plugin<TSetup = void, TStart = void, TPluginsSetup extends Reco
 }
 
 // @public
-export type PluginInitializer<TSetup, TStart, TPluginsSetup extends {} = {}, TPluginsStart extends {} = {}> = (core: PluginInitializerContext) => Plugin<TSetup, TStart, TPluginsSetup, TPluginsStart>;
+export type PluginInitializer<TSetup, TStart, TPluginsSetup extends Record<PluginName, any> = {}, TPluginsStart extends Record<PluginName, any> = {}> = (core: PluginInitializerContext) => Plugin<TSetup, TStart, TPluginsSetup, TPluginsStart>;
 
 // @public
 export interface PluginInitializerContext {
