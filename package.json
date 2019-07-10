@@ -79,7 +79,7 @@
   "resolutions": {
     "**/@types/node": "10.12.27",
     "**/@types/hapi": "^17.0.18",
-    "**/typescript": "3.5.2"
+    "**/typescript": "3.5.3"
   },
   "workspaces": {
     "packages": [
@@ -430,7 +430,7 @@
     "supertest": "^3.1.0",
     "supertest-as-promised": "^4.0.2",
     "tree-kill": "^1.1.0",
-    "typescript": "3.5.2",
+    "typescript": "3.5.3",
     "typings-tester": "^0.3.2",
     "vinyl-fs": "^3.0.2",
     "xml2js": "^0.4.19",
