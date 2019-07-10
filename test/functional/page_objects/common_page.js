@@ -44,13 +44,7 @@ export function CommonPageProvider({ getService, getPageObjects }) {
         await browser.get(url);
       } catch(navigationError) {
         log.debug('Error navigating to url');
-        let alert;
-        try {
-          alert = await browser.getAlert();
-        } catch(alertRetrievalError) {
-          log.debug('Error getting alert box');
-          throw alertRetrievalError;
-        }
+        const alert = await browser.getAlert();
         if (alert && alert.accept) {
           if (shouldAcceptAlert) {
             log.debug('Should accept alert');
