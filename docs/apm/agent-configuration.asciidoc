@@ -6,7 +6,6 @@ beta[] APM Agent configuration allows you to fine-tune your agent configuration 
 Best of all, changes are automatically propagated to your APM agents so there's no need to redeploy.
 
 To get started, simply choose the service and environment you wish to configure.
-APM Agent configuration takes precedence over any settings set locally in each agent.
 
 [role="screenshot"]
 image::apm/images/apm-agent-configuration.png[APM Agent configuration in Kibana]
@@ -26,7 +25,7 @@ For this reason, it is still important to set custom default configurations loca
 [float]
 ==== APM Server setup
 
-This feature requires {apm-server-ref}setup-kibana-endpoint.html[Kibana endpoint configuration] in APM Server.
+This feature requires {apm-server-ref}/setup-kibana-endpoint.html[Kibana endpoint configuration] in APM Server.
 
 Why is additional configuration needed in APM Server?
 That's because APM Server acts as a proxy between the agents and Kibana.
@@ -35,6 +34,7 @@ Kibana communicates any changed settings to APM Server so that your agents only 
 [float]
 ==== Supported configurations
 
+[float]
 ===== `TRANSACTION_SAMPLE_RATE`
 
 added[7.3.0] A sample rate between `0.000` and `1.0`. Default configuration is `1.0` (100% of traces).
