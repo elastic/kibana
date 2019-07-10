@@ -16,29 +16,28 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
-import angular from 'angular';
-import 'ace';
+// @ts-ignore
 import { DocViewsRegistryProvider } from 'ui/registry/doc_views';
+import { i18n } from '@kbn/i18n';
+import { JsonCodeEditor } from './json_code_editor';
 
-import jsonHtml from './json.html';
-
-DocViewsRegistryProvider.register(function () {
+/*
+ * Registration of the the doc view: json
+ * - used to display an ES hit as pretty printed JSON at Discover
+ * - registered as angular directive to stay compatible with community plugins
+ */
+DocViewsRegistryProvider.register(function(reactDirective: any) {
+  const reactDir = reactDirective(JsonCodeEditor, ['hit']);
+  // setting of reactDir.scope is required to assign $scope props
+  // to the react component via render-directive in doc_viewer.js
+  reactDir.scope = {
+    hit: '=',
+  };
   return {
-    title: 'JSON',
+    title: i18n.translate('kbnDocViews.json.jsonTitle', {
+      defaultMessage: 'JSON',
+    }),
     order: 20,
-    directive: {
-      template: jsonHtml,
-      scope: {
-        hit: '='
-      },
-      controller: function ($scope) {
-        $scope.hitJson = angular.toJson($scope.hit, true);
-
-        $scope.aceLoaded = (editor) => {
-          editor.$blockScrolling = Infinity;
-        };
-      }
-    }
+    directive: reactDir,
   };
 });
