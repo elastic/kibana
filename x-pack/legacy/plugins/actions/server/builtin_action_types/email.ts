@@ -5,8 +5,9 @@
  */
 
 import { schema, TypeOf } from '@kbn/config-schema';
+import nodemailerServices from 'nodemailer/lib/well-known/services.json';
 
-import { sendEmail } from './lib/send_email';
+import { sendEmail, JSON_TRANSPORT_SERVICE } from './lib/send_email';
 import { ActionType, ActionTypeExecutorOptions } from '../types';
 
 const PORT_MAX = 256 * 256 - 1;
@@ -66,6 +67,11 @@ function validateConfig(object: any): { error?: Error; value?: ActionTypeConfigT
     if (port == null) {
       return toErrorObject('[port] is required if [service] is not provided');
     }
+  } else {
+    // service is not null
+    if (!isValidService(service)) {
+      return toErrorObject(`[service] value "${service}" is not valid`);
+    }
   }
 
   return { value };
@@ -124,6 +130,33 @@ async function executor({ config, params, services }: ActionTypeExecutorOptions)
   };
 
   return await sendEmail(sendEmailOptions);
+}
+
+const ValidServiceNames = getValidServiceNames();
+
+function isValidService(service: string): boolean {
+  return ValidServiceNames.has(service.toLowerCase());
+}
+
+function getValidServiceNames(): Set<string> {
+  const result = new Set<string>();
+
+  // add our special json service
+  result.add(JSON_TRANSPORT_SERVICE);
+
+  const keys = Object.keys(nodemailerServices) as string[];
+  for (const key of keys) {
+    result.add(key.toLowerCase());
+
+    const record = nodemailerServices[key];
+    if (record.aliases == null) continue;
+
+    for (const alias of record.aliases as string[]) {
+      result.add(alias.toLowerCase());
+    }
+  }
+
+  return result;
 }
 
 function toErrorObject(message: string) {

@@ -5,7 +5,7 @@
  */
 
 import { openSans } from '../../../common/lib/fonts';
-import { ElementFactory } from '../types';
+import { ElementFactory } from '../../../types';
 import header from './header.png';
 
 export const progressWheel: ElementFactory = () => ({

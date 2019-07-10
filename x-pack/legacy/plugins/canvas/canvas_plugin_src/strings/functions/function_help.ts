@@ -5,8 +5,8 @@
  */
 
 import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/public';
-import { CanvasFunction } from '../../functions/types';
-import { UnionToIntersection } from '../../functions/types';
+import { CanvasFunction } from '../../../types';
+import { UnionToIntersection } from '../../../types';
 
 import { help as all } from './all';
 import { help as alterColumn } from './alterColumn';
