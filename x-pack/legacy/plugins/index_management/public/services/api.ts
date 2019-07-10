@@ -210,3 +210,10 @@ export const deleteTemplates = async (names: Array<Template['name']>) => {
     uimActionType,
   });
 };
+
+export function loadIndexTemplate(name: Template['name']) {
+  return useRequest({
+    path: `${apiPrefix}/templates/${name}`,
+    method: 'get',
+  });
+}
