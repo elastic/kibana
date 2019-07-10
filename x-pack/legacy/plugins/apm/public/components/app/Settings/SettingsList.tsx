@@ -292,16 +292,18 @@ export function SettingsList() {
 
         <EuiSpacer size="m" />
 
-        <ManagedTable
-          noItemsMessage={
-            status === 'loading' ? <LoadingStatePrompt /> : emptyStatePrompt
-          }
-          columns={COLUMNS}
-          items={data}
-          initialSortField="service.name"
-          initialSortDirection="asc"
-          initialPageSize={50}
-        />
+        {status === 'success' && !hasConfigurations ? (
+          emptyStatePrompt
+        ) : (
+          <ManagedTable
+            noItemsMessage={<LoadingStatePrompt />}
+            columns={COLUMNS}
+            items={data}
+            initialSortField="service.name"
+            initialSortDirection="asc"
+            initialPageSize={50}
+          />
+        )}
       </EuiPanel>
     </>
   );
