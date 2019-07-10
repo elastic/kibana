@@ -10,12 +10,9 @@ import { IntegrationInfo } from '../../common/types';
 
 export function Detail(props: { package: string }) {
   const [info, setInfo] = useState<IntegrationInfo | null>(null);
-  useEffect(
-    () => {
-      getIntegrationInfoByKey(props.package).then(setInfo);
-    },
-    [props.package]
-  );
+  useEffect(() => {
+    getIntegrationInfoByKey(props.package).then(setInfo);
+  }, [props.package]);
 
   // don't have designs for loading/empty states
   if (!info) return null;

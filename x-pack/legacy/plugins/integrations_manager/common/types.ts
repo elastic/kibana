@@ -12,11 +12,11 @@ import {
 } from 'src/core/server/saved_objects';
 
 type AssetReference = Pick<SavedObjectReference, 'id' | 'type'>;
-export interface Installation extends SavedObjectAttributes {
+export interface InstallationAttributes extends SavedObjectAttributes {
   installed: AssetReference[];
 }
 
-export type InstallationSavedObject = SavedObject<Installation>;
+export type Installation = SavedObject<InstallationAttributes>;
 
 // the contract with the registry
 export type RegistryList = RegistryListItem[];
@@ -49,15 +49,17 @@ export interface RegistryPackage {
 // the public HTTP response types
 export type IntegrationList = IntegrationListItem[];
 
-export type IntegrationListItem = Installed<RegistryListItem> | NotInstalled<RegistryListItem>;
+export type IntegrationListItem = Installable<RegistryListItem>;
 
-export type IntegrationInfo = Installed<RegistryPackage> | NotInstalled<RegistryPackage>;
+export type IntegrationInfo = Installable<RegistryPackage>;
 
-type Installed<T = {}> = T & {
+export type Installable<T> = Installed<T> | NotInstalled<T>;
+
+export type Installed<T = {}> = T & {
   status: 'installed';
-  savedObject: InstallationSavedObject;
+  savedObject: Installation;
 };
 
-type NotInstalled<T = {}> = T & {
+export type NotInstalled<T = {}> = T & {
   status: 'not_installed';
 };
