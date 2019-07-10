@@ -13,6 +13,9 @@ import { DatasourcePublicAPI, DatasourceDimensionPanelProps, Operation } from '.
 import { State, SeriesType } from './types';
 import { Position } from '@elastic/charts';
 import { NativeRendererProps } from '../native_renderer';
+import { generateId } from '../id_generator';
+
+jest.mock('../id_generator');
 
 describe('XYConfigPanel', () => {
   const dragDropContext = { dragging: undefined, setDragging: jest.fn() };
@@ -21,7 +24,6 @@ describe('XYConfigPanel', () => {
     return {
       duplicateColumn: () => [],
       getOperationForColumnId: () => null,
-      generateColumnId: () => 'TESTID',
       getTableSpec: () => [],
       moveColumnTo: () => {},
       removeColumnInTableSpec: () => [],
@@ -380,12 +382,13 @@ describe('XYConfigPanel', () => {
   });
 
   test('allows adding y dimensions', () => {
+    (generateId as jest.Mock).mockReturnValueOnce('zed');
     const setState = jest.fn();
     const state = testState();
     const component = mount(
       <XYConfigPanel
         dragDropContext={dragDropContext}
-        datasource={{ ...mockDatasource(), generateColumnId: () => 'zed' }}
+        datasource={mockDatasource()}
         setState={setState}
         state={{ ...state, y: { ...state.y, accessors: ['a', 'b', 'c'] } }}
       />
@@ -396,6 +399,27 @@ describe('XYConfigPanel', () => {
     expect(setState).toHaveBeenCalledTimes(1);
     expect(setState.mock.calls[0][0]).toMatchObject({
       y: { accessors: ['a', 'b', 'c', 'zed'] },
+    });
+  });
+
+  test('allows adding split dimensions', () => {
+    (generateId as jest.Mock).mockReturnValueOnce('foo');
+    const setState = jest.fn();
+    const state = testState();
+    const component = mount(
+      <XYConfigPanel
+        dragDropContext={dragDropContext}
+        datasource={mockDatasource()}
+        setState={setState}
+        state={{ ...state, splitSeriesAccessors: ['a', 'b', 'c'] }}
+      />
+    );
+
+    (testSubj(component, 'lnsXY_splitSeriesDimensionPanel_add').onClick as Function)();
+
+    expect(setState).toHaveBeenCalledTimes(1);
+    expect(setState.mock.calls[0][0]).toMatchObject({
+      splitSeriesAccessors: ['a', 'b', 'c', 'foo'],
     });
   });
 

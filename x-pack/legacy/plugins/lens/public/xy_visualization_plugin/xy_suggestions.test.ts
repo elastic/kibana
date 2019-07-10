@@ -8,6 +8,9 @@ import { getSuggestions } from './xy_suggestions';
 import { TableColumn, VisualizationSuggestion } from '../types';
 import { State } from './types';
 import { Ast } from '@kbn/interpreter/target/common';
+import { generateId } from '../id_generator';
+
+jest.mock('../id_generator');
 
 describe('xy_suggestions', () => {
   function numCol(columnId: string): TableColumn {
@@ -87,6 +90,7 @@ describe('xy_suggestions', () => {
   });
 
   test('suggests a basic x y chart with date on x', () => {
+    (generateId as jest.Mock).mockReturnValueOnce('aaa');
     const [suggestion, ...rest] = getSuggestions({
       tables: [
         {
@@ -101,7 +105,9 @@ describe('xy_suggestions', () => {
     expect(suggestionSubset(suggestion)).toMatchInlineSnapshot(`
       Object {
         "seriesType": "bar",
-        "splitSeriesAccessors": Array [],
+        "splitSeriesAccessors": Array [
+          "aaa",
+        ],
         "x": "date",
         "y": Array [
           "bytes",
@@ -123,21 +129,22 @@ describe('xy_suggestions', () => {
 
     expect(rest).toHaveLength(0);
     expect(suggestionSubset(suggestion)).toMatchInlineSnapshot(`
-            Object {
-              "seriesType": "line",
-              "splitSeriesAccessors": Array [
-                "product",
-              ],
-              "x": "date",
-              "y": Array [
-                "price",
-                "quantity",
-              ],
-            }
-        `);
+                  Object {
+                    "seriesType": "line",
+                    "splitSeriesAccessors": Array [
+                      "product",
+                    ],
+                    "x": "date",
+                    "y": Array [
+                      "price",
+                      "quantity",
+                    ],
+                  }
+            `);
   });
 
   test('supports multiple suggestions', () => {
+    (generateId as jest.Mock).mockReturnValueOnce('bbb').mockReturnValueOnce('ccc');
     const [s1, s2, ...rest] = getSuggestions({
       tables: [
         {
@@ -158,7 +165,9 @@ describe('xy_suggestions', () => {
       Array [
         Object {
           "seriesType": "bar",
-          "splitSeriesAccessors": Array [],
+          "splitSeriesAccessors": Array [
+            "bbb",
+          ],
           "x": "date",
           "y": Array [
             "price",
@@ -166,7 +175,9 @@ describe('xy_suggestions', () => {
         },
         Object {
           "seriesType": "bar",
-          "splitSeriesAccessors": Array [],
+          "splitSeriesAccessors": Array [
+            "ccc",
+          ],
           "x": "country",
           "y": Array [
             "count",
@@ -177,6 +188,7 @@ describe('xy_suggestions', () => {
   });
 
   test('handles two numeric values', () => {
+    (generateId as jest.Mock).mockReturnValueOnce('ddd');
     const [suggestion] = getSuggestions({
       tables: [
         {
@@ -188,18 +200,21 @@ describe('xy_suggestions', () => {
     });
 
     expect(suggestionSubset(suggestion)).toMatchInlineSnapshot(`
-            Object {
-              "seriesType": "bar",
-              "splitSeriesAccessors": Array [],
-              "x": "quantity",
-              "y": Array [
-                "price",
-              ],
-            }
-        `);
+      Object {
+        "seriesType": "bar",
+        "splitSeriesAccessors": Array [
+          "ddd",
+        ],
+        "x": "quantity",
+        "y": Array [
+          "price",
+        ],
+      }
+    `);
   });
 
   test('handles unbucketed suggestions', () => {
+    (generateId as jest.Mock).mockReturnValueOnce('eee');
     const [suggestion] = getSuggestions({
       tables: [
         {
@@ -222,15 +237,17 @@ describe('xy_suggestions', () => {
     });
 
     expect(suggestionSubset(suggestion)).toMatchInlineSnapshot(`
-            Object {
-              "seriesType": "bar",
-              "splitSeriesAccessors": Array [],
-              "x": "mybool",
-              "y": Array [
-                "num votes",
-              ],
-            }
-        `);
+      Object {
+        "seriesType": "bar",
+        "splitSeriesAccessors": Array [
+          "eee",
+        ],
+        "x": "mybool",
+        "y": Array [
+          "num votes",
+        ],
+      }
+    `);
   });
 
   test('adds a preview expression with disabled axes and legend', () => {

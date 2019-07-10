@@ -10,6 +10,9 @@ import { Ast } from '@kbn/interpreter/target/common';
 import { Operation } from '../types';
 import { State } from './types';
 import { createMockDatasource } from '../editor_frame_plugin/mocks';
+import { generateId } from '../id_generator';
+
+jest.mock('../id_generator');
 
 function exampleState(): State {
   return {
@@ -34,10 +37,11 @@ function exampleState(): State {
 describe('xy_visualization', () => {
   describe('#initialize', () => {
     it('loads default state', () => {
+      (generateId as jest.Mock)
+        .mockReturnValueOnce('test-id1')
+        .mockReturnValueOnce('test-id2')
+        .mockReturnValue('test-id3');
       const mockDatasource = createMockDatasource();
-      mockDatasource.publicAPIMock.generateColumnId
-        .mockReturnValue('test-id1')
-        .mockReturnValueOnce('test-id2');
       const initialState = xyVisualization.initialize(mockDatasource.publicAPIMock);
 
       expect(initialState.x.accessor).toBeDefined();
@@ -51,17 +55,19 @@ describe('xy_visualization', () => {
             "position": "right",
           },
           "seriesType": "bar",
-          "splitSeriesAccessors": Array [],
+          "splitSeriesAccessors": Array [
+            "test-id3",
+          ],
           "title": "Empty XY Chart",
           "x": Object {
-            "accessor": "test-id2",
+            "accessor": "test-id1",
             "position": "bottom",
             "showGridlines": false,
             "title": "X",
           },
           "y": Object {
             "accessors": Array [
-              "test-id1",
+              "test-id2",
             ],
             "position": "left",
             "showGridlines": false,
