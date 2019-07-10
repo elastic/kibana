@@ -4,8 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// eslint-disable-next-line
-require('@kbn/storybook').runStorybookCli({
-  name: 'canvas',
-  exampleGlobs: ['x-pack/plugins/legacy/canvas/**/*.examples.tsx'],
-});
+class TranslationsPlugin {
+  public setup() {
+    return {};
+  }
+
+  public start() {
+    return {};
+  }
+}
+
+export const plugin = () => new TranslationsPlugin();
