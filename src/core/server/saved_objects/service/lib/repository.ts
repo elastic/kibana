@@ -19,11 +19,13 @@
 
 import { omit } from 'lodash';
 import { CallCluster } from 'src/legacy/core_plugins/elasticsearch';
+
 import { getRootPropertiesObjects, IndexMapping } from '../../mappings';
 import { getSearchDsl } from './search_dsl';
 import { includedFields } from './included_fields';
 import { decorateEsError } from './decorate_es_error';
 import { SavedObjectsErrorHelpers } from './errors';
+import { SavedObjectsCacheIndexPatterns } from './cache_index_patterns';
 import { decodeRequestVersion, encodeVersion, encodeHitVersion } from '../../version';
 import { SavedObjectsSchema } from '../../schema';
 import { KibanaMigrator } from '../../migrations';
@@ -74,6 +76,7 @@ export interface SavedObjectsRepositoryOptions {
   serializer: SavedObjectsSerializer;
   migrator: KibanaMigrator;
   allowedTypes: string[];
+  cacheIndexPatterns: SavedObjectsCacheIndexPatterns;
   onBeforeWrite?: (...args: Parameters<CallCluster>) => Promise<void>;
 }
 
@@ -91,11 +94,13 @@ export class SavedObjectsRepository {
   private _onBeforeWrite: (...args: Parameters<CallCluster>) => Promise<void>;
   private _unwrappedCallCluster: CallCluster;
   private _serializer: SavedObjectsSerializer;
+  private _cacheIndexPatterns: SavedObjectsCacheIndexPatterns;
 
   constructor(options: SavedObjectsRepositoryOptions) {
     const {
       index,
       config,
+      cacheIndexPatterns,
       mappings,
       callCluster,
       schema,
@@ -117,6 +122,7 @@ export class SavedObjectsRepository {
     this._config = config;
     this._mappings = mappings;
     this._schema = schema;
+    this._cacheIndexPatterns = cacheIndexPatterns;
     if (allowedTypes.length === 0) {
       throw new Error('Empty or missing types for saved object repository!');
     }
@@ -126,6 +132,9 @@ export class SavedObjectsRepository {
 
     this._unwrappedCallCluster = async (...args: Parameters<CallCluster>) => {
       await migrator.runMigrations();
+      if (this._cacheIndexPatterns.getIndexPatterns() == null) {
+        await this._cacheIndexPatterns.setIndexPatterns(index);
+      }
       return callCluster(...args);
     };
     this._schema = schema;
@@ -404,6 +413,7 @@ export class SavedObjectsRepository {
     fields,
     namespace,
     type,
+    filter,
   }: SavedObjectsFindOptions): Promise<SavedObjectsFindResponse<T>> {
     if (!type) {
       throw new TypeError(`options.type must be a string or an array of strings`);
@@ -428,6 +438,10 @@ export class SavedObjectsRepository {
       throw new TypeError('options.fields must be an array');
     }
 
+    if (filter && filter !== '' && this._cacheIndexPatterns.getIndexPatterns() == null) {
+      throw new TypeError('options.filter is missing index pattern to work correctly');
+    }
+
     const esOptions = {
       index: this.getIndicesForTypes(allowedTypes),
       size: perPage,
@@ -446,6 +460,9 @@ export class SavedObjectsRepository {
           sortOrder,
           namespace,
           hasReference,
+          indexPattern:
+            filter && filter !== '' ? this._cacheIndexPatterns.getIndexPatterns() : undefined,
+          filter,
         }),
       },
     };
@@ -769,7 +786,7 @@ export class SavedObjectsRepository {
 
   // The internal representation of the saved object that the serializer returns
   // includes the namespace, and we use this for migrating documents. However, we don't
-  // want the namespcae to be returned from the repository, as the repository scopes each
+  // want the namespace to be returned from the repository, as the repository scopes each
   // method transparently to the specified namespace.
   private _rawToSavedObject(raw: RawDoc): SavedObject {
     const savedObject = this._serializer.rawToSavedObject(raw);

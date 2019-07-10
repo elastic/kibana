@@ -16,19 +16,15 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { Readable } from 'stream';
-import { SavedObject } from 'src/core/server';
-import { createSplitStream, createMapStream, createFilterStream } from '../../../utils/streams';
 
-export function createSavedObjectsStreamFromNdJson(ndJsonStream: Readable) {
-  return ndJsonStream
-    .pipe(createSplitStream('\n'))
-    .pipe(
-      createMapStream((str: string) => {
-        if (str && str.trim() !== '') {
-          return JSON.parse(str);
-        }
-      })
-    )
-    .pipe(createFilterStream<SavedObject>(obj => !!obj));
-}
+import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
+import { SavedObjectsIndexPattern } from './cache_index_patterns';
+
+export const convertKqlToElasticSearchQuery = (
+  kqlExpression: string | undefined,
+  indexPattern: SavedObjectsIndexPattern | undefined
+) => {
+  return kqlExpression && indexPattern && kqlExpression.length > 0
+    ? [toElasticsearchQuery(fromKueryExpression(kqlExpression), indexPattern)]
+    : [];
+};

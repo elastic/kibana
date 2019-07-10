@@ -10,8 +10,12 @@ import { ConfigOptions } from 'elasticsearch';
 import { DetailedPeerCertificate } from 'tls';
 import { Duration } from 'moment';
 import { IncomingHttpHeaders } from 'http';
+<<<<<<< HEAD
 import { KibanaConfigType } from 'src/core/server/kibana_config';
 import { Logger as Logger_2 } from 'src/core/server/logging';
+=======
+import { IndexPatternsService } from 'src/legacy/server/index_patterns';
+>>>>>>> Add KQL functionality in the find function of the saved objects
 import { ObjectType } from '@kbn/config-schema';
 import { Observable } from 'rxjs';
 import { PeerCertificate } from 'tls';
@@ -840,6 +844,8 @@ export interface SavedObjectsFindOptions extends SavedObjectsBaseOptions {
     // (undocumented)
     defaultSearchOperator?: 'AND' | 'OR';
     fields?: string[];
+    // (undocumented)
+    filter?: string;
     // (undocumented)
     hasReference?: {
         type: string;

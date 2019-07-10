@@ -19,6 +19,8 @@
 
 import { getRootPropertiesObjects, IndexMapping } from '../../../mappings';
 import { SavedObjectsSchema } from '../../../schema';
+import { SavedObjectsIndexPattern } from '../cache_index_patterns';
+import { convertKqlToElasticSearchQuery } from '../kql_utils';
 
 /**
  * Gets the types based on the type. Uses mappings to support
@@ -76,25 +78,43 @@ function getClauseForType(schema: SavedObjectsSchema, namespace: string | undefi
   };
 }
 
+interface HasReferenceQueryParams {
+  type: string;
+  id: string;
+}
+
+interface QueryParams {
+  mappings: IndexMapping;
+  schema: SavedObjectsSchema;
+  namespace?: string;
+  type?: string | string[];
+  search?: string;
+  searchFields?: string[];
+  defaultSearchOperator?: string;
+  hasReference?: HasReferenceQueryParams;
+  filter?: string;
+  indexPattern?: SavedObjectsIndexPattern;
+}
+
 /**
  *  Get the "query" related keys for the search body
  */
-export function getQueryParams(
-  mappings: IndexMapping,
-  schema: SavedObjectsSchema,
-  namespace?: string,
-  type?: string | string[],
-  search?: string,
-  searchFields?: string[],
-  defaultSearchOperator?: string,
-  hasReference?: {
-    type: string;
-    id: string;
-  }
-) {
+export function getQueryParams({
+  mappings,
+  schema,
+  namespace,
+  type,
+  search,
+  searchFields,
+  defaultSearchOperator,
+  hasReference,
+  filter,
+  indexPattern,
+}: QueryParams) {
   const types = getTypes(mappings, type);
   const bool: any = {
     filter: [
+      ...convertKqlToElasticSearchQuery(filter || '', indexPattern),
       {
         bool: {
           must: hasReference

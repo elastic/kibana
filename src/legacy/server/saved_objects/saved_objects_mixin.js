@@ -26,6 +26,7 @@ import {
   SavedObjectsClient,
   SavedObjectsRepository,
   ScopedSavedObjectsClientProvider,
+  SavedObjectsCacheIndexPatterns,
   getSortedObjectsForExport,
   importSavedObjects,
   resolveImportErrors,
@@ -46,6 +47,8 @@ import {
   createResolveImportErrorsRoute,
   createLogLegacyImportRoute,
 } from './routes';
+
+const cacheIndexPatterns = new SavedObjectsCacheIndexPatterns();
 
 function getImportableAndExportableTypes({ kbnServer, visibleTypes }) {
   const { savedObjectsManagement = {} } = kbnServer.uiExports;
@@ -113,11 +116,18 @@ export function savedObjectsMixin(kbnServer, server) {
     });
     const combinedTypes = visibleTypes.concat(extraTypes);
     const allowedTypes = [...new Set(combinedTypes)];
+
+    if (cacheIndexPatterns.getIndexPatternsService() == null) {
+      cacheIndexPatterns.setIndexPatternsService(
+        server.indexPatternsServiceFactory({ callCluster })
+      );
+    }
     const config = server.config();
 
     return new SavedObjectsRepository({
       index: config.get('kibana.index'),
       config,
+      cacheIndexPatterns,
       migrator,
       mappings,
       schema,

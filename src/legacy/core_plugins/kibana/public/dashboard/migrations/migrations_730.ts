@@ -23,6 +23,12 @@ import { isDashboardDoc } from './is_dashboard_doc';
 import { moveFiltersToQuery } from './move_filters_to_query';
 import { migratePanelsTo730 } from './migrate_to_730_panels';
 
+interface Logger {
+  debug: (msg: string) => void;
+  info: (msg: string) => void;
+  warning: (msg: string) => void;
+}
+
 export function migrations730(
   doc:
     | {
