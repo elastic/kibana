@@ -1611,17 +1611,18 @@
     ts-debounce "^1.0.0"
     uuid "^3.3.2"
 
-"@elastic/ctags-langserver@^0.0.5":
-  version "0.0.5"
-  resolved "https://registry.yarnpkg.com/@elastic/ctags-langserver/-/ctags-langserver-0.0.5.tgz#2ee09024a5106c548a1ddb52992352c577e38a66"
-  integrity sha512-XEpB60SW4/jo+r7r06Uro5n7Mv1iqWwirqBWtHwhaIV17QKsjU4uRn3RZ7gwm9uHu5kri0RSnu3hfRuSskCyEw==
+"@elastic/ctags-langserver@^0.0.6":
+  version "0.0.6"
+  resolved "https://registry.yarnpkg.com/@elastic/ctags-langserver/-/ctags-langserver-0.0.6.tgz#12e347267365241c84930857994418e742412254"
+  integrity sha512-KsJRD1xsBmh66fdvdw03AIUPP6g/45hIoo7wWpxYG/im2mcpnTXDei9iY633vW/iESH4T0617KQ0vMUGCGK4/g==
   dependencies:
     "@elastic/lsp-extension" "^0.1.1"
     "@elastic/node-ctags" "1.0.2"
     commander "^2.11.0"
     find-root "^1.1.0"
-    grep1 "^0.0.5"
     line-column "^1.0.2"
+    minimatch "3.0.4"
+    mz "^2.7.0"
     vscode-languageserver "^5.2.1"
 
 "@elastic/elasticsearch@^7.0.0-rc.2":
@@ -14146,11 +14147,6 @@ graphviz@^0.0.8:
   dependencies:
     temp "~0.4.0"
 
-grep1@^0.0.5:
-  version "0.0.5"
-  resolved "https://registry.yarnpkg.com/grep1/-/grep1-0.0.5.tgz#8e185b8f063973e7c465c107938c86f52c34fb74"
-  integrity sha1-jhhbjwY5c+fEZcEHk4yG9Sw0+3Q=
-
 grid-index@^1.1.0:
   version "1.1.0"
   resolved "https://registry.yarnpkg.com/grid-index/-/grid-index-1.1.0.tgz#97f8221edec1026c8377b86446a7c71e79522ea7"
@@ -19713,7 +19709,7 @@ mute-stream@0.0.7:
   resolved "https://registry.yarnpkg.com/mute-stream/-/mute-stream-0.0.7.tgz#3075ce93bc21b8fab43e1bc4da7e8115ed1e7bab"
   integrity sha1-MHXOk7whuPq0PhvE2n6BFe0ee6s=
 
-mz@^2.6.0:
+mz@^2.6.0, mz@^2.7.0:
   version "2.7.0"
   resolved "https://registry.yarnpkg.com/mz/-/mz-2.7.0.tgz#95008057a56cafadc2bc63dde7f9ff6955948e32"
   integrity sha512-z81GNO7nnYMEhrGh9LeymoE4+Yr0Wn5McHIZMK5cfQCl+NDX08sCZgUc9/6MHni9IWuFLm1Z3HTCXu2z9fN62Q==

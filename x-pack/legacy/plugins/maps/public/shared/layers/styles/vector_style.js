@@ -299,7 +299,7 @@ export class VectorStyle extends AbstractStyle {
     );
   }
 
-  getLegendDetails() {
+  getLegendDetails(getFieldLabel) {
     const styles = this.getProperties();
     const styleProperties = Object.keys(styles).map(styleName => {
       const { type, options } = styles[styleName];
@@ -311,7 +311,12 @@ export class VectorStyle extends AbstractStyle {
       };
     });
 
-    return (<VectorStyleLegend styleProperties={styleProperties}/>);
+    return (
+      <VectorStyleLegend
+        styleProperties={styleProperties}
+        getFieldLabel={getFieldLabel}
+      />
+    );
   }
 
   _getStyleFields() {
