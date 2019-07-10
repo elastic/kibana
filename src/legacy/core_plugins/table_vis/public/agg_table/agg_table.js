@@ -112,7 +112,7 @@ uiModules
             $scope.rows = table.rows;
             $scope.formattedColumns = [];
 
-            if (_.isUndefined($scope.dimensions)) return;
+            if (typeof $scope.dimensions === 'undefined') return;
 
             const { buckets, metrics } = $scope.dimensions;
 
@@ -146,7 +146,7 @@ uiModules
                   _.get(dimension, 'format.params.id') === 'number';
 
                 let { totalFunc } = $scope;
-                if (_.isUndefined(totalFunc) && showPercentage) {
+                if (typeof totalFunc === 'undefined' && showPercentage) {
                   totalFunc = 'sum';
                 }
 
@@ -163,12 +163,15 @@ uiModules
                       0
                     );
                   };
+
+                  formattedColumn.sumTotal = sum(table.rows);
+
                   switch (totalFunc) {
                     case 'sum': {
                       if (!isDate) {
-                        const total = sum(table.rows);
+                        const total = formattedColumn.sumTotal;
                         formattedColumn.formattedTotal = formatter.convert(total);
-                        formattedColumn.total = total;
+                        formattedColumn.total = formattedColumn.sumTotal;
                       }
                       break;
                     }
@@ -242,7 +245,7 @@ uiModules
  * @returns {Object} - cols and rows for the table to render now included percentage column(s)
  */
 function addPercentageCol(columns, title, rows, insertAtIndex) {
-  const { id, total } = columns[insertAtIndex];
+  const { id, sumTotal } = columns[insertAtIndex];
   const newId = `${id}-percents`;
   const formatter = getFormat({ id: 'percent' });
   const i18nTitle = i18n.translate('tableVis.params.percentageTableColumnName', {
@@ -255,7 +258,7 @@ function addPercentageCol(columns, title, rows, insertAtIndex) {
     formatter,
   });
   const newRows = rows.map(row => ({
-    [newId]: formatter.convert(row[id] / total / 100),
+    [newId]: formatter.convert(row[id] / sumTotal / 100),
     ...row,
   }));
 

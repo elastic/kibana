@@ -27,7 +27,7 @@ import { legacyResponseHandlerProvider } from 'ui/vis/response_handlers/legacy';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 import { VisProvider } from 'ui/vis';
 import { tabifyAggResponse } from 'ui/agg_response/tabify';
-import _ from 'lodash';
+import { round } from 'lodash';
 
 describe('AggTable Directive', function () {
 
@@ -403,7 +403,7 @@ describe('AggTable Directive', function () {
     );
 
     $percentageColValues.each((i, value) => {
-      const percentage = `${_.round((counts[i] / total) * 100, 1)}%`;
+      const percentage = `${round((counts[i] / total) * 100, 1)}%`;
       expect(value).to.be(percentage);
     });
   });

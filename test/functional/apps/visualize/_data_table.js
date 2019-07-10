@@ -98,7 +98,7 @@ export default function ({ getService, getPageObjects }) {
     });
 
     it('should show percentage columns', async () => {
-      async function isCorrect() {
+      async function expectValidTableData() {
         const data = await PageObjects.visualize.getTableVisData();
         expect(data.trim().split('\n')).to.be.eql([
           '0 to 1000',
@@ -117,7 +117,6 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.visualize.selectAggregation('Range');
       await PageObjects.visualize.selectField('bytes');
       await PageObjects.visualize.clickGo();
-      await PageObjects.visualize.getTableVisData();
       await PageObjects.visualize.clickOptionsTab();
       await PageObjects.visualize.setSelectByOptionText(
         'datatableVisualizationPercentageCol',
@@ -125,7 +124,7 @@ export default function ({ getService, getPageObjects }) {
       );
       await PageObjects.visualize.clickGo();
 
-      await isCorrect();
+      await expectValidTableData();
 
       // check that it works after a save and reload
       const SAVE_NAME = 'viz w/ percents';
@@ -134,7 +133,7 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.visualize.loadSavedVisualization(SAVE_NAME);
       await PageObjects.visualize.waitForVisualization();
 
-      await isCorrect();
+      await expectValidTableData();
 
       // check that it works after selecting a column that's deleted
       await PageObjects.visualize.clickData();
