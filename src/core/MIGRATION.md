@@ -833,7 +833,7 @@ Many of the utilities you're using to build your plugins are available in the Ne
 
 #### Client-side
 
-##### Core Services
+##### Core services
 In client code, `core` can be imported in legacy plugins via the `ui/new_platform` module.
 
 ```ts
@@ -858,13 +858,15 @@ import { npStart: { core } } from 'ui/new_platform';
 
 _See also: [Public's CoreStart API Docs](/docs/development/core/public/kibana-plugin-public.corestart.md)_
 
-##### Application Services
-In client code, we have a series of shared application services that are being built in the shape of the new platform, but still technically reside in the legacy world. To expose these "shim plugin" contracts for you to consume in your own plugin's shim, we are creating dedicated exports for the `setup` and `start` contracts, which export APIs in the shape you will receive them in the new platform.
+##### Plugins for shared application services
+In client code, we have a series of plugins which house shared application services that are being built in the shape of the new platform, but still technically reside in the legacy world. If your plugin depends on any of the APIs below, you'll need to add a dependency on the new platform plugin which will house them moving forward.
+
+The contracts for these plugins are exposed for you to consume in your own plugin; we have created dedicated exports for the `setup` and `start` contracts in a file called `legacy`. By passing these contracts to your plugin's `setup` and `start` methods, you can mimic the functionality that will eventually be provided in the new platform.
 
 ```ts
-import { data as dataSetup } from '../core_plugins/data/public/setup';
-import { embeddables as embeddablesSetup } from '../core_plugins/embeddables/public/setup';
-import { visualizations as visualizationsSetup } from '../core_plugins/visualizations/public/setup';
+import { setup, start } from '../core_plugins/data/public/legacy';
+import { setup, start } from '../core_plugins/embeddables/public/legacy';
+import { setup, start } from '../core_plugins/visualizations/public/legacy';
 ```
 
 | Legacy Platform                                        | New Platform                               | Notes                                                                                                                              |
@@ -888,7 +890,7 @@ import { visualizations as visualizationsSetup } from '../core_plugins/visualiza
 
 #### Server-side
 
-##### Core Services
+##### Core services
 In server code, `core` can be accessed from either `server.newPlatform` or `kbnServer.newPlatform`. There are not currently very many services available on the server-side:
 
 | Legacy Platform                                   | New Platform                     | Notes                                              |
