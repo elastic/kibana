@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Toast, EuiButtonIcon } from '@elastic/eui';
+import { EuiGlobalToastListToast as Toast, EuiButtonIcon } from '@elastic/eui';
 import copy from 'copy-to-clipboard';
 import * as React from 'react';
 import uuid from 'uuid';
@@ -12,9 +12,13 @@ import uuid from 'uuid';
 import * as i18n from './translations';
 import { useStateToaster } from '../../components/toasters';
 
-export type OnCopy = (
-  { content, isSuccess }: { content: string | number; isSuccess: boolean }
-) => void;
+export type OnCopy = ({
+  content,
+  isSuccess,
+}: {
+  content: string | number;
+  isSuccess: boolean;
+}) => void;
 
 interface GetSuccessToastParams {
   titleSummary?: string;

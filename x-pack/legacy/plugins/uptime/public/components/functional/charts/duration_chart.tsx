@@ -5,7 +5,6 @@
  */
 
 import {
-  AreaSeries,
   Axis,
   Chart,
   CurveType,
@@ -25,24 +24,16 @@ import {
   convertMicrosecondsToMilliseconds as microsToMillis,
   getChartDateLabel,
 } from '../../../lib/helper';
-import {
-  MonitorDurationAreaPoint,
-  MonitorDurationAveragePoint,
-} from '../../../../common/graphql/types';
+import { LocationDurationLine } from '../../../../common/graphql/types';
 import { UptimeSettingsContext } from '../../../contexts';
 import { getColorsMap } from './get_colors_map';
 
 interface DurationChartProps {
   /**
-   * Timeseries data that is used to express a max/min area series
-   * on the duration chart.
-   */
-  durationArea: MonitorDurationAreaPoint[];
-  /**
    * Timeseries data that is used to express an average line series
-   * on the duration chart.
+   * on the duration chart. One entry per location
    */
-  durationLine: MonitorDurationAveragePoint[];
+  locationDurationLines: LocationDurationLine[];
   /**
    * The color to be used for the average duration series.
    */
@@ -60,17 +51,32 @@ interface DurationChartProps {
  * @param props The props required for this component to render properly
  */
 export const DurationChart = ({
-  durationArea,
-  durationLine,
+  locationDurationLines,
   meanColor,
   rangeColor,
 }: DurationChartProps) => {
   const { absoluteStartDate, absoluteEndDate } = useContext(UptimeSettingsContext);
-  // this id is used for the area chart representing the max/min of check durations
-  const areaSpecId = getSpecId('area');
-
   // this id is used for the line chart representing the average duration length
-  const averageSpecId = getSpecId('average');
+  const averageSpecId = getSpecId('average-');
+
+  const lineSeries = locationDurationLines.map(line => {
+    const locationSpecId = getSpecId('loc-avg' + line.name);
+    return (
+      <LineSeries
+        curve={CurveType.CURVE_MONOTONE_X}
+        customSeriesColors={getColorsMap(meanColor, averageSpecId)}
+        data={line.line.map(({ x, y }) => [x || 0, microsToMillis(y)])}
+        id={locationSpecId}
+        key={`locline-${line.name}`}
+        name={line.name}
+        xAccessor={0}
+        xScaleType={ScaleType.Time}
+        yAccessors={[1]}
+        yScaleToDataExtent={false}
+        yScaleType={ScaleType.Linear}
+      />
+    );
+  });
 
   return (
     <React.Fragment>
@@ -85,7 +91,11 @@ export const DurationChart = ({
       </EuiTitle>
       <EuiPanel>
         <Chart>
-          <Settings xDomain={{ min: absoluteStartDate, max: absoluteEndDate }} showLegend={false} />
+          <Settings
+            xDomain={{ min: absoluteStartDate, max: absoluteEndDate }}
+            showLegend={true}
+            legendPosition={Position.Bottom}
+          />
           <Axis
             id={getAxisId('bottom')}
             position={Position.Bottom}
@@ -104,45 +114,7 @@ export const DurationChart = ({
               defaultMessage: 'Duration ms',
             })}
           />
-          <AreaSeries
-            curve={CurveType.CURVE_MONOTONE_X}
-            customSeriesColors={getColorsMap(rangeColor, areaSpecId)}
-            data={durationArea.map(({ x, yMin, yMax }) => ({
-              x,
-              Min: microsToMillis(yMin),
-              Max: microsToMillis(yMax),
-            }))}
-            id={areaSpecId}
-            name={i18n.translate(
-              'xpack.uptime.monitorCharts.monitorDuration.series.durationRangeLabel',
-              {
-                defaultMessage: 'Duration range',
-              }
-            )}
-            xAccessor={'x'}
-            xScaleType={ScaleType.Time}
-            yAccessors={['Max']}
-            yScaleType={ScaleType.Linear}
-            y0Accessors={['Min']}
-            yScaleToDataExtent={false}
-          />
-          <LineSeries
-            curve={CurveType.CURVE_MONOTONE_X}
-            customSeriesColors={getColorsMap(meanColor, averageSpecId)}
-            data={durationLine.map(({ x, y }) => [x || 0, microsToMillis(y)])}
-            id={averageSpecId}
-            name={i18n.translate(
-              'xpack.uptime.monitorCharts.monitorDuration.series.meanDurationLabel',
-              {
-                defaultMessage: 'Mean duration',
-              }
-            )}
-            xAccessor={0}
-            xScaleType={ScaleType.Time}
-            yAccessors={[1]}
-            yScaleToDataExtent={false}
-            yScaleType={ScaleType.Linear}
-          />
+          {lineSeries}
         </Chart>
       </EuiPanel>
     </React.Fragment>

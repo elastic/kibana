@@ -155,8 +155,6 @@ export interface Source {
 
   Domains: DomainsData;
 
-  DomainFirstLastSeen: FirstLastSeenDomain;
-
   Tls: TlsData;
 
   Users: UsersData;
@@ -164,6 +162,8 @@ export interface Source {
   KpiNetwork?: KpiNetworkData | null;
 
   KpiHosts: KpiHostsData;
+
+  KpiHostDetails: KpiHostDetailsData;
   /** Gets Hosts based on timerange and specified criteria, or all events in the timerange if no criteria is specified */
   NetworkTopNFlow: NetworkTopNFlowData;
 
@@ -230,6 +230,8 @@ export interface AuthenticationsData {
   totalCount: number;
 
   pageInfo: PageInfo;
+
+  inspect?: Inspect | null;
 }
 
 export interface AuthenticationsEdges {
@@ -352,20 +354,20 @@ export interface PageInfo {
   hasNextPage?: boolean | null;
 }
 
-export interface EventsData {
-  kpiEventType?: KpiItem[] | null;
+export interface Inspect {
+  dsl: string[];
 
+  response: string[];
+}
+
+export interface EventsData {
   edges: EcsEdges[];
 
   totalCount: number;
 
   pageInfo: PageInfo;
-}
 
-export interface KpiItem {
-  value?: string | null;
-
-  count: number;
+  inspect?: Inspect | null;
 }
 
 export interface EcsEdges {
@@ -832,6 +834,8 @@ export interface TimelineData {
   totalCount: number;
 
   pageInfo: PageInfo;
+
+  inspect?: Inspect | null;
 }
 
 export interface TimelineEdges {
@@ -858,6 +862,8 @@ export interface TimelineNonEcsData {
 
 export interface TimelineDetailsData {
   data?: DetailItem[] | null;
+
+  inspect?: Inspect | null;
 }
 
 export interface DetailItem {
@@ -878,6 +884,8 @@ export interface DetailItem {
 
 export interface LastEventTimeData {
   lastSeen?: Date | null;
+
+  inspect?: Inspect | null;
 }
 
 export interface HostsData {
@@ -886,6 +894,8 @@ export interface HostsData {
   totalCount: number;
 
   pageInfo: PageInfo;
+
+  inspect?: Inspect | null;
 }
 
 export interface HostsEdges {
@@ -902,6 +912,8 @@ export interface HostItem {
   host?: HostEcsFields | null;
 
   cloud?: CloudFields | null;
+
+  inspect?: Inspect | null;
 }
 
 export interface CloudFields {
@@ -923,6 +935,8 @@ export interface CloudMachine {
 }
 
 export interface FirstLastSeenHost {
+  inspect?: Inspect | null;
+
   firstSeen?: Date | null;
 
   lastSeen?: Date | null;
@@ -938,6 +952,8 @@ export interface IpOverviewData {
   server?: Overview | null;
 
   source?: Overview | null;
+
+  inspect?: Inspect | null;
 }
 
 export interface Overview {
@@ -964,6 +980,8 @@ export interface DomainsData {
   totalCount: number;
 
   pageInfo: PageInfo;
+
+  inspect?: Inspect | null;
 }
 
 export interface DomainsEdges {
@@ -1008,18 +1026,14 @@ export interface DomainsNetworkField {
   direction?: NetworkDirectionEcs[] | null;
 }
 
-export interface FirstLastSeenDomain {
-  firstSeen?: Date | null;
-
-  lastSeen?: Date | null;
-}
-
 export interface TlsData {
   edges: TlsEdges[];
 
   totalCount: number;
 
   pageInfo: PageInfo;
+
+  inspect?: Inspect | null;
 }
 
 export interface TlsEdges {
@@ -1050,6 +1064,8 @@ export interface UsersData {
   totalCount: number;
 
   pageInfo: PageInfo;
+
+  inspect?: Inspect | null;
 }
 
 export interface UsersEdges {
@@ -1094,6 +1110,8 @@ export interface KpiNetworkData {
   dnsQueries?: number | null;
 
   tlsHandshakes?: number | null;
+
+  inspect?: Inspect | null;
 }
 
 export interface KpiNetworkHistogramData {
@@ -1122,6 +1140,8 @@ export interface KpiHostsData {
   uniqueDestinationIps?: number | null;
 
   uniqueDestinationIpsHistogram?: KpiHostHistogramData[] | null;
+
+  inspect?: Inspect | null;
 }
 
 export interface KpiHostHistogramData {
@@ -1130,12 +1150,34 @@ export interface KpiHostHistogramData {
   y?: number | null;
 }
 
+export interface KpiHostDetailsData {
+  authSuccess?: number | null;
+
+  authSuccessHistogram?: KpiHostHistogramData[] | null;
+
+  authFailure?: number | null;
+
+  authFailureHistogram?: KpiHostHistogramData[] | null;
+
+  uniqueSourceIps?: number | null;
+
+  uniqueSourceIpsHistogram?: KpiHostHistogramData[] | null;
+
+  uniqueDestinationIps?: number | null;
+
+  uniqueDestinationIpsHistogram?: KpiHostHistogramData[] | null;
+
+  inspect?: Inspect | null;
+}
+
 export interface NetworkTopNFlowData {
   edges: NetworkTopNFlowEdges[];
 
   totalCount: number;
 
   pageInfo: PageInfo;
+
+  inspect?: Inspect | null;
 }
 
 export interface NetworkTopNFlowEdges {
@@ -1146,8 +1188,6 @@ export interface NetworkTopNFlowEdges {
 
 export interface NetworkTopNFlowItem {
   _id?: string | null;
-
-  timestamp?: Date | null;
 
   source?: TopNFlowItem | null;
 
@@ -1184,6 +1224,8 @@ export interface NetworkDnsData {
   totalCount: number;
 
   pageInfo: PageInfo;
+
+  inspect?: Inspect | null;
 }
 
 export interface NetworkDnsEdges {
@@ -1202,8 +1244,6 @@ export interface NetworkDnsItem {
   dnsName?: string | null;
 
   queryCount?: number | null;
-
-  timestamp?: Date | null;
 
   uniqueDomains?: number | null;
 }
@@ -1226,6 +1266,8 @@ export interface OverviewNetworkData {
   packetbeatFlow?: number | null;
 
   packetbeatTLS?: number | null;
+
+  inspect?: Inspect | null;
 }
 
 export interface OverviewHostData {
@@ -1244,6 +1286,8 @@ export interface OverviewHostData {
   filebeatSystemModule?: number | null;
 
   winlogbeat?: number | null;
+
+  inspect?: Inspect | null;
 }
 
 export interface UncommonProcessesData {
@@ -1252,6 +1296,8 @@ export interface UncommonProcessesData {
   totalCount: number;
 
   pageInfo: PageInfo;
+
+  inspect?: Inspect | null;
 }
 
 export interface UncommonProcessesEdges {
@@ -1841,17 +1887,6 @@ export interface DomainsSourceArgs {
 
   defaultIndex: string[];
 }
-export interface DomainFirstLastSeenSourceArgs {
-  id?: string | null;
-
-  ip: string;
-
-  domainName: string;
-
-  flowTarget: FlowTarget;
-
-  defaultIndex: string[];
-}
 export interface TlsSourceArgs {
   filterQuery?: string | null;
 
@@ -1896,6 +1931,15 @@ export interface KpiNetworkSourceArgs {
   defaultIndex: string[];
 }
 export interface KpiHostsSourceArgs {
+  id?: string | null;
+
+  timerange: TimerangeInput;
+
+  filterQuery?: string | null;
+
+  defaultIndex: string[];
+}
+export interface KpiHostDetailsSourceArgs {
   id?: string | null;
 
   timerange: TimerangeInput;
@@ -1978,8 +2022,6 @@ export interface PersistNoteMutationArgs {
 }
 export interface DeleteNoteMutationArgs {
   id: string[];
-
-  version?: string | null;
 }
 export interface DeleteNoteByTimelineIdMutationArgs {
   timelineId: string;
@@ -2415,8 +2457,6 @@ export namespace SourceResolvers {
 
     Domains?: DomainsResolver<DomainsData, TypeParent, Context>;
 
-    DomainFirstLastSeen?: DomainFirstLastSeenResolver<FirstLastSeenDomain, TypeParent, Context>;
-
     Tls?: TlsResolver<TlsData, TypeParent, Context>;
 
     Users?: UsersResolver<UsersData, TypeParent, Context>;
@@ -2424,6 +2464,8 @@ export namespace SourceResolvers {
     KpiNetwork?: KpiNetworkResolver<KpiNetworkData | null, TypeParent, Context>;
 
     KpiHosts?: KpiHostsResolver<KpiHostsData, TypeParent, Context>;
+
+    KpiHostDetails?: KpiHostDetailsResolver<KpiHostDetailsData, TypeParent, Context>;
     /** Gets Hosts based on timerange and specified criteria, or all events in the timerange if no criteria is specified */
     NetworkTopNFlow?: NetworkTopNFlowResolver<NetworkTopNFlowData, TypeParent, Context>;
 
@@ -2624,23 +2666,6 @@ export namespace SourceResolvers {
     defaultIndex: string[];
   }
 
-  export type DomainFirstLastSeenResolver<
-    R = FirstLastSeenDomain,
-    Parent = Source,
-    Context = SiemContext
-  > = Resolver<R, Parent, Context, DomainFirstLastSeenArgs>;
-  export interface DomainFirstLastSeenArgs {
-    id?: string | null;
-
-    ip: string;
-
-    domainName: string;
-
-    flowTarget: FlowTarget;
-
-    defaultIndex: string[];
-  }
-
   export type TlsResolver<R = TlsData, Parent = Source, Context = SiemContext> = Resolver<
     R,
     Parent,
@@ -2711,6 +2736,21 @@ export namespace SourceResolvers {
     KpiHostsArgs
   >;
   export interface KpiHostsArgs {
+    id?: string | null;
+
+    timerange: TimerangeInput;
+
+    filterQuery?: string | null;
+
+    defaultIndex: string[];
+  }
+
+  export type KpiHostDetailsResolver<
+    R = KpiHostDetailsData,
+    Parent = Source,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context, KpiHostDetailsArgs>;
+  export interface KpiHostDetailsArgs {
     id?: string | null;
 
     timerange: TimerangeInput;
@@ -2973,6 +3013,8 @@ export namespace AuthenticationsDataResolvers {
     totalCount?: TotalCountResolver<number, TypeParent, Context>;
 
     pageInfo?: PageInfoResolver<PageInfo, TypeParent, Context>;
+
+    inspect?: InspectResolver<Inspect | null, TypeParent, Context>;
   }
 
   export type EdgesResolver<
@@ -2987,6 +3029,11 @@ export namespace AuthenticationsDataResolvers {
   > = Resolver<R, Parent, Context>;
   export type PageInfoResolver<
     R = PageInfo,
+    Parent = AuthenticationsData,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type InspectResolver<
+    R = Inspect | null,
     Parent = AuthenticationsData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
@@ -3390,22 +3437,36 @@ export namespace PageInfoResolvers {
   > = Resolver<R, Parent, Context>;
 }
 
+export namespace InspectResolvers {
+  export interface Resolvers<Context = SiemContext, TypeParent = Inspect> {
+    dsl?: DslResolver<string[], TypeParent, Context>;
+
+    response?: ResponseResolver<string[], TypeParent, Context>;
+  }
+
+  export type DslResolver<R = string[], Parent = Inspect, Context = SiemContext> = Resolver<
+    R,
+    Parent,
+    Context
+  >;
+  export type ResponseResolver<R = string[], Parent = Inspect, Context = SiemContext> = Resolver<
+    R,
+    Parent,
+    Context
+  >;
+}
+
 export namespace EventsDataResolvers {
   export interface Resolvers<Context = SiemContext, TypeParent = EventsData> {
-    kpiEventType?: KpiEventTypeResolver<KpiItem[] | null, TypeParent, Context>;
-
     edges?: EdgesResolver<EcsEdges[], TypeParent, Context>;
 
     totalCount?: TotalCountResolver<number, TypeParent, Context>;
 
     pageInfo?: PageInfoResolver<PageInfo, TypeParent, Context>;
+
+    inspect?: InspectResolver<Inspect | null, TypeParent, Context>;
   }
 
-  export type KpiEventTypeResolver<
-    R = KpiItem[] | null,
-    Parent = EventsData,
-    Context = SiemContext
-  > = Resolver<R, Parent, Context>;
   export type EdgesResolver<R = EcsEdges[], Parent = EventsData, Context = SiemContext> = Resolver<
     R,
     Parent,
@@ -3421,25 +3482,11 @@ export namespace EventsDataResolvers {
     Parent,
     Context
   >;
-}
-
-export namespace KpiItemResolvers {
-  export interface Resolvers<Context = SiemContext, TypeParent = KpiItem> {
-    value?: ValueResolver<string | null, TypeParent, Context>;
-
-    count?: CountResolver<number, TypeParent, Context>;
-  }
-
-  export type ValueResolver<R = string | null, Parent = KpiItem, Context = SiemContext> = Resolver<
-    R,
-    Parent,
-    Context
-  >;
-  export type CountResolver<R = number, Parent = KpiItem, Context = SiemContext> = Resolver<
-    R,
-    Parent,
-    Context
-  >;
+  export type InspectResolver<
+    R = Inspect | null,
+    Parent = EventsData,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
 }
 
 export namespace EcsEdgesResolvers {
@@ -4984,6 +5031,8 @@ export namespace TimelineDataResolvers {
     totalCount?: TotalCountResolver<number, TypeParent, Context>;
 
     pageInfo?: PageInfoResolver<PageInfo, TypeParent, Context>;
+
+    inspect?: InspectResolver<Inspect | null, TypeParent, Context>;
   }
 
   export type EdgesResolver<
@@ -4998,6 +5047,11 @@ export namespace TimelineDataResolvers {
   > = Resolver<R, Parent, Context>;
   export type PageInfoResolver<
     R = PageInfo,
+    Parent = TimelineData,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type InspectResolver<
+    R = Inspect | null,
     Parent = TimelineData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
@@ -5077,10 +5131,17 @@ export namespace TimelineNonEcsDataResolvers {
 export namespace TimelineDetailsDataResolvers {
   export interface Resolvers<Context = SiemContext, TypeParent = TimelineDetailsData> {
     data?: DataResolver<DetailItem[] | null, TypeParent, Context>;
+
+    inspect?: InspectResolver<Inspect | null, TypeParent, Context>;
   }
 
   export type DataResolver<
     R = DetailItem[] | null,
+    Parent = TimelineDetailsData,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type InspectResolver<
+    R = Inspect | null,
     Parent = TimelineDetailsData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
@@ -5143,10 +5204,17 @@ export namespace DetailItemResolvers {
 export namespace LastEventTimeDataResolvers {
   export interface Resolvers<Context = SiemContext, TypeParent = LastEventTimeData> {
     lastSeen?: LastSeenResolver<Date | null, TypeParent, Context>;
+
+    inspect?: InspectResolver<Inspect | null, TypeParent, Context>;
   }
 
   export type LastSeenResolver<
     R = Date | null,
+    Parent = LastEventTimeData,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type InspectResolver<
+    R = Inspect | null,
     Parent = LastEventTimeData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
@@ -5159,6 +5227,8 @@ export namespace HostsDataResolvers {
     totalCount?: TotalCountResolver<number, TypeParent, Context>;
 
     pageInfo?: PageInfoResolver<PageInfo, TypeParent, Context>;
+
+    inspect?: InspectResolver<Inspect | null, TypeParent, Context>;
   }
 
   export type EdgesResolver<R = HostsEdges[], Parent = HostsData, Context = SiemContext> = Resolver<
@@ -5176,6 +5246,11 @@ export namespace HostsDataResolvers {
     Parent,
     Context
   >;
+  export type InspectResolver<
+    R = Inspect | null,
+    Parent = HostsData,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
 }
 
 export namespace HostsEdgesResolvers {
@@ -5206,6 +5281,8 @@ export namespace HostItemResolvers {
     host?: HostResolver<HostEcsFields | null, TypeParent, Context>;
 
     cloud?: CloudResolver<CloudFields | null, TypeParent, Context>;
+
+    inspect?: InspectResolver<Inspect | null, TypeParent, Context>;
   }
 
   export type IdResolver<R = string | null, Parent = HostItem, Context = SiemContext> = Resolver<
@@ -5225,6 +5302,11 @@ export namespace HostItemResolvers {
   > = Resolver<R, Parent, Context>;
   export type CloudResolver<
     R = CloudFields | null,
+    Parent = HostItem,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type InspectResolver<
+    R = Inspect | null,
     Parent = HostItem,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
@@ -5289,11 +5371,18 @@ export namespace CloudMachineResolvers {
 
 export namespace FirstLastSeenHostResolvers {
   export interface Resolvers<Context = SiemContext, TypeParent = FirstLastSeenHost> {
+    inspect?: InspectResolver<Inspect | null, TypeParent, Context>;
+
     firstSeen?: FirstSeenResolver<Date | null, TypeParent, Context>;
 
     lastSeen?: LastSeenResolver<Date | null, TypeParent, Context>;
   }
 
+  export type InspectResolver<
+    R = Inspect | null,
+    Parent = FirstLastSeenHost,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
   export type FirstSeenResolver<
     R = Date | null,
     Parent = FirstLastSeenHost,
@@ -5317,6 +5406,8 @@ export namespace IpOverviewDataResolvers {
     server?: ServerResolver<Overview | null, TypeParent, Context>;
 
     source?: SourceResolver<Overview | null, TypeParent, Context>;
+
+    inspect?: InspectResolver<Inspect | null, TypeParent, Context>;
   }
 
   export type ClientResolver<
@@ -5341,6 +5432,11 @@ export namespace IpOverviewDataResolvers {
   > = Resolver<R, Parent, Context>;
   export type SourceResolver<
     R = Overview | null,
+    Parent = IpOverviewData,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type InspectResolver<
+    R = Inspect | null,
     Parent = IpOverviewData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
@@ -5412,6 +5508,8 @@ export namespace DomainsDataResolvers {
     totalCount?: TotalCountResolver<number, TypeParent, Context>;
 
     pageInfo?: PageInfoResolver<PageInfo, TypeParent, Context>;
+
+    inspect?: InspectResolver<Inspect | null, TypeParent, Context>;
   }
 
   export type EdgesResolver<
@@ -5426,6 +5524,11 @@ export namespace DomainsDataResolvers {
   > = Resolver<R, Parent, Context>;
   export type PageInfoResolver<
     R = PageInfo,
+    Parent = DomainsData,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type InspectResolver<
+    R = Inspect | null,
     Parent = DomainsData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
@@ -5570,25 +5673,6 @@ export namespace DomainsNetworkFieldResolvers {
   > = Resolver<R, Parent, Context>;
 }
 
-export namespace FirstLastSeenDomainResolvers {
-  export interface Resolvers<Context = SiemContext, TypeParent = FirstLastSeenDomain> {
-    firstSeen?: FirstSeenResolver<Date | null, TypeParent, Context>;
-
-    lastSeen?: LastSeenResolver<Date | null, TypeParent, Context>;
-  }
-
-  export type FirstSeenResolver<
-    R = Date | null,
-    Parent = FirstLastSeenDomain,
-    Context = SiemContext
-  > = Resolver<R, Parent, Context>;
-  export type LastSeenResolver<
-    R = Date | null,
-    Parent = FirstLastSeenDomain,
-    Context = SiemContext
-  > = Resolver<R, Parent, Context>;
-}
-
 export namespace TlsDataResolvers {
   export interface Resolvers<Context = SiemContext, TypeParent = TlsData> {
     edges?: EdgesResolver<TlsEdges[], TypeParent, Context>;
@@ -5596,6 +5680,8 @@ export namespace TlsDataResolvers {
     totalCount?: TotalCountResolver<number, TypeParent, Context>;
 
     pageInfo?: PageInfoResolver<PageInfo, TypeParent, Context>;
+
+    inspect?: InspectResolver<Inspect | null, TypeParent, Context>;
   }
 
   export type EdgesResolver<R = TlsEdges[], Parent = TlsData, Context = SiemContext> = Resolver<
@@ -5613,6 +5699,11 @@ export namespace TlsDataResolvers {
     Parent,
     Context
   >;
+  export type InspectResolver<
+    R = Inspect | null,
+    Parent = TlsData,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
 }
 
 export namespace TlsEdgesResolvers {
@@ -5695,6 +5786,8 @@ export namespace UsersDataResolvers {
     totalCount?: TotalCountResolver<number, TypeParent, Context>;
 
     pageInfo?: PageInfoResolver<PageInfo, TypeParent, Context>;
+
+    inspect?: InspectResolver<Inspect | null, TypeParent, Context>;
   }
 
   export type EdgesResolver<R = UsersEdges[], Parent = UsersData, Context = SiemContext> = Resolver<
@@ -5712,6 +5805,11 @@ export namespace UsersDataResolvers {
     Parent,
     Context
   >;
+  export type InspectResolver<
+    R = Inspect | null,
+    Parent = UsersData,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
 }
 
 export namespace UsersEdgesResolvers {
@@ -5828,6 +5926,8 @@ export namespace KpiNetworkDataResolvers {
     dnsQueries?: DnsQueriesResolver<number | null, TypeParent, Context>;
 
     tlsHandshakes?: TlsHandshakesResolver<number | null, TypeParent, Context>;
+
+    inspect?: InspectResolver<Inspect | null, TypeParent, Context>;
   }
 
   export type NetworkEventsResolver<
@@ -5867,6 +5967,11 @@ export namespace KpiNetworkDataResolvers {
   > = Resolver<R, Parent, Context>;
   export type TlsHandshakesResolver<
     R = number | null,
+    Parent = KpiNetworkData,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type InspectResolver<
+    R = Inspect | null,
     Parent = KpiNetworkData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
@@ -5928,6 +6033,8 @@ export namespace KpiHostsDataResolvers {
       TypeParent,
       Context
     >;
+
+    inspect?: InspectResolver<Inspect | null, TypeParent, Context>;
   }
 
   export type HostsResolver<
@@ -5980,6 +6087,11 @@ export namespace KpiHostsDataResolvers {
     Parent = KpiHostsData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
+  export type InspectResolver<
+    R = Inspect | null,
+    Parent = KpiHostsData,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
 }
 
 export namespace KpiHostHistogramDataResolvers {
@@ -6001,6 +6113,90 @@ export namespace KpiHostHistogramDataResolvers {
   > = Resolver<R, Parent, Context>;
 }
 
+export namespace KpiHostDetailsDataResolvers {
+  export interface Resolvers<Context = SiemContext, TypeParent = KpiHostDetailsData> {
+    authSuccess?: AuthSuccessResolver<number | null, TypeParent, Context>;
+
+    authSuccessHistogram?: AuthSuccessHistogramResolver<
+      KpiHostHistogramData[] | null,
+      TypeParent,
+      Context
+    >;
+
+    authFailure?: AuthFailureResolver<number | null, TypeParent, Context>;
+
+    authFailureHistogram?: AuthFailureHistogramResolver<
+      KpiHostHistogramData[] | null,
+      TypeParent,
+      Context
+    >;
+
+    uniqueSourceIps?: UniqueSourceIpsResolver<number | null, TypeParent, Context>;
+
+    uniqueSourceIpsHistogram?: UniqueSourceIpsHistogramResolver<
+      KpiHostHistogramData[] | null,
+      TypeParent,
+      Context
+    >;
+
+    uniqueDestinationIps?: UniqueDestinationIpsResolver<number | null, TypeParent, Context>;
+
+    uniqueDestinationIpsHistogram?: UniqueDestinationIpsHistogramResolver<
+      KpiHostHistogramData[] | null,
+      TypeParent,
+      Context
+    >;
+
+    inspect?: InspectResolver<Inspect | null, TypeParent, Context>;
+  }
+
+  export type AuthSuccessResolver<
+    R = number | null,
+    Parent = KpiHostDetailsData,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type AuthSuccessHistogramResolver<
+    R = KpiHostHistogramData[] | null,
+    Parent = KpiHostDetailsData,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type AuthFailureResolver<
+    R = number | null,
+    Parent = KpiHostDetailsData,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type AuthFailureHistogramResolver<
+    R = KpiHostHistogramData[] | null,
+    Parent = KpiHostDetailsData,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type UniqueSourceIpsResolver<
+    R = number | null,
+    Parent = KpiHostDetailsData,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type UniqueSourceIpsHistogramResolver<
+    R = KpiHostHistogramData[] | null,
+    Parent = KpiHostDetailsData,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type UniqueDestinationIpsResolver<
+    R = number | null,
+    Parent = KpiHostDetailsData,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type UniqueDestinationIpsHistogramResolver<
+    R = KpiHostHistogramData[] | null,
+    Parent = KpiHostDetailsData,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type InspectResolver<
+    R = Inspect | null,
+    Parent = KpiHostDetailsData,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+}
+
 export namespace NetworkTopNFlowDataResolvers {
   export interface Resolvers<Context = SiemContext, TypeParent = NetworkTopNFlowData> {
     edges?: EdgesResolver<NetworkTopNFlowEdges[], TypeParent, Context>;
@@ -6008,6 +6204,8 @@ export namespace NetworkTopNFlowDataResolvers {
     totalCount?: TotalCountResolver<number, TypeParent, Context>;
 
     pageInfo?: PageInfoResolver<PageInfo, TypeParent, Context>;
+
+    inspect?: InspectResolver<Inspect | null, TypeParent, Context>;
   }
 
   export type EdgesResolver<
@@ -6022,6 +6220,11 @@ export namespace NetworkTopNFlowDataResolvers {
   > = Resolver<R, Parent, Context>;
   export type PageInfoResolver<
     R = PageInfo,
+    Parent = NetworkTopNFlowData,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type InspectResolver<
+    R = Inspect | null,
     Parent = NetworkTopNFlowData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
@@ -6050,8 +6253,6 @@ export namespace NetworkTopNFlowItemResolvers {
   export interface Resolvers<Context = SiemContext, TypeParent = NetworkTopNFlowItem> {
     _id?: IdResolver<string | null, TypeParent, Context>;
 
-    timestamp?: TimestampResolver<Date | null, TypeParent, Context>;
-
     source?: SourceResolver<TopNFlowItem | null, TypeParent, Context>;
 
     destination?: DestinationResolver<TopNFlowItem | null, TypeParent, Context>;
@@ -6065,11 +6266,6 @@ export namespace NetworkTopNFlowItemResolvers {
 
   export type IdResolver<
     R = string | null,
-    Parent = NetworkTopNFlowItem,
-    Context = SiemContext
-  > = Resolver<R, Parent, Context>;
-  export type TimestampResolver<
-    R = Date | null,
     Parent = NetworkTopNFlowItem,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
@@ -6166,6 +6362,8 @@ export namespace NetworkDnsDataResolvers {
     totalCount?: TotalCountResolver<number, TypeParent, Context>;
 
     pageInfo?: PageInfoResolver<PageInfo, TypeParent, Context>;
+
+    inspect?: InspectResolver<Inspect | null, TypeParent, Context>;
   }
 
   export type EdgesResolver<
@@ -6180,6 +6378,11 @@ export namespace NetworkDnsDataResolvers {
   > = Resolver<R, Parent, Context>;
   export type PageInfoResolver<
     R = PageInfo,
+    Parent = NetworkDnsData,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type InspectResolver<
+    R = Inspect | null,
     Parent = NetworkDnsData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
@@ -6216,8 +6419,6 @@ export namespace NetworkDnsItemResolvers {
 
     queryCount?: QueryCountResolver<number | null, TypeParent, Context>;
 
-    timestamp?: TimestampResolver<Date | null, TypeParent, Context>;
-
     uniqueDomains?: UniqueDomainsResolver<number | null, TypeParent, Context>;
   }
 
@@ -6243,11 +6444,6 @@ export namespace NetworkDnsItemResolvers {
   > = Resolver<R, Parent, Context>;
   export type QueryCountResolver<
     R = number | null,
-    Parent = NetworkDnsItem,
-    Context = SiemContext
-  > = Resolver<R, Parent, Context>;
-  export type TimestampResolver<
-    R = Date | null,
     Parent = NetworkDnsItem,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
@@ -6277,6 +6473,8 @@ export namespace OverviewNetworkDataResolvers {
     packetbeatFlow?: PacketbeatFlowResolver<number | null, TypeParent, Context>;
 
     packetbeatTLS?: PacketbeatTlsResolver<number | null, TypeParent, Context>;
+
+    inspect?: InspectResolver<Inspect | null, TypeParent, Context>;
   }
 
   export type AuditbeatSocketResolver<
@@ -6324,6 +6522,11 @@ export namespace OverviewNetworkDataResolvers {
     Parent = OverviewNetworkData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
+  export type InspectResolver<
+    R = Inspect | null,
+    Parent = OverviewNetworkData,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
 }
 
 export namespace OverviewHostDataResolvers {
@@ -6343,6 +6546,8 @@ export namespace OverviewHostDataResolvers {
     filebeatSystemModule?: FilebeatSystemModuleResolver<number | null, TypeParent, Context>;
 
     winlogbeat?: WinlogbeatResolver<number | null, TypeParent, Context>;
+
+    inspect?: InspectResolver<Inspect | null, TypeParent, Context>;
   }
 
   export type AuditbeatAuditdResolver<
@@ -6385,6 +6590,11 @@ export namespace OverviewHostDataResolvers {
     Parent = OverviewHostData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
+  export type InspectResolver<
+    R = Inspect | null,
+    Parent = OverviewHostData,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
 }
 
 export namespace UncommonProcessesDataResolvers {
@@ -6394,6 +6604,8 @@ export namespace UncommonProcessesDataResolvers {
     totalCount?: TotalCountResolver<number, TypeParent, Context>;
 
     pageInfo?: PageInfoResolver<PageInfo, TypeParent, Context>;
+
+    inspect?: InspectResolver<Inspect | null, TypeParent, Context>;
   }
 
   export type EdgesResolver<
@@ -6408,6 +6620,11 @@ export namespace UncommonProcessesDataResolvers {
   > = Resolver<R, Parent, Context>;
   export type PageInfoResolver<
     R = PageInfo,
+    Parent = UncommonProcessesData,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type InspectResolver<
+    R = Inspect | null,
     Parent = UncommonProcessesData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
@@ -6993,8 +7210,6 @@ export namespace MutationResolvers {
   > = Resolver<R, Parent, Context, DeleteNoteArgs>;
   export interface DeleteNoteArgs {
     id: string[];
-
-    version?: string | null;
   }
 
   export type DeleteNoteByTimelineIdResolver<

@@ -11,12 +11,16 @@ import { RedirectWrapper } from './redirect_wrapper';
 
 export type HostComponentProps = RouteComponentProps<{
   hostName: string;
+  search: string;
 }>;
 
 export const RedirectToHostsPage = ({
   match: {
     params: { hostName },
   },
-}: HostComponentProps) => <RedirectWrapper to={hostName ? `/hosts/${hostName}` : '/hosts'} />;
+  location: { search },
+}: HostComponentProps) => {
+  return <RedirectWrapper to={hostName ? `/hosts/${hostName}${search}` : `/hosts/${search}`} />;
+};
 
 export const getHostsUrl = () => '#/link-to/hosts';

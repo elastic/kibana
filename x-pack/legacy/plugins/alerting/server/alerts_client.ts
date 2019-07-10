@@ -8,7 +8,7 @@ import { omit } from 'lodash';
 import { SavedObjectsClientContract, SavedObjectReference } from 'src/core/server';
 import { Alert, RawAlert, AlertTypeRegistry, AlertAction, Log } from './types';
 import { TaskManager } from '../../task_manager';
-import { validateAlertTypeParams } from './lib';
+import { validateAlertTypeParams, parseDuration } from './lib';
 
 interface ConstructorOptions {
   log: Log;
@@ -44,7 +44,7 @@ interface CreateOptions {
 interface UpdateOptions {
   id: string;
   data: {
-    interval: number;
+    interval: string;
     actions: AlertAction[];
     alertTypeParams: Record<string, any>;
   };
@@ -95,9 +95,7 @@ export class AlertsClient {
         // Skip the cleanup error and throw the task manager error to avoid confusion
         this.log(
           ['alerting', 'error'],
-          `Failed to cleanup alert "${createdAlert.id}" after scheduling task failed. Error: ${
-            err.message
-          }`
+          `Failed to cleanup alert "${createdAlert.id}" after scheduling task failed. Error: ${err.message}`
         );
       }
       throw e;
@@ -171,7 +169,7 @@ export class AlertsClient {
       state: {
         // This is here because we can't rely on the task manager's internal runAt.
         // It changes it for timeout, etc when a task is running.
-        scheduledRunAt: new Date(Date.now() + alert.interval),
+        scheduledRunAt: new Date(Date.now() + parseDuration(alert.interval)),
         previousScheduledRunAt: null,
         alertTypeState: {},
         alertInstances: {},
