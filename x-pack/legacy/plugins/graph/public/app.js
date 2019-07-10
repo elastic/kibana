@@ -24,7 +24,7 @@ import 'ui/saved_objects/ui/saved_object_save_as_checkbox';
 import chrome from 'ui/chrome';
 import { uiModules } from 'ui/modules';
 import uiRoutes from 'ui/routes';
-import { notify, addAppRedirectMessageToUrl, fatalError, toastNotifications } from 'ui/notify';
+import { addAppRedirectMessageToUrl, fatalError, toastNotifications } from 'ui/notify';
 import { IndexPatternsProvider } from 'ui/index_patterns/index_patterns';
 import { SavedObjectsClientProvider } from 'ui/saved_objects';
 import { KibanaParsedUrl } from 'ui/url/kibana_parsed_url';
@@ -173,7 +173,22 @@ app.controller('graphuiPlugin', function (
 
   function handleError(err) {
     return checkLicense(Promise, kbnBaseUrl)
-      .then(() => notify.error(err));
+      .then(() => {
+        const toastTitle = i18n.translate('xpack.graph.errorToastTitle', {
+          defaultMessage: 'Graph Error',
+          description: '"Graph" is a product name and should not be translated.',
+        });
+        if (err instanceof Error) {
+          toastNotifications.addError(err, {
+            title: toastTitle,
+          });
+        } else {
+          toastNotifications.addDanger({
+            title: toastTitle,
+            text: err,
+          });
+        }
+      });
   }
 
   $scope.title = 'Graph';
