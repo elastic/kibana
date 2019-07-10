@@ -92,6 +92,26 @@
 {
   "type": "doc",
   "value": {
+    "id": "index-pattern:f7fc94a0-936b-11e9-a43f-eb6ee3467b2b",
+    "index": ".kibana",
+    "source": {
+      "index-pattern" : {
+        "title" : "flights",
+        "fields" : "[{\"name\":\"_id\",\"type\":\"string\",\"esTypes\":[\"_id\"],\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":false},{\"name\":\"_index\",\"type\":\"string\",\"esTypes\":[\"_index\"],\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":false},{\"name\":\"_score\",\"type\":\"number\",\"count\":0,\"scripted\":false,\"searchable\":false,\"aggregatable\":false,\"readFromDocValues\":false},{\"name\":\"_source\",\"type\":\"_source\",\"esTypes\":[\"_source\"],\"count\":0,\"scripted\":false,\"searchable\":false,\"aggregatable\":false,\"readFromDocValues\":false},{\"name\":\"_type\",\"type\":\"string\",\"esTypes\":[\"_type\"],\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":false},{\"name\":\"altitude\",\"type\":\"number\",\"esTypes\":[\"integer\"],\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true},{\"name\":\"heading\",\"type\":\"number\",\"esTypes\":[\"integer\"],\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true},{\"name\":\"location\",\"type\":\"geo_point\",\"esTypes\":[\"geo_point\"],\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true}]"
+      },
+      "type" : "index-pattern",
+      "references" : [ ],
+      "migrationVersion" : {
+        "index-pattern" : "6.5.0"
+      },
+      "updated_at" : "2019-06-20T14:59:15.348Z"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
     "id": "map:d2e73f40-e14a-11e8-a35a-370a8516603a",
     "index": ".kibana",
     "source": {
@@ -444,6 +464,62 @@
         "uiStateJSON": "{}"
       },
       "type": "map"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "map:62914770-936c-11e9-a43f-eb6ee3467b2b",
+    "index": ".kibana",
+    "source": {
+      "map": {
+        "title" : "vector styling icon demo",
+        "description" : "",
+        "mapStateJSON" : "{\"zoom\":4.13,\"center\":{\"lon\":-3.57807,\"lat\":2.04204},\"timeFilters\":{\"from\":\"now-15m\",\"to\":\"now\"},\"refreshConfig\":{\"isPaused\":false,\"interval\":0},\"query\":{\"language\":\"kuery\",\"query\":\"\"}}",
+        "layerListJSON" : "[{\"sourceDescriptor\":{\"id\":\"5b46884e-062f-4ff4-9dd2-bd410d9e8754\",\"type\":\"ES_SEARCH\",\"geoField\":\"location\",\"filterByMapBounds\":false,\"tooltipProperties\":[],\"useTopHits\":false,\"topHitsSize\":1,\"indexPatternRefName\":\"layer_0_source_index_pattern\"},\"id\":\"8fcb7c4b-7d6a-4b69-82c2-74f53ec0df24\",\"label\":null,\"minZoom\":0,\"maxZoom\":24,\"alpha\":0.75,\"visible\":true,\"applyGlobalQuery\":true,\"style\":{\"type\":\"VECTOR\",\"properties\":{\"fillColor\":{\"type\":\"DYNAMIC\",\"options\":{\"color\":\"Reds\",\"field\":{\"label\":\"altitude\",\"name\":\"altitude\",\"origin\":\"source\"}}},\"lineColor\":{\"type\":\"STATIC\",\"options\":{\"color\":\"#FFFFFF\"}},\"lineWidth\":{\"type\":\"STATIC\",\"options\":{\"size\":1}},\"iconSize\":{\"type\":\"DYNAMIC\",\"options\":{\"minSize\":30,\"maxSize\":64,\"field\":{\"label\":\"altitude\",\"name\":\"altitude\",\"origin\":\"source\"}}},\"iconOrientation\":{\"type\":\"DYNAMIC\",\"options\":{\"field\":{\"label\":\"heading\",\"name\":\"heading\",\"origin\":\"source\"}}},\"symbol\":{\"options\":{\"symbolizeAs\":\"icon\",\"symbolId\":\"airport\"}}}},\"type\":\"VECTOR\"}]",
+        "uiStateJSON" : "{\"isLayerTOCOpen\":true,\"openTOCDetails\":[\"8fcb7c4b-7d6a-4b69-82c2-74f53ec0df24\"]}",
+        "bounds" : {
+          "type" : "polygon",
+          "coordinates" : [
+            [
+              [
+                -40.00193,
+                19.58063
+              ],
+              [
+                -40.00193,
+                -15.68855
+              ],
+              [
+                32.84579,
+                -15.68855
+              ],
+              [
+                32.84579,
+                19.58063
+              ],
+              [
+                -40.00193,
+                19.58063
+              ]
+            ]
+          ]
+        }
+      },
+      "type": "map",
+      "references" : [
+        {
+          "name" : "layer_0_source_index_pattern",
+          "type" : "index-pattern",
+          "id" : "f7fc94a0-936b-11e9-a43f-eb6ee3467b2b"
+        }
+      ],
+      "migrationVersion" : {
+        "map" : "7.2.0"
+      },
+      "updated_at" : "2019-06-20T15:02:13.095Z"
     }
   }
 }
