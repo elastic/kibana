@@ -172,15 +172,15 @@ function asTerabytes(value: number | null) {
   return `${asDecimal(value / 1e12)} TB`;
 }
 
-export function asBytes(value: number | null) {
-  if (value === null || isNaN(value)) {
+export function asBytes(value: number | null | undefined) {
+  if (value === null || value === undefined || isNaN(value)) {
     return '';
   }
   return `${asDecimal(value)} B`;
 }
 
-export function asDynamicBytes(value: number | null) {
-  if (value === null || isNaN(value)) {
+export function asDynamicBytes(value: number | null | undefined) {
+  if (value === null || value === undefined || isNaN(value)) {
     return '';
   }
   return unmemoizedFixedByteFormatter(value)(value);
