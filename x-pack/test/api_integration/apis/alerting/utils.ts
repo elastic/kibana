@@ -11,7 +11,7 @@ const esTestIndexName = '.kibaka-alerting-test-data';
 export function getTestAlertData(attributeOverwrites = {}) {
   return {
     alertTypeId: 'test.noop',
-    interval: 10 * 1000,
+    interval: '10s',
     actions: [
       {
         group: 'default',
@@ -61,5 +61,5 @@ export async function setupEsTestIndex(es: any) {
 }
 
 export async function destroyEsTestIndex(es: any) {
-  await es.indices.delete({ index: esTestIndexName });
+  await es.indices.delete({ index: esTestIndexName, ignore: [404] });
 }

@@ -13,13 +13,22 @@ import {
   formatTimelineData,
 } from './elasticsearch_adapter';
 import {
+  mockDetailsQueryDsl,
   mockOptions,
+  mockQueryDsl,
   mockRequest,
   mockResponseMap,
   mockResponseSearchTimelineDetails,
   mockTimelineDetailsResult,
 } from './mock';
 import { EventHit } from './types';
+
+jest.mock('./query.dsl', () => {
+  return {
+    buildQuery: jest.fn(() => mockQueryDsl),
+    buildDetailsQuery: jest.fn(() => mockDetailsQueryDsl),
+  };
+});
 
 describe('events elasticsearch_adapter', () => {
   const hit: EventHit = {

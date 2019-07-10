@@ -26,6 +26,7 @@ const ipOverviewSchema = gql`
     host: HostEcsFields!
     server: Overview
     source: Overview
+    inspect: Inspect
   }
 
   extend type Source {
@@ -85,6 +86,7 @@ const domainsSchema = gql`
     edges: [DomainsEdges!]!
     totalCount: Float!
     pageInfo: PageInfo!
+    inspect: Inspect
   }
 
   extend type Source {
@@ -99,23 +101,6 @@ const domainsSchema = gql`
       timerange: TimerangeInput!
       defaultIndex: [String!]!
     ): DomainsData!
-  }
-`;
-
-const firstLastSeenSchema = gql`
-  type FirstLastSeenDomain {
-    firstSeen: Date
-    lastSeen: Date
-  }
-
-  extend type Source {
-    DomainFirstLastSeen(
-      id: String
-      ip: String!
-      domainName: String!
-      flowTarget: FlowTarget!
-      defaultIndex: [String!]!
-    ): FirstLastSeenDomain!
   }
 `;
 
@@ -144,6 +129,7 @@ const tlsSchema = gql`
     edges: [TlsEdges!]!
     totalCount: Float!
     pageInfo: PageInfo!
+    inspect: Inspect
   }
   extend type Source {
     Tls(
@@ -193,6 +179,7 @@ const usersSchema = gql`
     edges: [UsersEdges!]!
     totalCount: Float!
     pageInfo: PageInfo!
+    inspect: Inspect
   }
 
   extend type Source {
@@ -209,10 +196,4 @@ const usersSchema = gql`
   }
 `;
 
-export const ipDetailsSchemas = [
-  ipOverviewSchema,
-  domainsSchema,
-  firstLastSeenSchema,
-  tlsSchema,
-  usersSchema,
-];
+export const ipDetailsSchemas = [ipOverviewSchema, domainsSchema, tlsSchema, usersSchema];

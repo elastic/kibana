@@ -11,7 +11,7 @@ import { EuiComboBox } from '@elastic/eui';
 import { SOURCE_DATA_ID_ORIGIN } from '../../../../../../common/constants';
 import { i18n } from '@kbn/i18n';
 
-export function FieldSelect({ fields, selectedField, onChange }) {
+export function FieldSelect({ fields, selectedFieldName, onChange }) {
 
   const onFieldChange = (selectedFields) => {
     onChange({
@@ -53,13 +53,16 @@ export function FieldSelect({ fields, selectedField, onChange }) {
     return optionGroups;
   };
 
-  const selectedOptions = selectedField
-    ? [{ label: selectedField.label, value: selectedField }]
-    : [];
+  let selectedOption;
+  if (selectedFieldName) {
+    selectedOption = fields.find(field => {
+      return field.name === selectedFieldName;
+    });
+  }
 
   return (
     <EuiComboBox
-      selectedOptions={selectedOptions}
+      selectedOptions={selectedOption ? [selectedOption] : []}
       options={groupFieldsByOrigin()}
       onChange={onFieldChange}
       singleSelection={{ asPlainText: true }}
@@ -76,12 +79,11 @@ export function FieldSelect({ fields, selectedField, onChange }) {
 
 export const fieldShape = PropTypes.shape({
   name: PropTypes.string.isRequired,
-  label: PropTypes.string.isRequired,
   origin: PropTypes.oneOf(['join', SOURCE_DATA_ID_ORIGIN]).isRequired
 });
 
 FieldSelect.propTypes = {
-  selectedField: fieldShape,
+  selectedFieldName: PropTypes.string,
   fields: PropTypes.arrayOf(fieldShape).isRequired,
   onChange: PropTypes.func.isRequired,
 };

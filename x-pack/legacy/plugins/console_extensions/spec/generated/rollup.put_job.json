@@ -1,0 +1,10 @@
+{
+  "rollup.put_job": {
+    "methods": [
+      "PUT"
+    ],
+    "patterns": [
+      "_rollup/job/{id}"
+    ]
+  }
+}

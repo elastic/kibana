@@ -46,6 +46,7 @@ interface Job {
   max_size_reached: boolean;
   attempts: number;
   max_attempts: number;
+  csv_contains_formulas: boolean;
 }
 
 interface Props {
@@ -334,6 +335,21 @@ class ReportListingUi extends Component<Props, State> {
       />
     );
 
+    if (record.csv_contains_formulas) {
+      return (
+        <EuiToolTip
+          position="top"
+          content={intl.formatMessage({
+            id: 'xpack.reporting.listing.table.csvContainsFormulas',
+            defaultMessage:
+              'Your CSV contains characters which spreadsheet applications can interpret as formulas.',
+          })}
+        >
+          {button}
+        </EuiToolTip>
+      );
+    }
+
     if (record.max_size_reached) {
       return (
         <EuiToolTip
@@ -428,6 +444,7 @@ class ReportListingUi extends Component<Props, State> {
             max_size_reached: job._source.output ? job._source.output.max_size_reached : false,
             attempts: job._source.attempts,
             max_attempts: job._source.max_attempts,
+            csv_contains_formulas: job._source.output.csv_contains_formulas,
           })
         ),
       });

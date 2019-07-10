@@ -30,12 +30,12 @@ import { CoreSetup, CoreStart } from '..';
  *
  * @public
  */
-export interface PluginInitializerContext {
+export interface PluginInitializerContext<ConfigSchema = unknown> {
   env: { mode: EnvironmentMode };
   logger: LoggerFactory;
   config: {
-    create: <Schema>() => Observable<Schema>;
-    createIfExists: <Schema>() => Observable<Schema | undefined>;
+    create: <T = ConfigSchema>() => Observable<T>;
+    createIfExists: <T = ConfigSchema>() => Observable<T | undefined>;
   };
 }
 
@@ -122,6 +122,7 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>(
       registerOnPostAuth: deps.http.registerOnPostAuth,
       basePath: deps.http.basePath,
       createNewServer: deps.http.createNewServer,
+      isTlsEnabled: deps.http.isTlsEnabled,
     },
   };
 }

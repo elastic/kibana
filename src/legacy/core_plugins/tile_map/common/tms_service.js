@@ -29,33 +29,38 @@ export class TMSService {
     this._emsClient = emsClient;
   }
 
-  _getFormatsOfType(type) {
-    const formats = this._config.formats.filter(format => {
-      const language = this._emsClient.getLocale();
-      return format.locale === language && format.format === type;
+  _getRasterFormats(locale) {
+    return this._config.formats.filter(format => {
+      return format.locale === locale && format.format === 'raster';
     });
-    return formats;
   }
 
   _getDefaultStyleUrl() {
-    const defaultStyle = this._getFormatsOfType('raster')[0];
+    let rasterFormats = this._getRasterFormats(this._emsClient.getLocale());
+    if (!rasterFormats.length) {//fallback to default locale
+      rasterFormats = this._getRasterFormats(this._emsClient.getDefaultLocale());
+    }
+    if (!rasterFormats.length) {
+      throw new Error(`Cannot find raster tile layer for locale ${this._emsClient.getLocale()} or ${this._emsClient.getDefaultLocale()}`);
+    }
+    const defaultStyle = rasterFormats[0];
     if (defaultStyle && defaultStyle.hasOwnProperty('url')) {
       return defaultStyle.url;
     }
   }
 
   async getUrlTemplate() {
-    const tileJson = await this._getTileJson(this._getDefaultStyleUrl());
+    const defaultStyle = this._getDefaultStyleUrl();
+    const tileJson = await this._getTileJson(defaultStyle);
     return this._emsClient.extendUrlWithParams(tileJson.tiles[0]);
   }
 
   getDisplayName() {
-    const serviceName = this._emsClient.getValueInLanguage(this._config.name);
-    return serviceName;
+    return this._emsClient.getValueInLanguage(this._config.name);
   }
 
   getAttributions() {
-    const attributions = this._config.attribution.map(attribution => {
+    return this._config.attribution.map(attribution => {
       const url = this._emsClient.getValueInLanguage(attribution.url);
       const label = this._emsClient.getValueInLanguage(attribution.label);
       return {
@@ -63,7 +68,6 @@ export class TMSService {
         label: label
       };
     });
-    return attributions;
   }
 
   getHTMLAttribution() {

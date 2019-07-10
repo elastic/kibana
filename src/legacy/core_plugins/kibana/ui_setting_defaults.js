@@ -405,6 +405,19 @@ export function getUiSettingDefaults() {
       }),
       category: ['search'],
     },
+    'courier:batchSearches': {
+      name: i18n.translate('kbn.advancedSettings.courier.batchSearchesTitle', {
+        defaultMessage: 'Batch concurrent searches',
+      }),
+      value: true,
+      type: 'boolean',
+      description: i18n.translate('kbn.advancedSettings.courier.batchSearchesText', {
+        defaultMessage:
+          'Batch multiple concurrent searches in a single request. This may improve overall load' +
+          'times, but it also means that no single search request will be returned until the last has completed.',
+      }),
+      category: ['search'],
+    },
     'search:includeFrozen': {
       name: 'Search in frozen indices',
       description: `Will include <a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/frozen-indices.html"
