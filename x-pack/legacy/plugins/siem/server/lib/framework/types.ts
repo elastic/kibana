@@ -156,6 +156,6 @@ export interface RequestBasicOptions {
 
 export interface RequestOptions extends RequestBasicOptions {
   pagination: PaginationInput;
-  fields: ReadonlyArray<string>;
+  fields: readonly string[];
   sortField?: SortField;
 }

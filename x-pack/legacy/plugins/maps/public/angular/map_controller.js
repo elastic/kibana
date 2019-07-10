@@ -15,8 +15,8 @@ import { render, unmountComponentAtNode } from 'react-dom';
 import { uiModules } from 'ui/modules';
 import { timefilter } from 'ui/timefilter';
 import { Provider } from 'react-redux';
-import { createMapStore } from '../store/store';
-import { GisMap } from '../components/gis_map';
+import { createMapStore } from '../reducers/store';
+import { GisMap } from '../connected_components/gis_map';
 import { addHelpMenuToAppChrome } from '../help_menu_util';
 import {
   setSelectedLayer,
@@ -25,20 +25,19 @@ import {
   replaceLayerList,
   setQuery,
   clearTransientLayerStateAndCloseFlyout,
-} from '../actions/store_actions';
+} from '../actions/map_actions';
+import { DEFAULT_IS_LAYER_TOC_OPEN, FLYOUT_STATE } from '../reducers/ui';
 import {
-  DEFAULT_IS_LAYER_TOC_OPEN,
   enableFullScreen,
-  getIsFullScreen,
   updateFlyout,
-  FLYOUT_STATE,
   setReadOnly,
   setIsLayerTOCOpen,
   setOpenTOCDetails,
-} from '../store/ui';
-import { copyPersistentState } from '../store/util';
+} from '../actions/ui_actions';
+import { getIsFullScreen } from '../selectors/ui_selectors';
+import { copyPersistentState } from '../reducers/util';
 import { getQueryableUniqueIndexPatternIds, hasDirtyState, getLayerListRaw } from '../selectors/map_selectors';
-import { getInspectorAdapters } from '../store/non_serializable_instances';
+import { getInspectorAdapters } from '../reducers/non_serializable_instances';
 import { Inspector } from 'ui/inspector';
 import { docTitle } from 'ui/doc_title';
 import { indexPatternService } from '../kibana_services';

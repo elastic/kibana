@@ -7,7 +7,7 @@
 import { action } from '@storybook/addon-actions';
 import { storiesOf } from '@storybook/react';
 import React from 'react';
-import { AssetType } from '../asset';
+import { AssetType } from '../../../../types';
 import { AssetManager } from '../asset_manager';
 
 const AIRPLANE: AssetType = {
