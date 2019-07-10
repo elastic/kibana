@@ -46,7 +46,10 @@ exports.generateStorybookEntry = ({ log, exampleGlobs }) => {
       onlyFiles: true,
     })
   ).pipe(
-    map(paths => new Set(paths.map(norm))),
+    map(paths => {
+      console.log('Discovered files for Storybook:', paths);
+      return new Set(paths.map(norm));
+    }),
     mergeMap(
       paths =>
         new Rx.Observable(observer => {
