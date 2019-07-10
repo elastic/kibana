@@ -13,7 +13,7 @@ export interface IArgOptions {
     server: string;
     bypass?: string[];
   };
-  verboseLogging: boolean;
+  verboseLogging?: boolean;
 }
 
 export const args = ({

@@ -17,14 +17,9 @@ import { HeadlessChromiumDriver } from '../driver';
 import { args, IArgOptions } from './args';
 import { safeChildProcess } from '../../safe_child_process';
 import { getChromeLogLocation } from '../paths';
+import { Logger } from '../../../../types';
 
 type binaryPath = string;
-interface ILogger {
-  isVerbose: boolean;
-  warning: (msg: string) => any;
-  debug: (msg: string) => any;
-  error: (msg: string) => any;
-}
 type queueTimeout = number;
 interface IBrowserConfig {
   [key: string]: any;
@@ -36,7 +31,7 @@ const compactWhitespace = (str: string) => {
 
 export class HeadlessChromiumDriverFactory {
   private binaryPath: binaryPath;
-  private logger: ILogger;
+  private logger: Logger;
   private browserConfig: IBrowserConfig;
   private queueTimeout: queueTimeout;
 
@@ -122,6 +117,7 @@ export class HeadlessChromiumDriverFactory {
         // which can cause the job to fail even if we bump timeouts in
         // the config. Help alleviate errors like
         // "TimeoutError: waiting for selector ".application" failed: timeout 30000ms exceeded"
+        // @ts-ignore outdated typedefs for puppteer
         page.setDefaultTimeout(this.queueTimeout);
       } catch (err) {
         observer.error(new Error(`Error spawning Chromium browser: [${err}]`));
