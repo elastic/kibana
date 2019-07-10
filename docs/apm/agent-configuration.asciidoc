@@ -25,7 +25,7 @@ For this reason, it is still important to set custom default configurations loca
 [float]
 ==== APM Server setup
 
-This feature requires {apm-server-ref}/setup-kibana-endpoint.html[Kibana endpoint configuration] in APM Server.
+This feature requires https://www.elastic.co/guide/en/apm/server/master/setup-kibana-endpoint.html[Kibana endpoint configuration] in APM Server.
 
 Why is additional configuration needed in APM Server?
 That's because APM Server acts as a proxy between the agents and Kibana.
