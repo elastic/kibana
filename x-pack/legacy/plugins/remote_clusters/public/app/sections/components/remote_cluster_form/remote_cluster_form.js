@@ -9,7 +9,6 @@ import PropTypes from 'prop-types';
 import { merge } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -31,6 +30,7 @@ import {
   EuiTitle,
   EuiDelayRender,
   EuiScreenReaderOnly,
+  htmlIdGenerator,
 } from '@elastic/eui';
 
 import {
@@ -45,6 +45,9 @@ const defaultFields = {
   seeds: [],
   skipUnavailable: false,
 };
+
+const ERROR_TITLE_ID = 'removeClustersErrorTitle';
+const ERROR_LIST_ID = 'removeClustersErrorList';
 
 export class RemoteClusterForm extends Component {
   static propTypes = {
@@ -74,6 +77,7 @@ export class RemoteClusterForm extends Component {
       disabledFields,
       fieldsErrors: this.getFieldsErrors(fieldsState),
       areErrorsVisible: false,
+      generateId: htmlIdGenerator(),
     };
   }
 
@@ -432,6 +436,7 @@ export class RemoteClusterForm extends Component {
             onClick={this.save}
             fill
             disabled={isSaveDisabled}
+            aria-describedby={this.state.generateId(ERROR_LIST_ID)}
           >
             <FormattedMessage
               id="xpack.remoteClusters.remoteClusterForm.saveButtonLabel"
@@ -500,14 +505,11 @@ export class RemoteClusterForm extends Component {
   renderErrors = () => {
     const {
       areErrorsVisible,
-      fields: {
-        name,
-      },
       fieldsErrors: {
         name: errorClusterName,
+        seeds: errorsSeeds,
       },
       localSeedErrors,
-      seedInput,
     } = this.state;
 
     const hasErrors = this.hasErrors();
@@ -516,38 +518,49 @@ export class RemoteClusterForm extends Component {
       return null;
     }
 
-    const errorExplanation = [];
+    const errorExplanations = [];
 
     if (errorClusterName) {
-      errorExplanation.push({
+      errorExplanations.push({
         key: 'nameExplanation',
-        where: i18n.translate('xpack.remoteClusters.remoteClusterForm.inputNameErrorsScreenReaderExplanation', {
-          defaultMessage: 'The input "Name". You have entered: {name}.',
-          values: { name }
+        field: i18n.translate('xpack.remoteClusters.remoteClusterForm.inputNameErrorMessage', {
+          defaultMessage: 'The "Name" field is invalid.',
         }),
-        what: errorClusterName
-      });
-    }
-    if (localSeedErrors && localSeedErrors.length) {
-      errorExplanation.push({
-        key: 'seedExplanation',
-        where: i18n.translate('xpack.remoteClusters.remoteClusterForm.inputSeedErrorsScreenReaderExplanation', {
-          defaultMessage: 'The "Seed Nodes" input. You have entered: {seedInput}.',
-          values: { seedInput }
-        }),
-        what: localSeedErrors.join(' ')
+        error: errorClusterName
       });
     }
 
-    const messagesToBeRendered = (
-      errorExplanation.length && errorExplanation.map(errorMessage => (
-        <EuiScreenReaderOnly key={errorMessage.key}>
-          <p>
-            {errorMessage.where}<br/>
-            {errorMessage.what}
-          </p>
-        </EuiScreenReaderOnly>
-      ))
+    if (errorsSeeds) {
+      errorExplanations.push({
+        key: 'seedsExplanation',
+        field: i18n.translate('xpack.remoteClusters.remoteClusterForm.inputSeedsErrorMessage', {
+          defaultMessage: 'The "Seed nodes" field is invalid.',
+        }),
+        error: errorsSeeds
+      });
+    }
+
+    if (localSeedErrors && localSeedErrors.length) {
+      errorExplanations.push({
+        key: 'localSeedExplanation',
+        field: i18n.translate('xpack.remoteClusters.remoteClusterForm.inputLocalSeedErrorMessage', {
+          defaultMessage: 'The "Seed nodes" field is invalid.',
+        }),
+        error: localSeedErrors.join(' '),
+      });
+    }
+
+    const messagesToBeRendered = errorExplanations.length && (
+      <EuiScreenReaderOnly>
+        <dl id={this.state.generateId(ERROR_LIST_ID)} aria-labelledby={this.state.generateId(ERROR_TITLE_ID)}>
+          {errorExplanations.map(({ key, field, error }) => (
+            <div key={key}>
+              <dt>{field}</dt>
+              <dd>{error}</dd>
+            </div>
+          ))}
+        </dl>
+      </EuiScreenReaderOnly>
     );
 
     return (
@@ -555,18 +568,19 @@ export class RemoteClusterForm extends Component {
         <EuiSpacer size="m" data-test-subj="remoteClusterFormGlobalError" />
         <EuiCallOut
           title={(
-            <FormattedMessage
-              id="xpack.remoteClusters.remoteClusterForm.errorTitle"
-              defaultMessage="Fix errors before continuing."
-            />
+            <h2 id={this.state.generateId(ERROR_TITLE_ID)}>
+              <FormattedMessage
+                id="xpack.remoteClusters.remoteClusterForm.errorTitle"
+                defaultMessage="Fix errors before continuing."
+              />
+            </h2>
           )}
           color="danger"
           iconType="cross"
-        >
-          <EuiDelayRender>
-            {messagesToBeRendered}
-          </EuiDelayRender>
-        </EuiCallOut>
+        />
+        <EuiDelayRender>
+          {messagesToBeRendered}
+        </EuiDelayRender>
       </Fragment>
     );
   }
@@ -646,9 +660,7 @@ export class RemoteClusterForm extends Component {
           {this.renderSkipUnavailable()}
         </EuiForm>
 
-        <div role="region" aria-live="assertive">
-          {this.renderErrors()}
-        </div>
+        {this.renderErrors()}
 
         <EuiSpacer size="l" />
 
