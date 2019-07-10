@@ -1,3 +1,5 @@
+#!/usr/bin/env groovy
+
 // Licensed to Elasticsearch B.V. under one or more contributor
 // license agreements. See the NOTICE file distributed with
 // this work for additional information regarding copyright
@@ -15,196 +17,100 @@
 // specific language governing permissions and limitations
 // under the License.
 
-/**
-  Stolen from APM UI Pipeline, :)
-*/
-void call(Map args = [:]){
-  pipeline {
-   agent { label 'linux && immutable' }
-   environment {
-     BASE_DIR="src/github.com/elastic/kibana"
-     ES_BASE_DIR="src/github.com/elastic/elasticsearch"
-     JOB_GIT_CREDENTIALS = "f6c7695a-671e-4f4f-a331-acdce44ff9ba"
-     FORCE_COLOR = "2"
-     GIT_URL = "git@github.com:elastic/kibana.git"
-     ES_GIT_URL = "git@github.com:elastic/elasticsearch.git"
-     TEST_BROWSER_HEADLESS = "${params.TEST_BROWSER_HEADLESS}"
-     TEST_ES_FROM = "${params.TEST_ES_FROM}"
-   }
-   options {
-     //timeout(time: 5, unit: 'HOURS')
-     buildDiscarder(logRotator(numToKeepStr: '3', artifactNumToKeepStr: '2', daysToKeepStr: '30'))
-     timestamps()
-     preserveStashes()
-     ansiColor('xterm')
-     disableResume()
-     durabilityHint('PERFORMANCE_OPTIMIZED')
-   }
-   parameters {
-     string(name: 'branch_specifier', defaultValue: "master", description: "the Git branch specifier to build (branchName, tagName, commitId, etc.)")
-     string(name: 'ES_VERSION', defaultValue: "6.5", description: "Elastic Stack Git branch/tag to use")
-     string(name: 'TEST_BROWSER_HEADLESS', defaultValue: "1", description: "Use headless browser.")
-     string(name: 'TEST_ES_FROM', defaultValue: "source", description: "Test from sources.")
-     booleanParam(name: 'Run_As_Master_Branch', defaultValue: false, description: 'Allow to run any steps on a PR, some steps normally only run on master branch.')
-     booleanParam(name: 'build_oss_ci', defaultValue: false, description: 'Build OSS')
-     booleanParam(name: 'build_no_oss_ci', defaultValue: false, description: 'Build NO OSS')
-     booleanParam(name: 'intake_ci', defaultValue: false, description: 'Intake Tests')
-     booleanParam(name: 'ciGroup_ci', defaultValue: false, description: 'Group Tests')
-     booleanParam(name: 'x_pack_intake_ci', defaultValue: false, description: 'X-Pack intake Tests')
-     booleanParam(name: 'x_pack_ciGroup_ci', defaultValue: false, description: 'X-Pack Group Tests')
-   }
-   stages {
-     /**
-      Checkout the code and stash it, to use it on other stages.
-     */
-     stage('Initializing') {
-       agent { label 'linux && immutable' }
-       environment {
-         HOME = "${env.WORKSPACE}"
-       }
-       stages {
-         stage('Checkout') {
-           steps {
-             checkoutKibana()
-             checkoutES()
-           }
-         }
-         stage('Quick Test') {
-           steps {
-             quickTest()
-           }
-         }
-       }
-     }
-     stage('build'){
-       failFast true
-       parallel {
-         /**
-         Build on a linux environment.
-         */
-         stage('build oss') {
-           agent { label 'linux && immutable' }
-           environment {
-             HOME = "${env.WORKSPACE}"
-           }
-           when {
-             beforeAgent true
-             expression { return params.build_oss_ci }
-           }
-           steps {
-             buildOSSSteps()
-           }
-         }
-         /**
-         Building and extracting default Kibana distributable for use in functional tests
-         */
-         stage('build no-oss') {
-           agent { label 'linux && immutable' }
-           environment {
-             HOME = "${env.WORKSPACE}"
-           }
-           when {
-             beforeAgent true
-             expression { return params.build_no_oss_ci }
-           }
-           steps {
-             buildNoOSSSteps()
-           }
-         }
-       }
-     }
-     /**
-     Test on a linux environment.
-     */
-     stage('kibana-intake') {
-       environment {
-         HOME = "${env.WORKSPACE}"
-         JAVA_HOME = "${env.HUDSON_HOME}/.java/java11"
-         PATH = "${env.JAVA_HOME}/bin:${env.PATH}"
-       }
-       when {
-         beforeAgent true
-         expression { return params.intake_ci }
-       }
-       steps {
-         kibanaIntakeSteps()
-       }
-       post { always { grabTestResults() } }
-     }
-     /**
-     Test ciGroup tests on a linux environment.
-     */
-     stage('kibana-ciGroup') {
-       environment {
-         HOME = "${env.WORKSPACE}"
-         JAVA_HOME = "${env.HUDSON_HOME}/.java/java11"
-         PATH = "${env.JAVA_HOME}/bin:${env.PATH}"
-       }
-       when {
-         beforeAgent true
-         expression { return params.ciGroup_ci }
-       }
-       steps {
-         kibanaGroupSteps()
-       }
-       post { always { grabTestResults() } }
-     }
-     /**
-     Test x-pack-intake tests on a linux environment.
-     */
-     stage('x-pack-intake') {
-       environment {
-         HOME = "${env.WORKSPACE}"
-         JAVA_HOME = "${env.HUDSON_HOME}/.java/java11"
-         PATH = "${env.JAVA_HOME}/bin:${env.PATH}"
-         XPACK_DIR = "${env.WORKSPACE}/${env.BASE_DIR}/x-pack"
-       }
-       when {
-         beforeAgent true
-         expression { return params.x_pack_intake_ci }
-       }
-       steps {
-         xPackIntakeSteps()
-       }
-       post { always { grabTestResults() } }
-     }
-     /**
-     Test x-pack-ciGroup tests on a linux environment.
-     */
-     stage('x-pack-ciGroup') {
-       environment {
-         HOME = "${env.WORKSPACE}"
-         JAVA_HOME = "${env.HUDSON_HOME}/.java/java11"
-         PATH = "${env.JAVA_HOME}/bin:${env.PATH}"
-         XPACK_DIR = "${env.WORKSPACE}/${env.BASE_DIR}/x-pack"
-         INSTALL_DIR = "${env.WORKSPACE}/install/kibana"
-       }
-       when {
-         beforeAgent true
-         expression { return params.x_pack_ciGroup_ci }
-       }
-       steps {
-         xPackGroupSteps()
-       }
-       post { always { grabTestResults() } }
-     }
-   }
-   post {
-     success {
-       echoColor(text: '[SUCCESS]', colorfg: 'green', colorbg: 'default')
-     }
-     aborted {
-       echoColor(text: '[ABORTED]', colorfg: 'magenta', colorbg: 'default')
-     }
-     failure {
-       echoColor(text: '[FAILURE]', colorfg: 'red', colorbg: 'default')
-       //step([$class: 'Mailer', notifyEveryUnstableBuild: true, recipients: "${NOTIFY_TO}", sendToIndividuals: false])
-     }
-     unstable {
-       echoColor(text: '[UNSTABLE]', colorfg: 'yellow', colorbg: 'default')
-     }
-   }
+library identifier: 'apm@current', retriever: modernSCM(
+  [$class: 'GitSCMSource',
+   remote: 'git@github.com:elastic/apm-pipeline-library.git',
+   credentialsId: 'f6c7695a-671e-4f4f-a331-acdce44ff9ba'])
+
+
+pipeline {
+  agent none
+  environment {
+    // Global vars
+    CI = true
+    BASE_DIR = "."
+    CI_DIR = "./.ci"
+    GROOVY_SRC = "${CI_DIR}/src/groovy"
+    HOME = "${JENKINS_HOME}"  // /var/lib/jenkins
+    MAIN_CACHE_DIR = "${JENKINS_HOME}/.kibana" // /var/lib/jenkins/.kibana
+    BOOTSTRAP_CACHE_DIR = "${MAIN_CACHE_DIR}/bootstrap_cache" // /var/lib/jenkins/.kibana/bootstrap_cache
+    WORKSPACE_DIR = "${JENKINS_HOME}/workspace" // /var/lib/jenkins/workspace
+    WORKSPACE_CACHE_DIR = "${MAIN_CACHE_DIR}/workspace_cache" // /var/lib/jenkins/.kibana/workspace_cache
+    WORKSPACE_CACHE_NAME = "JOB_NAME-${JOB_NAME}-BUILD_ID-${BUILD_ID}.tgz"
+    // /var/lib/jenkins/.kibana/workspace_cache/JOB_NAME-SOMEBRANCHNAME-BUILD_ID-SOMEBUILDNUMBER.tgz
+    FULL_WORKSPACE_CACHE_PATH = "${WORKSPACE_CACHE_DIR}/${WORKSPACE_CACHE_NAME}"
+    TEMP_PIPELINE_SETUP_DIR = "src/dev/temp_pipeline_setup"
+    // PR_SOURCE_BRANCH = "${ghprbSourceBranch}"
+    // PR_TARGET_BRANCH = "${ghprbTargetBranch}"
+    // PR_AUTHOR = "${ghprbPullAuthorLogin}"
+    CREDENTIALS_ID ='kibana-ci-gcs-plugin'
+    BUCKET = "gs://kibana-ci-artifacts/jobs/${JOB_NAME}/${BUILD_NUMBER}"
+    PATTERN = "${FULL_WORKSPACE_CACHE_PATH}"
   }
+  stages {
+    stage('Install All-The-Things') {
+      agent { label 'linux && immutable' }
+      steps {
+        dir("${env.BASE_DIR}"){
+          sh "${CI_DIR}/run_pipeline.sh"
+          script {
+            def d = load("${env.GROOVY_SRC}/dump.groovy")
+            def t = load("${env.GROOVY_SRC}/tar.groovy")
+            d.dumpEnv()
+            createWorkspaceCache()
+            t.tarAll()
+            d.dumpSizes(["${env.WORKSPACE}", "${env.WORKSPACE_DIR}/elasticsearch", "${env.FULL_WORKSPACE_CACHE_PATH}"])
+          }
+          step([$class: 'ClassicUploadStep',
+            credentialsId: env.CREDENTIALS_ID, bucket: env.BUCKET, pattern: env.PATTERN])
+        }
+      }
+    }
+    stage('kibana-intake') {
+      agent { label 'linux || immutable' }
+      // options { skipDefaultCheckout() }
+      steps {
+        script {
+          createWorkspaceCache()
+        }
+        step([$class: 'DownloadStep', credentialsId: env.CREDENTIALS_ID,  bucketUri: "gs://kibana-ci-artifacts/jobs/${JOB_NAME}/${BUILD_ID}/var/lib/jenkins/.kibana/workspace_cache/JOB_NAME-kibana-automation-pipeline-BUILD_ID-${BUILD_ID}.tgz", localDirectory: "${WORKSPACE_CACHE_DIR}"])
+        unTar()
+//        dir("${WORKSPACE}"){
+//          sh './test/scripts/jenkins_unit.sh'
+//        }
+      }
+    }
+    stage('Component Integration Tests') {
+      agent { label 'linux || immutable' }
+      options { skipDefaultCheckout() }
+      steps {
+        sh 'echo "Not implemented yet"'
+      }
+    }
+    stage('Functional Tests') {
+      agent { label 'linux || immutable' }
+      options { skipDefaultCheckout() }
+      steps {
+        sh 'echo "Not implemented yet"'
+      }
+    }
+    stage('Finish') {
+      agent { label 'linux || immutable' }
+      options { skipDefaultCheckout() }
+      steps {
+        sh 'echo "Not implemented yet"'
+      }
+    }
+  }
+}
+def clearDir(String x){
+  dir(x){
+    sh 'rm -rf ./*'
+  }
+}
+def createWorkspaceCache(){
+  sh "mkdir -p ${WORKSPACE_CACHE_DIR}"
+}
 }
 
 /**
