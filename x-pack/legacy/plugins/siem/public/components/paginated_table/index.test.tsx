@@ -21,7 +21,7 @@ jest.mock('react', () => {
   return { ...r, memo: (x: any) => x };
 });
 
-describe('Load More Table Component', () => {
+describe('Paginated Table Component', () => {
   const theme = () => ({ eui: euiDarkVars, darkMode: true });
   let loadPage: jest.Mock<number>;
   let updateLimitPagination: jest.Mock<number>;

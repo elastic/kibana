@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Load More Table Component rendering it renders the default load more table 1`] = `
+exports[`Paginated Table Component rendering it renders the default load more table 1`] = `
 <Component
   columns={
     Array [
@@ -100,6 +100,7 @@ exports[`Load More Table Component rendering it renders the default load more ta
     ]
   }
   showMorePagesIndicator={true}
+  showTooManyResults={false}
   totalCount={10}
   updateActivePage={[Function]}
   updateLimitPagination={[Function]}
