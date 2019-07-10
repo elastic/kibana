@@ -39,21 +39,22 @@ function createKibanaRequestMock({
   headers = { accept: 'something/html' },
   params = {},
   body = {},
-  query,
+  query = {},
   method = 'get',
 }: RequestFixtureOptions = {}) {
+  const queryString = querystring.stringify(query);
   return KibanaRequest.from(
     {
       headers,
       params,
-      query: query || {},
+      query,
       payload: body,
       path,
       method,
       url: {
         path,
-        query: query ? querystring.stringify(query) : query,
-        search: query ? `?${querystring.stringify(query)}` : query,
+        query: queryString,
+        search: queryString ? `?${queryString}` : queryString,
       },
       route: { settings: {} },
       raw: {

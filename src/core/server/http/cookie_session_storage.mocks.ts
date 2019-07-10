@@ -18,7 +18,7 @@
  */
 import { SessionStorageFactory, SessionStorage } from './session_storage';
 
-const creatSessionStorageMock = <T>(): jest.Mocked<SessionStorage<T>> => ({
+const createSessionStorageMock = <T>(): jest.Mocked<SessionStorage<T>> => ({
   get: jest.fn().mockResolvedValue({}),
   set: jest.fn(),
   clear: jest.fn(),
@@ -36,11 +36,11 @@ const creatSessionStorageFactoryMock = <T>() => {
   const mocked: DeepMocked<SessionStorageFactory<T>> = {
     asScoped: jest.fn(),
   };
-  mocked.asScoped.mockImplementation(creatSessionStorageMock);
+  mocked.asScoped.mockImplementation(createSessionStorageMock);
   return mocked;
 };
 
 export const sessionStorageMock = {
-  create: creatSessionStorageMock,
+  create: createSessionStorageMock,
   createFactory: creatSessionStorageFactoryMock,
 };
