@@ -41,7 +41,7 @@ describe('rison_helpers', () => {
     });
 
     test('returns false if a non string is sent in', () => {
-      expect(isRisonObject({})).toEqual(false);
+      expect(isRegularString({})).toEqual(false);
     });
   });
 });
