@@ -12,7 +12,7 @@ import { CONTEXT, TYPE_NULL } from '../constants';
 
 export const help: FunctionHelp<FunctionFactory<typeof clear>> = {
   help: i18n.translate('xpack.canvas.functions.clearHelpText', {
-    defaultMessage: 'Clears the {context}, and returns {null}.',
+    defaultMessage: 'Clears the {CONTEXT}, and returns {TYPE_NULL}.',
     values: {
       CONTEXT,
       TYPE_NULL,

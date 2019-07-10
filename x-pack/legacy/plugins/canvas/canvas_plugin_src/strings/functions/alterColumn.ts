@@ -13,7 +13,7 @@ import { DATATABLE_COLUMN_TYPES } from '../../../common/lib';
 export const help: FunctionHelp<FunctionFactory<typeof alterColumn>> = {
   help: i18n.translate('xpack.canvas.functions.alterColumnHelpText', {
     defaultMessage:
-      'Converts between core types, including {examples}, and rename columns. ' +
+      'Converts between core types, including {list}, and {end}, and rename columns. ' +
       'See also {mapColumnFn} and {staticColumnFn}.',
     values: {
       list: Object.values(DATATABLE_COLUMN_TYPES)

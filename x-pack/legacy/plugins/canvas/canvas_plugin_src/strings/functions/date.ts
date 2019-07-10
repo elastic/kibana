@@ -8,7 +8,7 @@ import { i18n } from '@kbn/i18n';
 import { date } from '../../functions/common/date';
 import { FunctionHelp } from '.';
 import { FunctionFactory } from '../../../types';
-import { ISO8601, MOMENTJS } from '../constants';
+import { ISO8601, MOMENTJS, JS } from '../constants';
 
 export const help: FunctionHelp<FunctionFactory<typeof date>> = {
   help: i18n.translate('xpack.canvas.functions.dateHelpText', {
@@ -19,11 +19,11 @@ export const help: FunctionHelp<FunctionFactory<typeof date>> = {
     value: i18n.translate('xpack.canvas.functions.date.args.valueHelpText', {
       defaultMessage:
         'An optional date string that is parsed into milliseconds since epoch. The date string can be either a valid ' +
-        '{js} {dateObj} input or a string to parse using the {format} argument. Must be an {ISO8601} ' +
+        '{JS} {date} input or a string to parse using the {formatArg} argument. Must be an {ISO8601} ' +
         'string, or you must provide the format.',
       values: {
-        js: 'JavaScript',
-        dateObj: '`Date`',
+        JS,
+        date: '`Date`',
         formatArg: '`format`',
         ISO8601,
       },

@@ -28,7 +28,7 @@ export const help: FunctionHelp<FunctionFactory<typeof repeatImage>> = {
     }),
     image: i18n.translate('xpack.canvas.functions.repeatImage.args.imageHelpText', {
       defaultMessage:
-        'The image to repeat. Provide an image asset as a {base64} data {url}, or pass in a sub-expression.',
+        'The image to repeat. Provide an image asset as a {BASE64} data {URL}, or pass in a sub-expression.',
       values: {
         BASE64,
         URL,

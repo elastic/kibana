@@ -16,7 +16,7 @@ const WHEN_ARG = '`when`';
 export const help: FunctionHelp<FunctionFactory<typeof caseFn>> = {
   help: i18n.translate('xpack.canvas.functions.caseHelpText', {
     defaultMessage:
-      'Builds a {case}, including a condition and a result, to pass to the {switch} function.',
+      'Builds a {case}, including a condition and a result, to pass to the {switchFn} function.',
     values: {
       case: '`case`',
       switchFn: '`switch`',
@@ -25,7 +25,7 @@ export const help: FunctionHelp<FunctionFactory<typeof caseFn>> = {
   args: {
     when: i18n.translate('xpack.canvas.functions.case.args.whenHelpText', {
       defaultMessage:
-        'The value compared to the {context} to see if they are equal. The {WHEN_ARG} argument is ignored when the {IF_ARG} argument is also specified.',
+        'The value compared to the {CONTEXT} to see if they are equal. The {WHEN_ARG} argument is ignored when the {IF_ARG} argument is also specified.',
       values: {
         CONTEXT,
         IF_ARG,
@@ -34,7 +34,7 @@ export const help: FunctionHelp<FunctionFactory<typeof caseFn>> = {
     }),
     if: i18n.translate('xpack.canvas.functions.case.args.ifHelpText', {
       defaultMessage:
-        'This value indicates whether the condition is met. The {IF_ARG} argument overrides the {WHEN_ARG} argument when both are provided.',
+        'This value indicates whether the condition is met, usually using a sub-expression. The {IF_ARG} argument overrides the {WHEN_ARG} argument when both are provided.',
       values: {
         IF_ARG,
         WHEN_ARG,

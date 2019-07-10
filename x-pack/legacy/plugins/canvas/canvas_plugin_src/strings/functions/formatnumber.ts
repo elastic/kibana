@@ -24,7 +24,7 @@ export const help: FunctionHelp<FunctionFactory<typeof formatnumber>> = {
         'A {NUMERALJS} format string. For example, {example1} or {example2}. See {url}.',
       values: {
         example1: `"0.0a"`,
-        exmaple2: `"0%"`,
+        example2: `"0%"`,
         NUMERALJS,
         url: 'http://numeraljs.com/#format',
       },

@@ -28,7 +28,7 @@ export const help: FunctionHelp<FunctionFactory<typeof revealImage>> = {
     emptyImage: i18n.translate('xpack.canvas.functions.revealImage.args.emptyImageHelpText', {
       defaultMessage:
         'An optional background image to reveal over. ' +
-        'Provide an image asset as a `{base64}` data {url}, or pass in a sub-expression.',
+        'Provide an image asset as a `{BASE64}` data {URL}, or pass in a sub-expression.',
       values: {
         BASE64,
         URL,

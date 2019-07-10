@@ -35,7 +35,6 @@ export const help: FunctionHelp<FunctionFactory<typeof plot>> = {
         positions: Object.values(Position)
           .map(position => `\`"${position}"\``)
           .join(', '),
-        false: 'false',
         BOOLEAN_FALSE,
       },
     }),

@@ -21,14 +21,14 @@ export const help: FunctionHelp<FunctionFactory<typeof axisConfig>> = {
   args: {
     max: i18n.translate('xpack.canvas.functions.axisConfig.args.maxHelpText', {
       defaultMessage:
-        'The maximum value displayed in the axis. Must be a number or a date in milliseconds since epoch or {iso} string.',
+        'The maximum value displayed in the axis. Must be a number or a date in milliseconds since epoch or {ISO8601} string.',
       values: {
         ISO8601,
       },
     }),
     min: i18n.translate('xpack.canvas.functions.axisConfig.args.minHelpText', {
       defaultMessage:
-        'The minimum value displayed in the axis. Must be a number or a date in {ms} or {iso} string.',
+        'The minimum value displayed in the axis. Must be a number or a date in milliseconds since epoch or {ISO8601} string.',
       values: {
         ISO8601,
       },
