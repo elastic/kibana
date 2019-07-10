@@ -283,9 +283,6 @@ export const PaginatedTable = memo<SiemTables>(
 );
 
 export const BasicTableContainer = styled.div`
-  display: flex;
-  flex-wrap: wrap;
-  height: auto;
   position: relative;
 `;
 

@@ -7,20 +7,19 @@
 import { EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiText, EuiTitle } from '@elastic/eui';
 import React from 'react';
 import { pure } from 'recompose';
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 
 import { InspectButton } from '../inspect';
 
 const Header = styled.header<{ border?: boolean }>`
-  ${props => `
-    margin-bottom: ${props.theme.eui.euiSizeL};
+  margin-bottom: ${props => props.theme.eui.euiSizeL};
 
-    ${props.border &&
-      `
+  ${props =>
+    props.border &&
+    css`
       border-bottom: ${props.theme.eui.euiBorderThin};
       padding-bottom: ${props.theme.eui.euiSizeL};
     `}
-  `}
 `;
 
 export interface HeaderPanelProps {
