@@ -67,7 +67,7 @@ export const SnapshotHistogramComponent = ({
         <EuiTitle size="xs">
           <h5>
             <FormattedMessage
-              id="xpack.uptime.snapshot.statusOverTimeTitle"
+              id="xpack.uptime.snapshot.pingsOverTimeTitle"
               defaultMessage="Pings over time"
             />
           </h5>
@@ -111,7 +111,7 @@ export const SnapshotHistogramComponent = ({
       <EuiTitle size="xs">
         <h5>
           <FormattedMessage
-            id="xpack.uptime.snapshot.statusOverTimeTitle"
+            id="xpack.uptime.snapshot.pingsOverTimeTitle"
             defaultMessage="Pings over time"
           />
         </h5>
