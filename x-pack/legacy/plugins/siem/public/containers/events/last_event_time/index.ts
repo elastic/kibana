@@ -36,9 +36,9 @@ export function useLastEventTimeQuery<TCache = object>(
   apolloClient: ApolloClient<TCache>
 ) {
   const [loading, updateLoading] = useState(false);
-  const [lastSeen, updateLastSeen] = useState(null);
-  const [errorMessage, updateErrorMessage] = useState(null);
-  const [currentIndexKey, updateCurrentIndexKey] = useState(null);
+  const [lastSeen, updateLastSeen] = useState<number | null>(null);
+  const [errorMessage, updateErrorMessage] = useState<string | null>(null);
+  const [currentIndexKey, updateCurrentIndexKey] = useState<LastEventIndexKey | null>(null);
   async function fetchLastEventTime() {
     updateLoading(true);
     return apolloClient

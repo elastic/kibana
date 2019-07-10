@@ -26,3 +26,4 @@ export { LicenseManagementPageProvider } from './license_management_page';
 export { IndexManagementPageProvider } from './index_management_page';
 export { IndexLifecycleManagementPageProvider } from './index_lifecycle_management_page';
 export { SnapshotRestorePageProvider } from './snapshot_restore_page';
+export { CrossClusterReplicationPageProvider } from './cross_cluster_replication_page';
