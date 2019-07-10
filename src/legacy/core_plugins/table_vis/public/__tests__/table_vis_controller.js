@@ -22,11 +22,15 @@ import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
 import { legacyResponseHandlerProvider } from 'ui/vis/response_handlers/legacy';
 import { VisProvider } from 'ui/vis';
+import { VisFactoryProvider } from 'ui/vis/vis_factory';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 import { AppStateProvider } from 'ui/state_management/app_state';
 import { tabifyAggResponse } from 'ui/agg_response/tabify';
 
-describe('Table Vis Controller', function () {
+import { createTableVisTypeDefinition } from '../table_vis_type';
+import { visualizations } from '../../../visualizations/public';
+
+describe('Table Vis - Controller', async function () {
   let $rootScope;
   let $compile;
   let Private;
@@ -37,10 +41,19 @@ describe('Table Vis Controller', function () {
   let AppState;
   let tableAggResponse;
   let tabifiedResponse;
+  let legacyDependencies;
 
   beforeEach(ngMock.module('kibana', 'kibana/table_vis'));
-  beforeEach(ngMock.inject(function ($injector) {
-    Private = $injector.get('Private');
+  beforeEach(ngMock.inject(function ($injector, Private) {
+    legacyDependencies = {
+      // eslint-disable-next-line new-cap
+      createAngularVisualization: VisFactoryProvider(Private).createAngularVisualization
+    };
+
+    visualizations.types.VisTypesRegistryProvider.register(() =>
+      createTableVisTypeDefinition(legacyDependencies)
+    );
+
     $rootScope = $injector.get('$rootScope');
     $compile = $injector.get('$compile');
     fixtures = require('fixtures/fake_hierarchical_data');

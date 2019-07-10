@@ -28,7 +28,11 @@ import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logsta
 import { VisProvider } from 'ui/vis';
 import { tabifyAggResponse } from 'ui/agg_response/tabify';
 
-describe('AggTable Directive', function () {
+import { VisFactoryProvider } from 'ui/vis/vis_factory';
+import { createTableVisTypeDefinition } from '../../table_vis_type';
+import { visualizations } from '../../../../visualizations/public';
+
+describe('Table Vis - AggTable Directive', function () {
 
   let $rootScope;
   let $compile;
@@ -36,6 +40,7 @@ describe('AggTable Directive', function () {
   let indexPattern;
   let settings;
   let tableAggResponse;
+  let legacyDependencies;
   const tabifiedData = {};
 
   const init = () => {
@@ -81,6 +86,15 @@ describe('AggTable Directive', function () {
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function ($injector, Private, config) {
+    legacyDependencies = {
+      // eslint-disable-next-line new-cap
+      createAngularVisualization: VisFactoryProvider(Private).createAngularVisualization
+    };
+
+    visualizations.types.VisTypesRegistryProvider.register(() =>
+      createTableVisTypeDefinition(legacyDependencies)
+    );
+
     tableAggResponse = legacyResponseHandlerProvider().handler;
     indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
     Vis = Private(VisProvider);
