@@ -44,7 +44,7 @@ export const WithWaffleNodes = ({
 }: WithWaffleNodesProps) => (
   <Query<WaffleNodesQuery.Query, WaffleNodesQuery.Variables>
     query={waffleNodesQuery}
-    fetchPolicy="no-cache"
+    fetchPolicy="network-only"
     notifyOnNetworkStatusChange
     variables={{
       sourceId,
@@ -55,15 +55,15 @@ export const WithWaffleNodes = ({
       filterQuery,
     }}
   >
-    {({ data, loading, refetch }) =>
-      children({
+    {({ data, loading, refetch, error }) => {
+      return children({
         loading,
         nodes:
-          data && data.source && data.source.snapshot && data.source.snapshot.nodes
+          !error && data && data.source && data.source.snapshot && data.source.snapshot.nodes
             ? data.source.snapshot.nodes
             : [],
         refetch,
-      })
-    }
+      });
+    }}
   </Query>
 );
