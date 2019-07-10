@@ -5,6 +5,7 @@
  */
 
 import {
+  SavedObject,
   SavedObjectsBulkGetObject,
   SavedObjectsClientContract,
 } from 'src/core/server/saved_objects';
@@ -53,11 +54,12 @@ export async function getInstallationObject(
 export async function installAssets(
   client: SavedObjectsClientContract,
   pkgkey: string,
-  asset: string
+  filter = (entry: Registry.ArchiveEntry): boolean => true
 ) {
-  const toBeSavedObjects = await Registry.getObjects(pkgkey, asset);
+  const toBeSavedObjects = await Registry.getObjects(pkgkey, filter);
   const createResults = await client.bulkCreate(toBeSavedObjects, { overwrite: true });
-  const installed = createResults.saved_objects.map(({ id, type }) => ({ id, type }));
+  const createdObjects: SavedObject[] = createResults.saved_objects;
+  const installed = createdObjects.map(({ id, type }) => ({ id, type }));
   const results = await client.create(
     SAVED_OBJECT_TYPE,
     { installed },

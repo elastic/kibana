@@ -4,12 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SavedObject, SavedObjectReference } from 'src/core/server/saved_objects';
+import { SavedObject } from 'src/core/server/saved_objects';
 import { RegistryList, RegistryPackage } from '../common/types';
 import { cacheGet, cacheSet, cacheHas } from './cache';
 import { ArchiveEntry, untarBuffer, unzipBuffer } from './extract';
 import { fetchUrl, getResponseStream } from './requests';
 import { streamToBuffer } from './streams';
+
+export { ArchiveEntry } from './extract';
 
 const REGISTRY = process.env.REGISTRY || 'http://integrations-registry.app.elstc.co';
 
@@ -28,9 +30,13 @@ export async function getArchiveInfo(
   const paths: string[] = [];
   const onEntry = (entry: ArchiveEntry) => {
     const { path, buffer } = entry;
-    paths.push(path);
+    const { file } = pathParts(path);
+    if (!file) return;
     if (cacheHas(path)) return;
-    if (buffer) cacheSet(path, buffer);
+    if (buffer) {
+      cacheSet(path, buffer);
+      paths.push(path);
+    }
   };
 
   await extract(key, filter, onEntry);
@@ -67,42 +73,48 @@ async function fetchArchiveBuffer(key: string): Promise<Buffer> {
   return getResponseStream(`${REGISTRY}/package/${key}`).then(streamToBuffer);
 }
 
-export async function getObjects(pkgkey: string, desiredType?: string): Promise<SavedObject[]> {
-  const paths = await getArchiveInfo(`${pkgkey}.tar.gz`);
-  const toBeSavedObjects = paths.reduce((map, path) => {
-    collectReferences(map, { path, desiredType });
-    return map;
-  }, new Map());
+export async function getObjects(
+  pkgkey: string,
+  filter = (entry: ArchiveEntry): boolean => true
+): Promise<SavedObject[]> {
+  // Create a Map b/c some values, especially index-patterns, are referenced multiple times
+  const objects: Map<string, SavedObject> = new Map();
 
-  return Array.from(toBeSavedObjects.values(), ensureJsonValues);
+  // Get paths which match the given filter
+  const paths = await getArchiveInfo(`${pkgkey}.tar.gz`, filter);
+
+  // Add all objects which matched filter to the Map
+  paths.map(getObject).forEach(obj => objects.set(obj.id, obj));
+
+  // Each of those objects might have `references` property like [{id, type, name}]
+  for (const object of objects.values()) {
+    // For each of those objects
+    for (const reference of object.references) {
+      // Get the objects they reference. Call same function with a new filter
+      const referencedObjects = await getObjects(pkgkey, (entry: ArchiveEntry) => {
+        // Skip anything we've already stored
+        if (objects.has(reference.id)) return false;
+
+        // Is the archive entry the reference we want?
+        const { type, file } = pathParts(entry.path);
+        const isType = type === reference.type;
+        const isJson = file === `${reference.id}.json`;
+        return isType && isJson;
+      });
+
+      // Add referenced objects to the Map
+      referencedObjects.forEach(ro => objects.set(ro.id, ro));
+    }
+  }
+
+  // return the array of unique objects
+  return Array.from(objects.values());
 }
 
-interface CollectReferencesOptions {
-  path: string;
-  desiredType?: string; // TODO: from enum or similar of acceptable asset types
-}
-function collectReferences(
-  toBeSavedObjects: Map<string, SavedObject> = new Map(),
-  { path, desiredType }: CollectReferencesOptions
-) {
+export function pathParts(path: string) {
   const [pkgkey, service, type, file] = path.split('/');
-  if (type !== desiredType) return;
-  if (toBeSavedObjects.has(path)) return;
-  if (!/\.json$/.test(path)) return;
 
-  const asset = getAsset(path);
-  if (!asset.type) asset.type = type;
-  if (!asset.id) asset.id = file.replace('.json', '');
-  toBeSavedObjects.set(path, asset);
-
-  const references: SavedObjectReference[] = asset.references;
-  return references.reduce((map, reference) => {
-    collectReferences(toBeSavedObjects, {
-      path: `${pkgkey}/${service}/${reference.type}/${reference.id}.json`,
-      desiredType: reference.type,
-    });
-    return map;
-  }, toBeSavedObjects);
+  return { pkgkey, service, type, file };
 }
 
 // the assets from the registry are malformed
@@ -125,8 +137,20 @@ function ensureJsonValues(obj: SavedObject) {
 
 function getAsset(key: string) {
   const value = cacheGet(key);
-  if (value !== undefined) {
-    const json = value.toString('utf8');
-    return JSON.parse(json);
-  }
+  if (value === undefined) throw new Error(`Cannot find asset ${key}`);
+
+  const json = value.toString('utf8');
+  const asset = JSON.parse(json);
+
+  return asset;
+}
+
+function getObject(key: string) {
+  const asset = getAsset(key);
+  const { type, file } = pathParts(key);
+
+  if (!asset.type) asset.type = type;
+  if (!asset.id) asset.id = file.replace('.json', '');
+
+  return ensureJsonValues(asset);
 }

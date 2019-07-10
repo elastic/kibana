@@ -5,6 +5,7 @@
  */
 
 import { Request, InstallationSavedObject } from '../../common/types';
+import { ArchiveEntry, pathParts } from '../registry';
 import { getClient } from '../saved_objects';
 import { getIntegrations, getIntegrationInfo, installAssets, removeInstallation } from './data';
 
@@ -19,6 +20,9 @@ interface InstallAssetRequest extends PackageRequest {
     asset: string;
   };
 }
+
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+interface DeleteAssetRequest extends InstallAssetRequest {}
 
 export async function handleGetList(req: Request) {
   const client = getClient(req);
@@ -41,7 +45,10 @@ export async function handleRequestInstall(req: InstallAssetRequest) {
 
   if (asset === 'dashboard') {
     const client = getClient(req);
-    const object = await installAssets(client, pkgkey, asset);
+    const object = await installAssets(client, pkgkey, (entry: ArchiveEntry) => {
+      const { type } = pathParts(entry.path);
+      return type === asset;
+    });
 
     created.push(object);
   }
@@ -53,7 +60,7 @@ export async function handleRequestInstall(req: InstallAssetRequest) {
   };
 }
 
-export async function handleRequestDelete(req: InstallAssetRequest) {
+export async function handleRequestDelete(req: DeleteAssetRequest) {
   const { pkgkey, asset } = req.params;
   const client = getClient(req);
   const deleted = await removeInstallation(client, pkgkey);
