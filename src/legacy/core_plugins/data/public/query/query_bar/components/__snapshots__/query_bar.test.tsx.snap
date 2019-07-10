@@ -31,7 +31,7 @@ exports[`QueryBar Should render the given query 1`] = `
       }
       isDirty={false}
       onChange={[Function]}
-      onClose={[Function]}
+      onClearSavedQuery={[Function]}
       onLoadSavedQuery={[Function]}
       onSave={[Function]}
       onSaveNew={[Function]}
