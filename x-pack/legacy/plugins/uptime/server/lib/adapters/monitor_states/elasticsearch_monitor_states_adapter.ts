@@ -176,14 +176,9 @@ export class ElasticsearchMonitorStatesAdapter implements UMMonitorStatesAdapter
           bool: {
             filter: [
               { terms: { 'monitor.check_group': checkGroups } },
-              {
-                range: {
-                  '@timestamp': {
-                    gte: dateRangeStart,
-                    lte: dateRangeEnd,
-                  },
-                },
-              },
+              // Even though this work is already done when calculating the groups
+              // this helps the planner
+              query,
             ],
           },
         },
