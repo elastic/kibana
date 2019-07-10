@@ -48,6 +48,13 @@ exports[`it renders without crashing 1`] = `
       labelType="label"
     >
       <ClusterPrivileges
+        availableClusterPrivileges={
+          Array [
+            "all",
+            "manage",
+            "monitor",
+          ]
+        }
         onChange={[Function]}
         role={
           Object {
@@ -163,6 +170,14 @@ exports[`it renders without crashing 1`] = `
   <IndexPrivileges
     allowDocumentLevelSecurity={true}
     allowFieldLevelSecurity={true}
+    availableIndexPrivileges={
+      Array [
+        "all",
+        "read",
+        "write",
+        "index",
+      ]
+    }
     httpClient={[MockFunction]}
     indexPatterns={Array []}
     onChange={[MockFunction]}
