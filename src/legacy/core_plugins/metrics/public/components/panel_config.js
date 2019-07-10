@@ -16,9 +16,8 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 import PropTypes from 'prop-types';
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { TimeseriesPanelConfig as timeseries } from './panel_config/timeseries';
 import { MetricPanelConfig as metric } from './panel_config/metric';
 import { TopNPanelConfig as topN } from './panel_config/top_n';
@@ -26,6 +25,7 @@ import { TablePanelConfig as table } from './panel_config/table';
 import { GaugePanelConfig as gauge } from './panel_config/gauge';
 import { MarkdownPanelConfig as markdown } from './panel_config/markdown';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { FormValidationContext } from '../contexts/form_validation_context';
 
 const types = {
   timeseries,
@@ -36,12 +36,30 @@ const types = {
   markdown,
 };
 
+const checkModelValidity = validationResults =>
+  Boolean(Object.values(validationResults).every(isValid => isValid));
+
 export function PanelConfig(props) {
   const { model } = props;
-  const component = types[model.type];
-  if (component) {
-    return React.createElement(component, props);
+  const Component = types[model.type];
+  const [formValidationResults] = useState({});
+
+  useEffect(() => {
+    model.isModelInvalid = !checkModelValidity(formValidationResults);
+  });
+
+  const updateControlValidity = (controlKey, isControlValid) => {
+    formValidationResults[controlKey] = isControlValid;
+  };
+
+  if (Component) {
+    return (
+      <FormValidationContext.Provider value={updateControlValidity}>
+        <Component {...props} />
+      </FormValidationContext.Provider>
+    );
   }
+
   return (
     <div>
       <FormattedMessage

@@ -48,6 +48,8 @@ export {
   Headers,
   ScopedClusterClient,
   ElasticsearchClientConfig,
+  ElasticsearchError,
+  ElasticsearchErrorHelpers,
   APICaller,
   FakeRequest,
   LegacyRequest,
@@ -120,6 +122,7 @@ export interface CoreSetup {
     registerOnPostAuth: HttpServiceSetup['registerOnPostAuth'];
     basePath: HttpServiceSetup['basePath'];
     createNewServer: HttpServiceSetup['createNewServer'];
+    isTlsEnabled: HttpServiceSetup['isTlsEnabled'];
   };
 }
 
