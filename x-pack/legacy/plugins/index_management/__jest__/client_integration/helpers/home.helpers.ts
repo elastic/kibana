@@ -84,6 +84,8 @@ type IdxMgmtTestSubjects = TestSubjects;
 export type TestSubjects =
   | 'appTitle'
   | 'cell'
+  | 'deleteTemplateButton'
+  | 'deleteTemplatesButton'
   | 'deleteTemplatesConfirmation'
   | 'documentationLink'
   | 'emptyPrompt'
@@ -91,6 +93,7 @@ export type TestSubjects =
   | 'reloadButton'
   | 'row'
   | 'sectionLoading'
+  | 'systemTemplatesSwitch'
   | 'tab'
   | 'templatesList'
   | 'templatesTable';

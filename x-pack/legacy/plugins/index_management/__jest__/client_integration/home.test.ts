@@ -124,6 +124,9 @@ describe.skip('<IndexManagementHome />', () => {
           settings: {
             index: {
               number_of_shards: '1',
+              lifecycle: {
+                name: 'my_ilm_policy',
+              },
             },
           },
         });
@@ -132,7 +135,7 @@ describe.skip('<IndexManagementHome />', () => {
           indexPatterns: ['template2Pattern1*'],
         });
         const template3 = fixtures.getTemplate({
-          name: `c${getRandomString()}`,
+          name: `.c${getRandomString()}`, // mock system template
           indexPatterns: ['template3Pattern1*', 'template3Pattern2', 'template3Pattern3'],
         });
 
@@ -159,14 +162,18 @@ describe.skip('<IndexManagementHome />', () => {
 
           tableCellsValues.forEach((row, i) => {
             const template = templates[i];
-            const { name, indexPatterns, order, version } = template;
+            const { name, indexPatterns, order, settings } = template;
+            const ilmPolicyName =
+              settings && settings.index && settings.index.lifecycle
+                ? settings.index.lifecycle.name
+                : '';
 
             expect(removeWhiteSpaceOnArrayValues(row)).toEqual([
               '',
               name,
               indexPatterns.join(', '),
+              ilmPolicyName,
               order.toString(),
-              version.toString(),
               '',
               '',
               '',
@@ -192,15 +199,69 @@ describe.skip('<IndexManagementHome />', () => {
           expect(server.requests[server.requests.length - 1].url).toBe(`${API_PATH}/templates`);
         });
 
-        test('should have action buttons on each row to delete an index template', () => {
-          const { table } = testBed;
+        test('should have a switch to view system templates', async () => {
+          const { table, exists, component, form } = testBed;
           const { rows } = table.getMetaData('templatesTable');
-          const lastColumn = rows[0].columns[rows[0].columns.length - 1].reactWrapper;
 
-          expect(findTestSubject(lastColumn, 'deleteTemplateButton').length).toBe(1);
+          expect(rows.length).toEqual(
+            templates.filter(template => !template.name.startsWith('.')).length
+          );
+
+          expect(exists('systemTemplatesSwitch')).toBe(true);
+
+          // @ts-ignore (remove when react 16.9.0 is released)
+          await act(async () => {
+            form.toggleEuiSwitch('systemTemplatesSwitch');
+            await nextTick();
+            component.update();
+          });
+
+          const { rows: updatedRows } = table.getMetaData('templatesTable');
+          expect(updatedRows.length).toEqual(templates.length);
+        });
+
+        describe('system template', () => {
+          beforeEach(async () => {
+            const { component, form } = testBed;
+
+            // @ts-ignore (remove when react 16.9.0 is released)
+            await act(async () => {
+              form.toggleEuiSwitch('systemTemplatesSwitch');
+              await nextTick();
+              component.update();
+            });
+          });
+
+          test('should disable delete actions', async () => {
+            const { table } = testBed;
+            const { rows } = table.getMetaData('templatesTable');
+            const systemTemplate = rows[0];
+
+            const firstColumn = systemTemplate.columns[0].reactWrapper;
+            const lastColumn = systemTemplate.columns[rows[0].columns.length - 1].reactWrapper;
+
+            expect(
+              findTestSubject(firstColumn, `checkboxSelectRow-${template3.name}`)
+                .getDOMNode()
+                .getAttribute('disabled')
+            ).toEqual('');
+            expect(
+              findTestSubject(lastColumn, 'deleteTemplateButton')
+                .getDOMNode()
+                .getAttribute('disabled')
+            ).toEqual('');
+          });
         });
 
         describe('delete index template', () => {
+          test('should have action buttons on each row to delete an index template', () => {
+            const { table } = testBed;
+            const { rows } = table.getMetaData('templatesTable');
+            const lastColumn = rows[0].columns[rows[0].columns.length - 1].reactWrapper;
+
+            expect(findTestSubject(lastColumn, 'deleteTemplateButton').length).toBe(1);
+          });
+
           test('should show a confirmation when clicking the delete template button', async () => {
             const { actions } = testBed;
 

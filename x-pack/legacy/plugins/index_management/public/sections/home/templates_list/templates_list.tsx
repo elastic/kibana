@@ -83,6 +83,7 @@ export const TemplatesList: React.FunctionComponent = () => {
         <EuiSpacer size="m" />
         <EuiSwitch
           id="checkboxShowSystemIndexTemplates"
+          data-test-subj="systemTemplatesSwitch"
           checked={showSystemTemplates}
           onChange={event => setShowSystemTemplates(event.target.checked)}
           label={
