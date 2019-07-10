@@ -20,7 +20,7 @@
 import { cloneDeep } from 'lodash';
 import { IKey, logging } from 'selenium-webdriver';
 import request from 'request';
-import { takeUntil } from 'rxjs/operators';
+import { takeUntil, mergeMap } from 'rxjs/operators';
 
 import { modifyUrl } from '../../../src/core/utils';
 import { WebElementWrapper } from './lib/web_element_wrapper';
@@ -32,11 +32,14 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
   const log = getService('log');
   const config = getService('config');
   const lifecycle = getService('lifecycle');
+  const coverage = getService('coverage');
   const { driver, Key, LegacyActionSequence, browserType } = await getService(
     '__webdriver__'
   ).init();
 
   const isW3CEnabled = (driver as any).executor_.w3c === true;
+
+  const coveragePrefix = 'coveragejson:';
 
   if (!isW3CEnabled) {
     // The logs endpoint has not been defined in W3C Spec browsers other than Chrome don't have access to this endpoint.
@@ -44,13 +47,34 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
     // See: https://w3c.github.io/webdriver/#endpoints
 
     pollForLogEntry$(driver, logging.Type.BROWSER, config.get('browser.logPollingMs'))
-      .pipe(takeUntil(lifecycle.cleanup$))
+      .pipe(
+        mergeMap(logEntry => {
+          log.debug(`logEntry check, length = ${logEntry.message.length}`);
+          if (logEntry.message.indexOf(coveragePrefix) > -1) {
+            log.debug(`logEntry check: adding coverage`);
+            coverage.addCoverage(logEntry.message.split(coveragePrefix)[1]);
+            return [];
+          }
+
+          return [logEntry];
+        }),
+        takeUntil(lifecycle.cleanup$)
+      )
       .subscribe({
         next({ message, level: { name: level } }) {
           const msg = message.replace(/\\n/g, '\n');
           log[level === 'SEVERE' ? 'error' : 'debug'](`browser[${level}] ${msg}`);
         },
       });
+
+    // pollForLogEntry$(driver, logging.Type.BROWSER, config.get('browser.logPollingMs'))
+    //   .pipe(takeUntil(lifecycle.cleanup$))
+    //   .subscribe({
+    //     next({ message, level: { name: level } }) {
+    //       const msg = message.replace(/\\n/g, '\n');
+    //       log[level === 'SEVERE' ? 'error' : 'debug'](`browser[${level}] ${msg}`);
+    //     },
+    //   });
   }
 
   return new (class BrowserService {
@@ -132,7 +156,7 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
      * @return {Promise<void>}
      */
     public async get(url: string, insertTimestamp: boolean = true): Promise<void> {
-      await this.loadTestCoverage();
+      // await this.loadTestCoverage();
       if (insertTimestamp) {
         const urlWithTime = modifyUrl(url, parsed => {
           (parsed.query as any)._t = Date.now();
@@ -287,7 +311,7 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
      * @return {Promise<void>}
      */
     public async refresh(): Promise<void> {
-      await this.loadTestCoverage();
+      // await this.loadTestCoverage();
       await driver.navigate().refresh();
     }
 
@@ -298,7 +322,7 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
      * @return {Promise<void>}
      */
     public async goBack(): Promise<void> {
-      await this.loadTestCoverage();
+      // await this.loadTestCoverage();
       await driver.navigate().back();
     }
 
@@ -499,8 +523,9 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
       return await driver.executeScript('return window.__coverage__;');
     }
 
-    public async loadTestCoverage(): Promise<void> {
-      const obj = await this.getTestCoverage();
+    public async loadTestCoverage(data: any): Promise<void> {
+      const obj = data ? data : await this.getTestCoverage();
+
       if (obj !== null) {
         // eslint-disable-next-line no-console
         console.log(`sending code coverage`);

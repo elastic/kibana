@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import request from 'request';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { initWebDriver } from './webdriver';
 import { Browsers } from './browsers';
@@ -25,11 +26,36 @@ export async function RemoteProvider({ getService }: FtrProviderContext) {
   const lifecycle = getService('lifecycle');
   const log = getService('log');
   const config = getService('config');
+  const coverage = getService('coverage');
   const browserType: Browsers = config.get('browser.type');
 
   const { driver, By, Key, until, LegacyActionSequence } = await initWebDriver(log, browserType);
   const caps = await driver.getCapabilities();
   const browserVersion = caps.get(browserType === Browsers.Chrome ? 'version' : 'browserVersion');
+
+  const loadTestCoverage = async (obj: any): Promise<void> => {
+    if (obj !== null) {
+      // eslint-disable-next-line no-console
+      console.log(`sending code coverage`);
+      await request(
+        {
+          url: `http://localhost:6969/coverage/client`,
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(obj),
+        },
+        (error, response, body) => {
+          // eslint-disable-next-line no-console
+          console.log(`error: ${error}`);
+        }
+      );
+    } else {
+      // eslint-disable-next-line no-console
+      console.log(`no code coverage to send`);
+    }
+  };
 
   log.info(`Remote initialized: ${caps.get('browserName')} ${browserVersion}`);
 
@@ -53,8 +79,8 @@ export async function RemoteProvider({ getService }: FtrProviderContext) {
   });
 
   lifecycle.on('afterEachTest', async () => {
-    const browser = getService('browser');
-    await browser.loadTestCoverage();
+    // const browser = getService('browser');
+    // await browser.loadTestCoverage();
   });
 
   lifecycle.on('afterTestSuite', async () => {
@@ -62,7 +88,15 @@ export async function RemoteProvider({ getService }: FtrProviderContext) {
     await (driver.manage().window() as any).setRect({ width, height });
   });
 
-  lifecycle.on('cleanup', async () => await driver.quit());
+  lifecycle.on('cleanup', async () => {
+    const lastData = await driver.executeScript('return window.__coverage__;');
+    await driver.quit();
+    const data = coverage.getCoverage();
+    for (let i = 0; i < data.length; i++) {
+      await loadTestCoverage(data[i]);
+    }
+    await loadTestCoverage(lastData);
+  });
 
   return { driver, By, Key, until, LegacyActionSequence, browserType };
 }

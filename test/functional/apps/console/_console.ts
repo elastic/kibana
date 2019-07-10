@@ -35,7 +35,6 @@ GET _search
 export default function({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const log = getService('log');
-  const browser = getService('browser');
   const PageObjects = getPageObjects(['common', 'console']);
 
   describe('console app', function describeIndexTests() {
