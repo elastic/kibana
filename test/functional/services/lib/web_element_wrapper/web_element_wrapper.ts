@@ -45,6 +45,12 @@ export class WebElementWrapper {
   private By: typeof By = this.webDriver.By;
   private Keys: IKey = this.webDriver.Key;
   private driver: WebDriver = this.webDriver.driver;
+  private retryAttempts: number = 3;
+  private errors = [
+    'ElementClickInterceptedError',
+    'ElementNotInteractableError',
+    'StaleElementReferenceError',
+  ];
   public _webElement: WebElement = this.webElement as WebElement;
   public LegacyAction: any = this.webDriver.LegacyActionSequence;
 
@@ -92,26 +98,22 @@ export class WebElementWrapper {
     return otherWebElements.map(e => this._wrap(e));
   }
 
-  private retryCount: number = 3;
-
-  private async retryCall(fn: Function, n: number = this.retryCount): Promise<any> {
-    const errors = [
-      'ElementClickInterceptedError',
-      'ElementNotInteractableError',
-      'StaleElementReferenceError',
-    ];
+  private async retryCall(
+    fn: Function,
+    attemptsRemaining: number = this.retryAttempts
+  ): Promise<any> {
     try {
       return await fn(this);
     } catch (err) {
-      if (!errors.includes(err.name) || this.locator === null || n === 1) throw err;
-      this.logger.debug(`${fn.name}: ${err.message}`);
+      if (!this.errors.includes(err.name) || this.locator === null || attemptsRemaining === 0)
+        throw err;
+      this.logger.warning(`WebElementWrapper.${fn.name}: ${err.message}`);
       this.logger.debug(
-        `WebElementWrapper: searching element '${this.locator.toString()}', ${n - 1} attempts left`
+        `Researching element '${this.locator.toString()}', ${attemptsRemaining - 1} attempts left`
       );
       await delay(200);
-      const element = await this.driver.findElement(this.locator);
-      this.webElement = element;
-      return await this.retryCall(fn, n - 1);
+      this.webElement = await this.driver.findElement(this.locator);
+      return await this.retryCall(fn, attemptsRemaining - 1);
     }
   }
 
