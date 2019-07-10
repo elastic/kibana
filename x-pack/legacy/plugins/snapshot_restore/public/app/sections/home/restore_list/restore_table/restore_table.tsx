@@ -11,7 +11,7 @@ import { RIGHT_ALIGNMENT } from '@elastic/eui/lib/services';
 import { SnapshotRestore } from '../../../../../../common/types';
 import { UIM_RESTORE_LIST_EXPAND_INDEX } from '../../../../constants';
 import { useAppDependencies } from '../../../../index';
-import { uiMetricService } from '../../../../services/ui_metric';
+import { trackUiMetric } from '../../../../services/ui_metric';
 import { formatDate } from '../../../../services/text';
 import { ShardsTable } from './shards_table';
 
@@ -24,7 +24,6 @@ export const RestoreTable: React.FunctionComponent<Props> = ({ restores }) => {
     core: { i18n },
   } = useAppDependencies();
   const { FormattedMessage } = i18n;
-  const { trackUiMetric } = uiMetricService;
 
   // Track restores to show based on sort and pagination state
   const [currentRestores, setCurrentRestores] = useState<SnapshotRestore[]>([]);

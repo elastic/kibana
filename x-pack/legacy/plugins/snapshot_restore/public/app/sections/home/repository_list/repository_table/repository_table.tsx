@@ -22,7 +22,7 @@ import { RepositoryDeleteProvider } from '../../../../components';
 import { BASE_PATH, UIM_REPOSITORY_SHOW_DETAILS_CLICK } from '../../../../constants';
 import { useAppDependencies } from '../../../../index';
 import { textService } from '../../../../services/text';
-import { uiMetricService } from '../../../../services/ui_metric';
+import { trackUiMetric } from '../../../../services/ui_metric';
 
 interface Props {
   repositories: Repository[];
@@ -43,7 +43,6 @@ export const RepositoryTable: React.FunctionComponent<Props> = ({
     core: { i18n },
   } = useAppDependencies();
   const { FormattedMessage } = i18n;
-  const { trackUiMetric } = uiMetricService;
   const [selectedItems, setSelectedItems] = useState<Repository[]>([]);
 
   const columns = [

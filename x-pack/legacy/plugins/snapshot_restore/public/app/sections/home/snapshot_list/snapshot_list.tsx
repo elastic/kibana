@@ -16,7 +16,7 @@ import { useAppDependencies } from '../../../index';
 import { documentationLinksService } from '../../../services/documentation';
 import { useLoadSnapshots } from '../../../services/http';
 import { linkToRepositories } from '../../../services/navigation';
-import { uiMetricService } from '../../../services/ui_metric';
+import { trackUiMetric } from '../../../services/ui_metric';
 
 import { SnapshotDetails } from './snapshot_details';
 import { SnapshotTable } from './snapshot_table';
@@ -91,7 +91,6 @@ export const SnapshotList: React.FunctionComponent<RouteComponentProps<MatchPara
   }, []);
 
   // Track component loaded
-  const { trackUiMetric } = uiMetricService;
   useEffect(() => {
     trackUiMetric(UIM_SNAPSHOT_LIST_LOAD);
   }, []);

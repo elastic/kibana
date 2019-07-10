@@ -13,7 +13,7 @@ import { SectionError, SectionLoading } from '../../../components';
 import { BASE_PATH, UIM_REPOSITORY_LIST_LOAD } from '../../../constants';
 import { useAppDependencies } from '../../../index';
 import { useLoadRepositories } from '../../../services/http';
-import { uiMetricService } from '../../../services/ui_metric';
+import { trackUiMetric } from '../../../services/ui_metric';
 
 import { RepositoryDetails } from './repository_details';
 import { RepositoryTable } from './repository_table';
@@ -64,7 +64,6 @@ export const RepositoryList: React.FunctionComponent<RouteComponentProps<MatchPa
   };
 
   // Track component loaded
-  const { trackUiMetric } = uiMetricService;
   useEffect(() => {
     trackUiMetric(UIM_REPOSITORY_LIST_LOAD);
   }, []);

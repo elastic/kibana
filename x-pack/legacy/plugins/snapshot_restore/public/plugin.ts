@@ -15,7 +15,7 @@ import { breadcrumbService } from './app/services/navigation';
 import { documentationLinksService } from './app/services/documentation';
 import { init as initHttp } from './app/services/http';
 import { textService } from './app/services/text';
-import { uiMetricService } from './app/services/ui_metric';
+import { init as initUiMetric } from './app/services/ui_metric';
 
 const REACT_ROOT_ID = 'snapshotRestoreReactRoot';
 
@@ -39,7 +39,7 @@ export class Plugin {
     textService.init(i18n);
     breadcrumbService.init(chrome, management.constants.BREADCRUMB);
     documentationLinksService.init(documentation.esDocBasePath, documentation.esPluginDocBasePath);
-    uiMetricService.init(uiMetric.track);
+    initUiMetric(uiMetric.track);
 
     const unmountReactApp = (): void => {
       const elem = document.getElementById(REACT_ROOT_ID);

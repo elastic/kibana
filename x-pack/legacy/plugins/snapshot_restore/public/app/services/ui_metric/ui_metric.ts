@@ -3,18 +3,15 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+
 import { UIM_APP_NAME } from '../../constants';
 
-class UiMetricService {
-  public track: any = () => {};
+let _track: any;
 
-  public init = (track: any): void => {
-    this.track = track;
-  };
-
-  public trackUiMetric = (actionType: string): any => {
-    return this.track(UIM_APP_NAME, actionType);
-  };
+export function init(track: any): void {
+  _track = track;
 }
 
-export const uiMetricService = new UiMetricService();
+export function trackUiMetric(actionType: string): any {
+  return _track(UIM_APP_NAME, actionType);
+}

@@ -20,7 +20,7 @@ import { BASE_PATH, SNAPSHOT_STATE, UIM_SNAPSHOT_SHOW_DETAILS_CLICK } from '../.
 import { useAppDependencies } from '../../../../index';
 import { formatDate } from '../../../../services/text';
 import { linkToRepository } from '../../../../services/navigation';
-import { uiMetricService } from '../../../../services/ui_metric';
+import { trackUiMetric } from '../../../../services/ui_metric';
 import { DataPlaceholder, SnapshotDeleteProvider } from '../../../../components';
 
 interface Props {
@@ -44,7 +44,6 @@ export const SnapshotTable: React.FunctionComponent<Props> = ({
     core: { i18n },
   } = useAppDependencies();
   const { FormattedMessage } = i18n;
-  const { trackUiMetric } = uiMetricService;
   const [selectedItems, setSelectedItems] = useState<SnapshotDetails[]>([]);
 
   const columns = [

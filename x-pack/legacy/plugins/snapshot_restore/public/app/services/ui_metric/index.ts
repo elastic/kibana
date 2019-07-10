@@ -3,4 +3,5 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-export { uiMetricService } from './ui_metric';
+
+export { init, trackUiMetric } from './ui_metric';

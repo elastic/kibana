@@ -32,7 +32,7 @@ import {
 } from '../../../../constants';
 import { useLoadSnapshot } from '../../../../services/http';
 import { linkToRepository } from '../../../../services/navigation';
-import { uiMetricService } from '../../../../services/ui_metric';
+import { trackUiMetric } from '../../../../services/ui_metric';
 import { TabSummary, TabFailures } from './tabs';
 
 interface Props {
@@ -60,7 +60,6 @@ export const SnapshotDetails: React.FunctionComponent<Props> = ({
     core: { i18n },
   } = useAppDependencies();
   const { FormattedMessage } = i18n;
-  const { trackUiMetric } = uiMetricService;
   const { error, data: snapshotDetails } = useLoadSnapshot(repositoryName, snapshotId);
 
   const [activeTab, setActiveTab] = useState<string>(TAB_SUMMARY);
