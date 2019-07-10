@@ -13,3 +13,4 @@ export {
   AuthenticatedUser,
   canUserChangePassword,
 } from '../../../../../plugins/security/common/model';
+export { BuiltinESPrivileges } from './builtin_es_privileges';
