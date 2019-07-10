@@ -24,67 +24,65 @@ interface QueryStringType {
   timerange: string | null;
 }
 
-export const MlHostConditionalContainer = React.memo<MlHostConditionalProps>(({ match }) => {
-  return (
-    <Switch>
-      <Route
-        strict
-        exact
-        path={match.url}
-        render={({ location }) => {
-          const queryStringDecoded: QueryStringType = QueryString.decode(
-            location.search.substring(1)
-          );
+export const MlHostConditionalContainer = React.memo<MlHostConditionalProps>(({ match }) => (
+  <Switch>
+    <Route
+      strict
+      exact
+      path={match.url}
+      render={({ location }) => {
+        const queryStringDecoded: QueryStringType = QueryString.decode(
+          location.search.substring(1)
+        );
+        if (queryStringDecoded.kqlQuery != null) {
+          queryStringDecoded.kqlQuery = replaceKQLParts(queryStringDecoded.kqlQuery);
+        }
+        const reEncoded = QueryString.encode(queryStringDecoded);
+        return <Redirect to={`/hosts?${reEncoded}`} />;
+      }}
+    />
+    <Route
+      path={`${match.url}/:hostName`}
+      render={({
+        location,
+        match: {
+          params: { hostName },
+        },
+      }) => {
+        const queryStringDecoded: QueryStringType = QueryString.decode(
+          location.search.substring(1)
+        );
+        if (queryStringDecoded.kqlQuery != null) {
+          queryStringDecoded.kqlQuery = replaceKQLParts(queryStringDecoded.kqlQuery);
+        }
+        if (emptyEntity(hostName)) {
           if (queryStringDecoded.kqlQuery != null) {
-            queryStringDecoded.kqlQuery = replaceKQLParts(queryStringDecoded.kqlQuery);
+            queryStringDecoded.kqlQuery = replaceKqlQueryLocationForHostPage(
+              queryStringDecoded.kqlQuery
+            );
           }
           const reEncoded = QueryString.encode(queryStringDecoded);
           return <Redirect to={`/hosts?${reEncoded}`} />;
-        }}
-      />
-      <Route
-        path={`${match.url}/:hostName`}
-        render={({
-          location,
-          match: {
-            params: { hostName },
-          },
-        }) => {
-          const queryStringDecoded: QueryStringType = QueryString.decode(
-            location.search.substring(1)
-          );
+        } else if (multipleEntities(hostName)) {
+          const hosts: string[] = getMultipleEntities(hostName);
           if (queryStringDecoded.kqlQuery != null) {
-            queryStringDecoded.kqlQuery = replaceKQLParts(queryStringDecoded.kqlQuery);
+            queryStringDecoded.kqlQuery = addEntitiesToKql(
+              ['host.name'],
+              hosts,
+              queryStringDecoded.kqlQuery
+            );
+            queryStringDecoded.kqlQuery = replaceKqlQueryLocationForHostPage(
+              queryStringDecoded.kqlQuery
+            );
           }
-          if (emptyEntity(hostName)) {
-            if (queryStringDecoded.kqlQuery != null) {
-              queryStringDecoded.kqlQuery = replaceKqlQueryLocationForHostPage(
-                queryStringDecoded.kqlQuery
-              );
-            }
-            const reEncoded = QueryString.encode(queryStringDecoded);
-            return <Redirect to={`/hosts?${reEncoded}`} />;
-          } else if (multipleEntities(hostName)) {
-            const hosts: string[] = getMultipleEntities(hostName);
-            if (queryStringDecoded.kqlQuery != null) {
-              queryStringDecoded.kqlQuery = addEntitiesToKql(
-                ['host.name'],
-                hosts,
-                queryStringDecoded.kqlQuery
-              );
-              queryStringDecoded.kqlQuery = replaceKqlQueryLocationForHostPage(
-                queryStringDecoded.kqlQuery
-              );
-            }
-            const reEncoded = QueryString.encode(queryStringDecoded);
-            return <Redirect to={`/hosts?${reEncoded}`} />;
-          } else {
-            const reEncoded = QueryString.encode(queryStringDecoded);
-            return <Redirect to={`/hosts/${hostName}?${reEncoded}`} />;
-          }
-        }}
-      />
-      <Redirect from="/ml-hosts/" to="/ml-hosts" />
-    </Switch>
-  );
-});
+          const reEncoded = QueryString.encode(queryStringDecoded);
+          return <Redirect to={`/hosts?${reEncoded}`} />;
+        } else {
+          const reEncoded = QueryString.encode(queryStringDecoded);
+          return <Redirect to={`/hosts/${hostName}?${reEncoded}`} />;
+        }
+      }}
+    />
+    <Redirect from="/ml-hosts/" to="/ml-hosts" />
+  </Switch>
+));
