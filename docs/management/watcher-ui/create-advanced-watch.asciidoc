@@ -1,54 +1,46 @@
+[role="xpack"]
 [[watcher-create-advanced-watch]]
-=== Create Advanced Watch
+=== Create an advanced watch
 
-Advanced watches are for people who are more familiar with Elasticsearch query syntax and the watcher framework overall. The creation UI is more closely aligned with using the REST apis directly. For 
-more information, see {ref}/query-dsl.html[Query DSL].
+Advanced watches are for users who are more familiar with {es} query syntax and 
+the Watcher framework. The UI is aligned with using the REST APIs. 
+For more information, see {ref}/query-dsl.html[Query DSL].
 
-To create an advanced watch:
-
-* Click the *Create advanced watch* button.
-
-==== Advanced Watch UI
-
-This screen lets you define the core properties of an advanced watch.
-
-[role="screenshot"]
-image:management/watcher-ui/images/advanced-watch/advanced-watch-create.png["Create Advanced Watch",link="management/watcher-ui/images/advanced-watch/advanced-watch-create.png"]
-
-The `ID` refers to the identifier used by Elasticsearch, whereas `Name` is the more user-friendly way to identify the watch. Refer to the 
-{stack-ov}/how-watcher-works.html#watch-definition[Watch definition documentation] 
-for the Watch JSON.
 
 [float]
-=== Simulate
+==== Create the watch
+
+On the Watch overview page, click *Create* and choose *Create advanced watch*.  
+An advanced watch requires a name and ID.  `Name` is a user-friendly way to 
+identify the watch, and `ID` refers to the identifier used by {es}.  Refer to 
+{stack-ov}/how-watcher-works.html#watch-definition[Watch definition] for how 
+to input the watch JSON.  
 
 [role="screenshot"]
-image:management/watcher-ui/images/advanced-watch/advanced-watch-simulate.png["Simulate Advanced Watch",link="management/watcher-ui/images/advanced-watch/advanced-watch-simulate.png"]
+image:management/watcher-ui/images/advanced-watch/advanced-watch-create.png["Create advanced watch"]
 
-This screen allows you to override parts of the watch and then run a simulation of it.
+[float]
+==== Simulate the watch
 
-Some implementation details on overrides:
+The *Simulate* tab allows you to override parts of the watch, and then run a 
+simulation. Be aware of these implementation details on overrides:
 
 * Trigger overrides use {ref}/common-options.html#date-math[date math].
-* Input override accepts a JSON blob that overrides the `input`.
-* Condition overrides is just a checkbox to indicate if you want to force the condition to always be true.
-* Action overrides support multiple options, which are {ref}/watcher-api-execute-watch.html#watcher-api-execute-watch-action-mode[explained here].
+* Input overrides accepts a JSON blob.
+* Condition overrides indicates if you want to force the condition to always be `true`.
+* Action overrides support {ref}/watcher-api-execute-watch.html#watcher-api-execute-watch-action-mode[multiple options].
 
-[float]
-=== Simulated
-
-After starting the simulation, the UI will show a results screen.
+After starting the simulation, you’ll see a results screen. For more information 
+on the fields in the response, see the {ref}//watcher-api-execute-watch.html[Execute Watch API].
 
 [role="screenshot"]
-image:management/watcher-ui/images/advanced-watch/advanced-watch-simulated.png["Simulated Advanced Watch",link="management/watcher-ui/images/advanced-watch/advanced-watch-simulated.png"]
+image:management/watcher-ui/images/advanced-watch/advanced-watch-simulate.png["Create advanced watch"]
 
-The possible simulation statuses for watches are:
+[float]
+==== Example watches
 
-* `Firing` - The watch is currently triggered and is actively performing the associated actions.
-* `Error` - The watch is an error state and not properly working.
-* `Ok` - The watch is not actively firing but working properly.
-* `Disabled` - The watch will not fire under any circumstance.
+Refer to these examples for creating an advanced watch: 
 
-For more information on the various fields in the response, see the 
-{ref}/watcher-api-execute-watch.html[Execute Watch API].
+* {stack-ov}/watch-cluster-status.html[Watch the status of an {es} cluster]
+* {stack-ov}/watching-meetup-data.html[Watch event data]
 
