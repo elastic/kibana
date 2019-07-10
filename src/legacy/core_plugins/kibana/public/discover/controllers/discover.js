@@ -704,6 +704,7 @@ function discoverController(
 
     $scope.updateTime();
 
+    // Abort any in-progress requests before fetching again
     $scope.searchSource.cancelQueued();
 
     $scope.updateDataSource()
