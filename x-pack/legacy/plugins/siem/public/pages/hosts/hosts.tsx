@@ -85,13 +85,16 @@ const HostsComponent = pure<HostsComponentProps>(({ filterQuery, setAbsoluteRang
                       sourceId="default"
                       startDate={from}
                     >
-                      {({ kpiHosts, loading, id, refetch }) => (
+                      {({ kpiHosts, loading, id, inspect, refetch }) => (
                         <KpiHostsComponentManage
-                          id={id}
-                          setQuery={setQuery}
-                          refetch={refetch}
                           data={kpiHosts}
+                          from={from}
+                          id={id}
+                          inspect={inspect}
                           loading={loading}
+                          refetch={refetch}
+                          setQuery={setQuery}
+                          to={to}
                         />
                       )}
                     </KpiHostsQuery>
@@ -106,9 +109,19 @@ const HostsComponent = pure<HostsComponentProps>(({ filterQuery, setAbsoluteRang
                       startDate={from}
                       type={hostsModel.HostsType.page}
                     >
-                      {({ hosts, totalCount, loading, pageInfo, loadMore, id, refetch }) => (
+                      {({
+                        hosts,
+                        totalCount,
+                        loading,
+                        pageInfo,
+                        loadMore,
+                        id,
+                        inspect,
+                        refetch,
+                      }) => (
                         <HostsTableManage
                           id={id}
+                          inspect={inspect}
                           indexPattern={indexPattern}
                           refetch={refetch}
                           setQuery={setQuery}
@@ -140,10 +153,12 @@ const HostsComponent = pure<HostsComponentProps>(({ filterQuery, setAbsoluteRang
                         pageInfo,
                         loadMore,
                         id,
+                        inspect,
                         refetch,
                       }) => (
                         <AuthenticationTableManage
                           id={id}
+                          inspect={inspect}
                           refetch={refetch}
                           setQuery={setQuery}
                           loading={loading}
@@ -174,10 +189,12 @@ const HostsComponent = pure<HostsComponentProps>(({ filterQuery, setAbsoluteRang
                         pageInfo,
                         loadMore,
                         id,
+                        inspect,
                         refetch,
                       }) => (
                         <UncommonProcessTableManage
                           id={id}
+                          inspect={inspect}
                           refetch={refetch}
                           setQuery={setQuery}
                           loading={loading}
@@ -197,6 +214,7 @@ const HostsComponent = pure<HostsComponentProps>(({ filterQuery, setAbsoluteRang
                       startDate={from}
                       endDate={to}
                       skip={isInitializing}
+                      type={hostsModel.HostsType.page}
                       narrowDateRange={(score, interval) => {
                         const fromTo = scoreIntervalToDateTime(score, interval);
                         setAbsoluteRangeDatePicker({
@@ -217,9 +235,19 @@ const HostsComponent = pure<HostsComponentProps>(({ filterQuery, setAbsoluteRang
                       startDate={from}
                       type={hostsModel.HostsType.page}
                     >
-                      {({ events, loading, id, refetch, totalCount, pageInfo, loadMore }) => (
+                      {({
+                        events,
+                        loading,
+                        id,
+                        inspect,
+                        refetch,
+                        totalCount,
+                        pageInfo,
+                        loadMore,
+                      }) => (
                         <EventsTableManage
                           id={id}
+                          inspect={inspect}
                           refetch={refetch}
                           setQuery={setQuery}
                           data={events!}

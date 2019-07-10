@@ -48,9 +48,7 @@ export function discover(config: PluginsConfig, coreContext: CoreContext) {
 
   if (config.additionalPluginPaths.length) {
     log.warn(
-      `Explicit plugin paths [${
-        config.additionalPluginPaths
-      }] are only supported in development. Relative imports will not work in production.`
+      `Explicit plugin paths [${config.additionalPluginPaths}] are only supported in development. Relative imports will not work in production.`
     );
   }
 

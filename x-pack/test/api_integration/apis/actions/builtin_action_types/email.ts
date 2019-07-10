@@ -16,8 +16,10 @@ export default function emailTest({ getService }: KibanaFunctionalTestDefaultPro
   describe('create email action', () => {
     after(() => esArchiver.unload('empty_kibana'));
 
+    let createdActionId = '';
+
     it('should return 200 when creating an email action successfully', async () => {
-      await supertest
+      const { body: createdAction } = await supertest
         .post('/api/action')
         .set('kbn-xsrf', 'foo')
         .send({
@@ -25,31 +27,83 @@ export default function emailTest({ getService }: KibanaFunctionalTestDefaultPro
             description: 'An email action',
             actionTypeId: '.email',
             actionTypeConfig: {
-              service: 'gmail',
+              service: '__json',
               user: 'bob',
               password: 'supersecret',
               from: 'bob@example.com',
             },
           },
         })
+        .expect(200);
+
+      createdActionId = createdAction.id;
+      expect(createdAction).to.eql({
+        id: createdActionId,
+      });
+
+      expect(typeof createdActionId).to.be('string');
+
+      const { body: fetchedAction } = await supertest
+        .get(`/api/action/${createdActionId}`)
+        .expect(200);
+
+      expect(fetchedAction).to.eql({
+        type: 'action',
+        id: fetchedAction.id,
+        attributes: {
+          description: 'An email action',
+          actionTypeId: '.email',
+          actionTypeConfig: {
+            from: 'bob@example.com',
+            service: '__json',
+          },
+        },
+        references: [],
+        updated_at: fetchedAction.updated_at,
+        version: fetchedAction.version,
+      });
+    });
+
+    it('should return the message data when firing the __json service', async () => {
+      await supertest
+        .post(`/api/action/${createdActionId}/_fire`)
+        .set('kbn-xsrf', 'foo')
+        .send({
+          params: {
+            to: ['kibana-action-test@elastic.co'],
+            subject: 'email-subject',
+            message: 'email-message',
+          },
+        })
         .expect(200)
         .then((resp: any) => {
+          expect(resp.body.message.messageId).to.be.a('string');
+          expect(resp.body.messageId).to.be.a('string');
+
+          delete resp.body.message.messageId;
+          delete resp.body.messageId;
+
           expect(resp.body).to.eql({
-            type: 'action',
-            id: resp.body.id,
-            attributes: {
-              description: 'An email action',
-              actionTypeId: '.email',
-              actionTypeConfig: {
-                from: 'bob@example.com',
-                service: 'gmail',
-              },
+            envelope: {
+              from: 'bob@example.com',
+              to: ['kibana-action-test@elastic.co'],
             },
-            references: [],
-            updated_at: resp.body.updated_at,
-            version: resp.body.version,
+            message: {
+              from: { address: 'bob@example.com', name: '' },
+              to: [
+                {
+                  address: 'kibana-action-test@elastic.co',
+                  name: '',
+                },
+              ],
+              cc: null,
+              bcc: null,
+              subject: 'email-subject',
+              html: 'email-message',
+              text: 'email-message',
+              headers: {},
+            },
           });
-          expect(typeof resp.body.id).to.be('string');
         });
     });
 

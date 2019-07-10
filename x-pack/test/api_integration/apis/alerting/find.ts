@@ -45,7 +45,7 @@ export default function createFindTests({ getService }: KibanaFunctionalTestDefa
           expect(match).to.eql({
             id: alertId,
             alertTypeId: 'test.noop',
-            interval: 10000,
+            interval: '10s',
             actions: [
               {
                 group: 'default',

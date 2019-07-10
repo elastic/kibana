@@ -81,6 +81,7 @@ export const ShardsTable: React.FunctionComponent<Props> = ({ shards }) => {
                   <FormattedMessage
                     id="xpack.snapshotRestore.restoreList.shardTable.primaryAbbreviationText"
                     defaultMessage="P"
+                    description="Used as an abbreviation for 'Primary', as in 'Primary shard'"
                   />
                 </strong>
               </EuiToolTip>

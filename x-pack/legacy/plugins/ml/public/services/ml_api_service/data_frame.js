@@ -13,9 +13,10 @@ import { http } from '../../services/http_service';
 const basePath = chrome.addBasePath('/api/ml');
 
 export const dataFrame = {
-  getDataFrameTransforms() {
+  getDataFrameTransforms(jobId) {
+    const jobIdString = jobId !== undefined ? `/${jobId}` : '';
     return http({
-      url: `${basePath}/_data_frame/transforms`,
+      url: `${basePath}/_data_frame/transforms${jobIdString}`,
       method: 'GET'
     });
   },
@@ -52,15 +53,15 @@ export const dataFrame = {
       data: obj
     });
   },
-  startDataFrameTransformsJob(jobId) {
+  startDataFrameTransformsJob(jobId, force = false) {
     return http({
-      url: `${basePath}/_data_frame/transforms/${jobId}/_start`,
+      url: `${basePath}/_data_frame/transforms/${jobId}/_start?force=${force}`,
       method: 'POST',
     });
   },
-  stopDataFrameTransformsJob(jobId) {
+  stopDataFrameTransformsJob(jobId, force = false, waitForCompletion = false) {
     return http({
-      url: `${basePath}/_data_frame/transforms/${jobId}/_stop?force=true`,
+      url: `${basePath}/_data_frame/transforms/${jobId}/_stop?force=${force}&wait_for_completion=${waitForCompletion}`,
       method: 'POST',
     });
   },

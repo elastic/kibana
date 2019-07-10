@@ -19,6 +19,12 @@
 
 import { getSortedObjectsForExport } from './get_sorted_objects_for_export';
 import { SavedObjectsClientMock } from '../service/saved_objects_client.mock';
+import { Readable } from 'stream';
+import { createPromiseFromStreams, createConcatStream } from '../../../../legacy/utils/streams';
+
+async function readStreamToCompletion(stream: Readable) {
+  return createPromiseFromStreams([stream, createConcatStream([])]);
+}
 
 describe('getSortedObjectsForExport()', () => {
   const savedObjectsClient = SavedObjectsClientMock.create();
@@ -59,11 +65,14 @@ describe('getSortedObjectsForExport()', () => {
       per_page: 1,
       page: 0,
     });
-    const response = await getSortedObjectsForExport({
+    const exportStream = await getSortedObjectsForExport({
       savedObjectsClient,
       exportSizeLimit: 500,
       types: ['index-pattern', 'search'],
     });
+
+    const response = await readStreamToCompletion(exportStream);
+
     expect(response).toMatchInlineSnapshot(`
 Array [
   Object {
@@ -169,7 +178,7 @@ Array [
         },
       ],
     });
-    const response = await getSortedObjectsForExport({
+    const exportStream = await getSortedObjectsForExport({
       exportSizeLimit: 10000,
       savedObjectsClient,
       types: ['index-pattern', 'search'],
@@ -184,6 +193,7 @@ Array [
         },
       ],
     });
+    const response = await readStreamToCompletion(exportStream);
     expect(response).toMatchInlineSnapshot(`
 Array [
   Object {
@@ -259,7 +269,7 @@ Array [
         },
       ],
     });
-    const response = await getSortedObjectsForExport({
+    const exportStream = await getSortedObjectsForExport({
       exportSizeLimit: 10000,
       savedObjectsClient,
       types: ['index-pattern', 'search'],
@@ -271,6 +281,7 @@ Array [
       ],
       includeReferencesDeep: true,
     });
+    const response = await readStreamToCompletion(exportStream);
     expect(response).toMatchInlineSnapshot(`
 Array [
   Object {
