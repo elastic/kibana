@@ -319,9 +319,12 @@ const PaginationEuiFlexItem = styled(EuiFlexItem)`
   button.euiButtonIcon.euiButtonIcon--text {
     margin-left: 20px;
   }
+  .euiPagination {
+    position: relative;
+  }
   .euiPagination::before {
     content: '\\2026';
-    bottom: 9px;
+    bottom: 5px;
     color: ${props => props.theme.eui.euiButtonColorDisabled};
     font-size: ${props => props.theme.eui.euiFontSizeS};
     position: absolute;
