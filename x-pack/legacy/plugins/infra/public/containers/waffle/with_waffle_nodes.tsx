@@ -55,15 +55,15 @@ export const WithWaffleNodes = ({
       filterQuery,
     }}
   >
-    {({ data, loading, refetch, error }) => {
-      return children({
+    {({ data, loading, refetch, error }) =>
+      children({
         loading,
         nodes:
           !error && data && data.source && data.source.snapshot && data.source.snapshot.nodes
             ? data.source.snapshot.nodes
             : [],
         refetch,
-      });
-    }}
+      })
+    }
   </Query>
 );
