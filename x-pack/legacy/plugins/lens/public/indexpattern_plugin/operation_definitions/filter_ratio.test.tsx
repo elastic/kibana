@@ -38,7 +38,7 @@ describe('filter_ratio', () => {
           operationType: 'filter_ratio',
           params: {
             numerator: { query: '', language: 'kuery' },
-            denominator: { query: '*', language: 'kuery' },
+            denominator: { query: '', language: 'kuery' },
           },
         },
       },
@@ -66,7 +66,7 @@ describe('filter_ratio', () => {
     it('should create column object with default params', () => {
       const column = filterRatioOperation.buildColumn('op', 0);
       expect(column.params.numerator).toEqual({ query: '', language: 'kuery' });
-      expect(column.params.denominator).toEqual({ query: '*', language: 'kuery' });
+      expect(column.params.denominator).toEqual({ query: '', language: 'kuery' });
     });
   });
 
@@ -85,7 +85,7 @@ describe('filter_ratio', () => {
                 label: '',
               },
               {
-                input: { query: '*', language: 'kuery' },
+                input: { query: '', language: 'kuery' },
                 label: '',
               },
             ],
@@ -149,7 +149,7 @@ describe('filter_ratio', () => {
             ...state.columns.col1,
             params: {
               numerator: { query: 'geo.src : "US"', language: 'kuery' },
-              denominator: { query: '*', language: 'kuery' },
+              denominator: { query: '', language: 'kuery' },
             },
           },
         },
