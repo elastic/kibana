@@ -3857,7 +3857,6 @@
     "xpack.apm.metrics.plot.noDataLabel": "此时间范围内没有数据。",
     "xpack.apm.metrics.transactionChart.machineLearningLabel": "Machine Learning",
     "xpack.apm.metrics.transactionChart.machineLearningTooltip": "环绕平均持续时间的流显示预期边界。对 >= 75 的异常分数显示标注。",
-    "xpack.apm.metrics.transactionChart.msTimeUnitLabel": "ms",
     "xpack.apm.metrics.transactionChart.pageLoadTimesLabel": "页面加载时间",
     "xpack.apm.metrics.transactionChart.requestsPerMinuteLabel": "每分钟请求数",
     "xpack.apm.metrics.transactionChart.routeChangeTimesLabel": "路由更改时间",
