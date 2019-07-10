@@ -159,7 +159,7 @@
     "supertest-as-promised": "^4.0.2",
     "tmp": "0.1.0",
     "tree-kill": "^1.1.0",
-    "typescript": "^3.3.3333",
+    "typescript": "3.5.3",
     "vinyl-fs": "^3.0.2",
     "xml-crypto": "^0.10.1",
     "yargs": "4.8.1"
