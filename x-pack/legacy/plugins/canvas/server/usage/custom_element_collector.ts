@@ -7,7 +7,6 @@
 import { SearchParams } from 'elasticsearch';
 import { get } from 'lodash';
 import { fromExpression } from '@kbn/interpreter/common';
-import { SearchResponse } from 'elasticsearch';
 import { collectFns } from './collector_helpers';
 import { TelemetryCollector } from '../../types';
 import { AST, TelemetryCustomElement, TelemetryCustomElementDocument } from '../../types';
