@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get, set, sortBy } from 'lodash';
+import { get, set, sortBy, flatten } from 'lodash';
 import { DatabaseAdapter } from '../database';
 import { UMMonitorStatesAdapter } from './adapter_types';
 import {
@@ -80,21 +80,12 @@ export class ElasticsearchMonitorStatesAdapter implements UMMonitorStatesAdapter
       aggs: {
         monitors: {
           composite: {
-            size: 5000, // We use a much larger size here in case there are many agents per monitor
+            size: 100,
             sources: [
               {
                 monitor_id: {
                   terms: {
                     field: 'monitor.id',
-                  },
-                },
-              },
-              {
-                agent_id: {
-                  // We need to add the agent.id in because we have one check group
-                  // per agent ID
-                  terms: {
-                    field: 'agent.id',
                   },
                 },
               },
@@ -111,7 +102,12 @@ export class ElasticsearchMonitorStatesAdapter implements UMMonitorStatesAdapter
                 _source: {
                   includes: ['monitor.check_group'],
                 },
-                size: 1,
+                // The idea here is that we want to get enough documents to get all
+                // possible agent IDs. Doing that in a deterministic way is hard,
+                // but all agent IDs should be represented in the top 50 results in most cases.
+                // There's an edge case here where a user has accidentally configured
+                // two agents to run on different schedules, but that's an issue on the user side.
+                size: 50,
               },
             },
           },
@@ -130,8 +126,9 @@ export class ElasticsearchMonitorStatesAdapter implements UMMonitorStatesAdapter
 
     const result = await this.database.search(request, params);
 
-    const checkGroups = result.aggregations.monitors.buckets.map((b: any) => {
-      return get<string>(b, 'top.hits.hits[0]._source.monitor.check_group');
+    const checkGroups = result.aggregations.monitors.buckets.flatMap((b: any) => {
+      const topHits =  get<any[]>(b, 'top.hits.hits', []);
+      return flatten(topHits.map( (t: any) => get<string>(t, '_source.monitor.check_group')));
     });
     const afterKey = get<any | null>(result, 'aggregations.monitors.after_key', null);
     return {
