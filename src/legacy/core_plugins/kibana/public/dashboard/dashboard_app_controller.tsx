@@ -260,10 +260,10 @@ export class DashboardAppController {
             });
           });
 
-          dashboardStateManager.registerChangeListener(({ dirty }: { dirty: boolean }) => {
-            if (dirty) {
-              refreshDashboardContainer();
-            }
+          dashboardStateManager.registerChangeListener(() => {
+            // we aren't checking dirty state because there are changes the container needs to know about
+            // that won't make the dashboard "dirty" - like a view mode change.
+            refreshDashboardContainer();
           });
 
           // This code needs to be replaced with a better mechanism for adding new embeddables of
