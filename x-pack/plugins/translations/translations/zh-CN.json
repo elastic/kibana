@@ -10763,7 +10763,6 @@
     "xpack.uptime.snapshot.stats.downDescription": "关闭",
     "xpack.uptime.snapshot.stats.totalDescription": "合计",
     "xpack.uptime.snapshot.stats.upDescription": "运行",
-    "xpack.uptime.snapshot.statusOverTimeTitle": "时移状态",
     "xpack.uptime.snapshotHistogram.series.downLabel": "关闭",
     "xpack.uptime.snapshotHistogram.series.upLabel": "运行",
     "xpack.uptime.uptimeFeatureCatalogueTitle": "运行时间",
