@@ -24,7 +24,7 @@ import {
 
 import { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } from 'ui/documentation_links';
 import { TelemetryOptIn } from '../../../components/telemetry_opt_in';
-import { optInToTelemetry } from '../../../lib/telemetry';
+import { optInToTelemetry } from '../../../../../telemetry/public/lib';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EXTERNAL_LINKS } from '../../../../common/constants';
 const esBase = `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/reference/${DOC_LINK_VERSION}`;

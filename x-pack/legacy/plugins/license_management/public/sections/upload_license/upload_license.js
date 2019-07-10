@@ -22,7 +22,7 @@ import {
   EuiPageContentBody,
 } from '@elastic/eui';
 import { TelemetryOptIn } from '../../components/telemetry_opt_in';
-import { optInToTelemetry } from '../../lib/telemetry';
+import { optInToTelemetry } from '../../../../telemetry/public/lib';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 export class UploadLicense extends React.PureComponent {

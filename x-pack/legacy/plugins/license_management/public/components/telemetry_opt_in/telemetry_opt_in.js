@@ -13,7 +13,7 @@ import {
   EuiTitle,
   EuiPopover
 } from '@elastic/eui';
-import { showTelemetryOptIn, getTelemetryFetcher, PRIVACY_STATEMENT_URL, OptInExampleFlyout } from '../../lib/telemetry';
+import { showTelemetryOptIn, getTelemetryFetcher, PRIVACY_STATEMENT_URL, OptInExampleFlyout } from '../../../../telemetry/public/lib';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 export class TelemetryOptIn extends React.Component {
