@@ -75,6 +75,7 @@ export interface HttpServerSetup {
     isAuthenticated: AuthStateStorage['isAuthenticated'];
     getAuthHeaders: AuthHeadersStorage['get'];
   };
+  isTlsEnabled: boolean;
 }
 
 export class HttpServer {
@@ -127,6 +128,7 @@ export class HttpServer {
         isAuthenticated: this.authState.isAuthenticated,
         getAuthHeaders: this.authHeaders.get,
       },
+      isTlsEnabled: config.ssl.enabled,
       // Return server instance with the connection options so that we can properly
       // bridge core and the "legacy" Kibana internally. Once this bridge isn't
       // needed anymore we shouldn't return the instance from this method.
