@@ -37,11 +37,28 @@ declare interface Ml {
   };
 
   hasPrivileges(obj: object): Promise<any>;
+
   checkMlPrivileges(): Promise<{ capabilities: Privileges; upgradeInProgress: boolean }>;
-  esSearch: any;
+  getJobStats(obj: object): Promise<any>;
+  getDatafeedStats(obj: object): Promise<any>;
+  esSearch(obj: object): any;
   getIndices(): Promise<EsIndex[]>;
 
   getTimeFieldRange(obj: object): Promise<any>;
+
+  jobs: {
+    jobsSummary(jobIds: string[]): Promise<object>;
+    jobs(jobIds: string[]): Promise<object>;
+    groups(): Promise<object>;
+    updateGroups(updatedJobs: string[]): Promise<object>;
+    forceStartDatafeeds(datafeedIds: string[], start: string, end: string): Promise<object>;
+    stopDatafeeds(datafeedIds: string[]): Promise<object>;
+    deleteJobs(jobIds: string[]): Promise<object>;
+    closeJobs(jobIds: string[]): Promise<object>;
+    jobAuditMessages(jobId: string, from: string): Promise<object>;
+    deletingJobTasks(): Promise<object>;
+    newJobCaps(indexPatternTitle: string, isRollup: boolean): Promise<object>;
+  };
 }
 
 declare const ml: Ml;

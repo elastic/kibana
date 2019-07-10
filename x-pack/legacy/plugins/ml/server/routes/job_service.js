@@ -180,4 +180,20 @@ export function jobServiceRoutes({ commonRouteConfig, elasticsearchPlugin, route
     }
   });
 
+  route({
+    method: 'GET',
+    path: '/api/ml/jobs/new_job_caps/{indexPattern}',
+    handler(request) {
+      const callWithRequest = callWithRequestFactory(elasticsearchPlugin, request);
+      const { indexPattern } = request.params;
+      const isRollup = (request.query.rollup === 'true');
+      const { newJobCaps } = jobServiceProvider(callWithRequest, request);
+      return newJobCaps(indexPattern, isRollup)
+        .catch(resp => wrapError(resp));
+    },
+    config: {
+      ...commonRouteConfig
+    }
+  });
+
 }
