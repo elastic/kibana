@@ -16,6 +16,14 @@ We recommend you watch your agent logs to confirm that configuration has been ap
 If you have feedback, please reach out in our https://discuss.elastic.co/c/apm[Discuss forum].
 
 [float]
+==== Precedence
+
+Configurations set with APM Agent configuration take precedence over configurations set locally in the Agent.
+However, if APM Server is slow to respond, is offline, reports an error, etc.,
+APM agents will use local defaults until they're able to update the configuration.
+For this reason, it is still important to set custom default configurations locally in each of your agents.
+
+[float]
 ==== APM Server setup
 
 This feature requires {apm-server-ref}setup-kibana-endpoint.html[Kibana endpoint configuration] in APM Server.
