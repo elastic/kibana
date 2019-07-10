@@ -11,9 +11,9 @@ export const replacement = (match: string, p1: string, p2: string) => {
   const split = p2.split(',');
   const newQuery = split.reduce((accum, item, index) => {
     if (index === 0) {
-      return `${p1}: ${item}`;
+      return `${p1}: "${item}"`;
     } else {
-      return `${accum} or ${p1}: ${item}`;
+      return `${accum} or ${p1}: "${item}"`;
     }
   }, '');
   return `(${newQuery})`;
@@ -22,7 +22,7 @@ export const replacement = (match: string, p1: string, p2: string) => {
 // TODO: Add tests like this one
 // const expression = 'process.name: "something,yolo" AND user.name : "root,systemd-timesync"';
 export const replaceKqlCommasWithOrUsingRegex = (expression: string) => {
-  const myRegexp = /([\w\.\-\(\)\[\]]+)\s*:\s*"([\w\.\-\(\)\[\]]+,[\w\.\-\(\)\[\]]+)"/g;
+  const myRegexp = /([\w\.\-\[\]]+)\s*:\s*"(([\w\.\-\(\)\[\]]+,[\w\.\-\(\)\[\]]+){1,})"/g;
   return expression.replace(myRegexp, replacement);
 };
 

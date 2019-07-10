@@ -7,9 +7,31 @@
 import { RisonValue, encode } from 'rison-node';
 import { decodeRison, isRisonObject, isRegularString } from './rison_helpers';
 
+export const operators = ['and', 'or', 'not'];
+
 export const removeKqlVariablesUsingRegex = (expression: string) => {
-  const myRegexp = /([\w\.\-\(\)\[\]]+)\s*:\s*"(\$[\w\.\-\(\)\[\]]+\$)"/g;
-  return expression.replace(myRegexp, '');
+  const myRegexp = /(\s+)*(and|or|not){0,1}(\s+)*([\w\.\-\[\]]+)\s*:\s*"(\$[\w\.\-\(\)\[\]]+\$)"(\s+)*(and|or|not){0,1}(\s+)*/g;
+  return expression.replace(myRegexp, replacement);
+  // return expression.replace(myRegexp, '');
+};
+
+export const replacement = (match: string, ...parts: string[]): string => {
+  if (parts == null) {
+    return '';
+  }
+  const operatorsMatched = parts.reduce<string[]>((accum, part) => {
+    if (part != null && operators.includes(part)) {
+      accum = [...accum, part];
+      return accum;
+    } else {
+      return accum;
+    }
+  }, []);
+  if (operatorsMatched.length > 1) {
+    return ` ${operatorsMatched[operatorsMatched.length - 1].trim()} `;
+  } else {
+    return '';
+  }
 };
 
 export const removeKqlVariables = (kqlQuery: string): string => {
