@@ -98,7 +98,7 @@ export default function({ getService }: { getService: any }) {
 
       it('With scripted fields and field formatters', async () => {
         // load test data that contains a saved search and documents
-        await esArchiver.load('reporting/scripted');
+        await esArchiver.load('reporting/hugedata');
 
         const {
           status: resStatus,
@@ -120,7 +120,7 @@ export default function({ getService }: { getService: any }) {
         expect(resType).to.eql('text/csv');
         expect(resText).to.eql(CSV_RESULT_SCRIPTED);
 
-        await esArchiver.unload('reporting/scripted');
+        await esArchiver.unload('reporting/hugedata');
       });
 
       it('Formatted date_nanos data', async () => {
@@ -186,7 +186,7 @@ export default function({ getService }: { getService: any }) {
 
       it('Stops at Max Size Reached', async () => {
         // load test data that contains a saved search and documents
-        await esArchiver.load('reporting/scripted');
+        await esArchiver.load('reporting/hugedata');
 
         const {
           status: resStatus,
@@ -208,7 +208,7 @@ export default function({ getService }: { getService: any }) {
         expect(resType).to.eql('text/csv');
         expect(resText).to.eql(CSV_RESULT_HUGE);
 
-        await esArchiver.unload('reporting/scripted');
+        await esArchiver.unload('reporting/hugedata');
       });
     });
 
@@ -244,7 +244,7 @@ export default function({ getService }: { getService: any }) {
 
       it('for sort', async () => {
         // load test data that contains a saved search and documents
-        await esArchiver.load('reporting/scripted');
+        await esArchiver.load('reporting/hugedata');
 
         const {
           status: resStatus,
@@ -266,7 +266,7 @@ export default function({ getService }: { getService: any }) {
         expect(resType).to.eql('text/csv');
         expect(resText).to.eql(CSV_RESULT_SCRIPTED_RESORTED);
 
-        await esArchiver.unload('reporting/scripted');
+        await esArchiver.unload('reporting/hugedata');
       });
     });
 
