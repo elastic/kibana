@@ -34,7 +34,7 @@ export class ElasticsearchAuthenticationAdapter implements AuthenticationsAdapte
     );
     const { activePage, cursorStart, fakePossibleCount, querySize } = options.pagination;
     const totalCount = getOr(0, 'aggregations.user_count.value', response);
-    const fakeTotalCount = fakePossibleCount <= totalCount ? fakePossibleCount : totalCount;
+    let fakeTotalCount = fakePossibleCount <= totalCount ? fakePossibleCount : totalCount;
     const hits: AuthenticationHit[] = getOr(
       [],
       'aggregations.group_by_users.buckets',
@@ -58,7 +58,11 @@ export class ElasticsearchAuthenticationAdapter implements AuthenticationsAdapte
       dsl: [inspectStringifyObject(dsl)],
       response: [inspectStringifyObject(response)],
     };
-    const showMorePagesIndicator = totalCount > fakeTotalCount;
+    let showMorePagesIndicator = totalCount > fakeTotalCount;
+    if (fakeTotalCount >= 10000) {
+      fakeTotalCount = 10000;
+      showMorePagesIndicator = false;
+    }
     return {
       inspect,
       edges,
