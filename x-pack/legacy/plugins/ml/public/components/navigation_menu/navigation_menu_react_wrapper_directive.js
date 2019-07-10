@@ -11,6 +11,7 @@ import { NavigationMenu } from './navigation_menu';
 import { isFullLicense } from '../../license/check_license';
 import { timeHistory } from 'ui/timefilter/time_history';
 import { uiModules } from 'ui/modules';
+import { timefilter } from 'ui/timefilter';
 const module = uiModules.get('apps/ml');
 
 import 'ui/directives/kbn_href';
@@ -39,7 +40,8 @@ module.directive('mlNavMenu', function (config) {
         disableLinks: (isFullLicense() === false),
         showTabs,
         tabId: name,
-        timeHistory
+        timeHistory,
+        timefilter
       };
 
       ReactDOM.render(React.createElement(NavigationMenu, props),

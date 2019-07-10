@@ -4,14 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { SFC, useState, useEffect } from 'react';
+import React, { FC, useState, useEffect } from 'react';
 import { EuiSuperDatePicker } from '@elastic/eui';
 import { TimeHistory, TimeRange } from 'src/legacy/ui/public/timefilter/time_history';
-import { timefilter } from '../../../../common/timefilter';
 
 interface Props {
   dateFormat: string;
   timeHistory: TimeHistory;
+  timefilter: any; // TODO: update with proper type.
 }
 
 function getRecentlyUsedRanges(timeHistory: TimeHistory): Array<{ start: string; end: string }> {
@@ -23,22 +23,39 @@ function getRecentlyUsedRanges(timeHistory: TimeHistory): Array<{ start: string;
   });
 }
 
-export const TopNav: SFC<Props> = ({ dateFormat, timeHistory }) => {
+export const TopNav: FC<Props> = ({ dateFormat, timeHistory, timefilter }) => {
   const [refreshInterval, setRefreshInterval] = useState(timefilter.getRefreshInterval());
   const [time, setTime] = useState(timefilter.getTime());
   const [recentlyUsedRanges, setRecentlyUsedRanges] = useState(getRecentlyUsedRanges(timeHistory));
+  const [isAutoRefreshSelectorEnabled, setIsAutoRefreshSelectorEnabled] = useState(
+    timefilter.isAutoRefreshSelectorEnabled
+  );
+  const [isTimeRangeSelectorEnabled, setIsTimeRangeSelectorEnabled] = useState(
+    timefilter.isTimeRangeSelectorEnabled
+  );
 
   useEffect(() => {
-    const subscription = timefilter.subscribeToUpdates(timefilterUpdateListener);
+    timefilter.on('refreshIntervalUpdate', timefilterUpdateListener);
+    timefilter.on('timeUpdate', timefilterUpdateListener);
+    timefilter.on('enabledUpdated', timefilterUpdateListener);
 
     return function cleanup() {
-      subscription.unsubscribe();
+      timefilter.off('refreshIntervalUpdate', timefilterUpdateListener);
+      timefilter.off('timeUpdate', timefilterUpdateListener);
+      timefilter.off('enabledUpdated', timefilterUpdateListener);
     };
   }, []);
+
+  useEffect(() => {
+    // Force re-render with up-to-date values when isTimeRangeSelectorEnabled/isAutoRefreshSelectorEnabled are changed.
+    timefilterUpdateListener();
+  }, [isTimeRangeSelectorEnabled, isAutoRefreshSelectorEnabled]);
 
   function timefilterUpdateListener() {
     setTime(timefilter.getTime());
     setRefreshInterval(timefilter.getRefreshInterval());
+    setIsAutoRefreshSelectorEnabled(timefilter.isAutoRefreshSelectorEnabled);
+    setIsTimeRangeSelectorEnabled(timefilter.isTimeRangeSelectorEnabled);
   }
 
   function updateFilter({ start, end }: { start: string; end: string }) {
@@ -67,12 +84,12 @@ export const TopNav: SFC<Props> = ({ dateFormat, timeHistory }) => {
   }
 
   return (
-    (timefilter.isAutoRefreshSelectorEnabled || timefilter.isTimeRangeSelectorEnabled) && (
+    (isAutoRefreshSelectorEnabled || isTimeRangeSelectorEnabled) && (
       <EuiSuperDatePicker
         start={time.from}
         end={time.to}
         isPaused={refreshInterval.pause}
-        isAutoRefreshOnly={!timefilter.isAutoRefreshSelectorEnabled()}
+        isAutoRefreshOnly={!isTimeRangeSelectorEnabled}
         refreshInterval={refreshInterval.value}
         onTimeChange={updateFilter}
         onRefresh={updateFilter}

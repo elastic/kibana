@@ -22,6 +22,7 @@ interface Props {
   showTabs: boolean;
   tabId: string;
   timeHistory: any;
+  timefilter: any;
 }
 
 function moveToSelectedTab(selectedTabId: string) {
@@ -81,6 +82,7 @@ export const NavigationMenu: SFC<Props> = ({
   showTabs,
   tabId,
   timeHistory,
+  timefilter,
 }) => {
   const [tabs] = useState(getTabs(disableLinks));
   const [selectedTabId, setSelectedTabId] = useState(tabId);
@@ -108,7 +110,7 @@ export const NavigationMenu: SFC<Props> = ({
     <Fragment>
       <EuiFlexGroup justifyContent="flexEnd" gutterSize="xs" className="mlNavigationMenu__topNav">
         <EuiFlexItem grow={false}>
-          <TopNav dateFormat={dateFormat} timeHistory={timeHistory} />
+          <TopNav dateFormat={dateFormat} timeHistory={timeHistory} timefilter={timefilter} />
         </EuiFlexItem>
       </EuiFlexGroup>
       {showTabs && <EuiTabs>{renderTabs()}</EuiTabs>}
