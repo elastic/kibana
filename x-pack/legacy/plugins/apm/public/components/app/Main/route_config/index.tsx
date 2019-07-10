@@ -11,7 +11,7 @@ import { legacyDecodeURIComponent } from '../../../shared/Links/url_helpers';
 import { ErrorGroupDetails } from '../../ErrorGroupDetails';
 import { ServiceDetails } from '../../ServiceDetails';
 import { TransactionDetails } from '../../TransactionDetails';
-import { Home } from '../Home';
+import { Home } from '../../Home';
 import { BreadcrumbRoute } from '../ProvideBreadcrumbs';
 import { RouteName } from './route_names';
 import { SettingsList } from '../../Settings/SettingsList';
@@ -50,21 +50,21 @@ export const routes: BreadcrumbRoute[] = [
   },
   {
     exact: true,
-    path: '/settings',
-    component: SettingsList,
-    breadcrumb: i18n.translate('xpack.apm.breadcrumb.listSettingsTitle', {
-      defaultMessage: 'Settings'
-    }),
-    name: RouteName.SETTINGS
-  },
-  {
-    exact: true,
     path: '/traces',
     component: Home,
     breadcrumb: i18n.translate('xpack.apm.breadcrumb.tracesTitle', {
       defaultMessage: 'Traces'
     }),
     name: RouteName.TRACES
+  },
+  {
+    exact: true,
+    path: '/settings',
+    component: SettingsList,
+    breadcrumb: i18n.translate('xpack.apm.breadcrumb.listSettingsTitle', {
+      defaultMessage: 'Settings'
+    }),
+    name: RouteName.SETTINGS
   },
   {
     exact: true,
