@@ -22,35 +22,34 @@ import { getDefaultDecoration } from '../../helpers/get_default_decoration';
 
 describe('getDefaultDecoration', () => {
   describe('stack option', () => {
-    it('should set a stack option to false', () => {
+    it('should set a stack option to none', () => {
       const series = {
         id: 'test_id',
+        stacked: 'none',
       };
-      expect(getDefaultDecoration(series)).to.have.property('stack', false);
-
-      series.stacked = 'none';
-      expect(getDefaultDecoration(series)).to.have.property('stack', false);
+      expect(getDefaultDecoration(series)).to.have.property('stack', 'none');
     });
 
-    it('should set a stack option to true', () => {
+    it('should set a stack option to stacked/percent', () => {
       const series = {
         stacked: 'stacked',
         id: 'test_id',
       };
 
-      expect(getDefaultDecoration(series)).to.have.property('stack', true);
+      expect(getDefaultDecoration(series)).to.have.property('stack', 'stacked');
 
       series.stacked = 'percent';
-      expect(getDefaultDecoration(series)).to.have.property('stack', true);
+
+      expect(getDefaultDecoration(series)).to.have.property('stack', 'percent');
     });
 
-    it('should set a stack option to be series id', () => {
+    it('should set a stack option to stacked_within_series', () => {
       const series = {
         stacked: 'stacked_within_series',
         id: 'test_id',
       };
 
-      expect(getDefaultDecoration(series)).to.have.property('stack', series.id);
+      expect(getDefaultDecoration(series)).to.have.property('stack', 'stacked_within_series');
     });
   });
 
