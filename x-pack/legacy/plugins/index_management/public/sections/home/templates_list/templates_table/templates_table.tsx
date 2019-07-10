@@ -41,15 +41,6 @@ export const TemplatesTable: React.FunctionComponent<Props> = ({ templates, relo
 
   const columns = [
     {
-      field: 'indexPatterns',
-      name: i18n.translate('xpack.idxMgmt.templatesList.table.indexPatternsColumnTitle', {
-        defaultMessage: 'Index patterns',
-      }),
-      truncateText: true,
-      sortable: true,
-      render: (indexPatterns: string[]) => indexPatterns.join(', '),
-    },
-    {
       field: 'name',
       name: i18n.translate('xpack.idxMgmt.templatesList.table.nameColumnTitle', {
         defaultMessage: 'Name',
@@ -58,17 +49,38 @@ export const TemplatesTable: React.FunctionComponent<Props> = ({ templates, relo
       sortable: true,
     },
     {
-      field: 'order',
-      name: i18n.translate('xpack.idxMgmt.templatesList.table.orderColumnTitle', {
-        defaultMessage: 'Order',
+      field: 'indexPatterns',
+      name: i18n.translate('xpack.idxMgmt.templatesList.table.indexPatternsColumnTitle', {
+        defaultMessage: 'Index patterns',
       }),
       truncateText: true,
       sortable: true,
+      render: (indexPatterns: string[]) => <strong>{indexPatterns.join(', ')}</strong>,
     },
     {
-      field: 'version',
-      name: i18n.translate('xpack.idxMgmt.templatesList.table.versionColumnTitle', {
-        defaultMessage: 'Version',
+      field: 'settings',
+      name: i18n.translate('xpack.idxMgmt.templatesList.table.ilmPolicyColumnTitle', {
+        defaultMessage: 'ILM policy',
+      }),
+      truncateText: true,
+      sortable: true,
+      render: (settings?: {
+        index: {
+          lifecycle: {
+            name: string;
+          };
+        };
+      }) => {
+        if (settings && settings.index && settings.index.lifecycle) {
+          return settings.index.lifecycle.name;
+        }
+        return null;
+      },
+    },
+    {
+      field: 'order',
+      name: i18n.translate('xpack.idxMgmt.templatesList.table.orderColumnTitle', {
+        defaultMessage: 'Order',
       }),
       truncateText: true,
       sortable: true,
@@ -158,6 +170,13 @@ export const TemplatesTable: React.FunctionComponent<Props> = ({ templates, relo
     pageSizeOptions: [10, 20, 50],
   };
 
+  const sorting = {
+    sort: {
+      field: 'name',
+      direction: 'asc',
+    },
+  };
+
   const selectionConfig = {
     onSelectionChange: setSelection,
     selectable: (template: Template) => !template.name.startsWith('.'),
@@ -173,6 +192,15 @@ export const TemplatesTable: React.FunctionComponent<Props> = ({ templates, relo
     box: {
       incremental: true,
     },
+    filters: [
+      {
+        type: 'is',
+        field: 'settings.index.lifecycle.name',
+        name: i18n.translate('xpack.idxMgmt.templatesList.table.ilmPolicyFilterLabel', {
+          defaultMessage: 'ILM policy',
+        }),
+      },
+    ],
     toolsLeft: selection.length && (
       <EuiButton
         data-test-subj="deleteTemplatesButton"
@@ -217,6 +245,7 @@ export const TemplatesTable: React.FunctionComponent<Props> = ({ templates, relo
         itemId="name"
         columns={columns}
         search={searchConfig}
+        sorting={sorting}
         isSelectable={true}
         selection={selectionConfig}
         pagination={pagination}

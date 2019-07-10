@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment, useState, useEffect } from 'react';
+import React, { Fragment, useState, useEffect, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiEmptyPrompt, EuiSpacer, EuiTitle, EuiText, EuiSwitch } from '@elastic/eui';
 import { SectionError, SectionLoading } from '../../../components';
@@ -20,6 +20,13 @@ export const TemplatesList: React.FunctionComponent = () => {
   let content;
 
   const [showSystemTemplates, setShowSystemTemplates] = useState<boolean>(false);
+
+  // Filter out system index templates
+  const filteredTemplates = useMemo(
+    () =>
+      templates ? templates.filter((template: Template) => !template.name.startsWith('.')) : [],
+    [templates]
+  );
 
   // Track component loaded
   useEffect(() => {
@@ -63,11 +70,6 @@ export const TemplatesList: React.FunctionComponent = () => {
       />
     );
   } else if (Array.isArray(templates) && templates.length > 0) {
-    // Filter out system index templates
-    const filteredTemplates = templates.filter(
-      (template: Template) => !template.name.startsWith('.')
-    );
-
     content = (
       <Fragment>
         <EuiTitle size="s">

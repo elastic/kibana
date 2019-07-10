@@ -21,7 +21,7 @@ export const fetchTemplates = async (callWithRequest: any) => {
       name,
       version,
       order,
-      indexPatterns,
+      indexPatterns: indexPatterns.sort(),
       settings,
       aliases,
       mappings,
