@@ -7,7 +7,7 @@
 import { i18n } from '@kbn/i18n';
 import { esdocs } from '../../functions/server/esdocs';
 import { FunctionHelp } from '.';
-import { FunctionFactory } from '../../functions/types';
+import { FunctionFactory } from '../../../types';
 
 export const help: FunctionHelp<FunctionFactory<typeof esdocs>> = {
   help: i18n.translate('xpack.canvas.functions.esdocsHelpText', {

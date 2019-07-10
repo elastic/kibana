@@ -7,7 +7,7 @@
 // @ts-ignore no @typed def
 import keyBy from 'lodash.keyby';
 import { groupBy, get, set, map, sortBy } from 'lodash';
-import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/public';
+import { ExpressionFunction, Style } from 'src/legacy/core_plugins/interpreter/public';
 // @ts-ignore untyped local
 import { getColorsFromPalette } from '../../../../common/lib/get_colors_from_palette';
 // @ts-ignore untyped local
@@ -17,7 +17,7 @@ import { getFontSpec } from './get_font_spec';
 import { seriesStyleToFlot } from './series_style_to_flot';
 import { getTickHash } from './get_tick_hash';
 import { getFunctionHelp } from '../../../strings';
-import { AxisConfig, PointSeries, Render, SeriesStyle, Style, Palette, Legend } from '../../types';
+import { AxisConfig, PointSeries, Render, SeriesStyle, Palette, Legend } from '../../../../types';
 
 interface Arguments {
   seriesStyle: SeriesStyle[];

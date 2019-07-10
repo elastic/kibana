@@ -7,7 +7,7 @@
 import { i18n } from '@kbn/i18n';
 import { metric } from '../../functions/common/metric';
 import { FunctionHelp } from '.';
-import { FunctionFactory } from '../../functions/types';
+import { FunctionFactory } from '../../../types';
 
 export const help: FunctionHelp<FunctionFactory<typeof metric>> = {
   help: i18n.translate('xpack.canvas.functions.metricHelpText', {

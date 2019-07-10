@@ -7,7 +7,7 @@
 import { i18n } from '@kbn/i18n';
 import { progress } from '../../functions/common/progress';
 import { FunctionHelp } from '.';
-import { FunctionFactory } from '../../functions/types';
+import { FunctionFactory } from '../../../types';
 
 import { Shape } from '../../functions/common/progress';
 

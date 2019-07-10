@@ -7,7 +7,7 @@
 import { i18n } from '@kbn/i18n';
 import { caseFn } from '../../functions/common/case';
 import { FunctionHelp } from '.';
-import { FunctionFactory } from '../../functions/types';
+import { FunctionFactory } from '../../../types';
 
 export const help: FunctionHelp<FunctionFactory<typeof caseFn>> = {
   help: i18n.translate('xpack.canvas.functions.caseHelpText', {
