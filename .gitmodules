@@ -1,0 +1,3 @@
+[submodule ".ci/src/resources/jenkinsfile-runner"]
+	path = .ci/src/resources/jenkinsfile-runner
+	url = git@github.com:jenkinsci/jenkinsfile-runner.git
