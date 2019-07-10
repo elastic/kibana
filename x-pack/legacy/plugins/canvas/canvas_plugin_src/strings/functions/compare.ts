@@ -7,7 +7,7 @@
 import { i18n } from '@kbn/i18n';
 import { compare, Operation } from '../../functions/common/compare';
 import { FunctionHelp } from '.';
-import { FunctionFactory } from '../../functions/types';
+import { FunctionFactory } from '../../../types';
 
 export const help: FunctionHelp<FunctionFactory<typeof compare>> = {
   help: i18n.translate('xpack.canvas.functions.compareHelpText', {

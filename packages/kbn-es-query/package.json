@@ -28,6 +28,6 @@
     "del": "^4.0.0",
     "getopts": "^2.2.4",
     "supports-color": "^6.1.0",
-    "typescript": "^3.3.3333"
+    "typescript": "3.5.3"
   }
 }

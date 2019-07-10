@@ -6,7 +6,7 @@
 
 import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/public';
 import { openSans } from '../../../common/lib/fonts';
-import { Render, Style } from '../types';
+import { Render, Style } from '../../../types';
 import { getFunctionHelp } from '../../strings';
 
 type Context = number | string | null;
