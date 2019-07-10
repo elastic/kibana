@@ -11,8 +11,8 @@ import { MapEmbeddable } from './map_embeddable';
 import { indexPatternService } from '../kibana_services';
 import { i18n } from '@kbn/i18n';
 import { createMapPath, MAP_SAVED_OBJECT_TYPE, APP_ICON } from '../../common/constants';
-import { createMapStore } from '../store/store';
-import { addLayerWithoutDataSync } from '../actions/store_actions';
+import { createMapStore } from '../reducers/store';
+import { addLayerWithoutDataSync } from '../actions/map_actions';
 import { getQueryableUniqueIndexPatternIds } from '../selectors/map_selectors';
 import { capabilities } from 'ui/capabilities';
 

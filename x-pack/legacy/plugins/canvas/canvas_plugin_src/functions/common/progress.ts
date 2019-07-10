@@ -7,7 +7,7 @@
 import { get } from 'lodash';
 import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/public';
 import { openSans } from '../../../common/lib/fonts';
-import { Render, Style } from '../types';
+import { Render, Style } from '../../../types';
 import { getFunctionHelp, getFunctionErrors } from '../../strings';
 
 export enum Shape {

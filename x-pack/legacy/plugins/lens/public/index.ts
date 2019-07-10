@@ -19,7 +19,6 @@ import { render, unmountComponentAtNode } from 'react-dom';
 import { IScope } from 'angular';
 import chrome from 'ui/chrome';
 import { appSetup, appStop } from './app_plugin';
-
 import { PLUGIN_ID } from '../common';
 
 // TODO: Convert this to the "new platform" way of doing UI
