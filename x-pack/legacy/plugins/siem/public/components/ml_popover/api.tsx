@@ -8,6 +8,7 @@ import chrome from 'ui/chrome';
 import {
   CloseJobsResponse,
   Group,
+  IndexPatternResponse,
   Job,
   MlSetupArgs,
   SetupMlResponse,
@@ -25,6 +26,8 @@ const emptyStartDatafeedResponse: StartDatafeedResponse = {};
 const emptyStopDatafeeds: [StopDatafeedResponse, CloseJobsResponse] = [{}, {}];
 
 const emptyJob: Job[] = [];
+
+const emptyIndexPattern: string = '';
 
 /**
  * Fetches ML Groups Data
@@ -207,5 +210,49 @@ export const jobsSummary = async (
   } catch (error) {
     // TODO: Toaster error when this happens instead of returning empty data
     return emptyJob;
+  }
+};
+
+/**
+ * Fetches Configured Index Patterns from the Kibana saved objects API (as ML does during create job flow)
+ *
+ * @param headers
+ */
+export const getIndexPatterns = async (
+  headers: Record<string, string | undefined>
+): Promise<string> => {
+  try {
+    const response = await fetch(
+      '/api/saved_objects/_find?type=index-pattern&fields=title&fields=type&per_page=10000',
+      {
+        method: 'GET',
+        credentials: 'same-origin',
+        headers: {
+          'content-type': 'application/json',
+          'kbn-xsrf': chrome.getXsrfToken(),
+          'kbn-system-api': 'true',
+          ...headers,
+        },
+      }
+    );
+    await throwIfNotOk(response);
+    const results: IndexPatternResponse = await response.json();
+
+    if (results.saved_objects && Array.isArray(results.saved_objects)) {
+      return results.saved_objects
+        .reduce(
+          (acc: string[], v) => [
+            ...acc,
+            ...(v.attributes && v.attributes.title ? [v.attributes.title] : []),
+          ],
+          []
+        )
+        .join(', ');
+    } else {
+      return emptyIndexPattern;
+    }
+  } catch (error) {
+    // TODO: Toaster error when this happens instead of returning empty data
+    return emptyIndexPattern;
   }
 };

@@ -6,7 +6,7 @@
 
 import React from 'react';
 
-import { EuiBasicTable, EuiText, EuiTitle } from '@elastic/eui';
+import { EuiBasicTable, EuiLink, EuiText } from '@elastic/eui';
 
 import { RIGHT_ALIGNMENT } from '@elastic/eui/lib/services';
 import styled from 'styled-components';
@@ -22,15 +22,16 @@ const getJobsTableColumns = () => [
     name: i18n.COLUMN_JOB_NAME,
     render: ({ jobName, jobDescription }: JobDetailProps) => (
       <JobNameWrapper>
-        <EuiTitle size="xxs">
-          <h5>{jobName}</h5>
-        </EuiTitle>
+        <EuiLink href={`ml#/explorer?_g=(ml:(jobIds:!(${jobName})))`} target="_blank">
+          <EuiText size="s">{jobName}</EuiText>
+        </EuiLink>
         <EuiText color="subdued" size="xs">
           {jobDescription}
         </EuiText>
       </JobNameWrapper>
     ),
   },
+
   {
     name: i18n.COLUMN_RUN_JOB,
     render: ({ jobName, jobDescription, isChecked, onJobStateChange }: JobDetailProps) => (
@@ -41,7 +42,6 @@ const getJobsTableColumns = () => [
         onJobStateChange={onJobStateChange}
       />
     ),
-    sortable: false,
     align: RIGHT_ALIGNMENT,
     width: '80px',
   },

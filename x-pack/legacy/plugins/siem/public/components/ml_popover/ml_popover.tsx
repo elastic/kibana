@@ -33,6 +33,7 @@ import { EuiSearchBarQuery } from '../open_timeline/types';
 import { JobDetailProps } from './job_detail';
 import { JobsTable } from './jobs_table';
 import { setupMlJob } from './api';
+import { useIndexPatterns } from './hooks/use_index_patterns';
 
 const PopoverContentsDiv = styled.div`
   width: 550px;
@@ -100,7 +101,7 @@ export const getJobsToDisplay = (
 export const MlPopover = React.memo(() => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [showAllJobs, setShowAllJobs] = useState(false);
-  const [isCreatingJobs, setIsCreatingJobs] = useState(false);
+  const [, setIsCreatingJobs] = useState(false);
   const [refetchSummaryData, setRefetchSummaryData] = useState(false);
   const [filterQuery, setFilterQuery] = useState('');
   const [, siemJobs] = useSiemJobs(isPopoverOpen ? !refetchSummaryData : refetchSummaryData);
@@ -108,6 +109,7 @@ export const MlPopover = React.memo(() => {
     siemJobs,
     isPopoverOpen ? !refetchSummaryData : refetchSummaryData
   );
+  const [, configuredIndexPattern] = useIndexPatterns();
   const config = useContext(KibanaConfigContext);
   const capabilities = useContext(MlCapabilitiesContext);
   const headers = { 'kbn-version': config.kbnVersion };
@@ -122,7 +124,7 @@ export const MlPopover = React.memo(() => {
   const configTemplatesToInstall = getConfigTemplatesToInstall(
     configTemplates,
     installedJobIds,
-    config.indexPattern || ''
+    configuredIndexPattern || ''
   );
 
   // Install Config Templates as effect of opening popover
@@ -141,13 +143,12 @@ export const MlPopover = React.memo(() => {
             });
           })
         );
-
-        setRefetchSummaryData(!refetchSummaryData);
         setIsCreatingJobs(false);
-        setupJobs();
+        setRefetchSummaryData(!refetchSummaryData);
       };
+      setupJobs();
     }
-  }, []);
+  }, [configTemplatesToInstall.length]);
 
   // Filter installed job to show all 'siem' group jobs or just embedded
   const jobsToDisplay = getJobsToDisplay(siemJobSummaryData, embeddedJobIds, showAllJobs);

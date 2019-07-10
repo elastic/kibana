@@ -11,10 +11,7 @@ import {
   getConfigTemplatesToInstall,
   getJobsToDisplay,
   getJobsToInstall,
-  JobDetail,
-  JobDetailsHeader,
   MlPopover,
-  MlPopoverTitle,
 } from './ml_popover';
 import {
   mockConfigTemplates,
@@ -22,6 +19,7 @@ import {
   mockInstalledJobIds,
   mockJobsSummaryResponse,
 } from './__mocks__/api';
+import { JobDetail } from './job_detail';
 
 jest.mock('../ml/permissions/has_ml_admin_permissions', () => ({
   hasMlAdminPermissions: () => true,
@@ -37,20 +35,6 @@ describe('MlPopover', () => {
         .simulate('click');
       wrapper.update();
       expect(wrapper.find('[data-test-subj="ml-popover-contents"]').exists()).toEqual(true);
-    });
-  });
-
-  describe('MlPopoverTitle', () => {
-    test('renders correctly against snapshot', () => {
-      const wrapper = shallow(<MlPopoverTitle />);
-      expect(toJson(wrapper)).toMatchSnapshot();
-    });
-  });
-
-  describe('JobDetailsHeader', () => {
-    test('renders correctly against snapshot', () => {
-      const wrapper = shallow(<JobDetailsHeader />);
-      expect(toJson(wrapper)).toMatchSnapshot();
     });
   });
 

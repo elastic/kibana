@@ -80,3 +80,20 @@ export interface CloseJobsResponse {
     closed: boolean;
   };
 }
+
+export interface IndexPatternSavedObject {
+  attributes: {
+    title: string;
+  };
+  id: string;
+  type: string;
+  updated_at: string;
+  version: string;
+}
+
+export interface IndexPatternResponse {
+  page: number;
+  per_page: number;
+  saved_objects: IndexPatternSavedObject[];
+  total: number;
+}
