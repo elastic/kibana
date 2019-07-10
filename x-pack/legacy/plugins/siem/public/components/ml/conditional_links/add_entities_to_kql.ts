@@ -34,44 +34,25 @@ export const entitiesToKql = (entityNames: string[], entities: string[]): string
   }, '');
 };
 
-export const emptyKql = {
-  filterQuery: {
-    expression: '',
-  },
-  kind: 'kuery',
-};
-
-export const decodeKqlQueryOrInitialize = (kqlQuery: string | null): RisonValue => {
-  if (kqlQuery == null) {
-    return emptyKql;
-  } else {
-    return decodeRison(kqlQuery);
-  }
-};
-
 export const addEntitiesToKql = (
   entityNames: string[],
   entities: string[],
-  kqlQuery: string | null
+  kqlQuery: string
 ): string => {
-  const value: RisonValue = decodeKqlQueryOrInitialize(kqlQuery);
+  const value: RisonValue = decodeRison(kqlQuery);
   if (isRisonObject(value)) {
     const filterQuery = value.filterQuery;
     if (isRisonObject(filterQuery)) {
       if (isRegularString(filterQuery.expression)) {
         const entitiesKql = entitiesToKql(entityNames, entities);
-        if (filterQuery.expression !== '') {
+        if (filterQuery.expression !== '' && entitiesKql !== '') {
           filterQuery.expression = `(${entitiesKql}) and (${filterQuery.expression})`;
-        } else {
+        } else if (filterQuery.expression === '' && entitiesKql !== '') {
           filterQuery.expression = `(${entitiesKql})`;
         }
         return encode(value);
       }
     }
   }
-  if (kqlQuery == null) {
-    return '';
-  } else {
-    return kqlQuery;
-  }
+  return kqlQuery;
 };
