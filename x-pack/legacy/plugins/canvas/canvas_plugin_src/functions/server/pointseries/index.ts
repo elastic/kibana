@@ -26,7 +26,7 @@ import {
   PointSeries,
   PointSeriesColumnName,
   PointSeriesColumns,
-} from '../../types';
+} from '../../../../types';
 
 // TODO: pointseries performs poorly, that's why we run it on the server.
 

@@ -84,6 +84,7 @@ uiRoutes.when('/kibana/instances/:uuid', {
                       <MonitoringTimeseriesContainer
                         series={data.metrics.kibana_requests}
                         onBrush={this.onBrush}
+                        zoomInfo={this.zoomInfo}
                       />
                       <EuiSpacer />
                     </EuiFlexItem>
@@ -91,6 +92,7 @@ uiRoutes.when('/kibana/instances/:uuid', {
                       <MonitoringTimeseriesContainer
                         series={data.metrics.kibana_response_times}
                         onBrush={this.onBrush}
+                        zoomInfo={this.zoomInfo}
                       />
                       <EuiSpacer />
                     </EuiFlexItem>
@@ -98,6 +100,7 @@ uiRoutes.when('/kibana/instances/:uuid', {
                       <MonitoringTimeseriesContainer
                         series={data.metrics.kibana_memory}
                         onBrush={this.onBrush}
+                        zoomInfo={this.zoomInfo}
                       />
                       <EuiSpacer />
                     </EuiFlexItem>
@@ -105,6 +108,7 @@ uiRoutes.when('/kibana/instances/:uuid', {
                       <MonitoringTimeseriesContainer
                         series={data.metrics.kibana_average_concurrent_connections}
                         onBrush={this.onBrush}
+                        zoomInfo={this.zoomInfo}
                       />
                       <EuiSpacer />
                     </EuiFlexItem>
@@ -112,6 +116,7 @@ uiRoutes.when('/kibana/instances/:uuid', {
                       <MonitoringTimeseriesContainer
                         series={data.metrics.kibana_os_load}
                         onBrush={this.onBrush}
+                        zoomInfo={this.zoomInfo}
                       />
                       <EuiSpacer />
                     </EuiFlexItem>
@@ -119,6 +124,7 @@ uiRoutes.when('/kibana/instances/:uuid', {
                       <MonitoringTimeseriesContainer
                         series={data.metrics.kibana_process_delay}
                         onBrush={this.onBrush}
+                        zoomInfo={this.zoomInfo}
                       />
                       <EuiSpacer />
                     </EuiFlexItem>
