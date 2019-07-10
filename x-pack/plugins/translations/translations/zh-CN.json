@@ -1534,7 +1534,6 @@
     "kbn.discover.bucketIntervalTooltip.tooManyBucketsText": "过多的存储桶",
     "kbn.discover.discoverBreadcrumbTitle": "Discover",
     "kbn.discover.discoverDescription": "通过查询和筛选原始文档来以交互方式浏览您的数据。",
-    "kbn.discover.discoverError": "Discover 错误",
     "kbn.discover.discoverTitle": "Discover",
     "kbn.discover.documentsAriaLabel": "文档",
     "kbn.discover.errorLoadingData": "加载数据时出错",
