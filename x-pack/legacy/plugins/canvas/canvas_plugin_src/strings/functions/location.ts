@@ -12,11 +12,11 @@ import { FunctionFactory } from '../../../types';
 export const help: FunctionHelp<FunctionFactory<typeof location>> = {
   help: i18n.translate('xpack.canvas.functions.locationHelpText', {
     defaultMessage:
-      'Find your current location using the {geolocation} of the browser. ' +
+      'Find your current location using the {geolocationAPI} of the browser. ' +
       'Performance can vary, but is fairly accurate. ' +
       'See {url}.',
     values: {
-      geolocation: 'Geolocation API',
+      geolocationAPI: 'Geolocation API',
       url: 'https://developer.mozilla.org/en-US/docs/Web/API/Navigator/geolocation',
     },
   }),

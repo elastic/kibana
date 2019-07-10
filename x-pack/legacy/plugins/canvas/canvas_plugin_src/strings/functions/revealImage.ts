@@ -9,6 +9,7 @@ import { revealImage } from '../../functions/common/revealImage';
 import { FunctionHelp } from '.';
 import { FunctionFactory } from '../../../types';
 import { Position } from '../../../types';
+import { BASE64, URL } from '../constants';
 
 export const help: FunctionHelp<FunctionFactory<typeof revealImage>> = {
   help: i18n.translate('xpack.canvas.functions.revealImageHelpText', {
@@ -17,11 +18,11 @@ export const help: FunctionHelp<FunctionFactory<typeof revealImage>> = {
   args: {
     image: i18n.translate('xpack.canvas.functions.revealImage.args.imageHelpText', {
       defaultMessage:
-        'The image to reveal. Provide an image asset as a `{base64}` data {url}, ' +
+        'The image to reveal. Provide an image asset as a {BASE64} data {URL}, ' +
         'or pass in a sub-expression.',
       values: {
-        base64: 'base64',
-        url: 'URL',
+        BASE64,
+        URL,
       },
     }),
     emptyImage: i18n.translate('xpack.canvas.functions.revealImage.args.emptyImageHelpText', {
@@ -29,8 +30,8 @@ export const help: FunctionHelp<FunctionFactory<typeof revealImage>> = {
         'An optional background image to reveal over. ' +
         'Provide an image asset as a `{base64}` data {url}, or pass in a sub-expression.',
       values: {
-        base64: 'base64',
-        url: 'URL',
+        BASE64,
+        URL,
       },
     }),
     origin: i18n.translate('xpack.canvas.functions.revealImage.args.originHelpText', {

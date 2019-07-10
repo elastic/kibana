@@ -8,20 +8,20 @@ import { i18n } from '@kbn/i18n';
 import { pointseries } from '../../functions/server/pointseries';
 import { FunctionHelp } from '.';
 import { FunctionFactory } from '../../../types';
+import { DATATABLE, TINYMATH, TINYMATH_URL } from '../constants';
 
 export const help: FunctionHelp<FunctionFactory<typeof pointseries>> = {
   help: i18n.translate('xpack.canvas.functions.pointseriesHelpText', {
     defaultMessage:
-      'Turn a {datatable} into a point series model. Currently we differentiate measure ' +
-      'from dimensions by looking for a {url}. If you enter a {tinymath} expression in your ' +
+      'Turn a {DATATABLE} into a point series model. Currently we differentiate measure ' +
+      'from dimensions by looking for a {TINYMATH} expression. See {TINYMATH_URL}. If you enter a {TINYMATH} expression in your ' +
       'argument, we treat that argument as a measure, otherwise it is a dimension. Dimensions ' +
       'are combined to create unique keys. Measures are then deduplicated by those keys using ' +
-      'the specified {tinymath} function',
+      'the specified {TINYMATH} function',
     values: {
-      datatable: 'datatable',
-      url:
-        '[TinyMath function](https://www.elastic.co/guide/en/kibana/current/canvas-tinymath-functions.html)',
-      tinymath: 'TinyMath',
+      DATATABLE,
+      TINYMATH,
+      TINYMATH_URL,
     },
   }),
   args: {

@@ -8,6 +8,7 @@ import { i18n } from '@kbn/i18n';
 import { containerStyle } from '../../functions/common/containerStyle';
 import { FunctionHelp } from '.';
 import { FunctionFactory } from '../../../types';
+import { CSS } from '../constants';
 
 export const help: FunctionHelp<FunctionFactory<typeof containerStyle>> = {
   help: i18n.translate('xpack.canvas.functions.containerStyleHelpText', {
@@ -17,43 +18,43 @@ export const help: FunctionHelp<FunctionFactory<typeof containerStyle>> = {
     backgroundColor: i18n.translate(
       'xpack.canvas.functions.containerStyle.args.backgroundColorHelpText',
       {
-        defaultMessage: 'A valid {css} background color.',
+        defaultMessage: 'A valid {CSS} background color.',
         values: {
-          css: 'CSS',
+          CSS,
         },
       }
     ),
     backgroundImage: i18n.translate(
       'xpack.canvas.functions.containerStyle.args.backgroundImageHelpText',
       {
-        defaultMessage: 'A valid {css} background image.',
+        defaultMessage: 'A valid {CSS} background image.',
         values: {
-          css: 'CSS',
+          CSS,
         },
       }
     ),
     backgroundRepeat: i18n.translate(
       'xpack.canvas.functions.containerStyle.args.backgroundRepeatHelpText',
       {
-        defaultMessage: 'A valid {css} background repeat.',
+        defaultMessage: 'A valid {CSS} background repeat.',
         values: {
-          css: 'CSS',
+          CSS,
         },
       }
     ),
     backgroundSize: i18n.translate(
       'xpack.canvas.functions.containerStyle.args.backgroundSizeHelpText',
       {
-        defaultMessage: 'A valid {css} background size.',
+        defaultMessage: 'A valid {CSS} background size.',
         values: {
-          css: 'CSS',
+          CSS,
         },
       }
     ),
     border: i18n.translate('xpack.canvas.functions.containerStyle.args.borderHelpText', {
-      defaultMessage: 'A valid {css} border.',
+      defaultMessage: 'A valid {CSS} border.',
       values: {
-        css: 'CSS',
+        CSS,
       },
     }),
     borderRadius: i18n.translate(
@@ -67,7 +68,10 @@ export const help: FunctionHelp<FunctionFactory<typeof containerStyle>> = {
         'A number between 0 and 1 that represents the degree of transparency of the element.',
     }),
     overflow: i18n.translate('xpack.canvas.functions.containerStyle.args.overflowHelpText', {
-      defaultMessage: 'A valid CSS overflow.',
+      defaultMessage: 'A valid {CSS} overflow.',
+      values: {
+        CSS,
+      },
     }),
     padding: i18n.translate('xpack.canvas.functions.containerStyle.args.paddingHelpText', {
       defaultMessage: 'The distance of the content, in pixels, from border.',

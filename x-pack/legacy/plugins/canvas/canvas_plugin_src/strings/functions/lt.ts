@@ -8,19 +8,20 @@ import { i18n } from '@kbn/i18n';
 import { lt } from '../../functions/common/lt';
 import { FunctionHelp } from '.';
 import { FunctionFactory } from '../../../types';
+import { CONTEXT } from '../constants';
 
 export const help: FunctionHelp<FunctionFactory<typeof lt>> = {
   help: i18n.translate('xpack.canvas.functions.ltHelpText', {
-    defaultMessage: 'Returns whether the {context} is less than the argument.',
+    defaultMessage: 'Returns whether the {CONTEXT} is less than the argument.',
     values: {
-      context: '_context_',
+      CONTEXT,
     },
   }),
   args: {
     value: i18n.translate('xpack.canvas.functions.lt.args.valueHelpText', {
-      defaultMessage: 'The value compared to the {context}.',
+      defaultMessage: 'The value compared to the {CONTEXT}.',
       values: {
-        context: '_context_',
+        CONTEXT,
       },
     }),
   },

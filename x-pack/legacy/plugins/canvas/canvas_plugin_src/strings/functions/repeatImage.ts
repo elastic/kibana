@@ -8,6 +8,7 @@ import { i18n } from '@kbn/i18n';
 import { repeatImage } from '../../functions/common/repeatImage';
 import { FunctionHelp } from '.';
 import { FunctionFactory } from '../../../types';
+import { CONTEXT, BASE64, URL } from '../constants';
 
 export const help: FunctionHelp<FunctionFactory<typeof repeatImage>> = {
   help: i18n.translate('xpack.canvas.functions.repeatImageHelpText', {
@@ -16,21 +17,21 @@ export const help: FunctionHelp<FunctionFactory<typeof repeatImage>> = {
   args: {
     emptyImage: i18n.translate('xpack.canvas.functions.repeatImage.args.emptyImageHelpText', {
       defaultMessage:
-        'Fills the difference between the {context} and `{max}` parameter for the element with this image' +
-        'Provide an image asset as a `{base64}` data {url}, or pass in a sub-expression.',
+        'Fills the difference between the {CONTEXT} and {maxArg} parameter for the element with this image' +
+        'Provide an image asset as a {BASE64} data {URL}, or pass in a sub-expression.',
       values: {
-        context: '_context_',
-        base64: 'base64',
-        max: 'max',
-        url: 'URL',
+        BASE64,
+        CONTEXT,
+        maxArg: '`max`',
+        URL,
       },
     }),
     image: i18n.translate('xpack.canvas.functions.repeatImage.args.imageHelpText', {
       defaultMessage:
-        'The image to repeat. Provide an image asset as a `{base64}` data {url}, or pass in a sub-expression.',
+        'The image to repeat. Provide an image asset as a {base64} data {url}, or pass in a sub-expression.',
       values: {
-        base64: 'base46',
-        url: 'URL',
+        BASE64,
+        URL,
       },
     }),
     max: i18n.translate('xpack.canvas.functions.repeatImage.args.maxHelpText', {

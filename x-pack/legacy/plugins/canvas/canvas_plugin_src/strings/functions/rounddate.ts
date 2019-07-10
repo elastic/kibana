@@ -8,23 +8,24 @@ import { i18n } from '@kbn/i18n';
 import { rounddate } from '../../functions/common/rounddate';
 import { FunctionHelp } from '.';
 import { FunctionFactory } from '../../../types';
+import { MOMENTJS } from '../constants';
 
 export const help: FunctionHelp<FunctionFactory<typeof rounddate>> = {
   help: i18n.translate('xpack.canvas.functions.rounddateHelpText', {
     defaultMessage:
-      'Uses a {moment} formatting string to round milliseconds since epoch, and returns milliseconds since epoch.',
+      'Uses a {MOMENTJS} formatting string to round milliseconds since epoch, and returns milliseconds since epoch.',
     values: {
-      moment: 'MomentJS',
+      MOMENTJS,
     },
   }),
   args: {
     format: i18n.translate('xpack.canvas.functions.rounddate.args.formatHelpText', {
       defaultMessage:
-        'The {moment} format to use for bucketing. For example, "{example}" would round each date to months. See {url}.',
+        'The {MOMENTJS} format to use for bucketing. For example, {example} would round each date to months. See {url}.',
       values: {
-        moment: 'MomentJS',
+        example: '`"YYYY-MM"`',
+        MOMENTJS,
         url: 'https://momentjs.com/docs/#/displaying/',
-        example: 'YYYY-MM',
       },
     }),
   },

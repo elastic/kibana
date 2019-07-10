@@ -8,13 +8,14 @@ import { i18n } from '@kbn/i18n';
 import { clear } from '../../functions/common/clear';
 import { FunctionHelp } from '.';
 import { FunctionFactory } from '../../../types';
+import { CONTEXT, TYPE_NULL } from '../constants';
 
 export const help: FunctionHelp<FunctionFactory<typeof clear>> = {
   help: i18n.translate('xpack.canvas.functions.clearHelpText', {
-    defaultMessage: 'Clears the {context}, and returns `{null}`',
+    defaultMessage: 'Clears the {context}, and returns {null}.',
     values: {
-      context: '_context_',
-      null: 'null',
+      CONTEXT,
+      TYPE_NULL,
     },
   }),
   args: {},

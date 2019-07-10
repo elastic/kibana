@@ -8,35 +8,40 @@ import { i18n } from '@kbn/i18n';
 import { caseFn } from '../../functions/common/case';
 import { FunctionHelp } from '.';
 import { FunctionFactory } from '../../../types';
+import { CONTEXT } from '../constants';
+
+const IF_ARG = '`if`';
+const WHEN_ARG = '`when`';
 
 export const help: FunctionHelp<FunctionFactory<typeof caseFn>> = {
   help: i18n.translate('xpack.canvas.functions.caseHelpText', {
     defaultMessage:
-      'Builds a case (including a condition/result) to pass to the {switch} function.',
+      'Builds a {case}, including a condition and a result, to pass to the {switch} function.',
     values: {
-      switch: 'switch',
+      case: '`case`',
+      switchFn: '`switch`',
     },
   }),
   args: {
     when: i18n.translate('xpack.canvas.functions.case.args.whenHelpText', {
       defaultMessage:
-        'The value compared to the {context} to see if they are equal. The `{whenArg}` argument is ignored when the `{ifArg}` argument is also specified.',
+        'The value compared to the {context} to see if they are equal. The {WHEN_ARG} argument is ignored when the {IF_ARG} argument is also specified.',
       values: {
-        context: '_context_',
-        ifArg: 'if',
-        whenArg: 'when',
+        CONTEXT,
+        IF_ARG,
+        WHEN_ARG,
       },
     }),
     if: i18n.translate('xpack.canvas.functions.case.args.ifHelpText', {
       defaultMessage:
-        'This value indicates whether the condition is met. The `{ifArg}` argument overrides the `{whenArg}` argument when both are provided.',
+        'This value indicates whether the condition is met. The {IF_ARG} argument overrides the {WHEN_ARG} argument when both are provided.',
       values: {
-        ifArg: 'if',
-        whenArg: 'when',
+        IF_ARG,
+        WHEN_ARG,
       },
     }),
     then: i18n.translate('xpack.canvas.functions.case.args.thenHelpText', {
-      defaultMessage: 'The value to return if the condition is met',
+      defaultMessage: 'The value to return if the condition is met.',
     }),
   },
 };

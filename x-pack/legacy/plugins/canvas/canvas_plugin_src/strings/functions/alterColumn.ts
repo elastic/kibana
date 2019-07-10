@@ -8,18 +8,21 @@ import { i18n } from '@kbn/i18n';
 import { alterColumn } from '../../functions/common/alterColumn';
 import { FunctionHelp } from '.';
 import { FunctionFactory } from '../../../types';
+import { DATATABLE_COLUMN_TYPES } from '../../../common/lib';
 
 export const help: FunctionHelp<FunctionFactory<typeof alterColumn>> = {
   help: i18n.translate('xpack.canvas.functions.alterColumnHelpText', {
     defaultMessage:
       'Converts between core types, including {examples}, and rename columns. ' +
-      'See also `{mapColumnFn}` and `{staticColumnFn}`.',
+      'See also {mapColumnFn} and {staticColumnFn}.',
     values: {
-      examples: ['string', 'number', 'null', 'boolean', 'date']
+      list: Object.values(DATATABLE_COLUMN_TYPES)
+        .slice(0, -1)
         .map(type => `\`${type}\``)
         .join(', '),
-      mapColumnFn: 'mapColumn',
-      staticColumnFn: 'staticColumn',
+      end: Object.values(DATATABLE_COLUMN_TYPES).slice(-1)[0],
+      mapColumnFn: '`mapColumn`',
+      staticColumnFn: '`staticColumn`',
     },
   }),
   args: {

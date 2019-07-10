@@ -10,10 +10,11 @@ import { FunctionHelp } from '.';
 import { FunctionFactory } from '../../../types';
 
 import { Shape } from '../../functions/common/progress';
+import { CSS, FONT_FAMILY, FONT_WEIGHT, BOOLEAN_TRUE, BOOLEAN_FALSE } from '../constants';
 
 export const help: FunctionHelp<FunctionFactory<typeof progress>> = {
   help: i18n.translate('xpack.canvas.functions.progressHelpText', {
-    defaultMessage: 'Configure a progress element.',
+    defaultMessage: 'Configures a progress element.',
   }),
   args: {
     barColor: i18n.translate('xpack.canvas.functions.progress.args.barColorHelpText', {
@@ -24,23 +25,23 @@ export const help: FunctionHelp<FunctionFactory<typeof progress>> = {
     }),
     font: i18n.translate('xpack.canvas.functions.progress.args.fontHelpText', {
       defaultMessage:
-        'The {css} font properties for the label. For example, {fontFamily} or {fontWeight}.',
+        'The {CSS} font properties for the label. For example, {FONT_FAMILY} or {FONT_WEIGHT}.',
       values: {
-        css: 'CSS',
-        fontFamily: 'font-family',
-        fontWeight: 'font-weight',
+        CSS,
+        FONT_FAMILY,
+        FONT_WEIGHT,
       },
     }),
     label: i18n.translate('xpack.canvas.functions.progress.args.labelHelpText', {
       defaultMessage:
-        'To show or hide labels, use `{true}` or `{false}`. Alternatively, provide a string to display as a label.',
+        'To show or hide labels, use {BOOLEAN_TRUE} or {BOOLEAN_FALSE}. Alternatively, provide a string to display as a label.',
       values: {
-        true: 'true',
-        false: 'false',
+        BOOLEAN_TRUE,
+        BOOLEAN_FALSE,
       },
     }),
     max: i18n.translate('xpack.canvas.functions.progress.args.maxHelpText', {
-      defaultMessage: 'The maximum value of the progress element',
+      defaultMessage: 'The maximum value of the progress element.',
     }),
     shape: i18n.translate('xpack.canvas.functions.progress.args.shapeHelpText', {
       defaultMessage: `Select {list}, or {end}.`,
@@ -53,10 +54,10 @@ export const help: FunctionHelp<FunctionFactory<typeof progress>> = {
       },
     }),
     valueColor: i18n.translate('xpack.canvas.functions.progress.args.valueColorHelpText', {
-      defaultMessage: 'The color of the progress bar',
+      defaultMessage: 'The color of the progress bar.',
     }),
     valueWeight: i18n.translate('xpack.canvas.functions.progress.args.valueWeightHelpText', {
-      defaultMessage: 'The thickness of the progress bar',
+      defaultMessage: 'The thickness of the progress bar.',
     }),
   },
 };

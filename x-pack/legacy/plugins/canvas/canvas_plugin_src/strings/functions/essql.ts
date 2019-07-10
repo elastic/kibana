@@ -8,21 +8,22 @@ import { i18n } from '@kbn/i18n';
 import { essql } from '../../functions/server/essql';
 import { FunctionHelp } from '.';
 import { FunctionFactory } from '../../../types';
+import { ELASTICSEARCH, SQL, ISO8601, UTC } from '../constants';
 
 export const help: FunctionHelp<FunctionFactory<typeof essql>> = {
   help: i18n.translate('xpack.canvas.functions.essqlHelpText', {
-    defaultMessage: 'Queries {es} using {es} {sql}.',
+    defaultMessage: 'Queries {ELASTICSEARCH} using {ELASTICSEARCH} {SQL}.',
     values: {
-      es: 'Elasticsearch',
-      sql: 'SQL',
+      ELASTICSEARCH,
+      SQL,
     },
   }),
   args: {
     query: i18n.translate('xpack.canvas.functions.essql.args.queryHelpText', {
-      defaultMessage: 'An {es} {sql} query',
+      defaultMessage: 'An {ELASTICSEARCH} {SQL} query.',
       values: {
-        es: 'Elasticsearch',
-        sql: 'SQL',
+        ELASTICSEARCH,
+        SQL,
       },
     }),
     count: i18n.translate('xpack.canvas.functions.essql.args.countHelpText', {
@@ -30,10 +31,10 @@ export const help: FunctionHelp<FunctionFactory<typeof essql>> = {
     }),
     timezone: i18n.translate('xpack.canvas.functions.essql.args.timezoneHelpText', {
       defaultMessage:
-        'The timezone to use for date operations. Valid {iso} formats and {utc} offsets both work',
+        'The timezone to use for date operations. Valid {ISO8601} formats and {UTC} offsets both work.',
       values: {
-        iso: 'ISO',
-        utc: 'UTC',
+        ISO8601,
+        UTC,
       },
     }),
   },

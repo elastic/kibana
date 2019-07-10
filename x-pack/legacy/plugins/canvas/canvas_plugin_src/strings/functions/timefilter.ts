@@ -8,6 +8,7 @@ import { i18n } from '@kbn/i18n';
 import { timefilter } from '../../functions/common/timefilter';
 import { FunctionHelp } from '.';
 import { FunctionFactory } from '../../../types';
+import { ISO8601, ELASTICSEARCH, DATEMATH } from '../constants';
 
 export const help: FunctionHelp<FunctionFactory<typeof timefilter>> = {
   help: i18n.translate('xpack.canvas.functions.timefilterHelpText', {
@@ -18,23 +19,24 @@ export const help: FunctionHelp<FunctionFactory<typeof timefilter>> = {
       defaultMessage: 'The column or field that you want to filter.',
     }),
     from: i18n.translate('xpack.canvas.functions.timefilter.args.fromHelpText', {
-      defaultMessage: 'The beginning of the range, in {iso} or {es} {dm} format',
+      defaultMessage:
+        'The beginning of the range, in {ISO8601} or {ELASTICSEARCH} {DATEMATH} format',
       values: {
-        iso: 'ISO8601',
-        es: 'Elasticsearch',
-        dm: 'datemath',
+        DATEMATH,
+        ELASTICSEARCH,
+        ISO8601,
       },
     }),
     to: i18n.translate('xpack.canvas.functions.timefilter.args.toHelpText', {
-      defaultMessage: 'The end of the range, in {iso} or {es} {dm} format',
+      defaultMessage: 'The end of the range, in {ISO8601} or {ELASTICSEARCH} {DATEMATH} format',
       values: {
-        iso: 'ISO8601',
-        es: 'Elasticsearch',
-        dm: 'datemath',
+        DATEMATH,
+        ELASTICSEARCH,
+        ISO8601,
       },
     }),
     filterGroup: i18n.translate('xpack.canvas.functions.timefilter.args.filterGroupHelpText', {
-      defaultMessage: 'The group name for the filter',
+      defaultMessage: 'The group name for the filter.',
     }),
   },
 };

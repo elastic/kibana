@@ -8,22 +8,26 @@ import { i18n } from '@kbn/i18n';
 import { filterrows } from '../../functions/common/filterrows';
 import { FunctionHelp } from '.';
 import { FunctionFactory } from '../../../types';
+import { DATATABLE, TYPE_BOOLEAN, BOOLEAN_TRUE, BOOLEAN_FALSE } from '../constants';
 
 export const help: FunctionHelp<FunctionFactory<typeof filterrows>> = {
   help: i18n.translate('xpack.canvas.functions.filterrowsHelpText', {
-    defaultMessage: 'Filter rows in a `{datatable}` based on the return value of a sub-expression.',
+    defaultMessage: 'Filter rows in a {DATATABLE} based on the return value of a sub-expression.',
     values: {
-      datatable: 'datatable',
+      DATATABLE,
     },
   }),
   args: {
     fn: i18n.translate('xpack.canvas.functions.filterrows.args.fnHelpText', {
       defaultMessage:
-        'An expression to pass into each row in the `{datatable}`. The expression should return a ' +
-        '`{boolean}`. A `true` value preserves the row, and a `false` value removes it.',
+        'An expression to pass into each row in the {DATATABLE}. ' +
+        'The expression should return a {TYPE_BOOLEAN}. ' +
+        'A {BOOLEAN_TRUE} value preserves the row, and a {BOOLEAN_FALSE} value removes it.',
       values: {
-        datatable: 'datatable',
-        boolean: 'boolean',
+        BOOLEAN_FALSE,
+        BOOLEAN_TRUE,
+        DATATABLE,
+        TYPE_BOOLEAN,
       },
     }),
   },

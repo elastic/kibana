@@ -8,15 +8,17 @@ import { i18n } from '@kbn/i18n';
 import { switchFn } from '../../functions/common/switch';
 import { FunctionHelp } from '.';
 import { FunctionFactory } from '../../../types';
+import { CONTEXT } from '../constants';
 
 export const help: FunctionHelp<FunctionFactory<typeof switchFn>> = {
   help: i18n.translate('xpack.canvas.functions.switchHelpText', {
     defaultMessage:
       'Performs conditional logic with multiple conditions. ' +
-      'See also {caseFn} which builds a `case` to pass to the {switchFn} function.',
+      'See also {caseFn} which builds a {case} to pass to the {switchFn} function.',
     values: {
-      caseFn: 'case',
-      switchFn: 'switch',
+      case: '`case`',
+      caseFn: '`case`',
+      switchFn: '`switch`',
     },
   }),
   args: {
@@ -26,9 +28,9 @@ export const help: FunctionHelp<FunctionFactory<typeof switchFn>> = {
     default: i18n.translate('xpack.canvas.functions.switch.args.defaultHelpText', {
       defaultMessage:
         'The value returned when no conditions are met. ' +
-        'When unspecified and no conditions are met, the original {context} is returned.',
+        'When unspecified and no conditions are met, the original {CONTEXT} is returned.',
       values: {
-        context: '_context_',
+        CONTEXT,
       },
     }),
   },

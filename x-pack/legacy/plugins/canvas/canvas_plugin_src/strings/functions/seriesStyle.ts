@@ -13,11 +13,11 @@ export const help: FunctionHelp<FunctionFactory<typeof seriesStyle>> = {
   help: i18n.translate('xpack.canvas.functions.seriesStyleHelpText', {
     defaultMessage:
       'Creates an object used for describing the properties of a series on a chart. ' +
-      'Use `{seriesStyle}` inside of a charting function, like `{plot}` or `{pie}`.',
+      'Use {seriesStyleFn} inside of a charting function, like {plotFn} or {pieFn}.',
     values: {
-      seriesStyle: 'seriesStyle',
-      pie: 'pie',
-      plot: 'plot',
+      seriesStyleFn: '`seriesStyle`',
+      pieFn: '`pie`',
+      plotFn: '`plot`',
     },
   }),
   args: {
@@ -41,8 +41,7 @@ export const help: FunctionHelp<FunctionFactory<typeof seriesStyle>> = {
     }),
     stack: i18n.translate('xpack.canvas.functions.seriesStyle.args.stackHelpText', {
       defaultMessage:
-        'Specifies if the series should be stacked. ' +
-        'The number is the stack ID. ' +
+        'Specifies if the series should be stacked. The number is the stack ID. ' +
         'Series with the same stack ID are stacked together.',
     }),
     horizontalBars: i18n.translate(

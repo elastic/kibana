@@ -8,17 +8,28 @@ import { i18n } from '@kbn/i18n';
 import { compare, Operation } from '../../functions/common/compare';
 import { FunctionHelp } from '.';
 import { FunctionFactory } from '../../../types';
+import {
+  CONTEXT,
+  TYPE_BOOLEAN,
+  TYPE_NUMBER,
+  TYPE_STRING,
+  BOOLEAN_TRUE,
+  BOOLEAN_FALSE,
+  TYPE_NULL,
+} from '../constants';
 
 export const help: FunctionHelp<FunctionFactory<typeof compare>> = {
   help: i18n.translate('xpack.canvas.functions.compareHelpText', {
     defaultMessage:
-      'Compares the {context} to specified value to determine `true` or `false`. Usually used in combination with `{ifFn}` or `{caseFn}`. ' +
+      'Compares the {CONTEXT} to specified value to determine {BOOLEAN_TRUE} or {BOOLEAN_FALSE}. Usually used in combination with `{ifFn}` or `{caseFn}`. ' +
       'This only works with primitive types, such as {examples}. See also `{eqFn}`, `{gtFn}`, `{gteFn}`, `{ltFn}`, `{lteFn}`, `{neqFn}`',
     values: {
-      context: '_context_',
+      CONTEXT,
+      BOOLEAN_TRUE,
+      BOOLEAN_FALSE,
       ifFn: 'if',
       caseFn: 'case',
-      examples: ['number', 'string', 'boolean'].map(type => `\`${type}\``).join(', '),
+      examples: [TYPE_NUMBER, TYPE_STRING, TYPE_BOOLEAN, TYPE_NULL].join(', '),
       eqFn: 'eq',
       gtFn: 'gt',
       gteFn: 'gte',
@@ -43,9 +54,9 @@ export const help: FunctionHelp<FunctionFactory<typeof compare>> = {
       },
     }),
     to: i18n.translate('xpack.canvas.functions.compare.args.toHelpText', {
-      defaultMessage: 'The value compared to the {context}.',
+      defaultMessage: 'The value compared to the {CONTEXT}.',
       values: {
-        context: '_context_',
+        CONTEXT,
       },
     }),
   },

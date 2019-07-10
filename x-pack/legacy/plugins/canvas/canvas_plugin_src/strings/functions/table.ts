@@ -8,6 +8,7 @@ import { i18n } from '@kbn/i18n';
 import { table } from '../../functions/common/table';
 import { FunctionHelp } from '.';
 import { FunctionFactory } from '../../../types';
+import { CSS, FONT_FAMILY, FONT_WEIGHT, BOOLEAN_FALSE } from '../constants';
 
 export const help: FunctionHelp<FunctionFactory<typeof table>> = {
   help: i18n.translate('xpack.canvas.functions.tableHelpText', {
@@ -16,21 +17,25 @@ export const help: FunctionHelp<FunctionFactory<typeof table>> = {
   args: {
     font: i18n.translate('xpack.canvas.functions.table.args.fontHelpText', {
       defaultMessage:
-        'The {css} font properties for the contents of the table. For example, {fontFamily} or {fontWeight}.',
+        'The {CSS} font properties for the contents of the table. For example, {FONT_FAMILY} or {FONT_WEIGHT}.',
       values: {
-        css: 'CSS',
-        fontFamily: 'font-family',
-        fontWeight: 'font-weight',
+        CSS,
+        FONT_FAMILY,
+        FONT_WEIGHT,
       },
     }),
     paginate: i18n.translate('xpack.canvas.functions.table.args.paginateHelpText', {
-      defaultMessage: 'Show pagination controls? When `false`, only the first page is displayed.',
+      defaultMessage:
+        'Show pagination controls? When {BOOLEAN_FALSE}, only the first page is displayed.',
+      values: {
+        BOOLEAN_FALSE,
+      },
     }),
     perPage: i18n.translate('xpack.canvas.functions.table.args.perPageHelpText', {
       defaultMessage: 'The number of rows to display on each page.',
     }),
     showHeader: i18n.translate('xpack.canvas.functions.table.args.showHeaderHelpText', {
-      defaultMessage: 'Show or hide the header row with titles for each column',
+      defaultMessage: 'Show/hide the header row with titles for each column.',
     }),
   },
 };

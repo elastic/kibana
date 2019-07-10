@@ -8,19 +8,20 @@ import { i18n } from '@kbn/i18n';
 import { neq } from '../../functions/common/neq';
 import { FunctionHelp } from '.';
 import { FunctionFactory } from '../../../types';
+import { CONTEXT } from '../constants';
 
 export const help: FunctionHelp<FunctionFactory<typeof neq>> = {
   help: i18n.translate('xpack.canvas.functions.neqHelpText', {
-    defaultMessage: 'Returns whether the {context} is not equal to the argument.',
+    defaultMessage: 'Returns whether the {CONTEXT} is not equal to the argument.',
     values: {
-      context: '_context_',
+      CONTEXT,
     },
   }),
   args: {
     value: i18n.translate('xpack.canvas.functions.neq.args.valueHelpText', {
-      defaultMessage: 'The value compared to the {context}.',
+      defaultMessage: 'The value compared to the {CONTEXT}.',
       values: {
-        context: '_context_',
+        CONTEXT,
       },
     }),
   },

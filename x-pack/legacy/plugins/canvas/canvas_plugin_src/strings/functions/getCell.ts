@@ -8,12 +8,13 @@ import { i18n } from '@kbn/i18n';
 import { getCell } from '../../functions/common/getCell';
 import { FunctionHelp } from '.';
 import { FunctionFactory } from '../../../types';
+import { DATATABLE } from '../constants';
 
 export const help: FunctionHelp<FunctionFactory<typeof getCell>> = {
   help: i18n.translate('xpack.canvas.functions.getCellHelpText', {
-    defaultMessage: 'Fetchs a single cell from a `{datatable}`.',
+    defaultMessage: 'Fetchs a single cell from a {DATATABLE}.',
     values: {
-      datatable: 'datatable',
+      DATATABLE,
     },
   }),
   args: {

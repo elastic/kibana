@@ -8,25 +8,26 @@ import { i18n } from '@kbn/i18n';
 import { escount } from '../../functions/server/escount';
 import { FunctionHelp } from '.';
 import { FunctionFactory } from '../../../types';
+import { ELASTICSEARCH, LUCENE } from '../constants';
 
 export const help: FunctionHelp<FunctionFactory<typeof escount>> = {
   help: i18n.translate('xpack.canvas.functions.escountHelpText', {
-    defaultMessage: 'Query {es} for the number of hits matching the specified query.',
+    defaultMessage: 'Query {ELASTICSEARCH} for the number of hits matching the specified query.',
     values: {
-      es: 'Elasticsearch',
+      ELASTICSEARCH,
     },
   }),
   args: {
     query: i18n.translate('xpack.canvas.functions.escount.args.queryHelpText', {
-      defaultMessage: 'A {lucene} query string.',
+      defaultMessage: 'A {LUCENE} query string.',
       values: {
-        lucene: 'Lucene',
+        LUCENE,
       },
     }),
     index: i18n.translate('xpack.canvas.functions.escount.args.indexHelpText', {
-      defaultMessage: 'An index or index pattern. For example, "{example}".',
+      defaultMessage: 'An index or index pattern. For example, {example}.',
       values: {
-        example: 'logstash-*',
+        example: '`"logstash-*"`',
       },
     }),
   },

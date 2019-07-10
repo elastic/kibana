@@ -8,19 +8,20 @@ import { i18n } from '@kbn/i18n';
 import { eq } from '../../functions/common/eq';
 import { FunctionHelp } from '.';
 import { FunctionFactory } from '../../../types';
+import { CONTEXT } from '../constants';
 
 export const help: FunctionHelp<FunctionFactory<typeof eq>> = {
   help: i18n.translate('xpack.canvas.functions.eqHelpText', {
-    defaultMessage: 'Return whether the {context} is equal to the argument.',
+    defaultMessage: 'Return whether the {CONTEXT} is equal to the argument.',
     values: {
-      context: '_context_',
+      CONTEXT,
     },
   }),
   args: {
     value: i18n.translate('xpack.canvas.functions.eq.args.valueHelpText', {
-      defaultMessage: 'The value compared to the {context}.',
+      defaultMessage: 'The value compared to the {CONTEXT}.',
       values: {
-        context: '_context_',
+        CONTEXT,
       },
     }),
   },

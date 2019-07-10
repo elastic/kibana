@@ -8,12 +8,14 @@ import { i18n } from '@kbn/i18n';
 import { asFn } from '../../functions/common/as';
 import { FunctionHelp } from '.';
 import { FunctionFactory } from '../../../types';
+import { DATATABLE } from '../constants';
 
 export const help: FunctionHelp<FunctionFactory<typeof asFn>> = {
   help: i18n.translate('xpack.canvas.functions.asHelpText', {
-    defaultMessage: 'Creates a `datatable` with a single value. See also `{getCellFn}`.',
+    defaultMessage: 'Creates a {DATATABLE} with a single value. See also {getCellFn}.',
     values: {
-      getCellFn: 'getCell',
+      DATATABLE,
+      getCellFn: '`getCell`',
     },
   }),
   args: {

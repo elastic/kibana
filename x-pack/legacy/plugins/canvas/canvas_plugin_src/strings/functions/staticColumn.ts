@@ -14,8 +14,8 @@ export const help: FunctionHelp<FunctionFactory<typeof staticColumn>> = {
     defaultMessage:
       'Add a column with the same static value in every row. See also {alterColumnFn} and {mapColumnFn}.',
     values: {
-      alterColumnFn: 'alterColumn',
-      mapColumnFn: 'mapColumn',
+      alterColumnFn: '`alterColumn`',
+      mapColumnFn: '`mapColumn`',
     },
   }),
   args: {

@@ -8,14 +8,15 @@ import { i18n } from '@kbn/i18n';
 import { context } from '../../functions/common/context';
 import { FunctionHelp } from '.';
 import { FunctionFactory } from '../../../types';
+import { CONTEXT } from '../constants';
 
 export const help: FunctionHelp<FunctionFactory<typeof context>> = {
   help: i18n.translate('xpack.canvas.functions.contextHelpText', {
     defaultMessage:
       'Returns whatever you pass into it. This can be useful when you need to use ' +
-      '{context} as argument to a function as a sub-expression.',
+      '{CONTEXT} as argument to a function as a sub-expression.',
     values: {
-      context: '_context_',
+      CONTEXT,
     },
   }),
   args: {},

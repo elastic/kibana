@@ -9,6 +9,7 @@ import { pie } from '../../functions/common/pie';
 import { FunctionHelp } from '.';
 import { FunctionFactory } from '../../../types';
 import { Position } from '../../../types';
+import { CSS, FONT_FAMILY, FONT_WEIGHT, BOOLEAN_FALSE } from '../constants';
 
 export const help: FunctionHelp<FunctionFactory<typeof pie>> = {
   help: i18n.translate('xpack.canvas.functions.pieHelpText', {
@@ -17,15 +18,16 @@ export const help: FunctionHelp<FunctionFactory<typeof pie>> = {
   args: {
     font: i18n.translate('xpack.canvas.functions.pie.args.fontHelpText', {
       defaultMessage:
-        'The {css} font properties for the labels. For example, {fontFamily} or {fontWeight}.',
+        'The {CSS} font properties for the labels. For example, {FONT_FAMILY} or {FONT_WEIGHT}.',
       values: {
-        css: 'CSS',
-        fontFamily: 'font-family',
-        fontWeight: 'font-weight',
+        CSS,
+        FONT_FAMILY,
+        FONT_WEIGHT,
       },
     }),
     hole: i18n.translate('xpack.canvas.functions.pie.args.holeHelpText', {
-      defaultMessage: 'Draws a hole in the pie, 0-100, as a percentage of the pie radius.',
+      defaultMessage:
+        'Draws a hole in the pie, between `0` and `100`, as a percentage of the pie radius.',
     }),
     labelRadius: i18n.translate('xpack.canvas.functions.pie.args.labelRadiusHelpText', {
       defaultMessage:
@@ -36,33 +38,36 @@ export const help: FunctionHelp<FunctionFactory<typeof pie>> = {
     }),
     legend: i18n.translate('xpack.canvas.functions.pie.args.legendHelpText', {
       defaultMessage:
-        'The legend position. For example, {positions}, or {false}. When `false`, the legend is hidden.',
+        'The legend position. For example, {positions}, or {BOOLEAN_FALSE}. When {BOOLEAN_FALSE}, the legend is hidden.',
       values: {
         positions: Object.values(Position)
           .map(position => `\`"${position}"\``)
           .join(', '),
-        false: 'false',
+        BOOLEAN_FALSE,
       },
     }),
     palette: i18n.translate('xpack.canvas.functions.pie.args.paletteHelpText', {
-      defaultMessage: 'A {palette} object for describing the colors to use in this pie chart',
+      defaultMessage:
+        'A {palette} object for describing the colors to use in this pie chart. See {paletteFn}.',
       values: {
-        palette: 'palette',
+        palette: '`palette`',
+        paletteFn: '`palette`',
       },
     }),
     radius: i18n.translate('xpack.canvas.functions.pie.args.radiusHelpText', {
       defaultMessage:
-        'The radius of the pie as a percentage (between 0 and 1) of the available ' +
-        'space. To automatically set radius, use `"{auto}"`.',
+        'The radius of the pie as a percentage, between `0` and `1`, of the available space. ' +
+        'To automatically set the radius, use {auto}.',
       values: {
-        auto: 'auto',
+        auto: '`"auto"`',
       },
     }),
     seriesStyle: i18n.translate('xpack.canvas.functions.pie.args.seriesStyleHelpText', {
       defaultMessage: 'A style of a specific series',
     }),
     tilt: i18n.translate('xpack.canvas.functions.pie.args.tiltHelpText', {
-      defaultMessage: 'The percentage of tilt where 1 is fully vertical, and 0 is completely flat.',
+      defaultMessage:
+        'The percentage of tilt where `1` is fully vertical, and `0` is completely flat.',
     }),
   },
 };

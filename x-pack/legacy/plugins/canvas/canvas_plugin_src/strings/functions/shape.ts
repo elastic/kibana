@@ -8,6 +8,7 @@ import { i18n } from '@kbn/i18n';
 import { shape } from '../../functions/common/shape';
 import { FunctionHelp } from '.';
 import { FunctionFactory } from '../../../types';
+import { SVG } from '../constants';
 
 export const help: FunctionHelp<FunctionFactory<typeof shape>> = {
   help: i18n.translate('xpack.canvas.functions.shapeHelpText', {
@@ -18,18 +19,18 @@ export const help: FunctionHelp<FunctionFactory<typeof shape>> = {
       defaultMessage: 'Pick a shape.',
     }),
     border: i18n.translate('xpack.canvas.functions.shape.args.borderHelpText', {
-      defaultMessage: 'An {svg} color for the border outlining the shape.',
+      defaultMessage: 'An {SVG} color for the border outlining the shape.',
       values: {
-        svg: 'SVG',
+        SVG,
       },
     }),
     borderWidth: i18n.translate('xpack.canvas.functions.shape.args.borderWidthHelpText', {
       defaultMessage: 'The thickness of the border.',
     }),
     fill: i18n.translate('xpack.canvas.functions.shape.args.fillHelpText', {
-      defaultMessage: 'An {svg} color to fill the shape.',
+      defaultMessage: 'An {SVG} color to fill the shape.',
       values: {
-        svg: 'SVG',
+        SVG,
       },
     }),
     maintainAspect: i18n.translate('xpack.canvas.functions.shape.args.maintainAspectHelpText', {

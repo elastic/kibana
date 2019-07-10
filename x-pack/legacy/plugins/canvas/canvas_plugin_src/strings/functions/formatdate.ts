@@ -8,22 +8,24 @@ import { i18n } from '@kbn/i18n';
 import { formatdate } from '../../functions/common/formatdate';
 import { FunctionHelp } from '.';
 import { FunctionFactory } from '../../../types';
+import { ISO8601, MOMENTJS } from '../constants';
 
 export const help: FunctionHelp<FunctionFactory<typeof formatdate>> = {
   help: i18n.translate('xpack.canvas.functions.formatdateHelpText', {
     defaultMessage:
-      'Formats an {iso} date string or a date in milliseconds since epoch using {moment}. See {url}.',
+      'Formats an {ISO8601} date string or a date in milliseconds since epoch using {MOMENTJS}. See {url}.',
     values: {
-      iso: 'ISO8601',
-      moment: 'MomentJS',
+      ISO8601,
+      MOMENTJS,
       url: 'https://momentjs.com/docs/#/displaying/',
     },
   }),
   args: {
     format: i18n.translate('xpack.canvas.functions.formatdate.args.formatHelpText', {
-      defaultMessage: 'A {moment} format. For example, `"MM/DD/YYYY"`. See {url}.',
+      defaultMessage: 'A {MOMENTJS} format. For example, {example}. See {url}.',
       values: {
-        moment: 'MomentJS',
+        MOMENTJS,
+        example: `"MM/DD/YYYY"`,
         url: 'https://momentjs.com/docs/#/displaying/',
       },
     }),

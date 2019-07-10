@@ -8,6 +8,7 @@ import { i18n } from '@kbn/i18n';
 import { sort } from '../../functions/common/sort';
 import { FunctionHelp } from '.';
 import { FunctionFactory } from '../../../types';
+import { DATATABLE } from '../constants';
 
 export const help: FunctionHelp<FunctionFactory<typeof sort>> = {
   help: i18n.translate('xpack.canvas.functions.sortHelpText', {
@@ -16,18 +17,18 @@ export const help: FunctionHelp<FunctionFactory<typeof sort>> = {
   args: {
     by: i18n.translate('xpack.canvas.functions.sort.args.byHelpText', {
       defaultMessage:
-        'The column to sort by. When unspecified, the `{datatable}` ' +
+        'The column to sort by. When unspecified, the `{DATATABLE}` ' +
         'is sorted by the first column.',
       values: {
-        datatable: 'datatable',
+        DATATABLE,
       },
     }),
     reverse: i18n.translate('xpack.canvas.functions.sort.args.reverseHelpText', {
       defaultMessage:
-        'Reverses the sorting order. When unspecified, the `{datatable}` ' +
+        'Reverses the sorting order. When unspecified, the `{DATATABLE}` ' +
         'is sorted in ascending order.',
       values: {
-        datatable: 'datatable',
+        DATATABLE,
       },
     }),
   },

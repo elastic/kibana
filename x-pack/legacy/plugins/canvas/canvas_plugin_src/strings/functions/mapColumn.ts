@@ -8,6 +8,7 @@ import { i18n } from '@kbn/i18n';
 import { mapColumn } from '../../functions/common/mapColumn';
 import { FunctionHelp } from '.';
 import { FunctionFactory } from '../../../types';
+import { CANVAS, DATATABLE } from '../constants';
 
 export const help: FunctionHelp<FunctionFactory<typeof mapColumn>> = {
   help: i18n.translate('xpack.canvas.functions.mapColumnHelpText', {
@@ -16,8 +17,8 @@ export const help: FunctionHelp<FunctionFactory<typeof mapColumn>> = {
       'Changes are made only when you provide arguments.' +
       'See also {mapColumnFn} and {staticColumnFn}.',
     values: {
-      mapColumnFn: 'mapColumn',
-      staticColumnFn: 'staticColumn',
+      mapColumnFn: '`mapColumn`',
+      staticColumnFn: '`staticColumn`',
     },
   }),
   args: {
@@ -26,10 +27,10 @@ export const help: FunctionHelp<FunctionFactory<typeof mapColumn>> = {
     }),
     expression: i18n.translate('xpack.canvas.functions.mapColumn.args.expressionHelpText', {
       defaultMessage:
-        'A {canvas} expression that is passed to each row as a single row `{datatable}`.',
+        'A {canvas} expression that is passed to each row as a single row {DATATABLE}.',
       values: {
-        canvas: 'Canvas',
-        datatable: 'datatable',
+        CANVAS,
+        DATATABLE,
       },
     }),
   },
