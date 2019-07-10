@@ -1,7 +1,7 @@
 # Jenkins CI Pipelines
 
-## Setup
+## Pipeline Unit Test Setup
 ```
 cd KIBANA_PATH/.ci
-Run `./test_pipeline.groovy`
+./test_pipeline.sh
 ```
