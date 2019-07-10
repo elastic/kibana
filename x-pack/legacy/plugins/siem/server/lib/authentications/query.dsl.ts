@@ -99,13 +99,6 @@ export const buildQuery = ({
                 },
               },
             },
-            authentication: {
-              top_hits: {
-                size: 1,
-                _source: esFields,
-                sort: [{ '@timestamp': { order: 'desc' } }],
-              },
-            },
           },
         },
       },

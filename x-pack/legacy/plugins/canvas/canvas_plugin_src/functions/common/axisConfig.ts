@@ -6,7 +6,7 @@
 
 import moment from 'moment';
 import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/public';
-import { Position } from '../types';
+import { Position } from '../../../types';
 import { getFunctionHelp, getFunctionErrors } from '../../strings';
 
 interface Arguments {

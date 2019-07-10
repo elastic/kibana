@@ -155,8 +155,6 @@ export interface Source {
 
   Domains: DomainsData;
 
-  DomainFirstLastSeen: FirstLastSeenDomain;
-
   Tls: TlsData;
 
   Users: UsersData;
@@ -365,8 +363,6 @@ export interface Inspect {
 }
 
 export interface EventsData {
-  kpiEventType?: KpiItem[] | null;
-
   edges: EcsEdges[];
 
   totalCount: number;
@@ -374,12 +370,6 @@ export interface EventsData {
   pageInfo: PageInfo;
 
   inspect?: Inspect | null;
-}
-
-export interface KpiItem {
-  value?: string | null;
-
-  count: number;
 }
 
 export interface EcsEdges {
@@ -1044,14 +1034,6 @@ export interface DomainsNetworkField {
   direction?: NetworkDirectionEcs[] | null;
 }
 
-export interface FirstLastSeenDomain {
-  firstSeen?: Date | null;
-
-  lastSeen?: Date | null;
-
-  inspect?: Inspect | null;
-}
-
 export interface TlsData {
   edges: TlsEdges[];
 
@@ -1215,8 +1197,6 @@ export interface NetworkTopNFlowEdges {
 export interface NetworkTopNFlowItem {
   _id?: string | null;
 
-  timestamp?: Date | null;
-
   source?: TopNFlowItem | null;
 
   destination?: TopNFlowItem | null;
@@ -1272,8 +1252,6 @@ export interface NetworkDnsItem {
   dnsName?: string | null;
 
   queryCount?: number | null;
-
-  timestamp?: Date | null;
 
   uniqueDomains?: number | null;
 }
@@ -1928,17 +1906,6 @@ export interface DomainsSourceArgs {
 
   defaultIndex: string[];
 }
-export interface DomainFirstLastSeenSourceArgs {
-  id?: string | null;
-
-  ip: string;
-
-  domainName: string;
-
-  flowTarget: FlowTarget;
-
-  defaultIndex: string[];
-}
 export interface TlsSourceArgs {
   filterQuery?: string | null;
 
@@ -2509,8 +2476,6 @@ export namespace SourceResolvers {
 
     Domains?: DomainsResolver<DomainsData, TypeParent, Context>;
 
-    DomainFirstLastSeen?: DomainFirstLastSeenResolver<FirstLastSeenDomain, TypeParent, Context>;
-
     Tls?: TlsResolver<TlsData, TypeParent, Context>;
 
     Users?: UsersResolver<UsersData, TypeParent, Context>;
@@ -2716,23 +2681,6 @@ export namespace SourceResolvers {
     flowTarget: FlowTarget;
 
     timerange: TimerangeInput;
-
-    defaultIndex: string[];
-  }
-
-  export type DomainFirstLastSeenResolver<
-    R = FirstLastSeenDomain,
-    Parent = Source,
-    Context = SiemContext
-  > = Resolver<R, Parent, Context, DomainFirstLastSeenArgs>;
-  export interface DomainFirstLastSeenArgs {
-    id?: string | null;
-
-    ip: string;
-
-    domainName: string;
-
-    flowTarget: FlowTarget;
 
     defaultIndex: string[];
   }
@@ -3536,8 +3484,6 @@ export namespace InspectResolvers {
 
 export namespace EventsDataResolvers {
   export interface Resolvers<Context = SiemContext, TypeParent = EventsData> {
-    kpiEventType?: KpiEventTypeResolver<KpiItem[] | null, TypeParent, Context>;
-
     edges?: EdgesResolver<EcsEdges[], TypeParent, Context>;
 
     totalCount?: TotalCountResolver<number, TypeParent, Context>;
@@ -3547,11 +3493,6 @@ export namespace EventsDataResolvers {
     inspect?: InspectResolver<Inspect | null, TypeParent, Context>;
   }
 
-  export type KpiEventTypeResolver<
-    R = KpiItem[] | null,
-    Parent = EventsData,
-    Context = SiemContext
-  > = Resolver<R, Parent, Context>;
   export type EdgesResolver<R = EcsEdges[], Parent = EventsData, Context = SiemContext> = Resolver<
     R,
     Parent,
@@ -3572,25 +3513,6 @@ export namespace EventsDataResolvers {
     Parent = EventsData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
-}
-
-export namespace KpiItemResolvers {
-  export interface Resolvers<Context = SiemContext, TypeParent = KpiItem> {
-    value?: ValueResolver<string | null, TypeParent, Context>;
-
-    count?: CountResolver<number, TypeParent, Context>;
-  }
-
-  export type ValueResolver<R = string | null, Parent = KpiItem, Context = SiemContext> = Resolver<
-    R,
-    Parent,
-    Context
-  >;
-  export type CountResolver<R = number, Parent = KpiItem, Context = SiemContext> = Resolver<
-    R,
-    Parent,
-    Context
-  >;
 }
 
 export namespace EcsEdgesResolvers {
@@ -5796,32 +5718,6 @@ export namespace DomainsNetworkFieldResolvers {
   > = Resolver<R, Parent, Context>;
 }
 
-export namespace FirstLastSeenDomainResolvers {
-  export interface Resolvers<Context = SiemContext, TypeParent = FirstLastSeenDomain> {
-    firstSeen?: FirstSeenResolver<Date | null, TypeParent, Context>;
-
-    lastSeen?: LastSeenResolver<Date | null, TypeParent, Context>;
-
-    inspect?: InspectResolver<Inspect | null, TypeParent, Context>;
-  }
-
-  export type FirstSeenResolver<
-    R = Date | null,
-    Parent = FirstLastSeenDomain,
-    Context = SiemContext
-  > = Resolver<R, Parent, Context>;
-  export type LastSeenResolver<
-    R = Date | null,
-    Parent = FirstLastSeenDomain,
-    Context = SiemContext
-  > = Resolver<R, Parent, Context>;
-  export type InspectResolver<
-    R = Inspect | null,
-    Parent = FirstLastSeenDomain,
-    Context = SiemContext
-  > = Resolver<R, Parent, Context>;
-}
-
 export namespace TlsDataResolvers {
   export interface Resolvers<Context = SiemContext, TypeParent = TlsData> {
     edges?: EdgesResolver<TlsEdges[], TypeParent, Context>;
@@ -6402,8 +6298,6 @@ export namespace NetworkTopNFlowItemResolvers {
   export interface Resolvers<Context = SiemContext, TypeParent = NetworkTopNFlowItem> {
     _id?: IdResolver<string | null, TypeParent, Context>;
 
-    timestamp?: TimestampResolver<Date | null, TypeParent, Context>;
-
     source?: SourceResolver<TopNFlowItem | null, TypeParent, Context>;
 
     destination?: DestinationResolver<TopNFlowItem | null, TypeParent, Context>;
@@ -6417,11 +6311,6 @@ export namespace NetworkTopNFlowItemResolvers {
 
   export type IdResolver<
     R = string | null,
-    Parent = NetworkTopNFlowItem,
-    Context = SiemContext
-  > = Resolver<R, Parent, Context>;
-  export type TimestampResolver<
-    R = Date | null,
     Parent = NetworkTopNFlowItem,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
@@ -6575,8 +6464,6 @@ export namespace NetworkDnsItemResolvers {
 
     queryCount?: QueryCountResolver<number | null, TypeParent, Context>;
 
-    timestamp?: TimestampResolver<Date | null, TypeParent, Context>;
-
     uniqueDomains?: UniqueDomainsResolver<number | null, TypeParent, Context>;
   }
 
@@ -6602,11 +6489,6 @@ export namespace NetworkDnsItemResolvers {
   > = Resolver<R, Parent, Context>;
   export type QueryCountResolver<
     R = number | null,
-    Parent = NetworkDnsItem,
-    Context = SiemContext
-  > = Resolver<R, Parent, Context>;
-  export type TimestampResolver<
-    R = Date | null,
     Parent = NetworkDnsItem,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
