@@ -135,22 +135,18 @@ function ensureJsonValues(obj: SavedObject) {
   return obj;
 }
 
-function getAsset(key: string) {
-  const value = cacheGet(key);
-  if (value === undefined) throw new Error(`Cannot find asset ${key}`);
-
-  const json = value.toString('utf8');
-  const asset = JSON.parse(json);
-
-  return asset;
-}
-
 function getObject(key: string) {
-  const asset = getAsset(key);
-  const { type, file } = pathParts(key);
+  const buffer = cacheGet(key);
+  if (buffer === undefined) throw new Error(`Cannot find asset ${key}`);
 
+  // cache values are buffers. convert to string / JSON
+  const json = buffer.toString('utf8');
+  // convert that to an object & address issues with the formatting of some parts
+  const asset = ensureJsonValues(JSON.parse(json));
+
+  const { type, file } = pathParts(key);
   if (!asset.type) asset.type = type;
   if (!asset.id) asset.id = file.replace('.json', '');
 
-  return ensureJsonValues(asset);
+  return asset;
 }
