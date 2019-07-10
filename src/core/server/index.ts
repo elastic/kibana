@@ -35,7 +35,12 @@
  * @packageDocumentation
  */
 
-import { ElasticsearchServiceSetup } from './elasticsearch';
+import { Observable } from 'rxjs';
+import {
+  ClusterClient,
+  ElasticsearchClientConfig,
+  ElasticsearchServiceSetup,
+} from './elasticsearch';
 import { HttpServiceSetup, HttpServiceStart } from './http';
 import { PluginsServiceSetup, PluginsServiceStart } from './plugins';
 
@@ -111,7 +116,14 @@ export { RecursiveReadonly, deepFreeze } from '../utils';
  * @public
  */
 export interface CoreSetup {
-  elasticsearch: ElasticsearchServiceSetup;
+  elasticsearch: {
+    adminClient$: Observable<ClusterClient>;
+    dataClient$: Observable<ClusterClient>;
+    createClient: (
+      type: string,
+      clientConfig?: Partial<ElasticsearchClientConfig>
+    ) => ClusterClient;
+  };
   http: {
     registerOnPreAuth: HttpServiceSetup['registerOnPreAuth'];
     registerAuth: HttpServiceSetup['registerAuth'];

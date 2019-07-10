@@ -116,7 +116,6 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>(
       adminClient$: deps.elasticsearch.adminClient$,
       dataClient$: deps.elasticsearch.dataClient$,
       createClient: deps.elasticsearch.createClient,
-      legacy: deps.elasticsearch.legacy,
     },
     http: {
       registerOnPreAuth: deps.http.registerOnPreAuth,

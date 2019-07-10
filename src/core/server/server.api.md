@@ -86,7 +86,11 @@ export class ConfigService {
 // @public
 export interface CoreSetup {
     // (undocumented)
-    elasticsearch: ElasticsearchServiceSetup;
+    elasticsearch: {
+        adminClient$: Observable<ClusterClient>;
+        dataClient$: Observable<ClusterClient>;
+        createClient: (type: string, clientConfig?: Partial<ElasticsearchClientConfig>) => ClusterClient;
+    };
     // (undocumented)
     http: {
         registerOnPreAuth: HttpServiceSetup['registerOnPreAuth'];

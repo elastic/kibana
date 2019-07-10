@@ -22,7 +22,7 @@ describe('Security Plugin', () => {
     );
 
     mockCoreSetup = coreMock.createSetup();
-    mockCoreSetup.http.isTLSEnabled = true;
+    mockCoreSetup.http.isTlsEnabled = true;
     mockCoreSetup.http.registerAuth.mockResolvedValue({
       sessionStorageFactory: {
         asScoped: jest.fn().mockReturnValue({ get: jest.fn(), set: jest.fn(), clear: jest.fn() }),

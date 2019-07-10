@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { first, map } from 'rxjs/operators';
+import { first } from 'rxjs/operators';
 import {
   ClusterClient,
   CoreSetup,
@@ -68,21 +68,13 @@ export class Plugin {
   }
 
   public async setup(core: CoreSetup): Promise<RecursiveReadonly<PluginSetupContract>> {
-    const config = await createConfig$(this.initializerContext, core.http.isTLSEnabled)
+    const config = await createConfig$(this.initializerContext, core.http.isTlsEnabled)
       .pipe(first())
       .toPromise();
 
-    this.clusterClient = await core.elasticsearch.legacy.config$
-      .pipe(
-        first(),
-        map(esLegacyConfig =>
-          core.elasticsearch.createClient('security', {
-            ...esLegacyConfig,
-            plugins: [require('../../../legacy/server/lib/esjs_shield_plugin')],
-          })
-        )
-      )
-      .toPromise();
+    this.clusterClient = core.elasticsearch.createClient('security', {
+      plugins: [require('../../../legacy/server/lib/esjs_shield_plugin')],
+    });
 
     return deepFreeze({
       registerLegacyAPI: (legacyAPI: LegacyAPI) => (this.legacyAPI = legacyAPI),
