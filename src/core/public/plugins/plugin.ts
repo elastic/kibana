@@ -30,8 +30,8 @@ import { CoreStart, CoreSetup } from '..';
 export interface Plugin<
   TSetup = void,
   TStart = void,
-  TPluginsSetup extends {} = {},
-  TPluginsStart extends {} = {}
+  TPluginsSetup extends Record<string, any> = {},
+  TPluginsStart extends Record<string, any> = {}
 > {
   setup(core: CoreSetup, plugins: TPluginsSetup): TSetup | Promise<TSetup>;
   start(core: CoreStart, plugins: TPluginsStart): TStart | Promise<TStart>;
