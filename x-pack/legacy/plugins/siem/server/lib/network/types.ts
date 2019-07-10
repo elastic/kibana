@@ -24,10 +24,6 @@ export interface DirectionBuckets {
 
 export interface NetworkTopNFlowBuckets {
   key: string;
-  timestamp: {
-    value: number;
-    value_as_string: string;
-  };
   bytes: {
     value: number;
   };
@@ -62,10 +58,6 @@ export interface NetworkTopNFlowData extends SearchHit {
 export interface NetworkDnsBuckets {
   key: string;
   doc_count: number;
-  timestamp: {
-    value: number;
-    value_as_string: string;
-  };
   unique_domains: {
     value: number;
   };

@@ -21,3 +21,25 @@ exports[`draggable_score renders correctly against snapshot 1`] = `
   render={[Function]}
 />
 `;
+
+exports[`draggable_score renders correctly against snapshot when the index is not included 1`] = `
+<Connect(DraggableWrapperComponent)
+  dataProvider={
+    Object {
+      "and": Array [],
+      "enabled": true,
+      "excluded": false,
+      "id": "some-id",
+      "kqlQuery": "",
+      "name": "process.name",
+      "queryMatch": Object {
+        "field": "process.name",
+        "operator": ":",
+        "value": "du",
+      },
+    }
+  }
+  key="some-id"
+  render={[Function]}
+/>
+`;

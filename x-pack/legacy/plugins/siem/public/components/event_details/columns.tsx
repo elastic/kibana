@@ -87,9 +87,7 @@ export const getColumns = ({
       >
         <Draggable
           draggableId={getDraggableFieldId({
-            contextId: `field-browser-category-${eventId}-${
-              data.category
-            }-field-${field}-${timelineId}`,
+            contextId: `field-browser-category-${eventId}-${data.category}-field-${field}-${timelineId}`,
             fieldId: field,
           })}
           index={0}

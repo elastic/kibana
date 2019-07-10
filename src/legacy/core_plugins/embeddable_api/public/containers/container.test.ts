@@ -18,7 +18,6 @@
  */
 
 import '../ui_capabilities.test.mocks';
-import '../../../../../core/public/ui_new_platform.test.mocks';
 
 import * as Rx from 'rxjs';
 import { skip } from 'rxjs/operators';
@@ -46,6 +45,8 @@ import {
 import { ERROR_EMBEDDABLE_TYPE } from '../embeddables/error_embeddable';
 import { Filter, FilterStateStore } from '@kbn/es-query';
 import { PanelNotFoundError } from './panel_not_found_error';
+
+jest.mock('ui/new_platform');
 
 const embeddableFactories = new Map<string, EmbeddableFactory>();
 embeddableFactories.set(FILTERABLE_EMBEDDABLE, new FilterableEmbeddableFactory());
