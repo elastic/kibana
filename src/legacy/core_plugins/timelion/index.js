@@ -161,7 +161,8 @@ export default function (kibana) {
         },
         'timelion:graphite.url': {
           name: i18n.translate('timelion.uiSettings.graphiteURLLabel', {
-            defaultMessage: 'Graphite URL'
+            defaultMessage: 'Graphite URL',
+            description: 'The URL should be in the form of https://www.hostedgraphite.com/UID/ACCESS_KEY/graphite'
           }),
           value: (server) => {
             const urls = server.config().get('timelion.graphiteUrls');
@@ -172,7 +173,7 @@ export default function (kibana) {
             }
           },
           description: i18n.translate('timelion.uiSettings.graphiteURLDescription', {
-            defaultMessage: '{experimentalLabel} The URL of your graphite host',
+            defaultMessage: '{experimentalLabel} The <a href="https://www.hostedgraphite.com/UID/ACCESS_KEY/graphite" target="_blank" rel="noopener">URL</a> of your graphite host',
             values: { experimentalLabel: `<em>[${experimentalLabel}]</em>` }
           }),
           type: 'select',
