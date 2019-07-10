@@ -30,7 +30,6 @@ export const blame = handleActions<BlameState, BlameStatePayload>(
       }),
     [String(loadBlameSuccess)]: (state, action: Action<GitBlame[]>) =>
       produce<BlameState>(state, draft => {
-        // @ts-ignore
         draft.blames = action.payload!;
         draft.loading = false;
       }),

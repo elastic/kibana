@@ -51,9 +51,7 @@ export const symbol = handleActions<SymbolState, SymbolPayload>(
       produce<SymbolState>(state, draft => {
         draft.loading = false;
         const { path, data, structureTree } = action.payload!;
-        // @ts-ignore
         draft.structureTree[path] = structureTree;
-        // @ts-ignore
         draft.symbols = {
           ...state.symbols,
           [path]: data,
@@ -73,7 +71,6 @@ export const symbol = handleActions<SymbolState, SymbolPayload>(
       produce<SymbolState>(state, draft => {
         const path = action.payload!;
         if (!state.closedPaths.includes(path)) {
-          // @ts-ignore
           draft.closedPaths.push(path);
         }
       }),
