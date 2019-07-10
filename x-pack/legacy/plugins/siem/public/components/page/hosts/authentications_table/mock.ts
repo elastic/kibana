@@ -77,7 +77,6 @@ export const mockData: { Authentications: AuthenticationsData } = {
       activePage: 1,
       fakeTotalCount: 50,
       showMorePagesIndicator: true,
-      showTooManyResults: false,
     },
   },
 };
