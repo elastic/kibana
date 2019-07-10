@@ -43,7 +43,6 @@ import {
   FilterableEmbeddable,
 } from '../test_samples/embeddables/filterable_embeddable';
 import { ERROR_EMBEDDABLE_TYPE } from '../embeddables/error_embeddable';
-import { Filter, FilterStateStore } from '@kbn/es-query';
 import { PanelNotFoundError } from './panel_not_found_error';
 
 jest.mock('ui/new_platform');
@@ -416,67 +415,6 @@ test('Test nested reactions', async done => {
   });
 
   embeddable.updateInput({ nameTitle: 'Dr.' });
-});
-
-test('Explicit embeddable input mapped to undefined will default to inherited', async () => {
-  const derivedFilter: Filter = {
-    $state: { store: FilterStateStore.APP_STATE },
-    meta: { disabled: false, alias: 'name', negate: false },
-    query: { match: {} },
-  };
-  const container = new FilterableContainer(
-    { id: 'hello', panels: {}, filters: [derivedFilter] },
-    embeddableFactories
-  );
-  const embeddable = await container.addNewEmbeddable<
-    FilterableEmbeddableInput,
-    EmbeddableOutput,
-    FilterableEmbeddable
-  >(FILTERABLE_EMBEDDABLE, {});
-
-  if (isErrorEmbeddable(embeddable)) {
-    throw new Error('Error adding embeddable');
-  }
-
-  embeddable.updateInput({ filters: [] });
-
-  expect(container.getInputForChild<FilterableEmbeddableInput>(embeddable.id).filters).toEqual([]);
-
-  embeddable.updateInput({ filters: undefined });
-
-  expect(container.getInputForChild<FilterableEmbeddableInput>(embeddable.id).filters).toEqual([
-    derivedFilter,
-  ]);
-});
-
-test('Explicit embeddable input mapped to undefined with no inherited value will get passed to embeddable', async done => {
-  const container = new HelloWorldContainer({ id: 'hello', panels: {} }, embeddableFactories);
-
-  const embeddable = await container.addNewEmbeddable<
-    FilterableEmbeddableInput,
-    EmbeddableOutput,
-    FilterableEmbeddable
-  >(FILTERABLE_EMBEDDABLE, {});
-
-  if (isErrorEmbeddable(embeddable)) {
-    throw new Error('Error adding embeddable');
-  }
-
-  embeddable.updateInput({ filters: [] });
-
-  expect(container.getInputForChild<FilterableEmbeddableInput>(embeddable.id).filters).toEqual([]);
-
-  const subscription = embeddable
-    .getInput$()
-    .pipe(skip(1))
-    .subscribe(() => {
-      if (embeddable.getInput().filters === undefined) {
-        subscription.unsubscribe();
-        done();
-      }
-    });
-
-  embeddable.updateInput({ filters: undefined });
 });
 
 test('Panel removed from input state', async done => {
