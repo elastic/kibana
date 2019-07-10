@@ -66,7 +66,7 @@ interface WorkpadTelemetry {
   @returns Workpad Telemetry Data
 */
 export function summarizeWorkpads(workpadDocs: Workpad[]): WorkpadTelemetry {
-  const functionSet = new Set();
+  const functionSet = new Set<string>();
 
   if (workpadDocs.length === 0) {
     return {};
@@ -185,7 +185,7 @@ const workpadCollector: TelemetryCollector = async function(server, callCluster)
 
   const esResponse = await callCluster<WorkpadSearch>('search', searchParams);
 
-  if (get(esResponse, 'hits.hits.length') > 0) {
+  if (get<number>(esResponse, 'hits.hits.length') > 0) {
     const workpads = esResponse.hits.hits.map(hit => hit._source[CANVAS_TYPE]);
     return summarizeWorkpads(workpads);
   }

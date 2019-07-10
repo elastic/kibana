@@ -81,7 +81,7 @@ export function discover(config: PluginsConfig, coreContext: CoreContext) {
  * @param pluginDirs List of the top-level directories to process.
  * @param log Plugin discovery logger instance.
  */
-function processPluginSearchPaths$(pluginDirs: ReadonlyArray<string>, log: Logger) {
+function processPluginSearchPaths$(pluginDirs: readonly string[], log: Logger) {
   return from(pluginDirs).pipe(
     mergeMap(dir => {
       log.debug(`Scanning "${dir}" for plugin sub-directories...`);
