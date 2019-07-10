@@ -13,16 +13,18 @@ import {
   EuiPagination,
   EuiPanel,
   EuiPopover,
+  Toast,
 } from '@elastic/eui';
 import { isEmpty, noop, getOr } from 'lodash/fp';
 import React, { memo, useState, useEffect } from 'react';
 import styled from 'styled-components';
-import { toastNotifications } from 'ui/notify';
 
 import { Direction } from '../../graphql/types';
 import { AuthTableColumns } from '../page/hosts/authentications_table';
 import { HeaderPanel } from '../header_panel';
 import { LoadingPanel } from '../loading';
+import { useStateToaster } from '../toasters';
+import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../common/constants';
 
 import * as i18n from './translations';
 
@@ -74,7 +76,6 @@ export interface BasicTableProps<T> {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   pageOfItems: any[];
   showMorePagesIndicator: boolean;
-  showTooManyResults: boolean;
   sorting?: SortingBasicTable;
   totalCount: number;
   updateActivePage: (activePage: number) => void;
@@ -112,7 +113,6 @@ export const PaginatedTable = memo<SiemTables>(
     onChange = noop,
     pageOfItems,
     showMorePagesIndicator,
-    showTooManyResults,
     sorting = null,
     totalCount,
     updateActivePage,
@@ -124,6 +124,7 @@ export const PaginatedTable = memo<SiemTables>(
     const [isEmptyTable, setEmptyTable] = useState(pageOfItems.length === 0);
     const [isPopoverOpen, setPopoverOpen] = useState(false);
     const pageCount = Math.ceil(totalCount / limit);
+    const dispatchToaster = useStateToaster()[1];
     const effectDeps = updateProps ? [limit, ...Object.values(updateProps)] : [limit];
     useEffect(() => {
       if (activePage !== 0) {
@@ -131,15 +132,6 @@ export const PaginatedTable = memo<SiemTables>(
         updateActivePage(0);
       }
     }, effectDeps);
-
-    useEffect(() => {
-      if (showTooManyResults) {
-        toastNotifications.addDanger({
-          title: headerTitle + i18n.TOAST_TITLE,
-          text: i18n.TOAST_TEXT,
-        });
-      }
-    }, [showTooManyResults]);
 
     const onButtonClick = () => {
       setPopoverOpen(!isPopoverOpen);
@@ -150,6 +142,20 @@ export const PaginatedTable = memo<SiemTables>(
     };
 
     const goToPage = (newActivePage: number) => {
+      if ((newActivePage + 1) * limit >= DEFAULT_MAX_TABLE_QUERY_SIZE) {
+        const toast: Toast = {
+          id: 'PaginationWarningMsg',
+          title: headerTitle + i18n.TOAST_TITLE,
+          color: 'warning',
+          iconType: 'alert',
+          toastLifeTimeMs: 10000,
+          text: i18n.TOAST_TEXT,
+        };
+        return dispatchToaster({
+          type: 'addToaster',
+          toast,
+        });
+      }
       setActivePage(newActivePage);
       loadPage(newActivePage);
       updateActivePage(newActivePage);

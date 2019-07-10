@@ -10,6 +10,7 @@ import { AuthenticationsData, AuthenticationsEdges } from '../../graphql/types';
 import { mergeFieldsWithHit, inspectStringifyObject } from '../../utils/build_query';
 import { FrameworkAdapter, FrameworkRequest, RequestOptionsPaginated } from '../framework';
 import { TermAggregation } from '../types';
+import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../common/constants';
 
 import { auditdFieldsMap, buildQuery } from './query.dsl';
 import {
@@ -27,6 +28,9 @@ export class ElasticsearchAuthenticationAdapter implements AuthenticationsAdapte
     options: RequestOptionsPaginated
   ): Promise<AuthenticationsData> {
     const dsl = buildQuery(options);
+    if (options.pagination && options.pagination.querySize >= DEFAULT_MAX_TABLE_QUERY_SIZE) {
+      throw new Error(`No query size above ${DEFAULT_MAX_TABLE_QUERY_SIZE}`);
+    }
     const response = await this.framework.callWithRequest<AuthenticationData, TermAggregation>(
       request,
       'search',
@@ -34,7 +38,7 @@ export class ElasticsearchAuthenticationAdapter implements AuthenticationsAdapte
     );
     const { activePage, cursorStart, fakePossibleCount, querySize } = options.pagination;
     const totalCount = getOr(0, 'aggregations.user_count.value', response);
-    let fakeTotalCount = fakePossibleCount <= totalCount ? fakePossibleCount : totalCount;
+    const fakeTotalCount = fakePossibleCount <= totalCount ? fakePossibleCount : totalCount;
     const hits: AuthenticationHit[] = getOr(
       [],
       'aggregations.group_by_users.buckets',
@@ -62,11 +66,8 @@ export class ElasticsearchAuthenticationAdapter implements AuthenticationsAdapte
       dsl: [inspectStringifyObject(dsl)],
       response: [inspectStringifyObject(response)],
     };
-    let showMorePagesIndicator = totalCount > fakeTotalCount;
-    if (fakeTotalCount >= 10000) {
-      fakeTotalCount = 10000;
-      showMorePagesIndicator = false;
-    }
+    const showMorePagesIndicator = totalCount > fakeTotalCount;
+
     return {
       inspect,
       edges,
