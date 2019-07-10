@@ -233,6 +233,7 @@ const HostDetailsComponent = pure<HostDetailsComponentProps>(
                         endDate={to}
                         skip={isInitializing}
                         hostName={hostName}
+                        type={type}
                         narrowDateRange={(score, interval) => {
                           const fromTo = scoreIntervalToDateTime(score, interval);
                           setAbsoluteRangeDatePicker({
