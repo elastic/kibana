@@ -19,8 +19,6 @@ export const replacement = (match: string, p1: string, p2: string) => {
   return `(${newQuery})`;
 };
 
-// TODO: Add tests like this one
-// const expression = 'process.name: "something,yolo" AND user.name : "root,systemd-timesync"';
 export const replaceKqlCommasWithOrUsingRegex = (expression: string) => {
   const myRegexp = /([\w\.\-\[\]]+)\s*:\s*"(([\w\.\-\(\)\[\]]+,[\w\.\-\(\)\[\]]+){1,})"/g;
   return expression.replace(myRegexp, replacement);
