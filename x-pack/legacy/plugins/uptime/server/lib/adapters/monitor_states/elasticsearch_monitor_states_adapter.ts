@@ -14,7 +14,7 @@ import {
   SnapshotCount,
   StatesIndexStatus,
 } from '../../../../common/graphql/types';
-import { INDEX_NAMES } from '../../../../common/constants';
+import { INDEX_NAMES, LEGACY_STATES_QUERY_SIZE } from '../../../../common/constants';
 import { getHistogramInterval, getFilteredQueryAndStatusFilter } from '../../helper';
 
 type SortChecks = (check: Check) => string[];
@@ -33,8 +33,6 @@ interface LegacyMonitorStatesRecentCheckGroupsQueryResult {
   checkGroups: string[];
   afterKey: any | null;
 }
-
-const legacyStatesQuerySize = 50;
 
 export class ElasticsearchMonitorStatesAdapter implements UMMonitorStatesAdapter {
   constructor(private readonly database: DatabaseAdapter) {
@@ -73,7 +71,7 @@ export class ElasticsearchMonitorStatesAdapter implements UMMonitorStatesAdapter
       aggs: {
         monitors: {
           composite: {
-            size: legacyStatesQuerySize,
+            size: LEGACY_STATES_QUERY_SIZE,
             sources: [
               {
                 monitor_id: {
@@ -187,7 +185,7 @@ export class ElasticsearchMonitorStatesAdapter implements UMMonitorStatesAdapter
         aggs: {
           monitors: {
             composite: {
-              size: legacyStatesQuerySize,
+              size: LEGACY_STATES_QUERY_SIZE,
               sources: [
                 {
                   monitor_id: {
@@ -399,7 +397,7 @@ export class ElasticsearchMonitorStatesAdapter implements UMMonitorStatesAdapter
       );
       monitors.push(...this.getMonitorBuckets(result, statusFilter));
       searchAfter = afterKey;
-    } while (searchAfter !== null && monitors.length < legacyStatesQuerySize);
+    } while (searchAfter !== null && monitors.length < LEGACY_STATES_QUERY_SIZE);
 
     const monitorIds: string[] = [];
     const summaries: MonitorSummary[] = monitors.map((monitor: any) => {
@@ -529,7 +527,7 @@ export class ElasticsearchMonitorStatesAdapter implements UMMonitorStatesAdapter
           by_id: {
             terms: {
               field: 'monitor.id',
-              size: legacyStatesQuerySize,
+              size: LEGACY_STATES_QUERY_SIZE,
             },
             aggs: {
               histogram: {
