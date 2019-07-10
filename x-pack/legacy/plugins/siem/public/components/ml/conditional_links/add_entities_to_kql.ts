@@ -9,15 +9,15 @@ import { decodeRison, isRisonObject, isRegularString } from './rison_helpers';
 
 export const entityToKql = (entityNames: string[], entity: string): string => {
   if (entityNames.length === 1) {
-    return `${entityNames[0]}: ${entity}`;
+    return `${entityNames[0]}: "${entity}"`;
   } else {
     return entityNames.reduce((accum, entityName, index, array) => {
       if (index === 0) {
-        return `(${entityName}: ${entity}`;
+        return `(${entityName}: "${entity}"`;
       } else if (index === array.length - 1) {
-        return `${accum} or ${entityName}: ${entity})`;
+        return `${accum} or ${entityName}: "${entity}")`;
       } else {
-        return `${accum} or ${entityName}: ${entity}`;
+        return `${accum} or ${entityName}: "${entity}"`;
       }
     }, '');
   }
