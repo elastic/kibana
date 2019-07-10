@@ -7,7 +7,7 @@ exports[`DefaultEditorAggParams component should init with the default set of pa
   isInvalid={false}
 >
   <DefaultEditorAggSelect
-    aggTypeOptions={Object {}}
+    aggTypeOptions={Array []}
     indexPattern={Object {}}
     isSubAggregation={false}
     setTouched={[Function]}
@@ -50,6 +50,7 @@ exports[`DefaultEditorAggParams component should init with the default set of pa
   <EuiAccordion
     buttonContent="Advanced"
     id="advancedAccordion"
+    initialIsOpen={false}
     paddingSize="none"
   >
     <DefaultEditorAggParam

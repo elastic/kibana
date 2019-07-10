@@ -26,6 +26,7 @@ import {
   getAggTypeOptions,
   isInvalidParamsTouched,
 } from './default_editor_agg_params_helper';
+import { EditorConfig } from '../../config/types';
 
 jest.mock('ui/agg_types', () => ({
   aggTypes: {
@@ -41,26 +42,48 @@ jest.mock('../default_editor_utils', () => ({
 
 describe('DefaultEditorAggParams helpers', () => {
   describe('getAggParamsToRender', () => {
-    let agg: AggConfig = {
-      type: {
-        params: [{ name: 'interval' }],
-      },
-    };
-    const editorConfig = {
-      interval: {
-        hidden: true,
-      },
-    };
+    let agg: AggConfig;
+    let editorConfig: EditorConfig;
     const state = {} as VisState;
     const responseValueAggs = null;
+    const emptyParams = {
+      basic: [],
+      advanced: [],
+    };
 
-    it('should not create any param if there is no agg type, params do not have editorComponents or a parma is hidden', () => {
+    it('should not create any param if they do not have editorComponents', () => {
+      agg = {
+        type: {
+          params: [{ name: 'interval' }],
+        },
+        schema: {},
+      };
       const params = getAggParamsToRender({ agg, editorConfig, responseValueAggs, state });
 
-      expect(params).toEqual({
-        basic: [],
-        advanced: [],
-      });
+      expect(params).toEqual(emptyParams);
+    });
+
+    it('should not create any param if there is no agg type', () => {
+      agg = {};
+      const params = getAggParamsToRender({ agg, editorConfig, responseValueAggs, state });
+
+      expect(params).toEqual(emptyParams);
+    });
+
+    it('should not create a param if it is hidden', () => {
+      agg = {
+        type: {
+          params: [{ name: 'interval' }],
+        },
+      };
+      editorConfig = {
+        interval: {
+          hidden: true,
+        },
+      };
+      const params = getAggParamsToRender({ agg, editorConfig, responseValueAggs, state });
+
+      expect(params).toEqual(emptyParams);
     });
 
     it('should skip customLabel param if it is hidden', () => {
@@ -74,13 +97,10 @@ describe('DefaultEditorAggParams helpers', () => {
       };
       const params = getAggParamsToRender({ agg, editorConfig, responseValueAggs, state });
 
-      expect(params).toEqual({
-        basic: [],
-        advanced: [],
-      });
+      expect(params).toEqual(emptyParams);
     });
 
-    it('should create a basic param orderBy', () => {
+    it('should create a basic params field and orderBy', () => {
       const filterFieldTypes = ['number', 'boolean', 'date'];
       agg = {
         type: {
@@ -189,7 +209,7 @@ describe('DefaultEditorAggParams helpers', () => {
     it('should return aggTypeState touched if there is no aggType', () => {
       const isTouched = isInvalidParamsTouched(aggType, aggTypeState, aggParams);
 
-      expect(isTouched).toBeFalsy();
+      expect(isTouched).toBe(aggTypeState.touched);
     });
 
     it('should return false if there is no invalid params', () => {

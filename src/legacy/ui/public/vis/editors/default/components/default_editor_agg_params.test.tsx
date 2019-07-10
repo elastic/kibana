@@ -41,11 +41,6 @@ jest.mock('ui/agg_types', () => ({
     },
   },
 }));
-jest.mock('@elastic/eui', () => ({
-  EuiForm: () => null,
-  EuiAccordion: () => null,
-  EuiSpacer: () => null,
-}));
 jest.mock('../../config/editor_config_providers', () => ({
   editorConfigProviders: {
     getConfigForAgg: jest.fn(() => mockEditorConfig),
@@ -72,7 +67,7 @@ jest.mock('./default_editor_agg_params_helper', () => ({
       },
     ],
   })),
-  getAggTypeOptions: jest.fn(() => ({})),
+  getAggTypeOptions: jest.fn(() => []),
   getError: jest.fn((agg, aggIsTooLow) => (aggIsTooLow ? ['error'] : [])),
   isInvalidParamsTouched: jest.fn(() => false),
 }));
@@ -127,7 +122,9 @@ describe('DefaultEditorAggParams component', () => {
   });
 
   it('should reset the validity to true when destroyed', () => {
-    const comp = mount(<DefaultEditorAggParams {...defaultProps} />);
+    const comp = mount(<DefaultEditorAggParams {...defaultProps} aggIsTooLow={true} />);
+
+    expect(setValidity).lastCalledWith(false);
 
     comp.unmount();
 
