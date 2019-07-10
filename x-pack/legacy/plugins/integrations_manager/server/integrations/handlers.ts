@@ -15,14 +15,17 @@ interface PackageRequest extends Request {
   };
 }
 
-interface InstallAssetRequest extends PackageRequest {
-  params: PackageRequest['params'] & {
-    asset: string;
-  };
+interface InstallAssetRequest extends Request {
+  params: AssetRequestParams;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-interface DeleteAssetRequest extends InstallAssetRequest {}
+interface DeleteAssetRequest extends Request {
+  params: AssetRequestParams;
+}
+
+type AssetRequestParams = PackageRequest['params'] & {
+  asset: string;
+};
 
 export async function handleGetList(req: Request) {
   const client = getClient(req);
