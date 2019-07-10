@@ -102,7 +102,7 @@ export class ElasticsearchMonitorStatesAdapter implements UMMonitorStatesAdapter
                   },
                 ],
                 _source: {
-                  includes: ['monitor.check_group'],
+                  includes: ['monitor.check_group', '@timestamp', 'agent.id'],
                 },
                 // The idea here is that we want to get enough documents to get all
                 // possible agent IDs. Doing that in a deterministic way is hard,
@@ -130,8 +130,22 @@ export class ElasticsearchMonitorStatesAdapter implements UMMonitorStatesAdapter
 
     const checkGroups = result.aggregations.monitors.buckets.flatMap((b: any) => {
       const topHits = get<any[]>(b, 'top.hits.hits', []);
-      return flatten(topHits.map((t: any) => get<string>(t, '_source.monitor.check_group')));
+
+      const latestAgentGroup: { [key: string]: { timestamp: string; checkGroup: string } } = {};
+      topHits.forEach(({ _source: source }) => {
+        // We set the agent group to the first thing we see since it's already sorted
+        // by timestamp descending
+        if (!latestAgentGroup[source.agent.id]) {
+          latestAgentGroup[source.agent.id] = {
+            timestamp: source['@timestamp'],
+            checkGroup: source.monitor.check_group,
+          };
+        }
+      });
+
+      return Object.values(latestAgentGroup).map(lag => lag.checkGroup);
     });
+
     const afterKey = get<any | null>(result, 'aggregations.monitors.after_key', null);
     return {
       checkGroups,
