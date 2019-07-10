@@ -87,7 +87,11 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
      * @return {Promise<void>}
      */
     public async getAlert() {
-      await driver.switchTo().alert();
+      try {
+        return await driver.switchTo().alert();
+      } catch (e) {
+        return null;
+      }
     }
 
     /**
