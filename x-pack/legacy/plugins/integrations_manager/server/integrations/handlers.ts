@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Request, InstallationSavedObject } from '../../common/types';
+import { Request } from '../../common/types';
 import { ArchiveEntry, pathParts } from '../registry';
 import { getClient } from '../saved_objects';
 import { getIntegrations, getIntegrationInfo, installAssets, removeInstallation } from './data';
@@ -44,7 +44,7 @@ export async function handleGetInfo(req: PackageRequest) {
 
 export async function handleRequestInstall(req: InstallAssetRequest) {
   const { pkgkey, asset } = req.params;
-  const created: InstallationSavedObject[] = [];
+  const created = [];
 
   if (asset === 'dashboard') {
     const client = getClient(req);

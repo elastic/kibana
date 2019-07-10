@@ -9,7 +9,7 @@ import {
   SavedObjectsBulkGetObject,
   SavedObjectsClientContract,
 } from 'src/core/server/saved_objects';
-import { InstallationSavedObject, Installable } from '../../common/types';
+import { Installation, InstallationAttributes, Installable } from '../../common/types';
 import { SAVED_OBJECT_TYPE } from '../../common/constants';
 import * as Registry from '../registry';
 
@@ -20,8 +20,8 @@ export async function getIntegrations(client: SavedObjectsClientContract) {
     id: `${name}-${version}`,
   }));
 
-  const results = await client.bulkGet(searchObjects);
-  const savedObjects: InstallationSavedObject[] = results.saved_objects.filter(o => !o.error); // ignore errors for now
+  const results = await client.bulkGet<InstallationAttributes>(searchObjects);
+  const savedObjects = results.saved_objects.filter(o => !o.error); // ignore errors for now
   const integrationList = registryItems
     .map(item =>
       createInstallableFrom(
@@ -44,11 +44,8 @@ export async function getIntegrationInfo(client: SavedObjectsClientContract, pkg
   return installation;
 }
 
-export async function getInstallationObject(
-  client: SavedObjectsClientContract,
-  pkgkey: string
-): Promise<InstallationSavedObject | undefined> {
-  return client.get(SAVED_OBJECT_TYPE, pkgkey).catch(e => undefined);
+export async function getInstallationObject(client: SavedObjectsClientContract, pkgkey: string) {
+  return client.get<InstallationAttributes>(SAVED_OBJECT_TYPE, pkgkey).catch(e => undefined);
 }
 
 export async function installAssets(
@@ -57,10 +54,12 @@ export async function installAssets(
   filter = (entry: Registry.ArchiveEntry): boolean => true
 ) {
   const toBeSavedObjects = await Registry.getObjects(pkgkey, filter);
-  const createResults = await client.bulkCreate(toBeSavedObjects, { overwrite: true });
+  const createResults = await client.bulkCreate<InstallationAttributes>(toBeSavedObjects, {
+    overwrite: true,
+  });
   const createdObjects: SavedObject[] = createResults.saved_objects;
   const installed = createdObjects.map(({ id, type }) => ({ id, type }));
-  const results = await client.create(
+  const results = await client.create<InstallationAttributes>(
     SAVED_OBJECT_TYPE,
     { installed },
     { id: pkgkey, overwrite: true }
@@ -95,7 +94,7 @@ function sortByName(a: { name: string }, b: { name: string }) {
   }
 }
 
-function createInstallableFrom<T>(from: T, savedObject?: InstallationSavedObject): Installable<T> {
+function createInstallableFrom<T>(from: T, savedObject?: Installation): Installable<T> {
   return savedObject
     ? {
         ...from,
