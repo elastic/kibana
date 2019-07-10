@@ -44,4 +44,4 @@ package-lock.json
 *.sublime-*
 npm-debug.log*
 .tern-project
-./.ci/resources/jenkins.war
+./.ci/src/resources/jenkins.war
