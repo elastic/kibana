@@ -235,6 +235,7 @@ function DefaultEditorAggParams({
             )}
             paddingSize="none"
           >
+            <EuiSpacer size="m" />
             {params.advanced.map((param: ParamInstance) => {
               const model = paramsState[param.aggParam.name] || {
                 touched: false,

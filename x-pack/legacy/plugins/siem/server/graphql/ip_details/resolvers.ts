@@ -14,7 +14,6 @@ import {
 } from '../../lib/ip_details';
 import { createOptions } from '../../utils/build_query/create_options';
 import { QuerySourceResolver } from '../sources/resolvers';
-import { DomainFirstLastSeenRequestOptions } from '../../lib/ip_details/types';
 
 export type QueryIpOverviewResolver = ChildResolverOf<
   AppResolverOf<SourceResolvers.IpOverviewResolver>,
@@ -28,11 +27,6 @@ export type QueryDomainsResolver = ChildResolverOf<
 
 export type QueryTlsResolver = ChildResolverOf<
   AppResolverOf<SourceResolvers.TlsResolver>,
-  QuerySourceResolver
->;
-
-type QueryDomainFirstLastSeenResolver = ChildResolverOf<
-  AppResolverOf<SourceResolvers.DomainFirstLastSeenResolver>,
   QuerySourceResolver
 >;
 
@@ -52,7 +46,6 @@ export const createIpDetailsResolvers = (
     IpOverview: QueryIpOverviewResolver;
     Domains: QueryDomainsResolver;
     Tls: QueryTlsResolver;
-    DomainFirstLastSeen: QueryDomainFirstLastSeenResolver;
     Users: QueryUsersResolver;
   };
 } => ({
@@ -79,16 +72,6 @@ export const createIpDetailsResolvers = (
         flowTarget: args.flowTarget,
       };
       return libs.ipDetails.getTls(req, options);
-    },
-    async DomainFirstLastSeen(source, args, { req }) {
-      const options: DomainFirstLastSeenRequestOptions = {
-        sourceConfiguration: source.configuration,
-        ip: args.ip,
-        domainName: args.domainName,
-        flowTarget: args.flowTarget,
-        defaultIndex: args.defaultIndex,
-      };
-      return libs.ipDetails.getDomainFirstLastSeen(req, options);
     },
     async Users(source, args, { req }, info) {
       const options: UsersRequestOptions = {
