@@ -53,6 +53,9 @@ exports[`DefaultEditorAggParams component should init with the default set of pa
     initialIsOpen={false}
     paddingSize="none"
   >
+    <EuiSpacer
+      size="m"
+    />
     <DefaultEditorAggParam
       aggParam={
         Object {
