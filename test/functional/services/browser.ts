@@ -83,14 +83,11 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
     }
 
     /**
-     * Accept an alert or confirmation dialog. Equivalent to clicking OK.
+     * Get handle for an alert, confirm, or prompt dialog. (if any).
      * @return {Promise<void>}
      */
-    public async acceptAlert() {
-      await driver
-        .switchTo()
-        .alert()
-        .accept();
+    public async getAlert() {
+      await driver.switchTo().alert();
     }
 
     /**

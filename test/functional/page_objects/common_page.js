@@ -42,19 +42,30 @@ export function CommonPageProvider({ getService, getPageObjects }) {
       log.debug('Navigate to: ' + url);
       try {
         await browser.get(url);
-      } catch(e) {
+      } catch(navigationError) {
         log.debug('Error navigating to url');
+        let alert;
         try {
+          alert = await browser.getAlert();
+        } catch(alertRetrievalError) {
+          log.debug('Error getting alert box');
+          throw alertRetrievalError;
+        }
+        if (alert && alert.accept) {
           if (shouldAcceptAlert) {
-            log.debug('Accept alert');
-            await browser.acceptAlert();
+            log.debug('Should accept alert');
+            try {
+              await alert.accept();
+            } catch(alertException) {
+              log.debug('Error accepting alert');
+              throw alertException;
+            }
           } else {
             log.debug('Will not accept alert');
-            throw e;
+            throw navigationError;
           }
-        } catch(e) {
-          log.debug('Error accepting alert');
-          throw e;
+        } else {
+          throw navigationError;
         }
       }
     }
