@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { findIndex, reduce } from 'lodash';
 import {
   EuiAccordion,
@@ -28,6 +28,7 @@ import {
   EuiSpacer,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIconTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -40,6 +41,7 @@ interface DefaultEditorAggProps {
   agg: AggConfig;
   aggIndex: number;
   aggIsTooLow: boolean;
+  dragHandleProps: {} | null;
   groupName: string;
   formIsTouched: boolean;
   isDraggable: boolean;
@@ -61,6 +63,8 @@ function DefaultEditorAgg({
   agg,
   aggIndex,
   aggIsTooLow,
+  dragHandleProps,
+  dragging,
   groupName,
   formIsTouched,
   isDraggable,
@@ -82,6 +86,12 @@ function DefaultEditorAgg({
   const showError = !isEditorOpen && !isValid;
 
   const SchemaComponent = agg.schema.editorComponent;
+
+  useEffect(() => {
+    if (dragging) {
+      setIsEditorOpen(false);
+    }
+  }, [dragging]);
 
   const renderAggButtons = () => {
     const actionIcons = [];
@@ -120,9 +130,7 @@ function DefaultEditorAgg({
       // directive draggable-handle
       actionIcons.push({
         id: 'dragHandle',
-        color: 'text',
-        type: 'sortable',
-        onClick: () => 'onPriorityReorder(direction)',
+        type: 'grab',
         ariaLabel: i18n.translate('common.ui.vis.editors.agg.modifyPriorityButtonAriaLabel', {
           defaultMessage:
             'Use up and down key on this button to move this aggregation up and down in the priority order.',
@@ -150,17 +158,33 @@ function DefaultEditorAgg({
     }
     return (
       <div>
-        {actionIcons.map(icon => (
-          <EuiToolTip key={icon.id} position="bottom" content={icon.tooltip}>
-            <EuiButtonIcon
-              iconType={icon.type}
-              color={icon.color}
-              onClick={icon.onClick}
-              aria-label={icon.ariaLabel}
-              data-test-subj={icon.dataTestSubj}
-            />
-          </EuiToolTip>
-        ))}
+        {actionIcons.map(icon => {
+          if (icon.type === 'grab') {
+            return (
+              <EuiIconTip
+                key={icon.id}
+                type={icon.type}
+                content={icon.tooltip}
+                iconProps={{
+                  ['aria-label']: icon.ariaLabel,
+                  ['data-test-subj']: icon.dataTestSubj,
+                }}
+              />
+            );
+          }
+
+          return (
+            <EuiToolTip key={icon.id} position="bottom" content={icon.tooltip}>
+              <EuiButtonIcon
+                iconType={icon.type}
+                color={icon.color}
+                onClick={icon.onClick}
+                aria-label={icon.ariaLabel}
+                data-test-subj={icon.dataTestSubj}
+              />
+            </EuiToolTip>
+          );
+        })}
       </div>
     );
   };
@@ -228,6 +252,7 @@ function DefaultEditorAgg({
         data-test-subj="toggleEditor"
         extraAction={renderAggButtons()}
         onToggle={isOpen => setIsEditorOpen(isOpen)}
+        {...dragHandleProps}
       >
         <>
           <EuiSpacer size="m" />

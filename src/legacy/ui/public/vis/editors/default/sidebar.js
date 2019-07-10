@@ -23,6 +23,8 @@ import './vis_options';
 import 'ui/directives/css_truncate';
 import { uiModules } from '../../../modules';
 import sidebarTemplate from './sidebar.html';
+import { move } from '../../../utils/collection';
+import { AggConfig } from '../../agg_config';
 
 uiModules.get('app/visualize').directive('visEditorSidebar', function () {
   return {
@@ -48,6 +50,52 @@ uiModules.get('app/visualize').directive('visEditorSidebar', function () {
             (this.showData ? 'data' : _.get(visType, 'editorConfig.optionTabs[0].name'));
         }
       });
+
+      $scope.onAggTypeChange = (agg, value) => {
+        if (agg.type !== value) {
+          agg.type = value;
+        }
+      };
+
+      $scope.onAggParamsChange = (params, paramName, value) => {
+        if (params[paramName] !== value) {
+          params[paramName] = value;
+        }
+      };
+
+      $scope.addSchema = function (schema) {
+        const aggConfig = new AggConfig($scope.state.aggs, {
+          schema,
+          id: AggConfig.nextId($scope.state.aggs),
+        });
+        aggConfig.brandNew = true;
+
+        $scope.state.aggs.push(aggConfig);
+      };
+
+      $scope.removeAgg = function (agg) {
+        const aggs = $scope.state.aggs;
+        const index = aggs.indexOf(agg);
+
+        if (index === -1) {
+          return;
+        }
+
+        aggs.splice(index, 1);
+      };
+
+      $scope.onToggleEnableAgg = (agg, isEnable) => {
+        agg.enabled = isEnable;
+      };
+
+      $scope.reorderAggs = (group) => {
+        //the aggs have been reordered in [group] and we need
+        //to apply that ordering to [vis.aggs]
+        const indexOffset = $scope.state.aggs.indexOf(group[0]);
+        _.forEach(group, (agg, index) => {
+          move($scope.state.aggs, agg, indexOffset + index);
+        });
+      };
     },
   };
 });

@@ -21,7 +21,6 @@ import 'ngreact';
 import { wrapInI18nContext } from 'ui/i18n';
 import { uiModules } from '../../../modules';
 import { DefaultEditorAggGroup } from './components/default_editor_agg_group';
-import { AggConfig } from '../../agg_config';
 
 uiModules
   .get('app/visualize')
@@ -32,6 +31,7 @@ uiModules
       ['vis', { watchDepth: 'reference' }],
       ['addSchema', { watchDepth: 'reference' }],
       ['removeAgg', { watchDepth: 'reference' }],
+      ['reorderAggs', { watchDepth: 'reference' }],
       ['onToggleEnableAgg', { watchDepth: 'reference' }],
       ['onAggErrorChanged', { watchDepth: 'reference' }],
       ['onAggTypeChange', { watchDepth: 'reference' }],
@@ -49,7 +49,7 @@ uiModules
       // parent scope values right now. So we cannot easy change this, until we remove the whole directive.
       scope: true,
       require: '?^ngModel',
-      template: function ($el, attrs) {
+      template: function () {
         return `<vis-editor-agg-group-wrapper	
             ng-if="setValidity"	
             group-name="groupName"
@@ -64,6 +64,7 @@ uiModules
             on-agg-params-change="onAggParamsChange"
             remove-agg="removeAgg"
             on-toggle-enable-agg="onToggleEnableAgg"
+            reorder-aggs="reorderAggs"
           ></vis-editor-agg-group-wrapper>`;
       },
       link: function ($scope, $el, attr, ngModelCtrl) {
@@ -79,18 +80,6 @@ uiModules
           },
           true
         );
-
-        $scope.onAggTypeChange = (agg, value) => {
-          if (agg.type !== value) {
-            agg.type = value;
-          }
-        };
-
-        $scope.onAggParamsChange = (params, paramName, value) => {
-          if (params[paramName] !== value) {
-            params[paramName] = value;
-          }
-        };
 
         $scope.setValidity = isValid => {
           ngModelCtrl.$setValidity('aggGroup', isValid);
@@ -110,31 +99,6 @@ uiModules
           } else {
             delete agg.error;
           }
-        };
-
-        $scope.addSchema = function (schema) {
-          const aggConfig = new AggConfig($scope.state.aggs, {
-            schema,
-            id: AggConfig.nextId($scope.state.aggs),
-          });
-          aggConfig.brandNew = true;
-
-          $scope.state.aggs.push(aggConfig);
-        };
-
-        $scope.removeAgg = function (agg) {
-          const aggs = $scope.state.aggs;
-          const index = aggs.indexOf(agg);
-
-          if (index === -1) {
-            return;
-          }
-
-          aggs.splice(index, 1);
-        };
-
-        $scope.onToggleEnableAgg = (agg, isEnable) => {
-          agg.enabled = isEnable;
         };
       },
     };
