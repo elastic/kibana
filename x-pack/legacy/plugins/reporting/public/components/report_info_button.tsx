@@ -105,21 +105,21 @@ export class ReportInfoButton extends Component<Props, State> {
         },
         {
           title: 'Browser Timezone',
-          description: (info.payload && info.payload.browserTimezone) || NA,
+          description: info.payload.browserTimezone || NA,
         },
       ],
       payload: [
         {
           title: 'Title',
-          description: (info.payload && info.payload.title) || NA,
+          description: info.payload.title || NA,
         },
         {
           title: 'Type',
-          description: (info.payload && info.payload.type) || NA,
+          description: info.payload.type || NA,
         },
         {
           title: 'Layout',
-          description: (info.meta && info.meta.layout) || NA,
+          description: info.meta.layout || NA,
         },
         {
           title: 'Dimensions',
@@ -131,11 +131,11 @@ export class ReportInfoButton extends Component<Props, State> {
         },
         {
           title: 'Content Type',
-          description: (info.output && info.output.content_type) || NA,
+          description: info.output.content_type || NA,
         },
         {
           title: 'Size in Bytes',
-          description: (info.output && info.output.size) || NA,
+          description: info.output.size || NA,
         },
       ],
       status: [
