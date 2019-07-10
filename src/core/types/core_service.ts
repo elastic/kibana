@@ -23,6 +23,8 @@ export interface PluginScoped<T> {
   forPlugin(plugin: PluginName): T;
 }
 
+export type LifecycleContract<T> = T extends PluginScoped<infer U> ? U : T;
+
 export type LifecycleReturnType<T> = T | PluginScoped<T> | Promise<T | PluginScoped<T>>;
 
 /** @internal */

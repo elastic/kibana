@@ -44,7 +44,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [LogMeta](./kibana-plugin-server.logmeta.md) | Contextual metadata |
 |  [OnPostAuthToolkit](./kibana-plugin-server.onpostauthtoolkit.md) | A tool set defining an outcome of OnPostAuth interceptor for incoming request. |
 |  [OnPreAuthToolkit](./kibana-plugin-server.onpreauthtoolkit.md) | A tool set defining an outcome of OnPreAuth interceptor for incoming request. |
-|  [Plugin](./kibana-plugin-server.plugin.md) | The interface that should be returned by a <code>PluginInitializer</code>. |
+|  [Plugin](./kibana-plugin-server.plugin.md) | The interface that should be returned by a [PluginInitializer](./kibana-plugin-server.plugininitializer.md)<!-- -->. |
 |  [PluginInitializerContext](./kibana-plugin-server.plugininitializercontext.md) | Context that's available to plugins during initialization stage. |
 |  [PluginsServiceSetup](./kibana-plugin-server.pluginsservicesetup.md) |  |
 |  [PluginsServiceStart](./kibana-plugin-server.pluginsservicestart.md) |  |
@@ -81,6 +81,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [OnPostAuthHandler](./kibana-plugin-server.onpostauthhandler.md) |  |
 |  [OnPreAuthHandler](./kibana-plugin-server.onpreauthhandler.md) |  |
 |  [PluginInitializer](./kibana-plugin-server.plugininitializer.md) | The <code>plugin</code> export at the root of a plugin's <code>server</code> directory should conform to this interface. |
+|  [PluginLifecycleContract](./kibana-plugin-server.pluginlifecyclecontract.md) | A plugin contact can either be a raw value or a function that receives a unique symbol per dependency to provide a pre-configured or scoped contract to the dependency. |
 |  [PluginName](./kibana-plugin-server.pluginname.md) | Dedicated type for plugin name/id that is supposed to make Map/Set/Arrays that use it as a key or value more obvious. |
 |  [RecursiveReadonly](./kibana-plugin-server.recursivereadonly.md) |  |
 |  [RouteMethod](./kibana-plugin-server.routemethod.md) | The set of common HTTP methods supported by Kibana routing. |

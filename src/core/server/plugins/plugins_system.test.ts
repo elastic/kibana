@@ -132,6 +132,32 @@ Array [
 `);
 });
 
+test(`calls scoped plugin function for dependencies`, async () => {
+  mockCreatePluginSetupContext.mockReturnValue({});
+  mockCreatePluginStartContext.mockReturnValue({});
+
+  const plugin1 = createPlugin('plugin-1');
+  const scopedSetup = jest.fn<string, [{ id: symbol }]>(() => 'plugin-1-setup');
+  const scopedStart = jest.fn<string, [{ id: symbol }]>(() => 'plugin-1-start');
+  jest.spyOn(plugin1, 'setup').mockResolvedValue(scopedSetup);
+  jest.spyOn(plugin1, 'start').mockResolvedValue(scopedStart);
+
+  const plugin2 = createPlugin('plugin-2', { required: ['plugin-1'] });
+  const plugin2Setup = jest.spyOn(plugin2, 'setup').mockResolvedValue('plugin-2-setup');
+  const plugin2Start = jest.spyOn(plugin2, 'start').mockResolvedValue('plugin-2-start');
+
+  pluginsSystem.addPlugin(plugin1);
+  pluginsSystem.addPlugin(plugin2);
+
+  await pluginsSystem.setupPlugins(setupDeps);
+  await pluginsSystem.startPlugins({});
+
+  expect(scopedSetup).toHaveBeenCalledWith({ id: plugin2.opaqueId });
+  expect(scopedStart).toHaveBeenCalledWith({ id: plugin2.opaqueId });
+  expect(plugin2Setup).toHaveBeenCalledWith({}, { 'plugin-1': 'plugin-1-setup' });
+  expect(plugin2Start).toHaveBeenCalledWith({}, { 'plugin-1': 'plugin-1-start' });
+});
+
 test('correctly orders plugins and returns exposed values for "setup" and "start"', async () => {
   interface Contracts {
     setup: Record<PluginName, unknown>;

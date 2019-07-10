@@ -77,6 +77,7 @@ export { Logger, LoggerFactory, LogMeta, LogRecord, LogLevel } from './logging';
 export {
   DiscoveredPlugin,
   Plugin,
+  PluginLifecycleContract,
   PluginInitializer,
   PluginInitializerContext,
   PluginName,

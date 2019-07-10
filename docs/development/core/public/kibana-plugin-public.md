@@ -48,7 +48,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [NotificationsStart](./kibana-plugin-public.notificationsstart.md) |  |
 |  [OverlayRef](./kibana-plugin-public.overlayref.md) |  |
 |  [OverlayStart](./kibana-plugin-public.overlaystart.md) |  |
-|  [Plugin](./kibana-plugin-public.plugin.md) | The interface that should be returned by a <code>PluginInitializer</code>. |
+|  [Plugin](./kibana-plugin-public.plugin.md) | The interface that should be returned by a [PluginInitializer](./kibana-plugin-public.plugininitializer.md)<!-- -->. |
 |  [PluginInitializerContext](./kibana-plugin-public.plugininitializercontext.md) | The available core services passed to a <code>PluginInitializer</code> |
 |  [UiSettingsState](./kibana-plugin-public.uisettingsstate.md) |  |
 
@@ -61,6 +61,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [HttpSetup](./kibana-plugin-public.httpsetup.md) |  |
 |  [HttpStart](./kibana-plugin-public.httpstart.md) |  |
 |  [PluginInitializer](./kibana-plugin-public.plugininitializer.md) | The <code>plugin</code> export at the root of a plugin's <code>public</code> directory should conform to this interface. |
+|  [PluginLifecycleContract](./kibana-plugin-public.pluginlifecyclecontract.md) | A plugin contact can either be a raw value or a function that receives a unique symbol per dependency to provide a pre-configured or scoped contract to the dependency. |
 |  [RecursiveReadonly](./kibana-plugin-public.recursivereadonly.md) |  |
 |  [ToastInput](./kibana-plugin-public.toastinput.md) |  |
 |  [UiSettingsClientContract](./kibana-plugin-public.uisettingsclientcontract.md) | [UiSettingsClient](./kibana-plugin-public.uisettingsclient.md) |

@@ -18,5 +18,5 @@
  */
 
 export * from './plugins_service';
-export { Plugin, PluginInitializer } from './plugin';
+export { Plugin, PluginInitializer, PluginLifecycleContract } from './plugin';
 export { PluginInitializerContext } from './plugin_context';

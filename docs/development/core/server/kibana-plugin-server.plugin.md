@@ -4,7 +4,7 @@
 
 ## Plugin interface
 
-The interface that should be returned by a `PluginInitializer`<!-- -->.
+The interface that should be returned by a [PluginInitializer](./kibana-plugin-server.plugininitializer.md)<!-- -->.
 
 <b>Signature:</b>
 

@@ -200,7 +200,7 @@ test('`PluginsService.setup` exposes dependent setup contracts to plugins', asyn
 
 test('`PluginsService.setup` does not set missing dependent setup contracts', async () => {
   mockSetupDeps.injectedMetadata.getPlugins.mockReturnValue([
-    { id: 'pluginD', plugin: createManifest('pluginD', { required: ['missing'] }) },
+    { id: 'pluginD', plugin: createManifest('pluginD', { optional: ['missing'] }) },
   ]);
   mockPluginInitializers.set('pluginD', jest.fn(() => ({
     setup: jest.fn(),
@@ -226,6 +226,42 @@ test('`PluginsService.setup` returns plugin setup contracts', async () => {
   expect((contracts.get('pluginB')! as any).pluginAPlusB).toEqual(2);
 });
 
+test('`PluginService.setup` calls scoped plugin function for dependencies', async () => {
+  const setupScoped = jest.fn<string, [{ id: symbol }]>(() => 'plugin-d-setup');
+
+  mockSetupDeps.injectedMetadata.getPlugins.mockReturnValue([
+    { id: 'pluginD', plugin: createManifest('pluginD') },
+    { id: 'pluginE', plugin: createManifest('pluginE', { required: ['pluginD'] }) },
+  ]);
+
+  mockPluginInitializers
+    .set(
+      'pluginD',
+      jest.fn(
+        () =>
+          ({
+            setup: jest.fn(() => setupScoped),
+            start: jest.fn(),
+          } as any)
+      )
+    )
+    .set('pluginE', jest.fn(() => ({
+      setup: jest.fn(),
+      start: jest.fn(),
+    })) as any);
+
+  const pluginsService = new PluginsService(mockCoreContext);
+  await pluginsService.setup(mockSetupDeps);
+
+  expect(setupScoped).toHaveBeenCalled();
+  expect(typeof setupScoped.mock.calls[0][0].id === 'symbol').toBe(true);
+
+  const pluginEInstance = mockPluginInitializers.get('pluginE')!.mock.results[0].value;
+  expect(pluginEInstance.setup).toHaveBeenCalledWith(mockSetupContext, {
+    pluginD: 'plugin-d-setup',
+  });
+});
+
 test('`PluginsService.start` exposes dependent start contracts to plugins', async () => {
   const pluginsService = new PluginsService(mockCoreContext);
   await pluginsService.setup(mockSetupDeps);
@@ -247,7 +283,7 @@ test('`PluginsService.start` exposes dependent start contracts to plugins', asyn
 
 test('`PluginsService.start` does not set missing dependent start contracts', async () => {
   mockSetupDeps.injectedMetadata.getPlugins.mockReturnValue([
-    { id: 'pluginD', plugin: createManifest('pluginD', { required: ['missing'] }) },
+    { id: 'pluginD', plugin: createManifest('pluginD', { optional: ['missing'] }) },
   ]);
   mockPluginInitializers.set('pluginD', jest.fn(() => ({
     setup: jest.fn(),
@@ -273,6 +309,43 @@ test('`PluginsService.start` returns plugin start contracts', async () => {
   // Verify that plugin contracts were available
   expect((contracts.get('pluginA')! as any).startValue).toEqual(2);
   expect((contracts.get('pluginB')! as any).pluginAPlusB).toEqual(3);
+});
+
+test('`PluginService.start` calls scoped plugin function for dependencies', async () => {
+  const startScoped = jest.fn<string, [{ id: symbol }]>(() => 'plugin-d-start');
+
+  mockSetupDeps.injectedMetadata.getPlugins.mockReturnValue([
+    { id: 'pluginD', plugin: createManifest('pluginD') },
+    { id: 'pluginE', plugin: createManifest('pluginE', { required: ['pluginD'] }) },
+  ]);
+
+  mockPluginInitializers
+    .set(
+      'pluginD',
+      jest.fn(
+        () =>
+          ({
+            setup: jest.fn(),
+            start: jest.fn(() => startScoped),
+          } as any)
+      )
+    )
+    .set('pluginE', jest.fn(() => ({
+      setup: jest.fn(),
+      start: jest.fn(),
+    })) as any);
+
+  const pluginsService = new PluginsService(mockCoreContext);
+  await pluginsService.setup(mockSetupDeps);
+  await pluginsService.start(mockStartDeps);
+
+  expect(startScoped).toHaveBeenCalled();
+  expect(typeof startScoped.mock.calls[0][0].id === 'symbol').toBe(true);
+
+  const pluginEInstance = mockPluginInitializers.get('pluginE')!.mock.results[0].value;
+  expect(pluginEInstance.start).toHaveBeenCalledWith(mockStartContext, {
+    pluginD: 'plugin-d-start',
+  });
 });
 
 test('`PluginService.stop` calls the stop function on each plugin', async () => {

@@ -473,9 +473,9 @@ export interface OverlayStart {
 // @public
 export interface Plugin<TSetup = void, TStart = void, TPluginsSetup extends {} = {}, TPluginsStart extends {} = {}> {
     // (undocumented)
-    setup(core: CoreSetup, plugins: TPluginsSetup): TSetup | Promise<TSetup>;
+    setup(core: CoreSetup, plugins: TPluginsSetup): PluginLifecycleContract<TSetup> | Promise<PluginLifecycleContract<TSetup>>;
     // (undocumented)
-    start(core: CoreStart, plugins: TPluginsStart): TStart | Promise<TStart>;
+    start(core: CoreStart, plugins: TPluginsStart): PluginLifecycleContract<TStart> | Promise<PluginLifecycleContract<TStart>>;
     // (undocumented)
     stop?(): void;
 }
@@ -486,6 +486,11 @@ export type PluginInitializer<TSetup, TStart, TPluginsSetup extends Record<strin
 // @public
 export interface PluginInitializerContext {
 }
+
+// @public
+export type PluginLifecycleContract<T> = T extends (dependency: Readonly<{
+    id: symbol;
+}>) => infer U ? U : T;
 
 // Warning: (ae-forgotten-export) The symbol "RecursiveReadonlyArray" needs to be exported by the entry point index.d.ts
 // 

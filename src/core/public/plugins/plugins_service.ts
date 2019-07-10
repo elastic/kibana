@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { PluginName } from '../../server';
+import { PluginName, PluginLifecycleContract } from '../../server';
 import { CoreService } from '../../types';
 import { CoreContext, InternalCoreStart } from '../core_system';
 import { PluginWrapper } from './plugin';
@@ -73,7 +73,7 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
     await this.loadPluginBundles(deps.http.basePath.prepend);
 
     // Setup each plugin with required and optional plugin contracts
-    const contracts = new Map<string, unknown>();
+    const contracts = new Map<string, PluginLifecycleContract<unknown>>();
     for (const [pluginName, plugin] of this.plugins.entries()) {
       const pluginDeps = new Set([
         ...plugin.requiredPlugins,
@@ -85,7 +85,12 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
           // Only set if present. Could be absent if plugin does not have client-side code or is a
           // missing optional plugin.
           if (contracts.has(dependencyName)) {
-            depContracts[dependencyName] = contracts.get(dependencyName);
+            const contract = contracts.get(dependencyName);
+            if (typeof contract === 'function') {
+              depContracts[dependencyName] = contract(Object.freeze({ id: plugin.opaqueId }));
+            } else {
+              depContracts[dependencyName] = contract;
+            }
           }
 
           return depContracts;
@@ -110,7 +115,7 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
 
   public async start(deps: PluginsServiceStartDeps) {
     // Setup each plugin with required and optional plugin contracts
-    const contracts = new Map<string, unknown>();
+    const contracts = new Map<string, PluginLifecycleContract<unknown>>();
     for (const [pluginName, plugin] of this.plugins.entries()) {
       const pluginDeps = new Set([
         ...plugin.requiredPlugins,
@@ -122,7 +127,12 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
           // Only set if present. Could be absent if plugin does not have client-side code or is a
           // missing optional plugin.
           if (contracts.has(dependencyName)) {
-            depContracts[dependencyName] = contracts.get(dependencyName);
+            const contract = contracts.get(dependencyName);
+            if (typeof contract === 'function') {
+              depContracts[dependencyName] = contract(Object.freeze({ id: plugin.opaqueId }));
+            } else {
+              depContracts[dependencyName] = contract;
+            }
           }
 
           return depContracts;

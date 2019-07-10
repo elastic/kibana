@@ -26,6 +26,7 @@ export {
   DiscoveredPlugin,
   DiscoveredPluginInternal,
   Plugin,
+  PluginLifecycleContract,
   PluginInitializer,
   PluginName,
 } from './plugin';

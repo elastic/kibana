@@ -21,7 +21,13 @@ import { pick } from 'lodash';
 
 import { CoreContext } from '../core_context';
 import { Logger } from '../logging';
-import { DiscoveredPlugin, DiscoveredPluginInternal, PluginWrapper, PluginName } from './plugin';
+import {
+  DiscoveredPlugin,
+  DiscoveredPluginInternal,
+  PluginWrapper,
+  PluginName,
+  PluginLifecycleContract,
+} from './plugin';
 import { createPluginSetupContext, createPluginStartContext } from './plugin_context';
 import { PluginsServiceSetupDeps, PluginsServiceStartDeps } from './plugins_service';
 
@@ -41,7 +47,7 @@ export class PluginsSystem {
   }
 
   public async setupPlugins(deps: PluginsServiceSetupDeps) {
-    const contracts = new Map<PluginName, unknown>();
+    const contracts = new Map<PluginName, PluginLifecycleContract<unknown>>();
     if (this.plugins.size === 0) {
       return contracts;
     }
@@ -62,7 +68,12 @@ export class PluginsSystem {
           // Only set if present. Could be absent if plugin does not have server-side code or is a
           // missing optional dependency.
           if (contracts.has(dependencyName)) {
-            depContracts[dependencyName] = contracts.get(dependencyName);
+            const contract = contracts.get(dependencyName);
+            if (typeof contract === 'function') {
+              depContracts[dependencyName] = contract(Object.freeze({ id: plugin.opaqueId }));
+            } else {
+              depContracts[dependencyName] = contract;
+            }
           }
 
           return depContracts;
@@ -85,7 +96,7 @@ export class PluginsSystem {
   }
 
   public async startPlugins(deps: PluginsServiceStartDeps) {
-    const contracts = new Map<PluginName, unknown>();
+    const contracts = new Map<PluginName, PluginLifecycleContract<unknown>>();
     if (this.satupPlugins.length === 0) {
       return contracts;
     }
@@ -101,7 +112,12 @@ export class PluginsSystem {
           // Only set if present. Could be absent if plugin does not have server-side code or is a
           // missing optional dependency.
           if (contracts.has(dependencyName)) {
-            depContracts[dependencyName] = contracts.get(dependencyName);
+            const contract = contracts.get(dependencyName);
+            if (typeof contract === 'function') {
+              depContracts[dependencyName] = contract(Object.freeze({ id: plugin.opaqueId }));
+            } else {
+              depContracts[dependencyName] = contract;
+            }
           }
 
           return depContracts;

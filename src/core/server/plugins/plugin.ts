@@ -131,7 +131,17 @@ export interface DiscoveredPluginInternal extends DiscoveredPlugin {
 }
 
 /**
- * The interface that should be returned by a `PluginInitializer`.
+ * A plugin contact can either be a raw value or a function that receives a unique symbol per dependency to provide
+ * a pre-configured or scoped contract to the dependency.
+ *
+ * @public
+ */
+export type PluginLifecycleContract<T> = T extends (dependency: Readonly<{ id: symbol }>) => infer U
+  ? U
+  : T;
+
+/**
+ * The interface that should be returned by a {@link PluginInitializer}.
  *
  * @public
  */
@@ -141,8 +151,14 @@ export interface Plugin<
   TPluginsSetup extends {} = {},
   TPluginsStart extends {} = {}
 > {
-  setup(core: CoreSetup, plugins: TPluginsSetup): TSetup | Promise<TSetup>;
-  start(core: CoreStart, plugins: TPluginsStart): TStart | Promise<TStart>;
+  setup(
+    core: CoreSetup,
+    plugins: TPluginsSetup
+  ): PluginLifecycleContract<TSetup> | Promise<PluginLifecycleContract<TSetup>>;
+  start(
+    core: CoreStart,
+    plugins: TPluginsStart
+  ): PluginLifecycleContract<TStart> | Promise<PluginLifecycleContract<TStart>>;
   stop?(): void;
 }
 
@@ -177,6 +193,7 @@ export class PluginWrapper<
   public readonly optionalPlugins: PluginManifest['optionalPlugins'];
   public readonly includesServerPlugin: PluginManifest['server'];
   public readonly includesUiPlugin: PluginManifest['ui'];
+  public readonly opaqueId = Symbol();
 
   private readonly log: Logger;
 
