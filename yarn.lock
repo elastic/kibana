@@ -18537,10 +18537,10 @@ lodash@^3.10.1, lodash@^3.3.1, lodash@~3.10.1:
   resolved "https://registry.yarnpkg.com/lodash/-/lodash-3.10.1.tgz#5bf45e8e49ba4189e17d482789dfd15bd140b7b6"
   integrity sha1-W/Rejkm6QYnhfUgnid/RW9FAt7Y=
 
-"lodash@npm:@elastic/lodash@3.10.1-kibana2":
-  version "3.10.1-kibana2"
-  resolved "https://registry.yarnpkg.com/@elastic/lodash/-/lodash-3.10.1-kibana2.tgz#f4094d14a2d1af01a9f24df6ca2d7801ae60235c"
-  integrity sha512-D/fDyUlwnrDFAI+ElVvdvQ25YGOX4QM6XhMj66FXeZRkwB5om2YRo65q/d/BnqWIJyY8Lzh3L3iPe23KEQq2cA==
+"lodash@npm:@elastic/lodash@3.10.1-kibana3":
+  version "3.10.1-kibana3"
+  resolved "https://registry.yarnpkg.com/@elastic/lodash/-/lodash-3.10.1-kibana3.tgz#c0e318245219eeeff535895c429e0cef5058a9ad"
+  integrity sha512-HMfwwT2yAkEQNzHSR1BxgE5YcDMUaZ/skhNyjy1nvM/A4m0Kh940hLZeCqKBCsSaUJz/8A/9cQGd9BaAOCIBLg==
 
 lodash@~1.0.1:
   version "1.0.2"
