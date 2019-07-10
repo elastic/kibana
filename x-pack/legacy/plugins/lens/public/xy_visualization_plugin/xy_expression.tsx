@@ -129,6 +129,7 @@ export function XYChart({ data, args }: XYChartProps) {
         showLegend={legend.isVisible}
         legendPosition={legend.position}
         showLegendDisplayValue={false}
+        rotation={seriesType === 'horizontal_bar' ? 90 : undefined}
       />
 
       <Axis
@@ -149,7 +150,7 @@ export function XYChart({ data, args }: XYChartProps) {
 
       {seriesType === 'line' ? (
         <LineSeries {...seriesProps} />
-      ) : seriesType === 'bar' ? (
+      ) : seriesType === 'bar' || seriesType === 'horizontal_bar' ? (
         <BarSeries {...seriesProps} />
       ) : (
         <AreaSeries {...seriesProps} />
