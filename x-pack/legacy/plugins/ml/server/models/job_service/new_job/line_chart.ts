@@ -5,13 +5,13 @@
  */
 
 import { get } from 'lodash';
-import { DslName, AggFieldNamePair } from '../../../../common/types/fields';
+import { AggFieldNamePair } from '../../../../common/types/fields';
 import { ML_MEDIAN_PERCENTS } from '../../../../common/util/job_utils';
 
 export type callWithRequestType = (action: string, params: any) => Promise<any>;
 
 const EVENT_RATE_COUNT_FIELD = '__ml_event_rate_count__';
-const OVER_FIELD_EXAMPLES_COUNT = 40;
+// const OVER_FIELD_EXAMPLES_COUNT = 40;
 
 type DtrIndex = number;
 type TimeStamp = number;

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { createContext, Dispatch } from 'react';
+import { createContext } from 'react';
 import { Field, Aggregation } from '../../../../../common/types/fields';
 import { MlTimeBuckets } from '../../../../util/ml_time_buckets';
 import {
@@ -22,7 +22,7 @@ export interface ExistingJobsAndGroups {
 
 export interface JobCreatorContextValue {
   jobCreatorUpdated: number;
-  jobCreatorUpdate: Dispatch<void>;
+  jobCreatorUpdate: () => void;
   jobCreator: SingleMetricJobCreator | MultiMetricJobCreator | PopulationJobCreator;
   chartLoader: ChartLoader;
   resultsLoader: ResultsLoader;
