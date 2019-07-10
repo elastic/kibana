@@ -281,10 +281,6 @@ Array [
     </div>
   </div>,
   <div
-    aria-live="assertive"
-    role="region"
-  />,
-  <div
     class="euiSpacer euiSpacer--l"
   />,
   <div
@@ -294,6 +290,7 @@ Array [
       class="euiFlexItem euiFlexItem--flexGrowZero"
     >
       <button
+        aria-describedby="staticGenerator_removeClustersErrorList"
         class="euiButton euiButton--secondary euiButton--fill"
         data-test-subj="remoteClusterFormSaveButton"
         type="button"
