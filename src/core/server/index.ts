@@ -108,7 +108,7 @@ export {
   SavedObjectsUpdateResponse,
 } from './saved_objects';
 
-export { RecursiveReadonly, deepFreeze } from '../utils';
+export { RecursiveReadonly } from '../utils';
 
 /**
  * Context passed to the plugins `setup` method.
