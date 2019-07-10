@@ -97,7 +97,10 @@ export class WebElementWrapper {
     return otherWebElements.map(e => this._wrap(e));
   }
 
-  private async retryCall(fn: Function, attemptsRemaining: number = this.attempts): Promise<any> {
+  private async retryCall<T>(
+    fn: (wrapper: this) => T | Promise<T>,
+    attemptsRemaining: number = this.attempts
+  ): Promise<T> {
     try {
       return await fn(this);
     } catch (err) {
