@@ -16,7 +16,7 @@
 // under the License.
 
 /**
-  APM UI Pipeline
+  Stolen from APM UI Pipeline, :)
 */
 void call(Map args = [:]){
   pipeline {
