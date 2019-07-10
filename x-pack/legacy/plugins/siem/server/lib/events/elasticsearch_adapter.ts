@@ -22,7 +22,6 @@ import {
   DetailItem,
   EcsEdges,
   EventsData,
-  KpiItem,
   LastEventTimeData,
   TimelineData,
   TimelineDetailsData,
@@ -66,13 +65,6 @@ export class ElasticsearchEventsAdapter implements EventsAdapter {
       dsl
     );
 
-    const kpiEventType: KpiItem[] =
-      response.aggregations && response.aggregations.count_event_type
-        ? response.aggregations.count_event_type.buckets.map(item => ({
-            value: item.key,
-            count: item.doc_count,
-          }))
-        : [];
     const { limit } = options.pagination;
     const totalCount = getOr(0, 'hits.total.value', response);
     const hits = response.hits.hits;
@@ -90,7 +82,6 @@ export class ElasticsearchEventsAdapter implements EventsAdapter {
     return {
       inspect,
       edges,
-      kpiEventType,
       pageInfo: { hasNextPage, endCursor: lastCursor },
       totalCount,
     };

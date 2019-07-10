@@ -7,6 +7,8 @@
 import {
   EuiButton,
   EuiCodeBlock,
+  EuiDescriptionList,
+  EuiIconTip,
   EuiModal,
   EuiModalBody,
   EuiModalHeader,
@@ -16,10 +18,23 @@ import {
   EuiSpacer,
   EuiTabbedContent,
 } from '@elastic/eui';
-import React from 'react';
+import numeral from '@elastic/numeral';
+import React, { ReactNode } from 'react';
 import styled from 'styled-components';
 
 import * as i18n from './translations';
+
+const DescriptionListStyled = styled(EuiDescriptionList)`
+  dt .euiToolTipAnchor {
+    padding-left: 5px;
+  }
+  dt.euiDescriptionList__title {
+    width: 30% !important;
+  }
+  dd.euiDescriptionList__description {
+    width: 70% !important;
+  }
+`;
 
 interface ModalInspectProps {
   closeModal: () => void;
@@ -27,6 +42,21 @@ interface ModalInspectProps {
   request: string | null;
   response: string | null;
   title: string | React.ReactElement | React.ReactNode;
+}
+
+interface Request {
+  index: string[];
+  allowNoIndices: boolean;
+  ignoreUnavailable: boolean;
+  body: Record<string, unknown>;
+}
+
+interface Response {
+  took: number;
+  timed_out: boolean;
+  _shards: Record<string, unknown>;
+  hits: Record<string, unknown>;
+  aggregations: Record<string, unknown>;
 }
 
 const MyEuiModal = styled(EuiModal)`
@@ -38,6 +68,21 @@ const MyEuiModal = styled(EuiModal)`
     max-width: 718px;
   }
 `;
+const parseInspectString = function<T>(objectStringify: string): T | null {
+  try {
+    return JSON.parse(objectStringify);
+  } catch {
+    return null;
+  }
+};
+
+const manageStringify = (object: Record<string, unknown> | Response): string => {
+  try {
+    return JSON.stringify(object, null, 2);
+  } catch {
+    return i18n.SOMETHING_WENT_WRONG;
+  }
+};
 
 export const ModalInspectQuery = ({
   closeModal,
@@ -49,7 +94,65 @@ export const ModalInspectQuery = ({
   if (!isShowing || request == null || response == null) {
     return null;
   }
+  const inspectRequest: Request | null = parseInspectString(request);
+  const inspectResponse: Response | null = parseInspectString(response);
+  const statistics: Array<{
+    title: NonNullable<ReactNode | string>;
+    description: NonNullable<ReactNode | string>;
+  }> = [
+    {
+      title: (
+        <span data-test-subj="index-pattern-title">
+          {i18n.INDEX_PATTERN}
+          <EuiIconTip content={i18n.INDEX_PATTERN_DESC} position="top" type="iInCircle" />
+        </span>
+      ),
+      description: (
+        <span data-test-subj="index-pattern-description">
+          {inspectRequest != null ? inspectRequest.index.join(', ') : i18n.SOMETHING_WENT_WRONG}
+        </span>
+      ),
+    },
+
+    {
+      title: (
+        <span data-test-subj="query-time-title">
+          {i18n.QUERY_TIME}
+          <EuiIconTip content={i18n.QUERY_TIME_DESC} position="top" type="iInCircle" />
+        </span>
+      ),
+      description: (
+        <span data-test-subj="query-time-description">
+          {inspectResponse != null
+            ? `${numeral(inspectResponse.took).format('0,0')}ms`
+            : i18n.SOMETHING_WENT_WRONG}
+        </span>
+      ),
+    },
+    {
+      title: (
+        <span data-test-subj="request-timestamp-title">
+          {i18n.REQUEST_TIMESTAMP}
+          <EuiIconTip content={i18n.REQUEST_TIMESTAMP_DESC} position="top" type="iInCircle" />
+        </span>
+      ),
+      description: (
+        <span data-test-subj="request-timestamp-description">{new Date().toISOString()}</span>
+      ),
+    },
+  ];
+
   const tabs = [
+    {
+      id: 'statistics',
+      name: 'Statistics',
+      content: (
+        <>
+          <EuiSpacer />
+          <DescriptionListStyled listItems={statistics} type="column" />
+        </>
+      ),
+    },
     {
       id: 'request',
       name: 'Request',
@@ -64,7 +167,9 @@ export const ModalInspectQuery = ({
             overflowHeight={300}
             isCopyable
           >
-            {request}
+            {inspectRequest != null
+              ? manageStringify(inspectRequest.body)
+              : i18n.SOMETHING_WENT_WRONG}
           </EuiCodeBlock>
         </>
       ),
@@ -100,7 +205,7 @@ export const ModalInspectQuery = ({
         </EuiModalHeader>
 
         <EuiModalBody>
-          <EuiTabbedContent tabs={tabs} initialSelectedTab={tabs[1]} autoFocus="selected" />
+          <EuiTabbedContent tabs={tabs} initialSelectedTab={tabs[0]} autoFocus="selected" />
         </EuiModalBody>
 
         <EuiModalFooter>

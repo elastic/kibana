@@ -7,7 +7,7 @@
 import { i18n } from '@kbn/i18n';
 import { alterColumn } from '../../functions/common/alterColumn';
 import { FunctionHelp } from '.';
-import { FunctionFactory } from '../../functions/types';
+import { FunctionFactory } from '../../../types';
 
 export const help: FunctionHelp<FunctionFactory<typeof alterColumn>> = {
   help: i18n.translate('xpack.canvas.functions.alterColumnHelpText', {

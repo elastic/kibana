@@ -7,7 +7,7 @@
 import { i18n } from '@kbn/i18n';
 import { timefilter } from '../../functions/common/timefilter';
 import { FunctionHelp } from '.';
-import { FunctionFactory } from '../../functions/types';
+import { FunctionFactory } from '../../../types';
 
 export const help: FunctionHelp<FunctionFactory<typeof timefilter>> = {
   help: i18n.translate('xpack.canvas.functions.timefilterHelpText', {
