@@ -8,11 +8,13 @@
 import { datafeedsProvider } from './datafeeds';
 import { jobsProvider } from './jobs';
 import { groupsProvider } from './groups';
+import { newJobCapsProvider } from './new_job_caps';
 
-export function jobServiceProvider(callWithRequest) {
+export function jobServiceProvider(callWithRequest, request) {
   return {
     ...datafeedsProvider(callWithRequest),
     ...jobsProvider(callWithRequest),
     ...groupsProvider(callWithRequest),
+    ...newJobCapsProvider(callWithRequest, request),
   };
 }

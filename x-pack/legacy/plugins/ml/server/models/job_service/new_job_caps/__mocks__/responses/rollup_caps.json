@@ -1,0 +1,185 @@
+{
+  "cloud_roll_index": {
+    "rollup_jobs": [
+      {
+        "job_id": "cloud_roll",
+        "rollup_index": "cloud_roll_index",
+        "index_pattern": "cloudwatch-*",
+        "fields": {
+          "NetworkOut": [
+            {
+              "agg": "histogram",
+              "interval": 5
+            },
+            {
+              "agg": "avg"
+            },
+            {
+              "agg": "min"
+            },
+            {
+              "agg": "value_count"
+            }
+          ],
+          "CPUUtilization": [
+            {
+              "agg": "histogram",
+              "interval": 5
+            },
+            {
+              "agg": "avg"
+            },
+            {
+              "agg": "max"
+            }
+          ],
+          "@timestamp": [
+            {
+              "agg": "date_histogram",
+              "delay": "1d",
+              "interval": "5m",
+              "time_zone": "UTC"
+            }
+          ],
+          "instance": [
+            {
+              "agg": "terms"
+            }
+          ],
+          "NetworkIn": [
+            {
+              "agg": "histogram",
+              "interval": 5
+            },
+            {
+              "agg": "avg"
+            },
+            {
+              "agg": "min"
+            }
+          ],
+          "sourcetype.keyword": [
+            {
+              "agg": "terms"
+            }
+          ],
+          "region": [
+            {
+              "agg": "terms"
+            }
+          ],
+          "DiskReadBytes": [
+            {
+              "agg": "avg"
+            },
+            {
+              "agg": "max"
+            },
+            {
+              "agg": "sum"
+            },
+            {
+              "agg": "value_count"
+            }
+          ]
+        }
+      },
+      {
+        "job_id": "cloud_roll2",
+        "rollup_index": "cloud_roll_index",
+        "index_pattern": "cloudwatch*",
+        "fields": {
+          "NetworkOut": [
+            {
+              "agg": "histogram",
+              "interval": 5
+            },
+            {
+              "agg": "avg"
+            },
+            {
+              "agg": "sum"
+            },
+            {
+              "agg": "value_count"
+            }
+          ],
+          "CPUUtilization": [
+            {
+              "agg": "histogram",
+              "interval": 5
+            },
+            {
+              "agg": "avg"
+            },
+            {
+              "agg": "max"
+            },
+            {
+              "agg": "value_count"
+            }
+          ],
+          "@timestamp": [
+            {
+              "agg": "date_histogram",
+              "delay": "1d",
+              "interval": "5m",
+              "time_zone": "UTC"
+            }
+          ],
+          "instance": [
+            {
+              "agg": "terms"
+            }
+          ],
+          "NetworkIn": [
+            {
+              "agg": "histogram",
+              "interval": 5
+            },
+            {
+              "agg": "avg"
+            },
+            {
+              "agg": "min"
+            },
+            {
+              "agg": "value_count"
+            }
+          ],
+          "region": [
+            {
+              "agg": "terms"
+            }
+          ]
+        }
+      },
+      {
+        "job_id": "cloud_roll3",
+        "rollup_index": "cloud_roll_index",
+        "index_pattern": "cloudwatc*",
+        "fields": {
+          "NetworkOut": [
+            {
+              "agg": "histogram",
+              "interval": 15
+            }
+          ],
+          "DiskWriteOps": [
+            {
+              "agg": "sum"
+            }
+          ],
+          "@timestamp": [
+            {
+              "agg": "date_histogram",
+              "delay": "1d",
+              "interval": "5m",
+              "time_zone": "UTC"
+            }
+          ]
+        }
+      }
+    ]
+  }
+}
