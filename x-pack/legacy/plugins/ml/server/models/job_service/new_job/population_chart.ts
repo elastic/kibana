@@ -5,7 +5,7 @@
  */
 
 import { get } from 'lodash';
-import { DslName, AggFieldNamePair } from '../../../../common/types/fields';
+import { AggFieldNamePair } from '../../../../common/types/fields';
 import { ML_MEDIAN_PERCENTS } from '../../../../common/util/job_utils';
 
 export type callWithRequestType = (action: string, params: any) => Promise<any>;
@@ -76,21 +76,13 @@ function processSearchResults(resp: any, fields: string[]): ProcessedResults {
 
   aggregationsByTime.forEach((dataForTime: any) => {
     const time: TimeStamp = +dataForTime.key;
-    const docCount = +dataForTime.doc_count;
+    // const docCount = +dataForTime.doc_count;
 
     fields.forEach((field, i) => {
-      // FIX ALL OF THIS!!!!!!
-      // let value;
-      // if (fields[i] === EVENT_RATE_COUNT_FIELD) {
-      //   value = docCount;
-      // } else if (typeof dataForTime[i].value !== 'undefined') {
-      //   value = dataForTime[i].value;
-      // } else if (typeof dataForTime[i].values !== 'undefined') {
-      //   value = dataForTime[i].values[ML_MEDIAN_PERCENTS];
-      // }
       const populationBuckets = get(dataForTime, ['population', 'buckets'], []);
       const values: Thing[] = [];
       if (field === EVENT_RATE_COUNT_FIELD) {
+        // TODO event rate
         // populationBuckets.forEach(b => {
         //   // check to see if the data is split.
         //   if (b[i] === undefined) {
@@ -217,12 +209,11 @@ function getPopulationSearchJsonFromConfig(
 
   json.body.query = query;
 
-  // const aggs: Record<number, Record<string, { field: string; percents?: number[] }>> = {};
   const aggs: any = {};
 
   aggFieldNamePairs.forEach(({ agg, field, by }, i) => {
     if (field === EVENT_RATE_COUNT_FIELD) {
-      const h = 7;
+      // TODO event rate
     } else {
       if (by !== undefined && by.field !== null && by.value !== null) {
         // if the field is split, add a filter to the aggregation to just select the
