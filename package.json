@@ -79,7 +79,8 @@
   "resolutions": {
     "**/@types/node": "10.12.27",
     "**/@types/hapi": "^17.0.18",
-    "**/typescript": "^3.3.3333"
+    "**/typescript": "^3.3.3333",
+    "**/cypress/lodash": "4.17.13"
   },
   "workspaces": {
     "packages": [
