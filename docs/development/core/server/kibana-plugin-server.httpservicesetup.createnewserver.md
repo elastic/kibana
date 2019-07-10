@@ -7,5 +7,5 @@
 <b>Signature:</b>
 
 ```typescript
-createNewServer: (cfg: Partial<HttpConfig>) => Promise<HttpServerSetup>;
+createNewServer: (port: number, ssl: SslConfigType) => Promise<HttpServerSetup>;
 ```

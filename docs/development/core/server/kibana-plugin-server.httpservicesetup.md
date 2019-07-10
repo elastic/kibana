@@ -15,5 +15,5 @@ export interface HttpServiceSetup extends HttpServerSetup
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [createNewServer](./kibana-plugin-server.httpservicesetup.createnewserver.md) | <code>(cfg: Partial&lt;HttpConfig&gt;) =&gt; Promise&lt;HttpServerSetup&gt;</code> |  |
+|  [createNewServer](./kibana-plugin-server.httpservicesetup.createnewserver.md) | <code>(port: number, ssl: SslConfigType) =&gt; Promise&lt;HttpServerSetup&gt;</code> |  |
 

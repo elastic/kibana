@@ -5,7 +5,6 @@
 ```ts
 
 import Boom from 'boom';
-import { ByteSizeValue } from '@kbn/config-schema';
 import { CallCluster } from 'src/legacy/core_plugins/elasticsearch';
 import { ConfigOptions } from 'elasticsearch';
 import { Duration } from 'moment';
@@ -165,14 +164,43 @@ export type GetAuthHeaders = (request: KibanaRequest | Request) => AuthHeaders |
 // @public (undocumented)
 export type Headers = Record<string, string | string[] | undefined>;
 
-// Warning: (ae-forgotten-export) The symbol "HttpServerSetup" needs to be exported by the entry point index.d.ts
+// Warning: (ae-missing-release-tag) "HttpServerSetup" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 // 
 // @public (undocumented)
+export interface HttpServerSetup {
+    // (undocumented)
+    auth: {
+        get: AuthStateStorage['get'];
+        isAuthenticated: AuthStateStorage['isAuthenticated'];
+        getAuthHeaders: AuthHeadersStorage['get'];
+    };
+    // (undocumented)
+    basePath: {
+        get: (request: KibanaRequest | Request) => string;
+        set: (request: KibanaRequest | Request, basePath: string) => void;
+        prepend: (url: string) => string;
+        remove: (url: string) => string;
+    };
+    // (undocumented)
+    isTlsEnabled: boolean;
+    // Warning: (ae-forgotten-export) The symbol "SessionStorageCookieOptions" needs to be exported by the entry point index.d.ts
+    registerAuth: <T>(handler: AuthenticationHandler, cookieOptions: SessionStorageCookieOptions<T>) => Promise<{
+        sessionStorageFactory: SessionStorageFactory<T>;
+    }>;
+    registerOnPostAuth: (handler: OnPostAuthHandler) => void;
+    registerOnPreAuth: (handler: OnPreAuthHandler) => void;
+    // (undocumented)
+    registerRouter: (router: Router) => void;
+    // (undocumented)
+    server: Server;
+}
+
+// @public (undocumented)
 export interface HttpServiceSetup extends HttpServerSetup {
-    // Warning: (ae-forgotten-export) The symbol "HttpConfig" needs to be exported by the entry point index.d.ts
+    // Warning: (ae-forgotten-export) The symbol "SslConfigType" needs to be exported by the entry point index.d.ts
     // 
     // (undocumented)
-    createNewServer: (cfg: Partial<HttpConfig>) => Promise<HttpServerSetup>;
+    createNewServer: (port: number, ssl: SslConfigType) => Promise<HttpServerSetup>;
 }
 
 // @public (undocumented)
@@ -690,6 +718,8 @@ export interface SessionStorageFactory<T> {
 
 // Warnings were encountered during analysis:
 // 
+// src/core/server/http/http_server.ts:74:5 - (ae-forgotten-export) The symbol "AuthStateStorage" needs to be exported by the entry point index.d.ts
+// src/core/server/http/http_server.ts:76:5 - (ae-forgotten-export) The symbol "AuthHeadersStorage" needs to be exported by the entry point index.d.ts
 // src/core/server/plugins/plugin_context.ts:34:10 - (ae-forgotten-export) The symbol "EnvironmentMode" needs to be exported by the entry point index.d.ts
 // src/core/server/plugins/plugins_service.ts:37:5 - (ae-forgotten-export) The symbol "DiscoveredPluginInternal" needs to be exported by the entry point index.d.ts
 
