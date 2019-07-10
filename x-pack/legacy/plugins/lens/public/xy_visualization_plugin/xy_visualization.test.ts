@@ -55,17 +55,19 @@ describe('xy_visualization', () => {
             "position": "right",
           },
           "seriesType": "bar",
-          "splitSeriesAccessors": Array [],
+          "splitSeriesAccessors": Array [
+            "test-id3",
+          ],
           "title": "Empty XY Chart",
           "x": Object {
-            "accessor": "test-id2",
+            "accessor": "test-id1",
             "position": "bottom",
             "showGridlines": false,
             "title": "X",
           },
           "y": Object {
             "accessors": Array [
-              "test-id1",
+              "test-id2",
             ],
             "position": "left",
             "showGridlines": false,
