@@ -356,8 +356,6 @@ export interface PageInfoPaginated {
   fakeTotalCount: number;
 
   showMorePagesIndicator: boolean;
-
-  showTooManyResults: boolean;
 }
 
 export interface Inspect {
@@ -3498,8 +3496,6 @@ export namespace PageInfoPaginatedResolvers {
     fakeTotalCount?: FakeTotalCountResolver<number, TypeParent, Context>;
 
     showMorePagesIndicator?: ShowMorePagesIndicatorResolver<boolean, TypeParent, Context>;
-
-    showTooManyResults?: ShowTooManyResultsResolver<boolean, TypeParent, Context>;
   }
 
   export type ActivePageResolver<
@@ -3513,11 +3509,6 @@ export namespace PageInfoPaginatedResolvers {
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type ShowMorePagesIndicatorResolver<
-    R = boolean,
-    Parent = PageInfoPaginated,
-    Context = SiemContext
-  > = Resolver<R, Parent, Context>;
-  export type ShowTooManyResultsResolver<
     R = boolean,
     Parent = PageInfoPaginated,
     Context = SiemContext

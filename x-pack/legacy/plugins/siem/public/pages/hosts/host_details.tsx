@@ -187,7 +187,6 @@ const HostDetailsComponent = pure<HostDetailsComponentProps>(
                               'showMorePagesIndicator',
                               pageInfo
                             )}
-                            showTooManyResults={getOr(false, 'showTooManyResults', pageInfo)}
                             setQuery={setQuery}
                             totalCount={totalCount}
                             type={type}

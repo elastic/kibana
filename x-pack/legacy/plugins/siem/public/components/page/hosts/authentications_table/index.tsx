@@ -35,7 +35,6 @@ interface OwnProps {
   loadPage: (newActivePage: number) => void;
   id: string;
   showMorePagesIndicator: boolean;
-  showTooManyResults: boolean;
   totalCount: number;
   type: hostsModel.HostsType;
 }
@@ -94,7 +93,6 @@ const AuthenticationTableComponent = pure<AuthenticationTableProps>(
     loading,
     loadPage,
     showMorePagesIndicator,
-    showTooManyResults,
     totalCount,
     type,
     updateTableActivePage,
@@ -113,7 +111,7 @@ const AuthenticationTableComponent = pure<AuthenticationTableProps>(
       loadPage={newActivePage => loadPage(newActivePage)}
       pageOfItems={data}
       showMorePagesIndicator={showMorePagesIndicator}
-      showTooManyResults={showTooManyResults}
+      showTooManyResults={fakeTotalCount >= 10000}
       totalCount={fakeTotalCount}
       updateLimitPagination={newLimit =>
         updateTableLimit({
