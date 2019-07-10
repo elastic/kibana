@@ -34,6 +34,8 @@ interface LegacyMonitorStatesRecentCheckGroupsQueryResult {
   afterKey: any | null;
 }
 
+const legacyStatesQuerySize = 100;
+
 export class ElasticsearchMonitorStatesAdapter implements UMMonitorStatesAdapter {
   constructor(private readonly database: DatabaseAdapter) {
     this.database = database;
@@ -80,7 +82,7 @@ export class ElasticsearchMonitorStatesAdapter implements UMMonitorStatesAdapter
       aggs: {
         monitors: {
           composite: {
-            size: 100,
+            size: legacyStatesQuerySize,
             sources: [
               {
                 monitor_id: {
@@ -176,7 +178,7 @@ export class ElasticsearchMonitorStatesAdapter implements UMMonitorStatesAdapter
         aggs: {
           monitors: {
             composite: {
-              size: 10000,
+              size: legacyStatesQuerySize,
               sources: [
                 {
                   monitor_id: {
