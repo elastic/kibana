@@ -44,7 +44,7 @@ export function sortColumns(groupByArr: string[]) {
 function getDataFromTransform(
   transformConfig: DataFrameTransformWithId
 ): { previewRequest: DataFramePreviewRequest; groupByArr: string[] | [] } {
-  const index = transformConfig.source.index[0];
+  const index = transformConfig.source.index;
   const pivot = transformConfig.pivot;
   const groupByArr = [];
 
