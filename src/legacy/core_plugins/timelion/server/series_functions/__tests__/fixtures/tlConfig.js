@@ -29,6 +29,8 @@ export default function () {
       switch (key) {
         case 'elasticsearch.shardTimeout':
           return 30000;
+        case 'timelion.graphiteUrls':
+          return ['https://www.hostedgraphite.com/UID/ACCESS_KEY/graphite'];
         default:
           throw new Error(`unexpected config ${key}`);
       }
@@ -56,8 +58,8 @@ export default function () {
   };
 
   const tlConfig = require('../../../handlers/lib/tl_config.js')({
-    server: server,
-    request: {}
+    server,
+    request: {},
   });
 
   tlConfig.time = {
@@ -67,7 +69,7 @@ export default function () {
     timezone: 'Etc/UTC'
   };
 
-  tlConfig.settings = timelionDefaults;
+  tlConfig.settings = timelionDefaults();
 
   tlConfig.setTargetSeries();
 
