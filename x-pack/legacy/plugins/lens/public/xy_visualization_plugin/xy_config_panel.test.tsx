@@ -7,6 +7,7 @@
 import React from 'react';
 import { ReactWrapper } from 'enzyme';
 import { mountWithIntl as mount } from 'test_utils/enzyme_helpers';
+import { EuiButtonGroupProps } from '@elastic/eui';
 import { XYConfigPanel } from './xy_config_panel';
 import { DatasourcePublicAPI, DatasourceDimensionPanelProps, Operation } from '../types';
 import { State, SeriesType } from './types';
@@ -33,7 +34,6 @@ describe('XYConfigPanel', () => {
       legend: { isVisible: true, position: Position.Right },
       seriesType: 'bar',
       splitSeriesAccessors: [],
-      stackAccessors: [],
       x: {
         accessor: 'foo',
         position: Position.Bottom,
@@ -55,6 +55,56 @@ describe('XYConfigPanel', () => {
       .first()
       .props();
   }
+
+  test('disables stacked chart types without a split series', () => {
+    const component = mount(
+      <XYConfigPanel
+        dragDropContext={dragDropContext}
+        datasource={mockDatasource()}
+        setState={() => {}}
+        state={testState()}
+      />
+    );
+
+    const options = component
+      .find('[data-test-subj="lnsXY_seriesType"]')
+      .first()
+      .prop('options') as EuiButtonGroupProps['options'];
+
+    expect(options.map(({ id }) => id)).toEqual([
+      'line',
+      'area',
+      'bar',
+      'horizontal_bar',
+      'area_stacked',
+      'bar_stacked',
+      'horizontal_bar_stacked',
+    ]);
+
+    expect(options.filter(({ isDisabled }) => isDisabled).map(({ id }) => id)).toEqual([
+      'area_stacked',
+      'bar_stacked',
+      'horizontal_bar_stacked',
+    ]);
+  });
+
+  test('enables all stacked chart types when there is a split series', () => {
+    const component = mount(
+      <XYConfigPanel
+        dragDropContext={dragDropContext}
+        datasource={mockDatasource()}
+        setState={() => {}}
+        state={{ ...testState(), splitSeriesAccessors: ['c'] }}
+      />
+    );
+
+    const options = component
+      .find('[data-test-subj="lnsXY_seriesType"]')
+      .first()
+      .prop('options') as EuiButtonGroupProps['options'];
+
+    expect(options.every(({ isDisabled }) => !isDisabled)).toEqual(true);
+  });
 
   test('toggles axis position when going from horizontal bar to any other type', () => {
     const changeSeriesType = (fromSeriesType: SeriesType, toSeriesType: SeriesType) => {
