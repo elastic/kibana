@@ -44,35 +44,6 @@ export async function getArchiveInfo(
   return paths;
 }
 
-async function extract(
-  key: string,
-  filter = (entry: ArchiveEntry): boolean => true,
-  onEntry: (entry: ArchiveEntry) => void
-) {
-  const libExtract = key.endsWith('.zip') ? unzipBuffer : untarBuffer;
-  const archiveBuffer = await getOrFetchArchiveBuffer(key);
-
-  return libExtract(archiveBuffer, filter, onEntry);
-}
-
-async function getOrFetchArchiveBuffer(key: string): Promise<Buffer> {
-  let buffer = cacheGet(key);
-  if (!buffer) {
-    buffer = await fetchArchiveBuffer(key);
-    cacheSet(key, buffer);
-  }
-
-  if (buffer) {
-    return buffer;
-  } else {
-    throw new Error(`no archive buffer for ${key}`);
-  }
-}
-
-async function fetchArchiveBuffer(key: string): Promise<Buffer> {
-  return getResponseStream(`${REGISTRY}/package/${key}`).then(streamToBuffer);
-}
-
 export async function getObjects(
   pkgkey: string,
   filter = (entry: ArchiveEntry): boolean => true
@@ -115,6 +86,35 @@ export function pathParts(path: string) {
   const [pkgkey, service, type, file] = path.split('/');
 
   return { pkgkey, service, type, file };
+}
+
+async function extract(
+  key: string,
+  filter = (entry: ArchiveEntry): boolean => true,
+  onEntry: (entry: ArchiveEntry) => void
+) {
+  const libExtract = key.endsWith('.zip') ? unzipBuffer : untarBuffer;
+  const archiveBuffer = await getOrFetchArchiveBuffer(key);
+
+  return libExtract(archiveBuffer, filter, onEntry);
+}
+
+async function getOrFetchArchiveBuffer(key: string): Promise<Buffer> {
+  let buffer = cacheGet(key);
+  if (!buffer) {
+    buffer = await fetchArchiveBuffer(key);
+    cacheSet(key, buffer);
+  }
+
+  if (buffer) {
+    return buffer;
+  } else {
+    throw new Error(`no archive buffer for ${key}`);
+  }
+}
+
+async function fetchArchiveBuffer(key: string): Promise<Buffer> {
+  return getResponseStream(`${REGISTRY}/package/${key}`).then(streamToBuffer);
 }
 
 // the assets from the registry are malformed
