@@ -174,7 +174,17 @@ export class ElasticsearchMonitorStatesAdapter implements UMMonitorStatesAdapter
       body: {
         query: {
           bool: {
-            filter: [{ terms: { 'monitor.check_group': checkGroups } }],
+            filter: [
+              { terms: { 'monitor.check_group': checkGroups } },
+              {
+                range: {
+                  '@timestamp': {
+                    gte: dateRangeStart,
+                    lte: dateRangeEnd,
+                  },
+                },
+              },
+            ],
           },
         },
         sort: [{ '@timestamp': 'desc' }],
