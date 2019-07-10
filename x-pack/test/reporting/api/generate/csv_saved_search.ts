@@ -98,7 +98,7 @@ export default function({ getService }: { getService: any }) {
 
       it('With scripted fields and field formatters', async () => {
         // load test data that contains a saved search and documents
-        await esArchiver.load('reporting/hugedata');
+        await esArchiver.load('reporting/scripted_small');
 
         const {
           status: resStatus,
@@ -120,7 +120,7 @@ export default function({ getService }: { getService: any }) {
         expect(resType).to.eql('text/csv');
         expect(resText).to.eql(CSV_RESULT_SCRIPTED);
 
-        await esArchiver.unload('reporting/hugedata');
+        await esArchiver.unload('reporting/scripted_small');
       });
 
       it('Formatted date_nanos data', async () => {
