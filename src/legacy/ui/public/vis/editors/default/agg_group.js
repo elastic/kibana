@@ -17,68 +17,100 @@
  * under the License.
  */
 
-import _ from 'lodash';
-import './agg';
-import './agg_add';
-
+import 'ngreact';
+import { wrapInI18nContext } from 'ui/i18n';
 import { uiModules } from '../../../modules';
-import aggGroupTemplate from './agg_group.html';
-import { move } from '../../../utils/collection';
-import { aggGroupNameMaps } from './agg_group_names';
+import { DefaultEditorAggGroup } from './components/default_editor_agg_group';
 import { AggConfig } from '../../agg_config';
-
-import '../../draggable/draggable_container';
-import '../../draggable/draggable_item';
-import '../../draggable/draggable_handle';
 
 uiModules
   .get('app/visualize')
+  .directive('visEditorAggGroupWrapper', reactDirective =>
+    reactDirective(wrapInI18nContext(DefaultEditorAggGroup), [
+      ['responseValueAggs', { watchDepth: 'reference' }], // we watch reference to identify each aggs change in useEffects
+      ['state', { watchDepth: 'reference' }],
+      ['vis', { watchDepth: 'reference' }],
+      ['addSchema', { watchDepth: 'reference' }],
+      ['removeAgg', { watchDepth: 'reference' }],
+      ['onToggleEnableAgg', { watchDepth: 'reference' }],
+      ['onAggErrorChanged', { watchDepth: 'reference' }],
+      ['onAggTypeChange', { watchDepth: 'reference' }],
+      ['onAggParamsChange', { watchDepth: 'reference' }],
+      ['setTouched', { watchDepth: 'reference' }],
+      ['setValidity', { watchDepth: 'reference' }],
+      'groupName',
+      'formIsTouched',
+    ])
+  )
   .directive('visEditorAggGroup', function () {
-
     return {
       restrict: 'E',
-      template: aggGroupTemplate,
+      // We can't use scope binding here yet, since quiet a lot of child directives arbitrary access
+      // parent scope values right now. So we cannot easy change this, until we remove the whole directive.
       scope: true,
-      link: function ($scope, $el, attr) {
+      require: '?^ngModel',
+      template: function ($el, attrs) {
+        return `<vis-editor-agg-group-wrapper	
+            ng-if="setValidity"	
+            group-name="groupName"
+            state="state"
+            vis="vis"	
+            add-schema="addSchema"	
+            set-touched="setTouched"	
+            set-validity="setValidity"	
+            response-value-aggs="responseValueAggs"
+            on-agg-error-changed="onAggErrorChanged"
+            on-agg-type-change="onAggTypeChange"
+            on-agg-params-change="onAggParamsChange"
+            remove-agg="removeAgg"
+            on-toggle-enable-agg="onToggleEnableAgg"
+          ></vis-editor-agg-group-wrapper>`;
+      },
+      link: function ($scope, $el, attr, ngModelCtrl) {
         $scope.groupName = attr.groupName;
-        $scope.groupNameLabel = aggGroupNameMaps()[$scope.groupName];
-        $scope.$bind('group', 'state.aggs.bySchemaGroup["' + $scope.groupName + '"]');
-        $scope.$bind('schemas', 'vis.type.schemas["' + $scope.groupName + '"]');
+        // The model can become touched either onBlur event or when the form is submitted.
+        // We watch $touched to identify when the form is submitted.
+        $scope.$watch(
+          () => {
+            return ngModelCtrl.$touched;
+          },
+          value => {
+            $scope.formIsTouched = value;
+          },
+          true
+        );
 
-        $scope.$watchMulti([
-          'schemas',
-          '[]group'
-        ], function () {
-          const stats = $scope.stats = {
-            min: 0,
-            max: 0,
-            count: $scope.group ? $scope.group.length : 0
-          };
+        $scope.onAggTypeChange = (agg, value) => {
+          if (agg.type !== value) {
+            agg.type = value;
+          }
+        };
 
-          if (!$scope.schemas) return;
+        $scope.onAggParamsChange = (params, paramName, value) => {
+          if (params[paramName] !== value) {
+            params[paramName] = value;
+          }
+        };
 
-          $scope.schemas.forEach(function (schema) {
-            stats.min += schema.min;
-            stats.max += schema.max;
-            stats.deprecate = schema.deprecate;
-          });
-        });
+        $scope.setValidity = isValid => {
+          ngModelCtrl.$setValidity('aggGroup', isValid);
+        };
 
-        function reorderFinished() {
-        //the aggs have been reordered in [group] and we need
-        //to apply that ordering to [vis.aggs]
-          const indexOffset = $scope.state.aggs.indexOf($scope.group[0]);
-          _.forEach($scope.group, (agg, index) => {
-            move($scope.state.aggs, agg, indexOffset + index);
-          });
-        }
+        $scope.setTouched = isTouched => {
+          if (isTouched) {
+            ngModelCtrl.$setTouched();
+          } else {
+            ngModelCtrl.$setUntouched();
+          }
+        };
 
-        $scope.$on('agg-reorder', reorderFinished);
-        $scope.$on('agg-drag-start', () => $scope.dragging = true);
-        $scope.$on('agg-drag-end', () => {
-          $scope.dragging = false;
-          reorderFinished();
-        });
+        $scope.onAggErrorChanged = (agg, error) => {
+          if (error) {
+            agg.error = error;
+          } else {
+            delete agg.error;
+          }
+        };
 
         $scope.addSchema = function (schema) {
           const aggConfig = new AggConfig($scope.state.aggs, {
@@ -89,7 +121,21 @@ uiModules
 
           $scope.state.aggs.push(aggConfig);
         };
-      }
-    };
 
+        $scope.removeAgg = function (agg) {
+          const aggs = $scope.state.aggs;
+          const index = aggs.indexOf(agg);
+
+          if (index === -1) {
+            return;
+          }
+
+          aggs.splice(index, 1);
+        };
+
+        $scope.onToggleEnableAgg = (agg, isEnable) => {
+          agg.enabled = isEnable;
+        };
+      },
+    };
   });

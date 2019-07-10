@@ -83,7 +83,7 @@ function DefaultEditorAggAdd({
     return count >= schema.max;
   };
 
-  return stats.max > stats.count ? (
+  return (
     <EuiFlexGroup justifyContent="center">
       <EuiFlexItem grow={false}>
         <EuiPopover
@@ -128,7 +128,7 @@ function DefaultEditorAggAdd({
         </EuiPopover>
       </EuiFlexItem>
     </EuiFlexGroup>
-  ) : null;
+  );
 }
 
 export { DefaultEditorAggAdd };

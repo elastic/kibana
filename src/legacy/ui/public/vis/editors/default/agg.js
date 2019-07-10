@@ -17,148 +17,122 @@
  * under the License.
  */
 
-import './agg_params';
-import './agg_add';
-import './controls/agg_controls';
-import { Direction } from './keyboard_move';
-import _ from 'lodash';
-import './fancy_forms';
+import 'ngreact';
+import { wrapInI18nContext } from 'ui/i18n';
 import { uiModules } from '../../../modules';
-import aggTemplate from './agg.html';
-import { move } from '../../../utils/collection';
+import { DefaultEditorAgg } from './components/default_editor_agg';
 
 uiModules
   .get('app/visualize')
-  .directive('visEditorAgg', () => {
+  .directive('visEditorAggReactWrapper', reactDirective =>
+    reactDirective(wrapInI18nContext(DefaultEditorAgg), [
+      ['agg', { watchDepth: 'reference' }],
+      ['group', { watchDepth: 'reference' }],
+      ['indexPattern', { watchDepth: 'reference' }],
+      ['responseValueAggs', { watchDepth: 'reference' }], // we watch reference to identify each aggs change in useEffects
+      ['schemas', { watchDepth: 'reference' }],
+      ['state', { watchDepth: 'reference' }],
+      ['stats', { watchDepth: 'reference' }],
+      ['vis', { watchDepth: 'reference' }],
+      ['addSchema', { watchDepth: 'reference' }],
+      ['onAggErrorChanged', { watchDepth: 'reference' }],
+      ['onAggTypeChange', { watchDepth: 'reference' }],
+      ['onAggParamsChange', { watchDepth: 'reference' }],
+      ['removeAgg', { watchDepth: 'reference' }],
+      ['onToggleEnableAgg', { watchDepth: 'reference' }],
+      ['setTouched', { watchDepth: 'reference' }],
+      ['setValidity', { watchDepth: 'reference' }],
+      'aggIndex',
+      'groupName',
+      'formIsTouched',
+      'isDraggable',
+      'isValid'
+    ])
+  )
+  .directive('visEditorAgg', function (config) {
     return {
-      restrict: 'A',
-      template: aggTemplate,
-      require: ['^form', '^ngModel'],
-      link: function ($scope, $el, attrs, [kbnForm, ngModelCtrl]) {
-        $scope.editorOpen = !!$scope.agg.brandNew;
-        $scope.aggIsTooLow = false;
+      restrict: 'E',
+      // We can't use scope binding here yet, since quiet a lot of child directives arbitrary access
+      // parent scope values right now. So we cannot easy change this, until we remove the whole directive.
+      scope: true,
+      require: '?^ngModel',
+      template: function ($el, attrs) {
+        return `<vis-editor-agg-react-wrapper	
+            ng-if="setValidity"	
+            agg="agg"	
+            agg-index="$index"
+            group="group"
+            groupName="groupName"
+            indexed-fields="indexedFields"
+            is-valid="aggForm.$valid"
+            show-validation="showValidation"	
+            schemas="schemas"
+            state="state"
+            stats="stats"
+            vis="vis"	
+            add-schema="addSchema"	
+            set-touched="setTouched"	
+            set-validity="setValidity"	
+            response-value-aggs="responseValueAggs"
+            on-agg-error-changed="onAggErrorChanged"
+            on-agg-type-change="onAggTypeChange"
+            on-agg-params-change="onAggParamsChange"
+            remove-agg="removeAgg"
+            on-toggle-enable-agg="onToggleEnableAgg"
+          ></vis-editor-agg-react-wrapper>`;
 
-        $scope.$watch('editorOpen', function (open) {
-        // make sure that all of the form inputs are "touched"
-        // so that their errors propagate
-          if (!open) kbnForm.$setTouched();
-        });
+        return $el.html();
+      },
+      link: {
+        pre: function ($scope, $el, attr) {
+          // $scope.$bind('aggParam', attr.aggParam);
+          // $scope.$bind('editorComponent', attr.editorComponent);
+        },
+        post: function ($scope, $el, attr, ngModelCtrl) {
+          // The model can become touched either onBlur event or when the form is submitted.
+          // We watch $touched to identify when the form is submitted.
+          $scope.$watch(
+            () => {
+              return ngModelCtrl.$touched;
+            },
+            value => {
+              $scope.formIsTouched = value;
+            },
+            true
+          );
 
-        $scope.$watchMulti([
-          '$index',
-          'group.length'
-        ], function () {
-          $scope.aggIsTooLow = calcAggIsTooLow();
-        });
+          $scope.onAggTypeChange = (agg, value) => {
+            if (agg.type !== value) {
+              agg.type = value;
+            }
+          };
 
-        /**
-       * Describe the aggregation, for display in the collapsed agg header
-       * @return {[type]} [description]
-       */
-        $scope.describe = function () {
-          if (!$scope.agg.type || !$scope.agg.type.makeLabel) return '';
-          const label = $scope.agg.type.makeLabel($scope.agg);
-          return label ? label : '';
-        };
+          $scope.onAggParamsChange = (params, paramName, value) => {
+            if (params[paramName] !== value) {
+              params[paramName] = value;
+            }
+          };
 
-        $scope.$on('drag-start', () => {
-          $scope.editorWasOpen = $scope.editorOpen;
-          $scope.editorOpen = false;
-          $scope.$emit('agg-drag-start', $scope.agg);
-        });
+          $scope.setValidity = isValid => {
+            ngModelCtrl.$setValidity(`aggParams${$scope.agg.id}`, isValid);
+          };
 
-        $scope.$on('drag-end', () => {
-          $scope.editorOpen = $scope.editorWasOpen;
-          $scope.$emit('agg-drag-end', $scope.agg);
-        });
+          $scope.setTouched = isTouched => {
+            if (isTouched) {
+              ngModelCtrl.$setTouched();
+            } else {
+              ngModelCtrl.$setUntouched();
+            }
+          };
 
-        /**
-       * Move aggregations down/up in the priority list by pressing arrow keys.
-       */
-        $scope.onPriorityReorder = function (direction) {
-          const positionOffset = direction === Direction.down ? 1 : -1;
-
-          const currentPosition = $scope.group.indexOf($scope.agg);
-          const newPosition = Math.max(0, Math.min(currentPosition + positionOffset, $scope.group.length - 1));
-          move($scope.group, currentPosition, newPosition);
-          $scope.$emit('agg-reorder');
-        };
-
-        $scope.remove = function (agg) {
-          const aggs = $scope.state.aggs;
-          const index = aggs.indexOf(agg);
-
-          if (index === -1) {
-            return;
-          }
-
-          aggs.splice(index, 1);
-        };
-
-        $scope.canRemove = function (aggregation) {
-          const metricCount = _.reduce($scope.group, function (count, agg) {
-            return (agg.schema.name === aggregation.schema.name) ? ++count : count;
-          }, 0);
-
-          // make sure the the number of these aggs is above the min
-          return metricCount > aggregation.schema.min;
-        };
-
-        function calcAggIsTooLow() {
-          if (!$scope.agg.schema.mustBeFirst) {
-            return false;
-          }
-
-          const firstDifferentSchema = _.findIndex($scope.group, function (agg) {
-            return agg.schema !== $scope.agg.schema;
-          });
-
-          if (firstDifferentSchema === -1) {
-            return false;
-          }
-
-          return $scope.$index > firstDifferentSchema;
-        }
-
-        // The model can become touched either onBlur event or when the form is submitted.
-        // We watch $touched to identify when the form is submitted.
-        $scope.$watch(() => {
-          return ngModelCtrl.$touched;
-        }, (value) => {
-          $scope.formIsTouched = value;
-        }, true);
-
-        $scope.onAggTypeChange = (agg, value) => {
-          if (agg.type !== value) {
-            agg.type = value;
-          }
-        };
-
-        $scope.onAggParamsChange = (params, paramName, value) => {
-          if (params[paramName] !== value) {
-            params[paramName] = value;
-          }
-        };
-
-        $scope.setValidity = (isValid) => {
-          ngModelCtrl.$setValidity(`aggParams${$scope.agg.id}`, isValid);
-        };
-
-        $scope.setTouched = (isTouched) => {
-          if (isTouched) {
-            ngModelCtrl.$setTouched();
-          } else {
-            ngModelCtrl.$setUntouched();
-          }
-        };
-
-        $scope.onAggErrorChanged = (agg, error) => {
-          if (error) {
-            agg.error = error;
-          } else {
-            delete agg.error;
-          }
-        };
-      }
+          $scope.onAggErrorChanged = (agg, error) => {
+            if (error) {
+              agg.error = error;
+            } else {
+              delete agg.error;
+            }
+          };
+        },
+      },
     };
   });

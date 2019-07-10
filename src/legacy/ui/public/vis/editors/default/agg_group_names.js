@@ -20,6 +20,6 @@
 import { i18n } from '@kbn/i18n';
 
 export const aggGroupNameMaps = () => ({
-  metrics: i18n.translate('common.ui.vis.editors.aggGroups.metricsText', { defaultMessage: 'metrics' }),
-  buckets: i18n.translate('common.ui.vis.editors.aggGroups.bucketsText', { defaultMessage: 'buckets' })
+  metrics: i18n.translate('common.ui.vis.editors.aggGroups.metricsText', { defaultMessage: 'Metrics' }),
+  buckets: i18n.translate('common.ui.vis.editors.aggGroups.bucketsText', { defaultMessage: 'Buckets' })
 });
