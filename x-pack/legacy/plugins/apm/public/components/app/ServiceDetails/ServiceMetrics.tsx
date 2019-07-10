@@ -8,8 +8,8 @@ import { EuiFlexGrid, EuiFlexItem, EuiPanel, EuiSpacer } from '@elastic/eui';
 import React from 'react';
 import { useServiceMetricCharts } from '../../../hooks/useServiceMetricCharts';
 import { IUrlParams } from '../../../context/UrlParamsContext/types';
-import { SyncChartGroup } from '../../shared/charts/SyncChartGroup';
 import { MetricsChart } from './MetricsChart';
+import { ChartsSyncContextProvider } from '../../../context/ChartsSyncContext';
 
 interface ServiceMetricsProps {
   urlParams: IUrlParams;
@@ -21,25 +21,17 @@ export function ServiceMetrics({ urlParams, agentName }: ServiceMetricsProps) {
   const { start, end } = urlParams;
   return (
     <React.Fragment>
-      <SyncChartGroup
-        render={hoverXHandlers => (
-          <EuiFlexGrid columns={2} gutterSize="s">
-            {data.charts.map(chart => (
-              <EuiFlexItem key={chart.key}>
-                <EuiPanel>
-                  <MetricsChart
-                    start={start}
-                    end={end}
-                    chart={chart}
-                    hoverXHandlers={hoverXHandlers}
-                  />
-                </EuiPanel>
-              </EuiFlexItem>
-            ))}
-          </EuiFlexGrid>
-        )}
-      />
-
+      <EuiFlexGrid columns={2} gutterSize="s">
+        {data.charts.map(chart => (
+          <EuiFlexItem key={chart.key}>
+            <EuiPanel>
+              <ChartsSyncContextProvider>
+                <MetricsChart start={start} end={end} chart={chart} />
+              </ChartsSyncContextProvider>
+            </EuiPanel>
+          </EuiFlexItem>
+        ))}
+      </EuiFlexGrid>
       <EuiSpacer size="xxl" />
     </React.Fragment>
   );
