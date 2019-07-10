@@ -1,0 +1,6 @@
+{
+  "id": "shared-elasticsearch-ui",
+  "version": "8",
+  "server": false,
+  "ui": true
+}
