@@ -30,7 +30,7 @@ import { httpServiceMock } from '../http/http_service.mock';
 import { loggingServiceMock } from '../logging/logging_service.mock';
 import { PluginDiscoveryError } from './discovery';
 import { PluginWrapper } from './plugin';
-import { PluginsService } from './plugins_service';
+import { PluginsService, PluginsServiceSetupDeps } from './plugins_service';
 import { PluginsSystem } from './plugins_system';
 import { config } from './plugins_config';
 
@@ -40,8 +40,8 @@ let pluginsService: PluginsService;
 let configService: ConfigService;
 let env: Env;
 let mockPluginSystem: jest.Mocked<PluginsSystem>;
-const setupDeps = {
-  elasticsearch: elasticsearchServiceMock.createSetupContract(),
+const setupDeps: PluginsServiceSetupDeps = {
+  elasticsearch: elasticsearchServiceMock.createInternalSetupContract(),
   http: httpServiceMock.createSetupContract(),
 };
 const logger = loggingServiceMock.create();

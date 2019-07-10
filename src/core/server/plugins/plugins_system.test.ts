@@ -33,6 +33,7 @@ import { httpServiceMock } from '../http/http_service.mock';
 import { loggingServiceMock } from '../logging/logging_service.mock';
 import { PluginWrapper, PluginName } from './plugin';
 import { PluginsSystem } from './plugins_system';
+import { PluginsServiceSetupDeps } from './plugins_service';
 
 const logger = loggingServiceMock.create();
 function createPlugin(
@@ -64,8 +65,8 @@ const configService = configServiceMock.create();
 configService.atPath.mockReturnValue(new BehaviorSubject({ initialize: true }));
 let env: Env;
 let coreContext: CoreContext;
-const setupDeps = {
-  elasticsearch: elasticsearchServiceMock.createSetupContract(),
+const setupDeps: PluginsServiceSetupDeps = {
+  elasticsearch: elasticsearchServiceMock.createInternalSetupContract(),
   http: httpServiceMock.createSetupContract(),
 };
 beforeEach(() => {

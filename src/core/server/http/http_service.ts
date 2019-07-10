@@ -33,6 +33,7 @@ import { HttpsRedirectServer } from './https_redirect_server';
 export interface HttpServiceSetup extends HttpServerSetup {
   createNewServer: (cfg: Partial<HttpConfig>) => Promise<HttpServerSetup>;
 }
+
 /** @public */
 export interface HttpServiceStart {
   /** Indicates if http server is listening on a given port */

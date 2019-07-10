@@ -5,7 +5,7 @@
  */
 
 import { flatten } from 'lodash';
-import { InternalCoreSetup } from 'src/core/server';
+import { LegacyCoreSetup } from 'src/core/server';
 import { initErrorsApi } from '../errors';
 import { initServicesApi } from '../services';
 import { initTracesApi } from '../traces';
@@ -13,13 +13,13 @@ import { initTracesApi } from '../traces';
 describe('route handlers should fail with a Boom error', () => {
   let consoleErrorSpy: any;
 
-  function testRouteFailures(init: (core: InternalCoreSetup) => void) {
+  function testRouteFailures(init: (core: LegacyCoreSetup) => void) {
     const mockServer = { route: jest.fn() };
     const mockCore = ({
       http: {
         server: mockServer
       }
-    } as unknown) as InternalCoreSetup;
+    } as unknown) as LegacyCoreSetup;
     init(mockCore);
     expect(mockServer.route).toHaveBeenCalled();
 

@@ -21,13 +21,12 @@ import { Observable } from 'rxjs';
 import { filter, first, map, mergeMap, tap, toArray } from 'rxjs/operators';
 import { CoreService } from '../../types';
 import { CoreContext } from '../core_context';
-import { ElasticsearchServiceSetup } from '../elasticsearch/elasticsearch_service';
-import { HttpServiceSetup } from '../http/http_service';
 import { Logger } from '../logging';
 import { discover, PluginDiscoveryError, PluginDiscoveryErrorType } from './discovery';
 import { DiscoveredPlugin, DiscoveredPluginInternal, PluginWrapper, PluginName } from './plugin';
 import { PluginsConfig, PluginsConfigType } from './plugins_config';
 import { PluginsSystem } from './plugins_system';
+import { InternalCoreSetup, InternalCoreStart } from '../server';
 
 /** @public */
 export interface PluginsServiceSetup {
@@ -44,13 +43,16 @@ export interface PluginsServiceStart {
 }
 
 /** @internal */
-export interface PluginsServiceSetupDeps {
-  elasticsearch: ElasticsearchServiceSetup;
-  http: HttpServiceSetup;
-}
+export type PluginsServiceSetupDeps = Pick<
+  InternalCoreSetup,
+  Exclude<keyof InternalCoreSetup, 'plugins'>
+>;
 
 /** @internal */
-export interface PluginsServiceStartDeps {} // eslint-disable-line @typescript-eslint/no-empty-interface
+export type PluginsServiceStartDeps = Pick<
+  InternalCoreStart,
+  Exclude<keyof InternalCoreStart, 'plugins'>
+>;
 
 /** @internal */
 export class PluginsService implements CoreService<PluginsServiceSetup, PluginsServiceStart> {

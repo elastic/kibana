@@ -18,7 +18,12 @@
  */
 
 import { capabilitiesServiceMock } from './capabilities/capabilities_service.mock';
-import { ApplicationService, ApplicationSetup, ApplicationStart } from './application_service';
+import {
+  ApplicationService,
+  ApplicationSetup,
+  ApplicationStart,
+  InternalApplicationStart,
+} from './application_service';
 
 type ApplicationServiceContract = PublicMethodsOf<ApplicationService>;
 
@@ -28,18 +33,27 @@ const createSetupContractMock = (): jest.Mocked<ApplicationSetup> => ({
 });
 
 const createStartContractMock = (): jest.Mocked<ApplicationStart> => ({
-  mount: jest.fn(),
-  ...capabilitiesServiceMock.createStartContract(),
+  capabilities: capabilitiesServiceMock.createStartContract().capabilities,
 });
 
+const createInternalStartContractMock = (): DeeplyMockedKeys<InternalApplicationStart> => {
+  const internalStartContract = {
+    availableApps: [],
+    forPlugin: jest.fn(),
+  };
+  internalStartContract.forPlugin.mockImplementation(createStartContractMock);
+  return internalStartContract;
+};
+
 const createMock = (): jest.Mocked<ApplicationServiceContract> => ({
-  setup: jest.fn().mockReturnValue(createSetupContractMock()),
-  start: jest.fn().mockReturnValue(createStartContractMock()),
+  setup: jest.fn().mockResolvedValue(createSetupContractMock()),
+  start: jest.fn().mockReturnValue(createInternalStartContractMock()),
   stop: jest.fn(),
 });
 
 export const applicationServiceMock = {
   create: createMock,
   createSetupContract: createSetupContractMock,
+  createInternalStartContract: createInternalStartContractMock,
   createStartContract: createStartContractMock,
 };

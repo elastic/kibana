@@ -29,30 +29,22 @@ import KbnServer from '../../../legacy/server/kbn_server';
 import { Config, Env, ObjectToConfigAdapter } from '../config';
 import { getEnvOptions } from '../config/__mocks__/env';
 import { configServiceMock } from '../config/config_service.mock';
-import { ElasticsearchServiceSetup } from '../elasticsearch';
-import { HttpServiceStart, BasePathProxyServer } from '../http';
+import { BasePathProxyServer } from '../http';
 import { loggingServiceMock } from '../logging/logging_service.mock';
 import { DiscoveredPlugin, DiscoveredPluginInternal } from '../plugins';
-import { PluginsServiceSetup, PluginsServiceStart } from '../plugins/plugins_service';
+import { LegacyCoreSetup, LegacyCoreStart } from '..';
 
 const MockKbnServer: jest.Mock<KbnServer> = KbnServer as any;
 
 let env: Env;
 let config$: BehaviorSubject<Config>;
 let setupDeps: {
-  core: {
-    elasticsearch: ElasticsearchServiceSetup;
-    http: any;
-    plugins: PluginsServiceSetup;
-  };
+  core: LegacyCoreSetup;
   plugins: Record<string, unknown>;
 };
 
 let startDeps: {
-  core: {
-    http: HttpServiceStart;
-    plugins: PluginsServiceStart;
-  };
+  core: LegacyCoreStart;
   plugins: Record<string, unknown>;
 };
 
@@ -72,7 +64,7 @@ beforeEach(() => {
         auth: {
           getAuthHeaders: () => undefined,
         },
-      },
+      } as any,
       plugins: {
         contracts: new Map([['plugin-id', 'plugin-value']]),
         uiPlugins: {
@@ -86,9 +78,6 @@ beforeEach(() => {
 
   startDeps = {
     core: {
-      http: {
-        isListening: () => true,
-      },
       plugins: { contracts: new Map() },
     },
     plugins: {},

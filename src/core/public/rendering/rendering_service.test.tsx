@@ -25,7 +25,7 @@ import { RenderingService } from './rendering_service';
 describe('RenderingService#start', () => {
   const getService = () => {
     const rendering = new RenderingService();
-    const chrome = chromeServiceMock.createStartContract();
+    const chrome = chromeServiceMock.createInternalStartContract();
     chrome.getComponent.mockReturnValue(<div>Hello chrome!</div>);
     const targetDomElement = document.createElement('div');
     const start = rendering.start({ chrome, targetDomElement });

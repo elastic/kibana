@@ -6,7 +6,7 @@
 
 import Boom from 'boom';
 import Joi from 'joi';
-import { InternalCoreSetup } from 'src/core/server';
+import { LegacyCoreSetup } from 'src/core/server';
 import { getErrorDistribution } from '../lib/errors/distribution/get_distribution';
 import { getErrorGroup } from '../lib/errors/get_error_group';
 import { getErrorGroups } from '../lib/errors/get_error_groups';
@@ -19,7 +19,7 @@ const defaultErrorHandler = (err: Error) => {
   throw Boom.boomify(err, { statusCode: 400 });
 };
 
-export function initErrorsApi(core: InternalCoreSetup) {
+export function initErrorsApi(core: LegacyCoreSetup) {
   const { server } = core.http;
   server.route({
     method: 'GET',

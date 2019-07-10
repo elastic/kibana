@@ -6,7 +6,7 @@
 
 import Boom from 'boom';
 import Joi from 'joi';
-import { InternalCoreSetup } from 'src/core/server';
+import { LegacyCoreSetup } from 'src/core/server';
 import { withDefaultValidators } from '../lib/helpers/input_validation';
 import { setupRequest } from '../lib/helpers/setup_request';
 import { getEnvironments } from '../lib/ui_filters/get_environments';
@@ -17,7 +17,7 @@ const defaultErrorHandler = (err: Error) => {
   throw Boom.boomify(err, { statusCode: 400 });
 };
 
-export function initUIFiltersApi(core: InternalCoreSetup) {
+export function initUIFiltersApi(core: LegacyCoreSetup) {
   const { server } = core.http;
   server.route({
     method: 'GET',

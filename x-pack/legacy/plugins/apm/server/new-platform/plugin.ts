@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { InternalCoreSetup } from 'src/core/server';
+import { LegacyCoreSetup } from 'src/core/server';
 import { makeApmUsageCollector } from '../lib/apm_telemetry';
 import { CoreSetupWithUsageCollector } from '../lib/apm_telemetry/make_apm_usage_collector';
 import { initErrorsApi } from '../routes/errors';
@@ -17,7 +17,7 @@ import { initIndexPatternApi } from '../routes/index_pattern';
 import { initSettingsApi } from '../routes/settings';
 
 export class Plugin {
-  public setup(core: InternalCoreSetup) {
+  public setup(core: LegacyCoreSetup) {
     initUIFiltersApi(core);
     initTransactionGroupsApi(core);
     initTracesApi(core);

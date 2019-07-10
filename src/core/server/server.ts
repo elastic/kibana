@@ -20,17 +20,35 @@ import { Observable } from 'rxjs';
 import { Type } from '@kbn/config-schema';
 
 import { ConfigService, Env, Config, ConfigPath } from './config';
-import { ElasticsearchService } from './elasticsearch';
+import { ElasticsearchService, InternalElasticsearchServiceSetup } from './elasticsearch';
 import { HttpService, HttpServiceSetup, Router } from './http';
 import { LegacyService } from './legacy';
 import { Logger, LoggerFactory } from './logging';
-import { PluginsService, config as pluginsConfig } from './plugins';
+import {
+  PluginsService,
+  config as pluginsConfig,
+  PluginsServiceSetup,
+  PluginsServiceStart,
+} from './plugins';
 
 import { config as elasticsearchConfig } from './elasticsearch';
 import { config as httpConfig } from './http';
 import { config as loggingConfig } from './logging';
 import { config as devConfig } from './dev';
 import { mapToObject } from '../utils/';
+import { LegacyCoreSetup, LegacyCoreStart } from '.';
+
+/** @internal */
+export interface InternalCoreSetup {
+  http: HttpServiceSetup;
+  elasticsearch: InternalElasticsearchServiceSetup;
+  plugins: PluginsServiceSetup;
+}
+
+/** @internal */
+export interface InternalCoreStart {
+  plugins: PluginsServiceStart;
+}
 
 export class Server {
   public readonly configService: ConfigService;
@@ -61,43 +79,46 @@ export class Server {
     const httpSetup = await this.http.setup();
     this.registerDefaultRoute(httpSetup);
 
-    const elasticsearchServiceSetup = await this.elasticsearch.setup({
+    const elasticsearchSetup = await this.elasticsearch.setup({
       http: httpSetup,
     });
 
     const pluginsSetup = await this.plugins.setup({
-      elasticsearch: elasticsearchServiceSetup,
+      elasticsearch: elasticsearchSetup,
       http: httpSetup,
     });
 
-    const coreSetup = {
-      elasticsearch: elasticsearchServiceSetup,
+    const legacyCore: LegacyCoreSetup = {
+      elasticsearch: {
+        legacy: elasticsearchSetup.legacy,
+        ...elasticsearchSetup.forPlugin(),
+      },
       http: httpSetup,
       plugins: pluginsSetup,
     };
 
     await this.legacy.setup({
-      core: coreSetup,
+      core: legacyCore,
       plugins: mapToObject(pluginsSetup.contracts),
     });
 
-    return coreSetup;
+    return legacyCore;
   }
 
   public async start() {
     const pluginsStart = await this.plugins.start({});
 
-    const coreStart = {
+    const legacyStart: LegacyCoreStart = {
       plugins: pluginsStart,
     };
 
     await this.legacy.start({
-      core: coreStart,
+      core: legacyStart,
       plugins: mapToObject(pluginsStart.contracts),
     });
 
     await this.http.start();
-    return coreStart;
+    return legacyStart;
   }
 
   public async stop() {

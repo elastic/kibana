@@ -21,11 +21,11 @@ import { sortBy } from 'lodash';
 import { BehaviorSubject, ReplaySubject, Observable } from 'rxjs';
 import { map, takeUntil } from 'rxjs/operators';
 import { NavLinkWrapper, ChromeNavLinkUpdateableFields, ChromeNavLink } from './nav_link';
-import { ApplicationStart } from '../../application';
+import { InternalApplicationStart } from '../../application';
 import { HttpStart } from '../../http';
 
 interface StartDeps {
-  application: ApplicationStart;
+  application: InternalApplicationStart;
   http: HttpStart;
 }
 

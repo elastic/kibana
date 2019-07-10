@@ -45,7 +45,7 @@ configService.atPath.mockReturnValue(
     ssl: {
       verificationMode: 'none',
     },
-  } as any)
+  })
 );
 
 let env: Env;
@@ -76,10 +76,11 @@ describe('#setup', () => {
       () => mockAdminClusterClientInstance
     ).mockImplementationOnce(() => mockDataClusterClientInstance);
 
-    const setupContract = await elasticsearchService.setup(deps);
+    const internalSetupContract = await elasticsearchService.setup(deps);
+    const setupContract = internalSetupContract.forPlugin();
 
     const [esConfig, adminClient, dataClient] = await combineLatest(
-      setupContract.legacy.config$,
+      internalSetupContract.legacy.config$,
       setupContract.adminClient$,
       setupContract.dataClient$
     )
@@ -109,7 +110,7 @@ describe('#setup', () => {
 
   describe('#createClient', () => {
     it('allows to specify config properties', async () => {
-      const setupContract = await elasticsearchService.setup(deps);
+      const setupContract = (await elasticsearchService.setup(deps)).forPlugin();
 
       const mockClusterClientInstance = { close: jest.fn() };
       MockClusterClient.mockImplementation(() => mockClusterClientInstance);
@@ -127,7 +128,7 @@ describe('#setup', () => {
     });
 
     it('falls back to elasticsearch default config values if property not specified', async () => {
-      const setupContract = await elasticsearchService.setup(deps);
+      const setupContract = (await elasticsearchService.setup(deps)).forPlugin();
       // reset all mocks called during setup phase
       MockClusterClient.mockClear();
 
@@ -157,7 +158,7 @@ Object {
 `);
     });
     it('falls back to elasticsearch config if custom config not passed', async () => {
-      const setupContract = await elasticsearchService.setup(deps);
+      const setupContract = (await elasticsearchService.setup(deps)).forPlugin();
       // reset all mocks called during setup phase
       MockClusterClient.mockClear();
 

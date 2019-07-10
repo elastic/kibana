@@ -86,20 +86,9 @@ export class ConfigService {
 // @public
 export interface CoreSetup {
     // (undocumented)
-    elasticsearch: {
-        adminClient$: Observable<ClusterClient>;
-        dataClient$: Observable<ClusterClient>;
-        createClient: (type: string, clientConfig?: Partial<ElasticsearchClientConfig>) => ClusterClient;
-    };
+    elasticsearch: ElasticsearchServiceSetup;
     // (undocumented)
-    http: {
-        registerOnPreAuth: HttpServiceSetup['registerOnPreAuth'];
-        registerAuth: HttpServiceSetup['registerAuth'];
-        registerOnPostAuth: HttpServiceSetup['registerOnPostAuth'];
-        basePath: HttpServiceSetup['basePath'];
-        createNewServer: HttpServiceSetup['createNewServer'];
-        isTlsEnabled: HttpServiceSetup['isTlsEnabled'];
-    };
+    http: HttpServiceSetup;
 }
 
 // @public
@@ -147,10 +136,6 @@ export interface ElasticsearchServiceSetup {
     readonly createClient: (type: string, clientConfig?: Partial<ElasticsearchClientConfig>) => ClusterClient;
     // (undocumented)
     readonly dataClient$: Observable<ClusterClient>;
-    // (undocumented)
-    readonly legacy: {
-        readonly config$: Observable<ElasticsearchConfig>;
-    };
 }
 
 // @public
@@ -177,22 +162,6 @@ export interface HttpServiceSetup extends HttpServerSetup {
 // @public (undocumented)
 export interface HttpServiceStart {
     isListening: (port: number) => boolean;
-}
-
-// @internal (undocumented)
-export interface InternalCoreSetup {
-    // (undocumented)
-    elasticsearch: ElasticsearchServiceSetup;
-    // (undocumented)
-    http: HttpServiceSetup;
-    // (undocumented)
-    plugins: PluginsServiceSetup;
-}
-
-// @public (undocumented)
-export interface InternalCoreStart {
-    // (undocumented)
-    plugins: PluginsServiceStart;
 }
 
 // @public
@@ -225,6 +194,24 @@ export interface KibanaRequestRoute {
     options: Required<RouteConfigOptions>;
     // (undocumented)
     path: string;
+}
+
+// @public (undocumented)
+export interface LegacyCoreSetup extends CoreSetup {
+    // (undocumented)
+    elasticsearch: ElasticsearchServiceSetup & {
+        readonly legacy: {
+            readonly config$: Observable<ElasticsearchConfig>;
+        };
+    };
+    // (undocumented)
+    plugins: PluginsServiceSetup;
+}
+
+// @public (undocumented)
+export interface LegacyCoreStart extends CoreStart {
+    // (undocumented)
+    plugins: PluginsServiceStart;
 }
 
 // @public
@@ -690,6 +677,6 @@ export interface SessionStorageFactory<T> {
 // Warnings were encountered during analysis:
 // 
 // src/core/server/plugins/plugin_context.ts:34:10 - (ae-forgotten-export) The symbol "EnvironmentMode" needs to be exported by the entry point index.d.ts
-// src/core/server/plugins/plugins_service.ts:37:5 - (ae-forgotten-export) The symbol "DiscoveredPluginInternal" needs to be exported by the entry point index.d.ts
+// src/core/server/plugins/plugins_service.ts:36:5 - (ae-forgotten-export) The symbol "DiscoveredPluginInternal" needs to be exported by the entry point index.d.ts
 
 ```

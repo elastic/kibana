@@ -27,7 +27,7 @@ import { IconType } from '@elastic/eui';
 
 import { InjectedMetadataStart } from '../injected_metadata';
 import { NotificationsStart } from '../notifications';
-import { ApplicationStart } from '../application';
+import { InternalApplicationStart } from '../application';
 import { HttpStart } from '../http';
 
 import { ChromeNavLinks, NavLinksService } from './nav_links';
@@ -35,6 +35,7 @@ import { ChromeRecentlyAccessed, RecentlyAccessedService } from './recently_acce
 import { NavControlsService, ChromeNavControls } from './nav_controls';
 import { LoadingIndicator, Header } from './ui';
 import { DocLinksStart } from '../doc_links';
+import { CoreService } from '../../types';
 
 export { ChromeNavControls, ChromeRecentlyAccessed };
 
@@ -73,7 +74,7 @@ interface ConstructorParams {
 }
 
 interface StartDeps {
-  application: ApplicationStart;
+  application: InternalApplicationStart;
   docLinks: DocLinksStart;
   http: HttpStart;
   injectedMetadata: InjectedMetadataStart;
@@ -81,7 +82,7 @@ interface StartDeps {
 }
 
 /** @internal */
-export class ChromeService {
+export class ChromeService implements CoreService<void, ChromeStart> {
   private readonly stop$ = new ReplaySubject(1);
   private readonly browserSupportsCsp: boolean;
   private readonly navControls = new NavControlsService();
@@ -92,13 +93,9 @@ export class ChromeService {
     this.browserSupportsCsp = browserSupportsCsp;
   }
 
-  public async start({
-    application,
-    docLinks,
-    http,
-    injectedMetadata,
-    notifications,
-  }: StartDeps): Promise<InternalChromeStart> {
+  public setup() {}
+
+  public async start({ application, docLinks, http, injectedMetadata, notifications }: StartDeps) {
     const FORCE_HIDDEN = isEmbedParamInHash();
 
     const appTitle$ = new BehaviorSubject<string>('Kibana');
@@ -123,10 +120,6 @@ export class ChromeService {
     }
 
     return {
-      navControls,
-      navLinks,
-      recentlyAccessed,
-
       getComponent: () => (
         <React.Fragment>
           <LoadingIndicator loadingCount$={http.getLoadingCount$()} />
@@ -155,75 +148,81 @@ export class ChromeService {
         </React.Fragment>
       ),
 
-      setAppTitle: (appTitle: string) => appTitle$.next(appTitle),
+      forPlugin: () => ({
+        navControls,
+        navLinks,
+        recentlyAccessed,
 
-      getBrand$: () => brand$.pipe(takeUntil(this.stop$)),
+        setAppTitle: (appTitle: string) => appTitle$.next(appTitle),
 
-      setBrand: (brand: ChromeBrand) => {
-        brand$.next(
-          Object.freeze({
-            logo: brand.logo,
-            smallLogo: brand.smallLogo,
-          })
-        );
-      },
+        getBrand$: () => brand$.pipe(takeUntil(this.stop$)),
 
-      getIsVisible$: () =>
-        isVisible$.pipe(
-          map(visibility => (FORCE_HIDDEN ? false : visibility)),
-          takeUntil(this.stop$)
-        ),
+        setBrand: (brand: ChromeBrand) => {
+          brand$.next(
+            Object.freeze({
+              logo: brand.logo,
+              smallLogo: brand.smallLogo,
+            })
+          );
+        },
 
-      setIsVisible: (visibility: boolean) => {
-        isVisible$.next(visibility);
-      },
+        getIsVisible$: () =>
+          isVisible$.pipe(
+            map(visibility => (FORCE_HIDDEN ? false : visibility)),
+            takeUntil(this.stop$)
+          ),
 
-      getIsCollapsed$: () => isCollapsed$.pipe(takeUntil(this.stop$)),
+        setIsVisible: (visibility: boolean) => {
+          isVisible$.next(visibility);
+        },
 
-      setIsCollapsed: (isCollapsed: boolean) => {
-        isCollapsed$.next(isCollapsed);
-        if (isCollapsed) {
-          localStorage.setItem(IS_COLLAPSED_KEY, 'true');
-        } else {
-          localStorage.removeItem(IS_COLLAPSED_KEY);
-        }
-      },
+        getIsCollapsed$: () => isCollapsed$.pipe(takeUntil(this.stop$)),
 
-      getApplicationClasses$: () =>
-        applicationClasses$.pipe(
-          map(set => [...set]),
-          takeUntil(this.stop$)
-        ),
+        setIsCollapsed: (isCollapsed: boolean) => {
+          isCollapsed$.next(isCollapsed);
+          if (isCollapsed) {
+            localStorage.setItem(IS_COLLAPSED_KEY, 'true');
+          } else {
+            localStorage.removeItem(IS_COLLAPSED_KEY);
+          }
+        },
 
-      addApplicationClass: (className: string) => {
-        const update = new Set([...applicationClasses$.getValue()]);
-        update.add(className);
-        applicationClasses$.next(update);
-      },
+        getApplicationClasses$: () =>
+          applicationClasses$.pipe(
+            map(set => [...set]),
+            takeUntil(this.stop$)
+          ),
 
-      removeApplicationClass: (className: string) => {
-        const update = new Set([...applicationClasses$.getValue()]);
-        update.delete(className);
-        applicationClasses$.next(update);
-      },
+        addApplicationClass: (className: string) => {
+          const update = new Set([...applicationClasses$.getValue()]);
+          update.add(className);
+          applicationClasses$.next(update);
+        },
 
-      getBadge$: () => badge$.pipe(takeUntil(this.stop$)),
+        removeApplicationClass: (className: string) => {
+          const update = new Set([...applicationClasses$.getValue()]);
+          update.delete(className);
+          applicationClasses$.next(update);
+        },
 
-      setBadge: (badge: ChromeBadge) => {
-        badge$.next(badge);
-      },
+        getBadge$: () => badge$.pipe(takeUntil(this.stop$)),
 
-      getBreadcrumbs$: () => breadcrumbs$.pipe(takeUntil(this.stop$)),
+        setBadge: (badge?: ChromeBadge) => {
+          badge$.next(badge);
+        },
 
-      setBreadcrumbs: (newBreadcrumbs: ChromeBreadcrumb[]) => {
-        breadcrumbs$.next(newBreadcrumbs);
-      },
+        getBreadcrumbs$: () => breadcrumbs$.pipe(takeUntil(this.stop$)),
 
-      getHelpExtension$: () => helpExtension$.pipe(takeUntil(this.stop$)),
+        setBreadcrumbs: (newBreadcrumbs: ChromeBreadcrumb[]) => {
+          breadcrumbs$.next(newBreadcrumbs);
+        },
 
-      setHelpExtension: (helpExtension?: ChromeHelpExtension) => {
-        helpExtension$.next(helpExtension);
-      },
+        getHelpExtension$: () => helpExtension$.pipe(takeUntil(this.stop$)),
+
+        setHelpExtension: (helpExtension?: ChromeHelpExtension) => {
+          helpExtension$.next(helpExtension);
+        },
+      }),
     };
   }
 
@@ -370,10 +369,13 @@ export interface ChromeStart {
 }
 
 /** @internal */
-export interface InternalChromeStart extends ChromeStart {
+export interface InternalChromeStart {
   /**
    * Used only by MountingService to render the header UI
    * @internal
    */
   getComponent(): JSX.Element;
+
+  /** @internal */
+  forPlugin(): ChromeStart;
 }

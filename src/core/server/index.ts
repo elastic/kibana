@@ -36,11 +36,7 @@
  */
 
 import { Observable } from 'rxjs';
-import {
-  ClusterClient,
-  ElasticsearchClientConfig,
-  ElasticsearchServiceSetup,
-} from './elasticsearch';
+import { ElasticsearchServiceSetup, ElasticsearchConfig } from './elasticsearch';
 import { HttpServiceSetup, HttpServiceStart } from './http';
 import { PluginsServiceSetup, PluginsServiceStart } from './plugins';
 
@@ -116,22 +112,8 @@ export { RecursiveReadonly } from '../utils';
  * @public
  */
 export interface CoreSetup {
-  elasticsearch: {
-    adminClient$: Observable<ClusterClient>;
-    dataClient$: Observable<ClusterClient>;
-    createClient: (
-      type: string,
-      clientConfig?: Partial<ElasticsearchClientConfig>
-    ) => ClusterClient;
-  };
-  http: {
-    registerOnPreAuth: HttpServiceSetup['registerOnPreAuth'];
-    registerAuth: HttpServiceSetup['registerAuth'];
-    registerOnPostAuth: HttpServiceSetup['registerOnPostAuth'];
-    basePath: HttpServiceSetup['basePath'];
-    createNewServer: HttpServiceSetup['createNewServer'];
-    isTlsEnabled: HttpServiceSetup['isTlsEnabled'];
-  };
+  elasticsearch: ElasticsearchServiceSetup;
+  http: HttpServiceSetup;
 }
 
 /**
@@ -141,17 +123,18 @@ export interface CoreSetup {
  */
 export interface CoreStart {} // eslint-disable-line @typescript-eslint/no-empty-interface
 
-/** @internal */
-export interface InternalCoreSetup {
-  http: HttpServiceSetup;
-  elasticsearch: ElasticsearchServiceSetup;
+/** @public */
+export interface LegacyCoreSetup extends CoreSetup {
+  elasticsearch: ElasticsearchServiceSetup & {
+    readonly legacy: {
+      readonly config$: Observable<ElasticsearchConfig>;
+    };
+  };
   plugins: PluginsServiceSetup;
 }
 
-/**
- * @public
- */
-export interface InternalCoreStart {
+/** @public */
+export interface LegacyCoreStart extends CoreStart {
   plugins: PluginsServiceStart;
 }
 

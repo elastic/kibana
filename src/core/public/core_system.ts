@@ -19,20 +19,24 @@
 
 import './core.css';
 
-import { InternalCoreSetup, InternalCoreStart } from '.';
-import { ChromeService } from './chrome';
+import { LegacyCoreSetup, LegacyCoreStart } from '.';
+import { ChromeService, InternalChromeStart } from './chrome';
 import { FatalErrorsService, FatalErrorsSetup } from './fatal_errors';
-import { HttpService } from './http';
-import { I18nService } from './i18n';
-import { InjectedMetadataParams, InjectedMetadataService } from './injected_metadata';
+import { HttpService, HttpStart } from './http';
+import { I18nService, I18nStart } from './i18n';
+import {
+  InjectedMetadataParams,
+  InjectedMetadataService,
+  InjectedMetadataStart,
+} from './injected_metadata';
 import { LegacyPlatformParams, LegacyPlatformService } from './legacy';
-import { NotificationsService } from './notifications';
-import { OverlayService } from './overlays';
+import { NotificationsService, NotificationsStart } from './notifications';
+import { OverlayService, OverlayStart } from './overlays';
 import { PluginsService } from './plugins';
-import { UiSettingsService } from './ui_settings';
-import { ApplicationService } from './application';
+import { UiSettingsService, UiSettingsClientContract } from './ui_settings';
+import { ApplicationService, InternalApplicationStart } from './application';
 import { mapToObject } from '../utils/';
-import { DocLinksService } from './doc_links';
+import { DocLinksService, DocLinksStart } from './doc_links';
 import { RenderingService } from './rendering';
 
 interface Params {
@@ -46,6 +50,19 @@ interface Params {
 /** @internal */
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface CoreContext {}
+
+/** @internal */
+export interface InternalCoreStart {
+  application: InternalApplicationStart;
+  chrome: InternalChromeStart;
+  docLinks: DocLinksStart;
+  http: HttpStart;
+  i18n: I18nStart;
+  injectedMetadata: InjectedMetadataStart;
+  notifications: NotificationsStart;
+  overlays: OverlayStart;
+  uiSettings: UiSettingsClientContract;
+}
 
 /**
  * The CoreSystem is the root of the new platform, and setups all parts
@@ -127,7 +144,7 @@ export class CoreSystem {
       const notifications = this.notifications.setup({ uiSettings });
       const application = this.application.setup();
 
-      const core: InternalCoreSetup = {
+      const core: LegacyCoreSetup = {
         application,
         fatalErrors: this.fatalErrorsSetup,
         http,
@@ -187,7 +204,7 @@ export class CoreSystem {
       });
       const uiSettings = await this.uiSettings.start();
 
-      const core: InternalCoreStart = {
+      const internalCore: InternalCoreStart = {
         application,
         chrome,
         docLinks,
@@ -199,13 +216,26 @@ export class CoreSystem {
         uiSettings,
       };
 
-      const plugins = await this.plugins.start(core);
+      const plugins = await this.plugins.start(internalCore);
       const rendering = this.rendering.start({
         chrome,
         targetDomElement: coreUiTargetDomElement,
       });
+
+      const legacyCore: LegacyCoreStart = {
+        application: application.forPlugin(),
+        chrome: chrome.forPlugin(),
+        docLinks,
+        http,
+        i18n,
+        injectedMetadata,
+        notifications,
+        overlays,
+        uiSettings,
+      };
+
       await this.legacyPlatform.start({
-        core,
+        core: legacyCore,
         plugins: mapToObject(plugins.contracts),
         targetDomElement: rendering.legacyTargetDomElement,
       });

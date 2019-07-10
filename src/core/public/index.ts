@@ -101,7 +101,7 @@ export interface CoreSetup {
  */
 export interface CoreStart {
   /** {@link ApplicationStart} */
-  application: Pick<ApplicationStart, 'capabilities'>;
+  application: ApplicationStart;
   /** {@link ChromeStart} */
   chrome: ChromeStart;
   /** {@link DocLinksStart} */
@@ -119,13 +119,13 @@ export interface CoreStart {
 }
 
 /** @internal */
-export interface InternalCoreSetup extends CoreSetup {
+export interface LegacyCoreSetup extends CoreSetup {
   application: ApplicationSetup;
   injectedMetadata: InjectedMetadataSetup;
 }
 
 /** @internal */
-export interface InternalCoreStart extends CoreStart {
+export interface LegacyCoreStart extends CoreStart {
   application: ApplicationStart;
   injectedMetadata: InjectedMetadataStart;
 }

@@ -20,6 +20,7 @@
 import { Observable, BehaviorSubject } from 'rxjs';
 import { CapabilitiesStart, CapabilitiesService, Capabilities } from './capabilities';
 import { InjectedMetadataStart } from '../injected_metadata';
+import { CoreService } from '../../types';
 
 interface BaseApp {
   id: string;
@@ -99,9 +100,12 @@ export interface ApplicationSetup {
 }
 
 export interface ApplicationStart {
-  mount: (mountHandler: Function) => void;
-  availableApps: CapabilitiesStart['availableApps'];
   capabilities: CapabilitiesStart['capabilities'];
+}
+
+export interface InternalApplicationStart {
+  availableApps: CapabilitiesStart['availableApps'];
+  forPlugin(): ApplicationStart;
 }
 
 interface StartDeps {
@@ -112,12 +116,12 @@ interface StartDeps {
  * Service that is responsible for registering new applications.
  * @internal
  */
-export class ApplicationService {
+export class ApplicationService implements CoreService<ApplicationSetup, ApplicationStart> {
   private readonly apps$ = new BehaviorSubject<App[]>([]);
   private readonly legacyApps$ = new BehaviorSubject<LegacyApp[]>([]);
   private readonly capabilities = new CapabilitiesService();
 
-  public setup(): ApplicationSetup {
+  public setup() {
     return {
       registerApp: (app: App) => {
         this.apps$.next([...this.apps$.value, app]);
@@ -128,7 +132,7 @@ export class ApplicationService {
     };
   }
 
-  public async start({ injectedMetadata }: StartDeps): Promise<ApplicationStart> {
+  public async start({ injectedMetadata }: StartDeps) {
     this.apps$.complete();
     this.legacyApps$.complete();
 
@@ -139,9 +143,8 @@ export class ApplicationService {
     });
 
     return {
-      mount() {},
-      capabilities,
       availableApps,
+      forPlugin: () => ({ capabilities }),
     };
   }
 

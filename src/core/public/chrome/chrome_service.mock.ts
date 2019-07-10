@@ -23,11 +23,11 @@ import {
   ChromeBreadcrumb,
   ChromeService,
   InternalChromeStart,
+  ChromeStart,
 } from './chrome_service';
 
 const createStartContractMock = () => {
-  const startContract: jest.Mocked<InternalChromeStart> = {
-    getComponent: jest.fn(),
+  const startContract: DeeplyMockedKeys<ChromeStart> = {
     navLinks: {
       getNavLinks$: jest.fn(),
       has: jest.fn(),
@@ -76,17 +76,29 @@ const createStartContractMock = () => {
   return startContract;
 };
 
+const createInternalStartContractMock = (): DeeplyMockedKeys<InternalChromeStart> => {
+  const startContract = createStartContractMock();
+  const internalStartContract: DeeplyMockedKeys<InternalChromeStart> = {
+    getComponent: jest.fn(),
+    forPlugin: jest.fn(),
+  };
+  internalStartContract.forPlugin.mockReturnValue(startContract);
+  return internalStartContract;
+};
+
 type ChromeServiceContract = PublicMethodsOf<ChromeService>;
 const createMock = () => {
   const mocked: jest.Mocked<ChromeServiceContract> = {
+    setup: jest.fn(),
     start: jest.fn(),
     stop: jest.fn(),
   };
-  mocked.start.mockResolvedValue(createStartContractMock());
+  mocked.start.mockResolvedValue(createInternalStartContractMock());
   return mocked;
 };
 
 export const chromeServiceMock = {
   create: createMock,
+  createInternalStartContract: createInternalStartContractMock,
   createStartContract: createStartContractMock,
 };

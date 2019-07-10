@@ -20,7 +20,7 @@
 import { combineLatest, ConnectableObservable, EMPTY, Observable, Subscription } from 'rxjs';
 import { first, map, mergeMap, publishReplay, tap } from 'rxjs/operators';
 import { CoreService } from '../../types';
-import { InternalCoreSetup, InternalCoreStart } from '../../server';
+import { LegacyCoreSetup, LegacyCoreStart } from '../../server';
 import { Config } from '../config';
 import { CoreContext } from '../core_context';
 import { DevConfig, DevConfigType } from '../dev';
@@ -47,12 +47,12 @@ function getLegacyRawConfig(config: Config) {
 }
 
 interface SetupDeps {
-  core: InternalCoreSetup;
+  core: LegacyCoreSetup;
   plugins: Record<string, unknown>;
 }
 
 interface StartDeps {
-  core: InternalCoreStart;
+  core: LegacyCoreStart;
   plugins: Record<string, unknown>;
 }
 

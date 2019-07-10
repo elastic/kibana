@@ -50,13 +50,11 @@ mockPluginInitializerProvider.mockImplementation(
   pluginName => mockPluginInitializers.get(pluginName)!
 );
 
-type DeeplyMocked<T> = { [P in keyof T]: jest.Mocked<T[P]> };
-
 const mockCoreContext: CoreContext = {};
-let mockSetupDeps: DeeplyMocked<PluginsServiceSetupDeps>;
-let mockSetupContext: DeeplyMocked<CoreSetup>;
-let mockStartDeps: DeeplyMocked<PluginsServiceStartDeps>;
-let mockStartContext: DeeplyMocked<CoreStart>;
+let mockSetupDeps: DeeplyMockedKeys<PluginsServiceSetupDeps>;
+let mockSetupContext: DeeplyMockedKeys<CoreSetup>;
+let mockStartDeps: DeeplyMockedKeys<PluginsServiceStartDeps>;
+let mockStartContext: DeeplyMockedKeys<CoreStart>;
 
 beforeEach(() => {
   mockSetupDeps = {
@@ -80,10 +78,10 @@ beforeEach(() => {
   };
   mockSetupContext = omit(mockSetupDeps, 'application', 'injectedMetadata');
   mockStartDeps = {
-    application: applicationServiceMock.createStartContract(),
+    application: applicationServiceMock.createInternalStartContract(),
     docLinks: docLinksServiceMock.createStartContract(),
     http: httpServiceMock.createStartContract(),
-    chrome: chromeServiceMock.createStartContract(),
+    chrome: chromeServiceMock.createInternalStartContract(),
     i18n: i18nServiceMock.createStartContract(),
     injectedMetadata: injectedMetadataServiceMock.createStartContract(),
     notifications: notificationServiceMock.createStartContract(),
@@ -92,10 +90,8 @@ beforeEach(() => {
   };
   mockStartContext = {
     ...omit(mockStartDeps, 'injectedMetadata'),
-    application: {
-      capabilities: mockStartDeps.application.capabilities,
-    },
-    chrome: omit(mockStartDeps.chrome, 'getComponent'),
+    application: mockStartDeps.application.forPlugin(),
+    chrome: mockStartDeps.chrome.forPlugin() as DeeplyMockedKeys<CoreStart['chrome']>,
   };
 
   // Reset these for each test.

@@ -21,7 +21,11 @@ import { BehaviorSubject } from 'rxjs';
 import { ClusterClient } from './cluster_client';
 import { ScopedClusterClient } from './scoped_cluster_client';
 import { ElasticsearchConfig } from './elasticsearch_config';
-import { ElasticsearchService, ElasticsearchServiceSetup } from './elasticsearch_service';
+import {
+  ElasticsearchService,
+  ElasticsearchServiceSetup,
+  InternalElasticsearchServiceSetup,
+} from './elasticsearch_service';
 
 const createScopedClusterClientMock = (): jest.Mocked<PublicMethodsOf<ScopedClusterClient>> => ({
   callAsInternalUser: jest.fn(),
@@ -36,15 +40,23 @@ const createClusterClientMock = (): jest.Mocked<PublicMethodsOf<ClusterClient>> 
 
 const createSetupContractMock = () => {
   const setupContract: jest.Mocked<ElasticsearchServiceSetup> = {
-    legacy: {
-      config$: new BehaviorSubject({} as ElasticsearchConfig),
-    },
-
     createClient: jest.fn().mockImplementation(createClusterClientMock),
     adminClient$: new BehaviorSubject((createClusterClientMock() as unknown) as ClusterClient),
     dataClient$: new BehaviorSubject((createClusterClientMock() as unknown) as ClusterClient),
   };
   return setupContract;
+};
+
+const createInternalSetupContractMock = () => {
+  const internalSetupContract: jest.Mocked<InternalElasticsearchServiceSetup> = {
+    legacy: {
+      config$: new BehaviorSubject({} as ElasticsearchConfig),
+    },
+
+    forPlugin: jest.fn(),
+  };
+  internalSetupContract.forPlugin.mockImplementation(createSetupContractMock);
+  return internalSetupContract;
 };
 
 type ElasticsearchServiceContract = PublicMethodsOf<ElasticsearchService>;
@@ -54,7 +66,7 @@ const createMock = () => {
     start: jest.fn(),
     stop: jest.fn(),
   };
-  mocked.setup.mockResolvedValue(createSetupContractMock());
+  mocked.setup.mockResolvedValue(createInternalSetupContractMock());
   mocked.stop.mockResolvedValue();
   return mocked;
 };
@@ -62,6 +74,7 @@ const createMock = () => {
 export const elasticsearchServiceMock = {
   create: createMock,
   createSetupContract: createSetupContractMock,
+  createInternalSetupContract: createInternalSetupContractMock,
   createClusterClient: createClusterClientMock,
   createScopedClusterClient: createScopedClusterClientMock,
 };

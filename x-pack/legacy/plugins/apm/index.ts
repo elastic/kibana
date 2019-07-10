@@ -8,7 +8,7 @@ import { i18n } from '@kbn/i18n';
 import { Server } from 'hapi';
 import { resolve } from 'path';
 import {
-  InternalCoreSetup,
+  LegacyCoreSetup,
   PluginInitializerContext
 } from '../../../../src/core/server';
 import { LegacyPluginInitializer } from '../../../../src/legacy/types';
@@ -109,7 +109,7 @@ export const apm: LegacyPluginInitializer = kibana => {
         http: {
           server
         }
-      } as InternalCoreSetup;
+      } as LegacyCoreSetup;
       plugin(initializerContext).setup(core);
     }
   });

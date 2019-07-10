@@ -5,7 +5,7 @@
  */
 
 import Boom from 'boom';
-import { InternalCoreSetup } from 'src/core/server';
+import { LegacyCoreSetup } from 'src/core/server';
 import Joi from 'joi';
 import { setupRequest } from '../lib/helpers/setup_request';
 import { getServiceNames } from '../lib/settings/agent_configuration/get_service_names';
@@ -24,7 +24,7 @@ const defaultErrorHandler = (err: Error) => {
   throw Boom.boomify(err, { statusCode: 400 });
 };
 
-export function initSettingsApi(core: InternalCoreSetup) {
+export function initSettingsApi(core: LegacyCoreSetup) {
   const { server } = core.http;
 
   createApmAgentConfigurationIndex(server);

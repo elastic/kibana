@@ -18,7 +18,7 @@
  */
 
 import angular from 'angular';
-import { InternalCoreSetup, InternalCoreStart } from '../';
+import { LegacyCoreSetup, LegacyCoreStart } from '../';
 
 /** @internal */
 export interface LegacyPlatformParams {
@@ -27,12 +27,12 @@ export interface LegacyPlatformParams {
 }
 
 interface SetupDeps {
-  core: InternalCoreSetup;
+  core: LegacyCoreSetup;
   plugins: Record<string, unknown>;
 }
 
 interface StartDeps {
-  core: InternalCoreStart;
+  core: LegacyCoreStart;
   plugins: Record<string, unknown>;
   targetDomElement: HTMLElement;
 }

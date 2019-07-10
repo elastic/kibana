@@ -27,11 +27,7 @@ export interface ApplicationStart {
     // Warning: (ae-forgotten-export) The symbol "CapabilitiesStart" needs to be exported by the entry point index.d.ts
     // 
     // (undocumented)
-    availableApps: CapabilitiesStart['availableApps'];
-    // (undocumented)
     capabilities: CapabilitiesStart['capabilities'];
-    // (undocumented)
-    mount: (mountHandler: Function) => void;
 }
 
 // @public
@@ -185,7 +181,7 @@ export interface CoreSetup {
 // @public
 export interface CoreStart {
     // (undocumented)
-    application: Pick<ApplicationStart, 'capabilities'>;
+    application: ApplicationStart;
     // (undocumented)
     chrome: ChromeStart;
     // (undocumented)
@@ -401,7 +397,7 @@ export interface I18nStart {
 }
 
 // @internal (undocumented)
-export interface InternalCoreSetup extends CoreSetup {
+export interface LegacyCoreSetup extends CoreSetup {
     // (undocumented)
     application: ApplicationSetup;
     // Warning: (ae-forgotten-export) The symbol "InjectedMetadataSetup" needs to be exported by the entry point index.d.ts
@@ -411,7 +407,7 @@ export interface InternalCoreSetup extends CoreSetup {
 }
 
 // @internal (undocumented)
-export interface InternalCoreStart extends CoreStart {
+export interface LegacyCoreStart extends CoreStart {
     // (undocumented)
     application: ApplicationStart;
     // Warning: (ae-forgotten-export) The symbol "InjectedMetadataStart" needs to be exported by the entry point index.d.ts

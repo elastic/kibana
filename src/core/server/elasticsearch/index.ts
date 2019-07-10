@@ -17,9 +17,13 @@
  * under the License.
  */
 
-export { ElasticsearchServiceSetup, ElasticsearchService } from './elasticsearch_service';
+export {
+  ElasticsearchServiceSetup,
+  ElasticsearchService,
+  InternalElasticsearchServiceSetup,
+} from './elasticsearch_service';
 export { CallAPIOptions, ClusterClient, FakeRequest, LegacyRequest } from './cluster_client';
 export { ScopedClusterClient, Headers, APICaller } from './scoped_cluster_client';
 export { ElasticsearchClientConfig } from './elasticsearch_client_config';
-export { config } from './elasticsearch_config';
+export { config, ElasticsearchConfig } from './elasticsearch_config';
 export { ElasticsearchError, ElasticsearchErrorHelpers } from './errors';

@@ -22,8 +22,8 @@ import { ResponseObject, Server } from 'hapi';
 import {
   ConfigService,
   ElasticsearchServiceSetup,
-  InternalCoreSetup,
-  InternalCoreStart,
+  LegacyCoreSetup,
+  LegacyCoreStart,
   LoggerFactory,
   SavedObjectsClientContract,
   SavedObjectsService,
@@ -94,11 +94,11 @@ export default class KbnServer {
       logger: LoggerFactory;
     };
     setup: {
-      core: InternalCoreSetup;
+      core: LegacyCoreSetup;
       plugins: Record<string, unknown>;
     };
     start: {
-      core: InternalCoreStart;
+      core: LegacyCoreStart;
       plugins: Record<string, unknown>;
     };
     stop: null;

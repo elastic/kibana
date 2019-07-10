@@ -33,7 +33,7 @@ const createStartContractMock = (
 
 type CapabilitiesServiceContract = PublicMethodsOf<CapabilitiesService>;
 const createMock = (): jest.Mocked<CapabilitiesServiceContract> => ({
-  start: jest.fn().mockImplementation(({ apps }) => createStartContractMock(apps)),
+  start: jest.fn().mockImplementation(async ({ apps }) => createStartContractMock(apps)),
 });
 
 export const capabilitiesServiceMock = {

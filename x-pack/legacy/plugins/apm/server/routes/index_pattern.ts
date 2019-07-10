@@ -5,7 +5,7 @@
  */
 
 import Boom from 'boom';
-import { InternalCoreSetup } from 'src/core/server';
+import { LegacyCoreSetup } from 'src/core/server';
 import { getIndexPattern } from '../lib/index_pattern';
 
 const ROOT = '/api/apm/index_pattern';
@@ -15,7 +15,7 @@ const defaultErrorHandler = (err: Error & { status?: number }) => {
   throw Boom.boomify(err, { statusCode: err.status || 500 });
 };
 
-export function initIndexPatternApi(core: InternalCoreSetup) {
+export function initIndexPatternApi(core: LegacyCoreSetup) {
   const { server } = core.http;
   server.route({
     method: 'GET',

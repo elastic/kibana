@@ -4,12 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { InternalCoreSetup } from 'src/core/server';
+import { LegacyCoreSetup } from 'src/core/server';
 import { getSavedObjectsClient } from '../helpers/saved_objects_client';
 import { APM_TELEMETRY_DOC_ID, createApmTelementry } from './apm_telemetry';
 
-export interface CoreSetupWithUsageCollector extends InternalCoreSetup {
-  http: InternalCoreSetup['http'] & {
+export interface CoreSetupWithUsageCollector extends LegacyCoreSetup {
+  http: LegacyCoreSetup['http'] & {
     server: {
       usage: {
         collectorSet: {

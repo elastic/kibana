@@ -5,7 +5,7 @@
  */
 
 import Boom from 'boom';
-import { InternalCoreSetup } from 'src/core/server';
+import { LegacyCoreSetup } from 'src/core/server';
 import { AgentName } from '../../typings/es_schemas/ui/fields/Agent';
 import { createApmTelementry, storeApmTelemetry } from '../lib/apm_telemetry';
 import { withDefaultValidators } from '../lib/helpers/input_validation';
@@ -20,7 +20,7 @@ const defaultErrorHandler = (err: Error) => {
   throw Boom.boomify(err, { statusCode: 400 });
 };
 
-export function initServicesApi(core: InternalCoreSetup) {
+export function initServicesApi(core: LegacyCoreSetup) {
   const { server } = core.http;
   server.route({
     method: 'GET',

@@ -17,8 +17,6 @@
  * under the License.
  */
 
-import { omit } from 'lodash';
-
 import { DiscoveredPlugin, PluginName } from '../../server';
 import { CoreContext } from '../core_system';
 import { PluginWrapper } from './plugin';
@@ -97,12 +95,10 @@ export function createPluginStartContext<
   plugin: PluginWrapper<TSetup, TStart, TPluginsSetup, TPluginsStart>
 ): CoreStart {
   return {
-    application: {
-      capabilities: deps.application.capabilities,
-    },
+    application: deps.application.forPlugin(),
+    chrome: deps.chrome.forPlugin(),
     docLinks: deps.docLinks,
     http: deps.http,
-    chrome: omit(deps.chrome, 'getComponent'),
     i18n: deps.i18n,
     notifications: deps.notifications,
     overlays: deps.overlays,

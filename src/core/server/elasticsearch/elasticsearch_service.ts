@@ -39,12 +39,18 @@ interface SetupDeps {
   http: HttpServiceSetup;
 }
 
-/** @public */
-export interface ElasticsearchServiceSetup {
+/** @internal */
+export interface InternalElasticsearchServiceSetup {
   // Required for the BWC with the legacy Kibana only.
   readonly legacy: {
     readonly config$: Observable<ElasticsearchConfig>;
   };
+
+  forPlugin(): ElasticsearchServiceSetup;
+}
+
+/** @public */
+export interface ElasticsearchServiceSetup {
   /**
    * Create application specific Elasticsearch cluster API client with customized config.
    *
@@ -71,7 +77,7 @@ export interface ElasticsearchServiceSetup {
 }
 
 /** @internal */
-export class ElasticsearchService implements CoreService<ElasticsearchServiceSetup> {
+export class ElasticsearchService implements CoreService<InternalElasticsearchServiceSetup> {
   private readonly log: Logger;
   private readonly config$: Observable<ElasticsearchConfig>;
   private subscription?: Subscription;
@@ -83,7 +89,7 @@ export class ElasticsearchService implements CoreService<ElasticsearchServiceSet
       .pipe(map(rawConfig => new ElasticsearchConfig(rawConfig)));
   }
 
-  public async setup(deps: SetupDeps): Promise<ElasticsearchServiceSetup> {
+  public async setup(deps: SetupDeps) {
     this.log.debug('Setting up elasticsearch service');
 
     const clients$ = this.config$.pipe(
@@ -126,13 +132,15 @@ export class ElasticsearchService implements CoreService<ElasticsearchServiceSet
     return {
       legacy: { config$: clients$.pipe(map(clients => clients.config)) },
 
-      adminClient$: clients$.pipe(map(clients => clients.adminClient)),
-      dataClient$: clients$.pipe(map(clients => clients.dataClient)),
+      forPlugin: () => ({
+        adminClient$: clients$.pipe(map(clients => clients.adminClient)),
+        dataClient$: clients$.pipe(map(clients => clients.dataClient)),
 
-      createClient: (type: string, clientConfig: Partial<ElasticsearchClientConfig> = {}) => {
-        const finalConfig = merge({}, config, clientConfig);
-        return this.createClusterClient(type, finalConfig, deps.http.auth.getAuthHeaders);
-      },
+        createClient: (type: string, clientConfig: Partial<ElasticsearchClientConfig> = {}) => {
+          const finalConfig = merge({}, config, clientConfig);
+          return this.createClusterClient(type, finalConfig, deps.http.auth.getAuthHeaders);
+        },
+      }),
     };
   }
 

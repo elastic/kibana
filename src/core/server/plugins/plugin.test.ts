@@ -31,6 +31,7 @@ import { loggingServiceMock } from '../logging/logging_service.mock';
 
 import { PluginWrapper, PluginManifest } from './plugin';
 import { createPluginInitializerContext, createPluginSetupContext } from './plugin_context';
+import { PluginsServiceSetupDeps } from './plugins_service';
 
 const mockPluginInitializer = jest.fn();
 const logger = loggingServiceMock.create();
@@ -65,8 +66,8 @@ configService.atPath.mockReturnValue(new BehaviorSubject({ initialize: true }));
 
 let env: Env;
 let coreContext: CoreContext;
-const setupDeps = {
-  elasticsearch: elasticsearchServiceMock.createSetupContract(),
+const setupDeps: PluginsServiceSetupDeps = {
+  elasticsearch: elasticsearchServiceMock.createInternalSetupContract(),
   http: httpServiceMock.createSetupContract(),
 };
 beforeEach(() => {

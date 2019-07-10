@@ -17,9 +17,17 @@
  * under the License.
  */
 
+import { PluginName } from '../server';
+
+export interface PluginScoped<T> {
+  forPlugin(plugin: PluginName): T;
+}
+
+export type LifecycleReturnType<T> = T | PluginScoped<T> | Promise<T | PluginScoped<T>>;
+
 /** @internal */
 export interface CoreService<TSetup = void, TStart = void> {
-  setup(...params: any[]): Promise<TSetup>;
-  start(...params: any[]): Promise<TStart>;
-  stop(): Promise<void>;
+  setup(...params: any[]): LifecycleReturnType<TSetup>;
+  start(...params: any[]): LifecycleReturnType<TStart>;
+  stop(): void | Promise<void>;
 }

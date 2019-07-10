@@ -19,17 +19,17 @@
 
 import { PluginName } from '../../server';
 import { CoreService } from '../../types';
-import { CoreContext } from '../core_system';
+import { CoreContext, InternalCoreStart } from '../core_system';
 import { PluginWrapper } from './plugin';
 import {
   createPluginInitializerContext,
   createPluginSetupContext,
   createPluginStartContext,
 } from './plugin_context';
-import { InternalCoreSetup, InternalCoreStart } from '..';
+import { LegacyCoreSetup } from '..';
 
 /** @internal */
-export type PluginsServiceSetupDeps = InternalCoreSetup;
+export type PluginsServiceSetupDeps = LegacyCoreSetup;
 /** @internal */
 export type PluginsServiceStartDeps = InternalCoreStart;
 
