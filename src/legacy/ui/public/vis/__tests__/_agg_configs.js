@@ -27,7 +27,7 @@ import { AggConfigs } from '../agg_configs';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 import { Schemas } from '../editors/default/schemas';
 import { IndexedArray } from '../../indexed_array';
-import { AggGroupNames } from '../editors/default';
+import { AggGroupNames } from '../editors/default/agg_groups';
 
 describe('AggConfigs', function () {
 

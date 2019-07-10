@@ -18,7 +18,7 @@
  */
 
 import { groupAggregationsBy } from '../default_editor_utils';
-import { AggGroupNames } from '../';
+import { AggGroupNames } from '../agg_groups';
 
 const aggs = [
   {

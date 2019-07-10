@@ -29,7 +29,7 @@
 import _ from 'lodash';
 import { IndexedArray } from '../indexed_array';
 import { AggConfig } from './agg_config';
-import { AggGroupNames } from './editors/default';
+import { AggGroupNames } from './editors/default/agg_groups';
 
 function removeParentAggs(obj) {
   for(const prop in obj) {

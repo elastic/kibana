@@ -46,7 +46,7 @@ import { FixedParam, TimeIntervalParam, EditorParamConfig } from '../../config/t
 // TODO: Below import is temporary, use `react-use` lib instead.
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { useUnmount } from '../../../../../../../plugins/kibana_react/public/util/use_unmount';
-import { AggGroupNames } from '../';
+import { AggGroupNames } from '../agg_groups';
 
 const FIXED_VALUE_PROP = 'fixedValue';
 const DEFAULT_PROP = 'default';

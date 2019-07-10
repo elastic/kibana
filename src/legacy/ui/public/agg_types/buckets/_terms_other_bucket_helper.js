@@ -19,7 +19,7 @@
 
 import _ from 'lodash';
 import { buildExistsFilter, buildPhrasesFilter, buildQueryFromFilters } from '@kbn/es-query';
-import { AggGroupNames } from '../../vis/editors/default';
+import { AggGroupNames } from '../../vis/editors/default/agg_groups';
 
 /**
  * walks the aggregation DSL and returns DSL starting at aggregation with id of startFromAggId

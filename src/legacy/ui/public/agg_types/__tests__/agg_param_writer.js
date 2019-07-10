@@ -21,7 +21,7 @@ import _ from 'lodash';
 import { VisProvider } from '../../vis';
 import { aggTypes } from '..';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
-import { AggGroupNames } from '../../vis/editors/default';
+import { AggGroupNames } from '../../vis/editors/default/agg_groups';
 
 // eslint-disable-next-line import/no-default-export
 export default function AggParamWriterHelper(Private) {
