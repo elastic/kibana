@@ -66,7 +66,7 @@ interface WorkpadTelemetry {
   @returns Workpad Telemetry Data
 */
 export function summarizeWorkpads(workpadDocs: Workpad[]): WorkpadTelemetry {
-  const functionSet = new Set();
+  const functionSet = new Set<string>();
 
   if (workpadDocs.length === 0) {
     return {};
