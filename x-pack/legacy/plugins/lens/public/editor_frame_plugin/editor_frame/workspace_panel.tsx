@@ -29,7 +29,8 @@ export interface WorkspacePanelProps {
 
 export const WorkspacePanel = debouncedComponent(InnerWorkspacePanel);
 
-function InnerWorkspacePanel({
+// Exported for testing purposes only.
+export function InnerWorkspacePanel({
   activeDatasource,
   activeVisualizationId,
   datasourceState,

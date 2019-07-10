@@ -122,7 +122,10 @@ describe('IndexPatternDimensionPanel', () => {
   it('should pass the right arguments to getPotentialColumns', async () => {
     wrapper = shallow(<IndexPatternDimensionPanel {...defaultProps} suggestedPriority={1} />);
 
-    expect(getPotentialColumns as jest.Mock).toHaveBeenCalledWith(state, 1);
+    expect(getPotentialColumns as jest.Mock).toHaveBeenCalledWith(
+      state.indexPatterns[state.currentIndexPatternId].fields,
+      1
+    );
   });
 
   it('should call the filterOperations function', () => {
