@@ -6,10 +6,10 @@
 
 import { get } from 'lodash';
 import { addBasePath } from './add_base_path';
-import { LatestMonitor } from '../../../../common/graphql/types';
+import { MonitorSummary } from '../../../../common/graphql/types';
 
 export const getApmHref = (
-  monitor: LatestMonitor,
+  summary: MonitorSummary,
   basePath: string,
   dateRangeStart: string,
   dateRangeEnd: string
@@ -17,6 +17,6 @@ export const getApmHref = (
   addBasePath(
     basePath,
     `/app/apm#/services?kuery=${encodeURI(
-      `url.domain: "${get(monitor, 'ping.url.domain')}"`
+      `url.domain: "${get(summary, 'state.url.domain')}"`
     )}&rangeFrom=${dateRangeStart}&rangeTo=${dateRangeEnd}`
   );

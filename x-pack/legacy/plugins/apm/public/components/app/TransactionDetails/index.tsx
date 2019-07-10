@@ -7,7 +7,7 @@
 import { EuiPanel, EuiSpacer, EuiTitle, EuiHorizontalRule } from '@elastic/eui';
 import _ from 'lodash';
 import React from 'react';
-import { useTransactionDetailsCharts } from '../../../hooks/useTransactionDetailsCharts';
+import { useTransactionCharts } from '../../../hooks/useTransactionCharts';
 import { useTransactionDistribution } from '../../../hooks/useTransactionDistribution';
 import { useWaterfall } from '../../../hooks/useWaterfall';
 import { TransactionCharts } from '../../shared/charts/TransactionCharts';
@@ -18,6 +18,7 @@ import { useLocation } from '../../../hooks/useLocation';
 import { useUrlParams } from '../../../hooks/useUrlParams';
 import { FETCH_STATUS } from '../../../hooks/useFetcher';
 import { TransactionBreakdown } from '../../shared/TransactionBreakdown';
+import { ChartsSyncContextProvider } from '../../../context/ChartsSyncContext';
 
 export function TransactionDetails() {
   const location = useLocation();
@@ -26,9 +27,9 @@ export function TransactionDetails() {
     data: distributionData,
     status: distributionStatus
   } = useTransactionDistribution(urlParams);
-  const { data: transactionDetailsChartsData } = useTransactionDetailsCharts(
-    urlParams
-  );
+
+  const { data: transactionChartsData } = useTransactionCharts();
+
   const { data: waterfall } = useWaterfall(urlParams);
   const transaction = waterfall.getTransactionById(urlParams.transactionId);
 
@@ -42,16 +43,18 @@ export function TransactionDetails() {
         </EuiTitle>
       </ApmHeader>
 
-      <TransactionBreakdown />
+      <ChartsSyncContextProvider>
+        <TransactionBreakdown />
 
-      <EuiSpacer size="s" />
+        <EuiSpacer size="s" />
 
-      <TransactionCharts
-        hasMLJob={false}
-        charts={transactionDetailsChartsData}
-        urlParams={urlParams}
-        location={location}
-      />
+        <TransactionCharts
+          hasMLJob={false}
+          charts={transactionChartsData}
+          urlParams={urlParams}
+          location={location}
+        />
+      </ChartsSyncContextProvider>
 
       <EuiHorizontalRule size="full" margin="l" />
 

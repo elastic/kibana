@@ -17,14 +17,11 @@ import { useUrlParams } from '../../../hooks/useUrlParams';
 export function ServiceDetails() {
   const { urlParams, uiFilters } = useUrlParams();
   const { serviceName, start, end } = urlParams;
-  const { data: serviceDetailsData } = useFetcher(
-    () => {
-      if (serviceName && start && end) {
-        return loadServiceDetails({ serviceName, start, end, uiFilters });
-      }
-    },
-    [serviceName, start, end, uiFilters]
-  );
+  const { data: serviceDetailsData } = useFetcher(() => {
+    if (serviceName && start && end) {
+      return loadServiceDetails({ serviceName, start, end, uiFilters });
+    }
+  }, [serviceName, start, end, uiFilters]);
 
   if (!serviceDetailsData) {
     return null;

@@ -126,6 +126,33 @@ export class MBMapContainer extends React.Component {
     }
   }, 256);
 
+  _getIdsForFeatures(mbFeatures) {
+    const uniqueFeatures = [];
+    //there may be duplicates in the results from mapbox
+    //this is because mapbox returns the results per tile
+    //for polygons or lines, it might return multiple features, one for each tile
+    for (let i = 0; i < mbFeatures.length; i++) {
+      const mbFeature = mbFeatures[i];
+      const layer = this._getLayerByMbLayerId(mbFeature.layer.id);
+      const featureId = mbFeature.properties[FEATURE_ID_PROPERTY_NAME];
+      const layerId = layer.getId();
+      let match = false;
+      for (let j = 0; j < uniqueFeatures.length; j++) {
+        const uniqueFeature = uniqueFeatures[j];
+        if (featureId === uniqueFeature.id && layerId === uniqueFeature.layerId) {
+          match = true;
+          break;
+        }
+      }
+      if (!match) {
+        uniqueFeatures.push({
+          id: featureId,
+          layerId: layerId
+        });
+      }
+    }
+    return uniqueFeatures;
+  }
 
   _lockTooltip =  (e) => {
 
@@ -136,19 +163,19 @@ export class MBMapContainer extends React.Component {
 
     this._updateHoverTooltipState.cancel();//ignore any possible moves
 
-    const features = this._getFeaturesUnderPointer(e.point);
-    if (!features.length) {
+    const mbFeatures = this._getFeaturesUnderPointer(e.point);
+    if (!mbFeatures.length) {
       this.props.setTooltipState(null);
       return;
     }
 
-    const targetFeature = features[0];
-    const layer = this._getLayerByMbLayerId(targetFeature.layer.id);
-    const popupAnchorLocation = this._justifyAnchorLocation(e.lngLat, targetFeature);
+    const targetMbFeataure = mbFeatures[0];
+    const popupAnchorLocation = this._justifyAnchorLocation(e.lngLat, targetMbFeataure);
+
+    const features = this._getIdsForFeatures(mbFeatures);
     this.props.setTooltipState({
       type: TOOLTIP_TYPE.LOCKED,
-      layerId: layer.getId(),
-      featureId: targetFeature.properties[FEATURE_ID_PROPERTY_NAME],
+      features: features,
       location: popupAnchorLocation
     });
   };
@@ -165,27 +192,25 @@ export class MBMapContainer extends React.Component {
       return;
     }
 
-    const features = this._getFeaturesUnderPointer(e.point);
-    if (!features.length) {
+    const mbFeatures = this._getFeaturesUnderPointer(e.point);
+    if (!mbFeatures.length) {
       this.props.setTooltipState(null);
       return;
     }
 
-    const targetFeature = features[0];
-
+    const targetMbFeature = mbFeatures[0];
     if (this.props.tooltipState) {
-      if (targetFeature.properties[FEATURE_ID_PROPERTY_NAME] === this.props.tooltipState.featureId) {
+      const firstFeature = this.props.tooltipState.features[0];
+      if (targetMbFeature.properties[FEATURE_ID_PROPERTY_NAME] === firstFeature.id) {
         return;
       }
     }
 
-    const layer = this._getLayerByMbLayerId(targetFeature.layer.id);
-    const popupAnchorLocation = this._justifyAnchorLocation(e.lngLat, targetFeature);
-
+    const popupAnchorLocation = this._justifyAnchorLocation(e.lngLat, targetMbFeature);
+    const features = this._getIdsForFeatures(mbFeatures);
     this.props.setTooltipState({
       type: TOOLTIP_TYPE.HOVER,
-      featureId: targetFeature.properties[FEATURE_ID_PROPERTY_NAME],
-      layerId: layer.getId(),
+      features: features,
       location: popupAnchorLocation
     });
 
@@ -215,8 +240,8 @@ export class MBMapContainer extends React.Component {
     }, []);
 
 
-    //ensure all layers that are actually on the map
-    //the raw list may contain layer-ids that have not been added to the map yet.
+    //Ensure that all layers are actually on the map.
+    //The raw list may contain layer-ids that have not been added to the map yet.
     //For example:
     //a vector or heatmap layer will not add a source and layer to the mapbox-map, until that data is available.
     //during that data-fetch window, the app should not query for layers that do not exist.
@@ -386,11 +411,12 @@ export class MBMapContainer extends React.Component {
     const isLocked = this.props.tooltipState.type === TOOLTIP_TYPE.LOCKED;
     ReactDOM.render((
       <FeatureTooltip
-        tooltipState={this.props.tooltipState}
+        features={this.props.tooltipState.features}
         loadFeatureProperties={this._loadFeatureProperties}
+        findLayerById={this._findLayerById}
         closeTooltip={this._onTooltipClose}
         showFilterButtons={this.props.isFilterable && isLocked}
-        showCloseButton={isLocked}
+        isLocked={isLocked}
       />
     ), this._tooltipContainer);
 
@@ -400,9 +426,7 @@ export class MBMapContainer extends React.Component {
   }
 
   _loadFeatureProperties = async ({ layerId, featureId }) => {
-    const tooltipLayer = this.props.layerList.find(layer => {
-      return layer.getId() === layerId;
-    });
+    const tooltipLayer = this._findLayerById(layerId);
     if (!tooltipLayer) {
       return [];
     }
@@ -411,7 +435,13 @@ export class MBMapContainer extends React.Component {
       return [];
     }
     return await tooltipLayer.getPropertiesForTooltip(targetFeature.properties);
-  }
+  };
+
+  _findLayerById = (layerId) => {
+    return this.props.layerList.find(layer => {
+      return layer.getId() === layerId;
+    });
+  };
 
   _syncTooltipState() {
     if (this.props.tooltipState) {
