@@ -29,9 +29,115 @@ interface LegacyMonitorStatesQueryResult {
   afterKey: any | null;
 }
 
+interface LegacyMonitorStatesRecentCheckGroupsQueryResult {
+  checkGroups: string[];
+  afterKey: any | null;
+}
+
 export class ElasticsearchMonitorStatesAdapter implements UMMonitorStatesAdapter {
   constructor(private readonly database: DatabaseAdapter) {
     this.database = database;
+  }
+
+  // This query returns the most recent check groups for a given
+  // monitor ID.
+  private async runLegacyMonitorStatesRecentCheckGroupsQuery(
+    request: any,
+    dateRangeStart: string,
+    dateRangeEnd: string,
+    filters?: string | null,
+    searchAfter?: any
+  ): Promise<LegacyMonitorStatesRecentCheckGroupsQueryResult> {
+    const body = {
+      query: {
+        bool: {
+          filter: [
+            {
+              range: {
+                '@timestamp': {
+                  gte: dateRangeStart,
+                  lte: dateRangeEnd,
+                },
+              },
+            },
+            {
+              // We check for summary.up to ensure that the check group
+              // is complete. Summary fields are only present on
+              // completed check groups.
+              exists: {
+                field: 'summary.up',
+              },
+            },
+          ],
+        },
+      },
+      sort: [
+        {
+          '@timestamp': 'desc',
+        },
+      ],
+      size: 0,
+      aggs: {
+        monitors: {
+          composite: {
+            size: 5000, // We use a much larger size here in case there are many agents per monitor
+            sources: [
+              {
+                monitor_id: {
+                  terms: {
+                    field: 'monitor.id',
+                  },
+                },
+              },
+              {
+                agent_id: {
+                  // We need to add the agent.id in because we have one check group
+                  // per agent ID
+                  terms: {
+                    field: 'agent.id',
+                  },
+                },
+              },
+            ],
+          },
+          aggs: {
+            top: {
+              top_hits: {
+                sort: [
+                  {
+                    '@timestamp': 'desc',
+                  },
+                ],
+                _source: {
+                  includes: ['monitor.check_group'],
+                },
+                size: 1,
+              },
+            },
+          },
+        },
+      },
+    };
+
+    if (searchAfter) {
+      set(body, 'aggs.monitors.composite.after', searchAfter);
+    }
+
+    const params = {
+      index: INDEX_NAMES.HEARTBEAT,
+      body,
+    };
+
+    const result = await this.database.search(request, params);
+
+    const checkGroups = result.aggregations.monitors.buckets.map((b: any) => {
+      return get<string>(b, 'top.hits.hits[0]._source.monitor.check_group');
+    });
+    const afterKey = get<any | null>(result, 'aggregations.monitors.after_key', null);
+    return {
+      checkGroups,
+      afterKey,
+    };
   }
 
   private async runLegacyMonitorStatesQuery(
@@ -41,6 +147,20 @@ export class ElasticsearchMonitorStatesAdapter implements UMMonitorStatesAdapter
     filters?: string | null,
     searchAfter?: any
   ): Promise<LegacyMonitorStatesQueryResult> {
+    // First we fetch the most recent check groups for this query
+    // This is a critical performance optimization.
+    // Without this the expensive scripted_metric agg below will run
+    // over large numbers of documents.
+    // It only really needs to run over the latest complete check group for each
+    // agent.
+    const { checkGroups, afterKey } = await this.runLegacyMonitorStatesRecentCheckGroupsQuery(
+      request,
+      dateRangeStart,
+      dateRangeEnd,
+      filters,
+      searchAfter
+    );
+
     const { query, statusFilter } = getFilteredQueryAndStatusFilter(
       dateRangeStart,
       dateRangeEnd,
@@ -49,12 +169,17 @@ export class ElasticsearchMonitorStatesAdapter implements UMMonitorStatesAdapter
     const params = {
       index: INDEX_NAMES.HEARTBEAT,
       body: {
-        query,
+        query: {
+          bool: {
+            filter: [{ terms: { 'monitor.check_group': checkGroups } }, query],
+          },
+        },
+        sort: [{ '@timestamp': 'desc' }],
         size: 0,
         aggs: {
           monitors: {
             composite: {
-              size: 100,
+              size: 10000,
               sources: [
                 {
                   monitor_id: {
@@ -234,11 +359,7 @@ export class ElasticsearchMonitorStatesAdapter implements UMMonitorStatesAdapter
       },
     };
 
-    if (searchAfter) {
-      set(params, 'body.aggs.monitors.composite.after', searchAfter);
-    }
     const result = await this.database.search(request, params);
-    const afterKey = get<any | null>(result, 'aggregations.monitors.after_key', null);
     return { afterKey, result, statusFilter };
   }
 
