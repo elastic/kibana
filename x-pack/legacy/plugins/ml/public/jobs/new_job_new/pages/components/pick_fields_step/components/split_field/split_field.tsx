@@ -23,6 +23,7 @@ export const SplitFieldSelector: FC = () => {
     return <Fragment />;
   }
   const jobCreator = jc as MultiMetricJobCreator | PopulationJobCreator;
+  const canClearSelection = isMultiMetricJobCreator(jc);
 
   const { categoryFields } = newJobCapsService;
   const [splitField, setSplitField] = useState(jobCreator.splitField);
@@ -42,6 +43,7 @@ export const SplitFieldSelector: FC = () => {
         fields={categoryFields}
         changeHandler={setSplitField}
         selectedField={splitField}
+        isClearable={canClearSelection}
       />
     </Description>
   );

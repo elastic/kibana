@@ -6,6 +6,7 @@
 
 import React, { FC, Fragment, useContext, useEffect, useState } from 'react';
 
+import { Field } from '../../../../../../../../common/types/fields';
 import { SplitFieldSelect } from './split_field_select';
 import { JobCreatorContext } from '../../../job_creator_context';
 import { newJobCapsService } from '../../../../../../../services/new_job_capabilities_service';
@@ -26,9 +27,19 @@ export const ByFieldSelector: FC<Props> = ({ detectorIndex }) => {
   }
   const jobCreator = jc as PopulationJobCreator;
 
-  const { categoryFields } = newJobCapsService;
+  const { categoryFields: allCategoryFields } = newJobCapsService;
 
   const [byField, setByField] = useState(jobCreator.getByField(detectorIndex));
+  const [categoryFields, setCategoryFields] = useState<Field[]>(getFilteredCategoryFields());
+
+  function getFilteredCategoryFields(): Field[] {
+    // remove the split (over) field from the by field options
+    const sf = jobCreator.splitField;
+    if (sf !== null) {
+      return allCategoryFields.filter(f => f.name !== sf.name);
+    }
+    return allCategoryFields;
+  }
 
   useEffect(() => {
     jobCreator.setByField(byField, detectorIndex);
@@ -38,9 +49,17 @@ export const ByFieldSelector: FC<Props> = ({ detectorIndex }) => {
   useEffect(() => {
     const bf = jobCreator.getByField(detectorIndex);
     setByField(bf);
+
+    const filteredFields = getFilteredCategoryFields();
+    setCategoryFields(filteredFields);
   }, [jobCreatorUpdated]);
 
   return (
-    <SplitFieldSelect fields={categoryFields} changeHandler={setByField} selectedField={byField} />
+    <SplitFieldSelect
+      fields={categoryFields}
+      changeHandler={setByField}
+      selectedField={byField}
+      isClearable={true}
+    />
   );
 };
