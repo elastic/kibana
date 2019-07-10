@@ -9,7 +9,7 @@ import PropTypes from 'prop-types';
 import { get } from 'lodash';
 import { fromExpression } from '@kbn/interpreter/common';
 import { TimePicker } from '../time_picker';
-import { TimePickerMini } from '../time_picker_mini';
+import { TimePickerPopover } from '../time_picker_popover';
 
 export interface FilterMeta {
   column: string;
@@ -42,7 +42,7 @@ export const TimeFilter = ({ filter, commit, compact }: Props) => {
   const { column, from, to } = getFilterMeta(filter);
 
   if (compact) {
-    return <TimePickerMini from={from} to={to} onSelect={setFilter(column)} />;
+    return <TimePickerPopover from={from} to={to} onSelect={setFilter(column)} />;
   } else {
     return <TimePicker from={from} to={to} onSelect={setFilter(column)} />;
   }

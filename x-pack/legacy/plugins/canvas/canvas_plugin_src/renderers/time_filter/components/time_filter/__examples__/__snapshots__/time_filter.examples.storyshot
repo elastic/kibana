@@ -2,7 +2,7 @@
 
 exports[`Storyshots renderers/TimeFilter compact mode 1`] = `
 <div
-  className="euiPopover euiPopover--anchorDownCenter canvasTimePickerMini"
+  className="euiPopover euiPopover--anchorDownCenter canvasTimePickerPopover"
   container={null}
   id="timefilter-popover-trigger-click"
   onKeyDown={[Function]}
@@ -12,10 +12,10 @@ exports[`Storyshots renderers/TimeFilter compact mode 1`] = `
   onTouchStart={[Function]}
 >
   <div
-    className="euiPopover__anchor canvasTimePickerMini__anchor"
+    className="euiPopover__anchor canvasTimePickerPopover__anchor"
   >
     <button
-      className="canvasTimePickerMini__button"
+      className="canvasTimePickerPopover__button"
       onClick={[Function]}
     >
       <span>

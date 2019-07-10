@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { TimePickerMini } from './time_picker_mini';
+export { TimePickerPopover } from './time_picker_popover';

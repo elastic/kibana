@@ -20,9 +20,9 @@ export interface Props {
   onSelect: (from: string, to: string) => void;
 }
 
-export const TimePickerMini: FunctionComponent<Props> = ({ from, to, onSelect }) => {
+export const TimePickerPopover: FunctionComponent<Props> = ({ from, to, onSelect }) => {
   const button = (handleClick: (event: MouseEvent<HTMLButtonElement>) => void) => (
-    <button className="canvasTimePickerMini__button" onClick={handleClick}>
+    <button className="canvasTimePickerPopover__button" onClick={handleClick}>
       <PrettyDuration from={from} to={to} />
     </button>
   );
@@ -30,8 +30,8 @@ export const TimePickerMini: FunctionComponent<Props> = ({ from, to, onSelect })
   return (
     <Popover
       id="timefilter-popover-trigger-click"
-      className="canvasTimePickerMini"
-      anchorClassName="canvasTimePickerMini__anchor"
+      className="canvasTimePickerPopover"
+      anchorClassName="canvasTimePickerPopover__anchor"
       button={button}
     >
       {() => <TimePicker from={from} to={to} onSelect={onSelect} />}
@@ -39,7 +39,7 @@ export const TimePickerMini: FunctionComponent<Props> = ({ from, to, onSelect })
   );
 };
 
-TimePickerMini.propTypes = {
+TimePickerPopover.propTypes = {
   from: PropTypes.string.isRequired,
   to: PropTypes.string.isRequired,
   onSelect: PropTypes.func.isRequired,
