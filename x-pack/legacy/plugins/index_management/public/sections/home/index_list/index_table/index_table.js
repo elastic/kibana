@@ -31,6 +31,7 @@ import {
   EuiTableRowCell,
   EuiTableRowCellCheckbox,
   EuiText,
+  EuiTitle,
 } from '@elastic/eui';
 
 import { UIM_SHOW_DETAILS_CLICK } from '../../../../../common/constants';
@@ -408,27 +409,41 @@ export class IndexTable extends Component {
 
     return (
       <Fragment>
-        {((indicesLoading && allIndices.length === 0) || indicesError) ? null : (
-          <EuiFlexGroup>
-            {getToggleExtensions().map((toggle) => {
-              return this.renderToggleControl(toggle);
-            })}
-            <EuiFlexItem grow={false}>
-              <EuiSwitch
-                id="checkboxShowSystemIndices"
-                checked={showSystemIndices}
-                onChange={event => showSystemIndicesChanged(event.target.checked)}
-                label={
-                  <FormattedMessage
-                    id="xpack.idxMgmt.indexTable.systemIndicesSwitchLabel"
-                    defaultMessage="Include system indices"
+        <EuiFlexGroup alignItems="center">
+          <EuiFlexItem grow={true}>
+            <EuiTitle size="s">
+              <EuiText color="subdued">
+                <FormattedMessage
+                  id="xpack.idxMgmt.home.idxMgmtDescription"
+                  defaultMessage="Update your Elasticsearch indices individually or in bulk."
+                />
+              </EuiText>
+            </EuiTitle>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            {((indicesLoading && allIndices.length === 0) || indicesError) ? null : (
+              <EuiFlexGroup>
+                {getToggleExtensions().map((toggle) => {
+                  return this.renderToggleControl(toggle);
+                })}
+                <EuiFlexItem grow={false}>
+                  <EuiSwitch
+                    id="checkboxShowSystemIndices"
+                    checked={showSystemIndices}
+                    onChange={event => showSystemIndicesChanged(event.target.checked)}
+                    label={
+                      <FormattedMessage
+                        id="xpack.idxMgmt.indexTable.systemIndicesSwitchLabel"
+                        defaultMessage="Include system indices"
+                      />
+                    }
                   />
-                }
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        )}
-        <EuiSpacer />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            )}
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        <EuiSpacer size="l" />
         {this.renderBanners()}
         {indicesError && this.renderError()}
         <EuiFlexGroup gutterSize="l" alignItems="center">

@@ -6,7 +6,15 @@
 
 import React, { Fragment, useState, useEffect, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiEmptyPrompt, EuiSpacer, EuiTitle, EuiText, EuiSwitch } from '@elastic/eui';
+import {
+  EuiEmptyPrompt,
+  EuiSpacer,
+  EuiTitle,
+  EuiText,
+  EuiSwitch,
+  EuiFlexItem,
+  EuiFlexGroup,
+} from '@elastic/eui';
 import { SectionError, SectionLoading } from '../../../components';
 import { TemplatesTable } from './templates_table';
 import { loadIndexTemplates } from '../../../services/api';
@@ -72,27 +80,32 @@ export const TemplatesList: React.FunctionComponent = () => {
   } else if (Array.isArray(templates) && templates.length > 0) {
     content = (
       <Fragment>
-        <EuiTitle size="s">
-          <EuiText color="subdued">
-            <FormattedMessage
-              id="xpack.idxMgmt.home.indexTemplatesDescription"
-              defaultMessage="Use index templates to automatically apply mappings and other properties to new indices."
+        <EuiFlexGroup alignItems="center">
+          <EuiFlexItem grow={true}>
+            <EuiTitle size="s">
+              <EuiText color="subdued">
+                <FormattedMessage
+                  id="xpack.idxMgmt.home.indexTemplatesDescription"
+                  defaultMessage="Use index templates to automatically apply mappings and other properties to new indices."
+                />
+              </EuiText>
+            </EuiTitle>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiSwitch
+              id="checkboxShowSystemIndexTemplates"
+              data-test-subj="systemTemplatesSwitch"
+              checked={showSystemTemplates}
+              onChange={event => setShowSystemTemplates(event.target.checked)}
+              label={
+                <FormattedMessage
+                  id="xpack.idxMgmt.indexTemplatesTable.systemIndexTemplatesSwitchLabel"
+                  defaultMessage="Include system index templates"
+                />
+              }
             />
-          </EuiText>
-        </EuiTitle>
-        <EuiSpacer size="m" />
-        <EuiSwitch
-          id="checkboxShowSystemIndexTemplates"
-          data-test-subj="systemTemplatesSwitch"
-          checked={showSystemTemplates}
-          onChange={event => setShowSystemTemplates(event.target.checked)}
-          label={
-            <FormattedMessage
-              id="xpack.idxMgmt.indexTemplatesTable.systemIndexTemplatesSwitchLabel"
-              defaultMessage="Include system index templates"
-            />
-          }
-        />
+          </EuiFlexItem>
+        </EuiFlexGroup>
         <EuiSpacer size="l" />
         <TemplatesTable
           templates={showSystemTemplates ? templates : filteredTemplates}
