@@ -84,7 +84,7 @@ interface HttpResponseOptions {
    // list of  known headers
    ...
    // for custom headers:
-   [header: string]: number | string | string[] | undefined;
+   [header: string]: string;
   }
 }
 
@@ -127,6 +127,9 @@ interface ResponseError extends Error {
   }
 }
 
+export const createResponseError = (error: Error | string, meta?: ResponseErrorType['meta']) =>
+  new ResponseError(error, meta)
+
 const kibanaResponseToolkit = {
   // Client errors
   badRequest: <T extends ResponseError>(err: T, options?: HttpResponseOptions) =>
@@ -146,19 +149,19 @@ const kibanaResponseToolkit = {
     new KibanaResponse(500, err, options),
 ```
 
-##### Generic
-If a custom respond is required
+##### Custom
+If a custom response is required
 ```typescript
-interface GenericOptions extends HttpResponseOptions {
+interface CustomOptions extends HttpResponseOptions {
   statusCode: StatusCode;
 }
 export const kibanaResponseToolkit = {
-  generic: <T extends HttpResponsePayload>(payload: T, {statusCode, ...options}: GenericOptions) =>
+  custom: <T extends HttpResponsePayload>(payload: T, {statusCode, ...options}: CustomOptions) =>
     new KibanaResponse(statusCode, payload, options),
 ```
 # Drawbacks
 - `Handler` is not compatible with Legacy platform implementation when anything can be returned or thrown from handler function and server send it as a valid result. Transition to the new format may require additional work in plugins.
-- `Handler` doesn't cover **all** functionality of Legacy server at the current moment. For example, we cannot render anything in New platform yet and in this case, we have to proxy the request to the Legacy platform endpoint to perform rendering. All such cases should be considered in an individual order.
+- `Handler` doesn't cover **all** functionality of the Legacy server at the current moment. For example, we cannot render a view in New platform yet and in this case, we have to proxy the request to the Legacy platform endpoint to perform rendering. All such cases should be considered in an individual order.
 - `KibanaResponseToolkit` may not cover all use cases and requires an extension for specific use-cases.
 - `KibanaResponseToolkit` operates low-level Http primitives, such as Headers e.g., and it is not always handy to work with them directly.
 - `KibanaResponse` cannot be extended with arbitrary data. 
