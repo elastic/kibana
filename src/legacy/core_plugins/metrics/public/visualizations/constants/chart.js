@@ -35,4 +35,5 @@ export const Y_ACCESSOR_INDEXES = [1];
 export const STACKED_OPTIONS = {
   STACKED: 'stacked',
   PERCENT: 'percent',
+  NONE: 'none',
 };

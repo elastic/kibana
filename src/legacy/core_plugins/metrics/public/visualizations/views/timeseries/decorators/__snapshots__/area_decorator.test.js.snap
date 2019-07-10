@@ -47,7 +47,6 @@ exports[`src/legacy/core_plugins/metrics/public/visualizations/views/timeseries/
   hideInLegend={false}
   id="id:61ca57f1-469d-11e7-af02-69e470af7417:Rome"
   name="Rome"
-  stackAccessors={null}
   xAccessor={0}
   xScaleType="time"
   yAccessors={

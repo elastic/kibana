@@ -18,15 +18,16 @@
  */
 
 import { getStackAccessors } from './stack_format';
+import { X_ACCESSOR_INDEX, STACKED_OPTIONS } from '../../../constants';
 
 describe('src/legacy/core_plugins/metrics/public/visualizations/views/timeseries/utils/stack.js', () => {
   describe('getStackAccessors()', () => {
-    test('should return [0] if stack is true', () => {
-      expect(getStackAccessors(true)).toEqual([0]);
+    test('should return X_ACCESSOR_INDEX if stack is stacked', () => {
+      expect(getStackAccessors(STACKED_OPTIONS.STACKED)).toEqual([X_ACCESSOR_INDEX]);
     });
 
-    test('should return null if stack is false', () => {
-      expect(getStackAccessors(false)).toBe(null);
+    test('should return null if stack is none', () => {
+      expect(getStackAccessors(STACKED_OPTIONS.NONE)).toBe(null);
     });
   });
 });
