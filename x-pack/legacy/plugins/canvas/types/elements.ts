@@ -4,26 +4,59 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-type ArgumentValue = null | string | number | boolean | Ast;
-
-interface Function {
-  type: 'function';
-  /**
-   * name of the function
-   */
-  function: string;
-  /**
-   * arguments passed into the function
-   */
-  arguments: { [argument: string]: ArgumentValue } | {};
+export interface ElementSpec {
+  name: string;
+  image: string;
+  expression: string;
+  displayName?: string;
+  tags?: string[];
+  help?: string;
+  filter?: string;
+  width?: number;
+  height?: number;
 }
 
-interface Ast {
-  type: 'expression';
+export type ElementFactory = () => ElementSpec;
+
+export interface CustomElement {
   /**
-   * array of functions in the expression
+   * unique ID for the custom element
    */
-  chain: Function[];
+  id: string;
+  /**
+   * name of the custom element
+   */
+  name: string;
+  /**
+   * name to be displayed from element picker
+   */
+  displayName: string;
+  /**
+   * description of the custom element
+   */
+  help?: string;
+  /**
+   * base 64 data URL string of the preview image
+   */
+  image?: string;
+  /**
+   * tags associated with the element
+   */
+  tags?: string[];
+  /**
+   * the element object stringified
+   */
+  content: string;
+}
+
+export interface AST {
+  type: string;
+  chain: Array<{
+    function: string;
+    arguments: {
+      [s: string]: AST[];
+    };
+  }>;
 }
 
 interface Position {
@@ -69,5 +102,5 @@ export interface PositionedElement {
   /**
    * AST of the Canvas expression for the element
    */
-  ast: Ast;
+  ast: AST;
 }

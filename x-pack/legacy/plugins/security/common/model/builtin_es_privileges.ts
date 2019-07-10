@@ -4,4 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export * from '../../../../../../../src/legacy/core_plugins/interpreter/public/types/style';
+export interface BuiltinESPrivileges {
+  cluster: string[];
+  index: string[];
+}

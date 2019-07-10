@@ -5,13 +5,13 @@
  */
 
 import { useContext } from 'react';
-import { ChartsTimeContext } from '../context/ChartsTimeContext';
+import { ChartsSyncContext } from '../context/ChartsSyncContext';
 
-export function useChartsTime() {
-  const context = useContext(ChartsTimeContext);
+export function useChartsSync() {
+  const context = useContext(ChartsSyncContext);
 
   if (!context) {
-    throw new Error('Missing ChartsTime context provider');
+    throw new Error('Missing ChartsSync context provider');
   }
 
   return context;

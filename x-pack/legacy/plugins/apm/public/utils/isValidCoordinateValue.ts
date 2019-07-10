@@ -4,6 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export * from './common';
-export * from './functions';
-export * from './style';
+export const isValidCoordinateValue = (
+  value: number | null | undefined
+): value is number => value !== null && value !== undefined;
