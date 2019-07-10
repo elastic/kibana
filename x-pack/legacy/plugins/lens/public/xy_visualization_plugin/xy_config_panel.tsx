@@ -160,7 +160,7 @@ export function XYConfigPanel(props: VisualizationProps<State>) {
               splitSeriesAccessors: state.splitSeriesAccessors.filter(col => col !== accessor),
             })
           }
-          filterOperations={op => op.isBucketed}
+          filterOperations={op => op.isBucketed && op.dataType !== 'date'}
           suggestedPriority={0}
           testSubj="splitSeriesDimensionPanel"
         />
