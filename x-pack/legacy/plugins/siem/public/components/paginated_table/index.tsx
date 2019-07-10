@@ -233,13 +233,8 @@ export const PaginatedTable = memo<SiemTables>(
             }
           />
           <FooterAction>
-            <EuiFlexGroup
-              gutterSize="none"
-              alignItems="flexStart"
-              justifyContent="flexStart"
-              direction="row"
-            >
-              <EuiFlexItem grow={false}>
+            <EuiFlexGroup alignItems="center">
+              <EuiFlexItem>
                 {!isEmpty(itemsPerRow) && (
                   <EuiPopover
                     id="customizablePagination"
@@ -253,23 +248,14 @@ export const PaginatedTable = memo<SiemTables>(
                   </EuiPopover>
                 )}
               </EuiFlexItem>
-              <EuiFlexItem>
-                <EuiFlexGroup
-                  gutterSize="none"
-                  alignItems="flexEnd"
-                  justifyContent="flexEnd"
-                  direction="row"
-                >
-                  <PaginationWrapper grow={false}>
-                    <EuiPagination
-                      data-test-subj="numberedPagination"
-                      pageCount={pageCount}
-                      activePage={activePage}
-                      onPageClick={goToPage}
-                    />
-                  </PaginationWrapper>
-                </EuiFlexGroup>
-              </EuiFlexItem>
+              <PaginationWrapper grow={false}>
+                <EuiPagination
+                  data-test-subj="numberedPagination"
+                  pageCount={pageCount}
+                  activePage={activePage}
+                  onPageClick={goToPage}
+                />
+              </PaginationWrapper>
             </EuiFlexGroup>
           </FooterAction>
         </BasicTableContainer>
@@ -280,7 +266,6 @@ export const PaginatedTable = memo<SiemTables>(
 
 export const BasicTableContainer = styled.div`
   display: flex;
-  flex-direction: row;
   flex-wrap: wrap;
   height: auto;
   position: relative;
@@ -320,10 +305,10 @@ const PaginationEuiFlexItem = styled(EuiFlexItem)`
     margin-left: 20px;
   }
   .euiPagination::before {
-    content: '...';
-    bottom: 13px;
-    color: #c2c3c6;
-    font-size: 14px;
+    content: '\\2026';
+    bottom: 9px;
+    color: ${props => props.theme.eui.euiButtonColorDisabled};
+    font-size: ${props => props.theme.eui.euiFontSizeS};
     position: absolute;
     right: 30px;
   }
