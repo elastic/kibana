@@ -168,7 +168,7 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
             .perform();
           if (element instanceof WebElementWrapper) {
             await this.getActions()
-              .move({ x: xOffset || 10, y: yOffset || 10, origin: element._webElement })
+              .move({ x: xOffset || 10, y: yOffset || 10, origin: element.getWebElement() })
               .perform();
           } else {
             await this.getActions()
@@ -181,7 +181,7 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
           if (element instanceof WebElementWrapper) {
             await this.getActions()
               .pause(this.getActions().mouse)
-              .move({ origin: element._webElement })
+              .move({ origin: element.getWebElement() })
               .perform();
           } else {
             await this.getActions()
@@ -205,8 +205,8 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
      * @return {Promise<void>}
      */
     public async dragAndDrop(
-      from: { offset: { x: any; y: any }; location: { _webElement: any } },
-      to: { offset: { x: any; y: any }; location: { _webElement: any; x: any } }
+      from: { offset: { x: any; y: any }; location: any },
+      to: { offset: { x: any; y: any }; location: any }
     ) {
       // tslint:disable-next-line:variable-name
       let _from;
@@ -236,7 +236,7 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
       // tslint:disable-next-line:variable-name
       const _convertPoint = (point: any) => {
         return point.location instanceof WebElementWrapper
-          ? point.location._webElement
+          ? point.location.getWebElement()
           : point.location;
       };
 
@@ -332,7 +332,7 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
       if (arg0 instanceof WebElementWrapper) {
         await this.getActions()
           .pause(this.getActions().mouse)
-          .move({ origin: arg0._webElement })
+          .move({ origin: arg0.getWebElement() })
           .click()
           .perform();
       } else if (isNaN(args[1] as number) || isNaN(args[2] as number) === false) {
@@ -376,7 +376,7 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
     public async doubleClick(element?: WebElementWrapper): Promise<void> {
       if (element instanceof WebElementWrapper) {
         await this.getActions()
-          .doubleClick(element._webElement)
+          .doubleClick(element.getWebElement())
           .perform();
       } else {
         await this.getActions()
@@ -450,7 +450,7 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
         fn,
         ...cloneDeep<any>(args, arg => {
           if (arg instanceof WebElementWrapper) {
-            return arg._webElement;
+            return arg.getWebElement();
           }
         })
       );
@@ -464,7 +464,7 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
         fn,
         ...cloneDeep<any>(args, arg => {
           if (arg instanceof WebElementWrapper) {
-            return arg._webElement;
+            return arg.getWebElement();
           }
         })
       );

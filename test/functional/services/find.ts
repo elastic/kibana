@@ -173,7 +173,7 @@ export async function FindProvider({ getService }: FtrProviderContext) {
       timeout: number = WAIT_FOR_EXISTS_TIME
     ): Promise<boolean> {
       log.debug(`Find.descendantExistsByCssSelector('${selector}') with timeout=${timeout}`);
-      const els = await parentElement._webElement.findElements(By.css(selector));
+      const els = await parentElement.getWebElement().findElements(By.css(selector));
       return await this.exists(async () => wrapAll(els), timeout);
     }
 
@@ -182,7 +182,7 @@ export async function FindProvider({ getService }: FtrProviderContext) {
       parentElement: WebElementWrapper
     ): Promise<WebElementWrapper | never> {
       log.debug(`Find.descendantDisplayedByCssSelector('${selector}')`);
-      const element = await parentElement._webElement.findElement(By.css(selector));
+      const element = await parentElement.getWebElement().findElement(By.css(selector));
       const descendant = wrap(element, By.css(selector));
       const isDisplayed = await descendant.isDisplayed();
       if (isDisplayed) {
@@ -198,7 +198,7 @@ export async function FindProvider({ getService }: FtrProviderContext) {
     ): Promise<WebElementWrapper[]> {
       log.debug(`Find.allDescendantDisplayedByCssSelector('${selector}')`);
       const allElements = await wrapAll(
-        await parentElement._webElement.findElements(By.css(selector))
+        await parentElement.getWebElement().findElements(By.css(selector))
       );
       return await this.filterElementIsDisplayed(allElements);
     }
@@ -210,7 +210,7 @@ export async function FindProvider({ getService }: FtrProviderContext) {
       log.debug(`Find.displayedByLinkText('${linkText}') with timeout=${timeout}`);
       const element = await this.byLinkText(linkText, timeout);
       log.debug(`Wait for element become visible: ${linkText} with timeout=${timeout}`);
-      await driver.wait(until.elementIsVisible(element._webElement), timeout);
+      await driver.wait(until.elementIsVisible(element.getWebElement()), timeout);
       return wrap(element, By.linkText(linkText));
     }
 
@@ -221,7 +221,7 @@ export async function FindProvider({ getService }: FtrProviderContext) {
       log.debug(`Find.displayedByCssSelector(${selector})`);
       const element = await this.byCssSelector(selector, timeout);
       log.debug(`Wait for element become visible: ${selector} with timeout=${timeout}`);
-      await driver.wait(until.elementIsVisible(element._webElement), timeout);
+      await driver.wait(until.elementIsVisible(element.getWebElement()), timeout);
       return wrap(element, By.css(selector));
     }
 
@@ -309,7 +309,7 @@ export async function FindProvider({ getService }: FtrProviderContext) {
       // it's gone.
       const element = await this.byCssSelector(selector, timeout);
       await element.moveMouseTo();
-      await driver.wait(until.elementIsEnabled(element._webElement), timeout);
+      await driver.wait(until.elementIsEnabled(element.getWebElement()), timeout);
       await element.click();
     }
 
@@ -345,8 +345,7 @@ export async function FindProvider({ getService }: FtrProviderContext) {
       log.debug(`Find.byButtonText('${buttonText}') with timeout=${timeout}`);
       return await retry.tryForTime(timeout, async () => {
         // tslint:disable-next-line:variable-name
-        const _element =
-          element instanceof WebElementWrapper ? (element as any)._webElement : element;
+        const _element = element instanceof WebElementWrapper ? element.getWebElement() : element;
         const allButtons = wrapAll(await _element.findElements(By.tagName('button')));
         const buttonTexts = await Promise.all(
           allButtons.map(async el => {
@@ -455,7 +454,7 @@ export async function FindProvider({ getService }: FtrProviderContext) {
       timeout: number = defaultFindTimeout
     ): Promise<void> {
       log.debug(`Find.waitForElementStale with timeout=${timeout}`);
-      await driver.wait(until.stalenessOf(element._webElement), timeout);
+      await driver.wait(until.stalenessOf(element.getWebElement()), timeout);
     }
 
     public async waitForElementHidden(
@@ -463,7 +462,7 @@ export async function FindProvider({ getService }: FtrProviderContext) {
       timeout: number = defaultFindTimeout
     ) {
       log.debug(`Find.waitForElementHidden with timeout=${timeout}`);
-      await driver.wait(until.elementIsNotVisible(element._webElement), timeout);
+      await driver.wait(until.elementIsNotVisible(element.getWebElement()), timeout);
     }
 
     private async _withTimeout(timeout: number) {

@@ -51,7 +51,6 @@ export class WebElementWrapper {
     'ElementNotInteractableError',
     'StaleElementReferenceError',
   ];
-  public _webElement: WebElement = this.webElement as WebElement;
   public LegacyAction: any = this.webDriver.LegacyActionSequence;
 
   constructor(
@@ -115,6 +114,14 @@ export class WebElementWrapper {
   }
 
   /**
+   * Returns WebElement object that represents a DOM element
+   * https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/index_exports_WebElement.html
+   */
+  public getWebElement(): WebElement {
+    return this.webElement instanceof WebElementWrapper ? this.getWebElement() : this.webElement;
+  }
+
+  /**
    * Returns whether or not the element would be visible to an actual user. This means
    * that the following types of elements are considered to be not displayed:
    *
@@ -130,7 +137,7 @@ export class WebElementWrapper {
    */
   public async isDisplayed(): Promise<boolean> {
     return await this.retryCall(async function isDisplayed(wrapper: WebElementWrapper) {
-      return await wrapper._webElement.isDisplayed();
+      return await wrapper.getWebElement().isDisplayed();
     });
   }
 
@@ -142,7 +149,7 @@ export class WebElementWrapper {
    */
   public async isEnabled(): Promise<boolean> {
     return await this.retryCall(async function isEnabled(wrapper: WebElementWrapper) {
-      return await wrapper._webElement.isEnabled();
+      return await wrapper.getWebElement().isEnabled();
     });
   }
 
@@ -154,7 +161,7 @@ export class WebElementWrapper {
    */
   public async isSelected(): Promise<boolean> {
     return await this.retryCall(async function isSelected(wrapper: WebElementWrapper) {
-      return await wrapper._webElement.isSelected();
+      return await wrapper.getWebElement().isSelected();
     });
   }
 
@@ -167,7 +174,7 @@ export class WebElementWrapper {
   public async click(): Promise<void> {
     await this.retryCall(async function click(wrapper: WebElementWrapper) {
       await wrapper.scrollIntoViewIfNecessary();
-      await wrapper._webElement.click();
+      await wrapper.getWebElement().click();
     });
   }
 
@@ -180,9 +187,9 @@ export class WebElementWrapper {
    */
   async clearValue() {
     // https://bugs.chromium.org/p/chromedriver/issues/detail?id=2702
-    // await wrapper._webElement.clear();
+    // await wrapper.getWebElement().clear();
     await this.retryCall(async function clearValue(wrapper: WebElementWrapper) {
-      await wrapper.driver.executeScript(`arguments[0].value=''`, wrapper._webElement);
+      await wrapper.driver.executeScript(`arguments[0].value=''`, wrapper.getWebElement());
     });
   }
 
@@ -202,7 +209,7 @@ export class WebElementWrapper {
       if (this.browserType === Browsers.Chrome) {
         // https://bugs.chromium.org/p/chromedriver/issues/detail?id=30
         await this.retryCall(async function clearValueWithKeyboard(wrapper: WebElementWrapper) {
-          await wrapper.driver.executeScript(`arguments[0].select();`, wrapper._webElement);
+          await wrapper.driver.executeScript(`arguments[0].select();`, wrapper.getWebElement());
         });
         await this.pressKeys(this.Keys.BACK_SPACE);
       } else {
@@ -237,13 +244,13 @@ export class WebElementWrapper {
     if (options.charByChar) {
       for (const char of value) {
         await this.retryCall(async function type(wrapper: WebElementWrapper) {
-          await wrapper._webElement.sendKeys(char);
+          await wrapper.getWebElement().sendKeys(char);
           await delay(100);
         });
       }
     } else {
       await this.retryCall(async function type(wrapper: WebElementWrapper) {
-        await wrapper._webElement.sendKeys(...value);
+        await wrapper.getWebElement().sendKeys(...value);
       });
     }
   }
@@ -261,9 +268,9 @@ export class WebElementWrapper {
     await this.retryCall(async function pressKeys(wrapper: WebElementWrapper) {
       if (Array.isArray(keys)) {
         const chord = wrapper.Keys.chord(keys);
-        await wrapper._webElement.sendKeys(chord);
+        await wrapper.getWebElement().sendKeys(chord);
       } else {
-        await wrapper._webElement.sendKeys(keys);
+        await wrapper.getWebElement().sendKeys(keys);
       }
     });
   }
@@ -281,7 +288,7 @@ export class WebElementWrapper {
    */
   public async getAttribute(name: string): Promise<string> {
     return await this.retryCall(async function getAttribute(wrapper: WebElementWrapper) {
-      return await wrapper._webElement.getAttribute(name);
+      return await wrapper.getWebElement().getAttribute(name);
     });
   }
 
@@ -296,7 +303,7 @@ export class WebElementWrapper {
    */
   public async getComputedStyle(propertyName: string): Promise<string> {
     return await this.retryCall(async function getComputedStyle(wrapper: WebElementWrapper) {
-      return await wrapper._webElement.getCssValue(propertyName);
+      return await wrapper.getWebElement().getCssValue(propertyName);
     });
   }
 
@@ -309,7 +316,7 @@ export class WebElementWrapper {
    */
   public async getVisibleText(): Promise<string> {
     return await this.retryCall(async function getVisibleText(wrapper: WebElementWrapper) {
-      return await wrapper._webElement.getText();
+      return await wrapper.getWebElement().getText();
     });
   }
 
@@ -323,7 +330,7 @@ export class WebElementWrapper {
   public async getTagName<T extends string>(): Promise<T>;
   public async getTagName(): Promise<string> {
     return await this.retryCall(async function getTagName(wrapper: WebElementWrapper) {
-      return await wrapper._webElement.getTagName();
+      return await wrapper.getWebElement().getTagName();
     });
   }
 
@@ -336,7 +343,7 @@ export class WebElementWrapper {
    */
   public async getPosition(): Promise<{ height: number; width: number; x: number; y: number }> {
     return await this.retryCall(async function getPosition(wrapper: WebElementWrapper) {
-      return await (wrapper._webElement as any).getRect();
+      return await (wrapper.getWebElement() as any).getRect();
     });
   }
 
@@ -349,7 +356,7 @@ export class WebElementWrapper {
    */
   public async getSize(): Promise<{ height: number; width: number; x: number; y: number }> {
     return await this.retryCall(async function getSize(wrapper: WebElementWrapper) {
-      return await (wrapper._webElement as any).getRect();
+      return await (wrapper.getWebElement() as any).getRect();
     });
   }
 
@@ -365,13 +372,13 @@ export class WebElementWrapper {
       if (wrapper.browserType === Browsers.Firefox) {
         const actions = (wrapper.driver as any).actions();
         await actions.move({ x: 0, y: 0 }).perform();
-        await actions.move({ x: 10, y: 10, origin: wrapper._webElement }).perform();
+        await actions.move({ x: 10, y: 10, origin: wrapper.getWebElement() }).perform();
       } else {
         const mouse = (wrapper.driver.actions() as any).mouse();
         const actions = (wrapper.driver as any).actions({ bridge: true });
         await actions
           .pause(mouse)
-          .move({ origin: wrapper._webElement })
+          .move({ origin: wrapper.getWebElement() })
           .perform();
       }
     });
@@ -387,7 +394,7 @@ export class WebElementWrapper {
   public async findByCssSelector(selector: string): Promise<WebElementWrapper> {
     return await this.retryCall(async function findByCssSelector(wrapper: WebElementWrapper) {
       return wrapper._wrap(
-        await wrapper._webElement.findElement(wrapper.By.css(selector)),
+        await wrapper.getWebElement().findElement(wrapper.By.css(selector)),
         wrapper.By.css(selector)
       );
     });
@@ -408,7 +415,7 @@ export class WebElementWrapper {
     return await this.retryCall(async function findAllByCssSelector(wrapper: WebElementWrapper) {
       return wrapper._wrapAll(
         await wrapper._findWithCustomTimeout(
-          async () => await wrapper._webElement.findElements(wrapper.By.css(selector)),
+          async () => await wrapper.getWebElement().findElements(wrapper.By.css(selector)),
           timeout
         )
       );
@@ -425,7 +432,7 @@ export class WebElementWrapper {
   public async findByClassName(className: string): Promise<WebElementWrapper> {
     return await this.retryCall(async function findByClassName(wrapper: WebElementWrapper) {
       return wrapper._wrap(
-        await wrapper._webElement.findElement(wrapper.By.className(className)),
+        await wrapper.getWebElement().findElement(wrapper.By.className(className)),
         wrapper.By.className(className)
       );
     });
@@ -446,7 +453,7 @@ export class WebElementWrapper {
     return await this.retryCall(async function findAllByClassName(wrapper: WebElementWrapper) {
       return wrapper._wrapAll(
         await wrapper._findWithCustomTimeout(
-          async () => await wrapper._webElement.findElements(wrapper.By.className(className)),
+          async () => await wrapper.getWebElement().findElements(wrapper.By.className(className)),
           timeout
         )
       );
@@ -467,7 +474,7 @@ export class WebElementWrapper {
   public async findByTagName(tagName: string): Promise<WebElementWrapper> {
     return await this.retryCall(async function findByTagName(wrapper: WebElementWrapper) {
       return wrapper._wrap(
-        await wrapper._webElement.findElement(wrapper.By.tagName(tagName)),
+        await wrapper.getWebElement().findElement(wrapper.By.tagName(tagName)),
         wrapper.By.tagName(tagName)
       );
     });
@@ -493,7 +500,7 @@ export class WebElementWrapper {
     return await this.retryCall(async function findAllByTagName(wrapper: WebElementWrapper) {
       return wrapper._wrapAll(
         await wrapper._findWithCustomTimeout(
-          async () => await wrapper._webElement.findElements(wrapper.By.tagName(tagName)),
+          async () => await wrapper.getWebElement().findElements(wrapper.By.tagName(tagName)),
           timeout
         )
       );
@@ -510,7 +517,7 @@ export class WebElementWrapper {
   async findByXpath(selector: string): Promise<WebElementWrapper> {
     return await this.retryCall(async function findByXpath(wrapper: WebElementWrapper) {
       return wrapper._wrap(
-        await wrapper._webElement.findElement(wrapper.By.xpath(selector)),
+        await wrapper.getWebElement().findElement(wrapper.By.xpath(selector)),
         wrapper.By.xpath(selector)
       );
     });
@@ -528,7 +535,7 @@ export class WebElementWrapper {
     return await this.retryCall(async function findAllByXpath(wrapper: WebElementWrapper) {
       return wrapper._wrapAll(
         await wrapper._findWithCustomTimeout(
-          async () => await wrapper._webElement.findElements(wrapper.By.xpath(selector)),
+          async () => await wrapper.getWebElement().findElements(wrapper.By.xpath(selector)),
           timeout
         )
       );
@@ -545,7 +552,7 @@ export class WebElementWrapper {
   public async findByPartialLinkText(linkText: string): Promise<WebElementWrapper> {
     return await this.retryCall(async function findByPartialLinkText(wrapper: WebElementWrapper) {
       return wrapper._wrap(
-        await wrapper._webElement.findElement(wrapper.By.partialLinkText(linkText)),
+        await wrapper.getWebElement().findElement(wrapper.By.partialLinkText(linkText)),
         wrapper.By.partialLinkText(linkText)
       );
     });
@@ -568,7 +575,8 @@ export class WebElementWrapper {
     ) {
       return wrapper._wrapAll(
         await wrapper._findWithCustomTimeout(
-          async () => await wrapper._webElement.findElements(wrapper.By.partialLinkText(linkText)),
+          async () =>
+            await wrapper.getWebElement().findElements(wrapper.By.partialLinkText(linkText)),
           timeout
         )
       );
@@ -585,7 +593,7 @@ export class WebElementWrapper {
     await (this.driver.manage() as any).setTimeouts({ implicit: 1000 });
     await this.driver.wait(
       async () => {
-        const found = await this._webElement.findElements(this.By.css(selector));
+        const found = await this.getWebElement().findElements(this.By.css(selector));
         return found.length === 0;
       },
       this.timeout,
@@ -603,7 +611,7 @@ export class WebElementWrapper {
   public async scrollIntoViewIfNecessary(): Promise<void> {
     await this.driver.executeScript(
       scrollIntoViewIfNecessary,
-      this._webElement,
+      this.getWebElement(),
       this.fixedHeaderHeight
     );
   }
