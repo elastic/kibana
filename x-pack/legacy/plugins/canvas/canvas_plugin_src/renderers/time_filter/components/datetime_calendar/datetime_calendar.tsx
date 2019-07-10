@@ -7,6 +7,7 @@
 import React, { FunctionComponent } from 'react';
 import PropTypes from 'prop-types';
 import { Moment } from 'moment';
+import { momentObj } from 'react-moment-proptypes';
 import { EuiDatePicker } from '@elastic/eui';
 import { DatetimeInput } from '../datetime_input';
 
@@ -54,11 +55,11 @@ export const DatetimeCalendar: FunctionComponent<Props> = ({
 );
 
 DatetimeCalendar.propTypes = {
-  value: PropTypes.object,
+  value: PropTypes.oneOfType([momentObj, PropTypes.object]), // Handle both valid and invalid moment objects
   onSelect: PropTypes.func.isRequired,
   onValueChange: PropTypes.func.isRequired, // Called with a moment
-  startDate: PropTypes.object, // a moment
-  endDate: PropTypes.object, // a moment
-  minDate: PropTypes.object, // a moment
-  maxDate: PropTypes.object, // a moment
+  startDate: momentObj,
+  endDate: momentObj,
+  minDate: momentObj,
+  maxDate: momentObj,
 };

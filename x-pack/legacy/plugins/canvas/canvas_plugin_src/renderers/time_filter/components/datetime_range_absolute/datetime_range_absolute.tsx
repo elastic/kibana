@@ -7,6 +7,7 @@
 import React, { FunctionComponent } from 'react';
 import PropTypes from 'prop-types';
 import { Moment } from 'moment';
+import { momentObj } from 'react-moment-proptypes';
 import { DatetimeCalendar } from '../datetime_calendar';
 
 interface Props {
@@ -28,7 +29,9 @@ export const DatetimeRangeAbsolute: FunctionComponent<Props> = ({ from, to, onSe
         maxDate={to}
         onValueChange={val => onSelect(val, to)}
         onSelect={val => {
-          if (!val || !from) return;
+          if (!val || !from) {
+            return;
+          }
 
           // sets the time to start of day if only the date was selected
           if (from.format('hh:mm:ss a') === val.format('hh:mm:ss a')) {
@@ -62,7 +65,7 @@ export const DatetimeRangeAbsolute: FunctionComponent<Props> = ({ from, to, onSe
 );
 
 DatetimeRangeAbsolute.propTypes = {
-  from: PropTypes.object, // a moment
-  to: PropTypes.object, // a moment
+  from: momentObj,
+  to: momentObj,
   onSelect: PropTypes.func.isRequired,
 };

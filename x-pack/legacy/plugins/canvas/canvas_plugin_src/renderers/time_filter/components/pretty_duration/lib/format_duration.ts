@@ -7,7 +7,7 @@
 import dateMath from '@elastic/datemath';
 import moment, { Moment } from 'moment';
 import { quickRanges, QuickRange } from './quick_ranges';
-import { timeUnits } from './time_units';
+import { timeUnits } from '../../../../../../common/lib/time_units';
 
 const lookupByRange: { [key: string]: QuickRange } = {};
 quickRanges.forEach(frame => {
