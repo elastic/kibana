@@ -49,7 +49,6 @@ module.service('Promise', function ($q, $timeout) {
     return defer.promise;
   };
   Promise.cast = $q.when;
-  Promise.defer = $q.defer;
   Promise.delay = function (ms) {
     return $timeout(_.noop, ms);
   };

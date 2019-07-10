@@ -102,7 +102,8 @@ export function TraceList({ items = [], isLoading }: Props) {
     <ManagedTable
       columns={traceListColumns}
       items={items}
-      initialSort={{ field: 'impact', direction: 'desc' }}
+      initialSortField="impact"
+      initialSortDirection="desc"
       noItemsMessage={noItems}
       initialPageSize={25}
     />

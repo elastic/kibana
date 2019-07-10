@@ -97,6 +97,7 @@ export interface CoreSetup {
         registerOnPostAuth: HttpServiceSetup['registerOnPostAuth'];
         basePath: HttpServiceSetup['basePath'];
         createNewServer: HttpServiceSetup['createNewServer'];
+        isTlsEnabled: HttpServiceSetup['isTlsEnabled'];
     };
 }
 
@@ -122,12 +123,27 @@ export type ElasticsearchClientConfig = Pick<ConfigOptions, 'keepAlive' | 'log' 
     ssl?: Partial<ElasticsearchConfig['ssl']>;
 };
 
+// Warning: (ae-missing-release-tag) "ElasticsearchError" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+// 
+// @public (undocumented)
+export interface ElasticsearchError extends Boom {
+    // (undocumented)
+    [code]?: string;
+}
+
+// @public
+export class ElasticsearchErrorHelpers {
+    // (undocumented)
+    static decorateNotAuthorizedError(error: Error, reason?: string): ElasticsearchError;
+    // (undocumented)
+    static isNotAuthorizedError(error: any): error is ElasticsearchError;
+}
+
 // @public (undocumented)
 export interface ElasticsearchServiceSetup {
     // (undocumented)
     readonly adminClient$: Observable<ClusterClient>;
-    // (undocumented)
-    readonly createClient: (type: string, config: ElasticsearchClientConfig) => ClusterClient;
+    readonly createClient: (type: string, clientConfig?: Partial<ElasticsearchClientConfig>) => ClusterClient;
     // (undocumented)
     readonly dataClient$: Observable<ClusterClient>;
     // (undocumented)
@@ -138,7 +154,7 @@ export interface ElasticsearchServiceSetup {
 
 // @public
 export interface FakeRequest {
-    headers: Record<string, string>;
+    headers: Headers;
 }
 
 // @public
@@ -313,24 +329,24 @@ export interface OnPreAuthToolkit {
 }
 
 // @public
-export interface Plugin<TSetup, TStart, TPluginsSetup extends Record<PluginName, unknown> = {}, TPluginsStart extends Record<PluginName, unknown> = {}> {
+export interface Plugin<TSetup = void, TStart = void, TPluginsSetup extends {} = {}, TPluginsStart extends {} = {}> {
     // (undocumented)
-    setup: (core: CoreSetup, plugins: TPluginsSetup) => TSetup | Promise<TSetup>;
+    setup(core: CoreSetup, plugins: TPluginsSetup): TSetup | Promise<TSetup>;
     // (undocumented)
-    start: (core: CoreStart, plugins: TPluginsStart) => TStart | Promise<TStart>;
+    start(core: CoreStart, plugins: TPluginsStart): TStart | Promise<TStart>;
     // (undocumented)
-    stop?: () => void;
+    stop?(): void;
 }
 
 // @public
 export type PluginInitializer<TSetup, TStart, TPluginsSetup extends Record<PluginName, unknown> = {}, TPluginsStart extends Record<PluginName, unknown> = {}> = (core: PluginInitializerContext) => Plugin<TSetup, TStart, TPluginsSetup, TPluginsStart>;
 
 // @public
-export interface PluginInitializerContext {
+export interface PluginInitializerContext<ConfigSchema = unknown> {
     // (undocumented)
     config: {
-        create: <Schema>() => Observable<Schema>;
-        createIfExists: <Schema>() => Observable<Schema | undefined>;
+        create: <T = ConfigSchema>() => Observable<T>;
+        createIfExists: <T = ConfigSchema>() => Observable<T | undefined>;
     };
     // (undocumented)
     env: {
