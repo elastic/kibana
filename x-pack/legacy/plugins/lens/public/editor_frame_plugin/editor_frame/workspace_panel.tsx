@@ -4,8 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState, useEffect, useMemo, useContext, memo } from 'react';
-import { debounce } from 'lodash';
+import React, { useState, useEffect, useMemo, useContext } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiCodeBlock, EuiSpacer } from '@elastic/eui';
 import { toExpression } from '@kbn/interpreter/common';
@@ -15,6 +14,7 @@ import { Datasource, Visualization, DatasourcePublicAPI } from '../../types';
 import { DragDrop, DragContext } from '../../drag_drop';
 import { getSuggestions, toSwitchAction } from './suggestion_helpers';
 import { buildExpression } from './expression_helpers';
+import { debouncedComponent } from '../../debounced_component';
 
 export interface WorkspacePanelProps {
   activeDatasource: Datasource;
@@ -27,18 +27,7 @@ export interface WorkspacePanelProps {
   ExpressionRenderer: ExpressionRenderer;
 }
 
-const MemoizedWorkspacePanel = memo(InnerWorkspacePanel);
-
-export function WorkspacePanel(props: WorkspacePanelProps) {
-  const [rendered, setRendered] = useState(props);
-  const delayRender = useMemo(() => debounce(setRendered, 256), []);
-
-  useEffect(() => {
-    delayRender(props);
-  }, [props.activeVisualizationId, props.datasourceState, props.visualizationState]);
-
-  return <MemoizedWorkspacePanel {...rendered} />;
-}
+export const WorkspacePanel = debouncedComponent(InnerWorkspacePanel);
 
 function InnerWorkspacePanel({
   activeDatasource,

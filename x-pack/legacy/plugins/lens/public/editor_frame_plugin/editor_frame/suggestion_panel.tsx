@@ -9,12 +9,12 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiIcon, EuiTitle, EuiPanel, EuiIconTip } from '@elastic/eui';
 import { toExpression } from '@kbn/interpreter/common';
 import { i18n } from '@kbn/i18n';
-import { throttle } from 'lodash';
 import { Action } from './state_management';
 import { Datasource, Visualization } from '../../types';
 import { getSuggestions, toSwitchAction, Suggestion } from './suggestion_helpers';
 import { ExpressionRenderer } from '../../../../../../../src/legacy/core_plugins/data/public';
 import { prependDatasourceExpression } from './expression_helpers';
+import { debouncedComponent } from '../../debounced_component';
 
 export interface SuggestionPanelProps {
   activeDatasource: Datasource;
@@ -87,10 +87,7 @@ const SuggestionPreview = ({
   );
 };
 
-export const SuggestionPanel = throttle(
-  (props: SuggestionPanelProps) => <InnerSuggestionPanel {...props} />,
-  2000
-);
+export const SuggestionPanel = debouncedComponent(InnerSuggestionPanel, 2000);
 
 function InnerSuggestionPanel({
   activeDatasource,
