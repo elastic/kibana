@@ -77,5 +77,6 @@ export const sharedSchema = gql`
     activePage: Float!
     fakeTotalCount: Float!
     showMorePagesIndicator: Boolean!
+    showTooManyResults: Boolean!
   }
 `;

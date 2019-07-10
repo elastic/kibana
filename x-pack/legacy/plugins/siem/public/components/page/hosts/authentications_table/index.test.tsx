@@ -44,6 +44,11 @@ describe('Authentication Table Component', () => {
               'showMorePagesIndicator',
               mockData.Authentications.pageInfo
             )}
+            showTooManyResults={getOr(
+              false,
+              'showTooManyResults',
+              mockData.Authentications.pageInfo
+            )}
             totalCount={mockData.Authentications.totalCount}
             type={hostsModel.HostsType.page}
           />

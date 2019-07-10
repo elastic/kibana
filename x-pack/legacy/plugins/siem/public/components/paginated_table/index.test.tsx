@@ -50,6 +50,7 @@ describe('Load More Table Component', () => {
             loadPage={newActivePage => loadPage(newActivePage)}
             pageOfItems={mockData.Hosts.edges}
             showMorePagesIndicator={true}
+            showTooManyResults={false}
             totalCount={10}
             updateActivePage={activePage => updateActivePage(activePage)}
             updateLimitPagination={limit => updateLimitPagination({ limit })}
@@ -77,6 +78,7 @@ describe('Load More Table Component', () => {
             loadPage={newActivePage => loadPage(newActivePage)}
             pageOfItems={[]}
             showMorePagesIndicator={true}
+            showTooManyResults={false}
             totalCount={10}
             updateActivePage={activePage => updateActivePage(activePage)}
             updateLimitPagination={limit => updateLimitPagination({ limit })}
@@ -106,6 +108,7 @@ describe('Load More Table Component', () => {
             loadPage={newActivePage => loadPage(newActivePage)}
             pageOfItems={mockData.Hosts.edges}
             showMorePagesIndicator={true}
+            showTooManyResults={false}
             totalCount={10}
             updateActivePage={activePage => updateActivePage(activePage)}
             updateLimitPagination={limit => updateLimitPagination({ limit })}
@@ -133,6 +136,7 @@ describe('Load More Table Component', () => {
             loadPage={newActivePage => loadPage(newActivePage)}
             pageOfItems={mockData.Hosts.edges}
             showMorePagesIndicator={true}
+            showTooManyResults={false}
             totalCount={10}
             updateActivePage={updateActivePage}
             updateLimitPagination={limit => updateLimitPagination({ limit })}
@@ -170,6 +174,7 @@ describe('Load More Table Component', () => {
             loadPage={newActivePage => loadPage(newActivePage)}
             pageOfItems={mockData.Hosts.edges}
             showMorePagesIndicator={true}
+            showTooManyResults={false}
             totalCount={10}
             updateActivePage={activePage => updateActivePage(activePage)}
             updateLimitPagination={limit => updateLimitPagination({ limit })}
@@ -201,6 +206,7 @@ describe('Load More Table Component', () => {
             loadPage={newActivePage => loadPage(newActivePage)}
             pageOfItems={mockData.Hosts.edges}
             showMorePagesIndicator={true}
+            showTooManyResults={false}
             totalCount={10}
             updateActivePage={activePage => updateActivePage(activePage)}
             updateLimitPagination={limit => updateLimitPagination({ limit })}
@@ -230,6 +236,7 @@ describe('Load More Table Component', () => {
             onChange={mockOnChange}
             pageOfItems={mockData.Hosts.edges}
             showMorePagesIndicator={true}
+            showTooManyResults={false}
             sorting={{ direction: Direction.asc, field: 'node.host.name' }}
             totalCount={10}
             updateActivePage={activePage => updateActivePage(activePage)}
@@ -260,6 +267,7 @@ describe('Load More Table Component', () => {
             loadPage={newActivePage => loadPage(newActivePage)}
             pageOfItems={mockData.Hosts.edges}
             showMorePagesIndicator={true}
+            showTooManyResults={false}
             totalCount={10}
             updateActivePage={activePage => updateActivePage(activePage)}
             updateLimitPagination={limit => updateLimitPagination({ limit })}
@@ -290,6 +298,7 @@ describe('Load More Table Component', () => {
             loadPage={newActivePage => loadPage(newActivePage)}
             pageOfItems={mockData.Hosts.edges}
             showMorePagesIndicator={true}
+            showTooManyResults={false}
             totalCount={10}
             updateActivePage={activePage => updateActivePage(activePage)}
             updateLimitPagination={limit => updateLimitPagination({ limit })}
@@ -329,6 +338,7 @@ describe('Load More Table Component', () => {
         loadPage: newActivePage => loadPage(newActivePage),
         pageOfItems: mockData.Hosts.edges,
         showMorePagesIndicator: true,
+        showTooManyResults: false,
         totalCount: 10,
         updateActivePage: activePage => updateActivePage(activePage),
         updateLimitPagination: limit => updateLimitPagination({ limit }),
@@ -374,6 +384,7 @@ describe('Load More Table Component', () => {
             loadPage={newActivePage => loadPage(newActivePage)}
             pageOfItems={mockData.Hosts.edges}
             showMorePagesIndicator={true}
+            showTooManyResults={false}
             totalCount={10}
             updateActivePage={activePage => updateActivePage(activePage)}
             updateLimitPagination={limit => updateLimitPagination({ limit })}
@@ -412,6 +423,7 @@ describe('Load More Table Component', () => {
             onChange={mockOnChange}
             pageOfItems={mockData.Hosts.edges}
             showMorePagesIndicator={true}
+            showTooManyResults={false}
             sorting={{ direction: Direction.asc, field: 'node.host.name' }}
             totalCount={10}
             updateActivePage={activePage => updateActivePage(activePage)}

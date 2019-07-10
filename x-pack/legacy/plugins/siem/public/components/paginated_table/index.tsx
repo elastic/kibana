@@ -17,6 +17,7 @@ import {
 import { isEmpty, noop, getOr } from 'lodash/fp';
 import React, { memo, useState, useEffect } from 'react';
 import styled from 'styled-components';
+import { toastNotifications } from 'ui/notify';
 
 import { Direction } from '../../graphql/types';
 import { AuthTableColumns } from '../page/hosts/authentications_table';
@@ -73,6 +74,7 @@ export interface BasicTableProps<T> {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   pageOfItems: any[];
   showMorePagesIndicator: boolean;
+  showTooManyResults: boolean;
   sorting?: SortingBasicTable;
   totalCount: number;
   updateActivePage: (activePage: number) => void;
@@ -110,6 +112,7 @@ export const PaginatedTable = memo<SiemTables>(
     onChange = noop,
     pageOfItems,
     showMorePagesIndicator,
+    showTooManyResults,
     sorting = null,
     totalCount,
     updateActivePage,
@@ -128,6 +131,15 @@ export const PaginatedTable = memo<SiemTables>(
         updateActivePage(0);
       }
     }, effectDeps);
+
+    useEffect(() => {
+      if (showTooManyResults) {
+        toastNotifications.addDanger({
+          title: headerTitle + i18n.TOAST_TITLE,
+          text: i18n.TOAST_TEXT,
+        });
+      }
+    }, [showTooManyResults]);
 
     const onButtonClick = () => {
       setPopoverOpen(!isPopoverOpen);

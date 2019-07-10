@@ -58,10 +58,12 @@ export class ElasticsearchAuthenticationAdapter implements AuthenticationsAdapte
       dsl: [inspectStringifyObject(dsl)],
       response: [inspectStringifyObject(response)],
     };
+    let showTooManyResults = false;
     let showMorePagesIndicator = totalCount > fakeTotalCount;
     if (fakeTotalCount >= 10000) {
       fakeTotalCount = 10000;
       showMorePagesIndicator = false;
+      showTooManyResults = true;
     }
     return {
       inspect,
@@ -71,6 +73,7 @@ export class ElasticsearchAuthenticationAdapter implements AuthenticationsAdapte
         activePage: activePage ? activePage : 0,
         fakeTotalCount,
         showMorePagesIndicator,
+        showTooManyResults,
       },
     };
   }

@@ -21,3 +21,11 @@ export const SHOWING = i18n.translate('xpack.siem.loadingMoreTable.showing', {
 export const ROWS = i18n.translate('xpack.siem.loadingMoreTable.rows', {
   defaultMessage: 'Rows',
 });
+
+export const TOAST_TITLE = i18n.translate('xpack.siem.unableToLoadMoreResults.title', {
+  defaultMessage: ' - too many results',
+});
+
+export const TOAST_TEXT = i18n.translate('xpack.siem.unableToLoadMoreResults.text', {
+  defaultMessage: 'Narrow your query to better filter the results',
+});
