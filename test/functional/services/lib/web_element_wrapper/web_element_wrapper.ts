@@ -45,7 +45,7 @@ export class WebElementWrapper {
   private By: typeof By = this.webDriver.By;
   private Keys: IKey = this.webDriver.Key;
   private driver: WebDriver = this.webDriver.driver;
-  private retryAttempts: number = 3;
+  private attempts: number = 3;
   private errors = [
     'ElementClickInterceptedError',
     'ElementNotInteractableError',
@@ -98,10 +98,7 @@ export class WebElementWrapper {
     return otherWebElements.map(e => this._wrap(e));
   }
 
-  private async retryCall(
-    fn: Function,
-    attemptsRemaining: number = this.retryAttempts
-  ): Promise<any> {
+  private async retryCall(fn: Function, attemptsRemaining: number = this.attempts): Promise<any> {
     try {
       return await fn(this);
     } catch (err) {
@@ -111,7 +108,7 @@ export class WebElementWrapper {
       this.logger.debug(
         `Researching element '${this.locator.toString()}', ${attemptsRemaining - 1} attempts left`
       );
-      await delay(200);
+      await delay(300);
       this.webElement = await this.driver.findElement(this.locator);
       return await this.retryCall(fn, attemptsRemaining - 1);
     }
