@@ -29,6 +29,7 @@ import { convertMicrosecondsToMilliseconds as microsToMillis } from '../../lib/h
 import { UptimeGraphQLQueryProps, withUptimeGraphQL } from '../higher_order';
 import { pingsQuery } from '../../queries';
 import { LocationName } from './location_name';
+import { asTime } from '../../../../apm/public/utils/formatters';
 
 interface PingListQueryResult {
   allPings?: PingResults;
@@ -114,7 +115,7 @@ export const PingListComponent = ({
     },
     {
       field: 'observer.geo.name',
-      dataType: 'number',
+      dataType: 'string',
       name: i18n.translate('xpack.uptime.pingList.locationNameColumnLabel', {
         defaultMessage: 'Location',
       }),
@@ -122,17 +123,18 @@ export const PingListComponent = ({
     },
     {
       field: 'monitor.ip',
-      dataType: 'number',
+      dataType: 'string',
       name: i18n.translate('xpack.uptime.pingList.ipAddressColumnLabel', {
         defaultMessage: 'IP',
       }),
     },
     {
       field: 'monitor.duration.us',
+      dataType: 'number',
       name: i18n.translate('xpack.uptime.pingList.durationMsColumnLabel', {
         defaultMessage: 'Duration',
       }),
-      render: (duration: number) => microsToMillis(duration),
+      render: (duration : number) => asTime(microsToMillis(duration)),
     },
     {
       field: 'error.type',
