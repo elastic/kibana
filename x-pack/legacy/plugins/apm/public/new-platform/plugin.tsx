@@ -12,7 +12,7 @@ import { CoreStart } from 'src/core/public';
 import { history } from '../utils/history';
 import { LocationProvider } from '../context/LocationContext';
 import { UrlParamsProvider } from '../context/UrlParamsContext';
-import { px, topNavHeight, unit, units } from '../style/variables';
+import { px, unit, units } from '../style/variables';
 import { LoadingIndicatorProvider } from '../context/LoadingIndicatorContext';
 import { LicenseProvider } from '../context/LicenseContext';
 import { UpdateBreadcrumbs } from '../components/app/Main/UpdateBreadcrumbs';
@@ -26,7 +26,6 @@ export const REACT_APP_ROOT_ID = 'react-apm-root';
 const MainContainer = styled.div`
   min-width: ${px(unit * 50)};
   padding: ${px(units.plus)};
-  min-height: calc(100vh - ${topNavHeight});
 `;
 
 const App = () => {
