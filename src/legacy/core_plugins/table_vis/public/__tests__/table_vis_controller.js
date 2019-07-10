@@ -44,7 +44,8 @@ describe('Table Vis - Controller', async function () {
   let legacyDependencies;
 
   beforeEach(ngMock.module('kibana', 'kibana/table_vis'));
-  beforeEach(ngMock.inject(function ($injector, Private) {
+  beforeEach(ngMock.inject(function ($injector) {
+    Private = $injector.get('Private');
     legacyDependencies = {
       // eslint-disable-next-line new-cap
       createAngularVisualization: VisFactoryProvider(Private).createAngularVisualization
