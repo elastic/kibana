@@ -607,7 +607,6 @@
     "common.ui.vis.editors.aggGroups.metricsText": "メトリック",
     "common.ui.vis.editors.aggParams.errors.aggWrongRunOrderErrorMessage": "「{schema}」集約は他のバケットの前に実行する必要があります！",
     "common.ui.vis.editors.aggParams.errors.schemaIsDeprecatedErrorMessage": "「{schema}」は廃止されました。",
-    "common.ui.vis.editors.howToModifyScreenReaderPriorityDescription": "このボタンの上下の矢印キーで、集約の優先順位の上下を変更します。",
     "common.ui.vis.editors.resizeAriaLabels": "左右のキーでエディターのサイズを変更します",
     "common.ui.vis.editors.sidebar.applyChangesAriaLabel": "ビジュアライゼーションを変更と共に更新します",
     "common.ui.vis.editors.sidebar.applyChangesTooltip": "変更を適用",

@@ -17,6 +17,8 @@
  * under the License.
  */
 
+import 'ui/angular-bootstrap';
+import './fancy_forms';
 import './sidebar';
 import { i18n } from '@kbn/i18n';
 import './vis_options';

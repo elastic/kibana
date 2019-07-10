@@ -17,8 +17,7 @@
  * under the License.
  */
 
-import React, { useState, useEffect } from 'react';
-import { findIndex, reduce } from 'lodash';
+import React, { useState } from 'react';
 import {
   EuiAccordion,
   EuiToolTip,
@@ -46,7 +45,6 @@ interface DefaultEditorAggProps {
   formIsTouched: boolean;
   isDraggable: boolean;
   isRemovable: boolean;
-  isValid: boolean;
   responseValueAggs: AggConfig[] | null;
   state: VisState;
   vis: Vis;
@@ -64,12 +62,10 @@ function DefaultEditorAgg({
   aggIndex,
   aggIsTooLow,
   dragHandleProps,
-  dragging,
   groupName,
   formIsTouched,
   isDraggable,
   isRemovable,
-  isValid,
   responseValueAggs,
   state,
   vis,
@@ -82,17 +78,16 @@ function DefaultEditorAgg({
   removeAgg,
 }: DefaultEditorAggProps) {
   const [isEditorOpen, setIsEditorOpen] = useState(agg.brandNew);
-  const showDescription = !isEditorOpen && isValid;
-  const showError = !isEditorOpen && !isValid;
+  const [validState, setValidState] = useState(true);
+  const showDescription = !isEditorOpen && validState;
+  const showError = !isEditorOpen && !validState;
 
   const SchemaComponent = agg.schema.editorComponent;
 
-  useEffect(() => {
-    if (dragging) {
-      setIsEditorOpen(false);
-    }
-  }, [dragging]);
-
+  const onSetValidity = (isValid: boolean) => {
+    setValidity(isValid);
+    setValidState(isValid);
+  };
   const renderAggButtons = () => {
     const actionIcons = [];
 
@@ -127,14 +122,9 @@ function DefaultEditorAgg({
       });
     }
     if (isDraggable) {
-      // directive draggable-handle
       actionIcons.push({
         id: 'dragHandle',
         type: 'grab',
-        ariaLabel: i18n.translate('common.ui.vis.editors.agg.modifyPriorityButtonAriaLabel', {
-          defaultMessage:
-            'Use up and down key on this button to move this aggregation up and down in the priority order.',
-        }),
         tooltip: i18n.translate('common.ui.vis.editors.agg.modifyPriorityButtonTooltip', {
           defaultMessage: 'Modify priority by dragging',
         }),
@@ -169,6 +159,7 @@ function DefaultEditorAgg({
                   ['aria-label']: icon.ariaLabel,
                   ['data-test-subj']: icon.dataTestSubj,
                 }}
+                position="bottom"
               />
             );
           }
@@ -200,12 +191,6 @@ function DefaultEditorAgg({
     return agg.type.makeLabel(agg) || '';
   };
 
-  // $scope.$watch('editorOpen', function(open) {
-  //   // make sure that all of the form inputs are "touched"
-  //   // so that their errors propagate
-  //   if (!open) kbnForm.$setTouched();
-  // });
-
   const buttonContent = (
     <div>
       <EuiFlexGroup gutterSize="s" alignItems="center">
@@ -223,7 +208,12 @@ function DefaultEditorAgg({
           )}
 
           {showError && (
-            <EuiTextColor color="danger">
+            <EuiTextColor
+              color="danger"
+              aria-label={i18n.translate('common.ui.vis.editors.agg.errorsAriaLabel', {
+                defaultMessage: 'Aggregation has errors',
+              })}
+            >
               <h6>
                 <FormattedMessage
                   id="common.ui.vis.editors.agg.errorsText"
@@ -236,6 +226,13 @@ function DefaultEditorAgg({
       </EuiFlexGroup>
     </div>
   );
+
+  const onToggle = (isOpen: boolean) => {
+    setIsEditorOpen(isOpen);
+    if (!isOpen) {
+      setTouched(true);
+    }
+  };
 
   return (
     <>
@@ -251,7 +248,7 @@ function DefaultEditorAgg({
         })}
         data-test-subj="toggleEditor"
         extraAction={renderAggButtons()}
-        onToggle={isOpen => setIsEditorOpen(isOpen)}
+        onToggle={onToggle}
         {...dragHandleProps}
       >
         <>
@@ -267,16 +264,16 @@ function DefaultEditorAgg({
             agg={agg}
             aggIndex={aggIndex}
             aggIsTooLow={aggIsTooLow}
-            groupName={groupName}
             formIsTouched={formIsTouched}
+            groupName={groupName}
             indexPattern={vis.indexPattern}
             responseValueAggs={responseValueAggs}
             state={state}
+            onAggErrorChanged={onAggErrorChanged}
             onAggParamsChange={onAggParamsChange}
             onAggTypeChange={onAggTypeChange}
             setTouched={setTouched}
-            setValidity={setValidity}
-            onAggErrorChanged={onAggErrorChanged}
+            setValidity={onSetValidity}
           />
         </>
       </EuiAccordion>

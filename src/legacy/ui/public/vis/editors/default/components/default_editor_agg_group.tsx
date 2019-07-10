@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import React, { useState } from 'react';
+import React from 'react';
 import { findIndex, reduce } from 'lodash';
 import { EuiTitle, EuiDragDropContext, EuiDroppable, EuiDraggable } from '@elastic/eui';
 
@@ -70,7 +70,7 @@ function DefaultEditorAggGroup({
   const stats = {
     min: 0,
     max: 0,
-    count: group ? group.length : 0,
+    count: group.length,
     deprecate: false,
   };
 
@@ -126,7 +126,7 @@ function DefaultEditorAggGroup({
       <EuiTitle size="xxs">
         <p>{groupNameLabel}</p>
       </EuiTitle>
-      <EuiDroppable droppableId={`agg_group_dnd_${groupName}`} spacing="l">
+      <EuiDroppable droppableId={`agg_group_dnd_${groupName}`}>
         {group.map((agg: AggConfig, index: number) => (
           <EuiDraggable
             spacing="s"
@@ -144,7 +144,6 @@ function DefaultEditorAggGroup({
                 formIsTouched={formIsTouched}
                 isDraggable={stats.count > 1}
                 isRemovable={canRemove(agg)}
-                isValid={true}
                 data-test-subj={`aggregationEditor${agg.id}`}
                 responseValueAggs={responseValueAggs}
                 state={state}

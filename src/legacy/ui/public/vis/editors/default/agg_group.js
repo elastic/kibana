@@ -52,6 +52,7 @@ uiModules
       template: function () {
         return `<vis-editor-agg-group-wrapper	
             ng-if="setValidity"	
+            form-is-touched="formIsTouched"
             group-name="groupName"
             state="state"
             vis="vis"	
