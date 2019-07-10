@@ -272,7 +272,7 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage
         onClick: () => {
           if (isOnMapNow() && hasUnsavedChanges()) {
             const navigateAway = window.confirm(i18n.translate('xpack.maps.mapController.unsavedChangesWarning', {
-              defaultMessage: `Changes you made may not be saved.`,
+              defaultMessage: `Your unsaved changes might not be saved`,
             }));
             if (navigateAway) {
               window.location.hash = '#';
