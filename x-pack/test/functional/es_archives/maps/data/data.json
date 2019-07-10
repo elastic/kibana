@@ -345,3 +345,42 @@
     }
   }
 }
+
+{
+  "type": "doc",
+  "value": {
+    "id": "1",
+    "index": "flights",
+    "source": {
+      "location" : [-5, 5],
+      "heading" : 45,
+      "altitude" : 1000
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "2",
+    "index": "flights",
+    "source": {
+      "location" : [5, 5],
+      "heading" : 180,
+      "altitude" : 5000
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "3",
+    "index": "flights",
+    "source": {
+      "location" : [0,-5],
+      "heading" : 270,
+      "altitude" : 3000
+    }
+  }
+}
