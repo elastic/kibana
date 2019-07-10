@@ -10,14 +10,14 @@ import {
   UseRequest,
   createRequestService,
 } from '../../../shared_imports';
-import { httpService } from './index';
+import { httpClient } from './index';
 
 export const sendRequest = (config: SendRequest): Promise<Partial<SendRequestResponse>> => {
-  const { sendRequest: sendRequestFn } = createRequestService(httpService.httpClient);
+  const { sendRequest: sendRequestFn } = createRequestService(httpClient);
   return sendRequestFn(config);
 };
 
 export const useRequest = (config: UseRequest) => {
-  const { useRequest: useRequestFn } = createRequestService(httpService.httpClient);
+  const { useRequest: useRequestFn } = createRequestService(httpClient);
   return useRequestFn(config);
 };

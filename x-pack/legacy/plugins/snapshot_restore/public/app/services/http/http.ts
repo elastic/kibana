@@ -3,18 +3,15 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-class HttpService {
-  private client: any;
-  public addBasePath: (path: string) => string = () => '';
 
-  public init(httpClient: any, chrome: any): void {
-    this.client = httpClient;
-    this.addBasePath = chrome.addBasePath.bind(chrome);
-  }
+export let httpClient: any;
+let _prependBasePath: any;
 
-  get httpClient(): any {
-    return this.client;
-  }
+export function init(httpClientObj: any, chrome: any): void {
+  httpClient = httpClientObj;
+  _prependBasePath = chrome.addBasePath.bind(chrome);
 }
 
-export const httpService = new HttpService();
+export function addBasePath(path: string): string {
+  return _prependBasePath(path);
+}

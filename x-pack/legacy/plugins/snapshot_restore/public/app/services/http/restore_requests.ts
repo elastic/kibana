@@ -7,7 +7,7 @@ import { API_BASE_PATH } from '../../../../common/constants';
 import { RestoreSettings } from '../../../../common/types';
 import { UIM_RESTORE_CREATE } from '../../constants';
 import { uiMetricService } from '../ui_metric';
-import { httpService } from './http';
+import { addBasePath } from './http';
 import { sendRequest, useRequest } from './use_request';
 
 export const executeRestore = async (
@@ -16,7 +16,7 @@ export const executeRestore = async (
   restoreSettings: RestoreSettings
 ) => {
   const result = await sendRequest({
-    path: httpService.addBasePath(
+    path: addBasePath(
       `${API_BASE_PATH}restore/${encodeURIComponent(repository)}/${encodeURIComponent(snapshot)}`
     ),
     method: 'post',
@@ -30,7 +30,7 @@ export const executeRestore = async (
 
 export const useLoadRestores = (interval?: number) => {
   return useRequest({
-    path: httpService.addBasePath(`${API_BASE_PATH}restores`),
+    path: addBasePath(`${API_BASE_PATH}restores`),
     method: 'get',
     initialData: [],
     interval,

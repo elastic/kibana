@@ -4,12 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { API_BASE_PATH } from '../../../../common/constants';
-import { httpService } from './http';
+import { addBasePath } from './http';
 import { useRequest } from './use_request';
 
 export const useLoadPermissions = () => {
   return useRequest({
-    path: httpService.addBasePath(`${API_BASE_PATH}permissions`),
+    path: addBasePath(`${API_BASE_PATH}permissions`),
     method: 'get',
   });
 };

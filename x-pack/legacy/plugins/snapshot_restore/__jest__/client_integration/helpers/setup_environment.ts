@@ -9,14 +9,14 @@ import axiosXhrAdapter from 'axios/lib/adapters/xhr';
 
 import { i18n } from '@kbn/i18n';
 
-import { httpService } from '../../../public/app/services/http';
+import { init as initHttp } from '../../../public/app/services/http';
 import { breadcrumbService } from '../../../public/app/services/navigation';
 import { textService } from '../../../public/app/services/text';
 import { chrome } from '../../../public/test/mocks';
 import { init as initHttpRequests } from './http_requests';
 
 export const setupEnvironment = () => {
-  httpService.init(axios.create({ adapter: axiosXhrAdapter }), {
+  initHttp(axios.create({ adapter: axiosXhrAdapter }), {
     addBasePath: (path: string) => path,
   });
   breadcrumbService.init(chrome, {});

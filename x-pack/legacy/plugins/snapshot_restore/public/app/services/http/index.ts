@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-export { httpService } from './http';
+export * from './http';
 export * from './app_requests';
 export * from './repository_requests';
 export * from './snapshot_requests';
