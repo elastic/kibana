@@ -29,7 +29,7 @@ interface Props {
   onSave: () => void;
   onSaveNew: () => void;
   isDirty: boolean;
-  onClose: () => void;
+  onClearSavedQuery: () => void;
 }
 
 export interface SavedQueryDetails {
@@ -46,7 +46,7 @@ export const SavedQueryRow: FunctionComponent<Props> = ({
   onSave,
   onSaveNew,
   isDirty,
-  onClose,
+  onClearSavedQuery,
 }) => {
   let rowContent;
   if (savedQuery) {
@@ -60,7 +60,7 @@ export const SavedQueryRow: FunctionComponent<Props> = ({
               </EuiButtonEmpty>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiButtonEmpty onClick={onClose} color="text">
+              <EuiButtonEmpty onClick={onClearSavedQuery} color="text">
                 <EuiIcon type="crossInACircleFilled" />
               </EuiButtonEmpty>
             </EuiFlexItem>
@@ -80,7 +80,7 @@ export const SavedQueryRow: FunctionComponent<Props> = ({
               </EuiButtonEmpty>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiButtonEmpty onClick={onClose} color="text">
+              <EuiButtonEmpty onClick={onClearSavedQuery} color="text">
                 <EuiIcon type="crossInACircleFilled" />
               </EuiButtonEmpty>
             </EuiFlexItem>

@@ -72,7 +72,7 @@ interface Props {
   onSaveNew: () => void;
   onLoadSavedQuery: (savedQuery: SavedQuery) => void;
   isDirty: boolean;
-  onClose: () => void;
+  onClearSavedQuery: () => void;
 }
 
 interface State {
@@ -191,7 +191,7 @@ export class QueryBarUI extends Component<Props, State> {
             onSaveNew={this.props.onSaveNew}
             onLoadSavedQuery={this.props.onLoadSavedQuery}
             isDirty={this.props.isDirty}
-            onClose={this.props.onClose}
+            onClearSavedQuery={this.props.onClearSavedQuery}
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>{this.renderUpdateButton()}</EuiFlexItem>

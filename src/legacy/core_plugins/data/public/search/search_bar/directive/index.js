@@ -39,6 +39,7 @@ export function setupDirective() {
         ['onRefreshChange', { watchDepth: 'reference' }],
         ['onSaved', { watchDepth: 'reference' }],
         ['onSavedQueryUpdated', { watchDepth: 'reference' }],
+        ['onClearSavedQuery', { watchDepth: 'reference' }],
 
         ['indexPatterns', { watchDepth: 'collection' }],
         ['filters', { watchDepth: 'collection' }],

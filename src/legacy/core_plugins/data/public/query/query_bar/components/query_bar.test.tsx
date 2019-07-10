@@ -85,7 +85,7 @@ describe('QueryBar', () => {
         onSaveNew={noop}
         onLoadSavedQuery={noop}
         isDirty={false}
-        onClose={noop}
+        onClearSavedQuery={noop}
       />
     );
 
@@ -108,7 +108,7 @@ describe('QueryBar', () => {
         onSaveNew={noop}
         onLoadSavedQuery={noop}
         isDirty={false}
-        onClose={noop}
+        onClearSavedQuery={noop}
       />
     );
 
