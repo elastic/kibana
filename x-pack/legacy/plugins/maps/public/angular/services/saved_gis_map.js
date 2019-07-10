@@ -87,7 +87,7 @@ module.factory('SavedGisMap', function (Private) {
     return `/app/maps#map/${this.id}`;
   };
 
-  SavedGisMap.prototype.getLayerListJSON = function () {
+  SavedGisMap.prototype.getLayerList = function () {
     return this.layerListJSON ? JSON.parse(this.layerListJSON) : null;
   };
 

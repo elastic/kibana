@@ -136,7 +136,7 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage
     const layerList = getLayerListRaw(state);
     const layerListConfigOnly = copyPersistentState(layerList);
 
-    const savedLayerList  = savedMap.getLayerListJSON();
+    const savedLayerList  = savedMap.getLayerList();
     const oldConfig = savedLayerList ? savedLayerList : initialLayerListConfig;
 
     return !_.isEqual(layerListConfigOnly, oldConfig);

@@ -37,6 +37,28 @@ export function CommonPageProvider({ getService, getPageObjects }) {
   const defaultFindTimeout = config.get('timeouts.find');
 
   class CommonPage {
+
+    static async navigateToUrlAndHandleAlert(url, shouldAcceptAlert) {
+      log.debug('Navigate to: ' + url);
+      try {
+        await browser.get(url);
+      } catch(e) {
+        log.debug('Error navigating to url');
+        try {
+          if (shouldAcceptAlert) {
+            log.debug('Accept alert');
+            await browser.acceptAlert();
+          } else {
+            log.debug('Will not accept alert');
+            throw e;
+          }
+        } catch(e) {
+          log.debug('Error accepting alert');
+          throw e;
+        }
+      }
+    }
+
     getHostPort() {
       return getUrl.baseUrl(config.get('servers.kibana'));
     }
@@ -64,18 +86,7 @@ export function CommonPageProvider({ getService, getPageObjects }) {
       const appUrl = getUrl.noAuth(config.get('servers.kibana'), appConfig);
       await retry.try(async () => {
         log.debug(`navigateToUrl ${appUrl}`);
-        try {
-          await browser.get(appUrl);
-        } catch(e) {
-          //Accept dialog here so the error isn't trapped over and over again in the retry.try loop
-          if (shouldAcceptAlert) {
-            log.debug('accept alert');
-            await browser.acceptAlert();
-          } else {
-            throw e;
-          }
-        }
-
+        await CommonPage.navigateToUrlAndHandleAlert(appUrl, shouldAcceptAlert);
         const currentUrl = shouldLoginIfPrompted ? await this.loginIfPrompted(appUrl) : await browser.getCurrentUrl();
 
         if (ensureCurrentUrl && !currentUrl.includes(appUrl)) {
@@ -148,23 +159,7 @@ export function CommonPageProvider({ getService, getPageObjects }) {
           // since we're using hash URLs, always reload first to force re-render
           return kibanaServer.uiSettings.getDefaultIndex()
             .then(async function () {
-              log.debug('navigate to: ' + url);
-              try {
-                await browser.get(url);
-              } catch(e) {
-                log.debug('Error navigating to url');
-                try {
-                  if (shouldAcceptAlert) {
-                    log.debug('Accept alert');
-                    await browser.acceptAlert();
-                  } else {
-                    throw e;
-                  }
-                } catch(e) {
-                  log.debug('Error accepting alert');
-                  throw e;
-                }
-              }
+              return await CommonPage.navigateToUrlAndHandleAlert(url, shouldAcceptAlert);
             })
             .then(function () {
               return self.sleep(700);
