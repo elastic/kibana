@@ -16,7 +16,6 @@ function exampleState(): State {
     legend: { position: Position.Bottom, isVisible: true },
     seriesType: 'area',
     splitSeriesAccessors: [],
-    stackAccessors: [],
     x: {
       accessor: 'a',
       position: Position.Bottom,
