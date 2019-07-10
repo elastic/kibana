@@ -53,16 +53,16 @@ pipeline {
       steps {
         dir("${env.BASE_DIR}"){
           sh "${CI_DIR}/run_pipeline.sh"
-          script {
-            def d = load("${env.GROOVY_SRC}/dump.groovy")
-            def t = load("${env.GROOVY_SRC}/tar.groovy")
-            d.dumpEnv()
-            createWorkspaceCache()
-            t.tarAll()
-            d.dumpSizes(["${env.WORKSPACE}", "${env.WORKSPACE_DIR}/elasticsearch", "${env.FULL_WORKSPACE_CACHE_PATH}"])
-          }
-          step([$class: 'ClassicUploadStep',
-            credentialsId: env.CREDENTIALS_ID, bucket: env.BUCKET, pattern: env.PATTERN])
+          // script {
+          //   def d = load("${env.GROOVY_SRC}/dump.groovy")
+          //   def t = load("${env.GROOVY_SRC}/tar.groovy")
+          //   d.dumpEnv()
+          //   createWorkspaceCache()
+          //   t.tarAll()
+          //   d.dumpSizes(["${env.WORKSPACE}", "${env.WORKSPACE_DIR}/elasticsearch", "${env.FULL_WORKSPACE_CACHE_PATH}"])
+          // }
+          // step([$class: 'ClassicUploadStep',
+          //   credentialsId: env.CREDENTIALS_ID, bucket: env.BUCKET, pattern: env.PATTERN])
         }
       }
     }
