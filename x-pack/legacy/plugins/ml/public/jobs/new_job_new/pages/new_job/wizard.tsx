@@ -73,7 +73,7 @@ export const Wizard: FC<Props> = ({
 
   const stepsConfig = [
     {
-      title: i18n.translate('xpack.ml.dataframe.transformsWizard.definePivotStepTitle', {
+      title: i18n.translate('xpack.ml.newJob.wizard.step.timeRangeTitle', {
         defaultMessage: 'Time range',
       }),
       children: (
@@ -85,7 +85,7 @@ export const Wizard: FC<Props> = ({
       status: currentStep >= WIZARD_STEPS.TIME_RANGE ? undefined : ('incomplete' as EuiStepStatus),
     },
     {
-      title: i18n.translate('xpack.ml.dataframe.transformsWizard.definePivotStepTitle', {
+      title: i18n.translate('xpack.ml.newJob.wizard.step.pickFieldsTitle', {
         defaultMessage: 'Pick fields',
       }),
       children: (
@@ -98,7 +98,7 @@ export const Wizard: FC<Props> = ({
     },
 
     {
-      title: i18n.translate('xpack.ml.dataframe.transformsWizard.definePivotStepTitle', {
+      title: i18n.translate('xpack.ml.newJob.wizard.step.jobDetailsTitle', {
         defaultMessage: 'Job details',
       }),
       children: (
@@ -111,7 +111,7 @@ export const Wizard: FC<Props> = ({
     },
 
     {
-      title: i18n.translate('xpack.ml.dataframe.transformsWizard.definePivotStepTitle', {
+      title: i18n.translate('xpack.ml.newJob.wizard.step.summaryTitle', {
         defaultMessage: 'Summary',
       }),
       children: (

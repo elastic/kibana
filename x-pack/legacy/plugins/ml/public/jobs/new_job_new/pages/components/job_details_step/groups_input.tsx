@@ -73,12 +73,9 @@ export const GroupsInput: FC<Props> = ({ selectedGroupNames, setSelectedGroupNam
     >
       <EuiFormRow label="Groups" describedByIds={['single-example-aria']}>
         <EuiComboBox
-          placeholder={i18n.translate(
-            'xpack.ml.dataframe.definePivot.nestedAggListConflictErrorMessage',
-            {
-              defaultMessage: 'Select or create groups',
-            }
-          )}
+          placeholder={i18n.translate('xpack.ml.newJob.wizard.jobGroupSelectPlaceholder', {
+            defaultMessage: 'Select or create groups',
+          })}
           options={groups}
           selectedOptions={selectedGroups}
           onChange={setSelectedGroups}
