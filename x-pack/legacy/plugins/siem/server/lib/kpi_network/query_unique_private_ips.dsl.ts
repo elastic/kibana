@@ -8,92 +8,70 @@ import { RequestBasicOptions } from '../framework';
 
 import { KpiNetworkESMSearchBody, UniquePrivateAttributeQuery } from './types';
 
-const getUniquePrivateIpsFilter = (attrQuery: UniquePrivateAttributeQuery) => [
-  {
-    bool: {
-      should: [
-        {
-          bool: {
-            should: [
-              {
-                match: {
-                  [`${attrQuery}.ip`]: '10.0.0.0/8',
-                },
-              },
-            ],
-            minimum_should_match: 1,
+const getUniquePrivateIpsFilter = (attrQuery: UniquePrivateAttributeQuery) => ({
+  bool: {
+    should: [
+      {
+        term: {
+          [`${attrQuery}.ip`]: '10.0.0.0/8',
+        },
+      },
+      {
+        term: {
+          [`${attrQuery}.ip`]: '192.168.0.0/16',
+        },
+      },
+      {
+        term: {
+          [`${attrQuery}.ip`]: '172.16.0.0/12',
+        },
+      },
+      {
+        term: {
+          [`${attrQuery}.ip`]: 'fd00::/8',
+        },
+      },
+    ],
+    minimum_should_match: 1,
+  },
+});
+
+const getAggs = (attrQuery: 'source' | 'destination') => ({
+  [attrQuery]: {
+    filter: getUniquePrivateIpsFilter(attrQuery),
+    aggs: {
+      unique_private_ips: {
+        cardinality: {
+          field: `${attrQuery}.ip`,
+        },
+      },
+      histogram: {
+        auto_date_histogram: {
+          field: '@timestamp',
+          buckets: '6',
+        },
+        aggs: {
+          count: {
+            cardinality: {
+              field: `${attrQuery}.ip`,
+            },
           },
         },
-        {
-          bool: {
-            should: [
-              {
-                bool: {
-                  should: [
-                    {
-                      match: {
-                        [`${attrQuery}.ip`]: '192.168.0.0/16',
-                      },
-                    },
-                  ],
-                  minimum_should_match: 1,
-                },
-              },
-              {
-                bool: {
-                  should: [
-                    {
-                      bool: {
-                        should: [
-                          {
-                            match: {
-                              [`${attrQuery}.ip`]: '172.16.0.0/12',
-                            },
-                          },
-                        ],
-                        minimum_should_match: 1,
-                      },
-                    },
-                    {
-                      bool: {
-                        should: [
-                          {
-                            match_phrase: {
-                              [`${attrQuery}.ip`]: 'fd00::/8',
-                            },
-                          },
-                        ],
-                        minimum_should_match: 1,
-                      },
-                    },
-                  ],
-                  minimum_should_match: 1,
-                },
-              },
-            ],
-            minimum_should_match: 1,
-          },
-        },
-      ],
-      minimum_should_match: 1,
+      },
     },
   },
-];
+});
 
-export const buildUniquePrvateIpQuery = (
-  attrQuery: UniquePrivateAttributeQuery,
-  {
-    filterQuery,
-    timerange: { from, to },
-    defaultIndex,
-    sourceConfiguration: {
-      fields: { timestamp },
-    },
-  }: RequestBasicOptions
-): KpiNetworkESMSearchBody[] => {
+export const buildUniquePrvateIpQuery = ({
+  filterQuery,
+  timerange: { from, to },
+  defaultIndex,
+  sourceConfiguration: {
+    fields: { timestamp },
+  },
+}: RequestBasicOptions): KpiNetworkESMSearchBody[] => {
   const filter = [
     ...createQueryFilterClauses(filterQuery),
-    ...getUniquePrivateIpsFilter(attrQuery),
     {
       range: {
         [timestamp]: {
@@ -112,24 +90,8 @@ export const buildUniquePrvateIpQuery = (
     },
     {
       aggregations: {
-        unique_private_ips: {
-          cardinality: {
-            field: `${attrQuery}.ip`,
-          },
-        },
-        histogram: {
-          auto_date_histogram: {
-            field: '@timestamp',
-            buckets: '6',
-          },
-          aggs: {
-            count: {
-              cardinality: {
-                field: `${attrQuery}.ip`,
-              },
-            },
-          },
-        },
+        ...getAggs('source'),
+        ...getAggs('destination'),
       },
       query: {
         bool: {
@@ -137,7 +99,7 @@ export const buildUniquePrvateIpQuery = (
         },
       },
       size: 0,
-      track_total_hits: true,
+      track_total_hits: false,
     },
   ];
 

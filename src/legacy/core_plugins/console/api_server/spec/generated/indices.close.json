@@ -10,7 +10,8 @@
         "closed",
         "none",
         "all"
-      ]
+      ],
+      "wait_for_active_shards": ""
     },
     "methods": [
       "POST"

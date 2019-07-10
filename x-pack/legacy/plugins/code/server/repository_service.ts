@@ -280,9 +280,7 @@ export class RepositoryService {
         const currentBranch = await gitRepo.getCurrentBranch();
         const currentBranchName = currentBranch.shorthand();
         this.log.info(
-          `Clone repository from ${
-            repo.url
-          } done with head revision ${headRevision} and default branch ${currentBranchName}`
+          `Clone repository from ${repo.url} done with head revision ${headRevision} and default branch ${currentBranchName}`
         );
         return {
           uri: repo.uri,

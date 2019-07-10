@@ -15,18 +15,21 @@ describe('MonitorBarSeries component', () => {
       absoluteStartDate: 1548697920000,
       absoluteEndDate: 1548700920000,
       dangerColor: 'A danger color',
-      downSeries: [
+      histogramSeries: [
         {
-          x: 123,
-          y: 1,
+          timestamp: 124,
+          down: 1,
+          up: 0,
         },
         {
-          x: 124,
-          y: 1,
+          timestamp: 125,
+          down: 1,
+          up: 0,
         },
         {
-          x: 125,
-          y: 1,
+          timestamp: 126,
+          down: 1,
+          up: 0,
         },
       ],
     };
@@ -38,27 +41,42 @@ describe('MonitorBarSeries component', () => {
   });
 
   it('renders null when there are no down items', () => {
-    props.downSeries = [];
+    props.histogramSeries = [];
     const component = shallowWithIntl(<MonitorBarSeries {...props} />);
     expect(component).toEqual({});
   });
 
   it('renders nothing if the down count has no counts', () => {
-    props.downSeries = [
+    props.histogramSeries = [
       {
-        x: 123,
-        y: 0,
+        timestamp: 123,
+        down: 0,
+        up: 1,
       },
       {
-        x: 124,
-        y: null,
+        timestamp: 124,
+        down: 0,
+        up: 0,
       },
       {
-        x: 125,
-        y: 0,
+        timestamp: 125,
+        down: 0,
+        up: 0,
       },
     ];
     const component = shallowWithIntl(<MonitorBarSeries {...props} />);
+    expect(component).toEqual({});
+  });
+
+  it('renders nothing if the data series is null', () => {
+    const component = shallowWithIntl(
+      <MonitorBarSeries
+        absoluteStartDate={123}
+        absoluteEndDate={124}
+        dangerColor="danger"
+        histogramSeries={null}
+      />
+    );
     expect(component).toEqual({});
   });
 });

@@ -34,7 +34,7 @@ const MetricsRequestHandlerProvider = function(Private, config) {
       const scaledDataFormat = config.get('dateFormat:scaled');
       const dateFormat = config.get('dateFormat');
 
-      if (visParams && visParams.id) {
+      if (visParams && visParams.id && !visParams.isModelInvalid) {
         try {
           const maxBuckets = config.get('metrics:max_buckets');
 
@@ -65,6 +65,8 @@ const MetricsRequestHandlerProvider = function(Private, config) {
           return Promise.reject(error);
         }
       }
+
+      return Promise.resolve({});
     },
   };
 };

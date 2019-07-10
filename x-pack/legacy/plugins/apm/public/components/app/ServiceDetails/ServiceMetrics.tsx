@@ -7,16 +7,16 @@
 import { EuiFlexGrid, EuiFlexItem, EuiPanel, EuiSpacer } from '@elastic/eui';
 import React from 'react';
 import { useServiceMetricCharts } from '../../../hooks/useServiceMetricCharts';
-import { IUrlParams } from '../../../context/UrlParamsContext/types';
 import { SyncChartGroup } from '../../shared/charts/SyncChartGroup';
 import { MetricsChart } from './MetricsChart';
+import { useUrlParams } from '../../../hooks/useUrlParams';
 
 interface ServiceMetricsProps {
-  urlParams: IUrlParams;
   agentName?: string;
 }
 
-export function ServiceMetrics({ urlParams, agentName }: ServiceMetricsProps) {
+export function ServiceMetrics({ agentName }: ServiceMetricsProps) {
+  const { urlParams } = useUrlParams();
   const { data } = useServiceMetricCharts(urlParams, agentName);
   const { start, end } = urlParams;
   return (

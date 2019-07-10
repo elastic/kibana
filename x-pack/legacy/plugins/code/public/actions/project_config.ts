@@ -7,8 +7,10 @@
 import { createAction } from 'redux-actions';
 import { RepositoryConfig } from '../../model';
 
+export interface RepoLangserverConfigs {
+  [key: string]: RepositoryConfig;
+}
+
 export const loadConfigs = createAction('LOAD CONFIGS');
-export const loadConfigsSuccess = createAction<{ [key: string]: RepositoryConfig }>(
-  'LOAD CONFIGS SUCCESS'
-);
+export const loadConfigsSuccess = createAction<RepoLangserverConfigs>('LOAD CONFIGS SUCCESS');
 export const loadConfigsFailed = createAction<Error>('LOAD CONFIGS FAILED');

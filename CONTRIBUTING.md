@@ -461,6 +461,7 @@ yarn test:browser --dev # remove the --dev flag to run them once and close
 * In System Preferences > Sharing, change your computer name to be something simple, e.g. "computer".
 * Run Kibana with `yarn start --host=computer.local` (substituting your computer name).
 * Now you can run your VM, open the browser, and navigate to `http://computer.local:5601` to test Kibana.
+* Alternatively you can use browserstack 
 
 #### Running Browser Automation Tests
 

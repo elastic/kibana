@@ -17,7 +17,7 @@ export function validateActionTypeParams<T extends Record<string, any>>(
   }
   const { error, value } = validator.validate(params);
   if (error) {
-    throw Boom.badRequest(`params invalid: ${error.message}`);
+    throw Boom.badRequest(`The actionParams is invalid: ${error.message}`);
   }
   return value;
 }
