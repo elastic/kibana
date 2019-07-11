@@ -18,33 +18,35 @@
  */
 import React from 'react';
 import classNames from 'classnames';
-import chrome from 'ui/chrome';
 // @ts-ignore
 import { shortenDottedString } from '../../../../core_plugins/kibana/common/utils/shorten_dotted_string';
 import { FieldNameIcon } from './field_name_icon';
 
-const config = chrome.getUiSettingsClient();
-
+// property field is provided at discover's field chooser
+// properties fieldType and fieldName are provided in kbn_doc_view
+// this should be changed when both components are deangularized
 interface Props {
-  field?: any;
+  field?: {
+    type: string;
+    name: string;
+    rowCount: number;
+    scripted: boolean;
+  };
   fieldName?: string;
   fieldType?: string;
+  useShortDots?: boolean;
 }
 
-export function FieldName(props: Props) {
-  // field is provided at discover's field chooser
-  // fieldType and fieldName in kbn_doc_view
-  // this should be changed when both components are deangularized
-  const type = props.field ? props.field.type : props.fieldType;
-  const name = props.field ? props.field.name : props.fieldName;
+export function FieldName({ field, fieldName, fieldType, useShortDots }: Props) {
+  const type = field ? String(field.type) : String(fieldType);
+  const name = field ? String(field.name) : String(fieldName);
+  const displayName = useShortDots ? shortenDottedString(name) : name;
 
   const className = classNames({
-    'dscField--noResults': props.field ? !props.field.rowCount && !props.field.scripted : false,
-    // this is currently not styled, should be adapted
-    scripted: props.field ? props.field.scripted : false,
+    'dscField--noResults': field ? !field.rowCount && !field.scripted : false,
+    // this is currently not styled, should display an icon
+    scripted: field ? field.scripted : false,
   });
-  const isShortDots = config.get('shortDots:enable');
-  const displayName = isShortDots ? shortenDottedString(name) : name;
 
   return (
     <span className={className} title={name}>

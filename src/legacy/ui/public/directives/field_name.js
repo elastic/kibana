@@ -18,16 +18,20 @@
  */
 import { FieldName } from './field_name/field_name';
 import { uiModules } from '../modules';
+import { wrapInI18nContext } from 'ui/i18n';
 const module = uiModules.get('kibana');
 
-module.directive('fieldName', function ($rootScope, config, reactDirective) {
+module.directive('fieldName', function (config, reactDirective) {
   return reactDirective(
-    FieldName,
+    wrapInI18nContext(FieldName),
     [
       ['field', { watchDepth: 'collection' }],
       ['fieldName', { watchDepth: 'reference' }],
       ['fieldType', { watchDepth: 'reference' }],
     ],
-    { restrict: 'AE' }
+    { restrict: 'AE' },
+    {
+      useShortDots: config.get('shortDots:enable'),
+    }
   );
 });

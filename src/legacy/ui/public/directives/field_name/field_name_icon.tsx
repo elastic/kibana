@@ -103,6 +103,7 @@ export function FieldNameIcon({ type }: Props) {
       );
 
     case 'source':
+      // Note that this type is currently not provided, type for _source is undefined
       return (
         <span
           aria-label={i18n.translate('common.ui.directives.fieldNameIcons.sourceFieldAriaLabel', {
