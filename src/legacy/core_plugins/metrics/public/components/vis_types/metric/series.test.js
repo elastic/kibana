@@ -40,33 +40,35 @@ const defaultProps = {
   onDelete: jest.fn(),
 };
 
-it('should enable add data', () => {
-  const wrapper = mountWithIntl(<MetricSeries {...defaultProps} />);
-  const props = wrapper.props();
+describe('MetricSeries', () => {
+  it('should enable add data', () => {
+    const wrapper = mountWithIntl(<MetricSeries.WrappedComponent {...defaultProps} />);
+    const props = wrapper.props();
 
-  expect(props.disableAdd).toBeFalsy();
-});
+    expect(props.disableAdd).toBeFalsy();
+  });
 
-it('should disable delete data', () => {
-  const wrapper = mountWithIntl(<MetricSeries {...defaultProps} />);
-  const props = wrapper.props();
-  expect(props.disableDelete).toBeTruthy();
-});
+  it('should disable delete data', () => {
+    const wrapper = mountWithIntl(<MetricSeries.WrappedComponent {...defaultProps} />);
+    const props = wrapper.props();
+    expect(props.disableDelete).toBeTruthy();
+  });
 
-it('should call toggleVisible function', () => {
-  const wrapper = mountWithIntl(<MetricSeries {...defaultProps} />);
-  wrapper
-    .find('EuiButtonIcon')
-    .at(0)
-    .simulate('click');
-  expect(defaultProps.toggleVisible).toBeCalled();
-});
+  it('should call toggleVisible function', () => {
+    const wrapper = mountWithIntl(<MetricSeries.WrappedComponent {...defaultProps} />);
+    wrapper
+      .find('EuiButtonIcon')
+      .at(0)
+      .simulate('click');
+    expect(defaultProps.toggleVisible).toBeCalled();
+  });
 
-it('should call onAdd function', () => {
-  const wrapper = mountWithIntl(<MetricSeries {...defaultProps} />);
-  wrapper
-    .find('EuiButtonIcon')
-    .at(3)
-    .simulate('click');
-  expect(defaultProps.onAdd).toBeCalled();
+  it('should call onAdd function', () => {
+    const wrapper = mountWithIntl(<MetricSeries.WrappedComponent {...defaultProps} />);
+    wrapper
+      .find('EuiButtonIcon')
+      .at(3)
+      .simulate('click');
+    expect(defaultProps.onAdd).toBeCalled();
+  });
 });
