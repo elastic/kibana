@@ -11,12 +11,12 @@
     flex: 0 0 auto;
     margin: 0 $euiSize;
   }
+}
 
-  & > h4 {
-    flex: 0 1 auto;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
+.lnsIndexPatternDataPanel__header-text {
+  flex: 0 1 auto;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .lnsIndexPatternDataPanel {

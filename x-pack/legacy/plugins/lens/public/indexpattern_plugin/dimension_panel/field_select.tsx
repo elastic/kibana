@@ -60,16 +60,16 @@ export function FieldSelect({
   }
 
   const fieldOptions = [];
-  const fieldLessColumn = filteredColumns.find(column => !hasField(column));
-  if (fieldLessColumn) {
+  const fieldlessColumn = filteredColumns.find(column => !hasField(column));
+  if (fieldlessColumn) {
     fieldOptions.push({
       label: i18n.translate('xpack.lens.indexPattern.documentField', {
         defaultMessage: 'Document',
       }),
-      value: { operationId: fieldLessColumn.operationId, dataType: fieldLessColumn.dataType },
+      value: { operationId: fieldlessColumn.operationId, dataType: fieldlessColumn.dataType },
       className: classNames({
         'lnsConfigPanel__fieldOption--incompatible': !isCompatibleWithCurrentOperation(
-          fieldLessColumn
+          fieldlessColumn
         ),
       }),
     });

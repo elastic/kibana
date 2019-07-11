@@ -16,6 +16,9 @@ export interface FieldItemProps {
 }
 
 function wrapOnDot(str?: string) {
+  // u200B is a non-width white-space character, which allows
+  // the browser to efficiently word-wrap right after the dot
+  // without us having to draw a lot of extra DOM elements, etc
   return str ? str.replace(/\./g, '.\u200B') : undefined;
 }
 

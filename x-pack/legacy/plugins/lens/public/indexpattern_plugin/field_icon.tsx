@@ -10,7 +10,6 @@ import classNames from 'classnames';
 import { DataType } from '../types';
 
 function stringToNum(s: string) {
-  // tslint:disable-next-line:no-bitwise
   return Array.from(s).reduce((acc, ch) => acc + ch.charCodeAt(0), 1);
 }
 

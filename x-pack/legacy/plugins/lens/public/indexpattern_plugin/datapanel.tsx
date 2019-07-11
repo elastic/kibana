@@ -121,7 +121,10 @@ export function IndexPatternDataPanel(props: DatasourceDataPanelProps<IndexPatte
             {!showIndexPatternSwitcher ? (
               <>
                 <EuiTitle size="xxs">
-                  <h4 title={props.state.indexPatterns[props.state.currentIndexPatternId].title}>
+                  <h4
+                    className="lnsIndexPatternDataPanel__header"
+                    title={props.state.indexPatterns[props.state.currentIndexPatternId].title}
+                  >
                     {props.state.indexPatterns[props.state.currentIndexPatternId].title}{' '}
                   </h4>
                 </EuiTitle>
