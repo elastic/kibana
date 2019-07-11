@@ -5,7 +5,7 @@
  */
 
 import { SavedObject } from 'src/core/server/saved_objects';
-import { RegistryList, RegistryPackage } from '../common/types';
+import { RegistryList, RegistryPackage } from '../../common/types';
 import { cacheGet, cacheSet, cacheHas } from './cache';
 import { ArchiveEntry, untarBuffer, unzipBuffer } from './extract';
 import { fetchUrl, getResponseStream } from './requests';
