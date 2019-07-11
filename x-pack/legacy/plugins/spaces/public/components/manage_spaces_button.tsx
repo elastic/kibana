@@ -8,7 +8,7 @@ import { EuiButton } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { Component, CSSProperties } from 'react';
 import { capabilities } from 'ui/capabilities';
-import { MANAGE_SPACES_URL } from '../lib/constants';
+import { getManageSpacesUrl } from '../lib/constants';
 
 interface Props {
   isDisabled?: boolean;
@@ -44,6 +44,6 @@ export class ManageSpacesButton extends Component<Props, {}> {
     if (this.props.onClick) {
       this.props.onClick();
     }
-    window.location.replace(MANAGE_SPACES_URL);
+    window.location.replace(getManageSpacesUrl());
   };
 }
