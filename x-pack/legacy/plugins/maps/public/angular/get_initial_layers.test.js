@@ -84,7 +84,7 @@ describe('EMS is enabled', () => {
     };
   });
 
-  it('Should get initial layer with with EMS tile source', () => {
+  it('Should get initial layer with EMS tile source', () => {
     const layers = getInitialLayers(layerListNotProvided);
     expect(layers).toEqual([{
       alpha: 1,
