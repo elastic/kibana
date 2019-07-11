@@ -29,7 +29,6 @@ export class TelemetryForm extends Component {
     query: PropTypes.object,
     onQueryMatchChange: PropTypes.func.isRequired,
     spacesEnabled: PropTypes.bool.isRequired,
-    activeSpace: PropTypes.object,
     enableSaving: PropTypes.bool.isRequired,
   };
 

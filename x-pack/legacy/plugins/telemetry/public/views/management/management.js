@@ -12,16 +12,12 @@ import { TelemetryForm } from '../../components';
 
 routes.defaults(/\/management/, {
   resolve: {
-    telemetryManagementSection: function (Private, spacesEnabled, activeSpace) {
+    telemetryManagementSection: function (Private, spacesEnabled) {
       const telemetryOptInProvider = Private(TelemetryOptInProvider);
 
       const spaceProps = {
         spacesEnabled,
       };
-
-      if (spacesEnabled) {
-        spaceProps.activeSpace = activeSpace ? activeSpace.space : null;
-      }
 
       const Component = (props) => (
         <TelemetryForm

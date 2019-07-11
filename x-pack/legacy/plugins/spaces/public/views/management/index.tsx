@@ -15,14 +15,16 @@ import {
 } from 'ui/management';
 // @ts-ignore
 import routes from 'ui/routes';
+import { getSpacesManager } from 'plugins/spaces/lib';
 import { AdvancedSettingsSubtitle } from './components/advanced_settings_subtitle';
 import { AdvancedSettingsTitle } from './components/advanced_settings_title';
+import { waitForSpacesNPInit } from '../../hacks/init_np_plugin';
 
 const MANAGE_SPACES_KEY = 'spaces';
 
 routes.defaults(/\/management/, {
   resolve: {
-    spacesManagementSection(activeSpace: any) {
+    spacesManagementSection() {
       function getKibanaSection() {
         return management.getSection('kibana');
       }
@@ -45,10 +47,15 @@ routes.defaults(/\/management/, {
           });
         }
 
-        const PageTitle = () => <AdvancedSettingsTitle space={activeSpace.space} />;
+        const getActiveSpace = async () => {
+          await waitForSpacesNPInit;
+          return getSpacesManager().getActiveSpace();
+        };
+
+        const PageTitle = () => <AdvancedSettingsTitle getActiveSpace={getActiveSpace} />;
         registerSettingsComponent(PAGE_TITLE_COMPONENT, PageTitle, true);
 
-        const SubTitle = () => <AdvancedSettingsSubtitle space={activeSpace.space} />;
+        const SubTitle = () => <AdvancedSettingsSubtitle getActiveSpace={getActiveSpace} />;
         registerSettingsComponent(PAGE_SUBTITLE_COMPONENT, SubTitle, true);
       }
 
