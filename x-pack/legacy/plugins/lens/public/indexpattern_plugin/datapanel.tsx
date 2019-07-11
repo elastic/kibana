@@ -57,7 +57,6 @@ export function IndexPatternDataPanel(props: DatasourceDataPanelProps<IndexPatte
   const [showIndexPatternSwitcher, setShowIndexPatternSwitcher] = useState(false);
   const [isTypeFilterOpen, setTypeFilterOpen] = useState(false);
   const [scrollContainer, setScrollContainer] = useState<Element | undefined>(undefined);
-
   const lazyScroll = () => {
     if (scrollContainer) {
       const nearBottom =
@@ -245,17 +244,17 @@ export function IndexPatternDataPanel(props: DatasourceDataPanelProps<IndexPatte
               </EuiFilterGroup>
             </EuiFlexItem>
           </EuiFlexGroup>
-          <div className="lnsFieldListPanel__list">
-            <div
-              className="lnsFieldListPanel__overflow"
-              ref={el => {
-                if (el && !el.dataset.dynamicScroll) {
-                  el.dataset.dynamicScroll = 'true';
-                  setScrollContainer(el);
-                }
-              }}
-              onScroll={lazyScroll}
-            >
+          <div
+            className="lnsFieldListPanel__list-wrapper"
+            ref={el => {
+              if (el && !el.dataset.dynamicScroll) {
+                el.dataset.dynamicScroll = 'true';
+                setScrollContainer(el);
+              }
+            }}
+            onScroll={lazyScroll}
+          >
+            <div className="lnsFieldListPanel__list">
               {filteredFields
                 .filter(
                   field => typeFilter.length === 0 || typeFilter.includes(field.type as DataType)

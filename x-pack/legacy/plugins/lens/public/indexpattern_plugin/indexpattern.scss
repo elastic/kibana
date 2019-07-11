@@ -13,6 +13,10 @@
   }
 }
 
+.lnsIndexPatternDataPanel__filter-wrapper {
+  flex-grow: 0;
+}
+
 .lnsIndexPatternDataPanel__header-text {
   flex: 0 1 auto;
   overflow: hidden;
@@ -25,24 +29,21 @@
   padding: $euiSize $euiSize 0;
 }
 
-.lnsIndexPatternDataPanel__filter-wrapper {
-  flex: 0 0 auto;
+.lnsFieldListPanel__list-wrapper {
+  @include euiOverflowShadow($euiPageBackgroundColor);
+  margin-top: 2px; // form control shadow
+  position: relative;
+  flex-grow: 1;
+  overflow: auto;
 }
 
 .lnsFieldListPanel__list {
-  @include euiOverflowShadow($euiPageBackgroundColor);
-  margin-top: 2px; // form control shadow
-  flex: 1 0 auto;
-}
-
-.lnsFieldListPanel__overflow {
   padding-top: $euiSizeS;
-  overflow: visible auto;
+  scrollbar-width: thin;
   position: absolute;
   top: 0;
   left: 0;
   right: 0;
-  bottom: 0;
   @include euiScrollBar;
 }
 
