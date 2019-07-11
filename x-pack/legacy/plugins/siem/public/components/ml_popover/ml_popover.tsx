@@ -155,7 +155,9 @@ export const MlPopover = React.memo(() => {
 
   // Filter installed job to show all 'siem' group jobs or just embedded
   const jobsToDisplay = getJobsToDisplay(jobSummaryData, embeddedJobIds, showAllJobs, filterQuery);
-  if (!hasMlAdminPermissions(capabilities)) {
+
+  if (!capabilities.isPlatinumOrTrialLicense) {
+    // If the user does not have platinum show upgrade UI
     return (
       <EuiPopover
         anchorPosition="downRight"
@@ -176,7 +178,8 @@ export const MlPopover = React.memo(() => {
         <UpgradeContents />
       </EuiPopover>
     );
-  } else {
+  } else if (hasMlAdminPermissions(capabilities)) {
+    // If the user has Platinum License & ML Admin Permissions, show Anomaly Detection button & full config UI
     return (
       <EuiPopover
         anchorPosition="downRight"
@@ -218,5 +221,8 @@ export const MlPopover = React.memo(() => {
         </PopoverContentsDiv>
       </EuiPopover>
     );
+  } else {
+    // If the user has Platinum License & not ML Admin, hide Anomaly Detection button as they don't have permissions to configure
+    return null;
   }
 });
