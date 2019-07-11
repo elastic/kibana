@@ -8,6 +8,7 @@ import {
   getIndexPatternDatasource,
   IndexPatternPersistedState,
   IndexPatternPrivateState,
+  IndexPatternColumn,
 } from './indexpattern';
 import { DatasourcePublicAPI, Operation, Datasource } from '../types';
 
@@ -455,6 +456,52 @@ describe('IndexPattern Data Source', () => {
             columnId: 'col1',
           },
         ]);
+      });
+    });
+
+    describe('removeColumnInTableSpec', () => {
+      it('should remove the specified column', async () => {
+        const initialState = await indexPatternDatasource.initialize(persistedState);
+        const setState = jest.fn();
+        const sampleColumn: IndexPatternColumn = {
+          dataType: 'number',
+          isBucketed: false,
+          label: 'foo',
+          operationId: 'bar',
+          operationType: 'max',
+          sourceField: 'baz',
+          suggestedOrder: 0,
+        };
+        const columns: Record<string, IndexPatternColumn> = {
+          a: {
+            ...sampleColumn,
+            suggestedOrder: 0,
+          },
+          b: {
+            ...sampleColumn,
+            suggestedOrder: 1,
+          },
+          c: {
+            ...sampleColumn,
+            suggestedOrder: 2,
+          },
+        };
+        const api = indexPatternDatasource.getPublicAPI(
+          {
+            ...initialState,
+            columnOrder: ['a', 'b', 'c'],
+            columns,
+          },
+          setState
+        );
+
+        api.removeColumnInTableSpec('b');
+
+        expect(setState.mock.calls[0][0].columnOrder).toEqual(['a', 'c']);
+        expect(setState.mock.calls[0][0].columns).toEqual({
+          a: columns.a,
+          c: columns.c,
+        });
       });
     });
 

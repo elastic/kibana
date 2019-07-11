@@ -9,13 +9,13 @@ import React from 'react';
 import { render } from 'react-dom';
 import { Chrome } from 'ui/chrome';
 import { ToastNotifications } from 'ui/notify/toasts/toast_notifications';
-import uuid from 'uuid';
-import { I18nProvider } from '@kbn/i18n/react';
+import { EuiComboBox } from '@elastic/eui';
 import {
   DatasourceDimensionPanelProps,
   DatasourceDataPanelProps,
   DimensionPriority,
   DatasourceSuggestion,
+  Operation,
 } from '../types';
 import { getIndexPatterns } from './loader';
 import { toExpression } from './to_expression';
@@ -122,7 +122,50 @@ export type IndexPatternPrivateState = IndexPatternPersistedState & {
   indexPatterns: Record<string, IndexPattern>;
 };
 
-export function columnToOperation(column: IndexPatternColumn) {
+export function IndexPatternDataPanel(props: DatasourceDataPanelProps<IndexPatternPrivateState>) {
+  return (
+    <ChildDragDropProvider {...props.dragDropContext}>
+      Index Pattern Data Source
+      <div>
+        <EuiComboBox
+          data-test-subj="indexPattern-switcher"
+          options={Object.values(props.state.indexPatterns).map(({ title, id }) => ({
+            label: title,
+            value: id,
+          }))}
+          selectedOptions={
+            props.state.currentIndexPatternId
+              ? [
+                  {
+                    label: props.state.indexPatterns[props.state.currentIndexPatternId].title,
+                    value: props.state.indexPatterns[props.state.currentIndexPatternId].id,
+                  },
+                ]
+              : undefined
+          }
+          singleSelection={{ asPlainText: true }}
+          isClearable={false}
+          onChange={choices => {
+            props.setState({
+              ...props.state,
+              currentIndexPatternId: choices[0].value as string,
+            });
+          }}
+        />
+        <div>
+          {props.state.currentIndexPatternId &&
+            props.state.indexPatterns[props.state.currentIndexPatternId].fields.map(field => (
+              <DragDrop key={field.name} value={field} draggable>
+                {field.name}
+              </DragDrop>
+            ))}
+        </div>
+      </div>
+    </ChildDragDropProvider>
+  );
+}
+
+export function columnToOperation(column: IndexPatternColumn): Operation {
   const { dataType, label, isBucketed, operationId } = column;
   return {
     id: operationId,
@@ -166,6 +209,12 @@ function addRestrictionsToFields(
     timeFieldName: timeFieldName || undefined,
     fields: newFields,
   };
+}
+
+function removeProperty<T>(prop: string, object: Record<string, T>): Record<string, T> {
+  const result = { ...object };
+  delete result[prop];
+  return result;
 }
 
 export function getIndexPatternDatasource(chrome: Chrome, toastNotifications: ToastNotifications) {
@@ -224,11 +273,6 @@ export function getIndexPatternDatasource(chrome: Chrome, toastNotifications: To
           }
           return columnToOperation(state.columns[columnId]);
         },
-        generateColumnId: () => {
-          // TODO: Come up with a more compact form of generating unique column ids
-          return uuid.v4();
-        },
-
         renderDimensionPanel: (domElement: Element, props: DatasourceDimensionPanelProps) => {
           render(
             <IndexPatternDimensionPanel
@@ -240,7 +284,13 @@ export function getIndexPatternDatasource(chrome: Chrome, toastNotifications: To
           );
         },
 
-        removeColumnInTableSpec: (columnId: string) => [],
+        removeColumnInTableSpec: (columnId: string) => {
+          setState({
+            ...state,
+            columnOrder: state.columnOrder.filter(id => id !== columnId),
+            columns: removeProperty(columnId, state.columns),
+          });
+        },
         moveColumnTo: (columnId: string, targetIndex: number) => {},
         duplicateColumn: (columnId: string) => [],
       };
