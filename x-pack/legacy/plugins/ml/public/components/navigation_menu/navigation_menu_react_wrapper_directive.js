@@ -27,7 +27,7 @@ module.directive('mlNavMenu', function (config) {
 
       if (name === 'jobs' ||
         name === 'settings' ||
-        name === 'data_frame' ||
+        name === 'data_frames' ||
         name === 'datavisualizer' ||
         name === 'filedatavisualizer' ||
         name === 'timeseriesexplorer' ||
