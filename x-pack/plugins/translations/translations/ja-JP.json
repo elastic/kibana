@@ -10798,7 +10798,6 @@
     "xpack.uptime.snapshot.stats.downDescription": "ダウン",
     "xpack.uptime.snapshot.stats.totalDescription": "合計",
     "xpack.uptime.snapshot.stats.upDescription": "アップ",
-    "xpack.uptime.snapshot.statusOverTimeTitle": "長期的なステータス",
     "xpack.uptime.snapshotHistogram.series.downLabel": "ダウン",
     "xpack.uptime.snapshotHistogram.series.upLabel": "アップ",
     "xpack.uptime.uptimeFeatureCatalogueTitle": "起動時間",
