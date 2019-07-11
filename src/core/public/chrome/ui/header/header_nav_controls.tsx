@@ -28,7 +28,7 @@ import { HeaderExtension } from './header_extension';
 import { ChromeNavControl } from '../../nav_controls';
 
 interface Props {
-  navControls: ReadonlyArray<ChromeNavControl>;
+  navControls: readonly ChromeNavControl[];
   side: 'left' | 'right';
 }
 

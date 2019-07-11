@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SearchParams, SearchResponse } from 'elasticsearch';
+import { SearchParams } from 'elasticsearch';
 import { sum as arraySum, min as arrayMin, max as arrayMax, get } from 'lodash';
 import { fromExpression } from '@kbn/interpreter/common';
 import { CANVAS_TYPE } from '../../common/lib/constants';
@@ -185,7 +185,7 @@ const workpadCollector: TelemetryCollector = async function(server, callCluster)
 
   const esResponse = await callCluster<WorkpadSearch>('search', searchParams);
 
-  if (get<SearchResponse<WorkpadSearch>, number>(esResponse, 'hits.hits.length') > 0) {
+  if (get<number>(esResponse, 'hits.hits.length') > 0) {
     const workpads = esResponse.hits.hits.map(hit => hit._source[CANVAS_TYPE]);
     return summarizeWorkpads(workpads);
   }
