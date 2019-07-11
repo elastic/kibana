@@ -31,7 +31,7 @@ When the property value is undefined for a feature:
 * *Border width* and *Symbol size* style properties are set to the minimum size.
 * *Symbol orientation* style property is set to 0.
 
-When the minimum value and maximum value are the same and there is not range:
+When the minimum and maximum are the same and there is not range:
 
 * *Fill color* and *Border color* style properties are set to last color in the color ramp.
 * *Border width* and *Symbol size* style properties are set to the maximum size.
