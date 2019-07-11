@@ -30,7 +30,6 @@ export const getMlCapabilities = async (
       method: 'GET',
       credentials: 'same-origin',
       headers: {
-        credentials: 'same-origin',
         'kbn-system-api': 'true',
         'content-Type': 'application/json',
         'kbn-xsrf': chrome.getXsrfToken(),
