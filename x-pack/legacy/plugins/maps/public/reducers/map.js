@@ -358,7 +358,7 @@ function findDataRequestByDataId(layerDescriptor, dataRequestAction) {
   });
 }
 
-function findDataRequestByLayerId(state, layerId) {
+function findSourceDataRequestByLayerId(state, layerId) {
   const layerDescriptor = findLayerById(state, layerId);
   if (!layerDescriptor) {
     return;
@@ -370,7 +370,7 @@ function findDataRequestByLayerId(state, layerId) {
 
 
 function updateSourceDataRequest(state, action) {
-  const dataRequest = findDataRequestByLayerId(state, action.layerId);
+  const dataRequest = findSourceDataRequestByLayerId(state, action.layerId);
   if (!dataRequest) {
     return state;
   }
@@ -379,9 +379,8 @@ function updateSourceDataRequest(state, action) {
   return resetDataRequest(state, action, dataRequest);
 }
 
-
 function clearDataRequest(state, action) {
-  const dataRequest = findDataRequestByLayerId(state, action.layerId);
+  const dataRequest = getValidDataRequest(state, action, true);
   if (!dataRequest) {
     return state;
   }
