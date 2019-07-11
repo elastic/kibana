@@ -137,3 +137,34 @@ def checkoutKibana() {
     }
   }
 }
+/**
+ Get Elasticsearch sources, it uses stash as cache (It used to lol).
+ */
+def checkoutES(){
+//  useCache('es-source'){
+  dir("${ES_BASE_DIR}"){
+    checkout([$class: 'GitSCM', branches: [[name: "${params.ES_VERSION}"]],
+              doGenerateSubmoduleConfigurations: false,
+              extensions: [[$class: 'CloneOption',
+                            depth: 1,
+                            noTags: false,
+                            reference: "/var/lib/jenkins/.git-references/elasticsearch.git",
+                            shallow: true
+                           ]],
+              submoduleCfg: [],
+              userRemoteConfigs: [[credentialsId: "${JOB_GIT_CREDENTIALS}",
+                                   url: "${ES_GIT_URL}"]]])
+  }
+//    stash allowEmpty: true, name: 'es-source', includes: "${ES_BASE_DIR}/**", excludes: ".git", useDefaultExcludes: false
+//  }
+}
+/**
+ Some quick Test to run before anything else.
+ */
+def quickTest(){
+  dir("${BASE_DIR}"){
+    sh 'yarn tslint x-pack/plugins/apm/**/*.{ts,tsx} --fix'
+    sh 'cd x-pack/plugins/apm && yarn tsc --noEmit'
+    sh 'cd x-pack && node ./scripts/jest.js plugins/apm'
+  }
+}
