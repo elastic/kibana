@@ -325,7 +325,9 @@ export const SnapshotTable: React.FunctionComponent<Props> = ({
       {
         type: 'field_value_selection',
         field: 'repository',
-        name: 'Repository',
+        name: i18n.translate('xpack.snapshotRestore.snapshotList.table.repositoryFilterLabel', {
+          defaultMessage: 'Repository',
+        }),
         multiSelect: false,
         options: repositories.map(repository => ({
           value: repository,
