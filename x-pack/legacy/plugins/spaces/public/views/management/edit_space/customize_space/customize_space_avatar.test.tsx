@@ -16,13 +16,26 @@ const space = {
 
 test('renders without crashing', () => {
   const wrapper = shallowWithIntl(
-    <CustomizeSpaceAvatar.WrappedComponent space={space} onChange={jest.fn()} intl={null as any} />
+    <CustomizeSpaceAvatar.WrappedComponent
+      space={space}
+      onChange={jest.fn()}
+      intl={null as any}
+      onColorPickerOpen={jest.fn()}
+      onColorPickerClose={jest.fn()}
+    />
   );
   expect(wrapper).toMatchSnapshot();
 });
 
 test('shows customization fields', () => {
-  const wrapper = mountWithIntl(<CustomizeSpaceAvatar space={space} onChange={jest.fn()} />);
+  const wrapper = mountWithIntl(
+    <CustomizeSpaceAvatar
+      space={space}
+      onChange={jest.fn()}
+      onColorPickerOpen={jest.fn()}
+      onColorPickerClose={jest.fn()}
+    />
+  );
 
   expect(wrapper.find(EuiLink)).toHaveLength(0);
   expect(wrapper.find(EuiFieldText)).toHaveLength(2); // EuiColorPicker contains an EuiFieldText element
@@ -40,7 +53,12 @@ test('invokes onChange callback when avatar is customized', () => {
   const changeHandler = jest.fn();
 
   const wrapper = mountWithIntl(
-    <CustomizeSpaceAvatar space={customizedSpace} onChange={changeHandler} />
+    <CustomizeSpaceAvatar
+      space={customizedSpace}
+      onChange={changeHandler}
+      onColorPickerOpen={jest.fn()}
+      onColorPickerClose={jest.fn()}
+    />
   );
 
   wrapper

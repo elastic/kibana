@@ -39,7 +39,9 @@ exports[`renders without crashing 1`] = `
       <EuiColorPicker
         color="#BFA180"
         isInvalid={false}
+        onBlur={[MockFunction]}
         onChange={[Function]}
+        onFocus={[MockFunction]}
       />
     </EuiFormRow>
   </EuiFlexItem>
