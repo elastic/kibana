@@ -603,7 +603,7 @@ test('enables auth for a route by default if registerAuth has been called', asyn
   registerRouter(router);
 
   const authenticate = jest.fn().mockImplementation((req, t) => t.authenticated());
-  await registerAuth(authenticate, cookieOptions);
+  registerAuth(authenticate);
 
   await server.start();
   await supertest(innerServer.listener)
@@ -622,7 +622,7 @@ test('supports disabling auth for a route explicitly', async () => {
   );
   registerRouter(router);
   const authenticate = jest.fn();
-  await registerAuth(authenticate, cookieOptions);
+  registerAuth(authenticate);
 
   await server.start();
   await supertest(innerServer.listener)
@@ -641,7 +641,7 @@ test('supports enabling auth for a route explicitly', async () => {
   );
   registerRouter(router);
   const authenticate = jest.fn().mockImplementation((req, t) => t.authenticated({}));
-  await registerAuth(authenticate, cookieOptions);
+  await registerAuth(authenticate);
 
   await server.start();
   await supertest(innerServer.listener)
@@ -695,29 +695,115 @@ test('exposes route details of incoming request to a route handler', async () =>
 });
 
 describe('setup contract', () => {
+  describe('#createSessionStorage', () => {
+    it('creates session storage factory', async () => {
+      const { createCookieSessionStorageFactory } = await server.setup(config);
+      const sessionStorageFactory = await createCookieSessionStorageFactory(cookieOptions);
+
+      expect(sessionStorageFactory.asScoped).toBeDefined();
+    });
+    it('creates session storage factory only once', async () => {
+      const { createCookieSessionStorageFactory } = await server.setup(config);
+      const create = async () => await createCookieSessionStorageFactory(cookieOptions);
+
+      await create();
+      expect(create()).rejects.toThrowError('A cookieSessionStorageFactory was already created');
+    });
+  });
   describe('#registerAuth', () => {
     it('registers auth request interceptor only once', async () => {
       const { registerAuth } = await server.setup(config);
-      const doRegister = () =>
-        registerAuth(() => null as any, {
-          encryptionKey: 'any_password',
-        } as any);
+      const doRegister = () => registerAuth(() => null as any);
 
-      await doRegister();
-      expect(doRegister()).rejects.toThrowError('Auth interceptor was already registered');
+      doRegister();
+      expect(doRegister).toThrowError('Auth interceptor was already registered');
     });
 
-    it('supports implementing custom authentication logic', async () => {
+    it('may grant access to a resource', async () => {
+      const { registerAuth, registerRouter, server: innerServer } = await server.setup(config);
+      const router = new Router('');
+      router.get({ path: '/', validate: false }, async (req, res) => res.ok({ content: 'ok' }));
+      registerRouter(router);
+
+      await registerAuth((req, t) => t.authenticated());
+      await server.start();
+
+      await supertest(innerServer.listener)
+        .get('/')
+        .expect(200, { content: 'ok' });
+    });
+
+    it('supports rejecting a request from an unauthenticated user', async () => {
+      const { registerAuth, registerRouter, server: innerServer } = await server.setup(config);
+      const router = new Router('');
+      router.get({ path: '/', validate: false }, async (req, res) => res.ok({ content: 'ok' }));
+      registerRouter(router);
+
+      await registerAuth((req, t) => t.rejected(Boom.unauthorized()));
+      await server.start();
+
+      await supertest(innerServer.listener)
+        .get('/')
+        .expect(401);
+    });
+
+    it('supports redirecting', async () => {
+      const redirectTo = '/redirect-url';
+      const { registerAuth, registerRouter, server: innerServer } = await server.setup(config);
+      const router = new Router('');
+      router.get({ path: '/', validate: false }, async (req, res) => res.ok({ content: 'ok' }));
+      registerRouter(router);
+
+      await registerAuth((req, t) => {
+        return t.redirected(redirectTo);
+      });
+      await server.start();
+
+      const response = await supertest(innerServer.listener)
+        .get('/')
+        .expect(302);
+      expect(response.header.location).toBe(redirectTo);
+    });
+
+    it(`doesn't expose internal error details`, async () => {
+      const { registerAuth, registerRouter, server: innerServer } = await server.setup(config);
+      const router = new Router('');
+      router.get({ path: '/', validate: false }, async (req, res) => res.ok({ content: 'ok' }));
+      registerRouter(router);
+
+      await registerAuth((req, t) => {
+        throw new Error('sensitive info');
+      });
+      await server.start();
+
+      await supertest(innerServer.listener)
+        .get('/')
+        .expect({
+          statusCode: 500,
+          error: 'Internal Server Error',
+          message: 'An internal server error occurred',
+        });
+    });
+
+    it('allows manipulating cookies via cookie session storage', async () => {
       const router = new Router('');
       router.get({ path: '/', validate: false }, async (req, res) => res.ok({ content: 'ok' }));
 
-      const { registerAuth, registerRouter, server: innerServer } = await server.setup(config);
-      const { sessionStorageFactory } = await registerAuth<StorageData>((req, t) => {
+      const {
+        createCookieSessionStorageFactory,
+        registerAuth,
+        registerRouter,
+        server: innerServer,
+      } = await server.setup(config);
+      const sessionStorageFactory = await createCookieSessionStorageFactory<StorageData>(
+        cookieOptions
+      );
+      registerAuth((req, t) => {
         const user = { id: '42' };
         const sessionStorage = sessionStorageFactory.asScoped(req);
         sessionStorage.set({ value: user, expires: Date.now() + 1000 });
         return t.authenticated({ state: user });
-      }, cookieOptions);
+      });
       registerRouter(router);
       await server.start();
 
@@ -740,66 +826,22 @@ describe('setup contract', () => {
       expect(sessionCookie.httpOnly).toBe(true);
     });
 
-    it('supports rejecting a request from an unauthenticated user', async () => {
-      const { registerAuth, registerRouter, server: innerServer } = await server.setup(config);
-      const router = new Router('');
-      router.get({ path: '/', validate: false }, async (req, res) => res.ok({ content: 'ok' }));
-      registerRouter(router);
-
-      await registerAuth((req, t) => t.rejected(Boom.unauthorized()), cookieOptions);
-      await server.start();
-
-      await supertest(innerServer.listener)
-        .get('/')
-        .expect(401);
-    });
-
-    it('supports redirecting', async () => {
-      const redirectTo = '/redirect-url';
-      const { registerAuth, registerRouter, server: innerServer } = await server.setup(config);
-      const router = new Router('');
-      router.get({ path: '/', validate: false }, async (req, res) => res.ok({ content: 'ok' }));
-      registerRouter(router);
-
-      await registerAuth((req, t) => {
-        return t.redirected(redirectTo);
-      }, cookieOptions);
-      await server.start();
-
-      const response = await supertest(innerServer.listener)
-        .get('/')
-        .expect(302);
-      expect(response.header.location).toBe(redirectTo);
-    });
-
-    it(`doesn't expose internal error details`, async () => {
-      const { registerAuth, registerRouter, server: innerServer } = await server.setup(config);
-      const router = new Router('');
-      router.get({ path: '/', validate: false }, async (req, res) => res.ok({ content: 'ok' }));
-      registerRouter(router);
-
-      await registerAuth((req, t) => {
-        throw new Error('sensitive info');
-      }, cookieOptions);
-      await server.start();
-
-      await supertest(innerServer.listener)
-        .get('/')
-        .expect({
-          statusCode: 500,
-          error: 'Internal Server Error',
-          message: 'An internal server error occurred',
-        });
-    });
-
     it('allows manipulating cookies from route handler', async () => {
-      const { registerAuth, registerRouter, server: innerServer } = await server.setup(config);
-      const { sessionStorageFactory } = await registerAuth<StorageData>((req, t) => {
+      const {
+        createCookieSessionStorageFactory,
+        registerAuth,
+        registerRouter,
+        server: innerServer,
+      } = await server.setup(config);
+      const sessionStorageFactory = await createCookieSessionStorageFactory<StorageData>(
+        cookieOptions
+      );
+      registerAuth((req, t) => {
         const user = { id: '42' };
         const sessionStorage = sessionStorageFactory.asScoped(req);
         sessionStorage.set({ value: user, expires: Date.now() + 1000 });
         return t.authenticated();
-      }, cookieOptions);
+      });
 
       const router = new Router('');
       router.get({ path: '/', validate: false }, (req, res) => res.ok({ content: 'ok' }));
@@ -847,7 +889,7 @@ describe('setup contract', () => {
       await registerAuth((req, t) => {
         fromRegisterAuth = req.headers.authorization;
         return t.authenticated();
-      }, cookieOptions);
+      });
 
       let fromRegisterOnPostAuth;
       await registerOnPostAuth((req, t) => {
@@ -889,7 +931,7 @@ describe('setup contract', () => {
       );
       registerRouter(router);
 
-      await registerAuth((req, t) => t.authenticated(), cookieOptions);
+      await registerAuth((req, t) => t.authenticated());
 
       await server.start();
       await supertest(innerServer.listener)
@@ -908,7 +950,7 @@ describe('setup contract', () => {
       );
       registerRouter(router);
 
-      await registerAuth((req, t) => t.authenticated(), cookieOptions);
+      await registerAuth((req, t) => t.authenticated());
 
       await server.start();
       await supertest(innerServer.listener)
@@ -935,13 +977,18 @@ describe('setup contract', () => {
   describe('#auth.get()', () => {
     it('returns authenticated status and allow associate auth state with request', async () => {
       const user = { id: '42' };
-      const { registerRouter, registerAuth, server: innerServer, auth } = await server.setup(
-        config
-      );
-      const { sessionStorageFactory } = await registerAuth<StorageData>((req, t) => {
+      const {
+        createCookieSessionStorageFactory,
+        registerRouter,
+        registerAuth,
+        server: innerServer,
+        auth,
+      } = await server.setup(config);
+      const sessionStorageFactory = await createCookieSessionStorageFactory(cookieOptions);
+      registerAuth((req, t) => {
         sessionStorageFactory.asScoped(req).set({ value: user, expires: Date.now() + 1000 });
         return t.authenticated({ state: user });
-      }, cookieOptions);
+      });
 
       const router = new Router('');
       router.get({ path: '/', validate: false }, (req, res) => res.ok(auth.get(req)));
@@ -971,7 +1018,7 @@ describe('setup contract', () => {
       const { registerRouter, registerAuth, server: innerServer, auth } = await server.setup(
         config
       );
-      await registerAuth(authenticate, cookieOptions);
+      await registerAuth(authenticate);
       const router = new Router('');
       router.get({ path: '/', validate: false, options: { authRequired: false } }, (req, res) =>
         res.ok(auth.get(req))

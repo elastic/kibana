@@ -29,6 +29,7 @@ const createSetupContractMock = () => {
   const setupContract: ServiceSetupMockType = {
     // we can mock some hapi server method when we need it
     server: {} as Server,
+    createCookieSessionStorageFactory: jest.fn(),
     registerOnPreAuth: jest.fn(),
     registerAuth: jest.fn(),
     registerOnPostAuth: jest.fn(),

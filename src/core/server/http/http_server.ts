@@ -38,16 +38,16 @@ import { BasePath } from './base_path_service';
 export interface HttpServerSetup {
   server: Server;
   registerRouter: (router: Router) => void;
+  createCookieSessionStorageFactory: <T>(
+    cookieOptions: SessionStorageCookieOptions<T>
+  ) => Promise<SessionStorageFactory<T>>;
   /**
    * To define custom authentication and/or authorization mechanism for incoming requests.
    * A handler should return a state to associate with the incoming request.
    * The state can be retrieved later via http.auth.get(..)
    * Only one AuthenticationHandler can be registered.
    */
-  registerAuth: <T>(
-    handler: AuthenticationHandler,
-    cookieOptions: SessionStorageCookieOptions<T>
-  ) => Promise<{ sessionStorageFactory: SessionStorageFactory<T> }>;
+  registerAuth: (handler: AuthenticationHandler) => void;
   /**
    * To define custom logic to perform for incoming requests. Runs the handler before Auth
    * hook performs a check that user has access to requested resources, so it's the only
@@ -83,6 +83,7 @@ export class HttpServer {
   private config?: HttpConfig;
   private registeredRouters = new Set<Router>();
   private authRegistered = false;
+  private cookieSessionStorageCreated = false;
 
   private readonly log: Logger;
   private readonly authState: AuthStateStorage;
@@ -120,8 +121,9 @@ export class HttpServer {
       registerRouter: this.registerRouter.bind(this),
       registerOnPreAuth: this.registerOnPreAuth.bind(this),
       registerOnPostAuth: this.registerOnPostAuth.bind(this),
-      registerAuth: <T>(fn: AuthenticationHandler, cookieOptions: SessionStorageCookieOptions<T>) =>
-        this.registerAuth(fn, cookieOptions, config.basePath),
+      createCookieSessionStorageFactory: <T>(cookieOptions: SessionStorageCookieOptions<T>) =>
+        this.createCookieSessionStorageFactory(cookieOptions, config.basePath),
+      registerAuth: this.registerAuth.bind(this),
       basePath: basePathService,
       auth: {
         get: this.authState.get,
@@ -212,11 +214,27 @@ export class HttpServer {
     this.server.ext('onRequest', adoptToHapiOnPreAuthFormat(fn));
   }
 
-  private async registerAuth<T>(
-    fn: AuthenticationHandler,
+  private async createCookieSessionStorageFactory<T>(
     cookieOptions: SessionStorageCookieOptions<T>,
     basePath?: string
   ) {
+    if (this.server === undefined) {
+      throw new Error('Server is not created yet');
+    }
+    if (this.cookieSessionStorageCreated) {
+      throw new Error('A cookieSessionStorageFactory was already created');
+    }
+    this.cookieSessionStorageCreated = true;
+    const sessionStorageFactory = await createCookieSessionStorageFactory<T>(
+      this.logger.get('http', 'server', this.name, 'cookie-session-storage'),
+      this.server,
+      cookieOptions,
+      basePath
+    );
+    return sessionStorageFactory;
+  }
+
+  private registerAuth<T>(fn: AuthenticationHandler) {
     if (this.server === undefined) {
       throw new Error('Server is not created yet');
     }
@@ -224,13 +242,6 @@ export class HttpServer {
       throw new Error('Auth interceptor was already registered');
     }
     this.authRegistered = true;
-
-    const sessionStorageFactory = await createCookieSessionStorageFactory<T>(
-      this.logger.get('http', 'server', this.name, 'cookie-session-storage'),
-      this.server,
-      cookieOptions,
-      basePath
-    );
 
     this.server.auth.scheme('login', () => ({
       authenticate: adoptToHapiAuthFormat(fn, (req, { state, headers }) => {
@@ -248,7 +259,5 @@ export class HttpServer {
     // should be applied for all routes if they don't specify auth strategy in route declaration
     // https://github.com/hapijs/hapi/blob/master/API.md#-serverauthdefaultoptions
     this.server.auth.default('session');
-
-    return { sessionStorageFactory };
   }
 }
