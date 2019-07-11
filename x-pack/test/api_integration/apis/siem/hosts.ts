@@ -12,10 +12,13 @@ import {
   GetHostFirstLastSeenQuery,
   GetHostsTableQuery,
   HostsFields,
+  HostBeatsIngestAnalyticsQuery,
 } from '../../../../legacy/plugins/siem/public/graphql/types';
 import { HostOverviewQuery } from '../../../../legacy/plugins/siem/public/containers/hosts/overview/host_overview.gql_query';
 import { HostFirstLastSeenGqlQuery } from './../../../../legacy/plugins/siem/public/containers/hosts/first_last_seen/first_last_seen.gql_query';
 import { HostsTableQuery } from './../../../../legacy/plugins/siem/public/containers/hosts/hosts_table.gql_query';
+import { HostBeatsIngestAnalyticsGqlQuery } from './../../../../legacy/plugins/siem/public/containers/hosts/beats_ingest_analytics/beats_ingest_analytics.gql_query';
+
 import { KbnTestProvider } from './types';
 
 const FROM = new Date('2000-01-01T00:00:00.000Z').valueOf();
@@ -170,6 +173,33 @@ const hostsTests: KbnTestProvider = ({ getService }) => {
             __typename: 'FirstLastSeenHost',
             firstSeen: '2019-02-19T19:36:23.561Z',
             lastSeen: '2019-02-19T20:42:33.561Z',
+          });
+        });
+    });
+
+    it('Make sure that we get Beats ingest analytics for Hosts', () => {
+      return client
+        .query<HostBeatsIngestAnalyticsQuery.Query>({
+          query: HostBeatsIngestAnalyticsGqlQuery,
+          variables: {
+            sourceId: 'default',
+            timerange: {
+              interval: '12h',
+              to: TO,
+              from: FROM,
+            },
+            filterQuery: '',
+            defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+            inspect: false,
+          },
+        })
+        .then(resp => {
+          const beatsIngestAnalyticsData = resp.data.source.HostBeatsIngestAnalytics;
+          expect(beatsIngestAnalyticsData).to.eql({
+            __typename: 'BeatsIngestAnalyticsData',
+            auditbeat: 1751,
+            winlogbeat: 0,
+            filebeat: 0,
           });
         });
     });

@@ -4,7 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { FirstLastSeenHost, HostItem, HostsData, HostsEdges } from '../../graphql/types';
+import {
+  FirstLastSeenHost,
+  HostItem,
+  HostsData,
+  HostsEdges,
+  BeatsIngestAnalyticsData,
+} from '../../graphql/types';
 import { FrameworkAdapter, FrameworkRequest } from '../framework';
 
 import { ElasticsearchHostsAdapter, formatHostEdgesData } from './elasticsearch_adapter';
@@ -23,6 +29,11 @@ import {
   mockGetHostLastFirstSeenResponse,
   mockGetHostOverviewRequestDsl,
   mockGetHostLastFirstSeenDsl,
+  mockGetHostBeatsIngestAnalyticsResponse,
+  mockGetHostBeatsIngestAnalyticsOptions,
+  mockGetHostBeatsIngestAnalyticsResult,
+  mockGetHostBeatsIngestAnalyticsRequest,
+  mockGetHostBeatsIngestAnalyticsDsl,
 } from './mock';
 import { HostAggEsItem } from './types';
 import { mockGetHostsQueryDsl } from './mock';
@@ -42,6 +53,12 @@ jest.mock('./query.detail_host.dsl', () => {
 jest.mock('./query.last_first_seen_host.dsl', () => {
   return {
     buildLastFirstSeenHostQuery: jest.fn(() => mockGetHostLastFirstSeenDsl),
+  };
+});
+
+jest.mock('./query.beats_ingest_analytics.dsl', () => {
+  return {
+    buildBeatsIngestAnalyticsHostQuery: jest.fn(() => mockGetHostBeatsIngestAnalyticsDsl),
   };
 });
 
@@ -229,6 +246,29 @@ describe('hosts elasticsearch_adapter', () => {
         mockGetHostLastFirstSeenOptions
       );
       expect(data).toEqual(mockGetHostLastFirstSeenResult);
+    });
+  });
+
+  describe('#getHostBeatsIngestAnalytics', () => {
+    const mockCallWithRequest = jest.fn();
+    mockCallWithRequest.mockResolvedValue(mockGetHostBeatsIngestAnalyticsResponse);
+    const mockFramework: FrameworkAdapter = {
+      version: 'mock',
+      callWithRequest: mockCallWithRequest,
+      exposeStaticDir: jest.fn(),
+      registerGraphQLEndpoint: jest.fn(),
+      getIndexPatternsService: jest.fn(),
+      getSavedObjectsService: jest.fn(),
+    };
+    jest.doMock('../framework', () => ({ callWithRequest: mockCallWithRequest }));
+
+    test('Happy Path', async () => {
+      const EsHosts = new ElasticsearchHostsAdapter(mockFramework);
+      const data: BeatsIngestAnalyticsData = await EsHosts.getHostBeatsIngestAnalytics(
+        mockGetHostBeatsIngestAnalyticsRequest as FrameworkRequest,
+        mockGetHostBeatsIngestAnalyticsOptions
+      );
+      expect(data).toEqual(mockGetHostBeatsIngestAnalyticsResult);
     });
   });
 });

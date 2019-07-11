@@ -560,3 +560,71 @@ export const mockGetHostLastFirstSeenResult = {
   firstSeen: '2019-02-22T03:41:32.826Z',
   lastSeen: '2019-04-09T16:18:12.178Z',
 };
+
+export const mockGetHostBeatsIngestAnalyticsDsl = {
+  mockGetHostBeatsIngestAnalyticsDsl: 'mockGetHostBeatsIngestAnalyticsDsl',
+};
+
+export const mockGetHostBeatsIngestAnalyticsRequest = {
+  params: {},
+  payload: {
+    operationName: 'HostBeatsIngestAnalyticsQuery',
+    variables: {
+      sourceId: 'default',
+      timerange: {
+        interval: '12h',
+        to: new Date('2019-07-12T15:59:59.999Z').valueOf(),
+        from: new Date('2019-07-11T16:00:00.000Z').valueOf(),
+      },
+      filterQuery: '',
+      defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+      inspect: false,
+    },
+    query:
+      'query HostBeatsIngestAnalyticsQuery($sourceId: ID!, $timerange: TimerangeInput!, $filterQuery: String, $defaultIndex: [String!]!, $inspect: Boolean!) {\n  source(id: $sourceId) {\n    id\n    HostBeatsIngestAnalytics(timerange: $timerange, filterQuery: $filterQuery, defaultIndex: $defaultIndex) {\n      auditbeat\n      winlogbeat\n      filebeat\n      inspect @include(if: $inspect) {\n        dsl\n        response\n        __typename\n      }\n      __typename\n    }\n    __typename\n  }\n}\n',
+  },
+  query: {},
+};
+
+export const mockGetHostBeatsIngestAnalyticsOptions = {
+  defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+  sourceConfiguration: {
+    fields: {
+      container: 'docker.container.name',
+      host: 'beat.hostname',
+      message: ['message', '@message'],
+      pod: 'kubernetes.pod.name',
+      tiebreaker: '_doc',
+      timestamp: '@timestamp',
+    },
+  },
+  timerange: {
+    interval: '12h',
+    to: new Date('2019-07-12T15:59:59.999Z').valueOf(),
+    from: new Date('2019-07-11T16:00:00.000Z').valueOf(),
+  },
+  filterQuery: {},
+  fields: ['auditbeat', 'winlogbeat', 'filebeat', 'inspect.dsl', 'inspect.response'],
+};
+
+export const mockGetHostBeatsIngestAnalyticsResponse = {
+  took: 180,
+  timed_out: false,
+  _shards: { total: 28, successful: 28, skipped: 0, failed: 0 },
+  hits: { max_score: null, hits: [] },
+  aggregations: {
+    winlogbeat: { doc_count: 8931 },
+    auditbeat: { doc_count: 511694 },
+    filebeat: { doc_count: 25354 },
+  },
+};
+
+export const mockGetHostBeatsIngestAnalyticsResult = {
+  inspect: {
+    dsl: [JSON.stringify(mockGetHostBeatsIngestAnalyticsDsl, null, 2)],
+    response: [JSON.stringify(mockGetHostBeatsIngestAnalyticsResponse, null, 2)],
+  },
+  winlogbeat: 8931,
+  auditbeat: 511694,
+  filebeat: 25354,
+};

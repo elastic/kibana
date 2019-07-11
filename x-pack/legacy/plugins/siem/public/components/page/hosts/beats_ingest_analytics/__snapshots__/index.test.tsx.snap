@@ -1,0 +1,100 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`beats ingest analytics render it should render BeatsIngestAnalytics 1`] = `
+<EuiPopover
+  anchorPosition="upCenter"
+  button={
+    <EuiButtonEmpty
+      color="primary"
+      iconSide="right"
+      iconType="arrowDown"
+      onClick={[Function]}
+      type="button"
+    >
+      <EuiText
+        size="s"
+      >
+        Beats Ingest Analytics
+      </EuiText>
+    </EuiButtonEmpty>
+  }
+  closePopover={[Function]}
+  hasArrow={true}
+  id="beats-ingest-analytics"
+  isOpen={false}
+  ownFocus={true}
+  panelPaddingSize="m"
+>
+  <styled.div
+    key="beats-ingest-analytics-auditbeat"
+  >
+    <EuiText
+      size="s"
+    >
+      <EuiFlexGroup
+        gutterSize="s"
+        justifyContent="spaceBetween"
+      >
+        <EuiFlexItem
+          grow={1}
+        >
+          Auditbeat Events
+        </EuiFlexItem>
+        <EuiFlexItem
+          grow={false}
+        >
+          10
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiText>
+  </styled.div>
+  <styled.div
+    key="beats-ingest-analytics-filebeat"
+  >
+    <EuiText
+      size="s"
+    >
+      <EuiFlexGroup
+        gutterSize="s"
+        justifyContent="spaceBetween"
+      >
+        <EuiFlexItem
+          grow={1}
+        >
+          Filebeat Events
+        </EuiFlexItem>
+        <EuiFlexItem
+          grow={false}
+        >
+          30
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiText>
+  </styled.div>
+  <styled.div
+    key="beats-ingest-analytics-winlogbeat"
+  >
+    <EuiText
+      size="s"
+    >
+      <EuiFlexGroup
+        gutterSize="s"
+        justifyContent="spaceBetween"
+      >
+        <EuiFlexItem
+          grow={1}
+        >
+          Winlogbeat Events
+        </EuiFlexItem>
+        <EuiFlexItem
+          grow={false}
+        >
+          20
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiText>
+  </styled.div>
+</EuiPopover>
+`;
+
+exports[`beats ingest analytics render it should render spinner if it is loading 1`] = `""`;
