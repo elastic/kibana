@@ -4,22 +4,23 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment, ReactElement, FC } from 'react';
+import React, { Fragment, memo, FC } from 'react';
 import { EuiDescribedFormGroup, EuiFormRow } from '@elastic/eui';
 
 import { JOB_TYPE } from '../../../../../common/job_creator/util/constants';
 
 interface Props {
-  children: ReactElement;
+  children: JSX.Element;
   jobType: JOB_TYPE;
 }
 
-export const Description: FC<Props> = ({ children, jobType }) => {
+export const Description: FC<Props> = memo(({ children, jobType }) => {
   if (jobType === JOB_TYPE.MULTI_METRIC) {
+    const title = 'Split field';
     return (
       <EuiDescribedFormGroup
         idAria="single-example-aria"
-        title={<h3>Split field</h3>}
+        title={<h3>{title}</h3>}
         description={
           <Fragment>
             Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor
@@ -27,16 +28,17 @@ export const Description: FC<Props> = ({ children, jobType }) => {
           </Fragment>
         }
       >
-        <EuiFormRow label="Split field" describedByIds={['single-example-aria']}>
+        <EuiFormRow label={title} describedByIds={['single-example-aria']}>
           {children}
         </EuiFormRow>
       </EuiDescribedFormGroup>
     );
   } else if (jobType === JOB_TYPE.POPULATION) {
+    const title = 'Population field';
     return (
       <EuiDescribedFormGroup
         idAria="single-example-aria"
-        title={<h3>Population</h3>}
+        title={<h3>{title}</h3>}
         description={
           <Fragment>
             Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor
@@ -44,7 +46,7 @@ export const Description: FC<Props> = ({ children, jobType }) => {
           </Fragment>
         }
       >
-        <EuiFormRow label="Population" describedByIds={['single-example-aria']}>
+        <EuiFormRow label={title} describedByIds={['single-example-aria']}>
           {children}
         </EuiFormRow>
       </EuiDescribedFormGroup>
@@ -52,4 +54,4 @@ export const Description: FC<Props> = ({ children, jobType }) => {
   } else {
     return <Fragment />;
   }
-};
+});

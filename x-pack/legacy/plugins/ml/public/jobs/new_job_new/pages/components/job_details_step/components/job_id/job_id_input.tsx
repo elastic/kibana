@@ -6,18 +6,17 @@
 
 import React, { FC } from 'react';
 import { EuiFieldText } from '@elastic/eui';
+import { Description } from './description';
 
 interface Props {
-  bucketSpan: string;
-  setBucketSpan: (bs: string) => void;
+  jobId: string;
+  setJobId: (id: string) => void;
 }
 
-export const BucketSpanInput: FC<Props> = ({ bucketSpan, setBucketSpan }) => {
+export const JobIdInput: FC<Props> = ({ jobId, setJobId }) => {
   return (
-    <EuiFieldText
-      placeholder="Bucket span"
-      value={bucketSpan}
-      onChange={e => setBucketSpan(e.target.value)}
-    />
+    <Description>
+      <EuiFieldText placeholder="Job Id" value={jobId} onChange={e => setJobId(e.target.value)} />
+    </Description>
   );
 };

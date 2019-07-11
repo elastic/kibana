@@ -7,9 +7,9 @@
 import React, { Fragment, FC, useContext, useEffect, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { WizardNav } from '../../../../../data_frame/components/wizard_nav';
-import { JobIdInput } from './job_id_input';
-import { JobDescriptionInput } from './job_description_input';
-import { GroupsInput } from './groups_input';
+import { JobIdInput } from './components/job_id';
+import { JobDescriptionInput } from './components/job_description';
+import { GroupsInput } from './components/groups';
 import { WIZARD_STEPS, StepProps } from '../step_types';
 import { JobCreatorContext } from '../job_creator_context';
 import { KibanaContext, isKibanaContext } from '../../../../../data_frame/common/kibana_context';

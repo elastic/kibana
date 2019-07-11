@@ -8,6 +8,7 @@ import React, { FC, useContext, useEffect, useState } from 'react';
 
 import { BucketSpanInput } from './bucket_span_input';
 import { JobCreatorContext } from '../../../job_creator_context';
+import { Description } from './description';
 
 export const BucketSpan: FC = () => {
   const { jobCreator, jobCreatorUpdate, jobCreatorUpdated } = useContext(JobCreatorContext);
@@ -22,5 +23,9 @@ export const BucketSpan: FC = () => {
     setBucketSpan(jobCreator.bucketSpan);
   }, [jobCreatorUpdated]);
 
-  return <BucketSpanInput setBucketSpan={setBucketSpan} bucketSpan={bucketSpan} />;
+  return (
+    <Description>
+      <BucketSpanInput setBucketSpan={setBucketSpan} bucketSpan={bucketSpan} />
+    </Description>
+  );
 };

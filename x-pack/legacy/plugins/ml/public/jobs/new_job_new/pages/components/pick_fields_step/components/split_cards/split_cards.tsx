@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FC, ReactElement, memo, Fragment } from 'react';
+import React, { FC, memo, Fragment } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
 
 import { SplitField } from '../../../../../../../../common/types/fields';
@@ -14,7 +14,7 @@ interface Props {
   fieldValues: string[];
   splitField: SplitField;
   numberOfDetectors: number;
-  children: ReactElement;
+  children: JSX.Element;
   jobType: JOB_TYPE;
 }
 

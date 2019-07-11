@@ -15,6 +15,7 @@ import {
   PopulationJobCreator,
   isPopulationJobCreator,
 } from '../../../../../common/job_creator';
+import { Description } from './description';
 
 export const Influencers: FC = () => {
   const { jobCreator: jc, jobCreatorUpdate, jobCreatorUpdated } = useContext(JobCreatorContext);
@@ -46,11 +47,13 @@ export const Influencers: FC = () => {
   }, [jobCreatorUpdated]);
 
   return (
-    <InfluencersSelect
-      fields={fields}
-      changeHandler={setInfluencers}
-      selectedInfluencers={influencers}
-      splitField={splitField}
-    />
+    <Description>
+      <InfluencersSelect
+        fields={fields}
+        changeHandler={setInfluencers}
+        selectedInfluencers={influencers}
+        splitField={splitField}
+      />
+    </Description>
   );
 };

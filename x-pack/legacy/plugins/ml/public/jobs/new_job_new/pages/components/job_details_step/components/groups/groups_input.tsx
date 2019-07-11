@@ -4,16 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment, FC, useContext } from 'react';
-import {
-  EuiDescribedFormGroup,
-  EuiFormRow,
-  EuiComboBox,
-  EuiComboBoxOptionProps,
-} from '@elastic/eui';
+import React, { FC, useContext } from 'react';
+import { EuiComboBox, EuiComboBoxOptionProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { JobCreatorContext } from '../job_creator_context';
-import { tabColor } from '../../../../../../common/util/group_color_utils';
+import { JobCreatorContext } from '../../../job_creator_context';
+import { tabColor } from '../../../../../../../../common/util/group_color_utils';
+import { Description } from './description';
 
 interface Props {
   selectedGroupNames: string[];
@@ -61,30 +57,19 @@ export const GroupsInput: FC<Props> = ({ selectedGroupNames, setSelectedGroupNam
   }
 
   return (
-    <EuiDescribedFormGroup
-      idAria="single-example-aria"
-      title={<h3>Groups</h3>}
-      description={
-        <Fragment>
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt
-          ut labore et dolore magna aliqua. Ut enim ad minim veniam.
-        </Fragment>
-      }
-    >
-      <EuiFormRow label="Groups" describedByIds={['single-example-aria']}>
-        <EuiComboBox
-          placeholder={i18n.translate('xpack.ml.newJob.wizard.jobGroupSelectPlaceholder', {
-            defaultMessage: 'Select or create groups',
-          })}
-          options={groups}
-          selectedOptions={selectedGroups}
-          onChange={setSelectedGroups}
-          onCreateOption={onCreateGroup}
-          isClearable={true}
-          // isInvalid={groupsValidationError !== ''}
-          // error={groupsValidationError}
-        />
-      </EuiFormRow>
-    </EuiDescribedFormGroup>
+    <Description>
+      <EuiComboBox
+        placeholder={i18n.translate('xpack.ml.newJob.wizard.jobGroupSelectPlaceholder', {
+          defaultMessage: 'Select or create groups',
+        })}
+        options={groups}
+        selectedOptions={selectedGroups}
+        onChange={setSelectedGroups}
+        onCreateOption={onCreateGroup}
+        isClearable={true}
+        // isInvalid={groupsValidationError !== ''}
+        // error={groupsValidationError}
+      />
+    </Description>
   );
 };

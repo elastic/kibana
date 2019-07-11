@@ -4,19 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment, FC } from 'react';
-import { EuiDescribedFormGroup, EuiFormRow, EuiFieldText } from '@elastic/eui';
+import React, { Fragment, memo, FC } from 'react';
+import { EuiDescribedFormGroup, EuiFormRow } from '@elastic/eui';
 
 interface Props {
-  jobId: string;
-  setJobId: (id: string) => void;
+  children: JSX.Element;
 }
 
-export const JobIdInput: FC<Props> = ({ jobId, setJobId }) => {
+export const Description: FC<Props> = memo(({ children }) => {
+  const title = 'Groups';
   return (
     <EuiDescribedFormGroup
       idAria="single-example-aria"
-      title={<h3>Job Id</h3>}
+      title={<h3>{title}</h3>}
       description={
         <Fragment>
           Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt
@@ -24,9 +24,9 @@ export const JobIdInput: FC<Props> = ({ jobId, setJobId }) => {
         </Fragment>
       }
     >
-      <EuiFormRow label="Job Id" describedByIds={['single-example-aria']}>
-        <EuiFieldText placeholder="Job Id" value={jobId} onChange={e => setJobId(e.target.value)} />
+      <EuiFormRow label={title} describedByIds={['single-example-aria']}>
+        {children}
       </EuiFormRow>
     </EuiDescribedFormGroup>
   );
-};
+});
