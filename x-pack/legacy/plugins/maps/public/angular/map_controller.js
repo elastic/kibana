@@ -158,6 +158,10 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage
     $scope.savedQuery = savedQuery;
   };
 
+  $scope.onClearSavedQuery = () => {
+    $scope.savedQuery = undefined;
+  };
+
   const updateStateFromSavedQuery = (savedQuery) => {
     $scope.query = savedQuery.attributes.query;
     if (savedQuery.attributes.timefilter) {
@@ -170,18 +174,28 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage
       }
     }
     syncAppAndGlobalState();
+    store.dispatch(setQuery({ query: $scope.query, timeFilters: $scope.time }));
   };
 
   $scope.$watch('savedQuery', (newSavedQuery, oldSavedQuery) => {
-    if (!newSavedQuery) return;
-    $state.savedQuery = newSavedQuery.id;
+    if (!newSavedQuery) {
+      $state.savedQuery = undefined;
+      $scope.query = {
+        query: '',
+        language: localStorage.get('kibana.userQueryLanguage') || config.get('search:queryLanguage')
+      };
+      syncAppAndGlobalState();
+      store.dispatch(setQuery({ query: $scope.query, timeFilters: $scope.time }));
+    } else {
+      $state.savedQuery = newSavedQuery.id;
 
-    if (newSavedQuery.id === (oldSavedQuery && oldSavedQuery.id)) {
-      updateStateFromSavedQuery(newSavedQuery);
+      if (newSavedQuery.id === (oldSavedQuery && oldSavedQuery.id)) {
+        updateStateFromSavedQuery(newSavedQuery);
+      }
     }
   });
 
-  $scope.$watch('state.savedQuery', newSavedQueryId => {
+  $scope.$watch(() => $state.savedQuery, newSavedQueryId => {
     if (!newSavedQueryId) {
       $scope.savedQuery = undefined;
       return;
