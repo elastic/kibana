@@ -17,36 +17,55 @@
  * under the License.
  */
 
+import Joi from 'joi';
 import Boom from 'boom';
+import { Reports } from '@kbn/analytics';
 import { Server } from 'hapi';
-import { API_BASE_PATH } from '../../../common';
 
-export const registerUserActionRoute = (server: Server) => {
-  /*
-   * Increment a count on an object representing a specific interaction with the UI.
-   */
+const storeMetrics = (server: any) =>
+  async function({ appName, eventName }: Reports) {
+    const { getSavedObjectsRepository } = server.savedObjects;
+    const { callWithInternalUser } = server.plugins.elasticsearch.getCluster('admin');
+    const internalRepository = getSavedObjectsRepository(callWithInternalUser);
+    const savedObjectId = `${appName}:${eventName}`;
+
+    return internalRepository.incrementCounter('ui-metric', savedObjectId, 'count');
+  };
+
+export function registerUiMetricRoute(server: Server) {
   server.route({
-    path: `${API_BASE_PATH}/{appName}/{metricTypes}`,
     method: 'POST',
-    handler: async (request: any) => {
-      const { appName, metricTypes } = request.params;
+    path: '/api/telemetry/report',
+    options: {
+      validate: {
+        payload: Joi.object({
+          metrics: Joi.array()
+            .items(
+              Joi.object({
+                type: Joi.string().required(),
+                appName: Joi.string().required(),
+                eventName: Joi.string().required(),
+                stats: Joi.object({
+                  min: Joi.number(),
+                  sum: Joi.number(),
+                  max: Joi.number(),
+                  avg: Joi.number(),
+                }).allow(null),
+              })
+            )
+            .min(1),
+        }),
+      },
+    },
+    handler: async (req: any, h: any) => {
+      const { metrics } = req.payload;
 
       try {
-        const { getSavedObjectsRepository } = server.savedObjects;
-        const { callWithInternalUser } = server.plugins.elasticsearch.getCluster('admin');
-        const internalRepository = getSavedObjectsRepository(callWithInternalUser);
-
-        const incrementRequests = metricTypes.split(',').map((metricType: string) => {
-          const savedObjectId = `${appName}:${metricType}`;
-          // This object is created if it doesn't already exist.
-          return internalRepository.incrementCounter('ui-metric', savedObjectId, 'count');
-        });
-
-        await Promise.all(incrementRequests);
+        await Promise.all(metrics.map(storeMetrics(server)));
         return {};
       } catch (error) {
         return new Boom('Something went wrong', { statusCode: error.status });
       }
     },
   });
-};
+}

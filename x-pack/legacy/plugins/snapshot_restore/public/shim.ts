@@ -16,7 +16,7 @@ import routes from 'ui/routes';
 import { HashRouter } from 'react-router-dom';
 
 // @ts-ignore: allow traversal to fail on x-pack build
-import { trackUiMetric as track } from '../../../../../src/legacy/core_plugins/ui_metric/public';
+import { getAnalyticsReporter } from '../../../../../src/legacy/core_plugins/ui_metric/public';
 
 export interface AppCore {
   i18n: {
@@ -61,7 +61,7 @@ export interface Plugins extends AppPlugins {
     };
   };
   uiMetric: {
-    track: typeof track;
+    getAnalyticsReporter: typeof getAnalyticsReporter;
   };
 }
 
@@ -114,7 +114,7 @@ export function createShim(): { core: Core; plugins: Plugins } {
         },
       },
       uiMetric: {
-        track,
+        getAnalyticsReporter,
       },
     },
   };

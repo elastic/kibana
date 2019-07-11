@@ -16,19 +16,27 @@ the name of a dashboard they've viewed, or the timestamp of the interaction.
 
 ## How to use it
 
-To track a user interaction, import the `trackUiMetric` helper function from UI Metric app:
+To track a user interaction, import the `getAnalyticsReporter` helper function from UI Metric app:
 
 ```js
-import { trackUiMetric } from 'relative/path/to/src/legacy/core_plugins/ui_metric/public';
+import { getAnalyticsReporter } from 'relative/path/to/src/legacy/core_plugins/ui_metric/public';
+const trackMetric = getAnalyticsReporter(`<AppName>`);
+trackMetric(`<MetricType>`, `<EventName>`);
 ```
 
+
+Metric Types:
+  - `click` for tracking clicks `trackMetric('click', 'my_button_clicked');`
+  - `loaded` for a component load or page load `trackMetric('loaded', 'my_component_loaded');`
+  - `count` for a tracking a misc count `trackMetric('count', 'my_counter', { count: 13 });`
+
 Call this function whenever you would like to track a user interaction within your app. The function
-accepts two arguments, `appName` and `metricType`. These should be underscore-delimited strings.
-For example, to track the `my_metric` metric in the app `my_app` call `trackUiMetric('my_app', 'my_metric)`.
+accepts two arguments, `metricType` and `eventNames`. These should be underscore-delimited strings.
+For example, to track the `my_event` metric in the app `my_app` call `trackUiMetric('MetricType', 'my_event)`.
 
 That's all you need to do!
 
-To track multiple metrics within a single request, provide an array of metric types, e.g. `trackUiMetric('my_app', ['my_metric1', 'my_metric2', 'my_metric3'])`.
+To track multiple metrics within a single request, provide an array of metric types, e.g. `trackMetric('<MetricType>', ['my_event1', 'my_event2', 'my_event3'])`.
 
 **NOTE:** When called, this function sends a `POST` request to `/api/ui_metric/{appName}/{metricType}`.
 It's important that this request is sent via the `trackUiMetric` function, because it contains special
@@ -47,7 +55,7 @@ logic yourself. You'll also need to predefine some buckets into which the UI met
 For example, if you're timing how long it takes to create a visualization, you may decide to
 measure interactions that take less than 1 minute, 1-5 minutes, 5-20 minutes, and longer than 20 minutes.
 To track these interactions, you'd use the timed length of the interaction to determine whether to
-use a `metricType` of  `create_vis_1m`, `create_vis_5m`, `create_vis_20m`, or `create_vis_infinity`.
+use a `eventName` of  `create_vis_1m`, `create_vis_5m`, `create_vis_20m`, or `create_vis_infinity`.
 
 ## How it works
 

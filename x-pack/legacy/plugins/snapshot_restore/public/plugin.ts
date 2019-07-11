@@ -39,7 +39,7 @@ export class Plugin {
     textService.init(i18n);
     breadcrumbService.init(chrome, management.constants.BREADCRUMB);
     documentationLinksService.init(documentation.esDocBasePath, documentation.esPluginDocBasePath);
-    uiMetricService.init(uiMetric.track);
+    uiMetricService.init(uiMetric.getAnalyticsReporter);
 
     const unmountReactApp = (): void => {
       const elem = document.getElementById(REACT_ROOT_ID);

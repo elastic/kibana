@@ -34,7 +34,7 @@ export class App extends Component {
   }
 
   componentDidMount() {
-    trackUiMetric(UIM_APP_LOAD);
+    trackUiMetric('loaded', UIM_APP_LOAD);
   }
 
   componentWillUnmount() {

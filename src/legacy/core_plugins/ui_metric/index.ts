@@ -19,8 +19,7 @@
 
 import { resolve } from 'path';
 import { Legacy } from '../../../../kibana';
-import { registerUserActionRoute } from './server/routes/api/ui_metric';
-import { registerUiMetricUsageCollector } from './server/usage/index';
+import { registerUiMetricRoute } from './server/routes/api/ui_metric';
 
 // eslint-disable-next-line import/no-default-export
 export default function(kibana: any) {
@@ -31,12 +30,11 @@ export default function(kibana: any) {
 
     uiExports: {
       mappings: require('./mappings.json'),
-      hacks: ['plugins/ui_metric'],
+      hacks: ['plugins/ui_metric/hacks/ui_metric_init'],
     },
 
     init(server: Legacy.Server) {
-      registerUserActionRoute(server);
-      registerUiMetricUsageCollector(server);
+      registerUiMetricRoute(server);
     },
   });
 }

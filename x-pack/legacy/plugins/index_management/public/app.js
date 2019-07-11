@@ -11,7 +11,7 @@ import { IndexList } from './sections/index_list';
 import { trackUiMetric } from './services';
 
 export const App = () => {
-  useEffect(() => trackUiMetric(UIM_APP_LOAD), []);
+  useEffect(() => trackUiMetric('loaded', UIM_APP_LOAD), []);
 
   return (
     <HashRouter>

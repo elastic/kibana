@@ -222,7 +222,7 @@ export class IndexTable extends Component {
             className="indTable__link"
             data-test-subj="indexTableIndexNameLink"
             onClick={() => {
-              trackUiMetric(UIM_SHOW_DETAILS_CLICK);
+              trackUiMetric('click', UIM_SHOW_DETAILS_CLICK);
               openDetailPanel(value);
             }}
           >

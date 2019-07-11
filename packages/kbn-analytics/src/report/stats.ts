@@ -19,7 +19,7 @@
 
 import { BaseReport, ReportTypes } from './report';
 
-type StatsReport = Extract<ReportTypes, 'click' | 'load'>
+type StatsReport = Extract<ReportTypes, 'click' | 'loaded' | 'count'>;
 
 interface Stats {
   sum: number;
@@ -28,17 +28,49 @@ interface Stats {
   max: number;
 }
 
-interface StatsMetric<ReportType extends StatsReport, AllowedStats extends keyof Stats> extends BaseReport<ReportType> {
+interface StatsMetric<AllowedStats extends keyof Stats> extends BaseReport {
   stats: Pick<Stats, AllowedStats>;
 }
 
-export type ClickReport = StatsMetric<'click', 'sum'>;
-export function createClickReport(appName: string, eventName: string): ClickReport {
-  return { appName, eventName, type: 'click', stats: { sum: 1 }}
+export interface ClickReport extends StatsMetric<'sum'> {
+  type: 'click';
 }
 
-export type LoadReport = StatsMetric<'load', 'sum'>;
-export function createLoadReport(appName: string, eventName: string): LoadReport {
-  return { appName, eventName, type: 'load', stats: { sum: 1 }}
+interface ClickReportConfig {
+  appName: string;
+  eventName: string;
+}
+export function createClickReport({ appName, eventName }: ClickReportConfig): ClickReport {
+  return { appName, eventName, type: 'click', stats: { sum: 1 } };
 }
 
+export interface CountReport extends StatsMetric<'sum'> {
+  type: 'count';
+}
+
+export interface CountReportConfig {
+  appName: string;
+  eventName: string;
+  count?: number;
+}
+
+export function createCountReport({
+  appName,
+  eventName,
+  count = 1,
+}: CountReportConfig): CountReport {
+  return { appName, eventName, type: 'count', stats: { sum: count } };
+}
+
+export interface LoadedReport extends StatsMetric<'sum'> {
+  type: 'loaded';
+}
+
+export interface LoadedReportConfig {
+  appName: string;
+  eventName: string;
+}
+
+export function createLoadedReport({ appName, eventName }: LoadedReportConfig): LoadedReport {
+  return { appName, eventName, type: 'loaded', stats: { sum: 1 } };
+}

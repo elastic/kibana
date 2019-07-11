@@ -178,7 +178,7 @@ export class PolicyTable extends Component {
           className="policyTable__link"
           data-test-subj="policyTablePolicyNameLink"
           href={getPolicyPath(value)}
-          onClick={() => trackUiMetric(UIM_EDIT_CLICK)}
+          onClick={() => trackUiMetric('click', UIM_EDIT_CLICK)}
         >
           {value}
         </EuiLink>

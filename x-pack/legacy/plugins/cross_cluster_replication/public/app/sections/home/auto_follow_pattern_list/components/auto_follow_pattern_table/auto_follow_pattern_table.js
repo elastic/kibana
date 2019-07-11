@@ -77,7 +77,7 @@ export class AutoFollowPatternTable extends PureComponent {
         return (
           <EuiLink
             onClick={() => {
-              trackUiMetric(UIM_AUTO_FOLLOW_PATTERN_SHOW_DETAILS_CLICK);
+              trackUiMetric('click', UIM_AUTO_FOLLOW_PATTERN_SHOW_DETAILS_CLICK);
               selectAutoFollowPattern(name);
             }}
             data-test-subj="autoFollowPatternLink"

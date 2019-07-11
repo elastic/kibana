@@ -17,4 +17,21 @@
  * under the License.
  */
 
-export { registerUiMetricUsageCollector } from './collector';
+// / @ts-ignore
+import { uiModules } from 'ui/modules';
+// / @ts-ignore
+import { Path } from 'plugins/xpack_main/services/path';
+// / @ts-ignore
+import { npStart } from 'ui/new_platform';
+import chrome from 'ui/chrome';
+import { createAnalyticsReporter, setTelemetryReporter } from '../services/telemetry_analytics';
+
+function telemetryInit($injector: any) {
+  const localStorage = $injector.get('localStorage');
+  const $http = $injector.get('$http');
+  const basePath = chrome.getBasePath();
+  const uiReporter = createAnalyticsReporter({ localStorage, $http, basePath });
+  setTelemetryReporter(uiReporter);
+}
+
+uiModules.get('kibana').run(telemetryInit);

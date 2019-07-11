@@ -17,42 +17,38 @@
  * under the License.
  */
 
-import { Reports, ReportTypes, createReport } from './report';
+import { ToolingLog } from '@kbn/dev-utils';
+import { Reports, ReportTypes, getReport } from './report';
 
 export interface ReporterConfig {
-  debug: boolean;
   http: ReportHTTP;
-  storage?: Map;
+  storage?: Map<string, any>;
   checkInterval?: number;
+  logLevel?: 'silent' | 'error' | 'warning' | 'info' | 'debug' | 'verbose';
 }
 
-export interface ReportHTTP {
-  (reports: Reports[]): Promise<void>
-}
+export type ReportHTTP = (reports: Reports[]) => Promise<void>;
 
 export class Reporter {
   storageKey = 'analytics';
   checkInterval: number;
   interval: any;
   http: ReportHTTP;
-  reports: Reports[]
-  private debug: boolean;
+  reports: Reports[];
   private storage?: Map<string, any>;
+  private log: ToolingLog;
 
   constructor(config: ReporterConfig) {
-    this.http =  config.http;
-    this.checkInterval = config.checkInterval || 1000;
+    const { http, checkInterval = 10000, storage, logLevel = 'verbose' } = config;
+    this.http = http;
+    this.checkInterval = checkInterval;
     this.interval = null;
-    this.storage = config.storage;
-    if (this.storage) {
-
-    }
-
-    this.reports = [];
-    this.debug = config.debug;
+    this.storage = storage;
+    this.reports = this.getFromStorage();
+    this.log = new ToolingLog({ level: logLevel, writeTo: process.stdout });
   }
 
-  getStorage() {
+  getFromStorage() {
     if (!this.storage) return [];
     return this.storage.get(this.storageKey);
   }
@@ -66,9 +62,7 @@ export class Reporter {
     if (!this.interval) {
       this.interval = setTimeout(() => {
         this.interval = null;
-        if (this.reports.length) {
-          this.sendReports();
-        }
+        this.sendReports();
       }, this.checkInterval);
     }
   }
@@ -83,12 +77,18 @@ export class Reporter {
     clearTimeout(this.interval);
   }
 
-  public report(type: ReportTypes, appName: string, eventName: string) {
-    if (this.debug) {
-      console.debug(`${type} Report -> (${appName}:${eventName})`);
-    }
-    const report = createReport(type, appName, eventName);
-    this.insertReport(report);
+  public report(
+    appName: string,
+    type: ReportTypes,
+    events: string | string[],
+    additionalConfig = {}
+  ) {
+    const eventNames = Array.isArray(events) ? events : [events];
+    eventNames.forEach(eventName => {
+      this.log.debug(`${type} Report -> (${appName}:${eventName})`);
+      const report = getReport(type)({ appName, eventName, ...additionalConfig });
+      this.insertReport(report);
+    });
   }
 
   protected insertReport(report: Reports) {
@@ -98,12 +98,12 @@ export class Reporter {
 
   public async sendReports() {
     try {
-      await this.http(this.reports);
-      this.flushStorage();
-    } catch (err) {
-      if (this.debug) {
-        console.debug('Error Sending Reports', err);
+      if (this.reports.length) {
+        await this.http(this.reports);
+        this.flushStorage();
       }
+    } catch (err) {
+      this.log.error(`Error Sending Reports ${err}`);
     }
     this.start();
   }

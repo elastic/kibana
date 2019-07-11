@@ -20,7 +20,7 @@ jest.mock('ui/index_patterns', () => {
 });
 
 jest.mock('../../../../../../src/legacy/core_plugins/ui_metric/public', () => ({
-  trackUiMetric: jest.fn(),
+  getAnalyticsReporter: jest.fn(),
 }));
 
 const { setup } = pageHelpers.followerIndexList;

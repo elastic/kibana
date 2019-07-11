@@ -191,7 +191,7 @@ export class FollowerIndicesTable extends PureComponent {
         return (
           <EuiLink
             onClick={() => {
-              trackUiMetric(UIM_FOLLOWER_INDEX_SHOW_DETAILS_CLICK);
+              trackUiMetric('click', UIM_FOLLOWER_INDEX_SHOW_DETAILS_CLICK);
               selectFollowerIndex(name);
             }}
             data-test-subj="followerIndexLink"

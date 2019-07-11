@@ -102,7 +102,7 @@ export class TabNavigation extends React.PureComponent<TabNavigationProps, TabNa
             isSelected={this.state.selectedTabId === tab.id}
             key={`navigation-${tab.id}`}
             onClick={() => {
-              track(`tab_${tab.id}`);
+              track('click', `tab_${tab.id}`);
             }}
           >
             {tab.name}

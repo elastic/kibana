@@ -100,7 +100,7 @@ export const FlyoutComponent = pure<Props>(
         show={!show}
         timelineId={timelineId}
         onOpen={() => {
-          track('open_timeline');
+          track('loaded', 'open_timeline');
           showTimeline!({ id: timelineId, show: true });
         }}
       />

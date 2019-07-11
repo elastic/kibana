@@ -91,7 +91,7 @@ export class RemoteClusterTable extends Component {
           <EuiLink
             data-test-subj="remoteClustersTableListClusterLink"
             onClick={() => {
-              trackUiMetric(UIM_SHOW_DETAILS_CLICK);
+              trackUiMetric('click', UIM_SHOW_DETAILS_CLICK);
               openDetailPanel(name);
             }}
           >

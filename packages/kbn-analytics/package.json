@@ -14,11 +14,11 @@
   },
   "devDependencies": {
     "@babel/cli": "7.4.4",
-    "@babel/preset-env": "7.4.5",
+    "@babel/plugin-proposal-export-default-from": "^7.2.0",
     "babel-plugin-add-module-exports": "1.0.2",
     "typescript": "^3.3.3333"
   },
   "dependencies": {
-    "@babel/plugin-proposal-export-default-from": "^7.2.0"
+    "@kbn/dev-utils": "1.0.0"
   }
 }

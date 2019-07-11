@@ -12,7 +12,7 @@ import { PolicyTable } from './sections/policy_table';
 import { trackUiMetric } from './services';
 
 export const App = () => {
-  useEffect(() => trackUiMetric(UIM_APP_LOAD), []);
+  useEffect(() => trackUiMetric('loaded', UIM_APP_LOAD), []);
 
   return (
     <HashRouter>

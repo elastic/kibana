@@ -4,24 +4,30 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+// / @ts-ignore
 import { uiModules } from 'ui/modules';
+// / @ts-ignore
 import { Path } from 'plugins/xpack_main/services/path';
-import { Telemetry } from './telemetry';
-import { fetchTelemetry } from './fetch_telemetry';
+// / @ts-ignore
 import { npStart } from 'ui/new_platform';
+import { Telemetry } from './telemetry';
+// / @ts-ignore
+import { fetchTelemetry } from './fetch_telemetry';
 
-function telemetryStart($injector) {
+function telemetryInit($injector: any) {
+  const $http = $injector.get('$http');
+
   const telemetryEnabled = npStart.core.injectedMetadata.getInjectedVar('telemetryEnabled');
 
   if (telemetryEnabled) {
     // no telemetry for non-logged in users
-    if (Path.isUnauthenticated()) { return; }
+    if (Path.isUnauthenticated()) {
+      return;
+    }
 
-    const $http = $injector.get('$http');
     const sender = new Telemetry($injector, () => fetchTelemetry($http));
-
     sender.start();
   }
 }
 
-uiModules.get('telemetry/hacks').run(telemetryStart);
+uiModules.get('telemetry/hacks').run(telemetryInit);

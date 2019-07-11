@@ -4,7 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getAnalyticsReporter } from '../../../../../../src/legacy/core_plugins/ui_metric/public';
-import { UIM_APP_NAME } from '../../common/constants';
-
-export const trackUiMetric = getAnalyticsReporter(UIM_APP_NAME);
+export { createUiMetricUsageCollector } from './telemetry_ui_metric_collector';

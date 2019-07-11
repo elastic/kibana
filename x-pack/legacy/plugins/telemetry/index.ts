@@ -17,6 +17,7 @@ import { telemetryPlugin } from './server';
 import {
   createLocalizationUsageCollector,
   createTelemetryUsageCollector,
+  createUiMetricUsageCollector,
 } from './server/collectors';
 
 const ENDPOINT_VERSION = 'v2';
@@ -72,10 +73,7 @@ export const telemetry = (kibana: any) => {
           activeSpace: null,
         };
       },
-      hacks: [
-        'plugins/telemetry/hacks/telemetry_opt_in',
-        'plugins/telemetry/hacks/telemetry_trigger',
-      ],
+      hacks: ['plugins/telemetry/hacks/telemetry_init', 'plugins/telemetry/hacks/telemetry_opt_in'],
       mappings,
     },
     init(server: Server) {
@@ -89,6 +87,7 @@ export const telemetry = (kibana: any) => {
       // register collectors
       server.usage.collectorSet.register(createLocalizationUsageCollector(server));
       server.usage.collectorSet.register(createTelemetryUsageCollector(server));
+      server.usage.collectorSet.register(createUiMetricUsageCollector(server));
 
       // expose
       server.expose('telemetryCollectionInterval', REPORT_INTERVAL_MS);

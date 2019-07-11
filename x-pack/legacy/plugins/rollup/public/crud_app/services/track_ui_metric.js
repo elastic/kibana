@@ -4,12 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { trackUiMetric as track } from '../../../../../../../src/legacy/core_plugins/ui_metric/public';
+import { getAnalyticsReporter } from '../../../../../../../src/legacy/core_plugins/ui_metric/public';
 import { UIM_APP_NAME } from '../../../common';
 
-export function trackUiMetric(actionType) {
-  track(UIM_APP_NAME, actionType);
-}
+export const trackUiMetric = getAnalyticsReporter(UIM_APP_NAME);
 
 /**
  * Transparently return provided request Promise, while allowing us to track
@@ -18,7 +16,7 @@ export function trackUiMetric(actionType) {
 export function trackUserRequest(request, actionType) {
   // Only track successful actions.
   return request.then(response => {
-    trackUiMetric(actionType);
+    trackUiMetric('loaded', actionType);
     // We return the response immediately without waiting for the tracking request to resolve,
     // to avoid adding additional latency.
     return response;

@@ -58,7 +58,7 @@ export class FollowerIndicesList extends PureComponent {
   componentDidMount() {
     const { loadFollowerIndices, selectFollowerIndex, history } = this.props;
 
-    trackUiMetric(UIM_FOLLOWER_INDEX_LIST_LOAD);
+    trackUiMetric('loaded', UIM_FOLLOWER_INDEX_LIST_LOAD);
     loadFollowerIndices();
 
     // Select the pattern in the URL query params

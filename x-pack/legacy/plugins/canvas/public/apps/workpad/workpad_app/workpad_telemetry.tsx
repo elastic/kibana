@@ -79,7 +79,7 @@ function areAllElementsInResolvedArgs(workpad: Workpad, resolvedArgs: ResolvedAr
 
 export const withUnconnectedElementsLoadedTelemetry = function<P extends object>(
   Component: React.ComponentType<P>,
-  trackMetric: (metric: string | string[]) => void = trackCanvasUiMetric
+  trackMetric = trackCanvasUiMetric
 ): React.SFC<P & ElementsLoadedTelemetryProps> {
   return function ElementsLoadedTelemetry(
     props: P & ElementsLoadedTelemetryProps
@@ -117,10 +117,9 @@ export const withUnconnectedElementsLoadedTelemetry = function<P extends object>
         resolvedArgsAreForWorkpad
       ) {
         if (telemetryElementCounts.error > 0) {
-          trackMetric([WorkpadLoadedMetric, WorkpadLoadedWithErrorsMetric]);
-        } else {
-          trackMetric(WorkpadLoadedMetric);
+          trackMetric('loaded', WorkpadLoadedWithErrorsMetric);
         }
+        trackMetric('loaded', WorkpadLoadedMetric);
 
         setHasReported(true);
       }
