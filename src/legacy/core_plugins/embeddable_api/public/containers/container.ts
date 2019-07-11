@@ -322,6 +322,12 @@ export abstract class Container<
     // switch over to inline creation we can probably clean this up, and force EmbeddableFactory.create to always
     // return an embeddable, or throw an error.
     if (embeddable) {
+      // make sure the panel wasn't removed in the mean time, since the embeddable creation is async
+      if (!this.input.panels[panel.explicitInput.id]) {
+        embeddable.destroy();
+        return;
+      }
+
       if (embeddable.getOutput().savedObjectId) {
         this.updateInput({
           panels: {

@@ -677,7 +677,9 @@ export class DashboardAppController {
       next: () => {
         $scope.model.filters = queryFilter.getFilters();
         dashboardStateManager.applyFilters($scope.model.query, $scope.model.filters);
-        refreshDashboardContainer();
+        if (dashboardContainer) {
+          dashboardContainer.updateInput({ filters: $scope.model.filters });
+        }
       },
     });
 

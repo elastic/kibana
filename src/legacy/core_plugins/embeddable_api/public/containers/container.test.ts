@@ -687,3 +687,47 @@ test('untilEmbeddableLoaded rejects with an error if child is subsequently remov
 
   container.updateInput({ panels: {} });
 });
+
+test('adding a panel then subsequently removing it before its loaded removes the panel', async done => {
+  embeddableFactories.clear();
+  embeddableFactories.set(
+    CONTACT_CARD_EMBEDDABLE,
+    new SlowContactCardEmbeddableFactory({ loadTickCount: 1 })
+  );
+
+  const container = new HelloWorldContainer(
+    {
+      id: 'hello',
+      panels: {
+        '123': {
+          explicitInput: { id: '123', firstName: 'Sam', lastName: 'Tarley' },
+          type: CONTACT_CARD_EMBEDDABLE,
+        },
+      },
+    },
+    embeddableFactories
+  );
+
+  // Final state should be that the panel is removed.
+  Rx.merge(container.getInput$(), container.getOutput$()).subscribe(() => {
+    if (
+      container.getInput().panels['123'] === undefined &&
+      container.getOutput().embeddableLoaded['123'] === undefined &&
+      container.getInput().panels['456'] !== undefined &&
+      container.getOutput().embeddableLoaded['456'] === true
+    ) {
+      done();
+    }
+  });
+
+  container.updateInput({ panels: {} });
+
+  container.updateInput({
+    panels: {
+      '456': {
+        explicitInput: { id: '456', firstName: 'a', lastName: 'b' },
+        type: CONTACT_CARD_EMBEDDABLE,
+      },
+    },
+  });
+});
