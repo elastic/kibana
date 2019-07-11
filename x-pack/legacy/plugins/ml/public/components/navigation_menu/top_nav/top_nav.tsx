@@ -87,18 +87,20 @@ export const TopNav: FC<Props> = ({ dateFormat, timeHistory, timefilter }) => {
   return (
     <Fragment>
       {(isAutoRefreshSelectorEnabled || isTimeRangeSelectorEnabled) && (
-        <EuiSuperDatePicker
-          start={time.from}
-          end={time.to}
-          isPaused={refreshInterval.pause}
-          isAutoRefreshOnly={!isTimeRangeSelectorEnabled}
-          refreshInterval={refreshInterval.value}
-          onTimeChange={updateFilter}
-          onRefresh={updateFilter}
-          onRefreshChange={updateInterval}
-          recentlyUsedRanges={recentlyUsedRanges}
-          dateFormat={dateFormat}
-        />
+        <div className="mlNavigationMenu__topNav">
+          <EuiSuperDatePicker
+            start={time.from}
+            end={time.to}
+            isPaused={refreshInterval.pause}
+            isAutoRefreshOnly={!isTimeRangeSelectorEnabled}
+            refreshInterval={refreshInterval.value}
+            onTimeChange={updateFilter}
+            onRefresh={updateFilter}
+            onRefreshChange={updateInterval}
+            recentlyUsedRanges={recentlyUsedRanges}
+            dateFormat={dateFormat}
+          />
+        </div>
       )}
     </Fragment>
   );

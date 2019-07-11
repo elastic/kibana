@@ -27,7 +27,7 @@ export const NavigationMenu: FC<Props> = ({
   timefilter,
 }) => (
   <Fragment>
-    <EuiFlexGroup justifyContent="flexEnd" gutterSize="xs" className="mlNavigationMenu__topNav">
+    <EuiFlexGroup justifyContent="flexEnd" gutterSize="xs">
       <EuiFlexItem grow={false}>
         <TopNav dateFormat={dateFormat} timeHistory={timeHistory} timefilter={timefilter} />
       </EuiFlexItem>
