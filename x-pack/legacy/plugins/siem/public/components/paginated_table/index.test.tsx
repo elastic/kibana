@@ -271,6 +271,58 @@ describe('Paginated Table Component', () => {
         .simulate('click');
       expect(updateActivePage.mock.calls.length).toEqual(0);
     });
+
+    test('Should show items per row if totalCount is greater than items', () => {
+      const wrapper = mount(
+        <ThemeProvider theme={theme}>
+          <PaginatedTable
+            columns={getHostsColumns()}
+            headerCount={1}
+            headerSupplement={<p>{'My test supplement.'}</p>}
+            headerTitle="Hosts"
+            headerTooltip="My test tooltip"
+            headerUnit="Test Unit"
+            itemsPerRow={rowItems}
+            limit={DEFAULT_MAX_TABLE_QUERY_SIZE}
+            loading={false}
+            loadingTitle="Hosts"
+            loadPage={newActivePage => loadPage(newActivePage)}
+            pageOfItems={mockData.Hosts.edges}
+            showMorePagesIndicator={true}
+            totalCount={30}
+            updateActivePage={activePage => updateActivePage(activePage)}
+            updateLimitPagination={limit => updateLimitPagination({ limit })}
+          />
+        </ThemeProvider>
+      );
+      expect(wrapper.find('[data-test-subj="loadingMoreSizeRowPopover"]').exists()).toBeTruthy();
+    });
+
+    test('Should hide items per row if totalCount is less than items', () => {
+      const wrapper = mount(
+        <ThemeProvider theme={theme}>
+          <PaginatedTable
+            columns={getHostsColumns()}
+            headerCount={1}
+            headerSupplement={<p>{'My test supplement.'}</p>}
+            headerTitle="Hosts"
+            headerTooltip="My test tooltip"
+            headerUnit="Test Unit"
+            itemsPerRow={rowItems}
+            limit={DEFAULT_MAX_TABLE_QUERY_SIZE}
+            loading={false}
+            loadingTitle="Hosts"
+            loadPage={newActivePage => loadPage(newActivePage)}
+            pageOfItems={mockData.Hosts.edges}
+            showMorePagesIndicator={true}
+            totalCount={1}
+            updateActivePage={activePage => updateActivePage(activePage)}
+            updateLimitPagination={limit => updateLimitPagination({ limit })}
+          />
+        </ThemeProvider>
+      );
+      expect(wrapper.find('[data-test-subj="loadingMoreSizeRowPopover"]').exists()).toBeFalsy();
+    });
   });
 
   describe('Events', () => {

@@ -253,7 +253,7 @@ export const PaginatedTable = memo<SiemTables>(
           <FooterAction>
             <EuiFlexGroup alignItems="center">
               <EuiFlexItem>
-                {!isEmpty(itemsPerRow) && (
+                {itemsPerRow && itemsPerRow.length > 0 && totalCount >= itemsPerRow[0].numberOfRow && (
                   <EuiPopover
                     id="customizablePagination"
                     data-test-subj="loadingMoreSizeRowPopover"
