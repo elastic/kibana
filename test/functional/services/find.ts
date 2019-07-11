@@ -46,7 +46,8 @@ export async function FindProvider({ getService }: FtrProviderContext) {
       browserType
     );
 
-  const wrapAll = (webElements: Array<WebElement | WebElementWrapper>) => webElements.map(wrap);
+  const wrapAll = (webElements: Array<WebElement | WebElementWrapper>) =>
+    webElements.map(e => wrap(e));
 
   const findAndWrap = async (locator: By, timeout: number): Promise<WebElementWrapper> => {
     const webElement = await driver.wait(until.elementLocated(locator), timeout);
