@@ -8,7 +8,7 @@ This will download, extract, and launch `Junkins` @ http://localhost:8080/
 _From one shell window_
 ```
 pushd KIBANA_PATH/.ci
-./bootsrap_pipeline_test.sh 
+./bootstrap_pipeline_test.sh 
 ```
 
 ### Prepare local Junkins for use
