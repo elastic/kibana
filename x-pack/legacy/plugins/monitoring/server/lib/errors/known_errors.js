@@ -42,6 +42,6 @@ export function isKnownError(err) {
 }
 
 export function handleKnownError(err) {
-  err.message = err.message + ': ' + err.description || mapTypeMessage[err.constructor.name];
+  err.message = err.message + ': ' + (err.description || mapTypeMessage[err.constructor.name]);
   return boomify(err, { statusCode: KNOWN_ERROR_STATUS_CODE });
 }
