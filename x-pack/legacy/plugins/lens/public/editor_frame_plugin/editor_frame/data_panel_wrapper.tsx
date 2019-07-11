@@ -5,6 +5,7 @@
  */
 
 import React, { useMemo, memo, useContext, useState } from 'react';
+import { i18n } from '@kbn/i18n';
 import { EuiPopover, EuiButtonIcon, EuiContextMenuPanel, EuiContextMenuItem } from '@elastic/eui';
 import { DatasourceDataPanelProps, Datasource } from '../../../public';
 import { NativeRenderer } from '../../native_renderer';
@@ -46,8 +47,12 @@ export const DataPanelWrapper = memo((props: DataPanelWrapperProps) => {
           className="lnsDatasourceSwitch"
           button={
             <EuiButtonIcon
-              aria-label="Switch to datasource"
-              title="Switch to datasource"
+              aria-label={i18n.translate('xpack.lens.dataPanelWrapper.switchDatasource', {
+                defaultMessage: 'Switch to datasource',
+              })}
+              title={i18n.translate('xpack.lens.dataPanelWrapper.switchDatasource', {
+                defaultMessage: 'Switch to datasource',
+              })}
               data-test-subj="datasource-switch"
               onClick={() => setDatasourceSwitcher(true)}
               iconType="gear"
@@ -59,7 +64,9 @@ export const DataPanelWrapper = memo((props: DataPanelWrapperProps) => {
           anchorPosition="rightUp"
         >
           <EuiContextMenuPanel
-            title="Switch to datasource"
+            title={i18n.translate('xpack.lens.dataPanelWrapper.switchDatasource', {
+              defaultMessage: 'Switch to datasource',
+            })}
             items={Object.keys(props.datasourceMap).map(datasourceId => (
               <EuiContextMenuItem
                 key={datasourceId}
