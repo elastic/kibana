@@ -7,13 +7,8 @@
 import { i18n } from '@kbn/i18n';
 import { revealImage } from '../../functions/common/revealImage';
 import { FunctionHelp } from '.';
-<<<<<<< HEAD
 import { FunctionFactory, Position } from '../../functions/types';
-=======
-import { FunctionFactory } from '../../../types';
-import { Position } from '../../../types';
 import { BASE64, URL } from '../constants';
->>>>>>> 0166246fb8... [Canvas][Docs] Merge Canvas function references (#38300)
 
 export const help: FunctionHelp<FunctionFactory<typeof revealImage>> = {
   help: i18n.translate('xpack.canvas.functions.revealImageHelpText', {

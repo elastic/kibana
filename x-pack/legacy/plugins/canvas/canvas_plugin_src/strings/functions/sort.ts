@@ -7,12 +7,8 @@
 import { i18n } from '@kbn/i18n';
 import { sort } from '../../functions/common/sort';
 import { FunctionHelp } from '.';
-<<<<<<< HEAD
 import { FunctionFactory } from '../../functions/types';
-=======
-import { FunctionFactory } from '../../../types';
 import { DATATABLE } from '../constants';
->>>>>>> 0166246fb8... [Canvas][Docs] Merge Canvas function references (#38300)
 
 export const help: FunctionHelp<FunctionFactory<typeof sort>> = {
   help: i18n.translate('xpack.canvas.functions.sortHelpText', {
