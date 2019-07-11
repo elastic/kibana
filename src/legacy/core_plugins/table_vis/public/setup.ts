@@ -22,7 +22,7 @@ import { visualizations, VisualizationsSetup } from '../../visualizations/public
 import { DataSetup } from '../../data/public';
 import { LegacyDependenciesPlugin } from './shim';
 
-/** @public */
+/** @internal */
 export interface TablePluginSetupDependencies {
   // TODO: Remove `any` as functionsRegistry will be added to the DataSetup.
   data: DataSetup | any;
@@ -30,7 +30,7 @@ export interface TablePluginSetupDependencies {
   __LEGACY: LegacyDependenciesPlugin;
 }
 
-export const plugins: TablePluginSetupDependencies = {
+export const plugins: Readonly<TablePluginSetupDependencies> = {
   data: {
     expressions: {
       registerFunction: (fn: any) => functionsRegistry.register(fn),

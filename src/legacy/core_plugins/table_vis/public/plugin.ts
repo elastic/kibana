@@ -16,16 +16,17 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from 'kibana/public';
+
+import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '../../../../core/public';
+import { TablePluginSetupDependencies } from './setup';
+import { TableVisualizationDependencies } from './shim';
 
 // @ts-ignore
 import { createTableVisFn } from './table_vis_fn';
 // @ts-ignore
 import { createTableVisTypeDefinition } from './table_vis_type';
 
-import { TablePluginSetupDependencies } from './setup';
-import { TableVisualizationDependencies } from './shim';
-
+/** @internal */
 export class TableVisPlugin implements Plugin<any, any> {
   initializerContext: PluginInitializerContext;
 
@@ -37,7 +38,7 @@ export class TableVisPlugin implements Plugin<any, any> {
     core: CoreSetup,
     { data, visualizations, __LEGACY }: TablePluginSetupDependencies
   ) {
-    const visualizationDependencies: Required<TableVisualizationDependencies> = {
+    const visualizationDependencies: Readonly<TableVisualizationDependencies> = {
       uiSettings: core.uiSettings,
       ...(await __LEGACY.setup()),
     };

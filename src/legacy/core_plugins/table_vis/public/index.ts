@@ -17,11 +17,9 @@
  * under the License.
  */
 
-import { PluginInitializerContext } from 'kibana/public';
-import { TableVisPlugin } from './plugin';
+import { PluginInitializerContext } from '../../../../core/public';
+import { TableVisPlugin as Plugin } from './plugin';
 
 export function plugin(initializerContext: PluginInitializerContext) {
-  return new TableVisPlugin(initializerContext);
+  return new Plugin(initializerContext);
 }
-
-export { TableVisPlugin as Plugin };

@@ -38,7 +38,8 @@ import { KbnRows } from '../paginated_table/rows';
 // @ts-ignore
 import { PaginatedTable } from '../paginated_table/paginated_table';
 
-export const initTableVisLegacyModule = once(() => {
+/** @internal */
+export const initTableVisLegacyModule = once((): void => {
   uiModules
     .get('kibana/table_vis', ['kibana'])
     .controller('KbnTableVisController', TableVisController)
