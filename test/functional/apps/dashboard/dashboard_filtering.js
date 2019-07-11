@@ -49,6 +49,9 @@ export default function ({ getService, getPageObjects }) {
 
         await dashboardAddPanel.closeAddPanel();
 
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.dashboard.waitForRenderComplete();
+
         await PageObjects.dashboard.saveDashboard('filtering test');
 
         await PageObjects.header.waitUntilLoadingHasFinished();
