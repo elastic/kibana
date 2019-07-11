@@ -13,6 +13,7 @@ import { XYConfigPanel } from './xy_config_panel';
 import { Visualization } from '../types';
 import { State, PersistableState } from './types';
 import { toExpression } from './to_expression';
+import { generateId } from '../id_generator';
 
 export const xyVisualization: Visualization<State, PersistableState> = {
   getSuggestions,
@@ -20,23 +21,22 @@ export const xyVisualization: Visualization<State, PersistableState> = {
   initialize(datasource, state) {
     return (
       state || {
-        seriesType: 'line',
+        seriesType: 'bar',
         title: 'Empty XY Chart',
         legend: { isVisible: true, position: Position.Right },
         x: {
-          accessor: datasource.generateColumnId(),
+          accessor: generateId(),
           position: Position.Bottom,
           showGridlines: false,
           title: 'X',
         },
         y: {
-          accessors: [datasource.generateColumnId()],
+          accessors: [generateId()],
           position: Position.Left,
           showGridlines: false,
           title: 'Y',
         },
-        splitSeriesAccessors: [],
-        stackAccessors: [],
+        splitSeriesAccessors: [generateId()],
       }
     );
   },

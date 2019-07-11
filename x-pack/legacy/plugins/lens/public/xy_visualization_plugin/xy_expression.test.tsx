@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { BarSeries, Position } from '@elastic/charts';
+import { AreaSeries, BarSeries, Position, LineSeries, Settings } from '@elastic/charts';
 import { xyChart, XYChart } from './xy_expression';
 import { KibanaDatatable } from '../types';
 import React from 'react';
@@ -38,7 +38,6 @@ function sampleArgs() {
       title: 'C',
     },
     splitSeriesAccessors: [],
-    stackAccessors: [],
   };
 
   return { data, args };
@@ -104,25 +103,69 @@ describe('xy_expression', () => {
     test('it renders line', () => {
       const { data, args } = sampleArgs();
 
-      expect(
-        shallow(<XYChart data={data} args={{ ...args, seriesType: 'line' }} />)
-      ).toMatchSnapshot();
+      const component = shallow(<XYChart data={data} args={{ ...args, seriesType: 'line' }} />);
+      expect(component).toMatchSnapshot();
+      expect(component.find(LineSeries)).toHaveLength(1);
     });
 
     test('it renders bar', () => {
       const { data, args } = sampleArgs();
 
-      expect(
-        shallow(<XYChart data={data} args={{ ...args, seriesType: 'bar' }} />)
-      ).toMatchSnapshot();
+      const component = shallow(<XYChart data={data} args={{ ...args, seriesType: 'bar' }} />);
+      expect(component).toMatchSnapshot();
+      expect(component.find(BarSeries)).toHaveLength(1);
     });
 
     test('it renders area', () => {
       const { data, args } = sampleArgs();
 
-      expect(
-        shallow(<XYChart data={data} args={{ ...args, seriesType: 'area' }} />)
-      ).toMatchSnapshot();
+      const component = shallow(<XYChart data={data} args={{ ...args, seriesType: 'area' }} />);
+      expect(component).toMatchSnapshot();
+      expect(component.find(AreaSeries)).toHaveLength(1);
+    });
+
+    test('it renders horizontal bar', () => {
+      const { data, args } = sampleArgs();
+
+      const component = shallow(
+        <XYChart data={data} args={{ ...args, seriesType: 'horizontal_bar' }} />
+      );
+      expect(component).toMatchSnapshot();
+      expect(component.find(BarSeries)).toHaveLength(1);
+    });
+
+    test('it renders stacked bar', () => {
+      const { data, args } = sampleArgs();
+
+      const component = shallow(
+        <XYChart data={data} args={{ ...args, seriesType: 'bar_stacked' }} />
+      );
+      expect(component).toMatchSnapshot();
+      expect(component.find(BarSeries)).toHaveLength(1);
+      expect(component.find(BarSeries).prop('stackAccessors')).toHaveLength(1);
+    });
+
+    test('it renders stacked area', () => {
+      const { data, args } = sampleArgs();
+
+      const component = shallow(
+        <XYChart data={data} args={{ ...args, seriesType: 'area_stacked' }} />
+      );
+      expect(component).toMatchSnapshot();
+      expect(component.find(AreaSeries)).toHaveLength(1);
+      expect(component.find(AreaSeries).prop('stackAccessors')).toHaveLength(1);
+    });
+
+    test('it renders stacked horizontal bar', () => {
+      const { data, args } = sampleArgs();
+
+      const component = shallow(
+        <XYChart data={data} args={{ ...args, seriesType: 'horizontal_bar_stacked' }} />
+      );
+      expect(component).toMatchSnapshot();
+      expect(component.find(BarSeries)).toHaveLength(1);
+      expect(component.find(BarSeries).prop('stackAccessors')).toHaveLength(1);
+      expect(component.find(Settings).prop('rotation')).toEqual(90);
     });
 
     test('it remaps rows based on the labels', () => {

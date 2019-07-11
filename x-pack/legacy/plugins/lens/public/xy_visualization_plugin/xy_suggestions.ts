@@ -8,6 +8,7 @@ import { partition } from 'lodash';
 import { Position } from '@elastic/charts';
 import { SuggestionRequest, VisualizationSuggestion, TableColumn, TableSuggestion } from '../types';
 import { State } from './types';
+import { generateId } from '../id_generator';
 import { buildExpression } from './to_expression';
 
 const columnSortOrder = {
@@ -78,9 +79,8 @@ function getSuggestion(
   const title = `${yTitle} ${preposition} ${xTitle}`;
   const state: State = {
     legend: { isVisible: true, position: Position.Right },
-    seriesType: isDate ? 'line' : 'bar',
-    splitSeriesAccessors: splitBy && isDate ? [splitBy.columnId] : [],
-    stackAccessors: splitBy && !isDate ? [splitBy.columnId] : [],
+    seriesType: splitBy && isDate ? 'line' : 'bar',
+    splitSeriesAccessors: splitBy && isDate ? [splitBy.columnId] : [generateId()],
     x: {
       accessor: xValue.columnId,
       position: Position.Bottom,

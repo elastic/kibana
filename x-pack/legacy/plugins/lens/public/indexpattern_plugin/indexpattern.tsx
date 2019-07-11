@@ -8,13 +8,13 @@ import _ from 'lodash';
 import React from 'react';
 import { render } from 'react-dom';
 import { EuiComboBox } from '@elastic/eui';
-import uuid from 'uuid';
 import { I18nProvider } from '@kbn/i18n/react';
 import {
   DatasourceDimensionPanelProps,
   DatasourceDataPanelProps,
   DimensionPriority,
   DatasourceSuggestion,
+  Operation,
 } from '../types';
 import { Query } from '../../../../../../src/legacy/core_plugins/data/public/query';
 import { getIndexPatterns } from './loader';
@@ -175,7 +175,7 @@ export function IndexPatternDataPanel(props: DatasourceDataPanelProps<IndexPatte
   );
 }
 
-export function columnToOperation(column: IndexPatternColumn) {
+export function columnToOperation(column: IndexPatternColumn): Operation {
   const { dataType, label, isBucketed, operationId } = column;
   return {
     id: operationId,
@@ -219,6 +219,12 @@ function addRestrictionsToFields(
     timeFieldName: timeFieldName || undefined,
     fields: newFields,
   };
+}
+
+function removeProperty<T>(prop: string, object: Record<string, T>): Record<string, T> {
+  const result = { ...object };
+  delete result[prop];
+  return result;
 }
 
 export function getIndexPatternDatasource({
@@ -277,11 +283,6 @@ export function getIndexPatternDatasource({
           }
           return columnToOperation(state.columns[columnId]);
         },
-        generateColumnId: () => {
-          // TODO: Come up with a more compact form of generating unique column ids
-          return uuid.v4();
-        },
-
         renderDimensionPanel: (domElement: Element, props: DatasourceDimensionPanelProps) => {
           render(
             <I18nProvider>
@@ -297,7 +298,13 @@ export function getIndexPatternDatasource({
           );
         },
 
-        removeColumnInTableSpec: (columnId: string) => [],
+        removeColumnInTableSpec: (columnId: string) => {
+          setState({
+            ...state,
+            columnOrder: state.columnOrder.filter(id => id !== columnId),
+            columns: removeProperty(columnId, state.columns),
+          });
+        },
         moveColumnTo: (columnId: string, targetIndex: number) => {},
         duplicateColumn: (columnId: string) => [],
       };

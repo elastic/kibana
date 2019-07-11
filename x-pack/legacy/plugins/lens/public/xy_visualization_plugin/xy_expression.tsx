@@ -39,7 +39,16 @@ export const xyChart: ExpressionFunction<'lens_xy_chart', KibanaDatatable, XYArg
   args: {
     seriesType: {
       types: ['string'],
-      options: ['bar', 'line', 'area'],
+      options: [
+        'bar',
+        'line',
+        'area',
+        'horizontal_bar',
+        'bar_stacked',
+        'line_stacked',
+        'area_stacked',
+        'horizontal_bar_stacked',
+      ],
       help: 'The type of chart to display.',
     },
     legend: {
@@ -58,11 +67,6 @@ export const xyChart: ExpressionFunction<'lens_xy_chart', KibanaDatatable, XYArg
       types: ['string'],
       multi: true,
       help: 'The columns used to split the series.',
-    },
-    stackAccessors: {
-      types: ['string'],
-      multi: true,
-      help: 'The columns used to stack the series.',
     },
   },
   context: {
@@ -98,12 +102,12 @@ export const xyChartRenderer: RenderFunction<XYChartProps> = {
 };
 
 export function XYChart({ data, args }: XYChartProps) {
-  const { legend, x, y, splitSeriesAccessors, stackAccessors, seriesType } = args;
+  const { legend, x, y, splitSeriesAccessors, seriesType } = args;
   // TODO: Stop mapping data once elastic-charts allows axis naming
   // https://github.com/elastic/elastic-charts/issues/245
   const seriesProps = {
     splitSeriesAccessors,
-    stackAccessors,
+    stackAccessors: seriesType.includes('stacked') ? [x.accessor] : [],
     id: getSpecId(y.labels.join(',')),
     xAccessor: x.accessor,
     yAccessors: y.labels,
@@ -129,6 +133,7 @@ export function XYChart({ data, args }: XYChartProps) {
         showLegend={legend.isVisible}
         legendPosition={legend.position}
         showLegendDisplayValue={false}
+        rotation={seriesType.includes('horizontal') ? 90 : 0}
       />
 
       <Axis
@@ -149,7 +154,10 @@ export function XYChart({ data, args }: XYChartProps) {
 
       {seriesType === 'line' ? (
         <LineSeries {...seriesProps} />
-      ) : seriesType === 'bar' ? (
+      ) : seriesType === 'bar' ||
+        seriesType === 'bar_stacked' ||
+        seriesType === 'horizontal_bar' ||
+        seriesType === 'horizontal_bar_stacked' ? (
         <BarSeries {...seriesProps} />
       ) : (
         <AreaSeries {...seriesProps} />
