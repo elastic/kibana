@@ -5,23 +5,21 @@
  */
 
 import React, { Fragment, FC, useContext, useEffect, useState, useReducer } from 'react';
-import { EuiFlexGrid, EuiFlexGroup, EuiFlexItem, EuiHorizontalRule } from '@elastic/eui';
+import { EuiHorizontalRule } from '@elastic/eui';
+
 import { JobCreatorContext } from '../../../job_creator_context';
 import { PopulationJobCreator, isPopulationJobCreator } from '../../../../../common/job_creator';
 import { Results, ModelItem, Anomaly } from '../../../../../common/results_loader';
 import { LineChartData } from '../../../../../common/chart_loader';
 import { DropDownLabel, DropDownProps } from '../agg_select';
 import { newJobCapsService } from '../../../../../../../services/new_job_capabilities_service';
-import { Field, AggFieldPair, SplitField } from '../../../../../../../../common/types/fields';
-import { AnomalyChart, CHART_TYPE } from '../../../charts/anomaly_chart';
+import { Field, AggFieldPair } from '../../../../../../../../common/types/fields';
 import { defaultChartSettings, ChartSettings } from '../../../charts/common/settings';
 import { MetricSelector } from './metric_selector';
-import { DetectorTitle } from '../detector_title';
 import { JobProgress } from '../job_progress';
-import { SplitCards } from '../split_cards';
-import { SplitFieldSelector, ByFieldSelector } from '../split_field';
-import { JOB_TYPE } from '../../../../../common/job_creator/util/constants';
+import { SplitFieldSelector } from '../split_field';
 import { MlTimeBuckets } from '../../../../../../../util/ml_time_buckets';
+import { ChartGrid } from './chart_grid';
 
 interface Props {
   isActive: boolean;
@@ -266,71 +264,5 @@ export const PopulationDetectors: FC<Props> = ({ isActive, setIsValid }) => {
         <Fragment>{lineChartsData && <JobProgress progress={progress} />}</Fragment>
       )}
     </Fragment>
-  );
-};
-
-interface ChartGridProps {
-  aggFieldPairList: AggFieldPair[];
-  chartSettings: ChartSettings;
-  splitField: SplitField;
-  lineChartsData: LineChartData;
-  modelData: Record<number, ModelItem[]>;
-  anomalyData: Record<number, Anomaly[]>;
-  deleteDetector?: (index: number) => void;
-  jobType: JOB_TYPE;
-  fieldValuesPerDetector: DetectorFieldValues;
-}
-
-const ChartGrid: FC<ChartGridProps> = ({
-  aggFieldPairList,
-  chartSettings,
-  splitField,
-  lineChartsData,
-  modelData,
-  anomalyData,
-  deleteDetector,
-  jobType,
-  fieldValuesPerDetector,
-}) => {
-  return (
-    <EuiFlexGrid columns={chartSettings.cols as any}>
-      {aggFieldPairList.map((af, i) => (
-        <EuiFlexItem key={i}>
-          {lineChartsData[i] !== undefined && (
-            <Fragment>
-              <EuiFlexGroup>
-                <EuiFlexItem>
-                  <DetectorTitle
-                    index={i}
-                    agg={aggFieldPairList[i].agg}
-                    field={aggFieldPairList[i].field}
-                    splitField={splitField}
-                    deleteDetector={deleteDetector}
-                  />
-                </EuiFlexItem>
-                <EuiFlexItem>
-                  {deleteDetector !== undefined && <ByFieldSelector detectorIndex={i} />}
-                </EuiFlexItem>
-              </EuiFlexGroup>
-              <SplitCards
-                fieldValues={fieldValuesPerDetector[i] || []}
-                splitField={splitField}
-                numberOfDetectors={aggFieldPairList.length}
-                jobType={jobType}
-              >
-                <AnomalyChart
-                  chartType={CHART_TYPE.SCATTER}
-                  chartData={lineChartsData[i]}
-                  modelData={modelData[i]}
-                  anomalyData={anomalyData[i]}
-                  height={chartSettings.height}
-                  width={chartSettings.width}
-                />
-              </SplitCards>
-            </Fragment>
-          )}
-        </EuiFlexItem>
-      ))}
-    </EuiFlexGrid>
   );
 };
