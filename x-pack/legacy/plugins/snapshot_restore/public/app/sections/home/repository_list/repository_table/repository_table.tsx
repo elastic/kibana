@@ -270,7 +270,9 @@ export const RepositoryTable: React.FunctionComponent<Props> = ({
       {
         type: 'field_value_selection',
         field: 'type',
-        name: 'Type',
+        name: i18n.translate('xpack.snapshotRestore.repositoryList.table.typeFilterLabel', {
+          defaultMessage: 'Type',
+        }),
         multiSelect: false,
         options: Object.keys(
           repositories.reduce((typeMap: any, repository) => {

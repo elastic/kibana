@@ -7,7 +7,7 @@
 import { i18n } from '@kbn/i18n';
 import { pointseries } from '../../functions/server/pointseries';
 import { FunctionHelp } from '.';
-import { FunctionFactory } from '../../functions/types';
+import { FunctionFactory } from '../../../types';
 
 export const help: FunctionHelp<FunctionFactory<typeof pointseries>> = {
   help: i18n.translate('xpack.canvas.functions.pointseriesHelpText', {

@@ -39,7 +39,11 @@ export class ElasticsearchAuthenticationAdapter implements AuthenticationsAdapte
       'aggregations.group_by_users.buckets',
       response
     ).map((bucket: AuthenticationBucket) => ({
-      _id: bucket.authentication.hits.hits[0]._id,
+      _id: getOr(
+        `${bucket.key}+${bucket.doc_count}`,
+        'failures.lastFailure.hits.hits[0].id',
+        bucket
+      ),
       _source: {
         lastSuccess: getOr(null, 'successes.lastSuccess.hits.hits[0]._source', bucket),
         lastFailure: getOr(null, 'failures.lastFailure.hits.hits[0]._source', bucket),
@@ -77,7 +81,7 @@ export class ElasticsearchAuthenticationAdapter implements AuthenticationsAdapte
 }
 
 export const formatAuthenticationData = (
-  fields: ReadonlyArray<string>,
+  fields: readonly string[],
   hit: AuthenticationHit,
   fieldMap: Readonly<Record<string, string>>
 ): AuthenticationsEdges =>

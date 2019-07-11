@@ -19,6 +19,7 @@ import {
 } from '../../typings/timeseries';
 import { asDecimal, asMillis, tpmUnit } from '../utils/formatters';
 import { IUrlParams } from '../context/UrlParamsContext/types';
+import { getEmptySeries } from '../components/shared/charts/CustomPlot/getEmptySeries';
 
 export interface ITpmBucket {
   title: string;
@@ -29,14 +30,12 @@ export interface ITpmBucket {
 }
 
 export interface ITransactionChartData {
-  noHits: boolean;
   tpmSeries: ITpmBucket[];
   responseTimeSeries: TimeSeries[];
 }
 
 const INITIAL_DATA = {
   apmTimeseries: {
-    totalHits: 0,
     responseTimes: {
       avg: [],
       p95: [],
@@ -52,7 +51,6 @@ export function getTransactionCharts(
   { transactionType }: IUrlParams,
   { apmTimeseries, anomalyTimeseries }: TimeSeriesAPIResponse = INITIAL_DATA
 ): ITransactionChartData {
-  const noHits = apmTimeseries.totalHits === 0;
   const tpmSeries = getTpmSeries(apmTimeseries, transactionType);
 
   const responseTimeSeries = getResponseTimeSeries({
@@ -61,7 +59,6 @@ export function getTransactionCharts(
   });
 
   return {
-    noHits,
     tpmSeries,
     responseTimeSeries
   };
@@ -162,12 +159,20 @@ export function getTpmSeries(
   const bucketKeys = tpmBuckets.map(({ key }) => key);
   const getColor = getColorByKey(bucketKeys);
 
+  const { avg } = apmTimeseries.responseTimes;
+
+  if (!tpmBuckets.length && avg.length) {
+    const start = avg[0].x;
+    const end = avg[avg.length - 1].x;
+    return getEmptySeries(start, end);
+  }
+
   return tpmBuckets.map(bucket => {
-    const avg = mean(bucket.dataPoints.map(p => p.y));
+    const average = mean(bucket.dataPoints.map(p => p.y));
     return {
       title: bucket.key,
       data: bucket.dataPoints,
-      legendValue: `${asDecimal(avg)} ${tpmUnit(transactionType || '')}`,
+      legendValue: `${asDecimal(average)} ${tpmUnit(transactionType || '')}`,
       type: 'linemark',
       color: getColor(bucket.key)
     };

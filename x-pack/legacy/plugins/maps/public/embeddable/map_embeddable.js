@@ -13,8 +13,8 @@ import 'mapbox-gl/dist/mapbox-gl.css';
 import { Embeddable } from 'ui/embeddable';
 import { I18nContext } from 'ui/i18n';
 
-import { GisMap } from '../components/gis_map';
-import { createMapStore } from '../store/store';
+import { GisMap } from '../connected_components/gis_map';
+import { createMapStore } from '../reducers/store';
 import { getInitialLayers } from '../angular/get_initial_layers';
 import {
   setGotoWithCenter,
@@ -22,17 +22,16 @@ import {
   setQuery,
   setRefreshConfig,
   disableScrollZoom,
-} from '../actions/store_actions';
+} from '../actions/map_actions';
+import { DEFAULT_IS_LAYER_TOC_OPEN } from '../reducers/ui';
 import {
-  DEFAULT_IS_LAYER_TOC_OPEN,
-  getIsLayerTOCOpen,
-  getOpenTOCDetails,
   setReadOnly,
   setFilterable,
   setIsLayerTOCOpen,
   setOpenTOCDetails,
-} from '../store/ui';
-import { getInspectorAdapters } from '../store/non_serializable_instances';
+} from '../actions/ui_actions';
+import { getIsLayerTOCOpen, getOpenTOCDetails } from '../selectors/ui_selectors';
+import { getInspectorAdapters } from '../reducers/non_serializable_instances';
 import { getMapCenter, getMapZoom } from '../selectors/map_selectors';
 import { i18n } from '@kbn/i18n';
 

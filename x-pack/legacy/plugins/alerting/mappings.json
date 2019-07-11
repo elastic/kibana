@@ -1,11 +1,14 @@
 {
   "alert": {
     "properties": {
+      "enabled": {
+        "type": "boolean"
+      },
       "alertTypeId": {
         "type": "keyword"
       },
       "interval": {
-        "type": "long"
+        "type": "keyword"
       },
       "actions": {
         "type": "nested",
