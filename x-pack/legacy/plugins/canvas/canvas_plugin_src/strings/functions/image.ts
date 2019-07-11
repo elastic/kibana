@@ -7,7 +7,7 @@
 import { i18n } from '@kbn/i18n';
 import { image, ImageMode } from '../../functions/common/image';
 import { FunctionHelp } from '.';
-import { FunctionFactory } from '../../functions/types';
+import { FunctionFactory } from '../../../types';
 
 export const help: FunctionHelp<FunctionFactory<typeof image>> = {
   help: i18n.translate('xpack.canvas.functions.imageHelpText', {
