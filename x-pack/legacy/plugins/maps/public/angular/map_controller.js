@@ -36,7 +36,6 @@ import {
   setIsLayerTOCOpen,
   setOpenTOCDetails,
 } from '../store/ui';
-import { getIsFullScreen } from '../selectors/map_selectors';
 import { copyPersistentState } from '../store/util';
 import { getQueryableUniqueIndexPatternIds, hasDirtyState, getLayerListRaw } from '../selectors/map_selectors';
 import { getInspectorAdapters } from '../store/non_serializable_instances';
