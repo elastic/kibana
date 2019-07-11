@@ -37,12 +37,16 @@ interface Props {
 interface State {
   customizingAvatar: boolean;
   usingCustomIdentifier: boolean;
+  // workaround for a bug when a popover with ownFocus=true contains a popover (in this case, a color picker)
+  // see https://github.com/elastic/kibana/issues/40900
+  ownFocus: boolean;
 }
 
 export class CustomizeSpace extends Component<Props, State> {
   public state = {
     customizingAvatar: false,
     usingCustomIdentifier: false,
+    ownFocus: true,
   };
 
   public render() {
@@ -122,11 +126,16 @@ export class CustomizeSpace extends Component<Props, State> {
                   }
                   closePopover={this.closePopover}
                   {...extraPopoverProps}
-                  ownFocus={true}
+                  ownFocus={this.state.ownFocus}
                   isOpen={this.state.customizingAvatar}
                 >
                   <div style={{ maxWidth: 240 }}>
-                    <CustomizeSpaceAvatar space={this.props.space} onChange={this.onAvatarChange} />
+                    <CustomizeSpaceAvatar
+                      space={this.props.space}
+                      onChange={this.onAvatarChange}
+                      onColorPickerOpen={() => this.setState({ ownFocus: false })}
+                      onColorPickerClose={() => this.setState({ ownFocus: true })}
+                    />
                   </div>
                 </EuiPopover>
               </EuiFormRow>

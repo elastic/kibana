@@ -15,6 +15,10 @@ interface Props {
   space: Partial<Space>;
   onChange: (space: Partial<Space>) => void;
   intl: InjectedIntl;
+  // workaround for a bug when a popover with ownFocus=true contains a popover (in this case, a color picker)
+  // see https://github.com/elastic/kibana/issues/40900
+  onColorPickerOpen: () => void;
+  onColorPickerClose: () => void;
 }
 
 interface State {
@@ -71,6 +75,8 @@ class CustomizeSpaceAvatarUI extends Component<Props, State> {
               color={spaceColor}
               onChange={this.onColorChange}
               isInvalid={isInvalidSpaceColor}
+              onFocus={this.props.onColorPickerOpen}
+              onBlur={this.props.onColorPickerClose}
             />
           </EuiFormRow>
         </EuiFlexItem>
