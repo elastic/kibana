@@ -35,9 +35,6 @@ import mapTemplate from './angular/map.html';
 import { MapListing } from './shared/components/map_listing';
 import { recentlyAccessed } from 'ui/persisted_log';
 
-import { data } from 'plugins/data/setup';
-data.query.loadLegacyDirectives();
-
 const app = uiModules.get('app/maps', ['ngRoute', 'react']);
 
 app.directive('mapListing', function (reactDirective) {

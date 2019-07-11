@@ -30,7 +30,6 @@ import { FeatureCatalogueRegistryProvider, FeatureCatalogueCategory } from 'ui/r
 import { getLandingBreadcrumbs, getWizardStep1Breadcrumbs } from './breadcrumbs';
 
 import { data } from 'plugins/data/setup';
-data.search.loadLegacyDirectives();
 data.filter.loadLegacyDirectives();
 
 uiRoutes
