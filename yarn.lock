@@ -1697,10 +1697,10 @@
     oppsy "2.x.x"
     pumpify "1.3.x"
 
-"@elastic/javascript-typescript-langserver@^0.2.0":
-  version "0.2.0"
-  resolved "https://registry.yarnpkg.com/@elastic/javascript-typescript-langserver/-/javascript-typescript-langserver-0.2.0.tgz#a02ab62a04e7d7fb367c08b7eaed19394715332d"
-  integrity sha512-FvGrvioAhgiGzUnlQIFMlXaIDOUUiYCz/TEmTmv4EgcMVGGJ7pNn5QMYtkIUZbuuZEyJhFwaH8IUvqbcaFkgBw==
+"@elastic/javascript-typescript-langserver@^0.2.1":
+  version "0.2.1"
+  resolved "https://registry.yarnpkg.com/@elastic/javascript-typescript-langserver/-/javascript-typescript-langserver-0.2.1.tgz#14fd5bc20f50cfbcb785c5741743f67ad1d96e77"
+  integrity sha512-QjVENpUpjOM3SWr2inHeq6Drg6VwO5jKD2JGT+D5apDYJQ0cWCauIkfX2XvrNw0c3tR/Nlt+yWqtdj+Cq9eybA==
   dependencies:
     "@elastic/lsp-extension" "^0.1.2"
     javascript-typescript-langserver "^2.11.3"
