@@ -644,7 +644,9 @@ export class WebElementWrapper {
     const screenshot = await this.driver.takeScreenshot();
     const buffer = Buffer.from(screenshot.toString(), 'base64');
     const { width, height, x, y } = await this.getPosition();
-    const windowWidth = await this.driver.executeScript('return window.document.body.clientWidth');
+    const windowWidth: number = await this.driver.executeScript(
+      'return window.document.body.clientWidth'
+    );
     const src = PNG.sync.read(buffer);
     if (src.width > windowWidth) {
       // on linux size of screenshot is double size of screen, scale it down
