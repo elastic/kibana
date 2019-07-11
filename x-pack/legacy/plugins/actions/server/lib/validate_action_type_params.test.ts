@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { schema, TypeOf, Type } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
 import { validateActionTypeParams } from './validate_action_type_params';
 
 test('should return passed in params when validation not defined', () => {
