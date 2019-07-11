@@ -7,8 +7,8 @@
 This will download, extract, and launch `Junkins` @ http://localhost:8080/  
 _From one shell window_
 ```
-pushd KIBANA_PATH/.ci
-./bootstrap_pipeline_test.sh 
+$ pushd KIBANA_PATH/.ci
+$ ./bootstrap_pipeline_test.sh 
 ```
 
 ### Prepare local Junkins for use
@@ -25,8 +25,8 @@ Using the gui
 ### Run the Pipeline Test
 _From a different shell window_
 ```
-pushd KIBANA_PATH/.ci
-src/resources/jenkinsfile-runner/app/target/appassembler/bin/jenkinsfile-runner -w /tmp/jenkins -p /tmp/jenkins_home/plugins -f ~/foo/ -a "param1=Hello&param2=value2"
+$ pushd KIBANA_PATH/.ci
+$ src/resources/jenkinsfile-runner/app/target/appassembler/bin/jenkinsfile-runner -w /tmp/jenkins -p /tmp/jenkins_home/plugins -f ~/foo/ -a "param1=Hello&param2=value2"
 ```
 
 > Dont forget to kill the Junkins process when finished
