@@ -30,7 +30,6 @@ export function timeseriesTransformer({
   const tpmBuckets = getTpmBuckets(transactionResultBuckets, bucketSize);
 
   return {
-    totalHits: timeseriesResponse.hits.total,
     responseTimes: {
       avg,
       p95,
