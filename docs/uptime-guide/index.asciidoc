@@ -1,7 +1,7 @@
 [[uptime-guide]]
 = Uptime monitoring guide
 
-include::{asciidoc-dir}/../../shared/versions.asciidoc[]
+include::versions.asciidoc[]
 
 include::{asciidoc-dir}/../../shared/attributes.asciidoc[]
 

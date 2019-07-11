@@ -1,15 +1,14 @@
 [[uptime-getting-started]]
 == Getting started
 
-The easiest way to get started with Elastic Uptime is by using our
-https://www.elastic.co/cloud/elasticsearch-service[hosted {es} Service] on
-Elastic Cloud. The {es} Service is available on both AWS and GCP,
+The easiest way to get started with Elastic Uptime is by using our hosted {es} Service on Elastic Cloud.
+The {es} Service is available on both AWS and GCP,
 and automatically configures {es} and {kib}.
 
 [float]
 === Hosted Elasticsearch Service
 
-Skip managing your own {es}, and {kib} instance by using our
+Skip managing your own {es} and {kib} instance by using our
 https://www.elastic.co/cloud/elasticsearch-service[hosted {es} Service] on
 Elastic Cloud.
 
@@ -63,8 +62,8 @@ image::images/uptime-setup.png[Installation instructions on the Uptime page in K
 * Make sure you're using the same major versions of Heartbeat and Kibana.
 
 * Index patterns tell Kibana which Elasticsearch indices you want to explore.
-The Uptime UI requires a `heartbeat-7*` index pattern.
-If you have configured a different index pattern, you can use field aliases to ensure data is recognized by the UI.
+The Uptime UI requires a +heartbeat-{short-version}*+ index pattern.
+If you have configured a different index pattern, you can use {ref}/indices-aliases.html[field aliases] to ensure data is recognized by the UI.
 
 After you install and configure Heartbeat,
 the {kibana-ref}/xpack-uptime.html[Uptime UI] will automatically populate with the Heartbeat monitors.
