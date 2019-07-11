@@ -11,6 +11,7 @@ import { i18n } from '@kbn/i18n';
 import uiRoutes from 'ui/routes';
 import 'ui/capabilities/route_setup';
 import { toastNotifications } from 'ui/notify';
+import { formatAngularHttpError } from 'ui/notify/lib';
 
 // License
 import { xpackInfo } from 'plugins/xpack_main/services/xpack_info';
@@ -147,7 +148,7 @@ function profileVizController($scope, $http, HighlightService) {
       }
 
       $scope.renderProfile(resp.data.resp.profile.shards);
-    }).catch(reason => toastNotifications.addDanger(reason));
+    }).catch(reason => toastNotifications.addDanger(formatAngularHttpError(reason)));
   };
 
   $scope.renderProfile = data => {

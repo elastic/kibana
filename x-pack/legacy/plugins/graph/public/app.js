@@ -25,6 +25,7 @@ import chrome from 'ui/chrome';
 import { uiModules } from 'ui/modules';
 import uiRoutes from 'ui/routes';
 import { addAppRedirectMessageToUrl, fatalError, toastNotifications } from 'ui/notify';
+import { formatAngularHttpError } from 'ui/notify/lib';
 import { IndexPatternsProvider } from 'ui/index_patterns/index_patterns';
 import { SavedObjectsClientProvider } from 'ui/saved_objects';
 import { KibanaParsedUrl } from 'ui/url/kibana_parsed_url';
@@ -185,9 +186,16 @@ app.controller('graphuiPlugin', function (
         } else {
           toastNotifications.addDanger({
             title: toastTitle,
-            text: err,
+            text: String(err),
           });
         }
+      });
+  }
+
+  function handleHttpError(error) {
+    return checkLicense(Promise, kbnBaseUrl)
+      .then(() => {
+        toastNotifications.addDanger(formatAngularHttpError(error));
       });
   }
 
@@ -447,7 +455,7 @@ app.controller('graphuiPlugin', function (
         }
         responseHandler(resp.data.resp);
       })
-      .catch(handleError);
+      .catch(handleHttpError);
   }
 
 
@@ -461,7 +469,7 @@ app.controller('graphuiPlugin', function (
       .then(function (resp) {
         responseHandler(resp.data.resp);
       })
-      .catch(handleError);
+      .catch(handleHttpError);
   };
 
   $scope.submit = function () {
