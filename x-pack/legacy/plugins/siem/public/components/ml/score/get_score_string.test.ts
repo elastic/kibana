@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getScoreString } from './get_score_string';
+import { getScoreString } from './score_health';
 
 describe('create_influencers', () => {
   test('it rounds up to 1 from 0.3', () => {

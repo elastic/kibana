@@ -53,15 +53,15 @@ export const dataFrame = {
       data: obj
     });
   },
-  startDataFrameTransformsJob(jobId) {
+  startDataFrameTransformsJob(jobId, force = false) {
     return http({
-      url: `${basePath}/_data_frame/transforms/${jobId}/_start`,
+      url: `${basePath}/_data_frame/transforms/${jobId}/_start?force=${force}`,
       method: 'POST',
     });
   },
-  stopDataFrameTransformsJob(jobId) {
+  stopDataFrameTransformsJob(jobId, force = false, waitForCompletion = false) {
     return http({
-      url: `${basePath}/_data_frame/transforms/${jobId}/_stop?force=true`,
+      url: `${basePath}/_data_frame/transforms/${jobId}/_stop?force=${force}&wait_for_completion=${waitForCompletion}`,
       method: 'POST',
     });
   },
