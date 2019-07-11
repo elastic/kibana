@@ -23,4 +23,4 @@
 // of the ExpressionExectorService
 
 /** @public types */
-export { TopNavMenu } from './kbn_top_nav';
+export { TopNavMenu } from './top_nav_menu';

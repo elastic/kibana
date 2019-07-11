@@ -77,7 +77,7 @@ export function TopNavMenu(props: Props) {
   function renderLayout() {
     if (props.showSearchBarInline) {
       return (
-        <div>
+        <div className="topNavMenu__wrapper">
           <EuiFlexGroup
             data-test-subj="top-nav"
             justifyContent="spaceBetween"
@@ -85,7 +85,7 @@ export function TopNavMenu(props: Props) {
             wrap={true}
             className="topNavMenu"
           >
-            <EuiFlexGroup justifyContent="flexStart" gutterSize="xs">
+            <EuiFlexGroup justifyContent="flexStart" gutterSize="none">
               {renderItems()}
             </EuiFlexGroup>
             <EuiFlexItem grow={false}>{renderSearchBar()}</EuiFlexItem>
@@ -94,11 +94,11 @@ export function TopNavMenu(props: Props) {
       );
     } else {
       return (
-        <span>
+        <span className="topNavMenu__wrapper">
           <EuiFlexGroup
             data-test-subj="top-nav"
             justifyContent="flexStart"
-            gutterSize="s"
+            gutterSize="none"
             className="topNavMenu"
           >
             {renderItems()}
