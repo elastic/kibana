@@ -42,14 +42,32 @@ describe('SpacesGridPage', () => {
   it('renders as expected', () => {
     expect(
       shallowWithIntl(
-        <SpacesGridPage.WrappedComponent spacesManager={spacesManager} intl={null as any} />
+        <SpacesGridPage.WrappedComponent
+          spacesManager={spacesManager}
+          intl={null as any}
+          capabilities={{
+            navLinks: {},
+            management: {},
+            catalogue: {},
+            spaces: { manage: true },
+          }}
+        />
       )
     ).toMatchSnapshot();
   });
 
   it('renders the list of spaces', async () => {
     const wrapper = mountWithIntl(
-      <SpacesGridPage.WrappedComponent spacesManager={spacesManager} intl={null as any} />
+      <SpacesGridPage.WrappedComponent
+        spacesManager={spacesManager}
+        intl={null as any}
+        capabilities={{
+          navLinks: {},
+          management: {},
+          catalogue: {},
+          spaces: { manage: true },
+        }}
+      />
     );
 
     // allow spacesManager to load spaces

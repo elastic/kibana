@@ -20,6 +20,7 @@ describe('NavControlPopover', () => {
         spacesManager={spacesManager}
         anchorPosition={'downRight'}
         buttonClass={SpacesHeaderNavButton}
+        capabilities={{ navLinks: {}, management: {}, catalogue: {}, spaces: { manage: true } }}
       />
     );
     expect(wrapper).toMatchSnapshot();
@@ -50,6 +51,7 @@ describe('NavControlPopover', () => {
         spacesManager={spacesManager}
         anchorPosition={'rightCenter'}
         buttonClass={SpacesHeaderNavButton}
+        capabilities={{ navLinks: {}, management: {}, catalogue: {}, spaces: { manage: true } }}
       />
     );
 

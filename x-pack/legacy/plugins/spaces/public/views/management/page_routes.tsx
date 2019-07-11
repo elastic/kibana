@@ -11,6 +11,7 @@ import 'ui/autoload/styles';
 import { I18nContext } from 'ui/i18n';
 // @ts-ignore
 import routes from 'ui/routes';
+import { npStart } from 'ui/new_platform';
 import { getSpacesManager } from '../../lib/spaces_manager';
 import { ManageSpacePage } from './edit_space';
 import { getCreateBreadcrumbs, getEditBreadcrumbs, getListBreadcrumbs } from './lib';
@@ -32,7 +33,10 @@ routes.when('/management/spaces/list', {
 
       render(
         <I18nContext>
-          <SpacesGridPage spacesManager={getSpacesManager()} />
+          <SpacesGridPage
+            spacesManager={getSpacesManager()}
+            capabilities={npStart.core.application.capabilities}
+          />
         </I18nContext>,
         domNode
       );
@@ -59,7 +63,10 @@ routes.when('/management/spaces/create', {
 
       render(
         <I18nContext>
-          <ManageSpacePage spacesManager={getSpacesManager()} />
+          <ManageSpacePage
+            spacesManager={getSpacesManager()}
+            capabilities={npStart.core.application.capabilities}
+          />
         </I18nContext>,
         domNode
       );
@@ -82,7 +89,7 @@ routes.when('/management/spaces/edit/:spaceId', {
   template,
   k7Breadcrumbs: () => getEditBreadcrumbs(),
   requireUICapability: 'management.kibana.spaces',
-  controller($scope: any, $route: any, chrome: any) {
+  controller($scope: any, $route: any) {
     $scope.$$postDigest(async () => {
       const domNode = document.getElementById(reactRootNodeId);
 
@@ -95,9 +102,8 @@ routes.when('/management/spaces/edit/:spaceId', {
           <ManageSpacePage
             spaceId={spaceId}
             spacesManager={getSpacesManager()}
-            setBreadcrumbs={breadcrumbs => {
-              chrome.breadcrumbs.set(breadcrumbs);
-            }}
+            setBreadcrumbs={npStart.core.chrome.setBreadcrumbs}
+            capabilities={npStart.core.application.capabilities}
           />
         </I18nContext>,
         domNode

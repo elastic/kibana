@@ -17,10 +17,10 @@ import {
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import _ from 'lodash';
 import React, { Component, Fragment } from 'react';
-import { capabilities } from 'ui/capabilities';
 import { Breadcrumb } from 'ui/chrome';
 import { kfetch } from 'ui/kfetch';
 import { toastNotifications } from 'ui/notify';
+import { Capabilities } from 'src/core/public';
 import { Feature } from '../../../../../xpack_main/types';
 import { isReservedSpace } from '../../../../common';
 import { Space } from '../../../../common/model/space';
@@ -40,6 +40,7 @@ interface Props {
   spaceId?: string;
   intl: InjectedIntl;
   setBreadcrumbs?: (breadcrumbs: Breadcrumb[]) => void;
+  capabilities: Capabilities;
 }
 
 interface State {
@@ -71,7 +72,7 @@ class ManageSpacePageUI extends Component<Props, State> {
   }
 
   public async componentDidMount() {
-    if (!capabilities.get().spaces.manage) {
+    if (!this.props.capabilities.spaces.manage) {
       return;
     }
 
@@ -137,7 +138,7 @@ class ManageSpacePageUI extends Component<Props, State> {
   );
 
   public getForm = () => {
-    if (!capabilities.get().spaces.manage) {
+    if (!this.props.capabilities.spaces.manage) {
       return <UnauthorizedPrompt />;
     }
 
@@ -171,7 +172,7 @@ class ManageSpacePageUI extends Component<Props, State> {
         <EnabledFeatures
           space={this.state.space}
           features={this.state.features}
-          uiCapabilities={capabilities.get()}
+          capabilities={this.props.capabilities}
           onChange={this.onSpaceChange}
           intl={this.props.intl}
         />
@@ -214,7 +215,7 @@ class ManageSpacePageUI extends Component<Props, State> {
 
   public maybeGetSecureSpacesMessage = () => {
     if (this.editingExistingSpace()) {
-      return <SecureSpaceMessage />;
+      return <SecureSpaceMessage capabilities={this.props.capabilities} />;
     }
     return null;
   };

@@ -29,7 +29,16 @@ describe('ManageSpacePage', () => {
     spacesManager.getActiveSpace = jest.fn().mockResolvedValue(space);
 
     const wrapper = mountWithIntl(
-      <ManageSpacePage.WrappedComponent spacesManager={spacesManager} intl={null as any} />
+      <ManageSpacePage.WrappedComponent
+        spacesManager={spacesManager}
+        intl={null as any}
+        capabilities={{
+          navLinks: {},
+          management: {},
+          catalogue: {},
+          spaces: { manage: false },
+        }}
+      />
     );
 
     await waitForDataLoad(wrapper);
@@ -71,6 +80,12 @@ describe('ManageSpacePage', () => {
         spaceId={'existing-space'}
         spacesManager={spacesManager}
         intl={null as any}
+        capabilities={{
+          navLinks: {},
+          management: {},
+          catalogue: {},
+          spaces: { manage: false },
+        }}
       />
     );
 
@@ -113,6 +128,12 @@ describe('ManageSpacePage', () => {
         spaceId={'my-space'}
         spacesManager={spacesManager}
         intl={null as any}
+        capabilities={{
+          navLinks: {},
+          management: {},
+          catalogue: {},
+          spaces: { manage: false },
+        }}
       />
     );
 
@@ -164,6 +185,12 @@ describe('ManageSpacePage', () => {
         spaceId={'my-space'}
         spacesManager={spacesManager}
         intl={null as any}
+        capabilities={{
+          navLinks: {},
+          management: {},
+          catalogue: {},
+          spaces: { manage: false },
+        }}
       />
     );
 

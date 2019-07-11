@@ -19,10 +19,10 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
-import { capabilities } from 'ui/capabilities';
 import { kfetch } from 'ui/kfetch';
 // @ts-ignore
 import { toastNotifications } from 'ui/notify';
+import { Capabilities } from 'src/core/public';
 import { Feature } from '../../../../../xpack_main/types';
 import { isReservedSpace } from '../../../../common';
 import { DEFAULT_SPACE_ID } from '../../../../common/constants';
@@ -38,6 +38,7 @@ import { getEnabledFeatures } from '../lib/feature_utils';
 interface Props {
   spacesManager: SpacesManager;
   intl: InjectedIntl;
+  capabilities: Capabilities;
 }
 
 interface State {
@@ -63,7 +64,7 @@ class SpacesGridPageUI extends Component<Props, State> {
   }
 
   public componentDidMount() {
-    if (capabilities.get().spaces.manage) {
+    if (this.props.capabilities.spaces.manage) {
       this.loadGrid();
     }
   }
@@ -72,7 +73,7 @@ class SpacesGridPageUI extends Component<Props, State> {
     return (
       <div className="spcGridPage" data-test-subj="spaces-grid-page">
         <EuiPageContent horizontalPosition="center">{this.getPageContent()}</EuiPageContent>
-        <SecureSpaceMessage />
+        <SecureSpaceMessage capabilities={this.props.capabilities} />
         {this.getConfirmDeleteModal()}
       </div>
     );
@@ -81,7 +82,7 @@ class SpacesGridPageUI extends Component<Props, State> {
   public getPageContent() {
     const { intl } = this.props;
 
-    if (!capabilities.get().spaces.manage) {
+    if (!this.props.capabilities.spaces.manage) {
       return <UnauthorizedPrompt />;
     }
 

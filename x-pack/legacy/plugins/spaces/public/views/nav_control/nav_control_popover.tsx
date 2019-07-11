@@ -6,6 +6,7 @@
 
 import { EuiAvatar, EuiPopover, PopoverAnchorPosition } from '@elastic/eui';
 import React, { Component, ComponentClass } from 'react';
+import { Capabilities } from 'src/core/public';
 import { Space } from '../../../common/model/space';
 import { SpaceAvatar } from '../../components';
 import { SpacesManager } from '../../lib/spaces_manager';
@@ -17,6 +18,7 @@ interface Props {
   spacesManager: SpacesManager;
   anchorPosition: PopoverAnchorPosition;
   buttonClass: ComponentClass<ButtonProps>;
+  capabilities: Capabilities;
 }
 
 interface State {
@@ -55,13 +57,19 @@ export class NavControlPopover extends Component<Props, State> {
 
     let element: React.ReactNode;
     if (this.state.spaces.length < 2) {
-      element = <SpacesDescription onManageSpacesClick={this.toggleSpaceSelector} />;
+      element = (
+        <SpacesDescription
+          onManageSpacesClick={this.toggleSpaceSelector}
+          capabilities={this.props.capabilities}
+        />
+      );
     } else {
       element = (
         <SpacesMenu
           spaces={this.state.spaces}
           onSelectSpace={this.onSelectSpace}
           onManageSpacesClick={this.toggleSpaceSelector}
+          capabilities={this.props.capabilities}
         />
       );
     }

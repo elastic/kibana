@@ -28,6 +28,16 @@ exports[`NavControlPopover renders without crashing 1`] = `
   withTitle={true}
 >
   <SpacesDescription
+    capabilities={
+      Object {
+        "catalogue": Object {},
+        "management": Object {},
+        "navLinks": Object {},
+        "spaces": Object {
+          "manage": true,
+        },
+      }
+    }
     onManageSpacesClick={[Function]}
   />
 </EuiPopover>

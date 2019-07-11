@@ -28,6 +28,7 @@ export function initSpacesNavControl(spacesManager: SpacesManager, core: CoreSta
             spacesManager={spacesManager}
             anchorPosition="downLeft"
             buttonClass={SpacesHeaderNavButton}
+            capabilities={core.application.capabilities}
           />
         </I18nContext>,
         targetDomElement

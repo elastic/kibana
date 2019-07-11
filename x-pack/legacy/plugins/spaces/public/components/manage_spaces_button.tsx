@@ -7,7 +7,7 @@
 import { EuiButton } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { Component, CSSProperties } from 'react';
-import { capabilities } from 'ui/capabilities';
+import { Capabilities } from 'src/core/public';
 import { getManageSpacesUrl } from '../lib/constants';
 
 interface Props {
@@ -16,11 +16,12 @@ interface Props {
   size?: 's' | 'l';
   style?: CSSProperties;
   onClick?: () => void;
+  capabilities: Capabilities;
 }
 
 export class ManageSpacesButton extends Component<Props, {}> {
   public render() {
-    if (!capabilities.get().spaces.manage) {
+    if (!this.props.capabilities.spaces.manage) {
       return null;
     }
 

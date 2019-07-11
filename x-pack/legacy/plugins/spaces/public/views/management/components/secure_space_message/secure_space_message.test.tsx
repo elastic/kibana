@@ -5,27 +5,37 @@
  */
 import React from 'react';
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';
-import { setMockCapabilities } from '../../../../__mocks__/ui_capabilities';
+
 import { SecureSpaceMessage } from './secure_space_message';
 
 describe('SecureSpaceMessage', () => {
   it(`doesn't render if UI Capabilities does not allow security to be managed`, () => {
-    setMockCapabilities({
-      navLinks: {},
-      management: {},
-      catalogue: {},
-      spaces: { manage: false },
-    });
-    expect(shallowWithIntl(<SecureSpaceMessage />)).toMatchSnapshot();
+    expect(
+      shallowWithIntl(
+        <SecureSpaceMessage
+          capabilities={{
+            navLinks: {},
+            management: {},
+            catalogue: {},
+            spaces: { manage: false },
+          }}
+        />
+      )
+    ).toMatchSnapshot();
   });
 
   it(`renders if user profile allows security to be managed`, () => {
-    setMockCapabilities({
-      navLinks: {},
-      management: {},
-      catalogue: {},
-      spaces: { manage: true },
-    });
-    expect(shallowWithIntl(<SecureSpaceMessage />)).toMatchSnapshot();
+    expect(
+      shallowWithIntl(
+        <SecureSpaceMessage
+          capabilities={{
+            navLinks: {},
+            management: {},
+            catalogue: {},
+            spaces: { manage: true },
+          }}
+        />
+      )
+    ).toMatchSnapshot();
   });
 });

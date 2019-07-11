@@ -128,7 +128,18 @@ exports[`SpacesGridPage renders as expected 1`] = `
       sorting={false}
     />
   </EuiPageContent>
-  <SecureSpaceMessage />
+  <SecureSpaceMessage
+    capabilities={
+      Object {
+        "catalogue": Object {},
+        "management": Object {},
+        "navLinks": Object {},
+        "spaces": Object {
+          "manage": true,
+        },
+      }
+    }
+  />
 </div>
 `;
 

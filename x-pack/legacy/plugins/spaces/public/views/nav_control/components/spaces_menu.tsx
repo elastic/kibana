@@ -7,6 +7,7 @@
 import { EuiContextMenuItem, EuiContextMenuPanel, EuiFieldSearch, EuiText } from '@elastic/eui';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import React, { Component } from 'react';
+import { Capabilities } from 'src/core/public';
 import { SPACE_SEARCH_COUNT_THRESHOLD } from '../../../../common/constants';
 import { Space } from '../../../../common/model/space';
 import { ManageSpacesButton, SpaceAvatar } from '../../../components';
@@ -16,6 +17,7 @@ interface Props {
   onSelectSpace: (space: Space) => void;
   onManageSpacesClick: () => void;
   intl: InjectedIntl;
+  capabilities: Capabilities;
 }
 
 interface State {
@@ -151,6 +153,7 @@ class SpacesMenuUI extends Component<Props, State> {
         className="spcMenu__manageButton"
         size="s"
         onClick={this.props.onManageSpacesClick}
+        capabilities={this.props.capabilities}
       />
     );
   };

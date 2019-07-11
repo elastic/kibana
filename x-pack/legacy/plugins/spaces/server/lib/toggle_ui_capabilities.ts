@@ -4,16 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import _ from 'lodash';
-import { UICapabilities } from 'ui/capabilities';
+import { Capabilities } from 'src/core/public';
 import { Feature } from '../../../xpack_main/types';
 import { Space } from '../../common/model/space';
 
 export function toggleUICapabilities(
   features: Feature[],
-  uiCapabilities: UICapabilities,
+  capabilities: Capabilities,
   activeSpace: Space
 ) {
-  const clonedCapabilities = _.cloneDeep(uiCapabilities);
+  const clonedCapabilities = _.cloneDeep(capabilities);
 
   toggleDisabledFeatures(features, clonedCapabilities, activeSpace);
 
@@ -22,7 +22,7 @@ export function toggleUICapabilities(
 
 function toggleDisabledFeatures(
   features: Feature[],
-  uiCapabilities: UICapabilities,
+  capabilities: Capabilities,
   activeSpace: Space
 ) {
   const disabledFeatureKeys: string[] = activeSpace.disabledFeatures;
@@ -31,9 +31,9 @@ function toggleDisabledFeatures(
     .map(key => features.find(feature => feature.id === key))
     .filter(feature => typeof feature !== 'undefined') as Feature[];
 
-  const navLinks: Record<string, boolean> = uiCapabilities.navLinks;
-  const catalogueEntries: Record<string, boolean> = uiCapabilities.catalogue;
-  const managementItems: Record<string, Record<string, boolean>> = uiCapabilities.management;
+  const navLinks: Record<string, boolean> = capabilities.navLinks;
+  const catalogueEntries: Record<string, boolean> = capabilities.catalogue;
+  const managementItems: Record<string, Record<string, boolean>> = capabilities.management;
 
   for (const feature of disabledFeatures) {
     // Disable associated navLink, if one exists
@@ -61,8 +61,8 @@ function toggleDisabledFeatures(
     });
 
     // Disable "sub features" that match the disabled feature
-    if (uiCapabilities.hasOwnProperty(feature.id)) {
-      const capability = uiCapabilities[feature.id];
+    if (capabilities.hasOwnProperty(feature.id)) {
+      const capability = capabilities[feature.id];
       Object.keys(capability).forEach(featureKey => {
         capability[featureKey] = false;
       });
