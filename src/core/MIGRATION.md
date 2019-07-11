@@ -604,9 +604,128 @@ It is generally a much greater challenge preparing legacy browser-side code for 
 
 To complicate matters further, a significant amount of the business logic in Kibana's client-side code exists inside the `ui/public` directory (aka ui modules), and all of that must be migrated as well. Unlike the server-side code where the order in which you migrated plugins was not particularly important, it's important that UI modules be addressed as soon as possible.
 
-Also unlike the server-side migration, we won't concern ourselves with creating shimmed plugin definitions that then get copied over to complete the migration.
+Because usage of angular and `ui/public` modules varies widely between legacy plugins, there is no "one size fits all" solution to migrating your browser-side code to the new platform. The best place to start is by checking with the platform team to help identify the best migration path for your particular plugin.
 
-### Move UI modules into plugins
+That said, we've seen a series of patterns emerge as teams begin migrating browser code. In practice, most migrations will follow a path that looks something like this:
+
+#### 1. Create a plugin definition file
+
+We've found that doing this right away helps you start thinking about your plugin in terms of lifecycle methods and services, which makes the rest of the migration process feel more natural. It also forces you to identify which actions "kick off" your plugin, since you'll need to execute those when the `setup/start` methods are called.
+
+This definition isn't going to do much for us just yet, but as we get further into the process, we will gradually start returning contracts from our `setup` and `start` methods, while also injecting dependencies as arguments to these methods.
+
+```ts
+// public/plugin.ts
+import { CoreSetup, CoreStart, Plugin } from '../../../../core/public';
+import { FooSetup, FooStart } from '../../../../legacy/core_plugins/foo/public';
+
+/** @public */
+export type DemoSetup = ReturnType<DemoPublicPlugin['setup']>;
+/** @public */
+export type DemoStart = ReturnType<DemoPublicPlugin['start']>;
+
+/** @internal */
+export interface DemoSetupPlugins {
+  foo: FooSetup;
+}
+/** @internal */
+export interface DemoStartPlugins {
+  foo: FooStart;
+}
+
+/** @internal */
+export class DemoPublicPlugin implements Plugin<DemoSetup, DemoStart, DemoSetupPlugins, DemoStartPlugins> {
+  public setup(core: CoreSetup, plugins: DemoSetupPlugins): DemoSetup {
+    // kick off your plugin here...
+    return {};
+  }
+
+  public start(core: CoreStart, plugins: DemoStartPlugins): DemoStart {
+    // ...or here
+    return {};
+  }
+
+  public stop() {}
+}
+```
+
+#### 2. Export all static code and types from `public/index.ts`
+
+If your plugin needs to share static code with other plugins, this code must be exported from your top-level `public/index.ts`. This includes any type interfaces that you wish to make public. For details on the types of code that you can safely share outside of the runtime lifecycle contracts, see [Can static code be shared between plugins?](#can-static-code-be-shared-between-plugins)
+
+```ts
+// public/index.ts
+import { DemoSetup, DemoStart } from './plugin';
+
+const myPureFn = (x: number): number => x + 1;
+
+// These are your public types & static code
+export {
+  myPureFn,
+  DemoSetup,
+  DemoStart,
+}
+```
+
+While you're at it, you can also add your plugin initializer to this file:
+
+```ts
+// public/index.ts
+import { PluginInitializer, PluginInitializerContext } from '../../../../core/public';
+import { DemoSetup, DemoStart, DemoSetupPlugins, DemoStartPlugins, DemoPublicPlugin } from './plugin';
+
+// Core will be looking for this when loading our plugin in the new platform
+export const plugin: PluginInitializer<DemoSetup, DemoStart, DemoSetupPlugins, DemoStartPlugins> = (
+  initializerContext: PluginInitializerContext
+) => {
+  return new DataPublicPlugin();
+};
+
+const myPureFn = (x: number): number => x + 1;
+
+/** @public */
+export {
+  myPureFn,
+  DemoSetup,
+  DemoStart,
+}
+```
+
+Great! So you have your plugin definition, and you've moved all of your static exports to the top level of your plugin... now let's move on to the runtime contract your plugin will be exposing.
+
+#### 3. Export your runtime contract
+
+Next, we need a way to expose your runtime dependencies. In the new platform, core will handle this for you. But while we are still in the legacy world, other plugins will need a way to consume your plugin's contract without the help of core.
+
+So we will take a similar approach to what was described above in the server section: actually call the `Plugin.setup()` and `Plugin.start()` methods, and export the values those return for other legacy plugins to consume. By convention, we've been placing this in a `legacy.ts` file, which also serves as our shim where we import our legacy dependencies and reshape them into what we are expecting in the new platform:
+
+```ts
+// public/legacy.ts
+import { PluginInitializerContext } from '../../../../core/public';
+import { npSetup, npStart } from 'ui/new_platform';
+import { plugin } from '.';
+
+import { setup as fooSetup, start as fooStart } from '../../foo/public/legacy'; // assumes `foo` lives in `legacy/core_plugins`
+
+const pluginInstance = plugin({} as PluginInitializerContext);
+const shimSetupPlugins = {
+  ...npSetup.plugins,
+  foo: fooSetup,
+};
+const shimStartPlugins = {
+  ...npStart.plugins,
+  foo: fooStart,
+};
+
+export const setup = pluginInstance.setup(npSetup.core, shimSetupPlugins);
+export const start = pluginInstance.start(npStart.core, shimStartPlugins);
+```
+
+Notice how in the example above, we are importing the `setup` and `start` contracts from the legacy shim provided by `foo` plugin; we could just as easily be importing modules from `ui/public` here as well.
+
+The point is that, over time, this becomes the one file in our plugin containing stateful imports from the legacy world. And _that_ is where things start to get interesting...
+
+#### 4. Move "owned" UI modules into your plugin and expose them from your public contract
 
 Everything inside of the `ui/public` directory is going to be dealt with in one of the following ways:
 
@@ -621,7 +740,20 @@ Concerns around ownership or duplication of a given module should be raised and 
 
 A great outcome is a module being deleted altogether because it isn't used or it was used so lightly that it was easy to refactor away.
 
-### Provide plugin extension points decoupled from angular.js
+If it is determined that your plugin is going to own any UI modules that other plugins depend on, you'll want to migrate these quickly so that there's time for downstream plugins to update their imports. This will ultimately involve moving the module code into your plugin, and exposing it via your setup/start contracts, or as static code from your `plugin/index.ts`.
+
+Depending on the module's level of complexity and the number of other places in Kibana that rely on it, there are a number of strategies you could use for this:
+
+* **Do it all at once.** Move the code, expose it from your plugin, and update all imports across Kibana.
+  - This works best for small pieces of code that aren't widely used.
+* **Shim first, move later.** Expose the code from your plugin by importing it in your shim and then re-exporting it from your plugin first, then gradually update imports to pull from the new location, leaving the actual moving of the code as a final step.
+  - This works best for the largest, most widely used modules that would otherwise result in huge, hard-to-review PRs.
+  - It makes things easier by splitting the process into small, incremental PRs, but is probably overkill for things with a small surface area.
+* **Hybrid approach.** As a middle ground, you can also move the code to your plugin immediately, and then re-export your plugin code from the original `ui/public` directory.
+  - This eliminates any concerns about backwards compatibility by allowing you to update the imports across Kibana later.
+  - Works best when the size of the PR is such that moving the code can be done without much refactoring.
+
+#### 5. Provide plugin extension points decoupled from angular.js
 
 There will be no global angular module in the new platform, which means none of the functionality provided by core will be coupled to angular. Since there is no global angular module shared by all applications, plugins providing extension points to be used by other plugins can not couple those extension points to angular either.
 
@@ -633,7 +765,7 @@ Another way to address this problem is to create an entirely new set of plugin A
 
 Please talk with the platform team when formalizing _any_ client-side extension points that you intend to move to the new platform as there are some bundling considerations to consider.
 
-### Move all webpack alias imports into uiExport entry files
+#### 6. Move all webpack alias imports into uiExport entry files
 
 Existing plugins import three things using webpack aliases today: services from ui/public (`ui/`), services from other plugins (`plugins/`), and uiExports themselves (`uiExports/`). These webpack aliases will not exist once we remove the legacy plugin system, so part of our migration effort is addressing all of the places where they are used today.
 
@@ -643,7 +775,29 @@ With the legacy plugin system, extensions of core and other plugins are handled 
 
 Each uiExport path is an entry file into one specific set of functionality provided by a client-side plugin. All webpack alias-based imports should be moved to these entry files, where they are appropriate. Moving a deeply nested webpack alias-based import in a plugin to one of the uiExport entry files might require some refactoring to ensure the dependency is now passed down to the appropriate place as function arguments instead of via import statements.
 
-### Switch to new platform services
+For the `plugins/` and `ui/` webpack aliases, you should be able to take advantage of the `legacy.ts` shim you created earlier. By placing these imports directly in your shim, you can pass the dependencies you need into your `Plugin.start` and `Plugin.setup` methods, from which point they can be passed down to the rest of your plugin's entry files.
+
+For items that don't yet have a clear "home" in the new platform, it may also be helpful to somehow indicate this in your shim to make it easier to remember that you'll need to change this later. One convention we've found helpful for this is simply using a namespace like `__LEGACY`:
+
+```ts
+// public/legacy.ts
+import { uiThing } from 'ui/thing';
+...
+
+const pluginInstance = plugin({} as PluginInitializerContext);
+const shimSetupPlugins = {
+  ...npSetup.plugins,
+  foo: fooSetup,
+  __LEGACY: {
+    uiThing, // eventually this will move out of __LEGACY and into a proper plugin
+  },
+};
+
+...
+export const setup = pluginInstance.setup(npSetup.core, shimSetupPlugins);
+```
+
+#### 7. Switch to new platform services
 
 At this point, your plugin has one or more uiExport entry files that together contain all of the webpack alias-based import statements needed to run your plugin. Each one of these import statements is either a service that is or will be provided by core or a service provided by another plugin.
 
@@ -651,13 +805,19 @@ As new non-angular-based APIs are added, update your entry files to import the c
 
 Once all of the existing webpack alias-based imports in your plugin switch to `ui/new_platform`, it no longer depends directly on the legacy "core" features or other legacy plugins, so it is ready to officially migrate to the new platform.
 
-### Migrate to the new plugin system
+#### 8. Migrate to the new plugin system
 
 With all of your services converted, you are now ready to complete your migration to the new platform.
 
-Many plugins at this point will create a new plugin definition class and copy and paste the code from their various uiExport entry files directly into the new plugin class. The legacy uiExport entry files can then simply be deleted.
+Many plugins at this point will copy over their plugin definition class & the code from their various service/uiExport entry files directly into the new plugin directory. The `legacy.ts` shim file can then simply be deleted.
 
 With the previous steps resolved, this final step should be easy, but the exact process may vary plugin by plugin, so when you're at this point talk to the platform team to figure out the exact changes you need.
+
+#### Bonus: Tips for complex migration scenarios
+
+For a few plugins, some of these steps (such as angular removal) could be a months-long process. In those cases, it may be helpful from an organizational perspective to maintain a clear separation of code that is and isn't "ready" for the new platform.
+
+One convention that is useful for this is creating a dedicated `public/new_platform` directory to house the code that is ready to migrate, and gradually move more and more code into it until the rest of your plugin is essentially empty. At that point, you'll be able to copy your `index.ts`, `plugin.ts`, and the contents of `./new_platform` over into your plugin in the new platform, leaving your legacy shim behind. This carries the added benefit of providing a way for us to introduce helpful tooling in the future, such as custom eslint rules, which could be run against that specific directory to ensure your code is ready to migrate.
 
 ## Frequently asked questions
 
