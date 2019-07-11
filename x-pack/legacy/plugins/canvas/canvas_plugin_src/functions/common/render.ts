@@ -5,7 +5,7 @@
  */
 
 import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/public';
-import { Render, ContainerStyle } from '../types';
+import { Render, ContainerStyle } from '../../../types';
 import { getFunctionHelp } from '../../strings';
 // @ts-ignore unconverted local file
 import { DEFAULT_ELEMENT_CSS } from '../../../common/lib/constants';

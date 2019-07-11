@@ -36,7 +36,11 @@
  */
 
 import { Observable } from 'rxjs';
-import { ClusterClient, ElasticsearchServiceSetup } from './elasticsearch';
+import {
+  ClusterClient,
+  ElasticsearchClientConfig,
+  ElasticsearchServiceSetup,
+} from './elasticsearch';
 import { HttpServiceSetup, HttpServiceStart } from './http';
 import { PluginsServiceSetup, PluginsServiceStart } from './plugins';
 
@@ -115,6 +119,10 @@ export interface CoreSetup {
   elasticsearch: {
     adminClient$: Observable<ClusterClient>;
     dataClient$: Observable<ClusterClient>;
+    createClient: (
+      type: string,
+      clientConfig?: Partial<ElasticsearchClientConfig>
+    ) => ClusterClient;
   };
   http: {
     registerOnPreAuth: HttpServiceSetup['registerOnPreAuth'];
