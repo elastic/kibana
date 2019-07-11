@@ -143,16 +143,16 @@ class SearchBarUI extends Component<SearchBarProps, State> {
 
   public render() {
     const filtersAppliedText = this.props.intl.formatMessage({
-      id: 'data.search.searchBar.filtersButtonFiltersAppliedTitle',
+      id: 'kibana_react.search.searchBar.filtersButtonFiltersAppliedTitle',
       defaultMessage: 'filters applied.',
     });
     const clickToShowOrHideText = this.state.isFiltersVisible
       ? this.props.intl.formatMessage({
-          id: 'data.search.searchBar.filtersButtonClickToShowTitle',
+          id: 'kibana_react.search.searchBar.filtersButtonClickToShowTitle',
           defaultMessage: 'Select to hide',
         })
       : this.props.intl.formatMessage({
-          id: 'data.search.searchBar.filtersButtonClickToHideTitle',
+          id: 'kibana_react.search.searchBar.filtersButtonClickToHideTitle',
           defaultMessage: 'Select to show',
         });
 
