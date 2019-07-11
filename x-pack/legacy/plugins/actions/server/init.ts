@@ -31,7 +31,7 @@ export function init(server: Legacy.Server) {
   server.plugins.encrypted_saved_objects!.registerType({
     type: 'action',
     attributesToEncrypt: new Set(['actionTypeConfigSecrets']),
-    attributesToExcludeFromAAD: new Set(['description', 'actionTypeConfig']),
+    attributesToExcludeFromAAD: new Set(['description']),
   });
 
   function getServices(basePath: string, overwrites: Partial<Services> = {}): Services {

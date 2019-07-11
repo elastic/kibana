@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { schema, TypeOf } from '@kbn/config-schema';
+import { schema, TypeOf, Type } from '@kbn/config-schema';
 import nodemailerServices from 'nodemailer/lib/well-known/services.json';
 
 import { sendEmail, JSON_TRANSPORT_SERVICE } from './lib/send_email';
@@ -14,18 +14,53 @@ const PORT_MAX = 256 * 256 - 1;
 
 export type ActionTypeConfigType = TypeOf<typeof ActionTypeConfig.schema>;
 
+function nullableType<V>(type: Type<V>) {
+  return schema.oneOf([type, schema.literal(null)], { defaultValue: () => null });
+}
+
 const ActionTypeConfig = {
   path: 'actionTypeConfig',
-  schema: schema.object({
-    service: schema.maybe(schema.string()),
-    host: schema.maybe(schema.string()),
-    port: schema.maybe(schema.number({ min: 1, max: PORT_MAX })),
-    secure: schema.maybe(schema.boolean()),
-    user: schema.string(),
-    password: schema.string(),
-    from: schema.string(),
-  }),
+  schema: schema.object(
+    {
+      service: nullableType(schema.string()),
+      host: nullableType(schema.string()),
+      port: nullableType(schema.number({ min: 1, max: PORT_MAX })),
+      secure: nullableType(schema.boolean()),
+      user: schema.string(),
+      password: schema.string(),
+      from: schema.string(),
+    },
+    {
+      validate: validateConfigType,
+    }
+  ),
 };
+
+function validateConfigType(configObject: any): string | void {
+  // avoids circular reference ...
+  const config: ActionTypeConfigType = configObject;
+
+  // Make sure service is set, or if not, both host/port must be set.
+  // If service is set, host/port are ignored, when the email is sent.
+  if (config.service == null) {
+    if (config.host == null && config.port == null) {
+      return 'either [service] or [host]/[port] is required';
+    }
+
+    if (config.host == null) {
+      return '[host] is required if [service] is not provided';
+    }
+
+    if (config.port == null) {
+      return '[port] is required if [service] is not provided';
+    }
+  } else {
+    // service is not null
+    if (!isValidService(config.service)) {
+      return `[service] value "${config.service}" is not valid`;
+    }
+  }
+}
 
 const unencryptedConfigProperties = ['service', 'host', 'port', 'secure', 'from'];
 
@@ -42,36 +77,13 @@ const ActionParams = {
   }),
 };
 
-function validateConfig(object: any): { error?: Error; value?: ActionTypeConfigType } {
+function validateConfig(object: any): { error?: Error; value?: object } {
   let value;
 
   try {
-    value = ActionTypeConfig.schema.validate(object);
+    value = ActionTypeConfig.schema.validate(object) as any;
   } catch (error) {
     return { error };
-  }
-
-  const { service, host, port } = value;
-
-  // Make sure service is set, or if not, both host/port must be set.
-  // If service is set, host/port are ignored, when the email is sent.
-  if (service == null) {
-    if (host == null && port == null) {
-      return toErrorObject('either [service] or [host]/[port] is required');
-    }
-
-    if (host == null) {
-      return toErrorObject('[host] is required if [service] is not provided');
-    }
-
-    if (port == null) {
-      return toErrorObject('[port] is required if [service] is not provided');
-    }
-  } else {
-    // service is not null
-    if (!isValidService(service)) {
-      return toErrorObject(`[service] value "${service}" is not valid`);
-    }
   }
 
   return { value };
@@ -108,15 +120,21 @@ export const actionType: ActionType = {
 };
 
 async function executor({ config, params, services }: ActionTypeExecutorOptions): Promise<any> {
+  const transport: any = {
+    user: config.user,
+    password: config.password,
+  };
+
+  if (config.service !== null) {
+    transport.service = config.service;
+  } else {
+    transport.host = config.host;
+    transport.port = config.port;
+    transport.secure = getSecureValue(config.secure, config.port);
+  }
+
   const sendEmailOptions = {
-    transport: {
-      service: config.service,
-      host: config.host,
-      port: config.port,
-      secure: config.secure,
-      user: config.user,
-      password: config.password,
-    },
+    transport,
     routing: {
       from: config.from,
       to: params.to,
@@ -157,6 +175,17 @@ function getValidServiceNames(): Set<string> {
   }
 
   return result;
+}
+
+// Returns the secure value - whether to use TLS or not.
+// Respect value if not null | undefined.
+// Otherwise, if the port is 465, return true, otherwise return false.
+// Based on data here:
+// - https://github.com/nodemailer/nodemailer/blob/master/lib/well-known/services.json
+function getSecureValue(secure: boolean | null | undefined, port: number): boolean {
+  if (secure != null) return secure;
+  if (port === 465) return true;
+  return false;
 }
 
 function toErrorObject(message: string) {

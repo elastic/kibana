@@ -1,6 +1,6 @@
 {
   "value": {
-    "id": "action:684af8ff-489a-41d3-9ed1-c68e48e7eacc",
+    "id": "action:19cfba7c-711a-4170-8590-9a99a281e85c",
     "index": ".kibana",
     "source": {
       "type": "action",
@@ -11,7 +11,7 @@
         "actionTypeConfig": {
           "unencrypted" : "This value shouldn't get encrypted"
         },
-        "actionTypeConfigSecrets": "wO0ScsOm9nRF+6LGK4GEp2RQljBZ26vi7YVfTIEtiz4R6jVA9Ub2zruUF9PWOPs0MAblF6pvRWhumXHVY1RhutH3BD2jeOUK6p1YxQmh0uxbVSK8MKORXTn10IUfgiDyiY0UGdyEYS/YeqKqCb3oFUi8GXP25V+7+PRY+3iNc9No2/6TdXXoJNlS"
+        "actionTypeConfigSecrets": "iQw4fXsPBWItxabHCqQOZhPgkvDzvB7RMEMeWjg7WbcWbhi05KWp7xAmfnUaUZ0wDgHHcrujMiVTYdfXRnL4IZdIbiFDoDsOTicF2PucUGlpspSSFI2KJQIr+bLiFz+LqULMouIkhtPYEZSQ1oU6OECxn54aNExZ+NLbC+TMewp7+C6lWZ+BVqHA"
       }
     }
   }
