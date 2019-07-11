@@ -17,8 +17,9 @@ import {
   EuiDescriptionListTitle,
   EuiDescriptionListDescription,
   EuiHorizontalRule,
-  EuiNotificationBadge,
-  EuiFlexGroup
+  EuiBadge,
+  EuiFlexGroup,
+  EuiToolTip
 } from '@elastic/eui';
 import { ClusterItemContainer } from './helpers';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -44,11 +45,24 @@ export function BeatsPanel(props) {
       totalNodesCount = 1;
     }
 
+    const badgeColor = migratedNodesCount === totalNodesCount
+      ? 'secondary'
+      : 'danger';
+
     setupModeInstancesData = (
       <EuiFlexItem grow={false}>
-        <EuiNotificationBadge>
-          {migratedNodesCount}/{totalNodesCount}
-        </EuiNotificationBadge>
+        <EuiToolTip
+          position="top"
+          content={i18n.translate('xpack.monitoring.cluster.overview.beatsPanel.setupModeNodesTooltip', {
+            defaultMessage: `These numbers indicate how many detected monitored beats versus how many ` +
+            `detected total beats. If there are more detected beats than monitored beats, click the Nodes ` +
+            `link and you will be guided in how to setup monitoring for the missing node.`
+          })}
+        >
+          <EuiBadge color={badgeColor}>
+            {migratedNodesCount}/{totalNodesCount}
+          </EuiBadge>
+        </EuiToolTip>
       </EuiFlexItem>
     );
   }

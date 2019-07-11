@@ -21,7 +21,8 @@ import {
   EuiDescriptionListDescription,
   EuiHorizontalRule,
   EuiIconTip,
-  EuiNotificationBadge,
+  EuiBadge,
+  EuiToolTip
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
@@ -50,11 +51,24 @@ export function LogstashPanel(props) {
       totalNodesCount = 1;
     }
 
+    const badgeColor = migratedNodesCount === totalNodesCount
+      ? 'secondary'
+      : 'danger';
+
     setupModeInstancesData = (
       <EuiFlexItem grow={false}>
-        <EuiNotificationBadge>
-          {formatNumber(migratedNodesCount, 'int_commas')}/{formatNumber(totalNodesCount, 'int_commas')}
-        </EuiNotificationBadge>
+        <EuiToolTip
+          position="top"
+          content={i18n.translate('xpack.monitoring.cluster.overview.logstashPanel.setupModeNodesTooltip', {
+            defaultMessage: `These numbers indicate how many detected monitored nodes versus how many ` +
+            `detected total nodes. If there are more detected nodes than monitored nodes, click the Nodes ` +
+            `link and you will be guided in how to setup monitoring for the missing node.`
+          })}
+        >
+          <EuiBadge color={badgeColor}>
+            {formatNumber(migratedNodesCount, 'int_commas')}/{formatNumber(totalNodesCount, 'int_commas')}
+          </EuiBadge>
+        </EuiToolTip>
       </EuiFlexItem>
     );
   }
