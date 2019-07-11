@@ -15,10 +15,9 @@ import {
 } from 'ui/management';
 // @ts-ignore
 import routes from 'ui/routes';
-import { getSpacesManager } from 'plugins/spaces/lib';
 import { AdvancedSettingsSubtitle } from './components/advanced_settings_subtitle';
 import { AdvancedSettingsTitle } from './components/advanced_settings_title';
-import { waitForSpacesNPInit } from '../../hacks/init_np_plugin';
+import { start as spacesNPStart } from '../../legacy';
 
 const MANAGE_SPACES_KEY = 'spaces';
 
@@ -48,8 +47,8 @@ routes.defaults(/\/management/, {
         }
 
         const getActiveSpace = async () => {
-          await waitForSpacesNPInit;
-          return getSpacesManager().getActiveSpace();
+          const { spacesManager } = await spacesNPStart;
+          return spacesManager.getActiveSpace();
         };
 
         const PageTitle = () => <AdvancedSettingsTitle getActiveSpace={getActiveSpace} />;

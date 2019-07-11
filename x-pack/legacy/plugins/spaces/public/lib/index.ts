@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { SpacesManager, initSpacesManager, getSpacesManager } from './spaces_manager';
+export { SpacesManager } from './spaces_manager';

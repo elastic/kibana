@@ -8,27 +8,6 @@ import { EventEmitter } from 'events';
 import { NotificationsSetup, HttpSetup } from 'src/core/public';
 import { Space } from '../../common/model/space';
 
-let spacesManager: SpacesManager | undefined;
-export const initSpacesManager = (
-  spaceSelectorUrl: string,
-  http: HttpSetup,
-  notifications: NotificationsSetup
-) => {
-  if (spacesManager) {
-    throw new Error('SpacesManager has already been initialized!');
-  }
-  spacesManager = new SpacesManager(spaceSelectorUrl, http, notifications);
-  return spacesManager;
-};
-
-export const getSpacesManager = () => {
-  if (!spacesManager) {
-    throw new Error('SpacesManager has not been initialized yet');
-  }
-
-  return spacesManager;
-};
-
 export class SpacesManager extends EventEmitter {
   private activeSpace: Space | undefined;
 

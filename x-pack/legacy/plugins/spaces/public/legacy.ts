@@ -5,11 +5,10 @@
  */
 
 import { npSetup, npStart } from 'ui/new_platform';
-import { plugin } from '../index';
-import { SpacesPlugin } from '../plugin';
+import { plugin } from './index';
+import { SpacesPlugin } from './plugin';
 
 const spacesPlugin: SpacesPlugin = plugin({});
 
-export const waitForSpacesNPInit = spacesPlugin
-  .start(npStart.core)
-  .then(() => spacesPlugin.setup(npSetup.core));
+export const setup = spacesPlugin.setup(npSetup.core);
+export const start = spacesPlugin.start(npStart.core);

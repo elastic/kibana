@@ -5,18 +5,28 @@
  */
 
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from 'src/core/public';
-import { initSpacesManager } from './lib';
+import { SpacesManager } from './lib';
 import { initSpacesNavControl } from './views/nav_control';
 
-export class SpacesPlugin implements Plugin<{}, {}> {
+export interface SpacesPluginStart {
+  spacesManager: SpacesManager;
+}
+
+export class SpacesPlugin implements Plugin<{}, SpacesPluginStart> {
+  private spacesManager: SpacesManager | undefined;
+
   // @ts-ignore
   constructor(private readonly initializerContext: PluginInitializerContext) {}
 
   public async start(core: CoreStart) {
     const { spaceSelectorUrl } = await core.http.get('/api/spaces/v1/npStart');
-    const spacesManager = initSpacesManager(spaceSelectorUrl, core.http, core.notifications);
+    this.spacesManager = new SpacesManager(spaceSelectorUrl, core.http, core.notifications);
 
-    initSpacesNavControl(spacesManager, core);
+    initSpacesNavControl(this.spacesManager, core);
+
+    return {
+      spacesManager: this.spacesManager,
+    };
   }
 
   public async setup(core: CoreSetup) {}

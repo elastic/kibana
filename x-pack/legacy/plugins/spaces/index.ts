@@ -59,7 +59,7 @@ export const spaces = (kibana: Record<string, any>) =>
           hidden: true,
         },
       ],
-      hacks: ['plugins/spaces/hacks/init_np_plugin'],
+      hacks: [],
       mappings,
       migrations: {
         space: {

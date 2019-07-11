@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getSpacesManager } from 'plugins/spaces/lib/spaces_manager';
 // @ts-ignore
 import template from 'plugins/spaces/views/space_selector/space_selector.html';
 import 'ui/autoload/styles';
@@ -17,18 +16,18 @@ import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { SpaceSelector } from './space_selector';
 
-import { waitForSpacesNPInit } from '../../hacks/init_np_plugin';
+import { start as spacesNPStart } from '../../legacy';
 
 const module = uiModules.get('spaces_selector', []);
 module.controller('spacesSelectorController', ($scope: any) => {
   $scope.$$postDigest(async () => {
     const domNode = document.getElementById('spaceSelectorRoot');
 
-    await waitForSpacesNPInit;
+    const { spacesManager } = await spacesNPStart;
 
     render(
       <I18nContext>
-        <SpaceSelector spacesManager={getSpacesManager()} />
+        <SpaceSelector spacesManager={spacesManager} />
       </I18nContext>,
       domNode
     );

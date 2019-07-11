@@ -12,12 +12,11 @@ import { I18nContext } from 'ui/i18n';
 // @ts-ignore
 import routes from 'ui/routes';
 import { npStart } from 'ui/new_platform';
-import { getSpacesManager } from '../../lib/spaces_manager';
 import { ManageSpacePage } from './edit_space';
 import { getCreateBreadcrumbs, getEditBreadcrumbs, getListBreadcrumbs } from './lib';
 import { SpacesGridPage } from './spaces_grid';
 
-import { waitForSpacesNPInit } from '../../hacks/init_np_plugin';
+import { start as spacesNPStart } from '../../legacy';
 
 const reactRootNodeId = 'manageSpacesReactRoot';
 
@@ -29,12 +28,12 @@ routes.when('/management/spaces/list', {
     $scope.$$postDigest(async () => {
       const domNode = document.getElementById(reactRootNodeId);
 
-      await waitForSpacesNPInit;
+      const { spacesManager } = await spacesNPStart;
 
       render(
         <I18nContext>
           <SpacesGridPage
-            spacesManager={getSpacesManager()}
+            spacesManager={spacesManager}
             capabilities={npStart.core.application.capabilities}
           />
         </I18nContext>,
@@ -59,12 +58,12 @@ routes.when('/management/spaces/create', {
     $scope.$$postDigest(async () => {
       const domNode = document.getElementById(reactRootNodeId);
 
-      await waitForSpacesNPInit;
+      const { spacesManager } = await spacesNPStart;
 
       render(
         <I18nContext>
           <ManageSpacePage
-            spacesManager={getSpacesManager()}
+            spacesManager={spacesManager}
             capabilities={npStart.core.application.capabilities}
           />
         </I18nContext>,
@@ -95,13 +94,13 @@ routes.when('/management/spaces/edit/:spaceId', {
 
       const { spaceId } = $route.current.params;
 
-      await waitForSpacesNPInit;
+      const { spacesManager } = await spacesNPStart;
 
       render(
         <I18nContext>
           <ManageSpacePage
             spaceId={spaceId}
-            spacesManager={getSpacesManager()}
+            spacesManager={spacesManager}
             setBreadcrumbs={npStart.core.chrome.setBreadcrumbs}
             capabilities={npStart.core.application.capabilities}
           />
