@@ -483,11 +483,12 @@ export class VectorLayer extends AbstractLayer {
 
   _assignIdsToFeatures(featureCollection) {
 
-    //todo: refer to corresponding mapbox issue
-    //In constrained resource environments, mapbox-gl may throw a stackoverflow error due to hitting the browser's recursion limit. This crashes Kibana.
+    //wrt https://github.com/elastic/kibana/issues/39317
+    // In constrained resource environments, mapbox-gl may throw a stackoverflow error due to hitting the browser's recursion limit. This crashes Kibana.
     //This error is thrown in mapbox-gl's quicksort implementation, when it is sorting all the features by id.
     //This is a work-around to avoid hitting such a worst-case
     //This was tested as a suitable work-around for mapbox-gl 0.54
+    //The core issue itself is likely related to https://github.com/mapbox/mapbox-gl-js/issues/6086
 
     //This only shuffles the id-assignment, _not_ the features in the collection
     //The reason for this is that we do not want to modify the feature-ordering, which is the responsiblity of the VectorSource#.
