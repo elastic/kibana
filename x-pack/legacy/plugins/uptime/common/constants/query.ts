@@ -23,3 +23,6 @@ export const QUERY = {
     'error.type',
   ],
 };
+
+// Number of results returned for a legacy states query
+export const LEGACY_STATES_QUERY_SIZE = 50;
