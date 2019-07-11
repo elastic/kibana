@@ -171,7 +171,7 @@
     "@elastic/ctags-langserver": "^0.0.7",
     "@elastic/datemath": "5.0.2",
     "@elastic/eui": "12.2.0",
-    "@elastic/javascript-typescript-langserver": "^0.2.0",
+    "@elastic/javascript-typescript-langserver": "^0.2.1",
     "@elastic/lsp-extension": "^0.1.2",
     "@elastic/node-crypto": "^1.0.0",
     "@elastic/nodegit": "0.25.0-alpha.22",
