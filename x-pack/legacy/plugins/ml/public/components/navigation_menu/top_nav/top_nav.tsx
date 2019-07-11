@@ -4,14 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FC, useState, useEffect } from 'react';
+import React, { FC, Fragment, useState, useEffect } from 'react';
 import { EuiSuperDatePicker } from '@elastic/eui';
 import { TimeHistory, TimeRange } from 'src/legacy/ui/public/timefilter/time_history';
+import { Timefilter } from 'ui/timefilter';
 
 interface Props {
   dateFormat: string;
   timeHistory: TimeHistory;
-  timefilter: any; // TODO: update with proper type.
+  timefilter: Timefilter;
 }
 
 function getRecentlyUsedRanges(timeHistory: TimeHistory): Array<{ start: string; end: string }> {
@@ -84,19 +85,21 @@ export const TopNav: FC<Props> = ({ dateFormat, timeHistory, timefilter }) => {
   }
 
   return (
-    (isAutoRefreshSelectorEnabled || isTimeRangeSelectorEnabled) && (
-      <EuiSuperDatePicker
-        start={time.from}
-        end={time.to}
-        isPaused={refreshInterval.pause}
-        isAutoRefreshOnly={!isTimeRangeSelectorEnabled}
-        refreshInterval={refreshInterval.value}
-        onTimeChange={updateFilter}
-        onRefresh={updateFilter}
-        onRefreshChange={updateInterval}
-        recentlyUsedRanges={recentlyUsedRanges}
-        dateFormat={dateFormat}
-      />
-    )
+    <Fragment>
+      {(isAutoRefreshSelectorEnabled || isTimeRangeSelectorEnabled) && (
+        <EuiSuperDatePicker
+          start={time.from}
+          end={time.to}
+          isPaused={refreshInterval.pause}
+          isAutoRefreshOnly={!isTimeRangeSelectorEnabled}
+          refreshInterval={refreshInterval.value}
+          onTimeChange={updateFilter}
+          onRefresh={updateFilter}
+          onRefreshChange={updateInterval}
+          recentlyUsedRanges={recentlyUsedRanges}
+          dateFormat={dateFormat}
+        />
+      )}
+    </Fragment>
   );
 };
