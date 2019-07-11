@@ -79,10 +79,10 @@ pipeline {
       stages {
         stage('Checkout') {
           steps {
-            script {
-              def d = load("${env.GROOVY_SRC}/dump.groovy")
-              d.dumpEnv()
-            }
+//            script {
+//              def d = load("${env.GROOVY_SRC}/dump.groovy")
+//              d.dumpEnv()
+//            }
 //              checkoutKibana()
             checkoutES()
           }
@@ -154,6 +154,7 @@ def checkoutES(){
               submoduleCfg: [],
               userRemoteConfigs: [[credentialsId: "${JOB_GIT_CREDENTIALS}",
                                    url: "${ES_GIT_URL}"]]])
+    sh 'echo "\n\t### pwd: $(pwd)'
   }
 //    stash allowEmpty: true, name: 'es-source', includes: "${ES_BASE_DIR}/**", excludes: ".git", useDefaultExcludes: false
 //  }
