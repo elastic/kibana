@@ -138,7 +138,7 @@ export class WebElementWrapper {
    *
    * @return {Promise<boolean>}
    */
-  public async isDisplayed(): Promise<boolean> {
+  public async isDisplayed() {
     return await this.retryCall(async function isDisplayed(wrapper: WebElementWrapper) {
       return await wrapper.getWebElement().isDisplayed();
     });
@@ -150,7 +150,7 @@ export class WebElementWrapper {
    *
    * @return {Promise<boolean>}
    */
-  public async isEnabled(): Promise<boolean> {
+  public async isEnabled() {
     return await this.retryCall(async function isEnabled(wrapper: WebElementWrapper) {
       return await wrapper.getWebElement().isEnabled();
     });
@@ -162,7 +162,7 @@ export class WebElementWrapper {
    *
    * @return {Promise<boolean>}
    */
-  public async isSelected(): Promise<boolean> {
+  public async isSelected() {
     return await this.retryCall(async function isSelected(wrapper: WebElementWrapper) {
       return await wrapper.getWebElement().isSelected();
     });
@@ -174,7 +174,7 @@ export class WebElementWrapper {
    *
    * @return {Promise<void>}
    */
-  public async click(): Promise<void> {
+  public async click() {
     await this.retryCall(async function click(wrapper: WebElementWrapper) {
       await wrapper.scrollIntoViewIfNecessary();
       await wrapper.getWebElement().click();
@@ -201,7 +201,7 @@ export class WebElementWrapper {
    * @param {{ charByChar: boolean }} options
    * @default { charByChar: false }
    */
-  async clearValueWithKeyboard(options: TypeOptions = { charByChar: false }): Promise<void> {
+  async clearValueWithKeyboard(options: TypeOptions = { charByChar: false }) {
     if (options.charByChar === true) {
       const value = await this.getAttribute('value');
       for (let i = 0; i <= value.length; i++) {
@@ -240,10 +240,7 @@ export class WebElementWrapper {
    * @param {charByChar: boolean} options
    * @return {Promise<void>}
    */
-  public async type(
-    value: string | string[],
-    options: TypeOptions = { charByChar: false }
-  ): Promise<void> {
+  public async type(value: string | string[], options: TypeOptions = { charByChar: false }) {
     if (options.charByChar) {
       for (const char of value) {
         await this.retryCall(async function type(wrapper: WebElementWrapper) {
@@ -289,7 +286,7 @@ export class WebElementWrapper {
    *
    * @param {string} name
    */
-  public async getAttribute(name: string): Promise<string> {
+  public async getAttribute(name: string) {
     return await this.retryCall(async function getAttribute(wrapper: WebElementWrapper) {
       return await wrapper.getWebElement().getAttribute(name);
     });
@@ -304,7 +301,7 @@ export class WebElementWrapper {
    * @param {string} propertyName
    * @return {Promise<string>}
    */
-  public async getComputedStyle(propertyName: string): Promise<string> {
+  public async getComputedStyle(propertyName: string) {
     return await this.retryCall(async function getComputedStyle(wrapper: WebElementWrapper) {
       return await wrapper.getWebElement().getCssValue(propertyName);
     });
@@ -317,7 +314,7 @@ export class WebElementWrapper {
    *
    * @return {Promise<string>}
    */
-  public async getVisibleText(): Promise<string> {
+  public async getVisibleText() {
     return await this.retryCall(async function getVisibleText(wrapper: WebElementWrapper) {
       return await wrapper.getWebElement().getText();
     });
@@ -369,7 +366,7 @@ export class WebElementWrapper {
    *
    * @return {Promise<void>}
    */
-  public async moveMouseTo(): Promise<void> {
+  public async moveMouseTo() {
     await this.retryCall(async function moveMouseTo(wrapper: WebElementWrapper) {
       await wrapper.scrollIntoViewIfNecessary();
       if (wrapper.browserType === Browsers.Firefox) {
@@ -394,7 +391,7 @@ export class WebElementWrapper {
    * @param {string} selector
    * @return {Promise<WebElementWrapper>}
    */
-  public async findByCssSelector(selector: string): Promise<WebElementWrapper> {
+  public async findByCssSelector(selector: string) {
     return await this.retryCall(async function findByCssSelector(wrapper: WebElementWrapper) {
       return wrapper._wrap(
         await wrapper.getWebElement().findElement(wrapper.By.css(selector)),
@@ -411,10 +408,7 @@ export class WebElementWrapper {
    * @param {number} timeout
    * @return {Promise<WebElementWrapper[]>}
    */
-  public async findAllByCssSelector(
-    selector: string,
-    timeout?: number
-  ): Promise<WebElementWrapper[]> {
+  public async findAllByCssSelector(selector: string, timeout?: number) {
     return await this.retryCall(async function findAllByCssSelector(wrapper: WebElementWrapper) {
       return wrapper._wrapAll(
         await wrapper._findWithCustomTimeout(
@@ -432,7 +426,7 @@ export class WebElementWrapper {
    * @param {string} className
    * @return {Promise<WebElementWrapper>}
    */
-  public async findByClassName(className: string): Promise<WebElementWrapper> {
+  public async findByClassName(className: string) {
     return await this.retryCall(async function findByClassName(wrapper: WebElementWrapper) {
       return wrapper._wrap(
         await wrapper.getWebElement().findElement(wrapper.By.className(className)),
@@ -449,10 +443,7 @@ export class WebElementWrapper {
    * @param {number} timeout
    * @return {Promise<WebElementWrapper[]>}
    */
-  public async findAllByClassName(
-    className: string,
-    timeout?: number
-  ): Promise<WebElementWrapper[]> {
+  public async findAllByClassName(className: string, timeout?: number) {
     return await this.retryCall(async function findAllByClassName(wrapper: WebElementWrapper) {
       return wrapper._wrapAll(
         await wrapper._findWithCustomTimeout(
@@ -517,7 +508,7 @@ export class WebElementWrapper {
    * @param {string} selector
    * @return {Promise<WebElementWrapper>}
    */
-  async findByXpath(selector: string): Promise<WebElementWrapper> {
+  async findByXpath(selector: string) {
     return await this.retryCall(async function findByXpath(wrapper: WebElementWrapper) {
       return wrapper._wrap(
         await wrapper.getWebElement().findElement(wrapper.By.xpath(selector)),
@@ -534,7 +525,7 @@ export class WebElementWrapper {
    * @param {number} timeout
    * @return {Promise<WebElementWrapper[]>}
    */
-  public async findAllByXpath(selector: string, timeout?: number): Promise<WebElementWrapper[]> {
+  public async findAllByXpath(selector: string, timeout?: number) {
     return await this.retryCall(async function findAllByXpath(wrapper: WebElementWrapper) {
       return wrapper._wrapAll(
         await wrapper._findWithCustomTimeout(
@@ -552,7 +543,7 @@ export class WebElementWrapper {
    * @param {string} linkText
    * @return {Promise<WebElementWrapper[]>}
    */
-  public async findByPartialLinkText(linkText: string): Promise<WebElementWrapper> {
+  public async findByPartialLinkText(linkText: string) {
     return await this.retryCall(async function findByPartialLinkText(wrapper: WebElementWrapper) {
       return wrapper._wrap(
         await wrapper.getWebElement().findElement(wrapper.By.partialLinkText(linkText)),
@@ -569,10 +560,7 @@ export class WebElementWrapper {
    * @param {number} timeout
    * @return {Promise<WebElementWrapper[]>}
    */
-  public async findAllByPartialLinkText(
-    linkText: string,
-    timeout?: number
-  ): Promise<WebElementWrapper[]> {
+  public async findAllByPartialLinkText(linkText: string, timeout?: number) {
     return await this.retryCall(async function findAllByPartialLinkText(
       wrapper: WebElementWrapper
     ) {
