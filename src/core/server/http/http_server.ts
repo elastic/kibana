@@ -38,6 +38,9 @@ import { BasePath } from './base_path_service';
 export interface HttpServerSetup {
   server: Server;
   registerRouter: (router: Router) => void;
+  /**
+   * Creates cookie based session storage factory {@link SessionStorageFactory}
+   */
   createCookieSessionStorageFactory: <T>(
     cookieOptions: SessionStorageCookieOptions<T>
   ) => Promise<SessionStorageFactory<T>>;
