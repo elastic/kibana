@@ -1,6 +1,9 @@
 {
   "alert": {
     "properties": {
+      "enabled": {
+        "type": "boolean"
+      },
       "alertTypeId": {
         "type": "keyword"
       },
