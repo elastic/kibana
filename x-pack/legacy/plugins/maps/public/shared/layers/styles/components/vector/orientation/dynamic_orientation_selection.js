@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import _ from 'lodash';
 import React from 'react';
 import PropTypes from 'prop-types';
 import { dynamicOrientationShape } from '../style_option_shapes';
@@ -17,7 +18,7 @@ export function DynamicOrientationSelection({ ordinalFields, styleOptions, onCha
   return (
     <FieldSelect
       fields={ordinalFields}
-      selectedField={styleOptions.field}
+      selectedFieldName={_.get(styleOptions, 'field.name')}
       onChange={onFieldChange}
     />
   );

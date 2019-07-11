@@ -44,7 +44,7 @@ export default function createUpdateTests({ getService }: KibanaFunctionalTestDe
           alertTypeParams: {
             foo: true,
           },
-          interval: 12000,
+          interval: '12s',
           actions: [
             {
               group: 'default',
@@ -63,7 +63,7 @@ export default function createUpdateTests({ getService }: KibanaFunctionalTestDe
             alertTypeParams: {
               foo: true,
             },
-            interval: 12000,
+            interval: '12s',
             actions: [
               {
                 group: 'default',
@@ -87,7 +87,7 @@ export default function createUpdateTests({ getService }: KibanaFunctionalTestDe
           alertTypeParams: {
             foo: true,
           },
-          interval: 12000,
+          interval: '12s',
           actions: [
             {
               group: 'default',
@@ -150,7 +150,7 @@ export default function createUpdateTests({ getService }: KibanaFunctionalTestDe
         .put(`/api/alert/${customAlert.id}`)
         .set('kbn-xsrf', 'foo')
         .send({
-          interval: 10000,
+          interval: '10s',
           alertTypeParams: {},
           actions: [],
         })
@@ -162,6 +162,24 @@ export default function createUpdateTests({ getService }: KibanaFunctionalTestDe
             message: 'alertTypeParams invalid: child "param1" fails because ["param1" is required]',
           });
         });
+    });
+
+    it(`should return 400 when interval is wrong syntax`, async () => {
+      const { body: error } = await supertest
+        .put(`/api/alert/${createdAlert.id}`)
+        .set('kbn-xsrf', 'foo')
+        .send(getTestAlertData({ interval: '10x', enabled: undefined }))
+        .expect(400);
+      expect(error).to.eql({
+        statusCode: 400,
+        error: 'Bad Request',
+        message:
+          'child "interval" fails because ["interval" with value "10x" fails to match the seconds pattern, "interval" with value "10x" fails to match the minutes pattern, "interval" with value "10x" fails to match the hours pattern, "interval" with value "10x" fails to match the days pattern]. "alertTypeId" is not allowed',
+        validation: {
+          source: 'payload',
+          keys: ['interval', 'interval', 'interval', 'interval', 'alertTypeId'],
+        },
+      });
     });
   });
 }

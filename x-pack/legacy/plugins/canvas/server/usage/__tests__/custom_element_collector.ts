@@ -5,9 +5,10 @@
  */
 
 import expect from '@kbn/expect';
-import { summarizeCustomElements, CustomElementDocument } from '../custom_element_collector';
+import { summarizeCustomElements } from '../custom_element_collector';
+import { TelemetryCustomElementDocument } from '../../../types';
 
-function mockCustomElement(...nodeExpressions: string[]): CustomElementDocument {
+function mockCustomElement(...nodeExpressions: string[]): TelemetryCustomElementDocument {
   return {
     content: JSON.stringify({
       selectedNodes: nodeExpressions.map(expression => ({

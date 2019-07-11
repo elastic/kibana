@@ -6,7 +6,6 @@
 import Joi from 'joi';
 import { omit } from 'lodash';
 import { REQUIRED_LICENSES } from '../../../common/constants/security';
-import { CMBeat } from '../../../common/domain_types';
 import { BaseReturnType, ReturnTypeCreate } from '../../../common/return_types';
 import { FrameworkRequest } from '../../lib/adapters/framework/adapter_types';
 import { BeatEnrollmentStatus, CMServerLibs } from '../../lib/types';
@@ -34,7 +33,7 @@ export const createBeatEnrollmentRoute = (libs: CMServerLibs) => ({
   },
   handler: async (
     request: FrameworkRequest
-  ): Promise<BaseReturnType | ReturnTypeCreate<CMBeat>> => {
+  ): Promise<BaseReturnType | ReturnTypeCreate<string>> => {
     const { beatId } = request.params;
     const enrollmentToken = request.headers['kbn-beats-enrollment-token'];
 
