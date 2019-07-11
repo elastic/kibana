@@ -7,7 +7,7 @@
 import { i18n } from '@kbn/i18n';
 import { filterrows } from '../../functions/common/filterrows';
 import { FunctionHelp } from '.';
-import { FunctionFactory } from '../../functions/types';
+import { FunctionFactory } from '../../../types';
 
 export const help: FunctionHelp<FunctionFactory<typeof filterrows>> = {
   help: i18n.translate('xpack.canvas.functions.filterrowsHelpText', {
