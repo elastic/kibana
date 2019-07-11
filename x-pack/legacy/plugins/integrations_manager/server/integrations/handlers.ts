@@ -37,40 +37,27 @@ export async function handleGetList(req: Request) {
 export async function handleGetInfo(req: PackageRequest) {
   const { pkgkey } = req.params;
   const client = getClient(req);
-  const installation = await getIntegrationInfo(client, pkgkey);
+  const integrationInfo = await getIntegrationInfo(client, pkgkey);
 
-  return installation;
+  return integrationInfo;
 }
 
 export async function handleRequestInstall(req: InstallAssetRequest) {
   const { pkgkey, asset } = req.params;
-  const created = [];
-
-  if (asset === 'dashboard') {
-    const client = getClient(req);
-    const object = await installAssets(client, pkgkey, (entry: ArchiveEntry) => {
-      const { type } = pathParts(entry.path);
-      return type === asset;
-    });
-
-    created.push(object);
-  }
-
-  return {
+  const client = getClient(req);
+  const object = await installAssets(
+    client,
     pkgkey,
-    asset,
-    created,
-  };
+    (entry: ArchiveEntry) => asset === pathParts(entry.path).type
+  );
+
+  return object;
 }
 
 export async function handleRequestDelete(req: DeleteAssetRequest) {
-  const { pkgkey, asset } = req.params;
+  const { pkgkey } = req.params;
   const client = getClient(req);
   const deleted = await removeInstallation(client, pkgkey);
 
-  return {
-    pkgkey,
-    asset,
-    deleted,
-  };
+  return deleted;
 }

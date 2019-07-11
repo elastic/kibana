@@ -11,18 +11,28 @@ import {
   SavedObjectReference,
 } from 'src/core/server/saved_objects';
 
-type AssetReference = Pick<SavedObjectReference, 'id' | 'type'>;
+export type AssetReference = Pick<SavedObjectReference, 'id' | 'type'>;
 export interface InstallationAttributes extends SavedObjectAttributes {
   installed: AssetReference[];
 }
 
 export type Installation = SavedObject<InstallationAttributes>;
 
-// the contract with the registry
-export type RegistryList = RegistryListItem[];
+export type Installable<T> = Installed<T> | NotInstalled<T>;
 
-// registry /list
+export type Installed<T = {}> = T & {
+  status: 'installed';
+  savedObject: Installation;
+};
+
+export type NotInstalled<T = {}> = T & {
+  status: 'not_installed';
+};
+
+// Registry's response types
+// from /list
 // https://github.com/elastic/integrations-registry/blob/master/docs/api/list.json
+export type RegistryList = RegistryListItem[];
 export interface RegistryListItem {
   description: string;
   download: string;
@@ -31,7 +41,7 @@ export interface RegistryListItem {
   version: string;
 }
 
-// registry /package/{name}
+// from /package/{name}
 // https://github.com/elastic/integrations-registry/blob/master/docs/api/package.json
 export interface RegistryPackage {
   name: string;
@@ -46,20 +56,17 @@ export interface RegistryPackage {
   };
 }
 
-// the public HTTP response types
+// Managers public HTTP response types
+// from API_LIST_PATTERN
 export type IntegrationList = IntegrationListItem[];
-
 export type IntegrationListItem = Installable<RegistryListItem>;
 
+// from API_INFO_PATTERN
 export type IntegrationInfo = Installable<RegistryPackage>;
 
-export type Installable<T> = Installed<T> | NotInstalled<T>;
+// from API_INSTALL_PATTERN
+// returns Installation
 
-export type Installed<T = {}> = T & {
-  status: 'installed';
-  savedObject: Installation;
-};
-
-export type NotInstalled<T = {}> = T & {
-  status: 'not_installed';
-};
+// from API_DELETE_PATTERN
+// returns [ AssetReference ]
+// more specifically, [ SavedObjectAttributes['installed'] ]
