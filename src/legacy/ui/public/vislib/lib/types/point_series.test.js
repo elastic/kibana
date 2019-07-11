@@ -16,38 +16,35 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import stackedSeries from '../../../../../../fixtures/vislib/mock_data/date_histogram/_stacked_series';
+import { vislibPointSeriesTypes } from './point_series';
 
-import ngMock from 'ng_mock';
-import expect from '@kbn/expect';
-import { vislibPointSeriesTypes as pointSeriesConfig } from '../../../lib/types/point_series';
-import percentileTestdata from './testdata_linechart_percentile.json';
-import percentileTestdataResult from './testdata_linechart_percentile_result.json';
-
-describe('Point Series Config Type Class Test Suite', function () {
-  let parsedConfig;
-  const histogramConfig = {
-    type: 'histogram',
+describe('vislibPointSeriesTypes', () => {
+  const heatmapConfig = {
+    type: 'heatmap',
     addLegend: true,
-    tooltip: {
-      show: true
-    },
-    categoryAxes: [
-      {
-        id: 'CategoryAxis-1',
-        type: 'category',
-        title: {}
-      }
-    ],
-    valueAxes: [{
-      id: 'ValueAxis-1',
-      type: 'value',
-      labels: {},
-      title: {}
-    }]
+    addTooltip: true,
+    colorsNumber: 4,
+    colorSchema: 'Greens',
+    setColorRange: false,
+    percentageMode: true,
+    invertColors: false,
+    colorsRange: [],
+    heatmapMaxBuckets: 20
   };
 
-  const data = {
-    get: (prop) => { return data[prop] || data.data[prop] ||  null; },
+  const stackedData = {
+    get: prop => {
+      return stackedSeries[prop] || null;
+    },
+    getLabels: () => [],
+    data: stackedSeries,
+  };
+
+  const maxBucketData = {
+    get: prop => {
+      return maxBucketData[prop] || maxBucketData.data[prop] || null;
+    },
     getLabels: () => [],
     data: {
       hits: 621,
@@ -55,7 +52,7 @@ describe('Point Series Config Type Class Test Suite', function () {
         date: true,
         interval: 30000,
         max: 1408734982458,
-        min: 1408734082458
+        min: 1408734082458,
       },
       series: [
         { label: 's1', values: [{ x: 1408734060000, y: 8 }] },
@@ -83,43 +80,29 @@ describe('Point Series Config Type Class Test Suite', function () {
         { label: 's23', values: [{ x: 1408734060000, y: 8 }] },
         { label: 's24', values: [{ x: 1408734060000, y: 8 }] },
         { label: 's25', values: [{ x: 1408734060000, y: 8 }] },
-        { label: 's26', values: [{ x: 1408734060000, y: 8 }] }
+        { label: 's26', values: [{ x: 1408734060000, y: 8 }] },
       ],
       xAxisLabel: 'Date Histogram',
       yAxisLabel: 'series',
-      yAxisFormatter: () => 'test'
-    }
-
+      yAxisFormatter: () => 'test',
+    },
   };
 
-  beforeEach(ngMock.module('kibana'));
-
-  describe('histogram chart', function () {
-    beforeEach(function () {
-      parsedConfig = pointSeriesConfig.column(histogramConfig, data);
-    });
-    it('should not throw an error when more than 25 series are provided', function () {
-      expect(parsedConfig.error).to.be.undefined;
+  describe('heatmap()', () => {
+    it('should return an error when more than 20 series are provided', () => {
+      const parsedConfig = vislibPointSeriesTypes.heatmap(heatmapConfig, maxBucketData);
+      expect(parsedConfig.error).toMatchInlineSnapshot(
+        `"There are too many series defined (26). The configured maximum is 20."`
+      );
     });
 
-    it('should set axis title and formatter from data', () => {
-      expect(parsedConfig.categoryAxes[0].title.text).to.equal(data.data.xAxisLabel);
-      expect(parsedConfig.valueAxes[0].labels.axisFormatter).to.not.be.undefined;
+    it('should return valid config when less than 20 series are provided', () => {
+      const parsedConfig = vislibPointSeriesTypes.heatmap(heatmapConfig, stackedData);
+      expect(parsedConfig.error).toBeUndefined();
+      expect(parsedConfig.valueAxes[0].show).toBeFalsy();
+      expect(parsedConfig.categoryAxes.length).toBe(2);
+      expect(parsedConfig.error).toBeUndefined();
     });
+
   });
-
-  describe('line chart', function () {
-    beforeEach(function () {
-      const percentileDataObj = {
-        get: (prop) => { return data[prop] || data.data[prop] ||  null; },
-        getLabels: () => [],
-        data: percentileTestdata.data
-      };
-      parsedConfig = pointSeriesConfig.line(percentileTestdata.cfg, percentileDataObj);
-    });
-    it('should render a percentile line chart', function () {
-      expect(JSON.stringify(parsedConfig)).to.eql(JSON.stringify(percentileTestdataResult));
-    });
-  });
-
 });
