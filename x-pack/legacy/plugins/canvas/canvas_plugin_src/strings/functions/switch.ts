@@ -7,18 +7,35 @@
 import { i18n } from '@kbn/i18n';
 import { switchFn } from '../../functions/common/switch';
 import { FunctionHelp } from '.';
+<<<<<<< HEAD
 import { FunctionFactory } from '../../functions/types';
+=======
+import { FunctionFactory } from '../../../types';
+import { CONTEXT } from '../constants';
+>>>>>>> 0166246fb8... [Canvas][Docs] Merge Canvas function references (#38300)
 
 export const help: FunctionHelp<FunctionFactory<typeof switchFn>> = {
   help: i18n.translate('xpack.canvas.functions.switchHelpText', {
-    defaultMessage: 'Perform conditional logic with multiple conditions',
+    defaultMessage:
+      'Performs conditional logic with multiple conditions. ' +
+      'See also {caseFn} which builds a {case} to pass to the {switchFn} function.',
+    values: {
+      case: '`case`',
+      caseFn: '`case`',
+      switchFn: '`switch`',
+    },
   }),
   args: {
     case: i18n.translate('xpack.canvas.functions.switch.args.caseHelpText', {
-      defaultMessage: 'The list of conditions to check',
+      defaultMessage: 'The conditions to check',
     }),
     default: i18n.translate('xpack.canvas.functions.switch.args.defaultHelpText', {
-      defaultMessage: 'The default case if no cases match',
+      defaultMessage:
+        'The value returned when no conditions are met. ' +
+        'When unspecified and no conditions are met, the original {CONTEXT} is returned.',
+      values: {
+        CONTEXT,
+      },
     }),
   },
 };
