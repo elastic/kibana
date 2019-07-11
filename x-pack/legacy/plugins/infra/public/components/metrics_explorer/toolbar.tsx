@@ -15,24 +15,28 @@ import {
 import {
   MetricsExplorerOptions,
   MetricsExplorerTimeOptions,
+  MetricsExplorerChartOptions,
 } from '../../containers/metrics_explorer/use_metrics_explorer_options';
 import { Toolbar } from '../eui/toolbar';
 import { MetricsExplorerKueryBar } from './kuery_bar';
 import { MetricsExplorerMetrics } from './metrics';
 import { MetricsExplorerGroupBy } from './group_by';
 import { MetricsExplorerAggregationPicker } from './aggregation';
+import { MetricsExplorerChartOptions as MetricsExplorerChartOptionsComponent } from './chart_options';
 
 interface Props {
   intl: InjectedIntl;
   derivedIndexPattern: StaticIndexPattern;
   timeRange: MetricsExplorerTimeOptions;
   options: MetricsExplorerOptions;
+  chartOptions: MetricsExplorerChartOptions;
   onRefresh: () => void;
   onTimeChange: (start: string, end: string) => void;
   onGroupByChange: (groupBy: string | null) => void;
   onFilterQuerySubmit: (query: string) => void;
   onMetricsChange: (metrics: MetricsExplorerMetric[]) => void;
   onAggregationChange: (aggregation: MetricsExplorerAggregation) => void;
+  onChartOptionsChange: (chartOptions: MetricsExplorerChartOptions) => void;
 }
 
 export const MetricsExplorerToolbar = injectI18n(
@@ -46,6 +50,8 @@ export const MetricsExplorerToolbar = injectI18n(
     onFilterQuerySubmit,
     onMetricsChange,
     onAggregationChange,
+    chartOptions,
+    onChartOptionsChange,
   }: Props) => {
     const isDefaultOptions =
       options.aggregation === MetricsExplorerAggregation.avg && options.metrics.length === 0;
@@ -97,6 +103,12 @@ export const MetricsExplorerToolbar = injectI18n(
               derivedIndexPattern={derivedIndexPattern}
               onSubmit={onFilterQuerySubmit}
               value={options.filterQuery}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <MetricsExplorerChartOptionsComponent
+              onChange={onChartOptionsChange}
+              chartOptions={chartOptions}
             />
           </EuiFlexItem>
           <EuiFlexItem grow={false} style={{ marginRight: 5 }}>

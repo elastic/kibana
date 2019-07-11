@@ -8,7 +8,7 @@ import React, { useCallback, useMemo } from 'react';
 import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import { EuiTitle, EuiToolTip, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { Axis, Chart, getAxisId, niceTimeFormatter, Position, Settings } from '@elastic/charts';
-import { first, last } from 'lodash';
+import { first, last, min, max, sum } from 'lodash';
 import moment from 'moment';
 import { UICapabilities } from 'ui/capabilities';
 import { injectUICapabilities } from 'ui/capabilities/react';
@@ -16,10 +16,13 @@ import { MetricsExplorerSeries } from '../../../server/routes/metrics_explorer/t
 import {
   MetricsExplorerOptions,
   MetricsExplorerTimeOptions,
+  MetricsExplorerOptionsMetric,
+  MetricsExplorerYAxisMode,
+  MetricsExplorerChartOptions,
 } from '../../containers/metrics_explorer/use_metrics_explorer_options';
 import euiStyled from '../../../../../common/eui_styled_components';
 import { createFormatterForMetric } from './helpers/create_formatter_for_metric';
-import { MetricLineSeries } from './line_series';
+import { MetricExplorerSeriesChart } from './line_series';
 import { MetricsExplorerChartContextMenu } from './chart_context_menu';
 import { SourceQuery } from '../../graphql/types';
 import { MetricsExplorerEmptyChart } from './empty_chart';
@@ -33,6 +36,7 @@ interface Props {
   width?: number | string;
   height?: number | string;
   options: MetricsExplorerOptions;
+  chartOptions: MetricsExplorerChartOptions;
   series: MetricsExplorerSeries;
   source: SourceQuery.Query['source']['configuration'] | undefined;
   timeRange: MetricsExplorerTimeOptions;
@@ -40,11 +44,33 @@ interface Props {
   uiCapabilities: UICapabilities;
 }
 
+const calculateDomain = (
+  series: MetricsExplorerSeries,
+  metrics: MetricsExplorerOptionsMetric[],
+  stacked = false
+) => {
+  const minsAndMaxes = metrics.reduce(
+    (acc, metric, index) => {
+      const values = series.rows.map(row => row[`metric_${index}`] as number).filter(v => v);
+      acc.mins.push(min(values) || null);
+      acc.maxes.push(max(values) || null);
+      return acc;
+    },
+    { mins: [] as Array<number | null>, maxes: [] as Array<number | null> }
+  );
+
+  const minValue = min(minsAndMaxes.mins) || 0;
+  const maxValue = stacked ? sum(minsAndMaxes.maxes) : max(minsAndMaxes.maxes);
+
+  return { min: minValue, max: maxValue };
+};
+
 export const MetricsExplorerChart = injectUICapabilities(
   injectI18n(
     ({
       source,
       options,
+      chartOptions,
       series,
       title,
       onFilter,
@@ -66,6 +92,11 @@ export const MetricsExplorerChart = injectUICapabilities(
         [series.rows]
       );
       const yAxisFormater = useCallback(createFormatterForMetric(first(metrics)), [options]);
+      const dataDomain = calculateDomain(series, metrics, chartOptions.stack);
+      const domain =
+        chartOptions.yAxisMode === MetricsExplorerYAxisMode.fromZero
+          ? { ...dataDomain, min: 0 }
+          : dataDomain;
       return (
         <div style={{ padding: 24 }}>
           {options.groupBy ? (
@@ -80,6 +111,7 @@ export const MetricsExplorerChart = injectUICapabilities(
                   <MetricsExplorerChartContextMenu
                     timeRange={timeRange}
                     options={options}
+                    chartOptions={chartOptions}
                     series={series}
                     onFilter={onFilter}
                     source={source}
@@ -93,6 +125,7 @@ export const MetricsExplorerChart = injectUICapabilities(
               <EuiFlexItem grow={false}>
                 <MetricsExplorerChartContextMenu
                   options={options}
+                  chartOptions={chartOptions}
                   series={series}
                   source={source}
                   timeRange={timeRange}
@@ -105,7 +138,14 @@ export const MetricsExplorerChart = injectUICapabilities(
             {series.rows.length > 0 ? (
               <Chart>
                 {metrics.map((metric, id) => (
-                  <MetricLineSeries key={id} metric={metric} id={id} series={series} />
+                  <MetricExplorerSeriesChart
+                    type={chartOptions.type}
+                    key={id}
+                    metric={metric}
+                    id={id}
+                    series={series}
+                    stack={chartOptions.stack}
+                  />
                 ))}
                 <Axis
                   id={getAxisId('timestamp')}
@@ -117,6 +157,7 @@ export const MetricsExplorerChart = injectUICapabilities(
                   id={getAxisId('values')}
                   position={Position.Left}
                   tickFormat={yAxisFormater}
+                  domain={domain}
                 />
                 <Settings onBrushEnd={handleTimeChange} theme={getChartTheme()} />
               </Chart>

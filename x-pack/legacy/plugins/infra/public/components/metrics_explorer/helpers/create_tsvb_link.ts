@@ -6,6 +6,7 @@
 
 import { encode } from 'rison-node';
 import uuid from 'uuid';
+import { set } from 'lodash';
 import { colorTransformer, MetricsExplorerColor } from '../../../../common/color_palette';
 import {
   MetricsExplorerSeries,
@@ -15,6 +16,8 @@ import {
   MetricsExplorerOptions,
   MetricsExplorerOptionsMetric,
   MetricsExplorerTimeOptions,
+  MetricsExplorerChartOptions,
+  MetricsExplorerYAxisMode,
 } from '../../../containers/metrics_explorer/use_metrics_explorer_options';
 import { metricToFormat } from './metric_to_format';
 import { InfraFormatterType } from '../../../lib/lib';
@@ -98,7 +101,8 @@ export const createTSVBLink = (
   source: SourceQuery.Query['source']['configuration'] | undefined,
   options: MetricsExplorerOptions,
   series: MetricsExplorerSeries,
-  timeRange: MetricsExplorerTimeOptions
+  timeRange: MetricsExplorerTimeOptions,
+  chartOptions: MetricsExplorerChartOptions
 ) => {
   const appState = {
     filters: [],
@@ -126,6 +130,10 @@ export const createTSVBLink = (
       type: 'metrics',
     },
   };
+
+  if (chartOptions.yAxisMode === MetricsExplorerYAxisMode.fromZero) {
+    set(appState, 'vis.params.axis_min', 0);
+  }
 
   const globalState = {
     refreshInterval: { pause: true, value: 0 },
