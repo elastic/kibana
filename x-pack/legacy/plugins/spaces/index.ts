@@ -71,7 +71,7 @@ export const spaces = (kibana: Record<string, any>) =>
           isNamespaceAgnostic: true,
         },
       },
-      home: ['plugins/spaces/register_feature'],
+      home: ['plugins/spaces/legacy'],
     },
 
     async init(server: Server) {

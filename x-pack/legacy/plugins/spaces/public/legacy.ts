@@ -5,10 +5,19 @@
  */
 
 import { npSetup, npStart } from 'ui/new_platform';
+import { FeatureCatalogueRegistryProvider } from 'ui/registry/feature_catalogue';
 import { plugin } from './index';
-import { SpacesPlugin } from './plugin';
+import { SpacesPlugin, PluginsSetup } from './plugin';
 
 const spacesPlugin: SpacesPlugin = plugin({});
 
+const plugins: PluginsSetup = {
+  kibana: {
+    registerCatalogueFeature: fn => {
+      FeatureCatalogueRegistryProvider.register(fn);
+    },
+  },
+};
+
 export const setup = spacesPlugin.setup(npSetup.core);
-export const start = spacesPlugin.start(npStart.core);
+export const start = spacesPlugin.start(npStart.core, plugins);

@@ -4,18 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { i18n } from '@kbn/i18n';
 import {
   FeatureCatalogueCategory,
-  FeatureCatalogueRegistryProvider,
-  // @ts-ignore
+  FeatureCatalogueRegistryFunction,
 } from 'ui/registry/feature_catalogue';
 import { getSpacesFeatureDescription } from './lib/constants';
 
-FeatureCatalogueRegistryProvider.register(() => {
+export const createSpacesFeatureCatalogueEntry: FeatureCatalogueRegistryFunction = i18n => {
   return {
     id: 'spaces',
-    title: i18n.translate('xpack.spaces.spacesTitle', {
+    title: i18n('xpack.spaces.spacesTitle', {
       defaultMessage: 'Spaces',
     }),
     description: getSpacesFeatureDescription(),
@@ -24,4 +22,4 @@ FeatureCatalogueRegistryProvider.register(() => {
     showOnHomePage: true,
     category: FeatureCatalogueCategory.ADMIN,
   };
-});
+};
