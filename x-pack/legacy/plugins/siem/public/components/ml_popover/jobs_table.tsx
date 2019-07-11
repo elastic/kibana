@@ -4,14 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 
-import { EuiBasicTable, EuiLink, EuiText } from '@elastic/eui';
+import {
+  CENTER_ALIGNMENT,
+  EuiBasicTable,
+  EuiButton,
+  EuiEmptyPrompt,
+  EuiLink,
+  EuiText,
+} from '@elastic/eui';
 
-import { RIGHT_ALIGNMENT } from '@elastic/eui/lib/services';
 import styled from 'styled-components';
 import * as i18n from './translations';
-import { JobDetail, JobDetailProps } from './job_detail';
+import { JobSwitch, JobSwitchProps } from './job_switch';
 
 const JobNameWrapper = styled.div`
   margin: 5px 0;
@@ -20,7 +26,7 @@ const JobNameWrapper = styled.div`
 const getJobsTableColumns = () => [
   {
     name: i18n.COLUMN_JOB_NAME,
-    render: ({ jobName, jobDescription }: JobDetailProps) => (
+    render: ({ jobName, jobDescription }: { jobName: string; jobDescription: string }) => (
       <JobNameWrapper>
         <EuiLink href={`ml#/explorer?_g=(ml:(jobIds:!(${jobName})))`} target="_blank">
           <EuiText size="s">{jobName}</EuiText>
@@ -34,40 +40,73 @@ const getJobsTableColumns = () => [
 
   {
     name: i18n.COLUMN_RUN_JOB,
-    render: ({ jobName, jobDescription, isChecked, onJobStateChange }: JobDetailProps) => (
-      <JobDetail
+    render: ({
+      jobName,
+      jobDescription,
+      datafeedState,
+      latestTimestampMs,
+      onJobStateChange,
+    }: JobSwitchProps) => (
+      <JobSwitch
         jobName={jobName}
         jobDescription={jobDescription}
-        isChecked={isChecked}
+        datafeedState={datafeedState}
+        latestTimestampMs={latestTimestampMs}
         onJobStateChange={onJobStateChange}
       />
     ),
-    align: RIGHT_ALIGNMENT,
+    align: CENTER_ALIGNMENT,
     width: '80px',
   },
 ];
 
+const getPaginatedItems = (
+  items: JobSwitchProps[],
+  pageIndex: number,
+  pageSize: number
+): JobSwitchProps[] => items.slice(pageIndex * pageSize, pageIndex * pageSize + pageSize);
+
 export const JobsTable = React.memo(
-  ({ items, isLoading }: { items: JobDetailProps[]; isLoading: boolean }) => {
+  ({ items, isLoading }: { items: JobSwitchProps[]; isLoading: boolean }) => {
+    const [pageIndex, setPageIndex] = useState(0);
+    const pageSize = 5;
+
     const pagination = {
-      pageIndex: 0,
-      pageSize: 5,
-      totalItemCount: items.length,
-      pageSizeOptions: [3, 5, 8],
       hidePerPageOptions: true,
+      pageIndex,
+      pageSize,
+      totalItemCount: items.length,
     };
+
+    useEffect(() => {
+      setPageIndex(0);
+    }, [items.length]);
 
     return (
       <EuiBasicTable
         compressed={true}
         columns={getJobsTableColumns()}
         data-test-subj="jobs-table"
-        items={items}
+        items={getPaginatedItems(items, pageIndex, pageSize)}
         loading={isLoading}
-        noItemsMessage={i18n.NO_ITEMS_TEXT}
+        noItemsMessage={<NoItemsMessage />}
         pagination={pagination}
-        onChange={({ page = {} }) => {}}
+        onChange={({ page }: { page: { index: number } }) => {
+          setPageIndex(page.index);
+        }}
       />
     );
   }
 );
+
+export const NoItemsMessage = React.memo(() => (
+  <EuiEmptyPrompt
+    title={<h3>{i18n.NO_ITEMS_TEXT}</h3>}
+    titleSize="xs"
+    actions={
+      <EuiButton size="s" href="/app/ml#/jobs/new_job/step/index_or_search" target="blank">
+        {i18n.CREATE_CUSTOM_JOB}
+      </EuiButton>
+    }
+  />
+));

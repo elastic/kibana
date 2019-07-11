@@ -43,10 +43,6 @@ export const FILTER_PLACEHOLDER = i18n.translate(
   }
 );
 
-export const WITH = i18n.translate('xpack.siem.components.mlPopup.withLabel', {
-  defaultMessage: 'with',
-});
-
 export const SHOW_ALL_JOBS = i18n.translate('xpack.siem.components.mlPopup.showAllJobsLabel', {
   defaultMessage: 'Elastic Jobs',
 });
@@ -72,7 +68,7 @@ export const COLUMN_RUN_JOB = i18n.translate(
 export const NO_ITEMS_TEXT = i18n.translate(
   'xpack.siem.components.mlPopup.jobsTable.noItemsDescription',
   {
-    defaultMessage: 'No SIEM Machine Learning Jobs FOund',
+    defaultMessage: 'No SIEM Machine Learning Jobs Found',
   }
 );
 

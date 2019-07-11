@@ -40,12 +40,6 @@ export interface Job {
   processed_record_count: number;
 }
 
-export interface DisplayJob {
-  title: string;
-  description: string;
-  isChecked: boolean;
-}
-
 export interface SetupMlResponseJob {
   id: string;
   success: boolean;

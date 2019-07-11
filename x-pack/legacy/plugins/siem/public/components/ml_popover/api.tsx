@@ -100,11 +100,13 @@ export const setupMlJob = async ({
  * Starts the given dataFeedIds
  *
  * @param datafeedIds
+ * @param start
  * @param headers
  */
 export const startDatafeeds = async (
   datafeedIds: string[],
-  headers: Record<string, string | undefined>
+  headers: Record<string, string | undefined>,
+  start = 0
 ): Promise<StartDatafeedResponse> => {
   try {
     const response = await fetch('/api/ml/jobs/force_start_datafeeds', {
@@ -112,6 +114,7 @@ export const startDatafeeds = async (
       credentials: 'same-origin',
       body: JSON.stringify({
         datafeedIds,
+        ...(start !== 0 && { start }),
       }),
       headers: {
         'kbn-system-api': 'true',

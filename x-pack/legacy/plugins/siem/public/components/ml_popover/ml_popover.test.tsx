@@ -19,7 +19,7 @@ import {
   mockInstalledJobIds,
   mockJobsSummaryResponse,
 } from './__mocks__/api';
-import { JobDetail } from './job_detail';
+import { JobSwitch } from './job_switch';
 
 jest.mock('../ml/permissions/has_ml_admin_permissions', () => ({
   hasMlAdminPermissions: () => true,
@@ -38,16 +38,16 @@ describe('MlPopover', () => {
     });
   });
 
-  describe('JobDetail', () => {
+  describe('JobSwitch', () => {
     const onJobStateChangeMock = jest.fn();
 
     test('renders correctly against snapshot', () => {
       const wrapper = shallow(
-        <JobDetail
-          key="job.title"
+        <JobSwitch
           jobName="job.title"
+          datafeedState="stopped"
+          latestTimestampMs={0}
           jobDescription="job.description"
-          isChecked={false}
           onJobStateChange={onJobStateChangeMock}
         />
       );
@@ -56,11 +56,11 @@ describe('MlPopover', () => {
 
     test('showing a popover on a mouse click', () => {
       const wrapper = shallow(
-        <JobDetail
-          key="job.title"
+        <JobSwitch
           jobName="job.title"
           jobDescription="job.description"
-          isChecked={true}
+          datafeedState="started"
+          latestTimestampMs={0}
           onJobStateChange={onJobStateChangeMock}
         />
       );

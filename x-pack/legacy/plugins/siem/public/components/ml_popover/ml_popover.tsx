@@ -23,17 +23,17 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { useJobSummaryData } from './hooks/use_job_summary_data';
-import { useSiemJobs } from './hooks/use_siem_jobs';
 import * as i18n from './translations';
 import { KibanaConfigContext } from '../../lib/adapters/framework/kibana_framework_adapter';
-import { ConfigTemplate, DisplayJob, Job } from './types';
+import { ConfigTemplate, Job } from './types';
 import { hasMlAdminPermissions } from '../ml/permissions/has_ml_admin_permissions';
 import { MlCapabilitiesContext } from '../ml/permissions/ml_capabilities_provider';
 import { EuiSearchBarQuery } from '../open_timeline/types';
-import { JobDetailProps } from './job_detail';
+import { JobSwitchProps } from './job_switch';
 import { JobsTable } from './jobs_table';
 import { setupMlJob } from './api';
 import { useIndexPatterns } from './hooks/use_index_patterns';
+import { UpgradePopoverContents } from './upgrade_popover';
 
 const PopoverContentsDiv = styled.div`
   width: 550px;
@@ -42,11 +42,6 @@ const PopoverContentsDiv = styled.div`
 const ShowingContainer = styled.div`
   user-select: none;
   margin-top: 5px;
-`;
-
-const SelectableQueryText = styled.span`
-  margin-left: 3px;
-  user-select: text;
 `;
 
 const siemJobPrefix = 'siem-api-';
@@ -86,30 +81,35 @@ export const getConfigTemplatesToInstall = (
 export const getJobsToDisplay = (
   siemJobSummaryData: Job[] | null,
   embeddedJobIds: string[],
-  showAllJobs: boolean
-): DisplayJob[] =>
+  showAllJobs: boolean,
+  filterQuery?: string
+): Job[] =>
   siemJobSummaryData
-    ? siemJobSummaryData
-        .filter(job => (showAllJobs ? true : embeddedJobIds.includes(job.id)))
-        .map(job => ({
-          title: job.id,
-          description: job.description,
-          isChecked: job.datafeedState === 'started',
-        }))
+    ? searchFilter(
+        siemJobSummaryData.filter(job => (showAllJobs ? true : embeddedJobIds.includes(job.id))),
+        filterQuery
+      )
     : [];
+
+export const searchFilter = (jobs: Job[], filterQuery?: string): Job[] =>
+  jobs.filter(job =>
+    filterQuery == null
+      ? true
+      : job.id.includes(filterQuery) || job.description.includes(filterQuery)
+  );
 
 export const MlPopover = React.memo(() => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [showAllJobs, setShowAllJobs] = useState(false);
-  const [, setIsCreatingJobs] = useState(false);
+  const [isCreatingJobs, setIsCreatingJobs] = useState(false);
   const [refetchSummaryData, setRefetchSummaryData] = useState(false);
   const [filterQuery, setFilterQuery] = useState('');
-  const [, siemJobs] = useSiemJobs(isPopoverOpen ? !refetchSummaryData : refetchSummaryData);
-  const [, siemJobSummaryData] = useJobSummaryData(
-    siemJobs,
+
+  const [isLoadingJobSummaryData, siemJobSummaryData] = useJobSummaryData(
+    [],
     isPopoverOpen ? !refetchSummaryData : refetchSummaryData
   );
-  const [, configuredIndexPattern] = useIndexPatterns();
+  const [isLoadingConfiguredIndexPatterns, configuredIndexPattern] = useIndexPatterns();
   const config = useContext(KibanaConfigContext);
   const capabilities = useContext(MlCapabilitiesContext);
   const headers = { 'kbn-version': config.kbnVersion };
@@ -117,7 +117,8 @@ export const MlPopover = React.memo(() => {
   // All jobs from embedded configTemplates that should be installed
   const embeddedJobIds = getJobsToInstall(configTemplates);
 
-  // Jobs currently installed retrieved via ml groups api for 'siem' group
+  // Jobs currently installed retrieved via ml jobs_summary api for 'siem' group
+  const siemJobs = siemJobSummaryData.map(job => job.id);
   const installedJobIds = embeddedJobIds.filter(job => siemJobs.includes(job));
 
   // Config templates that still need to be installed and have a defaultIndexPattern that is configured
@@ -129,7 +130,11 @@ export const MlPopover = React.memo(() => {
 
   // Install Config Templates as effect of opening popover
   useEffect(() => {
-    if (configTemplatesToInstall.length > 0) {
+    if (
+      !isLoadingJobSummaryData &&
+      !isLoadingConfiguredIndexPatterns &&
+      configTemplatesToInstall.length > 0
+    ) {
       const setupJobs = async () => {
         setIsCreatingJobs(true);
         await Promise.all(
@@ -151,9 +156,33 @@ export const MlPopover = React.memo(() => {
   }, [configTemplatesToInstall.length]);
 
   // Filter installed job to show all 'siem' group jobs or just embedded
-  const jobsToDisplay = getJobsToDisplay(siemJobSummaryData, embeddedJobIds, showAllJobs);
+  const jobsToDisplay = getJobsToDisplay(
+    siemJobSummaryData,
+    embeddedJobIds,
+    showAllJobs,
+    filterQuery
+  );
   if (!hasMlAdminPermissions(capabilities)) {
-    return null;
+    return (
+      <EuiPopover
+        anchorPosition="downRight"
+        id="integrations-popover"
+        button={
+          <EuiButton
+            data-test-subj="integrations-button"
+            iconType="arrowDown"
+            iconSide="right"
+            onClick={() => setIsPopoverOpen(!isPopoverOpen)}
+          >
+            {i18n.ANOMALY_DETECTION}
+          </EuiButton>
+        }
+        isOpen={isPopoverOpen}
+        closePopover={() => setIsPopoverOpen(!isPopoverOpen)}
+      >
+        <UpgradePopoverContents />
+      </EuiPopover>
+    );
   } else {
     return (
       <EuiPopover
@@ -184,6 +213,7 @@ export const MlPopover = React.memo(() => {
                 data-test-subj="jobs-filter-bar"
                 box={{
                   placeholder: i18n.FILTER_PLACEHOLDER,
+                  incremental: true,
                 }}
                 onChange={(query: EuiSearchBarQuery) => setFilterQuery(query.queryText.trim())}
               />
@@ -214,15 +244,11 @@ export const MlPopover = React.memo(() => {
               <FormattedMessage
                 data-test-subj="query-message"
                 id="xpack.siem.components.mlPopup.showingLabel"
-                defaultMessage="Showing: {filterResultsLength} {filterResultsLength, plural, one {Job} other {Jobs}} {with}"
+                defaultMessage="Showing: {filterResultsLength} {filterResultsLength, plural, one {Job} other {Jobs}}"
                 values={{
                   filterResultsLength: jobsToDisplay.length,
-                  with: filterQuery.trim().length ? i18n.WITH : '',
                 }}
               />
-              <SelectableQueryText data-test-subj="selectable-query-text">
-                {filterQuery.trim()}
-              </SelectableQueryText>
             </EuiText>
           </ShowingContainer>
 
@@ -230,14 +256,15 @@ export const MlPopover = React.memo(() => {
 
           <JobsTable
             items={jobsToDisplay.map(
-              (dp): JobDetailProps => ({
-                jobName: dp.title,
+              (dp): JobSwitchProps => ({
+                jobName: dp.id,
                 jobDescription: dp.description,
-                isChecked: dp.isChecked,
+                datafeedState: dp.datafeedState,
+                latestTimestampMs: dp.latestTimestampMs || 0,
                 onJobStateChange: () => setRefetchSummaryData(!refetchSummaryData),
               })
             )}
-            isLoading={false}
+            isLoading={isCreatingJobs || isLoadingJobSummaryData}
           />
         </PopoverContentsDiv>
       </EuiPopover>
