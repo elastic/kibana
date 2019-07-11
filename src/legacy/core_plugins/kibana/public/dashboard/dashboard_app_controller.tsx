@@ -299,7 +299,18 @@ export class DashboardAppController {
     };
 
     $scope.onClearSavedQuery = () => {
-      $scope.savedQuery = undefined;
+      delete $scope.savedQuery;
+      dashboardStateManager.setSavedQueryId(undefined);
+      queryFilter.setFilters([]);
+      dashboardStateManager.applyFilters(
+        {
+          query: '',
+          language:
+            localStorage.get('kibana.userQueryLanguage') || config.get('search:queryLanguage'),
+        },
+        []
+      );
+      $scope.refresh();
     };
 
     const updateStateFromSavedQuery = (savedQuery: SavedQuery) => {
@@ -321,24 +332,11 @@ export class DashboardAppController {
     };
 
     $scope.$watch('savedQuery', (newSavedQuery: SavedQuery, oldSavedQuery: SavedQuery) => {
-      if (!newSavedQuery) {
-        dashboardStateManager.setSavedQueryId(undefined);
-        queryFilter.setFilters([]);
-        dashboardStateManager.applyFilters(
-          {
-            query: '',
-            language:
-              localStorage.get('kibana.userQueryLanguage') || config.get('search:queryLanguage'),
-          },
-          []
-        );
-        $scope.refresh();
-      } else {
-        dashboardStateManager.setSavedQueryId(newSavedQuery.id);
+      if (!newSavedQuery) return;
+      dashboardStateManager.setSavedQueryId(newSavedQuery.id);
 
-        if (newSavedQuery.id === (oldSavedQuery && oldSavedQuery.id)) {
-          updateStateFromSavedQuery(newSavedQuery);
-        }
+      if (newSavedQuery.id === (oldSavedQuery && oldSavedQuery.id)) {
+        updateStateFromSavedQuery(newSavedQuery);
       }
     });
 

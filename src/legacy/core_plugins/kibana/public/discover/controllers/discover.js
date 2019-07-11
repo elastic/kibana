@@ -381,7 +381,7 @@ function discoverController(
 
   // searchSource which applies time range
   const timeRangeSearchSource = savedSearch.searchSource.create();
-  if(isDefaultTypeIndexPattern($scope.indexPattern)) {
+  if (isDefaultTypeIndexPattern($scope.indexPattern)) {
     timeRangeSearchSource.setField('filter', () => {
       return timefilter.createFilter($scope.indexPattern);
     });
@@ -398,7 +398,7 @@ function discoverController(
   if (savedSearch.id && savedSearch.title) {
     chrome.breadcrumbs.set([{
       text: discoverBreadcrumbsTitle,
-      href: '#/discover'
+      href: '#/discover',
     }, { text: savedSearch.title }]);
   } else {
     chrome.breadcrumbs.set([{
@@ -891,7 +891,15 @@ function discoverController(
   };
 
   $scope.onClearSavedQuery = () => {
-    $scope.savedQuery = undefined;
+    delete $scope.savedQuery;
+    delete $state.savedQuery;
+    $state.query = {
+      query: '',
+      language: localStorage.get('kibana.userQueryLanguage') || config.get('search:queryLanguage'),
+    };
+    queryFilter.setFilters([]);
+    $state.save();
+    $scope.fetch();
   };
 
   const updateStateFromSavedQuery = (savedQuery) => {
@@ -912,22 +920,13 @@ function discoverController(
   };
 
   $scope.$watch('savedQuery', (newSavedQuery, oldSavedQuery) => {
-    if (!newSavedQuery) {
-      $state.savedQuery = undefined;
-      $state.query = {
-        query: '',
-        language: localStorage.get('kibana.userQueryLanguage') || config.get('search:queryLanguage')
-      };
-      queryFilter.setFilters([]);
-      $state.save();
-      $scope.fetch();
-    } else {
-      $state.savedQuery = newSavedQuery.id;
-      $state.save();
+    if (!newSavedQuery) return;
 
-      if (newSavedQuery.id === (oldSavedQuery && oldSavedQuery.id)) {
-        updateStateFromSavedQuery(newSavedQuery);
-      }
+    $state.savedQuery = newSavedQuery.id;
+    $state.save();
+
+    if (newSavedQuery.id === (oldSavedQuery && oldSavedQuery.id)) {
+      updateStateFromSavedQuery(newSavedQuery);
     }
   });
 
