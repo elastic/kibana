@@ -24,12 +24,12 @@ import { SearchSource } from '../../courier';
 import { QueryFilter } from '../../filter_manager/query_filter';
 import { Adapters } from '../../inspector/types';
 import { PersistedState } from '../../persisted_state';
-import { AggConfigs } from '../agg_configs';
+import { AggConfig } from '../agg_config';
 import { Vis } from '../vis';
 
 export interface RequestHandlerParams {
   searchSource: SearchSource;
-  aggs: AggConfigs;
+  aggs: AggConfig[];
   timeRange?: TimeRange;
   query?: Query;
   filters?: Filter[];

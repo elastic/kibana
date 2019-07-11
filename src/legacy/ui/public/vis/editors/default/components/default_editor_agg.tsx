@@ -28,12 +28,13 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIconTip,
+  Color,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import { AggType } from 'ui/agg_types';
-import { AggConfig, Vis, VisState, AggParams } from 'ui/vis';
+import { AggConfig, VisState, AggParams } from '../../../';
 import { DefaultEditorAggParams } from './default_editor_agg_params';
 
 interface DefaultEditorAggProps {
@@ -41,16 +42,15 @@ interface DefaultEditorAggProps {
   aggIndex: number;
   aggIsTooLow: boolean;
   dragHandleProps: {} | null;
-  groupName: string;
   formIsTouched: boolean;
+  groupName: string;
   isDraggable: boolean;
   isRemovable: boolean;
   responseValueAggs: AggConfig[] | null;
   state: VisState;
-  vis: Vis;
+  onAggErrorChanged: (agg: AggConfig, error?: string) => void;
   onAggParamsChange: (agg: AggParams, paramName: string, value: unknown) => void;
   onAggTypeChange: (agg: AggConfig, aggType: AggType) => void;
-  onAggErrorChanged: (agg: AggConfig, error?: string) => void;
   onToggleEnableAgg: (agg: AggConfig, isEnable: boolean) => void;
   removeAgg: (agg: AggConfig) => void;
   setTouched: (isTouched: boolean) => void;
@@ -62,20 +62,19 @@ function DefaultEditorAgg({
   aggIndex,
   aggIsTooLow,
   dragHandleProps,
-  groupName,
   formIsTouched,
+  groupName,
   isDraggable,
   isRemovable,
   responseValueAggs,
   state,
-  vis,
+  onAggErrorChanged,
   onAggParamsChange,
   onAggTypeChange,
-  setTouched,
-  setValidity,
-  onAggErrorChanged,
   onToggleEnableAgg,
   removeAgg,
+  setTouched,
+  setValidity,
 }: DefaultEditorAggProps) {
   const [isEditorOpen, setIsEditorOpen] = useState(agg.brandNew);
   const [validState, setValidState] = useState(true);
@@ -84,10 +83,26 @@ function DefaultEditorAgg({
 
   const SchemaComponent = agg.schema.editorComponent;
 
+  // Returns a description of the aggregation, for display in the collapsed agg header
+  const getDescription = () => {
+    if (!agg.type || !agg.type.makeLabel) {
+      return '';
+    }
+    return agg.type.makeLabel(agg) || '';
+  };
+
+  const onToggle = (isOpen: boolean) => {
+    setIsEditorOpen(isOpen);
+    if (!isOpen) {
+      setTouched(true);
+    }
+  };
+
   const onSetValidity = (isValid: boolean) => {
     setValidity(isValid);
     setValidState(isValid);
   };
+
   const renderAggButtons = () => {
     const actionIcons = [];
 
@@ -149,7 +164,7 @@ function DefaultEditorAgg({
     return (
       <div>
         {actionIcons.map(icon => {
-          if (icon.type === 'grab') {
+          if (icon.id === 'dragHandle') {
             return (
               <EuiIconTip
                 key={icon.id}
@@ -168,7 +183,7 @@ function DefaultEditorAgg({
             <EuiToolTip key={icon.id} position="bottom" content={icon.tooltip}>
               <EuiButtonIcon
                 iconType={icon.type}
-                color={icon.color}
+                color={icon.color as Color}
                 onClick={icon.onClick}
                 aria-label={icon.ariaLabel}
                 data-test-subj={icon.dataTestSubj}
@@ -180,33 +195,18 @@ function DefaultEditorAgg({
     );
   };
 
-  /**
-   * Describe the aggregation, for display in the collapsed agg header
-   * @return {[type]} [description]
-   */
-  const describe = () => {
-    if (!agg.type || !agg.type.makeLabel) {
-      return '';
-    }
-    return agg.type.makeLabel(agg) || '';
-  };
-
   const buttonContent = (
     <div>
       <EuiFlexGroup gutterSize="s" alignItems="center">
-        <EuiFlexItem grow={false}>
-          <p className="euiAccordionForm__title">{agg.schema.title}</p>
-        </EuiFlexItem>
-
+        <EuiFlexItem grow={false}>{agg.schema.title}</EuiFlexItem>
         <EuiFlexItem>
           {showDescription && (
             <EuiText size="s">
               <p>
-                <EuiTextColor color="subdued">{describe()}</EuiTextColor>
+                <EuiTextColor color="subdued">{getDescription()}</EuiTextColor>
               </p>
             </EuiText>
           )}
-
           {showError && (
             <EuiTextColor
               color="danger"
@@ -227,57 +227,48 @@ function DefaultEditorAgg({
     </div>
   );
 
-  const onToggle = (isOpen: boolean) => {
-    setIsEditorOpen(isOpen);
-    if (!isOpen) {
-      setTouched(true);
-    }
-  };
-
   return (
-    <>
-      <EuiAccordion
-        id={`visEditorAggAccordion${agg.id}`}
-        initialIsOpen={isEditorOpen}
-        buttonContent={buttonContent}
-        className="visEditorSidebar__section visEditorSidebar__collapsible visEditorSidebar__collapsible--marginBottom"
-        paddingSize="s"
-        aria-label={i18n.translate('common.ui.vis.editors.agg.toggleEditorButtonAriaLabel', {
-          defaultMessage: 'Toggle {schema} editor',
-          values: { schema: agg.schema.title },
-        })}
-        data-test-subj="toggleEditor"
-        extraAction={renderAggButtons()}
-        onToggle={onToggle}
-        {...dragHandleProps}
-      >
-        <>
-          <EuiSpacer size="m" />
-          {SchemaComponent && (
-            <SchemaComponent
-              aggParams={agg.params}
-              editorStateParams={state.params}
-              setValue={onAggParamsChange}
-            />
-          )}
-          <DefaultEditorAggParams
-            agg={agg}
-            aggIndex={aggIndex}
-            aggIsTooLow={aggIsTooLow}
-            formIsTouched={formIsTouched}
-            groupName={groupName}
-            indexPattern={vis.indexPattern}
-            responseValueAggs={responseValueAggs}
-            state={state}
-            onAggErrorChanged={onAggErrorChanged}
-            onAggParamsChange={onAggParamsChange}
-            onAggTypeChange={onAggTypeChange}
-            setTouched={setTouched}
-            setValidity={onSetValidity}
+    <EuiAccordion
+      id={`visEditorAggAccordion${agg.id}`}
+      initialIsOpen={isEditorOpen}
+      buttonContent={buttonContent}
+      className="visEditorSidebar__section visEditorSidebar__collapsible visEditorSidebar__collapsible--marginBottom"
+      paddingSize="s"
+      aria-label={i18n.translate('common.ui.vis.editors.agg.toggleEditorButtonAriaLabel', {
+        defaultMessage: 'Toggle {schema} editor',
+        values: { schema: agg.schema.title },
+      })}
+      data-test-subj="toggleEditor"
+      extraAction={renderAggButtons()}
+      onToggle={onToggle}
+      {...dragHandleProps}
+    >
+      <>
+        <EuiSpacer size="m" />
+        {SchemaComponent && (
+          <SchemaComponent
+            aggParams={agg.params}
+            editorStateParams={state.params}
+            setValue={onAggParamsChange}
           />
-        </>
-      </EuiAccordion>
-    </>
+        )}
+        <DefaultEditorAggParams
+          agg={agg}
+          aggIndex={aggIndex}
+          aggIsTooLow={aggIsTooLow}
+          formIsTouched={formIsTouched}
+          groupName={groupName}
+          indexPattern={agg.getIndexPattern()}
+          responseValueAggs={responseValueAggs}
+          state={state}
+          onAggErrorChanged={onAggErrorChanged}
+          onAggParamsChange={onAggParamsChange}
+          onAggTypeChange={onAggTypeChange}
+          setTouched={setTouched}
+          setValidity={onSetValidity}
+        />
+      </>
+    </EuiAccordion>
   );
 }
 

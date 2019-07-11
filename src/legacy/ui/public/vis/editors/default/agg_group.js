@@ -30,12 +30,12 @@ uiModules
       ['state', { watchDepth: 'reference' }],
       ['vis', { watchDepth: 'reference' }],
       ['addSchema', { watchDepth: 'reference' }],
+      ['onAggErrorChanged', { watchDepth: 'reference' }],
+      ['onAggParamsChange', { watchDepth: 'reference' }],
+      ['onAggTypeChange', { watchDepth: 'reference' }],
+      ['onToggleEnableAgg', { watchDepth: 'reference' }],
       ['removeAgg', { watchDepth: 'reference' }],
       ['reorderAggs', { watchDepth: 'reference' }],
-      ['onToggleEnableAgg', { watchDepth: 'reference' }],
-      ['onAggErrorChanged', { watchDepth: 'reference' }],
-      ['onAggTypeChange', { watchDepth: 'reference' }],
-      ['onAggParamsChange', { watchDepth: 'reference' }],
       ['setTouched', { watchDepth: 'reference' }],
       ['setValidity', { watchDepth: 'reference' }],
       'groupName',
@@ -54,24 +54,24 @@ uiModules
             ng-if="setValidity"	
             form-is-touched="formIsTouched"
             group-name="groupName"
+            response-value-aggs="responseValueAggs"
             state="state"
             vis="vis"	
             add-schema="addSchema"	
-            set-touched="setTouched"	
-            set-validity="setValidity"	
-            response-value-aggs="responseValueAggs"
             on-agg-error-changed="onAggErrorChanged"
-            on-agg-type-change="onAggTypeChange"
             on-agg-params-change="onAggParamsChange"
-            remove-agg="removeAgg"
+            on-agg-type-change="onAggTypeChange"
             on-toggle-enable-agg="onToggleEnableAgg"
+            remove-agg="removeAgg"
             reorder-aggs="reorderAggs"
+            set-validity="setValidity"	
+            set-touched="setTouched"	
           ></vis-editor-agg-group-wrapper>`;
       },
       link: function ($scope, $el, attr, ngModelCtrl) {
         $scope.groupName = attr.groupName;
         // The model can become touched either onBlur event or when the form is submitted.
-        // We watch $touched to identify when the form is submitted.
+        // We also watch $touched to identify when the form is submitted.
         $scope.$watch(
           () => {
             return ngModelCtrl.$touched;
@@ -91,14 +91,6 @@ uiModules
             ngModelCtrl.$setTouched();
           } else {
             ngModelCtrl.$setUntouched();
-          }
-        };
-
-        $scope.onAggErrorChanged = (agg, error) => {
-          if (error) {
-            agg.error = error;
-          } else {
-            delete agg.error;
           }
         };
       },

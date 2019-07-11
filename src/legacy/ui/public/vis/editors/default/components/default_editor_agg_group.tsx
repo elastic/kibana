@@ -17,30 +17,36 @@
  * under the License.
  */
 
-import React from 'react';
-import { findIndex, reduce } from 'lodash';
-import { EuiTitle, EuiDragDropContext, EuiDroppable, EuiDraggable } from '@elastic/eui';
+import React, { useEffect, useState } from 'react';
+import {
+  EuiTitle,
+  EuiDragDropContext,
+  EuiDroppable,
+  EuiDraggable,
+  EuiSpacer,
+  EuiPanel,
+} from '@elastic/eui';
 
 import { AggType } from 'ui/agg_types';
-import { Vis, VisState, AggParams } from 'ui/vis';
+import { Vis, VisState, AggParams } from '../../../';
 import { AggConfig } from '../../../agg_config';
-import { AggConfigs } from '../../../agg_configs';
+// @ts-ignore
+import { aggGroupNameMaps } from '../agg_group_names';
 import { DefaultEditorAgg } from './default_editor_agg';
 import { DefaultEditorAggAdd } from './default_editor_agg_add';
-
-import { aggGroupNameMaps } from '../agg_group_names';
+import { isAggRemovable, calcAggIsTooLow } from './default_editor_agg_group_helper';
 import { Schema } from '../schemas';
 
 interface DefaultEditorAggGroupProps {
-  groupName: string;
   formIsTouched: boolean;
+  groupName: string;
   responseValueAggs: AggConfig[] | null;
   state: VisState;
   vis: Vis;
-  addSchema: () => {};
+  addSchema: (schems: Schema) => void;
+  onAggErrorChanged: (agg: AggConfig, error?: string) => void;
   onAggParamsChange: (agg: AggParams, paramName: string, value: unknown) => void;
   onAggTypeChange: (agg: AggConfig, aggType: AggType) => void;
-  onAggErrorChanged: (agg: AggConfig, error?: string) => void;
   onToggleEnableAgg: (agg: AggConfig, isEnable: boolean) => void;
   removeAgg: (agg: AggConfig) => void;
   reorderAggs: (group: AggConfig[]) => void;
@@ -49,23 +55,24 @@ interface DefaultEditorAggGroupProps {
 }
 
 function DefaultEditorAggGroup({
-  groupName,
   formIsTouched,
+  groupName,
   responseValueAggs,
   state,
   vis,
   addSchema,
+  onAggErrorChanged,
   onAggParamsChange,
   onAggTypeChange,
-  setTouched,
-  setValidity,
-  onAggErrorChanged,
   onToggleEnableAgg,
   removeAgg,
   reorderAggs,
+  setTouched,
+  setValidity,
 }: DefaultEditorAggGroupProps) {
   const groupNameLabel = aggGroupNameMaps()[groupName];
-  const group: AggConfigs = state.aggs.bySchemaGroup[groupName] || [];
+  const group: AggConfig[] = state.aggs.bySchemaGroup[groupName] || [];
+
   const schemas = vis.type.schemas[groupName];
   const stats = {
     min: 0,
@@ -82,34 +89,32 @@ function DefaultEditorAggGroup({
     });
   }
 
-  const canRemove = (agg: AggConfig) => {
-    const metricCount = reduce(
-      group,
-      (count, aggregation: AggConfig) => {
-        return aggregation.schema.name === agg.schema.name ? ++count : count;
-      },
-      0
+  const [aggsState, setAggsState] = useState(() =>
+    group.reduce((newState, item) => {
+      newState[item.id] = { touched: false, valid: true };
+      return newState;
+    }, {})
+  );
+
+  useEffect(() => {
+    setAggsState(
+      group.reduce((newState, item) => {
+        newState[item.id] = aggsState[item.id] || { touched: false, valid: true };
+        return newState;
+      }, {})
     );
+  }, [group.length]);
 
-    // make sure the the number of these aggs is above the min
-    return metricCount > agg.schema.min;
-  };
+  const isGroupValid = Object.entries(aggsState).every(([, item]) => item.valid);
+  const isAllAggsTouched = Object.entries(aggsState).every(([, item]) => item.touched);
 
-  const calcAggIsTooLow = (agg: AggConfig, aggIndex: number) => {
-    if (!agg.schema.mustBeFirst) {
-      return false;
-    }
+  useEffect(() => {
+    setTouched(isAllAggsTouched);
+  }, [isAllAggsTouched]);
 
-    const firstDifferentSchema = findIndex(group, (aggr: AggConfig) => {
-      return aggr.schema !== agg.schema;
-    });
-
-    if (firstDifferentSchema === -1) {
-      return false;
-    }
-
-    return aggIndex > firstDifferentSchema;
-  };
+  useEffect(() => {
+    setValidity(isGroupValid);
+  }, [isGroupValid]);
 
   const onDragEnd = ({ source, destination }: any) => {
     if (source && destination) {
@@ -121,55 +126,66 @@ function DefaultEditorAggGroup({
     }
   };
 
+  const setTouchedHandler = (aggId: number, touched: boolean) => {
+    setAggsState({ ...aggsState, [aggId]: { ...aggsState[aggId], touched } });
+  };
+
+  const setValidityHandler = (aggId: number, valid: boolean) => {
+    setAggsState({ ...aggsState, [aggId]: { ...aggsState[aggId], valid } });
+  };
+
   return (
     <EuiDragDropContext onDragEnd={onDragEnd}>
-      <EuiTitle size="xxs">
-        <p>{groupNameLabel}</p>
-      </EuiTitle>
-      <EuiDroppable droppableId={`agg_group_dnd_${groupName}`}>
-        {group.map((agg: AggConfig, index: number) => (
-          <EuiDraggable
-            spacing="s"
-            key={agg.id}
-            index={index}
-            draggableId={`agg_group_dnd_${groupName}_${agg.id}`}
-            customDragHandle={true}
-          >
-            {provided => (
-              <DefaultEditorAgg
-                agg={agg}
-                aggIndex={index}
-                aggIsTooLow={calcAggIsTooLow(agg, index)}
-                groupName={groupName}
-                formIsTouched={formIsTouched}
-                isDraggable={stats.count > 1}
-                isRemovable={canRemove(agg)}
-                data-test-subj={`aggregationEditor${agg.id}`}
-                responseValueAggs={responseValueAggs}
-                state={state}
-                vis={vis}
-                onAggParamsChange={onAggParamsChange}
-                onAggTypeChange={onAggTypeChange}
-                setTouched={setTouched}
-                setValidity={setValidity}
-                onAggErrorChanged={onAggErrorChanged}
-                onToggleEnableAgg={onToggleEnableAgg}
-                removeAgg={removeAgg}
-                dragHandleProps={provided.dragHandleProps}
-              />
-            )}
-          </EuiDraggable>
-        ))}
-      </EuiDroppable>
-      {stats.max > stats.count && (
-        <DefaultEditorAggAdd
-          group={group}
-          groupName={groupName}
-          schemas={schemas}
-          stats={stats}
-          addSchema={addSchema}
-        />
-      )}
+      <EuiPanel paddingSize="s">
+        <EuiTitle size="xs">
+          <h2>{groupNameLabel}</h2>
+        </EuiTitle>
+        <EuiSpacer size="s" />
+        <EuiDroppable droppableId={`agg_group_dnd_${groupName}`}>
+          <>
+            {group.map((agg: AggConfig, index: number) => (
+              <EuiDraggable
+                key={agg.id}
+                index={index}
+                draggableId={`agg_group_dnd_${groupName}_${agg.id}`}
+                customDragHandle={true}
+              >
+                {provided => (
+                  <DefaultEditorAgg
+                    agg={agg}
+                    aggIndex={index}
+                    aggIsTooLow={calcAggIsTooLow(agg, index, group)}
+                    dragHandleProps={provided.dragHandleProps}
+                    formIsTouched={formIsTouched}
+                    groupName={groupName}
+                    isDraggable={stats.count > 1}
+                    isRemovable={isAggRemovable(agg, group)}
+                    data-test-subj={`aggregationEditor${agg.id}`}
+                    responseValueAggs={responseValueAggs}
+                    state={state}
+                    onAggErrorChanged={onAggErrorChanged}
+                    onAggParamsChange={onAggParamsChange}
+                    onAggTypeChange={onAggTypeChange}
+                    onToggleEnableAgg={onToggleEnableAgg}
+                    removeAgg={removeAgg}
+                    setTouched={isTouched => setTouchedHandler(agg.id, isTouched)}
+                    setValidity={isValid => setValidityHandler(agg.id, isValid)}
+                  />
+                )}
+              </EuiDraggable>
+            ))}
+          </>
+        </EuiDroppable>
+        {stats.max > stats.count && (
+          <DefaultEditorAggAdd
+            group={group}
+            groupName={groupName}
+            schemas={schemas}
+            stats={stats}
+            addSchema={addSchema}
+          />
+        )}
+      </EuiPanel>
     </EuiDragDropContext>
   );
 }

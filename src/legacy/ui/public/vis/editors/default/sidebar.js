@@ -96,6 +96,14 @@ uiModules.get('app/visualize').directive('visEditorSidebar', function () {
           move($scope.state.aggs, agg, indexOffset + index);
         });
       };
+
+      $scope.onAggErrorChanged = (agg, error) => {
+        if (error) {
+          agg.error = error;
+        } else {
+          delete agg.error;
+        }
+      };
     },
   };
 });
