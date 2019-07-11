@@ -109,9 +109,7 @@ export function FieldNameIcon({ type }: Props) {
             defaultMessage: 'Source field',
           })}
           className="dscField__icon kuiIcon fa-file-text-o"
-        >
-          <strong aria-hidden="true">t</strong>
-        </span>
+        ></span>
       );
 
     case 'string':

@@ -26,9 +26,9 @@ import { FieldNameIcon } from './field_name_icon';
 const config = chrome.getUiSettingsClient();
 
 interface Props {
-  field: any;
-  fieldName: string;
-  fieldType: string;
+  field?: any;
+  fieldName?: string;
+  fieldType?: string;
 }
 
 export function FieldName(props: Props) {
@@ -40,7 +40,7 @@ export function FieldName(props: Props) {
 
   const className = classNames({
     'dscField--noResults': props.field ? !props.field.rowCount && !props.field.scripted : false,
-    // this is currently not styled
+    // this is currently not styled, should be adapted
     scripted: props.field ? props.field.scripted : false,
   });
   const isShortDots = config.get('shortDots:enable');
