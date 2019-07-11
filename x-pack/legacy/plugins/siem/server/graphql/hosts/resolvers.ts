@@ -7,7 +7,7 @@
 import { getOr } from 'lodash/fp';
 
 import { SourceResolvers } from '../../graphql/types';
-import { AppResolverOf, ChildResolverOf } from '../../lib/framework';
+import { AppResolverOf, ChildResolverOf, RequestBasicOptions } from '../../lib/framework';
 import {
   Hosts,
   HostOverviewRequestOptions,
@@ -33,6 +33,11 @@ type QueryHostFirstLastSeenResolver = ChildResolverOf<
   QuerySourceResolver
 >;
 
+type QueryHostBeatsIngestAnalyticsResolver = ChildResolverOf<
+  AppResolverOf<SourceResolvers.HostBeatsIngestAnalyticsResolver>,
+  QuerySourceResolver
+>;
+
 export interface HostsResolversDeps {
   hosts: Hosts;
 }
@@ -44,6 +49,7 @@ export const createHostsResolvers = (
     Hosts: QueryHostsResolver;
     HostOverview: QueryHostOverviewResolver;
     HostFirstLastSeen: QueryHostFirstLastSeenResolver;
+    HostBeatsIngestAnalytics: QueryHostBeatsIngestAnalyticsResolver;
   };
 } => ({
   Source: {
@@ -73,6 +79,13 @@ export const createHostsResolvers = (
         defaultIndex: args.defaultIndex,
       };
       return libs.hosts.getHostFirstLastSeen(req, options);
+    },
+    async HostBeatsIngestAnalytics(source, args, { req }, info) {
+      const options: RequestBasicOptions = {
+        ...createOptions(source, args, info),
+        defaultIndex: args.defaultIndex,
+      };
+      return libs.hosts.getHostBeatsIngestAnalytics(req, options);
     },
   },
 });

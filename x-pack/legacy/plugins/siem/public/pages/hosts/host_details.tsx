@@ -19,7 +19,12 @@ import { FiltersGlobal } from '../../components/filters_global';
 import { HeaderPage } from '../../components/header_page';
 import { LastEventTime } from '../../components/last_event_time';
 import { getHostsUrl, HostComponentProps } from '../../components/link_to/redirect_to_hosts';
-import { EventsTable, UncommonProcessTable, KpiHostsComponent } from '../../components/page/hosts';
+import {
+  BeatsIngestAnalytics,
+  EventsTable,
+  UncommonProcessTable,
+  KpiHostsComponent,
+} from '../../components/page/hosts';
 import { AuthenticationTable } from '../../components/page/hosts/authentications_table';
 import { HostOverview } from '../../components/page/hosts/host_overview';
 import { manageQuery } from '../../components/page/manage_query';
@@ -44,6 +49,7 @@ import { InputsModelId } from '../../store/inputs/constants';
 import { scoreIntervalToDateTime } from '../../components/ml/score/score_interval_to_datetime';
 import { KpiHostDetailsQuery } from '../../containers/kpi_host_details';
 import { AnomaliesHostTable } from '../../components/ml/tables/anomalies_host_table';
+import { HostBeatsIngestAnalyticsContainer } from '../../containers/hosts/beats_ingest_analytics';
 
 const type = hostsModel.HostsType.details;
 
@@ -52,6 +58,7 @@ const AuthenticationTableManage = manageQuery(AuthenticationTable);
 const UncommonProcessTableManage = manageQuery(UncommonProcessTable);
 const EventsTableManage = manageQuery(EventsTable);
 const KpiHostDetailsManage = manageQuery(KpiHostsComponent);
+const HostEventsByAgentManage = manageQuery(BeatsIngestAnalytics);
 
 interface HostDetailsComponentReduxProps {
   filterQueryExpression: string;
@@ -82,7 +89,30 @@ const HostDetailsComponent = pure<HostDetailsComponentProps>(
 
             <HeaderPage
               subtitle={
-                <LastEventTime indexKey={LastEventIndexKey.hostDetails} hostName={hostName} />
+                <>
+                  <LastEventTime indexKey={LastEventIndexKey.hostDetails} hostName={hostName} />
+                  <GlobalTime>
+                    {({ to, from, setQuery }) => (
+                      <HostBeatsIngestAnalyticsContainer
+                        endDate={to}
+                        filterQuery={getFilterQuery(hostName, filterQueryExpression, indexPattern)}
+                        sourceId="default"
+                        startDate={from}
+                      >
+                        {({ beatsIngestAnalyticsData, loading, id, inspect, refetch }) => (
+                          <HostEventsByAgentManage
+                            id={id}
+                            inspect={inspect}
+                            refetch={refetch}
+                            setQuery={setQuery}
+                            loading={loading}
+                            data={beatsIngestAnalyticsData}
+                          />
+                        )}
+                      </HostBeatsIngestAnalyticsContainer>
+                    )}
+                  </GlobalTime>
+                </>
               }
               title={hostName}
             />

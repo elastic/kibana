@@ -9,3 +9,4 @@ export * from './events_table';
 export * from './hosts_table';
 export * from './uncommon_process_table';
 export * from './kpi_hosts';
+export * from './beats_ingest_analytics';

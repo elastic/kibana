@@ -93,7 +93,7 @@ export class TabNavigation extends React.PureComponent<TabNavigationProps, TabNa
 
   private renderTabs = () =>
     navTabs.map((tab: NavTab) => (
-      <TabContainer className="euiTab">
+      <TabContainer className="euiTab" key={`navigation-link-${tab.id}`}>
         <EuiLink data-test-subj={`navigation-link-${tab.id}`} href={tab.href + this.props.search}>
           <EuiTab
             data-href={tab.href}

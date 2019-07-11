@@ -20,6 +20,7 @@ import {
   HostsTable,
   KpiHostsComponent,
   UncommonProcessTable,
+  BeatsIngestAnalytics,
 } from '../../components/page/hosts';
 import { AuthenticationTable } from '../../components/page/hosts/authentications_table';
 import { manageQuery } from '../../components/page/manage_query';
@@ -41,12 +42,14 @@ import { AnomaliesHostTable } from '../../components/ml/tables/anomalies_host_ta
 import { setAbsoluteRangeDatePicker as dispatchSetAbsoluteRangeDatePicker } from '../../store/inputs/actions';
 import { InputsModelId } from '../../store/inputs/constants';
 import { scoreIntervalToDateTime } from '../../components/ml/score/score_interval_to_datetime';
+import { HostBeatsIngestAnalyticsContainer } from '../../containers/hosts/beats_ingest_analytics';
 
 const AuthenticationTableManage = manageQuery(AuthenticationTable);
 const HostsTableManage = manageQuery(HostsTable);
 const EventsTableManage = manageQuery(EventsTable);
 const UncommonProcessTableManage = manageQuery(UncommonProcessTable);
 const KpiHostsComponentManage = manageQuery(KpiHostsComponent);
+const HostEventsByAgentManage = manageQuery(BeatsIngestAnalytics);
 
 interface HostsComponentReduxProps {
   filterQuery: string;
@@ -69,7 +72,32 @@ const HostsComponent = pure<HostsComponentProps>(({ filterQuery, setAbsoluteRang
           </FiltersGlobal>
 
           <HeaderPage
-            subtitle={<LastEventTime indexKey={LastEventIndexKey.hosts} />}
+            subtitle={
+              <>
+                <LastEventTime indexKey={LastEventIndexKey.hosts} />
+                <GlobalTime>
+                  {({ to, from, setQuery }) => (
+                    <HostBeatsIngestAnalyticsContainer
+                      endDate={to}
+                      filterQuery={filterQuery}
+                      sourceId="default"
+                      startDate={from}
+                    >
+                      {({ beatsIngestAnalyticsData, loading, id, inspect, refetch }) => (
+                        <HostEventsByAgentManage
+                          id={id}
+                          inspect={inspect}
+                          refetch={refetch}
+                          setQuery={setQuery}
+                          loading={loading}
+                          data={beatsIngestAnalyticsData}
+                        />
+                      )}
+                    </HostBeatsIngestAnalyticsContainer>
+                  )}
+                </GlobalTime>
+              </>
+            }
             title={i18n.PAGE_TITLE}
           />
 

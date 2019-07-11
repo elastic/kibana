@@ -12,8 +12,9 @@ import {
   HostsSortField,
   SourceConfiguration,
   TimerangeInput,
+  BeatsIngestAnalyticsData,
 } from '../../graphql/types';
-import { FrameworkRequest, RequestOptions } from '../framework';
+import { FrameworkRequest, RequestOptions, RequestBasicOptions } from '../framework';
 import { Hit, Hits, SearchHit } from '../types';
 
 export interface HostsAdapter {
@@ -23,6 +24,10 @@ export interface HostsAdapter {
     req: FrameworkRequest,
     options: HostLastFirstSeenRequestOptions
   ): Promise<FirstLastSeenHost>;
+  getHostBeatsIngestAnalytics(
+    req: FrameworkRequest,
+    options: RequestBasicOptions
+  ): Promise<BeatsIngestAnalyticsData>;
 }
 
 type StringOrNumber = string | number;

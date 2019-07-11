@@ -151,6 +151,8 @@ export interface Source {
 
   HostFirstLastSeen: FirstLastSeenHost;
 
+  HostBeatsIngestAnalytics: BeatsIngestAnalyticsData;
+
   IpOverview?: IpOverviewData | null;
 
   Domains: DomainsData;
@@ -940,6 +942,16 @@ export interface FirstLastSeenHost {
   firstSeen?: Date | null;
 
   lastSeen?: Date | null;
+}
+
+export interface BeatsIngestAnalyticsData {
+  inspect?: Inspect | null;
+
+  auditbeat?: number | null;
+
+  winlogbeat?: number | null;
+
+  filebeat?: number | null;
 }
 
 export interface IpOverviewData {
@@ -1859,6 +1871,15 @@ export interface HostFirstLastSeenSourceArgs {
 
   defaultIndex: string[];
 }
+export interface HostBeatsIngestAnalyticsSourceArgs {
+  id?: string | null;
+
+  timerange: TimerangeInput;
+
+  defaultIndex: string[];
+
+  filterQuery?: string | null;
+}
 export interface IpOverviewSourceArgs {
   id?: string | null;
 
@@ -2453,6 +2474,12 @@ export namespace SourceResolvers {
 
     HostFirstLastSeen?: HostFirstLastSeenResolver<FirstLastSeenHost, TypeParent, Context>;
 
+    HostBeatsIngestAnalytics?: HostBeatsIngestAnalyticsResolver<
+      BeatsIngestAnalyticsData,
+      TypeParent,
+      Context
+    >;
+
     IpOverview?: IpOverviewResolver<IpOverviewData | null, TypeParent, Context>;
 
     Domains?: DomainsResolver<DomainsData, TypeParent, Context>;
@@ -2623,6 +2650,21 @@ export namespace SourceResolvers {
     hostName: string;
 
     defaultIndex: string[];
+  }
+
+  export type HostBeatsIngestAnalyticsResolver<
+    R = BeatsIngestAnalyticsData,
+    Parent = Source,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context, HostBeatsIngestAnalyticsArgs>;
+  export interface HostBeatsIngestAnalyticsArgs {
+    id?: string | null;
+
+    timerange: TimerangeInput;
+
+    defaultIndex: string[];
+
+    filterQuery?: string | null;
   }
 
   export type IpOverviewResolver<
@@ -5391,6 +5433,39 @@ export namespace FirstLastSeenHostResolvers {
   export type LastSeenResolver<
     R = Date | null,
     Parent = FirstLastSeenHost,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+}
+
+export namespace BeatsIngestAnalyticsDataResolvers {
+  export interface Resolvers<Context = SiemContext, TypeParent = BeatsIngestAnalyticsData> {
+    inspect?: InspectResolver<Inspect | null, TypeParent, Context>;
+
+    auditbeat?: AuditbeatResolver<number | null, TypeParent, Context>;
+
+    winlogbeat?: WinlogbeatResolver<number | null, TypeParent, Context>;
+
+    filebeat?: FilebeatResolver<number | null, TypeParent, Context>;
+  }
+
+  export type InspectResolver<
+    R = Inspect | null,
+    Parent = BeatsIngestAnalyticsData,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type AuditbeatResolver<
+    R = number | null,
+    Parent = BeatsIngestAnalyticsData,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type WinlogbeatResolver<
+    R = number | null,
+    Parent = BeatsIngestAnalyticsData,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type FilebeatResolver<
+    R = number | null,
+    Parent = BeatsIngestAnalyticsData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
 }

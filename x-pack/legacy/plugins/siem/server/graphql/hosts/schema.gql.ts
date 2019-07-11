@@ -67,6 +67,13 @@ export const hostsSchema = gql`
     lastSeen: Date
   }
 
+  type BeatsIngestAnalyticsData {
+    inspect: Inspect
+    auditbeat: Float
+    winlogbeat: Float
+    filebeat: Float
+  }
+
   enum HostsFields {
     hostName
     lastSeen
@@ -94,5 +101,11 @@ export const hostsSchema = gql`
       defaultIndex: [String!]!
     ): HostItem!
     HostFirstLastSeen(id: String, hostName: String!, defaultIndex: [String!]!): FirstLastSeenHost!
+    HostBeatsIngestAnalytics(
+      id: String
+      timerange: TimerangeInput!
+      defaultIndex: [String!]!
+      filterQuery: String
+    ): BeatsIngestAnalyticsData!
   }
 `;

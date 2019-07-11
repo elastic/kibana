@@ -122,6 +122,8 @@ export interface Source {
 
   HostFirstLastSeen: FirstLastSeenHost;
 
+  HostBeatsIngestAnalytics: BeatsIngestAnalyticsData;
+
   IpOverview?: IpOverviewData | null;
 
   Domains: DomainsData;
@@ -911,6 +913,16 @@ export interface FirstLastSeenHost {
   firstSeen?: Date | null;
 
   lastSeen?: Date | null;
+}
+
+export interface BeatsIngestAnalyticsData {
+  inspect?: Inspect | null;
+
+  auditbeat?: number | null;
+
+  winlogbeat?: number | null;
+
+  filebeat?: number | null;
 }
 
 export interface IpOverviewData {
@@ -1830,6 +1842,15 @@ export interface HostFirstLastSeenSourceArgs {
 
   defaultIndex: string[];
 }
+export interface HostBeatsIngestAnalyticsSourceArgs {
+  id?: string | null;
+
+  timerange: TimerangeInput;
+
+  defaultIndex: string[];
+
+  filterQuery?: string | null;
+}
 export interface IpOverviewSourceArgs {
   id?: string | null;
 
@@ -2583,6 +2604,50 @@ export namespace GetLastEventTimeQuery {
     __typename?: 'LastEventTimeData';
 
     lastSeen?: Date | null;
+  };
+}
+
+export namespace HostBeatsIngestAnalyticsQuery {
+  export type Variables = {
+    sourceId: string;
+    timerange: TimerangeInput;
+    filterQuery?: string | null;
+    defaultIndex: string[];
+    inspect: boolean;
+  };
+
+  export type Query = {
+    __typename?: 'Query';
+
+    source: Source;
+  };
+
+  export type Source = {
+    __typename?: 'Source';
+
+    id: string;
+
+    HostBeatsIngestAnalytics: HostBeatsIngestAnalytics;
+  };
+
+  export type HostBeatsIngestAnalytics = {
+    __typename?: 'BeatsIngestAnalyticsData';
+
+    auditbeat?: number | null;
+
+    winlogbeat?: number | null;
+
+    filebeat?: number | null;
+
+    inspect?: Inspect | null;
+  };
+
+  export type Inspect = {
+    __typename?: 'Inspect';
+
+    dsl: string[];
+
+    response: string[];
   };
 }
 

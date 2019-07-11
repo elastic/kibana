@@ -4,8 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { FirstLastSeenHost, HostItem, HostsData } from '../../graphql/types';
-import { FrameworkRequest } from '../framework';
+import {
+  FirstLastSeenHost,
+  HostItem,
+  HostsData,
+  BeatsIngestAnalyticsData,
+} from '../../graphql/types';
+import { FrameworkRequest, RequestBasicOptions } from '../framework';
 
 import {
   HostOverviewRequestOptions,
@@ -36,5 +41,12 @@ export class Hosts {
     options: HostLastFirstSeenRequestOptions
   ): Promise<FirstLastSeenHost> {
     return await this.adapter.getHostFirstLastSeen(req, options);
+  }
+
+  public async getHostBeatsIngestAnalytics(
+    req: FrameworkRequest,
+    options: RequestBasicOptions
+  ): Promise<BeatsIngestAnalyticsData> {
+    return await this.adapter.getHostBeatsIngestAnalytics(req, options);
   }
 }
