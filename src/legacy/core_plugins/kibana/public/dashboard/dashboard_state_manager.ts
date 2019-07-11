@@ -421,7 +421,7 @@ export class DashboardStateManager {
     return this.appState.savedQuery;
   }
 
-  public setSavedQueryId(id: string) {
+  public setSavedQueryId(id?: string) {
     this.appState.savedQuery = id;
     this.saveState();
   }
