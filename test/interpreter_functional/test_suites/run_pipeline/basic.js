@@ -82,7 +82,7 @@ export default function ({ getService, updateBaselines }) {
 
     // if we want to do multiple different tests using the same data, or reusing a part of expression its
     // possible to retrieve the intermediate result and reuse it in later expressions
-    describe.skip('reusing partial results', () => {
+    describe('reusing partial results', () => {
       it ('does some screenshot comparisons', async () => {
         const expression = `kibana | kibana_context | esaggs index='logstash-*' aggConfigs='[
           {"id":"1","enabled":true,"type":"count","schema":"metric","params":{}},
@@ -94,16 +94,17 @@ export default function ({ getService, updateBaselines }) {
 
         // we reuse that response to render 3 different charts and compare screenshots with baselines
         const tagCloudExpr =
-          `tagcloud metric={visdimension 1 format="number"} bucket={visdimension 0}'`;
+          `tagcloud metric={visdimension 1 format="number"} bucket={visdimension 0}`;
         await expectExpression('partial_test_1', tagCloudExpr, context).toMatchScreenshot();
 
         const metricExpr =
-          `metricVis metric={visdimension 1 format="number"} bucket={visdimension 0}'`;
+          `metricVis metric={visdimension 1 format="number"} bucket={visdimension 0}`;
         await expectExpression('partial_test_2', metricExpr, context).toMatchScreenshot();
 
-        const regionMapExpr =
-          `regionmap visConfig='{"metric":{"accessor":1,"format":{"id":"number"}},"bucket":{"accessor":0}}'`;
-        await expectExpression('partial_test_3', regionMapExpr, context).toMatchScreenshot();
+        // todo: regionmap doesn't correctly signal when its done rendering (base layer might not yet be loaded)
+        // const regionMapExpr =
+        //   `regionmap visConfig='{"metric":{"accessor":1,"format":{"id":"number"}},"bucket":{"accessor":0}}'`;
+        // await expectExpression('partial_test_3', regionMapExpr, context).toMatchScreenshot();
       });
     });
   });
