@@ -43,7 +43,7 @@ export const SnapshotList: React.FunctionComponent<RouteComponentProps<MatchPara
     error,
     loading,
     data: { snapshots = [], repositories = [], errors = {} },
-    request: reload,
+    sendRequest: reload,
   } = useLoadSnapshots();
 
   const openSnapshotDetailsUrl = (

@@ -38,7 +38,7 @@ export interface UseRequest extends SendRequest {
 }
 
 export function createRequestService(httpClient: any) {
-  const sendRequest = async ({
+  const _sendRequest = async ({
     path,
     method,
     body,
@@ -76,7 +76,7 @@ export function createRequestService(httpClient: any) {
     // Tied to every render and bound to each request.
     let isOutdatedRequest = false;
 
-    const request = async () => {
+    const sendRequest = async () => {
       // We don't clear error or data, so it's up to the consumer to decide whether to display the
       // "old" error/data, initialData, or loading state when a new request is in-flight.
       setLoading(true);
@@ -87,7 +87,7 @@ export function createRequestService(httpClient: any) {
         body,
       };
 
-      const response = await sendRequest(requestBody);
+      const response = await _sendRequest(requestBody);
 
       if (onSuccess) {
         onSuccess(response);
@@ -110,7 +110,7 @@ export function createRequestService(httpClient: any) {
 
     useEffect(() => {
       // Perform request
-      request();
+      sendRequest();
 
       // Clear current interval
       if (requestIntervalId.current) {
@@ -119,7 +119,7 @@ export function createRequestService(httpClient: any) {
 
       // Set new interval
       if (currentInterval) {
-        requestIntervalId.current = setInterval(request, currentInterval);
+        requestIntervalId.current = setInterval(sendRequest, currentInterval);
       }
 
       // Clean up intervals and inflight requests and corresponding state changes
@@ -136,7 +136,7 @@ export function createRequestService(httpClient: any) {
       error,
       data,
       initialData,
-      request,
+      sendRequest, // Gives the user the ability to manually request data
       isInitialRequest,
       changeInterval: (newInterval: UseRequest['interval']) => {
         // The consumer can set this to undefined to stop polling, or to a number to begin polling.
@@ -144,14 +144,14 @@ export function createRequestService(httpClient: any) {
 
         // If we're beginning to poll, then we need to schedule the first request.
         if (!requestIntervalId.current && newInterval) {
-          requestIntervalId.current = setInterval(request, newInterval);
+          requestIntervalId.current = setInterval(sendRequest, newInterval);
         }
       },
     };
   };
 
   return {
-    sendRequest,
+    sendRequest: _sendRequest,
     useRequest,
   };
 }

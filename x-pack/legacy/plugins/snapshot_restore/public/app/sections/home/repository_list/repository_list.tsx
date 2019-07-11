@@ -41,7 +41,7 @@ export const RepositoryList: React.FunctionComponent<RouteComponentProps<MatchPa
       repositories: undefined,
       managedRepository: undefined,
     },
-    request: reload,
+    sendRequest: reload,
   } = useLoadRepositories();
 
   const openRepositoryDetailsUrl = (newRepositoryName: Repository['name']): string => {
