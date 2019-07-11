@@ -476,6 +476,10 @@ function VisEditor(
     $scope.savedQuery = savedQuery;
   };
 
+  $scope.onClearSavedQuery = () => {
+    $scope.savedQuery = undefined;
+  };
+
   const updateStateFromSavedQuery = (savedQuery) => {
     $state.query = savedQuery.attributes.query;
     queryFilter.setFilters(savedQuery.attributes.filters || []);
@@ -494,12 +498,22 @@ function VisEditor(
   };
 
   $scope.$watch('savedQuery', (newSavedQuery, oldSavedQuery) => {
-    if (!newSavedQuery) return;
-    $state.savedQuery = newSavedQuery.id;
-    $state.save();
+    if (!newSavedQuery) {
+      $state.savedQuery = undefined;
+      $state.query = {
+        query: '',
+        language: localStorage.get('kibana.userQueryLanguage') || config.get('search:queryLanguage')
+      };
+      queryFilter.setFilters([]);
+      $state.save();
+      $scope.fetch();
+    } else {
+      $state.savedQuery = newSavedQuery.id;
+      $state.save();
 
-    if (newSavedQuery.id === (oldSavedQuery && oldSavedQuery.id)) {
-      updateStateFromSavedQuery(newSavedQuery);
+      if (newSavedQuery.id === (oldSavedQuery && oldSavedQuery.id)) {
+        updateStateFromSavedQuery(newSavedQuery);
+      }
     }
   });
 
