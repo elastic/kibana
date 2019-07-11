@@ -47,8 +47,8 @@ export interface Plugin<
 export type PluginInitializer<
   TSetup,
   TStart,
-  TPluginsSetup extends Record<string, unknown> = {},
-  TPluginsStart extends Record<string, unknown> = {}
+  TPluginsSetup extends Record<string, any> = {},
+  TPluginsStart extends Record<string, any> = {}
 > = (core: PluginInitializerContext) => Plugin<TSetup, TStart, TPluginsSetup, TPluginsStart>;
 
 /**
@@ -60,8 +60,8 @@ export type PluginInitializer<
 export class PluginWrapper<
   TSetup = unknown,
   TStart = unknown,
-  TPluginsSetup extends Record<PluginName, unknown> = Record<PluginName, unknown>,
-  TPluginsStart extends Record<PluginName, unknown> = Record<PluginName, unknown>
+  TPluginsSetup extends Record<PluginName, any> = Record<PluginName, unknown>,
+  TPluginsStart extends Record<PluginName, any> = Record<PluginName, unknown>
 > {
   public readonly name: DiscoveredPlugin['id'];
   public readonly configPath: DiscoveredPlugin['configPath'];

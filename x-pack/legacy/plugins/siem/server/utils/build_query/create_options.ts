@@ -7,8 +7,14 @@
 import { GraphQLResolveInfo } from 'graphql';
 import { getOr } from 'lodash/fp';
 
-import { PaginationInput, SortField, Source, TimerangeInput } from '../../graphql/types';
-import { RequestOptions } from '../../lib/framework';
+import {
+  PaginationInput,
+  PaginationInputPaginated,
+  SortField,
+  Source,
+  TimerangeInput,
+} from '../../graphql/types';
+import { RequestOptions, RequestOptionsPaginated } from '../../lib/framework';
 import { parseFilterQuery } from '../serialized_query';
 
 import { getFields } from '.';
@@ -27,6 +33,13 @@ export interface Args {
   sortField?: SortField | null;
   defaultIndex: string[];
 }
+export interface ArgsPaginated {
+  timerange?: TimerangeInput | null;
+  pagination?: PaginationInputPaginated | null;
+  filterQuery?: string | null;
+  sortField?: SortField | null;
+  defaultIndex: string[];
+}
 
 export const createOptions = (
   source: Configuration,
@@ -34,6 +47,26 @@ export const createOptions = (
   info: FieldNodes,
   fieldReplacement: string = 'edges.node.'
 ): RequestOptions => {
+  const fields = getFields(getOr([], 'fieldNodes[0]', info));
+  return {
+    defaultIndex: args.defaultIndex,
+    sourceConfiguration: source.configuration,
+    timerange: args.timerange!,
+    pagination: args.pagination!,
+    sortField: args.sortField!,
+    filterQuery: parseFilterQuery(args.filterQuery || ''),
+    fields: fields
+      .filter(field => !field.includes('__typename'))
+      .map(field => field.replace(fieldReplacement, '')),
+  };
+};
+
+export const createOptionsPaginated = (
+  source: Configuration,
+  args: ArgsPaginated,
+  info: FieldNodes,
+  fieldReplacement: string = 'edges.node.'
+): RequestOptionsPaginated => {
   const fields = getFields(getOr([], 'fieldNodes[0]', info));
   return {
     defaultIndex: args.defaultIndex,

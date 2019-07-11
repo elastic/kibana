@@ -142,7 +142,6 @@ export function jobsProvider(callWithRequest) {
 
   async function jobsWithTimerange() {
     const fullJobsList = await createFullJobsList();
-    const latestBucketTimestampsByJob = await getLatestBucketTimestampByJob();
     const jobsMap = {};
 
     const jobs = fullJobsList.map((job) => {
@@ -150,9 +149,12 @@ export function jobsProvider(callWithRequest) {
       const hasDatafeed = (typeof job.datafeed_config === 'object' && Object.keys(job.datafeed_config).length > 0);
       const timeRange = {};
 
-      if (job.data_counts !== undefined) {
-        timeRange.to = getLatestDataOrBucketTimestamp(job.data_counts, latestBucketTimestampsByJob[job.job_id]);
-        timeRange.from = job.data_counts.earliest_record_timestamp;
+      const dataCounts = job.data_counts;
+      if (dataCounts !== undefined) {
+        timeRange.to = getLatestDataOrBucketTimestamp(
+          dataCounts.latest_record_timestamp,
+          dataCounts.latest_bucket_timestamp);
+        timeRange.from = dataCounts.earliest_record_timestamp;
       }
 
       const tempJob = {
