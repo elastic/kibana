@@ -45,6 +45,7 @@ describe('MlPopover', () => {
       const wrapper = shallow(
         <JobSwitch
           jobName="job.title"
+          jobState="closed"
           datafeedState="stopped"
           latestTimestampMs={0}
           jobDescription="job.description"
@@ -59,6 +60,7 @@ describe('MlPopover', () => {
         <JobSwitch
           jobName="job.title"
           jobDescription="job.description"
+          jobState="opened"
           datafeedState="started"
           latestTimestampMs={0}
           onJobStateChange={onJobStateChangeMock}

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useContext, useEffect, useReducer, useState } from 'react';
 
 import styled from 'styled-components';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -98,17 +98,68 @@ export const searchFilter = (jobs: Job[], filterQuery?: string): Job[] =>
       : job.id.includes(filterQuery) || job.description.includes(filterQuery)
   );
 
+interface State {
+  isLoading: boolean;
+  jobs: Job[];
+  refreshToggle: boolean;
+}
+
+type Action =
+  | { type: 'refresh' }
+  | { type: 'loading' }
+  | { type: 'success'; results: Job[] }
+  | { type: 'failure' };
+
+function mlPopoverReducer(state: State, action: Action): State {
+  switch (action.type) {
+    case 'refresh': {
+      return {
+        ...state,
+        refreshToggle: !state.refreshToggle,
+      };
+    }
+    case 'loading': {
+      return {
+        ...state,
+        isLoading: true,
+      };
+    }
+    case 'success': {
+      return {
+        ...state,
+        isLoading: false,
+        jobs: action.results,
+      };
+    }
+    case 'failure': {
+      return {
+        ...state,
+        isLoading: false,
+        jobs: [],
+      };
+    }
+    default:
+      return state;
+  }
+}
+
+const initialState: State = {
+  isLoading: false,
+  jobs: [],
+  refreshToggle: true,
+};
+
 export const MlPopover = React.memo(() => {
+  const [{ refreshToggle }, dispatch] = useReducer(mlPopoverReducer, initialState);
+
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [showAllJobs, setShowAllJobs] = useState(false);
+  const [isLoadingJobSummaryData, jobSummaryData] = useJobSummaryData([], refreshToggle);
+
   const [isCreatingJobs, setIsCreatingJobs] = useState(false);
-  const [refetchSummaryData, setRefetchSummaryData] = useState(false);
+
   const [filterQuery, setFilterQuery] = useState('');
 
-  const [isLoadingJobSummaryData, siemJobSummaryData] = useJobSummaryData(
-    [],
-    isPopoverOpen ? !refetchSummaryData : refetchSummaryData
-  );
   const [isLoadingConfiguredIndexPatterns, configuredIndexPattern] = useIndexPatterns();
   const config = useContext(KibanaConfigContext);
   const capabilities = useContext(MlCapabilitiesContext);
@@ -118,7 +169,7 @@ export const MlPopover = React.memo(() => {
   const embeddedJobIds = getJobsToInstall(configTemplates);
 
   // Jobs currently installed retrieved via ml jobs_summary api for 'siem' group
-  const siemJobs = siemJobSummaryData.map(job => job.id);
+  const siemJobs = jobSummaryData.map(job => job.id);
   const installedJobIds = embeddedJobIds.filter(job => siemJobs.includes(job));
 
   // Config templates that still need to be installed and have a defaultIndexPattern that is configured
@@ -149,19 +200,14 @@ export const MlPopover = React.memo(() => {
           })
         );
         setIsCreatingJobs(false);
-        setRefetchSummaryData(!refetchSummaryData);
+        dispatch({ type: 'refresh' });
       };
       setupJobs();
     }
   }, [configTemplatesToInstall.length]);
 
   // Filter installed job to show all 'siem' group jobs or just embedded
-  const jobsToDisplay = getJobsToDisplay(
-    siemJobSummaryData,
-    embeddedJobIds,
-    showAllJobs,
-    filterQuery
-  );
+  const jobsToDisplay = getJobsToDisplay(jobSummaryData, embeddedJobIds, showAllJobs, filterQuery);
   if (!hasMlAdminPermissions(capabilities)) {
     return (
       <EuiPopover
@@ -259,9 +305,10 @@ export const MlPopover = React.memo(() => {
               (dp): JobSwitchProps => ({
                 jobName: dp.id,
                 jobDescription: dp.description,
+                jobState: dp.jobState,
                 datafeedState: dp.datafeedState,
                 latestTimestampMs: dp.latestTimestampMs || 0,
-                onJobStateChange: () => setRefetchSummaryData(!refetchSummaryData),
+                onJobStateChange: () => dispatch({ type: 'refresh' }),
               })
             )}
             isLoading={isCreatingJobs || isLoadingJobSummaryData}

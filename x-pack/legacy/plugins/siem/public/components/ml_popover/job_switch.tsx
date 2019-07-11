@@ -14,6 +14,7 @@ import { startDatafeeds, stopDatafeeds } from './api';
 export interface JobSwitchProps {
   jobName: string;
   jobDescription: string;
+  jobState: string;
   datafeedState: string;
   latestTimestampMs: number;
   onJobStateChange: Function;
@@ -25,31 +26,25 @@ const maxStartTime = moment
   .subtract(14, 'days')
   .valueOf();
 
-// Based on ML Datefeed States from x-pack/legacy/plugins/ml/common/constants/states.js
-const getIsCheckedFromDatafeedState = (datafeedState: string): boolean => {
-  switch (datafeedState) {
-    case 'started':
-      return true;
-    case 'stopped':
-      return false;
-    default:
-      return false;
-  }
+// Based on ML Job/Datafeed States from x-pack/legacy/plugins/ml/common/constants/states.js
+const enabledStates = ['started', 'opened'];
+const loadingStates = ['starting', 'stopping', 'opening', 'closing'];
+const failureStates = ['deleted', 'failed'];
+
+const isChecked = (jobState: string, datafeedState: string): boolean => {
+  return enabledStates.includes(jobState) && enabledStates.includes(datafeedState);
 };
 
-const getIsProcessingFromDatafeedState = (datafeedState: string): boolean => {
-  switch (datafeedState) {
-    case 'starting':
-      return true;
-    case 'stopping':
-      return true;
-    default:
-      return false;
-  }
+const isJobLoading = (jobState: string, datafeedState: string): boolean => {
+  return loadingStates.includes(jobState) || loadingStates.includes(datafeedState);
+};
+
+const isFailure = (jobState: string, datafeedState: string): boolean => {
+  return failureStates.includes(jobState) || failureStates.includes(datafeedState);
 };
 
 export const JobSwitch = React.memo<JobSwitchProps>(
-  ({ jobName, datafeedState, latestTimestampMs, onJobStateChange }) => {
+  ({ jobName, jobState, datafeedState, latestTimestampMs, onJobStateChange }) => {
     const [isLoading, setIsLoading] = useState(false);
     const config = useContext(KibanaConfigContext);
     const headers = { 'kbn-version': config.kbnVersion };
@@ -68,13 +63,13 @@ export const JobSwitch = React.memo<JobSwitchProps>(
     return (
       <EuiFlexGroup justifyContent="spaceAround">
         <EuiFlexItem grow={false}>
-          {isLoading || getIsProcessingFromDatafeedState(datafeedState) ? (
+          {isLoading || isJobLoading(jobState, datafeedState) ? (
             <EuiLoadingSpinner size="m" />
           ) : (
             <EuiSwitch
               data-test-subj="job-detail-switch"
-              disabled={isLoading}
-              checked={getIsCheckedFromDatafeedState(datafeedState)}
+              disabled={isFailure(jobState, datafeedState)}
+              checked={isChecked(jobState, datafeedState)}
               onChange={e => {
                 setIsLoading(true);
                 startDatafeed(e.target.checked);

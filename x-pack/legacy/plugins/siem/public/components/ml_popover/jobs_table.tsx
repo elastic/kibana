@@ -42,6 +42,7 @@ const getJobsTableColumns = () => [
     name: i18n.COLUMN_RUN_JOB,
     render: ({
       jobName,
+      jobState,
       jobDescription,
       datafeedState,
       latestTimestampMs,
@@ -49,6 +50,7 @@ const getJobsTableColumns = () => [
     }: JobSwitchProps) => (
       <JobSwitch
         jobName={jobName}
+        jobState={jobState}
         jobDescription={jobDescription}
         datafeedState={datafeedState}
         latestTimestampMs={latestTimestampMs}
