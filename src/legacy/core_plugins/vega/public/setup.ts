@@ -22,7 +22,7 @@ import { visualizations, VisualizationsSetup } from '../../visualizations/public
 import { DataSetup } from '../../data/public';
 import { LegacyDependenciesPlugin } from './shim';
 
-/** @public */
+/** @internal */
 export interface VegaPluginSetupDependencies {
   // TODO: Remove `any` as functionsRegistry will be added to the DataSetup.
   data: DataSetup | any;
@@ -30,7 +30,7 @@ export interface VegaPluginSetupDependencies {
   __LEGACY: LegacyDependenciesPlugin;
 }
 
-export const plugins: VegaPluginSetupDependencies = {
+export const plugins: Readonly<VegaPluginSetupDependencies> = {
   data: {
     expressions: {
       registerFunction: (fn: any) => functionsRegistry.register(fn),

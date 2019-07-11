@@ -21,6 +21,12 @@ import chrome from 'ui/chrome';
 import { CoreStart, Plugin } from 'kibana/public';
 import { initVegaLegacyModule } from './vega_legacy_module';
 
+/** @internal */
+export interface LegacyDependenciesPluginSetup {
+  es: any;
+  serviceSettings: any;
+}
+
 export class LegacyDependenciesPlugin implements Plugin<any, any> {
   public async setup() {
     // Init kibana/vega AngularJS module.
@@ -37,7 +43,7 @@ export class LegacyDependenciesPlugin implements Plugin<any, any> {
       //  will probably end up being exposed from the future vis_type_maps plugin,
       //  which would register both the tile_map and the region_map vis plugins.
       serviceSettings: $injector.get('serviceSettings'),
-    };
+    } as LegacyDependenciesPluginSetup;
   }
 
   public start(core: CoreStart) {

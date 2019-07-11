@@ -16,16 +16,16 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from 'kibana/public';
+import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '../../../../core/public';
+import { VegaPluginSetupDependencies } from './setup';
+import { VegaVisualizationDependencies } from './shim';
 
 // @ts-ignore
 import { createVegaFn } from './vega_fn';
 // @ts-ignore
 import { createVegaTypeDefinition } from './vega_type';
 
-import { VegaPluginSetupDependencies } from './setup';
-import { VegaVisualizationDependencies } from './shim';
-
+/** @internal */
 export class VegaPlugin implements Plugin<any, any> {
   initializerContext: PluginInitializerContext;
 
@@ -37,7 +37,7 @@ export class VegaPlugin implements Plugin<any, any> {
     core: CoreSetup,
     { data, visualizations, __LEGACY }: VegaPluginSetupDependencies
   ) {
-    const visualizationDependencies: Required<VegaVisualizationDependencies> = {
+    const visualizationDependencies: Readonly<VegaVisualizationDependencies> = {
       uiSettings: core.uiSettings,
       ...(await __LEGACY.setup()),
     };

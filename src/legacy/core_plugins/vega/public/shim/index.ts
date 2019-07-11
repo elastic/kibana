@@ -18,12 +18,11 @@
  */
 
 import { UiSettingsClientContract } from 'kibana/public';
+import { LegacyDependenciesPluginSetup } from './legacy_dependencies_plugin';
 
-export * from './legacy_dependencies_plugin';
-
-// @public
-export interface VegaVisualizationDependencies {
-  es: any;
-  serviceSettings: any;
+/** @internal */
+export interface VegaVisualizationDependencies extends LegacyDependenciesPluginSetup {
   uiSettings: UiSettingsClientContract;
 }
+
+export * from './legacy_dependencies_plugin';

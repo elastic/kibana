@@ -34,10 +34,11 @@ import { VegaHelpMenu } from '../help_menus/vega_help_menu';
 // @ts-ignore
 import { VegaActionsMenu } from '../help_menus/vega_action_menu';
 
-export const initVegaLegacyModule = once(() => {
+/** @internal */
+export const initVegaLegacyModule = once((): void => {
   uiModules
     .get('kibana/vega', ['react'])
-    .controller('VegaEditorController', ($scope: any) => new VegaEditorController($scope))
+    .controller('VegaEditorController', VegaEditorController)
     .directive('vegaActionsMenu', (reactDirective: any) =>
       reactDirective(wrapInI18nContext(VegaActionsMenu))
     )

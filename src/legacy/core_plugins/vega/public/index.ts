@@ -17,11 +17,9 @@
  * under the License.
  */
 
-import { PluginInitializerContext } from 'kibana/public';
-import { VegaPlugin } from './plugin';
+import { PluginInitializerContext } from '../../../../core/public';
+import { VegaPlugin as Plugin } from './plugin';
 
 export function plugin(initializerContext: PluginInitializerContext) {
-  return new VegaPlugin(initializerContext);
+  return new Plugin(initializerContext);
 }
-
-export { VegaPlugin as Plugin };
