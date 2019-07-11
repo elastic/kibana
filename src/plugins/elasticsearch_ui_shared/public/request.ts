@@ -44,6 +44,7 @@ export function createRequestService(httpClient: any) {
     body,
   }: SendRequest): Promise<Partial<SendRequestResponse>> => {
     try {
+      // NOTE: This is tightly coupled to Angular's $http service.
       const response = await httpClient[method](path, body);
 
       if (typeof response.data === 'undefined') {
@@ -67,26 +68,18 @@ export function createRequestService(httpClient: any) {
     const [data, setData] = useState<any>(initialData);
 
     // States for tracking polling
-    const [polling, setPolling] = useState<boolean>(false);
     const [currentInterval, setCurrentInterval] = useState<UseRequest['interval']>(interval);
-    const intervalRequest = useRef<any>(null);
-    const isFirstRequest = useRef<boolean>(true);
+    // Consumers can use isInitialRequest to implement a polling UX.
+    const [isInitialRequest, setIsInitialRequest] = useState<boolean>(true);
+    const requestIntervalId = useRef<any>(null);
 
     // Tied to every render and bound to each request.
     let isOutdatedRequest = false;
 
     const request = async () => {
-      const isPollRequest = currentInterval && !isFirstRequest.current;
-
-      // Don't reset main error/loading states if we are doing polling
-      if (isPollRequest) {
-        setPolling(true);
-      } else {
-        setError(null);
-        setData(initialData);
-        setLoading(true);
-        setPolling(false);
-      }
+      // We don't clear error or data, so it's up to the consumer to decide whether to display the
+      // "old" error/data, initialData, or loading state when a new request is in-flight.
+      setLoading(true);
 
       const requestBody = {
         path,
@@ -105,19 +98,10 @@ export function createRequestService(httpClient: any) {
         return;
       }
 
-      // Set just data if we are doing polling
-      if (isPollRequest) {
-        setPolling(false);
-        if (response.data) {
-          setData(response.data);
-        }
-      } else {
-        setError(response.error);
-        setData(response.data);
-        setLoading(false);
-      }
-
-      isFirstRequest.current = false;
+      setError(response.error);
+      setData(response.data);
+      setLoading(false);
+      setIsInitialRequest(false);
     };
 
     const cancelOutdatedRequest = () => {
@@ -129,36 +113,39 @@ export function createRequestService(httpClient: any) {
       request();
 
       // Clear current interval
-      if (intervalRequest.current) {
-        clearInterval(intervalRequest.current);
+      if (requestIntervalId.current) {
+        clearInterval(requestIntervalId.current);
       }
 
       // Set new interval
       if (currentInterval) {
-        intervalRequest.current = setInterval(request, currentInterval);
+        requestIntervalId.current = setInterval(request, currentInterval);
       }
 
-      // Cleanup intervals and inflight requests and corresponding state changes
+      // Clean up intervals and inflight requests and corresponding state changes
       return () => {
         cancelOutdatedRequest();
-        if (intervalRequest.current) {
-          clearInterval(intervalRequest.current);
+        if (requestIntervalId.current) {
+          clearInterval(requestIntervalId.current);
         }
       };
     }, [path, currentInterval]);
 
     return {
-      error,
       loading,
+      error,
       data,
+      initialData,
       request,
-      polling,
+      isInitialRequest,
       changeInterval: (newInterval: UseRequest['interval']) => {
-        // Allow changing polling interval if there was one set
-        if (!interval) {
-          return;
-        }
+        // The consumer can set this to undefined to stop polling, or to a number to begin polling.
         setCurrentInterval(newInterval);
+
+        // If we're beginning to poll, then we need to schedule the first request.
+        if (!requestIntervalId.current && newInterval) {
+          requestIntervalId.current = setInterval(request, newInterval);
+        }
       },
     };
   };

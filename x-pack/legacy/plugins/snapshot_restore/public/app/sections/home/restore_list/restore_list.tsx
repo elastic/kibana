@@ -83,7 +83,7 @@ export const RestoreList: React.FunctionComponent = () => {
   const [currentInterval, setCurrentInterval] = useState<number>(INTERVAL_OPTIONS[1]);
 
   // Load restores
-  const { error, loading, data: restores = [], polling, changeInterval } = useLoadRestores(
+  const { error, loading, data: restores = [], isInitialRequest, changeInterval } = useLoadRestores(
     currentInterval
   );
 
@@ -94,139 +94,148 @@ export const RestoreList: React.FunctionComponent = () => {
 
   let content;
 
-  if (loading) {
-    content = (
-      <SectionLoading>
-        <FormattedMessage
-          id="xpack.snapshotRestore.restoreList.loadingRestoresDescription"
-          defaultMessage="Loading restores…"
-        />
-      </SectionLoading>
-    );
-  } else if (error) {
-    content = (
-      <SectionError
-        title={
+  if (isInitialRequest) {
+    if (loading) {
+      // Because we're polling for new data, we only want to hide the list during the initial fetch.
+      content = (
+        <SectionLoading>
           <FormattedMessage
-            id="xpack.snapshotRestore.restoreList.LoadingRestoresErrorMessage"
-            defaultMessage="Error loading restores"
+            id="xpack.snapshotRestore.restoreList.loadingRestoresDescription"
+            defaultMessage="Loading restores…"
           />
-        }
-        error={error}
-      />
-    );
-  } else if (restores && restores.length === 0) {
-    content = (
-      <EuiEmptyPrompt
-        iconType="managementApp"
-        title={
-          <h1>
+        </SectionLoading>
+      );
+    } else if (error) {
+      // If we get an error while polling we don't need to show it to the user because they can still
+      // work wit the table.
+      content = (
+        <SectionError
+          title={
             <FormattedMessage
-              id="xpack.snapshotRestore.restoreList.emptyPromptTitle"
-              defaultMessage="You don't have any restored snapshots"
+              id="xpack.snapshotRestore.restoreList.LoadingRestoresErrorMessage"
+              defaultMessage="Error loading restores"
             />
-          </h1>
-        }
-        body={
-          <Fragment>
-            <p>
-              <FormattedMessage
-                id="xpack.snapshotRestore.restoreList.emptyPromptDescription"
-                defaultMessage="Go to {snapshotsLink} to start a restore."
-                values={{
-                  snapshotsLink: (
-                    <EuiLink href={`#${BASE_PATH}/snapshots`}>
-                      <FormattedMessage
-                        id="xpack.snapshotRestore.restoreList.emptyPromptDescriptionLink"
-                        defaultMessage="Snapshots"
-                      />
-                    </EuiLink>
-                  ),
-                }}
-              />
-            </p>
-          </Fragment>
-        }
-        data-test-subj="emptyPrompt"
-      />
-    );
+          }
+          error={error}
+        />
+      );
+    }
   } else {
-    content = (
-      <Fragment>
-        <EuiFlexGroup alignItems="center" justifyContent="flexStart" gutterSize="s">
-          <EuiFlexItem grow={false}>
-            <EuiPopover
-              id="srRestoreListIntervalMenu"
-              button={
-                <EuiButtonEmpty
-                  size="xs"
-                  type="text"
-                  iconType="arrowDown"
-                  iconSide="right"
-                  onClick={() => setIsIntervalMenuOpen(!isIntervalMenuOpen)}
-                >
-                  <FormattedMessage
-                    id="xpack.snapshotRestore.restoreList.intervalMenuButtonText"
-                    defaultMessage="Refresh data every {interval}"
-                    values={{
-                      interval:
-                        currentInterval >= ONE_MINUTE_MS ? (
-                          <FormattedMessage
-                            id="xpack.snapshotRestore.restoreList.intervalMenu.minutesIntervalValue"
-                            defaultMessage="{minutes} {minutes, plural, one {minute} other {minutes}}"
-                            values={{ minutes: Math.ceil(currentInterval / ONE_MINUTE_MS) }}
-                          />
-                        ) : (
-                          <FormattedMessage
-                            id="xpack.snapshotRestore.restoreList.intervalMenu.secondsIntervalValue"
-                            defaultMessage="{seconds} {seconds, plural, one {second} other {seconds}}"
-                            values={{ seconds: Math.ceil(currentInterval / ONE_SECOND_MS) }}
-                          />
-                        ),
-                    }}
-                  />
-                </EuiButtonEmpty>
-              }
-              isOpen={isIntervalMenuOpen}
-              closePopover={() => setIsIntervalMenuOpen(false)}
-              panelPaddingSize="none"
-              anchorPosition="downLeft"
-            >
-              <EuiContextMenuPanel
-                items={INTERVAL_OPTIONS.map(interval => (
-                  <EuiContextMenuItem
-                    key={interval}
-                    icon="empty"
-                    onClick={() => {
-                      changeInterval(interval);
-                      setCurrentInterval(interval);
-                      setIsIntervalMenuOpen(false);
-                    }}
-                  >
-                    {interval >= ONE_MINUTE_MS ? (
-                      <FormattedMessage
-                        id="xpack.snapshotRestore.restoreList.intervalMenu.minutesIntervalValue"
-                        defaultMessage="{minutes} {minutes, plural, one {minute} other {minutes}}"
-                        values={{ minutes: Math.ceil(interval / ONE_MINUTE_MS) }}
-                      />
-                    ) : (
-                      <FormattedMessage
-                        id="xpack.snapshotRestore.restoreList.intervalMenu.secondsIntervalValue"
-                        defaultMessage="{seconds} {seconds, plural, one {second} other {seconds}}"
-                        values={{ seconds: Math.ceil(interval / ONE_SECOND_MS) }}
-                      />
-                    )}
-                  </EuiContextMenuItem>
-                ))}
+    if (restores && restores.length === 0) {
+      content = (
+        <EuiEmptyPrompt
+          iconType="managementApp"
+          title={
+            <h1>
+              <FormattedMessage
+                id="xpack.snapshotRestore.restoreList.emptyPromptTitle"
+                defaultMessage="You don't have any restored snapshots"
               />
-            </EuiPopover>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>{polling ? <EuiLoadingSpinner size="m" /> : null}</EuiFlexItem>
-        </EuiFlexGroup>
-        <EuiSpacer size="m" />
-        <RestoreTable restores={restores || []} />
-      </Fragment>
-    );
+            </h1>
+          }
+          body={
+            <Fragment>
+              <p>
+                <FormattedMessage
+                  id="xpack.snapshotRestore.restoreList.emptyPromptDescription"
+                  defaultMessage="Go to {snapshotsLink} to start a restore."
+                  values={{
+                    snapshotsLink: (
+                      <EuiLink href={`#${BASE_PATH}/snapshots`}>
+                        <FormattedMessage
+                          id="xpack.snapshotRestore.restoreList.emptyPromptDescriptionLink"
+                          defaultMessage="Snapshots"
+                        />
+                      </EuiLink>
+                    ),
+                  }}
+                />
+              </p>
+            </Fragment>
+          }
+          data-test-subj="emptyPrompt"
+        />
+      );
+    } else {
+      content = (
+        <Fragment>
+          <EuiFlexGroup alignItems="center" justifyContent="flexStart" gutterSize="s">
+            <EuiFlexItem grow={false}>
+              <EuiPopover
+                id="srRestoreListIntervalMenu"
+                button={
+                  <EuiButtonEmpty
+                    size="xs"
+                    type="text"
+                    iconType="arrowDown"
+                    iconSide="right"
+                    onClick={() => setIsIntervalMenuOpen(!isIntervalMenuOpen)}
+                  >
+                    <FormattedMessage
+                      id="xpack.snapshotRestore.restoreList.intervalMenuButtonText"
+                      defaultMessage="Refresh data every {interval}"
+                      values={{
+                        interval:
+                          currentInterval >= ONE_MINUTE_MS ? (
+                            <FormattedMessage
+                              id="xpack.snapshotRestore.restoreList.intervalMenu.minutesIntervalValue"
+                              defaultMessage="{minutes} {minutes, plural, one {minute} other {minutes}}"
+                              values={{ minutes: Math.ceil(currentInterval / ONE_MINUTE_MS) }}
+                            />
+                          ) : (
+                            <FormattedMessage
+                              id="xpack.snapshotRestore.restoreList.intervalMenu.secondsIntervalValue"
+                              defaultMessage="{seconds} {seconds, plural, one {second} other {seconds}}"
+                              values={{ seconds: Math.ceil(currentInterval / ONE_SECOND_MS) }}
+                            />
+                          ),
+                      }}
+                    />
+                  </EuiButtonEmpty>
+                }
+                isOpen={isIntervalMenuOpen}
+                closePopover={() => setIsIntervalMenuOpen(false)}
+                panelPaddingSize="none"
+                anchorPosition="downLeft"
+              >
+                <EuiContextMenuPanel
+                  items={INTERVAL_OPTIONS.map(interval => (
+                    <EuiContextMenuItem
+                      key={interval}
+                      icon="empty"
+                      onClick={() => {
+                        changeInterval(interval);
+                        setCurrentInterval(interval);
+                        setIsIntervalMenuOpen(false);
+                      }}
+                    >
+                      {interval >= ONE_MINUTE_MS ? (
+                        <FormattedMessage
+                          id="xpack.snapshotRestore.restoreList.intervalMenu.minutesIntervalValue"
+                          defaultMessage="{minutes} {minutes, plural, one {minute} other {minutes}}"
+                          values={{ minutes: Math.ceil(interval / ONE_MINUTE_MS) }}
+                        />
+                      ) : (
+                        <FormattedMessage
+                          id="xpack.snapshotRestore.restoreList.intervalMenu.secondsIntervalValue"
+                          defaultMessage="{seconds} {seconds, plural, one {second} other {seconds}}"
+                          values={{ seconds: Math.ceil(interval / ONE_SECOND_MS) }}
+                        />
+                      )}
+                    </EuiContextMenuItem>
+                  ))}
+                />
+              </EuiPopover>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              {loading ? <EuiLoadingSpinner size="m" /> : null}
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          <EuiSpacer size="m" />
+          <RestoreTable restores={restores || []} />
+        </Fragment>
+      );
+    }
   }
 
   return <section data-test-subj="restoreList">{content}</section>;
