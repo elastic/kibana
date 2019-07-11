@@ -17,8 +17,7 @@
  * under the License.
  */
 
-import { once } from 'lodash';
-import { SearchBar, setupDirective as setupSearchBarDirective } from './search_bar';
+import { SearchBar } from './search_bar';
 
 /**
  * Search Service
@@ -30,7 +29,6 @@ export class SearchService {
       ui: {
         SearchBar,
       },
-      loadLegacyDirectives: once(setupSearchBarDirective),
     };
   }
 
