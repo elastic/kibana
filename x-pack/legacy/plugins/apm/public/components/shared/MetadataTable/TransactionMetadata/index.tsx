@@ -5,9 +5,9 @@
  */
 
 import React from 'react';
-import { MetadataTable } from '..';
 import { TRANSACTION_METADATA_SECTIONS } from './sections';
 import { Transaction } from '../../../../../typings/es_schemas/ui/Transaction';
+import { MetadataTable } from '..';
 
 interface Props {
   transaction: Transaction;

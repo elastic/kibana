@@ -56,7 +56,7 @@
 
 .codeContainer__blame {
   position: relative;
-  max-height: calc(100% - (6rem + 1px));
+  overflow: hidden;
   flex-grow: 1;
 }
 
@@ -72,6 +72,9 @@
 
 .codeContainer__select {
   margin-right: $euiSizeS;
+  width: 12rem;
+  flex-grow: 0;
+  flex-shrink: 0;
 }
 
 .codeContainer__tabs {

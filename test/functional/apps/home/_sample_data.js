@@ -88,7 +88,7 @@ export default function ({ getService, getPageObjects }) {
         const toTime = `${todayYearMonthDay} 23:59:59.999`;
         await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
         const panelCount = await PageObjects.dashboard.getPanelCount();
-        expect(panelCount).to.be(19);
+        expect(panelCount).to.be(18);
       });
 
 

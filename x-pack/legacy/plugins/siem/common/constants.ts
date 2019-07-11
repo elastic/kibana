@@ -7,3 +7,4 @@
 export const APP_ID = 'siem';
 export const APP_NAME = 'SIEM';
 export const DEFAULT_INDEX_KEY = 'siem:defaultIndex';
+export const DEFAULT_ANOMALY_SCORE = 'siem:defaultAnomalyScore';

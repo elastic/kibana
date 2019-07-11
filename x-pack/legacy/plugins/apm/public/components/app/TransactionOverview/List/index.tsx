@@ -6,7 +6,7 @@
 
 import { EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
+import React, { useMemo } from 'react';
 import styled from 'styled-components';
 import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
 import { ITransactionGroup } from '../../../../../server/lib/transaction_groups/transform';
@@ -16,6 +16,8 @@ import { ImpactBar } from '../../../shared/ImpactBar';
 import { APMLink } from '../../../shared/Links/APMLink';
 import { legacyEncodeURIComponent } from '../../../shared/Links/url_helpers';
 import { ITableColumn, ManagedTable } from '../../../shared/ManagedTable';
+import { LoadingStatePrompt } from '../../../shared/LoadingStatePrompt';
+import { EmptyMessage } from '../../../shared/EmptyMessage';
 
 const TransactionNameLink = styled(APMLink)`
   ${truncate('100%')};
@@ -25,96 +27,109 @@ const TransactionNameLink = styled(APMLink)`
 interface Props {
   items: ITransactionGroup[];
   serviceName: string;
+  isLoading: boolean;
 }
 
-export function TransactionList({ items, serviceName, ...rest }: Props) {
-  const columns: Array<ITableColumn<ITransactionGroup>> = [
-    {
-      field: 'name',
-      name: i18n.translate('xpack.apm.transactionsTable.nameColumnLabel', {
-        defaultMessage: 'Name'
-      }),
-      width: '50%',
-      sortable: true,
-      render: (transactionName: string, data) => {
-        const encodedType = legacyEncodeURIComponent(
-          data.sample.transaction.type
-        );
-        const encodedName = legacyEncodeURIComponent(transactionName);
-        const transactionPath = `/${serviceName}/transactions/${encodedType}/${encodedName}`;
+export function TransactionList({ items, serviceName, isLoading }: Props) {
+  const columns: Array<ITableColumn<ITransactionGroup>> = useMemo(
+    () => [
+      {
+        field: 'name',
+        name: i18n.translate('xpack.apm.transactionsTable.nameColumnLabel', {
+          defaultMessage: 'Name'
+        }),
+        width: '50%',
+        sortable: true,
+        render: (transactionName: string, data: typeof items[0]) => {
+          const encodedType = legacyEncodeURIComponent(
+            data.sample.transaction.type
+          );
+          const encodedName = legacyEncodeURIComponent(transactionName);
+          const transactionPath = `/${serviceName}/transactions/${encodedType}/${encodedName}`;
 
-        return (
-          <EuiToolTip
-            id="transaction-name-link-tooltip"
-            content={transactionName || NOT_AVAILABLE_LABEL}
-          >
-            <TransactionNameLink path={transactionPath}>
-              {transactionName || NOT_AVAILABLE_LABEL}
-            </TransactionNameLink>
-          </EuiToolTip>
-        );
-      }
-    },
-    {
-      field: 'averageResponseTime',
-      name: i18n.translate(
-        'xpack.apm.transactionsTable.avgDurationColumnLabel',
-        {
-          defaultMessage: 'Avg. duration'
+          return (
+            <EuiToolTip
+              id="transaction-name-link-tooltip"
+              content={transactionName || NOT_AVAILABLE_LABEL}
+            >
+              <TransactionNameLink path={transactionPath}>
+                {transactionName || NOT_AVAILABLE_LABEL}
+              </TransactionNameLink>
+            </EuiToolTip>
+          );
         }
-      ),
-      sortable: true,
-      dataType: 'number',
-      render: (value: number) => asMillis(value)
-    },
-    {
-      field: 'p95',
-      name: i18n.translate(
-        'xpack.apm.transactionsTable.95thPercentileColumnLabel',
-        {
-          defaultMessage: '95th percentile'
-        }
-      ),
-      sortable: true,
-      dataType: 'number',
-      render: (value: number) => asMillis(value)
-    },
-    {
-      field: 'transactionsPerMinute',
-      name: i18n.translate(
-        'xpack.apm.transactionsTable.transactionsPerMinuteColumnLabel',
-        {
-          defaultMessage: 'Trans. per minute'
-        }
-      ),
-      sortable: true,
-      dataType: 'number',
-      render: (value: number) =>
-        `${asDecimal(value)} ${i18n.translate(
-          'xpack.apm.transactionsTable.transactionsPerMinuteUnitLabel',
+      },
+      {
+        field: 'averageResponseTime',
+        name: i18n.translate(
+          'xpack.apm.transactionsTable.avgDurationColumnLabel',
           {
-            defaultMessage: 'tpm'
+            defaultMessage: 'Avg. duration'
           }
-        )}`
-    },
-    {
-      field: 'impact',
-      name: i18n.translate('xpack.apm.transactionsTable.impactColumnLabel', {
-        defaultMessage: 'Impact'
-      }),
-      sortable: true,
-      dataType: 'number',
-      render: (value: number) => <ImpactBar value={value} />
-    }
-  ];
+        ),
+        sortable: true,
+        dataType: 'number',
+        render: (value: number) => asMillis(value)
+      },
+      {
+        field: 'p95',
+        name: i18n.translate(
+          'xpack.apm.transactionsTable.95thPercentileColumnLabel',
+          {
+            defaultMessage: '95th percentile'
+          }
+        ),
+        sortable: true,
+        dataType: 'number',
+        render: (value: number) => asMillis(value)
+      },
+      {
+        field: 'transactionsPerMinute',
+        name: i18n.translate(
+          'xpack.apm.transactionsTable.transactionsPerMinuteColumnLabel',
+          {
+            defaultMessage: 'Trans. per minute'
+          }
+        ),
+        sortable: true,
+        dataType: 'number',
+        render: (value: number) =>
+          `${asDecimal(value)} ${i18n.translate(
+            'xpack.apm.transactionsTable.transactionsPerMinuteUnitLabel',
+            {
+              defaultMessage: 'tpm'
+            }
+          )}`
+      },
+      {
+        field: 'impact',
+        name: i18n.translate('xpack.apm.transactionsTable.impactColumnLabel', {
+          defaultMessage: 'Impact'
+        }),
+        sortable: true,
+        dataType: 'number',
+        render: (value: number) => <ImpactBar value={value} />
+      }
+    ],
+    [serviceName]
+  );
+
+  const noItemsMessage = (
+    <EmptyMessage
+      heading={i18n.translate('xpack.apm.transactionsTable.notFoundLabel', {
+        defaultMessage: 'No transactions were found.'
+      })}
+    />
+  );
 
   return (
     <ManagedTable
+      noItemsMessage={isLoading ? <LoadingStatePrompt /> : noItemsMessage}
       columns={columns}
       items={items}
-      initialSort={{ field: 'impact', direction: 'desc' }}
+      initialSortField="impact"
+      initialSortDirection="desc"
       initialPageSize={25}
-      {...rest}
     />
   );
 }

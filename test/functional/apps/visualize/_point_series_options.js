@@ -38,17 +38,15 @@ export default function ({ getService, getPageObjects }) {
     await PageObjects.visualize.clickLineChart();
     await PageObjects.visualize.clickNewSearch();
     await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
-    log.debug('Bucket = X-Axis');
-    await PageObjects.visualize.clickBucket('X-Axis');
+    log.debug('Bucket = X-axis');
+    await PageObjects.visualize.clickBucket('X-axis');
     log.debug('Aggregation = Date Histogram');
     await PageObjects.visualize.selectAggregation('Date Histogram');
     log.debug('Field = @timestamp');
     await PageObjects.visualize.selectField('@timestamp');
     // add another metrics
-    log.debug('Add Metric');
-    await PageObjects.visualize.clickAddMetric();
     log.debug('Metric = Value Axis');
-    await PageObjects.visualize.clickBucket('Y-Axis', 'metric');
+    await PageObjects.visualize.clickBucket('Y-axis', 'metrics');
     log.debug('Aggregation = Average');
     await PageObjects.visualize.selectAggregation('Average', 'metrics');
     log.debug('Field = memory');

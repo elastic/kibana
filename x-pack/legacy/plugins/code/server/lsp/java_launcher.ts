@@ -30,19 +30,26 @@ export class JavaLauncher extends AbstractLauncher {
   }
 
   createExpander(proxy: LanguageServerProxy, builtinWorkspace: boolean, maxWorkspace: number) {
-    return new RequestExpander(proxy, builtinWorkspace, maxWorkspace, this.options, {
-      initialOptions: {
-        settings: {
-          'java.import.gradle.enabled': this.options.security.enableGradleImport,
-          'java.import.maven.enabled': this.options.security.enableMavenImport,
-          'java.autobuild.enabled': false,
+    return new RequestExpander(
+      proxy,
+      builtinWorkspace,
+      maxWorkspace,
+      this.options,
+      {
+        initialOptions: {
+          settings: {
+            'java.import.gradle.enabled': this.options.security.enableGradleImport,
+            'java.import.maven.enabled': this.options.security.enableMavenImport,
+            'java.autobuild.enabled': false,
+          },
         },
-      },
-    } as InitializeOptions);
+      } as InitializeOptions,
+      this.log
+    );
   }
 
   startConnect(proxy: LanguageServerProxy) {
-    proxy.awaitServerConnection().catch(this.log.debug);
+    proxy.startServerConnection();
   }
 
   async getPort(): Promise<number> {
@@ -120,6 +127,11 @@ export class JavaLauncher extends AbstractLauncher {
       process.platform === 'win32' ? 'java.exe' : 'java'
     );
 
+    const configPath =
+      process.platform === 'win32'
+        ? path.resolve(installationPath, 'repository/config_win')
+        : this.options.jdtConfigPath;
+
     const params: string[] = [
       '-Declipse.application=org.elastic.jdt.ls.core.id1',
       '-Dosgi.bundles.defaultStartLevel=4',
@@ -131,7 +143,7 @@ export class JavaLauncher extends AbstractLauncher {
       '-jar',
       path.resolve(installationPath, launchersFound[0]),
       '-configuration',
-      this.options.jdtConfigPath,
+      configPath,
       '-data',
       this.options.jdtWorkspacePath,
     ];

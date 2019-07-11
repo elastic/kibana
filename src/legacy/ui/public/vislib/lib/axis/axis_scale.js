@@ -168,6 +168,21 @@ export class AxisScale {
     return [Math.min(0, min), Math.max(0, max)];
   }
 
+  getDomain(length) {
+    const domain = this.getExtents();
+    const pad = this.axisConfig.get('padForLabels');
+    if (pad > 0 && this.canApplyNice()) {
+      const domainLength = domain[1] - domain[0];
+      const valuePerPixel = domainLength / length;
+      const padValue = valuePerPixel * pad;
+      if (domain[0] < 0) {
+        domain[0] -= padValue;
+      }
+      domain[1] += padValue;
+    }
+    return domain;
+  }
+
   getRange(length) {
     if (this.axisConfig.isHorizontal()) {
       return !this.axisConfig.get('scale.inverted') ? [0, length] : [length, 0];
@@ -212,7 +227,7 @@ export class AxisScale {
   getScale(length) {
     const config = this.axisConfig;
     const scale = this.getD3Scale(config.getScaleType());
-    const domain = this.getExtents();
+    const domain = this.getDomain(length);
     const range = this.getRange(length);
     const padding = config.get('style.rangePadding');
     const outerPadding = config.get('style.rangeOuterPadding');

@@ -26,7 +26,7 @@ import { InstallationType } from '../../../common/installation';
 import { LanguageServer, LanguageServerStatus } from '../../../common/language_server';
 import { requestInstallLanguageServer } from '../../actions/language_server';
 import { RootState } from '../../reducers';
-import { JavaIcon, TypeScriptIcon, GoIcon } from '../shared/icons';
+import { JavaIcon, TypeScriptIcon, GoIcon, CtagsIcon } from '../shared/icons';
 
 const LanguageServerLi = (props: {
   languageServer: LanguageServer;
@@ -42,6 +42,8 @@ const LanguageServerLi = (props: {
       return <JavaIcon />;
     } else if (name === 'Go') {
       return <GoIcon />;
+    } else if (name === 'Ctags') {
+      return <CtagsIcon />;
     }
   };
 

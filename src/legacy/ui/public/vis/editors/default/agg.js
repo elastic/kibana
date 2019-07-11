@@ -19,9 +19,10 @@
 
 import './agg_params';
 import './agg_add';
+import './controls/agg_controls';
 import { Direction } from './keyboard_move';
 import _ from 'lodash';
-import '../../../fancy_forms';
+import './fancy_forms';
 import { uiModules } from '../../../modules';
 import aggTemplate from './agg.html';
 import { move } from '../../../utils/collection';
@@ -32,9 +33,10 @@ uiModules
     return {
       restrict: 'A',
       template: aggTemplate,
-      require: 'form',
-      link: function ($scope, $el, attrs, kbnForm) {
+      require: ['^form', '^ngModel'],
+      link: function ($scope, $el, attrs, [kbnForm, ngModelCtrl]) {
         $scope.editorOpen = !!$scope.agg.brandNew;
+        $scope.aggIsTooLow = false;
 
         $scope.$watch('editorOpen', function (open) {
         // make sure that all of the form inputs are "touched"
@@ -117,6 +119,46 @@ uiModules
 
           return $scope.$index > firstDifferentSchema;
         }
+
+        // The model can become touched either onBlur event or when the form is submitted.
+        // We watch $touched to identify when the form is submitted.
+        $scope.$watch(() => {
+          return ngModelCtrl.$touched;
+        }, (value) => {
+          $scope.formIsTouched = value;
+        }, true);
+
+        $scope.onAggTypeChange = (agg, value) => {
+          if (agg.type !== value) {
+            agg.type = value;
+          }
+        };
+
+        $scope.onAggParamsChange = (params, paramName, value) => {
+          if (params[paramName] !== value) {
+            params[paramName] = value;
+          }
+        };
+
+        $scope.setValidity = (isValid) => {
+          ngModelCtrl.$setValidity(`aggParams${$scope.agg.id}`, isValid);
+        };
+
+        $scope.setTouched = (isTouched) => {
+          if (isTouched) {
+            ngModelCtrl.$setTouched();
+          } else {
+            ngModelCtrl.$setUntouched();
+          }
+        };
+
+        $scope.onAggErrorChanged = (agg, error) => {
+          if (error) {
+            agg.error = error;
+          } else {
+            delete agg.error;
+          }
+        };
       }
     };
   });

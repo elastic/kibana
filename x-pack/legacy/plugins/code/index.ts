@@ -11,6 +11,7 @@ import { resolve } from 'path';
 
 import { init } from './server/init';
 import { APP_TITLE } from './common/constants';
+import { LanguageServers, LanguageServersDeveloping } from './server/lsp/language_servers';
 
 export const code = (kibana: any) =>
   new kibana.Plugin({
@@ -35,6 +36,17 @@ export const code = (kibana: any) =>
       hacks: ['plugins/code/hacks/toggle_app_link_in_nav'],
     },
     config(Joi: typeof JoiNamespace) {
+      const langSwitches: any = {};
+      LanguageServers.forEach(lang => {
+        langSwitches[lang.name] = Joi.object({
+          enabled: Joi.boolean().default(true),
+        });
+      });
+      LanguageServersDeveloping.forEach(lang => {
+        langSwitches[lang.name] = Joi.object({
+          enabled: Joi.boolean().default(false),
+        });
+      });
       return Joi.object({
         ui: Joi.object({
           enabled: Joi.boolean().default(true),
@@ -51,13 +63,16 @@ export const code = (kibana: any) =>
         updateRepoFrequencyMs: Joi.number().default(moment.duration(1, 'hour').asMilliseconds()),
         // The frequency which each repo tries to index. 1 day by default.
         indexRepoFrequencyMs: Joi.number().default(moment.duration(1, 'day').asMilliseconds()),
+        // whether we want to show more logs
+        verbose: Joi.boolean().default(false),
         lsp: Joi.object({
+          ...langSwitches,
           // timeout of a request
           requestTimeoutMs: Joi.number().default(moment.duration(10, 'second').asMilliseconds()),
           // if we want the language server run in seperately
           detach: Joi.boolean().default(false),
-          // whether we want to show more language server logs
-          verbose: Joi.boolean().default(false),
+          // enable oom_score_adj on linux
+          oomScoreAdj: Joi.boolean().default(true),
         }).default(),
         repos: Joi.array().default([]),
         security: Joi.object({
@@ -79,7 +94,7 @@ export const code = (kibana: any) =>
           enableGitCertCheck: Joi.boolean().default(true),
         }).default(),
         maxWorkspace: Joi.number().default(5), // max workspace folder for each language server
-        disableIndexScheduler: Joi.boolean().default(true), // Temp option to disable index scheduler.
+        disableIndexScheduler: Joi.boolean().default(false),
         enableGlobalReference: Joi.boolean().default(false), // Global reference as optional feature for now
         codeNodeUrl: Joi.string(),
       }).default();

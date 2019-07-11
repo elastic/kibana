@@ -18,6 +18,7 @@ import Histogram from '../../../shared/charts/Histogram';
 import { EmptyMessage } from '../../../shared/EmptyMessage';
 import { fromQuery, toQuery } from '../../../shared/Links/url_helpers';
 import { history } from '../../../../utils/history';
+import { LoadingStatePrompt } from '../../../shared/LoadingStatePrompt';
 
 interface IChartPoint {
   sample?: IBucket['sample'];
@@ -90,7 +91,7 @@ const getFormatYLong = (transactionType: string | undefined) => (t: number) => {
 interface Props {
   distribution?: ITransactionDistributionAPIResponse;
   urlParams: IUrlParams;
-  loading: boolean;
+  isLoading: boolean;
 }
 
 export const TransactionDistribution: FunctionComponent<Props> = (
@@ -99,7 +100,7 @@ export const TransactionDistribution: FunctionComponent<Props> = (
   const {
     distribution,
     urlParams: { transactionId, traceId, transactionType },
-    loading
+    isLoading
   } = props;
 
   const formatYShort = useCallback(getFormatYShort(transactionType), [
@@ -110,48 +111,52 @@ export const TransactionDistribution: FunctionComponent<Props> = (
     transactionType
   ]);
 
-  const redirectToDefaultSample = useCallback(
-    () => {
-      const defaultSample =
-        distribution && distribution.defaultSample
-          ? distribution.defaultSample
-          : {};
+  const redirectToDefaultSample = useCallback(() => {
+    const defaultSample =
+      distribution && distribution.defaultSample
+        ? distribution.defaultSample
+        : {};
 
-      const parsedQueryParams = toQuery(history.location.search);
+    const parsedQueryParams = toQuery(history.location.search);
 
-      history.replace({
-        ...history.location,
-        search: fromQuery({
-          ...omit(parsedQueryParams, 'transactionId', 'traceId'),
-          ...defaultSample
-        })
-      });
-    },
-    [distribution, loading]
-  );
+    history.replace({
+      ...history.location,
+      search: fromQuery({
+        ...omit(parsedQueryParams, 'transactionId', 'traceId'),
+        ...defaultSample
+      })
+    });
+  }, [distribution, isLoading]);
 
-  useEffect(
-    () => {
-      if (loading) {
-        return;
-      }
-      const selectedSampleIsAvailable = distribution
-        ? !!distribution.buckets.find(
-            bucket =>
-              !!(
-                bucket.sample &&
-                bucket.sample.transactionId === transactionId &&
-                bucket.sample.traceId === traceId
-              )
-          )
-        : false;
+  useEffect(() => {
+    if (isLoading) {
+      return;
+    }
+    const selectedSampleIsAvailable = distribution
+      ? !!distribution.buckets.find(
+          bucket =>
+            !!(
+              bucket.sample &&
+              bucket.sample.transactionId === transactionId &&
+              bucket.sample.traceId === traceId
+            )
+        )
+      : false;
 
-      if (!selectedSampleIsAvailable && !!distribution) {
-        redirectToDefaultSample();
-      }
-    },
-    [distribution, transactionId, traceId, redirectToDefaultSample, loading]
-  );
+    if (!selectedSampleIsAvailable && !!distribution) {
+      redirectToDefaultSample();
+    }
+  }, [
+    distribution,
+    transactionId,
+    traceId,
+    redirectToDefaultSample,
+    isLoading
+  ]);
+
+  if (isLoading) {
+    return <LoadingStatePrompt />;
+  }
 
   if (!distribution || !distribution.totalHits || !traceId || !transactionId) {
     return (

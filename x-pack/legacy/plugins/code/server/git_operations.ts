@@ -29,7 +29,7 @@ import { FileTree, FileTreeItemType, RepositoryUri, sortFileTree } from '../mode
 import { CommitInfo, ReferenceInfo, ReferenceType } from '../model/commit';
 import { detectLanguage } from './utils/detect_language';
 
-const HEAD = 'HEAD';
+export const HEAD = 'HEAD';
 const REFS_HEADS = 'refs/heads/';
 export const DEFAULT_TREE_CHILDREN_LIMIT = 50;
 
@@ -129,7 +129,7 @@ export class GitOperations {
 
   public async getCommit(uri: RepositoryUri, revision: string): Promise<Commit> {
     const repo = await this.openRepo(uri);
-    if (revision.toUpperCase() === 'HEAD') {
+    if (revision.toUpperCase() === HEAD) {
       return await repo.getHeadCommit();
     }
     // branches and tags
@@ -582,6 +582,7 @@ export function commitInfo(commit: Commit): CommitInfo {
     parents: commit.parents().map(oid => oid.toString().substring(0, 7)),
   };
 }
+const REMOTE_PREFIX = 'origin/';
 
 export async function referenceInfo(ref: Reference): Promise<ReferenceInfo | null> {
   const repository = ref.owner();
@@ -593,9 +594,13 @@ export async function referenceInfo(ref: Reference): Promise<ReferenceInfo | nul
     return null;
   }
   let type: ReferenceType;
+  let name = ref.shorthand();
   if (ref.isTag()) {
     type = ReferenceType.TAG;
   } else if (ref.isRemote()) {
+    if (name.startsWith(REMOTE_PREFIX)) {
+      name = name.substr(REMOTE_PREFIX.length);
+    }
     type = ReferenceType.REMOTE_BRANCH;
   } else if (ref.isBranch()) {
     type = ReferenceType.BRANCH;
@@ -603,7 +608,7 @@ export async function referenceInfo(ref: Reference): Promise<ReferenceInfo | nul
     type = ReferenceType.OTHER;
   }
   return {
-    name: ref.shorthand(),
+    name,
     reference: ref.name(),
     commit,
     type,

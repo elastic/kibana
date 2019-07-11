@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiBadge, EuiFlexGroup, EuiIcon, EuiPage } from '@elastic/eui';
+import React from 'react';
+import { EuiBadge, EuiBadgeProps, EuiFlexGroup, EuiIcon, EuiPage } from '@elastic/eui';
 import styled, { injectGlobal } from 'styled-components';
 import { getOr } from 'lodash/fp';
 
@@ -92,17 +93,25 @@ export const Pane1FlexContent = styled.div`
   height: 100%;
 `;
 
-export const CountBadge = styled(EuiBadge)`
-  margin-left: 5px;
-`;
+// Ref: https://github.com/elastic/eui/issues/1655
+// const Badge = styled(EuiBadge)`
+//   margin-left: 5px;
+// `;
+export const CountBadge = (props: EuiBadgeProps) => (
+  <EuiBadge {...props} style={{ marginLeft: '5px' }} />
+);
 
 export const Spacer = styled.span`
   margin-left: 5px;
 `;
 
-export const Badge = styled(EuiBadge)`
-  vertical-align: top;
-`;
+// Ref: https://github.com/elastic/eui/issues/1655
+// export const Badge = styled(EuiBadge)`
+//   vertical-align: top;
+// `;
+export const Badge = (props: EuiBadgeProps) => (
+  <EuiBadge {...props} style={{ verticalAlign: 'top' }} />
+);
 
 export const MoreRowItems = styled(EuiIcon)`
   margin-left: 5px;
@@ -110,6 +119,11 @@ export const MoreRowItems = styled(EuiIcon)`
 
 export const OverviewWrapper = styled(EuiFlexGroup)`
   position: relative;
+  .euiButtonIcon {
+    position: absolute;
+    top: -10px;
+    right: 10px;
+  }
 `;
 
 export const LoadingOverlay = styled.div`

@@ -17,7 +17,8 @@
  * under the License.
  */
 
-import { postSnapshot } from '@percy/agent';
+import { postSnapshot } from '@percy/agent/dist/utils/sdk-utils';
+
 import { Test } from 'mocha';
 
 import { pkg } from '../../../../src/legacy/utils/package_json';
@@ -51,7 +52,7 @@ export async function VisualTestingProvider({ getService }: FtrProviderContext) 
     return statsCache.get(test)!;
   }
 
-  return new class VisualTesting {
+  return new (class VisualTesting {
     public async snapshot(name?: string) {
       log.debug('Capturing percy snapshot');
 
@@ -83,5 +84,5 @@ export async function VisualTestingProvider({ getService }: FtrProviderContext) 
         ? snapshot
         : await browser.execute<[], string>(takePercySnapshotWithAgent);
     }
-  }();
+  })();
 }

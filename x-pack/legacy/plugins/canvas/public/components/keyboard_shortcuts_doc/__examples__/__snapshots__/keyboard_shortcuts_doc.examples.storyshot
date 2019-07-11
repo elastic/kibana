@@ -451,6 +451,218 @@ exports[`Storyshots components/KeyboardShortcutsDoc default 1`] = `
                     </span>
                   </span>
                 </dd>
+                <dt
+                  className="euiDescriptionList__title"
+                >
+                  Shift up by 10px
+                </dt>
+                <dd
+                  className="euiDescriptionList__description"
+                >
+                  <span>
+                    <span
+                      className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
+                      style={Object {}}
+                    >
+                      <code
+                        className="euiCodeBlock__code"
+                      >
+                        ↑
+                      </code>
+                    </span>
+                  </span>
+                </dd>
+                <dt
+                  className="euiDescriptionList__title"
+                >
+                  Shift down by 10px
+                </dt>
+                <dd
+                  className="euiDescriptionList__description"
+                >
+                  <span>
+                    <span
+                      className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
+                      style={Object {}}
+                    >
+                      <code
+                        className="euiCodeBlock__code"
+                      >
+                        ↓
+                      </code>
+                    </span>
+                  </span>
+                </dd>
+                <dt
+                  className="euiDescriptionList__title"
+                >
+                  Shift left by 10px
+                </dt>
+                <dd
+                  className="euiDescriptionList__description"
+                >
+                  <span>
+                    <span
+                      className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
+                      style={Object {}}
+                    >
+                      <code
+                        className="euiCodeBlock__code"
+                      >
+                        ←
+                      </code>
+                    </span>
+                  </span>
+                </dd>
+                <dt
+                  className="euiDescriptionList__title"
+                >
+                  Shift right by 10px
+                </dt>
+                <dd
+                  className="euiDescriptionList__description"
+                >
+                  <span>
+                    <span
+                      className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
+                      style={Object {}}
+                    >
+                      <code
+                        className="euiCodeBlock__code"
+                      >
+                        →
+                      </code>
+                    </span>
+                  </span>
+                </dd>
+                <dt
+                  className="euiDescriptionList__title"
+                >
+                  Shift up by 1px
+                </dt>
+                <dd
+                  className="euiDescriptionList__description"
+                >
+                  <span>
+                    <span
+                      className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
+                      style={Object {}}
+                    >
+                      <code
+                        className="euiCodeBlock__code"
+                      >
+                        SHIFT
+                      </code>
+                    </span>
+                     
+                    <span
+                      className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
+                      style={Object {}}
+                    >
+                      <code
+                        className="euiCodeBlock__code"
+                      >
+                        ↑
+                      </code>
+                    </span>
+                  </span>
+                </dd>
+                <dt
+                  className="euiDescriptionList__title"
+                >
+                  Shift down by 1px
+                </dt>
+                <dd
+                  className="euiDescriptionList__description"
+                >
+                  <span>
+                    <span
+                      className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
+                      style={Object {}}
+                    >
+                      <code
+                        className="euiCodeBlock__code"
+                      >
+                        SHIFT
+                      </code>
+                    </span>
+                     
+                    <span
+                      className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
+                      style={Object {}}
+                    >
+                      <code
+                        className="euiCodeBlock__code"
+                      >
+                        ↓
+                      </code>
+                    </span>
+                  </span>
+                </dd>
+                <dt
+                  className="euiDescriptionList__title"
+                >
+                  Shift left by 1px
+                </dt>
+                <dd
+                  className="euiDescriptionList__description"
+                >
+                  <span>
+                    <span
+                      className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
+                      style={Object {}}
+                    >
+                      <code
+                        className="euiCodeBlock__code"
+                      >
+                        SHIFT
+                      </code>
+                    </span>
+                     
+                    <span
+                      className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
+                      style={Object {}}
+                    >
+                      <code
+                        className="euiCodeBlock__code"
+                      >
+                        ←
+                      </code>
+                    </span>
+                  </span>
+                </dd>
+                <dt
+                  className="euiDescriptionList__title"
+                >
+                  Shift right by 1px
+                </dt>
+                <dd
+                  className="euiDescriptionList__description"
+                >
+                  <span>
+                    <span
+                      className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
+                      style={Object {}}
+                    >
+                      <code
+                        className="euiCodeBlock__code"
+                      >
+                        SHIFT
+                      </code>
+                    </span>
+                     
+                    <span
+                      className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
+                      style={Object {}}
+                    >
+                      <code
+                        className="euiCodeBlock__code"
+                      >
+                        →
+                      </code>
+                    </span>
+                  </span>
+                </dd>
               </dl>
               <div
                 className="euiSpacer euiSpacer--l"
@@ -880,6 +1092,135 @@ exports[`Storyshots components/KeyboardShortcutsDoc default 1`] = `
                         className="euiCodeBlock__code"
                       >
                         R
+                      </code>
+                    </span>
+                  </span>
+                </dd>
+                <dt
+                  className="euiDescriptionList__title"
+                >
+                  Zoom in
+                </dt>
+                <dd
+                  className="euiDescriptionList__description"
+                >
+                  <span>
+                    <span
+                      className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
+                      style={Object {}}
+                    >
+                      <code
+                        className="euiCodeBlock__code"
+                      >
+                        CTRL
+                      </code>
+                    </span>
+                     
+                    <span
+                      className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
+                      style={Object {}}
+                    >
+                      <code
+                        className="euiCodeBlock__code"
+                      >
+                        ALT
+                      </code>
+                    </span>
+                     
+                    <span
+                      className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
+                      style={Object {}}
+                    >
+                      <code
+                        className="euiCodeBlock__code"
+                      >
+                        +
+                      </code>
+                    </span>
+                  </span>
+                </dd>
+                <dt
+                  className="euiDescriptionList__title"
+                >
+                  Zoom out
+                </dt>
+                <dd
+                  className="euiDescriptionList__description"
+                >
+                  <span>
+                    <span
+                      className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
+                      style={Object {}}
+                    >
+                      <code
+                        className="euiCodeBlock__code"
+                      >
+                        CTRL
+                      </code>
+                    </span>
+                     
+                    <span
+                      className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
+                      style={Object {}}
+                    >
+                      <code
+                        className="euiCodeBlock__code"
+                      >
+                        ALT
+                      </code>
+                    </span>
+                     
+                    <span
+                      className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
+                      style={Object {}}
+                    >
+                      <code
+                        className="euiCodeBlock__code"
+                      >
+                        -
+                      </code>
+                    </span>
+                  </span>
+                </dd>
+                <dt
+                  className="euiDescriptionList__title"
+                >
+                  Reset zoom to 100%
+                </dt>
+                <dd
+                  className="euiDescriptionList__description"
+                >
+                  <span>
+                    <span
+                      className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
+                      style={Object {}}
+                    >
+                      <code
+                        className="euiCodeBlock__code"
+                      >
+                        CTRL
+                      </code>
+                    </span>
+                     
+                    <span
+                      className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
+                      style={Object {}}
+                    >
+                      <code
+                        className="euiCodeBlock__code"
+                      >
+                        ALT
+                      </code>
+                    </span>
+                     
+                    <span
+                      className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
+                      style={Object {}}
+                    >
+                      <code
+                        className="euiCodeBlock__code"
+                      >
+                        [
                       </code>
                     </span>
                   </span>

@@ -22,6 +22,7 @@ const createSetupContractMock = () => {
   const setupContract: jest.Mocked<InjectedMetadataSetup> = {
     getBasePath: jest.fn(),
     getKibanaVersion: jest.fn(),
+    getKibanaBranch: jest.fn(),
     getCapabilities: jest.fn(),
     getCspConfig: jest.fn(),
     getLegacyMetadata: jest.fn(),

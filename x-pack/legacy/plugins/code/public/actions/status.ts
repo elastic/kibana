@@ -6,25 +6,66 @@
 
 import { createAction } from 'redux-actions';
 
-import { RepositoryUri } from '../../model';
-import { RepoStatus } from '../reducers';
+import {
+  RepositoryUri,
+  CloneWorkerProgress,
+  WorkerProgress,
+  Repository,
+  CloneProgress,
+} from '../../model';
+import { FetchFilePayload } from './file';
+import { StatusReport } from '../../common/repo_file_status';
+
+export enum RepoState {
+  CLONING,
+  DELETING,
+  INDEXING,
+  READY,
+  CLONE_ERROR,
+  DELETE_ERROR,
+  INDEX_ERROR,
+}
+
+export interface RepoStatus {
+  uri: string;
+  progress: number;
+  cloneProgress?: CloneProgress;
+  timestamp?: Date;
+  state?: RepoState;
+  errorMessage?: string;
+}
+
+export interface StatusSuccessPayload {
+  [key: string]: {
+    gitStatus: CloneWorkerProgress | null;
+    indexStatus: WorkerProgress | null;
+    deleteStatus: WorkerProgress | null;
+  };
+}
 
 export const loadStatus = createAction<string>('LOAD STATUS');
-export const loadStatusSuccess = createAction<any>('LOAD STATUS SUCCESS');
-export const loadStatusFailed = createAction<string>('LOAD STATUS FAILED');
+export const loadStatusSuccess = createAction<StatusSuccessPayload>('LOAD STATUS SUCCESS');
+export const loadStatusFailed = createAction<Error>('LOAD STATUS FAILED');
 
 export const loadRepo = createAction<string>('LOAD REPO');
-export const loadRepoSuccess = createAction<any>('LOAD REPO SUCCESS');
-export const loadRepoFailed = createAction<any>('LOAD REPO FAILED');
+export const loadRepoSuccess = createAction<Repository[]>('LOAD REPO SUCCESS');
+export const loadRepoFailed = createAction<Error>('LOAD REPO FAILED');
 
 export const updateCloneProgress = createAction<RepoStatus>('UPDATE CLONE PROGRESS');
 export const updateIndexProgress = createAction<RepoStatus>('UPDATE INDEX PROGRESS');
 export const updateDeleteProgress = createAction<RepoStatus>('UPDATE DELETE PROGRESS');
 
-export const pollRepoCloneStatusStart = createAction<any>('POLL CLONE STATUS START');
-export const pollRepoIndexStatusStart = createAction<any>('POLL INDEX STATUS START');
-export const pollRepoDeleteStatusStart = createAction<any>('POLL DELETE STATUS START');
+export const pollRepoCloneStatusStart = createAction<string>('POLL CLONE STATUS START');
+export const pollRepoIndexStatusStart = createAction<string>('POLL INDEX STATUS START');
+export const pollRepoDeleteStatusStart = createAction<string>('POLL DELETE STATUS START');
 
 export const pollRepoCloneStatusStop = createAction<RepositoryUri>('POLL CLONE STATUS STOP');
 export const pollRepoIndexStatusStop = createAction<RepositoryUri>('POLL INDEX STATUS STOP');
 export const pollRepoDeleteStatusStop = createAction<RepositoryUri>('POLL DELETE STATUS STOP');
+
+export const FetchRepoFileStatus = createAction<FetchFilePayload>('FETCH REPO FILE STATUS');
+export const FetchRepoFileStatusSuccess = createAction<{
+  path: FetchFilePayload;
+  statusReport: StatusReport;
+}>('FETCH REPO FILE STATUS SUCCESS');
+export const FetchRepoFileStatusFailed = createAction<any>('FETCH REPO FILE STATUS FAILED');

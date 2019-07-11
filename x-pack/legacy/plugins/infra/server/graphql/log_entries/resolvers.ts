@@ -6,9 +6,11 @@
 
 import { failure } from 'io-ts/lib/PathReporter';
 
+import { JsonObject } from '../../../common/typed_json';
 import {
   InfraLogEntryColumn,
   InfraLogEntryFieldColumn,
+  InfraLogEntryHighlightInput,
   InfraLogEntryMessageColumn,
   InfraLogEntryTimestampColumn,
   InfraLogMessageConstantSegment,
@@ -33,6 +35,11 @@ export type InfraSourceLogEntriesBetweenResolver = ChildResolverOf<
   QuerySourceResolver
 >;
 
+export type InfraSourceLogEntryHighlightsResolver = ChildResolverOf<
+  InfraResolverOf<InfraSourceResolvers.LogEntryHighlightsResolver>,
+  QuerySourceResolver
+>;
+
 export type InfraSourceLogSummaryBetweenResolver = ChildResolverOf<
   InfraResolverOf<InfraSourceResolvers.LogSummaryBetweenResolver>,
   QuerySourceResolver
@@ -49,6 +56,7 @@ export const createLogEntriesResolvers = (libs: {
   InfraSource: {
     logEntriesAround: InfraSourceLogEntriesAroundResolver;
     logEntriesBetween: InfraSourceLogEntriesBetweenResolver;
+    logEntryHighlights: InfraSourceLogEntryHighlightsResolver;
     logSummaryBetween: InfraSourceLogSummaryBetweenResolver;
     logItem: InfraSourceLogItem;
   };
@@ -78,8 +86,7 @@ export const createLogEntriesResolvers = (libs: {
         args.key,
         countBefore + 1,
         countAfter + 1,
-        parseFilterQuery(args.filterQuery),
-        args.highlightQuery || undefined
+        parseFilterQuery(args.filterQuery)
       );
 
       const hasMoreBefore = entriesBefore.length > countBefore;
@@ -96,7 +103,6 @@ export const createLogEntriesResolvers = (libs: {
         hasMoreBefore,
         hasMoreAfter,
         filterQuery: args.filterQuery,
-        highlightQuery: args.highlightQuery,
         entries,
       };
     },
@@ -106,8 +112,7 @@ export const createLogEntriesResolvers = (libs: {
         source.id,
         args.startKey,
         args.endKey,
-        parseFilterQuery(args.filterQuery),
-        args.highlightQuery || undefined
+        parseFilterQuery(args.filterQuery)
       );
 
       return {
@@ -116,9 +121,27 @@ export const createLogEntriesResolvers = (libs: {
         hasMoreBefore: true,
         hasMoreAfter: true,
         filterQuery: args.filterQuery,
-        highlightQuery: args.highlightQuery,
         entries,
       };
+    },
+    async logEntryHighlights(source, args, { req }) {
+      const highlightedLogEntrySets = await libs.logEntries.getLogEntryHighlights(
+        req,
+        source.id,
+        args.startKey,
+        args.endKey,
+        parseHighlightInputs(args.highlights),
+        parseFilterQuery(args.filterQuery)
+      );
+
+      return highlightedLogEntrySets.map(entries => ({
+        start: entries.length > 0 ? entries[0].key : null,
+        end: entries.length > 0 ? entries[entries.length - 1].key : null,
+        hasMoreBefore: true,
+        hasMoreAfter: true,
+        filterQuery: args.filterQuery,
+        entries,
+      }));
     },
     async logSummaryBetween(source, args, { req }) {
       UsageCollector.countLogs();
@@ -194,3 +217,24 @@ const isConstantSegment = (
 
 const isFieldSegment = (segment: InfraLogMessageSegment): segment is InfraLogMessageFieldSegment =>
   'field' in segment && 'value' in segment && 'highlights' in segment;
+
+const parseHighlightInputs = (highlightInputs: InfraLogEntryHighlightInput[]) =>
+  highlightInputs
+    ? highlightInputs.reduce<Array<{ query: JsonObject }>>(
+        (parsedHighlightInputs, highlightInput) => {
+          const parsedQuery = parseFilterQuery(highlightInput.query);
+          if (parsedQuery) {
+            return [
+              ...parsedHighlightInputs,
+              {
+                ...highlightInput,
+                query: parsedQuery,
+              },
+            ];
+          } else {
+            return parsedHighlightInputs;
+          }
+        },
+        []
+      )
+    : [];

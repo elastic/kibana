@@ -29,6 +29,7 @@ import { toastNotifications } from 'ui/notify';
 import { VisualizeListingTable } from './visualize_listing_table';
 import { NewVisModal } from '../wizard/new_vis_modal';
 import { createVisualizeEditUrl, VisualizeConstants } from '../visualize_constants';
+import { visualizations } from 'plugins/visualizations';
 
 import { i18n } from '@kbn/i18n';
 
@@ -42,6 +43,7 @@ export function VisualizeListingController($injector, createNewVis) {
   const kbnUrl = $injector.get('kbnUrl');
 
   this.visTypeRegistry = Private(VisTypesRegistryProvider);
+  this.visTypeAliases = visualizations.types.visTypeAliasRegistry.get();
 
   timefilter.disableAutoRefreshSelector();
   timefilter.disableTimeRangeSelector();
