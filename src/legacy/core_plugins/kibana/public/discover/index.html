@@ -1,34 +1,6 @@
 <discover-app class="app-container">
   <!-- Local nav. -->
 
-  <div class="kuiLocalBreadcrumbs">
-    <h1 id="kui_local_breadcrumb" class="kuiLocalBreadcrumb" ng-if="opts.savedSearch.id">
-      <span class="kuiLocalBreadcrumb__emphasis">
-        <button
-          class="kuiLink"
-          type="button"
-          id="reload_saved_search"
-          aria-label="{{::'kbn.discover.reloadSavedSearchAriaLabel' | i18n: {defaultMessage: 'Reload saved search'} }}"
-          tooltip="{{::'kbn.discover.reloadSavedSearchTooltip' | i18n: {defaultMessage: 'Reload saved search'} }}"
-          tooltip-placement="right"
-          tooltip-append-to-body="1"
-          ng-click="resetQuery()"
-        >
-          <span class="kuiIcon fa-undo small"></span>
-          {{::'kbn.discover.reloadSavedSearchButton' | i18n: {defaultMessage: 'Reload'} }}
-        </button>
-      </span>
-    </h1>
-    <div class="kuiLocalBreadcrumb">
-      <span data-test-subj="discoverQueryHits" class="kuiLocalBreadcrumb__emphasis">{{(hits || 0) | number:0}}</span>
-      <span
-        i18n-id="kbn.discover.hitsPluralTitle"
-        i18n-default-message="{hits, plural, one {hit} other {hits}}"
-        i18n-values="{ hits }"
-      ></span>
-    </div>
-  </div>
-
   <kbn-top-nav2 
     name="discover" 
     config="topNavMenu"
@@ -109,6 +81,7 @@
               class="kuiButton kuiButton--basic kuiButton--iconText dscSkipButton"
               ng-click="showAllRows(); scrollToBottom()"
             >
+
               <span class="kuiButton__inner">
                 <span aria-hidden="true" class="kuiButton__icon kuiIcon fa-chevron-down"></span>
                 <span
@@ -117,6 +90,15 @@
                 ></span>
               </span>
             </button>
+
+            <div class="dscResultCount">
+              <span data-test-subj="discoverQueryHits" class="kuiLocalBreadcrumb__emphasis">{{(hits || 0) | number:0}}</span>
+              <span
+                i18n-id="kbn.discover.hitsPluralTitle"
+                i18n-default-message="{hits, plural, one {hit} other {hits}}"
+                i18n-values="{ hits }"
+              ></span>
+            </div>
 
             <section
               aria-label="{{::'kbn.discover.histogramOfFoundDocumentsAriaLabel' | i18n: {defaultMessage: 'Histogram of found documents'} }}"
