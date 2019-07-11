@@ -18,8 +18,8 @@
  */
 
 import chrome from 'ui/chrome';
-import { getFromSavedObject } from 'ui/index_patterns/static_utils';
 import { isEmpty } from 'lodash';
+import { utils as indexPatternUtils } from '../../../index_patterns';
 
 const config = chrome.getUiSettingsClient();
 
@@ -45,7 +45,7 @@ export async function fetchIndexPatterns(indexPatternStrings: string[]) {
       ? exactMatches
       : [...exactMatches, await fetchDefaultIndexPattern()];
 
-  return allMatches.map(getFromSavedObject);
+  return allMatches.map(indexPatternUtils.getFromSavedObject);
 }
 
 const fetchDefaultIndexPattern = async () => {

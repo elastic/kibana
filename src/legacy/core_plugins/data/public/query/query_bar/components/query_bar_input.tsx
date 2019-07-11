@@ -29,12 +29,12 @@ import {
   getAutocompleteProvider,
 } from 'ui/autocomplete_providers';
 import { debounce, compact, isEqual, omit } from 'lodash';
-import { IndexPattern, StaticIndexPattern } from 'ui/index_patterns';
 import { PersistedLog } from 'ui/persisted_log';
 import chrome from 'ui/chrome';
 import { kfetch } from 'ui/kfetch';
 import { Storage } from 'ui/storage';
 import { localStorage } from 'ui/storage/storage_service';
+import { IndexPattern, StaticIndexPattern } from '../../../index_patterns';
 import { Query } from '../index';
 import { fromUser, matchPairs, toUser } from '../lib';
 import { QueryLanguageSwitcher } from './language_switcher';

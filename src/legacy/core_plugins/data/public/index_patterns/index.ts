@@ -26,4 +26,6 @@ export {
   StaticIndexPattern,
   StaticIndexPatternField,
   Field,
+  fixtures,
+  utils,
 } from './index_patterns_service';
