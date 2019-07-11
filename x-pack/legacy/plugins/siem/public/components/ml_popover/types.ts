@@ -37,6 +37,7 @@ export interface Job {
   jobState: string;
   latestTimestampMs?: number;
   memory_status: string;
+  nodeName?: string;
   processed_record_count: number;
 }
 

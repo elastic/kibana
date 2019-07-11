@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`MlPopover JobSwitch renders correctly against snapshot 1`] = `
+exports[`JobSwitch renders correctly against snapshot 1`] = `
 <EuiFlexGroup
   justifyContent="spaceAround"
 >
@@ -8,8 +8,8 @@ exports[`MlPopover JobSwitch renders correctly against snapshot 1`] = `
     grow={false}
   >
     <EuiSwitch
-      checked={false}
-      data-test-subj="job-detail-switch"
+      checked={true}
+      data-test-subj="job-switch"
       disabled={false}
       onChange={[Function]}
     />

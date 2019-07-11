@@ -32,7 +32,7 @@ export const UPGRADE_DESCRIPTION = i18n.translate(
   }
 );
 
-export const UPGRADE_BUTTON = i18n.translate('xpack.siem.components.mlPopup.upgradeButton', {
+export const UPGRADE_BUTTON = i18n.translate('xpack.siem.components.mlPopup.upgradeButtonLabel', {
   defaultMessage: 'Subscription Options',
 });
 
@@ -73,7 +73,7 @@ export const NO_ITEMS_TEXT = i18n.translate(
 );
 
 export const CREATE_CUSTOM_JOB = i18n.translate(
-  'xpack.siem.components.mlPopup.jobsTable.createCustomJobButton',
+  'xpack.siem.components.mlPopup.jobsTable.createCustomJobButtonLabel',
   {
     defaultMessage: 'Create Custom Job',
   }

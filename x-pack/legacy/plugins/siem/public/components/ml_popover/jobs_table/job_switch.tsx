@@ -4,27 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useContext, useState } from 'react';
+import React, { useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiSwitch } from '@elastic/eui';
-import moment from 'moment';
-
-import { KibanaConfigContext } from '../../lib/adapters/framework/kibana_framework_adapter';
-import { startDatafeeds, stopDatafeeds } from './api';
+import { Job } from '../types';
 
 export interface JobSwitchProps {
-  jobName: string;
-  jobDescription: string;
-  jobState: string;
-  datafeedState: string;
-  latestTimestampMs: number;
-  onJobStateChange: Function;
+  job: Job;
+  isSummaryLoading: boolean;
+  onJobStateChange: (jobName: string, latestTimestampMs: number, enable: boolean) => void;
 }
-
-// Max start time for job is no more than two weeks ago to ensure job performance
-const maxStartTime = moment
-  .utc()
-  .subtract(14, 'days')
-  .valueOf();
 
 // Based on ML Job/Datafeed States from x-pack/legacy/plugins/ml/common/constants/states.js
 const enabledStates = ['started', 'opened'];
@@ -44,35 +32,22 @@ const isFailure = (jobState: string, datafeedState: string): boolean => {
 };
 
 export const JobSwitch = React.memo<JobSwitchProps>(
-  ({ jobName, jobState, datafeedState, latestTimestampMs, onJobStateChange }) => {
+  ({ job, isSummaryLoading, onJobStateChange }) => {
     const [isLoading, setIsLoading] = useState(false);
-    const config = useContext(KibanaConfigContext);
-    const headers = { 'kbn-version': config.kbnVersion };
-
-    const startDatafeed = async (enable: boolean) => {
-      if (enable) {
-        const startTime = Math.max(latestTimestampMs, maxStartTime);
-        await startDatafeeds([`datafeed-${jobName}`], headers, startTime);
-      } else {
-        await stopDatafeeds([`datafeed-${jobName}`], headers);
-      }
-      onJobStateChange();
-      setIsLoading(false);
-    };
 
     return (
       <EuiFlexGroup justifyContent="spaceAround">
         <EuiFlexItem grow={false}>
-          {isLoading || isJobLoading(jobState, datafeedState) ? (
-            <EuiLoadingSpinner size="m" />
+          {isSummaryLoading || isLoading || isJobLoading(job.jobState, job.datafeedId) ? (
+            <EuiLoadingSpinner size="m" data-test-subj="job-switch-loader" />
           ) : (
             <EuiSwitch
-              data-test-subj="job-detail-switch"
-              disabled={isFailure(jobState, datafeedState)}
-              checked={isChecked(jobState, datafeedState)}
+              data-test-subj="job-switch"
+              disabled={isFailure(job.jobState, job.datafeedState)}
+              checked={isChecked(job.jobState, job.datafeedState)}
               onChange={e => {
                 setIsLoading(true);
-                startDatafeed(e.target.checked);
+                onJobStateChange(job.id, job.latestTimestampMs || 0, e.target.checked);
               }}
             />
           )}
