@@ -81,7 +81,7 @@ export class ElasticsearchAuthenticationAdapter implements AuthenticationsAdapte
 }
 
 export const formatAuthenticationData = (
-  fields: ReadonlyArray<string>,
+  fields: readonly string[],
   hit: AuthenticationHit,
   fieldMap: Readonly<Record<string, string>>
 ): AuthenticationsEdges =>
