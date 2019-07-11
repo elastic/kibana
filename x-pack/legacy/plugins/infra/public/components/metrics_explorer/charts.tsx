@@ -80,7 +80,7 @@ export const MetricsExplorerCharts = injectI18n(
       <React.Fragment>
         <EuiFlexGrid gutterSize="s" columns={data.series.length === 1 ? 1 : 3}>
           {data.series.map(series => (
-            <EuiFlexItem key={series.id}>
+            <EuiFlexItem key={series.id} style={{ minWidth: 0 }}>
               <MetricsExplorerChart
                 key={`chart-${series.id}`}
                 onFilter={onFilter}
