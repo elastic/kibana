@@ -32,7 +32,6 @@ import { deepFreeze } from './server/lib/deep_freeze';
 import { createOptionalPlugin } from '../../server/lib/optional_plugin';
 import { KibanaRequest } from '../../../../src/core/server';
 
-let defaultVars;
 export const security = (kibana) => new kibana.Plugin({
   id: 'security',
   configPrefix: 'xpack.security',
@@ -95,7 +94,18 @@ export const security = (kibana) => new kibana.Plugin({
       'plugins/security/hacks/on_unauthorized_response'
     ],
     home: ['plugins/security/register_feature'],
-    injectDefaultVars: () => defaultVars,
+    injectDefaultVars: (server) => {
+      const securityPlugin = server.newPlatform.setup.plugins.security;
+      if (!securityPlugin) {
+        throw new Error('New Platform XPack Security plugin is not available.');
+      }
+
+      return {
+        secureCookies: securityPlugin.config.secureCookies,
+        sessionTimeout: securityPlugin.config.sessionTimeout,
+        enableSpaceAwarePrivileges: server.config().get('xpack.spaces.enabled'),
+      };
+    },
   },
 
   async postInit(server) {
@@ -113,7 +123,7 @@ export const security = (kibana) => new kibana.Plugin({
   },
 
   async init(server) {
-    const securityPlugin = this.kbnServer.newPlatform.setup.plugins.security;
+    const securityPlugin = server.newPlatform.setup.plugins.security;
     if (!securityPlugin) {
       throw new Error('New Platform XPack Security plugin is not available.');
     }
@@ -130,14 +140,6 @@ export const security = (kibana) => new kibana.Plugin({
     const plugin = this;
     const config = server.config();
     const xpackInfoFeature = xpackInfo.feature(plugin.id);
-
-    // Config required for default injected vars is coming from new platform plugin and hence we can
-    // initialize these only within `init` function of the legacy plugin.
-    defaultVars = {
-      secureCookies: securityPlugin.config.secureCookies,
-      sessionTimeout: securityPlugin.config.sessionTimeout,
-      enableSpaceAwarePrivileges: config.get('xpack.spaces.enabled'),
-    };
 
     // Register a function that is called whenever the xpack info changes,
     // to re-compute the license check results for this plugin

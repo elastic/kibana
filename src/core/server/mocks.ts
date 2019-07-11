@@ -55,7 +55,7 @@ function pluginInitializerContextMock<T>(config: T) {
 
 function createCoreSetupMock() {
   const mock: MockedKeys<CoreSetup> = {
-    elasticsearch: elasticsearchServiceMock.createSetupContract() as any,
+    elasticsearch: elasticsearchServiceMock.createSetupContract(),
     http: httpServiceMock.createSetupContract(),
   };
 
