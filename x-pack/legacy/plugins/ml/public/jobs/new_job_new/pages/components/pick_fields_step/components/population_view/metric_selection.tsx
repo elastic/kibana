@@ -13,7 +13,11 @@ import { Results, ModelItem, Anomaly } from '../../../../../common/results_loade
 import { LineChartData } from '../../../../../common/chart_loader';
 import { DropDownLabel, DropDownProps } from '../agg_select';
 import { newJobCapsService } from '../../../../../../../services/new_job_capabilities_service';
-import { Field, AggFieldPair } from '../../../../../../../../common/types/fields';
+import {
+  Field,
+  AggFieldPair,
+  EVENT_RATE_FIELD_ID,
+} from '../../../../../../../../common/types/fields';
 import { defaultChartSettings, ChartSettings } from '../../../charts/common/settings';
 import { MetricSelector } from './metric_selector';
 import { JobProgress } from '../job_progress';
@@ -84,13 +88,9 @@ export const PopulationDetectors: FC<Props> = ({ isActive, setIsValid }) => {
     setAnomalyData(results.anomalies);
   }
 
-  // subscribe to progress
   useEffect(() => {
+    // subscribe to progress and results
     jobCreator.subscribeToProgress(setProgress);
-  }, []);
-
-  // subscribe to results
-  useEffect(() => {
     resultsLoader.subscribeToResults(setResultsWrapper);
   }, []);
 
@@ -98,7 +98,8 @@ export const PopulationDetectors: FC<Props> = ({ isActive, setIsValid }) => {
   useEffect(() => {
     jobCreator.removeAllDetectors();
     aggFieldPairList.forEach((pair, i) => {
-      jobCreator.addDetector(pair.agg, pair.field);
+      const field = pair.field.id === EVENT_RATE_FIELD_ID ? null : pair.field;
+      jobCreator.addDetector(pair.agg, field);
       if (pair.by !== undefined) {
         // re-add by fields
         jobCreator.setByField(pair.by.field, i);

@@ -73,13 +73,9 @@ export const SingleMetricDetectors: FC<Props> = ({ isActive, setIsValid }) => {
     }
   }
 
-  // subscribe to progress
   useEffect(() => {
+    // subscribe to progress and results
     jobCreator.subscribeToProgress(setProgress);
-  }, []);
-
-  // subscribe to results
-  useEffect(() => {
     resultsLoader.subscribeToResults(setResultsWrapper);
   }, []);
 
@@ -119,40 +115,24 @@ export const SingleMetricDetectors: FC<Props> = ({ isActive, setIsValid }) => {
   return (
     <Fragment>
       {isActive && (
-        <Fragment>
-          <AggSelect
-            fields={fields}
-            changeHandler={detectorChangeHandler}
-            selectedOptions={selectedOptions}
-            removeOptions={[]}
-          />
-          {lineChartsData[DTR_IDX] !== undefined && (
-            <AnomalyChart
-              chartType={CHART_TYPE.LINE}
-              chartData={lineChartsData[DTR_IDX]}
-              modelData={modelData}
-              anomalyData={anomalyData}
-              height="300px"
-              width="100%"
-            />
-          )}
-        </Fragment>
+        <AggSelect
+          fields={fields}
+          changeHandler={detectorChangeHandler}
+          selectedOptions={selectedOptions}
+          removeOptions={[]}
+        />
       )}
-      {isActive === false && (
+      {lineChartsData[DTR_IDX] !== undefined && (
         <Fragment>
-          {lineChartsData[DTR_IDX] !== undefined && (
-            <Fragment>
-              <AnomalyChart
-                chartType={CHART_TYPE.LINE}
-                chartData={lineChartsData[DTR_IDX]}
-                modelData={modelData}
-                anomalyData={anomalyData}
-                height="300px"
-                width="100%"
-              />
-              <JobProgress progress={progress} />
-            </Fragment>
-          )}
+          <AnomalyChart
+            chartType={CHART_TYPE.LINE}
+            chartData={lineChartsData[DTR_IDX]}
+            modelData={modelData}
+            anomalyData={anomalyData}
+            height="300px"
+            width="100%"
+          />
+          {isActive === false && <JobProgress progress={progress} />}
         </Fragment>
       )}
     </Fragment>

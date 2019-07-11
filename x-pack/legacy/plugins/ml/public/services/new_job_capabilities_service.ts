@@ -5,8 +5,16 @@
  */
 
 import { IndexPatternWithType } from '../../common/types/kibana';
-import { Field, Aggregation, AggId, FieldId, NewJobCaps } from '../../common/types/fields';
+import {
+  Field,
+  Aggregation,
+  AggId,
+  FieldId,
+  NewJobCaps,
+  EVENT_RATE_FIELD_ID,
+} from '../../common/types/fields';
 import { ES_FIELD_TYPES } from '../../common/constants/field_types';
+import { ML_JOB_AGGREGATION } from '../../common/constants/aggregation_types';
 import { ml } from './ml_api_service';
 
 // called in the angular routing resolve block to initialize the
@@ -30,10 +38,12 @@ const categoryFieldTypes = [ES_FIELD_TYPES.TEXT, ES_FIELD_TYPES.KEYWORD, ES_FIEL
 class NewJobCapsService {
   private _fields: Field[];
   private _aggs: Aggregation[];
+  private _includeCountAgg: boolean;
 
-  constructor() {
+  constructor(includeCountAgg = true) {
     this._fields = [];
     this._aggs = [];
+    this._includeCountAgg = includeCountAgg;
   }
 
   get fields(): Field[] {
@@ -59,6 +69,14 @@ class NewJobCapsService {
     try {
       const resp = await ml.jobs.newJobCaps(indexPattern.title, indexPattern.type === 'rollup');
       const { fields, aggs } = createObjects(resp, indexPattern.title);
+
+      if (this._includeCountAgg === true) {
+        const { countField, countAggs } = createCountFieldAndAggs();
+
+        fields.push(countField);
+        aggs.push(...countAggs);
+      }
+
       this._fields = fields;
       this._aggs = aggs;
     } catch (error) {
@@ -137,6 +155,64 @@ function mix(field: Field, agg: Aggregation) {
   }
   agg.fields.push(field);
   field.aggs.push(agg);
+}
+
+function createCountFieldAndAggs() {
+  const countField: Field = {
+    id: EVENT_RATE_FIELD_ID,
+    name: 'Event rate',
+    type: ES_FIELD_TYPES.INTEGER,
+    aggregatable: true,
+    aggs: [],
+  };
+
+  const countAggs: Aggregation[] = [
+    {
+      id: ML_JOB_AGGREGATION.COUNT,
+      title: 'Count',
+      kibanaName: 'count',
+      dslName: 'count',
+      type: 'metrics',
+      mlModelPlotAgg: {
+        min: 'min;',
+        max: 'max',
+      },
+      fields: [countField],
+    },
+    {
+      id: ML_JOB_AGGREGATION.HIGH_COUNT,
+      title: 'High count',
+      kibanaName: 'count',
+      dslName: 'count',
+      type: 'metrics',
+      mlModelPlotAgg: {
+        min: 'min;',
+        max: 'max',
+      },
+      fields: [countField],
+    },
+    {
+      id: ML_JOB_AGGREGATION.LOW_COUNT,
+      title: 'Low count',
+      kibanaName: 'count',
+      dslName: 'count',
+      type: 'metrics',
+      mlModelPlotAgg: {
+        min: 'min;',
+        max: 'max',
+      },
+      fields: [countField],
+    },
+  ];
+
+  if (countField.aggs !== undefined) {
+    countField.aggs.push(...countAggs);
+  }
+
+  return {
+    countField,
+    countAggs,
+  };
 }
 
 export const newJobCapsService = new NewJobCapsService();

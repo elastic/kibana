@@ -5,13 +5,10 @@
  */
 
 import { get } from 'lodash';
-import { AggFieldNamePair } from '../../../../common/types/fields';
+import { AggFieldNamePair, EVENT_RATE_FIELD_ID } from '../../../../common/types/fields';
 import { ML_MEDIAN_PERCENTS } from '../../../../common/util/job_utils';
 
 export type callWithRequestType = (action: string, params: any) => Promise<any>;
-
-const EVENT_RATE_COUNT_FIELD = '__ml_event_rate_count__';
-// const OVER_FIELD_EXAMPLES_COUNT = 40;
 
 type DtrIndex = number;
 type TimeStamp = number;
@@ -62,8 +59,6 @@ export function newJobLineChartProvider(callWithRequest: callWithRequestType) {
 
 function processSearchResults(resp: any, fields: string[]): ProcessedResults {
   const aggregationsByTime = get(resp, ['aggregations', 'times', 'buckets'], []);
-  // let highestValue: number;
-  // let lowestValue: number;
 
   const tempResults: Record<DtrIndex, Result[]> = {};
   fields.forEach((f, i) => (tempResults[i] = []));
@@ -74,7 +69,7 @@ function processSearchResults(resp: any, fields: string[]): ProcessedResults {
 
     fields.forEach((field, i) => {
       let value;
-      if (field === EVENT_RATE_COUNT_FIELD) {
+      if (field === EVENT_RATE_FIELD_ID) {
         value = docCount;
       } else if (typeof dataForTime[i].value !== 'undefined') {
         value = dataForTime[i].value;
@@ -82,38 +77,12 @@ function processSearchResults(resp: any, fields: string[]): ProcessedResults {
         value = dataForTime[i].values[ML_MEDIAN_PERCENTS];
       }
 
-      // let value: Value = get(dataForTime, ['field_value', 'value']);
-
-      // if (value === undefined && field !== null) {
-      //   value = get(dataForTime, ['field_value', 'values', ML_MEDIAN_PERCENTS]);
-      // }
-
-      // if (value === undefined && field === null) {
-      //   value = dataForTime.doc_count;
-      // }
-      // if (
-      //   (value !== null && value !== undefined && !isFinite(value)) ||
-      //   dataForTime.doc_count === 0
-      // ) {
-      //   value = null;
-      // }
-
-      // if (value !== null && value !== undefined) {
-      //   highestValue = highestValue === undefined ? value : Math.max(value, highestValue);
-      //   lowestValue = lowestValue === undefined ? value : Math.min(value, lowestValue);
-      // }
-
       tempResults[i].push({
         time,
         value,
       });
     });
   });
-
-  // const results: Record<number, Result[]> = {};
-  // Object.entries(tempResults).forEach(([fieldIdx, results2]) => {
-  //   results[+fieldIdx] = results2.sort((a, b) => a.time - b.time);
-  // });
 
   return {
     success: true,
@@ -179,7 +148,7 @@ function getSearchJsonFromConfig(
   const aggs: Record<number, Record<string, { field: string; percents?: number[] }>> = {};
 
   aggFieldNamePairs.forEach(({ agg, field }, i) => {
-    if (field !== null) {
+    if (field !== null && field !== EVENT_RATE_FIELD_ID) {
       aggs[i] = {
         [agg]: { field },
       };
@@ -191,28 +160,6 @@ function getSearchJsonFromConfig(
   });
 
   json.body.aggs.times.aggs = aggs;
-  // json.body.aggs.times.aggs = {
-  //   field_value: {
-  //     [agg]: { field },
-  //   },
-  // };
-
-  // if (Object.keys(formConfig.fields).length) {
-  //   json.body.aggs.times.aggs = {};
-  //   _.each(formConfig.fields, field => {
-  //     if (field.id !== EVENT_RATE_COUNT_FIELD) {
-  //       json.body.aggs.times.aggs[field.id] = {
-  //         [field.agg.type.dslName]: { field: field.name },
-  //       };
-
-  //       if (field.agg.type.dslName === 'percentiles') {
-  //         json.body.aggs.times.aggs[field.id][field.agg.type.dslName].percents = [
-  //           ML_MEDIAN_PERCENTS,
-  //         ];
-  //       }
-  //     }
-  //   });
-  // }
 
   return json;
 }

@@ -57,7 +57,7 @@ export class ChartLoader {
         this._query,
         aggFieldPairs.map(af => ({
           agg: af.agg.dslName,
-          field: af.field.name,
+          field: af.field.id,
         })),
         splitFieldName,
         splitFieldValue
@@ -87,12 +87,12 @@ export class ChartLoader {
         aggFieldPairs.map(af => {
           const by =
             af.by !== undefined && af.by.field !== null && af.by.value !== null
-              ? { field: af.by.field.name, value: af.by.value }
+              ? { field: af.by.field.id, value: af.by.value }
               : { field: null, value: null };
 
           return {
             agg: af.agg.dslName,
-            field: af.field.name,
+            field: af.field.id,
             by,
           };
         }),

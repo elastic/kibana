@@ -7,6 +7,8 @@
 import { ES_FIELD_TYPES } from '../../common/constants/field_types';
 import { ML_JOB_AGGREGATION } from '../../common/constants/aggregation_types';
 
+export const EVENT_RATE_FIELD_ID = '__ml_event_rate_count__';
+
 export type FieldId = string;
 export type AggId = ML_JOB_AGGREGATION;
 export type SplitField = Field | null;
