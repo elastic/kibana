@@ -49,6 +49,7 @@ export function setupDirective() {
         'showFilterBar',
         'showQueryBar',
         'showDatePicker',
+        'showSaveQuery',
         'dateRangeFrom',
         'dateRangeTo',
         'isRefreshPaused',

@@ -20,12 +20,14 @@
 import React, { FunctionComponent, Fragment } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiButtonEmpty, EuiIcon } from '@elastic/eui';
 import chrome from 'ui/chrome';
+import { capabilities } from 'ui/capabilities';
 import { SavedQueryAttributes } from '../../../search/search_bar';
 import { Query } from '../index';
 
 interface Props {
   query: Query;
   savedQuery?: SavedQueryAttributes;
+  showSaveQuery?: boolean;
   onSave: () => void;
   onSaveNew: () => void;
   isDirty: boolean;
@@ -45,12 +47,13 @@ export const SavedQueryRow: FunctionComponent<Props> = ({
   savedQuery,
   onSave,
   onSaveNew,
+  showSaveQuery,
   isDirty,
   onClearSavedQuery,
 }) => {
   let rowContent;
   if (savedQuery) {
-    if (isDirty) {
+    if (isDirty && showSaveQuery) {
       rowContent = (
         <Fragment>
           <EuiFlexGroup>
@@ -85,19 +88,21 @@ export const SavedQueryRow: FunctionComponent<Props> = ({
               </EuiButtonEmpty>
             </EuiFlexItem>
           </EuiFlexGroup>
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty onClick={onSaveNew}>Save as new</EuiButtonEmpty>
-          </EuiFlexItem>
+          {showSaveQuery && (
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty onClick={onSaveNew}>Save as new</EuiButtonEmpty>
+            </EuiFlexItem>
+          )}
         </Fragment>
       );
     }
-  } else if (query.query.length !== 0) {
+  } else if (query.query.length !== 0 && showSaveQuery) {
     rowContent = (
       <EuiFlexItem grow={false}>
         <EuiButtonEmpty onClick={onSave}>Save this query for reuse</EuiButtonEmpty>
       </EuiFlexItem>
     );
-  } else {
+  } else if (capabilities.get().savedObjectsManagement.read) {
     rowContent = (
       <EuiFlexItem grow={false}>
         <EuiButtonEmpty
@@ -109,9 +114,13 @@ export const SavedQueryRow: FunctionComponent<Props> = ({
     );
   }
 
-  return (
-    <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
-      {rowContent}
-    </EuiFlexGroup>
-  );
+  if (rowContent) {
+    return (
+      <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+        {rowContent}
+      </EuiFlexGroup>
+    );
+  } else {
+    return <Fragment></Fragment>;
+  }
 };

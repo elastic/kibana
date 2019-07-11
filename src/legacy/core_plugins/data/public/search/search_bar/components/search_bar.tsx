@@ -38,6 +38,7 @@ import { Storage } from 'ui/storage';
 import { get, isEqual } from 'lodash';
 
 import { toastNotifications } from 'ui/notify';
+import { capabilities } from 'ui/capabilities';
 import { Query, QueryBar } from '../../../query/query_bar';
 import { FilterBar } from '../../../filter/filter_bar';
 import { SavedQuery, SavedQueryAttributes } from '../index';
@@ -73,6 +74,7 @@ interface Props {
   isRefreshPaused?: boolean;
   refreshInterval?: number;
   showAutoRefreshOnly?: boolean;
+  showSaveQuery?: boolean;
   onRefreshChange?: (options: { isPaused: boolean; refreshInterval: number }) => void;
   onSaved?: (savedQuery: SavedQuery) => void;
   onSavedQueryUpdated: (savedQuery: SavedQuery) => void;
@@ -402,34 +404,38 @@ class SearchBarUI extends Component<Props, State> {
         </EuiFlexGroup>
 
         <EuiFlexGroup direction="rowReverse" alignItems="center">
-          <EuiFlexItem grow={false}>
-            <EuiButton
-              fill
-              onClick={() => {
-                if (this.props.savedQuery) {
-                  this.onInitiateSave();
-                } else {
-                  this.onInitiateSaveNew();
-                }
-              }}
-            >
-              <FormattedMessage
-                id="data.search.searchBar.savedQueryPopoverSaveButtonText"
-                defaultMessage="Save"
-              />
-            </EuiButton>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              flush="right"
-              href={chrome.addBasePath(`/app/kibana#/management/kibana/objects?type=query`)}
-            >
-              <FormattedMessage
-                id="data.search.searchBar.savedQueryPopoverManageQueriesButtonText"
-                defaultMessage="Manage queries"
-              />
-            </EuiButtonEmpty>
-          </EuiFlexItem>
+          {this.props.showSaveQuery && (
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                fill
+                onClick={() => {
+                  if (this.props.savedQuery) {
+                    this.onInitiateSave();
+                  } else {
+                    this.onInitiateSaveNew();
+                  }
+                }}
+              >
+                <FormattedMessage
+                  id="data.search.searchBar.savedQueryPopoverSaveButtonText"
+                  defaultMessage="Save"
+                />
+              </EuiButton>
+            </EuiFlexItem>
+          )}
+          {capabilities.get().savedObjectsManagement.read && (
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                flush="right"
+                href={chrome.addBasePath(`/app/kibana#/management/kibana/objects?type=query`)}
+              >
+                <FormattedMessage
+                  id="data.search.searchBar.savedQueryPopoverManageQueriesButtonText"
+                  defaultMessage="Manage queries"
+                />
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+          )}
           <EuiFlexItem />
         </EuiFlexGroup>
       </EuiPopover>
@@ -457,6 +463,7 @@ class SearchBarUI extends Component<Props, State> {
             isRefreshPaused={this.props.isRefreshPaused}
             refreshInterval={this.props.refreshInterval}
             showAutoRefreshOnly={this.props.showAutoRefreshOnly}
+            showSaveQuery={this.props.showSaveQuery}
             onRefreshChange={this.props.onRefreshChange}
             onSave={this.onInitiateSave}
             onSaveNew={this.onInitiateSaveNew}

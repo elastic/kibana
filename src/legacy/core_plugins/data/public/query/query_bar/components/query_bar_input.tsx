@@ -58,6 +58,7 @@ interface Props {
   persistedLog?: PersistedLog;
   bubbleSubmitEvent?: boolean;
   languageSwitcherPopoverAnchorPosition?: PopoverAnchorPosition;
+  showSaveQuery?: boolean;
   onChange?: (query: Query) => void;
   onSubmit?: (query: Query) => void;
   onLoadSavedQuery?: (savedQuery: SavedQuery) => void;
@@ -483,6 +484,7 @@ export class QueryBarInputUI extends Component<Props, State> {
       'onLoadSavedQuery',
       'isDirty',
       'onClearSavedQuery',
+      'showSaveQuery',
     ]);
 
     return (
@@ -567,6 +569,7 @@ export class QueryBarInputUI extends Component<Props, State> {
                 <SavedQueryRow
                   query={this.props.query}
                   savedQuery={this.props.savedQuery}
+                  showSaveQuery={this.props.showSaveQuery}
                   onSave={this.props.onSave}
                   onSaveNew={this.props.onSaveNew}
                   isDirty={this.props.isDirty}

@@ -223,6 +223,11 @@ function discoverController(
   $scope.fetchStatus = fetchStatuses.UNINITIALIZED;
   $scope.refreshInterval = timefilter.getRefreshInterval();
   $scope.savedQuery = $route.current.locals.savedQuery;
+  $scope.showSaveQuery = uiCapabilities.discover.saveQuery;
+
+  $scope.$watch(() => uiCapabilities.discover.saveQuery, (newCapability) => {
+    $scope.showSaveQuery = newCapability;
+  });
 
   $scope.intervalEnabled = function (interval) {
     return interval.val !== 'custom';

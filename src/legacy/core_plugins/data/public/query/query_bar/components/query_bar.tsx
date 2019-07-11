@@ -66,6 +66,7 @@ interface Props {
   isRefreshPaused?: boolean;
   refreshInterval?: number;
   showAutoRefreshOnly?: boolean;
+  showSaveQuery?: boolean;
   onRefreshChange?: (options: { isPaused: boolean; refreshInterval: number }) => void;
   customSubmitButton?: any;
   onSave: () => void;
@@ -187,6 +188,7 @@ export class QueryBarUI extends Component<Props, State> {
             onSubmit={this.onInputSubmit}
             persistedLog={this.persistedLog}
             savedQuery={this.props.savedQuery}
+            showSaveQuery={this.props.showSaveQuery}
             onSave={this.props.onSave}
             onSaveNew={this.props.onSaveNew}
             onLoadSavedQuery={this.props.onLoadSavedQuery}
