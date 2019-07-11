@@ -842,7 +842,7 @@ import { npStart: { core } } from 'ui/new_platform';
 
 | Legacy Platform                                       | New Platform                   | Notes                                                                                                                                          |
 |-------------------------------------------------------|--------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------|
-| `chrome.addBasePath`                                  | `core.http.basePath.prepend`   | This API is also available on the server                                                                                                       |
+| `chrome.addBasePath`                                  | `core.http.basePath.prepend`   |                                                                                                                                                |
 | `chrome.breadcrumbs.set`                              | `core.chrome.setBreadcrumbs`   |                                                                                                                                                |
 | `chrome.getUiSettingsClient`                          | `core.uiSettings`              |                                                                                                                                                |
 | `chrome.helpExtension.set`                            | `core.chrome.setHelpExtension` |                                                                                                                                                |
@@ -893,10 +893,12 @@ import { setup, start } from '../core_plugins/visualizations/public/legacy';
 ##### Core services
 In server code, `core` can be accessed from either `server.newPlatform` or `kbnServer.newPlatform`. There are not currently very many services available on the server-side:
 
-| Legacy Platform                                   | New Platform                     | Notes                                              |
-|---------------------------------------------------|----------------------------------|----------------------------------------------------|
-| `server.plugins.elasticsearch.getCluster('data')` | `core.elasticsearch.dataClient$` | Handlers will also include a pre-configured client |
-| `request.getBasePath()`                           | `core.http.basePath`             |                                                    |
+| Legacy Platform                                    | New Platform                      | Notes                                              |
+|----------------------------------------------------|-----------------------------------|----------------------------------------------------|
+| `request.getBasePath()`                            | `core.http.basePath.get`          |                                                    |
+| `server.plugins.elasticsearch.getCluster('data')`  | `core.elasticsearch.dataClient$`  | Handlers will also include a pre-configured client |
+| `server.plugins.elasticsearch.getCluster('admin')` | `core.elasticsearch.adminClient$` | Handlers will also include a pre-configured client |
+| `request.getBasePath()`                            | `core.http.basePath`              |                                                    |
 
 _See also: [Server's CoreSetup API Docs](/docs/development/core/server/kibana-plugin-server.coresetup.md)_
 
