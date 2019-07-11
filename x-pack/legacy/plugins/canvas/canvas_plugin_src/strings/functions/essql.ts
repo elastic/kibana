@@ -27,7 +27,8 @@ export const help: FunctionHelp<FunctionFactory<typeof essql>> = {
       },
     }),
     count: i18n.translate('xpack.canvas.functions.essql.args.countHelpText', {
-      defaultMessage: 'The number of documents to retrieve. Smaller numbers perform better.',
+      defaultMessage:
+        'The number of documents to retrieve. For better performance, use a smaller data set.',
     }),
     timezone: i18n.translate('xpack.canvas.functions.essql.args.timezoneHelpText', {
       defaultMessage:

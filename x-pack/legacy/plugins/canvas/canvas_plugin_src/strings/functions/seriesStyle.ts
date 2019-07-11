@@ -21,28 +21,14 @@ export const help: FunctionHelp<FunctionFactory<typeof seriesStyle>> = {
     },
   }),
   args: {
-    label: i18n.translate('xpack.canvas.functions.seriesStyle.args.labelHelpText', {
-      defaultMessage: 'The name of the series to style.',
+    bars: i18n.translate('xpack.canvas.functions.seriesStyle.args.barsHelpText', {
+      defaultMessage: 'The width of bars.',
     }),
     color: i18n.translate('xpack.canvas.functions.seriesStyle.args.colorHelpText', {
       defaultMessage: 'The line color.',
     }),
-    lines: i18n.translate('xpack.canvas.functions.seriesStyle.args.linesHelpText', {
-      defaultMessage: 'The width of the line.',
-    }),
-    bars: i18n.translate('xpack.canvas.functions.seriesStyle.args.barsHelpText', {
-      defaultMessage: 'The width of bars.',
-    }),
-    points: i18n.translate('xpack.canvas.functions.seriesStyle.args.pointsHelpText', {
-      defaultMessage: 'Size of points on line',
-    }),
     fill: i18n.translate('xpack.canvas.functions.seriesStyle.args.fillHelpText', {
       defaultMessage: 'Should we fill in the points?',
-    }),
-    stack: i18n.translate('xpack.canvas.functions.seriesStyle.args.stackHelpText', {
-      defaultMessage:
-        'Specifies if the series should be stacked. The number is the stack ID. ' +
-        'Series with the same stack ID are stacked together.',
     }),
     horizontalBars: i18n.translate(
       'xpack.canvas.functions.seriesStyle.args.horizontalBarsHelpText',
@@ -50,5 +36,19 @@ export const help: FunctionHelp<FunctionFactory<typeof seriesStyle>> = {
         defaultMessage: 'Sets the orientation of the bars in the chart to horizontal.',
       }
     ),
+    label: i18n.translate('xpack.canvas.functions.seriesStyle.args.labelHelpText', {
+      defaultMessage: 'The name of the series to style.',
+    }),
+    lines: i18n.translate('xpack.canvas.functions.seriesStyle.args.linesHelpText', {
+      defaultMessage: 'The width of the line.',
+    }),
+    points: i18n.translate('xpack.canvas.functions.seriesStyle.args.pointsHelpText', {
+      defaultMessage: 'Size of points on line',
+    }),
+    stack: i18n.translate('xpack.canvas.functions.seriesStyle.args.stackHelpText', {
+      defaultMessage:
+        'Specifies if the series should be stacked. The number is the stack ID. ' +
+        'Series with the same stack ID are stacked together.',
+    }),
   },
 };
