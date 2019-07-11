@@ -115,6 +115,7 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>(
     elasticsearch: {
       adminClient$: deps.elasticsearch.adminClient$,
       dataClient$: deps.elasticsearch.dataClient$,
+      createClient: deps.elasticsearch.createClient,
     },
     http: {
       registerOnPreAuth: deps.http.registerOnPreAuth,
@@ -122,6 +123,7 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>(
       registerOnPostAuth: deps.http.registerOnPostAuth,
       basePath: deps.http.basePath,
       createNewServer: deps.http.createNewServer,
+      isTlsEnabled: deps.http.isTlsEnabled,
     },
   };
 }
