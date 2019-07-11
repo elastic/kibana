@@ -31,7 +31,7 @@ export const anomaliesTableData = async (
   headers: Record<string, string | undefined>
 ): Promise<Anomalies> => {
   try {
-    const response = await fetch('/api/ml/results/anomalies_table_data', {
+    const response = await fetch(`${chrome.getBasePath()}/api/ml/results/anomalies_table_data`, {
       method: 'POST',
       credentials: 'same-origin',
       body: JSON.stringify(body),
