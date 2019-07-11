@@ -5,32 +5,34 @@
  */
 // @ts-ignore
 import template from 'plugins/spaces/views/management/template.html';
-import { SpacesNavState } from 'plugins/spaces/views/nav_control';
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import 'ui/autoload/styles';
 import { I18nContext } from 'ui/i18n';
 // @ts-ignore
 import routes from 'ui/routes';
-import { SpacesManager } from '../../lib/spaces_manager';
+import { getSpacesManager } from '../../lib/spaces_manager';
 import { ManageSpacePage } from './edit_space';
 import { getCreateBreadcrumbs, getEditBreadcrumbs, getListBreadcrumbs } from './lib';
 import { SpacesGridPage } from './spaces_grid';
+
+import { waitForSpacesNPInit } from '../../hacks/init_np_plugin';
+
 const reactRootNodeId = 'manageSpacesReactRoot';
 
 routes.when('/management/spaces/list', {
   template,
   k7Breadcrumbs: getListBreadcrumbs,
   requireUICapability: 'management.kibana.spaces',
-  controller($scope: any, spacesNavState: SpacesNavState, spaceSelectorURL: string) {
+  controller($scope: any) {
     $scope.$$postDigest(async () => {
       const domNode = document.getElementById(reactRootNodeId);
 
-      const spacesManager = new SpacesManager(spaceSelectorURL);
+      await waitForSpacesNPInit;
 
       render(
         <I18nContext>
-          <SpacesGridPage spacesManager={spacesManager} spacesNavState={spacesNavState} />
+          <SpacesGridPage spacesManager={getSpacesManager()} />
         </I18nContext>,
         domNode
       );
@@ -49,15 +51,15 @@ routes.when('/management/spaces/create', {
   template,
   k7Breadcrumbs: getCreateBreadcrumbs,
   requireUICapability: 'management.kibana.spaces',
-  controller($scope: any, spacesNavState: SpacesNavState, spaceSelectorURL: string) {
+  controller($scope: any) {
     $scope.$$postDigest(async () => {
       const domNode = document.getElementById(reactRootNodeId);
 
-      const spacesManager = new SpacesManager(spaceSelectorURL);
+      await waitForSpacesNPInit;
 
       render(
         <I18nContext>
-          <ManageSpacePage spacesManager={spacesManager} spacesNavState={spacesNavState} />
+          <ManageSpacePage spacesManager={getSpacesManager()} />
         </I18nContext>,
         domNode
       );
@@ -80,26 +82,19 @@ routes.when('/management/spaces/edit/:spaceId', {
   template,
   k7Breadcrumbs: () => getEditBreadcrumbs(),
   requireUICapability: 'management.kibana.spaces',
-  controller(
-    $scope: any,
-    $route: any,
-    chrome: any,
-    spacesNavState: SpacesNavState,
-    spaceSelectorURL: string
-  ) {
+  controller($scope: any, $route: any, chrome: any) {
     $scope.$$postDigest(async () => {
       const domNode = document.getElementById(reactRootNodeId);
 
       const { spaceId } = $route.current.params;
 
-      const spacesManager = new SpacesManager(spaceSelectorURL);
+      await waitForSpacesNPInit;
 
       render(
         <I18nContext>
           <ManageSpacePage
             spaceId={spaceId}
-            spacesManager={spacesManager}
-            spacesNavState={spacesNavState}
+            spacesManager={getSpacesManager()}
             setBreadcrumbs={breadcrumbs => {
               chrome.breadcrumbs.set(breadcrumbs);
             }}

@@ -10,6 +10,7 @@ function createSpacesManagerMock() {
   return ({
     getSpaces: jest.fn().mockResolvedValue([]),
     getSpace: jest.fn().mockResolvedValue(undefined),
+    getActiveSpace: jest.fn().mockResolvedValue(undefined),
     createSpace: jest.fn().mockResolvedValue(undefined),
     updateSpace: jest.fn().mockResolvedValue(undefined),
     deleteSpace: jest.fn().mockResolvedValue(undefined),

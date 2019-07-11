@@ -11,7 +11,6 @@ import { EuiButton, EuiLink, EuiSwitch } from '@elastic/eui';
 import { ReactWrapper } from 'enzyme';
 import React from 'react';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
-import { SpacesNavState } from '../../nav_control';
 import { ConfirmAlterActiveSpaceModal } from './confirm_alter_active_space_modal';
 import { ManageSpacePage } from './manage_space_page';
 import { SectionPanel } from './section_panel';
@@ -27,18 +26,10 @@ describe('ManageSpacePage', () => {
   it('allows a space to be created', async () => {
     const spacesManager = spacesManagerMock.create();
     spacesManager.createSpace = jest.fn(spacesManager.createSpace);
-
-    const spacesNavState: SpacesNavState = {
-      getActiveSpace: () => space,
-      refreshSpacesList: jest.fn(),
-    };
+    spacesManager.getActiveSpace = jest.fn().mockResolvedValue(space);
 
     const wrapper = mountWithIntl(
-      <ManageSpacePage.WrappedComponent
-        spacesManager={spacesManager}
-        spacesNavState={spacesNavState}
-        intl={null as any}
-      />
+      <ManageSpacePage.WrappedComponent spacesManager={spacesManager} intl={null as any} />
     );
 
     await waitForDataLoad(wrapper);
@@ -73,16 +64,12 @@ describe('ManageSpacePage', () => {
       initials: 'AB',
       disabledFeatures: [],
     });
+    spacesManager.getActiveSpace = jest.fn().mockResolvedValue(space);
 
-    const spacesNavState: SpacesNavState = {
-      getActiveSpace: () => space,
-      refreshSpacesList: jest.fn(),
-    };
     const wrapper = mountWithIntl(
       <ManageSpacePage.WrappedComponent
         spaceId={'existing-space'}
         spacesManager={spacesManager}
-        spacesNavState={spacesNavState}
         intl={null as any}
       />
     );
@@ -119,16 +106,12 @@ describe('ManageSpacePage', () => {
       initials: 'AB',
       disabledFeatures: [],
     });
+    spacesManager.getActiveSpace = jest.fn().mockResolvedValue(space);
 
-    const spacesNavState: SpacesNavState = {
-      getActiveSpace: () => space,
-      refreshSpacesList: jest.fn(),
-    };
     const wrapper = mountWithIntl(
       <ManageSpacePage.WrappedComponent
         spaceId={'my-space'}
         spacesManager={spacesManager}
-        spacesNavState={spacesNavState}
         intl={null as any}
       />
     );
@@ -174,16 +157,12 @@ describe('ManageSpacePage', () => {
       initials: 'AB',
       disabledFeatures: [],
     });
+    spacesManager.getActiveSpace = jest.fn().mockResolvedValue(space);
 
-    const spacesNavState: SpacesNavState = {
-      getActiveSpace: () => space,
-      refreshSpacesList: jest.fn(),
-    };
     const wrapper = mountWithIntl(
       <ManageSpacePage.WrappedComponent
         spaceId={'my-space'}
         spacesManager={spacesManager}
-        spacesNavState={spacesNavState}
         intl={null as any}
       />
     );

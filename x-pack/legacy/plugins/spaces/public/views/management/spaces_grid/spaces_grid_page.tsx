@@ -30,7 +30,6 @@ import { Space } from '../../../../common/model/space';
 import { SpaceAvatar } from '../../../components';
 import { getSpacesFeatureDescription } from '../../../lib/constants';
 import { SpacesManager } from '../../../lib/spaces_manager';
-import { SpacesNavState } from '../../nav_control';
 import { ConfirmDeleteModal } from '../components/confirm_delete_modal';
 import { SecureSpaceMessage } from '../components/secure_space_message';
 import { UnauthorizedPrompt } from '../components/unauthorized_prompt';
@@ -38,7 +37,6 @@ import { getEnabledFeatures } from '../lib/feature_utils';
 
 interface Props {
   spacesManager: SpacesManager;
-  spacesNavState: SpacesNavState;
   intl: InjectedIntl;
 }
 
@@ -158,12 +156,11 @@ class SpacesGridPageUI extends Component<Props, State> {
       return null;
     }
 
-    const { spacesNavState, spacesManager } = this.props;
+    const { spacesManager } = this.props;
 
     return (
       <ConfirmDeleteModal
         space={this.state.selectedSpace}
-        spacesNavState={spacesNavState}
         spacesManager={spacesManager}
         onCancel={() => {
           this.setState({
@@ -177,7 +174,7 @@ class SpacesGridPageUI extends Component<Props, State> {
 
   public deleteSpace = async () => {
     const { intl } = this.props;
-    const { spacesManager, spacesNavState } = this.props;
+    const { spacesManager } = this.props;
 
     const space = this.state.selectedSpace;
 
@@ -220,8 +217,6 @@ class SpacesGridPageUI extends Component<Props, State> {
     );
 
     toastNotifications.addSuccess(message);
-
-    spacesNavState.refreshSpacesList();
   };
 
   public loadGrid = async () => {

@@ -16,6 +16,7 @@ import {
   EuiSpacer,
   EuiText,
   EuiTitle,
+  EuiLoadingSpinner,
 } from '@elastic/eui';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import { SpacesManager } from 'plugins/spaces/lib';
@@ -25,7 +26,6 @@ import { Space } from '../../../common/model/space';
 import { SpaceCards } from '../components/space_cards';
 
 interface Props {
-  spaces?: Space[];
   spacesManager: SpacesManager;
   intl: InjectedIntl;
 }
@@ -46,10 +46,6 @@ class SpaceSelectorUI extends Component<Props, State> {
       searchTerm: '',
       spaces: [],
     };
-
-    if (Array.isArray(props.spaces)) {
-      state.spaces = [...props.spaces];
-    }
 
     this.state = state;
   }
@@ -130,9 +126,13 @@ class SpaceSelectorUI extends Component<Props, State> {
 
             <EuiSpacer size="xl" />
 
-            <SpaceCards spaces={filteredSpaces} onSpaceSelect={this.onSelectSpace} />
+            {this.state.loading && <EuiLoadingSpinner size="xl" />}
 
-            {filteredSpaces.length === 0 && (
+            {!this.state.loading && (
+              <SpaceCards spaces={filteredSpaces} onSpaceSelect={this.onSelectSpace} />
+            )}
+
+            {!this.state.loading && filteredSpaces.length === 0 && (
               <Fragment>
                 <EuiSpacer />
                 <EuiText
@@ -155,7 +155,7 @@ class SpaceSelectorUI extends Component<Props, State> {
 
   public getSearchField = () => {
     const { intl } = this.props;
-    if (!this.props.spaces || this.props.spaces.length < SPACE_SEARCH_COUNT_THRESHOLD) {
+    if (!this.state.spaces || this.state.spaces.length < SPACE_SEARCH_COUNT_THRESHOLD) {
       return null;
     }
     return (

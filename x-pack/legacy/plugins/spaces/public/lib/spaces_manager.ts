@@ -4,58 +4,85 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { i18n } from '@kbn/i18n';
-import { toastNotifications } from 'ui/notify';
 import { EventEmitter } from 'events';
-import { kfetch } from 'ui/kfetch';
+import { NotificationsSetup, HttpSetup } from 'src/core/public';
 import { Space } from '../../common/model/space';
 
-export class SpacesManager extends EventEmitter {
-  private spaceSelectorURL: string;
+let spacesManager: SpacesManager | undefined;
+export const initSpacesManager = (
+  spaceSelectorUrl: string,
+  http: HttpSetup,
+  notifications: NotificationsSetup
+) => {
+  if (spacesManager) {
+    throw new Error('SpacesManager has already been initialized!');
+  }
+  spacesManager = new SpacesManager(spaceSelectorUrl, http, notifications);
+  return spacesManager;
+};
 
-  constructor(spaceSelectorURL: string) {
+export const getSpacesManager = () => {
+  if (!spacesManager) {
+    throw new Error('SpacesManager has not been initialized yet');
+  }
+
+  return spacesManager;
+};
+
+export class SpacesManager extends EventEmitter {
+  private activeSpace: Space | undefined;
+
+  constructor(
+    private readonly spaceSelectorURL: string,
+    private readonly http: HttpSetup,
+    private readonly notifications: NotificationsSetup
+  ) {
     super();
-    this.spaceSelectorURL = spaceSelectorURL;
   }
 
   public async getSpaces(): Promise<Space[]> {
-    return await kfetch({ pathname: '/api/spaces/space' });
+    return await this.http.get('/api/spaces/space');
   }
 
   public async getSpace(id: string): Promise<Space> {
-    return await kfetch({ pathname: `/api/spaces/space/${encodeURIComponent(id)}` });
+    return await this.http.get(`/api/spaces/space/${encodeURIComponent(id)}`);
+  }
+
+  public async getActiveSpace(): Promise<Space> {
+    if (!this.activeSpace) {
+      this.activeSpace = (await this.http.get('/api/spaces/v1/activeSpace')) as Space;
+    }
+    return this.activeSpace;
   }
 
   public async createSpace(space: Space) {
-    return await kfetch({
-      pathname: `/api/spaces/space`,
-      method: 'POST',
-      body: JSON.stringify(space),
-    });
+    return this.http
+      .post(`/api/spaces/space`, {
+        body: JSON.stringify(space),
+      })
+      .then(() => this.requestRefresh());
   }
 
   public async updateSpace(space: Space) {
-    return await kfetch({
-      pathname: `/api/spaces/space/${encodeURIComponent(space.id)}`,
-      query: {
-        overwrite: true,
-      },
-      method: 'PUT',
-      body: JSON.stringify(space),
-    });
+    return this.http
+      .put(`/api/spaces/space/${encodeURIComponent(space.id)}`, {
+        query: {
+          overwrite: true,
+        },
+        body: JSON.stringify(space),
+      })
+      .then(() => this.requestRefresh());
   }
 
   public async deleteSpace(space: Space) {
-    return await kfetch({
-      pathname: `/api/spaces/space/${encodeURIComponent(space.id)}`,
-      method: 'DELETE',
-    });
+    return this.http
+      .delete(`/api/spaces/space/${encodeURIComponent(space.id)}`)
+      .then(() => this.requestRefresh());
   }
 
   public async changeSelectedSpace(space: Space) {
-    await kfetch({
-      pathname: `/api/spaces/v1/space/${encodeURIComponent(space.id)}/select`,
-      method: 'POST',
-    })
+    await this.http
+      .post(`/api/spaces/v1/space/${encodeURIComponent(space.id)}/select`)
       .then(response => {
         if (response.location) {
           window.location = response.location;
@@ -75,7 +102,7 @@ export class SpacesManager extends EventEmitter {
   }
 
   public _displayError() {
-    toastNotifications.addDanger({
+    this.notifications.toasts.addDanger({
       title: i18n.translate('xpack.spaces.spacesManager.unableToChangeSpaceWarningTitle', {
         defaultMessage: 'Unable to change your Space',
       }),

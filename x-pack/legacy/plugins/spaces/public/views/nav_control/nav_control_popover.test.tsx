@@ -13,16 +13,10 @@ import { NavControlPopover } from './nav_control_popover';
 
 describe('NavControlPopover', () => {
   it('renders without crashing', () => {
-    const activeSpace = {
-      space: { id: '', name: 'foo', disabledFeatures: [] },
-      valid: true,
-    };
-
     const spacesManager = spacesManagerMock.create();
 
     const wrapper = shallow(
       <NavControlPopover
-        activeSpace={activeSpace}
         spacesManager={spacesManager}
         anchorPosition={'downRight'}
         buttonClass={SpacesHeaderNavButton}
@@ -32,11 +26,6 @@ describe('NavControlPopover', () => {
   });
 
   it('renders a SpaceAvatar with the active space', async () => {
-    const activeSpace = {
-      space: { id: 'foo-space', name: 'foo', disabledFeatures: [] },
-      valid: true,
-    };
-
     const spacesManager = spacesManagerMock.create();
     spacesManager.getSpaces = jest.fn().mockResolvedValue([
       {
@@ -50,10 +39,14 @@ describe('NavControlPopover', () => {
         disabledFeatures: [],
       },
     ]);
+    spacesManager.getActiveSpace = jest.fn().mockResolvedValue({
+      id: 'foo-space',
+      name: 'foo',
+      disabledFeatures: [],
+    });
 
     const wrapper = mount<any, any>(
       <NavControlPopover
-        activeSpace={activeSpace}
         spacesManager={spacesManager}
         anchorPosition={'rightCenter'}
         buttonClass={SpacesHeaderNavButton}

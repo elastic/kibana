@@ -6,7 +6,6 @@
 
 import React from 'react';
 import { mountWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
-import { SpacesNavState } from '../../nav_control';
 import { ConfirmDeleteModal } from './confirm_delete_modal';
 import { spacesManagerMock } from '../../../lib/mocks';
 
@@ -20,11 +19,6 @@ describe('ConfirmDeleteModal', () => {
 
     const spacesManager = spacesManagerMock.create();
 
-    const spacesNavState: SpacesNavState = {
-      getActiveSpace: () => space,
-      refreshSpacesList: jest.fn(),
-    };
-
     const onCancel = jest.fn();
     const onConfirm = jest.fn();
 
@@ -33,7 +27,6 @@ describe('ConfirmDeleteModal', () => {
         <ConfirmDeleteModal.WrappedComponent
           space={space}
           spacesManager={spacesManager}
-          spacesNavState={spacesNavState}
           onCancel={onCancel}
           onConfirm={onConfirm}
           intl={null as any}
@@ -51,11 +44,6 @@ describe('ConfirmDeleteModal', () => {
 
     const spacesManager = spacesManagerMock.create();
 
-    const spacesNavState: SpacesNavState = {
-      getActiveSpace: () => space,
-      refreshSpacesList: jest.fn(),
-    };
-
     const onCancel = jest.fn();
     const onConfirm = jest.fn();
 
@@ -63,7 +51,6 @@ describe('ConfirmDeleteModal', () => {
       <ConfirmDeleteModal.WrappedComponent
         space={space}
         spacesManager={spacesManager}
-        spacesNavState={spacesNavState}
         onCancel={onCancel}
         onConfirm={onConfirm}
         intl={null as any}

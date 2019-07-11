@@ -11,7 +11,6 @@ import React from 'react';
 import { mountWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
 import { SpaceAvatar } from '../../../components';
 import { spacesManagerMock } from '../../../lib/mocks';
-import { SpacesNavState } from '../../nav_control';
 import { SpacesGridPage } from './spaces_grid_page';
 
 const spaces = [
@@ -36,11 +35,6 @@ const spaces = [
   },
 ];
 
-const spacesNavState: SpacesNavState = {
-  getActiveSpace: () => spaces[0],
-  refreshSpacesList: jest.fn(),
-};
-
 const spacesManager = spacesManagerMock.create();
 spacesManager.getSpaces = jest.fn().mockResolvedValue(spaces);
 
@@ -48,22 +42,14 @@ describe('SpacesGridPage', () => {
   it('renders as expected', () => {
     expect(
       shallowWithIntl(
-        <SpacesGridPage.WrappedComponent
-          spacesManager={spacesManager}
-          spacesNavState={spacesNavState}
-          intl={null as any}
-        />
+        <SpacesGridPage.WrappedComponent spacesManager={spacesManager} intl={null as any} />
       )
     ).toMatchSnapshot();
   });
 
   it('renders the list of spaces', async () => {
     const wrapper = mountWithIntl(
-      <SpacesGridPage.WrappedComponent
-        spacesManager={spacesManager}
-        spacesNavState={spacesNavState}
-        intl={null as any}
-      />
+      <SpacesGridPage.WrappedComponent spacesManager={spacesManager} intl={null as any} />
     );
 
     // allow spacesManager to load spaces

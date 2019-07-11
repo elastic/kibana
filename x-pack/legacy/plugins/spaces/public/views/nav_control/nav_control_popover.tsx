@@ -15,11 +15,6 @@ import { ButtonProps } from './types';
 
 interface Props {
   spacesManager: SpacesManager;
-  activeSpace: {
-    valid: boolean;
-    error?: string;
-    space: Space;
-  };
   anchorPosition: PopoverAnchorPosition;
   buttonClass: ComponentClass<ButtonProps>;
 }
@@ -37,7 +32,7 @@ export class NavControlPopover extends Component<Props, State> {
     this.state = {
       showSpaceSelector: false,
       loading: false,
-      activeSpace: props.activeSpace.space,
+      activeSpace: null,
       spaces: [],
     };
   }
@@ -91,24 +86,20 @@ export class NavControlPopover extends Component<Props, State> {
   }
 
   private async loadSpaces() {
-    const { spacesManager, activeSpace } = this.props;
+    const { spacesManager } = this.props;
 
     this.setState({
       loading: true,
     });
 
-    const spaces = await spacesManager.getSpaces();
-
-    // Update the active space definition, if it changed since the last load operation
-    let activeSpaceEntry: Space | null = activeSpace.space;
-
-    if (activeSpace.valid) {
-      activeSpaceEntry = spaces.find(space => space.id === this.props.activeSpace.space.id) || null;
-    }
+    const [activeSpace, spaces] = await Promise.all([
+      spacesManager.getActiveSpace(),
+      spacesManager.getSpaces(),
+    ]);
 
     this.setState({
       spaces,
-      activeSpace: activeSpaceEntry,
+      activeSpace,
       loading: false,
     });
   }
@@ -118,8 +109,8 @@ export class NavControlPopover extends Component<Props, State> {
 
     if (!activeSpace) {
       return this.getButton(
-        <EuiAvatar size={'s'} className={'spaceNavGraphic'} name={'error'} />,
-        'error'
+        <EuiAvatar size={'s'} className={'spaceNavGraphic'} name={'...'} />,
+        'loading'
       );
     }
 

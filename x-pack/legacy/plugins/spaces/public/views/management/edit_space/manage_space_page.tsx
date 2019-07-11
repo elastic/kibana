@@ -16,7 +16,6 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import _ from 'lodash';
-import { SpacesNavState } from 'plugins/spaces/views/nav_control';
 import React, { Component, Fragment } from 'react';
 import { capabilities } from 'ui/capabilities';
 import { Breadcrumb } from 'ui/chrome';
@@ -39,7 +38,6 @@ import { ReservedSpaceBadge } from './reserved_space_badge';
 interface Props {
   spacesManager: SpacesManager;
   spaceId?: string;
-  spacesNavState: SpacesNavState;
   intl: InjectedIntl;
   setBreadcrumbs?: (breadcrumbs: Breadcrumb[]) => void;
 }
@@ -269,7 +267,6 @@ class ManageSpacePageUI extends Component<Props, State> {
             data-test-subj="delete-space-button"
             space={this.state.space as Space}
             spacesManager={this.props.spacesManager}
-            spacesNavState={this.props.spacesNavState}
             onDelete={this.backToSpacesList}
           />
         </EuiFlexItem>
@@ -298,27 +295,30 @@ class ManageSpacePageUI extends Component<Props, State> {
     }
 
     if (this.editingExistingSpace()) {
-      const { spacesNavState } = this.props;
+      const { spacesManager } = this.props;
 
       const originalSpace: Space = this.state.originalSpace as Space;
       const space: Space = this.state.space as Space;
 
-      const editingActiveSpace = spacesNavState.getActiveSpace().id === originalSpace.id;
+      spacesManager.getActiveSpace().then(activeSpace => {
+        const editingActiveSpace = activeSpace.id === originalSpace.id;
 
-      const haveDisabledFeaturesChanged =
-        space.disabledFeatures.length !== originalSpace.disabledFeatures.length ||
-        _.difference(space.disabledFeatures, originalSpace.disabledFeatures).length > 0;
+        const haveDisabledFeaturesChanged =
+          space.disabledFeatures.length !== originalSpace.disabledFeatures.length ||
+          _.difference(space.disabledFeatures, originalSpace.disabledFeatures).length > 0;
 
-      if (editingActiveSpace && haveDisabledFeaturesChanged) {
-        this.setState({
-          showAlteringActiveSpaceDialog: true,
-        });
+        if (editingActiveSpace && haveDisabledFeaturesChanged) {
+          this.setState({
+            showAlteringActiveSpaceDialog: true,
+          });
 
-        return;
-      }
+          return;
+        }
+        this.performSave();
+      });
+    } else {
+      this.performSave();
     }
-
-    this.performSave();
   };
 
   private performSave = (requireRefresh = false) => {
@@ -356,7 +356,6 @@ class ManageSpacePageUI extends Component<Props, State> {
 
     action
       .then(() => {
-        this.props.spacesNavState.refreshSpacesList();
         toastNotifications.addSuccess(
           intl.formatMessage(
             {

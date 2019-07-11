@@ -5,15 +5,47 @@
  */
 
 import Boom from 'boom';
+import { Legacy } from 'kibana';
 import { Space } from '../../../../common/model/space';
 import { wrapError } from '../../../lib/errors';
 import { SpacesClient } from '../../../lib/spaces_client';
 import { addSpaceIdToPath } from '../../../lib/spaces_url_parser';
 import { getSpaceById } from '../../lib';
 import { InternalRouteDeps } from '.';
+import { getActiveSpace } from '../../../lib/get_active_space';
+import { getSpaceSelectorUrl } from '../../../lib/get_space_selector_url';
 
 export function initInternalSpacesApi(deps: InternalRouteDeps) {
   const { http, config, spacesService, savedObjects, routePreCheckLicenseFn } = deps;
+
+  http.route({
+    method: 'GET',
+    path: '/api/spaces/v1/activeSpace',
+    async handler(request: Legacy.Request) {
+      const spacesClient: SpacesClient = await spacesService.scopedClient(request);
+      return await getActiveSpace(
+        spacesClient,
+        http.basePath.get(request),
+        config.get('server.basePath')
+      );
+    },
+    options: {
+      pre: [routePreCheckLicenseFn],
+    },
+  });
+
+  http.route({
+    method: 'GET',
+    path: '/api/spaces/v1/npStart',
+    async handler() {
+      return {
+        spaceSelectorUrl: getSpaceSelectorUrl(config),
+      };
+    },
+    options: {
+      pre: [routePreCheckLicenseFn],
+    },
+  });
 
   http.route({
     method: 'POST',

@@ -41,6 +41,36 @@ describe('Spaces API', () => {
     await Promise.all(teardowns.splice(0).map(fn => fn()));
   });
 
+  test('GET /npStart should return the space selector URL', async () => {
+    const { response } = await request('GET', '/api/spaces/v1/npStart', {
+      expectSpacesClientCall: false,
+    });
+
+    const { statusCode, payload } = response;
+
+    expect(statusCode).toEqual(200);
+
+    const result = JSON.parse(payload);
+    expect(result).toEqual({
+      spaceSelectorUrl: '/',
+    });
+  });
+
+  test('GET /activeSpace should return the active space', async () => {
+    const { response } = await request('GET', '/api/spaces/v1/activeSpace');
+
+    const { statusCode, payload } = response;
+
+    expect(statusCode).toEqual(200);
+
+    const result = JSON.parse(payload);
+    expect(result).toEqual({
+      id: 'default',
+      name: 'Default Space',
+      _reserved: true,
+    });
+  });
+
   test('POST space/{id}/select should respond with the new space location', async () => {
     const { response } = await request('POST', '/api/spaces/v1/space/a-space/select');
 

@@ -11,9 +11,6 @@ import { createOptionalPlugin } from '../../server/lib/optional_plugin';
 // @ts-ignore
 import { AuditLogger } from '../../server/lib/audit_logger';
 import mappings from './mappings.json';
-import { wrapError } from './server/lib/errors';
-import { getActiveSpace } from './server/lib/get_active_space';
-import { getSpaceSelectorUrl } from './server/lib/get_space_selector_url';
 import { migrateToKibana660 } from './server/lib/migrations';
 import { plugin } from './server/new_platform';
 import {
@@ -51,7 +48,6 @@ export const spaces = (kibana: Record<string, any>) =>
     },
 
     uiExports: {
-      chromeNavControls: ['plugins/spaces/views/nav_control'],
       styleSheetPaths: resolve(__dirname, 'public/index.scss'),
       managementSections: ['plugins/spaces/views/management'],
       apps: [
@@ -63,7 +59,7 @@ export const spaces = (kibana: Record<string, any>) =>
           hidden: true,
         },
       ],
-      hacks: [],
+      hacks: ['plugins/spaces/hacks/init_np_plugin'],
       mappings,
       migrations: {
         space: {
@@ -76,37 +72,6 @@ export const spaces = (kibana: Record<string, any>) =>
         },
       },
       home: ['plugins/spaces/register_feature'],
-      injectDefaultVars(server: any) {
-        return {
-          spaces: [],
-          activeSpace: null,
-          spaceSelectorURL: getSpaceSelectorUrl(server.config()),
-        };
-      },
-      async replaceInjectedVars(
-        vars: Record<string, any>,
-        request: Record<string, any>,
-        server: Record<string, any>
-      ) {
-        const spacesClient = await server.plugins.spaces.getScopedSpacesClient(request);
-        try {
-          vars.activeSpace = {
-            valid: true,
-            space: await getActiveSpace(
-              spacesClient,
-              request.getBasePath(),
-              server.config().get('server.basePath')
-            ),
-          };
-        } catch (e) {
-          vars.activeSpace = {
-            valid: false,
-            error: wrapError(e).output.payload,
-          };
-        }
-
-        return vars;
-      },
     },
 
     async init(server: Server) {

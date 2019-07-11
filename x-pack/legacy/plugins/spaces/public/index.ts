@@ -3,5 +3,9 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { PluginInitializerContext } from 'src/core/public';
+import { Plugin } from './plugin';
 
-export { SpacesManager, initSpacesManager, getSpacesManager } from './spaces_manager';
+export const plugin = (initializerContext: PluginInitializerContext) => {
+  return new Plugin(initializerContext);
+};

@@ -5,69 +5,37 @@
  */
 
 import { SpacesManager } from 'plugins/spaces/lib/spaces_manager';
-// @ts-ignore
-import template from 'plugins/spaces/views/nav_control/nav_control.html';
 import { NavControlPopover } from 'plugins/spaces/views/nav_control/nav_control_popover';
 // @ts-ignore
 import { Path } from 'plugins/xpack_main/services/path';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { I18nContext } from 'ui/i18n';
-// @ts-ignore
-import { uiModules } from 'ui/modules';
-import {
-  chromeHeaderNavControlsRegistry,
-  NavControlSide,
-} from 'ui/registry/chrome_header_nav_controls';
-// @ts-ignore
-import { Space } from '../../../common/model/space';
+import { CoreStart } from 'src/core/public';
 import { SpacesHeaderNavButton } from './components/spaces_header_nav_button';
 
-const module = uiModules.get('spaces_nav', ['kibana']);
-
-export interface SpacesNavState {
-  getActiveSpace: () => Space;
-  refreshSpacesList: () => void;
-}
-
-let spacesManager: SpacesManager;
-
-module.service('spacesNavState', (activeSpace: any) => {
-  return {
-    getActiveSpace: () => {
-      return activeSpace.space;
-    },
-    refreshSpacesList: () => {
-      if (spacesManager) {
-        spacesManager.requestRefresh();
+export function initSpacesNavControl(spacesManager: SpacesManager, core: CoreStart) {
+  const I18nContext = core.i18n.Context;
+  core.chrome.navControls.registerLeft({
+    order: 1000,
+    mount(targetDomElement: HTMLElement) {
+      if (Path.isUnauthenticated()) {
+        return () => null;
       }
+
+      ReactDOM.render(
+        <I18nContext>
+          <NavControlPopover
+            spacesManager={spacesManager}
+            anchorPosition="downLeft"
+            buttonClass={SpacesHeaderNavButton}
+          />
+        </I18nContext>,
+        targetDomElement
+      );
+
+      return () => {
+        ReactDOM.unmountComponentAtNode(targetDomElement);
+      };
     },
-  } as SpacesNavState;
-});
-
-chromeHeaderNavControlsRegistry.register((chrome: any, activeSpace: any) => ({
-  name: 'spaces',
-  order: 1000,
-  side: NavControlSide.Left,
-  render(el: HTMLElement) {
-    if (Path.isUnauthenticated()) {
-      return;
-    }
-
-    const spaceSelectorURL = chrome.getInjected('spaceSelectorURL');
-
-    spacesManager = new SpacesManager(spaceSelectorURL);
-
-    ReactDOM.render(
-      <I18nContext>
-        <NavControlPopover
-          spacesManager={spacesManager}
-          activeSpace={activeSpace}
-          anchorPosition="downLeft"
-          buttonClass={SpacesHeaderNavButton}
-        />
-      </I18nContext>,
-      el
-    );
-  },
-}));
+  });
+}

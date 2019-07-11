@@ -6,20 +6,13 @@ exports[`NavControlPopover renders without crashing 1`] = `
   button={
     <SpacesHeaderNavButton
       linkIcon={
-        <SpaceAvatar
-          announceSpaceName={true}
+        <EuiAvatar
           className="spaceNavGraphic"
+          name="..."
           size="s"
-          space={
-            Object {
-              "disabledFeatures": Array [],
-              "id": "",
-              "name": "foo",
-            }
-          }
         />
       }
-      linkTitle="foo"
+      linkTitle="loading"
       spaceSelectorShown={false}
       toggleSpaceSelector={[Function]}
     />

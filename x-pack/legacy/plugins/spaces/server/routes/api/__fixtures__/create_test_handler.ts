@@ -182,7 +182,7 @@ export function createTestHandler(
 
     initApiFn({
       http: ({
-        server,
+        ...httpServiceMock.createSetupContract(),
         route: server.route.bind(server),
       } as unknown) as SpacesHttpServiceSetup,
       routePreCheckLicenseFn: pre,
