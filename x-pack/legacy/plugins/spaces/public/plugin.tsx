@@ -4,11 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { PluginInitializerContext, CoreSetup, CoreStart } from 'src/core/public';
+import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from 'src/core/public';
 import { initSpacesManager } from './lib';
 import { initSpacesNavControl } from './views/nav_control';
 
-export class Plugin {
+export class SpacesPlugin implements Plugin<{}, {}> {
   // @ts-ignore
   constructor(private readonly initializerContext: PluginInitializerContext) {}
 

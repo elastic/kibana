@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { PluginInitializerContext } from 'src/core/public';
-import { Plugin } from './plugin';
+import { SpacesPlugin } from './plugin';
 
 export const plugin = (initializerContext: PluginInitializerContext) => {
-  return new Plugin(initializerContext);
+  return new SpacesPlugin(initializerContext);
 };

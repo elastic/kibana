@@ -6,9 +6,9 @@
 
 import { npSetup, npStart } from 'ui/new_platform';
 import { plugin } from '../index';
-import { Plugin } from '../plugin';
+import { SpacesPlugin } from '../plugin';
 
-const spacesPlugin: Plugin = plugin({});
+const spacesPlugin: SpacesPlugin = plugin({});
 
 export const waitForSpacesNPInit = spacesPlugin
   .start(npStart.core)
