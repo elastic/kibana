@@ -7,12 +7,12 @@
 import { EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiText, EuiTitle } from '@elastic/eui';
 import React from 'react';
 import { pure } from 'recompose';
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 
 import { InspectButton } from '../inspect';
 
 const Header = styled.header<{ border?: boolean }>`
-  ${props => `
+  ${props => css`
     margin-bottom: ${props.theme.eui.euiSizeL};
 
     ${props.border &&
