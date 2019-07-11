@@ -41,7 +41,7 @@ export const SnapshotList: React.FunctionComponent<RouteComponentProps<MatchPara
 
   const {
     error,
-    loading,
+    isLoading,
     data: { snapshots = [], repositories = [], errors = {} },
     sendRequest: reload,
   } = useLoadSnapshots();
@@ -97,7 +97,7 @@ export const SnapshotList: React.FunctionComponent<RouteComponentProps<MatchPara
 
   let content;
 
-  if (loading) {
+  if (isLoading) {
     content = (
       <SectionLoading>
         <FormattedMessage

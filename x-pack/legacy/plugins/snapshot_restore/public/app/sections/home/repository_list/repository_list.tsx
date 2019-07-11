@@ -36,7 +36,7 @@ export const RepositoryList: React.FunctionComponent<RouteComponentProps<MatchPa
 
   const {
     error,
-    loading,
+    isLoading,
     data: { repositories, managedRepository } = {
       repositories: undefined,
       managedRepository: undefined,
@@ -70,7 +70,7 @@ export const RepositoryList: React.FunctionComponent<RouteComponentProps<MatchPa
 
   let content;
 
-  if (loading) {
+  if (isLoading) {
     content = (
       <SectionLoading>
         <FormattedMessage

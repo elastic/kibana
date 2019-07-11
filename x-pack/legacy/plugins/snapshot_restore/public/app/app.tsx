@@ -36,7 +36,7 @@ export const App: React.FunctionComponent = () => {
   // Load permissions
   const {
     error: permissionsError,
-    loading: loadingPermissions,
+    isLoading: loadingPermissions,
     data: permissionsData = defaultPermissionsData.current,
   } = useLoadPermissions();
 

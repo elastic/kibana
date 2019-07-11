@@ -83,9 +83,14 @@ export const RestoreList: React.FunctionComponent = () => {
   const [currentInterval, setCurrentInterval] = useState<number>(INTERVAL_OPTIONS[1]);
 
   // Load restores
-  const { error, loading, data: restores = [], isInitialRequest, changeInterval } = useLoadRestores(
-    currentInterval
-  );
+  const {
+    error,
+    isLoading,
+    data: restores = [],
+    isInitialRequest,
+    setRequestInterval,
+    sendRequest,
+  } = useLoadRestores(currentInterval);
 
   // Track component loaded
   useEffect(() => {
@@ -95,7 +100,7 @@ export const RestoreList: React.FunctionComponent = () => {
   let content;
 
   if (isInitialRequest) {
-    if (loading) {
+    if (isLoading) {
       // Because we're polling for new data, we only want to hide the list during the initial fetch.
       content = (
         <SectionLoading>
@@ -204,7 +209,8 @@ export const RestoreList: React.FunctionComponent = () => {
                       key={interval}
                       icon="empty"
                       onClick={() => {
-                        changeInterval(interval);
+                        sendRequest();
+                        setRequestInterval(interval);
                         setCurrentInterval(interval);
                         setIsIntervalMenuOpen(false);
                       }}
@@ -228,7 +234,7 @@ export const RestoreList: React.FunctionComponent = () => {
               </EuiPopover>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              {loading ? <EuiLoadingSpinner size="m" /> : null}
+              {isLoading ? <EuiLoadingSpinner size="m" /> : null}
             </EuiFlexItem>
           </EuiFlexGroup>
           <EuiSpacer size="m" />

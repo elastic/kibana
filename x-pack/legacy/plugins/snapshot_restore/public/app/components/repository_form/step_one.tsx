@@ -54,7 +54,7 @@ export const RepositoryFormStepOne: React.FunctionComponent<Props> = ({
   // Load repository types
   const {
     error: repositoryTypesError,
-    loading: repositoryTypesLoading,
+    isLoading: repositoryTypesLoading,
     data: repositoryTypes = [],
   } = useLoadRepositoryTypes();
 

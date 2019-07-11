@@ -51,9 +51,7 @@ export function createRequestService(httpClient: any) {
         throw new Error(response.statusText);
       }
 
-      return {
-        data: response.data,
-      };
+      return response;
     } catch (e) {
       return {
         error: e.response ? e.response : e,
@@ -64,11 +62,11 @@ export function createRequestService(httpClient: any) {
   const useRequest = ({ path, method, body, interval, initialData, onSuccess }: UseRequest) => {
     // Main states for tracking request status and data
     const [error, setError] = useState<null | any>(null);
-    const [loading, setLoading] = useState<boolean>(true);
+    const [isLoading, setIsLoading] = useState<boolean>(true);
     const [data, setData] = useState<any>(initialData);
 
     // States for tracking polling
-    const [currentInterval, setCurrentInterval] = useState<UseRequest['interval']>(interval);
+    const [requestInterval, setRequestInterval] = useState<UseRequest['interval']>(interval);
     // Consumers can use isInitialRequest to implement a polling UX.
     const [isInitialRequest, setIsInitialRequest] = useState<boolean>(true);
     const requestIntervalId = useRef<any>(null);
@@ -78,8 +76,8 @@ export function createRequestService(httpClient: any) {
 
     const sendRequest = async () => {
       // We don't clear error or data, so it's up to the consumer to decide whether to display the
-      // "old" error/data, initialData, or loading state when a new request is in-flight.
-      setLoading(true);
+      // "old" error/data or loading state when a new request is in-flight.
+      setIsLoading(true);
 
       const requestBody = {
         path,
@@ -100,7 +98,7 @@ export function createRequestService(httpClient: any) {
 
       setError(response.error);
       setData(response.data);
-      setLoading(false);
+      setIsLoading(false);
       setIsInitialRequest(false);
     };
 
@@ -108,18 +106,15 @@ export function createRequestService(httpClient: any) {
       isOutdatedRequest = true;
     };
 
-    useEffect(() => {
-      // Perform request
-      sendRequest();
-
+    const updateInterval = () => {
       // Clear current interval
       if (requestIntervalId.current) {
         clearInterval(requestIntervalId.current);
       }
 
       // Set new interval
-      if (currentInterval) {
-        requestIntervalId.current = setInterval(sendRequest, currentInterval);
+      if (requestInterval) {
+        requestIntervalId.current = setInterval(sendRequest, requestInterval);
       }
 
       // Clean up intervals and inflight requests and corresponding state changes
@@ -129,23 +124,28 @@ export function createRequestService(httpClient: any) {
           clearInterval(requestIntervalId.current);
         }
       };
-    }, [path, currentInterval]);
+    };
+
+    useEffect(() => {
+      sendRequest();
+      // We need to update the interval so that the scheduled request uses the new path, mathod, and body.
+      return updateInterval();
+    }, [path, method, body]);
+
+    useEffect(() => {
+      return updateInterval();
+    }, [requestInterval]);
 
     return {
-      loading,
+      isInitialRequest,
+      isLoading,
       error,
       data,
-      initialData,
       sendRequest, // Gives the user the ability to manually request data
-      isInitialRequest,
-      changeInterval: (newInterval: UseRequest['interval']) => {
+      setRequestInterval: (newInterval: UseRequest['interval']) => {
         // The consumer can set this to undefined to stop polling, or to a number to begin polling.
-        setCurrentInterval(newInterval);
-
-        // If we're beginning to poll, then we need to schedule the first request.
-        if (!requestIntervalId.current && newInterval) {
-          requestIntervalId.current = setInterval(sendRequest, newInterval);
-        }
+        setRequestInterval(newInterval);
+        updateInterval();
       },
     };
   };
