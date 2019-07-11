@@ -9,11 +9,26 @@ your application to Kibana 7.3.
 
 See also <<release-highlights-7.3.0, release highlights>> and <<release-notes-7.3.0, release notes>>.
 
-coming[7.3.0]
+
+[float]
+=== Visibility of features after configuring a term join in Maps
+*Details:* When performing a terms join in a vector layer in the Maps app, features that do not have a matching term in the join will no longer be visible on the map. Before, these features would remain visible although they would not show any results for the join in their corresponding tooltip. This aligns the behavior of this functionality with the behavior in the Region Maps visualization. The old behavior, in which features without a corresponding record in the term-query result would still be visible on the map, is no longer supported.
+
+*Impact:* This affects all maps that have a term join configured on a vector layer. The effect is primarily a change in the visual representation of the layer. In practice, fewer features will be visible if the results of the term-query have no corresponding record for all features on the map. This also means that all fields in a tooltip will have a corresponding value. Previously, the aggregation metrics for some rows in the tooltip would just be empty if there was no corresponing result in the term-query.
+
 
 //NOTE: The notable-breaking-changes tagged regions are re-used in the
 //Installation and Upgrade Guide
 
-//tag::notable-breaking-changes[]
+////
+The following section is re-used in the Installation and Upgrade Guide
+[[breaking_70_notable]]
+=== Notable breaking changes
+////
+// tag::notable-breaking-changes[]
+
+
+
+
 
 // end::notable-breaking-changes[]
