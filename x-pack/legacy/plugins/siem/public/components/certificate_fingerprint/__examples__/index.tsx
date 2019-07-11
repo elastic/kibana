@@ -5,8 +5,8 @@
  */
 import { storiesOf } from '@storybook/react';
 import React from 'react';
-import { CertificateFingerprint } from '..';
 import { TestProviders } from '../../../mock';
+import { CertificateFingerprint } from '..';
 
 storiesOf('components/CertificateFingerprint', module).add('example', () => (
   <TestProviders>

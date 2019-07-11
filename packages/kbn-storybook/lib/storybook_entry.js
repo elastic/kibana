@@ -36,7 +36,7 @@ const STORE_ENTRY_DIR = dirname(STORY_ENTRY_PATH);
 
 exports.generateStorybookEntry = ({ log, exampleGlobs }) => {
   const globs = ['built_assets/css/**/*.light.css', ...exampleGlobs];
-
+  log.info('Storybook globs:', globs);
   const norm = p => normalize(relative(STORE_ENTRY_DIR, p));
 
   return Rx.defer(() =>
@@ -47,7 +47,7 @@ exports.generateStorybookEntry = ({ log, exampleGlobs }) => {
     })
   ).pipe(
     map(paths => {
-      console.log('Discovered files for Storybook:', paths);
+      log.info('Discovered files for Storybook:', paths);
       return new Set(paths.map(norm));
     }),
     mergeMap(

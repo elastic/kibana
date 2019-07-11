@@ -17,8 +17,7 @@
  * under the License.
  */
 
-const { resolve } = require('path');
-
+const { join } = require('path');
 const Rx = require('rxjs');
 const { first } = require('rxjs/operators');
 const storybook = require('@storybook/react/standalone');
@@ -58,10 +57,12 @@ exports.runStorybookCli = ({ name, exampleGlobs }) => {
 
         new Promise(() => {
           // storybook never completes, so neither will this promise
+          const configDir = join(__dirname, 'storybook_config');
+          log.info('Config dir:', configDir);
           storybook({
             mode: 'dev',
             port: 9001,
-            configDir: resolve(__dirname, 'storybook_config'),
+            configDir,
           });
         }),
       ]);

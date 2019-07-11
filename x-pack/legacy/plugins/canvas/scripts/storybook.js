@@ -7,5 +7,5 @@
 // eslint-disable-next-line
 require('@kbn/storybook').runStorybookCli({
   name: 'canvas',
-  exampleGlobs: ['x-pack/plugins/legacy/canvas/**/*.examples.tsx'],
+  exampleGlobs: ['x-pack/legacy/plugins/canvas/public/components/**/*.examples.tsx'],
 });
