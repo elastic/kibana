@@ -48,8 +48,8 @@ export class SpacesManager extends EventEmitter {
     return await this.http.get(`/api/spaces/space/${encodeURIComponent(id)}`);
   }
 
-  public async getActiveSpace(): Promise<Space> {
-    if (!this.activeSpace) {
+  public async getActiveSpace(forceRefresh: boolean = false): Promise<Space> {
+    if (!this.activeSpace || forceRefresh) {
       this.activeSpace = (await this.http.get('/api/spaces/v1/activeSpace')) as Space;
     }
     return this.activeSpace;

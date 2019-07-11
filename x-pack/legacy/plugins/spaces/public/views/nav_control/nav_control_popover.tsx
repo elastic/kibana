@@ -42,7 +42,7 @@ export class NavControlPopover extends Component<Props, State> {
 
     if (this.props.spacesManager) {
       this.props.spacesManager.on('request_refresh', () => {
-        this.loadSpaces();
+        this.loadSpaces(true);
       });
     }
   }
@@ -85,7 +85,7 @@ export class NavControlPopover extends Component<Props, State> {
     );
   }
 
-  private async loadSpaces() {
+  private async loadSpaces(refreshActiveSpace: boolean = false) {
     const { spacesManager } = this.props;
 
     this.setState({
@@ -93,7 +93,7 @@ export class NavControlPopover extends Component<Props, State> {
     });
 
     const [activeSpace, spaces] = await Promise.all([
-      spacesManager.getActiveSpace(),
+      spacesManager.getActiveSpace(refreshActiveSpace),
       spacesManager.getSpaces(),
     ]);
 
