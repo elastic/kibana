@@ -4,13 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { HostOrNetworkProps } from '../types';
+import { AnomaliesNetworkTableProps } from '../types';
 
-// TODO: Delete this if we no longer are using it
-export const dateTimesAreEqual = (
-  prevProps: HostOrNetworkProps,
-  nextProps: HostOrNetworkProps
+export const networkEquality = (
+  prevProps: AnomaliesNetworkTableProps,
+  nextProps: AnomaliesNetworkTableProps
 ): boolean =>
   prevProps.startDate === nextProps.startDate &&
   prevProps.endDate === nextProps.endDate &&
-  prevProps.skip === nextProps.skip;
+  prevProps.skip === nextProps.skip &&
+  prevProps.flowTarget === nextProps.flowTarget;

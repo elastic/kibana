@@ -5,12 +5,12 @@
  */
 
 import chrome from 'ui/chrome';
-import { Anomalies, InfluencerInput } from '../types';
+import { Anomalies, InfluencerInput, CriteriaFields } from '../types';
 import { throwIfNotOk } from './throw_if_not_ok';
 
 export interface Body {
   jobIds: string[];
-  criteriaFields: string[];
+  criteriaFields: CriteriaFields[];
   influencers: InfluencerInput[];
   aggregationInterval: string;
   threshold: number;
