@@ -17,7 +17,7 @@ interface Props {
 
 // round to 2dp
 function tickFormatter(d: number): string {
-  return Math.round((d * 100) / 100).toString();
+  return (Math.round(d * 100) / 100).toString();
 }
 
 export const Axes: FC<Props> = ({ chartData }) => {
