@@ -47,4 +47,4 @@ export class QueryService {
 /** @public */
 export type QuerySetup = ReturnType<QueryService['setup']>;
 
-export { Query } from './query_bar';
+export { Query, QueryBar } from './query_bar';

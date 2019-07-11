@@ -24,3 +24,5 @@
 
 /** @public types */
 export { TopNavMenu } from './top_nav_menu';
+
+export { SearchBar, SearchBarProps } from './search_bar';

@@ -21,14 +21,9 @@ import React from 'react';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { SearchBar } from './search_bar';
 
-jest.mock('../../../filter/filter_bar', () => {
+jest.mock('../../../../data/public', () => {
   return {
     FilterBar: () => <div className="filterBar"></div>,
-  };
-});
-
-jest.mock('../../../query/query_bar', () => {
-  return {
     QueryBar: () => <div className="queryBar"></div>,
   };
 });
