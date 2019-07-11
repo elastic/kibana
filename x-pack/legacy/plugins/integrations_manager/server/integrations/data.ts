@@ -4,18 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  SavedObject,
-  SavedObjectsBulkGetObject,
-  SavedObjectsClientContract,
-} from 'src/core/server/saved_objects';
+import { SavedObjectsClientContract } from 'src/core/server/saved_objects';
 import { Installation, InstallationAttributes, Installable } from '../../common/types';
 import { SAVED_OBJECT_TYPE } from '../../common/constants';
 import * as Registry from '../registry';
 
 export async function getIntegrations(client: SavedObjectsClientContract) {
   const registryItems = await Registry.fetchList();
-  const searchObjects: SavedObjectsBulkGetObject[] = registryItems.map(({ name, version }) => ({
+  const searchObjects = registryItems.map(({ name, version }) => ({
     type: SAVED_OBJECT_TYPE,
     id: `${name}-${version}`,
   }));
@@ -57,7 +53,7 @@ export async function installAssets(
   const createResults = await client.bulkCreate<InstallationAttributes>(toBeSavedObjects, {
     overwrite: true,
   });
-  const createdObjects: SavedObject[] = createResults.saved_objects;
+  const createdObjects = createResults.saved_objects;
   const installed = createdObjects.map(({ id, type }) => ({ id, type }));
   const results = await client.create<InstallationAttributes>(
     SAVED_OBJECT_TYPE,
