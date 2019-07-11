@@ -49,7 +49,7 @@ export class VisualizeEmbeddable extends Embeddable {
   private loader: VisualizeLoader;
   private uiState: PersistedState;
   private handler?: EmbeddedVisualizeHandler;
-  private customization?: object;
+  private customization?: { [key: string]: any };
   private panelTitle?: string;
   private timeRange?: TimeRange;
   private query?: Query;

@@ -7,7 +7,7 @@
 import { i18n } from '@kbn/i18n';
 import { location } from '../../functions/browser/location';
 import { FunctionHelp } from '.';
-import { FunctionFactory } from '../../functions/types';
+import { FunctionFactory } from '../../../types';
 
 export const help: FunctionHelp<FunctionFactory<typeof location>> = {
   help: i18n.translate('xpack.canvas.functions.locationHelpText', {

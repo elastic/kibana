@@ -159,7 +159,7 @@
     "supertest-as-promised": "^4.0.2",
     "tmp": "0.1.0",
     "tree-kill": "^1.1.0",
-    "typescript": "^3.3.3333",
+    "typescript": "3.5.3",
     "vinyl-fs": "^3.0.2",
     "xml-crypto": "^0.10.1",
     "yargs": "4.8.1"
@@ -172,7 +172,7 @@
     "@elastic/ctags-langserver": "^0.0.6",
     "@elastic/datemath": "5.0.2",
     "@elastic/eui": "12.2.0",
-    "@elastic/javascript-typescript-langserver": "^0.2.0",
+    "@elastic/javascript-typescript-langserver": "^0.2.1",
     "@elastic/lsp-extension": "^0.1.2",
     "@elastic/node-crypto": "^1.0.0",
     "@elastic/nodegit": "0.25.0-alpha.22",
