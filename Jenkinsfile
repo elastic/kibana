@@ -154,7 +154,7 @@ def checkoutES(){
               submoduleCfg: [],
               userRemoteConfigs: [[credentialsId: "${JOB_GIT_CREDENTIALS}",
                                    url: "${ES_GIT_URL}"]]])
-    sh 'echo "\n\t### pwd: $(pwd)'
+    sh 'pwd'
   }
 //    stash allowEmpty: true, name: 'es-source', includes: "${ES_BASE_DIR}/**", excludes: ".git", useDefaultExcludes: false
 //  }
