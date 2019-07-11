@@ -13,25 +13,21 @@ import {
   createPermissionFailureMessage,
 } from '../../../../../privilege/check_privilege';
 
-import { DataFrameJobListRow, DATA_FRAME_RUNNING_STATE } from './common';
-import { deleteJobFactory, startJobFactory, stopJobFactory } from './job_service';
+import { DataFrameJobListRow, DATA_FRAME_TASK_STATE } from './common';
+import { stopJob } from './job_service';
 
 import { StartAction } from './action_start';
 import { DeleteAction } from './action_delete';
 
-export const getActions = (getJobs: () => void) => {
+export const getActions = () => {
   const canStartStopDataFrameJob: boolean = checkPermission('canStartStopDataFrameJob');
-
-  const deleteJob = deleteJobFactory(getJobs);
-  const startJob = startJobFactory(getJobs);
-  const stopJob = stopJobFactory(getJobs);
 
   return [
     {
       isPrimary: true,
       render: (item: DataFrameJobListRow) => {
-        if (item.state.task_state !== DATA_FRAME_RUNNING_STATE.STARTED) {
-          return <StartAction startJob={startJob} item={item} />;
+        if (item.state.task_state !== DATA_FRAME_TASK_STATE.STARTED) {
+          return <StartAction item={item} />;
         }
 
         const buttonStopText = i18n.translate('xpack.ml.dataframe.jobsList.stopActionName', {
@@ -66,7 +62,7 @@ export const getActions = (getJobs: () => void) => {
     },
     {
       render: (item: DataFrameJobListRow) => {
-        return <DeleteAction deleteJob={deleteJob} item={item} />;
+        return <DeleteAction item={item} />;
       },
     },
   ];

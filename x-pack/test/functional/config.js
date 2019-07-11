@@ -30,7 +30,8 @@ import {
   LicenseManagementPageProvider,
   IndexManagementPageProvider,
   IndexLifecycleManagementPageProvider,
-  SnapshotRestorePageProvider
+  SnapshotRestorePageProvider,
+  CrossClusterReplicationPageProvider
 } from './page_objects';
 
 import {
@@ -117,7 +118,8 @@ export default async function ({ readConfigFile }) {
       resolve(__dirname, './apps/license_management'),
       resolve(__dirname, './apps/index_management'),
       resolve(__dirname, './apps/index_lifecycle_management'),
-      resolve(__dirname, './apps/snapshot_restore')
+      resolve(__dirname, './apps/snapshot_restore'),
+      resolve(__dirname, './apps/cross_cluster_replication'),
     ],
 
     // define the name and providers for services that should be
@@ -187,7 +189,8 @@ export default async function ({ readConfigFile }) {
       licenseManagement: LicenseManagementPageProvider,
       indexManagement: IndexManagementPageProvider,
       indexLifecycleManagement: IndexLifecycleManagementPageProvider,
-      snapshotRestore: SnapshotRestorePageProvider
+      snapshotRestore: SnapshotRestorePageProvider,
+      crossClusterReplication: CrossClusterReplicationPageProvider
     },
 
     servers: kibanaFunctionalConfig.get('servers'),
@@ -205,6 +208,7 @@ export default async function ({ readConfigFile }) {
         '--status.allowAnonymous=true',
         '--server.uuid=5b2de169-2785-441b-ae8c-186a1936b17d',
         '--xpack.maps.showMapsInspectorAdapter=true',
+        '--xpack.maps.preserveDrawingBuffer=true',
         '--xpack.telemetry.banner=false',
         '--xpack.reporting.queue.pollInterval=3000', // make it explicitly the default
         '--xpack.reporting.csv.maxSizeBytes=2850', // small-ish limit for cutting off a 1999 byte report
@@ -300,6 +304,10 @@ export default async function ({ readConfigFile }) {
       snapshotRestore: {
         pathname: '/app/kibana',
         hash: '/management/elasticsearch/snapshot_restore',
+      },
+      crossClusterReplication: {
+        pathname: '/app/kibana',
+        hash: '/management/elasticsearch/cross_cluster_replication',
       },
       apm: {
         pathname: '/app/apm',

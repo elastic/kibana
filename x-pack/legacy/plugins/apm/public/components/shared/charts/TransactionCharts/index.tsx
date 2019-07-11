@@ -18,6 +18,7 @@ import { Location } from 'history';
 import React, { Component } from 'react';
 import { isEmpty } from 'lodash';
 import styled from 'styled-components';
+import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
 import { Coordinate } from '../../../../../typings/timeseries';
 import { ITransactionChartData } from '../../../../selectors/chartSelectors';
 import { IUrlParams } from '../../../../context/UrlParamsContext/types';
@@ -25,6 +26,7 @@ import { asInteger, asMillis, tpmUnit } from '../../../../utils/formatters';
 import { MLJobLink } from '../../Links/MachineLearningLinks/MLJobLink';
 import { LicenseContext } from '../../../../context/LicenseContext';
 import { TransactionLineChart } from './TransactionLineChart';
+import { isValidCoordinateValue } from '../../../../utils/isValidCoordinateValue';
 
 interface TransactionChartProps {
   hasMLJob: boolean;
@@ -45,34 +47,25 @@ const ShiftedEuiText = styled(EuiText)`
   top: 5px;
 `;
 
-const msTimeUnitLabel = i18n.translate(
-  'xpack.apm.metrics.transactionChart.msTimeUnitLabel',
-  {
-    defaultMessage: 'ms'
-  }
-);
-
 export class TransactionCharts extends Component<TransactionChartProps> {
-  public getResponseTimeTickFormatter = (t: number | null) => {
-    return this.props.charts.noHits ? `- ${msTimeUnitLabel}` : asMillis(t);
+  public getResponseTimeTickFormatter = (t: number) => {
+    return asMillis(t);
   };
 
   public getResponseTimeTooltipFormatter = (p: Coordinate) => {
-    return this.props.charts.noHits || !p
-      ? `- ${msTimeUnitLabel}`
-      : asMillis(p.y);
+    return isValidCoordinateValue(p.y) ? asMillis(p.y) : NOT_AVAILABLE_LABEL;
   };
 
-  public getTPMFormatter = (t: number | null) => {
-    const { urlParams, charts } = this.props;
+  public getTPMFormatter = (t: number) => {
+    const { urlParams } = this.props;
     const unit = tpmUnit(urlParams.transactionType);
-    return charts.noHits || t === null
-      ? `- ${unit}`
-      : `${asInteger(t)} ${unit}`;
+    return `${asInteger(t)} ${unit}`;
   };
 
   public getTPMTooltipFormatter = (p: Coordinate) => {
-    return this.getTPMFormatter(p.y);
+    return isValidCoordinateValue(p.y)
+      ? this.getTPMFormatter(p.y)
+      : NOT_AVAILABLE_LABEL;
   };
 
   public renderMLHeader(hasValidMlLicense: boolean) {

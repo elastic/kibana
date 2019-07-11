@@ -8,7 +8,7 @@
 import uniqBy from 'lodash.uniqby';
 // @ts-ignore Untyped Elastic library
 import { evaluate } from 'tinymath';
-import { groupBy, zipObject, omit, values } from 'lodash';
+import { groupBy, zipObject, omit } from 'lodash';
 import moment from 'moment';
 import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/public';
 // @ts-ignore Untyped local
@@ -26,7 +26,7 @@ import {
   PointSeries,
   PointSeriesColumnName,
   PointSeriesColumns,
-} from '../../types';
+} from '../../../../types';
 
 // TODO: pointseries performs poorly, that's why we run it on the server.
 
@@ -185,7 +185,7 @@ export function pointseries(): ExpressionFunction<
       );
 
       // Then compute that 1 value for each measure
-      values<DatatableRow[]>(measureKeys).forEach(valueRows => {
+      Object.values<DatatableRow[]>(measureKeys).forEach(valueRows => {
         const subtable = { type: 'datatable', columns: context.columns, rows: valueRows };
         const subScope = pivotObjectArray(subtable.rows, subtable.columns.map(col => col.name));
         const measureValues = measureNames.map(measure => {
@@ -209,7 +209,7 @@ export function pointseries(): ExpressionFunction<
 
       // It only makes sense to uniq the rows in a point series as 2 values can not exist in the exact same place at the same time.
       const resultingRows = uniqBy(
-        values(results).map(row => omit(row, PRIMARY_KEY)),
+        Object.values(results).map(row => omit(row, PRIMARY_KEY)),
         JSON.stringify
       );
 
