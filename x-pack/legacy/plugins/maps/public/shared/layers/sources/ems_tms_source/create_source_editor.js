@@ -24,14 +24,12 @@ export class EMSTMSCreateSourceEditor extends React.Component {
 
   _loadTmsOptions = async () => {
     const options = await getEmsTMSServices();
-    console.log('original', options);
     options.push({
       id: EMS_TILE_AUTO_ID,
       name: i18n.translate('xpack.maps.source.emsTile.autoLabel', {
         defaultMessage: 'Auto',
       })
     });
-    console.log(options);
     if (this._isMounted) {
       this.setState({
         emsTmsOptionsRaw: options
