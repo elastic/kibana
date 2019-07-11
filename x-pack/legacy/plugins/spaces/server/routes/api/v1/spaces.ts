@@ -43,6 +43,7 @@ export function initInternalSpacesApi(deps: InternalRouteDeps) {
       };
     },
     options: {
+      auth: false,
       pre: [routePreCheckLicenseFn],
     },
   });
