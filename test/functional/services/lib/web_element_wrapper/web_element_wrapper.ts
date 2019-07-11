@@ -110,7 +110,7 @@ export class WebElementWrapper {
       this.logger.debug(
         `Researching element '${this.locator.toString()}', ${attemptsRemaining - 1} attempts left`
       );
-      await delay(300);
+      await delay(200);
       this.webElement = await this.driver.findElement(this.locator);
       return await this.retryCall(fn, attemptsRemaining - 1);
     }
