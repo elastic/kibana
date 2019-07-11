@@ -9,7 +9,18 @@ your application to Kibana 7.3.
 
 See also <<release-highlights-7.3.0, release highlights>> and <<release-notes-7.3.0, release notes>>.
 
-coming[7.3.0]
+[float]
+[[breaking_73_data_frames_date_format]]
+
+[float]
+=== Data frame transforms with date_histogram group-by configurations
+*Details:* In 7.3 the `format` option for `date_histogram` 
+configurations for data frame transforms is no longer supported.
+
+*Impact:* An existing pivot transform which contains a `date_histogram` configuration might 
+no longer work with 7.3. If you run into issues starting this transform, it's best to recreate
+it by copying the `pivot` part of the configuration into the advanced editor of the data frame 
+creation wizard.
 
 //NOTE: The notable-breaking-changes tagged regions are re-used in the
 //Installation and Upgrade Guide
