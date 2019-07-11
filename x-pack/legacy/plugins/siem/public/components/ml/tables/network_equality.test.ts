@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { dateTimesAreEqual } from './date_time_equality';
+import { networkEquality } from './network_equality';
 import { AnomaliesNetworkTableProps } from '../types';
 import { NetworkType } from '../../../store/network/model';
 import { FlowTarget } from '../../../graphql/types';
@@ -25,14 +25,14 @@ describe('network_equality', () => {
       skip: false,
       type: NetworkType.details,
     };
-    const equal = dateTimesAreEqual(prev, next);
+    const equal = networkEquality(prev, next);
     expect(equal).toEqual(true);
   });
 
   test('it returns false if starts are not equal', () => {
     const prev: AnomaliesNetworkTableProps = {
-      startDate: new Date('2000').valueOf(),
-      endDate: new Date('1999').valueOf(),
+      startDate: new Date('2001').valueOf(),
+      endDate: new Date('2000').valueOf(),
       narrowDateRange: jest.fn(),
       skip: false,
       type: NetworkType.details,
@@ -44,7 +44,7 @@ describe('network_equality', () => {
       skip: false,
       type: NetworkType.details,
     };
-    const equal = dateTimesAreEqual(prev, next);
+    const equal = networkEquality(prev, next);
     expect(equal).toEqual(false);
   });
 
@@ -57,13 +57,13 @@ describe('network_equality', () => {
       type: NetworkType.details,
     };
     const next: AnomaliesNetworkTableProps = {
-      startDate: new Date('2000').valueOf(),
-      endDate: new Date('1999').valueOf(),
+      startDate: new Date('2001').valueOf(),
+      endDate: new Date('2000').valueOf(),
       narrowDateRange: jest.fn(),
       skip: false,
       type: NetworkType.details,
     };
-    const equal = dateTimesAreEqual(prev, next);
+    const equal = networkEquality(prev, next);
     expect(equal).toEqual(false);
   });
 
@@ -82,7 +82,7 @@ describe('network_equality', () => {
       skip: false,
       type: NetworkType.details,
     };
-    const equal = dateTimesAreEqual(prev, next);
+    const equal = networkEquality(prev, next);
     expect(equal).toEqual(false);
   });
 
@@ -101,7 +101,7 @@ describe('network_equality', () => {
       skip: false,
       type: NetworkType.details,
     };
-    const equal = dateTimesAreEqual(prev, next);
+    const equal = networkEquality(prev, next);
     expect(equal).toEqual(false);
   });
 
@@ -120,7 +120,7 @@ describe('network_equality', () => {
       skip: false,
       type: NetworkType.details,
     };
-    const equal = dateTimesAreEqual(prev, next);
+    const equal = networkEquality(prev, next);
     expect(equal).toEqual(false);
   });
 
@@ -141,7 +141,7 @@ describe('network_equality', () => {
       type: NetworkType.details,
       flowTarget: FlowTarget.destination,
     };
-    const equal = dateTimesAreEqual(prev, next);
+    const equal = networkEquality(prev, next);
     expect(equal).toEqual(false);
   });
 });

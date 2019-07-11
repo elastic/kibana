@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { dateTimesAreEqual } from './date_time_equality';
+import { hostEquality } from './host_equality';
 import { AnomaliesHostTableProps } from '../types';
 import { HostsType } from '../../../store/hosts/model';
 
@@ -24,14 +24,14 @@ describe('host_equality', () => {
       skip: false,
       type: HostsType.details,
     };
-    const equal = dateTimesAreEqual(prev, next);
+    const equal = hostEquality(prev, next);
     expect(equal).toEqual(true);
   });
 
   test('it returns false if starts are not equal', () => {
     const prev: AnomaliesHostTableProps = {
-      startDate: new Date('2000').valueOf(),
-      endDate: new Date('1999').valueOf(),
+      startDate: new Date('2001').valueOf(),
+      endDate: new Date('2000').valueOf(),
       narrowDateRange: jest.fn(),
       skip: false,
       type: HostsType.details,
@@ -43,7 +43,7 @@ describe('host_equality', () => {
       skip: false,
       type: HostsType.details,
     };
-    const equal = dateTimesAreEqual(prev, next);
+    const equal = hostEquality(prev, next);
     expect(equal).toEqual(false);
   });
 
@@ -56,13 +56,13 @@ describe('host_equality', () => {
       type: HostsType.details,
     };
     const next: AnomaliesHostTableProps = {
-      startDate: new Date('2000').valueOf(),
-      endDate: new Date('1999').valueOf(),
+      startDate: new Date('2001').valueOf(),
+      endDate: new Date('2000').valueOf(),
       narrowDateRange: jest.fn(),
       skip: false,
       type: HostsType.details,
     };
-    const equal = dateTimesAreEqual(prev, next);
+    const equal = hostEquality(prev, next);
     expect(equal).toEqual(false);
   });
 
@@ -81,7 +81,7 @@ describe('host_equality', () => {
       skip: false,
       type: HostsType.details,
     };
-    const equal = dateTimesAreEqual(prev, next);
+    const equal = hostEquality(prev, next);
     expect(equal).toEqual(false);
   });
 
@@ -100,7 +100,7 @@ describe('host_equality', () => {
       skip: false,
       type: HostsType.details,
     };
-    const equal = dateTimesAreEqual(prev, next);
+    const equal = hostEquality(prev, next);
     expect(equal).toEqual(false);
   });
 
@@ -119,7 +119,7 @@ describe('host_equality', () => {
       skip: false,
       type: HostsType.details,
     };
-    const equal = dateTimesAreEqual(prev, next);
+    const equal = hostEquality(prev, next);
     expect(equal).toEqual(false);
   });
 });
