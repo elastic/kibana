@@ -74,7 +74,44 @@ describe('Data Frame: Common', () => {
         group_by: { 'the-group-by-agg-name': { terms: { field: 'the-group-by-field' } } },
       },
       source: {
-        index: 'the-index-pattern-title',
+        index: ['the-index-pattern-title'],
+        query: { query_string: { default_operator: 'AND', query: 'the-query' } },
+      },
+    });
+  });
+
+  test('getDataFramePreviewRequest() with comma-separated index pattern', () => {
+    const query = getPivotQuery('the-query');
+    const groupBy: PivotGroupByConfig[] = [
+      {
+        agg: PIVOT_SUPPORTED_GROUP_BY_AGGS.TERMS,
+        field: 'the-group-by-field',
+        aggName: 'the-group-by-agg-name',
+        dropDownName: 'the-group-by-drop-down-name',
+      },
+    ];
+    const aggs: PivotAggsConfig[] = [
+      {
+        agg: PIVOT_SUPPORTED_AGGS.AVG,
+        field: 'the-agg-field',
+        aggName: 'the-agg-agg-name',
+        dropDownName: 'the-agg-drop-down-name',
+      },
+    ];
+    const request = getDataFramePreviewRequest(
+      'the-index-pattern-title,the-other-title',
+      query,
+      groupBy,
+      aggs
+    );
+
+    expect(request).toEqual({
+      pivot: {
+        aggregations: { 'the-agg-agg-name': { avg: { field: 'the-agg-field' } } },
+        group_by: { 'the-group-by-agg-name': { terms: { field: 'the-group-by-field' } } },
+      },
+      source: {
+        index: ['the-index-pattern-title', 'the-other-title'],
         query: { query_string: { default_operator: 'AND', query: 'the-query' } },
       },
     });
@@ -122,7 +159,7 @@ describe('Data Frame: Common', () => {
         group_by: { 'the-group-by-agg-name': { terms: { field: 'the-group-by-field' } } },
       },
       source: {
-        index: 'the-index-pattern-title',
+        index: ['the-index-pattern-title'],
         query: { query_string: { default_operator: 'AND', query: 'the-query' } },
       },
     });

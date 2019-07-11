@@ -21,6 +21,8 @@ const disableStickyMq = window.matchMedia(disableSticky);
 
 const Aside = styled.aside<{ isSticky?: boolean }>`
   ${props => `
+    position: relative;
+    z-index: ${props.theme.eui.euiZNavigation};
     background: ${props.theme.eui.euiColorEmptyShade};
     border-bottom: ${props.theme.eui.euiBorderThin};
     box-sizing: content-box;
@@ -32,7 +34,6 @@ const Aside = styled.aside<{ isSticky?: boolean }>`
     ${props.isSticky &&
       `
       top: ${offsetChrome}px !important;
-      z-index: ${props.theme.eui.euiZNavigation};
     `}
 
     @media only ${disableSticky} {
