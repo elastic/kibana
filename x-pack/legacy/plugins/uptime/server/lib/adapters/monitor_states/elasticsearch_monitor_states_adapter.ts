@@ -132,7 +132,7 @@ export class ElasticsearchMonitorStatesAdapter implements UMMonitorStatesAdapter
         }
       });
 
-      return Object.values(latestAgentGroup).map(lag => lag.checkGroup);
+      return Object.values(latestAgentGroup).map(({ checkGroup }) => checkGroup);
     });
 
     const afterKey = get<any | null>(result, 'aggregations.monitors.after_key', null);
