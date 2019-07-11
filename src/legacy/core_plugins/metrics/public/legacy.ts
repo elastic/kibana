@@ -18,8 +18,9 @@
  */
 
 import { PluginInitializerContext } from 'kibana/public';
-import { TsvbPlugin } from './plugin';
+import { core, plugins } from './setup';
+import { plugin } from '.';
 
-export function plugin(initializerContext: PluginInitializerContext) {
-  return new TsvbPlugin(initializerContext);
-}
+const pluginInstance = plugin({} as PluginInitializerContext);
+
+export const setup = pluginInstance.setup(core, plugins);

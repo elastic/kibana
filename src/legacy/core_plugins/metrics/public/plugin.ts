@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { CoreSetup } from 'kibana/public';
+import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from 'kibana/public';
 import { DataSetup } from '../../data/public';
 import { VisualizationsSetup } from '../../visualizations/public';
 // @ts-ignore
@@ -25,20 +25,38 @@ import { tsvb } from './tsvb_fn';
 // @ts-ignore
 import { MetricsVis } from './kbn_vis_type';
 
+/** @public */
+export type TsvbSetup = void;
+/** @public */
+export type TsvbStart = void;
+
+/** @internal */
 export interface TsvbSetupPlugins {
-  // TODO: Remove `any` as functionsRegistry will be added to the DataSetup.
+  // TODO: Remove `any` as functionsRegistry is added to the DataSetup.
   data: DataSetup | any;
   visualizations: VisualizationsSetup;
 }
 
-export class Plugin {
-  public setup(core: CoreSetup, plugins: TsvbSetupPlugins) {
+/** @internal */
+export interface TsvbStartPlugins {
+  foo: any;
+}
+
+export class TsvbPlugin
+  implements Plugin<TsvbSetup, TsvbStart, TsvbSetupPlugins, TsvbStartPlugins> {
+  initializerContext: PluginInitializerContext;
+
+  constructor(initializerContext: PluginInitializerContext) {
+    this.initializerContext = initializerContext;
+  }
+
+  public setup(core: CoreSetup, plugins: TsvbSetupPlugins): TsvbSetup {
     plugins.data.expressions.functionsRegistry.register(tsvb);
     // register the provider with the visTypes registry so that other know it exists
     plugins.visualizations.types.VisTypesRegistryProvider.register(MetricsVis);
   }
 
-  public start() {}
+  public start(core: CoreStart, plugins: TsvbStartPlugins): TsvbStart {}
 
   public stop() {}
 }
