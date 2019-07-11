@@ -31,6 +31,17 @@ describe('isKqlForRoute', () => {
     });
     expect(result).toBeFalsy();
   });
+  test('works when there is a trailing slash', () => {
+    const result = isKqlForRoute('/hosts/', {
+      filterQuery: {
+        expression: 'host.name:"siem-kibana"',
+        kind: 'kuery',
+      },
+      queryLocation: CONSTANTS.hostsPage,
+      type: hostsModel.HostsType.page,
+    });
+    expect(result).toBeTruthy();
+  });
   test('host details and host details kuery', () => {
     const result = isKqlForRoute('/hosts/siem-kibana', {
       filterQuery: {

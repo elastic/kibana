@@ -7,7 +7,8 @@
 import { i18n } from '@kbn/i18n';
 import { axisConfig } from '../../functions/common/axisConfig';
 import { FunctionHelp } from '.';
-import { FunctionFactory, Position } from '../../functions/types';
+import { FunctionFactory } from '../../../types';
+import { Position } from '../../../types';
 
 export const help: FunctionHelp<FunctionFactory<typeof axisConfig>> = {
   help: i18n.translate('xpack.canvas.functions.axisConfigHelpText', {

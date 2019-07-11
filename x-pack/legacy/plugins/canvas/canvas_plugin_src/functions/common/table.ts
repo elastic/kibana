@@ -5,7 +5,7 @@
  */
 
 import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/public';
-import { Datatable, Render, Style } from '../types';
+import { Datatable, Render, Style } from '../../../types';
 import { getFunctionHelp } from '../../strings';
 
 interface Arguments {
