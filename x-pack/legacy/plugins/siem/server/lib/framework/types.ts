@@ -12,6 +12,7 @@ import { Legacy } from 'kibana';
 import { ESQuery } from '../../../common/typed_json';
 import {
   PaginationInput,
+  PaginationInputPaginated,
   SortField,
   SourceConfiguration,
   TimerangeInput,
@@ -157,5 +158,11 @@ export interface RequestBasicOptions {
 export interface RequestOptions extends RequestBasicOptions {
   pagination: PaginationInput;
   fields: readonly string[];
+  sortField?: SortField;
+}
+
+export interface RequestOptionsPaginated extends RequestBasicOptions {
+  pagination: PaginationInputPaginated;
+  fields: ReadonlyArray<string>;
   sortField?: SortField;
 }
