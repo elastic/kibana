@@ -9,14 +9,14 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
 
-export const renderUptimeKibanaGlobalHelp = () => (
+export const renderUptimeKibanaGlobalHelp = (docsSiteUrl: string, docLinkVersion: string) => (
   <EuiFlexGroup direction="column">
     <EuiFlexItem>
       <EuiLink
         aria-label={i18n.translate('xpack.uptime.header.docsLinkAriaLabel', {
           defaultMessage: 'Go to Uptime documentation',
         })}
-        href="https://www.elastic.co/guide/en/kibana/current/xpack-uptime.html"
+        href={`${docsSiteUrl}guide/en/kibana/${docLinkVersion}/xpack-uptime.html`}
         target="_blank"
       >
         <FormattedMessage
