@@ -7,7 +7,7 @@
 import { i18n } from '@kbn/i18n';
 import { gte } from '../../functions/common/gte';
 import { FunctionHelp } from '.';
-import { FunctionFactory } from '../../functions/types';
+import { FunctionFactory } from '../../../types';
 
 export const help: FunctionHelp<FunctionFactory<typeof gte>> = {
   help: i18n.translate('xpack.canvas.functions.gteHelpText', {

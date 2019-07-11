@@ -24,4 +24,9 @@ describe('draggable_score', () => {
     );
     expect(toJson(wrapper)).toMatchSnapshot();
   });
+
+  test('renders correctly against snapshot when the index is not included', () => {
+    const wrapper = shallow(<DraggableScore id="some-id" score={anomalies.anomalies[0]} />);
+    expect(toJson(wrapper)).toMatchSnapshot();
+  });
 });

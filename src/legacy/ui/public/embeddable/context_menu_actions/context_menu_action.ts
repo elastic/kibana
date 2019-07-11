@@ -68,7 +68,7 @@ interface ContextMenuLinkOptions extends ContextMenuActionOptions {
   /**
    * An optional href to use as navigation when the action is clicked on.
    */
-  getHref?: (actionAPI: PanelActionAPI) => string;
+  getHref?: (actionAPI: PanelActionAPI) => string | undefined;
 }
 
 interface ContextMenuActionsConfig {
@@ -106,7 +106,7 @@ export class ContextMenuAction {
   /**
    * @param {PanelActionAPI} panelActionAPI
    */
-  public readonly getHref?: (panelActionAPI: PanelActionAPI) => string;
+  public readonly getHref?: (panelActionAPI: PanelActionAPI) => string | undefined;
 
   /**
    * @param {PanelActionAPI} panelActionAPI

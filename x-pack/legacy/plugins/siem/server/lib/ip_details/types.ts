@@ -4,15 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  DomainsData,
-  FirstLastSeenDomain,
-  FlowTarget,
-  IpOverviewData,
-  NetworkDirectionEcs,
-  SourceConfiguration,
-  UsersData,
-} from '../../graphql/types';
+import { DomainsData, IpOverviewData, NetworkDirectionEcs, UsersData } from '../../graphql/types';
 import { FrameworkRequest, RequestBasicOptions } from '../framework';
 import { Hit, ShardsResponse, TotalValue } from '../types';
 
@@ -20,10 +12,6 @@ export interface IpDetailsAdapter {
   getIpDetails(request: FrameworkRequest, options: RequestBasicOptions): Promise<IpOverviewData>;
   getDomains(request: FrameworkRequest, options: RequestBasicOptions): Promise<DomainsData>;
   getTls(request: FrameworkRequest, options: RequestBasicOptions): Promise<DomainsData>;
-  getDomainsFirstLastSeen(
-    req: FrameworkRequest,
-    options: DomainFirstLastSeenRequestOptions
-  ): Promise<FirstLastSeenDomain>;
   getUsers(request: FrameworkRequest, options: RequestBasicOptions): Promise<UsersData>;
 }
 
@@ -68,25 +56,13 @@ export interface OverviewHit {
   };
 }
 
-export interface OverviewHostHit {
-  took?: number;
-  timed_out?: boolean;
-  _scroll_id?: string;
-  _shards?: ShardsResponse;
-  timeout?: number;
-  hits?: {
-    total: number;
-    hits: Hit[];
-  };
-  doc_count: number;
-  host: ResultHit<object>;
-}
+export type OverviewHostHit = ResultHit<object>;
 
 export interface IpOverviewHit {
   aggregations: {
     destination?: OverviewHit;
     source?: OverviewHit;
-    host: OverviewHostHit;
+    host: ResultHit<object>;
   };
   _shards: {
     total: number;
@@ -164,25 +140,6 @@ export interface TlsBuckets {
 
   not_after: {
     buckets: Readonly<Array<{ key: number; key_as_string: string; doc_count: number }>>;
-  };
-}
-
-export interface DomainFirstLastSeenRequestOptions {
-  ip: string;
-  domainName: string;
-  flowTarget: FlowTarget;
-  sourceConfiguration: SourceConfiguration;
-  defaultIndex: string[];
-}
-
-export interface DomainFirstLastSeenItem {
-  firstSeen?: {
-    value: number;
-    value_as_string: string;
-  };
-  lastSeen?: {
-    value: number;
-    value_as_string: string;
   };
 }
 

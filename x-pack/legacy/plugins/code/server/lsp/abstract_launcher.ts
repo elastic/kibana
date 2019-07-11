@@ -20,11 +20,6 @@ let seqNo = 1;
 const OOM_SCORE_ADJ = 667;
 const OOM_ADJ = 10;
 
-export const ServerStartFailed = new ResponseError(
-  LanguageServerStartFailed,
-  'Launch language server failed.'
-);
-
 export abstract class AbstractLauncher implements ILanguageServerLauncher {
   running: boolean = false;
   private currentPid: number = -1;
@@ -92,10 +87,12 @@ export abstract class AbstractLauncher implements ILanguageServerLauncher {
         resolve();
       });
       this.launchReject = err => {
+        log.debug('launch error ' + err);
         proxy.exit().catch(this.log.debug);
         reject(err);
       };
     });
+
     return this.createExpander(proxy, builtinWorkspace, maxWorkspace);
   }
 
@@ -146,9 +143,13 @@ export abstract class AbstractLauncher implements ILanguageServerLauncher {
           this.onProcessExit(this.child, () => this.reconnect(proxy, installationPath, child));
           this.startConnect(proxy);
         } else {
-          this.log.warn(`spawned process ${this.spawnTimes} times, mark this proxy unusable.`);
-          proxy.setError(ServerStartFailed);
+          const ServerStartFailed = new ResponseError(
+            LanguageServerStartFailed,
+            'Launch language server failed.'
+          );
           this.launchReject!(ServerStartFailed);
+          proxy.setError(ServerStartFailed);
+          this.log.warn(`spawned process ${this.spawnTimes} times, mark this proxy unusable.`);
         }
       }
     }
@@ -159,6 +160,7 @@ export abstract class AbstractLauncher implements ILanguageServerLauncher {
     port: number,
     log: Logger
   ): Promise<ChildProcess> {
+    this.log.debug('spawn process');
     const child = await this.spawnProcess(installationPath, port, log);
     const pid = child.pid;
     this.currentPid = pid;
