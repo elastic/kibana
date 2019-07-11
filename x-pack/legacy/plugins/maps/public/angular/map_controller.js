@@ -35,7 +35,8 @@ import {
   setOpenTOCDetails,
 } from '../actions/ui_actions';
 import { getIsFullScreen } from '../selectors/ui_selectors';
-import { getQueryableUniqueIndexPatternIds, hasDirtyState } from '../selectors/map_selectors';
+import { copyPersistentState } from '../reducers/util';
+import { getQueryableUniqueIndexPatternIds, hasDirtyState, getLayerListRaw } from '../selectors/map_selectors';
 import { getInspectorAdapters } from '../reducers/non_serializable_instances';
 import { Inspector } from 'ui/inspector';
 import { docTitle } from 'ui/doc_title';
@@ -47,7 +48,10 @@ import { getInitialLayers } from './get_initial_layers';
 import { getInitialQuery } from './get_initial_query';
 import { getInitialTimeFilters } from './get_initial_time_filters';
 import { getInitialRefreshConfig } from './get_initial_refresh_config';
-import { MAP_SAVED_OBJECT_TYPE } from '../../common/constants';
+import {
+  MAP_SAVED_OBJECT_TYPE,
+  MAP_APP_PATH
+} from '../../common/constants';
 import { data } from 'plugins/data/setup';
 data.search.loadLegacyDirectives();
 const { savedQueryService } = data.search.services;
@@ -55,12 +59,13 @@ const { savedQueryService } = data.search.services;
 const REACT_ANCHOR_DOM_ELEMENT_ID = 'react-maps-root';
 
 
-const app = uiModules.get('app/maps', []);
+const app = uiModules.get(MAP_APP_PATH, []);
 
 app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage, AppState, globalState) => {
 
   const savedMap = $route.current.locals.map;
   let unsubscribe;
+  let initialLayerListConfig;
 
   const store = createMapStore();
 
@@ -190,6 +195,36 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage
     });
   });
   /* end Saved Queries */
+
+  function hasUnsavedChanges() {
+
+    const state = store.getState();
+    const layerList = getLayerListRaw(state);
+    const layerListConfigOnly = copyPersistentState(layerList);
+
+    const savedLayerList  = savedMap.getLayerList();
+    const oldConfig = savedLayerList ? savedLayerList : initialLayerListConfig;
+
+    return !_.isEqual(layerListConfigOnly, oldConfig);
+  }
+
+  function isOnMapNow() {
+    return window.location.hash.startsWith(`#/${MAP_SAVED_OBJECT_TYPE}`);
+  }
+
+  function beforeUnload(event) {
+    if (!isOnMapNow()) {
+      return;
+    }
+
+    const hasChanged = hasUnsavedChanges();
+    if (hasChanged) {
+      event.preventDefault();
+      event.returnValue = 'foobar';//this is required for Chrome
+    }
+  }
+  window.addEventListener('beforeunload', beforeUnload);
+
   function renderMap() {
     // clear old UI state
     store.dispatch(setSelectedLayer(null));
@@ -219,8 +254,8 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage
 
     const isDarkMode = config.get('theme:darkMode', false);
     const layerList = getInitialLayers(savedMap.layerListJSON, isDarkMode);
+    initialLayerListConfig = copyPersistentState(layerList);
     store.dispatch(replaceLayerList(layerList));
-
     store.dispatch(setRefreshConfig($scope.refreshConfig));
     store.dispatch(setQuery({ query: $scope.query, timeFilters: $scope.time }));
 
@@ -282,6 +317,9 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage
   }
 
   $scope.$on('$destroy', () => {
+
+    window.removeEventListener('beforeunload', beforeUnload);
+
     if (unsubscribe) {
       unsubscribe();
     }
@@ -297,7 +335,18 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage
         text: i18n.translate('xpack.maps.mapController.mapsBreadcrumbLabel', {
           defaultMessage: 'Maps'
         }),
-        href: '#'
+        onClick: () => {
+          if (isOnMapNow() && hasUnsavedChanges()) {
+            const navigateAway = window.confirm(i18n.translate('xpack.maps.mapController.unsavedChangesWarning', {
+              defaultMessage: `Your unsaved changes might not be saved`,
+            }));
+            if (navigateAway) {
+              window.location.hash = '#';
+            }
+          } else {
+            window.location.hash = '#';
+          }
+        }
       },
       { text: savedMap.title }
     ]);

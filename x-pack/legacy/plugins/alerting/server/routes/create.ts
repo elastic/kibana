@@ -11,6 +11,7 @@ import { SECONDS_REGEX, MINUTES_REGEX, HOURS_REGEX, DAYS_REGEX } from '../lib';
 
 interface ScheduleRequest extends Hapi.Request {
   payload: {
+    enabled: boolean;
     alertTypeId: string;
     interval: string;
     actions: AlertAction[];
@@ -29,6 +30,7 @@ export function createAlertRoute(server: Hapi.Server) {
         },
         payload: Joi.object()
           .keys({
+            enabled: Joi.boolean().default(true),
             alertTypeId: Joi.string().required(),
             interval: Joi.alternatives()
               .try(
