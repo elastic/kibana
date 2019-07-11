@@ -168,7 +168,7 @@ export const SnapshotRestoreHome: React.FunctionComponent<RouteComponentProps<Ma
             component={SnapshotList}
           />
           <Route exact path={`${BASE_PATH}/restore_status`} component={RestoreList} />
-          <Route exact path={`${BASE_PATH}/policies`} component={PolicyList} />
+          <Route exact path={`${BASE_PATH}/policies/:policyName*`} component={PolicyList} />
         </Switch>
       </EuiPageContent>
     </EuiPageBody>

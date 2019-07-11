@@ -21,6 +21,9 @@ describe('repository_serialization', () => {
               indices: ['kibana-*'],
               ignore_unavailable: false,
               include_global_state: false,
+              metadata: {
+                foo: 'bar',
+              },
             },
           },
           next_execution: '2019-07-11T01:30:00.000Z',
@@ -34,7 +37,14 @@ describe('repository_serialization', () => {
         snapshotName: '<daily-snap-{now/d}>',
         schedule: '0 30 1 * * ?',
         repository: 'my-backups',
-        config: { indices: ['kibana-*'], includeGlobalState: false, ignoreUnavailable: false },
+        config: {
+          indices: ['kibana-*'],
+          includeGlobalState: false,
+          ignoreUnavailable: false,
+          metadata: {
+            foo: 'bar',
+          },
+        },
         nextExecution: '2019-07-11T01:30:00.000Z',
         nextExecutionMillis: 1562722200000,
       });

@@ -5,17 +5,29 @@
  */
 
 import React, { Fragment, useEffect } from 'react';
+import { RouteComponentProps } from 'react-router-dom';
 
 import { EuiEmptyPrompt } from '@elastic/eui';
+import { SlmPolicy } from '../../../../../common/types';
 import { SectionError, SectionLoading } from '../../../components';
-import { UIM_POLICY_LIST_LOAD } from '../../../constants';
+import { BASE_PATH, UIM_POLICY_LIST_LOAD } from '../../../constants';
 import { useAppDependencies } from '../../../index';
 import { useLoadPolicies } from '../../../services/http';
 import { uiMetricService } from '../../../services/ui_metric';
 
+import { PolicyDetails } from './policy_details';
 import { PolicyTable } from './policy_table';
 
-export const PolicyList: React.FunctionComponent = () => {
+interface MatchParams {
+  policyName?: SlmPolicy['name'];
+}
+
+export const PolicyList: React.FunctionComponent<RouteComponentProps<MatchParams>> = ({
+  match: {
+    params: { policyName },
+  },
+  history,
+}) => {
   const {
     core: {
       i18n: { FormattedMessage },
@@ -30,6 +42,16 @@ export const PolicyList: React.FunctionComponent = () => {
     },
     request: reload,
   } = useLoadPolicies();
+
+  const openPolicyDetailsUrl = (newPolicyName: SlmPolicy['name']): string => {
+    return history.createHref({
+      pathname: `${BASE_PATH}/policies/${newPolicyName}`,
+    });
+  };
+
+  const closePolicyDetails = () => {
+    history.push(`${BASE_PATH}/policies`);
+  };
 
   // Track component loaded
   const { trackUiMetric } = uiMetricService;
@@ -86,8 +108,19 @@ export const PolicyList: React.FunctionComponent = () => {
       />
     );
   } else {
-    content = <PolicyTable policies={policies || []} reload={reload} />;
+    content = (
+      <PolicyTable
+        policies={policies || []}
+        reload={reload}
+        openPolicyDetailsUrl={openPolicyDetailsUrl}
+      />
+    );
   }
 
-  return <section data-test-subj="policyList">{content}</section>;
+  return (
+    <section data-test-subj="policyList">
+      {policyName ? <PolicyDetails policyName={policyName} onClose={closePolicyDetails} /> : null}
+      {content}
+    </section>
+  );
 };

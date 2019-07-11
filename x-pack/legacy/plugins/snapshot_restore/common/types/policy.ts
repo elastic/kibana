@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { RestoreSettings, RestoreSettingsEs } from './restore';
+import { SnapshotConfig, SnapshotConfigEs } from './snapshot';
 
 export interface SlmPolicy {
   name: string;
@@ -14,7 +14,7 @@ export interface SlmPolicy {
   snapshotName: string;
   schedule: string;
   repository: string;
-  config: RestoreSettings;
+  config: SnapshotConfig;
   nextExecution: string;
   nextExecutionMillis: number;
   lastSuccess?: {
@@ -38,7 +38,7 @@ export interface SlmPolicyEs {
     name: string;
     schedule: string;
     repository: string;
-    config: RestoreSettingsEs;
+    config: SnapshotConfigEs;
   };
   next_execution: string;
   next_execution_millis: number;

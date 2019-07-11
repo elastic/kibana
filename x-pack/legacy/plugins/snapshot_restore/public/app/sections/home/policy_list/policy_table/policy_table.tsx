@@ -5,22 +5,30 @@
  */
 
 import React from 'react';
-import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiInMemoryTable } from '@elastic/eui';
+import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiInMemoryTable, EuiLink } from '@elastic/eui';
 
 import { SlmPolicy } from '../../../../../../common/types';
+import { UIM_POLICY_SHOW_DETAILS_CLICK } from '../../../../constants';
 import { useAppDependencies } from '../../../../index';
 import { formatDate } from '../../../../services/text';
+import { uiMetricService } from '../../../../services/ui_metric';
 
 interface Props {
   policies: SlmPolicy[];
   reload: () => Promise<void>;
+  openPolicyDetailsUrl: (name: SlmPolicy['name']) => string;
 }
 
-export const PolicyTable: React.FunctionComponent<Props> = ({ policies, reload }) => {
+export const PolicyTable: React.FunctionComponent<Props> = ({
+  policies,
+  reload,
+  openPolicyDetailsUrl,
+}) => {
   const {
     core: { i18n },
   } = useAppDependencies();
   const { FormattedMessage } = i18n;
+  const { trackUiMetric } = uiMetricService;
 
   const columns = [
     {
@@ -30,6 +38,17 @@ export const PolicyTable: React.FunctionComponent<Props> = ({ policies, reload }
       }),
       truncateText: true,
       sortable: true,
+      render: (name: SlmPolicy['name']) => {
+        return (
+          <EuiLink
+            onClick={() => trackUiMetric(UIM_POLICY_SHOW_DETAILS_CLICK)}
+            href={openPolicyDetailsUrl(name)}
+            data-test-subj="policyLink"
+          >
+            {name}
+          </EuiLink>
+        );
+      },
     },
     {
       field: 'snapshotName',
@@ -105,12 +124,9 @@ export const PolicyTable: React.FunctionComponent<Props> = ({ policies, reload }
       {
         type: 'field_value_selection',
         field: 'repository',
-        name: (
-          <FormattedMessage
-            id="xpack.snapshotRestore.policyList.table.repositoryFilterLabel"
-            defaultMessage="Repository"
-          />
-        ),
+        name: i18n.translate('xpack.snapshotRestore.policyList.table.repositoryFilterLabel', {
+          defaultMessage: 'Repository',
+        }),
         multiSelect: false,
         options: Object.keys(
           policies.reduce((repositoriesMap: any, policy) => {

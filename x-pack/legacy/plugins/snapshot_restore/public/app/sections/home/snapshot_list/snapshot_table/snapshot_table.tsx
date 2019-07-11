@@ -29,6 +29,7 @@ interface Props {
   reload: () => Promise<void>;
   openSnapshotDetailsUrl: (repositoryName: string, snapshotId: string) => string;
   repositoryFilter?: string;
+  policyFilter?: string;
   onSnapshotDeleted: (snapshotsDeleted: Array<{ snapshot: string; repository: string }>) => void;
 }
 
@@ -39,6 +40,7 @@ export const SnapshotTable: React.FunctionComponent<Props> = ({
   openSnapshotDetailsUrl,
   onSnapshotDeleted,
   repositoryFilter,
+  policyFilter,
 }) => {
   const {
     core: { i18n },
@@ -252,6 +254,9 @@ export const SnapshotTable: React.FunctionComponent<Props> = ({
       repository: {
         type: 'string',
       },
+      policyName: {
+        type: 'string',
+      },
     },
   };
 
@@ -333,7 +338,14 @@ export const SnapshotTable: React.FunctionComponent<Props> = ({
         })),
       },
     ],
-    defaultQuery: repositoryFilter
+    defaultQuery: policyFilter
+      ? Query.parse(`policyName=${policyFilter}`, {
+          schema: {
+            ...searchSchema,
+            strict: true,
+          },
+        })
+      : repositoryFilter
       ? Query.parse(`repository:'${repositoryFilter}'`, {
           schema: {
             ...searchSchema,

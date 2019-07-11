@@ -3,8 +3,8 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { deserializeRestoreSettings } from '../../common/lib';
 import { SlmPolicy, SlmPolicyEs } from '../../common/types';
+import { deserializeSnapshotConfig } from './';
 
 export const deserializePolicy = (name: string, esPolicy: SlmPolicyEs): SlmPolicy => {
   const {
@@ -26,7 +26,7 @@ export const deserializePolicy = (name: string, esPolicy: SlmPolicyEs): SlmPolic
     snapshotName,
     schedule,
     repository,
-    config: deserializeRestoreSettings(config),
+    config: deserializeSnapshotConfig(config),
     nextExecution,
     nextExecutionMillis,
   };

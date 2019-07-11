@@ -6,8 +6,12 @@
 
 import { sortBy } from 'lodash';
 
-import { SnapshotDetails } from '../../common/types';
-import { SnapshotDetailsEs } from '../types';
+import {
+  SnapshotDetails,
+  SnapshotDetailsEs,
+  SnapshotConfig,
+  SnapshotConfigEs,
+} from '../../common/types';
 
 export function deserializeSnapshotDetails(
   repository: string,
@@ -33,6 +37,7 @@ export function deserializeSnapshotDetails(
     duration_in_millis: durationInMillis,
     failures = [],
     shards,
+    metadata: { policy: policyName } = { policy: undefined },
   } = snapshotDetailsEs;
 
   // If an index has multiple failures, we'll want to see them grouped together.
@@ -60,7 +65,7 @@ export function deserializeSnapshotDetails(
   // Sort by index name.
   const indexFailures = sortBy(Object.values(indexToFailuresMap), ({ index }) => index);
 
-  return {
+  const snapshotDetails: SnapshotDetails = {
     repository,
     snapshot,
     uuid,
@@ -78,4 +83,32 @@ export function deserializeSnapshotDetails(
     shards,
     isManagedRepository: repository === managedRepository,
   };
+
+  if (policyName) {
+    snapshotDetails.policyName = policyName;
+  }
+  return snapshotDetails;
+}
+
+export function deserializeSnapshotConfig(snapshotConfigEs: SnapshotConfigEs): SnapshotConfig {
+  const {
+    indices,
+    ignore_unavailable: ignoreUnavailable,
+    include_global_state: includeGlobalState,
+    metadata,
+  } = snapshotConfigEs;
+
+  const snapshotConfig: SnapshotConfig = {
+    indices,
+    ignoreUnavailable,
+    includeGlobalState,
+    metadata,
+  };
+
+  return Object.entries(snapshotConfig).reduce((config: any, [key, value]) => {
+    if (value !== undefined) {
+      config[key] = value;
+    }
+    return config;
+  }, {});
 }
