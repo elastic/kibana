@@ -19,23 +19,6 @@
 import stackedSeries from '../../../../../../fixtures/vislib/mock_data/date_histogram/_stacked_series';
 import { vislibPointSeriesTypes } from './point_series';
 
-jest.mock(
-  'ui/chrome',
-  () => ({
-    getUiSettingsClient: () => {
-      return {
-        get: key => {
-          switch (key) {
-            case 'visualization:heatmap:maxBuckets':
-              return 20;
-          }
-        },
-      };
-    },
-  }),
-  { virtual: true }
-);
-
 describe('vislibPointSeriesTypes', () => {
   const heatmapConfig = {
     type: 'heatmap',
@@ -47,6 +30,7 @@ describe('vislibPointSeriesTypes', () => {
     percentageMode: true,
     invertColors: false,
     colorsRange: [],
+    heatmapMaxBuckets: 20
   };
 
   const stackedData = {
