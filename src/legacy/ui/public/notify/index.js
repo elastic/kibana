@@ -18,7 +18,6 @@
  */
 
 export { notify } from './notify';
-export { Notifier } from './notifier';
 export { fatalError, addFatalErrorCallback } from './fatal_error';
 export { toastNotifications } from './toasts';
 export { GlobalBannerList, banners } from './banners';
