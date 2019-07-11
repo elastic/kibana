@@ -27,8 +27,16 @@ import { AggGroupNames } from '../../vis/editors/default/agg_groups';
  * @param startFromId: id of an aggregation from where we want to get the nested DSL
  */
 const getNestedAggDSL = (aggNestedDsl, startFromAggId) => {
-  if (aggNestedDsl[startFromAggId]) return aggNestedDsl[startFromAggId];
-  return getNestedAggDSL(_.values(aggNestedDsl)[0].aggs, startFromAggId);
+  if (aggNestedDsl[startFromAggId]) {
+    return aggNestedDsl[startFromAggId];
+  }
+  const nestedAggs = _.values(aggNestedDsl);
+  let aggs;
+  for (let i = 0; i < nestedAggs.length; i++) {
+    if (nestedAggs[i].aggs && (aggs = getNestedAggDSL(nestedAggs[i].aggs, startFromAggId))) {
+      return aggs;
+    }
+  }
 };
 
 /**
@@ -43,15 +51,19 @@ const getAggResultBuckets = (aggConfigs, response, aggWithOtherBucket, key) => {
   let responseAgg = response;
   for (const i in keyParts) {
     if (keyParts[i]) {
-      const agg = _.values(responseAgg)[0];
-      const aggKey = _.keys(responseAgg)[0];
-      const aggConfig = _.find(aggConfigs, agg => agg.id === aggKey);
-      const bucket = _.find(agg.buckets, (bucket, bucketObjKey) => {
-        const bucketKey = aggConfig.getKey(bucket, Number.isInteger(bucketObjKey) ? null : bucketObjKey).toString();
-        return bucketKey === keyParts[i];
-      });
-      if (bucket) {
-        responseAgg = bucket;
+      const responseAggs = _.values(responseAgg);
+      for (let aggId = 0; aggId < responseAggs.length; aggId++) {
+        const agg = responseAggs[aggId];
+        const aggKey = _.keys(responseAgg)[aggId];
+        const aggConfig = _.find(aggConfigs, agg => agg.id === aggKey);
+        const bucket = _.find(agg.buckets, (bucket, bucketObjKey) => {
+          const bucketKey = aggConfig.getKey(bucket, Number.isInteger(bucketObjKey) ? null : bucketObjKey).toString();
+          return bucketKey === keyParts[i];
+        });
+        if (bucket) {
+          responseAgg = bucket;
+          break;
+        }
       }
     }
   }
