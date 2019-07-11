@@ -1,5 +1,5 @@
-[[uptime-getting-started]]
-== Getting started
+[[install-uptime]]
+== Install Uptime
 
 The easiest way to get started with Elastic Uptime is by using our hosted {es} Service on Elastic Cloud.
 The {es} Service is available on both AWS and GCP,
