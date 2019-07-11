@@ -7,15 +7,20 @@
 import React, { useState, useMemo, memo, FunctionComponent } from 'react';
 import { debounce } from 'lodash';
 
+/**
+ * debouncedComponent wraps the specified React component, returning a component which
+ * only renders once there is a pause in props changes for at least `delay` milliseconds.
+ * During the debounce phase, it will return the previously rendered value.
+ */
 export function debouncedComponent<TProps>(component: FunctionComponent<TProps>, delay = 256) {
   const MemoizedComponent = (memo(component) as unknown) as FunctionComponent<TProps>;
 
-  return memo((props: TProps) => {
-    const [rendered, setRendered] = useState(props);
-    const delayRender = useMemo(() => debounce(setRendered, delay), []);
+  return (props: TProps) => {
+    const [cachedProps, setCachedProps] = useState(props);
+    const delayRender = useMemo(() => debounce(setCachedProps, delay), []);
 
     delayRender(props);
 
-    return React.createElement(MemoizedComponent, rendered);
-  });
+    return React.createElement(MemoizedComponent, cachedProps);
+  };
 }
