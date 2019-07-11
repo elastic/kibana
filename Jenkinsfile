@@ -111,7 +111,6 @@ def clearDir(String x){
 def createWorkspaceCache(){
   sh "mkdir -p ${WORKSPACE_CACHE_DIR}"
 }
-}
 
 /**
   unstash the stash passed as parameter or execute the block code passed.
