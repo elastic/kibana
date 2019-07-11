@@ -45,3 +45,4 @@ package-lock.json
 npm-debug.log*
 .tern-project
 ./.ci/src/resources/jenkins.war
+jenkins.war
