@@ -12,14 +12,15 @@ import styled, { css } from 'styled-components';
 import { InspectButton } from '../inspect';
 
 const Header = styled.header<{ border?: boolean }>`
-  margin-bottom: ${props => props.theme.eui.euiSizeL};
+  ${props => css`
+    margin-bottom: ${props.theme.eui.euiSizeL};
 
-  ${props =>
-    props.border &&
-    css`
+    ${props.border &&
+      `
       border-bottom: ${props.theme.eui.euiBorderThin};
       padding-bottom: ${props.theme.eui.euiSizeL};
     `}
+  `}
 `;
 
 export interface HeaderPanelProps {

@@ -20,25 +20,27 @@ const disableSticky = 'screen and (max-width: ' + euiLightVars.euiBreakpoints.s 
 const disableStickyMq = window.matchMedia(disableSticky);
 
 const Aside = styled.aside<{ isSticky?: boolean }>`
-  position: relative;
-  z-index: ${props => props.theme.eui.euiZNavigation};
-  background: ${props => props.theme.eui.euiColorEmptyShade};
-  border-bottom: ${props => props.theme.eui.euiBorderThin};
-  box-sizing: content-box;
-  margin: 0 -${gutterTimeline} 0 -${props => props.theme.eui.euiSizeL};
-  padding: ${props => props.theme.eui.euiSize} ${gutterTimeline} ${props =>
-  props.theme.eui.euiSize} ${props => props.theme.eui.euiSizeL};
+  ${props => css`
+    position: relative;
+    z-index: ${props.theme.eui.euiZNavigation};
+    background: ${props.theme.eui.euiColorEmptyShade};
+    border-bottom: ${props.theme.eui.euiBorderThin};
+    box-sizing: content-box;
+    margin: 0 -${gutterTimeline} 0 -${props.theme.eui.euiSizeL};
+    padding: ${props.theme.eui.euiSize} ${gutterTimeline} ${props.theme.eui.euiSize} ${
+    props.theme.eui.euiSizeL
+  };
 
-  ${props =>
-    props.isSticky &&
-    css`
+    ${props.isSticky &&
+      `
       top: ${offsetChrome}px !important;
     `}
 
-  @media only ${disableSticky} {
-    position: static !important;
-    z-index: ${props => props.theme.eui.euiZContent} !important;
-  }
+    @media only ${disableSticky} {
+      position: static !important;
+      z-index: ${props.theme.eui.euiZContent} !important;
+    }
+  `}
 `;
 
 // Temporary fix for EuiSuperDatePicker whitespace bug and auto width - Michael Marcialis
