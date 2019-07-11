@@ -7,7 +7,7 @@
 import dateMath from '@elastic/datemath';
 import moment, { Moment } from 'moment';
 import { quickRanges, QuickRange } from './quick_ranges';
-import { timeUnits } from '../../../../../../common/lib/time_units';
+import { timeUnits, TimeUnit } from '../../../../../../common/lib/time_units';
 
 const lookupByRange: { [key: string]: QuickRange } = {};
 quickRanges.forEach(frame => {
@@ -43,7 +43,8 @@ export function formatDuration(from: string, to: string) {
         const rounded = fromParts[1].split('/');
         let text = `Last  ${rounded[0]}`;
         if (rounded[1]) {
-          text = `${text} rounded to the ${timeUnits[rounded[1]]}`;
+          const unit = rounded[1] as TimeUnit;
+          text = `${text} rounded to the ${timeUnits[unit]}`;
         }
 
         return text;
