@@ -192,7 +192,7 @@ export function map(state = INITIAL_STATE, action) {
     case LAYER_DATA_LOAD_STARTED:
       return updateWithDataRequest(state, action);
     case LAYER_DATA_LOAD_ERROR:
-      return resetDataRequest(state, action);
+      return clearDataRequest(state, action);
     case LAYER_DATA_LOAD_ENDED:
       return updateWithDataResponse(state, action);
     case TOUCH_LAYER:
@@ -329,18 +329,6 @@ export function map(state = INITIAL_STATE, action) {
   }
 }
 
-function findDataRequest(layerDescriptor, dataRequestAction) {
-
-  if (!layerDescriptor.__dataRequests) {
-    return;
-  }
-
-  return layerDescriptor.__dataRequests.find(dataRequest => {
-    return dataRequest.dataId === dataRequestAction.dataId;
-  });
-}
-
-
 function updateWithDataRequest(state, action) {
   let dataRequest = getValidDataRequest(state, action, false);
   const layerRequestingData = findLayerById(state, action.layerId);
@@ -360,14 +348,29 @@ function updateWithDataRequest(state, action) {
 }
 
 
-function updateSourceDataRequest(state, action) {
-  const layerDescriptor = findLayerById(state, action.layerId);
-  if (!layerDescriptor) {
-    return state;
+
+function findDataRequestByDataId(layerDescriptor, dataRequestAction) {
+  if (!layerDescriptor.__dataRequests) {
+    return;
   }
-  const dataRequest =   layerDescriptor.__dataRequests.find(dataRequest => {
+  return layerDescriptor.__dataRequests.find(dataRequest => {
+    return dataRequest.dataId === dataRequestAction.dataId;
+  });
+}
+
+function findDataRequestByLayerId(state, layerId) {
+  const layerDescriptor = findLayerById(state, layerId);
+  if (!layerDescriptor) {
+    return;
+  }
+  return layerDescriptor.__dataRequests.find(dataRequest => {
     return dataRequest.dataId === SOURCE_DATA_ID_ORIGIN;
   });
+}
+
+
+function updateSourceDataRequest(state, action) {
+  const dataRequest = findDataRequestByLayerId(state, action.layerId);
   if (!dataRequest) {
     return state;
   }
@@ -377,33 +380,38 @@ function updateSourceDataRequest(state, action) {
 }
 
 
+function clearDataRequest(state, action) {
+  const dataRequest = findDataRequestByLayerId(state, action.layerId);
+  if (!dataRequest) {
+    return state;
+  }
+  dataRequest.data = null;
+  return resetDataRequest(state, action, dataRequest);
+}
+
 function updateWithDataResponse(state, action) {
-  const dataRequest = getValidDataRequest(state, action);
+  const dataRequest = getValidDataRequest(state, action, true);
   if (!dataRequest) { return state; }
 
   dataRequest.data = action.data;
   dataRequest.dataMeta = { ...dataRequest.dataMetaAtStart, ...action.meta };
-  dataRequest.dataMetaAtStart = null;
   return resetDataRequest(state, action, dataRequest);
 }
 
-function resetDataRequest(state, action, request) {
-  const dataRequest = request || getValidDataRequest(state, action);
-  if (!dataRequest) { return state; }
-
+function resetDataRequest(state, action, dataRequest) {
   dataRequest.dataRequestToken = null;
   dataRequest.dataId = action.dataId;
   const layerList = [...state.layerList];
   return { ...state, layerList };
 }
 
-function getValidDataRequest(state, action, checkRequestToken = true) {
+function getValidDataRequest(state, action, checkRequestToken) {
   const layer = findLayerById(state, action.layerId);
   if (!layer) {
     return;
   }
 
-  const dataRequest = findDataRequest(layer, action);
+  const dataRequest = findDataRequestByDataId(layer, action);
   if (!dataRequest) {
     return;
   }
