@@ -12,31 +12,32 @@ import { ActionType, ActionTypeExecutorOptions } from '../types';
 
 const PORT_MAX = 256 * 256 - 1;
 
-export type ActionTypeConfigType = TypeOf<typeof ActionTypeConfig.schema>;
-
 function nullableType<V>(type: Type<V>) {
   return schema.oneOf([type, schema.literal(null)], { defaultValue: () => null });
 }
 
-const ActionTypeConfig = {
-  path: 'actionTypeConfig',
-  schema: schema.object(
-    {
-      service: nullableType(schema.string()),
-      host: nullableType(schema.string()),
-      port: nullableType(schema.number({ min: 1, max: PORT_MAX })),
-      secure: nullableType(schema.boolean()),
-      user: schema.string(),
-      password: schema.string(),
-      from: schema.string(),
-    },
-    {
-      validate: validateConfigType,
-    }
-  ),
-};
+// config definition
 
-function validateConfigType(configObject: any): string | void {
+const unencryptedConfigProperties = ['service', 'host', 'port', 'secure', 'from'];
+
+export type ActionTypeConfigType = TypeOf<typeof ConfigSchema>;
+
+const ConfigSchema = schema.object(
+  {
+    user: schema.string(),
+    password: schema.string(),
+    service: nullableType(schema.string()),
+    host: nullableType(schema.string()),
+    port: nullableType(schema.number({ min: 1, max: PORT_MAX })),
+    secure: nullableType(schema.boolean()),
+    from: schema.string(),
+  },
+  {
+    validate: validateConfig,
+  }
+);
+
+function validateConfig(configObject: any): string | void {
   // avoids circular reference ...
   const config: ActionTypeConfigType = configObject;
 
@@ -62,64 +63,54 @@ function validateConfigType(configObject: any): string | void {
   }
 }
 
-const unencryptedConfigProperties = ['service', 'host', 'port', 'secure', 'from'];
+// params definition
 
-export type ActionParamsType = TypeOf<typeof ActionParams.schema>;
+export type ActionParamsType = TypeOf<typeof ParamsSchema>;
 
-const ActionParams = {
-  path: 'actionParams',
-  schema: schema.object({
+const ParamsSchema = schema.object(
+  {
     to: schema.arrayOf(schema.string(), { defaultValue: [] }),
     cc: schema.arrayOf(schema.string(), { defaultValue: [] }),
     bcc: schema.arrayOf(schema.string(), { defaultValue: [] }),
     subject: schema.string(),
     message: schema.string(),
-  }),
-};
-
-function validateConfig(object: any): { error?: Error; value?: object } {
-  let value;
-
-  try {
-    value = ActionTypeConfig.schema.validate(object) as any;
-  } catch (error) {
-    return { error };
+  },
+  {
+    validate: validateParams,
   }
+);
 
-  return { value };
-}
+function validateParams(paramsObject: any): string | void {
+  // avoids circular reference ...
+  const params: ActionParamsType = paramsObject;
 
-function validateParams(object: any): { error?: Error; value?: ActionParamsType } {
-  let value;
-
-  try {
-    value = ActionParams.schema.validate(object);
-  } catch (error) {
-    return { error };
-  }
-
-  const { to, cc, bcc } = value;
+  const { to, cc, bcc } = params;
   const addrs = to.length + cc.length + bcc.length;
 
   if (addrs === 0) {
-    return toErrorObject('no [to], [cc], or [bcc] entries');
+    return 'no [to], [cc], or [bcc] entries';
   }
-
-  return { value };
 }
+
+// action type definition
 
 export const actionType: ActionType = {
   id: '.email',
   name: 'email',
   unencryptedAttributes: unencryptedConfigProperties,
   validate: {
-    config: { validate: validateConfig },
-    params: { validate: validateParams },
+    config: ConfigSchema,
+    params: ParamsSchema,
   },
   executor,
 };
 
-async function executor({ config, params, services }: ActionTypeExecutorOptions): Promise<any> {
+// action executor
+
+async function executor(execOptions: ActionTypeExecutorOptions): Promise<any> {
+  const config = execOptions.config as ActionTypeConfigType;
+  const params = execOptions.params as ActionParamsType;
+
   const transport: any = {
     user: config.user,
     password: config.password,
@@ -149,6 +140,8 @@ async function executor({ config, params, services }: ActionTypeExecutorOptions)
 
   return await sendEmail(sendEmailOptions);
 }
+
+// utilities
 
 const ValidServiceNames = getValidServiceNames();
 
@@ -182,12 +175,8 @@ function getValidServiceNames(): Set<string> {
 // Otherwise, if the port is 465, return true, otherwise return false.
 // Based on data here:
 // - https://github.com/nodemailer/nodemailer/blob/master/lib/well-known/services.json
-function getSecureValue(secure: boolean | null | undefined, port: number): boolean {
+function getSecureValue(secure: boolean | null | undefined, port: number | null): boolean {
   if (secure != null) return secure;
   if (port === 465) return true;
   return false;
-}
-
-function toErrorObject(message: string) {
-  return { error: new Error(message) };
 }
