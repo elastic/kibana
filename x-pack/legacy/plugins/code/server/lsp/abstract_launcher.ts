@@ -42,7 +42,7 @@ export abstract class AbstractLauncher implements ILanguageServerLauncher {
     const port = await this.getPort();
     const log: Logger = this.log;
     let child: ChildProcess;
-    const proxy = new LanguageServerProxy(port, this.targetHost, log, this.options.lsp);
+    const proxy = new LanguageServerProxy(port, this.targetHost, log);
     if (this.options.lsp.detach) {
       log.debug('Detach mode, expected language server launch externally');
       proxy.onConnected(() => {
