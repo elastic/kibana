@@ -30,10 +30,23 @@ describe('MonitoringViewBaseController', function () {
       start: spy()
     };
 
+    const windowMock = () => {
+      const events = {};
+      const targetEvent = 'popstate';
+      return {
+        removeEventListener: stub(),
+        addEventListener: (name, handler) => name === targetEvent && (events[name] = handler),
+        history: {
+          back: () => events[targetEvent] && events[targetEvent]()
+        }
+      };
+    };
+
     const injectorGetStub = stub();
     injectorGetStub.withArgs('title').returns(titleService);
     injectorGetStub.withArgs('$executor').returns(executorService);
     injectorGetStub.withArgs('localStorage').throws('localStorage should not be used by this class');
+    injectorGetStub.withArgs('$window').returns(windowMock());
     $injector = { get: injectorGetStub };
 
     $scope = {
@@ -50,6 +63,26 @@ describe('MonitoringViewBaseController', function () {
     };
 
     ctrl = new MonitoringViewBaseController(opts);
+  });
+
+  it('show/hide zoom-out button based on interaction', (done) => {
+    const xaxis = { from: 1562089923880, to: 1562090159676 };
+    const timeRange = { xaxis };
+    const { zoomInfo } = ctrl;
+
+    ctrl.onBrush(timeRange);
+
+    expect(zoomInfo.showZoomOutBtn()).to.be(true);
+
+    /*
+      Need to do this async, since we are delaying event adding
+    */
+    setTimeout(() => {
+      zoomInfo.zoomOutHandler();
+      expect(zoomInfo.showZoomOutBtn()).to.be(false);
+      done();
+    }, 15);
+
   });
 
   it('creates functions for fetching data', () => {

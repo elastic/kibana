@@ -51,10 +51,16 @@ interface SearchScope extends ng.IScope {
   filter?: (field: string, value: string, operator: string) => void;
 }
 
-interface SearchEmbeddableCustomization {
+/**
+ * interfaces are not allowed to specify a sub-set of the required types until
+ * https://github.com/microsoft/TypeScript/issues/15300 is fixed so we use a type
+ * here instead
+ */
+// eslint-disable-next-line @typescript-eslint/prefer-interface
+type SearchEmbeddableCustomization = {
   sort?: string[];
   columns?: string[];
-}
+};
 
 interface SearchEmbeddableConfig {
   onEmbeddableStateChanged: OnEmbeddableStateChanged;

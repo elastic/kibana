@@ -5,6 +5,6 @@
  */
 
 export { getJobsFactory } from './get_jobs';
-export { deleteJobFactory } from './delete_job';
-export { startJobFactory } from './start_job';
-export { stopJobFactory } from './stop_job';
+export { deleteJob } from './delete_job';
+export { startJob } from './start_job';
+export { stopJob } from './stop_job';

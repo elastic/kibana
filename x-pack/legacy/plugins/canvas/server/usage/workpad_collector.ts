@@ -8,8 +8,8 @@ import { SearchParams } from 'elasticsearch';
 import { sum as arraySum, min as arrayMin, max as arrayMax, get } from 'lodash';
 import { fromExpression } from '@kbn/interpreter/common';
 import { CANVAS_TYPE } from '../../common/lib/constants';
-import { AST, collectFns } from './collector_helpers';
-import { TelemetryCollector } from './collector';
+import { collectFns } from './collector_helpers';
+import { AST, TelemetryCollector } from '../../types';
 
 interface Element {
   expression: string;
@@ -66,7 +66,7 @@ interface WorkpadTelemetry {
   @returns Workpad Telemetry Data
 */
 export function summarizeWorkpads(workpadDocs: Workpad[]): WorkpadTelemetry {
-  const functionSet = new Set();
+  const functionSet = new Set<string>();
 
   if (workpadDocs.length === 0) {
     return {};
@@ -185,7 +185,7 @@ const workpadCollector: TelemetryCollector = async function(server, callCluster)
 
   const esResponse = await callCluster<WorkpadSearch>('search', searchParams);
 
-  if (get(esResponse, 'hits.hits.length') > 0) {
+  if (get<number>(esResponse, 'hits.hits.length') > 0) {
     const workpads = esResponse.hits.hits.map(hit => hit._source[CANVAS_TYPE]);
     return summarizeWorkpads(workpads);
   }
