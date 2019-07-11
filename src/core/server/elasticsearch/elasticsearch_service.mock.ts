@@ -23,7 +23,7 @@ import { ElasticsearchConfig } from './elasticsearch_config';
 import { ElasticsearchService, ElasticsearchServiceSetup } from './elasticsearch_service';
 
 const createSetupContractMock = () => {
-  const setupContract: ElasticsearchServiceSetup = {
+  const setupContract: jest.Mocked<ElasticsearchServiceSetup> = {
     legacy: {
       config$: new BehaviorSubject({} as ElasticsearchConfig),
     },
