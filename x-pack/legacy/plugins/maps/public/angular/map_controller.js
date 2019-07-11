@@ -54,7 +54,7 @@ const REACT_ANCHOR_DOM_ELEMENT_ID = 'react-maps-root';
 
 const app = uiModules.get('app/maps', []);
 
-app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage, AppState, globalState) => {
+app.controller('GisMapController', ($scope, $route, kbnUrl, localStorage, AppState, globalState) => {
 
   const savedMap = $route.current.locals.map;
   let unsubscribe;
@@ -150,8 +150,7 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage
       store.dispatch(setOpenTOCDetails(_.get(uiState, 'openTOCDetails', [])));
     }
 
-    const isDarkMode = config.get('theme:darkMode', false);
-    const layerList = getInitialLayers(savedMap.layerListJSON, isDarkMode);
+    const layerList = getInitialLayers(savedMap.layerListJSON);
     store.dispatch(replaceLayerList(layerList));
 
     store.dispatch(setRefreshConfig($scope.refreshConfig));

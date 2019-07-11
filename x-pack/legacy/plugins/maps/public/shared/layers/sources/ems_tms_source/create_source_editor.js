@@ -11,6 +11,7 @@ import {
   EuiFormRow,
 } from '@elastic/eui';
 
+import { EMS_TILE_AUTO_ID } from './constants';
 import { getEmsTMSServices } from '../../../../meta';
 import { getEmsUnavailableMessage } from '../ems_unavailable_message';
 import { i18n } from '@kbn/i18n';
@@ -23,6 +24,12 @@ export class EMSTMSCreateSourceEditor extends React.Component {
 
   _loadTmsOptions = async () => {
     const options = await getEmsTMSServices();
+    options.push({
+      id: EMS_TILE_AUTO_ID,
+      name: i18n.translate('xpack.maps.source.emsTile.autoLabel', {
+        defaultMessage: 'Auto',
+      })
+    });
     if (this._isMounted) {
       this.setState({
         emsTmsOptionsRaw: options
