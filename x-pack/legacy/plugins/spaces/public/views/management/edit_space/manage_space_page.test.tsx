@@ -6,7 +6,6 @@
 jest.mock('ui/kfetch', () => ({
   kfetch: () => Promise.resolve([{ id: 'feature-1', name: 'feature 1' }]),
 }));
-import '../../../__mocks__/ui_capabilities';
 import { EuiButton, EuiLink, EuiSwitch } from '@elastic/eui';
 import { ReactWrapper } from 'enzyme';
 import React from 'react';
@@ -36,7 +35,7 @@ describe('ManageSpacePage', () => {
           navLinks: {},
           management: {},
           catalogue: {},
-          spaces: { manage: false },
+          spaces: { manage: true },
         }}
       />
     );
@@ -84,7 +83,7 @@ describe('ManageSpacePage', () => {
           navLinks: {},
           management: {},
           catalogue: {},
-          spaces: { manage: false },
+          spaces: { manage: true },
         }}
       />
     );
@@ -132,7 +131,7 @@ describe('ManageSpacePage', () => {
           navLinks: {},
           management: {},
           catalogue: {},
-          spaces: { manage: false },
+          spaces: { manage: true },
         }}
       />
     );
@@ -189,7 +188,7 @@ describe('ManageSpacePage', () => {
           navLinks: {},
           management: {},
           catalogue: {},
-          spaces: { manage: false },
+          spaces: { manage: true },
         }}
       />
     );
