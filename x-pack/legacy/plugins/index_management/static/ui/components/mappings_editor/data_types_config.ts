@@ -6,12 +6,12 @@
 
 import { ParameterName } from './parameters';
 
-export type DataType = 'text' | 'keyword' | 'object' | 'array' | 'boolean';
+export type DataType = 'text' | 'keyword' | 'numeric' | 'object' | 'array' | 'boolean';
 
 export interface DataTypeConfig {
   value: DataType;
   text: string;
-  commonParameters?: ParameterName[];
+  commonParameters?: ParameterName[] | ParameterName[][];
   hasAdvancedParameters?: boolean;
   hasMultiFields?: boolean;
 }
@@ -25,7 +25,15 @@ export const dataTypesConfig: DataTypeConfig[] = [
   {
     value: 'keyword',
     text: 'Keyword',
-    commonParameters: ['store', 'doc_values'],
+    commonParameters: ['store', 'index', 'doc_values'],
+  },
+  {
+    value: 'numeric',
+    text: 'Numeric',
+    commonParameters: [
+      ['store', 'index', 'coerce', 'doc_values', 'ignore_malformed'],
+      ['null_value', 'boost'],
+    ],
   },
   {
     value: 'object',

@@ -31,10 +31,12 @@ export interface Mappings {
   [key: string]: any;
 }
 
-const serializeData = (data: Record<string, unknown>): Record<string, unknown> => ({
-  ...data,
-  properties: propertiesArrayToObject(data.properties as any[]),
-});
+const serializeData = (data: Record<string, unknown>): Record<string, unknown> => {
+  return {
+    ...data,
+    properties: propertiesArrayToObject(data.properties as any[]),
+  };
+};
 
 export const MappingsEditor = ({
   setGetDataHandler,

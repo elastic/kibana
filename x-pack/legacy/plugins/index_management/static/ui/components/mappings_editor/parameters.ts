@@ -13,7 +13,16 @@ import {
   containsCharsField,
 } from '../../../../../../../../src/plugins/elasticsearch_ui_shared/static/forms/field_validators';
 
-export type ParameterName = 'name' | 'type' | 'store' | 'index' | 'doc_values';
+export type ParameterName =
+  | 'name'
+  | 'type'
+  | 'store'
+  | 'index'
+  | 'doc_values'
+  | 'coerce'
+  | 'ignore_malformed'
+  | 'null_value'
+  | 'boost';
 
 export interface Parameter {
   fieldConfig: FieldConfig;
@@ -57,7 +66,6 @@ export const parameters: { [key in ParameterName]: Parameter } = {
       type: FIELD_TYPES.TOGGLE,
       defaultValue: true,
     },
-    // docs: 'https://www.elastic.co/guide/en/elasticsearch/reference/current/mapping-store.html',
   },
   doc_values: {
     fieldConfig: {
@@ -66,5 +74,31 @@ export const parameters: { [key in ParameterName]: Parameter } = {
       defaultValue: true,
     },
     docs: 'https://www.elastic.co/guide/en/elasticsearch/reference/current/doc-values.html',
+  },
+  coerce: {
+    fieldConfig: {
+      label: 'Coerce',
+      type: FIELD_TYPES.TOGGLE,
+      defaultValue: true,
+    },
+  },
+  ignore_malformed: {
+    fieldConfig: {
+      label: 'Ignore malformed',
+      type: FIELD_TYPES.TOGGLE,
+      defaultValue: true,
+    },
+  },
+  null_value: {
+    fieldConfig: {
+      label: 'Null value',
+      type: FIELD_TYPES.TEXT,
+    },
+  },
+  boost: {
+    fieldConfig: {
+      label: 'Boost',
+      type: FIELD_TYPES.TEXT,
+    },
   },
 };

@@ -9,11 +9,13 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiSelect,
+  EuiButton,
   EuiButtonIcon,
   EuiFormRow,
 } from '@elastic/eui';
 import {
   UseField,
+  UseArray,
   Form,
 } from '../../../../../../../../../src/plugins/elasticsearch_ui_shared/static/forms/hook_form_lib';
 import { Field } from '../../../../../../../../../src/plugins/elasticsearch_ui_shared/static/forms/components';
@@ -35,7 +37,7 @@ export const MappingsProperty = ({ onRemove, fieldPathPrefix = '', form }: Props
 
   return (
     <Fragment>
-      <EuiFlexGroup>
+      <EuiFlexGroup justifyContent="spaceBetween">
         <EuiFlexItem grow={false}>
           <UseField
             path={`${fieldPathPrefix}name`}
@@ -82,7 +84,27 @@ export const MappingsProperty = ({ onRemove, fieldPathPrefix = '', form }: Props
         typeConfig={propertyType}
         fieldPathPrefix={fieldPathPrefix}
       />
-      <EuiSpacer size="m" />
+      <EuiSpacer size="l" />
+      {propertyType.value === 'object' && (
+        <UseArray path={`${fieldPathPrefix}properties`} form={form}>
+          {({ rows, addRow, removeRow }) => (
+            <Fragment>
+              {rows.map(({ id, rowPath, isNew }) => (
+                <MappingsProperty
+                  key={id}
+                  fieldPathPrefix={`${rowPath}.`}
+                  form={form}
+                  onRemove={() => removeRow(id)}
+                />
+              ))}
+              <EuiSpacer size="s" />
+              <EuiButton color="primary" onClick={addRow}>
+                Add property
+              </EuiButton>
+            </Fragment>
+          )}
+        </UseArray>
+      )}
     </Fragment>
   );
 };
