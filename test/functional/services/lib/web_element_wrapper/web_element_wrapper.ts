@@ -41,16 +41,17 @@ interface TypeOptions {
   charByChar: boolean;
 }
 
+const RETRY_CLICK_MAX_ATTEMPTS = 3;
+const RETRY_CLICK_RETRY_ON_ERRORS = [
+  'ElementClickInterceptedError',
+  'ElementNotInteractableError',
+  'StaleElementReferenceError',
+];
+
 export class WebElementWrapper {
   private By: typeof By = this.webDriver.By;
   private Keys: IKey = this.webDriver.Key;
   private driver: WebDriver = this.webDriver.driver;
-  private attempts: number = 3;
-  private errors = [
-    'ElementClickInterceptedError',
-    'ElementNotInteractableError',
-    'StaleElementReferenceError',
-  ];
   public LegacyAction: any = this.webDriver.LegacyActionSequence;
 
   public static create(
@@ -119,17 +120,24 @@ export class WebElementWrapper {
 
   private async retryCall<T>(
     fn: (wrapper: this) => T | Promise<T>,
-    attemptsRemaining: number = this.attempts
+    attemptsRemaining: number = RETRY_CLICK_MAX_ATTEMPTS
   ): Promise<T> {
     try {
       return await fn(this);
     } catch (err) {
-      if (!this.errors.includes(err.name) || this.locator === null || attemptsRemaining === 0)
+      if (
+        !RETRY_CLICK_RETRY_ON_ERRORS.includes(err.name) ||
+        this.locator === null ||
+        attemptsRemaining === 0
+      ) {
         throw err;
+      }
+
       this.logger.warning(`WebElementWrapper.${fn.name}: ${err.message}`);
       this.logger.debug(
-        `Researching element '${this.locator.toString()}', ${attemptsRemaining - 1} attempts left`
+        `finding element '${this.locator.toString()}' again, ${attemptsRemaining - 1} attempts left`
       );
+
       await delay(200);
       this._webElement = await this.driver.findElement(this.locator);
       return await this.retryCall(fn, attemptsRemaining - 1);
