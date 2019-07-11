@@ -14,7 +14,7 @@ import { cloneSubgraphs } from './clone_subgraphs';
 import { notify } from './notify';
 import * as customElementService from './custom_element_service';
 import { getId } from './get_id';
-import { PositionedElement } from './positioned_element';
+import { PositionedElement } from '../../types';
 import { ELEMENT_NUDGE_OFFSET, ELEMENT_SHIFT_OFFSET } from '../../common/lib/constants';
 
 const extractId = (node: { id: string }): string => node.id;
