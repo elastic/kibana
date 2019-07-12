@@ -235,7 +235,13 @@ export class GitOperations {
         if (entry.type === 'tree') {
           await walk(entry.oid);
         } else if (entry.type === 'blob') {
-          count++;
+          const type = GitOperations.mode2type(entry.mode);
+          if (type === FileTreeItemType.File) {
+            const blob = await isogit.readObject({ gitdir, oid: entry.oid, format: 'content' });
+            if (!isBinaryFileSync(blob.object as Buffer)) {
+              count++;
+            }
+          }
         }
       }
     }
@@ -256,13 +262,19 @@ export class GitOperations {
         if (entry.type === 'tree') {
           yield* walk(entry.oid, path);
         } else if (entry.type === 'blob') {
-          yield {
-            name: entry.path,
-            type: GitOperations.mode2type(entry.mode),
-            path,
-            repoUri: uri,
-            sha1: entry.oid,
-          } as FileTree;
+          const type = GitOperations.mode2type(entry.mode);
+          if (type === FileTreeItemType.File) {
+            const blob = await isogit.readObject({ gitdir, oid: entry.oid, format: 'content' });
+            if (!isBinaryFileSync(blob.object as Buffer)) {
+              yield {
+                name: entry.path,
+                type,
+                path,
+                repoUri: uri,
+                sha1: entry.oid,
+              } as FileTree;
+            }
+          }
         }
       }
     }
@@ -272,15 +284,6 @@ export class GitOperations {
     const commitObject = await isogit.readObject({ gitdir, oid: commit.id });
     const treeId = (commitObject.object as CommitDescription).tree;
     return await walk(treeId);
-  }
-
-  private static async readTree(gitdir: string, oid: string, filepath: string = '') {
-    const { object } = await isogit.readObject({ gitdir, oid, filepath });
-    const tree = object as TreeDescription;
-    return {
-      entries: tree.entries,
-      gitdir,
-    };
   }
 
   static mode2type(mode: string): FileTreeItemType {
@@ -632,7 +635,7 @@ export class GitOperations {
     const gitdir = this.repoDir(repoUri);
     // depth: avoid infinite loop
     let obj: isogit.GitObjectDescription | null = null;
-    let oid: string;
+    let oid: string = '';
     if (/^[0-9a-f]{5,40}$/.test(ref)) {
       // it's possible ref is sha-1 object id
       try {

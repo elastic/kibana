@@ -80,6 +80,7 @@ describe('git_operations', () => {
 
   // @ts-ignore
   before(async function() {
+    // @ts-ignore
     this.timeout(200000);
     await prepareProject(path.join(serverOptions.repoPath, repoUri));
     await cloneProject(
