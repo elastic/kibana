@@ -53,20 +53,21 @@ module
   })
   .service('mlGlobalState', function (globalState) {
     // This Proxy augments the original globlaState save function and triggers the observable.
-    const mlGlobalState = new Proxy(globalState,     {    get(target, propKey) {
-      if (propKey !== 'save') {
-        return target[propKey];
+    return new Proxy(
+      globalState,
+      {
+        get(target, propKey) {
+          if (propKey !== 'save') {
+            return target[propKey];
+          }
+          return function (...args) {
+            const result = target[propKey].apply(this, args);
+            globalStateSave$.next();
+            return result;
+          };
+        }
       }
-      const origMethod = target[propKey];
-      return function (...args) {
-        const result = origMethod.apply(this, args);
-        globalStateSave$.next();
-        return result;
-      };
-    } }
     );
-
-    return mlGlobalState;
   })
   .service('mlJobSelectService', function (mlGlobalState) {
     const { jobIds, selectedGroups } = getSelectedJobIds(mlGlobalState);
