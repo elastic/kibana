@@ -172,7 +172,7 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
       yOffset?: number
     ): Promise<void> {
       if (this.isW3CEnabled) {
-        // Workaround for scrolling bug in Firefox
+        // Workaround for scrolling bug in W3C mode: move pointer to { x: 0, y: 0 }
         // https://github.com/mozilla/geckodriver/issues/776
         await this.getActions()
           .move({ x: 0, y: 0 })
