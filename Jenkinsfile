@@ -83,8 +83,8 @@ pipeline {
 //              def d = load("${env.GROOVY_SRC}/dump.groovy")
 //              d.dumpEnv()
 //            }
-            checkoutES()
-//            checkoutKibana()
+           checkoutES()
+            // checkoutKibana()
           }
         }
         stage('Quick Test') {
@@ -140,20 +140,21 @@ def checkoutKibana() {
  */
 def checkoutES(){
   useCache('es-source'){
-  dir("${ES_BASE_DIR}"){
-    checkout([$class: 'GitSCM', branches: [[name: "${params.ES_VERSION}"]],
-              doGenerateSubmoduleConfigurations: false,
-              extensions: [[$class: 'CloneOption',
-                            depth: 1,
-                            noTags: false,
-                            reference: "/var/lib/jenkins/.git-references/elasticsearch.git",
-                            shallow: true
-                           ]],
-              submoduleCfg: [],
-              userRemoteConfigs: [[credentialsId: "${JOB_GIT_CREDENTIALS}",
-                                   url: "${ES_GIT_URL}"]]])
-    sh 'pwd'
-    stash allowEmpty: true, name: 'es-source', includes: "${ES_BASE_DIR}/**", excludes: ".git", useDefaultExcludes: false
+    dir("${ES_BASE_DIR}"){
+      checkout([$class: 'GitSCM', branches: [[name: "${params.ES_VERSION}"]],
+        doGenerateSubmoduleConfigurations: false,
+        extensions: [[$class   : 'CloneOption',
+          depth    : 1,
+          noTags   : false,
+          reference: "/var/lib/jenkins/.git-references/elasticsearch.git",
+          shallow  : true
+        ]],
+        submoduleCfg: [],
+        userRemoteConfigs: [[credentialsId: "${JOB_GIT_CREDENTIALS}",
+        url: "${ES_GIT_URL}"]]])
+      sh 'pwd'
+      stash allowEmpty: true, name: 'es-source', includes: "${ES_BASE_DIR}/**", excludes: ".git", useDefaultExcludes: false
+    }
   }
 }
 /**
