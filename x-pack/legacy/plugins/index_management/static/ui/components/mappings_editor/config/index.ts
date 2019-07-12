@@ -4,4 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export * from './properties_manager';
+export * from './data_types_definition';
+export * from './parameters_definition';
