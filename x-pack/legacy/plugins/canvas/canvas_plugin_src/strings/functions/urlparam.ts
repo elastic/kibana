@@ -7,28 +7,35 @@
 import { i18n } from '@kbn/i18n';
 import { urlparam } from '../../functions/browser/urlparam';
 import { FunctionHelp } from '.';
-import { FunctionFactory } from '../../functions/types';
+import { FunctionFactory } from '../../../types';
+import { TYPE_STRING, URL } from '../constants';
 
 export const help: FunctionHelp<FunctionFactory<typeof urlparam>> = {
   help: i18n.translate('xpack.canvas.functions.urlparamHelpText', {
     defaultMessage:
-      'Access {url} parameters and use them in expressions. Eg {example}. This will always return a string',
+      'Retreives a {URL} parameter to use in an expression. ' +
+      'The {urlparamFn} function always returns a {TYPE_STRING}. ' +
+      'For example, you can retrieve the value {value} from the parameter {myVar} from the {URL} {example}).',
     values: {
-      url: 'URL',
       example: 'https://localhost:5601/app/canvas?myVar=20',
+      myVar: '`myVar`',
+      TYPE_STRING,
+      URL,
+      urlparamFn: '`urlparam`',
+      value: '`"20"`',
     },
   }),
   args: {
     param: i18n.translate('xpack.canvas.functions.urlparam.args.paramHelpText', {
-      defaultMessage: 'The {url} hash parameter to access',
+      defaultMessage: 'The {URL} hash parameter to retrieve.',
       values: {
-        url: 'URL',
+        URL,
       },
     }),
     default: i18n.translate('xpack.canvas.functions.urlparam.args.defaultHelpText', {
-      defaultMessage: 'Return this string if the {url} parameter is not defined',
+      defaultMessage: 'The string returned when the {URL} parameter is unspecified.',
       values: {
-        url: 'url',
+        URL,
       },
     }),
   },

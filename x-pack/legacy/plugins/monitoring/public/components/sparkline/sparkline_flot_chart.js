@@ -99,7 +99,7 @@ export class SparklineFlotChart {
     };
     $(this.containerElem).off('plotselected');
     $(this.containerElem).on('plotselected', (_event, range) => {
-      onBrush(range.xaxis);
+      onBrush(range);
       this.flotChart.clearSelection();
     });
   }
