@@ -31,15 +31,8 @@ export class JsonIndexFilePicker extends Component {
     this._isMounted = false;
   }
 
-  _fileHandler = async fileList => {
-    const fileListArr = Array.from(fileList);
-    await this._validateAndParse(fileListArr);
-  };
-
-  _validateAndParse = async fileArr => {
-    if (!this._isMounted) {
-      return;
-    }
+  _fileHandler = fileList => {
+    const fileArr = Array.from(fileList);
     this.props.resetFileAndIndexSettings();
     this.setState({ fileUploadError: '' });
     if (fileArr.length === 0) { // Remove
@@ -47,62 +40,56 @@ export class JsonIndexFilePicker extends Component {
     }
     if (fileArr.length === 1) { // Parse & index file
       const file = fileArr[0];
-      if (!this._validateFile(file)) {
+      let initIndexName;
+      try {
+        initIndexName = this._getIndexName(file);
+      } catch (error) {
+        this.setState({
+          fileUploadError: i18n.translate('xpack.fileUpload.jsonIndexFilePicker.errorGettingIndexName', {
+            defaultMessage: 'Error retrieving index name: {errorMessage}',
+            values: {
+              errorMessage: error.message
+            }
+          })
+        });
+        this.props.resetFileAndIndexSettings();
         return;
       }
-      await this._parseFile(file);
+
+      this.props.setIndexName(initIndexName);
+      this._parseFile(file);
     }
   };
 
-  _validateFile(file) {
-    const { resetFileAndIndexSettings, setIndexName } = this.props;
-    if (!file.name) {
-      this.setState({
-        fileUploadError: i18n.translate(
-          'xpack.fileUpload.jsonIndexFilePicker.noFileNameError',
-          { defaultMessage: 'No file name provided' })
-      });
-      return false;
+  _getIndexName({ name, size }) {
+    if (!name) {
+      throw new Error(i18n.translate('xpack.fileUpload.jsonIndexFilePicker.noFileNameError', {
+        defaultMessage: 'No file name provided'
+      }));
     }
 
-    // Check file type, assign default index name
-    const splitNameArr = file.name.split('.');
+    const splitNameArr = name.split('.');
     const fileType = splitNameArr.pop();
-    const types = ACCEPTABLE_FILETYPES.join(', ');
     if (!ACCEPTABLE_FILETYPES.includes(fileType)) {
-      this.setState({
-        fileUploadError: (
-          <FormattedMessage
-            id="xpack.fileUpload.jsonIndexFilePicker.acceptableTypesError"
-            defaultMessage="File is not one of acceptable types: {types}"
-            values={{ types }}
-          />
-        )
-      });
-      resetFileAndIndexSettings();
-      return false;
+      throw new Error(i18n.translate('xpack.fileUpload.jsonIndexFilePicker.acceptableTypesError', {
+        defaultMessage: 'File is not one of acceptable types: {types}',
+        values: {
+          types: ACCEPTABLE_FILETYPES.join(', ')
+        }
+      }));
     }
-    const initIndexName = splitNameArr[0];
-    setIndexName(initIndexName);
 
-    // Check valid size
-    const { size } = file;
     if (size > MAX_FILE_SIZE) {
-      this.setState({
-        fileUploadError: (
-          <FormattedMessage
-            id="xpack.fileUpload.jsonIndexFilePicker.acceptableFileSize"
-            defaultMessage="File size {fileSize} bytes exceeds max file size of {maxFileSize}"
-            values={{
-              fileSize: size,
-              maxFileSize: MAX_FILE_SIZE
-            }}
-          />
-        )
-      });
-      return false;
+      throw new Error(i18n.translate('xpack.fileUpload.jsonIndexFilePicker.acceptableFileSize', {
+        defaultMessage: 'File size {fileSize} bytes exceeds max file size of {maxFileSize}',
+        values: {
+          fileSize: size,
+          maxFileSize: MAX_FILE_SIZE
+        }
+      }));
     }
-    return true;
+
+    return splitNameArr[0];
   }
 
   async _parseFile(file) {
