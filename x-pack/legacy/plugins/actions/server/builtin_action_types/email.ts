@@ -129,7 +129,7 @@ async function executor({ config, params, services }: ActionTypeExecutorOptions)
     },
   };
 
-  return await sendEmail(sendEmailOptions);
+  return await sendEmail(services, sendEmailOptions);
 }
 
 const ValidServiceNames = getValidServiceNames();
