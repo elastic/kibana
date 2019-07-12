@@ -17,39 +17,10 @@
  * under the License.
  */
 
-import { i18n } from '@kbn/i18n';
+import { PluginInitializerContext } from 'kibana/public';
+import { core, plugins } from './setup';
+import { plugin } from '.';
 
-export const regionmap = () => ({
-  name: 'regionmap',
-  type: 'render',
-  context: {
-    types: [
-      'kibana_datatable'
-    ],
-  },
-  help: i18n.translate('regionMap.function.help', {
-    defaultMessage: 'Regionmap visualization'
-  }),
-  args: {
-    visConfig: {
-      types: ['string', 'null'],
-      default: '"{}"',
-    },
-  },
-  fn(context, args) {
-    const visConfig = JSON.parse(args.visConfig);
+const pluginInstance = plugin({} as PluginInitializerContext);
 
-    return {
-      type: 'render',
-      as: 'visualization',
-      value: {
-        visData: context,
-        visType: 'region_map',
-        visConfig,
-        params: {
-          listenOnChange: true,
-        }
-      },
-    };
-  },
-});
+export const setup = pluginInstance.setup(core, plugins);

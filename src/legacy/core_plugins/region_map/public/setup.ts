@@ -17,16 +17,18 @@
  * under the License.
  */
 
-import { resolve } from 'path';
+// @ts-ignore
+import { functionsRegistry } from 'plugins/interpreter/registries';
+import { CoreSetup } from 'src/core/public';
+import { visualizations } from '../../visualizations/public';
+import { MapSetupPlugins } from './plugin';
 
-export default function (kibana) {
-
-  return new kibana.Plugin({
-    uiExports: {
-      visTypes: ['plugins/region_map/region_map_vis'],
-      interpreter: ['plugins/region_map/region_map_fn'],
-      styleSheetPaths: resolve(__dirname, 'public/index.scss'),
-    }
-  });
-
-}
+export const core = {} as CoreSetup;
+export const plugins = {
+  data: {
+    expressions: {
+      functionsRegistry,
+    },
+  },
+  visualizations,
+} as MapSetupPlugins;

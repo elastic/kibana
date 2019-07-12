@@ -17,39 +17,14 @@
  * under the License.
  */
 
-import { i18n } from '@kbn/i18n';
+import { resolve } from 'path';
 
-export const regionmap = () => ({
-  name: 'regionmap',
-  type: 'render',
-  context: {
-    types: [
-      'kibana_datatable'
-    ],
-  },
-  help: i18n.translate('regionMap.function.help', {
-    defaultMessage: 'Regionmap visualization'
-  }),
-  args: {
-    visConfig: {
-      types: ['string', 'null'],
-      default: '"{}"',
+// eslint-disable-next-line import/no-default-export
+export default function(kibana: any) {
+  return new kibana.Plugin({
+    uiExports: {
+      hacks: ['plugins/region_map/legacy'],
+      styleSheetPaths: resolve(__dirname, 'public/index.scss'),
     },
-  },
-  fn(context, args) {
-    const visConfig = JSON.parse(args.visConfig);
-
-    return {
-      type: 'render',
-      as: 'visualization',
-      value: {
-        visData: context,
-        visType: 'region_map',
-        visConfig,
-        params: {
-          listenOnChange: true,
-        }
-      },
-    };
-  },
-});
+  });
+}

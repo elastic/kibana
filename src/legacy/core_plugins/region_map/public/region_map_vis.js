@@ -21,20 +21,16 @@ import './region_map_vis_params';
 import { i18n } from '@kbn/i18n';
 import { VisFactoryProvider } from 'ui/vis/vis_factory';
 import { Schemas } from 'ui/vis/editors/default/schemas';
-import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
 import { truncatedColorMaps } from 'ui/vislib/components/color/truncated_colormaps';
 import { mapToLayerWithId } from './util';
 import { RegionMapsVisualizationProvider } from './region_map_visualization';
 import { Status } from 'ui/vis/update_status';
 import { ORIGIN } from '../../../../legacy/core_plugins/tile_map/common/origin';
 
-VisTypesRegistryProvider.register(function RegionMapProvider(Private, regionmapsConfig, config) {
-
+export function RegionMapProvider(Private, regionmapsConfig, config) {
   const VisFactory = Private(VisFactoryProvider);
   const RegionMapsVisualization = Private(RegionMapsVisualizationProvider);
-
   const vectorLayers = regionmapsConfig.layers.map(mapToLayerWithId.bind(null, ORIGIN.KIBANA_YML));
-
   const selectedLayer = vectorLayers[0];
   const selectedJoinField = selectedLayer ? vectorLayers[0].fields[0] : null;
 
@@ -106,4 +102,4 @@ provided base maps, or add your own. Darker colors represent higher values.' }),
       ])
     }
   });
-});
+}
