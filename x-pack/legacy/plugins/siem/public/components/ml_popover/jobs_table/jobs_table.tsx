@@ -36,7 +36,7 @@ const getJobsTableColumns = (
     name: i18n.COLUMN_JOB_NAME,
     render: ({ id, description }: Job) => (
       <JobNameWrapper>
-        <EuiLink href={`${chrome.getBasePath()}/app/ml`}>
+        <EuiLink href={`${chrome.getBasePath()}/app/ml`} target="_blank">
           <EuiText size="s">{id}</EuiText>
         </EuiLink>
         <EuiText color="subdued" size="xs">
@@ -104,7 +104,13 @@ export const NoItemsMessage = React.memo(() => (
     title={<h3>{i18n.NO_ITEMS_TEXT}</h3>}
     titleSize="xs"
     actions={
-      <EuiButton size="s" href={'ml#/jobs/new_job/step/index_or_search'}>
+      <EuiButton
+        href="ml#/jobs/new_job/step/index_or_search"
+        iconType="popout"
+        iconSide="right"
+        size="s"
+        target="_blank"
+      >
         {i18n.CREATE_CUSTOM_JOB}
       </EuiButton>
     }

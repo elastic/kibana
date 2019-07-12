@@ -117,7 +117,7 @@ export const HomePage = pure(() => (
                           <EuiFlexItem grow={false}>
                             <EuiButton
                               data-test-subj="add-data"
-                              href="kibana#home/tutorial_directory/security"
+                              href="kibana#home/tutorial_directory/siem"
                               iconType="plusInCircle"
                             >
                               <FormattedMessage
