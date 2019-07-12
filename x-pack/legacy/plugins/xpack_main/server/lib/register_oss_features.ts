@@ -82,7 +82,7 @@ const buildKibanaFeatures = (savedObjectTypes: string[]) => {
               'map',
             ],
           },
-          ui: ['createNew', 'show', 'showWriteControls'],
+          ui: ['createNew', 'show', 'showWriteControls', 'saveQuery'],
         },
         read: {
           savedObject: {

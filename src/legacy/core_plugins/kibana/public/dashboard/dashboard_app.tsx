@@ -105,6 +105,7 @@ export interface DashboardAppScope extends ng.IScope {
   topNavMenu: any;
   showFilterBar: () => boolean;
   showAddPanel: any;
+  showSaveQuery: boolean;
   kbnTopNav: any;
   enterEditMode: () => void;
   $listen: any;

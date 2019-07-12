@@ -55,6 +55,7 @@ import { IndexPattern } from 'ui/index_patterns';
 import { IPrivate } from 'ui/private';
 import { Query, SavedQuery } from 'plugins/data';
 import { SaveOptions } from 'ui/saved_objects/saved_object';
+import { capabilities } from 'ui/capabilities';
 import { data } from '../../../data/public/setup';
 import {
   DashboardAppState,
@@ -158,6 +159,7 @@ export class DashboardAppController {
     if (dashboardStateManager.getIsTimeSavedWithDashboard() && !getAppState.previouslyStored()) {
       dashboardStateManager.syncTimefilterWithDashboard(timefilter);
     }
+    $scope.showSaveQuery = capabilities.get().dashboard.saveQuery as boolean;
 
     const updateState = () => {
       // Following the "best practice" of always have a '.' in your ng-models –
@@ -371,6 +373,13 @@ export class DashboardAppController {
       const query = migrateLegacyQuery(newQuery) as Query;
       $scope.updateQueryAndFetch({ query });
     });
+
+    $scope.$watch(
+      () => capabilities.get().dashboard.saveQuery,
+      newCapability => {
+        $scope.showSaveQuery = newCapability as boolean;
+      }
+    );
 
     $scope.$listenAndDigestAsync(timefilter, 'fetch', () => {
       dashboardStateManager.handleTimeChange(timefilter.getTime());
