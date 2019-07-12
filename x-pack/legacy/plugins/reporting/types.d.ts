@@ -20,16 +20,20 @@ export interface KbnServer {
   log: any;
   fieldFormatServiceFactory: (uiConfig: any) => any;
   savedObjects: {
-    getScopedSavedObjectsClient: (fakeRequest: {
-      headers: object;
-      getBasePath: () => string;
-    }) => SavedObjectClient;
+    getScopedSavedObjectsClient: (
+      fakeRequest: {
+        headers: object;
+        getBasePath: () => string;
+      }
+    ) => SavedObjectClient;
   };
-  uiSettingsServiceFactory: ({
-    savedObjectsClient,
-  }: {
-    savedObjectsClient: SavedObjectClient;
-  }) => UiSettings;
+  uiSettingsServiceFactory: (
+    {
+      savedObjectsClient,
+    }: {
+      savedObjectsClient: SavedObjectClient;
+    }
+  ) => UiSettings;
 }
 
 export interface ExportTypeDefinition {
@@ -60,6 +64,7 @@ export interface Logger {
   error: (message: string) => void;
   warning: (message: string) => void;
   clone?: (tags: string[]) => Logger;
+  isVerbose?: boolean;
 }
 
 export interface ViewZoomWidthHeight {
