@@ -23,9 +23,19 @@ export class JsonIndexFilePicker extends Component {
     fileParsingProgress: '',
   };
 
+  async componentDidMount() {
+    this._isMounted = true;
+  }
+
+  componentWillUnmount() {
+    this._isMounted = false;
+  }
+
   _fileHandler = async fileList => {
-    const fileListArr = Array.from(fileList);
-    await this._validateAndParse(fileListArr);
+    if (this._isMounted) {
+      const fileListArr = Array.from(fileList);
+      await this._validateAndParse(fileListArr);
+    }
   };
 
   _validateAndParse = async fileArr => {
@@ -33,14 +43,13 @@ export class JsonIndexFilePicker extends Component {
     this.setState({ fileUploadError: '' });
     if (fileArr.length === 0) { // Remove
       return;
-    } else if (fileArr.length === 1) { // Parse & index file
+    }
+    if (fileArr.length === 1) { // Parse & index file
       const file = fileArr[0];
       if (!this._validateFile(file)) {
         return;
       }
       await this._parseFile(file);
-    } else {
-      // No else
     }
   };
 
@@ -58,10 +67,7 @@ export class JsonIndexFilePicker extends Component {
     // Check file type, assign default index name
     const splitNameArr = file.name.split('.');
     const fileType = splitNameArr.pop();
-    const types = ACCEPTABLE_FILETYPES.reduce((accu, type) => {
-      accu = accu ? `${accu}, ${type}` : type;
-      return accu;
-    }, '');
+    const types = ACCEPTABLE_FILETYPES.join(', ');
     if (!ACCEPTABLE_FILETYPES.includes(fileType)) {
       this.setState({
         fileUploadError: (
@@ -108,20 +114,25 @@ export class JsonIndexFilePicker extends Component {
       { defaultMessage: 'Parsing file...' })
     });
     const parsedFileResult = await parseFile(
-      file, onFileUpload, transformDetails
+      file, transformDetails, onFileUpload
     ).catch(err => {
-      this.setState({
-        fileUploadError: (
-          <FormattedMessage
-            id="xpack.fileUpload.jsonIndexFilePicker.unableParseFile"
-            defaultMessage="Unable to parse file: {error}"
-            values={{
-              error: err.message
-            }}
-          />
-        )
-      });
+      if (this._isMounted) {
+        this.setState({
+          fileUploadError: (
+            <FormattedMessage
+              id="xpack.fileUpload.jsonIndexFilePicker.unableParseFile"
+              defaultMessage="Unable to parse file: {error}"
+              values={{
+                error: err.message
+              }}
+            />
+          )
+        });
+      }
     });
+    if (!this._isMounted) {
+      return;
+    }
     this.setState({ fileParsingProgress: '' });
     if (!parsedFileResult) {
       resetFileAndIndexSettings();

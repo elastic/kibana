@@ -25,12 +25,22 @@ export class IndexSettings extends Component {
   };
 
   async componentDidMount() {
-    this.setState({
-      // Set once on component load
-      indexNameList: await getExistingIndexNames(),
-      indexPatternList: await getExistingIndexPatternNames(),
-    });
+    this._isMounted = true;
+    this.loadExistingIndexData();
   }
+
+  componentWillUnmount() {
+    this._isMounted = false;
+  }
+
+  loadExistingIndexData = async () => {
+    if (this._isMounted) {
+      this.setState({
+        indexNameList: await getExistingIndexNames(),
+        indexPatternList: await getExistingIndexPatternNames(),
+      });
+    }
+  };
 
   componentDidUpdate(prevProps, prevState) {
     const { indexNameError, indexName } = this.state;
