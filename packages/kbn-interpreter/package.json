@@ -9,7 +9,7 @@
     "kbn:watch": "node scripts/build --dev --watch"
   },
   "dependencies": {
-    "lodash": "npm:@elastic/lodash@3.10.1-kibana1",
+    "lodash": "npm:@elastic/lodash@3.10.1-kibana3",
     "lodash.clone": "^4.5.0",
     "uuid": "3.0.1"
   },
