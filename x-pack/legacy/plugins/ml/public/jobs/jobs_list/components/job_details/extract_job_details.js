@@ -122,6 +122,14 @@ export function extractJobDetails(job) {
   if (job.node) {
     datafeed.items.push(['node', JSON.stringify(job.node)]);
   }
+  if (job.datafeed_config && job.datafeed_config.timing_stats) {
+    // remove the timing_stats list from the datafeed section
+    // so not to show it twice.
+    const i = datafeed.items.findIndex(item => item[0] === 'timing_stats');
+    if (i >= 0) {
+      datafeed.items.splice(i, 1);
+    }
+  }
 
   const counts = {
     title: i18n.translate('xpack.ml.jobsList.jobDetails.countsTitle', {
@@ -139,6 +147,14 @@ export function extractJobDetails(job) {
     items: filterObjects(job.model_size_stats).map(formatValues)
   };
 
+  const datafeedTimingStats = {
+    title: i18n.translate('xpack.ml.jobsList.jobDetails.datafeedTimingStatsTitle', {
+      defaultMessage: 'Datafeed timing stats'
+    }),
+    position: 'right',
+    items: filterObjects(job.datafeed_config.timing_stats).map(formatValues)
+  };
+
   return {
     general,
     customUrl,
@@ -151,6 +167,7 @@ export function extractJobDetails(job) {
     dataDescription,
     datafeed,
     counts,
-    modelSizeStats
+    modelSizeStats,
+    datafeedTimingStats
   };
 }
