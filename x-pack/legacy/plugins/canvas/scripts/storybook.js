@@ -10,4 +10,5 @@ import { join } from 'path';
 require('@kbn/storybook').runStorybookCli({
   name: 'canvas',
   storyGlobs: [join(__dirname, '..', 'public', 'components', '**', '*.examples.tsx')],
+  webpackHook: join(__dirname, '..', 'storybook', 'webpack.config.js'),
 });

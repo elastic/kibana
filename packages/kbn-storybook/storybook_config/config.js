@@ -24,35 +24,34 @@ import { create } from '@storybook/theming';
 
 // If we're running Storyshots, be sure to register the require context hook.
 // Otherwise, add the other decorators.
-// if (process.env.NODE_ENV === 'test') {
-//   require('babel-plugin-require-context-hook/register')();
-// } else {
-// Customize the info for each story.
-addDecorator(
-  withInfo({
-    inline: true,
-    styles: {
-      infoBody: {
-        margin: 20,
+if (process.env.NODE_ENV === 'test') {
+  // eslint-disable-next-line
+  require('babel-plugin-require-context-hook/register')();
+} else {
+  // Customize the info for each story.
+  addDecorator(
+    withInfo({
+      inline: true,
+      styles: {
+        infoBody: {
+          margin: 20,
+        },
+        infoStory: {
+          margin: '40px 60px',
+        },
       },
-      infoStory: {
-        margin: '40px 60px',
-      },
-    },
-  })
-);
+    })
+  );
 
-// Add optional knobs to customize each story.
-addDecorator(withKnobs);
-// }
+  // Add optional knobs to customize each story.
+  addDecorator(withKnobs);
+}
 
 // Set up the Storybook environment with custom settings.
 addParameters({
   options: {
     theme: create({
       base: 'light',
-      brandTitle: 'Canvas Storybook',
-      brandUrl: 'https://github.com/elastic/kibana/tree/master/x-pack/plugins/canvas',
     }),
     showPanel: true,
     isFullscreen: false,

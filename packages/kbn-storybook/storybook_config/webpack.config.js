@@ -21,6 +21,7 @@ const { resolve } = require('path');
 const webpack = require('webpack');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 const { REPO_ROOT, DLL_DIST_DIR } = require('../lib/constants');
+const { currentConfig } = require('../../../built_assets/storybook/current.config');
 
 // Extend the Storybook Webpack config with some customizations
 module.exports = async ({ config }) => {
@@ -93,27 +94,14 @@ module.exports = async ({ config }) => {
     ])
   );
 
-  config.plugins.push(
-    new webpack.NormalModuleReplacementPlugin(/^uiExports\//, resource => {
-      resource.request = `${require.resolve('null-loader')}!/dev/null`;
-    })
-  );
-
   // Tell Webpack about the ts/x extensions
   config.resolve.extensions.push('.ts', '.tsx');
 
-  // Alias imports to either a mock or the proper module or directory.
-  // NOTE: order is important here - `ui/notify` will override `ui/notify/foo` if it
-  // is added first.
-  Object.assign(config.resolve.alias, {
-    ui: resolve(REPO_ROOT, 'src/legacy/ui/public'),
-    ng_mock$: resolve(REPO_ROOT, 'src/test_utils/public/ng_mock'),
-    'plugins/interpreter/interpreter': resolve(REPO_ROOT, 'packages/kbn-interpreter/target/common'),
-
-    'ui/notify$': require.resolve('./mocks/ui_notify'),
-    'ui/notify/lib/format_msg$': require.resolve('./mocks/ui_notify_format_msg'),
-    'ui/chrome$': require.resolve('./mocks/ui_chrome'),
-  });
+  // Load custom Webpack config specified by a plugin.
+  if (currentConfig.webpackHook) {
+    // eslint-disable-next-line import/no-dynamic-require
+    config = await require(currentConfig.webpackHook)({ config });
+  }
 
   return config;
 };

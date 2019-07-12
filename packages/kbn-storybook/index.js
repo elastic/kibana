@@ -17,19 +17,25 @@
  * under the License.
  */
 
+const fs = require('fs');
 const { join } = require('path');
 const Rx = require('rxjs');
 const { first } = require('rxjs/operators');
 const storybook = require('@storybook/react/standalone');
 const { run } = require('../../src/dev/run');
 const { generateStorybookEntry } = require('./lib/storybook_entry');
-const { REPO_ROOT } = require('./lib/constants');
+const { REPO_ROOT, CURRENT_CONFIG } = require('./lib/constants');
 const { buildDll } = require('./lib/dll');
 
-exports.runStorybookCli = ({ name, storyGlobs }) => {
+exports.runStorybookCli = config => {
+  const { name, storyGlobs } = config;
   run(
     async ({ flags, log, procRunner }) => {
       log.info('Global config:\n', require('./lib/constants'));
+
+      const currentConfig = JSON.stringify(config, null, 2);
+      log.info('Writing currentConfig:\n', CURRENT_CONFIG + '\n', currentConfig);
+      await fs.promises.writeFile(CURRENT_CONFIG, `exports.currentConfig = ${currentConfig};`);
 
       await buildDll({
         rebuildDll: flags.rebuildDll,
