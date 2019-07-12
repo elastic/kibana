@@ -18,24 +18,10 @@
  */
 
 import { join } from 'path';
-import { run } from './run';
-import { storybookAliases } from './storybook/aliases';
+import { run, createFlagError } from '../run';
+import { storybookAliases } from './aliases';
 
 const rootDir = join(__dirname, '..', '..');
-
-const help = `
-        Usage:
-
-        yarn storybook <alias>
-
-        Available aliases:
-
-        ${Object.entries(storybookAliases)
-          .map(([alias, path]) => `📕 ${alias}`)
-          .join('\n        ')}
-
-        Add your alias in src/dev/storybook/aliases.ts:20
-`;
 
 run(
   async params => {
@@ -44,30 +30,38 @@ run(
       _: [alias],
     } = flags;
 
-    if (!alias || !(storybookAliases as any)[alias]) {
-      // eslint-disable-next-line no-console
-      console.log(help);
-      return;
+    if (!alias) {
+      throw createFlagError('missing alias');
+    }
+
+    if (!storybookAliases.hasOwnProperty(alias)) {
+      throw createFlagError(`unknown alias [${alias}]`);
     }
 
     const relative = (storybookAliases as any)[alias];
     const absolute = join(rootDir, relative);
 
     log.info('Loading Storybook:', absolute);
-
     process.chdir(join(absolute, '..', '..'));
     require(absolute);
   },
   {
+    usage: `node scripts/storybook <alias>`,
     description: `
-    Start a 📕 Storybook for a plugin
-  `,
+      Start a 📕 Storybook for a plugin
+
+      Available aliases:
+        ${Object.keys(storybookAliases)
+          .map(alias => `📕 ${alias}`)
+          .join('\n        ')}
+
+      Add your alias in src/dev/storybook/aliases.ts
+    `,
     flags: {
       boolean: ['fix'],
       default: {
         fix: false,
       },
-      help,
     },
   }
 );

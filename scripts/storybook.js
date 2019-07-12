@@ -18,4 +18,4 @@
  */
 
 require('../src/setup_node_env');
-require('../src/dev/run_storybook');
+require('../src/dev/storybook/run_storybook_cli');
