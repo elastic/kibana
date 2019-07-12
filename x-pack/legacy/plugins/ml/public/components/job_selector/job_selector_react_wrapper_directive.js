@@ -14,24 +14,21 @@ import _ from 'lodash';
 
 import { JobSelector } from './job_selector';
 import { getSelectedJobIds } from './job_select_service_utils';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, Subject } from 'rxjs';
 import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml');
 
+// The observable we want to trigger on a globalState save.
+const globalStateSave$ = new Subject();
 
 module
-  .directive('mlJobSelectorReactWrapper', function (globalState, config, mlJobSelectService) {
+  .directive('mlJobSelectorReactWrapper', function (mlGlobalState, config, mlJobSelectService) {
     function link(scope, element, attrs) {
-      const { jobIds, selectedGroups } = getSelectedJobIds(globalState);
-      const oldSelectedJobIds = mlJobSelectService.getValue().selection;
-
-      if (jobIds && !(_.isEqual(oldSelectedJobIds, jobIds))) {
-        mlJobSelectService.next({ selection: jobIds, groups: selectedGroups });
-      }
+      const { jobIds, selectedGroups } = getSelectedJobIds(mlGlobalState);
 
       const props = {
         config,
-        globalState,
+        globalState: mlGlobalState,
         jobSelectService: mlJobSelectService,
         selectedJobIds: jobIds,
         selectedGroups,
@@ -54,7 +51,36 @@ module
       link,
     };
   })
-  .service('mlJobSelectService', function (globalState) {
-    const { jobIds, selectedGroups } = getSelectedJobIds(globalState);
-    return new BehaviorSubject({ selection: jobIds, groups: selectedGroups, resetSelection: false });
+  .service('mlGlobalState', function (globalState) {
+    // This Proxy augments the original globlaState save function and triggers the observable.
+    const mlGlobalState = new Proxy(globalState,     {    get(target, propKey) {
+      if (propKey !== 'save') {
+        return target[propKey];
+      }
+      const origMethod = target[propKey];
+      return function (...args) {
+        const result = origMethod.apply(this, args);
+        globalStateSave$.next();
+        return result;
+      };
+    } }
+    );
+
+    return mlGlobalState;
+  })
+  .service('mlJobSelectService', function (mlGlobalState) {
+    const { jobIds, selectedGroups } = getSelectedJobIds(mlGlobalState);
+    const mlJobSelectService = new BehaviorSubject({ selection: jobIds, groups: selectedGroups, resetSelection: false });
+
+    // Subscribe to changes to globalState and trigger a mlJobSelectService if the job selection changed.
+    globalStateSave$.subscribe(() => {
+      const { newJobIds, newSelectedGroups } = getSelectedJobIds(mlGlobalState);
+      const oldSelectedJobIds = mlJobSelectService.getValue().selection;
+
+      if (newJobIds && !(_.isEqual(oldSelectedJobIds, newJobIds))) {
+        mlJobSelectService.next({ selection: newJobIds, groups: newSelectedGroups });
+      }
+    });
+
+    return mlJobSelectService;
   });
