@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import Joi from 'joi';
 import { schema } from '@kbn/config-schema';
 import { AlertExecutorOptions, AlertType } from '../../../../../legacy/plugins/alerting';
 import { ActionTypeExecutorOptions, ActionType } from '../../../../../legacy/plugins/actions';
@@ -137,9 +138,11 @@ export default function(kibana: any) {
         id: 'test.validation',
         name: 'Test: Validation',
         validate: {
-          params: schema.object({
-            param1: schema.string(),
-          }),
+          params: Joi.object()
+            .keys({
+              param1: Joi.string().required(),
+            })
+            .required(),
         },
         async executor({ services, params, state }: AlertExecutorOptions) {},
       };
