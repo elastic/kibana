@@ -54,6 +54,15 @@ interface DefaultEditorAggGroupProps {
   setValidity: (isValid: boolean) => void;
 }
 
+interface AggsItem {
+  touched: boolean;
+  valid: boolean;
+}
+
+interface AggsState {
+  [aggId: number]: AggsItem;
+}
+
 function DefaultEditorAggGroup({
   formIsTouched,
   groupName,
@@ -89,11 +98,12 @@ function DefaultEditorAggGroup({
     });
   }
 
-  const [aggsState, setAggsState] = useState(() =>
-    group.reduce((newState, item) => {
-      newState[item.id] = { touched: false, valid: true };
-      return newState;
-    }, {})
+  const [aggsState, setAggsState] = useState(
+    (): AggsState =>
+      group.reduce((newState, item) => {
+        newState[item.id] = { touched: false, valid: true };
+        return newState;
+      }, {})
   );
 
   useEffect(() => {
