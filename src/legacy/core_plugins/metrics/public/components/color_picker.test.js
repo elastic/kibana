@@ -18,19 +18,20 @@
  */
 
 import React from 'react';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { ColorPicker } from './color_picker';
+import { mount } from 'enzyme';
+import { CustomColorPicker } from './custom_color_picker';
 
 const defaultProps = {
   name: 'color',
-  value: '',
+  value: null,
   onChange: jest.fn(),
   disableTrash: true,
 };
 
 describe('ColorPicker', () => {
   it('should change state after click', () => {
-    const wrapper = mountWithIntl(<ColorPicker.WrappedComponent {...defaultProps} />);
+    const wrapper = mount(<ColorPicker {...defaultProps} />);
 
     const stateBefore = wrapper.state();
     wrapper
@@ -39,17 +40,33 @@ describe('ColorPicker', () => {
       .simulate('click');
     const stateAfter = wrapper.state();
 
-    expect(stateBefore.displayPicker).toBeFalsy();
-    expect(stateAfter.displayPicker).toBeTruthy();
+    expect(stateBefore.displayPicker).toBe(!stateAfter.displayPicker);
   });
 
   it('should close popup after click', () => {
-    const wrapper = mountWithIntl(<ColorPicker.WrappedComponent {...defaultProps} />);
-
+    const wrapper = mount(<ColorPicker {...defaultProps} />);
     wrapper.setState({ displayPicker: true });
 
     wrapper.find('.tvbColorPicker__cover').simulate('click');
 
     expect(wrapper.state().displayPicker).toBeFalsy();
+  });
+
+  it('should exist CustomColorPickerUI component', () => {
+    const wrapper = mount(<ColorPicker {...defaultProps} />);
+    wrapper.setState({ displayPicker: true });
+
+    const w2 = wrapper.find(CustomColorPicker).exists();
+
+    expect(w2).toBeTruthy();
+  });
+
+  it('should call clear function', () => {
+    const props = { ...defaultProps, disableTrash: false, value: 'rgba(85,66,177,1)' };
+    const wrapper = mount(<ColorPicker {...props} />);
+
+    wrapper.find('.tvbColorPicker__clear').simulate('click');
+
+    expect(defaultProps.onChange).toHaveBeenCalled();
   });
 });
