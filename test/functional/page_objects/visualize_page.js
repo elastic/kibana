@@ -78,10 +78,17 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
       return await this.createVisualizationPromptButton();
     }
 
+    /*
+    This method should use retry loop to delete visualizations from multiple pages until we find the createVisualizationPromptButton.
+    Perhaps it *could* set the page size larger than the default 10, but it might still need to loop anyway.
+    */
     async deleteAllVisualizations() {
-      await this.checkListingSelectAllCheckbox();
-      await this.clickDeleteSelected();
-      await PageObjects.common.clickConfirmOnModal();
+      await retry.try(async () => {
+        await this.checkListingSelectAllCheckbox();
+        await this.clickDeleteSelected();
+        await PageObjects.common.clickConfirmOnModal();
+        await testSubjects.find('createVisualizationPromptButton');
+      });
     }
 
     async createSimpleMarkdownViz(vizName) {

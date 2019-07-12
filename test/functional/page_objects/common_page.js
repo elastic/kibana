@@ -285,7 +285,7 @@ export function CommonPageProvider({ getService, getPageObjects }) {
      */
     async ensureModalOverlayHidden() {
       return retry.try(async () => {
-        const shown = await testSubjects.exists('modalOverlay');
+        const shown = await testSubjects.exists('confirmModalTitleText');
         if (shown) {
           throw new Error('Modal overlay is showing');
         }
@@ -294,6 +294,8 @@ export function CommonPageProvider({ getService, getPageObjects }) {
 
     async clickConfirmOnModal() {
       log.debug('Clicking modal confirm');
+      // make sure this data-test-subj 'confirmModalTitleText' exists because we're going to wait for it to be gone later
+      await testSubjects.exists('confirmModalTitleText');
       await testSubjects.click('confirmModalConfirmButton');
       await this.ensureModalOverlayHidden();
     }

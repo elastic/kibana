@@ -35,7 +35,6 @@ export default function ({ getPageObjects }) {
       it('create new viz', async function () {
         // type markdown is used for simplicity
         await PageObjects.visualize.createSimpleMarkdownViz(vizName);
-
         await PageObjects.visualize.gotoVisualizationLandingPage();
         const visCount = await PageObjects.visualize.getCountOfItemsInListingTable();
         expect(visCount).to.equal(1);
