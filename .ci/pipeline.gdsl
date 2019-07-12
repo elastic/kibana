@@ -2,7 +2,7 @@
 //The global script scope
 def ctx = context(scope: scriptScope())
 contributor(ctx) {
-  method(name: 'pipeline', type: 'Object', params: [body:'Closure'], doc: 'Pipeline root element')    
+  method(name: 'pipeline', type: 'Object', params: [body:'Closure'], doc: 'Pipeline root element')
 method(name: 'addEmbeddableBadgeConfiguration', type: 'Object', params: [id:'java.lang.String'], doc: 'Add an Embeddable Badge Configuration')
 method(name: 'addEmbeddableBadgeConfiguration', type: 'Object', namedParams: [parameter(name: 'id', type: 'java.lang.String'), parameter(name: 'animatedOverlayColor', type: 'java.lang.String'), parameter(name: 'color', type: 'java.lang.String'), parameter(name: 'status', type: 'java.lang.String'), parameter(name: 'subject', type: 'java.lang.String'), ], doc: 'Add an Embeddable Badge Configuration')
 method(name: 'ansiColor', type: 'Object', params: [colorMapName:java.lang.String, body:'Closure'], doc: 'Color ANSI Console Output')
