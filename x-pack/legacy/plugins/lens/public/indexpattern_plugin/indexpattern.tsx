@@ -7,9 +7,8 @@
 import _ from 'lodash';
 import React from 'react';
 import { render } from 'react-dom';
-import { Chrome } from 'ui/chrome';
-import { ToastNotifications } from 'ui/notify/toasts/toast_notifications';
 import { EuiComboBox } from '@elastic/eui';
+import { I18nProvider } from '@kbn/i18n/react';
 import {
   DatasourceDimensionPanelProps,
   DatasourceDataPanelProps,
@@ -17,11 +16,13 @@ import {
   DatasourceSuggestion,
   Operation,
 } from '../types';
+import { Query } from '../../../../../../src/legacy/core_plugins/data/public/query';
 import { getIndexPatterns } from './loader';
 import { ChildDragDropProvider, DragDrop } from '../drag_drop';
 import { toExpression } from './to_expression';
 import { IndexPatternDimensionPanel } from './dimension_panel';
 import { buildColumnForOperationType, getOperationTypesForField } from './operations';
+import { IndexPatternDatasourcePluginPlugins } from './plugin';
 import { Datasource, DataType } from '..';
 
 export type OperationType = IndexPatternColumn['operationType'];
@@ -33,7 +34,8 @@ export type IndexPatternColumn =
   | AvgIndexPatternColumn
   | MinIndexPatternColumn
   | MaxIndexPatternColumn
-  | CountIndexPatternColumn;
+  | CountIndexPatternColumn
+  | FilterRatioIndexPatternColumn;
 
 export interface BaseIndexPatternColumn {
   // Public
@@ -71,6 +73,14 @@ export interface TermsIndexPatternColumn extends FieldBasedIndexPatternColumn {
   params: {
     size: number;
     orderBy: { type: 'alphabetical' } | { type: 'column'; columnId: string };
+  };
+}
+
+export interface FilterRatioIndexPatternColumn extends BaseIndexPatternColumn {
+  operationType: 'filter_ratio';
+  params: {
+    numerator: Query;
+    denominator: Query;
   };
 }
 
@@ -217,7 +227,12 @@ function removeProperty<T>(prop: string, object: Record<string, T>): Record<stri
   return result;
 }
 
-export function getIndexPatternDatasource(chrome: Chrome, toastNotifications: ToastNotifications) {
+export function getIndexPatternDatasource({
+  chrome,
+  toastNotifications,
+  data,
+  storage,
+}: IndexPatternDatasourcePluginPlugins) {
   // Not stateful. State is persisted to the frame
   const indexPatternDatasource: Datasource<IndexPatternPrivateState, IndexPatternPersistedState> = {
     async initialize(state?: IndexPatternPersistedState) {
@@ -270,11 +285,15 @@ export function getIndexPatternDatasource(chrome: Chrome, toastNotifications: To
         },
         renderDimensionPanel: (domElement: Element, props: DatasourceDimensionPanelProps) => {
           render(
-            <IndexPatternDimensionPanel
-              state={state}
-              setState={newState => setState(newState)}
-              {...props}
-            />,
+            <I18nProvider>
+              <IndexPatternDimensionPanel
+                state={state}
+                setState={newState => setState(newState)}
+                dataPlugin={data}
+                storage={storage}
+                {...props}
+              />
+            </I18nProvider>,
             domElement
           );
         },

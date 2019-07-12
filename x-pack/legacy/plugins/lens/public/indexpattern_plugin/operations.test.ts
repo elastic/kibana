@@ -8,6 +8,8 @@ import { getOperationTypesForField, getPotentialColumns } from './operations';
 import { IndexPatternPrivateState } from './indexpattern';
 import { hasField } from './state_helpers';
 
+jest.mock('./loader');
+
 const expectedIndexPatterns = {
   1: {
     id: '1',
@@ -205,6 +207,10 @@ Array [
   Array [
     "timestamp",
     "date_histogram",
+  ],
+  Array [
+    "_documents_",
+    "filter_ratio",
   ],
 ]
 `);

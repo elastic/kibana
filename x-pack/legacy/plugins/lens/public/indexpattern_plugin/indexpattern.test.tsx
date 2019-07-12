@@ -7,6 +7,11 @@
 import { shallow } from 'enzyme';
 import React from 'react';
 import { EuiComboBox } from '@elastic/eui';
+import chromeMock from 'ui/chrome';
+import { data as dataMock } from '../../../../../../src/legacy/core_plugins/data/public/setup';
+import { localStorage as storageMock } from 'ui/storage/storage_service';
+import { functionsRegistry } from '../../../../../../src/legacy/core_plugins/interpreter/public/registries';
+import { toastNotifications as notificationsMock } from 'ui/notify';
 import {
   getIndexPatternDatasource,
   IndexPatternPersistedState,
@@ -18,6 +23,13 @@ import { DatasourcePublicAPI, Operation, Datasource } from '../types';
 import { createMockedDragDropContext } from './mocks';
 
 jest.mock('./loader');
+// chrome, notify, storage are used by ./plugin
+jest.mock('ui/chrome');
+jest.mock('ui/notify');
+jest.mock('ui/storage/storage_service');
+// Contains old and new platform data plugins, used for interpreter and filter ratio
+jest.mock('ui/new_platform');
+jest.mock('plugins/data/setup', () => ({ data: { query: { ui: {} } } }));
 
 const expectedIndexPatterns = {
   1: {
@@ -109,8 +121,13 @@ describe('IndexPattern Data Source', () => {
   let indexPatternDatasource: Datasource<IndexPatternPrivateState, IndexPatternPersistedState>;
 
   beforeEach(() => {
-    // @ts-ignore
-    indexPatternDatasource = getIndexPatternDatasource();
+    indexPatternDatasource = getIndexPatternDatasource({
+      chrome: chromeMock,
+      storage: storageMock,
+      interpreter: { functionsRegistry },
+      toastNotifications: notificationsMock,
+      data: dataMock,
+    });
 
     persistedState = {
       currentIndexPatternId: '1',

@@ -381,5 +381,4 @@ export class QueryBarUI extends Component<Props, State> {
   }
 }
 
-// @ts-ignore
 export const QueryBar = injectI18n(QueryBarUI);

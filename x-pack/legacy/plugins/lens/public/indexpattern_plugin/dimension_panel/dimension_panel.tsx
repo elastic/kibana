@@ -7,7 +7,9 @@
 import _ from 'lodash';
 import React from 'react';
 import { EuiFlexItem, EuiFlexGroup, EuiButtonIcon } from '@elastic/eui';
+import { Storage } from 'ui/storage';
 import { i18n } from '@kbn/i18n';
+import { DataSetup } from '../../../../../../../src/legacy/core_plugins/data/public';
 import { DatasourceDimensionPanelProps } from '../../types';
 import {
   IndexPatternColumn,
@@ -25,6 +27,8 @@ export type IndexPatternDimensionPanelProps = DatasourceDimensionPanelProps & {
   state: IndexPatternPrivateState;
   setState: (newState: IndexPatternPrivateState) => void;
   dragDropContext: DragContextState;
+  dataPlugin: DataSetup;
+  storage: Storage;
 };
 
 export function IndexPatternDimensionPanel(props: IndexPatternDimensionPanelProps) {
