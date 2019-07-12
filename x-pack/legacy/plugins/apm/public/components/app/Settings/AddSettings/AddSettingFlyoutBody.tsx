@@ -131,7 +131,7 @@ export function AddSettingFlyoutBody({
             'xpack.apm.settings.agentConf.flyOut.serviceEnvironmentSelectErrorText',
             {
               defaultMessage:
-                'Must select a valid environement to save a configuration.'
+                'Must select a valid environment to save a configuration.'
             }
           )}
           isInvalid={

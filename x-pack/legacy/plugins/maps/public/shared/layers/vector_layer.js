@@ -180,7 +180,16 @@ export class VectorLayer extends AbstractLayer {
   }
 
   getLegendDetails() {
-    return this._style.getLegendDetails();
+    const getFieldLabel = async fieldName => {
+      const ordinalFields = await this.getOrdinalFields();
+      const field = ordinalFields.find(({ name }) => {
+        return name === fieldName;
+      });
+
+      return field ? field.label : fieldName;
+    };
+
+    return this._style.getLegendDetails(getFieldLabel);
   }
 
   _getBoundsBasedOnData() {
@@ -473,12 +482,30 @@ export class VectorLayer extends AbstractLayer {
   }
 
   _assignIdsToFeatures(featureCollection) {
+
+    //wrt https://github.com/elastic/kibana/issues/39317
+    // In constrained resource environments, mapbox-gl may throw a stackoverflow error due to hitting the browser's recursion limit. This crashes Kibana.
+    //This error is thrown in mapbox-gl's quicksort implementation, when it is sorting all the features by id.
+    //This is a work-around to avoid hitting such a worst-case
+    //This was tested as a suitable work-around for mapbox-gl 0.54
+    //The core issue itself is likely related to https://github.com/mapbox/mapbox-gl-js/issues/6086
+
+    //This only shuffles the id-assignment, _not_ the features in the collection
+    //The reason for this is that we do not want to modify the feature-ordering, which is the responsiblity of the VectorSource#.
+    const ids = [];
     for (let i = 0; i < featureCollection.features.length; i++) {
-      const feature = featureCollection.features[i];
       const id = generateNumericalId();
+      ids.push(id);
+    }
+
+    const randomizedIds = _.shuffle(ids);
+    for (let i = 0; i < featureCollection.features.length; i++) {
+      const id = randomizedIds[i];
+      const feature = featureCollection.features[i];
       feature.properties[FEATURE_ID_PROPERTY_NAME] = id;
       feature.id = id;
     }
+
   }
 
   async syncData({ startLoading, stopLoading, onLoadError, dataFilters, updateSourceData }) {
@@ -515,18 +542,15 @@ export class VectorLayer extends AbstractLayer {
       return;
     }
 
-    if (featureCollection !== featureCollectionOnMap) {
-      mbGeoJSONSource.setData(featureCollection);
-    }
-
-    const hasGeoJsonProperties = this._style.setFeatureState(featureCollection, mbMap, this.getId());
 
     // "feature-state" data expressions are not supported with layout properties.
     // To work around this limitation,
     // scaled layout properties (like icon-size) must fall back to geojson property values :(
-    if (hasGeoJsonProperties) {
+    const hasGeoJsonProperties = this._style.setFeatureState(featureCollection, mbMap, this.getId());
+    if (featureCollection !== featureCollectionOnMap || hasGeoJsonProperties) {
       mbGeoJSONSource.setData(featureCollection);
     }
+
   }
 
   _setMbPointsProperties(mbMap) {

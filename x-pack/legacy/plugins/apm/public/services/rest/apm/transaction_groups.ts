@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { TransactionBreakdownAPIResponse } from '../../../../server/lib/transactions/breakdown';
 import { TimeSeriesAPIResponse } from '../../../../server/lib/transactions/charts';
 import { ITransactionDistributionAPIResponse } from '../../../../server/lib/transactions/distribution';
 import { TransactionListAPIResponse } from '../../../../server/lib/transactions/get_top_transactions';
@@ -89,6 +90,30 @@ export async function loadTransactionCharts({
       start,
       end,
       transactionType,
+      transactionName,
+      uiFiltersES: await getUiFiltersES(uiFilters)
+    }
+  });
+}
+
+export async function loadTransactionBreakdown({
+  serviceName,
+  start,
+  end,
+  transactionName,
+  uiFilters
+}: {
+  serviceName: string;
+  start: string;
+  end: string;
+  transactionName?: string;
+  uiFilters: UIFilters;
+}) {
+  return callApi<TransactionBreakdownAPIResponse>({
+    pathname: `/api/apm/services/${serviceName}/transaction_groups/breakdown`,
+    query: {
+      start,
+      end,
       transactionName,
       uiFiltersES: await getUiFiltersES(uiFilters)
     }

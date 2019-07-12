@@ -84,7 +84,8 @@
   "resolutions": {
     "**/@types/node": "10.12.27",
     "**/@types/hapi": "^17.0.18",
-    "**/typescript": "^3.3.3333"
+    "**/typescript": "3.5.3",
+    "**/isomorphic-git/**/base64-js": "^1.2.1"
   },
   "workspaces": {
     "packages": [
@@ -106,7 +107,7 @@
     "@babel/core": "7.4.5",
     "@babel/polyfill": "7.4.4",
     "@babel/register": "7.4.4",
-    "@elastic/charts": "^7.0.1",
+    "@elastic/charts": "^7.2.1",
     "@elastic/datemath": "5.0.2",
     "@elastic/eui": "12.2.0",
     "@elastic/filesaver": "1.1.2",
@@ -343,8 +344,8 @@
     "@types/type-detect": "^4.0.1",
     "@types/uuid": "^3.4.4",
     "@types/zen-observable": "^0.8.0",
-    "@typescript-eslint/eslint-plugin": "^1.6.0",
-    "@typescript-eslint/parser": "^1.6.0",
+    "@typescript-eslint/eslint-plugin": "1.11.0",
+    "@typescript-eslint/parser": "1.11.0",
     "angular-mocks": "1.4.7",
     "archiver": "^3.0.0",
     "babel-eslint": "10.0.2",
@@ -435,7 +436,7 @@
     "supertest": "^3.1.0",
     "supertest-as-promised": "^4.0.2",
     "tree-kill": "^1.1.0",
-    "typescript": "^3.3.3333",
+    "typescript": "3.5.3",
     "typings-tester": "^0.3.2",
     "vinyl-fs": "^3.0.2",
     "xml2js": "^0.4.19",

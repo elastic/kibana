@@ -24,7 +24,12 @@ import { UICapabilities } from 'ui/capabilities';
 import { toastNotifications } from 'ui/notify';
 import { Space } from '../../../../../../spaces/common/model/space';
 import { Feature } from '../../../../../../xpack_main/types';
-import { KibanaPrivileges, RawKibanaPrivileges, Role } from '../../../../../common/model';
+import {
+  KibanaPrivileges,
+  RawKibanaPrivileges,
+  Role,
+  BuiltinESPrivileges,
+} from '../../../../../common/model';
 import {
   isReadOnlyRole,
   isReservedRole,
@@ -46,7 +51,8 @@ interface Props {
   httpClient: any;
   allowDocumentLevelSecurity: boolean;
   allowFieldLevelSecurity: boolean;
-  privileges: RawKibanaPrivileges;
+  kibanaPrivileges: RawKibanaPrivileges;
+  builtinESPrivileges: BuiltinESPrivileges;
   spaces?: Space[];
   spacesEnabled: boolean;
   intl: InjectedIntl;
@@ -246,6 +252,7 @@ class EditRolePageUI extends Component<Props, State> {
           runAsUsers={this.props.runAsUsers}
           validator={this.validator}
           indexPatterns={this.props.indexPatterns}
+          builtinESPrivileges={this.props.builtinESPrivileges}
           allowDocumentLevelSecurity={this.props.allowDocumentLevelSecurity}
           allowFieldLevelSecurity={this.props.allowFieldLevelSecurity}
         />
@@ -264,7 +271,7 @@ class EditRolePageUI extends Component<Props, State> {
       <div>
         <EuiSpacer />
         <KibanaPrivilegesRegion
-          kibanaPrivileges={new KibanaPrivileges(this.props.privileges)}
+          kibanaPrivileges={new KibanaPrivileges(this.props.kibanaPrivileges)}
           spaces={this.props.spaces}
           spacesEnabled={this.props.spacesEnabled}
           features={this.props.features}

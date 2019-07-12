@@ -68,7 +68,7 @@ export class EncryptedSavedObjectsService {
    */
   constructor(
     encryptionKey: string,
-    private readonly knownTypes: ReadonlyArray<string>,
+    private readonly knownTypes: readonly string[],
     private readonly log: Server.Logger,
     private readonly audit: EncryptedSavedObjectsAuditLogger
   ) {
@@ -281,13 +281,13 @@ export class EncryptedSavedObjectsService {
    * @param descriptor Descriptor of the saved object to get AAD for.
    * @param attributes All attributes of the saved object instance of the specified type.
    */
-  private getAAD<T extends Record<string, unknown>>(
+  private getAAD(
     typeRegistration: EncryptedSavedObjectTypeRegistration,
     descriptor: SavedObjectDescriptor,
-    attributes: T
+    attributes: Record<string, unknown>
   ) {
     // Collect all attributes (both keys and values) that should contribute to AAD.
-    const attributesAAD = {} as T;
+    const attributesAAD: Record<string, unknown> = {};
     for (const [attributeKey, attributeValue] of Object.entries(attributes)) {
       if (
         !typeRegistration.attributesToEncrypt.has(attributeKey) &&

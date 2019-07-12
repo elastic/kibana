@@ -4,6 +4,15 @@
   -webkit-tap-highlight-color: transparent;
 }
 
+.monRhythmChart__wrapper .monRhythmChart__zoom {
+  visibility: hidden;
+  padding-right: $euiSizeM;
+}
+
+.monRhythmChart__wrapper:hover .monRhythmChart__zoom {
+  visibility: visible;
+}
+  
 .monRhythmChart {
   position: relative;
   display: flex;
