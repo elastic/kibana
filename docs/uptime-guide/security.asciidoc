@@ -1,7 +1,5 @@
-[role="xpack"]
 [[uptime-security]]
-
-== Use with Elasticsearch Security
+== Elasticsearch Security
 
 If you use Elasticsearch security, you'll need to enable certain privileges for users 
 that would like to access the Uptime app. Below is an example of creating 
