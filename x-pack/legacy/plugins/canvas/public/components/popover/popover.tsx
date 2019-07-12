@@ -4,12 +4,25 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-/* eslint react/no-did-mount-set-state: 0, react/forbid-elements: 0 */
+/* eslint react/forbid-elements: 0 */
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { EuiPopover, EuiToolTip } from '@elastic/eui';
 
-export class Popover extends Component {
+interface Props {
+  isOpen: boolean;
+  ownFocus: boolean;
+  button: (handleClick: Function) => React.ReactElement;
+  tooltip: string;
+  tooltipPosition: 'top' | 'bottom' | 'left' | 'right';
+  children: (arg: { closePopover: Function }) => React.ReactElement;
+}
+
+interface State {
+  isPopoverOpen: boolean;
+}
+
+export class Popover extends Component<Props, State> {
   static propTypes = {
     isOpen: PropTypes.bool,
     ownFocus: PropTypes.bool,
@@ -26,18 +39,12 @@ export class Popover extends Component {
     tooltipPosition: 'top',
   };
 
-  state = {
-    isPopoverOpen: false,
+  state: State = {
+    isPopoverOpen: this.props.isOpen,
   };
 
-  componentDidMount() {
-    if (this.props.isOpen) {
-      this.setState({ isPopoverOpen: true });
-    }
-  }
-
   handleClick = () => {
-    this.setState(state => ({
+    this.setState((state: any) => ({
       isPopoverOpen: !state.isPopoverOpen,
     }));
   };
@@ -51,7 +58,7 @@ export class Popover extends Component {
   render() {
     const { button, children, tooltip, tooltipPosition, ...rest } = this.props;
 
-    const wrappedButton = handleClick => {
+    const wrappedButton = (handleClick: any) => {
       // wrap button in tooltip, if tooltip text is provided
       if (!this.state.isPopoverOpen && tooltip.length) {
         return (

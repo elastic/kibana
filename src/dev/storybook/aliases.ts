@@ -18,7 +18,7 @@
  */
 
 export const storybookAliases = {
-  canvas: 'x-pack/legacy/plugins/canvas/scripts/storybook.js',
+  canvas: 'x-pack/legacy/plugins/canvas/scripts/storybook_new.js',
   infra: 'x-pack/legacy/plugins/infra/scripts/storybook.js',
   siem: 'x-pack/legacy/plugins/siem/scripts/storybook.js',
 };

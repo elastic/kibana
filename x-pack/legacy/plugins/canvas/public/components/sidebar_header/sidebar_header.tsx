@@ -17,10 +17,9 @@ import {
   EuiContextMenuPanelDescriptor,
   EuiOverlayMask,
 } from '@elastic/eui';
-// @ts-ignore unconverted component
-import { Popover } from '../popover';
 import { CustomElementModal } from '../custom_element_modal';
 import { ToolTipShortcut } from '../tool_tip_shortcut/';
+import { Popover } from '../popover/popover';
 
 const topBorderClassName = 'canvasContextMenu--topBorder';
 
