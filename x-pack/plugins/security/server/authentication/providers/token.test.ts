@@ -7,13 +7,15 @@
 import Boom from 'boom';
 import { errors } from 'elasticsearch';
 import sinon from 'sinon';
+
+import { httpServerMock } from '../../../../../../src/core/server/mocks';
 import { mockAuthenticatedUser } from '../../../common/model/authenticated_user.mock';
-import { requestFixture } from '../../__fixtures__';
 import {
   MockAuthenticationProviderOptions,
   mockAuthenticationProviderOptions,
   mockScopedClusterClient,
 } from './base.mock';
+
 import { TokenAuthenticationProvider } from './token';
 
 describe('TokenAuthenticationProvider', () => {
@@ -26,7 +28,7 @@ describe('TokenAuthenticationProvider', () => {
 
   describe('`login` method', () => {
     it('succeeds with valid login attempt, creates session and authHeaders', async () => {
-      const request = requestFixture();
+      const request = httpServerMock.createKibanaRequest();
       const user = mockAuthenticatedUser();
 
       const credentials = { username: 'user', password: 'password' };
@@ -52,7 +54,7 @@ describe('TokenAuthenticationProvider', () => {
     });
 
     it('fails if token cannot be generated during login attempt', async () => {
-      const request = requestFixture();
+      const request = httpServerMock.createKibanaRequest();
       const credentials = { username: 'user', password: 'password' };
 
       const authenticationError = new Error('Invalid credentials');
@@ -74,7 +76,7 @@ describe('TokenAuthenticationProvider', () => {
     });
 
     it('fails if user cannot be retrieved during login attempt', async () => {
-      const request = requestFixture();
+      const request = httpServerMock.createKibanaRequest();
       const credentials = { username: 'user', password: 'password' };
       const tokenPair = { accessToken: 'foo', refreshToken: 'bar' };
 
@@ -107,7 +109,7 @@ describe('TokenAuthenticationProvider', () => {
       // Add `kbn-xsrf` header to make `can_redirect_request` think that it's AJAX request and
       // avoid triggering of redirect logic.
       const authenticationResult = await provider.authenticate(
-        requestFixture({ headers: { 'kbn-xsrf': 'xsrf' } }),
+        httpServerMock.createKibanaRequest({ headers: { 'kbn-xsrf': 'xsrf' } }),
         null
       );
 
@@ -116,7 +118,7 @@ describe('TokenAuthenticationProvider', () => {
 
     it('redirects non-AJAX requests that can not be authenticated to the login page.', async () => {
       const authenticationResult = await provider.authenticate(
-        requestFixture({ path: '/s/foo/some-path # that needs to be encoded' }),
+        httpServerMock.createKibanaRequest({ path: '/s/foo/some-path # that needs to be encoded' }),
         null
       );
 
@@ -128,7 +130,7 @@ describe('TokenAuthenticationProvider', () => {
 
     it('succeeds if only `authorization` header is available and returns neither state nor authHeaders.', async () => {
       const authorization = 'Bearer foo';
-      const request = requestFixture({ headers: { authorization } });
+      const request = httpServerMock.createKibanaRequest({ headers: { authorization } });
       const user = mockAuthenticatedUser();
 
       mockScopedClusterClient(mockOptions.client, sinon.match({ headers: { authorization } }))
@@ -144,7 +146,7 @@ describe('TokenAuthenticationProvider', () => {
     });
 
     it('succeeds if only state is available.', async () => {
-      const request = requestFixture();
+      const request = httpServerMock.createKibanaRequest();
       const tokenPair = { accessToken: 'foo', refreshToken: 'bar' };
       const user = mockAuthenticatedUser();
       const authorization = `Bearer ${tokenPair.accessToken}`;
@@ -164,7 +166,7 @@ describe('TokenAuthenticationProvider', () => {
 
     it('succeeds with valid session even if requiring a token refresh', async () => {
       const user = mockAuthenticatedUser();
-      const request = requestFixture();
+      const request = httpServerMock.createKibanaRequest();
       const tokenPair = { accessToken: 'foo', refreshToken: 'bar' };
 
       mockScopedClusterClient(
@@ -197,7 +199,9 @@ describe('TokenAuthenticationProvider', () => {
     });
 
     it('does not handle `authorization` header with unsupported schema even if state contains valid credentials.', async () => {
-      const request = requestFixture({ headers: { authorization: 'Basic ***' } });
+      const request = httpServerMock.createKibanaRequest({
+        headers: { authorization: 'Basic ***' },
+      });
       const tokenPair = { accessToken: 'foo', refreshToken: 'bar' };
       const user = mockAuthenticatedUser();
       const authorization = `Bearer ${tokenPair.accessToken}`;
@@ -216,7 +220,7 @@ describe('TokenAuthenticationProvider', () => {
     it('authenticates only via `authorization` header even if state is available.', async () => {
       const tokenPair = { accessToken: 'foo', refreshToken: 'bar' };
       const authorization = `Bearer foo-from-header`;
-      const request = requestFixture({ headers: { authorization } });
+      const request = httpServerMock.createKibanaRequest({ headers: { authorization } });
       const user = mockAuthenticatedUser();
 
       // GetUser will be called with request's `authorization` header.
@@ -235,7 +239,7 @@ describe('TokenAuthenticationProvider', () => {
 
     it('fails if authentication with token from header fails with unknown error', async () => {
       const authorization = `Bearer foo`;
-      const request = requestFixture({ headers: { authorization } });
+      const request = httpServerMock.createKibanaRequest({ headers: { authorization } });
 
       const authenticationError = new errors.InternalServerError('something went wrong');
       mockScopedClusterClient(mockOptions.client, sinon.match({ headers: { authorization } }))
@@ -252,7 +256,7 @@ describe('TokenAuthenticationProvider', () => {
 
     it('fails if authentication with token from state fails with unknown error.', async () => {
       const tokenPair = { accessToken: 'foo', refreshToken: 'bar' };
-      const request = requestFixture();
+      const request = httpServerMock.createKibanaRequest();
 
       const authenticationError = new errors.InternalServerError('something went wrong');
       mockScopedClusterClient(
@@ -272,7 +276,7 @@ describe('TokenAuthenticationProvider', () => {
     });
 
     it('fails if token refresh is rejected with unknown error', async () => {
-      const request = requestFixture();
+      const request = httpServerMock.createKibanaRequest();
       const tokenPair = { accessToken: 'foo', refreshToken: 'bar' };
 
       mockScopedClusterClient(
@@ -297,7 +301,7 @@ describe('TokenAuthenticationProvider', () => {
     });
 
     it('redirects non-AJAX requests to /login and clears session if token document is missing', async () => {
-      const request = requestFixture({ path: '/some-path' });
+      const request = httpServerMock.createKibanaRequest({ path: '/some-path' });
       const tokenPair = { accessToken: 'foo', refreshToken: 'bar' };
 
       mockScopedClusterClient(
@@ -327,7 +331,7 @@ describe('TokenAuthenticationProvider', () => {
     });
 
     it('redirects non-AJAX requests to /login and clears session if token cannot be refreshed', async () => {
-      const request = requestFixture({ path: '/some-path' });
+      const request = httpServerMock.createKibanaRequest({ path: '/some-path' });
       const tokenPair = { accessToken: 'foo', refreshToken: 'bar' };
 
       mockScopedClusterClient(
@@ -354,7 +358,10 @@ describe('TokenAuthenticationProvider', () => {
     });
 
     it('does not redirect AJAX requests if token token cannot be refreshed', async () => {
-      const request = requestFixture({ headers: { 'kbn-xsrf': 'xsrf' }, path: '/some-path' });
+      const request = httpServerMock.createKibanaRequest({
+        headers: { 'kbn-xsrf': 'xsrf' },
+        path: '/some-path',
+      });
       const tokenPair = { accessToken: 'foo', refreshToken: 'bar' };
 
       mockScopedClusterClient(
@@ -380,7 +387,7 @@ describe('TokenAuthenticationProvider', () => {
     });
 
     it('fails if new access token is rejected after successful refresh', async () => {
-      const request = requestFixture();
+      const request = httpServerMock.createKibanaRequest();
       const tokenPair = { accessToken: 'foo', refreshToken: 'bar' };
 
       mockScopedClusterClient(
@@ -416,7 +423,7 @@ describe('TokenAuthenticationProvider', () => {
 
   describe('`logout` method', () => {
     it('returns `notHandled` if state is not presented.', async () => {
-      const request = requestFixture();
+      const request = httpServerMock.createKibanaRequest();
       const tokenPair = { accessToken: 'foo', refreshToken: 'bar' };
 
       let deauthenticateResult = await provider.logout(request);
@@ -432,7 +439,7 @@ describe('TokenAuthenticationProvider', () => {
     });
 
     it('fails if `tokens.invalidate` fails', async () => {
-      const request = requestFixture();
+      const request = httpServerMock.createKibanaRequest();
       const tokenPair = { accessToken: 'foo', refreshToken: 'bar' };
 
       const failureReason = new Error('failed to delete token');
@@ -448,7 +455,7 @@ describe('TokenAuthenticationProvider', () => {
     });
 
     it('redirects to /login if tokens are invalidated successfully', async () => {
-      const request = requestFixture();
+      const request = httpServerMock.createKibanaRequest();
       const tokenPair = { accessToken: 'foo', refreshToken: 'bar' };
 
       mockOptions.tokens.invalidate.withArgs(tokenPair).resolves();
@@ -463,7 +470,7 @@ describe('TokenAuthenticationProvider', () => {
     });
 
     it('redirects to /login with optional search parameters if tokens are invalidated successfully', async () => {
-      const request = requestFixture({ search: '?yep' });
+      const request = httpServerMock.createKibanaRequest({ query: { yep: 'nope' } });
       const tokenPair = { accessToken: 'foo', refreshToken: 'bar' };
 
       mockOptions.tokens.invalidate.withArgs(tokenPair).resolves();
@@ -474,7 +481,7 @@ describe('TokenAuthenticationProvider', () => {
       sinon.assert.calledWithExactly(mockOptions.tokens.invalidate, tokenPair);
 
       expect(authenticationResult.redirected()).toBe(true);
-      expect(authenticationResult.redirectURL).toBe('/base-path/login?yep');
+      expect(authenticationResult.redirectURL).toBe('/base-path/login?yep=nope');
     });
   });
 });

@@ -5,9 +5,11 @@
  */
 
 import sinon from 'sinon';
+
+import { httpServerMock } from '../../../../../../src/core/server/mocks';
 import { mockAuthenticatedUser } from '../../../common/model/authenticated_user.mock';
-import { requestFixture } from '../../__fixtures__';
 import { mockAuthenticationProviderOptions, mockScopedClusterClient } from './base.mock';
+
 import { BasicAuthenticationProvider, BasicCredentials } from './basic';
 
 function generateAuthorizationHeader(username: string, password: string) {
@@ -32,7 +34,6 @@ describe('BasicAuthenticationProvider', () => {
 
   describe('`login` method', () => {
     it('succeeds with valid login attempt, creates session and authHeaders', async () => {
-      const request = requestFixture();
       const user = mockAuthenticatedUser();
       const credentials = { username: 'user', password: 'password' };
       const authorization = generateAuthorizationHeader(credentials.username, credentials.password);
@@ -41,7 +42,10 @@ describe('BasicAuthenticationProvider', () => {
         .callAsCurrentUser.withArgs('shield.authenticate')
         .resolves(user);
 
-      const authenticationResult = await provider.login(request, credentials);
+      const authenticationResult = await provider.login(
+        httpServerMock.createKibanaRequest(),
+        credentials
+      );
 
       expect(authenticationResult.succeeded()).toBe(true);
       expect(authenticationResult.user).toEqual(user);
@@ -50,7 +54,7 @@ describe('BasicAuthenticationProvider', () => {
     });
 
     it('fails if user cannot be retrieved during login attempt', async () => {
-      const request = requestFixture();
+      const request = httpServerMock.createKibanaRequest();
       const credentials = { username: 'user', password: 'password' };
       const authorization = generateAuthorizationHeader(credentials.username, credentials.password);
 
@@ -74,7 +78,7 @@ describe('BasicAuthenticationProvider', () => {
       // Add `kbn-xsrf` header to make `can_redirect_request` think that it's AJAX request and
       // avoid triggering of redirect logic.
       const authenticationResult = await provider.authenticate(
-        requestFixture({ headers: { 'kbn-xsrf': 'xsrf' } }),
+        httpServerMock.createKibanaRequest({ headers: { 'kbn-xsrf': 'xsrf' } }),
         null
       );
 
@@ -83,7 +87,7 @@ describe('BasicAuthenticationProvider', () => {
 
     it('redirects non-AJAX requests that can not be authenticated to the login page.', async () => {
       const authenticationResult = await provider.authenticate(
-        requestFixture({ path: '/s/foo/some-path # that needs to be encoded' }),
+        httpServerMock.createKibanaRequest({ path: '/s/foo/some-path # that needs to be encoded' }),
         null
       );
 
@@ -94,12 +98,15 @@ describe('BasicAuthenticationProvider', () => {
     });
 
     it('does not handle authentication if state exists, but authorization property is missing.', async () => {
-      const authenticationResult = await provider.authenticate(requestFixture(), {});
+      const authenticationResult = await provider.authenticate(
+        httpServerMock.createKibanaRequest(),
+        {}
+      );
       expect(authenticationResult.notHandled()).toBe(true);
     });
 
     it('succeeds if only `authorization` header is available.', async () => {
-      const request = requestFixture({
+      const request = httpServerMock.createKibanaRequest({
         headers: { authorization: generateAuthorizationHeader('user', 'password') },
       });
       const user = mockAuthenticatedUser();
@@ -119,7 +126,7 @@ describe('BasicAuthenticationProvider', () => {
     });
 
     it('succeeds if only state is available.', async () => {
-      const request = requestFixture();
+      const request = httpServerMock.createKibanaRequest();
       const user = mockAuthenticatedUser();
       const authorization = generateAuthorizationHeader('user', 'password');
 
@@ -136,7 +143,9 @@ describe('BasicAuthenticationProvider', () => {
     });
 
     it('does not handle `authorization` header with unsupported schema even if state contains valid credentials.', async () => {
-      const request = requestFixture({ headers: { authorization: 'Bearer ***' } });
+      const request = httpServerMock.createKibanaRequest({
+        headers: { authorization: 'Bearer ***' },
+      });
       const authorization = generateAuthorizationHeader('user', 'password');
 
       const authenticationResult = await provider.authenticate(request, { authorization });
@@ -147,7 +156,7 @@ describe('BasicAuthenticationProvider', () => {
     });
 
     it('fails if state contains invalid credentials.', async () => {
-      const request = requestFixture();
+      const request = httpServerMock.createKibanaRequest();
       const authorization = generateAuthorizationHeader('user', 'password');
 
       const authenticationError = new Error('Forbidden');
@@ -166,7 +175,7 @@ describe('BasicAuthenticationProvider', () => {
     });
 
     it('authenticates only via `authorization` header even if state is available.', async () => {
-      const request = requestFixture({
+      const request = httpServerMock.createKibanaRequest({
         headers: { authorization: generateAuthorizationHeader('user', 'password') },
       });
       const user = mockAuthenticatedUser();
@@ -189,14 +198,16 @@ describe('BasicAuthenticationProvider', () => {
 
   describe('`logout` method', () => {
     it('always redirects to the login page.', async () => {
-      const request = requestFixture();
+      const request = httpServerMock.createKibanaRequest();
       const deauthenticateResult = await provider.logout(request);
       expect(deauthenticateResult.redirected()).toBe(true);
       expect(deauthenticateResult.redirectURL).toBe('/base-path/login?msg=LOGGED_OUT');
     });
 
     it('passes query string parameters to the login page.', async () => {
-      const request = requestFixture({ search: '?next=%2Fapp%2Fml&msg=SESSION_EXPIRED' });
+      const request = httpServerMock.createKibanaRequest({
+        query: { next: '/app/ml', msg: 'SESSION_EXPIRED' },
+      });
       const deauthenticateResult = await provider.logout(request);
       expect(deauthenticateResult.redirected()).toBe(true);
       expect(deauthenticateResult.redirectURL).toBe(

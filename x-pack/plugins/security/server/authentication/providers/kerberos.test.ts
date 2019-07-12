@@ -6,9 +6,9 @@
 
 import Boom from 'boom';
 import sinon from 'sinon';
-import { mockAuthenticatedUser } from '../../../common/model/authenticated_user.mock';
 
-import { requestFixture } from '../../__fixtures__';
+import { httpServerMock } from '../../../../../../src/core/server/mocks';
+import { mockAuthenticatedUser } from '../../../common/model/authenticated_user.mock';
 import {
   MockAuthenticationProviderOptions,
   mockAuthenticationProviderOptions,
@@ -27,7 +27,9 @@ describe('KerberosAuthenticationProvider', () => {
 
   describe('`authenticate` method', () => {
     it('does not handle `authorization` header with unsupported schema even if state contains a valid token.', async () => {
-      const request = requestFixture({ headers: { authorization: 'Basic some:credentials' } });
+      const request = httpServerMock.createKibanaRequest({
+        headers: { authorization: 'Basic some:credentials' },
+      });
       const tokenPair = {
         accessToken: 'some-valid-token',
         refreshToken: 'some-valid-refresh-token',
@@ -42,7 +44,7 @@ describe('KerberosAuthenticationProvider', () => {
     });
 
     it('does not handle requests that can be authenticated without `Negotiate` header.', async () => {
-      const request = requestFixture();
+      const request = httpServerMock.createKibanaRequest();
       mockScopedClusterClient(mockOptions.client)
         .callAsCurrentUser.withArgs('shield.authenticate')
         .resolves({});
@@ -53,7 +55,7 @@ describe('KerberosAuthenticationProvider', () => {
     });
 
     it('does not handle requests if backend does not support Kerberos.', async () => {
-      const request = requestFixture();
+      const request = httpServerMock.createKibanaRequest();
       mockScopedClusterClient(mockOptions.client)
         .callAsCurrentUser.withArgs('shield.authenticate')
         .rejects(Boom.unauthorized());
@@ -69,7 +71,7 @@ describe('KerberosAuthenticationProvider', () => {
     });
 
     it('fails if state is present, but backend does not support Kerberos.', async () => {
-      const request = requestFixture();
+      const request = httpServerMock.createKibanaRequest();
       const tokenPair = { accessToken: 'token', refreshToken: 'refresh-token' };
 
       mockScopedClusterClient(mockOptions.client)
@@ -93,7 +95,7 @@ describe('KerberosAuthenticationProvider', () => {
     });
 
     it('fails with `Negotiate` challenge if backend supports Kerberos.', async () => {
-      const request = requestFixture();
+      const request = httpServerMock.createKibanaRequest();
       mockScopedClusterClient(mockOptions.client)
         .callAsCurrentUser.withArgs('shield.authenticate')
         .rejects(Boom.unauthorized(null, 'Negotiate'));
@@ -106,7 +108,7 @@ describe('KerberosAuthenticationProvider', () => {
     });
 
     it('fails if request authentication is failed with non-401 error.', async () => {
-      const request = requestFixture();
+      const request = httpServerMock.createKibanaRequest();
       mockScopedClusterClient(mockOptions.client)
         .callAsCurrentUser.withArgs('shield.authenticate')
         .rejects(Boom.serverUnavailable());
@@ -120,7 +122,9 @@ describe('KerberosAuthenticationProvider', () => {
 
     it('gets an token pair in exchange to SPNEGO one and stores it in the state.', async () => {
       const user = mockAuthenticatedUser();
-      const request = requestFixture({ headers: { authorization: 'negotiate spnego' } });
+      const request = httpServerMock.createKibanaRequest({
+        headers: { authorization: 'negotiate spnego' },
+      });
 
       mockScopedClusterClient(mockOptions.client)
         .callAsCurrentUser.withArgs('shield.authenticate')
@@ -156,7 +160,9 @@ describe('KerberosAuthenticationProvider', () => {
     });
 
     it('fails if could not retrieve an access token in exchange to SPNEGO one.', async () => {
-      const request = requestFixture({ headers: { authorization: 'negotiate spnego' } });
+      const request = httpServerMock.createKibanaRequest({
+        headers: { authorization: 'negotiate spnego' },
+      });
 
       const failureReason = Boom.unauthorized();
       mockOptions.client.callAsInternalUser
@@ -178,7 +184,9 @@ describe('KerberosAuthenticationProvider', () => {
     });
 
     it('fails if could not retrieve user using the new access token.', async () => {
-      const request = requestFixture({ headers: { authorization: 'negotiate spnego' } });
+      const request = httpServerMock.createKibanaRequest({
+        headers: { authorization: 'negotiate spnego' },
+      });
 
       const failureReason = Boom.unauthorized();
       mockScopedClusterClient(
@@ -208,7 +216,7 @@ describe('KerberosAuthenticationProvider', () => {
 
     it('succeeds if state contains a valid token.', async () => {
       const user = mockAuthenticatedUser();
-      const request = requestFixture();
+      const request = httpServerMock.createKibanaRequest();
       const tokenPair = {
         accessToken: 'some-valid-token',
         refreshToken: 'some-valid-refresh-token',
@@ -230,7 +238,7 @@ describe('KerberosAuthenticationProvider', () => {
 
     it('succeeds with valid session even if requiring a token refresh', async () => {
       const user = mockAuthenticatedUser();
-      const request = requestFixture();
+      const request = httpServerMock.createKibanaRequest();
       const tokenPair = { accessToken: 'foo', refreshToken: 'bar' };
 
       mockScopedClusterClient(
@@ -263,7 +271,7 @@ describe('KerberosAuthenticationProvider', () => {
     });
 
     it('fails if token from the state is rejected because of unknown reason.', async () => {
-      const request = requestFixture();
+      const request = httpServerMock.createKibanaRequest();
       const tokenPair = {
         accessToken: 'some-valid-token',
         refreshToken: 'some-valid-refresh-token',
@@ -285,7 +293,7 @@ describe('KerberosAuthenticationProvider', () => {
     });
 
     it('fails with `Negotiate` challenge if both access and refresh tokens from the state are expired and backend supports Kerberos.', async () => {
-      const request = requestFixture();
+      const request = httpServerMock.createKibanaRequest();
       const tokenPair = { accessToken: 'expired-token', refreshToken: 'some-valid-refresh-token' };
 
       mockScopedClusterClient(mockOptions.client)
@@ -301,7 +309,7 @@ describe('KerberosAuthenticationProvider', () => {
     });
 
     it('fails with `Negotiate` challenge if both access and refresh token documents are missing and backend supports Kerberos.', async () => {
-      const request = requestFixture({ headers: {} });
+      const request = httpServerMock.createKibanaRequest({ headers: {} });
       const tokenPair = { accessToken: 'missing-token', refreshToken: 'missing-refresh-token' };
 
       mockScopedClusterClient(
@@ -329,7 +337,9 @@ describe('KerberosAuthenticationProvider', () => {
 
     it('succeeds if `authorization` contains a valid token.', async () => {
       const user = mockAuthenticatedUser();
-      const request = requestFixture({ headers: { authorization: 'Bearer some-valid-token' } });
+      const request = httpServerMock.createKibanaRequest({
+        headers: { authorization: 'Bearer some-valid-token' },
+      });
 
       mockScopedClusterClient(
         mockOptions.client,
@@ -348,7 +358,9 @@ describe('KerberosAuthenticationProvider', () => {
     });
 
     it('fails if token from `authorization` header is rejected.', async () => {
-      const request = requestFixture({ headers: { authorization: 'Bearer some-invalid-token' } });
+      const request = httpServerMock.createKibanaRequest({
+        headers: { authorization: 'Bearer some-invalid-token' },
+      });
 
       const failureReason = { statusCode: 401 };
       mockScopedClusterClient(
@@ -366,7 +378,9 @@ describe('KerberosAuthenticationProvider', () => {
 
     it('fails if token from `authorization` header is rejected even if state contains a valid one.', async () => {
       const user = mockAuthenticatedUser();
-      const request = requestFixture({ headers: { authorization: 'Bearer some-invalid-token' } });
+      const request = httpServerMock.createKibanaRequest({
+        headers: { authorization: 'Bearer some-invalid-token' },
+      });
       const tokenPair = {
         accessToken: 'some-valid-token',
         refreshToken: 'some-valid-refresh-token',
@@ -396,7 +410,7 @@ describe('KerberosAuthenticationProvider', () => {
 
   describe('`logout` method', () => {
     it('returns `notHandled` if state is not presented.', async () => {
-      const request = requestFixture();
+      const request = httpServerMock.createKibanaRequest();
 
       let deauthenticateResult = await provider.logout(request);
       expect(deauthenticateResult.notHandled()).toBe(true);
@@ -408,7 +422,7 @@ describe('KerberosAuthenticationProvider', () => {
     });
 
     it('fails if `tokens.invalidate` fails', async () => {
-      const request = requestFixture();
+      const request = httpServerMock.createKibanaRequest();
       const tokenPair = { accessToken: 'foo', refreshToken: 'bar' };
 
       const failureReason = new Error('failed to delete token');
@@ -424,7 +438,7 @@ describe('KerberosAuthenticationProvider', () => {
     });
 
     it('redirects to `/logged_out` page if tokens are invalidated successfully.', async () => {
-      const request = requestFixture();
+      const request = httpServerMock.createKibanaRequest();
       const tokenPair = {
         accessToken: 'some-valid-token',
         refreshToken: 'some-valid-refresh-token',

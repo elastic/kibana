@@ -24,7 +24,7 @@ export { AuthenticationResult } from './authentication_result';
 export { DeauthenticationResult } from './deauthentication_result';
 export { BasicCredentials } from './providers';
 
-export interface SetupAuthenticationParams {
+interface SetupAuthenticationParams {
   core: CoreSetup;
   clusterClient: PublicMethodsOf<ClusterClient>;
   config: ConfigType;

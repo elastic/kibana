@@ -6,9 +6,9 @@
 
 import sinon from 'sinon';
 import Boom from 'boom';
-import { mockAuthenticatedUser } from '../../../common/model/authenticated_user.mock';
 
-import { requestFixture } from '../../__fixtures__';
+import { httpServerMock } from '../../../../../../src/core/server/mocks';
+import { mockAuthenticatedUser } from '../../../common/model/authenticated_user.mock';
 import {
   MockAuthenticationProviderOptions,
   mockAuthenticationProviderOptions,
@@ -41,7 +41,7 @@ describe('OIDCAuthenticationProvider', () => {
 
   describe('`login` method', () => {
     it('redirects third party initiated login attempts to the OpenId Connect Provider.', async () => {
-      const request = requestFixture({ path: '/api/security/v1/oidc' });
+      const request = httpServerMock.createKibanaRequest({ path: '/api/security/v1/oidc' });
 
       mockOptions.client.callAsInternalUser.withArgs('shield.oidcPrepare').resolves({
         state: 'statevalue',
@@ -81,7 +81,7 @@ describe('OIDCAuthenticationProvider', () => {
     });
 
     it('gets token and redirects user to requested URL if OIDC authentication response is valid.', async () => {
-      const request = requestFixture({
+      const request = httpServerMock.createKibanaRequest({
         path: '/api/security/v1/oidc?code=somecodehere&state=somestatehere',
       });
 
@@ -116,7 +116,7 @@ describe('OIDCAuthenticationProvider', () => {
     });
 
     it('fails if authentication response is presented but session state does not contain the state parameter.', async () => {
-      const request = requestFixture({ path: '/api/security/v1/oidc' });
+      const request = httpServerMock.createKibanaRequest({ path: '/api/security/v1/oidc' });
 
       const authenticationResult = await provider.login(
         request,
@@ -135,7 +135,7 @@ describe('OIDCAuthenticationProvider', () => {
     });
 
     it('fails if authentication response is presented but session state does not contain redirect URL.', async () => {
-      const request = requestFixture({ path: '/api/security/v1/oidc' });
+      const request = httpServerMock.createKibanaRequest({ path: '/api/security/v1/oidc' });
 
       const authenticationResult = await provider.login(
         request,
@@ -154,7 +154,7 @@ describe('OIDCAuthenticationProvider', () => {
     });
 
     it('fails if session state is not presented.', async () => {
-      const request = requestFixture({
+      const request = httpServerMock.createKibanaRequest({
         path: '/api/security/v1/oidc?code=somecodehere&state=somestatehere',
       });
 
@@ -166,7 +166,7 @@ describe('OIDCAuthenticationProvider', () => {
     });
 
     it('fails if code is invalid.', async () => {
-      const request = requestFixture({
+      const request = httpServerMock.createKibanaRequest({
         path: '/api/security/v1/oidc?code=somecodehere&state=somestatehere',
       });
 
@@ -202,7 +202,7 @@ describe('OIDCAuthenticationProvider', () => {
 
   describe('`authenticate` method', () => {
     it('does not handle AJAX request that can not be authenticated.', async () => {
-      const request = requestFixture({ headers: { 'kbn-xsrf': 'xsrf' } });
+      const request = httpServerMock.createKibanaRequest({ headers: { 'kbn-xsrf': 'xsrf' } });
 
       const authenticationResult = await provider.authenticate(request, null);
 
@@ -210,7 +210,7 @@ describe('OIDCAuthenticationProvider', () => {
     });
 
     it('redirects non-AJAX request that can not be authenticated to the OpenId Connect Provider.', async () => {
-      const request = requestFixture({ path: '/s/foo/some-path' });
+      const request = httpServerMock.createKibanaRequest({ path: '/s/foo/some-path' });
 
       mockOptions.client.callAsInternalUser.withArgs('shield.oidcPrepare').resolves({
         state: 'statevalue',
@@ -245,7 +245,7 @@ describe('OIDCAuthenticationProvider', () => {
     });
 
     it('fails if OpenID Connect authentication request preparation fails.', async () => {
-      const request = requestFixture({ path: '/some-path' });
+      const request = httpServerMock.createKibanaRequest({ path: '/some-path' });
 
       const failureReason = new Error('Realm is misconfigured!');
       mockOptions.client.callAsInternalUser
@@ -264,7 +264,7 @@ describe('OIDCAuthenticationProvider', () => {
 
     it('succeeds if state contains a valid token.', async () => {
       const user = mockAuthenticatedUser();
-      const request = requestFixture();
+      const request = httpServerMock.createKibanaRequest();
       const tokenPair = {
         accessToken: 'some-valid-token',
         refreshToken: 'some-valid-refresh-token',
@@ -285,7 +285,9 @@ describe('OIDCAuthenticationProvider', () => {
     });
 
     it('does not handle `authorization` header with unsupported schema even if state contains a valid token.', async () => {
-      const request = requestFixture({ headers: { authorization: 'Basic some:credentials' } });
+      const request = httpServerMock.createKibanaRequest({
+        headers: { authorization: 'Basic some:credentials' },
+      });
 
       const authenticationResult = await provider.authenticate(request, {
         accessToken: 'some-valid-token',
@@ -298,7 +300,7 @@ describe('OIDCAuthenticationProvider', () => {
     });
 
     it('fails if token from the state is rejected because of unknown reason.', async () => {
-      const request = requestFixture();
+      const request = httpServerMock.createKibanaRequest();
       const tokenPair = {
         accessToken: 'some-invalid-token',
         refreshToken: 'some-invalid-refresh-token',
@@ -319,7 +321,7 @@ describe('OIDCAuthenticationProvider', () => {
 
     it('succeeds if token from the state is expired, but has been successfully refreshed.', async () => {
       const user = mockAuthenticatedUser();
-      const request = requestFixture();
+      const request = httpServerMock.createKibanaRequest();
       const tokenPair = { accessToken: 'expired-token', refreshToken: 'valid-refresh-token' };
 
       mockScopedClusterClient(
@@ -355,7 +357,7 @@ describe('OIDCAuthenticationProvider', () => {
     });
 
     it('fails if token from the state is expired and refresh attempt failed too.', async () => {
-      const request = requestFixture();
+      const request = httpServerMock.createKibanaRequest();
       const tokenPair = { accessToken: 'expired-token', refreshToken: 'invalid-refresh-token' };
 
       mockScopedClusterClient(
@@ -379,7 +381,7 @@ describe('OIDCAuthenticationProvider', () => {
     });
 
     it('redirects to OpenID Connect Provider for non-AJAX requests if refresh token is expired or already refreshed.', async () => {
-      const request = requestFixture({ path: '/s/foo/some-path' });
+      const request = httpServerMock.createKibanaRequest({ path: '/s/foo/some-path' });
       const tokenPair = { accessToken: 'expired-token', refreshToken: 'expired-refresh-token' };
 
       mockOptions.client.callAsInternalUser.withArgs('shield.oidcPrepare').resolves({
@@ -424,7 +426,7 @@ describe('OIDCAuthenticationProvider', () => {
     });
 
     it('fails for AJAX requests with user friendly message if refresh token is expired.', async () => {
-      const request = requestFixture({ headers: { 'kbn-xsrf': 'xsrf' } });
+      const request = httpServerMock.createKibanaRequest({ headers: { 'kbn-xsrf': 'xsrf' } });
       const tokenPair = { accessToken: 'expired-token', refreshToken: 'expired-refresh-token' };
 
       mockScopedClusterClient(
@@ -448,7 +450,7 @@ describe('OIDCAuthenticationProvider', () => {
     it('succeeds if `authorization` contains a valid token.', async () => {
       const user = mockAuthenticatedUser();
       const authorization = 'Bearer some-valid-token';
-      const request = requestFixture({ headers: { authorization } });
+      const request = httpServerMock.createKibanaRequest({ headers: { authorization } });
 
       mockScopedClusterClient(mockOptions.client, sinon.match({ headers: { authorization } }))
         .callAsCurrentUser.withArgs('shield.authenticate')
@@ -465,7 +467,7 @@ describe('OIDCAuthenticationProvider', () => {
 
     it('fails if token from `authorization` header is rejected.', async () => {
       const authorization = 'Bearer some-invalid-token';
-      const request = requestFixture({ headers: { authorization } });
+      const request = httpServerMock.createKibanaRequest({ headers: { authorization } });
 
       const failureReason = { statusCode: 401 };
       mockScopedClusterClient(mockOptions.client, sinon.match({ headers: { authorization } }))
@@ -481,7 +483,7 @@ describe('OIDCAuthenticationProvider', () => {
     it('fails if token from `authorization` header is rejected even if state contains a valid one.', async () => {
       const user = mockAuthenticatedUser();
       const authorization = 'Bearer some-invalid-token';
-      const request = requestFixture({ headers: { authorization } });
+      const request = httpServerMock.createKibanaRequest({ headers: { authorization } });
 
       const failureReason = { statusCode: 401 };
       mockScopedClusterClient(mockOptions.client, sinon.match({ headers: { authorization } }))
@@ -507,7 +509,7 @@ describe('OIDCAuthenticationProvider', () => {
 
   describe('`logout` method', () => {
     it('returns `notHandled` if state is not presented or does not include access token.', async () => {
-      const request = requestFixture();
+      const request = httpServerMock.createKibanaRequest();
 
       let deauthenticateResult = await provider.logout(request, {});
       expect(deauthenticateResult.notHandled()).toBe(true);
@@ -522,7 +524,7 @@ describe('OIDCAuthenticationProvider', () => {
     });
 
     it('fails if OpenID Connect logout call fails.', async () => {
-      const request = requestFixture();
+      const request = httpServerMock.createKibanaRequest();
       const accessToken = 'x-oidc-token';
       const refreshToken = 'x-oidc-refresh-token';
 
@@ -546,7 +548,7 @@ describe('OIDCAuthenticationProvider', () => {
     });
 
     it('redirects to /logged_out if `redirect` field in OpenID Connect logout response is null.', async () => {
-      const request = requestFixture();
+      const request = httpServerMock.createKibanaRequest();
       const accessToken = 'x-oidc-token';
       const refreshToken = 'x-oidc-refresh-token';
 
@@ -569,7 +571,7 @@ describe('OIDCAuthenticationProvider', () => {
     });
 
     it('redirects user to the OpenID Connect Provider if RP initiated SLO is supported.', async () => {
-      const request = requestFixture();
+      const request = httpServerMock.createKibanaRequest();
       const accessToken = 'x-oidc-token';
       const refreshToken = 'x-oidc-refresh-token';
 

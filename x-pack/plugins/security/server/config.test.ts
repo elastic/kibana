@@ -172,12 +172,6 @@ Object {
 });
 
 describe('createConfig$()', () => {
-  const collectLogs = (contextMock: ReturnType<typeof coreMock.createPluginInitializerContext>) => {
-    return loggingServiceMock.collect(contextMock.logger as ReturnType<
-      typeof loggingServiceMock['create']
-    >);
-  };
-
   it('should log a warning and set xpack.security.encryptionKey if not set', async () => {
     const mockRandomBytes = jest.requireMock('crypto').randomBytes;
     mockRandomBytes.mockReturnValue('ab'.repeat(16));
@@ -188,7 +182,7 @@ describe('createConfig$()', () => {
       .toPromise();
     expect(config).toEqual({ encryptionKey: 'ab'.repeat(16), secureCookies: true });
 
-    expect(collectLogs(contextMock).warn).toMatchInlineSnapshot(`
+    expect(loggingServiceMock.collect(contextMock.logger).warn).toMatchInlineSnapshot(`
 Array [
   Array [
     "Generating a random key for xpack.security.encryptionKey. To prevent sessions from being invalidated on restart, please set xpack.security.encryptionKey in kibana.yml",
@@ -208,7 +202,7 @@ Array [
       .toPromise();
     expect(config).toEqual({ encryptionKey: 'a'.repeat(32), secureCookies: false });
 
-    expect(collectLogs(contextMock).warn).toMatchInlineSnapshot(`
+    expect(loggingServiceMock.collect(contextMock.logger).warn).toMatchInlineSnapshot(`
 Array [
   Array [
     "Session cookies will be transmitted over insecure connections. This is not recommended.",
@@ -228,7 +222,7 @@ Array [
       .toPromise();
     expect(config).toEqual({ encryptionKey: 'a'.repeat(32), secureCookies: true });
 
-    expect(collectLogs(contextMock).warn).toMatchInlineSnapshot(`
+    expect(loggingServiceMock.collect(contextMock.logger).warn).toMatchInlineSnapshot(`
 Array [
   Array [
     "Using secure cookies, but SSL is not enabled inside Kibana. SSL must be configured outside of Kibana to function properly.",
@@ -248,6 +242,6 @@ Array [
       .toPromise();
     expect(config).toEqual({ encryptionKey: 'a'.repeat(32), secureCookies: true });
 
-    expect(collectLogs(contextMock).warn).toEqual([]);
+    expect(loggingServiceMock.collect(contextMock.logger).warn).toEqual([]);
   });
 });

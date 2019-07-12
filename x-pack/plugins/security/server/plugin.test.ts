@@ -4,14 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ClusterClient } from '../../../../src/core/server';
-import { coreMock } from '../../../../src/core/server/mocks';
+import { coreMock, elasticsearchServiceMock } from '../../../../src/core/server/mocks';
+
 import { Plugin } from './plugin';
+import { ClusterClient, CoreSetup } from '../../../../src/core/server';
 
 describe('Security Plugin', () => {
   let plugin: Plugin;
-  let mockCoreSetup: ReturnType<typeof coreMock['createSetup']>;
-  let mockClusterClient: jest.Mocked<ClusterClient>;
+  let mockCoreSetup: MockedKeys<CoreSetup>;
+  let mockClusterClient: jest.Mocked<PublicMethodsOf<ClusterClient>>;
   beforeEach(() => {
     plugin = new Plugin(
       coreMock.createPluginInitializerContext({
@@ -23,18 +24,11 @@ describe('Security Plugin', () => {
 
     mockCoreSetup = coreMock.createSetup();
     mockCoreSetup.http.isTlsEnabled = true;
-    mockCoreSetup.http.registerAuth.mockResolvedValue({
-      sessionStorageFactory: {
-        asScoped: jest.fn().mockReturnValue({ get: jest.fn(), set: jest.fn(), clear: jest.fn() }),
-      },
-    });
 
-    mockClusterClient = {
-      callAsInternalUser: jest.fn(),
-      asScoped: jest.fn(),
-      close: jest.fn(),
-    } as any;
-    mockCoreSetup.elasticsearch.createClient.mockReturnValue(mockClusterClient);
+    mockClusterClient = elasticsearchServiceMock.createClusterClient();
+    mockCoreSetup.elasticsearch.createClient.mockReturnValue(
+      (mockClusterClient as unknown) as jest.Mocked<ClusterClient>
+    );
   });
 
   describe('setup()', () => {
