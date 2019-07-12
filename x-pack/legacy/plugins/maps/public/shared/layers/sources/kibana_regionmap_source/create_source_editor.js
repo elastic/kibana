@@ -41,7 +41,7 @@ export class CreateSourceEditor extends React.Component {
 
     const onChange = ({ target }) => {
       const selectedName = target.options[target.selectedIndex].text;
-      this.props.onSelect({ name: selectedName });
+      this.props.onSourceConfigChange({ name: selectedName });
     };
 
     const regionmapOptions = this.state.regionmapLayers.map(({ name, url }) => {
@@ -75,7 +75,7 @@ export class CreateSourceEditor extends React.Component {
 }
 
 CreateSourceEditor.propTypes = {
-  onSelect: PropTypes.func.isRequired
+  onSourceConfigChange: PropTypes.func.isRequired
 };
 
 
