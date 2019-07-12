@@ -5,7 +5,7 @@
  */
 
 // @ts-ignore missing typings for EuiStat
-import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiStat, EuiTitle } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiStat, EuiTitle, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { Fragment } from 'react';
@@ -23,36 +23,43 @@ export const SnapshotLoading = () => (
           </h5>
         </EuiTitle>
         <EuiPanel paddingSize="s" style={{ height: 170 }}>
-          <EuiFlexGroup gutterSize="xl">
+          <EuiFlexGroup direction="column">
             <EuiFlexItem grow={false}>
-              <EuiStat
-                description={i18n.translate('xpack.uptime.snapshot.stats.upDescription', {
-                  defaultMessage: 'Up',
-                })}
-                textAlign="center"
-                title="-"
-                titleColor="secondary"
-              />
+              <EuiSpacer size="s" />
             </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiStat
-                description={i18n.translate('xpack.uptime.snapshot.stats.downDescription', {
-                  defaultMessage: 'Down',
-                })}
-                textAlign="center"
-                title="-"
-                titleColor="danger"
-              />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiStat
-                description={i18n.translate('xpack.uptime.snapshot.stats.totalDescription', {
-                  defaultMessage: 'Total',
-                })}
-                textAlign="center"
-                title="-"
-                titleColor="subdued"
-              />
+            <EuiFlexItem>
+              <EuiFlexGroup justifyContent="spaceEvenly" gutterSize="s">
+                <EuiFlexItem>
+                  <EuiStat
+                    description={i18n.translate('xpack.uptime.snapshot.stats.upDescription', {
+                      defaultMessage: 'Up',
+                    })}
+                    textAlign="center"
+                    title="-"
+                    titleColor="secondary"
+                  />
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  <EuiStat
+                    description={i18n.translate('xpack.uptime.snapshot.stats.downDescription', {
+                      defaultMessage: 'Down',
+                    })}
+                    textAlign="center"
+                    title="-"
+                    titleColor="danger"
+                  />
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  <EuiStat
+                    description={i18n.translate('xpack.uptime.snapshot.stats.totalDescription', {
+                      defaultMessage: 'Total',
+                    })}
+                    textAlign="center"
+                    title="-"
+                    titleColor="subdued"
+                  />
+                </EuiFlexItem>
+              </EuiFlexGroup>
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiPanel>
