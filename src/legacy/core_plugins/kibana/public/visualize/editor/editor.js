@@ -329,6 +329,12 @@ function VisEditor(
     }
   });
 
+  $scope.showSaveQuery = capabilities.get().visualize.saveQuery;
+
+  $scope.$watch(() => capabilities.get().visualize.saveQuery, (newCapability) => {
+    $scope.showSaveQuery = newCapability;
+  });
+
   function init() {
     // export some objects
     $scope.savedVis = savedVis;
