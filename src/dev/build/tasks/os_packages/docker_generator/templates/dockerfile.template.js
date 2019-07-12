@@ -57,10 +57,10 @@ function generator({ artifactTarball, versionTag, license, usePublicArtifact  })
   EXPOSE 5601
 
   # Add Reporting dependencies.
-  RUN yum update -y && yum install -y fontconfig freetype wget && yum clean all
+  RUN yum update -y && yum install -y fontconfig freetype && yum clean all
 
   # Add an init process
-  RUN wget -O /usr/local/bin/dumb-init https://github.com/Yelp/dumb-init/releases/download/v1.2.2/dumb-init_1.2.2_amd64 && chmod +x /usr/local/bin/dumb-init
+  RUN curl -o /usr/local/bin/dumb-init https://github.com/Yelp/dumb-init/releases/download/v1.2.2/dumb-init_1.2.2_amd64 && chmod +x /usr/local/bin/dumb-init
 
   # Bring in Kibana from the initial stage.
   COPY --from=prep_files --chown=1000:0 /usr/share/kibana /usr/share/kibana
