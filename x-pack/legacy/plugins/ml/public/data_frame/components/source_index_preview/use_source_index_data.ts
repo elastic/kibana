@@ -56,6 +56,12 @@ export const useSourceIndexData = (
 
       const docs = resp.hits.hits;
 
+      if (docs.length === 0) {
+        setTableItems([] as EsDoc[]);
+        setStatus(SOURCE_INDEX_STATUS.LOADED);
+        return;
+      }
+
       if (selectedFields.length === 0) {
         const newSelectedFields = getDefaultSelectableFields(docs);
         setSelectedFields(newSelectedFields);

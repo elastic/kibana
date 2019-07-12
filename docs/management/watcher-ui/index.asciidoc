@@ -1,8 +1,57 @@
 [role="xpack"]
 [[watcher-ui]]
-== Watcher UI
+== Watcher
 
-_Watcher UI_ enables you to monitor, manage, create and simulate 
-{stack-ov}/xpack-alerting.html[watches] for your Elasticsearch indices.
+Watcher is an {es} feature that you can use to create actions based on 
+conditions, which are periodically evaluated using queries on your data. 
+Watches are helpful for analyzing mission-critical and business-critical 
+streaming data. For example, you might watch application logs for performance 
+outages or audit access logs for security threats.
 
-include::getting-started.asciidoc[]
+With the Watcher UI, you can:
+
+* Create a simple threshold watch
+* View your watch history and action status
+* Edit, deactivate, and delete a watch
+* Create more advanced watches using API syntax
+
+[role="screenshot"]
+image:management/watcher-ui/images/watches.png["Watcher list"]
+
+{stack-ov}/xpack-alerting.html[Alerting on cluster and index events]
+is a good source for detailed 
+information on how watches work. If you are using the UI to create a 
+threshold watch, take a look at the different watcher actions. If you are 
+creating an advanced watch, you should be familiar with the parts of a 
+watch&#8212;input, schedule, condition, and actions.
+
+[float]
+[[watcher-security]]
+=== Watcher security
+
+If the {es} {security-features} are enabled, you must have the
+{stack-ov}/security-privileges.html[`manage_watcher` or `monitor_watcher`]
+cluster privileges to use Watcher in {kib}.
+
+Alternately, you can have the built-in `kibana_user` role
+and either of these watcher roles:
+
+* `watcher_admin`. You can perform all Watcher actions, including create and edit watches.
+* `watcher_user`. You can view watches, but not create or edit them.
+
+You can manage roles in *Management > Security > Roles*, or use the 
+<<role-management-api, Kibana Role Management API>>. Watches are shared between 
+all users with the same role.  
+
+NOTE: If you are creating a threshold watch, you must also have index management 
+privileges.  See 
+<<managing-indices, Managing Indices>> for detailed information.
+
+
+include::create-threshold-alert.asciidoc[]
+include::watcher-getting-started.asciidoc[]
+include::create-advanced-watch.asciidoc[]
+
+
+
+
