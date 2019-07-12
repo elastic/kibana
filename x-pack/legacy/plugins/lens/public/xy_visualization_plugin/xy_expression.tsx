@@ -37,36 +37,27 @@ export const xyChart: ExpressionFunction<'lens_xy_chart', KibanaDatatable, XYArg
   type: 'render',
   help: 'An X/Y chart',
   args: {
-    seriesType: {
-      types: ['string'],
-      options: [
-        'bar',
-        'line',
-        'area',
-        'horizontal_bar',
-        'bar_stacked',
-        'line_stacked',
-        'area_stacked',
-        'horizontal_bar_stacked',
-      ],
-      help: 'The type of chart to display.',
-    },
     legend: {
       types: ['lens_xy_legendConfig'],
       help: 'Configure the chart legend.',
     },
-    y: {
-      types: ['lens_xy_yConfig'],
-      help: 'The y axis configuration',
-    },
+    // y: {
+    //   types: ['lens_xy_yConfig'],
+    //   help: 'The y axis configuration',
+    // },
     x: {
       types: ['lens_xy_xConfig'],
       help: 'The x axis configuration',
     },
-    splitSeriesAccessors: {
-      types: ['string'],
+    // splitSeriesAccessors: {
+    //   types: ['string'],
+    //   multi: true,
+    //   help: 'The columns used to split the series.',
+    // },
+    layers: {
+      types: ['lens_xy_layer'],
+      help: 'Layers of visual series',
       multi: true,
-      help: 'The columns used to split the series.',
     },
   },
   context: {
@@ -102,30 +93,7 @@ export const xyChartRenderer: RenderFunction<XYChartProps> = {
 };
 
 export function XYChart({ data, args }: XYChartProps) {
-  const { legend, x, y, splitSeriesAccessors, seriesType } = args;
-  // TODO: Stop mapping data once elastic-charts allows axis naming
-  // https://github.com/elastic/elastic-charts/issues/245
-  const seriesProps = {
-    splitSeriesAccessors,
-    stackAccessors: seriesType.includes('stacked') ? [x.accessor] : [],
-    id: getSpecId(y.labels.join(',')),
-    xAccessor: x.accessor,
-    yAccessors: y.labels,
-    data: data.rows.map(row => {
-      const newRow: typeof row = {};
-
-      // Remap data to { 'Count of documents': 5 }
-      Object.keys(row).forEach(key => {
-        const labelIndex = y.accessors.indexOf(key);
-        if (labelIndex > -1) {
-          newRow[y.labels[labelIndex]] = row[key];
-        } else {
-          newRow[key] = row[key];
-        }
-      });
-      return newRow;
-    }),
-  };
+  const { legend, x, layers } = args;
 
   return (
     <Chart className="lnsChart">
@@ -133,7 +101,7 @@ export function XYChart({ data, args }: XYChartProps) {
         showLegend={legend.isVisible}
         legendPosition={legend.position}
         showLegendDisplayValue={false}
-        rotation={seriesType.includes('horizontal') ? 90 : 0}
+        rotation={layers.some(({ seriesType }) => seriesType.includes('horizontal')) ? 90 : 0}
       />
 
       <Axis
@@ -146,22 +114,47 @@ export function XYChart({ data, args }: XYChartProps) {
 
       <Axis
         id={getAxisId('y')}
-        position={y.position}
-        title={y.title}
-        showGridLines={y.showGridlines}
-        hide={y.hide}
+        position={layers[0].position}
+        title={layers[0].title}
+        showGridLines={layers[0].showGridlines}
+        hide={layers[0].hide}
       />
 
-      {seriesType === 'line' ? (
-        <LineSeries {...seriesProps} />
-      ) : seriesType === 'bar' ||
-        seriesType === 'bar_stacked' ||
-        seriesType === 'horizontal_bar' ||
-        seriesType === 'horizontal_bar_stacked' ? (
-        <BarSeries {...seriesProps} />
-      ) : (
-        <AreaSeries {...seriesProps} />
-      )}
+      {layers.map(({ splitSeriesAccessors, seriesType, labels, accessors }, index) => {
+        const seriesProps = {
+          key: index,
+          splitSeriesAccessors,
+          stackAccessors: seriesType.includes('stacked') ? [x.accessor] : [],
+          id: getSpecId(labels.join(',')),
+          xAccessor: x.accessor,
+          yAccessors: labels,
+          data: data.rows.map(row => {
+            const newRow: typeof row = {};
+
+            // Remap data to { 'Count of documents': 5 }
+            Object.keys(row).forEach(key => {
+              const labelIndex = accessors.indexOf(key);
+              if (labelIndex > -1) {
+                newRow[labels[labelIndex]] = row[key];
+              } else {
+                newRow[key] = row[key];
+              }
+            });
+            return newRow;
+          }),
+        };
+
+        return seriesType === 'line' ? (
+          <LineSeries {...seriesProps} />
+        ) : seriesType === 'bar' ||
+          seriesType === 'bar_stacked' ||
+          seriesType === 'horizontal_bar' ||
+          seriesType === 'horizontal_bar_stacked' ? (
+          <BarSeries {...seriesProps} />
+        ) : (
+          <AreaSeries {...seriesProps} />
+        );
+      })}
     </Chart>
   );
 }

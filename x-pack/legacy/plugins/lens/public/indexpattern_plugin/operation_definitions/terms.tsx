@@ -8,7 +8,7 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiForm, EuiFormRow, EuiRange, EuiSelect } from '@elastic/eui';
 import { IndexPatternField, TermsIndexPatternColumn } from '../indexpattern';
-import { DimensionPriority } from '../../types';
+import { DimensionLayer, DimensionPriority } from '../../types';
 import { OperationDefinition } from '../operations';
 import { updateColumnParam } from '../state_helpers';
 
@@ -44,7 +44,8 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn> = {
   },
   buildColumn(
     operationId: string,
-    suggestedOrder?: DimensionPriority,
+    suggestedOrder: DimensionPriority | undefined,
+    layer: DimensionLayer,
     field?: IndexPatternField
   ): TermsIndexPatternColumn {
     return {
@@ -55,6 +56,7 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn> = {
       suggestedOrder,
       sourceField: field ? field.name : '',
       isBucketed: true,
+      layer,
       params: {
         size: 5,
         orderBy: { type: 'alphabetical' },

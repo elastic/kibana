@@ -27,15 +27,19 @@ export interface EditorFrameSetup {
 // Hints the default nesting to the data source. 0 is the highest priority
 export type DimensionPriority = 0 | 1 | 2;
 
-export interface TableColumn {
+// 0 is the default layer, layers are joined sequentially but there can only be one 'join' layer
+export type DimensionLayer = 'join' | number;
+
+export interface TableSuggestionColumn {
   columnId: string;
   operation: Operation;
+  layer?: DimensionLayer;
 }
 
 export interface TableSuggestion {
   datasourceSuggestionId: number;
   isMultiRow: boolean;
-  columns: TableColumn[];
+  columns: TableSuggestionColumn[];
 }
 
 export interface DatasourceSuggestion<T = unknown> {
@@ -69,6 +73,11 @@ export interface Datasource<T = unknown, P = unknown> {
  * This is an API provided to visualizations by the frame, which calls the publicAPI on the datasource
  */
 export interface DatasourcePublicAPI {
+  // Static properties provided to visualizations to indicate whether this datasource requires "layered"
+  // queries which indicate the level of nesting
+  supportsLayers: boolean;
+  supportsLayerJoin: boolean;
+
   getTableSpec: () => TableSpec;
   getOperationForColumnId: (columnId: string) => Operation | null;
 
@@ -79,6 +88,15 @@ export interface DatasourcePublicAPI {
   moveColumnTo: (columnId: string, targetIndex: number) => void;
   duplicateColumn: (columnId: string) => TableSpec;
 }
+
+export interface TableSpecColumn {
+  // Column IDs are the keys for internal state in data sources and visualizations
+  columnId: string;
+  layer?: DimensionLayer;
+}
+
+// TableSpec is managed by visualizations
+export type TableSpec = TableSpecColumn[];
 
 export interface DatasourceDataPanelProps<T = unknown> {
   state: T;
@@ -99,6 +117,8 @@ export interface DatasourceDimensionPanelProps {
   // Visualizations can hint at the role this dimension would play, which
   // affects the default ordering of the query
   suggestedPriority?: DimensionPriority;
+
+  layer?: DimensionLayer;
 }
 
 export type DataType = 'string' | 'number' | 'date' | 'boolean';
@@ -120,14 +140,6 @@ export interface Operation {
 
   // Extra meta-information like cardinality, color
 }
-
-export interface TableSpecColumn {
-  // Column IDs are the keys for internal state in data sources and visualizations
-  columnId: string;
-}
-
-// TableSpec is managed by visualizations
-export type TableSpec = TableSpecColumn[];
 
 // This is a temporary type definition, to be replaced with
 // the official Kibana Datatable type definition.

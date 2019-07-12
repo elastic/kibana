@@ -10,11 +10,13 @@ import { DatasourcePublicAPI } from '../types';
 
 export const toExpression = (state: State, datasource: DatasourcePublicAPI): Ast => {
   const labels: Partial<Record<string, string>> = {};
-  state.y.accessors.forEach(columnId => {
-    const operation = datasource.getOperationForColumnId(columnId);
-    if (operation && operation.label) {
-      labels[columnId] = operation.label;
-    }
+  state.layers.forEach(layer => {
+    layer.accessors.forEach(columnId => {
+      const operation = datasource.getOperationForColumnId(columnId);
+      if (operation && operation.label) {
+        labels[columnId] = operation.label;
+      }
+    });
   });
 
   return buildExpression(state, labels);
@@ -30,7 +32,6 @@ export const buildExpression = (
       type: 'function',
       function: 'lens_xy_chart',
       arguments: {
-        seriesType: [state.seriesType],
         legend: [
           {
             type: 'expression',
@@ -64,28 +65,28 @@ export const buildExpression = (
             ],
           },
         ],
-        y: [
-          {
-            type: 'expression',
-            chain: [
-              {
-                type: 'function',
-                function: 'lens_xy_yConfig',
-                arguments: {
-                  title: [state.y.title],
-                  showGridlines: [state.y.showGridlines],
-                  position: [state.y.position],
-                  accessors: state.y.accessors,
-                  hide: [Boolean(state.y.hide)],
-                  labels: state.y.accessors.map(accessor => {
-                    return columnLabels[accessor] || accessor;
-                  }),
-                },
+        layers: state.layers.map(layer => ({
+          type: 'expression',
+          chain: [
+            {
+              type: 'function',
+              function: 'lens_xy_layer',
+              arguments: {
+                title: [layer.title],
+                showGridlines: [layer.showGridlines],
+                position: [layer.position],
+                hide: [Boolean(layer.hide)],
+
+                splitSeriesAccessors: layer.splitSeriesAccessors,
+                seriesType: [layer.seriesType],
+                labels: layer.accessors.map(accessor => {
+                  return columnLabels[accessor] || accessor;
+                }),
+                accessors: layer.accessors,
               },
-            ],
-          },
-        ],
-        splitSeriesAccessors: state.splitSeriesAccessors,
+            },
+          ],
+        })),
       },
     },
   ],

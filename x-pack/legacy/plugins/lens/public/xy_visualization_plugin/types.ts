@@ -81,41 +81,41 @@ export interface YState extends AxisConfig {
   accessors: string[];
 }
 
-export type YConfig = AxisConfig &
-  YState & {
-    labels: string[];
-  };
+// export type YConfig = AxisConfig &
+//   YState & {
+//     labels: string[];
+//   };
 
-type YConfigResult = YConfig & { type: 'lens_xy_yConfig' };
+// type YConfigResult = YConfig & { type: 'lens_xy_yConfig' };
 
-export const yConfig: ExpressionFunction<'lens_xy_yConfig', null, YConfig, YConfigResult> = {
-  name: 'lens_xy_yConfig',
-  aliases: [],
-  type: 'lens_xy_yConfig',
-  help: `Configure the xy chart's y axis`,
-  context: {
-    types: ['null'],
-  },
-  args: {
-    ...axisConfig,
-    accessors: {
-      types: ['string'],
-      help: 'The columns to display on the y axis.',
-      multi: true,
-    },
-    labels: {
-      types: ['string'],
-      help: '',
-      multi: true,
-    },
-  },
-  fn: function fn(_context: unknown, args: YConfig) {
-    return {
-      type: 'lens_xy_yConfig',
-      ...args,
-    };
-  },
-};
+// export const yConfig: ExpressionFunction<'lens_xy_yConfig', null, YConfig, YConfigResult> = {
+//   name: 'lens_xy_yConfig',
+//   aliases: [],
+//   type: 'lens_xy_yConfig',
+//   help: `Configure the xy chart's y axis`,
+//   context: {
+//     types: ['null'],
+//   },
+//   args: {
+//     ...axisConfig,
+//     accessors: {
+//       types: ['string'],
+//       help: 'The columns to display on the y axis.',
+//       multi: true,
+//     },
+//     labels: {
+//       types: ['string'],
+//       help: '',
+//       multi: true,
+//     },
+//   },
+//   fn: function fn(_context: unknown, args: YConfig) {
+//     return {
+//       type: 'lens_xy_yConfig',
+//       ...args,
+//     };
+//   },
+// };
 
 export interface XConfig extends AxisConfig {
   accessor: string;
@@ -146,6 +146,60 @@ export const xConfig: ExpressionFunction<'lens_xy_xConfig', null, XConfig, XConf
   },
 };
 
+type LayerConfigResult = LayerConfig & { type: 'lens_xy_layer' };
+
+export const layerConfig: ExpressionFunction<
+  'lens_xy_layer',
+  null,
+  LayerConfig,
+  LayerConfigResult
+> = {
+  name: 'lens_xy_layer',
+  aliases: [],
+  type: 'lens_xy_layer',
+  help: `Configure a layer in the xy chart`,
+  context: {
+    types: ['null'],
+  },
+  args: {
+    ...axisConfig,
+    seriesType: {
+      types: ['string'],
+      options: [
+        'bar',
+        'line',
+        'area',
+        'horizontal_bar',
+        'bar_stacked',
+        'area_stacked',
+        'horizontal_bar_stacked',
+      ],
+      help: 'The type of chart to display.',
+    },
+    splitSeriesAccessors: {
+      types: ['string'],
+      help: 'The columns to split by',
+      multi: true,
+    },
+    accessors: {
+      types: ['string'],
+      help: 'The columns to display on the y axis.',
+      multi: true,
+    },
+    labels: {
+      types: ['string'],
+      help: '',
+      multi: true,
+    },
+  },
+  fn: function fn(_context: unknown, args: LayerConfig) {
+    return {
+      type: 'lens_xy_layer',
+      ...args,
+    };
+  },
+};
+
 export type SeriesType =
   | 'bar'
   | 'horizontal_bar'
@@ -155,20 +209,29 @@ export type SeriesType =
   | 'horizontal_bar_stacked'
   | 'area_stacked';
 
-export interface XYArgs {
+type LayerConfig = AxisConfig & {
+  accessors: string[];
+  labels: string[];
   seriesType: SeriesType;
-  legend: LegendConfig;
-  y: YConfig;
-  x: XConfig;
   splitSeriesAccessors: string[];
+};
+
+export interface XYArgs {
+  // seriesType: SeriesType;
+  legend: LegendConfig;
+  // y: YConfig;
+  x: XConfig;
+  // splitSeriesAccessors: string[];
+  layers: LayerConfig[];
 }
 
 export interface XYState {
-  seriesType: SeriesType;
+  // seriesType: SeriesType;
   legend: LegendConfig;
-  y: YState;
+  // y: YState;
   x: XConfig;
-  splitSeriesAccessors: string[];
+  layers: LayerConfig[];
+  // splitSeriesAccessors: string[];
 }
 
 export type State = XYState;

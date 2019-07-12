@@ -47,6 +47,7 @@ export interface BaseIndexPatternColumn {
   // Private
   operationType: OperationType;
   suggestedOrder?: DimensionPriority;
+  layer: 'join' | number;
 }
 
 type Omit<T, K> = Pick<T, Exclude<keyof T, K>>;
@@ -274,6 +275,9 @@ export function getIndexPatternDatasource({
 
     getPublicAPI(state, setState) {
       return {
+        supportsLayers: true,
+        supportsLayerJoin: true,
+
         getTableSpec: () => {
           return state.columnOrder.map(colId => ({ columnId: colId }));
         },
@@ -291,6 +295,7 @@ export function getIndexPatternDatasource({
                 setState={newState => setState(newState)}
                 dataPlugin={data}
                 storage={storage}
+                layer={props.layer || 0}
                 {...props}
               />
             </I18nProvider>,
@@ -325,9 +330,9 @@ export function getIndexPatternDatasource({
       const hasBucket = operations.find(op => op === 'date_histogram' || op === 'terms');
 
       if (hasBucket) {
-        const column = buildColumnForOperationType(0, hasBucket, undefined, field);
+        const column = buildColumnForOperationType(0, hasBucket, undefined, 0, field);
 
-        const countColumn = buildColumnForOperationType(1, 'count');
+        const countColumn = buildColumnForOperationType(1, 'count', undefined, 0);
 
         const suggestion: DatasourceSuggestion<IndexPatternPrivateState> = {
           state: {
@@ -362,9 +367,15 @@ export function getIndexPatternDatasource({
           f => f.name === currentIndexPattern.timeFieldName
         )!;
 
-        const column = buildColumnForOperationType(0, operations[0], undefined, field);
+        const column = buildColumnForOperationType(0, operations[0], undefined, 0, field);
 
-        const dateColumn = buildColumnForOperationType(1, 'date_histogram', undefined, dateField);
+        const dateColumn = buildColumnForOperationType(
+          1,
+          'date_histogram',
+          undefined,
+          0,
+          dateField
+        );
 
         const suggestion: DatasourceSuggestion<IndexPatternPrivateState> = {
           state: {

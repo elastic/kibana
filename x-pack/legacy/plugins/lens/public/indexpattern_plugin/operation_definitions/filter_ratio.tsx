@@ -10,7 +10,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiButton, EuiFormRow } from '@elastic/eui';
 import { Query } from '../../../../../../../src/legacy/core_plugins/data/public/query';
 import { FilterRatioIndexPatternColumn } from '../indexpattern';
-import { DimensionPriority } from '../../types';
+import { DimensionLayer, DimensionPriority } from '../../types';
 import { OperationDefinition } from '../operations';
 import { updateColumnParam } from '../state_helpers';
 
@@ -23,7 +23,8 @@ export const filterRatioOperation: OperationDefinition<FilterRatioIndexPatternCo
   isApplicableForField: () => false,
   buildColumn(
     operationId: string,
-    suggestedOrder?: DimensionPriority
+    suggestedOrder: DimensionPriority | undefined,
+    layer: DimensionLayer
   ): FilterRatioIndexPatternColumn {
     return {
       operationId,
@@ -34,6 +35,7 @@ export const filterRatioOperation: OperationDefinition<FilterRatioIndexPatternCo
       operationType: 'filter_ratio',
       suggestedOrder,
       isBucketed: false,
+      layer,
       params: {
         numerator: { language: 'kuery', query: '' },
         denominator: { language: 'kuery', query: '' },

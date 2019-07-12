@@ -5,7 +5,7 @@
  */
 
 import { getSuggestions } from './xy_suggestions';
-import { TableColumn, VisualizationSuggestion } from '../types';
+import { TableSuggestionColumn, VisualizationSuggestion } from '../types';
 import { State } from './types';
 import { Ast } from '@kbn/interpreter/target/common';
 import { generateId } from '../id_generator';
@@ -13,7 +13,7 @@ import { generateId } from '../id_generator';
 jest.mock('../id_generator');
 
 describe('xy_suggestions', () => {
-  function numCol(columnId: string): TableColumn {
+  function numCol(columnId: string): TableSuggestionColumn {
     return {
       columnId,
       operation: {
@@ -25,7 +25,7 @@ describe('xy_suggestions', () => {
     };
   }
 
-  function strCol(columnId: string): TableColumn {
+  function strCol(columnId: string): TableSuggestionColumn {
     return {
       columnId,
       operation: {
@@ -37,7 +37,7 @@ describe('xy_suggestions', () => {
     };
   }
 
-  function dateCol(columnId: string): TableColumn {
+  function dateCol(columnId: string): TableSuggestionColumn {
     return {
       columnId,
       operation: {

@@ -6,7 +6,12 @@
 
 import { partition } from 'lodash';
 import { Position } from '@elastic/charts';
-import { SuggestionRequest, VisualizationSuggestion, TableColumn, TableSuggestion } from '../types';
+import {
+  SuggestionRequest,
+  VisualizationSuggestion,
+  TableSuggestionColumn,
+  TableSuggestion,
+} from '../types';
 import { State } from './types';
 import { generateId } from '../id_generator';
 import { buildExpression } from './to_expression';
@@ -58,7 +63,7 @@ function getSuggestionForColumns(table: TableSuggestion): VisualizationSuggestio
 // This shuffles columns around so that the left-most column defualts to:
 // date, string, boolean, then number, in that priority. We then use this
 // order to pluck out the x column, and the split / stack column.
-function prioritizeColumns(columns: TableColumn[]) {
+function prioritizeColumns(columns: TableSuggestionColumn[]) {
   return [...columns].sort(
     (a, b) => columnSortOrder[a.operation.dataType] - columnSortOrder[b.operation.dataType]
   );
@@ -66,9 +71,9 @@ function prioritizeColumns(columns: TableColumn[]) {
 
 function getSuggestion(
   datasourceSuggestionId: number,
-  xValue: TableColumn,
-  yValues: TableColumn[],
-  splitBy?: TableColumn
+  xValue: TableSuggestionColumn,
+  yValues: TableSuggestionColumn[],
+  splitBy?: TableSuggestionColumn
 ): VisualizationSuggestion<State> {
   const yTitle = yValues.map(col => col.operation.label).join(' & ');
   const xTitle = xValue.operation.label;
@@ -79,20 +84,24 @@ function getSuggestion(
   const title = `${yTitle} ${preposition} ${xTitle}`;
   const state: State = {
     legend: { isVisible: true, position: Position.Right },
-    seriesType: splitBy && isDate ? 'line' : 'bar',
-    splitSeriesAccessors: splitBy && isDate ? [splitBy.columnId] : [generateId()],
+    // seriesType: splitBy && isDate ? 'line' : 'bar',
     x: {
       accessor: xValue.columnId,
       position: Position.Bottom,
       showGridlines: false,
       title: xTitle,
     },
-    y: {
-      accessors: yValues.map(col => col.columnId),
-      position: Position.Left,
-      showGridlines: false,
-      title: yTitle,
-    },
+    layers: [
+      {
+        seriesType: splitBy && isDate ? 'line' : 'bar',
+        splitSeriesAccessors: splitBy && isDate ? [splitBy.columnId] : [generateId()],
+        accessors: yValues.map(col => col.columnId),
+        labels: [''],
+        position: Position.Left,
+        showGridlines: false,
+        title: yTitle,
+      },
+    ],
   };
 
   const labels: Partial<Record<string, string>> = {};
@@ -115,10 +124,7 @@ function getSuggestion(
           ...state.x,
           hide: true,
         },
-        y: {
-          ...state.y,
-          hide: true,
-        },
+        layers: state.layers.map(layer => ({ ...layer, hide: true })),
         legend: {
           ...state.legend,
           isVisible: false,

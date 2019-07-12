@@ -6,7 +6,7 @@
 
 import { Storage } from 'ui/storage';
 import { DataSetup } from '../../../../../../src/legacy/core_plugins/data/public';
-import { DimensionPriority } from '../types';
+import { DimensionLayer, DimensionPriority } from '../types';
 import {
   IndexPatternColumn,
   IndexPatternField,
@@ -73,7 +73,8 @@ export interface OperationDefinition<C extends BaseIndexPatternColumn> {
   isApplicableForField: (field: IndexPatternField) => boolean;
   buildColumn: (
     operationId: string,
-    suggestedOrder?: DimensionPriority,
+    suggestedOrder: DimensionPriority | undefined,
+    layer: DimensionLayer,
     field?: IndexPatternField
   ) => C;
   paramEditor?: React.ComponentType<ParamEditorProps>;
@@ -106,16 +107,22 @@ export function getOperationTypesForField(field: IndexPatternField): OperationTy
 export function buildColumnForOperationType<T extends OperationType>(
   index: number,
   op: T,
-  suggestedOrder?: DimensionPriority,
+  suggestedOrder: DimensionPriority | undefined,
+  layer: DimensionLayer,
   field?: IndexPatternField
 ): IndexPatternColumn {
-  return operationDefinitionMap[op].buildColumn(`${index}${op}`, suggestedOrder, field);
+  return operationDefinitionMap[op].buildColumn(`${index}${op}`, suggestedOrder, layer, field);
 }
 
-export function getPotentialColumns(
-  state: IndexPatternPrivateState,
-  suggestedOrder?: DimensionPriority
-): IndexPatternColumn[] {
+export function getPotentialColumns({
+  state,
+  suggestedOrder,
+  layer,
+}: {
+  state: IndexPatternPrivateState;
+  suggestedOrder?: DimensionPriority;
+  layer: DimensionLayer;
+}): IndexPatternColumn[] {
   const fields = state.indexPatterns[state.currentIndexPatternId].fields;
 
   const columns: IndexPatternColumn[] = fields
@@ -123,14 +130,14 @@ export function getPotentialColumns(
       const validOperations = getOperationTypesForField(field);
 
       return validOperations.map(op =>
-        buildColumnForOperationType(index, op, suggestedOrder, field)
+        buildColumnForOperationType(index, op, suggestedOrder, layer, field)
       );
     })
     .reduce((prev, current) => prev.concat(current));
 
   operationDefinitions.forEach(operation => {
     if (operation.isApplicableWithoutField) {
-      columns.push(operation.buildColumn(operation.type, suggestedOrder));
+      columns.push(operation.buildColumn(operation.type, suggestedOrder, layer));
     }
   });
 

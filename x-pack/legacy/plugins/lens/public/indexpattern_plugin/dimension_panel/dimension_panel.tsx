@@ -10,7 +10,7 @@ import { EuiFlexItem, EuiFlexGroup, EuiButtonIcon } from '@elastic/eui';
 import { Storage } from 'ui/storage';
 import { i18n } from '@kbn/i18n';
 import { DataSetup } from '../../../../../../../src/legacy/core_plugins/data/public';
-import { DatasourceDimensionPanelProps } from '../../types';
+import { DatasourceDimensionPanelProps, DimensionLayer } from '../../types';
 import {
   IndexPatternColumn,
   IndexPatternPrivateState,
@@ -29,10 +29,11 @@ export type IndexPatternDimensionPanelProps = DatasourceDimensionPanelProps & {
   dragDropContext: DragContextState;
   dataPlugin: DataSetup;
   storage: Storage;
+  layer: DimensionLayer;
 };
 
 export function IndexPatternDimensionPanel(props: IndexPatternDimensionPanelProps) {
-  const columns = getPotentialColumns(props.state, props.suggestedPriority);
+  const columns = getPotentialColumns(props);
 
   const filteredColumns = columns.filter(col => {
     return props.filterOperations(columnToOperation(col));
