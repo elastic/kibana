@@ -18,14 +18,46 @@ import { PropertiesManager } from './properties_manager';
 
 interface Props {
   form: Form;
-  onRemove: () => void;
+  onRemove?: () => void;
   fieldPathPrefix?: string;
+  isDeletable?: boolean;
+  isAnonymous?: boolean;
 }
 
-const hasNestedProperties = (selectedDatatype: string) =>
+const hasNestedProperties = (selectedDatatype: DataType) =>
   selectedDatatype === 'object' || selectedDatatype === 'nested';
 
-export const PropertyEditor = ({ onRemove, fieldPathPrefix = '', form }: Props) => {
+export const PropertyEditor = ({
+  form,
+  fieldPathPrefix = '',
+  onRemove = () => undefined,
+  isAnonymous = false,
+  isDeletable = true,
+}: Props) => {
+  const renderNestedProperties = (selectedType: DataType) => {
+    if (selectedType === 'array') {
+      return (
+        <ul className="tree">
+          <li>
+            <PropertyEditor
+              form={form}
+              fieldPathPrefix={`${fieldPathPrefix}arrayItem.`}
+              isDeletable={false}
+              isAnonymous
+            />
+          </li>
+        </ul>
+      );
+    }
+
+    return hasNestedProperties(selectedType) ? (
+      <Fragment>
+        <EuiSpacer size="l" />
+        <PropertiesManager form={form} path={`${fieldPathPrefix}properties`} />
+      </Fragment>
+    ) : null;
+  };
+
   return (
     <FormDataProvider form={form} pathsToWatch={`${fieldPathPrefix}type`}>
       {formData => {
@@ -34,16 +66,18 @@ export const PropertyEditor = ({ onRemove, fieldPathPrefix = '', form }: Props) 
 
         return (
           <Fragment>
-            <EuiFlexGroup justifyContent="spaceBetween">
+            <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
               {/* Field name */}
-              <EuiFlexItem grow={false}>
-                <UseField
-                  path={`${fieldPathPrefix}name`}
-                  form={form}
-                  config={parametersDefinition.name.fieldConfig}
-                  component={Field}
-                />
-              </EuiFlexItem>
+              {isAnonymous !== true && (
+                <EuiFlexItem grow={false}>
+                  <UseField
+                    path={`${fieldPathPrefix}name`}
+                    form={form}
+                    config={parametersDefinition.name.fieldConfig}
+                    component={Field}
+                  />
+                </EuiFlexItem>
+              )}
 
               {/* Field type */}
               <EuiFlexItem grow={false}>
@@ -64,7 +98,8 @@ export const PropertyEditor = ({ onRemove, fieldPathPrefix = '', form }: Props) 
               </EuiFlexItem>
 
               {/* Field configuration (if any) */}
-              {typeDefinition.configuration &&
+              {typeDefinition &&
+                typeDefinition.configuration &&
                 typeDefinition.configuration.map((parameter, i) => (
                   <EuiFlexItem key={i} grow={false}>
                     <UseField
@@ -81,31 +116,32 @@ export const PropertyEditor = ({ onRemove, fieldPathPrefix = '', form }: Props) 
               <EuiFlexItem />
 
               {/* Delete field button */}
-              <EuiFlexItem grow={false}>
-                <EuiButtonIcon
-                  color="danger"
-                  iconType="cross"
-                  onClick={onRemove}
-                  aria-label="Remove property"
-                />
-              </EuiFlexItem>
+              {isDeletable && (
+                <EuiFlexItem grow={false}>
+                  <EuiButtonIcon
+                    color="danger"
+                    iconType="trash"
+                    onClick={onRemove}
+                    aria-label="Remove property"
+                  />
+                </EuiFlexItem>
+              )}
             </EuiFlexGroup>
 
-            <EuiSpacer size="s" />
-
-            {/* Basic parameters for the selected type */}
-            <PropertyBasicParameters
-              form={form}
-              typeDefinition={typeDefinition}
-              fieldPathPrefix={fieldPathPrefix}
-            />
-
-            {hasNestedProperties(selectedDatatype) && (
+            {typeDefinition && typeDefinition.basicParameters && (
               <Fragment>
-                <EuiSpacer size="l" />
-                <PropertiesManager form={form} path={`${fieldPathPrefix}properties`} />
+                <EuiSpacer size="s" />
+
+                {/* Basic parameters for the selected type */}
+                <PropertyBasicParameters
+                  form={form}
+                  typeDefinition={typeDefinition}
+                  fieldPathPrefix={fieldPathPrefix}
+                />
               </Fragment>
             )}
+
+            {renderNestedProperties(selectedDatatype)}
 
             <EuiSpacer size="l" />
           </Fragment>

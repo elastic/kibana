@@ -78,7 +78,7 @@ export const MappingsEditor = ({
       <EuiTitle size="s">
         <h4>Document fields</h4>
       </EuiTitle>
-      <EuiSpacer size="s" />
+      <EuiSpacer size="m" />
       <PropertiesManager form={form} />
     </div>
   );
