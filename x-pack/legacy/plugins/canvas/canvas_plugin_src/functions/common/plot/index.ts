@@ -41,21 +41,11 @@ export function plot(): ExpressionFunction<'plot', PointSeries, Arguments, Rende
       types: ['pointseries'],
     },
     args: {
-      seriesStyle: {
-        multi: true,
-        types: ['seriesStyle'],
-        help: argHelp.seriesStyle,
-      },
       defaultStyle: {
         multi: false,
         types: ['seriesStyle'],
         help: argHelp.defaultStyle,
         default: '{seriesStyle points=5}',
-      },
-      palette: {
-        types: ['palette'],
-        help: argHelp.palette,
-        default: '{palette}',
       },
       font: {
         types: ['style'],
@@ -68,14 +58,24 @@ export function plot(): ExpressionFunction<'plot', PointSeries, Arguments, Rende
         default: 'ne',
         options: Object.values(Legend).concat(false),
       },
-      yaxis: {
-        types: ['boolean', 'axisConfig'],
-        help: argHelp.yaxis,
-        default: true,
+      palette: {
+        types: ['palette'],
+        help: argHelp.palette,
+        default: '{palette}',
+      },
+      seriesStyle: {
+        multi: true,
+        types: ['seriesStyle'],
+        help: argHelp.seriesStyle,
       },
       xaxis: {
         types: ['boolean', 'axisConfig'],
         help: argHelp.xaxis,
+        default: true,
+      },
+      yaxis: {
+        types: ['boolean', 'axisConfig'],
+        help: argHelp.yaxis,
         default: true,
       },
     },
