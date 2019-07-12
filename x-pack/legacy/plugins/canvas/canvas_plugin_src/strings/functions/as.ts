@@ -7,15 +7,20 @@
 import { i18n } from '@kbn/i18n';
 import { asFn } from '../../functions/common/as';
 import { FunctionHelp } from '.';
-import { FunctionFactory } from '../../functions/types';
+import { FunctionFactory } from '../../../types';
+import { DATATABLE } from '../constants';
 
 export const help: FunctionHelp<FunctionFactory<typeof asFn>> = {
   help: i18n.translate('xpack.canvas.functions.asHelpText', {
-    defaultMessage: 'One or more conditions to check',
+    defaultMessage: 'Creates a {DATATABLE} with a single value. See also {getCellFn}.',
+    values: {
+      DATATABLE,
+      getCellFn: '`getCell`',
+    },
   }),
   args: {
     name: i18n.translate('xpack.canvas.functions.as.args.nameHelpText', {
-      defaultMessage: 'A name to give the column',
+      defaultMessage: 'A name to give the column.',
     }),
   },
 };
