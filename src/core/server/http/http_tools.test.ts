@@ -21,11 +21,12 @@ import { Request, ResponseToolkit } from 'hapi';
 import Joi from 'joi';
 import supertest from 'supertest';
 
+import { logger } from '../logging/__mocks__';
+
 import { ByteSizeValue } from '@kbn/config-schema';
 import { HttpConfig } from './http_config';
 import { HttpServer } from './http_server';
 import { defaultValidationErrorHandler, HapiValidationError } from './http_tools';
-import { logger } from '../logging/__mocks__';
 import { Router } from './router';
 
 const emptyOutput = {
@@ -77,13 +78,12 @@ describe('timeouts', () => {
     router.get({ path: '/b', validate: false }, async (req, res) => res.ok({}));
     server.registerRouter(router);
 
-
-      const config = {
-        socketTimeout: 1000,
-        host: '127.0.0.1',
-        maxPayload: new ByteSizeValue(1024),
-        ssl: {},
-      } as HttpConfig;
+    const config = {
+      socketTimeout: 1000,
+      host: '127.0.0.1',
+      maxPayload: new ByteSizeValue(1024),
+      ssl: {},
+    } as HttpConfig;
 
     const { server: innerServer } = await server.start(config);
     await supertest(innerServer.listener)
@@ -96,6 +96,6 @@ describe('timeouts', () => {
 
   afterAll(async () => {
     await server.stop();
-    logger.mockClear()
+    logger.mockClear();
   });
 });
