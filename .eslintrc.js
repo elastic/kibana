@@ -159,8 +159,10 @@ module.exports = {
               {
                 from: ['src/legacy/ui/**/*', 'ui/**/*'],
                 target: [
-                  'src/legacy/core_plugins/**/public/shim/**/*',
-                  'src/legacy/core_plugins/**/server/shim/**/*',
+                  'src/legacy/core_plugins/**/public/np_ready/**/*',
+                  'src/legacy/core_plugins/**/server/np_ready/**/*',
+                  'x-pack/legacy/plugins/**/public/np_ready/**/*',
+                  'x-pack/legacy/plugins/**/server/np_ready/**/*',
                 ],
                 allowSameFolder: true,
                 errorMessage:

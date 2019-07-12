@@ -98,8 +98,12 @@ module.exports = {
 
     function checkForRestrictedImportPath(importPath, node) {
       let absoluteImportPath;
-      if (importPath.indexOf('ui/') === 0) {
-        absoluteImportPath = importPath;
+      const [one, two, ...rest] = importPath.split('/');
+      if (one === 'ui') {
+        absoluteImportPath = path.join(
+          basePath,
+          `src/legacy/${one}/public/${two}${rest.length ? `/${rest.join('/')}` : ''}`
+        );
       } else {
         absoluteImportPath = resolve(importPath, context);
         if (!absoluteImportPath) return;
