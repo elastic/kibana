@@ -29,7 +29,7 @@ const { generateStorybookEntry } = require('./lib/storybook_entry');
 const { REPO_ROOT } = require('./lib/constants');
 const { buildDll } = require('./lib/dll');
 
-exports.runStorybookCli = ({ name, exampleGlobs }) => {
+exports.runStorybookCli = ({ name, storyGlobs }) => {
   run(
     async ({ flags, log, procRunner }) => {
       await buildDll({
@@ -47,7 +47,7 @@ exports.runStorybookCli = ({ name, exampleGlobs }) => {
       });
 
       const subj = new Rx.ReplaySubject(1);
-      generateStorybookEntry({ log, exampleGlobs }).subscribe(subj);
+      generateStorybookEntry({ log, storyGlobs }).subscribe(subj);
 
       await subj.pipe(first()).toPromise();
 

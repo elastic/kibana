@@ -34,8 +34,8 @@ const writeFileAsync = promisify(Fs.writeFile);
 const { REPO_ROOT, STORY_ENTRY_PATH } = require('./constants');
 const STORE_ENTRY_DIR = dirname(STORY_ENTRY_PATH);
 
-exports.generateStorybookEntry = ({ log, exampleGlobs }) => {
-  const globs = ['built_assets/css/**/*.light.css', ...exampleGlobs];
+exports.generateStorybookEntry = ({ log, storyGlobs }) => {
+  const globs = ['built_assets/css/**/*.light.css', ...storyGlobs];
   log.info('Storybook globs:', globs);
   const norm = p => normalize(relative(STORE_ENTRY_DIR, p));
 

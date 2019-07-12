@@ -7,5 +7,5 @@
 // eslint-disable-next-line
 require('@kbn/storybook').runStorybookCli({
   name: 'siem',
-  exampleGlobs: ['x-pack/legacy/plugins/siem/public/components/**/*.examples.tsx'],
+  storyGlobs: ['x-pack/legacy/plugins/siem/public/components/**/*.examples.tsx'],
 });

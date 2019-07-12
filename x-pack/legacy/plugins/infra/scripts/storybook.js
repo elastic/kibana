@@ -7,5 +7,5 @@
 // eslint-disable-next-line
 require('@kbn/storybook').runStorybookCli({
   name: 'infra',
-  exampleGlobs: ['x-pack/legacy/plugins/infra/public/components/**/*.examples.tsx'],
+  storyGlobs: ['x-pack/legacy/plugins/infra/public/components/**/*.examples.tsx'],
 });
