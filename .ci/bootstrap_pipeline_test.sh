@@ -11,11 +11,3 @@ bootstrapJunkins () {
 }
 bootstrapJunkins
 
-# startJunkins () {
-#   ./app/target/appassembler/bin/jenkinsfile-runner -w ${TEMP_JUNKINS_BINARY} \
-#   -p ${JENKINS_HOME}/plugins -f ~/foo/ -a "param1=Hello&param2=value2"
-# }
-# startJunkins
-
-# ${RESOURCES_DIR}/jenkinsfile-runner/app/target/appassembler/bin/jenkinsfile-runner -w ${TEMP_JUNKINS_BINARY} -p ${TEMP_JUNKINS_BINARY}_home/plugins -f ~/foo/ -a "param1=Hello&param2=value2"
-# ./app/target/appassembler/bin/jenkinsfile-runner -w ${TEMP_JUNKINS_BINARY} -p ${JENKINS_HOME}/plugins -f ~/foo/ -a "param1=Hello&param2=value2"
