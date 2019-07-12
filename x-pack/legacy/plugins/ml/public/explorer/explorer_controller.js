@@ -71,6 +71,7 @@ module.controller('MlExplorerController', function (
   $injector.get('mlSelectSeverityService');
 
   const mlJobSelectService = $injector.get('mlJobSelectService');
+  const mlTimefilterRefreshService = $injector.get('mlTimefilterRefreshService');
 
   // $scope should only contain what's actually still necessary for the angular part.
   // For the moment that's the job selector and the (hidden) filter bar.
@@ -203,6 +204,12 @@ module.controller('MlExplorerController', function (
     }
   });
 
+  const timefilterRefreshServiceSub = mlTimefilterRefreshService.subscribe(() => {
+    if ($scope.jobSelectionUpdateInProgress === false) {
+      explorer$.next({ action: EXPLORER_ACTION.RELOAD });
+    }
+  });
+
   // Refresh all the data when the time range is altered.
   $scope.$listenAndDigestAsync(timefilter, 'fetch', () => {
     if ($scope.jobSelectionUpdateInProgress === false) {
@@ -287,6 +294,7 @@ module.controller('MlExplorerController', function (
   $scope.$on('$destroy', () => {
     explorerSubscriber.unsubscribe();
     jobSelectServiceSub.unsubscribe();
+    timefilterRefreshServiceSub.unsubscribe();
     refreshWatcher.cancel();
     $(window).off('resize', jqueryRedrawOnResize);
     // Cancel listening for updates to the global nav state.
