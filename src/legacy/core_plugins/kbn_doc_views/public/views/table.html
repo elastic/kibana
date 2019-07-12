@@ -82,7 +82,7 @@
       </td>
       <td>
         <button ng-if="enableDocValueCollapse(field)" aria-expanded="{{!!fieldRowOpen[field]}}" class="discover-table-open-button" ng-click="toggleViewer(field)" aria-label="Toggle field details" tooltip="Toggle field details">
-          <span class="kuiIcon" ng-class="{ 'fa-caret-down': fieldRowOpen[field], 'fa-caret-right': !fieldRowOpen[field] }"></span>
+            <span class="kuiIcon" ng-class="{ 'fa-caret-down': fieldRowOpen[field], 'fa-caret-right': !fieldRowOpen[field] }"></span>
         </button>
         <i ng-if="!mapping[field] && field[0] === '_'"
           tooltip-placement="top"
@@ -94,12 +94,8 @@
         <i ng-if="!mapping[field] && field[0] !== '_' && !showArrayInObjectsWarning(doc, field)"
           tooltip-placement="top"
           tooltip="{{ ::'kbnDocViews.table.noCachedMappingForThisFieldTooltip' | i18n: { defaultMessage: 'No cached mapping for this field. Refresh field list from the Management > Index Patterns page' } }}"
-          class="fa fa-warning text-color-warning kbnDocViewer__noMapping"></i>
-        <i ng-if="showArrayInObjectsWarning(doc, field)"
-          tooltip-placement="top"
-          tooltip="{{ ::'kbnDocViews.table.objectsInArraysAreNotWellSupportedTooltip' | i18n: { defaultMessage: 'Objects in arrays are not well supported.' } }}"
-          class="fa fa-warning text-color-warning kbnDocViewer__objectArray"></i>
-        <div class="kbnDocViewer__value" ng-class="{ 'truncate-by-height': enableDocValueCollapse(field) && !fieldRowOpen[field] }" ng-bind-html="typeof(formatted[field]) === 'undefined' ? hit[field] : formatted[field] | trustAsHtml"></div>
+          class="fa fa-warning text-color-warning kbnDocViewer__noMapping"></i>         
+        <div class="kbnDocViewer__value" style="vertical-align: top" ng-class="{ 'truncate-by-height': enableDocValueCollapse(field) && !fieldRowOpen[field] }" ng-bind-html="typeof(formatted[field]) === 'undefined' ? hit[field] : formatted[field] | trustAsHtml"></div>
       </td>
     </tr>
   </tbody>
