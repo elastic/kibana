@@ -22,8 +22,8 @@ const mockLogger = {
   log: jest.fn(),
 };
 
-const createService = async () => {
-  const spacesService = new SpacesService(mockLogger, '/base-path');
+const createService = async (serverBasePath: string = '') => {
+  const spacesService = new SpacesService(mockLogger, serverBasePath);
 
   const httpSetup = httpServiceMock.createSetupContract();
   httpSetup.basePath.get = jest.fn().mockImplementation((request: KibanaRequest) => {
@@ -69,6 +69,41 @@ describe('SpacesService', () => {
       } as KibanaRequest;
 
       expect(spacesServiceSetup.getSpaceId(request)).toEqual('foo');
+    });
+  });
+
+  describe('#getBasePath', () => {
+    it(`throws when a space id is not provided`, async () => {
+      const spacesServiceSetup = await createService();
+
+      // @ts-ignore TS knows this isn't right
+      expect(() => spacesServiceSetup.getBasePath()).toThrowErrorMatchingInlineSnapshot(
+        `"spaceId is required to retrieve base path"`
+      );
+
+      expect(() => spacesServiceSetup.getBasePath('')).toThrowErrorMatchingInlineSnapshot(
+        `"spaceId is required to retrieve base path"`
+      );
+    });
+
+    it('returns / for the default space and no server base path', async () => {
+      const spacesServiceSetup = await createService();
+      expect(spacesServiceSetup.getBasePath(DEFAULT_SPACE_ID)).toEqual('/');
+    });
+
+    it('returns /sbp for the default space and the "/sbp" server base path', async () => {
+      const spacesServiceSetup = await createService('/sbp');
+      expect(spacesServiceSetup.getBasePath(DEFAULT_SPACE_ID)).toEqual('/sbp');
+    });
+
+    it('returns /s/foo for the foo space and no server base path', async () => {
+      const spacesServiceSetup = await createService();
+      expect(spacesServiceSetup.getBasePath('foo')).toEqual('/s/foo');
+    });
+
+    it('returns /sbp/s/foo for the foo space and the "/sbp" server base path', async () => {
+      const spacesServiceSetup = await createService('/sbp');
+      expect(spacesServiceSetup.getBasePath('foo')).toEqual('/sbp/s/foo');
     });
   });
 

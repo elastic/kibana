@@ -29,6 +29,8 @@ export interface SpacesServiceSetup {
 
   getSpaceId(request: RequestFacade): string;
 
+  getBasePath(spaceId: string): string;
+
   isInDefaultSpace(request: RequestFacade): boolean;
 
   spaceIdToNamespace(spaceId: string): string | undefined;
@@ -73,6 +75,15 @@ export class SpacesService {
 
     return {
       getSpaceId,
+      getBasePath: (spaceId: string) => {
+        if (!spaceId) {
+          throw new TypeError(`spaceId is required to retrieve base path`);
+        }
+        if (spaceId === DEFAULT_SPACE_ID) {
+          return this.serverBasePath || '/';
+        }
+        return `${this.serverBasePath}/s/${spaceId}`;
+      },
       isInDefaultSpace: (request: RequestFacade) => {
         const spaceId = getSpaceId(request);
 
