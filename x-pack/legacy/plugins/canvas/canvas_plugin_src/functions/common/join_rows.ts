@@ -40,21 +40,21 @@ export function joinRows(): ExpressionFunction<'joinRows', Datatable, Arguments,
         required: true,
         help: argHelp.column,
       },
-      separator: {
-        aliases: ['sep'],
-        types: ['string'],
-        default: ',',
-        help: argHelp.separator,
+      distinct: {
+        types: ['boolean'],
+        help: argHelp.distinct,
+        default: true,
       },
       quote: {
         types: ['string'],
-        default: `"'"`,
         help: argHelp.quote,
+        default: `"'"`,
       },
-      distinct: {
-        types: ['boolean'],
-        default: true,
-        help: argHelp.distinct,
+      separator: {
+        aliases: ['sep', 'delimiter'],
+        types: ['string'],
+        help: argHelp.separator,
+        default: ',',
       },
     },
     fn: (context, { column, separator, quote, distinct }) => {

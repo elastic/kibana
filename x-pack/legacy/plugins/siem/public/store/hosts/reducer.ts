@@ -7,7 +7,7 @@
 import { reducerWithInitialState } from 'typescript-fsa-reducers';
 
 import { Direction, HostsFields } from '../../graphql/types';
-import { DEFAULT_TABLE_LIMIT } from '../constants';
+import { DEFAULT_TABLE_ACTIVE_PAGE, DEFAULT_TABLE_LIMIT } from '../constants';
 
 import {
   applyHostsFilterQuery,
@@ -17,6 +17,8 @@ import {
   updateHostsLimit,
   updateHostsSort,
   updateUncommonProcessesLimit,
+  updateTableActivePage,
+  updateTableLimit,
 } from './actions';
 import { HostsModel } from './model';
 
@@ -25,7 +27,7 @@ export type HostsState = HostsModel;
 export const initialHostsState: HostsState = {
   page: {
     queries: {
-      authentications: { limit: DEFAULT_TABLE_LIMIT },
+      authentications: { limit: DEFAULT_TABLE_LIMIT, activePage: DEFAULT_TABLE_ACTIVE_PAGE },
       hosts: {
         limit: DEFAULT_TABLE_LIMIT,
         direction: Direction.desc,
@@ -39,7 +41,7 @@ export const initialHostsState: HostsState = {
   },
   details: {
     queries: {
-      authentications: { limit: DEFAULT_TABLE_LIMIT },
+      authentications: { limit: DEFAULT_TABLE_LIMIT, activePage: DEFAULT_TABLE_ACTIVE_PAGE },
       hosts: {
         limit: DEFAULT_TABLE_LIMIT,
         direction: Direction.desc,
@@ -54,6 +56,32 @@ export const initialHostsState: HostsState = {
 };
 
 export const hostsReducer = reducerWithInitialState(initialHostsState)
+  .case(updateTableActivePage, (state, { activePage, hostsType, tableType }) => ({
+    ...state,
+    [hostsType]: {
+      ...state[hostsType],
+      queries: {
+        ...state[hostsType].queries,
+        [tableType]: {
+          ...state[hostsType].queries[tableType],
+          activePage,
+        },
+      },
+    },
+  }))
+  .case(updateTableLimit, (state, { limit, hostsType, tableType }) => ({
+    ...state,
+    [hostsType]: {
+      ...state[hostsType],
+      queries: {
+        ...state[hostsType].queries,
+        [tableType]: {
+          ...state[hostsType].queries[tableType],
+          limit,
+        },
+      },
+    },
+  }))
   .case(updateAuthenticationsLimit, (state, { limit, hostsType }) => ({
     ...state,
     [hostsType]: {
