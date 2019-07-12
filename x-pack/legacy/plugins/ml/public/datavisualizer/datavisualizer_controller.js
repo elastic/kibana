@@ -52,11 +52,17 @@ import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml');
 
 module
-  .controller('MlDataVisualizerViewFields', function ($injector, $scope, $timeout, $window, Private, AppState, config) {
+  .controller('MlDataVisualizerViewFields', function (
+    $scope,
+    $timeout,
+    $window,
+    Private,
+    AppState,
+    config,
+    mlTimefilterRefreshService) {
 
     timefilter.enableTimeRangeSelector();
     timefilter.enableAutoRefreshSelector();
-    const mlTimefilterRefreshService = $injector.get('mlTimefilterRefreshService');
 
     const createSearchItems = Private(SearchItemsProvider);
     const {
@@ -152,9 +158,7 @@ module
     }
 
     // Refresh the data when the time range is altered.
-    $scope.$listenAndDigestAsync(timefilter, 'fetch', function () {
-      refresh();
-    });
+    $scope.$listenAndDigestAsync(timefilter, 'fetch', refresh);
 
     const timefilterRefreshServiceSub = mlTimefilterRefreshService.subscribe(refresh);
 

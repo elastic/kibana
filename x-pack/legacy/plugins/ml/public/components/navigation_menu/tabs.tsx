@@ -15,10 +15,6 @@ interface Tab {
   disabled: boolean;
 }
 
-interface TestSubjMap {
-  [key: string]: string;
-}
-
 interface Props {
   disableLinks: boolean;
   tabId: string;
@@ -71,14 +67,14 @@ function getTabs(disableLinks: boolean): Tab[] {
   ];
 }
 
-const TAB_TEST_SUBJ_MAP: TestSubjMap = {
-  jobs: 'mlTabJobManagement',
-  explorer: 'mlTabAnomalyExplorer',
-  timeseriesexplorer: 'mlTabSingleMetricViewer',
-  data_frames: 'mlTabDataFrames',
-  datavisualizer: 'mlTabDataVisualizer',
-  settings: 'mlTabSettings',
-};
+enum TAB_TEST_SUBJ_MAP {
+  jobs = 'mlTabJobManagement',
+  explorer = 'mlTabAnomalyExplorer',
+  timeseriesexplorer = 'mlTabSingleMetricViewer',
+  data_frames = 'mlTabDataFrames', // eslint-disable-line
+  datavisualizer = 'mlTabDataVisualizer',
+  settings = 'mlTabSettings',
+}
 
 function moveToSelectedTab(selectedTabId: string) {
   window.location.href = `${chrome.getBasePath()}/app/ml#/${selectedTabId}`;
@@ -95,18 +91,21 @@ export const Tabs: FC<Props> = ({ tabId, disableLinks }) => {
 
   return (
     <EuiTabs>
-      {tabs.map((tab: Tab) => (
-        <EuiTab
-          className="mlNavigationMenu__tab"
-          onClick={() => onSelectedTabChanged(tab.id)}
-          isSelected={tab.id === selectedTabId}
-          disabled={tab.disabled}
-          key={`${tab.id}-key`}
-          data-test-subj={TAB_TEST_SUBJ_MAP[tab.id]}
-        >
-          {tab.name}
-        </EuiTab>
-      ))}
+      {tabs.map((tab: Tab) => {
+        const id = tab.id;
+        return (
+          <EuiTab
+            className="mlNavigationMenu__tab"
+            onClick={() => onSelectedTabChanged(id)}
+            isSelected={tab.id === selectedTabId}
+            disabled={tab.disabled}
+            key={`${tab.id}-key`}
+            data-test-subj={TAB_TEST_SUBJ_MAP[id as keyof typeof TAB_TEST_SUBJ_MAP]}
+          >
+            {tab.name}
+          </EuiTab>
+        );
+      })}
     </EuiTabs>
   );
 };
