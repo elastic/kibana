@@ -73,23 +73,23 @@ export class LicensingService
       const features = (response && response.features) || {};
       const licenseInfoChanged = this.hasLicenseInfoChanged(newLicense);
 
-      if (licenseInfoChanged) {
-        const licenseInfo = [
-          `mode: ${newLicense.mode}`,
-          `status: ${newLicense.status}`,
-          'expiry_date_in_millis' in newLicense &&
-            `expiry date: ${moment(newLicense.expiry_date_in_millis, 'x').format()}`,
-        ]
-          .filter(Boolean)
-          .join(' | ');
-
-        this.logger.info(
-          `Imported ${this.license ? 'changed ' : ''}license information` +
-            ` from Elasticsearch for the [${clusterSource}] cluster: ${licenseInfo}`
-        );
-
-        return { license: false, error: null, features };
+      if (!licenseInfoChanged) {
+        return { license: false, error: null, features: null };
       }
+
+      const licenseInfo = [
+        `mode: ${newLicense.mode}`,
+        `status: ${newLicense.status}`,
+        'expiry_date_in_millis' in newLicense &&
+          `expiry date: ${moment(newLicense.expiry_date_in_millis, 'x').format()}`,
+      ]
+        .filter(Boolean)
+        .join(' | ');
+
+      this.logger.info(
+        `Imported ${this.license ? 'changed ' : ''}license information` +
+          ` from Elasticsearch for the [${clusterSource}] cluster: ${licenseInfo}`
+      );
 
       return { license: newLicense, error: null, features };
     } catch (err) {
