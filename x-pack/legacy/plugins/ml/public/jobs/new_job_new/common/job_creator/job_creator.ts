@@ -285,7 +285,7 @@ export class JobCreator {
 
   private _setCustomSetting(setting: string, value: string | object | null) {
     if (value === null) {
-      // if null is passed in, delete the created_by property
+      // if null is passed in, delete the custom setting
       if (
         this._job_config.custom_settings !== undefined &&
         this._job_config.custom_settings[setting] !== undefined
