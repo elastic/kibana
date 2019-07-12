@@ -21,6 +21,7 @@ export const DatetimeInput = compose<ComponentProps, Props>(
     moment ? moment.format('YYYY-MM-DD HH:mm:ss') : ''
   ),
   lifecycle<Props & ComponentProps, {}>({
+    // TODO: Refactor to no longer use componentWillReceiveProps since it is being deprecated
     componentWillReceiveProps({ moment, setStrValue, setValid }) {
       if (!moment) return;
 

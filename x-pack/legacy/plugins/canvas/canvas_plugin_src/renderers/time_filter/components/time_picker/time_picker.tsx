@@ -23,9 +23,12 @@ export interface Props {
 
 export interface State {
   range: {
+    /** Start date string of selected date range */
     from: string;
+    /** End date string of selected date range */
     to: string;
   };
+  /** Boolean denoting whether selected date range has been applied */
   isDirty: boolean;
 }
 
@@ -41,6 +44,7 @@ export class TimePicker extends Component<Props, State> {
     isDirty: false,
   };
 
+  // TODO: Refactor to no longer use componentWillReceiveProps since it is being deprecated
   componentWillReceiveProps({ from, to }: Props) {
     if (from !== this.props.from || to !== this.props.to) {
       this.setState({
@@ -50,7 +54,7 @@ export class TimePicker extends Component<Props, State> {
     }
   }
 
-  absoluteSelect = (from?: moment.Moment, to?: moment.Moment) => {
+  _absoluteSelect = (from?: moment.Moment, to?: moment.Moment) => {
     if (from && to) {
       this.setState({
         range: { from: moment(from).toISOString(), to: moment(to).toISOString() },
@@ -69,7 +73,7 @@ export class TimePicker extends Component<Props, State> {
         <DatetimeRangeAbsolute
           from={dateMath.parse(from)}
           to={dateMath.parse(to)}
-          onSelect={this.absoluteSelect}
+          onSelect={this._absoluteSelect}
         />
         <DatetimeQuickList from={from} to={to} onSelect={onSelect}>
           <EuiButton

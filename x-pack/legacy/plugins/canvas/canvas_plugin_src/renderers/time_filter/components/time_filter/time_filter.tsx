@@ -12,8 +12,11 @@ import { TimePicker } from '../time_picker';
 import { TimePickerPopover } from '../time_picker_popover';
 
 export interface FilterMeta {
+  /** Name of datetime column to be filtered  */
   column: string;
+  /** Start date string of filtered date range */
   from: string;
+  /** End date string of filtered date range */
   to: string;
 }
 

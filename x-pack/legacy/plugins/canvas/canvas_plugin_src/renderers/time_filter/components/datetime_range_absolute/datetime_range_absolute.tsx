@@ -16,6 +16,7 @@ interface Props {
   /** Optional initial end date moment */
   to?: Moment;
 
+  /** Function invoked when a date is selected from the datetime calendar */
   onSelect: (from?: Moment, to?: Moment) => void;
 }
 
