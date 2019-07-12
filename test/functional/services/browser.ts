@@ -18,64 +18,20 @@
  */
 
 import { cloneDeep } from 'lodash';
-import { IKey, logging } from 'selenium-webdriver';
+import { IKey } from 'selenium-webdriver';
 import request from 'request';
-import { takeUntil, mergeMap } from 'rxjs/operators';
 
 import { modifyUrl } from '../../../src/core/utils';
 import { WebElementWrapper } from './lib/web_element_wrapper';
 import { FtrProviderContext } from '../ftr_provider_context';
 import { Browsers } from './remote/browsers';
-import { pollForLogEntry$ } from './remote/poll_for_log_entry';
 
 export async function BrowserProvider({ getService }: FtrProviderContext) {
-  const log = getService('log');
-  const config = getService('config');
-  const lifecycle = getService('lifecycle');
-  const coverage = getService('coverage');
   const { driver, Key, LegacyActionSequence, browserType } = await getService(
     '__webdriver__'
   ).init();
 
   const isW3CEnabled = (driver as any).executor_.w3c === true;
-
-  const coveragePrefix = 'coveragejson:';
-
-  if (browserType === Browsers.Chrome) {
-    // The logs endpoint has not been defined in W3C Spec browsers other than Chrome don't have access to this endpoint.
-    // See: https://github.com/w3c/webdriver/issues/406
-    // See: https://w3c.github.io/webdriver/#endpoints
-
-    pollForLogEntry$(driver, logging.Type.BROWSER, config.get('browser.logPollingMs'))
-      .pipe(
-        mergeMap(logEntry => {
-          log.debug(`logEntry check, length = ${logEntry.message.length}`);
-          if (logEntry.message.indexOf(coveragePrefix) > -1) {
-            log.debug(`logEntry check: adding coverage`);
-            coverage.addCoverage(logEntry.message.split(coveragePrefix)[1]);
-            return [];
-          }
-
-          return [logEntry];
-        }),
-        takeUntil(lifecycle.cleanup$)
-      )
-      .subscribe({
-        next({ message, level: { name: level } }) {
-          const msg = message.replace(/\\n/g, '\n');
-          log[level === 'SEVERE' ? 'error' : 'debug'](`browser[${level}] ${msg}`);
-        },
-      });
-
-    // pollForLogEntry$(driver, logging.Type.BROWSER, config.get('browser.logPollingMs'))
-    //   .pipe(takeUntil(lifecycle.cleanup$))
-    //   .subscribe({
-    //     next({ message, level: { name: level } }) {
-    //       const msg = message.replace(/\\n/g, '\n');
-    //       log[level === 'SEVERE' ? 'error' : 'debug'](`browser[${level}] ${msg}`);
-    //     },
-    //   });
-  }
 
   return new (class BrowserService {
     /**

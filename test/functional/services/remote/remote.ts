@@ -17,16 +17,25 @@
  * under the License.
  */
 
-import request from 'request';
+import Fs from 'fs';
+import { resolve } from 'path';
+
+import * as Rx from 'rxjs';
+import { mergeMap } from 'rxjs/operators';
+import { logging } from 'selenium-webdriver';
+import del from 'del';
+// @ts-ignore
+import mkdirp from 'mkdirp';
+
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { initWebDriver } from './webdriver';
 import { Browsers } from './browsers';
+import { pollForLogEntry$ } from './poll_for_log_entry';
 
 export async function RemoteProvider({ getService }: FtrProviderContext) {
   const lifecycle = getService('lifecycle');
   const log = getService('log');
   const config = getService('config');
-  const coverage = getService('coverage');
   const browserType: Browsers = config.get('browser.type');
 
   const { driver, By, Key, until, LegacyActionSequence } = await initWebDriver(log, browserType);
@@ -35,36 +44,55 @@ export async function RemoteProvider({ getService }: FtrProviderContext) {
   const caps = await driver.getCapabilities();
   const browserVersion = caps.get(isW3CEnabled ? 'browserVersion' : 'version');
 
-  const loadTestCoverage = async (obj: any): Promise<void> => {
-    if (obj !== null) {
-      // eslint-disable-next-line no-console
-      console.log(`sending code coverage`);
-      await request(
-        {
-          url: `http://localhost:6969/coverage/client`,
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(obj),
-        },
-        (error, response, body) => {
-          // eslint-disable-next-line no-console
-          console.log(`error: ${error}`);
-        }
-      );
-    } else {
-      // eslint-disable-next-line no-console
-      console.log(`no code coverage to send`);
-    }
-  };
-
   log.info(`Remote initialized: ${caps.get('browserName')} ${browserVersion}`);
 
+  const coveragePrefix = 'coveragejson:';
+  const coverageDir = resolve(__dirname, '../../../../target/coverage');
+  let coverageCounter = 1;
+  let logSubscription: undefined | Rx.Subscription;
+
   if (browserType === Browsers.Chrome) {
+    // The logs endpoint has not been defined in W3C Spec browsers other than Chrome don't have access to this endpoint.
+    // See: https://github.com/w3c/webdriver/issues/406
+    // See: https://w3c.github.io/webdriver/#endpoints
+
     log.info(
       `Chromedriver version: ${caps.get('chrome').chromedriverVersion}, w3c=${isW3CEnabled}`
     );
+
+    del.sync(coverageDir);
+    mkdirp.sync(coverageDir);
+
+    logSubscription = pollForLogEntry$(
+      driver,
+      logging.Type.BROWSER,
+      config.get('browser.logPollingMs'),
+      lifecycle.cleanup$
+    )
+      .pipe(
+        mergeMap(logEntry => {
+          if (logEntry.message.includes(coveragePrefix)) {
+            const id = coverageCounter++;
+            const path = resolve(coverageDir, `${id}.coverage.json`);
+            const [, coverageJsonBase64] = logEntry.message.split(coveragePrefix);
+            const coverageJson = Buffer.from(coverageJsonBase64, 'base64').toString('utf8');
+
+            log.info('writing coverage to', path);
+            Fs.writeFileSync(path, JSON.stringify(JSON.parse(coverageJson), null, 2));
+
+            // filter out this message
+            return [];
+          }
+
+          return [logEntry];
+        })
+      )
+      .subscribe({
+        next({ message, level: { name: level } }) {
+          const msg = message.replace(/\\n/g, '\n');
+          log[level === 'SEVERE' ? 'error' : 'debug'](`browser[${level}] ${msg}`);
+        },
+      });
   }
 
   lifecycle.on('beforeTests', async () => {
@@ -82,24 +110,17 @@ export async function RemoteProvider({ getService }: FtrProviderContext) {
     await (driver.manage() as any).setTimeouts({ implicit: config.get('timeouts.find') });
   });
 
-  lifecycle.on('afterEachTest', async () => {
-    // const browser = getService('browser');
-    // await browser.loadTestCoverage();
-  });
-
   lifecycle.on('afterTestSuite', async () => {
     const { width, height } = windowSizeStack.shift()!;
     await (driver.manage().window() as any).setRect({ width, height });
   });
 
   lifecycle.on('cleanup', async () => {
-    const lastData = await driver.executeScript('return window.__coverage__;');
-    await driver.quit();
-    const data = coverage.getCoverage();
-    for (let i = 0; i < data.length; i++) {
-      await loadTestCoverage(data[i]);
+    if (logSubscription) {
+      await new Promise(r => logSubscription!.add(r));
     }
-    await loadTestCoverage(lastData);
+
+    await driver.quit();
   });
 
   return { driver, By, Key, until, LegacyActionSequence, browserType };
