@@ -4,7 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { compose } from 'recompose';
-import { TimePickerMini as Component } from './time_picker_mini';
-
-export const TimePickerMini = compose()(Component);
+export { TimePicker } from './time_picker';

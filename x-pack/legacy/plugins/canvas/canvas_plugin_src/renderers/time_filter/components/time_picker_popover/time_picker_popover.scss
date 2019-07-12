@@ -1,7 +1,7 @@
-.canvasTimePickerMini {
+.canvasTimePickerPopover {
   width: 100%;
 
-  .canvasTimePickerMini__button {
+  .canvasTimePickerPopover__button {
     width: 100%;
     padding: $euiSizeXS;
     border: $euiBorderThin;
@@ -13,7 +13,7 @@
     }
   }
 
-  .canvasTimePickerMini__anchor {
+  .canvasTimePickerPopover__anchor {
     width: 100%;
   }
 }

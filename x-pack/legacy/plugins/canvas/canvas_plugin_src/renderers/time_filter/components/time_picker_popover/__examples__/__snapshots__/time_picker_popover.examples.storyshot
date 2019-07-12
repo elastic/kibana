@@ -1,0 +1,27 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Storyshots renderers/TimeFilter/components/TimePickerPopover default 1`] = `
+<div
+  className="euiPopover euiPopover--anchorDownCenter canvasTimePickerPopover"
+  container={null}
+  id="timefilter-popover-trigger-click"
+  onKeyDown={[Function]}
+  onMouseDown={[Function]}
+  onMouseUp={[Function]}
+  onTouchEnd={[Function]}
+  onTouchStart={[Function]}
+>
+  <div
+    className="euiPopover__anchor canvasTimePickerPopover__anchor"
+  >
+    <button
+      className="canvasTimePickerPopover__button"
+      onClick={[Function]}
+    >
+      <span>
+        ~ 2 months ago to ~ a month ago
+      </span>
+    </button>
+  </div>
+</div>
+`;
