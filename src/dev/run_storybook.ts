@@ -34,7 +34,7 @@ const help = `
           .map(([alias, path]) => `📕 ${alias}`)
           .join('\n        ')}
 
-        Add your alias in /src/dev/storybook/aliases.ts
+        Add your alias in src/dev/storybook/aliases.ts:20
 `;
 
 run(

@@ -8,7 +8,6 @@ const path = require('path');
 const webpack = require('webpack');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 const { DLL_OUTPUT, KIBANA_ROOT } = require('./constants');
-const KIBANA_PLUGIN = process.argv[2] || ''
 
 // Extend the Storybook Webpack config with some customizations
 module.exports = async ({ config }) => {
@@ -57,14 +56,6 @@ module.exports = async ({ config }) => {
       require.resolve('react-docgen-typescript-loader'),
     ],
   });
-
-  config.plugins.push(
-    new webpack.DefinePlugin({
-      'process.env': {
-        KIBANA_PLUGIN: JSON.stringify(KIBANA_PLUGIN),
-      },
-    }),
-  );
 
   // Reference the built DLL file of static(ish) dependencies, which are removed
   // during kbn:bootstrap and rebuilt if missing.
