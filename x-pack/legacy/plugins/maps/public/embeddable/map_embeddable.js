@@ -191,9 +191,7 @@ export class MapEmbeddable extends Embeddable {
     }
 
     const isLayerTOCOpen = getIsLayerTOCOpen(this._store.getState());
-
-    if (!this.input.isLayerTOCOpen
-      || this.input.isLayerTOCOpen !== isLayerTOCOpen) {
+    if (this.input.isLayerTOCOpen !== isLayerTOCOpen) {
       this.updateInput({
         isLayerTOCOpen
       });
