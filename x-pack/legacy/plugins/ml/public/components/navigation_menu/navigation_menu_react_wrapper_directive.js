@@ -12,12 +12,13 @@ import { isFullLicense } from '../../license/check_license';
 import { timeHistory } from 'ui/timefilter/time_history';
 import { uiModules } from 'ui/modules';
 import { timefilter } from 'ui/timefilter';
+import { Subject } from 'rxjs';
 const module = uiModules.get('apps/ml');
 
 import 'ui/directives/kbn_href';
 
 
-module.directive('mlNavMenu', function (config) {
+module.directive('mlNavMenu', function (config, mlTimefilterRefreshService) {
   return {
     restrict: 'E',
     transclude: true,
@@ -35,13 +36,15 @@ module.directive('mlNavMenu', function (config) {
         name === 'explorer') {
         showTabs = true;
       }
+
       const props = {
         dateFormat: config.get('dateFormat'),
         disableLinks: (isFullLicense() === false),
         showTabs,
         tabId: name,
         timeHistory,
-        timefilter
+        timefilter,
+        forceRefresh: () => mlTimefilterRefreshService.next()
       };
 
       ReactDOM.render(React.createElement(NavigationMenu, props),
@@ -54,4 +57,7 @@ module.directive('mlNavMenu', function (config) {
       });
     }
   };
-});
+})
+  .service('mlTimefilterRefreshService', function () {
+    return new Subject();
+  });

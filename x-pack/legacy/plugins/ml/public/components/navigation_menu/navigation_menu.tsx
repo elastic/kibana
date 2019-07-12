@@ -12,6 +12,7 @@ import { Tabs } from './tabs';
 interface Props {
   dateFormat: string;
   disableLinks: boolean;
+  forceRefresh: () => void;
   showTabs: boolean;
   tabId: string;
   timeHistory: any;
@@ -21,6 +22,7 @@ interface Props {
 export const NavigationMenu: FC<Props> = ({
   dateFormat,
   disableLinks,
+  forceRefresh,
   showTabs,
   tabId,
   timeHistory,
@@ -29,7 +31,12 @@ export const NavigationMenu: FC<Props> = ({
   <Fragment>
     <EuiFlexGroup justifyContent="flexEnd" gutterSize="xs">
       <EuiFlexItem grow={false}>
-        <TopNav dateFormat={dateFormat} timeHistory={timeHistory} timefilter={timefilter} />
+        <TopNav
+          dateFormat={dateFormat}
+          timeHistory={timeHistory}
+          timefilter={timefilter}
+          forceRefresh={forceRefresh}
+        />
       </EuiFlexItem>
     </EuiFlexGroup>
     {showTabs && <Tabs tabId={tabId} disableLinks={disableLinks} />}

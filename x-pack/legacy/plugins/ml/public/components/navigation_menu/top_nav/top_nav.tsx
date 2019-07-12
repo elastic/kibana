@@ -11,6 +11,7 @@ import { Timefilter } from 'ui/timefilter';
 
 interface Props {
   dateFormat: string;
+  forceRefresh: () => void;
   timeHistory: TimeHistory;
   timefilter: Timefilter;
 }
@@ -24,7 +25,7 @@ function getRecentlyUsedRanges(timeHistory: TimeHistory): Array<{ start: string;
   });
 }
 
-export const TopNav: FC<Props> = ({ dateFormat, timeHistory, timefilter }) => {
+export const TopNav: FC<Props> = ({ dateFormat, forceRefresh, timeHistory, timefilter }) => {
   const [refreshInterval, setRefreshInterval] = useState(timefilter.getRefreshInterval());
   const [time, setTime] = useState(timefilter.getTime());
   const [recentlyUsedRanges, setRecentlyUsedRanges] = useState(getRecentlyUsedRanges(timeHistory));
@@ -95,7 +96,7 @@ export const TopNav: FC<Props> = ({ dateFormat, timeHistory, timefilter }) => {
             isAutoRefreshOnly={!isTimeRangeSelectorEnabled}
             refreshInterval={refreshInterval.value}
             onTimeChange={updateFilter}
-            onRefresh={updateFilter}
+            onRefresh={forceRefresh}
             onRefreshChange={updateInterval}
             recentlyUsedRanges={recentlyUsedRanges}
             dateFormat={dateFormat}
