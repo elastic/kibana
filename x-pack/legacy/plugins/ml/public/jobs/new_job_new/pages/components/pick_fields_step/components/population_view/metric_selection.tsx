@@ -60,6 +60,7 @@ export const PopulationDetectors: FC<Props> = ({ isActive, setIsValid }) => {
   const [splitField, setSplitField] = useState(jobCreator.splitField);
   const [fieldValuesPerDetector, setFieldValuesPerDetector] = useState<DetectorFieldValues>({});
   const [byFieldsUpdated, setByFieldsUpdated] = useReducer<(s: number) => number>(s => s + 1, 0);
+  const updateByFields = () => setByFieldsUpdated(0);
 
   function detectorChangeHandler(selectedOptionsIn: DropDownLabel[]) {
     addDetector(selectedOptionsIn);
@@ -81,6 +82,7 @@ export const PopulationDetectors: FC<Props> = ({ isActive, setIsValid }) => {
   function deleteDetector(index: number) {
     aggFieldPairList.splice(index, 1);
     setAggFieldPairList([...aggFieldPairList]);
+    updateByFields();
   }
 
   function setResultsWrapper(results: Results) {
@@ -142,7 +144,7 @@ export const PopulationDetectors: FC<Props> = ({ isActive, setIsValid }) => {
     });
     if (update) {
       setAggFieldPairList(newList);
-      setByFieldsUpdated(0);
+      updateByFields();
     }
   }, [jobCreatorUpdated]);
 

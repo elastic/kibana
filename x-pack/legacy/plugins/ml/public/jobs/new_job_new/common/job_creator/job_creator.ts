@@ -282,4 +282,35 @@ export class JobCreator {
   public forceStopRefreshPolls() {
     this._stopAllRefreshPolls.stop = true;
   }
+
+  public set createdBy(createdBy: string | null) {
+    if (createdBy === null) {
+      // if null is passed in, delete the created_by property
+      if (
+        this._job_config.custom_settings !== undefined &&
+        this._job_config.custom_settings.created_by !== undefined
+      ) {
+        delete this._job_config.custom_settings.created_by;
+
+        if (Object.keys(this._job_config.custom_settings).length === 0) {
+          // clean up custom_settings if there's nothing else in there
+          delete this._job_config.custom_settings;
+        }
+      }
+    } else {
+      this._job_config.custom_settings = {
+        created_by: createdBy,
+      };
+    }
+  }
+
+  public get createdBy(): string | null {
+    if (
+      this._job_config.custom_settings !== undefined &&
+      this._job_config.custom_settings.created_by !== undefined
+    ) {
+      return this._job_config.custom_settings.created_by;
+    }
+    return null;
+  }
 }
