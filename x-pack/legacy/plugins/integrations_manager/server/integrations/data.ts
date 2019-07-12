@@ -4,10 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SavedObjectsClientContract } from 'src/core/server/saved_objects';
-import { Installation, InstallationAttributes, Installable } from '../../common/types';
+import { SavedObjectsClientContract, ScopedClusterClient } from 'src/core/server/';
+import {
+  Installation,
+  InstallationAttributes,
+  Installable,
+  AssetReference,
+} from '../../common/types';
 import { SAVED_OBJECT_TYPE } from '../../common/constants';
 import * as Registry from '../registry';
+
+type CallESEndpoint = ScopedClusterClient['callAsCurrentUser'];
 
 export async function getIntegrations(client: SavedObjectsClientContract) {
   const registryItems = await Registry.fetchList();
@@ -47,21 +54,49 @@ export async function getInstallationObject(client: SavedObjectsClientContract, 
 export async function installAssets(
   client: SavedObjectsClientContract,
   pkgkey: string,
-  filter = (entry: Registry.ArchiveEntry): boolean => true
+  asset: string,
+  callESEndpoint: CallESEndpoint
 ) {
-  const toBeSavedObjects = await Registry.getObjects(pkgkey, filter);
-  const createResults = await client.bulkCreate<InstallationAttributes>(toBeSavedObjects, {
-    overwrite: true,
-  });
-  const createdObjects = createResults.saved_objects;
-  const installed = createdObjects.map(({ id, type }) => ({ id, type }));
-  const results = await client.create<InstallationAttributes>(
-    SAVED_OBJECT_TYPE,
-    { installed },
-    { id: pkgkey, overwrite: true }
-  );
+  let toInstall: AssetReference[] = [];
 
-  return results;
+  if (assetUsesObjects(asset)) {
+    const references = await installObjects(client, pkgkey, asset);
+    toInstall = toInstall.concat(references);
+  }
+
+  if (asset === 'ingest-pipeline') {
+    const paths = await Registry.getArchiveInfo(
+      `${pkgkey}.tar.gz`,
+      entry => Registry.pathParts(entry.path).type === asset
+    );
+
+    const installationPromises = paths.map(path => installPipeline(callESEndpoint, path));
+    const references = await Promise.all(installationPromises);
+    toInstall = toInstall.concat(references);
+  }
+
+  if (toInstall.length) {
+    const savedObject = await getInstallationObject(client, pkgkey);
+    const current: AssetReference[] = (savedObject && savedObject.attributes.installed) || [];
+    const references = toInstall.reduce((toSave, pending) => {
+      // skip if to be installed is already installed
+      if (toSave.find(c => c.id === pending.id && c.type === pending.type)) return;
+
+      toSave.push(pending);
+
+      return toSave;
+    }, current);
+
+    const results = await client.create<InstallationAttributes>(
+      SAVED_OBJECT_TYPE,
+      { installed: references },
+      { id: pkgkey, overwrite: true }
+    );
+
+    return results;
+  }
+
+  return toInstall; // []
 }
 
 export async function removeInstallation(client: SavedObjectsClientContract, pkgkey: string) {
@@ -101,4 +136,49 @@ function createInstallableFrom<T>(from: T, savedObject?: Installation): Installa
         ...from,
         status: 'not_installed',
       };
+}
+
+function assetUsesObjects(asset: string) {
+  const usesObjects = [
+    'visualization',
+    'dashboard',
+    'search',
+    'index-pattern',
+    'config',
+    'timelion-sheet',
+  ];
+  return usesObjects.includes(asset);
+}
+
+async function installObjects(
+  client: SavedObjectsClientContract,
+  pkgkey: string,
+  asset: string
+): Promise<AssetReference[]> {
+  const filter = (entry: Registry.ArchiveEntry) => asset === Registry.pathParts(entry.path).type;
+  const toBeSavedObjects = await Registry.getObjects(pkgkey, filter);
+  const createResults = await client.bulkCreate<InstallationAttributes>(toBeSavedObjects, {
+    overwrite: true,
+  });
+  const createdObjects = createResults.saved_objects;
+  const installed = createdObjects.map(({ id, type }) => ({ id, type }));
+
+  return installed;
+}
+
+async function installPipeline(
+  callESEndpoint: CallESEndpoint,
+  path: string
+): Promise<AssetReference> {
+  const buffer = Registry.getAsset(path);
+  // sample data is invalid json. strip the offending parts before parsing
+  const json = buffer.toString('utf8').replace(/\\/g, '');
+  const pipeline = JSON.parse(json);
+  const { file, type } = Registry.pathParts(path);
+  const id = file.replace('.json', '');
+
+  // TODO: any sort of error, not "happy path", handling
+  await callESEndpoint('ingest.putPipeline', { id, body: pipeline });
+
+  return { id, type };
 }

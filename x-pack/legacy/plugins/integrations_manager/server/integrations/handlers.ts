@@ -4,10 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Request } from '../../common/types';
-import { ArchiveEntry, pathParts } from '../registry';
+import { PLUGIN_ID } from '../../common/constants';
+import { Request, ResponseToolkit } from '../../common/types';
+import { CoreSetup } from '../plugin';
 import { getClient } from '../saved_objects';
 import { getIntegrations, getIntegrationInfo, installAssets, removeInstallation } from './data';
+
+interface Extra extends ResponseToolkit {
+  context: {
+    core: CoreSetup;
+  };
+}
 
 interface PackageRequest extends Request {
   params: {
@@ -24,17 +31,17 @@ interface DeleteAssetRequest extends Request {
 }
 
 type AssetRequestParams = PackageRequest['params'] & {
-  asset: string;
+  asset?: string;
 };
 
-export async function handleGetList(req: Request) {
+export async function handleGetList(req: Request, extra: Extra) {
   const client = getClient(req);
   const integrationList = await getIntegrations(client);
 
   return integrationList;
 }
 
-export async function handleGetInfo(req: PackageRequest) {
+export async function handleGetInfo(req: PackageRequest, extra: Extra) {
   const { pkgkey } = req.params;
   const client = getClient(req);
   const integrationInfo = await getIntegrationInfo(client, pkgkey);
@@ -42,19 +49,20 @@ export async function handleGetInfo(req: PackageRequest) {
   return integrationInfo;
 }
 
-export async function handleRequestInstall(req: InstallAssetRequest) {
+export async function handleRequestInstall(req: InstallAssetRequest, extra: Extra) {
   const { pkgkey, asset } = req.params;
+  if (!asset) throw new Error('Unhandled empty/default asset case');
+
   const client = getClient(req);
-  const object = await installAssets(
-    client,
-    pkgkey,
-    (entry: ArchiveEntry) => asset === pathParts(entry.path).type
-  );
+  const { elasticsearch } = extra.context.core;
+  const esClient = elasticsearch.createClient(PLUGIN_ID);
+  const callESEndpoint = esClient.asScoped(req).callAsCurrentUser;
+  const object = await installAssets(client, pkgkey, asset, callESEndpoint);
 
   return object;
 }
 
-export async function handleRequestDelete(req: DeleteAssetRequest) {
+export async function handleRequestDelete(req: DeleteAssetRequest, extra: Extra) {
   const { pkgkey } = req.params;
   const client = getClient(req);
   const deleted = await removeInstallation(client, pkgkey);

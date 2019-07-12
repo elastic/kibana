@@ -4,11 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { HttpServiceSetup, CoreStart } from 'src/core/server';
+import { CoreStart, ElasticsearchServiceSetup, HttpServiceSetup } from 'src/core/server';
 import { fetchList } from './registry';
 import { routes } from './routes';
 
 export interface CoreSetup {
+  elasticsearch: ElasticsearchServiceSetup;
   http: HttpServiceSetup;
 }
 
@@ -22,6 +23,12 @@ export class Plugin {
   constructor(initializerContext: PluginInitializerContext) {}
   public setup(core: CoreSetup) {
     const { server } = core.http;
+
+    // make these items available to handlers via h.context
+    // https://github.com/hapijs/hapi/blob/master/API.md#server.bind()
+    // aligns closely with approach proposed in handler RFC
+    // https://github.com/epixa/kibana/blob/rfc-handlers/rfcs/text/0003_handler_interface.md
+    server.bind({ core });
 
     // map routes to handlers
     routes.forEach(route => server.route(route));

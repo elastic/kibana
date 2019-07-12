@@ -4,19 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { Request, ServerRoute } from 'hapi';
-import {
-  SavedObject,
-  SavedObjectAttributes,
-  SavedObjectReference,
-} from 'src/core/server/saved_objects';
+import { SavedObject, SavedObjectAttributes, SavedObjectReference } from 'src/core/server';
+
+export { Request, ResponseToolkit, ServerRoute } from 'hapi';
+export { ClusterClient } from 'src/core/server';
 
 export type AssetReference = Pick<SavedObjectReference, 'id' | 'type'>;
+
+export type Installation = SavedObject<InstallationAttributes>;
 export interface InstallationAttributes extends SavedObjectAttributes {
   installed: AssetReference[];
 }
-
-export type Installation = SavedObject<InstallationAttributes>;
 
 export type Installable<T> = Installed<T> | NotInstalled<T>;
 
