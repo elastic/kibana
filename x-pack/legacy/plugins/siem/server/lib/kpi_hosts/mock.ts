@@ -287,154 +287,10 @@ const mockHostsReponse = {
 
 export const mockKpiHostsResponse = {
   took: 4405,
-  responses: [mockUniqueIpsResponse, mockAuthResponse, mockHostsReponse],
+  responses: [mockHostsReponse, mockAuthResponse, mockUniqueIpsResponse],
 };
 
-export const mockKpiHostsResult = {
-  hosts: 986,
-  hostsHistogram: [
-    {
-      x: new Date('2019-05-03T13:00:00.000Z').valueOf(),
-      y: 919,
-    },
-    {
-      x: new Date('2019-05-04T01:00:00.000Z').valueOf(),
-      y: 82,
-    },
-    {
-      x: new Date('2019-05-04T13:00:00.000Z').valueOf(),
-      y: 4,
-    },
-  ],
-  authSuccess: 61,
-  authSuccessHistogram: [
-    {
-      x: new Date('2019-05-03T13:00:00.000Z').valueOf(),
-      y: 8,
-    },
-    {
-      x: new Date('2019-05-04T01:00:00.000Z').valueOf(),
-      y: 52,
-    },
-    {
-      x: new Date('2019-05-04T13:00:00.000Z').valueOf(),
-      y: 1,
-    },
-  ],
-  authFailure: 15722,
-  authFailureHistogram: [
-    {
-      x: new Date('2019-05-03T13:00:00.000Z').valueOf(),
-      y: 11731,
-    },
-    {
-      x: new Date('2019-05-04T01:00:00.000Z').valueOf(),
-      y: 3979,
-    },
-    {
-      x: new Date('2019-05-04T13:00:00.000Z').valueOf(),
-      y: 12,
-    },
-  ],
-  uniqueSourceIps: 1407,
-  uniqueSourceIpsHistogram: [
-    {
-      x: new Date('2019-05-03T13:00:00.000Z').valueOf(),
-      y: 1182,
-    },
-    {
-      x: new Date('2019-05-04T01:00:00.000Z').valueOf(),
-      y: 364,
-    },
-    {
-      x: new Date('2019-05-04T13:00:00.000Z').valueOf(),
-      y: 63,
-    },
-  ],
-  uniqueDestinationIps: 1954,
-  uniqueDestinationIpsHistogram: [
-    {
-      x: new Date('2019-05-03T13:00:00.000Z').valueOf(),
-      y: 1809,
-    },
-    {
-      x: new Date('2019-05-04T01:00:00.000Z').valueOf(),
-      y: 407,
-    },
-    {
-      x: new Date('2019-05-04T13:00:00.000Z').valueOf(),
-      y: 64,
-    },
-  ],
-};
-
-export const mockKpiHostDetailsResponse = {
-  took: 4405,
-  responses: [mockUniqueIpsResponse, mockAuthResponse],
-};
-
-export const mockKpiHostDetailsResult = {
-  authSuccess: 61,
-  authSuccessHistogram: [
-    {
-      x: new Date('2019-05-03T13:00:00.000Z').valueOf(),
-      y: 8,
-    },
-    {
-      x: new Date('2019-05-04T01:00:00.000Z').valueOf(),
-      y: 52,
-    },
-    {
-      x: new Date('2019-05-04T13:00:00.000Z').valueOf(),
-      y: 1,
-    },
-  ],
-  authFailure: 15722,
-  authFailureHistogram: [
-    {
-      x: new Date('2019-05-03T13:00:00.000Z').valueOf(),
-      y: 11731,
-    },
-    {
-      x: new Date('2019-05-04T01:00:00.000Z').valueOf(),
-      y: 3979,
-    },
-    {
-      x: new Date('2019-05-04T13:00:00.000Z').valueOf(),
-      y: 12,
-    },
-  ],
-  uniqueSourceIps: 1407,
-  uniqueSourceIpsHistogram: [
-    {
-      x: new Date('2019-05-03T13:00:00.000Z').valueOf(),
-      y: 1182,
-    },
-    {
-      x: new Date('2019-05-04T01:00:00.000Z').valueOf(),
-      y: 364,
-    },
-    {
-      x: new Date('2019-05-04T13:00:00.000Z').valueOf(),
-      y: 63,
-    },
-  ],
-  uniqueDestinationIps: 1954,
-  uniqueDestinationIpsHistogram: [
-    {
-      x: new Date('2019-05-03T13:00:00.000Z').valueOf(),
-      y: 1809,
-    },
-    {
-      x: new Date('2019-05-04T01:00:00.000Z').valueOf(),
-      y: 407,
-    },
-    {
-      x: new Date('2019-05-04T13:00:00.000Z').valueOf(),
-      y: 64,
-    },
-  ],
-};
+export const mockKpiHostsResponseNodata = { responses: [null, null, null] };
 
 const mockMsearchHeader = {
   index: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
@@ -517,11 +373,13 @@ const mockAuthAggs = {
 
 const mockAuthFilter = {
   bool: {
-    should: [
-      { match: { 'event.type': 'authentication_success' } },
-      { match: { 'event.type': 'authentication_failure' } },
+    filter: [
+      {
+        term: {
+          'event.category': 'authentication',
+        },
+      },
     ],
-    minimum_should_match: 1,
   },
 };
 
@@ -554,9 +412,198 @@ export const mockKpiHostDetailsAuthQuery = [
 ];
 
 export const mockKpiHostsMsearchOptions = {
-  body: [...mockKpiHostsUniqueIpsQuery, ...mockKpiHostsAuthQuery, ...mockHostsQuery],
+  body: [...mockHostsQuery, ...mockKpiHostsAuthQuery, ...mockKpiHostsUniqueIpsQuery],
 };
 
 export const mockKpiHostDetailsMsearchOptions = {
-  body: [...mockKpiHostDetailsUniqueIpsQuery, ...mockKpiHostDetailsAuthQuery],
+  body: [...mockKpiHostDetailsAuthQuery, ...mockKpiHostDetailsUniqueIpsQuery],
+};
+
+export const mockKpiHostsQueryDsl = [
+  JSON.stringify({ ...mockHostsQuery[0], body: mockHostsQuery[1] }, null, 2),
+  JSON.stringify({ ...mockKpiHostsAuthQuery[0], body: mockKpiHostsAuthQuery[1] }, null, 2),
+  JSON.stringify(
+    { ...mockKpiHostsUniqueIpsQuery[0], body: mockKpiHostsUniqueIpsQuery[1] },
+    null,
+    2
+  ),
+];
+
+export const mockKpiHostsResult = {
+  inspect: {
+    dsl: mockKpiHostsQueryDsl,
+    response: [
+      JSON.stringify(mockKpiHostsResponse.responses[0], null, 2),
+      JSON.stringify(mockKpiHostsResponse.responses[1], null, 2),
+      JSON.stringify(mockKpiHostsResponse.responses[2], null, 2),
+    ],
+  },
+  hosts: 986,
+  hostsHistogram: [
+    {
+      x: new Date('2019-05-03T13:00:00.000Z').valueOf(),
+      y: 919,
+    },
+    {
+      x: new Date('2019-05-04T01:00:00.000Z').valueOf(),
+      y: 82,
+    },
+    {
+      x: new Date('2019-05-04T13:00:00.000Z').valueOf(),
+      y: 4,
+    },
+  ],
+  authSuccess: 61,
+  authSuccessHistogram: [
+    {
+      x: new Date('2019-05-03T13:00:00.000Z').valueOf(),
+      y: 8,
+    },
+    {
+      x: new Date('2019-05-04T01:00:00.000Z').valueOf(),
+      y: 52,
+    },
+    {
+      x: new Date('2019-05-04T13:00:00.000Z').valueOf(),
+      y: 1,
+    },
+  ],
+  authFailure: 15722,
+  authFailureHistogram: [
+    {
+      x: new Date('2019-05-03T13:00:00.000Z').valueOf(),
+      y: 11731,
+    },
+    {
+      x: new Date('2019-05-04T01:00:00.000Z').valueOf(),
+      y: 3979,
+    },
+    {
+      x: new Date('2019-05-04T13:00:00.000Z').valueOf(),
+      y: 12,
+    },
+  ],
+  uniqueSourceIps: 1407,
+  uniqueSourceIpsHistogram: [
+    {
+      x: new Date('2019-05-03T13:00:00.000Z').valueOf(),
+      y: 1182,
+    },
+    {
+      x: new Date('2019-05-04T01:00:00.000Z').valueOf(),
+      y: 364,
+    },
+    {
+      x: new Date('2019-05-04T13:00:00.000Z').valueOf(),
+      y: 63,
+    },
+  ],
+  uniqueDestinationIps: 1954,
+  uniqueDestinationIpsHistogram: [
+    {
+      x: new Date('2019-05-03T13:00:00.000Z').valueOf(),
+      y: 1809,
+    },
+    {
+      x: new Date('2019-05-04T01:00:00.000Z').valueOf(),
+      y: 407,
+    },
+    {
+      x: new Date('2019-05-04T13:00:00.000Z').valueOf(),
+      y: 64,
+    },
+  ],
+};
+
+export const mockKpiHostDetailsResponse = {
+  took: 4405,
+  responses: [mockAuthResponse, mockUniqueIpsResponse],
+};
+
+export const mockKpiHostDetailsResponseNoData = {
+  took: 4405,
+  responses: [null, null],
+};
+
+export const mockKpiHostDetailsDsl = [
+  JSON.stringify(
+    { ...mockKpiHostDetailsAuthQuery[0], body: mockKpiHostDetailsAuthQuery[1] },
+    null,
+    2
+  ),
+  JSON.stringify(
+    { ...mockKpiHostDetailsUniqueIpsQuery[0], body: mockKpiHostDetailsUniqueIpsQuery[1] },
+    null,
+    2
+  ),
+];
+
+export const mockKpiHostDetailsResult = {
+  inspect: {
+    dsl: mockKpiHostDetailsDsl,
+    response: [
+      JSON.stringify(mockKpiHostDetailsResponse.responses[0], null, 2),
+      JSON.stringify(mockKpiHostDetailsResponse.responses[1], null, 2),
+    ],
+  },
+  authSuccess: 61,
+  authSuccessHistogram: [
+    {
+      x: new Date('2019-05-03T13:00:00.000Z').valueOf(),
+      y: 8,
+    },
+    {
+      x: new Date('2019-05-04T01:00:00.000Z').valueOf(),
+      y: 52,
+    },
+    {
+      x: new Date('2019-05-04T13:00:00.000Z').valueOf(),
+      y: 1,
+    },
+  ],
+  authFailure: 15722,
+  authFailureHistogram: [
+    {
+      x: new Date('2019-05-03T13:00:00.000Z').valueOf(),
+      y: 11731,
+    },
+    {
+      x: new Date('2019-05-04T01:00:00.000Z').valueOf(),
+      y: 3979,
+    },
+    {
+      x: new Date('2019-05-04T13:00:00.000Z').valueOf(),
+      y: 12,
+    },
+  ],
+  uniqueSourceIps: 1407,
+  uniqueSourceIpsHistogram: [
+    {
+      x: new Date('2019-05-03T13:00:00.000Z').valueOf(),
+      y: 1182,
+    },
+    {
+      x: new Date('2019-05-04T01:00:00.000Z').valueOf(),
+      y: 364,
+    },
+    {
+      x: new Date('2019-05-04T13:00:00.000Z').valueOf(),
+      y: 63,
+    },
+  ],
+  uniqueDestinationIps: 1954,
+  uniqueDestinationIpsHistogram: [
+    {
+      x: new Date('2019-05-03T13:00:00.000Z').valueOf(),
+      y: 1809,
+    },
+    {
+      x: new Date('2019-05-04T01:00:00.000Z').valueOf(),
+      y: 407,
+    },
+    {
+      x: new Date('2019-05-04T13:00:00.000Z').valueOf(),
+      y: 64,
+    },
+  ],
 };

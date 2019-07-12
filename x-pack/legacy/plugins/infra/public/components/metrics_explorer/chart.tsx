@@ -67,7 +67,7 @@ export const MetricsExplorerChart = injectUICapabilities(
       );
       const yAxisFormater = useCallback(createFormatterForMetric(first(metrics)), [options]);
       return (
-        <React.Fragment>
+        <div style={{ padding: 24 }}>
           {options.groupBy ? (
             <EuiTitle size="xs">
               <EuiFlexGroup alignItems="center">
@@ -101,7 +101,7 @@ export const MetricsExplorerChart = injectUICapabilities(
               </EuiFlexItem>
             </EuiFlexGroup>
           )}
-          <div style={{ height, width }}>
+          <div className="infMetricsExplorerChart" style={{ height, width }}>
             {series.rows.length > 0 ? (
               <Chart>
                 {metrics.map((metric, id) => (
@@ -126,7 +126,7 @@ export const MetricsExplorerChart = injectUICapabilities(
               <MetricsExplorerNoMetrics />
             )}
           </div>
-        </React.Fragment>
+        </div>
       );
     }
   )

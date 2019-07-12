@@ -13,7 +13,7 @@ export const UptimePageProvider = ({
   const pageObjects = getPageObjects(['common', 'timePicker']);
   const uptimeService = getService('uptime');
 
-  return new class UptimePage {
+  return new (class UptimePage {
     public async goToUptimeOverviewAndLoadData(
       datePickerStartValue: string,
       datePickerEndValue: string,
@@ -48,5 +48,5 @@ export const UptimePageProvider = ({
       await uptimeService.setFilterText(filterQuery);
       await uptimeService.monitorIdExists('monitor-page-link-auto-http-0X131221E73F825974');
     }
-  }();
+  })();
 };

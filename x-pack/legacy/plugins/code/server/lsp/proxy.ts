@@ -26,7 +26,6 @@ import {
 
 import { LspRequest } from '../../model';
 import { Logger } from '../log';
-import { LspOptions } from '../server_options';
 import { InternalError, RequestCancelled } from '../../common/lsp_error_codes';
 import { InitializeOptions, WorkspaceStatus } from './request_expander';
 
@@ -53,16 +52,14 @@ export class LanguageServerProxy implements ILanguageServerHandler {
   private readonly targetHost: string;
   private targetPort: number;
   private readonly logger: Logger;
-  private readonly lspOptions: LspOptions;
   private eventEmitter = new EventEmitter();
   private currentServer: net.Server | null = null;
   private listeningPort: number | null = null;
 
-  constructor(targetPort: number, targetHost: string, logger: Logger, lspOptions: LspOptions) {
+  constructor(targetPort: number, targetHost: string, logger: Logger) {
     this.targetHost = targetHost;
     this.targetPort = targetPort;
     this.logger = logger;
-    this.lspOptions = lspOptions;
   }
 
   public async handleRequest(request: LspRequest): Promise<ResponseMessage> {
@@ -93,7 +90,7 @@ export class LanguageServerProxy implements ILanguageServerHandler {
       return Promise.resolve(this.clientConnection);
     } else {
       return new Promise<MessageConnection>((resolve, reject) => {
-        this.eventEmitter.on('error', error =>
+        this.eventEmitter.on('err', error =>
           reject(new ResponseError(InternalError, 'Server error', error))
         );
         this.eventEmitter.on('exit', () =>
@@ -240,10 +237,7 @@ export class LanguageServerProxy implements ILanguageServerHandler {
     this.socket.on('error', () => void 0);
     this.socket.on('timeout', () => void 0);
     this.socket.on('drain', () => void 0);
-    this.socket.connect(
-      this.targetPort,
-      this.targetHost
-    );
+    this.socket.connect(this.targetPort, this.targetHost);
   }
 
   public unloadWorkspace(workspaceDir: string): Promise<void> {
@@ -268,25 +262,13 @@ export class LanguageServerProxy implements ILanguageServerHandler {
           this.logger.debug(notification.message);
           break;
         case MessageType.Info:
-          if (this.lspOptions.verbose) {
-            this.logger.info(notification.message);
-          } else {
-            this.logger.debug(notification.message);
-          }
+          this.logger.debug(notification.message);
           break;
         case MessageType.Warning:
-          if (this.lspOptions.verbose) {
-            this.logger.warn(notification.message);
-          } else {
-            this.logger.log(notification.message);
-          }
+          this.logger.warn(notification.message);
           break;
         case MessageType.Error:
-          if (this.lspOptions.verbose) {
-            this.logger.error(notification.message);
-          } else {
-            this.logger.warn(notification.message);
-          }
+          this.logger.error(notification.message);
           break;
       }
     });
@@ -300,6 +282,6 @@ export class LanguageServerProxy implements ILanguageServerHandler {
 
   public setError(error: any) {
     this.error = error;
-    this.eventEmitter.emit('error', error);
+    this.eventEmitter.emit('err', error);
   }
 }

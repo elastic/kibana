@@ -27,7 +27,7 @@ import { REPOSITORY_TYPES } from '../../../../common/constants';
 
 import { useAppDependencies } from '../../index';
 import { documentationLinksService } from '../../services/documentation';
-import { loadRepositoryTypes } from '../../services/http';
+import { useLoadRepositoryTypes } from '../../services/http';
 import { textService } from '../../services/text';
 import { RepositoryValidation } from '../../services/validation';
 import { SectionError, SectionLoading, RepositoryTypeLogo } from '../';
@@ -56,7 +56,7 @@ export const RepositoryFormStepOne: React.FunctionComponent<Props> = ({
     error: repositoryTypesError,
     loading: repositoryTypesLoading,
     data: repositoryTypes = [],
-  } = loadRepositoryTypes();
+  } = useLoadRepositoryTypes();
 
   const hasValidationErrors: boolean = !validation.isValid;
 
@@ -143,6 +143,7 @@ export const RepositoryFormStepOne: React.FunctionComponent<Props> = ({
         <EuiCard
           title={displayName}
           icon={<RepositoryTypeLogo type={type} size="l" />}
+          description={<Fragment />} /* EuiCard requires `description` */
           footer={
             <EuiButtonEmpty
               href={documentationLinksService.getRepositoryTypeDocUrl(type)}

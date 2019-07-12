@@ -11,6 +11,7 @@ import * as ReactDOM from 'react-dom';
 
 import { UIRoutes as KibanaUIRoutes } from 'ui/routes';
 
+import { DEFAULT_INDEX_KEY, DEFAULT_ANOMALY_SCORE } from '../../../../common/constants';
 import {
   AppBufferedKibanaServiceCall,
   AppFrameworkAdapter,
@@ -30,6 +31,8 @@ export class AppKibanaFrameworkAdapter implements AppFrameworkAdapter {
   public dateFormat?: string;
   public dateFormatTz?: string;
   public darkMode?: boolean;
+  public indexPattern?: string;
+  public anomalyScore?: number;
   public kbnVersion?: string;
   public scaledDateFormat?: string;
   public timezone?: string;
@@ -142,6 +145,8 @@ export class AppKibanaFrameworkAdapter implements AppFrameworkAdapter {
       } catch (e) {
         this.darkMode = false;
       }
+      this.indexPattern = config.get(DEFAULT_INDEX_KEY);
+      this.anomalyScore = config.get(DEFAULT_ANOMALY_SCORE);
       this.scaledDateFormat = config.get('dateFormat:scaled');
     });
 

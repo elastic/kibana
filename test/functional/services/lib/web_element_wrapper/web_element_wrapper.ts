@@ -242,32 +242,6 @@ export class WebElementWrapper {
   }
 
   /**
-   * Retrieves the current value of the given attribute of this element. Will return the current
-   * value, even if it has been modified after the page has been loaded. More exactly, this method
-   * will return the value of the given attribute, unless that attribute is not present, in which
-   * case the value of the property with the same name is returned. If neither value is set, null
-   * is returned (for example, the "value" property of a textarea element). The "style" attribute
-   * is converted as best can be to a text representation with a trailing semi-colon.
-   * https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/webdriver_exports_WebElement.html#getAttribute
-   *
-   * @param {string} name
-   * @return {Promise<any>}
-   */
-  public async getProperty(name: string): Promise<string | boolean> {
-    const property = await this._webElement.getAttribute(name);
-
-    // leadfoot compatibility convertion
-    if (property == null) {
-      return false;
-    }
-    if (['true', 'false'].includes(property)) {
-      return property === 'true';
-    } else {
-      return property;
-    }
-  }
-
-  /**
    * Retrieves the value of a computed style property for this instance. If the element inherits
    * the named style from its parent, the parent will be queried for its value. Where possible,
    * color values will be converted to their hex representation (e.g. #00ff00 instead of rgb(0, 255, 0)).
@@ -542,7 +516,7 @@ export class WebElementWrapper {
    * @return {Promise<void>}
    */
   public async parseDomContent(): Promise<any> {
-    const htmlContent: any = await this.getProperty('innerHTML');
+    const htmlContent: any = await this.getAttribute('innerHTML');
     const $: any = cheerio.load(htmlContent, {
       normalizeWhitespace: true,
       xmlMode: true,
@@ -572,7 +546,9 @@ export class WebElementWrapper {
     const screenshot = await this.driver.takeScreenshot();
     const buffer = Buffer.from(screenshot.toString(), 'base64');
     const { width, height, x, y } = await this.getPosition();
-    const windowWidth = await this.driver.executeScript('return window.document.body.clientWidth');
+    const windowWidth: number = await this.driver.executeScript(
+      'return window.document.body.clientWidth'
+    );
     const src = PNG.sync.read(buffer);
     if (src.width > windowWidth) {
       // on linux size of screenshot is double size of screen, scale it down

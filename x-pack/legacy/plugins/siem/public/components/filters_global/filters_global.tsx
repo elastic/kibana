@@ -9,7 +9,7 @@ import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
 import React from 'react';
 import { Sticky } from 'react-sticky';
 import { pure } from 'recompose';
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 
 import { SuperDatePicker } from '../super_date_picker';
 
@@ -20,7 +20,9 @@ const disableSticky = 'screen and (max-width: ' + euiLightVars.euiBreakpoints.s 
 const disableStickyMq = window.matchMedia(disableSticky);
 
 const Aside = styled.aside<{ isSticky?: boolean }>`
-  ${props => `
+  ${props => css`
+    position: relative;
+    z-index: ${props.theme.eui.euiZNavigation};
     background: ${props.theme.eui.euiColorEmptyShade};
     border-bottom: ${props.theme.eui.euiBorderThin};
     box-sizing: content-box;
@@ -32,7 +34,6 @@ const Aside = styled.aside<{ isSticky?: boolean }>`
     ${props.isSticky &&
       `
       top: ${offsetChrome}px !important;
-      z-index: ${props.theme.eui.euiZNavigation};
     `}
 
     @media only ${disableSticky} {

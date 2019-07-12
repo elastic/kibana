@@ -46,24 +46,24 @@ function getFlattenedCoordinates(visibleSeries, enabledSeries) {
 export function getPlotValues(
   visibleSeries,
   enabledSeries,
-  { width, yMin = 0, yMax = 'max' }
+  { width, yMin = 0, yMax = 'max', height, stackBy }
 ) {
   const flattenedCoordinates = getFlattenedCoordinates(
     visibleSeries,
     enabledSeries
   );
-  if (isEmpty(flattenedCoordinates)) {
-    return null;
-  }
 
   const xMin = d3.min(flattenedCoordinates, d => d.x);
+
   const xMax = d3.max(flattenedCoordinates, d => d.x);
+
   if (yMax === 'max') {
     yMax = d3.max(flattenedCoordinates, d => d.y);
   }
   if (yMin === 'min') {
     yMin = d3.min(flattenedCoordinates, d => d.y);
   }
+
   const xScale = getXScale(xMin, xMax, width);
   const yScale = getYScale(yMin, yMax);
 
@@ -75,22 +75,26 @@ export function getPlotValues(
     y: yScale,
     yTickValues,
     XY_MARGIN,
-    XY_HEIGHT,
-    XY_WIDTH: width
+    XY_HEIGHT: height || XY_HEIGHT,
+    XY_WIDTH: width,
+    stackBy
   };
 }
 
 export function SharedPlot({ plotValues, ...props }) {
+  const { XY_HEIGHT: height, XY_MARGIN: margin, XY_WIDTH: width } = plotValues;
+
   return (
     <div style={{ position: 'absolute', top: 0, left: 0 }}>
       <XYPlot
         dontCheckIfEmpty
-        height={XY_HEIGHT}
-        margin={XY_MARGIN}
+        height={height}
+        margin={margin}
         xType="time"
-        width={plotValues.XY_WIDTH}
+        width={width}
         xDomain={plotValues.x.domain()}
         yDomain={plotValues.y.domain()}
+        stackBy={plotValues.stackBy}
         {...props}
       />
     </div>
@@ -101,6 +105,7 @@ SharedPlot.propTypes = {
   plotValues: PropTypes.shape({
     x: PropTypes.func.isRequired,
     y: PropTypes.func.isRequired,
-    XY_WIDTH: PropTypes.number.isRequired
+    XY_WIDTH: PropTypes.number.isRequired,
+    height: PropTypes.number
   }).isRequired
 };

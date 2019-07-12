@@ -29,7 +29,7 @@ declare module 'elasticsearch' {
   export type AggregationOptionMap = {
     aggs?: {
       [aggregationName: string]: {
-        [T in AggregationType]?: AggOptions & AggregationOptionMap
+        [T in AggregationType]?: AggOptions & AggregationOptionMap;
       };
     };
   };
@@ -99,7 +99,7 @@ declare module 'elasticsearch' {
             lower: number;
           };
         };
-      }[AggregationType & keyof AggregationOption[AggregationName]]
+      }[AggregationType & keyof AggregationOption[AggregationName]];
     }
   >;
 
@@ -115,7 +115,7 @@ declare module 'elasticsearch' {
 
   export interface ESFilter {
     [key: string]: {
-      [key: string]: string | number | StringMap | ESFilter[];
+      [key: string]: string | string[] | number | StringMap | ESFilter[];
     };
   }
 }

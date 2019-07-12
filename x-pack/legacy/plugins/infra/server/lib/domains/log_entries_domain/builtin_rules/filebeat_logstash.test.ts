@@ -27,7 +27,7 @@ describe('Filebeat Rules', () => {
         'service.type': 'logstash',
       };
 
-      expect(format(flattenedDocument)).toMatchInlineSnapshot(`
+      expect(format(flattenedDocument, {})).toMatchInlineSnapshot(`
 Array [
   Object {
     "constant": "[",
@@ -81,7 +81,7 @@ Array [
         'service.type': 'logstash',
       };
 
-      expect(format(flattenedDocument)).toMatchInlineSnapshot(`
+      expect(format(flattenedDocument, {})).toMatchInlineSnapshot(`
 Array [
   Object {
     "constant": "[Logstash][",
@@ -120,7 +120,7 @@ Array [
         'prospector.type': 'log',
       };
 
-      expect(format(flattenedDocument)).toMatchInlineSnapshot(`
+      expect(format(flattenedDocument, {})).toMatchInlineSnapshot(`
 Array [
   Object {
     "constant": "[Logstash][",
@@ -173,7 +173,7 @@ Array [
         'prospector.type': 'log',
       };
 
-      expect(format(flattenedDocument)).toMatchInlineSnapshot(`
+      expect(format(flattenedDocument, {})).toMatchInlineSnapshot(`
 Array [
   Object {
     "constant": "[Logstash][",

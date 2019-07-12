@@ -11,49 +11,61 @@ import { connect } from 'react-redux';
 
 import chrome from 'ui/chrome';
 import { DEFAULT_INDEX_KEY } from '../../../common/constants';
-import { AuthenticationsEdges, GetAuthenticationsQuery, PageInfo } from '../../graphql/types';
-import { hostsModel, hostsSelectors, inputsModel, State } from '../../store';
+import {
+  AuthenticationsEdges,
+  GetAuthenticationsQuery,
+  PageInfoPaginated,
+} from '../../graphql/types';
+import { hostsModel, hostsSelectors, inputsModel, State, inputsSelectors } from '../../store';
 import { createFilter, getDefaultFetchPolicy } from '../helpers';
-import { QueryTemplate, QueryTemplateProps } from '../query_template';
+import { generateTablePaginationOptions } from '../../components/paginated_table/helpers';
+import { QueryTemplatePaginated, QueryTemplatePaginatedProps } from '../query_template_paginated';
 
 import { authenticationsQuery } from './index.gql_query';
 
+const ID = 'authenticationQuery';
+
 export interface AuthenticationArgs {
   id: string;
+  inspect: inputsModel.InspectQuery;
   authentications: AuthenticationsEdges[];
   totalCount: number;
-  pageInfo: PageInfo;
+  pageInfo: PageInfoPaginated;
   loading: boolean;
-  loadMore: (cursor: string) => void;
+  loadPage: (newActivePage: number) => void;
   refetch: inputsModel.Refetch;
 }
 
-export interface OwnProps extends QueryTemplateProps {
+export interface OwnProps extends QueryTemplatePaginatedProps {
   children: (args: AuthenticationArgs) => React.ReactNode;
   type: hostsModel.HostsType;
 }
 
 export interface AuthenticationsComponentReduxProps {
+  activePage: number;
+  isInspected: boolean;
   limit: number;
 }
 
 type AuthenticationsProps = OwnProps & AuthenticationsComponentReduxProps;
 
-class AuthenticationsComponentQuery extends QueryTemplate<
+class AuthenticationsComponentQuery extends QueryTemplatePaginated<
   AuthenticationsProps,
   GetAuthenticationsQuery.Query,
   GetAuthenticationsQuery.Variables
 > {
   public render() {
     const {
-      id = 'authenticationQuery',
+      activePage,
       children,
+      endDate,
       filterQuery,
+      id = ID,
+      isInspected,
+      limit,
       skip,
       sourceId,
       startDate,
-      endDate,
-      limit,
     } = this.props;
     return (
       <Query<GetAuthenticationsQuery.Query, GetAuthenticationsQuery.Variables>
@@ -68,24 +80,18 @@ class AuthenticationsComponentQuery extends QueryTemplate<
             from: startDate!,
             to: endDate!,
           },
-          pagination: {
-            limit,
-            cursor: null,
-            tiebreaker: null,
-          },
+          pagination: generateTablePaginationOptions(activePage, limit),
           filterQuery: createFilter(filterQuery),
           defaultIndex: chrome.getUiSettingsClient().get(DEFAULT_INDEX_KEY),
+          inspect: isInspected,
         }}
       >
         {({ data, loading, fetchMore, refetch }) => {
           const authentications = getOr([], 'source.Authentications.edges', data);
           this.setFetchMore(fetchMore);
-          this.setFetchMoreOptions((newCursor: string) => ({
+          this.setFetchMoreOptions((newActivePage: number) => ({
             variables: {
-              pagination: {
-                cursor: newCursor,
-                limit: limit + parseInt(newCursor, 10),
-              },
+              pagination: generateTablePaginationOptions(newActivePage, limit),
             },
             updateQuery: (prev, { fetchMoreResult }) => {
               if (!fetchMoreResult) {
@@ -97,23 +103,21 @@ class AuthenticationsComponentQuery extends QueryTemplate<
                   ...fetchMoreResult.source,
                   Authentications: {
                     ...fetchMoreResult.source.Authentications,
-                    edges: [
-                      ...prev.source.Authentications.edges,
-                      ...fetchMoreResult.source.Authentications.edges,
-                    ],
+                    edges: [...fetchMoreResult.source.Authentications.edges],
                   },
                 },
               };
             },
           }));
           return children({
-            id,
-            refetch,
-            loading,
-            totalCount: getOr(0, 'source.Authentications.totalCount', data),
             authentications,
+            id,
+            inspect: getOr(null, 'source.Authentications.inspect', data),
+            loading,
+            loadPage: this.wrappedLoadMore,
             pageInfo: getOr({}, 'source.Authentications.pageInfo', data),
-            loadMore: this.wrappedLoadMore,
+            refetch,
+            totalCount: getOr(0, 'source.Authentications.totalCount', data),
           });
         }}
       </Query>
@@ -123,8 +127,13 @@ class AuthenticationsComponentQuery extends QueryTemplate<
 
 const makeMapStateToProps = () => {
   const getAuthenticationsSelector = hostsSelectors.authenticationsSelector();
-  const mapStateToProps = (state: State, { type }: OwnProps) => {
-    return getAuthenticationsSelector(state, type);
+  const getQuery = inputsSelectors.globalQueryByIdSelector();
+  const mapStateToProps = (state: State, { type, id = ID }: OwnProps) => {
+    const { isInspected } = getQuery(state, id);
+    return {
+      ...getAuthenticationsSelector(state, type),
+      isInspected,
+    };
   };
   return mapStateToProps;
 };
