@@ -22,10 +22,10 @@ import Joi from 'joi';
 import supertest from 'supertest';
 
 import { ByteSizeValue } from '@kbn/config-schema';
-import { defaultValidationErrorHandler, HapiValidationError } from './http_tools';
 import { HttpConfig } from './http_config';
 import { HttpServer } from './http_server';
-import { loggingServiceMock } from '../logging/logging_service.mock';
+import { defaultValidationErrorHandler, HapiValidationError } from './http_tools';
+import { logger } from '../logging/__mocks__';
 import { Router } from './router';
 
 const emptyOutput = {
@@ -66,8 +66,7 @@ describe('defaultValidationErrorHandler', () => {
 });
 
 describe('timeouts', () => {
-  const logger = loggingServiceMock.create();
-  const server = new HttpServer(logger, 'foo');
+  const server = new HttpServer(logger.get());
 
   test('returns 408 on timeout error', async () => {
     const router = new Router('');
@@ -75,18 +74,18 @@ describe('timeouts', () => {
       await new Promise(resolve => setTimeout(resolve, 2000));
       return res.ok({});
     });
-    router.get({ path: '/b', validate: false }, (req, res) => res.ok({}));
+    router.get({ path: '/b', validate: false }, async (req, res) => res.ok({}));
+    server.registerRouter(router);
 
-    const { registerRouter, server: innerServer } = await server.setup({
-      socketTimeout: 1000,
-      host: '127.0.0.1',
-      maxPayload: new ByteSizeValue(1024),
-      ssl: {},
-    } as HttpConfig);
-    registerRouter(router);
 
-    await server.start();
+      const config = {
+        socketTimeout: 1000,
+        host: '127.0.0.1',
+        maxPayload: new ByteSizeValue(1024),
+        ssl: {},
+      } as HttpConfig;
 
+    const { server: innerServer } = await server.start(config);
     await supertest(innerServer.listener)
       .get('/a')
       .expect(408);
@@ -97,5 +96,6 @@ describe('timeouts', () => {
 
   afterAll(async () => {
     await server.stop();
+    logger.mockClear()
   });
 });
