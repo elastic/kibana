@@ -28,7 +28,7 @@ import { convertMicrosecondsToMilliseconds as microsToMillis } from '../../lib/h
 import { UptimeGraphQLQueryProps, withUptimeGraphQL } from '../higher_order';
 import { pingsQuery } from '../../queries';
 import { LocationName } from './location_name';
-import { Criteria } from './monitor_list';
+import { Criteria, Pagination } from './monitor_list';
 
 interface PingListQueryResult {
   allPings?: PingResults;
@@ -201,6 +201,13 @@ export const PingListComponent = ({
       });
     }
   }
+  const pagination: Pagination = {
+    initialPageSize: 20,
+    pageIndex: 0,
+    pageSize,
+    pageSizeOptions: [5, 10, 20, 50, 100],
+    totalItemCount: total,
+  };
 
   return (
     <Fragment>
@@ -287,12 +294,7 @@ export const PingListComponent = ({
           loading={loading}
           columns={columns}
           items={pings}
-          pagination={{
-            initialPageSize: 20,
-            pageIndex: 0,
-            pageSize,
-            pageSizeOptions: [5, 10, 20, 50, 100],
-          }}
+          pagination={pagination}
           onChange={({ page: { size } }: Criteria) => onPageCountChange(size)}
         />
       </EuiPanel>

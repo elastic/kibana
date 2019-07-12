@@ -33,9 +33,10 @@ export interface ExpandedRowMap {
 }
 
 export interface Pagination {
+  hidePerPageOptions?: boolean;
+  initialPageSize: number;
   pageIndex: number;
   pageSize: number;
-  totalItemCount: number;
   pageSizeOptions: number[];
-  hidePerPageOptions: boolean;
+  totalItemCount: number;
 }
