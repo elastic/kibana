@@ -12,7 +12,7 @@ import {
   GetHostFirstLastSeenQuery,
   GetHostsTableQuery,
   HostsFields,
-  HostBeatsIngestAnalyticsQuery,
+  GetHostBeatsIngestAnalyticsQuery,
 } from '../../../../legacy/plugins/siem/public/graphql/types';
 import { HostOverviewQuery } from '../../../../legacy/plugins/siem/public/containers/hosts/overview/host_overview.gql_query';
 import { HostFirstLastSeenGqlQuery } from './../../../../legacy/plugins/siem/public/containers/hosts/first_last_seen/first_last_seen.gql_query';
@@ -179,7 +179,7 @@ const hostsTests: KbnTestProvider = ({ getService }) => {
 
     it('Make sure that we get Beats ingest analytics for Hosts', () => {
       return client
-        .query<HostBeatsIngestAnalyticsQuery.Query>({
+        .query<GetHostBeatsIngestAnalyticsQuery.Query>({
           query: HostBeatsIngestAnalyticsGqlQuery,
           variables: {
             sourceId: 'default',

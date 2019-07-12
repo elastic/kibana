@@ -568,7 +568,7 @@ export const mockGetHostBeatsIngestAnalyticsDsl = {
 export const mockGetHostBeatsIngestAnalyticsRequest = {
   params: {},
   payload: {
-    operationName: 'HostBeatsIngestAnalyticsQuery',
+    operationName: 'GetHostBeatsIngestAnalyticsQuery',
     variables: {
       sourceId: 'default',
       timerange: {
@@ -581,7 +581,7 @@ export const mockGetHostBeatsIngestAnalyticsRequest = {
       inspect: false,
     },
     query:
-      'query HostBeatsIngestAnalyticsQuery($sourceId: ID!, $timerange: TimerangeInput!, $filterQuery: String, $defaultIndex: [String!]!, $inspect: Boolean!) {\n  source(id: $sourceId) {\n    id\n    HostBeatsIngestAnalytics(timerange: $timerange, filterQuery: $filterQuery, defaultIndex: $defaultIndex) {\n      auditbeat\n      winlogbeat\n      filebeat\n      inspect @include(if: $inspect) {\n        dsl\n        response\n        __typename\n      }\n      __typename\n    }\n    __typename\n  }\n}\n',
+      'query GetHostBeatsIngestAnalyticsQuery($sourceId: ID!, $timerange: TimerangeInput!, $filterQuery: String, $defaultIndex: [String!]!, $inspect: Boolean!) {\n  source(id: $sourceId) {\n    id\n    HostBeatsIngestAnalytics(timerange: $timerange, filterQuery: $filterQuery, defaultIndex: $defaultIndex) {\n      auditbeat\n      winlogbeat\n      filebeat\n      inspect @include(if: $inspect) {\n        dsl\n        response\n        __typename\n      }\n      __typename\n    }\n    __typename\n  }\n}\n',
   },
   query: {},
 };

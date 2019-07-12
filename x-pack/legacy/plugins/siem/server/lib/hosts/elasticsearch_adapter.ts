@@ -16,7 +16,7 @@ import {
 import { inspectStringifyObject } from '../../utils/build_query';
 import { hostFieldsMap } from '../ecs_fields';
 import { FrameworkAdapter, FrameworkRequest, RequestBasicOptions } from '../framework';
-import { TermAggregation } from '../types';
+import { TermAggregation, BeatsIngestAnalyticsFilterAggregation } from '../types';
 
 import { buildHostOverviewQuery } from './query.detail_host.dsl';
 import { buildHostsQuery } from './query.hosts.dsl';
@@ -114,11 +114,10 @@ export class ElasticsearchHostsAdapter implements HostsAdapter {
     options: RequestBasicOptions
   ): Promise<BeatsIngestAnalyticsData> {
     const dsl = buildBeatsIngestAnalyticsHostQuery(options);
-    const response = await this.framework.callWithRequest<HostAggEsData, TermAggregation>(
-      request,
-      'search',
-      dsl
-    );
+    const response = await this.framework.callWithRequest<
+      HostAggEsData,
+      BeatsIngestAnalyticsFilterAggregation
+    >(request, 'search', dsl);
     const aggregations: HostAggEsItem = get('aggregations', response) || {};
     const inspect = {
       dsl: [inspectStringifyObject(dsl)],

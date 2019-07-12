@@ -42,7 +42,7 @@ import { AnomaliesHostTable } from '../../components/ml/tables/anomalies_host_ta
 import { setAbsoluteRangeDatePicker as dispatchSetAbsoluteRangeDatePicker } from '../../store/inputs/actions';
 import { InputsModelId } from '../../store/inputs/constants';
 import { scoreIntervalToDateTime } from '../../components/ml/score/score_interval_to_datetime';
-import { HostBeatsIngestAnalyticsContainer } from '../../containers/hosts/beats_ingest_analytics';
+import { HostBeatsIngestAnalyticsQuery } from '../../containers/hosts/beats_ingest_analytics';
 
 const AuthenticationTableManage = manageQuery(AuthenticationTable);
 const HostsTableManage = manageQuery(HostsTable);
@@ -77,7 +77,7 @@ const HostsComponent = pure<HostsComponentProps>(({ filterQuery, setAbsoluteRang
                 <LastEventTime indexKey={LastEventIndexKey.hosts} />
                 <GlobalTime>
                   {({ to, from, setQuery }) => (
-                    <HostBeatsIngestAnalyticsContainer
+                    <HostBeatsIngestAnalyticsQuery
                       endDate={to}
                       filterQuery={filterQuery}
                       sourceId="default"
@@ -93,7 +93,7 @@ const HostsComponent = pure<HostsComponentProps>(({ filterQuery, setAbsoluteRang
                           data={beatsIngestAnalyticsData}
                         />
                       )}
-                    </HostBeatsIngestAnalyticsContainer>
+                    </HostBeatsIngestAnalyticsQuery>
                   )}
                 </GlobalTime>
               </>

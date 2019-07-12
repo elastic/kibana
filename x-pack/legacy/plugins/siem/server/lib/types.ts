@@ -118,6 +118,18 @@ export interface TermAggregation {
   };
 }
 
+export interface BeatsIngestAnalyticsFilterAggregation {
+  winlogbeat: {
+    doc_count: number;
+  };
+  auditbeat: {
+    doc_count: number;
+  };
+  filebeat: {
+    doc_count: number;
+  };
+}
+
 export interface TotalHit {
   value: number;
   relation: string;

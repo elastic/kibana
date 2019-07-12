@@ -16,7 +16,7 @@ import { getDefaultFetchPolicy } from '../../helpers';
 import { QueryTemplate, QueryTemplateProps } from '../../query_template';
 
 import { HostBeatsIngestAnalyticsGqlQuery } from './beats_ingest_analytics.gql_query';
-import { BeatsIngestAnalyticsData, HostBeatsIngestAnalyticsQuery } from '../../../graphql/types';
+import { BeatsIngestAnalyticsData, GetHostBeatsIngestAnalyticsQuery } from '../../../graphql/types';
 
 const ID = 'hostOverviewQuery';
 
@@ -42,8 +42,8 @@ export interface OwnProps extends QueryTemplateProps {
 
 class HostBeatsIngestAnalyticsComponentQuery extends QueryTemplate<
   OwnProps & HostBeatsIngestAnalyticsReduxProps,
-  HostBeatsIngestAnalyticsQuery.Query,
-  HostBeatsIngestAnalyticsQuery.Variables
+  GetHostBeatsIngestAnalyticsQuery.Query,
+  GetHostBeatsIngestAnalyticsQuery.Variables
 > {
   public render() {
     const {
@@ -57,7 +57,7 @@ class HostBeatsIngestAnalyticsComponentQuery extends QueryTemplate<
       startDate,
     } = this.props;
     return (
-      <Query<HostBeatsIngestAnalyticsQuery.Query, HostBeatsIngestAnalyticsQuery.Variables>
+      <Query<GetHostBeatsIngestAnalyticsQuery.Query, GetHostBeatsIngestAnalyticsQuery.Variables>
         query={HostBeatsIngestAnalyticsGqlQuery}
         fetchPolicy={getDefaultFetchPolicy()}
         notifyOnNetworkStatusChange
@@ -102,6 +102,6 @@ const makeMapStateToProps = () => {
   return mapStateToProps;
 };
 
-export const HostBeatsIngestAnalyticsContainer = connect(makeMapStateToProps)(
+export const HostBeatsIngestAnalyticsQuery = connect(makeMapStateToProps)(
   HostBeatsIngestAnalyticsComponentQuery
 );

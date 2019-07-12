@@ -49,7 +49,7 @@ import { InputsModelId } from '../../store/inputs/constants';
 import { scoreIntervalToDateTime } from '../../components/ml/score/score_interval_to_datetime';
 import { KpiHostDetailsQuery } from '../../containers/kpi_host_details';
 import { AnomaliesHostTable } from '../../components/ml/tables/anomalies_host_table';
-import { HostBeatsIngestAnalyticsContainer } from '../../containers/hosts/beats_ingest_analytics';
+import { HostBeatsIngestAnalyticsQuery } from '../../containers/hosts/beats_ingest_analytics';
 
 const type = hostsModel.HostsType.details;
 
@@ -93,7 +93,7 @@ const HostDetailsComponent = pure<HostDetailsComponentProps>(
                   <LastEventTime indexKey={LastEventIndexKey.hostDetails} hostName={hostName} />
                   <GlobalTime>
                     {({ to, from, setQuery }) => (
-                      <HostBeatsIngestAnalyticsContainer
+                      <HostBeatsIngestAnalyticsQuery
                         endDate={to}
                         filterQuery={getFilterQuery(hostName, filterQueryExpression, indexPattern)}
                         sourceId="default"
@@ -109,7 +109,7 @@ const HostDetailsComponent = pure<HostDetailsComponentProps>(
                             data={beatsIngestAnalyticsData}
                           />
                         )}
-                      </HostBeatsIngestAnalyticsContainer>
+                      </HostBeatsIngestAnalyticsQuery>
                     )}
                   </GlobalTime>
                 </>

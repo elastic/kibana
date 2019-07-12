@@ -72,6 +72,10 @@ export interface HostBucketItem {
   timestamp: HostValue;
 }
 
+export interface HostFilterBucketItem {
+  doc_count: number;
+}
+
 export interface HostBuckets {
   buckets: HostBucketItem[];
 }
@@ -93,6 +97,9 @@ export interface HostAggEsItem {
   host_os_name?: HostBuckets;
   host_os_version?: HostBuckets;
   host_type?: HostBuckets;
+  winlogbeat?: HostFilterBucketItem;
+  auditbeat?: HostFilterBucketItem;
+  filebeat?: HostFilterBucketItem;
 }
 
 export interface HostEsData extends SearchHit {

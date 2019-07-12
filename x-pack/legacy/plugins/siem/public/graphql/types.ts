@@ -2607,7 +2607,7 @@ export namespace GetLastEventTimeQuery {
   };
 }
 
-export namespace HostBeatsIngestAnalyticsQuery {
+export namespace GetHostBeatsIngestAnalyticsQuery {
   export type Variables = {
     sourceId: string;
     timerange: TimerangeInput;

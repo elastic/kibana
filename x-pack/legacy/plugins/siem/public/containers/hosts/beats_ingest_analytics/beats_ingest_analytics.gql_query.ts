@@ -7,7 +7,7 @@
 import gql from 'graphql-tag';
 
 export const HostBeatsIngestAnalyticsGqlQuery = gql`
-  query HostBeatsIngestAnalyticsQuery(
+  query GetHostBeatsIngestAnalyticsQuery(
     $sourceId: ID!
     $timerange: TimerangeInput!
     $filterQuery: String
