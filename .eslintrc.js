@@ -166,9 +166,9 @@ module.exports = {
                 ],
                 allowSameFolder: true,
                 errorMessage:
-                  'Shim should not import from /src/legacy/ui/** folder. ' +
-                  'Instead of importing from /src/legacy/ui/** deeply withing a shim, ' +
-                  'import those things once at the top level of your shim and pass those down, just ' +
+                  'NP-ready code should not import from /src/legacy/ui/** folder. ' +
+                  'Instead of importing from /src/legacy/ui/** deeply within a np_ready folder, ' +
+                  'import those things once at the top level of your plugin and pass those down, just ' +
                   'like you pass down `core` and `plugins` objects.',
               },
             ],
