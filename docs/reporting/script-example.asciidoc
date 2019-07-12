@@ -54,7 +54,7 @@ number of seconds in the `Retry-After` header in the download API response until
 report is complete.
 
 If there was an error in generating the report, the download URL will return a 500
-(Internal Server Error) response. More information will be available in the the
+(Internal Server Error) response. More information is available in the
 Reporting management page in Kibana: *Management > Kibana > Reporting*
 ===================
 
