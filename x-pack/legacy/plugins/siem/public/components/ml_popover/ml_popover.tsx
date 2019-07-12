@@ -81,7 +81,6 @@ const initialState: State = {
 };
 
 export const MlPopover = React.memo(() => {
-  // Hooks/State
   const [{ refreshToggle }, dispatch] = useReducer(mlPopoverReducer, initialState);
 
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
@@ -90,12 +89,12 @@ export const MlPopover = React.memo(() => {
   const [isCreatingJobs, setIsCreatingJobs] = useState(false);
   const [filterQuery, setFilterQuery] = useState('');
 
-  const [isLoadingConfiguredIndexPatterns, configuredIndexPattern] = useIndexPatterns();
+  const [, configuredIndexPattern] = useIndexPatterns(refreshToggle);
   const config = useContext(KibanaConfigContext);
   const capabilities = useContext(MlCapabilitiesContext);
   const headers = { 'kbn-version': config.kbnVersion };
 
-  // Enable/Disable Job & Datafeed
+  // Enable/Disable Job & Datafeed -- passed to JobsTable for use as callback on JobSwitch
   const enableDatafeed = async (jobName: string, latestTimestampMs: number, enable: boolean) => {
     // Max start time for job is no more than two weeks ago to ensure job performance
     const maxStartTime = moment
@@ -126,11 +125,14 @@ export const MlPopover = React.memo(() => {
     configuredIndexPattern || ''
   );
 
+  // Filter installed job to show all 'siem' group jobs or just embedded
+  const jobsToDisplay = getJobsToDisplay(jobSummaryData, embeddedJobIds, showAllJobs, filterQuery);
+
   // Install Config Templates as effect of opening popover
   useEffect(() => {
     if (
-      !isLoadingJobSummaryData &&
-      !isLoadingConfiguredIndexPatterns &&
+      jobSummaryData.length &&
+      configuredIndexPattern !== '' &&
       configTemplatesToInstall.length > 0
     ) {
       const setupJobs = async () => {
@@ -151,10 +153,7 @@ export const MlPopover = React.memo(() => {
       };
       setupJobs();
     }
-  }, [configTemplatesToInstall.length]);
-
-  // Filter installed job to show all 'siem' group jobs or just embedded
-  const jobsToDisplay = getJobsToDisplay(jobSummaryData, embeddedJobIds, showAllJobs, filterQuery);
+  }, [jobSummaryData, configuredIndexPattern]);
 
   if (!capabilities.isPlatinumOrTrialLicense) {
     // If the user does not have platinum show upgrade UI
@@ -189,7 +188,10 @@ export const MlPopover = React.memo(() => {
             data-test-subj="integrations-button"
             iconType="arrowDown"
             iconSide="right"
-            onClick={() => setIsPopoverOpen(!isPopoverOpen)}
+            onClick={() => {
+              setIsPopoverOpen(!isPopoverOpen);
+              dispatch({ type: 'refresh' });
+            }}
           >
             {i18n.ANOMALY_DETECTION}
           </EuiButton>

@@ -98,11 +98,7 @@ export const NoItemsMessage = React.memo(() => (
     title={<h3>{i18n.NO_ITEMS_TEXT}</h3>}
     titleSize="xs"
     actions={
-      <EuiButton
-        size="s"
-        href={`${chrome.getBasePath()}/app/ml#/jobs/new_job/step/index_or_search`}
-        target="blank"
-      >
+      <EuiButton size="s" href={'ml#/jobs/new_job/step/index_or_search'} target="_blank">
         {i18n.CREATE_CUSTOM_JOB}
       </EuiButton>
     }

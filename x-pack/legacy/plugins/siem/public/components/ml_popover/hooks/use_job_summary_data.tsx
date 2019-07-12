@@ -18,7 +18,7 @@ export const getSiemJobsFromJobsSummary = (data: Job[]) =>
     return job.groups.includes('siem') ? [...jobs, job] : jobs;
   }, []);
 
-export const useJobSummaryData = (jobIds: string[] = [], refetchSummaryData = false): Return => {
+export const useJobSummaryData = (jobIds: string[] = [], refreshToggle = false): Return => {
   const [jobSummaryData, setJobSummaryData] = useState<Job[]>([]);
   const [loading, setLoading] = useState(true);
   const config = useContext(KibanaConfigContext);
@@ -42,7 +42,7 @@ export const useJobSummaryData = (jobIds: string[] = [], refetchSummaryData = fa
   useEffect(() => {
     setLoading(true);
     fetchFunc();
-  }, [refetchSummaryData, userPermissions]);
+  }, [refreshToggle, userPermissions]);
 
   return [loading, jobSummaryData];
 };

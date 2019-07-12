@@ -10,7 +10,7 @@ import { KibanaConfigContext } from '../../../lib/adapters/framework/kibana_fram
 
 type Return = [boolean, string];
 
-export const useIndexPatterns = (): Return => {
+export const useIndexPatterns = (refreshToggle = false): Return => {
   const [indexPattern, setIndexPattern] = useState<string>('');
   const [isLoading, setIsLoading] = useState(true);
   const config = useContext(KibanaConfigContext);
@@ -27,7 +27,7 @@ export const useIndexPatterns = (): Return => {
   useEffect(() => {
     setIsLoading(true);
     fetchFunc();
-  }, []);
+  }, [refreshToggle]);
 
   return [isLoading, indexPattern];
 };
