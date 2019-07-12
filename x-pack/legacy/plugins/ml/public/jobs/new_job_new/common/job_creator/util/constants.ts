@@ -9,3 +9,9 @@ export enum JOB_TYPE {
   MULTI_METRIC = 'multi_metric',
   POPULATION = 'population',
 }
+
+export enum CREATED_BY_LABEL {
+  SINGLE_METRIC = 'single-metric-wizard',
+  MULTI_METRIC = 'multi-metric-wizard',
+  POPULATION = 'population-wizard',
+}

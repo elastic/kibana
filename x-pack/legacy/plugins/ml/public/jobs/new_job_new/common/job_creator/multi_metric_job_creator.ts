@@ -4,17 +4,24 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { SavedSearch } from 'src/legacy/core_plugins/kibana/public/discover/types';
 import { JobCreator } from './job_creator';
+import { IndexPatternWithType } from '../../../../../common/types/kibana';
 import { Field, Aggregation, SplitField } from '../../../../../common/types/fields';
 import { Detector } from './configs';
 import { createBasicDetector } from './util/default_configs';
-import { JOB_TYPE } from './util/constants';
+import { JOB_TYPE, CREATED_BY_LABEL } from './util/constants';
 
 export class MultiMetricJobCreator extends JobCreator {
   // a multi metric job has one optional overall partition field
   // which is the same for all detectors.
   private _splitField: SplitField = null;
   protected _type: JOB_TYPE = JOB_TYPE.MULTI_METRIC;
+
+  constructor(indexPattern: IndexPatternWithType, savedSearch: SavedSearch, query: object) {
+    super(indexPattern, savedSearch, query);
+    this.createdBy = CREATED_BY_LABEL.MULTI_METRIC;
+  }
 
   // set the split field, applying it to each detector
   public setSplitField(field: SplitField) {

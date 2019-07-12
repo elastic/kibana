@@ -4,17 +4,24 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { SavedSearch } from 'src/legacy/core_plugins/kibana/public/discover/types';
 import { parseInterval } from 'ui/utils/parse_interval';
 import { JobCreator } from './job_creator';
+import { IndexPatternWithType } from '../../../../../common/types/kibana';
 import { Field, Aggregation } from '../../../../../common/types/fields';
 import { Detector, BucketSpan } from './configs';
 import { createBasicDetector } from './util/default_configs';
 import { KIBANA_AGGREGATION } from '../../../../../common/constants/aggregation_types';
-import { JOB_TYPE } from './util/constants';
+import { JOB_TYPE, CREATED_BY_LABEL } from './util/constants';
 
 export class SingleMetricJobCreator extends JobCreator {
   private _field: Field | null = null;
   protected _type: JOB_TYPE = JOB_TYPE.SINGLE_METRIC;
+
+  constructor(indexPattern: IndexPatternWithType, savedSearch: SavedSearch, query: object) {
+    super(indexPattern, savedSearch, query);
+    this.createdBy = CREATED_BY_LABEL.SINGLE_METRIC;
+  }
 
   // only a single detector exists for this job type
   // therefore _addDetector and _editDetector merge into this

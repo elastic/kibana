@@ -4,11 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { SavedSearch } from 'src/legacy/core_plugins/kibana/public/discover/types';
 import { JobCreator } from './job_creator';
+import { IndexPatternWithType } from '../../../../../common/types/kibana';
 import { Field, Aggregation, SplitField } from '../../../../../common/types/fields';
 import { Detector } from './configs';
 import { createBasicDetector } from './util/default_configs';
-import { JOB_TYPE } from './util/constants';
+import { JOB_TYPE, CREATED_BY_LABEL } from './util/constants';
 
 export class PopulationJobCreator extends JobCreator {
   // a population job has one overall over (split) field, which is the same for all detectors
@@ -16,6 +18,11 @@ export class PopulationJobCreator extends JobCreator {
   private _splitField: SplitField = null;
   private _byFields: SplitField[] = [];
   protected _type: JOB_TYPE = JOB_TYPE.POPULATION;
+
+  constructor(indexPattern: IndexPatternWithType, savedSearch: SavedSearch, query: object) {
+    super(indexPattern, savedSearch, query);
+    this.createdBy = CREATED_BY_LABEL.POPULATION;
+  }
 
   // add a by field to a specific detector
   public setByField(field: SplitField, index: number) {
