@@ -17,16 +17,16 @@
  * under the License.
  */
 
-import supertest from 'supertest';
 import { Request, ResponseToolkit } from 'hapi';
 import Joi from 'joi';
+import supertest from 'supertest';
 
-import { defaultValidationErrorHandler, HapiValidationError } from './http_tools';
-import { HttpServer } from './http_server';
-import { HttpConfig } from './http_config';
-import { Router } from './router';
-import { loggingServiceMock } from '../logging/logging_service.mock';
 import { ByteSizeValue } from '@kbn/config-schema';
+import { defaultValidationErrorHandler, HapiValidationError } from './http_tools';
+import { HttpConfig } from './http_config';
+import { HttpServer } from './http_server';
+import { loggingServiceMock } from '../logging/logging_service.mock';
+import { Router } from './router';
 
 const emptyOutput = {
   statusCode: 400,
