@@ -33,6 +33,7 @@ import { loadCurrentIndexPattern, loadCurrentSavedSearch, timeBasedIndexCheck } 
 import { checkMlNodesAvailable } from 'plugins/ml/ml_nodes_check/check_ml_nodes';
 import { ml } from 'plugins/ml/services/ml_api_service';
 import template from './datavisualizer.html';
+import { mlTimefilterRefresh$ } from '../services/timefilter_refresh_service';
 
 uiRoutes
   .when('/jobs/new_job/datavisualizer', {
@@ -58,8 +59,7 @@ module
     $window,
     Private,
     AppState,
-    config,
-    mlTimefilterRefreshService) {
+    config) {
 
     timefilter.enableTimeRangeSelector();
     timefilter.enableAutoRefreshSelector();
@@ -160,7 +160,7 @@ module
     // Refresh the data when the time range is altered.
     $scope.$listenAndDigestAsync(timefilter, 'fetch', refresh);
 
-    const timefilterRefreshServiceSub = mlTimefilterRefreshService.subscribe(refresh);
+    const timefilterRefreshServiceSub = mlTimefilterRefresh$.subscribe(refresh);
 
     $scope.$on('$destroy', () => {
       timefilterRefreshServiceSub.unsubscribe();

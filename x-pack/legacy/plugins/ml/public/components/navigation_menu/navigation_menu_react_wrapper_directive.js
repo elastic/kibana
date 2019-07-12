@@ -12,13 +12,13 @@ import { isFullLicense } from '../../license/check_license';
 import { timeHistory } from 'ui/timefilter/time_history';
 import { uiModules } from 'ui/modules';
 import { timefilter } from 'ui/timefilter';
-import { Subject } from 'rxjs';
 const module = uiModules.get('apps/ml');
+import { mlTimefilterRefresh$ } from '../../services/timefilter_refresh_service';
 
 import 'ui/directives/kbn_href';
 
 
-module.directive('mlNavMenu', function (config, mlTimefilterRefreshService) {
+module.directive('mlNavMenu', function (config) {
   return {
     restrict: 'E',
     transclude: true,
@@ -44,7 +44,7 @@ module.directive('mlNavMenu', function (config, mlTimefilterRefreshService) {
         tabId: name,
         timeHistory,
         timefilter,
-        forceRefresh: () => mlTimefilterRefreshService.next()
+        forceRefresh: () => mlTimefilterRefresh$.next()
       };
 
       ReactDOM.render(React.createElement(NavigationMenu, props),
@@ -57,7 +57,4 @@ module.directive('mlNavMenu', function (config, mlTimefilterRefreshService) {
       });
     }
   };
-})
-  .service('mlTimefilterRefreshService', function () {
-    return new Subject();
-  });
+});
