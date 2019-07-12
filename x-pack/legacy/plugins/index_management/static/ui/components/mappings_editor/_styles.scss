@@ -18,7 +18,7 @@
     top:0;
     bottom:0;
     left:0;
-    border-left:1px solid;
+    border-left:1px dotted;
   }
 
   .tree li {
@@ -33,7 +33,7 @@
     display:block;
     width:10px; /* same with indentation */
     height:0;
-    border-top:1px solid;
+    border-top:1px dotted;
     margin-top:-1px; /* border top width */
     position:absolute;
     top: 64px;

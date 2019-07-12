@@ -34,7 +34,6 @@ export const PropertiesManager = ({ form, path = 'properties' }: Props) => {
                 />
               </li>
             ))}
-            <EuiSpacer size="s" />
             <EuiButton color="primary" onClick={addRow}>
               Add property
             </EuiButton>
