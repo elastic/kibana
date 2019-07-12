@@ -21,6 +21,7 @@ interface BeatsIngestAnalyticsProps {
 const TooltipContent = styled.div`
   padding: 8px 0;
   border-bottom: 1px solid #d3dae6;
+  width: 280px;
   &:last-child {
     border-bottom: 0;
   }
