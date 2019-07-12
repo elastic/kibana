@@ -25,6 +25,8 @@ import tableHtml from './table.html';
 import { i18n } from '@kbn/i18n';
 
 DocViewsRegistryProvider.register(function () {
+  const MIN_LINE_LENGTH = 350;
+
   return {
     title: i18n.translate('kbnDocViews.table.tableTitle', {
       defaultMessage: 'Table'
@@ -45,6 +47,8 @@ DocViewsRegistryProvider.register(function () {
         $scope.flattened = $scope.indexPattern.flattenHit($scope.hit);
         $scope.formatted = $scope.indexPattern.formatHit($scope.hit);
         $scope.fields = _.keys($scope.flattened).sort();
+        $scope.fieldRowOpen = {};
+        $scope.fields.forEach(field => $scope.fieldRowOpen[field] = false);
 
         $scope.canToggleColumns = function canToggleColumn() {
           return (
@@ -68,6 +72,16 @@ DocViewsRegistryProvider.register(function () {
         $scope.showArrayInObjectsWarning = function (row, field) {
           const value = $scope.flattened[field];
           return Array.isArray(value) && typeof value[0] === 'object';
+        };
+
+        $scope.enableDocValueCollapse = function (docValueField) {
+          const html = (typeof $scope.formatted[docValueField] === 'undefined') ?
+            $scope.hit[docValueField] : $scope.formatted[docValueField] || $scope.trustAsHtml;
+          return html.length > MIN_LINE_LENGTH;
+        };
+
+        $scope.toggleViewer = function (field) {
+          $scope.fieldRowOpen[field] = !$scope.fieldRowOpen[field];
         };
       }
     }

@@ -81,6 +81,9 @@
           class="kbnDocViewer__field">
       </td>
       <td>
+        <button ng-if="enableDocValueCollapse(field)" aria-expanded="{{!!fieldRowOpen[field]}}" class="discover-table-open-button" ng-click="toggleViewer(field)" aria-label="Toggle field details" tooltip="Toggle field details">
+          <span class="kuiIcon" ng-class="{ 'fa-caret-down': fieldRowOpen[field], 'fa-caret-right': !fieldRowOpen[field] }"></span>
+        </button>
         <i ng-if="!mapping[field] && field[0] === '_'"
           tooltip-placement="top"
           tooltip="{{ ::'kbnDocViews.table.fieldNamesBeginningWithUnderscoreUnsupportedTooltip' | i18n: {
@@ -96,7 +99,7 @@
           tooltip-placement="top"
           tooltip="{{ ::'kbnDocViews.table.objectsInArraysAreNotWellSupportedTooltip' | i18n: { defaultMessage: 'Objects in arrays are not well supported.' } }}"
           class="fa fa-warning text-color-warning kbnDocViewer__objectArray"></i>
-        <div class="kbnDocViewer__value" ng-bind-html="typeof(formatted[field]) === 'undefined' ? hit[field] : formatted[field] | trustAsHtml"></div>
+        <div class="kbnDocViewer__value" ng-class="{ 'truncate-by-height': enableDocValueCollapse(field) && !fieldRowOpen[field] }" ng-bind-html="typeof(formatted[field]) === 'undefined' ? hit[field] : formatted[field] | trustAsHtml"></div>
       </td>
     </tr>
   </tbody>
