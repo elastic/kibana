@@ -83,8 +83,8 @@ pipeline {
 //              def d = load("${env.GROOVY_SRC}/dump.groovy")
 //              d.dumpEnv()
 //            }
-           checkoutES()
-            // checkoutKibana()
+          //  checkoutES()
+            checkoutKibana()
           }
         }
         stage('Quick Test') {
@@ -99,12 +99,23 @@ pipeline {
 }
 
 def checkoutKibana() {
-  useCache('source') {
-    gitCheckout(basedir: "${BASE_DIR}", branch: params.branch_specifier,
-      repo: "${GIT_URL}",
-      credentialsId: "${JOB_GIT_CREDENTIALS}",
-      reference: "/var/lib/jenkins/.git-references/kibana.git")
-    stash allowEmpty: true, name: 'source', excludes: "${BASE_DIR}/.git,node/**", useDefaultExcludes: false
+  // useCache('source') {
+  //   dir("${BASE_DIR}"){
+  //     checkout([$class: 'GitSCM', branches: [[name: params.branch_specifier]],,
+  //       repo: "${GIT_URL}",
+  //       credentialsId: "${JOB_GIT_CREDENTIALS}",
+  //       reference: "/var/lib/jenkins/.git-references/kibana.git")
+  //     sh 'pwd'
+  //     stash allowEmpty: true, name: 'source', excludes: "${BASE_DIR}/.git,node/**", useDefaultExcludes: false
+  //   }
+  // }
+  useCache('source'){
+    dir("${BASE_DIR}"){
+      checkout([$class: 'GitSCM', branches: [[name: params.branch_specifier]],
+        userRemoteConfigs: [[credentialsId: "${JOB_GIT_CREDENTIALS}", url: "${GIT_URL}"]]])
+      sh 'echo "### pwd: $(pwd)"'
+      stash allowEmpty: true, name: 'source', includes: "${BASE_DIR}/.git,node/**", excludes: ".git", useDefaultExcludes: false
+    }
   }
 
   dir("${BASE_DIR}") {
@@ -113,7 +124,7 @@ def checkoutKibana() {
     env.YARN_VERSION = packageJson.engines.yarn
   }
 
-  installNodeJs("${NODE_VERSION}", ["yarn@${YARN_VERSION}"])
+  installNodeJs("${env.NODE_VERSION}", ["yarn@${env.YARN_VERSION}"])
 
   dir("${BASE_DIR}") {
     def yarnBinPath = sh(script: 'yarn bin', returnStdout: true)
@@ -210,4 +221,27 @@ def useCache(String name, Closure body) {
     currentBuild.result = "SUCCESS"
   }
   return isCacheUsed
+}
+def readJSON(params){
+  def jsonSlurper = new groovy.json.JsonSlurper()
+  def jsonText = params.text
+//  sh '### params.file: ${params.file}'
+//  if(params.file){
+//    File f = new File("src/test/resources/${params.file}")
+//    jsonText = f.getText()
+//  }
+  return jsonSlurper.parseText(jsonText)
+}
+/**
+  Define NodeJs environment variables.
+*/
+def nodeEnviromentVars(nodeVersion){
+  /** TODO this enviroment variables could change on diferent type of agents, so maybe it is better to move then to the stage*/
+  if(env.ORG_PATH == null){
+    env.ORG_PATH = env.PATH
+  }
+  env.NODE_DIR="${WORKSPACE}/node/${nodeVersion}"
+  env.NODE_BIN="${NODE_DIR}/bin"
+  env.PATH="${NODE_BIN}:${WORKSPACE}/${BASE_DIR}/node_modules/.bin:${NODE_DIR}/lib/node_modules/yarn/bin:${ORG_PATH}"
+  sh 'export'
 }
