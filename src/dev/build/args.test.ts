@@ -29,120 +29,125 @@ const fn = (...subArgs: string[]) => {
 
 it('renders help if `--help` passed', () => {
   expect(fn('--help')).toMatchInlineSnapshot(`
-Object {
-  "log": "undefined",
-  "showHelp": true,
-  "unknownFlags": Array [],
-}
-`);
+    Object {
+      "log": "undefined",
+      "showHelp": true,
+      "unknownFlags": Array [],
+    }
+  `);
 });
 
 it('build default and oss dist for current platform, without packages, by default', () => {
   expect(fn()).toMatchInlineSnapshot(`
-Object {
-  "buildArgs": Object {
-    "buildDefaultDist": true,
-    "buildOssDist": true,
-    "createArchives": true,
-    "createDebPackage": false,
-    "createDockerPackage": false,
-    "createRpmPackage": false,
-    "downloadFreshNode": true,
-    "isRelease": false,
-    "targetAllPlatforms": false,
-    "versionQualifier": "",
-  },
-  "log": "<ToolingLog>",
-  "showHelp": false,
-  "unknownFlags": Array [],
-}
-`);
+    Object {
+      "buildArgs": Object {
+        "buildDefaultDist": true,
+        "buildOssDist": true,
+        "createArchives": true,
+        "createDebPackage": false,
+        "createDockerPackage": false,
+        "createRpmPackage": false,
+        "downloadFreshNode": true,
+        "installDir": undefined,
+        "isRelease": false,
+        "targetAllPlatforms": false,
+        "versionQualifier": "",
+      },
+      "log": "<ToolingLog>",
+      "showHelp": false,
+      "unknownFlags": Array [],
+    }
+  `);
 });
 
 it('builds packages if --all-platforms is passed', () => {
   expect(fn('--all-platforms')).toMatchInlineSnapshot(`
-Object {
-  "buildArgs": Object {
-    "buildDefaultDist": true,
-    "buildOssDist": true,
-    "createArchives": true,
-    "createDebPackage": true,
-    "createDockerPackage": true,
-    "createRpmPackage": true,
-    "downloadFreshNode": true,
-    "isRelease": false,
-    "targetAllPlatforms": true,
-    "versionQualifier": "",
-  },
-  "log": "<ToolingLog>",
-  "showHelp": false,
-  "unknownFlags": Array [],
-}
-`);
+    Object {
+      "buildArgs": Object {
+        "buildDefaultDist": true,
+        "buildOssDist": true,
+        "createArchives": true,
+        "createDebPackage": true,
+        "createDockerPackage": true,
+        "createRpmPackage": true,
+        "downloadFreshNode": true,
+        "installDir": undefined,
+        "isRelease": false,
+        "targetAllPlatforms": true,
+        "versionQualifier": "",
+      },
+      "log": "<ToolingLog>",
+      "showHelp": false,
+      "unknownFlags": Array [],
+    }
+  `);
 });
 
 it('limits packages if --rpm passed with --all-platforms', () => {
   expect(fn('--all-platforms', '--rpm')).toMatchInlineSnapshot(`
-Object {
-  "buildArgs": Object {
-    "buildDefaultDist": true,
-    "buildOssDist": true,
-    "createArchives": true,
-    "createDebPackage": false,
-    "createDockerPackage": false,
-    "createRpmPackage": true,
-    "downloadFreshNode": true,
-    "isRelease": false,
-    "targetAllPlatforms": true,
-    "versionQualifier": "",
-  },
-  "log": "<ToolingLog>",
-  "showHelp": false,
-  "unknownFlags": Array [],
-}
-`);
+    Object {
+      "buildArgs": Object {
+        "buildDefaultDist": true,
+        "buildOssDist": true,
+        "createArchives": true,
+        "createDebPackage": false,
+        "createDockerPackage": false,
+        "createRpmPackage": true,
+        "downloadFreshNode": true,
+        "installDir": undefined,
+        "isRelease": false,
+        "targetAllPlatforms": true,
+        "versionQualifier": "",
+      },
+      "log": "<ToolingLog>",
+      "showHelp": false,
+      "unknownFlags": Array [],
+    }
+  `);
 });
 
 it('limits packages if --deb passed with --all-platforms', () => {
   expect(fn('--all-platforms', '--deb')).toMatchInlineSnapshot(`
-Object {
-  "buildArgs": Object {
-    "buildDefaultDist": true,
-    "buildOssDist": true,
-    "createArchives": true,
-    "createDebPackage": true,
-    "createDockerPackage": false,
-    "createRpmPackage": false,
-    "downloadFreshNode": true,
-    "isRelease": false,
-    "targetAllPlatforms": true,
-    "versionQualifier": "",
-  },
-  "log": "<ToolingLog>",
-  "showHelp": false,
-  "unknownFlags": Array [],
-}
-`);
+    Object {
+      "buildArgs": Object {
+        "buildDefaultDist": true,
+        "buildOssDist": true,
+        "createArchives": true,
+        "createDebPackage": true,
+        "createDockerPackage": false,
+        "createRpmPackage": false,
+        "downloadFreshNode": true,
+        "installDir": undefined,
+        "isRelease": false,
+        "targetAllPlatforms": true,
+        "versionQualifier": "",
+      },
+      "log": "<ToolingLog>",
+      "showHelp": false,
+      "unknownFlags": Array [],
+    }
+  `);
 });
 
 it('limits packages if --docker passed with --all-platforms', () => {
   expect(fn('--all-platforms', '--docker')).toMatchInlineSnapshot(`
-Object {
-  "buildArgs": Object {
-    "buildDefaultDist": true,
-    "buildOssDist": true,
-    "createArchives": true,
-    "createDebPackage": false,
-    "createDockerPackage": true,
-    "createRpmPackage": false,
-    "downloadFreshNode": true,
-    "isRelease": false,
-    "targetAllPlatforms": true,
-    "versionQualifier": "",
-  },
-  "log": "<ToolingLog>",
-  "showHelp": false,
-  "unknownFlags": Array [],
-}
-`);
+    Object {
+      "buildArgs": Object {
+        "buildDefaultDist": true,
+        "buildOssDist": true,
+        "createArchives": true,
+        "createDebPackage": false,
+        "createDockerPackage": true,
+        "createRpmPackage": false,
+        "downloadFreshNode": true,
+        "installDir": undefined,
+        "isRelease": false,
+        "targetAllPlatforms": true,
+        "versionQualifier": "",
+      },
+      "log": "<ToolingLog>",
+      "showHelp": false,
+      "unknownFlags": Array [],
+    }
+  `);
 });
