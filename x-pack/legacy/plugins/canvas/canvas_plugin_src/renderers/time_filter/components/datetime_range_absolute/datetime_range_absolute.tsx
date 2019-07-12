@@ -50,7 +50,9 @@ export const DatetimeRangeAbsolute: FunctionComponent<Props> = ({ from, to, onSe
         minDate={from}
         onValueChange={val => onSelect(from, val)}
         onSelect={val => {
-          if (!val || !to) return;
+          if (!val || !to) {
+            return;
+          }
 
           // set the time to end of day if only the date was selected
           if (to.format('hh:mm:ss a') === val.format('hh:mm:ss a')) {
