@@ -94,7 +94,7 @@ export class DocLinksService {
           top_hits: `${ELASTICSEARCH_DOCS}search-aggregations-metrics-top-hits-aggregation.html`,
         },
         scriptedFields: {
-          scriptFields: `${ELASTICSEARCH_DOCS}search-request-body.html#search-request-script-fields`,
+          scriptFields: `${ELASTICSEARCH_DOCS}search-request-script-fields.html`,
           scriptAggs: `${ELASTICSEARCH_DOCS}search-aggregations.html#_values_source`,
           painless: `${ELASTICSEARCH_DOCS}modules-scripting-painless.html`,
           painlessApi: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/painless/${DOC_LINK_VERSION}/painless-api-reference.html`,
