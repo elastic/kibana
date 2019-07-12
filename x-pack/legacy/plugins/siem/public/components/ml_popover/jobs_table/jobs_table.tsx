@@ -25,6 +25,9 @@ const JobNameWrapper = styled.div`
   margin: 5px 0;
 `;
 
+// TODO: Use SASS mixin @include EuiTextTruncate when we switch from styled components
+const truncateThreshold = 200;
+
 const getJobsTableColumns = (
   isLoading: boolean,
   onJobStateChange: (jobName: string, latestTimestampMs: number, enable: boolean) => void
@@ -37,7 +40,9 @@ const getJobsTableColumns = (
           <EuiText size="s">{id}</EuiText>
         </EuiLink>
         <EuiText color="subdued" size="xs">
-          {description}
+          {description.length > truncateThreshold
+            ? `${description.substring(0, truncateThreshold)}...`
+            : description}
         </EuiText>
       </JobNameWrapper>
     ),
@@ -86,6 +91,7 @@ export const JobsTable = React.memo(({ isLoading, jobs, onJobStateChange }: JobT
       loading={isLoading}
       noItemsMessage={<NoItemsMessage />}
       pagination={pagination}
+      responsive={false}
       onChange={({ page }: { page: { index: number } }) => {
         setPageIndex(page.index);
       }}
@@ -98,7 +104,7 @@ export const NoItemsMessage = React.memo(() => (
     title={<h3>{i18n.NO_ITEMS_TEXT}</h3>}
     titleSize="xs"
     actions={
-      <EuiButton size="s" href={'ml#/jobs/new_job/step/index_or_search'} target="_blank">
+      <EuiButton size="s" href={'ml#/jobs/new_job/step/index_or_search'}>
         {i18n.CREATE_CUSTOM_JOB}
       </EuiButton>
     }

@@ -60,18 +60,38 @@ describe('helpers', () => {
 
   describe('getJobsToDisplay', () => {
     test('returns empty array when null summaryData provided', () => {
-      const jobsToDisplay = getJobsToDisplay(null, mockEmbeddedJobIds, false);
+      const jobsToDisplay = getJobsToDisplay(null, mockEmbeddedJobIds, false, false);
       expect(jobsToDisplay.length).toEqual(0);
     });
 
+    test('returns all DisplayJobs', () => {
+      const jobsToDisplay = getJobsToDisplay(
+        mockJobsSummaryResponse,
+        mockEmbeddedJobIds,
+        false,
+        false
+      );
+      expect(jobsToDisplay.length).toEqual(4);
+    });
+
     test('returns DisplayJobs matching only embeddedJobs', () => {
-      const jobsToDisplay = getJobsToDisplay(mockJobsSummaryResponse, mockEmbeddedJobIds, false);
+      const jobsToDisplay = getJobsToDisplay(
+        mockJobsSummaryResponse,
+        mockEmbeddedJobIds,
+        true,
+        false
+      );
       expect(jobsToDisplay.length).toEqual(3);
     });
 
-    test('returns all DisplayJobs from jobsSummary', () => {
-      const jobsToDisplay = getJobsToDisplay(mockJobsSummaryResponse, mockEmbeddedJobIds, true);
-      expect(jobsToDisplay.length).toEqual(4);
+    test('returns only custom DisplayJobs from jobsSummary', () => {
+      const jobsToDisplay = getJobsToDisplay(
+        mockJobsSummaryResponse,
+        mockEmbeddedJobIds,
+        false,
+        true
+      );
+      expect(jobsToDisplay.length).toEqual(1);
     });
   });
 

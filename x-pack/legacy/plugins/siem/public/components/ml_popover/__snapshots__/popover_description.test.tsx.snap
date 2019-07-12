@@ -12,7 +12,6 @@ exports[`FilterGroup renders correctly against snapshot 1`] = `
         "machineLearning": <EuiLink
           color="primary"
           href="/test/base/path/app/ml"
-          target="blank"
           type="button"
         >
           <FormattedMessage

@@ -105,6 +105,6 @@ exports[`JobsTable renders correctly against snapshot 1`] = `
       "totalItemCount": 4,
     }
   }
-  responsive={true}
+  responsive={false}
 />
 `;

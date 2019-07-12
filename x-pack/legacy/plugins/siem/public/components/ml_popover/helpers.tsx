@@ -35,18 +35,21 @@ export const getConfigTemplatesToInstall = (
  *
  * @param jobs to filter
  * @param embeddedJobIds jobIds as defined in the ConfigTemplates provided by the ML Team
- * @param showAllJobs whether or not to show all Custom Jobs, or just the embedded Elastic Jobs
+ * @param showCustomJobs whether or not to show all Custom Jobs, or just the embedded Elastic Jobs
  * @param filterQuery user-provided search string to filter for occurrence in job names/description
  */
 export const getJobsToDisplay = (
   jobs: Job[] | null,
   embeddedJobIds: string[],
-  showAllJobs: boolean,
+  showCustomJobs: boolean,
+  showElasticJobs: boolean,
   filterQuery?: string
 ): Job[] =>
   jobs
     ? searchFilter(
-        jobs.filter(job => (showAllJobs ? true : embeddedJobIds.includes(job.id))),
+        jobs
+          .filter(job => (showCustomJobs ? embeddedJobIds.includes(job.id) : true))
+          .filter(job => (showElasticJobs ? !embeddedJobIds.includes(job.id) : true)),
         filterQuery
       )
     : [];

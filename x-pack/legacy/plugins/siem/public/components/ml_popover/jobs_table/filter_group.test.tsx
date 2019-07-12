@@ -12,7 +12,13 @@ import { FilterGroup } from './filter_group';
 describe('FilterGroup', () => {
   test('renders correctly against snapshot', () => {
     const wrapper = shallow(
-      <FilterGroup showAllJobs={true} setShowAllJobs={jest.fn()} setFilterQuery={jest.fn()} />
+      <FilterGroup
+        showCustomJobs={true}
+        setShowCustomJobs={jest.fn()}
+        showElasticJobs={true}
+        setShowElasticJobs={jest.fn()}
+        setFilterQuery={jest.fn()}
+      />
     );
     expect(toJson(wrapper)).toMatchSnapshot();
   });
@@ -21,8 +27,10 @@ describe('FilterGroup', () => {
     const mockSetShowAllJobs = jest.fn();
     const wrapper = mount(
       <FilterGroup
-        showAllJobs={false}
-        setShowAllJobs={mockSetShowAllJobs}
+        showCustomJobs={false}
+        setShowCustomJobs={mockSetShowAllJobs}
+        showElasticJobs={false}
+        setShowElasticJobs={mockSetShowAllJobs}
         setFilterQuery={jest.fn()}
       />
     );

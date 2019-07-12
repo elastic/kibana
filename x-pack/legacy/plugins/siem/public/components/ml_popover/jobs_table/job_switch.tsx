@@ -4,9 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import styled from 'styled-components';
 import React, { useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiSwitch } from '@elastic/eui';
 import { Job } from '../types';
+
+const StaticSwitch = styled(EuiSwitch)`
+  .euiSwitch__thumb,
+  .euiSwitch__icon {
+    transition: none;
+  }
+`;
 
 export interface JobSwitchProps {
   job: Job;
@@ -41,7 +49,7 @@ export const JobSwitch = React.memo<JobSwitchProps>(
           {isSummaryLoading || isLoading || isJobLoading(job.jobState, job.datafeedId) ? (
             <EuiLoadingSpinner size="m" data-test-subj="job-switch-loader" />
           ) : (
-            <EuiSwitch
+            <StaticSwitch
               data-test-subj="job-switch"
               disabled={isFailure(job.jobState, job.datafeedState)}
               checked={isChecked(job.jobState, job.datafeedState)}

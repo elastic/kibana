@@ -27,10 +27,11 @@ exports[`FilterGroup renders correctly against snapshot 1`] = `
         color="text"
         data-test-subj="show-custom-jobs-filter-button"
         grow={true}
-        hasActiveFilters={false}
+        hasActiveFilters={true}
         iconSide="right"
         onClick={[Function]}
         type="button"
+        withNext={true}
       >
         Elastic Jobs
       </EuiFilterButton>

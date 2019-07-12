@@ -26,7 +26,7 @@ import { getConfigTemplatesToInstall, getJobsToDisplay, getJobsToInstall } from 
 import { configTemplates, siemJobPrefix } from './config_templates';
 
 const PopoverContentsDiv = styled.div`
-  width: 550px;
+  max-width: 550px;
 `;
 
 interface State {
@@ -84,7 +84,8 @@ export const MlPopover = React.memo(() => {
   const [{ refreshToggle }, dispatch] = useReducer(mlPopoverReducer, initialState);
 
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-  const [showAllJobs, setShowAllJobs] = useState(false);
+  const [showCustomJobs, setShowCustomJobs] = useState(false);
+  const [showElasticJobs, setShowElasticJobs] = useState(false);
   const [isLoadingJobSummaryData, jobSummaryData] = useJobSummaryData([], refreshToggle);
   const [isCreatingJobs, setIsCreatingJobs] = useState(false);
   const [filterQuery, setFilterQuery] = useState('');
@@ -126,7 +127,13 @@ export const MlPopover = React.memo(() => {
   );
 
   // Filter installed job to show all 'siem' group jobs or just embedded
-  const jobsToDisplay = getJobsToDisplay(jobSummaryData, embeddedJobIds, showAllJobs, filterQuery);
+  const jobsToDisplay = getJobsToDisplay(
+    jobSummaryData,
+    embeddedJobIds,
+    showCustomJobs,
+    showElasticJobs,
+    filterQuery
+  );
 
   // Install Config Templates as effect of opening popover
   useEffect(() => {
@@ -203,17 +210,19 @@ export const MlPopover = React.memo(() => {
           <EuiPopoverTitle>{i18n.ANOMALY_DETECTION_TITLE}</EuiPopoverTitle>
           <PopoverDescription />
 
-          <EuiSpacer size="m" />
+          <EuiSpacer />
 
           <FilterGroup
-            showAllJobs={showAllJobs}
-            setShowAllJobs={setShowAllJobs}
+            showCustomJobs={showCustomJobs}
+            setShowCustomJobs={setShowCustomJobs}
+            showElasticJobs={showElasticJobs}
+            setShowElasticJobs={setShowElasticJobs}
             setFilterQuery={setFilterQuery}
           />
 
           <ShowingCount filterResultsLength={jobsToDisplay.length} />
 
-          <EuiSpacer size="s" />
+          <EuiSpacer />
 
           <JobsTable
             isLoading={isCreatingJobs || isLoadingJobSummaryData}

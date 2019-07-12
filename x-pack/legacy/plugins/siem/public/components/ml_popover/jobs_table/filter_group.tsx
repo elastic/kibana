@@ -18,13 +18,15 @@ import { EuiSearchBarQuery } from '../../open_timeline/types';
 import * as i18n from '../translations';
 
 interface FilterGroupProps {
-  showAllJobs: boolean;
-  setShowAllJobs: (showAllJobs: boolean) => void;
+  showCustomJobs: boolean;
+  setShowCustomJobs: (showCustomJobs: boolean) => void;
+  showElasticJobs: boolean;
+  setShowElasticJobs: (showCustomJobs: boolean) => void;
   setFilterQuery: (filterQuery: string) => void;
 }
 
 export const FilterGroup = React.memo<FilterGroupProps>(
-  ({ showAllJobs, setShowAllJobs, setFilterQuery }) => (
+  ({ showCustomJobs, setShowCustomJobs, showElasticJobs, setShowElasticJobs, setFilterQuery }) => (
     <EuiFlexGroup gutterSize="m" justifyContent="flexEnd">
       <EuiFlexItem grow={true}>
         <EuiSearchBar
@@ -40,15 +42,22 @@ export const FilterGroup = React.memo<FilterGroupProps>(
       <EuiFlexItem grow={false}>
         <EuiFilterGroup>
           <EuiFilterButton
-            hasActiveFilters={!showAllJobs}
-            onClick={() => setShowAllJobs(false)}
+            hasActiveFilters={showCustomJobs}
+            onClick={() => {
+              setShowCustomJobs(!showCustomJobs);
+              setShowElasticJobs(false);
+            }}
             data-test-subj="show-custom-jobs-filter-button"
+            withNext
           >
             {i18n.SHOW_ELASTIC_JOBS}
           </EuiFilterButton>
           <EuiFilterButton
-            hasActiveFilters={showAllJobs}
-            onClick={() => setShowAllJobs(true)}
+            hasActiveFilters={showElasticJobs}
+            onClick={() => {
+              setShowElasticJobs(!showElasticJobs);
+              setShowCustomJobs(false);
+            }}
             data-test-subj="show-elastic-jobs-filter-button"
           >
             {i18n.SHOW_CUSTOM_JOBS}

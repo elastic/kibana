@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 export const ANOMALY_DETECTION = i18n.translate(
   'xpack.siem.components.mlPopup.anomalyDetectionButtonLabel',
   {
-    defaultMessage: 'Anomaly Detection',
+    defaultMessage: 'Anomaly detection',
   }
 );
 
@@ -75,6 +75,6 @@ export const NO_ITEMS_TEXT = i18n.translate(
 export const CREATE_CUSTOM_JOB = i18n.translate(
   'xpack.siem.components.mlPopup.jobsTable.createCustomJobButtonLabel',
   {
-    defaultMessage: 'Create Custom Job',
+    defaultMessage: 'Create custom job',
   }
 );
