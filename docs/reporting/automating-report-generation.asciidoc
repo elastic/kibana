@@ -41,10 +41,9 @@ include::script-example.asciidoc[]
 [float]
 == Deprecated Report URLs
 
-The following is deprecated in 6.0, and you should now use {kib} to get the URL for a
-particular report.
-
-You may request PDF reports optimized for printing through three {reporting} endpoints:
+The following POST URL paths were once supported but are now deprecated. If there are
+any problems with using these paths after upgrading, you should use {kib} to
+re-generate the POST URL for a particular report.
 
 * Dashboard Reports:  `/api/reporting/generate/dashboard/<dashboard-id>`
 * Visualization Reports:  `/api/reporting/generate/visualization/<visualization-id>`
