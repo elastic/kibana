@@ -19,8 +19,13 @@ export function spaceIdToNamespace(spaceId: string): string | undefined {
 }
 
 export function namespaceToSpaceId(namespace: string | undefined): string {
+  if (namespace === '') {
+    throw new TypeError('namespace cannot be an empty string');
+  }
+
   if (!namespace) {
     return DEFAULT_SPACE_ID;
   }
+
   return namespace;
 }

@@ -39,4 +39,10 @@ describe('#namespaceToSpaceId', () => {
   it('returns all other namespaces as-is', () => {
     expect(namespaceToSpaceId('foo')).toEqual('foo');
   });
+
+  it('throws an error when an empty string is provided', () => {
+    expect(() => namespaceToSpaceId('')).toThrowErrorMatchingInlineSnapshot(
+      `"namespace cannot be an empty string"`
+    );
+  });
 });
