@@ -21,10 +21,7 @@ const { join } = require('path');
 const Rx = require('rxjs');
 const { first } = require('rxjs/operators');
 const storybook = require('@storybook/react/standalone');
-
-require('../../src/setup_node_env');
 const { run } = require('../../src/dev/run');
-
 const { generateStorybookEntry } = require('./lib/storybook_entry');
 const { REPO_ROOT } = require('./lib/constants');
 const { buildDll } = require('./lib/dll');
@@ -32,6 +29,8 @@ const { buildDll } = require('./lib/dll');
 exports.runStorybookCli = ({ name, storyGlobs }) => {
   run(
     async ({ flags, log, procRunner }) => {
+      log.info('Global config:\n', require('./lib/constants'));
+
       await buildDll({
         rebuildDll: flags.rebuildDll,
         log,
