@@ -18,14 +18,6 @@
  */
 
 import _ from 'lodash';
-import {
-  APPLY_FILTER_TRIGGER,
-  Embeddable,
-  EmbeddableInput,
-  EmbeddableOutput,
-  Trigger,
-  Container,
-} from 'plugins/embeddable_api';
 import { StaticIndexPattern } from 'ui/index_patterns';
 import { PersistedState } from 'ui/persisted_state';
 import { VisualizeLoader } from 'ui/visualize/loader';
@@ -40,6 +32,14 @@ import * as Rx from 'rxjs';
 import { TimeRange } from 'ui/timefilter/time_history';
 import { Query } from 'src/legacy/core_plugins/data/public';
 import { Filter } from '@kbn/es-query';
+import {
+  APPLY_FILTER_TRIGGER,
+  Embeddable,
+  EmbeddableInput,
+  EmbeddableOutput,
+  Trigger,
+  Container,
+} from '../../../../embeddable_api/public';
 import { VISUALIZE_EMBEDDABLE_TYPE } from './constants';
 
 const getKeys = <T extends {}>(o: T): Array<keyof T> => Object.keys(o) as Array<keyof T>;
@@ -65,6 +65,7 @@ export interface VisualizeOutput extends EmbeddableOutput {
   editUrl: string;
   indexPatterns?: StaticIndexPattern[];
   savedObjectId: string;
+  visTypeName: string;
 }
 
 export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOutput> {
@@ -98,6 +99,7 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
         indexPatterns,
         editable,
         savedObjectId: savedVisualization.id!,
+        visTypeName: savedVisualization.vis.type.name,
       },
       parent
     );

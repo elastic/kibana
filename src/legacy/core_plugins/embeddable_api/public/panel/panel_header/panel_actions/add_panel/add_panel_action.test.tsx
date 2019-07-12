@@ -116,5 +116,5 @@ test('Returns title', async () => {
 
 test('Returns an icon', async () => {
   const action = new AddPanelAction();
-  expect(action.getIcon()).toBeDefined();
+  expect(action.getIconType()).toBeDefined();
 });

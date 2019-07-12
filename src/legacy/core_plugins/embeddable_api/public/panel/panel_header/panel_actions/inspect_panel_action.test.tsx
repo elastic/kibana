@@ -125,5 +125,5 @@ test('Returns title', async () => {
 
 test('Returns an icon', async () => {
   const inspectAction = new InspectPanelAction();
-  expect(inspectAction.getIcon()).toBeDefined();
+  expect(inspectAction.getIconType()).toBeDefined();
 });

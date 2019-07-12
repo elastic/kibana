@@ -16,10 +16,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
-import { EuiIcon } from '@elastic/eui';
-import React from 'react';
-
 import { i18n } from '@kbn/i18n';
 import { Inspector } from 'ui/inspector';
 import { Action, ActionContext } from '../../../actions';
@@ -39,8 +35,8 @@ export class InspectPanelAction extends Action {
     });
   }
 
-  public getIcon() {
-    return <EuiIcon type="inspect" />;
+  public getIconType() {
+    return 'inspect';
   }
 
   public async isCompatible({ embeddable }: ActionContext) {

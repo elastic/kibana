@@ -17,42 +17,42 @@
  * under the License.
  */
 
-import { EuiIcon } from '@elastic/eui';
-import React from 'react';
-
 import { i18n } from '@kbn/i18n';
-import { ViewMode } from '../../../../types';
 import { Action, ActionContext } from '../../../../actions';
-import { openAddPanelFlyout } from './open_add_panel_flyout';
+import { ViewMode } from '../../../../types';
+import { getUserData } from './get_user_data';
 
-export const ADD_PANEL_ACTION_ID = 'ADD_PANEL_ACTION_ID';
+const CUSTOMIZE_PANEL_ACTION_ID = 'CUSTOMIZE_PANEL_ACTION_ID';
 
-export class AddPanelAction extends Action {
-  public readonly type = ADD_PANEL_ACTION_ID;
-
-  constructor() {
-    super(ADD_PANEL_ACTION_ID);
+export class CustomizePanelTitleAction extends Action {
+  public readonly type = CUSTOMIZE_PANEL_ACTION_ID;
+  private getDataFromUser: (context: ActionContext) => Promise<{ title: string | undefined }>;
+  constructor(
+    getDataFromUser: (
+      context: ActionContext
+    ) => Promise<{ title: string | undefined }> = getUserData
+  ) {
+    super(CUSTOMIZE_PANEL_ACTION_ID);
+    this.order = 10;
+    this.getDataFromUser = getDataFromUser;
   }
 
   public getDisplayName() {
-    return i18n.translate('embeddableApi.addPanel.displayName', {
-      defaultMessage: 'Add panel',
+    return i18n.translate('embeddableApi.customizePanel.action.displayName', {
+      defaultMessage: 'Customize panel',
     });
   }
 
-  public getIcon() {
-    return <EuiIcon type="plusInCircleFilled" />;
+  public getIconType() {
+    return 'pencil';
   }
 
   public async isCompatible({ embeddable }: ActionContext) {
-    return embeddable.getIsContainer() && embeddable.getInput().viewMode === ViewMode.EDIT;
+    return embeddable.getInput().viewMode === ViewMode.EDIT ? true : false;
   }
 
   public async execute({ embeddable }: ActionContext) {
-    if (!embeddable.getIsContainer() || !(await this.isCompatible({ embeddable }))) {
-      throw new Error('Context is incompatible');
-    }
-
-    openAddPanelFlyout(embeddable);
+    const customTitle = await this.getDataFromUser({ embeddable });
+    embeddable.updateInput(customTitle);
   }
 }

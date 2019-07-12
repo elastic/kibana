@@ -3,7 +3,6 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React from 'react';
 import dateMath from '@elastic/datemath';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment-timezone';
@@ -11,7 +10,6 @@ import moment from 'moment-timezone';
 import { kfetch } from 'ui/kfetch';
 import { toastNotifications } from 'ui/notify';
 import chrome from 'ui/chrome';
-import { EuiIcon } from '@elastic/eui';
 import {
   ISearchEmbeddable,
   SEARCH_EMBEDDABLE_TYPE,
@@ -49,8 +47,8 @@ class GetCsvReportPanelAction extends Action<ISearchEmbeddable> {
     this.isDownloading = false;
   }
 
-  public getIcon() {
-    return <EuiIcon type="document" />;
+  public getIconType() {
+    return 'document';
   }
 
   public getDisplayName() {

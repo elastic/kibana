@@ -99,5 +99,5 @@ test('Returns title', async () => {
 
 test('Returns an icon', async () => {
   const action = new ExpandPanelAction();
-  expect(action.getIcon({ embeddable })).toBeDefined();
+  expect(action.getIconType({ embeddable })).toBeDefined();
 });

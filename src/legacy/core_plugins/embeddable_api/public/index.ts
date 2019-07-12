@@ -38,6 +38,7 @@ export {
   triggerRegistry,
   executeTriggerActions,
   CONTEXT_MENU_TRIGGER,
+  PANEL_BADGE_TRIGGER,
   attachAction,
 } from './triggers';
 

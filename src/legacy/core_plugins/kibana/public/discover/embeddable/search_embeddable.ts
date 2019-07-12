@@ -39,6 +39,7 @@ import * as columnActions from '../doc_table/actions/columns';
 import { SavedSearch } from '../types';
 import searchTemplate from './search_template.html';
 import { ISearchEmbeddable, SearchInput, SearchOutput } from './types';
+import { SEARCH_EMBEDDABLE_TYPE } from './constants';
 
 interface SearchScope extends ng.IScope {
   columns?: string[];
@@ -76,8 +77,6 @@ interface SearchEmbeddableConfig {
   editable: boolean;
   queryFilter: unknown;
 }
-
-export const SEARCH_EMBEDDABLE_TYPE = 'search';
 
 export class SearchEmbeddable extends Embeddable<SearchInput, SearchOutput>
   implements ISearchEmbeddable {

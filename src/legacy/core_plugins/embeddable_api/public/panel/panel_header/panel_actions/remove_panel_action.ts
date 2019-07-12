@@ -16,9 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiIcon } from '@elastic/eui';
 import { ContainerInput, IContainer } from '../../../containers';
 import { ViewMode } from '../../../types';
 import { Action, ActionContext, IncompatibleActionError } from '../../../actions';
@@ -49,8 +47,8 @@ export class RemovePanelAction extends Action {
     });
   }
 
-  public getIcon() {
-    return <EuiIcon type="trash" />;
+  public getIconType() {
+    return 'trash';
   }
 
   public async isCompatible({ embeddable }: ActionContext) {

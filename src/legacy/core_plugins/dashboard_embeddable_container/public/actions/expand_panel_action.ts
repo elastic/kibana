@@ -17,9 +17,7 @@
  * under the License.
  */
 
-import { EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
 import {
   Action,
   IEmbeddable,
@@ -72,12 +70,12 @@ export class ExpandPanelAction extends Action {
         );
   }
 
-  public getIcon({ embeddable }: ActionContext) {
+  public getIconType({ embeddable }: ActionContext) {
     if (!embeddable.parent || !isDashboard(embeddable.parent)) {
       throw new IncompatibleActionError();
     }
     // TODO: use 'minimize' when an eui-icon of such is available.
-    return <EuiIcon type={isExpanded(embeddable) ? 'expand' : 'expand'} />;
+    return isExpanded(embeddable) ? 'expand' : 'expand';
   }
 
   public async isCompatible({ embeddable }: ActionContext) {

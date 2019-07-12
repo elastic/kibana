@@ -17,11 +17,13 @@
  * under the License.
  */
 
-import { EuiContextMenuPanelDescriptor } from '@elastic/eui';
+import { EuiContextMenuPanelDescriptor, EuiBadge } from '@elastic/eui';
 import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import classNames from 'classnames';
 import React from 'react';
 import { PanelOptionsMenu } from './panel_options_menu';
+import { Action } from '../../actions';
+import { IEmbeddable } from '../../embeddables';
 
 export interface PanelHeaderProps {
   title?: string;
@@ -29,10 +31,27 @@ export interface PanelHeaderProps {
   hidePanelTitles: boolean;
   getActionContextMenuPanel: () => Promise<EuiContextMenuPanelDescriptor>;
   closeContextMenu: boolean;
+  badges: Action[];
+  embeddable: IEmbeddable;
 }
 
 interface PanelHeaderUiProps extends PanelHeaderProps {
   intl: InjectedIntl;
+}
+
+function renderBadges(badges: Action[], embeddable: IEmbeddable) {
+  return badges.map(badge => (
+    <EuiBadge
+      key={badge.id}
+      iconType={badge.getIconType({ embeddable })}
+      iconOnClick={() => badge.execute({ embeddable })}
+      iconOnClickAriaLabel={badge.getDisplayName({ embeddable })}
+      onClick={() => badge.execute({ embeddable })}
+      onClickAriaLabel={badge.getDisplayName({ embeddable })}
+    >
+      {badge.getDisplayName({ embeddable })}
+    </EuiBadge>
+  ));
 }
 
 function PanelHeaderUi({
@@ -42,12 +61,17 @@ function PanelHeaderUi({
   getActionContextMenuPanel,
   intl,
   closeContextMenu,
+  badges,
+  embeddable,
 }: PanelHeaderUiProps) {
   const classes = classNames('embPanel__header', {
-    'embPanel__header--floater': !title || hidePanelTitles,
+    'embPanel__header--floater': (!title || hidePanelTitles) && badges.length === 0,
   });
 
-  if (isViewMode && (!title || hidePanelTitles)) {
+  const showTitle = !isViewMode || (title && !hidePanelTitles);
+  const showPanelBar = badges.length > 0 || showTitle;
+
+  if (!showPanelBar) {
     return (
       <div className={classes}>
         <PanelOptionsMenu
@@ -78,7 +102,8 @@ function PanelHeaderUi({
           }
         )}
       >
-        {hidePanelTitles ? '' : title}
+        {showTitle ? title : ''}
+        {renderBadges(badges, embeddable)}
       </div>
 
       <PanelOptionsMenu

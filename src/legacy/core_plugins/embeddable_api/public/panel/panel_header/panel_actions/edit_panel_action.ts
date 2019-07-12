@@ -17,9 +17,7 @@
  * under the License.
  */
 
-import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiIcon } from '@elastic/eui';
 
 import { embeddableFactories } from '../../../embeddables/embeddable_factories_registry';
 import { Action, ActionContext } from '../../../actions';
@@ -48,8 +46,8 @@ export class EditPanelAction extends Action {
     });
   }
 
-  getIcon() {
-    return <EuiIcon type="pencil" />;
+  getIconType() {
+    return 'pencil';
   }
 
   public async isCompatible({ embeddable }: ActionContext) {

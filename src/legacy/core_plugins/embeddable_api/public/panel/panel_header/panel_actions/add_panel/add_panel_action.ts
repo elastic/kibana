@@ -16,45 +16,39 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
-import { EuiIcon } from '@elastic/eui';
-import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { Action, ActionContext } from '../../../../actions';
 import { ViewMode } from '../../../../types';
-import { getUserData } from './get_user_data';
+import { Action, ActionContext } from '../../../../actions';
+import { openAddPanelFlyout } from './open_add_panel_flyout';
 
-const CUSTOMIZE_PANEL_ACTION_ID = 'CUSTOMIZE_PANEL_ACTION_ID';
+export const ADD_PANEL_ACTION_ID = 'ADD_PANEL_ACTION_ID';
 
-export class CustomizePanelTitleAction extends Action {
-  public readonly type = CUSTOMIZE_PANEL_ACTION_ID;
-  private getDataFromUser: (context: ActionContext) => Promise<{ title: string | undefined }>;
-  constructor(
-    getDataFromUser: (
-      context: ActionContext
-    ) => Promise<{ title: string | undefined }> = getUserData
-  ) {
-    super(CUSTOMIZE_PANEL_ACTION_ID);
-    this.order = 10;
-    this.getDataFromUser = getDataFromUser;
+export class AddPanelAction extends Action {
+  public readonly type = ADD_PANEL_ACTION_ID;
+
+  constructor() {
+    super(ADD_PANEL_ACTION_ID);
   }
 
   public getDisplayName() {
-    return i18n.translate('embeddableApi.customizePanel.action.displayName', {
-      defaultMessage: 'Customize panel',
+    return i18n.translate('embeddableApi.addPanel.displayName', {
+      defaultMessage: 'Add panel',
     });
   }
 
-  public getIcon() {
-    return <EuiIcon type="pencil" />;
+  public getIconType() {
+    return 'plusInCircleFilled';
   }
 
   public async isCompatible({ embeddable }: ActionContext) {
-    return embeddable.getInput().viewMode === ViewMode.EDIT ? true : false;
+    return embeddable.getIsContainer() && embeddable.getInput().viewMode === ViewMode.EDIT;
   }
 
   public async execute({ embeddable }: ActionContext) {
-    const customTitle = await this.getDataFromUser({ embeddable });
-    embeddable.updateInput(customTitle);
+    if (!embeddable.getIsContainer() || !(await this.isCompatible({ embeddable }))) {
+      throw new Error('Context is incompatible');
+    }
+
+    openAddPanelFlyout(embeddable);
   }
 }

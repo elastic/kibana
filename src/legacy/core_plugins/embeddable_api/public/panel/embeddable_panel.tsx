@@ -22,7 +22,7 @@ import React from 'react';
 import { Subscription } from 'rxjs';
 import { buildContextMenuForActions } from '../context_menu_actions';
 
-import { CONTEXT_MENU_TRIGGER, triggerRegistry } from '../triggers';
+import { CONTEXT_MENU_TRIGGER, triggerRegistry, PANEL_BADGE_TRIGGER } from '../triggers';
 import { IEmbeddable } from '../embeddables/i_embeddable';
 import { ViewMode } from '../types';
 
@@ -30,7 +30,7 @@ import { RemovePanelAction } from './panel_header/panel_actions';
 import { AddPanelAction } from './panel_header/panel_actions/add_panel/add_panel_action';
 import { CustomizePanelTitleAction } from './panel_header/panel_actions/customize_title/customize_panel_action';
 import { PanelHeader } from './panel_header/panel_header';
-import { actionRegistry } from '../actions';
+import { actionRegistry, Action } from '../actions';
 import { InspectPanelAction } from './panel_header/panel_actions/inspect_panel_action';
 import { EditPanelAction } from './panel_header/panel_actions/edit_panel_action';
 import { getActionsForTrigger } from '../get_actions_for_trigger';
@@ -45,6 +45,7 @@ interface State {
   viewMode: ViewMode;
   hidePanelTitles: boolean;
   closeContextMenu: boolean;
+  badges: Action[];
 }
 
 export class EmbeddablePanel extends React.Component<Props, State> {
@@ -67,12 +68,13 @@ export class EmbeddablePanel extends React.Component<Props, State> {
       viewMode,
       hidePanelTitles,
       closeContextMenu: false,
+      badges: [],
     };
 
     this.embeddableRoot = React.createRef();
   }
 
-  public componentWillMount() {
+  public async componentWillMount() {
     this.mounted = true;
     const { embeddable } = this.props;
     const { parent } = embeddable;
@@ -82,6 +84,7 @@ export class EmbeddablePanel extends React.Component<Props, State> {
         this.setState({
           viewMode: embeddable.getInput().viewMode ? embeddable.getInput().viewMode : ViewMode.EDIT,
         });
+        this.refreshBadges();
       }
     });
 
@@ -91,7 +94,25 @@ export class EmbeddablePanel extends React.Component<Props, State> {
           this.setState({
             hidePanelTitles: Boolean(parent.getInput().hidePanelTitles),
           });
+          this.refreshBadges();
         }
+      });
+    }
+  }
+
+  private async refreshBadges() {
+    const badges = await getActionsForTrigger(
+      actionRegistry,
+      triggerRegistry,
+      PANEL_BADGE_TRIGGER,
+      {
+        embeddable: this.props.embeddable,
+      }
+    );
+
+    if (this.mounted) {
+      this.setState({
+        badges,
       });
     }
   }
@@ -122,6 +143,7 @@ export class EmbeddablePanel extends React.Component<Props, State> {
     const classes = classNames('embPanel', {
       'embPanel--editing': !viewOnlyMode,
     });
+
     const title = this.props.embeddable.getTitle();
     return (
       <EuiPanel className={classes} data-test-subj="embeddablePanel" paddingSize="none">
@@ -131,6 +153,8 @@ export class EmbeddablePanel extends React.Component<Props, State> {
           isViewMode={viewOnlyMode}
           closeContextMenu={this.state.closeContextMenu}
           title={title}
+          badges={this.state.badges}
+          embeddable={this.props.embeddable}
         />
         <div className="embPanel__content" ref={this.embeddableRoot} />
       </EuiPanel>

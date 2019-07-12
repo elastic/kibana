@@ -22,8 +22,16 @@ export { executeTriggerActions } from './execute_trigger_actions';
 
 export const CONTEXT_MENU_TRIGGER = 'CONTEXT_MENU_TRIGGER';
 export const APPLY_FILTER_TRIGGER = 'FITLER_TRIGGER';
+export const PANEL_BADGE_TRIGGER = 'PANEL_BADGE_TRIGGER';
+
 import { Trigger } from '../types';
 export const triggerRegistry = new Map<string, Trigger>();
+
+triggerRegistry.set(PANEL_BADGE_TRIGGER, {
+  id: PANEL_BADGE_TRIGGER,
+  title: 'Panel badges',
+  actionIds: [],
+});
 
 triggerRegistry.set(CONTEXT_MENU_TRIGGER, {
   id: CONTEXT_MENU_TRIGGER,
