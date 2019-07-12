@@ -10,6 +10,7 @@
 
 This section summarizes the changes in each release.
 
+* <<release-notes-7.2.1>>
 * <<release-notes-7.2.0>>
 * <<release-notes-7.1.1>>
 * <<release-notes-7.1.0>>
@@ -22,6 +23,59 @@ This section summarizes the changes in each release.
 * <<release-notes-7.0.0-alpha1>>
 
 --
+
+[[release-notes-7.2.1]]
+== {kib} 7.2.1
+
+coming[7.2.1]
+
+See also <<breaking-changes-7.2, breaking changes in 7.2>>.
+
+[float]
+[[enhancement-7.2.1]]
+=== Enhancements
+Machine Learning::
+* Only adds ML links for sample data sets if full license {pull}38120[#38120]
+* Adds check that forecast duration is no more than 3650 days {pull}38408[#38408]
+Observability::
+* Uptime: Adds error callout for filter bar {pull}38140[#38140]
+
+[float]
+[[bug-7.2.1]]
+=== Bug fixes
+Geo::
+* Uses default locale as fallback for EMS tile layers {pull}40433[#40433]
+Infra Logs UI::
+* Infra UI: Resets error when IP address changes to valid entry {pull}38022[#38022]
+Machine Learning::
+* Closes job after forecast errors if starting from closed {pull}38253[#38253]
+* Shows time range button on index data viz when not on full license {pull}38789[#38789]
+* Increases max data frame transforms in list from 100 to 1000 {pull}38973[#38973]
+* Data Frames: Fixes crash of the source table for complex field values {pull}39878[#39878]
+Management::
+* Console: Fixes field autocomplete suggestions {pull}38948[#38948]
+* Console: Fixes aggs autocompletion {pull}40816[#40816]
+* Console: Fixes bug caused by rapidly opening and closing the History tab {pull}38950[#38950]
+* Index Management: Improves user experiences for permissions error {pull}38916[#38916]
+* Index Management: Warns user before closing or deleting {kib} index {pull}39018[#39018]
+* License Management: Checks permissions before loading license management actions {pull}39183[#39183]
+* Search Profiler: Fixes placeholder color contrast accessibility in Index input {pull}38952[#38952]
+Monitoring::
+* Adds zoomout functionality to all charts {pull}39072[#39072]
+Platform::
+* Fixes custom vis types `buildPipeline` {pull}39874[#39874]
+Security::
+* Feature Controls: Automatically grants access to short urls {pull}37532[#37532]
+* Feature Controls: Only navigates to index pattern management if available {pull}40067[#40067]
+* Spaces: Fixes scenario where a Space is created via the API without specifying any `disabledFeatures` {pull}40017[#40017]
+Visualizations::
+* Fixes problem with `Rollup` tag not showing on rollup index patterns in list {pull}40297[#40297]
+* Fixes show listing limit so it no longer shows a false warning {pull}38246[#38246]
+* Fixes tooltip label name rendering in pie charts {pull}40105[#40105]
+* Fixes visualization migration when `savedSearchId` is an empty string {pull}40172[#40172]
+* Checks whether vis type exists {pull}39803[#39803]
+* Fixes visualizations for rollups using `fixed_interval` or `calendar_interval` {pull}39537[#39537]
+
 
 [[release-notes-7.2.0]]
 == {kib} 7.2.0
