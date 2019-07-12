@@ -44,7 +44,7 @@ run(
       _: [alias],
     } = flags;
 
-    if (!alias) {
+    if (!alias || !(storybookAliases as any)[alias]) {
       // eslint-disable-next-line no-console
       console.log(help);
       return;
