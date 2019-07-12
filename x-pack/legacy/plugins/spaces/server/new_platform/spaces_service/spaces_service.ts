@@ -18,7 +18,7 @@ import { OptionalPlugin } from '../../../../../server/lib/optional_plugin';
 import { DEFAULT_SPACE_ID } from '../../../common/constants';
 import { SecurityPlugin } from '../../../../security';
 import { SpacesClient } from '../../lib/spaces_client';
-import { getSpaceIdFromPath } from '../../lib/spaces_url_parser';
+import { getSpaceIdFromPath, addSpaceIdToPath } from '../../lib/spaces_url_parser';
 import { SpacesConfigType } from '../config';
 import { namespaceToSpaceId, spaceIdToNamespace } from '../../lib/utils/namespace';
 
@@ -79,10 +79,7 @@ export class SpacesService {
         if (!spaceId) {
           throw new TypeError(`spaceId is required to retrieve base path`);
         }
-        if (spaceId === DEFAULT_SPACE_ID) {
-          return this.serverBasePath || '/';
-        }
-        return `${this.serverBasePath}/s/${spaceId}`;
+        return addSpaceIdToPath(this.serverBasePath, spaceId);
       },
       isInDefaultSpace: (request: RequestFacade) => {
         const spaceId = getSpaceId(request);

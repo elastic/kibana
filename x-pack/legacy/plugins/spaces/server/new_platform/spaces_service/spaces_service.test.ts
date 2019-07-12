@@ -86,9 +86,9 @@ describe('SpacesService', () => {
       );
     });
 
-    it('returns / for the default space and no server base path', async () => {
+    it('returns "" for the default space and no server base path', async () => {
       const spacesServiceSetup = await createService();
-      expect(spacesServiceSetup.getBasePath(DEFAULT_SPACE_ID)).toEqual('/');
+      expect(spacesServiceSetup.getBasePath(DEFAULT_SPACE_ID)).toEqual('');
     });
 
     it('returns /sbp for the default space and the "/sbp" server base path', async () => {
