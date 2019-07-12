@@ -83,10 +83,9 @@ pipeline {
 //              def d = load("${env.GROOVY_SRC}/dump.groovy")
 //              d.dumpEnv()
 //            }
-//              checkoutKibana()
             checkoutES()
+//            checkoutKibana()
           }
-
         }
         stage('Quick Test') {
           steps {
@@ -97,17 +96,16 @@ pipeline {
     }
 
   }
-
 }
 
 def checkoutKibana() {
-//  useCache('source'){
-  gitCheckout(basedir: "${BASE_DIR}", branch: params.branch_specifier,
-    repo: "${GIT_URL}",
-    credentialsId: "${JOB_GIT_CREDENTIALS}",
-    reference: "/var/lib/jenkins/.git-references/kibana.git")
-//    stash allowEmpty: true, name: 'source', excludes: "${BASE_DIR}/.git,node/**", useDefaultExcludes: false
-//  }
+  useCache('source') {
+    gitCheckout(basedir: "${BASE_DIR}", branch: params.branch_specifier,
+      repo: "${GIT_URL}",
+      credentialsId: "${JOB_GIT_CREDENTIALS}",
+      reference: "/var/lib/jenkins/.git-references/kibana.git")
+    stash allowEmpty: true, name: 'source', excludes: "${BASE_DIR}/.git,node/**", useDefaultExcludes: false
+  }
 
   dir("${BASE_DIR}") {
     def packageJson = readJSON(file: 'package.json')
@@ -141,7 +139,7 @@ def checkoutKibana() {
  Get Elasticsearch sources, it uses stash as cache (It used to lol).
  */
 def checkoutES(){
-//  useCache('es-source'){
+  useCache('es-source'){
   dir("${ES_BASE_DIR}"){
     checkout([$class: 'GitSCM', branches: [[name: "${params.ES_VERSION}"]],
               doGenerateSubmoduleConfigurations: false,
@@ -155,17 +153,60 @@ def checkoutES(){
               userRemoteConfigs: [[credentialsId: "${JOB_GIT_CREDENTIALS}",
                                    url: "${ES_GIT_URL}"]]])
     sh 'pwd'
+    stash allowEmpty: true, name: 'es-source', includes: "${ES_BASE_DIR}/**", excludes: ".git", useDefaultExcludes: false
   }
-//    stash allowEmpty: true, name: 'es-source', includes: "${ES_BASE_DIR}/**", excludes: ".git", useDefaultExcludes: false
-//  }
 }
 /**
  Some quick Test to run before anything else.
  */
 def quickTest(){
-  dir("${BASE_DIR}"){
+  dir("${BASE_DIR}") {
     sh 'yarn tslint x-pack/plugins/apm/**/*.{ts,tsx} --fix'
     sh 'cd x-pack/plugins/apm && yarn tsc --noEmit'
     sh 'cd x-pack && node ./scripts/jest.js plugins/apm'
   }
+}
+/**
+ install NodeJs, it uses stash as cache.
+
+ see how to we can grab the cache from ~/.npm/_cacache
+ */
+def installNodeJs(nodeVersion, pakages = null) {
+  nodeEnviromentVars(nodeVersion)
+  useCache('nodeJs') {
+    sh label: 'Install Node.js', script: """#!/bin/bash
+    set -euxo pipefail
+    NODE_URL="https://nodejs.org/dist/v${nodeVersion}/node-v${nodeVersion}-linux-x64.tar.gz"
+    mkdir -p "${NODE_DIR}"
+    curl -sL \${NODE_URL} | tar -xz -C "${NODE_DIR}" --strip-components=1
+    node --version
+    npm config set prefix "${NODE_DIR}"
+    npm config list
+    """
+    def cmd = "echo 'Installing aditional packages'\n"
+    pakages?.each { pkg ->
+      cmd += "npm install -g ${pkg}\n"
+    }
+    sh label: 'Install packages', script: """#!/bin/bash
+    set -euxo pipefail
+    ${cmd}
+    """
+    stash allowEmpty: true, name: 'nodeJs', includes: "node/**", useDefaultExcludes: false
+  }
+}
+/**
+ unstash the stash passed as parameter or execute the block code passed.
+ This works as a cache that make the retrieve process only once, the rest of times
+ unstash the stuff.
+ */
+def useCache(String name, Closure body) {
+  def isCacheUsed = false
+  try {
+    unstash name
+    isCacheUsed = true
+  } catch (error) {
+    body()
+    currentBuild.result = "SUCCESS"
+  }
+  return isCacheUsed
 }
