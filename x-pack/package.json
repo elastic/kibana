@@ -305,6 +305,7 @@
     "react-fast-compare": "^2.0.4",
     "react-markdown": "^3.4.1",
     "react-markdown-renderer": "^1.4.0",
+    "react-moment-proptypes": "^1.6.0",
     "react-portal": "^3.2.0",
     "react-redux": "^5.0.7",
     "react-redux-request": "^1.5.6",

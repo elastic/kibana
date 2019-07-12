@@ -19630,7 +19630,7 @@ moment@2.22.2, moment@>=2.14.0:
   resolved "https://registry.yarnpkg.com/moment/-/moment-2.22.2.tgz#3c257f9839fc0e93ff53149632239eb90783ff66"
   integrity sha1-PCV/mDn8DpP/UxSWMiOeuQeD/2Y=
 
-moment@2.24.0:
+moment@2.24.0, moment@>=1.6.0:
   version "2.24.0"
   resolved "https://registry.yarnpkg.com/moment/-/moment-2.24.0.tgz#0d055d53f5052aa653c9f6eb68bb5d12bf5c2b5b"
   integrity sha512-bV7f+6l2QigeBBZSM/6yTNq4P2fNpSWj/0e7jQcy87A8e7o2nAfP/34/2ky5Vw4B9S446EtIhodAzkFCcR4dQg==
@@ -23120,6 +23120,13 @@ react-modal@^3.8.1:
     prop-types "^15.5.10"
     react-lifecycles-compat "^3.0.0"
     warning "^3.0.0"
+
+react-moment-proptypes@^1.6.0:
+  version "1.6.0"
+  resolved "https://registry.yarnpkg.com/react-moment-proptypes/-/react-moment-proptypes-1.6.0.tgz#8ec266ee392a08ba3412d2df2eebf833ab1046df"
+  integrity sha512-4h7EuhDMTzQqZ+02KUUO+AVA7PqhbD88yXB740nFpNDyDS/bj9jiPyn2rwr9sa8oDyaE1ByFN9+t5XPyPTmN6g==
+  dependencies:
+    moment ">=1.6.0"
 
 react-motion@^0.4.8:
   version "0.4.8"

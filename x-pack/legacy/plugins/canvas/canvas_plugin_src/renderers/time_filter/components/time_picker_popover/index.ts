@@ -4,12 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const timeUnits = {
-  s: 'second',
-  m: 'minute',
-  h: 'hour',
-  d: 'day',
-  w: 'week',
-  M: 'month',
-  y: 'year',
-};
+export { TimePickerPopover } from './time_picker_popover';
