@@ -8,7 +8,7 @@ import React, { useCallback, useMemo } from 'react';
 import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import { EuiTitle, EuiToolTip, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { Axis, Chart, getAxisId, niceTimeFormatter, Position, Settings } from '@elastic/charts';
-import { first, last, min, max, sum } from 'lodash';
+import { first, last } from 'lodash';
 import moment from 'moment';
 import { UICapabilities } from 'ui/capabilities';
 import { injectUICapabilities } from 'ui/capabilities/react';
@@ -16,7 +16,6 @@ import { MetricsExplorerSeries } from '../../../server/routes/metrics_explorer/t
 import {
   MetricsExplorerOptions,
   MetricsExplorerTimeOptions,
-  MetricsExplorerOptionsMetric,
   MetricsExplorerYAxisMode,
   MetricsExplorerChartOptions,
 } from '../../containers/metrics_explorer/use_metrics_explorer_options';
@@ -28,6 +27,7 @@ import { SourceQuery } from '../../graphql/types';
 import { MetricsExplorerEmptyChart } from './empty_chart';
 import { MetricsExplorerNoMetrics } from './no_metrics';
 import { getChartTheme } from './helpers/get_chart_theme';
+import { calculateDomain } from './helpers/calculate_domain';
 
 interface Props {
   intl: InjectedIntl;
@@ -43,27 +43,6 @@ interface Props {
   onTimeChange: (start: string, end: string) => void;
   uiCapabilities: UICapabilities;
 }
-
-const calculateDomain = (
-  series: MetricsExplorerSeries,
-  metrics: MetricsExplorerOptionsMetric[],
-  stacked = false
-) => {
-  const minsAndMaxes = metrics.reduce(
-    (acc, metric, index) => {
-      const values = series.rows.map(row => row[`metric_${index}`] as number).filter(v => v);
-      acc.mins.push(min(values) || null);
-      acc.maxes.push(max(values) || null);
-      return acc;
-    },
-    { mins: [] as Array<number | null>, maxes: [] as Array<number | null> }
-  );
-
-  const minValue = min(minsAndMaxes.mins) || 0;
-  const maxValue = stacked ? sum(minsAndMaxes.maxes) : max(minsAndMaxes.maxes);
-
-  return { min: minValue, max: maxValue };
-};
 
 export const MetricsExplorerChart = injectUICapabilities(
   injectI18n(
