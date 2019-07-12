@@ -22,7 +22,7 @@ To get the URL for triggering PDF report generation during a given time period:
 
 To get the URL for triggering CSV report generation during a given time period:
 
-. Load a saved search in Discover
+. Load a saved search in Discover.
 . Use the timepicker to specify a relative or absolute time period.
 . Click *Share* in the Kibana toolbar.
 . Select *CSV Reports*.
