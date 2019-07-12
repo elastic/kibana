@@ -70,6 +70,8 @@ describe('EmbeddedVisualizeHandler', () => {
         title: 'My Vis',
         searchSource: undefined,
         destroy: () => ({}),
+        copyOnSave: false,
+        save: () => Promise.resolve('123'),
       },
       {
         autoFetch: true,
@@ -100,6 +102,8 @@ describe('EmbeddedVisualizeHandler', () => {
           title: 'My Vis',
           searchSource: undefined,
           destroy: () => ({}),
+          copyOnSave: false,
+          save: () => Promise.resolve('123'),
         },
         {
           autoFetch: false,
