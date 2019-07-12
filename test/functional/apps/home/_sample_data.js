@@ -26,7 +26,8 @@ export default function ({ getService, getPageObjects }) {
   const dashboardExpect = getService('dashboardExpect');
   const PageObjects = getPageObjects(['common', 'header', 'home', 'dashboard', 'timePicker']);
 
-  describe('sample data', function describeIndexTests() {
+  // FLAKY: https://github.com/elastic/kibana/issues/40670
+  describe.skip('sample data', function describeIndexTests() {
     this.tags('smoke');
 
     before(async () => {
