@@ -67,14 +67,14 @@ export interface PluginManifest {
    * An optional list of the other plugins that **must be** installed and enabled
    * for this plugin to function properly.
    */
-  readonly requiredPlugins: ReadonlyArray<PluginName>;
+  readonly requiredPlugins: readonly PluginName[];
 
   /**
    * An optional list of the other plugins that if installed and enabled **may be**
    * leveraged by this plugin for some additional functionality but otherwise are
    * not required for this plugin to work properly.
    */
-  readonly optionalPlugins: ReadonlyArray<PluginName>;
+  readonly optionalPlugins: readonly PluginName[];
 
   /**
    * Specifies whether plugin includes some client/browser specific functionality
@@ -108,14 +108,14 @@ export interface DiscoveredPlugin {
    * An optional list of the other plugins that **must be** installed and enabled
    * for this plugin to function properly.
    */
-  readonly requiredPlugins: ReadonlyArray<PluginName>;
+  readonly requiredPlugins: readonly PluginName[];
 
   /**
    * An optional list of the other plugins that if installed and enabled **may be**
    * leveraged by this plugin for some additional functionality but otherwise are
    * not required for this plugin to work properly.
    */
-  readonly optionalPlugins: ReadonlyArray<PluginName>;
+  readonly optionalPlugins: readonly PluginName[];
 }
 
 /**

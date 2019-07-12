@@ -44,7 +44,7 @@ export class SymbolSuggestionsProvider extends AbstractSuggestionsProvider {
             description: this.getSymbolDescription(symbol.symbolInformation.location),
             end: 10,
             start: 1,
-            text: symbol.qname,
+            text: symbol.qname ? symbol.qname : symbol.symbolInformation.name,
             tokenType: this.symbolKindToTokenClass(symbol.symbolInformation.kind),
             selectUrl: this.getSymbolLinkUrl(symbol.symbolInformation.location),
           };
