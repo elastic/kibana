@@ -149,7 +149,7 @@ export function extractJobDetails(job) {
 
   const datafeedTimingStats = {
     title: i18n.translate('xpack.ml.jobsList.jobDetails.datafeedTimingStatsTitle', {
-      defaultMessage: 'Datafeed timing stats'
+      defaultMessage: 'Timing stats'
     }),
     position: 'right',
     items: filterObjects(job.datafeed_config.timing_stats).map(formatValues)
