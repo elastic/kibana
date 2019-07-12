@@ -23,10 +23,10 @@ export function filterrows(): ExpressionFunction<
     name: 'filterrows',
     aliases: [],
     type: 'datatable',
+    help,
     context: {
       types: ['datatable'],
     },
-    help,
     args: {
       fn: {
         resolve: false,

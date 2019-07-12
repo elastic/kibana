@@ -10,7 +10,6 @@ import { RepoConfig, RepoConfigs } from '../model';
 export interface LspOptions {
   requestTimeoutMs: number;
   detach: boolean;
-  verbose: boolean;
   oomScoreAdj: boolean;
 }
 
