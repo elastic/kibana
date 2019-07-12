@@ -87,6 +87,7 @@ describe('AddToKql Component', async () => {
     expect(store.getState().hosts.page).toEqual({
       queries: {
         authentications: {
+          activePage: 0,
           limit: 10,
         },
         hosts: {

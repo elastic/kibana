@@ -106,7 +106,8 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         expect(actualCount).to.be(expectedLegendValue);
       });
 
-      it('should show the correct count in the legend with "Human readable" duration formatter', async () => {
+      // FLAKY: https://github.com/elastic/kibana/issues/40458
+      it.skip('should show the correct count in the legend with "Human readable" duration formatter', async () => {
         await visualBuilder.clickSeriesOption();
         await visualBuilder.changeDataFormatter('Duration');
         await visualBuilder.setDurationFormatterSettings({ to: 'Human readable' });
