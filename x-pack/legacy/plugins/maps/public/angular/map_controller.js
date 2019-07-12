@@ -206,6 +206,12 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage
       });
     });
   });
+
+  $scope.showSaveQuery = capabilities.get().maps.saveQuery;
+
+  $scope.$watch(() => capabilities.get().maps.saveQuery, (newCapability) => {
+    $scope.showSaveQuery = newCapability;
+  });
   /* end Saved Queries */
 
   function hasUnsavedChanges() {
