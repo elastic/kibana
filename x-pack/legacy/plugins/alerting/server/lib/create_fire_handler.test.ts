@@ -14,7 +14,7 @@ const createFireHandlerParams = {
     type: 'alert',
     attributes: {
       alertTypeId: '123',
-      interval: 10000,
+      interval: '10s',
       alertTypeParams: {
         bar: true,
       },
@@ -114,7 +114,7 @@ test('throws error if reference not found', async () => {
       type: 'alert',
       attributes: {
         alertTypeId: '123',
-        interval: 10000,
+        interval: '10s',
         alertTypeParams: {
           bar: true,
         },

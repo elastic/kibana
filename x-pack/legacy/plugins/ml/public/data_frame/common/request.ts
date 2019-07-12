@@ -25,6 +25,7 @@ import {
 import { PivotAggDict, PivotAggsConfig } from './pivot_aggs';
 import { DateHistogramAgg, HistogramAgg, PivotGroupByDict, TermsAgg } from './pivot_group_by';
 import { SavedSearchQuery } from './kibana_context';
+import { IndexPattern as Index } from './job';
 
 export interface DataFramePreviewRequest {
   pivot: {
@@ -32,7 +33,7 @@ export interface DataFramePreviewRequest {
     aggregations: PivotAggDict;
   };
   source: {
-    index: string;
+    index: Index | Index[];
     query?: any;
   };
 }
@@ -50,7 +51,7 @@ export interface DataFrameJobConfig extends DataFrameRequest {
 export interface SimpleQuery {
   query_string: {
     query: string;
-    default_operator: DefaultOperator;
+    default_operator?: DefaultOperator;
   };
 }
 
@@ -83,9 +84,11 @@ export function getDataFramePreviewRequest(
   groupBy: PivotGroupByConfig[],
   aggs: PivotAggsConfig[]
 ): DataFramePreviewRequest {
+  const index = indexPatternTitle.split(',').map((name: string) => name.trim());
+
   const request: DataFramePreviewRequest = {
     source: {
-      index: indexPatternTitle,
+      index,
     },
     pivot: {
       group_by: {},
