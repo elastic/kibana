@@ -28,6 +28,7 @@ export const getMlCapabilities = async (
   try {
     const response = await fetch(`${chrome.getBasePath()}/api/ml/ml_capabilities`, {
       method: 'GET',
+      credentials: 'same-origin',
       headers: {
         'kbn-system-api': 'true',
         'content-Type': 'application/json',
