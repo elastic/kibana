@@ -16,25 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
-import { resolve } from 'path';
-
-// TODO: use something better once https://github.com/elastic/kibana/issues/26555 is
-// figured out.
-type KibanaPlugin = any;
-
-function samplePanelAction(kibana: KibanaPlugin) {
-  return new kibana.Plugin({
-    publicDir: resolve(__dirname, './public'),
-    uiExports: {
-      embeddableActions: [
-        'plugins/kbn_tp_sample_panel_action/sample_panel_action',
-        'plugins/kbn_tp_sample_panel_action/sample_panel_link',
-      ],
-    },
-  });
-}
-
-module.exports = (kibana: KibanaPlugin) => {
-  return [samplePanelAction(kibana)];
-};
+export { DisabledLabEmbeddable } from './disabled_lab_embeddable';
+export { VisualizeEmbeddable, VisualizeInput } from './visualize_embeddable';
+export { VisualizeEmbeddableFactory } from './visualize_embeddable_factory';
+export { VISUALIZE_EMBEDDABLE_TYPE } from './constants';

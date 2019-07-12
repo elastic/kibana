@@ -48,6 +48,7 @@ export default function ({ getService, getPageObjects }) {
         await dashboardAddPanel.addEverySavedSearch('"Filter Bytes Test"');
 
         await dashboardAddPanel.closeAddPanel();
+
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.dashboard.waitForRenderComplete();
         await filterBar.addFilter('bytes', 'is', '12345678');

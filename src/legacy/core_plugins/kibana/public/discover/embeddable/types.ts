@@ -16,34 +16,33 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
+import { StaticIndexPattern } from 'ui/index_patterns';
+import { TimeRange } from 'ui/timefilter/time_history';
+import { Query } from 'src/legacy/core_plugins/data/public';
+import { Filter } from '@kbn/es-query';
+import { SavedSearch } from '../types';
 import {
-  Action,
-  actionRegistry,
-  triggerRegistry,
-  CONTEXT_MENU_TRIGGER,
-  attachAction,
-} from 'plugins/embeddable_api';
+  EmbeddableInput,
+  EmbeddableOutput,
+  IEmbeddable,
+} from '../../../../embeddable_api/public/index';
 
-class SamplePanelLink extends Action {
-  public readonly type = 'samplePanelLink';
-
-  constructor() {
-    super('samplePanelLink');
-  }
-
-  public getDisplayName() {
-    return 'Sample panel Link';
-  }
-
-  public execute() {
-    return;
-  }
-
-  public getHref = () => {
-    return 'https://example.com/kibana/test';
-  };
+export interface SearchInput extends EmbeddableInput {
+  timeRange: TimeRange;
+  query?: Query;
+  filters?: Filter[];
+  hidePanelTitles?: boolean;
+  columns?: string[];
+  sort?: string[];
 }
 
-actionRegistry.set('samplePanelLink', new SamplePanelLink());
+export interface SearchOutput extends EmbeddableOutput {
+  editUrl: string;
+  indexPatterns?: StaticIndexPattern[];
+  editable: boolean;
+}
 
-attachAction(triggerRegistry, { triggerId: CONTEXT_MENU_TRIGGER, actionId: 'samplePanelLink' });
+export interface ISearchEmbeddable extends IEmbeddable<SearchInput, SearchOutput> {
+  getSavedSearch(): SavedSearch;
+}
