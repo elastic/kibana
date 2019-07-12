@@ -4,109 +4,122 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { dateTimesAreEqual } from './date_time_equality';
-import { HostOrNetworkProps } from '../types';
+import { hostEquality } from './host_equality';
+import { AnomaliesHostTableProps } from '../types';
+import { HostsType } from '../../../store/hosts/model';
 
-describe('date_time_equality', () => {
+describe('host_equality', () => {
   test('it returns true if start and end date are equal', () => {
-    const prev: HostOrNetworkProps = {
+    const prev: AnomaliesHostTableProps = {
       startDate: new Date('2000').valueOf(),
       endDate: new Date('2000').valueOf(),
       narrowDateRange: jest.fn(),
       skip: false,
+      type: HostsType.details,
     };
-    const next: HostOrNetworkProps = {
+    const next: AnomaliesHostTableProps = {
       startDate: new Date('2000').valueOf(),
       endDate: new Date('2000').valueOf(),
       narrowDateRange: jest.fn(),
       skip: false,
+      type: HostsType.details,
     };
-    const equal = dateTimesAreEqual(prev, next);
+    const equal = hostEquality(prev, next);
     expect(equal).toEqual(true);
   });
 
   test('it returns false if starts are not equal', () => {
-    const prev: HostOrNetworkProps = {
-      startDate: new Date('2000').valueOf(),
-      endDate: new Date('1999').valueOf(),
+    const prev: AnomaliesHostTableProps = {
+      startDate: new Date('2001').valueOf(),
+      endDate: new Date('2000').valueOf(),
       narrowDateRange: jest.fn(),
       skip: false,
+      type: HostsType.details,
     };
-    const next: HostOrNetworkProps = {
+    const next: AnomaliesHostTableProps = {
       startDate: new Date('2000').valueOf(),
       endDate: new Date('2000').valueOf(),
       narrowDateRange: jest.fn(),
       skip: false,
+      type: HostsType.details,
     };
-    const equal = dateTimesAreEqual(prev, next);
+    const equal = hostEquality(prev, next);
     expect(equal).toEqual(false);
   });
 
   test('it returns false if starts are not equal for next', () => {
-    const prev: HostOrNetworkProps = {
+    const prev: AnomaliesHostTableProps = {
       startDate: new Date('2000').valueOf(),
       endDate: new Date('2000').valueOf(),
       narrowDateRange: jest.fn(),
       skip: false,
+      type: HostsType.details,
     };
-    const next: HostOrNetworkProps = {
-      startDate: new Date('2000').valueOf(),
-      endDate: new Date('1999').valueOf(),
+    const next: AnomaliesHostTableProps = {
+      startDate: new Date('2001').valueOf(),
+      endDate: new Date('2000').valueOf(),
       narrowDateRange: jest.fn(),
       skip: false,
+      type: HostsType.details,
     };
-    const equal = dateTimesAreEqual(prev, next);
+    const equal = hostEquality(prev, next);
     expect(equal).toEqual(false);
   });
 
   test('it returns false if ends are not equal', () => {
-    const prev: HostOrNetworkProps = {
+    const prev: AnomaliesHostTableProps = {
       startDate: new Date('2000').valueOf(),
       endDate: new Date('2001').valueOf(),
       narrowDateRange: jest.fn(),
       skip: false,
+      type: HostsType.details,
     };
-    const next: HostOrNetworkProps = {
+    const next: AnomaliesHostTableProps = {
       startDate: new Date('2000').valueOf(),
       endDate: new Date('2000').valueOf(),
       narrowDateRange: jest.fn(),
       skip: false,
+      type: HostsType.details,
     };
-    const equal = dateTimesAreEqual(prev, next);
+    const equal = hostEquality(prev, next);
     expect(equal).toEqual(false);
   });
 
   test('it returns false if ends are not equal for next', () => {
-    const prev: HostOrNetworkProps = {
+    const prev: AnomaliesHostTableProps = {
       startDate: new Date('2000').valueOf(),
       endDate: new Date('2000').valueOf(),
       narrowDateRange: jest.fn(),
       skip: false,
+      type: HostsType.details,
     };
-    const next: HostOrNetworkProps = {
+    const next: AnomaliesHostTableProps = {
       startDate: new Date('2000').valueOf(),
       endDate: new Date('2001').valueOf(),
       narrowDateRange: jest.fn(),
       skip: false,
+      type: HostsType.details,
     };
-    const equal = dateTimesAreEqual(prev, next);
+    const equal = hostEquality(prev, next);
     expect(equal).toEqual(false);
   });
 
   test('it returns false if skip is not equal', () => {
-    const prev: HostOrNetworkProps = {
+    const prev: AnomaliesHostTableProps = {
       startDate: new Date('2000').valueOf(),
       endDate: new Date('2000').valueOf(),
       narrowDateRange: jest.fn(),
       skip: true,
+      type: HostsType.details,
     };
-    const next: HostOrNetworkProps = {
+    const next: AnomaliesHostTableProps = {
       startDate: new Date('2000').valueOf(),
       endDate: new Date('2000').valueOf(),
       narrowDateRange: jest.fn(),
       skip: false,
+      type: HostsType.details,
     };
-    const equal = dateTimesAreEqual(prev, next);
+    const equal = hostEquality(prev, next);
     expect(equal).toEqual(false);
   });
 });
