@@ -97,8 +97,8 @@ describe('Error handling for 503 errors', () => {
     const wrappedErr = handleKnownError(err);
     expect(wrappedErr.message).to.be(
       'Monitoring License Error: ' +
-      `Could not find licensing information for cluster = '${clusterName}'. ` +
-      `Check master node server logs for errors or warnings.`);
+      `Could not find license information for cluster = '${clusterName}'. ` +
+      `Please check the cluster's master node server logs for errors or warnings.`);
     expect(wrappedErr.isBoom).to.be(true);
     expect(wrappedErr.isServer).to.be(true);
     expect(wrappedErr.data).to.be(null);
@@ -107,8 +107,8 @@ describe('Error handling for 503 errors', () => {
       payload: {
         statusCode: 503,
         error: 'Service Unavailable',
-        message: `Monitoring License Error: Could not find licensing information for cluster = '${clusterName}'. `
-        + `Check master node server logs for errors or warnings.`
+        message: `Monitoring License Error: Could not find license information for cluster = '${clusterName}'. `
+        + `Please check the cluster's master node server logs for errors or warnings.`
       },
       headers: {}
     });
