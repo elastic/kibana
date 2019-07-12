@@ -62,10 +62,7 @@ Management::
 * Search Profiler: Fixes placeholder color contrast accessibility in Index input {pull}38952[#38952]
 Monitoring::
 * Adds zoomout functionality to all charts {pull}39072[#39072]
-Platform::
-* Fixes custom vis types `buildPipeline` {pull}39874[#39874]
 Security::
-* Feature Controls: Automatically grants access to short urls {pull}37532[#37532]
 * Feature Controls: Only navigates to index pattern management if available {pull}40067[#40067]
 * Spaces: Fixes scenario where a Space is created via the API without specifying any `disabledFeatures` {pull}40017[#40017]
 Visualizations::
@@ -75,6 +72,8 @@ Visualizations::
 * Fixes visualization migration when `savedSearchId` is an empty string {pull}40172[#40172]
 * Checks whether vis type exists {pull}39803[#39803]
 * Fixes visualizations for rollups using `fixed_interval` or `calendar_interval` {pull}39537[#39537]
+* Fixes custom vis types `buildPipeline` {pull}39874[#39874]
+
 
 
 [[release-notes-7.2.0]]
