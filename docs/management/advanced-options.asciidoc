@@ -81,7 +81,7 @@ Choices are <<kuery-query, KQL>>, a language built specifically for {kib}, and t
 query syntax>>.
 `shortDots:enable`:: Set this property to `true` to shorten long 
 field names in visualizations. For example, show `f.b.baz` instead of `foo.bar.baz`.
-`sort:options`:: Options for the Elasticsearch {ref}/search-request-sort.html[sort] parameter.
+`sort:options`:: Options for the Elasticsearch {ref}/search-request-body.html#search-request-sort[sort] parameter.
 `state:storeInSessionStorage`:: [experimental] Kibana tracks UI state in the 
 URL, which can lead to problems when there is a lot of state information, 
 and the URL gets very long. 
@@ -182,7 +182,7 @@ Refresh the page to apply the changes.
 === Search settings
 
 [horizontal]
-`courier:customRequestPreference`:: {ref}/search-request-preference.html[Request preference] 
+`courier:customRequestPreference`:: {ref}/search-request-body.html#search-request-preference[Request preference] 
 to use when `courier:setRequestPreference` is set to "custom".
 `courier:ignoreFilterIfFieldNotInIndex`:: Skips filters that apply to fields that don't exist in the index for a visualization. 
 Useful when dashboards consist of visualizations from multiple index patterns.
@@ -210,7 +210,9 @@ might increase the search time.
 `timelion:default_rows`:: The default number of rows to use on a Timelion sheet.
 `timelion:es.default_index`:: The default index when using the `.es()` query.
 `timelion:es.timefield`:: The default field containing a timestamp when using the `.es()` query.
-`timelion:graphite.url`:: [experimental] Used with graphite queries, this is the URL of your graphite host.
+`timelion:graphite.url`:: [experimental] Used with graphite queries, this is the URL of your graphite host 
+in the form https://www.hostedgraphite.com/UID/ACCESS_KEY/graphite. This URL can be 
+selected from a whitelist configured in the `kibana.yml` under `timelion.graphiteUrls`.
 `timelion:max_buckets`:: The maximum number of buckets a single data source can return.
 This value is used for calculating automatic intervals in visualizations.
 `timelion:min_interval`:: The smallest interval to calculate when using "auto".

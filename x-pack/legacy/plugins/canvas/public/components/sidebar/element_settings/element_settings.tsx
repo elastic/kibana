@@ -11,7 +11,7 @@ import { EuiSpacer, EuiTabbedContent } from '@elastic/eui';
 import { Datasource } from '../../datasource';
 // @ts-ignore unconverted component
 import { FunctionFormList } from '../../function_form_list';
-import { PositionedElement } from '../../../lib/positioned_element';
+import { PositionedElement } from '../../../../types';
 
 interface Props {
   /**

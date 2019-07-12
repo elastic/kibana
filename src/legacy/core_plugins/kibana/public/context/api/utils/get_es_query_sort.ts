@@ -24,7 +24,7 @@ export type EsQuerySort = [EsQuerySortValue, EsQuerySortValue];
 
 /**
  * Returns `EsQuerySort` which is used to sort records in the ES query
- * https://www.elastic.co/guide/en/elasticsearch/reference/current/search-request-sort.html
+ * https://www.elastic.co/guide/en/elasticsearch/reference/current/search-request-body.html#search-request-sort
  * @param timeField
  * @param tieBreakerField
  * @param sortDir
