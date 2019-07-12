@@ -23,4 +23,5 @@ For more {kib} configuration settings, see <<settings>>.
 [role="exclude",id="uptime-security"]
 == Uptime security
 
-This page has moved. Please see the new section in the {uptime-guide}/uptime-security.html[Uptime monitoring guide].
+This page has moved. Please see the new section in the Uptime Monitoring Guide.
+// {uptime-guide}/uptime-security.html[Uptime Monitoring Guide].
