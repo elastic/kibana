@@ -98,9 +98,7 @@ export function getColumns(
     },
     {
       field: 'severity',
-      name: isAggregatedData === true ? i18n.translate('xpack.ml.anomaliesTable.maxSeverityColumnName', {
-        defaultMessage: 'max severity',
-      }) : i18n.translate('xpack.ml.anomaliesTable.severityColumnName', {
+      name: i18n.translate('xpack.ml.anomaliesTable.severityColumnName', {
         defaultMessage: 'severity',
       }),
       render: (score) => (
@@ -276,8 +274,7 @@ export function getColumns(
         } else {
           return null;
         }
-      },
-      sortable: false
+      }
     });
   }
 
