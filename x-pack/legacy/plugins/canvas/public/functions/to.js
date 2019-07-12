@@ -10,7 +10,7 @@ import { registries } from 'plugins/interpreter/registries';
 export const to = () => ({
   name: 'to',
   aliases: [],
-  help: 'Explicitly cast from one type to another',
+  help: 'Explicitly casts the type of the _context_ to the specified type.',
   context: {},
   args: {
     type: {
