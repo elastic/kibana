@@ -96,7 +96,7 @@ describe('EMS is enabled', () => {
       minZoom: 0,
       source: undefined,
       sourceDescriptor: {
-        id: 'auto',
+        isAutoSelect: true,
         type: 'EMS_TMS'
       },
       style: {

@@ -11,10 +11,11 @@ import {
   EuiFormRow,
 } from '@elastic/eui';
 
-import { EMS_TILE_AUTO_ID } from './constants';
 import { getEmsTMSServices } from '../../../../meta';
 import { getEmsUnavailableMessage } from '../ems_unavailable_message';
 import { i18n } from '@kbn/i18n';
+
+export const AUTO_SELECT = 'auto_select';
 
 export class EMSTMSCreateSourceEditor extends React.Component {
 
@@ -24,10 +25,10 @@ export class EMSTMSCreateSourceEditor extends React.Component {
 
   _loadTmsOptions = async () => {
     const options = await getEmsTMSServices();
-    options.push({
-      id: EMS_TILE_AUTO_ID,
+    options.unshift({
+      id: AUTO_SELECT,
       name: i18n.translate('xpack.maps.source.emsTile.autoLabel', {
-        defaultMessage: 'Auto',
+        defaultMessage: 'Autoselect based on Kibana theme',
       })
     });
     if (this._isMounted) {
@@ -35,6 +36,15 @@ export class EMSTMSCreateSourceEditor extends React.Component {
         emsTmsOptionsRaw: options
       });
     }
+  }
+
+  _onEmsTileServiceChange = e => {
+    const value = e.target.value;
+    const isAutoSelect = value === AUTO_SELECT;
+    this.props.onSourceConfigChange({
+      id: isAutoSelect ? null : value,
+      isAutoSelect
+    });
   }
 
   componentWillUnmount() {
@@ -69,7 +79,7 @@ export class EMSTMSCreateSourceEditor extends React.Component {
         <EuiSelect
           hasNoInitialSelection
           options={emsTileOptions}
-          onChange={this.props.onChange}
+          onChange={this._onEmsTileServiceChange}
           disabled={this.state.emsTmsOptionsRaw.length === 0}
         />
       </EuiFormRow>

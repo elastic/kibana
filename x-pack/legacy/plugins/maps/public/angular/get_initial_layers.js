@@ -27,7 +27,7 @@ export function getInitialLayers(savedMapLayerListJSON) {
 
   const isEmsEnabled = chrome.getInjected('isEmsEnabled', true);
   if (isEmsEnabled) {
-    const descriptor = EMSTMSSource.createDescriptor();
+    const descriptor = EMSTMSSource.createDescriptor({ isAutoSelect: true });
     const source = new EMSTMSSource(descriptor);
     const layer = source.createDefaultLayer();
     return [

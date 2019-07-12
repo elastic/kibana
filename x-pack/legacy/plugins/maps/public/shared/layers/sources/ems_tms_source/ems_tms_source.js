@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import _ from 'lodash';
 import chrome from 'ui/chrome';
 import React from 'react';
 import { AbstractTMSSource } from '../tms_source';
@@ -11,7 +12,6 @@ import { TileLayer } from '../../tile_layer';
 
 import { getEmsTMSServices } from '../../../../meta';
 import { EMSTMSCreateSourceEditor } from './create_source_editor';
-import { EMS_TILE_AUTO_ID } from './constants';
 import { i18n } from '@kbn/i18n';
 import { getDataSourceLabel } from '../../../../../common/i18n_getters';
 
@@ -26,26 +26,38 @@ export class EMSTMSSource extends AbstractTMSSource {
   });
   static icon = 'emsApp';
 
-  static createDescriptor(serviceId = EMS_TILE_AUTO_ID) {
+  static createDescriptor(sourceConfig) {
     return {
       type: EMSTMSSource.type,
-      id: serviceId
+      id: sourceConfig.id,
+      isAutoSelect: sourceConfig.isAutoSelect
     };
   }
 
   static renderEditor({ onPreviewSource, inspectorAdapters }) {
-
-    const onChange = ({ target }) => {
-      const selectedId = target.options[target.selectedIndex].value;
-      const emsTMSSourceDescriptor = EMSTMSSource.createDescriptor(selectedId);
-      const emsTMSSource = new EMSTMSSource(emsTMSSourceDescriptor, inspectorAdapters);
-      onPreviewSource(emsTMSSource);
+    const onSourceConfigChange = (sourceConfig) => {
+      const descriptor = EMSTMSSource.createDescriptor(sourceConfig);
+      const source = new EMSTMSSource(descriptor, inspectorAdapters);
+      onPreviewSource(source);
     };
 
-    return <EMSTMSCreateSourceEditor onChange={onChange}/>;
+    return <EMSTMSCreateSourceEditor onSourceConfigChange={onSourceConfigChange}/>;
+  }
+
+  constructor(descriptor, inspectorAdapters) {
+    super({
+      id: descriptor.id,
+      type: EMSTMSSource.type,
+      isAutoSelect: _.get(descriptor, 'isAutoSelect', false),
+    }, inspectorAdapters);
   }
 
   async getImmutableProperties() {
+    const displayName = await this.getDisplayName();
+    const autoSelectMsg = i18n.translate('xpack.maps.source.emsTile.isAutoSelectLabel', {
+      defaultMessage: 'autoselect based on Kibana theme',
+    });
+
     return [
       {
         label: getDataSourceLabel(),
@@ -55,7 +67,9 @@ export class EMSTMSSource extends AbstractTMSSource {
         label: i18n.translate('xpack.maps.source.emsTile.serviceId', {
           defaultMessage: `Tile service`,
         }),
-        value: await this.getDisplayName()
+        value: this._descriptor.isAutoSelect
+          ? `${displayName} - ${autoSelectMsg}`
+          : displayName
       }
     ];
   }
@@ -122,7 +136,7 @@ export class EMSTMSSource extends AbstractTMSSource {
   }
 
   _getEmsTileLayerId() {
-    if (this._descriptor.id !== EMS_TILE_AUTO_ID) {
+    if (!this._descriptor.isAutoSelect) {
       return this._descriptor.id;
     }
 
