@@ -22,7 +22,7 @@ import {
 } from '../../containers/metrics_explorer/use_metrics_explorer_options';
 import euiStyled from '../../../../../common/eui_styled_components';
 import { createFormatterForMetric } from './helpers/create_formatter_for_metric';
-import { MetricExplorerSeriesChart } from './line_series';
+import { MetricExplorerSeriesChart } from './series_chart';
 import { MetricsExplorerChartContextMenu } from './chart_context_menu';
 import { SourceQuery } from '../../graphql/types';
 import { MetricsExplorerEmptyChart } from './empty_chart';
