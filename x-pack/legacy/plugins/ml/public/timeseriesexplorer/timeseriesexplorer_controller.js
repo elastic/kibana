@@ -717,7 +717,6 @@ module.controller('MlTimeSeriesExplorerController', function (
     severitySub.unsubscribe();
     annotationsRefreshSub.unsubscribe();
     jobSelectServiceSub.unsubscribe();
-    $scope.appState = undefined;
   });
 
   $scope.$on('contextChartSelected', function (event, selection) {
