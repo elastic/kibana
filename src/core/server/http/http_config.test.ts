@@ -132,7 +132,7 @@ describe('with TLS', () => {
       keepaliveTimeout: 1e5,
       socketTimeout: 5e5,
     };
-    const { keepaliveTimeout, socketTimeout } = config.schema.validate(obj);
+    const { keepaliveTimeout, socketTimeout } = HttpConfig.schema.validate(obj);
     expect(keepaliveTimeout).toBe(1e5);
     expect(socketTimeout).toBe(5e5);
   });
