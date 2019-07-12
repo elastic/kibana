@@ -82,6 +82,7 @@ async function attemptToCreateCommand(log: ToolingLog, browserType: Browsers) {
           w3c: false,
           args: chromeOptions,
         });
+        chromeCapabilities.set('goog:loggingPrefs', { browser: 'ALL' });
         return new Builder()
           .forBrowser(browserType)
           .withCapabilities(chromeCapabilities)
