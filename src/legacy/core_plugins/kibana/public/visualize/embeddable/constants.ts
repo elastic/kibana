@@ -17,24 +17,4 @@
  * under the License.
  */
 
-import { resolve } from 'path';
-
-// TODO: use something better once https://github.com/elastic/kibana/issues/26555 is
-// figured out.
-type KibanaPlugin = any;
-
-function samplePanelAction(kibana: KibanaPlugin) {
-  return new kibana.Plugin({
-    publicDir: resolve(__dirname, './public'),
-    uiExports: {
-      embeddableActions: [
-        'plugins/kbn_tp_sample_panel_action/sample_panel_action',
-        'plugins/kbn_tp_sample_panel_action/sample_panel_link',
-      ],
-    },
-  });
-}
-
-module.exports = (kibana: KibanaPlugin) => {
-  return [samplePanelAction(kibana)];
-};
+export const VISUALIZE_EMBEDDABLE_TYPE = 'visualization';
