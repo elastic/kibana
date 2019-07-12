@@ -134,7 +134,7 @@ interface MenuTuple {
   panel: EuiContextMenuPanelDescriptor;
 }
 
-const contextMenuButton = (handleClick: (event: MouseEvent) => void) => (
+const contextMenuButton = (handleClick: React.MouseEventHandler<HTMLButtonElement>) => (
   <EuiButtonIcon
     color="text"
     iconType="boxesVertical"

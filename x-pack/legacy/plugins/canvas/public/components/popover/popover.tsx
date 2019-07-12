@@ -19,6 +19,7 @@ interface Props {
   anchorPosition?: string;
   panelPaddingSize?: 'none' | 's' | 'm' | 'l';
   id?: string;
+  className?: string;
 }
 
 interface State {
