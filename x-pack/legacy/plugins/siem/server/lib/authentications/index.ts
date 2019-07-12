@@ -5,7 +5,7 @@
  */
 
 import { AuthenticationsData } from '../../graphql/types';
-import { FrameworkRequest, RequestOptions } from '../framework';
+import { FrameworkRequest, RequestOptionsPaginated } from '../framework';
 
 import { AuthenticationsAdapter } from './types';
 
@@ -14,7 +14,7 @@ export class Authentications {
 
   public async getAuthentications(
     req: FrameworkRequest,
-    options: RequestOptions
+    options: RequestOptionsPaginated
   ): Promise<AuthenticationsData> {
     return await this.adapter.getAuthentications(req, options);
   }
