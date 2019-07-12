@@ -11,13 +11,19 @@ import { i18n } from '@kbn/i18n';
 export async function readFile(file) {
   const readPromise = new Promise((resolve, reject) => {
     if (!file) {
-      reject(new Error('Error, no file provided'));
+      reject(new Error(i18n.translate(
+        'xpack.fileUpload.fileParser.noFileProvided', {
+          defaultMessage: 'Error, no file provided',
+        })));
     }
     const fr = new window.FileReader();
     fr.onload = e => resolve(e.target.result);
     fr.onerror = () => {
       fr.abort();
-      reject(new Error(`Error reading file`));
+      reject(new Error(i18n.translate(
+        'xpack.fileUpload.fileParser.errorReadingFile', {
+          defaultMessage: 'Error reading file',
+        })));
     };
     fr.readAsText(file);
   });

@@ -32,13 +32,14 @@ export class JsonIndexFilePicker extends Component {
   }
 
   _fileHandler = async fileList => {
-    if (this._isMounted) {
-      const fileListArr = Array.from(fileList);
-      await this._validateAndParse(fileListArr);
-    }
+    const fileListArr = Array.from(fileList);
+    await this._validateAndParse(fileListArr);
   };
 
   _validateAndParse = async fileArr => {
+    if (!this._isMounted) {
+      return;
+    }
     this.props.resetFileAndIndexSettings();
     this.setState({ fileUploadError: '' });
     if (fileArr.length === 0) { // Remove

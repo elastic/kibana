@@ -34,10 +34,12 @@ export class IndexSettings extends Component {
   }
 
   loadExistingIndexData = async () => {
+    const indexNameList = await getExistingIndexNames();
+    const indexPatternList = await getExistingIndexPatternNames();
     if (this._isMounted) {
       this.setState({
-        indexNameList: await getExistingIndexNames(),
-        indexPatternList: await getExistingIndexPatternNames(),
+        indexNameList,
+        indexPatternList
       });
     }
   };
