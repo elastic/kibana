@@ -7,6 +7,7 @@
 jest.mock('./authenticator');
 
 import Boom from 'boom';
+import { errors } from 'elasticsearch';
 import { first } from 'rxjs/operators';
 
 import {
@@ -23,6 +24,7 @@ import {
   AuthToolkit,
   ClusterClient,
   CoreSetup,
+  ElasticsearchErrorHelpers,
   KibanaRequest,
   LoggerFactory,
   ScopedClusterClient,
@@ -198,19 +200,19 @@ describe('setupAuthentication()', () => {
     });
 
     it('includes `WWW-Authenticate` header if `authenticate` fails to authenticate user and provides challenges', async () => {
-      const originalEsError = Boom.unauthorized('some message');
-      originalEsError.output.headers['WWW-Authenticate'] = [
+      const originalError = Boom.unauthorized('some message');
+      originalError.output.headers['WWW-Authenticate'] = [
         'Basic realm="Access to prod", charset="UTF-8"',
         'Basic',
         'Negotiate',
       ] as any;
-      authenticate.mockResolvedValue(AuthenticationResult.failed(originalEsError, ['Negotiate']));
+      authenticate.mockResolvedValue(AuthenticationResult.failed(originalError, ['Negotiate']));
 
       await authHandler(httpServerMock.createKibanaRequest(), mockAuthToolkit);
 
       expect(mockAuthToolkit.rejected).toHaveBeenCalledTimes(1);
       const [[error]] = mockAuthToolkit.rejected.mock.calls;
-      expect(error.message).toBe(originalEsError.message);
+      expect(error.message).toBe(originalError.message);
       expect((error as Boom).output.headers).toEqual({ 'WWW-Authenticate': ['Negotiate'] });
 
       expect(mockAuthToolkit.authenticated).not.toHaveBeenCalled();
@@ -281,14 +283,14 @@ describe('setupAuthentication()', () => {
     });
 
     it('returns `false` if `authenticate` fails with 401.', async () => {
-      const failureReason = Boom.unauthorized();
+      const failureReason = ElasticsearchErrorHelpers.decorateNotAuthorizedError(new Error());
       mockScopedClusterClient.callAsCurrentUser.mockRejectedValue(failureReason);
 
       await expect(isAuthenticated(httpServerMock.createKibanaRequest())).resolves.toBe(false);
     });
 
     it('fails if `authenticate` call fails with unknown reason', async () => {
-      const failureReason = Boom.badRequest();
+      const failureReason = new errors.BadRequest();
       mockScopedClusterClient.callAsCurrentUser.mockRejectedValue(failureReason);
 
       await expect(isAuthenticated(httpServerMock.createKibanaRequest())).rejects.toBe(

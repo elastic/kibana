@@ -4,12 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Boom from 'boom';
 import { errors } from 'elasticsearch';
 
 import { elasticsearchServiceMock, loggingServiceMock } from '../../../../../src/core/server/mocks';
 
-import { ClusterClient } from '../../../../../src/core/server';
+import { ClusterClient, ElasticsearchErrorHelpers } from '../../../../../src/core/server';
 import { Tokens } from './tokens';
 
 describe('Tokens', () => {
@@ -30,8 +29,6 @@ describe('Tokens', () => {
     const nonExpirationErrors = [
       {},
       new Error(),
-      Boom.serverUnavailable(),
-      Boom.forbidden(),
       new errors.InternalServerError(),
       new errors.Forbidden(),
       { statusCode: 500, body: { error: { reason: 'some unknown reason' } } },
@@ -42,7 +39,7 @@ describe('Tokens', () => {
 
     const expirationErrors = [
       { statusCode: 401 },
-      Boom.unauthorized(),
+      ElasticsearchErrorHelpers.decorateNotAuthorizedError(new Error()),
       new errors.AuthenticationException(),
       {
         statusCode: 500,
@@ -58,7 +55,7 @@ describe('Tokens', () => {
     const refreshToken = 'some-refresh-token';
 
     it('throws if API call fails with unknown reason', async () => {
-      const refreshFailureReason = Boom.serverUnavailable('Server is not available');
+      const refreshFailureReason = new errors.ServiceUnavailable('Server is not available');
       mockClusterClient.callAsInternalUser.mockRejectedValue(refreshFailureReason);
 
       await expect(tokens.refresh(refreshToken)).rejects.toBe(refreshFailureReason);
@@ -70,7 +67,7 @@ describe('Tokens', () => {
     });
 
     it('returns `null` if refresh token is not valid', async () => {
-      const refreshFailureReason = Boom.badRequest();
+      const refreshFailureReason = new errors.BadRequest();
       mockClusterClient.callAsInternalUser.mockRejectedValue(refreshFailureReason);
 
       await expect(tokens.refresh(refreshToken)).resolves.toBe(null);

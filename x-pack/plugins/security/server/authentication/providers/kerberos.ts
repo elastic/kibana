@@ -5,9 +5,11 @@
  */
 
 import Boom from 'boom';
-import { get } from 'lodash';
-import { KibanaRequest } from '../../../../../../src/core/server';
-import { getErrorStatusCode } from '../../errors';
+import {
+  ElasticsearchError,
+  ElasticsearchErrorHelpers,
+  KibanaRequest,
+} from '../../../../../../src/core/server';
 import { AuthenticationResult } from '../authentication_result';
 import { DeauthenticationResult } from '../deauthentication_result';
 import { BaseAuthenticationProvider } from './base';
@@ -234,7 +236,7 @@ export class KerberosAuthenticationProvider extends BaseAuthenticationProvider {
     this.logger.debug('Trying to authenticate request via SPNEGO.');
 
     // Try to authenticate current request with Elasticsearch to see whether it supports SPNEGO.
-    let authenticationError: Error;
+    let elasticsearchError: ElasticsearchError;
     try {
       await this.getUser(request);
       this.logger.debug('Request was not supposed to be authenticated, ignoring result.');
@@ -242,15 +244,15 @@ export class KerberosAuthenticationProvider extends BaseAuthenticationProvider {
     } catch (err) {
       // Fail immediately if we get unexpected error (e.g. ES isn't available). We should not touch
       // session cookie in this case.
-      if (getErrorStatusCode(err) !== 401) {
+      if (!ElasticsearchErrorHelpers.isNotAuthorizedError(err)) {
         return AuthenticationResult.failed(err);
       }
 
-      authenticationError = err;
+      elasticsearchError = err;
     }
 
     const challenges = ([] as string[]).concat(
-      get<string | string[]>(authenticationError, 'output.headers[WWW-Authenticate]') || ''
+      elasticsearchError.output.headers['WWW-Authenticate']
     );
 
     if (challenges.some(challenge => challenge.toLowerCase() === 'negotiate')) {
