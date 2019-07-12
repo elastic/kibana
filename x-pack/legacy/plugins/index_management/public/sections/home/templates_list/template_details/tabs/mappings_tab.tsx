@@ -18,18 +18,20 @@ export const MappingsTab: React.FunctionComponent<Props> = ({ templateDetails })
   const mappingsJsonString = JSON.stringify(mappings, null, 2);
 
   return (
-    <EuiCodeEditor
-      mode="json"
-      theme="textmate"
-      width="100%"
-      isReadOnly
-      value={mappingsJsonString}
-      aria-label={i18n.translate(
-        'xpack.idxMgmt.templateDetails.mappingsTab.mappingsCodeEditAriaLabel',
-        {
-          defaultMessage: 'Mappings code editor',
-        }
-      )}
-    />
+    <div data-test-subj="mappingsTab">
+      <EuiCodeEditor
+        mode="json"
+        theme="textmate"
+        width="100%"
+        isReadOnly
+        value={mappingsJsonString}
+        aria-label={i18n.translate(
+          'xpack.idxMgmt.templateDetails.mappingsTab.mappingsCodeEditAriaLabel',
+          {
+            defaultMessage: 'Mappings code editor',
+          }
+        )}
+      />
+    </div>
   );
 };

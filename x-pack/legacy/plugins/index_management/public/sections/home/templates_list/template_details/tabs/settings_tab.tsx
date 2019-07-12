@@ -18,19 +18,21 @@ export const SettingsTab: React.FunctionComponent<Props> = ({ templateDetails })
   const settingsJsonString = JSON.stringify(settings, null, 2);
 
   return (
-    <EuiCodeEditor
-      mode="json"
-      theme="textmate"
-      width="100%"
-      height="300px"
-      isReadOnly
-      value={settingsJsonString}
-      aria-label={i18n.translate(
-        'xpack.idxMgmt.templateDetails.settingsTab.settingsCodeEditAriaLabel',
-        {
-          defaultMessage: 'Settings code editor',
-        }
-      )}
-    />
+    <div data-test-subj="settingsTab">
+      <EuiCodeEditor
+        mode="json"
+        theme="textmate"
+        width="100%"
+        height="300px"
+        isReadOnly
+        value={settingsJsonString}
+        aria-label={i18n.translate(
+          'xpack.idxMgmt.templateDetails.settingsTab.settingsCodeEditAriaLabel',
+          {
+            defaultMessage: 'Settings code editor',
+          }
+        )}
+      />
+    </div>
   );
 };

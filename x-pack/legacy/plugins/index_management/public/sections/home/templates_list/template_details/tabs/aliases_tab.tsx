@@ -18,19 +18,21 @@ export const AliasesTab: React.FunctionComponent<Props> = ({ templateDetails }) 
   const aliasesJsonString = JSON.stringify(aliases, null, 2);
 
   return (
-    <EuiCodeEditor
-      mode="json"
-      theme="textmate"
-      width="100%"
-      height="300px"
-      isReadOnly
-      value={aliasesJsonString}
-      aria-label={i18n.translate(
-        'xpack.idxMgmt.templateDetails.aliasesTab.aliasesCodeEditAriaLabel',
-        {
-          defaultMessage: 'Aliases code editor',
-        }
-      )}
-    />
+    <div data-test-subj="aliasesTab">
+      <EuiCodeEditor
+        mode="json"
+        theme="textmate"
+        width="100%"
+        height="300px"
+        isReadOnly
+        value={aliasesJsonString}
+        aria-label={i18n.translate(
+          'xpack.idxMgmt.templateDetails.aliasesTab.aliasesCodeEditAriaLabel',
+          {
+            defaultMessage: 'Aliases code editor',
+          }
+        )}
+      />
+    </div>
   );
 };

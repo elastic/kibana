@@ -93,7 +93,7 @@ const tabToUiMetricMap: { [key: string]: string } = {
 };
 
 const hasEntries = (tabData: object) => {
-  return Object.entries(tabData).length > 0;
+  return tabData ? Object.entries(tabData).length > 0 : false;
 };
 
 export const TemplateDetails: React.FunctionComponent<Props> = ({
@@ -127,6 +127,7 @@ export const TemplateDetails: React.FunctionComponent<Props> = ({
           />
         }
         error={error}
+        data-test-subj="sectionError"
       />
     );
   } else if (templateDetails) {
@@ -169,7 +170,7 @@ export const TemplateDetails: React.FunctionComponent<Props> = ({
       content = (
         <Fragment>
           <EuiTitle size="s">
-            <h3>
+            <h3 data-test-subj="summaryTitle">
               <FormattedMessage
                 id="xpack.idxMgmt.templateDetails.summaryHeadingText"
                 defaultMessage="Summary"
@@ -200,7 +201,7 @@ export const TemplateDetails: React.FunctionComponent<Props> = ({
 
       <EuiFlyout
         onClose={onClose}
-        data-test-subj="templateDetail"
+        data-test-subj="templateDetails"
         aria-labelledby="templateDetailsFlyoutTitle"
         size="s"
       >
@@ -217,7 +218,12 @@ export const TemplateDetails: React.FunctionComponent<Props> = ({
         <EuiFlyoutFooter>
           <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
             <EuiFlexItem grow={false}>
-              <EuiButtonEmpty iconType="cross" flush="left" onClick={onClose}>
+              <EuiButtonEmpty
+                iconType="cross"
+                flush="left"
+                onClick={onClose}
+                data-test-subj="closeDetailsButton"
+              >
                 <FormattedMessage
                   id="xpack.idxMgmt.templateDetails.closeButtonLabel"
                   defaultMessage="Close"
@@ -230,6 +236,7 @@ export const TemplateDetails: React.FunctionComponent<Props> = ({
                 <EuiButtonEmpty
                   color="danger"
                   onClick={setTemplateToDelete.bind(null, [templateName])}
+                  data-test-subj="deleteTemplateButton"
                 >
                   <FormattedMessage
                     id="xpack.idxMgmt.templateDetails.deleteButtonLabel"
