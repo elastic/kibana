@@ -185,8 +185,8 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
      * @return {Promise<void>}
      */
     public async dragAndDrop(
-      from: { offset: { x: any; y: any }; location: { _webElement: any } },
-      to: { offset: { x: any; y: any }; location: { _webElement: any; x: any } }
+      from: { offset: { x: any; y: any }; location: any },
+      to: { offset: { x: any; y: any }; location: any }
     ) {
       // tslint:disable-next-line:variable-name
       let _from;
