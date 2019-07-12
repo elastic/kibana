@@ -10,4 +10,4 @@ export { CONTEXT_DEFAULTS } from './context_defaults';
 export { INDEX_NAMES } from './index_names';
 export { INTEGRATED_SOLUTIONS } from './capabilities';
 export { PLUGIN } from './plugin';
-export { QUERY } from './query';
+export { QUERY, LEGACY_STATES_QUERY_SIZE } from './query';
