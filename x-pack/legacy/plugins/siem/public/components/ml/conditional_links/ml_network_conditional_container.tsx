@@ -8,6 +8,7 @@ import React from 'react';
 
 import { match as RouteMatch, Redirect, Route, Switch } from 'react-router-dom';
 import { QueryString } from 'ui/utils/query_string';
+import { pure } from 'recompose';
 import { addEntitiesToKql } from './add_entities_to_kql';
 import { replaceKQLParts } from './replace_kql_parts';
 import { emptyEntity, getMultipleEntities, multipleEntities } from './entity_helpers';
@@ -24,7 +25,7 @@ interface QueryStringType {
   timerange: string | null;
 }
 
-export const MlNetworkConditionalContainer = React.memo<MlNetworkConditionalProps>(({ match }) => (
+export const MlNetworkConditionalContainer = pure<MlNetworkConditionalProps>(({ match }) => (
   <Switch>
     <Route
       strict
