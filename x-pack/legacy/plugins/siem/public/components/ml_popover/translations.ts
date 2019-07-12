@@ -43,11 +43,11 @@ export const FILTER_PLACEHOLDER = i18n.translate(
   }
 );
 
-export const SHOW_ALL_JOBS = i18n.translate('xpack.siem.components.mlPopup.showAllJobsLabel', {
+export const SHOW_ELASTIC_JOBS = i18n.translate('xpack.siem.components.mlPopup.showAllJobsLabel', {
   defaultMessage: 'Elastic Jobs',
 });
 
-export const SHOW_SIEM_JOBS = i18n.translate('xpack.siem.components.mlPopup.showSiemJobsLabel', {
+export const SHOW_CUSTOM_JOBS = i18n.translate('xpack.siem.components.mlPopup.showSiemJobsLabel', {
   defaultMessage: 'Custom Jobs',
 });
 

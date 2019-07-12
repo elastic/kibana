@@ -13,15 +13,15 @@ jest.mock('../ml/permissions/has_ml_admin_permissions', () => ({
 }));
 
 describe('MlPopover', () => {
-  describe('MlPopover', () => {
-    test('showing a popover on a mouse click', () => {
-      const wrapper = mount(<MlPopover />);
-      wrapper
-        .find('[data-test-subj="integrations-button"]')
-        .first()
-        .simulate('click');
-      wrapper.update();
-      expect(wrapper.find('[data-test-subj="ml-popover-contents"]').exists()).toEqual(true);
-    });
+  test('shows upgrade popover on mouse click', () => {
+    const wrapper = mount(<MlPopover />);
+
+    // TODO: Update to use act() https://fb.me/react-wrap-tests-with-act
+    wrapper
+      .find('[data-test-subj="integrations-button"]')
+      .first()
+      .simulate('click');
+    wrapper.update();
+    expect(wrapper.find('[data-test-subj="ml-popover-upgrade-contents"]').exists()).toEqual(true);
   });
 });

@@ -44,14 +44,14 @@ export const FilterGroup = React.memo<FilterGroupProps>(
             onClick={() => setShowAllJobs(false)}
             data-test-subj="show-custom-jobs-filter-button"
           >
-            {i18n.SHOW_ALL_JOBS}
+            {i18n.SHOW_ELASTIC_JOBS}
           </EuiFilterButton>
           <EuiFilterButton
             hasActiveFilters={showAllJobs}
             onClick={() => setShowAllJobs(true)}
             data-test-subj="show-elastic-jobs-filter-button"
           >
-            {i18n.SHOW_SIEM_JOBS}
+            {i18n.SHOW_CUSTOM_JOBS}
           </EuiFilterButton>
         </EuiFilterGroup>
       </EuiFlexItem>

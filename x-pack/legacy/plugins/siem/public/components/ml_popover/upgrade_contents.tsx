@@ -16,7 +16,7 @@ const PopoverContentsDiv = styled.div`
 
 export const UpgradeContents = React.memo(() => {
   return (
-    <PopoverContentsDiv data-test-subj="ml-popover-contents">
+    <PopoverContentsDiv data-test-subj="ml-popover-upgrade-contents">
       <EuiPopoverTitle>{i18n.UPGRADE_TITLE}</EuiPopoverTitle>
       <EuiText size="s">{i18n.UPGRADE_DESCRIPTION}</EuiText>
       <EuiSpacer />

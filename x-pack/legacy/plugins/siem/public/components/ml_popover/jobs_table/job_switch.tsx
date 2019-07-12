@@ -19,15 +19,15 @@ const enabledStates = ['started', 'opened'];
 const loadingStates = ['starting', 'stopping', 'opening', 'closing'];
 const failureStates = ['deleted', 'failed'];
 
-const isChecked = (jobState: string, datafeedState: string): boolean => {
+export const isChecked = (jobState: string, datafeedState: string): boolean => {
   return enabledStates.includes(jobState) && enabledStates.includes(datafeedState);
 };
 
-const isJobLoading = (jobState: string, datafeedState: string): boolean => {
+export const isJobLoading = (jobState: string, datafeedState: string): boolean => {
   return loadingStates.includes(jobState) || loadingStates.includes(datafeedState);
 };
 
-const isFailure = (jobState: string, datafeedState: string): boolean => {
+export const isFailure = (jobState: string, datafeedState: string): boolean => {
   return failureStates.includes(jobState) || failureStates.includes(datafeedState);
 };
 

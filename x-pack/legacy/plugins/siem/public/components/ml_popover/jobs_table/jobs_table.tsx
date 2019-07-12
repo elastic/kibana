@@ -79,9 +79,9 @@ export const JobsTable = React.memo(({ isLoading, jobs, onJobStateChange }: JobT
 
   return (
     <EuiBasicTable
+      data-test-subj="jobs-table"
       compressed={true}
       columns={getJobsTableColumns(isLoading, onJobStateChange)}
-      data-test-subj="jobs-table"
       items={getPaginatedItems(jobs, pageIndex, pageSize)}
       loading={isLoading}
       noItemsMessage={<NoItemsMessage />}

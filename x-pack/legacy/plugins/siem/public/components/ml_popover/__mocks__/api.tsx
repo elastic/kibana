@@ -22,7 +22,7 @@ export const mockGroupsResponse: Group[] = [
   { id: 'suricata', jobIds: ['suricata_alert_rate'], calendarIds: [] },
 ];
 
-export const mockJob: Job = {
+export const mockOpenedJob: Job = {
   datafeedId: 'datafeed-siem-api-rare_process_linux_ecs',
   datafeedIndices: ['auditbeat-*'],
   datafeedState: 'started',

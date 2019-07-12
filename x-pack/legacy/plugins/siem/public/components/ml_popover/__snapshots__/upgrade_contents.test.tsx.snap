@@ -2,7 +2,7 @@
 
 exports[`FilterGroup renders correctly against snapshot 1`] = `
 <styled.div
-  data-test-subj="ml-popover-contents"
+  data-test-subj="ml-popover-upgrade-contents"
 >
   <EuiPopoverTitle>
     Upgrade to Elastic Platinum
