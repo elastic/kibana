@@ -1,5 +1,5 @@
 To automatically generate reports from a script, you'll make a request to the POST URL.
-The response from this request with be JSON, and will contain a `path` property with a
+The response from this request will be JSON, and will contain a `path` property with a
 URL to use to download the generated report when it is complete.
 
 The request method must be POST and it must include a `kbn-version` header for Kibana
