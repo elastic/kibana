@@ -47,6 +47,10 @@ describe('DashboardState', function() {
     enableAutoRefreshSelector: jest.fn(),
     off: jest.fn(),
     on: jest.fn(),
+    getActiveBounds: () => {},
+    enableTimeRangeSelector: () => {},
+    isAutoRefreshSelectorEnabled: true,
+    isTimeRangeSelectorEnabled: true,
   };
   const mockIndexPattern: IndexPattern = { id: 'index1', fields: [], title: 'hi' };
 
