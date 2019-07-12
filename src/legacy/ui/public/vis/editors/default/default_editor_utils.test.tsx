@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { groupAggregationsBy } from '../default_editor_utils';
+import { groupAggregationsBy } from './default_editor_utils';
 
 const aggs = [
   {
