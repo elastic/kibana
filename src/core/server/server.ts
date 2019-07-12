@@ -22,6 +22,7 @@ import { Type } from '@kbn/config-schema';
 import { ConfigService, Env, Config, ConfigPath } from './config';
 import { ElasticsearchService } from './elasticsearch';
 import { HttpService, HttpServiceSetup, Router } from './http';
+import { LicensingService } from './licensing';
 import { LegacyService } from './legacy';
 import { Logger, LoggerFactory } from './logging';
 import { PluginsService, config as pluginsConfig } from './plugins';
@@ -36,6 +37,7 @@ export class Server {
   public readonly configService: ConfigService;
   private readonly elasticsearch: ElasticsearchService;
   private readonly http: HttpService;
+  private readonly licensing: LicensingService;
   private readonly plugins: PluginsService;
   private readonly legacy: LegacyService;
   private readonly log: Logger;
@@ -50,6 +52,7 @@ export class Server {
 
     const core = { configService: this.configService, env, logger };
     this.http = new HttpService(core);
+    this.licensing = new LicensingService(core);
     this.plugins = new PluginsService(core);
     this.legacy = new LegacyService(core);
     this.elasticsearch = new ElasticsearchService(core);
@@ -64,15 +67,17 @@ export class Server {
     const elasticsearchServiceSetup = await this.elasticsearch.setup({
       http: httpSetup,
     });
-
+    const licensingSetup = await this.licensing.setup({ http: httpSetup });
     const pluginsSetup = await this.plugins.setup({
       elasticsearch: elasticsearchServiceSetup,
       http: httpSetup,
+      licensing: licensingSetup,
     });
 
     const coreSetup = {
       elasticsearch: elasticsearchServiceSetup,
       http: httpSetup,
+      licensing: licensingSetup,
       plugins: pluginsSetup,
     };
 

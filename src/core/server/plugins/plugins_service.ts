@@ -28,6 +28,7 @@ import { discover, PluginDiscoveryError, PluginDiscoveryErrorType } from './disc
 import { DiscoveredPlugin, DiscoveredPluginInternal, PluginWrapper, PluginName } from './plugin';
 import { PluginsConfig, PluginsConfigType } from './plugins_config';
 import { PluginsSystem } from './plugins_system';
+import { LicensingServiceSetup } from '../licensing';
 
 /** @public */
 export interface PluginsServiceSetup {
@@ -47,6 +48,7 @@ export interface PluginsServiceStart {
 export interface PluginsServiceSetupDeps {
   elasticsearch: ElasticsearchServiceSetup;
   http: HttpServiceSetup;
+  licensing: LicensingServiceSetup;
 }
 
 /** @internal */
