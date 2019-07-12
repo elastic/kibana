@@ -4,10 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ResponseError, ResponseMessage } from 'vscode-jsonrpc/lib/messages';
+import { kfetch } from 'ui/kfetch';
+
+import { ResponseError, ResponseMessage } from './jsonrpc';
 
 export { TextDocumentMethods } from './text_document_methods';
-import { kfetch } from 'ui/kfetch';
 
 export interface LspClient {
   sendRequest(method: string, params: any, singal?: AbortSignal): Promise<ResponseMessage>;
@@ -38,7 +39,7 @@ export class LspRestClient implements LspClient {
       if (error.body && error.body.error) {
         error = error.body.error;
       }
-      throw new ResponseError<any>(error.code, error.message, error.data);
+      throw new ResponseError(error.code, error.message, error.data);
     }
   }
 }

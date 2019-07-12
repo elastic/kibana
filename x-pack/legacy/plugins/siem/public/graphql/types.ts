@@ -200,7 +200,7 @@ export interface AuthenticationsData {
 
   totalCount: number;
 
-  pageInfo: PageInfo;
+  pageInfo: PageInfoPaginated;
 
   inspect?: Inspect | null;
 }
@@ -319,10 +319,12 @@ export interface CursorType {
   tiebreaker?: string | null;
 }
 
-export interface PageInfo {
-  endCursor?: CursorType | null;
+export interface PageInfoPaginated {
+  activePage: number;
 
-  hasNextPage?: boolean | null;
+  fakeTotalCount: number;
+
+  showMorePagesIndicator: boolean;
 }
 
 export interface Inspect {
@@ -797,6 +799,12 @@ export interface SshEcsFields {
   method?: ToStringArray | null;
 
   signature?: ToStringArray | null;
+}
+
+export interface PageInfo {
+  endCursor?: CursorType | null;
+
+  hasNextPage?: boolean | null;
 }
 
 export interface TimelineData {
@@ -1530,6 +1538,17 @@ export interface TimerangeInput {
   from: number;
 }
 
+export interface PaginationInputPaginated {
+  /** The activePage parameter defines the page of results you want to fetch */
+  activePage: number;
+  /** The cursorStart parameter defines the start of the results to be displayed */
+  cursorStart: number;
+  /** The fakePossibleCount parameter determines the total count in order to show 5 additional pages */
+  fakePossibleCount: number;
+  /** The querySize parameter is the number of items to be returned */
+  querySize: number;
+}
+
 export interface PaginationInput {
   /** The limit parameter allows you to configure the maximum amount of items to be returned */
   limit: number;
@@ -1755,7 +1774,7 @@ export interface GetAllTimelineQueryArgs {
 export interface AuthenticationsSourceArgs {
   timerange: TimerangeInput;
 
-  pagination: PaginationInput;
+  pagination: PaginationInputPaginated;
 
   filterQuery?: string | null;
 
@@ -2125,7 +2144,7 @@ export namespace GetAuthenticationsQuery {
   export type Variables = {
     sourceId: string;
     timerange: TimerangeInput;
-    pagination: PaginationInput;
+    pagination: PaginationInputPaginated;
     filterQuery?: string | null;
     defaultIndex: string[];
     inspect: boolean;
@@ -2242,17 +2261,13 @@ export namespace GetAuthenticationsQuery {
   };
 
   export type PageInfo = {
-    __typename?: 'PageInfo';
+    __typename?: 'PageInfoPaginated';
 
-    endCursor?: EndCursor | null;
+    activePage: number;
 
-    hasNextPage?: boolean | null;
-  };
+    fakeTotalCount: number;
 
-  export type EndCursor = {
-    __typename?: 'CursorType';
-
-    value?: string | null;
+    showMorePagesIndicator: boolean;
   };
 
   export type Inspect = {

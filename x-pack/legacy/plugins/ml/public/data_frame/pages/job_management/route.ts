@@ -15,7 +15,7 @@ import { loadIndexPatterns } from '../../../util/index_utils';
 // @ts-ignore
 import { getDataFrameBreadcrumbs } from '../../breadcrumbs';
 
-const template = `<ml-nav-menu name="data_frame" /><ml-data-frame-page />`;
+const template = `<ml-nav-menu name="data_frames" /><ml-data-frame-page />`;
 
 uiRoutes.when('/data_frames/?', {
   template,
