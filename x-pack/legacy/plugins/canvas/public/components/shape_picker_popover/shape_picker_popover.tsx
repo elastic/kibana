@@ -27,14 +27,14 @@ interface Props {
 }
 
 export const ShapePickerPopover = ({ shapes, onChange, value, anchorPosition }: Props) => {
-  const button = (handleClick: () => unknown) => (
+  const button = (handleClick: React.MouseEventHandler<any>) => (
     <EuiLink style={{ fontSize: 0 }} onClick={handleClick}>
       <ShapePreview shape={value ? shapes[value] : undefined} />
     </EuiLink>
   );
 
   return (
-    <Popover panelClassName="canvas" button={button} anchorPosition={anchorPosition}>
+    <Popover panelClassName="canvas" button={button} anchorPosition={anchorPosition as any}>
       {() => <ShapePicker onChange={onChange} shapes={shapes} />}
     </Popover>
   );

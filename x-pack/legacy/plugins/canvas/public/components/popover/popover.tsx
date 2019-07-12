@@ -4,18 +4,21 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-/* eslint react/forbid-elements: 0 */
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { EuiPopover, EuiToolTip } from '@elastic/eui';
 
 interface Props {
-  isOpen: boolean;
-  ownFocus: boolean;
-  button: (handleClick: Function) => React.ReactElement;
-  tooltip: string;
-  tooltipPosition: 'top' | 'bottom' | 'left' | 'right';
-  children: (arg: { closePopover: Function }) => React.ReactElement;
+  button: (handleClick: React.MouseEventHandler<HTMLButtonElement>) => React.ReactElement;
+  tooltipPosition?: 'top' | 'bottom' | 'left' | 'right';
+  children: (arg: { closePopover: () => void }) => React.ReactElement;
+  isOpen?: boolean;
+  ownFocus?: boolean;
+  tooltip?: string;
+  panelClassName?: string;
+  anchorPosition?: string;
+  panelPaddingSize?: 'none' | 's' | 'm' | 'l';
+  id?: string;
 }
 
 interface State {
@@ -40,7 +43,7 @@ export class Popover extends Component<Props, State> {
   };
 
   state: State = {
-    isPopoverOpen: this.props.isOpen,
+    isPopoverOpen: !!this.props.isOpen,
   };
 
   handleClick = () => {
@@ -60,7 +63,7 @@ export class Popover extends Component<Props, State> {
 
     const wrappedButton = (handleClick: any) => {
       // wrap button in tooltip, if tooltip text is provided
-      if (!this.state.isPopoverOpen && tooltip.length) {
+      if (!this.state.isPopoverOpen && tooltip && tooltip.length) {
         return (
           <EuiToolTip position={tooltipPosition} content={tooltip}>
             {button(handleClick)}
@@ -72,9 +75,10 @@ export class Popover extends Component<Props, State> {
     };
 
     const appWrapper = document.querySelector('.app-wrapper');
+    const EuiPopoverAny = EuiPopover as React.FC<any>;
 
     return (
-      <EuiPopover
+      <EuiPopoverAny
         {...rest}
         button={wrappedButton(this.handleClick)}
         isOpen={this.state.isPopoverOpen}
@@ -82,7 +86,7 @@ export class Popover extends Component<Props, State> {
         container={appWrapper}
       >
         {children({ closePopover: this.closePopover })}
-      </EuiPopover>
+      </EuiPopoverAny>
     );
   }
 }
