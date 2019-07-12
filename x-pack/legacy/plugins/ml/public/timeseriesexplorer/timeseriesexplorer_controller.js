@@ -88,7 +88,7 @@ module.controller('MlTimeSeriesExplorerController', function (
   Private,
   AppState,
   config,
-  mlGlobalState) {
+  globalState) {
 
   $injector.get('mlSelectIntervalService');
   $injector.get('mlSelectSeverityService');
@@ -151,7 +151,7 @@ module.controller('MlTimeSeriesExplorerController', function (
       const timeSeriesJobIds = $scope.jobs.map(j => j.id);
 
       // Select any jobs set in the global state (i.e. passed in the URL).
-      let { jobIds: selectedJobIds } = getSelectedJobIds(mlGlobalState);
+      let { jobIds: selectedJobIds } = getSelectedJobIds(globalState);
 
       // Check if any of the jobs set in the URL are not time series jobs
       // (e.g. if switching to this view straight from the Anomaly Explorer).
@@ -183,7 +183,7 @@ module.controller('MlTimeSeriesExplorerController', function (
             })
           );
 
-          setGlobalState(mlGlobalState, { selectedIds: [selectedJobIds[0]] });
+          setGlobalState(globalState, { selectedIds: [selectedJobIds[0]] });
           mlJobSelectService.next({ selection: [selectedJobIds[0]], resetSelection: true });
         } else {
         // if a group has been loaded
@@ -195,12 +195,12 @@ module.controller('MlTimeSeriesExplorerController', function (
               })
             );
 
-            setGlobalState(mlGlobalState, { selectedIds: [selectedJobIds[0]] });
+            setGlobalState(globalState, { selectedIds: [selectedJobIds[0]] });
             mlJobSelectService.next({ selection: [selectedJobIds[0]], resetSelection: true });
           } else if ($scope.jobs.length > 0) {
           // if there are no valid jobs in the group but there are valid jobs
           // in the list of all jobs, select the first
-            setGlobalState(mlGlobalState, { selectedIds: [$scope.jobs[0].id] });
+            setGlobalState(globalState, { selectedIds: [$scope.jobs[0].id] });
             mlJobSelectService.next({ selection: [$scope.jobs[0].id], resetSelection: true });
           } else {
           // if there are no valid jobs left.
@@ -210,7 +210,7 @@ module.controller('MlTimeSeriesExplorerController', function (
       } else if (invalidIds.length > 0 && selectedJobIds.length > 0) {
       // if some ids have been filtered out because they were invalid.
       // refresh the URL with the first valid id
-        setGlobalState(mlGlobalState, { selectedIds: [selectedJobIds[0]] });
+        setGlobalState(globalState, { selectedIds: [selectedJobIds[0]] });
         mlJobSelectService.next({ selection: [selectedJobIds[0]], resetSelection: true });
       } else if (selectedJobIds.length > 0) {
       // normal behavior. a job ID has been loaded from the URL
@@ -219,7 +219,7 @@ module.controller('MlTimeSeriesExplorerController', function (
         if (selectedJobIds.length === 0 && $scope.jobs.length > 0) {
         // no jobs were loaded from the URL, so add the first job
         // from the full jobs list.
-          setGlobalState(mlGlobalState, { selectedIds: [$scope.jobs[0].id] });
+          setGlobalState(globalState, { selectedIds: [$scope.jobs[0].id] });
           mlJobSelectService.next({ selection: [$scope.jobs[0].id], resetSelection: true });
         } else {
         // Jobs exist, but no time series jobs.

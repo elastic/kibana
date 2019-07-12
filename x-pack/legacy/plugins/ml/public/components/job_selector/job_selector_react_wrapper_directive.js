@@ -14,21 +14,18 @@ import _ from 'lodash';
 
 import { JobSelector } from './job_selector';
 import { getSelectedJobIds } from './job_select_service_utils';
-import { BehaviorSubject, Subject } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml');
 
-// The observable we want to trigger on a globalState save.
-const globalStateSave$ = new Subject();
-
 module
-  .directive('mlJobSelectorReactWrapper', function (mlGlobalState, config, mlJobSelectService) {
+  .directive('mlJobSelectorReactWrapper', function (globalState, config, mlJobSelectService) {
     function link(scope, element, attrs) {
-      const { jobIds, selectedGroups } = getSelectedJobIds(mlGlobalState);
+      const { jobIds, selectedGroups } = getSelectedJobIds(globalState);
 
       const props = {
         config,
-        globalState: mlGlobalState,
+        globalState,
         jobSelectService: mlJobSelectService,
         selectedJobIds: jobIds,
         selectedGroups,
@@ -51,31 +48,14 @@ module
       link,
     };
   })
-  .service('mlGlobalState', function (globalState) {
-    // This Proxy augments the original globlaState save function and triggers the observable.
-    return new Proxy(
-      globalState,
-      {
-        get(target, propKey) {
-          if (propKey !== 'save') {
-            return target[propKey];
-          }
-          return function (...args) {
-            const result = target[propKey].apply(this, args);
-            globalStateSave$.next();
-            return result;
-          };
-        }
-      }
-    );
-  })
-  .service('mlJobSelectService', function (mlGlobalState) {
-    const { jobIds, selectedGroups } = getSelectedJobIds(mlGlobalState);
+  .service('mlJobSelectService', function (globalState) {
+    const { jobIds, selectedGroups } = getSelectedJobIds(globalState);
     const mlJobSelectService = new BehaviorSubject({ selection: jobIds, groups: selectedGroups, resetSelection: false });
 
-    // Subscribe to changes to globalState and trigger a mlJobSelectService if the job selection changed.
-    globalStateSave$.subscribe(() => {
-      const { newJobIds, newSelectedGroups } = getSelectedJobIds(mlGlobalState);
+    // Subscribe to changes to globalState and trigger
+    // a mlJobSelectService update if the job selection changed.
+    globalState.on('save_with_changes', () => {
+      const { newJobIds, newSelectedGroups } = getSelectedJobIds(globalState);
       const oldSelectedJobIds = mlJobSelectService.getValue().selection;
 
       if (newJobIds && !(_.isEqual(oldSelectedJobIds, newJobIds))) {
