@@ -14,6 +14,10 @@ import {
   EuiTitle,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiDragDropContext,
+  EuiDraggable,
+  EuiDroppable,
+  EuiIcon,
 } from '@elastic/eui';
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 import React from 'react';
@@ -30,11 +34,12 @@ interface LogColumnsConfigurationPanelProps {
   isLoading: boolean;
   logColumnConfiguration: LogColumnConfigurationProps[];
   addLogColumn: (logColumn: LogColumnConfiguration) => void;
+  reorderLogColumns: (sourceIndex: number, destinationIndex: number) => void;
 }
 
 export const LogColumnsConfigurationPanel: React.FunctionComponent<
   LogColumnsConfigurationPanelProps
-> = ({ addLogColumn, availableFields, isLoading, logColumnConfiguration }) => (
+> = ({ addLogColumn, reorderLogColumns, availableFields, isLoading, logColumnConfiguration }) => (
   <EuiForm>
     <EuiFlexGroup>
       <EuiFlexItem>
@@ -56,12 +61,32 @@ export const LogColumnsConfigurationPanel: React.FunctionComponent<
       </EuiFlexItem>
     </EuiFlexGroup>
     {logColumnConfiguration.length > 0 ? (
-      logColumnConfiguration.map((column, index) => (
-        <LogColumnConfigurationPanel
-          logColumnConfigurationProps={column}
-          key={`logColumnConfigurationPanel-${index}`}
-        />
-      ))
+      <EuiDragDropContext
+        onDragEnd={({ source, destination }) =>
+          destination && reorderLogColumns(source.index, destination.index)
+        }
+      >
+        <EuiDroppable droppableId="COLUMN_CONFIG_DROPPABLE_AREA">
+          <>
+            {/* Fragment here necessary for typechecking */}
+            {logColumnConfiguration.map((column, index) => (
+              <EuiDraggable
+                key={`logColumnConfigurationPanel-${column.logColumnConfiguration.id}`}
+                index={index}
+                draggableId={column.logColumnConfiguration.id}
+                customDragHandle
+              >
+                {provided => (
+                  <LogColumnConfigurationPanel
+                    dragHandleProps={provided.dragHandleProps}
+                    logColumnConfigurationProps={column}
+                  />
+                )}
+              </EuiDraggable>
+            ))}
+          </>
+        </EuiDroppable>
+      </EuiDragDropContext>
     ) : (
       <LogColumnConfigurationEmptyPrompt />
     )}
@@ -70,30 +95,30 @@ export const LogColumnsConfigurationPanel: React.FunctionComponent<
 
 interface LogColumnConfigurationPanelProps {
   logColumnConfigurationProps: LogColumnConfigurationProps;
+  dragHandleProps: any;
 }
 
-const LogColumnConfigurationPanel: React.FunctionComponent<LogColumnConfigurationPanelProps> = ({
-  logColumnConfigurationProps,
-}) => (
+const LogColumnConfigurationPanel: React.FunctionComponent<
+  LogColumnConfigurationPanelProps
+> = props => (
   <>
     <EuiSpacer size="m" />
-    {logColumnConfigurationProps.type === 'timestamp' ? (
-      <TimestampLogColumnConfigurationPanel
-        logColumnConfigurationProps={logColumnConfigurationProps}
-      />
-    ) : logColumnConfigurationProps.type === 'message' ? (
-      <MessageLogColumnConfigurationPanel
-        logColumnConfigurationProps={logColumnConfigurationProps}
-      />
+    {props.logColumnConfigurationProps.type === 'timestamp' ? (
+      <TimestampLogColumnConfigurationPanel {...props} />
+    ) : props.logColumnConfigurationProps.type === 'message' ? (
+      <MessageLogColumnConfigurationPanel {...props} />
     ) : (
-      <FieldLogColumnConfigurationPanel logColumnConfigurationProps={logColumnConfigurationProps} />
+      <FieldLogColumnConfigurationPanel
+        logColumnConfigurationProps={props.logColumnConfigurationProps}
+        dragHandleProps={props.dragHandleProps}
+      />
     )}
   </>
 );
 
 const TimestampLogColumnConfigurationPanel: React.FunctionComponent<
   LogColumnConfigurationPanelProps
-> = ({ logColumnConfigurationProps }) => (
+> = ({ logColumnConfigurationProps, dragHandleProps }) => (
   <ExplainedLogColumnConfigurationPanel
     fieldName="Timestamp"
     helpText={
@@ -107,12 +132,13 @@ const TimestampLogColumnConfigurationPanel: React.FunctionComponent<
       />
     }
     removeColumn={logColumnConfigurationProps.remove}
+    dragHandleProps={dragHandleProps}
   />
 );
 
 const MessageLogColumnConfigurationPanel: React.FunctionComponent<
   LogColumnConfigurationPanelProps
-> = ({ logColumnConfigurationProps }) => (
+> = ({ logColumnConfigurationProps, dragHandleProps }) => (
   <ExplainedLogColumnConfigurationPanel
     fieldName="Message"
     helpText={
@@ -123,19 +149,27 @@ const MessageLogColumnConfigurationPanel: React.FunctionComponent<
       />
     }
     removeColumn={logColumnConfigurationProps.remove}
+    dragHandleProps={dragHandleProps}
   />
 );
 
 const FieldLogColumnConfigurationPanel: React.FunctionComponent<{
   logColumnConfigurationProps: FieldLogColumnConfigurationProps;
+  dragHandleProps: any;
 }> = ({
   logColumnConfigurationProps: {
     logColumnConfiguration: { field },
     remove,
   },
+  dragHandleProps,
 }) => (
   <EuiPanel data-test-subj={`logColumnPanel fieldLogColumnPanel fieldLogColumnPanel:${field}`}>
     <EuiFlexGroup>
+      <EuiFlexItem grow={false}>
+        <div {...dragHandleProps}>
+          <EuiIcon type="grab" />
+        </div>
+      </EuiFlexItem>
       <EuiFlexItem grow={1}>
         <FormattedMessage
           id="xpack.infra.sourceConfiguration.fieldLogColumnTitle"
@@ -156,11 +190,17 @@ const ExplainedLogColumnConfigurationPanel: React.FunctionComponent<{
   fieldName: React.ReactNode;
   helpText: React.ReactNode;
   removeColumn: () => void;
-}> = ({ fieldName, helpText, removeColumn }) => (
+  dragHandleProps: any;
+}> = ({ fieldName, helpText, removeColumn, dragHandleProps }) => (
   <EuiPanel
     data-test-subj={`logColumnPanel systemLogColumnPanel systemLogColumnPanel:${fieldName}`}
   >
     <EuiFlexGroup>
+      <EuiFlexItem grow={false}>
+        <div {...dragHandleProps}>
+          <EuiIcon type="grab" />
+        </div>
+      </EuiFlexItem>
       <EuiFlexItem grow={1}>{fieldName}</EuiFlexItem>
       <EuiFlexItem grow={3}>
         <EuiText size="s" color="subdued">

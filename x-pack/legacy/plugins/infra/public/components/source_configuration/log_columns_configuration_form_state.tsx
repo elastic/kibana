@@ -106,6 +106,18 @@ export const useLogColumnsConfigurationFormState = ({
     [formState.logColumns]
   );
 
+  const reorderLogColumns = useCallback(
+    (sourceIndex, destinationIndex) => {
+      const newLogColumns = [...formState.logColumns];
+      newLogColumns.splice(destinationIndex, 0, newLogColumns.splice(sourceIndex, 1)[0]);
+      setFormStateChanges(changes => ({
+        ...changes,
+        logColumns: newLogColumns,
+      }));
+    },
+    [formState.logColumns]
+  );
+
   const errors = useMemo(
     () =>
       logColumnConfigurationProps.length <= 0
@@ -125,6 +137,7 @@ export const useLogColumnsConfigurationFormState = ({
 
   return {
     addLogColumn,
+    reorderLogColumns,
     errors,
     logColumnConfigurationProps,
     formState,
