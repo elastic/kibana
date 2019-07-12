@@ -170,7 +170,6 @@ function DefaultEditorAggGroup({
                     groupName={groupName}
                     isDraggable={stats.count > 1}
                     isRemovable={isAggRemovable(agg, group)}
-                    data-test-subj={`aggregationEditor${agg.id}`}
                     responseValueAggs={responseValueAggs}
                     state={state}
                     onAggErrorChanged={onAggErrorChanged}

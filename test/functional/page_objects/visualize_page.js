@@ -440,8 +440,7 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
     async selectAggregation(myString, groupName = 'buckets', childAggregationType = null) {
       const comboBoxElement = await find.byCssSelector(`
         [group-name="${groupName}"]
-        vis-editor-agg-params:not(.ng-hide)
-        [data-test-subj="visAggEditorParams"]
+        [data-test-subj="visEditorAggToggle"] [aria-expanded="true"]
         ${childAggregationType ? '.visEditorAgg__subAgg' : ''}
         [data-test-subj="defaultEditorAggSelect"]
       `);
@@ -469,7 +468,7 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
 
     async toggleOpenEditor(index, toState = 'true') {
       // index, see selectYAxisAggregation
-      const toggle = await find.byCssSelector(`button[aria-controls="visAggEditorParams${index}"]`);
+      const toggle = await find.byCssSelector(`button[aria-controls="visEditorAggAccordion${index}"]`);
       const toggleOpen = await toggle.getAttribute('aria-expanded');
       log.debug(`toggle ${index} expand = ${toggleOpen}`);
       if (toggleOpen !== toState) {
@@ -487,12 +486,10 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
 
       // select our agg
       const aggSelect = await find
-        .byCssSelector(`[data-test-subj="aggregationEditor${index}"]
-          vis-editor-agg-params:not(.ng-hide) [data-test-subj="defaultEditorAggSelect"]`);
+        .byCssSelector(`#visEditorAggAccordion${index} [data-test-subj="defaultEditorAggSelect"]`);
       await comboBox.setElement(aggSelect, agg);
 
-      const fieldSelect = await find.byCssSelector(`[data-test-subj="aggregationEditor${index}"]
-        vis-editor-agg-params:not(.ng-hide) [data-test-subj="visDefaultEditorField"]`);
+      const fieldSelect = await find.byCssSelector(`#visEditorAggAccordion${index} [data-test-subj="visDefaultEditorField"]`);
       // select our field
       await comboBox.setElement(fieldSelect, field);
       // enter custom label
@@ -543,7 +540,7 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
       log.debug(`selectField ${fieldValue}`);
       const selector = `
         [group-name="${groupName}"]
-        vis-editor-agg-params:not(.ng-hide)
+        [data-test-subj="visEditorAggToggle"] [aria-expanded="true"]
         [data-test-subj="visAggEditorParams"]
         ${childAggregationType ? '.visEditorAgg__subAgg' : ''}
         [data-test-subj="visDefaultEditorField"]
