@@ -31,7 +31,15 @@ interface LogMinimapProps {
   width: number;
 }
 
-export class LogMinimap extends React.Component<LogMinimapProps> {
+interface LogMinimapState {
+  timeCursorY: number;
+}
+
+export class LogMinimap extends React.Component<LogMinimapProps, LogMinimapState> {
+  public readonly state = {
+    timeCursorY: 0,
+  };
+
   public handleClick: React.MouseEventHandler<SVGSVGElement> = event => {
     const svgPosition = event.currentTarget.getBoundingClientRect();
     const clickedYPosition = event.clientY - svgPosition.top;
@@ -61,6 +69,13 @@ export class LogMinimap extends React.Component<LogMinimapProps> {
     return ((time - minTime) * height) / intervalSize;
   };
 
+  private updateTimeCursor: React.MouseEventHandler<SVGSVGElement> = event => {
+    const svgPosition = event.currentTarget.getBoundingClientRect();
+    const timeCursorY = event.clientY - svgPosition.top;
+
+    this.setState({ timeCursorY });
+  };
+
   public render() {
     const {
       className,
@@ -72,16 +87,19 @@ export class LogMinimap extends React.Component<LogMinimapProps> {
       width,
     } = this.props;
 
+    const { timeCursorY } = this.state;
+
     const [minTime, maxTime] = this.getYScale().domain();
 
     return (
-      <svg
+      <MinimapWrapper
         className={className}
         height={height}
         preserveAspectRatio="none"
         viewBox={`0 0 ${width} ${height}`}
         width={width}
         onClick={this.handleClick}
+        onMouseMove={this.updateTimeCursor}
       >
         <MinimapBackground x={width / 2} y="0" width={width / 2} height={height} />
         <DensityChart
@@ -101,6 +119,7 @@ export class LogMinimap extends React.Component<LogMinimapProps> {
             width={width}
           />
         ) : null}
+        <TimeCursor x1={0} x2={width} y1={timeCursorY} y2={timeCursorY} />
         {/* <g transform={`translate(${width * 0.5}, 0)`}>
           <SearchMarkers
             buckets={searchSummaryBuckets || []}
@@ -111,7 +130,7 @@ export class LogMinimap extends React.Component<LogMinimapProps> {
             jumpToTarget={jumpToTarget}
           />
         </g> */}
-      </svg>
+      </MinimapWrapper>
     );
   }
 }
@@ -123,4 +142,21 @@ const MinimapBackground = euiStyled.rect`
 const MinimapBorder = euiStyled.line`
   stroke: ${props => props.theme.eui.euiColorMediumShade};
   stroke-width: 1px;
+`;
+
+const TimeCursor = euiStyled.line`
+  stroke-width: 1px;
+  stroke: ${props =>
+    props.theme.darkMode
+      ? props.theme.eui.euiColorDarkestShade
+      : props.theme.eui.euiColorDarkShade};
+`;
+
+const MinimapWrapper = euiStyled.svg`
+  & ${TimeCursor} {
+    visibility: hidden;
+  }
+  &:hover ${TimeCursor} {
+    visibility: visible;
+  }
 `;

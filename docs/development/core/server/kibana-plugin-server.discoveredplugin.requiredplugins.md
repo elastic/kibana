@@ -9,5 +9,5 @@ An optional list of the other plugins that \*\*must be\*\* installed and enabled
 <b>Signature:</b>
 
 ```typescript
-readonly requiredPlugins: ReadonlyArray<PluginName>;
+readonly requiredPlugins: readonly PluginName[];
 ```

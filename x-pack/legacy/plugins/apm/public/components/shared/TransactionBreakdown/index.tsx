@@ -3,8 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import theme from '@elastic/eui/dist/eui_theme_light.json';
-import React, { useState, useMemo } from 'react';
+import React, { useState } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -19,19 +18,6 @@ import { TransactionBreakdownHeader } from './TransactionBreakdownHeader';
 import { TransactionBreakdownKpiList } from './TransactionBreakdownKpiList';
 import { TransactionBreakdownGraph } from './TransactionBreakdownGraph';
 import { FETCH_STATUS } from '../../../hooks/useFetcher';
-
-const COLORS = [
-  theme.euiColorVis0,
-  theme.euiColorVis1,
-  theme.euiColorVis2,
-  theme.euiColorVis3,
-  theme.euiColorVis4,
-  theme.euiColorVis5,
-  theme.euiColorVis6,
-  theme.euiColorVis7,
-  theme.euiColorVis8,
-  theme.euiColorVis9
-];
 
 const NoTransactionsTitle = styled.span`
   font-weight: bold;
@@ -48,58 +34,17 @@ const TransactionBreakdown: React.FC<{
     receivedDataDuringLifetime
   } = useTransactionBreakdown();
 
-  const kpis = data ? data.kpis : undefined;
-  const timeseriesPerSubtype = data ? data.timeseries_per_subtype : undefined;
-
-  const legends = useMemo(() => {
-    const names = kpis ? kpis.map(kpi => kpi.name).sort() : [];
-
-    return names.map((name, index) => {
-      return {
-        name,
-        color: COLORS[index % COLORS.length]
-      };
-    });
-  }, [kpis]);
-
-  const sortedAndColoredKpis = useMemo(() => {
-    if (!kpis) {
-      return null;
-    }
-
-    return legends.map(legend => {
-      const { color } = legend;
-
-      const breakdown = kpis.find(
-        b => b.name === legend.name
-      ) as typeof kpis[0];
-
-      return {
-        ...breakdown,
-        color
-      };
-    });
-  }, [kpis, legends]);
-
   const loading = status === FETCH_STATUS.LOADING || status === undefined;
 
-  const hasHits = data && data.kpis.length > 0;
-  const timeseries = useMemo(() => {
-    if (!timeseriesPerSubtype) {
-      return [];
-    }
-    return legends.map(legend => {
-      const series = timeseriesPerSubtype[legend.name];
+  const { kpis, timeseries } = data;
 
-      return {
-        name: legend.name,
-        values: series,
-        color: legend.color
-      };
-    });
-  }, [timeseriesPerSubtype, legends]);
+  const hasHits = kpis.length > 0;
 
-  return receivedDataDuringLifetime ? (
+  if (!receivedDataDuringLifetime) {
+    return null;
+  }
+
+  return (
     <EuiPanel>
       <EuiFlexGroup direction="column" gutterSize="s">
         <EuiFlexItem grow={false}>
@@ -111,11 +56,9 @@ const TransactionBreakdown: React.FC<{
             }}
           />
         </EuiFlexItem>
-        {hasHits && sortedAndColoredKpis ? (
+        {hasHits ? (
           <EuiFlexItem grow={false}>
-            {sortedAndColoredKpis && (
-              <TransactionBreakdownKpiList kpis={sortedAndColoredKpis} />
-            )}
+            <TransactionBreakdownKpiList kpis={kpis} />
           </EuiFlexItem>
         ) : (
           !loading && (
@@ -155,7 +98,7 @@ const TransactionBreakdown: React.FC<{
         ) : null}
       </EuiFlexGroup>
     </EuiPanel>
-  ) : null;
+  );
 };
 
 export { TransactionBreakdown };
