@@ -13,35 +13,35 @@ For example, Timelion enables you to easily get the answers to questions like:
 * What percent of Japan's population came to my site today?
 * What's the 10-day moving average of the S&P 500?
 * What's the cumulative sum of all search requests received in the last 2 years?
-{nbsp}
 
-You might also be interested in these tutorial videos:
+[[time-series-intro]]
+=== Create time series visualizations
 
-* https://www.elastic.co/elasticon/conf/2017/sf/timelion-magic-math-and-everything-in-the-middle[Timelion: Magic, Math, and Everything in the Middle]
-* https://www.elastic.co/videos/timelion-plugin-for-kibana-enables-times-series-paris-meetup[Timelion Plugin for Kibana Enables Time Series]
-* https://www.elastic.co/videos/using-kibana-and-timelion-to-analyze-earthquake-data[Using Kibana and Timelion to Analyze Earthquake Data]
+To compare the real-time percentage of CPU time spent in user space to the results offset by one hour, create a time series visualization with Timelion.
 
-[[timelion-getting-started]]
-=== Getting started
+[float]
+[[time-series-before-you-begin]]
+==== Before you begin
 
-Ready to experience all that is Timelion? This getting started tutorial shows
-you how to:
+In this tutorial, you'll use the time series data from https://www.elastic.co/guide/en/beats/metricbeat/current/index.html[Metricbeat]. To ingest the data locally, link:https://www.elastic.co/downloads/beats/metricbeat[download Metricbeat].
 
-* <<timelion-create, Create a time series chart with multiple expressions>>
-* <<timelion-customize, Customize the visualization type and formatting options>>
-* <<timelion-math, Use mathematical functions to manipulate your data>>
-* <<timelion-conditional, Track trends and use conditional logic to format outliers>>
-* <<timelion-save, Add Timelion visualizations to a dashboard>>
-* <<timelion-inline-help, Access inline help and documentation>>
+[float]
+[[time-series-create]]
+==== Create the visualization
 
-[[timelion-create]]
-==== Creating time series visualizations
+Create the visualization using Timelion.
 
-This tutorial will be using the time series data from https://www.elastic.co/guide/en/beats/metricbeat/current/index.html[Metricbeat] to walk you through a number of functions that Timelion offers. To get started, download Metricbeat and follow the https://www.elastic.co/downloads/beats/metricbeat[instructions here] to start ingesting the data locally.
+. Click *Visualize*.
 
-The first visualization you'll create will compare the real-time percentage of CPU time spent in user space to the results offset by one hour. In order to create this visualization, we’ll need to create two Timelion expressions. One with the real-time average of `system.cpu.user.pct` and another with the average offset by one hour.
+. On the *Visualizations* page, click *Create new visualization*.
 
-To start, you will need to define an `index`, `timefield` and `metric` in the first expression. Go ahead and enter the below expression into the Timelion query bar.
+. On the *New Visualization* window, click *Timelion*.
+
+[float]
+[[time-series-define-functions]]
+==== Define the functions
+
+To start tracking the real-time percentage of CPU, enter the following in the *Timelion Expression* field:
 
 [source,text]
 ----------------------------------
@@ -51,147 +51,269 @@ To start, you will need to define an `index`, `timefield` and `metric` in the fi
 image::images/timelion-create01.png[]
 {nbsp}
 
-Now you need to add another series with data from the previous hour for comparison. To do so, you'll have to add an `offset` argument to the `.es()` function. `offset` will offset the series retrieval by a date expression. For this example, you'll want to offset the data back one hour and will be using the date expression `-1h`. Using a comma to separate the two series, enter the following expression into the Timelion query bar:
+[float]
+[[time-series-compare-data]]
+==== Compare the data
+
+To compare the two data sets, add another series with data from the previous hour, separated by a comma:  
 
 [source,text]
 ----------------------------------
-.es(index=metricbeat-*, timefield='@timestamp', metric='avg:system.cpu.user.pct'), .es(offset=-1h,index=metricbeat-*, timefield='@timestamp', metric='avg:system.cpu.user.pct')
+.es(index=metricbeat-*, timefield='@timestamp', metric='avg:system.cpu.user.pct'), .es(offset<1>=-1h<2>,index=metricbeat-*, timefield='@timestamp', metric='avg:system.cpu.user.pct')
 ----------------------------------
+
+<1> `offset` offsets the data retrieval by a date expression.
+<2> `-1h` offsets the data back by one hour.
 
 image::images/timelion-create02.png[]
 {nbsp}
 
-It’s a bit hard to differentiate the two series. Customize the labels in order to easily distinguish them. You can always append the `.label()` function to any expression to add a custom label. Enter the below expression into the Timelion query bar to customize your labels:
+[float]
+[[time-series-add-labels]]
+==== Add label names
+
+To easily distinguish between the two data sets, add the label names:
+
 [source,text]
 ----------------------------------
-.es(offset=-1h,index=metricbeat-*, timefield='@timestamp', metric='avg:system.cpu.user.pct').label('last hour'), .es(index=metricbeat-*, timefield='@timestamp', metric='avg:system.cpu.user.pct').label('current hour')
+.es(offset=-1h,index=metricbeat-*, timefield='@timestamp', metric='avg:system.cpu.user.pct').label('last hour')<1>, .es(index=metricbeat-*, timefield='@timestamp', metric='avg:system.cpu.user.pct').label('current hour')<1>
 ----------------------------------
+
+<1> The `.label()` function adds a custom label to the expression.
 
 image::images/timelion-create03.png[]
 {nbsp}
 
-[[timelion-customize]]
-==== Customize and format visualizations
+[float]
+[[time-series-title]]
+==== Add a title 
 
-Timelion has plenty of options for customization. You can personalize nearly every aspect of a chart with the functions available. For this tutorial, you will perform the following modifications.
-
-* Add a title
-* Change a series type
-* Change the color and opacity of a series
-* Modify the legend
-
-In the <<timelion-create, previous section>>, you created a Timelion chart with two series. Let’s continue to customize this visualization.
-
-Before making any other modifications, append the `title()` function to the end of an expression to add a title with a meaningful name. This will make it much easier for unfamiliar users to understand the visualizations purpose. For this example, add `title('CPU usage over time')` to the original series. Use the following expression in your Timelion querybar:
+To add a title with a meaningful name, add the `title()` function to the end of an expression:
 
 [source,text]
 ----------------------------------
-.es(offset=-1h,index=metricbeat-*, timefield='@timestamp', metric='avg:system.cpu.user.pct').label('last hour'), .es(index=metricbeat-*, timefield='@timestamp', metric='avg:system.cpu.user.pct').label('current hour').title('CPU usage over time')
+.es(offset=-1h,index=metricbeat-*, timefield='@timestamp', metric='avg:system.cpu.user.pct').label('last hour'), .es(index=metricbeat-*, timefield='@timestamp', metric='avg:system.cpu.user.pct').label('current hour').title('CPU usage over time')<1>
 ----------------------------------
+
+<1> The `.title()` function adds a title with a meaningful name. Titles make is easier for unfamiliar users to understand the purpose of the visualization.
 
 image::images/timelion-customize01.png[]
 {nbsp}
 
-To differentiate the last hour series a bit more, you are going to change the chart type to an area chart. In order do so, you'll need to use the `.lines()` function to customize the line chart. You'll be setting the `fill` and `width` arguments to set the fill of the line chart and line width respectively. In this example, you will set the fill level to 1 and the width of the border to 0.5 by appending  `.lines(fill=1,width=0.5)`. Use the following expression in the Timelion query bar:
+[float]
+[[time-series-change-chart-type]]
+==== Change the chart type
+
+To create contrast between the current hour data and the last hour data, change the chart type to area chart:
 
 [source,text]
 ----------------------------------
-.es(offset=-1h,index=metricbeat-*, timefield='@timestamp', metric='avg:system.cpu.user.pct').label('last hour').lines(fill=1,width=0.5), .es(index=metricbeat-*, timefield='@timestamp', metric='avg:system.cpu.user.pct').label('current hour').title('CPU usage over time')
+.es(offset=-1h,index=metricbeat-*, timefield='@timestamp', metric='avg:system.cpu.user.pct').label('last hour').lines(fill=1,width=0.5)<1>, .es(index=metricbeat-*, timefield='@timestamp', metric='avg:system.cpu.user.pct').label('current hour').title('CPU usage over time')
 ----------------------------------
+
+<1> The `.lines()` function changes the appearance of the chart lines. In this example, `.lines(fill=1,width=0.5)` sets the fill level to `1`, and the border width to `0.5`.
 
 image::images/timelion-customize02.png[]
 {nbsp}
 
-Let’s color these series so that the current hour series pops a bit more than the last hour series. The `color()` function can be used to change the color of any series and accepts standard color names, hexadecimal values or a color schema for grouped series. For this example you will use `.color(gray)` for the last hour and `.color(#1E90FF)` for the current hour. Enter the following expression into the Timelion query bar to make the adjustments:
+[float]
+[[time-series-change-color]]
+==== Change the line colors
+
+To make the current hour data stand out more than the last hour data, change the color of the lines:
 
 [source,text]
 ----------------------------------
-.es(offset=-1h,index=metricbeat-*, timefield='@timestamp', metric='avg:system.cpu.user.pct').label('last hour').lines(fill=1,width=0.5).color(gray), .es(index=metricbeat-*, timefield='@timestamp', metric='avg:system.cpu.user.pct').label('current hour').title('CPU usage over time').color(#1E90FF)
+.es(offset=-1h,index=metricbeat-*, timefield='@timestamp', metric='avg:system.cpu.user.pct').label('last hour').lines(fill=1,width=0.5).color(gray)<1>, .es(index=metricbeat-*, timefield='@timestamp', metric='avg:system.cpu.user.pct').label('current hour').title('CPU usage over time').color(#1E90FF)
 ----------------------------------
+
+<1> The `.color()` function changes the color of the data. Supported color types include standard color names, hexadecimal values, or a color schema for grouped data. In this example, `.color(gray)` represents the last hour, and `.color(#1E90FF)` represents the current hour.
 
 image::images/timelion-customize03.png[]
 {nbsp}
 
-Last but not least, adjust the legend so that it takes up as little space as possible. You can utilize the `.legend()` function to set the position and style of the legend. For this example, place the legend in the north west position of the visualization with two columns by appending `.legend(columns=2, position=nw)` to the original series. Use the following expression to make the adjustments:
+[float]
+[[time-series-adjust-legend]]
+==== Make adjustments to the legend
+
+To make sure the legend takes up as little space as possible, make adjustments:
 
 [source,text]
 ----------------------------------
-.es(offset=-1h,index=metricbeat-*, timefield='@timestamp', metric='avg:system.cpu.user.pct').label('last hour').lines(fill=1,width=0.5).color(gray), .es(index=metricbeat-*, timefield='@timestamp', metric='avg:system.cpu.user.pct').label('current hour').title('CPU usage over time').color(#1E90FF).legend(columns=2, position=nw) 
+.es(offset=-1h,index=metricbeat-*, timefield='@timestamp', metric='avg:system.cpu.user.pct').label('last hour').lines(fill=1,width=0.5).color(gray), .es(index=metricbeat-*, timefield='@timestamp', metric='avg:system.cpu.user.pct').label('current hour').title('CPU usage over time').color(#1E90FF).legend(columns=2, position=nw)<1> 
 ----------------------------------
+
+<1> The `.legend()` function sets the position and style of the legend. For this example, `.legend(columns=2, position=nw)` places the legend in the north west position of the visualization with two columns.
 
 image::images/timelion-customize04.png[]
 {nbsp}
 
-Continue on to the next section to learn about mathematical functions.
+[float]
+[[time-series-save-visualization]]
+==== Save the visualization
 
-[[timelion-math]]
-==== Using mathematical functions
+When you have finished making changes, save the visualization.
 
-You’ve learned how to create and style a Timelion visualization in the previous two sections. This section will explore the mathematical functions Timelion offers. You will continue to use the https://www.elastic.co/downloads/beats/metricbeat[Metricbeat data] to create a new Timelion visualization for inbound and outbound network traffic. To start, you'll need to add a new Timelion visualization to the sheet.
+. Click *Save*.
 
-In the top menu, click `Add` to add a second visualization. When added to the sheet, you’ll notice that the query bar has been replaced with the default `.es(*)` expression. This is because the query is associated with the visualization on the Timelion sheet you have selected. 
+. In the *Title* field, enter a name for the visualization.
 
-image::images/timelion-math01.png[]
-{nbsp}
+. Click *Confirm Save*.
 
-To start tracking the inbound / outbound network traffic, your first expression will calculate the maximum value of `system.network.in.bytes`. Enter the expression below into your Timelion query bar:
+[[mathematical-functions-intro]]
+=== Create visualizations with mathematical functions
+
+To create a visualization for inbound and outbound network traffic, use mathematical functions with Timelion.
+
+[float]
+[[mathematical-functions-before-you-begin]]
+==== Before you begin
+
+In this tutorial, you'll use the time series data from https://www.elastic.co/guide/en/beats/metricbeat/current/index.html[Metricbeat]. To ingest the data locally, link:https://www.elastic.co/downloads/beats/metricbeat[download Metricbeat].
+
+[float]
+[[math-add-timelion-visualization]]
+==== Create the visualization
+
+Create the visualization using Timelion.
+
+. Click *Visualize*.
+
+. On the *Visualizations* page, click *Create new visualization*.
+
+. On the *New Visualization* window, click *Timelion*.
+
+[float]
+[[mathematical-functions-define-functions]]
+==== Define the functions
+
+To start tracking the inbound and outbound network traffic, enter the following in the *Timelion Expression* field:
 
 [source,text]
 ----------------------------------
 .es(index=metricbeat*, timefield=@timestamp, metric=max:system.network.in.bytes)
 ----------------------------------
 
-image::images/timelion-math02.png[]
+image::images/timelion-math01.png[]
 {nbsp}
 
-Monitoring network traffic is much more valuable when plotting the rate of change. The `derivative()` function is used do just that - plot the change in values over time. This can be easily done by appending the `.derivative()` to the end of an expression. Use the following expression to update your visualization:
+[float]
+[[mathematical-functions-plot-change]]
+==== Plot the rate of change
+
+Change how the data is displayed so that you can easily monitor the inbound traffic:
 
 [source,text]
 ----------------------------------
-.es(index=metricbeat*, timefield=@timestamp, metric=max:system.network.in.bytes).derivative()
+.es(index=metricbeat*, timefield=@timestamp, metric=max:system.network.in.bytes).derivative()<1>
 ----------------------------------
+
+<1> The `.derivative` function plots the change in values over time. 
+
+image::images/timelion-math02.png[]
+{nbsp}
+
+Add a similar calculation for outbound traffic:
+
+[source,text]
+----------------------------------
+.es(index=metricbeat*, timefield=@timestamp, metric=max:system.network.in.bytes).derivative(), .es(index=metricbeat*, timefield=@timestamp, metric=max:system.network.out.bytes).derivative().multiply(-1)<1>
+----------------------------------
+
+<1> The `.multiply()` function multiplies the data series by a number, the result of a data series, or a list of data series. For this example, `.multiply(-1)` converts the outbound network traffic to a negative value since the outbound network traffic is leaving your machine.
 
 image::images/timelion-math03.png[]
 {nbsp}
 
-Now for the outbound traffic. You'll need to add a similar calculation for `system.network.out.bytes`. Since outbound traffic is leaving your machine, it makes sense to represent this metric as a negative number. The `.multiply()` function will multiply the series by a  number, the result of a series or a list of series. For this example, you will use `.multiply(-1)` to convert the outbound network traffic to a negative value. Use the following expression to update your visualization:
+[float]
+[[mathematical-functions-convert-data]]
+==== Change the data metric
+
+To make the visualization easier to analyze, change the data metric from bytes to megabytes:
 
 [source,text]
 ----------------------------------
-.es(index=metricbeat*, timefield=@timestamp, metric=max:system.network.in.bytes).derivative(), .es(index=metricbeat*, timefield=@timestamp, metric=max:system.network.out.bytes).derivative().multiply(-1)
+.es(index=metricbeat*, timefield=@timestamp, metric=max:system.network.in.bytes).derivative().divide(1048576), .es(index=metricbeat*, timefield=@timestamp, metric=max:system.network.out.bytes).derivative().multiply(-1).divide(1048576)<1>
 ----------------------------------
+
+<1> The `.divide()` function accepts the same input as `.multiply()`, then divides the data series by the defined divisor. 
 
 image::images/timelion-math04.png[]
 {nbsp}
 
-To make this visualization a bit easier to consume, convert the series from bytes to megabytes. Timelion has a `.divide()` function that can be used. `.divide()` accepts the same input as `.multiply()` and will divide the series by the divisor defined. Use the following expression to update your visualization:
+[float]
+[[mathematical-functions-customize]]
+==== Customize and format the visualization
+
+Customize and format the visualization using functions:
 
 [source,text]
 ----------------------------------
-.es(index=metricbeat*, timefield=@timestamp, metric=max:system.network.in.bytes).derivative().divide(1048576), .es(index=metricbeat*, timefield=@timestamp, metric=max:system.network.out.bytes).derivative().multiply(-1).divide(1048576)
+.es(index=metricbeat*, timefield=@timestamp, metric=max:system.network.in.bytes).derivative().divide(1048576).lines(fill=2, width=1).color(green).label("Inbound traffic")<1>.title("Network traffic (MB/s)")<2>, .es(index=metricbeat*, timefield=@timestamp, metric=max:system.network.out.bytes).derivative().multiply(-1).divide(1048576).lines(fill=2, width=1)<3>.color(blue)<4>.label("Outbound traffic")<1>.legend(columns=2, position=nw)<5>
 ----------------------------------
+
+<1> The `.label()` function adds a custom label to the expression.
+<2> The `.title()` function adds a title with a meaningful name.
+<3> The `.lines()` function changes the appearance of the chart lines. In this example, `.lines(fill=2, width=1)` sets the fill level to `2`, and the border width to `1`.
+<4> The `.color()` function changes the color of the data. Supported color types include standard color names, hexadecimal values, or a color schema for grouped data. In this example, `.color(green)` represents the inbound network traffic, and `.color(blue)` represents the outbound network traffic.
+<5> The `.legend()` function sets the position and style of the legend. For this example, `legend(columns=2, position=nw)` places the legend in the north west position of the visualization with two columns.
 
 image::images/timelion-math05.png[]
 {nbsp}
 
-Utilizing the formatting functions `.title()`, `.label()`, `.color()`, `.lines()` and `.legend()` learned in <<timelion-customize, the last section>>, let’s clean up the visualization a bit. Use the following expression to update your visualization:
+[float]
+[[mathematical-functions-save-visualization]]
+==== Save the visualization
 
-[source,text]
-----------------------------------
-.es(index=metricbeat*, timefield=@timestamp, metric=max:system.network.in.bytes).derivative().divide(1048576).lines(fill=2, width=1).color(green).label("Inbound traffic").title("Network traffic (MB/s)"), .es(index=metricbeat*, timefield=@timestamp, metric=max:system.network.out.bytes).derivative().multiply(-1).divide(1048576).lines(fill=2, width=1).color(blue).label("Outbound traffic").legend(columns=2, position=nw)
-----------------------------------
+When you have finished making changes, save the visualization.
 
-image::images/timelion-math06.png[]
-{nbsp}
+. Click *Save*.
 
-Continue on to the next section to learn about conditional logic and tracking trends.
+. In the *Title* field, enter a name for the visualization.
+
+. Click *Confirm Save*.
 
 [[timelion-conditional]]
-==== Using conditional logic and tracking trends
+=== Create visualizations with conditional logic and tracking trends
+++++
+<titleabbrev>Conditional logic and tracking rends</titleabbrev>
+++++
 
-In this section you will learn how to modify time series data with conditional logic and create a trend with a moving average. This is helpful to easily detect outliers and patterns over time.
+To easily detect outliers and discover patterns over time, modify time series data with conditional logic and create a trend with a moving average.
 
-For the purposes of this tutorial, you will continue to use https://www.elastic.co/downloads/beats/metricbeat[Metricbeat data] to add another visualization that monitors memory consumption. To start, use the following expression to chart the maximum value of  `system.memory.actual.used.bytes`.
+With Timelion conditional logic, you can use the following operator values for comparison:
+
+[horizontal]
+`eq`:: equal
+`ne`:: not equal
+`lt`:: less than
+`lte`:: less than or equal to
+`gt`:: greater than
+`gte`:: greater than or equal to
+
+[float]
+[[time-series-before-you-begin]]
+==== Before you begin
+
+In this tutorial, you'll use the time series data from https://www.elastic.co/guide/en/beats/metricbeat/current/index.html[Metricbeat]. To ingest the data locally, link:https://www.elastic.co/downloads/beats/metricbeat[download Metricbeat].
+
+[float]
+[[conditional-create]]
+==== Create the visualization
+
+Create the visualization using Timelion.
+
+. Click *Visualize*.
+
+. On the *Visualizations* page, click *Create new visualization*.
+
+. On the *New Visualization* window, click *Timelion*.
+
+[float]
+[[conditional-define-functions]]
+==== Define the functions
+
+To chart the maximum value of `system.memory.actual.used.bytes`, enter the following in the *Timelion Expression* field:
 
 [source,text]
 ----------------------------------
@@ -201,105 +323,70 @@ For the purposes of this tutorial, you will continue to use https://www.elastic.
 image::images/timelion-conditional01.png[]
 {nbsp}
 
-Let’s create two thresholds to keep an eye on the amount of used memory. For the purposes of this tutorial, your warning threshold will be 12.5GB and your severe threshold will be 15GB. When the maximum amount of used memory exceeds either of these thresholds, the series will be colored accordingly.
+[float]
+[[conditional-track-memory]]
+==== Track used memory
 
-NOTE: If the threshold values are too high or low for your machine, please adjust accordingly.
-
-To configure these two threshold values, you can utilize Timelion's conditional logic. In this tutorial you will use `if()` to compare each point to a number, adjust the styling if the condition evaluates to `true` and use the default styling if the condition evaluates to `false`. Timelion offers the following six operator values for comparison.
-
-[horizontal]
-`eq`:: equal
-`ne`:: not equal
-`lt`:: less than
-`lte`:: less than or equal to
-`gt`:: greater than
-`gte`:: greater than or equal to
- 
-Since there are two thresholds, it makes sense to style them differently. Use the `gt` operator to color the warning threshold yellow with `.color('#FFCC11')` and the severe threshold red with `.color('red')`. Enter the following expression into the Timelion query bar to apply the conditional logic and threshold styling:
+To track the amount of used memory, create two thresholds:
 
 [source,text]
 ----------------------------------
-.es(index=metricbeat-*, timefield='@timestamp', metric='max:system.memory.actual.used.bytes'), .es(index=metricbeat-*, timefield='@timestamp', metric='max:system.memory.actual.used.bytes').if(gt,12500000000,.es(index=metricbeat-*, timefield='@timestamp', metric='max:system.memory.actual.used.bytes'),null).label('warning').color('#FFCC11'), .es(index=metricbeat-*, timefield='@timestamp', metric='max:system.memory.actual.used.bytes').if(gt,15000000000,.es(index=metricbeat-*, timefield='@timestamp', metric='max:system.memory.actual.used.bytes'),null).label('severe').color('red')
+.es(index=metricbeat-*, timefield='@timestamp', metric='max:system.memory.actual.used.bytes'), .es(index=metricbeat-*, timefield='@timestamp', metric='max:system.memory.actual.used.bytes').if(gt<1>,11300000000,.es(index=metricbeat-*<2>, timefield='@timestamp', metric='max:system.memory.actual.used.bytes'),null).label('warning').color('#FFCC11')<3>, .es(index=metricbeat-*, timefield='@timestamp', metric='max:system.memory.actual.used.bytes').if(gt<1>,11375000000,.es(index=metricbeat-*<2>, timefield='@timestamp', metric='max:system.memory.actual.used.bytes'),null).label('severe').color('red')<3>
 ----------------------------------
+
+<1> Timelion conditional logic for the _greater than_ operator. In this example, the warning threshold is 11.3GB (`11300000000`), and the severe threshold is 11.375GB (`11375000000`). If the threshold values are too high or low for your machine, adjust the values accordingly.
+<2> `if()` compares each point to a number. If the condition evaluates to `true`, adjust the styling. If the condition evaluates to `false`, use the default styling.
+<3> Use the `gt` operator to color the warning threshold yellow with `.color('#FFCC11')` and the severe threshold red with `.color('red')`.
 
 image::images/timelion-conditional02.png[]
 {nbsp}
 
-For additional information on Timelions conditional capabilities, check out the blog post https://www.elastic.co/blog/timeseries-if-then-else-with-timelion[I have but one .condition()].
+[float]
+[[conditional-determine-trend]]
+==== Determine the trend
 
-Now that you have thresholds defined to easily identify outliers, let’s create a new series to determine what the trend really is. Timelion's `mvavg()` function allows you to calculate the moving average over a given window. This is especially helpful for noisy time series. For this tutorial, you will use `.mvavg(10)` to create a moving average with a window of 10 data points. Use the following expression to create a moving average of the maximum memory usage:
+To determine the trend, create a new data series:
 
 [source,text]
 ----------------------------------
-.es(index=metricbeat-*, timefield='@timestamp', metric='max:system.memory.actual.used.bytes'), .es(index=metricbeat-*, timefield='@timestamp', metric='max:system.memory.actual.used.bytes').if(gt,12500000000,.es(index=metricbeat-*, timefield='@timestamp', metric='max:system.memory.actual.used.bytes'),null).label('warning').color('#FFCC11'), .es(index=metricbeat-*, timefield='@timestamp', metric='max:system.memory.actual.used.bytes').if(gt,15000000000,.es(index=metricbeat-*, timefield='@timestamp', metric='max:system.memory.actual.used.bytes'),null).label('severe').color('red'), .es(index=metricbeat-*, timefield='@timestamp', metric='max:system.memory.actual.used.bytes').mvavg(10)
+.es(index=metricbeat-*, timefield='@timestamp', metric='max:system.memory.actual.used.bytes'), .es(index=metricbeat-*, timefield='@timestamp', metric='max:system.memory.actual.used.bytes').if(gt,11300000000,.es(index=metricbeat-*, timefield='@timestamp', metric='max:system.memory.actual.used.bytes'),null).label('warning').color('#FFCC11'), .es(index=metricbeat-*, timefield='@timestamp', metric='max:system.memory.actual.used.bytes').if(gt,11375000000,.es(index=metricbeat-*, timefield='@timestamp', metric='max:system.memory.actual.used.bytes'),null).label('severe').color('red'), .es(index=metricbeat-*, timefield='@timestamp', metric='max:system.memory.actual.used.bytes').mvavg(10)<1>
 ----------------------------------
+
+<1> `mvavg()` calculates the moving average over a specified period of time. In this example, `.mvavg(10)` creates a moving average with a window of 10 data points.
 
 image::images/timelion-conditional03.png[]
 {nbsp}
 
-Now that you have thresholds and a moving average, let's format the visualization so it is a bit easier to consume. As with the last section, use the `.color()`, `.line()`, `.title()` and `.legend()` functions to update your visualization accordingly:
+[float]
+[[conditional-format-visualization]]
+==== Format the visualization
+
+Format the visualization using functions:
 
 [source,text]
 ----------------------------------
-.es(index=metricbeat-*, timefield='@timestamp', metric='max:system.memory.actual.used.bytes').label('max memory').title('Memory consumption over time'), .es(index=metricbeat-*, timefield='@timestamp', metric='max:system.memory.actual.used.bytes').if(gt,12500000000,.es(index=metricbeat-*, timefield='@timestamp', metric='max:system.memory.actual.used.bytes'),null).label('warning').color('#FFCC11').lines(width=5), .es(index=metricbeat-*, timefield='@timestamp', metric='max:system.memory.actual.used.bytes').if(gt,15000000000,.es(index=metricbeat-*, timefield='@timestamp', metric='max:system.memory.actual.used.bytes'),null).label('severe').color('red').lines(width=5), .es(index=metricbeat-*, timefield='@timestamp', metric='max:system.memory.actual.used.bytes').mvavg(10).label('mvavg').lines(width=2).color(#5E5E5E).legend(columns=4, position=nw) 
+.es(index=metricbeat-*, timefield='@timestamp', metric='max:system.memory.actual.used.bytes').label('max memory')<1>.title('Memory consumption over time')<2>, .es(index=metricbeat-*, timefield='@timestamp', metric='max:system.memory.actual.used.bytes').if(gt,11300000000,.es(index=metricbeat-*, timefield='@timestamp', metric='max:system.memory.actual.used.bytes'),null).label('warning')<1>.color('#FFCC11')<4>.lines(width=5)<3>, .es(index=metricbeat-*, timefield='@timestamp', metric='max:system.memory.actual.used.bytes').if(gt,11375000000,.es(index=metricbeat-*, timefield='@timestamp', metric='max:system.memory.actual.used.bytes'),null).label('severe')<1>.color('red')<4>.lines(width=5), .es(index=metricbeat-*, timefield='@timestamp', metric='max:system.memory.actual.used.bytes').mvavg(10).label('mvavg')<1>.lines(width=2).color(#5E5E5E)<4>.legend(columns=4, position=nw)<4> 
 ----------------------------------
+
+<1> `.label()` adds custom labels to the expression.
+<2> `.title()` adds a title with a meaningful name.
+<3> The `.lines()` function changes the appearance of the chart lines. In this example, .lines(width=5) sets border width to `5`.
+<4> The `.color()` function changes the color of the data. Supported color types include standard color names, hexadecimal values, or a color schema for grouped data.
+<5> The `.legend()` function sets the position and style of the legend. For this example, `(columns=4, position=nw)` places the legend in the north west position of the visualization with four columns.
 
 image::images/timelion-conditional04.png[]
 {nbsp}
 
-Continue on to the next section to learn how to save your timelion sheet and add an expression to your dashboard.
+[float]
+[[conditional-save-visualization]]
+==== Save the visualization
 
-[[timelion-save]]
-==== Save and add to dashboard
+When you have finished making changes, save the visualization.
 
-You’ve officially harnessed the power of Timelion to create time series visualizations. The final steps of this tutorial are to save your entire Timelion sheet and save an expression as a dashboard panel.
+. Click *Save*.
 
-[role="xpack"]
-[[timelion-read-only-access]]
-===== Read only access
-When you have insufficient privileges to save Timelion sheets, the following indicator in Kibana will be
-displayed and the *Save* button won't be visible. For more information on granting access to
-Kibana see <<xpack-security-authorization>>.
+. In the *Title* field, enter a name for the visualization.
 
-[role="screenshot"]
-image::images/timelion-read-only-badge.png[Example of Timelion's read only access indicator in Kibana's header]
+. Click *Confirm Save*.
 
-===== Save entire Timelion sheet
-
-Saving an entire Timelion sheet allows you to reload it in the Timelion application and make changes to any of the expressions:
-
-. Click the `Save` option in the top menu
-. Select `Save entire Timelion sheet`
-. Name your sheet and click `Save`
-
-===== Save as dashboard panel
-
-To save a Timelion expression as a dashboard panel, follow the steps below.
-
-. Select the visualization you’d like to add to one (or multiple) dashboards
-. Click the `Save` option in the top menu
-. Select `Save current expression as Kibana dashboard panel`
-. Name your panel and and click `Save` to save as a dashboard visualization
-
-image::images/timelion-save01.png[]
-{nbsp}
-
-Now you can add this dashboard panel to any dashboard you’d like. This visualization will now be listed in the Visualize list. Go ahead and follow the same process for the rest of the visualizations you created.
-
-Create a new dashboard or open an existing one to add the Timelion visualizations as you would any other visualization.
-
-image::images/timelion-save02.png[]
-{nbsp}
-
-TIP: You can also create time series visualizations right from the Visualize
-app--just select the Timeseries visualization type and enter a Timelion
-expression in the expression field.
-
-[[timelion-inline-help]]
-=== Inline help and documentation
-
-Can't remember a function or searching for a new one? You can always reference the inline help and documentation in Timelion.
-
-Documentation for the Timelion expression language is built-in. Click `Docs` in the top menu to view the available functions and access the inline reference. As you start to enter functions in the query bar, Timelion will display the relevant arguments in real time.
-
-image::images/timelion-arg-help.jpg["Timelion inline help"]
+For additional information on Timelion conditional capabilities, go to https://www.elastic.co/blog/timeseries-if-then-else-with-timelion[I have but one .condition()].
