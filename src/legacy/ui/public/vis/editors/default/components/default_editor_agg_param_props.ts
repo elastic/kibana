@@ -38,7 +38,7 @@ export interface AggParamCommonProps<T> {
   showValidation: boolean;
   state: VisState;
   value: T;
-  metricAggs: AggConfig[] | null;
+  metricAggs: AggConfig[];
   subAggParams: SubAggParamsProp;
   setValidity(isValid: boolean): void;
   setTouched(): void;

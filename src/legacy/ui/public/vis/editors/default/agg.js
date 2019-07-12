@@ -52,7 +52,7 @@ uiModules
           $scope.aggIsTooLow = calcAggIsTooLow();
         });
 
-        if ($scope.agg.schema.group === 'buckets') {
+        if ($scope.groupName === 'buckets') {
           $scope.$watchMulti([
             '$last',
             'lastParentPipelineAggTitle',
@@ -69,6 +69,8 @@ uiModules
               $scope.onAggParamsChange(
                 $scope.agg.params,
                 'min_doc_count',
+                // "histogram" agg has an editor for "min_doc_count" param, which acceppts boolean
+                // "date_histogram" agg doesn't have an editor for "min_doc_count" param, it should be set as a numeric value
                 aggType.name === 'histogram' ? true : 0);
               $scope.disabledParams = ['min_doc_count'];
             } else {

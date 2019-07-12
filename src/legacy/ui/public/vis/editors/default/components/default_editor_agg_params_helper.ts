@@ -32,7 +32,7 @@ import { AggParamEditorProps } from './default_editor_agg_param_props';
 interface ParamInstanceBase {
   agg: AggConfig;
   editorConfig: EditorConfig;
-  metricAggs: AggConfig[] | null;
+  metricAggs: AggConfig[];
   state: VisState;
 }
 

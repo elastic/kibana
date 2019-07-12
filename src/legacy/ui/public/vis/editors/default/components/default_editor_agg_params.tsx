@@ -66,7 +66,7 @@ interface DefaultEditorAggParamsProps extends SubAggParamsProp {
   disabledParams?: string[];
   groupName: string;
   indexPattern: IndexPattern;
-  metricAggs: AggConfig[] | null;
+  metricAggs: AggConfig[];
   state: VisState;
   setTouched: (isTouched: boolean) => void;
   setValidity: (isValid: boolean) => void;
