@@ -36,8 +36,8 @@ describe('new_job_capabilities_service', () => {
       const meanAgg = aggs.find(a => a.id === 'mean') || { fields: [] };
       const distinctCountAgg = aggs.find(a => a.id === 'distinct_count') || { fields: [] };
 
-      expect(fields).toHaveLength(2);
-      expect(aggs).toHaveLength(12);
+      expect(fields).toHaveLength(3);
+      expect(aggs).toHaveLength(15);
 
       expect(responseTimeField.aggs).toHaveLength(12);
       expect(airlineField.aggs).toHaveLength(1);
