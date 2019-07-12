@@ -80,7 +80,8 @@
   "resolutions": {
     "**/@types/node": "10.12.27",
     "**/@types/hapi": "^17.0.18",
-    "**/typescript": "3.5.3"
+    "**/typescript": "3.5.3",
+    "**/isomorphic-git/**/base64-js": "^1.2.1"
   },
   "workspaces": {
     "packages": [
