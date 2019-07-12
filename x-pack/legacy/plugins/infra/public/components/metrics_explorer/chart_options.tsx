@@ -134,19 +134,6 @@ export const MetricsExplorerChartOptions = injectI18n(({ chartOptions, onChange,
         <EuiFormRow
           compressed
           label={intl.formatMessage({
-            id: 'xpack.infra.metricsExplorer.chartOptions.yAxisDomainLabel',
-            defaultMessage: 'Y Axis Domain',
-          })}
-        >
-          <EuiRadioGroup
-            options={yAxisRadios}
-            idSelected={chartOptions.yAxisMode}
-            onChange={handleYAxisChange}
-          />
-        </EuiFormRow>
-        <EuiFormRow
-          compressed
-          label={intl.formatMessage({
             id: 'xpack.infra.metricsExplorer.chartOptions.stackLabel',
             defaultMessage: 'Stack Series',
           })}
@@ -158,6 +145,19 @@ export const MetricsExplorerChartOptions = injectI18n(({ chartOptions, onChange,
             })}
             checked={chartOptions.stack}
             onChange={handleStackChange}
+          />
+        </EuiFormRow>
+        <EuiFormRow
+          compressed
+          label={intl.formatMessage({
+            id: 'xpack.infra.metricsExplorer.chartOptions.yAxisDomainLabel',
+            defaultMessage: 'Y Axis Domain',
+          })}
+        >
+          <EuiRadioGroup
+            options={yAxisRadios}
+            idSelected={chartOptions.yAxisMode}
+            onChange={handleYAxisChange}
           />
         </EuiFormRow>
       </EuiForm>
