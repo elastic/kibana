@@ -12,7 +12,10 @@ export default function ({ getService, getPageObjects }) {
   const nodesList = getService('monitoringElasticsearchNodes');
   const esClusterSummaryStatus = getService('monitoringElasticsearchSummaryStatus');
 
-  describe('Elasticsearch nodes listing', () => {
+  describe('Elasticsearch nodes listing', function () {
+    // FF issue: https://github.com/elastic/kibana/issues/35551
+    this.tags(['skipFirefox']);
+
     describe('with offline node', () => {
       const { setup, tearDown } = getLifecycleMethods(getService, getPageObjects);
 
@@ -90,7 +93,7 @@ export default function ({ getService, getPageObjects }) {
           await nodesList.clickCpuCol();
 
           const nodesAll = await nodesList.getNodesAll();
-          const tableData = [{ cpu: '0% \n3% max\n0% min' }, { cpu: '2% \n3% max\n0% min' }, { cpu: undefined }];
+          const tableData = [{ cpu: '2% \n3% max\n0% min' }, { cpu: '0% \n3% max\n0% min' }, { cpu: undefined }];
           nodesAll.forEach((obj, node) => {
             expect(nodesAll[node].cpu).to.be(tableData[node].cpu);
           });

@@ -20,14 +20,14 @@
 import _ from 'lodash';
 import chrome from '../../chrome';
 import moment from 'moment-timezone';
-import '../directives/validate_date_interval';
 import { BucketAggType } from './_bucket_agg_type';
 import { TimeBuckets } from '../../time_buckets';
 import { createFilterDateHistogram } from './create_filter/date_histogram';
 import { intervalOptions } from './_interval_options';
-import intervalTemplate from '../controls/time_interval.html';
+import { TimeIntervalParamEditor } from '../controls/time_interval';
 import { timefilter } from '../../timefilter';
 import { DropPartialsParamEditor } from '../controls/drop_partials';
+import { dateHistogramInterval } from '../../../../core_plugins/data/common';
 import { i18n } from '@kbn/i18n';
 
 const config = chrome.getUiSettingsClient();
@@ -35,11 +35,7 @@ const detectedTimezone = moment.tz.guess();
 const tzOffset = moment().format('Z');
 
 function getInterval(agg) {
-  const interval = _.get(agg, ['params', 'interval']);
-  if (interval && interval.val === 'custom') {
-    return _.get(agg, ['params', 'customInterval']);
-  }
-  return interval;
+  return _.get(agg, ['params', 'interval']);
 }
 
 export function setBounds(agg, force) {
@@ -99,7 +95,7 @@ export const dateHistogramBucketAgg = new BucketAggType({
         return agg.getIndexPattern().timeFieldName;
       },
       onChange: function (agg) {
-        if (_.get(agg, 'params.interval.val') === 'auto' && !agg.fieldIsTimeField()) {
+        if (_.get(agg, 'params.interval') === 'auto' && !agg.fieldIsTimeField()) {
           delete agg.params.interval;
         }
 
@@ -118,18 +114,24 @@ export const dateHistogramBucketAgg = new BucketAggType({
     },
     {
       name: 'interval',
-      type: 'optioned',
-      deserialize: function (state) {
+      editorComponent: TimeIntervalParamEditor,
+      deserialize: function (state, agg) {
+        // For upgrading from 7.0.x to 7.1.x - intervals are now stored as key of options or custom value
+        if (state === 'custom') {
+          return _.get(agg, 'params.customInterval');
+        }
+
         const interval = _.find(intervalOptions, { val: state });
-        return interval || _.find(intervalOptions, function (option) {
-          // For upgrading from 4.0.x to 4.1.x - intervals are now stored as 'y' instead of 'year',
-          // but this maps the old values to the new values
-          return Number(moment.duration(1, state)) === Number(moment.duration(1, option.val));
-        });
+
+        // For upgrading from 4.0.x to 4.1.x - intervals are now stored as 'y' instead of 'year',
+        // but this maps the old values to the new values
+        if (!interval && state === 'year') {
+          return 'y';
+        }
+        return state;
       },
       default: 'auto',
       options: intervalOptions,
-      editor: intervalTemplate,
       modifyAggConfigOnSearchRequestStart: function (agg) {
         setBounds(agg, true);
       },
@@ -139,7 +141,19 @@ export const dateHistogramBucketAgg = new BucketAggType({
         const { useNormalizedEsInterval } = agg.params;
         const interval = agg.buckets.getInterval(useNormalizedEsInterval);
         output.bucketInterval = interval;
-        output.params.interval = interval.expression;
+        if (interval.expression === '0ms') {
+          // We are hitting this code a couple of times while configuring in editor
+          // with an interval of 0ms because the overall time range has not yet been
+          // set. Since 0ms is not a valid ES interval, we cannot pass it through dateHistogramInterval
+          // below, since it would throw an exception. So in the cases we still have an interval of 0ms
+          // here we simply skip the rest of the method and never write an interval into the DSL, since
+          // this DSL will anyway not be used before we're passing this code with an actual interval.
+          return;
+        }
+        output.params = {
+          ...output.params,
+          ...dateHistogramInterval(interval.expression),
+        };
 
         const scaleMetrics = interval.scaled && interval.scale < 1;
         if (scaleMetrics && aggs) {
@@ -185,12 +199,6 @@ export const dateHistogramBucketAgg = new BucketAggType({
         const field = agg.params.field;
         return field && field.name && field.name === agg.getIndexPattern().timeFieldName;
       },
-    },
-
-    {
-      name: 'customInterval',
-      default: '2h',
-      write: _.noop
     },
     {
       name: 'format'

@@ -45,13 +45,13 @@ export const ScriptingWarningCallOut = ({
             defaultMessage="Please familiarize yourself with {scripFields} and with {scriptsInAggregation} before using scripted fields."
             values={{
               scripFields: (
-                <EuiLink target="_window" href={getDocLink('scriptedFields.scriptFields')}>
+                <EuiLink target="_blank" href={getDocLink('scriptedFields.scriptFields')}>
                   <FormattedMessage id="common.ui.fieldEditor.warningCallOutLabel.scripFieldsLink" defaultMessage="script fields" />&nbsp;
                   <EuiIcon type="link" />
                 </EuiLink>
               ),
               scriptsInAggregation: (
-                <EuiLink target="_window" href={getDocLink('scriptedFields.scriptAggs')}>
+                <EuiLink target="_blank" href={getDocLink('scriptedFields.scriptAggs')}>
                   <FormattedMessage
                     id="common.ui.fieldEditor.warningCallOutLabel.scriptsInAggregationLink"
                     defaultMessage="scripts in aggregations"

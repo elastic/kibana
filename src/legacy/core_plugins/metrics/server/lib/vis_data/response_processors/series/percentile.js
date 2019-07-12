@@ -18,13 +18,13 @@
  */
 
 import _ from 'lodash';
-import getAggValue from '../../helpers/get_agg_value';
-import getDefaultDecoration from '../../helpers/get_default_decoration';
-import getSplits from '../../helpers/get_splits';
-import getLastMetric from '../../helpers/get_last_metric';
+import { getAggValue } from '../../helpers/get_agg_value';
+import { getDefaultDecoration } from '../../helpers/get_default_decoration';
+import { getSplits } from '../../helpers/get_splits';
+import { getLastMetric } from '../../helpers/get_last_metric';
 import { METRIC_TYPES } from '../../../../../common/metric_types';
 
-export default function percentile(resp, panel, series, meta) {
+export function percentile(resp, panel, series, meta) {
   return next => results => {
     const metric = getLastMetric(series);
 
@@ -32,7 +32,7 @@ export default function percentile(resp, panel, series, meta) {
       return next(results);
     }
 
-    getSplits(resp, panel, series, meta).forEach((split) => {
+    getSplits(resp, panel, series, meta).forEach(split => {
       metric.percentiles.forEach(percentile => {
         const percentileValue = percentile.value ? percentile.value : 0;
         const label = `${split.label} (${percentileValue})`;
@@ -53,7 +53,7 @@ export default function percentile(resp, panel, series, meta) {
             lines: { show: true, fill: percentile.shade, lineWidth: 0 },
             points: { show: false },
             legend: false,
-            fillBetween: `${split.id}:${percentile.id}:${percentile.percentile}`
+            fillBetween: `${split.id}:${percentile.id}:${percentile.percentile}`,
           });
           results.push({
             id: `${split.id}:${percentile.id}:${percentile.percentile}`,
@@ -62,7 +62,7 @@ export default function percentile(resp, panel, series, meta) {
             data: fillData,
             lines: { show: true, fill: false, lineWidth: 0 },
             legend: false,
-            points: { show: false }
+            points: { show: false },
           });
         } else {
           const decoration = getDefaultDecoration(series);
@@ -71,11 +71,10 @@ export default function percentile(resp, panel, series, meta) {
             color: split.color,
             label,
             data,
-            ...decoration
+            ...decoration,
           });
         }
       });
-
     });
     return next(results);
   };

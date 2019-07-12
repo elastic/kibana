@@ -17,7 +17,9 @@
  * under the License.
  */
 
+import 'ui/angular-bootstrap';
 import './sidebar';
+import { i18n } from '@kbn/i18n';
 import './vis_options';
 import './vis_editor_resizer';
 import './vis_type_agg_filter';
@@ -33,7 +35,7 @@ import { VisEditorTypesRegistryProvider } from '../../../registry/vis_editor_typ
 import { getVisualizeLoader } from '../../../visualize/loader/visualize_loader';
 
 
-const defaultEditor = function ($rootScope, $compile, i18n) {
+const defaultEditor = function ($rootScope, $compile) {
   return class DefaultEditor {
     static key = 'default';
 
@@ -46,7 +48,7 @@ const defaultEditor = function ($rootScope, $compile, i18n) {
         this.vis.type.editorConfig.optionTabs = [
           {
             name: 'options',
-            title: i18n('common.ui.vis.editors.sidebar.tabs.optionsLabel', { defaultMessage: 'Options' }),
+            title: i18n.translate('common.ui.vis.editors.sidebar.tabs.optionsLabel', { defaultMessage: 'Options' }),
             editor: this.vis.type.editorConfig.optionsTemplate,
           }
         ];

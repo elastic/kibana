@@ -1,0 +1,30 @@
+{
+  "flattenTypes": true,
+  "generatorConfig": {
+    "contextType": "SiemContext",
+    "prepend": [
+      "/* eslint-disable */",
+      "/*",
+      " * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one",
+      " * or more contributor license agreements. Licensed under the Elastic License;",
+      " * you may not use this file except in compliance with the Elastic License.",
+      " */",
+      "",
+      "import { SiemContext } from '../lib/types';"
+    ],
+    "scalars": {
+      "ToStringArray": "string[] | string",
+      "ToNumberArray": "number[] | number",
+      "ToDateArray": "string[] | string",
+      "ToBooleanArray": "boolean[] | boolean",
+      "Date": "string"
+    }
+  },
+  "primitives": {
+    "String": "string",
+    "Int": "number",
+    "Float": "number",
+    "Boolean": "boolean",
+    "ID": "string"
+  }
+}

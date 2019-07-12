@@ -93,7 +93,7 @@ export function TestSubjectsProvider({ getService }: FtrProviderContext) {
         log.debug(`TestSubjects.doubleClick(${selector})`);
         const element = await this.find(selector, timeout);
         await element.moveMouseTo();
-        await browser.doubleClick();
+        await browser.doubleClick(element);
       });
     }
 
@@ -131,21 +131,6 @@ export function TestSubjectsProvider({ getService }: FtrProviderContext) {
         log.debug(`TestSubjects.findAll(${selector})`);
         const all = await find.allByCssSelector(testSubjSelector(selector), timeout);
         return await find.filterElementIsDisplayed(all);
-      });
-    }
-
-    public async getPropertyAll(selector: string, property: string): Promise<string[]> {
-      log.debug(`TestSubjects.getPropertyAll(${selector}, ${property})`);
-      return await this._mapAll(selector, async (element: WebElementWrapper) => {
-        return (await element.getProperty(property)) as string;
-      });
-    }
-
-    public async getProperty(selector: string, property: string): Promise<string> {
-      log.debug(`TestSubjects.getProperty(${selector}, ${property})`);
-      return await retry.try(async () => {
-        const element = await this.find(selector);
-        return (await element.getProperty(property)) as string;
       });
     }
 

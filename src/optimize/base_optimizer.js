@@ -19,7 +19,6 @@
 
 import { writeFile } from 'fs';
 import os from 'os';
-import path from 'path';
 import Boom from 'boom';
 import MiniCssExtractPlugin from 'mini-css-extract-plugin';
 import TerserPlugin from 'terser-webpack-plugin';
@@ -268,7 +267,7 @@ export default class BaseOptimizer {
         filename: '[name].bundle.js',
         sourceMapFilename: '[file].map',
         publicPath: PUBLIC_PATH_PLACEHOLDER,
-        devtoolModuleFilenameTemplate: info => `${ path.relative(fromRoot('.'), info.absoluteResourcePath) }`,
+        devtoolModuleFilenameTemplate: '[absolute-resource-path]',
 
         // When the entry point is loaded, assign it's exported `plugin`
         // value to a key on the global `__kbnBundles__` object.
@@ -473,14 +472,16 @@ export default class BaseOptimizer {
       }
     };
 
-    return webpackMerge(
-      commonConfig,
-      IS_KIBANA_DISTRIBUTABLE
-        ? isDistributableConfig
-        : {},
-      this.uiBundles.isDevMode()
-        ? webpackMerge(watchingConfig, supportEnzymeConfig)
-        : productionConfig
+    return this.uiBundles.getExtendedConfig(
+      webpackMerge(
+        commonConfig,
+        IS_KIBANA_DISTRIBUTABLE
+          ? isDistributableConfig
+          : {},
+        this.uiBundles.isDevMode()
+          ? webpackMerge(watchingConfig, supportEnzymeConfig)
+          : productionConfig
+      )
     );
   }
 

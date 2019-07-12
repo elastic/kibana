@@ -44,8 +44,8 @@ export const CreatePackageJsonTask = {
       engines: {
         node: pkg.engines.node,
       },
-      workspaces: pkg.workspaces,
       resolutions: pkg.resolutions,
+      workspaces: pkg.workspaces,
       dependencies: pkg.dependencies
     };
 
@@ -69,6 +69,7 @@ export const RemovePackageJsonDepsTask = {
 
     delete pkg.dependencies;
     delete pkg.private;
+    delete pkg.resolutions;
 
     await write(
       build.resolvePath('package.json'),

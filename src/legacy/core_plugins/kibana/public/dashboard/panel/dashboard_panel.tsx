@@ -30,9 +30,10 @@ import {
   EmbeddableState,
 } from 'ui/embeddable';
 import { EmbeddableErrorAction } from '../actions';
-import { PanelId, PanelState } from '../selectors';
+import { PanelId } from '../selectors';
 import { PanelError } from './panel_error';
 import { PanelHeader } from './panel_header';
+import { SavedDashboardPanel } from '../types';
 
 export interface DashboardPanelProps {
   viewOnlyMode: boolean;
@@ -48,7 +49,7 @@ export interface DashboardPanelProps {
   embeddableError: (errorMessage: EmbeddableErrorAction) => void;
   embeddableIsInitializing: () => void;
   initialized: boolean;
-  panel: PanelState;
+  panel: SavedDashboardPanel;
   className?: string;
 }
 
@@ -64,6 +65,8 @@ class DashboardPanelUi extends React.Component<DashboardPanelUiProps, State> {
   [panel: string]: any;
   public mounted: boolean;
   public embeddable!: Embeddable;
+  private panelElement?: HTMLDivElement;
+
   constructor(props: DashboardPanelUiProps) {
     super(props);
     this.state = {
@@ -93,12 +96,13 @@ class DashboardPanelUi extends React.Component<DashboardPanelUiProps, State> {
     if (!initialized) {
       embeddableIsInitializing();
       embeddableFactory
+        // @ts-ignore -- going away with Embeddable V2
         .create(panel, embeddableStateChanged)
         .then((embeddable: Embeddable) => {
           if (this.mounted) {
             this.embeddable = embeddable;
             embeddableIsInitialized(embeddable.metadata);
-            this.embeddable.render(this.panelElement, this.props.containerState);
+            this.embeddable.render(this.panelElement!, this.props.containerState);
           } else {
             embeddable.destroy();
           }
@@ -142,7 +146,7 @@ class DashboardPanelUi extends React.Component<DashboardPanelUiProps, State> {
       <div
         id="embeddedPanel"
         className={classes}
-        ref={panelElement => (this.panelElement = panelElement)}
+        ref={panelElement => (this.panelElement = panelElement || undefined)}
       >
         {!this.props.initialized && <EuiLoadingChart size="l" mono />}
       </div>

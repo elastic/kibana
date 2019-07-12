@@ -23,6 +23,7 @@ exports[`render 1`] = `
     />
   </EuiFlexGroup>
   <EuiTabs
+    display="default"
     expand={false}
     size="m"
   >
@@ -106,6 +107,7 @@ exports[`statusCheckState checking status 1`] = `
     />
   </EuiFlexGroup>
   <EuiTabs
+    display="default"
     expand={false}
     size="m"
   >
@@ -224,6 +226,7 @@ exports[`statusCheckState failed status check - error 1`] = `
     />
   </EuiFlexGroup>
   <EuiTabs
+    display="default"
     expand={false}
     size="m"
   >
@@ -347,6 +350,7 @@ exports[`statusCheckState failed status check - no data 1`] = `
     />
   </EuiFlexGroup>
   <EuiTabs
+    display="default"
     expand={false}
     size="m"
   >
@@ -470,6 +474,7 @@ exports[`statusCheckState initial state - no check has been attempted 1`] = `
     />
   </EuiFlexGroup>
   <EuiTabs
+    display="default"
     expand={false}
     size="m"
   >
@@ -588,6 +593,7 @@ exports[`statusCheckState successful status check 1`] = `
     />
   </EuiFlexGroup>
   <EuiTabs
+    display="default"
     expand={false}
     size="m"
   >

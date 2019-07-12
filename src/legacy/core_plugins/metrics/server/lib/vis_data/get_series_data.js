@@ -17,32 +17,36 @@
  * under the License.
  */
 import { getSeriesRequestParams } from './series/get_request_params';
-import handleResponseBody from './series/handle_response_body';
-import handleErrorResponse from './handle_error_response';
+import { handleResponseBody } from './series/handle_response_body';
+import { handleErrorResponse } from './handle_error_response';
 import { getAnnotations } from './get_annotations';
 import { SearchStrategiesRegister } from '../search_strategies/search_strategies_register';
 import { getEsQueryConfig } from './helpers/get_es_query_uisettings';
 import { getActiveSeries } from './helpers/get_active_series';
 
 export async function getSeriesData(req, panel) {
-  const panelIndexPattern = panel.index_pattern;
-  const { searchStrategy, capabilities } = await SearchStrategiesRegister.getViableStrategy(req, panelIndexPattern);
-  const searchRequest = searchStrategy.getSearchRequest(req, panelIndexPattern);
+  const { searchStrategy, capabilities } = await SearchStrategiesRegister.getViableStrategyForPanel(
+    req,
+    panel
+  );
+  const searchRequest = searchStrategy.getSearchRequest(req);
   const esQueryConfig = await getEsQueryConfig(req);
-
-  const bodiesPromises = getActiveSeries(panel)
-    .map(series => getSeriesRequestParams(req, panel, series, esQueryConfig, capabilities));
-
-  const body = (await Promise.all(bodiesPromises))
-    .reduce((acc, items) => acc.concat(items), []);
-
   const meta = {
     type: panel.type,
     uiRestrictions: capabilities.uiRestrictions,
   };
 
   try {
-    const data = await searchRequest.search({ body });
+    const bodiesPromises = getActiveSeries(panel).map(series =>
+      getSeriesRequestParams(req, panel, series, esQueryConfig, capabilities)
+    );
+
+    const searches = (await Promise.all(bodiesPromises)).reduce(
+      (acc, items) => acc.concat(items),
+      []
+    );
+
+    const data = await searchRequest.search(searches);
     const series = data.map(handleResponseBody(panel));
 
     let annotations = null;
@@ -50,11 +54,11 @@ export async function getSeriesData(req, panel) {
     if (panel.annotations && panel.annotations.length) {
       annotations = await getAnnotations({
         req,
+        panel,
+        series,
         esQueryConfig,
         searchStrategy,
-        panel,
         capabilities,
-        series
       });
     }
 
@@ -66,9 +70,8 @@ export async function getSeriesData(req, panel) {
         series: series.reduce((acc, series) => acc.concat(series), []),
       },
     };
-
   } catch (err) {
-    if (err.body) {
+    if (err.body || err.name === 'KQLSyntaxError') {
       err.response = err.body;
 
       return {

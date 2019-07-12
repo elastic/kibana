@@ -17,15 +17,24 @@
  * under the License.
  */
 
-import { AggConfig } from '../vis';
+import { AggConfig, AggParamEditorProps } from '../vis';
 
 interface AggParam {
+  editorComponent: React.ComponentType<AggParamEditorProps<unknown>>;
   type: string;
   name: string;
+  advanced?: boolean;
+  options?: AggParamOption[];
   required?: boolean;
   displayName?: string;
   onChange?(agg: AggConfig): void;
   shouldShow?(agg: AggConfig): boolean;
 }
 
-export { AggParam };
+interface AggParamOption {
+  val: string;
+  display: string;
+  enabled?(agg: AggConfig): void;
+}
+
+export { AggParam, AggParamOption };

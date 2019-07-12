@@ -6,6 +6,8 @@
 
 import expect from '@kbn/expect';
 
+import { MAPBOX_STYLES } from './mapbox_styles';
+
 const JOIN_PROPERTY_NAME = '__kbnjoin__max_of_prop1_groupby_meta_for_geo_shapes*.shape_name';
 const EXPECTED_JOIN_VALUES = {
   alpha: 10,
@@ -45,6 +47,17 @@ export default function ({ getPageObjects, getService }) {
       expect(beforeRefreshTimerTimestamp).not.to.equal(afterRefreshTimerTimestamp);
     });
 
+    it('should show dynamic data range in legend', async () => {
+      const layerTOCDetails = await PageObjects.maps.getLayerTOCDetails('geo_shapes*');
+      const split = layerTOCDetails.trim().split('\n');
+
+      const min = split[0];
+      expect(min).to.equal('3');
+
+      const max = split[2];
+      expect(max).to.equal('12');
+    });
+
     it('should decorate feature properties with join property', async () => {
       const mapboxStyle = await PageObjects.maps.getMapboxStyle();
       expect(mapboxStyle.sources[VECTOR_SOURCE_ID].data.features.length).to.equal(4);
@@ -60,7 +73,6 @@ export default function ({ getPageObjects, getService }) {
       });
     });
 
-
     it('should style fills, points and lines independently', async () => {
       const mapboxStyle = await PageObjects.maps.getMapboxStyle();
       const layersForVectorSource = mapboxStyle.layers.filter(mbLayer => {
@@ -68,19 +80,27 @@ export default function ({ getPageObjects, getService }) {
       });
 
       //circle layer for points
-      // eslint-disable-next-line max-len
-      expect(layersForVectorSource[0]).to.eql({ 'id': 'n1t6f_circle', 'type': 'circle', 'source': 'n1t6f', 'minzoom': 0, 'maxzoom': 24, 'filter': ['any', ['==', ['geometry-type'], 'Point'], ['==', ['geometry-type'], 'MultiPoint']], 'paint': { 'circle-color': ['interpolate', ['linear'], ['coalesce', ['get', '__kbn__scaled(__kbnjoin__max_of_prop1_groupby_meta_for_geo_shapes*.shape_name)'], -1], -1, 'rgba(0,0,0,0)', 0, '#f7faff', 0.125, '#ddeaf7', 0.25, '#c5daee', 0.375, '#9dc9e0', 0.5, '#6aadd5', 0.625, '#4191c5', 0.75, '#2070b4', 0.875, '#072f6b'], 'circle-opacity': 0.75, 'circle-stroke-color': '#FFFFFF', 'circle-stroke-opacity': 0.75, 'circle-stroke-width': 1, 'circle-radius': 10 } });
+      expect(layersForVectorSource[0]).to.eql(MAPBOX_STYLES.POINT_LAYER);
 
       //fill layer
-      // eslint-disable-next-line max-len
-      expect(layersForVectorSource[1]).to.eql({ 'id': 'n1t6f_fill', 'type': 'fill', 'source': 'n1t6f', 'minzoom': 0, 'maxzoom': 24, 'filter': ['any', ['==', ['geometry-type'], 'Polygon'], ['==', ['geometry-type'], 'MultiPolygon']], 'paint': { 'fill-color': ['interpolate', ['linear'], ['coalesce', ['get', '__kbn__scaled(__kbnjoin__max_of_prop1_groupby_meta_for_geo_shapes*.shape_name)'], -1], -1, 'rgba(0,0,0,0)', 0, '#f7faff', 0.125, '#ddeaf7', 0.25, '#c5daee', 0.375, '#9dc9e0', 0.5, '#6aadd5', 0.625, '#4191c5', 0.75, '#2070b4', 0.875, '#072f6b'], 'fill-opacity': 0.75 } }
-      );
+      expect(layersForVectorSource[1]).to.eql(MAPBOX_STYLES.FILL_LAYER);
 
       //line layer for borders
-      // eslint-disable-next-line max-len
-      expect(layersForVectorSource[2]).to.eql({ 'id': 'n1t6f_line', 'type': 'line', 'source': 'n1t6f', 'minzoom': 0, 'maxzoom': 24, 'filter': ['any', ['==', ['geometry-type'], 'Polygon'], ['==', ['geometry-type'], 'MultiPolygon'], ['==', ['geometry-type'], 'LineString'], ['==', ['geometry-type'], 'MultiLineString']], 'paint': { 'line-color': '#FFFFFF', 'line-opacity': 0.75, 'line-width': 1 } });
+      expect(layersForVectorSource[2]).to.eql(MAPBOX_STYLES.LINE_LAYER);
 
     });
+
+    it('should flag only the joined features as visible', async () => {
+      const mapboxStyle = await PageObjects.maps.getMapboxStyle();
+      const vectorSource = mapboxStyle.sources[VECTOR_SOURCE_ID];
+
+      const visibilitiesOfFeatures = vectorSource.data.features.map(feature => {
+        return feature.properties.__kbn__isvisible__;
+      });
+
+      expect(visibilitiesOfFeatures).to.eql([true, true, true, false]);
+    });
+
 
     describe('query bar', () => {
       before(async () => {
@@ -117,6 +137,49 @@ export default function ({ getPageObjects, getService }) {
       });
     });
 
+    describe('where clause', () => {
+      before(async () => {
+        await PageObjects.maps.setJoinWhereQuery('geo_shapes*', 'prop1 >= 11');
+      });
+
+      after(async () => {
+        await PageObjects.maps.closeLayerPanel();
+      });
+
+      it('should apply query to join request', async () => {
+        await PageObjects.maps.openInspectorRequest('meta_for_geo_shapes*.shape_name');
+        const requestStats = await inspector.getTableData();
+        const totalHits =  PageObjects.maps.getInspectorStatRowHit(requestStats, 'Hits (total)');
+        expect(totalHits).to.equal('2');
+        const hits =  PageObjects.maps.getInspectorStatRowHit(requestStats, 'Hits');
+        expect(hits).to.equal('0'); // aggregation requests do not return any documents
+        await inspector.close();
+      });
+
+      it('should update dynamic data range in legend with new results', async () => {
+        const layerTOCDetails = await PageObjects.maps.getLayerTOCDetails('geo_shapes*');
+        const split = layerTOCDetails.trim().split('\n');
+
+        const min = split[0];
+        expect(min).to.equal('12');
+
+        const max = split[2];
+        expect(max).to.equal('12');
+      });
+
+      it('should flag only the joined features as visible', async () => {
+        const mapboxStyle = await PageObjects.maps.getMapboxStyle();
+        const vectorSource = mapboxStyle.sources[VECTOR_SOURCE_ID];
+
+        const visibilitiesOfFeatures = vectorSource.data.features.map(feature => {
+          return feature.properties.__kbn__isvisible__;
+        });
+
+        expect(visibilitiesOfFeatures).to.eql([false, false, true, false]);
+      });
+
+
+    });
 
     describe('inspector', () => {
       afterEach(async () => {

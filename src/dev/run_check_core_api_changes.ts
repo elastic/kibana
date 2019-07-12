@@ -57,6 +57,7 @@ const apiExtractorConfig = (folder: string): ExtractorConfig => {
       extractorMessageReporting: {
         default: {
           logLevel: 'warning' as ExtractorLogLevel.Warning,
+          addToApiReportFile: true,
         },
         'ae-internal-missing-underscore': {
           logLevel: 'none' as ExtractorLogLevel.None,
@@ -103,7 +104,7 @@ const runApiExtractor = (
   const config = apiExtractorConfig(folder);
   const options = {
     // Indicates that API Extractor is running as part of a local build,
-    // e.g. on developer's machine. For example, if the *.api.ts output file
+    // e.g. on developer's machine. For example, if the *.api.md output file
     // has differences, it will be automatically overwritten for a
     // local build, whereas this should report an error for a production build.
     localBuild: acceptChanges,
@@ -123,7 +124,7 @@ const runApiExtractor = (
         // ConsoleMessageId.ApiReportCopied
         log.warning(`You have changed the signature of the ${folder} Core API`);
         log.warning(
-          "Please commit the updated API documentation and the review file in '" +
+          "Please commit the updated API documentation and the API review file: '" +
             config.reportFilePath
         );
         message.handled = true;
@@ -220,8 +221,10 @@ async function run(folder: string): Promise<boolean> {
     log.info(`Core ${folder} API: updated documentation ✔`);
   }
 
-  // If any errors or warnings occured, exit with an error
-  return succeeded;
+  // If the api signature changed or any errors or warnings occured, exit with an error
+  // NOTE: Because of https://github.com/Microsoft/web-build-tools/issues/1258
+  //  api-extractor will not return `succeeded: false` when the API changes.
+  return !apiReportChanged && succeeded;
 }
 
 (async () => {

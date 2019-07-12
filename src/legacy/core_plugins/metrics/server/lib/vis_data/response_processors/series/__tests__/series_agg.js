@@ -17,8 +17,8 @@
  * under the License.
  */
 
-import seriesAgg from '../series_agg';
-import stdMetric from '../std_metric';
+import { seriesAgg } from '../series_agg';
+import { stdMetric } from '../std_metric';
 import { expect } from 'chai';
 import sinon from 'sinon';
 
@@ -28,7 +28,7 @@ describe('seriesAgg(resp, panel, series)', () => {
   let resp;
   beforeEach(() => {
     panel = {
-      time_field: 'timestamp'
+      time_field: 'timestamp',
     };
     series = {
       chart_type: 'line',
@@ -44,14 +44,14 @@ describe('seriesAgg(resp, panel, series)', () => {
         {
           id: 'avgcpu',
           type: 'avg',
-          field: 'cpu'
+          field: 'cpu',
         },
         {
           id: 'seriesgg',
           type: 'series_agg',
-          function: 'sum'
-        }
-      ]
+          function: 'sum',
+        },
+      ],
     };
     resp = {
       aggregations: {
@@ -63,14 +63,14 @@ describe('seriesAgg(resp, panel, series)', () => {
                 buckets: [
                   {
                     key: 1,
-                    avgcpu: { value: 0.25 }
+                    avgcpu: { value: 0.25 },
                   },
                   {
                     key: 2,
-                    avgcpu: { value: 0.25 }
-                  }
-                ]
-              }
+                    avgcpu: { value: 0.25 },
+                  },
+                ],
+              },
             },
             {
               key: 'example-02',
@@ -78,18 +78,18 @@ describe('seriesAgg(resp, panel, series)', () => {
                 buckets: [
                   {
                     key: 1,
-                    avgcpu: { value: 0.25 }
+                    avgcpu: { value: 0.25 },
                   },
                   {
                     key: 2,
-                    avgcpu: { value: 0.25 }
-                  }
-                ]
-              }
-            }
-          ]
-        }
-      }
+                    avgcpu: { value: 0.25 },
+                  },
+                ],
+              },
+            },
+          ],
+        },
+      },
     };
   });
 
@@ -112,17 +112,7 @@ describe('seriesAgg(resp, panel, series)', () => {
       lines: { show: true, fill: 0, lineWidth: 1, steps: false },
       points: { show: true, radius: 1, lineWidth: 1 },
       bars: { fill: 0, lineWidth: 1, show: false },
-      data: [
-        [ 1, 0.5 ],
-        [ 2, 0.5 ]
-      ]
+      data: [[1, 0.5], [2, 0.5]],
     });
-
   });
-
 });
-
-
-
-
-

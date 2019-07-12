@@ -17,27 +17,22 @@
  * under the License.
  */
 
-import _ from 'lodash';
 import chrome from 'ui/chrome';
+import { i18n } from '@kbn/i18n';
 import { BucketAggType } from './_bucket_agg_type';
 import { AggConfig } from '../../vis/agg_config';
 import { Schemas } from '../../vis/editors/default/schemas';
-import { createFilterTerms } from './create_filter/terms';
-import orderAggTemplate from '../controls/order_agg.html';
-import orderAndSizeTemplate from '../controls/order_and_size.html';
-import { i18n } from '@kbn/i18n';
-
 import { getRequestInspectorStats, getResponseInspectorStats } from '../../courier/utils/courier_inspector_utils';
+import { createFilterTerms } from './create_filter/terms';
+import { wrapWithInlineComp } from './_inline_comp_wrapper';
 import { buildOtherBucketAgg, mergeOtherBucketAggResponse, updateMissingBucket } from './_terms_other_bucket_helper';
+import { isStringType, migrateIncludeExcludeFormat } from './migrate_include_exclude_format';
+import { OrderAggParamEditor } from '../controls/order_agg';
+import { OrderParamEditor } from '../controls/order';
+import { OrderByParamEditor, aggFilter } from '../controls/order_by';
+import { SizeParamEditor } from '../controls/size';
 import { MissingBucketParamEditor } from '../controls/missing_bucket';
 import { OtherBucketParamEditor } from '../controls/other_bucket';
-import { isStringType, migrateIncludeExcludeFormat } from './migrate_include_exclude_format';
-
-const aggFilter = [
-  '!top_hits', '!percentiles', '!median', '!std_dev',
-  '!derivative', '!moving_avg', '!serial_diff', '!cumulative_sum',
-  '!avg_bucket', '!max_bucket', '!min_bucket', '!sum_bucket'
-];
 
 const orderAggSchema = (new Schemas([
   {
@@ -57,7 +52,7 @@ export const termsBucketAgg = new BucketAggType({
   }),
   makeLabel: function (agg) {
     const params = agg.params;
-    return agg.getFieldDisplayName() + ': ' + params.order.display;
+    return agg.getFieldDisplayName() + ': ' + params.order.text;
   },
   getFormat: function (bucket) {
     return {
@@ -119,14 +114,15 @@ export const termsBucketAgg = new BucketAggType({
       filterFieldTypes: ['number', 'boolean', 'date', 'ip',  'string']
     },
     {
-      name: 'size',
-      default: 5
+      name: 'orderBy',
+      editorComponent: OrderByParamEditor,
+      write: () => {} // prevent default write, it's handled by orderAgg
     },
     {
       name: 'orderAgg',
       type: AggConfig,
       default: null,
-      editor: orderAggTemplate,
+      editorComponent: OrderAggParamEditor,
       serialize: function (orderAgg) {
         return orderAgg.toJSON();
       },
@@ -140,71 +136,8 @@ export const termsBucketAgg = new BucketAggType({
         orderAgg.id = termsAgg.id + '-orderAgg';
         return orderAgg;
       },
-      controller: function ($scope) {
-        $scope.safeMakeLabel = function (agg) {
-          try {
-            return agg.makeLabel();
-          } catch (e) {
-            return i18n.translate('common.ui.aggTypes.buckets.terms.aggNotValidLabel', {
-              defaultMessage: '- agg not valid -',
-            });
-          }
-        };
-
-        const INIT = {}; // flag to know when prevOrderBy has changed
-        let prevOrderBy = INIT;
-
-        $scope.$watch('responseValueAggs', updateOrderAgg);
-        $scope.$watch('agg.params.orderBy', updateOrderAgg);
-
-        // Returns true if the agg is not compatible with the terms bucket
-        $scope.rejectAgg = function rejectAgg(agg) {
-          return aggFilter.includes(`!${agg.type.name}`);
-        };
-
-        $scope.$watch('agg.params.field.type', (type) => {
-          if (type !== 'string') {
-            $scope.agg.params.missingBucket = false;
-          }
-        });
-
-        function updateOrderAgg() {
-          // abort until we get the responseValueAggs
-          if (!$scope.responseValueAggs) return;
-          const agg = $scope.agg;
-          const params = agg.params;
-          const orderBy = params.orderBy;
-          const paramDef = agg.type.params.byName.orderAgg;
-
-          // setup the initial value of orderBy
-          if (!orderBy && prevOrderBy === INIT) {
-            let respAgg = _($scope.responseValueAggs).filter((agg) => !$scope.rejectAgg(agg)).first();
-            if (!respAgg) {
-              respAgg = { id: '_key' };
-            }
-            params.orderBy = respAgg.id;
-            return;
-          }
-
-          // track the previous value
-          prevOrderBy = orderBy;
-
-          // we aren't creating a custom aggConfig
-          if (!orderBy || orderBy !== 'custom') {
-            params.orderAgg = null;
-            // ensure that orderBy is set to a valid agg
-            const respAgg = _($scope.responseValueAggs).filter((agg) => !$scope.rejectAgg(agg)).find({ id: orderBy });
-            if (!respAgg) {
-              params.orderBy = '_key';
-            }
-            return;
-          }
-
-          params.orderAgg = params.orderAgg || paramDef.makeOrderAgg(agg);
-        }
-      },
       write: function (agg, output, aggs) {
-        const dir = agg.params.order.val;
+        const dir = agg.params.order.value;
         const order = output.params.order = {};
 
         let orderAgg = agg.params.orderAgg || aggs.getResponseAggById(agg.params.orderBy);
@@ -241,34 +174,35 @@ export const termsBucketAgg = new BucketAggType({
     },
     {
       name: 'order',
-      type: 'optioned',
+      type: 'select',
       default: 'desc',
-      editor: orderAndSizeTemplate,
+      editorComponent: wrapWithInlineComp(OrderParamEditor),
       options: [
         {
-          display: i18n.translate('common.ui.aggTypes.buckets.terms.orderDescendingTitle', {
+          text: i18n.translate('common.ui.aggTypes.buckets.terms.orderDescendingTitle', {
             defaultMessage: 'Descending',
           }),
-          val: 'desc'
+          value: 'desc'
         },
         {
-          display: i18n.translate('common.ui.aggTypes.buckets.terms.orderAscendingTitle', {
+          text: i18n.translate('common.ui.aggTypes.buckets.terms.orderAscendingTitle', {
             defaultMessage: 'Ascending',
           }),
-          val: 'asc'
+          value: 'asc'
         }
       ],
-      write: _.noop // prevent default write, it's handled by orderAgg
+      write: () => {} // prevent default write, it's handled by orderAgg
     },
     {
-      name: 'orderBy',
-      write: _.noop // prevent default write, it's handled by orderAgg
+      name: 'size',
+      editorComponent: wrapWithInlineComp(SizeParamEditor),
+      default: 5
     },
     {
       name: 'otherBucket',
       default: false,
       editorComponent: OtherBucketParamEditor,
-      write: _.noop,
+      write: () => {},
     },
     {
       name: 'otherBucketLabel',
@@ -280,13 +214,13 @@ export const termsBucketAgg = new BucketAggType({
         defaultMessage: 'Label for other bucket',
       }),
       shouldShow: agg => agg.params.otherBucket,
-      write: _.noop,
+      write: () => {},
     },
     {
       name: 'missingBucket',
       default: false,
       editorComponent: MissingBucketParamEditor,
-      write: _.noop,
+      write: () => {},
     },
     {
       name: 'missingBucketLabel',
@@ -300,7 +234,7 @@ export const termsBucketAgg = new BucketAggType({
         defaultMessage: 'Label for missing values',
       }),
       shouldShow: agg => agg.params.missingBucket,
-      write: _.noop,
+      write: () => {},
     },
     {
       name: 'exclude',

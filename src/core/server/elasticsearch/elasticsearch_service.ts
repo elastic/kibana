@@ -18,13 +18,15 @@
  */
 
 import { ConnectableObservable, Observable, Subscription } from 'rxjs';
-import { filter, map, publishReplay, switchMap } from 'rxjs/operators';
+import { filter, first, map, publishReplay, switchMap } from 'rxjs/operators';
+import { merge } from 'lodash';
 import { CoreService } from '../../types';
 import { CoreContext } from '../core_context';
 import { Logger } from '../logging';
 import { ClusterClient } from './cluster_client';
 import { ElasticsearchClientConfig } from './elasticsearch_client_config';
-import { ElasticsearchConfig } from './elasticsearch_config';
+import { ElasticsearchConfig, ElasticsearchConfigType } from './elasticsearch_config';
+import { HttpServiceSetup, GetAuthHeaders } from '../http/';
 
 /** @internal */
 interface CoreClusterClients {
@@ -33,14 +35,37 @@ interface CoreClusterClients {
   dataClient: ClusterClient;
 }
 
+interface SetupDeps {
+  http: HttpServiceSetup;
+}
+
 /** @public */
 export interface ElasticsearchServiceSetup {
   // Required for the BWC with the legacy Kibana only.
   readonly legacy: {
     readonly config$: Observable<ElasticsearchConfig>;
   };
-
-  readonly createClient: (type: string, config: ElasticsearchClientConfig) => ClusterClient;
+  /**
+   * Create application specific Elasticsearch cluster API client with customized config.
+   *
+   * @param type Unique identifier of the client
+   * @param clientConfig A config consists of Elasticsearch JS client options and
+   * valid sub-set of Elasticsearch service config.
+   * We fill all the missing properties in the `clientConfig` using the default
+   * Elasticsearch config so that we don't depend on default values set and
+   * controlled by underlying Elasticsearch JS client.
+   * We don't run validation against passed config expect it to be valid.
+   *
+   * @example
+   * ```js
+   * const client = elasticsearch.createCluster('my-app-name', config);
+   * const data = await client.callAsInternalUser();
+   * ```
+   */
+  readonly createClient: (
+    type: string,
+    clientConfig?: Partial<ElasticsearchClientConfig>
+  ) => ClusterClient;
   readonly adminClient$: Observable<ClusterClient>;
   readonly dataClient$: Observable<ClusterClient>;
 }
@@ -48,51 +73,55 @@ export interface ElasticsearchServiceSetup {
 /** @internal */
 export class ElasticsearchService implements CoreService<ElasticsearchServiceSetup> {
   private readonly log: Logger;
+  private readonly config$: Observable<ElasticsearchConfig>;
   private subscription?: Subscription;
 
   constructor(private readonly coreContext: CoreContext) {
     this.log = coreContext.logger.get('elasticsearch-service');
+    this.config$ = coreContext.configService
+      .atPath<ElasticsearchConfigType>('elasticsearch')
+      .pipe(map(rawConfig => new ElasticsearchConfig(rawConfig)));
   }
 
-  public async setup(): Promise<ElasticsearchServiceSetup> {
+  public async setup(deps: SetupDeps): Promise<ElasticsearchServiceSetup> {
     this.log.debug('Setting up elasticsearch service');
 
-    const clients$ = this.coreContext.configService
-      .atPath('elasticsearch', ElasticsearchConfig)
-      .pipe(
-        filter(() => {
-          if (this.subscription !== undefined) {
-            this.log.error('Clients cannot be changed after they are created');
-            return false;
-          }
+    const clients$ = this.config$.pipe(
+      filter(() => {
+        if (this.subscription !== undefined) {
+          this.log.error('Clients cannot be changed after they are created');
+          return false;
+        }
 
-          return true;
-        }),
-        switchMap(
-          config =>
-            new Observable<CoreClusterClients>(subscriber => {
-              this.log.debug(`Creating elasticsearch clients`);
+        return true;
+      }),
+      switchMap(
+        config =>
+          new Observable<CoreClusterClients>(subscriber => {
+            this.log.debug(`Creating elasticsearch clients`);
 
-              const coreClients = {
-                config,
-                adminClient: this.createClusterClient('admin', config),
-                dataClient: this.createClusterClient('data', config),
-              };
+            const coreClients = {
+              config,
+              adminClient: this.createClusterClient('admin', config),
+              dataClient: this.createClusterClient('data', config, deps.http.auth.getAuthHeaders),
+            };
 
-              subscriber.next(coreClients);
+            subscriber.next(coreClients);
 
-              return () => {
-                this.log.debug(`Closing elasticsearch clients`);
+            return () => {
+              this.log.debug(`Closing elasticsearch clients`);
 
-                coreClients.adminClient.close();
-                coreClients.dataClient.close();
-              };
-            })
-        ),
-        publishReplay(1)
-      ) as ConnectableObservable<CoreClusterClients>;
+              coreClients.adminClient.close();
+              coreClients.dataClient.close();
+            };
+          })
+      ),
+      publishReplay(1)
+    ) as ConnectableObservable<CoreClusterClients>;
 
     this.subscription = clients$.connect();
+
+    const config = await this.config$.pipe(first()).toPromise();
 
     return {
       legacy: { config$: clients$.pipe(map(clients => clients.config)) },
@@ -100,8 +129,9 @@ export class ElasticsearchService implements CoreService<ElasticsearchServiceSet
       adminClient$: clients$.pipe(map(clients => clients.adminClient)),
       dataClient$: clients$.pipe(map(clients => clients.dataClient)),
 
-      createClient: (type: string, clientConfig: ElasticsearchClientConfig) => {
-        return this.createClusterClient(type, clientConfig);
+      createClient: (type: string, clientConfig: Partial<ElasticsearchClientConfig> = {}) => {
+        const finalConfig = merge({}, config, clientConfig);
+        return this.createClusterClient(type, finalConfig, deps.http.auth.getAuthHeaders);
       },
     };
   }
@@ -117,7 +147,15 @@ export class ElasticsearchService implements CoreService<ElasticsearchServiceSet
     }
   }
 
-  private createClusterClient(type: string, config: ElasticsearchClientConfig) {
-    return new ClusterClient(config, this.coreContext.logger.get('elasticsearch', type));
+  private createClusterClient(
+    type: string,
+    config: ElasticsearchClientConfig,
+    getAuthHeaders?: GetAuthHeaders
+  ) {
+    return new ClusterClient(
+      config,
+      this.coreContext.logger.get('elasticsearch', type),
+      getAuthHeaders
+    );
   }
 }

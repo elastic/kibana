@@ -22,11 +22,11 @@ import { MultiSearchRequest } from './multi_search_request';
 import { SingleSearchRequest } from './single_search_request';
 
 export class SearchRequest extends AbstractSearchRequest {
-  getSearchRequestType(options) {
-    const isMultiSearch = Array.isArray(options.body);
+  getSearchRequestType(searches) {
+    const isMultiSearch = Array.isArray(searches) && searches.length > 1;
     const SearchRequest = isMultiSearch ? MultiSearchRequest : SingleSearchRequest;
 
-    return new SearchRequest(this.req, this.callWithRequest, this.indexPattern);
+    return new SearchRequest(this.req, this.callWithRequest);
   }
 
   async search(options) {

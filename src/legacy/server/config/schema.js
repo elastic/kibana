@@ -81,6 +81,8 @@ export default () => Joi.object({
     name: Joi.string().default(os.hostname()),
     host: Joi.string().hostname().default('localhost'),
     port: Joi.number().default(5601),
+    keepaliveTimeout: Joi.number().default(120000),
+    socketTimeout: Joi.number().default(120000),
     maxPayloadBytes: Joi.number().default(1048576),
     autoListen: Joi.boolean().default(true),
     defaultRoute: Joi.string().default('/app/kibana').regex(/^\//, `start with a slash`),
@@ -175,6 +177,10 @@ export default () => Joi.object({
     pollInterval: Joi.number().default(1500),
   }).default(),
 
+  stats: Joi.object({
+    maximumWaitTimeForAllCollectorsInS: Joi.number().default(60)
+  }).default(),
+
   optimize: Joi.object({
     enabled: Joi.boolean().default(true),
     bundleFilter: Joi.string().default('!tests'),
@@ -205,6 +211,7 @@ export default () => Joi.object({
   }).default(),
   map: Joi.object({
     includeElasticMapsService: Joi.boolean().default(true),
+    proxyElasticMapsServiceInMaps: Joi.boolean().default(false),
     tilemap: Joi.object({
       url: Joi.string(),
       options: Joi.object({
@@ -244,8 +251,17 @@ export default () => Joi.object({
         }))
       })).default([])
     }).default(),
-    manifestServiceUrl: Joi.string().default('https://catalogue.maps.elastic.co/v7.0/manifest'),
-    emsLandingPageUrl: Joi.string().default('https://maps.elastic.co/v7.0'),
+    manifestServiceUrl: Joi.string().default('https://catalogue.maps.elastic.co/v7.2/manifest'),
+    emsLandingPageUrl: Joi.string().default('https://maps.elastic.co/v7.2'),
+    emsTileLayerId: Joi.object({
+      bright: Joi.string().default('road_map'),
+      desaturated: Joi.string().default('road_map_desaturated'),
+      dark: Joi.string().default('dark_map'),
+    }).default({
+      bright: 'road_map',
+      desaturated: 'road_map_desaturated',
+      dark: 'dark_map',
+    }),
   }).default(),
 
   i18n: Joi.object({

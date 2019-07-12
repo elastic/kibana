@@ -8,7 +8,7 @@ import expect from '@kbn/expect';
 import { TestInvoker } from './lib/types';
 
 // eslint-disable-next-line import/no-default-export
-export default function exploreRepositoryFunctonalTests({
+export default function exploreRepositoryFunctionalTests({
   getService,
   getPageObjects,
 }: TestInvoker) {
@@ -23,7 +23,8 @@ export default function exploreRepositoryFunctonalTests({
 
   const FIND_TIME = config.get('timeouts.find');
 
-  describe('Code', () => {
+  describe('Explore Repository', function() {
+    this.tags('smoke');
     describe('Explore a repository', () => {
       const repositoryListSelector = 'codeRepositoryList codeRepositoryItem';
 
@@ -64,7 +65,14 @@ export default function exploreRepositoryFunctonalTests({
 
         // Clean up the imported repository
         await PageObjects.code.clickDeleteRepositoryButton();
+
         await retry.try(async () => {
+          expect(await testSubjects.exists('confirmModalConfirmButton')).to.be(true);
+        });
+
+        await testSubjects.click('confirmModalConfirmButton');
+
+        await retry.tryForTime(300000, async () => {
           const repositoryItems = await testSubjects.findAll(repositoryListSelector);
           expect(repositoryItems).to.have.length(0);
         });
@@ -79,6 +87,27 @@ export default function exploreRepositoryFunctonalTests({
 
         // Enter the first repository from the admin page.
         await testSubjects.click(repositoryListSelector);
+      });
+
+      it('open a file that does not exists should load tree', async () => {
+        // open a file that does not exists
+        const url = `${PageObjects.common.getHostPort()}/app/code#/github.com/elastic/TypeScript-Node-Starter/tree/master/I_DO_NOT_EXIST`;
+        await browser.get(url);
+        await retry.try(async () => {
+          const currentUrl: string = await browser.getCurrentUrl();
+          expect(
+            currentUrl.indexOf(
+              'github.com/elastic/TypeScript-Node-Starter/tree/master/I_DO_NOT_EXIST'
+            )
+          ).to.greaterThan(0);
+        });
+        await retry.try(async () => {
+          expect(await testSubjects.exists('codeFileTreeNode-Directory-src')).ok();
+          expect(await testSubjects.exists('codeFileTreeNode-Directory-src-doc')).ok();
+          expect(await testSubjects.exists('codeFileTreeNode-Directory-test')).ok();
+          expect(await testSubjects.exists('codeFileTreeNode-Directory-views')).ok();
+          expect(await testSubjects.exists('codeFileTreeNode-File-package.json')).ok();
+        });
       });
 
       it('tree should be loaded', async () => {
@@ -124,6 +153,18 @@ export default function exploreRepositoryFunctonalTests({
           expect(await testSubjects.exists('codeSourceViewer')).to.be(true);
         });
 
+        // Click breadcrumb does not affect file tree
+        await retry.try(async () => {
+          expect(await testSubjects.exists('codeFileBreadcrumb-src')).ok();
+        });
+        await testSubjects.click('codeFileBreadcrumb-src');
+        await retry.try(async () => {
+          expect(await testSubjects.exists('codeFileTreeNode-Directory-Icon-src-open')).ok();
+          expect(await testSubjects.exists('codeFileTreeNode-Directory-Icon-src-doc-closed')).ok();
+          expect(await testSubjects.exists('codeFileTreeNode-Directory-Icon-test-closed')).ok();
+          expect(await testSubjects.exists('codeFileTreeNode-Directory-Icon-views-closed')).ok();
+        });
+
         // open another folder
         await testSubjects.click('codeFileTreeNode-Directory-src-doc');
         await retry.tryForTime(5000, async () => {
@@ -131,9 +172,10 @@ export default function exploreRepositoryFunctonalTests({
           expect(await testSubjects.exists('codeFileTreeNode-Directory-Icon-src-open')).ok();
           expect(await testSubjects.exists('codeFileTreeNode-Directory-Icon-src-doc-open')).ok();
         });
-        log.info('src-doc folder opened');
 
-        // click src again to close this folder
+        // click src again to focus on this folder
+        await testSubjects.click('codeFileTreeNode-Directory-src');
+        // then click again to close this folder.
         await testSubjects.click('codeFileTreeNode-Directory-src');
 
         await retry.tryForTime(5000, async () => {
@@ -152,23 +194,23 @@ export default function exploreRepositoryFunctonalTests({
         });
         await testSubjects.click('codeFileTreeNode-Directory-src');
         await retry.try(async () => {
-          expect(await testSubjects.exists('codeFileTreeNode-Directory-src/config')).ok();
+          expect(await testSubjects.exists('codeFileTreeNode-Directory-src/controllers')).ok();
         });
-        await testSubjects.click('codeFileTreeNode-Directory-src/config');
+        await testSubjects.click('codeFileTreeNode-Directory-src/controllers');
         await retry.try(async () => {
-          expect(await testSubjects.exists('codeFileTreeNode-File-src/config/passport.ts')).ok();
+          expect(await testSubjects.exists('codeFileTreeNode-File-src/controllers/user.ts')).ok();
         });
-        await testSubjects.click('codeFileTreeNode-File-src/config/passport.ts');
+        await testSubjects.click('codeFileTreeNode-File-src/controllers/user.ts');
         await retry.try(async () => {
           expect(await testSubjects.exists('codeStructureTreeTab')).ok();
         });
-        await testSubjects.click('codeStructureTreeTab');
+
         await retry.try(async () => {
-          expect(
-            await testSubjects.exists('"codeStructureTreeNode-User.findById() callback"')
-          ).ok();
+          // Retry click the structure tab in case it's not ready yet
+          await testSubjects.click('codeStructureTreeTab');
+          expect(await testSubjects.exists('codeStructureTreeNode-errors')).ok();
         });
-        await testSubjects.click('"codeStructureTreeNode-User.findById() callback"');
+        await testSubjects.click('codeStructureTreeNode-errors');
 
         await retry.try(async () => {
           const highlightSymbols = await find.allByCssSelector('.code-full-width-node', FIND_TIME);
@@ -178,7 +220,7 @@ export default function exploreRepositoryFunctonalTests({
 
       it('click a breadcrumb should not affect the file tree', async () => {
         log.debug('it goes to a deep node of file tree');
-        const url = `${PageObjects.common.getHostPort()}/app/code#/github.com/Microsoft/TypeScript-Node-Starter/blob/master/src/models/User.ts`;
+        const url = `${PageObjects.common.getHostPort()}/app/code#/github.com/elastic/TypeScript-Node-Starter/blob/master/src/models/User.ts`;
         await browser.get(url);
         // Click breadcrumb does not affect file tree
         await retry.try(async () => {
@@ -187,7 +229,7 @@ export default function exploreRepositoryFunctonalTests({
         await testSubjects.click('codeFileBreadcrumb-src');
         await retry.try(async () => {
           expect(await testSubjects.exists('codeFileTreeNode-Directory-Icon-src-open')).ok();
-          expect(await testSubjects.exists('codeFileTreeNode-Directory-Icon-src-doc-open')).ok();
+          expect(await testSubjects.exists('codeFileTreeNode-Directory-Icon-src-doc-closed')).ok();
           expect(await testSubjects.exists('codeFileTreeNode-Directory-Icon-test-closed')).ok();
           expect(await testSubjects.exists('codeFileTreeNode-Directory-Icon-views-closed')).ok();
         });
@@ -250,11 +292,60 @@ export default function exploreRepositoryFunctonalTests({
           expect(await testSubjects.exists('codeStructureTreeNode-User')).to.be(true);
 
           await testSubjects.click('codeStructureTreeNode-User');
-          await retry.tryForTime(5000, async () => {
+          await retry.tryForTime(120000, async () => {
             const currentUrl: string = await browser.getCurrentUrl();
             log.info(`Jump to url: ${currentUrl}`);
             expect(currentUrl.indexOf('src/models/User.ts!L92:6') > 0).to.be(true);
           });
+        });
+      });
+
+      it('goes to a repository which does not exist should render the 404 error page', async () => {
+        log.debug('it goes to a repository which does not exist');
+        const notExistRepoUri = 'github.com/I_DO_NOT_EXIST/I_DO_NOT_EXIST';
+        const url = `${PageObjects.common.getHostPort()}/app/code#/${notExistRepoUri}`;
+        await browser.get(url);
+        await retry.try(async () => {
+          const currentUrl: string = await browser.getCurrentUrl();
+          // should redirect to main page
+          expect(currentUrl.indexOf(`${notExistRepoUri}/tree/master`)).to.greaterThan(0);
+        });
+        await retry.tryForTime(5000, async () => {
+          expect(await testSubjects.exists('codeNotFoundErrorPage')).ok();
+        });
+      });
+
+      it('goes to a branch of a project', async () => {
+        log.debug('it goes to a branch of the repo');
+        await retry.try(async () => {
+          expect(testSubjects.exists('codeBranchSelector'));
+        });
+        await testSubjects.click('codeBranchSelector');
+        const branch = 'addAzure';
+        const branchOptionSelector = `codeBranchSelectOption-${branch}`;
+        await retry.try(async () => {
+          expect(testSubjects.exists(branchOptionSelector));
+        });
+        await testSubjects.click(branchOptionSelector);
+        await retry.try(async () => {
+          const currentUrl: string = await browser.getCurrentUrl();
+          expect(currentUrl.indexOf(branch.replace(/\//g, ':'))).to.greaterThan(0);
+          expect(testSubjects.exists(`codeBranchSelectOption-${branch}Active`)).to.be.ok();
+        });
+        await retry.try(async () => {
+          expect(testSubjects.exists('codeBranchSelector'));
+        });
+        await testSubjects.click('codeBranchSelector');
+        const anotherBranch = 'noDatabase';
+        const anotherBranchOptionSelector = `codeBranchSelectOption-${anotherBranch}`;
+        await retry.try(async () => {
+          expect(testSubjects.exists(anotherBranchOptionSelector));
+        });
+        await testSubjects.click(anotherBranchOptionSelector);
+        await retry.try(async () => {
+          const currentUrl: string = await browser.getCurrentUrl();
+          expect(currentUrl.indexOf(anotherBranch.replace(/\//g, ':'))).to.greaterThan(0);
+          expect(testSubjects.exists(`codeBranchSelectOption-${anotherBranch}Active`)).to.be.ok();
         });
       });
     });

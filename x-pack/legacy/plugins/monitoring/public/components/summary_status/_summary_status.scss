@@ -1,0 +1,13 @@
+.monSummaryStatusNoWrap {
+  margin-left: $euiSizeM;
+  margin-right: $euiSizeM;
+  .euiTitle {
+    overflow-x: hidden;
+    white-space: nowrap;
+    @include euiFontSizeXS;
+  }
+
+  .euiFlexItem {
+    margin: $euiSizeS;
+  }
+}

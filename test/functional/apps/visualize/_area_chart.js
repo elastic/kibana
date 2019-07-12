@@ -40,8 +40,8 @@ export default function ({ getService, getPageObjects }) {
       log.debug('clickNewSearch');
       await PageObjects.visualize.clickNewSearch();
       await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
-      log.debug('Click X-Axis');
-      await PageObjects.visualize.clickBucket('X-Axis');
+      log.debug('Click X-axis');
+      await PageObjects.visualize.clickBucket('X-axis');
       log.debug('Click Date Histogram');
       await PageObjects.visualize.selectAggregation('Date Histogram');
       log.debug('Check field value');
@@ -50,7 +50,7 @@ export default function ({ getService, getPageObjects }) {
       expect(fieldValues[0]).to.be('@timestamp');
       const intervalValue = await PageObjects.visualize.getInterval();
       log.debug('intervalValue = ' + intervalValue);
-      expect(intervalValue).to.be('Auto');
+      expect(intervalValue[0]).to.be('Auto');
       return PageObjects.visualize.clickGo();
     };
 
@@ -228,8 +228,8 @@ export default function ({ getService, getPageObjects }) {
         log.debug('clickNewSearch');
         await PageObjects.visualize.clickNewSearch('long-window-logstash-*');
         await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
-        log.debug('Click X-Axis');
-        await PageObjects.visualize.clickBucket('X-Axis');
+        log.debug('Click X-axis');
+        await PageObjects.visualize.clickBucket('X-axis');
         log.debug('Click Date Histogram');
         await PageObjects.visualize.selectAggregation('Date Histogram');
         await PageObjects.visualize.selectField('@timestamp');
@@ -251,8 +251,8 @@ export default function ({ getService, getPageObjects }) {
         log.debug('clickNewSearch');
         await PageObjects.visualize.clickNewSearch('long-window-logstash-*');
         await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
-        log.debug('Click X-Axis');
-        await PageObjects.visualize.clickBucket('X-Axis');
+        log.debug('Click X-axis');
+        await PageObjects.visualize.clickBucket('X-axis');
         log.debug('Click Date Histogram');
         await PageObjects.visualize.selectAggregation('Date Histogram');
         await PageObjects.visualize.selectField('@timestamp');

@@ -73,7 +73,7 @@ import _ from 'lodash';
 import angular from 'angular';
 import { buildEsQuery, getEsQueryConfig, filterMatchesIndex } from '@kbn/es-query';
 
-import '../../promises';
+import { createDefer } from 'ui/promises';
 import { NormalizeSortRequestProvider } from './_normalize_sort_request';
 import { SearchRequestProvider } from '../fetch/request';
 
@@ -110,7 +110,7 @@ function parseInitialFields(initialFields) {
 }
 
 function isIndexPattern(val) {
-  return Boolean(val && typeof val.toIndexList === 'function');
+  return Boolean(val && typeof val.title === 'string');
 }
 
 export function SearchSourceProvider(Promise, Private, config) {
@@ -376,7 +376,7 @@ export function SearchSourceProvider(Promise, Private, config) {
       const self = this;
 
       return new Promise(function (resolve, reject) {
-        const defer = Promise.defer();
+        const defer = createDefer(Promise);
         defer.promise.then(resolve, reject);
 
         const errorHandler = (request, error) => {

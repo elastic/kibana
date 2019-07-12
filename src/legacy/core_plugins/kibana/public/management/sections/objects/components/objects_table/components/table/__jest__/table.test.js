@@ -44,26 +44,49 @@ jest.mock('ui/chrome', () => ({
 import { Table } from '../table';
 
 const defaultProps = {
-  selectedSavedObjects: [{ type: 'visualization' }],
+  selectedSavedObjects: [{
+    id: '1',
+    type: 'index-pattern',
+    meta: {
+      title: `MyIndexPattern*`,
+      icon: 'indexPatternApp',
+      editUrl: '#/management/kibana/index_patterns/1',
+      inAppUrl: {
+        path: '/management/kibana/index_patterns/1',
+        uiCapabilitiesPath: 'management.kibana.index_patterns',
+      },
+    },
+  }],
   selectionConfig: {
     onSelectionChange: () => {},
   },
   filterOptions: [{ value: 2 }],
   onDelete: () => {},
   onExport: () => {},
-  getEditUrl: () => {},
+  goInspectObject: () => {},
   canGoInApp: () => {},
-  goInApp: () => {},
   pageIndex: 1,
   pageSize: 2,
-  items: [3],
+  items: [{
+    id: '1',
+    type: 'index-pattern',
+    meta: {
+      title: `MyIndexPattern*`,
+      icon: 'indexPatternApp',
+      editUrl: '#/management/kibana/index_patterns/1',
+      inAppUrl: {
+        path: '/management/kibana/index_patterns/1',
+        uiCapabilitiesPath: 'management.kibana.index_patterns',
+      },
+    },
+  }],
   itemId: 'id',
   totalItemCount: 3,
   onQueryChange: () => {},
   onTableChange: () => {},
   isSearching: false,
   onShowRelationships: () => {},
-  canDeleteSavedObjectTypes: ['visualization']
+  canDelete: true
 };
 
 describe('Table', () => {
@@ -104,9 +127,9 @@ describe('Table', () => {
     expect(component.state().isSearchTextValid).toBe(true);
   });
 
-  it(`restricts which saved objects can be deleted based on type`, () => {
+  it(`prevents saved objects from being deleted`, () => {
     const selectedSavedObjects = [{ type: 'visualization' }, { type: 'search' }, { type: 'index-pattern' }];
-    const customizedProps = { ...defaultProps, selectedSavedObjects, canDeleteSavedObjectTypes: ['visualization'] };
+    const customizedProps = { ...defaultProps, selectedSavedObjects, canDelete: false };
     const component = shallowWithIntl(
       <Table.WrappedComponent
         {...customizedProps}

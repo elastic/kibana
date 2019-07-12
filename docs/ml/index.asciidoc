@@ -16,8 +16,9 @@ The {ml-features} run in and scale with {es}, and include an
 intuitive UI on the {kib} *Machine Learning* page for creating anomaly detection
 jobs and understanding results.
 
-If you have a basic license, you can use the *Data Visualizer* to learn more 
-about the data that you've stored in {es} and to identify possible fields for 
+If you have a basic license, you can use the *Data Visualizer* to learn more
+about your data. In particular, if your data is stored in {es} and contains a
+time field, you can use the *Data Visualizer* to identify possible fields for
 {ml} analysis:
 
 [role="screenshot"]
@@ -71,4 +72,5 @@ For more information about {ml}, see
 
 include::creating-jobs.asciidoc[]
 include::job-tips.asciidoc[]
+include::creating-df-kib.asciidoc[]
 

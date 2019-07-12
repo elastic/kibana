@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import AggRow from './agg_row';
+import { AggRow } from './agg_row';
 import React from 'react';
 import { EuiCode, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -30,13 +30,14 @@ export function TemporaryUnsupportedAgg(props) {
       onAdd={props.onAdd}
       onDelete={props.onDelete}
       siblings={props.siblings}
+      dragHandleProps={props.dragHandleProps}
     >
       <EuiTitle className="tvbAggRow__unavailable" size="xxxs">
         <span>
           <FormattedMessage
             id="tsvb.unsupportedAgg.aggIsTemporaryUnsupportedDescription"
             defaultMessage="The {modelType} aggregation is currently unsupported."
-            values={{ modelType: (<EuiCode>{props.model.type}</EuiCode>) }}
+            values={{ modelType: <EuiCode>{props.model.type}</EuiCode> }}
           />
         </span>
       </EuiTitle>

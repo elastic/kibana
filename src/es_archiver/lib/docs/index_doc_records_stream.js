@@ -19,7 +19,7 @@
 
 import { Writable } from 'stream';
 
-export function createIndexDocRecordsStream(client, stats) {
+export function createIndexDocRecordsStream(client, stats, progress) {
 
   async function indexDocs(docs) {
     const body = [];
@@ -51,6 +51,7 @@ export function createIndexDocRecordsStream(client, stats) {
     async write(record, enc, callback) {
       try {
         await indexDocs([record.value]);
+        progress.addToComplete(1);
         callback(null);
       } catch (err) {
         callback(err);
@@ -60,6 +61,7 @@ export function createIndexDocRecordsStream(client, stats) {
     async writev(chunks, callback) {
       try {
         await indexDocs(chunks.map(({ chunk: record }) => record.value));
+        progress.addToComplete(chunks.length);
         callback(null);
       } catch (err) {
         callback(err);

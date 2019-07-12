@@ -39,19 +39,6 @@ export function uiRenderMixin(kbnServer, server, config) {
     );
   }
 
-  function getInitialDefaultInjectedVars() {
-    const navLinkSpecs = server.getUiNavLinks();
-
-    return {
-      uiCapabilities: {
-        navLinks: navLinkSpecs.reduce((acc, navLinkSpec) => ({
-          ...acc,
-          [navLinkSpec._id]: true
-        }), {})
-      }
-    };
-  }
-
   let defaultInjectedVars = {};
   kbnServer.afterPluginsInit(() => {
     const { defaultInjectedVarProviders = [] } = kbnServer.uiExports;
@@ -61,7 +48,7 @@ export function uiRenderMixin(kbnServer, server, config) {
           allDefaults,
           fn(kbnServer.server, pluginSpec.readConfigValue(kbnServer.config, []))
         )
-      ), getInitialDefaultInjectedVars());
+      ), {});
   });
 
   // render all views from ./views
@@ -69,6 +56,7 @@ export function uiRenderMixin(kbnServer, server, config) {
 
   server.exposeStaticDir('/node_modules/@elastic/eui/dist/{path*}', fromRoot('node_modules/@elastic/eui/dist'));
   server.exposeStaticDir('/node_modules/@kbn/ui-framework/dist/{path*}', fromRoot('node_modules/@kbn/ui-framework/dist'));
+  server.exposeStaticDir('/node_modules/@elastic/charts/dist/{path*}', fromRoot('node_modules/@elastic/charts/dist'));
 
   const translationsCache = { translations: null, hash: null };
   server.route({
@@ -133,9 +121,11 @@ export function uiRenderMixin(kbnServer, server, config) {
               [
                 `${basePath}/node_modules/@elastic/eui/dist/eui_theme_dark.css`,
                 `${basePath}/node_modules/@kbn/ui-framework/dist/kui_dark.css`,
+                `${basePath}/node_modules/@elastic/charts/dist/theme_only_dark.css`,
               ] : [
                 `${basePath}/node_modules/@elastic/eui/dist/eui_theme_light.css`,
                 `${basePath}/node_modules/@kbn/ui-framework/dist/kui_light.css`,
+                `${basePath}/node_modules/@elastic/charts/dist/theme_only_light.css`,
               ]
           ),
           `${regularBundlePath}/${darkMode ? 'dark' : 'light'}_theme.style.css`,
@@ -229,7 +219,7 @@ export function uiRenderMixin(kbnServer, server, config) {
     // Get the list of new platform plugins.
     // Convert the Map into an array of objects so it is JSON serializable and order is preserved.
     const uiPlugins = [
-      ...kbnServer.newPlatform.setup.plugins.uiPlugins.public.entries()
+      ...kbnServer.newPlatform.setup.core.plugins.uiPlugins.public.entries()
     ].map(([id, plugin]) => ({ id, plugin }));
 
     const nonce = await generateCSPNonce();
@@ -246,6 +236,7 @@ export function uiRenderMixin(kbnServer, server, config) {
       injectedMetadata: {
         version: kbnServer.version,
         buildNumber: config.get('pkg.buildNum'),
+        branch: config.get('pkg.branch'),
         basePath,
         i18n: {
           translationsUrl: `${basePath}/translations/${i18n.getLocale()}.json`,
@@ -265,6 +256,8 @@ export function uiRenderMixin(kbnServer, server, config) {
         uiPlugins,
 
         legacyMetadata,
+
+        capabilities: await request.getCapabilities(),
       },
     });
 

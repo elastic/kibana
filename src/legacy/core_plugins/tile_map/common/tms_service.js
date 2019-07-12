@@ -17,33 +17,87 @@
  * under the License.
  */
 
+import _ from 'lodash';
 import { ORIGIN } from './origin';
 
 export class TMSService {
+  _getTileJson = _.once(
+    async url => this._emsClient.getManifest(this._emsClient.extendUrlWithParams(url)));
 
   constructor(config,  emsClient) {
     this._config = config;
     this._emsClient = emsClient;
   }
 
-  getUrlTemplate() {
-    return this._emsClient.extendUrlWithParams(this._config.url);
+  _getRasterFormats(locale) {
+    return this._config.formats.filter(format => {
+      return format.locale === locale && format.format === 'raster';
+    });
+  }
+
+  _getDefaultStyleUrl() {
+    let rasterFormats = this._getRasterFormats(this._emsClient.getLocale());
+    if (!rasterFormats.length) {//fallback to default locale
+      rasterFormats = this._getRasterFormats(this._emsClient.getDefaultLocale());
+    }
+    if (!rasterFormats.length) {
+      throw new Error(`Cannot find raster tile layer for locale ${this._emsClient.getLocale()} or ${this._emsClient.getDefaultLocale()}`);
+    }
+    const defaultStyle = rasterFormats[0];
+    if (defaultStyle && defaultStyle.hasOwnProperty('url')) {
+      return defaultStyle.url;
+    }
+  }
+
+  async getUrlTemplate() {
+    const defaultStyle = this._getDefaultStyleUrl();
+    const tileJson = await this._getTileJson(defaultStyle);
+    return this._emsClient.extendUrlWithParams(tileJson.tiles[0]);
+  }
+
+  getDisplayName() {
+    return this._emsClient.getValueInLanguage(this._config.name);
+  }
+
+  getAttributions() {
+    return this._config.attribution.map(attribution => {
+      const url = this._emsClient.getValueInLanguage(attribution.url);
+      const label = this._emsClient.getValueInLanguage(attribution.label);
+      return {
+        url: url,
+        label: label
+      };
+    });
   }
 
   getHTMLAttribution() {
-    return this._emsClient.sanitizeMarkdown(this._config.attribution);
+    const attributions = this._config.attribution.map(attribution => {
+      const url = this._emsClient.getValueInLanguage(attribution.url);
+      const label = this._emsClient.getValueInLanguage(attribution.label);
+      const html = url ? `<a rel="noreferrer noopener" href="${url}">${label}</a>` : label;
+      return this._emsClient.sanitizeHtml(`${html}`);
+    });
+    return `<p>${attributions.join(' | ')}</p>`;//!!!this is the current convention used in Kibana
   }
 
   getMarkdownAttribution() {
-    return this._config.attribution;
+    const attributions = this._config.attribution.map(attribution => {
+      const url = this._emsClient.getValueInLanguage(attribution.url);
+      const label = this._emsClient.getValueInLanguage(attribution.label);
+      const markdown = `[${label}](${url})`;
+      return markdown;
+    });
+    return attributions.join('|');
   }
 
-  getMinZoom() {
-    return this._config.minZoom;
+  async getMinZoom() {
+    const tileJson = await this._getTileJson(this._getDefaultStyleUrl());
+    return tileJson.minzoom;
   }
 
-  getMaxZoom() {
-    return this._config.maxZoom;
+  async getMaxZoom() {
+    const tileJson = await this._getTileJson(this._getDefaultStyleUrl());
+    return tileJson.maxzoom;
   }
 
   getId() {

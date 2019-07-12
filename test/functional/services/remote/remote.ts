@@ -19,26 +19,21 @@
 
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { initWebDriver } from './webdriver';
+import { Browsers } from './browsers';
 
 export async function RemoteProvider({ getService }: FtrProviderContext) {
   const lifecycle = getService('lifecycle');
   const log = getService('log');
   const config = getService('config');
-  const browserType = process.env.TEST_BROWSER_TYPE || 'chrome';
-
-  if (browserType !== 'chrome' && browserType !== 'firefox') {
-    throw new Error(
-      `Unexpected TEST_BROWSER_TYPE "${browserType}", only "chrome" and "firefox" are supported`
-    );
-  }
+  const browserType: Browsers = config.get('browser.type');
 
   const { driver, By, Key, until, LegacyActionSequence } = await initWebDriver(log, browserType);
   const caps = await driver.getCapabilities();
-  const browserVersion = caps.get(browserType === 'chrome' ? 'version' : 'browserVersion');
+  const browserVersion = caps.get(browserType === Browsers.Chrome ? 'version' : 'browserVersion');
 
   log.info(`Remote initialized: ${caps.get('browserName')} ${browserVersion}`);
 
-  if (browserType === 'chrome') {
+  if (browserType === Browsers.Chrome) {
     log.info(`Chromedriver version: ${caps.get('chrome').chromedriverVersion}`);
   }
 
@@ -64,5 +59,5 @@ export async function RemoteProvider({ getService }: FtrProviderContext) {
 
   lifecycle.on('cleanup', async () => await driver.quit());
 
-  return { driver, By, Key, until, LegacyActionSequence };
+  return { driver, By, Key, until, LegacyActionSequence, browserType };
 }

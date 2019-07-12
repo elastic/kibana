@@ -16,39 +16,44 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { CoreSetup, CoreStart } from '../../../../core/public';
+import { InternalCoreSetup, InternalCoreStart } from '../../../../core/public';
+import { Plugin as DataPlugin } from '../../../../plugins/data/public';
 
-const runtimeContext = {
-  setup: {
-    core: (null as unknown) as CoreSetup,
-    plugins: {},
-  },
-  start: {
-    core: (null as unknown) as CoreStart,
-    plugins: {},
-  },
+export interface PluginsSetup {
+  data: ReturnType<DataPlugin['setup']>;
+}
+
+export interface PluginsStart {
+  data: ReturnType<DataPlugin['start']>;
+}
+
+export const npSetup = {
+  core: (null as unknown) as InternalCoreSetup,
+  plugins: {} as PluginsSetup,
 };
 
-export function __newPlatformSetup__(core: CoreSetup) {
-  if (runtimeContext.setup.core) {
-    throw new Error('New platform core api was already set up');
-  }
+export const npStart = {
+  core: (null as unknown) as InternalCoreStart,
+  plugins: {} as PluginsStart,
+};
 
-  runtimeContext.setup.core = core;
+/**
+ * Only used by unit tests
+ * @internal
+ */
+export function __reset__() {
+  npSetup.core = (null as unknown) as InternalCoreSetup;
+  npSetup.plugins = {} as any;
+  npStart.core = (null as unknown) as InternalCoreStart;
+  npStart.plugins = {} as any;
 }
 
-export function __newPlatformStart__(core: CoreStart) {
-  if (runtimeContext.start.core) {
-    throw new Error('New platform core api was already started');
-  }
-
-  runtimeContext.start.core = core;
+export function __setup__(coreSetup: InternalCoreSetup, plugins: PluginsSetup) {
+  npSetup.core = coreSetup;
+  npSetup.plugins = plugins;
 }
 
-export function getNewPlatform() {
-  if (runtimeContext.setup.core === null || runtimeContext.start.core === null) {
-    throw new Error('runtimeContext is not initialized yet');
-  }
-
-  return runtimeContext;
+export function __start__(coreStart: InternalCoreStart, plugins: PluginsStart) {
+  npStart.core = coreStart;
+  npStart.plugins = plugins;
 }

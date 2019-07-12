@@ -15,8 +15,10 @@ export default function searchFunctonalTests({ getService, getPageObjects }: Tes
   const log = getService('log');
   const PageObjects = getPageObjects(['common', 'header', 'security', 'code', 'home']);
 
-  describe('Code', () => {
+  describe('Search', function() {
+    this.tags('smoke');
     const symbolTypeaheadListSelector = 'codeTypeaheadList-symbol codeTypeaheadItem';
+    const fileTypeaheadListSelector = 'codeTypeaheadList-file codeTypeaheadItem';
     const searchResultListSelector = 'codeSearchResultList codeSearchResultFileItem';
     const languageFilterListSelector = 'codeSearchLanguageFilterList codeSearchLanguageFilterItem';
 
@@ -36,7 +38,6 @@ export default function searchFunctonalTests({ getService, getPageObjects }: Tes
 
       it('Trigger symbols in typeahead', async () => {
         log.debug('Trigger symbols in typeahead');
-        // Fill in the search query bar with a common prefix of symbols.
         await PageObjects.code.fillSearchQuery('user');
 
         await retry.tryForTime(5000, async () => {
@@ -45,6 +46,27 @@ export default function searchFunctonalTests({ getService, getPageObjects }: Tes
 
           expect(await symbols[0].getVisibleText()).to.equal('user');
           expect(await symbols[1].getVisibleText()).to.equal('passport.User');
+        });
+      });
+
+      it('File typeahead should be case insensitive', async () => {
+        log.debug('File typeahead should be case insensitive');
+        await PageObjects.code.fillSearchQuery('LICENSE');
+
+        await retry.tryForTime(5000, async () => {
+          const symbols = await testSubjects.findAll(fileTypeaheadListSelector);
+          expect(symbols).to.have.length(1);
+
+          expect(await symbols[0].getVisibleText()).to.equal('LICENSE');
+        });
+
+        await PageObjects.code.fillSearchQuery('license');
+
+        await retry.tryForTime(5000, async () => {
+          const symbols = await testSubjects.findAll(fileTypeaheadListSelector);
+          expect(symbols).to.have.length(1);
+
+          expect(await symbols[0].getVisibleText()).to.equal('LICENSE');
         });
       });
 
@@ -64,6 +86,20 @@ export default function searchFunctonalTests({ getService, getPageObjects }: Tes
           expect(await results[0].getVisibleText()).to.equal('src/controllers/user.ts');
           expect(await results[1].getVisibleText()).to.equal('src/models/User.ts');
           expect(await results[2].getVisibleText()).to.equal('src/config/passport.js');
+        });
+      });
+
+      it('Full text search with complex query terms', async () => {
+        log.debug('Full text search with complex query terms');
+        // Fill in the search query bar with a complex query which could result in multiple
+        // terms.
+        await PageObjects.code.fillSearchQuery('postUpdateProfile');
+        await PageObjects.code.submitSearchQuery();
+
+        await retry.tryForTime(5000, async () => {
+          const results = await testSubjects.findAll(searchResultListSelector);
+          expect(results).to.have.length(1);
+          expect(await results[0].getVisibleText()).to.equal('src/controllers/user.ts');
         });
       });
 

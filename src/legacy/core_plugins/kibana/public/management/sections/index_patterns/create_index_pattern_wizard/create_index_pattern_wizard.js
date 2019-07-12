@@ -36,6 +36,7 @@ import {
   ensureMinimumTime,
   getIndices,
 } from './lib';
+import { i18n } from '@kbn/i18n';
 
 export class CreateIndexPatternWizard extends Component {
   static propTypes = {
@@ -130,6 +131,16 @@ export class CreateIndexPatternWizard extends Component {
     });
 
     const createdId = await emptyPattern.create();
+    if (!createdId) {
+      const confirmMessage = i18n.translate('kbn.management.indexPattern.titleExistsLabel', { values: { title: this.title },
+        defaultMessage: 'An index pattern with the title \'{title}\' already exists.' });
+      try {
+        await services.confirmModalPromise(confirmMessage, { confirmButtonText: 'Go to existing pattern' });
+        return services.changeUrl(`/management/kibana/index_patterns/${indexPatternId}`);
+      } catch (err) {
+        return false;
+      }
+    }
 
     if (!services.config.get('defaultIndex')) {
       await services.config.set('defaultIndex', createdId);

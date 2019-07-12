@@ -17,12 +17,12 @@
  * under the License.
  */
 
-import getSplits from '../../helpers/get_splits';
-import getLastMetric from '../../helpers/get_last_metric';
-import mapBucket from '../../helpers/map_bucket';
+import { getSplits } from '../../helpers/get_splits';
+import { getLastMetric } from '../../helpers/get_last_metric';
+import { mapBucket } from '../../helpers/map_bucket';
 import { METRIC_TYPES } from '../../../../../common/metric_types';
 
-export default function stdMetric(bucket, panel, series) {
+export function stdMetric(bucket, panel, series) {
   return next => results => {
     const metric = getLastMetric(series);
 
@@ -54,4 +54,3 @@ export default function stdMetric(bucket, panel, series) {
     return next(results);
   };
 }
-

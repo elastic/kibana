@@ -17,10 +17,10 @@
  * under the License.
  */
 
+import { i18n } from '@kbn/i18n';
+import { SizeParamEditor } from '../controls/size';
 import { BucketAggType } from './_bucket_agg_type';
 import { createFilterTerms } from './create_filter/terms';
-import orderAndSizeTemplate from '../controls/order_and_size.html';
-import { i18n } from '@kbn/i18n';
 import { isStringType, migrateIncludeExcludeFormat } from './migrate_include_exclude_format';
 
 export const significantTermsBucketAgg = new BucketAggType({
@@ -47,7 +47,8 @@ export const significantTermsBucketAgg = new BucketAggType({
     },
     {
       name: 'size',
-      editor: orderAndSizeTemplate,
+      editorComponent: SizeParamEditor,
+      default: '',
     },
     {
       name: 'exclude',

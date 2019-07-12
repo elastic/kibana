@@ -31,6 +31,12 @@ interface UiSettingsClientParams {
   initialSettings?: UiSettingsState;
 }
 
+/**
+ * {@link UiSettingsClient}
+ * @public
+ */
+export type UiSettingsClientContract = PublicMethodsOf<UiSettingsClient>;
+
 /** @public */
 export class UiSettingsClient {
   private readonly update$ = new Rx.Subject<{ key: string; newValue: any; oldValue: any }>();
@@ -41,7 +47,7 @@ export class UiSettingsClient {
   private readonly defaults: UiSettingsState;
   private cache: UiSettingsState;
 
-  constructor(readonly params: UiSettingsClientParams) {
+  constructor(params: UiSettingsClientParams) {
     this.api = params.api;
     this.defaults = cloneDeep(params.defaults);
     this.cache = defaultsDeep({}, this.defaults, cloneDeep(params.initialSettings));

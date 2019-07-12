@@ -17,42 +17,88 @@
  * under the License.
  */
 
-import { QueryBarService } from './query_bar';
+// TODO these are imports from the old plugin world.
+// Once the new platform is ready, they can get removed
+// and handled by the platform itself in the setup method
+// of the ExpressionExectorService
+// @ts-ignore
+import { renderersRegistry } from 'plugins/interpreter/registries';
+import { ExpressionsService, ExpressionsSetup } from './expressions';
+import { SearchService, SearchSetup } from './search';
+import { QueryService, QuerySetup } from './query';
+import { FilterService, FilterSetup } from './filter';
 import { IndexPatternsService, IndexPatternsSetup } from './index_patterns';
 
-class DataPlugin {
+export class DataPlugin {
+  // Exposed services, sorted alphabetically
+  private readonly expressions: ExpressionsService;
+  private readonly filter: FilterService;
   private readonly indexPatterns: IndexPatternsService;
-  private readonly queryBar: QueryBarService;
+  private readonly search: SearchService;
+  private readonly query: QueryService;
 
   constructor() {
     this.indexPatterns = new IndexPatternsService();
-    this.queryBar = new QueryBarService();
+    this.filter = new FilterService();
+    this.query = new QueryService();
+    this.search = new SearchService();
+    this.expressions = new ExpressionsService();
   }
 
-  public setup() {
+  public setup(): DataSetup {
+    // TODO: this is imported here to avoid circular imports.
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const { getInterpreter } = require('plugins/interpreter/interpreter');
+    const indexPatternsService = this.indexPatterns.setup();
     return {
-      indexPatterns: this.indexPatterns.setup(),
-      query: this.queryBar.setup(),
+      expressions: this.expressions.setup({
+        interpreter: {
+          getInterpreter,
+          renderersRegistry,
+        },
+      }),
+      indexPatterns: indexPatternsService,
+      filter: this.filter.setup({
+        indexPatterns: indexPatternsService.indexPatterns,
+      }),
+      search: this.search.setup(),
+      query: this.query.setup(),
     };
   }
 
   public stop() {
+    this.expressions.stop();
     this.indexPatterns.stop();
-    this.queryBar.stop();
+    this.filter.stop();
+    this.search.stop();
+    this.query.stop();
   }
 }
 
-/**
- * We export data here so that users importing from 'plugins/data'
- * will automatically receive the response value of the `setup` contract, mimicking
- * the data that will eventually be injected by the new platform.
- */
-export const data = new DataPlugin().setup();
-
 /** @public */
 export interface DataSetup {
+  expressions: ExpressionsSetup;
   indexPatterns: IndexPatternsSetup;
+  filter: FilterSetup;
+  search: SearchSetup;
+  query: QuerySetup;
 }
 
 /** @public types */
+export { ExpressionRenderer, ExpressionRendererProps, ExpressionRunner } from './expressions';
+
+/** @public types */
 export { IndexPattern, StaticIndexPattern, StaticIndexPatternField, Field } from './index_patterns';
+export { Query } from './query';
+export { FilterManager, FilterStateManager, uniqFilters } from './filter/filter_manager';
+
+/** @public static code */
+export { dateHistogramInterval } from '../common/date_histogram_interval';
+/** @public static code */
+export {
+  isValidEsInterval,
+  InvalidEsCalendarIntervalError,
+  InvalidEsIntervalFormatError,
+  parseEsInterval,
+  ParsedInterval,
+} from '../common/parse_es_interval';

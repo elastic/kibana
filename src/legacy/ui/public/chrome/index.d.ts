@@ -24,7 +24,7 @@ import { BreadcrumbsApi } from './api/breadcrumbs';
 import { HelpExtensionApi } from './api/help_extension';
 import { ChromeNavLinks } from './api/nav';
 
-interface IInjector {
+export interface IInjector {
   get<T>(injectable: string): T;
 }
 
@@ -55,5 +55,4 @@ declare const chrome: Chrome;
 export default chrome;
 export { Chrome };
 export { Breadcrumb } from './api/breadcrumbs';
-export { NavLink } from './api/nav';
 export { HelpExtension } from './api/help_extension';

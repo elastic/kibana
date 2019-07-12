@@ -17,26 +17,50 @@
  * under the License.
  */
 
-import { FlyoutService } from './flyout';
+import React from 'react';
 
-import { FlyoutRef } from '..';
+import { FlyoutService } from './flyout';
+import { ModalService } from './modal';
 import { I18nStart } from '../i18n';
+
+export interface OverlayRef {
+  /**
+   * A Promise that will resolve once this overlay is closed.
+   *
+   * Overlays can close from user interaction, calling `close()` on the overlay
+   * reference or another overlay replacing yours via `openModal` or `openFlyout`.
+   */
+  onClose: Promise<void>;
+
+  /**
+   * Closes the referenced overlay if it's still open which in turn will
+   * resolve the `onClose` Promise. If the overlay had already been
+   * closed this method does nothing.
+   */
+  close(): Promise<void>;
+}
 
 interface StartDeps {
   i18n: I18nStart;
+  targetDomElement: HTMLElement;
 }
 
 /** @internal */
 export class OverlayService {
-  private flyoutService: FlyoutService;
+  private flyoutService?: FlyoutService;
+  private modalService?: ModalService;
 
-  constructor(targetDomElement: HTMLElement) {
-    this.flyoutService = new FlyoutService(targetDomElement);
-  }
+  public start({ i18n, targetDomElement }: StartDeps): OverlayStart {
+    const flyoutElement = document.createElement('div');
+    const modalElement = document.createElement('div');
+    targetDomElement.appendChild(flyoutElement);
+    targetDomElement.appendChild(modalElement);
+    this.flyoutService = new FlyoutService(flyoutElement);
+    this.modalService = new ModalService(modalElement);
 
-  public start({ i18n }: StartDeps): OverlayStart {
     return {
       openFlyout: this.flyoutService.openFlyout.bind(this.flyoutService, i18n),
+      openModal: this.modalService.openModal.bind(this.modalService, i18n),
     };
   }
 }
@@ -49,5 +73,12 @@ export interface OverlayStart {
       closeButtonAriaLabel?: string;
       'data-test-subj'?: string;
     }
-  ) => FlyoutRef;
+  ) => OverlayRef;
+  openModal: (
+    modalChildren: React.ReactNode,
+    modalProps?: {
+      closeButtonAriaLabel?: string;
+      'data-test-subj'?: string;
+    }
+  ) => OverlayRef;
 }

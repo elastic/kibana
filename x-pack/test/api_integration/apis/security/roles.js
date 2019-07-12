@@ -9,6 +9,8 @@ import expect from '@kbn/expect';
 export default function ({ getService }) {
   const es = getService('es');
   const supertest = getService('supertest');
+  const config = getService('config');
+  const basic = config.get('esTestCluster.license') === 'basic';
 
   describe('Roles', () => {
     describe('Create Role', () => {
@@ -30,13 +32,8 @@ export default function ({ getService }) {
               cluster: ['manage'],
               indices: [
                 {
-                  field_security: {
-                    grant: ['*'],
-                    except: ['geo.*']
-                  },
                   names: ['logstash-*'],
                   privileges: ['read', 'view_index_metadata'],
-                  query: `{ "match": { "geo.src": "CN" } }`,
                 },
               ],
               run_as: ['watcher_user'],
@@ -66,11 +63,6 @@ export default function ({ getService }) {
                 names: ['logstash-*'],
                 privileges: ['read', 'view_index_metadata'],
                 allow_restricted_indices: false,
-                field_security: {
-                  grant: ['*'],
-                  except: ['geo.*']
-                },
-                query: `{ "match": { "geo.src": "CN" } }`,
               },
             ],
             applications: [
@@ -95,6 +87,33 @@ export default function ({ getService }) {
           }
         });
       });
+
+      it(`should ${basic ? 'not' : ''} create a role with kibana and FLS/DLS elasticsearch 
+      privileges on ${basic ? 'basic' : 'trial'} licenses`, async () => {
+        await supertest.put('/api/security/role/role_with_privileges_dls_fls')
+          .set('kbn-xsrf', 'xxx')
+          .send({
+            metadata: {
+              foo: 'test-metadata',
+            },
+            elasticsearch: {
+              cluster: ['manage'],
+              indices: [
+                {
+                  field_security: {
+                    grant: ['*'],
+                    except: ['geo.*']
+                  },
+                  names: ['logstash-*'],
+                  privileges: ['read', 'view_index_metadata'],
+                  query: `{ "match": { "geo.src": "CN" } }`,
+                },
+              ],
+              run_as: ['watcher_user'],
+            },
+          })
+          .expect(basic ? 403 : 204);
+      });
     });
 
     describe('Update Role', () => {
@@ -107,11 +126,6 @@ export default function ({ getService }) {
               {
                 names: ['beats-*'],
                 privileges: ['write'],
-                field_security: {
-                  grant: ['request.*'],
-                  except: ['response.*']
-                },
-                query: `{ "match": { "host.name": "localhost" } }`,
               },
             ],
             applications: [
@@ -143,13 +157,8 @@ export default function ({ getService }) {
               cluster: ['manage'],
               indices: [
                 {
-                  field_security: {
-                    grant: ['*'],
-                    except: ['geo.*']
-                  },
                   names: ['logstash-*'],
                   privileges: ['read', 'view_index_metadata'],
-                  query: `{ "match": { "geo.src": "CN" } }`,
                   allow_restricted_indices: true,
                 },
               ],
@@ -180,11 +189,6 @@ export default function ({ getService }) {
                 names: ['logstash-*'],
                 privileges: ['read', 'view_index_metadata'],
                 allow_restricted_indices: true,
-                field_security: {
-                  grant: ['*'],
-                  except: ['geo.*']
-                },
-                query: `{ "match": { "geo.src": "CN" } }`,
               },
             ],
             applications: [
@@ -214,6 +218,53 @@ export default function ({ getService }) {
           }
         });
       });
+
+      it(`should ${basic ? 'not' : ''} update a role adding DLS and TLS priviledges 
+      when using ${basic ? 'basic' : 'trial'} license`, async () => {
+
+        await es.shield.putRole({
+          name: 'role_to_update_with_dls_fls',
+          body: {
+            cluster: ['monitor'],
+            indices: [
+              {
+                names: ['beats-*'],
+                privileges: ['write'],
+              },
+            ],
+            run_as: ['reporting_user'],
+          }
+        });
+
+        await supertest.put('/api/security/role/role_to_update_with_dls_fls')
+          .set('kbn-xsrf', 'xxx')
+          .send({
+            elasticsearch: {
+              cluster: ['manage'],
+              indices: [
+                {
+                  field_security: {
+                    grant: ['*'],
+                    except: ['geo.*']
+                  },
+                  names: ['logstash-*'],
+                  privileges: ['read'],
+                  query: `{ "match": { "geo.src": "CN" } }`,
+                },
+              ],
+              run_as: ['watcher_user'],
+            },
+          })
+          .expect(basic ? 403 : 204);
+
+        const role = await es.shield.getRole({ name: 'role_to_update_with_dls_fls' });
+
+        expect(role.role_to_update_with_dls_fls.cluster).to.eql(basic ? ['monitor'] : ['manage']);
+        expect(role.role_to_update_with_dls_fls.run_as).to.eql(basic ? ['reporting_user'] : ['watcher_user']);
+        expect(role.role_to_update_with_dls_fls.indices[0].names).to.eql(basic ? ['beats-*'] : ['logstash-*']);
+        expect(role.role_to_update_with_dls_fls.indices[0].query).to.eql(basic ? undefined : `{ "match": { "geo.src": "CN" } }`);
+
+      });
     });
 
     describe('Get Role', async () => {
@@ -227,11 +278,6 @@ export default function ({ getService }) {
                 names: ['logstash-*'],
                 privileges: ['read', 'view_index_metadata'],
                 allow_restricted_indices: false,
-                field_security: {
-                  grant: ['*'],
-                  except: ['geo.*']
-                },
-                query: `{ "match": { "geo.src": "CN" } }`,
               },
             ],
             applications: [
@@ -273,13 +319,8 @@ export default function ({ getService }) {
               cluster: ['manage'],
               indices: [
                 {
-                  field_security: {
-                    grant: ['*'],
-                    except: ['geo.*']
-                  },
                   names: ['logstash-*'],
                   privileges: ['read', 'view_index_metadata'],
-                  query: `{ "match": { "geo.src": "CN" } }`,
                   allow_restricted_indices: false
                 },
               ],
@@ -308,17 +349,25 @@ export default function ({ getService }) {
       });
     });
     describe('Delete Role', () => {
-      it('should delete the three roles we created', async () => {
+      it('should delete the roles we created', async () => {
+
         await supertest.delete('/api/security/role/empty_role').set('kbn-xsrf', 'xxx').expect(204);
         await supertest.delete('/api/security/role/role_with_privileges').set('kbn-xsrf', 'xxx').expect(204);
+        await supertest.delete('/api/security/role/role_with_privileges_dls_fls').set('kbn-xsrf', 'xxx').expect(basic ? 404 : 204);
         await supertest.delete('/api/security/role/role_to_update').set('kbn-xsrf', 'xxx').expect(204);
+        await supertest.delete('/api/security/role/role_to_update_with_dls_fls').set('kbn-xsrf', 'xxx').expect(204);
 
         const emptyRole = await es.shield.getRole({ name: 'empty_role', ignore: [404] });
         expect(emptyRole).to.eql({});
         const roleWithPrivileges = await es.shield.getRole({ name: 'role_with_privileges', ignore: [404] });
         expect(roleWithPrivileges).to.eql({});
+        const roleWithPriviledgesDlsFls = await es.shield.getRole({ name: 'role_with_privileges_dls_fls', ignore: [404] });
+        expect(roleWithPriviledgesDlsFls).to.eql({});
         const roleToUpdate = await es.shield.getRole({ name: 'role_to_update', ignore: [404] });
         expect(roleToUpdate).to.eql({});
+        const roleToUpdateWithDlsFls = await es.shield.getRole({ name: 'role_to_update_with_dls_fls', ignore: [404] });
+        expect(roleToUpdateWithDlsFls).to.eql({});
+
       });
     });
   });

@@ -54,7 +54,7 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
         license,
         serverArgs: [
           `xpack.license.self_generated.type=${license}`,
-          `xpack.security.enabled=${!disabledPlugins.includes('security') && license === 'trial'}`,
+          `xpack.security.enabled=${!disabledPlugins.includes('security')}`,
         ],
       },
 
@@ -63,6 +63,8 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
         serverArgs: [
           ...config.xpack.api.get('kbnTestServer.serverArgs'),
           '--optimize.enabled=false',
+          // disable anonymouse access so that we're testing both on and off in different suites
+          '--status.allowAnonymous=false',
           '--server.xsrf.disableProtection=true',
           ...disabledPlugins.map(key => `--xpack.${key}.enabled=false`),
         ],

@@ -9,8 +9,12 @@ exports[`Flyout conflicts should allow conflict resolution 1`] = `
   ownFocus={false}
   size="s"
 >
-  <EuiFlyoutHeader>
-    <EuiTitle>
+  <EuiFlyoutHeader
+    hasBorder={true}
+  >
+    <EuiTitle
+      size="m"
+    >
       <h2>
         <FormattedMessage
           defaultMessage="Import saved objects"
@@ -19,6 +23,8 @@ exports[`Flyout conflicts should allow conflict resolution 1`] = `
         />
       </h2>
     </EuiTitle>
+  </EuiFlyoutHeader>
+  <EuiFlyoutBody>
     <span>
       <EuiSpacer
         size="s"
@@ -58,8 +64,6 @@ exports[`Flyout conflicts should allow conflict resolution 1`] = `
         </p>
       </EuiCallOut>
     </span>
-  </EuiFlyoutHeader>
-  <EuiFlyoutBody>
     <EuiInMemoryTable
       columns={
         Array [
@@ -269,6 +273,37 @@ exports[`Flyout conflicts should handle errors 1`] = `
 </EuiCallOut>
 `;
 
+exports[`Flyout errors should display unsupported type errors properly 1`] = `
+<EuiCallOut
+  color="warning"
+  iconType="help"
+  size="m"
+  title={
+    <FormattedMessage
+      defaultMessage="Import failed"
+      id="kbn.management.objects.objectsTable.flyout.importFailedTitle"
+      values={Object {}}
+    />
+  }
+>
+  <p>
+    <FormattedMessage
+      defaultMessage="Failed to import {failedImportCount} of {totalImportCount} objects. Import failed"
+      id="kbn.management.objects.objectsTable.flyout.importFailedDescription"
+      values={
+        Object {
+          "failedImportCount": 1,
+          "totalImportCount": 1,
+        }
+      }
+    />
+  </p>
+  <p>
+    wigwags [id=1] unsupported type
+  </p>
+</EuiCallOut>
+`;
+
 exports[`Flyout legacy conflicts should allow conflict resolution 1`] = `
 <EuiFlyout
   closeButtonAriaLabel="Closes this dialog"
@@ -278,8 +313,12 @@ exports[`Flyout legacy conflicts should allow conflict resolution 1`] = `
   ownFocus={false}
   size="s"
 >
-  <EuiFlyoutHeader>
-    <EuiTitle>
+  <EuiFlyoutHeader
+    hasBorder={true}
+  >
+    <EuiTitle
+      size="m"
+    >
       <h2>
         <FormattedMessage
           defaultMessage="Import saved objects"
@@ -288,6 +327,8 @@ exports[`Flyout legacy conflicts should allow conflict resolution 1`] = `
         />
       </h2>
     </EuiTitle>
+  </EuiFlyoutHeader>
+  <EuiFlyoutBody>
     <span>
       <EuiSpacer
         size="s"
@@ -352,8 +393,6 @@ exports[`Flyout legacy conflicts should allow conflict resolution 1`] = `
         </p>
       </EuiCallOut>
     </span>
-  </EuiFlyoutHeader>
-  <EuiFlyoutBody>
     <EuiInMemoryTable
       columns={
         Array [
@@ -458,22 +497,77 @@ exports[`Flyout legacy conflicts should allow conflict resolution 1`] = `
 `;
 
 exports[`Flyout legacy conflicts should handle errors 1`] = `
-<EuiCallOut
-  color="danger"
-  iconType="cross"
-  size="m"
-  title={
-    <FormattedMessage
-      defaultMessage="Sorry, there was an error"
-      id="kbn.management.objects.objectsTable.flyout.errorCalloutTitle"
-      values={Object {}}
-    />
-  }
->
-  <p>
-    foobar
-  </p>
-</EuiCallOut>
+Array [
+  <EuiCallOut
+    color="warning"
+    iconType="help"
+    size="m"
+    title={
+      <FormattedMessage
+        defaultMessage="Support for JSON files is going away"
+        id="kbn.management.objects.objectsTable.flyout.legacyFileUsedTitle"
+        values={Object {}}
+      />
+    }
+  >
+    <p>
+      <FormattedMessage
+        defaultMessage="Use our updated export to generate NDJSON files, and you'll be all set."
+        id="kbn.management.objects.objectsTable.flyout.legacyFileUsedBody"
+        values={Object {}}
+      />
+    </p>
+  </EuiCallOut>,
+  <EuiCallOut
+    color="warning"
+    iconType="help"
+    size="m"
+    title={
+      <FormattedMessage
+        defaultMessage="Index Pattern Conflicts"
+        id="kbn.management.objects.objectsTable.flyout.indexPatternConflictsTitle"
+        values={Object {}}
+      />
+    }
+  >
+    <p>
+      <FormattedMessage
+        defaultMessage="The following saved objects use index patterns that do not exist. Please select the index patterns you'd like re-associated with them. You can {indexPatternLink} if necessary."
+        id="kbn.management.objects.objectsTable.flyout.indexPatternConflictsDescription"
+        values={
+          Object {
+            "indexPatternLink": <EuiLink
+              color="primary"
+              href=""
+              type="button"
+            >
+              <FormattedMessage
+                defaultMessage="create a new index pattern"
+                id="kbn.management.objects.objectsTable.flyout.indexPatternConflictsCalloutLinkText"
+                values={Object {}}
+              />
+            </EuiLink>,
+          }
+        }
+      />
+    </p>
+  </EuiCallOut>,
+  <EuiCallOut
+    color="danger"
+    size="m"
+    title={
+      <FormattedMessage
+        defaultMessage="Sorry, there was an error"
+        id="kbn.management.objects.objectsTable.flyout.errorCalloutTitle"
+        values={Object {}}
+      />
+    }
+  >
+    <p>
+      foobar
+    </p>
+  </EuiCallOut>,
+]
 `;
 
 exports[`Flyout should render import step 1`] = `
@@ -485,8 +579,12 @@ exports[`Flyout should render import step 1`] = `
   ownFocus={false}
   size="s"
 >
-  <EuiFlyoutHeader>
-    <EuiTitle>
+  <EuiFlyoutHeader
+    hasBorder={true}
+  >
+    <EuiTitle
+      size="m"
+    >
       <h2>
         <FormattedMessage
           defaultMessage="Import saved objects"

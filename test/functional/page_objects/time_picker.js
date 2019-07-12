@@ -60,6 +60,14 @@ export function TimePickerPageProvider({ getService, getPageObjects }) {
     }
 
     /**
+     * @param {String} commonlyUsedOption 'superDatePickerCommonlyUsed_This_week'
+     */
+    async setCommonlyUsedTime(commonlyUsedOption) {
+      await testSubjects.click('superDatePickerToggleQuickMenuButton');
+      await testSubjects.click(commonlyUsedOption);
+    }
+
+    /**
      * @param {String} fromTime YYYY-MM-DD HH:mm:ss.SSS
      * @param {String} fromTime YYYY-MM-DD HH:mm:ss.SSS
      */

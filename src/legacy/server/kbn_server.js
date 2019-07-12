@@ -18,6 +18,8 @@
  */
 
 import { constant, once, compact, flatten } from 'lodash';
+
+
 import { isWorker } from 'cluster';
 import { fromRoot, pkg } from '../utils';
 import { Config } from './config';
@@ -36,8 +38,9 @@ import configCompleteMixin from './config/complete';
 import optimizeMixin from '../../optimize';
 import * as Plugins from './plugins';
 import { indexPatternsMixin } from './index_patterns';
-import { savedObjectsMixin } from './saved_objects';
+import { savedObjectsMixin } from './saved_objects/saved_objects_mixin';
 import { sampleDataMixin } from './sample_data';
+import { capabilitiesMixin } from './capabilities';
 import { urlShorteningMixin } from './url_shortening';
 import { serverExtensionsMixin } from './server_extensions';
 import { uiMixin } from '../ui';
@@ -54,23 +57,15 @@ export default class KbnServer {
     this.rootDir = rootDir;
     this.settings = settings || {};
 
-    const { setupDeps, startDeps, serverOptions, handledConfigPaths } = core;
+    const { setupDeps, startDeps, handledConfigPaths, logger } = core;
     this.newPlatform = {
-      setup: {
-        core: {
-          elasticsearch: setupDeps.elasticsearch,
-          http: setupDeps.http,
-        },
-        plugins: setupDeps.plugins,
+      coreContext: {
+        logger,
       },
-      start: {
-        core: {
-          http: startDeps.http,
-        },
-      },
+      setup: setupDeps,
+      start: startDeps,
       stop: null,
       params: {
-        serverOptions,
         handledConfigPaths,
       },
     };
@@ -112,6 +107,9 @@ export default class KbnServer {
 
       // setup saved object routes
       savedObjectsMixin,
+
+      // setup capabilities routes
+      capabilitiesMixin,
 
       // setup routes for installing/uninstalling sample data sets
       sampleDataMixin,

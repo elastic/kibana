@@ -17,17 +17,17 @@
  * under the License.
  */
 
-import pivot from './pivot';
-import query from './query';
-import splitByEverything from './split_by_everything';
-import splitByTerms from './split_by_terms';
-import dateHistogram from './date_histogram';
-import metricBuckets from './metric_buckets';
-import siblingBuckets from './sibling_buckets';
-import filterRatios from './filter_ratios';
-import normalizeQuery from './normalize_query';
+import { pivot } from './pivot';
+import { query } from './query';
+import { splitByEverything } from './split_by_everything';
+import { splitByTerms } from './split_by_terms';
+import { dateHistogram } from './date_histogram';
+import { metricBuckets } from './metric_buckets';
+import { siblingBuckets } from './sibling_buckets';
+import { ratios as filterRatios } from './filter_ratios';
+import { normalizeQuery } from './normalize_query';
 
-export default [
+export const processors = [
   query,
   pivot,
   splitByTerms,
@@ -36,5 +36,5 @@ export default [
   metricBuckets,
   siblingBuckets,
   filterRatios,
-  normalizeQuery
+  normalizeQuery,
 ];

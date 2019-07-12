@@ -18,7 +18,7 @@ export default function manageRepositoriesFunctionalTests({
   const log = getService('log');
   const PageObjects = getPageObjects(['common', 'header', 'security', 'code', 'home']);
 
-  describe('Code', () => {
+  describe('Manage Repositories', () => {
     const repositoryListSelector = 'codeRepositoryList codeRepositoryItem';
 
     describe('Manage Repositories', () => {
@@ -37,7 +37,7 @@ export default function manageRepositoriesFunctionalTests({
         log.debug('Code test import repository');
         // Fill in the import repository input box with a valid git repository url.
         await PageObjects.code.fillImportRepositoryUrlInputBox(
-          'https://github.com/Microsoft/TypeScript-Node-Starter'
+          'https://github.com/elastic/code-examples_empty-file'
         );
         // Click the import repository button.
         await PageObjects.code.clickImportRepositoryButton();
@@ -46,7 +46,7 @@ export default function manageRepositoriesFunctionalTests({
           const repositoryItems = await testSubjects.findAll(repositoryListSelector);
           expect(repositoryItems).to.have.length(1);
           expect(await repositoryItems[0].getVisibleText()).to.equal(
-            'Microsoft/TypeScript-Node-Starter'
+            'elastic/code-examples_empty-file'
           );
         });
 
@@ -66,6 +66,12 @@ export default function manageRepositoriesFunctionalTests({
         await PageObjects.code.clickDeleteRepositoryButton();
 
         await retry.try(async () => {
+          expect(await testSubjects.exists('confirmModalConfirmButton')).to.be(true);
+        });
+
+        await testSubjects.click('confirmModalConfirmButton');
+
+        await retry.tryForTime(300000, async () => {
           const repositoryItems = await testSubjects.findAll(repositoryListSelector);
           expect(repositoryItems).to.have.length(0);
         });
@@ -75,8 +81,9 @@ export default function manageRepositoriesFunctionalTests({
         log.debug('Code test import repository');
         // Fill in the import repository input box with a valid git repository url.
         await PageObjects.code.fillImportRepositoryUrlInputBox(
-          'git://github.com/Microsoft/TypeScript-Node-Starter'
+          'git://github.com/elastic/code-examples_empty-file'
         );
+
         // Click the import repository button.
         await PageObjects.code.clickImportRepositoryButton();
 
@@ -84,7 +91,7 @@ export default function manageRepositoriesFunctionalTests({
           const repositoryItems = await testSubjects.findAll(repositoryListSelector);
           expect(repositoryItems).to.have.length(1);
           expect(await repositoryItems[0].getVisibleText()).to.equal(
-            'Microsoft/TypeScript-Node-Starter'
+            'elastic/code-examples_empty-file'
           );
         });
 
@@ -101,6 +108,12 @@ export default function manageRepositoriesFunctionalTests({
         await PageObjects.code.clickDeleteRepositoryButton();
 
         await retry.try(async () => {
+          expect(await testSubjects.exists('confirmModalConfirmButton')).to.be(true);
+        });
+
+        await testSubjects.click('confirmModalConfirmButton');
+
+        await retry.tryForTime(300000, async () => {
           const repositoryItems = await testSubjects.findAll(repositoryListSelector);
           expect(repositoryItems).to.have.length(0);
         });

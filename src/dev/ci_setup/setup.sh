@@ -180,3 +180,44 @@ if [ "$GIT_CHANGES" ]; then
   echo -e "$GIT_CHANGES\n"
   exit 1
 fi
+
+###
+### rebuild kbn-pm distributable to ensure it's not out of date
+###
+echo " -- building renovate config"
+node scripts/build_renovate_config
+
+###
+### verify no git modifications
+###
+GIT_CHANGES="$(git ls-files --modified)"
+if [ "$GIT_CHANGES" ]; then
+  echo -e "\n${RED}ERROR: 'node scripts/build_renovate_config' caused changes to the following files:${C_RESET}\n"
+  echo -e "$GIT_CHANGES\n"
+  exit 1
+fi
+
+###
+### github-checks-reporter kill switch. Remove to disable
+###
+export CHECKS_REPORTER_ACTIVE=true
+
+### only run on pr jobs
+if [[ "$JOB_NAME" != "elastic+kibana+pull-request"* ]] ; then
+  export CHECKS_REPORTER_ACTIVE=false
+fi
+
+###
+### Implements github-checks-reporter kill switch when scripts are called from the command line
+### $@ - all arguments
+###
+function checks-reporter-with-killswitch() {
+  if [ "$CHECKS_REPORTER_ACTIVE" == "true" ] ; then
+    yarn run github-checks-reporter "$@"
+  else
+    arguments=("$@");
+    "${arguments[@]:1}";
+  fi
+}
+
+export -f checks-reporter-with-killswitch

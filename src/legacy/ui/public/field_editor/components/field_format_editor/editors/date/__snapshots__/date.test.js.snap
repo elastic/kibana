@@ -11,8 +11,8 @@ exports[`DateFormatEditor should render normally 1`] = `
       <span>
         <EuiLink
           color="primary"
-          href="http://momentjs.com/"
-          target="_window"
+          href="https://momentjs.com/"
+          target="_blank"
           type="button"
         >
           <FormattedMessage
