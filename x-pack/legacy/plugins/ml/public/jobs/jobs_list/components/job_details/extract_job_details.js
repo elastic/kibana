@@ -152,7 +152,8 @@ export function extractJobDetails(job) {
       defaultMessage: 'Timing stats'
     }),
     position: 'right',
-    items: filterObjects(job.datafeed_config.timing_stats).map(formatValues)
+    items: (job.datafeed_config && job.datafeed_config.timing_stats) ?
+      filterObjects(job.datafeed_config.timing_stats).map(formatValues) : []
   };
 
   return {
