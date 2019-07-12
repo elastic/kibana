@@ -19,14 +19,10 @@
 
 import dateMath from '@elastic/datemath';
 import { Field, IndexPattern } from 'ui/index_patterns';
+import { TimeRange } from './time_history';
 
 interface CalculateBoundsOptions {
   forceNow?: Date;
-}
-
-interface TimeRange {
-  to: string;
-  from: string;
 }
 
 interface RangeFilter {
@@ -68,7 +64,9 @@ export function getTime(
   if (!bounds) {
     return;
   }
-  const filter: Filter = { range: { [timefield.name]: { format: 'strict_date_optional_time' } } };
+  const filter: Filter = {
+    range: { [timefield.name]: { format: 'strict_date_optional_time' } },
+  };
 
   if (bounds.min) {
     filter.range[timefield.name].gte = bounds.min.toISOString();

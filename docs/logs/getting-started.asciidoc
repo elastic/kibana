@@ -1,0 +1,10 @@
+[role="xpack"]
+[[xpack-logs-getting-started]]
+== Getting started with the Logs UI
+
+Kibana provides step-by-step instructions to help you add log data. The
+{infra-guide}[Infrastructure Monitoring Guide] is a good source for more
+detailed information and instructions.
+
+[role="screenshot"]
+image::logs/images/logs-add-data.png[Included data ingestion tutorials in Kibana]

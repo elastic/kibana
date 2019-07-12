@@ -30,8 +30,9 @@ const defaults = {
     type: 'linear',
     expandLastBucket: true,
     inverted: false,
-    setYExtents: null,
     defaultYExtents: null,
+    boundsMargin: 0,
+    setYExtents: null,
     min: null,
     max: null,
     mode: SCALE_MODES.NORMAL
@@ -60,8 +61,12 @@ const defaults = {
   title: {
     text: '',
     elSelector: '.visAxis__column--{pos} .axis-div',
-  }
+  },
+  padForLabels: 0,
 };
+
+const padForLabelsX = 40;
+const padForLabelsY = 15;
 
 const categoryDefaults = {
   type: 'category',
@@ -156,6 +161,10 @@ export class AxisConfig {
 
     if (this.get('type') === 'category' && !this.isHorizontal()) {
       this._values.scale.inverted = _.get(axisConfigArgs, 'scale.inverted', true);
+    }
+
+    if (chartConfig.get('labels.show', false) && !isCategoryAxis) {
+      this._values.padForLabels = isHorizontal ? padForLabelsX : padForLabelsY;
     }
 
     let offset;

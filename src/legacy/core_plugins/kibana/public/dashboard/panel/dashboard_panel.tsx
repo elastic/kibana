@@ -65,6 +65,8 @@ class DashboardPanelUi extends React.Component<DashboardPanelUiProps, State> {
   [panel: string]: any;
   public mounted: boolean;
   public embeddable!: Embeddable;
+  private panelElement?: HTMLDivElement;
+
   constructor(props: DashboardPanelUiProps) {
     super(props);
     this.state = {
@@ -94,12 +96,13 @@ class DashboardPanelUi extends React.Component<DashboardPanelUiProps, State> {
     if (!initialized) {
       embeddableIsInitializing();
       embeddableFactory
+        // @ts-ignore -- going away with Embeddable V2
         .create(panel, embeddableStateChanged)
         .then((embeddable: Embeddable) => {
           if (this.mounted) {
             this.embeddable = embeddable;
             embeddableIsInitialized(embeddable.metadata);
-            this.embeddable.render(this.panelElement, this.props.containerState);
+            this.embeddable.render(this.panelElement!, this.props.containerState);
           } else {
             embeddable.destroy();
           }
@@ -143,7 +146,7 @@ class DashboardPanelUi extends React.Component<DashboardPanelUiProps, State> {
       <div
         id="embeddedPanel"
         className={classes}
-        ref={panelElement => (this.panelElement = panelElement)}
+        ref={panelElement => (this.panelElement = panelElement || undefined)}
       >
         {!this.props.initialized && <EuiLoadingChart size="l" mono />}
       </div>

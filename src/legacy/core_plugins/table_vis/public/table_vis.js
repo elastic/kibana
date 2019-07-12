@@ -27,7 +27,6 @@ import { Schemas } from 'ui/vis/editors/default/schemas';
 import tableVisTemplate from './table_vis.html';
 import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
 import { legacyResponseHandlerProvider } from 'ui/vis/response_handlers/legacy';
-import { VisFiltersProvider } from 'ui/vis/vis_filters';
 
 // we need to load the css ourselves
 
@@ -45,7 +44,6 @@ const legacyTableResponseHandler = legacyResponseHandlerProvider().handler;
 // define the TableVisType
 function TableVisTypeProvider(Private) {
   const VisFactory = Private(VisFactoryProvider);
-  const visFilters = Private(VisFiltersProvider);
 
   // define the TableVisController which is used in the template
   // by angular's ng-controller directive
@@ -86,6 +84,11 @@ function TableVisTypeProvider(Private) {
             defaultMessage: 'Metric',
           }),
           aggFilter: ['!geo_centroid', '!geo_bounds'],
+          aggSettings: {
+            top_hits: {
+              allowStrings: true,
+            },
+          },
           min: 1,
           defaults: [
             { type: 'count', schema: 'metric' }
@@ -95,7 +98,7 @@ function TableVisTypeProvider(Private) {
           group: 'buckets',
           name: 'bucket',
           title: i18n.translate('tableVis.tableVisEditorConfig.schemas.bucketTitle', {
-            defaultMessage: 'Split Rows',
+            defaultMessage: 'Split rows',
           }),
           aggFilter: ['!filter']
         },
@@ -103,7 +106,7 @@ function TableVisTypeProvider(Private) {
           group: 'buckets',
           name: 'split',
           title: i18n.translate('tableVis.tableVisEditorConfig.schemas.splitTitle', {
-            defaultMessage: 'Split Table',
+            defaultMessage: 'Split table',
           }),
           min: 0,
           max: 1,
@@ -112,11 +115,6 @@ function TableVisTypeProvider(Private) {
       ])
     },
     responseHandler: legacyTableResponseHandler,
-    events: {
-      filterBucket: {
-        defaultAction: visFilters.filter,
-      },
-    },
     hierarchicalData: function (vis) {
       return Boolean(vis.params.showPartialRows || vis.params.showMetricsAtAllLevels);
     }

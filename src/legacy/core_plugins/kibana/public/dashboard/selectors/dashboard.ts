@@ -18,10 +18,12 @@
  */
 
 import _ from 'lodash';
-import { ContainerState, EmbeddableMetadata, Query, TimeRange } from 'ui/embeddable';
+import { ContainerState, EmbeddableMetadata } from 'ui/embeddable';
 import { EmbeddableCustomization } from 'ui/embeddable/types';
 import { Filter } from '@kbn/es-query';
 import { RefreshInterval } from 'ui/timefilter/timefilter';
+import { Query } from 'src/legacy/core_plugins/data/public';
+import { TimeRange } from 'ui/timefilter/time_history';
 import { DashboardViewMode } from '../dashboard_view_mode';
 import {
   DashboardMetadata,

@@ -25,10 +25,10 @@ import { FieldParamEditor } from './field';
 import { getCompatibleAggs } from './top_aggregate';
 
 function TopFieldParamEditor(props: AggParamEditorProps<FieldParamType>) {
-  const compatibleAggs = getCompatibleAggs(props.agg, props.visName);
+  const compatibleAggs = getCompatibleAggs(props.agg);
   let customError;
 
-  if (!compatibleAggs.length) {
+  if (props.value && !compatibleAggs.length) {
     customError = i18n.translate('common.ui.aggTypes.aggregateWith.noAggsErrorTooltip', {
       defaultMessage: 'The chosen field has no compatible aggregations.',
     });

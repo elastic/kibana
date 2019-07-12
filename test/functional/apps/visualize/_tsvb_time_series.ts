@@ -23,6 +23,7 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 export default function({ getPageObjects, getService }: FtrProviderContext) {
   const { visualize, visualBuilder } = getPageObjects(['visualBuilder', 'visualize']);
   const retry = getService('retry');
+  const log = getService('log');
 
   describe('visual builder', function describeIndexTests() {
     beforeEach(async () => {
@@ -105,13 +106,23 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         expect(actualCount).to.be(expectedLegendValue);
       });
 
-      it('should show the correct count in the legend with duration formatter', async () => {
-        const expectedLegendValue = '156.00';
-
+      // FLAKY: https://github.com/elastic/kibana/issues/40458
+      it.skip('should show the correct count in the legend with "Human readable" duration formatter', async () => {
         await visualBuilder.clickSeriesOption();
         await visualBuilder.changeDataFormatter('Duration');
-        const actualCount = await visualBuilder.getRhythmChartLegendValue();
-        expect(actualCount).to.be(expectedLegendValue);
+        await visualBuilder.setDurationFormatterSettings({ to: 'Human readable' });
+        const actualCountDefault = await visualBuilder.getRhythmChartLegendValue();
+        expect(actualCountDefault).to.be('a few seconds');
+
+        log.debug(`to: 'Human readable', from: 'Seconds'`);
+        await visualBuilder.setDurationFormatterSettings({ to: 'Human readable', from: 'Seconds' });
+        const actualCountSec = await visualBuilder.getRhythmChartLegendValue();
+        expect(actualCountSec).to.be('3 minutes');
+
+        log.debug(`to: 'Human readable', from: 'Minutes'`);
+        await visualBuilder.setDurationFormatterSettings({ to: 'Human readable', from: 'Minutes' });
+        const actualCountMin = await visualBuilder.getRhythmChartLegendValue();
+        expect(actualCountMin).to.be('3 hours');
       });
     });
   });

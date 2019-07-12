@@ -9,5 +9,5 @@ Authentication is successful with given credentials, allow request to pass throu
 <b>Signature:</b>
 
 ```typescript
-authenticated: (state?: object) => AuthResult;
+authenticated: (data?: Partial<AuthResultData>) => AuthResult;
 ```

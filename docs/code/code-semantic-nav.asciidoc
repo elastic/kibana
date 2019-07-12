@@ -9,7 +9,7 @@ Hovering your cursor over a symbol in a file opens information about the symbol,
 
 * *Goto Definition* navigates to the symbol definition. If the definition is defined in another repo, *Code* can find the definition if the definition repo is also imported.
 
-* *Find Reference* opens a  panel that lists all the places where the symbol is referenced in the current repo.
+* *Find Reference* opens a panel that lists all the places where the symbol is referenced in the current repo.
 
 [role="screenshot"]
 image::images/code-semantic-nav.png[]

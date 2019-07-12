@@ -17,38 +17,48 @@
  * under the License.
  */
 
-import { Server, ServerOptions } from 'hapi';
+import { Server } from 'hapi';
 import { HttpService } from './http_service';
-import { HttpConfig } from './http_config';
 import { HttpServerSetup } from './http_server';
+import { HttpServiceSetup } from './http_service';
+import { OnPreAuthToolkit } from './lifecycle/on_pre_auth';
+import { AuthToolkit } from './lifecycle/auth';
+import { OnPostAuthToolkit } from './lifecycle/on_post_auth';
+import { sessionStorageMock } from './cookie_session_storage.mocks';
+
+type ServiceSetupMockType = jest.Mocked<HttpServiceSetup> & {
+  basePath: jest.Mocked<HttpServiceSetup['basePath']>;
+};
+
+const createBasePathMock = (): jest.Mocked<HttpServiceSetup['basePath']> => ({
+  get: jest.fn(),
+  set: jest.fn(),
+  prepend: jest.fn(),
+  remove: jest.fn(),
+});
 
 const createSetupContractMock = () => {
-  const setupContract = {
-    options: {} as ServerOptions,
+  const setupContract: ServiceSetupMockType = {
+    // we can mock some hapi server method when we need it
+    server: {} as Server,
     registerOnPreAuth: jest.fn(),
     registerAuth: jest.fn(),
     registerOnPostAuth: jest.fn(),
     registerRouter: jest.fn(),
-    getBasePathFor: jest.fn(),
-    setBasePathFor: jest.fn(),
-    // we can mock some hapi server method when we need it
-    server: {} as Server,
+    basePath: createBasePathMock(),
     auth: {
       get: jest.fn(),
       isAuthenticated: jest.fn(),
+      getAuthHeaders: jest.fn(),
     },
-    createNewServer: async (cfg: Partial<HttpConfig>): Promise<HttpServerSetup> =>
-      ({} as HttpServerSetup),
+    createNewServer: jest.fn(),
+    isTlsEnabled: false,
   };
+  setupContract.createNewServer.mockResolvedValue({} as HttpServerSetup);
+  setupContract.registerAuth.mockResolvedValue({
+    sessionStorageFactory: sessionStorageMock.createFactory(),
+  });
   return setupContract;
-};
-
-const createStartContractMock = () => {
-  const startContract = {
-    isListening: jest.fn(),
-  };
-  startContract.isListening.mockReturnValue(true);
-  return startContract;
 };
 
 type HttpServiceContract = PublicMethodsOf<HttpService>;
@@ -59,11 +69,32 @@ const createHttpServiceMock = () => {
     stop: jest.fn(),
   };
   mocked.setup.mockResolvedValue(createSetupContractMock());
-  mocked.start.mockResolvedValue(createStartContractMock());
   return mocked;
 };
 
+const createOnPreAuthToolkitMock = (): jest.Mocked<OnPreAuthToolkit> => ({
+  next: jest.fn(),
+  redirected: jest.fn(),
+  rejected: jest.fn(),
+});
+
+const createAuthToolkitMock = (): jest.Mocked<AuthToolkit> => ({
+  authenticated: jest.fn(),
+  redirected: jest.fn(),
+  rejected: jest.fn(),
+});
+
+const createOnPostAuthToolkitMock = (): jest.Mocked<OnPostAuthToolkit> => ({
+  next: jest.fn(),
+  redirected: jest.fn(),
+  rejected: jest.fn(),
+});
+
 export const httpServiceMock = {
   create: createHttpServiceMock,
+  createBasePath: createBasePathMock,
   createSetupContract: createSetupContractMock,
+  createOnPreAuthToolkit: createOnPreAuthToolkitMock,
+  createAuthToolkit: createAuthToolkitMock,
+  createOnPostAuthToolkit: createOnPostAuthToolkitMock,
 };

@@ -28,6 +28,19 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
   const comboBox = getService('comboBox');
   const PageObjects = getPageObjects(['common', 'header', 'visualize', 'timePicker']);
 
+  type Duration =
+    | 'Milliseconds'
+    | 'Seconds'
+    | 'Minutes'
+    | 'Hours'
+    | 'Days'
+    | 'Weeks'
+    | 'Months'
+    | 'Years';
+
+  type FromDuration = Duration | 'Picoseconds' | 'Nanoseconds' | 'Microseconds';
+  type ToDuration = Duration | 'Human readable';
+
   class VisualBuilderPage {
     public async resetPage(
       fromTime = '2015-09-19 06:31:44.000',
@@ -225,8 +238,38 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
     public async changeDataFormatter(
       formatter: 'Bytes' | 'Number' | 'Percent' | 'Duration' | 'Custom'
     ) {
-      const [formatterEl] = await find.allByCssSelector('.euiComboBox');
+      const formatterEl = await find.byCssSelector('[id$="row"] .euiComboBox');
       await comboBox.setElement(formatterEl, formatter);
+    }
+
+    /**
+     * set duration formatter additional settings
+     *
+     * @param from start format
+     * @param to end format
+     * @param decimalPlaces decimals count
+     */
+    public async setDurationFormatterSettings({
+      from,
+      to,
+      decimalPlaces,
+    }: {
+      from?: FromDuration;
+      to?: ToDuration;
+      decimalPlaces?: string;
+    }) {
+      if (from) {
+        const fromCombobox = await find.byCssSelector('[id$="from-row"] .euiComboBox');
+        await comboBox.setElement(fromCombobox, from);
+      }
+      if (to) {
+        const toCombobox = await find.byCssSelector('[id$="to-row"] .euiComboBox');
+        await comboBox.setElement(toCombobox, to);
+      }
+      if (decimalPlaces) {
+        const decimalPlacesInput = await find.byCssSelector('[id$="decimal"]');
+        await decimalPlacesInput.type(decimalPlaces);
+      }
     }
 
     /**

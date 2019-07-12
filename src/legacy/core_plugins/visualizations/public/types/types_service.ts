@@ -22,8 +22,13 @@ import { defaultFeedbackMessage } from 'ui/vis/default_feedback_message';
 // @ts-ignore
 import { VisProvider as Vis } from 'ui/vis/index.js';
 // @ts-ignore
-import { VisFactoryProvider as VisFactory } from 'ui/vis/vis_factory';
+import { VisFactoryProvider, visFactory } from 'ui/vis/vis_factory';
+// @ts-ignore
+import { DefaultEditorSize } from 'ui/vis/editor_size';
 import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
+import * as types from 'ui/vis/vis';
+
+import { visTypeAliasRegistry, VisTypeAlias } from './vis_type_alias_registry';
 
 /**
  * Vis Types Service
@@ -34,9 +39,10 @@ export class TypesService {
   public setup() {
     return {
       Vis,
-      VisFactory,
+      VisFactoryProvider,
       VisTypesRegistryProvider,
       defaultFeedbackMessage, // make default in base vis type, or move?
+      visTypeAliasRegistry,
     };
   }
 
@@ -48,12 +54,14 @@ export class TypesService {
 /** @public */
 export type TypesSetup = ReturnType<TypesService['setup']>;
 
+export { visFactory, DefaultEditorSize };
+
 /** @public types */
-import * as types from 'ui/vis/vis';
+export type VisTypeAlias = VisTypeAlias;
 export type Vis = types.Vis;
 export type VisParams = types.VisParams;
 export type VisProvider = types.VisProvider;
 export type VisState = types.VisState;
-export { VisualizationController, VisType } from 'ui/vis/vis_types/vis_type';
+// todo: this breaks it // export { VisualizationController, VisType } from 'ui/vis/vis_types/vis_type';
 export { VisTypesRegistry } from 'ui/registry/vis_types';
 export { Status } from 'ui/vis/update_status';

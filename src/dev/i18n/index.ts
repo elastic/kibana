@@ -20,6 +20,8 @@
 // @ts-ignore
 export { extractMessagesFromPathToMap } from './extract_default_translations';
 // @ts-ignore
+export { matchEntriesWithExctractors } from './extract_default_translations';
+// @ts-ignore
 export { writeFileAsync, readFileAsync, normalizePath, ErrorReporter } from './utils';
 export { serializeToJson, serializeToJson5 } from './serializers';
 export { I18nConfig, filterConfigPaths, mergeConfigs } from './config';

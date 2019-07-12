@@ -6,8 +6,8 @@
 
 import expect from '@kbn/expect';
 
-import { metadataQuery } from '../../../../plugins/infra/public/containers/metadata/metadata.gql_query';
-import { MetadataQuery } from '../../../../plugins/infra/public/graphql/types';
+import { metadataQuery } from '../../../../legacy/plugins/infra/public/containers/metadata/metadata.gql_query';
+import { MetadataQuery } from '../../../../legacy/plugins/infra/public/graphql/types';
 import { KbnTestProvider } from './types';
 
 const metadataTests: KbnTestProvider = ({ getService }) => {
@@ -32,7 +32,7 @@ const metadataTests: KbnTestProvider = ({ getService }) => {
           .then(resp => {
             const metadata = resp.data.source.metadataByNode;
             if (metadata) {
-              expect(metadata.features.length).to.be(14);
+              expect(metadata.features.length).to.be(12);
               expect(metadata.name).to.equal('demo-stack-mysql-01');
             } else {
               throw new Error('Metadata should never be empty');

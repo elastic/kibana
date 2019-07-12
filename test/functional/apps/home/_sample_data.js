@@ -26,7 +26,9 @@ export default function ({ getService, getPageObjects }) {
   const dashboardExpect = getService('dashboardExpect');
   const PageObjects = getPageObjects(['common', 'header', 'home', 'dashboard', 'timePicker']);
 
-  describe('sample data', function describeIndexTests() {
+  // FLAKY: https://github.com/elastic/kibana/issues/40670
+  describe.skip('sample data', function describeIndexTests() {
+    this.tags('smoke');
 
     before(async () => {
       await PageObjects.common.navigateToUrl('home', 'tutorial_directory/sampleData');
@@ -87,7 +89,7 @@ export default function ({ getService, getPageObjects }) {
         const toTime = `${todayYearMonthDay} 23:59:59.999`;
         await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
         const panelCount = await PageObjects.dashboard.getPanelCount();
-        expect(panelCount).to.be(19);
+        expect(panelCount).to.be(18);
       });
 
 

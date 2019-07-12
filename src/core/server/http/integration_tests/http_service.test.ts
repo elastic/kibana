@@ -17,6 +17,9 @@
  * under the License.
  */
 import Boom from 'boom';
+import { Request } from 'hapi';
+import { first } from 'rxjs/operators';
+import { clusterClientMock } from './http_service.test.mocks';
 
 import { Router } from '../router';
 import * as kbnTestServer from '../../../../test_utils/kbn_server';
@@ -48,16 +51,19 @@ describe('http service', () => {
         root = kbnTestServer.createRoot();
       }, 30000);
 
-      afterEach(async () => await root.shutdown());
+      afterEach(async () => {
+        clusterClientMock.mockClear();
+        await root.shutdown();
+      });
 
-      it('Should run auth for legacy routes and proxy request to legacy server route handlers', async () => {
+      it('runs auth for legacy routes and proxy request to legacy server route handlers', async () => {
         const { http } = await root.setup();
         const { sessionStorageFactory } = await http.registerAuth<StorageData>((req, t) => {
           if (req.headers.authorization) {
             const user = { id: '42' };
             const sessionStorage = sessionStorageFactory.asScoped(req);
             sessionStorage.set({ value: user, expires: Date.now() + sessionDurationMs });
-            return t.authenticated(user);
+            return t.authenticated({ state: user });
           } else {
             return t.rejected(Boom.unauthorized());
           }
@@ -76,10 +82,47 @@ describe('http service', () => {
           .get(root, legacyUrl)
           .expect(200, 'ok from legacy server');
 
-        expect(response.header['set-cookie']).toBe(undefined);
+        expect(response.header['set-cookie']).toHaveLength(1);
       });
 
-      it('Should pass associated auth state to Legacy platform', async () => {
+      it('passes authHeaders as request headers to the legacy platform', async () => {
+        const token = 'Basic: name:password';
+        const { http } = await root.setup();
+        const { sessionStorageFactory } = await http.registerAuth<StorageData>((req, t) => {
+          if (req.headers.authorization) {
+            const user = { id: '42' };
+            const sessionStorage = sessionStorageFactory.asScoped(req);
+            sessionStorage.set({ value: user, expires: Date.now() + sessionDurationMs });
+            return t.authenticated({
+              state: user,
+              headers: {
+                authorization: token,
+              },
+            });
+          } else {
+            return t.rejected(Boom.unauthorized());
+          }
+        }, cookieOptions);
+        await root.start();
+
+        const legacyUrl = '/legacy';
+        const kbnServer = kbnTestServer.getKbnServer(root);
+        kbnServer.server.route({
+          method: 'GET',
+          path: legacyUrl,
+          handler: (req: Request) => ({
+            authorization: req.headers.authorization,
+            custom: req.headers.custom,
+          }),
+        });
+
+        await kbnTestServer.request
+          .get(root, legacyUrl)
+          .set({ custom: 'custom-header' })
+          .expect(200, { authorization: token, custom: 'custom-header' });
+      });
+
+      it('passes associated auth state to Legacy platform', async () => {
         const user = { id: '42' };
 
         const { http } = await root.setup();
@@ -87,7 +130,7 @@ describe('http service', () => {
           if (req.headers.authorization) {
             const sessionStorage = sessionStorageFactory.asScoped(req);
             sessionStorage.set({ value: user, expires: Date.now() + sessionDurationMs });
-            return t.authenticated(user);
+            return t.authenticated({ state: user });
           } else {
             return t.rejected(Boom.unauthorized());
           }
@@ -106,7 +149,61 @@ describe('http service', () => {
         expect(response.body.state).toEqual(user);
         expect(response.body.status).toEqual('authenticated');
 
-        expect(response.header['set-cookie']).toBe(undefined);
+        expect(response.header['set-cookie']).toHaveLength(1);
+      });
+
+      it('rewrites authorization header via authHeaders to make a request to Elasticsearch', async () => {
+        const authHeaders = { authorization: 'Basic: user:password' };
+        const { http, elasticsearch } = await root.setup();
+        const { registerAuth, registerRouter } = http;
+
+        await registerAuth((req, t) => {
+          return t.authenticated({ headers: authHeaders });
+        }, cookieOptions);
+
+        const router = new Router('/new-platform');
+        router.get({ path: '/', validate: false }, async (req, res) => {
+          const client = await elasticsearch.dataClient$.pipe(first()).toPromise();
+          client.asScoped(req);
+          return res.ok({ header: 'ok' });
+        });
+        registerRouter(router);
+
+        await root.start();
+
+        await kbnTestServer.request.get(root, '/new-platform/').expect(200);
+        expect(clusterClientMock).toBeCalledTimes(1);
+        const [firstCall] = clusterClientMock.mock.calls;
+        const [, , headers] = firstCall;
+        expect(headers).toEqual(authHeaders);
+      });
+
+      it('pass request authorization header to Elasticsearch if registerAuth was not set', async () => {
+        const authorizationHeader = 'Basic: username:password';
+        const { http, elasticsearch } = await root.setup();
+        const { registerRouter } = http;
+
+        const router = new Router('/new-platform');
+        router.get({ path: '/', validate: false }, async (req, res) => {
+          const client = await elasticsearch.dataClient$.pipe(first()).toPromise();
+          client.asScoped(req);
+          return res.ok({ header: 'ok' });
+        });
+        registerRouter(router);
+
+        await root.start();
+
+        await kbnTestServer.request
+          .get(root, '/new-platform/')
+          .set('Authorization', authorizationHeader)
+          .expect(200);
+
+        expect(clusterClientMock).toBeCalledTimes(1);
+        const [firstCall] = clusterClientMock.mock.calls;
+        const [, , headers] = firstCall;
+        expect(headers).toEqual({
+          authorization: authorizationHeader,
+        });
       });
     });
 
@@ -117,8 +214,8 @@ describe('http service', () => {
       }, 30000);
       afterEach(async () => await root.shutdown());
 
-      it('Should support passing request through to the route handler', async () => {
-        const router = new Router('');
+      it('supports passing request through to the route handler', async () => {
+        const router = new Router('/new-platform');
         router.get({ path: '/', validate: false }, async (req, res) => res.ok({ content: 'ok' }));
 
         const { http } = await root.setup();
@@ -130,20 +227,20 @@ describe('http service', () => {
         http.registerRouter(router);
         await root.start();
 
-        await kbnTestServer.request.get(root, '/').expect(200, { content: 'ok' });
+        await kbnTestServer.request.get(root, '/new-platform/').expect(200, { content: 'ok' });
       });
 
-      it('Should support redirecting to configured url', async () => {
+      it('supports redirecting to configured url', async () => {
         const redirectTo = '/redirect-url';
         const { http } = await root.setup();
         http.registerOnPostAuth(async (req, t) => t.redirected(redirectTo));
         await root.start();
 
-        const response = await kbnTestServer.request.get(root, '/').expect(302);
+        const response = await kbnTestServer.request.get(root, '/new-platform/').expect(302);
         expect(response.header.location).toBe(redirectTo);
       });
 
-      it('Should failing a request with configured error and status code', async () => {
+      it('fails a request with configured error and status code', async () => {
         const { http } = await root.setup();
         http.registerOnPostAuth(async (req, t) =>
           t.rejected(new Error('unexpected error'), { statusCode: 400 })
@@ -151,25 +248,25 @@ describe('http service', () => {
         await root.start();
 
         await kbnTestServer.request
-          .get(root, '/')
+          .get(root, '/new-platform/')
           .expect(400, { statusCode: 400, error: 'Bad Request', message: 'unexpected error' });
       });
 
-      it(`Shouldn't expose internal error details`, async () => {
+      it(`doesn't expose internal error details`, async () => {
         const { http } = await root.setup();
         http.registerOnPostAuth(async (req, t) => {
           throw new Error('sensitive info');
         });
         await root.start();
 
-        await kbnTestServer.request.get(root, '/').expect({
+        await kbnTestServer.request.get(root, '/new-platform/').expect({
           statusCode: 500,
           error: 'Internal Server Error',
           message: 'An internal server error occurred',
         });
       });
 
-      it(`Shouldn't share request object between interceptors`, async () => {
+      it(`doesn't share request object between interceptors`, async () => {
         const { http } = await root.setup();
         http.registerOnPostAuth(async (req, t) => {
           // @ts-ignore. don't complain customField is not defined on Request type
@@ -183,7 +280,7 @@ describe('http service', () => {
           }
           return t.next();
         });
-        const router = new Router('');
+        const router = new Router('/new-platform');
         router.get({ path: '/', validate: false }, async (req, res) =>
           // @ts-ignore. don't complain customField is not defined on Request type
           res.ok({ customField: String(req.customField) })
@@ -191,7 +288,9 @@ describe('http service', () => {
         http.registerRouter(router);
         await root.start();
 
-        await kbnTestServer.request.get(root, '/').expect(200, { customField: 'undefined' });
+        await kbnTestServer.request
+          .get(root, '/new-platform/')
+          .expect(200, { customField: 'undefined' });
       });
     });
 
@@ -205,10 +304,10 @@ describe('http service', () => {
       it('supports Url change on the flight', async () => {
         const { http } = await root.setup();
         http.registerOnPreAuth((req, t) => {
-          return t.redirected('/new-url', { forward: true });
+          return t.redirected('/new-platform/new-url', { forward: true });
         });
 
-        const router = new Router('/');
+        const router = new Router('/new-platform');
         router.get({ path: '/new-url', validate: false }, async (req, res) =>
           res.ok({ key: 'new-url-reached' })
         );
@@ -238,7 +337,7 @@ describe('http service', () => {
       });
     });
 
-    describe('#getBasePathFor()/#setBasePathFor()', () => {
+    describe('#basePath()', () => {
       let root: ReturnType<typeof kbnTestServer.createRoot>;
       beforeEach(async () => {
         root = kbnTestServer.createRoot();
@@ -249,7 +348,7 @@ describe('http service', () => {
         const reqBasePath = '/requests-specific-base-path';
         const { http } = await root.setup();
         http.registerOnPreAuth((req, t) => {
-          http.setBasePathFor(req, reqBasePath);
+          http.basePath.set(req, reqBasePath);
           return t.next();
         });
 
@@ -260,7 +359,7 @@ describe('http service', () => {
         kbnServer.server.route({
           method: 'GET',
           path: legacyUrl,
-          handler: kbnServer.newPlatform.setup.core.http.getBasePathFor,
+          handler: kbnServer.newPlatform.setup.core.http.basePath.get,
         });
 
         await kbnTestServer.request.get(root, legacyUrl).expect(200, reqBasePath);

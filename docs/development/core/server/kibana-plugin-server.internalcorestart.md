@@ -15,6 +15,5 @@ export interface InternalCoreStart
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [http](./kibana-plugin-server.internalcorestart.http.md) | <code>HttpServiceStart</code> |  |
 |  [plugins](./kibana-plugin-server.internalcorestart.plugins.md) | <code>PluginsServiceStart</code> |  |
 

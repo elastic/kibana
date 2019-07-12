@@ -3,7 +3,7 @@
 set -e
 trap 'node "$KIBANA_DIR/src/dev/failed_tests/cli"' EXIT
 
-"$(FORCE_COLOR=0 yarn bin)/grunt" functionalTests:ensureAllTestsInCiGroup;
+yarn run grunt functionalTests:ensureAllTestsInCiGroup;
 
 export KBN_INSTALL_DIR="$PARENT_DIR/install/kibana"
 
