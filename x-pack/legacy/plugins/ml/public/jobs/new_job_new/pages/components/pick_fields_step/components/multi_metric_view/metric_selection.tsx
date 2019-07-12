@@ -34,7 +34,7 @@ export const MultiMetricDetectors: FC<Props> = ({ isActive, setIsValid }) => {
   } = useContext(JobCreatorContext);
 
   if (isMultiMetricJobCreator(jc) === false) {
-    return <Fragment />;
+    return null;
   }
   const jobCreator = jc as MultiMetricJobCreator;
 

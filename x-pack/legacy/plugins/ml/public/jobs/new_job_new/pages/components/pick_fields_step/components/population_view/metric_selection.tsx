@@ -43,7 +43,7 @@ export const PopulationDetectors: FC<Props> = ({ isActive, setIsValid }) => {
   } = useContext(JobCreatorContext);
 
   if (isPopulationJobCreator(jc) === false) {
-    return <Fragment />;
+    return null;
   }
   const jobCreator = jc as PopulationJobCreator;
 

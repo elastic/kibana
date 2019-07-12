@@ -59,7 +59,6 @@ export const AggSelect: FC<Props> = ({ fields, changeHandler, selectedOptions, r
   return (
     <Fragment>
       <EuiComboBox
-        // placeholder={placeholder}
         singleSelection={{ asPlainText: true }}
         options={options}
         selectedOptions={selectedOptions}

@@ -52,6 +52,6 @@ export const Description: FC<Props> = memo(({ children, jobType }) => {
       </EuiDescribedFormGroup>
     );
   } else {
-    return <Fragment />;
+    return null;
   }
 });

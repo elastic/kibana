@@ -4,8 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const LINE_COLOR = '#006BB4';
-export const MODEL_COLOR = '#006BB4';
+import chrome from 'ui/chrome';
+import darkTheme from '@elastic/eui/dist/eui_theme_dark.json';
+import lightTheme from '@elastic/eui/dist/eui_theme_light.json';
+
+const IS_DARK_THEME = chrome.getUiSettingsClient().get('theme:darkMode');
+const themeName = IS_DARK_THEME ? darkTheme : lightTheme;
+
+export const LINE_COLOR = themeName.euiColorPrimary;
+export const MODEL_COLOR = themeName.euiColorPrimary;
+export const EVENT_RATE_COLOR = themeName.euiColorPrimary;
 
 export interface ChartSettings {
   width: string;

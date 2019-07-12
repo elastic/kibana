@@ -9,6 +9,7 @@ import { BarSeries, Chart, getSpecId, ScaleType, Settings, TooltipType } from '@
 import { Axes } from '../common/axes';
 import { getCustomColor } from '../common/utils';
 import { LineChartPoint } from '../../../../common/chart_loader';
+import { EVENT_RATE_COLOR } from '../common/settings';
 
 interface Props {
   eventRateChartData: LineChartPoint[];
@@ -18,7 +19,6 @@ interface Props {
 }
 
 const SPEC_ID = 'event_rate';
-const COLOR = '#006BB4';
 
 export const EventRateChart: FC<Props> = ({ eventRateChartData, height, width, showAxis }) => {
   return (
@@ -34,7 +34,7 @@ export const EventRateChart: FC<Props> = ({ eventRateChartData, height, width, s
           xAccessor={'time'}
           yAccessors={['value']}
           data={eventRateChartData}
-          customSeriesColors={getCustomColor(SPEC_ID, COLOR)}
+          customSeriesColors={getCustomColor(SPEC_ID, EVENT_RATE_COLOR)}
         />
       </Chart>
     </div>

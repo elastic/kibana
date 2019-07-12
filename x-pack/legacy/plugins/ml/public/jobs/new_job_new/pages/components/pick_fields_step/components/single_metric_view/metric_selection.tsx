@@ -36,7 +36,7 @@ export const SingleMetricDetectors: FC<Props> = ({ isActive, setIsValid }) => {
   } = useContext(JobCreatorContext);
 
   if (isSingleMetricJobCreator(jc) === false) {
-    return <Fragment />;
+    return null;
   }
   const jobCreator = jc as SingleMetricJobCreator;
 

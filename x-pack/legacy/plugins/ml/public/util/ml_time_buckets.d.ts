@@ -6,7 +6,7 @@
 
 import { Moment } from 'moment';
 
-declare interface TimefilterBounds {
+declare interface TimeFilterBounds {
   min: Moment;
   max: Moment;
 }
@@ -15,7 +15,7 @@ export class MlTimeBuckets {
   setBarTarget: (barTarget: number) => void;
   setMaxBars: (maxBars: number) => void;
   setInterval: (interval: string) => void;
-  setBounds: (bounds: TimefilterBounds) => void;
+  setBounds: (bounds: TimeFilterBounds) => void;
   getBounds: () => { min: any; max: any };
   getInterval: () => {
     asMilliseconds: () => number;

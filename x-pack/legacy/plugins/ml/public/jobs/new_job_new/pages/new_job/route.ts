@@ -20,17 +20,14 @@ import {
   // @ts-ignore
 } from '../../../breadcrumbs';
 
+import { Route } from '../../../../../common/types/kibana';
+
 import { loadNewJobCapabilities } from '../../../../services/new_job_capabilities_service';
 
 import { mlJobService } from '../../../../services/job_service';
 import { JOB_TYPE } from '../../common/job_creator/util/constants';
 
 const template = `<ml-nav-menu name="new_job_single_metric" /><ml-new-job-page />`;
-
-interface Route {
-  id: JOB_TYPE;
-  k7Breadcrumbs: () => any;
-}
 
 const routes: Route[] = [
   {

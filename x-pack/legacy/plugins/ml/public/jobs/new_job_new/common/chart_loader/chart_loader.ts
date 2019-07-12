@@ -55,10 +55,7 @@ export class ChartLoader {
         end,
         intervalMs,
         this._query,
-        aggFieldPairs.map(af => ({
-          agg: af.agg.dslName,
-          field: af.field.id,
-        })),
+        aggFieldPairs.map(getAggFieldPairNames),
         splitFieldName,
         splitFieldValue
       );
@@ -84,18 +81,7 @@ export class ChartLoader {
         end,
         intervalMs,
         this._query,
-        aggFieldPairs.map(af => {
-          const by =
-            af.by !== undefined && af.by.field !== null && af.by.value !== null
-              ? { field: af.by.field.id, value: af.by.value }
-              : { field: null, value: null };
-
-          return {
-            agg: af.agg.dslName,
-            field: af.field.id,
-            by,
-          };
-        }),
+        aggFieldPairs.map(getAggFieldPairNames),
         splitFieldName
       );
       return resp.results;
@@ -134,4 +120,17 @@ export class ChartLoader {
     );
     return results;
   }
+}
+
+export function getAggFieldPairNames(af: AggFieldPair) {
+  const by =
+    af.by !== undefined && af.by.field !== null && af.by.value !== null
+      ? { field: af.by.field.id, value: af.by.value }
+      : { field: null, value: null };
+
+  return {
+    agg: af.agg.dslName,
+    field: af.field.id,
+    by,
+  };
 }

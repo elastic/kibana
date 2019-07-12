@@ -4,12 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FC, Fragment, useContext, useEffect, useState } from 'react';
+import React, { FC, useContext, useEffect, useState } from 'react';
 
 import { SplitFieldSelect } from './split_field_select';
 import { JobCreatorContext } from '../../../job_creator_context';
+import { Field } from '../../../../../../../../common/types/fields';
 import { newJobCapsService } from '../../../../../../../services/new_job_capabilities_service';
 import {
+  MultiMetricJobCreator,
   isMultiMetricJobCreator,
   PopulationJobCreator,
   isPopulationJobCreator,
@@ -22,30 +24,18 @@ interface Props {
 export const ByFieldSelector: FC<Props> = ({ detectorIndex }) => {
   const { jobCreator: jc, jobCreatorUpdate, jobCreatorUpdated } = useContext(JobCreatorContext);
   if (isMultiMetricJobCreator(jc) === false && isPopulationJobCreator(jc) === false) {
-    return <Fragment />;
+    return null;
   }
   const jobCreator = jc as PopulationJobCreator;
 
   const { categoryFields: allCategoryFields } = newJobCapsService;
 
   const [byField, setByField] = useState(jobCreator.getByField(detectorIndex));
-  const categoryFields = useFilteredCategoryFields();
-
-  // remove the split (over) field from the by field options
-  function useFilteredCategoryFields() {
-    const [fields, setFields] = useState(allCategoryFields);
-
-    useEffect(() => {
-      const sf = jobCreator.splitField;
-      if (sf !== null) {
-        setFields(allCategoryFields.filter(f => f.name !== sf.name));
-      } else {
-        setFields(allCategoryFields);
-      }
-    }, [jobCreatorUpdated]);
-
-    return fields;
-  }
+  const categoryFields = useFilteredCategoryFields(
+    allCategoryFields,
+    jobCreator,
+    jobCreatorUpdated
+  );
 
   useEffect(() => {
     jobCreator.setByField(byField, detectorIndex);
@@ -66,3 +56,23 @@ export const ByFieldSelector: FC<Props> = ({ detectorIndex }) => {
     />
   );
 };
+
+// remove the split (over) field from the by field options
+function useFilteredCategoryFields(
+  allCategoryFields: Field[],
+  jobCreator: MultiMetricJobCreator | PopulationJobCreator,
+  jobCreatorUpdated: number
+) {
+  const [fields, setFields] = useState(allCategoryFields);
+
+  useEffect(() => {
+    const sf = jobCreator.splitField;
+    if (sf !== null) {
+      setFields(allCategoryFields.filter(f => f.name !== sf.name));
+    } else {
+      setFields(allCategoryFields);
+    }
+  }, [jobCreatorUpdated]);
+
+  return fields;
+}
