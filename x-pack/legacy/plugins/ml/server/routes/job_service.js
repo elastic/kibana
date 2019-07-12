@@ -196,4 +196,99 @@ export function jobServiceRoutes({ commonRouteConfig, elasticsearchPlugin, route
     }
   });
 
+  route({
+    method: 'POST',
+    path: '/api/ml/jobs/new_job_line_chart',
+    handler(request) {
+      const callWithRequest = callWithRequestFactory(elasticsearchPlugin, request);
+      const {
+        indexPatternTitle,
+        timeField,
+        start,
+        end,
+        intervalMs,
+        query,
+        aggFieldNamePairs,
+        splitFieldName,
+        splitFieldValue
+      } = request.payload;
+      const { newJobLineChart } = jobServiceProvider(callWithRequest, request);
+      return newJobLineChart(
+        indexPatternTitle,
+        timeField,
+        start,
+        end,
+        intervalMs,
+        query,
+        aggFieldNamePairs,
+        splitFieldName,
+        splitFieldValue,
+      ).catch(resp => wrapError(resp));
+    },
+    config: {
+      ...commonRouteConfig
+    }
+  });
+
+  route({
+    method: 'POST',
+    path: '/api/ml/jobs/new_job_population_chart',
+    handler(request) {
+      const callWithRequest = callWithRequestFactory(elasticsearchPlugin, request);
+      const {
+        indexPatternTitle,
+        timeField,
+        start,
+        end,
+        intervalMs,
+        query,
+        aggFieldNamePairs,
+        splitFieldName,
+      } = request.payload;
+      const { newJobPopulationChart } = jobServiceProvider(callWithRequest, request);
+      return newJobPopulationChart(
+        indexPatternTitle,
+        timeField,
+        start,
+        end,
+        intervalMs,
+        query,
+        aggFieldNamePairs,
+        splitFieldName,
+      ).catch(resp => wrapError(resp));
+    },
+    config: {
+      ...commonRouteConfig
+    }
+  });
+
+  route({
+    method: 'GET',
+    path: '/api/ml/jobs/all_jobs_and_group_ids',
+    handler(request) {
+      const callWithRequest = callWithRequestFactory(elasticsearchPlugin, request);
+      const { getAllJobAndGroupIds } = jobServiceProvider(callWithRequest);
+      return getAllJobAndGroupIds()
+        .catch(resp => wrapError(resp));
+    },
+    config: {
+      ...commonRouteConfig
+    }
+  });
+
+  route({
+    method: 'POST',
+    path: '/api/ml/jobs/look_back_progress',
+    handler(request) {
+      const callWithRequest = callWithRequestFactory(elasticsearchPlugin, request);
+      const { getLookBackProgress } = jobServiceProvider(callWithRequest);
+      const { jobId, start, end } = request.payload;
+      return getLookBackProgress(jobId, start, end)
+        .catch(resp => wrapError(resp));
+    },
+    config: {
+      ...commonRouteConfig
+    }
+  });
+
 }

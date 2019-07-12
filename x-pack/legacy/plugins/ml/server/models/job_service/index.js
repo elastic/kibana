@@ -9,6 +9,7 @@ import { datafeedsProvider } from './datafeeds';
 import { jobsProvider } from './jobs';
 import { groupsProvider } from './groups';
 import { newJobCapsProvider } from './new_job_caps';
+import { newJobChartsProvider } from './new_job';
 
 export function jobServiceProvider(callWithRequest, request) {
   return {
@@ -16,5 +17,6 @@ export function jobServiceProvider(callWithRequest, request) {
     ...jobsProvider(callWithRequest),
     ...groupsProvider(callWithRequest),
     ...newJobCapsProvider(callWithRequest, request),
+    ...newJobChartsProvider(callWithRequest, request),
   };
 }
