@@ -11,7 +11,6 @@ import { Path } from 'plugins/xpack_main/services/path';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { CoreStart } from 'src/core/public';
-import { SpacesHeaderNavButton } from './components/spaces_header_nav_button';
 
 export function initSpacesNavControl(spacesManager: SpacesManager, core: CoreStart) {
   const I18nContext = core.i18n.Context;
@@ -27,7 +26,6 @@ export function initSpacesNavControl(spacesManager: SpacesManager, core: CoreSta
           <NavControlPopover
             spacesManager={spacesManager}
             anchorPosition="downLeft"
-            buttonClass={SpacesHeaderNavButton}
             capabilities={core.application.capabilities}
           />
         </I18nContext>,
