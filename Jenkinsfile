@@ -113,7 +113,7 @@ def checkoutKibana() {
     dir("${BASE_DIR}"){
       checkout([$class: 'GitSCM', branches: [[name: params.branch_specifier]],
         userRemoteConfigs: [[credentialsId: "${JOB_GIT_CREDENTIALS}", url: "${GIT_URL}"]]])
-      sh 'echo "### pwd: $(pwd)"'
+      printPwd()
       stash allowEmpty: true, name: 'source', includes: "${BASE_DIR}/.git,node/**", excludes: ".git", useDefaultExcludes: false
     }
   }
@@ -145,6 +145,9 @@ def checkoutKibana() {
       sh 'yarn kbn bootstrap'
     }
   }
+}
+def printPwd(){
+  sh 'echo "### pwd: $(pwd)"'
 }
 /**
  Get Elasticsearch sources, it uses stash as cache (It used to lol).
@@ -222,6 +225,7 @@ def useCache(String name, Closure body) {
   }
   return isCacheUsed
 }
+
 def readJSON(params){
   def jsonSlurper = new groovy.json.JsonSlurper()
   def jsonText = params.text
