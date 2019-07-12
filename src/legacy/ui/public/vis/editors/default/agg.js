@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { i18n } from '@kbn/i18n';
 import './agg_params';
 import './agg_add';
 import './controls/agg_controls';
@@ -50,6 +51,35 @@ uiModules
         ], function () {
           $scope.aggIsTooLow = calcAggIsTooLow();
         });
+
+        if ($scope.agg.schema.group === 'buckets') {
+          $scope.$watchMulti([
+            '$last',
+            'lastParentPipelineAggTitle',
+            'agg.type'
+          ], function ([isLastBucket, lastParentPipelineAggTitle, aggType]) {
+            $scope.error = null;
+            $scope.disabledParams = [];
+
+            if (!lastParentPipelineAggTitle || !isLastBucket || !aggType) {
+              return;
+            }
+
+            if (['date_histogram', 'histogram'].includes(aggType.name)) {
+              $scope.onAggParamsChange(
+                $scope.agg.params,
+                'min_doc_count',
+                aggType.name === 'histogram' ? true : 0);
+              $scope.disabledParams = ['min_doc_count'];
+            } else {
+              $scope.error = i18n.translate('common.ui.aggTypes.metrics.wrongLastBucketTypeErrorMessage', {
+                defaultMessage: 'Last bucket aggregation must be "Date Histogram" or "Histogram" when using "{type}" metric aggregation.',
+                values: { type: lastParentPipelineAggTitle },
+                description: 'Date Histogram and Histogram should not be translated',
+              });
+            }
+          });
+        }
 
         /**
        * Describe the aggregation, for display in the collapsed agg header
@@ -149,14 +179,6 @@ uiModules
             ngModelCtrl.$setTouched();
           } else {
             ngModelCtrl.$setUntouched();
-          }
-        };
-
-        $scope.onAggErrorChanged = (agg, error) => {
-          if (error) {
-            agg.error = error;
-          } else {
-            delete agg.error;
           }
         };
       }

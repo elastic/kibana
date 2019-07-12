@@ -26,7 +26,7 @@ import { AggConfig } from '../../vis';
 function SubMetricParamEditor({
   agg,
   aggParam,
-  responseValueAggs,
+  metricAggs,
   state,
   setValue,
   setValidity,
@@ -63,7 +63,7 @@ function SubMetricParamEditor({
         className="visEditorAgg__subAgg"
         formIsTouched={subAggParams.formIsTouched}
         indexPattern={agg.getIndexPattern()}
-        responseValueAggs={responseValueAggs}
+        metricAggs={metricAggs}
         state={state}
         onAggParamsChange={(...rest) => {
           // to force update when sub-agg params are changed
@@ -71,7 +71,6 @@ function SubMetricParamEditor({
           subAggParams.onAggParamsChange(...rest);
         }}
         onAggTypeChange={subAggParams.onAggTypeChange}
-        onAggErrorChanged={subAggParams.onAggErrorChanged}
         setValidity={setValidity}
         setTouched={setTouched}
       />

@@ -46,7 +46,7 @@ function OrderByParamEditor({
   setValue,
   setValidity,
   setTouched,
-  responseValueAggs,
+  metricAggs,
 }: AggParamEditorProps<string>) {
   const label = i18n.translate('common.ui.aggTypes.orderAgg.orderByLabel', {
     defaultMessage: 'Order by',
@@ -62,8 +62,8 @@ function OrderByParamEditor({
     if (!value) {
       let respAgg = { id: '_key' };
 
-      if (responseValueAggs) {
-        respAgg = responseValueAggs.filter(isCompatibleAgg)[0] || respAgg;
+      if (metricAggs) {
+        respAgg = metricAggs.filter(isCompatibleAgg)[0] || respAgg;
       }
 
       setValue(respAgg.id);
@@ -71,9 +71,9 @@ function OrderByParamEditor({
   }, []);
 
   useEffect(() => {
-    if (responseValueAggs && value && value !== 'custom') {
+    if (metricAggs && value && value !== 'custom') {
       // ensure that orderBy is set to a valid agg
-      const respAgg = responseValueAggs
+      const respAgg = metricAggs
         .filter(isCompatibleAgg)
         .find(aggregation => aggregation.id === value);
 
@@ -81,7 +81,7 @@ function OrderByParamEditor({
         setValue('_key');
       }
     }
-  }, [responseValueAggs]);
+  }, [metricAggs]);
 
   const defaultOptions = [
     {
@@ -98,8 +98,8 @@ function OrderByParamEditor({
     },
   ];
 
-  const options = responseValueAggs
-    ? responseValueAggs.map(respAgg => ({
+  const options = metricAggs
+    ? metricAggs.map(respAgg => ({
         text: i18n.translate('common.ui.aggTypes.orderAgg.metricLabel', {
           defaultMessage: 'Metric: {metric}',
           values: {

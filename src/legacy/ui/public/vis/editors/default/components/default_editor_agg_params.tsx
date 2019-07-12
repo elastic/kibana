@@ -56,16 +56,17 @@ export interface SubAggParamsProp {
   formIsTouched: boolean;
   onAggParamsChange: (agg: AggParams, paramName: string, value: unknown) => void;
   onAggTypeChange: (agg: AggConfig, aggType: AggType) => void;
-  onAggErrorChanged: (agg: AggConfig, error?: string) => void;
 }
 interface DefaultEditorAggParamsProps extends SubAggParamsProp {
   agg: AggConfig;
+  aggError?: string | null;
   aggIndex?: number;
   aggIsTooLow?: boolean;
   className?: string;
+  disabledParams?: string[];
   groupName: string;
   indexPattern: IndexPattern;
-  responseValueAggs: AggConfig[] | null;
+  metricAggs: AggConfig[] | null;
   state: VisState;
   setTouched: (isTouched: boolean) => void;
   setValidity: (isValid: boolean) => void;
@@ -73,19 +74,20 @@ interface DefaultEditorAggParamsProps extends SubAggParamsProp {
 
 function DefaultEditorAggParams({
   agg,
+  aggError,
   aggIndex = 0,
   aggIsTooLow = false,
   className,
+  disabledParams,
   groupName,
   formIsTouched,
   indexPattern,
-  responseValueAggs,
+  metricAggs,
   state = {} as VisState,
   onAggParamsChange,
   onAggTypeChange,
   setTouched,
   setValidity,
-  onAggErrorChanged,
 }: DefaultEditorAggParamsProps) {
   const groupedAggTypeOptions = getAggTypeOptions(agg, indexPattern, groupName);
   const errors = getError(agg, aggIsTooLow);
@@ -95,7 +97,7 @@ function DefaultEditorAggParams({
     indexPattern,
     agg
   );
-  const params = getAggParamsToRender({ agg, editorConfig, responseValueAggs, state });
+  const params = getAggParamsToRender({ agg, editorConfig, metricAggs, state });
   const allParams = [...params.basic, ...params.advanced];
   const [paramsState, onChangeParamsState] = useReducer(
     aggParamsReducer,
@@ -162,6 +164,7 @@ function DefaultEditorAggParams({
     return (
       <DefaultEditorAggParam
         key={`${paramInstance.aggParam.name}${agg.type ? agg.type.name : ''}`}
+        disabled={disabledParams && disabledParams.includes(paramInstance.aggParam.name)}
         showValidation={formIsTouched || model.touched}
         onChange={onAggParamsChange}
         setValidity={valid => {
@@ -182,7 +185,6 @@ function DefaultEditorAggParams({
         subAggParams={{
           onAggParamsChange,
           onAggTypeChange,
-          onAggErrorChanged,
           formIsTouched,
         }}
         {...paramInstance}
@@ -198,7 +200,7 @@ function DefaultEditorAggParams({
       data-test-subj="visAggEditorParams"
     >
       <DefaultEditorAggSelect
-        aggError={agg.error}
+        aggError={aggError}
         id={agg.id}
         indexPattern={indexPattern}
         value={agg.type}

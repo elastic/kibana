@@ -28,6 +28,7 @@ import _ from 'lodash';
 import angular from 'angular';
 import defaultEditorTemplate from './default.html';
 import { keyCodes } from '@elastic/eui';
+import { parentPipelineAggHelper } from 'ui/agg_types/metrics/lib/parent_pipeline_agg_helper';
 import { DefaultEditorSize } from '../../editor_size';
 
 import { VisEditorTypesRegistryProvider } from '../../../registry/vis_editor_types';
@@ -123,16 +124,11 @@ const defaultEditor = function ($rootScope, $compile) {
             return $scope.vis.getSerializableState($scope.state);
           }, function (newState) {
             $scope.vis.dirty = !angular.equals(newState, $scope.oldState);
-            $scope.responseValueAggs = null;
-            try {
-              $scope.responseValueAggs = $scope.state.aggs.getResponseAggs().filter(function (agg) {
-                return _.get(agg, 'schema.group') === 'metrics';
-              });
-            }
-            // this can fail when the agg.type is changed but the
-            // params have not been set yet. watcher will trigger again
-            // when the params update
-            catch (e) {} // eslint-disable-line no-empty
+            $scope.metricAggs = $scope.state.aggs.getResponseAggs().filter(function (agg) {
+              return _.get(agg, 'schema.group') === 'metrics';
+            });
+            const lastParentPipelineAgg = _.findLast($scope.metricAggs, ({ type }) => type.subtype === parentPipelineAggHelper.subtype);
+            $scope.lastParentPipelineAggTitle = lastParentPipelineAgg && lastParentPipelineAgg.type.title;
           }, true);
 
           // fires when visualization state changes, and we need to copy changes to editorState
