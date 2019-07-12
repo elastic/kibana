@@ -7,7 +7,7 @@
 import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/public';
 // @ts-ignore untyped local
 import { queryEsSQL } from '../../../server/lib/query_es_sql';
-import { Filter } from '../types';
+import { Filter } from '../../../types';
 import { getFunctionHelp } from '../../strings';
 
 interface Arguments {
@@ -22,10 +22,10 @@ export function essql(): ExpressionFunction<'essql', Filter, Arguments, any> {
   return {
     name: 'essql',
     type: 'datatable',
+    help,
     context: {
       types: ['filter'],
     },
-    help,
     args: {
       query: {
         aliases: ['_', 'q'],

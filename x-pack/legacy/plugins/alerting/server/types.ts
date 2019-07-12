@@ -60,6 +60,7 @@ export interface RawAlertAction extends SavedObjectAttributes {
 }
 
 export interface Alert {
+  enabled: boolean;
   alertTypeId: string;
   interval: string;
   actions: AlertAction[];
@@ -68,6 +69,7 @@ export interface Alert {
 }
 
 export interface RawAlert extends SavedObjectAttributes {
+  enabled: boolean;
   alertTypeId: string;
   interval: string;
   actions: RawAlertAction[];
