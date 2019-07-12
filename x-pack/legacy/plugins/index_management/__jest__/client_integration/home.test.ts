@@ -220,39 +220,6 @@ describe.skip('<IndexManagementHome />', () => {
           expect(updatedRows.length).toEqual(templates.length);
         });
 
-        describe('system template', () => {
-          beforeEach(async () => {
-            const { component, form } = testBed;
-
-            // @ts-ignore (remove when react 16.9.0 is released)
-            await act(async () => {
-              form.toggleEuiSwitch('systemTemplatesSwitch');
-              await nextTick();
-              component.update();
-            });
-          });
-
-          test('should disable delete actions', async () => {
-            const { table } = testBed;
-            const { rows } = table.getMetaData('templatesTable');
-            const systemTemplate = rows[0];
-
-            const firstColumn = systemTemplate.columns[0].reactWrapper;
-            const lastColumn = systemTemplate.columns[rows[0].columns.length - 1].reactWrapper;
-
-            expect(
-              findTestSubject(firstColumn, `checkboxSelectRow-${template3.name}`)
-                .getDOMNode()
-                .getAttribute('disabled')
-            ).toEqual('');
-            expect(
-              findTestSubject(lastColumn, 'deleteTemplateButton')
-                .getDOMNode()
-                .getAttribute('disabled')
-            ).toEqual('');
-          });
-        });
-
         describe('delete index template', () => {
           test('should have action buttons on each row to delete an index template', () => {
             const { table } = testBed;
@@ -277,6 +244,23 @@ describe.skip('<IndexManagementHome />', () => {
               document.body.querySelector('[data-test-subj="deleteTemplatesConfirmation"]')!
                 .textContent
             ).toContain('Delete template');
+          });
+
+          test('should show a warning message when attempting to delete a system template', async () => {
+            const { component, form, actions } = testBed;
+
+            // @ts-ignore (remove when react 16.9.0 is released)
+            await act(async () => {
+              form.toggleEuiSwitch('systemTemplatesSwitch');
+              await nextTick();
+              component.update();
+            });
+
+            await actions.clickTemplateActionAt(0, 'delete');
+
+            expect(
+              document.body.querySelector('[data-test-subj="deleteSystemTemplateCallOut"]')
+            ).not.toBe(null);
           });
 
           test('should send the correct HTTP request to delete an index template', async () => {

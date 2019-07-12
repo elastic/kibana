@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState, Fragment, useMemo } from 'react';
+import React, { useState, Fragment } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiInMemoryTable, EuiIcon, EuiButton, EuiToolTip, EuiButtonIcon } from '@elastic/eui';
@@ -29,15 +29,6 @@ const Checkmark = ({ tableCellData }: { tableCellData: object }) => {
 export const TemplatesTable: React.FunctionComponent<Props> = ({ templates, reload }) => {
   const [selection, setSelection] = useState<Template[]>([]);
   const [templatesToDelete, setTemplatesToDelete] = useState<Array<Template['name']>>([]);
-  const [deletedTemplates, setDeletedTemplates] = useState<Array<Template['name']>>([]);
-
-  const availableTemplates = useMemo(
-    () =>
-      templates
-        ? templates.filter((template: Template) => !deletedTemplates.includes(template.name))
-        : undefined,
-    [templates, deletedTemplates]
-  );
 
   const columns = [
     {
@@ -126,21 +117,17 @@ export const TemplatesTable: React.FunctionComponent<Props> = ({ templates, relo
         {
           render: (template: Template) => {
             const { name } = template;
-            const isSystemTemplate = name.startsWith('.');
-
-            const label = isSystemTemplate
-              ? i18n.translate(
-                  'xpack.idxMgmt.templatesList.table.systemTemplateDeleteTooltipLabel',
-                  {
-                    defaultMessage: 'Cannot delete system templates',
-                  }
-                )
-              : i18n.translate('xpack.idxMgmt.templatesList.table.actionDeleteTooltipLabel', {
-                  defaultMessage: 'Delete',
-                });
 
             return (
-              <EuiToolTip content={label} delay="long">
+              <EuiToolTip
+                content={i18n.translate(
+                  'xpack.idxMgmt.templatesList.table.actionDeleteTooltipLabel',
+                  {
+                    defaultMessage: 'Delete',
+                  }
+                )}
+                delay="long"
+              >
                 <EuiButtonIcon
                   aria-label={i18n.translate(
                     'xpack.idxMgmt.templatesList.table.actionDeleteAriaLabel',
@@ -151,7 +138,6 @@ export const TemplatesTable: React.FunctionComponent<Props> = ({ templates, relo
                   )}
                   iconType="trash"
                   color="danger"
-                  isDisabled={isSystemTemplate}
                   onClick={() => {
                     setTemplatesToDelete([name]);
                   }}
@@ -166,7 +152,7 @@ export const TemplatesTable: React.FunctionComponent<Props> = ({ templates, relo
   ];
 
   const pagination = {
-    initialPageSize: 10,
+    initialPageSize: 20,
     pageSizeOptions: [10, 20, 50],
   };
 
@@ -179,13 +165,6 @@ export const TemplatesTable: React.FunctionComponent<Props> = ({ templates, relo
 
   const selectionConfig = {
     onSelectionChange: setSelection,
-    selectable: (template: Template) => !template.name.startsWith('.'),
-    selectableMessage: (selectable: boolean) =>
-      !selectable
-        ? i18n.translate('xpack.idxMgmt.templatesList.table.disabledTemplateTooltipText', {
-            defaultMessage: 'System templates are read-only',
-          })
-        : undefined,
   };
 
   const searchConfig = {
@@ -234,14 +213,14 @@ export const TemplatesTable: React.FunctionComponent<Props> = ({ templates, relo
       <DeleteTemplatesModal
         callback={data => {
           if (data && data.hasDeletedTemplates) {
-            setDeletedTemplates([...deletedTemplates, ...templatesToDelete]);
+            reload();
           }
           setTemplatesToDelete([]);
         }}
         templatesToDelete={templatesToDelete}
       />
       <EuiInMemoryTable
-        items={availableTemplates}
+        items={templates}
         itemId="name"
         columns={columns}
         search={searchConfig}

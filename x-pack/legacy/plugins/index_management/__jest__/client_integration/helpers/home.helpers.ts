@@ -84,6 +84,7 @@ type IdxMgmtTestSubjects = TestSubjects;
 export type TestSubjects =
   | 'appTitle'
   | 'cell'
+  | 'deleteSystemTemplateCallOut'
   | 'deleteTemplateButton'
   | 'deleteTemplatesButton'
   | 'deleteTemplatesConfirmation'
