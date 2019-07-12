@@ -12,33 +12,37 @@ import {
   Form,
 } from '../../../../../../../../../src/plugins/elasticsearch_ui_shared/static/forms/hook_form_lib';
 import { Field } from '../../../../../../../../../src/plugins/elasticsearch_ui_shared/static/forms/components';
-import { DataTypeConfig } from '../data_types_config';
-import { parameters, ParameterName } from '../parameters';
+import { parametersDefinition, ParameterName, DataTypeDefinition } from '../config';
 
 interface Props {
   form: Form;
-  typeConfig: DataTypeConfig | null;
+  typeDefinition: DataTypeDefinition | null;
   fieldPathPrefix?: string;
 }
 
-const splitParametersIntoRows = (params: ParameterName[] | ParameterName[][]): ParameterName[][] =>
+const parametersToRows = (params: ParameterName[] | ParameterName[][]): ParameterName[][] =>
   Array.isArray(params[0]) ? (params as ParameterName[][]) : ([params] as ParameterName[][]);
 
-export const PropertyCommonParameters = ({ form, typeConfig, fieldPathPrefix = '' }: Props) => {
-  if (!typeConfig || !typeConfig.commonParameters) {
+export const PropertyBasicParameters = ({ form, typeDefinition, fieldPathPrefix = '' }: Props) => {
+  if (!typeDefinition || !typeDefinition.basicParameters) {
     return null;
   }
+
+  const rows = parametersToRows(typeDefinition.basicParameters);
+
   return (
     <Fragment>
-      {splitParametersIntoRows(typeConfig.commonParameters).map((row, i) => (
+      {rows.map((parameters, i) => (
         <div key={i}>
           <EuiFlexGroup>
-            {row.map(parameter => (
+            {parameters.map(parameter => (
               <EuiFlexItem key={parameter} grow={false}>
                 <UseField
                   form={form}
                   path={fieldPathPrefix + parameter}
-                  config={parameters[parameter]!.fieldConfig}
+                  config={
+                    parametersDefinition[parameter] && parametersDefinition[parameter].fieldConfig
+                  }
                   component={Field}
                 />
               </EuiFlexItem>

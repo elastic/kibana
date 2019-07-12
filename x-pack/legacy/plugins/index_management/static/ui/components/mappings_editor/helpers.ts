@@ -4,12 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const propertiesArrayToObject = (properties: any[]): any =>
-  properties.reduce((acc, property) => {
-    const { name, ...rest } = property;
-    acc[property.name] = rest;
-    if (rest.type === 'object' && rest.properties) {
-      rest.properties = propertiesArrayToObject(rest.properties);
-    }
-    return acc;
-  }, {});
+export const propertiesArrayToObject = (properties?: any[]): any =>
+  properties
+    ? properties.reduce((acc, property) => {
+        const { name, ...rest } = property;
+        acc[property.name] = rest;
+        if (rest.properties) {
+          // Recursively convert Array to Object
+          rest.properties = propertiesArrayToObject(rest.properties);
+        }
+        return acc;
+      }, {})
+    : properties;

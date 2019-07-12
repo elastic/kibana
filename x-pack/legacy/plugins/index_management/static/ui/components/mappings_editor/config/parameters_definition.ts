@@ -7,11 +7,11 @@
 import {
   FIELD_TYPES,
   FieldConfig,
-} from '../../../../../../../../src/plugins/elasticsearch_ui_shared/static/forms/hook_form_lib';
+} from '../../../../../../../../../src/plugins/elasticsearch_ui_shared/static/forms/hook_form_lib';
 import {
   emptyField,
   containsCharsField,
-} from '../../../../../../../../src/plugins/elasticsearch_ui_shared/static/forms/field_validators';
+} from '../../../../../../../../../src/plugins/elasticsearch_ui_shared/static/forms/field_validators';
 
 export type ParameterName =
   | 'name'
@@ -22,6 +22,8 @@ export type ParameterName =
   | 'coerce'
   | 'ignore_malformed'
   | 'null_value'
+  | 'dynamic'
+  | 'enabled'
   | 'boost';
 
 export interface Parameter {
@@ -29,7 +31,7 @@ export interface Parameter {
   docs?: string;
 }
 
-export const parameters: { [key in ParameterName]: Parameter } = {
+export const parametersDefinition: { [key in ParameterName]: Parameter } = {
   name: {
     fieldConfig: {
       label: 'Name',
@@ -99,6 +101,20 @@ export const parameters: { [key in ParameterName]: Parameter } = {
     fieldConfig: {
       label: 'Boost',
       type: FIELD_TYPES.TEXT,
+    },
+  },
+  dynamic: {
+    fieldConfig: {
+      label: 'Dynamic',
+      type: FIELD_TYPES.TOGGLE,
+      defaultValue: true,
+    },
+  },
+  enabled: {
+    fieldConfig: {
+      label: 'Enabled',
+      type: FIELD_TYPES.TOGGLE,
+      defaultValue: true,
     },
   },
 };
