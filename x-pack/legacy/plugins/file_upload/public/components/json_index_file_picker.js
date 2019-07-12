@@ -38,27 +38,24 @@ export class JsonIndexFilePicker extends Component {
     if (fileArr.length === 0) { // Remove
       return;
     }
-    if (fileArr.length === 1) { // Parse & index file
-      const file = fileArr[0];
-      let initIndexName;
-      try {
-        initIndexName = this._getIndexName(file);
-      } catch (error) {
-        this.setState({
-          fileUploadError: i18n.translate('xpack.fileUpload.jsonIndexFilePicker.errorGettingIndexName', {
-            defaultMessage: 'Error retrieving index name: {errorMessage}',
-            values: {
-              errorMessage: error.message
-            }
-          })
-        });
-        this.props.resetFileAndIndexSettings();
-        return;
-      }
-
-      this.props.setIndexName(initIndexName);
-      this._parseFile(file);
+    const file = fileArr[0];
+    let initIndexName;
+    try {
+      initIndexName = this._getIndexName(file);
+    } catch (error) {
+      this.setState({
+        fileUploadError: i18n.translate('xpack.fileUpload.jsonIndexFilePicker.errorGettingIndexName', {
+          defaultMessage: 'Error retrieving index name: {errorMessage}',
+          values: {
+            errorMessage: error.message
+          }
+        })
+      });
+      return;
     }
+
+    this.props.setIndexName(initIndexName);
+    this._parseFile(file);
   };
 
   _getIndexName({ name, size }) {
