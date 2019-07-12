@@ -12,7 +12,7 @@ export class MonitoringLicenseError extends Error {
     this.message = i18n.translate('xpack.monitoring.errors.monitoringLicenseErrorTitle', {
       defaultMessage: 'Monitoring License Error',
     });
-    this.description = i18n.translate('xpack.monitoring.errors.monitoringLicenseErrorTitle', {
+    this.description = i18n.translate('xpack.monitoring.errors.monitoringLicenseErrorDescription', {
       defaultMessage: 'Could not find licensing information for cluster = \'{clusterId}\'. ' +
       'Check master node server logs for errors or warnings.',
       values: {
