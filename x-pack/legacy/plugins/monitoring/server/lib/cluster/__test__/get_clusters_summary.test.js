@@ -34,7 +34,7 @@ describe('getClustersSummary', () => {
     expect(() => getClustersSummary(mockServer, fakeClusters)).toThrow('Monitoring License Error');
     expect(mockLog).toHaveBeenCalledWith(
       ['error', 'monitoring'],
-      'Could not find license information for cluster ID = fOt6KT9KTICAMm2ncRhsMg. ' +
+      'Could not find license information for cluster = \'Custom name\'. ' +
       'Please check the cluster\'s master node server logs for errors or warnings.'
     );
   });

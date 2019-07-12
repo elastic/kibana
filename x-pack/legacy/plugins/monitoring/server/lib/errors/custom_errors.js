@@ -7,14 +7,17 @@
 import { i18n } from '@kbn/i18n';
 
 export class MonitoringLicenseError extends Error {
-  constructor(clusterUuid) {
+  constructor(clusterId) {
     super();
     this.message = i18n.translate('xpack.monitoring.errors.monitoringLicenseErrorTitle', {
       defaultMessage: 'Monitoring License Error',
     });
     this.description = i18n.translate('xpack.monitoring.errors.monitoringLicenseErrorTitle', {
-      defaultMessage: `Could not find licensing information for cluster ID = ${clusterUuid}. ` +
-      `Check master node server logs for errors or warnings.`
+      defaultMessage: 'Could not find licensing information for cluster = \'{clusterId}\'. ' +
+      'Check master node server logs for errors or warnings.',
+      values: {
+        clusterId
+      }
     });
   }
 }

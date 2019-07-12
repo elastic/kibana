@@ -32,12 +32,13 @@ export function getClustersSummary(server, clusters, kibanaUuid, isCcrEnabled) {
 
     // check for any missing licenses
     if (!license) {
+      const clusterId = cluster.name || clusterName || clusterUuid;
       server.log(
         ['error', LOGGING_TAG],
-        'Could not find license information for cluster ID = ' + clusterUuid + '. ' +
+        'Could not find license information for cluster = \'' + clusterId + '\'. ' +
         'Please check the cluster\'s master node server logs for errors or warnings.'
       );
-      throw new MonitoringLicenseError(clusterUuid);
+      throw new MonitoringLicenseError(clusterId);
     }
 
     const {
