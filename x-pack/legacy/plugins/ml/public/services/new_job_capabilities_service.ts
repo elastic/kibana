@@ -174,7 +174,7 @@ function createCountFieldAndAggs() {
       dslName: 'count',
       type: 'metrics',
       mlModelPlotAgg: {
-        min: 'min;',
+        min: 'min',
         max: 'max',
       },
       fields: [countField],
@@ -186,7 +186,7 @@ function createCountFieldAndAggs() {
       dslName: 'count',
       type: 'metrics',
       mlModelPlotAgg: {
-        min: 'min;',
+        min: 'min',
         max: 'max',
       },
       fields: [countField],
@@ -198,7 +198,7 @@ function createCountFieldAndAggs() {
       dslName: 'count',
       type: 'metrics',
       mlModelPlotAgg: {
-        min: 'min;',
+        min: 'min',
         max: 'max',
       },
       fields: [countField],

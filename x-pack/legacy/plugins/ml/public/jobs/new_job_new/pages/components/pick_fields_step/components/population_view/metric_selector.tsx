@@ -13,9 +13,11 @@ interface Props {
   fields: Field[];
   detectorChangeHandler: (options: DropDownLabel[]) => void;
   selectedOptions: DropDownProps;
-  maxWidth: number;
+  maxWidth?: number;
   removeOptions: AggFieldPair[];
 }
+
+const MAX_WIDTH = 560;
 
 export const MetricSelector: FC<Props> = ({
   fields,
@@ -25,7 +27,7 @@ export const MetricSelector: FC<Props> = ({
   removeOptions,
 }) => {
   return (
-    <EuiFlexGroup style={{ maxWidth }}>
+    <EuiFlexGroup style={{ maxWidth: maxWidth !== undefined ? maxWidth : MAX_WIDTH }}>
       <EuiFlexItem>
         <EuiFormRow label="Add metric">
           <AggSelect

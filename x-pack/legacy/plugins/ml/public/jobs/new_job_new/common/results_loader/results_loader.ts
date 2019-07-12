@@ -65,7 +65,6 @@ export class ResultsLoader {
   private _lastModelTimeStamp: number = 0;
   private _lastResultsTimeout: any = null;
   private _chartLoader: ChartLoader;
-  // private _detectorSplitFieldWithValue: DetectorSplitFieldFilter;
 
   private _results: Results = {
     progress: 0,
@@ -86,26 +85,27 @@ export class ResultsLoader {
   }
 
   progressSubscriber = async (progress: number) => {
-    if (this._resultsSearchRunning === false) {
-      if (progress - this._results.progress > 5 || progress === 100) {
-        if (this._splitFieldFiltersLoaded === false) {
-          this._splitFieldFiltersLoaded = true;
-          // load detector field filters if this is the first run.
-          await this._populateDetectorSplitFieldFilters();
-        }
+    if (
+      this._resultsSearchRunning === false &&
+      (progress - this._results.progress > 5 || progress === 100)
+    ) {
+      if (this._splitFieldFiltersLoaded === false) {
+        this._splitFieldFiltersLoaded = true;
+        // load detector field filters if this is the first run.
+        await this._populateDetectorSplitFieldFilters();
+      }
 
-        this._updateData(progress, false);
+      this._updateData(progress, false);
 
-        if (progress === 100) {
-          // after the job has finished, do one final update
-          // a while after the last 100% has been received.
-          // note, there may be multiple 100% progresses sent as they will only stop once the
-          // datafeed has stopped.
-          clearTimeout(this._lastResultsTimeout);
-          this._lastResultsTimeout = setTimeout(() => {
-            this._updateData(progress, true);
-          }, LAST_UPDATE_DELAY_MS);
-        }
+      if (progress === 100) {
+        // after the job has finished, do one final update
+        // a while after the last 100% has been received.
+        // note, there may be multiple 100% progresses sent as they will only stop once the
+        // datafeed has stopped.
+        clearTimeout(this._lastResultsTimeout);
+        this._lastResultsTimeout = setTimeout(() => {
+          this._updateData(progress, true);
+        }, LAST_UPDATE_DELAY_MS);
       }
     }
   };
@@ -133,7 +133,7 @@ export class ResultsLoader {
   }
 
   public subscribeToResults(func: ResultsSubscriber) {
-    this._results$.subscribe(func);
+    return this._results$.subscribe(func);
   }
 
   public get progress() {

@@ -81,7 +81,10 @@ export const MultiMetricDetectors: FC<Props> = ({ isActive, setIsValid }) => {
   useEffect(() => {
     // subscribe to progress and results
     jobCreator.subscribeToProgress(setProgress);
-    resultsLoader.subscribeToResults(setResultsWrapper);
+    const subscription = resultsLoader.subscribeToResults(setResultsWrapper);
+    return () => {
+      subscription.unsubscribe();
+    };
   }, []);
 
   // watch for changes in detector list length
@@ -181,7 +184,6 @@ export const MultiMetricDetectors: FC<Props> = ({ isActive, setIsValid }) => {
           fields={fields}
           detectorChangeHandler={detectorChangeHandler}
           selectedOptions={selectedOptions}
-          maxWidth={560}
           removeOptions={aggFieldPairList}
         />
       )}

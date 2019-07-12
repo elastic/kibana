@@ -52,7 +52,6 @@ export const Influencers: FC = () => {
         fields={fields}
         changeHandler={setInfluencers}
         selectedInfluencers={influencers}
-        splitField={splitField}
       />
     </Description>
   );

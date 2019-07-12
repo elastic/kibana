@@ -10,7 +10,7 @@ export const MODEL_COLOR = '#006BB4';
 export interface ChartSettings {
   width: string;
   height: string;
-  cols: number;
+  cols: 1 | 2 | 3;
   intervalMs: number;
 }
 

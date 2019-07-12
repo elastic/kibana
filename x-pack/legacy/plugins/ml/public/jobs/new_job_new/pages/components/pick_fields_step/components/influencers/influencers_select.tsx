@@ -7,24 +7,20 @@
 import React, { FC } from 'react';
 import { EuiComboBox, EuiComboBoxOptionProps } from '@elastic/eui';
 
-import { Field, SplitField } from '../../../../../../../../common/types/fields';
+import { Field, EVENT_RATE_FIELD_ID } from '../../../../../../../../common/types/fields';
 
 interface Props {
   fields: Field[];
   changeHandler(i: string[]): void;
   selectedInfluencers: string[];
-  splitField: SplitField;
 }
 
-export const InfluencersSelect: FC<Props> = ({
-  fields,
-  changeHandler,
-  selectedInfluencers,
-  splitField,
-}) => {
-  const options: EuiComboBoxOptionProps[] = fields.map(f => ({
-    label: f.name,
-  }));
+export const InfluencersSelect: FC<Props> = ({ fields, changeHandler, selectedInfluencers }) => {
+  const options: EuiComboBoxOptionProps[] = fields
+    .filter(f => f.id !== EVENT_RATE_FIELD_ID)
+    .map(f => ({
+      label: f.name,
+    }));
   const selection: EuiComboBoxOptionProps[] = selectedInfluencers.map(i => ({ label: i }));
 
   function onChange(selectedOptions: EuiComboBoxOptionProps[]) {

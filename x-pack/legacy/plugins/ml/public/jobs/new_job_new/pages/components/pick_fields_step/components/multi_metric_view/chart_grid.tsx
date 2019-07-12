@@ -46,7 +46,7 @@ export const ChartGrid: FC<ChartGridProps> = ({
       numberOfDetectors={aggFieldPairList.length}
       jobType={jobType}
     >
-      <EuiFlexGrid columns={chartSettings.cols as any}>
+      <EuiFlexGrid columns={chartSettings.cols}>
         {aggFieldPairList.map((af, i) => (
           <EuiFlexItem key={i}>
             {lineChartsData[i] !== undefined && (

@@ -14,7 +14,7 @@ import { Results, ModelItem, Anomaly } from '../../../../../common/results_loade
 import { LineChartData } from '../../../../../common/chart_loader';
 import { AggSelect, DropDownLabel, DropDownProps } from '../agg_select';
 import { newJobCapsService } from '../../../../../../../services/new_job_capabilities_service';
-import { AggFieldPair } from '../../../../../../../../common/types/fields';
+import { AggFieldPair, EVENT_RATE_FIELD_ID } from '../../../../../../../../common/types/fields';
 import { AnomalyChart, CHART_TYPE } from '../../../charts/anomaly_chart';
 import { JobProgress } from '../job_progress';
 
@@ -76,12 +76,16 @@ export const SingleMetricDetectors: FC<Props> = ({ isActive, setIsValid }) => {
   useEffect(() => {
     // subscribe to progress and results
     jobCreator.subscribeToProgress(setProgress);
-    resultsLoader.subscribeToResults(setResultsWrapper);
+    const subscription = resultsLoader.subscribeToResults(setResultsWrapper);
+    return () => {
+      subscription.unsubscribe();
+    };
   }, []);
 
   useEffect(() => {
     if (aggFieldPair !== null) {
-      jobCreator.setDetector(aggFieldPair.agg, aggFieldPair.field);
+      const field = aggFieldPair.field.id === EVENT_RATE_FIELD_ID ? null : aggFieldPair.field;
+      jobCreator.setDetector(aggFieldPair.agg, field);
       jobCreatorUpdate();
       loadChart();
       setIsValid(aggFieldPair !== null);
