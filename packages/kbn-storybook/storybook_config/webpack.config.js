@@ -21,6 +21,7 @@ const { resolve } = require('path');
 const webpack = require('webpack');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 const { REPO_ROOT, DLL_DIST_DIR } = require('../lib/constants');
+// eslint-disable-next-line import/no-unresolved
 const { currentConfig } = require('../../../built_assets/storybook/current.config');
 
 // Extend the Storybook Webpack config with some customizations
