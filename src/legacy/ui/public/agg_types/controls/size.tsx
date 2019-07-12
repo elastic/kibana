@@ -21,33 +21,41 @@ import React, { useEffect } from 'react';
 import { isUndefined } from 'lodash';
 import { AggParamEditorProps } from 'ui/vis/editors/default';
 import { EuiFormRow, EuiFieldNumber } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
+
+interface SizeParamEditorProps extends AggParamEditorProps<number | ''> {
+  iconTip?: React.ReactNode;
+  disabled?: boolean;
+}
 
 function SizeParamEditor({
+  disabled,
+  iconTip,
   value,
   setValue,
   showValidation,
   setValidity,
   setTouched,
-}: AggParamEditorProps<number | ''>) {
-  const label = i18n.translate('common.ui.aggTypes.sizeLabel', {
-    defaultMessage: 'Size',
-  });
-  const isValid = Number(value) > 0;
-
-  useEffect(
-    () => {
-      setValidity(isValid);
-    },
-    [isValid]
+  wrappedWithInlineComp,
+}: SizeParamEditorProps) {
+  const label = (
+    <>
+      <FormattedMessage id="common.ui.aggTypes.sizeLabel" defaultMessage="Size" />
+      {iconTip}
+    </>
   );
+  const isValid = disabled || Number(value) > 0;
+
+  useEffect(() => {
+    setValidity(isValid);
+  }, [isValid]);
 
   return (
     <EuiFormRow
       label={label}
       fullWidth={true}
       isInvalid={showValidation ? !isValid : false}
-      className="visEditorSidebar__aggParamFormRow"
+      compressed
     >
       <EuiFieldNumber
         value={isUndefined(value) ? '' : value}
@@ -56,6 +64,7 @@ function SizeParamEditor({
         isInvalid={showValidation ? !isValid : false}
         onBlur={setTouched}
         min={1}
+        disabled={disabled}
         data-test-subj="sizeParamEditor"
       />
     </EuiFormRow>

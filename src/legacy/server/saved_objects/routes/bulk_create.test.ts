@@ -20,22 +20,16 @@
 import Hapi from 'hapi';
 import { createMockServer } from './_mock_server';
 import { createBulkCreateRoute } from './bulk_create';
+// Disable lint errors for imports from src/core/* until SavedObjects migration is complete
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { SavedObjectsClientMock } from '../../../../core/server/saved_objects/service/saved_objects_client.mock';
 
 describe('POST /api/saved_objects/_bulk_create', () => {
   let server: Hapi.Server;
-  const savedObjectsClient = {
-    errors: {} as any,
-    bulkCreate: jest.fn(),
-    bulkGet: jest.fn(),
-    create: jest.fn(),
-    delete: jest.fn(),
-    find: jest.fn(),
-    get: jest.fn(),
-    update: jest.fn(),
-  };
+  const savedObjectsClient = SavedObjectsClientMock.create();
 
   beforeEach(() => {
-    savedObjectsClient.bulkCreate.mockImplementation(() => Promise.resolve(''));
+    savedObjectsClient.bulkCreate.mockImplementation(() => Promise.resolve('' as any));
     server = createMockServer();
 
     const prereqs = {
@@ -75,7 +69,8 @@ describe('POST /api/saved_objects/_bulk_create', () => {
           id: 'abc123',
           type: 'index-pattern',
           title: 'logstash-*',
-          version: 2,
+          attributes: {},
+          version: '2',
           references: [],
         },
       ],

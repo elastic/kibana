@@ -39,18 +39,22 @@ const waitForInterpreterRun = async () => {
   await new Promise(resolve => setTimeout(resolve));
 };
 
+const RENDERER_ID = 'mockId';
+
 describe('expressions_service', () => {
+  let interpretAstMock: jest.Mocked<Interpreter>['interpretAst'];
   let interpreterMock: jest.Mocked<Interpreter>;
   let renderFunctionMock: jest.Mocked<RenderFunction>;
   let setupPluginsMock: ExpressionsServiceDependencies;
-  const expressionResult: Result = { type: 'render', as: 'abc', value: {} };
+  const expressionResult: Result = { type: 'render', as: RENDERER_ID, value: {} };
 
   let api: ExpressionsSetup;
   let testExpression: string;
   let testAst: Ast;
 
   beforeEach(() => {
-    interpreterMock = { interpretAst: jest.fn(_ => Promise.resolve(expressionResult)) };
+    interpretAstMock = jest.fn((..._) => Promise.resolve(expressionResult));
+    interpreterMock = { interpretAst: interpretAstMock };
     renderFunctionMock = ({
       render: jest.fn(),
     } as unknown) as jest.Mocked<RenderFunction>;
@@ -58,7 +62,7 @@ describe('expressions_service', () => {
       interpreter: {
         getInterpreter: () => Promise.resolve({ interpreter: interpreterMock }),
         renderersRegistry: ({
-          get: () => renderFunctionMock,
+          get: (id: string) => (id === RENDERER_ID ? renderFunctionMock : null),
         } as unknown) as RenderFunctionsRegistry,
       },
     };
@@ -99,6 +103,47 @@ describe('expressions_service', () => {
         expect.anything(),
         expect.anything()
       );
+    });
+
+    it('should return the result of the interpreter run', async () => {
+      const response = await api.run(testAst, {});
+      expect(response).toBe(expressionResult);
+    });
+
+    it('should reject the promise if the response is not renderable but an element is passed', async () => {
+      const unexpectedResult = { type: 'datatable', value: {} };
+      interpretAstMock.mockReturnValue(Promise.resolve(unexpectedResult));
+      expect(
+        api.run(testAst, {
+          element: document.createElement('div'),
+        })
+      ).rejects.toBe(unexpectedResult);
+    });
+
+    it('should reject the promise if the renderer is not known', async () => {
+      const unexpectedResult = { type: 'render', as: 'unknown_id' };
+      interpretAstMock.mockReturnValue(Promise.resolve(unexpectedResult));
+      expect(
+        api.run(testAst, {
+          element: document.createElement('div'),
+        })
+      ).rejects.toBe(unexpectedResult);
+    });
+
+    it('should not reject the promise on unknown renderer if the runner is not rendering', async () => {
+      const unexpectedResult = { type: 'render', as: 'unknown_id' };
+      interpretAstMock.mockReturnValue(Promise.resolve(unexpectedResult));
+      expect(api.run(testAst, {})).resolves.toBe(unexpectedResult);
+    });
+
+    it('should reject the promise if the response is an error', async () => {
+      const errorResult = { type: 'error', error: {} };
+      interpretAstMock.mockReturnValue(Promise.resolve(errorResult));
+      expect(api.run(testAst, {})).rejects.toBe(errorResult);
+    });
+
+    it('should reject the promise if there are syntax errors', async () => {
+      expect(api.run('|||', {})).rejects.toBeInstanceOf(Error);
     });
 
     it('should call the render function with the result and element', async () => {
@@ -212,6 +257,20 @@ describe('expressions_service', () => {
 
       expect(renderFunctionMock.render).toHaveBeenCalledTimes(1);
       expect(interpreterMock.interpretAst).toHaveBeenCalledTimes(1);
+    });
+
+    it('should call onRenderFailure if the result can not be rendered', async () => {
+      const errorResult = { type: 'error', error: {} };
+      interpretAstMock.mockReturnValue(Promise.resolve(errorResult));
+      const renderFailureSpy = jest.fn();
+
+      const ExpressionRenderer = api.ExpressionRenderer;
+
+      mount(<ExpressionRenderer expression={testExpression} onRenderFailure={renderFailureSpy} />);
+
+      await waitForInterpreterRun();
+
+      expect(renderFailureSpy).toHaveBeenCalledWith(errorResult);
     });
   });
 });

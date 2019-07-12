@@ -27,5 +27,5 @@ export const basicAggs = [
   'variance',
   'sum_of_squares',
   'value_count',
-  'cardinality'
+  'cardinality',
 ];

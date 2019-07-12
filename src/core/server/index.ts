@@ -36,7 +36,11 @@
  */
 
 import { Observable } from 'rxjs';
-import { ClusterClient, ElasticsearchServiceSetup } from './elasticsearch';
+import {
+  ClusterClient,
+  ElasticsearchClientConfig,
+  ElasticsearchServiceSetup,
+} from './elasticsearch';
 import { HttpServiceSetup, HttpServiceStart } from './http';
 import { PluginsServiceSetup, PluginsServiceStart } from './plugins';
 
@@ -48,15 +52,29 @@ export {
   Headers,
   ScopedClusterClient,
   ElasticsearchClientConfig,
+  ElasticsearchError,
+  ElasticsearchErrorHelpers,
   APICaller,
+  FakeRequest,
+  LegacyRequest,
 } from './elasticsearch';
 export {
   AuthenticationHandler,
+  AuthHeaders,
+  AuthResultData,
   AuthToolkit,
+  GetAuthHeaders,
   KibanaRequest,
-  OnRequestHandler,
-  OnRequestToolkit,
+  KibanaRequestRoute,
+  OnPreAuthHandler,
+  OnPreAuthToolkit,
+  OnPostAuthHandler,
+  OnPostAuthToolkit,
   Router,
+  RouteMethod,
+  RouteConfigOptions,
+  SessionStorageFactory,
+  SessionStorage,
 } from './http';
 export { Logger, LoggerFactory, LogMeta, LogRecord, LogLevel } from './logging';
 
@@ -68,6 +86,30 @@ export {
   PluginName,
 } from './plugins';
 
+export {
+  SavedObject,
+  SavedObjectAttributes,
+  SavedObjectReference,
+  SavedObjectsBaseOptions,
+  SavedObjectsBulkCreateObject,
+  SavedObjectsBulkGetObject,
+  SavedObjectsBulkResponse,
+  SavedObjectsClient,
+  SavedObjectsClientContract,
+  SavedObjectsCreateOptions,
+  SavedObjectsClientWrapperFactory,
+  SavedObjectsClientWrapperOptions,
+  SavedObjectsErrorHelpers,
+  SavedObjectsFindOptions,
+  SavedObjectsFindResponse,
+  SavedObjectsMigrationVersion,
+  SavedObjectsService,
+  SavedObjectsUpdateOptions,
+  SavedObjectsUpdateResponse,
+} from './saved_objects';
+
+export { RecursiveReadonly } from '../utils';
+
 /**
  * Context passed to the plugins `setup` method.
  *
@@ -77,12 +119,18 @@ export interface CoreSetup {
   elasticsearch: {
     adminClient$: Observable<ClusterClient>;
     dataClient$: Observable<ClusterClient>;
+    createClient: (
+      type: string,
+      clientConfig?: Partial<ElasticsearchClientConfig>
+    ) => ClusterClient;
   };
   http: {
+    registerOnPreAuth: HttpServiceSetup['registerOnPreAuth'];
     registerAuth: HttpServiceSetup['registerAuth'];
-    registerOnRequest: HttpServiceSetup['registerOnRequest'];
-    getBasePathFor: HttpServiceSetup['getBasePathFor'];
-    setBasePathFor: HttpServiceSetup['setBasePathFor'];
+    registerOnPostAuth: HttpServiceSetup['registerOnPostAuth'];
+    basePath: HttpServiceSetup['basePath'];
+    createNewServer: HttpServiceSetup['createNewServer'];
+    isTlsEnabled: HttpServiceSetup['isTlsEnabled'];
   };
 }
 
@@ -104,7 +152,6 @@ export interface InternalCoreSetup {
  * @public
  */
 export interface InternalCoreStart {
-  http: HttpServiceStart;
   plugins: PluginsServiceStart;
 }
 

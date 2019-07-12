@@ -27,6 +27,8 @@ The various build flags are not well documented. Some are documented [here](http
 
 As of this writing, there is an officially supported headless Chromium build args file for Linux: `build/args/headless.gn`. This does not work on Windows or Mac, so we have taken that as our starting point, and modified it until the Windows / Mac builds succeeded.
 
+**NOTE:** Please, make sure you consult @elastic/kibana-security before you change, remove or add any of the build flags.
+
 ## VMs
 
 I ran Linux and Windows VMs in GCP with the following specs:
@@ -108,7 +110,7 @@ To run the build, replace the sha in the following commands with the sha that yo
 
 After the build completes, there will be a .zip file and a .md5 file in `~/chromium/chromium/src/out/headless`. These are named like so: `chromium-{first_7_of_SHA}-{platform}`, for example: `chromium-4747cc2-linux`.
 
-The zip files need to be deployed to s3. For testing, I drop them into `headless-shell-dev`, but for production, they need to be in `headless-shell`. And the `x-pack/plugins/reporting/server/browsers/chromium/paths.js` file needs to be upated to have the correct `archiveChecksum`, `archiveFilename`, `rawChecksum` and `baseUrl`. Below is a list of what the archive's are:
+The zip files need to be deployed to s3. For testing, I drop them into `headless-shell-dev`, but for production, they need to be in `headless-shell`. And the `x-pack/legacy/plugins/reporting/server/browsers/chromium/paths.js` file needs to be upated to have the correct `archiveChecksum`, `archiveFilename`, `rawChecksum` and `baseUrl`. Below is a list of what the archive's are:
 
 - `archiveChecksum`: The contents of the `.md5` file, which is the `md5` checksum of the zip file.
 - `rawChecksum`: The `md5` checksum of the `headless_shell` binary itself.

@@ -5,7 +5,7 @@
 .DS_Store
 .node_binaries
 node_modules
-!/src/dev/npm/__tests__/fixtures/fixture1/node_modules
+!/src/dev/npm/integration_tests/__fixtures__/fixture1/node_modules
 !/src/dev/notice/__fixtures__/node_modules
 trash
 /optimize
@@ -31,7 +31,7 @@ webpackstats.json
 !/config/kibana.yml
 coverage
 selenium
-.babelcache.json
+.babel_register_cache.json
 .webpack.babelcache
 *.swp
 *.swo

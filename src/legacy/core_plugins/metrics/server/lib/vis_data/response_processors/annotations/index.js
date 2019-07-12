@@ -21,4 +21,8 @@ import { flow } from 'lodash';
 import { filterAnnotations } from './filter';
 import { getAnnotationBuckets } from './buckets';
 
-export const handleAnnotationResponse = timestamp => flow(getAnnotationBuckets, filterAnnotations(timestamp));
+export const handleAnnotationResponse = timestamp =>
+  flow(
+    getAnnotationBuckets,
+    filterAnnotations(timestamp)
+  );

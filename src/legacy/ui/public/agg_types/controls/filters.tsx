@@ -22,14 +22,15 @@ import { omit, isEqual } from 'lodash';
 import { htmlIdGenerator, EuiButton, EuiSpacer } from '@elastic/eui';
 import { AggParamEditorProps } from 'ui/vis/editors/default';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { data } from 'plugins/data';
+import chrome from 'ui/chrome';
+import { Query } from 'plugins/data';
 import { FilterRow } from './filter';
 
-const { toUser, fromUser } = data.query.helpers;
 const generateId = htmlIdGenerator();
+const config = chrome.getUiSettingsClient();
 
 interface FilterValue {
-  input: any;
+  input: Query;
   label: string;
   id: string;
 }
@@ -41,25 +42,18 @@ function FiltersParamEditor({ agg, value, setValue }: AggParamEditorProps<Filter
 
   useEffect(() => {
     // set parsed values into model after initialization
-    setValue(
-      filters.map(filter =>
-        omit({ ...filter, input: { query: fromUser(filter.input.query) } }, 'id')
-      )
-    );
+    setValue(filters.map(filter => omit({ ...filter, input: filter.input }, 'id')));
   }, []);
 
-  useEffect(
-    () => {
-      // responsible for discarding changes
-      if (
-        value.length !== filters.length ||
-        value.some((filter, index) => !isEqual(filter, omit(filters[index], 'id')))
-      ) {
-        setFilters(value.map(filter => ({ ...filter, id: generateId() })));
-      }
-    },
-    [value]
-  );
+  useEffect(() => {
+    // responsible for discarding changes
+    if (
+      value.length !== filters.length ||
+      value.some((filter, index) => !isEqual(filter, omit(filters[index], 'id')))
+    ) {
+      setFilters(value.map(filter => ({ ...filter, id: generateId() })));
+    }
+  }, [value]);
 
   const updateFilters = (updatedFilters: FilterValue[]) => {
     // do not set internal id parameter into saved object
@@ -68,15 +62,22 @@ function FiltersParamEditor({ agg, value, setValue }: AggParamEditorProps<Filter
   };
 
   const onAddFilter = () =>
-    updateFilters([...filters, { input: { query: '' }, label: '', id: generateId() }]);
+    updateFilters([
+      ...filters,
+      {
+        input: { query: '', language: config.get('search:queryLanguage') },
+        label: '',
+        id: generateId(),
+      },
+    ]);
   const onRemoveFilter = (id: string) => updateFilters(filters.filter(filter => filter.id !== id));
-  const onChangeValue = (id: string, query: string, label: string) =>
+  const onChangeValue = (id: string, query: Query, label: string) =>
     updateFilters(
       filters.map(filter =>
         filter.id === id
           ? {
               ...filter,
-              input: { query: fromUser(query) },
+              input: query,
               label,
             }
           : filter
@@ -91,10 +92,11 @@ function FiltersParamEditor({ agg, value, setValue }: AggParamEditorProps<Filter
           id={id}
           arrayIndex={arrayIndex}
           customLabel={label}
-          value={toUser(input.query)}
+          value={input}
           autoFocus={arrayIndex === filters.length - 1}
           disableRemove={arrayIndex === 0 && filters.length === 1}
           dataTestSubj={`visEditorFilterInput_${agg.id}_${arrayIndex}`}
+          agg={agg}
           onChangeValue={onChangeValue}
           onRemoveFilter={onRemoveFilter}
         />

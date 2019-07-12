@@ -31,6 +31,9 @@ import { OverlayService } from './overlays';
 import { PluginsService } from './plugins';
 import { UiSettingsService } from './ui_settings';
 import { ApplicationService } from './application';
+import { mapToObject } from '../utils/';
+import { DocLinksService } from './doc_links';
+import { RenderingService } from './rendering';
 
 interface Params {
   rootDomElement: HTMLElement;
@@ -64,6 +67,8 @@ export class CoreSystem {
   private readonly overlay: OverlayService;
   private readonly plugins: PluginsService;
   private readonly application: ApplicationService;
+  private readonly docLinks: DocLinksService;
+  private readonly rendering: RenderingService;
 
   private readonly rootDomElement: HTMLElement;
   private fatalErrorsSetup: FatalErrorsSetup | null = null;
@@ -96,6 +101,8 @@ export class CoreSystem {
     this.overlay = new OverlayService();
     this.application = new ApplicationService();
     this.chrome = new ChromeService({ browserSupportsCsp });
+    this.docLinks = new DocLinksService();
+    this.rendering = new RenderingService();
 
     const core: CoreContext = {};
     this.plugins = new PluginsService(core);
@@ -110,29 +117,28 @@ export class CoreSystem {
     try {
       // Setup FatalErrorsService and it's dependencies first so that we're
       // able to render any errors.
-      const i18n = this.i18n.setup();
       const injectedMetadata = this.injectedMetadata.setup();
-      this.fatalErrorsSetup = this.fatalErrors.setup({ injectedMetadata, i18n });
+      this.fatalErrorsSetup = this.fatalErrors.setup({
+        injectedMetadata,
+        i18n: this.i18n.getContext(),
+      });
       const http = this.http.setup({ injectedMetadata, fatalErrors: this.fatalErrorsSetup });
       const uiSettings = this.uiSettings.setup({ http, injectedMetadata });
       const notifications = this.notifications.setup({ uiSettings });
       const application = this.application.setup();
-      const chrome = this.chrome.setup({ injectedMetadata, notifications });
 
       const core: InternalCoreSetup = {
         application,
-        chrome,
         fatalErrors: this.fatalErrorsSetup,
         http,
-        i18n,
         injectedMetadata,
         notifications,
         uiSettings,
       };
 
       // Services that do not expose contracts at setup
-      await this.plugins.setup(core);
-      await this.legacyPlatform.setup({ core });
+      const plugins = await this.plugins.setup(core);
+      await this.legacyPlatform.setup({ core, plugins: mapToObject(plugins.contracts) });
 
       return { fatalErrors: this.fatalErrorsSetup };
     } catch (error) {
@@ -149,40 +155,60 @@ export class CoreSystem {
   public async start() {
     try {
       const injectedMetadata = await this.injectedMetadata.start();
+      const docLinks = await this.docLinks.start({ injectedMetadata });
       const http = await this.http.start({ injectedMetadata, fatalErrors: this.fatalErrorsSetup });
       const i18n = await this.i18n.start();
       const application = await this.application.start({ injectedMetadata });
-      const chrome = await this.chrome.start({ application, http });
 
+      const coreUiTargetDomElement = document.createElement('div');
+      coreUiTargetDomElement.id = 'kibana-body';
       const notificationsTargetDomElement = document.createElement('div');
       const overlayTargetDomElement = document.createElement('div');
-      const legacyPlatformTargetDomElement = document.createElement('div');
 
       // ensure the rootDomElement is empty
       this.rootDomElement.textContent = '';
       this.rootDomElement.classList.add('coreSystemRootDomElement');
+      this.rootDomElement.appendChild(coreUiTargetDomElement);
       this.rootDomElement.appendChild(notificationsTargetDomElement);
-      this.rootDomElement.appendChild(legacyPlatformTargetDomElement);
       this.rootDomElement.appendChild(overlayTargetDomElement);
 
+      const overlays = this.overlay.start({ i18n, targetDomElement: overlayTargetDomElement });
       const notifications = await this.notifications.start({
         i18n,
+        overlays,
         targetDomElement: notificationsTargetDomElement,
       });
-      const overlays = this.overlay.start({ i18n, targetDomElement: overlayTargetDomElement });
+      const chrome = await this.chrome.start({
+        application,
+        docLinks,
+        http,
+        injectedMetadata,
+        notifications,
+      });
+      const uiSettings = await this.uiSettings.start();
 
       const core: InternalCoreStart = {
         application,
         chrome,
+        docLinks,
         http,
         i18n,
         injectedMetadata,
         notifications,
         overlays,
+        uiSettings,
       };
 
-      await this.plugins.start(core);
-      await this.legacyPlatform.start({ core, targetDomElement: legacyPlatformTargetDomElement });
+      const plugins = await this.plugins.start(core);
+      const rendering = this.rendering.start({
+        chrome,
+        targetDomElement: coreUiTargetDomElement,
+      });
+      await this.legacyPlatform.start({
+        core,
+        plugins: mapToObject(plugins.contracts),
+        targetDomElement: rendering.legacyTargetDomElement,
+      });
     } catch (error) {
       if (this.fatalErrorsSetup) {
         this.fatalErrorsSetup.add(error);

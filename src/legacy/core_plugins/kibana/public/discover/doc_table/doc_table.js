@@ -26,14 +26,15 @@ import './components/table_header';
 import './components/table_row';
 import { dispatchRenderComplete } from 'ui/render_complete';
 import { uiModules } from 'ui/modules';
-import 'ui/pager_control';
-import 'ui/pager';
+import './pager_control';
+import './pager';
 import { getRequestInspectorStats, getResponseInspectorStats } from 'ui/courier/utils/courier_inspector_utils';
+import { toastNotifications } from 'ui/notify';
 
 import { getLimitedSearchResultsMessage } from './doc_table_strings';
 
 uiModules.get('app/discover')
-  .directive('docTable', function (config, Notifier, getAppState, pagerFactory, $filter, courier) {
+  .directive('docTable', function (config, getAppState, pagerFactory, $filter, courier) {
     return {
       restrict: 'E',
       template: html,
@@ -54,8 +55,6 @@ uiModules.get('app/discover')
         inspectorAdapters: '=?',
       },
       link: function ($scope, $el) {
-        const notify = new Notifier();
-
         $scope.$watch('minimumVisibleRows', (minimumVisibleRows) => {
           $scope.limit = Math.max(minimumVisibleRows || 50, $scope.limit || 50);
         });
@@ -161,7 +160,11 @@ uiModules.get('app/discover')
               })
               .then(onResults)
               .catch(error => {
-                notify.error(error);
+                toastNotifications.addError(error, {
+                  title: i18n.translate('kbn.docTable.errorTitle', {
+                    defaultMessage: 'Error fetching data'
+                  }),
+                });
                 startSearching();
               });
           }

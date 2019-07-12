@@ -78,7 +78,3 @@ export class UrlOverflowService {
     this._sync();
   }
 }
-
-export function UrlOverflowServiceProvider() {
-  return new UrlOverflowService();
-}

@@ -24,16 +24,11 @@ import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import classNames from 'classnames';
 import React, { Component } from 'react';
 import ResizeObserver from 'resize-observer-polyfill';
-import { FilterBar } from 'ui/filter_bar';
 import { IndexPattern } from 'ui/index_patterns';
 import { Storage } from 'ui/storage';
 
-import { QueryBar } from '../../../query/query_bar';
-
-interface Query {
-  query: string;
-  language: string;
-}
+import { Query, QueryBar } from '../../../query/query_bar';
+import { FilterBar } from '../../../filter/filter_bar';
 
 interface DateRange {
   from: string;
@@ -45,10 +40,7 @@ interface DateRange {
  * See [search_bar\directive\index.js] file
  */
 interface Props {
-  query: {
-    query: string;
-    language: string;
-  };
+  query: Query;
   onQuerySubmit: (payload: { dateRange: DateRange; query: Query }) => void;
   disableAutoFocus?: boolean;
   appName: string;

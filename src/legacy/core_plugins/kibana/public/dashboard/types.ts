@@ -17,6 +17,28 @@
  * under the License.
  */
 
+import { EmbeddableFactory } from 'ui/embeddable';
+import { AppState } from 'ui/state_management/app_state';
+import { UIRegistry } from 'ui/registry/_registry';
+import { Filter } from '@kbn/es-query';
+import { Query } from 'src/legacy/core_plugins/data/public';
+import { AppState as TAppState } from 'ui/state_management/app_state';
+import { DashboardViewMode } from './dashboard_view_mode';
+import {
+  RawSavedDashboardPanelTo60,
+  RawSavedDashboardPanel610,
+  RawSavedDashboardPanel620,
+  RawSavedDashboardPanel630,
+  RawSavedDashboardPanel640To720,
+  RawSavedDashboardPanel730ToLatest,
+} from './migrations/types';
+
+export interface EmbeddableFactoryRegistry extends UIRegistry<EmbeddableFactory> {
+  byName: { [key: string]: EmbeddableFactory };
+}
+
+export type NavAction = (menuItem: any, navController: any, anchorElement: any) => void;
+
 export interface GridData {
   w: number;
   h: number;
@@ -24,3 +46,118 @@ export interface GridData {
   y: number;
   i: string;
 }
+
+/**
+ * This should always represent the latest dashboard panel shape, after all possible migrations.
+ */
+export type SavedDashboardPanel = SavedDashboardPanel730ToLatest;
+
+// id becomes optional starting in 7.3.0
+export type SavedDashboardPanel730ToLatest = Pick<
+  RawSavedDashboardPanel730ToLatest,
+  Exclude<keyof RawSavedDashboardPanel730ToLatest, 'name'>
+> & {
+  readonly id?: string;
+  readonly type: string;
+};
+
+export type SavedDashboardPanel640To720 = Pick<
+  RawSavedDashboardPanel640To720,
+  Exclude<keyof RawSavedDashboardPanel640To720, 'name'>
+> & {
+  readonly id: string;
+  readonly type: string;
+};
+
+export type SavedDashboardPanel630 = Pick<
+  RawSavedDashboardPanel630,
+  Exclude<keyof RawSavedDashboardPanel620, 'name'>
+> & {
+  readonly id: string;
+  readonly type: string;
+};
+
+export type SavedDashboardPanel620 = Pick<
+  RawSavedDashboardPanel620,
+  Exclude<keyof RawSavedDashboardPanel620, 'name'>
+> & {
+  readonly id: string;
+  readonly type: string;
+};
+
+export type SavedDashboardPanel610 = Pick<
+  RawSavedDashboardPanel610,
+  Exclude<keyof RawSavedDashboardPanel610, 'name'>
+> & {
+  readonly id: string;
+  readonly type: string;
+};
+
+export type SavedDashboardPanelTo60 = Pick<
+  RawSavedDashboardPanelTo60,
+  Exclude<keyof RawSavedDashboardPanelTo60, 'name'>
+> & {
+  readonly id: string;
+  readonly type: string;
+};
+
+export type DashboardAppStateDefaults = DashboardAppStateParameters & {
+  description?: string;
+};
+
+export interface DashboardAppStateParameters {
+  panels: SavedDashboardPanel[];
+  fullScreenMode: boolean;
+  title: string;
+  description: string;
+  timeRestore: boolean;
+  options: {
+    hidePanelTitles: boolean;
+    useMargins: boolean;
+  };
+  query: Query | string;
+  filters: Filter[];
+  viewMode: DashboardViewMode;
+}
+
+// This could probably be improved if we flesh out AppState more... though AppState will be going away
+// so maybe not worth too much time atm.
+export type DashboardAppState = DashboardAppStateParameters & AppState;
+
+export interface SavedDashboardPanelMap {
+  [key: string]: SavedDashboardPanel;
+}
+
+export interface StagedFilter {
+  field: string;
+  value: string;
+  operator: string;
+  index: string;
+}
+
+export type ConfirmModalFn = (
+  message: string,
+  confirmOptions: {
+    onConfirm: () => void;
+    onCancel: () => void;
+    confirmButtonText: string;
+    cancelButtonText: string;
+    defaultFocusedButton: string;
+    title: string;
+  }
+) => void;
+
+export type AddFilterFn = (
+  {
+    field,
+    value,
+    operator,
+    index,
+  }: {
+    field: string;
+    value: string;
+    operator: string;
+    index: string;
+  },
+  appState: TAppState
+) => void;

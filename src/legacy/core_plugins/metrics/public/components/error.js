@@ -50,11 +50,7 @@ export function ErrorComponent(props) {
       </div>
     );
   } else if (reason) {
-    additionalInfo = (
-      <div className="tvbError__additional">
-        {reason}
-      </div>
-    );
+    additionalInfo = <div className="tvbError__additional">{reason}</div>;
   }
 
   return (
@@ -64,11 +60,12 @@ export function ErrorComponent(props) {
 
         <EuiSpacer size="s" />
 
-        {title ||
-        <FormattedMessage
-          id="tsvb.error.requestForPanelFailedErrorMessage"
-          defaultMessage="The request for this panel failed"
-        />}
+        {title || (
+          <FormattedMessage
+            id="tsvb.error.requestForPanelFailedErrorMessage"
+            defaultMessage="The request for this panel failed"
+          />
+        )}
 
         {additionalInfo}
       </EuiText>
@@ -77,5 +74,5 @@ export function ErrorComponent(props) {
 }
 
 ErrorComponent.propTypes = {
-  error: PropTypes.object
+  error: PropTypes.object,
 };

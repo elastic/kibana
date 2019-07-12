@@ -30,6 +30,7 @@ import { config as elasticsearchConfig } from './elasticsearch';
 import { config as httpConfig } from './http';
 import { config as loggingConfig } from './logging';
 import { config as devConfig } from './dev';
+import { mapToObject } from '../utils/';
 
 export class Server {
   public readonly configService: ConfigService;
@@ -60,7 +61,9 @@ export class Server {
     const httpSetup = await this.http.setup();
     this.registerDefaultRoute(httpSetup);
 
-    const elasticsearchServiceSetup = await this.elasticsearch.setup();
+    const elasticsearchServiceSetup = await this.elasticsearch.setup({
+      http: httpSetup,
+    });
 
     const pluginsSetup = await this.plugins.setup({
       elasticsearch: elasticsearchServiceSetup,
@@ -73,23 +76,28 @@ export class Server {
       plugins: pluginsSetup,
     };
 
-    await this.legacy.setup(coreSetup);
+    await this.legacy.setup({
+      core: coreSetup,
+      plugins: mapToObject(pluginsSetup.contracts),
+    });
 
     return coreSetup;
   }
 
   public async start() {
-    const httpStart = await this.http.start();
-    const plugins = await this.plugins.start({});
+    const pluginsStart = await this.plugins.start({});
 
-    const startDeps = {
-      http: httpStart,
-      plugins,
+    const coreStart = {
+      plugins: pluginsStart,
     };
 
-    await this.legacy.start(startDeps);
+    await this.legacy.start({
+      core: coreStart,
+      plugins: mapToObject(pluginsStart.contracts),
+    });
 
-    return startDeps;
+    await this.http.start();
+    return coreStart;
   }
 
   public async stop() {

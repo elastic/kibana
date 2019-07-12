@@ -26,25 +26,13 @@ exports[`<EditorOptionsGroup/> renders as expected 1`] = `
               class="euiFlexItem euiFlexItem--flexGrowZero euiAccordion__iconWrapper"
             >
               <svg
-                class="euiIcon euiIcon--medium"
+                class="euiIcon euiIcon--medium euiIcon-isLoading"
                 focusable="false"
                 height="16"
                 viewBox="0 0 16 16"
                 width="16"
-                xlink="http://www.w3.org/1999/xlink"
                 xmlns="http://www.w3.org/2000/svg"
-              >
-                <defs>
-                  <path
-                    d="M13.069 5.157L8.384 9.768a.546.546 0 0 1-.768 0L2.93 5.158a.552.552 0 0 0-.771 0 .53.53 0 0 0 0 .759l4.684 4.61c.641.631 1.672.63 2.312 0l4.684-4.61a.53.53 0 0 0 0-.76.552.552 0 0 0-.771 0z"
-                    id="arrow_down-a"
-                  />
-                </defs>
-                <use
-                  fill-rule="nonzero"
-                  href="#arrow_down-a"
-                />
-              </svg>
+              />
             </div>
             <div
               class="euiFlexItem euiAccordion__buttonContent"
@@ -109,25 +97,13 @@ exports[`<EditorOptionsGroup/> renders as expected with actions 1`] = `
               class="euiFlexItem euiFlexItem--flexGrowZero euiAccordion__iconWrapper"
             >
               <svg
-                class="euiIcon euiIcon--medium"
+                class="euiIcon euiIcon--medium euiIcon-isLoading"
                 focusable="false"
                 height="16"
                 viewBox="0 0 16 16"
                 width="16"
-                xlink="http://www.w3.org/1999/xlink"
                 xmlns="http://www.w3.org/2000/svg"
-              >
-                <defs>
-                  <path
-                    d="M13.069 5.157L8.384 9.768a.546.546 0 0 1-.768 0L2.93 5.158a.552.552 0 0 0-.771 0 .53.53 0 0 0 0 .759l4.684 4.61c.641.631 1.672.63 2.312 0l4.684-4.61a.53.53 0 0 0 0-.76.552.552 0 0 0-.771 0z"
-                    id="arrow_down-a"
-                  />
-                </defs>
-                <use
-                  fill-rule="nonzero"
-                  href="#arrow_down-a"
-                />
-              </svg>
+              />
             </div>
             <div
               class="euiFlexItem euiAccordion__buttonContent"
@@ -151,24 +127,13 @@ exports[`<EditorOptionsGroup/> renders as expected with actions 1`] = `
         >
           <svg
             aria-hidden="true"
-            class="euiIcon euiIcon--medium euiButtonIcon__icon"
+            class="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
             focusable="false"
             height="16"
             viewBox="0 0 16 16"
             width="16"
-            xlink="http://www.w3.org/1999/xlink"
             xmlns="http://www.w3.org/2000/svg"
-          >
-            <defs>
-              <path
-                d="M11 3h5v1H0V3h5V1a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2zm-7.056 8H7v1H4.1l.392 2.519c.042.269.254.458.493.458h6.03c.239 0 .451-.189.493-.458l1.498-9.576H14l-1.504 9.73c-.116.747-.74 1.304-1.481 1.304h-6.03c-.741 0-1.365-.557-1.481-1.304l-1.511-9.73H9V5.95H3.157L3.476 8H8v1H3.632l.312 2zM6 3h4V1H6v2z"
-                id="trash-a"
-              />
-            </defs>
-            <use
-              href="#trash-a"
-            />
-          </svg>
+          />
         </button>
       </div>
     </div>
@@ -219,26 +184,13 @@ exports[`<EditorOptionsGroup/> renders as expected with initial collapsed 1`] = 
               class="euiFlexItem euiFlexItem--flexGrowZero euiAccordion__iconWrapper"
             >
               <svg
-                class="euiIcon euiIcon--medium"
+                class="euiIcon euiIcon--medium euiIcon-isLoading"
                 focusable="false"
                 height="16"
                 viewBox="0 0 16 16"
                 width="16"
-                xlink="http://www.w3.org/1999/xlink"
                 xmlns="http://www.w3.org/2000/svg"
-              >
-                <defs>
-                  <path
-                    d="M13.069 5.157L8.384 9.768a.546.546 0 0 1-.768 0L2.93 5.158a.552.552 0 0 0-.771 0 .53.53 0 0 0 0 .759l4.684 4.61c.641.631 1.672.63 2.312 0l4.684-4.61a.53.53 0 0 0 0-.76.552.552 0 0 0-.771 0z"
-                    id="arrow_right-a"
-                  />
-                </defs>
-                <use
-                  fill-rule="nonzero"
-                  href="#arrow_right-a"
-                  transform="matrix(0 1 1 0 0 0)"
-                />
-              </svg>
+              />
             </div>
             <div
               class="euiFlexItem euiAccordion__buttonContent"

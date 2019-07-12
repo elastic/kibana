@@ -21,6 +21,7 @@ import { mockPersistedLogFactory } from './query_bar_input.test.mocks';
 
 import React from 'react';
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';
+import './query_bar.test.mocks';
 import { QueryBar } from './query_bar';
 
 const noop = () => {

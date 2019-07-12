@@ -18,7 +18,7 @@
  */
 import { EuiFlyoutBody, EuiFlyoutHeader, EuiTitle } from '@elastic/eui';
 import React from 'react';
-import { getNewPlatform } from 'ui/new_platform';
+import { npStart } from 'ui/new_platform';
 
 import {
   ContextMenuAction,
@@ -44,7 +44,7 @@ class SamplePanelAction extends ContextMenuAction {
     if (!embeddable) {
       return;
     }
-    getNewPlatform().start.core.overlays.openFlyout(
+    npStart.core.overlays.openFlyout(
       <React.Fragment>
         <EuiFlyoutHeader>
           <EuiTitle size="m" data-test-subj="samplePanelActionTitle">

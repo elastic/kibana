@@ -206,6 +206,7 @@ export interface DeprecationAPIResponse {
 
 export interface CallClusterOptions {
   wrap401Errors?: boolean;
+  signal?: AbortSignal;
 }
 
 export interface CallClusterWithRequest {

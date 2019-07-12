@@ -40,7 +40,7 @@ export default function GaugeVisType(Private) {
         addLegend: true,
         isDisplayWarning: false,
         gauge: {
-          verticalSplit: false,
+          alignment: 'automatic',
           extendRange: true,
           percentageMode: false,
           gaugeType: 'Arc',
@@ -86,6 +86,19 @@ export default function GaugeVisType(Private) {
       collections: {
         gaugeTypes: ['Arc', 'Circle'],
         gaugeColorMode: ['None', 'Labels', 'Background'],
+        alignments: [
+          {
+            id: 'automatic',
+            label: i18n.translate('kbnVislibVisTypes.gauge.alignmentAutomaticTitle', { defaultMessage: 'Automatic' })
+          },
+          {
+            id: 'horizontal',
+            label: i18n.translate('kbnVislibVisTypes.gauge.alignmentHorizontalTitle', { defaultMessage: 'Horizontal' })
+          },
+          {
+            id: 'vertical',
+            label: i18n.translate('kbnVislibVisTypes.gauge.alignmentVerticalTitle', { defaultMessage: 'Vertical' }) },
+        ],
         scales: ['linear', 'log', 'square root'],
         colorSchemas: Object.values(vislibColorMaps).map(value => ({ id: value.id, label: value.label })),
       },
@@ -106,7 +119,7 @@ export default function GaugeVisType(Private) {
         {
           group: 'buckets',
           name: 'group',
-          title: i18n.translate('kbnVislibVisTypes.gauge.groupTitle', { defaultMessage: 'Split Group' }),
+          title: i18n.translate('kbnVislibVisTypes.gauge.groupTitle', { defaultMessage: 'Split group' }),
           min: 0,
           max: 1,
           aggFilter: ['!geohash_grid', '!geotile_grid', '!filter']

@@ -20,6 +20,8 @@
 import { functionWrapper } from '../../interpreter/test_helpers';
 import { kibanaPie } from './pie_fn';
 
+jest.mock('ui/new_platform');
+
 const mockResponseHandler = jest.fn().mockReturnValue(Promise.resolve({
   hits: 1,
   names: ['Count'],
@@ -35,7 +37,7 @@ const mockResponseHandler = jest.fn().mockReturnValue(Promise.resolve({
   },
 }));
 jest.mock('ui/vis/response_handlers/vislib', () => ({
-  VislibSlicesResponseHandlerProvider: () => ({ handler: mockResponseHandler }),
+  vislibSlicesResponseHandlerProvider: () => ({ handler: mockResponseHandler }),
 }));
 
 describe('interpreter/functions#pie', () => {

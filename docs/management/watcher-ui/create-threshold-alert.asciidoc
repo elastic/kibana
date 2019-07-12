@@ -1,73 +1,107 @@
+[role="xpack"]
 [[watcher-create-threshold-alert]]
-=== Create Threshold Alert
+=== Create a threshold alert
 
-You can create a threshold alert to periodically check when your data goes above or below a certain threshold within a given time interval. It's one of the most common type of alerts that you can create using Watcher. For more advanced watches, see the <<watcher-create-advanced-watch>>.
+A threshold alert is one of the most common types of watches that you can create.  
+This alert periodically checks when your data is above, below, equals, 
+or is in between a certain threshold within a given time interval.
 
-To create a threshold alert:
+The following example walks you through creating a threshold alert. The alert 
+is triggered when the maximum total CPU usage on a machine goes above a 
+certain percentage. The example uses https://www.elastic.co/products/beats/metricbeat[Metricbeat] 
+to collect metrics from your systems and services. 
+{metricbeat-ref}/metricbeat-installation.html[Learn more] on how to install 
+and get started with Metricbeat.
 
-* Click the *Create threshold alert* button.
+[float]
+==== Get started
 
-==== Inputs & Triggers
+. Go to *Management > Elasticsearch > Watcher*.
 
-You must first configure the inputs and triggers.
+. Click *Create* and then select *Create threshold alert*. 
 
-. Add a `name` for the alert.
-. Choose one or more indices that have a time-based field as the alert input.
-. Configure a trigger interval.
+
+[float]
+==== Define the watch input and schedule
+
+You're navigated to a page that walks you through creating the alert.
+You're asked to define the watch name, the data that you want to evaluate, and
+how often you want to trigger the watch. 
+
+. Enter a name that you want to call the alert, for example, `cpu_threshold_alert`.
+
+. In the *Indices to query* field, enter `metricbeat-*` and select `@timestamp` 
+as the time field. 
+
+. Use the default schedule to run the watch every 1 minute.
 +
 [role="screenshot"]
-image:management/watcher-ui/images/threshold-alert/create-threshold-alert-created.png["Created Threshold Alert",link="management/watcher-ui/images/threshold-alert/create-threshold-alert-created.png"]
+image:management/watcher-ui/images/threshold-alert/create-threshold-alert-created.png["Input and schedule for threshold alert"]
 
-==== Condition
+[float]
+==== Add a condition
 
-Here, you can configure the condition that will cause alert to trigger. The UI is interactive and selecting the various elements within the expression will display a UI to change the values.
+You should now see a panel with default conditions and a visualization of the 
+data based on those conditions. The condition evaluates the data you’ve loaded 
+into the watch and determines if any action is required.
 
+. Click the `WHEN` expression and change the value to `max()`. 
++
+The `OF` expression now appears.  
+
+. Search for `system.process.cpu.total.norm.pct` and select it from the list. 
+
+
+. Select the `IS ABOVE` expression and change the value to `.25` to trigger 
+an alert whenever the CPU is above 25%.
++
+As you change the condition, the visualization is automatically updated. The black 
+line represents the threshold (25%), while the green fluctuating line 
+represents the change in CPU over the set time period.
++
 [role="screenshot"]
-image:management/watcher-ui/images/threshold-alert/threshold-alert-aggType.png["Threshold Alert Agg Type",link="management/watcher-ui/images/threshold-alert/threshold-alert-aggType.png"]
+image:management/watcher-ui/images/threshold-alert/threshold-alert-condition.png["Condition for threshold alert"]
 
-Here are a few examples of common alerts based on x-pack monitoring data:
+[float]
+==== Add an action
 
-* High heap usage:
-image:management/watcher-ui/images/threshold-alert/high-heap-usage.png["Threshold Alert Example High Heap Usage",link="management/watcher-ui/images/threshold-alert/high-heap-usage.png"]
+Now that the condition is set, you must add an action. The action triggers 
+when the watch condition is met. For a complete list of actions and how to configure them, see 
+{stack-ov}/action-conditions.html[Adding conditions to actions].
 
-* System load:
-image:management/watcher-ui/images/threshold-alert/system-load.png["Threshold Alert Example System Load",link="management/watcher-ui/images/threshold-alert/system-load.png"]
+In this example, you’ll configure an email action. You must have an {stack-ov}/actions-email.html#configuring-email[email account configured]
+in {es} for this example to work. 
 
+. Click *Add action* and select *Email*.
 
-Here are some specifics of how the visualization works:
+. In the *To email address* field, enter one or more email addresses to whom 
+you want to send the message when the condition is met. 
 
-* The time window that is used in the visualization is calculated by taking the duration defined in the expression and multiplying it by 5. So, if you select `FOR THE LAST 5 hours`, the visualization will show data from the last 25 hours.
+. Enter a subject and body for the email.
++
+[role="screenshot"]
+image:management/watcher-ui/images/threshold-alert/threshold-alert-action.png["Action for threshold alert"]
 
-* In the chart, you will see a blue line that represents the aggregated data. There is also a red line that represents the threshold value.
+. To test the action before saving the watch, click *Send test email*. 
++
+A sample email is sent using the configuration you set up.
 
-* If you use the `terms` aggregation to aggregate over a specific field, there will be multiple visualizations available and pagination controls will appear as shown below.
+. Click *Create alert*.  
++
+The alert appears on the Watcher overview page, where you can drill down into 
+the watch history and status.
 
-** image:management/watcher-ui/images/threshold-alert/threshold-alert-groupBy-pagination.png["Threshold Alert Group By pagination",link="management/watcher-ui/images/threshold-alert/threshold-alert-groupBy-pagination.png"]
+[float]
+==== Delete the alert
 
-==== Actions
+In this example, you set the threshold to 25% so you can see the watch fire. In 
+a  real-world scenario, this threshold is likely too low because the alerts are 
+so frequent. Once you are done experimenting, you should delete the alert. 
+Find the alert on the Watcher overview page and click the trash icon in the *Actions* column.
 
-Here you can configure the various actions that will occur when the alert fires.
+[float]
+==== Edit the alert
 
-Click `Add new action` to trigger a dropdown selection:
-
-image:management/watcher-ui/images/threshold-alert/threshold-alert-select-action.png["Threshold Alert Select Action",link="management/watcher-ui/images/threshold-alert/threshold-alert-select-action.png"]
-
-Selecting an action will allow you to customize settings for the respective action.
-
-image:management/watcher-ui/images/threshold-alert/threshold-alert-action.png["Threshold Alert Logging Action",link="management/watcher-ui/images/threshold-alert/threshold-alert-action.png"]
-
-All fields for an alert support using http://mustache.github.io/mustache.5.html[mustache syntax] and expose a `{{ctx}}` variable which exposes {stack-ov}/condition-script.html#accessing-watch-payload[various properties of the alert]
-
-The supported actions are:
-
-* {stack-ov}/actions-slack.html[Slack]
-* {stack-ov}/actions-logging.html[Logging]
-* {stack-ov}/actions-email.html[Email]
-
-Note that certain actions require configuration within {es}, such as 
-{stack-ov}/actions-email.html#configuring-email[email] and 
-{stack-ov}/actions-slack.html#configuring-slack[slack].
-
-include::create-advanced-watch.asciidoc[]
-
-
+Alternatively, you can keep the alert and adjust the threshold value. To edit 
+an alert, find the alert on the Watcher overview page and click the pencil icon 
+in the *Actions* column. 

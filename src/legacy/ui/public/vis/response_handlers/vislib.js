@@ -20,7 +20,7 @@
 import { buildHierarchicalData } from '../../agg_response/hierarchical/build_hierarchical_data';
 import { buildPointSeriesData } from '../../agg_response/point_series/point_series';
 import { VisResponseHandlersRegistryProvider } from '../../registry/vis_response_handlers';
-import { LegacyResponseHandlerProvider as legacyResponseHandlerProvider } from './legacy';
+import { legacyResponseHandlerProvider } from './legacy';
 
 const tableResponseHandler = legacyResponseHandlerProvider().handler;
 
@@ -78,14 +78,14 @@ const handlerFunction =  function (convertTable) {
   };
 };
 
-const VislibSeriesResponseHandlerProvider = function () {
+export const vislibSeriesResponseHandlerProvider = function () {
   return {
     name: 'vislib_series',
     handler: handlerFunction(buildPointSeriesData)
   };
 };
 
-const VislibSlicesResponseHandlerProvider = function () {
+export const vislibSlicesResponseHandlerProvider = function () {
   return {
     name: 'vislib_slices',
     handler: handlerFunction(buildHierarchicalData)
@@ -94,7 +94,6 @@ const VislibSlicesResponseHandlerProvider = function () {
 
 
 
-VisResponseHandlersRegistryProvider.register(VislibSeriesResponseHandlerProvider);
-VisResponseHandlersRegistryProvider.register(VislibSlicesResponseHandlerProvider);
+VisResponseHandlersRegistryProvider.register(vislibSeriesResponseHandlerProvider);
+VisResponseHandlersRegistryProvider.register(vislibSlicesResponseHandlerProvider);
 
-export { VislibSeriesResponseHandlerProvider, VislibSlicesResponseHandlerProvider };

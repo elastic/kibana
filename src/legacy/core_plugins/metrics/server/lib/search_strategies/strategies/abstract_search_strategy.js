@@ -21,7 +21,7 @@ export class AbstractSearchStrategy {
   constructor(server, callWithRequestFactory, SearchRequest) {
     this.getCallWithRequestInstance = req => callWithRequestFactory(server, req);
 
-    this.getSearchRequest = (req) => {
+    this.getSearchRequest = req => {
       const callWithRequest = this.getCallWithRequestInstance(req);
 
       return new SearchRequest(req, callWithRequest);

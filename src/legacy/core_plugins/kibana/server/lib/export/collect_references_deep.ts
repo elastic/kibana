@@ -17,10 +17,7 @@
  * under the License.
  */
 
-import {
-  SavedObject,
-  SavedObjectsClient,
-} from '../../../../../server/saved_objects/service/saved_objects_client';
+import { SavedObject, SavedObjectsClientContract } from 'src/core/server';
 
 const MAX_BULK_GET_SIZE = 10000;
 
@@ -30,7 +27,7 @@ interface ObjectsToCollect {
 }
 
 export async function collectReferencesDeep(
-  savedObjectClient: SavedObjectsClient,
+  savedObjectClient: SavedObjectsClientContract,
   objects: ObjectsToCollect[]
 ) {
   let result: SavedObject[] = [];

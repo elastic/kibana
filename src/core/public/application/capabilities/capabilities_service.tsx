@@ -17,12 +17,12 @@
  * under the License.
  */
 
-import { deepFreeze, RecursiveReadonly } from '../../utils/deep_freeze';
+import { deepFreeze, RecursiveReadonly } from '../../../utils';
 import { MixedApp } from '../application_service';
 import { InjectedMetadataStart } from '../../injected_metadata';
 
 interface StartDeps {
-  apps: ReadonlyArray<MixedApp>;
+  apps: readonly MixedApp[];
   injectedMetadata: InjectedMetadataStart;
 }
 
@@ -63,7 +63,7 @@ export interface CapabilitiesStart {
    * Apps available based on the current capabilities. Should be used
    * to show navigation links and make routing decisions.
    */
-  availableApps: ReadonlyArray<MixedApp>;
+  availableApps: readonly MixedApp[];
 }
 
 /** @internal */

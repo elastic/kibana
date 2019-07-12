@@ -19,18 +19,20 @@
 
 import chrome from 'ui/chrome';
 import { getFromSavedObject } from 'ui/index_patterns/static_utils';
+import { isEmpty } from 'lodash';
 
 const config = chrome.getUiSettingsClient();
 
 export async function fetchIndexPatterns(indexPatternStrings: string[]) {
-  const quotedIndexPatternStrings = indexPatternStrings.map(
-    indexPatternString => `"${indexPatternString}"`
-  );
-  const searchString = quotedIndexPatternStrings.join(' | ');
+  if (!indexPatternStrings || isEmpty(indexPatternStrings)) {
+    return [];
+  }
+
+  const searchString = indexPatternStrings.map(string => `"${string}"`).join(' | ');
   const indexPatternsFromSavedObjects = await chrome.getSavedObjectsClient().find({
     type: 'index-pattern',
     fields: ['title', 'fields'],
-    search: `"${searchString}"`,
+    search: searchString,
     searchFields: ['title'],
   });
 
@@ -48,7 +50,5 @@ export async function fetchIndexPatterns(indexPatternStrings: string[]) {
 
 const fetchDefaultIndexPattern = async () => {
   const savedObjectsClient = chrome.getSavedObjectsClient();
-  const indexPattern = await savedObjectsClient.get('index-pattern', config.get('defaultIndex'));
-
-  return getFromSavedObject(indexPattern);
+  return await savedObjectsClient.get('index-pattern', config.get('defaultIndex'));
 };

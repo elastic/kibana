@@ -20,6 +20,9 @@
 import minimatch from 'minimatch';
 
 import { deleteAll, deleteEmptyFolders, scanDelete } from '../lib';
+import { resolve } from 'path';
+
+const RELATIVE_CTAGS_BUILD_DIR = 'node_modules/@elastic/node-ctags/ctags/build';
 
 export const CleanTask = {
   global: true,
@@ -168,7 +171,10 @@ export const CleanExtraFilesFromModulesTask = {
 
     log.info('Deleted %d files', await scanDelete({
       directory: build.resolvePath('node_modules'),
-      regularExpressions
+      regularExpressions,
+      excludePaths: [
+        build.resolvePath('node_modules/@elastic/ctags-langserver/vendor')
+      ]
     }));
 
     if (!build.isOss()) {
@@ -204,7 +210,7 @@ export const CleanExtraBrowsersTask = {
 
   async run(config, log, build) {
     const getBrowserPathsForPlatform = platform => {
-      const reportingDir = 'x-pack/plugins/reporting';
+      const reportingDir = 'x-pack/legacy/plugins/reporting';
       const chromiumDir = '.chromium';
       const chromiumPath = p =>
         build.resolvePathForPlatform(platform, reportingDir, chromiumDir, p);
@@ -254,4 +260,34 @@ export const CleanEmptyFoldersTask = {
       ]
     );
   },
+};
+
+export const CleanCtagBuildTask = {
+  description: 'Cleaning extra platform-specific files from @elastic/node-ctag build dir',
+
+  async run(config, log, build) {
+    const getPlatformId = (platform) => {
+      if (platform.isWindows()) {
+        return 'win32';
+      } else if (platform.isLinux()) {
+        return 'linux';
+      } else if (platform.isMac()) {
+        return 'darwin';
+      }
+    };
+
+    await Promise.all(
+      config.getTargetPlatforms().map(async platform => {
+        if (build.isOss()) {
+          return;
+        }
+
+        const ctagsBuildDir = build.resolvePathForPlatform(platform, RELATIVE_CTAGS_BUILD_DIR);
+        await deleteAll([
+          resolve(ctagsBuildDir, '*'),
+          `!${resolve(ctagsBuildDir, `ctags-node-v${process.versions.modules}-${getPlatformId(platform)}-x64`)}`
+        ], log);
+      })
+    );
+  }
 };

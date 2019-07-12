@@ -18,10 +18,8 @@
  */
 
 import _ from 'lodash';
-import { SavedObjectsClientProvider } from '../saved_objects';
 
-export function IndexPatternsGetProvider(Private) {
-  const savedObjectsClient = Private(SavedObjectsClientProvider);
+export function indexPatternsGetProvider(savedObjectsClient) {
 
   // many places may require the id list, so we will cache it separately
   // didn't incorporate with the indexPattern cache to prevent id collisions.
