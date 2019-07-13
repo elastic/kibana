@@ -35,7 +35,7 @@ jest.mock(
   'ui/chrome',
   () => ({
     getBasePath: jest.fn(() => 'path'),
-    getUiSettingsClient: jest.fn(() => {
+    getUiSettingsClientContract: jest.fn(() => {
       return {
         get: () => true,
       };

@@ -93,6 +93,7 @@ export class FilterEditor extends Component {
       >
         <div className="mapFilterEditor" data-test-subj="mapFilterEditor">
           <QueryBar
+            uiSettings={settings}
             query={layerQuery ? layerQuery : { language: settings.get('search:queryLanguage'), query: '' }}
             onSubmit={this._onQueryChange}
             appName="maps"

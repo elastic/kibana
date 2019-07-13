@@ -22,7 +22,7 @@ import './change_time_filter.test.mocks';
 jest.mock('ui/chrome',
   () => ({
     getBasePath: () => `/some/base/path`,
-    getUiSettingsClient: () => {
+    getUiSettingsClientContract: () => {
       return {
         get: (key) => {
           switch(key) {

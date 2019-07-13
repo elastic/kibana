@@ -35,8 +35,8 @@ import { isFilterable, getFromSavedObject } from 'ui/index_patterns/static_utils
 
 // IndexPattern, StaticIndexPattern, StaticIndexPatternField, Field
 import * as types from 'ui/index_patterns';
+import { UiSettingsClientContract } from 'kibana/public';
 
-const config = chrome.getUiSettingsClient();
 const savedObjectsClient = chrome.getSavedObjectsClient();
 /**
  * Index Patterns Service
@@ -50,9 +50,9 @@ const savedObjectsClient = chrome.getSavedObjectsClient();
  * @internal
  */
 export class IndexPatternsService {
-  public setup() {
+  public setup(uiSettings: UiSettingsClientContract) {
     return {
-      indexPatterns: new IndexPatterns(config, savedObjectsClient),
+      indexPatterns: new IndexPatterns(uiSettings, savedObjectsClient),
     };
   }
 

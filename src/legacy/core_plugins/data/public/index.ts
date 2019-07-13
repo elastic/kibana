@@ -46,7 +46,11 @@ export class DataPlugin {
     // TODO: this is imported here to avoid circular imports.
     // eslint-disable-next-line @typescript-eslint/no-var-requires
     const { getInterpreter } = require('plugins/interpreter/interpreter');
-    const indexPatternsService = this.indexPatterns.setup();
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const { npSetup } = require('ui/new_platform');
+
+    const uiSettingsClient = npSetup.core.uiSettings;
+    const indexPatternsService = this.indexPatterns.setup(uiSettingsClient);
     return {
       expressions: this.expressions.setup({
         interpreter: {

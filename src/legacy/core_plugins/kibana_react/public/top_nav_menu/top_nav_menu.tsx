@@ -21,12 +21,14 @@ import React from 'react';
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n/react';
+import { UiSettingsClientContract } from 'kibana/public';
 import { TopNavMenuData, TopNavMenuAction } from './top_nav_menu_data';
 import { TopNavMenuItem } from './top_nav_menu_item';
 import { SearchBar, SearchBarProps } from '../search_bar';
 
 type Props = Partial<SearchBarProps> & {
   name: string;
+  uiSettings: UiSettingsClientContract;
   config?: TopNavMenuData[];
   showSearchBar?: boolean;
   showSearchBarInline?: boolean;
@@ -54,6 +56,7 @@ export function TopNavMenu(props: Props) {
       <SearchBar
         query={props.query}
         filters={props.filters}
+        uiSettings={props.uiSettings}
         showQueryBar={props.showQueryBar}
         showQueryInput={props.showQueryInput}
         showFilterBar={props.showFilterBar}
@@ -108,6 +111,9 @@ export function TopNavMenu(props: Props) {
       );
     }
   }
+
+  // Needed due to Angular loading chrome sync
+  if (!props.uiSettings) return null;
 
   return <I18nProvider>{renderLayout()}</I18nProvider>;
 }

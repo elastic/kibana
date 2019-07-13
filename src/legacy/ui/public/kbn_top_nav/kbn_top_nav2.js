@@ -22,6 +22,7 @@ import { wrapInI18nContext } from 'ui/i18n';
 import { uiModules } from 'ui/modules';
 import { TopNavMenu } from '../../../core_plugins/kibana_react/public';
 import { Storage } from 'ui/storage';
+import chrome from 'ui/chrome';
 
 const module = uiModules.get('kibana');
 
@@ -44,12 +45,14 @@ module.directive('kbnTopNav2', () => {
       // Pass in storage
       const localStorage = new Storage(window.localStorage);
       child.setAttribute('store', 'store');
+      child.setAttribute('ui-settings', 'uiSettings');
 
       // Append helper directive
       elem.append(child);
 
       const linkFn = ($scope, _, $attr) => {
         $scope.store = localStorage;
+        $scope.uiSettings = chrome.getUiSettingsClient();
 
         // Watch the disableButton functions
         $scope.$watch(() => {
@@ -81,6 +84,7 @@ module.directive('kbnTopNav2Helper', (reactDirective) => {
 
       ['query', { watchDepth: 'reference' }],
       ['store', { watchDepth: 'reference' }],
+      ['uiSettings', { watchDepth: 'reference' }],
       ['intl', { watchDepth: 'reference' }],
       ['store', { watchDepth: 'reference' }],
 

@@ -38,7 +38,7 @@ const mockIndexPattern = {
 const mockChromeFactory = jest.fn(() => {
   return {
     getBasePath: () => `foo`,
-    getUiSettingsClient: () => {
+    getUiSettingsClientContract: () => {
       return {
         get: (key: string) => {
           switch (key) {
