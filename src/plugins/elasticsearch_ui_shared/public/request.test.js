@@ -66,7 +66,7 @@ describe('request lib', () => {
     it('uses the provided path, method, and body to send the request', async () => {
       const response = await sendRequest({ ...successRequest });
       sinon.assert.calledOnce(sendPost);
-      expect(response).toBe(successResponse);
+      expect(response).toEqual({ data: successResponse.data });
     });
 
     it('surfaces errors', async () => {
@@ -121,15 +121,21 @@ describe('request lib', () => {
         });
       });
 
-      describe('onSuccess', () => {
+      describe('processData', () => {
         it('is called once the request resolves', async () => {
-          const onSuccess = sinon.stub();
-          initUseRequest({ ...successRequest, onSuccess });
-          sinon.assert.notCalled(onSuccess);
+          const processData = sinon.stub();
+          initUseRequest({ ...successRequest, processData });
+          sinon.assert.notCalled(processData);
 
           await wait(5);
-          sinon.assert.calledOnce(onSuccess);
-          sinon.assert.calledWith(onSuccess, successResponse);
+          sinon.assert.calledOnce(processData);
+          sinon.assert.calledWith(processData, successResponse.data);
+        });
+
+        it('processes data', async () => {
+          initUseRequest({ ...successRequest, processData: () => 'intercepted' });
+          await wait(5);
+          expect(hook.data).toBe('intercepted');
         });
       });
     });

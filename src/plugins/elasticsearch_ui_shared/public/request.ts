@@ -34,7 +34,7 @@ export interface SendRequestResponse {
 export interface UseRequest extends SendRequest {
   interval?: number;
   initialData?: any;
-  onSuccess?: any;
+  processData?: any;
 }
 
 export function createRequestService(httpClient: any) {
@@ -51,7 +51,7 @@ export function createRequestService(httpClient: any) {
         throw new Error(response.statusText);
       }
 
-      return response;
+      return { data: response.data };
     } catch (e) {
       return {
         error: e.response ? e.response : e,
@@ -59,7 +59,7 @@ export function createRequestService(httpClient: any) {
     }
   };
 
-  const useRequest = ({ path, method, body, interval, initialData, onSuccess }: UseRequest) => {
+  const useRequest = ({ path, method, body, interval, initialData, processData }: UseRequest) => {
     // Main states for tracking request status and data
     const [error, setError] = useState<null | any>(null);
     const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -100,18 +100,21 @@ export function createRequestService(httpClient: any) {
       };
 
       const response = await _sendRequest(requestBody);
+      let { data: responseData } = response;
+      const { error: responseError } = response;
 
-      if (onSuccess) {
-        onSuccess(response);
+      if (processData) {
+        responseData = processData(responseData);
       }
 
-      // Don't update state if an outdated request has resolved.
+      // If an outdated request has resolved, DON'T update state, but DO allow the processData handler
+      // to execute side effects like update telemetry.
       if (isOutdatedRequest) {
         return;
       }
 
-      setError(response.error);
-      setData(response.data);
+      setError(responseError);
+      setData(responseData);
       setIsLoading(false);
       setIsInitialRequest(false);
 
@@ -122,7 +125,8 @@ export function createRequestService(httpClient: any) {
 
     useEffect(() => {
       sendRequest();
-    }, [path, method, body]);
+      // Don't watch body because it's likely to be a new object even if its shape hasn't changed.
+    }, [path, method]);
 
     useEffect(() => {
       updateInterval();

@@ -75,7 +75,7 @@ export const loadWatchHistory = (id: string, startTime: string) => {
 
 export const loadWatchHistoryDetail = (id: string | undefined) => {
   return useRequest({
-    path: !id ? undefined : `${basePath}/history/${id}`,
+    path: !id ? '' : `${basePath}/history/${id}`,
     method: 'get',
     processData: ({ watchHistoryItem }: { watchHistoryItem: any }) =>
       WatchHistoryItem.fromUpstreamJson(watchHistoryItem),
