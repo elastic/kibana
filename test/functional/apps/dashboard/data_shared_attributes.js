@@ -69,7 +69,7 @@ export default function ({ getService, getPageObjects }) {
     });
 
     it('data-shared-item title is cleared with an empty panel title string', async () => {
-      await dashboardPanelActions.setCustomPanelTitle('');
+      await dashboardPanelActions.toggleHidePanelTitle();
       await retry.try(async () => {
         const sharedData = await PageObjects.dashboard.getPanelSharedItemData();
         const foundSharedItemTitle = !!sharedData.find(item => {
@@ -77,6 +77,7 @@ export default function ({ getService, getPageObjects }) {
         });
         expect(foundSharedItemTitle).to.be(true);
       });
+      await dashboardPanelActions.toggleHidePanelTitle();
     });
 
     it('data-shared-item title can be reset', async () => {
