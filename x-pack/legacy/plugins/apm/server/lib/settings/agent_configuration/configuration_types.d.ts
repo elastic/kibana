@@ -6,7 +6,7 @@
 
 export interface AgentConfigurationIntake {
   settings: {
-    transaction_sample_rate: string;
+    transaction_sample_rate: number;
   };
   service: {
     name: string;

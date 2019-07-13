@@ -247,7 +247,7 @@ export function AddSettingFlyoutBody({
               e.preventDefault();
               setSampleRate(e.target.value);
             }}
-            disabled={!(serviceName && environment) || !selectedConfig}
+            disabled={!(serviceName && environment) && !selectedConfig}
           />
         </EuiFormRow>
 

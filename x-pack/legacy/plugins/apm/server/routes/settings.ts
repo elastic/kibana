@@ -113,6 +113,21 @@ export function initSettingsApi(core: InternalCoreSetup) {
     }
   });
 
+  const agentConfigPayloadValidation = {
+    settings: Joi.object({
+      transaction_sample_rate: Joi.number()
+        .min(0)
+        .max(1)
+        .precision(3)
+        .required()
+        .options({ convert: false })
+    }),
+    service: Joi.object({
+      name: Joi.string().required(),
+      environment: Joi.string()
+    })
+  };
+
   // create configuration
   server.route({
     method: 'POST',
@@ -121,7 +136,8 @@ export function initSettingsApi(core: InternalCoreSetup) {
       validate: {
         query: {
           _debug: Joi.bool()
-        }
+        },
+        payload: agentConfigPayloadValidation
       },
       tags: ['access:apm']
     },
@@ -143,7 +159,8 @@ export function initSettingsApi(core: InternalCoreSetup) {
       validate: {
         query: {
           _debug: Joi.bool()
-        }
+        },
+        payload: agentConfigPayloadValidation
       },
       tags: ['access:apm']
     },

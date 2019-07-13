@@ -30,7 +30,10 @@ export async function createApmAgentConfigurationIndex(server: Server) {
             settings: {
               properties: {
                 transaction_sample_rate: {
-                  type: 'text'
+                  type: 'scaled_float',
+                  scaling_factor: 1000,
+                  ignore_malformed: true,
+                  coerce: false
                 }
               }
             },
