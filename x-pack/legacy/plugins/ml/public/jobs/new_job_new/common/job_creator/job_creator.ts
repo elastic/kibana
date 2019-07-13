@@ -313,4 +313,12 @@ export class JobCreator {
     }
     return null;
   }
+
+  public get formattedJobJson() {
+    return JSON.stringify(this._job_config, null, 2);
+  }
+
+  public get formattedDatafeedJson() {
+    return JSON.stringify(this._datafeed_config, null, 2);
+  }
 }
