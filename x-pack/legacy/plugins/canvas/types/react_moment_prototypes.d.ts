@@ -4,7 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { compose } from 'recompose';
-import { DatetimeCalendar as Component } from './datetime_calendar';
-
-export const DatetimeCalendar = compose()(Component);
+declare module 'react-moment-proptypes';
