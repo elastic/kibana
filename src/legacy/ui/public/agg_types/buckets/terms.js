@@ -81,6 +81,8 @@ export const termsBucketAgg = new BucketAggType({
     const nestedSearchSource = searchSource.createChild();
     if (aggConfig.params.otherBucket) {
       const filterAgg = buildOtherBucketAgg(aggConfigs, aggConfig, resp);
+      if (!filterAgg) return resp;
+
       nestedSearchSource.setField('aggs', filterAgg);
 
       const request = inspectorAdapters.requests.start(

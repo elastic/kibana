@@ -119,6 +119,12 @@ const buildOtherBucketAgg = (aggConfigs, aggWithOtherBucket, response) => {
   const aggs = aggConfigs.toDsl();
   const indexPattern = aggWithOtherBucket.params.field.indexPattern;
 
+  const aggBucketResults = response.aggregations[bucketAggs[0].id].buckets.length > 0;
+  if (!aggBucketResults) {
+    // No buckets data in this response
+    return false;
+  }
+
   // create filters aggregation
   const filterAgg = aggConfigs.createAggConfig({
     type: 'filters',
