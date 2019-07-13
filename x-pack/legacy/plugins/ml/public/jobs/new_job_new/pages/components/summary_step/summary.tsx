@@ -12,6 +12,7 @@ import { JobCreatorContext } from '../job_creator_context';
 import { KibanaContext, isKibanaContext } from '../../../../../data_frame/common/kibana_context';
 import { mlJobService } from '../../../../../services/job_service';
 import { JsonFlyout } from './json_flyout';
+import { isSingleMetricJobCreator } from '../../../common/job_creator';
 
 export const SummaryStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) => {
   const kibanaContext = useContext(KibanaContext);
@@ -41,7 +42,7 @@ export const SummaryStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) =>
       [jobCreator.jobId],
       jobCreator.start,
       jobCreator.end,
-      'timeseriesexplorer'
+      isSingleMetricJobCreator(jobCreator) === true ? 'timeseriesexplorer' : 'explorer'
     );
     window.open(url, '_blank');
   }
@@ -82,7 +83,7 @@ export const SummaryStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) =>
               &emsp;
             </Fragment>
           )}
-          {progress === 100 && (
+          {progress > 0 && (
             <Fragment>
               <EuiButton onClick={viewResults}>View results</EuiButton>
             </Fragment>
