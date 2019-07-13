@@ -59,9 +59,6 @@ export function AddSettingsFlyout({
   const [serviceName, setServiceName] = useState<string | undefined>(
     selectedConfig ? selectedConfig.service.name : undefined
   );
-  // const [sampleRate, setSampleRate] = useState<number>(
-  //   selectedConfig ? parseFloat(selectedConfig.settings.transaction_sample_rate) : NaN
-  // );
   const [sampleRate, setSampleRate] = useState<string | undefined>(
     selectedConfig ? selectedConfig.settings.transaction_sample_rate : undefined
   );

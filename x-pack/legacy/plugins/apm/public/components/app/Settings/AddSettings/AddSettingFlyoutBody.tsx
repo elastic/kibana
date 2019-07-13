@@ -76,8 +76,6 @@ export function AddSettingFlyoutBody({
   setEnvironment: React.Dispatch<React.SetStateAction<string | undefined>>;
   serviceName?: string;
   setServiceName: React.Dispatch<React.SetStateAction<string | undefined>>;
-  // sampleRate: number;
-  // setSampleRate: React.Dispatch<React.SetStateAction<number>>;
   sampleRate?: string;
   setSampleRate: React.Dispatch<React.SetStateAction<string | undefined>>;
   sampleRateFloat: number;
@@ -238,20 +236,15 @@ export function AddSettingFlyoutBody({
           }
         >
           <EuiFieldText
-            // min={0}
-            // max={1}
-            // step={0.001}
             placeholder={i18n.translate(
               'xpack.apm.settings.agentConf.flyOut.sampleRateConfigurationInputPlaceholderText',
               {
                 defaultMessage: 'Set sample rate'
               }
             )}
-            // value={isNaN(sampleRate) ? '' : sampleRate}
             value={sampleRate === undefined ? '' : sampleRate}
             onChange={e => {
               e.preventDefault();
-              // setSampleRate(parseFloat(e.target.value));
               setSampleRate(e.target.value);
             }}
             disabled={!(serviceName && environment) || !selectedConfig}
