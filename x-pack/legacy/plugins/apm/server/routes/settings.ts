@@ -27,8 +27,6 @@ const defaultErrorHandler = (err: Error) => {
 export function initSettingsApi(core: InternalCoreSetup) {
   const { server } = core.http;
 
-  createApmAgentConfigurationIndex(server);
-
   // get list of configurations
   server.route({
     method: 'GET',
@@ -42,6 +40,8 @@ export function initSettingsApi(core: InternalCoreSetup) {
       tags: ['access:apm']
     },
     handler: async req => {
+      await createApmAgentConfigurationIndex(server);
+
       const setup = setupRequest(req);
       return await listConfigurations({
         setup

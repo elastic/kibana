@@ -59,8 +59,11 @@ export function AddSettingsFlyout({
   const [serviceName, setServiceName] = useState<string | undefined>(
     selectedConfig ? selectedConfig.service.name : undefined
   );
-  const [sampleRate, setSampleRate] = useState<number>(
-    selectedConfig ? parseFloat(selectedConfig.settings.sample_rate) : NaN
+  // const [sampleRate, setSampleRate] = useState<number>(
+  //   selectedConfig ? parseFloat(selectedConfig.settings.transaction_sample_rate) : NaN
+  // );
+  const [sampleRate, setSampleRate] = useState<string | undefined>(
+    selectedConfig ? selectedConfig.settings.transaction_sample_rate : undefined
   );
   const { data: serviceNames = [], status: serviceNamesStatus } = useFetcher<
     string[]
@@ -82,7 +85,8 @@ export function AddSettingsFlyout({
     env =>
       env.name === environment && (Boolean(selectedConfig) || env.available)
   );
-  const isSampleRateValid = sampleRate >= 0 && sampleRate <= 1;
+  const sampleRateFloat = parseFloat(sampleRate || '');
+  const isSampleRateValid = sampleRateFloat >= 0 && sampleRateFloat <= 1;
 
   return (
     <EuiPortal>
@@ -143,6 +147,7 @@ export function AddSettingsFlyout({
             serviceName={serviceName}
             setServiceName={setServiceName}
             sampleRate={sampleRate}
+            sampleRateFloat={sampleRateFloat}
             setSampleRate={setSampleRate}
             serviceNames={serviceNames}
             serviceNamesStatus={serviceNamesStatus}
@@ -182,7 +187,7 @@ export function AddSettingsFlyout({
                   await saveConfig({
                     environment,
                     serviceName,
-                    sampleRate,
+                    sampleRate: sampleRateFloat,
                     configurationId: selectedConfig
                       ? selectedConfig.id
                       : undefined
@@ -264,7 +269,7 @@ async function saveConfig({
 
     const configuration = {
       settings: {
-        sample_rate: sampleRate.toString(10)
+        transaction_sample_rate: sampleRate.toString(10)
       },
       service: {
         name: serviceName,

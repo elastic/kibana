@@ -19,6 +19,9 @@ export async function createApmAgentConfigurationIndex(server: Server) {
     const result = await callWithInternalUser('indices.create', {
       index,
       body: {
+        settings: {
+          'index.auto_expand_replicas': '0-1'
+        },
         mappings: {
           properties: {
             '@timestamp': {
@@ -26,7 +29,7 @@ export async function createApmAgentConfigurationIndex(server: Server) {
             },
             settings: {
               properties: {
-                sample_rate: {
+                transaction_sample_rate: {
                   type: 'text'
                 }
               }

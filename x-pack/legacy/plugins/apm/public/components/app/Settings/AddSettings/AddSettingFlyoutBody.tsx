@@ -10,16 +10,48 @@ import {
   EuiForm,
   EuiFormRow,
   EuiButton,
-  EuiFieldNumber,
+  EuiFieldText,
   EuiTitle,
   EuiSpacer,
   EuiHorizontalRule,
   EuiText
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { isEmpty } from 'lodash';
 import { FETCH_STATUS } from '../../../../hooks/useFetcher';
 import { Config } from '../SettingsList';
 import { ENVIRONMENT_NOT_DEFINED } from '../../../../../common/environment_filter_values';
+
+const NO_SELECTION = 'NO_SELECTION';
+const EuiSelectWithPlaceholder: typeof EuiSelect = props => (
+  <EuiSelect
+    {...props}
+    options={[
+      { text: props.placeholder, value: NO_SELECTION },
+      ...props.options
+    ]}
+    value={isEmpty(props.value) ? NO_SELECTION : props.value}
+    onChange={e => {
+      if (props.onChange) {
+        props.onChange(
+          Object.assign(e, {
+            target: Object.assign(e.target, {
+              value:
+                e.target.value === NO_SELECTION ? undefined : e.target.value
+            })
+          })
+        );
+      }
+    }}
+  />
+);
+
+const selectPlaceholderLabel = `- ${i18n.translate(
+  'xpack.apm.settings.agentConf.flyOut.selectPlaceholder',
+  {
+    defaultMessage: 'Select'
+  }
+)} -`;
 
 export function AddSettingFlyoutBody({
   selectedConfig,
@@ -30,6 +62,7 @@ export function AddSettingFlyoutBody({
   setServiceName,
   sampleRate,
   setSampleRate,
+  sampleRateFloat,
   serviceNames,
   serviceNamesStatus,
   environments,
@@ -43,8 +76,11 @@ export function AddSettingFlyoutBody({
   setEnvironment: React.Dispatch<React.SetStateAction<string | undefined>>;
   serviceName?: string;
   setServiceName: React.Dispatch<React.SetStateAction<string | undefined>>;
-  sampleRate: number;
-  setSampleRate: React.Dispatch<React.SetStateAction<number>>;
+  // sampleRate: number;
+  // setSampleRate: React.Dispatch<React.SetStateAction<number>>;
+  sampleRate?: string;
+  setSampleRate: React.Dispatch<React.SetStateAction<string | undefined>>;
+  sampleRateFloat: number;
   serviceNames: string[];
   serviceNamesStatus?: FETCH_STATUS;
   environments: Array<{
@@ -99,9 +135,9 @@ export function AddSettingFlyoutBody({
             }
           )}
         >
-          <EuiSelect
+          <EuiSelectWithPlaceholder
+            placeholder={selectPlaceholderLabel}
             isLoading={serviceNamesStatus === 'loading'}
-            hasNoInitialSelection
             options={serviceNames.map(text => ({ text }))}
             value={serviceName}
             disabled={Boolean(selectedConfig)}
@@ -141,14 +177,13 @@ export function AddSettingFlyoutBody({
                 environment &&
                 isSelectedEnvironmentValid &&
                 environmentStatus === 'success') ||
-              isNaN(sampleRate)
+              isNaN(sampleRateFloat)
             )
           }
         >
-          <EuiSelect
-            key={serviceName} // rerender when serviceName changes to mitigate initial selection bug in EuiSelect
+          <EuiSelectWithPlaceholder
+            placeholder={selectPlaceholderLabel}
             isLoading={environmentStatus === 'loading'}
-            hasNoInitialSelection
             options={environmentOptions}
             value={environment}
             disabled={!serviceName || Boolean(selectedConfig)}
@@ -195,28 +230,31 @@ export function AddSettingFlyoutBody({
           isInvalid={
             !(
               (Boolean(selectedConfig) &&
-                (isNaN(sampleRate) || isSampleRateValid)) ||
+                (isNaN(sampleRateFloat) || isSampleRateValid)) ||
               (!selectedConfig &&
                 (!(serviceName || environment) ||
-                  (isNaN(sampleRate) || isSampleRateValid)))
+                  (isNaN(sampleRateFloat) || isSampleRateValid)))
             )
           }
         >
-          <EuiFieldNumber
-            min={0}
-            max={1}
-            step={0.001}
+          <EuiFieldText
+            // min={0}
+            // max={1}
+            // step={0.001}
             placeholder={i18n.translate(
               'xpack.apm.settings.agentConf.flyOut.sampleRateConfigurationInputPlaceholderText',
               {
                 defaultMessage: 'Set sample rate'
               }
             )}
-            value={isNaN(sampleRate) ? '' : sampleRate}
+            // value={isNaN(sampleRate) ? '' : sampleRate}
+            value={sampleRate === undefined ? '' : sampleRate}
             onChange={e => {
               e.preventDefault();
-              setSampleRate(parseFloat(e.target.value));
+              // setSampleRate(parseFloat(e.target.value));
+              setSampleRate(e.target.value);
             }}
+            disabled={!(serviceName && environment) || !selectedConfig}
           />
         </EuiFormRow>
 
