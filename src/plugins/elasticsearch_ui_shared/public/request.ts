@@ -37,120 +37,115 @@ export interface UseRequest extends SendRequest {
   processData?: any;
 }
 
-export function createRequestService(httpClient: any) {
-  const _sendRequest = async ({
-    path,
-    method,
-    body,
-  }: SendRequest): Promise<Partial<SendRequestResponse>> => {
-    try {
-      // NOTE: This is tightly coupled to Angular's $http service.
-      const response = await httpClient[method](path, body);
+export const sendRequest = async (
+  httpClient: any,
+  { path, method, body }: SendRequest
+): Promise<Partial<SendRequestResponse>> => {
+  try {
+    // NOTE: This is tightly coupled to Angular's $http service.
+    const response = await httpClient[method](path, body);
 
-      if (typeof response.data === 'undefined') {
-        throw new Error(response.statusText);
-      }
+    if (typeof response.data === 'undefined') {
+      throw new Error(response.statusText);
+    }
 
-      return { data: response.data };
-    } catch (e) {
-      return {
-        error: e.response ? e.response : e,
-      };
+    return { data: response.data };
+  } catch (e) {
+    return {
+      error: e.response ? e.response : e,
+    };
+  }
+};
+
+export const useRequest = (
+  httpClient: any,
+  { path, method, body, interval, initialData, processData }: UseRequest
+) => {
+  // Main states for tracking request status and data
+  const [error, setError] = useState<null | any>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [data, setData] = useState<any>(initialData);
+
+  // Consumers can use isInitialRequest to implement a polling UX.
+  const [isInitialRequest, setIsInitialRequest] = useState<boolean>(true);
+  const requestInterval = useRef<any>(null);
+  const requestIntervalId = useRef<any>(null);
+
+  // We always want to use the most recently-set interval in updateInterval.
+  requestInterval.current = interval;
+
+  // Tied to every render and bound to each request.
+  let isOutdatedRequest = false;
+
+  const updateInterval = () => {
+    // Clear current interval
+    if (requestIntervalId.current) {
+      clearTimeout(requestIntervalId.current);
+    }
+
+    // Set new interval
+    if (requestInterval.current) {
+      requestIntervalId.current = setTimeout(_sendRequest, requestInterval.current);
     }
   };
 
-  const useRequest = ({ path, method, body, interval, initialData, processData }: UseRequest) => {
-    // Main states for tracking request status and data
-    const [error, setError] = useState<null | any>(null);
-    const [isLoading, setIsLoading] = useState<boolean>(true);
-    const [data, setData] = useState<any>(initialData);
+  const _sendRequest = async () => {
+    // We don't clear error or data, so it's up to the consumer to decide whether to display the
+    // "old" error/data or loading state when a new request is in-flight.
+    setIsLoading(true);
 
-    // Consumers can use isInitialRequest to implement a polling UX.
-    const [isInitialRequest, setIsInitialRequest] = useState<boolean>(true);
-    const requestInterval = useRef<any>(null);
-    const requestIntervalId = useRef<any>(null);
+    const requestBody = {
+      path,
+      method,
+      body,
+    };
 
-    // We always want to use the most recently-set interval in updateInterval.
-    requestInterval.current = interval;
+    const response = await sendRequest(httpClient, requestBody);
+    let { data: responseData } = response;
+    const { error: responseError } = response;
 
-    // Tied to every render and bound to each request.
-    let isOutdatedRequest = false;
+    if (processData) {
+      responseData = processData(responseData);
+    }
 
-    const updateInterval = () => {
-      // Clear current interval
+    // If an outdated request has resolved, DON'T update state, but DO allow the processData handler
+    // to execute side effects like update telemetry.
+    if (isOutdatedRequest) {
+      return;
+    }
+
+    setError(responseError);
+    setData(responseData);
+    setIsLoading(false);
+    setIsInitialRequest(false);
+
+    // If we're on an interval, we need to schedule the next request. This also allows us to reset
+    // the interval if the user has manually requested the data, to avoid doubled-up requests.
+    updateInterval();
+  };
+
+  useEffect(() => {
+    _sendRequest();
+    // Don't watch body because it's likely to be a new object even if its shape hasn't changed.
+  }, [path, method]);
+
+  useEffect(() => {
+    updateInterval();
+
+    // Clean up intervals and inflight requests and corresponding state changes
+    return () => {
+      isOutdatedRequest = true;
       if (requestIntervalId.current) {
         clearTimeout(requestIntervalId.current);
       }
-
-      // Set new interval
-      if (requestInterval.current) {
-        requestIntervalId.current = setTimeout(sendRequest, requestInterval.current);
-      }
     };
-
-    const sendRequest = async () => {
-      // We don't clear error or data, so it's up to the consumer to decide whether to display the
-      // "old" error/data or loading state when a new request is in-flight.
-      setIsLoading(true);
-
-      const requestBody = {
-        path,
-        method,
-        body,
-      };
-
-      const response = await _sendRequest(requestBody);
-      let { data: responseData } = response;
-      const { error: responseError } = response;
-
-      if (processData) {
-        responseData = processData(responseData);
-      }
-
-      // If an outdated request has resolved, DON'T update state, but DO allow the processData handler
-      // to execute side effects like update telemetry.
-      if (isOutdatedRequest) {
-        return;
-      }
-
-      setError(responseError);
-      setData(responseData);
-      setIsLoading(false);
-      setIsInitialRequest(false);
-
-      // If we're on an interval, we need to schedule the next request. This also allows us to reset
-      // the interval if the user has manually requested the data, to avoid doubled-up requests.
-      updateInterval();
-    };
-
-    useEffect(() => {
-      sendRequest();
-      // Don't watch body because it's likely to be a new object even if its shape hasn't changed.
-    }, [path, method]);
-
-    useEffect(() => {
-      updateInterval();
-
-      // Clean up intervals and inflight requests and corresponding state changes
-      return () => {
-        isOutdatedRequest = true;
-        if (requestIntervalId.current) {
-          clearTimeout(requestIntervalId.current);
-        }
-      };
-    }, [interval]);
-
-    return {
-      isInitialRequest,
-      isLoading,
-      error,
-      data,
-      sendRequest, // Gives the user the ability to manually request data
-    };
-  };
+  }, [interval]);
 
   return {
-    sendRequest: _sendRequest,
-    useRequest,
+    isInitialRequest,
+    isLoading,
+    error,
+    data,
+    sendRequest: _sendRequest, // Gives the user the ability to manually request data
   };
-}
+};

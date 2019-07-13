@@ -8,16 +8,15 @@ import {
   SendRequest,
   SendRequestResponse,
   UseRequest,
-  createRequestService,
+  sendRequest as _sendRequest,
+  useRequest as _useRequest,
 } from '../../../shared_imports';
 import { httpClient } from './index';
 
 export const sendRequest = (config: SendRequest): Promise<Partial<SendRequestResponse>> => {
-  const { sendRequest: sendRequestFn } = createRequestService(httpClient);
-  return sendRequestFn(config);
+  return _sendRequest(httpClient, config);
 };
 
 export const useRequest = (config: UseRequest) => {
-  const { useRequest: useRequestFn } = createRequestService(httpClient);
-  return useRequestFn(config);
+  return _useRequest(httpClient, config);
 };

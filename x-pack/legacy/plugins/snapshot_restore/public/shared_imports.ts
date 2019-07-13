@@ -8,5 +8,6 @@ export {
   SendRequest,
   SendRequestResponse,
   UseRequest,
-  createRequestService,
+  sendRequest,
+  useRequest,
 } from '../../../../../src/plugins/elasticsearch_ui_shared/public';

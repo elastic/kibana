@@ -18,7 +18,10 @@
  */
 
 import sinon from 'sinon';
-import { createRequestService } from './request';
+import {
+  sendRequest as sendRequestUnbound,
+  useRequest as useRequestUnbound,
+} from './request';
 
 import React from 'react';
 import { act } from 'react-dom/test-utils';
@@ -59,7 +62,8 @@ describe('request lib', () => {
       },
     };
 
-    ({ sendRequest, useRequest } = createRequestService(httpClient));
+    sendRequest = sendRequestUnbound.bind(null, httpClient);
+    useRequest = useRequestUnbound.bind(null, httpClient);
   });
 
   describe('sendRequest function', () => {

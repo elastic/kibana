@@ -17,7 +17,7 @@
  * under the License.
  */
 
-export { SendRequest, SendRequestResponse, UseRequest, createRequestService } from './request';
+export { SendRequest, SendRequestResponse, UseRequest, sendRequest, useRequest } from './request';
 
 // New Platform requires this as the default export.
 export const plugin = () => ({
