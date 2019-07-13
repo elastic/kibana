@@ -21,7 +21,7 @@ export const SummaryStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) =>
 
   const { jobCreator } = useContext(JobCreatorContext);
   const [progress, setProgress] = useState(0);
-  const [showJsonFlyout, setsSowJsonFlyout] = useState(false);
+  const [showJsonFlyout, setShowJsonFlyout] = useState(false);
 
   function setProgressWrapper(p: number) {
     setProgress(p);
@@ -32,7 +32,7 @@ export const SummaryStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) =>
   }, []);
 
   function start() {
-    setsSowJsonFlyout(false);
+    setShowJsonFlyout(false);
     jobCreator.createAndStartJob();
   }
 
@@ -47,7 +47,7 @@ export const SummaryStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) =>
   }
 
   function toggleJsonFlyout() {
-    setsSowJsonFlyout(!showJsonFlyout);
+    setShowJsonFlyout(!showJsonFlyout);
   }
 
   return (
@@ -77,7 +77,7 @@ export const SummaryStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) =>
                 Preview job JSON
               </EuiButtonEmpty>
               {showJsonFlyout && (
-                <JsonFlyout closeFlyout={() => setsSowJsonFlyout(false)} jobCreator={jobCreator} />
+                <JsonFlyout closeFlyout={() => setShowJsonFlyout(false)} jobCreator={jobCreator} />
               )}
               &emsp;
             </Fragment>
