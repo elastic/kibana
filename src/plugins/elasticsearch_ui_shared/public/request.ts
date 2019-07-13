@@ -65,14 +65,28 @@ export function createRequestService(httpClient: any) {
     const [isLoading, setIsLoading] = useState<boolean>(true);
     const [data, setData] = useState<any>(initialData);
 
-    // States for tracking polling
-    const [requestInterval, setRequestInterval] = useState<UseRequest['interval']>(interval);
     // Consumers can use isInitialRequest to implement a polling UX.
     const [isInitialRequest, setIsInitialRequest] = useState<boolean>(true);
+    const requestInterval = useRef<any>(null);
     const requestIntervalId = useRef<any>(null);
+
+    // We always want to use the most recently-set interval in updateInterval.
+    requestInterval.current = interval;
 
     // Tied to every render and bound to each request.
     let isOutdatedRequest = false;
+
+    const updateInterval = () => {
+      // Clear current interval
+      if (requestIntervalId.current) {
+        clearTimeout(requestIntervalId.current);
+      }
+
+      // Set new interval
+      if (requestInterval.current) {
+        requestIntervalId.current = setTimeout(sendRequest, requestInterval.current);
+      }
+    };
 
     const sendRequest = async () => {
       // We don't clear error or data, so it's up to the consumer to decide whether to display the
@@ -100,41 +114,27 @@ export function createRequestService(httpClient: any) {
       setData(response.data);
       setIsLoading(false);
       setIsInitialRequest(false);
-    };
 
-    const cancelOutdatedRequest = () => {
-      isOutdatedRequest = true;
-    };
-
-    const updateInterval = () => {
-      // Clear current interval
-      if (requestIntervalId.current) {
-        clearInterval(requestIntervalId.current);
-      }
-
-      // Set new interval
-      if (requestInterval) {
-        requestIntervalId.current = setInterval(sendRequest, requestInterval);
-      }
-
-      // Clean up intervals and inflight requests and corresponding state changes
-      return () => {
-        cancelOutdatedRequest();
-        if (requestIntervalId.current) {
-          clearInterval(requestIntervalId.current);
-        }
-      };
+      // If we're on an interval, we need to schedule the next request. This also allows us to reset
+      // the interval if the user has manually requested the data, to avoid doubled-up requests.
+      updateInterval();
     };
 
     useEffect(() => {
       sendRequest();
-      // We need to update the interval so that the scheduled request uses the new path, mathod, and body.
-      return updateInterval();
     }, [path, method, body]);
 
     useEffect(() => {
-      return updateInterval();
-    }, [requestInterval]);
+      updateInterval();
+
+      // Clean up intervals and inflight requests and corresponding state changes
+      return () => {
+        isOutdatedRequest = true;
+        if (requestIntervalId.current) {
+          clearTimeout(requestIntervalId.current);
+        }
+      };
+    }, [interval]);
 
     return {
       isInitialRequest,
@@ -142,11 +142,6 @@ export function createRequestService(httpClient: any) {
       error,
       data,
       sendRequest, // Gives the user the ability to manually request data
-      setRequestInterval: (newInterval: UseRequest['interval']) => {
-        // The consumer can set this to undefined to stop polling, or to a number to begin polling.
-        setRequestInterval(newInterval);
-        updateInterval();
-      },
     };
   };
 

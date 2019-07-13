@@ -83,14 +83,9 @@ export const RestoreList: React.FunctionComponent = () => {
   const [currentInterval, setCurrentInterval] = useState<number>(INTERVAL_OPTIONS[1]);
 
   // Load restores
-  const {
-    error,
-    isLoading,
-    data: restores = [],
-    isInitialRequest,
-    setRequestInterval,
-    sendRequest,
-  } = useLoadRestores(currentInterval);
+  const { error, isLoading, data: restores = [], isInitialRequest, sendRequest } = useLoadRestores(
+    currentInterval
+  );
 
   // Track component loaded
   useEffect(() => {
@@ -210,7 +205,6 @@ export const RestoreList: React.FunctionComponent = () => {
                       icon="empty"
                       onClick={() => {
                         sendRequest();
-                        setRequestInterval(interval);
                         setCurrentInterval(interval);
                         setIsIntervalMenuOpen(false);
                       }}

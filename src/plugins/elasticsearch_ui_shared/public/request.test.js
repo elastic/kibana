@@ -211,31 +211,25 @@ describe('request lib', () => {
           hook.sendRequest();
           sinon.assert.calledTwice(sendPost);
         });
-      });
 
-      describe('setRequestInterval', () => {
-        it('updates the interval', async () => {
+        it('resets the interval', async () => {
           initUseRequest({ ...successRequest, interval: 30 });
           await wait(5);
           sinon.assert.calledOnce(sendPost);
-          hook.setRequestInterval(200);
 
-          await wait(40);
-          sinon.assert.calledOnce(sendPost);
+          await wait(20);
+          hook.sendRequest();
+
+          // If the request didn't reset the interval, there would have been three requests sent by now.
+          await wait(20);
+          sinon.assert.calledTwice(sendPost);
+
+          await wait(20);
+          sinon.assert.calledThrice(sendPost);
 
           // We have to manually clean up or else the interval will continue to fire requests,
           // interfering with other tests.
           element.unmount();
-        });
-
-        it('removes the interval when set to undefined', async () => {
-          initUseRequest({ ...successRequest, interval: 20 });
-          await wait(5);
-          sinon.assert.calledOnce(sendPost);
-          hook.setRequestInterval(undefined);
-
-          await wait(10);
-          sinon.assert.calledOnce(sendPost);
         });
       });
     });
