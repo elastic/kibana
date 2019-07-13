@@ -5,7 +5,7 @@
  */
 
 import Joi from 'joi';
-import { AlertExecuteOptions } from '../types';
+import { AlertExecutorOptions } from '../types';
 import { SavedObjectsClientMock } from '../../../../../../src/core/server/mocks';
 import { getCreateTaskRunnerFunction } from './get_create_task_runner_function';
 
@@ -30,7 +30,7 @@ const getCreateTaskRunnerFunctionParams = {
   alertType: {
     id: 'test',
     name: 'My test alert',
-    execute: jest.fn(),
+    executor: jest.fn(),
   },
   fireAction: jest.fn(),
   internalSavedObjectsRepository: savedObjectsClient,
@@ -51,8 +51,9 @@ const mockedAlertTypeSavedObject = {
   id: '1',
   type: 'alert',
   attributes: {
+    enabled: true,
     alertTypeId: '123',
-    interval: 10,
+    interval: '10s',
     alertTypeParams: {
       bar: true,
     },
@@ -83,23 +84,23 @@ test('successfully executes the task', async () => {
   const runner = createTaskRunner({ taskInstance: mockedTaskInstance });
   const runnerResult = await runner.run();
   expect(runnerResult).toMatchInlineSnapshot(`
-Object {
-  "runAt": 2019-06-03T18:55:30.982Z,
-  "state": Object {
-    "alertInstances": Object {},
-    "alertTypeState": undefined,
-    "previousScheduledRunAt": 2019-06-03T18:55:20.982Z,
-    "scheduledRunAt": 2019-06-03T18:55:30.982Z,
-  },
-}
-`);
-  expect(getCreateTaskRunnerFunctionParams.alertType.execute).toHaveBeenCalledTimes(1);
-  const call = getCreateTaskRunnerFunctionParams.alertType.execute.mock.calls[0][0];
+    Object {
+      "runAt": 2019-06-03T18:55:30.982Z,
+      "state": Object {
+        "alertInstances": Object {},
+        "alertTypeState": undefined,
+        "previousScheduledRunAt": 2019-06-03T18:55:20.982Z,
+        "scheduledRunAt": 2019-06-03T18:55:30.982Z,
+      },
+    }
+  `);
+  expect(getCreateTaskRunnerFunctionParams.alertType.executor).toHaveBeenCalledTimes(1);
+  const call = getCreateTaskRunnerFunctionParams.alertType.executor.mock.calls[0][0];
   expect(call.params).toMatchInlineSnapshot(`
-Object {
-  "bar": true,
-}
-`);
+    Object {
+      "bar": true,
+    }
+  `);
   expect(call.scheduledRunAt).toMatchInlineSnapshot(`2019-06-03T18:55:20.982Z`);
   expect(call.state).toMatchInlineSnapshot(`Object {}`);
   expect(call.services.alertInstanceFactory).toBeTruthy();
@@ -108,8 +109,8 @@ Object {
 });
 
 test('fireAction is called per alert instance that fired', async () => {
-  getCreateTaskRunnerFunctionParams.alertType.execute.mockImplementation(
-    ({ services }: AlertExecuteOptions) => {
+  getCreateTaskRunnerFunctionParams.alertType.executor.mockImplementation(
+    ({ services }: AlertExecutorOptions) => {
       services.alertInstanceFactory('1').fire('default');
     }
   );
@@ -119,21 +120,21 @@ test('fireAction is called per alert instance that fired', async () => {
   await runner.run();
   expect(getCreateTaskRunnerFunctionParams.fireAction).toHaveBeenCalledTimes(1);
   expect(getCreateTaskRunnerFunctionParams.fireAction.mock.calls[0]).toMatchInlineSnapshot(`
-Array [
-  Object {
-    "basePath": undefined,
-    "id": "1",
-    "params": Object {
-      "foo": true,
-    },
-  },
-]
-`);
+    Array [
+      Object {
+        "basePath": undefined,
+        "id": "1",
+        "params": Object {
+          "foo": true,
+        },
+      },
+    ]
+  `);
 });
 
 test('persists alertInstances passed in from state, only if they fire', async () => {
-  getCreateTaskRunnerFunctionParams.alertType.execute.mockImplementation(
-    ({ services }: AlertExecuteOptions) => {
+  getCreateTaskRunnerFunctionParams.alertType.executor.mockImplementation(
+    ({ services }: AlertExecutorOptions) => {
       services.alertInstanceFactory('1').fire('default');
     }
   );
@@ -153,17 +154,17 @@ test('persists alertInstances passed in from state, only if they fire', async ()
   });
   const runnerResult = await runner.run();
   expect(runnerResult.state.alertInstances).toMatchInlineSnapshot(`
-Object {
-  "1": Object {
-    "meta": Object {
-      "lastFired": 1559588125982,
-    },
-    "state": Object {
-      "bar": false,
-    },
-  },
-}
-`);
+    Object {
+      "1": Object {
+        "meta": Object {
+          "lastFired": 1559588125982,
+        },
+        "state": Object {
+          "bar": false,
+        },
+      },
+    }
+  `);
 });
 
 test('validates params before executing the alert type', async () => {

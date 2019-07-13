@@ -29,7 +29,7 @@ describe('getTransactionBreakdown', () => {
 
     expect(response.kpis.length).toBe(0);
 
-    expect(Object.keys(response.timeseries_per_subtype).length).toBe(0);
+    expect(Object.keys(response.timeseries).length).toBe(0);
   });
 
   it('returns transaction breakdowns grouped by type and subtype', async () => {
@@ -53,18 +53,20 @@ describe('getTransactionBreakdown', () => {
 
     expect(response.kpis.map(kpi => kpi.name)).toEqual([
       'app',
+      'dispatcher-servlet',
       'http',
-      'postgresql',
-      'dispatcher-servlet'
+      'postgresql'
     ]);
 
     expect(response.kpis[0]).toEqual({
       name: 'app',
+      color: '#00b3a4',
       percentage: 0.5408550899466306
     });
 
-    expect(response.kpis[2]).toEqual({
+    expect(response.kpis[3]).toEqual({
       name: 'postgresql',
+      color: '#490092',
       percentage: 0.047366859295002
     });
   });
@@ -86,17 +88,22 @@ describe('getTransactionBreakdown', () => {
       }
     });
 
-    const { timeseries_per_subtype: timeseriesPerSubtype } = response;
+    const { timeseries } = response;
 
-    expect(Object.keys(timeseriesPerSubtype).length).toBe(4);
+    expect(timeseries.length).toBe(4);
+
+    const appTimeseries = timeseries[0];
+    expect(appTimeseries.title).toBe('app');
+    expect(appTimeseries.type).toBe('areaStacked');
+    expect(appTimeseries.hideLegend).toBe(true);
 
     // empty buckets should result in null values for visible types
-    expect(timeseriesPerSubtype.app.length).toBe(276);
-    expect(timeseriesPerSubtype.app.length).not.toBe(257);
+    expect(appTimeseries.data.length).toBe(276);
+    expect(appTimeseries.data.length).not.toBe(257);
 
-    expect(timeseriesPerSubtype.app[0].x).toBe(1561102380000);
+    expect(appTimeseries.data[0].x).toBe(1561102380000);
 
-    expect(timeseriesPerSubtype.app[0].y).toBeCloseTo(0.8689440187037277);
+    expect(appTimeseries.data[0].y).toBeCloseTo(0.8689440187037277);
   });
 
   it('should not include more KPIs than MAX_KPIs', async () => {
@@ -119,8 +126,8 @@ describe('getTransactionBreakdown', () => {
       }
     });
 
-    const { timeseries_per_subtype: timeseriesPerSubtype } = response;
+    const { timeseries } = response;
 
-    expect(Object.keys(timeseriesPerSubtype)).toEqual(['app', 'http']);
+    expect(timeseries.map(serie => serie.title)).toEqual(['app', 'http']);
   });
 });

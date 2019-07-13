@@ -7,22 +7,31 @@
 import { getOr } from 'lodash/fp';
 import React from 'react';
 import { Query } from 'react-apollo';
+import { connect } from 'react-redux';
 import { pure } from 'recompose';
 
 import chrome from 'ui/chrome';
 import { DEFAULT_INDEX_KEY } from '../../../../common/constants';
 import { GetOverviewNetworkQuery, OverviewNetworkData } from '../../../graphql/types';
-import { inputsModel } from '../../../store/inputs';
+import { State } from '../../../store';
+import { inputsModel, inputsSelectors } from '../../../store/inputs';
 import { createFilter } from '../../helpers';
 import { QueryTemplateProps } from '../../query_template';
 
 import { overviewNetworkQuery } from './index.gql_query';
 
+export const ID = 'overviewNetworkQuery';
+
 export interface OverviewNetworkArgs {
   id: string;
+  inspect: inputsModel.InspectQuery;
   overviewNetwork: OverviewNetworkData;
   loading: boolean;
   refetch: inputsModel.Refetch;
+}
+
+export interface OverviewNetworkReducer {
+  isInspected: boolean;
 }
 
 export interface OverviewNetworkProps extends QueryTemplateProps {
@@ -32,8 +41,8 @@ export interface OverviewNetworkProps extends QueryTemplateProps {
   startDate: number;
 }
 
-export const OverviewNetworkQuery = pure<OverviewNetworkProps>(
-  ({ id = 'overviewNetworkQuery', children, filterQuery, sourceId, startDate, endDate }) => (
+export const OverviewNetworkComponentQuery = pure<OverviewNetworkProps & OverviewNetworkReducer>(
+  ({ id = ID, children, filterQuery, isInspected, sourceId, startDate, endDate }) => (
     <Query<GetOverviewNetworkQuery.Query, GetOverviewNetworkQuery.Variables>
       query={overviewNetworkQuery}
       fetchPolicy="cache-and-network"
@@ -47,12 +56,14 @@ export const OverviewNetworkQuery = pure<OverviewNetworkProps>(
         },
         filterQuery: createFilter(filterQuery),
         defaultIndex: chrome.getUiSettingsClient().get(DEFAULT_INDEX_KEY),
+        inspect: isInspected,
       }}
     >
       {({ data, loading, refetch }) => {
         const overviewNetwork = getOr({}, `source.OverviewNetwork`, data);
         return children({
           id,
+          inspect: getOr(null, 'source.OverviewNetwork.inspect', data),
           overviewNetwork,
           loading,
           refetch,
@@ -61,3 +72,16 @@ export const OverviewNetworkQuery = pure<OverviewNetworkProps>(
     </Query>
   )
 );
+
+const makeMapStateToProps = () => {
+  const getQuery = inputsSelectors.globalQueryByIdSelector();
+  const mapStateToProps = (state: State, { id = ID }: OverviewNetworkProps) => {
+    const { isInspected } = getQuery(state, id);
+    return {
+      isInspected,
+    };
+  };
+  return mapStateToProps;
+};
+
+export const OverviewNetworkQuery = connect(makeMapStateToProps)(OverviewNetworkComponentQuery);

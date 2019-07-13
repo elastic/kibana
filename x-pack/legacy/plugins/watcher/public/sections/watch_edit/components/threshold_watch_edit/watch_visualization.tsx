@@ -139,30 +139,27 @@ export const WatchVisualization = () => {
     createRequest: reload,
   } = getWatchVisualizationData(watchWithoutActions, visualizeOptions);
 
-  useEffect(
-    () => {
-      // Prevents refetch on initial render
-      if (isInitialRequest) {
-        return setIsInitialRequest(false);
-      }
-      reload(false);
-    },
-    [
-      index,
-      timeField,
-      triggerIntervalSize,
-      triggerIntervalUnit,
-      aggType,
-      aggField,
-      termSize,
-      termField,
-      thresholdComparator,
-      timeWindowSize,
-      timeWindowUnit,
-      groupBy,
-      threshold,
-    ]
-  );
+  useEffect(() => {
+    // Prevents refetch on initial render
+    if (isInitialRequest) {
+      return setIsInitialRequest(false);
+    }
+    reload(false);
+  }, [
+    index,
+    timeField,
+    triggerIntervalSize,
+    triggerIntervalUnit,
+    aggType,
+    aggField,
+    termSize,
+    termField,
+    thresholdComparator,
+    timeWindowSize,
+    timeWindowUnit,
+    groupBy,
+    threshold,
+  ]);
 
   if (isLoading) {
     return (

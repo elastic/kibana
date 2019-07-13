@@ -53,7 +53,7 @@ describe('expressions_service', () => {
   let testAst: Ast;
 
   beforeEach(() => {
-    interpretAstMock = jest.fn(_ => Promise.resolve(expressionResult));
+    interpretAstMock = jest.fn((..._) => Promise.resolve(expressionResult));
     interpreterMock = { interpretAst: interpretAstMock };
     renderFunctionMock = ({
       render: jest.fn(),

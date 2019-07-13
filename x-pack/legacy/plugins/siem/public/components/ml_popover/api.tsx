@@ -8,12 +8,26 @@ import chrome from 'ui/chrome';
 import {
   CloseJobsResponse,
   Group,
+  IndexPatternResponse,
   Job,
   MlSetupArgs,
   SetupMlResponse,
   StartDatafeedResponse,
   StopDatafeedResponse,
 } from './types';
+import { throwIfNotOk } from '../ml/api/throw_if_not_ok';
+
+const emptyGroup: Group[] = [];
+
+const emptyMlResponse: SetupMlResponse = { jobs: [], datafeeds: [], kibana: {} };
+
+const emptyStartDatafeedResponse: StartDatafeedResponse = {};
+
+const emptyStopDatafeeds: [StopDatafeedResponse, CloseJobsResponse] = [{}, {}];
+
+const emptyJob: Job[] = [];
+
+const emptyIndexPattern: string = '';
 
 /**
  * Fetches ML Groups Data
@@ -22,7 +36,7 @@ import {
  */
 export const groupsData = async (headers: Record<string, string | undefined>): Promise<Group[]> => {
   try {
-    const response = await fetch('/api/ml/jobs/groups', {
+    const response = await fetch(`${chrome.getBasePath()}/api/ml/jobs/groups`, {
       method: 'GET',
       credentials: 'same-origin',
       headers: {
@@ -32,10 +46,11 @@ export const groupsData = async (headers: Record<string, string | undefined>): P
         ...headers,
       },
     });
+    await throwIfNotOk(response);
     return await response.json();
   } catch (error) {
     // TODO: Toaster error when this happens instead of returning empty data
-    return [];
+    return emptyGroup;
   }
 };
 
@@ -56,7 +71,7 @@ export const setupMlJob = async ({
   headers = {},
 }: MlSetupArgs): Promise<SetupMlResponse> => {
   try {
-    const response = await fetch(`/api/ml/modules/setup/${configTemplate}`, {
+    const response = await fetch(`${chrome.getBasePath()}/api/ml/modules/setup/${configTemplate}`, {
       method: 'POST',
       credentials: 'same-origin',
       body: JSON.stringify({
@@ -73,10 +88,11 @@ export const setupMlJob = async ({
         ...headers,
       },
     });
+    await throwIfNotOk(response);
     return await response.json();
   } catch (error) {
     // TODO: Toaster error when this happens instead of returning empty data
-    return { jobs: [], datafeeds: [], kibana: {} };
+    return emptyMlResponse;
   }
 };
 
@@ -84,18 +100,21 @@ export const setupMlJob = async ({
  * Starts the given dataFeedIds
  *
  * @param datafeedIds
+ * @param start
  * @param headers
  */
 export const startDatafeeds = async (
   datafeedIds: string[],
-  headers: Record<string, string | undefined>
+  headers: Record<string, string | undefined>,
+  start = 0
 ): Promise<StartDatafeedResponse> => {
   try {
-    const response = await fetch('/api/ml/jobs/force_start_datafeeds', {
+    const response = await fetch(`${chrome.getBasePath()}/api/ml/jobs/force_start_datafeeds`, {
       method: 'POST',
       credentials: 'same-origin',
       body: JSON.stringify({
         datafeedIds,
+        ...(start !== 0 && { start }),
       }),
       headers: {
         'kbn-system-api': 'true',
@@ -104,10 +123,11 @@ export const startDatafeeds = async (
         ...headers,
       },
     });
+    await throwIfNotOk(response);
     return await response.json();
   } catch (error) {
     // TODO: Toaster error when this happens instead of returning empty data
-    return {};
+    return emptyStartDatafeedResponse;
   }
 };
 
@@ -122,24 +142,28 @@ export const stopDatafeeds = async (
   headers: Record<string, string | undefined>
 ): Promise<[StopDatafeedResponse, CloseJobsResponse]> => {
   try {
-    const stopDatafeedsResponse = await fetch('/api/ml/jobs/stop_datafeeds', {
-      method: 'POST',
-      credentials: 'same-origin',
-      body: JSON.stringify({
-        datafeedIds,
-      }),
-      headers: {
-        'kbn-system-api': 'true',
-        'content-type': 'application/json',
-        'kbn-xsrf': chrome.getXsrfToken(),
-        ...headers,
-      },
-    });
+    const stopDatafeedsResponse = await fetch(
+      `${chrome.getBasePath()}/api/ml/jobs/stop_datafeeds`,
+      {
+        method: 'POST',
+        credentials: 'same-origin',
+        body: JSON.stringify({
+          datafeedIds,
+        }),
+        headers: {
+          'kbn-system-api': 'true',
+          'content-type': 'application/json',
+          'kbn-xsrf': chrome.getXsrfToken(),
+          ...headers,
+        },
+      }
+    );
 
+    await throwIfNotOk(stopDatafeedsResponse);
     const stopDatafeedsResponseJson = await stopDatafeedsResponse.json();
 
     const datafeedPrefix = 'datafeed-';
-    const closeJobsResponse = await fetch('/api/ml/jobs/close_jobs', {
+    const closeJobsResponse = await fetch(`${chrome.getBasePath()}/api/ml/jobs/close_jobs`, {
       method: 'POST',
       credentials: 'same-origin',
       body: JSON.stringify({
@@ -157,10 +181,11 @@ export const stopDatafeeds = async (
       },
     });
 
+    await throwIfNotOk(stopDatafeedsResponseJson);
     return [stopDatafeedsResponseJson, await closeJobsResponse.json()];
   } catch (error) {
     // TODO: Toaster error when this happens instead of returning empty data
-    return [{}, {}];
+    return emptyStopDatafeeds;
   }
 };
 
@@ -175,7 +200,7 @@ export const jobsSummary = async (
   headers: Record<string, string | undefined>
 ): Promise<Job[]> => {
   try {
-    const response = await fetch('/api/ml/jobs/jobs_summary', {
+    const response = await fetch(`${chrome.getBasePath()}/api/ml/jobs/jobs_summary`, {
       method: 'POST',
       credentials: 'same-origin',
       body: JSON.stringify({ jobIds }),
@@ -186,9 +211,54 @@ export const jobsSummary = async (
         ...headers,
       },
     });
+    await throwIfNotOk(response);
     return await response.json();
   } catch (error) {
     // TODO: Toaster error when this happens instead of returning empty data
-    return [];
+    return emptyJob;
+  }
+};
+
+/**
+ * Fetches Configured Index Patterns from the Kibana saved objects API (as ML does during create job flow)
+ *
+ * @param headers
+ */
+export const getIndexPatterns = async (
+  headers: Record<string, string | undefined>
+): Promise<string> => {
+  try {
+    const response = await fetch(
+      `${chrome.getBasePath()}/api/saved_objects/_find?type=index-pattern&fields=title&fields=type&per_page=10000`,
+      {
+        method: 'GET',
+        credentials: 'same-origin',
+        headers: {
+          'content-type': 'application/json',
+          'kbn-xsrf': chrome.getXsrfToken(),
+          'kbn-system-api': 'true',
+          ...headers,
+        },
+      }
+    );
+    await throwIfNotOk(response);
+    const results: IndexPatternResponse = await response.json();
+
+    if (results.saved_objects && Array.isArray(results.saved_objects)) {
+      return results.saved_objects
+        .reduce(
+          (acc: string[], v) => [
+            ...acc,
+            ...(v.attributes && v.attributes.title ? [v.attributes.title] : []),
+          ],
+          []
+        )
+        .join(', ');
+    } else {
+      return emptyIndexPattern;
+    }
+  } catch (error) {
+    // TODO: Toaster error when this happens instead of returning empty data
+    return emptyIndexPattern;
   }
 };

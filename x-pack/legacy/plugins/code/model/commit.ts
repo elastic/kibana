@@ -8,6 +8,7 @@ export interface CommitInfo {
   updated: Date;
   message: string;
   committer: string;
+  author: string;
   id: string;
   parents: string[];
 }

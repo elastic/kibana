@@ -26,9 +26,7 @@ import { VisResponseData } from './types';
 import { Inspector } from '../../inspector';
 import { EmbeddedVisualizeHandler } from './embedded_visualize_handler';
 
-jest.mock('ui/new_platform', () =>
-  require('../../../../ui/public/new_platform/index.test.mocks').mockNewPlatformBackdoor()
-);
+jest.mock('ui/new_platform');
 
 describe('EmbeddedVisualizeHandler', () => {
   let handler: any;
@@ -70,6 +68,8 @@ describe('EmbeddedVisualizeHandler', () => {
         title: 'My Vis',
         searchSource: undefined,
         destroy: () => ({}),
+        copyOnSave: false,
+        save: () => Promise.resolve('123'),
       },
       {
         autoFetch: true,
@@ -100,6 +100,8 @@ describe('EmbeddedVisualizeHandler', () => {
           title: 'My Vis',
           searchSource: undefined,
           destroy: () => ({}),
+          copyOnSave: false,
+          save: () => Promise.resolve('123'),
         },
         {
           autoFetch: false,

@@ -46,34 +46,32 @@ export const MonitorPage = ({
 }: MonitorPageProps) => {
   const parsedPath = location.pathname.replace(/^(\/monitor\/)/, '').split('/');
   const [monitorId] = useState<string>(decodeURI(parsedPath[0]));
+  const [pingListPageCount, setPingListPageCount] = useState<number>(10);
   const { colors, refreshApp, setHeadingText } = useContext(UptimeSettingsContext);
   const [params, updateUrlParams] = useUrlParams(history, location);
   const { dateRangeStart, dateRangeEnd, selectedPingStatus } = params;
 
-  useEffect(
-    () => {
-      query({
-        query: gql`
-          query MonitorPageTitle($monitorId: String!) {
-            monitorPageTitle: getMonitorPageTitle(monitorId: $monitorId) {
-              id
-              url
-              name
-            }
+  useEffect(() => {
+    query({
+      query: gql`
+        query MonitorPageTitle($monitorId: String!) {
+          monitorPageTitle: getMonitorPageTitle(monitorId: $monitorId) {
+            id
+            url
+            name
           }
-        `,
-        variables: { monitorId },
-      }).then((result: any) => {
-        const { name, url, id } = result.data.monitorPageTitle;
-        const heading: string = name || url || id;
-        setBreadcrumbs(getMonitorPageBreadcrumb(heading, stringifyUrlParams(params)));
-        if (setHeadingText) {
-          setHeadingText(heading);
         }
-      });
-    },
-    [params]
-  );
+      `,
+      variables: { monitorId },
+    }).then((result: any) => {
+      const { name, url, id } = result.data.monitorPageTitle;
+      const heading: string = name || url || id;
+      setBreadcrumbs(getMonitorPageBreadcrumb(heading, stringifyUrlParams(params)));
+      if (setHeadingText) {
+        setHeadingText(heading);
+      }
+    });
+  }, [params]);
 
   const [selectedLocation, setSelectedLocation] = useState<EuiComboBoxOptionProps[]>(
     BaseLocationOptions
@@ -107,15 +105,18 @@ export const MonitorPage = ({
       />
       <EuiSpacer size="s" />
       <PingList
-        onSelectedStatusUpdate={(selectedStatus: string | null) =>
+        onPageCountChange={setPingListPageCount}
+        onSelectedLocationChange={setSelectedLocation}
+        onSelectedStatusChange={(selectedStatus: string | null) =>
           updateUrlParams({ selectedPingStatus: selectedStatus || '' })
         }
         onUpdateApp={refreshApp}
+        pageSize={pingListPageCount}
         selectedOption={selectedPingStatus}
         selectedLocation={selectedLocation}
-        setSelectedLocation={setSelectedLocation}
         variables={{
           ...sharedVariables,
+          size: pingListPageCount,
           status: selectedPingStatus,
         }}
       />

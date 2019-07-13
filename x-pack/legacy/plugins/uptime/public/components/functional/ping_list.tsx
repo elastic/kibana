@@ -5,13 +5,12 @@
  */
 import {
   EuiBadge,
+  EuiBasicTable,
   EuiComboBox,
   EuiComboBoxOptionProps,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHealth,
-  // @ts-ignore
-  EuiInMemoryTable,
   EuiPanel,
   EuiSpacer,
   EuiText,
@@ -29,17 +28,20 @@ import { convertMicrosecondsToMilliseconds as microsToMillis } from '../../lib/h
 import { UptimeGraphQLQueryProps, withUptimeGraphQL } from '../higher_order';
 import { pingsQuery } from '../../queries';
 import { LocationName } from './location_name';
+import { Criteria } from './monitor_list';
 
 interface PingListQueryResult {
   allPings?: PingResults;
 }
 
 interface PingListProps {
+  onSelectedStatusChange: (status: string | null) => void;
+  onSelectedLocationChange: (location: EuiComboBoxOptionProps[]) => void;
+  onPageCountChange: (itemCount: number) => void;
   onUpdateApp: () => void;
-  onSelectedStatusUpdate: (status: string | null) => void;
+  pageSize: number;
   selectedOption: string;
   selectedLocation: EuiComboBoxOptionProps[];
-  setSelectedLocation: (location: EuiComboBoxOptionProps[]) => void;
 }
 
 type Props = UptimeGraphQLQueryProps<PingListQueryResult> & PingListProps;
@@ -49,11 +51,13 @@ export const BaseLocationOptions = [{ label: 'All', value: 'All' }];
 export const PingListComponent = ({
   data,
   loading,
-  onSelectedStatusUpdate,
+  onPageCountChange,
+  onSelectedLocationChange,
+  onSelectedStatusChange,
   onUpdateApp,
+  pageSize,
   selectedOption,
   selectedLocation,
-  setSelectedLocation,
 }: Props) => {
   const statusOptions: EuiComboBoxOptionProps[] = [
     {
@@ -163,12 +167,9 @@ export const PingListComponent = ({
         ),
     },
   ];
-  useEffect(
-    () => {
-      onUpdateApp();
-    },
-    [selectedOption]
-  );
+  useEffect(() => {
+    onUpdateApp();
+  }, [selectedOption]);
   let pings: Ping[] = [];
   let total: number = 0;
   if (data && data.allPings && data.allPings.pings) {
@@ -237,7 +238,7 @@ export const PingListComponent = ({
                         })}
                         onChange={(selectedOptions: EuiComboBoxOptionProps[]) => {
                           if (typeof selectedOptions[0].value === 'string') {
-                            onSelectedStatusUpdate(
+                            onSelectedStatusChange(
                               // @ts-ignore it's definitely a string
                               selectedOptions[0].value !== '' ? selectedOptions[0].value : null
                             );
@@ -262,7 +263,7 @@ export const PingListComponent = ({
                           defaultMessage: 'Location',
                         })}
                         onChange={(selectedOptions: EuiComboBoxOptionProps[]) => {
-                          setSelectedLocation(selectedOptions);
+                          onSelectedLocationChange(selectedOptions);
                         }}
                       />
                     </EuiFormRow>
@@ -273,11 +274,17 @@ export const PingListComponent = ({
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiSpacer size="s" />
-        <EuiInMemoryTable
+        <EuiBasicTable
           loading={loading}
           columns={columns}
           items={pings}
-          pagination={{ initialPageSize: 20, pageSizeOptions: [5, 10, 20, 100] }}
+          pagination={{
+            initialPageSize: 20,
+            pageIndex: 0,
+            pageSize,
+            pageSizeOptions: [5, 10, 20, 50, 100],
+          }}
+          onChange={({ page: { size } }: Criteria) => onPageCountChange(size)}
         />
       </EuiPanel>
     </Fragment>
