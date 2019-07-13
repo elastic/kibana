@@ -43,7 +43,7 @@ const basePath = chrome.getBasePath();
 
 const AddDataUi = ({ apmUiEnabled, isNewKibanaInstance, intl, mlEnabled }) => {
   const renderCards = () => {
-    const apmData = {
+    const ampData = {
       title: intl.formatMessage({
         id: 'kbn.home.addData.apm.nameTitle',
         defaultMessage: 'APM',
@@ -79,17 +79,17 @@ const AddDataUi = ({ apmUiEnabled, isNewKibanaInstance, intl, mlEnabled }) => {
       }),
       ariaDescribedby: 'aria-describedby.addMetricsButtonLabel',
     };
-    const siemData = {
+    const securityData = {
       title: intl.formatMessage({
-        id: 'kbn.home.addData.siem.nameTitle',
-        defaultMessage: 'SIEM',
+        id: 'kbn.home.addData.security.nameTitle',
+        defaultMessage: 'Security analytics',
       }),
       description: intl.formatMessage({
-        id: 'kbn.home.addData.siem.nameDescription',
+        id: 'kbn.home.addData.security.nameDescription',
         defaultMessage:
           'Centralize security events for interactive investigation in ready-to-go visualizations.',
       }),
-      ariaDescribedby: 'aria-describedby.addSiemButtonLabel',
+      ariaDescribedby: 'aria-describedby.addSecurityButtonLabel',
     };
 
     const getApmCard = () => (
@@ -97,13 +97,13 @@ const AddDataUi = ({ apmUiEnabled, isNewKibanaInstance, intl, mlEnabled }) => {
         <EuiCard
           className="homAddData__card"
           icon={<EuiIcon className="homAddData__icon" type="apmApp" />}
-          title={apmData.title}
-          description={<span id={apmData.ariaDescribedby}>{apmData.description}</span>}
+          title={ampData.title}
+          description={<span id={ampData.ariaDescribedby}>{ampData.description}</span>}
           footer={
             <EuiButton
               className="homAddData__button"
               href="#/home/tutorial/apm"
-              aria-describedby={apmData.ariaDescribedby}
+              aria-describedby={ampData.ariaDescribedby}
             >
               <FormattedMessage
                 id="kbn.home.addData.apm.addApmButtonLabel"
@@ -170,17 +170,17 @@ const AddDataUi = ({ apmUiEnabled, isNewKibanaInstance, intl, mlEnabled }) => {
         <EuiFlexItem grow={false}>
           <EuiCard
             className="homAddData__card"
-            icon={<EuiIcon className="homAddData__icon" type="securityAnalyticsApp" />}
-            title={siemData.title}
-            description={<span id={siemData.ariaDescribedby}>{siemData.description}</span>}
+            icon={<EuiIcon className="homAddData__icon" type="securityApp" />}
+            title={securityData.title}
+            description={<span id={securityData.ariaDescribedby}>{securityData.description}</span>}
             footer={
               <EuiButton
                 className="homAddData__button"
-                href="#/home/tutorial_directory/siem"
-                aria-describedby={siemData.ariaDescribedby}
+                href="#/home/tutorial_directory/security"
+                aria-describedby={securityData.ariaDescribedby}
               >
                 <FormattedMessage
-                  id="kbn.home.addData.siem.addSiemEventsButtonLabel"
+                  id="kbn.home.addData.security.addSecurityEventsButtonLabel"
                   defaultMessage="Add security events"
                 />
               </EuiButton>
