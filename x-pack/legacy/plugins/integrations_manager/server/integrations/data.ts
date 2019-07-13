@@ -57,46 +57,14 @@ export async function installAssets(
   asset: string,
   callESEndpoint: CallESEndpoint
 ) {
-  let toInstall: AssetReference[] = [];
+  const installed = await _installAssets(client, pkgkey, asset, callESEndpoint);
 
-  if (assetUsesObjects(asset)) {
-    const references = await installObjects(client, pkgkey, asset);
-    toInstall = toInstall.concat(references);
+  if (installed.length) {
+    const saved = await saveInstallationReferences(client, pkgkey, installed);
+    return saved;
   }
 
-  if (asset === 'ingest-pipeline') {
-    const paths = await Registry.getArchiveInfo(
-      `${pkgkey}.tar.gz`,
-      entry => Registry.pathParts(entry.path).type === asset
-    );
-
-    const installationPromises = paths.map(path => installPipeline(callESEndpoint, path));
-    const references = await Promise.all(installationPromises);
-    toInstall = toInstall.concat(references);
-  }
-
-  if (toInstall.length) {
-    const savedObject = await getInstallationObject(client, pkgkey);
-    const current: AssetReference[] = (savedObject && savedObject.attributes.installed) || [];
-    const references = toInstall.reduce((toSave, pending) => {
-      // skip if to be installed is already installed
-      if (toSave.find(c => c.id === pending.id && c.type === pending.type)) return;
-
-      toSave.push(pending);
-
-      return toSave;
-    }, current);
-
-    const results = await client.create<InstallationAttributes>(
-      SAVED_OBJECT_TYPE,
-      { installed: references },
-      { id: pkgkey, overwrite: true }
-    );
-
-    return results;
-  }
-
-  return toInstall; // []
+  return [];
 }
 
 export async function removeInstallation(client: SavedObjectsClientContract, pkgkey: string) {
@@ -181,4 +149,52 @@ async function installPipeline(
   await callESEndpoint('ingest.putPipeline', { id, body: pipeline });
 
   return { id, type };
+}
+
+async function _installAssets(
+  client: SavedObjectsClientContract,
+  pkgkey: string,
+  asset: string,
+  callESEndpoint: CallESEndpoint
+) {
+  if (assetUsesObjects(asset)) {
+    const references = await installObjects(client, pkgkey, asset);
+    return references;
+  }
+
+  if (asset === 'ingest-pipeline') {
+    const isAssetType = (entry: Registry.ArchiveEntry) =>
+      Registry.pathParts(entry.path).type === asset;
+    const paths = await Registry.getArchiveInfo(`${pkgkey}.tar.gz`, isAssetType);
+    const installationPromises = paths.map(path => installPipeline(callESEndpoint, path));
+    const references = await Promise.all(installationPromises);
+
+    return references;
+  }
+
+  return [];
+}
+
+async function saveInstallationReferences(
+  client: SavedObjectsClientContract,
+  pkgkey: string,
+  toSave: AssetReference[]
+) {
+  const savedObject = await getInstallationObject(client, pkgkey);
+  const savedRefs = (savedObject && savedObject.attributes.installed) || [];
+
+  const toInstall = toSave.reduce((current, pending) => {
+    const hasRef = current.find(c => c.id === pending.id && c.type === pending.type);
+    if (!hasRef) current.push(pending);
+
+    return current;
+  }, savedRefs);
+
+  const installed = await client.create<InstallationAttributes>(
+    SAVED_OBJECT_TYPE,
+    { installed: toInstall },
+    { id: pkgkey, overwrite: true }
+  );
+
+  return installed;
 }
