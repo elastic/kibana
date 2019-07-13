@@ -206,7 +206,11 @@ export const PingListComponent = ({
     pageIndex: 0,
     pageSize,
     pageSizeOptions: [5, 10, 20, 50, 100],
-    totalItemCount: total,
+    /**
+     * we're not currently supporting pagination in this component
+     * so the first page is the only page
+     */
+    totalItemCount: pageSize,
   };
 
   return (

@@ -404,6 +404,7 @@ exports[`PingList component renders sorted list without errors 1`] = `
             50,
             100,
           ],
+          "totalItemCount": 30,
         }
       }
       responsive={true}
