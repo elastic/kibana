@@ -5,7 +5,8 @@
  */
 
 import open from 'opn';
-import * as Chrome from 'puppeteer-core';
+// @ts-ignore
+import * as puppeteer from 'puppeteer-core';
 import { parse as parseUrl } from 'url';
 import {
   ConditionalHeaders,
@@ -30,11 +31,11 @@ interface WaitForSelectorOpts {
 const WAIT_FOR_DELAY_MS: number = 100;
 
 export class HeadlessChromiumDriver {
-  private readonly page: Chrome.Page;
+  private readonly page: puppeteer.Page;
   private readonly logger: Logger;
   private readonly inspect: boolean;
 
-  constructor(page: Chrome.Page, { logger, inspect }: ChromiumDriverOptions) {
+  constructor(page: puppeteer.Page, { logger, inspect }: ChromiumDriverOptions) {
     this.page = page;
     // @ts-ignore https://github.com/elastic/kibana/issues/32140
     this.logger = logger.clone(['headless-chromium-driver']);
