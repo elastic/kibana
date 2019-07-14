@@ -19,15 +19,16 @@
 
 import _ from 'lodash';
 import { readFileSync } from 'fs';
-import http from 'http';
-import https from 'https';
 import url from 'url';
 
 const readFile = (file) => readFileSync(file, 'utf8');
 
-const createAgent = (legacyConfig) => {
+const createAgentOptions = (legacyConfig) => {
   const target = url.parse(_.head(legacyConfig.hosts));
-  if (!/^https/.test(target.protocol)) return new http.Agent();
+
+  if (!/^https/.test(target.protocol)) {
+    return {};
+  }
 
   const agentOptions = {};
 
@@ -65,12 +66,12 @@ const createAgent = (legacyConfig) => {
     agentOptions.passphrase = legacyConfig.ssl.keyPassphrase;
   }
 
-  return new https.Agent(agentOptions);
+  return agentOptions;
 };
 
 export const getElasticsearchProxyConfig = (legacyConfig) => {
   return {
     timeout: legacyConfig.requestTimeout.asMilliseconds(),
-    agent: createAgent(legacyConfig)
+    agent: createAgentOptions(legacyConfig)
   };
 };

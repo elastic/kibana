@@ -21,32 +21,11 @@ import Boom from 'boom';
 import { first } from 'rxjs/operators';
 import { resolve, join, sep } from 'path';
 import url from 'url';
-import { has, isEmpty, head, pick } from 'lodash';
+import { has, head } from 'lodash';
 
 import { resolveApi } from './api_server/server';
 import { addExtensionSpecFilePath } from './api_server/spec';
-import { setHeaders } from './server/set_headers';
-
-import {
-  ProxyConfigCollection,
-  getElasticsearchProxyConfig,
-  createProxyRoute
-} from './server';
-
-function filterHeaders(originalHeaders, headersToKeep) {
-  const normalizeHeader = function (header) {
-    if (!header) {
-      return '';
-    }
-    header = header.toString();
-    return header.trim().toLowerCase();
-  };
-
-  // Normalize list of headers we want to allow in upstream request
-  const headersToKeepNormalized = headersToKeep.map(normalizeHeader);
-
-  return pick(originalHeaders, headersToKeepNormalized);
-}
+import { ProxyConfigCollection, registerProxyRoute } from './server';
 
 export default function (kibana) {
   const modules = resolve(__dirname, 'public/webpackShims/');
@@ -111,7 +90,6 @@ export default function (kibana) {
         throw new Error('sense.ssl.verify is no longer supported.');
       }
 
-      const config = server.config();
       const legacyEsConfig = await server.newPlatform.setup.core.elasticsearch.legacy.config$.pipe(first()).toPromise();
       const proxyConfigCollection = new ProxyConfigCollection(options.proxyConfig);
       const proxyPathFilters = options.proxyFilter.map(str => new RegExp(str));
@@ -122,26 +100,7 @@ export default function (kibana) {
         ),
       };
 
-      server.route(createProxyRoute({
-        baseUrl: head(legacyEsConfig.hosts),
-        pathFilters: proxyPathFilters,
-        getConfigForReq(req, uri) {
-          const filteredHeaders = filterHeaders(req.headers, legacyEsConfig.requestHeadersWhitelist);
-          const headers = setHeaders(filteredHeaders, legacyEsConfig.customHeaders);
-
-          if (!isEmpty(config.get('console.proxyConfig'))) {
-            return {
-              ...proxyConfigCollection.configForUri(uri),
-              headers,
-            };
-          }
-
-          return {
-            ...getElasticsearchProxyConfig(legacyEsConfig),
-            headers,
-          };
-        }
-      }));
+      registerProxyRoute(server, legacyEsConfig, proxyConfigCollection, proxyPathFilters);
 
       server.route({
         path: '/api/console/api_server',
