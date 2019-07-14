@@ -10,24 +10,6 @@ import { InstallationStatus } from './constants';
 export { Request, ResponseToolkit, ServerRoute } from 'hapi';
 export { ClusterClient } from 'src/core/server';
 
-export type AssetReference = Pick<SavedObjectReference, 'id' | 'type'>;
-
-export type Installation = SavedObject<InstallationAttributes>;
-export interface InstallationAttributes extends SavedObjectAttributes {
-  installed: AssetReference[];
-}
-
-export type Installable<T> = Installed<T> | NotInstalled<T>;
-
-export type Installed<T = {}> = T & {
-  status: InstallationStatus.installed;
-  savedObject: Installation;
-};
-
-export type NotInstalled<T = {}> = T & {
-  status: InstallationStatus.notInstalled;
-};
-
 // Registry's response types
 // from /list
 // https://github.com/elastic/integrations-registry/blob/master/docs/api/list.json
@@ -65,7 +47,22 @@ export type IntegrationInfo = Installable<RegistryPackage>;
 
 // from API_INSTALL_PATTERN
 // returns Installation
+export type Installation = SavedObject<InstallationAttributes>;
+export interface InstallationAttributes extends SavedObjectAttributes {
+  installed: AssetReference[];
+}
+
+export type Installable<T> = Installed<T> | NotInstalled<T>;
+
+export type Installed<T = {}> = T & {
+  status: InstallationStatus.installed;
+  savedObject: Installation;
+};
+
+export type NotInstalled<T = {}> = T & {
+  status: InstallationStatus.notInstalled;
+};
 
 // from API_DELETE_PATTERN
-// returns [ AssetReference ]
-// more specifically, [ SavedObjectAttributes['installed'] ]
+// returns InstallationAttributes['installed']
+export type AssetReference = Pick<SavedObjectReference, 'id' | 'type'>;
