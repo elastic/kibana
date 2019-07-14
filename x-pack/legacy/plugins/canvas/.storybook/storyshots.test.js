@@ -9,6 +9,8 @@ import moment from 'moment';
 import 'moment-timezone';
 
 import initStoryshots, { multiSnapshotWithOptions } from '@storybook/addon-storyshots';
+import styleSheetSerializer from 'jest-styled-components/src/styleSheetSerializer';
+import { addSerializer } from 'jest-specific-snapshot';
 
 // Set our default timezone to UTC for tests so we can generate predictable snapshots
 moment.tz.setDefault('UTC');
@@ -46,6 +48,8 @@ jest.mock('@elastic/eui/packages/react-datepicker', () => {
     default: 'ReactDatePicker',
   };
 });
+
+addSerializer(styleSheetSerializer);
 
 // Initialize Storyshots and build the Jest Snapshots
 initStoryshots({
