@@ -30,6 +30,9 @@ import { i18n } from '@kbn/i18n';
 import { AggConfig } from 'ui/vis';
 // @ts-ignore
 import { Query, QueryBarInput } from 'plugins/data';
+import { npSetup } from 'ui/new_platform';
+import { Storage } from 'ui/storage';
+const localStorage = new Storage(window.localStorage);
 
 interface FilterRowProps {
   id: string;
@@ -108,6 +111,8 @@ function FilterRow({
           data-test-subj={dataTestSubj}
           bubbleSubmitEvent={true}
           languageSwitcherPopoverAnchorPosition="leftDown"
+          store={localStorage}
+          uiSettings={npSetup.core.uiSettings}
         />
       </EuiFormRow>
       {showCustomLabel ? (
