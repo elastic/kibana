@@ -115,7 +115,7 @@ export const BorderForm: FunctionComponent<Props> = ({
 
 BorderForm.propTypes = {
   value: PropTypes.string,
-  radius: PropTypes.string,
+  radius: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
   onChange: PropTypes.func.isRequired,
   colors: PropTypes.array.isRequired,
 };

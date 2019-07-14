@@ -6,8 +6,6 @@
 
 import path from 'path';
 import initStoryshots, { multiSnapshotWithOptions } from '@storybook/addon-storyshots';
-import styleSheetSerializer from 'jest-styled-components/src/styleSheetSerializer';
-import { addSerializer } from 'jest-specific-snapshot';
 
 // Mock EUI generated ids to be consistently predictable for snapshots.
 jest.mock(`@elastic/eui/lib/components/form/form_row/make_id`, () => () => `generated-id`);
@@ -24,8 +22,6 @@ jest.mock('../canvas_plugin_src/renderers/shape/shapes', () => ({
     </svg>`,
   },
 }));
-
-addSerializer(styleSheetSerializer);
 
 // Initialize Storyshots and build the Jest Snapshots
 initStoryshots({
