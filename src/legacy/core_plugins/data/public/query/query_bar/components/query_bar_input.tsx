@@ -32,7 +32,6 @@ import { debounce, compact, isEqual, omit } from 'lodash';
 import { PersistedLog } from 'ui/persisted_log';
 import { kfetch } from 'ui/kfetch';
 import { Storage } from 'ui/storage';
-import { localStorage } from 'ui/storage/storage_service';
 import { UiSettingsClientContract } from 'kibana/public';
 import { IndexPattern, StaticIndexPattern } from '../../../index_patterns';
 import { Query } from '../index';
@@ -50,7 +49,7 @@ interface Props {
   disableAutoFocus?: boolean;
   screenTitle?: string;
   prepend?: any;
-  store?: Storage;
+  store: Storage;
   persistedLog?: PersistedLog;
   bubbleSubmitEvent?: boolean;
   languageSwitcherPopoverAnchorPosition?: PopoverAnchorPosition;
@@ -366,11 +365,7 @@ export class QueryBarInputUI extends Component<Props, State> {
       body: JSON.stringify({ opt_in: language === 'kuery' }),
     });
 
-    if (this.props.store) {
-      this.props.store.set('kibana.userQueryLanguage', language);
-    } else {
-      localStorage.set('kibana.userQueryLanguage', language);
-    }
+    this.props.store.set('kibana.userQueryLanguage', language);
 
     const newQuery = { query: '', language };
     this.onChange(newQuery);
