@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import React, { useState } from 'react';
+import React, { Fragment, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
@@ -106,9 +106,70 @@ export function DevToolsSettingsModal(props: Props) {
     });
   }
 
+  // It only makes sense to show polling options if the user needs to fetch any data.
+  const pollingFields =
+    fields || indices || templates ? (
+      <Fragment>
+        <EuiFormRow
+          label={
+            <FormattedMessage
+              id="console.settingsPage.refreshingDataLabel"
+              defaultMessage="Refreshing autocomplete suggestions"
+            />
+          }
+          helpText={
+            <FormattedMessage
+              id="console.settingsPage.refreshingDataDescription"
+              defaultMessage="Console refreshes autocomplete suggestions by querying Elasticsearch.
+              Automatic refreshes may be an issue if you have a large cluster or if you have network limitations."
+            />
+          }
+        >
+          <EuiSwitch
+            checked={polling}
+            data-test-subj="autocompletePolling"
+            id="autocompletePolling"
+            label={
+              <FormattedMessage
+                defaultMessage="Automatically refresh autocomplete suggestions"
+                id="console.settingsPage.pollingLabelText"
+              />
+            }
+            onChange={e => setPolling(e.target.checked)}
+          />
+        </EuiFormRow>
+
+        <EuiButton
+          data-test-subj="autocompletePolling"
+          id="autocompletePolling"
+          onClick={() => {
+            // Only refresh the currently selected settings.
+            props.refreshAutocompleteSettings({
+              autocomplete: {
+                fields,
+                indices,
+                templates,
+              },
+            });
+          }}
+        >
+          <FormattedMessage
+            defaultMessage="Refresh autocomplete suggestions"
+            id="console.settingsPage.refreshButtonLabel"
+          />
+        </EuiButton>
+      </Fragment>
+    ) : (
+      undefined
+    );
+
   return (
     <EuiOverlayMask>
-      <EuiModal data-test-subj="devToolsSettingsModal" onClose={props.onClose}>
+      <EuiModal
+        data-test-subj="devToolsSettingsModal"
+        className="conApp__settingsModal"
+        onClose={props.onClose}
+      >
         <EuiModalHeader>
           <EuiModalHeaderTitle>
             <FormattedMessage
@@ -140,6 +201,7 @@ export function DevToolsSettingsModal(props: Props) {
               }}
             />
           </EuiFormRow>
+
           <EuiFormRow>
             <EuiSwitch
               checked={wrapMode}
@@ -176,6 +238,7 @@ export function DevToolsSettingsModal(props: Props) {
               onChange={e => setTripleQuotes(e.target.checked)}
             />
           </EuiFormRow>
+
           <EuiFormRow
             labelType="legend"
             label={
@@ -193,45 +256,8 @@ export function DevToolsSettingsModal(props: Props) {
               }}
             />
           </EuiFormRow>
-          <EuiFormRow
-            label={
-              <FormattedMessage
-                id="console.settingsPage.refreshingDataLabel"
-                defaultMessage="Refreshing autocomplete suggestions"
-              />
-            }
-            helpText={
-              <FormattedMessage
-                id="console.settingsPage.refreshingDataDescription"
-                defaultMessage="Console refreshes autocomplete suggestions by querying Elasticsearch.
-                  Automatic refreshes may be an issue if you have a large cluster or if you have network limitations."
-              />
-            }
-          >
-            <EuiSwitch
-              checked={polling}
-              data-test-subj="autocompletePolling"
-              id="autocompletePolling"
-              label={
-                <FormattedMessage
-                  defaultMessage="Automatically refresh autocomplete suggestions"
-                  id="console.settingsPage.pollingLabelText"
-                />
-              }
-              onChange={e => setPolling(e.target.checked)}
-            />
-          </EuiFormRow>
 
-          <EuiButton
-            data-test-subj="autocompletePolling"
-            id="autocompletePolling"
-            onClick={props.refreshAutocompleteSettings}
-          >
-            <FormattedMessage
-              defaultMessage="Refresh autocomplete suggestions"
-              id="console.settingsPage.refreshButtonLabel"
-            />
-          </EuiButton>
+          {pollingFields}
         </EuiModalBody>
 
         <EuiModalFooter>

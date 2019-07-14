@@ -32,8 +32,8 @@ export function showSettingsModal() {
   const container = document.getElementById('consoleSettingsModal');
   const curSettings = getCurrentSettings();
 
-  const refreshAutocompleteSettings = () => {
-    mappings.retrieveAutoCompleteInfo();
+  const refreshAutocompleteSettings = selectedSettings => {
+    mappings.retrieveAutoCompleteInfo(selectedSettings);
   };
 
   const closeModal = () => {
@@ -54,12 +54,22 @@ export function showSettingsModal() {
     prevSettings: DevToolsSettings
   ) => {
     // We'll only retrieve settings if polling is on.
-    const isPollingChanged = prevSettings.polling !== newSettings.polling;
     if (newSettings.polling) {
       const autocompleteDiff = getAutocompleteDiff(newSettings, prevSettings);
-      if (autocompleteDiff.length > 0) {
-        mappings.retrieveAutoCompleteInfo(newSettings.autocomplete);
-      } else if (isPollingChanged) {
+
+      const isSettingsChanged = autocompleteDiff.length > 0;
+      const isPollingChanged = prevSettings.polling !== newSettings.polling;
+
+      if (isSettingsChanged) {
+        // If the user has changed one of the autocomplete settings, then we'll fetch just the
+        // ones which have changed.
+        const changedSettings = autocompleteDiff.reduce((changedSettingsAccum, setting) => {
+          changedSettingsAccum[setting] = newSettings.autocomplete[setting];
+          return changedSettingsAccum;
+        }, {});
+        mappings.retrieveAutoCompleteInfo(changedSettings);
+      } else if (isPollingChanged && newSettings.polling) {
+        // If the user has turned polling on, then we'll fetch all selected autocomplete settings.
         mappings.retrieveAutoCompleteInfo();
       }
     }
