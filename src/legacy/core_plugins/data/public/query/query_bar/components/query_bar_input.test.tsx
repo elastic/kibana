@@ -28,6 +28,8 @@ import React from 'react';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { QueryLanguageSwitcher } from './language_switcher';
 import { QueryBarInput, QueryBarInputUI } from './query_bar_input';
+import { coreMock } from '../../../../../../../core/public/mocks';
+const setupMock = coreMock.createSetup();
 
 const noop = () => {
   return;
@@ -75,6 +77,12 @@ const mockIndexPattern = {
   ],
 };
 
+const createMockSavedObjectsClient = () => {
+  return {
+    get: async () => mockIndexPattern,
+  };
+};
+
 describe('QueryBarInput', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -90,6 +98,7 @@ describe('QueryBarInput', () => {
         indexPatterns={[mockIndexPattern]}
         store={createMockStorage()}
         intl={null as any}
+        uiSettings={setupMock.uiSettings}
       />
     );
 
@@ -106,6 +115,7 @@ describe('QueryBarInput', () => {
         indexPatterns={[mockIndexPattern]}
         store={createMockStorage()}
         intl={null as any}
+        uiSettings={setupMock.uiSettings}
       />
     );
 
@@ -123,6 +133,7 @@ describe('QueryBarInput', () => {
         store={createMockStorage()}
         disableAutoFocus={true}
         intl={null as any}
+        uiSettings={setupMock.uiSettings}
       />
     );
 
@@ -142,6 +153,7 @@ describe('QueryBarInput', () => {
         store={createMockStorage()}
         disableAutoFocus={true}
         intl={null as any}
+        uiSettings={setupMock.uiSettings}
       />
     );
 
@@ -162,6 +174,7 @@ describe('QueryBarInput', () => {
         store={mockStorage}
         disableAutoFocus={true}
         intl={null as any}
+        uiSettings={setupMock.uiSettings}
       />
     );
 
@@ -186,6 +199,7 @@ describe('QueryBarInput', () => {
         store={createMockStorage()}
         disableAutoFocus={true}
         intl={null as any}
+        uiSettings={setupMock.uiSettings}
       />
     );
 
@@ -209,6 +223,7 @@ describe('QueryBarInput', () => {
         store={createMockStorage()}
         disableAutoFocus={true}
         intl={null as any}
+        uiSettings={setupMock.uiSettings}
       />
     );
 
@@ -237,8 +252,9 @@ describe('QueryBarInput', () => {
         store={createMockStorage()}
         disableAutoFocus={true}
         intl={null as any}
+        uiSettings={setupMock.uiSettings}
       />
     );
-    expect(mockFetchIndexPatterns).toHaveBeenCalledWith(['logstash-*']);
+    expect(mockFetchIndexPatterns).toHaveBeenCalledWith(['logstash-*'], setupMock.uiSettings);
   });
 });

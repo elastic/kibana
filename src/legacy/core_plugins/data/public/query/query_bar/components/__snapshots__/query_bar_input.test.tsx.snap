@@ -150,6 +150,36 @@ exports[`QueryBarInput Should disable autoFocus on EuiFieldText when disableAuto
       },
     }
   }
+  uiSettings={
+    Object {
+      "get": [MockFunction] {
+        "calls": Array [
+          Array [
+            "history:limit",
+          ],
+        ],
+        "results": Array [
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+        ],
+      },
+      "get$": [MockFunction],
+      "getAll": [MockFunction],
+      "getSaved$": [MockFunction],
+      "getUpdate$": [MockFunction],
+      "getUpdateErrors$": [MockFunction],
+      "isCustom": [MockFunction],
+      "isDeclared": [MockFunction],
+      "isDefault": [MockFunction],
+      "isOverridden": [MockFunction],
+      "overrideLocalDefault": [MockFunction],
+      "remove": [MockFunction],
+      "set": [MockFunction],
+      "stop": [MockFunction],
+    }
+  }
 >
   <EuiOutsideClickDetector
     onOutsideClick={[Function]}
@@ -496,6 +526,36 @@ exports[`QueryBarInput Should pass the query language to the language switcher 1
       },
     }
   }
+  uiSettings={
+    Object {
+      "get": [MockFunction] {
+        "calls": Array [
+          Array [
+            "history:limit",
+          ],
+        ],
+        "results": Array [
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+        ],
+      },
+      "get$": [MockFunction],
+      "getAll": [MockFunction],
+      "getSaved$": [MockFunction],
+      "getUpdate$": [MockFunction],
+      "getUpdateErrors$": [MockFunction],
+      "isCustom": [MockFunction],
+      "isDeclared": [MockFunction],
+      "isDefault": [MockFunction],
+      "isOverridden": [MockFunction],
+      "overrideLocalDefault": [MockFunction],
+      "remove": [MockFunction],
+      "set": [MockFunction],
+      "stop": [MockFunction],
+    }
+  }
 >
   <EuiOutsideClickDetector
     onOutsideClick={[Function]}
@@ -840,6 +900,36 @@ exports[`QueryBarInput Should render the given query 1`] = `
         "removeItem": [MockFunction],
         "setItem": [MockFunction],
       },
+    }
+  }
+  uiSettings={
+    Object {
+      "get": [MockFunction] {
+        "calls": Array [
+          Array [
+            "history:limit",
+          ],
+        ],
+        "results": Array [
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+        ],
+      },
+      "get$": [MockFunction],
+      "getAll": [MockFunction],
+      "getSaved$": [MockFunction],
+      "getUpdate$": [MockFunction],
+      "getUpdateErrors$": [MockFunction],
+      "isCustom": [MockFunction],
+      "isDeclared": [MockFunction],
+      "isDefault": [MockFunction],
+      "isOverridden": [MockFunction],
+      "overrideLocalDefault": [MockFunction],
+      "remove": [MockFunction],
+      "set": [MockFunction],
+      "stop": [MockFunction],
     }
   }
 >

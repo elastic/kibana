@@ -35,34 +35,6 @@ const mockIndexPattern = {
   ],
 };
 
-const mockChromeFactory = jest.fn(() => {
-  return {
-    getBasePath: () => `foo`,
-    getUiSettingsClientContract: () => {
-      return {
-        get: (key: string) => {
-          switch (key) {
-            case 'timepicker:quickRanges':
-              return [
-                {
-                  from: 'now/d',
-                  to: 'now/d',
-                  display: 'Today',
-                },
-              ];
-            case 'dateFormat':
-              return 'YY';
-            case 'history:limit':
-              return 10;
-            default:
-              throw new Error(`Unexpected config key: ${key}`);
-          }
-        },
-      };
-    },
-  };
-});
-
 export const mockPersistedLog = {
   add: jest.fn(),
   get: jest.fn(() => ['response:200']),
