@@ -16,15 +16,20 @@ export interface InstallationAttributes extends SavedObjectAttributes {
   installed: AssetReference[];
 }
 
+export enum InstallationStatus {
+  installed = 'installed',
+  notInstalled = 'not_installed',
+}
+
 export type Installable<T> = Installed<T> | NotInstalled<T>;
 
 export type Installed<T = {}> = T & {
-  status: 'installed';
+  status: InstallationStatus.installed;
   savedObject: Installation;
 };
 
 export type NotInstalled<T = {}> = T & {
-  status: 'not_installed';
+  status: InstallationStatus.notInstalled;
 };
 
 // Registry's response types

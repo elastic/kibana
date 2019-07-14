@@ -10,6 +10,7 @@ import {
   Installable,
   Installation,
   InstallationAttributes,
+  InstallationStatus,
 } from '../../common/types';
 import { SAVED_OBJECT_TYPE } from '../../common/constants';
 import * as Registry from '../registry';
@@ -97,12 +98,12 @@ function createInstallableFrom<T>(from: T, savedObject?: Installation): Installa
   return savedObject
     ? {
         ...from,
-        status: 'installed',
+        status: InstallationStatus.installed,
         savedObject,
       }
     : {
         ...from,
-        status: 'not_installed',
+        status: InstallationStatus.notInstalled,
       };
 }
 
