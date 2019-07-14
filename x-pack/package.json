@@ -84,7 +84,7 @@
     "@types/react-router-dom": "^4.3.1",
     "@types/react-sticky": "^6.0.3",
     "@types/react-test-renderer": "^16.8.0",
-    "@types/recompose": "^0.30.2",
+    "@types/recompose": "^0.30.6",
     "@types/reduce-reducers": "^0.3.0",
     "@types/redux-actions": "^2.2.1",
     "@types/rimraf": "^2.0.2",

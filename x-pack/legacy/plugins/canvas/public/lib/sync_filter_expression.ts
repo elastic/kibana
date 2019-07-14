@@ -6,9 +6,10 @@
 
 // @ts-ignore internal untyped
 import { fromExpression } from '@kbn/interpreter/common';
-// @ts-ignore external untyped
-import { set, del } from 'object-path-immutable';
+import immutable from 'object-path-immutable';
 import { get } from 'lodash';
+
+const { set, del } = immutable;
 
 export function syncFilterExpression(
   config: Record<string, any>,

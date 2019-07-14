@@ -6,7 +6,7 @@
 
 import { createAction } from 'redux-actions';
 import { createThunk } from 'redux-thunks';
-import { set, del } from 'object-path-immutable';
+import immutable from 'object-path-immutable';
 import { get, pick, cloneDeep, without } from 'lodash';
 import { toExpression, safeElementFromExpression } from '@kbn/interpreter/common';
 import { interpretAst } from 'plugins/interpreter/interpreter';
@@ -18,6 +18,8 @@ import { runInterpreter } from '../../lib/run_interpreter';
 import { subMultitree } from '../../lib/aeroelastic/functional';
 import { selectToplevelNodes } from './transient';
 import * as args from './resolved_args';
+
+const { set, del } = immutable;
 
 export function getSiblingContext(state, elementId, checkIndex) {
   const prevContextPath = [elementId, 'expressionContext', checkIndex];
@@ -61,7 +63,7 @@ export const flushContextAfterIndex = createAction('flushContextAfterIndex');
 export const fetchContext = createThunk(
   'fetchContext',
   ({ dispatch, getState }, index, element, fullRefresh = false) => {
-    const chain = get(element, ['ast', 'chain']);
+    const chain = get(element, 'ast.chain');
     const invalidIndex = chain ? index >= chain.length : true;
 
     if (!element || !chain || invalidIndex) {
@@ -301,7 +303,7 @@ export const setAstAtIndex = createThunk(
     // invalidate cached context for elements after this index
     dispatch(flushContextAfterIndex({ elementId: element.id, index }));
 
-    const newElement = set(element, ['ast', 'chain', index], ast);
+    const newElement = set(element, `ast.chain.${index}`, ast);
     const newAst = get(newElement, 'ast');
 
     // fetch renderable using existing context, if available (value is null if not cached)
@@ -340,9 +342,9 @@ export const setAstAtIndex = createThunk(
 // the entire argument from be set to the passed value
 export const setArgumentAtIndex = createThunk('setArgumentAtIndex', ({ dispatch }, args) => {
   const { index, argName, value, valueIndex, element, pageId } = args;
-  const selector = ['ast', 'chain', index, 'arguments', argName];
+  let selector = `ast.chain.${index}.arguments.${argName}`;
   if (valueIndex != null) {
-    selector.push(valueIndex);
+    selector += '.' + valueIndex;
   }
 
   const newElement = set(element, selector, value);
@@ -380,9 +382,9 @@ export const deleteArgumentAtIndex = createThunk('deleteArgumentAtIndex', ({ dis
   const newElement =
     argIndex != null && curVal.length > 1
       ? // if more than one val, remove the specified val
-        del(element, ['ast', 'chain', index, 'arguments', argName, argIndex])
+        del(element, `ast.chain.${index}.arguments.${argName}.${argIndex}`)
       : // otherwise, remove the entire key
-        del(element, ['ast', 'chain', index, 'arguments', argName]);
+        del(element, `ast.chain.${index}.arguments.${argName}`);
 
   dispatch(setAstAtIndex(index, get(newElement, ['ast', 'chain', index]), element, pageId));
 });

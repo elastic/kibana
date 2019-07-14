@@ -4,9 +4,28 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { FunctionComponent, ChangeEvent } from 'react';
 import PropTypes from 'prop-types';
 import { EuiFieldNumber, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSelect } from '@elastic/eui';
+
+type Overflow = 'hidden' | 'visible';
+
+export interface Arguments {
+  padding: string | number;
+  opacity: string | number;
+  overflow: Overflow;
+}
+export type ArgumentTypes = Arguments;
+export type Argument = keyof Arguments;
+
+interface Props extends Arguments {
+  onChange: <T extends Argument>(arg: T, val: ArgumentTypes[T]) => void;
+}
+
+const overflows: Array<{ value: Overflow; text: string }> = [
+  { value: 'hidden', text: 'Hidden' },
+  { value: 'visible', text: 'Visible' },
+];
 
 const opacities = [
   { value: 1, text: '100%' },
@@ -17,12 +36,19 @@ const opacities = [
   { value: 0.1, text: '10%' },
 ];
 
-const overflows = [{ value: 'hidden', text: 'Hidden' }, { value: 'visible', text: 'Visible' }];
+export const AppearanceForm: FunctionComponent<Props> = ({
+  padding = '',
+  opacity = 1,
+  overflow = 'hidden',
+  onChange,
+}) => {
+  if (typeof padding === 'string') {
+    padding = padding.replace('px', '');
+  }
 
-export const AppearanceForm = ({ padding, opacity, overflow, onChange }) => {
-  const paddingVal = padding ? padding.replace('px', '') : '';
-
-  const namedChange = name => ev => {
+  const namedChange = (name: keyof Arguments) => (
+    ev: ChangeEvent<HTMLSelectElement | HTMLInputElement>
+  ) => {
     if (name === 'padding') {
       return onChange(name, `${ev.target.value}px`);
     }
@@ -34,7 +60,7 @@ export const AppearanceForm = ({ padding, opacity, overflow, onChange }) => {
     <EuiFlexGroup gutterSize="s" justify-content="spaceBetween">
       <EuiFlexItem grow={2}>
         <EuiFormRow label="Padding" compressed>
-          <EuiFieldNumber value={Number(paddingVal)} onChange={namedChange('padding')} />
+          <EuiFieldNumber value={Number(padding)} onChange={namedChange('padding')} />
         </EuiFormRow>
       </EuiFlexItem>
       <EuiFlexItem grow={3}>

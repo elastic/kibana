@@ -4,11 +4,23 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { FunctionComponent } from 'react';
 import PropTypes from 'prop-types';
 import { ColorPickerPopover } from '../../../components/color_picker_popover';
+import { CanvasWorkpad } from '../.../../../../../types';
 
-export const SimpleTemplate = ({ getArgValue, setArgValue, workpad }) => (
+export interface Arguments {
+  backgroundColor: string;
+}
+export type Argument = keyof Arguments;
+
+interface Props {
+  getArgValue: <T extends Argument>(key: T) => Arguments[T];
+  setArgValue: <T extends Argument>(key: T, val: Arguments[T]) => void;
+  workpad: CanvasWorkpad;
+}
+
+export const SimpleTemplate: FunctionComponent<Props> = ({ getArgValue, setArgValue, workpad }) => (
   <div style={{ fontSize: 0 }}>
     <ColorPickerPopover
       value={getArgValue('backgroundColor')}
@@ -22,8 +34,6 @@ export const SimpleTemplate = ({ getArgValue, setArgValue, workpad }) => (
 SimpleTemplate.displayName = 'ContainerStyleArgSimpleInput';
 
 SimpleTemplate.propTypes = {
-  onValueChange: PropTypes.func.isRequired,
-  argValue: PropTypes.any.isRequired,
   getArgValue: PropTypes.func.isRequired,
   setArgValue: PropTypes.func.isRequired,
   workpad: PropTypes.shape({

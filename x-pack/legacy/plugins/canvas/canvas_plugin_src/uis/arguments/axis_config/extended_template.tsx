@@ -9,10 +9,11 @@ import PropTypes from 'prop-types';
 import { EuiSelect, EuiFormRow, EuiText } from '@elastic/eui';
 import immutable from 'object-path-immutable';
 import { get } from 'lodash';
+import { ExpressionAST } from '../../../../types';
 
 const { set } = immutable;
 
-const defaultExpression = {
+const defaultExpression: ExpressionAST = {
   type: 'expression',
   chain: [
     {
@@ -24,12 +25,11 @@ const defaultExpression = {
 };
 
 export interface Props {
-  onValueChange: (newValue: string[]) => void;
-  argValue: boolean | { chain: string[] };
+  onValueChange: (newValue: ExpressionAST) => void;
+  argValue: boolean | ExpressionAST;
   typeInstance: {
     name: 'xaxis' | 'yaxis';
   };
-  argId: string;
 }
 
 export class ExtendedTemplate extends PureComponent<Props> {
@@ -42,14 +42,13 @@ export class ExtendedTemplate extends PureComponent<Props> {
       }).isRequired,
     ]),
     typeInstance: PropTypes.object.isRequired,
-    argId: PropTypes.string.isRequired,
   };
 
   static displayName = 'AxisConfigExtendedInput';
 
   // TODO: this should be in a helper, it's the same code from container_style
-  getArgValue = (name: string, alt) => {
-    return get(this.props.argValue, ['chain', 0, 'arguments', name, 0], alt);
+  getArgValue = (name: string, alt: string) => {
+    return get(this.props.argValue, `chain.0.arguments.${name}.0`, alt);
   };
 
   // TODO: this should be in a helper, it's the same code from container_style
@@ -62,7 +61,6 @@ export class ExtendedTemplate extends PureComponent<Props> {
     const { argValue, onValueChange } = this.props;
     const oldVal = typeof argValue === 'boolean' ? defaultExpression : argValue;
     const newValue = set(oldVal, `chain.0.arguments.${name}.0`, val);
-    console.log(newValue);
     onValueChange(newValue);
   };
 

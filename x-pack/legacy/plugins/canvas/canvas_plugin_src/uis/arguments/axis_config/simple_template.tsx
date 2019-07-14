@@ -10,12 +10,14 @@ import { EuiSwitch } from '@elastic/eui';
 
 export interface Props {
   onValueChange: (argValue: boolean) => void;
-  argValue: string;
+  argValue: boolean;
 }
 
-export const SimpleTemplate: SFC<Props> = ({ onValueChange, argValue }) => (
-  <EuiSwitch checked={Boolean(argValue)} onChange={() => onValueChange(!Boolean(argValue))} />
-);
+export const SimpleTemplate: SFC<Props> = ({ onValueChange, argValue }) => {
+  return (
+    <EuiSwitch checked={Boolean(argValue)} onChange={() => onValueChange(!Boolean(argValue))} />
+  );
+};
 
 SimpleTemplate.propTypes = {
   onValueChange: PropTypes.func.isRequired,
