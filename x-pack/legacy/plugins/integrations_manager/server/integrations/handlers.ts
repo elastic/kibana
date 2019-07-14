@@ -8,7 +8,12 @@ import { PLUGIN_ID } from '../../common/constants';
 import { Request, ResponseToolkit } from '../../common/types';
 import { CoreSetup } from '../plugin';
 import { getClient } from '../saved_objects';
-import { getIntegrations, getIntegrationInfo, installAssets, removeInstallation } from './data';
+import {
+  getIntegrations,
+  getIntegrationInfo,
+  installIntegration,
+  removeInstallation,
+} from './data';
 
 interface Extra extends ResponseToolkit {
   context: {
@@ -57,7 +62,7 @@ export async function handleRequestInstall(req: InstallAssetRequest, extra: Extr
   const { elasticsearch } = extra.context.core;
   const esClient = elasticsearch.createClient(PLUGIN_ID);
   const callESEndpoint = esClient.asScoped(req).callAsCurrentUser;
-  const object = await installAssets(client, pkgkey, asset, callESEndpoint);
+  const object = await installIntegration(client, pkgkey, asset, callESEndpoint);
 
   return object;
 }

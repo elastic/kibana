@@ -51,13 +51,13 @@ export async function getInstallationObject(client: SavedObjectsClientContract, 
   return client.get<InstallationAttributes>(SAVED_OBJECT_TYPE, pkgkey).catch(e => undefined);
 }
 
-export async function installAssets(
+export async function installIntegration(
   client: SavedObjectsClientContract,
   pkgkey: string,
   asset: string,
   callESEndpoint: CallESEndpoint
 ) {
-  const installed = await _installAssets(client, pkgkey, asset, callESEndpoint);
+  const installed = await installAssets(client, pkgkey, asset, callESEndpoint);
 
   if (installed.length) {
     const saved = await saveInstallationReferences(client, pkgkey, installed);
@@ -151,7 +151,7 @@ async function installPipeline(
   return { id, type };
 }
 
-async function _installAssets(
+async function installAssets(
   client: SavedObjectsClientContract,
   pkgkey: string,
   asset: string,
@@ -190,11 +190,11 @@ async function saveInstallationReferences(
     return current;
   }, savedRefs);
 
-  const installed = await client.create<InstallationAttributes>(
+  const results = await client.create<InstallationAttributes>(
     SAVED_OBJECT_TYPE,
     { installed: toInstall },
     { id: pkgkey, overwrite: true }
   );
 
-  return installed;
+  return results;
 }
