@@ -5,6 +5,7 @@
  */
 
 import { SavedObject, SavedObjectAttributes, SavedObjectReference } from 'src/core/server';
+import { InstallationStatus } from './constants';
 
 export { Request, ResponseToolkit, ServerRoute } from 'hapi';
 export { ClusterClient } from 'src/core/server';
@@ -14,11 +15,6 @@ export type AssetReference = Pick<SavedObjectReference, 'id' | 'type'>;
 export type Installation = SavedObject<InstallationAttributes>;
 export interface InstallationAttributes extends SavedObjectAttributes {
   installed: AssetReference[];
-}
-
-export enum InstallationStatus {
-  installed = 'installed',
-  notInstalled = 'not_installed',
 }
 
 export type Installable<T> = Installed<T> | NotInstalled<T>;

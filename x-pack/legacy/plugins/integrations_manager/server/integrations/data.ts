@@ -5,17 +5,25 @@
  */
 
 import { SavedObjectsClientContract, ScopedClusterClient } from 'src/core/server/';
+import { SAVED_OBJECT_TYPE, AssetTypes, InstallationStatus } from '../../common/constants';
 import {
   AssetReference,
   Installable,
   Installation,
   InstallationAttributes,
-  InstallationStatus,
 } from '../../common/types';
-import { SAVED_OBJECT_TYPE } from '../../common/constants';
 import * as Registry from '../registry';
 
 type CallESEndpoint = ScopedClusterClient['callAsCurrentUser'];
+
+enum SavedObjectTypes {
+  config = AssetTypes.config,
+  dashboard = AssetTypes.dashboard,
+  indexPattern = AssetTypes.indexPattern,
+  search = AssetTypes.search,
+  timelionSheet = AssetTypes.timelionSheet,
+  visualization = AssetTypes.visualization,
+}
 
 export async function getIntegrations(client: SavedObjectsClientContract) {
   const registryItems = await Registry.fetchList();
@@ -108,15 +116,8 @@ function createInstallableFrom<T>(from: T, savedObject?: Installation): Installa
 }
 
 function assetUsesObjects(asset: string) {
-  const usesObjects = [
-    'visualization',
-    'dashboard',
-    'search',
-    'index-pattern',
-    'config',
-    'timelion-sheet',
-  ];
-  return usesObjects.includes(asset);
+  const values = Object.values(SavedObjectTypes);
+  return values.includes(asset);
 }
 
 async function installObjects(
@@ -163,7 +164,7 @@ async function installAssets(
     return references;
   }
 
-  if (asset === 'ingest-pipeline') {
+  if (asset === AssetTypes.ingestPipeline) {
     const isAssetType = (entry: Registry.ArchiveEntry) =>
       Registry.pathParts(entry.path).type === asset;
     const paths = await Registry.getArchiveInfo(`${pkgkey}.tar.gz`, isAssetType);

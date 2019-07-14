@@ -7,3 +7,18 @@ import manifest from '../kibana.json';
 
 export const PLUGIN_ID = manifest.id;
 export const SAVED_OBJECT_TYPE = 'integrations-manager';
+
+export enum AssetTypes {
+  config = 'config',
+  dashboard = 'dashboard',
+  ingestPipeline = 'ingest-pipeline',
+  indexPattern = 'index-pattern',
+  search = 'search',
+  timelionSheet = 'timelion-sheet',
+  visualization = 'visualization',
+}
+
+export enum InstallationStatus {
+  installed = 'installed',
+  notInstalled = 'not_installed',
+}
