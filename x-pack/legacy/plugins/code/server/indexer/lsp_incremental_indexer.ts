@@ -4,9 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import fs from 'fs';
-import util from 'util';
-
 import { ProgressReporter } from '.';
 import { Diff, DiffKind } from '../../common/git_diff';
 import { toCanonicalUrl } from '../../common/uri_util';
@@ -24,7 +21,7 @@ import { LspService } from '../lsp/lsp_service';
 import { ServerOptions } from '../server_options';
 import { detectLanguage } from '../utils/detect_language';
 import { LspIndexer } from './lsp_indexer';
-import { DocumentIndexName, ReferenceIndexName, SymbolIndexName } from './schema';
+import { DocumentIndexName, SymbolIndexName } from './schema';
 
 export class LspIncrementalIndexer extends LspIndexer {
   protected type: string = 'lsp_inc';
@@ -124,16 +121,10 @@ export class LspIncrementalIndexer extends LspIndexer {
 
   protected async *getIndexRequestIterator(): AsyncIterableIterator<LspIncIndexRequest> {
     try {
-      const { workspaceRepo } = await this.lspService.workspaceHandler.openWorkspace(
-        this.repoUri,
-        HEAD
-      );
-      const workspaceDir = workspaceRepo.workdir();
       if (this.diff) {
         for (const f of this.diff.files) {
           yield {
             repoUri: this.repoUri,
-            localRepoPath: workspaceDir,
             filePath: f.path,
             originPath: f.originPath,
             // Always use HEAD for now until we have multi revision.
@@ -175,48 +166,25 @@ export class LspIncrementalIndexer extends LspIndexer {
   }
 
   private async handleAddedRequest(request: LspIncIndexRequest, stats: IndexStats) {
-    const { repoUri, revision, filePath, localRepoPath } = request;
+    const { repoUri, filePath } = request;
 
-    const lspDocUri = toCanonicalUrl({ repoUri, revision, file: filePath, schema: 'git:' });
-    const symbolNames = new Set<string>();
-
+    let content = '';
     try {
-      const response = await this.lspService.sendRequest('textDocument/full', {
-        textDocument: {
-          uri: lspDocUri,
-        },
-        reference: this.options.enableGlobalReference,
-      });
-
-      if (response && response.result.length > 0) {
-        const { symbols, references } = response.result[0];
-        for (const symbol of symbols) {
-          await this.lspBatchIndexHelper.index(SymbolIndexName(repoUri), symbol);
-          symbolNames.add(symbol.symbolInformation.name);
-        }
-        stats.set(IndexStatsKey.Symbol, symbols.length);
-
-        for (const ref of references) {
-          await this.lspBatchIndexHelper.index(ReferenceIndexName(repoUri), ref);
-        }
-        stats.set(IndexStatsKey.Reference, references.length);
-      } else {
-        this.log.debug(`Empty response from lsp server. Skip symbols and references indexing.`);
-      }
+      content = await this.getFileSource(request);
     } catch (error) {
-      this.log.error(`Index symbols or references error. Skip to file indexing.`);
-      this.log.error(error);
+      if ((error as Error).message === this.FILE_OVERSIZE_ERROR_MSG) {
+        // Skip this index request if the file is oversized
+        this.log.debug(this.FILE_OVERSIZE_ERROR_MSG);
+        return stats;
+      } else {
+        // Rethrow the issue if for other reasons
+        throw error;
+      }
     }
 
-    const localFilePath = `${localRepoPath}${filePath}`;
-    const lstat = util.promisify(fs.lstat);
-    const stat = await lstat(localFilePath);
-
-    const readLink = util.promisify(fs.readlink);
-    const readFile = util.promisify(fs.readFile);
-    const content = stat.isSymbolicLink()
-      ? await readLink(localFilePath, 'utf8')
-      : await readFile(localFilePath, 'utf8');
+    const { symbolNames, symbolsLength, referencesLength } = await this.execLspIndexing(request);
+    stats.set(IndexStatsKey.Symbol, symbolsLength);
+    stats.set(IndexStatsKey.Reference, referencesLength);
 
     const language = await detectLanguage(filePath, Buffer.from(content));
     const body: Document = {
@@ -269,17 +237,14 @@ export class LspIncrementalIndexer extends LspIndexer {
   }
 
   private async handleModifiedRequest(request: LspIncIndexRequest, stats: IndexStats) {
-    const { kind, originRevision, originPath, repoUri, localRepoPath } = request;
+    const { originRevision, originPath } = request;
 
     // 1. first delete all related indexed data
     await this.handleDeletedRequest(
       {
-        repoUri,
-        localRepoPath,
+        ...request,
         revision: originRevision,
         filePath: originPath ? originPath : '',
-        kind,
-        originRevision,
       },
       stats
     );

@@ -28,14 +28,14 @@ import { CoreStart, CoreSetup } from '..';
  * @public
  */
 export interface Plugin<
-  TSetup,
-  TStart,
-  TPluginsSetup extends Record<string, unknown> = {},
-  TPluginsStart extends Record<string, unknown> = {}
+  TSetup = void,
+  TStart = void,
+  TPluginsSetup extends {} = {},
+  TPluginsStart extends {} = {}
 > {
-  setup: (core: CoreSetup, plugins: TPluginsSetup) => TSetup | Promise<TSetup>;
-  start: (core: CoreStart, plugins: TPluginsStart) => TStart | Promise<TStart>;
-  stop?: () => void;
+  setup(core: CoreSetup, plugins: TPluginsSetup): TSetup | Promise<TSetup>;
+  start(core: CoreStart, plugins: TPluginsStart): TStart | Promise<TStart>;
+  stop?(): void;
 }
 
 /**
@@ -47,8 +47,8 @@ export interface Plugin<
 export type PluginInitializer<
   TSetup,
   TStart,
-  TPluginsSetup extends Record<string, unknown> = {},
-  TPluginsStart extends Record<string, unknown> = {}
+  TPluginsSetup extends Record<string, any> = {},
+  TPluginsStart extends Record<string, any> = {}
 > = (core: PluginInitializerContext) => Plugin<TSetup, TStart, TPluginsSetup, TPluginsStart>;
 
 /**
@@ -60,8 +60,8 @@ export type PluginInitializer<
 export class PluginWrapper<
   TSetup = unknown,
   TStart = unknown,
-  TPluginsSetup extends Record<PluginName, unknown> = Record<PluginName, unknown>,
-  TPluginsStart extends Record<PluginName, unknown> = Record<PluginName, unknown>
+  TPluginsSetup extends Record<PluginName, any> = Record<PluginName, unknown>,
+  TPluginsStart extends Record<PluginName, any> = Record<PluginName, unknown>
 > {
   public readonly name: DiscoveredPlugin['id'];
   public readonly configPath: DiscoveredPlugin['configPath'];

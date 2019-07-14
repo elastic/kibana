@@ -4,8 +4,20 @@
 
 ## ElasticsearchServiceSetup.createClient property
 
+Create application specific Elasticsearch cluster API client with customized config.
+
 <b>Signature:</b>
 
 ```typescript
-readonly createClient: (type: string, config: ElasticsearchClientConfig) => ClusterClient;
+readonly createClient: (type: string, clientConfig?: Partial<ElasticsearchClientConfig>) => ClusterClient;
 ```
+
+## Example
+
+
+```js
+const client = elasticsearch.createCluster('my-app-name', config);
+const data = await client.callAsInternalUser();
+
+```
+

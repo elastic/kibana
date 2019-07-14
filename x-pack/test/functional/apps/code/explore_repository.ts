@@ -23,7 +23,8 @@ export default function exploreRepositoryFunctionalTests({
 
   const FIND_TIME = config.get('timeouts.find');
 
-  describe('Explore Repository', () => {
+  describe('Explore Repository', function() {
+    this.tags('smoke');
     describe('Explore a repository', () => {
       const repositoryListSelector = 'codeRepositoryList codeRepositoryItem';
 
@@ -119,7 +120,8 @@ export default function exploreRepositoryFunctionalTests({
         });
       });
 
-      it('Click file/directory on the file tree', async () => {
+      // FLAKY: https://github.com/elastic/kibana/issues/41076
+      it.skip('Click file/directory on the file tree', async () => {
         log.debug('Click a file in the source tree');
         // Wait the file tree to be rendered and click the 'src' folder on the file tree.
         await retry.try(async () => {

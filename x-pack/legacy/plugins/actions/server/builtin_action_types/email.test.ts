@@ -117,6 +117,13 @@ describe('config validation', () => {
     }).toThrowErrorMatchingInlineSnapshot(
       `"The actionTypeConfig is invalid: [host] is required if [service] is not provided"`
     );
+
+    // invalid service
+    expect(() => {
+      validateActionTypeConfig(actionType, { ...baseConfig, service: 'bad-nodemailer-service' });
+    }).toThrowErrorMatchingInlineSnapshot(
+      `"The actionTypeConfig is invalid: [service] value \\"bad-nodemailer-service\\" is not valid"`
+    );
   });
 });
 

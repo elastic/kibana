@@ -36,7 +36,11 @@
  */
 
 import { Observable } from 'rxjs';
-import { ClusterClient, ElasticsearchServiceSetup } from './elasticsearch';
+import {
+  ClusterClient,
+  ElasticsearchClientConfig,
+  ElasticsearchServiceSetup,
+} from './elasticsearch';
 import { HttpServiceSetup, HttpServiceStart } from './http';
 import { PluginsServiceSetup, PluginsServiceStart } from './plugins';
 
@@ -48,6 +52,8 @@ export {
   Headers,
   ScopedClusterClient,
   ElasticsearchClientConfig,
+  ElasticsearchError,
+  ElasticsearchErrorHelpers,
   APICaller,
   FakeRequest,
   LegacyRequest,
@@ -113,6 +119,10 @@ export interface CoreSetup {
   elasticsearch: {
     adminClient$: Observable<ClusterClient>;
     dataClient$: Observable<ClusterClient>;
+    createClient: (
+      type: string,
+      clientConfig?: Partial<ElasticsearchClientConfig>
+    ) => ClusterClient;
   };
   http: {
     registerOnPreAuth: HttpServiceSetup['registerOnPreAuth'];
@@ -120,6 +130,7 @@ export interface CoreSetup {
     registerOnPostAuth: HttpServiceSetup['registerOnPostAuth'];
     basePath: HttpServiceSetup['basePath'];
     createNewServer: HttpServiceSetup['createNewServer'];
+    isTlsEnabled: HttpServiceSetup['isTlsEnabled'];
   };
 }
 

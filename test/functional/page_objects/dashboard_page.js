@@ -151,7 +151,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
     }
 
     async getCloneTitle() {
-      return await testSubjects.getProperty('clonedDashboardTitle', 'value');
+      return await testSubjects.getAttribute('clonedDashboardTitle', 'value');
     }
 
     async confirmClone() {
@@ -199,8 +199,8 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       // wait until the count of dashboard panels equals the count of toggle menu icons
       await retry.waitFor('in edit mode', async () => {
         const [panels, menuIcons] = await Promise.all([
-          testSubjects.findAll('dashboardPanel'),
-          testSubjects.findAll('dashboardPanelToggleMenuIcon'),
+          testSubjects.findAll('embeddablePanel'),
+          testSubjects.findAll('embeddablePanelToggleMenuIcon'),
         ]);
         return panels.length === menuIcons.length;
       });
@@ -277,8 +277,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
     async isMarginsOn() {
       log.debug('isMarginsOn');
       await this.openOptions();
-      const marginsCheckbox = await testSubjects.find('dashboardMarginsCheckbox');
-      return await marginsCheckbox.getProperty('checked');
+      return await testSubjects.getAttribute('dashboardMarginsCheckbox', 'checked');
     }
 
     async useMargins(on = true) {
@@ -410,7 +409,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
 
     async getSearchFilterValue() {
       const searchFilter = await this.getSearchFilter();
-      return await searchFilter.getProperty('value');
+      return await searchFilter.getAttribute('value');
     }
 
     async getSearchFilter() {
@@ -483,7 +482,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
 
     async getPanelCount() {
       log.debug('getPanelCount');
-      const panels = await testSubjects.findAll('dashboardPanel');
+      const panels = await testSubjects.findAll('embeddablePanel');
       return panels.length;
     }
 
@@ -508,7 +507,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
     }
 
     async getDashboardPanels() {
-      return await testSubjects.findAll('dashboardPanel');
+      return await testSubjects.findAll('embeddablePanel');
     }
 
     async addVisualizations(visualizations) {
@@ -536,7 +535,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
     async setSaveAsNewCheckBox(checked) {
       log.debug('saveAsNewCheckbox: ' + checked);
       const saveAsNewCheckbox = await testSubjects.find('saveAsNewCheckbox');
-      const isAlreadyChecked = await saveAsNewCheckbox.getProperty('checked');
+      const isAlreadyChecked = (await saveAsNewCheckbox.getAttribute('checked') === 'true');
       if (isAlreadyChecked !== checked) {
         log.debug('Flipping save as new checkbox');
         await retry.try(() => saveAsNewCheckbox.click());
@@ -546,7 +545,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
     async setStoreTimeWithDashboard(checked) {
       log.debug('Storing time with dashboard: ' + checked);
       const storeTimeCheckbox = await testSubjects.find('storeTimeWithDashboard');
-      const isAlreadyChecked = await storeTimeCheckbox.getProperty('checked');
+      const isAlreadyChecked = (await storeTimeCheckbox.getAttribute('checked') === 'true');
       if (isAlreadyChecked !== checked) {
         log.debug('Flipping store time checkbox');
         await retry.try(() => storeTimeCheckbox.click());
@@ -612,7 +611,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       const checkList = [];
       for (const name of vizList) {
         const isPresent = await testSubjects.exists(
-          `dashboardPanelHeading-${name.replace(/\s+/g, '')}`,
+          `embeddablePanelHeading-${name.replace(/\s+/g, '')}`,
           { timeout: 10000 }
         );
         checkList.push({ name, isPresent });

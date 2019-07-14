@@ -60,7 +60,7 @@ export function AddSettingFlyoutBody({
     text:
       name === ENVIRONMENT_NOT_DEFINED
         ? i18n.translate(
-            'xpack.apm.settings.cm.flyOut.serviceEnvironmentNotSetOptionLabel',
+            'xpack.apm.settings.agentConf.flyOut.serviceEnvironmentNotSetOptionLabel',
             {
               defaultMessage: 'Not set'
             }
@@ -75,7 +75,7 @@ export function AddSettingFlyoutBody({
         <EuiTitle size="xs">
           <h3>
             {i18n.translate(
-              'xpack.apm.settings.cm.flyOut.serviceSectionTitle',
+              'xpack.apm.settings.agentConf.flyOut.serviceSectionTitle',
               {
                 defaultMessage: 'Service'
               }
@@ -87,13 +87,13 @@ export function AddSettingFlyoutBody({
 
         <EuiFormRow
           label={i18n.translate(
-            'xpack.apm.settings.cm.flyOut.serviceNameSelectLabel',
+            'xpack.apm.settings.agentConf.flyOut.serviceNameSelectLabel',
             {
               defaultMessage: 'Name'
             }
           )}
           helpText={i18n.translate(
-            'xpack.apm.settings.cm.flyOut.serviceNameSelectHelpText',
+            'xpack.apm.settings.agentConf.flyOut.serviceNameSelectHelpText',
             {
               defaultMessage: 'Choose the service you want to configure.'
             }
@@ -115,23 +115,23 @@ export function AddSettingFlyoutBody({
 
         <EuiFormRow
           label={i18n.translate(
-            'xpack.apm.settings.cm.flyOut.serviceEnvironmentSelectLabel',
+            'xpack.apm.settings.agentConf.flyOut.serviceEnvironmentSelectLabel',
             {
               defaultMessage: 'Environment'
             }
           )}
           helpText={i18n.translate(
-            'xpack.apm.settings.cm.flyOut.serviceEnvironmentSelectHelpText',
+            'xpack.apm.settings.agentConf.flyOut.serviceEnvironmentSelectHelpText',
             {
               defaultMessage:
                 'Only a single environment per configuration is supported.'
             }
           )}
           error={i18n.translate(
-            'xpack.apm.settings.cm.flyOut.serviceEnvironmentSelectErrorText',
+            'xpack.apm.settings.agentConf.flyOut.serviceEnvironmentSelectErrorText',
             {
               defaultMessage:
-                'Must select a valid environement to save a configuration.'
+                'Must select a valid environment to save a configuration.'
             }
           )}
           isInvalid={
@@ -162,7 +162,7 @@ export function AddSettingFlyoutBody({
         <EuiTitle size="xs">
           <h3>
             {i18n.translate(
-              'xpack.apm.settings.cm.flyOut.configurationSectionTitle',
+              'xpack.apm.settings.agentConf.flyOut.configurationSectionTitle',
               {
                 defaultMessage: 'Configuration'
               }
@@ -174,20 +174,20 @@ export function AddSettingFlyoutBody({
 
         <EuiFormRow
           label={i18n.translate(
-            'xpack.apm.settings.cm.flyOut.sampleRateConfigurationInputLabel',
+            'xpack.apm.settings.agentConf.flyOut.sampleRateConfigurationInputLabel',
             {
               defaultMessage: 'Transaction sample rate'
             }
           )}
           helpText={i18n.translate(
-            'xpack.apm.settings.cm.flyOut.sampleRateConfigurationInputHelpText',
+            'xpack.apm.settings.agentConf.flyOut.sampleRateConfigurationInputHelpText',
             {
               defaultMessage:
                 'Choose a rate between 0.000 and 1.0. Default configuration is 1.0 (100% of traces).'
             }
           )}
           error={i18n.translate(
-            'xpack.apm.settings.cm.flyOut.sampleRateConfigurationInputErrorText',
+            'xpack.apm.settings.agentConf.flyOut.sampleRateConfigurationInputErrorText',
             {
               defaultMessage: 'Sample rate must be between 0.000 and 1'
             }
@@ -207,7 +207,7 @@ export function AddSettingFlyoutBody({
             max={1}
             step={0.001}
             placeholder={i18n.translate(
-              'xpack.apm.settings.cm.flyOut.sampleRateConfigurationInputPlaceholderText',
+              'xpack.apm.settings.agentConf.flyOut.sampleRateConfigurationInputPlaceholderText',
               {
                 defaultMessage: 'Set sample rate'
               }
@@ -227,7 +227,7 @@ export function AddSettingFlyoutBody({
               <h3>
                 <EuiText color="danger">
                   {i18n.translate(
-                    'xpack.apm.settings.cm.flyOut.deleteConfigurationSectionTitle',
+                    'xpack.apm.settings.agentConf.flyOut.deleteConfigurationSectionTitle',
                     {
                       defaultMessage: 'Delete configuration'
                     }
@@ -241,7 +241,7 @@ export function AddSettingFlyoutBody({
             <EuiText>
               <p>
                 {i18n.translate(
-                  'xpack.apm.settings.cm.flyOut.deleteConfigurationSectionText',
+                  'xpack.apm.settings.agentConf.flyOut.deleteConfigurationSectionText',
                   {
                     defaultMessage:
                       'If you wish to delete this configuration, please be aware that the agents will continue to use the existing configuration until they sync with the APM Server.'
@@ -254,7 +254,7 @@ export function AddSettingFlyoutBody({
 
             <EuiButton fill={false} color="danger" onClick={onDelete}>
               {i18n.translate(
-                'xpack.apm.settings.cm.flyOut.deleteConfigurationButtonLabel',
+                'xpack.apm.settings.agentConf.flyOut.deleteConfigurationButtonLabel',
                 {
                   defaultMessage: 'Delete'
                 }

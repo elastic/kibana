@@ -22,17 +22,21 @@ import {
   EuiLink
 } from '@elastic/eui';
 import { isEmpty } from 'lodash';
-import { loadCMList } from '../../../services/rest/apm/settings';
+import { loadAgentConfigurationList } from '../../../services/rest/apm/settings';
 import { useFetcher } from '../../../hooks/useFetcher';
 import { ITableColumn, ManagedTable } from '../../shared/ManagedTable';
-import { CMListAPIResponse } from '../../../../server/lib/settings/cm/list_configurations';
+import { AgentConfigurationListAPIResponse } from '../../../../server/lib/settings/agent_configuration/list_configurations';
 import { AddSettingsFlyout } from './AddSettings/AddSettingFlyout';
 import { APMLink } from '../../shared/Links/APMLink';
+import { LoadingStatePrompt } from '../../shared/LoadingStatePrompt';
 
-export type Config = CMListAPIResponse[0];
+export type Config = AgentConfigurationListAPIResponse[0];
 
 export function SettingsList() {
-  const { data = [], refresh } = useFetcher(loadCMList, []);
+  const { data = [], status, refresh } = useFetcher(
+    loadAgentConfigurationList,
+    []
+  );
   const [selectedConfig, setSelectedConfig] = useState<Config | null>(null);
   const [isFlyoutOpen, setIsFlyoutOpen] = useState(false);
 
@@ -40,7 +44,7 @@ export function SettingsList() {
     {
       field: 'service.name',
       name: i18n.translate(
-        'xpack.apm.settings.cm.configTable.serviceNameColumnLabel',
+        'xpack.apm.settings.agentConf.configTable.serviceNameColumnLabel',
         {
           defaultMessage: 'Service name'
         }
@@ -62,7 +66,7 @@ export function SettingsList() {
     {
       field: 'service.environment',
       name: i18n.translate(
-        'xpack.apm.settings.cm.configTable.environmentColumnLabel',
+        'xpack.apm.settings.agentConf.configTable.environmentColumnLabel',
         {
           defaultMessage: 'Service environment'
         }
@@ -73,7 +77,7 @@ export function SettingsList() {
     {
       field: 'settings.sample_rate',
       name: i18n.translate(
-        'xpack.apm.settings.cm.configTable.sampleRateColumnLabel',
+        'xpack.apm.settings.agentConf.configTable.sampleRateColumnLabel',
         {
           defaultMessage: 'Sample rate'
         }
@@ -84,7 +88,7 @@ export function SettingsList() {
     {
       field: '@timestamp',
       name: i18n.translate(
-        'xpack.apm.settings.cm.configTable.lastUpdatedColumnLabel',
+        'xpack.apm.settings.agentConf.configTable.lastUpdatedColumnLabel',
         {
           defaultMessage: 'Last updated'
         }
@@ -97,13 +101,13 @@ export function SettingsList() {
       actions: [
         {
           name: i18n.translate(
-            'xpack.apm.settings.cm.configTable.editButtonLabel',
+            'xpack.apm.settings.agentConf.configTable.editButtonLabel',
             {
               defaultMessage: 'Edit'
             }
           ),
           description: i18n.translate(
-            'xpack.apm.settings.cm.configTable.editButtonDescription',
+            'xpack.apm.settings.agentConf.configTable.editButtonDescription',
             {
               defaultMessage: 'Edit this config'
             }
@@ -121,7 +125,7 @@ export function SettingsList() {
   ];
 
   const RETURN_TO_OVERVIEW_LINK_LABEL = i18n.translate(
-    'xpack.apm.settings.cm.returnToOverviewLinkLabel',
+    'xpack.apm.settings.agentConf.returnToOverviewLinkLabel',
     {
       defaultMessage: 'Return to overview'
     }
@@ -129,13 +133,13 @@ export function SettingsList() {
 
   const hasConfigurations = !isEmpty(data);
 
-  const emptyState = (
+  const emptyStatePrompt = (
     <EuiEmptyPrompt
       iconType="controlsHorizontal"
       title={
         <h2>
           {i18n.translate(
-            'xpack.apm.settings.cm.configTable.emptyPromptTitle',
+            'xpack.apm.settings.agentConf.configTable.emptyPromptTitle',
             { defaultMessage: 'No configurations found.' }
           )}
         </h2>
@@ -144,7 +148,7 @@ export function SettingsList() {
         <>
           <p>
             {i18n.translate(
-              'xpack.apm.settings.cm.configTable.emptyPromptText',
+              'xpack.apm.settings.agentConf.configTable.emptyPromptText',
               {
                 defaultMessage:
                   "Let's change that! You can fine-tune agent configuration directly from Kibana without having to redeploy. Get started by creating your first configuration."
@@ -155,9 +159,12 @@ export function SettingsList() {
       }
       actions={
         <EuiButton color="primary" fill onClick={() => setIsFlyoutOpen(true)}>
-          {i18n.translate('xpack.apm.settings.cm.createConfigButtonLabel', {
-            defaultMessage: 'Create configuration'
-          })}
+          {i18n.translate(
+            'xpack.apm.settings.agentConf.createConfigButtonLabel',
+            {
+              defaultMessage: 'Create configuration'
+            }
+          )}
         </EuiButton>
       }
     />
@@ -183,7 +190,7 @@ export function SettingsList() {
         <EuiFlexItem grow={false}>
           <EuiTitle size="l">
             <h1>
-              {i18n.translate('xpack.apm.settings.cm.pageTitle', {
+              {i18n.translate('xpack.apm.settings.agentConf.pageTitle', {
                 defaultMessage: 'Settings'
               })}
             </h1>
@@ -206,7 +213,7 @@ export function SettingsList() {
             <EuiTitle>
               <h2>
                 {i18n.translate(
-                  'xpack.apm.settings.cm.configurationsPanelTitle',
+                  'xpack.apm.settings.agentConf.configurationsPanelTitle',
                   {
                     defaultMessage: 'Configurations'
                   }
@@ -216,11 +223,14 @@ export function SettingsList() {
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiBetaBadge
-              label={i18n.translate('xpack.apm.settings.cm.betaBadgeLabel', {
-                defaultMessage: 'Beta'
-              })}
+              label={i18n.translate(
+                'xpack.apm.settings.agentConf.betaBadgeLabel',
+                {
+                  defaultMessage: 'Beta'
+                }
+              )}
               tooltipContent={i18n.translate(
-                'xpack.apm.settings.cm.betaBadgeText',
+                'xpack.apm.settings.agentConf.betaBadgeText',
                 {
                   defaultMessage:
                     'This feature is still in development. If you have feedback, please reach out in our Discuss forum.'
@@ -239,7 +249,7 @@ export function SettingsList() {
                     onClick={() => setIsFlyoutOpen(true)}
                   >
                     {i18n.translate(
-                      'xpack.apm.settings.cm.createConfigButtonLabel',
+                      'xpack.apm.settings.agentConf.createConfigButtonLabel',
                       {
                         defaultMessage: 'Create configuration'
                       }
@@ -254,20 +264,23 @@ export function SettingsList() {
         <EuiSpacer size="m" />
 
         <EuiCallOut
-          title={i18n.translate('xpack.apm.settings.cm.betaCallOutTitle', {
-            defaultMessage: 'APM Agent Configuration (BETA)'
-          })}
+          title={i18n.translate(
+            'xpack.apm.settings.agentConf.betaCallOutTitle',
+            {
+              defaultMessage: 'APM Agent Configuration (BETA)'
+            }
+          )}
           iconType="iInCircle"
         >
           <p>
             <FormattedMessage
-              id="xpack.apm.settings.cm.betaCallOutText"
+              id="xpack.apm.settings.agentConf.betaCallOutText"
               defaultMessage="We're excited to bring you a first look at APM Agent configuration. {agentConfigDocsLink}"
               values={{
                 agentConfigDocsLink: (
                   <EuiLink href="https://www.elastic.co/guide/en/kibana/current/agent-configuration.html">
                     {i18n.translate(
-                      'xpack.apm.settings.cm.agentConfigDocsLinkLabel',
+                      'xpack.apm.settings.agentConf.agentConfigDocsLinkLabel',
                       { defaultMessage: 'Learn more in our docs.' }
                     )}
                   </EuiLink>
@@ -279,15 +292,17 @@ export function SettingsList() {
 
         <EuiSpacer size="m" />
 
-        {hasConfigurations ? (
+        {status === 'success' && !hasConfigurations ? (
+          emptyStatePrompt
+        ) : (
           <ManagedTable
+            noItemsMessage={<LoadingStatePrompt />}
             columns={COLUMNS}
             items={data}
-            initialSort={{ field: 'service.name', direction: 'asc' }}
+            initialSortField="service.name"
+            initialSortDirection="asc"
             initialPageSize={50}
           />
-        ) : (
-          emptyState
         )}
       </EuiPanel>
     </>
