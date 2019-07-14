@@ -24,8 +24,27 @@ import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 import './query_bar.test.mocks';
 import { QueryBar } from './query_bar';
 
-import { coreMock } from 'src/core/public/mocks';
+import { coreMock } from '../../../../../../../core/public/mocks';
 const setupMock = coreMock.createSetup();
+
+setupMock.uiSettings.get.mockImplementation((key: string) => {
+  switch (key) {
+    case 'timepicker:quickRanges':
+      return [
+        {
+          from: 'now/d',
+          to: 'now/d',
+          display: 'Today',
+        },
+      ];
+    case 'dateFormat':
+      return 'YY';
+    case 'history:limit':
+      return 10;
+    default:
+      throw new Error(`Unexpected config key: ${key}`);
+  }
+});
 
 const noop = () => {
   return;
@@ -89,7 +108,8 @@ describe('QueryBar', () => {
       />
     );
 
-    expect(component).toMatchSnapshot();
+    expect(component.find(QUERY_INPUT_SELECTOR).length).toBe(1);
+    expect(component.find(TIMEPICKER_SELECTOR).length).toBe(1);
   });
 
   it('Should create a unique PersistedLog based on the appName and query language', () => {
