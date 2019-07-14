@@ -23,6 +23,7 @@
 // of the ExpressionExectorService
 // @ts-ignore
 import { renderersRegistry } from 'plugins/interpreter/registries';
+import chrome from 'ui/chrome';
 import { ExpressionsService, ExpressionsSetup } from './expressions';
 import { QueryService, QuerySetup } from './query';
 import { FilterService, FilterSetup } from './filter';
@@ -49,8 +50,12 @@ export class DataPlugin {
     // eslint-disable-next-line @typescript-eslint/no-var-requires
     const { npSetup } = require('ui/new_platform');
 
+    const savedObjectsClient = chrome.getSavedObjectsClient();
     const uiSettingsClient = npSetup.core.uiSettings;
-    const indexPatternsService = this.indexPatterns.setup(uiSettingsClient);
+    const indexPatternsService = this.indexPatterns.setup({
+      uiSettings: uiSettingsClient,
+      savedObjectsClient,
+    });
     return {
       expressions: this.expressions.setup({
         interpreter: {

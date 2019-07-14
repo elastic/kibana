@@ -16,8 +16,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
-import chrome from 'ui/chrome';
 // @ts-ignore
 import { mockFields, mockIndexPattern } from 'ui/index_patterns/fixtures';
 // @ts-ignore
@@ -35,9 +33,15 @@ import { isFilterable, getFromSavedObject } from 'ui/index_patterns/static_utils
 
 // IndexPattern, StaticIndexPattern, StaticIndexPatternField, Field
 import * as types from 'ui/index_patterns';
+import { SavedObjectsClient } from 'ui/saved_objects';
+
 import { UiSettingsClientContract } from 'kibana/public';
 
-const savedObjectsClient = chrome.getSavedObjectsClient();
+export interface IndexPatternDependencies {
+  uiSettings: UiSettingsClientContract;
+  savedObjectsClient: SavedObjectsClient;
+}
+
 /**
  * Index Patterns Service
  *
@@ -50,7 +54,7 @@ const savedObjectsClient = chrome.getSavedObjectsClient();
  * @internal
  */
 export class IndexPatternsService {
-  public setup(uiSettings: UiSettingsClientContract) {
+  public setup({ uiSettings, savedObjectsClient }: IndexPatternDependencies) {
     return {
       indexPatterns: new IndexPatterns(uiSettings, savedObjectsClient),
     };
