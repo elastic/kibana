@@ -40,10 +40,10 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
-import { data } from 'plugins/data/setup';
 import { Storage } from 'ui/storage';
 import { getDefaultQueryLanguage } from '../../lib/get_default_query_language';
-const { QueryBarInput } = data.query.ui;
+
+import { QueryBarInput } from 'plugins/data';
 const localStorage = new Storage(window.localStorage);
 class TableSeriesConfigUI extends Component {
   componentWillMount() {
