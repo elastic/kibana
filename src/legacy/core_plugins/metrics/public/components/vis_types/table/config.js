@@ -40,11 +40,10 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
-import { Storage } from 'ui/storage';
 import { getDefaultQueryLanguage } from '../../lib/get_default_query_language';
 
 import { QueryBarInput } from 'plugins/data';
-const localStorage = new Storage(window.localStorage);
+import { QueryInputBarContext } from '../../../contexts/query_input_bar_context';
 class TableSeriesConfigUI extends Component {
   componentWillMount() {
     const { model } = this.props;
@@ -159,19 +158,22 @@ class TableSeriesConfigUI extends Component {
               label={<FormattedMessage id="tsvb.table.filterLabel" defaultMessage="Filter" />}
               fullWidth
             >
-              <QueryBarInput
-                query={{
-                  language:
-                    model.filter && model.filter.language
-                      ? model.filter.language
-                      : getDefaultQueryLanguage(),
-                  query: model.filter && model.filter.query ? model.filter.query : '',
-                }}
-                onChange={filter => this.props.onChange({ filter })}
-                appName={'VisEditor'}
-                indexPatterns={[this.props.indexPatternForQuery]}
-                store={localStorage}
-              />
+              <QueryInputBarContext.Consumer>
+                {context => (
+                  <QueryBarInput
+                    query={{
+                      language:
+                        model.filter && model.filter.language
+                          ? model.filter.language
+                          : getDefaultQueryLanguage(),
+                      query: model.filter && model.filter.query ? model.filter.query : '',
+                    }}
+                    onChange={filter => this.props.onChange({ filter })}
+                    indexPatterns={[this.props.indexPatternForQuery]}
+                    {...context}
+                  />
+                )}
+              </QueryInputBarContext.Consumer>
             </EuiFormRow>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>

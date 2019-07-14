@@ -21,12 +21,11 @@ import { createSelectHandler } from '../lib/create_select_handler';
 import { GroupBySelect } from './group_by_select';
 import PropTypes from 'prop-types';
 import React from 'react';
-import { QueryBarInput } from 'plugins/data';
-import { Storage } from 'ui/storage';
 import { htmlIdGenerator, EuiFlexGroup, EuiFlexItem, EuiFormRow } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { getDefaultQueryLanguage } from '../lib/get_default_query_language';
-const localStorage = new Storage(window.localStorage);
+import { QueryBarInput } from 'plugins/data';
+import { QueryInputBarContext } from '../../contexts/query_input_bar_context';
 
 export const SplitByFilter = props => {
   const { onChange, uiRestrictions, indexPattern } = props;
@@ -60,16 +59,19 @@ export const SplitByFilter = props => {
             />
           }
         >
-          <QueryBarInput
-            query={{
-              language: model.filter.language || getDefaultQueryLanguage(),
-              query: model.filter.query || '',
-            }}
-            onChange={filter => onChange({ filter })}
-            appName={'VisEditor'}
-            indexPatterns={[indexPattern]}
-            store={localStorage}
-          />
+          <QueryInputBarContext.Consumer>
+            {context => (
+              <QueryBarInput
+                query={{
+                  language: model.filter.language || getDefaultQueryLanguage(),
+                  query: model.filter.query || '',
+                }}
+                onChange={filter => onChange({ filter })}
+                indexPatterns={[indexPattern]}
+                {...context}
+              />
+            )}
+          </QueryInputBarContext.Consumer>
         </EuiFormRow>
       </EuiFlexItem>
     </EuiFlexGroup>

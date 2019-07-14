@@ -43,10 +43,9 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { Storage } from 'ui/storage';
 import { QueryBarInput } from 'plugins/data';
 import { getDefaultQueryLanguage } from '../lib/get_default_query_language';
-const localStorage = new Storage(window.localStorage);
+import { QueryInputBarContext } from '../../contexts/query_input_bar_context';
 export class TablePanelConfig extends Component {
   constructor(props) {
     super(props);
@@ -233,18 +232,21 @@ export class TablePanelConfig extends Component {
                   }
                   fullWidth
                 >
-                  <QueryBarInput
-                    query={{
-                      language: model.filter.language
-                        ? model.filter.language
-                        : getDefaultQueryLanguage(),
-                      query: model.filter.query || '',
-                    }}
-                    onChange={filter => this.props.onChange({ filter })}
-                    appName={'VisEditor'}
-                    indexPatterns={[model.index_pattern || model.default_index_pattern]}
-                    store={localStorage}
-                  />
+                  <QueryInputBarContext.Consumer>
+                    {context => (
+                      <QueryBarInput
+                        query={{
+                          language: model.filter.language
+                            ? model.filter.language
+                            : getDefaultQueryLanguage(),
+                          query: model.filter.query || '',
+                        }}
+                        onChange={filter => this.props.onChange({ filter })}
+                        indexPatterns={[model.index_pattern || model.default_index_pattern]}
+                        {...context}
+                      />
+                    )}
+                  </QueryInputBarContext.Consumer>
                 </EuiFormRow>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>

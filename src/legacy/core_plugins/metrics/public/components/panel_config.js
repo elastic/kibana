@@ -26,6 +26,11 @@ import { GaugePanelConfig as gauge } from './panel_config/gauge';
 import { MarkdownPanelConfig as markdown } from './panel_config/markdown';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { FormValidationContext } from '../contexts/form_validation_context';
+import { QueryInputBarContext } from '../contexts/query_input_bar_context';
+
+import { npSetup } from 'ui/new_platform';
+import { Storage } from 'ui/storage';
+const localStorage = new Storage(window.localStorage);
 
 const types = {
   timeseries,
@@ -52,11 +57,19 @@ export function PanelConfig(props) {
     formValidationResults[controlKey] = isControlValid;
   };
 
+  const queryBarInputContext = {
+    uiSettings: npSetup.core.uiSettings,
+    store: localStorage,
+    appName: 'VisEditor',
+  };
+
   if (Component) {
     return (
-      <FormValidationContext.Provider value={updateControlValidity}>
-        <Component {...props} />
-      </FormValidationContext.Provider>
+      <QueryInputBarContext.Provider value={queryBarInputContext}>
+        <FormValidationContext.Provider value={updateControlValidity}>
+          <Component {...props} />
+        </FormValidationContext.Provider>
+      </QueryInputBarContext.Provider>
     );
   }
 

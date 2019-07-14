@@ -28,8 +28,8 @@ import { FieldSelect } from './aggs/field_select';
 import uuid from 'uuid';
 import { IconSelect } from './icon_select';
 import { YesNo } from './yes_no';
-import { Storage } from 'ui/storage';
 import { QueryBarInput } from 'plugins/data';
+import { QueryInputBarContext } from '../contexts/query_input_bar_context';
 import { getDefaultQueryLanguage } from './lib/get_default_query_language';
 
 import {
@@ -61,7 +61,6 @@ function newAnnotation() {
 
 const RESTRICT_FIELDS = [ES_TYPES.DATE];
 
-const localStorage = new Storage(window.localStorage);
 export class AnnotationsEditor extends Component {
   constructor(props) {
     super(props);
@@ -172,17 +171,19 @@ export class AnnotationsEditor extends Component {
                   }
                   fullWidth
                 >
-                  <QueryBarInput
-                    query={{
-                      language: model.query_string.language || getDefaultQueryLanguage(),
-                      query: model.query_string.query || '',
-                    }}
-                    onChange={query => this.handleQueryChange(model, query)}
-                    appName={'VisEditor'}
-                    indexPatterns={[model.index_pattern]}
-                    store={localStorage}
-                    showDatePicker={false}
-                  />
+                  <QueryInputBarContext.Consumer>
+                    {context => (
+                      <QueryBarInput
+                        query={{
+                          language: model.query_string.language || getDefaultQueryLanguage(),
+                          query: model.query_string.query || '',
+                        }}
+                        onChange={query => this.handleQueryChange(model, query)}
+                        indexPatterns={[model.index_pattern]}
+                        {...context}
+                      />
+                    )}
+                  </QueryInputBarContext.Consumer>
                 </EuiFormRow>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
@@ -344,4 +345,5 @@ AnnotationsEditor.propTypes = {
   model: PropTypes.object,
   name: PropTypes.string,
   onChange: PropTypes.func,
+  uiSettings: PropTypes.object,
 };

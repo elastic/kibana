@@ -36,10 +36,9 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { Storage } from 'ui/storage';
 import { getDefaultQueryLanguage } from './lib/get_default_query_language';
 import { QueryBarInput } from 'plugins/data';
-const localStorage = new Storage(window.localStorage);
+import { QueryInputBarContext } from '../contexts/query_input_bar_context';
 
 export const SeriesConfig = props => {
   const defaults = { offset_time: '', value_template: '' };
@@ -63,20 +62,22 @@ export const SeriesConfig = props => {
         label={<FormattedMessage id="tsvb.seriesConfig.filterLabel" defaultMessage="Filter" />}
         fullWidth
       >
-        <QueryBarInput
-          query={{
-            language:
-              model.filter && model.filter.language
-                ? model.filter.language
-                : getDefaultQueryLanguage(),
-            query: model.filter && model.filter.query ? model.filter.query : '',
-          }}
-          onChange={filter => props.onChange({ filter })}
-          appName={'VisEditor'}
-          indexPatterns={[seriesIndexPattern]}
-          store={localStorage}
-          showDatePicker={false}
-        />
+        <QueryInputBarContext.Consumer>
+          {context => (
+            <QueryBarInput
+              query={{
+                language:
+                  model.filter && model.filter.language
+                    ? model.filter.language
+                    : getDefaultQueryLanguage(),
+                query: model.filter && model.filter.query ? model.filter.query : '',
+              }}
+              onChange={filter => props.onChange({ filter })}
+              indexPatterns={[seriesIndexPattern]}
+              {...context}
+            />
+          )}
+        </QueryInputBarContext.Consumer>
       </EuiFormRow>
 
       <EuiHorizontalRule margin="s" />
@@ -162,4 +163,5 @@ SeriesConfig.propTypes = {
   model: PropTypes.object,
   onChange: PropTypes.func,
   indexPatternForQuery: PropTypes.string,
+  uiSettings: PropTypes.object,
 };

@@ -24,8 +24,6 @@ import { createSelectHandler } from '../../lib/create_select_handler';
 import { YesNo } from '../../yes_no';
 import { createTextHandler } from '../../lib/create_text_handler';
 import { IndexPattern } from '../../index_pattern';
-import { QueryBarInput } from 'plugins/data';
-import { Storage } from 'ui/storage';
 import {
   htmlIdGenerator,
   EuiComboBox,
@@ -41,7 +39,8 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 import { getDefaultQueryLanguage } from '../../lib/get_default_query_language';
-const localStorage = new Storage(window.localStorage);
+import { QueryBarInput } from 'plugins/data';
+import { QueryInputBarContext } from '../../../contexts/query_input_bar_context';
 
 export const TimeseriesConfig = injectI18n(function(props) {
   const handleSelectChange = createSelectHandler(props.onChange);
@@ -357,19 +356,22 @@ export const TimeseriesConfig = injectI18n(function(props) {
           label={<FormattedMessage id="tsvb.timeSeries.filterLabel" defaultMessage="Filter" />}
           fullWidth
         >
-          <QueryBarInput
-            query={{
-              language:
-                model.filter && model.filter.language
-                  ? model.filter.language
-                  : getDefaultQueryLanguage(),
-              query: model.filter && model.filter.query ? model.filter.query : '',
-            }}
-            onChange={filter => props.onChange({ filter })}
-            appName={'VisEditor'}
-            indexPatterns={[seriesIndexPattern]}
-            store={localStorage}
-          />
+          <QueryInputBarContext.Consumer>
+            {context => (
+              <QueryBarInput
+                query={{
+                  language:
+                    model.filter && model.filter.language
+                      ? model.filter.language
+                      : getDefaultQueryLanguage(),
+                  query: model.filter && model.filter.query ? model.filter.query : '',
+                }}
+                onChange={filter => props.onChange({ filter })}
+                indexPatterns={[seriesIndexPattern]}
+                {...context}
+              />
+            )}
+          </QueryInputBarContext.Consumer>
         </EuiFormRow>
       </EuiFlexItem>
       <EuiHorizontalRule margin="s" />
