@@ -6,10 +6,10 @@
 
 import { SavedObjectsClientContract, ScopedClusterClient } from 'src/core/server/';
 import {
+  AssetReference,
+  Installable,
   Installation,
   InstallationAttributes,
-  Installable,
-  AssetReference,
 } from '../../common/types';
 import { SAVED_OBJECT_TYPE } from '../../common/constants';
 import * as Registry from '../registry';
