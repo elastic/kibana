@@ -92,34 +92,6 @@ export async function removeInstallation(client: SavedObjectsClientContract, pkg
   return installedObjects;
 }
 
-function sortByName(a: { name: string }, b: { name: string }) {
-  if (a.name > b.name) {
-    return 1;
-  } else if (a.name < b.name) {
-    return -1;
-  } else {
-    return 0;
-  }
-}
-
-function createInstallableFrom<T>(from: T, savedObject?: Installation): Installable<T> {
-  return savedObject
-    ? {
-        ...from,
-        status: InstallationStatus.installed,
-        savedObject,
-      }
-    : {
-        ...from,
-        status: InstallationStatus.notInstalled,
-      };
-}
-
-function assetUsesObjects(asset: string) {
-  const values = Object.values(SavedObjectTypes);
-  return values.includes(asset);
-}
-
 async function installObjects(
   client: SavedObjectsClientContract,
   pkgkey: string,
@@ -134,6 +106,16 @@ async function installObjects(
   const installed = createdObjects.map(({ id, type }) => ({ id, type }));
 
   return installed;
+}
+
+async function installPipelines(callESEndpoint: CallESEndpoint, pkgkey: string) {
+  const isSameType = ({ path }: Registry.ArchiveEntry) =>
+    Registry.pathParts(path).type === AssetTypes.ingestPipeline;
+  const paths = await Registry.getArchiveInfo(`${pkgkey}.tar.gz`, isSameType);
+  const installationPromises = paths.map(path => installPipeline(callESEndpoint, path));
+  const references = await Promise.all(installationPromises);
+
+  return references;
 }
 
 async function installPipeline(
@@ -165,12 +147,7 @@ async function installAssets(
   }
 
   if (asset === AssetTypes.ingestPipeline) {
-    const isAssetType = (entry: Registry.ArchiveEntry) =>
-      Registry.pathParts(entry.path).type === asset;
-    const paths = await Registry.getArchiveInfo(`${pkgkey}.tar.gz`, isAssetType);
-    const installationPromises = paths.map(path => installPipeline(callESEndpoint, path));
-    const references = await Promise.all(installationPromises);
-
+    const references = await installPipelines(callESEndpoint, pkgkey);
     return references;
   }
 
@@ -199,4 +176,32 @@ async function saveInstallationReferences(
   );
 
   return results;
+}
+
+function sortByName(a: { name: string }, b: { name: string }) {
+  if (a.name > b.name) {
+    return 1;
+  } else if (a.name < b.name) {
+    return -1;
+  } else {
+    return 0;
+  }
+}
+
+function createInstallableFrom<T>(from: T, savedObject?: Installation): Installable<T> {
+  return savedObject
+    ? {
+        ...from,
+        status: InstallationStatus.installed,
+        savedObject,
+      }
+    : {
+        ...from,
+        status: InstallationStatus.notInstalled,
+      };
+}
+
+function assetUsesObjects(asset: string) {
+  const values = Object.values(SavedObjectTypes);
+  return values.includes(asset);
 }
