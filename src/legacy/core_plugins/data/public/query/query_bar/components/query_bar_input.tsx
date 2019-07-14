@@ -42,20 +42,20 @@ import { getQueryLog } from '../lib/get_query_log';
 import { fetchIndexPatterns } from '../lib/fetch_index_patterns';
 
 interface Props {
+  uiSettings: UiSettingsClientContract;
   indexPatterns: Array<IndexPattern | string>;
+  store: Storage;
   intl: InjectedIntl;
   query: Query;
   appName: string;
   disableAutoFocus?: boolean;
   screenTitle?: string;
   prepend?: any;
-  store: Storage;
   persistedLog?: PersistedLog;
   bubbleSubmitEvent?: boolean;
   languageSwitcherPopoverAnchorPosition?: PopoverAnchorPosition;
   onChange?: (query: Query) => void;
   onSubmit?: (query: Query) => void;
-  uiSettings: UiSettingsClientContract;
 }
 
 interface State {

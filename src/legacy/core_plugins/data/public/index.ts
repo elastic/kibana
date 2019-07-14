@@ -92,7 +92,7 @@ export { ExpressionRenderer, ExpressionRendererProps, ExpressionRunner } from '.
 
 /** @public types */
 export { IndexPattern, StaticIndexPattern, StaticIndexPatternField, Field } from './index_patterns';
-export { Query, QueryBar } from './query';
+export { Query, QueryBar, QueryBarInput } from './query';
 export { FilterBar } from './filter';
 export { FilterManager, FilterStateManager, uniqFilters } from './filter/filter_manager';
 

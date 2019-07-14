@@ -32,10 +32,6 @@ export class QueryService {
         toUser,
         getQueryLog,
       },
-      ui: {
-        QueryBar,
-        QueryBarInput,
-      },
     };
   }
 
@@ -47,4 +43,4 @@ export class QueryService {
 /** @public */
 export type QuerySetup = ReturnType<QueryService['setup']>;
 
-export { Query, QueryBar } from './query_bar';
+export { Query, QueryBar, QueryBarInput } from './query_bar';
