@@ -17,19 +17,26 @@
  * under the License.
  */
 
-import { BaseReport } from './report';
-
-export interface NagivationReport extends BaseReport<'navigation'> {
-  navigavtionEntries:  PerformanceEntry[]
+export type StatsMetricType = 'click' | 'loaded' | 'count';
+export interface StatsMetricConfig<T extends StatsMetricType> {
+  type: T;
+  appName: string;
+  eventName: string;
+  count?: number;
 }
 
-export function createNavigationReport(appName: string, eventName: string): NagivationReport {
-  const navigavtionEntries = performance.getEntriesByType("navigation");
+export interface StatsMetric<T extends StatsMetricType = StatsMetricType> {
+  type: T;
+  appName: string;
+  eventName: string;
+  count: number;
+}
 
-  return {
-    type: 'navigation',
-    appName,
-    eventName,
-    navigavtionEntries,
-  }
+export function createStatsMetric<T extends StatsMetricType>({
+  type,
+  appName,
+  eventName,
+  count = 1,
+}: StatsMetricConfig<T>): StatsMetric<T> {
+  return { type, appName, eventName, count };
 }

@@ -17,4 +17,11 @@
  * under the License.
  */
 
-export { createReporter, ReportHTTP, Reporter, ReporterConfig } from './reporter';
+import { StatsMetric, StatsMetricType } from './stats';
+import { PerformanceMetric } from './performance';
+
+export { StatsMetric, createStatsMetric } from './stats';
+export { PerformanceMetric, createNavigationMetric } from './performance';
+
+export type Metric = PerformanceMetric | StatsMetric<StatsMetricType>;
+export type MetricType = Metric['type'];

@@ -16,7 +16,7 @@
     "@babel/cli": "7.4.4",
     "@babel/plugin-proposal-export-default-from": "^7.2.0",
     "babel-plugin-add-module-exports": "1.0.2",
-    "typescript": "^3.3.3333"
+    "typescript": "3.5.1"
   },
   "dependencies": {
     "@kbn/dev-utils": "1.0.0"

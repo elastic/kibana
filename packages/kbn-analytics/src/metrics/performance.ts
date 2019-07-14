@@ -17,4 +17,23 @@
  * under the License.
  */
 
-export { createReporter, ReportHTTP, Reporter, ReporterConfig } from './reporter';
+export type PerformanceMetric = NavigationMetric;
+export type PerformanceMetricType = NavigationMetric['type'];
+
+export interface NavigationMetric {
+  type: 'navigation';
+  appName: string;
+  navigavtionEntries: PerformanceEntry[];
+}
+export interface NavigationMetricConfig {
+  appName: string;
+}
+export function createNavigationMetric({ appName }: NavigationMetricConfig): NavigationMetric {
+  const navigavtionEntries = performance.getEntriesByType('navigation');
+
+  return {
+    type: 'navigation',
+    appName,
+    navigavtionEntries,
+  };
+}

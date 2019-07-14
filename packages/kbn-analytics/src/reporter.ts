@@ -17,35 +17,43 @@
  * under the License.
  */
 
-import { ToolingLog } from '@kbn/dev-utils';
-import { Reports, ReportTypes, getReport } from './report';
+import { ToolingLog, WriterConfig } from '@kbn/dev-utils';
+import { wrapArray, createLogger } from './util';
+import {
+  Metric,
+  StatsMetric,
+  createStatsMetric,
+  PerformanceMetric,
+  createNavigationMetric,
+} from './metrics';
 
 export interface ReporterConfig {
   http: ReportHTTP;
   storage?: Map<string, any>;
   checkInterval?: number;
-  logLevel?: 'silent' | 'error' | 'warning' | 'info' | 'debug' | 'verbose';
+  logConfig?: WriterConfig;
 }
 
-export type ReportHTTP = (reports: Reports[]) => Promise<void>;
+export type ReportHTTP = (reports: Metric[]) => Promise<void>;
 
 export class Reporter {
   storageKey = 'analytics';
   checkInterval: number;
   interval: any;
   http: ReportHTTP;
-  reports: Reports[];
+  reports: Metric[];
   private storage?: Map<string, any>;
   private log: ToolingLog;
 
   constructor(config: ReporterConfig) {
-    const { http, checkInterval = 10000, storage, logLevel = 'verbose' } = config;
+    const { http, checkInterval = 10000, storage, logConfig } = config;
+
     this.http = http;
     this.checkInterval = checkInterval;
     this.interval = null;
     this.storage = storage;
     this.reports = this.getFromStorage();
-    this.log = new ToolingLog({ level: logLevel, writeTo: process.stdout });
+    this.log = createLogger(logConfig);
   }
 
   getFromStorage() {
@@ -53,7 +61,7 @@ export class Reporter {
     return this.storage.get(this.storageKey);
   }
 
-  storeReports() {
+  storeReport() {
     if (!this.storage) return;
     this.storage.set(this.storageKey, this.reports);
   }
@@ -77,23 +85,30 @@ export class Reporter {
     clearTimeout(this.interval);
   }
 
-  public report(
+  public reportPerformance(appName: string, type: PerformanceMetric['type']) {
+    this.log.debug(`${type} Metric -> (${appName})`);
+    const report = createNavigationMetric({ appName });
+    this.log.debug(report);
+    this.insertMetric(report);
+  }
+
+  public reportStats(
     appName: string,
-    type: ReportTypes,
-    events: string | string[],
-    additionalConfig = {}
+    type: StatsMetric['type'],
+    eventNames: string | string[],
+    count?: number
   ) {
-    const eventNames = Array.isArray(events) ? events : [events];
-    eventNames.forEach(eventName => {
-      this.log.debug(`${type} Report -> (${appName}:${eventName})`);
-      const report = getReport(type)({ appName, eventName, ...additionalConfig });
-      this.insertReport(report);
+    wrapArray(eventNames).forEach(eventName => {
+      this.log.debug(`${type} Metric -> (${appName}:${eventName}):`);
+      const report = createStatsMetric({ type, appName, eventName, count });
+      this.log.debug(report);
+      this.insertMetric(report);
     });
   }
 
-  protected insertReport(report: Reports) {
-    this.reports.push(report);
-    this.storeReports();
+  private insertMetric(metric: Metric) {
+    this.reports.push(metric);
+    this.storeReport();
   }
 
   public async sendReports() {
