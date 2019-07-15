@@ -93,7 +93,7 @@ export const xyChartRenderer: RenderFunction<XYChartProps> = {
 };
 
 export function XYChart({ data, args }: XYChartProps) {
-  const { legend, x, layers } = args;
+  const { legend, layers } = args;
 
   return (
     <Chart className="lnsChart">
@@ -106,10 +106,12 @@ export function XYChart({ data, args }: XYChartProps) {
 
       <Axis
         id={getAxisId('x')}
-        position={x.position}
-        title={x.title}
-        showGridLines={x.showGridlines}
-        hide={x.hide}
+        // position={layers[0].position}
+        // position={'bottom'}
+        // title={layers.title}
+        title={'X'}
+        showGridLines={false}
+        hide={layers[0].hide}
       />
 
       <Axis
@@ -120,13 +122,13 @@ export function XYChart({ data, args }: XYChartProps) {
         hide={layers[0].hide}
       />
 
-      {layers.map(({ splitSeriesAccessors, seriesType, labels, accessors }, index) => {
+      {layers.map(({ splitSeriesAccessors, seriesType, labels, accessors, xAccessor }, index) => {
         const seriesProps = {
           key: index,
           splitSeriesAccessors,
-          stackAccessors: seriesType.includes('stacked') ? [x.accessor] : [],
+          stackAccessors: seriesType.includes('stacked') ? [xAccessor] : [],
           id: getSpecId(labels.join(',')),
-          xAccessor: x.accessor,
+          xAccessor,
           yAccessors: labels,
           data: data.rows.map(row => {
             const newRow: typeof row = {};

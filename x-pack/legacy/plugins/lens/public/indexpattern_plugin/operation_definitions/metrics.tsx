@@ -33,7 +33,8 @@ function buildMetricOperation<T extends FieldBasedIndexPatternColumn>(
     buildColumn(
       operationId: string,
       suggestedOrder: DimensionPriority | undefined,
-      layer: DimensionLayer,
+      layerId: string,
+      // layer: DimensionLayer,
       field?: IndexPatternField
     ): T {
       if (!field) {
@@ -47,7 +48,7 @@ function buildMetricOperation<T extends FieldBasedIndexPatternColumn>(
         suggestedOrder,
         sourceField: field ? field.name : '',
         isBucketed: false,
-        layer,
+        // layer,
       } as T;
     },
     toEsAggsConfig: (column, columnId) => ({

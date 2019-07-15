@@ -29,17 +29,20 @@ export type IndexPatternDimensionPanelProps = DatasourceDimensionPanelProps & {
   dragDropContext: DragContextState;
   dataPlugin: DataSetup;
   storage: Storage;
-  layer: DimensionLayer;
+  // layer: DimensionLayer;
+  layerId: string;
 };
 
 export function IndexPatternDimensionPanel(props: IndexPatternDimensionPanelProps) {
+  const layerId = props.layerId;
   const columns = getPotentialColumns(props);
 
   const filteredColumns = columns.filter(col => {
     return props.filterOperations(columnToOperation(col));
   });
 
-  const selectedColumn: IndexPatternColumn | null = props.state.columns[props.columnId] || null;
+  const selectedColumn: IndexPatternColumn | null =
+    props.state.layers[layerId].columns[props.columnId] || null;
 
   function findColumnByField(field: IndexPatternField) {
     return filteredColumns.find(col => hasField(col) && col.sourceField === field.name);
@@ -66,7 +69,7 @@ export function IndexPatternDimensionPanel(props: IndexPatternDimensionPanelProp
             return;
           }
 
-          props.setState(changeColumn(props.state, props.columnId, column));
+          props.setState(changeColumn(props.state, layerId, props.columnId, column));
         }}
       >
         <EuiFlexGroup alignItems="center">
@@ -89,7 +92,7 @@ export function IndexPatternDimensionPanel(props: IndexPatternDimensionPanelProp
                     defaultMessage: 'Remove',
                   })}
                   onClick={() => {
-                    props.setState(deleteColumn(props.state, props.columnId));
+                    props.setState(deleteColumn(props.state, layerId, props.columnId));
                   }}
                 />
               </EuiFlexItem>

@@ -34,40 +34,48 @@ export function updateColumnParam<
   K extends keyof C['params']
 >(
   state: IndexPatternPrivateState,
+  layerId: string,
   currentColumn: C,
   paramName: K,
   value: C['params'][K]
 ): IndexPatternPrivateState {
-  const columnId = Object.entries(state.columns).find(
+  const columnId = Object.entries(state.layers[layerId].columns).find(
     ([_columnId, column]) => column === currentColumn
   )![0];
 
-  if (!('params' in state.columns[columnId])) {
+  if (!('params' in state.layers[layerId].columns[columnId])) {
     throw new Error('Invariant: no params in this column');
   }
 
   return {
     ...state,
-    columns: {
-      ...state.columns,
-      [columnId]: ({
-        ...currentColumn,
-        params: {
-          ...currentColumn.params,
-          [paramName]: value,
+    layers: {
+      ...state.layers,
+      [layerId]: {
+        ...state.layers[layerId],
+        columns: {
+          ...state.layers[layerId].columns,
+          [columnId]: ({
+            ...currentColumn,
+            params: {
+              ...currentColumn.params,
+              [paramName]: value,
+            },
+          } as unknown) as IndexPatternColumn,
         },
-      } as unknown) as IndexPatternColumn,
+      },
     },
   };
 }
 
 export function changeColumn(
   state: IndexPatternPrivateState,
+  layerId: string,
   columnId: string,
   newColumn: IndexPatternColumn,
   { keepParams }: { keepParams: boolean } = { keepParams: true }
 ) {
-  const oldColumn = state.columns[columnId];
+  const oldColumn = state.layers[layerId].columns[columnId];
 
   const updatedColumn =
     keepParams &&
@@ -77,28 +85,54 @@ export function changeColumn(
       ? ({ ...newColumn, params: oldColumn.params } as IndexPatternColumn)
       : newColumn;
 
-  const newColumns: IndexPatternPrivateState['columns'] = {
-    ...state.columns,
+  const newColumns: Record<string, IndexPatternColumn> = {
+    ...state.layers[layerId].columns,
     [columnId]: updatedColumn,
   };
 
   return {
     ...state,
-    columnOrder: getColumnOrder(newColumns),
-    columns: newColumns,
+    layers: {
+      ...state.layers,
+      [layerId]: {
+        ...state.layers[layerId],
+        columnOrder: getColumnOrder(newColumns),
+        columns: newColumns,
+      },
+    },
   };
 }
 
-export function deleteColumn(state: IndexPatternPrivateState, columnId: string) {
-  const newColumns: IndexPatternPrivateState['columns'] = {
-    ...state.columns,
+export function deleteColumn(state: IndexPatternPrivateState, layerId: string, columnId: string) {
+  // const newColumns: IndexPatternPrivateState['columns'] = {
+  //   ...state.columns,
+  // };
+  const newColumns: Record<string, IndexPatternColumn> = {
+    ...state.layers[layerId].columns,
   };
   delete newColumns[columnId];
 
+  // return {
+  //   ...state,
+  //   columns: newColumns,
+  //   columnOrder: getColumnOrder(newColumns),
+  // };
+
+  // const newColumns: Record<string, IndexPatternColumn> = {
+  //   ...state.layers[layerId].columns,
+  //   [columnId]: updatedColumn,
+  // };
+
   return {
     ...state,
-    columns: newColumns,
-    columnOrder: getColumnOrder(newColumns),
+    layers: {
+      ...state.layers,
+      [layerId]: {
+        ...state.layers[layerId],
+        columnOrder: getColumnOrder(newColumns),
+        columns: newColumns,
+      },
+    },
   };
 }
 

@@ -19,7 +19,8 @@ export const countOperation: OperationDefinition<CountIndexPatternColumn> = {
   buildColumn(
     operationId: string,
     suggestedOrder: DimensionPriority | undefined,
-    layer: DimensionLayer
+    // layer: DimensionLayer
+    layerId: string
   ): CountIndexPatternColumn {
     return {
       operationId,
@@ -30,7 +31,7 @@ export const countOperation: OperationDefinition<CountIndexPatternColumn> = {
       operationType: 'count',
       suggestedOrder,
       isBucketed: false,
-      layer,
+      // layer,
     };
   },
   toEsAggsConfig: (column, columnId) => ({

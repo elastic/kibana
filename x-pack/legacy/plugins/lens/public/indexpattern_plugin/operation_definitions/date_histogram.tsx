@@ -46,7 +46,8 @@ export const dateHistogramOperation: OperationDefinition<DateHistogramIndexPatte
   buildColumn(
     operationId: string,
     suggestedOrder: DimensionPriority | undefined,
-    layer: DimensionLayer,
+    // layer: DimensionLayer,
+    layerId: string,
     field?: IndexPatternField
   ): DateHistogramIndexPatternColumn {
     if (!field) {
@@ -67,7 +68,7 @@ export const dateHistogramOperation: OperationDefinition<DateHistogramIndexPatte
       suggestedOrder,
       sourceField: field.name,
       isBucketed: true,
-      layer,
+      // layerId,
       params: {
         interval,
         timeZone,
@@ -94,8 +95,8 @@ export const dateHistogramOperation: OperationDefinition<DateHistogramIndexPatte
       extended_bounds: {},
     },
   }),
-  paramEditor: ({ state, setState, columnId }) => {
-    const column = state.columns[columnId] as DateHistogramIndexPatternColumn;
+  paramEditor: ({ state, setState, columnId, layerId }) => {
+    const column = state.layers[layerId].columns[columnId] as DateHistogramIndexPatternColumn;
 
     const field =
       column &&
@@ -141,6 +142,7 @@ export const dateHistogramOperation: OperationDefinition<DateHistogramIndexPatte
                 setState(
                   updateColumnParam(
                     state,
+                    layerId,
                     column,
                     'interval',
                     numericToInterval(Number(e.target.value))

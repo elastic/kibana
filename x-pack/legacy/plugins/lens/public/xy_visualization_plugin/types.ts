@@ -81,42 +81,6 @@ export interface YState extends AxisConfig {
   accessors: string[];
 }
 
-// export type YConfig = AxisConfig &
-//   YState & {
-//     labels: string[];
-//   };
-
-// type YConfigResult = YConfig & { type: 'lens_xy_yConfig' };
-
-// export const yConfig: ExpressionFunction<'lens_xy_yConfig', null, YConfig, YConfigResult> = {
-//   name: 'lens_xy_yConfig',
-//   aliases: [],
-//   type: 'lens_xy_yConfig',
-//   help: `Configure the xy chart's y axis`,
-//   context: {
-//     types: ['null'],
-//   },
-//   args: {
-//     ...axisConfig,
-//     accessors: {
-//       types: ['string'],
-//       help: 'The columns to display on the y axis.',
-//       multi: true,
-//     },
-//     labels: {
-//       types: ['string'],
-//       help: '',
-//       multi: true,
-//     },
-//   },
-//   fn: function fn(_context: unknown, args: YConfig) {
-//     return {
-//       type: 'lens_xy_yConfig',
-//       ...args,
-//     };
-//   },
-// };
-
 export interface XConfig extends AxisConfig {
   accessor: string;
 }
@@ -163,6 +127,14 @@ export const layerConfig: ExpressionFunction<
   },
   args: {
     ...axisConfig,
+    layerId: {
+      types: ['string'],
+      help: '',
+    },
+    xAccessor: {
+      types: ['string'],
+      help: '',
+    },
     seriesType: {
       types: ['string'],
       options: [
@@ -210,6 +182,9 @@ export type SeriesType =
   | 'area_stacked';
 
 type LayerConfig = AxisConfig & {
+  layerId: string;
+  xAccessor: string;
+
   accessors: string[];
   labels: string[];
   seriesType: SeriesType;
@@ -220,7 +195,7 @@ export interface XYArgs {
   // seriesType: SeriesType;
   legend: LegendConfig;
   // y: YConfig;
-  x: XConfig;
+  // x: XConfig;
   // splitSeriesAccessors: string[];
   layers: LayerConfig[];
 }
@@ -229,7 +204,7 @@ export interface XYState {
   // seriesType: SeriesType;
   legend: LegendConfig;
   // y: YState;
-  x: XConfig;
+  // x: XConfig;
   layers: LayerConfig[];
   // splitSeriesAccessors: string[];
 }

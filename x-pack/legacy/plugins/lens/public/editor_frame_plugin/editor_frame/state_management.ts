@@ -16,11 +16,18 @@ export interface EditorFrameState {
     activeId: string | null;
     state: unknown;
   };
-  datasource: {
-    activeId: string | null;
-    state: unknown;
-    isLoading: boolean;
-  };
+  datasources: Record<
+    string,
+    {
+      state: unknown;
+      isLoading: boolean;
+    }
+  >;
+  activeDatasourceId: string | null;
+  // datasource: {
+  //   activeId: string | null;
+  // };
+  layerToDatasourceId: Record<string, string>;
 }
 
 export type Action =
@@ -61,17 +68,27 @@ export type Action =
   | {
       type: 'SWITCH_DATASOURCE';
       newDatasourceId: string;
+    }
+  | {
+      type: 'CREATE_LAYER';
+      newLayerId: string;
     };
 
 export const getInitialState = (props: EditorFrameProps): EditorFrameState => {
   return {
     saving: false,
     title: i18n.translate('xpack.lens.chartTitle', { defaultMessage: 'New visualization' }),
-    datasource: {
-      state: null,
-      isLoading: Boolean(props.initialDatasourceId),
-      activeId: props.initialDatasourceId,
-    },
+    datasources: props.initialDatasourceId
+      ? {
+          [props.initialDatasourceId]: {
+            state: null,
+            isLoading: Boolean(props.initialDatasourceId),
+            // activeId: props.initialDatasourceId,
+          },
+        }
+      : {},
+    activeDatasourceId: props.initialDatasourceId,
+    layerToDatasourceId: {},
     visualization: {
       state: null,
       activeId: props.initialVisualizationId,
@@ -94,12 +111,23 @@ export const reducer = (state: EditorFrameState, action: Action): EditorFrameSta
         ...state,
         persistedId: action.doc.id,
         title: action.doc.title,
-        datasource: {
-          ...state.datasource,
-          activeId: action.doc.datasourceType || null,
-          isLoading: true,
-          state: action.doc.state.datasource,
-        },
+        // datasource: {
+        //   ...state.datasource,
+        //   activeId: action.doc.datasourceType || null,
+        //   isLoading: true,
+        //   state: action.doc.state.datasource,
+        // },
+        datasources: action.doc.datasourceType
+          ? {
+              ...state.datasources,
+              [action.doc.datasourceType]: {
+                isLoading: true,
+                state: action.doc.state.datasource,
+              },
+            }
+          : state.datasources,
+        activeDatasourceId: action.doc.datasourceType || null,
+
         visualization: {
           ...state.visualization,
           activeId: action.doc.visualizationType,
@@ -109,12 +137,20 @@ export const reducer = (state: EditorFrameState, action: Action): EditorFrameSta
     case 'SWITCH_DATASOURCE':
       return {
         ...state,
-        datasource: {
-          ...state.datasource,
-          isLoading: true,
-          state: null,
-          activeId: action.newDatasourceId,
+        // datasource: {
+        //   ...state.datasource,
+        //   isLoading: true,
+        //   state: null,
+        //   activeId: action.newDatasourceId,
+        // },
+        datasources: {
+          ...state.datasources,
+          [action.newDatasourceId]: {
+            state: null,
+            isLoading: true,
+          },
         },
+        activeDatasourceId: action.newDatasourceId,
         visualization: {
           ...state.visualization,
           // purge visualization on datasource switch
@@ -130,19 +166,26 @@ export const reducer = (state: EditorFrameState, action: Action): EditorFrameSta
           activeId: action.newVisualizationId,
           state: action.initialState,
         },
-        datasource: {
-          ...state.datasource,
-          state: action.datasourceState ? action.datasourceState : state.datasource.state,
-        },
+        // datasource: {
+        //   ...state.datasource,
+        //   state: action.datasourceState ? action.datasourceState : state.datasource.state,
+        // },
+        // datasources: {
+        //   ...state.datasources,
+        //   [state.activeDatasourceId]:
+        //   state: action.datasourceState ? action.datasourceState : state.datasource.state,
+        // },
       };
     case 'UPDATE_DATASOURCE_STATE':
       return {
         ...state,
-        datasource: {
-          ...state.datasource,
+        datasources: {
+          ...state.datasources,
           // when the datasource state is updated, the initialization is complete
-          isLoading: false,
-          state: action.newState,
+          [state.activeDatasourceId!]: {
+            isLoading: false,
+            state: action.newState,
+          },
         },
       };
     case 'UPDATE_VISUALIZATION_STATE':
@@ -154,6 +197,14 @@ export const reducer = (state: EditorFrameState, action: Action): EditorFrameSta
         visualization: {
           ...state.visualization,
           state: action.newState,
+        },
+      };
+    case 'CREATE_LAYER':
+      return {
+        ...state,
+        layerToDatasourceId: {
+          ...state.layerToDatasourceId,
+          [action.newLayerId]: state.activeDatasourceId!,
         },
       };
     default:

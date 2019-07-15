@@ -6,11 +6,14 @@
 
 import { Ast } from '@kbn/interpreter/common';
 import { State } from './types';
-import { DatasourcePublicAPI } from '../types';
+import { FramePublicAPI } from '../types';
 
-export const toExpression = (state: State, datasource: DatasourcePublicAPI): Ast => {
+// export const toExpression = (state: State, datasource: DatasourcePublicAPI): Ast => {
+export const toExpression = (state: State, frame: FramePublicAPI): Ast => {
   const labels: Partial<Record<string, string>> = {};
+  // const datasource = frame.datasourceLayers.first;
   state.layers.forEach(layer => {
+    const datasource = frame.datasourceLayers[layer.layerId];
     layer.accessors.forEach(columnId => {
       const operation = datasource.getOperationForColumnId(columnId);
       if (operation && operation.label) {
@@ -47,24 +50,24 @@ export const buildExpression = (
             ],
           },
         ],
-        x: [
-          {
-            type: 'expression',
-            chain: [
-              {
-                type: 'function',
-                function: 'lens_xy_xConfig',
-                arguments: {
-                  title: [state.x.title],
-                  showGridlines: [state.x.showGridlines],
-                  position: [state.x.position],
-                  accessor: [state.x.accessor],
-                  hide: [Boolean(state.x.hide)],
-                },
-              },
-            ],
-          },
-        ],
+        // x: [
+        //   {
+        //     type: 'expression',
+        //     chain: [
+        //       {
+        //         type: 'function',
+        //         function: 'lens_xy_xConfig',
+        //         arguments: {
+        //           title: [state.x.title],
+        //           showGridlines: [state.x.showGridlines],
+        //           position: [state.x.position],
+        //           accessor: [state.x.accessor],
+        //           hide: [Boolean(state.x.hide)],
+        //         },
+        //       },
+        //     ],
+        //   },
+        // ],
         layers: state.layers.map(layer => ({
           type: 'expression',
           chain: [
@@ -77,6 +80,7 @@ export const buildExpression = (
                 position: [layer.position],
                 hide: [Boolean(layer.hide)],
 
+                xAccessor: [layer.xAccessor],
                 splitSeriesAccessors: layer.splitSeriesAccessors,
                 seriesType: [layer.seriesType],
                 labels: layer.accessors.map(accessor => {

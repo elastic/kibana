@@ -47,7 +47,8 @@ export interface BaseIndexPatternColumn {
   // Private
   operationType: OperationType;
   suggestedOrder?: DimensionPriority;
-  layer: 'join' | number;
+  // layer: 'join' | number;
+  isJoin?: boolean;
 }
 
 type Omit<T, K> = Pick<T, Exclude<keyof T, K>>;
@@ -125,8 +126,13 @@ export interface IndexPatternField {
 export interface IndexPatternPersistedState {
   currentIndexPatternId: string;
 
-  columnOrder: string[];
-  columns: Record<string, IndexPatternColumn>;
+  layers: Record<
+    string,
+    {
+      columnOrder: string[];
+      columns: Record<string, IndexPatternColumn>;
+    }
+  >;
 }
 
 export type IndexPatternPrivateState = IndexPatternPersistedState & {
@@ -255,13 +261,24 @@ export function getIndexPatternDatasource({
       return {
         currentIndexPatternId: indexPatternObjects ? indexPatternObjects[0].id : '',
         indexPatterns,
-        columns: {},
-        columnOrder: [],
+        layers: {
+          first: {
+            columns: {},
+            columnOrder: [],
+          },
+        },
       };
     },
 
-    getPersistableState({ currentIndexPatternId, columns, columnOrder }: IndexPatternPrivateState) {
-      return { currentIndexPatternId, columns, columnOrder };
+    // getPersistableState({ currentIndexPatternId, columns, columnOrder }: IndexPatternPrivateState) {
+    getPersistableState({ currentIndexPatternId, layers }: IndexPatternPrivateState) {
+      return { currentIndexPatternId, layers };
+    },
+
+    insertLayer(state: IndexPatternPrivateState, newLayerId: string) {
+      return {
+        ...state,
+      };
     },
 
     toExpression,
@@ -275,17 +292,27 @@ export function getIndexPatternDatasource({
 
     getPublicAPI(state, setState) {
       return {
-        supportsLayers: true,
-        supportsLayerJoin: true,
+        // supportsLayers: true,
+        // supportsLayerJoin: true,
 
         getTableSpec: () => {
-          return state.columnOrder.map(colId => ({ columnId: colId }));
+          // return state.columnOrder.map(colId => ({ columnId: colId }));
+          return [];
         },
         getOperationForColumnId: (columnId: string) => {
-          if (!state.columns[columnId]) {
-            return null;
+          const layer = Object.values(state.layers).find(l =>
+            l.columnOrder.find(id => id === columnId)
+          );
+
+          if (layer) {
+            return columnToOperation(layer.columns[columnId]);
           }
-          return columnToOperation(state.columns[columnId]);
+          return null;
+
+          // if (!state.columns[columnId]) {
+          //   return null;
+          // }
+          // return columnToOperation(state.columns[columnId]);
         },
         renderDimensionPanel: (domElement: Element, props: DatasourceDimensionPanelProps) => {
           render(
@@ -295,7 +322,8 @@ export function getIndexPatternDatasource({
                 setState={newState => setState(newState)}
                 dataPlugin={data}
                 storage={storage}
-                layer={props.layer || 0}
+                // layer={props.layer || 0}
+                layerId={props.layerId || 'first'}
                 {...props}
               />
             </I18nProvider>,
@@ -304,11 +332,11 @@ export function getIndexPatternDatasource({
         },
 
         removeColumnInTableSpec: (columnId: string) => {
-          setState({
-            ...state,
-            columnOrder: state.columnOrder.filter(id => id !== columnId),
-            columns: removeProperty(columnId, state.columns),
-          });
+          // setState({
+          //   ...state,
+          //   columnOrder: state.columnOrder.filter(id => id !== columnId),
+          //   columns: removeProperty(columnId, state.columns),
+          // });
         },
         moveColumnTo: (columnId: string, targetIndex: number) => {},
         duplicateColumn: (columnId: string) => [],
@@ -319,92 +347,92 @@ export function getIndexPatternDatasource({
       state,
       item
     ): Array<DatasourceSuggestion<IndexPatternPrivateState>> {
-      const field: IndexPatternField = item as IndexPatternField;
+      // const field: IndexPatternField = item as IndexPatternField;
 
-      if (Object.keys(state.columns).length) {
-        // Not sure how to suggest multiple fields yet
-        return [];
-      }
+      // if (Object.keys(state.columns).length) {
+      //   // Not sure how to suggest multiple fields yet
+      //   return [];
+      // }
 
-      const operations = getOperationTypesForField(field);
-      const hasBucket = operations.find(op => op === 'date_histogram' || op === 'terms');
+      // const operations = getOperationTypesForField(field);
+      // const hasBucket = operations.find(op => op === 'date_histogram' || op === 'terms');
 
-      if (hasBucket) {
-        const column = buildColumnForOperationType(0, hasBucket, undefined, 0, field);
+      // if (hasBucket) {
+      //   const column = buildColumnForOperationType(0, hasBucket, undefined, 0, field);
 
-        const countColumn = buildColumnForOperationType(1, 'count', undefined, 0);
+      //   const countColumn = buildColumnForOperationType(1, 'count', undefined, 0);
 
-        const suggestion: DatasourceSuggestion<IndexPatternPrivateState> = {
-          state: {
-            ...state,
-            columns: {
-              col1: column,
-              col2: countColumn,
-            },
-            columnOrder: ['col1', 'col2'],
-          },
+      //   const suggestion: DatasourceSuggestion<IndexPatternPrivateState> = {
+      //     state: {
+      //       ...state,
+      //       columns: {
+      //         col1: column,
+      //         col2: countColumn,
+      //       },
+      //       columnOrder: ['col1', 'col2'],
+      //     },
 
-          table: {
-            columns: [
-              {
-                columnId: 'col1',
-                operation: columnToOperation(column),
-              },
-              {
-                columnId: 'col2',
-                operation: columnToOperation(countColumn),
-              },
-            ],
-            isMultiRow: true,
-            datasourceSuggestionId: 0,
-          },
-        };
+      //     table: {
+      //       columns: [
+      //         {
+      //           columnId: 'col1',
+      //           operation: columnToOperation(column),
+      //         },
+      //         {
+      //           columnId: 'col2',
+      //           operation: columnToOperation(countColumn),
+      //         },
+      //       ],
+      //       isMultiRow: true,
+      //       datasourceSuggestionId: 0,
+      //     },
+      //   };
 
-        return [suggestion];
-      } else if (state.indexPatterns[state.currentIndexPatternId].timeFieldName) {
-        const currentIndexPattern = state.indexPatterns[state.currentIndexPatternId];
-        const dateField = currentIndexPattern.fields.find(
-          f => f.name === currentIndexPattern.timeFieldName
-        )!;
+      //   return [suggestion];
+      // } else if (state.indexPatterns[state.currentIndexPatternId].timeFieldName) {
+      //   const currentIndexPattern = state.indexPatterns[state.currentIndexPatternId];
+      //   const dateField = currentIndexPattern.fields.find(
+      //     f => f.name === currentIndexPattern.timeFieldName
+      //   )!;
 
-        const column = buildColumnForOperationType(0, operations[0], undefined, 0, field);
+      //   const column = buildColumnForOperationType(0, operations[0], undefined, 0, field);
 
-        const dateColumn = buildColumnForOperationType(
-          1,
-          'date_histogram',
-          undefined,
-          0,
-          dateField
-        );
+      //   const dateColumn = buildColumnForOperationType(
+      //     1,
+      //     'date_histogram',
+      //     undefined,
+      //     0,
+      //     dateField
+      //   );
 
-        const suggestion: DatasourceSuggestion<IndexPatternPrivateState> = {
-          state: {
-            ...state,
-            columns: {
-              col1: dateColumn,
-              col2: column,
-            },
-            columnOrder: ['col1', 'col2'],
-          },
+      //   const suggestion: DatasourceSuggestion<IndexPatternPrivateState> = {
+      //     state: {
+      //       ...state,
+      //       columns: {
+      //         col1: dateColumn,
+      //         col2: column,
+      //       },
+      //       columnOrder: ['col1', 'col2'],
+      //     },
 
-          table: {
-            columns: [
-              {
-                columnId: 'col1',
-                operation: columnToOperation(column),
-              },
-              {
-                columnId: 'col2',
-                operation: columnToOperation(dateColumn),
-              },
-            ],
-            isMultiRow: true,
-            datasourceSuggestionId: 0,
-          },
-        };
+      //     table: {
+      //       columns: [
+      //         {
+      //           columnId: 'col1',
+      //           operation: columnToOperation(column),
+      //         },
+      //         {
+      //           columnId: 'col2',
+      //           operation: columnToOperation(dateColumn),
+      //         },
+      //       ],
+      //       isMultiRow: true,
+      //       datasourceSuggestionId: 0,
+      //     },
+      //   };
 
-        return [suggestion];
-      }
+      //   return [suggestion];
+      // }
 
       return [];
     },
@@ -412,23 +440,24 @@ export function getIndexPatternDatasource({
     getDatasourceSuggestionsFromCurrentState(
       state
     ): Array<DatasourceSuggestion<IndexPatternPrivateState>> {
-      if (!state.columnOrder.length) {
-        return [];
-      }
-      return [
-        {
-          state,
+      return [];
+      // if (!state.columnOrder.length) {
+      //   return [];
+      // }
+      // return [
+      //   {
+      //     state,
 
-          table: {
-            columns: state.columnOrder.map(id => ({
-              columnId: id,
-              operation: columnToOperation(state.columns[id]),
-            })),
-            isMultiRow: true,
-            datasourceSuggestionId: 0,
-          },
-        },
-      ];
+      //     table: {
+      //       columns: state.columnOrder.map(id => ({
+      //         columnId: id,
+      //         operation: columnToOperation(state.columns[id]),
+      //       })),
+      //       isMultiRow: true,
+      //       datasourceSuggestionId: 0,
+      //     },
+      //   },
+      // ];
     },
   };
 

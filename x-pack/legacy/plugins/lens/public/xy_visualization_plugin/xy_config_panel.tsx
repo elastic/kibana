@@ -112,7 +112,8 @@ function updateLayer(state: State, layer: UnwrapArray<State['layers']>, index: n
 }
 
 export function XYConfigPanel(props: VisualizationProps<State>) {
-  const { state, datasource, setState } = props;
+  const { state, datasource, setState, frame } = props;
+  // console.log(state);
 
   return (
     <EuiForm className="lnsConfigPanel">
@@ -196,13 +197,13 @@ export function XYConfigPanel(props: VisualizationProps<State>) {
       )}
       */}
 
-      <EuiFormRow
+      {/* <EuiFormRow
         label={i18n.translate('xpack.lens.xyChart.xAxisLabel', {
           defaultMessage: 'X Axis',
         })}
       >
-        <EuiPanel>
-          {/*
+        <EuiPanel> */}
+      {/*
           <EuiFormRow
             label={i18n.translate('xpack.lens.xyChart.xTitleLabel', {
               defaultMessage: 'Title',
@@ -222,10 +223,10 @@ export function XYConfigPanel(props: VisualizationProps<State>) {
           </EuiFormRow>
           */}
 
-          <EuiFormRow
-          // label={i18n.translate('xpack.lens.xyChart.xValueLabel', {
-          //   defaultMessage: 'Value',
-          // })}
+      {/* <EuiFormRow
+          label={i18n.translate('xpack.lens.xyChart.xValueLabel', {
+            defaultMessage: 'Value',
+          })}
           >
             <NativeRenderer
               data-test-subj="lnsXY_xDimensionPanel"
@@ -239,7 +240,6 @@ export function XYConfigPanel(props: VisualizationProps<State>) {
             />
           </EuiFormRow>
 
-          {/*
           <EuiFormRow>
             <EuiSwitch
               label={i18n.translate('xpack.lens.xyChart.xShowGridlinesLabel', {
@@ -252,9 +252,9 @@ export function XYConfigPanel(props: VisualizationProps<State>) {
               }
             />
           </EuiFormRow>
+      //   </EuiPanel>
+      // </EuiFormRow>
           */}
-        </EuiPanel>
-      </EuiFormRow>
 
       {state.layers.map((layer, index) => (
         <EuiFormRow key={index}>
@@ -285,6 +285,68 @@ export function XYConfigPanel(props: VisualizationProps<State>) {
                 }}
                 isIconOnly
               />
+            </EuiFormRow>
+
+            <EuiFormRow
+              label={i18n.translate('xpack.lens.xyChart.xAxisLabel', {
+                defaultMessage: 'X Axis',
+              })}
+            >
+              <EuiPanel>
+                {/*
+                <EuiFormRow
+                  label={i18n.translate('xpack.lens.xyChart.xTitleLabel', {
+                    defaultMessage: 'Title',
+                  })}
+                >
+                  <EuiFieldText
+                    placeholder={i18n.translate('xpack.lens.xyChart.xTitlePlaceholder', {
+                      defaultMessage: 'Title',
+                    })}
+                    data-test-subj="lnsXY_xTitle"
+                    value={state.x.title}
+                    onChange={e => setState({ ...state, x: { ...state.x, title: e.target.value } })}
+                    aria-label={i18n.translate('xpack.lens.xyChart.xTitleAriaLabel', {
+                      defaultMessage: 'Title',
+                    })}
+                  />
+                </EuiFormRow>
+                */}
+
+                <EuiFormRow
+                // label={i18n.translate('xpack.lens.xyChart.xValueLabel', {
+                //   defaultMessage: 'Value',
+                // })}
+                >
+                  <NativeRenderer
+                    data-test-subj="lnsXY_xDimensionPanel"
+                    render={datasource.renderDimensionPanel}
+                    nativeProps={{
+                      columnId: layer.xAccessor,
+                      dragDropContext: props.dragDropContext,
+                      filterOperations: operation => operation.isBucketed,
+                      // layer:
+                      // datasource.supportsLayers && datasource.supportsLayerJoin ? 'join' : index,
+                      layerId: 'first',
+                    }}
+                  />
+                </EuiFormRow>
+
+                {/*
+                <EuiFormRow>
+                  <EuiSwitch
+                    label={i18n.translate('xpack.lens.xyChart.xShowGridlinesLabel', {
+                      defaultMessage: 'Show gridlines',
+                    })}
+                    data-test-subj="lnsXY_xShowGridlines"
+                    checked={state.x.showGridlines}
+                    onChange={() =>
+                      setState({ ...state, x: { ...state.x, showGridlines: !state.x.showGridlines } })
+                    }
+                  />
+                </EuiFormRow>
+                */}
+              </EuiPanel>
             </EuiFormRow>
 
             <EuiFormRow
@@ -321,7 +383,8 @@ export function XYConfigPanel(props: VisualizationProps<State>) {
                 }
                 filterOperations={op => op.isBucketed && op.dataType !== 'date'}
                 suggestedPriority={0}
-                layer={index}
+                // layer={index}
+                layerId={'first'}
                 testSubj="splitSeriesDimensionPanel"
               />
             </EuiFormRow>
@@ -387,7 +450,8 @@ export function XYConfigPanel(props: VisualizationProps<State>) {
                     }
                     filterOperations={op => !op.isBucketed && op.dataType === 'number'}
                     testSubj="yDimensionPanel"
-                    layer={index}
+                    // layer={index}
+                    layerId={'first'}
                   />
                 </EuiFormRow>
 
@@ -411,33 +475,33 @@ export function XYConfigPanel(props: VisualizationProps<State>) {
         </EuiFormRow>
       ))}
 
-      {datasource.supportsLayers && (
-        <EuiFormRow>
-          <EuiButton
-            data-test-subj={`lnsXY_layer_add`}
-            onClick={() => {
-              setState({
-                ...state,
-                layers: [
-                  ...state.layers,
-                  {
-                    seriesType: 'bar_stacked',
-                    accessors: [generateId()],
-                    title: '',
-                    showGridlines: false,
-                    position: Position.Left,
-                    labels: [''],
-                    splitSeriesAccessors: [],
-                  },
-                ],
-              });
-            }}
-            iconType="plusInCircle"
-          >
-            <FormattedMessage id="xpack.lens.xyChart.addLayerButton" defaultMessage="Add layer" />
-          </EuiButton>
-        </EuiFormRow>
-      )}
+      <EuiFormRow>
+        <EuiButton
+          data-test-subj={`lnsXY_layer_add`}
+          onClick={() => {
+            frame.addNewLayer();
+
+            // setState({
+            //   ...state,
+            //   layers: [
+            //     ...state.layers,
+            //     {
+            //       seriesType: 'bar_stacked',
+            //       accessors: [generateId()],
+            //       title: '',
+            //       showGridlines: false,
+            //       position: Position.Left,
+            //       labels: [''],
+            //       splitSeriesAccessors: [],
+            //     },
+            //   ],
+            // });
+          }}
+          iconType="plusInCircle"
+        >
+          <FormattedMessage id="xpack.lens.xyChart.addLayerButton" defaultMessage="Add layer" />
+        </EuiButton>
+      </EuiFormRow>
 
       <EuiFormRow>
         <EuiButton>

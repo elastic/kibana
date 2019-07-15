@@ -59,6 +59,8 @@ export interface Datasource<T = unknown, P = unknown> {
   // Given the current state, which parts should be saved?
   getPersistableState: (state: T) => P;
 
+  insertLayer: (state: T, newLayerId: string) => T;
+
   renderDataPanel: (domElement: Element, props: DatasourceDataPanelProps<T>) => void;
 
   toExpression: (state: T) => Ast | string | null;
@@ -73,11 +75,6 @@ export interface Datasource<T = unknown, P = unknown> {
  * This is an API provided to visualizations by the frame, which calls the publicAPI on the datasource
  */
 export interface DatasourcePublicAPI {
-  // Static properties provided to visualizations to indicate whether this datasource requires "layered"
-  // queries which indicate the level of nesting
-  supportsLayers: boolean;
-  supportsLayerJoin: boolean;
-
   getTableSpec: () => TableSpec;
   getOperationForColumnId: (columnId: string) => Operation | null;
 
@@ -106,7 +103,9 @@ export interface DatasourceDataPanelProps<T = unknown> {
 
 // The only way a visualization has to restrict the query building
 export interface DatasourceDimensionPanelProps {
-  // If no columnId is passed, it will render as empty
+  // layerId: DimensionLayer;
+  layerId: string;
+
   columnId: string;
 
   dragDropContext: DragContextState;
@@ -117,8 +116,6 @@ export interface DatasourceDimensionPanelProps {
   // Visualizations can hint at the role this dimension would play, which
   // affects the default ordering of the query
   suggestedPriority?: DimensionPriority;
-
-  layer?: DimensionLayer;
 }
 
 export type DataType = 'string' | 'number' | 'date' | 'boolean';
@@ -152,6 +149,7 @@ export interface KibanaDatatable {
 export interface VisualizationProps<T = unknown> {
   dragDropContext: DragContextState;
   datasource: DatasourcePublicAPI;
+  frame: FramePublicAPI;
   state: T;
   setState: (newState: T) => void;
 }
@@ -171,15 +169,24 @@ export interface VisualizationSuggestion<T = unknown> {
   previewIcon: string;
 }
 
+export interface FramePublicAPI {
+  datasourceLayers: Record<string, DatasourcePublicAPI>;
+  layerIdToDatasource: Record<string, string>;
+  // Adds a new layer. This triggers a re-render
+  addNewLayer: () => void;
+}
+
 export interface Visualization<T = unknown, P = unknown> {
   // For initializing from saved object
-  initialize: (datasource: DatasourcePublicAPI, state?: P) => T;
+  // initialize: (frame: FramePublicAPI, datasource: DatasourcePublicAPI, state?: P) => T;
+  initialize: (frame: FramePublicAPI, state?: P) => T;
 
   getPersistableState: (state: T) => P;
 
   renderConfigPanel: (domElement: Element, props: VisualizationProps<T>) => void;
 
-  toExpression: (state: T, datasource: DatasourcePublicAPI) => Ast | string | null;
+  // toExpression: (state: T, datasource: DatasourcePublicAPI) => Ast | string | null;
+  toExpression: (state: T, frame: FramePublicAPI) => Ast | string | null;
 
   // The frame will call this function on all visualizations when the table changes, or when
   // rendering additional ways of using the data

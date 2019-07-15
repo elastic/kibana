@@ -61,6 +61,7 @@ export interface ParamEditorProps {
   state: IndexPatternPrivateState;
   setState: (newState: IndexPatternPrivateState) => void;
   columnId: string;
+  layerId: string;
   dataPlugin?: DataSetup;
   storage?: Storage;
 }
@@ -74,7 +75,8 @@ export interface OperationDefinition<C extends BaseIndexPatternColumn> {
   buildColumn: (
     operationId: string,
     suggestedOrder: DimensionPriority | undefined,
-    layer: DimensionLayer,
+    // layer: DimensionLayer,
+    layerId: string,
     field?: IndexPatternField
   ) => C;
   paramEditor?: React.ComponentType<ParamEditorProps>;
@@ -108,20 +110,22 @@ export function buildColumnForOperationType<T extends OperationType>(
   index: number,
   op: T,
   suggestedOrder: DimensionPriority | undefined,
-  layer: DimensionLayer,
+  // layer: DimensionLayer,
+  layerId: string,
   field?: IndexPatternField
 ): IndexPatternColumn {
-  return operationDefinitionMap[op].buildColumn(`${index}${op}`, suggestedOrder, layer, field);
+  return operationDefinitionMap[op].buildColumn(`${index}${op}`, suggestedOrder, layerId, field);
 }
 
 export function getPotentialColumns({
   state,
   suggestedOrder,
-  layer,
+  layerId,
 }: {
   state: IndexPatternPrivateState;
   suggestedOrder?: DimensionPriority;
-  layer: DimensionLayer;
+  // layer: DimensionLayer;
+  layerId: string;
 }): IndexPatternColumn[] {
   const fields = state.indexPatterns[state.currentIndexPatternId].fields;
 
@@ -130,14 +134,14 @@ export function getPotentialColumns({
       const validOperations = getOperationTypesForField(field);
 
       return validOperations.map(op =>
-        buildColumnForOperationType(index, op, suggestedOrder, layer, field)
+        buildColumnForOperationType(index, op, suggestedOrder, layerId, field)
       );
     })
     .reduce((prev, current) => prev.concat(current));
 
   operationDefinitions.forEach(operation => {
     if (operation.isApplicableWithoutField) {
-      columns.push(operation.buildColumn(operation.type, suggestedOrder, layer));
+      columns.push(operation.buildColumn(operation.type, suggestedOrder, layerId));
     }
   });
 

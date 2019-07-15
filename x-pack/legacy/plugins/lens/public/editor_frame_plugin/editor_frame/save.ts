@@ -32,9 +32,11 @@ export async function save({
       title: state.title,
       type: 'lens',
       visualizationType: state.visualization.activeId,
-      datasourceType: state.datasource.activeId,
+      // datasourceType: state.datasource.activeId,
+      datasourceType: state.activeDatasourceId,
       state: {
         datasource: datasource.getPersistableState(state.datasource.state),
+        // datasources: datasource.getPersistableState(state.datasource.state),
         visualization: visualization.getPersistableState(state.visualization.state),
       },
     });

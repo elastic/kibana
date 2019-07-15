@@ -45,7 +45,8 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn> = {
   buildColumn(
     operationId: string,
     suggestedOrder: DimensionPriority | undefined,
-    layer: DimensionLayer,
+    // layer: DimensionLayer,
+    layerId: string,
     field?: IndexPatternField
   ): TermsIndexPatternColumn {
     return {
@@ -56,7 +57,7 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn> = {
       suggestedOrder,
       sourceField: field ? field.name : '',
       isBucketed: true,
-      layer,
+      // layerId,
       params: {
         size: 5,
         orderBy: { type: 'alphabetical' },
@@ -80,8 +81,8 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn> = {
       missingBucketLabel: 'Missing',
     },
   }),
-  paramEditor: ({ state, setState, columnId: currentColumnId }) => {
-    const currentColumn = state.columns[currentColumnId] as TermsIndexPatternColumn;
+  paramEditor: ({ state, setState, columnId: currentColumnId, layerId }) => {
+    const currentColumn = state.layers[layerId].columns[currentColumnId] as TermsIndexPatternColumn;
     const SEPARATOR = '$$$';
     function toValue(orderBy: TermsIndexPatternColumn['params']['orderBy']) {
       if (orderBy.type === 'alphabetical') {
@@ -101,7 +102,7 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn> = {
       };
     }
 
-    const orderOptions = Object.entries(state.columns)
+    const orderOptions = Object.entries(state.layers[layerId].columns)
       .filter(([_columnId, column]) => !column.isBucketed)
       .map(([columnId, column]) => {
         return {
@@ -129,7 +130,9 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn> = {
             value={currentColumn.params.size}
             showInput
             onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-              setState(updateColumnParam(state, currentColumn, 'size', Number(e.target.value)))
+              setState(
+                updateColumnParam(state, layerId, currentColumn, 'size', Number(e.target.value))
+              )
             }
             aria-label={i18n.translate('xpack.lens.indexPattern.terms.size', {
               defaultMessage: 'Number of values',
@@ -146,7 +149,13 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn> = {
             value={toValue(currentColumn.params.orderBy)}
             onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
               setState(
-                updateColumnParam(state, currentColumn, 'orderBy', fromValue(e.target.value))
+                updateColumnParam(
+                  state,
+                  layerId,
+                  currentColumn,
+                  'orderBy',
+                  fromValue(e.target.value)
+                )
               )
             }
             aria-label={i18n.translate('xpack.lens.indexPattern.terms.orderBy', {

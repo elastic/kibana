@@ -8,7 +8,7 @@ import React, { useMemo, useContext } from 'react';
 import { EuiSelect } from '@elastic/eui';
 import { NativeRenderer } from '../../native_renderer';
 import { Action } from './state_management';
-import { Visualization, DatasourcePublicAPI } from '../../types';
+import { Visualization, DatasourcePublicAPI, FramePublicAPI } from '../../types';
 import { DragContext } from '../../drag_drop';
 
 interface ConfigPanelWrapperProps {
@@ -17,11 +17,13 @@ interface ConfigPanelWrapperProps {
   activeVisualizationId: string | null;
   dispatch: (action: Action) => void;
   datasourcePublicAPI: DatasourcePublicAPI;
+  framePublicAPI: FramePublicAPI;
 }
 
 function getSuggestedVisualizationState(
-  visualization: Visualization,
-  datasource: DatasourcePublicAPI
+  frame: FramePublicAPI,
+  visualization: Visualization
+  // datasource: DatasourcePublicAPI
 ) {
   const suggestions = visualization.getSuggestions({
     tables: [
@@ -37,10 +39,10 @@ function getSuggestedVisualizationState(
   });
 
   if (!suggestions.length) {
-    return visualization.initialize(datasource);
+    return visualization.initialize(frame);
   }
 
-  return visualization.initialize(datasource, suggestions[0].state);
+  return visualization.initialize(frame, suggestions[0].state);
 }
 
 export function ConfigPanelWrapper(props: ConfigPanelWrapperProps) {
@@ -66,8 +68,9 @@ export function ConfigPanelWrapper(props: ConfigPanelWrapperProps) {
         value={props.activeVisualizationId || undefined}
         onChange={e => {
           const newState = getSuggestedVisualizationState(
-            props.visualizationMap[e.target.value],
-            props.datasourcePublicAPI
+            props.framePublicAPI,
+            props.visualizationMap[e.target.value]
+            // props.datasourcePublicAPI
           );
           props.dispatch({
             type: 'SWITCH_VISUALIZATION',
@@ -84,6 +87,7 @@ export function ConfigPanelWrapper(props: ConfigPanelWrapperProps) {
             state: props.visualizationState,
             setState: setVisualizationState,
             datasource: props.datasourcePublicAPI,
+            frame: props.framePublicAPI,
           }}
         />
       )}
