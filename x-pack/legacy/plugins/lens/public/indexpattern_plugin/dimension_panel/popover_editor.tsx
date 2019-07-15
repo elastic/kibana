@@ -19,7 +19,7 @@ import {
   EuiLink,
 } from '@elastic/eui';
 import classNames from 'classnames';
-import { IndexPatternColumn, OperationType, FieldBasedIndexPatternColumn } from '../indexpattern';
+import { IndexPatternColumn, OperationType } from '../indexpattern';
 import { IndexPatternDimensionPanelProps } from './dimension_panel';
 import { operationDefinitionMap, getOperationDisplay } from '../operations';
 import { hasField, deleteColumn, changeColumn } from '../state_helpers';
