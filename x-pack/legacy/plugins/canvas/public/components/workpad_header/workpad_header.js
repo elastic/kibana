@@ -78,7 +78,7 @@ export class WorkpadHeader extends React.PureComponent {
     </EuiOverlayMask>
   );
 
-  _getEditToggleToolTip = ({ textOnly = false }) => {
+  _getEditToggleToolTip = ({ textOnly } = { textOnly: false }) => {
     if (!this.props.canUserWrite) {
       return "You don't have permission to edit this workpad";
     }
