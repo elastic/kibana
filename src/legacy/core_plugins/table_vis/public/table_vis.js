@@ -70,7 +70,8 @@ function TableVisTypeProvider(Private) {
           direction: null
         },
         showTotal: false,
-        totalFunc: 'sum'
+        totalFunc: 'sum',
+        percentageCol: '',
       },
       template: tableVisTemplate,
     },

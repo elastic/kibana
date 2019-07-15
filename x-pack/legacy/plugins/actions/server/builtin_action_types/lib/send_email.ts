@@ -18,12 +18,12 @@ interface SendEmailOptions {
 
 // config validation ensures either service is set or host/port are set
 interface Transport {
+  user: string;
+  password: string;
   service?: string; // see: https://nodemailer.com/smtp/well-known/
   host?: string;
   port?: number;
   secure?: boolean; // see: https://nodemailer.com/smtp/#tls-options
-  user: string;
-  password: string;
 }
 
 interface Routing {

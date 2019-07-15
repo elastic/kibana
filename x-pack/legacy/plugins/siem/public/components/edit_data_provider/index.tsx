@@ -54,14 +54,6 @@ injectGlobal`
   }
 `;
 
-export const FieldComboBox = styled(EuiComboBox)`
-  width: ${FIELD_COMBO_BOX_WIDTH}px;
-`;
-
-export const OperatorComboBox = styled(EuiComboBox)`
-  width: ${OPERATOR_COMBO_BOX_WIDTH}px;
-`;
-
 interface Props {
   andProviderId?: string;
   browserFields: BrowserFields;
@@ -138,13 +130,14 @@ export class StatefulEditDataProvider extends React.PureComponent<Props, State> 
                       this.state.updatedField.length > 0 ? this.state.updatedField[0].label : null
                     }
                   >
-                    <FieldComboBox
+                    <EuiComboBox
                       isClearable={false}
                       onChange={this.onFieldSelected}
                       options={getCategorizedFieldNames(browserFields)}
                       placeholder={i18n.FIELD_PLACEHOLDER}
                       selectedOptions={this.state.updatedField}
                       singleSelection={{ asPlainText: true }}
+                      style={{ width: `${FIELD_COMBO_BOX_WIDTH}px` }}
                     />
                   </EuiToolTip>
                 </EuiFormRow>
@@ -152,13 +145,14 @@ export class StatefulEditDataProvider extends React.PureComponent<Props, State> 
 
               <EuiFlexItem grow={false}>
                 <EuiFormRow label={i18n.OPERATOR}>
-                  <OperatorComboBox
+                  <EuiComboBox
                     isClearable={false}
                     onChange={this.onOperatorSelected}
                     options={operatorLabels}
                     placeholder={i18n.SELECT_AN_OPERATOR}
                     selectedOptions={this.state.updatedOperator}
                     singleSelection={{ asPlainText: true }}
+                    style={{ width: `${OPERATOR_COMBO_BOX_WIDTH}px` }}
                   />
                 </EuiFormRow>
               </EuiFlexItem>
