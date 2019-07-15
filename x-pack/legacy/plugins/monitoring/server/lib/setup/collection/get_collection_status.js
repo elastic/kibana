@@ -354,6 +354,9 @@ export const getCollectionStatus = async (req, indexPatterns, clusterUuid, skipL
           if (product.name === KIBANA_SYSTEM_ID && key === kibanaUuid) {
             map[key].isPrimary = true;
           }
+          if (product.name === BEATS_SYSTEM_ID) {
+            map[key].beatType = get(bucket.beat_type, 'buckets[0].key');
+          }
         }
       }
       productStatus.totalUniqueInstanceCount = Object.keys(map).length;
@@ -414,6 +417,9 @@ export const getCollectionStatus = async (req, indexPatterns, clusterUuid, skipL
               map[key] = {};
               if (product.name === KIBANA_SYSTEM_ID && key === kibanaUuid) {
                 map[key].isPrimary = true;
+              }
+              if (product.name === BEATS_SYSTEM_ID) {
+                map[key].beatType = get(bucket.beat_type, 'buckets[0].key');
               }
             }
           }

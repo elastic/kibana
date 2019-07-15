@@ -27,6 +27,7 @@ export function getBeatsInstructionsForEnablingMetricbeat(product, _meta, {
   checkForMigrationStatus,
   autoCheckIntervalInMs
 }) {
+  const beatType = product.beatType;
   const securitySetup = (
     <Fragment>
       <EuiSpacer size="m"/>
@@ -62,7 +63,10 @@ export function getBeatsInstructionsForEnablingMetricbeat(product, _meta, {
   );
   const installMetricbeatStep = {
     title: i18n.translate('xpack.monitoring.metricbeatMigration.beatsInstructions.installMetricbeatTitle', {
-      defaultMessage: 'Install Metricbeat on the same server as Beats'
+      defaultMessage: 'Install Metricbeat on the same server as this {beatType}',
+      values: {
+        beatType
+      }
     }),
     children: (
       <EuiText>
@@ -83,7 +87,7 @@ export function getBeatsInstructionsForEnablingMetricbeat(product, _meta, {
 
   const enableMetricbeatModuleStep = {
     title: i18n.translate('xpack.monitoring.metricbeatMigration.beatsInstructions.enableMetricbeatModuleTitle', {
-      defaultMessage: 'Enable and configure the Beats x-pack module in Metricbeat'
+      defaultMessage: 'Enable and configure the Beat x-pack module in Metricbeat'
     }),
     children: (
       <Fragment>
@@ -98,18 +102,48 @@ export function getBeatsInstructionsForEnablingMetricbeat(product, _meta, {
           <p>
             <FormattedMessage
               id="xpack.monitoring.metricbeatMigration.beatsInstructions.enableMetricbeatModuleDescription"
-              defaultMessage="By default the module will collect Beats monitoring metrics from http://localhost:5601. If the local Beats instance has a different address, you must specify it via the {hosts} setting in the {file} file."
+              defaultMessage="By default the module will collect {beatType} monitoring metrics from http://localhost:5066. If the local {beatType} instance has a different address, you must specify it via the {hosts} setting in the {file} file."
               values={{
                 hosts: (
                   <Monospace>hosts</Monospace>
                 ),
                 file: (
                   <Monospace>modules.d/beat-xpack.yml</Monospace>
-                )
+                ),
+                beatType
               }}
             />
           </p>
         </EuiText>
+        <EuiSpacer size="m"/>
+        <EuiCallOut
+          color="warning"
+          iconType="help"
+          title={(
+            <EuiText>
+              <p>
+                <FormattedMessage
+                  id="xpack.monitoring.metricbeatMigration.beatsInstructions.enableMetricbeatModuleHttpEnabledDirections"
+                  defaultMessage="In order for Metricbeat to collect metrics from the running {beatType}, you need to {link}."
+                  values={{
+                    link: (
+                      <EuiLink href={`${ELASTIC_WEBSITE_URL}guide/en/beats/${beatType}/${DOC_LINK_VERSION}/http-endpoint.html`}>
+                        <FormattedMessage
+                          id="xpack.monitoring.metricbeatMigration.beatsInstructions.enableMetricbeatModuleHttpEnabledDirectionsLinkText"
+                          defaultMessage="enable an HTTP endpoint"
+                        />
+                      </EuiLink>
+                    ),
+                    file: (
+                      <Monospace>modules.d/beat-xpack.yml</Monospace>
+                    ),
+                    beatType
+                  }}
+                />
+              </p>
+            </EuiText>
+          )}
+        />
         {securitySetup}
       </Fragment>
     )
