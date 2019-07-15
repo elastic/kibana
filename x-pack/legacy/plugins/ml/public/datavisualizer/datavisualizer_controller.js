@@ -52,10 +52,11 @@ import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml');
 
 module
-  .controller('MlDataVisualizerViewFields', function ($scope, $timeout, $window, Private, AppState, config) {
+  .controller('MlDataVisualizerViewFields', function ($injector, $scope, $timeout, $window, Private, AppState, config) {
 
     timefilter.enableTimeRangeSelector();
     timefilter.enableAutoRefreshSelector();
+    const mlTimefilterRefreshService = $injector.get('mlTimefilterRefreshService');
 
     const createSearchItems = Private(SearchItemsProvider);
     const {
@@ -144,12 +145,21 @@ module
       .value();
     $scope.indexedFieldTypes = indexedFieldTypes.sort();
 
-
-    // Refresh the data when the time range is altered.
-    $scope.$listenAndDigestAsync(timefilter, 'fetch', function () {
+    function refresh() {
       $scope.earliest = timefilter.getActiveBounds().min.valueOf();
       $scope.latest = timefilter.getActiveBounds().max.valueOf();
       loadOverallStats();
+    }
+
+    // Refresh the data when the time range is altered.
+    $scope.$listenAndDigestAsync(timefilter, 'fetch', function () {
+      refresh();
+    });
+
+    const timefilterRefreshServiceSub = mlTimefilterRefreshService.subscribe(refresh);
+
+    $scope.$on('$destroy', () => {
+      timefilterRefreshServiceSub.unsubscribe();
     });
 
     $scope.submitSearchQuery = function () {

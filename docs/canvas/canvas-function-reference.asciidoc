@@ -1,6 +1,6 @@
 [role="xpack"]
 [[canvas-function-reference]]
-= Canvas function reference
+== Canvas function reference
 
 Behind the scenes, Canvas is driven by a powerful expression language,
 with dozens of functions and other capabilities, including table transforms, 
@@ -11,13 +11,15 @@ perform complex math calculations.
 
 A *** denotes a required argument. 
 
-A *†* denotes an argument can be passed multiple times.
+A † denotes an argument can be passed multiple times.
 
 <<a_fns>> | B | <<c_fns>> | <<d_fns>> | <<e_fns>> | <<f_fns>> | <<g_fns>> | <<h_fns>> | <<i_fns>> | <<j_fns>> | K | <<l_fns>> | <<m_fns>> | <<n_fns>> | O | <<p_fns>> | Q | <<r_fns>> | <<s_fns>> | <<t_fns>> | <<u_fns>> | V | W | X | Y | Z
 
 [float]
 [[a_fns]]
 == A
+
+[float]
 [[all_fn]]
 === `all`
 
@@ -29,7 +31,7 @@ Returns `true` if all of the conditions are met. See also <<any_fn>>.
 |===
 |Argument |Type |Description
 
-|_Unnamed_ *** *†*
+|_Unnamed_ *** †
 
 Alias: `condition`
 |`boolean`
@@ -81,7 +83,7 @@ Returns `true` if at least one of the conditions is met. See also <<all_fn>>.
 |===
 |Argument |Type |Description
 
-|_Unnamed_ *** *†*
+|_Unnamed_ *** †
 
 Alias: `condition`
 |`boolean`
@@ -179,6 +181,8 @@ Default: `true`
 [float]
 [[c_fns]]
 == C
+
+[float]
 [[case_fn]]
 === `case`
 
@@ -379,6 +383,8 @@ Alias: `data`
 [float]
 [[d_fns]]
 == D
+
+[float]
 [[date_fn]]
 === `date`
 
@@ -442,7 +448,7 @@ Executes multiple sub-expressions, then returns the original _context_. Use for 
 |===
 |Argument |Type |Description
 
-|_Unnamed_ *†*
+|_Unnamed_ †
 
 Aliases: `expression`, `exp`, `fn`, `function`
 |`any`
@@ -483,6 +489,8 @@ Configures a dropdown filter control element.
 [float]
 [[e_fns]]
 == E
+
+[float]
 [[eq_fn]]
 === `eq`
 
@@ -649,6 +657,8 @@ capitalization.
 [float]
 [[f_fns]]
 == F
+
+[float]
 [[filterrows_fn]]
 === `filterrows`
 
@@ -684,7 +694,7 @@ Aggregates element filters from the workpad for use elsewhere, usually a data so
 |===
 |Argument |Type |Description
 
-|_Unnamed_ *†* 
+|_Unnamed_ † 
 
 Alias: `group`
 |`string`
@@ -812,6 +822,8 @@ Alias: `format`
 [float]
 [[g_fns]]
 == G
+
+[float]
 [[getCell_fn]]
 === `getCell`
 
@@ -888,6 +900,8 @@ Alias: `value`
 [float]
 [[h_fns]]
 == H
+
+[float]
 [[head_fn]]
 === `head`
 
@@ -914,6 +928,8 @@ Default: `1`
 [float]
 [[i_fns]]
 == I
+
+[float]
 [[if_fn]]
 === `if`
 
@@ -985,6 +1001,8 @@ data:image/svg+xml;`base64`,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiIHN0
 == J
 
 [float]
+
+[float]
 [[joinRows_fn]]
 === `joinRows`
 
@@ -1029,6 +1047,8 @@ Default: `", "`
 [float]
 [[l_fns]]
 == L
+
+[float]
 [float]
 [[location_fn]]
 === `location`
@@ -1088,6 +1108,8 @@ Alias: `value`
 [float]
 [[m_fns]]
 == M
+
+[float]
 [[mapColumn_fn]]
 === `mapColumn`
 
@@ -1127,7 +1149,7 @@ Adds an element that renders Markdown text. TIP: Use the <<markdown_fn>> functio
 |===
 |Argument |Type |Description
 
-|_Unnamed_ *†*
+|_Unnamed_ †
 
 Alias: `expression`, `content`
 |`string`
@@ -1206,6 +1228,8 @@ Default: `{<<font_fn>> size=14 family="'Open Sans', Helvetica, Arial, sans-serif
 [float]
 [[n_fns]]
 == N
+
+[float]
 [[neq_fn]]
 === `neq`
 
@@ -1230,6 +1254,8 @@ Alias: `value`
 [float]
 [[p_fns]]
 == P
+
+[float]
 [[palette_fn]]
 === `palette`
 
@@ -1241,7 +1267,7 @@ Creates a color palette.
 |===
 |Argument |Type |Description
 
-|_Unnamed_ *** *†*
+|_Unnamed_ *** †
 
 Alias: `color`
 |`string`
@@ -1317,7 +1343,7 @@ Default: `{<<palette_fn>>}`
 
 Default: `"auto"`
 
-|`seriesStyle` *†*
+|`seriesStyle` †
 |`seriesStyle`
 |A style of a specific series
 
@@ -1367,7 +1393,7 @@ Default: `"ne"`
 
 Default: `{<<palette_fn>>}`
 
-|`seriesStyle` *†*
+|`seriesStyle` †
 |`seriesStyle`
 |A style of a specific series
 
@@ -1399,11 +1425,11 @@ Subdivides a `datatable` by the unique values of the specified columns, and pass
 |===
 |Argument |Type |Description
 
-|`by` *** *†*
+|`by` *** †
 |`string`
 |The column to subdivide the `datatable`.
 
-|`expression` *** *†*
+|`expression` *** †
 
 Alias: `fn`, `exp`, `function`
 |`datatable`
@@ -1519,6 +1545,8 @@ Default: `20`
 [float]
 [[r_fns]]
 == R
+
+[float]
 [[render_fn]]
 === `render`
 
@@ -1707,6 +1735,8 @@ Returns the number of rows. Pairs with `<<ply_fn>>` to get the count of unique c
 [float]
 [[s_fns]]
 == S
+
+[float]
 [[seriesStyle_fn]]
 === `seriesStyle`
 
@@ -1876,7 +1906,7 @@ Concatenates all of the arguments into a single string.
 |===
 |Argument |Type |Description
 
-|_Unnamed_ *** *†*
+|_Unnamed_ *** †
 
 Alias: `value`
 |`string`, `number`, `boolean`
@@ -1898,7 +1928,7 @@ Performs conditional logic with multiple conditions. See also <<case_fn>>, which
 |===
 |Argument |Type |Description
 
-|_Unnamed_ *** *†*
+|_Unnamed_ *** †
 
 Alias: `case`
 |`case`
@@ -1917,6 +1947,8 @@ Alias: `finally`
 [float]
 [[t_fns]]
 == T
+
+[float]
 [[table_fn]]
 === `table`
 
@@ -2126,6 +2158,8 @@ Alias: `type`
 [float]
 [[u_fns]]
 == U
+
+[float]
 [[urlparam_fn]]
 === `urlparam`
 
