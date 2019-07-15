@@ -24,11 +24,10 @@ const trackMetric = getUiStatsReporter(`<AppName>`);
 trackMetric(`<MetricType>`, `<EventName>`);
 ```
 
-
 Metric Types:
   - `click` for tracking clicks `trackMetric('click', 'my_button_clicked');`
   - `loaded` for a component load or page load `trackMetric('loaded', 'my_component_loaded');`
-  - `count` for a tracking a misc count `trackMetric('count', 'my_counter', { count: 13 });`
+  - `count` for a tracking a misc count `trackMetric('count', 'my_counter', <count> });`
 
 Call this function whenever you would like to track a user interaction within your app. The function
 accepts two arguments, `metricType` and `eventNames`. These should be underscore-delimited strings.
@@ -36,17 +35,12 @@ For example, to track the `my_event` metric in the app `my_app` call `trackUiMet
 
 That's all you need to do!
 
-To track multiple metrics within a single request, provide an array of metric types, e.g. `trackMetric('<MetricType>', ['my_event1', 'my_event2', 'my_event3'])`.
-
-**NOTE:** When called, this function sends a `POST` request to `/api/ui_metric/{appName}/{metricType}`.
-It's important that this request is sent via the `trackUiMetric` function, because it contains special
-logic for blocking the request if the user hasn't opted in to telemetry.
+To track multiple metrics within a single request, provide an array of events, e.g. `trackMetric('<MetricType>', ['my_event1', 'my_event2', 'my_event3'])`.
 
 ### Disallowed characters
 
-The colon and comma characters (`,`, `:`) should not be used in app name or metric types. Colons play
-a sepcial role in how metrics are stored as saved objects, and the API endpoint uses commas to delimit
-multiple metric types in a single API request.
+The colon character (`:`) should not be used in app name or event names. Colons play
+a sepcial role in how metrics are stored as saved objects.
 
 ### Tracking timed interactions
 
