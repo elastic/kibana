@@ -48,7 +48,7 @@ export class ContactCardEmbeddableFactory extends EmbeddableFactory<ContactCardE
             modalSession.close();
             resolve(undefined);
           }}
-          onCreate={(input: { firstName: string; lastName: string }) => {
+          onCreate={(input: { firstName: string; lastName?: string }) => {
             modalSession.close();
             resolve(input);
           }}

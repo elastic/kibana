@@ -87,9 +87,7 @@ export abstract class Container<
     EEO extends EmbeddableOutput = EmbeddableOutput,
     E extends IEmbeddable<EEI, EEO> = IEmbeddable<EEI, EEO>
   >(type: string, explicitInput: Partial<EEI>): Promise<E | ErrorEmbeddable> {
-    const factory = this.getFactory(type) as
-      | EmbeddableFactory<EEI, EEO, E>
-      | undefined;
+    const factory = this.getFactory(type) as EmbeddableFactory<EEI, EEO, E> | undefined;
 
     if (!factory) {
       throw new EmbeddableFactoryNotFoundError(type);
@@ -104,11 +102,7 @@ export abstract class Container<
     TEmbeddableInput extends EmbeddableInput = EmbeddableInput,
     TEmbeddable extends IEmbeddable<TEmbeddableInput> = IEmbeddable<TEmbeddableInput>
   >(type: string, savedObjectId: string): Promise<TEmbeddable | ErrorEmbeddable> {
-    const factory = this.getFactory(type) as EmbeddableFactory<
-      TEmbeddableInput,
-      any,
-      TEmbeddable
-    >;
+    const factory = this.getFactory(type) as EmbeddableFactory<TEmbeddableInput, any, TEmbeddable>;
     const panelState = this.createNewPanelState(factory);
     panelState.savedObjectId = savedObjectId;
 
@@ -320,14 +314,13 @@ export abstract class Container<
     // switch over to inline creation we can probably clean this up, and force EmbeddableFactory.create to always
     // return an embeddable, or throw an error.
     if (embeddable) {
-      // The factory creation process may ask the user for input to update or override any input coming
-      // from the container.
-      const input = embeddable.getInput();
-      const newOrChangedInput = getKeys(input)
-        .filter(key => input[key] !== inputForChild[key])
-        .reduce((res, key) => Object.assign(res, { [key]: input[key] }), {});
+      // make sure the panel wasn't removed in the mean time, since the embeddable creation is async
+      if (!this.input.panels[panel.explicitInput.id]) {
+        embeddable.destroy();
+        return;
+      }
 
-      if (embeddable.getOutput().savedObjectId || Object.keys(newOrChangedInput).length > 0) {
+      if (embeddable.getOutput().savedObjectId) {
         this.updateInput({
           panels: {
             ...this.input.panels,
@@ -338,7 +331,6 @@ export abstract class Container<
                 : undefined),
               explicitInput: {
                 ...this.input.panels[panel.explicitInput.id].explicitInput,
-                ...newOrChangedInput,
               },
             },
           },

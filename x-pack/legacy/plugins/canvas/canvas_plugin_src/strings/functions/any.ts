@@ -7,15 +7,21 @@
 import { i18n } from '@kbn/i18n';
 import { any } from '../../functions/common/any';
 import { FunctionHelp } from '.';
-import { FunctionFactory } from '../../functions/types';
+import { FunctionFactory } from '../../../types';
+import { BOOLEAN_TRUE } from '../constants';
 
 export const help: FunctionHelp<FunctionFactory<typeof any>> = {
   help: i18n.translate('xpack.canvas.functions.anyHelpText', {
-    defaultMessage: 'Return true if any of the conditions are true',
+    defaultMessage:
+      'Returns {BOOLEAN_TRUE} if at least one of the conditions is met. See also {all_fn}.',
+    values: {
+      all_fn: '`all`',
+      BOOLEAN_TRUE,
+    },
   }),
   args: {
     condition: i18n.translate('xpack.canvas.functions.any.args.conditionHelpText', {
-      defaultMessage: 'One or more conditions to check',
+      defaultMessage: 'The conditions to check.',
     }),
   },
 };

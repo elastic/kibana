@@ -21,7 +21,7 @@ import * as Rx from 'rxjs';
 import { skip } from 'rxjs/operators';
 import { isErrorEmbeddable, EmbeddableOutput, EmbeddableFactory } from '../embeddables';
 import { ContainerInput } from './i_container';
-import { ViewMode } from '../types';
+import { ViewMode, GetEmbeddableFactory } from '../types';
 import {
   FilterableEmbeddableInput,
   FilterableEmbeddable,
@@ -36,8 +36,15 @@ import { SlowContactCardEmbeddableFactory } from '../test_samples/embeddables/co
 import { HELLO_WORLD_EMBEDDABLE_TYPE } from '../test_samples/embeddables/hello_world/hello_world_embeddable';
 import { HelloWorldEmbeddableFactory } from '../test_samples/embeddables/hello_world/hello_world_embeddable_factory';
 import { HelloWorldContainer } from '../test_samples/embeddables/hello_world_container';
-import { ContactCardEmbeddableInput, ContactCardEmbeddableOutput, ContactCardEmbeddable } from '../test_samples/embeddables/contact_card/contact_card_embeddable';
-import { FilterableContainer, FilterableContainerInput } from '../test_samples/embeddables/filterable_container';
+import {
+  ContactCardEmbeddableInput,
+  ContactCardEmbeddableOutput,
+  ContactCardEmbeddable,
+} from '../test_samples/embeddables/contact_card/contact_card_embeddable';
+import {
+  FilterableContainer,
+  FilterableContainerInput,
+} from '../test_samples/embeddables/filterable_container';
 
 const __embeddableFactories = new Map<string, EmbeddableFactory>();
 __embeddableFactories.set(FILTERABLE_EMBEDDABLE, new FilterableEmbeddableFactory());
@@ -472,10 +479,7 @@ test('Explicit embeddable input mapped to undefined with no inherited value will
 });
 
 test('Panel removed from input state', async done => {
-  const container = new FilterableContainer(
-    { id: 'hello', panels: {}, filters: [] },
-    getFactory
-  );
+  const container = new FilterableContainer({ id: 'hello', panels: {}, filters: [] }, getFactory);
 
   const embeddable = await container.addNewEmbeddable<
     FilterableEmbeddableInput,
@@ -504,10 +508,7 @@ test('Panel removed from input state', async done => {
 });
 
 test('Panel added to input state', async done => {
-  const container = new FilterableContainer(
-    { id: 'hello', panels: {}, filters: [] },
-    getFactory
-  );
+  const container = new FilterableContainer({ id: 'hello', panels: {}, filters: [] }, getFactory);
 
   const embeddable = await container.addNewEmbeddable<
     FilterableEmbeddableInput,
@@ -521,10 +522,7 @@ test('Panel added to input state', async done => {
     FilterableEmbeddable
   >(FILTERABLE_EMBEDDABLE, {});
 
-  const container2 = new FilterableContainer(
-    { id: 'hello', panels: {}, filters: [] },
-    getFactory
-  );
+  const container2 = new FilterableContainer({ id: 'hello', panels: {}, filters: [] }, getFactory);
 
   const subscription = container2
     .getOutput$()
@@ -740,4 +738,48 @@ test('untilEmbeddableLoaded rejects with an error if child is subsequently remov
   });
 
   container.updateInput({ panels: {} });
+});
+
+test('adding a panel then subsequently removing it before its loaded removes the panel', async done => {
+  __embeddableFactories.clear();
+  __embeddableFactories.set(
+    CONTACT_CARD_EMBEDDABLE,
+    new SlowContactCardEmbeddableFactory({ loadTickCount: 1 })
+  );
+
+  const container = new HelloWorldContainer(
+    {
+      id: 'hello',
+      panels: {
+        '123': {
+          explicitInput: { id: '123', firstName: 'Sam', lastName: 'Tarley' },
+          type: CONTACT_CARD_EMBEDDABLE,
+        },
+      },
+    },
+    getFactory
+  );
+
+  // Final state should be that the panel is removed.
+  Rx.merge(container.getInput$(), container.getOutput$()).subscribe(() => {
+    if (
+      container.getInput().panels['123'] === undefined &&
+      container.getOutput().embeddableLoaded['123'] === undefined &&
+      container.getInput().panels['456'] !== undefined &&
+      container.getOutput().embeddableLoaded['456'] === true
+    ) {
+      done();
+    }
+  });
+
+  container.updateInput({ panels: {} });
+
+  container.updateInput({
+    panels: {
+      '456': {
+        explicitInput: { id: '456' },
+        type: CONTACT_CARD_EMBEDDABLE,
+      },
+    },
+  });
 });

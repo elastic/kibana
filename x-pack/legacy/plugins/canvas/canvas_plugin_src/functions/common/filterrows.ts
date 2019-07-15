@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/public';
-import { Datatable } from '../types';
+import { Datatable } from '../../../types';
 import { getFunctionHelp } from '../../strings';
 
 interface Arguments {
@@ -23,10 +23,10 @@ export function filterrows(): ExpressionFunction<
     name: 'filterrows',
     aliases: [],
     type: 'datatable',
+    help,
     context: {
       types: ['datatable'],
     },
-    help,
     args: {
       fn: {
         resolve: false,
