@@ -19,9 +19,9 @@ import {
   OperationType,
   BaseIndexPatternColumn,
 } from '../indexpattern';
-import { hasField, sortByField } from '../state_helpers';
 import { FieldIcon } from '../field_icon';
 import { DataType } from '../../types';
+import { hasField, sortByField } from '../utils';
 
 export interface FieldSelectProps {
   incompatibleSelectedOperationType: OperationType | null;
@@ -54,19 +54,23 @@ export function FieldSelect({
   );
 
   function isCompatibleWithCurrentOperation(col: BaseIndexPatternColumn) {
-    return incompatibleSelectedOperationType
-      ? col.operationType === incompatibleSelectedOperationType
-      : !selectedColumn || col.operationType === selectedColumn.operationType;
+    if (incompatibleSelectedOperationType) {
+      return col.operationType === incompatibleSelectedOperationType;
+    }
+    return !selectedColumn || col.operationType === selectedColumn.operationType;
   }
 
   const fieldOptions = [];
-  const fieldlessColumn = filteredColumns.find(column => !hasField(column));
+  const fieldlessColumn =
+    filteredColumns.find(column => !hasField(column) && isCompatibleWithCurrentOperation(column)) ||
+    filteredColumns.find(column => !hasField(column));
+
   if (fieldlessColumn) {
     fieldOptions.push({
       label: i18n.translate('xpack.lens.indexPattern.documentField', {
         defaultMessage: 'Document',
       }),
-      value: { operationId: fieldlessColumn.operationId, dataType: fieldlessColumn.dataType },
+      value: fieldlessColumn.operationId,
       className: classNames({
         'lnsConfigPanel__fieldOption--incompatible': !isCompatibleWithCurrentOperation(
           fieldlessColumn

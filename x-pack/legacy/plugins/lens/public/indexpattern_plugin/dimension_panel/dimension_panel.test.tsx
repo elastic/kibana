@@ -6,7 +6,10 @@
 
 import { ReactWrapper, ShallowWrapper } from 'enzyme';
 import React from 'react';
+import { act } from 'react-dom/test-utils';
 import { EuiComboBox, EuiSideNav, EuiPopover } from '@elastic/eui';
+import { data } from '../../../../../../../src/legacy/core_plugins/data/public/setup';
+import { localStorage } from 'ui/storage/storage_service';
 import { IndexPatternPrivateState } from '../indexpattern';
 import { changeColumn } from '../state_helpers';
 import { getPotentialColumns } from '../operations';
@@ -15,8 +18,16 @@ import { DropHandler, DragContextState } from '../../drag_drop';
 import { createMockedDragDropContext } from '../mocks';
 import { mountWithIntl as mount, shallowWithIntl as shallow } from 'test_utils/enzyme_helpers';
 
+jest.mock('../loader');
 jest.mock('../state_helpers');
 jest.mock('../operations');
+
+// Used by indexpattern plugin, which is a dependency of a dependency
+jest.mock('ui/chrome');
+jest.mock('ui/storage/storage_service');
+// Contains old and new platform data plugins, used for interpreter and filter ratio
+jest.mock('ui/new_platform');
+jest.mock('plugins/data/setup', () => ({ data: { query: { ui: {} } } }));
 
 const expectedIndexPatterns = {
   1: {
@@ -98,6 +109,8 @@ describe('IndexPatternDimensionPanel', () => {
       setState,
       columnId: 'col1',
       filterOperations: () => true,
+      dataPlugin: data,
+      storage: localStorage,
     };
 
     jest.clearAllMocks();
@@ -166,6 +179,8 @@ describe('IndexPatternDimensionPanel', () => {
     openPopover();
 
     const options = wrapper.find(EuiComboBox).prop('options');
+
+    expect(options).toHaveLength(2);
 
     expect(options![0].label).toEqual('Document');
 
@@ -276,7 +291,9 @@ describe('IndexPatternDimensionPanel', () => {
     const comboBox = wrapper.find(EuiComboBox)!;
     const option = comboBox.prop('options')![1].options!.find(({ label }) => label === 'memory')!;
 
-    comboBox.prop('onChange')!([option]);
+    act(() => {
+      comboBox.prop('onChange')!([option]);
+    });
 
     expect(setState).toHaveBeenCalledWith({
       ...initialState,
@@ -299,7 +316,9 @@ describe('IndexPatternDimensionPanel', () => {
     const comboBox = wrapper.find(EuiComboBox)!;
     const option = comboBox.prop('options')![1].options!.find(({ label }) => label === 'source')!;
 
-    comboBox.prop('onChange')!([option]);
+    act(() => {
+      comboBox.prop('onChange')!([option]);
+    });
 
     expect(setState).toHaveBeenCalledWith({
       ...state,
@@ -339,7 +358,9 @@ describe('IndexPatternDimensionPanel', () => {
 
     openPopover();
 
-    wrapper.find('button[data-test-subj="lns-indexPatternDimension-min"]').simulate('click');
+    act(() => {
+      wrapper.find('button[data-test-subj="lns-indexPatternDimension-min"]').simulate('click');
+    });
 
     expect(setState).toHaveBeenCalledWith({
       ...state,
@@ -359,9 +380,11 @@ describe('IndexPatternDimensionPanel', () => {
 
     openPopover();
 
-    wrapper
-      .find('button[data-test-subj="lns-indexPatternDimension-date_histogram"]')
-      .simulate('click');
+    act(() => {
+      wrapper
+        .find('button[data-test-subj="lns-indexPatternDimension-date_histogram"]')
+        .simulate('click');
+    });
 
     expect(setState).not.toHaveBeenCalled();
   });
@@ -371,9 +394,11 @@ describe('IndexPatternDimensionPanel', () => {
 
     openPopover();
 
-    wrapper
-      .find('input[data-test-subj="indexPattern-label-edit"]')
-      .simulate('change', { target: { value: 'New Label' } });
+    act(() => {
+      wrapper
+        .find('input[data-test-subj="indexPattern-label-edit"]')
+        .simulate('change', { target: { value: 'New Label' } });
+    });
 
     expect(setState).toHaveBeenCalledWith({
       ...state,
@@ -393,7 +418,9 @@ describe('IndexPatternDimensionPanel', () => {
 
       openPopover();
 
-      wrapper.find('button[data-test-subj="lns-indexPatternDimension-terms"]').simulate('click');
+      act(() => {
+        wrapper.find('button[data-test-subj="lns-indexPatternDimension-terms"]').simulate('click');
+      });
 
       expect(setState).not.toHaveBeenCalled();
     });
@@ -431,7 +458,9 @@ describe('IndexPatternDimensionPanel', () => {
 
       wrapper.find('button[data-test-subj="lns-indexPatternDimension-terms"]').simulate('click');
 
-      wrapper.find(EuiPopover).prop('closePopover')!();
+      act(() => {
+        wrapper.find(EuiPopover).prop('closePopover')!();
+      });
 
       openPopover();
 
@@ -462,12 +491,16 @@ describe('IndexPatternDimensionPanel', () => {
 
       openPopover();
 
-      wrapper.find('button[data-test-subj="lns-indexPatternDimension-terms"]').simulate('click');
+      act(() => {
+        wrapper.find('button[data-test-subj="lns-indexPatternDimension-terms"]').simulate('click');
+      });
 
       const comboBox = wrapper.find(EuiComboBox)!;
       const option = comboBox.prop('options')![1].options!.find(({ label }) => label === 'source')!;
 
-      comboBox.prop('onChange')!([option]);
+      act(() => {
+        comboBox.prop('onChange')!([option]);
+      });
 
       expect(setState).toHaveBeenCalledWith({
         ...state,
@@ -491,7 +524,9 @@ describe('IndexPatternDimensionPanel', () => {
     const comboBox = wrapper.find(EuiComboBox);
     const options = comboBox.prop('options');
 
-    comboBox.prop('onChange')!([options![1].options![0]]);
+    act(() => {
+      comboBox.prop('onChange')!([options![1].options![0]]);
+    });
 
     expect(setState).toHaveBeenCalledWith({
       ...state,
@@ -544,7 +579,7 @@ describe('IndexPatternDimensionPanel', () => {
         .find(EuiSideNav)
         .prop('items')[0]
         .items.map(({ name }) => name)
-    ).toEqual(['Count', 'Maximum', 'Average', 'Sum', 'Minimum']);
+    ).toEqual(['Maximum', 'Average', 'Sum', 'Minimum', 'Count', 'Filter Ratio']);
   });
 
   it('should add a column on selection of a field', () => {
@@ -555,7 +590,9 @@ describe('IndexPatternDimensionPanel', () => {
     const comboBox = wrapper.find(EuiComboBox)!;
     const option = comboBox.prop('options')![1].options![0];
 
-    comboBox.prop('onChange')!([option]);
+    act(() => {
+      comboBox.prop('onChange')!([option]);
+    });
 
     expect(setState).toHaveBeenCalledWith({
       ...state,
@@ -591,10 +628,12 @@ describe('IndexPatternDimensionPanel', () => {
 
     openPopover();
 
-    wrapper
-      .find('[data-test-subj="lns-indexPatternDimension-min"]')
-      .first()
-      .prop('onClick')!({} as React.MouseEvent<{}, MouseEvent>);
+    act(() => {
+      wrapper
+        .find('[data-test-subj="lns-indexPatternDimension-min"]')
+        .first()
+        .prop('onClick')!({} as React.MouseEvent<{}, MouseEvent>);
+    });
 
     expect(changeColumn).toHaveBeenCalledWith(
       initialState,
@@ -613,7 +652,9 @@ describe('IndexPatternDimensionPanel', () => {
       'EuiButtonIcon[data-test-subj="indexPattern-dimensionPopover-remove"]'
     );
 
-    clearButton.simulate('click');
+    act(() => {
+      clearButton.simulate('click');
+    });
 
     expect(setState).toHaveBeenCalledWith({
       ...state,
@@ -627,7 +668,9 @@ describe('IndexPatternDimensionPanel', () => {
 
     openPopover();
 
-    wrapper.find(EuiComboBox).prop('onChange')!([]);
+    act(() => {
+      wrapper.find(EuiComboBox).prop('onChange')!([]);
+    });
 
     expect(setState).toHaveBeenCalledWith({
       ...state,
@@ -645,7 +688,14 @@ describe('IndexPatternDimensionPanel', () => {
           foo: {
             id: 'foo',
             title: 'Foo pattern',
-            fields: [{ aggregatable: true, name: 'bar', searchable: true, type: 'number' }],
+            fields: [
+              {
+                aggregatable: true,
+                name: 'bar',
+                searchable: true,
+                type: 'number',
+              },
+            ],
           },
         },
       };
@@ -740,12 +790,14 @@ describe('IndexPatternDimensionPanel', () => {
         />
       );
 
-      const onDrop = wrapper
-        .find('[data-test-subj="indexPattern-dropTarget"]')
-        .first()
-        .prop('onDrop') as DropHandler;
+      act(() => {
+        const onDrop = wrapper
+          .find('[data-test-subj="indexPattern-dropTarget"]')
+          .first()
+          .prop('onDrop') as DropHandler;
 
-      onDrop(dragging);
+        onDrop(dragging);
+      });
 
       expect(setState).toBeCalledTimes(1);
       expect(setState).toHaveBeenCalledWith(
@@ -776,12 +828,14 @@ describe('IndexPatternDimensionPanel', () => {
         />
       );
 
-      const onDrop = wrapper
-        .find('[data-test-subj="indexPattern-dropTarget"]')
-        .first()
-        .prop('onDrop') as DropHandler;
+      act(() => {
+        const onDrop = wrapper
+          .find('[data-test-subj="indexPattern-dropTarget"]')
+          .first()
+          .prop('onDrop') as DropHandler;
 
-      onDrop(dragging);
+        onDrop(dragging);
+      });
 
       expect(setState).toBeCalledTimes(1);
       expect(setState).toHaveBeenCalledWith(
@@ -811,12 +865,14 @@ describe('IndexPatternDimensionPanel', () => {
         />
       );
 
-      const onDrop = wrapper
-        .find('[data-test-subj="indexPattern-dropTarget"]')
-        .first()
-        .prop('onDrop') as DropHandler;
+      act(() => {
+        const onDrop = wrapper
+          .find('[data-test-subj="indexPattern-dropTarget"]')
+          .first()
+          .prop('onDrop') as DropHandler;
 
-      onDrop(dragging);
+        onDrop(dragging);
+      });
 
       expect(setState).not.toBeCalled();
     });

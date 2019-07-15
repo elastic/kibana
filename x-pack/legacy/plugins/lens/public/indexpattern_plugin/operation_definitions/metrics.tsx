@@ -32,6 +32,7 @@ function buildMetricOperation<T extends FieldBasedIndexPatternColumn>(
     },
     buildColumn(
       operationId: string,
+      columns: {},
       suggestedOrder?: DimensionPriority,
       field?: IndexPatternField
     ): T {

@@ -22,8 +22,9 @@ import classNames from 'classnames';
 import { IndexPatternColumn, OperationType } from '../indexpattern';
 import { IndexPatternDimensionPanelProps } from './dimension_panel';
 import { operationDefinitionMap, getOperationDisplay } from '../operations';
-import { hasField, deleteColumn, changeColumn } from '../state_helpers';
+import { deleteColumn, changeColumn } from '../state_helpers';
 import { FieldSelect } from './field_select';
+import { hasField } from '../utils';
 
 const operationPanels = getOperationDisplay();
 
@@ -179,7 +180,13 @@ export function PopoverEditor(props: PopoverEditorProps) {
                 </EuiCallOut>
               )}
               {!incompatibleSelectedOperationType && ParamEditor && (
-                <ParamEditor state={state} setState={setState} columnId={columnId} />
+                <ParamEditor
+                  state={state}
+                  setState={setState}
+                  columnId={columnId}
+                  storage={props.storage}
+                  dataPlugin={props.dataPlugin}
+                />
               )}
               {!incompatibleSelectedOperationType && selectedColumn && (
                 <EuiFormRow label="Label">

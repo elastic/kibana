@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { Storage } from 'ui/storage';
+import { DataSetup } from '../../../../../../src/legacy/core_plugins/data/public';
 import { DimensionPriority } from '../types';
 import {
   IndexPatternColumn,
@@ -21,7 +23,8 @@ import {
 } from './operation_definitions/metrics';
 import { dateHistogramOperation } from './operation_definitions/date_histogram';
 import { countOperation } from './operation_definitions/count';
-import { sortByField } from './state_helpers';
+import { filterRatioOperation } from './operation_definitions/filter_ratio';
+import { sortByField } from './utils';
 
 type PossibleOperationDefinitions<
   U extends IndexPatternColumn = IndexPatternColumn
@@ -46,6 +49,7 @@ export const operationDefinitionMap: AllOperationDefinitions = {
   avg: averageOperation,
   sum: sumOperation,
   count: countOperation,
+  filter_ratio: filterRatioOperation,
 };
 const operationDefinitions: PossibleOperationDefinitions[] = Object.values(operationDefinitionMap);
 
@@ -57,6 +61,8 @@ export interface ParamEditorProps {
   state: IndexPatternPrivateState;
   setState: (newState: IndexPatternPrivateState) => void;
   columnId: string;
+  dataPlugin?: DataSetup;
+  storage?: Storage;
 }
 
 export interface OperationDefinition<C extends BaseIndexPatternColumn> {
@@ -67,8 +73,13 @@ export interface OperationDefinition<C extends BaseIndexPatternColumn> {
   isApplicableForField: (field: IndexPatternField) => boolean;
   buildColumn: (
     operationId: string,
+    columns: Partial<Record<string, IndexPatternColumn>>,
     suggestedOrder?: DimensionPriority,
     field?: IndexPatternField
+  ) => C;
+  onOtherColumnChanged?: (
+    currentColumn: C,
+    columns: Partial<Record<string, IndexPatternColumn>>
   ) => C;
   paramEditor?: React.ComponentType<ParamEditorProps>;
   toEsAggsConfig: (column: C, columnId: string) => unknown;
@@ -100,31 +111,32 @@ export function getOperationTypesForField(field: IndexPatternField): OperationTy
 export function buildColumnForOperationType<T extends OperationType>(
   index: number,
   op: T,
+  columns: Partial<Record<string, IndexPatternColumn>>,
   suggestedOrder?: DimensionPriority,
   field?: IndexPatternField
 ): IndexPatternColumn {
-  return operationDefinitionMap[op].buildColumn(`${index}${op}`, suggestedOrder, field);
+  return operationDefinitionMap[op].buildColumn(`${index}${op}`, columns, suggestedOrder, field);
 }
 
 export function getPotentialColumns(
   fields: IndexPatternField[],
   suggestedOrder?: DimensionPriority
 ): IndexPatternColumn[] {
-  const columns: IndexPatternColumn[] = fields
+  const result: IndexPatternColumn[] = fields
     .map((field, index) => {
       const validOperations = getOperationTypesForField(field);
 
       return validOperations.map(op =>
-        buildColumnForOperationType(index, op, suggestedOrder, field)
+        buildColumnForOperationType(index, op, {}, suggestedOrder, field)
       );
     })
     .reduce((prev, current) => prev.concat(current));
 
   operationDefinitions.forEach(operation => {
     if (operation.isApplicableWithoutField) {
-      columns.push(operation.buildColumn(operation.type, suggestedOrder));
+      result.push(operation.buildColumn(operation.type, {}, suggestedOrder));
     }
   });
 
-  return sortByField(columns);
+  return sortByField(result);
 }

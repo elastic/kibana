@@ -7,7 +7,9 @@
 import _ from 'lodash';
 import React, { memo, useMemo } from 'react';
 import { EuiFlexItem, EuiFlexGroup, EuiButtonIcon } from '@elastic/eui';
+import { Storage } from 'ui/storage';
 import { i18n } from '@kbn/i18n';
+import { DataSetup } from '../../../../../../../src/legacy/core_plugins/data/public';
 import { DatasourceDimensionPanelProps } from '../../types';
 import {
   IndexPatternColumn,
@@ -19,12 +21,15 @@ import {
 import { getPotentialColumns } from '../operations';
 import { PopoverEditor } from './popover_editor';
 import { DragContextState, ChildDragDropProvider, DragDrop } from '../../drag_drop';
-import { changeColumn, hasField, deleteColumn } from '../state_helpers';
+import { changeColumn, deleteColumn } from '../state_helpers';
+import { hasField } from '../utils';
 
 export type IndexPatternDimensionPanelProps = DatasourceDimensionPanelProps & {
   state: IndexPatternPrivateState;
   setState: (newState: IndexPatternPrivateState) => void;
   dragDropContext: DragContextState;
+  dataPlugin: DataSetup;
+  storage: Storage;
 };
 
 export const IndexPatternDimensionPanel = memo(function IndexPatternDimensionPanel(

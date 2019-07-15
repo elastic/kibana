@@ -7,8 +7,6 @@
 import _ from 'lodash';
 import React from 'react';
 import { render } from 'react-dom';
-import { Chrome } from 'ui/chrome';
-import { ToastNotifications } from 'ui/notify/toasts/toast_notifications';
 import { I18nProvider } from '@kbn/i18n/react';
 import {
   DatasourceDimensionPanelProps,
@@ -17,10 +15,12 @@ import {
   DatasourceSuggestion,
   Operation,
 } from '../types';
+import { Query } from '../../../../../../src/legacy/core_plugins/data/public/query';
 import { getIndexPatterns } from './loader';
 import { toExpression } from './to_expression';
 import { IndexPatternDimensionPanel } from './dimension_panel';
 import { buildColumnForOperationType, getOperationTypesForField } from './operations';
+import { IndexPatternDatasourcePluginPlugins } from './plugin';
 import { IndexPatternDataPanel } from './datapanel';
 import { Datasource, DataType } from '..';
 
@@ -33,7 +33,8 @@ export type IndexPatternColumn =
   | AvgIndexPatternColumn
   | MinIndexPatternColumn
   | MaxIndexPatternColumn
-  | CountIndexPatternColumn;
+  | CountIndexPatternColumn
+  | FilterRatioIndexPatternColumn;
 
 export interface BaseIndexPatternColumn {
   // Public
@@ -71,6 +72,15 @@ export interface TermsIndexPatternColumn extends FieldBasedIndexPatternColumn {
   params: {
     size: number;
     orderBy: { type: 'alphabetical' } | { type: 'column'; columnId: string };
+    orderDirection: 'asc' | 'desc';
+  };
+}
+
+export interface FilterRatioIndexPatternColumn extends BaseIndexPatternColumn {
+  operationType: 'filter_ratio';
+  params: {
+    numerator: Query;
+    denominator: Query;
   };
 }
 
@@ -174,7 +184,12 @@ function removeProperty<T>(prop: string, object: Record<string, T>): Record<stri
   return result;
 }
 
-export function getIndexPatternDatasource(chrome: Chrome, toastNotifications: ToastNotifications) {
+export function getIndexPatternDatasource({
+  chrome,
+  toastNotifications,
+  data,
+  storage,
+}: IndexPatternDatasourcePluginPlugins) {
   // Not stateful. State is persisted to the frame
   const indexPatternDatasource: Datasource<IndexPatternPrivateState, IndexPatternPersistedState> = {
     async initialize(state?: IndexPatternPersistedState) {
@@ -232,11 +247,15 @@ export function getIndexPatternDatasource(chrome: Chrome, toastNotifications: To
         },
         renderDimensionPanel: (domElement: Element, props: DatasourceDimensionPanelProps) => {
           render(
-            <IndexPatternDimensionPanel
-              state={state}
-              setState={newState => setState(newState)}
-              {...props}
-            />,
+            <I18nProvider>
+              <IndexPatternDimensionPanel
+                state={state}
+                setState={newState => setState(newState)}
+                dataPlugin={data}
+                storage={storage}
+                {...props}
+              />
+            </I18nProvider>,
             domElement
           );
         },
@@ -248,8 +267,8 @@ export function getIndexPatternDatasource(chrome: Chrome, toastNotifications: To
             columns: removeProperty(columnId, state.columns),
           });
         },
-        moveColumnTo: (columnId: string, targetIndex: number) => {},
-        duplicateColumn: (columnId: string) => [],
+        moveColumnTo: () => {},
+        duplicateColumn: () => [],
       };
     },
 
@@ -268,9 +287,18 @@ export function getIndexPatternDatasource(chrome: Chrome, toastNotifications: To
       const hasBucket = operations.find(op => op === 'date_histogram' || op === 'terms');
 
       if (hasBucket) {
-        const column = buildColumnForOperationType(0, hasBucket, undefined, field);
+        const countColumn = buildColumnForOperationType(1, 'count', state.columns);
 
-        const countColumn = buildColumnForOperationType(1, 'count');
+        // let column know about count column
+        const column = buildColumnForOperationType(
+          0,
+          hasBucket,
+          {
+            col2: countColumn,
+          },
+          undefined,
+          field
+        );
 
         const suggestion: DatasourceSuggestion<IndexPatternPrivateState> = {
           state: {
@@ -305,9 +333,21 @@ export function getIndexPatternDatasource(chrome: Chrome, toastNotifications: To
           f => f.name === currentIndexPattern.timeFieldName
         )!;
 
-        const column = buildColumnForOperationType(0, operations[0], undefined, field);
+        const column = buildColumnForOperationType(
+          0,
+          operations[0],
+          state.columns,
+          undefined,
+          field
+        );
 
-        const dateColumn = buildColumnForOperationType(1, 'date_histogram', undefined, dateField);
+        const dateColumn = buildColumnForOperationType(
+          1,
+          'date_histogram',
+          state.columns,
+          undefined,
+          dateField
+        );
 
         const suggestion: DatasourceSuggestion<IndexPatternPrivateState> = {
           state: {

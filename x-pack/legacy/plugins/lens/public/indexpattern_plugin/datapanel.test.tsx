@@ -29,6 +29,7 @@ const initialState: IndexPatternPrivateState = {
       sourceField: 'op',
       params: {
         size: 5,
+        orderDirection: 'asc',
         orderBy: {
           type: 'alphabetical',
         },
