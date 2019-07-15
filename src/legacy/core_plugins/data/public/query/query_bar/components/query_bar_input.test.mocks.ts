@@ -53,15 +53,8 @@ export const mockFetchIndexPatterns = jest
   .fn()
   .mockReturnValue(Promise.resolve([mockIndexPattern]));
 
-jest.mock('ui/chrome', () => mockChromeFactory());
-jest.mock('ui/kfetch', () => ({
-  kfetch: () => {},
-}));
 jest.mock('ui/persisted_log', () => ({
   PersistedLog: mockPersistedLogFactory,
-}));
-jest.mock('ui/autocomplete_providers', () => ({
-  getAutocompleteProvider: mockGetAutocompleteProvider,
 }));
 jest.mock('ui/kfetch', () => ({
   kfetch: mockKfetch,
