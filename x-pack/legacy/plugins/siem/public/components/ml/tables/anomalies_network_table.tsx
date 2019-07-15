@@ -78,6 +78,7 @@ export const AnomaliesNetworkTable = React.memo<AnomaliesNetworkTableProps>(
             <HeaderPanel
               subtitle={`${i18n.SHOWING}: ${networks.length.toLocaleString()} ${i18n.ANOMALIES}`}
               title={i18n.ANOMALIES}
+              tooltip={i18n.TOOLTIP}
             />
             <BasicTable
               items={networks}
