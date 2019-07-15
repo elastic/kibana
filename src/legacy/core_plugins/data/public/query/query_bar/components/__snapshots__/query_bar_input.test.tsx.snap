@@ -250,6 +250,7 @@ exports[`QueryBarInput Should disable autoFocus on EuiFieldText when disableAuto
                 </div>
                 <QueryLanguageSwitcher
                   className="euiFormControlLayout__append"
+                  key="0/.0"
                   language="kuery"
                   onSelectLanguage={[Function]}
                 >
@@ -272,6 +273,7 @@ exports[`QueryBarInput Should disable autoFocus on EuiFieldText when disableAuto
                     }
                     className="eui-displayBlock"
                     closePopover={[Function]}
+                    display="inlineBlock"
                     hasArrow={true}
                     id="popover"
                     isOpen={false}
@@ -597,6 +599,7 @@ exports[`QueryBarInput Should pass the query language to the language switcher 1
                 </div>
                 <QueryLanguageSwitcher
                   className="euiFormControlLayout__append"
+                  key="0/.0"
                   language="lucene"
                   onSelectLanguage={[Function]}
                 >
@@ -619,6 +622,7 @@ exports[`QueryBarInput Should pass the query language to the language switcher 1
                     }
                     className="eui-displayBlock"
                     closePopover={[Function]}
+                    display="inlineBlock"
                     hasArrow={true}
                     id="popover"
                     isOpen={false}
@@ -944,6 +948,7 @@ exports[`QueryBarInput Should render the given query 1`] = `
                 </div>
                 <QueryLanguageSwitcher
                   className="euiFormControlLayout__append"
+                  key="0/.0"
                   language="kuery"
                   onSelectLanguage={[Function]}
                 >
@@ -966,6 +971,7 @@ exports[`QueryBarInput Should render the given query 1`] = `
                     }
                     className="eui-displayBlock"
                     closePopover={[Function]}
+                    display="inlineBlock"
                     hasArrow={true}
                     id="popover"
                     isOpen={false}

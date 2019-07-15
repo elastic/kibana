@@ -61,7 +61,7 @@ const REACT_ANCHOR_DOM_ELEMENT_ID = 'react-maps-root';
 
 const app = uiModules.get(MAP_APP_PATH, []);
 
-app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage, AppState, globalState) => {
+app.controller('GisMapController', ($scope, $route, kbnUrl, localStorage, AppState, globalState) => {
 
   const savedMap = $route.current.locals.map;
   let unsubscribe;
@@ -163,7 +163,7 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage
     delete $state.savedQuery;
     $scope.query = {
       query: '',
-      language: localStorage.get('kibana.userQueryLanguage') || config.get('search:queryLanguage')
+      language: localStorage.get('kibana.userQueryLanguage') || chrome.getUiSettingsClient().get('search:queryLanguage')
     };
     syncAppAndGlobalState();
     store.dispatch(setQuery({ query: $scope.query, timeFilters: $scope.time }));
@@ -270,8 +270,7 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage
       store.dispatch(setOpenTOCDetails(_.get(uiState, 'openTOCDetails', [])));
     }
 
-    const isDarkMode = config.get('theme:darkMode', false);
-    const layerList = getInitialLayers(savedMap.layerListJSON, isDarkMode);
+    const layerList = getInitialLayers(savedMap.layerListJSON);
     initialLayerListConfig = copyPersistentState(layerList);
     store.dispatch(replaceLayerList(layerList));
     store.dispatch(setRefreshConfig($scope.refreshConfig));
