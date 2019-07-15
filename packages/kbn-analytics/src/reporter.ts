@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { wrapArray, createLogger } from './util';
+import { wrapArray } from './util';
 import { Metric, UiStatsMetric, createUiStatsMetric } from './metrics';
 
 import { Storage, ReportStorageManager } from './storage';
@@ -50,7 +50,7 @@ export class Reporter {
     this.storageManager = new ReportStorageManager(storageKey, storage);
     const storedReport = this.storageManager.get();
     this.reportManager = new ReportManager(storedReport);
-    this.debug = debug;
+    this.debug = !!debug;
   }
 
   private saveToReport(newMetrics: Metric[]) {
