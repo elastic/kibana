@@ -47,16 +47,22 @@ function RowsOrColumnsControl({ aggParams, setValue }: AggControlProps<boolean>)
 
   return (
     <EuiFormRow compressed fullWidth={true} className="visEditorSidebar__aggParamFormRow">
-      <EuiButtonGroup
-        data-test-subj="visEditorSplitBy"
-        legend={i18n.translate('common.ui.vis.defaultEditor.controls.splitByLegend', {
-          defaultMessage: 'Split chart by rows or columns.',
-        })}
-        options={options}
-        isFullWidth={true}
-        idSelected={idSelected}
-        onChange={optionId => setValue(aggParams, PARAMS.NAME, optionId === PARAMS.ROWS)}
-      />
+      <>
+        {/*
+          We have to put it into React.Fragment to avoid errors:
+          EuiFormRow will try to put "compressed" as attribute into a EuiButtonGroup div
+        */}
+        <EuiButtonGroup
+          data-test-subj="visEditorSplitBy"
+          legend={i18n.translate('common.ui.vis.defaultEditor.controls.splitByLegend', {
+            defaultMessage: 'Split chart by rows or columns.',
+          })}
+          options={options}
+          isFullWidth={true}
+          idSelected={idSelected}
+          onChange={optionId => setValue(aggParams, PARAMS.NAME, optionId === PARAMS.ROWS)}
+        />
+      </>
     </EuiFormRow>
   );
 }
