@@ -20,7 +20,8 @@ import {
   EuiIcon,
 } from '@elastic/eui';
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
-import React from 'react';
+import React, { useCallback } from 'react';
+import { DragHandleProps, DropResult } from '../../../../../common/eui_draggable';
 
 import { AddLogColumnButtonAndPopover } from './add_log_column_popover';
 import {
@@ -39,63 +40,67 @@ interface LogColumnsConfigurationPanelProps {
 
 export const LogColumnsConfigurationPanel: React.FunctionComponent<
   LogColumnsConfigurationPanelProps
-> = ({ addLogColumn, reorderLogColumns, availableFields, isLoading, logColumnConfiguration }) => (
-  <EuiForm>
-    <EuiFlexGroup>
-      <EuiFlexItem>
-        <EuiTitle size="s" data-test-subj="sourceConfigurationLogColumnsSectionTitle">
-          <h3>
-            <FormattedMessage
-              id="xpack.infra.sourceConfiguration.logColumnsSectionTitle"
-              defaultMessage="Columns"
-            />
-          </h3>
-        </EuiTitle>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <AddLogColumnButtonAndPopover
-          addLogColumn={addLogColumn}
-          availableFields={availableFields}
-          isDisabled={isLoading}
-        />
-      </EuiFlexItem>
-    </EuiFlexGroup>
-    {logColumnConfiguration.length > 0 ? (
-      <EuiDragDropContext
-        onDragEnd={({ source, destination }) =>
-          destination && reorderLogColumns(source.index, destination.index)
-        }
-      >
-        <EuiDroppable droppableId="COLUMN_CONFIG_DROPPABLE_AREA">
-          <>
-            {/* Fragment here necessary for typechecking */}
-            {logColumnConfiguration.map((column, index) => (
-              <EuiDraggable
-                key={`logColumnConfigurationPanel-${column.logColumnConfiguration.id}`}
-                index={index}
-                draggableId={column.logColumnConfiguration.id}
-                customDragHandle
-              >
-                {provided => (
-                  <LogColumnConfigurationPanel
-                    dragHandleProps={provided.dragHandleProps}
-                    logColumnConfigurationProps={column}
-                  />
-                )}
-              </EuiDraggable>
-            ))}
-          </>
-        </EuiDroppable>
-      </EuiDragDropContext>
-    ) : (
-      <LogColumnConfigurationEmptyPrompt />
-    )}
-  </EuiForm>
-);
+> = ({ addLogColumn, reorderLogColumns, availableFields, isLoading, logColumnConfiguration }) => {
+  const onDragEnd = useCallback(
+    ({ source, destination }: DropResult) =>
+      destination && reorderLogColumns(source.index, destination.index),
+    []
+  );
+
+  return (
+    <EuiForm>
+      <EuiFlexGroup>
+        <EuiFlexItem>
+          <EuiTitle size="s" data-test-subj="sourceConfigurationLogColumnsSectionTitle">
+            <h3>
+              <FormattedMessage
+                id="xpack.infra.sourceConfiguration.logColumnsSectionTitle"
+                defaultMessage="Columns"
+              />
+            </h3>
+          </EuiTitle>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <AddLogColumnButtonAndPopover
+            addLogColumn={addLogColumn}
+            availableFields={availableFields}
+            isDisabled={isLoading}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      {logColumnConfiguration.length > 0 ? (
+        <EuiDragDropContext onDragEnd={onDragEnd}>
+          <EuiDroppable droppableId="COLUMN_CONFIG_DROPPABLE_AREA">
+            <>
+              {/* Fragment here necessary for typechecking */}
+              {logColumnConfiguration.map((column, index) => (
+                <EuiDraggable
+                  key={`logColumnConfigurationPanel-${column.logColumnConfiguration.id}`}
+                  index={index}
+                  draggableId={column.logColumnConfiguration.id}
+                  customDragHandle
+                >
+                  {provided => (
+                    <LogColumnConfigurationPanel
+                      dragHandleProps={provided.dragHandleProps}
+                      logColumnConfigurationProps={column}
+                    />
+                  )}
+                </EuiDraggable>
+              ))}
+            </>
+          </EuiDroppable>
+        </EuiDragDropContext>
+      ) : (
+        <LogColumnConfigurationEmptyPrompt />
+      )}
+    </EuiForm>
+  );
+};
 
 interface LogColumnConfigurationPanelProps {
   logColumnConfigurationProps: LogColumnConfigurationProps;
-  dragHandleProps: any;
+  dragHandleProps: DragHandleProps;
 }
 
 const LogColumnConfigurationPanel: React.FunctionComponent<
@@ -155,7 +160,7 @@ const MessageLogColumnConfigurationPanel: React.FunctionComponent<
 
 const FieldLogColumnConfigurationPanel: React.FunctionComponent<{
   logColumnConfigurationProps: FieldLogColumnConfigurationProps;
-  dragHandleProps: any;
+  dragHandleProps: DragHandleProps;
 }> = ({
   logColumnConfigurationProps: {
     logColumnConfiguration: { field },
@@ -190,7 +195,7 @@ const ExplainedLogColumnConfigurationPanel: React.FunctionComponent<{
   fieldName: React.ReactNode;
   helpText: React.ReactNode;
   removeColumn: () => void;
-  dragHandleProps: any;
+  dragHandleProps: DragHandleProps;
 }> = ({ fieldName, helpText, removeColumn, dragHandleProps }) => (
   <EuiPanel
     data-test-subj={`logColumnPanel systemLogColumnPanel systemLogColumnPanel:${fieldName}`}
