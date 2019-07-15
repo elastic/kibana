@@ -60,23 +60,28 @@ export const LogHighlightsFilterQueryBridge = withLogFilter(
   }
 );
 
-export const LogHighlightsSummaryBridge = WithSummary(
-  ({ start, end }: { start: number | null; end: number | null }) => {
-    const { setSummaryStart, setSummaryEnd } = useContext(LogHighlightsState.Context);
+export const LogHighlightsSummaryBridge = () => {
+  return (
+    <WithSummary>
+      {({ start, end }) => {
+        const { setSummaryStart, setSummaryEnd } = useContext(LogHighlightsState.Context);
 
-    useEffect(() => {
-      setSummaryStart(start);
-      setSummaryEnd(end);
-    }, [start, end]);
+        useEffect(() => {
+          setSummaryStart(start);
+          setSummaryEnd(end);
+        }, [start, end]);
 
-    return null;
-  }
-);
+        return null;
+      }}
+    </WithSummary>
+  );
+};
 
 export const LogHighlightsBridge = ({ indexPattern }: { indexPattern: any }) => (
   <>
     <LogHighlightsStreamItemsBridge />
     <LogHighlightsPositionBridge />
     <LogHighlightsFilterQueryBridge indexPattern={indexPattern} />
+    <LogHighlightsSummaryBridge />
   </>
 );
