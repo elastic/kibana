@@ -203,7 +203,7 @@ exports[`<PrivilegeSpaceForm> renders without crashing 1`] = `
                   "value": "basePrivilege_custom",
                 },
                 Object {
-                  "disabled": true,
+                  "disabled": false,
                   "dropdownDisplay": <EuiText>
                     <strong>
                       <FormattedMessage
@@ -288,9 +288,27 @@ exports[`<PrivilegeSpaceForm> renders without crashing 1`] = `
             Object {
               "base": Object {
                 "canUnassign": true,
-                "privileges": Array [],
+                "privileges": Array [
+                  "all",
+                  "read",
+                ],
               },
-              "feature": Object {},
+              "feature": Object {
+                "normal": Object {
+                  "canUnassign": true,
+                  "privileges": Array [
+                    "all",
+                    "read",
+                  ],
+                },
+                "reservedAndNormalFeature": Object {
+                  "canUnassign": true,
+                  "privileges": Array [
+                    "all",
+                    "read",
+                  ],
+                },
+              },
             }
           }
           calculatedPrivileges={
@@ -300,7 +318,18 @@ exports[`<PrivilegeSpaceForm> renders without crashing 1`] = `
                 "actualPrivilegeSource": 40,
                 "isDirectlyAssigned": true,
               },
-              "feature": Object {},
+              "feature": Object {
+                "normal": Object {
+                  "actualPrivilege": "none",
+                  "actualPrivilegeSource": 30,
+                  "isDirectlyAssigned": true,
+                },
+                "reservedAndNormalFeature": Object {
+                  "actualPrivilege": "none",
+                  "actualPrivilegeSource": 30,
+                  "isDirectlyAssigned": true,
+                },
+              },
               "reserved": undefined,
             }
           }
@@ -411,16 +440,70 @@ exports[`<PrivilegeSpaceForm> renders without crashing 1`] = `
           kibanaPrivileges={
             KibanaPrivileges {
               "rawKibanaPrivileges": Object {
-                "features": Object {},
-                "global": Object {},
-                "reserved": Object {},
-                "space": Object {},
+                "features": Object {
+                  "normal": Object {
+                    "all": Array [
+                      "normal-feature-all",
+                      "normal-feature-read",
+                    ],
+                    "read": Array [
+                      "normal-feature-read",
+                    ],
+                  },
+                  "reservedAndNormalFeature": Object {
+                    "all": Array [
+                      "reserved-and-normal-all",
+                      "reserved-and-normal-read",
+                    ],
+                    "read": Array [
+                      "reserved-and-normal-read",
+                    ],
+                  },
+                },
+                "global": Object {
+                  "all": Array [
+                    "normal-feature-all",
+                    "normal-feature-read",
+                    "just-global-all",
+                  ],
+                  "read": Array [
+                    "normal-feature-read",
+                  ],
+                },
+                "reserved": Object {
+                  "onlyReservedFeature": Array [
+                    "only-reserved",
+                  ],
+                  "reservedAndNormalFeature": Array [
+                    "reserved-and-normal-reserved",
+                  ],
+                },
+                "space": Object {
+                  "all": Array [
+                    "normal-feature-all",
+                    "normal-feature-read",
+                  ],
+                  "read": Array [
+                    "normal-feature-read",
+                  ],
+                },
               },
             }
           }
           onChange={[Function]}
           onChangeAll={[Function]}
-          rankedFeaturePrivileges={Object {}}
+          rankedFeaturePrivileges={
+            Object {
+              "normal": Array [
+                "all",
+                "read",
+              ],
+              "reservedAndNormalFeature": Array [
+                "all",
+                "read",
+              ],
+            }
+          }
           role={
             Object {
               "elasticsearch": Object {
