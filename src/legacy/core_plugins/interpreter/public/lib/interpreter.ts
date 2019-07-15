@@ -21,9 +21,18 @@ import { interpreterProvider, serializeProvider } from '../../common';
 import { createHandlers } from './create_handlers';
 import { batchedFetch } from './batched_fetch';
 import { FUNCTIONS_URL } from './consts';
+import { CoreStart } from '../../../../../core/public';
 
-export async function initializeInterpreter({ kfetch, ajaxStream, typesRegistry, functionsRegistry }) {
-  const serverFunctionList = await kfetch({ pathname: FUNCTIONS_URL });
+interface Config {
+  http: CoreStart['http'];
+  ajaxStream: any; // TODO: Import this from kibana_utils/ajax_stream
+  typesRegistry: any;
+  functionsRegistry: any;
+}
+
+export async function initializeInterpreter(config: Config) {
+  const { http, ajaxStream, typesRegistry, functionsRegistry } = config;
+  const serverFunctionList = await http.get(FUNCTIONS_URL);
   const types = typesRegistry.toJS();
   const { serialize } = serializeProvider(types);
   const batch = batchedFetch({ ajaxStream, serialize });
@@ -34,11 +43,11 @@ export async function initializeInterpreter({ kfetch, ajaxStream, typesRegistry,
   Object.keys(serverFunctionList).forEach(functionName => {
     functionsRegistry.register(() => ({
       ...serverFunctionList[functionName],
-      fn: (context, args) => batch({ functionName, args, context }),
+      fn: (context: any, args: any) => batch({ functionName, args, context }),
     }));
   });
 
-  const interpretAst = async (ast, context, handlers) => {
+  const interpretAst = async (ast: any, context: any, handlers: any) => {
     const interpretFn = await interpreterProvider({
       types: typesRegistry.toJS(),
       handlers: { ...handlers, ...createHandlers() },
@@ -49,4 +58,3 @@ export async function initializeInterpreter({ kfetch, ajaxStream, typesRegistry,
 
   return { interpretAst };
 }
-

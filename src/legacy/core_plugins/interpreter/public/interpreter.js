@@ -21,11 +21,13 @@ import 'uiExports/interpreter';
 import { register, registryFactory } from '@kbn/interpreter/common';
 import { initializeInterpreter } from './lib/interpreter';
 import { registries } from './registries';
-import { kfetch } from 'ui/kfetch';
+import { npSetup } from '../../../ui/public/new_platform';
 import { ajaxStream } from 'ui/ajax_stream';
 import { functions } from './functions';
 import { visualization } from './renderers/visualization';
 import { typeSpecs } from '../../../../plugins/data/common/expressions/expression_types';
+
+const { http } = npSetup.core;
 
 // Expose kbnInterpreter.register(specs) and kbnInterpreter.registries() globally so that plugins
 // can register without a transpile step.
@@ -42,7 +44,7 @@ let _interpreterPromise;
 
 const initialize = async () => {
   initializeInterpreter({
-    kfetch,
+    http,
     ajaxStream,
     typesRegistry: registries.types,
     functionsRegistry: registries.browserFunctions,
