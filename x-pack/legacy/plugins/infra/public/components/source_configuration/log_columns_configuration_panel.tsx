@@ -35,15 +35,15 @@ interface LogColumnsConfigurationPanelProps {
   isLoading: boolean;
   logColumnConfiguration: LogColumnConfigurationProps[];
   addLogColumn: (logColumn: LogColumnConfiguration) => void;
-  reorderLogColumns: (sourceIndex: number, destinationIndex: number) => void;
+  moveLogColumn: (sourceIndex: number, destinationIndex: number) => void;
 }
 
 export const LogColumnsConfigurationPanel: React.FunctionComponent<
   LogColumnsConfigurationPanelProps
-> = ({ addLogColumn, reorderLogColumns, availableFields, isLoading, logColumnConfiguration }) => {
+> = ({ addLogColumn, moveLogColumn, availableFields, isLoading, logColumnConfiguration }) => {
   const onDragEnd = useCallback(
     ({ source, destination }: DropResult) =>
-      destination && reorderLogColumns(source.index, destination.index),
+      destination && moveLogColumn(source.index, destination.index),
     []
   );
 
