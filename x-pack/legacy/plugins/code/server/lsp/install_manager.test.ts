@@ -8,13 +8,14 @@
 import fs from 'fs';
 import os from 'os';
 import path from 'path';
+import rimraf from 'rimraf';
+
 import { LanguageServers } from './language_servers';
 import { InstallManager } from './install_manager';
 import { ServerOptions } from '../server_options';
-import rimraf from 'rimraf';
 import { LanguageServerStatus } from '../../common/language_server';
-import { Server } from 'hapi';
 import { InstallationType } from '../../common/installation';
+import { ServerFacade } from '../..';
 
 const LANG_SERVER_NAME = 'Java';
 const langSrvDef = LanguageServers.find(l => l.name === LANG_SERVER_NAME)!;
@@ -23,7 +24,7 @@ const fakeTestDir = path.join(os.tmpdir(), 'foo-');
 
 const options: ServerOptions = {} as ServerOptions;
 
-const server = new Server();
+const server = {} as ServerFacade;
 server.config = () => {
   return {
     get(key: string): any {

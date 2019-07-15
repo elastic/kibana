@@ -4,13 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Server, ServerRoute, RouteOptions } from 'hapi';
+import { CoreSetup } from 'src/core/server';
+
+import { ServerFacade, ServerRouteFacade, RouteOptionsFacade } from '..';
 
 export class CodeServerRouter {
-  constructor(readonly server: Server) {}
+  public server: ServerFacade;
+
+  constructor(readonly core: CoreSetup) {
+    const { server } = core.http as any;
+    this.server = server;
+  }
 
   route(route: CodeRoute) {
-    const routeOptions: RouteOptions = (route.options || {}) as RouteOptions;
+    const routeOptions: RouteOptionsFacade = (route.options || {}) as RouteOptionsFacade;
     routeOptions.tags = [
       ...(routeOptions.tags || []),
       `access:code_${route.requireAdmin ? 'admin' : 'user'}`,
@@ -25,6 +32,6 @@ export class CodeServerRouter {
   }
 }
 
-export interface CodeRoute extends ServerRoute {
+export interface CodeRoute extends ServerRouteFacade {
   requireAdmin?: boolean;
 }

@@ -5,12 +5,12 @@
  */
 
 import fs from 'fs';
-import { Server } from 'hapi';
 import * as os from 'os';
 import path from 'path';
 
 import { AnyObject } from './lib/esqueue';
 import { ServerOptions } from './server_options';
+import { ServerFacade } from '..';
 
 // TODO migrate other duplicate classes, functions
 
@@ -55,7 +55,7 @@ export function createTestServerOption() {
 }
 
 export function createTestHapiServer() {
-  const server = new Server();
+  const server = {} as ServerFacade;
   // @ts-ignore
   server.config = () => {
     return {

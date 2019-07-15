@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { RequestQuery, Server } from 'hapi';
+import { RequestQuery, ResponseToolkit, RouteOptions, ServerRoute } from 'hapi';
 import JoiNamespace from 'joi';
 import { Legacy } from 'kibana';
 import moment from 'moment';
@@ -16,6 +16,10 @@ import { LanguageServers, LanguageServersDeveloping } from './server/lsp/languag
 
 export type RequestFacade = Legacy.Request;
 export type RequestQueryFacade = RequestQuery;
+export type ResponseToolkitFacade = ResponseToolkit;
+export type RouteOptionsFacade = RouteOptions;
+export type ServerFacade = Legacy.Server;
+export type ServerRoute = ServerRoute;
 
 export const code = (kibana: any) =>
   new kibana.Plugin({
@@ -31,7 +35,7 @@ export const code = (kibana: any) =>
         euiIconType: 'codeApp',
       },
       styleSheetPaths: resolve(__dirname, 'public/index.scss'),
-      injectDefaultVars(server: Server) {
+      injectDefaultVars(server: ServerFacade) {
         const config = server.config();
         return {
           codeUiEnabled: config.get('xpack.code.ui.enabled'),

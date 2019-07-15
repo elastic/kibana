@@ -5,7 +5,6 @@
  */
 
 import Boom from 'boom';
-import hapi from 'hapi';
 
 import { RequestFacade, RequestQueryFacade } from '../../';
 import { DocumentSearchRequest, RepositorySearchRequest, SymbolSearchRequest } from '../../model';

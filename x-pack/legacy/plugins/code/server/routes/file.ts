@@ -7,9 +7,8 @@
 import { Commit, Oid, Revwalk } from '@elastic/nodegit';
 import Boom from 'boom';
 import fileType from 'file-type';
-import hapi from 'hapi';
 
-import { RequestFacade, RequestQueryFacade } from '../../';
+import { RequestFacade, RequestQueryFacade, ResponseToolkitFacade } from '../../';
 import { commitInfo, DEFAULT_TREE_CHILDREN_LIMIT, GitOperations } from '../git_operations';
 import { extractLines } from '../utils/buffer';
 import { detectLanguage } from '../utils/detect_language';
@@ -67,7 +66,7 @@ export function fileRoute(server: CodeServerRouter, gitOps: GitOperations) {
   server.route({
     path: '/api/code/repo/{uri*3}/blob/{ref}/{path*}',
     method: 'GET',
-    async handler(req: RequestFacade, h: hapi.ResponseToolkit) {
+    async handler(req: RequestFacade, h: ResponseToolkitFacade) {
       const { uri, path, ref } = req.params;
       const revision = decodeRevisionString(ref);
       const repoUri = await getRepoUriFromMeta(req, uri);
@@ -127,7 +126,7 @@ export function fileRoute(server: CodeServerRouter, gitOps: GitOperations) {
   server.route({
     path: '/app/code/repo/{uri*3}/raw/{ref}/{path*}',
     method: 'GET',
-    async handler(req, h: hapi.ResponseToolkit) {
+    async handler(req, h: ResponseToolkitFacade) {
       const { uri, path, ref } = req.params;
       const revision = decodeRevisionString(ref);
       const repoUri = await getRepoUriFromMeta(req, uri);

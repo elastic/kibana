@@ -4,11 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import crypto from 'crypto';
-import { Server } from 'hapi';
 import * as _ from 'lodash';
 import { i18n } from '@kbn/i18n';
 
+import { CoreSetup, PluginInitializerContext } from 'src/core/server';
 import { XPackMainPlugin } from '../../xpack_main/xpack_main';
+import { codePlugin } from '.';
 import { GitOperations } from './git_operations';
 import { LspIndexerFactory, RepositoryIndexInitializerFactory, tryMigrateIndices } from './indexer';
 import { EsClient, Esqueue } from './lib/esqueue';
@@ -34,6 +35,7 @@ import { ServerLoggerFactory } from './utils/server_logger_factory';
 import { EsClientWithInternalRequest } from './utils/esclient_with_internal_request';
 import { checkCodeNode, checkRoute } from './routes/check';
 import { statusRoute } from './routes/status';
+import { ServerFacade } from '..';
 
 async function retryUntilAvailable<T>(
   func: () => Promise<T>,
@@ -65,10 +67,18 @@ async function retryUntilAvailable<T>(
   }
 }
 
-export function init(server: Server, options: any) {
+// TODO: migrate the options
+export function init(server: ServerFacade, options: any) {
   if (!options.ui.enabled) {
     return;
   }
+
+  const initializerContext = {} as PluginInitializerContext;
+  const coreSetup = ({
+    http: { server },
+  } as any) as CoreSetup;
+
+  codePlugin(initializerContext).setup(coreSetup);
 
   const log = new Logger(server);
   const serverOptions = new ServerOptions(options, server.config());
@@ -114,23 +124,26 @@ export function init(server: Server, options: any) {
         5000
       );
       if (checkResult.me) {
-        await initCodeNode(server, serverOptions, log);
+        await initCodeNode(coreSetup, serverOptions, log);
       } else {
-        await initNonCodeNode(codeNodeUrl, server, log);
+        await initNonCodeNode(codeNodeUrl, coreSetup, log);
       }
     } else {
       // codeNodeUrl not set, single node mode
-      await initCodeNode(server, serverOptions, log);
+      await initCodeNode(coreSetup, serverOptions, log);
     }
   });
 }
 
-async function initNonCodeNode(url: string, server: Server, log: Logger) {
+async function initNonCodeNode(url: string, core: CoreSetup, log: Logger) {
+  const { server } = core.http as any;
   log.info(`Initializing Code plugin as non-code node, redirecting all code requests to ${url}`);
   redirectRoute(server, url, log);
 }
 
-async function initCodeNode(server: Server, serverOptions: ServerOptions, log: Logger) {
+async function initCodeNode(core: CoreSetup, serverOptions: ServerOptions, log: Logger) {
+  const { server } = core.http as any;
+
   // wait until elasticsearch is ready
   // @ts-ignore
   await server.plugins.elasticsearch.waitUntilReady();
@@ -257,6 +270,7 @@ async function initCodeNode(server: Server, serverOptions: ServerOptions, log: L
   setupRoute(codeServerRouter);
   statusRoute(codeServerRouter, gitOps, lspService);
 
+  // Move this to new platform
   server.events.on('stop', () => {
     gitOps.cleanAllRepo();
     indexScheduler.stop();
