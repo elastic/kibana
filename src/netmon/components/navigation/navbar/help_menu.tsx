@@ -32,7 +32,8 @@ const HelpMenu = (props: InjectedProps) => {
     <div className={classes.helpMenuWrapper}>
       <li className="dropdown nav-item">
         <a
-          id="user-dropdown"
+          id="help-dropdown"
+          data-testid="help-dropdown"
           className="nav-link pointer"
           data-toggle="dropdown"
           role="button"
@@ -46,27 +47,39 @@ const HelpMenu = (props: InjectedProps) => {
           </div>
         </a>
         <ul className="dropdown-menu dropdown-menu-right" aria-labelledby="user-dropdown">
-          <a className="dropdown-item" href="/about">
+          <a data-testid="help-dropdown-about" className="dropdown-item" href="/about">
             About NetMon
           </a>
-          <a className="dropdown-item" target="_blank" href="/userDocs/NetworkMonitorHelp.htm">
+          <a
+            data-testid="help-dropdown-help"
+            className="dropdown-item"
+            target="_blank"
+            href="/userDocs/NetworkMonitorHelp.htm"
+          >
             NetMon Help
           </a>
           <a
+            data-testid="help-dropdown-forum"
             className="dropdown-item"
             target="_blank"
             href="https://community.logrhythm.com/t5/Network-monitor/ct-p/Netmon"
           >
             NetMon Forum
           </a>
-          <a className="dropdown-item" href="#" onClick={triggerModalOpen}>
+          <a
+            data-testid="help-dropdown-diagnostics"
+            className="dropdown-item"
+            href="#"
+            onClick={triggerModalOpen}
+          >
             Download Diagnostics
           </a>
         </ul>
       </li>
       <Modal
+        testid="diagnostics-modal"
         isOpen={downloadModalOpen}
-        dialogClass={classnames(classes.modalClass, 'Day')}
+        dialogClass={classnames(classes.modalClass, 'Day', 'nm-section')}
         title={<h4>Download Diagnostics</h4>}
         body={
           <div>
@@ -83,10 +96,10 @@ const HelpMenu = (props: InjectedProps) => {
         }
         footer={
           <>
-            <Button type="primary" onClick={handleModalConfirm}>
+            <Button testid="diagnostics-modal-download" type="primary" onClick={handleModalConfirm}>
               Download Diagnostics Package
             </Button>
-            <Button type="secondary" onClick={triggerModalClose}>
+            <Button testid="diagnostics-modal-cancel" type="secondary" onClick={triggerModalClose}>
               Cancel
             </Button>
           </>

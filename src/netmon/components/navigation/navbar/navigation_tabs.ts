@@ -15,27 +15,27 @@ export const alarmsTab: Tab = {
 
 export const basicTabs: Tab[] = [
   {
-    id: 'rules.queryRules',
+    id: 'rules',
     display: 'Rules',
     path: '/rules/queryRules',
   },
   {
-    id: 'tools.replay',
+    id: 'tools',
     display: 'Replay',
     path: '/tools/replay',
   },
   {
-    id: 'configuration.syslog',
+    id: 'configuration',
     display: 'Configuration',
     path: '/configuration/syslog',
   },
   {
-    id: 'diagnostics.interface',
+    id: 'diagnostics',
     display: 'Diagnostics',
     path: '/diagnostics/interface',
   },
   {
-    id: 'logs.engine',
+    id: 'logs',
     display: 'Logs',
     path: '/logs/engine',
   },

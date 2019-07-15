@@ -1,5 +1,17 @@
 @import '~@logrhythm/icons/icons.css';
 
-.nm-section {
-  @import '~lr-style/dist/lr-style.min.css';
+html {
+  font-size: 14px;
+}
+
+.nm-section,
+.ui-mask-wrapper {
+  font-family: Ubuntu, Tahoma, sans-serif;
+  line-height: 1.4;
+
+  .modal-footer .btn {
+    margin-left: 3px;
+  }
+
+  @import (less) '~lr-style/dist/lr-style.min.css';
 }

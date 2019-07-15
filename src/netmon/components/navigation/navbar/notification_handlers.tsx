@@ -1,30 +1,28 @@
-import * as moment from "moment";
-import HTTP from "../../../common/HTTP";
-import LicenseExpiration from "../../../services/LicenseExpiration/LicenseExpiration";
-import Notification from "../../../services/Notification/Notification";
-import PasswordExpiration from "../../../services/PasswordExpiration/PasswordExpiration";
-import ServerTime from "../../../services/ServerTime";
+import moment from 'moment';
+import HTTP from '../../../common/http';
+import LicenseExpiration from '../../../services/LicenseExpiration/LicenseExpiration';
+import Notification from '../../../services/Notification/Notification';
+import PasswordExpiration from '../../../services/PasswordExpiration/PasswordExpiration';
+import ServerTime from '../../../services/ServerTime';
 
 let HttpSingleton: HTTP | undefined = undefined;
 const HttpService = HttpSingleton || (HttpSingleton = new HTTP());
 
 let passwordExpirationSingleton: PasswordExpiration | undefined = undefined;
 const passwordExpiration =
-  passwordExpirationSingleton ||
-  (passwordExpirationSingleton = new PasswordExpiration());
+  passwordExpirationSingleton || (passwordExpirationSingleton = new PasswordExpiration());
 
 let serverTimeSingleton: ServerTime | undefined = undefined;
-const serverTimeService =
-  serverTimeSingleton || (serverTimeSingleton = new ServerTime());
+const serverTimeService = serverTimeSingleton || (serverTimeSingleton = new ServerTime());
 
 const LICENSE_NOTIFICATION = {
   POLL_TIME_MS: 28800000, // 8 hours
-  LOCAL_STORAGE_KEY: "license_notification_last_dismissed"
+  LOCAL_STORAGE_KEY: 'license_notification_last_dismissed',
 };
 
 const PASSWORD_NOTIFICATION = {
   POLL_TIME_MS: 28800000, // 8 hours
-  LOCAL_STORAGE_KEY: "password_notification_last_dismissed"
+  LOCAL_STORAGE_KEY: 'password_notification_last_dismissed',
 };
 
 let licenseTimeout: number | undefined = undefined;
@@ -39,7 +37,7 @@ export const checkLicenseStatus = () => {
   if (licenseTimeout) {
     clearTimeout(licenseTimeout);
   }
-  HttpService.fetch("/api/licenses")
+  HttpService.fetch('/api/licenses')
     .then(response => {
       response
         .json()
@@ -48,7 +46,7 @@ export const checkLicenseStatus = () => {
             const bannerContent = LicenseExpiration.bannerContent(json);
 
             Notification.notify(
-              "licenseExpiration",
+              'licenseExpiration',
               bannerContent.title,
               bannerContent.content,
               bannerContent.severity,
@@ -57,11 +55,11 @@ export const checkLicenseStatus = () => {
           }
         })
         .catch(reject => {
-          console.error("Unable to fetch license expiration status");
+          console.error('Unable to fetch license expiration status');
         });
     })
     .catch(reject => {
-      console.error("Unable to fetch license status");
+      console.error('Unable to fetch license status');
     });
 };
 
@@ -77,7 +75,7 @@ export const checkPasswordStatus = () => {
   if (passwordTimeout) {
     clearTimeout(passwordTimeout);
   }
-  HttpService.fetch("/api/me")
+  HttpService.fetch('/api/me')
     .then(response => {
       response
         .json()
@@ -89,12 +87,9 @@ export const checkPasswordStatus = () => {
                 body.timeMs
               );
               if (passwordExpiration.shouldShowBanner(timeUntilExpiredMs)) {
-                const bannerContent = passwordExpiration.bannerContent(
-                  json,
-                  timeUntilExpiredMs
-                );
+                const bannerContent = passwordExpiration.bannerContent(json, timeUntilExpiredMs);
                 Notification.notify(
-                  "passwordExpiration",
+                  'passwordExpiration',
                   bannerContent.title,
                   bannerContent.content,
                   bannerContent.severity,
@@ -105,11 +100,11 @@ export const checkPasswordStatus = () => {
           }
         })
         .catch(reject => {
-          console.error("Unable to fetch password status", reject);
+          console.error('Unable to fetch password status', reject);
         });
     })
     .catch(reject => {
-      console.error("Unable to fetch password status", reject);
+      console.error('Unable to fetch password status', reject);
     });
 };
 
@@ -135,10 +130,10 @@ export const checkTimeInSync = (isLicensed: boolean) => () => {
 
         if (!timeNSync && isLicensed) {
           Notification.notify(
-            "timeOutOfSync",
-            "Time Out of Sync",
+            'timeOutOfSync',
+            'Time Out of Sync',
             timeMessage,
-            "alert-danger",
+            'alert-danger',
             () => {}
           );
         }

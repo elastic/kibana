@@ -119,8 +119,8 @@ block content
       .kibanaLoader
       .kibanaWelcomeLogoCircle
         .kibanaWelcomeLogo
-    .kibanaWelcomeText(data-error-message=i18n('common.ui.welcomeErrorMessage', { defaultMessage: 'Kibana did not load properly. Check the server output for more information.' }))
-      | #{i18n('common.ui.welcomeMessage', { defaultMessage: 'Loading Kibana' })}
+    .kibanaWelcomeText(data-error-message=i18n('common.ui.welcomeErrorMessage', { defaultMessage: 'Netmon did not load properly. Check the server output for more information.' }))
+      | #{i18n('common.ui.welcomeMessage', { defaultMessage: 'Loading Netmon' })}
 
   .kibanaWelcomeView(id="kbn_legacy_browser_error", style="display: none;")
     .kibanaLoaderWrap
@@ -129,7 +129,7 @@ block content
     h2.kibanaWelcomeTitle
       | #{i18n('common.ui.legacyBrowserTitle', { defaultMessage: 'Please upgrade your browser' })}
     .kibanaWelcomeText
-      | #{i18n('common.ui.legacyBrowserMessage', { defaultMessage: 'This Kibana installation has strict security requirements enabled that your current browser does not meet.' })}
+      | #{i18n('common.ui.legacyBrowserMessage', { defaultMessage: 'This Netmon installation has strict security requirements enabled that your current browser does not meet.' })}
 
   script.
     // Since this is an unsafe inline script, this code will not run

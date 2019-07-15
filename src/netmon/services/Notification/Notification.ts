@@ -2,92 +2,99 @@ import { ReactNode } from 'react';
 import * as _ from 'lodash';
 
 export interface INotification {
-   type: string;
-   title: string;
-   text: string | ReactNode;
-   severity: any;
-   onClear: Function;
+  type: string;
+  title: string;
+  text: string | ReactNode;
+  severity: any;
+  onClear: Function;
 }
 
 class Notification {
-   public notifications: INotification[] = [];
+  public notifications: INotification[] = [];
 
-   private subscribers: Set<
-      (notifications: INotification[]) => void
-   > = new Set();
+  private subscribers: Set<(notifications: INotification[]) => void> = new Set();
 
-   constructor() {
-      this.notifications = [];
-   }
+  constructor() {
+    this.notifications = [];
+  }
 
-   public subscribe(
-      subscription: (notifications: INotification[]) => void
-   ): () => void {
-      this.subscribers.add(subscription);
-      subscription(this.notifications);
-      return () => {
-         this.subscribers.delete(subscription);
-      };
-   }
+  public subscribe(subscription: (notifications: INotification[]) => void): () => void {
+    this.subscribers.add(subscription);
+    subscription(this.notifications);
+    return () => {
+      this.subscribers.delete(subscription);
+    };
+  }
 
-   private triggerSubscribers() {
-      this.subscribers.forEach(sub => sub([...this.notifications]));
-   }
+  private triggerSubscribers() {
+    this.subscribers.forEach(sub => sub([...this.notifications]));
+  }
 
-   public notify(
-      type: string,
-      title: string = '',
-      text: string | ReactNode = '',
-      severity = 'alert-warning',
-      onClear = _.noop
-   ): void {
-      this.notifications = [
-         ...this.notifications,
-         {
-            onClear,
-            severity,
-            text,
-            title,
-            type
-         }
-      ];
+  public notify(
+    type: string,
+    title: string = '',
+    text: string | ReactNode = '',
+    severity = 'alert-warning',
+    onClear = _.noop
+  ): void {
+    const newNotification: INotification = {
+      onClear,
+      severity,
+      text,
+      title,
+      type,
+    };
 
-      this.triggerSubscribers();
-   }
+    if (
+      _.find(this.notifications, n => {
+        return _.isEqual(_.omit(n, ['onClear']), _.omit(newNotification, ['onClear']));
+      })
+    ) {
+      // already have this notification, don't add it again
+      return;
+    }
 
-   public clear(): void {
-      this.notifications = [];
+    this.notifications = [...this.notifications, newNotification];
 
-      this.triggerSubscribers();
-   }
+    this.triggerSubscribers();
+  }
 
-   public clearNotification(notification: INotification): void {
-      notification.onClear();
-      this.notifications = _.without(this.notifications, notification);
+  public clear(): void {
+    this.notifications = [];
 
-      this.triggerSubscribers();
-   }
+    this.triggerSubscribers();
+  }
 
-   public clearAllNotificationsOfType(notificationType: string): void {
-      this.notifications = _.without(
-         this.notifications,
-         _.find(this.notifications, (notification: INotification) => {
-            return notification.type === notificationType;
-         })
-      );
+  public clearNotification(notification: INotification): void {
+    notification.onClear();
+    this.notifications = _.without(this.notifications, notification);
 
-      this.triggerSubscribers();
-   }
+    this.triggerSubscribers();
+  }
 
-   public clearAllNotifications(): void {
-      this.notifications = [];
+  public clearAllNotificationsOfType(notificationType: string): void {
+    const notificationsWithType = _.find(this.notifications, (notification: INotification) => {
+      return notification.type === notificationType;
+    });
 
-      this.triggerSubscribers();
-   }
+    if (!notificationsWithType) {
+      return;
+    }
 
-   public hasNotificationOfType(type: string): boolean {
-      return _.some(this.notifications, { type: type });
-   }
+    this.notifications = _.without(this.notifications, notificationsWithType);
+
+    this.triggerSubscribers();
+  }
+
+  public clearAllNotifications(): void {
+    this.notifications = [];
+
+    this.triggerSubscribers();
+  }
+
+  public hasNotificationOfType(type: string): boolean {
+    return _.some(this.notifications, { type: type });
+  }
 }
 
 export default new Notification();

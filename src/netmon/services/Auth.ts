@@ -1,4 +1,5 @@
-import HTTP from '../common/HTTP';
+import * as _ from 'lodash';
+import HTTP from '../common/http';
 import Notification from './Notification/Notification';
 
 export interface IUser {
@@ -10,6 +11,7 @@ export interface IUser {
 
 class Auth {
   private HTTP: HTTP;
+  private subscribers: Set<(user: IUser | undefined) => void> = new Set();
   public currentUser: IUser | undefined = undefined;
 
   constructor() {
@@ -17,6 +19,26 @@ class Auth {
     if (localStorage.getItem('token')) {
       this.getCurrentUser();
     }
+  }
+
+  public subscribe(subscription: (user: IUser | undefined) => void) {
+    try {
+      subscription(this.currentUser);
+    } catch (err) {
+      console.error('The subscription to add threw an exception, not subscribing.');
+      return;
+    }
+    this.subscribers.add(subscription);
+
+    return () => {
+      this.subscribers.delete(subscription);
+    };
+  }
+
+  private notifySubscribers() {
+    this.subscribers.forEach(subscription => {
+      subscription(this.currentUser);
+    });
   }
 
   public isAdmin(): Promise<boolean> {
@@ -80,6 +102,7 @@ class Auth {
 
   public clearCurrentUser(): void {
     this.currentUser = undefined;
+    this.notifySubscribers();
   }
 
   public logout() {
@@ -87,24 +110,34 @@ class Auth {
     this.clearClientData();
   }
 
-  public getCurrentUser(): Promise<any> {
-    return this.HTTP.fetch('/data/api/auth/').then(response => {
-      return response
-        .json()
-        .then(json => {
-          return new Promise((resolve, reject) => {
-            if (json.data) {
-              this.currentUser = json.data;
-              if (json.data.hasOwnProperty('role')) {
-                resolve(this.currentUser);
-              }
-            } else {
-              reject(new Error('Unauthorized'));
-            }
-          });
-        })
-        .catch(err => false);
-    });
+  public async getCurrentUser(): Promise<any> {
+    let shouldNotify: boolean = true;
+    try {
+      const response = await this.HTTP.fetch('/data/api/auth/');
+      const json = await response.json();
+
+      const newUser = json && json.data && json.data.hasOwnProperty('role') ? json.data : undefined;
+
+      shouldNotify = !_.isEqual(newUser, this.currentUser);
+
+      this.currentUser = newUser;
+    } catch (err) {
+      console.error('An error occurred looking up the current user', err);
+      return null;
+    }
+
+    try {
+      if (shouldNotify) {
+        this.notifySubscribers();
+      }
+    } catch (err) {
+      console.error(
+        'An error occurred notifying the authentication subscribers of the new user.',
+        err
+      );
+    }
+
+    return this.currentUser;
   }
 
   private recordLogoutInAuditLog(): Promise<any> {
@@ -113,9 +146,8 @@ class Auth {
     let route: string = '/api/audit/logout';
     let config: any = { method: 'PUT' };
     let ignoreRequestToken: boolean = false;
-    let ignoreResponseToken: boolean = true;
 
-    return this.HTTP.fetch(route, config, ignoreRequestToken, ignoreResponseToken)
+    return this.HTTP.fetch(route, config, ignoreRequestToken)
       .then(response => {
         return response
           .json()

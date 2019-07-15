@@ -1,6 +1,6 @@
 import * as React from 'react';
 import injectSheet, { WithSheet } from 'react-jss';
-import { useUsername } from '../../../hooks/authHooks';
+import { useCurrentUser } from '../../../hooks/auth_hooks';
 import Auth from '../../../services/Auth';
 
 const styles = {
@@ -14,7 +14,7 @@ type InjectedProps = WithSheet<typeof styles, {}>;
 const UserMenu = (props: InjectedProps) => {
   const { classes } = props;
 
-  const username = useUsername();
+  const currentUser = useCurrentUser();
 
   const signOut = () => {
     Auth.logout();
@@ -26,6 +26,7 @@ const UserMenu = (props: InjectedProps) => {
       <li className="dropdown nav-item">
         <a
           id="user-dropdown"
+          data-testid="user-dropdown"
           className="nav-link pointer"
           data-toggle="dropdown"
           role="button"
@@ -37,11 +38,20 @@ const UserMenu = (props: InjectedProps) => {
           </span>
         </a>
         <ul className="dropdown-menu dropdown-menu-right" aria-labelledby="user-dropdown">
-          <a className="dropdown-item username" onClick={e => e.stopPropagation()}>
+          <a
+            data-testid="user-dropdown-username"
+            className="dropdown-item username"
+            onClick={e => e.stopPropagation()}
+          >
             <i className="fa fa-user" aria-hidden="true" />
-            {username}
+            {currentUser && currentUser.username}
           </a>
-          <a className="dropdown-item" href="#" onClick={signOut}>
+          <a
+            data-testid="user-dropdown-sign-out"
+            className="dropdown-item"
+            href="#"
+            onClick={signOut}
+          >
             <i className="fa fa-sign-out" aria-hidden="true" />
             Sign Out
           </a>

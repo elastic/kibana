@@ -1,7 +1,7 @@
 import * as React from 'react';
 import classnames from 'classnames';
-import { useNotifications } from '../../../hooks/notificationHooks';
-import Notification from '../../../services/Notification';
+import { useNotifications } from '../../../hooks/notification_hooks';
+import Notification from '../../../services/Notification/Notification';
 
 const NotificationDisplay = () => {
   const notifications = useNotifications();

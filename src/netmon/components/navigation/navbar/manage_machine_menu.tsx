@@ -1,20 +1,23 @@
 import * as React from 'react';
+import classnames from 'classnames';
 import { useState } from 'react';
 import injectSheet, { WithSheet } from 'react-jss';
 import Button from '@logrhythm/webui/components/Button';
 import Modal from '@logrhythm/webui/components/Modal';
+import System from '../../../services/System';
 
 const modalConfigsForActions = {
   restart: {
     title: 'Restart Network Monitor Services',
     body: 'Are you sure you want to restart Network Monitor services?',
-    close: () => undefined,
+    close: () =>
+      System.sendSystemCommand('restartServices', () => console.log('Unable to restart services.')),
     closeBtnMsg: 'Restart Services',
   },
   reboot: {
     title: 'Reboot Network Monitor',
     body: 'Are you sure you want to reboot the system?',
-    close: () => undefined,
+    close: () => System.sendSystemCommand('reboot', () => console.log('Unable to reboot machine.')),
     closeBtnMsg: 'Reboot Now',
   },
   shutdown: {
@@ -28,7 +31,7 @@ const modalConfigsForActions = {
         Are you <strong>sure</strong> you want to <strong>shutdown the server?</strong>
       </>
     ),
-    close: () => undefined,
+    close: () => System.sendSystemCommand('shutdown', () => console.log('Unable to shutdown.')),
     closeBtnMsg: 'Shutdown Now',
   },
 };
@@ -38,7 +41,7 @@ const styles = {
     display: 'inline-block',
   },
   modalClass: {
-    width: '75vw',
+    width: '75vw !important',
   },
 };
 
@@ -68,7 +71,8 @@ const ManageMachineMenu = (props: InjectedProps) => {
     <div className={classes.manageMachineMenuWrapper}>
       <li className="dropdown nav-item">
         <a
-          id="slider-dropdown"
+          id="manage-machine-dropdown"
+          data-testid="manage-machine-dropdown"
           className="nav-link pointer"
           data-toggle="dropdown"
           role="button"
@@ -84,31 +88,55 @@ const ManageMachineMenu = (props: InjectedProps) => {
           </span>
         </a>
         <ul className="dropdown-menu dropdown-menu-right" aria-labelledby="slider-dropdown">
-          <a className="dropdown-item" href="#" onClick={() => setRequestedActionKey('restart')}>
+          <a
+            data-testid="manage-machine-dropdown-restart"
+            className="dropdown-item"
+            href="#"
+            onClick={() => setRequestedActionKey('restart')}
+          >
             <i className="fa fa-refresh" aria-hidden="true" />
             Restart Netmon&nbsp;
           </a>
-          <a className="dropdown-item" href="#" onClick={() => setRequestedActionKey('reboot')}>
+          <a
+            data-testid="manage-machine-dropdown-reboot"
+            className="dropdown-item"
+            href="#"
+            onClick={() => setRequestedActionKey('reboot')}
+          >
             <i className="fa fa-history" aria-hidden="true" />
             Reboot&nbsp;
           </a>
-          <a className="dropdown-item" href="#" onClick={() => setRequestedActionKey('shutdown')}>
+          <a
+            data-testid="manage-machine-dropdown-shutdown"
+            className="dropdown-item"
+            href="#"
+            onClick={() => setRequestedActionKey('shutdown')}
+          >
             <i className="fa fa-power-off" aria-hidden="true" />
             Shutdown&nbsp;
           </a>
         </ul>
       </li>
       <Modal
+        testid="manage-machine-modal"
         isOpen={!!requestedActionModalConfig}
-        dialogClass={classes.modalClass}
+        dialogClass={classnames(classes.modalClass, 'Day')}
         title={<h4>{title}</h4>}
         body={body}
         footer={
           <>
-            <Button type="primary" onClick={handleModalConfirm}>
+            <Button
+              testid="manage-machine-modal-confirm"
+              type="primary"
+              onClick={handleModalConfirm}
+            >
               {closeBtnMsg}
             </Button>
-            <Button type="secondary" onClick={triggerModalClose}>
+            <Button
+              testid="manage-machine-modal-cancel"
+              type="secondary"
+              onClick={triggerModalClose}
+            >
               Cancel
             </Button>
           </>

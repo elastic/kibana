@@ -1957,10 +1957,10 @@
   resolved "https://logrhythm.jfrog.io/logrhythm/api/npm/npm-virtual/@logrhythm/lucene-parser/-/@logrhythm/lucene-parser-3.4.0.tgz#19274929b73c83713c3597febe71a0c62ff2a5e9"
   integrity sha1-GSdJKbc8g3E8NZf+vnGgxi/ypek=
 
-"@logrhythm/webui@^5.9.12":
-  version "5.9.12"
-  resolved "https://logrhythm.jfrog.io/logrhythm/api/npm/npm-virtual/@logrhythm/webui/-/@logrhythm/webui-5.9.12.tgz#cdeadd547c7f2129ad1a762392e2b6cd7d0e319b"
-  integrity sha1-zerdVHx/ISmtGnYjkuK2zX0OMZs=
+"@logrhythm/webui@^5.9.13":
+  version "5.9.13"
+  resolved "https://logrhythm.jfrog.io/logrhythm/api/npm/npm-virtual/@logrhythm/webui/-/@logrhythm/webui-5.9.13.tgz#c802b01c2efd2cfbe7154ff503c04aa4366bf0ad"
+  integrity sha1-yAKwHC79LPvnFU/1A8BKpDZr8K0=
   dependencies:
     "@logrhythm/icons" "1.18.0"
     "@logrhythm/lodash-fp" "1.10.2"

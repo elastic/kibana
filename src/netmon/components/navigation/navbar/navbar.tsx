@@ -1,13 +1,18 @@
 import * as React from 'react';
+import { useCallback, useEffect } from 'react';
 import classnames from 'classnames';
 import injectSheet, { WithSheet } from 'react-jss';
-import { useLogoUrl } from '../../../hooks/applicationHooks';
-import { useAdminStatus, useLoggedInStatus, useLicensedStatus } from '../../../hooks/authHooks';
+import Events from '../../../services/Events';
+import { useLogoUrl } from '../../../hooks/application_hooks';
+import { useCurrentUser } from '../../../hooks/auth_hooks';
+import { useEvent } from '../../../hooks/event_hooks';
 import { Tab } from '../typings';
 import AnalyzeMenu from './analyze_menu';
 import HelpMenu from './help_menu';
 import ManageMachineMenu from './manage_machine_menu';
 import { alarmsTab, analyzeTab, basicTabs } from './navigation_tabs';
+import NotificationDisplay from './notification_display';
+import { checkLicenseStatus, checkPasswordStatus, checkTimeInSync } from './notification_handlers';
 import UserMenu from './user_menu';
 
 import 'tether';
@@ -90,6 +95,10 @@ const styles = {
       color: '#4c4c4c',
     },
   },
+  notificationWrapper: {
+    paddingTop: '3.571rem',
+    paddingLeft: '48px',
+  },
 };
 
 export type Props = {
@@ -102,51 +111,82 @@ const Navbar = (props: InjectedProps) => {
   const { classes, onTabSelected = () => undefined } = props;
 
   const logoUrl = useLogoUrl();
-  const isLoggedIn = useLoggedInStatus();
-  const isLicensed = useLicensedStatus();
-  const isAdmin = useAdminStatus();
+  const currentUser = useCurrentUser();
+
+  const isLicensed = !!currentUser && currentUser.licensed;
+  const isLoggedIn = !!currentUser;
+  const isAdmin = currentUser && currentUser.role === 'admin';
+
+  const checkTimeInSyncAndLicensed = useCallback(checkTimeInSync(isLicensed), [isLicensed]);
+  useEvent(Events.eventNames.licenseCheck, checkLicenseStatus);
+  useEvent(Events.eventNames.passwordCheck, checkPasswordStatus);
+  useEvent(Events.eventNames.timeSyncCheck, checkTimeInSyncAndLicensed);
+
+  useEffect(
+    () => {
+      Events.licenseCheck();
+      Events.passwordCheck();
+      Events.timeSyncCheck();
+    },
+    [currentUser]
+  );
 
   const isLoggedInAndLicensed = isLoggedIn && isLicensed;
 
   return (
-    <div className={classnames(classes.navbarMain, 'Day', 'nm-section')}>
-      <nav className="navbar navbar-fixed-top">
-        <a className="navbar-brand" href="" onClick={() => onTabSelected(analyzeTab)}>
-          {!!logoUrl && <img alt="Brand" src={logoUrl} />}
-        </a>
+    <div className="nm-section">
+      <div className={classnames(classes.navbarMain, 'Day')}>
+        <nav className="navbar navbar-fixed-top">
+          <a className="navbar-brand" href="" onClick={() => onTabSelected(analyzeTab)}>
+            {!!logoUrl && <img alt="Brand" src={logoUrl} />}
+          </a>
 
-        {isLoggedInAndLicensed && (
-          <>
-            <ul className="nav navbar-nav">
-              <AnalyzeMenu />
+          {isLoggedInAndLicensed && (
+            <>
+              <ul className="nav navbar-nav">
+                <AnalyzeMenu />
 
-              <li id={`tab_${alarmsTab.id}`} className="dropdown nav-item">
-                <a className="nav-link pointer" href={alarmsTab.path}>
-                  {alarmsTab.display}
-                </a>
-              </li>
-
-              {basicTabs.map(tab => (
-                <li key={`tab_${tab.id}`} id={`tab_${tab.id}`} className={'dropdown nav-item'}>
-                  <a className="nav-link" href={tab.path}>
-                    {tab.display}
+                <li id={`tab_${alarmsTab.id}`} className="dropdown nav-item">
+                  <a
+                    id="tab_alarms"
+                    data-testid="tab_alarms"
+                    className="nav-link pointer"
+                    href={alarmsTab.path}
+                  >
+                    {alarmsTab.display}
                   </a>
                 </li>
-              ))}
-            </ul>
 
-            <span className="navbar-gradient" />
-
-            <span className="navbar-right">
-              <ul>
-                {isAdmin && <ManageMachineMenu />}
-                <UserMenu />
-                <HelpMenu />
+                {basicTabs.map(tab => (
+                  <li key={`tab_${tab.id}`} className={'dropdown nav-item'}>
+                    <a
+                      id={`tab_${tab.id}`}
+                      data-testid={`tab_${tab.id}`}
+                      className="nav-link"
+                      href={tab.path}
+                    >
+                      {tab.display}
+                    </a>
+                  </li>
+                ))}
               </ul>
-            </span>
-          </>
-        )}
-      </nav>
+
+              <span className="navbar-gradient" />
+
+              <span className="navbar-right">
+                <ul>
+                  {isAdmin && <ManageMachineMenu />}
+                  <UserMenu />
+                  <HelpMenu />
+                </ul>
+              </span>
+            </>
+          )}
+        </nav>
+        <div className={classnames('alert-bar-margin', classes.notificationWrapper)}>
+          <NotificationDisplay />
+        </div>
+      </div>
     </div>
   );
 };
