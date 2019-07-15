@@ -172,7 +172,7 @@
     "@babel/runtime": "7.4.5",
     "@elastic/ctags-langserver": "^0.0.8",
     "@elastic/datemath": "5.0.2",
-    "@elastic/eui": "12.2.0",
+    "@elastic/eui": "12.3.1",
     "@elastic/javascript-typescript-langserver": "^0.2.1",
     "@elastic/lsp-extension": "^0.1.2",
     "@elastic/node-crypto": "^1.0.0",
