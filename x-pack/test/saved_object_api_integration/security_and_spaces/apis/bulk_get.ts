@@ -14,10 +14,13 @@ export default function({ getService }: TestInvoker) {
   const supertest = getService('supertestWithoutAuth');
   const esArchiver = getService('esArchiver');
 
-  const { bulkGetTest, createExpectResults, expectRbacForbidden } = bulkGetTestSuiteFactory(
-    esArchiver,
-    supertest
-  );
+  const {
+    bulkGetTest,
+    createExpectResults,
+    createExpectRbacForbidden,
+    expectBadRequestForSpace,
+    expectedForbiddenTypesWithSpace,
+  } = bulkGetTestSuiteFactory(esArchiver, supertest);
 
   describe('_bulk_get', () => {
     [
@@ -58,7 +61,11 @@ export default function({ getService }: TestInvoker) {
         tests: {
           default: {
             statusCode: 403,
-            response: expectRbacForbidden,
+            response: createExpectRbacForbidden(),
+          },
+          includingSpace: {
+            statusCode: 403,
+            response: createExpectRbacForbidden(expectedForbiddenTypesWithSpace),
           },
         },
       });
@@ -71,6 +78,10 @@ export default function({ getService }: TestInvoker) {
             statusCode: 200,
             response: createExpectResults(scenario.spaceId),
           },
+          includingSpace: {
+            statusCode: 200,
+            response: expectBadRequestForSpace,
+          },
         },
       });
 
@@ -80,7 +91,11 @@ export default function({ getService }: TestInvoker) {
         tests: {
           default: {
             statusCode: 403,
-            response: expectRbacForbidden,
+            response: createExpectRbacForbidden(),
+          },
+          includingSpace: {
+            statusCode: 403,
+            response: createExpectRbacForbidden(expectedForbiddenTypesWithSpace),
           },
         },
       });
@@ -93,6 +108,10 @@ export default function({ getService }: TestInvoker) {
             statusCode: 200,
             response: createExpectResults(scenario.spaceId),
           },
+          includingSpace: {
+            statusCode: 403,
+            response: createExpectRbacForbidden(['space']),
+          },
         },
       });
 
@@ -103,6 +122,10 @@ export default function({ getService }: TestInvoker) {
           default: {
             statusCode: 200,
             response: createExpectResults(scenario.spaceId),
+          },
+          includingSpace: {
+            statusCode: 403,
+            response: createExpectRbacForbidden(['space']),
           },
         },
       });
@@ -115,6 +138,10 @@ export default function({ getService }: TestInvoker) {
             statusCode: 200,
             response: createExpectResults(scenario.spaceId),
           },
+          includingSpace: {
+            statusCode: 403,
+            response: createExpectRbacForbidden(['space']),
+          },
         },
       });
 
@@ -125,6 +152,10 @@ export default function({ getService }: TestInvoker) {
           default: {
             statusCode: 200,
             response: createExpectResults(scenario.spaceId),
+          },
+          includingSpace: {
+            statusCode: 403,
+            response: createExpectRbacForbidden(['space']),
           },
         },
       });
@@ -137,6 +168,10 @@ export default function({ getService }: TestInvoker) {
             statusCode: 200,
             response: createExpectResults(scenario.spaceId),
           },
+          includingSpace: {
+            statusCode: 403,
+            response: createExpectRbacForbidden(['space']),
+          },
         },
       });
 
@@ -148,6 +183,10 @@ export default function({ getService }: TestInvoker) {
             statusCode: 200,
             response: createExpectResults(scenario.spaceId),
           },
+          includingSpace: {
+            statusCode: 403,
+            response: createExpectRbacForbidden(['space']),
+          },
         },
       });
 
@@ -157,7 +196,11 @@ export default function({ getService }: TestInvoker) {
         tests: {
           default: {
             statusCode: 403,
-            response: expectRbacForbidden,
+            response: createExpectRbacForbidden(),
+          },
+          includingSpace: {
+            statusCode: 403,
+            response: createExpectRbacForbidden(expectedForbiddenTypesWithSpace),
           },
         },
       });

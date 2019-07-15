@@ -17,6 +17,7 @@ interface BulkGetTest {
 
 interface BulkGetTests {
   default: BulkGetTest;
+  includingSpace: BulkGetTest;
 }
 
 interface BulkGetTestDefinition {
@@ -75,11 +76,30 @@ export function bulkGetTestSuiteFactory(esArchiver: any, supertest: SuperTest<an
     });
   };
 
-  const expectRbacForbidden = (resp: { [key: string]: any }) => {
+  const expectBadRequestForSpace = (resp: { [key: string]: any }) => {
+    const spaceEntry = resp.body.saved_objects.find(
+      (entry: any) => entry.id === 'my-space' && entry.type === 'space'
+    );
+    expect(spaceEntry).to.eql({
+      id: 'my-space',
+      type: 'space',
+      error: {
+        message: "Unsupported saved object type: 'space': Bad Request",
+        statusCode: 400,
+        error: 'Bad Request',
+      },
+    });
+  };
+
+  const expectedForbiddenTypes = ['dashboard', 'globaltype', 'visualization'];
+  const expectedForbiddenTypesWithSpace = ['dashboard', 'globaltype', 'space', 'visualization'];
+  const createExpectRbacForbidden = (types: string[] = expectedForbiddenTypes) => (resp: {
+    [key: string]: any;
+  }) => {
     expect(resp.body).to.eql({
       statusCode: 403,
       error: 'Forbidden',
-      message: `Unable to bulk_get dashboard,globaltype,visualization`,
+      message: `Unable to bulk_get ${types.join(',')}`,
     });
   };
 
@@ -149,6 +169,22 @@ export function bulkGetTestSuiteFactory(esArchiver: any, supertest: SuperTest<an
           .expect(tests.default.statusCode)
           .then(tests.default.response);
       });
+
+      it(`with a space saved object included should return ${tests.includingSpace.statusCode}`, async () => {
+        await supertest
+          .post(`${getUrlPrefix(spaceId)}/api/saved_objects/_bulk_get`)
+          .auth(user.username, user.password)
+          .send(
+            createBulkRequests(otherSpaceId || spaceId).concat([
+              {
+                type: 'space',
+                id: `my-space`,
+              },
+            ])
+          )
+          .expect(tests.includingSpace.statusCode)
+          .then(tests.includingSpace.response);
+      });
     });
   };
 
@@ -160,6 +196,8 @@ export function bulkGetTestSuiteFactory(esArchiver: any, supertest: SuperTest<an
     bulkGetTest,
     createExpectNotFoundResults,
     createExpectResults,
-    expectRbacForbidden,
+    createExpectRbacForbidden,
+    expectBadRequestForSpace,
+    expectedForbiddenTypesWithSpace,
   };
 }

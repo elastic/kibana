@@ -179,7 +179,7 @@ export function bulkCreateTestSuiteFactory(es: any, esArchiver: any, supertest: 
           .then(tests.default.response);
       });
 
-      it(`should return ${tests.includingSpace.statusCode}`, async () => {
+      it(`including a space saved object should return ${tests.includingSpace.statusCode}`, async () => {
         await supertest
           .post(`${getUrlPrefix(spaceId)}/api/saved_objects/_bulk_create`)
           .auth(user.username, user.password)

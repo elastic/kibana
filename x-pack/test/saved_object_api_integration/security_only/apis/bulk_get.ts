@@ -13,10 +13,13 @@ export default function({ getService }: TestInvoker) {
   const supertest = getService('supertestWithoutAuth');
   const esArchiver = getService('esArchiver');
 
-  const { bulkGetTest, createExpectResults, expectRbacForbidden } = bulkGetTestSuiteFactory(
-    esArchiver,
-    supertest
-  );
+  const {
+    bulkGetTest,
+    createExpectResults,
+    createExpectRbacForbidden,
+    expectedForbiddenTypesWithSpace,
+    expectBadRequestForSpace,
+  } = bulkGetTestSuiteFactory(esArchiver, supertest);
 
   describe('_bulk_get', () => {
     bulkGetTest(`user with no access`, {
@@ -24,7 +27,11 @@ export default function({ getService }: TestInvoker) {
       tests: {
         default: {
           statusCode: 403,
-          response: expectRbacForbidden,
+          response: createExpectRbacForbidden(),
+        },
+        includingSpace: {
+          statusCode: 403,
+          response: createExpectRbacForbidden(expectedForbiddenTypesWithSpace),
         },
       },
     });
@@ -36,6 +43,10 @@ export default function({ getService }: TestInvoker) {
           statusCode: 200,
           response: createExpectResults(),
         },
+        includingSpace: {
+          statusCode: 200,
+          response: expectBadRequestForSpace,
+        },
       },
     });
 
@@ -44,7 +55,11 @@ export default function({ getService }: TestInvoker) {
       tests: {
         default: {
           statusCode: 403,
-          response: expectRbacForbidden,
+          response: createExpectRbacForbidden(),
+        },
+        includingSpace: {
+          statusCode: 403,
+          response: createExpectRbacForbidden(expectedForbiddenTypesWithSpace),
         },
       },
     });
@@ -56,6 +71,10 @@ export default function({ getService }: TestInvoker) {
           statusCode: 200,
           response: createExpectResults(),
         },
+        includingSpace: {
+          statusCode: 403,
+          response: createExpectRbacForbidden(['space']),
+        },
       },
     });
 
@@ -65,6 +84,10 @@ export default function({ getService }: TestInvoker) {
         default: {
           statusCode: 200,
           response: createExpectResults(),
+        },
+        includingSpace: {
+          statusCode: 403,
+          response: createExpectRbacForbidden(['space']),
         },
       },
     });
@@ -76,6 +99,10 @@ export default function({ getService }: TestInvoker) {
           statusCode: 200,
           response: createExpectResults(),
         },
+        includingSpace: {
+          statusCode: 403,
+          response: createExpectRbacForbidden(['space']),
+        },
       },
     });
 
@@ -86,6 +113,10 @@ export default function({ getService }: TestInvoker) {
           statusCode: 200,
           response: createExpectResults(),
         },
+        includingSpace: {
+          statusCode: 403,
+          response: createExpectRbacForbidden(['space']),
+        },
       },
     });
 
@@ -94,7 +125,11 @@ export default function({ getService }: TestInvoker) {
       tests: {
         default: {
           statusCode: 403,
-          response: expectRbacForbidden,
+          response: createExpectRbacForbidden(),
+        },
+        includingSpace: {
+          statusCode: 403,
+          response: createExpectRbacForbidden(expectedForbiddenTypesWithSpace),
         },
       },
     });
@@ -104,7 +139,11 @@ export default function({ getService }: TestInvoker) {
       tests: {
         default: {
           statusCode: 403,
-          response: expectRbacForbidden,
+          response: createExpectRbacForbidden(),
+        },
+        includingSpace: {
+          statusCode: 403,
+          response: createExpectRbacForbidden(expectedForbiddenTypesWithSpace),
         },
       },
     });
@@ -114,7 +153,11 @@ export default function({ getService }: TestInvoker) {
       tests: {
         default: {
           statusCode: 403,
-          response: expectRbacForbidden,
+          response: createExpectRbacForbidden(),
+        },
+        includingSpace: {
+          statusCode: 403,
+          response: createExpectRbacForbidden(expectedForbiddenTypesWithSpace),
         },
       },
     });
@@ -124,7 +167,11 @@ export default function({ getService }: TestInvoker) {
       tests: {
         default: {
           statusCode: 403,
-          response: expectRbacForbidden,
+          response: createExpectRbacForbidden(),
+        },
+        includingSpace: {
+          statusCode: 403,
+          response: createExpectRbacForbidden(expectedForbiddenTypesWithSpace),
         },
       },
     });

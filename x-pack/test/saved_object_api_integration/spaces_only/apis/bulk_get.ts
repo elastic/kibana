@@ -13,10 +13,12 @@ export default function({ getService }: TestInvoker) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
 
-  const { bulkGetTest, createExpectResults, createExpectNotFoundResults } = bulkGetTestSuiteFactory(
-    esArchiver,
-    supertest
-  );
+  const {
+    bulkGetTest,
+    createExpectResults,
+    createExpectNotFoundResults,
+    expectBadRequestForSpace,
+  } = bulkGetTestSuiteFactory(esArchiver, supertest);
 
   describe('_bulk_get', () => {
     bulkGetTest(`objects within the current space (space_1)`, {
@@ -25,6 +27,10 @@ export default function({ getService }: TestInvoker) {
         default: {
           statusCode: 200,
           response: createExpectResults(SPACES.SPACE_1.spaceId),
+        },
+        includingSpace: {
+          statusCode: 200,
+          response: expectBadRequestForSpace,
         },
       },
     });
@@ -36,6 +42,10 @@ export default function({ getService }: TestInvoker) {
         default: {
           statusCode: 200,
           response: createExpectNotFoundResults(SPACES.SPACE_2.spaceId),
+        },
+        includingSpace: {
+          statusCode: 200,
+          response: expectBadRequestForSpace,
         },
       },
     });
