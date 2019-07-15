@@ -104,7 +104,7 @@ export default function ({ getService, getPageObjects }) {
       // Check index link
       const newIndexLinkExists = await testSubjects.exists('indexManagementNewIndexLink');
       expect(newIndexLinkExists).to.be(true);
-      const indexLink = await testSubjects.getProperty('indexManagementNewIndexLink', 'href');
+      const indexLink = await testSubjects.getAttribute('indexManagementNewIndexLink', 'href');
       // The only dynamic portion of the link is the end, just test this
       const linkDirectsToNewIndex = indexLink.endsWith(indexName);
       expect(linkDirectsToNewIndex).to.be(true);
