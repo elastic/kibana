@@ -60,7 +60,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         await visualBuilder.clickSeriesOption();
         await visualBuilder.enterOffsetSeries('-2h');
         const actualCount = await visualBuilder.getRhythmChartLegendValue();
-        expect(actualCount).to.be('53');
+        expect(actualCount).to.be('156');
       });
 
       it('should open color picker, deactivate panel and clone series', async () => {
