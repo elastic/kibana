@@ -93,6 +93,7 @@ module.controller('MlTimeSeriesExplorerController', function (
   $injector.get('mlSelectIntervalService');
   $injector.get('mlSelectSeverityService');
   const mlJobSelectService = $injector.get('mlJobSelectService');
+  const mlTimefilterRefreshService = $injector.get('mlTimefilterRefreshService');
 
   $scope.timeFieldName = 'timestamp';
   timefilter.enableTimeRangeSelector();
@@ -711,12 +712,15 @@ module.controller('MlTimeSeriesExplorerController', function (
     }
   });
 
+  const timefilterRefreshServiceSub = mlTimefilterRefreshService.subscribe($scope.refresh);
+
   $scope.$on('$destroy', () => {
     refreshWatcher.cancel();
     intervalSub.unsubscribe();
     severitySub.unsubscribe();
     annotationsRefreshSub.unsubscribe();
     jobSelectServiceSub.unsubscribe();
+    timefilterRefreshServiceSub.unsubscribe();
   });
 
   $scope.$on('contextChartSelected', function (event, selection) { // eslint-disable-line no-unused-vars

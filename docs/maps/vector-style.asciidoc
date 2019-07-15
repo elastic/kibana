@@ -25,12 +25,16 @@ Use data driven styling to symbolize features from a range of numeric property v
 To enable data driven styling, click image:maps/images/gs_link_icon.png[] next to the property.
 This button is only available when vector features contain numeric properties.
 
-NOTE: The *Fill color* and *Border color* style properties are set to transparent and are not visible
-when the property value is undefined for a feature.
-The *Border width* and *Symbol size* style properties are set to the minimum size
-when the property value is undefined for a feature.
-The *Symbol orientation* style property is set to 0
-when the property value is undefined for a feature.
+When the property value is undefined for a feature:
+
+* *Fill color* and *Border color* are set to transparent and are not visible.
+* *Border width* and *Symbol size* are set to the minimum size.
+* *Symbol orientation* is set to 0.
+
+When the minimum and maximum are the same and there is no range:
+
+* *Fill color* and *Border color* are set to last color in the color ramp.
+* *Border width* and *Symbol size* are set to the maximum size.
 
 The image below shows an example of data driven styling using the <<add-sample-data, Kibana sample web logs>> data set.
 The *kibana_sample_data_logs* layer uses data driven styling for fill color and symbol size style properties.
