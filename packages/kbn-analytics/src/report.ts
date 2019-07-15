@@ -40,7 +40,7 @@ export class ReportManager {
   public isReportEmpty(): boolean {
     return Object.keys(this.report.uiStatsMetrics).length === 0;
   }
-  private increamentStats(count: number, stats?: Stats): Stats {
+  private incrementStats(count: number, stats?: Stats): Stats {
     const { min = 0, max = 0, sum = 0 } = stats || {};
     const newMin = Math.min(min, count);
     const newMax = Math.max(max, count);
