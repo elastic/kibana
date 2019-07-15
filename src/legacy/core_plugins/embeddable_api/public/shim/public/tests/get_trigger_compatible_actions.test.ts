@@ -17,13 +17,13 @@
  * under the License.
  */
 
-import { testPlugin, TestPluginReturn } from '../test_plugin';
-import { HelloWorldAction } from '../../lib/test_samples/actions/hello_world_action';
-import { SayHelloAction } from '../../lib/test_samples/actions/say_hello_action';
-import { RestrictedAction } from '../../lib/test_samples/actions/restricted_action';
-import { EmptyEmbeddable } from '../../lib/test_samples/embeddables/empty_embeddable';
-import { ActionContext, CONTEXT_MENU_TRIGGER } from '../../lib';
-import { of } from '../helpers';
+import { testPlugin, TestPluginReturn } from './test_plugin';
+import { HelloWorldAction } from '../lib/test_samples/actions/hello_world_action';
+import { SayHelloAction } from '../lib/test_samples/actions/say_hello_action';
+import { RestrictedAction } from '../lib/test_samples/actions/restricted_action';
+import { EmptyEmbeddable } from '../lib/test_samples/embeddables/empty_embeddable';
+import { ActionContext, CONTEXT_MENU_TRIGGER } from '../lib';
+import { of } from './helpers';
 
 let action: SayHelloAction;
 let embeddables: TestPluginReturn;
@@ -73,11 +73,11 @@ test('getTriggerCompatibleActions returns attached actions', async () => {
 
 test('filters out actions not applicable based on the context', async () => {
   const { setup, doStart } = embeddables;
-  const action = new RestrictedAction((context: ActionContext) => {
+  const restrictedAction = new RestrictedAction((context: ActionContext) => {
     return context.embeddable.id === 'accept';
   });
 
-  setup.registerAction(action);
+  setup.registerAction(restrictedAction);
 
   const acceptEmbeddable = new EmptyEmbeddable({ id: 'accept' });
   const rejectEmbeddable = new EmptyEmbeddable({ id: 'reject' });
@@ -85,7 +85,7 @@ test('filters out actions not applicable based on the context', async () => {
   const testTrigger = {
     id: 'MY-TRIGGER',
     title: 'My trigger',
-    actionIds: [action.id],
+    actionIds: [restrictedAction.id],
   };
 
   setup.registerTrigger(testTrigger);
@@ -132,6 +132,6 @@ test(`with a trigger mapping that maps to an non-existing action returns empty l
   const actions = await start.getTriggerCompatibleActions(testTrigger.id, {
     embeddable: new EmptyEmbeddable({ id: 'empty' }),
   });
-  
+
   expect(actions).toEqual([]);
 });

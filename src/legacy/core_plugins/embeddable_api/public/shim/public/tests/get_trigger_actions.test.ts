@@ -17,19 +17,19 @@
  * under the License.
  */
 
-import { testPlugin } from '../test_plugin';
-import { Action } from '../../lib';
+import { testPlugin } from './test_plugin';
+import { Action } from '../lib';
 
-const action1 = {
+const action1 = ({
   id: 'action1',
   order: 1,
   type: 'type1',
-} as any as Action;
-const action2 = {
+} as any) as Action;
+const action2 = ({
   id: 'action2',
   order: 2,
   type: 'type2',
-} as any as Action;
+} as any) as Action;
 
 test('returns actions set on trigger', () => {
   const { setup, doStart } = testPlugin();
@@ -49,14 +49,14 @@ test('returns actions set on trigger', () => {
 
   setup.attachAction('trigger', 'action1');
   const list1 = start.getTriggerActions('trigger');
-  
+
   expect(list1).toHaveLength(1);
   expect(list1).toEqual([action1]);
 
   setup.attachAction('trigger', 'action2');
   const list2 = start.getTriggerActions('trigger');
-  
+
   expect(list2).toHaveLength(2);
-  expect(!!list2.find(({id}: any) => id === 'action1')).toBe(true);
-  expect(!!list2.find(({id}: any) => id === 'action2')).toBe(true);
+  expect(!!list2.find(({ id }: any) => id === 'action1')).toBe(true);
+  expect(!!list2.find(({ id }: any) => id === 'action2')).toBe(true);
 });

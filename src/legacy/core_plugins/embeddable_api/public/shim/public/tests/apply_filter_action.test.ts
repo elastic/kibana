@@ -18,16 +18,14 @@
  */
 
 import { Filter, FilterStateStore } from '@kbn/es-query';
-import { testPlugin } from '../test_plugin';
-import { EmbeddableApi } from '../../api';
-import { FILTERABLE_CONTAINER } from '../../lib/test_samples/embeddables/filterable_container';
-import { FILTERABLE_EMBEDDABLE } from '../../lib/test_samples/embeddables/filterable_embeddable';
-import { FilterableContainerFactory } from '../../lib/test_samples/embeddables/filterable_container_factory';
-import { FilterableEmbeddableFactory } from '../../lib/test_samples/embeddables/filterable_embeddable_factory';
+import { testPlugin } from './test_plugin';
+import { EmbeddableApi } from '../api';
+import { FILTERABLE_CONTAINER } from '../lib/test_samples/embeddables/filterable_container';
+import { FILTERABLE_EMBEDDABLE } from '../lib/test_samples/embeddables/filterable_embeddable';
+import { FilterableContainerFactory } from '../lib/test_samples/embeddables/filterable_container_factory';
+import { FilterableEmbeddableFactory } from '../lib/test_samples/embeddables/filterable_embeddable_factory';
 
-test('ApplyFilterAction applies the filter to the root of the container tree', async () => {
-  
-});
+test('ApplyFilterAction applies the filter to the root of the container tree', async () => {});
 
 /*
 test('ApplyFilterAction applies the filter to the root of the container tree', async () => {

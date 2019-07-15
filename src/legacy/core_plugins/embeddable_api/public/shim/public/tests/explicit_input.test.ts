@@ -17,36 +17,30 @@
  * under the License.
  */
 
-import '../ui_capabilities.test.mocks';
-
 import { skip } from 'rxjs/operators';
-import {
-  CONTACT_CARD_EMBEDDABLE,
-  HelloWorldContainer,
-  FilterableContainer,
-  FILTERABLE_EMBEDDABLE,
-  FilterableEmbeddableFactory,
-  ContactCardEmbeddable,
-  SlowContactCardEmbeddableFactory,
-  HELLO_WORLD_EMBEDDABLE_TYPE,
-  HelloWorldEmbeddableFactory,
-} from '../test_samples/index';
-import { isErrorEmbeddable, EmbeddableOutput, EmbeddableFactory } from '../embeddables';
-import {
-  FilterableEmbeddableInput,
-  FilterableEmbeddable,
-} from '../test_samples/embeddables/filterable_embeddable';
 import { Filter, FilterStateStore } from '@kbn/es-query';
+import { testPlugin } from './test_plugin';
+import {
+  FILTERABLE_EMBEDDABLE,
+  FilterableEmbeddableInput,
+} from '../lib/test_samples/embeddables/filterable_embeddable';
+import { FilterableEmbeddableFactory } from '../lib/test_samples/embeddables/filterable_embeddable_factory';
+import { CONTACT_CARD_EMBEDDABLE } from '../lib/test_samples/embeddables/contact_card/contact_card_embeddable_factory';
+import { SlowContactCardEmbeddableFactory } from '../lib/test_samples/embeddables/contact_card/slow_contact_card_embeddable_factory';
+import { HELLO_WORLD_EMBEDDABLE_TYPE } from '../lib/test_samples/embeddables/hello_world/hello_world_embeddable';
+import { HelloWorldEmbeddableFactory } from '../lib/test_samples/embeddables/hello_world/hello_world_embeddable_factory';
+import { FilterableContainer } from '../lib/test_samples/embeddables/filterable_container';
+import { isErrorEmbeddable } from '../lib';
+import { HelloWorldContainer } from '../lib/test_samples/embeddables/hello_world_container';
 
-jest.mock('ui/new_platform');
-
-const embeddableFactories = new Map<string, EmbeddableFactory>();
-embeddableFactories.set(FILTERABLE_EMBEDDABLE, new FilterableEmbeddableFactory());
-embeddableFactories.set(
+const { setup, doStart } = testPlugin();
+setup.registerEmbeddableFactory(FILTERABLE_EMBEDDABLE, new FilterableEmbeddableFactory());
+setup.registerEmbeddableFactory(
   CONTACT_CARD_EMBEDDABLE,
   new SlowContactCardEmbeddableFactory({ loadTickCount: 2 })
 );
-embeddableFactories.set(HELLO_WORLD_EMBEDDABLE_TYPE, new HelloWorldEmbeddableFactory());
+setup.registerEmbeddableFactory(HELLO_WORLD_EMBEDDABLE_TYPE, new HelloWorldEmbeddableFactory());
+const start = doStart();
 
 test('Explicit embeddable input mapped to undefined will default to inherited', async () => {
   const derivedFilter: Filter = {
@@ -56,13 +50,9 @@ test('Explicit embeddable input mapped to undefined will default to inherited', 
   };
   const container = new FilterableContainer(
     { id: 'hello', panels: {}, filters: [derivedFilter] },
-    embeddableFactories
+    start.getEmbeddableFactory
   );
-  const embeddable = await container.addNewEmbeddable<
-    FilterableEmbeddableInput,
-    EmbeddableOutput,
-    FilterableEmbeddable
-  >(FILTERABLE_EMBEDDABLE, {});
+  const embeddable = await container.addNewEmbeddable<any, any, any>(FILTERABLE_EMBEDDABLE, {});
 
   if (isErrorEmbeddable(embeddable)) {
     throw new Error('Error adding embeddable');
@@ -80,13 +70,12 @@ test('Explicit embeddable input mapped to undefined will default to inherited', 
 });
 
 test('Explicit embeddable input mapped to undefined with no inherited value will get passed to embeddable', async done => {
-  const container = new HelloWorldContainer({ id: 'hello', panels: {} }, embeddableFactories);
+  const container = new HelloWorldContainer(
+    { id: 'hello', panels: {} },
+    start.getEmbeddableFactory
+  );
 
-  const embeddable = await container.addNewEmbeddable<
-    FilterableEmbeddableInput,
-    EmbeddableOutput,
-    FilterableEmbeddable
-  >(FILTERABLE_EMBEDDABLE, {});
+  const embeddable = await container.addNewEmbeddable<any, any, any>(FILTERABLE_EMBEDDABLE, {});
 
   if (isErrorEmbeddable(embeddable)) {
     throw new Error('Error adding embeddable');
@@ -122,17 +111,15 @@ test('Explicit input tests in async situations', (done: () => void) => {
           type: CONTACT_CARD_EMBEDDABLE,
         },
       },
-      lastName: 'bar',
     },
-    embeddableFactories
+    start.getEmbeddableFactory
   );
 
   container.updateInput({ lastName: 'lolol' });
 
   const subscription = container.getOutput$().subscribe(() => {
     if (container.getOutput().embeddableLoaded['123']) {
-      expect(container.getInput().panels['123'].explicitInput.lastName).toBeUndefined();
-      const embeddable = container.getChild<ContactCardEmbeddable>('123');
+      const embeddable = container.getChild<any>('123');
       expect(embeddable).toBeDefined();
       expect(embeddable.getInput().lastName).toBe('lolol');
       subscription.unsubscribe();

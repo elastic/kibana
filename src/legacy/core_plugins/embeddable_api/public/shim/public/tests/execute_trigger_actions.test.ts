@@ -17,16 +17,19 @@
  * under the License.
  */
 
-import { testPlugin, TestPluginReturn } from '../test_plugin';
-import { of } from '../helpers';
-import { ActionContext, Action, openContextMenu } from '../../lib';
-import { ContactCardEmbeddable, CONTACT_USER_TRIGGER } from '../../lib/test_samples/embeddables/contact_card/contact_card_embeddable';
-import { SEND_MESSAGE_ACTION } from '../../lib/test_samples/actions/send_message_action';
+import { testPlugin, TestPluginReturn } from './test_plugin';
+import { of } from './helpers';
+import { ActionContext, Action, openContextMenu } from '../lib';
+import {
+  ContactCardEmbeddable,
+  CONTACT_USER_TRIGGER,
+} from '../lib/test_samples/embeddables/contact_card/contact_card_embeddable';
+import { SEND_MESSAGE_ACTION } from '../lib/test_samples/actions/send_message_action';
 
-jest.mock('../../lib/context_menu_actions');
+jest.mock('../lib/context_menu_actions');
 
 const executeFn = jest.fn();
-const openContextMenuSpy = openContextMenu as any as jest.SpyInstance;
+const openContextMenuSpy = (openContextMenu as any) as jest.SpyInstance;
 
 class TestAction extends Action {
   public readonly type = 'testAction';
@@ -116,10 +119,14 @@ test('does not execute an incompatible action', async () => {
     actionIds: ['test1'],
   };
   const action = new TestAction('test1', ({ embeddable }) => embeddable.id === 'executeme');
-  const embeddable = new ContactCardEmbeddable({ id: 'executeme', firstName: 'Stacey', lastName: 'G' });
+  const embeddable = new ContactCardEmbeddable({
+    id: 'executeme',
+    firstName: 'Stacey',
+    lastName: 'G',
+  });
   setup.registerTrigger(trigger);
   setup.registerAction(action);
-  
+
   const start = doStart();
   const context = {
     embeddable,
@@ -139,7 +146,11 @@ test('shows a context menu when more than one action is mapped to a trigger', as
   };
   const action1 = new TestAction('test1', () => true);
   const action2 = new TestAction('test2', () => true);
-  const embeddable = new ContactCardEmbeddable({ id: 'executeme', firstName: 'Stacey', lastName: 'G' });
+  const embeddable = new ContactCardEmbeddable({
+    id: 'executeme',
+    firstName: 'Stacey',
+    lastName: 'G',
+  });
   setup.registerTrigger(trigger);
   setup.registerAction(action1);
   setup.registerAction(action2);
