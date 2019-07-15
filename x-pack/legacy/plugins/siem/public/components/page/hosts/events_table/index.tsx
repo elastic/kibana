@@ -88,7 +88,6 @@ const EventsTableComponent = pure<EventsTableProps>(
       itemsPerRow={rowItems}
       limit={limit}
       loading={loading}
-      loadingTitle={i18n.EVENTS}
       loadMore={() => loadMore(nextCursor, tiebreaker)}
       pageOfItems={data}
       updateLimitPagination={newLimit =>

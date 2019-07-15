@@ -107,7 +107,6 @@ const AuthenticationTableComponent = pure<AuthenticationTableProps>(
       itemsPerRow={rowItems}
       limit={limit}
       loading={loading}
-      loadingTitle={i18n.AUTHENTICATIONS}
       loadPage={newActivePage => loadPage(newActivePage)}
       pageOfItems={data}
       showMorePagesIndicator={showMorePagesIndicator}
