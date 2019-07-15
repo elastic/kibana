@@ -4,8 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SavedObject } from 'src/core/server/saved_objects';
-import { SavedObjectsClientContract, ScopedClusterClient } from 'src/core/server/';
+import { SavedObject, SavedObjectsClientContract, ScopedClusterClient } from 'src/core/server/';
 import { SAVED_OBJECT_TYPE, AssetTypes, InstallationStatus } from '../../common/constants';
 import {
   AssetReference,

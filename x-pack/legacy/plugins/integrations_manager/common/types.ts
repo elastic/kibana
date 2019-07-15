@@ -8,7 +8,6 @@ import { SavedObject, SavedObjectAttributes, SavedObjectReference } from 'src/co
 import { InstallationStatus } from './constants';
 
 export { Request, ResponseToolkit, ServerRoute } from 'hapi';
-export { ClusterClient } from 'src/core/server';
 
 // Registry's response types
 // from /list
