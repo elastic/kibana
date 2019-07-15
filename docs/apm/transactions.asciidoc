@@ -18,6 +18,8 @@ The time a transaction took to complete is also recorded and displayed on the ch
 "App" indicates there was something happening within the application, but we're not sure what.
 This could be a sign that the agent does not have auto-instrumentation for whatever was happening during that time.
 
+It's important to note that if you have asynchronous spans, the total time of all spans might exceed 100%.
+
 TIP: If the *Time spent by span type* chart is missing in the APM UI, it means your agent does not support this feature yet. 
 
 *Transaction duration* shows the response times for this service and is broken down into average, 95th, and 99th percentile.
