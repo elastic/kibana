@@ -17,7 +17,7 @@ import {
 } from '@elastic/eui';
 import { SnapshotRestore, SnapshotRestoreShard } from '../../../../../../common/types';
 import { useAppDependencies } from '../../../../index';
-import { formatDate } from '../../../../services/text';
+import { FormattedDateTime } from '../../../../components';
 
 interface Props {
   shards: SnapshotRestore['shards'];
@@ -103,7 +103,11 @@ export const ShardsTable: React.FunctionComponent<Props> = ({ shards }) => {
         defaultMessage: 'Start time',
       }),
       render: (startTimeInMillis: SnapshotRestoreShard['startTimeInMillis']) =>
-        startTimeInMillis ? formatDate(startTimeInMillis) : <EuiLoadingSpinner size="m" />,
+        startTimeInMillis ? (
+          <FormattedDateTime epochMs={startTimeInMillis} />
+        ) : (
+          <EuiLoadingSpinner size="m" />
+        ),
     },
     {
       field: 'stopTimeInMillis',
@@ -111,7 +115,11 @@ export const ShardsTable: React.FunctionComponent<Props> = ({ shards }) => {
         defaultMessage: 'End time',
       }),
       render: (stopTimeInMillis: SnapshotRestoreShard['stopTimeInMillis']) =>
-        stopTimeInMillis ? formatDate(stopTimeInMillis) : <EuiLoadingSpinner size="m" />,
+        stopTimeInMillis ? (
+          <FormattedDateTime epochMs={stopTimeInMillis} />
+        ) : (
+          <EuiLoadingSpinner size="m" />
+        ),
     },
     {
       field: 'totalTimeInMillis',
