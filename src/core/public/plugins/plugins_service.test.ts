@@ -167,6 +167,22 @@ test('`PluginsService.setup` fails if any plugin instance does not have a setup 
   );
 });
 
+test('`PluginsService.setup` exposes plugin dependency map', async () => {
+  const pluginsService = new PluginsService(mockCoreContext);
+  const { pluginDependencies } = await pluginsService.setup(mockSetupDeps);
+  expect(pluginDependencies).toMatchInlineSnapshot(`
+    Map {
+      "pluginA" => Array [],
+      "pluginB" => Array [
+        "pluginA",
+      ],
+      "pluginC" => Array [
+        "pluginA",
+      ],
+    }
+  `);
+});
+
 test('`PluginsService.setup` calls loadPluginBundles with http and plugins', async () => {
   const pluginsService = new PluginsService(mockCoreContext);
   await pluginsService.setup(mockSetupDeps);

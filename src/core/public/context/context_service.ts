@@ -19,30 +19,15 @@
 
 import { InjectedMetadataStart } from '../injected_metadata';
 import { ContextContainer, ContextContainerImplementation } from './context';
-import { PluginName } from '../../server';
 
 interface StartDeps {
   injectedMetadata: InjectedMetadataStart;
+  pluginDependencies: ReadonlyMap<string, string[]>;
 }
 
 /** @internal */
 export class ContextService {
-  public start({ injectedMetadata }: StartDeps): ContextStart {
-    const plugins = injectedMetadata.getPlugins();
-    const allPluginNames = new Set<PluginName>(plugins.map(p => p.id));
-    const pluginDependencies = new Map(
-      plugins.map(
-        p =>
-          [
-            p.id,
-            [
-              ...p.plugin.requiredPlugins,
-              ...p.plugin.optionalPlugins.filter(optPlugin => allPluginNames.has(optPlugin)),
-            ],
-          ] as [PluginName, PluginName[]]
-      )
-    );
-
+  public start({ injectedMetadata, pluginDependencies }: StartDeps): ContextStart {
     return {
       createContextContainer: <T extends {}, U extends any[] = []>() =>
         new ContextContainerImplementation<T, U>(pluginDependencies),

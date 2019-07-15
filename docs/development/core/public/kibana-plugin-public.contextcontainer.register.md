@@ -4,21 +4,21 @@
 
 ## ContextContainer.register() method
 
-Register a new context provider. Throws an excpetion if more than one provider is registered for the same context key.
+Register a new context provider. Throws an exception if more than one provider is registered for the same context key.
 
 <b>Signature:</b>
 
 ```typescript
-register<TContextName extends keyof TContext>(contextName: TContextName, provider: ContextProvider<TContext, TContextName, TProviderParameters>, plugin?: PluginName): this;
+register<TContextName extends keyof TContext>(contextName: TContextName, provider: ContextProvider<TContext, TContextName, TProviderParameters>, plugin?: string): this;
 ```
 
 ## Parameters
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  contextName | <code>TContextName</code> | The key of the  object this provider supplies the value for. |
+|  contextName | <code>TContextName</code> | The key of the <code>TContext</code> object this provider supplies the value for. |
 |  provider | <code>ContextProvider&lt;TContext, TContextName, TProviderParameters&gt;</code> | A [ContextProvider](./kibana-plugin-public.contextprovider.md) to be called each time a new context is created. |
-|  plugin | <code>PluginName</code> | The plugin this provider is associated with. If <code>undefined</code>, provider gets access to all provided context keys. |
+|  plugin | <code>string</code> | The plugin this provider is associated with. If <code>undefined</code>, provider gets access to all provided context keys. Only the service owner should be able to call with <code>undefined</code>. |
 
 <b>Returns:</b>
 

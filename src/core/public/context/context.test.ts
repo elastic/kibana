@@ -50,7 +50,7 @@ describe('ContextContainer', () => {
   });
 
   it('resolves dependencies', async () => {
-    expect.assertions(8);
+    // expect.assertions(3);
     const contextContainer = new ContextContainerImplementation<MyContext>(plugins);
 
     contextContainer
@@ -61,7 +61,7 @@ describe('ContextContainer', () => {
       .register(
         'ctxFromA',
         context => {
-          expect(context).toEqual({});
+          expect(context).toEqual({ core1: 'core' });
           return 'aString';
         },
         'pluginA'
@@ -69,7 +69,7 @@ describe('ContextContainer', () => {
       .register(
         'ctxFromB',
         context => {
-          expect(context).toEqual({ ctxFromA: 'aString' });
+          expect(context).toEqual({ core1: 'core', ctxFromA: 'aString' });
           return 299;
         },
         'pluginB'
@@ -77,7 +77,7 @@ describe('ContextContainer', () => {
       .register(
         'ctxFromC',
         context => {
-          expect(context).toEqual({ ctxFromA: 'aString', ctxFromB: 299 });
+          expect(context).toEqual({ core1: 'core', ctxFromA: 'aString', ctxFromB: 299 });
           return false;
         },
         'pluginC'
@@ -85,7 +85,7 @@ describe('ContextContainer', () => {
       .register(
         'ctxFromD',
         context => {
-          expect(context).toEqual({});
+          expect(context).toEqual({ core1: 'core' });
           return {};
         },
         'pluginD'
@@ -106,7 +106,7 @@ describe('ContextContainer', () => {
     });
   });
 
-  it('exposes all previously registerd context to Core providers', async () => {
+  it('exposes all previously registered context to Core providers', async () => {
     expect.assertions(3);
     const contextContainer = new ContextContainerImplementation<MyContext>(plugins);
 
@@ -174,5 +174,14 @@ describe('ContextContainer', () => {
       baseCtx: 1234,
       ctxFromD: {},
     });
+  });
+
+  it('throws error for unknown plugin', async () => {
+    const contextContainer = new ContextContainerImplementation<MyContext>(plugins);
+    await expect(
+      contextContainer.createContext('otherPlugin')
+    ).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"Cannot create context for unknown plugin: otherPlugin"`
+    );
   });
 });

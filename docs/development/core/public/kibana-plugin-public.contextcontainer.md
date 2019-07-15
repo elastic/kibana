@@ -17,9 +17,11 @@ export interface ContextContainer<TContext extends {}, TProviderParameters exten
 |  Method | Description |
 |  --- | --- |
 |  [createContext(plugin, baseContext, contextArgs)](./kibana-plugin-public.contextcontainer.createcontext.md) | Create a new context. |
-|  [register(contextName, provider, plugin)](./kibana-plugin-public.contextcontainer.register.md) | Register a new context provider. Throws an excpetion if more than one provider is registered for the same context key. |
+|  [register(contextName, provider, plugin)](./kibana-plugin-public.contextcontainer.register.md) | Register a new context provider. Throws an exception if more than one provider is registered for the same context key. |
 
 ## Remarks
+
+A `ContextContainer` can be used by any Core service or plugin (known as the "service owner") which wishes to expose APIs in a handler function. The container object will manage registering context providers and building a context object for a handler with all of the contexts that should be exposed to the handler's plugin. This is dependent on the dependencies that the handler's plugin declares.
 
 Contexts providers are executed in the order they were registered. Each provider gets access to context values provided by any plugins that it depends on.
 

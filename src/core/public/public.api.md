@@ -168,10 +168,8 @@ export interface ChromeStart {
 
 // @public
 export interface ContextContainer<TContext extends {}, TProviderParameters extends any[] = []> {
-    createContext(plugin: PluginName, baseContext: Partial<TContext>, ...contextArgs: TProviderParameters): Promise<TContext>;
-    // Warning: (ae-forgotten-export) The symbol "PluginName" needs to be exported by the entry point index.d.ts
-    // Warning: (ae-unresolved-link) The @link reference could not be resolved: The package "kibana" does not have an export "TContext"
-    register<TContextName extends keyof TContext>(contextName: TContextName, provider: ContextProvider<TContext, TContextName, TProviderParameters>, plugin?: PluginName): this;
+    createContext(plugin: string, baseContext: Partial<TContext>, ...contextArgs: TProviderParameters): Promise<TContext>;
+    register<TContextName extends keyof TContext>(contextName: TContextName, provider: ContextProvider<TContext, TContextName, TProviderParameters>, plugin?: string): this;
 }
 
 // @public

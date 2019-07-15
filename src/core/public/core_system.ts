@@ -73,6 +73,7 @@ export class CoreSystem {
   private readonly context: ContextService;
 
   private readonly rootDomElement: HTMLElement;
+  private pluginDependencies?: ReadonlyMap<string, string[]>;
   private fatalErrorsSetup: FatalErrorsSetup | null = null;
 
   constructor(params: Params) {
@@ -141,6 +142,7 @@ export class CoreSystem {
 
       // Services that do not expose contracts at setup
       const plugins = await this.plugins.setup(core);
+      this.pluginDependencies = plugins.pluginDependencies;
       await this.legacyPlatform.setup({ core, plugins: mapToObject(plugins.contracts) });
 
       return { fatalErrors: this.fatalErrorsSetup };
@@ -160,7 +162,10 @@ export class CoreSystem {
       const injectedMetadata = await this.injectedMetadata.start();
       const docLinks = await this.docLinks.start({ injectedMetadata });
       const http = await this.http.start({ injectedMetadata, fatalErrors: this.fatalErrorsSetup });
-      const context = this.context.start({ injectedMetadata });
+      const context = this.context.start({
+        injectedMetadata,
+        pluginDependencies: this.pluginDependencies!,
+      });
       const i18n = await this.i18n.start();
       const application = await this.application.start({ injectedMetadata });
 

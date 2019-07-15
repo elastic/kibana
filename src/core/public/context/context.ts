@@ -46,6 +46,11 @@ export type ContextProvider<
  * An object that handles registration of context providers and building of new context objects.
  *
  * @remarks
+ * A `ContextContainer` can be used by any Core service or plugin (known as the "service owner") which wishes to expose
+ * APIs in a handler function. The container object will manage registering context providers and building a context
+ * object for a handler with all of the contexts that should be exposed to the handler's plugin. This is dependent on
+ * the dependencies that the handler's plugin declares.
+ *
  * Contexts providers are executed in the order they were registered. Each provider gets access to context values
  * provided by any plugins that it depends on.
  *
@@ -53,19 +58,19 @@ export type ContextProvider<
  */
 export interface ContextContainer<TContext extends {}, TProviderParameters extends any[] = []> {
   /**
-   * Register a new context provider. Throws an excpetion if more than one provider is registered for the same context
+   * Register a new context provider. Throws an exception if more than one provider is registered for the same context
    * key.
    *
-   * @param contextName - The key of the {@link TContext} object this provider supplies the value for.
+   * @param contextName - The key of the `TContext` object this provider supplies the value for.
    * @param provider - A {@link ContextProvider} to be called each time a new context is created.
    * @param plugin - The plugin this provider is associated with. If `undefined`, provider gets access to all provided
-   *                 context keys.
+   *                 context keys. Only the service owner should be able to call with `undefined`.
    * @returns The `ContextContainer` for method chaining.
    */
   register<TContextName extends keyof TContext>(
     contextName: TContextName,
     provider: ContextProvider<TContext, TContextName, TProviderParameters>,
-    plugin?: PluginName
+    plugin?: string
   ): this;
 
   /**
@@ -77,7 +82,7 @@ export interface ContextContainer<TContext extends {}, TProviderParameters exten
    * @returns A Promise for the new context object.
    */
   createContext(
-    plugin: PluginName,
+    plugin: string,
     baseContext: Partial<TContext>,
     ...contextArgs: TProviderParameters
   ): Promise<TContext>;
@@ -133,23 +138,29 @@ export class ContextContainerImplementation<
     baseContext: Partial<TContext> = {},
     ...contextArgs: TProviderParameters
   ): Promise<TContext> {
-    const contextNamesForPlugin = (plug: PluginName): Array<keyof TContext> => {
-      const pluginDeps = this.pluginDependencies.get(plug)!;
-      return flatten(pluginDeps.map(p => this.contextNamesByPlugin.get(p)!));
+    const ownerContextNames = [...this.contextProviders]
+      .filter(([name, { plugin }]) => plugin === undefined)
+      .map(([name]) => name);
+    const contextNamesForPlugin = (plug: PluginName): Set<keyof TContext> => {
+      const pluginDeps = this.pluginDependencies.get(plug);
+      if (!pluginDeps) {
+        throw new Error(`Cannot create context for unknown plugin: ${pluginName}`);
+      }
+
+      return new Set([
+        // Owner contexts
+        ...ownerContextNames,
+        // Contexts calling plugin created
+        ...(this.contextNamesByPlugin.get(pluginName) || []),
+        // Contexts calling plugin's dependencies created
+        ...flatten(pluginDeps.map(p => this.contextNamesByPlugin.get(p) || [])),
+      ]);
     };
 
-    // Set of all contexts depended on by this plugin
-    const neededContexts = new Set([
-      ...(this.contextNamesByPlugin.get(pluginName) || []),
-      ...contextNamesForPlugin(pluginName),
-    ]);
+    const contextsToBuild = contextNamesForPlugin(pluginName);
 
     return [...this.contextProviders]
-      .filter(
-        ([contextName, { plugin }]) =>
-          // Contexts we depend on OR provided by core
-          neededContexts.has(contextName) || plugin === undefined
-      )
+      .filter(([contextName]) => contextsToBuild.has(contextName))
       .reduce(
         async (contextPromise, [contextName, { provider, plugin }]) => {
           const resolvedContext = await contextPromise;
@@ -158,7 +169,7 @@ export class ContextContainerImplementation<
           // context built so far (this is only possible for providers registered
           // by the service owner).
           const exposedContext = plugin
-            ? pick(resolvedContext, contextNamesForPlugin(plugin))
+            ? pick(resolvedContext, [...contextNamesForPlugin(plugin)])
             : resolvedContext;
 
           return {

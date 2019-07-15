@@ -9,14 +9,14 @@ Create a new context.
 <b>Signature:</b>
 
 ```typescript
-createContext(plugin: PluginName, baseContext: Partial<TContext>, ...contextArgs: TProviderParameters): Promise<TContext>;
+createContext(plugin: string, baseContext: Partial<TContext>, ...contextArgs: TProviderParameters): Promise<TContext>;
 ```
 
 ## Parameters
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  plugin | <code>PluginName</code> | The plugin the context will be exposed to. |
+|  plugin | <code>string</code> | The plugin the context will be exposed to. |
 |  baseContext | <code>Partial&lt;TContext&gt;</code> | The initial context for the given handler. |
 |  contextArgs | <code>TProviderParameters</code> | Additional parameters to call providers with. |
 
