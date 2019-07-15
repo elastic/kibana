@@ -27,8 +27,6 @@ This section summarizes the changes in each release.
 [[release-notes-7.2.1]]
 == {kib} 7.2.1
 
-coming[7.2.1]
-
 See also <<breaking-changes-7.2, breaking changes in 7.2>>.
 
 [float]
