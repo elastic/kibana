@@ -18,7 +18,7 @@ import { i18n } from '@kbn/i18n';
 import { ESAggMetricTooltipProperty } from '../tooltips/es_aggmetric_tooltip_property';
 
 import uuid from 'uuid/v4';
-import { copyPersistentState } from '../../../store/util';
+import { copyPersistentState } from '../../../reducers/util';
 import { ES_GEO_FIELD_TYPE } from '../../../../common/constants';
 
 export class AbstractESSource extends AbstractVectorSource {
