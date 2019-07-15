@@ -8,7 +8,7 @@ import { Dictionary } from '../../../common/types/common';
 import { KBN_FIELD_TYPES } from '../../../common/constants/field_types';
 
 import { AggName } from './aggregations';
-import { FieldName } from './fields';
+import { EsFieldName } from './fields';
 
 export enum PIVOT_SUPPORTED_AGGS {
   AVG = 'avg',
@@ -47,7 +47,7 @@ export const pivotAggsFieldSupport = {
 
 export type PivotAgg = {
   [key in PIVOT_SUPPORTED_AGGS]?: {
-    field: FieldName;
+    field: EsFieldName;
   };
 };
 
@@ -61,7 +61,7 @@ export interface PivotAggsConfigBase {
 }
 
 export interface PivotAggsConfigWithUiSupport extends PivotAggsConfigBase {
-  field: FieldName;
+  field: EsFieldName;
 }
 
 export function isPivotAggsConfigWithUiSupport(arg: any): arg is PivotAggsConfigWithUiSupport {

@@ -5,7 +5,16 @@
  */
 
 export { AggName, isAggName } from './aggregations';
-export { FieldName } from './fields';
+export {
+  getDefaultSelectableFields,
+  getFlattenedFields,
+  getSelectableFields,
+  toggleSelectedField,
+  EsDoc,
+  EsDocSource,
+  EsFieldName,
+  MAX_COLUMNS,
+} from './fields';
 export { DropDownLabel, DropDownOption, Label } from './dropdown';
 export {
   KibanaContext,

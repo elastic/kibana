@@ -7,11 +7,14 @@
 import React, { FC, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { SortDirection } from '@elastic/eui';
-import { getFlattenedFields } from '../../../../components/source_index_preview/common';
 import { ml } from '../../../../../services/ml_api_service';
 
-import { DataFramePreviewRequest, useRefreshTransformList } from '../../../../common';
-import { DataFrameTransformWithId } from '../../../../common/job';
+import {
+  getFlattenedFields,
+  useRefreshTransformList,
+  DataFramePreviewRequest,
+  DataFrameTransformWithId,
+} from '../../../../common';
 import { TransformTable } from './transform_table';
 
 interface Column {

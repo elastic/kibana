@@ -6,8 +6,8 @@
 
 import { PivotGroupByConfig } from '../common';
 
-import { JobDetailsExposedState } from '../components/job_details/job_details_form';
-import { DefinePivotExposedState } from '../components/define_pivot/define_pivot_form';
+import { JobDetailsExposedState } from '../pages/data_frame_new_pivot/components/job_details/job_details_form';
+import { DefinePivotExposedState } from '../pages/data_frame_new_pivot/components/define_pivot/define_pivot_form';
 
 import { PIVOT_SUPPORTED_GROUP_BY_AGGS } from './pivot_group_by';
 import { PivotAggsConfig, PIVOT_SUPPORTED_AGGS } from './pivot_aggs';

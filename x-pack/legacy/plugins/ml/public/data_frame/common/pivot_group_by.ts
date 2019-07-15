@@ -8,7 +8,7 @@ import { Dictionary } from '../../../common/types/common';
 import { KBN_FIELD_TYPES } from '../../../common/constants/field_types';
 
 import { AggName } from './aggregations';
-import { FieldName } from './fields';
+import { EsFieldName } from './fields';
 
 export enum PIVOT_SUPPORTED_GROUP_BY_AGGS {
   DATE_HISTOGRAM = 'date_histogram',
@@ -50,19 +50,19 @@ export const dateHistogramIntervalFormatRegex = /^[1-9][0-9]*(ms|s|m|h|d|w|M|q|y
 
 interface GroupByDateHistogram extends GroupByConfigBase {
   agg: PIVOT_SUPPORTED_GROUP_BY_AGGS.DATE_HISTOGRAM;
-  field: FieldName;
+  field: EsFieldName;
   calendar_interval: string;
 }
 
 interface GroupByHistogram extends GroupByConfigBase {
   agg: PIVOT_SUPPORTED_GROUP_BY_AGGS.HISTOGRAM;
-  field: FieldName;
+  field: EsFieldName;
   interval: string;
 }
 
 interface GroupByTerms extends GroupByConfigBase {
   agg: PIVOT_SUPPORTED_GROUP_BY_AGGS.TERMS;
-  field: FieldName;
+  field: EsFieldName;
 }
 
 export type GroupByConfigWithInterval = GroupByDateHistogram | GroupByHistogram;
@@ -110,20 +110,20 @@ export type GenericAgg = object;
 
 export interface TermsAgg {
   terms: {
-    field: FieldName;
+    field: EsFieldName;
   };
 }
 
 export interface HistogramAgg {
   histogram: {
-    field: FieldName;
+    field: EsFieldName;
     interval: string;
   };
 }
 
 export interface DateHistogramAgg {
   date_histogram: {
-    field: FieldName;
+    field: EsFieldName;
     calendar_interval: string;
   };
 }

@@ -10,8 +10,8 @@ import { IndexPattern } from 'ui/index_patterns';
 
 import { dictionaryToArray } from '../../../common/types/common';
 
-import { DefinePivotExposedState } from '../components/define_pivot/define_pivot_form';
-import { JobDetailsExposedState } from '../components/job_details/job_details_form';
+import { DefinePivotExposedState } from '../pages/data_frame_new_pivot/components/define_pivot/define_pivot_form';
+import { JobDetailsExposedState } from '../pages/data_frame_new_pivot/components/job_details/job_details_form';
 
 import {
   getEsAggFromAggConfig,

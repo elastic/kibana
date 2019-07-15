@@ -20,7 +20,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
-import { Wizard } from './wizard';
+import { Wizard } from './components/wizard';
 
 export const Page: SFC = () => (
   <EuiPage>
