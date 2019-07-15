@@ -127,14 +127,3 @@ export const OverviewWrapper = styled(EuiFlexGroup)`
     z-index: 2;
   }
 `;
-
-export const LoadingOverlay = styled.div`
-  background-color: ${props => getOr('#ffffff', 'theme.eui.euiColorLightShade', props)};
-  margin: -4px 5px;
-  height: 100%;
-  opacity: 0.7;
-  width: calc(100% - 10px);
-  position: absolute;
-  z-index: 3;
-  border-radius: 5px;
-`;

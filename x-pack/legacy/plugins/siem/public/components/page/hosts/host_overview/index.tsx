@@ -5,6 +5,8 @@
  */
 
 import { EuiDescriptionList, EuiFlexItem } from '@elastic/eui';
+import darkTheme from '@elastic/eui/dist/eui_theme_dark.json';
+import lightTheme from '@elastic/eui/dist/eui_theme_light.json';
 import { getOr } from 'lodash/fp';
 import React, { useContext, useState } from 'react';
 import styled from 'styled-components';
@@ -14,16 +16,17 @@ import { getEmptyTagValue } from '../../../empty_value';
 import { DefaultFieldRenderer, hostIdRenderer } from '../../../field_renderers/field_renderers';
 import { InspectButton } from '../../../inspect';
 import { HostItem } from '../../../../graphql/types';
-import { LoadingPanel } from '../../../loading';
+import { Loader } from '../../../loader';
 import { IPDetailsLink } from '../../../links';
 import { MlCapabilitiesContext } from '../../../ml/permissions/ml_capabilities_provider';
 import { hasMlUserPermissions } from '../../../ml/permissions/has_ml_user_permissions';
 import { AnomalyScores } from '../../../ml/score/anomaly_scores';
 import { Anomalies, NarrowDateRange } from '../../../ml/types';
-import { LoadingOverlay, OverviewWrapper } from '../../index';
+import { OverviewWrapper } from '../../index';
 import { FirstLastSeenHost, FirstLastSeenHostType } from '../first_last_seen_host';
 
 import * as i18n from './translations';
+import { KibanaConfigContext } from '../../../../lib/adapters/framework/kibana_framework_adapter';
 
 interface HostSummaryProps {
   data: HostItem;
@@ -64,6 +67,7 @@ export const HostOverview = React.memo<HostSummaryProps>(
     const [showInspect, setShowInspect] = useState(false);
     const capabilities = useContext(MlCapabilitiesContext);
     const userPermissions = hasMlUserPermissions(capabilities);
+    const config = useContext(KibanaConfigContext);
 
     const getDefaultRenderer = (fieldName: string, fieldData: HostItem) => (
       <DefaultFieldRenderer
@@ -174,27 +178,25 @@ export const HostOverview = React.memo<HostSummaryProps>(
         onMouseEnter={() => setShowInspect(true)}
         onMouseLeave={() => setShowInspect(false)}
       >
-        {loading && (
-          <>
-            <LoadingOverlay />
-            <LoadingPanel
-              height="100%"
-              width="100%"
-              text=""
-              position="absolute"
-              zIndex={3}
-              data-test-subj="LoadingPanelLoadMoreTable"
-            />
-          </>
-        )}
         <InspectButton
           queryId={id}
           show={showInspect}
           title={i18n.INSPECT_TITLE}
           inspectIndex={0}
         />
+
         {descriptionLists.map((descriptionList, index) =>
           getDescriptionList(descriptionList, index)
+        )}
+
+        {loading && (
+          <Loader
+            overlay
+            overlayBackground={
+              config.darkMode ? darkTheme.euiPageBackgroundColor : lightTheme.euiPageBackgroundColor
+            }
+            size="xl"
+          />
         )}
       </OverviewWrapper>
     );
