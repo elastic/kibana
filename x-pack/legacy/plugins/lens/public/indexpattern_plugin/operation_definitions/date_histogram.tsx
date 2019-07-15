@@ -43,13 +43,20 @@ export const dateHistogramOperation: OperationDefinition<DateHistogramIndexPatte
       type === 'date' && (!aggregationRestrictions || aggregationRestrictions.date_histogram)
     );
   },
-  buildColumn(
-    operationId: string,
-    suggestedOrder: DimensionPriority | undefined,
+  buildColumn({
+    operationId,
+    suggestedOrder,
+    layerId,
+    columns,
+    field,
+  }: {
+    operationId: string;
+    suggestedOrder: DimensionPriority | undefined;
     // layer: DimensionLayer,
-    layerId: string,
-    field?: IndexPatternField
-  ): DateHistogramIndexPatternColumn {
+    layerId: string;
+    columns: {};
+    field?: IndexPatternField;
+  }): DateHistogramIndexPatternColumn {
     if (!field) {
       throw new Error('Invariant error: date histogram operation requires field');
     }

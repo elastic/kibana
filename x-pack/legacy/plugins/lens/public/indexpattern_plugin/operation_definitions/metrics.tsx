@@ -30,13 +30,14 @@ function buildMetricOperation<T extends FieldBasedIndexPatternColumn>(
         fieldType === 'number' && (!aggregationRestrictions || aggregationRestrictions[type])
       );
     },
-    buildColumn(
-      operationId: string,
-      suggestedOrder: DimensionPriority | undefined,
-      layerId: string,
-      // layer: DimensionLayer,
-      field?: IndexPatternField
-    ): T {
+    buildColumn({ operationId, suggestedOrder, field }): T {
+      // }: {
+      //   operationId: string;
+      //   suggestedOrder: DimensionPriority | undefined;
+      //   layerId: string;
+      //   columns: {};
+      //   field?: IndexPatternField;
+      // }): T {
       if (!field) {
         throw new Error(`Invariant: A ${type} operation can only be built with a field`);
       }

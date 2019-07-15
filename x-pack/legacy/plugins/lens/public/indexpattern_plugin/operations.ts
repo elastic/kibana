@@ -24,7 +24,7 @@ import {
 import { dateHistogramOperation } from './operation_definitions/date_histogram';
 import { countOperation } from './operation_definitions/count';
 import { filterRatioOperation } from './operation_definitions/filter_ratio';
-import { sortByField } from './state_helpers';
+import { sortByField } from './utils';
 
 type PossibleOperationDefinitions<
   U extends IndexPatternColumn = IndexPatternColumn
@@ -72,12 +72,16 @@ export interface OperationDefinition<C extends BaseIndexPatternColumn> {
   // TODO make this a function dependend on the indexpattern with typeMeta information
   isApplicableWithoutField: boolean;
   isApplicableForField: (field: IndexPatternField) => boolean;
-  buildColumn: (
-    operationId: string,
-    suggestedOrder: DimensionPriority | undefined,
-    // layer: DimensionLayer,
-    layerId: string,
-    field?: IndexPatternField
+  buildColumn: (arg: {
+    operationId: string;
+    suggestedOrder: DimensionPriority | undefined;
+    layerId: string;
+    columns: Partial<Record<string, IndexPatternColumn>>;
+    field?: IndexPatternField;
+  }) => C;
+  onOtherColumnChanged?: (
+    currentColumn: C,
+    columns: Partial<Record<string, IndexPatternColumn>>
   ) => C;
   paramEditor?: React.ComponentType<ParamEditorProps>;
   toEsAggsConfig: (column: C, columnId: string) => unknown;
@@ -106,15 +110,28 @@ export function getOperationTypesForField(field: IndexPatternField): OperationTy
     .map(({ type }) => type);
 }
 
-export function buildColumnForOperationType<T extends OperationType>(
-  index: number,
-  op: T,
-  suggestedOrder: DimensionPriority | undefined,
-  // layer: DimensionLayer,
-  layerId: string,
-  field?: IndexPatternField
-): IndexPatternColumn {
-  return operationDefinitionMap[op].buildColumn(`${index}${op}`, suggestedOrder, layerId, field);
+export function buildColumnForOperationType<T extends OperationType>({
+  index,
+  op,
+  columns,
+  field,
+  layerId,
+  suggestedOrder,
+}: {
+  index: number;
+  op: T;
+  columns: Partial<Record<string, IndexPatternColumn>>;
+  suggestedOrder: DimensionPriority | undefined;
+  layerId: string;
+  field?: IndexPatternField;
+}): IndexPatternColumn {
+  return operationDefinitionMap[op].buildColumn({
+    operationId: `${index}${op}`,
+    columns,
+    suggestedOrder,
+    field,
+    layerId,
+  });
 }
 
 export function getPotentialColumns({
@@ -124,7 +141,6 @@ export function getPotentialColumns({
 }: {
   state: IndexPatternPrivateState;
   suggestedOrder?: DimensionPriority;
-  // layer: DimensionLayer;
   layerId: string;
 }): IndexPatternColumn[] {
   const fields = state.indexPatterns[state.currentIndexPatternId].fields;
@@ -134,14 +150,28 @@ export function getPotentialColumns({
       const validOperations = getOperationTypesForField(field);
 
       return validOperations.map(op =>
-        buildColumnForOperationType(index, op, suggestedOrder, layerId, field)
+        buildColumnForOperationType({
+          index,
+          op,
+          columns: state.layers[layerId].columns,
+          suggestedOrder,
+          field,
+          layerId,
+        })
       );
     })
     .reduce((prev, current) => prev.concat(current));
 
   operationDefinitions.forEach(operation => {
     if (operation.isApplicableWithoutField) {
-      columns.push(operation.buildColumn(operation.type, suggestedOrder, layerId));
+      columns.push(
+        operation.buildColumn({
+          operationId: operation.type,
+          suggestedOrder,
+          layerId,
+          columns: state.layers[layerId].columns,
+        })
+      );
     }
   });
 

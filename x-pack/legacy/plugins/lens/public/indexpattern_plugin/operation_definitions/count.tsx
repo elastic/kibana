@@ -16,12 +16,14 @@ export const countOperation: OperationDefinition<CountIndexPatternColumn> = {
   }),
   isApplicableWithoutField: true,
   isApplicableForField: () => false,
-  buildColumn(
-    operationId: string,
-    suggestedOrder: DimensionPriority | undefined,
-    // layer: DimensionLayer
-    layerId: string
-  ): CountIndexPatternColumn {
+  buildColumn({ operationId, suggestedOrder }) {
+    // }: {
+    //   operationId: string;
+    //   suggestedOrder: DimensionPriority | undefined;
+    //   // columns: {};
+    //   // layer: DimensionLayer
+    //   // layerId: string;
+    // }): CountIndexPatternColumn {
     return {
       operationId,
       label: i18n.translate('xpack.lens.indexPattern.countOf', {

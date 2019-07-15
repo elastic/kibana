@@ -75,6 +75,7 @@ export interface TermsIndexPatternColumn extends FieldBasedIndexPatternColumn {
   params: {
     size: number;
     orderBy: { type: 'alphabetical' } | { type: 'column'; columnId: string };
+    orderDirection: 'asc' | 'desc';
   };
 }
 
@@ -358,9 +359,18 @@ export function getIndexPatternDatasource({
       // const hasBucket = operations.find(op => op === 'date_histogram' || op === 'terms');
 
       // if (hasBucket) {
-      //   const column = buildColumnForOperationType(0, hasBucket, undefined, 0, field);
+      //   const countColumn = buildColumnForOperationType(1, 'count', state.columns);
 
-      //   const countColumn = buildColumnForOperationType(1, 'count', undefined, 0);
+      //   // let column know about count column
+      //   const column = buildColumnForOperationType(
+      //     0,
+      //     hasBucket,
+      //     {
+      //       col2: countColumn,
+      //     },
+      //     undefined,
+      //     field
+      //   );
 
       //   const suggestion: DatasourceSuggestion<IndexPatternPrivateState> = {
       //     state: {
@@ -395,13 +405,19 @@ export function getIndexPatternDatasource({
       //     f => f.name === currentIndexPattern.timeFieldName
       //   )!;
 
-      //   const column = buildColumnForOperationType(0, operations[0], undefined, 0, field);
+      //   const column = buildColumnForOperationType(
+      //     0,
+      //     operations[0],
+      //     state.columns,
+      //     undefined,
+      //     field
+      //   );
 
       //   const dateColumn = buildColumnForOperationType(
       //     1,
       //     'date_histogram',
+      //     state.columns,
       //     undefined,
-      //     0,
       //     dateField
       //   );
 

@@ -21,7 +21,8 @@ import {
 import { getPotentialColumns } from '../operations';
 import { PopoverEditor } from './popover_editor';
 import { DragContextState, ChildDragDropProvider, DragDrop } from '../../drag_drop';
-import { changeColumn, hasField, deleteColumn } from '../state_helpers';
+import { changeColumn, deleteColumn } from '../state_helpers';
+import { hasField } from '../utils';
 
 export type IndexPatternDimensionPanelProps = DatasourceDimensionPanelProps & {
   state: IndexPatternPrivateState;

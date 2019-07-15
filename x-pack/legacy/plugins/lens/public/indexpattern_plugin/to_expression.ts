@@ -55,7 +55,13 @@ function getExpressionForLayer(
     );
 
     if (filterRatios.length) {
-      const countColumn = buildColumnForOperationType(columnEntries.length, 'count', 2, 'layerId');
+      const countColumn = buildColumnForOperationType({
+        index: columnEntries.length,
+        op: 'count',
+        columns,
+        suggestedOrder: 2,
+        layerId: 'first',
+      });
       aggs.push(getEsAggsConfig(countColumn, 'filter-ratio'));
 
       return `esaggs
@@ -199,5 +205,5 @@ export function toExpression(state: IndexPatternPrivateState) {
   // return dataFetchExpression;
   // }
 
-  return null;
+  // return null;
 }

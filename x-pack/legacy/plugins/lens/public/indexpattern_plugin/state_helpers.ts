@@ -9,25 +9,8 @@ import {
   IndexPatternPrivateState,
   IndexPatternColumn,
   BaseIndexPatternColumn,
-  FieldBasedIndexPatternColumn,
 } from './indexpattern';
-
-export function getColumnOrder(columns: Record<string, IndexPatternColumn>): string[] {
-  const entries = Object.entries(columns);
-
-  const [aggregations, metrics] = _.partition(entries, col => col[1].isBucketed);
-
-  return aggregations
-    .sort(([id, col], [id2, col2]) => {
-      return (
-        // Sort undefined orders last
-        (col.suggestedOrder !== undefined ? col.suggestedOrder : Number.MAX_SAFE_INTEGER) -
-        (col2.suggestedOrder !== undefined ? col2.suggestedOrder : Number.MAX_SAFE_INTEGER)
-      );
-    })
-    .map(([id]) => id)
-    .concat(metrics.map(([id]) => id));
-}
+import { operationDefinitionMap, OperationDefinition } from './operations';
 
 export function updateColumnParam<
   C extends BaseIndexPatternColumn & { params: object },
@@ -68,6 +51,25 @@ export function updateColumnParam<
   };
 }
 
+function adjustColumnReferencesForChangedColumn(
+  columns: Record<string, IndexPatternColumn>,
+  columnId: string
+) {
+  const newColumns = { ...columns };
+  Object.keys(newColumns).forEach(currentColumnId => {
+    if (currentColumnId !== columnId) {
+      const currentColumn = newColumns[currentColumnId] as BaseIndexPatternColumn;
+      const operationDefinition = operationDefinitionMap[
+        currentColumn.operationType
+      ] as OperationDefinition<BaseIndexPatternColumn>;
+      newColumns[currentColumnId] = (operationDefinition.onOtherColumnChanged
+        ? operationDefinition.onOtherColumnChanged(currentColumn, newColumns)
+        : currentColumn) as IndexPatternColumn;
+    }
+  });
+  return newColumns;
+}
+
 export function changeColumn(
   state: IndexPatternPrivateState,
   layerId: string,
@@ -85,10 +87,17 @@ export function changeColumn(
       ? ({ ...newColumn, params: oldColumn.params } as IndexPatternColumn)
       : newColumn;
 
-  const newColumns: Record<string, IndexPatternColumn> = {
-    ...state.layers[layerId].columns,
-    [columnId]: updatedColumn,
-  };
+  // const newColumns: Record<string, IndexPatternColumn> = {
+  //   ...state.layers[layerId].columns,
+  //   [columnId]: updatedColumn,
+  // };
+  const newColumns = adjustColumnReferencesForChangedColumn(
+    {
+      ...state.layers[layerId].columns,
+      [columnId]: updatedColumn,
+    },
+    columnId
+  );
 
   return {
     ...state,
@@ -104,24 +113,11 @@ export function changeColumn(
 }
 
 export function deleteColumn(state: IndexPatternPrivateState, layerId: string, columnId: string) {
-  // const newColumns: IndexPatternPrivateState['columns'] = {
-  //   ...state.columns,
-  // };
-  const newColumns: Record<string, IndexPatternColumn> = {
-    ...state.layers[layerId].columns,
-  };
+  const newColumns = adjustColumnReferencesForChangedColumn(
+    state.layers[layerId].columns,
+    columnId
+  );
   delete newColumns[columnId];
-
-  // return {
-  //   ...state,
-  //   columns: newColumns,
-  //   columnOrder: getColumnOrder(newColumns),
-  // };
-
-  // const newColumns: Record<string, IndexPatternColumn> = {
-  //   ...state.layers[layerId].columns,
-  //   [columnId]: updatedColumn,
-  // };
 
   return {
     ...state,
@@ -136,15 +132,19 @@ export function deleteColumn(state: IndexPatternPrivateState, layerId: string, c
   };
 }
 
-export function hasField(column: BaseIndexPatternColumn): column is FieldBasedIndexPatternColumn {
-  return 'sourceField' in column;
-}
+export function getColumnOrder(columns: Record<string, IndexPatternColumn>): string[] {
+  const entries = Object.entries(columns);
 
-export function sortByField<C extends BaseIndexPatternColumn>(columns: C[]) {
-  return [...columns].sort((column1, column2) => {
-    if (hasField(column1) && hasField(column2)) {
-      return column1.sourceField.localeCompare(column2.sourceField);
-    }
-    return column1.operationType.localeCompare(column2.operationType);
-  });
+  const [aggregations, metrics] = _.partition(entries, col => col[1].isBucketed);
+
+  return aggregations
+    .sort(([id, col], [id2, col2]) => {
+      return (
+        // Sort undefined orders last
+        (col.suggestedOrder !== undefined ? col.suggestedOrder : Number.MAX_SAFE_INTEGER) -
+        (col2.suggestedOrder !== undefined ? col2.suggestedOrder : Number.MAX_SAFE_INTEGER)
+      );
+    })
+    .map(([id]) => id)
+    .concat(metrics.map(([id]) => id));
 }
