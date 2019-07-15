@@ -4,128 +4,169 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useContext, useState } from 'react';
-import {
-  EuiButton,
-  EuiButtonEmpty,
-  EuiDescriptionList,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiHorizontalRule,
-  EuiIcon,
-  EuiPopover,
-  EuiSpacer,
-  EuiSwitch,
-  EuiText,
-  EuiTitle,
-  EuiToolTip,
-} from '@elastic/eui';
+import React, { useContext, useEffect, useReducer, useState } from 'react';
 
 import styled from 'styled-components';
-import { setupMlJob, startDatafeeds, stopDatafeeds } from './api';
+import moment from 'moment';
+import { EuiButton, EuiPopover, EuiPopoverTitle, EuiSpacer } from '@elastic/eui';
 import { useJobSummaryData } from './hooks/use_job_summary_data';
-import { useSiemJobs } from './hooks/use_siem_jobs';
 import * as i18n from './translations';
 import { KibanaConfigContext } from '../../lib/adapters/framework/kibana_framework_adapter';
-import { ConfigTemplate, DisplayJob, Job } from './types';
+import { Job } from './types';
 import { hasMlAdminPermissions } from '../ml/permissions/has_ml_admin_permissions';
 import { MlCapabilitiesContext } from '../ml/permissions/ml_capabilities_provider';
-
-const FilterJobsEuiFlexGroup = styled(EuiFlexGroup)`
-  margin-top: -20px;
-`;
-
-const SpanH4 = styled.h4`
-  display: inline-block;
-`;
+import { JobsTable } from './jobs_table/jobs_table';
+import { setupMlJob, startDatafeeds, stopDatafeeds } from './api';
+import { useIndexPatterns } from './hooks/use_index_patterns';
+import { UpgradeContents } from './upgrade_contents';
+import { FilterGroup } from './jobs_table/filter_group';
+import { ShowingCount } from './jobs_table/showing_count';
+import { PopoverDescription } from './popover_description';
+import { getConfigTemplatesToInstall, getJobsToDisplay, getJobsToInstall } from './helpers';
+import { configTemplates, siemJobPrefix } from './config_templates';
 
 const PopoverContentsDiv = styled.div`
-  width: 450px;
+  max-width: 550px;
 `;
 
-const siemJobPrefix = 'siem-api-';
+interface State {
+  isLoading: boolean;
+  jobs: Job[];
+  refreshToggle: boolean;
+}
 
-/**
- * Config Templates w/ corresponding defaultIndexPattern and jobId's of the SIEM Jobs embedded
- * in ML. Added as part of: https://github.com/elastic/kibana/pull/39678/files
- */
-const configTemplates: ConfigTemplate[] = [
-  {
-    name: 'siem_auditbeat_ecs',
-    defaultIndexPattern: 'auditbeat-*',
-    jobs: [
-      `${siemJobPrefix}rare_process_linux_ecs`,
-      `${siemJobPrefix}suspicious_login_activity_ecs`,
-    ],
-  },
-  {
-    name: 'siem_winlogbeat_ecs',
-    defaultIndexPattern: 'winlogbeat-*',
-    jobs: [`${siemJobPrefix}rare_process_windows_ecs`],
-  },
-];
+type Action =
+  | { type: 'refresh' }
+  | { type: 'loading' }
+  | { type: 'success'; results: Job[] }
+  | { type: 'failure' };
 
-export const getJobsToInstall = (templates: ConfigTemplate[]): string[] =>
-  templates.reduce((jobs: string[], template) => [...jobs, ...template.jobs], []);
+function mlPopoverReducer(state: State, action: Action): State {
+  switch (action.type) {
+    case 'refresh': {
+      return {
+        ...state,
+        refreshToggle: !state.refreshToggle,
+      };
+    }
+    case 'loading': {
+      return {
+        ...state,
+        isLoading: true,
+      };
+    }
+    case 'success': {
+      return {
+        ...state,
+        isLoading: false,
+        jobs: action.results,
+      };
+    }
+    case 'failure': {
+      return {
+        ...state,
+        isLoading: false,
+        jobs: [],
+      };
+    }
+    default:
+      return state;
+  }
+}
 
-export const getConfigTemplatesToInstall = (
-  templates: ConfigTemplate[],
-  installedJobIds: string[],
-  indexPattern: string
-): ConfigTemplate[] =>
-  templates
-    .filter(ct => !ct.jobs.every(ctJobId => installedJobIds.includes(ctJobId)))
-    .filter(ct => indexPattern.indexOf(ct.defaultIndexPattern) >= 0);
-
-export const getJobsToDisplay = (
-  siemJobSummaryData: Job[] | null,
-  embeddedJobIds: string[],
-  showAllJobs: boolean
-): DisplayJob[] =>
-  siemJobSummaryData
-    ? siemJobSummaryData
-        .filter(job => (showAllJobs ? true : embeddedJobIds.includes(job.id)))
-        .map(job => ({
-          title: job.id,
-          description: job.description,
-          isChecked: job.datafeedState === 'started',
-        }))
-    : [];
+const initialState: State = {
+  isLoading: false,
+  jobs: [],
+  refreshToggle: true,
+};
 
 export const MlPopover = React.memo(() => {
+  const [{ refreshToggle }, dispatch] = useReducer(mlPopoverReducer, initialState);
+
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-  const [showAllJobs, setShowAllJobs] = useState(false);
+  const [showCustomJobs, setShowCustomJobs] = useState(false);
+  const [showElasticJobs, setShowElasticJobs] = useState(false);
+  const [isLoadingJobSummaryData, jobSummaryData] = useJobSummaryData([], refreshToggle);
   const [isCreatingJobs, setIsCreatingJobs] = useState(false);
-  const [refetchSummaryData, setRefetchSummaryData] = useState(false);
-  const [, siemJobs] = useSiemJobs(isPopoverOpen ? !refetchSummaryData : refetchSummaryData);
-  const [, siemJobSummaryData] = useJobSummaryData(
-    siemJobs,
-    isPopoverOpen ? !refetchSummaryData : refetchSummaryData
-  );
+  const [filterQuery, setFilterQuery] = useState('');
+
+  const [, configuredIndexPattern] = useIndexPatterns(refreshToggle);
   const config = useContext(KibanaConfigContext);
   const capabilities = useContext(MlCapabilitiesContext);
   const headers = { 'kbn-version': config.kbnVersion };
 
+  // Enable/Disable Job & Datafeed -- passed to JobsTable for use as callback on JobSwitch
+  const enableDatafeed = async (jobName: string, latestTimestampMs: number, enable: boolean) => {
+    // Max start time for job is no more than two weeks ago to ensure job performance
+    const maxStartTime = moment
+      .utc()
+      .subtract(14, 'days')
+      .valueOf();
+
+    if (enable) {
+      const startTime = Math.max(latestTimestampMs, maxStartTime);
+      await startDatafeeds([`datafeed-${jobName}`], headers, startTime);
+    } else {
+      await stopDatafeeds([`datafeed-${jobName}`], headers);
+    }
+    dispatch({ type: 'refresh' });
+  };
+
   // All jobs from embedded configTemplates that should be installed
   const embeddedJobIds = getJobsToInstall(configTemplates);
 
-  // Jobs currently installed retrieved via ml groups api for 'siem' group
+  // Jobs currently installed retrieved via ml jobs_summary api for 'siem' group
+  const siemJobs = jobSummaryData.map(job => job.id);
   const installedJobIds = embeddedJobIds.filter(job => siemJobs.includes(job));
 
   // Config templates that still need to be installed and have a defaultIndexPattern that is configured
   const configTemplatesToInstall = getConfigTemplatesToInstall(
     configTemplates,
     installedJobIds,
-    config.indexPattern || ''
+    configuredIndexPattern || ''
   );
 
   // Filter installed job to show all 'siem' group jobs or just embedded
-  const jobsToDisplay = getJobsToDisplay(siemJobSummaryData, embeddedJobIds, showAllJobs);
-  if (!hasMlAdminPermissions(capabilities)) {
-    return null;
-  } else {
+  const jobsToDisplay = getJobsToDisplay(
+    jobSummaryData,
+    embeddedJobIds,
+    showCustomJobs,
+    showElasticJobs,
+    filterQuery
+  );
+
+  // Install Config Templates as effect of opening popover
+  useEffect(() => {
+    if (
+      jobSummaryData.length &&
+      configuredIndexPattern !== '' &&
+      configTemplatesToInstall.length > 0
+    ) {
+      const setupJobs = async () => {
+        setIsCreatingJobs(true);
+        await Promise.all(
+          configTemplatesToInstall.map(configTemplate => {
+            return setupMlJob({
+              configTemplate: configTemplate.name,
+              indexPatternName: configTemplate.defaultIndexPattern,
+              groups: ['siem'],
+              prefix: siemJobPrefix,
+              headers,
+            });
+          })
+        );
+        setIsCreatingJobs(false);
+        dispatch({ type: 'refresh' });
+      };
+      setupJobs();
+    }
+  }, [jobSummaryData, configuredIndexPattern]);
+
+  if (!capabilities.isPlatinumOrTrialLicense) {
+    // If the user does not have platinum show upgrade UI
     return (
       <EuiPopover
+        anchorPosition="downRight"
         id="integrations-popover"
         button={
           <EuiButton
@@ -134,153 +175,65 @@ export const MlPopover = React.memo(() => {
             iconSide="right"
             onClick={() => setIsPopoverOpen(!isPopoverOpen)}
           >
-            {i18n.INTEGRATIONS}
+            {i18n.ANOMALY_DETECTION}
+          </EuiButton>
+        }
+        isOpen={isPopoverOpen}
+        closePopover={() => setIsPopoverOpen(!isPopoverOpen)}
+      >
+        <UpgradeContents />
+      </EuiPopover>
+    );
+  } else if (hasMlAdminPermissions(capabilities)) {
+    // If the user has Platinum License & ML Admin Permissions, show Anomaly Detection button & full config UI
+    return (
+      <EuiPopover
+        anchorPosition="downRight"
+        id="integrations-popover"
+        button={
+          <EuiButton
+            data-test-subj="integrations-button"
+            iconType="arrowDown"
+            iconSide="right"
+            onClick={() => {
+              setIsPopoverOpen(!isPopoverOpen);
+              dispatch({ type: 'refresh' });
+            }}
+          >
+            {i18n.ANOMALY_DETECTION}
           </EuiButton>
         }
         isOpen={isPopoverOpen}
         closePopover={() => setIsPopoverOpen(!isPopoverOpen)}
       >
         <PopoverContentsDiv data-test-subj="ml-popover-contents">
-          <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
-            <EuiFlexItem grow={false}>
-              <EuiDescriptionList
-                listItems={[
-                  {
-                    title: <MlPopoverTitle />,
-                    description: i18n.ML_DESCRIPTION,
-                  },
-                ]}
-              />
-            </EuiFlexItem>
-            {configTemplatesToInstall.length > 0 && (
-              <EuiFlexItem>
-                <EuiButton
-                  isLoading={isCreatingJobs}
-                  iconType="plusInCircle"
-                  onClick={async () => {
-                    setIsCreatingJobs(true);
-                    await Promise.all(
-                      configTemplatesToInstall.map(configTemplate => {
-                        return setupMlJob({
-                          configTemplate: configTemplate.name,
-                          indexPatternName: configTemplate.defaultIndexPattern,
-                          groups: ['siem'],
-                          prefix: siemJobPrefix,
-                          headers,
-                        });
-                      })
-                    );
-                    setRefetchSummaryData(!refetchSummaryData);
-                    setIsCreatingJobs(false);
-                  }}
-                >
-                  {isCreatingJobs ? i18n.CREATING_JOBS : i18n.CREATE_JOBS}
-                </EuiButton>
-              </EuiFlexItem>
-            )}
-          </EuiFlexGroup>
+          <EuiPopoverTitle>{i18n.ANOMALY_DETECTION_TITLE}</EuiPopoverTitle>
+          <PopoverDescription />
 
-          <EuiSpacer size="xs" />
+          <EuiSpacer />
 
-          <JobDetailsHeader />
+          <FilterGroup
+            showCustomJobs={showCustomJobs}
+            setShowCustomJobs={setShowCustomJobs}
+            showElasticJobs={showElasticJobs}
+            setShowElasticJobs={setShowElasticJobs}
+            setFilterQuery={setFilterQuery}
+          />
 
-          <FilterJobsEuiFlexGroup gutterSize="xs" justifyContent="flexEnd">
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty size="xs" onClick={() => setShowAllJobs(!showAllJobs)}>
-                {showAllJobs ? i18n.SHOW_SIEM_JOBS : i18n.SHOW_ALL_JOBS}
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-          </FilterJobsEuiFlexGroup>
+          <ShowingCount filterResultsLength={jobsToDisplay.length} />
 
-          <EuiSpacer size="s" />
+          <EuiSpacer />
 
-          {jobsToDisplay.map(job => (
-            <JobDetail
-              key={job.title}
-              jobName={job.title}
-              jobDescription={job.description}
-              isChecked={job.isChecked}
-              onJobStateChange={() => setRefetchSummaryData(!refetchSummaryData)}
-            />
-          ))}
+          <JobsTable
+            isLoading={isCreatingJobs || isLoadingJobSummaryData}
+            jobs={jobsToDisplay}
+            onJobStateChange={enableDatafeed}
+          />
         </PopoverContentsDiv>
       </EuiPopover>
     );
+  } else {
+    // If the user has Platinum License & not ML Admin, hide Anomaly Detection button as they don't have permissions to configure
+    return null;
   }
 });
-
-export const JobDetail = React.memo<{
-  jobName: string;
-  jobDescription: string;
-  isChecked: boolean;
-  onJobStateChange: Function;
-}>(({ jobName, jobDescription, isChecked, onJobStateChange }) => {
-  const [isLoading, setIsLoading] = useState(false);
-  const config = useContext(KibanaConfigContext);
-  const headers = { 'kbn-version': config.kbnVersion };
-
-  const startDatafeed = async (enable: boolean) => {
-    if (enable) {
-      await startDatafeeds([`datafeed-${jobName}`], headers);
-    } else {
-      await stopDatafeeds([`datafeed-${jobName}`], headers);
-    }
-    onJobStateChange();
-    setIsLoading(false);
-  };
-
-  return (
-    <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
-      <EuiFlexItem grow={false}>
-        <EuiTitle size="xxs">
-          <h5>{jobName}</h5>
-        </EuiTitle>
-        <EuiText size="s">{jobDescription}</EuiText>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiSwitch
-          data-test-subj="job-detail-switch"
-          disabled={isLoading}
-          checked={isChecked}
-          onChange={e => {
-            setIsLoading(true);
-            startDatafeed(e.target.checked);
-          }}
-        />
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  );
-});
-
-export const JobDetailsHeader = React.memo(() => (
-  <EuiFlexGroup gutterSize="s" alignItems="center">
-    <EuiFlexItem grow={false}>
-      <EuiToolTip content={i18n.JOB_DETAILS_TOOL_TIP} position="left">
-        <>
-          <EuiTitle size="xs">
-            <SpanH4>{i18n.JOB_DETAILS}</SpanH4>
-          </EuiTitle>
-          <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
-        </>
-      </EuiToolTip>
-    </EuiFlexItem>
-
-    <EuiFlexItem>
-      <EuiHorizontalRule margin="m" />
-    </EuiFlexItem>
-  </EuiFlexGroup>
-));
-
-export const MlPopoverTitle = React.memo(() => (
-  <EuiFlexGroup gutterSize="s" alignItems="center">
-    <EuiFlexItem grow={false}>
-      <EuiIcon type="machineLearningApp" size="m" />
-    </EuiFlexItem>
-
-    <EuiFlexItem>
-      <EuiTitle size="s" className="euiAccordionForm__title">
-        <h6>{i18n.MACHINE_LEARNING}</h6>
-      </EuiTitle>
-    </EuiFlexItem>
-  </EuiFlexGroup>
-));

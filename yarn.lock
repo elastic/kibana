@@ -1611,10 +1611,10 @@
     ts-debounce "^1.0.0"
     uuid "^3.3.2"
 
-"@elastic/ctags-langserver@^0.0.7":
-  version "0.0.7"
-  resolved "https://registry.yarnpkg.com/@elastic/ctags-langserver/-/ctags-langserver-0.0.7.tgz#db73b0e956361db8f1b2c531978ab5a204fc13a4"
-  integrity sha512-srVVto+3MLTVf+AA/iccS+TJHwrMx0sc4XDTCzQ/tqOqPwY8tjfD9kEfOgJ57vaBknrejf70WVnSmLMiRjXueQ==
+"@elastic/ctags-langserver@^0.0.8":
+  version "0.0.8"
+  resolved "https://registry.yarnpkg.com/@elastic/ctags-langserver/-/ctags-langserver-0.0.8.tgz#3dceeba53ab18ea3e9eed0d44a6736c7edfe9452"
+  integrity sha512-Tn1DUfQbQg1qOo0JlKHsfEYnI0KETc2sHgVUxm6Gx08nyHNKduQgARBT4CKCVxFU3I3JaykUKayQGjlPpqU/6Q==
   dependencies:
     "@elastic/lsp-extension" "^0.1.1"
     "@elastic/node-ctags" "1.0.2"
@@ -4236,21 +4236,7 @@
   resolved "https://registry.yarnpkg.com/@types/proper-lockfile/-/proper-lockfile-3.0.0.tgz#dcc7cc3714857a4ae6583331d2687e89dc5c94d2"
   integrity sha512-+tfnsA3KNPDm7Sj9x5omRgvS6ALc+edjTZXYeR3kVEm+qmsrF+59yJUWZDreV/O0+EQ6t0YSWlzxfdV58UOEVg==
 
-"@types/puppeteer-core@^1.9.0":
-  version "1.9.0"
-  resolved "https://registry.yarnpkg.com/@types/puppeteer-core/-/puppeteer-core-1.9.0.tgz#5ceb397e3ff769081fb07d71289b5009392d24d3"
-  integrity sha512-YJwGTq0a8xZxN7/QDeW59XMdKTRNzDTc8ZVBPDB6J13GgXn1+QzgMA8pAq1/bj2FD0R7xj3nYoZra10b0HLzFw==
-  dependencies:
-    "@types/puppeteer" "*"
-
-"@types/puppeteer@*":
-  version "1.11.1"
-  resolved "https://registry.yarnpkg.com/@types/puppeteer/-/puppeteer-1.11.1.tgz#f2fe2e08917af2b4dc4b03bd2b838c05cb9d8410"
-  integrity sha512-IvrvZfWjITUH7q4WrM25ul9xlIeLM3Oh+hV2FL7xQQSroVf8mX3lMZaN7XEsw6Bdfp99Qm7I4GcD+ak5+wIEfA==
-  dependencies:
-    "@types/node" "*"
-
-"@types/puppeteer@^1.6.0":
+"@types/puppeteer@^1.12.4", "@types/puppeteer@^1.6.0":
   version "1.12.4"
   resolved "https://registry.yarnpkg.com/@types/puppeteer/-/puppeteer-1.12.4.tgz#8388efdb0b30a54a7e7c4831ca0d709191d77ff1"
   integrity sha512-aaGbJaJ9TuF9vZfTeoh876sBa+rYJWPwtsmHmYr28pGr42ewJnkDTq2aeSKEmS39SqUdkwLj73y/d7rBSp7mDQ==
@@ -19639,7 +19625,7 @@ moment@2.22.2, moment@>=2.14.0:
   resolved "https://registry.yarnpkg.com/moment/-/moment-2.22.2.tgz#3c257f9839fc0e93ff53149632239eb90783ff66"
   integrity sha1-PCV/mDn8DpP/UxSWMiOeuQeD/2Y=
 
-moment@2.24.0:
+moment@2.24.0, moment@>=1.6.0:
   version "2.24.0"
   resolved "https://registry.yarnpkg.com/moment/-/moment-2.24.0.tgz#0d055d53f5052aa653c9f6eb68bb5d12bf5c2b5b"
   integrity sha512-bV7f+6l2QigeBBZSM/6yTNq4P2fNpSWj/0e7jQcy87A8e7o2nAfP/34/2ky5Vw4B9S446EtIhodAzkFCcR4dQg==
@@ -23138,6 +23124,13 @@ react-modal@^3.8.1:
     prop-types "^15.5.10"
     react-lifecycles-compat "^3.0.0"
     warning "^3.0.0"
+
+react-moment-proptypes@^1.6.0:
+  version "1.6.0"
+  resolved "https://registry.yarnpkg.com/react-moment-proptypes/-/react-moment-proptypes-1.6.0.tgz#8ec266ee392a08ba3412d2df2eebf833ab1046df"
+  integrity sha512-4h7EuhDMTzQqZ+02KUUO+AVA7PqhbD88yXB740nFpNDyDS/bj9jiPyn2rwr9sa8oDyaE1ByFN9+t5XPyPTmN6g==
+  dependencies:
+    moment ">=1.6.0"
 
 react-motion@^0.4.8:
   version "0.4.8"
