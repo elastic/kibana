@@ -26,7 +26,7 @@ import {
   PointSeries,
   PointSeriesColumnName,
   PointSeriesColumns,
-} from '../../types';
+} from '../../../../types';
 
 // TODO: pointseries performs poorly, that's why we run it on the server.
 
@@ -55,14 +55,6 @@ export function pointseries(): ExpressionFunction<
       types: ['datatable'],
     },
     args: {
-      x: {
-        types: ['string'],
-        help: argHelp.x,
-      },
-      y: {
-        types: ['string'],
-        help: argHelp.y,
-      },
       color: {
         types: ['string'],
         help: argHelp.color, // If you need categorization, transform the field.
@@ -74,6 +66,14 @@ export function pointseries(): ExpressionFunction<
       text: {
         types: ['string'],
         help: argHelp.text,
+      },
+      x: {
+        types: ['string'],
+        help: argHelp.x,
+      },
+      y: {
+        types: ['string'],
+        help: argHelp.y,
       },
       // In the future it may make sense to add things like shape, or tooltip values, but I think what we have is good for now
       // The way the function below is written you can add as many arbitrary named args as you want.
