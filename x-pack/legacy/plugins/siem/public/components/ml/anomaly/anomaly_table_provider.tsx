@@ -5,7 +5,7 @@
  */
 
 import * as React from 'react';
-import { InfluencerInput, Anomalies } from '../types';
+import { InfluencerInput, Anomalies, CriteriaFields } from '../types';
 import { useAnomaliesTableData } from './use_anomalies_table_data';
 
 interface ChildrenArgs {
@@ -14,18 +14,22 @@ interface ChildrenArgs {
 }
 
 interface Props {
-  influencers: InfluencerInput[] | null;
+  influencers?: InfluencerInput[];
   startDate: number;
   endDate: number;
+  criteriaFields?: CriteriaFields[];
   children: (args: ChildrenArgs) => React.ReactNode;
+  skip: boolean;
 }
 
 export const AnomalyTableProvider = React.memo<Props>(
-  ({ influencers, startDate, endDate, children }) => {
+  ({ influencers, startDate, endDate, children, criteriaFields, skip }) => {
     const [isLoadingAnomaliesData, anomaliesData] = useAnomaliesTableData({
+      criteriaFields,
       influencers,
       startDate,
       endDate,
+      skip,
     });
     return <>{children({ isLoadingAnomaliesData, anomaliesData })}</>;
   }

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { DashboardViewMode } from '../dashboard_view_mode';
+import { ViewMode } from '../../../../embeddable_api/public';
 import { SavedObjectDashboard } from '../saved_dashboard/saved_dashboard';
 import { DashboardAppStateDefaults } from '../types';
 
@@ -34,7 +34,6 @@ export function getAppStateDefaults(
     options: savedDashboard.optionsJSON ? JSON.parse(savedDashboard.optionsJSON) : {},
     query: savedDashboard.getQuery(),
     filters: savedDashboard.getFilters(),
-    viewMode:
-      savedDashboard.id || hideWriteControls ? DashboardViewMode.VIEW : DashboardViewMode.EDIT,
+    viewMode: savedDashboard.id || hideWriteControls ? ViewMode.VIEW : ViewMode.EDIT,
   };
 }

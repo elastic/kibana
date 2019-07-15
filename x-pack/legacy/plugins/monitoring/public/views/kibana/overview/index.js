@@ -80,12 +80,14 @@ uiRoutes.when('/kibana', {
                       <MonitoringTimeseriesContainer
                         series={data.metrics.kibana_cluster_requests}
                         onBrush={this.onBrush}
+                        zoomInfo={this.zoomInfo}
                       />
                     </EuiFlexItem>
                     <EuiFlexItem grow={true}>
                       <MonitoringTimeseriesContainer
                         series={data.metrics.kibana_cluster_response_times}
                         onBrush={this.onBrush}
+                        zoomInfo={this.zoomInfo}
                       />
                     </EuiFlexItem>
                   </EuiFlexGroup>
