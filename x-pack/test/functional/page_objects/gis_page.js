@@ -403,7 +403,7 @@ export function GisPageProvider({ getService, getPageObjects }) {
       const indexRespCodeBlock = await find.byCssSelector(
         `[data-test-subj="${dataTestSubjName}"]`
       );
-      const indexRespJson = await indexRespCodeBlock.getProperty('innerText');
+      const indexRespJson = await indexRespCodeBlock.getAttribute('innerText');
       return JSON.parse(indexRespJson);
     }
 
