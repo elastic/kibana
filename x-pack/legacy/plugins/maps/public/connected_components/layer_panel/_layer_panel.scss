@@ -10,7 +10,7 @@
 }
 
 .mapLayerPanel__body {
-  @include euiOverflowShadow($euiPageBackgroundColor);
+  @include euiOverflowShadow;
   padding-bottom: 0; /* 1 */
   flex-grow: 1;
   flex-basis: 1px; /* Fixes scrolling for Firefox */
