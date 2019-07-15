@@ -60,6 +60,7 @@ export class Plugin {
     // `namespace` is included into AAD.
     core.savedObjects.addScopedSavedObjectsClientWrapperFactory(
       Number.MAX_SAFE_INTEGER,
+      'encrypted_saved_objects',
       ({ client: baseClient }) => new EncryptedSavedObjectsClientWrapper({ baseClient, service })
     );
 
