@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getAnalyticsReporter } from '../../../../../../../src/legacy/core_plugins/ui_metric/public';
+import { getUiStatsReporter } from '../../../../../../../src/legacy/core_plugins/ui_metric/public';
 import { UIM_APP_NAME } from '../../../common';
 
-export const trackUiMetric = getAnalyticsReporter(UIM_APP_NAME);
+export const trackUiMetric = getUiStatsReporter(UIM_APP_NAME);
 
 /**
  * Transparently return provided request Promise, while allowing us to track

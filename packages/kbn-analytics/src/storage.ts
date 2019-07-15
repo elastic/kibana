@@ -17,6 +17,22 @@
  * under the License.
  */
 
-export { createReporter, ReportHTTP, Reporter, ReporterConfig } from './reporter';
-export { UiStatsMetricType } from './metrics';
-export { Report } from './report';
+import { Report } from './report';
+
+export type Storage = Map<string, any>;
+export class ReportStorageManager {
+  storageKey: string;
+  private storage?: Storage;
+  constructor(storageKey: string, storage?: Storage) {
+    this.storageKey = storageKey;
+    this.storage = storage;
+  }
+  public get(): Report | undefined {
+    if (!this.storage) return;
+    return this.storage.get(this.storageKey);
+  }
+  public store(report: Report) {
+    if (!this.storage) return;
+    this.storage.set(this.storageKey, report);
+  }
+}

@@ -17,53 +17,50 @@
  * under the License.
  */
 
-import { ToolingLog, WriterConfig } from '@kbn/dev-utils';
 import { wrapArray, createLogger } from './util';
-import {
-  Metric,
-  StatsMetric,
-  createStatsMetric,
-  PerformanceMetric,
-  createNavigationMetric,
-} from './metrics';
+import { Metric, UiStatsMetric, createUiStatsMetric } from './metrics';
+
+import { Storage, ReportStorageManager } from './storage';
+import { Report, ReportManager } from './report';
 
 export interface ReporterConfig {
   http: ReportHTTP;
-  storage?: Map<string, any>;
+  storage?: Storage;
   checkInterval?: number;
-  logConfig?: WriterConfig;
+  debug?: boolean;
+  storageKey?: string;
 }
 
-export type ReportHTTP = (reports: Metric[]) => Promise<void>;
+export type ReportHTTP = (report: Report) => Promise<void>;
 
 export class Reporter {
-  storageKey = 'analytics';
   checkInterval: number;
-  interval: any;
-  http: ReportHTTP;
-  reports: Metric[];
-  private storage?: Map<string, any>;
-  private log: ToolingLog;
+  private interval: any;
+  private http: ReportHTTP;
+  private reportManager: ReportManager;
+  private storageManager: ReportStorageManager;
+  private debug: boolean;
 
   constructor(config: ReporterConfig) {
-    const { http, checkInterval = 10000, storage, logConfig } = config;
+    const { http, storage, debug, checkInterval = 10000, storageKey = 'analytics' } = config;
 
     this.http = http;
     this.checkInterval = checkInterval;
     this.interval = null;
-    this.storage = storage;
-    this.reports = this.getFromStorage();
-    this.log = createLogger(logConfig);
+    this.storageManager = new ReportStorageManager(storageKey, storage);
+    const storedReport = this.storageManager.get();
+    this.reportManager = new ReportManager(storedReport);
+    this.debug = debug;
   }
 
-  getFromStorage() {
-    if (!this.storage) return [];
-    return this.storage.get(this.storageKey);
+  private saveToReport(newMetrics: Metric[]) {
+    this.reportManager.assignReports(newMetrics);
+    this.storageManager.store(this.reportManager.report);
   }
 
-  storeReport() {
-    if (!this.storage) return;
-    this.storage.set(this.storageKey, this.reports);
+  private flushReport() {
+    this.reportManager.clearReport();
+    this.storageManager.store(this.reportManager.report);
   }
 
   public start() {
@@ -74,51 +71,41 @@ export class Reporter {
       }, this.checkInterval);
     }
   }
-  flushStorage() {
-    if (this.storage) {
-      this.storage.set(this.storageKey, []);
-    }
-    this.reports = [];
-  }
 
   public stop() {
     clearTimeout(this.interval);
   }
 
-  public reportPerformance(appName: string, type: PerformanceMetric['type']) {
-    this.log.debug(`${type} Metric -> (${appName})`);
-    const report = createNavigationMetric({ appName });
-    this.log.debug(report);
-    this.insertMetric(report);
+  private log(message: any) {
+    if (this.debug) {
+      // eslint-disable-next-line
+      console.debug(message);
+    }
   }
 
-  public reportStats(
+  public reportUiStats(
     appName: string,
-    type: StatsMetric['type'],
+    type: UiStatsMetric['type'],
     eventNames: string | string[],
     count?: number
   ) {
-    wrapArray(eventNames).forEach(eventName => {
-      this.log.debug(`${type} Metric -> (${appName}:${eventName}):`);
-      const report = createStatsMetric({ type, appName, eventName, count });
-      this.log.debug(report);
-      this.insertMetric(report);
+    const metrics = wrapArray(eventNames).map(eventName => {
+      if (this) this.log(`${type} Metric -> (${appName}:${eventName}):`);
+      const report = createUiStatsMetric({ type, appName, eventName, count });
+      this.log(report);
+      return report;
     });
-  }
-
-  private insertMetric(metric: Metric) {
-    this.reports.push(metric);
-    this.storeReport();
+    this.saveToReport(metrics);
   }
 
   public async sendReports() {
-    try {
-      if (this.reports.length) {
-        await this.http(this.reports);
-        this.flushStorage();
+    if (!this.reportManager.isReportEmpty()) {
+      try {
+        await this.http(this.reportManager.report);
+        this.flushReport();
+      } catch (err) {
+        this.log(`Error Sending Metrics Report ${err}`);
       }
-    } catch (err) {
-      this.log.error(`Error Sending Reports ${err}`);
     }
     this.start();
   }

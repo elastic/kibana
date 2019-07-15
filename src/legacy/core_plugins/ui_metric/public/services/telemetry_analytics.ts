@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { createReporter, Reporter, ReportTypes } from '@kbn/analytics';
+import { createReporter, Reporter, UiStatsMetricType } from '@kbn/analytics';
 
 let telemetryReporter: Reporter;
 
@@ -29,28 +29,28 @@ export const getTelemetryReporter = () => {
   return telemetryReporter;
 };
 
-export const getAnalyticsReporter = (appName: string) => (
-  type: ReportTypes,
+export const getUiStatsReporter = (appName: string) => (
+  type: UiStatsMetricType,
   events: string | string[],
-  additionalConfig = {}
-) => telemetryReporter.report(appName, type, events, additionalConfig);
+  count?: number
+) => telemetryReporter.reportUiStats(appName, type, events, count);
 
 interface AnalyicsReporterConfig {
   localStorage: any;
   basePath: string;
+  debug: boolean;
   $http: ng.IHttpService;
 }
 
 export function createAnalyticsReporter(config: AnalyicsReporterConfig) {
-  const { localStorage, basePath, $http } = config;
+  const { localStorage, basePath, $http, debug } = config;
 
   return createReporter({
+    debug,
     storage: localStorage,
-    logLevel: 'verbose',
-    async http(reports) {
+    async http(report) {
       const url = `${basePath}/api/telemetry/report`;
-      const payload = { metrics: reports };
-      await $http.post(url, payload);
+      await $http.post(url, { report });
     },
   });
 }

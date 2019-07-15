@@ -17,23 +17,36 @@
  * under the License.
  */
 
-export type PerformanceMetric = NavigationMetric;
-export type PerformanceMetricType = NavigationMetric['type'];
+import { Stats } from './stats';
 
-export interface NavigationMetric {
-  type: 'navigation';
+export type UiStatsMetricType = 'click' | 'loaded' | 'count';
+export interface UiStatsMetricConfig<T extends UiStatsMetricType> {
+  type: T;
   appName: string;
-  navigavtionEntries: PerformanceEntry[];
+  eventName: string;
+  count?: number;
 }
-export interface NavigationMetricConfig {
-  appName: string;
-}
-export function createNavigationMetric({ appName }: NavigationMetricConfig): NavigationMetric {
-  const navigavtionEntries = performance.getEntriesByType('navigation');
 
-  return {
-    type: 'navigation',
-    appName,
-    navigavtionEntries,
-  };
+export interface UiStatsMetric<T extends UiStatsMetricType = UiStatsMetricType> {
+  type: T;
+  appName: string;
+  eventName: string;
+  count: number;
+}
+
+export function createUiStatsMetric<T extends UiStatsMetricType>({
+  type,
+  appName,
+  eventName,
+  count = 1,
+}: UiStatsMetricConfig<T>): UiStatsMetric<T> {
+  return { type, appName, eventName, count };
+}
+
+export interface UiStatsMetricReport {
+  key: string;
+  appName: string;
+  eventName: string;
+  type: UiStatsMetricType;
+  stats: Stats;
 }

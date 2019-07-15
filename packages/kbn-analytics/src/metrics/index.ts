@@ -17,11 +17,15 @@
  * under the License.
  */
 
-import { StatsMetric, StatsMetricType } from './stats';
-import { PerformanceMetric } from './performance';
+import { UiStatsMetric, UiStatsMetricType } from './ui_stats';
 
-export { StatsMetric, createStatsMetric } from './stats';
-export { PerformanceMetric, createNavigationMetric } from './performance';
+export {
+  UiStatsMetric,
+  createUiStatsMetric,
+  UiStatsMetricReport,
+  UiStatsMetricType,
+} from './ui_stats';
+export { Stats } from './stats';
 
-export type Metric = PerformanceMetric | StatsMetric<StatsMetricType>;
+export type Metric = UiStatsMetric<UiStatsMetricType>;
 export type MetricType = Metric['type'];

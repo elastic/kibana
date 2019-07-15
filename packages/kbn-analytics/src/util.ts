@@ -17,10 +17,12 @@
  * under the License.
  */
 
-import { ToolingLog, WriterConfig } from '@kbn/dev-utils';
-
 export function wrapArray<T extends any>(subj: T | T[]): T[] {
   return Array.isArray(subj) ? subj : [subj];
 }
 
-export const createLogger = (writeConfig?: WriterConfig) => new ToolingLog(writeConfig);
+export class UnreachableCaseError extends Error {
+  constructor(val: never) {
+    super(`Unreachable case: ${val}`);
+  }
+}

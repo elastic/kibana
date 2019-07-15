@@ -5,11 +5,11 @@
  */
 
 import { UIM_APP_NAME } from '../constants';
-import { getAnalyticsReporter } from '../../../../../../../src/legacy/core_plugins/ui_metric/public';
+import { getUiStatsReporter } from '../../../../../../../src/legacy/core_plugins/ui_metric/public';
 
-export let trackUiMetric: ReturnType<typeof getAnalyticsReporter>;
+export let trackUiMetric: ReturnType<typeof getUiStatsReporter>;
 
-export function init(getReporter: typeof getAnalyticsReporter): void {
+export function init(getReporter: typeof getUiStatsReporter): void {
   trackUiMetric = getReporter(UIM_APP_NAME);
 }
 

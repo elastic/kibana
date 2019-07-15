@@ -4,14 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// / @ts-ignore
+// @ts-ignore
 import { uiModules } from 'ui/modules';
-// / @ts-ignore
+// @ts-ignore
 import { Path } from 'plugins/xpack_main/services/path';
-// / @ts-ignore
+// @ts-ignore
 import { npStart } from 'ui/new_platform';
+// @ts-ignore
 import { Telemetry } from './telemetry';
-// / @ts-ignore
+// @ts-ignore
 import { fetchTelemetry } from './fetch_telemetry';
 
 function telemetryInit($injector: any) {

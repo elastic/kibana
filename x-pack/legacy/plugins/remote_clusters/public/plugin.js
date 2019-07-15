@@ -35,7 +35,7 @@ export class Plugin {
     if (getInjectedVar('remoteClustersUiEnabled')) {
       const {
         management: { getSection, breadcrumb: managementBreadcrumb },
-        uiMetric: { getAnalyticsReporter },
+        uiMetric: { getUiStatsReporter },
       } = pluginsStart;
 
       const esSection = getSection('elasticsearch');
@@ -49,7 +49,7 @@ export class Plugin {
       // Initialize services
       initBreadcrumbs(setBreadcrumbs, managementBreadcrumb);
       initDocumentation(`${elasticWebsiteUrl}guide/en/elasticsearch/reference/${docLinkVersion}/`);
-      initUiMetric(getAnalyticsReporter);
+      initUiMetric(getUiStatsReporter);
       initNotification(toasts, fatalError);
 
       const unmountReactApp = () => {

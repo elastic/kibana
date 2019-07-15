@@ -17,26 +17,9 @@
  * under the License.
  */
 
-export type StatsMetricType = 'click' | 'loaded' | 'count';
-export interface StatsMetricConfig<T extends StatsMetricType> {
-  type: T;
-  appName: string;
-  eventName: string;
-  count?: number;
-}
-
-export interface StatsMetric<T extends StatsMetricType = StatsMetricType> {
-  type: T;
-  appName: string;
-  eventName: string;
-  count: number;
-}
-
-export function createStatsMetric<T extends StatsMetricType>({
-  type,
-  appName,
-  eventName,
-  count = 1,
-}: StatsMetricConfig<T>): StatsMetric<T> {
-  return { type, appName, eventName, count };
+export interface Stats {
+  min: number;
+  max: number;
+  sum: number;
+  avg: number;
 }

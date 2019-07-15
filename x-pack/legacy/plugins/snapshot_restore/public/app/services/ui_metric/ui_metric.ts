@@ -4,12 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { UIM_APP_NAME } from '../../constants';
-import { getAnalyticsReporter } from '../../../../../../../../src/legacy/core_plugins/ui_metric/public';
+import { getUiStatsReporter } from '../../../../../../../../src/legacy/core_plugins/ui_metric/public';
 
 class UiMetricService {
-  track?: ReturnType<typeof getAnalyticsReporter>;
+  track?: ReturnType<typeof getUiStatsReporter>;
 
-  public init = (getReporter: typeof getAnalyticsReporter): void => {
+  public init = (getReporter: typeof getUiStatsReporter): void => {
     this.track = getReporter(UIM_APP_NAME);
   };
 

@@ -16,11 +16,11 @@ the name of a dashboard they've viewed, or the timestamp of the interaction.
 
 ## How to use it
 
-To track a user interaction, import the `getAnalyticsReporter` helper function from UI Metric app:
+To track a user interaction, import the `getUiStatsReporter` helper function from UI Metric app:
 
 ```js
-import { getAnalyticsReporter } from 'relative/path/to/src/legacy/core_plugins/ui_metric/public';
-const trackMetric = getAnalyticsReporter(`<AppName>`);
+import { getUiStatsReporter } from 'relative/path/to/src/legacy/core_plugins/ui_metric/public';
+const trackMetric = getUiStatsReporter(`<AppName>`);
 trackMetric(`<MetricType>`, `<EventName>`);
 ```
 
