@@ -29,14 +29,13 @@ export interface Report {
 export class ReportManager {
   public report: Report;
   constructor(report?: Report) {
-    if (report) {
-      this.report = report;
-    } else {
-      this.clearReport();
-    }
+    this.report = report || ReportManager.createReport();
+  }
+  static createReport() {
+    return { uiStatsMetrics: {} };
   }
   public clearReport() {
-    this.report = { uiStatsMetrics: {} };
+    this.report = ReportManager.createReport();
   }
   public isReportEmpty(): boolean {
     return Object.keys(this.report.uiStatsMetrics).length === 0;
@@ -58,13 +57,25 @@ export class ReportManager {
   assignReports(newMetrics: Metric[]) {
     newMetrics.forEach(newMetric => this.assignReport(this.report, newMetric));
   }
+  static createMetricKey(metric: Metric): string {
+    switch (metric.type) {
+      case 'click':
+      case 'loaded':
+      case 'count': {
+        const { appName, type, eventName } = metric;
+        return `${appName}-${type}-${eventName}`;
+      }
+      default:
+        throw new UnreachableCaseError(metric.type);
+    }
+  }
   private assignReport(report: Report, metric: Metric) {
     switch (metric.type) {
       case 'loaded':
       case 'count':
       case 'click': {
         const { appName, type, eventName, count } = metric;
-        const key = `${appName}-${type}-${eventName}`;
+        const key = ReportManager.createMetricKey(metric);
         const existingStats = (report.uiStatsMetrics[key] || {}).stats;
         this.report.uiStatsMetrics[key] = {
           key,

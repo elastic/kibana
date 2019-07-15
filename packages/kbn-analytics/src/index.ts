@@ -19,4 +19,4 @@
 
 export { createReporter, ReportHTTP, Reporter, ReporterConfig } from './reporter';
 export { UiStatsMetricType } from './metrics';
-export { Report } from './report';
+export { Report, ReportManager } from './report';
