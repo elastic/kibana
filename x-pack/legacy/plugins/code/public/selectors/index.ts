@@ -99,3 +99,5 @@ export const currentRepoSelector = (state: RootState) => state.repository.reposi
 export const repoScopeSelector = (state: RootState) => state.search.searchOptions.repoScope;
 
 export const urlQueryStringSelector = (state: RootState) => state.route.match.location.search;
+
+export const previousMatchSelector = (state: RootState) => state.route.previousMatch;
