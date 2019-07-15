@@ -70,6 +70,7 @@ export class RemoteClusterForm extends Component {
     const { fields, disabledFields } = props;
     const fieldsState = merge({}, defaultFields, fields);
 
+    this.generateId = htmlIdGenerator();
     this.state = {
       localSeedErrors: [],
       seedInput: '',
@@ -77,7 +78,6 @@ export class RemoteClusterForm extends Component {
       disabledFields,
       fieldsErrors: this.getFieldsErrors(fieldsState),
       areErrorsVisible: false,
-      generateId: htmlIdGenerator(),
     };
   }
 
@@ -238,12 +238,12 @@ export class RemoteClusterForm extends Component {
       <EuiDescribedFormGroup
         title={(
           <EuiTitle size="s">
-            <h4>
+            <h2>
               <FormattedMessage
                 id="xpack.remoteClusters.remoteClusterForm.sectionSeedsTitle"
                 defaultMessage="Seed nodes for cluster discovery"
               />
-            </h4>
+            </h2>
           </EuiTitle>
         )}
         description={(
@@ -314,12 +314,12 @@ export class RemoteClusterForm extends Component {
       <EuiDescribedFormGroup
         title={(
           <EuiTitle size="s">
-            <h4>
+            <h2>
               <FormattedMessage
                 id="xpack.remoteClusters.remoteClusterForm.sectionSkipUnavailableTitle"
                 defaultMessage="Make remote cluster optional"
               />
-            </h4>
+            </h2>
           </EuiTitle>
         )}
         description={(
@@ -436,7 +436,7 @@ export class RemoteClusterForm extends Component {
             onClick={this.save}
             fill
             disabled={isSaveDisabled}
-            aria-describedby={this.state.generateId(ERROR_LIST_ID)}
+            aria-describedby={`${this.generateId(ERROR_TITLE_ID)} ${this.generateId(ERROR_LIST_ID)}`}
           >
             <FormattedMessage
               id="xpack.remoteClusters.remoteClusterForm.saveButtonLabel"
@@ -552,7 +552,7 @@ export class RemoteClusterForm extends Component {
 
     const messagesToBeRendered = errorExplanations.length && (
       <EuiScreenReaderOnly>
-        <dl id={this.state.generateId(ERROR_LIST_ID)} aria-labelledby={this.state.generateId(ERROR_TITLE_ID)}>
+        <dl id={this.generateId(ERROR_LIST_ID)} aria-labelledby={this.generateId(ERROR_TITLE_ID)}>
           {errorExplanations.map(({ key, field, error }) => (
             <div key={key}>
               <dt>{field}</dt>
@@ -568,12 +568,12 @@ export class RemoteClusterForm extends Component {
         <EuiSpacer size="m" data-test-subj="remoteClusterFormGlobalError" />
         <EuiCallOut
           title={(
-            <h2 id={this.state.generateId(ERROR_TITLE_ID)}>
+            <h3 id={this.generateId(ERROR_TITLE_ID)}>
               <FormattedMessage
                 id="xpack.remoteClusters.remoteClusterForm.errorTitle"
                 defaultMessage="Fix errors before continuing."
               />
-            </h2>
+            </h3>
           )}
           color="danger"
           iconType="cross"
@@ -610,12 +610,12 @@ export class RemoteClusterForm extends Component {
           <EuiDescribedFormGroup
             title={(
               <EuiTitle size="s">
-                <h4>
+                <h2>
                   <FormattedMessage
                     id="xpack.remoteClusters.remoteClusterForm.sectionNameTitle"
                     defaultMessage="Name"
                   />
-                </h4>
+                </h2>
               </EuiTitle>
             )}
             description={(
