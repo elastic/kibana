@@ -195,7 +195,7 @@ class SearchPage extends React.PureComponent<Props, State> {
             {statsComp}
             <EuiSpacer />
             <div className="codeContainer__search--results">
-              <CodeResult results={results!} />
+              <CodeResult results={results!} query={this.props.query} />
             </div>
             <Pagination query={this.props.query} totalPage={totalPage} currentPage={page - 1} />
           </div>
