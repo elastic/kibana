@@ -119,10 +119,12 @@ export const MoreRowItems = styled(EuiIcon)`
 
 export const OverviewWrapper = styled(EuiFlexGroup)`
   position: relative;
+
   .euiButtonIcon {
     position: absolute;
-    top: -10px;
-    right: 10px;
+    right: ${props => props.theme.eui.euiSizeM};
+    top: 6px;
+    z-index: 2;
   }
 `;
 
