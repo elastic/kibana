@@ -30,6 +30,7 @@ import { checkGetJobsPrivilege } from '../privilege/check_privilege';
 import { getIndexPatterns, loadIndexPatterns } from '../util/index_utils';
 import { MlTimeBuckets } from 'plugins/ml/util/ml_time_buckets';
 import { explorer$ } from './explorer_dashboard_service';
+import { mlTimefilterRefresh$ } from '../services/timefilter_refresh_service';
 import { mlFieldFormatService } from 'plugins/ml/services/field_format_service';
 import { mlJobService } from '../services/job_service';
 import { refreshIntervalWatcher } from '../util/refresh_interval_watcher';
@@ -71,7 +72,6 @@ module.controller('MlExplorerController', function (
   $injector.get('mlSelectSeverityService');
 
   const mlJobSelectService = $injector.get('mlJobSelectService');
-  const mlTimefilterRefreshService = $injector.get('mlTimefilterRefreshService');
 
   // $scope should only contain what's actually still necessary for the angular part.
   // For the moment that's the job selector and the (hidden) filter bar.
@@ -204,7 +204,7 @@ module.controller('MlExplorerController', function (
     }
   });
 
-  const timefilterRefreshServiceSub = mlTimefilterRefreshService.subscribe(() => {
+  const timefilterRefreshServiceSub = mlTimefilterRefresh$.subscribe(() => {
     if ($scope.jobSelectionUpdateInProgress === false) {
       explorer$.next({ action: EXPLORER_ACTION.RELOAD });
     }
