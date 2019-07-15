@@ -69,7 +69,14 @@ describe('KerberosAuthenticationProvider', () => {
 
     it('does not handle requests that can be authenticated without `Negotiate` header.', async () => {
       const request = requestFixture();
-      callWithRequest.withArgs(request, 'shield.authenticate').resolves({});
+      callWithRequest
+        .withArgs(
+          sinon.match({
+            headers: { authorization: `Negotiate ${Buffer.from('__fake__').toString('base64')}` },
+          }),
+          'shield.authenticate'
+        )
+        .resolves({});
 
       const authenticationResult = await provider.authenticate(request, null);
 
@@ -78,7 +85,14 @@ describe('KerberosAuthenticationProvider', () => {
 
     it('does not handle requests if backend does not support Kerberos.', async () => {
       const request = requestFixture();
-      callWithRequest.withArgs(request, 'shield.authenticate').rejects(Boom.unauthorized());
+      callWithRequest
+        .withArgs(
+          sinon.match({
+            headers: { authorization: `Negotiate ${Buffer.from('__fake__').toString('base64')}` },
+          }),
+          'shield.authenticate'
+        )
+        .rejects(Boom.unauthorized());
       let authenticationResult = await provider.authenticate(request, null);
       expect(authenticationResult.notHandled()).toBe(true);
 
@@ -93,7 +107,7 @@ describe('KerberosAuthenticationProvider', () => {
       const request = requestFixture();
       const tokenPair = { accessToken: 'token', refreshToken: 'refresh-token' };
 
-      callWithRequest.withArgs(request, 'shield.authenticate').rejects(Boom.unauthorized());
+      callWithRequest.withArgs(sinon.match.any, 'shield.authenticate').rejects(Boom.unauthorized());
       tokens.refresh.withArgs(tokenPair.refreshToken).resolves(null);
 
       let authenticationResult = await provider.authenticate(request, tokenPair);
@@ -102,7 +116,7 @@ describe('KerberosAuthenticationProvider', () => {
       expect(authenticationResult.challenges).toBeUndefined();
 
       callWithRequest
-        .withArgs(request, 'shield.authenticate')
+        .withArgs(sinon.match.any, 'shield.authenticate')
         .rejects(Boom.unauthorized(null, 'Basic'));
 
       authenticationResult = await provider.authenticate(request, tokenPair);
@@ -114,7 +128,12 @@ describe('KerberosAuthenticationProvider', () => {
     it('fails with `Negotiate` challenge if backend supports Kerberos.', async () => {
       const request = requestFixture();
       callWithRequest
-        .withArgs(request, 'shield.authenticate')
+        .withArgs(
+          sinon.match({
+            headers: { authorization: `Negotiate ${Buffer.from('__fake__').toString('base64')}` },
+          }),
+          'shield.authenticate'
+        )
         .rejects(Boom.unauthorized(null, 'Negotiate'));
 
       const authenticationResult = await provider.authenticate(request, null);
@@ -126,7 +145,9 @@ describe('KerberosAuthenticationProvider', () => {
 
     it('fails if request authentication is failed with non-401 error.', async () => {
       const request = requestFixture();
-      callWithRequest.withArgs(request, 'shield.authenticate').rejects(Boom.serverUnavailable());
+      callWithRequest
+        .withArgs(sinon.match.any, 'shield.authenticate')
+        .rejects(Boom.serverUnavailable());
 
       const authenticationResult = await provider.authenticate(request, null);
 
@@ -135,7 +156,7 @@ describe('KerberosAuthenticationProvider', () => {
       expect(authenticationResult.challenges).toBeUndefined();
     });
 
-    it('gets an token pair in exchange to SPNEGO one and stores it in the state.', async () => {
+    it('gets a token pair in exchange to SPNEGO one and stores it in the state.', async () => {
       const user = { username: 'user' };
       const request = requestFixture({ headers: { authorization: 'negotiate spnego' } });
 
@@ -307,7 +328,12 @@ describe('KerberosAuthenticationProvider', () => {
           statusCode: 500,
           body: { error: { reason: 'token document is missing and must be present' } },
         })
-        .withArgs(sinon.match({ headers: {} }), 'shield.authenticate')
+        .withArgs(
+          sinon.match({
+            headers: { authorization: `Negotiate ${Buffer.from('__fake__').toString('base64')}` },
+          }),
+          'shield.authenticate'
+        )
         .rejects(Boom.unauthorized(null, 'Negotiate'));
 
       tokens.refresh.withArgs(tokenPair.refreshToken).resolves(null);
