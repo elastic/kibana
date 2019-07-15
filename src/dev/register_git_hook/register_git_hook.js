@@ -18,7 +18,7 @@
  */
 
 import chalk from 'chalk';
-import { chmod, unlink, writeFile } from 'fs';
+import { chmod, exists, unlink, writeFile } from 'fs';
 import dedent from 'dedent';
 import normalizePath from 'normalize-path';
 import os from 'os';
@@ -30,6 +30,7 @@ import { REPO_ROOT } from '../constants';
 const simpleGit = new SimpleGit(REPO_ROOT);
 
 const chmodAsync = promisify(chmod);
+const existsAsync = promisify(exists);
 const gitRevParseAsync = promisify(simpleGit.revparse.bind(simpleGit));
 const unlinkAsync = promisify(unlink);
 const writeFileAsync = promisify(writeFile);
@@ -131,6 +132,15 @@ function getKbnPrecommitGitHookScript(rootPath, nodeHome, platform) {
 }
 
 export async function registerPrecommitGitHook(log) {
+  if (!(await existsAsync(`${REPO_ROOT}/.git`))) {
+    log.write(
+      chalk.bold(
+        `.git not present, skipping pre-commit git hook...\n`
+      )
+    );
+
+    return;
+  }
   log.write(
     chalk.bold(
       `Registering Kibana pre-commit git hook...\n`
