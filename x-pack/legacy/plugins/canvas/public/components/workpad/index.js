@@ -10,7 +10,7 @@ import { pure, compose, withState, withProps, getContext, withHandlers } from 'r
 import { transitionsRegistry } from '../../lib/transitions_registry';
 import { undoHistory, redoHistory } from '../../state/actions/history';
 import { fetchAllRenderables } from '../../state/actions/elements';
-import { setZoomScale } from '../../state/actions/transient';
+import { setZoomScale, setFullscreen } from '../../state/actions/transient';
 import { getFullscreen, getZoomScale } from '../../state/selectors/app';
 import {
   getSelectedPageIndex,
@@ -43,6 +43,7 @@ const mapDispatchToProps = {
   redoHistory,
   fetchAllRenderables,
   setZoomScale,
+  setFullscreen,
 };
 
 const mergeProps = (stateProps, dispatchProps, ownProps) => {
