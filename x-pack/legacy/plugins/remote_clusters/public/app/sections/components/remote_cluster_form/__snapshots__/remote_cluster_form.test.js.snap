@@ -17,12 +17,12 @@ Array [
         <div
           class="euiFlexItem"
         >
-          <h4
+          <h2
             class="euiTitle euiTitle--small euiTitle euiTitle--xsmall euiDescribedFormGroup__title"
             id="mockId-title"
           >
             Name
-          </h4>
+          </h2>
           <div
             class="euiText euiText--small euiDescribedFormGroup__description"
             id="mockId"
@@ -89,12 +89,12 @@ Array [
         <div
           class="euiFlexItem"
         >
-          <h4
+          <h2
             class="euiTitle euiTitle--small euiTitle euiTitle--xsmall euiDescribedFormGroup__title"
             id="mockId-title"
           >
             Seed nodes for cluster discovery
-          </h4>
+          </h2>
           <div
             class="euiText euiText--small euiDescribedFormGroup__description"
             id="mockId"
@@ -195,12 +195,12 @@ Array [
         <div
           class="euiFlexItem"
         >
-          <h4
+          <h2
             class="euiTitle euiTitle--small euiTitle euiTitle--xsmall euiDescribedFormGroup__title"
             id="mockId-title"
           >
             Make remote cluster optional
-          </h4>
+          </h2>
           <div
             class="euiText euiText--small euiDescribedFormGroup__description"
             id="mockId"
@@ -290,7 +290,7 @@ Array [
       class="euiFlexItem euiFlexItem--flexGrowZero"
     >
       <button
-        aria-describedby="staticGenerator_removeClustersErrorList"
+        aria-describedby="staticGenerator_removeClustersErrorTitle staticGenerator_removeClustersErrorList"
         class="euiButton euiButton--secondary euiButton--fill"
         data-test-subj="remoteClusterFormSaveButton"
         type="button"
