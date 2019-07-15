@@ -14,6 +14,7 @@ require('@kbn/test').runTestsCli([
   require.resolve('../test/api_integration/config.js'),
   require.resolve('../test/plugin_api_integration/config.js'),
   require.resolve('../test/kerberos_api_integration/config'),
+  require.resolve('../test/kerberos_api_integration/anonymous_access.config'),
   require.resolve('../test/saml_api_integration/config.js'),
   require.resolve('../test/token_api_integration/config.js'),
   // require.resolve('../test/oidc_api_integration/config.js'),
