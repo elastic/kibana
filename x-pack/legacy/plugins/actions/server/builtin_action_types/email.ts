@@ -138,7 +138,7 @@ async function executor(execOptions: ActionTypeExecutorOptions): Promise<any> {
     },
   };
 
-  return await sendEmail(services, sendEmailOptions);
+  return await sendEmail(sendEmailOptions);
 }
 
 // utilities
