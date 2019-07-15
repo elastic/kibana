@@ -6,35 +6,29 @@
 
 import { Dictionary } from '../../../../../../common/types/common';
 
-export type JobId = string;
+import { JobId, DataFrameTransformWithId } from '../../../../common';
 
-export interface DataFrameJob {
-  dest: string;
-  id: JobId;
-  source: string;
-  sync?: object;
-}
-
-export enum DATA_FRAME_RUNNING_STATE {
+export enum DATA_FRAME_TASK_STATE {
+  FAILED = 'failed',
   STARTED = 'started',
   STOPPED = 'stopped',
 }
-type RunningState = DATA_FRAME_RUNNING_STATE.STARTED | DATA_FRAME_RUNNING_STATE.STOPPED;
 
 export interface DataFrameJobState {
   checkpoint: number;
   current_position: Dictionary<any>;
   // indexer_state is a backend internal attribute
   // and should not be considered in the UI.
-  indexer_state: RunningState;
+  indexer_state: DATA_FRAME_TASK_STATE;
   progress?: {
     docs_remaining: number;
     percent_complete: number;
     total_docs: number;
   };
+  reason?: string;
   // task_state is the attribute to check against if a job
   // is running or not.
-  task_state: RunningState;
+  task_state: DATA_FRAME_TASK_STATE;
 }
 
 export interface DataFrameJobStats {
@@ -52,15 +46,17 @@ export interface DataFrameJobStats {
 
 export interface DataFrameJobListRow {
   id: JobId;
+  checkpointing: object;
   state: DataFrameJobState;
   stats: DataFrameJobStats;
-  config: DataFrameJob;
+  config: DataFrameTransformWithId;
 }
 
 // Used to pass on attribute names to table columns
 export enum DataFrameJobListColumn {
   configDestIndex = 'config.dest.index',
   configSourceIndex = 'config.source.index',
+  description = 'config.description',
   id = 'id',
 }
 
@@ -72,6 +68,6 @@ export function isCompletedBatchJob(item: DataFrameJobListRow) {
   return (
     item.state.checkpoint === 1 &&
     item.config.sync === undefined &&
-    item.state.task_state === DATA_FRAME_RUNNING_STATE.STOPPED
+    item.state.task_state === DATA_FRAME_TASK_STATE.STOPPED
   );
 }

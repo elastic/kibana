@@ -14,8 +14,8 @@ import { VectorStyle } from '../shared/layers/styles/vector_style';
 import { HeatmapStyle } from '../shared/layers/styles/heatmap_style';
 import { TileStyle } from '../shared/layers/styles/tile_style';
 import { timefilter } from 'ui/timefilter';
-import { getInspectorAdapters } from '../store/non_serializable_instances';
-import { copyPersistentState, TRACKED_LAYER_DESCRIPTOR } from '../store/util';
+import { getInspectorAdapters } from '../reducers/non_serializable_instances';
+import { copyPersistentState, TRACKED_LAYER_DESCRIPTOR } from '../reducers/util';
 
 function createLayerInstance(layerDescriptor, inspectorAdapters) {
   const source = createSourceInstance(layerDescriptor.sourceDescriptor, inspectorAdapters);
@@ -203,10 +203,40 @@ export const getQueryableUniqueIndexPatternIds = createSelector(
   }
 );
 
-export const hasDirtyState = createSelector(getLayerListRaw, (layerListRaw) => {
-  return layerListRaw.some(layerDescriptor => {
-    const currentState = copyPersistentState(layerDescriptor);
-    const trackedState = layerDescriptor[TRACKED_LAYER_DESCRIPTOR];
-    return (trackedState) ? !_.isEqual(currentState, trackedState) : false;
-  });
-});
+export const hasDirtyState = createSelector(
+  getLayerListRaw,
+  getTransientLayerId,
+  (layerListRaw, transientLayerId) => {
+    if (transientLayerId) {
+      return true;
+    }
+
+    return layerListRaw.some(layerDescriptor => {
+      const trackedState = layerDescriptor[TRACKED_LAYER_DESCRIPTOR];
+      if (!trackedState) {
+        return false;
+      }
+      const currentState = copyPersistentState(layerDescriptor);
+      return !_.isEqual(currentState, trackedState);
+    });
+  }
+);
+
+export const areLayersLoaded = createSelector(
+  getLayerList,
+  getWaitingForMapReadyLayerListRaw,
+  getMapZoom,
+  (layerList, waitingForMapReadyLayerList, zoom) => {
+    if (waitingForMapReadyLayerList.length) {
+      return false;
+    }
+
+    for (let i = 0; i < layerList.length; i++) {
+      const layer = layerList[i];
+      if (layer.isVisible() && layer.showAtZoomLevel(zoom) && !layer.isDataLoaded()) {
+        return false;
+      }
+    }
+    return true;
+  }
+);

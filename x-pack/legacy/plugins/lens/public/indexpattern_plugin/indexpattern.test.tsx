@@ -7,16 +7,29 @@
 import { shallow } from 'enzyme';
 import React from 'react';
 import { EuiComboBox } from '@elastic/eui';
+import chromeMock from 'ui/chrome';
+import { data as dataMock } from '../../../../../../src/legacy/core_plugins/data/public/setup';
+import { localStorage as storageMock } from 'ui/storage/storage_service';
+import { functionsRegistry } from '../../../../../../src/legacy/core_plugins/interpreter/public/registries';
+import { toastNotifications as notificationsMock } from 'ui/notify';
 import {
   getIndexPatternDatasource,
   IndexPatternPersistedState,
   IndexPatternPrivateState,
   IndexPatternDataPanel,
+  IndexPatternColumn,
 } from './indexpattern';
 import { DatasourcePublicAPI, Operation, Datasource } from '../types';
 import { createMockedDragDropContext } from './mocks';
 
 jest.mock('./loader');
+// chrome, notify, storage are used by ./plugin
+jest.mock('ui/chrome');
+jest.mock('ui/notify');
+jest.mock('ui/storage/storage_service');
+// Contains old and new platform data plugins, used for interpreter and filter ratio
+jest.mock('ui/new_platform');
+jest.mock('plugins/data/setup', () => ({ data: { query: { ui: {} } } }));
 
 const expectedIndexPatterns = {
   1: {
@@ -108,8 +121,13 @@ describe('IndexPattern Data Source', () => {
   let indexPatternDatasource: Datasource<IndexPatternPrivateState, IndexPatternPersistedState>;
 
   beforeEach(() => {
-    // @ts-ignore
-    indexPatternDatasource = getIndexPatternDatasource();
+    indexPatternDatasource = getIndexPatternDatasource({
+      chrome: chromeMock,
+      storage: storageMock,
+      interpreter: { functionsRegistry },
+      toastNotifications: notificationsMock,
+      data: dataMock,
+    });
 
     persistedState = {
       currentIndexPatternId: '1',
@@ -506,6 +524,52 @@ describe('IndexPattern Data Source', () => {
             columnId: 'col1',
           },
         ]);
+      });
+    });
+
+    describe('removeColumnInTableSpec', () => {
+      it('should remove the specified column', async () => {
+        const initialState = await indexPatternDatasource.initialize(persistedState);
+        const setState = jest.fn();
+        const sampleColumn: IndexPatternColumn = {
+          dataType: 'number',
+          isBucketed: false,
+          label: 'foo',
+          operationId: 'bar',
+          operationType: 'max',
+          sourceField: 'baz',
+          suggestedOrder: 0,
+        };
+        const columns: Record<string, IndexPatternColumn> = {
+          a: {
+            ...sampleColumn,
+            suggestedOrder: 0,
+          },
+          b: {
+            ...sampleColumn,
+            suggestedOrder: 1,
+          },
+          c: {
+            ...sampleColumn,
+            suggestedOrder: 2,
+          },
+        };
+        const api = indexPatternDatasource.getPublicAPI(
+          {
+            ...initialState,
+            columnOrder: ['a', 'b', 'c'],
+            columns,
+          },
+          setState
+        );
+
+        api.removeColumnInTableSpec('b');
+
+        expect(setState.mock.calls[0][0].columnOrder).toEqual(['a', 'c']);
+        expect(setState.mock.calls[0][0].columns).toEqual({
+          a: columns.a,
+          c: columns.c,
+        });
       });
     });
 

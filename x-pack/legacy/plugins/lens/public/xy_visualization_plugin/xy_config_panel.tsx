@@ -13,33 +13,61 @@ import {
   EuiForm,
   EuiFormRow,
   EuiSwitch,
-  EuiButtonIcon,
-  EuiButton,
   IconType,
 } from '@elastic/eui';
 import { State, SeriesType } from './types';
-import { VisualizationProps, Operation } from '../types';
+import { VisualizationProps } from '../types';
 import { NativeRenderer } from '../native_renderer';
+import { MultiColumnEditor } from './multi_column_editor';
 
 const chartTypeIcons: Array<{ id: SeriesType; label: string; iconType: IconType }> = [
   {
     id: 'line',
-    label: 'Line',
+    label: i18n.translate('xpack.lens.xyVisualization.lineChartLabel', {
+      defaultMessage: 'Line',
+    }),
     iconType: 'visLine',
   },
   {
     id: 'area',
-    label: 'Area',
+    label: i18n.translate('xpack.lens.xyVisualization.areaChartLabel', {
+      defaultMessage: 'Area',
+    }),
     iconType: 'visArea',
   },
   {
     id: 'bar',
-    label: 'Bar',
+    label: i18n.translate('xpack.lens.xyVisualization.barChartLabel', {
+      defaultMessage: 'Bar',
+    }),
     iconType: 'visBarVertical',
   },
   {
     id: 'horizontal_bar',
-    label: 'Horizontal Bar',
+    label: i18n.translate('xpack.lens.xyVisualization.horizontalBarChartLabel', {
+      defaultMessage: 'Horizontal Bar',
+    }),
+    iconType: 'visBarHorizontal',
+  },
+  {
+    id: 'area_stacked',
+    label: i18n.translate('xpack.lens.xyVisualization.stackedAreaChartLabel', {
+      defaultMessage: 'Stacked Area',
+    }),
+    iconType: 'visArea',
+  },
+  {
+    id: 'bar_stacked',
+    label: i18n.translate('xpack.lens.xyVisualization.stackedBarChartLabel', {
+      defaultMessage: 'Stacked Bar',
+    }),
+    iconType: 'visBarVertical',
+  },
+  {
+    id: 'horizontal_bar_stacked',
+    label: i18n.translate('xpack.lens.xyVisualization.stackedHorizontalBarChartLabel', {
+      defaultMessage: 'Stacked Horizontal Bar',
+    }),
     iconType: 'visBarHorizontal',
   },
 ];
@@ -84,7 +112,11 @@ export function XYConfigPanel(props: VisualizationProps<State>) {
           name="chartType"
           className="eui-displayInlineBlock"
           data-test-subj="lnsXY_seriesType"
-          options={chartTypeIcons}
+          options={chartTypeIcons.map(type =>
+            type.id.includes('stacked') && state.splitSeriesAccessors.length === 0
+              ? { ...type, isDisabled: true }
+              : type
+          )}
           idSelected={state.seriesType}
           onChange={seriesType => {
             const isHorizontal = seriesType === 'horizontal_bar';
@@ -142,6 +174,30 @@ export function XYConfigPanel(props: VisualizationProps<State>) {
           />
         </EuiFormRow>
       )}
+
+      <EuiFormRow
+        label={i18n.translate('xpack.lens.xyChart.splitSeries', {
+          defaultMessage: 'Split series',
+        })}
+      >
+        <MultiColumnEditor
+          accessors={state.splitSeriesAccessors}
+          datasource={datasource}
+          dragDropContext={props.dragDropContext}
+          onAdd={accessor =>
+            setState({ ...state, splitSeriesAccessors: [...state.splitSeriesAccessors, accessor] })
+          }
+          onRemove={accessor =>
+            setState({
+              ...state,
+              splitSeriesAccessors: state.splitSeriesAccessors.filter(col => col !== accessor),
+            })
+          }
+          filterOperations={op => op.isBucketed && op.dataType !== 'date'}
+          suggestedPriority={0}
+          testSubj="splitSeriesDimensionPanel"
+        />
+      </EuiFormRow>
 
       <EuiFormRow
         label={i18n.translate('xpack.lens.xyChart.xAxisLabel', {
@@ -228,54 +284,31 @@ export function XYConfigPanel(props: VisualizationProps<State>) {
               defaultMessage: 'Value',
             })}
           >
-            <>
-              {state.y.accessors.map(accessor => (
-                <div key={accessor}>
-                  <NativeRenderer
-                    data-test-subj={`lnsXY_yDimensionPanel_${accessor}`}
-                    render={datasource.renderDimensionPanel}
-                    nativeProps={{
-                      columnId: accessor,
-                      dragDropContext: props.dragDropContext,
-                      filterOperations: (op: Operation) =>
-                        !op.isBucketed && op.dataType === 'number',
-                    }}
-                  />
-                  <EuiButtonIcon
-                    size="s"
-                    color="warning"
-                    data-test-subj={`lnsXY_yDimensionPanel_remove_${accessor}`}
-                    iconType="trash"
-                    onClick={() => {
-                      datasource.removeColumnInTableSpec(accessor);
-                      setState({
-                        ...state,
-                        y: {
-                          ...state.y,
-                          accessors: state.y.accessors.filter(col => col !== accessor),
-                        },
-                      });
-                    }}
-                    aria-label={i18n.translate('xpack.lens.xyChart.yRemoveAriaLabel', {
-                      defaultMessage: 'Remove',
-                    })}
-                  />
-                </div>
-              ))}
-              <EuiButton
-                data-test-subj="lnsXY_yDimensionPanel_add"
-                onClick={() =>
-                  setState({
-                    ...state,
-                    y: {
-                      ...state.y,
-                      accessors: [...state.y.accessors, datasource.generateColumnId()],
-                    },
-                  })
-                }
-                iconType="plusInCircle"
-              />
-            </>
+            <MultiColumnEditor
+              accessors={state.y.accessors}
+              datasource={datasource}
+              dragDropContext={props.dragDropContext}
+              onAdd={accessor =>
+                setState({
+                  ...state,
+                  y: {
+                    ...state.y,
+                    accessors: [...state.y.accessors, accessor],
+                  },
+                })
+              }
+              onRemove={accessor =>
+                setState({
+                  ...state,
+                  y: {
+                    ...state.y,
+                    accessors: state.y.accessors.filter(col => col !== accessor),
+                  },
+                })
+              }
+              filterOperations={op => !op.isBucketed && op.dataType === 'number'}
+              testSubj="yDimensionPanel"
+            />
           </EuiFormRow>
 
           <EuiFormRow>

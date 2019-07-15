@@ -17,6 +17,9 @@
  * under the License.
  */
 
+import { Action } from './actions';
+import { EmbeddableFactory } from './embeddables';
+
 export interface Trigger {
   id: string;
   title?: string;
@@ -39,4 +42,10 @@ export interface OutputSpec {
 export enum ViewMode {
   EDIT = 'edit',
   VIEW = 'view',
+}
+
+export interface EmbeddablePlugin {
+  addAction: (action: Action) => void;
+  addEmbeddableFactory: (factory: EmbeddableFactory) => void;
+  attachAction: (data: { triggerId: string; actionId: string }) => void;
 }

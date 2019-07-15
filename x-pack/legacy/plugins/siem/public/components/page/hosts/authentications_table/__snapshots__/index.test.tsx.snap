@@ -101,6 +101,7 @@ exports[`Authentication Table Component rendering it renders the authentication 
     ]
   }
   hasNextPage={true}
+  id="authentication"
   loadMore={[MockFunction]}
   loading={false}
   nextCursor="aa7ca589f1b8220002f2fc61c64cfbf1"

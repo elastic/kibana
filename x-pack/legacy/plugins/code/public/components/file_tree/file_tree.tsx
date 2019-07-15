@@ -14,13 +14,14 @@ import { FileTree as Tree, FileTreeItemType } from '../../../model';
 import { closeTreePath, openTreePath } from '../../actions';
 import { EuiSideNavItem, MainRouteParams, PathTypes } from '../../common/types';
 import { RootState } from '../../reducers';
-import { encodeRevisionString } from '../../utils/url';
+import { encodeRevisionString } from '../../../common/uri_util';
 
 interface Props extends RouteComponentProps<MainRouteParams> {
   node?: Tree;
   closeTreePath: (paths: string) => void;
   openTreePath: (paths: string) => void;
   openedPaths: string[];
+  isNotFound: boolean;
 }
 
 export class CodeFileTree extends React.Component<Props> {
@@ -238,13 +239,15 @@ export class CodeFileTree extends React.Component<Props> {
   }
 
   private isPathOpen(path: string) {
+    if (this.props.isNotFound) return false;
     return this.props.openedPaths.includes(path);
   }
 }
 
 const mapStateToProps = (state: RootState) => ({
-  node: state.file.tree,
-  openedPaths: state.file.openedPaths,
+  node: state.fileTree.tree,
+  openedPaths: state.fileTree.openedPaths,
+  isNotFound: state.file.isNotFound,
 });
 
 const mapDispatchToProps = {

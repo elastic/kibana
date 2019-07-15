@@ -4,6 +4,15 @@
   -webkit-tap-highlight-color: transparent;
 }
 
+.monRhythmChart__wrapper .monRhythmChart__zoom {
+  visibility: hidden;
+  padding-right: $euiSizeM;
+}
+
+.monRhythmChart__wrapper:hover .monRhythmChart__zoom {
+  visibility: visible;
+}
+  
 .monRhythmChart {
   position: relative;
   display: flex;
@@ -67,4 +76,17 @@
   overflow: hidden;
   white-space: nowrap;
   margin-left: $euiSizeXS;
+}
+
+.monChart__tooltipLabel,
+.monChart__tooltipValue {
+  text-align: left;
+  font-size: $euiFontSizeXS;
+  padding: $euiSizeXS;
+  word-wrap: break-word;
+  white-space: normal;
+}
+
+.monChart__tooltipLabel {
+  font-weight: $euiFontWeightBold;
 }

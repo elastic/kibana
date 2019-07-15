@@ -5,7 +5,6 @@
  */
 
 import { Registry } from '@kbn/interpreter/target/common';
-// @ts-ignore untyped module
 import { ExpressionFunction } from '../../../../../src/legacy/core_plugins/interpreter/public';
 
 // TODO these are intermediary types because interpreter is not typed yet

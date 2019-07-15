@@ -49,7 +49,7 @@ export const ReadonlyDetails: React.FunctionComponent<Props> = ({ repository }) 
 
       <EuiSpacer size="s" />
 
-      <EuiDescriptionList listItems={listItems} />
+      <EuiDescriptionList textStyle="reverse" listItems={listItems} />
     </Fragment>
   );
 };

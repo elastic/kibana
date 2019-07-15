@@ -6,7 +6,6 @@
 
 import React, { useState, useEffect } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
-
 import { EuiIcon, EuiTitle, EuiPanel, EuiIconTip } from '@elastic/eui';
 import { toExpression } from '@kbn/interpreter/common';
 import { i18n } from '@kbn/i18n';
@@ -39,12 +38,9 @@ const SuggestionPreview = ({
 }) => {
   const [expressionError, setExpressionError] = useState<boolean>(false);
 
-  useEffect(
-    () => {
-      setExpressionError(false);
-    },
-    [previewExpression]
-  );
+  useEffect(() => {
+    setExpressionError(false);
+  }, [previewExpression]);
 
   return (
     <EuiPanel

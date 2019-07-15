@@ -15,8 +15,8 @@ import { render, unmountComponentAtNode } from 'react-dom';
 import { uiModules } from 'ui/modules';
 import { timefilter } from 'ui/timefilter';
 import { Provider } from 'react-redux';
-import { createMapStore } from '../store/store';
-import { GisMap } from '../components/gis_map';
+import { createMapStore } from '../reducers/store';
+import { GisMap } from '../connected_components/gis_map';
 import { addHelpMenuToAppChrome } from '../help_menu_util';
 import {
   setSelectedLayer,
@@ -25,19 +25,18 @@ import {
   replaceLayerList,
   setQuery,
   clearTransientLayerStateAndCloseFlyout,
-} from '../actions/store_actions';
+} from '../actions/map_actions';
+import { DEFAULT_IS_LAYER_TOC_OPEN, FLYOUT_STATE } from '../reducers/ui';
 import {
-  DEFAULT_IS_LAYER_TOC_OPEN,
   enableFullScreen,
-  getIsFullScreen,
   updateFlyout,
-  FLYOUT_STATE,
   setReadOnly,
   setIsLayerTOCOpen,
   setOpenTOCDetails,
-} from '../store/ui';
-import { getQueryableUniqueIndexPatternIds } from '../selectors/map_selectors';
-import { getInspectorAdapters } from '../store/non_serializable_instances';
+} from '../actions/ui_actions';
+import { getIsFullScreen } from '../selectors/ui_selectors';
+import { getQueryableUniqueIndexPatternIds, hasDirtyState } from '../selectors/map_selectors';
+import { getInspectorAdapters } from '../reducers/non_serializable_instances';
 import { Inspector } from 'ui/inspector';
 import { docTitle } from 'ui/doc_title';
 import { indexPatternService } from '../kibana_services';
@@ -191,6 +190,7 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage
   }
 
   $scope.isFullScreen = false;
+  $scope.isSaveDisabled = false;
   function handleStoreChanges(store) {
     const nextIsFullScreen = getIsFullScreen(store.getState());
     if (nextIsFullScreen !== $scope.isFullScreen) {
@@ -204,6 +204,13 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage
     if (nextIndexPatternIds !== prevIndexPatternIds) {
       prevIndexPatternIds = nextIndexPatternIds;
       updateIndexPatterns(nextIndexPatternIds);
+    }
+
+    const nextIsSaveDisabled = hasDirtyState(store.getState());
+    if (nextIsSaveDisabled !== $scope.isSaveDisabled) {
+      $scope.$evalAsync(() => {
+        $scope.isSaveDisabled = nextIsSaveDisabled;
+      });
     }
   }
 
@@ -307,6 +314,16 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage
       defaultMessage: `Save map`
     }),
     testId: 'mapSaveButton',
+    disableButton() {
+      return $scope.isSaveDisabled;
+    },
+    tooltip() {
+      if ($scope.isSaveDisabled) {
+        return i18n.translate('xpack.maps.mapController.saveMapDisabledButtonTooltip', {
+          defaultMessage: 'Save or Cancel your layer changes before saving'
+        });
+      }
+    },
     run: async () => {
       const onSave = ({ newTitle, newCopyOnSave, isTitleDuplicateConfirmed, onTitleDuplicate }) => {
         const currentTitle = savedMap.title;

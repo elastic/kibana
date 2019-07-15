@@ -180,7 +180,13 @@ export function PopoverEditor(props: PopoverEditorProps) {
                 </EuiCallOut>
               )}
               {!incompatibleSelectedOperationType && ParamEditor && (
-                <ParamEditor state={state} setState={setState} columnId={columnId} />
+                <ParamEditor
+                  state={state}
+                  setState={setState}
+                  columnId={columnId}
+                  storage={props.storage}
+                  dataPlugin={props.dataPlugin}
+                />
               )}
               {!incompatibleSelectedOperationType && selectedColumn && (
                 <EuiFormRow label="Label">

@@ -48,22 +48,26 @@ export function FieldSelect({
   );
 
   function isCompatibleWithCurrentOperation(col: BaseIndexPatternColumn) {
-    return incompatibleSelectedOperationType
-      ? col.operationType === incompatibleSelectedOperationType
-      : !selectedColumn || col.operationType === selectedColumn.operationType;
+    if (incompatibleSelectedOperationType) {
+      return col.operationType === incompatibleSelectedOperationType;
+    }
+    return !selectedColumn || col.operationType === selectedColumn.operationType;
   }
 
   const fieldOptions = [];
-  const fieldLessColumn = filteredColumns.find(column => !hasField(column));
-  if (fieldLessColumn) {
+  const fieldlessColumn =
+    filteredColumns.find(column => !hasField(column) && isCompatibleWithCurrentOperation(column)) ||
+    filteredColumns.find(column => !hasField(column));
+
+  if (fieldlessColumn) {
     fieldOptions.push({
       label: i18n.translate('xpack.lens.indexPattern.documentField', {
         defaultMessage: 'Document',
       }),
-      value: fieldLessColumn.operationId,
+      value: fieldlessColumn.operationId,
       className: classNames({
         'lnsConfigPanel__fieldOption--incompatible': !isCompatibleWithCurrentOperation(
-          fieldLessColumn
+          fieldlessColumn
         ),
       }),
     });

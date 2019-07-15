@@ -71,12 +71,11 @@ export interface Datasource<T = unknown, P = unknown> {
 export interface DatasourcePublicAPI {
   getTableSpec: () => TableSpec;
   getOperationForColumnId: (columnId: string) => Operation | null;
-  generateColumnId: () => string;
 
   // Render can be called many times
   renderDimensionPanel: (domElement: Element, props: DatasourceDimensionPanelProps) => void;
 
-  removeColumnInTableSpec: (columnId: string) => TableSpec;
+  removeColumnInTableSpec: (columnId: string) => void;
   moveColumnTo: (columnId: string, targetIndex: number) => void;
   duplicateColumn: (columnId: string) => TableSpec;
 }

@@ -5,7 +5,7 @@
  */
 
 import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/public';
-import { Datatable } from '../types';
+import { Datatable } from '../../../types';
 import { getFunctionHelp } from '../../strings';
 
 export function rowCount(): ExpressionFunction<'rowCount', Datatable, {}, number> {

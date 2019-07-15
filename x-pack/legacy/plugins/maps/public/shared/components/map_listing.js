@@ -23,7 +23,6 @@ import {
   EuiOverlayMask,
   EuiConfirmModal,
   EuiCallOut,
-  EuiBetaBadge,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -33,7 +32,6 @@ import chrome from 'ui/chrome';
 export const EMPTY_FILTER = '';
 
 export class MapListing extends React.Component {
-
   state = {
     hasInitialFetchReturned: false,
     isFetchingItems: false,
@@ -44,7 +42,7 @@ export class MapListing extends React.Component {
     selectedIds: [],
     page: 0,
     perPage: 20,
-  }
+  };
 
   componentWillMount() {
     this._isMounted = true;
@@ -60,7 +58,7 @@ export class MapListing extends React.Component {
     addHelpMenuToAppChrome(chrome);
   }
 
-  debouncedFetch = _.debounce(async (filter) => {
+  debouncedFetch = _.debounce(async filter => {
     const response = await this.props.find(filter);
 
     if (!this._isMounted) {
@@ -81,10 +79,13 @@ export class MapListing extends React.Component {
   }, 300);
 
   fetchItems = () => {
-    this.setState({
-      isFetchingItems: true,
-    }, this.debouncedFetch.bind(null, this.state.filter));
-  }
+    this.setState(
+      {
+        isFetchingItems: true,
+      },
+      this.debouncedFetch.bind(null, this.state.filter)
+    );
+  };
 
   deleteSelectedItems = async () => {
     try {
@@ -92,17 +93,17 @@ export class MapListing extends React.Component {
     } catch (error) {
       toastNotifications.addDanger({
         title: i18n.translate('xpack.maps.mapListing.unableToDeleteToastTitle', {
-          defaultMessage: `Unable to delete map(s)`
+          defaultMessage: `Unable to delete map(s)`,
         }),
         text: `${error}`,
       });
     }
     this.fetchItems();
     this.setState({
-      selectedIds: []
+      selectedIds: [],
     });
     this.closeDeleteModal();
-  }
+  };
 
   closeDeleteModal = () => {
     this.setState({ showDeleteModal: false });
@@ -113,21 +114,17 @@ export class MapListing extends React.Component {
   };
 
   onTableChange = ({ page, sort = {} }) => {
-    const {
-      index: pageIndex,
-      size: pageSize,
-    } = page;
+    const { index: pageIndex, size: pageSize } = page;
 
-    let {
-      field: sortField,
-      direction: sortDirection,
-    } = sort;
+    let { field: sortField, direction: sortDirection } = sort;
 
     // 3rd sorting state that is not captured by sort - native order (no sort)
     // when switching from desc to asc for the same field - use native order
-    if (this.state.sortField === sortField
-      && this.state.sortDirection === 'desc'
-      && sortDirection === 'asc') {
+    if (
+      this.state.sortField === sortField &&
+      this.state.sortDirection === 'desc' &&
+      sortDirection === 'asc'
+    ) {
       sortField = null;
       sortDirection = null;
     }
@@ -138,7 +135,7 @@ export class MapListing extends React.Component {
       sortField,
       sortDirection,
     });
-  }
+  };
 
   getPageOfItems = () => {
     // do not sort original list to preserve elasticsearch ranking order
@@ -161,7 +158,7 @@ export class MapListing extends React.Component {
     // If end is greater than the length of the sequence, slice extracts through to the end of the sequence (arr.length).
     const lastIndex = startIndex + this.state.perPage;
     return itemsCopy.slice(startIndex, lastIndex);
-  }
+  };
 
   hasNoItems() {
     if (!this.state.isFetchingItems && this.state.items.length === 0 && !this.state.filter) {
@@ -176,15 +173,15 @@ export class MapListing extends React.Component {
       <EuiOverlayMask>
         <EuiConfirmModal
           title={i18n.translate('xpack.maps.mapListing.deleteSelectedItemsTitle', {
-            defaultMessage: 'Delete selected items?'
+            defaultMessage: 'Delete selected items?',
           })}
           onCancel={this.closeDeleteModal}
           onConfirm={this.deleteSelectedItems}
           cancelButtonText={i18n.translate('xpack.maps.mapListing.cancelTitle', {
-            defaultMessage: 'Cancel'
+            defaultMessage: 'Cancel',
           })}
           confirmButtonText={i18n.translate('xpack.maps.mapListing.deleteTitle', {
-            defaultMessage: 'Delete'
+            defaultMessage: 'Delete',
           })}
           defaultFocusedButton="cancel"
         >
@@ -204,16 +201,13 @@ export class MapListing extends React.Component {
       return (
         <React.Fragment>
           <EuiCallOut
-            title={
-              i18n.translate('xpack.maps.mapListing.limitExceededTitle', {
-                defaultMessage: 'Listing limit exceeded'
-              })
-            }
+            title={i18n.translate('xpack.maps.mapListing.limitExceededTitle', {
+              defaultMessage: 'Listing limit exceeded',
+            })}
             color="warning"
             iconType="help"
           >
             <p>
-
               <FormattedMessage
                 id="xpack.maps.mapListing.limitHelpDescription"
                 defaultMessage="You have {totalItems} items,
@@ -221,7 +215,7 @@ export class MapListing extends React.Component {
               You can change this setting under "
                 values={{
                   totalItems: this.state.totalItems,
-                  listingLimit: this.props.listingLimit
+                  listingLimit: this.props.listingLimit,
                 }}
               />
               <EuiLink href="#/management/kibana/settings">
@@ -229,7 +223,8 @@ export class MapListing extends React.Component {
                   id="xpack.maps.mapListing.advancedSettingsLinkText"
                   defaultMessage="Advanced Settings"
                 />
-              </EuiLink>.
+              </EuiLink>
+              .
             </p>
           </EuiCallOut>
           <EuiSpacer size="m" />
@@ -245,12 +240,12 @@ export class MapListing extends React.Component {
 
     if (this.hasNoItems()) {
       return i18n.translate('xpack.maps.mapListing.noItemsDescription', {
-        defaultMessage: `Looks like you don't have any maps. Click the create button to create one.`
+        defaultMessage: `Looks like you don't have any maps. Click the create button to create one.`,
       });
     }
 
     return i18n.translate('xpack.maps.mapListing.noMatchDescription', {
-      defaultMessage: 'No items matched your search.'
+      defaultMessage: 'No items matched your search.',
     });
   }
 
@@ -280,17 +275,20 @@ export class MapListing extends React.Component {
         <EuiFlexItem grow={true}>
           <EuiFieldSearch
             aria-label={i18n.translate('xpack.maps.mapListing.searchAriaLabel', {
-              defaultMessage: 'Filter items'
+              defaultMessage: 'Filter items',
             })}
             placeholder={i18n.translate('xpack.maps.mapListing.searchPlaceholder', {
-              defaultMessage: 'Search...'
+              defaultMessage: 'Search...',
             })}
             fullWidth
             value={this.state.filter}
-            onChange={(e) => {
-              this.setState({
-                filter: e.target.value
-              }, this.fetchItems);
+            onChange={e => {
+              this.setState(
+                {
+                  filter: e.target.value,
+                },
+                this.fetchItems
+              );
             }}
             data-test-subj="searchFilter"
           />
@@ -304,7 +302,7 @@ export class MapListing extends React.Component {
       {
         field: 'title',
         name: i18n.translate('xpack.maps.mapListing.titleFieldTitle', {
-          defaultMessage: 'Title'
+          defaultMessage: 'Title',
         }),
         sortable: true,
         render: (field, record) => (
@@ -314,16 +312,16 @@ export class MapListing extends React.Component {
           >
             {field}
           </EuiLink>
-        )
+        ),
       },
       {
         field: 'description',
         name: i18n.translate('xpack.maps.mapListing.descriptionFieldTitle', {
-          defaultMessage: 'Description'
+          defaultMessage: 'Description',
         }),
         dataType: 'string',
         sortable: true,
-      }
+      },
     ];
     const pagination = {
       pageIndex: this.state.page,
@@ -335,11 +333,13 @@ export class MapListing extends React.Component {
     let selection = false;
     if (!this.props.readOnly) {
       selection = {
-        onSelectionChange: (selection) => {
+        onSelectionChange: selection => {
           this.setState({
-            selectedIds: selection.map(item => { return item.id; })
+            selectedIds: selection.map(item => {
+              return item.id;
+            }),
           });
-        }
+        },
       };
     }
 
@@ -371,51 +371,31 @@ export class MapListing extends React.Component {
     let createButton;
     if (!this.props.readOnly) {
       createButton = (
-        <EuiFlexItem grow={false}>
-          <EuiButton
-            href={`#/map`}
-            data-test-subj="newMapLink"
-            fill
-          >
-            <FormattedMessage
-              id="xpack.maps.mapListing.createMapButtonLabel"
-              defaultMessage="Create map"
-            />
-          </EuiButton>
-        </EuiFlexItem>
+        <EuiButton href={`#/map`} data-test-subj="newMapLink" fill>
+          <FormattedMessage
+            id="xpack.maps.mapListing.createMapButtonLabel"
+            defaultMessage="Create map"
+          />
+        </EuiButton>
       );
     }
     return (
-      <div>
+      <React.Fragment>
         {this.state.showDeleteModal && this.renderConfirmDeleteModal()}
 
-        <EuiFlexGroup justifyContent="spaceBetween" alignItems="flexEnd" data-test-subj="top-nav">
-          <EuiFlexGroup alignItems="center">
-            <EuiFlexItem grow={false}>
-              <EuiTitle size="l">
-                <h1>
-                  <FormattedMessage
-                    id="xpack.maps.mapListing.listingTableTitle"
-                    defaultMessage="Maps"
-                  />
-                </h1>
-              </EuiTitle>
-            </EuiFlexItem>
+        <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" data-test-subj="top-nav">
+          <EuiFlexItem grow={false}>
+            <EuiTitle size="l">
+              <h1>
+                <FormattedMessage
+                  id="xpack.maps.mapListing.listingTableTitle"
+                  defaultMessage="Maps"
+                />
+              </h1>
+            </EuiTitle>
+          </EuiFlexItem>
 
-            <EuiFlexItem grow={false}>
-              <EuiBetaBadge
-                label="Beta"
-                tooltipContent={
-                  i18n.translate('xpack.maps.mapListing.betaMessageBadge', {
-                    defaultMessage: 'Maps is still in beta. Please help us improve by reporting issues or bugs in the Kibana repo.'
-                  })
-                }
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-
-          {createButton}
-
+          <EuiFlexItem grow={false}>{createButton}</EuiFlexItem>
         </EuiFlexGroup>
 
         <EuiSpacer size="m" />
@@ -427,7 +407,7 @@ export class MapListing extends React.Component {
         <EuiSpacer size="m" />
 
         {this.renderTable()}
-      </div>
+      </React.Fragment>
     );
   }
 
@@ -436,19 +416,13 @@ export class MapListing extends React.Component {
       return;
     }
 
-    return (
-      <EuiPageContent horizontalPosition="center">
-        {this.renderListing()}
-      </EuiPageContent>
-    );
+    return <EuiPageContent horizontalPosition="center">{this.renderListing()}</EuiPageContent>;
   }
 
   render() {
     return (
       <EuiPage data-test-subj="mapsListingPage" restrictWidth>
-        <EuiPageBody>
-          {this.renderPageContent()}
-        </EuiPageBody>
+        <EuiPageBody>{this.renderPageContent()}</EuiPageBody>
       </EuiPage>
     );
   }
