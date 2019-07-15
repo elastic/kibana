@@ -27,8 +27,6 @@ This section summarizes the changes in each release.
 [[release-notes-7.2.1]]
 == {kib} 7.2.1
 
-coming[7.2.1]
-
 See also <<breaking-changes-7.2, breaking changes in 7.2>>.
 
 [float]
@@ -62,6 +60,7 @@ Management::
 * Search Profiler: Fixes placeholder color contrast accessibility in Index input {pull}38952[#38952]
 Monitoring::
 * Adds zoomout functionality to all charts {pull}39072[#39072]
+* Adds log message for error scenario around missing licensing {pull}40660[#40660]
 Security::
 * Feature Controls: Only navigates to index pattern management if available {pull}40067[#40067]
 * Spaces: Fixes scenario where a Space is created via the API without specifying any `disabledFeatures` {pull}40017[#40017]
