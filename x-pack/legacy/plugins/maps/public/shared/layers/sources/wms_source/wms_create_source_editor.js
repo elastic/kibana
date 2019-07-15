@@ -58,7 +58,7 @@ export class WMSCreateSourceEditor extends Component {
     const sourceConfig = (serviceUrl && layers)
       ? { serviceUrl, layers, styles }
       : null;
-    this.props.previewWMS(sourceConfig);
+    this.props.onSourceConfigChange(sourceConfig);
   }
 
   _loadCapabilities = async () => {
