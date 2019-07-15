@@ -24,7 +24,7 @@ import {
 import { dateHistogramOperation } from './operation_definitions/date_histogram';
 import { countOperation } from './operation_definitions/count';
 import { filterRatioOperation } from './operation_definitions/filter_ratio';
-import { sortByField } from './state_helpers';
+import { sortByField } from './utils';
 
 type PossibleOperationDefinitions<
   U extends IndexPatternColumn = IndexPatternColumn
