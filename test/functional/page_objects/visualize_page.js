@@ -440,7 +440,7 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
     async selectAggregation(myString, groupName = 'buckets', childAggregationType = null) {
       const comboBoxElement = await find.byCssSelector(`
         [group-name="${groupName}"]
-        [data-test-subj="visEditorAggToggle"] [aria-expanded="true"]
+        [data-test-subj="visEditorAggToggle"].euiAccordion-isOpen
         ${childAggregationType ? '.visEditorAgg__subAgg' : ''}
         [data-test-subj="defaultEditorAggSelect"]
       `);
@@ -540,7 +540,7 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
       log.debug(`selectField ${fieldValue}`);
       const selector = `
         [group-name="${groupName}"]
-        [data-test-subj="visEditorAggToggle"] [aria-expanded="true"]
+        [data-test-subj="visEditorAggToggle"].euiAccordion-isOpen
         [data-test-subj="visAggEditorParams"]
         ${childAggregationType ? '.visEditorAgg__subAgg' : ''}
         [data-test-subj="visDefaultEditorField"]
