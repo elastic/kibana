@@ -6,7 +6,6 @@
 
 import _ from 'lodash';
 import { ES_GEO_FIELD_TYPE } from '../../common/constants/file_import';
-import { i18n } from '@kbn/i18n';
 
 const DEFAULT_SETTINGS = {
   number_of_shards: 1
@@ -62,16 +61,6 @@ export function geoJsonToEs(parsedGeojson, datatype) {
   } else if (datatype === ES_GEO_FIELD_TYPE.GEO_POINT) {
     return features.reduce((accu, { geometry, properties }) => {
       const { coordinates } = geometry;
-      if (Array.isArray(coordinates[0])) {
-        throw(
-          i18n.translate(
-            'xpack.fileUpload.geoProcessing.notPointError', {
-              defaultMessage: 'Coordinates {coordinates} does not contain point datatype',
-              values: { coordinates: coordinates.toString() }
-            })
-        );
-        return accu;
-      }
       accu.push({
         coordinates,
         ...(!_.isEmpty(properties) ? { ...properties } : {})
