@@ -12,16 +12,17 @@ import {
   EuiContextMenuPanel,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiLoadingContent,
   EuiPanel,
   EuiPopover,
 } from '@elastic/eui';
-import { isEmpty, noop, getOr } from 'lodash/fp';
+import { isEmpty, noop } from 'lodash/fp';
 import React from 'react';
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 
 import { Direction } from '../../graphql/types';
 import { HeaderPanel } from '../header_panel';
-import { LoadingPanel } from '../loading';
+import { Loader } from '../loader';
 
 import * as i18n from './translations';
 
@@ -85,7 +86,6 @@ interface BasicTableProps<T, U = T, V = T, W = T, X = T, Y = T, Z = T, AA = T, A
   itemsPerRow?: ItemsPerRow[];
   limit: number;
   loading: boolean;
-  loadingTitle?: string;
   loadMore: () => void;
   onChange?: (criteria: Criteria) => void;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -152,26 +152,12 @@ export class LoadMoreTable<T, U, V, W, X, Y, Z, AA, AB> extends React.PureCompon
       itemsPerRow,
       limit,
       loading,
-      loadingTitle,
       onChange = noop,
       pageOfItems,
       sorting = null,
       updateLimitPagination,
     } = this.props;
     const { isEmptyTable } = this.state;
-
-    if (loading && isEmptyTable) {
-      return (
-        <EuiPanel>
-          <LoadingPanel
-            height="auto"
-            width="100%"
-            text={`${i18n.LOADING} ${loadingTitle ? loadingTitle : headerTitle}`}
-            data-test-subj="InitialLoadingPanelLoadMoreTable"
-          />
-        </EuiPanel>
-      );
-    }
 
     const button = (
       <EuiButtonEmpty
@@ -199,101 +185,96 @@ export class LoadMoreTable<T, U, V, W, X, Y, Z, AA, AB> extends React.PureCompon
           {item.text}
         </EuiContextMenuItem>
       ));
+
     return (
-      <EuiPanel
+      <Panel
         data-test-subj={dataTestSubj}
         onMouseEnter={this.mouseEnter}
         onMouseLeave={this.mouseLeave}
       >
-        <BasicTableContainer>
-          {loading && (
-            <>
-              <BackgroundRefetch />
-              <LoadingPanel
-                height="100%"
-                width="100%"
-                text={`${i18n.LOADING} ${loadingTitle ? loadingTitle : headerTitle}`}
-                position="absolute"
-                zIndex={3}
-                data-test-subj="LoadingPanelLoadMoreTable"
-              />
-            </>
-          )}
+        <HeaderPanel
+          id={id}
+          showInspect={!isEmptyTable && this.state.showInspect}
+          subtitle={
+            !isEmptyTable && `${i18n.SHOWING}: ${headerCount.toLocaleString()} ${headerUnit}`
+          }
+          title={headerTitle}
+          tooltip={headerTooltip}
+        >
+          {headerSupplement}
+        </HeaderPanel>
 
-          <HeaderPanel
-            id={id}
-            showInspect={this.state.showInspect}
-            subtitle={<>{`${i18n.SHOWING}: ${headerCount.toLocaleString()} ${headerUnit}`}</>}
-            title={headerTitle}
-            tooltip={headerTooltip}
-          >
-            {headerSupplement}
-          </HeaderPanel>
+        {loading && isEmptyTable ? (
+          <EuiLoadingContent lines={10} />
+        ) : (
+          <>
+            <BasicTable
+              items={pageOfItems}
+              columns={columns}
+              onChange={onChange}
+              sorting={
+                sorting
+                  ? {
+                      sort: {
+                        field: sorting.field,
+                        direction: sorting.direction,
+                      },
+                    }
+                  : null
+              }
+            />
 
-          <BasicTable
-            items={pageOfItems}
-            columns={columns}
-            onChange={onChange}
-            sorting={
-              sorting
-                ? {
-                    sort: {
-                      field: sorting.field,
-                      direction: sorting.direction,
-                    },
-                  }
-                : null
-            }
-          />
-
-          {hasNextPage && (
-            <FooterAction>
-              <EuiFlexGroup
-                gutterSize="none"
-                alignItems="flexStart"
-                justifyContent="flexStart"
-                direction="row"
-              >
-                <EuiFlexItem grow={false}>
-                  {!isEmpty(itemsPerRow) && (
-                    <EuiPopover
-                      id="customizablePagination"
-                      data-test-subj="loadingMoreSizeRowPopover"
-                      button={button}
-                      isOpen={this.state.isPopoverOpen}
-                      closePopover={this.closePopover}
-                      panelPaddingSize="none"
-                    >
-                      <EuiContextMenuPanel
-                        items={rowItems}
-                        data-test-subj="loadingMorePickSizeRow"
-                      />
-                    </EuiPopover>
-                  )}
-                </EuiFlexItem>
-                <EuiFlexItem>
-                  <EuiFlexGroup
-                    gutterSize="none"
-                    alignItems="flexStart"
-                    justifyContent="center"
-                    direction="row"
-                  >
-                    <EuiFlexItem grow={false}>
-                      <EuiButton
-                        data-test-subj="loadingMoreButton"
-                        isLoading={loading}
-                        onClick={this.props.loadMore}
+            {hasNextPage && (
+              <FooterAction>
+                <EuiFlexGroup
+                  gutterSize="none"
+                  alignItems="flexStart"
+                  justifyContent="flexStart"
+                  direction="row"
+                >
+                  <EuiFlexItem grow={false}>
+                    {!isEmpty(itemsPerRow) && (
+                      <EuiPopover
+                        id="customizablePagination"
+                        data-test-subj="loadingMoreSizeRowPopover"
+                        button={button}
+                        isOpen={this.state.isPopoverOpen}
+                        closePopover={this.closePopover}
+                        panelPaddingSize="none"
                       >
-                        {loading ? `${i18n.LOADING}` : i18n.LOAD_MORE}
-                      </EuiButton>
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </FooterAction>
-          )}
-        </BasicTableContainer>
-      </EuiPanel>
+                        <EuiContextMenuPanel
+                          items={rowItems}
+                          data-test-subj="loadingMorePickSizeRow"
+                        />
+                      </EuiPopover>
+                    )}
+                  </EuiFlexItem>
+                  <EuiFlexItem>
+                    <EuiFlexGroup
+                      gutterSize="none"
+                      alignItems="flexStart"
+                      justifyContent="center"
+                      direction="row"
+                    >
+                      <EuiFlexItem grow={false}>
+                        <EuiButton
+                          data-test-subj="loadingMoreButton"
+                          isLoading={loading}
+                          onClick={this.props.loadMore}
+                        >
+                          {loading ? `${i18n.LOADING}` : i18n.LOAD_MORE}
+                        </EuiButton>
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </FooterAction>
+            )}
+
+            {loading && <Loader overlay size="xl" />}
+          </>
+        )}
+      </Panel>
     );
   }
 
@@ -326,28 +307,15 @@ export class LoadMoreTable<T, U, V, W, X, Y, Z, AA, AB> extends React.PureCompon
   };
 }
 
-export const BasicTableContainer = styled.div`
-  position: relative;
-`;
+const Panel = styled(EuiPanel)<{ loading?: boolean }>`
+  ${props => css`
+    position: relative;
 
-const FooterAction = styled.div`
-  margin-top: 0.5rem;
-  width: 100%;
-`;
-
-/*
- *   The getOr is just there to simplify the test
- *   So we do NOT need to wrap it around TestProvider
- */
-export const BackgroundRefetch = styled.div`
-  background-color: ${props => getOr('#ffffff', 'theme.eui.euiColorLightShade', props)};
-  margin: -5px;
-  height: calc(100% + 10px);
-  opacity: 0.7;
-  width: calc(100% + 10px);
-  position: absolute;
-  z-index: 3;
-  border-radius: 5px;
+    ${props.loading &&
+      `
+      overflow: hidden;
+    `}
+  `}
 `;
 
 const BasicTable = styled(EuiBasicTable)`
@@ -357,4 +325,9 @@ const BasicTable = styled(EuiBasicTable)`
       vertical-align: top;
     }
   }
+`;
+
+const FooterAction = styled.div`
+  margin-top: 0.5rem;
+  width: 100%;
 `;
