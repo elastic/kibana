@@ -4,7 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { CoreStart, ElasticsearchServiceSetup, HttpServiceSetup } from 'src/core/server';
+import {
+  ClusterClient,
+  CoreStart,
+  ElasticsearchServiceSetup,
+  HttpServiceSetup,
+} from 'src/core/server';
+import { PLUGIN_ID } from '../common/constants';
 import { fetchList } from './registry';
 import { routes } from './routes';
 
@@ -19,19 +25,24 @@ export interface PluginInitializerContext {}
 export type PluginSetup = ReturnType<Plugin['setup']>;
 export type PluginStart = ReturnType<Plugin['start']>;
 export interface PluginContext {
-  core: CoreSetup;
+  esClient: ClusterClient;
 }
 
 export class Plugin {
   constructor(initializerContext: PluginInitializerContext) {}
   public setup(core: CoreSetup) {
-    const { server } = core.http;
+    const { http, elasticsearch } = core;
+    const { server } = http;
 
     // make these items available to handlers via h.context
     // https://github.com/hapijs/hapi/blob/master/API.md#server.bind()
     // aligns closely with approach proposed in handler RFC
     // https://github.com/epixa/kibana/blob/rfc-handlers/rfcs/text/0003_handler_interface.md
-    server.bind({ core });
+    const context: PluginContext = {
+      esClient: elasticsearch.createClient(PLUGIN_ID),
+    };
+
+    server.bind(context);
 
     // map routes to handlers
     routes.forEach(route => server.route(route));

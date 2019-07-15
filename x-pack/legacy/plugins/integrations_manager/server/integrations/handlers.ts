@@ -4,11 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { PLUGIN_ID } from '../../common/constants';
 import { Request, ResponseToolkit } from '../../common/types';
 import { PluginContext } from '../plugin';
 import { getClient } from '../saved_objects';
 import {
+  getClusterAccessor,
   getIntegrations,
   getIntegrationInfo,
   installIntegration,
@@ -57,9 +57,7 @@ export async function handleRequestInstall(req: InstallAssetRequest, extra: Extr
   if (!asset) throw new Error('Unhandled empty/default asset case');
 
   const client = getClient(req);
-  const { elasticsearch } = extra.context.core;
-  const esClient = elasticsearch.createClient(PLUGIN_ID);
-  const callESEndpoint = esClient.asScoped(req).callAsCurrentUser;
+  const callESEndpoint = getClusterAccessor(extra.context.esClient, req);
   const object = await installIntegration(client, pkgkey, asset, callESEndpoint);
 
   return object;

@@ -4,13 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SavedObject, SavedObjectsClientContract, ScopedClusterClient } from 'src/core/server/';
+import {
+  ClusterClient,
+  SavedObject,
+  SavedObjectsClientContract,
+  ScopedClusterClient,
+} from 'src/core/server/';
 import { SAVED_OBJECT_TYPE, AssetTypes, InstallationStatus } from '../../common/constants';
 import {
   AssetReference,
   Installable,
   Installation,
   InstallationAttributes,
+  Request,
 } from '../../common/types';
 import * as Registry from '../registry';
 
@@ -90,6 +96,10 @@ export async function removeInstallation(client: SavedObjectsClientContract, pkg
 
   // successful delete's in SO client return {}. return something more useful
   return installedObjects;
+}
+
+export function getClusterAccessor(esClient: ClusterClient, req: Request) {
+  return esClient.asScoped(req).callAsCurrentUser;
 }
 
 async function installObjects(
