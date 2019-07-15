@@ -61,6 +61,10 @@ const getShortcuts = (
 const refreshShortcut = getShortcuts('r', { modifiers: 'alt', help: 'Refresh workpad' });
 const previousPageShortcut = getShortcuts('[', { modifiers: 'alt', help: 'Go to previous page' });
 const nextPageShortcut = getShortcuts(']', { modifiers: 'alt', help: 'Go to next page' });
+const fullscreenShortcut = getShortcuts(['f', 'p'], {
+  modifiers: 'alt',
+  help: 'Enter presentation mode',
+});
 
 export const keymap: KeyMap = {
   ELEMENT: {
@@ -130,10 +134,11 @@ export const keymap: KeyMap = {
     ZOOM_IN: getShortcuts('plus', { modifiers: ['ctrl', 'alt'], help: 'Zoom in' }),
     ZOOM_OUT: getShortcuts('minus', { modifiers: ['ctrl', 'alt'], help: 'Zoom out' }),
     ZOOM_RESET: getShortcuts('[', { modifiers: ['ctrl', 'alt'], help: 'Reset zoom to 100%' }),
+    FULLSCREEN: fullscreenShortcut,
   },
   PRESENTATION: {
     displayName: 'Presentation controls',
-    FULLSCREEN: getShortcuts(['f', 'p'], { modifiers: 'alt', help: 'Enter presentation mode' }),
+    FULLSCREEN: fullscreenShortcut,
     FULLSCREEN_EXIT: getShortcuts('esc', { help: 'Exit presentation mode' }),
     PREV: mapValues(previousPageShortcut, (osShortcuts: string[], key?: string) =>
       // adds 'backspace' and 'left' to list of shortcuts per OS

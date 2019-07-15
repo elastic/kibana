@@ -19,6 +19,8 @@ import {
   getPages,
 } from '../../state/selectors/workpad';
 import { zoomHandlerCreators } from '../../lib/app_handler_creators';
+import { trackCanvasUiMetric } from '../../lib/ui_metric';
+import { LAUNCHED_FULLSCREEN, LAUNCHED_FULLSCREEN_AUTOPLAY } from '../../../common/lib/constants';
 import { Workpad as Component } from './workpad';
 
 const mapStateToProps = state => {
@@ -43,6 +45,25 @@ const mapDispatchToProps = {
   setZoomScale,
 };
 
+const mergeProps = (stateProps, dispatchProps, ownProps) => {
+  return {
+    ...ownProps,
+    ...stateProps,
+    ...dispatchProps,
+    setFullscreen: value => {
+      dispatchProps.setFullscreen(value);
+
+      if (value === true) {
+        trackCanvasUiMetric(
+          stateProps.autoplayEnabled
+            ? [LAUNCHED_FULLSCREEN, LAUNCHED_FULLSCREEN_AUTOPLAY]
+            : LAUNCHED_FULLSCREEN
+        );
+      }
+    },
+  };
+};
+
 export const Workpad = compose(
   pure,
   getContext({
@@ -51,7 +72,8 @@ export const Workpad = compose(
   withState('grid', 'setGrid', false),
   connect(
     mapStateToProps,
-    mapDispatchToProps
+    mapDispatchToProps,
+    mergeProps
   ),
   withState('transition', 'setTransition', null),
   withState('prevSelectedPageNumber', 'setPrevSelectedPageNumber', 0),
