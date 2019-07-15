@@ -176,23 +176,13 @@ export class ESGeoGridSource extends AbstractESSource {
     }));
   }
 
-  async getGeoJsonWithMeta(layerName, searchFilters) {
-    const featureCollection = await this.getGeoJsonPoints(layerName, searchFilters);
-    return {
-      data: featureCollection,
-      meta: {
-        areResultsTrimmed: false
-      }
-    };
-  }
-
   async getNumberFields() {
     return this.getMetricFields().map(({ propertyKey: name, propertyLabel: label }) => {
       return { label, name };
     });
   }
 
-  async getGeoJsonPoints(layerName, searchFilters) {
+  async getGeoJsonWithMeta(layerName, searchFilters) {
     const indexPattern = await this._getIndexPattern();
     const searchSource  = await this._makeSearchSource(searchFilters, 0);
     const aggConfigs = new AggConfigs(indexPattern, this._makeAggConfigs(searchFilters.geogridPrecision), aggSchemas.all);
@@ -207,13 +197,17 @@ export class ESGeoGridSource extends AbstractESSource {
       renderAs: this._descriptor.requestType,
     });
 
-    return featureCollection;
+    return {
+      data: featureCollection,
+      meta: {
+        areResultsTrimmed: false
+      }
+    };
   }
 
   isFilterByMapBounds() {
     return true;
   }
-
 
   _formatMetricKey(metric) {
     return metric.type !== 'count' ? `${metric.type}_of_${metric.field}` : COUNT_PROP_NAME;
