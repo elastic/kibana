@@ -40,7 +40,7 @@ jest.mock('./registries', () => ({
 }));
 
 jest.mock('ui/ajax_stream', () => ({ ajaxStream: jest.fn() }));
-jest.mock('ui/kfetch', () => ({ kfetch: jest.fn() }));
+jest.mock('../../../ui/public/new_platform');
 jest.mock('./functions', () => ({ functions: [{}, {}, {}] }));
 jest.mock('./renderers/visualization', () => ({ visualization: {} }));
 
@@ -49,7 +49,7 @@ describe('interpreter/interpreter', () => {
   let getInterpreter;
   let interpretAst;
   let initializeInterpreter;
-  let kfetch;
+  let http;
   let registries;
 
   beforeEach(() => {
@@ -59,7 +59,7 @@ describe('interpreter/interpreter', () => {
     getInterpreter = require('./interpreter').getInterpreter;
     interpretAst = require('./interpreter').interpretAst;
     initializeInterpreter = require('./lib/interpreter').initializeInterpreter;
-    kfetch = require('ui/kfetch').kfetch;
+    http = require('../../../ui/public/new_platform').npSetup.core.http;
     registries = require('./registries').registries;
   });
 
@@ -69,7 +69,7 @@ describe('interpreter/interpreter', () => {
       expect(initializeInterpreter).toHaveBeenCalledTimes(1);
       expect(initializeInterpreter).toHaveBeenCalledWith({
         ajaxStream,
-        kfetch,
+        http,
         typesRegistry: registries.types,
         functionsRegistry: registries.browserFunctions,
       });
