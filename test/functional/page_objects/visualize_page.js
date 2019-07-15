@@ -726,6 +726,9 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
       }
       log.debug('Click Save Visualization button');
       await testSubjects.click('confirmSaveSavedObjectButton');
+
+      // wait for save to complete before completion
+      await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     async saveVisualizationExpectSuccess(vizName, { saveAsNew = false } = {}) {
