@@ -64,6 +64,9 @@ export class ElasticsearchMonitorStatesAdapter implements UMMonitorStatesAdapter
       },
       sort: [
         {
+          'monitor.id': 'desc',
+        },
+        {
           '@timestamp': 'desc',
         },
       ],
@@ -71,7 +74,7 @@ export class ElasticsearchMonitorStatesAdapter implements UMMonitorStatesAdapter
       aggs: {
         monitors: {
           composite: {
-            size: LEGACY_STATES_QUERY_SIZE,
+            size: 10000,
             sources: [
               {
                 monitor_id: {
@@ -83,22 +86,27 @@ export class ElasticsearchMonitorStatesAdapter implements UMMonitorStatesAdapter
             ],
           },
           aggs: {
-            top: {
-              top_hits: {
-                sort: [
-                  {
-                    '@timestamp': 'desc',
-                  },
-                ],
-                _source: {
-                  includes: ['monitor.check_group', '@timestamp', 'agent.id'],
-                },
-                // The idea here is that we want to get enough documents to get all
-                // possible agent IDs. Doing that in a deterministic way is hard,
-                // but all agent IDs should be represented in the top 50 results in most cases.
-                // There's an edge case here where a user has accidentally configured
-                // two agents to run on different schedules, but that's an issue on the user side.
-                size: 50,
+            most_recent_group: {
+              scripted_metric: {
+                init_script: "state.highTs = 0; state.highGroup = ''",
+                map_script: `
+                long docTs = doc["@timestamp"][0].toInstant().toEpochMilli();
+                if (state.highTs < docTs) {
+                  state.highTs = docTs;
+                  state.highGroup = doc['monitor.check_group'][0];
+                }
+                `,
+                combine_script: 'return state',
+                reduce_script: `
+                  long highTs = 0;
+                  String highGroup = '';
+                  for (state in states) {
+                    if (highTs < state.highTs)  {
+                      highGroup = state.highGroup;
+                    }
+                  }
+                  return highGroup;
+                `,
               },
             },
           },
@@ -117,22 +125,8 @@ export class ElasticsearchMonitorStatesAdapter implements UMMonitorStatesAdapter
 
     const result = await this.database.search(request, params);
 
-    const checkGroups = result.aggregations.monitors.buckets.flatMap((bucket: any) => {
-      const topHits = get<any[]>(bucket, 'top.hits.hits', []);
-
-      const latestAgentGroup: { [key: string]: { timestamp: string; checkGroup: string } } = {};
-      topHits.forEach(({ _source: source }) => {
-        // We set the agent group to the first thing we see since it's already sorted
-        // by timestamp descending
-        if (!latestAgentGroup[source.agent.id]) {
-          latestAgentGroup[source.agent.id] = {
-            timestamp: source['@timestamp'],
-            checkGroup: source.monitor.check_group,
-          };
-        }
-      });
-
-      return Object.values(latestAgentGroup).map(({ checkGroup }) => checkGroup);
+    const checkGroups = result.aggregations.monitors.buckets.map((bucket: any) => {
+      return get<any>(bucket, 'most_recent_group.value', undefined);
     });
 
     const afterKey = get<any | null>(result, 'aggregations.monitors.after_key', null);
@@ -185,7 +179,7 @@ export class ElasticsearchMonitorStatesAdapter implements UMMonitorStatesAdapter
         aggs: {
           monitors: {
             composite: {
-              size: LEGACY_STATES_QUERY_SIZE,
+              size: 10000,
               sources: [
                 {
                   monitor_id: {
