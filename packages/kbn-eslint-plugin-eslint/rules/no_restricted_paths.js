@@ -97,24 +97,16 @@ module.exports = {
     }
 
     function checkForRestrictedImportPath(importPath, node) {
-      let absoluteImportPath;
-      const [one, two, ...rest] = importPath.split('/');
-      if (one === 'ui') {
-        absoluteImportPath = path.join(
-          basePath,
-          `src/legacy/${one}/public/${two}${rest.length ? `/${rest.join('/')}` : ''}`
-        );
-      } else {
-        absoluteImportPath = resolve(importPath, context);
-        if (!absoluteImportPath) return;
-      }
+      const absoluteImportPath = importPath[0] === '.' ? resolve(importPath, context) : undefined;
 
       const currentFilename = context.getFilename();
       for (const { target, from, allowSameFolder, errorMessage = '' } of zones) {
         const srcFilePath = resolve(currentFilename, context);
 
         const relativeSrcFile = path.relative(basePath, srcFilePath);
-        const relativeImportFile = path.relative(basePath, absoluteImportPath);
+        const relativeImportFile = absoluteImportPath
+          ? path.relative(basePath, absoluteImportPath)
+          : importPath;
 
         if (
           !mm([relativeSrcFile], target).length ||
