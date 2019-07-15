@@ -10,6 +10,28 @@ import { AssetReference, InstallationAttributes } from '../../common/types';
 import * as Registry from '../registry';
 import { CallESAsCurrentUser, assetUsesObjects, getInstallationObject } from './index';
 
+export async function installIntegration(options: {
+  savedObjectsClient: SavedObjectsClientContract;
+  pkgkey: string;
+  asset: string;
+  callCluster: CallESAsCurrentUser;
+}) {
+  const { savedObjectsClient, pkgkey, asset, callCluster } = options;
+  // install any assets (in ES, as Saved Objects, etc) as required. Get references to them
+  const toSave = await installAssets({ savedObjectsClient, pkgkey, asset, callCluster });
+
+  if (toSave.length) {
+    // saved those references in the integration manager's state object
+    const saved = await saveInstallationReferences({ savedObjectsClient, pkgkey, toSave });
+    return saved;
+  }
+
+  return [];
+}
+
+// the function which how to install each of the various asset types
+// TODO: make it an exhaustive list
+// e.g. switch statement with cases for each enum key returning `never` for default case
 export async function installAssets(options: {
   savedObjectsClient: SavedObjectsClientContract;
   pkgkey: string;
@@ -52,23 +74,6 @@ export async function saveInstallationReferences(options: {
   return results;
 }
 
-export async function installIntegration(options: {
-  savedObjectsClient: SavedObjectsClientContract;
-  pkgkey: string;
-  asset: string;
-  callCluster: CallESAsCurrentUser;
-}) {
-  const { savedObjectsClient, pkgkey, asset, callCluster } = options;
-  const toSave = await installAssets({ savedObjectsClient, pkgkey, asset, callCluster });
-
-  if (toSave.length) {
-    const saved = await saveInstallationReferences({ savedObjectsClient, pkgkey, toSave });
-    return saved;
-  }
-
-  return [];
-}
-
 async function installObjects({
   savedObjectsClient,
   pkgkey,
@@ -82,9 +87,7 @@ async function installObjects({
   const toBeSavedObjects = await getObjects(pkgkey, filter);
   const createResults = await savedObjectsClient.bulkCreate<InstallationAttributes>(
     toBeSavedObjects,
-    {
-      overwrite: true,
-    }
+    { overwrite: true }
   );
   const createdObjects = createResults.saved_objects;
   const installed = createdObjects.map(({ id, type }) => ({ id, type }));
