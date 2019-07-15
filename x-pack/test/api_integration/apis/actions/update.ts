@@ -178,9 +178,65 @@ export default function updateActionTests({ getService }: KibanaFunctionalTestDe
             statusCode: 400,
             error: 'Bad Request',
             message:
-              'The following actionTypeConfig attributes are invalid: encrypted [any.required]',
+              'The actionTypeConfig is invalid: [encrypted]: expected value of type [string] but got [undefined]',
           });
         });
+    });
+
+    it(`should allow changing non-secret config properties - create`, async () => {
+      let emailActionId: string = '';
+
+      // create the action
+      await supertest
+        .post('/api/action')
+        .set('kbn-xsrf', 'foo')
+        .send({
+          attributes: {
+            description: 'test email action',
+            actionTypeId: '.email',
+            actionTypeConfig: {
+              user: 'email-user',
+              password: 'email-password',
+              from: 'email-from@example.com',
+              host: 'host-is-ignored-here.example.com',
+              port: 666,
+            },
+          },
+        })
+        .expect(200)
+        .then((resp: any) => {
+          emailActionId = resp.body.id;
+        });
+
+      // add a new config param
+      await supertest
+        .put(`/api/action/${emailActionId}`)
+        .set('kbn-xsrf', 'foo')
+        .send({
+          attributes: {
+            description: 'a test email action 2',
+            actionTypeConfig: {
+              user: 'email-user',
+              password: 'email-password',
+              from: 'email-from@example.com',
+              service: '__json',
+            },
+          },
+        })
+        .expect(200);
+
+      // fire the action
+      await supertest
+        .post(`/api/action/${emailActionId}/_fire`)
+        .set('kbn-xsrf', 'foo')
+        .send({
+          params: {
+            to: ['X'],
+            subject: 'email-subject',
+            message: 'email-message',
+          },
+        })
+        .expect(200);
     });
   });
 }
