@@ -7,7 +7,7 @@
 import React from 'react';
 import expect from '@kbn/expect';
 import { shallow } from 'enzyme';
-import { ChartTarget } from '../chart_target';
+import { ChartTarget } from './chart_target';
 
 const props = {
   seriesToShow: ['Max Heap', 'Max Heap Used'],
