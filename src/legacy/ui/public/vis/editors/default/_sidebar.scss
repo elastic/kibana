@@ -170,10 +170,6 @@
   @include euiTextTruncate;
 }
 
-.visEditorSidebar__collapsibleText {
-  @include euiTextTruncate;
-}
-
 //
 // FORMS
 //
@@ -222,4 +218,13 @@
 .visEditorSidebar__aggParamFormRow {
   margin-top: $euiSizeS;
   margin-bottom: $euiSizeS;
+}
+
+vis-editor-agg-group-wrapper .visEditorSidebar__section > .euiFlexGroup > .euiFlexItem:first-child {
+  overflow: hidden;
+  padding: 0 0 1px 2px;
+
+  .euiAccordion__buttonContent {
+    overflow: hidden;
+  }
 }

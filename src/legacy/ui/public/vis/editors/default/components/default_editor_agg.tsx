@@ -196,35 +196,30 @@ function DefaultEditorAgg({
   };
 
   const buttonContent = (
-    <div>
-      <EuiFlexGroup gutterSize="s" alignItems="center">
-        <EuiFlexItem grow={false} className="visEditorSidebar__collapsibleText">
-          {agg.schema.title}
-        </EuiFlexItem>
-        <EuiFlexItem>
-          {showDescription && (
-            <EuiText size="s" color="subdued">
-              <p>{getDescription()}</p>
-            </EuiText>
-          )}
-          {showError && (
-            <EuiTextColor
-              color="danger"
-              aria-label={i18n.translate('common.ui.vis.editors.agg.errorsAriaLabel', {
-                defaultMessage: 'Aggregation has errors',
-              })}
-            >
-              <h6>
-                <FormattedMessage
-                  id="common.ui.vis.editors.agg.errorsText"
-                  defaultMessage="Errors"
-                />
-              </h6>
-            </EuiTextColor>
-          )}
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </div>
+    <EuiFlexGroup gutterSize="xs" alignItems="center">
+      <EuiFlexItem grow={false} className="eui-textTruncate">
+        {agg.schema.title}
+      </EuiFlexItem>
+      <EuiFlexItem className="eui-textTruncate">
+        {showDescription && (
+          <EuiText size="s" color="subdued">
+            <p className="eui-textTruncate">{getDescription()}</p>
+          </EuiText>
+        )}
+        {showError && (
+          <EuiTextColor
+            color="danger"
+            aria-label={i18n.translate('common.ui.vis.editors.agg.errorsAriaLabel', {
+              defaultMessage: 'Aggregation has errors',
+            })}
+          >
+            <h6>
+              <FormattedMessage id="common.ui.vis.editors.agg.errorsText" defaultMessage="Errors" />
+            </h6>
+          </EuiTextColor>
+        )}
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 
   return (
