@@ -1,0 +1,12 @@
+[[uptime-guide]]
+= Uptime monitoring guide
+
+include::versions.asciidoc[]
+
+include::{asciidoc-dir}/../../shared/attributes.asciidoc[]
+
+include::overview.asciidoc[]
+
+include::install.asciidoc[]
+
+include::security.asciidoc[]
