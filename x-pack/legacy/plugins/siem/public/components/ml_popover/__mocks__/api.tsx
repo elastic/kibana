@@ -22,6 +22,23 @@ export const mockGroupsResponse: Group[] = [
   { id: 'suricata', jobIds: ['suricata_alert_rate'], calendarIds: [] },
 ];
 
+export const mockOpenedJob: Job = {
+  datafeedId: 'datafeed-siem-api-rare_process_linux_ecs',
+  datafeedIndices: ['auditbeat-*'],
+  datafeedState: 'started',
+  description: 'SIEM Auditbeat: Detect unusually rare processes on Linux (beta)',
+  earliestTimestampMs: 1561651364098,
+  groups: ['siem'],
+  hasDatafeed: true,
+  id: 'siem-api-rare_process_linux_ecs',
+  isSingleMetricViewerJob: true,
+  jobState: 'opened',
+  latestTimestampMs: 1562870521264,
+  memory_status: 'hard_limit',
+  nodeName: 'siem-es',
+  processed_record_count: 3425264,
+};
+
 export const mockJobsSummaryResponse: Job[] = [
   {
     id: 'rc-rare-process-windows-5',
