@@ -32,7 +32,7 @@ const RESET_INDEX_PATTERN_STATE = {
 export class CreateSourceEditor extends Component {
 
   static propTypes = {
-    onSelect: PropTypes.func.isRequired,
+    onSourceConfigChange: PropTypes.func.isRequired,
   };
 
   state = {
@@ -142,7 +142,7 @@ export class CreateSourceEditor extends Component {
     const sourceConfig = (indexPatternId && geoField)
       ? { indexPatternId, geoField, filterByMapBounds }
       : null;
-    this.props.onSelect(sourceConfig);
+    this.props.onSourceConfigChange(sourceConfig);
   }
 
   _onNoIndexPatterns = () => {

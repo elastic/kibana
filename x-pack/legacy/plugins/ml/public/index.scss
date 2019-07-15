@@ -40,11 +40,11 @@
   @import 'components/form_label/index';
   @import 'components/influencers_list/index';
   @import 'components/items_grid/index';
-  @import 'components/job_selector/index'; // TODO: remove above two once react conversion of job selector is done
+  @import 'components/job_selector/index';
   @import 'components/json_tooltip/index'; // SASSTODO: This file overwrites EUI directly
   @import 'components/loading_indicator/index'; // SASSTODO: This component should be replaced with EuiLoadingSpinner
   @import 'components/messagebar/index';
-  @import 'components/nav_menu/index';
+  @import 'components/navigation_menu/index';
   @import 'components/rule_editor/index'; // SASSTODO: This file overwrites EUI directly
 
   // Hacks are last so they can overwrite anything above if needed

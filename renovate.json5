@@ -481,14 +481,6 @@
         ],
       },
       {
-        groupSlug: 'puppeteer-core',
-        groupName: 'puppeteer-core related packages',
-        packageNames: [
-          'puppeteer-core',
-          '@types/puppeteer-core',
-        ],
-      },
-      {
         groupSlug: 'request',
         groupName: 'request related packages',
         packageNames: [
@@ -710,6 +702,14 @@
         packageNames: [
           'proper-lockfile',
           '@types/proper-lockfile',
+        ],
+      },
+      {
+        groupSlug: 'puppeteer',
+        groupName: 'puppeteer related packages',
+        packageNames: [
+          'puppeteer',
+          '@types/puppeteer',
         ],
       },
       {
