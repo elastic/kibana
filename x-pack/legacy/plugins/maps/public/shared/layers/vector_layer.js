@@ -137,7 +137,6 @@ export class VectorLayer extends AbstractLayer {
     const sourceDataRequest = this.getSourceDataRequest();
     const featureCollection = sourceDataRequest ? sourceDataRequest.getData() : null;
 
-
     const noResultsIcon = (
       <EuiIcon
         size="m"

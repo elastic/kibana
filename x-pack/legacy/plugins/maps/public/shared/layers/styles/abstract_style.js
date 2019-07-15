@@ -23,4 +23,8 @@ export class AbstractStyle {
   renderEditor(/* { layer, onStyleDescriptorChange } */) {
     return null;
   }
+
+  getSourceFieldNames() {
+    return [];
+  }
 }
