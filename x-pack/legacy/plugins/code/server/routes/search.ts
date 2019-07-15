@@ -7,7 +7,7 @@
 import Boom from 'boom';
 import hapi from 'hapi';
 
-import { RequestFacade } from '../../';
+import { RequestFacade, RequestQueryFacade } from '../../';
 import { DocumentSearchRequest, RepositorySearchRequest, SymbolSearchRequest } from '../../model';
 import { Logger } from '../log';
 import { DocumentSearchClient, RepositorySearchClient, SymbolSearchClient } from '../search';
@@ -20,7 +20,7 @@ export function repositorySearchRoute(server: CodeServerRouter, log: Logger) {
     method: 'GET',
     async handler(req) {
       let page = 1;
-      const { p, q, repoScope } = req.query as hapi.RequestQuery;
+      const { p, q, repoScope } = req.query as RequestQueryFacade;
       if (p) {
         page = parseInt(p as string, 10);
       }
@@ -50,7 +50,7 @@ export function repositorySearchRoute(server: CodeServerRouter, log: Logger) {
     method: 'GET',
     async handler(req) {
       let page = 1;
-      const { p, q, repoScope } = req.query as hapi.RequestQuery;
+      const { p, q, repoScope } = req.query as RequestQueryFacade;
       if (p) {
         page = parseInt(p as string, 10);
       }
@@ -82,7 +82,7 @@ export function documentSearchRoute(server: CodeServerRouter, log: Logger) {
     method: 'GET',
     async handler(req) {
       let page = 1;
-      const { p, q, langs, repos, repoScope } = req.query as hapi.RequestQuery;
+      const { p, q, langs, repos, repoScope } = req.query as RequestQueryFacade;
       if (p) {
         page = parseInt(p as string, 10);
       }
@@ -114,7 +114,7 @@ export function documentSearchRoute(server: CodeServerRouter, log: Logger) {
     method: 'GET',
     async handler(req) {
       let page = 1;
-      const { p, q, repoScope } = req.query as hapi.RequestQuery;
+      const { p, q, repoScope } = req.query as RequestQueryFacade;
       if (p) {
         page = parseInt(p as string, 10);
       }
@@ -143,7 +143,7 @@ export function documentSearchRoute(server: CodeServerRouter, log: Logger) {
 export function symbolSearchRoute(server: CodeServerRouter, log: Logger) {
   const symbolSearchHandler = async (req: RequestFacade) => {
     let page = 1;
-    const { p, q, repoScope } = req.query as hapi.RequestQuery;
+    const { p, q, repoScope } = req.query as RequestQueryFacade;
     if (p) {
       page = parseInt(p as string, 10);
     }

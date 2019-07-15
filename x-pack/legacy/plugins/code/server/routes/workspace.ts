@@ -5,9 +5,8 @@
  */
 
 import Boom from 'boom';
-import { RequestQuery } from 'hapi';
 
-import { RequestFacade } from '../../';
+import { RequestFacade, RequestQueryFacade } from '../../';
 import { GitOperations } from '../git_operations';
 import { Logger } from '../log';
 import { WorkspaceCommand } from '../lsp/workspace_command';
@@ -38,7 +37,7 @@ export function workspaceRoute(
       const repoUri = req.params.uri as string;
       const revision = req.params.revision as string;
       const repoConfig = serverOptions.repoConfigs[repoUri];
-      const force = !!(req.query as RequestQuery).force;
+      const force = !!(req.query as RequestQueryFacade).force;
       if (repoConfig) {
         const log = new Logger(server.server, ['workspace', repoUri]);
         const workspaceHandler = new WorkspaceHandler(

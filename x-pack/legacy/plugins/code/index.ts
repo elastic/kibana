@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Server } from 'hapi';
+import { RequestQuery, Server } from 'hapi';
 import JoiNamespace from 'joi';
 import { Legacy } from 'kibana';
 import moment from 'moment';
@@ -15,6 +15,7 @@ import { APP_TITLE } from './common/constants';
 import { LanguageServers, LanguageServersDeveloping } from './server/lsp/language_servers';
 
 export type RequestFacade = Legacy.Request;
+export type RequestQueryFacade = RequestQuery;
 
 export const code = (kibana: any) =>
   new kibana.Plugin({

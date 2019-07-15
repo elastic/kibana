@@ -7,9 +7,9 @@
 import { Commit, Oid, Revwalk } from '@elastic/nodegit';
 import Boom from 'boom';
 import fileType from 'file-type';
-import hapi, { RequestQuery } from 'hapi';
+import hapi from 'hapi';
 
-import { RequestFacade } from '../../';
+import { RequestFacade, RequestQueryFacade } from '../../';
 import { commitInfo, DEFAULT_TREE_CHILDREN_LIMIT, GitOperations } from '../git_operations';
 import { extractLines } from '../utils/buffer';
 import { detectLanguage } from '../utils/detect_language';
@@ -40,7 +40,7 @@ export function fileRoute(server: CodeServerRouter, gitOps: GitOperations) {
     async handler(req: RequestFacade) {
       const { uri, path, ref } = req.params;
       const revision = decodeRevisionString(ref);
-      const queries = req.query as RequestQuery;
+      const queries = req.query as RequestQueryFacade;
       const limit = queries.limit
         ? parseInt(queries.limit as string, 10)
         : DEFAULT_TREE_CHILDREN_LIMIT;
@@ -90,7 +90,7 @@ export function fileRoute(server: CodeServerRouter, gitOps: GitOperations) {
               .code(204);
           }
         } else {
-          const line = (req.query as RequestQuery).line as string;
+          const line = (req.query as RequestQueryFacade).line as string;
           if (line) {
             const [from, to] = line.split(',');
             let fromLine = parseInt(from, 10);
@@ -166,7 +166,7 @@ export function fileRoute(server: CodeServerRouter, gitOps: GitOperations) {
   async function historyHandler(req: RequestFacade) {
     const { uri, ref, path } = req.params;
     const revision = decodeRevisionString(ref);
-    const queries = req.query as RequestQuery;
+    const queries = req.query as RequestQueryFacade;
     const count = queries.count ? parseInt(queries.count as string, 10) : 10;
     const after = queries.after !== undefined;
     try {
