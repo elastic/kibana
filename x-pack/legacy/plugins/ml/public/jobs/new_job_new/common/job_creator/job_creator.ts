@@ -283,14 +283,14 @@ export class JobCreator {
     this._stopAllRefreshPolls.stop = true;
   }
 
-  public set createdBy(createdBy: string | null) {
-    if (createdBy === null) {
-      // if null is passed in, delete the created_by property
+  private _setCustomSetting(setting: string, value: string | object | null) {
+    if (value === null) {
+      // if null is passed in, delete the custom setting
       if (
         this._job_config.custom_settings !== undefined &&
-        this._job_config.custom_settings.created_by !== undefined
+        this._job_config.custom_settings[setting] !== undefined
       ) {
-        delete this._job_config.custom_settings.created_by;
+        delete this._job_config.custom_settings[setting];
 
         if (Object.keys(this._job_config.custom_settings).length === 0) {
           // clean up custom_settings if there's nothing else in there
@@ -298,20 +298,33 @@ export class JobCreator {
         }
       }
     } else {
-      this._job_config.custom_settings = {
-        created_by: createdBy,
-      };
+      if (this._job_config.custom_settings === undefined) {
+        // if custom_settings doesn't exist, create it.
+        this._job_config.custom_settings = {
+          [setting]: value,
+        };
+      } else {
+        this._job_config.custom_settings[setting] = value;
+      }
     }
   }
 
-  public get createdBy(): string | null {
+  private _getCustomSetting(setting: string): string | object | null {
     if (
       this._job_config.custom_settings !== undefined &&
-      this._job_config.custom_settings.created_by !== undefined
+      this._job_config.custom_settings[setting] !== undefined
     ) {
-      return this._job_config.custom_settings.created_by;
+      return this._job_config.custom_settings[setting];
     }
     return null;
+  }
+
+  public set createdBy(createdBy: string | null) {
+    this._setCustomSetting('created_by', createdBy);
+  }
+
+  public get createdBy(): string | null {
+    return this._getCustomSetting('created_by') as string | null;
   }
 
   public get formattedJobJson() {
