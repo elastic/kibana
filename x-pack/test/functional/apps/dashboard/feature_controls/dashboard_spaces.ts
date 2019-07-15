@@ -85,7 +85,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
         });
-        await testSubjects.existOrFail('dashboardPanelHeading-APie', 10000);
+        await testSubjects.existOrFail('embeddablePanelHeading-APie', 10000);
       });
     });
 
