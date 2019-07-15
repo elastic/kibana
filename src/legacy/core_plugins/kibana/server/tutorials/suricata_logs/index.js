@@ -17,9 +17,13 @@
  * under the License.
  */
 
-import { i18n }  from '@kbn/i18n';
+import { i18n } from '@kbn/i18n';
 import { TUTORIAL_CATEGORY } from '../../../common/tutorials/tutorial_category';
-import { onPremInstructions, cloudInstructions, onPremCloudInstructions } from '../../../common/tutorials/filebeat_instructions';
+import {
+  onPremInstructions,
+  cloudInstructions,
+  onPremCloudInstructions,
+} from '../../../common/tutorials/filebeat_instructions';
 
 export function suricataLogsSpecProvider(server, context) {
   const moduleName = 'suricata';
@@ -29,12 +33,13 @@ export function suricataLogsSpecProvider(server, context) {
     name: i18n.translate('kbn.server.tutorials.suricataLogs.nameTitle', {
       defaultMessage: 'Suricata logs',
     }),
-    category: TUTORIAL_CATEGORY.SECURITY,
+    category: TUTORIAL_CATEGORY.SIEM,
     shortDescription: i18n.translate('kbn.server.tutorials.suricataLogs.shortDescription', {
       defaultMessage: 'Collect the result logs created by Suricata IDS/IPS/NSM.',
     }),
     longDescription: i18n.translate('kbn.server.tutorials.suricataLogs.longDescription', {
-      defaultMessage: 'The `suricata` Filebeat module collects the logs from the \
+      defaultMessage:
+        'The `suricata` Filebeat module collects the logs from the \
 [Suricata Eve JSON output](https://suricata.readthedocs.io/en/latest/output/eve/eve-json-format.html). \
 [Learn more]({learnMoreLink}).',
       values: {
@@ -46,20 +51,23 @@ export function suricataLogsSpecProvider(server, context) {
       dashboards: [
         {
           id: '69f5ae20-eb02-11e7-8f04-51231daa5b05',
-          linkLabel: i18n.translate('kbn.server.tutorials.suricataLogs.artifacts.dashboards.linkLabel', {
-            defaultMessage: 'Suricata logs dashboard',
-          }),
-          isOverview: true
-        }
+          linkLabel: i18n.translate(
+            'kbn.server.tutorials.suricataLogs.artifacts.dashboards.linkLabel',
+            {
+              defaultMessage: 'Suricata logs dashboard',
+            }
+          ),
+          isOverview: true,
+        },
       ],
       exportedFields: {
-        documentationUrl: '{config.docs.beats.filebeat}/exported-fields-suricata.html'
-      }
+        documentationUrl: '{config.docs.beats.filebeat}/exported-fields-suricata.html',
+      },
     },
     completionTimeMinutes: 10,
     previewImagePath: '/plugins/kibana/home/tutorial_resources/suricata_logs/screenshot.png',
     onPrem: onPremInstructions(moduleName, platforms, context),
     elasticCloud: cloudInstructions(moduleName, platforms),
-    onPremElasticCloud: onPremCloudInstructions(moduleName, platforms)
+    onPremElasticCloud: onPremCloudInstructions(moduleName, platforms),
   };
 }

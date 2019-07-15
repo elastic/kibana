@@ -7,18 +7,15 @@
 import { i18n } from '@kbn/i18n';
 import { string } from '../../functions/common/string';
 import { FunctionHelp } from '.';
-import { FunctionFactory } from '../../functions/types';
+import { FunctionFactory } from '../../../types';
 
 export const help: FunctionHelp<FunctionFactory<typeof string>> = {
   help: i18n.translate('xpack.canvas.functions.stringHelpText', {
-    defaultMessage:
-      'Output a string made of other strings. Mostly useful when combined with ' +
-      'sub-expressions that output a string, or something castable to a string',
+    defaultMessage: 'Concatenates all of the arguments into a single string.',
   }),
   args: {
     value: i18n.translate('xpack.canvas.functions.string.args.valueHelpText', {
-      defaultMessage:
-        "One or more strings to join together. Don't forget spaces " + 'where needed!',
+      defaultMessage: 'The values to join together into one string. Include spaces where needed.',
     }),
   },
 };
