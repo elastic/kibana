@@ -5,12 +5,13 @@
  */
 
 import React, { Fragment, FC, useContext, useState, useEffect } from 'react';
-import { EuiButton, EuiHorizontalRule } from '@elastic/eui';
+import { EuiButton, EuiButtonEmpty, EuiHorizontalRule } from '@elastic/eui';
 import { WizardNav } from '../../../../../data_frame/components/wizard_nav';
 import { WIZARD_STEPS, StepProps } from '../step_types';
 import { JobCreatorContext } from '../job_creator_context';
 import { KibanaContext, isKibanaContext } from '../../../../../data_frame/common/kibana_context';
 import { mlJobService } from '../../../../../services/job_service';
+import { JsonFlyout } from './json_flyout';
 
 export const SummaryStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) => {
   const kibanaContext = useContext(KibanaContext);
@@ -20,6 +21,7 @@ export const SummaryStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) =>
 
   const { jobCreator } = useContext(JobCreatorContext);
   const [progress, setProgress] = useState(0);
+  const [showJsonFlyout, setShowJsonFlyout] = useState(false);
 
   function setProgressWrapper(p: number) {
     setProgress(p);
@@ -30,6 +32,7 @@ export const SummaryStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) =>
   }, []);
 
   function start() {
+    setShowJsonFlyout(false);
     jobCreator.createAndStartJob();
   }
 
@@ -41,6 +44,10 @@ export const SummaryStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) =>
       'timeseriesexplorer'
     );
     window.open(url, '_blank');
+  }
+
+  function toggleJsonFlyout() {
+    setShowJsonFlyout(!showJsonFlyout);
   }
 
   return (
@@ -61,9 +68,19 @@ export const SummaryStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) =>
           )}
           <EuiHorizontalRule />
           {progress < 100 && (
-            <EuiButton onClick={start} isDisabled={progress > 0}>
-              Create job
-            </EuiButton>
+            <Fragment>
+              <EuiButton onClick={start} isDisabled={progress > 0}>
+                Create job
+              </EuiButton>
+              &emsp;
+              <EuiButtonEmpty size="s" onClick={toggleJsonFlyout} isDisabled={progress > 0}>
+                Preview job JSON
+              </EuiButtonEmpty>
+              {showJsonFlyout && (
+                <JsonFlyout closeFlyout={() => setShowJsonFlyout(false)} jobCreator={jobCreator} />
+              )}
+              &emsp;
+            </Fragment>
           )}
           {progress === 100 && (
             <Fragment>
