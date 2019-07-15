@@ -109,13 +109,17 @@
 }
 
 .mapTocEntry__layerDetails {
-  @include euiOverflowShadow(transparentize($euiShadowColor, .7));
+  @include euiOverflowShadow;
   background-color: $euiPageBackgroundColor;
   padding: $euiSize $euiSizeS $euiSizeS;
   margin: $euiSizeS (-$euiSizeS) (-$euiSizeS);
 }
 
 @keyframes mapTocEntryBecomeVisible {
-  0% { opacity: 0; }
-  100% { opacity: 1; }
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
 }
