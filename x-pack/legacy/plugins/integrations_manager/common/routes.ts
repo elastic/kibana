@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { PLUGIN_ID } from './constants';
+import { AssetType } from './types';
 
 export const API_ROOT = `/api/${PLUGIN_ID}`;
 export const API_LIST_PATTERN = `${API_ROOT}/list`;
@@ -17,4 +18,16 @@ export function getListPath() {
 
 export function getInfoPath(pkgkey: string) {
   return API_INFO_PATTERN.replace('{pkgkey}', pkgkey);
+}
+
+export function getInstallPath(pkgkey: string, asset?: AssetType) {
+  return API_INSTALL_PATTERN.replace('{pkgkey}', pkgkey)
+    .replace('{asset?}', asset || '')
+    .replace(/\/$/, ''); // trim trailing slash
+}
+
+export function getRemovePath(pkgkey: string, asset?: AssetType) {
+  return API_DELETE_PATTERN.replace('{pkgkey}', pkgkey)
+    .replace('{asset?}', asset || '')
+    .replace(/\/$/, ''); // trim trailing slash
 }
