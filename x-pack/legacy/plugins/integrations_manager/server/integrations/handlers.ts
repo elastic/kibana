@@ -9,11 +9,11 @@ import { PluginContext } from '../plugin';
 import { getClient } from '../saved_objects';
 import {
   getClusterAccessor,
-  getIntegrations,
   getIntegrationInfo,
+  getIntegrations,
   installIntegration,
   removeInstallation,
-} from './data';
+} from './index';
 
 interface Extra extends ResponseToolkit {
   context: PluginContext;
