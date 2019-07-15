@@ -8,15 +8,11 @@ import { shallow } from 'enzyme';
 import toJson from 'enzyme-to-json';
 import React from 'react';
 
-import { HeaderPanel } from './index';
+import { Loader } from './index';
 
 describe('rendering', () => {
   test('renders correctly', () => {
-    const wrapper = shallow(
-      <HeaderPanel subtitle="My Test Subtitle" title="My Test Title" tooltip="My test tooltip.">
-        <p>{'My test supplement.'}</p>
-      </HeaderPanel>
-    );
+    const wrapper = shallow(<Loader overlay size="xl" />);
     expect(toJson(wrapper)).toMatchSnapshot();
   });
 });
