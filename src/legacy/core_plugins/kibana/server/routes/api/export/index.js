@@ -47,7 +47,7 @@ export function exportApi(server) {
             .header('Content-Type', 'application/json')
             .header('Content-Length', Buffer.byteLength(json, 'utf8'));
         })
-        .catch(err => Boom.boomify(err, { statusCode: 400 }));
+        .catch(err => Boom.boomify(err, { statusCode: 500, override: false }));
     }
   });
 }
