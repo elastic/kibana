@@ -43,7 +43,7 @@ const basePath = chrome.getBasePath();
 
 const AddDataUi = ({ apmUiEnabled, isNewKibanaInstance, intl, mlEnabled }) => {
   const renderCards = () => {
-    const ampData = {
+    const apmData = {
       title: intl.formatMessage({
         id: 'kbn.home.addData.apm.nameTitle',
         defaultMessage: 'APM',
@@ -97,13 +97,13 @@ const AddDataUi = ({ apmUiEnabled, isNewKibanaInstance, intl, mlEnabled }) => {
         <EuiCard
           className="homAddData__card"
           icon={<EuiIcon className="homAddData__icon" type="logoAPM" />}
-          title={ampData.title}
-          description={<span id={ampData.ariaDescribedby}>{ampData.description}</span>}
+          title={apmData.title}
+          description={<span id={apmData.ariaDescribedby}>{apmData.description}</span>}
           footer={
             <EuiButton
               className="homAddData__button"
               href="#/home/tutorial/apm"
-              aria-describedby={ampData.ariaDescribedby}
+              aria-describedby={apmData.ariaDescribedby}
             >
               <FormattedMessage
                 id="kbn.home.addData.apm.addApmButtonLabel"
