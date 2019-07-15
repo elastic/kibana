@@ -28,11 +28,11 @@ export default function({ getService }: TestInvoker) {
   const esArchiver = getService('esArchiver');
   const es = getService('es');
 
-  const { bulkCreateTest, createExpectResults } = bulkCreateTestSuiteFactory(
-    es,
-    esArchiver,
-    supertest
-  );
+  const {
+    bulkCreateTest,
+    createExpectResults,
+    expectBadRequestForSpace,
+  } = bulkCreateTestSuiteFactory(es, esArchiver, supertest);
 
   describe('_bulk_create', () => {
     bulkCreateTest('in the current space (space_1)', {
@@ -41,6 +41,10 @@ export default function({ getService }: TestInvoker) {
         default: {
           statusCode: 200,
           response: createExpectResults(SPACES.SPACE_1.spaceId),
+        },
+        includingSpace: {
+          statusCode: 200,
+          response: expectBadRequestForSpace,
         },
         custom: {
           description: 'when a namespace is specified on the saved object',
@@ -65,6 +69,10 @@ export default function({ getService }: TestInvoker) {
         default: {
           statusCode: 200,
           response: createExpectResults(SPACES.DEFAULT.spaceId),
+        },
+        includingSpace: {
+          statusCode: 200,
+          response: expectBadRequestForSpace,
         },
         custom: {
           description: 'when a namespace is specified on the saved object',

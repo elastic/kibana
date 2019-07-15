@@ -24,6 +24,7 @@ interface BulkCreateCustomTest extends BulkCreateTest {
 
 interface BulkCreateTests {
   default: BulkCreateTest;
+  includingSpace: BulkCreateTest;
   custom?: BulkCreateCustomTest;
 }
 
@@ -132,11 +133,30 @@ export function bulkCreateTestSuiteFactory(es: any, esArchiver: any, supertest: 
     }
   };
 
-  const expectRbacForbidden = (resp: { [key: string]: any }) => {
+  const expectBadRequestForSpace = (resp: { [key: string]: any }) => {
+    const spaceEntry = resp.body.saved_objects.find(
+      (entry: any) => entry.id === 'my-space' && entry.type === 'space'
+    );
+    expect(spaceEntry).to.eql({
+      id: 'my-space',
+      type: 'space',
+      error: {
+        message: "Unsupported saved object type: 'space': Bad Request",
+        statusCode: 400,
+        error: 'Bad Request',
+      },
+    });
+  };
+
+  const expectedForbiddenTypes = ['dashboard', 'globaltype', 'visualization'];
+  const expectedForbiddenTypesWithSpace = ['dashboard', 'globaltype', 'space', 'visualization'];
+  const createExpectRbacForbidden = (types: string[] = expectedForbiddenTypes) => (resp: {
+    [key: string]: any;
+  }) => {
     expect(resp.body).to.eql({
       statusCode: 403,
       error: 'Forbidden',
-      message: `Unable to bulk_create dashboard,globaltype,visualization`,
+      message: `Unable to bulk_create ${types.join(',')}`,
     });
   };
 
@@ -159,6 +179,25 @@ export function bulkCreateTestSuiteFactory(es: any, esArchiver: any, supertest: 
           .then(tests.default.response);
       });
 
+      it(`should return ${tests.includingSpace.statusCode}`, async () => {
+        await supertest
+          .post(`${getUrlPrefix(spaceId)}/api/saved_objects/_bulk_create`)
+          .auth(user.username, user.password)
+          .send(
+            createBulkRequests(spaceId).concat([
+              {
+                type: 'space',
+                id: `my-space`,
+                attributes: {
+                  name: 'My awesome space',
+                },
+              },
+            ])
+          )
+          .expect(tests.includingSpace.statusCode)
+          .then(tests.includingSpace.response);
+      });
+
       if (tests.custom) {
         it(tests.custom!.description, async () => {
           await supertest
@@ -179,6 +218,8 @@ export function bulkCreateTestSuiteFactory(es: any, esArchiver: any, supertest: 
   return {
     bulkCreateTest,
     createExpectResults,
-    expectRbacForbidden,
+    createExpectRbacForbidden,
+    expectBadRequestForSpace,
+    expectedForbiddenTypesWithSpace,
   };
 }
