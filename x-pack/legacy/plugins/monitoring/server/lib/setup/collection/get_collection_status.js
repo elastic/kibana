@@ -478,6 +478,7 @@ export const getCollectionStatus = async (req, indexPatterns, clusterUuid, skipL
   status._meta = {
     secondsAgo: NUMBER_OF_SECONDS_AGO_TO_LOOK,
     clusterUuid: liveClusterUuid,
+    isOnCloud: get(req.server.plugins, 'cloud.config.isCloudEnabled', false)
   };
 
   return status;

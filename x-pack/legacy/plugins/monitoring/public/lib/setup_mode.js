@@ -5,6 +5,7 @@
  */
 
 import { ajaxErrorHandlersProvider } from './ajax_error_handler';
+import { get } from 'lodash';
 
 const angularState = {
   injector: null,
@@ -67,6 +68,9 @@ const notifySetupModeDataChange = (oldData) => {
 export const updateSetupModeData = async () => {
   const oldData = setupModeState.data;
   setupModeState.data = await fetchCollectionData();
+  if (get(setupModeState.data, '_meta.isOnCloud', false)) {
+    return toggleSetupMode(false); // eslint-disable-line no-use-before-define
+  }
   notifySetupModeDataChange(oldData);
 };
 
