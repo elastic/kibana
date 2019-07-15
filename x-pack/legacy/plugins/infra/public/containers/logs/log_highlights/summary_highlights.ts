@@ -74,7 +74,7 @@ export const useSummaryHighlights = (
 
   useEffect(() => {
     if (highlightTerms.filter(highlightTerm => highlightTerm.length > 0).length && start && end) {
-      debouncedLoadSummaryHighlights();
+      // debouncedLoadSummaryHighlights();
     } else {
       setSummaryHighlights(undefined);
     }
