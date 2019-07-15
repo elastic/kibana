@@ -27,9 +27,6 @@ module.exports = {
         [
           '@babel/preset-env',
           {
-            targets: {
-              browsers: ['last 2 versions', '> 5%', 'Safari 7'],
-            },
             modules: false
           },
         ],
