@@ -31,35 +31,20 @@ import { StubIndexPatterns } from './test_helpers/stub_index_pattern';
 import { StubState } from './test_helpers/stub_state';
 import { getFiltersArray } from './test_helpers/get_filters_array';
 
-jest.mock(
-  'ui/chrome',
-  () => ({
-    getBasePath: jest.fn(() => 'path'),
-    getUiSettingsClientContract: jest.fn(() => {
-      return {
-        get: () => true,
-      };
-    }),
-  }),
-  { virtual: true }
-);
+import { coreMock } from '../../../../../../core/public/mocks';
+const setupMock = coreMock.createSetup();
 
-jest.mock('ui/new_platform', () => ({
-  npStart: {
-    core: {
-      chrome: {
-        recentlyAccessed: false,
-      },
+setupMock.uiSettings.get.mockImplementation((key: string) => {
+  return true;
+});
+
+jest.mock('ui/timefilter', () => {
+  return {
+    timefilter: {
+      setTime: jest.fn(),
     },
-  },
-  npSetup: {
-    core: {
-      uiSettings: {
-        get: () => true,
-      },
-    },
-  },
-}));
+  };
+});
 
 describe('filter_manager', () => {
   let appStateStub: StubState;
@@ -78,7 +63,7 @@ describe('filter_manager', () => {
     appStateStub = new StubState();
     globalStateStub = new StubState();
     indexPatterns = new StubIndexPatterns();
-    filterManager = new FilterManager(indexPatterns);
+    filterManager = new FilterManager(indexPatterns, setupMock.uiSettings);
     readyFilters = getFiltersArray();
 
     // FilterStateManager is tested indirectly.

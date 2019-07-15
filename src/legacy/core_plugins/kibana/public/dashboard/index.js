@@ -39,8 +39,8 @@ import { DashboardListing, EMPTY_FILTER } from './listing/dashboard_listing';
 import { uiModules } from 'ui/modules';
 import 'ui/capabilities/route_setup';
 
-import { data } from 'plugins/data/setup';
-data.filter.loadLegacyDirectives();
+// load directives
+import 'plugins/data/legacy';
 
 const app = uiModules.get('app/dashboard', [
   'ngRoute',

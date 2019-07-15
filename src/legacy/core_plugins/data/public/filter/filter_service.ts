@@ -17,9 +17,7 @@
  * under the License.
  */
 
-import { once } from 'lodash';
-import { FilterBar, setupDirective as setupFilterBarDirective } from './filter_bar';
-import { ApplyFiltersPopover, setupDirective as setupApplyFiltersDirective } from './apply_filters';
+import { UiSettingsClientContract } from 'kibana/public';
 import { IndexPatterns } from '../index_patterns';
 import { FilterManager } from './filter_manager';
 /**
@@ -29,22 +27,15 @@ import { FilterManager } from './filter_manager';
 
 export interface FilterServiceDependencies {
   indexPatterns: IndexPatterns;
+  uiSettings: UiSettingsClientContract;
 }
 
 export class FilterService {
-  public setup({ indexPatterns }: FilterServiceDependencies) {
-    const filterManager = new FilterManager(indexPatterns);
+  public setup({ indexPatterns, uiSettings }: FilterServiceDependencies) {
+    const filterManager = new FilterManager(indexPatterns, uiSettings);
 
     return {
       filterManager,
-      ui: {
-        ApplyFiltersPopover,
-        FilterBar,
-      },
-      loadLegacyDirectives: once(() => {
-        setupFilterBarDirective();
-        setupApplyFiltersDirective();
-      }),
     };
   }
 

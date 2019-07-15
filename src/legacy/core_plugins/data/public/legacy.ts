@@ -17,11 +17,20 @@
  * under the License.
  */
 
-import { DataPlugin } from './index';
+import { npSetup } from 'ui/new_platform';
+// @ts-ignore
+import { renderersRegistry } from 'plugins/interpreter/registries';
+// @ts-ignore
+import { getInterpreter } from 'plugins/interpreter/interpreter';
+import { LegacyDependenciesPlugin } from './shim/legacy_dependencies_plugin';
+import { plugin } from '.';
 
-/**
- * We export data here so that users importing from 'plugins/data'
- * will automatically receive the response value of the `setup` contract, mimicking
- * the data that will eventually be injected by the new platform.
- */
-export const data = new DataPlugin().setup();
+const dataPlugin = plugin();
+const legacyPlugin = new LegacyDependenciesPlugin();
+export const setup = dataPlugin.setup(npSetup.core, {
+  __LEGACY: legacyPlugin.setup(),
+  interpreter: {
+    renderersRegistry,
+    getInterpreter,
+  },
+});

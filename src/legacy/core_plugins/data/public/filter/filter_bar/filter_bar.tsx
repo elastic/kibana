@@ -143,6 +143,7 @@ class FilterBarUI extends Component<Props, State> {
                 onSubmit={this.onAdd}
                 onCancel={this.onCloseAddFilterPopover}
                 key={JSON.stringify(newFilter)}
+                uiSettings={this.props.uiSettings}
               />
             </div>
           </EuiFlexItem>

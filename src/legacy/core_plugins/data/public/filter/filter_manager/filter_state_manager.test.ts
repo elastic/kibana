@@ -29,22 +29,20 @@ import { getFilter } from './test_helpers/get_stub_filter';
 import { FilterManager } from './filter_manager';
 import { StubIndexPatterns } from './test_helpers/stub_index_pattern';
 
-jest.mock('ui/new_platform', () => ({
-  npStart: {
-    core: {
-      chrome: {
-        recentlyAccessed: false,
-      },
+import { coreMock } from '../../../../../../core/public/mocks';
+const setupMock = coreMock.createSetup();
+
+setupMock.uiSettings.get.mockImplementation((key: string) => {
+  return true;
+});
+
+jest.mock('ui/timefilter', () => {
+  return {
+    timefilter: {
+      setTime: jest.fn(),
     },
-  },
-  npSetup: {
-    core: {
-      uiSettings: {
-        get: () => true,
-      },
-    },
-  },
-}));
+  };
+});
 
 describe('filter_state_manager', () => {
   let appStateStub: StubState;
@@ -57,7 +55,7 @@ describe('filter_state_manager', () => {
     appStateStub = new StubState();
     globalStateStub = new StubState();
     const indexPatterns = new StubIndexPatterns();
-    filterManager = new FilterManager(indexPatterns);
+    filterManager = new FilterManager(indexPatterns, setupMock.uiSettings);
   });
 
   afterEach(() => {
