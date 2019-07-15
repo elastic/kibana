@@ -29,7 +29,7 @@ fi
 cd %{name}
 npm install yarn
 ./node_modules/yarn/bin/yarn kbn bootstrap
-node scripts/build --rpm --oss --skip-archives --verbose
+node scripts/build --rpm --oss --skip-archives --release --verbose
 
 %install
 cd %{name}
@@ -37,7 +37,7 @@ mkdir -p %{buildroot}/lib/systemd/system
 cp systemd/kibana.service %{buildroot}/lib/systemd/system
 
 mkdir -p %{buildroot}/usr/local/%{name}-%{kibana_version}-linux-x64
-cp -a build/oss/%{name}-%{kibana_version}-SNAPSHOT-linux-x86_64/* %{buildroot}/usr/local/%{name}-%{kibana_version}-linux-x64/
+cp -a build/oss/%{name}-%{kibana_version}-linux-x86_64/* %{buildroot}/usr/local/%{name}-%{kibana_version}-linux-x64/
 
 mkdir -p %{buildroot}/usr/local/%{name}-%{kibana_version}-linux-x64/scripts
 cp scripts/exportAssets.py %{buildroot}/usr/local/%{name}-%{kibana_version}-linux-x64/scripts
