@@ -276,7 +276,19 @@ export class KerberosAuthenticationProvider extends BaseAuthenticationProvider {
     // Try to authenticate current request with Elasticsearch to see whether it supports SPNEGO.
     let authenticationError: Error;
     try {
-      await this.options.client.callWithRequest(request, 'shield.authenticate');
+      await this.options.client.callWithRequest(
+        {
+          headers: {
+            ...request.headers,
+            // We should send a fake SPNEGO token to Elasticsearch to make sure Kerberos realm is included
+            // into authentication chain and adds a `WWW-Authenticate: Negotiate` header to the error
+            // response. Otherwise it may not be even consulted if request can be authenticated by other
+            // means (e.g. when anonymous access is enabled in Elasticsearch).
+            authorization: `Negotiate ${Buffer.from('__fake__').toString('base64')}`,
+          },
+        },
+        'shield.authenticate'
+      );
       this.debug('Request was not supposed to be authenticated, ignoring result.');
       return AuthenticationResult.notHandled();
     } catch (err) {
