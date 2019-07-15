@@ -6,12 +6,15 @@
 
 import { Server } from 'hapi';
 import JoiNamespace from 'joi';
+import { Legacy } from 'kibana';
 import moment from 'moment';
 import { resolve } from 'path';
 
 import { init } from './server/init';
 import { APP_TITLE } from './common/constants';
 import { LanguageServers, LanguageServersDeveloping } from './server/lsp/language_servers';
+
+export type RequestFacade = Legacy.Request;
 
 export const code = (kibana: any) =>
   new kibana.Plugin({

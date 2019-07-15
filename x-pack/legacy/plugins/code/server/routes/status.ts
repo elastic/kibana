@@ -3,9 +3,10 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import hapi from 'hapi';
+
 import Boom from 'boom';
 
+import { RequestFacade } from '../../';
 import { LspService } from '../lsp/lsp_service';
 import { GitOperations } from '../git_operations';
 import { CodeServerRouter } from '../security';
@@ -82,7 +83,7 @@ export function statusRoute(
   server.route({
     path: '/api/code/repo/{uri*3}/status/{ref}/{path*}',
     method: 'GET',
-    async handler(req: hapi.Request) {
+    async handler(req: RequestFacade) {
       const { uri, path, ref } = req.params;
       const report: StatusReport = {};
       const repoObjectClient = new RepositoryObjectClient(new EsClientWithRequest(req));

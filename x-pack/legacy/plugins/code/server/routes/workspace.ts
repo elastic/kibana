@@ -5,8 +5,9 @@
  */
 
 import Boom from 'boom';
-import hapi, { RequestQuery } from 'hapi';
+import { RequestQuery } from 'hapi';
 
+import { RequestFacade } from '../../';
 import { GitOperations } from '../git_operations';
 import { Logger } from '../log';
 import { WorkspaceCommand } from '../lsp/workspace_command';
@@ -33,7 +34,7 @@ export function workspaceRoute(
     path: '/api/code/workspace/{uri*3}/{revision}',
     requireAdmin: true,
     method: 'POST',
-    async handler(req: hapi.Request, reply) {
+    async handler(req: RequestFacade, reply) {
       const repoUri = req.params.uri as string;
       const revision = req.params.revision as string;
       const repoConfig = serverOptions.repoConfigs[repoUri];

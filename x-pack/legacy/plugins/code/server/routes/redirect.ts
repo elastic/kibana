@@ -5,13 +5,15 @@
  */
 
 import hapi from 'hapi';
+
+import { RequestFacade } from '../../';
 import { Logger } from '../log';
 
 export function redirectRoute(server: hapi.Server, redirectUrl: string, log: Logger) {
   const proxyHandler = {
     proxy: {
       passThrough: true,
-      async mapUri(request: hapi.Request) {
+      async mapUri(request: RequestFacade) {
         let uri;
         uri = `${redirectUrl}${request.path}`;
         if (request.url.search) {

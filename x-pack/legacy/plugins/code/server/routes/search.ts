@@ -5,8 +5,9 @@
  */
 
 import Boom from 'boom';
-
 import hapi from 'hapi';
+
+import { RequestFacade } from '../../';
 import { DocumentSearchRequest, RepositorySearchRequest, SymbolSearchRequest } from '../../model';
 import { Logger } from '../log';
 import { DocumentSearchClient, RepositorySearchClient, SymbolSearchClient } from '../search';
@@ -140,7 +141,7 @@ export function documentSearchRoute(server: CodeServerRouter, log: Logger) {
 }
 
 export function symbolSearchRoute(server: CodeServerRouter, log: Logger) {
-  const symbolSearchHandler = async (req: hapi.Request) => {
+  const symbolSearchHandler = async (req: RequestFacade) => {
     let page = 1;
     const { p, q, repoScope } = req.query as hapi.RequestQuery;
     if (p) {

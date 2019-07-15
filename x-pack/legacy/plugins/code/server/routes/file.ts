@@ -8,6 +8,8 @@ import { Commit, Oid, Revwalk } from '@elastic/nodegit';
 import Boom from 'boom';
 import fileType from 'file-type';
 import hapi, { RequestQuery } from 'hapi';
+
+import { RequestFacade } from '../../';
 import { commitInfo, DEFAULT_TREE_CHILDREN_LIMIT, GitOperations } from '../git_operations';
 import { extractLines } from '../utils/buffer';
 import { detectLanguage } from '../utils/detect_language';
@@ -19,7 +21,7 @@ import { decodeRevisionString } from '../../common/uri_util';
 
 export function fileRoute(server: CodeServerRouter, gitOps: GitOperations) {
   async function getRepoUriFromMeta(
-    req: hapi.Request,
+    req: RequestFacade,
     repoUri: string
   ): Promise<string | undefined> {
     const repoObjectClient = new RepositoryObjectClient(new EsClientWithRequest(req));
@@ -35,7 +37,7 @@ export function fileRoute(server: CodeServerRouter, gitOps: GitOperations) {
   server.route({
     path: '/api/code/repo/{uri*3}/tree/{ref}/{path*}',
     method: 'GET',
-    async handler(req: hapi.Request) {
+    async handler(req: RequestFacade) {
       const { uri, path, ref } = req.params;
       const revision = decodeRevisionString(ref);
       const queries = req.query as RequestQuery;
@@ -65,7 +67,7 @@ export function fileRoute(server: CodeServerRouter, gitOps: GitOperations) {
   server.route({
     path: '/api/code/repo/{uri*3}/blob/{ref}/{path*}',
     method: 'GET',
-    async handler(req: hapi.Request, h: hapi.ResponseToolkit) {
+    async handler(req: RequestFacade, h: hapi.ResponseToolkit) {
       const { uri, path, ref } = req.params;
       const revision = decodeRevisionString(ref);
       const repoUri = await getRepoUriFromMeta(req, uri);
@@ -161,7 +163,7 @@ export function fileRoute(server: CodeServerRouter, gitOps: GitOperations) {
     handler: historyHandler,
   });
 
-  async function historyHandler(req: hapi.Request) {
+  async function historyHandler(req: RequestFacade) {
     const { uri, ref, path } = req.params;
     const revision = decodeRevisionString(ref);
     const queries = req.query as RequestQuery;
