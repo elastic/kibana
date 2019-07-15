@@ -22,8 +22,8 @@ describe('debouncedComponent', () => {
     }, 1);
     const component = mount(<TestComponent title="there" />);
     component.setProps({ title: 'yall' });
-    expect(component.html()).toMatchInlineSnapshot(`"<h1>there</h1>"`);
+    expect(component.text()).toEqual('there');
     await new Promise(r => setTimeout(r, 1));
-    expect(component.html()).toMatchInlineSnapshot(`"<h1>yall</h1>"`);
+    expect(component.text()).toEqual('yall');
   });
 });

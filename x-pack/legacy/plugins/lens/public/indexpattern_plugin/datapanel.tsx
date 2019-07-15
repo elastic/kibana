@@ -37,7 +37,7 @@ const FixedEuiContextMenuPanel = (EuiContextMenuPanel as any) as React.FunctionC
 >;
 
 function sortFields(fieldA: IndexPatternField, fieldB: IndexPatternField) {
-  return fieldA.name.toLowerCase() < fieldB.name.toLowerCase() ? -1 : 1;
+  return fieldA.name.localeCompare(fieldB.name, undefined, { sensitivity: 'base' });
 }
 
 const supportedFieldTypes = ['string', 'number', 'boolean', 'date'];
@@ -51,11 +51,13 @@ const fieldTypeNames: Record<DataType, string> = {
 };
 
 export function IndexPatternDataPanel(props: DatasourceDataPanelProps<IndexPatternPrivateState>) {
-  const [nameFilter, setNameFilter] = useState('');
-  const [typeFilter, setTypeFilter] = useState<DataType[]>([]);
+  const [state, setState] = useState({
+    nameFilter: '',
+    typeFilter: [] as DataType[],
+    showIndexPatternSwitcher: false,
+    isTypeFilterOpen: false,
+  });
   const [pageSize, setPageSize] = useState(PAGINATION_SIZE);
-  const [showIndexPatternSwitcher, setShowIndexPatternSwitcher] = useState(false);
-  const [isTypeFilterOpen, setTypeFilterOpen] = useState(false);
   const [scrollContainer, setScrollContainer] = useState<Element | undefined>(undefined);
   const lazyScroll = () => {
     if (scrollContainer) {
@@ -74,7 +76,7 @@ export function IndexPatternDataPanel(props: DatasourceDataPanelProps<IndexPatte
       setPageSize(PAGINATION_SIZE);
       lazyScroll();
     }
-  }, [nameFilter, typeFilter, props.state.currentIndexPatternId]);
+  }, [state.nameFilter, state.typeFilter, props.state.currentIndexPatternId]);
 
   if (Object.keys(props.state.indexPatterns).length === 0) {
     return (
@@ -104,20 +106,22 @@ export function IndexPatternDataPanel(props: DatasourceDataPanelProps<IndexPatte
   const filteredFields = allFields
     .filter(
       (field: IndexPatternField) =>
-        field.name.toLowerCase().includes(nameFilter.toLowerCase()) &&
+        field.name.toLowerCase().includes(state.nameFilter.toLowerCase()) &&
         supportedFieldTypes.includes(field.type)
     )
     .slice(0, pageSize);
 
   const availableFieldTypes = _.uniq(filteredFields.map(({ type }) => type));
-  const availableFilteredTypes = typeFilter.filter(type => availableFieldTypes.includes(type));
+  const availableFilteredTypes = state.typeFilter.filter(type =>
+    availableFieldTypes.includes(type)
+  );
 
   return (
     <ChildDragDropProvider {...props.dragDropContext}>
       <EuiFlexGroup gutterSize="s" className="lnsIndexPatternDataPanel" direction="column">
         <EuiFlexItem grow={null}>
           <div className="lnsIndexPatternDataPanel__header">
-            {!showIndexPatternSwitcher ? (
+            {!state.showIndexPatternSwitcher ? (
               <>
                 <EuiTitle size="xxs">
                   <h4
@@ -130,7 +134,7 @@ export function IndexPatternDataPanel(props: DatasourceDataPanelProps<IndexPatte
                 <EuiButtonEmpty
                   data-test-subj="indexPattern-switch-link"
                   className="lnsIndexPatternDataPanel__changeLink"
-                  onClick={() => setShowIndexPatternSwitcher(true)}
+                  onClick={() => setState({ ...state, showIndexPatternSwitcher: true })}
                   size="xs"
                 >
                   (
@@ -166,13 +170,19 @@ export function IndexPatternDataPanel(props: DatasourceDataPanelProps<IndexPatte
                 singleSelection={{ asPlainText: true }}
                 isClearable={false}
                 onBlur={() => {
-                  setShowIndexPatternSwitcher(false);
+                  setState({ ...state, showIndexPatternSwitcher: false });
                 }}
                 onChange={choices => {
-                  setShowIndexPatternSwitcher(false);
                   props.setState({
                     ...props.state,
                     currentIndexPatternId: choices[0].value as string,
+                  });
+
+                  setState({
+                    ...state,
+                    showIndexPatternSwitcher: false,
+                    nameFilter: '',
+                    typeFilter: [],
                   });
                 }}
               />
@@ -188,9 +198,9 @@ export function IndexPatternDataPanel(props: DatasourceDataPanelProps<IndexPatte
                   description:
                     'Search the list of fields in the index pattern for the provided text',
                 })}
-                value={nameFilter}
+                value={state.nameFilter}
                 onChange={e => {
-                  setNameFilter(e.target.value);
+                  setState({ ...state, nameFilter: e.target.value });
                 }}
                 aria-label={i18n.translate('xpack.lens.indexPatterns.filterByNameAriaLabel', {
                   defaultMessage: 'Search fields',
@@ -203,14 +213,16 @@ export function IndexPatternDataPanel(props: DatasourceDataPanelProps<IndexPatte
                   id="dataPanelTypeFilter"
                   panelClassName="euiFilterGroup__popoverPanel"
                   panelPaddingSize="none"
-                  isOpen={isTypeFilterOpen}
-                  closePopover={() => setTypeFilterOpen(false)}
+                  isOpen={state.isTypeFilterOpen}
+                  closePopover={() => setState({ ...state, isTypeFilterOpen: false })}
                   button={
                     <EuiFilterButton
-                      onClick={() => setTypeFilterOpen(!isTypeFilterOpen)}
+                      onClick={() =>
+                        setState({ ...state, isTypeFilterOpen: !state.isTypeFilterOpen })
+                      }
                       iconType="arrowDown"
                       data-test-subj="indexPatternTypeFilterButton"
-                      isSelected={isTypeFilterOpen}
+                      isSelected={state.isTypeFilterOpen}
                       numFilters={availableFieldTypes.length}
                       hasActiveFilters={availableFilteredTypes.length > 0}
                       numActiveFilters={availableFilteredTypes.length}
@@ -226,15 +238,16 @@ export function IndexPatternDataPanel(props: DatasourceDataPanelProps<IndexPatte
                     items={(availableFieldTypes as DataType[]).map(type => (
                       <EuiContextMenuItem
                         key={type}
-                        icon={typeFilter.includes(type) ? 'check' : 'empty'}
+                        icon={state.typeFilter.includes(type) ? 'check' : 'empty'}
                         data-test-subj={`typeFilter-${type}`}
-                        onClick={() => {
-                          setTypeFilter(
-                            typeFilter.includes(type)
-                              ? typeFilter.filter(t => t !== type)
-                              : [...typeFilter, type]
-                          );
-                        }}
+                        onClick={() =>
+                          setState({
+                            ...state,
+                            typeFilter: state.typeFilter.includes(type)
+                              ? state.typeFilter.filter(t => t !== type)
+                              : [...state.typeFilter, type],
+                          })
+                        }
                       >
                         <FieldIcon type={type} /> {fieldTypeNames[type]}
                       </EuiContextMenuItem>
@@ -257,11 +270,17 @@ export function IndexPatternDataPanel(props: DatasourceDataPanelProps<IndexPatte
             <div className="lnsFieldListPanel__list">
               {filteredFields
                 .filter(
-                  field => typeFilter.length === 0 || typeFilter.includes(field.type as DataType)
+                  field =>
+                    state.typeFilter.length === 0 ||
+                    state.typeFilter.includes(field.type as DataType)
                 )
                 .sort(sortFields)
                 .map(field => (
-                  <FieldItem key={field.name} field={field} highlight={nameFilter.toLowerCase()} />
+                  <FieldItem
+                    key={field.name}
+                    field={field}
+                    highlight={state.nameFilter.toLowerCase()}
+                  />
                 ))}
             </div>
           </div>
