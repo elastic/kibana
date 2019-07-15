@@ -47,7 +47,6 @@ describe('Paginated Table Component', () => {
             itemsPerRow={rowItems}
             limit={1}
             loading={false}
-            loadingTitle="Hosts"
             loadPage={newActivePage => loadPage(newActivePage)}
             pageOfItems={mockData.Hosts.edges}
             showMorePagesIndicator={true}
@@ -74,7 +73,6 @@ describe('Paginated Table Component', () => {
             itemsPerRow={rowItems}
             limit={1}
             loading={true}
-            loadingTitle="Hosts"
             loadPage={newActivePage => loadPage(newActivePage)}
             pageOfItems={[]}
             showMorePagesIndicator={true}
@@ -103,7 +101,6 @@ describe('Paginated Table Component', () => {
             itemsPerRow={rowItems}
             limit={1}
             loading={true}
-            loadingTitle="Hosts"
             loadPage={newActivePage => loadPage(newActivePage)}
             pageOfItems={mockData.Hosts.edges}
             showMorePagesIndicator={true}
@@ -130,7 +127,6 @@ describe('Paginated Table Component', () => {
             itemsPerRow={rowItems}
             limit={1}
             loading={false}
-            loadingTitle="Hosts"
             loadPage={newActivePage => loadPage(newActivePage)}
             pageOfItems={mockData.Hosts.edges}
             showMorePagesIndicator={true}
@@ -167,7 +163,6 @@ describe('Paginated Table Component', () => {
             itemsPerRow={rowItems}
             limit={2}
             loading={false}
-            loadingTitle="Hosts"
             loadPage={newActivePage => loadPage(newActivePage)}
             pageOfItems={mockData.Hosts.edges}
             showMorePagesIndicator={true}
@@ -198,7 +193,6 @@ describe('Paginated Table Component', () => {
             itemsPerRow={[]}
             limit={2}
             loading={false}
-            loadingTitle="Hosts"
             loadPage={newActivePage => loadPage(newActivePage)}
             pageOfItems={mockData.Hosts.edges}
             showMorePagesIndicator={true}
@@ -226,7 +220,6 @@ describe('Paginated Table Component', () => {
             itemsPerRow={rowItems}
             limit={2}
             loading={false}
-            loadingTitle="Hosts"
             loadPage={jest.fn()}
             onChange={mockOnChange}
             pageOfItems={mockData.Hosts.edges}
@@ -255,7 +248,6 @@ describe('Paginated Table Component', () => {
             itemsPerRow={rowItems}
             limit={DEFAULT_MAX_TABLE_QUERY_SIZE}
             loading={false}
-            loadingTitle="Hosts"
             loadPage={newActivePage => loadPage(newActivePage)}
             pageOfItems={mockData.Hosts.edges}
             showMorePagesIndicator={true}
@@ -285,7 +277,6 @@ describe('Paginated Table Component', () => {
             itemsPerRow={rowItems}
             limit={DEFAULT_MAX_TABLE_QUERY_SIZE}
             loading={false}
-            loadingTitle="Hosts"
             loadPage={newActivePage => loadPage(newActivePage)}
             pageOfItems={mockData.Hosts.edges}
             showMorePagesIndicator={true}
@@ -311,7 +302,6 @@ describe('Paginated Table Component', () => {
             itemsPerRow={rowItems}
             limit={DEFAULT_MAX_TABLE_QUERY_SIZE}
             loading={false}
-            loadingTitle="Hosts"
             loadPage={newActivePage => loadPage(newActivePage)}
             pageOfItems={mockData.Hosts.edges}
             showMorePagesIndicator={true}
@@ -339,7 +329,6 @@ describe('Paginated Table Component', () => {
             itemsPerRow={rowItems}
             limit={1}
             loading={false}
-            loadingTitle="Hosts"
             loadPage={newActivePage => loadPage(newActivePage)}
             pageOfItems={mockData.Hosts.edges}
             showMorePagesIndicator={true}
@@ -369,7 +358,6 @@ describe('Paginated Table Component', () => {
             itemsPerRow={rowItems}
             limit={2}
             loading={false}
-            loadingTitle="Hosts"
             loadPage={newActivePage => loadPage(newActivePage)}
             pageOfItems={mockData.Hosts.edges}
             showMorePagesIndicator={true}
@@ -408,7 +396,6 @@ describe('Paginated Table Component', () => {
         itemsPerRow: rowItems,
         limit: 1,
         loading: false,
-        loadingTitle: 'Hosts',
         loadPage: newActivePage => loadPage(newActivePage),
         pageOfItems: mockData.Hosts.edges,
         showMorePagesIndicator: true,
@@ -453,7 +440,6 @@ describe('Paginated Table Component', () => {
             itemsPerRow={rowItems}
             limit={2}
             loading={false}
-            loadingTitle="Hosts"
             loadPage={newActivePage => loadPage(newActivePage)}
             pageOfItems={mockData.Hosts.edges}
             showMorePagesIndicator={true}
@@ -490,7 +476,6 @@ describe('Paginated Table Component', () => {
             itemsPerRow={rowItems}
             limit={2}
             loading={false}
-            loadingTitle="Hosts"
             loadPage={jest.fn()}
             onChange={mockOnChange}
             pageOfItems={mockData.Hosts.edges}

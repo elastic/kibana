@@ -212,7 +212,7 @@ export const PaginatedTable = memo<SiemTables>(
         </HeaderPanel>
 
         {loading && isEmptyTable ? (
-          <EuiLoadingContent lines={10} />
+          <EuiLoadingContent data-test-subj="InitialLoadingPanelPaginatedTable" lines={10} />
         ) : (
           <>
             <BasicTable
@@ -263,7 +263,7 @@ export const PaginatedTable = memo<SiemTables>(
               </EuiFlexGroup>
             </FooterAction>
 
-            {loading && <Loader overlay size="xl" />}
+            {loading && <Loader data-test-subj="LoadingPanelPaginatedTable" overlay size="xl" />}
           </>
         )}
       </Panel>

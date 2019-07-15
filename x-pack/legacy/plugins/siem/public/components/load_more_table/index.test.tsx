@@ -34,7 +34,6 @@ describe('Load More Table Component', () => {
             itemsPerRow={rowItems}
             limit={1}
             loading={false}
-            loadingTitle="Hosts"
             loadMore={() => loadMore(mockData.Hosts.pageInfo.endCursor)}
             pageOfItems={mockData.Hosts.edges}
             updateLimitPagination={newlimit => updateLimitPagination({ limit: newlimit })}
@@ -59,7 +58,6 @@ describe('Load More Table Component', () => {
             itemsPerRow={rowItems}
             limit={1}
             loading={true}
-            loadingTitle="Hosts"
             loadMore={() => loadMore(mockData.Hosts.pageInfo.endCursor)}
             pageOfItems={[]}
             updateLimitPagination={newlimit => updateLimitPagination({ limit: newlimit })}
@@ -86,7 +84,6 @@ describe('Load More Table Component', () => {
             itemsPerRow={rowItems}
             limit={1}
             loading={true}
-            loadingTitle="Hosts"
             loadMore={() => loadMore(mockData.Hosts.pageInfo.endCursor)}
             pageOfItems={mockData.Hosts.edges}
             updateLimitPagination={newlimit => updateLimitPagination({ limit: newlimit })}
@@ -111,7 +108,6 @@ describe('Load More Table Component', () => {
             itemsPerRow={rowItems}
             limit={1}
             loading={false}
-            loadingTitle="Hosts"
             loadMore={() => loadMore(mockData.Hosts.pageInfo.endCursor)}
             pageOfItems={mockData.Hosts.edges}
             updateLimitPagination={newlimit => updateLimitPagination({ limit: newlimit })}
@@ -141,7 +137,6 @@ describe('Load More Table Component', () => {
             itemsPerRow={rowItems}
             limit={1}
             loading={true}
-            loadingTitle="Hosts"
             loadMore={() => loadMore(mockData.Hosts.pageInfo.endCursor)}
             pageOfItems={mockData.Hosts.edges}
             updateLimitPagination={newlimit => updateLimitPagination({ limit: newlimit })}
@@ -174,7 +169,6 @@ describe('Load More Table Component', () => {
             itemsPerRow={rowItems}
             limit={2}
             loading={false}
-            loadingTitle="Hosts"
             loadMore={() => loadMore(mockData.Hosts.pageInfo.endCursor)}
             pageOfItems={mockData.Hosts.edges}
             updateLimitPagination={newlimit => updateLimitPagination({ limit: newlimit })}
@@ -199,7 +193,6 @@ describe('Load More Table Component', () => {
             itemsPerRow={rowItems}
             limit={2}
             loading={false}
-            loadingTitle="Hosts"
             loadMore={() => loadMore(mockData.Hosts.pageInfo.endCursor)}
             pageOfItems={mockData.Hosts.edges}
             updateLimitPagination={newlimit => updateLimitPagination({ limit: newlimit })}
@@ -228,7 +221,6 @@ describe('Load More Table Component', () => {
             itemsPerRow={[]}
             limit={2}
             loading={false}
-            loadingTitle="Hosts"
             loadMore={() => loadMore(mockData.Hosts.pageInfo.endCursor)}
             pageOfItems={mockData.Hosts.edges}
             updateLimitPagination={newlimit => updateLimitPagination({ limit: newlimit })}
@@ -254,7 +246,6 @@ describe('Load More Table Component', () => {
             itemsPerRow={rowItems}
             limit={2}
             loading={false}
-            loadingTitle="Hosts"
             loadMore={jest.fn()}
             onChange={mockOnChange}
             pageOfItems={mockData.Hosts.edges}
@@ -283,7 +274,6 @@ describe('Load More Table Component', () => {
             itemsPerRow={rowItems}
             limit={1}
             loading={false}
-            loadingTitle="Hosts"
             loadMore={() => loadMore(mockData.Hosts.pageInfo.endCursor)}
             pageOfItems={mockData.Hosts.edges}
             updateLimitPagination={newlimit => updateLimitPagination({ limit: newlimit })}
@@ -313,7 +303,6 @@ describe('Load More Table Component', () => {
             itemsPerRow={rowItems}
             limit={2}
             loading={false}
-            loadingTitle="Hosts"
             loadMore={() => loadMore(mockData.Hosts.pageInfo.endCursor)}
             pageOfItems={mockData.Hosts.edges}
             updateLimitPagination={newlimit => updateLimitPagination({ limit: newlimit })}
@@ -348,7 +337,6 @@ describe('Load More Table Component', () => {
             itemsPerRow={rowItems}
             limit={2}
             loading={false}
-            loadingTitle="Hosts"
             loadMore={jest.fn()}
             onChange={mockOnChange}
             pageOfItems={mockData.Hosts.edges}
