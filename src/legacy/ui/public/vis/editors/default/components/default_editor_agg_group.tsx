@@ -34,7 +34,12 @@ import { AggConfig } from '../../../agg_config';
 import { aggGroupNameMaps } from '../agg_group_names';
 import { DefaultEditorAgg } from './default_editor_agg';
 import { DefaultEditorAggAdd } from './default_editor_agg_add';
-import { isAggRemovable, calcAggIsTooLow } from './default_editor_agg_group_helper';
+import {
+  AggsState,
+  isInvalidAggsTouched,
+  isAggRemovable,
+  calcAggIsTooLow,
+} from './default_editor_agg_group_helper';
 import { Schema } from '../schemas';
 
 interface DefaultEditorAggGroupProps {
@@ -52,15 +57,6 @@ interface DefaultEditorAggGroupProps {
   reorderAggs: (group: AggConfig[]) => void;
   setTouched: (isTouched: boolean) => void;
   setValidity: (isValid: boolean) => void;
-}
-
-interface AggsItem {
-  touched: boolean;
-  valid: boolean;
-}
-
-interface AggsState {
-  [aggId: number]: AggsItem;
 }
 
 function DefaultEditorAggGroup({
@@ -116,9 +112,7 @@ function DefaultEditorAggGroup({
   }, [group.length]);
 
   const isGroupValid = Object.entries(aggsState).every(([, item]) => item.valid);
-  const isAllAggsTouched = Object.entries(aggsState).every(([, item]) =>
-    item.valid ? false : item.touched
-  );
+  const isAllAggsTouched = isInvalidAggsTouched(aggsState);
 
   useEffect(() => {
     setTouched(isAllAggsTouched);

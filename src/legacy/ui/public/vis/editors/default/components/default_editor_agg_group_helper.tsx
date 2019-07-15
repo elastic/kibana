@@ -17,8 +17,17 @@
  * under the License.
  */
 
-import { findIndex, reduce } from 'lodash';
+import { findIndex, reduce, isEmpty } from 'lodash';
 import { AggConfig } from '../../../agg_config';
+
+export interface AggsItem {
+  touched: boolean;
+  valid: boolean;
+}
+
+export interface AggsState {
+  [aggId: number]: AggsItem;
+}
 
 const isAggRemovable = (agg: AggConfig, group: AggConfig[]) => {
   const metricCount = reduce(
@@ -48,4 +57,14 @@ const calcAggIsTooLow = (agg: AggConfig, aggIndex: number, group: AggConfig[]) =
   return aggIndex > firstDifferentSchema;
 };
 
-export { isAggRemovable, calcAggIsTooLow };
+function isInvalidAggsTouched(aggsState: AggsState) {
+  const invalidAggs = Object.values(aggsState).filter(agg => !agg.valid);
+
+  if (isEmpty(invalidAggs)) {
+    return false;
+  }
+
+  return invalidAggs.every(agg => agg.touched);
+}
+
+export { isAggRemovable, calcAggIsTooLow, isInvalidAggsTouched };
