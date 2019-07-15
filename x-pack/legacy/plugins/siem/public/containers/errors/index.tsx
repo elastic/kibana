@@ -28,7 +28,7 @@ export const errorLinkHandler: ErrorLink.ErrorHandler = ({ graphQLErrors, networ
   }
 
   if (networkError != null && store != null) {
-    store.dispatch(
+    dispatch(
       appActions.addError({
         id: uuid.v4(),
         title: i18n.NETWORK_FAILURE,
