@@ -49,7 +49,7 @@ export function Overview(props) {
 
         <BeatsPanel {...props.cluster.beats} setupMode={props.setupMode} changeUrl={props.changeUrl} />
 
-        <ApmPanel {...props.cluster.apm} changeUrl={props.changeUrl} />
+        <ApmPanel {...props.cluster.apm} setupMode={props.setupMode} changeUrl={props.changeUrl} />
       </EuiPageBody>
     </EuiPage>
   );

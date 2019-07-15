@@ -67,7 +67,8 @@ export class SetupModeRenderer extends React.Component {
     if (newProduct) {
       product = newProduct;
     }
-    else if (instance) {
+    // For new instance discovery flow, we pass in empty instance object
+    else if (instance && Object.keys(instance).length) {
       product = data.byUuid[instance.uuid];
     }
 

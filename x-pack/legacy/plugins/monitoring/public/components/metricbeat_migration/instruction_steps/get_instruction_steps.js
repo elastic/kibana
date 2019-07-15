@@ -21,10 +21,14 @@ import {
   getBeatsInstructionsForDisablingInternalCollection,
 } from './beats';
 import {
+  getApmInstructionsForEnablingMetricbeat,
+  getApmInstructionsForDisablingInternalCollection,
+} from './apm';
+import {
   INSTRUCTION_STEP_ENABLE_METRICBEAT,
   INSTRUCTION_STEP_DISABLE_INTERNAL
 } from '../constants';
-import { ELASTICSEARCH_CUSTOM_ID } from '../../../../common/constants';
+import { ELASTICSEARCH_CUSTOM_ID, APM_CUSTOM_ID } from '../../../../common/constants';
 import { KIBANA_SYSTEM_ID, LOGSTASH_SYSTEM_ID, BEATS_SYSTEM_ID } from '../../../../../telemetry/common/constants';
 
 export function getInstructionSteps(productName, product, step, meta, opts) {
@@ -56,6 +60,13 @@ export function getInstructionSteps(productName, product, step, meta, opts) {
       }
       if (step === INSTRUCTION_STEP_DISABLE_INTERNAL) {
         return getBeatsInstructionsForDisablingInternalCollection(product, meta, opts);
+      }
+    case APM_CUSTOM_ID:
+      if (step === INSTRUCTION_STEP_ENABLE_METRICBEAT) {
+        return getApmInstructionsForEnablingMetricbeat(product, meta, opts);
+      }
+      if (step === INSTRUCTION_STEP_DISABLE_INTERNAL) {
+        return getApmInstructionsForDisablingInternalCollection(product, meta, opts);
       }
   }
   return [];

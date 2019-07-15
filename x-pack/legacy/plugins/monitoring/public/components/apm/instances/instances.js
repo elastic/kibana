@@ -4,11 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { Fragment } from 'react';
 import moment from 'moment';
-import { uniq } from 'lodash';
+import { uniq, get } from 'lodash';
 import { EuiMonitoringTable } from '../../table';
-import { EuiLink, EuiPage, EuiPageBody, EuiPageContent, EuiSpacer } from '@elastic/eui';
+import { EuiLink, EuiPage, EuiPageBody, EuiPageContent, EuiSpacer, EuiCallOut } from '@elastic/eui';
 import { Status } from './status';
 import { formatMetric } from '../../../lib/format_number';
 import { formatTimestampToDuration } from '../../../../common';
@@ -83,13 +83,36 @@ const columns = [
   },
 ];
 
-export function ApmServerInstances({ apms }) {
+export function ApmServerInstances({ apms, setupMode }) {
   const {
     pagination,
     sorting,
     onTableChange,
-    data
+    data,
   } = apms;
+
+  let detectedInstanceMessage = null;
+  if (setupMode.enabled && setupMode.data && get(setupMode.data, 'detected.mightExist')) {
+    detectedInstanceMessage = (
+      <Fragment>
+        <EuiCallOut
+          title={i18n.translate('xpack.monitoring.apm.instances.metricbeatMigration.detectedInstanceTitle', {
+            defaultMessage: 'APM instance detected',
+          })}
+          color="warning"
+          iconType="help"
+        >
+          <p>
+            {i18n.translate('xpack.monitoring.apm.instances.metricbeatMigration.detectedInstanceDescription', {
+              defaultMessage: `Based on your indices, we think you might have an apm instance. Click the 'Setup monitoring'
+              button below to start monitoring this instance.`
+            })}
+          </p>
+        </EuiCallOut>
+        <EuiSpacer size="m"/>
+      </Fragment>
+    );
+  }
 
   const versions = uniq(data.apms.map(item => item.version)).map(version => {
     return { value: version };
@@ -101,12 +124,16 @@ export function ApmServerInstances({ apms }) {
         <EuiPageContent>
           <Status stats={data.stats} />
           <EuiSpacer size="m"/>
+          {detectedInstanceMessage}
           <EuiMonitoringTable
             className="apmInstancesTable"
             rows={data.apms}
             columns={columns}
             sorting={sorting}
             pagination={pagination}
+            setupMode={setupMode}
+            uuidField="uuid"
+            nameField="name"
             search={{
               box: {
                 incremental: true,
