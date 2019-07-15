@@ -79,24 +79,24 @@ const AddDataUi = ({ apmUiEnabled, isNewKibanaInstance, intl, mlEnabled }) => {
       }),
       ariaDescribedby: 'aria-describedby.addMetricsButtonLabel',
     };
-    const securityData = {
+    const siemData = {
       title: intl.formatMessage({
-        id: 'kbn.home.addData.security.nameTitle',
-        defaultMessage: 'Security analytics',
+        id: 'kbn.home.addData.siem.nameTitle',
+        defaultMessage: 'SIEM',
       }),
       description: intl.formatMessage({
-        id: 'kbn.home.addData.security.nameDescription',
+        id: 'kbn.home.addData.siem.nameDescription',
         defaultMessage:
           'Centralize security events for interactive investigation in ready-to-go visualizations.',
       }),
-      ariaDescribedby: 'aria-describedby.addSecurityButtonLabel',
+      ariaDescribedby: 'aria-describedby.addSiemButtonLabel',
     };
 
     const getApmCard = () => (
       <EuiFlexItem grow={false}>
         <EuiCard
           className="homAddData__card"
-          icon={<EuiIcon className="homAddData__icon" type="apmApp" />}
+          icon={<EuiIcon className="homAddData__icon" type="logoAPM" />}
           title={ampData.title}
           description={<span id={ampData.ariaDescribedby}>{ampData.description}</span>}
           footer={
@@ -128,7 +128,7 @@ const AddDataUi = ({ apmUiEnabled, isNewKibanaInstance, intl, mlEnabled }) => {
         <EuiFlexItem grow={false}>
           <EuiCard
             className="homAddData__card"
-            icon={<EuiIcon className="homAddData__icon" type="loggingApp" />}
+            icon={<EuiIcon className="homAddData__icon" type="logoLogging" />}
             title={loggingData.title}
             description={<span id={loggingData.ariaDescribedby}>{loggingData.description}</span>}
             footer={
@@ -149,7 +149,7 @@ const AddDataUi = ({ apmUiEnabled, isNewKibanaInstance, intl, mlEnabled }) => {
         <EuiFlexItem grow={false}>
           <EuiCard
             className="homAddData__card"
-            icon={<EuiIcon className="homAddData__icon" type="monitoringApp" />}
+            icon={<EuiIcon className="homAddData__icon" type="logoMetrics" />}
             title={metricsData.title}
             description={<span id={metricsData.ariaDescribedby}>{metricsData.description}</span>}
             footer={
@@ -170,17 +170,17 @@ const AddDataUi = ({ apmUiEnabled, isNewKibanaInstance, intl, mlEnabled }) => {
         <EuiFlexItem grow={false}>
           <EuiCard
             className="homAddData__card"
-            icon={<EuiIcon className="homAddData__icon" type="securityApp" />}
-            title={securityData.title}
-            description={<span id={securityData.ariaDescribedby}>{securityData.description}</span>}
+            icon={<EuiIcon className="homAddData__icon" type="logoSecurity" />}
+            title={siemData.title}
+            description={<span id={siemData.ariaDescribedby}>{siemData.description}</span>}
             footer={
               <EuiButton
                 className="homAddData__button"
-                href="#/home/tutorial_directory/security"
-                aria-describedby={securityData.ariaDescribedby}
+                href="#/home/tutorial_directory/siem"
+                aria-describedby={siemData.ariaDescribedby}
               >
                 <FormattedMessage
-                  id="kbn.home.addData.security.addSecurityEventsButtonLabel"
+                  id="kbn.home.addData.siem.addSiemEventsButtonLabel"
                   defaultMessage="Add security events"
                 />
               </EuiButton>
