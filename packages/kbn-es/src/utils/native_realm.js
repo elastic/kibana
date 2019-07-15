@@ -36,13 +36,28 @@ exports.NativeRealm = class NativeRealm {
           `setting ${chalk.bold(username)} password to ${chalk.bold(password)}`
       );
 
-      await this._client.security.changePassword({
-        username,
-        refresh: 'wait_for',
-        body: {
-          password,
-        },
-      });
+      try {
+        await this._client.security.changePassword({
+          username,
+          refresh: 'wait_for',
+          body: {
+            password,
+          },
+        });
+      } catch (err) {
+        const isAnonymousUserPasswordChangeError =
+          err.statusCode === 400 &&
+          err.body &&
+          err.body.error &&
+          err.body.error.reason.startsWith(`user [${username}] is anonymous`);
+        if (!isAnonymousUserPasswordChangeError) {
+          throw err;
+        } else {
+          this._log.info(
+            `cannot set password for anonymous user ${chalk.bold(username)}, skipping`
+          );
+        }
+      }
     });
   }
 
