@@ -17,9 +17,23 @@
  * under the License.
  */
 
+// @ts-ignore
+import { functionsRegistry } from 'plugins/interpreter/registries';
 import { PluginInitializerContext } from 'kibana/public';
-import { core, plugins } from './setup';
+import { CoreSetup } from 'src/core/public';
+import { visualizations } from '../../visualizations/public';
+import { TsvbSetupPlugins } from './plugin';
 import { plugin } from '.';
+
+export const core = {} as CoreSetup;
+export const plugins = {
+  data: {
+    expressions: {
+      functionsRegistry,
+    },
+  },
+  visualizations,
+} as TsvbSetupPlugins;
 
 const pluginInstance = plugin({} as PluginInitializerContext);
 

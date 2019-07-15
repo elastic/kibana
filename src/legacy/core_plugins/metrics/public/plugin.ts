@@ -38,9 +38,8 @@ export interface TsvbSetupPlugins {
 }
 
 /** @internal */
-export interface TsvbStartPlugins {
-  foo: any;
-}
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface TsvbStartPlugins {}
 
 export class TsvbPlugin
   implements Plugin<TsvbSetup, TsvbStart, TsvbSetupPlugins, TsvbStartPlugins> {
