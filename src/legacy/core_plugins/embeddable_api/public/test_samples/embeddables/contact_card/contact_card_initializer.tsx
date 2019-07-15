@@ -31,7 +31,7 @@ import {
 import React, { Component } from 'react';
 
 export interface ContactCardInitializerProps {
-  onCreate: (name: { lastName: string; firstName: string }) => void;
+  onCreate: (name: { lastName?: string; firstName: string }) => void;
   onCancel: () => void;
 }
 
@@ -67,6 +67,7 @@ export class ContactCardInitializer extends Component<ContactCardInitializerProp
               <EuiFieldText
                 name="popfirst"
                 value={this.state.lastName}
+                placeholder="optional"
                 onChange={e => this.setState({ lastName: e.target.value })}
               />
             </EuiFormRow>
@@ -77,12 +78,12 @@ export class ContactCardInitializer extends Component<ContactCardInitializerProp
           <EuiButtonEmpty onClick={this.props.onCancel}>Cancel</EuiButtonEmpty>
 
           <EuiButton
-            isDisabled={!this.state.lastName || !this.state.firstName}
+            isDisabled={!this.state.firstName}
             onClick={() => {
-              if (this.state.lastName && this.state.firstName) {
+              if (this.state.firstName) {
                 this.props.onCreate({
                   firstName: this.state.firstName,
-                  lastName: this.state.lastName,
+                  ...(this.state.lastName ? { lastName: this.state.lastName } : {}),
                 });
               }
             }}
