@@ -11,7 +11,7 @@ export const calculateDomain = (
   series: MetricsExplorerSeries,
   metrics: MetricsExplorerOptionsMetric[],
   stacked = false
-) => {
+): { min: number; max: number } => {
   const values = series.rows
     .reduce(
       (acc, row) => {
@@ -29,5 +29,5 @@ export const calculateDomain = (
       [] as Array<number | null>
     )
     .filter(v => v);
-  return { min: min(values), max: max(values) };
+  return { min: min(values) || 0, max: max(values) || 0 };
 };
