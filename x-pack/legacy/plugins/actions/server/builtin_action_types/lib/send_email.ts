@@ -7,10 +7,6 @@
 // info on nodemailer: https://nodemailer.com/about/
 import nodemailer from 'nodemailer';
 
-import { default as MarkdownIt } from 'markdown-it';
-
-import { Services } from '../../types';
-
 // an email "service" which doesn't actually send, just returns what it would send
 export const JSON_TRANSPORT_SERVICE = '__json';
 
@@ -43,7 +39,7 @@ interface Content {
 }
 
 // send an email
-export async function sendEmail(services: Services, options: SendEmailOptions): Promise<any> {
+export async function sendEmail(options: SendEmailOptions): Promise<any> {
   const { transport, routing, content } = options;
   const { service, host, port, secure, user, password } = transport;
   const { from, to, cc, bcc } = routing;
@@ -68,7 +64,6 @@ export async function sendEmail(services: Services, options: SendEmailOptions): 
   }
 
   const nodemailerTransport = nodemailer.createTransport(transportConfig);
-  const messageHTML = htmlFromMarkdown(services, message);
 
   const email = {
     // email routing
@@ -78,7 +73,7 @@ export async function sendEmail(services: Services, options: SendEmailOptions): 
     bcc,
     // email content
     subject,
-    html: messageHTML,
+    html: message,
     text: message,
   };
 
@@ -93,19 +88,4 @@ export async function sendEmail(services: Services, options: SendEmailOptions): 
   }
 
   return result;
-}
-
-// try rendering markdown to html, return markdown on any kind of error
-function htmlFromMarkdown(services: Services, markdown: string) {
-  try {
-    const md = MarkdownIt({
-      linkify: true,
-    });
-
-    return md.render(markdown);
-  } catch (err) {
-    services.log(['debug', 'actions'], `error rendering markdown to html: ${err.message}`);
-
-    return markdown;
-  }
 }
