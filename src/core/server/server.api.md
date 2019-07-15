@@ -11,6 +11,7 @@ import { ConfigOptions } from 'elasticsearch';
 import { Duration } from 'moment';
 import { ObjectType } from '@kbn/config-schema';
 import { Observable } from 'rxjs';
+import { Readable } from 'stream';
 import { Request } from 'hapi';
 import { ResponseObject } from 'hapi';
 import { ResponseToolkit } from 'hapi';
@@ -514,6 +515,14 @@ export class SavedObjectsClient {
 // @public
 export type SavedObjectsClientContract = Pick<SavedObjectsClient, keyof SavedObjectsClient>;
 
+// Warning: (ae-missing-release-tag) "SavedObjectsClientProviderOptions" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+// 
+// @public (undocumented)
+export interface SavedObjectsClientProviderOptions {
+    // (undocumented)
+    excludedWrappers?: string[];
+}
+
 // Warning: (ae-missing-release-tag) "SavedObjectsClientWrapperFactory" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 // 
 // @public (undocumented)
@@ -643,10 +652,20 @@ export interface SavedObjectsService<Request = any> {
     getSavedObjectsRepository(...rest: any[]): any;
     // (undocumented)
     getScopedSavedObjectsClient: ScopedSavedObjectsClientProvider<Request>['getClient'];
+    // (undocumented)
+    importExport: {
+        importSavedObjects(options: ImportSavedObjectsOptions): Promise<ImportResponse>;
+        getSortedObjectsForExport(options: ExportObjectsOptions): Promise<Readable>;
+        objectsToNdJson(objects: SavedObject[]): string;
+    };
     // Warning: (ae-incompatible-release-tags) The symbol "SavedObjectsClient" is marked as @public, but its signature references "SavedObjectsClient" which is marked as @internal
     // 
     // (undocumented)
     SavedObjectsClient: typeof SavedObjectsClient;
+    // Warning: (ae-forgotten-export) The symbol "SavedObjectsSchema" needs to be exported by the entry point index.d.ts
+    // 
+    // (undocumented)
+    schema: SavedObjectsSchema;
     // (undocumented)
     types: string[];
 }
@@ -691,5 +710,8 @@ export interface SessionStorageFactory<T> {
 // 
 // src/core/server/plugins/plugin_context.ts:34:10 - (ae-forgotten-export) The symbol "EnvironmentMode" needs to be exported by the entry point index.d.ts
 // src/core/server/plugins/plugins_service.ts:37:5 - (ae-forgotten-export) The symbol "DiscoveredPluginInternal" needs to be exported by the entry point index.d.ts
+// src/core/server/saved_objects/service/index.ts:41:5 - (ae-forgotten-export) The symbol "ImportSavedObjectsOptions" needs to be exported by the entry point index.d.ts
+// src/core/server/saved_objects/service/index.ts:41:5 - (ae-forgotten-export) The symbol "ImportResponse" needs to be exported by the entry point index.d.ts
+// src/core/server/saved_objects/service/index.ts:42:5 - (ae-forgotten-export) The symbol "ExportObjectsOptions" needs to be exported by the entry point index.d.ts
 
 ```
