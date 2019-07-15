@@ -24,6 +24,7 @@ histogram, the `format` property is no longer supported.
 *Impact:* {dataframe-transforms-cap} that were created in 7.2 and use date
 histograms might no longer work in 7.3. If you run into issues starting a
 transform, recreate it by copying the `pivot` part of the configuration into the
-advanced editor of the {dataframe-transforms} wizard.
+advanced editor of the {dataframe-transforms} wizard. The advanced editor will
+remove the unsupported attribute once the configuration gets applied.
 
 // end::notable-breaking-changes[]
