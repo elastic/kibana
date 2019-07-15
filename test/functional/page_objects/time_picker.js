@@ -54,7 +54,7 @@ export function TimePickerPageProvider({ getService, getPageObjects }) {
       await testSubjects.click('superDatePickerstartDatePopoverButton');
       const panel = await this.getTimePickerPanel();
       await testSubjects.click('superDatePickerAbsoluteTab');
-      await testSubjects.setValue('superDatePickerAbsoluteDateInput', startTime);
+      await this.inputValue('superDatePickerAbsoluteDateInput', startTime);
       await testSubjects.click('superDatePickerstartDatePopoverButton');
       await this.waitPanelIsGone(panel);
       await PageObjects.header.awaitGlobalLoadingIndicatorHidden();
@@ -70,9 +70,9 @@ export function TimePickerPageProvider({ getService, getPageObjects }) {
 
     async inputValue(dataTestsubj, value) {
       if (browser.isFirefox) {
-        const toInput = await testSubjects.find(dataTestsubj);
-        await toInput.clearValue();
-        await toInput.type(value);
+        const input = await testSubjects.find(dataTestsubj);
+        await input.clearValue();
+        await input.type(value);
       } else {
         await testSubjects.setValue(dataTestsubj, value);
       }
