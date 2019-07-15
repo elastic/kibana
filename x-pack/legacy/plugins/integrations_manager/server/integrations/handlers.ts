@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Request, ResponseToolkit } from '../../common/types';
+import { AssetType, Request, ResponseToolkit } from '../../common/types';
 import { PluginContext } from '../plugin';
 import { getClient } from '../saved_objects';
 import {
@@ -34,7 +34,7 @@ interface DeleteAssetRequest extends Request {
 }
 
 type AssetRequestParams = PackageRequest['params'] & {
-  asset?: string;
+  asset?: AssetType;
 };
 
 export async function handleGetList(req: Request, extra: Extra) {
