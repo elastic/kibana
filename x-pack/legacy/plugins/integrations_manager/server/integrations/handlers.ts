@@ -38,16 +38,16 @@ type AssetRequestParams = PackageRequest['params'] & {
 };
 
 export async function handleGetList(req: Request, extra: Extra) {
-  const client = getClient(req);
-  const integrationList = await getIntegrations(client);
+  const savedObjectsClient = getClient(req);
+  const integrationList = await getIntegrations({ savedObjectsClient });
 
   return integrationList;
 }
 
 export async function handleGetInfo(req: PackageRequest, extra: Extra) {
   const { pkgkey } = req.params;
-  const client = getClient(req);
-  const integrationInfo = await getIntegrationInfo(client, pkgkey);
+  const savedObjectsClient = getClient(req);
+  const integrationInfo = await getIntegrationInfo({ savedObjectsClient, pkgkey });
 
   return integrationInfo;
 }
@@ -56,17 +56,17 @@ export async function handleRequestInstall(req: InstallAssetRequest, extra: Extr
   const { pkgkey, asset } = req.params;
   if (!asset) throw new Error('Unhandled empty/default asset case');
 
-  const client = getClient(req);
-  const callESEndpoint = getClusterAccessor(extra.context.esClient, req);
-  const object = await installIntegration(client, pkgkey, asset, callESEndpoint);
+  const savedObjectsClient = getClient(req);
+  const callCluster = getClusterAccessor(extra.context.esClient, req);
+  const object = await installIntegration({ savedObjectsClient, pkgkey, asset, callCluster });
 
   return object;
 }
 
 export async function handleRequestDelete(req: DeleteAssetRequest, extra: Extra) {
   const { pkgkey } = req.params;
-  const client = getClient(req);
-  const deleted = await removeInstallation(client, pkgkey);
+  const savedObjectsClient = getClient(req);
+  const deleted = await removeInstallation({ savedObjectsClient, pkgkey });
 
   return deleted;
 }

@@ -20,7 +20,7 @@ import {
 } from '../../common/types';
 import * as Registry from '../registry';
 
-type CallESEndpoint = ScopedClusterClient['callAsCurrentUser'];
+type CallESAsCurrentUser = ScopedClusterClient['callAsCurrentUser'];
 
 enum SavedObjectTypes {
   config = AssetTypes.config,
@@ -31,14 +31,17 @@ enum SavedObjectTypes {
   visualization = AssetTypes.visualization,
 }
 
-export async function getIntegrations(client: SavedObjectsClientContract) {
+interface GetIntegrationsOptions {
+  savedObjectsClient: SavedObjectsClientContract;
+}
+export async function getIntegrations({ savedObjectsClient }: GetIntegrationsOptions) {
   const registryItems = await Registry.fetchList();
   const searchObjects = registryItems.map(({ name, version }) => ({
     type: SAVED_OBJECT_TYPE,
     id: `${name}-${version}`,
   }));
 
-  const results = await client.bulkGet<InstallationAttributes>(searchObjects);
+  const results = await savedObjectsClient.bulkGet<InstallationAttributes>(searchObjects);
   const savedObjects = results.saved_objects.filter(o => !o.error); // ignore errors for now
   const integrationList = registryItems
     .map(item =>
@@ -52,46 +55,74 @@ export async function getIntegrations(client: SavedObjectsClientContract) {
   return integrationList;
 }
 
-export async function getIntegrationInfo(client: SavedObjectsClientContract, pkgkey: string) {
+interface GetIntegrationInfoOptions {
+  savedObjectsClient: SavedObjectsClientContract;
+  pkgkey: string;
+}
+export async function getIntegrationInfo({
+  savedObjectsClient,
+  pkgkey,
+}: GetIntegrationInfoOptions) {
   const [item, savedObject] = await Promise.all([
     Registry.fetchInfo(pkgkey),
-    getInstallationObject(client, pkgkey),
+    getInstallationObject({ savedObjectsClient, pkgkey }),
   ]);
   const installation = createInstallableFrom(item, savedObject);
 
   return installation;
 }
 
-export async function getInstallationObject(client: SavedObjectsClientContract, pkgkey: string) {
-  return client.get<InstallationAttributes>(SAVED_OBJECT_TYPE, pkgkey).catch(e => undefined);
+interface GetInstallationObjectOptions {
+  savedObjectsClient: SavedObjectsClientContract;
+  pkgkey: string;
+}
+export async function getInstallationObject({
+  savedObjectsClient,
+  pkgkey,
+}: GetInstallationObjectOptions) {
+  return savedObjectsClient
+    .get<InstallationAttributes>(SAVED_OBJECT_TYPE, pkgkey)
+    .catch(e => undefined);
 }
 
-export async function installIntegration(
-  client: SavedObjectsClientContract,
-  pkgkey: string,
-  asset: string,
-  callESEndpoint: CallESEndpoint
-) {
-  const installed = await installAssets(client, pkgkey, asset, callESEndpoint);
+interface InstallIntegrationOptions {
+  savedObjectsClient: SavedObjectsClientContract;
+  pkgkey: string;
+  asset: string;
+  callCluster: CallESAsCurrentUser;
+}
+export async function installIntegration({
+  savedObjectsClient,
+  pkgkey,
+  asset,
+  callCluster,
+}: InstallIntegrationOptions) {
+  const toSave = await installAssets({ savedObjectsClient, pkgkey, asset, callCluster });
 
-  if (installed.length) {
-    const saved = await saveInstallationReferences(client, pkgkey, installed);
+  if (toSave.length) {
+    const saved = await saveInstallationReferences({ savedObjectsClient, pkgkey, toSave });
     return saved;
   }
 
   return [];
 }
 
-export async function removeInstallation(client: SavedObjectsClientContract, pkgkey: string) {
-  const installation = await getInstallationObject(client, pkgkey);
+interface RemoveIntegrationOptions {
+  savedObjectsClient: SavedObjectsClientContract;
+  pkgkey: string;
+}
+export async function removeInstallation({ savedObjectsClient, pkgkey }: RemoveIntegrationOptions) {
+  const installation = await getInstallationObject({ savedObjectsClient, pkgkey });
   const installedObjects = (installation && installation.attributes.installed) || [];
 
   // Delete the manager saved object with references to the asset objects
   // could also update with [] or some other state
-  await client.delete(SAVED_OBJECT_TYPE, pkgkey);
+  await savedObjectsClient.delete(SAVED_OBJECT_TYPE, pkgkey);
 
   // Delete the installed assets
-  const deletePromises = installedObjects.map(async ({ id, type }) => client.delete(type, id));
+  const deletePromises = installedObjects.map(async ({ id, type }) =>
+    savedObjectsClient.delete(type, id)
+  );
   await Promise.all(deletePromises);
 
   // successful delete's in SO client return {}. return something more useful
@@ -102,36 +133,52 @@ export function getClusterAccessor(esClient: ClusterClient, req: Request) {
   return esClient.asScoped(req).callAsCurrentUser;
 }
 
-async function installObjects(
-  client: SavedObjectsClientContract,
-  pkgkey: string,
-  asset: string
-): Promise<AssetReference[]> {
+interface InstallObjectsOptions {
+  savedObjectsClient: SavedObjectsClientContract;
+  pkgkey: string;
+  asset: string;
+}
+async function installObjects({
+  savedObjectsClient,
+  pkgkey,
+  asset,
+}: InstallObjectsOptions): Promise<AssetReference[]> {
   const filter = (entry: Registry.ArchiveEntry) => asset === Registry.pathParts(entry.path).type;
   const toBeSavedObjects = await getObjects(pkgkey, filter);
-  const createResults = await client.bulkCreate<InstallationAttributes>(toBeSavedObjects, {
-    overwrite: true,
-  });
+  const createResults = await savedObjectsClient.bulkCreate<InstallationAttributes>(
+    toBeSavedObjects,
+    {
+      overwrite: true,
+    }
+  );
   const createdObjects = createResults.saved_objects;
   const installed = createdObjects.map(({ id, type }) => ({ id, type }));
 
   return installed;
 }
 
-async function installPipelines(callESEndpoint: CallESEndpoint, pkgkey: string) {
-  const isSameType = ({ path }: Registry.ArchiveEntry) =>
+interface InstallPipelinesOptions {
+  callCluster: CallESAsCurrentUser;
+  pkgkey: string;
+}
+async function installPipelines({ callCluster, pkgkey }: InstallPipelinesOptions) {
+  const isPipeline = ({ path }: Registry.ArchiveEntry) =>
     Registry.pathParts(path).type === AssetTypes.ingestPipeline;
-  const paths = await Registry.getArchiveInfo(`${pkgkey}.tar.gz`, isSameType);
-  const installationPromises = paths.map(path => installPipeline(callESEndpoint, path));
+  const paths = await Registry.getArchiveInfo(`${pkgkey}.tar.gz`, isPipeline);
+  const installationPromises = paths.map(path => installPipeline({ callCluster, path }));
   const references = await Promise.all(installationPromises);
 
   return references;
 }
 
-async function installPipeline(
-  callESEndpoint: CallESEndpoint,
-  path: string
-): Promise<AssetReference> {
+interface InstallPipelineOptions {
+  callCluster: CallESAsCurrentUser;
+  path: string;
+}
+async function installPipeline({
+  callCluster,
+  path,
+}: InstallPipelineOptions): Promise<AssetReference> {
   const buffer = Registry.getAsset(path);
   // sample data is invalid json. strip the offending parts before parsing
   const json = buffer.toString('utf8').replace(/\\/g, '');
@@ -140,36 +187,47 @@ async function installPipeline(
   const id = file.replace('.json', '');
 
   // TODO: any sort of error, not "happy path", handling
-  await callESEndpoint('ingest.putPipeline', { id, body: pipeline });
+  await callCluster('ingest.putPipeline', { id, body: pipeline });
 
   return { id, type };
 }
 
-async function installAssets(
-  client: SavedObjectsClientContract,
-  pkgkey: string,
-  asset: string,
-  callESEndpoint: CallESEndpoint
-) {
+interface InstallAssetsOptions {
+  savedObjectsClient: SavedObjectsClientContract;
+  pkgkey: string;
+  asset: string;
+  callCluster: CallESAsCurrentUser;
+}
+async function installAssets({
+  savedObjectsClient,
+  pkgkey,
+  asset,
+  callCluster,
+}: InstallAssetsOptions) {
   if (assetUsesObjects(asset)) {
-    const references = await installObjects(client, pkgkey, asset);
+    const references = await installObjects({ savedObjectsClient, pkgkey, asset });
     return references;
   }
 
   if (asset === AssetTypes.ingestPipeline) {
-    const references = await installPipelines(callESEndpoint, pkgkey);
+    const references = await installPipelines({ callCluster, pkgkey });
     return references;
   }
 
   return [];
 }
 
-async function saveInstallationReferences(
-  client: SavedObjectsClientContract,
-  pkgkey: string,
-  toSave: AssetReference[]
-) {
-  const savedObject = await getInstallationObject(client, pkgkey);
+interface SaveInstallationReferencesOptions {
+  savedObjectsClient: SavedObjectsClientContract;
+  pkgkey: string;
+  toSave: AssetReference[];
+}
+async function saveInstallationReferences({
+  savedObjectsClient,
+  pkgkey,
+  toSave,
+}: SaveInstallationReferencesOptions) {
+  const savedObject = await getInstallationObject({ savedObjectsClient, pkgkey });
   const savedRefs = (savedObject && savedObject.attributes.installed) || [];
 
   const toInstall = toSave.reduce((current, pending) => {
@@ -179,7 +237,7 @@ async function saveInstallationReferences(
     return current;
   }, savedRefs);
 
-  const results = await client.create<InstallationAttributes>(
+  const results = await savedObjectsClient.create<InstallationAttributes>(
     SAVED_OBJECT_TYPE,
     { installed: toInstall },
     { id: pkgkey, overwrite: true }
