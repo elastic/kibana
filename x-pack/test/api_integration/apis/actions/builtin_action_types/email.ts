@@ -56,6 +56,9 @@ export default function emailTest({ getService }: KibanaFunctionalTestDefaultPro
           actionTypeConfig: {
             from: 'bob@example.com',
             service: '__json',
+            host: null,
+            port: null,
+            secure: null,
           },
         },
         references: [],
