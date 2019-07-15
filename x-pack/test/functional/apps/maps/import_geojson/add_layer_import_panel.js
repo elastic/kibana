@@ -12,7 +12,7 @@ export default function ({ getPageObjects }) {
 
   const IMPORT_FILE_PREVIEW_NAME = 'Import File';
   const FILE_LOAD_DIR = 'test_upload_files';
-  const DEFAULT_LOAD_FILE_NAME = 'Point.json';
+  const DEFAULT_LOAD_FILE_NAME = 'point.json';
   const GEO_POINT = 'geo_point';
   const GEO_SHAPE = 'geo_shape';
 
@@ -64,7 +64,7 @@ export default function ({ getPageObjects }) {
     it('should replace layer on input change',
       async () => {
         // Upload second file
-        const secondLoadFileName = 'Polygon.json';
+        const secondLoadFileName = 'polygon.json';
         await PageObjects.maps.uploadJsonFileForIndexing(
           path.join(__dirname, FILE_LOAD_DIR, secondLoadFileName)
         );
@@ -78,7 +78,7 @@ export default function ({ getPageObjects }) {
     it('should clear layer on replacement layer load error',
       async () => {
         // Upload second file
-        const secondLoadFileName = 'notJson.txt';
+        const secondLoadFileName = 'not_json.txt';
         await PageObjects.maps.uploadJsonFileForIndexing(
           path.join(__dirname, FILE_LOAD_DIR, secondLoadFileName)
         );
@@ -101,7 +101,7 @@ export default function ({ getPageObjects }) {
         expect(isGeoShapeAvab).to.be(true);
 
         // Upload shape file
-        const polygonJsonFile = 'Polygon.json';
+        const polygonJsonFile = 'polygon.json';
         await PageObjects.maps.uploadJsonFileForIndexing(
           path.join(__dirname, FILE_LOAD_DIR, polygonJsonFile)
         );
@@ -115,7 +115,7 @@ export default function ({ getPageObjects }) {
 
         // Multis
         // Upload multipoint file
-        const multiPointJsonFile = 'MultiPoint.json';
+        const multiPointJsonFile = 'multi_point.json';
         await PageObjects.maps.uploadJsonFileForIndexing(
           path.join(__dirname, FILE_LOAD_DIR, multiPointJsonFile)
         );
@@ -128,7 +128,7 @@ export default function ({ getPageObjects }) {
         expect(isGeoShapeAvab).to.be(true);
 
         // Upload multipolygon file
-        const multiPolygonJsonFile = 'MultiPolygon.json';
+        const multiPolygonJsonFile = 'multi_polygon.json';
         await PageObjects.maps.uploadJsonFileForIndexing(
           path.join(__dirname, FILE_LOAD_DIR, multiPolygonJsonFile)
         );
