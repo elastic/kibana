@@ -19,7 +19,7 @@
 
 import { Readable } from 'stream';
 import { ScopedSavedObjectsClientProvider } from './lib';
-import { SavedObjectsClient, SavedObject } from './saved_objects_client';
+import { SavedObjectsClient } from './saved_objects_client';
 import { ExportObjectsOptions } from '../export';
 import { ImportSavedObjectsOptions, ImportResponse } from '../import';
 import { SavedObjectsSchema } from '../schema';
@@ -40,7 +40,6 @@ export interface SavedObjectsService<Request = any> {
   importExport: {
     importSavedObjects(options: ImportSavedObjectsOptions): Promise<ImportResponse>;
     getSortedObjectsForExport(options: ExportObjectsOptions): Promise<Readable>;
-    objectsToNdJson(objects: SavedObject[]): string;
   };
 }
 

@@ -10,6 +10,5 @@
 importExport: {
         importSavedObjects(options: ImportSavedObjectsOptions): Promise<ImportResponse>;
         getSortedObjectsForExport(options: ExportObjectsOptions): Promise<Readable>;
-        objectsToNdJson(objects: SavedObject[]): string;
     };
 ```

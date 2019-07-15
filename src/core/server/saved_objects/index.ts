@@ -22,3 +22,7 @@ export * from './service';
 export { SavedObjectsSchema } from './schema';
 
 export { SavedObjectsManagement } from './management';
+
+export { importSavedObjects } from './import';
+
+export { getSortedObjectsForExport } from './export';

@@ -17,7 +17,7 @@ export interface SavedObjectsService<Request = any>
 |  --- | --- | --- |
 |  [addScopedSavedObjectsClientWrapperFactory](./kibana-plugin-server.savedobjectsservice.addscopedsavedobjectsclientwrapperfactory.md) | <code>ScopedSavedObjectsClientProvider&lt;Request&gt;['addClientWrapperFactory']</code> |  |
 |  [getScopedSavedObjectsClient](./kibana-plugin-server.savedobjectsservice.getscopedsavedobjectsclient.md) | <code>ScopedSavedObjectsClientProvider&lt;Request&gt;['getClient']</code> |  |
-|  [importExport](./kibana-plugin-server.savedobjectsservice.importexport.md) | <code>{</code><br/><code>        importSavedObjects(options: ImportSavedObjectsOptions): Promise&lt;ImportResponse&gt;;</code><br/><code>        getSortedObjectsForExport(options: ExportObjectsOptions): Promise&lt;Readable&gt;;</code><br/><code>        objectsToNdJson(objects: SavedObject[]): string;</code><br/><code>    }</code> |  |
+|  [importExport](./kibana-plugin-server.savedobjectsservice.importexport.md) | <code>{</code><br/><code>        importSavedObjects(options: ImportSavedObjectsOptions): Promise&lt;ImportResponse&gt;;</code><br/><code>        getSortedObjectsForExport(options: ExportObjectsOptions): Promise&lt;Readable&gt;;</code><br/><code>    }</code> |  |
 |  [SavedObjectsClient](./kibana-plugin-server.savedobjectsservice.savedobjectsclient.md) | <code>typeof SavedObjectsClient</code> |  |
 |  [schema](./kibana-plugin-server.savedobjectsservice.schema.md) | <code>SavedObjectsSchema</code> |  |
 |  [types](./kibana-plugin-server.savedobjectsservice.types.md) | <code>string[]</code> |  |

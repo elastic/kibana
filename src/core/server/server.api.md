@@ -656,7 +656,6 @@ export interface SavedObjectsService<Request = any> {
     importExport: {
         importSavedObjects(options: ImportSavedObjectsOptions): Promise<ImportResponse>;
         getSortedObjectsForExport(options: ExportObjectsOptions): Promise<Readable>;
-        objectsToNdJson(objects: SavedObject[]): string;
     };
     // Warning: (ae-incompatible-release-tags) The symbol "SavedObjectsClient" is marked as @public, but its signature references "SavedObjectsClient" which is marked as @internal
     // 

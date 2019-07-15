@@ -29,7 +29,7 @@ import {
   ScopedSavedObjectsClientProvider,
   getSortedObjectsForExport,
   importSavedObjects,
-} from '../../../core/server/saved_objects/service';
+} from '../../../core/server/saved_objects';
 import { getRootPropertiesObjects } from '../../../core/server/saved_objects/mappings';
 import { SavedObjectsManagement } from '../../../core/server/saved_objects/management';
 
