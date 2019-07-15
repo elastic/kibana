@@ -73,6 +73,7 @@ export const spaces = (kibana: Record<string, any>) =>
       savedObjectSchemas: {
         space: {
           isNamespaceAgnostic: true,
+          hidden: true,
         },
       },
       home: ['plugins/spaces/register_feature'],
