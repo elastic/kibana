@@ -1,0 +1,122 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Storyshots renderers/TimeFilter/components/DatetimeRangeAbsolute default 1`] = `
+<div
+  className="canvasDateTimeRangeAbsolute"
+>
+  <div>
+    <div
+      className="canvasDateTimeCal"
+    >
+      <div
+        className="euiFormControlLayout euiFormControlLayout--compressed"
+      >
+        <div
+          className="euiFormControlLayout__childrenWrapper"
+        >
+          <input
+            className="euiFieldText euiFieldText--compressed"
+            onChange={[Function]}
+            style={
+              Object {
+                "textAlign": "center",
+              }
+            }
+            type="text"
+            value="2019-06-21 00:00:00"
+          />
+        </div>
+      </div>
+      <span>
+        <span
+          className="euiDatePicker euiDatePicker--inline"
+        >
+          <div
+            className="euiFormControlLayout"
+          >
+            <div
+              className="euiFormControlLayout__childrenWrapper"
+            >
+              <ReactDatePicker
+                accessibleMode={true}
+                adjustDateOnChange={true}
+                className="euiDatePicker euiFieldText"
+                dateFormat="MM/DD/YYYY hh:mm A"
+                endDate={"2019-07-05T00:00:00.000Z"}
+                inline={true}
+                maxDate={"2019-07-05T00:00:00.000Z"}
+                onChange={[Function]}
+                selected={"2019-06-21T00:00:00.000Z"}
+                shouldCloseOnSelect={false}
+                showMonthDropdown={true}
+                showTimeSelect={true}
+                showYearDropdown={true}
+                startDate={"2019-06-21T00:00:00.000Z"}
+                timeFormat="hh:mm A"
+                yearDropdownItemNumber={7}
+              />
+            </div>
+          </div>
+        </span>
+      </span>
+    </div>
+  </div>
+  <div>
+    <div
+      className="canvasDateTimeCal"
+    >
+      <div
+        className="euiFormControlLayout euiFormControlLayout--compressed"
+      >
+        <div
+          className="euiFormControlLayout__childrenWrapper"
+        >
+          <input
+            className="euiFieldText euiFieldText--compressed"
+            onChange={[Function]}
+            style={
+              Object {
+                "textAlign": "center",
+              }
+            }
+            type="text"
+            value="2019-07-05 00:00:00"
+          />
+        </div>
+      </div>
+      <span>
+        <span
+          className="euiDatePicker euiDatePicker--inline"
+        >
+          <div
+            className="euiFormControlLayout"
+          >
+            <div
+              className="euiFormControlLayout__childrenWrapper"
+            >
+              <ReactDatePicker
+                accessibleMode={true}
+                adjustDateOnChange={true}
+                className="euiDatePicker euiFieldText"
+                dateFormat="MM/DD/YYYY hh:mm A"
+                endDate={"2019-07-05T00:00:00.000Z"}
+                inline={true}
+                minDate={"2019-06-21T00:00:00.000Z"}
+                onChange={[Function]}
+                selected={"2019-07-05T00:00:00.000Z"}
+                shouldCloseOnSelect={false}
+                showMonthDropdown={true}
+                showTimeSelect={true}
+                showYearDropdown={true}
+                startDate={"2019-06-21T00:00:00.000Z"}
+                timeFormat="hh:mm A"
+                yearDropdownItemNumber={7}
+              />
+            </div>
+          </div>
+        </span>
+      </span>
+    </div>
+  </div>
+</div>
+`;

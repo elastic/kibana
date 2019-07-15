@@ -60,6 +60,7 @@ export interface Logger {
   error: (message: string) => void;
   warning: (message: string) => void;
   clone?: (tags: string[]) => Logger;
+  isVerbose?: boolean;
 }
 
 export interface ViewZoomWidthHeight {

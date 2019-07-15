@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-interface Opts {
+export interface IArgOptions {
   userDataDir: string;
   viewport: { width: number; height: number };
   disableSandbox: boolean;
@@ -13,7 +13,7 @@ interface Opts {
     server: string;
     bypass?: string[];
   };
-  verboseLogging: boolean;
+  verboseLogging?: boolean;
 }
 
 export const args = ({
@@ -22,7 +22,7 @@ export const args = ({
   disableSandbox,
   proxyConfig,
   verboseLogging,
-}: Opts) => {
+}: IArgOptions) => {
   const flags = [
     // Disable built-in Google Translate service
     '--disable-translate',
