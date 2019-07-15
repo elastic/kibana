@@ -202,6 +202,39 @@ describe('terms', () => {
       ]);
     });
 
+    it('should not show filter ratio column as sort target', () => {
+      const setStateSpy = jest.fn();
+      const instance = shallow(
+        <InlineOptions
+          state={{
+            ...state,
+            columns: {
+              ...state.columns,
+              col2: {
+                operationId: 'op1',
+                label: 'Count',
+                dataType: 'number',
+                isBucketed: false,
+
+                // Private
+                operationType: 'filter_ratio',
+                params: {
+                  numerator: { query: '', language: 'kuery' },
+                  denominator: { query: '', language: 'kuery' },
+                },
+              },
+            },
+          }}
+          setState={setStateSpy}
+          columnId="col1"
+        />
+      );
+
+      const select = instance.find('[data-test-subj="indexPattern-terms-orderBy"]').find(EuiSelect);
+
+      expect(select.prop('options').map(({ value }) => value)).toEqual(['alphabetical']);
+    });
+
     it('should update state with the order by value', () => {
       const setStateSpy = jest.fn();
       const instance = shallow(

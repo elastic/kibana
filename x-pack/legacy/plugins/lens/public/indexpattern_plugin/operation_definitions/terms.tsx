@@ -31,6 +31,10 @@ function ofName(name: string) {
   });
 }
 
+function isSortableByColumn(column: IndexPatternColumn) {
+  return !column.isBucketed && column.operationType !== 'filter_ratio';
+}
+
 export const termsOperation: OperationDefinition<TermsIndexPatternColumn> = {
   type: 'terms',
   displayName: i18n.translate('xpack.lens.indexPattern.terms', {
@@ -49,7 +53,7 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn> = {
     field?: IndexPatternField
   ): TermsIndexPatternColumn {
     const existingMetricColumn = Object.entries(columns)
-      .filter(([_columnId, column]) => column && !column.isBucketed)
+      .filter(([_columnId, column]) => column && isSortableByColumn(column))
       .map(([id]) => id)[0];
 
     return {
@@ -90,7 +94,7 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn> = {
     if (currentColumn.params.orderBy.type === 'column') {
       // check whether the column is still there and still a metric
       const columnSortedBy = columns[currentColumn.params.orderBy.columnId];
-      if (!columnSortedBy || columnSortedBy.isBucketed) {
+      if (!columnSortedBy || !isSortableByColumn(columnSortedBy)) {
         return {
           ...currentColumn,
           params: {
@@ -125,7 +129,7 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn> = {
     }
 
     const orderOptions = Object.entries(state.columns)
-      .filter(([_columnId, column]) => !column.isBucketed)
+      .filter(([_columnId, column]) => isSortableByColumn(column))
       .map(([columnId, column]) => {
         return {
           value: toValue({ type: 'column', columnId }),
