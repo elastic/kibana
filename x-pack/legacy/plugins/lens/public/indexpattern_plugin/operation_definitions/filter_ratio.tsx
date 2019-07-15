@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiButton, EuiFormRow } from '@elastic/eui';
 import { Query } from '../../../../../../../src/legacy/core_plugins/data/public/query';
-import { FilterRatioIndexPatternColumn } from '../indexpattern';
+import { FilterRatioIndexPatternColumn, IndexPatternColumn } from '../indexpattern';
 import { DimensionPriority } from '../../types';
 import { OperationDefinition } from '../operations';
 import { updateColumnParam } from '../state_helpers';
@@ -23,6 +23,7 @@ export const filterRatioOperation: OperationDefinition<FilterRatioIndexPatternCo
   isApplicableForField: () => false,
   buildColumn(
     operationId: string,
+    _columns: Partial<Record<string, IndexPatternColumn>>,
     suggestedOrder?: DimensionPriority
   ): FilterRatioIndexPatternColumn {
     return {

@@ -51,7 +51,12 @@ export function toExpression(state: IndexPatternPrivateState) {
     );
 
     if (filterRatios.length) {
-      const countColumn = buildColumnForOperationType(columnEntries.length, 'count', 2);
+      const countColumn = buildColumnForOperationType(
+        columnEntries.length,
+        'count',
+        state.columns,
+        2
+      );
       aggs.push(getEsAggsConfig(countColumn, 'filter-ratio'));
 
       return `esaggs

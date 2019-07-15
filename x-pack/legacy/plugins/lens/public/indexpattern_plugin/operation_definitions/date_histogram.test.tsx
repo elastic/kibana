@@ -53,7 +53,7 @@ describe('date_histogram', () => {
 
   describe('buildColumn', () => {
     it('should create column object with default params', () => {
-      const column = dateHistogramOperation.buildColumn('op', 0, {
+      const column = dateHistogramOperation.buildColumn('op', {}, 0, {
         name: 'timestamp',
         type: 'date',
         esTypes: ['date'],
@@ -64,7 +64,7 @@ describe('date_histogram', () => {
     });
 
     it('should create column object with restrictions', () => {
-      const column = dateHistogramOperation.buildColumn('op', 0, {
+      const column = dateHistogramOperation.buildColumn('op', {}, 0, {
         name: 'timestamp',
         type: 'date',
         esTypes: ['date'],

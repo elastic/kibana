@@ -9,25 +9,8 @@ import {
   IndexPatternPrivateState,
   IndexPatternColumn,
   BaseIndexPatternColumn,
-  FieldBasedIndexPatternColumn,
 } from './indexpattern';
-
-export function getColumnOrder(columns: Record<string, IndexPatternColumn>): string[] {
-  const entries = Object.entries(columns);
-
-  const [aggregations, metrics] = _.partition(entries, col => col[1].isBucketed);
-
-  return aggregations
-    .sort(([id, col], [id2, col2]) => {
-      return (
-        // Sort undefined orders last
-        (col.suggestedOrder !== undefined ? col.suggestedOrder : Number.MAX_SAFE_INTEGER) -
-        (col2.suggestedOrder !== undefined ? col2.suggestedOrder : Number.MAX_SAFE_INTEGER)
-      );
-    })
-    .map(([id]) => id)
-    .concat(metrics.map(([id]) => id));
-}
+import { operationDefinitionMap, OperationDefinition } from './operations';
 
 export function updateColumnParam<
   C extends BaseIndexPatternColumn & { params: object },
@@ -61,6 +44,25 @@ export function updateColumnParam<
   };
 }
 
+function adjustColumnReferencesForChangedColumn(
+  columns: IndexPatternPrivateState['columns'],
+  columnId: string
+) {
+  const newColumns = { ...columns };
+  Object.keys(newColumns).forEach(currentColumnId => {
+    if (currentColumnId !== columnId) {
+      const currentColumn = newColumns[currentColumnId] as BaseIndexPatternColumn;
+      const operationDefinition = operationDefinitionMap[
+        currentColumn.operationType
+      ] as OperationDefinition<BaseIndexPatternColumn>;
+      newColumns[currentColumnId] = (operationDefinition.onOtherColumnChanged
+        ? operationDefinition.onOtherColumnChanged(currentColumn, newColumns)
+        : currentColumn) as IndexPatternColumn;
+    }
+  });
+  return newColumns;
+}
+
 export function changeColumn(
   state: IndexPatternPrivateState,
   columnId: string,
@@ -77,10 +79,13 @@ export function changeColumn(
       ? ({ ...newColumn, params: oldColumn.params } as IndexPatternColumn)
       : newColumn;
 
-  const newColumns: IndexPatternPrivateState['columns'] = {
-    ...state.columns,
-    [columnId]: updatedColumn,
-  };
+  const newColumns: IndexPatternPrivateState['columns'] = adjustColumnReferencesForChangedColumn(
+    {
+      ...state.columns,
+      [columnId]: updatedColumn,
+    },
+    columnId
+  );
 
   return {
     ...state,
@@ -90,27 +95,33 @@ export function changeColumn(
 }
 
 export function deleteColumn(state: IndexPatternPrivateState, columnId: string) {
-  const newColumns: IndexPatternPrivateState['columns'] = {
+  const columns: IndexPatternPrivateState['columns'] = {
     ...state.columns,
   };
-  delete newColumns[columnId];
+  delete columns[columnId];
+
+  const newColumns = adjustColumnReferencesForChangedColumn(columns, columnId);
 
   return {
     ...state,
-    columns: newColumns,
     columnOrder: getColumnOrder(newColumns),
+    columns: newColumns,
   };
 }
 
-export function hasField(column: BaseIndexPatternColumn): column is FieldBasedIndexPatternColumn {
-  return 'sourceField' in column;
-}
+export function getColumnOrder(columns: Record<string, IndexPatternColumn>): string[] {
+  const entries = Object.entries(columns);
 
-export function sortByField<C extends BaseIndexPatternColumn>(columns: C[]) {
-  return [...columns].sort((column1, column2) => {
-    if (hasField(column1) && hasField(column2)) {
-      return column1.sourceField.localeCompare(column2.sourceField);
-    }
-    return column1.operationType.localeCompare(column2.operationType);
-  });
+  const [aggregations, metrics] = _.partition(entries, col => col[1].isBucketed);
+
+  return aggregations
+    .sort(([id, col], [id2, col2]) => {
+      return (
+        // Sort undefined orders last
+        (col.suggestedOrder !== undefined ? col.suggestedOrder : Number.MAX_SAFE_INTEGER) -
+        (col2.suggestedOrder !== undefined ? col2.suggestedOrder : Number.MAX_SAFE_INTEGER)
+      );
+    })
+    .map(([id]) => id)
+    .concat(metrics.map(([id]) => id));
 }
