@@ -5,3 +5,4 @@
  */
 
 export const DEFAULT_TABLE_LIMIT = 10;
+export const DEFAULT_TABLE_ACTIVE_PAGE = 0;
