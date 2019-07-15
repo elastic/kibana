@@ -6,6 +6,7 @@
 
 import { HostsType } from '../../store/hosts/model';
 import { NetworkType } from '../../store/network/model';
+import { FlowTarget } from '../../graphql/types';
 
 export interface Influencer {
   influencer_field_name: string;
@@ -37,6 +38,11 @@ export interface Source {
 export interface Influencer {
   influencer_field_name: string;
   influencer_field_values: string[];
+}
+
+export interface CriteriaFields {
+  fieldName: string;
+  fieldValue: string;
 }
 
 export interface InfluencerInput {
@@ -91,6 +97,7 @@ export type AnomaliesHostTableProps = HostOrNetworkProps & {
 export type AnomaliesNetworkTableProps = HostOrNetworkProps & {
   ip?: string;
   type: NetworkType;
+  flowTarget?: FlowTarget;
 };
 
 export interface MlCapabilities {
