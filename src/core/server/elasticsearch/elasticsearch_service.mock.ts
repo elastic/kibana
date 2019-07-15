@@ -36,10 +36,6 @@ const createClusterClientMock = (): jest.Mocked<PublicMethodsOf<ClusterClient>> 
 
 const createSetupContractMock = () => {
   const setupContract: jest.Mocked<ElasticsearchServiceSetup> = {
-const createSetupContractMock = (clients: MockClients = {}) => {
-  const adminClient = clients!.adminClient || {};
-  const dataClient = clients!.dataClient || {};
-  const setupContract: ElasticsearchServiceSetup = {
     legacy: {
       config$: new BehaviorSubject({} as ElasticsearchConfig),
     },
