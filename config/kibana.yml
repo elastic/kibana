@@ -11,6 +11,8 @@ server.host: "localhost"
 # from requests it receives, and to prevent a deprecation warning at startup.
 # This setting cannot end in a slash.
 #server.basePath: ""
+# FIXME - change to "/Analyze" for esk7 release
+server.basePath: "/kibana4"
 
 # Specifies whether Kibana should rewrite requests that are prefixed with
 # `server.basePath` or require that they are rewritten by your reverse proxy.
