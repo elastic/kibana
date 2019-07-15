@@ -59,6 +59,15 @@ export const routes: BreadcrumbRoute[] = [
   },
   {
     exact: true,
+    path: '/servicemap',
+    component: Home,
+    breadcrumb: i18n.translate('xpack.apm.breadcrumb.tracesTitle', {
+      defaultMessage: 'Service Map'
+    }),
+    name: RouteName.SERVICEMAP
+  },
+  {
+    exact: true,
     path: '/settings',
     component: SettingsList,
     breadcrumb: i18n.translate('xpack.apm.breadcrumb.listSettingsTitle', {
@@ -126,5 +135,12 @@ export const routes: BreadcrumbRoute[] = [
     breadcrumb: ({ match }) =>
       legacyDecodeURIComponent(match.params.transactionName) || '',
     name: RouteName.TRANSACTION_NAME
+  },
+  {
+    exact: true,
+    path: '/:serviceName/servicemap',
+    component: ServiceDetails,
+    breadcrumb: null,
+    name: RouteName.SERVICE_SERVICEMAP
   }
 ];

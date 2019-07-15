@@ -9,6 +9,7 @@ import { ServiceListAPIResponse } from '../../../../server/lib/services/get_serv
 import { callApi } from '../callApi';
 import { getUiFiltersES } from '../../ui_filters/get_ui_filters_es';
 import { UIFilters } from '../../../../typings/ui-filters';
+import { ServiceMapAPIResponse } from '../../../../server/lib/services/map';
 
 export async function loadServiceList({
   start,
@@ -45,6 +46,28 @@ export async function loadServiceDetails({
     query: {
       start,
       end,
+      uiFiltersES: await getUiFiltersES(uiFilters)
+    }
+  });
+}
+
+export async function loadServiceMap({
+  start,
+  end,
+  uiFilters,
+  serviceName
+}: {
+  start: string;
+  end: string;
+  uiFilters: UIFilters;
+  serviceName?: string;
+}) {
+  return callApi<ServiceMapAPIResponse>({
+    pathname: '/api/apm/services/map',
+    query: {
+      start,
+      end,
+      serviceName,
       uiFiltersES: await getUiFiltersES(uiFilters)
     }
   });

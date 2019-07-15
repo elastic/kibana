@@ -11,6 +11,7 @@ import { HistoryTabs } from '../../shared/HistoryTabs';
 import { ErrorGroupOverview } from '../ErrorGroupOverview';
 import { TransactionOverview } from '../TransactionOverview';
 import { ServiceMetrics } from '../ServiceMetrics';
+import { ServiceMap } from '../ServiceMap';
 
 interface Props {
   transactionTypes: string[];
@@ -61,9 +62,18 @@ export function ServiceDetailTabs({
     render: () => <ServiceMetrics agentName={agentName} />,
     name: 'metrics'
   };
+
+  const serviceMapTab = {
+    title: i18n.translate('xpack.apm.serviceDetails.mapTabLabel', {
+      defaultMessage: 'Service Map'
+    }),
+    path: `/${serviceName}/servicemap`,
+    render: () => <ServiceMap layout="breadthfirst" />,
+    name: 'servicemap'
+  };
   const tabs = isRumAgent
-    ? [transactionsTab, errorsTab]
-    : [transactionsTab, errorsTab, metricsTab];
+    ? [transactionsTab, errorsTab, serviceMapTab]
+    : [transactionsTab, errorsTab, serviceMapTab, metricsTab];
 
   return <HistoryTabs tabs={tabs} />;
 }

@@ -17,6 +17,7 @@ export interface APMRequestQuery {
   start: string;
   end: string;
   uiFiltersES?: string;
+  serviceName?: string;
 }
 
 export type Setup = ReturnType<typeof setupRequest>;

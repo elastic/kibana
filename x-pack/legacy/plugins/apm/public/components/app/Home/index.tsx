@@ -17,7 +17,10 @@ import { HistoryTabs, IHistoryTab } from '../../shared/HistoryTabs';
 import { SetupInstructionsLink } from '../../shared/Links/SetupInstructionsLink';
 import { ServiceOverview } from '../ServiceOverview';
 import { TraceOverview } from '../TraceOverview';
+import { ServiceMap } from '../ServiceMap';
+
 import { APMLink } from '../../shared/Links/APMLink';
+import { useUrlParams } from '../../../hooks/useUrlParams';
 
 const homeTabs: IHistoryTab[] = [
   {
@@ -35,6 +38,14 @@ const homeTabs: IHistoryTab[] = [
     }),
     render: () => <TraceOverview />,
     name: 'traces'
+  },
+  {
+    path: '/servicemap',
+    title: i18n.translate('xpack.apm.home.tracesTabLabel', {
+      defaultMessage: 'Service Map'
+    }),
+    render: () => <ServiceMap global={true} />,
+    name: 'servicemap'
   }
 ];
 

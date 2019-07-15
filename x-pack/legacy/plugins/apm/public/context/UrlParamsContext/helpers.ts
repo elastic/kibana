@@ -59,7 +59,6 @@ export function removeUndefinedProps<T>(obj: T): Partial<T> {
 export function getPathParams(pathname: string = '') {
   const paths = getPathAsArray(pathname);
   const pageName = paths.length > 1 ? paths[1] : paths[0];
-
   // TODO: use react router's real match params instead of guessing the path order
   switch (pageName) {
     case 'transactions':
@@ -69,6 +68,8 @@ export function getPathParams(pathname: string = '') {
         transactionType: paths[2],
         transactionName: paths[3]
       };
+    case 'servicemap':
+      return { serviceName: paths[0] };
     case 'errors':
       return {
         processorEvent: 'error',
