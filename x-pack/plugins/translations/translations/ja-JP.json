@@ -5582,7 +5582,6 @@
     "xpack.maps.featureRegistry.mapsFeatureName": "Maps",
     "xpack.maps.geoGrid.resolutionLabel": "グリッド解像度",
     "xpack.maps.heatmap.colorRampLabel": "色の範囲",
-    "xpack.maps.heatmapLayer.noResultsFoundTooltip": "結果が見つかりませんでした。",
     "xpack.maps.heatmapLegend.coldLabel": "コールド",
     "xpack.maps.heatmapLegend.hotLabel": "ホット",
     "xpack.maps.helpMenu.docLabel": "Maps ドキュメンテーション",

@@ -5582,7 +5582,6 @@
     "xpack.maps.featureRegistry.mapsFeatureName": "Maps",
     "xpack.maps.geoGrid.resolutionLabel": "网格分辨率",
     "xpack.maps.heatmap.colorRampLabel": "颜色范围",
-    "xpack.maps.heatmapLayer.noResultsFoundTooltip": "找不到结果",
     "xpack.maps.heatmapLegend.coldLabel": "冷",
     "xpack.maps.heatmapLegend.hotLabel": "热",
     "xpack.maps.helpMenu.docLabel": "地图文档",
