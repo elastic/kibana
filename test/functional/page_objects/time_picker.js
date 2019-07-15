@@ -23,6 +23,7 @@ export function TimePickerPageProvider({ getService, getPageObjects }) {
   const log = getService('log');
   const retry = getService('retry');
   const find = getService('find');
+  const browser = getService('browser');
   const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects(['header']);
 
@@ -67,6 +68,16 @@ export function TimePickerPageProvider({ getService, getPageObjects }) {
       await testSubjects.click(commonlyUsedOption);
     }
 
+    async inputValue(dataTestsubj, value) {
+      if (browser.isFirefox) {
+        const toInput = await testSubjects.find(dataTestsubj);
+        await toInput.clearValue();
+        await toInput.type(value);
+      } else {
+        await testSubjects.setValue(dataTestsubj, value);
+      }
+    }
+
     /**
      * @param {String} fromTime YYYY-MM-DD HH:mm:ss.SSS
      * @param {String} fromTime YYYY-MM-DD HH:mm:ss.SSS
@@ -79,14 +90,15 @@ export function TimePickerPageProvider({ getService, getPageObjects }) {
       await testSubjects.click('superDatePickerendDatePopoverButton');
       let panel = await this.getTimePickerPanel();
       await testSubjects.click('superDatePickerAbsoluteTab');
-      await testSubjects.setValue('superDatePickerAbsoluteDateInput', toTime);
+      await this.inputValue('superDatePickerAbsoluteDateInput', toTime);
+
 
       // set from time
       await testSubjects.click('superDatePickerstartDatePopoverButton');
       await this.waitPanelIsGone(panel);
       panel = await this.getTimePickerPanel();
       await testSubjects.click('superDatePickerAbsoluteTab');
-      await testSubjects.setValue('superDatePickerAbsoluteDateInput', fromTime);
+      await this.inputValue('superDatePickerAbsoluteDateInput', fromTime);
 
       const superDatePickerApplyButtonExists = await testSubjects.exists('superDatePickerApplyTimeButton');
       if (superDatePickerApplyButtonExists) {
