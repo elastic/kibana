@@ -26,11 +26,16 @@ const DEFAULT_GEO_POINT_MAPPINGS = {
 const DEFAULT_INGEST_PIPELINE = {};
 
 export function getGeoIndexTypesForFeatures(featureTypes) {
-  if (!featureTypes || !featureTypes.length) {
+  const hasNoFeatureType = !featureTypes || !featureTypes.length;
+  if (hasNoFeatureType) {
     return [];
-  } else if (!featureTypes.includes('Point')) {
+  }
+
+  const isPoint = featureTypes.includes('Point')
+    || featureTypes.includes('MultiPoint');
+  if (!isPoint) {
     return [ES_GEO_FIELD_TYPE.GEO_SHAPE];
-  } else if (featureTypes.includes('Point') && featureTypes.length === 1) {
+  } else if (isPoint && featureTypes.length === 1) {
     return [ ES_GEO_FIELD_TYPE.GEO_POINT, ES_GEO_FIELD_TYPE.GEO_SHAPE ];
   } else {
     return [ ES_GEO_FIELD_TYPE.GEO_SHAPE ];
