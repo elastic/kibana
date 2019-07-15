@@ -19,15 +19,6 @@ export enum PIVOT_SUPPORTED_AGGS {
   VALUE_COUNT = 'value_count',
 }
 
-export const pivotSupportedAggs: PIVOT_SUPPORTED_AGGS[] = [
-  PIVOT_SUPPORTED_AGGS.AVG,
-  PIVOT_SUPPORTED_AGGS.CARDINALITY,
-  PIVOT_SUPPORTED_AGGS.MAX,
-  PIVOT_SUPPORTED_AGGS.MIN,
-  PIVOT_SUPPORTED_AGGS.SUM,
-  PIVOT_SUPPORTED_AGGS.VALUE_COUNT,
-];
-
 export const pivotAggsFieldSupport = {
   [KBN_FIELD_TYPES.ATTACHMENT]: [PIVOT_SUPPORTED_AGGS.VALUE_COUNT],
   [KBN_FIELD_TYPES.BOOLEAN]: [PIVOT_SUPPORTED_AGGS.VALUE_COUNT],
@@ -79,7 +70,7 @@ export function isPivotAggsConfigWithUiSupport(arg: any): arg is PivotAggsConfig
     arg.hasOwnProperty('aggName') &&
     arg.hasOwnProperty('dropDownName') &&
     arg.hasOwnProperty('field') &&
-    pivotSupportedAggs.includes(arg.agg)
+    Object.values(PIVOT_SUPPORTED_AGGS).includes(arg.agg)
   );
 }
 
