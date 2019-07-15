@@ -78,17 +78,22 @@ export class WorkpadHeader extends React.PureComponent {
     </EuiOverlayMask>
   );
 
-  _getTooltipText = () => {
+  _getEditToggleToolTip = ({ textOnly = false }) => {
     if (!this.props.canUserWrite) {
       return "You don't have permission to edit this workpad";
-    } else {
-      const content = this.props.isWriteable ? `Hide editing controls` : `Show editing controls`;
-      return (
-        <span>
-          {content} <ToolTipShortcut namespace="EDITOR" action="EDITING" />
-        </span>
-      );
     }
+
+    const content = this.props.isWriteable ? `Hide editing controls` : `Show editing controls`;
+
+    if (textOnly) {
+      return content;
+    }
+
+    return (
+      <span>
+        {content} <ToolTipShortcut namespace="EDITOR" action="EDITING" />
+      </span>
+    );
   };
 
   render() {
@@ -125,12 +130,12 @@ export class WorkpadHeader extends React.PureComponent {
                     global
                   />
                 )}
-                <EuiToolTip position="bottom" content={this._getTooltipText()}>
+                <EuiToolTip position="bottom" content={this._getEditToggleToolTip()}>
                   <EuiButtonIcon
                     iconType={isWriteable ? 'lockOpen' : 'lock'}
                     onClick={toggleWriteable}
                     size="s"
-                    aria-label={this._getTooltipText()}
+                    aria-label={this._getEditToggleToolTip({ textOnly: true })}
                     isDisabled={!canUserWrite}
                   />
                 </EuiToolTip>

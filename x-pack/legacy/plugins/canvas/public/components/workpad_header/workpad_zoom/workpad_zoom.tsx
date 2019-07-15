@@ -87,11 +87,7 @@ export class WorkpadZoom extends PureComponent<Props> {
   };
 
   _button = (togglePopover: MouseEventHandler<HTMLButtonElement>) => (
-    <EuiButtonIcon
-      iconType="magnifyWithPlus"
-      aria-label="Share this workpad"
-      onClick={togglePopover}
-    />
+    <EuiButtonIcon iconType="magnifyWithPlus" aria-label="Zoom controls" onClick={togglePopover} />
   );
 
   _getPrettyZoomLevel = (scale: number) => `${scale * 100}%`;
@@ -151,7 +147,7 @@ export class WorkpadZoom extends PureComponent<Props> {
       <Popover
         button={this._button}
         panelPaddingSize="none"
-        tooltip="Zoom"
+        tooltip="Zoom controls"
         tooltipPosition="bottom"
       >
         {() => <EuiContextMenu initialPanelId={0} panels={this._getPanels()} />}
