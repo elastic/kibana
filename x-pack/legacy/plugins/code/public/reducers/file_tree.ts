@@ -20,6 +20,7 @@ import {
   dirNotFound,
   FetchRepoTreePayload,
 } from '../actions';
+import { routePathChange, repoChange, revisionChange } from '../actions/route';
 
 function mergeNode(a: FileTree, b: FileTree): FileTree {
   const childrenMap: { [name: string]: FileTree } = {};
@@ -77,6 +78,15 @@ const initialState: FileTreeState = {
   notFoundDirs: [],
   revision: '',
 };
+
+const clearState = (state: FileTreeState) =>
+  produce<FileTreeState>(state, draft => {
+    draft.tree = initialState.tree;
+    draft.openedPaths = initialState.openedPaths;
+    draft.fileTreeLoadingPaths = initialState.fileTreeLoadingPaths;
+    draft.notFoundDirs = initialState.notFoundDirs;
+    draft.revision = initialState.revision;
+  });
 
 type FileTreePayload = FetchRepoTreePayload & RepoTreePayload & FileTree & string;
 
@@ -159,6 +169,9 @@ export const fileTree = handleActions<FileTreeState, FileTreePayload>(
         const isSubFolder = (p: string) => p.startsWith(path + '/');
         draft.openedPaths = state.openedPaths.filter(p => !(p === path || isSubFolder(p)));
       }),
+    [String(routePathChange)]: clearState,
+    [String(repoChange)]: clearState,
+    [String(revisionChange)]: clearState,
   },
   initialState
 );
