@@ -170,6 +170,9 @@
   @include euiTextTruncate;
 }
 
+.visEditorSidebar__collapsibleText {
+  @include euiTextTruncate;
+}
 
 //
 // FORMS

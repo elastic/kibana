@@ -198,13 +198,13 @@ function DefaultEditorAgg({
   const buttonContent = (
     <div>
       <EuiFlexGroup gutterSize="s" alignItems="center">
-        <EuiFlexItem grow={false}>{agg.schema.title}</EuiFlexItem>
-        <EuiFlexItem>
+        <EuiFlexItem grow={false} className="visEditorSidebar__collapsibleText">
+          {agg.schema.title}
+        </EuiFlexItem>
+        <EuiFlexItem className="visEditorSidebar__collapsibleText">
           {showDescription && (
-            <EuiText size="s">
-              <p>
-                <EuiTextColor color="subdued">{getDescription()}</EuiTextColor>
-              </p>
+            <EuiText size="s" color="subdued">
+              <p>{getDescription()}</p>
             </EuiText>
           )}
           {showError && (
