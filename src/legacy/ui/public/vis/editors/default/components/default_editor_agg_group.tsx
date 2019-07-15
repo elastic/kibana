@@ -116,7 +116,9 @@ function DefaultEditorAggGroup({
   }, [group.length]);
 
   const isGroupValid = Object.entries(aggsState).every(([, item]) => item.valid);
-  const isAllAggsTouched = Object.entries(aggsState).every(([, item]) => item.touched);
+  const isAllAggsTouched = Object.entries(aggsState).every(([, item]) =>
+    item.valid ? false : item.touched
+  );
 
   useEffect(() => {
     setTouched(isAllAggsTouched);
@@ -137,11 +139,25 @@ function DefaultEditorAggGroup({
   };
 
   const setTouchedHandler = (aggId: number, touched: boolean) => {
-    setAggsState({ ...aggsState, [aggId]: { ...aggsState[aggId], touched } });
+    const newState = Object.assign({}, aggsState);
+    if (newState[aggId]) {
+      newState[aggId].touched = touched;
+    } else {
+      newState[aggId] = { valid: true, touched };
+    }
+
+    setAggsState(newState);
   };
 
   const setValidityHandler = (aggId: number, valid: boolean) => {
-    setAggsState({ ...aggsState, [aggId]: { ...aggsState[aggId], valid } });
+    const newState = Object.assign({}, aggsState);
+    if (newState[aggId]) {
+      newState[aggId].valid = valid;
+    } else {
+      newState[aggId] = { touched: false, valid };
+    }
+
+    setAggsState(newState);
   };
 
   return (
@@ -166,7 +182,9 @@ function DefaultEditorAggGroup({
                     aggIndex={index}
                     aggIsTooLow={calcAggIsTooLow(agg, index, group)}
                     dragHandleProps={provided.dragHandleProps}
-                    formIsTouched={formIsTouched}
+                    formIsTouched={
+                      formIsTouched || (aggsState[agg.id] && aggsState[agg.id].touched)
+                    }
                     groupName={groupName}
                     isDraggable={stats.count > 1}
                     isRemovable={isAggRemovable(agg, group)}

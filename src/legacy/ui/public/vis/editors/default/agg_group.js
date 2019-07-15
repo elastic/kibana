@@ -83,7 +83,7 @@ uiModules
         );
 
         $scope.setValidity = isValid => {
-          ngModelCtrl.$setValidity('aggGroup', isValid);
+          ngModelCtrl.$setValidity(`aggGroup${$scope.groupName}`, isValid);
         };
 
         $scope.setTouched = isTouched => {
