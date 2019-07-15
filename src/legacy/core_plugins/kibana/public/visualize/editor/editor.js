@@ -406,7 +406,7 @@ function VisEditor(
     const filterUpdateSubscription = subscribeWithScope($scope, queryFilter.getUpdates$(), {
       next: () => {
         $scope.filters = queryFilter.getFilters();
-        $scope.fetch();
+        $scope.globalFilters = queryFilter.getGlobalFilters();
       }
     });
 
@@ -415,7 +415,6 @@ function VisEditor(
       $state.save();
       savedVis.searchSource.setField('query', $state.query);
       savedVis.searchSource.setField('filter', $state.filters);
-      $scope.globalFilters = queryFilter.getGlobalFilters();
       $scope.vis.forceReload();
     };
 
@@ -441,9 +440,16 @@ function VisEditor(
   }
 
   $scope.updateQueryAndFetch = function ({ query, dateRange }) {
-    timefilter.setTime(dateRange);
-    $state.query = query;
-    $scope.fetch();
+    const isUpdate = (
+      (query && !_.isEqual(query, $state.query)) ||
+      (dateRange && !_.isEqual(dateRange, $scope.timeRange))
+    );
+
+    if (query && !_.isEqual(query, $state.query)) $state.query = query;
+    if (dateRange && !_.isEqual(dateRange, $scope.timeRange)) timefilter.setTime(dateRange);
+
+    // If nothing has changed, trigger the fetch manually, otherwise it will happen as a result of the changes
+    if (!isUpdate) $scope.fetch();
   };
 
   $scope.onRefreshChange = function ({ isPaused, refreshInterval }) {
