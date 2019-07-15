@@ -24,9 +24,9 @@ import React from 'react';
 import { EuiLoadingChart } from '@elastic/eui';
 import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
 
-import { ErrorEmbeddable, IEmbeddable } from 'plugins/embeddable_api';
-
 import { Subscription } from 'rxjs';
+import { ErrorEmbeddable, IEmbeddable } from '../embeddables';
+
 import { EmbeddablePanel } from '../panel';
 import { IContainer } from './i_container';
 

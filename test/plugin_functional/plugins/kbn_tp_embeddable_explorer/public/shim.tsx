@@ -19,8 +19,8 @@
 import { embeddableFactories, EmbeddableFactory } from 'plugins/embeddable_api';
 
 import 'ui/autoload/all';
-import 'uiExports/embeddableActions';
 import 'uiExports/embeddableFactories';
+import 'uiExports/embeddableActions';
 
 import uiRoutes from 'ui/routes';
 
