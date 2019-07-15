@@ -22,7 +22,7 @@ curl \
 <2> Provide user credentials for a user with permission to access Kibana and X-Pack reporting.
 <3> The `kbn-version` header is required for all `POST` requests to Kibana.
 **The value must match the dotted-numeral version of the Kibana instance.**
-<4> The `POST` URL. You can copy and paste the URL for any report from the Kibana UI.
+<4> The POST URL. You can copy and paste the URL for any report from the Kibana UI.
 
 Here is an example response for a successfully queued report:
 
