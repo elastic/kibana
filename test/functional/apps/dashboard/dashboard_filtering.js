@@ -34,9 +34,7 @@ export default function ({ getService, getPageObjects }) {
   const dashboardPanelActions = getService('dashboardPanelActions');
   const PageObjects = getPageObjects(['dashboard', 'header', 'visualize']);
 
-  // FLAKY: https://github.com/elastic/kibana/issues/41088
-  // FLAKY: https://github.com/elastic/kibana/issues/41087
-  describe.skip('dashboard filtering', async function () {
+  describe('dashboard filtering', async function () {
     this.tags('smoke');
     before(async () => {
       await PageObjects.dashboard.gotoDashboardLandingPage();
@@ -219,7 +217,8 @@ export default function ({ getService, getPageObjects }) {
         await dashboardExpect.tsvbMarkdownWithValuesExists(['7,209.286']);
       });
 
-      it('saved searches', async () => {
+      // FLAKY: https://github.com/elastic/kibana/issues/41087
+      it.skip('saved searches', async () => {
         await dashboardExpect.savedSearchRowCount(1);
       });
 
