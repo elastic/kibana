@@ -5,8 +5,9 @@
  */
 
 
-import { notify } from 'ui/notify';
+import { toastNotifications } from 'ui/notify';
 import { MLRequestFailure } from '../../util/ml_error';
+import { i18n } from '@kbn/i18n';
 
 const messages = [];
 
@@ -68,7 +69,12 @@ function errorNotify(text, resp) {
   } else {
     err = new Error(text);
   }
-  notify.error(new MLRequestFailure(err, resp));
+
+  toastNotifications.addError(new MLRequestFailure(err, resp), {
+    title: i18n.translate('xpack.ml.messagebarService.errorTitle', {
+      defaultMessage: 'An error has ocurred',
+    })
+  });
 }
 
 export const mlMessageBarService = {
