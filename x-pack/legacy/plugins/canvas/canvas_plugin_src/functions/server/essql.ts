@@ -22,10 +22,10 @@ export function essql(): ExpressionFunction<'essql', Filter, Arguments, any> {
   return {
     name: 'essql',
     type: 'datatable',
+    help,
     context: {
       types: ['filter'],
     },
-    help,
     args: {
       query: {
         aliases: ['_', 'q'],

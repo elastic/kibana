@@ -40,8 +40,6 @@ export function ply(): ExpressionFunction<'ply', Datatable, Arguments, Return> {
         aliases: ['exp', 'fn', 'function'],
         help: argHelp.expression,
       },
-      // In the future it may make sense to add things like shape, or tooltip values, but I think what we have is good for now
-      // The way the function below is written you can add as many arbitrary named args as you want.
     },
     fn: (context, args) => {
       if (!args) {
