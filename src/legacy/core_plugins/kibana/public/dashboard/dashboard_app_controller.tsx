@@ -82,6 +82,23 @@ import { DashboardAppScope } from './dashboard_app';
 import { VISUALIZE_EMBEDDABLE_TYPE } from '../visualize/embeddable';
 import { convertSavedDashboardPanelToPanelState } from './lib/embeddable_saved_object_converters';
 
+function areFilterChangesFetchRelevant(oldFilters: Filter[], newFilters: Filter[]) {
+  if (oldFilters.length !== newFilters.length) {
+    return true;
+  }
+
+  for (let i = 0; i < oldFilters.length; i++) {
+    const oldFilter = oldFilters[i];
+    const newFilter = newFilters[i];
+
+    if (oldFilter.meta.disabled !== newFilter.meta.disabled) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
 export class DashboardAppController {
   // Part of the exposed plugin API - do not remove without careful consideration.
   appStatus: {
@@ -361,7 +378,15 @@ export class DashboardAppController {
 
     const refreshDashboardContainer = () => {
       const changes = getChangesFromAppStateForContainerState();
-      if (changes && dashboardContainer) {
+      if (
+        changes &&
+        dashboardContainer &&
+        !(
+          changes.filters &&
+          Object.keys(changes).length === 1 &&
+          !areFilterChangesFetchRelevant($scope.model.filters, changes.filters)
+        )
+      ) {
         dashboardContainer.updateInput(changes);
       }
     };
@@ -675,9 +700,10 @@ export class DashboardAppController {
     // update root source when filters update
     const updateSubscription = queryFilter.getUpdates$().subscribe({
       next: () => {
+        const oldFilters = $scope.model.filters;
         $scope.model.filters = queryFilter.getFilters();
         dashboardStateManager.applyFilters($scope.model.query, $scope.model.filters);
-        if (dashboardContainer) {
+        if (dashboardContainer && areFilterChangesFetchRelevant(oldFilters, $scope.model.filters)) {
           dashboardContainer.updateInput({ filters: $scope.model.filters });
         }
       },
