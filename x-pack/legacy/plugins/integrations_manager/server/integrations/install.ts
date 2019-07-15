@@ -5,15 +5,15 @@
  */
 
 import { SavedObject, SavedObjectsClientContract } from 'src/core/server/';
-import { SAVED_OBJECT_TYPE, AssetTypes } from '../../common/constants';
-import { AssetReference, InstallationAttributes } from '../../common/types';
+import { SAVED_OBJECT_TYPE, ASSET_TYPE_INGEST_PIPELINE } from '../../common/constants';
+import { AssetReference, AssetType, InstallationAttributes } from '../../common/types';
 import * as Registry from '../registry';
 import { CallESAsCurrentUser, assetUsesObjects, getInstallationObject } from './index';
 
 export async function installIntegration(options: {
   savedObjectsClient: SavedObjectsClientContract;
   pkgkey: string;
-  asset: string;
+  asset: AssetType;
   callCluster: CallESAsCurrentUser;
 }) {
   const { savedObjectsClient, pkgkey, asset, callCluster } = options;
@@ -35,7 +35,7 @@ export async function installIntegration(options: {
 export async function installAssets(options: {
   savedObjectsClient: SavedObjectsClientContract;
   pkgkey: string;
-  asset: string;
+  asset: AssetType;
   callCluster: CallESAsCurrentUser;
 }) {
   const { savedObjectsClient, pkgkey, asset, callCluster } = options;
@@ -43,10 +43,11 @@ export async function installAssets(options: {
     const references = await installObjects({ savedObjectsClient, pkgkey, asset });
     return references;
   }
-  if (asset === AssetTypes.ingestPipeline) {
+  if (asset === ASSET_TYPE_INGEST_PIPELINE) {
     const references = await installPipelines({ callCluster, pkgkey });
     return references;
   }
+
   return [];
 }
 
@@ -81,7 +82,7 @@ async function installObjects({
 }: {
   savedObjectsClient: SavedObjectsClientContract;
   pkgkey: string;
-  asset: string;
+  asset: AssetType;
 }): Promise<AssetReference[]> {
   const filter = (entry: Registry.ArchiveEntry) => asset === Registry.pathParts(entry.path).type;
   const toBeSavedObjects = await getObjects(pkgkey, filter);
@@ -91,6 +92,7 @@ async function installObjects({
   );
   const createdObjects = createResults.saved_objects;
   const installed = createdObjects.map(({ id, type }) => ({ id, type }));
+
   return installed;
 }
 
@@ -102,10 +104,11 @@ async function installPipelines({
   pkgkey: string;
 }) {
   const isPipeline = ({ path }: Registry.ArchiveEntry) =>
-    Registry.pathParts(path).type === AssetTypes.ingestPipeline;
+    Registry.pathParts(path).type === ASSET_TYPE_INGEST_PIPELINE;
   const paths = await Registry.getArchiveInfo(`${pkgkey}.tar.gz`, isPipeline);
   const installationPromises = paths.map(path => installPipeline({ callCluster, path }));
   const references = await Promise.all(installationPromises);
+
   return references;
 }
 
@@ -124,6 +127,7 @@ async function installPipeline({
   const id = file.replace('.json', '');
   // TODO: any sort of error, not "happy path", handling
   await callCluster('ingest.putPipeline', { id, body: pipeline });
+
   return { id, type };
 }
 
@@ -154,6 +158,7 @@ async function getObjects(
         const { type, file } = Registry.pathParts(entry.path);
         const isType = type === reference.type;
         const isJson = file === `${reference.id}.json`;
+
         return isType && isJson;
       });
 
@@ -181,6 +186,7 @@ function ensureJsonValues(obj: SavedObject) {
   ['optionsJSON', 'panelsJSON', 'uiStateJSON', 'visState']
     .filter(key => typeof attributes[key] !== 'string')
     .forEach(key => (attributes[key] = JSON.stringify(attributes[key])));
+
   return obj;
 }
 

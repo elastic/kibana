@@ -5,9 +5,30 @@
  */
 
 import { SavedObject, SavedObjectAttributes, SavedObjectReference } from 'src/core/server';
-import { InstallationStatus } from './constants';
+import {
+  ASSET_TYPE_CONFIG,
+  ASSET_TYPE_DASHBOARD,
+  ASSET_TYPE_INGEST_PIPELINE,
+  ASSET_TYPE_INDEX_PATTERN,
+  ASSET_TYPE_SEARCH,
+  ASSET_TYPE_TIMELION_SHEET,
+  ASSET_TYPE_VISUALIZATION,
+  STATUS_INSTALLED,
+  STATUS_NOT_INSTALLED,
+} from './constants';
 
 export { Request, ResponseToolkit, ServerRoute } from 'hapi';
+
+export type InstallationStatus = typeof STATUS_INSTALLED | typeof STATUS_NOT_INSTALLED;
+
+export type AssetType =
+  | typeof ASSET_TYPE_CONFIG
+  | typeof ASSET_TYPE_DASHBOARD
+  | typeof ASSET_TYPE_INGEST_PIPELINE
+  | typeof ASSET_TYPE_INDEX_PATTERN
+  | typeof ASSET_TYPE_SEARCH
+  | typeof ASSET_TYPE_TIMELION_SHEET
+  | typeof ASSET_TYPE_VISUALIZATION;
 
 // Registry's response types
 // from /list
@@ -54,12 +75,12 @@ export interface InstallationAttributes extends SavedObjectAttributes {
 export type Installable<T> = Installed<T> | NotInstalled<T>;
 
 export type Installed<T = {}> = T & {
-  status: InstallationStatus.installed;
+  status: typeof STATUS_INSTALLED;
   savedObject: Installation;
 };
 
 export type NotInstalled<T = {}> = T & {
-  status: InstallationStatus.notInstalled;
+  status: typeof STATUS_NOT_INSTALLED;
 };
 
 // from API_DELETE_PATTERN
