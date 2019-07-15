@@ -134,6 +134,9 @@ export function ApmServerInstances({ apms, setupMode }) {
             setupMode={setupMode}
             uuidField="uuid"
             nameField="name"
+            setupNewButtonLabel={i18n.translate('xpack.monitoring.apm.metricbeatMigration.setupNewButtonLabel', {
+              defaultMessage: 'Setup monitoring for new APM server instance'
+            })}
             search={{
               box: {
                 incremental: true,

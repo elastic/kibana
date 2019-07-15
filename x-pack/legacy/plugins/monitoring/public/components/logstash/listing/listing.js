@@ -162,6 +162,9 @@ export class Listing extends PureComponent {
               setupMode={setupMode}
               uuidField="logstash.uuid"
               nameField="name"
+              setupNewButtonLabel={i18n.translate('xpack.monitoring.logstash.metricbeatMigration.setupNewButtonLabel', {
+                defaultMessage: 'Setup monitoring for new Logstash node'
+              })}
               columns={columns}
               sorting={{
                 ...sorting,

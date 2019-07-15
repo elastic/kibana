@@ -98,7 +98,7 @@ export function getLogstashInstructionsForEnablingMetricbeat(product, _meta, {
           <p>
             <FormattedMessage
               id="xpack.monitoring.metricbeatMigration.logstashInstructions.enableMetricbeatModuleDescription"
-              defaultMessage="By default the module will collect Logstash monitoring metrics from http://localhost:5601. If the local Logstash instance has a different address, you must specify it via the {hosts} setting in the {file} file."
+              defaultMessage="By default the module will collect Logstash monitoring metrics from http://localhost:9600. If the local Logstash instance has a different address, you must specify it via the {hosts} setting in the {file} file."
               values={{
                 hosts: (
                   <Monospace>hosts</Monospace>

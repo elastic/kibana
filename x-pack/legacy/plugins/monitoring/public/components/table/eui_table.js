@@ -193,7 +193,7 @@ export class EuiMonitoringTable extends React.PureComponent {
         <Fragment>
           <EuiSpacer size="m"/>
           <EuiButton onClick={() => setupMode.openFlyout({}, true)}>
-            Setup monitoring for new instance
+            {props.setupNewButtonLabel}
           </EuiButton>
         </Fragment>
       );

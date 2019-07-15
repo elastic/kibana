@@ -122,6 +122,9 @@ export class Listing extends PureComponent {
               setupMode={setupMode}
               uuidField="uuid"
               nameField="name"
+              setupNewButtonLabel={i18n.translate('xpack.monitoring.beats.metricbeatMigration.setupNewButtonLabel', {
+                defaultMessage: 'Setup monitoring for new Beats instance'
+              })}
               columns={this.getColumns()}
               sorting={sorting}
               pagination={pagination}
