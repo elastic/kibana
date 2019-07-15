@@ -30,7 +30,7 @@ export interface EditorActions {
 }
 
 interface Props {
-  file: FetchFileResponse;
+  file?: FetchFileResponse;
   revealPosition?: Position;
   isReferencesOpen: boolean;
   isReferencesLoading: boolean;
@@ -96,6 +96,9 @@ export class EditorComponent extends React.Component<IProps> {
 
   public componentDidUpdate(prevProps: IProps) {
     const { file } = this.props;
+    if (!file) {
+      return;
+    }
     const { uri, path, revision } = file.payload;
     const {
       resource,
