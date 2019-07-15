@@ -117,6 +117,23 @@ uiModules
     };
   });
 
+function areFilterChangesFetchRelevant(oldFilters, newFilters) {
+  if (oldFilters.length !== newFilters.length) {
+    return true;
+  }
+
+  for (let i = 0; i < oldFilters.length; i++) {
+    const oldFilter = oldFilters[i];
+    const newFilter = newFilters[i];
+
+    if (oldFilter.meta.disabled !== newFilter.meta.disabled) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
 function VisEditor(
   $scope,
   $element,
@@ -418,8 +435,11 @@ function VisEditor(
     // update the searchSource when filters update
     const filterUpdateSubscription = subscribeWithScope($scope, queryFilter.getUpdates$(), {
       next: () => {
+        const oldFilters = $scope.filters;
         $scope.filters = queryFilter.getFilters();
-        $scope.fetch();
+        if (areFilterChangesFetchRelevant(oldFilters, $scope.filters)) {
+          $scope.fetch();
+        }
       }
     });
 
