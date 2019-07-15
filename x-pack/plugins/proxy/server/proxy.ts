@@ -31,7 +31,9 @@ import {
   HttpServiceSetup,
 } from '../../../../src/core/server';
 
-import { RouteState, RoutingTable, ClusterDocClient } from './cluster_doc';
+import { RouteState, RoutingNode } from './cluster_doc';
+import { ClusterDocClient as NewClusterDocClient } from './cluster_doc';
+import { ClusterDocClient as OldClusterDocClient } from './cluster_doc_original';
 
 // When we upgrade to typescript 3.5 we can remove this
 type Omit<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>;
@@ -50,12 +52,13 @@ export interface ProxyServiceStart {
   unassignResource: (resource: string) => Promise<void>;
   proxyResource: (resource: string) => (req: KibanaRequest) => Promise<any>;
   proxyRequest: (req: KibanaRequest, resource: string) => Promise<any>;
-  getAllocation: () => Promise<RoutingTable>;
+  getAllocation: () => Promise<Observable<[string, RoutingNode]>>;
 }
 
 export const ProxyConfig = {
   schema: schema.object({
     updateInterval: schema.number(),
+    timeoutThreshold: schema.maybe(schema.number()),
     port: schema.number(),
     maxRetry: schema.number(),
     cert: schema.string(),
@@ -75,7 +78,7 @@ export type ProxyPluginType = TypeOf<typeof ProxyConfig.schema>;
 
 export class ProxyService implements Plugin<ProxyServiceSetup, ProxyServiceStart> {
   public nodeName: string;
-  private clusterDocClient: ClusterDocClient;
+  private clusterDocClient: NewClusterDocClient | OldClusterDocClient;
   private port = 0;
 
   private httpsAgent: HTTPSAgent = new HTTPSAgent({ keepAlive: true });
@@ -85,10 +88,14 @@ export class ProxyService implements Plugin<ProxyServiceSetup, ProxyServiceStart
   private readonly log: Logger;
   private readonly config$: Observable<ProxyPluginType>;
 
-  constructor(initializerContext: PluginInitializerContext) {
+  constructor(initializerContext: PluginInitializerContext, originalClient: boolean = false) {
     this.config$ = initializerContext.config.create<ProxyPluginType>();
     this.log = initializerContext.logger.get('proxy');
-    this.clusterDocClient = new ClusterDocClient(initializerContext);
+    if (originalClient) {
+      this.clusterDocClient = new OldClusterDocClient(initializerContext);
+    } else {
+      this.clusterDocClient = new NewClusterDocClient(initializerContext);
+    }
     this.nodeName = this.clusterDocClient.nodeName;
   }
 

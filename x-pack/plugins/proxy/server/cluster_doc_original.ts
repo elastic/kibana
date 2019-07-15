@@ -1,0 +1,227 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
+import Boom from 'boom';
+import { v4 } from 'uuid';
+import { Observable, Subscription, pairs } from 'rxjs';
+import { first } from 'rxjs/operators';
+
+import { PluginInitializerContext, Logger, ClusterClient } from 'src/core/server';
+
+import { ProxyPluginType } from './proxy';
+import { RouteState, RoutingNode, RoutingTable, NodeList, randomInt } from './cluster_doc';
+
+interface ClusterDoc {
+  nodes: NodeList;
+  routing_table: RoutingTable;
+}
+
+export class ClusterDocClient {
+  public nodeName: string;
+  private readonly updateFloor = 30 * 1000; // 30 seconds is the fastest you can update
+  private routingTable: RoutingTable = {};
+  private elasticsearch?: Observable<ClusterClient>;
+  private updateInterval? = this.updateFloor;
+  private timeoutThreshold = 15 * 1000;
+  private timer: null | number = null;
+  private configSubscription?: Subscription;
+  private seq_no = 0;
+  private primary_term = 0;
+
+  private readonly minUpdateShuffle = 0;
+  private readonly maxUpdateShuffle = 1000;
+  private readonly proxyIndex = '.kibana';
+  private readonly proxyDoc = 'proxy-resource-list';
+  private readonly log: Logger;
+  private readonly config$: Observable<ProxyPluginType>;
+
+  constructor(initializerContext: PluginInitializerContext) {
+    this.nodeName = v4();
+    this.config$ = initializerContext.config.create<ProxyPluginType>();
+    this.log = initializerContext.logger.get('proxy');
+  }
+
+  public async setup(esClient: Observable<ClusterClient>) {
+    this.elasticsearch = esClient;
+    this.configSubscription = this.config$.subscribe(config => {
+      this.setConfig(config);
+    });
+    const config = await this.config$.pipe(first()).toPromise();
+    this.setConfig(config);
+  }
+
+  public async start() {
+    await this.mainLoop();
+  }
+
+  public async stop() {
+    // stop http service
+    if (this.timer) {
+      clearTimeout(this.timer);
+    }
+
+    const nodes = await this.getNodeList();
+    delete nodes[this.nodeName];
+    await this.updateNodeList(nodes);
+
+    if (this.configSubscription === undefined) {
+      return;
+    }
+
+    this.configSubscription.unsubscribe();
+    this.configSubscription = undefined;
+  }
+
+  public async getRoutingTable(): Promise<Observable<[string, RoutingNode]>> {
+    return Promise.resolve(pairs(this.routingTable));
+  }
+
+  public async getNodeForResource(resource: string) {
+    return Promise.resolve(this.routingTable[resource]);
+  }
+
+  public async assignResource(resource: string, type: string, state: RouteState, node?: string) {
+    // getting the ndoe list will refresh the internal routing table to match
+    // whatever the es doc contains, so this needs to be done before we assign
+    // the new node to the routing table, or we lose the update
+    const nodes = await this.getNodeList();
+    if (this.routingTable[resource]) {
+      throw new Error(`${resource} already exists on ${this.routingTable[resource].node}`);
+    }
+    const data = {
+      type,
+      state,
+      node: node || this.nodeName,
+    };
+    this.routingTable[resource] = data;
+    const currentTime = new Date().getTime();
+    await this.updateNodeList(this.updateLocalNode(nodes, currentTime));
+  }
+
+  public async unassignResource(resource: string) {
+    const nodes = await this.getNodeList();
+    delete this.routingTable[resource];
+    const currentTime = new Date().getTime();
+    await this.updateNodeList(this.updateLocalNode(nodes, currentTime));
+  }
+
+  private setConfig(config: ProxyPluginType) {
+    let update = randomInt(this.minUpdateShuffle, this.maxUpdateShuffle);
+    if (config.updateInterval < this.updateFloor) {
+      update += this.updateFloor;
+    } else {
+      update += this.updateFloor;
+    }
+
+    let timeout = config.timeoutThreshold || this.timeoutThreshold;
+    if (timeout < update) {
+      timeout = update + randomInt(this.minUpdateShuffle, this.maxUpdateShuffle);
+    }
+    this.updateInterval = update;
+    this.timeoutThreshold = timeout;
+  }
+
+  private setTimer() {
+    if (this.timer) return;
+    this.log.debug('Set timer to updateNodeMap');
+    this.timer = setTimeout(async () => {
+      this.log.debug('Updating node map');
+      await this.mainLoop();
+    }, this.updateInterval);
+  }
+
+  private updateRoutingTable(routingTable: RoutingTable): void {
+    const currentRoutes = [...Object.keys(this.routingTable)];
+    for (const [key, node] of Object.entries(routingTable)) {
+      this.routingTable[key] = node;
+      const idx = currentRoutes.findIndex(k => k === key);
+      if (idx) currentRoutes.splice(idx, 1);
+    }
+
+    for (const key of currentRoutes.values()) {
+      delete this.routingTable[key];
+    }
+  }
+
+  private async getNodeList(): Promise<NodeList> {
+    if (!this.elasticsearch) {
+      const err = Boom.boomify(new Error('You must call setup first'), { statusCode: 412 });
+      throw err;
+    }
+    const client = await this.elasticsearch.pipe(first()).toPromise();
+    const params = {
+      id: this.proxyDoc,
+      index: this.proxyIndex,
+      _source: true,
+    };
+    const reply = await client.callAsInternalUser('get', params);
+    this.seq_no = reply._seq_no;
+    this.primary_term = reply._primary_term;
+    const data: ClusterDoc = reply._source;
+    this.updateRoutingTable(data.routing_table || {});
+    const nodes: NodeList = data.nodes || {};
+    return nodes;
+  }
+
+  private async updateNodeList(nodes: NodeList): Promise<void> {
+    if (!this.elasticsearch) {
+      const err = Boom.boomify(new Error('You must call setup first'), { statusCode: 412 });
+      throw err;
+    }
+    const doc = {
+      nodes,
+      routing_table: this.routingTable,
+    };
+    const client = await this.elasticsearch.pipe(first()).toPromise();
+    const params = {
+      id: this.proxyDoc,
+      index: this.proxyIndex,
+      if_seq_no: this.seq_no,
+      if_primary_term: this.primary_term,
+      body: doc,
+    };
+    await client.callAsInternalUser('index', params);
+  }
+
+  private updateLocalNode(nodes: NodeList, finishTime: number): NodeList {
+    nodes[this.nodeName] = {
+      lastUpdate: finishTime,
+    };
+    return nodes;
+  }
+
+  private removeNode(node: string) {
+    for (const [resource, data] of Object.entries(this.routingTable)) {
+      if (data.node === node) {
+        delete this.routingTable[resource];
+      }
+    }
+  }
+
+  private async mainLoop(): Promise<void> {
+    const nodes = await this.getNodeList();
+    const finishTime = new Date().getTime();
+
+    for (const [key, node] of Object.entries(nodes)) {
+      const timeout = finishTime - node.lastUpdate;
+      if (!node || timeout > this.timeoutThreshold) {
+        this.log.warn(`Node ${key} has not updated in ${timeout}ms and has been dropped`);
+        this.removeNode(key);
+        delete nodes[key];
+      }
+    }
+
+    try {
+      await this.updateNodeList(this.updateLocalNode(nodes, finishTime));
+    } catch (err) {
+      // on conflict, skip until next loop
+      if (err.statusCode !== 409) {
+        throw err;
+      }
+    }
+    this.setTimer();
+  }
+}

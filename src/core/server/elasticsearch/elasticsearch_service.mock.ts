@@ -34,15 +34,15 @@ const createClusterClientMock = (): jest.Mocked<PublicMethodsOf<ClusterClient>> 
   close: jest.fn(),
 });
 
-const createSetupContractMock = () => {
-  const setupContract: jest.Mocked<ElasticsearchServiceSetup> = {
+const createSetupContractMock = (clients = { adminClient: {}, dataClient: {} }) => {
+  const setupContract: ElasticsearchServiceSetup = {
     legacy: {
       config$: new BehaviorSubject({} as ElasticsearchConfig),
     },
 
-    createClient: jest.fn().mockImplementation(createClusterClientMock),
-    adminClient$: new BehaviorSubject((createClusterClientMock() as unknown) as ClusterClient),
-    dataClient$: new BehaviorSubject((createClusterClientMock() as unknown) as ClusterClient),
+    createClient: jest.fn(),
+    adminClient$: new BehaviorSubject(clients.adminClient as ClusterClient),
+    dataClient$: new BehaviorSubject(clients.dataClient as ClusterClient),
   };
   return setupContract;
 };

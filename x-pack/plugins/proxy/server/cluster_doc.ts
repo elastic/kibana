@@ -6,7 +6,7 @@
 
 import Boom from 'boom';
 import { v4 } from 'uuid';
-import { Observable } from 'rxjs';
+import { Observable, pairs } from 'rxjs';
 import { first } from 'rxjs/operators';
 
 import { PluginInitializerContext, Logger, ClusterClient } from '../../../../src/core/server';
@@ -24,11 +24,11 @@ interface LivenessNode {
   lastUpdate: number;
 }
 
-interface NodeList {
+export interface NodeList {
   [key: string]: LivenessNode;
 }
 
-function randomInt(min: number, max: number) {
+export function randomInt(min: number, max: number) {
   return Math.floor(Math.random() * (min - max) + min);
 }
 
@@ -91,11 +91,11 @@ export class ClusterDocClient {
   }
 
   public async getNodeForResource(resource: string) {
-    const table = await this.getRoutingTable();
+    const table = await this.getRoutingData();
     return table[resource];
   }
 
-  public async getRoutingTable() {
+  public async getRoutingData(): Promise<RoutingTable> {
     const client = await this.getESClient();
     const params = {
       index: this.proxyIndex,
@@ -104,11 +104,17 @@ export class ClusterDocClient {
       source: true,
     };
     const res = await client.callAsInternalUser('get', params);
-    return res._source as RoutingTable;
+    const table = res._source as RoutingTable;
+    return table;
+  }
+
+  public async getRoutingTable(): Promise<Observable<[string, RoutingNode]>> {
+    const table = await this.getRoutingData();
+    return pairs(table);
   }
 
   public async assignResource(resource: string, type: string, state: RouteState, node?: string) {
-    const table = await this.getRoutingTable();
+    const table = await this.getRoutingData();
     if (table[resource]) {
       throw new Error(`${resource} already exists on ${table[resource].node}`);
     }
