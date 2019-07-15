@@ -46,12 +46,9 @@ export function getMakiSymbolSvg(symbolId) {
 
 export function getMakiSymbolAnchor(symbolId) {
   switch (symbolId) {
-    case 'embassy-11':
-    case 'embassy-15':
-    case 'marker-11':
-    case 'marker-15':
-    case 'marker-stroked-11':
-    case 'marker-stroked-15':
+    case 'embassy':
+    case 'marker':
+    case 'marker-stroked':
       return 'bottom';
     default:
       return 'center';

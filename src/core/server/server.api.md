@@ -89,6 +89,7 @@ export interface CoreSetup {
     elasticsearch: {
         adminClient$: Observable<ClusterClient>;
         dataClient$: Observable<ClusterClient>;
+        createClient: (type: string, clientConfig?: Partial<ElasticsearchClientConfig>) => ClusterClient;
     };
     // (undocumented)
     http: {
@@ -97,6 +98,7 @@ export interface CoreSetup {
         registerOnPostAuth: HttpServiceSetup['registerOnPostAuth'];
         basePath: HttpServiceSetup['basePath'];
         createNewServer: HttpServiceSetup['createNewServer'];
+        isTlsEnabled: HttpServiceSetup['isTlsEnabled'];
     };
 }
 
@@ -108,8 +110,8 @@ export interface CoreStart {
 export interface DiscoveredPlugin {
     readonly configPath: ConfigPath;
     readonly id: PluginName;
-    readonly optionalPlugins: ReadonlyArray<PluginName>;
-    readonly requiredPlugins: ReadonlyArray<PluginName>;
+    readonly optionalPlugins: readonly PluginName[];
+    readonly requiredPlugins: readonly PluginName[];
 }
 
 // Warning: (ae-forgotten-export) The symbol "ElasticsearchConfig" needs to be exported by the entry point index.d.ts
@@ -142,8 +144,7 @@ export class ElasticsearchErrorHelpers {
 export interface ElasticsearchServiceSetup {
     // (undocumented)
     readonly adminClient$: Observable<ClusterClient>;
-    // (undocumented)
-    readonly createClient: (type: string, config: ElasticsearchClientConfig) => ClusterClient;
+    readonly createClient: (type: string, clientConfig?: Partial<ElasticsearchClientConfig>) => ClusterClient;
     // (undocumented)
     readonly dataClient$: Observable<ClusterClient>;
     // (undocumented)
@@ -154,7 +155,7 @@ export interface ElasticsearchServiceSetup {
 
 // @public
 export interface FakeRequest {
-    headers: Record<string, string>;
+    headers: Headers;
 }
 
 // @public
@@ -386,7 +387,7 @@ export type RecursiveReadonly<T> = T extends (...args: any[]) => any ? T : T ext
 // @public
 export interface RouteConfigOptions {
     authRequired?: boolean;
-    tags?: ReadonlyArray<string>;
+    tags?: readonly string[];
 }
 
 // @public

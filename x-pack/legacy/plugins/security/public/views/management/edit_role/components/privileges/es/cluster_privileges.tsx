@@ -8,19 +8,16 @@ import { EuiComboBox, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React, { Component } from 'react';
 import { Role } from '../../../../../../../common/model';
 import { isReadOnlyRole } from '../../../../../../lib/role_utils';
-// @ts-ignore
-import { getClusterPrivileges } from '../../../../../../services/role_privileges';
 
 interface Props {
   role: Role;
+  availableClusterPrivileges: string[];
   onChange: (privs: string[]) => void;
 }
 
 export class ClusterPrivileges extends Component<Props, {}> {
   public render() {
-    const clusterPrivileges = getClusterPrivileges();
-
-    return <EuiFlexGroup>{this.buildComboBox(clusterPrivileges)}</EuiFlexGroup>;
+    return <EuiFlexGroup>{this.buildComboBox(this.props.availableClusterPrivileges)}</EuiFlexGroup>;
   }
 
   public buildComboBox = (items: string[]) => {
