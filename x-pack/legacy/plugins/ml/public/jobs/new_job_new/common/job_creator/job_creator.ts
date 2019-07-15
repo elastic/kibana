@@ -187,7 +187,7 @@ export class JobCreator {
     return this._useDedicatedIndex;
   }
 
-  public set modelMemoryLimit(mml: number | string | null) {
+  public set modelMemoryLimit(mml: string | null) {
     if (mml !== null) {
       this._job_config.analysis_limits = {
         model_memory_limit: mml,
@@ -197,8 +197,11 @@ export class JobCreator {
     }
   }
 
-  public get modelMemoryLimit(): number | string | null {
-    if (this._job_config.analysis_limits) {
+  public get modelMemoryLimit(): string | null {
+    if (
+      this._job_config.analysis_limits &&
+      this._job_config.analysis_limits.model_memory_limit !== undefined
+    ) {
       return this._job_config.analysis_limits.model_memory_limit;
     } else {
       return null;

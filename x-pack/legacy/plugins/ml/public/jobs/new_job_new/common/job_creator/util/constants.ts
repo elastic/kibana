@@ -15,3 +15,6 @@ export enum CREATED_BY_LABEL {
   MULTI_METRIC = 'multi-metric-wizard',
   POPULATION = 'population-wizard',
 }
+
+export const DEFAULT_MODEL_MEMORY_LIMIT = '10MB';
+export const DEFAULT_BUCKET_SPAN = '15m';

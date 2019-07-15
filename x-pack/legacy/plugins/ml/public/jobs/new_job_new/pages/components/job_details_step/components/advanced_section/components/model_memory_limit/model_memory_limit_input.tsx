@@ -6,21 +6,27 @@
 
 import React, { FC, useState, useContext, useEffect } from 'react';
 import { EuiFieldText } from '@elastic/eui';
-import { JobCreatorContext } from '../../../job_creator_context';
+import { JobCreatorContext } from '../../../../../job_creator_context';
 import { Description } from './description';
 
-export const JobIdInput: FC = () => {
+export const ModelMemoryLimitInput: FC = () => {
   const { jobCreator, jobCreatorUpdate } = useContext(JobCreatorContext);
-  const [jobId, setJobId] = useState(jobCreator.jobId);
+  const [modelMemoryLimit, setModelMemoryLimit] = useState(
+    jobCreator.modelMemoryLimit === null ? '' : jobCreator.modelMemoryLimit
+  );
 
   useEffect(() => {
-    jobCreator.jobId = jobId;
+    jobCreator.modelMemoryLimit = modelMemoryLimit === '' ? null : modelMemoryLimit;
     jobCreatorUpdate();
-  }, [jobId]);
+  }, [modelMemoryLimit]);
 
   return (
     <Description>
-      <EuiFieldText placeholder="Job Id" value={jobId} onChange={e => setJobId(e.target.value)} />
+      <EuiFieldText
+        // placeholder="Job Id"
+        value={modelMemoryLimit}
+        onChange={e => setModelMemoryLimit(e.target.value)}
+      />
     </Description>
   );
 };

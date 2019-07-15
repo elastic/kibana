@@ -46,6 +46,7 @@ declare interface Ml {
   getIndices(): Promise<EsIndex[]>;
 
   getTimeFieldRange(obj: object): Promise<any>;
+  calculateModelMemoryLimit(obj: object): Promise<{ modelMemoryLimit: string }>;
 
   jobs: {
     jobsSummary(jobIds: string[]): Promise<object>;

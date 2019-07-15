@@ -4,16 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FC } from 'react';
+import React, { FC, useState, useContext, useEffect } from 'react';
 import { EuiTextArea } from '@elastic/eui';
+import { JobCreatorContext } from '../../../job_creator_context';
 import { Description } from './description';
 
-interface Props {
-  jobDescription: string;
-  setJobDescription: (id: string) => void;
-}
+export const JobDescriptionInput: FC = () => {
+  const { jobCreator, jobCreatorUpdate } = useContext(JobCreatorContext);
+  const [jobDescription, setJobDescription] = useState(jobCreator.description);
 
-export const JobDescriptionInput: FC<Props> = ({ jobDescription, setJobDescription }) => {
+  useEffect(() => {
+    jobCreator.description = jobDescription;
+    jobCreatorUpdate();
+  }, [jobDescription]);
+
   return (
     <Description>
       <EuiTextArea

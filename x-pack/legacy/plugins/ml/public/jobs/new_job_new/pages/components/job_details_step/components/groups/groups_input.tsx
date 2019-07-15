@@ -4,33 +4,35 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FC, useContext } from 'react';
+import React, { FC, useState, useContext, useEffect } from 'react';
 import { EuiComboBox, EuiComboBoxOptionProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { JobCreatorContext } from '../../../job_creator_context';
 import { tabColor } from '../../../../../../../../common/util/group_color_utils';
 import { Description } from './description';
 
-interface Props {
-  selectedGroupNames: string[];
-  setSelectedGroupNames: (groupNames: string[]) => void;
-}
-
-export const GroupsInput: FC<Props> = ({ selectedGroupNames, setSelectedGroupNames }) => {
+export const GroupsInput: FC = () => {
+  const { jobCreator, jobCreatorUpdate } = useContext(JobCreatorContext);
   const { existingJobsAndGroups } = useContext(JobCreatorContext);
+  const [selectedGroups, setSelectedGroups] = useState(jobCreator.groups);
 
-  const groups: EuiComboBoxOptionProps[] = existingJobsAndGroups.groups.map((g: string) => ({
+  useEffect(() => {
+    jobCreator.groups = selectedGroups;
+    jobCreatorUpdate();
+  }, [selectedGroups.join()]);
+
+  const options: EuiComboBoxOptionProps[] = existingJobsAndGroups.groups.map((g: string) => ({
     label: g,
     color: tabColor(g),
   }));
 
-  const selectedGroups: EuiComboBoxOptionProps[] = selectedGroupNames.map((g: string) => ({
+  const selectedOptions: EuiComboBoxOptionProps[] = selectedGroups.map((g: string) => ({
     label: g,
     color: tabColor(g),
   }));
 
-  function setSelectedGroups(options: EuiComboBoxOptionProps[]) {
-    setSelectedGroupNames(options.map(g => g.label));
+  function onChange(optionsIn: EuiComboBoxOptionProps[]) {
+    setSelectedGroups(optionsIn.map(g => g.label));
   }
 
   function onCreateGroup(input: string, flattenedOptions: EuiComboBoxOptionProps[]) {
@@ -50,10 +52,10 @@ export const GroupsInput: FC<Props> = ({ selectedGroupNames, setSelectedGroupNam
         option => option.label.trim().toLowerCase() === normalizedSearchValue
       ) === -1
     ) {
-      groups.push(newGroup);
+      options.push(newGroup);
     }
 
-    setSelectedGroupNames([...selectedGroups, newGroup].map(g => g.label));
+    setSelectedGroups([...selectedOptions, newGroup].map(g => g.label));
   }
 
   return (
@@ -62,9 +64,9 @@ export const GroupsInput: FC<Props> = ({ selectedGroupNames, setSelectedGroupNam
         placeholder={i18n.translate('xpack.ml.newJob.wizard.jobGroupSelectPlaceholder', {
           defaultMessage: 'Select or create groups',
         })}
-        options={groups}
-        selectedOptions={selectedGroups}
-        onChange={setSelectedGroups}
+        options={options}
+        selectedOptions={selectedOptions}
+        onChange={onChange}
         onCreateOption={onCreateGroup}
         isClearable={true}
         // isInvalid={groupsValidationError !== ''}

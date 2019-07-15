@@ -69,6 +69,8 @@ export const Wizard: FC<Props> = ({
     existingJobsAndGroups,
   };
 
+  const [advancedExpanded, setAdvancedExpanded] = useState(false);
+
   const [currentStep, setCurrentStep] = useState(WIZARD_STEPS.TIME_RANGE);
 
   const stepsConfig = [
@@ -105,6 +107,8 @@ export const Wizard: FC<Props> = ({
         <JobDetailsStep
           isCurrentStep={currentStep === WIZARD_STEPS.JOB_DETAILS}
           setCurrentStep={setCurrentStep}
+          advancedExpanded={advancedExpanded}
+          setAdvancedExpanded={setAdvancedExpanded}
         />
       ),
       status: currentStep >= WIZARD_STEPS.JOB_DETAILS ? undefined : ('incomplete' as EuiStepStatus),

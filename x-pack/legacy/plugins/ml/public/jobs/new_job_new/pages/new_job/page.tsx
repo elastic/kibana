@@ -8,13 +8,22 @@ import React, { FC, useContext, useEffect, Fragment } from 'react';
 
 import { EuiPage, EuiPageBody, EuiPageContentBody, EuiSpacer } from '@elastic/eui';
 import { Wizard } from './wizard';
-import { jobCreatorFactory } from '../../common/job_creator';
-import { JOB_TYPE } from '../../common/job_creator/util/constants';
+import {
+  jobCreatorFactory,
+  isSingleMetricJobCreator,
+  isPopulationJobCreator,
+} from '../../common/job_creator';
+import {
+  JOB_TYPE,
+  DEFAULT_MODEL_MEMORY_LIMIT,
+  DEFAULT_BUCKET_SPAN,
+} from '../../common/job_creator/util/constants';
 import { ChartLoader } from '../../common/chart_loader';
 import { ResultsLoader } from '../../common/results_loader';
 import { KibanaContext, isKibanaContext } from '../../../../data_frame/common/kibana_context';
 import { getTimeFilterRange } from '../../../../components/full_time_range_selector';
 import { MlTimeBuckets } from '../../../../util/ml_time_buckets';
+import { newJobDefaults } from '../../../new_job/utils/new_job_defaults';
 
 const PAGE_WIDTH = 1200; // document.querySelector('.single-metric-job-container').width();
 const BAR_TARGET = PAGE_WIDTH > 2000 ? 1000 : PAGE_WIDTH / 2;
@@ -31,16 +40,28 @@ export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
     return null;
   }
 
+  const jobDefaults = newJobDefaults();
+
   const jobCreator = jobCreatorFactory(jobType)(
     kibanaContext.currentIndexPattern,
     kibanaContext.currentSavedSearch,
     kibanaContext.combinedQuery
   );
-  jobCreator.bucketSpan = '15m';
+
   const { from, to } = getTimeFilterRange();
   jobCreator.setTimeRange(from, to);
 
-  if (jobType === JOB_TYPE.SINGLE_METRIC) {
+  jobCreator.bucketSpan = DEFAULT_BUCKET_SPAN;
+
+  if (isPopulationJobCreator(jobCreator) === true) {
+    // for population jobs use the default mml (1GB)
+    jobCreator.modelMemoryLimit = jobDefaults.anomaly_detectors.model_memory_limit;
+  } else {
+    // for all other jobs, use 10MB
+    jobCreator.modelMemoryLimit = DEFAULT_MODEL_MEMORY_LIMIT;
+  }
+
+  if (isSingleMetricJobCreator(jobCreator) === true) {
     jobCreator.modelPlot = true;
   }
 

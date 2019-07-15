@@ -94,6 +94,7 @@ export const MultiMetricDetectors: FC<Props> = ({ isActive, setIsValid }) => {
       const field = pair.field.id === EVENT_RATE_FIELD_ID ? null : pair.field;
       jobCreator.addDetector(pair.agg, field);
     });
+    jobCreator.calculateModelMemoryLimit();
     jobCreatorUpdate();
     loadCharts();
     setIsValid(aggFieldPairList.length > 0);
@@ -121,6 +122,7 @@ export const MultiMetricDetectors: FC<Props> = ({ isActive, setIsValid }) => {
     } else {
       setFieldValues([]);
     }
+    jobCreator.calculateModelMemoryLimit();
   }, [splitField]);
 
   // watch for changes in the split field values

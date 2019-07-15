@@ -49,7 +49,7 @@ export interface Detector {
 }
 export interface AnalysisLimits {
   categorization_examples_limit?: number;
-  model_memory_limit: number | string;
+  model_memory_limit: string;
 }
 
 export interface DataDescription {
