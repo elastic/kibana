@@ -19,6 +19,7 @@ import {
   SymbolWithMembers,
 } from '../actions';
 import { languageServerInitializing } from '../actions/language_server';
+import { routePathChange, repoChange, revisionChange, filePathChange } from '../actions/route';
 
 export interface SymbolState {
   symbols: { [key: string]: SymbolInformation[] };
@@ -37,6 +38,17 @@ const initialState: SymbolState = {
   closedPaths: [],
   languageServerInitializing: false,
 };
+
+const clearState = (state: SymbolState) =>
+  produce<SymbolState>(state, draft => {
+    draft.symbols = initialState.symbols;
+    draft.loading = initialState.loading;
+    draft.structureTree = initialState.structureTree;
+    draft.closedPaths = initialState.closedPaths;
+    draft.languageServerInitializing = initialState.languageServerInitializing;
+    draft.error = undefined;
+    draft.lastRequestPath = undefined;
+  });
 
 type SymbolPayload = string & SymbolsPayload & Error;
 
@@ -85,6 +97,10 @@ export const symbol = handleActions<SymbolState, SymbolPayload>(
       produce<SymbolState>(state, draft => {
         draft.languageServerInitializing = true;
       }),
+    [String(routePathChange)]: clearState,
+    [String(repoChange)]: clearState,
+    [String(revisionChange)]: clearState,
+    [String(filePathChange)]: clearState,
   },
   initialState
 );

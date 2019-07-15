@@ -17,6 +17,7 @@ exports[`FilterListUsagePopover opens the popover onButtonClick 1`] = `
       />
     }
     closePopover={[Function]}
+    display="inlineBlock"
     hasArrow={true}
     id="filter_list_description_popover"
     isOpen={true}
@@ -76,6 +77,7 @@ exports[`FilterListUsagePopover renders the popover with a description 1`] = `
       />
     }
     closePopover={[Function]}
+    display="inlineBlock"
     hasArrow={true}
     id="filter_list_description_popover"
     isOpen={false}
@@ -135,6 +137,7 @@ exports[`FilterListUsagePopover renders the popover with no description 1`] = `
       />
     }
     closePopover={[Function]}
+    display="inlineBlock"
     hasArrow={true}
     id="filter_list_description_popover"
     isOpen={false}

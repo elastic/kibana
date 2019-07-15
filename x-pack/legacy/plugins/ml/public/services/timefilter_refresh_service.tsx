@@ -4,9 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { dateFormatAliases } from '@elastic/eui/lib/services/format';
-import moment from 'moment';
+import { Subject } from 'rxjs';
 
-export function formatDate(epochMs: number): string {
-  return moment(Number(epochMs)).format(dateFormatAliases.longDateTime);
-}
+export const mlTimefilterRefresh$ = new Subject();

@@ -75,12 +75,21 @@ describe('config validation', () => {
       password: 'supersecret',
       from: 'bob@example.com',
     };
-    expect(validateActionTypeConfig(actionType, config)).toEqual(config);
+    expect(validateActionTypeConfig(actionType, config)).toEqual({
+      ...config,
+      host: null,
+      port: null,
+      secure: null,
+    });
 
     delete config.service;
     config.host = 'elastic.co';
     config.port = 8080;
-    expect(validateActionTypeConfig(actionType, config)).toEqual(config);
+    expect(validateActionTypeConfig(actionType, config)).toEqual({
+      ...config,
+      service: null,
+      secure: null,
+    });
   });
 
   test('config validation fails when config is not valid', () => {
@@ -160,7 +169,7 @@ Object {
 describe('execute()', () => {
   test('ensure parameters are as expected', async () => {
     const config: ActionTypeConfigType = {
-      service: 'a service',
+      service: '__json',
       host: 'a host',
       port: 42,
       secure: true,
@@ -179,9 +188,7 @@ describe('execute()', () => {
     const executorOptions: ActionTypeExecutorOptions = { config, params, services };
     sendEmailMock.mockReset();
     await actionType.executor(executorOptions);
-    expect(sendEmailMock.mock.calls).toMatchInlineSnapshot(`
-Array [
-  Array [
+    expect(sendEmailMock.mock.calls[0][1]).toMatchInlineSnapshot(`
     Object {
       "content": Object {
         "message": "a message to you",
@@ -200,16 +207,11 @@ Array [
         ],
       },
       "transport": Object {
-        "host": "a host",
         "password": "supersecret",
-        "port": 42,
-        "secure": true,
-        "service": "a service",
+        "service": "__json",
         "user": "bob",
       },
-    },
-  ],
-]
+    }
 `);
   });
 });

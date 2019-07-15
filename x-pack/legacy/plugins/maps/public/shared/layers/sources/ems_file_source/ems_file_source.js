@@ -35,12 +35,12 @@ export class EMSFileSource extends AbstractVectorSource {
   }
 
   static renderEditor({ onPreviewSource, inspectorAdapters }) {
-    const onChange = (selectedId) => {
-      const emsFileSourceDescriptor = EMSFileSource.createDescriptor({ id: selectedId });
-      const emsFileSource = new EMSFileSource(emsFileSourceDescriptor, inspectorAdapters);
-      onPreviewSource(emsFileSource);
+    const onSourceConfigChange = (sourceConfig) => {
+      const sourceDescriptor = EMSFileSource.createDescriptor(sourceConfig);
+      const source = new EMSFileSource(sourceDescriptor, inspectorAdapters);
+      onPreviewSource(source);
     };
-    return <EMSFileCreateSourceEditor onChange={onChange}/>;
+    return <EMSFileCreateSourceEditor onSourceConfigChange={onSourceConfigChange}/>;
   }
 
   constructor(descriptor, inspectorAdapters) {
