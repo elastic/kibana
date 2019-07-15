@@ -17,14 +17,27 @@
  * under the License.
  */
 
-import { resolve } from 'path';
-import { LegacyPluginApi, LegacyPluginSpec, ArrayOrItem } from 'src/legacy/plugin_discovery/types';
+import { EmbeddablePublicPlugin } from '../plugin';
 
-// eslint-disable-next-line import/no-default-export
-export default function(kibana: LegacyPluginApi): ArrayOrItem<LegacyPluginSpec> {
-  return new kibana.Plugin({
-    uiExports: {
-      styleSheetPaths: resolve(__dirname, 'public/css/index.scss'),
-    },
-  });
+export interface TestPluginReturn {
+  plugin: EmbeddablePublicPlugin;
+  core: any;
+  setup: ReturnType<EmbeddablePublicPlugin['setup']>;
+  doStart: () => ReturnType<EmbeddablePublicPlugin['start']>;
 }
+
+export const testPlugin = (): TestPluginReturn => {
+  const plugin = new EmbeddablePublicPlugin({});
+  const core = {} as any;
+  const setup = plugin.setup(core);
+
+  return {
+    plugin,
+    core,
+    setup,
+    doStart: () => {
+      const start = plugin.start(core);
+      return start;
+    },
+  };
+};

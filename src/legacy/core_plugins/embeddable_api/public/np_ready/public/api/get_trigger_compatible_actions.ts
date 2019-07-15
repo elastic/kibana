@@ -17,14 +17,16 @@
  * under the License.
  */
 
-import { resolve } from 'path';
-import { LegacyPluginApi, LegacyPluginSpec, ArrayOrItem } from 'src/legacy/plugin_discovery/types';
+import { EmbeddableApiPure } from './types';
+import { Action } from '../lib';
 
-// eslint-disable-next-line import/no-default-export
-export default function(kibana: LegacyPluginApi): ArrayOrItem<LegacyPluginSpec> {
-  return new kibana.Plugin({
-    uiExports: {
-      styleSheetPaths: resolve(__dirname, 'public/css/index.scss'),
-    },
-  });
-}
+export const getTriggerCompatibleActions: EmbeddableApiPure['getTriggerCompatibleActions'] = ({
+  api,
+}) => async (triggerId, context) => {
+  const actions = api.getTriggerActions!(triggerId);
+  const isCompatibles = await Promise.all(actions.map(action => action.isCompatible(context)));
+  return actions.reduce<Action[]>(
+    (acc, action, i) => (isCompatibles[i] ? [...acc, action] : acc),
+    []
+  );
+};

@@ -17,14 +17,13 @@
  * under the License.
  */
 
-import { resolve } from 'path';
-import { LegacyPluginApi, LegacyPluginSpec, ArrayOrItem } from 'src/legacy/plugin_discovery/types';
+import { EmbeddableDependencies } from '../types';
 
-// eslint-disable-next-line import/no-default-export
-export default function(kibana: LegacyPluginApi): ArrayOrItem<LegacyPluginSpec> {
-  return new kibana.Plugin({
-    uiExports: {
-      styleSheetPaths: resolve(__dirname, 'public/css/index.scss'),
-    },
-  });
-}
+export const createDeps = (): EmbeddableDependencies => {
+  const deps: EmbeddableDependencies = {
+    triggers: new Map<any, any>(),
+    actions: new Map<any, any>(),
+    embeddableFactories: new Map<any, any>(),
+  };
+  return deps;
+};

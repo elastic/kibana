@@ -17,14 +17,10 @@
  * under the License.
  */
 
-import { resolve } from 'path';
-import { LegacyPluginApi, LegacyPluginSpec, ArrayOrItem } from 'src/legacy/plugin_discovery/types';
+import { EmbeddableApiPure } from './types';
 
-// eslint-disable-next-line import/no-default-export
-export default function(kibana: LegacyPluginApi): ArrayOrItem<LegacyPluginSpec> {
-  return new kibana.Plugin({
-    uiExports: {
-      styleSheetPaths: resolve(__dirname, 'public/css/index.scss'),
-    },
-  });
-}
+export const getEmbeddableFactories: EmbeddableApiPure['getEmbeddableFactories'] = ({
+  embeddableFactories,
+}) => () => {
+  return embeddableFactories.values();
+};

@@ -17,14 +17,14 @@
  * under the License.
  */
 
-import { resolve } from 'path';
-import { LegacyPluginApi, LegacyPluginSpec, ArrayOrItem } from 'src/legacy/plugin_discovery/types';
+import { EmbeddableApiPure } from './types';
 
-// eslint-disable-next-line import/no-default-export
-export default function(kibana: LegacyPluginApi): ArrayOrItem<LegacyPluginSpec> {
-  return new kibana.Plugin({
-    uiExports: {
-      styleSheetPaths: resolve(__dirname, 'public/css/index.scss'),
-    },
-  });
-}
+export const getTrigger: EmbeddableApiPure['getTrigger'] = ({ triggers }) => id => {
+  const trigger = triggers.get(id);
+
+  if (!trigger) {
+    throw new Error(`Trigger [triggerId = ${id}] does not exist.`);
+  }
+
+  return trigger;
+};

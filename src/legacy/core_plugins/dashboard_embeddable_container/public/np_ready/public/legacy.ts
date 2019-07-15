@@ -17,14 +17,19 @@
  * under the License.
  */
 
-import { resolve } from 'path';
-import { LegacyPluginApi, LegacyPluginSpec, ArrayOrItem } from 'src/legacy/plugin_discovery/types';
+import { npSetup, npStart } from 'ui/new_platform';
+import { plugin } from '.';
+import {
+  setup as embeddableSetup,
+  start as embeddableStart,
+} from '../../../../embeddable_api/public/np_ready/public/legacy';
 
-// eslint-disable-next-line import/no-default-export
-export default function(kibana: LegacyPluginApi): ArrayOrItem<LegacyPluginSpec> {
-  return new kibana.Plugin({
-    uiExports: {
-      styleSheetPaths: resolve(__dirname, 'public/css/index.scss'),
-    },
-  });
-}
+const pluginInstance = plugin({} as any);
+
+export const setup = pluginInstance.setup(npSetup.core, {
+  embeddable: embeddableSetup,
+});
+
+export const start = pluginInstance.start(npStart.core, {
+  embeddable: embeddableStart,
+});

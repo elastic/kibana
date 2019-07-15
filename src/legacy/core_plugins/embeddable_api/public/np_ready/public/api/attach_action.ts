@@ -17,14 +17,21 @@
  * under the License.
  */
 
-import { resolve } from 'path';
-import { LegacyPluginApi, LegacyPluginSpec, ArrayOrItem } from 'src/legacy/plugin_discovery/types';
+import { EmbeddableApiPure } from './types';
 
-// eslint-disable-next-line import/no-default-export
-export default function(kibana: LegacyPluginApi): ArrayOrItem<LegacyPluginSpec> {
-  return new kibana.Plugin({
-    uiExports: {
-      styleSheetPaths: resolve(__dirname, 'public/css/index.scss'),
-    },
-  });
-}
+export const attachAction: EmbeddableApiPure['attachAction'] = ({ triggers }) => (
+  triggerId,
+  actionId
+) => {
+  const trigger = triggers.get(triggerId);
+
+  if (!trigger) {
+    throw new Error(
+      `No trigger [triggerId = ${triggerId}] exists, for detaching action [actionId = ${actionId}].`
+    );
+  }
+
+  if (!trigger.actionIds.find(id => id === actionId)) {
+    trigger.actionIds.push(actionId);
+  }
+};

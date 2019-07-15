@@ -17,14 +17,21 @@
  * under the License.
  */
 
-import { resolve } from 'path';
-import { LegacyPluginApi, LegacyPluginSpec, ArrayOrItem } from 'src/legacy/plugin_discovery/types';
+export const expectError = (fn: (...args: any) => any) => {
+  try {
+    fn();
+    throw new Error('Expected an error throw.');
+  } catch (error) {
+    return error;
+  }
+};
 
-// eslint-disable-next-line import/no-default-export
-export default function(kibana: LegacyPluginApi): ArrayOrItem<LegacyPluginSpec> {
-  return new kibana.Plugin({
-    uiExports: {
-      styleSheetPaths: resolve(__dirname, 'public/css/index.scss'),
-    },
-  });
-}
+export const of = async <T, P extends Promise<T>>(
+  promise: P
+): Promise<[T | undefined, Error | any]> => {
+  try {
+    return [await promise, undefined];
+  } catch (error) {
+    return [, error];
+  }
+};
