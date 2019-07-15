@@ -19,7 +19,7 @@
 import { i18n } from '@kbn/i18n';
 import semver from 'semver';
 import { GridData } from 'src/legacy/core_plugins/dashboard_embeddable_container/public/embeddable/types';
-import { DEFAULT_PANEL_WIDTH, DEFAULT_PANEL_HEIGHT } from '../dashboard_constants';
+
 import {
   RawSavedDashboardPanelTo60,
   RawSavedDashboardPanel630,
@@ -112,7 +112,17 @@ function migratePre61PanelToLatest(
     ? PANEL_HEIGHT_SCALE_FACTOR_WITH_MARGINS
     : PANEL_HEIGHT_SCALE_FACTOR;
 
+  // These are snapshotted here instead of imported form dashboard_embeddable_container because
+  // this function is called from both client and server side, and having an import from a public
+  // folder will cause errors for the server side version.  Also, this is only run for the point in time
+  // from panels created in < 7.3 so maybe using a snapshot of the default values when this migration was
+  // written is more correct anyway.
+  const DASHBOARD_GRID_COLUMN_COUNT = 48;
+  const DEFAULT_PANEL_WIDTH = DASHBOARD_GRID_COLUMN_COUNT / 2;
+  const DEFAULT_PANEL_HEIGHT = 15;
+
   const { columns, sort, row, col, size_x: sizeX, size_y: sizeY, ...rest } = panel;
+
   return {
     ...rest,
     version,
