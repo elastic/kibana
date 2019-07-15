@@ -19,7 +19,15 @@
 
 import { Request, ResponseToolkit } from 'hapi';
 import Joi from 'joi';
+import supertest from 'supertest';
+
+import { logger } from '../logging/__mocks__';
+
+import { ByteSizeValue } from '@kbn/config-schema';
+import { HttpConfig } from './http_config';
+import { HttpServer } from './http_server';
 import { defaultValidationErrorHandler, HapiValidationError } from './http_tools';
+import { Router } from './router';
 
 const emptyOutput = {
   statusCode: 400,
@@ -55,5 +63,39 @@ describe('defaultValidationErrorHandler', () => {
       // Verify the empty string gets corrected to 'value'
       expect(err.output.payload.validation.keys).toEqual(['0.type', 'value']);
     }
+  });
+});
+
+describe('timeouts', () => {
+  const server = new HttpServer(logger.get());
+
+  test('returns 408 on timeout error', async () => {
+    const router = new Router('');
+    router.get({ path: '/a', validate: false }, async (req, res) => {
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      return res.ok({});
+    });
+    router.get({ path: '/b', validate: false }, async (req, res) => res.ok({}));
+    server.registerRouter(router);
+
+    const config = {
+      socketTimeout: 1000,
+      host: '127.0.0.1',
+      maxPayload: new ByteSizeValue(1024),
+      ssl: {},
+    } as HttpConfig;
+
+    const { server: innerServer } = await server.start(config);
+    await supertest(innerServer.listener)
+      .get('/a')
+      .expect(408);
+    await supertest(innerServer.listener)
+      .get('/b')
+      .expect(200);
+  });
+
+  afterAll(async () => {
+    await server.stop();
+    logger.mockClear();
   });
 });
