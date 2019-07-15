@@ -1,151 +1,86 @@
 [[TSVB]]
 == Visualizing your data with TSVB
 
-TSVB is a time series data visualizer that allows you to use the full power of 
-Elasticsearch aggregation framework. With TSVB, you can combine an infinite 
+TSVB is a time series data visualizer that allows you to use the full power of the 
+Elasticsearch aggregation framework. With TSVB, combine an infinite 
 number of aggregations and pipeline aggregations to display complex data in a 
 meaningful way.
 
 NOTE: In Elasticsearch version 7.3.0 and later, the time series data visualizer is now referred to simply as TSVB instead of Time Series Visual Builder.
 
-TSVB comes with 6 visualizations:
+TSVB comes with 6 types of visualizations:
 
 * *Time Series* — A histogram visualization that supports area, line, bar, and steps along with multiple y-axis.
-
-* *Metric* — Displays the latest number in a series.
-
-* *Top N* — A horizontal bar chart where the y-axis is based on a series of metrics, and the x-axis is the latest value in the series.
-
-* *Gauge* — A single value gauge visualization based on the latest value in a series.
-
-* *Markdown* — To customize the Markdown with data based on a set of series, enter Markdown text and embed Mustache template syntax.
-
-* *Table* — Display data from multiple time series by defining the field group to show in the rows, and the columns of data to display.
-
-[float]
-[[time-series-visualization]]
-=== Create a Time Series visualization
-
-Display your data over time with area, line, and bar charts.
-
-. Select *Time Series*.
-
-. To specify the series labels and customize the colors, points, line thickness, and fill opacity, select *Data*.
-+
-For series that are grouped by a term, you can specify a mustache variable of `{{key}}` to substitute the term.
-
-.. Select *Metrics*, then specify the options.
-+
-Each series supports multiple metrics (aggregations); the last metric (aggregation)
-is the value that will be displayed for the series, this is indicated with the "eye"
-icon to the left of the metric. Metrics can be composed using pipeline aggregations.
-A common use case is to create a metric with a "max" aggregation then create a "derivative"
-metric and choose the previous "max" metric as the source; this will create a rate.
-
-.. Select *Options*, then specify the series options for your Time Series visualization.
-
-.. To specify how the series should be grouped or split, select an option from the *Group by* drop-down list.
-
-. To configure the panel, select *Panel options*.
-
-. To add annotations that are loaded from a separate index based on a query, select *Annotations*.
-
 image:images/tsvb-screenshot.png["Time series visualization"]
 
-[float]
-[[metric-visualization]]
-=== Create a Metric visualization
-
-With the Metric visualization, you can use a primary and secondary metric, and customize the labels and backgrounds based on a set of rules.
-
-. Select *Metric*.
-
-. To specify the series labels and colors that you want to represent your data, select *Data*.
-+
-For series that are grouped by a term, you can specify a mustache variable of `{{key}}` to substitute the term.
-
-.. Select *Metrics*, then specify the options.
-+
-Each series supports multiple metrics (aggregations); the last metric (aggregation)
-is the value that will be displayed for the series, this is indicated with the "eye"
-icon to the left of the metric. Metrics can be composed using pipeline aggregations.
-A common use case is to create a metric with a "max" aggregation then create a "derivative"
-metric and choose the previous "max" metric as the source; this will create a rate.
-
-.. Select *Options*, then specify the series options for your Metric visualization.
-
-. To configure the panel, select *Panel options*.
-
+* *Metric* — Displays the latest number in a data series.
 image:images/tsvb-metric.png["Metric visualization"]
 
-[float]
-[[top-n-visualization]]
-=== Create a Top N visualization
-
-The values are displayed in descending order, and you can customize the color of the bars based on a set of rules.
-
-. Select *Top N*.
-
-. To specify the series labels and colors that you want to represent your data, select *Data*.
-+
-For series that are grouped by a term, you can specify a mustache variable of `{{key}}` to substitute the term.
-
-.. Select *Metrics*, then specify the options.
-+
-Each series supports multiple metrics (aggregations); the last metric (aggregation)
-is the value that will be displayed for the series, this is indicated with the "eye"
-icon to the left of the metric. Metrics can be composed using pipeline aggregations.
-A common use case is to create a metric with a "max" aggregation then create a "derivative"
-metric and choose the previous "max" metric as the source; this will create a rate.
-
-.. Select *Options*, then specify the series options for your Metric visualization.
-
-. To configure the panel, select *Panel options*.
-
+* *Top N* — A horizontal bar chart where the y-axis is based on a series of metrics, and the x-axis is the latest value in the series.
 image:images/tsvb-top-n.png["Top N visualization"]
 
+* *Gauge* — A single value gauge visualization based on the latest value in a series.
+image:images/tsvb-gauge.png["Gauge visualization"]
+
+* *Markdown* — To customize the Markdown with data based on a set of series, enter Markdown text and embed Mustache template syntax.
+image:images/tsvb-markdown.png["Markdown visualization"]
+
+* *Table* — Display data from multiple time series by defining the field group to show in the rows, and the columns of data to display.
+image:images/tsvb-table.png["Table visualization"]
+
 [float]
-[[gauge-visualization]]
-=== Create a Gauge visualization
+[[tsvb-data-series-options]]
+=== Add the data series
 
-The face of the gauge displays as a half-circle or full-circle. You can customize the thicknesses of the inner and outer lines to achieve a desired design aesthetic, and customize the gauge and text color based on a set of rules.
- 
-. Select *Gauge*.
+Add the data series that you want to display in the TSVB visualizations. 
 
-. To specify the series labels and colors that you want to represent your data, select *Data*.
+. Select a visualization type.
+
+. Select *Data*.
++ If you are using the *Table* visualization, select *Columns*.
+
+. In the *Label* field, enter a name for the data series.
 +
 For series that are grouped by a term, you can specify a mustache variable of `{{key}}` to substitute the term.
 
-.. Select *Metrics*, then specify the options.
+. To add another data series, make sure that *Time Series*, *Metric*, or *Top N* is selected, then click *+*.
+
+. Select *Metrics*, then specify the options from the drop down lists.
 +
-Each series supports multiple metrics (aggregations); the last metric (aggregation)
-is the value that will be displayed for the series, this is indicated with the "eye"
-icon to the left of the metric. Metrics can be composed using pipeline aggregations.
-A common use case is to create a metric with a "max" aggregation then create a "derivative"
-metric and choose the previous "max" metric as the source; this will create a rate.
+To add another metric, click *+*. The last metric value is displayed, which is indicated by the eye icon. 
 
-.. Select *Options*, then specify the series options for your Metric visualization.
+. To specify how to group or split the data, select an option from the *Group by* drop down list.
 
-. To configure the panel, select *Panel options*.
-
-image:images/tsvb-gauge.png["Gauge visualization"]
+. To specify the format and display options, select *Options*.
 
 [float]
-[[markdown-visualization]]
-==== Create a Markdown visualization
+[[tsvb-data-metrics-options]]
+=== Specify the index pattern and panel style options
 
-Customize the Markdown visualization with data based on a set of series.
+Short description.
+
+. Select *Panel options*.
+
+. Under *Data*, specify the Elasticsearch index pattern data that you want to display. 
+
+. Under *Style*, specify the customization options for the visualization.
+
+[float]
+[[tsvb-add-annotations]]
+=== Add annotations
+
+For the *Time Series* visualization, add annotations from another index.
+
+. Select *Annotations*.
+
+. Click *Add data source*, then specify the data source options.
+
+[float]
+[[tsvb-enter-markdown]]
+=== Enter Markdown text
+
+To customize the Markdown with data, embed Handlebar (mustache) syntax.
 
 . Select *Markdown*.
 
-image:images/tsvb-markdown.png["Markdown visualization"]
-
-[float]
-[[table-visualization]]
-=== Create a Table visualization
-
-Display data from multiple time series.
-
-. Select *Table*.
-
-image:images/tsvb-table.png["Table visualization"]
+. In the *Markdown* field, enter enter your Markdown text, then press Enter.
