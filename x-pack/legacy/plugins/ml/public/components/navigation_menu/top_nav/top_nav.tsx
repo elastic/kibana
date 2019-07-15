@@ -16,12 +16,12 @@ interface Props {
   timefilter: Timefilter;
 }
 
-interface Time {
+interface Duration {
   start: string;
   end: string;
 }
 
-function getRecentlyUsedRanges(timeHistory: TimeHistory): Time[] {
+function getRecentlyUsedRanges(timeHistory: TimeHistory): Duration[] {
   return timeHistory.get().map(({ from, to }: TimeRange) => {
     return {
       start: from,
@@ -65,7 +65,7 @@ export const TopNav: FC<Props> = ({ dateFormat, forceRefresh, timeHistory, timef
     setIsTimeRangeSelectorEnabled(timefilter.isTimeRangeSelectorEnabled);
   }
 
-  function updateFilter({ start, end }: Time) {
+  function updateFilter({ start, end }: Duration) {
     const newTime = { from: start, to: end };
     // Update timefilter for controllers listening for changes
     timefilter.setTime(newTime);

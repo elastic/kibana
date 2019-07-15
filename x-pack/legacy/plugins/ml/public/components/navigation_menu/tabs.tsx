@@ -5,7 +5,7 @@
  */
 
 import React, { FC, useState } from 'react';
-import { EuiTabs, EuiTab } from '@elastic/eui';
+import { EuiTabs, EuiTab, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import chrome from 'ui/chrome';
 
@@ -67,7 +67,7 @@ function getTabs(disableLinks: boolean): Tab[] {
   ];
 }
 
-enum TAB_TEST_SUBJ_MAP {
+enum TAB_TEST_SUBJECT {
   jobs = 'mlTabJobManagement',
   explorer = 'mlTabAnomalyExplorer',
   timeseriesexplorer = 'mlTabSingleMetricViewer',
@@ -76,14 +76,11 @@ enum TAB_TEST_SUBJ_MAP {
   settings = 'mlTabSettings',
 }
 
-function moveToSelectedTab(selectedTabId: string) {
-  window.location.href = `${chrome.getBasePath()}/app/ml#/${selectedTabId}`;
-}
+type TAB_TEST_SUBJECTS = keyof typeof TAB_TEST_SUBJECT;
 
 export const Tabs: FC<Props> = ({ tabId, disableLinks }) => {
   const [selectedTabId, setSelectedTabId] = useState(tabId);
   function onSelectedTabChanged(id: string) {
-    moveToSelectedTab(id);
     setSelectedTabId(id);
   }
 
@@ -94,16 +91,21 @@ export const Tabs: FC<Props> = ({ tabId, disableLinks }) => {
       {tabs.map((tab: Tab) => {
         const id = tab.id;
         return (
-          <EuiTab
-            className="mlNavigationMenu__tab"
-            onClick={() => onSelectedTabChanged(id)}
-            isSelected={tab.id === selectedTabId}
-            disabled={tab.disabled}
-            key={`${tab.id}-key`}
-            data-test-subj={TAB_TEST_SUBJ_MAP[id as keyof typeof TAB_TEST_SUBJ_MAP]}
+          <EuiLink
+            data-test-subj={TAB_TEST_SUBJECT[id as TAB_TEST_SUBJECTS]}
+            href={`${chrome.getBasePath()}/app/ml#/${id}`}
+            key={`${id}-key`}
+            color="text"
           >
-            {tab.name}
-          </EuiTab>
+            <EuiTab
+              className="mlNavigationMenu__tab"
+              onClick={() => onSelectedTabChanged(id)}
+              isSelected={id === selectedTabId}
+              disabled={tab.disabled}
+            >
+              {tab.name}
+            </EuiTab>
+          </EuiLink>
         );
       })}
     </EuiTabs>
