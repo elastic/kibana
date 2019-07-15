@@ -7,6 +7,7 @@
 import { ImportError } from 'src/core/server/saved_objects/import/types';
 import { SavedObjectsClientContract, SavedObjectsService } from 'src/core/server';
 import { Readable } from 'stream';
+import { SavedObjectsClientProviderOptions } from 'src/core/server/saved_objects/service/lib/scoped_client_provider';
 import { SpacesClient } from '../spaces_client';
 import { Rereadable } from './rereadable_stream';
 
@@ -32,6 +33,10 @@ interface CopyResponse {
     errors?: Array<ImportError | CopyToSpaceError>;
   };
 }
+
+export const COPY_TO_SPACES_SAVED_OBJECTS_CLIENT_OPTS: SavedObjectsClientProviderOptions = {
+  excludedWrappers: ['spaces'],
+};
 
 export function copySavedObjectsToSpacesFactory(
   spacesClient: SpacesClient,
@@ -96,14 +101,12 @@ export function copySavedObjectsToSpacesFactory(
     const response: CopyResponse = {};
 
     const objectsStream = await exportRequestedObjects(options);
+    const rereadableStream = objectsStream.pipe(new Rereadable());
 
-    const rereadableObjectsStream = objectsStream.pipe(new Rereadable());
+    let readStream: Readable = rereadableStream;
     for (const spaceId of spaces) {
-      response[spaceId] = await importObjectsToSpace(
-        spaceId,
-        rereadableObjectsStream.reread(),
-        options
-      );
+      response[spaceId] = await importObjectsToSpace(spaceId, readStream, options);
+      readStream = rereadableStream.reread();
     }
 
     return response;

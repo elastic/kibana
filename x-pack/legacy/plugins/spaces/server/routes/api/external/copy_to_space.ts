@@ -8,6 +8,7 @@ import Joi from 'joi';
 import { Legacy } from 'kibana';
 import { copySavedObjectsToSpacesFactory } from '../../../lib/copy_to_spaces';
 import { ExternalRouteDeps } from '.';
+import { COPY_TO_SPACES_SAVED_OBJECTS_CLIENT_OPTS } from '../../../lib/copy_to_spaces/copy_to_spaces';
 
 interface CopyPayload {
   spaces: string[];
@@ -25,7 +26,10 @@ export function initCopyToSpacesApi(deps: ExternalRouteDeps) {
     async handler(request: Legacy.Request, h: Legacy.ResponseToolkit) {
       const spacesClient = await spacesService.scopedClient(request);
 
-      const savedObjectsClient = request.getSavedObjectsClient();
+      const savedObjectsClient = savedObjects.getScopedSavedObjectsClient(
+        request,
+        COPY_TO_SPACES_SAVED_OBJECTS_CLIENT_OPTS
+      );
 
       const copySavedObjectsToSpaces = copySavedObjectsToSpacesFactory(
         spacesClient,
