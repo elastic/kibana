@@ -10,6 +10,7 @@ import { useState } from 'react';
 import { useHighlightsFetcher } from './data_fetching';
 import { useNextAndPrevious } from './next_and_previous';
 import { useReduxBridgeSetters } from './redux_bridge_setters';
+import { useSummaryHighlights } from './summary_highlights';
 
 export const useLogHighlightsState = ({
   sourceId,
@@ -31,6 +32,10 @@ export const useLogHighlightsState = ({
     setVisibleMidpoint,
     jumpToTarget,
     setJumpToTarget,
+    setSummaryStart,
+    setSummaryEnd,
+    summaryStart,
+    summaryEnd,
   } = useReduxBridgeSetters();
 
   const {
@@ -38,6 +43,15 @@ export const useLogHighlightsState = ({
     logEntryHighlightsById,
     loadLogEntryHighlightsRequest,
   } = useHighlightsFetcher(sourceId, sourceVersion, startKey, endKey, filterQuery, highlightTerms);
+
+  const { summaryHighlights, loadSummaryHighlightsRequest } = useSummaryHighlights(
+    sourceId,
+    sourceVersion,
+    summaryStart,
+    summaryEnd,
+    filterQuery,
+    highlightTerms
+  );
 
   const {
     hasPreviousHighlight,
@@ -66,6 +80,10 @@ export const useLogHighlightsState = ({
     goToPreviousHighlight,
     goToNextHighlight,
     setJumpToTarget,
+    setSummaryStart,
+    setSummaryEnd,
+    summaryHighlights,
+    loadSummaryHighlightsRequest,
   };
 };
 

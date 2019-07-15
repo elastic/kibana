@@ -65,5 +65,7 @@ export const useLogSummary = (
 
   return {
     buckets: logSummaryBetween.buckets,
+    start: bufferStart,
+    end: bufferEnd,
   };
 };
