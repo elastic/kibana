@@ -6,7 +6,7 @@
 
 import { PLUGIN_ID } from '../../common/constants';
 import { Request, ResponseToolkit } from '../../common/types';
-import { CoreSetup } from '../plugin';
+import { PluginContext } from '../plugin';
 import { getClient } from '../saved_objects';
 import {
   getIntegrations,
@@ -16,9 +16,7 @@ import {
 } from './data';
 
 interface Extra extends ResponseToolkit {
-  context: {
-    core: CoreSetup;
-  };
+  context: PluginContext;
 }
 
 interface PackageRequest extends Request {

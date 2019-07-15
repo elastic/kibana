@@ -18,6 +18,9 @@ export interface PluginInitializerContext {}
 
 export type PluginSetup = ReturnType<Plugin['setup']>;
 export type PluginStart = ReturnType<Plugin['start']>;
+export interface PluginContext {
+  core: CoreSetup;
+}
 
 export class Plugin {
   constructor(initializerContext: PluginInitializerContext) {}
