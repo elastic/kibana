@@ -42,7 +42,6 @@ enum WIZARD_STEPS {
 
 interface DefinePivotStepProps {
   isCurrentStep: boolean;
-  jobConfig: any;
   pivotState: DefinePivotExposedState;
   setCurrentStep: React.Dispatch<React.SetStateAction<WIZARD_STEPS>>;
   setPivot: React.Dispatch<React.SetStateAction<DefinePivotExposedState>>;
@@ -50,7 +49,6 @@ interface DefinePivotStepProps {
 
 const DefinePivotStep: SFC<DefinePivotStepProps> = ({
   isCurrentStep,
-  jobConfig,
   pivotState,
   setCurrentStep,
   setPivot,
@@ -62,7 +60,7 @@ const DefinePivotStep: SFC<DefinePivotStepProps> = ({
       <div ref={definePivotRef} />
       {isCurrentStep && (
         <Fragment>
-          <DefinePivotForm onChange={setPivot} overrides={{ ...pivotState, jobConfig }} />
+          <DefinePivotForm onChange={setPivot} overrides={{ ...pivotState }} />
           <WizardNav
             next={() => setCurrentStep(WIZARD_STEPS.JOB_DETAILS)}
             nextActive={pivotState.valid}
@@ -137,7 +135,6 @@ export const Wizard: SFC = React.memo(() => {
       children: (
         <DefinePivotStep
           isCurrentStep={currentStep === WIZARD_STEPS.DEFINE_PIVOT}
-          jobConfig={jobConfig}
           pivotState={pivotState}
           setCurrentStep={setCurrentStep}
           setPivot={setPivot}

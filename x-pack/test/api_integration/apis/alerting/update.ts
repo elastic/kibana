@@ -168,7 +168,7 @@ export default function createUpdateTests({ getService }: KibanaFunctionalTestDe
       const { body: error } = await supertest
         .put(`/api/alert/${createdAlert.id}`)
         .set('kbn-xsrf', 'foo')
-        .send(getTestAlertData({ interval: '10x' }))
+        .send(getTestAlertData({ interval: '10x', enabled: undefined }))
         .expect(400);
       expect(error).to.eql({
         statusCode: 400,

@@ -110,6 +110,9 @@ const buildOtherBucketAgg = (aggConfigs, aggWithOtherBucket, response) => {
   const filterAgg = aggConfigs.createAggConfig({
     type: 'filters',
     id: 'other',
+    params: {
+      filters: [],
+    },
   }, {
     addToAggConfigs: false,
   });

@@ -76,7 +76,7 @@ export class Env {
   /** @internal */
   public readonly staticFilesDir: string;
   /** @internal */
-  public readonly pluginSearchPaths: ReadonlyArray<string>;
+  public readonly pluginSearchPaths: readonly string[];
 
   /**
    * Information about Kibana package (version, build number etc.).
@@ -98,7 +98,7 @@ export class Env {
    * Paths to the configuration files.
    * @internal
    */
-  public readonly configs: ReadonlyArray<string>;
+  public readonly configs: readonly string[];
 
   /**
    * Indicates that this Kibana instance is run as development Node Cluster master.
