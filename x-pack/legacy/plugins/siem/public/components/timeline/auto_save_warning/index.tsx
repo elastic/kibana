@@ -8,8 +8,7 @@ import {
   EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
-  // @ts-ignore
-  Toast,
+  EuiGlobalToastListToast as Toast,
 } from '@elastic/eui';
 import { getOr } from 'lodash/fp';
 import { pure } from 'recompose';
