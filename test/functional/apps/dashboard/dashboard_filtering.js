@@ -34,7 +34,9 @@ export default function ({ getService, getPageObjects }) {
   const dashboardPanelActions = getService('dashboardPanelActions');
   const PageObjects = getPageObjects(['dashboard', 'header', 'visualize']);
 
-  describe('dashboard filtering', async function () {
+  // FLAKY: https://github.com/elastic/kibana/issues/41088
+  // FLAKY: https://github.com/elastic/kibana/issues/41087
+  describe.skip('dashboard filtering', async function () {
     this.tags('smoke');
     before(async () => {
       await PageObjects.dashboard.gotoDashboardLandingPage();
@@ -48,6 +50,7 @@ export default function ({ getService, getPageObjects }) {
         await dashboardAddPanel.addEverySavedSearch('"Filter Bytes Test"');
 
         await dashboardAddPanel.closeAddPanel();
+
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.dashboard.waitForRenderComplete();
         await filterBar.addFilter('bytes', 'is', '12345678');

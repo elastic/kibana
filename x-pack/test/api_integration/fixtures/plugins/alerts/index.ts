@@ -5,7 +5,8 @@
  */
 
 import Joi from 'joi';
-import { AlertExecuteOptions, AlertType } from '../../../../../legacy/plugins/alerting';
+import { schema } from '@kbn/config-schema';
+import { AlertExecutorOptions, AlertType } from '../../../../../legacy/plugins/alerting';
 import { ActionTypeExecutorOptions, ActionType } from '../../../../../legacy/plugins/actions';
 
 // eslint-disable-next-line import/no-default-export
@@ -20,19 +21,15 @@ export default function(kibana: any) {
         name: 'Test: Index Record',
         unencryptedAttributes: ['unencrypted'],
         validate: {
-          params: Joi.object()
-            .keys({
-              index: Joi.string().required(),
-              reference: Joi.string().required(),
-              message: Joi.string().required(),
-            })
-            .required(),
-          config: Joi.object()
-            .keys({
-              encrypted: Joi.string().required(),
-              unencrypted: Joi.string().required(),
-            })
-            .required(),
+          params: schema.object({
+            index: schema.string(),
+            reference: schema.string(),
+            message: schema.string(),
+          }),
+          config: schema.object({
+            encrypted: schema.string(),
+            unencrypted: schema.string(),
+          }),
         },
         async executor({ config, params, services }: ActionTypeExecutorOptions) {
           return await services.callCluster('index', {
@@ -52,12 +49,10 @@ export default function(kibana: any) {
         name: 'Test: Failing',
         unencryptedAttributes: [],
         validate: {
-          params: Joi.object()
-            .keys({
-              index: Joi.string().required(),
-              reference: Joi.string().required(),
-            })
-            .required(),
+          params: schema.object({
+            index: schema.string(),
+            reference: schema.string(),
+          }),
         },
         async executor({ config, params, services }: ActionTypeExecutorOptions) {
           await services.callCluster('index', {
@@ -80,7 +75,7 @@ export default function(kibana: any) {
       const alwaysFiringAlertType: AlertType = {
         id: 'test.always-firing',
         name: 'Test: Always Firing',
-        async execute({ services, params, state }: AlertExecuteOptions) {
+        async executor({ services, params, state }: AlertExecutorOptions) {
           const actionGroupToFire = params.actionGroupToFire || 'default';
           services
             .alertInstanceFactory('1')
@@ -106,7 +101,7 @@ export default function(kibana: any) {
       const neverFiringAlertType: AlertType = {
         id: 'test.never-firing',
         name: 'Test: Never firing',
-        async execute({ services, params, state }: AlertExecuteOptions) {
+        async executor({ services, params, state }: AlertExecutorOptions) {
           await services.callCluster('index', {
             index: params.index,
             refresh: 'wait_for',
@@ -125,7 +120,7 @@ export default function(kibana: any) {
       const failingAlertType: AlertType = {
         id: 'test.failing',
         name: 'Test: Failing',
-        async execute({ services, params, state }: AlertExecuteOptions) {
+        async executor({ services, params, state }: AlertExecutorOptions) {
           await services.callCluster('index', {
             index: params.index,
             refresh: 'wait_for',
@@ -149,12 +144,12 @@ export default function(kibana: any) {
             })
             .required(),
         },
-        async execute({ services, params, state }: AlertExecuteOptions) {},
+        async executor({ services, params, state }: AlertExecutorOptions) {},
       };
       const noopAlertType: AlertType = {
         id: 'test.noop',
         name: 'Test: Noop',
-        async execute({ services, params, state }: AlertExecuteOptions) {},
+        async executor({ services, params, state }: AlertExecutorOptions) {},
       };
       server.plugins.alerting.registerType(alwaysFiringAlertType);
       server.plugins.alerting.registerType(neverFiringAlertType);

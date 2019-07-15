@@ -25,7 +25,7 @@ import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 import {
   getInterval,
   convertIntervalIntoUnit,
-  isIntervalValid,
+  isAutoInterval,
   isGteInterval,
   AUTO_INTERVAL,
 } from './lib/get_interval';
@@ -126,7 +126,7 @@ class VisEditorVisualizationUI extends Component {
         PANEL_TYPES.MARKDOWN,
         PANEL_TYPES.TABLE,
       ].includes(type) &&
-      (interval === AUTO_INTERVAL || isGteInterval(interval) || !isIntervalValid(interval))
+      (isAutoInterval(interval) || isGteInterval(interval))
     );
   }
 

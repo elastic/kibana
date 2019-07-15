@@ -332,19 +332,22 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
+    async isChecked(selector) {
+      const checkbox = await testSubjects.find(selector);
+      return await checkbox.isSelected();
+    }
+
     async checkCheckbox(selector) {
-      const element = await testSubjects.find(selector);
-      const isSelected = await element.isSelected();
-      if(!isSelected) {
+      const isChecked = await this.isChecked(selector);
+      if (!isChecked) {
         log.debug(`checking checkbox ${selector}`);
         await testSubjects.click(selector);
       }
     }
 
     async uncheckCheckbox(selector) {
-      const element = await testSubjects.find(selector);
-      const isSelected = await element.isSelected();
-      if(isSelected) {
+      const isChecked = await this.isChecked(selector);
+      if (isChecked) {
         log.debug(`unchecking checkbox ${selector}`);
         await testSubjects.click(selector);
       }
@@ -441,7 +444,8 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
       const comboBoxElement = await find.byCssSelector(`
         [group-name="${groupName}"]
         vis-editor-agg-params:not(.ng-hide)
-        ${childAggregationType ? `vis-editor-agg-params[group-name="'${childAggregationType}'"]:not(.ng-hide)` : ''}
+        [data-test-subj="visAggEditorParams"]
+        ${childAggregationType ? '.visEditorAgg__subAgg' : ''}
         [data-test-subj="defaultEditorAggSelect"]
       `);
 
@@ -486,10 +490,12 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
 
       // select our agg
       const aggSelect = await find
-        .byCssSelector(`#visAggEditorParams${index} [data-test-subj="defaultEditorAggSelect"]`);
+        .byCssSelector(`[data-test-subj="aggregationEditor${index}"]
+          vis-editor-agg-params:not(.ng-hide) [data-test-subj="defaultEditorAggSelect"]`);
       await comboBox.setElement(aggSelect, agg);
 
-      const fieldSelect = await find.byCssSelector(`#visAggEditorParams${index} [data-test-subj="visDefaultEditorField"]`);
+      const fieldSelect = await find.byCssSelector(`[data-test-subj="aggregationEditor${index}"]
+        vis-editor-agg-params:not(.ng-hide) [data-test-subj="visDefaultEditorField"]`);
       // select our field
       await comboBox.setElement(fieldSelect, field);
       // enter custom label
@@ -541,7 +547,8 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
       const selector = `
         [group-name="${groupName}"]
         vis-editor-agg-params:not(.ng-hide)
-        ${childAggregationType ? `vis-editor-agg-params[group-name="'${childAggregationType}'"]:not(.ng-hide)` : ''}
+        [data-test-subj="visAggEditorParams"]
+        ${childAggregationType ? '.visEditorAgg__subAgg' : ''}
         [data-test-subj="visDefaultEditorField"]
       `;
       const fieldEl = await find.byCssSelector(selector);
@@ -567,8 +574,7 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
     }
 
     async getNumericInterval(agg = 2) {
-      const intervalElement = await testSubjects.find(`visEditorInterval${agg}`);
-      return await intervalElement.getProperty('value');
+      return await testSubjects.getAttribute(`visEditorInterval${agg}`, 'value');
     }
 
     async setNumericInterval(newValue, { append } = {}, agg = 2) {
@@ -726,6 +732,9 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
       }
       log.debug('Click Save Visualization button');
       await testSubjects.click('confirmSaveSavedObjectButton');
+
+      // wait for save to complete before completion
+      await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     async saveVisualizationExpectSuccess(vizName, { saveAsNew = false } = {}) {
@@ -1210,7 +1219,7 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
 
     async getBucketErrorMessage() {
       const error = await find.byCssSelector('[group-name="buckets"] [data-test-subj="defaultEditorAggSelect"] + .euiFormErrorText');
-      const errorMessage = await error.getProperty('innerText');
+      const errorMessage = await error.getAttribute('innerText');
       log.debug(errorMessage);
       return errorMessage;
     }
@@ -1223,8 +1232,8 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
 
     async selectCustomSortMetric(agg, metric, field) {
       await this.selectOrderByMetric(agg, 'custom');
-      await this.selectAggregation(metric, 'groupName');
-      await this.selectField(field, 'groupName');
+      await this.selectAggregation(metric, 'buckets', true);
+      await this.selectField(field, 'buckets', true);
     }
 
     async clickSplitDirection(direction) {
@@ -1249,6 +1258,9 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
       return result;
     }
 
+    async removeDimension(agg) {
+      await testSubjects.click(`aggregationEditor${agg} removeDimensionBtn`);
+    }
   }
 
   return new VisualizePage();

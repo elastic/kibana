@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ApmTimeSeriesResponse } from '../../../server/lib/transactions/charts/get_timeseries_data/transform';
 import {
   getAnomalyScoreSeries,
   getResponseTimeSeries,
@@ -34,8 +33,9 @@ describe('chartSelectors', () => {
         p95: [{ x: 0, y: 200 }, { x: 1000, y: 300 }],
         p99: [{ x: 0, y: 300 }, { x: 1000, y: 400 }]
       },
+      tpmBuckets: [],
       overallAvgDuration: 200
-    } as ApmTimeSeriesResponse;
+    };
 
     it('should produce correct series', () => {
       expect(
@@ -74,13 +74,20 @@ describe('chartSelectors', () => {
   });
 
   describe('getTpmSeries', () => {
-    const apmTimeseries = ({
+    const apmTimeseries = {
+      responseTimes: {
+        avg: [],
+        p95: [],
+        p99: []
+      },
       tpmBuckets: [
         { key: 'HTTP 2xx', dataPoints: [{ x: 0, y: 5 }, { x: 0, y: 2 }] },
         { key: 'HTTP 4xx', dataPoints: [{ x: 0, y: 1 }] },
         { key: 'HTTP 5xx', dataPoints: [{ x: 0, y: 0 }] }
-      ]
-    } as any) as ApmTimeSeriesResponse;
+      ],
+      overallAvgDuration: 200
+    };
+
     const transactionType = 'MyTransactionType';
     it('should produce correct series', () => {
       expect(getTpmSeries(apmTimeseries, transactionType)).toEqual([
@@ -106,6 +113,27 @@ describe('chartSelectors', () => {
           type: 'linemark'
         }
       ]);
+    });
+  });
+
+  describe('empty getTpmSeries', () => {
+    const apmTimeseries = {
+      responseTimes: {
+        avg: [{ x: 0, y: 1 }, { x: 100, y: 1 }],
+        p95: [{ x: 0, y: 1 }, { x: 100, y: 1 }],
+        p99: [{ x: 0, y: 1 }, { x: 100, y: 1 }]
+      },
+      tpmBuckets: [],
+      overallAvgDuration: 200
+    };
+
+    const transactionType = 'MyTransactionType';
+    it('should produce an empty series', () => {
+      const series = getTpmSeries(apmTimeseries, transactionType);
+
+      expect(series[0].data.length).toBe(11);
+      expect(series[0].data[0].x).toBe(0);
+      expect(series[0].data[10].x).toBe(100);
     });
   });
 });

@@ -70,7 +70,8 @@ function TableVisTypeProvider(Private) {
           direction: null
         },
         showTotal: false,
-        totalFunc: 'sum'
+        totalFunc: 'sum',
+        percentageCol: '',
       },
       template: tableVisTemplate,
     },
@@ -84,6 +85,11 @@ function TableVisTypeProvider(Private) {
             defaultMessage: 'Metric',
           }),
           aggFilter: ['!geo_centroid', '!geo_bounds'],
+          aggSettings: {
+            top_hits: {
+              allowStrings: true,
+            },
+          },
           min: 1,
           defaults: [
             { type: 'count', schema: 'metric' }

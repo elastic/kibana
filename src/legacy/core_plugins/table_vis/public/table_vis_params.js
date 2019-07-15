@@ -18,29 +18,67 @@
  */
 
 import { uiModules } from 'ui/modules';
+import { tabifyGetColumns } from 'ui/agg_response/tabify/_get_columns.js';
 import tableVisParamsTemplate from './table_vis_params.html';
+import _ from 'lodash';
+import { i18n } from '@kbn/i18n';
 
-uiModules.get('kibana/table_vis')
-  .directive('tableVisParams', function () {
-    return {
-      restrict: 'E',
-      template: tableVisParamsTemplate,
-      link: function ($scope) {
-        $scope.totalAggregations = ['sum', 'avg', 'min', 'max', 'count'];
+uiModules.get('kibana/table_vis').directive('tableVisParams', function () {
+  return {
+    restrict: 'E',
+    template: tableVisParamsTemplate,
+    link: function ($scope) {
+      const noCol = {
+        value: '',
+        name: i18n.translate('tableVis.params.defaultPercetangeCol', {
+          defaultMessage: 'Don’t show',
+        })
+      };
+      $scope.totalAggregations = ['sum', 'avg', 'min', 'max', 'count'];
+      $scope.percentageColumns = [noCol];
 
-        $scope.$watchMulti([
-          'editorState.params.showPartialRows',
-          'editorState.params.showMetricsAtAllLevels'
-        ], function () {
+      $scope.$watchMulti([
+        '[]editorState.aggs',
+        'editorState.params.percentageCol',
+        '=editorState.params.dimensions.buckets',
+        '=editorState.params.dimensions.metrics',
+        'vis.dirty' // though not used directly in the callback, it is a strong indicator that we should recompute
+      ], function () {
+        const { aggs, params } = $scope.editorState;
+
+        $scope.percentageColumns = [noCol, ...tabifyGetColumns(aggs.getResponseAggs(), true)
+          .filter(col => isNumeric(_.get(col, 'aggConfig.type.name'), params.dimensions))
+          .map(col => ({ value: col.name, name: col.name }))];
+
+        if (!_.find($scope.percentageColumns, { value: params.percentageCol })) {
+          params.percentageCol = $scope.percentageColumns[0].value;
+        }
+      }, true);
+
+      $scope.$watchMulti(
+        ['editorState.params.showPartialRows', 'editorState.params.showMetricsAtAllLevels'],
+        function () {
           if (!$scope.vis) return;
-
           const params = $scope.editorState.params;
-          if (params.showPartialRows || params.showMetricsAtAllLevels) {
-            $scope.metricsAtAllLevels = true;
-          } else {
-            $scope.metricsAtAllLevels = false;
-          }
-        });
-      }
-    };
-  });
+          $scope.metricsAtAllLevels = params.showPartialRows || params.showMetricsAtAllLevels;
+        }
+      );
+    },
+  };
+});
+
+/**
+ * Determines if a aggConfig is numeric
+ * @param {String} type - the type of the aggConfig
+ * @param {Object} obj - dimensions of the current visualization or editor
+ * @param {Object} obj.buckets
+ * @param {Object} obj.metrics
+ * @returns {Boolean}
+ */
+export function isNumeric(type, { buckets = [], metrics = [] } = {}) {
+  const dimension =
+    buckets.find(({ aggType }) => aggType === type) ||
+    metrics.find(({ aggType }) => aggType === type);
+  const formatType = _.get(dimension, 'format.id') || _.get(dimension, 'format.params.id');
+  return formatType === 'number';
+}

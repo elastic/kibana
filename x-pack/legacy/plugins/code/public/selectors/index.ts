@@ -6,7 +6,8 @@
 import { FileTree, RepositoryUri } from '../../model';
 import { RootState } from '../reducers';
 
-export const getTree = (state: RootState) => state.file.tree;
+export const getTree = (state: RootState) => state.fileTree.tree;
+export const getTreeRevision = (state: RootState) => state.fileTree.revision;
 
 export const lastRequestPathSelector: (state: RootState) => string = (state: RootState) =>
   state.symbol.lastRequestPath || '';
@@ -47,23 +48,19 @@ export const currentPathSelector = (state: RootState) => state.route.match.param
 
 export const treeCommitsSelector = (state: RootState) => {
   const path = currentPathSelector(state);
-  if (path === '') {
-    return state.file.commits;
-  } else {
-    return state.file.treeCommits[path];
-  }
+  return state.revision.treeCommits[path] || [];
 };
 
 export const hasMoreCommitsSelector = (state: RootState) => {
   const path = currentPathSelector(state);
-  const isLoading = state.file.loadingCommits;
+  const isLoading = state.revision.loadingCommits;
   if (isLoading) {
     return false;
   }
-  if (state.file.commitsFullyLoaded[path]) {
+  if (state.revision.commitsFullyLoaded[path]) {
     return false;
   }
-  const commits = path === '' ? state.file.commits : state.file.treeCommits[path];
+  const commits = state.revision.treeCommits[path];
   if (!commits) {
     // To avoid infinite loops in component `InfiniteScroll`,
     // here we set hasMore to false before we receive the first batch.
@@ -97,8 +94,10 @@ export const createTreeSelector = (path: string) => (state: RootState) => {
   return find(tree, path.split('/'));
 };
 
-export const currentRepoSelector = (state: RootState) => state.repository.currentRepository;
+export const currentRepoSelector = (state: RootState) => state.repository.repository;
 
 export const repoScopeSelector = (state: RootState) => state.search.searchOptions.repoScope;
 
 export const urlQueryStringSelector = (state: RootState) => state.route.match.location.search;
+
+export const previousMatchSelector = (state: RootState) => state.route.previousMatch;

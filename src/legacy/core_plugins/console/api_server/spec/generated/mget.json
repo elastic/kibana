@@ -7,8 +7,8 @@
       "refresh": "__flag__",
       "routing": "",
       "_source": [],
-      "_source_exclude": [],
-      "_source_include": []
+      "_source_excludes": [],
+      "_source_includes": []
     },
     "methods": [
       "GET",
@@ -16,8 +16,7 @@
     ],
     "patterns": [
       "_mget",
-      "{indices}/_mget",
-      "{indices}/{type}/_mget"
+      "{indices}/_mget"
     ],
     "documentation": "http://www.elastic.co/guide/en/elasticsearch/reference/master/docs-multi-get.html"
   }

@@ -51,42 +51,98 @@ exports[`PingList component renders sorted list without errors 1`] = `
               }
             }
           >
-            <EuiComboBox
-              aria-label="Status"
-              compressed={false}
-              fullWidth={false}
-              isClearable={false}
-              onChange={[Function]}
-              options={
-                Array [
-                  Object {
-                    "label": "All",
-                    "value": "",
-                  },
-                  Object {
-                    "label": "Up",
-                    "value": "up",
-                  },
-                  Object {
-                    "label": "Down",
-                    "value": "down",
-                  },
-                ]
-              }
-              selectedOptions={
-                Array [
-                  Object {
-                    "label": "Down",
-                    "value": "down",
-                  },
-                ]
-              }
-              singleSelection={
-                Object {
-                  "asPlainText": true,
-                }
-              }
-            />
+            <EuiFlexGroup>
+              <EuiFlexItem>
+                <EuiFormRow
+                  aria-label="Status"
+                  describedByIds={Array []}
+                  fullWidth={false}
+                  hasEmptyLabelSpace={false}
+                  label="Status"
+                  labelType="label"
+                >
+                  <EuiComboBox
+                    aria-label="Status"
+                    compressed={false}
+                    fullWidth={false}
+                    isClearable={false}
+                    onChange={[Function]}
+                    options={
+                      Array [
+                        Object {
+                          "label": "All",
+                          "value": "",
+                        },
+                        Object {
+                          "label": "Up",
+                          "value": "up",
+                        },
+                        Object {
+                          "label": "Down",
+                          "value": "down",
+                        },
+                      ]
+                    }
+                    selectedOptions={
+                      Array [
+                        Object {
+                          "label": "Down",
+                          "value": "down",
+                        },
+                      ]
+                    }
+                    singleSelection={
+                      Object {
+                        "asPlainText": true,
+                      }
+                    }
+                  />
+                </EuiFormRow>
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiFormRow
+                  aria-label="Location"
+                  describedByIds={Array []}
+                  fullWidth={false}
+                  hasEmptyLabelSpace={false}
+                  label="Location"
+                  labelType="label"
+                >
+                  <EuiComboBox
+                    aria-label="Location"
+                    compressed={false}
+                    fullWidth={false}
+                    isClearable={false}
+                    onChange={[Function]}
+                    options={
+                      Array [
+                        Object {
+                          "label": "All",
+                          "value": "All",
+                        },
+                        Object {
+                          "label": "nyc",
+                          "value": "nyc",
+                        },
+                      ]
+                    }
+                    selectedOptions={
+                      Array [
+                        Object {
+                          "label": "All",
+                          "value": "All",
+                        },
+                      ]
+                    }
+                    singleSelection={
+                      Object {
+                        "asPlainText": true,
+                      }
+                    }
+                  />
+                </EuiFormRow>
+              </EuiFlexItem>
+            </EuiFlexGroup>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
@@ -94,12 +150,18 @@ exports[`PingList component renders sorted list without errors 1`] = `
     <EuiSpacer
       size="s"
     />
-    <EuiInMemoryTable
+    <EuiBasicTable
       columns={
         Array [
           Object {
             "field": "monitor.status",
             "name": "Status",
+            "render": [Function],
+          },
+          Object {
+            "dataType": "number",
+            "field": "observer.geo.name",
+            "name": "Location",
             "render": [Function],
           },
           Object {
@@ -129,7 +191,6 @@ exports[`PingList component renders sorted list without errors 1`] = `
           },
         ]
       }
-      executeQueryOptions={Object {}}
       items={
         Array [
           Object {
@@ -324,19 +385,23 @@ exports[`PingList component renders sorted list without errors 1`] = `
         ]
       }
       loading={false}
+      noItemsMessage="No items found"
+      onChange={[Function]}
       pagination={
         Object {
           "initialPageSize": 20,
+          "pageIndex": 0,
+          "pageSize": 30,
           "pageSizeOptions": Array [
             5,
             10,
             20,
+            50,
             100,
           ],
         }
       }
       responsive={true}
-      sorting={false}
     />
   </EuiPanel>
 </Fragment>

@@ -34,17 +34,6 @@ export default function updateActionTests({ getService }: KibanaFunctionalTestDe
         .then((resp: any) => {
           expect(resp.body).to.eql({
             id: ES_ARCHIVER_ACTION_ID,
-            type: 'action',
-            references: [],
-            version: resp.body.version,
-            updated_at: resp.body.updated_at,
-            attributes: {
-              actionTypeId: 'test.index-record',
-              description: 'My action updated',
-              actionTypeConfig: {
-                unencrypted: `This value shouldn't get encrypted`,
-              },
-            },
           });
         });
     });
@@ -75,7 +64,7 @@ export default function updateActionTests({ getService }: KibanaFunctionalTestDe
     });
 
     it('should not return encrypted attributes', async () => {
-      await supertest
+      const { body: updatedAction } = await supertest
         .put(`/api/action/${ES_ARCHIVER_ACTION_ID}`)
         .set('kbn-xsrf', 'foo')
         .send({
@@ -87,23 +76,27 @@ export default function updateActionTests({ getService }: KibanaFunctionalTestDe
             },
           },
         })
-        .expect(200)
-        .then((resp: any) => {
-          expect(resp.body).to.eql({
-            id: ES_ARCHIVER_ACTION_ID,
-            type: 'action',
-            references: [],
-            version: resp.body.version,
-            updated_at: resp.body.updated_at,
-            attributes: {
-              actionTypeId: 'test.index-record',
-              description: 'My action updated',
-              actionTypeConfig: {
-                unencrypted: `This value shouldn't get encrypted`,
-              },
-            },
-          });
-        });
+        .expect(200);
+      expect(updatedAction).to.eql({
+        id: ES_ARCHIVER_ACTION_ID,
+      });
+      const { body: fetchedAction } = await supertest
+        .get(`/api/action/${ES_ARCHIVER_ACTION_ID}`)
+        .expect(200);
+      expect(fetchedAction).to.eql({
+        id: ES_ARCHIVER_ACTION_ID,
+        type: 'action',
+        references: [],
+        version: fetchedAction.version,
+        updated_at: fetchedAction.updated_at,
+        attributes: {
+          actionTypeId: 'test.index-record',
+          description: 'My action updated',
+          actionTypeConfig: {
+            unencrypted: `This value shouldn't get encrypted`,
+          },
+        },
+      });
     });
 
     it('should return 404 when updating a non existing document', async () => {
@@ -185,9 +178,65 @@ export default function updateActionTests({ getService }: KibanaFunctionalTestDe
             statusCode: 400,
             error: 'Bad Request',
             message:
-              'The following actionTypeConfig attributes are invalid: encrypted [any.required]',
+              'The actionTypeConfig is invalid: [encrypted]: expected value of type [string] but got [undefined]',
           });
         });
+    });
+
+    it(`should allow changing non-secret config properties - create`, async () => {
+      let emailActionId: string = '';
+
+      // create the action
+      await supertest
+        .post('/api/action')
+        .set('kbn-xsrf', 'foo')
+        .send({
+          attributes: {
+            description: 'test email action',
+            actionTypeId: '.email',
+            actionTypeConfig: {
+              user: 'email-user',
+              password: 'email-password',
+              from: 'email-from@example.com',
+              host: 'host-is-ignored-here.example.com',
+              port: 666,
+            },
+          },
+        })
+        .expect(200)
+        .then((resp: any) => {
+          emailActionId = resp.body.id;
+        });
+
+      // add a new config param
+      await supertest
+        .put(`/api/action/${emailActionId}`)
+        .set('kbn-xsrf', 'foo')
+        .send({
+          attributes: {
+            description: 'a test email action 2',
+            actionTypeConfig: {
+              user: 'email-user',
+              password: 'email-password',
+              from: 'email-from@example.com',
+              service: '__json',
+            },
+          },
+        })
+        .expect(200);
+
+      // fire the action
+      await supertest
+        .post(`/api/action/${emailActionId}/_fire`)
+        .set('kbn-xsrf', 'foo')
+        .send({
+          params: {
+            to: ['X'],
+            subject: 'email-subject',
+            message: 'email-message',
+          },
+        })
+        .expect(200);
     });
   });
 }

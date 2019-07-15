@@ -54,10 +54,9 @@ function getKbnPrecommitGitHookScript(rootPath, nodeHome, platform) {
   # PLEASE RE-RUN 'yarn kbn bootstrap' or 'node scripts/register_git_hook' IN THE ROOT
   # OF THE CURRENT PROJECT ${rootPath}
 
-  set -euo pipefail
+  # pre-commit script takes zero arguments: https://git-scm.com/docs/githooks#_pre_commit
 
-  # Export Git hook params
-  export GIT_PARAMS="$*"
+  set -euo pipefail
 
   has_node() {
     command -v node >/dev/null 2>&1
@@ -111,7 +110,17 @@ function getKbnPrecommitGitHookScript(rootPath, nodeHome, platform) {
     exit 1
   }
 
-  node scripts/precommit_hook || {
+  execute_precommit_hook() {
+    node scripts/precommit_hook || return 1
+
+    PRECOMMIT_FILE="./.git/hooks/pre-commit.local"
+    if [ -x "\${PRECOMMIT_FILE}" ]; then
+      echo "Executing local precommit hook found in \${PRECOMMIT_FILE}"
+      "$PRECOMMIT_FILE" || return 1
+    fi
+  }
+
+  execute_precommit_hook || {
     echo "Pre-commit hook failed (add --no-verify to bypass)";
     echo '  For eslint failures you can try running \`node scripts/precommit_hook --fix\`';
     exit 1;

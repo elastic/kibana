@@ -6,13 +6,14 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiSelect } from '@elastic/eui';
 import React, { ChangeEvent } from 'react';
-import { SearchOptions, SearchScope } from '../../../model';
+import { SearchOptions, SearchScope, Repository } from '../../../model';
 import { ReferenceInfo } from '../../../model/commit';
 import { MainRouteParams } from '../../common/types';
 import { encodeRevisionString, decodeRevisionString } from '../../../common/uri_util';
 import { history } from '../../utils/url';
 import { Breadcrumb } from './breadcrumb';
 import { SearchBar } from '../search_bar';
+import { StatusIndicator } from '../status_indicator/status_indicator';
 
 interface Props {
   routeParams: MainRouteParams;
@@ -21,6 +22,7 @@ interface Props {
   searchOptions: SearchOptions;
   branches: ReferenceInfo[];
   query: string;
+  currentRepository?: Repository;
 }
 
 export class TopBar extends React.Component<Props, { value: string }> {
@@ -37,6 +39,9 @@ export class TopBar extends React.Component<Props, { value: string }> {
 
   getBranch = (revision: string) => {
     const r = decodeRevisionString(revision);
+    if (r.toUpperCase() === 'HEAD' && this.props.currentRepository) {
+      return this.props.currentRepository.defaultBranch;
+    }
     const branch = this.props.branches.find(b => b.name === r);
     if (branch) {
       return branch.name;
@@ -82,8 +87,8 @@ export class TopBar extends React.Component<Props, { value: string }> {
           justifyContent="spaceBetween"
           className="codeTopBar__toolbar"
         >
-          <EuiFlexItem>
-            <EuiFlexGroup gutterSize="none">
+          <EuiFlexItem className="codeTopBar__left">
+            <EuiFlexGroup gutterSize="l" alignItems="center">
               <EuiFlexItem className="codeContainer__select" grow={false}>
                 <EuiSelect
                   options={this.branchOptions}
@@ -93,6 +98,9 @@ export class TopBar extends React.Component<Props, { value: string }> {
                 />
               </EuiFlexItem>
               <Breadcrumb routeParams={this.props.routeParams} />
+              <EuiFlexItem grow={false}>
+                <StatusIndicator />
+              </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>{this.props.buttons}</EuiFlexItem>

@@ -33,6 +33,7 @@ exports[`Data Frame: <AggLabelForm /> Date histogram aggregation 1`] = `
         />
       }
       closePopover={[Function]}
+      display="inlineBlock"
       hasArrow={true}
       id="mlFormPopover"
       isOpen={false}

@@ -13,69 +13,45 @@ import {
 import { getKibanaRegionList } from '../../../../meta';
 import { i18n } from '@kbn/i18n';
 
-export class CreateSourceEditor extends React.Component {
+export function CreateSourceEditor({ onSourceConfigChange }) {
 
-  state  = {
-    regionmapLayers: []
-  }
-
-  _loadList = async () => {
-    const list = getKibanaRegionList();
-    if (this._isMounted) {
-      this.setState({
-        regionmapLayers: list
-      });
-    }
+  const onChange = ({ target }) => {
+    const selectedName = target.options[target.selectedIndex].text;
+    onSourceConfigChange({ name: selectedName });
   };
 
-  componentWillUnmount() {
-    this._isMounted = false;
-  }
-
-  componentDidMount() {
-    this._isMounted = true;
-    this._loadList();
-  }
-
-  render() {
-
-    const onChange = ({ target }) => {
-      const selectedName = target.options[target.selectedIndex].text;
-      this.props.onSelect({ name: selectedName });
+  const regionmapOptions = getKibanaRegionList().map(({ name, url }) => {
+    return {
+      value: url,
+      text: name
     };
+  });
 
-    const regionmapOptions = this.state.regionmapLayers.map(({ name, url }) => {
-      return {
-        value: url,
-        text: name
-      };
-    });
+  const helpText = regionmapOptions.length === 0
+    ? i18n.translate('xpack.maps.source.kbnRegionMap.noLayerAvailableHelptext', {
+      defaultMessage: `No vector layers are available. Ask your system administrator to set "map.regionmap" in kibana.yml.`
+    })
+    : null;
 
-    return (
-      <EuiFormRow
-        label={
-          i18n.translate('xpack.maps.source.kbnRegionMap.vectorLayerLabel', {
-            defaultMessage: 'Vector layer'
-          })
-        }
-        helpText={this.state.regionmapLayers.length === 0 ?  i18n.translate('xpack.maps.source.kbnRegionMap.noLayerAvailableHelptext', {
-          defaultMessage: `No vector layers are available. Ask your system administrator to set "map.regionmap" in kibana.yml.`
+  return (
+    <EuiFormRow
+      label={
+        i18n.translate('xpack.maps.source.kbnRegionMap.vectorLayerLabel', {
+          defaultMessage: 'Vector layer'
         })
-          : null}
-      >
-        <EuiSelect
-          hasNoInitialSelection
-          options={regionmapOptions}
-          onChange={onChange}
-          disabled={this.state.regionmapLayers.length === 0}
-        />
-      </EuiFormRow>
-    );
-  }
+      }
+      helpText={helpText}
+    >
+      <EuiSelect
+        hasNoInitialSelection
+        options={regionmapOptions}
+        onChange={onChange}
+        disabled={regionmapOptions.length === 0}
+      />
+    </EuiFormRow>
+  );
 }
 
 CreateSourceEditor.propTypes = {
-  onSelect: PropTypes.func.isRequired
+  onSourceConfigChange: PropTypes.func.isRequired
 };
-
-

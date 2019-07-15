@@ -10,8 +10,6 @@ import { capabilities } from 'ui/capabilities';
 import { kfetch } from 'ui/kfetch';
 import { fatalError, toastNotifications } from 'ui/notify';
 import template from 'plugins/security/views/management/edit_role/edit_role.html';
-import 'ui/angular_ui_select';
-import 'plugins/security/services/application_privilege';
 import 'plugins/security/services/shield_user';
 import 'plugins/security/services/shield_role';
 import 'plugins/security/services/shield_indices';
@@ -19,7 +17,7 @@ import 'plugins/security/services/shield_indices';
 import { IndexPatternsProvider } from 'ui/index_patterns/index_patterns';
 import { xpackInfo } from 'plugins/xpack_main/services/xpack_info';
 import { SpacesManager } from '../../../../../spaces/public/lib';
-import { EDIT_ROLES_PATH, ROLES_PATH } from '../management_urls';
+import { ROLES_PATH, CLONE_ROLES_PATH, EDIT_ROLES_PATH } from '../management_urls';
 import { getEditRoleBreadcrumbs, getCreateRoleBreadcrumbs } from '../breadcrumbs';
 
 import { EditRolePage } from './components';
@@ -29,10 +27,10 @@ import { render, unmountComponentAtNode } from 'react-dom';
 import { I18nContext } from 'ui/i18n';
 import { i18n } from '@kbn/i18n';
 
-routes.when(`${EDIT_ROLES_PATH}/:name?`, {
+const routeDefinition = (action) => ({
   template,
   k7Breadcrumbs: ($injector, $route) => $injector.invoke(
-    $route.current.params.name
+    action === 'edit' && $route.current.params.name
       ? getEditRoleBreadcrumbs
       : getCreateRoleBreadcrumbs
   ),
@@ -87,8 +85,11 @@ routes.when(`${EDIT_ROLES_PATH}/:name?`, {
       }
       return [];
     },
-    privileges() {
+    kibanaPrivileges() {
       return kfetch({ method: 'get', pathname: '/api/security/privileges', query: { includeActions: true } });
+    },
+    builtinESPrivileges() {
+      return kfetch({ method: 'get', pathname: '/api/security/v1/esPrivileges/builtin' });
     },
     features() {
       return kfetch({ method: 'get', pathname: '/api/features/v1' }).catch(e => {
@@ -132,7 +133,8 @@ routes.when(`${EDIT_ROLES_PATH}/:name?`, {
       users,
       indexPatterns,
       spaces,
-      privileges,
+      kibanaPrivileges,
+      builtinESPrivileges,
       features,
     } = $route.current.locals;
 
@@ -142,6 +144,7 @@ routes.when(`${EDIT_ROLES_PATH}/:name?`, {
       render(
         <I18nContext>
           <EditRolePage
+            action={action}
             runAsUsers={users}
             role={role}
             indexPatterns={indexPatterns}
@@ -152,7 +155,8 @@ routes.when(`${EDIT_ROLES_PATH}/:name?`, {
             spacesEnabled={enableSpaceAwarePrivileges}
             uiCapabilities={capabilities.get()}
             features={features}
-            privileges={privileges}
+            kibanaPrivileges={kibanaPrivileges}
+            builtinESPrivileges={builtinESPrivileges}
           />
         </I18nContext>, domNode);
 
@@ -163,3 +167,6 @@ routes.when(`${EDIT_ROLES_PATH}/:name?`, {
     });
   }
 });
+
+routes.when(`${CLONE_ROLES_PATH}/:name`, routeDefinition('clone'));
+routes.when(`${EDIT_ROLES_PATH}/:name?`, routeDefinition('edit'));

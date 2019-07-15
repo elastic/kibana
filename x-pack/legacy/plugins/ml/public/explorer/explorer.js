@@ -1123,7 +1123,7 @@ export const Explorer = injectI18n(injectObservablesAsProps(
           )}
 
           {noInfluencersConfigured === false && (
-            <div className="column col-xs-2 euiText">
+            <div className="column col-xs-2 euiText" data-test-subj="mlAnomalyExplorerInfluencerList">
               <span className="panel-title">
                 <FormattedMessage
                   id="xpack.ml.explorer.topInfuencersTitle"
@@ -1149,6 +1149,7 @@ export const Explorer = injectI18n(injectObservablesAsProps(
               className="ml-explorer-swimlane euiText"
               onMouseEnter={this.onSwimlaneEnterHandler}
               onMouseLeave={this.onSwimlaneLeaveHandler}
+              data-test-subj="mlAnomalyExplorerSwimlaneOverall"
             >
               <ExplorerSwimlane
                 chartWidth={swimlaneWidth}
@@ -1224,6 +1225,7 @@ export const Explorer = injectI18n(injectObservablesAsProps(
                     className="ml-explorer-swimlane euiText"
                     onMouseEnter={this.onSwimlaneEnterHandler}
                     onMouseLeave={this.onSwimlaneLeaveHandler}
+                    data-test-subj="mlAnomalyExplorerSwimlaneViewBy"
                   >
                     <ExplorerSwimlane
                       chartWidth={swimlaneWidth}

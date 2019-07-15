@@ -20,11 +20,6 @@ let seqNo = 1;
 const OOM_SCORE_ADJ = 667;
 const OOM_ADJ = 10;
 
-export const ServerStartFailed = new ResponseError(
-  LanguageServerStartFailed,
-  'Launch language server failed.'
-);
-
 export abstract class AbstractLauncher implements ILanguageServerLauncher {
   running: boolean = false;
   private currentPid: number = -1;
@@ -33,7 +28,7 @@ export abstract class AbstractLauncher implements ILanguageServerLauncher {
   private proxyConnected: boolean = false;
   protected readonly log: Logger;
   private spawnTimes: number = 0;
-  private launchReject?: ((reason?: any) => void);
+  private launchReject?: (reason?: any) => void;
   protected constructor(
     readonly name: string,
     readonly targetHost: string,
@@ -47,7 +42,7 @@ export abstract class AbstractLauncher implements ILanguageServerLauncher {
     const port = await this.getPort();
     const log: Logger = this.log;
     let child: ChildProcess;
-    const proxy = new LanguageServerProxy(port, this.targetHost, log, this.options.lsp);
+    const proxy = new LanguageServerProxy(port, this.targetHost, log);
     if (this.options.lsp.detach) {
       log.debug('Detach mode, expected language server launch externally');
       proxy.onConnected(() => {
@@ -92,10 +87,12 @@ export abstract class AbstractLauncher implements ILanguageServerLauncher {
         resolve();
       });
       this.launchReject = err => {
+        log.debug('launch error ' + err);
         proxy.exit().catch(this.log.debug);
         reject(err);
       };
     });
+
     return this.createExpander(proxy, builtinWorkspace, maxWorkspace);
   }
 
@@ -146,9 +143,13 @@ export abstract class AbstractLauncher implements ILanguageServerLauncher {
           this.onProcessExit(this.child, () => this.reconnect(proxy, installationPath, child));
           this.startConnect(proxy);
         } else {
-          this.log.warn(`spawned process ${this.spawnTimes} times, mark this proxy unusable.`);
-          proxy.setError(ServerStartFailed);
+          const ServerStartFailed = new ResponseError(
+            LanguageServerStartFailed,
+            'Launch language server failed.'
+          );
           this.launchReject!(ServerStartFailed);
+          proxy.setError(ServerStartFailed);
+          this.log.warn(`spawned process ${this.spawnTimes} times, mark this proxy unusable.`);
         }
       }
     }
@@ -159,6 +160,7 @@ export abstract class AbstractLauncher implements ILanguageServerLauncher {
     port: number,
     log: Logger
   ): Promise<ChildProcess> {
+    this.log.debug('spawn process');
     const child = await this.spawnProcess(installationPath, port, log);
     const pid = child.pid;
     this.currentPid = pid;
@@ -171,11 +173,17 @@ export abstract class AbstractLauncher implements ILanguageServerLauncher {
         // clone form https://github.com/elastic/ml-cpp/blob/4dd90fa93338667b681364657222715f81c9868a/lib/core/CProcessPriority_Linux.cc
         fs.writeFileSync(`/proc/${pid}/oom_score_adj`, `${OOM_SCORE_ADJ}\n`);
         this.log.debug(`wrote oom_score_adj of process ${pid} to ${OOM_SCORE_ADJ}`);
-        fs.writeFileSync(`/proc/${pid}/oom_adj`, `${OOM_ADJ}\n`);
-        this.log.debug(`wrote oom_adj of process ${pid} to ${OOM_ADJ}`);
       } catch (e) {
-        this.log.error('write oom_score_adj failed');
-        this.log.error(e);
+        this.log.warn(e);
+        try {
+          fs.writeFileSync(`/proc/${pid}/oom_adj`, `${OOM_ADJ}\n`);
+          this.log.debug(`wrote oom_adj of process ${pid} to ${OOM_ADJ}`);
+        } catch (err) {
+          this.log.warn(
+            'write oom_score_adj and oom_adj file both failed, reduce priority not working'
+          );
+          this.log.warn(err);
+        }
       }
     }
     return child;

@@ -4,23 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Commit, Reference, Revwalk } from '@elastic/nodegit';
+import { Commit, Oid, Revwalk } from '@elastic/nodegit';
 import Boom from 'boom';
 import fileType from 'file-type';
 import hapi, { RequestQuery } from 'hapi';
-import {
-  commitInfo,
-  DEFAULT_TREE_CHILDREN_LIMIT,
-  GitOperations,
-  referenceInfo,
-} from '../git_operations';
+import { commitInfo, DEFAULT_TREE_CHILDREN_LIMIT, GitOperations } from '../git_operations';
 import { extractLines } from '../utils/buffer';
 import { detectLanguage } from '../utils/detect_language';
 import { CodeServerRouter } from '../security';
 import { RepositoryObjectClient } from '../search';
 import { EsClientWithRequest } from '../utils/esclient_with_request';
 import { TEXT_FILE_LIMIT } from '../../common/file';
-import { ReferenceType } from '../../model/commit';
 import { decodeRevisionString } from '../../common/uri_util';
 
 export function fileRoute(server: CodeServerRouter, gitOps: GitOperations) {
@@ -178,21 +172,24 @@ export function fileRoute(server: CodeServerRouter, gitOps: GitOperations) {
         return Boom.notFound(`repo ${uri} not found`);
       }
       const repository = await gitOps.openRepo(uri);
-      const commit = await gitOps.getCommit(uri, revision);
+      const commit = await gitOps.getCommitInfo(uri, revision);
+      if (commit === null) {
+        throw Boom.notFound(`commit ${revision} not found in repo ${uri}`);
+      }
       const walk = repository.createRevWalk();
       walk.sorting(Revwalk.SORT.TIME);
-      walk.push(commit.id());
+      const commitId = Oid.fromString(commit!.id);
+      walk.push(commitId);
       let commits: Commit[];
       if (path) {
         // magic number 10000: how many commits at the most to iterate in order to find the commits contains the path
         const results = await walk.fileHistoryWalk(path, count, 10000);
         commits = results.map(result => result.commit);
       } else {
-        walk.push(commit.id());
         commits = await walk.getCommits(count);
       }
       if (after && commits.length > 0) {
-        if (commits[0].id().equal(commit.id())) {
+        if (commits[0].id().equal(commitId)) {
           commits = commits.slice(1);
         }
       }
@@ -215,14 +212,7 @@ export function fileRoute(server: CodeServerRouter, gitOps: GitOperations) {
         return Boom.notFound(`repo ${uri} not found`);
       }
       try {
-        const repository = await gitOps.openRepo(uri);
-        const references = await repository.getReferences(Reference.TYPE.DIRECT);
-        const referenceInfos = await Promise.all(references.map(referenceInfo));
-        return referenceInfos.filter(
-          info =>
-            info !== null &&
-            (info.type === ReferenceType.REMOTE_BRANCH || info.type === ReferenceType.TAG)
-        );
+        return await gitOps.getBranchAndTags(uri);
       } catch (e) {
         if (e.isBoom) {
           return e;

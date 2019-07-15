@@ -12,7 +12,7 @@ import { SnapshotRestore } from '../../../../../../common/types';
 import { UIM_RESTORE_LIST_EXPAND_INDEX } from '../../../../constants';
 import { useAppDependencies } from '../../../../index';
 import { uiMetricService } from '../../../../services/ui_metric';
-import { formatDate } from '../../../../services/text';
+import { FormattedDateTime } from '../../../../components';
 import { ShardsTable } from './shards_table';
 
 interface Props {
@@ -111,26 +111,20 @@ export const RestoreTable: React.FunctionComponent<Props> = ({ restores }) => {
   };
 
   // Update current restores to show if table changes
-  useEffect(
-    () => {
-      setCurrentRestores(getCurrentRestores());
-    },
-    [sorting, pagination]
-  );
+  useEffect(() => {
+    setCurrentRestores(getCurrentRestores());
+  }, [sorting, pagination]);
 
   // Update current restores to show if data changes
   // as well as any expanded index details
-  useEffect(
-    () => {
-      setPagination({
-        ...pagination,
-        totalItemCount: restores.length,
-      });
-      setCurrentRestores(getCurrentRestores());
-      refreshIndexRestoreDetails();
-    },
-    [restores]
-  );
+  useEffect(() => {
+    setPagination({
+      ...pagination,
+      totalItemCount: restores.length,
+    });
+    setCurrentRestores(getCurrentRestores());
+    refreshIndexRestoreDetails();
+  }, [restores]);
 
   const columns = [
     {
@@ -176,7 +170,7 @@ export const RestoreTable: React.FunctionComponent<Props> = ({ restores }) => {
         { isComplete }: SnapshotRestore
       ) => {
         return isComplete ? (
-          formatDate(latestActivityTimeInMillis)
+          <FormattedDateTime epochMs={latestActivityTimeInMillis} />
         ) : (
           <FormattedMessage
             id="xpack.snapshotRestore.restoreList.table.lastActivityColumn.nowLabel"

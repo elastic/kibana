@@ -6,7 +6,7 @@
 
 import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/public';
 import { openSans } from '../../../common/lib/fonts';
-import { Render, Style } from '../types';
+import { Render, Style } from '../../../types';
 import { getFunctionHelp } from '../../strings';
 
 type Context = number | string | null;
@@ -38,9 +38,7 @@ export function metric(): ExpressionFunction<'metric', Context, Arguments, Rende
       metricFont: {
         types: ['style'],
         help: argHelp.metricFont,
-        default: `{font size=48 family="${
-          openSans.value
-        }" color="#000000" align=center lHeight=48}`,
+        default: `{font size=48 family="${openSans.value}" color="#000000" align=center lHeight=48}`,
       },
       labelFont: {
         types: ['style'],

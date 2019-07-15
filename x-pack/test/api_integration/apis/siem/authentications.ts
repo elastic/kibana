@@ -38,17 +38,20 @@ const authenticationsTests: KbnTestProvider = ({ getService }) => {
               from: FROM,
             },
             pagination: {
-              limit: 1,
-              cursor: null,
+              activePage: 0,
+              cursorStart: 0,
+              fakePossibleCount: 3,
+              querySize: 1,
             },
             defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+            inspect: false,
           },
         })
         .then(resp => {
           const authentications = resp.data.source.Authentications;
           expect(authentications.edges.length).to.be(EDGE_LENGTH);
           expect(authentications.totalCount).to.be(TOTAL_COUNT);
-          expect(authentications.pageInfo.endCursor!.value).to.equal('1');
+          expect(authentications.pageInfo.fakeTotalCount).to.equal(3);
         });
     });
 
@@ -64,10 +67,13 @@ const authenticationsTests: KbnTestProvider = ({ getService }) => {
               from: FROM,
             },
             pagination: {
-              limit: 2,
-              cursor: '1',
+              activePage: 2,
+              cursorStart: 1,
+              fakePossibleCount: 5,
+              querySize: 2,
             },
             defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+            inspect: false,
           },
         })
         .then(resp => {

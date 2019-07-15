@@ -19,21 +19,40 @@
 
 import { cloneDeep } from 'lodash';
 import { IKey, logging } from 'selenium-webdriver';
+import { takeUntil } from 'rxjs/operators';
 
 import { modifyUrl } from '../../../src/core/utils';
-
 import { WebElementWrapper } from './lib/web_element_wrapper';
-
 import { FtrProviderContext } from '../ftr_provider_context';
-
 import { Browsers } from './remote/browsers';
+import { pollForLogEntry$ } from './remote/poll_for_log_entry';
 
 export async function BrowserProvider({ getService }: FtrProviderContext) {
+  const log = getService('log');
+  const config = getService('config');
+  const lifecycle = getService('lifecycle');
   const { driver, Key, LegacyActionSequence, browserType } = await getService(
     '__webdriver__'
   ).init();
 
-  class BrowserService {
+  const isW3CEnabled = (driver as any).executor_.w3c === true;
+
+  if (browserType === Browsers.Chrome) {
+    // The logs endpoint has not been defined in W3C Spec browsers other than Chrome don't have access to this endpoint.
+    // See: https://github.com/w3c/webdriver/issues/406
+    // See: https://w3c.github.io/webdriver/#endpoints
+
+    pollForLogEntry$(driver, logging.Type.BROWSER, config.get('browser.logPollingMs'))
+      .pipe(takeUntil(lifecycle.cleanup$))
+      .subscribe({
+        next({ message, level: { name: level } }) {
+          const msg = message.replace(/\\n/g, '\n');
+          log[level === 'SEVERE' ? 'error' : 'debug'](`browser[${level}] ${msg}`);
+        },
+      });
+  }
+
+  return new (class BrowserService {
     /**
      * Keyboard events
      */
@@ -51,7 +70,7 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
     /**
      * Is WebDriver instance W3C compatible
      */
-    isW3CEnabled = (driver as any).executor_.w3c === true;
+    isW3CEnabled = isW3CEnabled;
 
     /**
      * Returns instance of Actions API based on driver w3c flag
@@ -61,6 +80,18 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
       return this.isW3CEnabled
         ? (driver as any).actions()
         : (driver as any).actions({ bridge: true });
+    }
+
+    /**
+     * Get handle for an alert, confirm, or prompt dialog. (if any).
+     * @return {Promise<void>}
+     */
+    public async getAlert() {
+      try {
+        return await driver.switchTo().alert();
+      } catch (e) {
+        return null;
+      }
     }
 
     /**
@@ -140,40 +171,33 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
       xOffset?: number,
       yOffset?: number
     ): Promise<void> {
-      switch (this.browserType) {
-        case Browsers.Firefox: {
-          // Workaround for scrolling bug in Firefox
-          // https://github.com/mozilla/geckodriver/issues/776
+      if (this.isW3CEnabled) {
+        // Workaround for scrolling bug in W3C mode: move pointer to { x: 0, y: 0 }
+        // https://github.com/mozilla/geckodriver/issues/776
+        await this.getActions()
+          .move({ x: 0, y: 0 })
+          .perform();
+        if (element instanceof WebElementWrapper) {
           await this.getActions()
-            .move({ x: 0, y: 0 })
+            .move({ x: xOffset || 10, y: yOffset || 10, origin: element._webElement })
             .perform();
-          if (element instanceof WebElementWrapper) {
-            await this.getActions()
-              .move({ x: xOffset || 10, y: yOffset || 10, origin: element._webElement })
-              .perform();
-          } else {
-            await this.getActions()
-              .move({ origin: { x: xOffset, y: yOffset } })
-              .perform();
-          }
-          break;
+        } else {
+          await this.getActions()
+            .move({ origin: { x: xOffset, y: yOffset } })
+            .perform();
         }
-        case Browsers.Chrome: {
-          if (element instanceof WebElementWrapper) {
-            await this.getActions()
-              .pause(this.getActions().mouse)
-              .move({ origin: element._webElement })
-              .perform();
-          } else {
-            await this.getActions()
-              .pause(this.getActions().mouse)
-              .move({ origin: { x: xOffset, y: yOffset } })
-              .perform();
-          }
-          break;
+      } else {
+        if (element instanceof WebElementWrapper) {
+          await this.getActions()
+            .pause(this.getActions().mouse)
+            .move({ origin: element._webElement })
+            .perform();
+        } else {
+          await this.getActions()
+            .pause(this.getActions().mouse)
+            .move({ origin: { x: xOffset, y: yOffset } })
+            .perform();
         }
-        default:
-          throw new Error(`unsupported browser: ${this.browserType}`);
       }
     }
 
@@ -186,8 +210,8 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
      * @return {Promise<void>}
      */
     public async dragAndDrop(
-      from: { offset: { x: any; y: any }; location: { _webElement: any } },
-      to: { offset: { x: any; y: any }; location: { _webElement: any; x: any } }
+      from: { offset: { x: any; y: any }; location: any },
+      to: { offset: { x: any; y: any }; location: any }
     ) {
       // tslint:disable-next-line:variable-name
       let _from;
@@ -339,29 +363,6 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
     }
 
     /**
-     * Gets all logs from the remote environment of the given type. The logs in the remote
-     * environment are cleared once they have been retrieved.
-     * https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/webdriver_exports_Logs.html#get
-     *
-     * @param {!logging.Type} type The desired log type.
-     * @return {Promise<LogEntry[]>}
-     */
-    public async getLogsFor(type: typeof logging.Type | string): Promise<logging.Entry[]>;
-    public async getLogsFor(...args: any[]): Promise<logging.Entry[]> {
-      // The logs endpoint has not been defined in W3C Spec browsers other than Chrome don't have access to this endpoint.
-      // See: https://github.com/w3c/webdriver/issues/406
-      // See: https://w3c.github.io/webdriver/#endpoints
-      if (this.isW3CEnabled) {
-        return [];
-      } else {
-        return await (driver as any)
-          .manage()
-          .logs()
-          .get(...args);
-      }
-    }
-
-    /**
      * Gets a screenshot of the focused window and returns it as a base-64 encoded PNG
      * https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/webdriver_exports_WebDriver.html#takeScreenshot
      *
@@ -494,7 +495,5 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
       await driver.executeScript('document.body.scrollLeft = ' + scrollSize);
       return this.getScrollLeft();
     }
-  }
-
-  return new BrowserService();
+  })();
 }

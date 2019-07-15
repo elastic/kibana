@@ -5,20 +5,29 @@
  */
 
 import { Privileges, getDefaultPrivileges } from '../../../common/types/privileges';
+import { XPackMainPlugin } from '../../../../../../legacy/plugins/xpack_main/xpack_main';
 import { callWithRequestType } from '../../../common/types/kibana';
 import { isSecurityDisabled } from '../../lib/security_utils';
 import { upgradeCheckProvider } from './upgrade';
+import { checkLicense } from '../check_license';
+import { LICENSE_TYPE } from '../../../common/constants/license';
 
 import { mlPrivileges } from './privileges';
 
 type ClusterPrivilege = Record<string, boolean>;
 
 interface Response {
-  privileges: Privileges;
+  capabilities: Privileges;
   upgradeInProgress: boolean;
+  isPlatinumOrTrialLicense: boolean;
+  mlFeatureEnabledInSpace: boolean;
 }
 
-export function privilegesProvider(callWithRequest: callWithRequestType, xpackMainPlugin: any) {
+export function privilegesProvider(
+  callWithRequest: callWithRequestType,
+  xpackMainPlugin: XPackMainPlugin,
+  isMlEnabled: () => Promise<boolean>
+) {
   const { isUpgradeInProgress } = upgradeCheckProvider(callWithRequest);
   async function getPrivileges(): Promise<Response> {
     // get the default privileges, forced to be false.
@@ -26,6 +35,28 @@ export function privilegesProvider(callWithRequest: callWithRequestType, xpackMa
 
     const upgradeInProgress = await isUpgradeInProgress();
     const securityDisabled = isSecurityDisabled(xpackMainPlugin);
+    const license = checkLicense(xpackMainPlugin.info);
+    const isPlatinumOrTrialLicense = license.licenseType === LICENSE_TYPE.FULL;
+    const mlFeatureEnabledInSpace = await isMlEnabled();
+
+    const setGettingPrivileges = isPlatinumOrTrialLicense
+      ? setFullGettingPrivileges
+      : setBasicGettingPrivileges;
+
+    const setActionPrivileges = isPlatinumOrTrialLicense
+      ? setFullActionPrivileges
+      : setBasicActionPrivileges;
+
+    if (mlFeatureEnabledInSpace === false) {
+      // if ML isn't enabled in the current space,
+      // return with the default privileges (all false)
+      return {
+        capabilities: privileges,
+        upgradeInProgress,
+        isPlatinumOrTrialLicense,
+        mlFeatureEnabledInSpace,
+      };
+    }
 
     if (securityDisabled === true) {
       if (upgradeInProgress === true) {
@@ -36,7 +67,8 @@ export function privilegesProvider(callWithRequest: callWithRequestType, xpackMa
       } else {
         // if no upgrade is in progress,
         // get all privileges forced to true
-        Object.keys(privileges).forEach(k => (privileges[k as keyof Privileges] = true));
+        setGettingPrivileges({}, privileges, true);
+        setActionPrivileges({}, privileges, true);
       }
     } else {
       // security enabled
@@ -49,12 +81,17 @@ export function privilegesProvider(callWithRequest: callWithRequestType, xpackMa
         setActionPrivileges(cluster, privileges);
       }
     }
-    return { privileges, upgradeInProgress };
+    return {
+      capabilities: privileges,
+      upgradeInProgress,
+      isPlatinumOrTrialLicense,
+      mlFeatureEnabledInSpace,
+    };
   }
   return { getPrivileges };
 }
 
-function setGettingPrivileges(
+function setFullGettingPrivileges(
   cluster: ClusterPrivilege = {},
   privileges: Privileges,
   forceTrue = false
@@ -100,100 +137,158 @@ function setGettingPrivileges(
   }
 }
 
-function setActionPrivileges(cluster: ClusterPrivilege = {}, privileges: Privileges) {
+function setFullActionPrivileges(
+  cluster: ClusterPrivilege = {},
+  privileges: Privileges,
+  forceTrue = false
+) {
   // Anomaly Detection
   if (
-    cluster['cluster:admin/xpack/ml/job/put'] &&
-    cluster['cluster:admin/xpack/ml/job/open'] &&
-    cluster['cluster:admin/xpack/ml/datafeeds/put']
+    forceTrue ||
+    (cluster['cluster:admin/xpack/ml/job/put'] &&
+      cluster['cluster:admin/xpack/ml/job/open'] &&
+      cluster['cluster:admin/xpack/ml/datafeeds/put'])
   ) {
     privileges.canCreateJob = true;
   }
 
-  if (cluster['cluster:admin/xpack/ml/job/update']) {
+  if (forceTrue || cluster['cluster:admin/xpack/ml/job/update']) {
     privileges.canUpdateJob = true;
   }
 
-  if (cluster['cluster:admin/xpack/ml/job/open']) {
+  if (forceTrue || cluster['cluster:admin/xpack/ml/job/open']) {
     privileges.canOpenJob = true;
   }
 
-  if (cluster['cluster:admin/xpack/ml/job/close']) {
+  if (forceTrue || cluster['cluster:admin/xpack/ml/job/close']) {
     privileges.canCloseJob = true;
   }
 
-  if (cluster['cluster:admin/xpack/ml/job/forecast']) {
+  if (forceTrue || cluster['cluster:admin/xpack/ml/job/forecast']) {
     privileges.canForecastJob = true;
   }
 
   if (
-    cluster['cluster:admin/xpack/ml/job/delete'] &&
-    cluster['cluster:admin/xpack/ml/datafeeds/delete']
+    forceTrue ||
+    (cluster['cluster:admin/xpack/ml/job/delete'] &&
+      cluster['cluster:admin/xpack/ml/datafeeds/delete'])
   ) {
     privileges.canDeleteJob = true;
   }
 
   if (
-    cluster['cluster:admin/xpack/ml/job/open'] &&
-    cluster['cluster:admin/xpack/ml/datafeeds/start'] &&
-    cluster['cluster:admin/xpack/ml/datafeeds/stop']
+    forceTrue ||
+    (cluster['cluster:admin/xpack/ml/job/open'] &&
+      cluster['cluster:admin/xpack/ml/datafeeds/start'] &&
+      cluster['cluster:admin/xpack/ml/datafeeds/stop'])
   ) {
     privileges.canStartStopDatafeed = true;
   }
 
-  if (cluster['cluster:admin/xpack/ml/datafeeds/update']) {
+  if (forceTrue || cluster['cluster:admin/xpack/ml/datafeeds/update']) {
     privileges.canUpdateDatafeed = true;
   }
 
-  if (cluster['cluster:admin/xpack/ml/datafeeds/preview']) {
+  if (forceTrue || cluster['cluster:admin/xpack/ml/datafeeds/preview']) {
     privileges.canPreviewDatafeed = true;
   }
 
   // Calendars
   if (
-    cluster['cluster:admin/xpack/ml/calendars/put'] &&
-    cluster['cluster:admin/xpack/ml/calendars/jobs/update'] &&
-    cluster['cluster:admin/xpack/ml/calendars/events/post']
+    forceTrue ||
+    (cluster['cluster:admin/xpack/ml/calendars/put'] &&
+      cluster['cluster:admin/xpack/ml/calendars/jobs/update'] &&
+      cluster['cluster:admin/xpack/ml/calendars/events/post'])
   ) {
     privileges.canCreateCalendar = true;
   }
 
   if (
-    cluster['cluster:admin/xpack/ml/calendars/delete'] &&
-    cluster['cluster:admin/xpack/ml/calendars/events/delete']
+    forceTrue ||
+    (cluster['cluster:admin/xpack/ml/calendars/delete'] &&
+      cluster['cluster:admin/xpack/ml/calendars/events/delete'])
   ) {
     privileges.canDeleteCalendar = true;
   }
 
   // Filters
   if (
-    cluster['cluster:admin/xpack/ml/filters/put'] &&
-    cluster['cluster:admin/xpack/ml/filters/update']
+    forceTrue ||
+    (cluster['cluster:admin/xpack/ml/filters/put'] &&
+      cluster['cluster:admin/xpack/ml/filters/update'])
   ) {
     privileges.canCreateFilter = true;
   }
 
-  if (cluster['cluster:admin/xpack/ml/filters/delete']) {
+  if (forceTrue || cluster['cluster:admin/xpack/ml/filters/delete']) {
     privileges.canDeleteFilter = true;
   }
 
   // Data Frames
-  if (cluster['cluster:admin/data_frame/put']) {
+  if (forceTrue || cluster['cluster:admin/data_frame/put']) {
     privileges.canCreateDataFrameJob = true;
   }
 
-  if (cluster['cluster:admin/data_frame/delete']) {
+  if (forceTrue || cluster['cluster:admin/data_frame/delete']) {
     privileges.canDeleteDataFrameJob = true;
   }
 
-  if (cluster['cluster:admin/data_frame/preview']) {
+  if (forceTrue || cluster['cluster:admin/data_frame/preview']) {
     privileges.canPreviewDataFrameJob = true;
   }
 
   if (
-    cluster['cluster:admin/data_frame/start'] &&
-    cluster['cluster:admin/data_frame/start_task'] &&
-    cluster['cluster:admin/data_frame/stop']
+    forceTrue ||
+    (cluster['cluster:admin/data_frame/start'] &&
+      cluster['cluster:admin/data_frame/start_task'] &&
+      cluster['cluster:admin/data_frame/stop'])
+  ) {
+    privileges.canStartStopDataFrameJob = true;
+  }
+}
+
+function setBasicGettingPrivileges(
+  cluster: ClusterPrivilege = {},
+  privileges: Privileges,
+  forceTrue = false
+) {
+  // File Data Visualizer
+  if (forceTrue || cluster['cluster:monitor/xpack/ml/findfilestructure']) {
+    privileges.canFindFileStructure = true;
+  }
+
+  // Data Frames
+  if (
+    forceTrue ||
+    (cluster['cluster:monitor/data_frame/get'] && cluster['cluster:monitor/data_frame/stats/get'])
+  ) {
+    privileges.canGetDataFrameJobs = true;
+  }
+}
+
+function setBasicActionPrivileges(
+  cluster: ClusterPrivilege = {},
+  privileges: Privileges,
+  forceTrue = false
+) {
+  // Data Frames
+  if (forceTrue || cluster['cluster:admin/data_frame/put']) {
+    privileges.canCreateDataFrameJob = true;
+  }
+
+  if (forceTrue || cluster['cluster:admin/data_frame/delete']) {
+    privileges.canDeleteDataFrameJob = true;
+  }
+
+  if (forceTrue || cluster['cluster:admin/data_frame/preview']) {
+    privileges.canPreviewDataFrameJob = true;
+  }
+
+  if (
+    forceTrue ||
+    (cluster['cluster:admin/data_frame/start'] &&
+      cluster['cluster:admin/data_frame/start_task'] &&
+      cluster['cluster:admin/data_frame/stop'])
   ) {
     privileges.canStartStopDataFrameJob = true;
   }

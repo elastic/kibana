@@ -167,9 +167,8 @@ discover-app {
   color: $euiColorDarkShade;
 }
 
-// SASSTODO: replace the margin-right value with a variables
 .dscField__icon {
-  margin-right: 5px;
+  margin-right: $euiSizeS;
   text-align: center;
   display: inline-block;
   width: $euiSizeM;
