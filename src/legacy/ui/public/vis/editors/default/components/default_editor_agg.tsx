@@ -201,7 +201,7 @@ function DefaultEditorAgg({
         <EuiFlexItem grow={false} className="visEditorSidebar__collapsibleText">
           {agg.schema.title}
         </EuiFlexItem>
-        <EuiFlexItem className="visEditorSidebar__collapsibleText">
+        <EuiFlexItem>
           {showDescription && (
             <EuiText size="s" color="subdued">
               <p>{getDescription()}</p>
