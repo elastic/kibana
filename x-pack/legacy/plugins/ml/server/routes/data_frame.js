@@ -25,11 +25,11 @@ export function dataFrameRoutes({ commonRouteConfig, elasticsearchPlugin, route 
 
   route({
     method: 'GET',
-    path: '/api/ml/_data_frame/transforms/{jobId}',
+    path: '/api/ml/_data_frame/transforms/{transformId}',
     handler(request) {
       const callWithRequest = callWithRequestFactory(elasticsearchPlugin, request);
-      const { jobId } = request.params;
-      return callWithRequest('ml.getDataFrameTransforms', { jobId })
+      const { transformId } = request.params;
+      return callWithRequest('ml.getDataFrameTransforms', { transformId })
         .catch(resp => wrapError(resp));
     },
     config: {
@@ -52,11 +52,11 @@ export function dataFrameRoutes({ commonRouteConfig, elasticsearchPlugin, route 
 
   route({
     method: 'GET',
-    path: '/api/ml/_data_frame/transforms/{jobId}/_stats',
+    path: '/api/ml/_data_frame/transforms/{transformId}/_stats',
     handler(request) {
       const callWithRequest = callWithRequestFactory(elasticsearchPlugin, request);
-      const { jobId } = request.params;
-      return callWithRequest('ml.getDataFrameTransformsStats', { jobId })
+      const { transformId } = request.params;
+      return callWithRequest('ml.getDataFrameTransformsStats', { transformId })
         .catch(resp => wrapError(resp));
     },
     config: {
@@ -66,11 +66,11 @@ export function dataFrameRoutes({ commonRouteConfig, elasticsearchPlugin, route 
 
   route({
     method: 'PUT',
-    path: '/api/ml/_data_frame/transforms/{jobId}',
+    path: '/api/ml/_data_frame/transforms/{transformId}',
     handler(request) {
       const callWithRequest = callWithRequestFactory(elasticsearchPlugin, request);
-      const { jobId } = request.params;
-      return callWithRequest('ml.createDataFrameTransformsJob', { body: request.payload, jobId })
+      const { transformId } = request.params;
+      return callWithRequest('ml.createDataFrameTransform', { body: request.payload, transformId })
         .catch(resp => wrapError(resp));
     },
     config: {
@@ -80,11 +80,11 @@ export function dataFrameRoutes({ commonRouteConfig, elasticsearchPlugin, route 
 
   route({
     method: 'DELETE',
-    path: '/api/ml/_data_frame/transforms/{jobId}',
+    path: '/api/ml/_data_frame/transforms/{transformId}',
     handler(request) {
       const callWithRequest = callWithRequestFactory(elasticsearchPlugin, request);
-      const { jobId } = request.params;
-      return callWithRequest('ml.deleteDataFrameTransformsJob', { jobId })
+      const { transformId } = request.params;
+      return callWithRequest('ml.deleteDataFrameTransform', { transformId })
         .catch(resp => wrapError(resp));
     },
     config: {
@@ -107,18 +107,18 @@ export function dataFrameRoutes({ commonRouteConfig, elasticsearchPlugin, route 
 
   route({
     method: 'POST',
-    path: '/api/ml/_data_frame/transforms/{jobId}/_start',
+    path: '/api/ml/_data_frame/transforms/{transformId}/_start',
     handler(request) {
       const callWithRequest = callWithRequestFactory(elasticsearchPlugin, request);
       const options = {
-        jobId: request.params.jobId
+        transformId: request.params.transformId
       };
 
       if (request.query.force !== undefined) {
         options.force = request.query.force;
       }
 
-      return callWithRequest('ml.startDataFrameTransformsJob', options)
+      return callWithRequest('ml.startDataFrameTransform', options)
         .catch(resp => wrapError(resp));
     },
     config: {
@@ -128,11 +128,11 @@ export function dataFrameRoutes({ commonRouteConfig, elasticsearchPlugin, route 
 
   route({
     method: 'POST',
-    path: '/api/ml/_data_frame/transforms/{jobId}/_stop',
+    path: '/api/ml/_data_frame/transforms/{transformId}/_stop',
     handler(request) {
       const callWithRequest = callWithRequestFactory(elasticsearchPlugin, request);
       const options = {
-        jobId: request.params.jobId
+        transformId: request.params.transformId
       };
 
       if (request.query.force !== undefined) {
@@ -143,7 +143,7 @@ export function dataFrameRoutes({ commonRouteConfig, elasticsearchPlugin, route 
         options.waitForCompletion = request.query.wait_for_completion;
       }
 
-      return callWithRequest('ml.stopDataFrameTransformsJob', options)
+      return callWithRequest('ml.stopDataFrameTransform', options)
         .catch(resp => wrapError(resp));
     },
     config: {

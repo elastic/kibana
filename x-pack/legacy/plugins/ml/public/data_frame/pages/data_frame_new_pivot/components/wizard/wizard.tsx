@@ -10,39 +10,36 @@ import { i18n } from '@kbn/i18n';
 
 import { EuiSteps, EuiStepStatus } from '@elastic/eui';
 
-import { WizardNav } from '../wizard_nav';
+import { isKibanaContext, getCreateRequestBody, KibanaContext } from '../../../../common';
 
 import {
-  DefinePivotExposedState,
-  DefinePivotForm,
-  DefinePivotSummary,
-  getDefaultPivotState,
-} from '../define_pivot';
-
-import { getDefaultJobCreateState, JobCreateForm, JobCreateSummary } from '../job_create';
-
-import { getDefaultJobDetailsState, JobDetailsForm, JobDetailsSummary } from '../job_details';
-
-import { isKibanaContext, getDataFrameRequest, KibanaContext } from '../../../../common';
+  StepDefineExposedState,
+  StepDefineForm,
+  StepDefineSummary,
+  getDefaultStepDefineState,
+} from '../step_define';
+import { getDefaultStepCreateState, StepCreateForm, StepCreateSummary } from '../step_create';
+import { getDefaultStepDetailsState, StepDetailsForm, StepDetailsSummary } from '../step_details';
+import { WizardNav } from '../wizard_nav';
 
 enum WIZARD_STEPS {
-  DEFINE_PIVOT,
-  JOB_DETAILS,
-  JOB_CREATE,
+  DEFINE,
+  DETAILS,
+  CREATE,
 }
 
 interface DefinePivotStepProps {
   isCurrentStep: boolean;
-  pivotState: DefinePivotExposedState;
+  stepDefineState: StepDefineExposedState;
   setCurrentStep: React.Dispatch<React.SetStateAction<WIZARD_STEPS>>;
-  setPivot: React.Dispatch<React.SetStateAction<DefinePivotExposedState>>;
+  setStepDefineState: React.Dispatch<React.SetStateAction<StepDefineExposedState>>;
 }
 
-const DefinePivotStep: SFC<DefinePivotStepProps> = ({
+const StepDefine: SFC<DefinePivotStepProps> = ({
   isCurrentStep,
-  pivotState,
+  stepDefineState,
   setCurrentStep,
-  setPivot,
+  setStepDefineState,
 }) => {
   const definePivotRef = useRef(null);
 
@@ -51,14 +48,14 @@ const DefinePivotStep: SFC<DefinePivotStepProps> = ({
       <div ref={definePivotRef} />
       {isCurrentStep && (
         <Fragment>
-          <DefinePivotForm onChange={setPivot} overrides={{ ...pivotState }} />
+          <StepDefineForm onChange={setStepDefineState} overrides={{ ...stepDefineState }} />
           <WizardNav
-            next={() => setCurrentStep(WIZARD_STEPS.JOB_DETAILS)}
-            nextActive={pivotState.valid}
+            next={() => setCurrentStep(WIZARD_STEPS.DETAILS)}
+            nextActive={stepDefineState.valid}
           />
         </Fragment>
       )}
-      {!isCurrentStep && <DefinePivotSummary {...pivotState} />}
+      {!isCurrentStep && <StepDefineSummary {...stepDefineState} />}
     </Fragment>
   );
 };
@@ -73,37 +70,41 @@ export const Wizard: SFC = React.memo(() => {
   const indexPattern = kibanaContext.currentIndexPattern;
 
   // The current WIZARD_STEP
-  const [currentStep, setCurrentStep] = useState(WIZARD_STEPS.DEFINE_PIVOT);
+  const [currentStep, setCurrentStep] = useState(WIZARD_STEPS.DEFINE);
 
-  // The DEFINE_PIVOT state
-  const [pivotState, setPivot] = useState(getDefaultPivotState(kibanaContext));
+  // The DEFINE state
+  const [stepDefineState, setStepDefineState] = useState(getDefaultStepDefineState(kibanaContext));
 
-  // The JOB_DETAILS state
-  const [jobDetailsState, setJobDetails] = useState(getDefaultJobDetailsState());
+  // The DETAILS state
+  const [stepDetailsState, setStepDetailsState] = useState(getDefaultStepDetailsState());
 
-  const jobDetails =
-    currentStep === WIZARD_STEPS.JOB_DETAILS ? (
-      <JobDetailsForm onChange={setJobDetails} overrides={jobDetailsState} />
+  const stepDetails =
+    currentStep === WIZARD_STEPS.DETAILS ? (
+      <StepDetailsForm onChange={setStepDetailsState} overrides={stepDetailsState} />
     ) : (
-      <JobDetailsSummary {...jobDetailsState} />
+      <StepDetailsSummary {...stepDetailsState} />
     );
 
-  const jobConfig = getDataFrameRequest(indexPattern.title, pivotState, jobDetailsState);
+  const transformConfig = getCreateRequestBody(
+    indexPattern.title,
+    stepDefineState,
+    stepDetailsState
+  );
 
-  // The JOB_CREATE state
-  const [jobCreateState, setJobCreate] = useState(getDefaultJobCreateState);
+  // The CREATE state
+  const [stepCreateState, setStepCreateState] = useState(getDefaultStepCreateState);
 
-  const jobCreate =
-    currentStep === WIZARD_STEPS.JOB_CREATE ? (
-      <JobCreateForm
-        createIndexPattern={jobDetailsState.createIndexPattern}
-        jobId={jobDetailsState.jobId}
-        jobConfig={jobConfig}
-        onChange={setJobCreate}
-        overrides={jobCreateState}
+  const stepCreate =
+    currentStep === WIZARD_STEPS.CREATE ? (
+      <StepCreateForm
+        createIndexPattern={stepDetailsState.createIndexPattern}
+        transformId={stepDetailsState.transformId}
+        transformConfig={transformConfig}
+        onChange={setStepCreateState}
+        overrides={stepCreateState}
       />
     ) : (
-      <JobCreateSummary />
+      <StepCreateSummary />
     );
 
   // scroll to the currently selected wizard step
@@ -124,34 +125,34 @@ export const Wizard: SFC = React.memo(() => {
         defaultMessage: 'Define pivot',
       }),
       children: (
-        <DefinePivotStep
-          isCurrentStep={currentStep === WIZARD_STEPS.DEFINE_PIVOT}
-          pivotState={pivotState}
+        <StepDefine
+          isCurrentStep={currentStep === WIZARD_STEPS.DEFINE}
+          stepDefineState={stepDefineState}
           setCurrentStep={setCurrentStep}
-          setPivot={setPivot}
+          setStepDefineState={setStepDefineState}
         />
       ),
     },
     {
-      title: i18n.translate('xpack.ml.dataframe.transformsWizard.jobDetailsStepTitle', {
+      title: i18n.translate('xpack.ml.dataframe.transformsWizard.StepDetailsTitle', {
         defaultMessage: 'Transform details',
       }),
       children: (
         <Fragment>
-          {jobDetails}
-          {currentStep === WIZARD_STEPS.JOB_DETAILS && (
+          {stepDetails}
+          {currentStep === WIZARD_STEPS.DETAILS && (
             <WizardNav
               previous={() => {
-                setCurrentStep(WIZARD_STEPS.DEFINE_PIVOT);
+                setCurrentStep(WIZARD_STEPS.DEFINE);
                 // scrollToRef();
               }}
-              next={() => setCurrentStep(WIZARD_STEPS.JOB_CREATE)}
-              nextActive={jobDetailsState.valid}
+              next={() => setCurrentStep(WIZARD_STEPS.CREATE)}
+              nextActive={stepDetailsState.valid}
             />
           )}
         </Fragment>
       ),
-      status: currentStep >= WIZARD_STEPS.JOB_DETAILS ? undefined : ('incomplete' as EuiStepStatus),
+      status: currentStep >= WIZARD_STEPS.DETAILS ? undefined : ('incomplete' as EuiStepStatus),
     },
     {
       title: i18n.translate('xpack.ml.dataframe.transformsWizard.createStepTitle', {
@@ -159,13 +160,13 @@ export const Wizard: SFC = React.memo(() => {
       }),
       children: (
         <Fragment>
-          {jobCreate}
-          {currentStep === WIZARD_STEPS.JOB_CREATE && !jobCreateState.created && (
-            <WizardNav previous={() => setCurrentStep(WIZARD_STEPS.JOB_DETAILS)} />
+          {stepCreate}
+          {currentStep === WIZARD_STEPS.CREATE && !stepCreateState.created && (
+            <WizardNav previous={() => setCurrentStep(WIZARD_STEPS.DETAILS)} />
           )}
         </Fragment>
       ),
-      status: currentStep >= WIZARD_STEPS.JOB_CREATE ? undefined : ('incomplete' as EuiStepStatus),
+      status: currentStep >= WIZARD_STEPS.CREATE ? undefined : ('incomplete' as EuiStepStatus),
     },
   ];
 

@@ -18,7 +18,7 @@ export function checkGetJobsPrivilege(kbnUrl: any): Promise<Privileges> {
   return new Promise((resolve, reject) => {
     getPrivileges().then(priv => {
       privileges = priv;
-      // the minimum privilege for using ML with a platinum or trial license is being able to get the jobs list.
+      // the minimum privilege for using ML with a platinum or trial license is being able to get the transforms list.
       // all other functionality is controlled by the return privileges object
       if (privileges.canGetJobs) {
         return resolve(privileges);
@@ -37,8 +37,8 @@ export function checkCreateJobsPrivilege(kbnUrl: any): Promise<Privileges> {
       if (privileges.canCreateJob) {
         return resolve(privileges);
       } else {
-        // if the user has no permission to create a job,
-        // redirect them back to the Jobs Management page
+        // if the user has no permission to create a transform,
+        // redirect them back to the Transforms Management page
         kbnUrl.redirect('/jobs');
         return reject();
       }
@@ -62,13 +62,13 @@ export function checkFindFileStructurePrivilege(kbnUrl: any): Promise<Privileges
   });
 }
 
-export function checkGetDataFrameJobsPrivilege(kbnUrl: any): Promise<Privileges> {
+export function checkGetDataFrameTransformsPrivilege(kbnUrl: any): Promise<Privileges> {
   return new Promise((resolve, reject) => {
     getPrivileges().then(priv => {
       privileges = priv;
       // the minimum privilege for using ML with a basic license is being able to use the data frames.
       // all other functionality is controlled by the return privileges object
-      if (privileges.canGetDataFrameJobs) {
+      if (privileges.canGetDataFrame) {
         return resolve(privileges);
       } else {
         kbnUrl.redirect('/data_frames/access-denied');
@@ -78,19 +78,19 @@ export function checkGetDataFrameJobsPrivilege(kbnUrl: any): Promise<Privileges>
   });
 }
 
-export function checkCreateDataFrameJobsPrivilege(kbnUrl: any): Promise<Privileges> {
+export function checkCreateDataFrameTransformPrivilege(kbnUrl: any): Promise<Privileges> {
   return new Promise((resolve, reject) => {
     getPrivileges().then(priv => {
       privileges = priv;
       if (
-        privileges.canCreateDataFrameJob &&
-        privileges.canPreviewDataFrameJob &&
-        privileges.canStartStopDataFrameJob
+        privileges.canCreateDataFrame &&
+        privileges.canPreviewDataFrame &&
+        privileges.canStartStopDataFrame
       ) {
         return resolve(privileges);
       } else {
-        // if the user has no permission to create a data frame job,
-        // redirect them back to the Data Frame Jobs Management page
+        // if the user has no permission to create a data frame transform,
+        // redirect them back to the Data Frame Transforms Management page
         kbnUrl.redirect('/data_frames');
         return reject();
       }
@@ -107,7 +107,7 @@ export function checkPermission(privilegeType: keyof Privileges) {
 
 // create the text for the button's tooltips if the user's license has
 // expired or if they don't have the privilege to press that button
-export function createPermissionFailureMessage(privilegeType: string) {
+export function createPermissionFailureMessage(privilegeType: keyof Privileges) {
   let message = '';
   const licenseHasExpired = hasLicenseExpired();
   if (licenseHasExpired) {
@@ -142,17 +142,20 @@ export function createPermissionFailureMessage(privilegeType: string) {
     message = i18n.translate('xpack.ml.privilege.noPermission.runForecastsTooltip', {
       defaultMessage: 'You do not have permission to run forecasts.',
     });
-  } else if (privilegeType === 'canCreateDataFrameJob') {
-    message = i18n.translate('xpack.ml.privilege.noPermission.createDataFrameJobsTooltip', {
-      defaultMessage: 'You do not have permission to create data frame jobs.',
+  } else if (privilegeType === 'canCreateDataFrame') {
+    message = i18n.translate('xpack.ml.privilege.noPermission.createDataFrameTransformTooltip', {
+      defaultMessage: 'You do not have permission to create data frame transforms.',
     });
-  } else if (privilegeType === 'canStartStopDataFrameJob') {
-    message = i18n.translate('xpack.ml.privilege.noPermission.startOrStopDataFrameJobTooltip', {
-      defaultMessage: 'You do not have permission to start or stop data frame jobs.',
-    });
-  } else if (privilegeType === 'canDeleteDataFrameJob') {
-    message = i18n.translate('xpack.ml.privilege.noPermission.deleteFrameJobTooltip', {
-      defaultMessage: 'You do not have permission to delete data frame jobs.',
+  } else if (privilegeType === 'canStartStopDataFrame') {
+    message = i18n.translate(
+      'xpack.ml.privilege.noPermission.startOrStopDataFrameTransformTooltip',
+      {
+        defaultMessage: 'You do not have permission to start or stop data frame transforms.',
+      }
+    );
+  } else if (privilegeType === 'canDeleteDataFrame') {
+    message = i18n.translate('xpack.ml.privilege.noPermission.deleteFrameTransformTooltip', {
+      defaultMessage: 'You do not have permission to delete data frame transforms.',
     });
   }
   return i18n.translate('xpack.ml.privilege.pleaseContactAdministratorTooltip', {

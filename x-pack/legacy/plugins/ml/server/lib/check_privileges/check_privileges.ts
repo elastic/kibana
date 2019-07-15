@@ -133,7 +133,7 @@ function setFullGettingPrivileges(
     forceTrue ||
     (cluster['cluster:monitor/data_frame/get'] && cluster['cluster:monitor/data_frame/stats/get'])
   ) {
-    privileges.canGetDataFrameJobs = true;
+    privileges.canGetDataFrame = true;
   }
 }
 
@@ -226,15 +226,15 @@ function setFullActionPrivileges(
 
   // Data Frames
   if (forceTrue || cluster['cluster:admin/data_frame/put']) {
-    privileges.canCreateDataFrameJob = true;
+    privileges.canCreateDataFrame = true;
   }
 
   if (forceTrue || cluster['cluster:admin/data_frame/delete']) {
-    privileges.canDeleteDataFrameJob = true;
+    privileges.canDeleteDataFrame = true;
   }
 
   if (forceTrue || cluster['cluster:admin/data_frame/preview']) {
-    privileges.canPreviewDataFrameJob = true;
+    privileges.canPreviewDataFrame = true;
   }
 
   if (
@@ -243,7 +243,7 @@ function setFullActionPrivileges(
       cluster['cluster:admin/data_frame/start_task'] &&
       cluster['cluster:admin/data_frame/stop'])
   ) {
-    privileges.canStartStopDataFrameJob = true;
+    privileges.canStartStopDataFrame = true;
   }
 }
 
@@ -262,7 +262,7 @@ function setBasicGettingPrivileges(
     forceTrue ||
     (cluster['cluster:monitor/data_frame/get'] && cluster['cluster:monitor/data_frame/stats/get'])
   ) {
-    privileges.canGetDataFrameJobs = true;
+    privileges.canGetDataFrame = true;
   }
 }
 
@@ -273,15 +273,15 @@ function setBasicActionPrivileges(
 ) {
   // Data Frames
   if (forceTrue || cluster['cluster:admin/data_frame/put']) {
-    privileges.canCreateDataFrameJob = true;
+    privileges.canCreateDataFrame = true;
   }
 
   if (forceTrue || cluster['cluster:admin/data_frame/delete']) {
-    privileges.canDeleteDataFrameJob = true;
+    privileges.canDeleteDataFrame = true;
   }
 
   if (forceTrue || cluster['cluster:admin/data_frame/preview']) {
-    privileges.canPreviewDataFrameJob = true;
+    privileges.canPreviewDataFrame = true;
   }
 
   if (
@@ -290,6 +290,6 @@ function setBasicActionPrivileges(
       cluster['cluster:admin/data_frame/start_task'] &&
       cluster['cluster:admin/data_frame/stop'])
   ) {
-    privileges.canStartStopDataFrameJob = true;
+    privileges.canStartStopDataFrame = true;
   }
 }

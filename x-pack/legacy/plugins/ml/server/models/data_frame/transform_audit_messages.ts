@@ -25,7 +25,7 @@ interface BoolQuery {
 
 export function transformAuditMessagesProvider(callWithRequest: callWithRequestType) {
   // search for audit messages,
-  // transformId is optional. without it, all jobs will be listed.
+  // transformId is optional. without it, all transforms will be listed.
   async function getTransformAuditMessages(transformId: string) {
     const query: BoolQuery = {
       bool: {

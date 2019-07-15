@@ -138,11 +138,11 @@ describe('check_privileges', () => {
       expect(capabilities.canCreateFilter).toBe(false);
       expect(capabilities.canDeleteFilter).toBe(false);
       expect(capabilities.canFindFileStructure).toBe(true);
-      expect(capabilities.canGetDataFrameJobs).toBe(false);
-      expect(capabilities.canDeleteDataFrameJob).toBe(false);
-      expect(capabilities.canPreviewDataFrameJob).toBe(false);
-      expect(capabilities.canCreateDataFrameJob).toBe(false);
-      expect(capabilities.canStartStopDataFrameJob).toBe(false);
+      expect(capabilities.canGetDataFrame).toBe(false);
+      expect(capabilities.canDeleteDataFrame).toBe(false);
+      expect(capabilities.canPreviewDataFrame).toBe(false);
+      expect(capabilities.canCreateDataFrame).toBe(false);
+      expect(capabilities.canStartStopDataFrame).toBe(false);
       done();
     });
 
@@ -174,11 +174,11 @@ describe('check_privileges', () => {
       expect(capabilities.canCreateFilter).toBe(true);
       expect(capabilities.canDeleteFilter).toBe(true);
       expect(capabilities.canFindFileStructure).toBe(true);
-      expect(capabilities.canGetDataFrameJobs).toBe(true);
-      expect(capabilities.canDeleteDataFrameJob).toBe(true);
-      expect(capabilities.canPreviewDataFrameJob).toBe(true);
-      expect(capabilities.canCreateDataFrameJob).toBe(true);
-      expect(capabilities.canStartStopDataFrameJob).toBe(true);
+      expect(capabilities.canGetDataFrame).toBe(true);
+      expect(capabilities.canDeleteDataFrame).toBe(true);
+      expect(capabilities.canPreviewDataFrame).toBe(true);
+      expect(capabilities.canCreateDataFrame).toBe(true);
+      expect(capabilities.canStartStopDataFrame).toBe(true);
       done();
     });
 
@@ -210,11 +210,11 @@ describe('check_privileges', () => {
       expect(capabilities.canCreateFilter).toBe(false);
       expect(capabilities.canDeleteFilter).toBe(false);
       expect(capabilities.canFindFileStructure).toBe(true);
-      expect(capabilities.canGetDataFrameJobs).toBe(true);
-      expect(capabilities.canDeleteDataFrameJob).toBe(false);
-      expect(capabilities.canPreviewDataFrameJob).toBe(false);
-      expect(capabilities.canCreateDataFrameJob).toBe(false);
-      expect(capabilities.canStartStopDataFrameJob).toBe(false);
+      expect(capabilities.canGetDataFrame).toBe(true);
+      expect(capabilities.canDeleteDataFrame).toBe(false);
+      expect(capabilities.canPreviewDataFrame).toBe(false);
+      expect(capabilities.canCreateDataFrame).toBe(false);
+      expect(capabilities.canStartStopDataFrame).toBe(false);
       done();
     });
 
@@ -246,11 +246,11 @@ describe('check_privileges', () => {
       expect(capabilities.canCreateFilter).toBe(false);
       expect(capabilities.canDeleteFilter).toBe(false);
       expect(capabilities.canFindFileStructure).toBe(true);
-      expect(capabilities.canGetDataFrameJobs).toBe(false);
-      expect(capabilities.canDeleteDataFrameJob).toBe(false);
-      expect(capabilities.canPreviewDataFrameJob).toBe(false);
-      expect(capabilities.canCreateDataFrameJob).toBe(false);
-      expect(capabilities.canStartStopDataFrameJob).toBe(false);
+      expect(capabilities.canGetDataFrame).toBe(false);
+      expect(capabilities.canDeleteDataFrame).toBe(false);
+      expect(capabilities.canPreviewDataFrame).toBe(false);
+      expect(capabilities.canCreateDataFrame).toBe(false);
+      expect(capabilities.canStartStopDataFrame).toBe(false);
       done();
     });
 
@@ -282,11 +282,11 @@ describe('check_privileges', () => {
       expect(capabilities.canCreateFilter).toBe(false);
       expect(capabilities.canDeleteFilter).toBe(false);
       expect(capabilities.canFindFileStructure).toBe(true);
-      expect(capabilities.canGetDataFrameJobs).toBe(false);
-      expect(capabilities.canDeleteDataFrameJob).toBe(false);
-      expect(capabilities.canPreviewDataFrameJob).toBe(false);
-      expect(capabilities.canCreateDataFrameJob).toBe(false);
-      expect(capabilities.canStartStopDataFrameJob).toBe(false);
+      expect(capabilities.canGetDataFrame).toBe(false);
+      expect(capabilities.canDeleteDataFrame).toBe(false);
+      expect(capabilities.canPreviewDataFrame).toBe(false);
+      expect(capabilities.canCreateDataFrame).toBe(false);
+      expect(capabilities.canStartStopDataFrame).toBe(false);
       done();
     });
 
@@ -318,11 +318,11 @@ describe('check_privileges', () => {
       expect(capabilities.canCreateFilter).toBe(false);
       expect(capabilities.canDeleteFilter).toBe(false);
       expect(capabilities.canFindFileStructure).toBe(true);
-      expect(capabilities.canGetDataFrameJobs).toBe(true);
-      expect(capabilities.canDeleteDataFrameJob).toBe(true);
-      expect(capabilities.canPreviewDataFrameJob).toBe(true);
-      expect(capabilities.canCreateDataFrameJob).toBe(true);
-      expect(capabilities.canStartStopDataFrameJob).toBe(true);
+      expect(capabilities.canGetDataFrame).toBe(true);
+      expect(capabilities.canDeleteDataFrame).toBe(true);
+      expect(capabilities.canPreviewDataFrame).toBe(true);
+      expect(capabilities.canCreateDataFrame).toBe(true);
+      expect(capabilities.canStartStopDataFrame).toBe(true);
       done();
     });
 
@@ -354,11 +354,11 @@ describe('check_privileges', () => {
       expect(capabilities.canCreateFilter).toBe(false);
       expect(capabilities.canDeleteFilter).toBe(false);
       expect(capabilities.canFindFileStructure).toBe(false);
-      expect(capabilities.canGetDataFrameJobs).toBe(false);
-      expect(capabilities.canDeleteDataFrameJob).toBe(false);
-      expect(capabilities.canPreviewDataFrameJob).toBe(false);
-      expect(capabilities.canCreateDataFrameJob).toBe(false);
-      expect(capabilities.canStartStopDataFrameJob).toBe(false);
+      expect(capabilities.canGetDataFrame).toBe(false);
+      expect(capabilities.canDeleteDataFrame).toBe(false);
+      expect(capabilities.canPreviewDataFrame).toBe(false);
+      expect(capabilities.canCreateDataFrame).toBe(false);
+      expect(capabilities.canStartStopDataFrame).toBe(false);
       done();
     });
   });
@@ -392,11 +392,11 @@ describe('check_privileges', () => {
       expect(capabilities.canCreateFilter).toBe(true);
       expect(capabilities.canDeleteFilter).toBe(true);
       expect(capabilities.canFindFileStructure).toBe(true);
-      expect(capabilities.canGetDataFrameJobs).toBe(true);
-      expect(capabilities.canDeleteDataFrameJob).toBe(true);
-      expect(capabilities.canPreviewDataFrameJob).toBe(true);
-      expect(capabilities.canCreateDataFrameJob).toBe(true);
-      expect(capabilities.canStartStopDataFrameJob).toBe(true);
+      expect(capabilities.canGetDataFrame).toBe(true);
+      expect(capabilities.canDeleteDataFrame).toBe(true);
+      expect(capabilities.canPreviewDataFrame).toBe(true);
+      expect(capabilities.canCreateDataFrame).toBe(true);
+      expect(capabilities.canStartStopDataFrame).toBe(true);
       done();
     });
 
@@ -428,11 +428,11 @@ describe('check_privileges', () => {
       expect(capabilities.canCreateFilter).toBe(false);
       expect(capabilities.canDeleteFilter).toBe(false);
       expect(capabilities.canFindFileStructure).toBe(true);
-      expect(capabilities.canGetDataFrameJobs).toBe(true);
-      expect(capabilities.canDeleteDataFrameJob).toBe(false);
-      expect(capabilities.canPreviewDataFrameJob).toBe(false);
-      expect(capabilities.canCreateDataFrameJob).toBe(false);
-      expect(capabilities.canStartStopDataFrameJob).toBe(false);
+      expect(capabilities.canGetDataFrame).toBe(true);
+      expect(capabilities.canDeleteDataFrame).toBe(false);
+      expect(capabilities.canPreviewDataFrame).toBe(false);
+      expect(capabilities.canCreateDataFrame).toBe(false);
+      expect(capabilities.canStartStopDataFrame).toBe(false);
       done();
     });
 
@@ -464,11 +464,11 @@ describe('check_privileges', () => {
       expect(capabilities.canCreateFilter).toBe(false);
       expect(capabilities.canDeleteFilter).toBe(false);
       expect(capabilities.canFindFileStructure).toBe(true);
-      expect(capabilities.canGetDataFrameJobs).toBe(true);
-      expect(capabilities.canDeleteDataFrameJob).toBe(false);
-      expect(capabilities.canPreviewDataFrameJob).toBe(false);
-      expect(capabilities.canCreateDataFrameJob).toBe(false);
-      expect(capabilities.canStartStopDataFrameJob).toBe(false);
+      expect(capabilities.canGetDataFrame).toBe(true);
+      expect(capabilities.canDeleteDataFrame).toBe(false);
+      expect(capabilities.canPreviewDataFrame).toBe(false);
+      expect(capabilities.canCreateDataFrame).toBe(false);
+      expect(capabilities.canStartStopDataFrame).toBe(false);
       done();
     });
 
@@ -500,11 +500,11 @@ describe('check_privileges', () => {
       expect(capabilities.canCreateFilter).toBe(false);
       expect(capabilities.canDeleteFilter).toBe(false);
       expect(capabilities.canFindFileStructure).toBe(true);
-      expect(capabilities.canGetDataFrameJobs).toBe(true);
-      expect(capabilities.canDeleteDataFrameJob).toBe(true);
-      expect(capabilities.canPreviewDataFrameJob).toBe(true);
-      expect(capabilities.canCreateDataFrameJob).toBe(true);
-      expect(capabilities.canStartStopDataFrameJob).toBe(true);
+      expect(capabilities.canGetDataFrame).toBe(true);
+      expect(capabilities.canDeleteDataFrame).toBe(true);
+      expect(capabilities.canPreviewDataFrame).toBe(true);
+      expect(capabilities.canCreateDataFrame).toBe(true);
+      expect(capabilities.canStartStopDataFrame).toBe(true);
       done();
     });
 
@@ -536,11 +536,11 @@ describe('check_privileges', () => {
       expect(capabilities.canCreateFilter).toBe(false);
       expect(capabilities.canDeleteFilter).toBe(false);
       expect(capabilities.canFindFileStructure).toBe(true);
-      expect(capabilities.canGetDataFrameJobs).toBe(true);
-      expect(capabilities.canDeleteDataFrameJob).toBe(true);
-      expect(capabilities.canPreviewDataFrameJob).toBe(true);
-      expect(capabilities.canCreateDataFrameJob).toBe(true);
-      expect(capabilities.canStartStopDataFrameJob).toBe(true);
+      expect(capabilities.canGetDataFrame).toBe(true);
+      expect(capabilities.canDeleteDataFrame).toBe(true);
+      expect(capabilities.canPreviewDataFrame).toBe(true);
+      expect(capabilities.canCreateDataFrame).toBe(true);
+      expect(capabilities.canStartStopDataFrame).toBe(true);
       done();
     });
 
@@ -572,11 +572,11 @@ describe('check_privileges', () => {
       expect(capabilities.canCreateFilter).toBe(false);
       expect(capabilities.canDeleteFilter).toBe(false);
       expect(capabilities.canFindFileStructure).toBe(false);
-      expect(capabilities.canGetDataFrameJobs).toBe(false);
-      expect(capabilities.canDeleteDataFrameJob).toBe(false);
-      expect(capabilities.canPreviewDataFrameJob).toBe(false);
-      expect(capabilities.canCreateDataFrameJob).toBe(false);
-      expect(capabilities.canStartStopDataFrameJob).toBe(false);
+      expect(capabilities.canGetDataFrame).toBe(false);
+      expect(capabilities.canDeleteDataFrame).toBe(false);
+      expect(capabilities.canPreviewDataFrame).toBe(false);
+      expect(capabilities.canCreateDataFrame).toBe(false);
+      expect(capabilities.canStartStopDataFrame).toBe(false);
       done();
     });
   });

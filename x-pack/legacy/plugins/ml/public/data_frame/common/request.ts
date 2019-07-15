@@ -10,8 +10,8 @@ import { IndexPattern } from 'ui/index_patterns';
 
 import { dictionaryToArray } from '../../../common/types/common';
 
-import { DefinePivotExposedState } from '../pages/data_frame_new_pivot/components/define_pivot/define_pivot_form';
-import { JobDetailsExposedState } from '../pages/data_frame_new_pivot/components/job_details/job_details_form';
+import { StepDefineExposedState } from '../pages/data_frame_new_pivot/components/step_define/step_define_form';
+import { StepDetailsExposedState } from '../pages/data_frame_new_pivot/components/step_details/step_details_form';
 
 import {
   getEsAggFromAggConfig,
@@ -22,31 +22,10 @@ import {
   PivotGroupByConfig,
 } from '../common';
 
-import { PivotAggDict, PivotAggsConfig } from './pivot_aggs';
-import { DateHistogramAgg, HistogramAgg, PivotGroupByDict, TermsAgg } from './pivot_group_by';
+import { PivotAggsConfig } from './pivot_aggs';
+import { DateHistogramAgg, HistogramAgg, TermsAgg } from './pivot_group_by';
 import { SavedSearchQuery } from './kibana_context';
-import { IndexPattern as Index } from './job';
-
-export interface DataFramePreviewRequest {
-  pivot: {
-    group_by: PivotGroupByDict;
-    aggregations: PivotAggDict;
-  };
-  source: {
-    index: Index | Index[];
-    query?: any;
-  };
-}
-
-export interface DataFrameRequest extends DataFramePreviewRequest {
-  dest: {
-    index: string;
-  };
-}
-
-export interface DataFrameJobConfig extends DataFrameRequest {
-  id: string;
-}
+import { PreviewRequestBody, CreateRequestBody } from './transform';
 
 export interface SimpleQuery {
   query_string: {
@@ -78,15 +57,15 @@ export function isDefaultQuery(query: PivotQuery): boolean {
   return isSimpleQuery(query) && query.query_string.query === '*';
 }
 
-export function getDataFramePreviewRequest(
+export function getPreviewRequestBody(
   indexPatternTitle: IndexPattern['title'],
   query: PivotQuery,
   groupBy: PivotGroupByConfig[],
   aggs: PivotAggsConfig[]
-): DataFramePreviewRequest {
+): PreviewRequestBody {
   const index = indexPatternTitle.split(',').map((name: string) => name.trim());
 
-  const request: DataFramePreviewRequest = {
+  const request: PreviewRequestBody = {
     source: {
       index,
     },
@@ -136,32 +115,32 @@ export function getDataFramePreviewRequest(
   return request;
 }
 
-export function getDataFrameRequest(
+export function getCreateRequestBody(
   indexPatternTitle: IndexPattern['title'],
-  pivotState: DefinePivotExposedState,
-  jobDetailsState: JobDetailsExposedState
-): DataFrameRequest {
-  const request: DataFrameRequest = {
-    ...getDataFramePreviewRequest(
+  pivotState: StepDefineExposedState,
+  transformDetailsState: StepDetailsExposedState
+): CreateRequestBody {
+  const request: CreateRequestBody = {
+    ...getPreviewRequestBody(
       indexPatternTitle,
       getPivotQuery(pivotState.search),
       dictionaryToArray(pivotState.groupByList),
       dictionaryToArray(pivotState.aggList)
     ),
     // conditionally add optional description
-    ...(jobDetailsState.jobDescription !== ''
-      ? { description: jobDetailsState.jobDescription }
+    ...(transformDetailsState.transformDescription !== ''
+      ? { description: transformDetailsState.transformDescription }
       : {}),
     dest: {
-      index: jobDetailsState.destinationIndex,
+      index: transformDetailsState.destinationIndex,
     },
     // conditionally add continuous mode config
-    ...(jobDetailsState.isContinuousModeEnabled
+    ...(transformDetailsState.isContinuousModeEnabled
       ? {
           sync: {
             time: {
-              field: jobDetailsState.continuousModeDateField,
-              delay: jobDetailsState.continuousModeDelay,
+              field: transformDetailsState.continuousModeDateField,
+              delay: transformDetailsState.continuousModeDelay,
             },
           },
         }

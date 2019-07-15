@@ -34,8 +34,8 @@ uiRoutes
   });
 
 uiRoutes
-  .when('/data_frames/new_job', {
-    redirectTo: '/data_frames/new_job/step/index_or_search'
+  .when('/data_frames/new_transform', {
+    redirectTo: '/data_frames/new_transform/step/index_or_search'
   });
 
 uiRoutes
@@ -65,7 +65,7 @@ uiRoutes
   });
 
 uiRoutes
-  .when('/data_frames/new_job/step/index_or_search', {
+  .when('/data_frames/new_transform/step/index_or_search', {
     template,
     k7Breadcrumbs: getDataFrameIndexOrSearchBreadcrumbs,
     resolve: {

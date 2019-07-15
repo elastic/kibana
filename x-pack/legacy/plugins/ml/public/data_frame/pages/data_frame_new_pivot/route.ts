@@ -17,7 +17,7 @@ import { getDataFrameCreateBreadcrumbs } from '../../breadcrumbs';
 
 const template = `<ml-nav-menu name="new_data_frame" /><ml-new-data-frame />`;
 
-uiRoutes.when('/data_frames/new_job/step/pivot?', {
+uiRoutes.when('/data_frames/new_transform/step/pivot?', {
   template,
   k7Breadcrumbs: getDataFrameCreateBreadcrumbs,
   resolve: {

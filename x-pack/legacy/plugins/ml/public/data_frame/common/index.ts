@@ -24,18 +24,19 @@ export {
   SavedSearchQuery,
 } from './kibana_context';
 export {
-  DataFrameJob,
-  DataFrameTransform,
-  DataFrameTransformWithId,
+  isTransformIdValid,
+  refreshTransformList$,
+  useRefreshTransformList,
+  CreateRequestBody,
+  PreviewRequestBody,
+  DataFrameTransformId,
+  DataFrameTransformPivotConfig,
   delayFormatRegex,
   IndexName,
   IndexPattern,
-  JobId,
   REFRESH_TRANSFORM_LIST_STATE,
-  refreshTransformList$,
-  useRefreshTransformList,
-} from './job';
-export { moveToDataFrameJobsList, moveToDataFrameWizard, moveToDiscover } from './navigation';
+} from './transform';
+export { moveToDataFrameTransformList, moveToDataFrameWizard, moveToDiscover } from './navigation';
 export {
   getEsAggFromAggConfig,
   isPivotAggsConfigWithUiSupport,
@@ -74,14 +75,11 @@ export {
   TermsAgg,
 } from './pivot_group_by';
 export {
-  getDataFramePreviewRequest,
-  getDataFrameRequest,
+  getPreviewRequestBody,
+  getCreateRequestBody,
   getPivotQuery,
   isDefaultQuery,
   isSimpleQuery,
-  DataFrameJobConfig,
-  DataFramePreviewRequest,
-  DataFrameRequest,
   PivotQuery,
   SimpleQuery,
 } from './request';
