@@ -21,8 +21,7 @@ import {
 
 import { SNAPSHOT_STATE } from '../../../../../constants';
 import { useAppDependencies } from '../../../../../index';
-import { formatDate } from '../../../../../services/text';
-import { DataPlaceholder } from '../../../../../components';
+import { DataPlaceholder, FormattedDateTime } from '../../../../../components';
 import { SnapshotState } from './snapshot_state';
 
 interface Props {
@@ -205,7 +204,7 @@ export const TabSummary: React.SFC<Props> = ({ snapshotDetails }) => {
 
           <EuiDescriptionListDescription className="eui-textBreakWord" data-test-subj="value">
             <DataPlaceholder data={startTimeInMillis}>
-              {formatDate(startTimeInMillis)}
+              <FormattedDateTime epochMs={startTimeInMillis} />
             </DataPlaceholder>
           </EuiDescriptionListDescription>
         </EuiFlexItem>
@@ -223,7 +222,7 @@ export const TabSummary: React.SFC<Props> = ({ snapshotDetails }) => {
               <EuiLoadingSpinner size="m" />
             ) : (
               <DataPlaceholder data={endTimeInMillis}>
-                {formatDate(endTimeInMillis)}
+                <FormattedDateTime epochMs={endTimeInMillis} />
               </DataPlaceholder>
             )}
           </EuiDescriptionListDescription>
