@@ -232,15 +232,28 @@ export class Authenticator {
     const authenticationResult = await provider.login(
       request,
       attempt.value,
-      existingSession ? existingSession.state : null
+      existingSession && existingSession.state
     );
 
-    this.updateSessionValue(sessionStorage, {
-      providerType: attempt.provider,
-      isSystemAPIRequest: this.options.isSystemAPIRequest(request),
-      authenticationResult,
-      existingSession,
-    });
+    // There are two possible cases when we'd want to clear existing state:
+    // 1. If provider owned the state (e.g. intermediate state used for multi step login), but failed
+    // to login, that likely means that state is not valid anymore and we should clear it.
+    // 2. Also provider can specifically ask to clear state by setting it to `null` even if
+    // authentication attempt didn't fail (e.g. custom realm could "pin" client/request identity to
+    // a server-side only session established during multi step login that relied on intermediate
+    // client-side state).
+    if (
+      authenticationResult.shouldClearState() ||
+      (authenticationResult.failed() && getErrorStatusCode(authenticationResult.error) === 401)
+    ) {
+      sessionStorage.clear();
+    } else if (authenticationResult.shouldUpdateState()) {
+      sessionStorage.set({
+        state: authenticationResult.state,
+        provider: attempt.provider,
+        expires: this.ttl && Date.now() + this.ttl,
+      });
+    }
 
     return authenticationResult;
   }
