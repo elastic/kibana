@@ -60,6 +60,7 @@ import { annotationsRefresh$ } from '../services/annotations_service';
 import { interval$ } from '../components/controls/select_interval/select_interval';
 import { severity$ } from '../components/controls/select_severity/select_severity';
 import { setGlobalState, getSelectedJobIds } from '../components/job_selector/job_select_service_utils';
+import { mlTimefilterRefresh$ } from '../services/timefilter_refresh_service';
 
 
 import chrome from 'ui/chrome';
@@ -711,12 +712,15 @@ module.controller('MlTimeSeriesExplorerController', function (
     }
   });
 
+  const timefilterRefreshServiceSub = mlTimefilterRefresh$.subscribe($scope.refresh);
+
   $scope.$on('$destroy', () => {
     refreshWatcher.cancel();
     intervalSub.unsubscribe();
     severitySub.unsubscribe();
     annotationsRefreshSub.unsubscribe();
     jobSelectServiceSub.unsubscribe();
+    timefilterRefreshServiceSub.unsubscribe();
   });
 
   $scope.$on('contextChartSelected', function (event, selection) {
