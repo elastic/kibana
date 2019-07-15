@@ -15,8 +15,7 @@ export const ANOMALIES = i18n.translate('xpack.siem.anomaliesTable.table.anomali
 });
 
 export const TOOLTIP = i18n.translate('xpack.siem.anomaliesTable.table.anomaliesTooltip', {
-  defaultMessage:
-    'At present, anomalies are not filterable via the SIEM global KQL search. Stay tuned for updates, as the addition of this enhancement is slated for a future release.',
+  defaultMessage: 'The anomalies table is not filterable via the SIEM global KQL search.',
 });
 
 export const LOADING = i18n.translate('xpack.siem.ml.table.loadingDescription', {
