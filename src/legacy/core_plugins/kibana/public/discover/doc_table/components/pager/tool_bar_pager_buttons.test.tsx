@@ -18,10 +18,21 @@
  */
 
 import React from 'react';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { mountWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
 import { ToolBarPagerButtons } from './tool_bar_pager_buttons';
 
-test('it renders ToolBarPagerButtons with next and previous page', () => {
+test('it renders ToolBarPagerButtons', () => {
+  const props = {
+    hasPreviousPage: true,
+    hasNextPage: true,
+    onPageNext: jest.fn(),
+    onPagePrevious: jest.fn(),
+  };
+  const wrapper = shallowWithIntl(<ToolBarPagerButtons {...props} />);
+  expect(wrapper).toMatchSnapshot();
+});
+
+test('it renders ToolBarPagerButtons with clickable next and previous button', () => {
   const props = {
     hasPreviousPage: true,
     hasNextPage: true,
@@ -29,14 +40,13 @@ test('it renders ToolBarPagerButtons with next and previous page', () => {
     onPagePrevious: jest.fn(),
   };
   const wrapper = mountWithIntl(<ToolBarPagerButtons {...props} />);
-  // expect(wrapper).toMatchSnapshot();
   wrapper.find('[data-test-subj="btnPrevPage"]').simulate('click');
   expect(props.onPagePrevious).toHaveBeenCalledTimes(1);
   wrapper.find('[data-test-subj="btnNextPage"]').simulate('click');
   expect(props.onPageNext).toHaveBeenCalledTimes(1);
 });
 
-test('it renders ToolBarPagerButtons with no next and no previous page', () => {
+test('it renders ToolBarPagerButtons with disabled next and previous button', () => {
   const props = {
     hasPreviousPage: false,
     hasNextPage: false,
@@ -48,5 +58,4 @@ test('it renders ToolBarPagerButtons with no next and no previous page', () => {
   expect(props.onPagePrevious).toHaveBeenCalledTimes(0);
   wrapper.find('[data-test-subj="btnNextPage"]').simulate('click');
   expect(props.onPageNext).toHaveBeenCalledTimes(0);
-  expect(wrapper).toMatchSnapshot();
 });
