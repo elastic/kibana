@@ -539,6 +539,41 @@ describe('IndexPatternDimensionPanel', () => {
     });
   });
 
+  it('should select operation directly if only one field is possible', () => {
+    const initialState = {
+      ...defaultProps.state,
+      indexPatterns: {
+        1: {
+          ...defaultProps.state.indexPatterns['1'],
+          fields: defaultProps.state.indexPatterns['1'].fields.filter(
+            field => field.name !== 'memory'
+          ),
+        },
+      },
+    };
+
+    wrapper = mount(
+      <IndexPatternDimensionPanel {...defaultProps} state={initialState} columnId={'col2'} />
+    );
+
+    openPopover();
+
+    wrapper.find('button[data-test-subj="lns-indexPatternDimension-avg"]').simulate('click');
+
+    expect(setState).toHaveBeenCalledWith({
+      ...initialState,
+      columns: {
+        ...state.columns,
+        col2: expect.objectContaining({
+          sourceField: 'bytes',
+          operationType: 'avg',
+          // Other parts of this don't matter for this test
+        }),
+      },
+      columnOrder: ['col1', 'col2'],
+    });
+  });
+
   it('should indicate compatible fields when selecting the operation first', () => {
     wrapper = mount(<IndexPatternDimensionPanel {...defaultProps} columnId={'col2'} />);
 
