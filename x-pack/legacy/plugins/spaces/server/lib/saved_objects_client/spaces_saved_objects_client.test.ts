@@ -37,7 +37,7 @@ const createSpacesService = async (spaceId: string) => {
 ].forEach(currentSpace => {
   describe(`${currentSpace.id} space`, () => {
     describe('#get', () => {
-      test.skip(`throws error if options.namespace is specified`, async () => {
+      test(`throws error if options.namespace is specified`, async () => {
         const request = createMockRequest();
         const baseClient = createMockClient();
         const spacesService = await createSpacesService(currentSpace.id);
@@ -97,7 +97,7 @@ const createSpacesService = async (spaceId: string) => {
     });
 
     describe('#bulkGet', () => {
-      test.skip(`throws error if options.namespace is specified`, async () => {
+      test(`throws error if options.namespace is specified`, async () => {
         const request = createMockRequest();
         const baseClient = createMockClient();
         const spacesService = await createSpacesService(currentSpace.id);
@@ -159,7 +159,7 @@ const createSpacesService = async (spaceId: string) => {
     });
 
     describe('#find', () => {
-      test.skip(`throws error if options.namespace is specified`, async () => {
+      test(`throws error if options.namespace is specified`, async () => {
         const request = createMockRequest();
         const baseClient = createMockClient();
         const spacesService = await createSpacesService(currentSpace.id);
@@ -279,7 +279,7 @@ const createSpacesService = async (spaceId: string) => {
     });
 
     describe('#create', () => {
-      test.skip(`throws error if options.namespace is specified`, async () => {
+      test(`throws error if options.namespace is specified`, async () => {
         const request = createMockRequest();
         const baseClient = createMockClient();
         const spacesService = await createSpacesService(currentSpace.id);
@@ -340,7 +340,7 @@ const createSpacesService = async (spaceId: string) => {
     });
 
     describe('#bulkCreate', () => {
-      test.skip(`throws error if options.namespace is specified`, async () => {
+      test(`throws error if options.namespace is specified`, async () => {
         const request = createMockRequest();
         const baseClient = createMockClient();
         const spacesService = await createSpacesService(currentSpace.id);
@@ -405,7 +405,7 @@ const createSpacesService = async (spaceId: string) => {
     });
 
     describe('#update', () => {
-      test.skip(`throws error if options.namespace is specified`, async () => {
+      test(`throws error if options.namespace is specified`, async () => {
         const request = createMockRequest();
         const baseClient = createMockClient();
         const spacesService = await createSpacesService(currentSpace.id);
@@ -468,7 +468,7 @@ const createSpacesService = async (spaceId: string) => {
     });
 
     describe('#delete', () => {
-      test.skip(`throws error if options.namespace is specified`, async () => {
+      test(`throws error if options.namespace is specified`, async () => {
         const request = createMockRequest();
         const baseClient = createMockClient();
         const spacesService = await createSpacesService(currentSpace.id);

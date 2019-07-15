@@ -82,6 +82,7 @@ export class SpacesSavedObjectsClient implements SavedObjectsClientContract {
     options: SavedObjectsCreateOptions = {}
   ) {
     throwErrorIfTypeIsSpace(type);
+    throwErrorIfNamespaceSpecified(options);
 
     return await this.client.create(type, attributes, {
       ...options,
@@ -103,6 +104,7 @@ export class SpacesSavedObjectsClient implements SavedObjectsClientContract {
     options: SavedObjectsBaseOptions = {}
   ) {
     throwErrorIfTypesContainsSpace(objects.map(object => object.type));
+    throwErrorIfNamespaceSpecified(options);
 
     return await this.client.bulkCreate(objects, {
       ...options,
@@ -121,6 +123,7 @@ export class SpacesSavedObjectsClient implements SavedObjectsClientContract {
    */
   public async delete(type: string, id: string, options: SavedObjectsBaseOptions = {}) {
     throwErrorIfTypeIsSpace(type);
+    throwErrorIfNamespaceSpecified(options);
 
     return await this.client.delete(type, id, {
       ...options,
@@ -148,6 +151,7 @@ export class SpacesSavedObjectsClient implements SavedObjectsClientContract {
     if (options.type) {
       throwErrorIfTypesContainsSpace(coerceToArray(options.type));
     }
+    throwErrorIfNamespaceSpecified(options);
 
     return await this.client.find({
       ...options,
@@ -177,6 +181,7 @@ export class SpacesSavedObjectsClient implements SavedObjectsClientContract {
     options: SavedObjectsBaseOptions = {}
   ) {
     throwErrorIfTypesContainsSpace(objects.map(object => object.type));
+    throwErrorIfNamespaceSpecified(options);
 
     return await this.client.bulkGet(objects, {
       ...options,
@@ -195,6 +200,7 @@ export class SpacesSavedObjectsClient implements SavedObjectsClientContract {
    */
   public async get(type: string, id: string, options: SavedObjectsBaseOptions = {}) {
     throwErrorIfTypeIsSpace(type);
+    throwErrorIfNamespaceSpecified(options);
 
     return await this.client.get(type, id, {
       ...options,
@@ -219,6 +225,7 @@ export class SpacesSavedObjectsClient implements SavedObjectsClientContract {
     options: SavedObjectsUpdateOptions = {}
   ) {
     throwErrorIfTypeIsSpace(type);
+    throwErrorIfNamespaceSpecified(options);
 
     return await this.client.update(type, id, attributes, {
       ...options,
