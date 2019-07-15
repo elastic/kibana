@@ -17,9 +17,13 @@
  * under the License.
  */
 
-import { i18n }  from '@kbn/i18n';
+import { i18n } from '@kbn/i18n';
 import { TUTORIAL_CATEGORY } from '../../../common/tutorials/tutorial_category';
-import { onPremInstructions, cloudInstructions, onPremCloudInstructions } from '../../../common/tutorials/filebeat_instructions';
+import {
+  onPremInstructions,
+  cloudInstructions,
+  onPremCloudInstructions,
+} from '../../../common/tutorials/filebeat_instructions';
 
 export function envoyproxyLogsSpecProvider(server, context) {
   const moduleName = 'envoyproxy';
@@ -29,12 +33,13 @@ export function envoyproxyLogsSpecProvider(server, context) {
     name: i18n.translate('kbn.server.tutorials.envoyproxyLogs.nameTitle', {
       defaultMessage: 'Envoyproxy',
     }),
-    category: TUTORIAL_CATEGORY.SECURITY,
+    category: TUTORIAL_CATEGORY.SIEM,
     shortDescription: i18n.translate('kbn.server.tutorials.envoyproxyLogs.shortDescription', {
       defaultMessage: 'Collect and parse logs received from the Envoy proxy.',
     }),
     longDescription: i18n.translate('kbn.server.tutorials.envoyproxyLogs.longDescription', {
-      defaultMessage: 'This is a filebeat module for [Envoy proxy access log](https://www.envoyproxy.io/docs/envoy/v1.10.0/configuration/access_log). \
+      defaultMessage:
+        'This is a filebeat module for [Envoy proxy access log](https://www.envoyproxy.io/docs/envoy/v1.10.0/configuration/access_log). \
 It supports both standalone deployment and Envoy proxy deployment in Kubernetes. \
 [Learn more]({learnMoreLink}).',
       values: {
@@ -54,13 +59,13 @@ It supports both standalone deployment and Envoy proxy deployment in Kubernetes.
         ),
       },
       exportedFields: {
-        documentationUrl: '{config.docs.beats.filebeat}/exported-fields-envoyproxy.html'
-      }
+        documentationUrl: '{config.docs.beats.filebeat}/exported-fields-envoyproxy.html',
+      },
     },
     completionTimeMinutes: 10,
     previewImagePath: '/plugins/kibana/home/tutorial_resources/envoyproxy_logs/screenshot.png',
     onPrem: onPremInstructions(moduleName, platforms, context),
     elasticCloud: cloudInstructions(moduleName, platforms),
-    onPremElasticCloud: onPremCloudInstructions(moduleName, platforms)
+    onPremElasticCloud: onPremCloudInstructions(moduleName, platforms),
   };
 }
