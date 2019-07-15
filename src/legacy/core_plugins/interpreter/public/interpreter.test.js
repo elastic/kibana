@@ -39,7 +39,7 @@ jest.mock('./registries', () => ({
   },
 }));
 
-jest.mock('ui/ajax_stream', () => ({ ajaxStream: jest.fn() }));
+jest.mock('../../../../plugins/kibana_utils/public', () => ({ ajaxStream: jest.fn() }));
 jest.mock('ui/kfetch', () => ({ kfetch: jest.fn() }));
 jest.mock('./functions', () => ({ functions: [{}, {}, {}] }));
 jest.mock('./renderers/visualization', () => ({ visualization: {} }));
@@ -55,7 +55,7 @@ describe('interpreter/interpreter', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     jest.resetModules();
-    ajaxStream = require('ui/ajax_stream').ajaxStream;
+    ajaxStream = require('../../../../plugins/kibana_utils/public').ajaxStream;
     getInterpreter = require('./interpreter').getInterpreter;
     interpretAst = require('./interpreter').interpretAst;
     initializeInterpreter = require('./lib/interpreter').initializeInterpreter;

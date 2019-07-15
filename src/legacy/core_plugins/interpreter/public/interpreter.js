@@ -22,7 +22,7 @@ import { register, registryFactory } from '@kbn/interpreter/common';
 import { initializeInterpreter } from './lib/interpreter';
 import { registries } from './registries';
 import { kfetch } from 'ui/kfetch';
-import { ajaxStream } from 'ui/ajax_stream';
+import { ajaxStream } from '../../../../plugins/kibana_utils/public';
 import { functions } from './functions';
 import { visualization } from './renderers/visualization';
 import { typeSpecs } from '../../../../plugins/data/common/expressions/expression_types';
