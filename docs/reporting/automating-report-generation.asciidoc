@@ -2,7 +2,7 @@
 [[automating-report-generation]]
 == Automating Report Generation
 You can automatically generate reports with {watcher}, or by submitting
-HTTP POST requests from a script.
+HTTP `POST` requests from a script.
 
 include::report-intervals.asciidoc[]
 
@@ -37,6 +37,11 @@ include::watch-example.asciidoc[]
 === Using a Script
 
 include::script-example.asciidoc[]
+
+[float]
+=== HTTP Response Codes
+
+include::response-codes.asciidoc[]
 
 [float]
 == Deprecated Report URLs

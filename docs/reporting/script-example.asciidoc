@@ -1,11 +1,12 @@
-To automatically generate reports from a script, you'll make a request to the POST URL.
+To automatically generate reports from a script, you'll make a request to the `POST` URL.
 The response from this request will be JSON, and will contain a `path` property with a
-URL to use to download the generated report when it is complete.
+URL to use to download the generated report. Use the `GET` method in the HTTP request to
+download the report.
 
-The request method must be POST and it must include a `kbn-version` header for Kibana
+The request method must be `POST` and it must include a `kbn-version` header for Kibana
 to allow the request.
 
-The following example queues CSV report generation using the POST URL with cURL:
+The following example queues CSV report generation using the `POST` URL with cURL:
 
 [source,shell]
 ---------------------------------------------------------
@@ -17,12 +18,13 @@ curl \
 ---------------------------------------------------------
 // CONSOLE
 
-<1> POST method is required.
+<1> `POST` method is required.
 <2> Provide user credentials for a user with permission to access Kibana and X-Pack reporting.
-<3> The `kbn-version` header is required for all POST requests to Kibana.
-<4> The POST URL. You can copy and paste the URL for any report from the Kibana UI.
+<3> The `kbn-version` header is required for all `POST` requests to Kibana.
+**The value must match the dotted-numeral version of the Kibana instance.**
+<4> The `POST` URL. You can copy and paste the URL for any report from the Kibana UI.
 
-Here is an example response:
+Here is an example response for a successfully queued report:
 
 [source,json]
 ---------------------------------------------------------
@@ -45,16 +47,3 @@ Here is an example response:
 <1> The relative path on the Kibana host for downloading the report.
 <2> (Not included in the example) Internal representation of the reporting job, as
 found in the `.reporting-*` index.
-
-[IMPORTANT]
-===================
-When using the `path` to request the download, you will get a 503 (Service Unavailable)
-response if report generation hasn't completed yet. In that case, retry after the
-number of seconds in the `Retry-After` header in the download API response until the
-report is complete.
-
-If there was an error in generating the report, the download URL will return a 500
-(Internal Server Error) response. More information is available in the
-Reporting management page in Kibana: *Management > Kibana > Reporting*
-===================
-
