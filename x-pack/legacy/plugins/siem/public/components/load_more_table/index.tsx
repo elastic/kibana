@@ -194,9 +194,10 @@ export class LoadMoreTable<T, U, V, W, X, Y, Z, AA, AB> extends React.PureCompon
       >
         <HeaderPanel
           id={id}
-          showInspect={!isEmptyTable && this.state.showInspect}
+          showInspect={!(loading && isEmptyTable) && this.state.showInspect}
           subtitle={
-            !isEmptyTable && `${i18n.SHOWING}: ${headerCount.toLocaleString()} ${headerUnit}`
+            !(loading && isEmptyTable) &&
+            `${i18n.SHOWING}: ${headerCount.toLocaleString()} ${headerUnit}`
           }
           title={headerTitle}
           tooltip={headerTooltip}

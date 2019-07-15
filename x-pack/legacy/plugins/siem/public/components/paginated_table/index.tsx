@@ -200,9 +200,10 @@ export const PaginatedTable = memo<SiemTables>(
       >
         <HeaderPanel
           id={id}
-          showInspect={!isEmptyTable && showInspect}
+          showInspect={!(loading && isEmptyTable) && showInspect}
           subtitle={
-            !isEmptyTable && `${i18n.SHOWING}: ${headerCount.toLocaleString()} ${headerUnit}`
+            !(loading && isEmptyTable) &&
+            `${i18n.SHOWING}: ${headerCount.toLocaleString()} ${headerUnit}`
           }
           title={headerTitle}
           tooltip={headerTooltip}
