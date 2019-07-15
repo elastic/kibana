@@ -21,6 +21,6 @@
     "@kbn/babel-preset": "1.0.0",
     "@babel/parser": "7.4.5",
     "@babel/traverse": "7.4.5",
-    "lodash": "^4.17.11"
+    "lodash": "^4.17.13"
   }
 }
