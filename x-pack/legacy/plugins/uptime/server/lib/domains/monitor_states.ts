@@ -22,15 +22,6 @@ export class UMMonitorStatesDomain {
     return this.adapter.getMonitorStates(request, pageIndex, pageSize, sortField, sortDirection);
   }
 
-  public async getSummaryCount(
-    request: any,
-    dateRangeStart: string,
-    dateRangeEnd: string,
-    filters?: string | null
-  ): Promise<SnapshotCount> {
-    return this.adapter.getSummaryCount(request, dateRangeStart, dateRangeEnd, filters);
-  }
-
   public async statesIndexExists(request: any): Promise<StatesIndexStatus> {
     return this.adapter.statesIndexExists(request);
   }

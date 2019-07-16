@@ -28,14 +28,6 @@ export class UMMemoryMonitorStatesAdapter implements UMMonitorStatesAdapter {
   ): Promise<MonitorSummary[]> {
     throw new Error('Method not implemented.');
   }
-  public async getSummaryCount(
-    request: any,
-    dateRangeStart: string,
-    dateRangeEnd: string,
-    filters?: string | null | undefined
-  ): Promise<SnapshotCount> {
-    throw new Error('Method not implemented.');
-  }
   public async statesIndexExists(request: any): Promise<StatesIndexStatus> {
     throw new Error('Method not implemented.');
   }

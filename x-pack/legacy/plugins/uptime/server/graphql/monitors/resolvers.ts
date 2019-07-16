@@ -109,7 +109,7 @@ export const createMonitorsResolvers: CreateUMGraphQLResolvers = (
       { dateRangeStart, dateRangeEnd, filters },
       { req }
     ): Promise<Snapshot> {
-      const counts = await libs.monitorStates.getSummaryCount(
+      const counts = await libs.monitors.getSnapshotCount(
         req,
         dateRangeStart,
         dateRangeEnd,

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { MonitorSummary, SnapshotCount, StatesIndexStatus } from '../../../../common/graphql/types';
+import { MonitorSummary, StatesIndexStatus } from '../../../../common/graphql/types';
 
 export interface UMMonitorStatesAdapter {
   getMonitorStates(
@@ -20,11 +20,5 @@ export interface UMMonitorStatesAdapter {
     dateRangeEnd: string,
     filters?: string | null
   ): Promise<MonitorSummary[]>;
-  getSummaryCount(
-    request: any,
-    dateRangeStart: string,
-    dateRangeEnd: string,
-    filters?: string | null
-  ): Promise<SnapshotCount>;
   statesIndexExists(request: any): Promise<StatesIndexStatus>;
 }

@@ -211,9 +211,15 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
       },
     };
 
-    let up: number = 0;
-    let down: number = 0;
     let searchAfter: any = null;
+
+    const summaryByIdLocation: {
+      // ID
+      [key: string]: {
+        // Location
+        [key: string]: { up: number; down: number; timestamp: number };
+      };
+    } = {};
 
     do {
       if (searchAfter) {
@@ -225,20 +231,67 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
 
       idBuckets.forEach(bucket => {
         // We only get the latest doc
-        const status = get(bucket, 'latest.hits.hits[0]._source.monitor.status', null);
-        if (!statusFilter || (statusFilter && statusFilter === status)) {
-          if (status === 'up') {
-            up++;
-          } else {
-            down++;
-          }
+        const source: any = get(bucket, 'latest.hits.hits[0]._source');
+        const {
+          summary: { up, down },
+          monitor: { id },
+        } = source;
+        const timestamp = source['@timestamp'];
+        const location = get(source, 'observer.geo.name', '');
+
+        let idSummary = summaryByIdLocation[id];
+        if (!idSummary) {
+          idSummary = {};
+          summaryByIdLocation[id] = idSummary;
+        }
+        const locationSummary = idSummary[location];
+        if (!locationSummary || locationSummary.timestamp < timestamp) {
+          idSummary[location] = { timestamp, up, down };
         }
       });
 
       searchAfter = get(queryResult, 'aggregations.ids.after_key');
     } while (searchAfter);
 
-    return { up, down, total: up + down };
+    let up: number = 0;
+    let mixed: number = 0;
+    let down: number = 0;
+
+    for (const id in summaryByIdLocation) {
+      if (!summaryByIdLocation.hasOwnProperty(id)) {
+        continue;
+      }
+      const locationInfo = summaryByIdLocation[id];
+      let locationUp = 0;
+      let locationDown = 0;
+      for (const locationName in locationInfo) {
+        if (!locationInfo.hasOwnProperty(locationName)) {
+          continue;
+        }
+        const locationData = locationInfo[locationName];
+        locationUp += locationData.up;
+        locationDown += locationData.down;
+      }
+
+      if (locationDown === 0) {
+        up++;
+      } else if (locationUp > 0) {
+        mixed++;
+      } else {
+        down++;
+      }
+    }
+
+    const result: any = { up, down, mixed, total: up + down + mixed };
+    if (statusFilter) {
+      for (const status in result) {
+        if (status !== 'total' && status !== statusFilter) {
+          result[status] = 0;
+        }
+      }
+    }
+
+    return result;
   }
 
   /**
