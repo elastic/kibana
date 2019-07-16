@@ -235,7 +235,7 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
           summary: { up, down },
           monitor: { id },
         } = source;
-        const timestamp = source['@timestamp'];
+        const timestamp = get(source, '@timestamp');
         const location = get(source, 'observer.geo.name', '');
 
         let idSummary = summaryByIdLocation[id];
