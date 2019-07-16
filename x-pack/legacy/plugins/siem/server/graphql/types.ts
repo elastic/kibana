@@ -1183,7 +1183,7 @@ export interface NetworkTopNFlowData {
 
   totalCount: number;
 
-  pageInfo: PageInfo;
+  pageInfo: PageInfoPaginated;
 
   inspect?: Inspect | null;
 }
@@ -1231,7 +1231,7 @@ export interface NetworkDnsData {
 
   totalCount: number;
 
-  pageInfo: PageInfo;
+  pageInfo: PageInfoPaginated;
 
   inspect?: Inspect | null;
 }
@@ -1986,7 +1986,7 @@ export interface NetworkTopNFlowSourceArgs {
 
   flowTarget: FlowTarget;
 
-  pagination: PaginationInput;
+  pagination: PaginationInputPaginated;
 
   sort: NetworkTopNFlowSortField;
 
@@ -2001,7 +2001,7 @@ export interface NetworkDnsSourceArgs {
 
   isPtrIncluded: boolean;
 
-  pagination: PaginationInput;
+  pagination: PaginationInputPaginated;
 
   sort: NetworkDnsSortField;
 
@@ -2803,7 +2803,7 @@ export namespace SourceResolvers {
 
     flowTarget: FlowTarget;
 
-    pagination: PaginationInput;
+    pagination: PaginationInputPaginated;
 
     sort: NetworkTopNFlowSortField;
 
@@ -2824,7 +2824,7 @@ export namespace SourceResolvers {
 
     isPtrIncluded: boolean;
 
-    pagination: PaginationInput;
+    pagination: PaginationInputPaginated;
 
     sort: NetworkDnsSortField;
 
@@ -6258,7 +6258,7 @@ export namespace NetworkTopNFlowDataResolvers {
 
     totalCount?: TotalCountResolver<number, TypeParent, Context>;
 
-    pageInfo?: PageInfoResolver<PageInfo, TypeParent, Context>;
+    pageInfo?: PageInfoResolver<PageInfoPaginated, TypeParent, Context>;
 
     inspect?: InspectResolver<Inspect | null, TypeParent, Context>;
   }
@@ -6274,7 +6274,7 @@ export namespace NetworkTopNFlowDataResolvers {
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type PageInfoResolver<
-    R = PageInfo,
+    R = PageInfoPaginated,
     Parent = NetworkTopNFlowData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
@@ -6416,7 +6416,7 @@ export namespace NetworkDnsDataResolvers {
 
     totalCount?: TotalCountResolver<number, TypeParent, Context>;
 
-    pageInfo?: PageInfoResolver<PageInfo, TypeParent, Context>;
+    pageInfo?: PageInfoResolver<PageInfoPaginated, TypeParent, Context>;
 
     inspect?: InspectResolver<Inspect | null, TypeParent, Context>;
   }
@@ -6432,7 +6432,7 @@ export namespace NetworkDnsDataResolvers {
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type PageInfoResolver<
-    R = PageInfo,
+    R = PageInfoPaginated,
     Parent = NetworkDnsData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;

@@ -1154,7 +1154,7 @@ export interface NetworkTopNFlowData {
 
   totalCount: number;
 
-  pageInfo: PageInfo;
+  pageInfo: PageInfoPaginated;
 
   inspect?: Inspect | null;
 }
@@ -1202,7 +1202,7 @@ export interface NetworkDnsData {
 
   totalCount: number;
 
-  pageInfo: PageInfo;
+  pageInfo: PageInfoPaginated;
 
   inspect?: Inspect | null;
 }
@@ -1957,7 +1957,7 @@ export interface NetworkTopNFlowSourceArgs {
 
   flowTarget: FlowTarget;
 
-  pagination: PaginationInput;
+  pagination: PaginationInputPaginated;
 
   sort: NetworkTopNFlowSortField;
 
@@ -1972,7 +1972,7 @@ export interface NetworkDnsSourceArgs {
 
   isPtrIncluded: boolean;
 
-  pagination: PaginationInput;
+  pagination: PaginationInputPaginated;
 
   sort: NetworkDnsSortField;
 
@@ -3195,7 +3195,7 @@ export namespace GetNetworkDnsQuery {
     sort: NetworkDnsSortField;
     isPtrIncluded: boolean;
     timerange: TimerangeInput;
-    pagination: PaginationInput;
+    pagination: PaginationInputPaginated;
     filterQuery?: string | null;
     defaultIndex: string[];
     inspect: boolean;
@@ -3258,17 +3258,13 @@ export namespace GetNetworkDnsQuery {
   };
 
   export type PageInfo = {
-    __typename?: 'PageInfo';
+    __typename?: 'PageInfoPaginated';
 
-    endCursor?: EndCursor | null;
+    activePage: number;
 
-    hasNextPage?: boolean | null;
-  };
+    fakeTotalCount: number;
 
-  export type EndCursor = {
-    __typename?: 'CursorType';
-
-    value?: string | null;
+    showMorePagesIndicator: boolean;
   };
 
   export type Inspect = {
@@ -3285,7 +3281,7 @@ export namespace GetNetworkTopNFlowQuery {
     sourceId: string;
     flowDirection: FlowDirection;
     filterQuery?: string | null;
-    pagination: PaginationInput;
+    pagination: PaginationInputPaginated;
     sort: NetworkTopNFlowSortField;
     flowTarget: FlowTarget;
     timerange: TimerangeInput;
@@ -3398,17 +3394,13 @@ export namespace GetNetworkTopNFlowQuery {
   };
 
   export type PageInfo = {
-    __typename?: 'PageInfo';
+    __typename?: 'PageInfoPaginated';
 
-    endCursor?: EndCursor | null;
+    activePage: number;
 
-    hasNextPage?: boolean | null;
-  };
+    fakeTotalCount: number;
 
-  export type EndCursor = {
-    __typename?: 'CursorType';
-
-    value?: string | null;
+    showMorePagesIndicator: boolean;
   };
 
   export type Inspect = {

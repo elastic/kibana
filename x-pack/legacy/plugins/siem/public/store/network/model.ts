@@ -20,25 +20,35 @@ export enum NetworkType {
   details = 'details',
 }
 
+export enum NetworkTableType {
+  dns = 'dns',
+  topNFlow = 'topNFlow',
+}
+
 export interface BasicQuery {
   limit: number;
 }
 
+export interface BasicQueryPaginated {
+  activePage: number;
+  limit: number;
+}
+
 // Network Page Models
-export interface TopNFlowQuery extends BasicQuery {
+export interface TopNFlowQuery extends BasicQueryPaginated {
   flowTarget: FlowTarget;
   topNFlowSort: NetworkTopNFlowSortField;
   flowDirection: FlowDirection;
 }
 
-export interface DnsQuery extends BasicQuery {
+export interface DnsQuery extends BasicQueryPaginated {
   dnsSortField: NetworkDnsSortField;
   isPtrIncluded: boolean;
 }
 
 interface NetworkQueries {
-  topNFlow: TopNFlowQuery;
-  dns: DnsQuery;
+  [NetworkTableType.topNFlow]: TopNFlowQuery;
+  [NetworkTableType.dns]: DnsQuery;
 }
 
 export interface NetworkPageModel {

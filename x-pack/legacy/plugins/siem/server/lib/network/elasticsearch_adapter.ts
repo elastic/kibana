@@ -16,6 +16,7 @@ import {
 import { inspectStringifyObject } from '../../utils/build_query';
 import { DatabaseSearchResponse, FrameworkAdapter, FrameworkRequest } from '../framework';
 import { TermAggregation } from '../types';
+import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../common/constants';
 
 import { NetworkDnsRequestOptions, NetworkTopNFlowRequestOptions } from './index';
 import { buildDnsQuery } from './query_dns.dsl';
@@ -35,26 +36,24 @@ export class ElasticsearchNetworkAdapter implements NetworkAdapter {
       'search',
       dsl
     );
-    const { cursor, limit } = options.pagination;
+    const { activePage, cursorStart, fakePossibleCount, querySize } = options.pagination;
     const totalCount = getOr(0, 'aggregations.top_n_flow_count.value', response);
     const networkTopNFlowEdges: NetworkTopNFlowEdges[] = getTopNFlowEdges(response, options);
-    const hasNextPage = networkTopNFlowEdges.length > limit;
-    const beginning = cursor != null ? parseInt(cursor, 10) : 0;
-    const edges = networkTopNFlowEdges.splice(beginning, limit - beginning);
+    const fakeTotalCount = fakePossibleCount <= totalCount ? fakePossibleCount : totalCount;
+    const edges = networkTopNFlowEdges.splice(cursorStart, querySize - cursorStart);
     const inspect = {
       dsl: [inspectStringifyObject(dsl)],
       response: [inspectStringifyObject(response)],
     };
+    const showMorePagesIndicator = totalCount > fakeTotalCount;
 
     return {
       edges,
       inspect,
       pageInfo: {
-        hasNextPage,
-        endCursor: {
-          value: String(limit),
-          tiebreaker: null,
-        },
+        activePage: activePage ? activePage : 0,
+        fakeTotalCount,
+        showMorePagesIndicator,
       },
       totalCount,
     };
@@ -70,28 +69,25 @@ export class ElasticsearchNetworkAdapter implements NetworkAdapter {
       'search',
       dsl
     );
-    const { cursor, limit } = options.pagination;
+    const { activePage, cursorStart, fakePossibleCount, querySize } = options.pagination;
     const totalCount = getOr(0, 'aggregations.dns_count.value', response);
     const networkDnsEdges: NetworkDnsEdges[] = formatDnsEdges(
       getOr([], 'aggregations.dns_name_query_count.buckets', response)
     );
-    const hasNextPage = networkDnsEdges.length > limit;
-    const beginning = cursor != null ? parseInt(cursor, 10) : 0;
-    const edges = networkDnsEdges.splice(beginning, limit - beginning);
+    const fakeTotalCount = fakePossibleCount <= totalCount ? fakePossibleCount : totalCount;
+    const edges = networkDnsEdges.splice(cursorStart, querySize - cursorStart);
     const inspect = {
       dsl: [inspectStringifyObject(dsl)],
       response: [inspectStringifyObject(response)],
     };
-
+    const showMorePagesIndicator = totalCount > fakeTotalCount;
     return {
       edges,
       inspect,
       pageInfo: {
-        hasNextPage,
-        endCursor: {
-          value: String(limit),
-          tiebreaker: null,
-        },
+        activePage: activePage ? activePage : 0,
+        fakeTotalCount,
+        showMorePagesIndicator,
       },
       totalCount,
     };
@@ -102,6 +98,9 @@ const getTopNFlowEdges = (
   response: DatabaseSearchResponse<NetworkTopNFlowData, TermAggregation>,
   options: NetworkTopNFlowRequestOptions
 ): NetworkTopNFlowEdges[] => {
+  if (options.pagination && options.pagination.querySize >= DEFAULT_MAX_TABLE_QUERY_SIZE) {
+    throw new Error(`No query size above ${DEFAULT_MAX_TABLE_QUERY_SIZE}`);
+  }
   if (options.flowDirection === FlowDirection.uniDirectional) {
     return formatTopNFlowEdges(
       getOr([], 'aggregations.top_uni_flow.buckets', response),

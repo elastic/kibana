@@ -22,20 +22,22 @@ import {
 import { networkModel, networkSelectors, State } from '../../../../store';
 import { FlowDirectionSelect } from '../../../flow_controls/flow_direction_select';
 import { FlowTargetSelect } from '../../../flow_controls/flow_target_select';
-import { Criteria, ItemsPerRow, LoadMoreTable } from '../../../load_more_table';
+import { Criteria, ItemsPerRow, PaginatedTable } from '../../../paginated_table';
 
 import { getNetworkTopNFlowColumns } from './columns';
 import * as i18n from './translations';
 
+const tableType = networkModel.NetworkTableType.topNFlow;
+
 interface OwnProps {
   data: NetworkTopNFlowEdges[];
+  fakeTotalCount: number;
   id: string;
   indexPattern: StaticIndexPattern;
   loading: boolean;
-  hasNextPage: boolean;
-  nextCursor: string;
+  loadPage: (newActivePage: number) => void;
+  showMorePagesIndicator: boolean;
   totalCount: number;
-  loadMore: (cursor: string) => void;
   type: networkModel.NetworkType;
 }
 
@@ -47,6 +49,11 @@ interface NetworkTopNFlowTableReduxProps {
 }
 
 interface NetworkTopNFlowTableDispatchProps {
+  updateTableActivePage: ActionCreator<{
+    activePage: number;
+    networkType: networkModel.NetworkType;
+    tableType: networkModel.NetworkTableType;
+  }>;
   updateTopNFlowDirection: ActionCreator<{
     flowDirection: FlowDirection;
     networkType: networkModel.NetworkType;
@@ -77,14 +84,6 @@ const rowItems: ItemsPerRow[] = [
     text: i18n.ROWS_10,
     numberOfRow: 10,
   },
-  {
-    text: i18n.ROWS_20,
-    numberOfRow: 20,
-  },
-  {
-    text: i18n.ROWS_50,
-    numberOfRow: 50,
-  },
 ];
 
 export const NetworkTopNFlowTableId = 'networkTopNFlow-top-talkers';
@@ -93,20 +92,21 @@ class NetworkTopNFlowTableComponent extends React.PureComponent<NetworkTopNFlowT
   public render() {
     const {
       data,
-      hasNextPage,
+      flowDirection,
+      flowTarget,
+      fakeTotalCount,
       id,
       indexPattern,
       limit,
       loading,
-      loadMore,
-      totalCount,
-      nextCursor,
-      updateTopNFlowLimit,
-      flowDirection,
+      loadPage,
+      showMorePagesIndicator,
       topNFlowSort,
-      flowTarget,
+      totalCount,
       type,
+      updateTopNFlowLimit,
       updateTopNFlowTarget,
+      updateTableActivePage,
     } = this.props;
 
     const field =
@@ -115,7 +115,7 @@ class NetworkTopNFlowTableComponent extends React.PureComponent<NetworkTopNFlowT
         : `node.network.${topNFlowSort.field}`;
 
     return (
-      <LoadMoreTable
+      <PaginatedTable
         columns={getNetworkTopNFlowColumns(
           indexPattern,
           flowDirection,
@@ -123,7 +123,6 @@ class NetworkTopNFlowTableComponent extends React.PureComponent<NetworkTopNFlowT
           type,
           NetworkTopNFlowTableId
         )}
-        hasNextPage={hasNextPage}
         headerCount={totalCount}
         headerSupplement={
           <EuiFlexGroup alignItems="center" gutterSize="m">
@@ -163,10 +162,19 @@ class NetworkTopNFlowTableComponent extends React.PureComponent<NetworkTopNFlowT
         limit={limit}
         loading={loading}
         loadingTitle={i18n.TOP_TALKERS}
-        loadMore={() => loadMore(nextCursor)}
+        loadPage={newActivePage => loadPage(newActivePage)}
         onChange={this.onChange}
         pageOfItems={data}
+        showMorePagesIndicator={showMorePagesIndicator}
         sorting={{ field, direction: topNFlowSort.direction }}
+        totalCount={fakeTotalCount}
+        updateActivePage={newPage =>
+          updateTableActivePage({
+            activePage: newPage,
+            networkType: type,
+            tableType,
+          })
+        }
         updateLimitPagination={newLimit =>
           updateTopNFlowLimit({ limit: newLimit, networkType: type })
         }
@@ -208,6 +216,7 @@ export const NetworkTopNFlowTable = connect(
     updateTopNFlowSort: networkActions.updateTopNFlowSort,
     updateTopNFlowTarget: networkActions.updateTopNFlowTarget,
     updateTopNFlowDirection: networkActions.updateTopNFlowDirection,
+    updateTableActivePage: networkActions.updateTableActivePage,
   }
 )(NetworkTopNFlowTableComponent);
 

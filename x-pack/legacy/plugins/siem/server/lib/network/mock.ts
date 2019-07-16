@@ -21,7 +21,12 @@ export const mockOptions: NetworkTopNFlowRequestOptions = {
     },
   },
   timerange: { interval: '12h', to: 1549852006071, from: 1549765606071 },
-  pagination: { limit: 10, cursor: null, tiebreaker: null },
+  pagination: {
+    activePage: 0,
+    cursorStart: 0,
+    fakePossibleCount: 10,
+    querySize: 2,
+  },
   filterQuery: {},
   fields: [
     'totalCount',
@@ -59,7 +64,12 @@ export const mockRequest = {
       filterQuery: '',
       flowDirection: FlowDirection.uniDirectional,
       flowType: FlowTarget.source,
-      pagination: { limit: 10, cursor: null, tiebreaker: null },
+      pagination: {
+        activePage: 0,
+        cursorStart: 0,
+        fakePossibleCount: 10,
+        querySize: 2,
+      },
       sourceId: 'default',
       timerange: { interval: '12h', from: 1549765830772, to: 1549852230772 },
     },

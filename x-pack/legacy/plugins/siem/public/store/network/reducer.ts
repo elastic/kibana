@@ -16,7 +16,7 @@ import {
   TlsFields,
   UsersFields,
 } from '../../graphql/types';
-import { DEFAULT_TABLE_LIMIT } from '../constants';
+import { DEFAULT_TABLE_ACTIVE_PAGE, DEFAULT_TABLE_LIMIT } from '../constants';
 
 import {
   applyNetworkFilterQuery,
@@ -29,6 +29,7 @@ import {
   updateDomainsSort,
   updateIpDetailsFlowTarget,
   updateIsPtrIncluded,
+  updateTableActivePage,
   updateTopNFlowDirection,
   updateTopNFlowLimit,
   updateTopNFlowSort,
@@ -39,13 +40,15 @@ import {
 } from './actions';
 import { helperUpdateTopNFlowDirection } from './helper';
 import { NetworkModel, NetworkType } from './model';
+import { networkModel } from './index';
 
 export type NetworkState = NetworkModel;
 
 export const initialNetworkState: NetworkState = {
   page: {
     queries: {
-      topNFlow: {
+      [networkModel.NetworkTableType.topNFlow]: {
+        activePage: DEFAULT_TABLE_ACTIVE_PAGE,
         limit: DEFAULT_TABLE_LIMIT,
         topNFlowSort: {
           field: NetworkTopNFlowFields.bytes,
@@ -54,7 +57,8 @@ export const initialNetworkState: NetworkState = {
         flowTarget: FlowTarget.source,
         flowDirection: FlowDirection.uniDirectional,
       },
-      dns: {
+      [networkModel.NetworkTableType.dns]: {
+        activePage: DEFAULT_TABLE_ACTIVE_PAGE,
         limit: DEFAULT_TABLE_LIMIT,
         dnsSortField: {
           field: NetworkDnsFields.uniqueDomains,
@@ -98,13 +102,26 @@ export const initialNetworkState: NetworkState = {
 };
 
 export const networkReducer = reducerWithInitialState(initialNetworkState)
+  .case(updateTableActivePage, (state, { activePage, networkType, tableType }) => ({
+    ...state,
+    [networkType]: {
+      ...state[networkType],
+      queries: {
+        ...state[networkType].queries,
+        [tableType]: {
+          ...state[networkType].queries[tableType],
+          activePage,
+        },
+      },
+    },
+  }))
   .case(updateDnsLimit, (state, { limit, networkType }) => ({
     ...state,
     [networkType]: {
       ...state[networkType],
       queries: {
         ...state[networkType].queries,
-        dns: {
+        [networkModel.NetworkTableType.dns]: {
           ...state[NetworkType.page].queries.dns,
           limit,
         },
@@ -117,7 +134,7 @@ export const networkReducer = reducerWithInitialState(initialNetworkState)
       ...state[networkType],
       queries: {
         ...state[networkType].queries,
-        dns: {
+        [networkModel.NetworkTableType.dns]: {
           ...state[NetworkType.page].queries.dns,
           dnsSortField,
         },
@@ -130,7 +147,7 @@ export const networkReducer = reducerWithInitialState(initialNetworkState)
       ...state[networkType],
       queries: {
         ...state[networkType].queries,
-        dns: {
+        [networkModel.NetworkTableType.dns]: {
           ...state[NetworkType.page].queries.dns,
           isPtrIncluded,
         },
@@ -143,7 +160,7 @@ export const networkReducer = reducerWithInitialState(initialNetworkState)
       ...state[networkType],
       queries: {
         ...state[networkType].queries,
-        topNFlow: {
+        [networkModel.NetworkTableType.topNFlow]: {
           ...state[NetworkType.page].queries.topNFlow,
           limit,
         },
@@ -156,7 +173,7 @@ export const networkReducer = reducerWithInitialState(initialNetworkState)
       ...state[networkType],
       queries: {
         ...state[networkType].queries,
-        topNFlow: {
+        [networkModel.NetworkTableType.topNFlow]: {
           ...state[NetworkType.page].queries.topNFlow,
           ...helperUpdateTopNFlowDirection(
             state[NetworkType.page].queries.topNFlow.flowTarget,
@@ -172,7 +189,7 @@ export const networkReducer = reducerWithInitialState(initialNetworkState)
       ...state[networkType],
       queries: {
         ...state[networkType].queries,
-        topNFlow: {
+        [networkModel.NetworkTableType.topNFlow]: {
           ...state[NetworkType.page].queries.topNFlow,
           topNFlowSort,
         },
@@ -185,7 +202,7 @@ export const networkReducer = reducerWithInitialState(initialNetworkState)
       ...state[NetworkType.page],
       queries: {
         ...state[NetworkType.page].queries,
-        topNFlow: {
+        [networkModel.NetworkTableType.topNFlow]: {
           ...state[NetworkType.page].queries.topNFlow,
           flowTarget,
           topNFlowSort: {

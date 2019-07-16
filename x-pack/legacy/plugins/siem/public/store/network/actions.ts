@@ -17,9 +17,15 @@ import {
 } from '../../graphql/types';
 import { KueryFilterQuery, SerializedFilterQuery } from '../model';
 
-import { NetworkType } from './model';
+import { NetworkTableType, NetworkType } from './model';
 
 const actionCreator = actionCreatorFactory('x-pack/siem/local/network');
+
+export const updateTableActivePage = actionCreator<{
+  activePage: number;
+  networkType: NetworkType;
+  tableType: NetworkTableType;
+}>('UPDATE_DNS_LIMIT');
 
 export const updateDnsLimit = actionCreator<{
   limit: number;
