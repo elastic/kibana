@@ -12,9 +12,13 @@ import uuid from 'uuid';
 import * as i18n from './translations';
 import { useStateToaster } from '../../components/toasters';
 
-export type OnCopy = (
-  { content, isSuccess }: { content: string | number; isSuccess: boolean }
-) => void;
+export type OnCopy = ({
+  content,
+  isSuccess,
+}: {
+  content: string | number;
+  isSuccess: boolean;
+}) => void;
 
 interface GetSuccessToastParams {
   titleSummary?: string;

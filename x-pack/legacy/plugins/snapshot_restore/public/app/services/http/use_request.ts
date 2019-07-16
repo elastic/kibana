@@ -122,31 +122,28 @@ export const useRequest = ({
     isOutdatedRequest = true;
   };
 
-  useEffect(
-    () => {
-      // Perform request
-      request();
+  useEffect(() => {
+    // Perform request
+    request();
 
-      // Clear current interval
+    // Clear current interval
+    if (intervalRequest.current) {
+      clearInterval(intervalRequest.current);
+    }
+
+    // Set new interval
+    if (currentInterval) {
+      intervalRequest.current = setInterval(request, currentInterval);
+    }
+
+    // Cleanup intervals and inflight requests and corresponding state changes
+    return () => {
+      cancelOutdatedRequest();
       if (intervalRequest.current) {
         clearInterval(intervalRequest.current);
       }
-
-      // Set new interval
-      if (currentInterval) {
-        intervalRequest.current = setInterval(request, currentInterval);
-      }
-
-      // Cleanup intervals and inflight requests and corresponding state changes
-      return () => {
-        cancelOutdatedRequest();
-        if (intervalRequest.current) {
-          clearInterval(intervalRequest.current);
-        }
-      };
-    },
-    [path, currentInterval]
-  );
+    };
+  }, [path, currentInterval]);
 
   return {
     error,

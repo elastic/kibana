@@ -46,19 +46,16 @@ function SizeParamEditor({
   );
   const isValid = disabled || Number(value) > 0;
 
-  useEffect(
-    () => {
-      setValidity(isValid);
-    },
-    [isValid]
-  );
+  useEffect(() => {
+    setValidity(isValid);
+  }, [isValid]);
 
   return (
     <EuiFormRow
       label={label}
       fullWidth={true}
       isInvalid={showValidation ? !isValid : false}
-      className={wrappedWithInlineComp ? undefined : 'visEditorSidebar__aggParamFormRow'}
+      compressed
     >
       <EuiFieldNumber
         value={isUndefined(value) ? '' : value}

@@ -30,12 +30,12 @@ export class KibanaTilemapSource extends AbstractTMSSource {
   }
 
   static renderEditor = ({ onPreviewSource, inspectorAdapters }) => {
-    const previewTilemap = () => {
+    const onSourceConfigChange = () => {
       const sourceDescriptor = KibanaTilemapSource.createDescriptor();
       const source = new KibanaTilemapSource(sourceDescriptor, inspectorAdapters);
       onPreviewSource(source);
     };
-    return (<CreateSourceEditor previewTilemap={previewTilemap}/>);
+    return (<CreateSourceEditor onSourceConfigChange={onSourceConfigChange}/>);
   };
 
   async getImmutableProperties() {

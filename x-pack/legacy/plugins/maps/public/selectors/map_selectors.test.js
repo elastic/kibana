@@ -5,8 +5,9 @@
  */
 
 jest.mock('../shared/layers/vector_layer', () => {});
+jest.mock('../shared/layers/heatmap_layer', () => {});
 jest.mock('../shared/layers/sources/all_sources', () => {});
-jest.mock('../store/non_serializable_instances', () => ({
+jest.mock('../reducers/non_serializable_instances', () => ({
   getInspectorAdapters: () => {
     return {};
   }

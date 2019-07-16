@@ -5,7 +5,7 @@
  */
 
 import { UMMonitorStatesAdapter } from './adapter_types';
-import { MonitorSummary, SnapshotCount } from '../../../../common/graphql/types';
+import { MonitorSummary, SnapshotCount, StatesIndexStatus } from '../../../../common/graphql/types';
 
 /**
  * This class will be implemented for server-side tests.
@@ -36,7 +36,7 @@ export class UMMemoryMonitorStatesAdapter implements UMMonitorStatesAdapter {
   ): Promise<SnapshotCount> {
     throw new Error('Method not implemented.');
   }
-  public async statesIndexExists(request: any): Promise<boolean> {
+  public async statesIndexExists(request: any): Promise<StatesIndexStatus> {
     throw new Error('Method not implemented.');
   }
 }

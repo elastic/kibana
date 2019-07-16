@@ -16,7 +16,7 @@ describe('Data Frame: Job List <ExpandedRow />', () => {
   test('Minimal initialization', () => {
     const item: DataFrameJobListRow = dataFrameJobListRow;
 
-    const wrapper = shallow(<ExpandedRow item={item} lastUpdate={12345678} />);
+    const wrapper = shallow(<ExpandedRow item={item} />);
 
     expect(wrapper).toMatchSnapshot();
   });

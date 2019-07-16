@@ -12,11 +12,13 @@ import { connect } from 'react-redux';
 import chrome from 'ui/chrome';
 import { DEFAULT_INDEX_KEY } from '../../../common/constants';
 import { GetUncommonProcessesQuery, PageInfo, UncommonProcessesEdges } from '../../graphql/types';
-import { hostsModel, hostsSelectors, inputsModel, State } from '../../store';
+import { hostsModel, hostsSelectors, inputsModel, State, inputsSelectors } from '../../store';
 import { createFilter, getDefaultFetchPolicy } from '../helpers';
 import { QueryTemplate, QueryTemplateProps } from '../query_template';
 
 import { uncommonProcessesQuery } from './index.gql_query';
+
+const ID = 'uncommonProcessesQuery';
 
 export interface UncommonProcessesArgs {
   id: string;
@@ -26,6 +28,7 @@ export interface UncommonProcessesArgs {
   loading: boolean;
   loadMore: (cursor: string) => void;
   refetch: inputsModel.Refetch;
+  inspect: inputsModel.InspectQuery;
 }
 
 export interface OwnProps extends QueryTemplateProps {
@@ -34,6 +37,7 @@ export interface OwnProps extends QueryTemplateProps {
 }
 
 export interface UncommonProcessesComponentReduxProps {
+  isInspected: boolean;
   limit: number;
 }
 
@@ -46,9 +50,10 @@ class UncommonProcessesComponentQuery extends QueryTemplate<
 > {
   public render() {
     const {
-      id = 'uncommonProcessesQuery',
+      id = ID,
       children,
       filterQuery,
+      isInspected,
       skip,
       sourceId,
       startDate,
@@ -75,6 +80,7 @@ class UncommonProcessesComponentQuery extends QueryTemplate<
           },
           filterQuery: createFilter(filterQuery),
           defaultIndex: chrome.getUiSettingsClient().get(DEFAULT_INDEX_KEY),
+          inspect: isInspected,
         }}
       >
         {({ data, loading, fetchMore, refetch }) => {
@@ -108,6 +114,7 @@ class UncommonProcessesComponentQuery extends QueryTemplate<
           }));
           return children({
             id,
+            inspect: getOr(null, 'source.UncommonProcesses.inspect', data),
             loading,
             refetch,
             totalCount: getOr(0, 'source.UncommonProcesses.totalCount', data),
@@ -123,8 +130,13 @@ class UncommonProcessesComponentQuery extends QueryTemplate<
 
 const makeMapStateToProps = () => {
   const getUncommonProcessesSelector = hostsSelectors.uncommonProcessesSelector();
-  const mapStateToProps = (state: State, { type }: OwnProps) => {
-    return getUncommonProcessesSelector(state, type);
+  const getQuery = inputsSelectors.globalQueryByIdSelector();
+  const mapStateToProps = (state: State, { type, id = ID }: OwnProps) => {
+    const { isInspected } = getQuery(state, id);
+    return {
+      ...getUncommonProcessesSelector(state, type),
+      isInspected,
+    };
   };
   return mapStateToProps;
 };

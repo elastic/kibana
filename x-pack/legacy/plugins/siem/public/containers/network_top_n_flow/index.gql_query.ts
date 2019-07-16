@@ -16,6 +16,7 @@ export const networkTopNFlowQuery = gql`
     $flowTarget: FlowTarget!
     $timerange: TimerangeInput!
     $defaultIndex: [String!]!
+    $inspect: Boolean!
   ) {
     source(id: $sourceId) {
       id
@@ -66,6 +67,10 @@ export const networkTopNFlowQuery = gql`
             value
           }
           hasNextPage
+        }
+        inspect @include(if: $inspect) {
+          dsl
+          response
         }
       }
     }

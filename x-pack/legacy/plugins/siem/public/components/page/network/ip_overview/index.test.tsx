@@ -29,19 +29,20 @@ describe('IP Overview Component', () => {
 
   describe('rendering', () => {
     const mockProps = {
+      anomaliesData: mockAnomalies,
+      data: mockData.IpOverview,
+      endDate: new Date('2019-06-18T06:00:00.000Z').valueOf(),
       flowTarget: FlowTarget.source,
       loading: false,
+      id: 'ipOverview',
       ip: '10.10.10.10',
-      data: mockData.IpOverview,
+      isLoadingAnomaliesData: false,
+      narrowDateRange: (jest.fn() as unknown) as NarrowDateRange,
+      startDate: new Date('2019-06-15T06:00:00.000Z').valueOf(),
       type: networkModel.NetworkType.details,
       updateFlowTargetAction: (jest.fn() as unknown) as ActionCreator<{
         flowTarget: FlowTarget;
       }>,
-      startDate: new Date('2019-06-15T06:00:00.000Z').valueOf(),
-      endDate: new Date('2019-06-18T06:00:00.000Z').valueOf(),
-      anomaliesData: mockAnomalies,
-      isLoadingAnomaliesData: false,
-      narrowDateRange: (jest.fn() as unknown) as NarrowDateRange,
     };
 
     test('it renders the default IP Overview', () => {

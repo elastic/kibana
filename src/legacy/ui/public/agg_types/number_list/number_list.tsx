@@ -67,30 +67,24 @@ function NumberList({
   const [ascendingError, setAscendingError] = useState(EMPTY_STRING);
 
   // responsible for discarding changes
-  useEffect(
-    () => {
-      const updatedModels = getUpdatedModels(numberArray, models, numberRange);
-      if (validateAscendingOrder) {
-        const isOrderValid = validateOrder(updatedModels);
-        setAscendingError(
-          isOrderValid
-            ? i18n.translate('common.ui.aggTypes.numberList.invalidAscOrderErrorMessage', {
-                defaultMessage: 'The values should be in ascending order.',
-              })
-            : EMPTY_STRING
-        );
-      }
-      setModels(updatedModels);
-    },
-    [numberArray]
-  );
+  useEffect(() => {
+    const updatedModels = getUpdatedModels(numberArray, models, numberRange);
+    if (validateAscendingOrder) {
+      const isOrderValid = validateOrder(updatedModels);
+      setAscendingError(
+        isOrderValid
+          ? i18n.translate('common.ui.aggTypes.numberList.invalidAscOrderErrorMessage', {
+              defaultMessage: 'The values should be in ascending order.',
+            })
+          : EMPTY_STRING
+      );
+    }
+    setModels(updatedModels);
+  }, [numberArray]);
 
-  useEffect(
-    () => {
-      setValidity(!hasInvalidValues(models));
-    },
-    [models]
-  );
+  useEffect(() => {
+    setValidity(!hasInvalidValues(models));
+  }, [models]);
 
   // resposible for setting up an initial value ([0]) when there is no default value
   useEffect(() => {

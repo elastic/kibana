@@ -77,6 +77,7 @@ exports[`Load More Table Component rendering it renders the default Hosts table 
       ]
     }
     hasNextPage={true}
+    id="hostsQuery"
     indexPattern={
       Object {
         "fields": Array [

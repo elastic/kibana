@@ -64,6 +64,7 @@ uiRoutes.when('/logstash', {
               stats={data.clusterStatus}
               metrics={data.metrics}
               onBrush={this.onBrush}
+              zoomInfo={this.zoomInfo}
             />
           </I18nContext>
         );

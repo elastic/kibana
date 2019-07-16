@@ -132,9 +132,7 @@ export class Router {
     // happen when it's used from JavaScript.
     if (route.validate === undefined) {
       throw new Error(
-        `The [${routeMethod}] at [${
-          route.path
-        }] does not have a 'validate' specified. Use 'false' as the value if you want to bypass validation.`
+        `The [${routeMethod}] at [${route.path}] does not have a 'validate' specified. Use 'false' as the value if you want to bypass validation.`
       );
     }
 

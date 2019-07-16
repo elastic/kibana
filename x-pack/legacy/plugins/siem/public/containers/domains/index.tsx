@@ -19,14 +19,17 @@ import {
   FlowTarget,
   PageInfo,
 } from '../../graphql/types';
-import { inputsModel, networkModel, networkSelectors, State } from '../../store';
+import { inputsModel, networkModel, networkSelectors, State, inputsSelectors } from '../../store';
 import { createFilter } from '../helpers';
 import { QueryTemplate, QueryTemplateProps } from '../query_template';
 
 import { domainsQuery } from './index.gql_query';
 
+const ID = 'domainsQuery';
+
 export interface DomainsArgs {
   id: string;
+  inspect: inputsModel.InspectQuery;
   domains: DomainsEdges[];
   totalCount: number;
   pageInfo: PageInfo;
@@ -43,6 +46,7 @@ export interface OwnProps extends QueryTemplateProps {
 }
 
 export interface DomainsComponentReduxProps {
+  isInspected: boolean;
   limit: number;
   domainsSortField: DomainsSortField;
   flowDirection: FlowDirection;
@@ -57,7 +61,8 @@ class DomainsComponentQuery extends QueryTemplate<
 > {
   public render() {
     const {
-      id = 'domainsQuery',
+      id = ID,
+      isInspected,
       children,
       domainsSortField,
       filterQuery,
@@ -94,6 +99,7 @@ class DomainsComponentQuery extends QueryTemplate<
           },
           filterQuery: createFilter(filterQuery),
           defaultIndex: chrome.getUiSettingsClient().get(DEFAULT_INDEX_KEY),
+          inspect: isInspected,
         }}
       >
         {({ data, loading, fetchMore, refetch }) => {
@@ -124,6 +130,7 @@ class DomainsComponentQuery extends QueryTemplate<
           }));
           return children({
             id,
+            inspect: getOr(null, 'source.Domains.inspect', data),
             refetch,
             loading,
             totalCount: getOr(0, 'source.Domains.totalCount', data),
@@ -139,9 +146,14 @@ class DomainsComponentQuery extends QueryTemplate<
 
 const makeMapStateToProps = () => {
   const getDomainsSelector = networkSelectors.domainsSelector();
-  const mapStateToProps = (state: State) => ({
-    ...getDomainsSelector(state),
-  });
+  const getQuery = inputsSelectors.globalQueryByIdSelector();
+  const mapStateToProps = (state: State, { id = ID }: OwnProps) => {
+    const { isInspected } = getQuery(state, id);
+    return {
+      ...getDomainsSelector(state),
+      isInspected,
+    };
+  };
 
   return mapStateToProps;
 };

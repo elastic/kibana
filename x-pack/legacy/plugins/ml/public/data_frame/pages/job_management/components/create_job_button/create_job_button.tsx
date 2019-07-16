@@ -34,7 +34,7 @@ export const CreateJobButton: SFC = () => {
     >
       <FormattedMessage
         id="xpack.ml.dataframe.jobsList.createDataFrameButton"
-        defaultMessage="Create data frame"
+        defaultMessage="Create transform"
       />
     </EuiButton>
   );

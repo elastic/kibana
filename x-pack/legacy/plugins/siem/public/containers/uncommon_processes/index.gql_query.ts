@@ -13,6 +13,7 @@ export const uncommonProcessesQuery = gql`
     $pagination: PaginationInput!
     $filterQuery: String
     $defaultIndex: [String!]!
+    $inspect: Boolean!
   ) {
     source(id: $sourceId) {
       id
@@ -48,6 +49,10 @@ export const uncommonProcessesQuery = gql`
             value
           }
           hasNextPage
+        }
+        inspect @include(if: $inspect) {
+          dsl
+          response
         }
       }
     }

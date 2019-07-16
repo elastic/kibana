@@ -20,7 +20,7 @@
 import { kibanaTestUser } from './users';
 import url from 'url';
 
-export const kbnTestConfig = new class KbnTestConfig {
+export const kbnTestConfig = new (class KbnTestConfig {
   getPort() {
     return this.getUrlParts().port;
   }
@@ -50,4 +50,4 @@ export const kbnTestConfig = new class KbnTestConfig {
       password,
     };
   }
-}();
+})();

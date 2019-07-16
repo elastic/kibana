@@ -75,13 +75,16 @@ const NetworkComponent = pure<NetworkComponentProps>(
                         sourceId="default"
                         startDate={from}
                       >
-                        {({ kpiNetwork, loading, id, refetch }) => (
+                        {({ kpiNetwork, loading, id, inspect, refetch }) => (
                           <KpiNetworkComponentManage
                             id={id}
+                            inspect={inspect}
                             setQuery={setQuery}
                             refetch={refetch}
                             data={kpiNetwork}
                             loading={loading}
+                            from={from}
+                            to={to}
                           />
                         )}
                       </KpiNetworkQuery>
@@ -103,12 +106,14 @@ const NetworkComponent = pure<NetworkComponentProps>(
                           pageInfo,
                           loadMore,
                           id,
+                          inspect,
                           refetch,
                         }) => (
                           <NetworkTopNFlowTableManage
                             data={networkTopNFlow}
                             indexPattern={indexPattern}
                             id={id}
+                            inspect={inspect}
                             hasNextPage={getOr(false, 'hasNextPage', pageInfo)!}
                             loading={loading}
                             loadMore={loadMore}
@@ -131,10 +136,20 @@ const NetworkComponent = pure<NetworkComponentProps>(
                         startDate={from}
                         type={networkModel.NetworkType.page}
                       >
-                        {({ totalCount, loading, networkDns, pageInfo, loadMore, id, refetch }) => (
+                        {({
+                          totalCount,
+                          loading,
+                          networkDns,
+                          pageInfo,
+                          loadMore,
+                          id,
+                          inspect,
+                          refetch,
+                        }) => (
                           <NetworkDnsTableManage
                             data={networkDns}
                             id={id}
+                            inspect={inspect}
                             hasNextPage={getOr(false, 'hasNextPage', pageInfo)!}
                             loading={loading}
                             loadMore={loadMore}
@@ -153,6 +168,7 @@ const NetworkComponent = pure<NetworkComponentProps>(
                         startDate={from}
                         endDate={to}
                         skip={isInitializing}
+                        type={networkModel.NetworkType.page}
                         narrowDateRange={(score, interval) => {
                           const fromTo = scoreIntervalToDateTime(score, interval);
                           setAbsoluteRangeDatePicker({

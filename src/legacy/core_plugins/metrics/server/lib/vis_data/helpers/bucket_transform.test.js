@@ -63,5 +63,35 @@ describe('src/legacy/core_plugins/metrics/server/lib/vis_data/helpers/bucket_tra
         expect(bucketTransform.moving_average(bucket, metrics)).toMatchSnapshot();
       });
     });
+
+    describe('static', () => {
+      test('should return a script with a double value when using decimals', () => {
+        expect(bucketTransform.static({ value: '421.12' })).toHaveProperty(
+          'bucket_script.script.source',
+          '421.12'
+        );
+      });
+
+      test('should return a long script for integer values', () => {
+        expect(bucketTransform.static({ value: '1234567890123' })).toHaveProperty(
+          'bucket_script.script.source',
+          '1234567890123L'
+        );
+      });
+
+      test('should not return a long script for exponential values', () => {
+        expect(bucketTransform.static({ value: '123123123e12' })).toHaveProperty(
+          'bucket_script.script.source',
+          '123123123e12'
+        );
+      });
+
+      test('should return decimal scripts for very large decimals', () => {
+        expect(bucketTransform.static({ value: '1234178312312381273123123.11123' })).toHaveProperty(
+          'bucket_script.script.source',
+          '1234178312312381273123123.11123'
+        );
+      });
+    });
   });
 });

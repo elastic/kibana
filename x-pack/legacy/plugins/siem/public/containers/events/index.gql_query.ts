@@ -14,6 +14,7 @@ export const eventsQuery = gql`
     $sortField: SortField!
     $filterQuery: String
     $defaultIndex: [String!]!
+    $inspect: Boolean!
   ) {
     source(id: $sourceId) {
       id
@@ -31,6 +32,10 @@ export const eventsQuery = gql`
             tiebreaker
           }
           hasNextPage
+        }
+        inspect @include(if: $inspect) {
+          dsl
+          response
         }
         edges {
           node {

@@ -18,6 +18,7 @@ export const JobDetailsSummary: SFC<JobDetailsExposedState> = React.memo(
     createIndexPattern,
     isContinuousModeEnabled,
     jobId,
+    jobDescription,
     destinationIndex,
     touched,
   }) => {
@@ -27,7 +28,7 @@ export const JobDetailsSummary: SFC<JobDetailsExposedState> = React.memo(
 
     const destinationIndexHelpText = createIndexPattern
       ? i18n.translate('xpack.ml.dataframe.jobDetailsSummary.createIndexPatternMessage', {
-          defaultMessage: 'A Kibana index pattern will be created for this job.',
+          defaultMessage: 'A Kibana index pattern will be created for this transform.',
         })
       : '';
 
@@ -35,10 +36,17 @@ export const JobDetailsSummary: SFC<JobDetailsExposedState> = React.memo(
       <Fragment>
         <EuiFormRow
           label={i18n.translate('xpack.ml.dataframe.jobDetailsSummary.jobIdLabel', {
-            defaultMessage: 'Job id',
+            defaultMessage: 'Transform id',
           })}
         >
           <EuiFieldText defaultValue={jobId} disabled={true} />
+        </EuiFormRow>
+        <EuiFormRow
+          label={i18n.translate('xpack.ml.dataframe.jobDetailsSummary.jobDescriptionLabel', {
+            defaultMessage: 'Transform description',
+          })}
+        >
+          <EuiFieldText defaultValue={jobDescription} disabled={true} />
         </EuiFormRow>
         <EuiFormRow
           helpText={destinationIndexHelpText}

@@ -7,7 +7,7 @@
 import { get, getOr } from 'lodash/fp';
 
 import { UncommonProcessesData, UncommonProcessesEdges } from '../../graphql/types';
-import { mergeFieldsWithHit } from '../../utils/build_query';
+import { mergeFieldsWithHit, inspectStringifyObject } from '../../utils/build_query';
 import { processFieldsMap, userFieldsMap } from '../ecs_fields';
 import { FrameworkAdapter, FrameworkRequest, RequestOptions } from '../framework';
 import { HostHits, TermAggregation } from '../types';
@@ -27,10 +27,11 @@ export class ElasticsearchUncommonProcessesAdapter implements UncommonProcessesA
     request: FrameworkRequest,
     options: RequestOptions
   ): Promise<UncommonProcessesData> {
+    const dsl = buildQuery(options);
     const response = await this.framework.callWithRequest<UncommonProcessData, TermAggregation>(
       request,
       'search',
-      buildQuery(options)
+      dsl
     );
     const { cursor, limit } = options.pagination;
     const totalCount = getOr(0, 'aggregations.process_count.value', response);
@@ -43,9 +44,14 @@ export class ElasticsearchUncommonProcessesAdapter implements UncommonProcessesA
     const hasNextPage = uncommonProcessesEdges.length === limit + 1;
     const beginning = cursor != null ? parseInt(cursor!, 10) : 0;
     const edges = uncommonProcessesEdges.splice(beginning, limit - beginning);
+    const inspect = {
+      dsl: [inspectStringifyObject(dsl)],
+      response: [inspectStringifyObject(response)],
+    };
+
     return {
       edges,
-      totalCount,
+      inspect,
       pageInfo: {
         hasNextPage,
         endCursor: {
@@ -53,13 +59,12 @@ export class ElasticsearchUncommonProcessesAdapter implements UncommonProcessesA
           tiebreaker: null,
         },
       },
+      totalCount,
     };
   }
 }
 
-export const getHits = (
-  buckets: ReadonlyArray<UncommonProcessBucket>
-): ReadonlyArray<UncommonProcessHit> =>
+export const getHits = (buckets: readonly UncommonProcessBucket[]): readonly UncommonProcessHit[] =>
   buckets.map((bucket: Readonly<UncommonProcessBucket>) => ({
     _id: bucket.process.hits.hits[0]._id,
     _index: bucket.process.hits.hits[0]._index,
@@ -82,7 +87,7 @@ export const getHosts = (buckets: ReadonlyArray<{ key: string; host: HostHits }>
   });
 
 export const formatUncommonProcessesData = (
-  fields: ReadonlyArray<string>,
+  fields: readonly string[],
   hit: UncommonProcessHit,
   fieldMap: Readonly<Record<string, string>>
 ): UncommonProcessesEdges =>

@@ -15,6 +15,7 @@ export const networkDnsQuery = gql`
     $pagination: PaginationInput!
     $filterQuery: String
     $defaultIndex: [String!]!
+    $inspect: Boolean!
   ) {
     source(id: $sourceId) {
       id
@@ -45,6 +46,10 @@ export const networkDnsQuery = gql`
             value
           }
           hasNextPage
+        }
+        inspect @include(if: $inspect) {
+          dsl
+          response
         }
       }
     }

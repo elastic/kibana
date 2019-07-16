@@ -161,10 +161,6 @@ export const monitorStatesSchema = gql`
     ): MonitorSummaryResult
 
     "Fetches details about the uptime index."
-    getStatesIndexStatus(
-      dateRangeStart: String!
-      dateRangeEnd: String!
-      filters: String
-    ): StatesIndexStatus!
+    getStatesIndexStatus: StatesIndexStatus!
   }
 `;

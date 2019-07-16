@@ -154,9 +154,7 @@ export default function getSpaceTestSuite({ getService }: TestInvoker) {
       });
 
       getTest(
-        `rbac user with all at other space from the ${scenario.otherSpaceId} getting the ${
-          scenario.spaceId
-        }`,
+        `rbac user with all at other space from the ${scenario.otherSpaceId} getting the ${scenario.spaceId}`,
         {
           currentSpaceId: scenario.otherSpaceId,
           spaceId: scenario.spaceId,

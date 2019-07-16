@@ -77,6 +77,7 @@ const timelineTests: KbnTestProvider = ({ getService }) => {
             },
             fieldRequested: ['@timestamp', 'host.name'],
             defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+            inspect: false,
           },
         })
         .then(resp => {
@@ -106,6 +107,7 @@ const timelineTests: KbnTestProvider = ({ getService }) => {
             },
             fieldRequested: ['@timestamp', 'host.name'],
             defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+            inspect: false,
           },
         })
         .then(resp => {

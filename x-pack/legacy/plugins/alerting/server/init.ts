@@ -12,6 +12,8 @@ import {
   getRoute,
   listAlertTypesRoute,
   updateAlertRoute,
+  enableAlertRoute,
+  disableAlertRoute,
 } from './routes';
 import { AlertingPlugin, Services } from './types';
 import { AlertTypeRegistry } from './alert_type_registry';
@@ -50,6 +52,8 @@ export function init(server: Legacy.Server) {
   getRoute(server);
   listAlertTypesRoute(server);
   updateAlertRoute(server);
+  enableAlertRoute(server);
+  disableAlertRoute(server);
 
   // Expose functions
   server.decorate('request', 'getAlertsClient', function() {
