@@ -17,17 +17,12 @@
  * under the License.
  */
 
-import chrome from 'ui/chrome';
-import { metadata } from 'ui/metadata';
 import { ajaxStream as ajax, BatchOpts } from './ajax_stream';
 
-const defaultHeaders = {
-  'Content-Type': 'application/json',
-  'kbn-version': metadata.version,
+export const ajaxStream = (version: string, basePath: string) => <T>(opts: BatchOpts<T>) => {
+  const defaultHeaders = {
+    'Content-Type': 'application/json',
+    'kbn-version': version,
+  };
+  return ajax(basePath, defaultHeaders, new XMLHttpRequest(), opts);
 };
-
-export { BatchOpts } from './ajax_stream';
-
-export function ajaxStream<T>(opts: BatchOpts<T>) {
-  return ajax(chrome.getBasePath(), defaultHeaders, new XMLHttpRequest(), opts);
-}
