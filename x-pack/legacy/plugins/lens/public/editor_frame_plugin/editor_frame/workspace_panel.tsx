@@ -10,38 +10,51 @@ import { EuiCodeBlock, EuiSpacer } from '@elastic/eui';
 import { toExpression } from '@kbn/interpreter/common';
 import { ExpressionRenderer } from '../../../../../../../src/legacy/core_plugins/data/public';
 import { Action } from './state_management';
-import { Datasource, Visualization, DatasourcePublicAPI } from '../../types';
+import { Datasource, Visualization, FramePublicAPI } from '../../types';
 import { DragDrop, DragContext } from '../../drag_drop';
 import { getSuggestions, toSwitchAction } from './suggestion_helpers';
 import { buildExpression } from './expression_helpers';
 
 export interface WorkspacePanelProps {
-  activeDatasource: Datasource;
-  datasourceState: unknown;
+  // activeDatasource: Datasource;
+  // datasourceState: unknown;
   activeVisualizationId: string | null;
   visualizationMap: Record<string, Visualization>;
   visualizationState: unknown;
-  datasourcePublicAPI: DatasourcePublicAPI;
+  // datasourcePublicAPI: DatasourcePublicAPI;
+  activeDatasourceId: string | null;
+  datasourceMap: Record<string, Datasource>;
+  datasourceStates: Record<
+    string,
+    {
+      state: unknown;
+      isLoading: boolean;
+    }
+  >;
+  framePublicAPI: FramePublicAPI;
   dispatch: (action: Action) => void;
   ExpressionRenderer: ExpressionRenderer;
 }
 
 export function WorkspacePanel({
-  activeDatasource,
+  // activeDatasource,
+  activeDatasourceId,
   activeVisualizationId,
-  datasourceState,
+  // datasourceState,
   visualizationMap,
   visualizationState,
-  datasourcePublicAPI,
+  // datasourcePublicAPI,
+  datasourceMap,
+  datasourceStates,
+  framePublicAPI,
   dispatch,
   ExpressionRenderer: ExpressionRendererComponent,
 }: WorkspacePanelProps) {
   const dragDropContext = useContext(DragContext);
   function onDrop(item: unknown) {
-    const datasourceSuggestions = activeDatasource.getDatasourceSuggestionsForField(
-      datasourceState,
-      item
-    );
+    const datasourceSuggestions = datasourceMap[
+      activeDatasourceId!
+    ].getDatasourceSuggestionsForField(datasourceStates[activeDatasourceId!].state, item);
 
     const suggestions = getSuggestions(
       datasourceSuggestions,
@@ -80,22 +93,26 @@ export function WorkspacePanel({
       : null;
     const expression = useMemo(() => {
       try {
-        return buildExpression(
-          activeVisualization,
+        return buildExpression({
+          visualization: activeVisualization,
           visualizationState,
-          activeDatasource,
-          datasourceState,
-          datasourcePublicAPI
-        );
+          // activeDatasource,
+          datasourceMap,
+          datasourceStates,
+          // datasourceState,
+          framePublicAPI,
+          // datasourcePublicAPI
+        });
       } catch (e) {
         setExpressionError(e.toString());
       }
     }, [
       activeVisualization,
       visualizationState,
-      activeDatasource,
-      datasourceState,
-      datasourcePublicAPI,
+      activeDatasourceId,
+      // activeDatasource,
+      datasourceStates,
+      // datasourcePublicAPI,
     ]);
 
     useEffect(() => {

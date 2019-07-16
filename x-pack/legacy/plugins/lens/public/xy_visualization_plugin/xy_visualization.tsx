@@ -30,25 +30,28 @@ export const xyVisualization: Visualization<State, PersistableState> = {
         //   showGridlines: false,
         //   title: 'X',
         // },
-        layers: [
-          {
-            layerId: 'first',
-            xAccessor: generateId(),
-            seriesType: 'bar_stacked',
-            accessors: [generateId()],
-            position: Position.Left,
-            showGridlines: false,
-            title: 'Y',
-            labels: [''],
-            // splitSeriesAccessors: [generateId()],
-            splitSeriesAccessors: [],
-          },
-        ],
+        // layers: [
+        //   {
+        //     layerId: 'first',
+        //     xAccessor: generateId(),
+        //     seriesType: 'bar_stacked',
+        //     accessors: [generateId()],
+        //     position: Position.Left,
+        //     showGridlines: false,
+        //     title: 'Y',
+        //     labels: [''],
+        //     // splitSeriesAccessors: [generateId()],
+        //     splitSeriesAccessors: [],
+        //   },
+        // ],
+        layers: [],
       }
     );
   },
 
   getPersistableState: state => state,
+
+  getLayerIds: state => state.layers.map(({ layerId }) => layerId),
 
   renderConfigPanel: (domElement, props) =>
     render(

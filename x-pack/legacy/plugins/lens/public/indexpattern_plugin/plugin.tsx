@@ -18,7 +18,7 @@ import { functionsRegistry } from '../../../../../../src/legacy/core_plugins/int
 import { getIndexPatternDatasource } from './indexpattern';
 import { renameColumns } from './rename_columns';
 import { calculateFilterRatio } from './filter_ratio';
-import { mergeTables } from './merge_tables';
+// import { mergeTables } from './merge_tables';
 
 // TODO these are intermediary types because interpreter is not typed yet
 // They can get replaced by references to the real interfaces as soon as they
@@ -48,7 +48,7 @@ class IndexPatternDatasourcePlugin {
   ) {
     interpreter.functionsRegistry.register(() => renameColumns);
     interpreter.functionsRegistry.register(() => calculateFilterRatio);
-    interpreter.functionsRegistry.register(() => mergeTables);
+    // interpreter.functionsRegistry.register(() => mergeTables);
     return getIndexPatternDatasource({
       chrome,
       interpreter,

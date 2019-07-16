@@ -16,7 +16,7 @@ interface ConfigPanelWrapperProps {
   visualizationMap: Record<string, Visualization>;
   activeVisualizationId: string | null;
   dispatch: (action: Action) => void;
-  datasourcePublicAPI: DatasourcePublicAPI;
+  // datasourcePublicAPI: DatasourcePublicAPI;
   framePublicAPI: FramePublicAPI;
 }
 
@@ -25,24 +25,25 @@ function getSuggestedVisualizationState(
   visualization: Visualization
   // datasource: DatasourcePublicAPI
 ) {
-  const suggestions = visualization.getSuggestions({
-    tables: [
-      {
-        datasourceSuggestionId: 0,
-        isMultiRow: true,
-        columns: datasource.getTableSpec().map(col => ({
-          ...col,
-          operation: datasource.getOperationForColumnId(col.columnId)!,
-        })),
-      },
-    ],
-  });
+  const suggestions = [];
+  // const suggestions = visualization.getSuggestions({
+  //   tables: [
+  //     {
+  //       datasourceSuggestionId: 0,
+  //       isMultiRow: true,
+  //       columns: datasource.getTableSpec().map(col => ({
+  //         ...col,
+  //         operation: datasource.getOperationForColumnId(col.columnId)!,
+  //       })),
+  //     },
+  //   ],
+  // });
 
   if (!suggestions.length) {
     return visualization.initialize(frame);
   }
 
-  return visualization.initialize(frame, suggestions[0].state);
+  // return visualization.initialize(frame, suggestions[0].state);
 }
 
 export function ConfigPanelWrapper(props: ConfigPanelWrapperProps) {
@@ -86,7 +87,7 @@ export function ConfigPanelWrapper(props: ConfigPanelWrapperProps) {
             dragDropContext: context,
             state: props.visualizationState,
             setState: setVisualizationState,
-            datasource: props.datasourcePublicAPI,
+            // datasource: props.datasourcePublicAPI,
             frame: props.framePublicAPI,
           }}
         />

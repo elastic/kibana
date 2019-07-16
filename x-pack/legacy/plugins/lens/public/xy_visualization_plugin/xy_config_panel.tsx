@@ -112,8 +112,7 @@ function updateLayer(state: State, layer: UnwrapArray<State['layers']>, index: n
 }
 
 export function XYConfigPanel(props: VisualizationProps<State>) {
-  const { state, datasource, setState, frame } = props;
-  // console.log(state);
+  const { state, setState, frame } = props;
 
   return (
     <EuiForm className="lnsConfigPanel">
@@ -257,7 +256,7 @@ export function XYConfigPanel(props: VisualizationProps<State>) {
           */}
 
       {state.layers.map((layer, index) => (
-        <EuiFormRow key={index}>
+        <EuiFormRow key={layer.layerId}>
           <EuiPanel>
             <EuiFormRow
               label={i18n.translate('xpack.lens.xyChart.chartTypeLabel', {
@@ -292,7 +291,7 @@ export function XYConfigPanel(props: VisualizationProps<State>) {
                 defaultMessage: 'X Axis',
               })}
             >
-              <EuiPanel>
+              <>
                 {/*
                 <EuiFormRow
                   label={i18n.translate('xpack.lens.xyChart.xTitleLabel', {
@@ -320,14 +319,14 @@ export function XYConfigPanel(props: VisualizationProps<State>) {
                 >
                   <NativeRenderer
                     data-test-subj="lnsXY_xDimensionPanel"
-                    render={datasource.renderDimensionPanel}
+                    render={props.frame.datasourceLayers[layer.layerId].renderDimensionPanel}
                     nativeProps={{
                       columnId: layer.xAccessor,
                       dragDropContext: props.dragDropContext,
                       filterOperations: operation => operation.isBucketed,
                       // layer:
                       // datasource.supportsLayers && datasource.supportsLayerJoin ? 'join' : index,
-                      layerId: 'first',
+                      layerId: layer.layerId,
                     }}
                   />
                 </EuiFormRow>
@@ -346,7 +345,7 @@ export function XYConfigPanel(props: VisualizationProps<State>) {
                   />
                 </EuiFormRow>
                 */}
-              </EuiPanel>
+              </>
             </EuiFormRow>
 
             <EuiFormRow
@@ -356,7 +355,7 @@ export function XYConfigPanel(props: VisualizationProps<State>) {
             >
               <MultiColumnEditor
                 accessors={layer.splitSeriesAccessors}
-                datasource={datasource}
+                datasource={frame.datasourceLayers[layer.layerId]}
                 dragDropContext={props.dragDropContext}
                 onAdd={accessor =>
                   setState(
@@ -384,7 +383,7 @@ export function XYConfigPanel(props: VisualizationProps<State>) {
                 filterOperations={op => op.isBucketed && op.dataType !== 'date'}
                 suggestedPriority={0}
                 // layer={index}
-                layerId={'first'}
+                layerId={layer.layerId}
                 testSubj="splitSeriesDimensionPanel"
               />
             </EuiFormRow>
@@ -422,7 +421,7 @@ export function XYConfigPanel(props: VisualizationProps<State>) {
                 >
                   <MultiColumnEditor
                     accessors={layer.accessors}
-                    datasource={datasource}
+                    datasource={frame.datasourceLayers[layer.layerId]}
                     dragDropContext={props.dragDropContext}
                     onAdd={accessor =>
                       setState(
@@ -451,7 +450,7 @@ export function XYConfigPanel(props: VisualizationProps<State>) {
                     filterOperations={op => !op.isBucketed && op.dataType === 'number'}
                     testSubj="yDimensionPanel"
                     // layer={index}
-                    layerId={'first'}
+                    layerId={layer.layerId}
                   />
                 </EuiFormRow>
 
@@ -479,23 +478,26 @@ export function XYConfigPanel(props: VisualizationProps<State>) {
         <EuiButton
           data-test-subj={`lnsXY_layer_add`}
           onClick={() => {
-            frame.addNewLayer();
+            const newId = frame.addNewLayer();
 
-            // setState({
-            //   ...state,
-            //   layers: [
-            //     ...state.layers,
-            //     {
-            //       seriesType: 'bar_stacked',
-            //       accessors: [generateId()],
-            //       title: '',
-            //       showGridlines: false,
-            //       position: Position.Left,
-            //       labels: [''],
-            //       splitSeriesAccessors: [],
-            //     },
-            //   ],
-            // });
+            setState({
+              ...state,
+              layers: [
+                ...state.layers,
+                {
+                  layerId: newId,
+                  datasourceId: 'indexpattern', // TODO: Don't hard code
+                  xAccessor: generateId(),
+                  seriesType: 'bar_stacked',
+                  accessors: [generateId()],
+                  title: '',
+                  showGridlines: false,
+                  position: Position.Left,
+                  labels: [''],
+                  splitSeriesAccessors: [],
+                },
+              ],
+            });
           }}
           iconType="plusInCircle"
         >

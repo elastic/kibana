@@ -9,11 +9,17 @@ import { State } from './types';
 import { FramePublicAPI } from '../types';
 
 // export const toExpression = (state: State, datasource: DatasourcePublicAPI): Ast => {
-export const toExpression = (state: State, frame: FramePublicAPI): Ast => {
+export const toExpression = (state: State, frame: FramePublicAPI): Ast | null => {
   const labels: Partial<Record<string, string>> = {};
+  if (!state || !state.layers.length) {
+    return null;
+  }
   // const datasource = frame.datasourceLayers.first;
   state.layers.forEach(layer => {
     const datasource = frame.datasourceLayers[layer.layerId];
+    if (!datasource) {
+      return;
+    }
     layer.accessors.forEach(columnId => {
       const operation = datasource.getOperationForColumnId(columnId);
       if (operation && operation.label) {
@@ -75,6 +81,9 @@ export const buildExpression = (
               type: 'function',
               function: 'lens_xy_layer',
               arguments: {
+                layerId: [layer.layerId],
+                datasourceId: [layer.datasourceId],
+
                 title: [layer.title],
                 showGridlines: [layer.showGridlines],
                 position: [layer.position],

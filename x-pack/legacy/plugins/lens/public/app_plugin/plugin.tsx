@@ -30,7 +30,7 @@ export class AppPlugin {
 
     editorFrame.registerDatasource('indexpattern', indexPattern);
     editorFrame.registerVisualization('xy', xyVisualization);
-    editorFrame.registerVisualization('datatable', datatableVisualization);
+    // editorFrame.registerVisualization('datatable', datatableVisualization);
 
     this.instance = editorFrame.createInstance({});
 

@@ -263,10 +263,10 @@ export function getIndexPatternDatasource({
         currentIndexPatternId: indexPatternObjects ? indexPatternObjects[0].id : '',
         indexPatterns,
         layers: {
-          first: {
-            columns: {},
-            columnOrder: [],
-          },
+          // first: {
+          //   columns: {},
+          //   columnOrder: [],
+          // },
         },
       };
     },
@@ -279,7 +279,18 @@ export function getIndexPatternDatasource({
     insertLayer(state: IndexPatternPrivateState, newLayerId: string) {
       return {
         ...state,
+        layers: {
+          ...state.layers,
+          [newLayerId]: {
+            columns: {},
+            columnOrder: [],
+          },
+        },
       };
+    },
+
+    getLayers(state: IndexPatternPrivateState) {
+      return Object.keys(state.layers);
     },
 
     toExpression,
@@ -324,7 +335,7 @@ export function getIndexPatternDatasource({
                 dataPlugin={data}
                 storage={storage}
                 // layer={props.layer || 0}
-                layerId={props.layerId || 'first'}
+                layerId={props.layerId}
                 {...props}
               />
             </I18nProvider>,

@@ -60,10 +60,12 @@ export interface Datasource<T = unknown, P = unknown> {
   getPersistableState: (state: T) => P;
 
   insertLayer: (state: T, newLayerId: string) => T;
+  getLayers: (state: T) => string[];
 
   renderDataPanel: (domElement: Element, props: DatasourceDataPanelProps<T>) => void;
 
-  toExpression: (state: T) => Ast | string | null;
+  // toExpression: (state: T) => Ast | string | null;
+  toExpression: (state: T, layerId: string) => Ast | string | null;
 
   getDatasourceSuggestionsForField: (state: T, field: unknown) => Array<DatasourceSuggestion<T>>;
   getDatasourceSuggestionsFromCurrentState: (state: T) => Array<DatasourceSuggestion<T>>;
@@ -148,7 +150,7 @@ export interface KibanaDatatable {
 
 export interface VisualizationProps<T = unknown> {
   dragDropContext: DragContextState;
-  datasource: DatasourcePublicAPI;
+  // datasource: DatasourcePublicAPI;
   frame: FramePublicAPI;
   state: T;
   setState: (newState: T) => void;
@@ -173,7 +175,7 @@ export interface FramePublicAPI {
   datasourceLayers: Record<string, DatasourcePublicAPI>;
   layerIdToDatasource: Record<string, string>;
   // Adds a new layer. This triggers a re-render
-  addNewLayer: () => void;
+  addNewLayer: () => string;
 }
 
 export interface Visualization<T = unknown, P = unknown> {
@@ -191,4 +193,6 @@ export interface Visualization<T = unknown, P = unknown> {
   // The frame will call this function on all visualizations when the table changes, or when
   // rendering additional ways of using the data
   getSuggestions: (options: SuggestionRequest<T>) => Array<VisualizationSuggestion<T>>;
+
+  getLayerIds: (state: T) => string[];
 }

@@ -6,6 +6,7 @@
 
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
+import { Registry } from '@kbn/interpreter/target/common';
 import { I18nProvider } from '@kbn/i18n/react';
 import { CoreSetup } from 'src/core/public';
 import { HashRouter, Switch, Route, RouteComponentProps } from 'react-router-dom';
@@ -15,6 +16,8 @@ import {
   ExpressionRenderer,
 } from '../../../../../../src/legacy/core_plugins/data/public';
 import { data } from '../../../../../../src/legacy/core_plugins/data/public/setup';
+import { ExpressionFunction } from '../../../../../../src/legacy/core_plugins/interpreter/public';
+import { functionsRegistry } from '../../../../../../src/legacy/core_plugins/interpreter/public/registries';
 import {
   Datasource,
   Visualization,
@@ -26,9 +29,18 @@ import {
 import { EditorFrame } from './editor_frame';
 import { SavedObjectIndexStore, SavedObjectStore, Document } from '../persistence';
 import { InitializableComponent } from './initializable_component';
+import { mergeTables } from './merge_tables';
+
+export interface InterpreterSetup {
+  functionsRegistry: Registry<
+    ExpressionFunction<string, unknown, unknown, unknown>,
+    ExpressionFunction<string, unknown, unknown, unknown>
+  >;
+}
 
 export interface EditorFrameSetupPlugins {
   data: DataSetup;
+  interpreter: InterpreterSetup;
 }
 
 interface InitializationResult {
@@ -48,7 +60,7 @@ interface RenderProps extends InitializationResult {
   onError: ErrorCallback;
   datasources: Record<string, Datasource>;
   visualizations: Record<string, Visualization>;
-  layerToDatasourceId: Record<string, string>; // Maps layer ID to datasource ID
+  // layerToDatasourceId: Record<string, string>; // Maps layer ID to datasource ID
   expressionRenderer: ExpressionRenderer;
 }
 
@@ -58,7 +70,7 @@ export class EditorFramePlugin {
   private ExpressionRenderer: ExpressionRenderer | null = null;
   private readonly datasources: Record<string, Datasource> = {};
   private readonly visualizations: Record<string, Visualization> = {};
-  private readonly layerToDatasourceId: Record<string, string> = {};
+  // private readonly layerToDatasourceId: Record<string, string> = {};
 
   private createInstance(): EditorFrameInstance {
     let domElement: Element;
@@ -91,7 +103,7 @@ export class EditorFramePlugin {
                   store={store}
                   datasources={this.datasources}
                   visualizations={this.visualizations}
-                  layerToDatasourceId={this.layerToDatasourceId}
+                  // layerToDatasourceId={this.layerToDatasourceId}
                   expressionRenderer={this.ExpressionRenderer!}
                 />
               )}
@@ -116,7 +128,12 @@ export class EditorFramePlugin {
     };
   }
 
-  public setup(_core: CoreSetup | null, plugins: EditorFrameSetupPlugins): EditorFrameSetup {
+  public setup(
+    _core: CoreSetup | null,
+    plugins: EditorFrameSetupPlugins // { interpreter, data, storage, toastNotifications: toast }: IndexPatternDatasourcePluginPlugins
+  ): EditorFrameSetup {
+    plugins.interpreter.functionsRegistry.register(() => mergeTables);
+
     this.ExpressionRenderer = plugins.data.expressions.ExpressionRenderer;
     return {
       createInstance: this.createInstance.bind(this),
@@ -139,6 +156,9 @@ const editorFrame = new EditorFramePlugin();
 export const editorFrameSetup = () =>
   editorFrame.setup(null, {
     data,
+    interpreter: {
+      functionsRegistry,
+    },
   });
 
 export const editorFrameStop = () => editorFrame.stop();
@@ -179,7 +199,7 @@ export function InitializedEditor({
   store,
   datasources,
   visualizations,
-  layerToDatasourceId,
+  // layerToDatasourceId,
   expressionRenderer,
 }: RenderProps) {
   const firstDatasourceId = Object.keys(datasources)[0];
@@ -196,7 +216,7 @@ export function InitializedEditor({
       store={store}
       datasourceMap={datasources}
       visualizationMap={visualizations}
-      layerToDatasourceId={layerToDatasourceId}
+      // layerToDatasourceId={layerToDatasourceId}
       initialDatasourceId={(doc && doc.datasourceType) || firstDatasourceId || null}
       initialVisualizationId={(doc && doc.visualizationType) || firstVisualizationId || null}
       ExpressionRenderer={expressionRenderer}

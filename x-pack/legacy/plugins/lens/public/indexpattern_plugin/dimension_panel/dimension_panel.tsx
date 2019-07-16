@@ -42,6 +42,8 @@ export function IndexPatternDimensionPanel(props: IndexPatternDimensionPanelProp
     return props.filterOperations(columnToOperation(col));
   });
 
+  const layer = props.state.layers[layerId];
+
   const selectedColumn: IndexPatternColumn | null =
     props.state.layers[layerId].columns[props.columnId] || null;
 

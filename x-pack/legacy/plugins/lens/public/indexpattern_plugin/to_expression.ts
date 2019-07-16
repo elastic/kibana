@@ -15,6 +15,7 @@ import {
 
 function getExpressionForLayer(
   currentIndexPatternId: string,
+  layerId: string,
   columns: Record<string, IndexPatternColumn>,
   columnOrder: string[]
 ) {
@@ -60,7 +61,7 @@ function getExpressionForLayer(
         op: 'count',
         columns,
         suggestedOrder: 2,
-        layerId: 'first',
+        layerId,
       });
       aggs.push(getEsAggsConfig(countColumn, 'filter-ratio'));
 
@@ -83,13 +84,23 @@ function getExpressionForLayer(
   return null;
 }
 
-export function toExpression(state: IndexPatternPrivateState) {
-  const expressions = Object.entries(state.layers).map(([id, layer]) => [
-    id,
-    getExpressionForLayer(state.currentIndexPatternId, layer.columns, layer.columnOrder),
-  ]);
+export function toExpression(state: IndexPatternPrivateState, layerId: string) {
+  // const expressions = Object.entries(state.layers).map(([id, layer]) => [
+  //   id,
+  //   getExpressionForLayer(state.currentIndexPatternId, layer.columns, layer.columnOrder),
+  // ]);
 
-  return `lens_merge_tables joins="" ${expressions.map(expr => `table={${expr}}`).join(' ')}`;
+  if (state.layers[layerId]) {
+    // return `lens_merge_tables joins="" ${expressions.map(expr => `table={${expr}}`).join(' ')}`;
+    return getExpressionForLayer(
+      state.currentIndexPatternId,
+      layerId,
+      state.layers[layerId].columns,
+      state.layers[layerId].columnOrder
+    );
+  }
+
+  return null;
 
   // if (state.columnOrder.length === 0) {
   //   return null;
