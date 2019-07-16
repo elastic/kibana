@@ -26,6 +26,9 @@ import {
   EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiListGroup,
+  EuiListGroupItem,
+  EuiSpacer,
 } from '@elastic/eui';
 import { Filter } from '@kbn/es-query';
 import { InjectedIntl, injectI18n, FormattedMessage } from '@kbn/i18n/react';
@@ -39,17 +42,19 @@ import { get, isEqual } from 'lodash';
 
 import { toastNotifications } from 'ui/notify';
 import { capabilities } from 'ui/capabilities';
+import { CommonProps } from '@elastic/eui';
 import { Query, QueryBar } from '../../../query/query_bar';
 import { FilterBar } from '../../../filter/filter_bar';
 import { SavedQuery, SavedQueryAttributes } from '../index';
-import { saveQuery } from '../lib/saved_query_service';
+import { saveQuery, getSavedQueries } from '../lib/saved_query_service';
 import { SavedQueryMeta, SaveQueryForm } from './save_query_form';
-
 interface DateRange {
   from: string;
   to: string;
 }
-
+const FixedEuiListGroup = (EuiListGroup as any) as React.FunctionComponent<
+  CommonProps & { maxWidth: boolean }
+>;
 /**
  * NgReact lib requires that changes to the props need to be made in the directive config as well
  * See [search_bar\directive\index.js] file
@@ -91,6 +96,7 @@ interface State {
   query: Query;
   dateRangeFrom: string;
   dateRangeTo: string;
+  savedQueries: SavedQuery[];
 }
 
 class SearchBarUI extends Component<Props, State> {
@@ -168,6 +174,7 @@ class SearchBarUI extends Component<Props, State> {
     },
     dateRangeFrom: _.get(this.props, 'dateRangeFrom', 'now-15m'),
     dateRangeTo: _.get(this.props, 'dateRangeTo', 'now'),
+    savedQueries: [],
   };
 
   public isDirty = () => {
@@ -209,9 +216,11 @@ class SearchBarUI extends Component<Props, State> {
     });
   };
 
-  public toggleSavedQueryPopover = () => {
+  public toggleSavedQueryPopover = async () => {
+    const savedQueriesItems = await this.fetchSavedQueries();
     this.setState({
       showSavedQueryPopover: !this.state.showSavedQueryPopover,
+      savedQueries: savedQueriesItems,
     });
   };
 
@@ -336,6 +345,10 @@ class SearchBarUI extends Component<Props, State> {
     this.props.onSavedQueryUpdated(savedQuery);
   };
 
+  private fetchSavedQueries = async () => {
+    return await getSavedQueries();
+  };
+
   public componentDidMount() {
     if (this.filterBarRef) {
       this.setFilterBarHeight();
@@ -402,7 +415,23 @@ class SearchBarUI extends Component<Props, State> {
         <EuiFlexGroup>
           <p>{savedQueryDescriptionText}</p>
         </EuiFlexGroup>
-
+        <EuiSpacer />
+        {this.state.savedQueries.length > 0 ? (
+          <FixedEuiListGroup data-test-subj="savedQueriesItemList" maxWidth={false}>
+            {this.state.savedQueries.map(({ attributes, id }) => {
+              const savedQueryAttributes = attributes.title;
+              return (
+                <EuiListGroupItem
+                  key={id}
+                  label={savedQueryAttributes}
+                  title={savedQueryAttributes}
+                />
+              );
+            })}
+          </FixedEuiListGroup>
+        ) : (
+          ''
+        )}
         <EuiFlexGroup direction="rowReverse" alignItems="center">
           {this.props.showSaveQuery && (
             <EuiFlexItem grow={false}>
