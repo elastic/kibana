@@ -20,6 +20,8 @@
 import React from 'react';
 import { mountWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
 import { ToolBarPagerButtons } from './tool_bar_pager_buttons';
+// @ts-ignore
+import { findTestSubject } from '@elastic/eui/lib/test';
 
 test('it renders ToolBarPagerButtons', () => {
   const props = {
@@ -40,9 +42,9 @@ test('it renders ToolBarPagerButtons with clickable next and previous button', (
     onPagePrevious: jest.fn(),
   };
   const wrapper = mountWithIntl(<ToolBarPagerButtons {...props} />);
-  wrapper.find('[data-test-subj="btnPrevPage"]').simulate('click');
+  findTestSubject(wrapper, 'btnPrevPage').simulate('click');
   expect(props.onPagePrevious).toHaveBeenCalledTimes(1);
-  wrapper.find('[data-test-subj="btnNextPage"]').simulate('click');
+  findTestSubject(wrapper, 'btnNextPage').simulate('click');
   expect(props.onPageNext).toHaveBeenCalledTimes(1);
 });
 
@@ -54,8 +56,8 @@ test('it renders ToolBarPagerButtons with disabled next and previous button', ()
     onPagePrevious: jest.fn(),
   };
   const wrapper = mountWithIntl(<ToolBarPagerButtons {...props} />);
-  wrapper.find('[data-test-subj="btnPrevPage"]').simulate('click');
+  findTestSubject(wrapper, 'btnPrevPage').simulate('click');
   expect(props.onPagePrevious).toHaveBeenCalledTimes(0);
-  wrapper.find('[data-test-subj="btnNextPage"]').simulate('click');
+  findTestSubject(wrapper, 'btnNextPage').simulate('click');
   expect(props.onPageNext).toHaveBeenCalledTimes(0);
 });
