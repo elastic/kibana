@@ -378,7 +378,7 @@ export class VectorLayer extends AbstractLayer {
     } catch (e) {
       onLoadError(sourceDataId, requestToken, `Join error: ${e.message}`);
       return {
-        dataHasChanged: false,
+        dataHasChanged: true,
         join: join,
         propertiesMap: null
       };
@@ -433,8 +433,12 @@ export class VectorLayer extends AbstractLayer {
         const joinState = joinStates[j];
         const leftInnerJoin = joinState.join;
         const rightMetricFields = leftInnerJoin.getRightMetricFields();
-        const canJoinOnCurrent = leftInnerJoin.joinPropertiesToFeature(feature, joinState.propertiesMap, rightMetricFields);
-        isFeatureVisible = isFeatureVisible && canJoinOnCurrent;
+        if (joinState.propertiesMap) {
+          const canJoinOnCurrent = leftInnerJoin.joinPropertiesToFeature(feature, joinState.propertiesMap, rightMetricFields);
+          isFeatureVisible = isFeatureVisible && canJoinOnCurrent;
+        } else {
+          isFeatureVisible = false;
+        }
       }
 
       if (oldVisbility !== isFeatureVisible) {
