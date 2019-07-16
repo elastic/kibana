@@ -9,9 +9,10 @@ import { useAppDependencies } from '../index';
 
 interface Props {
   epochMs: number;
+  type?: 'date' | 'time';
 }
 
-export const FormattedDateTime: React.FunctionComponent<Props> = ({ epochMs }) => {
+export const FormattedDateTime: React.FunctionComponent<Props> = ({ epochMs, type }) => {
   const {
     core: {
       i18n: { FormattedDate, FormattedTime },
@@ -22,8 +23,11 @@ export const FormattedDateTime: React.FunctionComponent<Props> = ({ epochMs }) =
 
   return (
     <Fragment>
-      <FormattedDate value={date} year="numeric" month="short" day="2-digit" />{' '}
-      <FormattedTime value={date} timeZoneName="short" />
+      {!type || type === 'date' ? (
+        <FormattedDate value={date} year="numeric" month="short" day="2-digit" />
+      ) : null}
+      {!type ? ' ' : null}
+      {!type || type === 'time' ? <FormattedTime value={date} timeZoneName="short" /> : null}
     </Fragment>
   );
 };

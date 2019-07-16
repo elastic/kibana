@@ -20,3 +20,9 @@ export function linkToSnapshots(repositoryName?: string) {
   }
   return `#${BASE_PATH}/snapshots`;
 }
+
+export function linkToSnapshot(repositoryName: string, snapshotName: string) {
+  return `#${BASE_PATH}/snapshots/${encodeURIComponent(repositoryName)}/${encodeURIComponent(
+    snapshotName
+  )}`;
+}

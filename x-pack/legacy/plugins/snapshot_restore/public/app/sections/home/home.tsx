@@ -69,20 +69,20 @@ export const SnapshotRestoreHome: React.FunctionComponent<RouteComponentProps<Ma
       ),
     },
     {
-      id: 'restore_status',
-      name: (
-        <FormattedMessage
-          id="xpack.snapshotRestore.home.restoreTabTitle"
-          defaultMessage="Restore Status"
-        />
-      ),
-    },
-    {
       id: 'policies',
       name: (
         <FormattedMessage
           id="xpack.snapshotRestore.home.policiesTabTitle"
           defaultMessage="Policies"
+        />
+      ),
+    },
+    {
+      id: 'restore_status',
+      name: (
+        <FormattedMessage
+          id="xpack.snapshotRestore.home.restoreTabTitle"
+          defaultMessage="Restore Status"
         />
       ),
     },

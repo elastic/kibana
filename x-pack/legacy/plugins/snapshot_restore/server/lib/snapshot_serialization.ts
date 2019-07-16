@@ -95,6 +95,7 @@ export function deserializeSnapshotConfig(snapshotConfigEs: SnapshotConfigEs): S
     indices,
     ignore_unavailable: ignoreUnavailable,
     include_global_state: includeGlobalState,
+    partial,
     metadata,
   } = snapshotConfigEs;
 
@@ -102,6 +103,7 @@ export function deserializeSnapshotConfig(snapshotConfigEs: SnapshotConfigEs): S
     indices,
     ignoreUnavailable,
     includeGlobalState,
+    partial,
     metadata,
   };
 

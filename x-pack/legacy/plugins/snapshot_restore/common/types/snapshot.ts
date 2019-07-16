@@ -7,6 +7,7 @@ export interface SnapshotConfig {
   indices?: string[];
   ignoreUnavailable?: boolean;
   includeGlobalState?: boolean;
+  partial?: boolean;
   metadata?: {
     [key: string]: string;
   };
@@ -16,6 +17,7 @@ export interface SnapshotConfigEs {
   indices?: string[];
   ignore_unavailable?: boolean;
   include_global_state?: boolean;
+  partial?: boolean;
   metadata?: {
     [key: string]: string;
   };

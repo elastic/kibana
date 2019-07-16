@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   EuiButtonEmpty,
   EuiFlexGroup,
@@ -12,25 +12,35 @@ import {
   EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiFlyoutHeader,
-  EuiLink,
   EuiTitle,
-  EuiDescriptionList,
-  EuiDescriptionListTitle,
-  EuiDescriptionListDescription,
+  EuiTabs,
+  EuiTab,
 } from '@elastic/eui';
 
 import { SlmPolicy } from '../../../../../../common/types';
 import { useAppDependencies } from '../../../../index';
-import { BASE_PATH } from '../../../../constants';
+import {
+  UIM_POLICY_DETAIL_PANEL_SUMMARY_TAB,
+  UIM_POLICY_DETAIL_PANEL_HISTORY_TAB,
+} from '../../../../constants';
 import { useLoadPolicy } from '../../../../services/http';
-import { formatDate } from '../../../../services/text';
+import { uiMetricService } from '../../../../services/ui_metric';
 
 import { SectionError, SectionLoading } from '../../../../components';
+import { TabSummary, TabHistory } from './tabs';
 
 interface Props {
   policyName: SlmPolicy['name'];
   onClose: () => void;
 }
+
+const TAB_SUMMARY = 'summary';
+const TAB_HISTORY = 'success';
+
+const tabToUiMetricMap: { [key: string]: string } = {
+  [TAB_SUMMARY]: UIM_POLICY_DETAIL_PANEL_SUMMARY_TAB,
+  [TAB_HISTORY]: UIM_POLICY_DETAIL_PANEL_HISTORY_TAB,
+};
 
 export const PolicyDetails: React.FunctionComponent<Props> = ({ policyName, onClose }) => {
   const {
@@ -38,11 +48,65 @@ export const PolicyDetails: React.FunctionComponent<Props> = ({ policyName, onCl
   } = useAppDependencies();
 
   const { FormattedMessage } = i18n;
+  const { trackUiMetric } = uiMetricService;
   const { error, data: policyDetails } = useLoadPolicy(policyName);
+  const [] = useState<boolean>(false);
+  const [activeTab, setActiveTab] = useState<string>(TAB_SUMMARY);
+
+  // Reset tab when we look at a different policy
+  useEffect(() => {
+    setActiveTab(TAB_SUMMARY);
+  }, [policyName]);
+
+  const tabOptions = [
+    {
+      id: TAB_SUMMARY,
+      name: (
+        <FormattedMessage
+          id="xpack.snapshotRestore.policyDetails.summaryTabTitle"
+          defaultMessage="Summary"
+        />
+      ),
+    },
+    {
+      id: TAB_HISTORY,
+      name: (
+        <FormattedMessage
+          id="xpack.snapshotRestore.policyDetails.historyTabTitle"
+          defaultMessage="History"
+        />
+      ),
+    },
+  ];
+
+  const renderTabs = () => (
+    <EuiTabs>
+      {tabOptions.map(tab => (
+        <EuiTab
+          onClick={() => {
+            trackUiMetric(tabToUiMetricMap[tab.id]);
+            setActiveTab(tab.id);
+          }}
+          isSelected={tab.id === activeTab}
+          key={tab.id}
+          data-test-subj="tab"
+        >
+          {tab.name}
+        </EuiTab>
+      ))}
+    </EuiTabs>
+  );
 
   const renderBody = () => {
     if (policyDetails) {
-      return renderPolicy();
+      const { policy } = policyDetails;
+
+      switch (activeTab) {
+        case TAB_HISTORY:
+          return <TabHistory policy={policy} />;
+        default:
+          return <TabSummary policy={policy} />;
+      }
     }
     if (error) {
       return renderError();
@@ -91,115 +155,6 @@ export const PolicyDetails: React.FunctionComponent<Props> = ({ policyName, onCl
     );
   };
 
-  const renderPolicy = () => {
-    const { policy } = policyDetails;
-
-    if (!policy) {
-      return null;
-    }
-
-    const {
-      version,
-      modifiedDateMillis,
-      snapshotName,
-      repository,
-      schedule,
-      nextExecutionMillis,
-    } = policy as SlmPolicy;
-
-    return (
-      <EuiDescriptionList textStyle="reverse">
-        <EuiFlexGroup>
-          <EuiFlexItem data-test-subj="version">
-            <EuiDescriptionListTitle data-test-subj="title">
-              <FormattedMessage
-                id="xpack.snapshotRestore.policyDetails.versionLabel"
-                defaultMessage="Version"
-              />
-            </EuiDescriptionListTitle>
-
-            <EuiDescriptionListDescription className="eui-textBreakWord" data-test-subj="value">
-              {version}
-            </EuiDescriptionListDescription>
-          </EuiFlexItem>
-
-          <EuiFlexItem data-test-subj="uuid">
-            <EuiDescriptionListTitle data-test-subj="title">
-              <FormattedMessage
-                id="xpack.snapshotRestore.policyDetails.modifiedDateLabel"
-                defaultMessage="Last modified"
-              />
-            </EuiDescriptionListTitle>
-
-            <EuiDescriptionListDescription className="eui-textBreakWord" data-test-subj="value">
-              {formatDate(modifiedDateMillis)}
-            </EuiDescriptionListDescription>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-
-        <EuiFlexGroup>
-          <EuiFlexItem data-test-subj="state">
-            <EuiDescriptionListTitle data-test-subj="title">
-              <FormattedMessage
-                id="xpack.snapshotRestore.policyDetails.snapshotNameLabel"
-                defaultMessage="Snapshot name"
-              />
-            </EuiDescriptionListTitle>
-
-            <EuiDescriptionListDescription className="eui-textBreakWord" data-test-subj="value">
-              <EuiLink href={`#${BASE_PATH}/snapshots?policy=${encodeURIComponent(policyName)}`}>
-                {snapshotName}
-              </EuiLink>
-            </EuiDescriptionListDescription>
-          </EuiFlexItem>
-
-          <EuiFlexItem data-test-subj="state">
-            <EuiDescriptionListTitle data-test-subj="title">
-              <FormattedMessage
-                id="xpack.snapshotRestore.policyDetails.repositoryLabel"
-                defaultMessage="Repository"
-              />
-            </EuiDescriptionListTitle>
-
-            <EuiDescriptionListDescription className="eui-textBreakWord" data-test-subj="value">
-              <EuiLink href={`#${BASE_PATH}/repositories/${encodeURIComponent(repository)}`}>
-                {repository}
-              </EuiLink>
-            </EuiDescriptionListDescription>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-
-        <EuiFlexGroup>
-          <EuiFlexItem data-test-subj="state">
-            <EuiDescriptionListTitle data-test-subj="title">
-              <FormattedMessage
-                id="xpack.snapshotRestore.policyDetails.scheduleLabel"
-                defaultMessage="Schedule"
-              />
-            </EuiDescriptionListTitle>
-
-            <EuiDescriptionListDescription className="eui-textBreakWord" data-test-subj="value">
-              {schedule}
-            </EuiDescriptionListDescription>
-          </EuiFlexItem>
-
-          <EuiFlexItem data-test-subj="state">
-            <EuiDescriptionListTitle data-test-subj="title">
-              <FormattedMessage
-                id="xpack.snapshotRestore.policyDetails.nextExecutionLabel"
-                defaultMessage="Next execution"
-              />
-            </EuiDescriptionListTitle>
-
-            <EuiDescriptionListDescription className="eui-textBreakWord" data-test-subj="value">
-              {formatDate(nextExecutionMillis)}
-            </EuiDescriptionListDescription>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiDescriptionList>
-    );
-  };
-
   const renderFooter = () => {
     return (
       <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
@@ -234,6 +189,7 @@ export const PolicyDetails: React.FunctionComponent<Props> = ({ policyName, onCl
             {policyName}
           </h2>
         </EuiTitle>
+        {renderTabs()}
       </EuiFlyoutHeader>
 
       <EuiFlyoutBody data-test-subj="content">{renderBody()}</EuiFlyoutBody>

@@ -10,7 +10,7 @@ import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiInMemoryTable, EuiLink } from 
 import { SlmPolicy } from '../../../../../../common/types';
 import { UIM_POLICY_SHOW_DETAILS_CLICK } from '../../../../constants';
 import { useAppDependencies } from '../../../../index';
-import { formatDate } from '../../../../services/text';
+import { FormattedDateTime } from '../../../../components';
 import { uiMetricService } from '../../../../services/ui_metric';
 
 interface Props {
@@ -81,8 +81,9 @@ export const PolicyTable: React.FunctionComponent<Props> = ({
       }),
       truncateText: true,
       sortable: true,
-      render: (nextExecutionMillis: SlmPolicy['nextExecutionMillis']) =>
-        formatDate(nextExecutionMillis),
+      render: (nextExecutionMillis: SlmPolicy['nextExecutionMillis']) => (
+        <FormattedDateTime epochMs={nextExecutionMillis} />
+      ),
     },
   ];
 
