@@ -12,6 +12,7 @@ import { shallowWithIntl, mountWithIntl } from 'test_utils/enzyme_helpers';
 import { KibanaPrivileges } from '../../../../../../../../common/model';
 import { KibanaPrivilegeCalculatorFactory } from '../../../../../../../lib/kibana_privilege_calculator';
 import { PrivilegeSpaceForm } from './privilege_space_form';
+import { rawKibanaPrivileges } from './__fixtures__';
 
 type RecursivePartial<T> = {
   [P in keyof T]?: RecursivePartial<T[P]>;
@@ -20,27 +21,6 @@ type RecursivePartial<T> = {
 const buildProps = (
   overrides?: RecursivePartial<PrivilegeSpaceForm['props']>
 ): PrivilegeSpaceForm['props'] => {
-  const rawKibanaPrivileges = {
-    global: {
-      all: ['normal-feature-all', 'normal-feature-read', 'just-global-all'],
-      read: ['normal-feature-read'],
-    },
-    space: {
-      all: ['normal-feature-all', 'normal-feature-read'],
-      read: ['normal-feature-read'],
-    },
-    reserved: {},
-    features: {
-      normal: {
-        all: ['normal-feature-all', 'normal-feature-read'],
-        read: ['normal-feature-read'],
-      },
-      excludedFromBase: {
-        all: ['excluded-from-base-all', 'excluded-from-base-read'],
-        read: ['excluded-from-base-read'],
-      },
-    },
-  };
   const kibanaPrivileges = new KibanaPrivileges(rawKibanaPrivileges);
   const defaultProps: PrivilegeSpaceForm['props'] = {
     spaces: [

@@ -12,6 +12,7 @@ import { PrivilegeSpaceTable } from './privilege_space_table';
 import { PrivilegeDisplay } from './privilege_display';
 import { KibanaPrivileges, Role, RoleKibanaPrivilege } from '../../../../../../../../common/model';
 import { KibanaPrivilegeCalculatorFactory } from '../../../../../../../lib/kibana_privilege_calculator';
+import { rawKibanaPrivileges } from './__fixtures__';
 
 interface TableRow {
   spaces: string[];
@@ -21,29 +22,7 @@ interface TableRow {
 }
 
 const buildProps = (roleKibanaPrivileges: RoleKibanaPrivilege[]): PrivilegeSpaceTable['props'] => {
-  const rawKibanaPrivileges = {
-    global: {
-      all: ['normal-feature-all', 'normal-feature-read', 'just-global-all'],
-      read: ['normal-feature-read'],
-    },
-    space: {
-      all: ['normal-feature-all', 'normal-feature-read'],
-      read: ['normal-feature-read'],
-    },
-    reserved: {},
-    features: {
-      normal: {
-        all: ['normal-feature-all', 'normal-feature-read'],
-        read: ['normal-feature-read'],
-      },
-      excludedFromBase: {
-        all: ['excluded-from-base-all', 'excluded-from-base-read'],
-        read: ['excluded-from-base-read'],
-      },
-    },
-  };
   const kibanaPrivileges = new KibanaPrivileges(rawKibanaPrivileges);
-
   return {
     role: {
       name: 'test role',
