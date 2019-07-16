@@ -27,7 +27,7 @@ export type HostsState = HostsModel;
 export const initialHostsState: HostsState = {
   page: {
     queries: {
-      authentications: { limit: DEFAULT_TABLE_LIMIT, activePage: DEFAULT_TABLE_ACTIVE_PAGE },
+      authentications: { activePage: DEFAULT_TABLE_ACTIVE_PAGE, limit: DEFAULT_TABLE_LIMIT },
       hosts: {
         activePage: DEFAULT_TABLE_ACTIVE_PAGE,
         direction: Direction.desc,
@@ -35,14 +35,14 @@ export const initialHostsState: HostsState = {
         sortField: HostsFields.lastSeen,
       },
       events: { limit: DEFAULT_TABLE_LIMIT },
-      uncommonProcesses: { limit: DEFAULT_TABLE_LIMIT },
+      uncommonProcesses: { activePage: DEFAULT_TABLE_ACTIVE_PAGE, limit: DEFAULT_TABLE_LIMIT },
     },
     filterQuery: null,
     filterQueryDraft: null,
   },
   details: {
     queries: {
-      authentications: { limit: DEFAULT_TABLE_LIMIT, activePage: DEFAULT_TABLE_ACTIVE_PAGE },
+      authentications: { activePage: DEFAULT_TABLE_ACTIVE_PAGE, limit: DEFAULT_TABLE_LIMIT },
       hosts: {
         activePage: DEFAULT_TABLE_ACTIVE_PAGE,
         direction: Direction.desc,
@@ -50,7 +50,7 @@ export const initialHostsState: HostsState = {
         sortField: HostsFields.lastSeen,
       },
       events: { limit: DEFAULT_TABLE_LIMIT },
-      uncommonProcesses: { limit: DEFAULT_TABLE_LIMIT },
+      uncommonProcesses: { activePage: DEFAULT_TABLE_ACTIVE_PAGE, limit: DEFAULT_TABLE_LIMIT },
     },
     filterQuery: null,
     filterQueryDraft: null,

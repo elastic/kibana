@@ -187,22 +187,22 @@ const HostsComponent = pure<HostsComponentProps>(({ filterQuery, setAbsoluteRang
                         totalCount,
                         loading,
                         pageInfo,
-                        loadMore,
+                        loadPage,
                         id,
                         inspect,
                         refetch,
                       }) => (
                         <UncommonProcessTableManage
+                          data={uncommonProcesses}
+                          fakeTotalCount={getOr(50, 'fakeTotalCount', pageInfo)}
                           id={id}
                           inspect={inspect}
+                          loading={loading}
+                          loadPage={loadPage}
                           refetch={refetch}
                           setQuery={setQuery}
-                          loading={loading}
-                          data={uncommonProcesses}
+                          showMorePagesIndicator={getOr(false, 'showMorePagesIndicator', pageInfo)}
                           totalCount={totalCount}
-                          nextCursor={getOr(null, 'endCursor.value', pageInfo)}
-                          hasNextPage={getOr(false, 'hasNextPage', pageInfo)!}
-                          loadMore={loadMore}
                           type={hostsModel.HostsType.page}
                         />
                       )}

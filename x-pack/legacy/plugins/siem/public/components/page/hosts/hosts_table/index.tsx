@@ -53,7 +53,6 @@ interface HostsTableReduxProps {
 }
 
 interface HostsTableDispatchProps {
-  updateLimitPagination: ActionCreator<{ limit: number; hostsType: hostsModel.HostsType }>;
   updateHostsSort: ActionCreator<{
     sort: HostsSortField;
     hostsType: hostsModel.HostsType;
@@ -221,7 +220,6 @@ export const HostsTable = connect(
   makeMapStateToProps,
   {
     updateHostsSort: hostsActions.updateHostsSort,
-    updateLimitPagination: hostsActions.updateHostsLimit,
     updateTableActivePage: hostsActions.updateTableActivePage,
     updateTableLimit: hostsActions.updateTableLimit,
   }

@@ -22,6 +22,7 @@ import styled from 'styled-components';
 import { Direction } from '../../graphql/types';
 import { AuthTableColumns } from '../page/hosts/authentications_table';
 import { HostsTableColumns } from '../page/hosts/hosts_table';
+import { UncommonProcessTableColumns } from '../page/hosts/uncommon_process_table';
 import { HeaderPanel } from '../header_panel';
 import { LoadingPanel } from '../loading';
 import { useStateToaster } from '../toasters';
@@ -54,7 +55,11 @@ declare type HostsTableColumnsTest = [
   Columns<string>
 ];
 
-declare type BasicTableColumns = AuthTableColumns | HostsTableColumnsTest | HostsTableColumns;
+declare type BasicTableColumns =
+  | AuthTableColumns
+  | HostsTableColumnsTest
+  | HostsTableColumns
+  | UncommonProcessTableColumns;
 
 declare type SiemTables = BasicTableProps<BasicTableColumns>;
 

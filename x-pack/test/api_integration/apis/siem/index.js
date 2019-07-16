@@ -9,7 +9,7 @@ export default function ({ loadTestFile }) {
     // loadTestFile(require.resolve('./authentications'));
     // loadTestFile(require.resolve('./domains'));
     // loadTestFile(require.resolve('./events'));
-    loadTestFile(require.resolve('./hosts'));
+    // loadTestFile(require.resolve('./hosts'));
     // loadTestFile(require.resolve('./kpi_network'));
     // loadTestFile(require.resolve('./kpi_hosts'));
     // loadTestFile(require.resolve('./network_dns'));
@@ -22,7 +22,7 @@ export default function ({ loadTestFile }) {
     // loadTestFile(require.resolve('./overview_network'));
     // loadTestFile(require.resolve('./timeline'));
     // loadTestFile(require.resolve('./timeline_details'));
-    // loadTestFile(require.resolve('./uncommon_processes'));
+    loadTestFile(require.resolve('./uncommon_processes'));
     // loadTestFile(require.resolve('./users'));
     // loadTestFile(require.resolve('./tls'));
     // loadTestFile(require.resolve('./feature_controls'));

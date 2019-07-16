@@ -109,6 +109,7 @@ describe('Hosts Table', () => {
       });
       test('Initial value of the store', () => {
         expect(store.getState().hosts.page.queries.hosts).toEqual({
+          activePage: 0,
           direction: 'desc',
           sortField: 'lastSeen',
           limit: 10,
@@ -136,6 +137,7 @@ describe('Hosts Table', () => {
         wrapper.update();
 
         expect(store.getState().hosts.page.queries.hosts).toEqual({
+          activePage: 0,
           direction: 'asc',
           sortField: 'hostName',
           limit: 10,

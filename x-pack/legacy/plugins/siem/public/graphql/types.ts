@@ -1274,7 +1274,7 @@ export interface UncommonProcessesData {
 
   totalCount: number;
 
-  pageInfo: PageInfo;
+  pageInfo: PageInfoPaginated;
 
   inspect?: Inspect | null;
 }
@@ -1991,7 +1991,7 @@ export interface OverviewHostSourceArgs {
 export interface UncommonProcessesSourceArgs {
   timerange: TimerangeInput;
 
-  pagination: PaginationInput;
+  pagination: PaginationInputPaginated;
 
   filterQuery?: string | null;
 
@@ -5095,7 +5095,7 @@ export namespace GetUncommonProcessesQuery {
   export type Variables = {
     sourceId: string;
     timerange: TimerangeInput;
-    pagination: PaginationInput;
+    pagination: PaginationInputPaginated;
     filterQuery?: string | null;
     defaultIndex: string[];
     inspect: boolean;
@@ -5178,17 +5178,13 @@ export namespace GetUncommonProcessesQuery {
   };
 
   export type PageInfo = {
-    __typename?: 'PageInfo';
+    __typename?: 'PageInfoPaginated';
 
-    endCursor?: EndCursor | null;
+    activePage: number;
 
-    hasNextPage?: boolean | null;
-  };
+    fakeTotalCount: number;
 
-  export type EndCursor = {
-    __typename?: 'CursorType';
-
-    value?: string | null;
+    showMorePagesIndicator: boolean;
   };
 
   export type Inspect = {

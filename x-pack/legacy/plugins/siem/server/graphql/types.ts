@@ -1303,7 +1303,7 @@ export interface UncommonProcessesData {
 
   totalCount: number;
 
-  pageInfo: PageInfo;
+  pageInfo: PageInfoPaginated;
 
   inspect?: Inspect | null;
 }
@@ -2020,7 +2020,7 @@ export interface OverviewHostSourceArgs {
 export interface UncommonProcessesSourceArgs {
   timerange: TimerangeInput;
 
-  pagination: PaginationInput;
+  pagination: PaginationInputPaginated;
 
   filterQuery?: string | null;
 
@@ -2861,7 +2861,7 @@ export namespace SourceResolvers {
   export interface UncommonProcessesArgs {
     timerange: TimerangeInput;
 
-    pagination: PaginationInput;
+    pagination: PaginationInputPaginated;
 
     filterQuery?: string | null;
 
@@ -6648,7 +6648,7 @@ export namespace UncommonProcessesDataResolvers {
 
     totalCount?: TotalCountResolver<number, TypeParent, Context>;
 
-    pageInfo?: PageInfoResolver<PageInfo, TypeParent, Context>;
+    pageInfo?: PageInfoResolver<PageInfoPaginated, TypeParent, Context>;
 
     inspect?: InspectResolver<Inspect | null, TypeParent, Context>;
   }
@@ -6664,7 +6664,7 @@ export namespace UncommonProcessesDataResolvers {
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type PageInfoResolver<
-    R = PageInfo,
+    R = PageInfoPaginated,
     Parent = UncommonProcessesData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;

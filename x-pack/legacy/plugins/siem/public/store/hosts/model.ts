@@ -37,7 +37,7 @@ interface Queries {
   authentications: BasicQueryPaginated;
   hosts: HostsQuery;
   events: BasicQuery;
-  uncommonProcesses: BasicQuery;
+  uncommonProcesses: BasicQueryPaginated;
 }
 
 export interface GenericHostsModel {
