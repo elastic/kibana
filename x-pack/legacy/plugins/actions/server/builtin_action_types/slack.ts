@@ -4,22 +4,30 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Joi from 'joi';
+import { schema, TypeOf } from '@kbn/config-schema';
 import { IncomingWebhook } from '@slack/webhook';
 
 import { ActionType, ActionTypeExecutorOptions, ExecutorType } from '../types';
 
-const CONFIG_SCHEMA = Joi.object()
-  .keys({
-    webhookUrl: Joi.string().required(),
-  })
-  .required();
+// config definition
 
-const PARAMS_SCHEMA = Joi.object()
-  .keys({
-    message: Joi.string().required(),
-  })
-  .required();
+const unencryptedConfigProperties: string[] = [];
+
+export type ActionTypeConfigType = TypeOf<typeof ConfigSchema>;
+
+const ConfigSchema = schema.object({
+  webhookUrl: schema.string(),
+});
+
+// params definition
+
+export type ActionParamsType = TypeOf<typeof ParamsSchema>;
+
+const ParamsSchema = schema.object({
+  message: schema.string(),
+});
+
+// action type definition
 
 // customizing executor is only used for tests
 export function getActionType({ executor }: { executor?: ExecutorType } = {}): ActionType {
@@ -28,10 +36,10 @@ export function getActionType({ executor }: { executor?: ExecutorType } = {}): A
   return {
     id: '.slack',
     name: 'slack',
-    unencryptedAttributes: [],
+    unencryptedAttributes: unencryptedConfigProperties,
     validate: {
-      params: PARAMS_SCHEMA,
-      config: CONFIG_SCHEMA,
+      config: ConfigSchema,
+      params: ParamsSchema,
     },
     executor,
   };
@@ -40,15 +48,13 @@ export function getActionType({ executor }: { executor?: ExecutorType } = {}): A
 // the production executor for this action
 export const actionType = getActionType();
 
-async function slackExecutor({
-  config,
-  params,
-  services,
-}: ActionTypeExecutorOptions): Promise<any> {
-  const { webhookUrl } = config;
-  const { message } = params;
+// action executor
 
-  const webhook = new IncomingWebhook(webhookUrl);
+async function slackExecutor(execOptions: ActionTypeExecutorOptions): Promise<any> {
+  const config = execOptions.config as ActionTypeConfigType;
+  const params = execOptions.params as ActionParamsType;
 
-  return await webhook.send(message);
+  const webhook = new IncomingWebhook(config.webhookUrl);
+
+  return await webhook.send(params.message);
 }
