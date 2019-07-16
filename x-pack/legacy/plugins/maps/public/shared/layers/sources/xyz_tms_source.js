@@ -27,20 +27,20 @@ export class XYZTMSSource extends AbstractTMSSource {
   });
   static icon = 'grid';
 
-  static createDescriptor(urlTemplate) {
+  static createDescriptor({ urlTemplate }) {
     return {
       type: XYZTMSSource.type,
-      urlTemplate: urlTemplate
+      urlTemplate
     };
   }
 
   static renderEditor({  onPreviewSource, inspectorAdapters }) {
-    const previewTMS = (urlTemplate) => {
-      const sourceDescriptor = XYZTMSSource.createDescriptor(urlTemplate);
+    const onSourceConfigChange = (sourceConfig) => {
+      const sourceDescriptor = XYZTMSSource.createDescriptor(sourceConfig);
       const source = new XYZTMSSource(sourceDescriptor, inspectorAdapters);
       onPreviewSource(source);
     };
-    return (<XYZTMSEditor previewTMS={previewTMS} />);
+    return (<XYZTMSEditor onSourceConfigChange={onSourceConfigChange} />);
   }
 
   async getImmutableProperties() {
@@ -90,7 +90,7 @@ class XYZTMSEditor extends  React.Component {
     });
 
     if (canPreview) {
-      this.props.previewTMS(url);
+      this.props.onSourceConfigChange({ urlTemplate: url });
     }
   }
 

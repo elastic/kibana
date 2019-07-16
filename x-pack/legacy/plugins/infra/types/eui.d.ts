@@ -62,17 +62,6 @@ declare module '@elastic/eui' {
     onClick?: React.MouseEventHandler<Element>;
   }
 
-  type EuiFormControlLayoutProps = CommonProps & {
-    icon?: string | EuiFormControlLayoutIconProps;
-    clear?: EuiFormControlLayoutClearIconProps;
-    fullWidth?: boolean;
-    isLoading?: boolean;
-    compressed?: boolean;
-    prepend?: React.ReactNode;
-    append?: React.ReactNode;
-  };
-  export const EuiFormControlLayout: React.SFC<EuiFormControlLayoutProps>;
-
   type EuiSideNavProps = CommonProps & {
     style?: any;
     items: Array<{

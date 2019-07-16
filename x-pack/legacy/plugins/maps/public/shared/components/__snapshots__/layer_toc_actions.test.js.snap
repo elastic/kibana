@@ -34,6 +34,7 @@ exports[`LayerTocActions is rendered 1`] = `
   }
   className="mapLayTocActions"
   closePopover={[Function]}
+  display="inlineBlock"
   hasArrow={true}
   id="contextMenu"
   isOpen={false}
@@ -130,6 +131,7 @@ exports[`LayerTocActions should disable fit to data when supportsFitToBounds is 
   }
   className="mapLayTocActions"
   closePopover={[Function]}
+  display="inlineBlock"
   hasArrow={true}
   id="contextMenu"
   isOpen={false}
@@ -226,6 +228,7 @@ exports[`LayerTocActions should not show edit actions in read only mode 1`] = `
   }
   className="mapLayTocActions"
   closePopover={[Function]}
+  display="inlineBlock"
   hasArrow={true}
   id="contextMenu"
   isOpen={false}

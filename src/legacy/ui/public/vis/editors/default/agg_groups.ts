@@ -17,23 +17,7 @@
  * under the License.
  */
 
-import { IndexedArray } from '../../indexed_array';
-
-interface SelectValueProp {
-  value: string;
-  text: string;
+export enum AggGroupNames {
+  Buckets = 'buckets',
+  Metrics = 'metrics',
 }
-
-interface SelectOptions<T> extends IndexedArray<T> {
-  byValue: {
-    [key: string]: T;
-  };
-}
-
-interface SelectParamEditorProps<T = SelectValueProp> {
-  aggParam: {
-    options: SelectOptions<T>;
-  };
-}
-
-export { SelectValueProp, SelectParamEditorProps };
