@@ -8,7 +8,7 @@ import testSubject from '@kbn/test-subj-selector';
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 
-import { mountWithIntl } from '../../../utils/enzyme_helpers';
+import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { LogEntryActionsMenu } from './log_entry_actions_menu';
 
 describe('LogEntryActionsMenu component', () => {
