@@ -217,15 +217,20 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
     }
 
     async clickNewDashboard() {
-      // newItemButton button is only visible when dashboard listing table is displayed
-      // (at least one dashboard).
-      const exists = await testSubjects.exists('newItemButton');
-      if (exists) {
-        return await testSubjects.click('newItemButton');
-      }
+      // One or the other will eventually show up on the landing page, depending on whether there are
+      // dashboards.
+      await retry.try(async () => {
+        const createNewItemButtonExists = await testSubjects.exists('newItemButton');
+        if (createNewItemButtonExists) {
+          return await testSubjects.click('newItemButton');
+        }
+        const createNewItemPromptExists = await this.getCreateDashboardPromptExists();
+        if (createNewItemPromptExists) {
+          return await this.clickCreateDashboardPrompt();
+        }
 
-      // If no dashboards exist, then newItemButton to create a new dashboard.
-      return await this.clickCreateDashboardPrompt();
+        throw new Error('Page is still loading... waiting for create new prompt or button to appear');
+      });
     }
 
     async clickCreateDashboardPrompt() {
