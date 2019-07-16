@@ -13,18 +13,14 @@ import {
   GEO_JSON_TYPE,
   FEATURE_ID_PROPERTY_NAME,
   SOURCE_DATA_ID_ORIGIN,
-  FEATURE_VISIBLE_PROPERTY_NAME
+  FEATURE_VISIBLE_PROPERTY_NAME,
+  EMPTY_FEATURE_COLLECTION
 } from '../../../common/constants';
 import _ from 'lodash';
 import { JoinTooltipProperty } from './tooltips/join_tooltip_property';
 import { isRefreshOnlyQuery } from './util/is_refresh_only_query';
 import { EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-
-const EMPTY_FEATURE_COLLECTION = {
-  type: 'FeatureCollection',
-  features: []
-};
 
 const VISIBILITY_FILTER_CLAUSE = ['all',
   [

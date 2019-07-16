@@ -8,6 +8,7 @@ import _ from 'lodash';
 import { AbstractLayer } from './layer';
 import { VectorLayer } from './vector_layer';
 import { HeatmapStyle } from './styles/heatmap_style';
+import { EMPTY_FEATURE_COLLECTION } from '../../../common/constants';
 
 const SCALED_PROPERTY_NAME = '__kbn_heatmap_weight__';//unique name to store scaled value for weighting
 
@@ -35,26 +36,21 @@ export class HeatmapLayer extends VectorLayer {
     return metricfields[0].propertyKey;
   }
 
-  _getMbLayerId() {
+  _getHeatmapLayerId() {
     return this.getId() + '_heatmap';
   }
 
   getMbLayerIds() {
-    return [this._getMbLayerId()];
+    return [this._getHeatmapLayerId()];
   }
 
   syncLayerWithMB(mbMap) {
-    const mbSource = mbMap.getSource(this.getId());
-    const mbLayerId = this._getMbLayerId();
+    super._syncSourceBindingWithMb(mbMap);
 
-    if (!mbSource) {
-      mbMap.addSource(this.getId(), {
-        type: 'geojson',
-        data: { 'type': 'FeatureCollection', 'features': [] }
-      });
-
+    const heatmapLayerId = this._getHeatmapLayerId();
+    if (!mbMap.getLayer(heatmapLayerId)) {
       mbMap.addLayer({
-        id: mbLayerId,
+        id: heatmapLayerId,
         type: 'heatmap',
         source: this.getId(),
         paint: {}
@@ -65,7 +61,7 @@ export class HeatmapLayer extends VectorLayer {
     const sourceDataRequest = this.getSourceDataRequest();
     const featureCollection = sourceDataRequest ? sourceDataRequest.getData() : null;
     if (!featureCollection) {
-      mbSourceAfter.setData({ 'type': 'FeatureCollection', 'features': [] });
+      mbSourceAfter.setData(EMPTY_FEATURE_COLLECTION);
       return;
     }
 
@@ -82,15 +78,15 @@ export class HeatmapLayer extends VectorLayer {
       mbSourceAfter.setData(featureCollection);
     }
 
-    mbMap.setLayoutProperty(mbLayerId, 'visibility', this.isVisible() ? 'visible' : 'none');
+    mbMap.setLayoutProperty(heatmapLayerId, 'visibility', this.isVisible() ? 'visible' : 'none');
     this._style.setMBPaintProperties({
       mbMap,
-      layerId: mbLayerId,
+      layerId: heatmapLayerId,
       propertyName: SCALED_PROPERTY_NAME,
       resolution: this._source.getGridResolution()
     });
-    mbMap.setPaintProperty(mbLayerId, 'heatmap-opacity', this.getAlpha());
-    mbMap.setLayerZoomRange(mbLayerId, this._descriptor.minZoom, this._descriptor.maxZoom);
+    mbMap.setPaintProperty(heatmapLayerId, 'heatmap-opacity', this.getAlpha());
+    mbMap.setLayerZoomRange(heatmapLayerId, this._descriptor.minZoom, this._descriptor.maxZoom);
   }
 
   getLayerTypeIconName() {
