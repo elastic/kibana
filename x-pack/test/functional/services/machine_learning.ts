@@ -69,7 +69,7 @@ export function MachineLearningProvider({
     },
 
     async assertDataFrameEmptyListMessageExists() {
-      await testSubjects.existOrFail('mlNoDataFrameJobsFound');
+      await testSubjects.existOrFail('mlNoDataFrameTransformsFound');
     },
 
     async assertDataVisualizerImportDataCardExists() {

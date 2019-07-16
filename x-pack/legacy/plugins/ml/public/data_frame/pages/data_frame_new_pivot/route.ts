@@ -8,22 +8,43 @@ import uiRoutes from 'ui/routes';
 
 // @ts-ignore
 import { checkBasicLicense } from '../../../license/check_license';
-// @ts-ignore
-import { checkCreateDataFrameJobsPrivilege } from '../../../privilege/check_privilege';
+import { checkCreateDataFrameTransformPrivilege } from '../../../privilege/check_privilege';
 // @ts-ignore
 import { loadCurrentIndexPattern, loadCurrentSavedSearch } from '../../../util/index_utils';
 // @ts-ignore
-import { getDataFrameCreateBreadcrumbs } from '../../breadcrumbs';
+import { loadIndexPatterns } from '../../../util/index_utils';
 
-const template = `<ml-nav-menu name="new_data_frame" /><ml-new-data-frame />`;
+import indexOrSearchTemplate from '../../../jobs/new_job/wizard/steps/index_or_search/index_or_search.html';
+
+import {
+  getDataFrameCreateBreadcrumbs,
+  getDataFrameIndexOrSearchBreadcrumbs,
+} from '../../breadcrumbs';
+
+const wizardTemplate = `<ml-nav-menu name="new_data_frame" /><ml-new-data-frame />`;
 
 uiRoutes.when('/data_frames/new_transform/step/pivot?', {
-  template,
+  template: wizardTemplate,
   k7Breadcrumbs: getDataFrameCreateBreadcrumbs,
   resolve: {
     CheckLicense: checkBasicLicense,
-    privileges: checkCreateDataFrameJobsPrivilege,
+    privileges: checkCreateDataFrameTransformPrivilege,
     indexPattern: loadCurrentIndexPattern,
     savedSearch: loadCurrentSavedSearch,
+  },
+});
+
+uiRoutes.when('/data_frames/new_transform', {
+  redirectTo: '/data_frames/new_transform/step/index_or_search',
+});
+
+uiRoutes.when('/data_frames/new_transform/step/index_or_search', {
+  template: indexOrSearchTemplate,
+  k7Breadcrumbs: getDataFrameIndexOrSearchBreadcrumbs,
+  resolve: {
+    CheckLicense: checkBasicLicense,
+    privileges: checkCreateDataFrameTransformPrivilege,
+    indexPatterns: loadIndexPatterns,
+    nextStepPath: () => '#data_frames/new_transform/step/pivot',
   },
 });
