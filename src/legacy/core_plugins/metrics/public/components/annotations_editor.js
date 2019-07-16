@@ -30,9 +30,7 @@ import { IconSelect } from './icon_select/icon_select';
 import { YesNo } from './yes_no';
 import { Storage } from 'ui/storage';
 import { data } from 'plugins/data/setup';
-const { QueryBarInput } = data.query.ui;
 import { getDefaultQueryLanguage } from './lib/get_default_query_language';
-
 import {
   htmlIdGenerator,
   EuiFlexGroup,
@@ -47,6 +45,8 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
+
+const { QueryBarInput } = data.query.ui;
 
 function newAnnotation() {
   return {

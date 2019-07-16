@@ -19,8 +19,9 @@
 
 import PropTypes from 'prop-types';
 import React from 'react';
-import { EuiComboBox } from '@elastic/eui';
+import { EuiComboBox, EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { ICON_TYPES_MAP } from '../../visualizations/constants/icons';
 
 export const ICONS = [
   {
@@ -92,7 +93,7 @@ export const ICONS = [
 export function IconView({ value: icon, label }) {
   return (
     <span>
-      <span className={`kuiIcon ${icon}`} aria-hidden="true" />
+      <EuiIcon type={ICON_TYPES_MAP[icon]} />
       {` ${label}`}
     </span>
   );
