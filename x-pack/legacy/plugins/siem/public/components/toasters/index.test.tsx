@@ -34,9 +34,10 @@ describe('Toaster', () => {
               onClick={() => dispatch({ type: 'addToaster', toast: mockToast })}
             />
             {toasts.map(toast => (
-              <span data-test-subj={`add-toaster-${toast.id}`} key={`add-toaster-${toast.id}`}>{`${
-                toast.title
-              } ${toast.text}`}</span>
+              <span
+                data-test-subj={`add-toaster-${toast.id}`}
+                key={`add-toaster-${toast.id}`}
+              >{`${toast.title} ${toast.text}`}</span>
             ))}
           </>
         );
@@ -88,8 +89,9 @@ describe('Toaster', () => {
 
       wrapper.find('[data-test-subj="add-toast"]').simulate('click');
       wrapper.update();
-
-      expect(wrapper.find('[data-test-subj="delete-toaster-id-super-id"]').exists()).toBe(false);
+      wait(() => {
+        expect(wrapper.find('[data-test-subj="delete-toaster-id-super-id"]').exists()).toBe(false);
+      });
     });
   });
 
