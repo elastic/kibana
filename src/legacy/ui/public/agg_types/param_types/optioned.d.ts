@@ -17,8 +17,23 @@
  * under the License.
  */
 
-import './_agg_config';
-import './_agg_configs';
-import './_vis';
-describe('Vis Component', function () {
-});
+import { IndexedArray } from '../../indexed_array';
+
+interface OptionedValueProp {
+  value: string;
+  text: string;
+}
+
+interface SelectOptions<T> extends IndexedArray<T> {
+  byValue: {
+    [key: string]: T;
+  };
+}
+
+interface OptionedParamEditorProps<T = OptionedValueProp> {
+  aggParam: {
+    options: SelectOptions<T>;
+  };
+}
+
+export { OptionedValueProp, OptionedParamEditorProps };
