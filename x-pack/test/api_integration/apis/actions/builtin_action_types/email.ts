@@ -56,6 +56,9 @@ export default function emailTest({ getService }: KibanaFunctionalTestDefaultPro
           actionTypeConfig: {
             from: 'bob@example.com',
             service: '__json',
+            host: null,
+            port: null,
+            secure: null,
           },
         },
         references: [],
@@ -99,11 +102,32 @@ export default function emailTest({ getService }: KibanaFunctionalTestDefaultPro
               cc: null,
               bcc: null,
               subject: 'email-subject',
-              html: 'email-message',
+              html: '<p>email-message</p>\n',
               text: 'email-message',
               headers: {},
             },
           });
+        });
+    });
+
+    it('should render html from markdown', async () => {
+      await supertest
+        .post(`/api/action/${createdActionId}/_fire`)
+        .set('kbn-xsrf', 'foo')
+        .send({
+          params: {
+            to: ['kibana-action-test@elastic.co'],
+            subject: 'message with markdown',
+            message: '_italic_ **bold** https://elastic.co link',
+          },
+        })
+        .expect(200)
+        .then((resp: any) => {
+          const { text, html } = resp.body.message;
+          expect(text).to.eql('_italic_ **bold** https://elastic.co link');
+          expect(html).to.eql(
+            '<p><em>italic</em> <strong>bold</strong> <a href="https://elastic.co">https://elastic.co</a> link</p>\n'
+          );
         });
     });
 
@@ -129,7 +153,4 @@ export default function emailTest({ getService }: KibanaFunctionalTestDefaultPro
         });
     });
   });
-
-  // TODO: once we have the HTTP API fire action, test that with a webhook url pointing
-  // back to the Kibana server
 }

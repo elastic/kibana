@@ -23,11 +23,11 @@ export default function ({ getService, getPageObjects }) {
   const retry = getService('retry');
   const find = getService('find');
   const pieChart = getService('pieChart');
+  const renderable = getService('renderable');
   const dashboardExpect = getService('dashboardExpect');
   const PageObjects = getPageObjects(['common', 'header', 'home', 'dashboard', 'timePicker']);
 
-  // FLAKY: https://github.com/elastic/kibana/issues/40670
-  describe.skip('sample data', function describeIndexTests() {
+  describe('sample data', function describeIndexTests() {
     this.tags('smoke');
 
     before(async () => {
@@ -83,6 +83,7 @@ export default function ({ getService, getPageObjects }) {
       it('should launch sample flights data set dashboard', async ()=> {
         await PageObjects.home.launchSampleDataSet('flights');
         await PageObjects.header.waitUntilLoadingHasFinished();
+        await renderable.waitForRender();
         const today = new Date();
         const todayYearMonthDay = today.toISOString().substring(0, 10);
         const fromTime = `${todayYearMonthDay} 00:00:00.000`;
@@ -121,6 +122,7 @@ export default function ({ getService, getPageObjects }) {
       it('should launch sample logs data set dashboard', async ()=> {
         await PageObjects.home.launchSampleDataSet('logs');
         await PageObjects.header.waitUntilLoadingHasFinished();
+        await renderable.waitForRender();
         const today = new Date();
         const todayYearMonthDay = today.toISOString().substring(0, 10);
         const fromTime = `${todayYearMonthDay} 00:00:00.000`;
@@ -133,6 +135,7 @@ export default function ({ getService, getPageObjects }) {
       it('should launch sample ecommerce data set dashboard', async ()=> {
         await PageObjects.home.launchSampleDataSet('ecommerce');
         await PageObjects.header.waitUntilLoadingHasFinished();
+        await renderable.waitForRender();
         const today = new Date();
         const todayYearMonthDay = today.toISOString().substring(0, 10);
         const fromTime = `${todayYearMonthDay} 00:00:00.000`;
