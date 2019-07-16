@@ -27,8 +27,17 @@ The following section is re-used in the Installation and Upgrade Guide
 ////
 // tag::notable-breaking-changes[]
 
+[float]
+[[breaking_73_data_frames_date_format]]
+=== Removed support for date histogram format specifications in {dataframe-transforms}
 
+*Details:* If your {dataframe-transform} groups your data by using a date
+histogram, the `format` property is no longer supported.
 
-
+*Impact:* {dataframe-transforms-cap} that were created in 7.2 and use date
+histograms might no longer work in 7.3. If you run into issues starting a
+transform, recreate it by copying the `pivot` part of the configuration into the
+advanced editor of the {dataframe-transforms} wizard. The advanced editor will
+remove the unsupported attribute once the configuration gets applied.
 
 // end::notable-breaking-changes[]
