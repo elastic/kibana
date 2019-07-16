@@ -34,22 +34,6 @@
               "agent": { "id": "5884d7f7-9a49-4b0e-bff2-72a475aa695f" },
               "container": null,
               "kubernetes": null,
-              "monitor": { "ip": "151.101.202.217", "name": "", "status": "up" },
-              "observer": { "geo": { "name": null, "location": null } },
-              "timestamp": "1548700903078"
-            },
-            {
-              "agent": { "id": "5884d7f7-9a49-4b0e-bff2-72a475aa695f" },
-              "container": null,
-              "kubernetes": null,
-              "monitor": { "ip": "151.101.210.217", "name": "", "status": "up" },
-              "observer": { "geo": { "name": null, "location": null } },
-              "timestamp": "1548700651073"
-            },
-            {
-              "agent": { "id": "5884d7f7-9a49-4b0e-bff2-72a475aa695f" },
-              "container": null,
-              "kubernetes": null,
               "monitor": { "ip": "151.101.250.217", "name": "", "status": "up" },
               "observer": { "geo": { "name": null, "location": null } },
               "timestamp": "1548700993074"
@@ -58,7 +42,7 @@
           "geo": null,
           "observer": { "geo": { "name": [], "location": null } },
           "monitor": { "id": null, "name": null, "status": "up", "type": null },
-          "summary": { "up": 3, "down": 0, "geo": null },
+          "summary": { "up": 1, "down": 0, "geo": null },
           "url": { "full": "https://www.elastic.co", "domain": "www.elastic.co" },
           "timestamp": 1548700993074
         }
