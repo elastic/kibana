@@ -9,5 +9,6 @@ import { PluginInitializerContext } from 'src/core/server';
 import * as constants from '../common/constants';
 import { CodePlugin } from './plugin';
 
-export const codePlugin = (initializerContext: PluginInitializerContext) => new CodePlugin();
+export const codePlugin = (initializerContext: PluginInitializerContext) =>
+  new CodePlugin(initializerContext);
 export { constants };

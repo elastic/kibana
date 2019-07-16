@@ -4,7 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// import { CoreSetup } from 'src/core/server';
-
-// export function registerRoutes(core: CoreSetup) {
-// }
+export * from './check';
+export * from './file';
+export * from './install';
+export * from './lsp';
+export * from './redirect';
+export * from './repository';
+export * from './search';
+export * from './setup';
+export * from './status';
+export * from './workspace';

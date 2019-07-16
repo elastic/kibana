@@ -10,16 +10,17 @@ import { Legacy } from 'kibana';
 import moment from 'moment';
 import { resolve } from 'path';
 
-import { init } from './server/init';
+import { CoreSetup, PluginInitializerContext } from 'src/core/server';
 import { APP_TITLE } from './common/constants';
 import { LanguageServers, LanguageServersDeveloping } from './server/lsp/language_servers';
+import { codePlugin } from './server';
 
 export type RequestFacade = Legacy.Request;
 export type RequestQueryFacade = RequestQuery;
 export type ResponseToolkitFacade = ResponseToolkit;
 export type RouteOptionsFacade = RouteOptions;
 export type ServerFacade = Legacy.Server;
-export type ServerRoute = ServerRoute;
+export type ServerRouteFacade = ServerRoute;
 
 export const code = (kibana: any) =>
   new kibana.Plugin({
@@ -106,5 +107,28 @@ export const code = (kibana: any) =>
         codeNodeUrl: Joi.string(),
       }).default();
     },
-    init,
+    init: (server: ServerFacade, options: any) => {
+      if (!options.ui.enabled) {
+        return;
+      }
+
+      const initializerContext = {} as PluginInitializerContext;
+      const coreSetup = ({
+        http: { server },
+      } as any) as CoreSetup;
+
+      // Set up with the new platform plugin lifecycle API.
+      const plugin = codePlugin(initializerContext);
+      codePlugin(initializerContext).setup(coreSetup, options);
+
+      // @ts-ignore
+      const kbnServer = this.kbnServer;
+      kbnServer.ready().then(async () => {
+        await plugin.start(coreSetup);
+      });
+
+      server.events.on('stop', () => {
+        plugin.stop();
+      });
+    },
   });
