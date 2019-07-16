@@ -20,14 +20,18 @@
 import { getStackAccessors } from './stack_format';
 import { X_ACCESSOR_INDEX, STACKED_OPTIONS } from '../../../constants';
 
-describe('src/legacy/core_plugins/metrics/public/visualizations/views/timeseries/utils/stack.js', () => {
+describe('src/legacy/core_plugins/metrics/public/visualizations/views/timeseries/utils/stack_format.js', () => {
   describe('getStackAccessors()', () => {
-    test('should return X_ACCESSOR_INDEX if stack is stacked', () => {
+    test('should return an accessor if the stack is stacked', () => {
       expect(getStackAccessors(STACKED_OPTIONS.STACKED)).toEqual([X_ACCESSOR_INDEX]);
     });
 
-    test('should return null if stack is none', () => {
-      expect(getStackAccessors(STACKED_OPTIONS.NONE)).toBe(null);
+    test('should return an accessor if the stack is percent', () => {
+      expect(getStackAccessors(STACKED_OPTIONS.PERCENT)).toEqual([X_ACCESSOR_INDEX]);
+    });
+
+    test('should return undefined if the stack does not match with STACKED and PERCENT', () => {
+      expect(getStackAccessors(STACKED_OPTIONS.NONE)).toBeUndefined();
     });
   });
 });

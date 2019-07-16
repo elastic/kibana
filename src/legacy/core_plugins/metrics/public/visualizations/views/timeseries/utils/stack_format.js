@@ -25,6 +25,6 @@ export const getStackAccessors = stack => {
     case STACKED_OPTIONS.PERCENT:
       return [X_ACCESSOR_INDEX];
     default:
-      return null;
+      return undefined;
   }
 };
