@@ -19,13 +19,24 @@
 
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
+import { wrapInI18nContext } from 'ui/i18n';
 import { shortenDottedString } from '../../../../common/utils/shorten_dotted_string';
 import headerHtml from './table_header.html';
 import { uiModules } from 'ui/modules';
+import { TableHeader } from './table_header/table_header';
 const module = uiModules.get('app/discover');
 
+module.directive('kbnTableHeader', function (reactDirective, config) {
+  return reactDirective(
+    wrapInI18nContext(TableHeader),
+    undefined,
+    { restrict: 'A' },
+    {
+      hideTimeColumn: config.get('doc_table:hideTimeColumn'),
+      isShortDots: config.get('shortDots:enable'),
+    }
+  );
 
-module.directive('kbnTableHeader', function () {
   return {
     restrict: 'A',
     scope: {
@@ -47,9 +58,9 @@ module.directive('kbnTableHeader', function () {
 
       $scope.isSortableColumn = function isSortableColumn(columnName) {
         return (
-          !!$scope.indexPattern
-          && _.isFunction($scope.onChangeSortOrder)
-          && _.get($scope, ['indexPattern', 'fields', 'byName', columnName, 'sortable'], false)
+          !!$scope.indexPattern &&
+          _.isFunction($scope.onChangeSortOrder) &&
+          _.get($scope, ['indexPattern', 'fields', 'byName', columnName, 'sortable'], false)
         );
       };
 
@@ -63,23 +74,20 @@ module.directive('kbnTableHeader', function () {
       };
 
       $scope.canMoveColumnLeft = function canMoveColumn(columnName) {
-        return (
-          _.isFunction($scope.onMoveColumn)
-          && $scope.columns.indexOf(columnName) > 0
-        );
+        return _.isFunction($scope.onMoveColumn) && $scope.columns.indexOf(columnName) > 0;
       };
 
       $scope.canMoveColumnRight = function canMoveColumn(columnName) {
         return (
-          _.isFunction($scope.onMoveColumn)
-          && $scope.columns.indexOf(columnName) < $scope.columns.length - 1
+          _.isFunction($scope.onMoveColumn) &&
+          $scope.columns.indexOf(columnName) < $scope.columns.length - 1
         );
       };
 
       $scope.canRemoveColumn = function canRemoveColumn(columnName) {
         return (
-          _.isFunction($scope.onRemoveColumn)
-          && (columnName !== '_source' || $scope.columns.length > 1)
+          _.isFunction($scope.onRemoveColumn) &&
+          (columnName !== '_source' || $scope.columns.length > 1)
         );
       };
 
@@ -119,11 +127,8 @@ module.directive('kbnTableHeader', function () {
         }
 
         const [currentColumnName, currentDirection = 'asc'] = $scope.sortOrder;
-        const newDirection = (
-          (columnName === currentColumnName && currentDirection === 'asc')
-            ? 'desc'
-            : 'asc'
-        );
+        const newDirection =
+          columnName === currentColumnName && currentDirection === 'asc' ? 'desc' : 'asc';
 
         $scope.onChangeSortOrder(columnName, newDirection);
       };
@@ -132,7 +137,7 @@ module.directive('kbnTableHeader', function () {
         if (!$scope.isSortableColumn(name)) return null;
 
         const [currentColumnName, currentDirection = 'asc'] = $scope.sortOrder;
-        if(name === currentColumnName && currentDirection === 'asc') {
+        if (name === currentColumnName && currentDirection === 'asc') {
           return i18n.translate('kbn.docTable.tableHeader.sortByColumnDescendingAriaLabel', {
             defaultMessage: 'Sort {columnName} descending',
             values: { columnName: name },
@@ -143,6 +148,6 @@ module.directive('kbnTableHeader', function () {
           values: { columnName: name },
         });
       };
-    }
+    },
   };
 });

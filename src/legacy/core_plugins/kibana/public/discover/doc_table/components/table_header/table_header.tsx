@@ -17,127 +17,79 @@
  * under the License.
  */
 import React from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
-import _ from 'lodash';
+import { isFunction, get } from 'lodash';
+// @ts-ignore
+import { IndexPattern } from 'src/legacy/core_plugins/data/public';
+import { shortenDottedString } from '../../../../../common/utils/shorten_dotted_string';
+
+import { TableHeaderColumn } from './table_header_column';
+import { TableHeaderTimeColumn } from './table_header_time_column';
+import { SortOrder } from './helpers';
 
 interface Props {
-  indexPattern: any;
+  indexPattern: IndexPattern;
   hideTimeColumn: number;
-  totalItems: number;
   columns: string[];
-  headerClass: (name: string) => string;
-  cycleSortOrder: (name: string) => string;
-  getShortDotsName: (name: string) => string;
-  isSortableColumn: (name: string) => boolean;
-  getAriaLabelForColumn: (name: string) => string;
-  tooltip: (name: string) => string;
-  moveColumnLeft: (name: string) => boolean;
+  sortOrder: SortOrder;
+  isShortDots: boolean;
   onRemoveColumn: (name: string) => void;
-  canMoveColumnRight: (name: string) => boolean;
-  canRemoveColumn: (name: string) => boolean;
-  canMoveColumnLeft: (name: string) => boolean;
-  moveColumnRight: (name: string) => void;
-  onChangeSortOrder: () => void;
+  onChangeSortOrder: (name: string, direction: 'asc' | 'desc') => void;
+  onMoveColumn: (name: string, index: number) => void;
 }
 
 export function TableHeader({
   indexPattern,
   hideTimeColumn,
   columns,
-  headerClass,
-  cycleSortOrder,
-  getShortDotsName,
-  getAriaLabelForColumn,
-  tooltip,
-  moveColumnLeft,
   onRemoveColumn,
-  canRemoveColumn,
-  canMoveColumnLeft,
-  canMoveColumnRight,
-  moveColumnRight,
   onChangeSortOrder,
+  sortOrder,
+  isShortDots,
+  onMoveColumn,
 }: Props) {
-  function isSortableColumn(columnName: string) {
-    return (
-      !!indexPattern &&
-      typeof onChangeSortOrder === 'function' &&
-      _.get(indexPattern, ['fields', 'byName', columnName, 'sortable'], false)
-    );
+  const { timeFieldName } = indexPattern;
+
+  function cycleSortOrder(colName: string) {
+    const [currColumnName, currDirection = 'asc'] = sortOrder;
+    const newDirection = colName === currColumnName && currDirection === 'asc' ? 'desc' : 'asc';
+
+    onChangeSortOrder(colName, newDirection);
   }
 
   return (
     <tr>
-      <td></td>
-      {indexPattern.timeFieldName && !hideTimeColumn && (
-        <th data-test-subj="docTableHeaderField" scope="col">
-          <span>
-            <FormattedMessage
-              id="kbn.docTable.tableHeader.timeHeaderCellTitle"
-              defaultMessage="Time"
-            />
-            <button
-              id="docTableHeaderFieldSort{{indexPattern.timeFieldName}}"
-              label="{{ getAriaLabelForColumn(indexPattern.timeFieldName) }}"
-              className={headerClass(indexPattern.timeFieldName)}
-              onClick={() => cycleSortOrder(indexPattern.timeFieldName)}
-              tooltip="{{ ::'kbn.docTable.tableHeader.sortByTimeTooltip' | i18n: {defaultMessage: 'Sort by time'} }}"
-            ></button>
-          </span>
-        </th>
+      <td style={{ width: '1%' }}></td>
+      {timeFieldName && !hideTimeColumn && (
+        <TableHeaderTimeColumn
+          sortOrder={sortOrder}
+          onCycleSortOrder={cycleSortOrder}
+          timeFieldName={timeFieldName}
+        />
       )}
-      {columns.map((name: string) => (
-        <th data-test-subj="docTableHeaderField">
-          <span data-test-subj="docTableHeader-{{name}}">
-            {getShortDotsName(name)}
-            {isSortableColumn(name) && (
-              <button
-                data-test-subj="docTableHeaderFieldSort_{{name}}"
-                id={`docTableHeaderFieldSort${name}`}
-                aria-label={getAriaLabelForColumn(name)}
-                className={headerClass(name)}
-                onClick={() => cycleSortOrder(name)}
-                tooltip={tooltip(name)}
-                tooltip-append-to-body="1"
-              ></button>
-            )}
-          </span>
-          {canRemoveColumn(name) && (
-            <button
-              className="fa fa-remove kbnDocTableHeader__move"
-              onClick={() => onRemoveColumn(name)}
-              tooltip-append-to-body="1"
-              tooltip="{{ ::'kbn.docTable.tableHeader.removeColumnButtonTooltip' | i18n: {defaultMessage: 'Remove column'} }}"
-              aria-label="{{ 'kbn.docTable.tableHeader.removeColumnButtonAriaLabel' | i18n: {
-        defaultMessage: 'Remove {columnName} column',
-        values: {columnName: name}
-      }}}"
-              data-test-subj="docTableRemoveHeader-{{name}}"
-            ></button>
-          )}
-          {canMoveColumnLeft(name) && (
-            <button
-              className="fa fa-angle-double-left kbnDocTableHeader__move"
-              oncClick={() => moveColumnLeft(name)}
-              tooltip="{{ ::'kbn.docTable.tableHeader.moveColumnLeftButtonTooltip' | i18n: {defaultMessage: 'Move column to the left'} }}"
-              aria-label="{{ 'kbn.docTable.tableHeader.moveColumnLeftButtonAriaLabel' | i18n: {
-        defaultMessage: 'Move {columnName} column to the left',
-        values: {columnName: name}
-      } }}"
-            ></button>
-          )}
-          {canMoveColumnRight(name) && (
-            <button
-              className="fa fa-angle-double-right kbnDocTableHeader__move"
-              onClick={() => moveColumnRight(name)}
-              tooltip="{{ ::'kbn.docTable.tableHeader.moveColumnRightButtonTooltip' | i18n: {defaultMessage: 'Move column to the right'} }}"
-              aria-label="{{ 'kbn.docTable.tableHeader.moveColumnRightButtonAriaLabel' | i18n: {
-        defaultMessage: 'Move {columnName} column to the right',
-        values: {columnName: name}
-      } }}"
-            ></button>
-          )}
-        </th>
-      ))}
+      {columns.map((name: string, idx: number) => {
+        const canRemoveColumn =
+          isFunction(onRemoveColumn) && (name !== '_source' || columns.length > 1);
+        const isSortable =
+          isFunction(onChangeSortOrder) &&
+          get(indexPattern, ['fields', 'byName', name, 'sortable'], false);
+
+        const colLeftIdx = idx - 1 < 0 ? -1 : idx - 1;
+        const colRightIdx = idx + 1 >= columns.length ? -1 : idx + 1;
+        const displayName = isShortDots ? shortenDottedString(name) : name;
+
+        return (
+          <TableHeaderColumn
+            key={name}
+            name={name}
+            displayName={displayName}
+            sortOrder={sortOrder}
+            onCycleSortOrder={isSortable ? () => cycleSortOrder(name) : undefined}
+            onMoveColumnLeft={colLeftIdx >= 0 ? () => onMoveColumn(name, colLeftIdx) : undefined}
+            onMoveColumnRight={colRightIdx >= 0 ? () => onMoveColumn(name, colRightIdx) : undefined}
+            onRemoveColumn={canRemoveColumn ? () => onRemoveColumn(name) : undefined}
+          />
+        );
+      })}
     </tr>
   );
 }
