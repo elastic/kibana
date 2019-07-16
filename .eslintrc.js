@@ -345,7 +345,6 @@ module.exports = {
         'packages/kbn-plugin-helpers/**/*.js',
         'packages/kbn-eslint-import-resolver-kibana/**/*.js',
         'packages/kbn-eslint-plugin-eslint/**/*',
-        'packages/kbn-utility-types/**/*',
         'x-pack/gulpfile.js',
         'x-pack/dev-tools/mocha/setup_mocha.js',
         'x-pack/scripts/*.js',

@@ -17,16 +17,23 @@
  * under the License.
  */
 
-/* eslint-disable no-restricted-syntax */
+import { PromiseType } from 'utility-types';
 
-export * from 'utility-types';
+/**
+ * Returns wrapped type of a promise.
+ */
+export type UnwrapPromise<T extends Promise<any>> = PromiseType<T>;
 
-export type UnwrapPromise<T extends Promise<any>> = T extends Promise<infer U> ? U : never;
-
+/**
+ * Minimal interface for an object resembling an `Observable`.
+ */
 export interface ObservableLike<T> {
   subscribe(observer: (value: T) => void): void;
 }
 
+/**
+ * Returns wrapped type of an observable.
+ */
 export type UnwrapObservable<T extends ObservableLike<any>> = T extends ObservableLike<infer U>
   ? U
   : never;
