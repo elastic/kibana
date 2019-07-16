@@ -11,7 +11,7 @@ import { RootDragDropProvider, DragContext } from './providers';
 jest.useFakeTimers();
 
 describe('RootDragDropProvider', () => {
-  test('provides a consistent context across render cycles', () => {
+  test('reuses contexts for each render', () => {
     const contexts: any[] = [];
     const TestComponent = ({ name }: { name: string }) => {
       const context = useContext(DragContext);
