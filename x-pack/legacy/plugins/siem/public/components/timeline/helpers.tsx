@@ -16,13 +16,15 @@ import { BrowserFields } from '../../containers/source';
 const convertDateFieldToQuery = (field: string, value: string | number) =>
   `${field}: ${isNumber(value) ? value : new Date(value).valueOf()}`;
 
-const getBaseFields = memoizeOne((browserFields: BrowserFields): string[] => {
-  const baseFields = get('base', browserFields);
-  if (baseFields != null && baseFields.fields != null) {
-    return Object.keys(baseFields.fields);
+const getBaseFields = memoizeOne(
+  (browserFields: BrowserFields): string[] => {
+    const baseFields = get('base', browserFields);
+    if (baseFields != null && baseFields.fields != null) {
+      return Object.keys(baseFields.fields);
+    }
+    return [];
   }
-  return [];
-});
+);
 
 const getBrowserFieldPath = (field: string, browserFields: BrowserFields) => {
   const splitFields = field.split('.');
@@ -77,7 +79,7 @@ export const buildGlobalQuery = (dataProviders: DataProvider[], browserFields: B
       const prepend = (q: string) => `${q !== '' ? `${q} or ` : ''}`;
       return dataProvider.enabled
         ? `${prepend(query)}(
-        ${buildQueryMatch(dataProvider, browserFields)}
+          ${buildQueryMatch(dataProvider, browserFields)}
         ${
           dataProvider.and.length > 0
             ? ` and ${buildQueryForAndProvider(dataProvider.and, browserFields)}`
@@ -118,9 +120,9 @@ export const combineQueries = (
   }
   const operatorKqlQuery = kqlMode === 'filter' ? 'and' : 'or';
   const postpend = (q: string) => `${!isEmpty(q) ? ` ${operatorKqlQuery} (${q})` : ''}`;
-  const globalQuery = `((${buildGlobalQuery(dataProviders, browserFields)}${postpend(
+  const globalQuery = `((${buildGlobalQuery(dataProviders, browserFields)})${postpend(
     kqlQuery
-  )}) and @timestamp >= ${start} and @timestamp <= ${end})`;
+  )} and @timestamp >= ${start} and @timestamp <= ${end})`;
   return {
     filterQuery: convertKueryToElasticSearchQuery(globalQuery, indexPattern),
   };
