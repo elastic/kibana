@@ -75,7 +75,7 @@ export function SettingsList() {
       render: (value: string) => value
     },
     {
-      field: 'settings.sample_rate',
+      field: 'settings.transaction_sample_rate',
       name: i18n.translate(
         'xpack.apm.settings.agentConf.configTable.sampleRateColumnLabel',
         {
