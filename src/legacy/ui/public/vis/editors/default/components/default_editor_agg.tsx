@@ -33,29 +33,18 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { AggType } from 'ui/agg_types';
-import { AggConfig, VisState, AggParams } from '../../../';
+import { AggConfig } from '../../../';
 import { DefaultEditorAggParams } from './default_editor_agg_params';
+import { DefaultEditorAggCommonProps } from './default_editor_agg_common_props';
 
-interface DefaultEditorAggProps {
+interface DefaultEditorAggProps extends DefaultEditorAggCommonProps {
   agg: AggConfig;
   aggIndex: number;
   aggIsTooLow: boolean;
   dragHandleProps: {} | null;
-  formIsTouched: boolean;
-  groupName: string;
   isDraggable: boolean;
   isLastBucket: boolean;
   isRemovable: boolean;
-  metricAggs: AggConfig[];
-  lastParentPipelineAggTitle: string;
-  state: VisState;
-  onAggParamsChange: (agg: AggParams, paramName: string, value: unknown) => void;
-  onAggTypeChange: (agg: AggConfig, aggType: AggType) => void;
-  onToggleEnableAgg: (agg: AggConfig, isEnable: boolean) => void;
-  removeAgg: (agg: AggConfig) => void;
-  setTouched: (isTouched: boolean) => void;
-  setValidity: (isValid: boolean) => void;
 }
 
 function DefaultEditorAgg({

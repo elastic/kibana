@@ -27,13 +27,12 @@ import {
   EuiPanel,
 } from '@elastic/eui';
 
-import { AggType } from 'ui/agg_types';
-import { Vis, VisState, AggParams } from '../../../';
+import { Vis } from '../../../';
 import { AggConfig } from '../../../agg_config';
 import { aggGroupNameMaps } from '../agg_group_names';
-import { AggGroupNames } from '../agg_groups';
 import { DefaultEditorAgg } from './default_editor_agg';
 import { DefaultEditorAggAdd } from './default_editor_agg_add';
+import { DefaultEditorAggCommonProps } from './default_editor_agg_common_props';
 import {
   AggsState,
   isInvalidAggsTouched,
@@ -42,21 +41,10 @@ import {
 } from './default_editor_agg_group_helper';
 import { Schema } from '../schemas';
 
-interface DefaultEditorAggGroupProps {
-  formIsTouched: boolean;
-  groupName: AggGroupNames;
-  lastParentPipelineAggTitle: string;
-  metricAggs: AggConfig[];
-  state: VisState;
+interface DefaultEditorAggGroupProps extends DefaultEditorAggCommonProps {
   vis: Vis;
   addSchema: (schems: Schema) => void;
-  onAggParamsChange: (agg: AggParams, paramName: string, value: unknown) => void;
-  onAggTypeChange: (agg: AggConfig, aggType: AggType) => void;
-  onToggleEnableAgg: (agg: AggConfig, isEnable: boolean) => void;
-  removeAgg: (agg: AggConfig) => void;
   reorderAggs: (group: AggConfig[]) => void;
-  setTouched: (isTouched: boolean) => void;
-  setValidity: (isValid: boolean) => void;
 }
 
 function DefaultEditorAggGroup({
