@@ -1,6 +1,6 @@
 To automatically generate reports with a watch, you need to configure
 {watcher} to trust the {kib} server’s certificate. For more information,
-see <<securing-reporting, Securing Reporting>>.
+see {kibana-ref}/secure-reporting.html[Securing Reporting].
 
 To configure a watch to email reports, you use the `reporting` attachment type
 in an `email` action. For more information, see

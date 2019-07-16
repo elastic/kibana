@@ -93,6 +93,7 @@ export interface CoreSetup {
     };
     // (undocumented)
     http: {
+        createCookieSessionStorageFactory: HttpServiceSetup['createCookieSessionStorageFactory'];
         registerOnPreAuth: HttpServiceSetup['registerOnPreAuth'];
         registerAuth: HttpServiceSetup['registerAuth'];
         registerOnPostAuth: HttpServiceSetup['registerOnPostAuth'];
