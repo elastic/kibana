@@ -7,6 +7,8 @@
 import createContainer from 'constate-latest';
 import { useCallback, useState } from 'react';
 
+import { useVisibilityState } from '../../utils/use_visibility_state';
+
 type TabId = 'indicesAndFieldsTab' | 'logsTab';
 const validTabIds: TabId[] = ['indicesAndFieldsTab', 'logsTab'];
 
@@ -17,33 +19,27 @@ export const useSourceConfigurationFlyoutState = ({
   initialVisibility?: boolean;
   initialTab?: TabId;
 } = {}) => {
-  const [isVisible, setIsVisible] = useState<boolean>(initialVisibility);
+  const { isVisible, show, hide, toggle: toggleIsVisible } = useVisibilityState(initialVisibility);
   const [activeTabId, setActiveTab] = useState(initialTab);
 
-  const toggleIsVisible = useCallback(
-    () => setIsVisible(isCurrentlyVisible => !isCurrentlyVisible),
-    [setIsVisible]
-  );
-
-  const show = useCallback(
+  const showWithTab = useCallback(
     (tabId?: TabId) => {
       if (tabId != null) {
         setActiveTab(tabId);
       }
-      setIsVisible(true);
+      show();
     },
-    [setIsVisible]
+    [show]
   );
-  const showIndicesConfiguration = useCallback(() => show('indicesAndFieldsTab'), [show]);
-  const showLogsConfiguration = useCallback(() => show('logsTab'), [show]);
-  const hide = useCallback(() => setIsVisible(false), [setIsVisible]);
+  const showIndicesConfiguration = useCallback(() => showWithTab('indicesAndFieldsTab'), [show]);
+  const showLogsConfiguration = useCallback(() => showWithTab('logsTab'), [show]);
 
   return {
     activeTabId,
     hide,
     isVisible,
     setActiveTab,
-    show,
+    show: showWithTab,
     showIndicesConfiguration,
     showLogsConfiguration,
     toggleIsVisible,

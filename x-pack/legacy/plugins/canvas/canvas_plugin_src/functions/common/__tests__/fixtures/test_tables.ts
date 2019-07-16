@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Datatable } from '../../../types';
+import { Datatable } from '../../../../../types';
 
 const emptyTable: Datatable = {
   type: 'datatable',

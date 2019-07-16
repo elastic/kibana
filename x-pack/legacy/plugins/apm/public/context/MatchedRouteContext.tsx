@@ -15,16 +15,13 @@ export const MatchedRouteContext = React.createContext<Array<typeof routes[0]>>(
 export const MatchedRouteProvider: React.FC = ({ children }) => {
   const { pathname } = useLocation();
 
-  const contextValue = useMemo(
-    () => {
-      return routes.filter(route => {
-        return matchPath(pathname, {
-          path: route.path
-        });
+  const contextValue = useMemo(() => {
+    return routes.filter(route => {
+      return matchPath(pathname, {
+        path: route.path
       });
-    },
-    [pathname]
-  );
+    });
+  }, [pathname]);
 
   return (
     <MatchedRouteContext.Provider value={contextValue} children={children} />

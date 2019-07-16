@@ -16,14 +16,19 @@ import { kpiHostDetailsMapping } from './kpi_host_details_mapping';
 
 const kpiWidgetHeight = 247;
 
-interface KpiHostsProps {
-  data: KpiHostsData;
+interface GenericKpiHostProps {
+  from: number;
+  id: string;
   loading: boolean;
+  to: number;
 }
 
-interface KpiHostDetailsProps {
+interface KpiHostsProps extends GenericKpiHostProps {
+  data: KpiHostsData;
+}
+
+interface KpiHostDetailsProps extends GenericKpiHostProps {
   data: KpiHostDetailsData;
-  loading: boolean;
 }
 
 const FlexGroupSpinner = styled(EuiFlexGroup)`
@@ -32,10 +37,16 @@ const FlexGroupSpinner = styled(EuiFlexGroup)`
   }
 `;
 
-export const KpiHostsComponent = ({ data, loading }: KpiHostsProps | KpiHostDetailsProps) => {
+export const KpiHostsComponent = ({
+  data,
+  from,
+  loading,
+  id,
+  to,
+}: KpiHostsProps | KpiHostDetailsProps) => {
   const mappings =
     (data as KpiHostsData).hosts !== undefined ? kpiHostsMapping : kpiHostDetailsMapping;
-  const statItemsProps: StatItemsProps[] = useKpiMatrixStatus(mappings, data);
+  const statItemsProps: StatItemsProps[] = useKpiMatrixStatus(mappings, data, id, from, to);
   return loading ? (
     <FlexGroupSpinner justifyContent="center" alignItems="center">
       <EuiFlexItem grow={false}>
@@ -44,7 +55,7 @@ export const KpiHostsComponent = ({ data, loading }: KpiHostsProps | KpiHostDeta
     </FlexGroupSpinner>
   ) : (
     <EuiFlexGroup>
-      {statItemsProps.map(mappedStatItemProps => {
+      {statItemsProps.map((mappedStatItemProps, idx) => {
         return <StatItemsComponent {...mappedStatItemProps} />;
       })}
     </EuiFlexGroup>

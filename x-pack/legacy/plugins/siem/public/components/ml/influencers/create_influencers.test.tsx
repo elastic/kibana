@@ -25,7 +25,7 @@ describe('create_influencers', () => {
 
   test('it returns expected createKeyAndValue record with special left and right quotes', () => {
     const entities = createKeyAndValue({ 'name-1': 'value-1' });
-    expect(entities).toEqual('name-1: “value-1”');
+    expect(entities).toEqual('name-1: "value-1"');
   });
 
   test('it returns expected createKeyAndValue record when empty object is passed', () => {
@@ -35,7 +35,7 @@ describe('create_influencers', () => {
 
   test('it creates the anomalies without filtering anything out since they are all well formed', () => {
     const wrapper = mount(<span>{createInfluencers(anomalies.anomalies[0])}</span>);
-    expect(wrapper.text()).toEqual('host.name: “zeek-iowa”process.name: “du”user.name: “root”');
+    expect(wrapper.text()).toEqual('host.name: "zeek-iowa"process.name: "du"user.name: "root"');
   });
 
   test('it returns empty text when passed in empty objects of influencers', () => {
@@ -52,7 +52,7 @@ describe('create_influencers', () => {
     ];
     const wrapper = mount(<span>{createInfluencers(anomalies.anomalies[0])}</span>);
     expect(wrapper.text()).toEqual(
-      'influencer-name-one: “influencer-value-one”influencer-name-two: “influencer-value-two”'
+      'influencer-name-one: "influencer-value-one"influencer-name-two: "influencer-value-two"'
     );
   });
 });

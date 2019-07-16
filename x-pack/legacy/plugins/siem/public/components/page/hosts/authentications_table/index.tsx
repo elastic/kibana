@@ -19,20 +19,23 @@ import { DragEffects, DraggableWrapper } from '../../../drag_and_drop/draggable_
 import { escapeDataProviderId } from '../../../drag_and_drop/helpers';
 import { getEmptyTagValue } from '../../../empty_value';
 import { HostDetailsLink, IPDetailsLink } from '../../../links';
-import { Columns, ItemsPerRow, LoadMoreTable } from '../../../load_more_table';
+import { Columns, ItemsPerRow, PaginatedTable } from '../../../paginated_table';
 import { IS_OPERATOR } from '../../../timeline/data_providers/data_provider';
 import { Provider } from '../../../timeline/data_providers/provider';
 
 import * as i18n from './translations';
 import { getRowItemDraggables } from '../../../tables/helpers';
 
+const tableType = hostsModel.HostsTableType.authentications;
+
 interface OwnProps {
   data: AuthenticationsEdges[];
+  fakeTotalCount: number;
   loading: boolean;
-  hasNextPage: boolean;
-  nextCursor: string;
+  loadPage: (newActivePage: number) => void;
+  id: string;
+  showMorePagesIndicator: boolean;
   totalCount: number;
-  loadMore: (cursor: string) => void;
   type: hostsModel.HostsType;
 }
 
@@ -42,7 +45,29 @@ interface AuthenticationTableReduxProps {
 
 interface AuthenticationTableDispatchProps {
   updateLimitPagination: ActionCreator<{ limit: number; hostsType: hostsModel.HostsType }>;
+  updateTableActivePage: ActionCreator<{
+    activePage: number;
+    hostsType: hostsModel.HostsType;
+    tableType: hostsModel.HostsTableType;
+  }>;
+  updateTableLimit: ActionCreator<{
+    limit: number;
+    hostsType: hostsModel.HostsType;
+    tableType: hostsModel.HostsTableType;
+  }>;
 }
+
+export declare type AuthTableColumns = [
+  Columns<AuthenticationsEdges>,
+  Columns<AuthenticationsEdges>,
+  Columns<AuthenticationsEdges>,
+  Columns<AuthenticationsEdges>,
+  Columns<AuthenticationsEdges>,
+  Columns<AuthenticationsEdges>,
+  Columns<AuthenticationsEdges>,
+  Columns<AuthenticationsEdges>,
+  Columns<AuthenticationsEdges>
+];
 
 type AuthenticationTableProps = OwnProps &
   AuthenticationTableReduxProps &
@@ -57,43 +82,51 @@ const rowItems: ItemsPerRow[] = [
     text: i18n.ROWS_10,
     numberOfRow: 10,
   },
-  {
-    text: i18n.ROWS_20,
-    numberOfRow: 20,
-  },
-  {
-    text: i18n.ROWS_50,
-    numberOfRow: 50,
-  },
 ];
 
 const AuthenticationTableComponent = pure<AuthenticationTableProps>(
   ({
+    fakeTotalCount,
     data,
-    hasNextPage,
+    id,
     limit,
     loading,
-    loadMore,
+    loadPage,
+    showMorePagesIndicator,
     totalCount,
-    nextCursor,
-    updateLimitPagination,
     type,
+    updateTableActivePage,
+    updateTableLimit,
   }) => (
-    <LoadMoreTable
+    <PaginatedTable
       columns={getAuthenticationColumnsCurated(type)}
-      hasNextPage={hasNextPage}
       headerCount={totalCount}
       headerTitle={i18n.AUTHENTICATIONS}
       headerUnit={i18n.UNIT(totalCount)}
+      id={id}
       itemsPerRow={rowItems}
       limit={limit}
       loading={loading}
       loadingTitle={i18n.AUTHENTICATIONS}
-      loadMore={() => loadMore(nextCursor)}
+      loadPage={newActivePage => loadPage(newActivePage)}
       pageOfItems={data}
+      showMorePagesIndicator={showMorePagesIndicator}
+      totalCount={fakeTotalCount}
       updateLimitPagination={newLimit =>
-        updateLimitPagination({ limit: newLimit, hostsType: type })
+        updateTableLimit({
+          hostsType: type,
+          limit: newLimit,
+          tableType,
+        })
       }
+      updateActivePage={newPage =>
+        updateTableActivePage({
+          activePage: newPage,
+          hostsType: type,
+          tableType,
+        })
+      }
+      updateProps={{ totalCount }}
     />
   )
 );
@@ -109,20 +142,12 @@ export const AuthenticationTable = connect(
   makeMapStateToProps,
   {
     updateLimitPagination: hostsActions.updateAuthenticationsLimit,
+    updateTableActivePage: hostsActions.updateTableActivePage,
+    updateTableLimit: hostsActions.updateTableLimit,
   }
 )(AuthenticationTableComponent);
 
-const getAuthenticationColumns = (): [
-  Columns<AuthenticationsEdges>,
-  Columns<AuthenticationsEdges>,
-  Columns<AuthenticationsEdges>,
-  Columns<AuthenticationsEdges>,
-  Columns<AuthenticationsEdges>,
-  Columns<AuthenticationsEdges>,
-  Columns<AuthenticationsEdges>,
-  Columns<AuthenticationsEdges>,
-  Columns<AuthenticationsEdges>
-] => [
+const getAuthenticationColumns = (): AuthTableColumns => [
   {
     name: i18n.USER,
     truncateText: false,

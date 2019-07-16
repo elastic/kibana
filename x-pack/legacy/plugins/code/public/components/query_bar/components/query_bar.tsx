@@ -63,6 +63,7 @@ interface State {
   groupIndex: number | null;
   itemIndex: number | null;
   suggestionGroups: AutocompleteSuggestionGroup[];
+  showOptions: boolean;
   currentProps?: Props;
 }
 
@@ -93,7 +94,7 @@ export class CodeQueryBar extends Component<Props, State> {
     keypress has been a major source of performance issues for us in previous implementations of the query bar.
     See https://github.com/elastic/kibana/issues/14086
   */
-  public state = {
+  public state: State = {
     query: this.props.query,
     inputIsPristine: true,
     isSuggestionsVisible: false,

@@ -115,6 +115,10 @@ export class EMSClient {
 
   }
 
+  getDefaultLocale() {
+    return DEFAULT_LANGUAGE;
+  }
+
   getLocale() {
     return this._language;
   }

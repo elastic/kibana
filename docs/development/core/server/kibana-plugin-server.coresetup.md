@@ -16,6 +16,6 @@ export interface CoreSetup
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [elasticsearch](./kibana-plugin-server.coresetup.elasticsearch.md) | <code>{</code><br/><code>        adminClient$: Observable&lt;ClusterClient&gt;;</code><br/><code>        dataClient$: Observable&lt;ClusterClient&gt;;</code><br/><code>    }</code> |  |
-|  [http](./kibana-plugin-server.coresetup.http.md) | <code>{</code><br/><code>        registerOnPreAuth: HttpServiceSetup['registerOnPreAuth'];</code><br/><code>        registerAuth: HttpServiceSetup['registerAuth'];</code><br/><code>        registerOnPostAuth: HttpServiceSetup['registerOnPostAuth'];</code><br/><code>        basePath: HttpServiceSetup['basePath'];</code><br/><code>        createNewServer: HttpServiceSetup['createNewServer'];</code><br/><code>    }</code> |  |
+|  [elasticsearch](./kibana-plugin-server.coresetup.elasticsearch.md) | <code>{</code><br/><code>        adminClient$: Observable&lt;ClusterClient&gt;;</code><br/><code>        dataClient$: Observable&lt;ClusterClient&gt;;</code><br/><code>        createClient: (type: string, clientConfig?: Partial&lt;ElasticsearchClientConfig&gt;) =&gt; ClusterClient;</code><br/><code>    }</code> |  |
+|  [http](./kibana-plugin-server.coresetup.http.md) | <code>{</code><br/><code>        registerOnPreAuth: HttpServiceSetup['registerOnPreAuth'];</code><br/><code>        registerAuth: HttpServiceSetup['registerAuth'];</code><br/><code>        registerOnPostAuth: HttpServiceSetup['registerOnPostAuth'];</code><br/><code>        basePath: HttpServiceSetup['basePath'];</code><br/><code>        createNewServer: HttpServiceSetup['createNewServer'];</code><br/><code>        isTlsEnabled: HttpServiceSetup['isTlsEnabled'];</code><br/><code>    }</code> |  |
 

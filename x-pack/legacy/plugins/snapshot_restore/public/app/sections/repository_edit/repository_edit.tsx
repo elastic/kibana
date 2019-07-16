@@ -51,14 +51,11 @@ export const RepositoryEdit: React.FunctionComponent<RouteComponentProps<MatchPa
   } = useLoadRepository(name);
 
   // Update repository state when data is loaded
-  useEffect(
-    () => {
-      if (repositoryData && repositoryData.repository) {
-        setRepository(repositoryData.repository);
-      }
-    },
-    [repositoryData]
-  );
+  useEffect(() => {
+    if (repositoryData && repositoryData.repository) {
+      setRepository(repositoryData.repository);
+    }
+  }, [repositoryData]);
 
   // Saving repository states
   const [isSaving, setIsSaving] = useState<boolean>(false);

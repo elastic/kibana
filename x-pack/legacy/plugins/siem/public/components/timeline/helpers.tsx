@@ -16,15 +16,13 @@ import { BrowserFields } from '../../containers/source';
 const convertDateFieldToQuery = (field: string, value: string | number) =>
   `${field}: ${isNumber(value) ? value : new Date(value).valueOf()}`;
 
-const getBaseFields = memoizeOne(
-  (browserFields: BrowserFields): string[] => {
-    const baseFields = get('base', browserFields);
-    if (baseFields != null && baseFields.fields != null) {
-      return Object.keys(baseFields.fields);
-    }
-    return [];
+const getBaseFields = memoizeOne((browserFields: BrowserFields): string[] => {
+  const baseFields = get('base', browserFields);
+  if (baseFields != null && baseFields.fields != null) {
+    return Object.keys(baseFields.fields);
   }
-);
+  return [];
+});
 
 const getBrowserFieldPath = (field: string, browserFields: BrowserFields) => {
   const splitFields = field.split('.');

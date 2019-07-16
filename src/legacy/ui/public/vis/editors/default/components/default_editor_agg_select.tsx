@@ -28,7 +28,7 @@ import { documentationLinks } from '../../../../documentation_links/documentatio
 import { ComboBoxGroupedOption } from '../default_editor_utils';
 
 interface DefaultEditorAggSelectProps {
-  aggError?: string;
+  aggError?: string | null;
   aggTypeOptions: AggType[];
   id: string;
   indexPattern: IndexPattern;
@@ -102,21 +102,15 @@ function DefaultEditorAggSelect({
 
   const isValid = !!value && !errors.length;
 
-  useEffect(
-    () => {
-      setValidity(isValid);
-    },
-    [isValid]
-  );
+  useEffect(() => {
+    setValidity(isValid);
+  }, [isValid]);
 
-  useEffect(
-    () => {
-      if (errors.length) {
-        setTouched();
-      }
-    },
-    [errors.length]
-  );
+  useEffect(() => {
+    if (errors.length) {
+      setTouched();
+    }
+  }, [errors.length]);
 
   const onChange = (options: EuiComboBoxOptionProps[]) => {
     const selectedOption = get(options, '0.value');
@@ -132,7 +126,7 @@ function DefaultEditorAggSelect({
       error={errors}
       isInvalid={showValidation ? !isValid : false}
       fullWidth={true}
-      className="visEditorAggSelect__formRow"
+      compressed
     >
       <EuiComboBox
         placeholder={i18n.translate('common.ui.vis.defaultEditor.aggSelect.selectAggPlaceholder', {

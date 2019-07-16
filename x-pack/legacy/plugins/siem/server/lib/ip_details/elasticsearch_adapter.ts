@@ -10,7 +10,6 @@ import {
   AutonomousSystem,
   DomainsData,
   DomainsEdges,
-  FirstLastSeenDomain,
   FlowTarget,
   GeoEcsFields,
   HostEcsFields,
@@ -20,8 +19,9 @@ import {
   UsersData,
   UsersEdges,
 } from '../../graphql/types';
+import { inspectStringifyObject } from '../../utils/build_query';
 import { DatabaseSearchResponse, FrameworkAdapter, FrameworkRequest } from '../framework';
-import { SearchHit, TermAggregation } from '../types';
+import { TermAggregation } from '../types';
 
 import {
   DomainsRequestOptions,
@@ -30,11 +30,8 @@ import {
   UsersRequestOptions,
 } from './index';
 import { buildDomainsQuery } from './query_domains.dsl';
-import { buildFirstLastSeenDomainQuery } from './query_last_first_seen_domain.dsl';
 import { buildOverviewQuery } from './query_overview.dsl';
 import {
-  DomainFirstLastSeenItem,
-  DomainFirstLastSeenRequestOptions,
   DomainsBuckets,
   IpDetailsAdapter,
   IpOverviewHit,
@@ -55,12 +52,20 @@ export class ElasticsearchIpOverviewAdapter implements IpDetailsAdapter {
     request: FrameworkRequest,
     options: IpOverviewRequestOptions
   ): Promise<IpOverviewData> {
+    const dsl = buildOverviewQuery(options);
     const response = await this.framework.callWithRequest<IpOverviewHit, TermAggregation>(
       request,
       'search',
-      buildOverviewQuery(options)
+      dsl
     );
+
+    const inspect = {
+      dsl: [inspectStringifyObject(dsl)],
+      response: [inspectStringifyObject(response)],
+    };
+
     return {
+      inspect,
       ...getIpOverviewAgg('source', getOr({}, 'aggregations.source', response)),
       ...getIpOverviewAgg('destination', getOr({}, 'aggregations.destination', response)),
       ...getIpOverviewHostAgg(getOr({}, 'aggregations.host', response)),
@@ -71,10 +76,11 @@ export class ElasticsearchIpOverviewAdapter implements IpDetailsAdapter {
     request: FrameworkRequest,
     options: DomainsRequestOptions
   ): Promise<DomainsData> {
+    const dsl = buildDomainsQuery(options);
     const response = await this.framework.callWithRequest<DomainsData, TermAggregation>(
       request,
       'search',
-      buildDomainsQuery(options)
+      dsl
     );
 
     const { cursor, limit } = options.pagination;
@@ -83,10 +89,14 @@ export class ElasticsearchIpOverviewAdapter implements IpDetailsAdapter {
     const hasNextPage = domainsEdges.length > limit;
     const beginning = cursor != null ? parseInt(cursor, 10) : 0;
     const edges = domainsEdges.splice(beginning, limit - beginning);
+    const inspect = {
+      dsl: [inspectStringifyObject(dsl)],
+      response: [inspectStringifyObject(response)],
+    };
 
     return {
       edges,
-      totalCount,
+      inspect,
       pageInfo: {
         hasNextPage,
         endCursor: {
@@ -94,14 +104,16 @@ export class ElasticsearchIpOverviewAdapter implements IpDetailsAdapter {
           tiebreaker: null,
         },
       },
+      totalCount,
     };
   }
 
   public async getTls(request: FrameworkRequest, options: TlsRequestOptions): Promise<TlsData> {
+    const dsl = buildTlsQuery(options);
     const response = await this.framework.callWithRequest<TlsData, TermAggregation>(
       request,
       'search',
-      buildTlsQuery(options)
+      dsl
     );
 
     const { cursor, limit } = options.pagination;
@@ -110,10 +122,14 @@ export class ElasticsearchIpOverviewAdapter implements IpDetailsAdapter {
     const hasNextPage = tlsEdges.length > limit;
     const beginning = cursor != null ? parseInt(cursor, 10) : 0;
     const edges = tlsEdges.splice(beginning, limit - beginning);
+    const inspect = {
+      dsl: [inspectStringifyObject(dsl)],
+      response: [inspectStringifyObject(response)],
+    };
 
     return {
       edges,
-      totalCount,
+      inspect,
       pageInfo: {
         hasNextPage,
         endCursor: {
@@ -121,23 +137,7 @@ export class ElasticsearchIpOverviewAdapter implements IpDetailsAdapter {
           tiebreaker: null,
         },
       },
-    };
-  }
-
-  public async getDomainsFirstLastSeen(
-    request: FrameworkRequest,
-    options: DomainFirstLastSeenRequestOptions
-  ): Promise<FirstLastSeenDomain> {
-    const response = await this.framework.callWithRequest<SearchHit, TermAggregation>(
-      request,
-      'search',
-      buildFirstLastSeenDomainQuery(options)
-    );
-
-    const aggregations: DomainFirstLastSeenItem = get('aggregations', response) || {};
-    return {
-      firstSeen: get('firstSeen.value_as_string', aggregations),
-      lastSeen: get('lastSeen.value_as_string', aggregations),
+      totalCount,
     };
   }
 
@@ -145,10 +145,11 @@ export class ElasticsearchIpOverviewAdapter implements IpDetailsAdapter {
     request: FrameworkRequest,
     options: UsersRequestOptions
   ): Promise<UsersData> {
+    const dsl = buildUsersQuery(options);
     const response = await this.framework.callWithRequest<UsersData, TermAggregation>(
       request,
       'search',
-      buildUsersQuery(options)
+      dsl
     );
 
     const { cursor, limit } = options.pagination;
@@ -157,10 +158,14 @@ export class ElasticsearchIpOverviewAdapter implements IpDetailsAdapter {
     const hasNextPage = usersEdges.length > limit;
     const beginning = cursor != null ? parseInt(cursor, 10) : 0;
     const edges = usersEdges.splice(beginning, limit - beginning);
+    const inspect = {
+      dsl: [inspectStringifyObject(dsl)],
+      response: [inspectStringifyObject(response)],
+    };
 
     return {
       edges,
-      totalCount,
+      inspect,
       pageInfo: {
         endCursor: {
           value: String(limit),
@@ -168,6 +173,7 @@ export class ElasticsearchIpOverviewAdapter implements IpDetailsAdapter {
         },
         hasNextPage,
       },
+      totalCount,
     };
   }
 }
@@ -204,10 +210,9 @@ export const getIpOverviewAgg = (type: string, overviewHit: OverviewHit | {}) =>
 export const getIpOverviewHostAgg = (overviewHostHit: OverviewHostHit | {}) => {
   const hostFields: HostEcsFields | null = getOr(
     null,
-    `host.results.hits.hits[0]._source.host`,
+    `results.hits.hits[0]._source.host`,
     overviewHostHit
   );
-
   return {
     host: {
       ...hostFields,
@@ -235,7 +240,6 @@ export const formatDomainsEdges = (
       [flowTarget]: {
         uniqueIpCount: getOrNumber('uniqueIpCount.value', bucket),
         domainName: bucket.key,
-        firstSeen: get('firstSeen.value_as_string', bucket),
         lastSeen: get('lastSeen.value_as_string', bucket),
       },
       network: {

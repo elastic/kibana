@@ -7,18 +7,23 @@
 import { getOr } from 'lodash/fp';
 import React from 'react';
 import { Query } from 'react-apollo';
-
+import { connect } from 'react-redux';
+import { pure } from 'recompose';
 import chrome from 'ui/chrome';
+
 import { DEFAULT_INDEX_KEY } from '../../../common/constants';
 import { KpiHostDetailsData, GetKpiHostDetailsQuery } from '../../graphql/types';
-import { inputsModel } from '../../store';
+import { inputsModel, inputsSelectors, State } from '../../store';
 import { createFilter } from '../helpers';
 import { QueryTemplateProps } from '../query_template';
 
 import { kpiHostDetailsQuery } from './index.gql_query';
 
+const ID = 'kpiHostDetailsQuery';
+
 export interface KpiHostDetailsArgs {
   id: string;
+  inspect: inputsModel.InspectQuery;
   kpiHostDetails: KpiHostDetailsData;
   loading: boolean;
   refetch: inputsModel.Refetch;
@@ -28,8 +33,12 @@ export interface QueryKpiHostDetailsProps extends QueryTemplateProps {
   children: (args: KpiHostDetailsArgs) => React.ReactNode;
 }
 
-export const KpiHostDetailsQuery = React.memo<QueryKpiHostDetailsProps>(
-  ({ id = 'kpiHostDetailsQuery', children, endDate, filterQuery, skip, sourceId, startDate }) => (
+export interface KpiHostDetailsReducer {
+  isInspected: boolean;
+}
+
+const KpiHostDetailsComponentQuery = pure<QueryKpiHostDetailsProps & KpiHostDetailsReducer>(
+  ({ id = ID, children, endDate, filterQuery, isInspected, skip, sourceId, startDate }) => (
     <Query<GetKpiHostDetailsQuery.Query, GetKpiHostDetailsQuery.Variables>
       query={kpiHostDetailsQuery}
       fetchPolicy="cache-and-network"
@@ -44,12 +53,14 @@ export const KpiHostDetailsQuery = React.memo<QueryKpiHostDetailsProps>(
         },
         filterQuery: createFilter(filterQuery),
         defaultIndex: chrome.getUiSettingsClient().get(DEFAULT_INDEX_KEY),
+        inspect: isInspected,
       }}
     >
       {({ data, loading, refetch }) => {
         const kpiHostDetails = getOr({}, `source.KpiHostDetails`, data);
         return children({
           id,
+          inspect: getOr(null, 'source.KpiHostDetails.inspect', data),
           kpiHostDetails,
           loading,
           refetch,
@@ -58,3 +69,16 @@ export const KpiHostDetailsQuery = React.memo<QueryKpiHostDetailsProps>(
     </Query>
   )
 );
+
+const makeMapStateToProps = () => {
+  const getQuery = inputsSelectors.globalQueryByIdSelector();
+  const mapStateToProps = (state: State, { id = ID }: QueryKpiHostDetailsProps) => {
+    const { isInspected } = getQuery(state, id);
+    return {
+      isInspected,
+    };
+  };
+  return mapStateToProps;
+};
+
+export const KpiHostDetailsQuery = connect(makeMapStateToProps)(KpiHostDetailsComponentQuery);

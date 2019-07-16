@@ -15,6 +15,7 @@ const euiColorVis9 = '#920000';
 export const kpiHostDetailsMapping: Readonly<StatItems[]> = [
   {
     key: 'authentication',
+    index: 0,
     fields: [
       {
         key: 'authSuccess',
@@ -38,6 +39,7 @@ export const kpiHostDetailsMapping: Readonly<StatItems[]> = [
   },
   {
     key: 'uniqueIps',
+    index: 1,
     fields: [
       {
         key: 'uniqueSourceIps',

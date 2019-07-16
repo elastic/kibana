@@ -33,38 +33,34 @@ const getBiDirectionalFilter = (flowDirection: FlowDirection, flowTarget: FlowTa
     flowDirection === FlowDirection.biDirectional &&
     [FlowTarget.source, FlowTarget.destination].includes(flowTarget)
   ) {
-    return {
-      must: [
-        {
-          exists: {
-            field: 'source.bytes',
-          },
+    return [
+      {
+        exists: {
+          field: 'source.bytes',
         },
-        {
-          exists: {
-            field: 'destination.bytes',
-          },
+      },
+      {
+        exists: {
+          field: 'destination.bytes',
         },
-      ],
-    };
+      },
+    ];
   } else if (
     flowDirection === FlowDirection.biDirectional &&
     [FlowTarget.client, FlowTarget.server].includes(flowTarget)
   ) {
-    return {
-      must: [
-        {
-          exists: {
-            field: 'client.bytes',
-          },
+    return [
+      {
+        exists: {
+          field: 'client.bytes',
         },
-        {
-          exists: {
-            field: 'server.bytes',
-          },
+      },
+      {
+        exists: {
+          field: 'server.bytes',
         },
-      ],
-    };
+      },
+    ];
   }
   return [];
 };
@@ -78,7 +74,6 @@ const getCountAgg = (flowTarget: FlowTarget) => ({
 });
 
 export const buildTopNFlowQuery = ({
-  fields,
   filterQuery,
   flowDirection,
   networkTopNFlowSort,
@@ -93,6 +88,7 @@ export const buildTopNFlowQuery = ({
   const filter = [
     ...createQueryFilterClauses(filterQuery),
     { range: { [timestamp]: { gte: from, lte: to } } },
+    ...getBiDirectionalFilter(flowDirection, flowTarget),
   ];
 
   const dslQuery = {
@@ -109,7 +105,6 @@ export const buildTopNFlowQuery = ({
         bool: {
           filter,
           ...getUniDirectionalFilter(flowDirection),
-          ...getBiDirectionalFilter(flowDirection, flowTarget),
         },
       },
     },
@@ -173,11 +168,6 @@ const getUniDirectionAggs = (
                 field: 'network.packets',
               },
             },
-            timestamp: {
-              max: {
-                field: '@timestamp',
-              },
-            },
           },
         },
       }
@@ -233,11 +223,6 @@ const getBiDirectionAggs = (
             packets: {
               sum: {
                 field: `${flowTarget}.packets`,
-              },
-            },
-            timestamp: {
-              max: {
-                field: '@timestamp',
               },
             },
           },

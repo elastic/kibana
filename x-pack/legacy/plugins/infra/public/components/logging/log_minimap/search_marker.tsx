@@ -24,7 +24,7 @@ interface SearchMarkerState {
 }
 
 export class SearchMarker extends React.PureComponent<SearchMarkerProps, SearchMarkerState> {
-  public readonly state = {
+  public readonly state: SearchMarkerState = {
     hoveredPosition: null,
   };
 

@@ -25,9 +25,11 @@ import { createFlagError, isFailError } from './fail';
 import { Flags, getFlags, getHelp } from './flags';
 
 type CleanupTask = () => void;
-type RunFn = (
-  args: { log: ToolingLog; flags: Flags; addCleanupTask: (task: CleanupTask) => void }
-) => Promise<void> | void;
+type RunFn = (args: {
+  log: ToolingLog;
+  flags: Flags;
+  addCleanupTask: (task: CleanupTask) => void;
+}) => Promise<void> | void;
 
 export interface Options {
   usage?: string;

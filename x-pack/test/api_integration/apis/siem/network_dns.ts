@@ -42,6 +42,7 @@ const networkDnsTests: KbnTestProvider = ({ getService }) => {
                 cursor: null,
               },
               defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+              inspect: false,
             },
           })
           .then(resp => {
@@ -73,6 +74,7 @@ const networkDnsTests: KbnTestProvider = ({ getService }) => {
                 cursor: null,
               },
               defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+              inspect: false,
             },
           })
           .then(resp => {

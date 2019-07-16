@@ -86,9 +86,7 @@ export class BackendFrameworkLib {
       ) {
         return {
           error: {
-            message: `Your ${
-              this.license.type
-            } license does not support this API or is expired. Please upgrade your license.`,
+            message: `Your ${this.license.type} license does not support this API or is expired. Please upgrade your license.`,
             code: 403,
           },
           success: false,

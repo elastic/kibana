@@ -12,6 +12,7 @@ import { dictionaryToArray } from '../../../../common/types/common';
 import { ml } from '../../../services/ml_api_service';
 
 import { Dictionary } from '../../../../common/types/common';
+import { ES_FIELD_TYPES } from '../../../../common/constants/field_types';
 import {
   DataFramePreviewRequest,
   getDataFramePreviewRequest,
@@ -27,11 +28,26 @@ export enum PIVOT_PREVIEW_STATUS {
   ERROR,
 }
 
+interface EsMappingType {
+  type: ES_FIELD_TYPES;
+}
+
+type DataFramePreviewData = Array<Dictionary<any>>;
+interface DataFramePreviewMappings {
+  properties: Dictionary<EsMappingType>;
+}
+
 export interface UsePivotPreviewDataReturnType {
   errorMessage: string;
   status: PIVOT_PREVIEW_STATUS;
-  dataFramePreviewData: Array<Dictionary<any>>;
+  dataFramePreviewData: DataFramePreviewData;
+  dataFramePreviewMappings: DataFramePreviewMappings;
   previewRequest: DataFramePreviewRequest;
+}
+
+export interface GetDataFrameTransformsResponse {
+  preview: DataFramePreviewData;
+  mappings: DataFramePreviewMappings;
 }
 
 export const usePivotPreviewData = (
@@ -42,7 +58,10 @@ export const usePivotPreviewData = (
 ): UsePivotPreviewDataReturnType => {
   const [errorMessage, setErrorMessage] = useState('');
   const [status, setStatus] = useState(PIVOT_PREVIEW_STATUS.UNUSED);
-  const [dataFramePreviewData, setDataFramePreviewData] = useState([]);
+  const [dataFramePreviewData, setDataFramePreviewData] = useState<DataFramePreviewData>([]);
+  const [dataFramePreviewMappings, setDataFramePreviewMappings] = useState<
+    DataFramePreviewMappings
+  >({ properties: {} });
 
   const aggsArr = dictionaryToArray(aggs);
   const groupByArr = dictionaryToArray(groupBy);
@@ -59,21 +78,27 @@ export const usePivotPreviewData = (
     setStatus(PIVOT_PREVIEW_STATUS.LOADING);
 
     try {
-      const resp: any = await ml.dataFrame.getDataFrameTransformsPreview(previewRequest);
+      const resp: GetDataFrameTransformsResponse = await ml.dataFrame.getDataFrameTransformsPreview(
+        previewRequest
+      );
       setDataFramePreviewData(resp.preview);
+      setDataFramePreviewMappings(resp.mappings);
       setStatus(PIVOT_PREVIEW_STATUS.LOADED);
     } catch (e) {
       setErrorMessage(JSON.stringify(e));
       setDataFramePreviewData([]);
+      setDataFramePreviewMappings({ properties: {} });
       setStatus(PIVOT_PREVIEW_STATUS.ERROR);
     }
   };
 
-  useEffect(
-    () => {
-      getDataFramePreviewData();
-    },
-    [indexPattern.title, JSON.stringify(aggsArr), JSON.stringify(groupByArr), JSON.stringify(query)]
-  );
-  return { errorMessage, status, dataFramePreviewData, previewRequest };
+  useEffect(() => {
+    getDataFramePreviewData();
+  }, [
+    indexPattern.title,
+    JSON.stringify(aggsArr),
+    JSON.stringify(groupByArr),
+    JSON.stringify(query),
+  ]);
+  return { errorMessage, status, dataFramePreviewData, dataFramePreviewMappings, previewRequest };
 };

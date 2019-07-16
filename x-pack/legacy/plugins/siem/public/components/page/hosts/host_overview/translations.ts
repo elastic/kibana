@@ -71,3 +71,7 @@ export const INSTANCE_ID = i18n.translate('xpack.siem.host.details.overview.inst
 export const MACHINE_TYPE = i18n.translate('xpack.siem.host.details.overview.machineTypeTitle', {
   defaultMessage: 'Machine Type',
 });
+
+export const INSPECT_TITLE = i18n.translate('xpack.siem.host.details.overview.inspectTitle', {
+  defaultMessage: 'Host overview',
+});

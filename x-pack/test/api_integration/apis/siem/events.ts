@@ -54,6 +54,7 @@ const eventsTests: KbnTestProvider = ({ getService }) => {
                 direction: Direction.desc,
               },
               defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+              inspect: false,
             },
           })
           .then(resp => {
@@ -85,6 +86,7 @@ const eventsTests: KbnTestProvider = ({ getService }) => {
                 direction: Direction.desc,
               },
               defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+              inspect: false,
             },
           })
           .then(resp => {
@@ -116,6 +118,7 @@ const eventsTests: KbnTestProvider = ({ getService }) => {
                 direction: Direction.desc,
               },
               defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+              inspect: false,
             },
           })
           .then(resp => {

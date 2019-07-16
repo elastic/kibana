@@ -6,23 +6,12 @@
 
 import { mapValues } from 'lodash';
 import { ELEMENT_NUDGE_OFFSET, ELEMENT_SHIFT_OFFSET } from '../../common/lib/constants';
-
-export interface ShortcutMap {
-  osx: string[];
-  windows: string[];
-  linux: string[];
-  other: string[];
-  help: string;
-}
-
-export interface ShortcutNameSpace {
-  displayName: string;
-  [shortcut: string]: string | ShortcutMap;
-}
+import { ShortcutMap, ShortcutNameSpace } from '../../types';
 
 interface KeyMap {
   [category: string]: ShortcutNameSpace;
 }
+
 type Modifier = 'ctrl' | 'command' | 'shift' | 'alt' | 'option';
 
 // maps key for all OS's with optional modifiers

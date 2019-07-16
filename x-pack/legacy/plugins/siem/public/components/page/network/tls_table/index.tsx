@@ -20,6 +20,7 @@ interface OwnProps {
   data: TlsEdges[];
   loading: boolean;
   hasNextPage: boolean;
+  id: string;
   nextCursor: string;
   totalCount: number;
   loadMore: (cursor: string) => void;
@@ -74,6 +75,7 @@ class TlsTableComponent extends React.PureComponent<TlsTableProps> {
       limit,
       loading,
       loadMore,
+      id,
       totalCount,
       nextCursor,
       updateTlsLimit,
@@ -86,6 +88,7 @@ class TlsTableComponent extends React.PureComponent<TlsTableProps> {
         headerCount={totalCount}
         headerTitle={i18n.TRANSPORT_LAYER_SECURITY}
         headerUnit={i18n.UNIT(totalCount)}
+        id={id}
         itemsPerRow={rowItems}
         limit={limit}
         loading={loading}

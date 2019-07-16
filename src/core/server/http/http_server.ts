@@ -21,7 +21,7 @@ import { Request, Server } from 'hapi';
 
 import { Logger, LoggerFactory } from '../logging';
 import { HttpConfig } from './http_config';
-import { createServer, getServerOptions } from './http_tools';
+import { createServer, getListenerOptions, getServerOptions } from './http_tools';
 import { adoptToHapiAuthFormat, AuthenticationHandler } from './lifecycle/auth';
 import { adoptToHapiOnPostAuthFormat, OnPostAuthHandler } from './lifecycle/on_post_auth';
 import { adoptToHapiOnPreAuthFormat, OnPreAuthHandler } from './lifecycle/on_pre_auth';
@@ -75,6 +75,7 @@ export interface HttpServerSetup {
     isAuthenticated: AuthStateStorage['isAuthenticated'];
     getAuthHeaders: AuthHeadersStorage['get'];
   };
+  isTlsEnabled: boolean;
 }
 
 export class HttpServer {
@@ -108,7 +109,8 @@ export class HttpServer {
 
   public setup(config: HttpConfig): HttpServerSetup {
     const serverOptions = getServerOptions(config);
-    this.server = createServer(serverOptions);
+    const listenerOptions = getListenerOptions(config);
+    this.server = createServer(serverOptions, listenerOptions);
     this.config = config;
 
     const basePathService = new BasePath(config.basePath);
@@ -126,6 +128,7 @@ export class HttpServer {
         isAuthenticated: this.authState.isAuthenticated,
         getAuthHeaders: this.authHeaders.get,
       },
+      isTlsEnabled: config.ssl.enabled,
       // Return server instance with the connection options so that we can properly
       // bridge core and the "legacy" Kibana internally. Once this bridge isn't
       // needed anymore we shouldn't return the instance from this method.

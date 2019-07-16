@@ -22,3 +22,4 @@ export { CallAPIOptions, ClusterClient, FakeRequest, LegacyRequest } from './clu
 export { ScopedClusterClient, Headers, APICaller } from './scoped_cluster_client';
 export { ElasticsearchClientConfig } from './elasticsearch_client_config';
 export { config } from './elasticsearch_config';
+export { ElasticsearchError, ElasticsearchErrorHelpers } from './errors';

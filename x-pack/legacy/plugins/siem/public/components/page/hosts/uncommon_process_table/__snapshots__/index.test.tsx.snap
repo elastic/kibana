@@ -202,6 +202,7 @@ exports[`UncommonProcess Table Component rendering it renders the default Uncomm
       ]
     }
     hasNextPage={true}
+    id="uncommonProcess"
     loadMore={[MockFunction]}
     loading={false}
     nextCursor="aa7ca589f1b8220002f2fc61c64cfbf1"

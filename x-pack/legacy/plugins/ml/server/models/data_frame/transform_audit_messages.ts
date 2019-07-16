@@ -8,7 +8,7 @@ import { ML_DF_NOTIFICATION_INDEX_PATTERN } from '../../../common/constants/inde
 import { callWithRequestType } from '../../../common/types/kibana';
 import { TransformMessage } from '../../../common/types/audit_message';
 
-const SIZE = 20;
+const SIZE = 50;
 
 interface Message {
   _index: string;
@@ -78,6 +78,7 @@ export function transformAuditMessagesProvider(callWithRequest: callWithRequestT
       let messages = [];
       if (resp.hits.total !== 0) {
         messages = resp.hits.hits.map((hit: Message) => hit._source);
+        messages.reverse();
       }
       return messages;
     } catch (e) {

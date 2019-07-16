@@ -21,6 +21,7 @@ import 'uiExports/visRequestHandlers';
 import 'uiExports/visEditorTypes';
 import 'uiExports/inspectorViews';
 import 'uiExports/savedObjectTypes';
+import 'uiExports/embeddableActions';
 import 'uiExports/embeddableFactories';
 import 'uiExports/navbarExtensions';
 import 'uiExports/docViews';

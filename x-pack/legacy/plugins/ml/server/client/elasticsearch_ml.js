@@ -111,6 +111,14 @@ export const elasticsearchJsPlugin = (Client, config, components) => {
   ml.getDataFrameTransforms = ca({
     urls: [
       {
+        fmt: '/_data_frame/transforms/<%=jobId%>',
+        req: {
+          jobId: {
+            type: 'string'
+          }
+        }
+      },
+      {
         fmt: '/_data_frame/transforms/_all?size=1000',
       }
     ],
@@ -179,10 +187,13 @@ export const elasticsearchJsPlugin = (Client, config, components) => {
   ml.startDataFrameTransformsJob = ca({
     urls: [
       {
-        fmt: '/_data_frame/transforms/<%=jobId%>/_start',
+        fmt: '/_data_frame/transforms/<%=jobId%>/_start?&force=<%=force%>',
         req: {
           jobId: {
             type: 'string'
+          },
+          force: {
+            type: 'boolean'
           }
         }
       }
@@ -193,12 +204,15 @@ export const elasticsearchJsPlugin = (Client, config, components) => {
   ml.stopDataFrameTransformsJob = ca({
     urls: [
       {
-        fmt: '/_data_frame/transforms/<%=jobId%>/_stop?&force=<%=force%>',
+        fmt: '/_data_frame/transforms/<%=jobId%>/_stop?&force=<%=force%>&wait_for_completion=<%waitForCompletion%>',
         req: {
           jobId: {
             type: 'string'
           },
           force: {
+            type: 'boolean'
+          },
+          waitForCompletion: {
             type: 'boolean'
           }
         }

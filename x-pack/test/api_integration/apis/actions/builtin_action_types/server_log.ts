@@ -17,7 +17,7 @@ export default function serverLogTest({ getService }: KibanaFunctionalTestDefaul
     after(() => esArchiver.unload('empty_kibana'));
 
     it('should return 200 when creating a builtin server-log action', async () => {
-      await supertest
+      const { body: createdAction } = await supertest
         .post('/api/action')
         .set('kbn-xsrf', 'foo')
         .send({
@@ -27,22 +27,30 @@ export default function serverLogTest({ getService }: KibanaFunctionalTestDefaul
             actionTypeConfig: {},
           },
         })
-        .expect(200)
-        .then((resp: any) => {
-          expect(resp.body).to.eql({
-            type: 'action',
-            id: resp.body.id,
-            attributes: {
-              description: 'A server.log action',
-              actionTypeId: '.server-log',
-              actionTypeConfig: {},
-            },
-            references: [],
-            updated_at: resp.body.updated_at,
-            version: resp.body.version,
-          });
-          expect(typeof resp.body.id).to.be('string');
-        });
+        .expect(200);
+
+      expect(createdAction).to.eql({
+        id: createdAction.id,
+      });
+
+      expect(typeof createdAction.id).to.be('string');
+
+      const { body: fetchedAction } = await supertest
+        .get(`/api/action/${createdAction.id}`)
+        .expect(200);
+
+      expect(fetchedAction).to.eql({
+        type: 'action',
+        id: fetchedAction.id,
+        attributes: {
+          description: 'A server.log action',
+          actionTypeId: '.server-log',
+          actionTypeConfig: {},
+        },
+        references: [],
+        updated_at: fetchedAction.updated_at,
+        version: fetchedAction.version,
+      });
     });
   });
 }

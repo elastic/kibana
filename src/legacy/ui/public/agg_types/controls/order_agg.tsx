@@ -24,29 +24,26 @@ import { AggConfig } from '../../vis';
 function OrderAggParamEditor({
   agg,
   value,
-  responseValueAggs,
+  metricAggs,
   state,
   setValue,
   setValidity,
   setTouched,
   subAggParams,
 }: AggParamEditorProps<AggConfig>) {
-  useEffect(
-    () => {
-      if (responseValueAggs) {
-        const orderBy = agg.params.orderBy;
+  useEffect(() => {
+    if (metricAggs) {
+      const orderBy = agg.params.orderBy;
 
-        // we aren't creating a custom aggConfig
-        if (!orderBy || orderBy !== 'custom') {
-          setValue(null);
-        } else {
-          const paramDef = agg.type.params.byName.orderAgg;
-          setValue(value || paramDef.makeOrderAgg(agg));
-        }
+      // we aren't creating a custom aggConfig
+      if (!orderBy || orderBy !== 'custom') {
+        setValue(null);
+      } else {
+        const paramDef = agg.type.params.byName.orderAgg;
+        setValue(value || paramDef.makeOrderAgg(agg));
       }
-    },
-    [agg.params.orderBy, responseValueAggs]
-  );
+    }
+  }, [agg.params.orderBy, metricAggs]);
 
   const [innerState, setInnerState] = useState(true);
 
@@ -61,16 +58,14 @@ function OrderAggParamEditor({
       className="visEditorAgg__subAgg"
       formIsTouched={subAggParams.formIsTouched}
       indexPattern={agg.getIndexPattern()}
-      responseValueAggs={responseValueAggs}
+      metricAggs={metricAggs}
       state={state}
-      vis={subAggParams.vis}
       onAggParamsChange={(...rest) => {
         // to force update when sub-agg params are changed
         setInnerState(!innerState);
         subAggParams.onAggParamsChange(...rest);
       }}
       onAggTypeChange={subAggParams.onAggTypeChange}
-      onAggErrorChanged={subAggParams.onAggErrorChanged}
       setValidity={setValidity}
       setTouched={setTouched}
     />

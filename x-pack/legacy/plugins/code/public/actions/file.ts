@@ -39,6 +39,7 @@ export interface RepoTreePayload {
   tree: FileTree;
   path: string;
   withParents: boolean | undefined;
+  revision: string;
 }
 
 export interface TreeCommitPayload {
@@ -48,7 +49,9 @@ export interface TreeCommitPayload {
 }
 
 export const fetchRootRepoTree = createAction<FetchRepoPayloadWithRevision>('FETCH ROOT REPO TREE');
-export const fetchRootRepoTreeSuccess = createAction<FileTree>('FETCH ROOT REPO TREE SUCCESS');
+export const fetchRootRepoTreeSuccess = createAction<{ tree: FileTree; revision: string }>(
+  'FETCH ROOT REPO TREE SUCCESS'
+);
 export const fetchRootRepoTreeFailed = createAction<Error>('FETCH ROOT REPO TREE FAILED');
 
 export const fetchRepoTree = createAction<FetchRepoTreePayload>('FETCH REPO TREE');

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { copyPersistentState } from '../../../store/util';
+import { copyPersistentState } from '../../../reducers/util';
 
 export class AbstractSource {
 

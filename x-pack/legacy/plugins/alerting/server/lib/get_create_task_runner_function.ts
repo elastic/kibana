@@ -62,7 +62,7 @@ export function getCreateTaskRunnerFunction({
           alertInstanceFactory,
         };
 
-        const alertTypeState = await alertType.execute({
+        const alertTypeState = await alertType.executor({
           services: alertTypeServices,
           params: validatedAlertTypeParams,
           state: taskInstance.state.alertTypeState || {},

@@ -33,13 +33,14 @@ describe('Users Table Component', () => {
       const wrapper = shallow(
         <ReduxStoreProvider store={store}>
           <UsersTable
-            totalCount={1}
-            loading={false}
-            loadMore={loadMore}
             data={mockUsersData.edges}
             flowTarget={FlowTarget.source}
             hasNextPage={getOr(false, 'hasNextPage', mockUsersData.pageInfo)!}
+            id="user"
+            loading={false}
+            loadMore={loadMore}
             nextCursor={getOr(null, 'endCursor.value', mockUsersData.pageInfo)!}
+            totalCount={1}
             type={networkModel.NetworkType.details}
           />
         </ReduxStoreProvider>
@@ -55,13 +56,14 @@ describe('Users Table Component', () => {
         <MockedProvider>
           <TestProviders store={store}>
             <UsersTable
-              totalCount={1}
-              loading={false}
-              loadMore={loadMore}
               data={mockUsersData.edges}
               flowTarget={FlowTarget.source}
               hasNextPage={getOr(false, 'hasNextPage', mockUsersData.pageInfo)!}
+              id="user"
+              loading={false}
+              loadMore={loadMore}
               nextCursor={getOr(null, 'endCursor.value', mockUsersData.pageInfo)!}
+              totalCount={1}
               type={networkModel.NetworkType.details}
             />
           </TestProviders>

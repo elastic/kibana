@@ -95,7 +95,7 @@ exports[`Data Frame: Job List <ExpandedRow /> Minimal initialization 1`] = `
         }
       />,
       "id": "job-details",
-      "name": "Job details",
+      "name": "Transform details",
     }
   }
   onTabClick={[Function]}
@@ -192,7 +192,7 @@ exports[`Data Frame: Job List <ExpandedRow /> Minimal initialization 1`] = `
           }
         />,
         "id": "job-details",
-        "name": "Job details",
+        "name": "Transform details",
       },
       Object {
         "content": <JobJsonPane
@@ -235,11 +235,49 @@ exports[`Data Frame: Job List <ExpandedRow /> Minimal initialization 1`] = `
       },
       Object {
         "content": <TransformMessagesPane
-          lastUpdate={12345678}
           transformId="fq_date_histogram_1m_1441"
         />,
         "id": "job-messages",
         "name": "Messages",
+      },
+      Object {
+        "content": <PreviewPane
+          transformConfig={
+            Object {
+              "dest": Object {
+                "index": "fq_data_histogram_1m_1441",
+              },
+              "id": "fq_date_histogram_1m_1441",
+              "pivot": Object {
+                "aggregations": Object {
+                  "avg(response)": Object {
+                    "avg": Object {
+                      "field": "responsetime",
+                    },
+                  },
+                },
+                "group_by": Object {
+                  "date_histogram(@timestamp)": Object {
+                    "date_histogram": Object {
+                      "field": "@timestamp",
+                      "interval": "1m",
+                    },
+                  },
+                },
+              },
+              "source": Object {
+                "index": Array [
+                  "farequote-2019",
+                ],
+                "query": Object {
+                  "match_all": Object {},
+                },
+              },
+            }
+          }
+        />,
+        "id": "job-preview",
+        "name": "Preview",
       },
     ]
   }

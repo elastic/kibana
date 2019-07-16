@@ -47,13 +47,13 @@ export function workspaceRoute(
           new ServerLoggerFactory(server.server)
         );
         try {
-          const { workspaceRepo, workspaceRevision } = await workspaceHandler.openWorkspace(
+          const { workspaceDir, workspaceRevision } = await workspaceHandler.openWorkspace(
             repoUri,
             revision
           );
           const workspaceCmd = new WorkspaceCommand(
             repoConfig,
-            workspaceRepo.workdir(),
+            workspaceDir,
             workspaceRevision,
             log
           );

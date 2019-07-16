@@ -59,13 +59,15 @@ export function createRoute(server: Hapi.Server) {
     async handler(request: CreateRequest) {
       const actionsClient = request.getActionsClient!();
 
-      return await actionsClient.create({
+      const createdAction = await actionsClient.create({
         attributes: request.payload.attributes,
         options: {
           migrationVersion: request.payload.migrationVersion,
           references: request.payload.references,
         },
       });
+
+      return { id: createdAction.id };
     },
   });
 }

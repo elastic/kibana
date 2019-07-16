@@ -18,7 +18,6 @@
  */
 
 import '../ui_capabilities.test.mocks';
-import '../../../../../core/public/ui_new_platform.test.mocks';
 
 import { EuiContextMenuPanelDescriptor } from '@elastic/eui';
 
@@ -32,6 +31,8 @@ import { triggerRegistry } from '../triggers';
 import { Action, ActionContext, actionRegistry } from '../actions';
 import { executeTriggerActions } from './execute_trigger_actions';
 import { ContactCardEmbeddable } from '../test_samples';
+
+jest.mock('ui/new_platform');
 
 class TestAction extends Action {
   public readonly type = 'testAction';

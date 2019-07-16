@@ -94,28 +94,25 @@ export const useRequest = ({
     setIsLoading(false);
   };
 
-  useEffect(
-    () => {
-      function cancelOutdatedRequest() {
-        isOutdatedRequest = true;
-      }
+  useEffect(() => {
+    function cancelOutdatedRequest() {
+      isOutdatedRequest = true;
+    }
 
-      createRequest();
+    createRequest();
 
-      if (interval) {
-        const intervalRequest = setInterval(createRequest.bind(null, false), interval);
+    if (interval) {
+      const intervalRequest = setInterval(createRequest.bind(null, false), interval);
 
-        return () => {
-          cancelOutdatedRequest();
-          clearInterval(intervalRequest);
-        };
-      }
+      return () => {
+        cancelOutdatedRequest();
+        clearInterval(intervalRequest);
+      };
+    }
 
-      // Called when a new render will trigger this effect.
-      return cancelOutdatedRequest;
-    },
-    [path]
-  );
+    // Called when a new render will trigger this effect.
+    return cancelOutdatedRequest;
+  }, [path]);
 
   return {
     error,

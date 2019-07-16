@@ -28,18 +28,18 @@ import { TopFieldParamEditor } from '../controls/top_field';
 import { TopSizeParamEditor } from '../controls/top_size';
 import { TopAggregateParamEditor } from '../controls/top_aggregate';
 
-const isNumber = function (type) {
-  return type === 'number';
+const isNumericFieldSelected = function (agg) {
+  const fieldType = agg.params.field && agg.params.field.type;
+  return fieldType && fieldType === 'number';
 };
 
 aggTypeFieldFilters.addFilter(
   (
     field,
     fieldParamType,
-    aggConfig,
-    vis
+    aggConfig
   ) => {
-    if (aggConfig.type.name !== 'top_hits' || vis.type.name === 'table' || vis.type.name === 'metric') {
+    if (aggConfig.type.name !== 'top_hits' || _.get(aggConfig.schema, 'aggSettings.top_hits.allowStrings', false)) {
       return true;
     }
     return field.type === 'number';
@@ -106,8 +106,7 @@ export const topHitMetricAgg = new MetricAggType({
           text: i18n.translate('common.ui.aggTypes.metrics.topHit.minLabel', {
             defaultMessage: 'Min'
           }),
-          isCompatibleType: isNumber,
-          isCompatibleVis: _.constant(true),
+          isCompatible: isNumericFieldSelected,
           disabled: true,
           value: 'min'
         },
@@ -115,8 +114,7 @@ export const topHitMetricAgg = new MetricAggType({
           text: i18n.translate('common.ui.aggTypes.metrics.topHit.maxLabel', {
             defaultMessage: 'Max'
           }),
-          isCompatibleType: isNumber,
-          isCompatibleVis: _.constant(true),
+          isCompatible: isNumericFieldSelected,
           disabled: true,
           value: 'max'
         },
@@ -124,8 +122,7 @@ export const topHitMetricAgg = new MetricAggType({
           text: i18n.translate('common.ui.aggTypes.metrics.topHit.sumLabel', {
             defaultMessage: 'Sum'
           }),
-          isCompatibleType: isNumber,
-          isCompatibleVis: _.constant(true),
+          isCompatible: isNumericFieldSelected,
           disabled: true,
           value: 'sum'
         },
@@ -133,8 +130,7 @@ export const topHitMetricAgg = new MetricAggType({
           text: i18n.translate('common.ui.aggTypes.metrics.topHit.averageLabel', {
             defaultMessage: 'Average'
           }),
-          isCompatibleType: isNumber,
-          isCompatibleVis: _.constant(true),
+          isCompatible: isNumericFieldSelected,
           disabled: true,
           value: 'average'
         },
@@ -142,9 +138,8 @@ export const topHitMetricAgg = new MetricAggType({
           text: i18n.translate('common.ui.aggTypes.metrics.topHit.concatenateLabel', {
             defaultMessage: 'Concatenate'
           }),
-          isCompatibleType: _.constant(true),
-          isCompatibleVis: function (name) {
-            return name === 'metric' || name === 'table';
+          isCompatible: (aggConfig) => {
+            return _.get(aggConfig.schema, 'aggSettings.top_hits.allowStrings', false);
           },
           disabled: true,
           value: 'concat'

@@ -28,6 +28,7 @@ export interface PackageInfo {
   branch: string;
   buildNum: number;
   buildSha: string;
+  dist: boolean;
 }
 
 export interface EnvironmentMode {
@@ -75,7 +76,7 @@ export class Env {
   /** @internal */
   public readonly staticFilesDir: string;
   /** @internal */
-  public readonly pluginSearchPaths: ReadonlyArray<string>;
+  public readonly pluginSearchPaths: readonly string[];
 
   /**
    * Information about Kibana package (version, build number etc.).
@@ -97,7 +98,7 @@ export class Env {
    * Paths to the configuration files.
    * @internal
    */
-  public readonly configs: ReadonlyArray<string>;
+  public readonly configs: readonly string[];
 
   /**
    * Indicates that this Kibana instance is run as development Node Cluster master.
@@ -132,12 +133,13 @@ export class Env {
       prod: !isDevMode,
     });
 
-    const isKibanaDistributable = pkg.build && pkg.build.distributable === true;
+    const isKibanaDistributable = Boolean(pkg.build && pkg.build.distributable === true);
     this.packageInfo = Object.freeze({
       branch: pkg.branch,
       buildNum: isKibanaDistributable ? pkg.build.number : Number.MAX_SAFE_INTEGER,
       buildSha: isKibanaDistributable ? pkg.build.sha : 'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX',
       version: pkg.version,
+      dist: isKibanaDistributable,
     });
   }
 }

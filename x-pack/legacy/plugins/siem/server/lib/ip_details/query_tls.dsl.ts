@@ -69,7 +69,6 @@ export const buildTlsQuery = ({
     ...createQueryFilterClauses(filterQuery),
     { range: { [timestamp]: { gte: from, lte: to } } },
     { term: { [`${flowTarget}.ip`]: ip } },
-    { term: { 'event.dataset': 'tls' } },
   ];
 
   const dslQuery = {
@@ -86,7 +85,7 @@ export const buildTlsQuery = ({
         },
       },
       size: 0,
-      track_total_hits: true,
+      track_total_hits: false,
     },
   };
 

@@ -27,8 +27,12 @@ export class LeftInnerJoin {
     return false;
   }
 
+  getRightMetricFields() {
+    return this._rightSource.getMetricFields();
+  }
+
   getJoinFields() {
-    return this._rightSource.getMetricFields().map(({ propertyKey: name, propertyLabel: label }) => {
+    return this.getRightMetricFields().map(({ propertyKey: name, propertyLabel: label }) => {
       return { label, name };
     });
   }
@@ -44,21 +48,20 @@ export class LeftInnerJoin {
     return this._descriptor.leftField;
   }
 
-  joinPropertiesToFeatureCollection(featureCollection, propertiesMap) {
-    const joinFields = this._rightSource.getMetricFields();
-    featureCollection.features.forEach(feature => {
-      // Clean up old join property values
-      joinFields.forEach(({ propertyKey }) => {
-        delete feature.properties[propertyKey];
-        const stylePropertyName = VectorStyle.getComputedFieldName(propertyKey);
-        delete feature.properties[stylePropertyName];
-      });
-
-      const joinKey = feature.properties[this._descriptor.leftField];
-      if (propertiesMap && propertiesMap.has(joinKey)) {
-        Object.assign(feature.properties,  propertiesMap.get(joinKey));
-      }
-    });
+  joinPropertiesToFeature(feature, propertiesMap, rightMetricFields) {
+    for (let j = 0; j < rightMetricFields.length; j++) {
+      const { propertyKey } = rightMetricFields[j];
+      delete feature.properties[propertyKey];
+      const stylePropertyName = VectorStyle.getComputedFieldName(propertyKey);
+      delete feature.properties[stylePropertyName];
+    }
+    const joinKey = feature.properties[this._descriptor.leftField];
+    if (propertiesMap && propertiesMap.has(joinKey)) {
+      Object.assign(feature.properties,  propertiesMap.get(joinKey));
+      return true;
+    } else {
+      return false;
+    }
   }
 
   getRightJoinSource() {

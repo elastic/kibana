@@ -37,9 +37,6 @@ import { showSaveModal } from 'ui/saved_objects/show_saved_object_save_modal';
 import { showShareContextMenu, ShareContextMenuExtensionsRegistryProvider } from 'ui/share';
 import { migrateLegacyQuery } from 'ui/utils/migrate_legacy_query';
 
-import { EmbeddableFactoriesRegistryProvider } from 'ui/embeddable/embeddable_factories_registry';
-import { ContextMenuActionsRegistryProvider } from 'ui/embeddable';
-import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
 import { timefilter } from 'ui/timefilter';
 
 import { getUnhashableStatesProvider } from 'ui/state_management/state_hashing/get_unhashable_states_provider';
@@ -55,17 +52,24 @@ import { IndexPattern } from 'ui/index_patterns';
 import { IPrivate } from 'ui/private';
 import { Query } from 'src/legacy/core_plugins/data/public';
 import { SaveOptions } from 'ui/saved_objects/saved_object';
+import { Subscription } from 'rxjs';
 import {
-  DashboardAppState,
-  EmbeddableFactoryRegistry,
-  NavAction,
-  ConfirmModalFn,
-  AddFilterFn,
-} from './types';
+  DashboardContainer,
+  DASHBOARD_CONTAINER_TYPE,
+  DashboardContainerFactory,
+  DashboardContainerInput,
+  DashboardPanelState,
+} from '../../../dashboard_embeddable_container/public';
+import {
+  isErrorEmbeddable,
+  embeddableFactories,
+  ErrorEmbeddable,
+  ViewMode,
+  openAddPanelFlyout,
+} from '../../../embeddable_api/public';
+import { DashboardAppState, NavAction, ConfirmModalFn, SavedDashboardPanel } from './types';
 
-import { showNewVisModal } from '../visualize/wizard';
 import { showOptionsPopover } from './top_nav/show_options_popover';
-import { showAddPanel } from './top_nav/show_add_panel';
 import { DashboardSaveModal } from './top_nav/save_modal';
 import { showCloneModal } from './top_nav/show_clone_modal';
 import { saveDashboard } from './lib';
@@ -73,10 +77,10 @@ import { DashboardStateManager } from './dashboard_state_manager';
 import { DashboardConstants, createDashboardEditUrl } from './dashboard_constants';
 import { getTopNavConfig } from './top_nav/get_top_nav_config';
 import { TopNavIds } from './top_nav/top_nav_ids';
-import { DashboardViewMode } from './dashboard_view_mode';
 import { getDashboardTitle } from './dashboard_strings';
-import { panelActionsStore } from './store/panel_actions_store';
 import { DashboardAppScope } from './dashboard_app';
+import { VISUALIZE_EMBEDDABLE_TYPE } from '../visualize/embeddable';
+import { convertSavedDashboardPanelToPanelState } from './lib/embeddable_saved_object_converters';
 
 export class DashboardAppController {
   // Part of the exposed plugin API - do not remove without careful consideration.
@@ -86,7 +90,6 @@ export class DashboardAppController {
 
   constructor({
     $scope,
-    $rootScope,
     $route,
     $routeParams,
     getAppState,
@@ -98,13 +101,11 @@ export class DashboardAppController {
     indexPatterns,
     config,
     confirmModal,
-    addFilter,
     courier,
   }: {
     courier: { fetch: () => void };
     $scope: DashboardAppScope;
     $route: any;
-    $rootScope: ng.IRootScopeService;
     $routeParams: any;
     getAppState: {
       previouslyStored: () => TAppState | undefined;
@@ -113,27 +114,20 @@ export class DashboardAppController {
       getDefault: () => Promise<IndexPattern>;
     };
     dashboardConfig: any;
-    localStorage: any;
+    localStorage: {
+      get: (prop: string) => unknown;
+    };
     Private: IPrivate;
     kbnUrl: KbnUrl;
     AppStateClass: TAppStateClass<DashboardAppState>;
     config: any;
     confirmModal: ConfirmModalFn;
-    addFilter: AddFilterFn;
   }) {
     const queryFilter = Private(FilterBarQueryFilterProvider);
-    const embeddableFactories = Private(
-      EmbeddableFactoriesRegistryProvider
-    ) as EmbeddableFactoryRegistry;
-    const panelActionsRegistry = Private(ContextMenuActionsRegistryProvider);
     const getUnhashableStates = Private(getUnhashableStatesProvider);
     const shareContextMenuExtensions = Private(ShareContextMenuExtensionsRegistryProvider);
 
-    // @ts-ignore This code is going away shortly.
-    panelActionsStore.initializeFromRegistry(panelActionsRegistry);
-
-    const visTypes = Private(VisTypesRegistryProvider);
-    $scope.getEmbeddableFactory = panelType => embeddableFactories.byName[panelType];
+    let lastReloadRequestTime = 0;
 
     const dash = ($scope.dash = $route.current.locals.dash);
     if (dash.id) {
@@ -144,10 +138,8 @@ export class DashboardAppController {
       savedDashboard: dash,
       AppStateClass,
       hideWriteControls: dashboardConfig.getHideWriteControls(),
-      addFilter,
     });
 
-    $scope.getDashboardState = () => dashboardStateManager;
     $scope.appState = dashboardStateManager.getAppState();
 
     // The 'previouslyStored' check is so we only update the time filter on dashboard open, not during
@@ -155,6 +147,58 @@ export class DashboardAppController {
     if (dashboardStateManager.getIsTimeSavedWithDashboard() && !getAppState.previouslyStored()) {
       dashboardStateManager.syncTimefilterWithDashboard(timefilter);
     }
+
+    const updateIndexPatterns = (container?: DashboardContainer) => {
+      if (!container || isErrorEmbeddable(container)) {
+        return;
+      }
+      const panelIndexPatterns = container.getPanelIndexPatterns();
+      if (panelIndexPatterns && panelIndexPatterns.length > 0) {
+        $scope.$evalAsync(() => {
+          $scope.indexPatterns = panelIndexPatterns;
+        });
+      } else {
+        indexPatterns.getDefault().then(defaultIndexPattern => {
+          $scope.$evalAsync(() => {
+            $scope.indexPatterns = [defaultIndexPattern];
+          });
+        });
+      }
+    };
+
+    const getDashboardInput = (): DashboardContainerInput => {
+      const embeddablesMap: {
+        [key: string]: DashboardPanelState;
+      } = {};
+      dashboardStateManager.getPanels().forEach((panel: SavedDashboardPanel) => {
+        embeddablesMap[panel.panelIndex] = convertSavedDashboardPanelToPanelState(
+          panel,
+          dashboardStateManager.getUseMargins()
+        );
+      });
+      let expandedPanelId;
+      if (dashboardContainer && !isErrorEmbeddable(dashboardContainer)) {
+        expandedPanelId = dashboardContainer.getInput().expandedPanelId;
+      }
+      return {
+        id: dashboardStateManager.savedDashboard.id || '',
+        filters: queryFilter.getFilters(),
+        hidePanelTitles: dashboardStateManager.getHidePanelTitles(),
+        query: $scope.model.query,
+        timeRange: {
+          ..._.cloneDeep(timefilter.getTime()),
+        },
+        refreshConfig: timefilter.getRefreshInterval(),
+        viewMode: dashboardStateManager.getViewMode(),
+        panels: embeddablesMap,
+        isFullScreenMode: dashboardStateManager.getFullScreenMode(),
+        useMargins: dashboardStateManager.getUseMargins(),
+        lastReloadRequestTime,
+        title: dashboardStateManager.getTitle(),
+        description: dashboardStateManager.getDescription(),
+        expandedPanelId,
+      };
+    };
 
     const updateState = () => {
       // Following the "best practice" of always have a '.' in your ng-models –
@@ -170,18 +214,75 @@ export class DashboardAppController {
       };
       $scope.panels = dashboardStateManager.getPanels();
       $scope.screenTitle = dashboardStateManager.getTitle();
-
-      const panelIndexPatterns = dashboardStateManager.getPanelIndexPatterns();
-      if (panelIndexPatterns && panelIndexPatterns.length > 0) {
-        $scope.indexPatterns = panelIndexPatterns;
-      } else {
-        indexPatterns.getDefault().then(defaultIndexPattern => {
-          $scope.$evalAsync(() => {
-            $scope.indexPatterns = [defaultIndexPattern];
-          });
-        });
-      }
     };
+
+    updateState();
+
+    let dashboardContainer: DashboardContainer | undefined;
+    let inputSubscription: Subscription | undefined;
+    let outputSubscription: Subscription | undefined;
+
+    const dashboardDom = document.getElementById('dashboardViewport');
+    const dashboardFactory = embeddableFactories.get(
+      DASHBOARD_CONTAINER_TYPE
+    ) as DashboardContainerFactory;
+    dashboardFactory
+      .create(getDashboardInput())
+      .then((container: DashboardContainer | ErrorEmbeddable) => {
+        if (!isErrorEmbeddable(container)) {
+          dashboardContainer = container;
+
+          updateIndexPatterns(dashboardContainer);
+
+          outputSubscription = dashboardContainer.getOutput$().subscribe(() => {
+            updateIndexPatterns(dashboardContainer);
+          });
+
+          inputSubscription = dashboardContainer.getInput$().subscribe(async () => {
+            let dirty = false;
+
+            // This has to be first because handleDashboardContainerChanges causes
+            // appState.save which will cause refreshDashboardContainer to be called.
+
+            // Add filters modifies the object passed to it, hence the clone deep.
+            if (!_.isEqual(container.getInput().filters, queryFilter.getFilters())) {
+              await queryFilter.addFilters(_.cloneDeep(container.getInput().filters));
+
+              dashboardStateManager.applyFilters($scope.model.query, container.getInput().filters);
+              dirty = true;
+            }
+
+            $scope.$evalAsync(() => {
+              dashboardStateManager.handleDashboardContainerChanges(container);
+              if (dirty) {
+                updateState();
+              }
+            });
+          });
+
+          dashboardStateManager.registerChangeListener(() => {
+            // we aren't checking dirty state because there are changes the container needs to know about
+            // that won't make the dashboard "dirty" - like a view mode change.
+            refreshDashboardContainer();
+          });
+
+          // This code needs to be replaced with a better mechanism for adding new embeddables of
+          // any type from the add panel. Likely this will happen via creating a visualization "inline",
+          // without navigating away from the UX.
+          if ($routeParams[DashboardConstants.NEW_VISUALIZATION_ID_PARAM]) {
+            container.addSavedObjectEmbeddable(
+              VISUALIZE_EMBEDDABLE_TYPE,
+              $routeParams[DashboardConstants.NEW_VISUALIZATION_ID_PARAM]
+            );
+            kbnUrl.removeParam(DashboardConstants.ADD_VISUALIZATION_TO_DASHBOARD_MODE_PARAM);
+            kbnUrl.removeParam(DashboardConstants.NEW_VISUALIZATION_ID_PARAM);
+          }
+        }
+
+        if (dashboardDom) {
+          container.render(dashboardDom);
+        }
+      });
 
     // Part of the exposed plugin API - do not remove without careful consideration.
     this.appStatus = {
@@ -204,15 +305,6 @@ export class DashboardAppController {
 
     timefilter.disableTimeRangeSelector();
     timefilter.disableAutoRefreshSelector();
-
-    updateState();
-
-    $scope.refresh = () => {
-      $rootScope.$broadcast('fetch');
-      courier.fetch();
-    };
-    dashboardStateManager.handleTimeChange(timefilter.getTime());
-    dashboardStateManager.handleRefreshConfigChange(timefilter.getRefreshInterval());
 
     const landingPageUrl = () => `#${DashboardConstants.LANDING_PAGE_PATH}`;
 
@@ -248,6 +340,32 @@ export class DashboardAppController {
       dashboardStateManager.getIsViewMode() &&
       !dashboardConfig.getHideWriteControls();
 
+    const getChangesFromAppStateForContainerState = () => {
+      const appStateDashboardInput = getDashboardInput();
+      if (!dashboardContainer || isErrorEmbeddable(dashboardContainer)) {
+        return appStateDashboardInput;
+      }
+
+      const containerInput = dashboardContainer.getInput();
+      const differences: Partial<DashboardContainerInput> = {};
+      Object.keys(containerInput).forEach(key => {
+        const containerValue = (containerInput as { [key: string]: unknown })[key];
+        const appStateValue = (appStateDashboardInput as { [key: string]: unknown })[key];
+        if (!_.isEqual(containerValue, appStateValue)) {
+          (differences as { [key: string]: unknown })[key] = appStateValue;
+        }
+      });
+
+      return Object.values(differences).length === 0 ? undefined : differences;
+    };
+
+    const refreshDashboardContainer = () => {
+      const changes = getChangesFromAppStateForContainerState();
+      if (changes && dashboardContainer) {
+        dashboardContainer.updateInput(changes);
+      }
+    };
+
     $scope.updateQueryAndFetch = function({ query, dateRange }) {
       if (dateRange) {
         timefilter.setTime(dateRange);
@@ -258,12 +376,12 @@ export class DashboardAppController {
         // The user can still request a reload in the query bar, even if the
         // query is the same, and in that case, we have to explicitly ask for
         // a reload, since no state changes will cause it.
-        dashboardStateManager.requestReload();
+        lastReloadRequestTime = new Date().getTime();
+        refreshDashboardContainer();
       } else {
         $scope.model.query = query;
         dashboardStateManager.applyFilters($scope.model.query, $scope.model.filters);
       }
-      $scope.refresh();
     };
 
     $scope.onRefreshChange = function({ isPaused, refreshInterval }) {
@@ -301,18 +419,24 @@ export class DashboardAppController {
     });
 
     $scope.$listenAndDigestAsync(timefilter, 'fetch', () => {
-      dashboardStateManager.handleTimeChange(timefilter.getTime());
-      // Currently discover relies on this logic to re-fetch. We need to refactor it to rely instead on the
-      // directly passed down time filter. Then we can get rid of this reliance on scope broadcasts.
-      $scope.refresh();
+      // The only reason this is here is so that search embeddables work on a dashboard with
+      // a refresh interval turned on. This kicks off the search poller. It should be
+      // refactored so no embeddables need to listen to the timefilter directly but instead
+      // the container tells it when to reload.
+      courier.fetch();
     });
-    $scope.$listenAndDigestAsync(timefilter, 'refreshIntervalUpdate', () => {
-      dashboardStateManager.handleRefreshConfigChange(timefilter.getRefreshInterval());
-      updateState();
-    });
-    $scope.$listenAndDigestAsync(timefilter, 'timeUpdate', updateState);
 
-    function updateViewMode(newMode: DashboardViewMode) {
+    $scope.$listenAndDigestAsync(timefilter, 'refreshIntervalUpdate', () => {
+      updateState();
+      refreshDashboardContainer();
+    });
+
+    $scope.$listenAndDigestAsync(timefilter, 'timeUpdate', () => {
+      updateState();
+      refreshDashboardContainer();
+    });
+
+    function updateViewMode(newMode: ViewMode) {
       $scope.topNavMenu = getTopNavConfig(
         newMode,
         navActions,
@@ -321,9 +445,9 @@ export class DashboardAppController {
       dashboardStateManager.switchViewMode(newMode);
     }
 
-    const onChangeViewMode = (newMode: DashboardViewMode) => {
+    const onChangeViewMode = (newMode: ViewMode) => {
       const isPageRefresh = newMode === dashboardStateManager.getViewMode();
-      const isLeavingEditMode = !isPageRefresh && newMode === DashboardViewMode.VIEW;
+      const isLeavingEditMode = !isPageRefresh && newMode === ViewMode.VIEW;
       const willLoseChanges = isLeavingEditMode && dashboardStateManager.getIsDirty(timefilter);
 
       if (!willLoseChanges) {
@@ -337,7 +461,7 @@ export class DashboardAppController {
           dash.id ? createDashboardEditUrl(dash.id) : DashboardConstants.CREATE_NEW_DASHBOARD_URL
         );
         // This is only necessary for new dashboards, which will default to Edit mode.
-        updateViewMode(DashboardViewMode.VIEW);
+        updateViewMode(ViewMode.VIEW);
 
         // We need to do a hard reset of the timepicker. appState will not reload like
         // it does on 'open' because it's been saved to the url and the getAppState.previouslyStored() check on
@@ -398,7 +522,7 @@ export class DashboardAppController {
               kbnUrl.change(createDashboardEditUrl(dash.id));
             } else {
               docTitle.change(dash.lastSavedTitle);
-              updateViewMode(DashboardViewMode.VIEW);
+              updateViewMode(ViewMode.VIEW);
             }
           }
           return { id };
@@ -433,8 +557,8 @@ export class DashboardAppController {
       [key: string]: NavAction;
     } = {};
     navActions[TopNavIds.FULL_SCREEN] = () => dashboardStateManager.setFullScreenMode(true);
-    navActions[TopNavIds.EXIT_EDIT_MODE] = () => onChangeViewMode(DashboardViewMode.VIEW);
-    navActions[TopNavIds.ENTER_EDIT_MODE] = () => onChangeViewMode(DashboardViewMode.EDIT);
+    navActions[TopNavIds.EXIT_EDIT_MODE] = () => onChangeViewMode(ViewMode.VIEW);
+    navActions[TopNavIds.ENTER_EDIT_MODE] = () => onChangeViewMode(ViewMode.EDIT);
     navActions[TopNavIds.SAVE] = () => {
       const currentTitle = dashboardStateManager.getTitle();
       const currentDescription = dashboardStateManager.getDescription();
@@ -512,14 +636,11 @@ export class DashboardAppController {
       showCloneModal(onClone, currentTitle);
     };
     navActions[TopNavIds.ADD] = () => {
-      const addNewVis = () => {
-        showNewVisModal(visTypes, {
-          editorParams: [DashboardConstants.ADD_VISUALIZATION_TO_DASHBOARD_MODE_PARAM],
-        });
-      };
-
-      showAddPanel(dashboardStateManager.addNewPanel, addNewVis, embeddableFactories);
+      if (dashboardContainer && !isErrorEmbeddable(dashboardContainer)) {
+        openAddPanelFlyout(dashboardContainer);
+      }
     };
+
     navActions[TopNavIds.OPTIONS] = (menuItem, navController, anchorElement) => {
       showOptionsPopover({
         anchorElement,
@@ -556,30 +677,24 @@ export class DashboardAppController {
       next: () => {
         $scope.model.filters = queryFilter.getFilters();
         dashboardStateManager.applyFilters($scope.model.query, $scope.model.filters);
+        if (dashboardContainer) {
+          dashboardContainer.updateInput({ filters: $scope.model.filters });
+        }
       },
     });
 
-    // update data when filters fire fetch event
-
-    const fetchSubscription = queryFilter.getFetches$().subscribe($scope.refresh);
-
     $scope.$on('$destroy', () => {
       updateSubscription.unsubscribe();
-      fetchSubscription.unsubscribe();
       dashboardStateManager.destroy();
+      if (inputSubscription) {
+        inputSubscription.unsubscribe();
+      }
+      if (outputSubscription) {
+        outputSubscription.unsubscribe();
+      }
+      if (dashboardContainer) {
+        dashboardContainer.destroy();
+      }
     });
-
-    if (
-      $route.current.params &&
-      $route.current.params[DashboardConstants.NEW_VISUALIZATION_ID_PARAM]
-    ) {
-      dashboardStateManager.addNewPanel(
-        $route.current.params[DashboardConstants.NEW_VISUALIZATION_ID_PARAM],
-        'visualization'
-      );
-
-      kbnUrl.removeParam(DashboardConstants.ADD_VISUALIZATION_TO_DASHBOARD_MODE_PARAM);
-      kbnUrl.removeParam(DashboardConstants.NEW_VISUALIZATION_ID_PARAM);
-    }
   }
 }
