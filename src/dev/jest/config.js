@@ -51,6 +51,8 @@ export default {
     'src/legacy/core_plugins/**/*.tsx',
     '!src/legacy/core_plugins/**/__test__/**/*',
     '!src/legacy/core_plugins/**/__snapshots__/**/*',
+    'src/legacy/ui/public/agg_types/**/*.{ts,tsx}',
+    '!src/legacy/ui/public/agg_types/**/*.d.ts',
   ],
   moduleNameMapper: {
     '^plugins/([^\/.]*)(.*)': '<rootDir>/src/legacy/core_plugins/$1/public$2',
