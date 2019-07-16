@@ -96,7 +96,7 @@ const AddDataUi = ({ apmUiEnabled, isNewKibanaInstance, intl, mlEnabled }) => {
       <EuiFlexItem grow={false}>
         <EuiCard
           className="homAddData__card"
-          icon={<EuiIcon className="homAddData__icon" type="apmApp" />}
+          icon={<EuiIcon className="homAddData__icon" type="logoAPM" />}
           title={apmData.title}
           description={<span id={apmData.ariaDescribedby}>{apmData.description}</span>}
           footer={
@@ -128,7 +128,7 @@ const AddDataUi = ({ apmUiEnabled, isNewKibanaInstance, intl, mlEnabled }) => {
         <EuiFlexItem grow={false}>
           <EuiCard
             className="homAddData__card"
-            icon={<EuiIcon className="homAddData__icon" type="loggingApp" />}
+            icon={<EuiIcon className="homAddData__icon" type="logoLogging" />}
             title={loggingData.title}
             description={<span id={loggingData.ariaDescribedby}>{loggingData.description}</span>}
             footer={
@@ -149,7 +149,7 @@ const AddDataUi = ({ apmUiEnabled, isNewKibanaInstance, intl, mlEnabled }) => {
         <EuiFlexItem grow={false}>
           <EuiCard
             className="homAddData__card"
-            icon={<EuiIcon className="homAddData__icon" type="monitoringApp" />}
+            icon={<EuiIcon className="homAddData__icon" type="logoMetrics" />}
             title={metricsData.title}
             description={<span id={metricsData.ariaDescribedby}>{metricsData.description}</span>}
             footer={
@@ -170,7 +170,7 @@ const AddDataUi = ({ apmUiEnabled, isNewKibanaInstance, intl, mlEnabled }) => {
         <EuiFlexItem grow={false}>
           <EuiCard
             className="homAddData__card"
-            icon={<EuiIcon className="homAddData__icon" type="securityAnalyticsApp" />}
+            icon={<EuiIcon className="homAddData__icon" type="logoSecurity" />}
             title={siemData.title}
             description={<span id={siemData.ariaDescribedby}>{siemData.description}</span>}
             footer={
