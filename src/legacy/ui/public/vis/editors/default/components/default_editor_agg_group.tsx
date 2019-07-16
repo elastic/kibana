@@ -45,11 +45,11 @@ import { Schema } from '../schemas';
 interface DefaultEditorAggGroupProps {
   formIsTouched: boolean;
   groupName: string;
-  responseValueAggs: AggConfig[] | null;
+  lastParentPipelineAggTitle: string;
+  metricAggs: AggConfig[];
   state: VisState;
   vis: Vis;
   addSchema: (schems: Schema) => void;
-  onAggErrorChanged: (agg: AggConfig, error?: string) => void;
   onAggParamsChange: (agg: AggParams, paramName: string, value: unknown) => void;
   onAggTypeChange: (agg: AggConfig, aggType: AggType) => void;
   onToggleEnableAgg: (agg: AggConfig, isEnable: boolean) => void;
@@ -62,11 +62,11 @@ interface DefaultEditorAggGroupProps {
 function DefaultEditorAggGroup({
   formIsTouched,
   groupName,
-  responseValueAggs,
+  lastParentPipelineAggTitle,
+  metricAggs,
   state,
   vis,
   addSchema,
-  onAggErrorChanged,
   onAggParamsChange,
   onAggTypeChange,
   onToggleEnableAgg,
@@ -181,10 +181,11 @@ function DefaultEditorAggGroup({
                     }
                     groupName={groupName}
                     isDraggable={stats.count > 1}
+                    isLastBucket={index === group.length - 1}
                     isRemovable={isAggRemovable(agg, group)}
-                    responseValueAggs={responseValueAggs}
+                    lastParentPipelineAggTitle={lastParentPipelineAggTitle}
+                    metricAggs={metricAggs}
                     state={state}
-                    onAggErrorChanged={onAggErrorChanged}
                     onAggParamsChange={onAggParamsChange}
                     onAggTypeChange={onAggTypeChange}
                     onToggleEnableAgg={onToggleEnableAgg}

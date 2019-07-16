@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   EuiAccordion,
   EuiToolTip,
@@ -45,10 +45,11 @@ interface DefaultEditorAggProps {
   formIsTouched: boolean;
   groupName: string;
   isDraggable: boolean;
+  isLastBucket: boolean;
   isRemovable: boolean;
-  responseValueAggs: AggConfig[] | null;
+  metricAggs: AggConfig[];
+  lastParentPipelineAggTitle: string;
   state: VisState;
-  onAggErrorChanged: (agg: AggConfig, error?: string) => void;
   onAggParamsChange: (agg: AggParams, paramName: string, value: unknown) => void;
   onAggTypeChange: (agg: AggConfig, aggType: AggType) => void;
   onToggleEnableAgg: (agg: AggConfig, isEnable: boolean) => void;
@@ -65,10 +66,11 @@ function DefaultEditorAgg({
   formIsTouched,
   groupName,
   isDraggable,
+  isLastBucket,
   isRemovable,
-  responseValueAggs,
+  metricAggs,
+  lastParentPipelineAggTitle,
   state,
-  onAggErrorChanged,
   onAggParamsChange,
   onAggTypeChange,
   onToggleEnableAgg,
@@ -80,8 +82,37 @@ function DefaultEditorAgg({
   const [validState, setValidState] = useState(true);
   const showDescription = !isEditorOpen && validState;
   const showError = !isEditorOpen && !validState;
+  let disabledParams;
+  let aggError;
+  const isLastBucketAgg =
+    groupName === 'buckets' && lastParentPipelineAggTitle && isLastBucket && agg.type;
 
   const SchemaComponent = agg.schema.editorComponent;
+
+  if (isLastBucketAgg) {
+    if (['date_histogram', 'histogram'].includes(agg.type.name)) {
+      disabledParams = ['min_doc_count'];
+    } else {
+      aggError = i18n.translate('common.ui.aggTypes.metrics.wrongLastBucketTypeErrorMessage', {
+        defaultMessage:
+          'Last bucket aggregation must be "Date Histogram" or "Histogram" when using "{type}" metric aggregation.',
+        values: { type: lastParentPipelineAggTitle },
+        description: 'Date Histogram and Histogram should not be translated',
+      });
+    }
+  }
+
+  useEffect(() => {
+    if (isLastBucketAgg && ['date_histogram', 'histogram'].includes(agg.type.name)) {
+      onAggParamsChange(
+        agg.params,
+        'min_doc_count',
+        // "histogram" agg has an editor for "min_doc_count" param, which accepts boolean
+        // "date_histogram" agg doesn't have an editor for "min_doc_count" param, it should be set as a numeric value
+        agg.type.name === 'histogram' ? true : 0
+      );
+    }
+  }, [lastParentPipelineAggTitle, isLastBucket, agg.type]);
 
   // Returns a description of the aggregation, for display in the collapsed agg header
   const getDescription = () => {
@@ -249,14 +280,15 @@ function DefaultEditorAgg({
         )}
         <DefaultEditorAggParams
           agg={agg}
+          aggError={aggError}
           aggIndex={aggIndex}
           aggIsTooLow={aggIsTooLow}
+          disabledParams={disabledParams}
           formIsTouched={formIsTouched}
           groupName={groupName}
           indexPattern={agg.getIndexPattern()}
-          responseValueAggs={responseValueAggs}
+          metricAggs={metricAggs}
           state={state}
-          onAggErrorChanged={onAggErrorChanged}
           onAggParamsChange={onAggParamsChange}
           onAggTypeChange={onAggTypeChange}
           setTouched={setTouched}

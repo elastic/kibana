@@ -26,11 +26,10 @@ uiModules
   .get('app/visualize')
   .directive('visEditorAggGroupWrapper', reactDirective =>
     reactDirective(wrapInI18nContext(DefaultEditorAggGroup), [
-      ['responseValueAggs', { watchDepth: 'reference' }], // we watch reference to identify each aggs change in useEffects
+      ['metricAggs', { watchDepth: 'reference' }], // we watch reference to identify each aggs change in useEffects
       ['state', { watchDepth: 'reference' }],
       ['vis', { watchDepth: 'reference' }],
       ['addSchema', { watchDepth: 'reference' }],
-      ['onAggErrorChanged', { watchDepth: 'reference' }],
       ['onAggParamsChange', { watchDepth: 'reference' }],
       ['onAggTypeChange', { watchDepth: 'reference' }],
       ['onToggleEnableAgg', { watchDepth: 'reference' }],
@@ -40,6 +39,7 @@ uiModules
       ['setValidity', { watchDepth: 'reference' }],
       'groupName',
       'formIsTouched',
+      'lastParentPipelineAggTitle',
     ])
   )
   .directive('visEditorAggGroup', function () {
@@ -54,11 +54,11 @@ uiModules
             ng-if="setValidity"	
             form-is-touched="formIsTouched"
             group-name="groupName"
-            response-value-aggs="responseValueAggs"
+            last-parent-pipeline-agg-title="lastParentPipelineAggTitle"
+            metric-aggs="metricAggs"
             state="state"
             vis="vis"	
             add-schema="addSchema"	
-            on-agg-error-changed="onAggErrorChanged"
             on-agg-params-change="onAggParamsChange"
             on-agg-type-change="onAggTypeChange"
             on-toggle-enable-agg="onToggleEnableAgg"

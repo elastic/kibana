@@ -28,7 +28,7 @@ import { documentationLinks } from '../../../../documentation_links/documentatio
 import { ComboBoxGroupedOption } from '../default_editor_utils';
 
 interface DefaultEditorAggSelectProps {
-  aggError?: string | null;
+  aggError?: string;
   aggTypeOptions: AggType[];
   id: string;
   indexPattern: IndexPattern;

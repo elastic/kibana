@@ -59,7 +59,7 @@ export interface SubAggParamsProp {
 }
 export interface DefaultEditorAggParamsProps extends SubAggParamsProp {
   agg: AggConfig;
-  aggError?: string | null;
+  aggError?: string;
   aggIndex?: number;
   aggIsTooLow?: boolean;
   className?: string;
