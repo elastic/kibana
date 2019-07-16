@@ -27,6 +27,7 @@ import { legacyResponseHandlerProvider } from 'ui/vis/response_handlers/legacy';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 import { VisProvider } from 'ui/vis';
 import { tabifyAggResponse } from 'ui/agg_response/tabify';
+import { round } from 'lodash';
 
 describe('AggTable Directive', function () {
 
@@ -211,7 +212,7 @@ describe('AggTable Directive', function () {
       expect($cells.length).to.be(6);
 
       for (let i = 0; i < 6; i++) {
-        expect($($cells[i]).text()).to.be(expected[i]);
+        expect($($cells[i]).text().trim()).to.be(expected[i]);
       }
       settings.set('dateFormat:tz', oldTimezoneSetting);
       off();
@@ -350,6 +351,60 @@ describe('AggTable Directive', function () {
         '"html_formatted",FR,win,412032,8293,3992' + '\r\n' +
         '"html_formatted",FR,mac,412032,8293,3029' + '\r\n'
       );
+    });
+  });
+
+  it('renders percentage columns', async function () {
+    $scope.dimensions = {
+      buckets: [
+        { accessor: 0, params: {} },
+        { accessor: 1, format: { id: 'date', params: { pattern: 'YYYY-MM-DD' } } },
+      ],
+      metrics: [
+        { accessor: 2, format: { id: 'number' } },
+        { accessor: 3, format: { id: 'date' } },
+        { accessor: 4, format: { id: 'number' } },
+        { accessor: 5, format: { id: 'number' } },
+      ],
+    };
+    const response = await tableAggResponse(
+      tabifiedData.oneTermOneHistogramBucketWithTwoMetricsOneTopHitOneDerivative,
+      $scope.dimensions
+    );
+    $scope.table = response.tables[0];
+    $scope.percentageCol = 'Average bytes';
+
+    const $el = $(`<kbn-agg-table
+      table="table"
+      dimensions="dimensions"
+      percentage-col="percentageCol"
+    ></kbn-agg-table>`);
+
+    $compile($el)($scope);
+    $scope.$digest();
+
+    const $headings = $el.find('th');
+    expect($headings.length).to.be(7);
+    expect(
+      $headings
+        .eq(3)
+        .text()
+        .trim()
+    ).to.be('Average bytes percentages');
+
+    const countColId = $scope.table.columns.find(col => col.name === $scope.percentageCol).id;
+    const counts = $scope.table.rows.map(row => row[countColId]);
+    const total = counts.reduce((sum, curr) => sum + curr, 0);
+    const $percentageColValues = $el.find('tbody tr').map((i, el) =>
+      $(el)
+        .find('td')
+        .eq(3)
+        .text()
+    );
+
+    $percentageColValues.each((i, value) => {
+      const percentage = `${round((counts[i] / total) * 100, 1)}%`;
+      expect(value).to.be(percentage);
     });
   });
 

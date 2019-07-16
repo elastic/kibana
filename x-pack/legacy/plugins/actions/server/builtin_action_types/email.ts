@@ -110,6 +110,7 @@ export const actionType: ActionType = {
 async function executor(execOptions: ActionTypeExecutorOptions): Promise<any> {
   const config = execOptions.config as ActionTypeConfigType;
   const params = execOptions.params as ActionParamsType;
+  const services = execOptions.services;
 
   const transport: any = {
     user: config.user,
