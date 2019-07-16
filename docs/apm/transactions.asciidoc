@@ -13,12 +13,14 @@ In other words, this view groups all transactions of the same name together, and
 image::apm/images/apm-transactions-overview.png[Example view of transactions table in the APM UI in Kibana]
 
 *Time spent by span type* -- beta[] Certain agents support breakdown graphs in the APM UI.
-This graph is an easy way to visualize how much time each span is taking within your application.
+This graph is an easy way to visualize where your application is spending most of its time.
+For example, is your app spending time in external calls, database processing, or application code execution?
+
 The time a transaction took to complete is also recorded and displayed on the chart under the "app" label.
-"App" indicates there was something happening within the application, but we're not sure what.
+"App" indicates that something was happening within the application, but we're not sure exactly what.
 This could be a sign that the agent does not have auto-instrumentation for whatever was happening during that time.
 
-It's important to note that if you have asynchronous spans, the total time of all spans might exceed 100%.
+It's important to note that if you have asynchronous spans, the sum of all span times may exceed the duration of the transaction.
 
 TIP: If the *Time spent by span type* chart is missing in the APM UI, it means your agent does not support this feature yet. 
 
