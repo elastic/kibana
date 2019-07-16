@@ -23,9 +23,11 @@ export async function fetchInfo(key: string): Promise<RegistryPackage> {
 }
 
 export async function getArchiveInfo(
-  key: string,
+  pkgkey: string,
   filter = (entry: ArchiveEntry): boolean => true
 ): Promise<string[]> {
+  // assume .tar.gz for now. add support for .zip if/when we need it
+  const key = `${pkgkey}.tar.gz`;
   const paths: string[] = [];
   const onEntry = (entry: ArchiveEntry) => {
     const { path, buffer } = entry;

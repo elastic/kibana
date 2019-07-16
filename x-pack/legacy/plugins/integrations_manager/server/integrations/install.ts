@@ -105,7 +105,7 @@ async function installPipelines({
 }) {
   const isPipeline = ({ path }: Registry.ArchiveEntry) =>
     Registry.pathParts(path).type === ASSET_TYPE_INGEST_PIPELINE;
-  const paths = await Registry.getArchiveInfo(`${pkgkey}.tar.gz`, isPipeline);
+  const paths = await Registry.getArchiveInfo(pkgkey, isPipeline);
   const installationPromises = paths.map(path => installPipeline({ callCluster, path }));
   const references = await Promise.all(installationPromises);
 
@@ -139,7 +139,7 @@ async function getObjects(
   const objects: Map<string, SavedObject> = new Map();
 
   // Get paths which match the given filter
-  const paths = await Registry.getArchiveInfo(`${pkgkey}.tar.gz`, filter);
+  const paths = await Registry.getArchiveInfo(pkgkey, filter);
 
   // Get all objects which matched filter. Add them to the Map
   const rootObjects = paths.map(getObject);
