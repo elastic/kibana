@@ -5,7 +5,7 @@
  */
 
 import { UMMonitorStatesAdapter } from '../adapters/monitor_states';
-import { MonitorSummary, SnapshotCount, StatesIndexStatus } from '../../../common/graphql/types';
+import { MonitorSummary, StatesIndexStatus } from '../../../common/graphql/types';
 
 export class UMMonitorStatesDomain {
   constructor(private readonly adapter: UMMonitorStatesAdapter, libs: {}) {

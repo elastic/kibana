@@ -5,7 +5,7 @@
  */
 
 import { UMMonitorStatesAdapter } from './adapter_types';
-import { MonitorSummary, SnapshotCount, StatesIndexStatus } from '../../../../common/graphql/types';
+import { MonitorSummary, StatesIndexStatus } from '../../../../common/graphql/types';
 
 /**
  * This class will be implemented for server-side tests.
