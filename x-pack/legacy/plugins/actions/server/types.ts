@@ -42,8 +42,8 @@ export interface ActionType {
   name: string;
   unencryptedAttributes: string[];
   validate?: {
-    params?: any;
-    config?: any;
+    params?: { validate: (object: any) => any };
+    config?: { validate: (object: any) => any };
   };
   executor: ExecutorType;
 }

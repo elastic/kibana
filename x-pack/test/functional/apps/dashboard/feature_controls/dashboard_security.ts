@@ -116,7 +116,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
         });
-        await testSubjects.existOrFail('dashboardPanelHeading-APie', 10000);
+        await testSubjects.existOrFail('embeddablePanelHeading-APie', 10000);
       });
 
       it(`does not allow a visualization to be edited`, async () => {
@@ -267,7 +267,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
         });
-        await testSubjects.existOrFail('dashboardPanelHeading-APie', 10000);
+        await testSubjects.existOrFail('embeddablePanelHeading-APie', 10000);
       });
 
       it(`Permalinks doesn't show create short-url button`, async () => {

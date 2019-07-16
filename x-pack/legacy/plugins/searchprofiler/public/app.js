@@ -10,7 +10,8 @@ import { uiModules } from 'ui/modules';
 import { i18n } from '@kbn/i18n';
 import uiRoutes from 'ui/routes';
 import 'ui/capabilities/route_setup';
-import { notify } from 'ui/notify';
+import { toastNotifications } from 'ui/notify';
+import { formatAngularHttpError } from 'ui/notify/lib';
 
 // License
 import { xpackInfo } from 'plugins/xpack_main/services/xpack_info';
@@ -98,7 +99,11 @@ function profileVizController($scope, $http, HighlightService) {
     $scope.resetHighlightPanel();
     let json = checkForParseErrors($scope.query);
     if (json.status === false) {
-      notify.error(json.error);
+      toastNotifications.addError(json.error, {
+        title: i18n.translate('xpack.searchProfiler.errorToastTitle', {
+          defaultMessage: 'JSON parse error',
+        }),
+      });
       return;
     }
     json = json.parsed;
@@ -127,7 +132,7 @@ function profileVizController($scope, $http, HighlightService) {
   $scope.executeRemoteQuery = requestBody => {
     $http.post('../api/searchprofiler/profile', requestBody).then(resp => {
       if (!resp.data.ok) {
-        notify.error(resp.data.err.msg);
+        toastNotifications.addDanger(resp.data.err.msg);
 
         try {
           const regex = /line=([0-9]+) col=([0-9]+)/g;
@@ -143,7 +148,7 @@ function profileVizController($scope, $http, HighlightService) {
       }
 
       $scope.renderProfile(resp.data.resp.profile.shards);
-    }).catch(notify.error);
+    }).catch(reason => toastNotifications.addDanger(formatAngularHttpError(reason)));
   };
 
   $scope.renderProfile = data => {

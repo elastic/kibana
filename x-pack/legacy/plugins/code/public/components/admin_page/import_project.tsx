@@ -84,7 +84,6 @@ class CodeImportProject extends React.PureComponent<
                 data-test-subj="importRepositoryUrlInputBox"
                 isLoading={importLoading}
                 fullWidth={true}
-                onBlur={this.updateIsInvalid}
                 isInvalid={this.state.isInvalid}
                 autoFocus={true}
               />
