@@ -23,9 +23,9 @@ export const filterRatioOperation: OperationDefinition<FilterRatioIndexPatternCo
   }),
   isApplicableWithoutField: true,
   isApplicableForField: () => false,
-  buildColumn({ operationId, suggestedOrder, indexPatternId, columns, layerId }) {
+  buildColumn({ operationId, suggestedPriority, indexPatternId, columns, layerId }) {
     //   operationId: string,
-    //   suggestedOrder: DimensionPriority | undefined,
+    //   suggestedPriority: DimensionPriority | undefined,
     //   columns: Partial<Record<string, IndexPatternColumn>>,
     //   // layer: DimensionLayer
     //   layerId: string
@@ -37,7 +37,7 @@ export const filterRatioOperation: OperationDefinition<FilterRatioIndexPatternCo
       }),
       dataType: 'number',
       operationType: 'filter_ratio',
-      suggestedOrder,
+      suggestedPriority,
       isBucketed: false,
       indexPatternId,
       // layer,

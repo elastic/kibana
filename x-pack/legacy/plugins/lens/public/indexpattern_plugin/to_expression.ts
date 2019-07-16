@@ -61,7 +61,7 @@ function getExpressionForLayer(
         index: columnEntries.length,
         op: 'count',
         columns,
-        suggestedOrder: 2,
+        suggestedPriority: 2,
         layerId,
         indexPatternId,
       });

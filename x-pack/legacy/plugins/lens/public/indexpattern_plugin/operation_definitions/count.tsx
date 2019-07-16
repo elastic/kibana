@@ -16,7 +16,7 @@ export const countOperation: OperationDefinition<CountIndexPatternColumn> = {
   }),
   isApplicableWithoutField: true,
   isApplicableForField: () => false,
-  buildColumn({ operationId, suggestedOrder, indexPatternId }) {
+  buildColumn({ operationId, suggestedPriority, indexPatternId }) {
     return {
       operationId,
       label: i18n.translate('xpack.lens.indexPattern.countOf', {
@@ -24,7 +24,7 @@ export const countOperation: OperationDefinition<CountIndexPatternColumn> = {
       }),
       dataType: 'number',
       operationType: 'count',
-      suggestedOrder,
+      suggestedPriority,
       isBucketed: false,
       indexPatternId,
       // layer,

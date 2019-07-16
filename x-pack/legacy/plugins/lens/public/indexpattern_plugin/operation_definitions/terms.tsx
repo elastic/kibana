@@ -47,10 +47,10 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn> = {
       type === 'string' && (!aggregationRestrictions || aggregationRestrictions.terms)
     );
   },
-  buildColumn({ operationId, suggestedOrder, columns, field, indexPatternId }) {
+  buildColumn({ operationId, suggestedPriority, columns, field, indexPatternId }) {
     // }: {
     //   operationId: string;
-    //   suggestedOrder: DimensionPriority | undefined;
+    //   suggestedPriority: DimensionPriority | undefined;
     //   layerId: string;
     //   columns: Partial<Record<string, IndexPatternColumn>>;
     //   field?: IndexPatternField;
@@ -64,7 +64,7 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn> = {
       label: ofName(field ? field.name : ''),
       dataType: 'string',
       operationType: 'terms',
-      suggestedOrder,
+      suggestedPriority,
       sourceField: field ? field.name : '',
       isBucketed: true,
       indexPatternId,

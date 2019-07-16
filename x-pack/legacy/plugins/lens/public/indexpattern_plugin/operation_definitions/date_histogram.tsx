@@ -45,14 +45,14 @@ export const dateHistogramOperation: OperationDefinition<DateHistogramIndexPatte
   },
   buildColumn({
     operationId,
-    suggestedOrder,
+    suggestedPriority,
     layerId,
     columns,
     indexPatternId,
     field,
   }: {
     operationId: string;
-    suggestedOrder: DimensionPriority | undefined;
+    suggestedPriority: DimensionPriority | undefined;
     // layer: DimensionLayer,
     layerId: string;
     indexPatternId: string;
@@ -75,7 +75,7 @@ export const dateHistogramOperation: OperationDefinition<DateHistogramIndexPatte
       label: ofName(field.name),
       dataType: 'date',
       operationType: 'date_histogram',
-      suggestedOrder,
+      suggestedPriority,
       sourceField: field.name,
       isBucketed: true,
       // layerId,

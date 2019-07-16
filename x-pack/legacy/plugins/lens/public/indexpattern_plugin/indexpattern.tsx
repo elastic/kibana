@@ -47,7 +47,7 @@ export interface BaseIndexPatternColumn {
 
   // Private
   operationType: OperationType;
-  suggestedOrder?: DimensionPriority;
+  suggestedPriority?: DimensionPriority;
   indexPatternId: string;
 }
 
@@ -59,7 +59,7 @@ type ParameterlessIndexPatternColumn<
 
 export interface FieldBasedIndexPatternColumn extends BaseIndexPatternColumn {
   sourceField: string;
-  suggestedOrder?: DimensionPriority;
+  suggestedPriority?: DimensionPriority;
 }
 
 export interface DateHistogramIndexPatternColumn extends FieldBasedIndexPatternColumn {

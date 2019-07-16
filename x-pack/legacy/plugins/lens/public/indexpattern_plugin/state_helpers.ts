@@ -141,8 +141,8 @@ export function getColumnOrder(columns: Record<string, IndexPatternColumn>): str
     .sort(([id, col], [id2, col2]) => {
       return (
         // Sort undefined orders last
-        (col.suggestedOrder !== undefined ? col.suggestedOrder : Number.MAX_SAFE_INTEGER) -
-        (col2.suggestedOrder !== undefined ? col2.suggestedOrder : Number.MAX_SAFE_INTEGER)
+        (col.suggestedPriority !== undefined ? col.suggestedPriority : Number.MAX_SAFE_INTEGER) -
+        (col2.suggestedPriority !== undefined ? col2.suggestedPriority : Number.MAX_SAFE_INTEGER)
       );
     })
     .map(([id]) => id)

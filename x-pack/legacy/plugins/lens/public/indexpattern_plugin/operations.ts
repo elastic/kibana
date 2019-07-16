@@ -74,7 +74,7 @@ export interface OperationDefinition<C extends BaseIndexPatternColumn> {
   isApplicableForField: (field: IndexPatternField) => boolean;
   buildColumn: (arg: {
     operationId: string;
-    suggestedOrder: DimensionPriority | undefined;
+    suggestedPriority: DimensionPriority | undefined;
     layerId: string;
     indexPatternId: string;
     columns: Partial<Record<string, IndexPatternColumn>>;
@@ -118,12 +118,12 @@ export function buildColumnForOperationType<T extends OperationType>({
   field,
   layerId,
   indexPatternId,
-  suggestedOrder,
+  suggestedPriority,
 }: {
   index: number;
   op: T;
   columns: Partial<Record<string, IndexPatternColumn>>;
-  suggestedOrder: DimensionPriority | undefined;
+  suggestedPriority: DimensionPriority | undefined;
   layerId: string;
   indexPatternId: string;
   field?: IndexPatternField;
@@ -131,7 +131,7 @@ export function buildColumnForOperationType<T extends OperationType>({
   return operationDefinitionMap[op].buildColumn({
     operationId: `${index}${op}`,
     columns,
-    suggestedOrder,
+    suggestedPriority,
     field,
     layerId,
     indexPatternId,
@@ -140,11 +140,12 @@ export function buildColumnForOperationType<T extends OperationType>({
 
 export function getPotentialColumns({
   state,
-  suggestedOrder,
+  // suggestedPriority,
+  suggestedPriority,
   layerId,
 }: {
   state: IndexPatternPrivateState;
-  suggestedOrder?: DimensionPriority;
+  suggestedPriority?: DimensionPriority;
   layerId: string;
 }): IndexPatternColumn[] {
   const indexPattern = state.layers[layerId].indexPatternId;
@@ -160,7 +161,7 @@ export function getPotentialColumns({
           index,
           op,
           columns: state.layers[layerId].columns,
-          suggestedOrder,
+          suggestedPriority,
           field,
           indexPatternId: state.layers[layerId].indexPatternId,
           layerId,
@@ -174,7 +175,7 @@ export function getPotentialColumns({
       columns.push(
         operation.buildColumn({
           operationId: operation.type,
-          suggestedOrder,
+          suggestedPriority,
           layerId,
           columns: state.layers[layerId].columns,
           indexPatternId: state.layers[layerId].indexPatternId,

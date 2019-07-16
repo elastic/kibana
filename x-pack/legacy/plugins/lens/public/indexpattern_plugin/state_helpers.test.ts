@@ -370,7 +370,7 @@ describe('state_helpers', () => {
               },
               orderDirection: 'asc',
             },
-            suggestedOrder: 2,
+            suggestedPriority: 2,
           },
           col2: {
             operationId: 'op2',
@@ -381,7 +381,7 @@ describe('state_helpers', () => {
             // Private
             operationType: 'avg',
             sourceField: 'bytes',
-            suggestedOrder: 0,
+            suggestedPriority: 0,
           },
           col3: {
             operationId: 'op3',
@@ -392,7 +392,7 @@ describe('state_helpers', () => {
             // Private
             operationType: 'date_histogram',
             sourceField: 'timestamp',
-            suggestedOrder: 1,
+            suggestedPriority: 1,
             params: {
               interval: '1d',
             },

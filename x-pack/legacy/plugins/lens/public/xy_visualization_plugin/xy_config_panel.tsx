@@ -461,6 +461,7 @@ export function XYConfigPanel(props: VisualizationProps<State>) {
                     }
                     filterOperations={op => !op.isBucketed && op.dataType === 'number'}
                     testSubj="yDimensionPanel"
+                    // suggestedPriority={2}
                     // layer={index}
                     layerId={layer.layerId}
                   />

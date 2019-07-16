@@ -36,7 +36,7 @@ export type IndexPatternDimensionPanelProps = DatasourceDimensionPanelProps & {
 
 export function IndexPatternDimensionPanel(props: IndexPatternDimensionPanelProps) {
   const layerId = props.layerId;
-  const columns = getPotentialColumns(props);
+  const columns = getPotentialColumns(props, props.suggestedPriority);
 
   const filteredColumns = columns.filter(col => {
     return props.filterOperations(columnToOperation(col));

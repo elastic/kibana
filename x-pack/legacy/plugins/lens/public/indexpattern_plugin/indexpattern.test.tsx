@@ -538,20 +538,20 @@ describe('IndexPattern Data Source', () => {
           operationId: 'bar',
           operationType: 'max',
           sourceField: 'baz',
-          suggestedOrder: 0,
+          suggestedPriority: 0,
         };
         const columns: Record<string, IndexPatternColumn> = {
           a: {
             ...sampleColumn,
-            suggestedOrder: 0,
+            suggestedPriority: 0,
           },
           b: {
             ...sampleColumn,
-            suggestedOrder: 1,
+            suggestedPriority: 1,
           },
           c: {
             ...sampleColumn,
-            suggestedOrder: 2,
+            suggestedPriority: 2,
           },
         };
         const api = indexPatternDatasource.getPublicAPI(

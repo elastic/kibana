@@ -30,10 +30,10 @@ function buildMetricOperation<T extends FieldBasedIndexPatternColumn>(
         fieldType === 'number' && (!aggregationRestrictions || aggregationRestrictions[type])
       );
     },
-    buildColumn({ operationId, suggestedOrder, field, indexPatternId }): T {
+    buildColumn({ operationId, suggestedPriority, field, indexPatternId }): T {
       // }: {
       //   operationId: string;
-      //   suggestedOrder: DimensionPriority | undefined;
+      //   suggestedPriority: DimensionPriority | undefined;
       //   layerId: string;
       //   columns: {};
       //   field?: IndexPatternField;
@@ -46,7 +46,7 @@ function buildMetricOperation<T extends FieldBasedIndexPatternColumn>(
         label: ofName(field ? field.name : ''),
         dataType: 'number',
         operationType: type,
-        suggestedOrder,
+        suggestedPriority,
         sourceField: field ? field.name : '',
         isBucketed: false,
         indexPatternId,
