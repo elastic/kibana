@@ -43,3 +43,7 @@ export function linkToRestoreSnapshot(repositoryName: string, snapshotName: stri
     snapshotName
   )}`;
 }
+
+export function linkToPolicy(policyName: string) {
+  return `#${BASE_PATH}/policies/${encodeURIComponent(policyName)}`;
+}

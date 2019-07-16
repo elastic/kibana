@@ -22,10 +22,10 @@ import {
 } from '@elastic/eui';
 import React, { Fragment, useState, useEffect } from 'react';
 
+import { SnapshotDetails as ISnapshotDetails } from '../../../../../../common/types';
 import { SectionError, SectionLoading, SnapshotDeleteProvider } from '../../../../components';
 import { useAppDependencies } from '../../../../index';
 import {
-  BASE_PATH,
   UIM_SNAPSHOT_DETAIL_PANEL_SUMMARY_TAB,
   UIM_SNAPSHOT_DETAIL_PANEL_FAILED_INDICES_TAB,
   SNAPSHOT_STATE,
@@ -75,7 +75,7 @@ export const SnapshotDetails: React.FunctionComponent<Props> = ({
   let content;
 
   if (snapshotDetails) {
-    const { indexFailures, state: snapshotState } = snapshotDetails;
+    const { indexFailures, state: snapshotState } = snapshotDetails as ISnapshotDetails;
     const tabOptions = [
       {
         id: TAB_SUMMARY,

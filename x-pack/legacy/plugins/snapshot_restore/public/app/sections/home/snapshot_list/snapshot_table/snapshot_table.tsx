@@ -342,14 +342,14 @@ export const SnapshotTable: React.FunctionComponent<Props> = ({
       },
     ],
     defaultQuery: policyFilter
-      ? Query.parse(`policyName=${policyFilter}`, {
+      ? Query.parse(`policyName="${policyFilter}"`, {
           schema: {
             ...searchSchema,
             strict: true,
           },
         })
       : repositoryFilter
-      ? Query.parse(`repository:'${repositoryFilter}'`, {
+      ? Query.parse(`repository="${repositoryFilter}"`, {
           schema: {
             ...searchSchema,
             strict: true,
