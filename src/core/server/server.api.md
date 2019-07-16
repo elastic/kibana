@@ -89,6 +89,7 @@ export interface CoreSetup {
     elasticsearch: {
         adminClient$: Observable<ClusterClient>;
         dataClient$: Observable<ClusterClient>;
+        createClient: (type: string, clientConfig?: Partial<ElasticsearchClientConfig>) => ClusterClient;
     };
     // (undocumented)
     http: {
@@ -109,8 +110,8 @@ export interface CoreStart {
 export interface DiscoveredPlugin {
     readonly configPath: ConfigPath;
     readonly id: PluginName;
-    readonly optionalPlugins: ReadonlyArray<PluginName>;
-    readonly requiredPlugins: ReadonlyArray<PluginName>;
+    readonly optionalPlugins: readonly PluginName[];
+    readonly requiredPlugins: readonly PluginName[];
 }
 
 // Warning: (ae-forgotten-export) The symbol "ElasticsearchConfig" needs to be exported by the entry point index.d.ts
@@ -386,7 +387,7 @@ export type RecursiveReadonly<T> = T extends (...args: any[]) => any ? T : T ext
 // @public
 export interface RouteConfigOptions {
     authRequired?: boolean;
-    tags?: ReadonlyArray<string>;
+    tags?: readonly string[];
 }
 
 // @public

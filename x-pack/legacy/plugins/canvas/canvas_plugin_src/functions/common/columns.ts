@@ -26,6 +26,7 @@ export function columns(): ExpressionFunction<'columns', Datatable, Arguments, D
     },
     args: {
       include: {
+        aliases: ['_'],
         types: ['string'],
         help: argHelp.include,
       },

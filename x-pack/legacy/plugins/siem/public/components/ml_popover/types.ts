@@ -37,13 +37,8 @@ export interface Job {
   jobState: string;
   latestTimestampMs?: number;
   memory_status: string;
+  nodeName?: string;
   processed_record_count: number;
-}
-
-export interface DisplayJob {
-  title: string;
-  description: string;
-  isChecked: boolean;
 }
 
 export interface SetupMlResponseJob {
@@ -79,4 +74,21 @@ export interface CloseJobsResponse {
   [key: string]: {
     closed: boolean;
   };
+}
+
+export interface IndexPatternSavedObject {
+  attributes: {
+    title: string;
+  };
+  id: string;
+  type: string;
+  updated_at: string;
+  version: string;
+}
+
+export interface IndexPatternResponse {
+  page: number;
+  per_page: number;
+  saved_objects: IndexPatternSavedObject[];
+  total: number;
 }

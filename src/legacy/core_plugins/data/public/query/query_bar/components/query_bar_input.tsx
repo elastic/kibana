@@ -84,7 +84,7 @@ const config = chrome.getUiSettingsClient();
 const recentSearchType: AutocompleteSuggestionType = 'recentSearch';
 
 export class QueryBarInputUI extends Component<Props, State> {
-  public state = {
+  public state: State = {
     isSuggestionsVisible: false,
     index: null,
     suggestions: [],

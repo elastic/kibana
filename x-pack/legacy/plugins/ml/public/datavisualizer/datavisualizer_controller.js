@@ -33,6 +33,7 @@ import { loadCurrentIndexPattern, loadCurrentSavedSearch, timeBasedIndexCheck } 
 import { checkMlNodesAvailable } from 'plugins/ml/ml_nodes_check/check_ml_nodes';
 import { ml } from 'plugins/ml/services/ml_api_service';
 import template from './datavisualizer.html';
+import { mlTimefilterRefresh$ } from '../services/timefilter_refresh_service';
 
 uiRoutes
   .when('/jobs/new_job/datavisualizer', {
@@ -52,7 +53,13 @@ import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml');
 
 module
-  .controller('MlDataVisualizerViewFields', function ($scope, $timeout, $window, Private, AppState, config) {
+  .controller('MlDataVisualizerViewFields', function (
+    $scope,
+    $timeout,
+    $window,
+    Private,
+    AppState,
+    config) {
 
     timefilter.enableTimeRangeSelector();
     timefilter.enableAutoRefreshSelector();
@@ -144,12 +151,19 @@ module
       .value();
     $scope.indexedFieldTypes = indexedFieldTypes.sort();
 
-
-    // Refresh the data when the time range is altered.
-    $scope.$listenAndDigestAsync(timefilter, 'fetch', function () {
+    function refresh() {
       $scope.earliest = timefilter.getActiveBounds().min.valueOf();
       $scope.latest = timefilter.getActiveBounds().max.valueOf();
       loadOverallStats();
+    }
+
+    // Refresh the data when the time range is altered.
+    $scope.$listenAndDigestAsync(timefilter, 'fetch', refresh);
+
+    const timefilterRefreshServiceSub = mlTimefilterRefresh$.subscribe(refresh);
+
+    $scope.$on('$destroy', () => {
+      timefilterRefreshServiceSub.unsubscribe();
     });
 
     $scope.submitSearchQuery = function () {

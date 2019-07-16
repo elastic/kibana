@@ -16,8 +16,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import 'uiExports/embeddableActions';
-import 'uiExports/embeddableFactories';
 
 export {
   DASHBOARD_GRID_COLUMN_COUNT,

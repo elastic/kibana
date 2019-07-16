@@ -20,6 +20,7 @@ import {
   SearchOptions,
   SearchScope,
   WorkerReservedProgress,
+  Repository,
 } from '../../../model';
 import { CommitInfo, ReferenceInfo } from '../../../model/commit';
 import { changeSearchScope, FetchFileResponse, RepoState, RepoStatus } from '../../actions';
@@ -57,6 +58,7 @@ interface Props extends RouteComponentProps<MainRouteParams> {
   fileTreeLoadingPaths: string[];
   searchOptions: SearchOptions;
   query: string;
+  currentRepository: Repository;
 }
 const LANG_MD = 'markdown';
 
@@ -232,6 +234,7 @@ class CodeContent extends React.PureComponent<Props> {
           searchOptions={this.props.searchOptions}
           branches={this.props.branches}
           query={this.props.query}
+          currentRepository={this.props.currentRepository}
         />
         {this.renderContent()}
       </div>
@@ -402,6 +405,7 @@ const mapStateToProps = (state: RootState) => ({
   repoStatus: statusSelector(state, repoUriSelector(state)),
   searchOptions: state.search.searchOptions,
   query: state.search.query,
+  currentRepository: state.repository.repository,
 });
 
 const mapDispatchToProps = {
