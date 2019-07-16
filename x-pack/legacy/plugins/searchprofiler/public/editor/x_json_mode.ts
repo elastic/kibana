@@ -24,8 +24,12 @@ class XJsonMode {
   foldingRules = new CStyleFoldMode();
 }
 
+// Order here matters here:
+
+// 1. We first inherit
 oop.inherits(XJsonMode, JSONMode);
 
+// 2. Then clobber `createWorker` method to install our worker source.
 (XJsonMode.prototype as any).createWorker = function(session: ace.IEditSession) {
   const xJsonWorker = new WorkerClient(
     ['ace'],
