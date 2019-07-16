@@ -20,7 +20,6 @@
 import { EditPanelAction } from './edit_panel_action';
 import { EmbeddableFactory, Embeddable, EmbeddableInput } from '../embeddables';
 import { GetEmbeddableFactory, ViewMode } from '../types';
-import { ContactCardEmbeddable } from '../test_samples/embeddables/contact_card/contact_card_embeddable';
 
 const embeddableFactories = new Map<string, EmbeddableFactory>();
 const getFactory: GetEmbeddableFactory = (id: string) => embeddableFactories.get(id);
@@ -62,13 +61,13 @@ test('getHref returns the edit urls', async () => {
 });
 
 test('is not compatible when edit url is not available', async () => {
+  /*
   const action = new EditPanelAction(getFactory);
   const embeddable = new ContactCardEmbeddable({
     id: '123',
     firstName: 'sue',
     viewMode: ViewMode.EDIT,
   });
-  /*
   expect(
     await action.isCompatible({
       embeddable,

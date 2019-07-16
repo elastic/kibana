@@ -17,22 +17,9 @@
  * under the License.
  */
 
-import { Filter, FilterStateStore } from '@kbn/es-query';
-import { EmbeddableOutput, isErrorEmbeddable } from '../../..';
-import { InspectPanelAction } from './inspect_panel_action';
-import { EmbeddableFactory } from '../../../embeddables';
-import {
-  FILTERABLE_EMBEDDABLE,
-  FilterableEmbeddable,
-  FilterableEmbeddableInput,
-} from '../../../test_samples/embeddables/filterable_embeddable';
-import { FilterableEmbeddableFactory } from '../../../test_samples/embeddables/filterable_embeddable_factory';
-import { FilterableContainer } from '../../../test_samples/embeddables/filterable_container';
-import { ContactCardEmbeddable } from '../../../test_samples/embeddables/contact_card/contact_card_embeddable';
-import { GetEmbeddableFactory } from '../../../types';
-
 // TODO: Adapt this for NP.
 test('...', () => {});
+
 /*
 const __embeddableFactories = new Map<string, EmbeddableFactory>();
 __embeddableFactories.set(FILTERABLE_EMBEDDABLE, new FilterableEmbeddableFactory());

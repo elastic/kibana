@@ -21,20 +21,26 @@ import classNames from 'classnames';
 import React from 'react';
 import { Subscription } from 'rxjs';
 import { buildContextMenuForActions } from '../context_menu_actions';
+import { CoreStart } from 'src/core/public';
 
 import { CONTEXT_MENU_TRIGGER } from '../triggers';
 import { IEmbeddable } from '../embeddables/i_embeddable';
-import { ViewMode, GetActionsCompatibleWithTrigger, GetEmbeddableFactory } from '../types';
+import { ViewMode, GetActionsCompatibleWithTrigger, GetEmbeddableFactory, GetEmbeddableFactories } from '../types';
 
 import { RemovePanelAction } from './panel_header/panel_actions';
 import { AddPanelAction } from './panel_header/panel_actions/add_panel/add_panel_action';
 import { CustomizePanelTitleAction } from './panel_header/panel_actions/customize_title/customize_panel_action';
 import { PanelHeader } from './panel_header/panel_header';
 import { InspectPanelAction } from './panel_header/panel_actions/inspect_panel_action';
-import { EditPanelAction } from '../actions';
+import { EditPanelAction, Action } from '../actions';
 
 interface Props {
   embeddable: IEmbeddable<any, any>;
+  getActions: GetActionsCompatibleWithTrigger,
+  getEmbeddableFactory: GetEmbeddableFactory,
+  getAllEmbeddableFactories: GetEmbeddableFactories,
+  overlays: CoreStart['overlays'],
+  notifications: CoreStart['notifications'],
 }
 
 interface State {
@@ -50,11 +56,7 @@ export class EmbeddablePanel extends React.Component<Props, State> {
   private parentSubscription?: Subscription;
   private subscription?: Subscription;
   private mounted: boolean = false;
-  constructor(
-    props: Props,
-    private getActions: GetActionsCompatibleWithTrigger,
-    private getEmbeddableFactory: GetEmbeddableFactory
-  ) {
+  constructor(props: Props) {
     super(props);
     const { embeddable } = this.props;
     const viewMode = embeddable.getInput().viewMode
@@ -156,7 +158,7 @@ export class EmbeddablePanel extends React.Component<Props, State> {
   };
 
   private getActionContextMenuPanel = async () => {
-    const actions = await this.getActions(CONTEXT_MENU_TRIGGER, {
+    const actions = await this.props.getActions(CONTEXT_MENU_TRIGGER, {
       embeddable: this.props.embeddable,
     });
 
@@ -164,13 +166,13 @@ export class EmbeddablePanel extends React.Component<Props, State> {
     // registry.
     const extraActions = [
       new CustomizePanelTitleAction(),
-      new AddPanelAction(),
+      new AddPanelAction(this.props.getEmbeddableFactory, this.props.getAllEmbeddableFactories, this.props.overlays, this.props.notifications),
       new InspectPanelAction(),
       new RemovePanelAction(),
-      new EditPanelAction(this.getEmbeddableFactory),
+      new EditPanelAction(this.props.getEmbeddableFactory),
     ];
 
-    const sorted = actions.concat(extraActions).sort((a, b) => {
+    const sorted = actions.concat(extraActions).sort((a: Action, b: Action) => {
       return b.order - a.order;
     });
 
