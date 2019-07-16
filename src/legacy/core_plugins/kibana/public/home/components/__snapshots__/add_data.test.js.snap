@@ -71,7 +71,7 @@ exports[`apmUiEnabled 1`] = `
         icon={
           <EuiIcon
             className="homAddData__icon"
-            type="apmApp"
+            type="logoAPM"
           />
         }
         layout="vertical"
@@ -113,7 +113,7 @@ exports[`apmUiEnabled 1`] = `
         icon={
           <EuiIcon
             className="homAddData__icon"
-            type="loggingApp"
+            type="logoLogging"
           />
         }
         layout="vertical"
@@ -155,7 +155,7 @@ exports[`apmUiEnabled 1`] = `
         icon={
           <EuiIcon
             className="homAddData__icon"
-            type="monitoringApp"
+            type="logoMetrics"
           />
         }
         layout="vertical"
@@ -197,7 +197,7 @@ exports[`apmUiEnabled 1`] = `
         icon={
           <EuiIcon
             className="homAddData__icon"
-            type="securityAnalyticsApp"
+            type="logoSecurity"
           />
         }
         layout="vertical"
@@ -362,7 +362,7 @@ exports[`isNewKibanaInstance 1`] = `
         icon={
           <EuiIcon
             className="homAddData__icon"
-            type="loggingApp"
+            type="logoLogging"
           />
         }
         layout="vertical"
@@ -404,7 +404,7 @@ exports[`isNewKibanaInstance 1`] = `
         icon={
           <EuiIcon
             className="homAddData__icon"
-            type="monitoringApp"
+            type="logoMetrics"
           />
         }
         layout="vertical"
@@ -446,7 +446,7 @@ exports[`isNewKibanaInstance 1`] = `
         icon={
           <EuiIcon
             className="homAddData__icon"
-            type="securityAnalyticsApp"
+            type="logoSecurity"
           />
         }
         layout="vertical"
@@ -611,7 +611,7 @@ exports[`mlEnabled 1`] = `
         icon={
           <EuiIcon
             className="homAddData__icon"
-            type="apmApp"
+            type="logoAPM"
           />
         }
         layout="vertical"
@@ -653,7 +653,7 @@ exports[`mlEnabled 1`] = `
         icon={
           <EuiIcon
             className="homAddData__icon"
-            type="loggingApp"
+            type="logoLogging"
           />
         }
         layout="vertical"
@@ -695,7 +695,7 @@ exports[`mlEnabled 1`] = `
         icon={
           <EuiIcon
             className="homAddData__icon"
-            type="monitoringApp"
+            type="logoMetrics"
           />
         }
         layout="vertical"
@@ -737,7 +737,7 @@ exports[`mlEnabled 1`] = `
         icon={
           <EuiIcon
             className="homAddData__icon"
-            type="securityAnalyticsApp"
+            type="logoSecurity"
           />
         }
         layout="vertical"
@@ -940,7 +940,7 @@ exports[`render 1`] = `
         icon={
           <EuiIcon
             className="homAddData__icon"
-            type="loggingApp"
+            type="logoLogging"
           />
         }
         layout="vertical"
@@ -982,7 +982,7 @@ exports[`render 1`] = `
         icon={
           <EuiIcon
             className="homAddData__icon"
-            type="monitoringApp"
+            type="logoMetrics"
           />
         }
         layout="vertical"
@@ -1024,7 +1024,7 @@ exports[`render 1`] = `
         icon={
           <EuiIcon
             className="homAddData__icon"
-            type="securityAnalyticsApp"
+            type="logoSecurity"
           />
         }
         layout="vertical"
