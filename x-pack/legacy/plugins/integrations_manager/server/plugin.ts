@@ -33,19 +33,20 @@ export class Plugin {
   public setup(core: CoreSetup) {
     const { http, elasticsearch } = core;
     const { server } = http;
-
-    // make these items available to handlers via h.context
-    // https://github.com/hapijs/hapi/blob/master/API.md#server.bind()
-    // aligns closely with approach proposed in handler RFC
-    // https://github.com/epixa/kibana/blob/rfc-handlers/rfcs/text/0003_handler_interface.md
     const context: PluginContext = {
       esClient: elasticsearch.createClient(PLUGIN_ID),
     };
 
-    server.bind(context);
-
     // map routes to handlers
-    routes.forEach(route => server.route(route));
+    routes.forEach(route => {
+      // make these items available to handlers via h.context
+      // https://github.com/hapijs/hapi/blob/master/API.md#route.options.bind
+      // aligns closely with approach proposed in handler RFC
+      // https://github.com/epixa/kibana/blob/rfc-handlers/rfcs/text/0003_handler_interface.md
+      if (!route.options) route.options = {};
+      if (!route.options.bind) route.options.bind = context;
+      server.route(route);
+    });
 
     // the JS API for other consumers
     return {
