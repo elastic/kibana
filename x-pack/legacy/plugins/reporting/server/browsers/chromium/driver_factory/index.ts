@@ -6,21 +6,41 @@
 import fs from 'fs';
 import os from 'os';
 import path from 'path';
+// @ts-ignore
 import puppeteer from 'puppeteer-core';
 import rimraf from 'rimraf';
 import * as Rx from 'rxjs';
 import { map, share, mergeMap, filter, partition } from 'rxjs/operators';
+import { InnerSubscriber } from 'rxjs/internal/InnerSubscriber';
+
 import { HeadlessChromiumDriver } from '../driver';
-import { args } from './args';
+import { args, IArgOptions } from './args';
 import { safeChildProcess } from '../../safe_child_process';
 import { getChromeLogLocation } from '../paths';
+import { Logger } from '../../../../types';
 
-const compactWhitespace = str => {
+type binaryPath = string;
+type queueTimeout = number;
+interface IBrowserConfig {
+  [key: string]: any;
+}
+
+const compactWhitespace = (str: string) => {
   return str.replace(/\s+/, ' ');
 };
 
 export class HeadlessChromiumDriverFactory {
-  constructor(binaryPath, logger, browserConfig, queueTimeout) {
+  private binaryPath: binaryPath;
+  private logger: Logger;
+  private browserConfig: IBrowserConfig;
+  private queueTimeout: queueTimeout;
+
+  constructor(
+    binaryPath: binaryPath,
+    logger: any,
+    browserConfig: IBrowserConfig,
+    queueTimeout: queueTimeout
+  ) {
     this.binaryPath = binaryPath;
     this.logger = logger.clone(['chromium-driver-factory']);
     this.browserConfig = browserConfig;
@@ -29,7 +49,10 @@ export class HeadlessChromiumDriverFactory {
 
   type = 'chromium';
 
-  test({ viewport, browserTimezone }, logger) {
+  test(
+    { viewport, browserTimezone }: { viewport: IArgOptions['viewport']; browserTimezone: string },
+    logger: any
+  ) {
     const userDataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'chromium-'));
     const chromiumArgs = args({
       userDataDir,
@@ -49,7 +72,7 @@ export class HeadlessChromiumDriverFactory {
           TZ: browserTimezone,
         },
       })
-      .catch(error => {
+      .catch((error: Error) => {
         logger.warning(
           `The Reporting plugin encountered issues launching Chromium in a self-test. You may have trouble generating reports: [${error}]`
         );
@@ -58,8 +81,14 @@ export class HeadlessChromiumDriverFactory {
       });
   }
 
-  create({ viewport, browserTimezone }) {
-    return Rx.Observable.create(async observer => {
+  create({
+    viewport,
+    browserTimezone,
+  }: {
+    viewport: IArgOptions['viewport'];
+    browserTimezone: string;
+  }): Rx.Observable<any> {
+    return Rx.Observable.create(async (observer: InnerSubscriber<any, any>) => {
       const userDataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'chromium-'));
       const chromiumArgs = args({
         userDataDir,
@@ -69,8 +98,8 @@ export class HeadlessChromiumDriverFactory {
         proxyConfig: this.browserConfig.proxy,
       });
 
-      let browser;
-      let page;
+      let browser: puppeteer.Browser;
+      let page: puppeteer.Page;
       try {
         browser = await puppeteer.launch({
           userDataDir,
@@ -88,6 +117,7 @@ export class HeadlessChromiumDriverFactory {
         // which can cause the job to fail even if we bump timeouts in
         // the config. Help alleviate errors like
         // "TimeoutError: waiting for selector ".application" failed: timeout 30000ms exceeded"
+        // @ts-ignore outdated typedefs for puppteer
         page.setDefaultTimeout(this.queueTimeout);
       } catch (err) {
         observer.error(new Error(`Error spawning Chromium browser: [${err}]`));
@@ -107,19 +137,18 @@ export class HeadlessChromiumDriverFactory {
       // https://pptr.dev/#?product=Puppeteer&version=v1.10.0&show=api-event-error
       // https://github.com/GoogleChrome/puppeteer/blob/master/docs/api.md#class-page
 
-      const stderr$ = Rx.fromEvent(page, 'console').pipe(
-        filter(line => line._type === 'error'),
-        map(line => line._text),
+      const stderr$ = Rx.fromEvent(page as NodeJS.EventEmitter, 'console').pipe(
+        filter((line: any) => line._type === 'error'),
+        map((line: any) => line._text),
         share()
       );
 
-      const [consoleMessage$, message$] = stderr$.pipe(
-        partition(msg => msg.match(/\[\d+\/\d+.\d+:\w+:CONSOLE\(\d+\)\]/))
-      );
+      const [consoleMessage$, message$] = partition(
+        (msg: string) => !!msg.match(/\[\d+\/\d+.\d+:\w+:CONSOLE\(\d+\)\]/)
+      )(stderr$);
 
       const driver$ = Rx.of(
         new HeadlessChromiumDriver(page, {
-          maxScreenshotDimension: this.browserConfig.maxScreenshotDimension,
           logger: this.logger,
         })
       );
@@ -133,7 +162,7 @@ export class HeadlessChromiumDriverFactory {
       );
 
       const processRequestFailed$ = Rx.fromEvent(page, 'requestfailed').pipe(
-        mergeMap(req => {
+        mergeMap((req: any) => {
           const failure = req.failure && req.failure();
           if (failure) {
             return Rx.throwError(
@@ -151,12 +180,12 @@ export class HeadlessChromiumDriverFactory {
       );
 
       const nssError$ = message$.pipe(
-        filter(line => line.includes('error while loading shared libraries: libnss3.so')),
+        filter((line: string) => line.includes('error while loading shared libraries: libnss3.so')),
         mergeMap(() => Rx.throwError(new Error(`You must install nss for Reporting to work`)))
       );
 
       const fontError$ = message$.pipe(
-        filter(line =>
+        filter((line: string) =>
           line.includes('Check failed: InitDefaultFont(). Could not find the default font')
         ),
         mergeMap(() =>
@@ -165,7 +194,7 @@ export class HeadlessChromiumDriverFactory {
       );
 
       const noUsableSandbox$ = message$.pipe(
-        filter(line => line.includes('No usable sandbox! Update your kernel')),
+        filter((line: string) => line.includes('No usable sandbox! Update your kernel')),
         mergeMap(() =>
           Rx.throwError(
             new Error(
@@ -196,7 +225,7 @@ export class HeadlessChromiumDriverFactory {
       });
 
       // unsubscribe logic makes a best-effort attempt to delete the user data directory used by chromium
-      return () => {
+      observer.add(() => {
         this.logger.debug(`deleting chromium user data directory at [${userDataDir}]`);
         // the unsubscribe function isn't `async` so we're going to make our best effort at
         // deleting the userDataDir and if it fails log an error.
@@ -207,7 +236,7 @@ export class HeadlessChromiumDriverFactory {
             );
           }
         });
-      };
+      });
     });
   }
 }

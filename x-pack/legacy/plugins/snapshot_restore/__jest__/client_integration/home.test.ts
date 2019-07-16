@@ -8,7 +8,6 @@ import { act } from 'react-dom/test-utils';
 import * as fixtures from '../../test/fixtures';
 import { SNAPSHOT_STATE } from '../../public/app/constants';
 import { API_BASE_PATH } from '../../common/constants';
-import { formatDate } from '../../public/app/services/text';
 import {
   setupEnvironment,
   pageHelpers,
@@ -458,7 +457,7 @@ describe.skip('<SnapshotRestoreHome />', () => {
           expect(row).toEqual([
             snapshot.snapshot, // Snapshot
             REPOSITORY_NAME, // Repository
-            formatDate(snapshot.startTimeInMillis), // Date created
+            'foo', // TODO: fix this with FormattedDateTime value
             `${Math.ceil(snapshot.durationInMillis / 1000).toString()}s`, // Duration
             snapshot.indices.length.toString(), // Indices
             snapshot.shards.total.toString(), // Shards
@@ -605,12 +604,8 @@ describe.skip('<SnapshotRestoreHome />', () => {
                 expect(find('snapshotDetail.indices.value').text()).toBe(
                   snapshot1.indices.join('')
                 );
-                expect(find('snapshotDetail.startTime.value').text()).toBe(
-                  formatDate(snapshot1.startTimeInMillis)
-                );
-                expect(find('snapshotDetail.endTime.value').text()).toBe(
-                  formatDate(snapshot1.endTimeInMillis)
-                );
+                expect(find('snapshotDetail.startTime.value').text()).toBe('foo'); // TODO: fix this with FormattedDateTime value
+                expect(find('snapshotDetail.endTime.value').text()).toBe('foo'); // TODO: fix this with FormattedDateTime value
               });
 
               test('should indicate the different snapshot states', async () => {

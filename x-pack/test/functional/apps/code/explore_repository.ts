@@ -218,7 +218,7 @@ export default function exploreRepositoryFunctionalTests({
       });
 
       // FLAKY: https://github.com/elastic/kibana/issues/41112
-      it('click a breadcrumb should not affect the file tree', async () => {
+      it.skip('click a breadcrumb should not affect the file tree', async () => {
         log.debug('it goes to a deep node of file tree');
         const url = `${PageObjects.common.getHostPort()}/app/code#/github.com/elastic/TypeScript-Node-Starter/blob/master/src/models/User.ts`;
         await browser.get(url);

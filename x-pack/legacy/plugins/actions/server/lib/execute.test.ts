@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Joi from 'joi';
+import { schema } from '@kbn/config-schema';
 import { execute } from './execute';
 import { actionTypeRegistryMock } from '../action_type_registry.mock';
 import { SavedObjectsClientMock } from '../../../../../../src/core/server/mocks';
@@ -110,11 +110,9 @@ test('throws an error when config is invalid', async () => {
     name: 'Test',
     unencryptedAttributes: [],
     validate: {
-      config: Joi.object()
-        .keys({
-          param1: Joi.string().required(),
-        })
-        .required(),
+      config: schema.object({
+        param1: schema.string(),
+      }),
     },
     executor: jest.fn(),
   };
@@ -131,7 +129,7 @@ test('throws an error when config is invalid', async () => {
   actionTypeRegistry.get.mockReturnValueOnce(actionType);
 
   await expect(execute(executeParams)).rejects.toThrowErrorMatchingInlineSnapshot(
-    `"The following actionTypeConfig attributes are invalid: param1 [any.required]"`
+    `"The actionTypeConfig is invalid: [param1]: expected value of type [string] but got [undefined]"`
   );
 });
 
@@ -141,11 +139,9 @@ test('throws an error when params is invalid', async () => {
     name: 'Test',
     unencryptedAttributes: [],
     validate: {
-      params: Joi.object()
-        .keys({
-          param1: Joi.string().required(),
-        })
-        .required(),
+      params: schema.object({
+        param1: schema.string(),
+      }),
     },
     executor: jest.fn(),
   };
@@ -162,6 +158,6 @@ test('throws an error when params is invalid', async () => {
   actionTypeRegistry.get.mockReturnValueOnce(actionType);
 
   await expect(execute(executeParams)).rejects.toThrowErrorMatchingInlineSnapshot(
-    `"The actionParams is invalid: child \\"param1\\" fails because [\\"param1\\" is required]"`
+    `"The actionParams is invalid: [param1]: expected value of type [string] but got [undefined]"`
   );
 });
