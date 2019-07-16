@@ -42,10 +42,10 @@ export const ChartSectionNew = injectI18n(
     const dateFormatter = useCallback(niceTimeFormatter(getMaxMinTimestamp(metric)), [metric]);
     const handleTimeChange = useCallback(
       (from: number, to: number) => {
-        if (isLiveStreaming && stopLiveStreaming) {
-          stopLiveStreaming();
-        }
         if (onChangeRangeTime) {
+          if (isLiveStreaming && stopLiveStreaming) {
+            stopLiveStreaming();
+          }
           onChangeRangeTime({
             from,
             to,
