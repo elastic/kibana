@@ -38,6 +38,7 @@ test('dashboard migration 7.3.0 migrates filters to query on search source', () 
     type: 'dashboard',
     references: [],
     attributes: {
+      title: 'hi',
       useMargins: true,
       description: '',
       uiStateJSON: '{}',
