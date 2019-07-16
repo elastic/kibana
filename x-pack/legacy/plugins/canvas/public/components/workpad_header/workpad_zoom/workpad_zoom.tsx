@@ -33,11 +33,11 @@ export interface Props {
   /**
    * width of the workpad page
    */
-  workpadWidth: { left: number; right: number; top: number; bottom: number };
+  workpadWidth: number;
   /**
    * height of the workpad page
    */
-  workpadHeight: { left: number; right: number; top: number; bottom: number };
+  workpadHeight: number;
   /**
    * handler to set the workpad zoom level to a specific value
    */
