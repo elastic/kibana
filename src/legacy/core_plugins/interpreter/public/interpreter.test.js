@@ -55,7 +55,7 @@ describe('interpreter/interpreter', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     jest.resetModules();
-    ajaxStream = require('../../../../plugins/kibana_utils/public').ajaxStream;
+    ajaxStream = require('./lib/ajax_stream').ajaxStream;
     getInterpreter = require('./interpreter').getInterpreter;
     interpretAst = require('./interpreter').interpretAst;
     initializeInterpreter = require('./lib/interpreter').initializeInterpreter;

@@ -19,13 +19,17 @@
 
 import 'uiExports/interpreter';
 import { register, registryFactory } from '@kbn/interpreter/common';
+import { npSetup } from 'ui/new_platform';
 import { initializeInterpreter } from './lib/interpreter';
 import { registries } from './registries';
 import { kfetch } from 'ui/kfetch';
-import { ajaxStream } from '../../../../plugins/kibana_utils/public';
+import { ajaxStream } from './lib/ajax_stream';
 import { functions } from './functions';
 import { visualization } from './renderers/visualization';
 import { typeSpecs } from '../../../../plugins/data/common/expressions/expression_types';
+
+const KIBANA_VERSION = npSetup.core.injectedMetadata.getKibanaVersion();
+const KIBANA_BASE_PATH = npSetup.core.injectedMetadata.getBasePath();
 
 // Expose kbnInterpreter.register(specs) and kbnInterpreter.registries() globally so that plugins
 // can register without a transpile step.
@@ -43,7 +47,7 @@ let _interpreterPromise;
 const initialize = async () => {
   initializeInterpreter({
     kfetch,
-    ajaxStream,
+    ajaxStream: ajaxStream(KIBANA_VERSION, KIBANA_BASE_PATH),
     typesRegistry: registries.types,
     functionsRegistry: registries.browserFunctions,
   }).then(interpreter => {

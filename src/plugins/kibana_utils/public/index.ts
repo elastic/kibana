@@ -17,5 +17,4 @@
  * under the License.
  */
 
-export * from './ajax_stream';
 export * from './store';
