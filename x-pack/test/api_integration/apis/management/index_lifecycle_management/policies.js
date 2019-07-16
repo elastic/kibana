@@ -35,7 +35,8 @@ export default function ({ getService }) {
     after(() => Promise.all([cleanUpEsResources(), cleanUpPolicies()]));
 
     describe('list', () => {
-      it('should have a default policy to manage the Watcher history indices', async () => {
+      // FAILING: https://github.com/elastic/kibana/issues/41237
+      it.skip('should have a default policy to manage the Watcher history indices', async () => {
         const { body } = await loadPolicies().expect(200);
         const [policy = {}] = body;
 

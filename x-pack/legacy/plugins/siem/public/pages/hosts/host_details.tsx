@@ -38,12 +38,12 @@ import { HostsEmptyPage } from './hosts_empty_page';
 import { HostsKql } from './kql';
 import * as i18n from './translations';
 import { AnomalyTableProvider } from '../../components/ml/anomaly/anomaly_table_provider';
-import { hostToInfluencers } from '../../components/ml/influencers/host_to_influencers';
 import { setAbsoluteRangeDatePicker as dispatchAbsoluteRangeDatePicker } from '../../store/inputs/actions';
 import { InputsModelId } from '../../store/inputs/constants';
 import { scoreIntervalToDateTime } from '../../components/ml/score/score_interval_to_datetime';
 import { KpiHostDetailsQuery } from '../../containers/kpi_host_details';
 import { AnomaliesHostTable } from '../../components/ml/tables/anomalies_host_table';
+import { hostToCriteria } from '../../components/ml/criteria/host_to_criteria';
 
 const type = hostsModel.HostsType.details;
 
@@ -101,9 +101,10 @@ const HostDetailsComponent = pure<HostDetailsComponentProps>(
                       >
                         {({ hostOverview, loading, id, inspect, refetch }) => (
                           <AnomalyTableProvider
-                            influencers={hostToInfluencers(hostOverview)}
+                            criteriaFields={hostToCriteria(hostOverview)}
                             startDate={from}
                             endDate={to}
+                            skip={isInitializing}
                           >
                             {({ isLoadingAnomaliesData, anomaliesData }) => (
                               <HostOverviewManage

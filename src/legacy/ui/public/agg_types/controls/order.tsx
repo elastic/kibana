@@ -21,7 +21,7 @@ import React, { useEffect } from 'react';
 import { EuiFormRow, EuiSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { AggParamEditorProps } from 'ui/vis/editors/default';
-import { SelectValueProp, SelectParamEditorProps } from '../param_types/select';
+import { OptionedValueProp, OptionedParamEditorProps } from '../param_types/optioned';
 
 function OrderParamEditor({
   aggParam,
@@ -31,7 +31,7 @@ function OrderParamEditor({
   setValidity,
   setTouched,
   wrappedWithInlineComp,
-}: AggParamEditorProps<SelectValueProp> & SelectParamEditorProps) {
+}: AggParamEditorProps<OptionedValueProp> & OptionedParamEditorProps) {
   const label = i18n.translate('common.ui.aggTypes.orderLabel', {
     defaultMessage: 'Order',
   });

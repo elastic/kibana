@@ -16,11 +16,12 @@ import { BackgroundRefetch, BasicTableContainer } from '../../load_more_table';
 import { LoadingPanel } from '../../loading';
 import { getIntervalFromAnomalies } from '../anomaly/get_interval_from_anomalies';
 import { getSizeFromAnomalies } from '../anomaly/get_size_from_anomalies';
-import { dateTimesAreEqual } from './date_time_equality';
 import { AnomaliesHostTableProps } from '../types';
 import { hasMlUserPermissions } from '../permissions/has_ml_user_permissions';
 import { MlCapabilitiesContext } from '../permissions/ml_capabilities_provider';
 import { BasicTable } from './basic_table';
+import { hostEquality } from './host_equality';
+import { getCriteriaFromHostType } from '../criteria/get_criteria_from_host_type';
 
 const sorting = {
   sort: {
@@ -33,10 +34,10 @@ export const AnomaliesHostTable = React.memo<AnomaliesHostTableProps>(
   ({ startDate, endDate, narrowDateRange, hostName, skip, type }): JSX.Element | null => {
     const capabilities = useContext(MlCapabilitiesContext);
     const [loading, tableData] = useAnomaliesTableData({
-      influencers: [],
       startDate,
       endDate,
       skip,
+      criteriaFields: getCriteriaFromHostType(type, hostName),
     });
 
     const hosts = convertAnomaliesToHosts(tableData, hostName);
@@ -77,6 +78,7 @@ export const AnomaliesHostTable = React.memo<AnomaliesHostTableProps>(
             <HeaderPanel
               subtitle={`${i18n.SHOWING}: ${hosts.length.toLocaleString()} ${i18n.ANOMALIES}`}
               title={i18n.ANOMALIES}
+              tooltip={i18n.TOOLTIP}
             />
             <BasicTable items={hosts} columns={columns} pagination={pagination} sorting={sorting} />
           </BasicTableContainer>
@@ -84,5 +86,5 @@ export const AnomaliesHostTable = React.memo<AnomaliesHostTableProps>(
       );
     }
   },
-  dateTimesAreEqual
+  hostEquality
 );
