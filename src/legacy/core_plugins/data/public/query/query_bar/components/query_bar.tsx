@@ -59,7 +59,7 @@ interface Props {
   indexPatterns: Array<IndexPattern | string>;
   store: Storage;
   intl: InjectedIntl;
-  prepend?: any;
+  prepend?: React.ReactNode;
   showDatePicker?: boolean;
   dateRangeFrom?: string;
   dateRangeTo?: string;

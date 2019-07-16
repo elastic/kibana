@@ -53,7 +53,7 @@ interface Props {
   appName: string;
   disableAutoFocus?: boolean;
   screenTitle?: string;
-  prepend?: any;
+  prepend?: React.ReactNode;
   store?: Storage;
   persistedLog?: PersistedLog;
   bubbleSubmitEvent?: boolean;
