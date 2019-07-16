@@ -34,7 +34,7 @@ export class WMSSource extends AbstractTMSSource {
   }
 
   static renderEditor({  onPreviewSource, inspectorAdapters }) {
-    const previewWMS = (sourceConfig) => {
+    const onSourceConfigChange = (sourceConfig) => {
       if (!sourceConfig) {
         onPreviewSource(null);
         return;
@@ -44,7 +44,7 @@ export class WMSSource extends AbstractTMSSource {
       const source = new WMSSource(sourceDescriptor, inspectorAdapters);
       onPreviewSource(source);
     };
-    return (<WMSCreateSourceEditor previewWMS={previewWMS} />);
+    return (<WMSCreateSourceEditor onSourceConfigChange={onSourceConfigChange} />);
   }
 
   async getImmutableProperties() {

@@ -194,11 +194,7 @@ export enum InfraFormatterType {
 
 export enum InfraWaffleMapDataFormat {
   bytesDecimal = 'bytesDecimal',
-  bytesBinaryIEC = 'bytesBinaryIEC',
-  bytesBinaryJEDEC = 'bytesBinaryJEDEC',
   bitsDecimal = 'bitsDecimal',
-  bitsBinaryIEC = 'bitsBinaryIEC',
-  bitsBinaryJEDEC = 'bitsBinaryJEDEC',
   abbreviatedNumber = 'abbreviatedNumber',
 }
 

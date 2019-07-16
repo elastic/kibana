@@ -87,6 +87,10 @@ module.factory('SavedGisMap', function (Private) {
     return `/app/maps#map/${this.id}`;
   };
 
+  SavedGisMap.prototype.getLayerList = function () {
+    return this.layerListJSON ? JSON.parse(this.layerListJSON) : null;
+  };
+
   SavedGisMap.prototype.syncWithStore = function (state) {
     const layerList = getLayerListRaw(state);
     const layerListConfigOnly = copyPersistentState(layerList);

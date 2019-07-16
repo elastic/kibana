@@ -178,7 +178,7 @@ export class ElasticsearchEventsAdapter implements EventsAdapter {
 }
 
 export const formatEventsData = (
-  fields: ReadonlyArray<string>,
+  fields: readonly string[],
   hit: EventHit,
   fieldMap: Readonly<Record<string, string>>
 ) =>
@@ -202,8 +202,8 @@ export const formatEventsData = (
   );
 
 export const formatTimelineData = (
-  dataFields: ReadonlyArray<string>,
-  ecsFields: ReadonlyArray<string>,
+  dataFields: readonly string[],
+  ecsFields: readonly string[],
   hit: EventHit,
   fieldMap: Readonly<Record<string, string>>
 ) =>
@@ -242,8 +242,8 @@ const mergeTimelineFieldsWithHit = <T>(
   flattenedFields: T,
   fieldMap: Readonly<Record<string, string>>,
   hit: { _source: {} },
-  dataFields: ReadonlyArray<string>,
-  ecsFields: ReadonlyArray<string>
+  dataFields: readonly string[],
+  ecsFields: readonly string[]
 ) => {
   if (fieldMap[fieldName] != null || dataFields.includes(fieldName)) {
     const esField = dataFields.includes(fieldName) ? fieldName : fieldMap[fieldName];

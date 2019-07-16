@@ -150,7 +150,7 @@ exports[`PingList component renders sorted list without errors 1`] = `
     <EuiSpacer
       size="s"
     />
-    <EuiInMemoryTable
+    <EuiBasicTable
       columns={
         Array [
           Object {
@@ -191,7 +191,6 @@ exports[`PingList component renders sorted list without errors 1`] = `
           },
         ]
       }
-      executeQueryOptions={Object {}}
       items={
         Array [
           Object {
@@ -386,19 +385,23 @@ exports[`PingList component renders sorted list without errors 1`] = `
         ]
       }
       loading={false}
+      noItemsMessage="No items found"
+      onChange={[Function]}
       pagination={
         Object {
           "initialPageSize": 20,
+          "pageIndex": 0,
+          "pageSize": 30,
           "pageSizeOptions": Array [
             5,
             10,
             20,
+            50,
             100,
           ],
         }
       }
       responsive={true}
-      sorting={false}
     />
   </EuiPanel>
 </Fragment>

@@ -28,7 +28,7 @@ describe('createFormatterForMetric()', () => {
       field: 'system.network.out.bytes',
     };
     const format = createFormatterForMetric(metric);
-    expect(format(103929292)).toBe('103.9Mbit/s');
+    expect(format(103929292)).toBe('831.4Mbit/s');
   });
   it('should just work for bytes', () => {
     const metric = {

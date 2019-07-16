@@ -47,7 +47,7 @@ export function timefilter(): ExpressionFunction<'timefilter', Filter, Arguments
       },
       filterGroup: {
         types: ['string'],
-        help: 'Group name for the filter',
+        help: 'The group name for the filter',
       },
     },
     fn: (context, args) => {

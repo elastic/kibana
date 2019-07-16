@@ -52,8 +52,7 @@ function TransactionLink({
       path={path}
       query={{
         transactionId: transaction.transaction.id,
-        traceId: transaction.trace.id,
-        banana: 'ok'
+        traceId: transaction.trace.id
       }}
     >
       {transaction.transaction.id}

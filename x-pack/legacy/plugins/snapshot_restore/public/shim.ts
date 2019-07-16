@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage, FormattedDate, FormattedTime } from '@kbn/i18n/react';
 import { I18nContext } from 'ui/i18n';
 
 import chrome from 'ui/chrome';
@@ -23,6 +23,8 @@ export interface AppCore {
     [i18nPackage: string]: any;
     Context: typeof I18nContext;
     FormattedMessage: typeof FormattedMessage;
+    FormattedDate: typeof FormattedDate;
+    FormattedTime: typeof FormattedTime;
   };
   notification: {
     fatalError: typeof fatalError;
@@ -78,6 +80,8 @@ export function createShim(): { core: Core; plugins: Plugins } {
         ...i18n,
         Context: I18nContext,
         FormattedMessage,
+        FormattedDate,
+        FormattedTime,
       },
       routing: {
         registerAngularRoute: (path: string, config: object): void => {
