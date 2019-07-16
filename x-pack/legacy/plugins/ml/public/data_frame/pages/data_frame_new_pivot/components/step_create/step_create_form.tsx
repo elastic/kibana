@@ -292,7 +292,7 @@ export const StepCreateForm: SFC<Props> = React.memo(
               {(copy: () => void) => (
                 <EuiButton onClick={copy} style={{ width: '100%' }}>
                   {i18n.translate(
-                    'xpack.ml.dataframe.stepCreateForm.copyTransformConfigToClipBoardButton',
+                    'xpack.ml.dataframe.stepCreateForm.copyTransformConfigToClipboardButton',
                     {
                       defaultMessage: 'Copy to clipboard',
                     }
@@ -304,7 +304,7 @@ export const StepCreateForm: SFC<Props> = React.memo(
           <EuiFlexItem>
             <EuiText color="subdued" size="s">
               {i18n.translate(
-                'xpack.ml.dataframe.stepCreateForm.copyTransformConfigToClipBoardDescription',
+                'xpack.ml.dataframe.stepCreateForm.copyTransformConfigToClipboardDescription',
                 {
                   defaultMessage:
                     'Copies to the clipboard the Kibana Dev Console command for creating the transform.',
