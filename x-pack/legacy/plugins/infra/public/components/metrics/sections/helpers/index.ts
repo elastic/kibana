@@ -39,7 +39,10 @@ export const getMaxMinTimestamp = (metric: InfraMetricData): [number, number] =>
     (acc, item) => {
       const firstRow = first(item.data);
       const lastRow = last(item.data);
-      return acc.concat([firstRow.timestamp, lastRow.timestamp]);
+      return acc.concat([
+        (firstRow && firstRow.timestamp) || 0,
+        (lastRow && lastRow.timestamp) || 0,
+      ]);
     },
     [] as number[]
   );
