@@ -347,74 +347,89 @@ function updateWithDataRequest(state, action) {
   return { ...state, layerList };
 }
 
-
-
-function findDataRequestByDataId(layerDescriptor, dataRequestAction) {
-  if (!layerDescriptor.__dataRequests) {
-    return;
-  }
-  return layerDescriptor.__dataRequests.find(dataRequest => {
-    return dataRequest.dataId === dataRequestAction.dataId;
-  });
-}
-
 function findSourceDataRequestByLayerId(state, layerId) {
   const layerDescriptor = findLayerById(state, layerId);
   if (!layerDescriptor) {
     return;
   }
-  return layerDescriptor.__dataRequests.find(dataRequest => {
+  const index = layerDescriptor.__dataRequests.findIndex(dataRequest => {
     return dataRequest.dataId === SOURCE_DATA_ID_ORIGIN;
   });
+
+  return {
+    index: index,
+    dataRequest: layerDescriptor.__dataRequests[index]
+  };
 }
 
 
 function updateSourceDataRequest(state, action) {
-  const dataRequest = findSourceDataRequestByLayerId(state, action.layerId);
-  if (!dataRequest) {
+  const { index, dataRequest } = findSourceDataRequestByLayerId(state, action.layerId);
+  if (index < 0) {
     return state;
   }
-
-  dataRequest.data = action.newData;
-  return resetDataRequest(state, action, dataRequest);
+  return resetDataRequest(state, action, dataRequest, index, {
+    data: action.newData
+  });
 }
 
 function clearDataRequest(state, action) {
-  const dataRequest = getValidDataRequest(state, action, true);
+  const { dataRequest, index } = getValidDataRequest(state, action, true);
   if (!dataRequest) {
     return state;
   }
-  dataRequest.data = null;
-  return resetDataRequest(state, action, dataRequest);
+  return resetDataRequest(state, action, dataRequest, index, {
+    data: null
+  });
 }
 
 function updateWithDataResponse(state, action) {
-  const dataRequest = getValidDataRequest(state, action, true);
-  if (!dataRequest) { return state; }
+  const { dataRequest, index } = getValidDataRequest(state, action, true);
+  if (!dataRequest) {
+    return state;
+  }
 
-  dataRequest.data = action.data;
-  dataRequest.dataMeta = { ...dataRequest.dataMetaAtStart, ...action.meta };
-  return resetDataRequest(state, action, dataRequest);
+  return resetDataRequest(state, action, dataRequest, index, {
+    data: action.data,
+    dataMeta: { ...dataRequest.dataMetaAtStart, ...action.meta }
+  });
 }
 
-function resetDataRequest(state, action, dataRequest) {
-  dataRequest.dataRequestToken = null;
-  dataRequest.dataId = action.dataId;
+function resetDataRequest(state, action, dataRequest, index, newProps) {
+
+  const newDataRequest = {
+    ...dataRequest,
+    dataRequestToken: null,
+    dataId: action.dataId,
+    ...newProps
+  };
+
+  const layerDescriptor = findLayerById(state, action.layerId);
+  layerDescriptor.__dataRequests[index] = newDataRequest;
+
   const layerList = [...state.layerList];
   return { ...state, layerList };
 }
 
 function getValidDataRequest(state, action, checkRequestToken) {
-  const layer = findLayerById(state, action.layerId);
-  if (!layer) {
+  const layerDescriptor = findLayerById(state, action.layerId);
+  if (!layerDescriptor) {
     return;
   }
 
-  const dataRequest = findDataRequestByDataId(layer, action);
-  if (!dataRequest) {
+  if (!layerDescriptor.__dataRequests) {
     return;
   }
 
+  const index = layerDescriptor.__dataRequests.findIndex((dataRequest) => {
+    return dataRequest.dataId === action.dataId;
+  });
+
+  if (index < 0) {
+    return;
+  }
+
+  const dataRequest = layerDescriptor.__dataRequests[index];
   if (
     checkRequestToken &&
     dataRequest.dataRequestToken &&
@@ -423,7 +438,7 @@ function getValidDataRequest(state, action, checkRequestToken) {
     // ignore responses to outdated requests
     return;
   }
-  return dataRequest;
+  return { dataRequest, index };
 }
 
 function findLayerById(state, id) {
