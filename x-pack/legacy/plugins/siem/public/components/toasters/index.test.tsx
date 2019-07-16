@@ -89,7 +89,9 @@ describe('Toaster', () => {
 
       wrapper.find('[data-test-subj="add-toast"]').simulate('click');
       wrapper.update();
-      expect(wrapper.find('[data-test-subj="delete-toaster-id-super-id"]').exists()).toBe(false);
+      wait(() => {
+        expect(wrapper.find('[data-test-subj="delete-toaster-id-super-id"]').exists()).toBe(false);
+      });
     });
   });
 
