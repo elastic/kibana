@@ -118,6 +118,7 @@ export class AbstractLayer {
   getIconAndTooltipContent(zoomLevel) {
     let icon;
     let tooltipContent = null;
+    let areResultsTrimmed = false;
     if (this.hasErrors()) {
       icon = (
         <EuiIcon
@@ -157,12 +158,14 @@ export class AbstractLayer {
       if (customIconAndTooltipContent) {
         icon = customIconAndTooltipContent.icon;
         tooltipContent = customIconAndTooltipContent.tooltipContent;
+        areResultsTrimmed = customIconAndTooltipContent.areResultsTrimmed;
       }
     }
 
     return {
       icon,
-      tooltipContent
+      tooltipContent,
+      areResultsTrimmed
     };
   }
 

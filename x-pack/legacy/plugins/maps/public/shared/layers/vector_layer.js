@@ -164,9 +164,13 @@ export class VectorLayer extends AbstractLayer {
         })
       };
     }
+
+
+    const { tooltipContent, areResultsTrimmed } = this._source.getSourceTooltipContent(sourceDataRequest);
     return {
       icon: this._style.getIcon(),
-      tooltipContent: this._source.getSourceTooltipContent(sourceDataRequest)
+      tooltipContent: tooltipContent,
+      areResultsTrimmed: areResultsTrimmed
     };
 
   }
@@ -348,8 +352,7 @@ export class VectorLayer extends AbstractLayer {
 
     const searchFilters = {
       ...dataFilters,
-      fieldNames: joinSource.getFieldNames(),
-      sourceQuery: joinSource.getWhereQuery(),
+      fieldNames: joinSource.getFieldNames(), sourceQuery: joinSource.getWhereQuery(),
       applyGlobalQuery: this.getApplyGlobalQuery(),
     };
     const canSkip = await this._canSkipSourceUpdate(joinSource, sourceDataId, searchFilters);

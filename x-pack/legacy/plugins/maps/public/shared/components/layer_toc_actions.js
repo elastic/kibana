@@ -12,6 +12,7 @@ import {
   EuiContextMenu,
   EuiIcon,
   EuiToolTip,
+  EuiIconTip
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
@@ -51,7 +52,15 @@ export class LayerTocActions extends Component {
   };
 
   _renderPopoverToggleButton() {
-    const { icon, tooltipContent } = this.props.layer.getIconAndTooltipContent(this.props.zoom);
+    const { icon, tooltipContent, areResultsTrimmed } = this.props.layer.getIconAndTooltipContent(this.props.zoom);
+
+    const displayName = this.props.displayName;
+
+
+    const infoButton = areResultsTrimmed ? (<EuiIconTip
+      type="iInCircle"
+    />) : null;
+
     return (
       <EuiToolTip
         position="top"
@@ -67,8 +76,10 @@ export class LayerTocActions extends Component {
           data-test-subj={`layerTocActionsPanelToggleButton${this.props.escapedDisplayName}`}
         >
           <span className="mapTocEntry__layerNameIcon">{icon}</span>
-          {this.props.displayName}
+          {displayName}
+          {infoButton}
         </EuiButtonEmpty>
+
       </EuiToolTip>
     );
   }
