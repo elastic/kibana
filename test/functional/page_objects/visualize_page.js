@@ -443,7 +443,7 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
     async selectAggregation(myString, groupName = 'buckets', childAggregationType = null) {
       const comboBoxElement = await find.byCssSelector(`
         [group-name="${groupName}"]
-        [data-test-subj="visEditorAggToggle"].euiAccordion-isOpen
+        [data-test-subj^="visEditorAggAccordion"].euiAccordion-isOpen
         ${childAggregationType ? '.visEditorAgg__subAgg' : ''}
         [data-test-subj="defaultEditorAggSelect"]
       `);
@@ -543,7 +543,7 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
       log.debug(`selectField ${fieldValue}`);
       const selector = `
         [group-name="${groupName}"]
-        [data-test-subj="visEditorAggToggle"].euiAccordion-isOpen
+        [data-test-subj^="visEditorAggAccordion"].euiAccordion-isOpen
         [data-test-subj="visAggEditorParams"]
         ${childAggregationType ? '.visEditorAgg__subAgg' : ''}
         [data-test-subj="visDefaultEditorField"]
@@ -583,26 +583,26 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
     }
 
     async setSize(newValue, aggId) {
-      const dataTestSubj = aggId ? `aggregationEditor${aggId} sizeParamEditor` : 'sizeParamEditor';
+      const dataTestSubj = aggId ? `visEditorAggAccordion${aggId} sizeParamEditor` : 'sizeParamEditor';
       await testSubjects.setValue(dataTestSubj, String(newValue));
     }
 
     async toggleDisabledAgg(agg) {
-      await testSubjects.click(`aggregationEditor${agg} disableAggregationBtn`);
+      await testSubjects.click(`visEditorAggAccordion${agg} disableAggregationBtn`);
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     async toggleAggregationEditor(agg) {
-      await testSubjects.click(`aggregationEditor${agg} toggleEditor`);
+      await testSubjects.click(`visEditorAggAccordion${agg} toggleEditor`);
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     async toggleOtherBucket(agg = 2) {
-      return await testSubjects.click(`aggregationEditor${agg} otherBucketSwitch`);
+      return await testSubjects.click(`visEditorAggAccordion${agg} otherBucketSwitch`);
     }
 
     async toggleMissingBucket(agg = 2) {
-      return await testSubjects.click(`aggregationEditor${agg} missingBucketSwitch`);
+      return await testSubjects.click(`visEditorAggAccordion${agg} missingBucketSwitch`);
     }
 
     async isApplyEnabled() {
@@ -1256,7 +1256,7 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
     }
 
     async removeDimension(agg) {
-      await testSubjects.click(`aggregationEditor${agg} removeDimensionBtn`);
+      await testSubjects.click(`visEditorAggAccordion${agg} removeDimensionBtn`);
     }
   }
 

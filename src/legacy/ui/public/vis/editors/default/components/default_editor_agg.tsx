@@ -253,7 +253,7 @@ function DefaultEditorAgg({
         defaultMessage: 'Toggle {schema} editor',
         values: { schema: agg.schema.title },
       })}
-      data-test-subj="visEditorAggToggle"
+      data-test-subj={`visEditorAggAccordion${agg.id}`}
       extraAction={renderAggButtons()}
       onToggle={onToggle}
       {...dragHandleProps}
