@@ -12,7 +12,7 @@ import { SectionLoading, SectionError } from './components';
 import { BASE_PATH, DEFAULT_SECTION, Section } from './constants';
 import { RepositoryAdd, RepositoryEdit, RestoreSnapshot, SnapshotRestoreHome } from './sections';
 import { useAppDependencies } from './index';
-import { AuthorizationContext, WithPrivileges, NotAuthorizedSection } from './lib/authorization';
+import { AuthorizationContext, AuthPrivileges, NotAuthorizedSection } from './lib/authorization';
 
 export const App: React.FunctionComponent = () => {
   const {
@@ -36,7 +36,7 @@ export const App: React.FunctionComponent = () => {
       error={apiError}
     />
   ) : (
-    <WithPrivileges requiredPrivileges="cluster.*">
+    <AuthPrivileges requiredPrivileges="cluster.*">
       {({ isLoading, hasPrivileges, missingPrivileges }) =>
         isLoading ? (
           <SectionLoading>
@@ -75,14 +75,27 @@ export const App: React.FunctionComponent = () => {
         ) : (
           <EuiPageContent>
             <NotAuthorizedSection
-              sectionName="Snapshot and Restore"
-              missingPrivileges={missingPrivileges.cluster!}
-              privilegeType="cluster"
-              FormattedMessage={FormattedMessage}
+              title={
+                <FormattedMessage
+                  id="xpack.snapshotRestore.app.deniedPermissionTitle"
+                  defaultMessage="You're missing cluster privileges"
+                />
+              }
+              message={
+                <FormattedMessage
+                  id="xpack.snapshotRestore.app.deniedPermissionDescription"
+                  defaultMessage="To use Snapshot and Restore, you must have {privilegesCount,
+                    plural, one {this cluster privilege} other {these cluster privileges}}: {missingPrivileges}."
+                  values={{
+                    missingPrivileges: missingPrivileges.cluster!.join(', '),
+                    privilegesCount: missingPrivileges.cluster!.length,
+                  }}
+                />
+              }
             />
           </EuiPageContent>
         )
       }
-    </WithPrivileges>
+    </AuthPrivileges>
   );
 };

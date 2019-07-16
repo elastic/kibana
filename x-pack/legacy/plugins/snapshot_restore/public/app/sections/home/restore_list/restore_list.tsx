@@ -23,7 +23,7 @@ import { useAppDependencies } from '../../../index';
 import { useLoadRestores } from '../../../services/http';
 import { uiMetricService } from '../../../services/ui_metric';
 import { RestoreTable } from './restore_table';
-import { WithPrivileges, NotAuthorizedSection } from '../../../lib/authorization';
+import { AuthPrivileges, NotAuthorizedSection } from '../../../lib/authorization';
 
 const ONE_SECOND_MS = 1000;
 const TEN_SECONDS_MS = 10 * 1000;
@@ -197,21 +197,32 @@ export const RestoreList: React.FunctionComponent = () => {
   }
 
   return (
-    <WithPrivileges requiredPrivileges="index.*">
-      {({ hasPrivileges, missingPrivileges }) => (
-        <Fragment>
-          {hasPrivileges ? (
-            <section data-test-subj="restoreList">{content}</section>
-          ) : (
-            <NotAuthorizedSection
-              sectionName="snapshot restore status"
-              missingPrivileges={missingPrivileges.index!}
-              privilegeType="index"
-              FormattedMessage={FormattedMessage}
-            />
-          )}
-        </Fragment>
-      )}
-    </WithPrivileges>
+    <AuthPrivileges requiredPrivileges="index.*">
+      {({ hasPrivileges, missingPrivileges }) =>
+        hasPrivileges ? (
+          <section data-test-subj="restoreList">{content}</section>
+        ) : (
+          <NotAuthorizedSection
+            title={
+              <FormattedMessage
+                id="xpack.snapshotRestore.restoreList.deniedPermissionTitle"
+                defaultMessage="You're missing index privileges"
+              />
+            }
+            message={
+              <FormattedMessage
+                id="xpack.snapshotRestore.restoreList.deniedPermissionDescription"
+                defaultMessage="To view snapshot restore status, you must have {privilegesCount,
+                  plural, one {this index privilege} other {these index privileges}} for one or more indices: {missingPrivileges}."
+                values={{
+                  missingPrivileges: missingPrivileges.index!.join(', '),
+                  privilegesCount: missingPrivileges.index!.length,
+                }}
+              />
+            }
+          />
+        )
+      }
+    </AuthPrivileges>
   );
 };

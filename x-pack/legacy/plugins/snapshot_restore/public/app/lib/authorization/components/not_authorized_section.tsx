@@ -8,44 +8,10 @@ import React from 'react';
 import { EuiEmptyPrompt } from '@elastic/eui';
 
 interface Props {
-  sectionName: string;
-  privilegeType: string;
-  missingPrivileges: string[];
-  FormattedMessage: typeof ReactIntl.FormattedMessage;
+  title: React.ReactNode;
+  message: React.ReactNode | string;
 }
 
-export const NotAuthorizedSection = ({
-  sectionName,
-  privilegeType,
-  missingPrivileges,
-  FormattedMessage,
-}: Props) => (
-  <EuiEmptyPrompt
-    iconType="securityApp"
-    title={
-      <h2>
-        <FormattedMessage
-          id="xpack.snapshotRestore.restoreList.deniedPermissionTitle"
-          defaultMessage="You're missing {privilegeType} privileges"
-          values={{
-            privilegeType,
-          }}
-        />
-      </h2>
-    }
-    body={
-      <p>
-        <FormattedMessage
-          id="xpack.snapshotRestore.restoreList.deniedPermissionDescription"
-          defaultMessage="To view {sectionName}, you must have {privilegesCount,
-                plural, one {the following privilege} other {the following privileges}}: {missingPrivileges}."
-          values={{
-            sectionName,
-            missingPrivileges: missingPrivileges.join(', '),
-            privilegesCount: missingPrivileges.length,
-          }}
-        />
-      </p>
-    }
-  />
+export const NotAuthorizedSection = ({ title, message }: Props) => (
+  <EuiEmptyPrompt iconType="securityApp" title={<h2>{title}</h2>} body={<p>{message}</p>} />
 );
