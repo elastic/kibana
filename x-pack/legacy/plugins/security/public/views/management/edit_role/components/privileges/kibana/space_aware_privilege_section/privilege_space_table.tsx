@@ -22,9 +22,12 @@ import {
   RoleKibanaPrivilege,
 } from '../../../../../../../../common/model';
 import { KibanaPrivilegeCalculatorFactory } from '../../../../../../../lib/kibana_privilege_calculator';
-import { isGlobalPrivilegeDefinition } from '../../../../../../../lib/privilege_utils';
+import {
+  isGlobalPrivilegeDefinition,
+  hasAssignedFeaturePrivileges,
+} from '../../../../../../../lib/privilege_utils';
 import { copyRole } from '../../../../../../../lib/role_utils';
-import { CUSTOM_PRIVILEGE_VALUE } from '../../../../lib/constants';
+import { CUSTOM_PRIVILEGE_VALUE, NO_PRIVILEGE_VALUE } from '../../../../lib/constants';
 import { SpacesPopoverList } from '../../../spaces_popover_list';
 import { PrivilegeDisplay } from './privilege_display';
 
@@ -183,35 +186,42 @@ export class PrivilegeSpaceTable extends Component<Props, State> {
           const effectivePrivilege = effectivePrivileges[record.spacesIndex];
           const basePrivilege = effectivePrivilege.base;
 
-          const hasAllowedCustomizations = Object.entries(privileges.feature).some(
-            ([featureId, featurePrivileges]) => {
-              const allowedFeaturePrivileges =
-                allowedPrivileges[record.spacesIndex].feature[featureId];
-              return (
-                allowedFeaturePrivileges &&
-                allowedFeaturePrivileges.canUnassign &&
-                allowedFeaturePrivileges.privileges.some(privilege =>
-                  featurePrivileges.includes(privilege)
-                )
-              );
-            }
-          );
-
-          const showCustomize = hasAllowedCustomizations;
-
           if (effectivePrivilege.reserved != null && effectivePrivilege.reserved.length > 0) {
             return <PrivilegeDisplay privilege={effectivePrivilege.reserved} />;
           } else if (record.isGlobal) {
             return (
               <PrivilegeDisplay
-                privilege={showCustomize ? CUSTOM_PRIVILEGE_VALUE : basePrivilege.actualPrivilege}
+                privilege={
+                  hasAssignedFeaturePrivileges(privileges)
+                    ? CUSTOM_PRIVILEGE_VALUE
+                    : basePrivilege.actualPrivilege
+                }
               />
             );
           } else {
+            const hasNonSupersededCustomizations = Object.entries(privileges.feature).some(
+              ([featureId, featurePrivileges]) => {
+                const allowedFeaturePrivileges =
+                  allowedPrivileges[record.spacesIndex].feature[featureId];
+                return (
+                  allowedFeaturePrivileges &&
+                  allowedFeaturePrivileges.canUnassign &&
+                  allowedFeaturePrivileges.privileges.some(privilege =>
+                    featurePrivileges.includes(privilege)
+                  )
+                );
+              }
+            );
+
+            const showCustom =
+              hasNonSupersededCustomizations ||
+              (hasAssignedFeaturePrivileges(privileges) &&
+                effectivePrivilege.base.actualPrivilege === NO_PRIVILEGE_VALUE);
+
             return (
               <PrivilegeDisplay
-                explanation={showCustomize ? undefined : basePrivilege}
-                privilege={showCustomize ? CUSTOM_PRIVILEGE_VALUE : basePrivilege.actualPrivilege}
+                explanation={hasNonSupersededCustomizations ? undefined : basePrivilege}
+                privilege={showCustom ? CUSTOM_PRIVILEGE_VALUE : basePrivilege.actualPrivilege}
               />
             );
           }
