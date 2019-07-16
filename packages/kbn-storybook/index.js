@@ -19,6 +19,8 @@
 
 const fs = require('fs');
 const { join } = require('path');
+const mkdirp = require('mkdirp');
+const { promisify } = require('util');
 const Rx = require('rxjs');
 const { first } = require('rxjs/operators');
 const storybook = require('@storybook/react/standalone');
@@ -27,6 +29,8 @@ const { generateStorybookEntry } = require('./lib/storybook_entry');
 const { REPO_ROOT, CURRENT_CONFIG } = require('./lib/constants');
 const { buildDll } = require('./lib/dll');
 
+const mkdirpAsync = promisify(mkdirp);
+
 exports.runStorybookCli = config => {
   const { name, storyGlobs } = config;
   run(
@@ -34,6 +38,8 @@ exports.runStorybookCli = config => {
       log.info('Global config:\n', require('./lib/constants'));
 
       const currentConfig = JSON.stringify(config, null, 2);
+      const currentConfigDir = join(CURRENT_CONFIG, '..');
+      await mkdirpAsync(currentConfigDir);
       log.info('Writing currentConfig:\n', CURRENT_CONFIG + '\n', currentConfig);
       await fs.promises.writeFile(CURRENT_CONFIG, `exports.currentConfig = ${currentConfig};`);
 

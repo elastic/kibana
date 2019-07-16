@@ -21,7 +21,7 @@ import { join } from 'path';
 import { run, createFlagError } from '../run';
 import { storybookAliases } from './aliases';
 
-const rootDir = join(__dirname, '..', '..');
+const rootDir = join(__dirname, '..', '..', '..');
 
 run(
   async params => {
