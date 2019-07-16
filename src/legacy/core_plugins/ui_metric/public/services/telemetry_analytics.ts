@@ -29,7 +29,7 @@ export const getTelemetryReporter = () => {
   return telemetryReporter;
 };
 
-export const getUiStatsReporter = (appName: string) => (
+export const createUiStatsReporter = (appName: string) => (
   type: UiStatsMetricType,
   events: string | string[],
   count?: number

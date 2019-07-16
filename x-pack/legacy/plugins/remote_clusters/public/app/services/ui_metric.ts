@@ -4,12 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { METRIC_TYPE } from '@kbn/analytics';
 import { UIM_APP_NAME } from '../constants';
-import { getUiStatsReporter } from '../../../../../../../src/legacy/core_plugins/ui_metric/public';
+import { createUiStatsReporter } from '../../../../../../../src/legacy/core_plugins/ui_metric/public';
 
-export let trackUiMetric: ReturnType<typeof getUiStatsReporter>;
+export let trackUiMetric: ReturnType<typeof createUiStatsReporter>;
 
-export function init(getReporter: typeof getUiStatsReporter): void {
+export function init(getReporter: typeof createUiStatsReporter): void {
   trackUiMetric = getReporter(UIM_APP_NAME);
 }
 
@@ -20,7 +21,7 @@ export function init(getReporter: typeof getUiStatsReporter): void {
 export function trackUserRequest(request: Promise<any>, eventName: string) {
   // Only track successful actions.
   return request.then((response: any) => {
-    trackUiMetric('count', eventName);
+    trackUiMetric(METRIC_TYPE.COUNT, eventName);
     // We return the response immediately without waiting for the tracking request to resolve,
     // to avoid adding additional latency.
     return response;

@@ -5,7 +5,7 @@
  */
 
 import { get } from 'lodash';
-import { getUiStatsReporter } from '../../../../../../src/legacy/core_plugins/ui_metric/public';
+import { createUiStatsReporter } from '../../../../../../src/legacy/core_plugins/ui_metric/public';
 
 import {
   UIM_APP_NAME,
@@ -28,7 +28,7 @@ import {
   defaultHotPhase,
 } from '../store/defaults';
 
-export const trackUiMetric = getUiStatsReporter(UIM_APP_NAME);
+export const trackUiMetric = createUiStatsReporter(UIM_APP_NAME);
 
 export function getUiMetricsForPhases(phases) {
   const phaseUiMetrics = [{

@@ -4,6 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getUiStatsReporter } from '../../../../../../src/legacy/core_plugins/ui_metric/public';
+import { createUiStatsReporter } from '../../../../../../src/legacy/core_plugins/ui_metric/public';
 
-export const trackCanvasUiMetric = getUiStatsReporter('canvas');
+export const trackCanvasUiMetric = createUiStatsReporter('canvas');

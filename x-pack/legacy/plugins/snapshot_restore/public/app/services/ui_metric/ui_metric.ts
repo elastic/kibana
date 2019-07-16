@@ -5,12 +5,12 @@
  */
 import { METRIC_TYPE } from '@kbn/analytics';
 import { UIM_APP_NAME } from '../../constants';
-import { getUiStatsReporter } from '../../../../../../../../src/legacy/core_plugins/ui_metric/public';
+import { createUiStatsReporter } from '../../../../../../../../src/legacy/core_plugins/ui_metric/public';
 
 class UiMetricService {
-  track?: ReturnType<typeof getUiStatsReporter>;
+  track?: ReturnType<typeof createUiStatsReporter>;
 
-  public init = (getReporter: typeof getUiStatsReporter): void => {
+  public init = (getReporter: typeof createUiStatsReporter): void => {
     this.track = getReporter(UIM_APP_NAME);
   };
 

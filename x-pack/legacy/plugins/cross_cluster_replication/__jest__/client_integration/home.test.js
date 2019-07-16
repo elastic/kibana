@@ -29,7 +29,7 @@ jest.mock('ui/index_patterns', () => {
 });
 
 jest.mock('../../../../../../src/legacy/core_plugins/ui_metric/public', () => ({
-  getUiStatsReporter: jest.fn(),
+  createUiStatsReporter: jest.fn(),
 }));
 
 const { setup } = pageHelpers.home;

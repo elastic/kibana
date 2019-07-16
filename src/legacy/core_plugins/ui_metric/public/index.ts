@@ -17,4 +17,4 @@
  * under the License.
  */
 
-export { getUiStatsReporter } from './services/telemetry_analytics';
+export { createUiStatsReporter } from './services/telemetry_analytics';

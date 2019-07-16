@@ -5,7 +5,7 @@
  */
 
 // @ts-ignore
-import { getUiStatsReporter } from '../../../../../../../src/legacy/core_plugins/ui_metric/public';
+import { createUiStatsReporter } from '../../../../../../../src/legacy/core_plugins/ui_metric/public';
 import { APP_ID } from '../../../common/constants';
 
-export const trackUiAction = getUiStatsReporter(APP_ID);
+export const trackUiAction = createUiStatsReporter(APP_ID);
