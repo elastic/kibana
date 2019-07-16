@@ -63,7 +63,14 @@ test('DashboardContainer in edit mode shows edit mode actions', async () => {
 
   const component = mount(
     <I18nProvider>
-      <EmbeddablePanel embeddable={embeddable} />
+      <EmbeddablePanel
+        embeddable={embeddable}
+        getActions={(() => []) as any}
+        getAllEmbeddableFactories={(() => []) as any}
+        getEmbeddableFactory={(() => null) as any}
+        notifications={{} as any}
+        overlays={{} as any}
+      />
     </I18nProvider>
   );
 

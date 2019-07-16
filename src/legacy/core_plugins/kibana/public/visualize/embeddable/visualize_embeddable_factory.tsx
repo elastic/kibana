@@ -46,13 +46,6 @@ import { showSaveModal } from 'ui/saved_objects/show_saved_object_save_modal';
 // @ts-ignore
 import { SavedObjectSaveModal } from 'ui/saved_objects/components/saved_object_save_modal';
 
-import {
-  embeddableFactories,
-  EmbeddableFactory,
-  ErrorEmbeddable,
-  Container,
-  EmbeddableOutput,
-} from 'plugins/embeddable_api';
 import chrome from 'ui/chrome';
 import { getVisualizeLoader } from 'ui/visualize/loader';
 
@@ -61,6 +54,12 @@ import { VisTypesRegistry, VisTypesRegistryProvider } from 'ui/registry/vis_type
 
 import { IPrivate } from 'ui/private';
 import { SavedObjectAttributes } from 'kibana/server';
+import {
+  EmbeddableFactory,
+  ErrorEmbeddable,
+  Container,
+  EmbeddableOutput,
+} from 'src/legacy/core_plugins/embeddable_api/public/np_ready/public';
 import { showNewVisModal } from '../wizard';
 import { SavedVisualizations } from '../types';
 import { DisabledLabEmbeddable } from './disabled_lab_embeddable';
@@ -188,4 +187,5 @@ export class VisualizeEmbeddableFactory extends EmbeddableFactory<
   }
 }
 
-embeddableFactories.set(VISUALIZE_EMBEDDABLE_TYPE, new VisualizeEmbeddableFactory());
+import { setup } from '../../../../embeddable_api/public/np_ready/public/legacy';
+setup.registerEmbeddableFactory(VISUALIZE_EMBEDDABLE_TYPE, new VisualizeEmbeddableFactory());

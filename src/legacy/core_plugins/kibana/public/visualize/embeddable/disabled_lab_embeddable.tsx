@@ -19,7 +19,10 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { Embeddable, EmbeddableOutput } from 'plugins/embeddable_api';
+import {
+  Embeddable,
+  EmbeddableOutput,
+} from 'src/legacy/core_plugins/embeddable_api/public/np_ready/public';
 import { DisabledLabVisualization } from './disabled_lab_visualization';
 import { VisualizeInput } from './visualize_embeddable';
 import { VISUALIZE_EMBEDDABLE_TYPE } from './constants';
