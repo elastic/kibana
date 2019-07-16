@@ -259,6 +259,18 @@ export function XYConfigPanel(props: VisualizationProps<State>) {
         <EuiFormRow key={layer.layerId}>
           <EuiPanel>
             <EuiFormRow
+              label={i18n.translate('xpack.lens.xyChart.layerLabel', {
+                defaultMessage: 'Layer',
+              })}
+            >
+              <NativeRenderer
+                data-test-subj="lnsXY_layerHeader"
+                render={props.frame.datasourceLayers[layer.layerId].renderLayerPanel}
+                nativeProps={{ layerId: layer.layerId }}
+              />
+            </EuiFormRow>
+
+            <EuiFormRow
               label={i18n.translate('xpack.lens.xyChart.chartTypeLabel', {
                 defaultMessage: 'Chart type',
               })}

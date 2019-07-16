@@ -14,7 +14,8 @@ import {
 } from './operations';
 
 function getExpressionForLayer(
-  currentIndexPatternId: string,
+  // currentIndexPatternId: string,
+  indexPatternId: string,
   layerId: string,
   columns: Record<string, IndexPatternColumn>,
   columnOrder: string[]
@@ -62,11 +63,12 @@ function getExpressionForLayer(
         columns,
         suggestedOrder: 2,
         layerId,
+        indexPatternId,
       });
       aggs.push(getEsAggsConfig(countColumn, 'filter-ratio'));
 
       return `esaggs
-        index="${currentIndexPatternId}"
+        index="${indexPatternId}"
         metricsAtAllLevels=false
         partialRows=false
         aggConfigs='${JSON.stringify(aggs)}' | lens_rename_columns idMap='${JSON.stringify(
@@ -75,7 +77,7 @@ function getExpressionForLayer(
     }
 
     return `esaggs
-      index="${currentIndexPatternId}"
+      index="${indexPatternId}"
       metricsAtAllLevels=false
       partialRows=false
       aggConfigs='${JSON.stringify(aggs)}' | lens_rename_columns idMap='${JSON.stringify(idMap)}'`;
@@ -93,7 +95,8 @@ export function toExpression(state: IndexPatternPrivateState, layerId: string) {
   if (state.layers[layerId]) {
     // return `lens_merge_tables joins="" ${expressions.map(expr => `table={${expr}}`).join(' ')}`;
     return getExpressionForLayer(
-      state.currentIndexPatternId,
+      // state.currentIndexPatternId,
+      state.layers[layerId].indexPatternId,
       layerId,
       state.layers[layerId].columns,
       state.layers[layerId].columnOrder

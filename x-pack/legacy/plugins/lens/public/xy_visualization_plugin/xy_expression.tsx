@@ -15,6 +15,7 @@ import {
   getSpecId,
   AreaSeries,
   BarSeries,
+  Position,
 } from '@elastic/charts';
 import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/types';
 import { XYArgs } from './types';
@@ -106,8 +107,7 @@ export function XYChart({ data, args }: XYChartProps) {
 
       <Axis
         id={getAxisId('x')}
-        // position={layers[0].position}
-        // position={'bottom'}
+        position={Position.Bottom}
         // title={layers.title}
         title={'X'}
         showGridLines={false}
@@ -116,47 +116,58 @@ export function XYChart({ data, args }: XYChartProps) {
 
       <Axis
         id={getAxisId('y')}
-        position={layers[0].position}
+        position={Position.Left}
         title={layers[0].title}
         showGridLines={layers[0].showGridlines}
         hide={layers[0].hide}
       />
 
-      {layers.map(({ splitSeriesAccessors, seriesType, labels, accessors, xAccessor }, index) => {
-        const seriesProps = {
-          key: index,
-          splitSeriesAccessors,
-          stackAccessors: seriesType.includes('stacked') ? [xAccessor] : [],
-          id: getSpecId(labels.join(',')),
-          xAccessor,
-          yAccessors: labels,
-          data: data.rows.map(row => {
-            const newRow: typeof row = {};
+      {layers.map(
+        ({ splitSeriesAccessors, seriesType, labels, accessors, xAccessor, layerId }, index) => {
+          const seriesDataRow = data.rows.find(row => row[layerId]);
+          const seriesData = seriesDataRow ? seriesDataRow[layerId] : null;
 
-            // Remap data to { 'Count of documents': 5 }
-            Object.keys(row).forEach(key => {
-              const labelIndex = accessors.indexOf(key);
-              if (labelIndex > -1) {
-                newRow[labels[labelIndex]] = row[key];
-              } else {
-                newRow[key] = row[key];
-              }
-            });
-            return newRow;
-          }),
-        };
+          if (!seriesData) {
+            return;
+          }
 
-        return seriesType === 'line' ? (
-          <LineSeries {...seriesProps} />
-        ) : seriesType === 'bar' ||
-          seriesType === 'bar_stacked' ||
-          seriesType === 'horizontal_bar' ||
-          seriesType === 'horizontal_bar_stacked' ? (
-          <BarSeries {...seriesProps} />
-        ) : (
-          <AreaSeries {...seriesProps} />
-        );
-      })}
+          const idForCaching = accessors.concat([xAccessor], splitSeriesAccessors).join(',');
+
+          const seriesProps = {
+            key: index,
+            splitSeriesAccessors,
+            stackAccessors: seriesType.includes('stacked') ? [xAccessor] : [],
+            id: getSpecId(idForCaching),
+            xAccessor,
+            yAccessors: labels,
+            data: (seriesData as KibanaDatatable).rows.map(row => {
+              const newRow: typeof row = {};
+
+              // Remap data to { 'Count of documents': 5 }
+              Object.keys(row).forEach(key => {
+                const labelIndex = accessors.indexOf(key);
+                if (labelIndex > -1) {
+                  newRow[labels[labelIndex]] = row[key];
+                } else {
+                  newRow[key] = row[key];
+                }
+              });
+              return newRow;
+            }),
+          };
+
+          return seriesType === 'line' ? (
+            <LineSeries {...seriesProps} />
+          ) : seriesType === 'bar' ||
+            seriesType === 'bar_stacked' ||
+            seriesType === 'horizontal_bar' ||
+            seriesType === 'horizontal_bar_stacked' ? (
+            <BarSeries {...seriesProps} />
+          ) : (
+            <AreaSeries {...seriesProps} />
+          );
+        }
+      )}
     </Chart>
   );
 }

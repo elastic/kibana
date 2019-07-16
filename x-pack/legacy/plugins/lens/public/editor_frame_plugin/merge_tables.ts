@@ -9,7 +9,7 @@ import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/types';
 import { KibanaDatatable } from '../types';
 
 interface MergeTables {
-  joins: string[];
+  layerIds: string[];
   tables: KibanaDatatable[];
 }
 
@@ -25,11 +25,9 @@ export const mergeTables: ExpressionFunction<
     defaultMessage: 'A helper to merge any number of kibana tables into a single table',
   }),
   args: {
-    joins: {
+    layerIds: {
       types: ['string'],
-      help: i18n.translate('xpack.lens.functions.calculateFilterRatio.id.help', {
-        defaultMessage: 'The column IDs to join on',
-      }),
+      help: '',
       multi: true,
     },
     tables: {
@@ -41,17 +39,19 @@ export const mergeTables: ExpressionFunction<
   context: {
     types: ['null'],
   },
-  fn(_ctx, { joins, tables }: MergeTables) {
+  fn(_ctx, { layerIds, tables }: MergeTables) {
+    const row: Record<string, KibanaDatatable> = {};
+
+    tables.forEach((table, index) => {
+      row[layerIds[index]] = table;
+    });
     return {
       type: 'kibana_datatable',
-      rows: tables.reduce(
-        (prev, current) => prev.concat(current.rows),
-        [] as KibanaDatatable['rows']
-      ),
-      columns: tables.reduce(
-        (prev, current) => prev.concat(current.columns),
-        [] as KibanaDatatable['columns']
-      ),
+      columns: layerIds.map(layerId => ({
+        id: layerId,
+        name: '',
+      })),
+      rows: [row],
     };
   },
 };

@@ -82,6 +82,7 @@ export interface DatasourcePublicAPI {
 
   // Render can be called many times
   renderDimensionPanel: (domElement: Element, props: DatasourceDimensionPanelProps) => void;
+  renderLayerPanel: (domElement: Element, props: DatasourceLayerPanelProps) => void;
 
   removeColumnInTableSpec: (columnId: string) => void;
   moveColumnTo: (columnId: string, targetIndex: number) => void;
@@ -105,9 +106,7 @@ export interface DatasourceDataPanelProps<T = unknown> {
 
 // The only way a visualization has to restrict the query building
 export interface DatasourceDimensionPanelProps {
-  // layerId: DimensionLayer;
   layerId: string;
-
   columnId: string;
 
   dragDropContext: DragContextState;
@@ -118,6 +117,10 @@ export interface DatasourceDimensionPanelProps {
   // Visualizations can hint at the role this dimension would play, which
   // affects the default ordering of the query
   suggestedPriority?: DimensionPriority;
+}
+
+export interface DatasourceLayerPanelProps {
+  layerId: string;
 }
 
 export type DataType = 'string' | 'number' | 'date' | 'boolean';

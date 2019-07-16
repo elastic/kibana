@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Ast, fromExpression } from '@kbn/interpreter/common';
+import { Ast, fromExpression, ExpressionFunctionAST } from '@kbn/interpreter/common';
 import { Visualization, Datasource, FramePublicAPI } from '../../types';
 
 export function prependDatasourceExpression(
@@ -18,7 +18,7 @@ export function prependDatasourceExpression(
     }
   >
 ): Ast | null {
-  const datasourceExpressions: Array<Ast | string> = [];
+  const datasourceExpressions: Array<[string, Ast | string]> = [];
 
   Object.entries(datasourceMap).forEach(([datasourceId, datasource]) => {
     const state = datasourceStates[datasourceId].state;
@@ -27,7 +27,7 @@ export function prependDatasourceExpression(
     layers.forEach(layerId => {
       const result = datasource.toExpression(state, layerId);
       if (result) {
-        datasourceExpressions.push(result);
+        datasourceExpressions.push([layerId, result]);
       }
     });
   });
@@ -35,22 +35,27 @@ export function prependDatasourceExpression(
   if (datasourceExpressions.length === 0 || visualizationExpression === null) {
     return null;
   }
-
-  const parsedDatasourceExpressions = datasourceExpressions.map(expr =>
-    typeof expr === 'string' ? fromExpression(expr) : expr
+  const parsedDatasourceExpressions: Array<[string, Ast]> = datasourceExpressions.map(
+    ([layerId, expr]) => [layerId, typeof expr === 'string' ? fromExpression(expr) : expr]
   );
+
+  const datafetchExpression: ExpressionFunctionAST = {
+    type: 'function',
+    function: 'lens_merge_tables',
+    arguments: {
+      layerIds: parsedDatasourceExpressions.map(([id]) => id),
+      tables: parsedDatasourceExpressions.map(([id, expr]) => expr),
+    },
+  };
+
   const parsedVisualizationExpression =
     typeof visualizationExpression === 'string'
       ? fromExpression(visualizationExpression)
       : visualizationExpression;
 
-  const chainedExpr = parsedDatasourceExpressions
-    .map(expr => expr.chain)
-    .reduce((prev, current) => prev.concat(current), []);
-
   return {
     type: 'expression',
-    chain: chainedExpr.concat([...parsedVisualizationExpression.chain]),
+    chain: [datafetchExpression, ...parsedVisualizationExpression.chain],
   };
 }
 

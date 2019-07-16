@@ -76,6 +76,7 @@ export interface OperationDefinition<C extends BaseIndexPatternColumn> {
     operationId: string;
     suggestedOrder: DimensionPriority | undefined;
     layerId: string;
+    indexPatternId: string;
     columns: Partial<Record<string, IndexPatternColumn>>;
     field?: IndexPatternField;
   }) => C;
@@ -116,6 +117,7 @@ export function buildColumnForOperationType<T extends OperationType>({
   columns,
   field,
   layerId,
+  indexPatternId,
   suggestedOrder,
 }: {
   index: number;
@@ -123,6 +125,7 @@ export function buildColumnForOperationType<T extends OperationType>({
   columns: Partial<Record<string, IndexPatternColumn>>;
   suggestedOrder: DimensionPriority | undefined;
   layerId: string;
+  indexPatternId: string;
   field?: IndexPatternField;
 }): IndexPatternColumn {
   return operationDefinitionMap[op].buildColumn({
@@ -131,6 +134,7 @@ export function buildColumnForOperationType<T extends OperationType>({
     suggestedOrder,
     field,
     layerId,
+    indexPatternId,
   });
 }
 
@@ -143,7 +147,9 @@ export function getPotentialColumns({
   suggestedOrder?: DimensionPriority;
   layerId: string;
 }): IndexPatternColumn[] {
-  const fields = state.indexPatterns[state.currentIndexPatternId].fields;
+  const indexPattern = state.layers[layerId].indexPatternId;
+
+  const fields = state.indexPatterns[indexPattern].fields;
 
   const columns: IndexPatternColumn[] = fields
     .map((field, index) => {
@@ -156,6 +162,7 @@ export function getPotentialColumns({
           columns: state.layers[layerId].columns,
           suggestedOrder,
           field,
+          indexPatternId: state.layers[layerId].indexPatternId,
           layerId,
         })
       );
@@ -170,6 +177,7 @@ export function getPotentialColumns({
           suggestedOrder,
           layerId,
           columns: state.layers[layerId].columns,
+          indexPatternId: state.layers[layerId].indexPatternId,
         })
       );
     }

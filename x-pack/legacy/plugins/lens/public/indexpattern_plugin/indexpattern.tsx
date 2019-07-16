@@ -15,6 +15,7 @@ import {
   DimensionPriority,
   DatasourceSuggestion,
   Operation,
+  DatasourceLayerPanelProps,
 } from '../types';
 import { Query } from '../../../../../../src/legacy/core_plugins/data/public/query';
 import { getIndexPatterns } from './loader';
@@ -47,8 +48,7 @@ export interface BaseIndexPatternColumn {
   // Private
   operationType: OperationType;
   suggestedOrder?: DimensionPriority;
-  // layer: 'join' | number;
-  isJoin?: boolean;
+  indexPatternId: string;
 }
 
 type Omit<T, K> = Pick<T, Exclude<keyof T, K>>;
@@ -132,6 +132,8 @@ export interface IndexPatternPersistedState {
     {
       columnOrder: string[];
       columns: Record<string, IndexPatternColumn>;
+      // Each layer is tied to the index pattern that created it
+      indexPatternId: string;
     }
   >;
 }
@@ -262,16 +264,10 @@ export function getIndexPatternDatasource({
       return {
         currentIndexPatternId: indexPatternObjects ? indexPatternObjects[0].id : '',
         indexPatterns,
-        layers: {
-          // first: {
-          //   columns: {},
-          //   columnOrder: [],
-          // },
-        },
+        layers: {},
       };
     },
 
-    // getPersistableState({ currentIndexPatternId, columns, columnOrder }: IndexPatternPrivateState) {
     getPersistableState({ currentIndexPatternId, layers }: IndexPatternPrivateState) {
       return { currentIndexPatternId, layers };
     },
@@ -282,6 +278,7 @@ export function getIndexPatternDatasource({
         layers: {
           ...state.layers,
           [newLayerId]: {
+            indexPatternId: state.currentIndexPatternId,
             columns: {},
             columnOrder: [],
           },
@@ -338,6 +335,15 @@ export function getIndexPatternDatasource({
                 layerId={props.layerId}
                 {...props}
               />
+            </I18nProvider>,
+            domElement
+          );
+        },
+
+        renderLayerPanel: (domElement: Element, props: DatasourceLayerPanelProps) => {
+          render(
+            <I18nProvider>
+              <span>{state.indexPatterns[state.layers[props.layerId].indexPatternId].title}</span>
             </I18nProvider>,
             domElement
           );

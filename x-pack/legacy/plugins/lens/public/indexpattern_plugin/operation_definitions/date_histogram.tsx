@@ -48,19 +48,21 @@ export const dateHistogramOperation: OperationDefinition<DateHistogramIndexPatte
     suggestedOrder,
     layerId,
     columns,
+    indexPatternId,
     field,
   }: {
     operationId: string;
     suggestedOrder: DimensionPriority | undefined;
     // layer: DimensionLayer,
     layerId: string;
+    indexPatternId: string;
     columns: {};
     field?: IndexPatternField;
   }): DateHistogramIndexPatternColumn {
     if (!field) {
       throw new Error('Invariant error: date histogram operation requires field');
     }
-    let interval = 'h';
+    let interval = 'd';
     let timeZone: string | undefined;
     if (field.aggregationRestrictions && field.aggregationRestrictions.date_histogram) {
       interval = (field.aggregationRestrictions.date_histogram.calendar_interval ||
@@ -69,6 +71,7 @@ export const dateHistogramOperation: OperationDefinition<DateHistogramIndexPatte
     }
     return {
       operationId,
+      indexPatternId,
       label: ofName(field.name),
       dataType: 'date',
       operationType: 'date_histogram',

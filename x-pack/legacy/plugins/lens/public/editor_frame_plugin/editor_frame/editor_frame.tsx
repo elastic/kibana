@@ -18,6 +18,7 @@ import { WorkspacePanel } from './workspace_panel';
 import { SavedObjectStore, Document } from '../../persistence/saved_object_store';
 import { save } from './save';
 import { WorkspacePanelWrapper } from './workspace_panel_wrapper';
+import { generateId } from '../../id_generator';
 
 export interface EditorFrameProps {
   doc?: Document;
@@ -92,7 +93,7 @@ export function EditorFrame(props: EditorFrameProps) {
     layerIdToDatasource: layerToDatasourceId,
     datasourceLayers,
     addNewLayer: () => {
-      const newLayerId = 'second';
+      const newLayerId = generateId();
 
       const newState = state.datasourceMap[state.activeDatasourceId!].insertLayer(
         state.datasourceStates[state.activeDatasourceId!].state,
