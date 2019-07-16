@@ -16,9 +16,9 @@ import {
 } from '@elastic/eui';
 
 import { SnapshotDetails } from '../../../../../../common/types';
-import { BASE_PATH, SNAPSHOT_STATE, UIM_SNAPSHOT_SHOW_DETAILS_CLICK } from '../../../../constants';
+import { SNAPSHOT_STATE, UIM_SNAPSHOT_SHOW_DETAILS_CLICK } from '../../../../constants';
 import { useAppDependencies } from '../../../../index';
-import { linkToRepository } from '../../../../services/navigation';
+import { linkToRepository, linkToRestoreSnapshot } from '../../../../services/navigation';
 import { uiMetricService } from '../../../../services/ui_metric';
 import { DataPlaceholder, FormattedDateTime, SnapshotDeleteProvider } from '../../../../components';
 
@@ -183,7 +183,7 @@ export const SnapshotTable: React.FunctionComponent<Props> = ({
                   iconType="importAction"
                   color="primary"
                   data-test-subj="srsnapshotListRestoreActionButton"
-                  href={`#${BASE_PATH}/restore/${repository}/${snapshot}`}
+                  href={linkToRestoreSnapshot(repository, snapshot)}
                   isDisabled={!canRestore}
                 />
               </EuiToolTip>

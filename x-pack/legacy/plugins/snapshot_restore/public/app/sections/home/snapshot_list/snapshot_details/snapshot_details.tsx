@@ -31,7 +31,7 @@ import {
   SNAPSHOT_STATE,
 } from '../../../../constants';
 import { useLoadSnapshot } from '../../../../services/http';
-import { linkToRepository } from '../../../../services/navigation';
+import { linkToRepository, linkToRestoreSnapshot } from '../../../../services/navigation';
 import { uiMetricService } from '../../../../services/ui_metric';
 import { TabSummary, TabFailures } from './tabs';
 
@@ -221,7 +221,7 @@ export const SnapshotDetails: React.FunctionComponent<Props> = ({
 
               <EuiFlexItem grow={false}>
                 <EuiButton
-                  href={`#${BASE_PATH}/restore/${repositoryName}/${snapshotId}`}
+                  href={linkToRestoreSnapshot(repositoryName, snapshotId)}
                   fill
                   color="primary"
                   isDisabled={

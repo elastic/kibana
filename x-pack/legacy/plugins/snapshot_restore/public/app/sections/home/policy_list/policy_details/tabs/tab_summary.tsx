@@ -18,8 +18,8 @@ import {
 
 import { SlmPolicy } from '../../../../../../../common/types';
 import { useAppDependencies } from '../../../../../index';
-import { BASE_PATH } from '../../../../../constants';
 import { FormattedDateTime } from '../../../../../components';
+import { linkToSnapshots, linkToRepository } from '../../../../../services/navigation';
 
 interface Props {
   policy: SlmPolicy;
@@ -144,9 +144,7 @@ export const TabSummary: React.FunctionComponent<Props> = ({ policy }) => {
           </EuiDescriptionListTitle>
 
           <EuiDescriptionListDescription className="eui-textBreakWord" data-test-subj="value">
-            <EuiLink href={`#${BASE_PATH}/snapshots?policy=${encodeURIComponent(name)}`}>
-              {snapshotName}
-            </EuiLink>
+            <EuiLink href={linkToSnapshots(undefined, name)}>{snapshotName}</EuiLink>
           </EuiDescriptionListDescription>
         </EuiFlexItem>
 
@@ -159,9 +157,7 @@ export const TabSummary: React.FunctionComponent<Props> = ({ policy }) => {
           </EuiDescriptionListTitle>
 
           <EuiDescriptionListDescription className="eui-textBreakWord" data-test-subj="value">
-            <EuiLink href={`#${BASE_PATH}/repositories/${encodeURIComponent(repository)}`}>
-              {repository}
-            </EuiLink>
+            <EuiLink href={linkToRepository(repository)}>{repository}</EuiLink>
           </EuiDescriptionListDescription>
         </EuiFlexItem>
       </EuiFlexGroup>

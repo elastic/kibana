@@ -19,10 +19,11 @@ import {
 import { REPOSITORY_TYPES } from '../../../../../../common/constants';
 import { Repository, RepositoryType } from '../../../../../../common/types';
 import { RepositoryDeleteProvider } from '../../../../components';
-import { BASE_PATH, UIM_REPOSITORY_SHOW_DETAILS_CLICK } from '../../../../constants';
+import { UIM_REPOSITORY_SHOW_DETAILS_CLICK } from '../../../../constants';
 import { useAppDependencies } from '../../../../index';
 import { textService } from '../../../../services/text';
 import { uiMetricService } from '../../../../services/ui_metric';
+import { linkToEditRepository, linkToAddRepository } from '../../../../services/navigation';
 
 interface Props {
   repositories: Repository[];
@@ -115,7 +116,7 @@ export const RepositoryTable: React.FunctionComponent<Props> = ({
                   )}
                   iconType="pencil"
                   color="primary"
-                  href={`#${BASE_PATH}/edit_repository/${name}`}
+                  href={linkToEditRepository(name)}
                   data-test-subj="editRepositoryButton"
                 />
               </EuiToolTip>
@@ -249,7 +250,7 @@ export const RepositoryTable: React.FunctionComponent<Props> = ({
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiButton
-            href={`#${BASE_PATH}/add_repository`}
+            href={linkToAddRepository()}
             fill
             iconType="plusInCircle"
             data-test-subj="registerRepositoryButton"
