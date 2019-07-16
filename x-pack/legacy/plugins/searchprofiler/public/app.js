@@ -17,6 +17,7 @@ import { formatAngularHttpError } from 'ui/notify/lib';
 import { xpackInfo } from 'plugins/xpack_main/services/xpack_info';
 
 // Our imports
+import $ from 'jquery';
 import _ from 'lodash';
 import 'ace';
 import 'angular-ui-ace';
@@ -26,6 +27,7 @@ import { Range } from './range';
 import { nsToPretty } from 'plugins/searchprofiler/filters/ns_to_pretty';
 import { msToPretty } from 'plugins/searchprofiler/filters/ms_to_pretty';
 import { checkForParseErrors } from 'plugins/searchprofiler/app_util.js';
+import { initializeEditor } from 'plugins/searchprofiler/editor';
 
 // Styles and templates
 import 'ui/autoload/all';
@@ -76,28 +78,21 @@ function profileVizController($scope, $http, HighlightService) {
     search: true
   };
   $scope.markers = [];
-  $scope.query = defaultQuery;
   $scope.licenseEnabled = xpackInfo.get('features.searchprofiler.enableAppLink');
 
-  $scope.aceLoaded = (_editor) => {
-    $scope.ace = _editor;
-    $scope.ace.$blockScrolling = Infinity;
-    $scope.ace.setReadOnly(!$scope.licenseEnabled);
-    if (!$scope.licenseEnabled) {
-      $scope.ace.container.style.pointerEvents = 'none';
-      $scope.ace.container.style.opacity = 0.5;
-      $scope.ace.renderer.setStyle('disabled', true);
-      $scope.ace.blur();
-    }
-  };
+  const editor = initializeEditor($('#SearchProfilerInput')[0], $scope.licenseEnabled);
+  editor.setValue(defaultQuery, 1);
+
+  $scope.hasQuery = () => !!editor.getValue();
 
   $scope.profile = () => {
+    const query = editor.getValue();
     if (!$scope.licenseEnabled) {
       return;
     }
     // Reset right detail panel
     $scope.resetHighlightPanel();
-    let json = checkForParseErrors($scope.query);
+    let json = checkForParseErrors(query);
     if (json.status === false) {
       toastNotifications.addError(json.error, {
         title: i18n.translate('xpack.searchProfiler.errorToastTitle', {
@@ -114,9 +109,7 @@ function profileVizController($scope, $http, HighlightService) {
       $scope.renderProfile(json.profile.shards);
     } else {
       // Otherwise it's (probably) a regular search, execute remotely
-      const requestBody = {
-        query: $scope.query
-      };
+      const requestBody = { query };
       if ($scope.index == null || $scope.index === '') {
         requestBody.index = '_all';
       } else {

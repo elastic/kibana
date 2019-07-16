@@ -1,0 +1,51 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
+import ace from 'brace';
+import * as xJsonRules from './x_json_highlight_rules';
+
+import workerSrc from '!!raw-loader!./worker.js';
+
+const oop = ace.acequire('ace/lib/oop');
+const { Mode: JSONMode } = ace.acequire('ace/mode/json');
+const { Tokenizer: AceTokenizer } = ace.acequire('ace/tokenizer');
+const { MatchingBraceOutdent } = ace.acequire('ace/mode/matching_brace_outdent');
+const { CstyleBehaviour } = ace.acequire('ace/mode/behaviour/cstyle');
+const { FoldMode: CStyleFoldMode } = ace.acequire('ace/mode/folding/cstyle');
+const { WorkerClient } = ace.acequire('ace/worker/worker_client');
+
+class XJsonMode {
+  $tokenizer = new AceTokenizer(xJsonRules.getRules());
+  $outdent = new MatchingBraceOutdent();
+  $behaviour = new CstyleBehaviour();
+  foldingRules = new CStyleFoldMode();
+}
+
+oop.inherits(XJsonMode, JSONMode);
+
+(XJsonMode.prototype as any).createWorker = function(session: ace.IEditSession) {
+  const xJsonWorker = new WorkerClient(
+    ['ace'],
+    { id: 'ace/mode/json_worker', src: workerSrc },
+    'JsonWorker'
+  );
+
+  xJsonWorker.attachToDocument(session.getDocument());
+  xJsonWorker.on('annotate', function(e: { data: any }) {
+    session.setAnnotations(e.data);
+  });
+
+  xJsonWorker.on('terminate', function() {
+    session.clearAnnotations();
+  });
+
+  return xJsonWorker;
+};
+
+export function installXJsonMode(editor: ace.Editor) {
+  const session = editor.getSession();
+  session.setMode(new XJsonMode() as any);
+}
