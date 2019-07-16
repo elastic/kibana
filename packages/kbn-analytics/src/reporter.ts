@@ -72,10 +72,6 @@ export class Reporter {
     }
   }
 
-  public stop() {
-    clearTimeout(this.interval);
-  }
-
   private log(message: any) {
     if (this.debug) {
       // eslint-disable-next-line
