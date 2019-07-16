@@ -5,8 +5,8 @@ this helps external systems track the various possible job states:
   successful requests to queue or download reports.
 +
 NOTE: Kibana will send a `200` response status for successfully queuing a Reporting job via
-the POST URL. This is true even if the job somehow fails later, since execution happens
-asynchronously from queuing.
+the POST URL. This is true even if the job somehow fails later, since report
+generation happens asynchronously from queuing.
 
 - **`400` (Bad Request)**: When sending requests to the POST URL, if you don't use
   `POST` as the HTTP method, or if your request is missing the `kbn-version` header,
@@ -17,7 +17,7 @@ asynchronously from queuing.
   retry after the number of seconds in the `Retry-After` header in the download API
   response until the report is complete.
 
-- **`500` (Internal Server Error)**: If there was an error in generating the report,
-  the download URL will return a `500` status response. More information will be
-  available in the Reporting management page in Kibana: *Management > Kibana >
-  Reporting*
+- **`500` (Internal Server Error)**: When using the `path` to request the download, you
+  will get a `500` status response if the report isn't available due to an error when
+  generating the report. More information will be available in the Reporting management
+  page in Kibana, at: *Management > Kibana > Reporting*
