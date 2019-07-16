@@ -19,10 +19,6 @@ export enum HostsTableType {
   uncommonProcesses = 'uncommonProcesses',
 }
 
-export interface BasicQuery {
-  limit: number;
-}
-
 export interface BasicQueryPaginated {
   activePage: number;
   limit: number;
@@ -36,7 +32,7 @@ export interface HostsQuery extends BasicQueryPaginated {
 interface Queries {
   authentications: BasicQueryPaginated;
   hosts: HostsQuery;
-  events: BasicQuery;
+  events: BasicQueryPaginated;
   uncommonProcesses: BasicQueryPaginated;
 }
 

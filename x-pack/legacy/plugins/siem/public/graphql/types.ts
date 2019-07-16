@@ -338,7 +338,7 @@ export interface EventsData {
 
   totalCount: number;
 
-  pageInfo: PageInfo;
+  pageInfo: PageInfoPaginated;
 
   inspect?: Inspect | null;
 }
@@ -801,12 +801,6 @@ export interface SshEcsFields {
   signature?: ToStringArray | null;
 }
 
-export interface PageInfo {
-  endCursor?: CursorType | null;
-
-  hasNextPage?: boolean | null;
-}
-
 export interface TimelineData {
   edges: TimelineEdges[];
 
@@ -837,6 +831,12 @@ export interface TimelineNonEcsData {
   field: string;
 
   value?: ToStringArray | null;
+}
+
+export interface PageInfo {
+  endCursor?: CursorType | null;
+
+  hasNextPage?: boolean | null;
 }
 
 export interface TimelineDetailsData {
@@ -1483,6 +1483,16 @@ export interface ResponseFavoriteTimeline {
   favorite?: FavoriteTimelineResult[] | null;
 }
 
+export interface EventsTimelineData {
+  edges: EcsEdges[];
+
+  totalCount: number;
+
+  pageInfo: PageInfo;
+
+  inspect?: Inspect | null;
+}
+
 export interface OsFields {
   platform?: string | null;
 
@@ -1549,6 +1559,12 @@ export interface PaginationInputPaginated {
   querySize: number;
 }
 
+export interface SortField {
+  sortFieldId: string;
+
+  direction: Direction;
+}
+
 export interface PaginationInput {
   /** The limit parameter allows you to configure the maximum amount of items to be returned */
   limit: number;
@@ -1556,12 +1572,6 @@ export interface PaginationInput {
   cursor?: string | null;
   /** The tiebreaker parameter allow to be more precise to fetch the next item */
   tiebreaker?: string | null;
-}
-
-export interface SortField {
-  sortFieldId: string;
-
-  direction: Direction;
 }
 
 export interface LastTimeDetails {
@@ -1781,7 +1791,7 @@ export interface AuthenticationsSourceArgs {
   defaultIndex: string[];
 }
 export interface EventsSourceArgs {
-  pagination: PaginationInput;
+  pagination: PaginationInputPaginated;
 
   sortField: SortField;
 
@@ -2404,7 +2414,7 @@ export namespace GetEventsQuery {
   export type Variables = {
     sourceId: string;
     timerange: TimerangeInput;
-    pagination: PaginationInput;
+    pagination: PaginationInputPaginated;
     sortField: SortField;
     filterQuery?: string | null;
     defaultIndex: string[];
@@ -2438,19 +2448,13 @@ export namespace GetEventsQuery {
   };
 
   export type PageInfo = {
-    __typename?: 'PageInfo';
+    __typename?: 'PageInfoPaginated';
 
-    endCursor?: EndCursor | null;
+    activePage: number;
 
-    hasNextPage?: boolean | null;
-  };
+    fakeTotalCount: number;
 
-  export type EndCursor = {
-    __typename?: 'CursorType';
-
-    value?: string | null;
-
-    tiebreaker?: string | null;
+    showMorePagesIndicator: boolean;
   };
 
   export type Inspect = {

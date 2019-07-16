@@ -367,7 +367,7 @@ export interface EventsData {
 
   totalCount: number;
 
-  pageInfo: PageInfo;
+  pageInfo: PageInfoPaginated;
 
   inspect?: Inspect | null;
 }
@@ -830,12 +830,6 @@ export interface SshEcsFields {
   signature?: ToStringArray | null;
 }
 
-export interface PageInfo {
-  endCursor?: CursorType | null;
-
-  hasNextPage?: boolean | null;
-}
-
 export interface TimelineData {
   edges: TimelineEdges[];
 
@@ -866,6 +860,12 @@ export interface TimelineNonEcsData {
   field: string;
 
   value?: ToStringArray | null;
+}
+
+export interface PageInfo {
+  endCursor?: CursorType | null;
+
+  hasNextPage?: boolean | null;
 }
 
 export interface TimelineDetailsData {
@@ -1512,6 +1512,16 @@ export interface ResponseFavoriteTimeline {
   favorite?: FavoriteTimelineResult[] | null;
 }
 
+export interface EventsTimelineData {
+  edges: EcsEdges[];
+
+  totalCount: number;
+
+  pageInfo: PageInfo;
+
+  inspect?: Inspect | null;
+}
+
 export interface OsFields {
   platform?: string | null;
 
@@ -1578,6 +1588,12 @@ export interface PaginationInputPaginated {
   querySize: number;
 }
 
+export interface SortField {
+  sortFieldId: string;
+
+  direction: Direction;
+}
+
 export interface PaginationInput {
   /** The limit parameter allows you to configure the maximum amount of items to be returned */
   limit: number;
@@ -1585,12 +1601,6 @@ export interface PaginationInput {
   cursor?: string | null;
   /** The tiebreaker parameter allow to be more precise to fetch the next item */
   tiebreaker?: string | null;
-}
-
-export interface SortField {
-  sortFieldId: string;
-
-  direction: Direction;
 }
 
 export interface LastTimeDetails {
@@ -1810,7 +1820,7 @@ export interface AuthenticationsSourceArgs {
   defaultIndex: string[];
 }
 export interface EventsSourceArgs {
-  pagination: PaginationInput;
+  pagination: PaginationInputPaginated;
 
   sortField: SortField;
 
@@ -2536,7 +2546,7 @@ export namespace SourceResolvers {
     EventsArgs
   >;
   export interface EventsArgs {
-    pagination: PaginationInput;
+    pagination: PaginationInputPaginated;
 
     sortField: SortField;
 
@@ -3488,7 +3498,7 @@ export namespace EventsDataResolvers {
 
     totalCount?: TotalCountResolver<number, TypeParent, Context>;
 
-    pageInfo?: PageInfoResolver<PageInfo, TypeParent, Context>;
+    pageInfo?: PageInfoResolver<PageInfoPaginated, TypeParent, Context>;
 
     inspect?: InspectResolver<Inspect | null, TypeParent, Context>;
   }
@@ -3503,11 +3513,11 @@ export namespace EventsDataResolvers {
     Parent,
     Context
   >;
-  export type PageInfoResolver<R = PageInfo, Parent = EventsData, Context = SiemContext> = Resolver<
-    R,
-    Parent,
-    Context
-  >;
+  export type PageInfoResolver<
+    R = PageInfoPaginated,
+    Parent = EventsData,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
   export type InspectResolver<
     R = Inspect | null,
     Parent = EventsData,
@@ -5050,25 +5060,6 @@ export namespace SshEcsFieldsResolvers {
   > = Resolver<R, Parent, Context>;
 }
 
-export namespace PageInfoResolvers {
-  export interface Resolvers<Context = SiemContext, TypeParent = PageInfo> {
-    endCursor?: EndCursorResolver<CursorType | null, TypeParent, Context>;
-
-    hasNextPage?: HasNextPageResolver<boolean | null, TypeParent, Context>;
-  }
-
-  export type EndCursorResolver<
-    R = CursorType | null,
-    Parent = PageInfo,
-    Context = SiemContext
-  > = Resolver<R, Parent, Context>;
-  export type HasNextPageResolver<
-    R = boolean | null,
-    Parent = PageInfo,
-    Context = SiemContext
-  > = Resolver<R, Parent, Context>;
-}
-
 export namespace TimelineDataResolvers {
   export interface Resolvers<Context = SiemContext, TypeParent = TimelineData> {
     edges?: EdgesResolver<TimelineEdges[], TypeParent, Context>;
@@ -5169,6 +5160,25 @@ export namespace TimelineNonEcsDataResolvers {
   export type ValueResolver<
     R = ToStringArray | null,
     Parent = TimelineNonEcsData,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+}
+
+export namespace PageInfoResolvers {
+  export interface Resolvers<Context = SiemContext, TypeParent = PageInfo> {
+    endCursor?: EndCursorResolver<CursorType | null, TypeParent, Context>;
+
+    hasNextPage?: HasNextPageResolver<boolean | null, TypeParent, Context>;
+  }
+
+  export type EndCursorResolver<
+    R = CursorType | null,
+    Parent = PageInfo,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type HasNextPageResolver<
+    R = boolean | null,
+    Parent = PageInfo,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
 }
@@ -7406,6 +7416,39 @@ export namespace ResponseFavoriteTimelineResolvers {
   export type FavoriteResolver<
     R = FavoriteTimelineResult[] | null,
     Parent = ResponseFavoriteTimeline,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+}
+
+export namespace EventsTimelineDataResolvers {
+  export interface Resolvers<Context = SiemContext, TypeParent = EventsTimelineData> {
+    edges?: EdgesResolver<EcsEdges[], TypeParent, Context>;
+
+    totalCount?: TotalCountResolver<number, TypeParent, Context>;
+
+    pageInfo?: PageInfoResolver<PageInfo, TypeParent, Context>;
+
+    inspect?: InspectResolver<Inspect | null, TypeParent, Context>;
+  }
+
+  export type EdgesResolver<
+    R = EcsEdges[],
+    Parent = EventsTimelineData,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type TotalCountResolver<
+    R = number,
+    Parent = EventsTimelineData,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type PageInfoResolver<
+    R = PageInfo,
+    Parent = EventsTimelineData,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type InspectResolver<
+    R = Inspect | null,
+    Parent = EventsTimelineData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
 }

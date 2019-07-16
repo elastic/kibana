@@ -44,7 +44,6 @@ interface AuthenticationTableReduxProps {
 }
 
 interface AuthenticationTableDispatchProps {
-  updateLimitPagination: ActionCreator<{ limit: number; hostsType: hostsModel.HostsType }>;
   updateTableActivePage: ActionCreator<{
     activePage: number;
     hostsType: hostsModel.HostsType;
@@ -141,7 +140,6 @@ const makeMapStateToProps = () => {
 export const AuthenticationTable = connect(
   makeMapStateToProps,
   {
-    updateLimitPagination: hostsActions.updateAuthenticationsLimit,
     updateTableActivePage: hostsActions.updateTableActivePage,
     updateTableLimit: hostsActions.updateTableLimit,
   }
