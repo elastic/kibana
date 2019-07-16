@@ -1,12 +1,15 @@
 FROM node:10.15.2
 
 # Chrome
-RUN wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add - \
+RUN curl -sSL https://dl.google.com/linux/linux_signing_key.pub | apt-key add - \
   && sh -c 'echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google.list' \
   && apt-get update \
   && apt-get install -y google-chrome-unstable fonts-ipafont-gothic fonts-wqy-zenhei fonts-thai-tlwg fonts-kacst ttf-freefont \
   --no-install-recommends \
-  && rm -rf /var/lib/apt/lists/*
+  && rm -rf /var/lib/apt/lists/* \
+  && rm -rf /tmp/tmp*
+# rm is so that Kaniko wont try to add tmp files to the image
+
 
 WORKDIR /app
 
@@ -22,7 +25,7 @@ RUN mkdir /app/data && mkdir /app/plugins
 COPY --chown=kibana:kibana preinstall_check.js /app/
 COPY --chown=kibana:kibana scripts/kbn.js /app/scripts/kbn.js
 COPY --chown=kibana:kibana src/setup_node_env /app/src/setup_node_env
-COPY --chown=kibana:kibana package.json yarn.lock .yarnrc tsconfig* /app/
+COPY --chown=kibana:kibana package.json yarn.lock .yarnrc tsconfig.browser.json tsconfig.json tsconfig.types.json /app/
 # COPY --chown=kibana:kibana packages /app/packages
 # COPY --chown=kibana:kibana x-pack /app/x-pack
 # COPY --chown=kibana:kibana test/plugin_functional/plugins /app/test/plugin_functional/plugins
