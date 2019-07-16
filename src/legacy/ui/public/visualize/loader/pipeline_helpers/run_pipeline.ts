@@ -30,7 +30,6 @@ type getInitialContextFunction = () => KibanaContext;
 export interface RunPipelineHandlers {
   getInitialContext: getInitialContextFunction;
   inspectorAdapters?: Adapters;
-  abortSignal?: AbortSignal;
 }
 
 export const runPipeline = async (

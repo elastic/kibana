@@ -39,7 +39,6 @@ export class PipelineDataLoader {
             : undefined,
         }),
         inspectorAdapters: params.inspectorAdapters,
-        abortSignal: params.abortSignal,
       }
     );
   }

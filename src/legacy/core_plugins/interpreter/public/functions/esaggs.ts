@@ -110,7 +110,6 @@ export const esaggs = (): ExpressionFunction<typeof name, Context, Arguments, Re
       partialRows: args.partialRows,
       inspectorAdapters: handlers.inspectorAdapters,
       queryFilter,
-      abortSignal: handlers.abortSignal,
     });
 
     return {

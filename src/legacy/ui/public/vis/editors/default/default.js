@@ -164,15 +164,18 @@ const defaultEditor = function ($rootScope, $compile) {
             }
             this._loader = loader;
             this._handler = this._loader.embedVisualizationWithSavedObject(visualizationEl, this.savedObj, {
+              uiState: uiState,
               listenOnChange: false,
-              uiState,
-              timeRange,
-              filters,
-              appState,
+              timeRange: timeRange,
+              filters: filters,
+              appState: appState,
             });
           });
         } else {
-          this._handler.update({ timeRange, filters });
+          this._handler.update({
+            timeRange: timeRange,
+            filters: filters,
+          });
         }
 
       });

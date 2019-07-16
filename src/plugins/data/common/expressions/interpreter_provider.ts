@@ -73,7 +73,7 @@ export function interpreterProvider(config: any) {
 
       // if execution was aborted return error
       if (handlers.abortSignal && handlers.abortSignal.aborted) {
-        return new Error(`abort was requested`);
+        return new Error(`Expression was aborted.`);
       }
 
       // Continue re-invoking chain until it's empty
