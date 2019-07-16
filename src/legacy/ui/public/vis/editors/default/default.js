@@ -35,7 +35,7 @@ import { DefaultEditorSize } from '../../editor_size';
 
 import { VisEditorTypesRegistryProvider } from '../../../registry/vis_editor_types';
 import { getVisualizeLoader } from '../../../visualize/loader/visualize_loader';
-
+import { AggGroupNames } from './agg_groups';
 
 const defaultEditor = function ($rootScope, $compile) {
   return class DefaultEditor {
@@ -126,9 +126,8 @@ const defaultEditor = function ($rootScope, $compile) {
             return $scope.vis.getSerializableState($scope.state);
           }, function (newState) {
             $scope.vis.dirty = !angular.equals(newState, $scope.oldState);
-            $scope.metricAggs = $scope.state.aggs.getResponseAggs().filter(function (agg) {
-              return _.get(agg, 'schema.group') === 'metrics';
-            });
+            $scope.metricAggs = $scope.state.aggs.getResponseAggs().filter(agg =>
+              _.get(agg, 'schema.group') === AggGroupNames.Metrics);
             const lastParentPipelineAgg = _.findLast($scope.metricAggs, ({ type }) => type.subtype === parentPipelineAggHelper.subtype);
             $scope.lastParentPipelineAggTitle = lastParentPipelineAgg && lastParentPipelineAgg.type.title;
           }, true);
