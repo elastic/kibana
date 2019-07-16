@@ -8,6 +8,7 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { METRIC_TYPE } from '@kbn/analytics';
 
 import {
   EuiButton,
@@ -91,7 +92,7 @@ export class RemoteClusterTable extends Component {
           <EuiLink
             data-test-subj="remoteClustersTableListClusterLink"
             onClick={() => {
-              trackUiMetric('click', UIM_SHOW_DETAILS_CLICK);
+              trackUiMetric(METRIC_TYPE.CLICK, UIM_SHOW_DETAILS_CLICK);
               openDetailPanel(name);
             }}
           >

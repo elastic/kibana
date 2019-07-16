@@ -8,6 +8,7 @@ import React, { Component, Fragment } from 'react';
 import PropTypes from 'prop-types';
 import { i18n }  from '@kbn/i18n';
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
+import { METRIC_TYPE } from '@kbn/analytics';
 
 import {
   EuiCheckbox,
@@ -259,7 +260,7 @@ export class JobTableUi extends Component {
         content = (
           <EuiLink
             onClick={() => {
-              trackUiMetric(UIM_SHOW_DETAILS_CLICK);
+              trackUiMetric(METRIC_TYPE.CLICK, UIM_SHOW_DETAILS_CLICK);
               openDetailPanel(job.id);
             }}
           >

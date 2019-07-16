@@ -7,6 +7,7 @@
 import React, { PureComponent, Fragment } from 'react';
 import PropTypes from 'prop-types';
 import { i18n } from '@kbn/i18n';
+import { METRIC_TYPE } from '@kbn/analytics';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiButton,
@@ -77,7 +78,7 @@ export class AutoFollowPatternTable extends PureComponent {
         return (
           <EuiLink
             onClick={() => {
-              trackUiMetric('click', UIM_AUTO_FOLLOW_PATTERN_SHOW_DETAILS_CLICK);
+              trackUiMetric(METRIC_TYPE.CLICK, UIM_AUTO_FOLLOW_PATTERN_SHOW_DETAILS_CLICK);
               selectAutoFollowPattern(name);
             }}
             data-test-subj="autoFollowPatternLink"

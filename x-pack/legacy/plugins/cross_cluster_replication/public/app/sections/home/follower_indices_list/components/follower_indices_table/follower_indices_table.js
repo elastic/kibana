@@ -8,6 +8,7 @@ import React, { PureComponent, Fragment } from 'react';
 import PropTypes from 'prop-types';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { METRIC_TYPE } from '@kbn/analytics';
 import {
   EuiHealth,
   EuiIcon,
@@ -191,7 +192,7 @@ export class FollowerIndicesTable extends PureComponent {
         return (
           <EuiLink
             onClick={() => {
-              trackUiMetric('click', UIM_FOLLOWER_INDEX_SHOW_DETAILS_CLICK);
+              trackUiMetric(METRIC_TYPE.CLICK, UIM_FOLLOWER_INDEX_SHOW_DETAILS_CLICK);
               selectFollowerIndex(name);
             }}
             data-test-subj="followerIndexLink"

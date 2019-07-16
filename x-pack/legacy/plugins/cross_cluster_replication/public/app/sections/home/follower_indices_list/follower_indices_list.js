@@ -8,6 +8,7 @@ import React, { PureComponent, Fragment } from 'react';
 import PropTypes from 'prop-types';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { METRIC_TYPE } from '@kbn/analytics';
 import {
   EuiButton,
   EuiEmptyPrompt,
@@ -58,7 +59,7 @@ export class FollowerIndicesList extends PureComponent {
   componentDidMount() {
     const { loadFollowerIndices, selectFollowerIndex, history } = this.props;
 
-    trackUiMetric('loaded', UIM_FOLLOWER_INDEX_LIST_LOAD);
+    trackUiMetric(METRIC_TYPE.LOADED, UIM_FOLLOWER_INDEX_LIST_LOAD);
     loadFollowerIndices();
 
     // Select the pattern in the URL query params

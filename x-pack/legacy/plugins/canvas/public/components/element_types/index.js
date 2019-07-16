@@ -8,6 +8,7 @@ import PropTypes from 'prop-types';
 import { compose, withProps, withState } from 'recompose';
 import { connect } from 'react-redux';
 import { camelCase } from 'lodash';
+import { METRIC_TYPE } from '@kbn/analytics';
 import { cloneSubgraphs } from '../../lib/clone_subgraphs';
 import * as customElementService from '../../lib/custom_element_service';
 import { elementsRegistry } from '../../lib/elements_registry';
@@ -51,7 +52,7 @@ const mergeProps = (stateProps, dispatchProps, ownProps) => {
         selectToplevelNodes(clonedNodes); // then select the cloned node(s)
       }
       onClose();
-      trackCanvasUiMetric(customElementAdded);
+      trackCanvasUiMetric(METRIC_TYPE.LOADED, customElementAdded);
     },
     // custom element search
     findCustomElements: async text => {

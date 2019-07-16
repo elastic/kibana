@@ -7,6 +7,7 @@ import { EuiTab, EuiTabs, EuiLink } from '@elastic/eui';
 import * as React from 'react';
 import styled from 'styled-components';
 
+import { METRIC_TYPE } from '@kbn/analytics';
 import { getHostsUrl, getNetworkUrl, getOverviewUrl, getTimelinesUrl } from '../../link_to';
 import { trackUiAction as track } from '../../../lib/track_usage';
 
@@ -101,7 +102,7 @@ export class TabNavigation extends React.PureComponent<TabNavigationProps, TabNa
             disabled={tab.disabled}
             isSelected={this.state.selectedTabId === tab.id}
             onClick={() => {
-              track('click', `tab_${tab.id}`);
+              track(METRIC_TYPE.CLICK, `tab_${tab.id}`);
             }}
           >
             {tab.name}

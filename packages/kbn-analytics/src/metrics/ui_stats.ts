@@ -18,8 +18,9 @@
  */
 
 import { Stats } from './stats';
+import { METRIC_TYPE } from './';
 
-export type UiStatsMetricType = 'click' | 'loaded' | 'count';
+export type UiStatsMetricType = METRIC_TYPE.CLICK | METRIC_TYPE.LOADED | METRIC_TYPE.COUNT;
 export interface UiStatsMetricConfig<T extends UiStatsMetricType> {
   type: T;
   appName: string;

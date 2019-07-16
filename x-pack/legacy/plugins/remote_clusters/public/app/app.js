@@ -10,6 +10,7 @@ import { Switch, Route, Redirect } from 'react-router-dom';
 
 import { CRUD_APP_BASE_PATH, UIM_APP_LOAD } from './constants';
 import { registerRouter, setUserHasLeftApp, trackUiMetric } from './services';
+import { METRIC_TYPE } from '@kbn/analytics';
 import { RemoteClusterList, RemoteClusterAdd, RemoteClusterEdit } from './sections';
 
 export class App extends Component {
@@ -34,7 +35,7 @@ export class App extends Component {
   }
 
   componentDidMount() {
-    trackUiMetric('loaded', UIM_APP_LOAD);
+    trackUiMetric(METRIC_TYPE.LOADED, UIM_APP_LOAD);
   }
 
   componentWillUnmount() {

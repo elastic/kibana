@@ -5,6 +5,7 @@
  */
 
 import { getUiStatsReporter } from '../../../../../../../src/legacy/core_plugins/ui_metric/public';
+import { METRIC_TYPE } from '@kbn/analytics';
 import { UIM_APP_NAME } from '../constants';
 
 export const trackUiMetric = getUiStatsReporter(UIM_APP_NAME);
@@ -16,7 +17,7 @@ export const trackUiMetric = getUiStatsReporter(UIM_APP_NAME);
 export function trackUserRequest(request, actionType) {
   // Only track successful actions.
   return request.then(response => {
-    trackUiMetric('loaded', actionType);
+    trackUiMetric(METRIC_TYPE.LOADED, actionType);
     // We return the response immediately without waiting for the tracking request to resolve,
     // to avoid adding additional latency.
     return response;

@@ -7,6 +7,7 @@
 import React, { PureComponent, Fragment } from 'react';
 import PropTypes from 'prop-types';
 import { i18n } from '@kbn/i18n';
+import { METRIC_TYPE } from '@kbn/analytics';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiButton,
@@ -60,7 +61,7 @@ export class AutoFollowPatternList extends PureComponent {
   componentDidMount() {
     const { loadAutoFollowPatterns, loadAutoFollowStats, selectAutoFollowPattern, history } = this.props;
 
-    trackUiMetric('loaded', UIM_AUTO_FOLLOW_PATTERN_LIST_LOAD);
+    trackUiMetric(METRIC_TYPE.LOADED, UIM_AUTO_FOLLOW_PATTERN_LIST_LOAD);
     loadAutoFollowPatterns();
     loadAutoFollowStats();
 

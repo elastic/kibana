@@ -19,23 +19,24 @@ the name of a dashboard they've viewed, or the timestamp of the interaction.
 To track a user interaction, import the `getUiStatsReporter` helper function from UI Metric app:
 
 ```js
+import { METRIC_TYPE } from '@kbn/analytics';
 import { getUiStatsReporter } from 'relative/path/to/src/legacy/core_plugins/ui_metric/public';
 const trackMetric = getUiStatsReporter(`<AppName>`);
-trackMetric(`<MetricType>`, `<EventName>`);
+trackMetric(METRIC_TYPE.*, `<EventName>`);
 ```
 
 Metric Types:
-  - `click` for tracking clicks `trackMetric('click', 'my_button_clicked');`
-  - `loaded` for a component load or page load `trackMetric('loaded', 'my_component_loaded');`
-  - `count` for a tracking a misc count `trackMetric('count', 'my_counter', <count> });`
+  - `METRIC_TYPE.CLICK` for tracking clicks `trackMetric(METRIC_TYPE.CLICK, 'my_button_clicked');`
+  - `METRIC_TYPE.LOADED` for a component load or page load `trackMetric(METRIC_TYPE.LOADED', 'my_component_loaded');`
+  - `METRIC_TYPE.COUNT` for a tracking a misc count `trackMetric(METRIC_TYPE.COUNT', 'my_counter', <count> });`
 
 Call this function whenever you would like to track a user interaction within your app. The function
 accepts two arguments, `metricType` and `eventNames`. These should be underscore-delimited strings.
-For example, to track the `my_event` metric in the app `my_app` call `trackUiMetric('MetricType', 'my_event)`.
+For example, to track the `my_event` metric in the app `my_app` call `trackUiMetric(METRIC_TYPE.*, 'my_event)`.
 
 That's all you need to do!
 
-To track multiple metrics within a single request, provide an array of events, e.g. `trackMetric('<MetricType>', ['my_event1', 'my_event2', 'my_event3'])`.
+To track multiple metrics within a single request, provide an array of events, e.g. `trackMetric(METRIC_TYPE.*, ['my_event1', 'my_event2', 'my_event3'])`.
 
 ### Disallowed characters
 

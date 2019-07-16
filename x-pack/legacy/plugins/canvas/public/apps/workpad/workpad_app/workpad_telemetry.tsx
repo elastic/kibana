@@ -6,6 +6,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { connect } from 'react-redux';
+import { METRIC_TYPE } from '@kbn/analytics';
 // @ts-ignore: Local Untyped
 import { trackCanvasUiMetric } from '../../../lib/ui_metric';
 // @ts-ignore: Local Untyped
@@ -117,9 +118,9 @@ export const withUnconnectedElementsLoadedTelemetry = function<P extends object>
         resolvedArgsAreForWorkpad
       ) {
         if (telemetryElementCounts.error > 0) {
-          trackMetric('loaded', WorkpadLoadedWithErrorsMetric);
+          trackMetric(METRIC_TYPE.LOADED, WorkpadLoadedWithErrorsMetric);
         }
-        trackMetric('loaded', WorkpadLoadedMetric);
+        trackMetric(METRIC_TYPE.LOADED, WorkpadLoadedMetric);
 
         setHasReported(true);
       }

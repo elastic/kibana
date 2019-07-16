@@ -11,6 +11,7 @@ import { connect } from 'react-redux';
 import { pure } from 'recompose';
 import styled from 'styled-components';
 import { ActionCreator } from 'typescript-fsa';
+import { METRIC_TYPE } from '@kbn/analytics';
 
 import { State, timelineSelectors } from '../../store';
 import { DataProvider } from '../timeline/data_providers/data_provider';
@@ -100,7 +101,7 @@ export const FlyoutComponent = pure<Props>(
         show={!show}
         timelineId={timelineId}
         onOpen={() => {
-          track('loaded', 'open_timeline');
+          track(METRIC_TYPE.LOADED, 'open_timeline');
           showTimeline!({ id: timelineId, show: true });
         }}
       />

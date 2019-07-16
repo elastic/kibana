@@ -18,7 +18,7 @@
  */
 
 import { UnreachableCaseError } from './util';
-import { Metric, Stats, UiStatsMetricReport } from './metrics';
+import { Metric, Stats, UiStatsMetricReport, METRIC_TYPE } from './metrics';
 
 export interface Report {
   uiStatsMetrics: {
@@ -59,9 +59,9 @@ export class ReportManager {
   }
   static createMetricKey(metric: Metric): string {
     switch (metric.type) {
-      case 'click':
-      case 'loaded':
-      case 'count': {
+      case METRIC_TYPE.CLICK:
+      case METRIC_TYPE.LOADED:
+      case METRIC_TYPE.COUNT: {
         const { appName, type, eventName } = metric;
         return `${appName}-${type}-${eventName}`;
       }
@@ -71,9 +71,9 @@ export class ReportManager {
   }
   private assignReport(report: Report, metric: Metric) {
     switch (metric.type) {
-      case 'loaded':
-      case 'count':
-      case 'click': {
+      case METRIC_TYPE.CLICK:
+      case METRIC_TYPE.LOADED:
+      case METRIC_TYPE.COUNT: {
         const { appName, type, eventName, count } = metric;
         const key = ReportManager.createMetricKey(metric);
         const existingStats = (report.uiStatsMetrics[key] || {}).stats;
@@ -82,7 +82,7 @@ export class ReportManager {
           appName,
           eventName,
           type,
-          stats: this.increamentStats(count, existingStats),
+          stats: this.incrementStats(count, existingStats),
         };
         return;
       }

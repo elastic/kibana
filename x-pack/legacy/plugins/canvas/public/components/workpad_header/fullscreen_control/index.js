@@ -5,6 +5,7 @@
  */
 
 import { connect } from 'react-redux';
+import { METRIC_TYPE } from '@kbn/analytics';
 import { setFullscreen, selectToplevelNodes } from '../../../state/actions/transient';
 import { enableAutoplay } from '../../../state/actions/workpad';
 import { getFullscreen } from '../../../state/selectors/app';
@@ -38,6 +39,7 @@ const mergeProps = (stateProps, dispatchProps, ownProps) => {
 
       if (value === true) {
         trackCanvasUiMetric(
+          METRIC_TYPE.COUNT,
           stateProps.autoplayEnabled
             ? [LaunchedFullScreen, LaunchedFullScreenAutoplay]
             : LaunchedFullScreen

@@ -7,6 +7,7 @@
 import React, { Component, Fragment } from 'react';
 import PropTypes from 'prop-types';
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
+import { METRIC_TYPE } from '@kbn/analytics';
 
 import {
   EuiErrorBoundary,
@@ -114,7 +115,7 @@ export class DetailPanelUi extends Component {
       renderedTabs.push(
         <EuiTab
           onClick={() => {
-            trackUiMetric(tabToUiMetricMap[tab]);
+            trackUiMetric(METRIC_TYPE.CLICK, tabToUiMetricMap[tab]);
             openDetailPanel({ panelType: tab, jobId: id });
           }}
           isSelected={isSelected}

@@ -28,4 +28,10 @@ export {
 export { Stats } from './stats';
 
 export type Metric = UiStatsMetric<UiStatsMetricType>;
-export type MetricType = Metric['type'];
+export type MetricType = keyof typeof METRIC_TYPE;
+
+export enum METRIC_TYPE {
+  CLICK,
+  LOADED,
+  COUNT,
+}
