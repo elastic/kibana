@@ -34,6 +34,7 @@ export async function executeTriggerActions(
 ) {
   const actions = await getActionsForTrigger(actionRegistry, triggerRegistry, triggerId, {
     embeddable,
+    triggerContext,
   });
 
   if (actions.length > 1) {

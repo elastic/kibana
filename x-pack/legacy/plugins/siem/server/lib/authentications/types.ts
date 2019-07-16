@@ -5,11 +5,14 @@
  */
 
 import { AuthenticationsData, LastSourceHost } from '../../graphql/types';
-import { FrameworkRequest, RequestOptions } from '../framework';
+import { FrameworkRequest, RequestOptionsPaginated } from '../framework';
 import { Hit, SearchHit, TotalHit } from '../types';
 
 export interface AuthenticationsAdapter {
-  getAuthentications(req: FrameworkRequest, options: RequestOptions): Promise<AuthenticationsData>;
+  getAuthentications(
+    req: FrameworkRequest,
+    options: RequestOptionsPaginated
+  ): Promise<AuthenticationsData>;
 }
 
 type StringOrNumber = string | number;
