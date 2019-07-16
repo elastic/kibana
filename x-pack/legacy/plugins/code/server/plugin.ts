@@ -41,7 +41,6 @@ import {
 } from './routes';
 import { EsClientWithInternalRequest } from './utils/esclient_with_internal_request';
 import { ServerLoggerFactory } from './utils/server_logger_factory';
-// import { registerRoutes } from './routes';
 
 export class CodePlugin {
   private isCodeNode = false;
@@ -54,7 +53,7 @@ export class CodePlugin {
   private updateScheduler: UpdateScheduler;
 
   constructor(initializerContext: PluginInitializerContext) {
-    // TODO: instantiate these objects correctly
+    // TODO: instantiate these objects appropriately
     this.gitOps = {} as GitOperations;
     this.queue = {} as Esqueue;
     this.log = {} as Logger;
@@ -123,13 +122,15 @@ export class CodePlugin {
         5000
       );
       if (checkResult.me) {
-        await this.initCodeNode(core, this.serverOptions, this.log);
+        this.isCodeNode = true;
+        await this.initCodeNode(core, this.serverOptions);
       } else {
-        await this.initNonCodeNode(codeNodeUrl, core, this.log);
+        await this.initNonCodeNode(codeNodeUrl, core);
       }
     } else {
       // codeNodeUrl not set, single node mode
-      await this.initCodeNode(core, this.serverOptions, this.log);
+      this.isCodeNode = true;
+      await this.initCodeNode(core, this.serverOptions);
     }
   }
 
@@ -143,20 +144,22 @@ export class CodePlugin {
     // called when plugin is torn down, aka window.onbeforeunload
   }
 
-  private async initNonCodeNode(url: string, core: CoreSetup, log: Logger) {
+  private async initNonCodeNode(url: string, core: CoreSetup) {
     const { server } = core.http as any;
-    log.info(`Initializing Code plugin as non-code node, redirecting all code requests to ${url}`);
-    redirectRoute(server, url, log);
+    this.log.info(
+      `Initializing Code plugin as non-code node, redirecting all code requests to ${url}`
+    );
+    redirectRoute(server, url, this.log);
   }
 
-  private async initCodeNode(core: CoreSetup, serverOptions: ServerOptions, log: Logger) {
+  private async initCodeNode(core: CoreSetup, serverOptions: ServerOptions) {
     const { server } = core.http as any;
 
     // wait until elasticsearch is ready
     // @ts-ignore
     await server.plugins.elasticsearch.waitUntilReady();
 
-    log.info('Initializing Code plugin as code-node.');
+    this.log.info('Initializing Code plugin as code-node.');
     const queueIndex: string = server.config().get('xpack.code.queueIndex');
     const queueTimeoutMs: number = server.config().get('xpack.code.queueTimeoutMs');
     const devMode: boolean = server.config().get('env.dev');
@@ -173,92 +176,91 @@ export class CodePlugin {
     }
 
     // Initialize git operations
-    const gitOps = new GitOperations(serverOptions.repoPath);
+    this.gitOps = new GitOperations(serverOptions.repoPath);
 
     const installManager = new InstallManager(server, serverOptions);
     const lspService = new LspService(
       '127.0.0.1',
       serverOptions,
-      gitOps,
+      this.gitOps,
       esClient,
       installManager,
       new ServerLoggerFactory(server),
       repoConfigController
     );
     server.events.on('stop', async () => {
-      log.debug('shutdown lsp process');
+      this.log.debug('shutdown lsp process');
       await lspService.shutdown();
     });
     // Initialize indexing factories.
     const lspIndexerFactory = new LspIndexerFactory(
       lspService,
       serverOptions,
-      gitOps,
+      this.gitOps,
       esClient,
       this.log
     );
 
-    const repoIndexInitializerFactory = new RepositoryIndexInitializerFactory(esClient, log);
+    const repoIndexInitializerFactory = new RepositoryIndexInitializerFactory(esClient, this.log);
 
     // Initialize queue worker cancellation service.
     const cancellationService = new CancellationSerivce();
 
     // Execute index version checking and try to migrate index data if necessary.
-    await tryMigrateIndices(esClient, log);
+    await tryMigrateIndices(esClient, this.log);
 
     // Initialize queue.
-    const queue = new Esqueue(queueIndex, {
+    this.queue = new Esqueue(queueIndex, {
       client: esClient,
       timeout: queueTimeoutMs,
     });
     const indexWorker = new IndexWorker(
-      queue,
-      log,
+      this.queue,
+      this.log,
       esClient,
       [lspIndexerFactory],
-      gitOps,
+      this.gitOps,
       cancellationService
     ).bind();
 
     const repoServiceFactory: RepositoryServiceFactory = new RepositoryServiceFactory();
 
     const cloneWorker = new CloneWorker(
-      queue,
-      log,
+      this.queue,
+      this.log,
       esClient,
       serverOptions,
-      gitOps,
+      this.gitOps,
       indexWorker,
       repoServiceFactory,
       cancellationService
     ).bind();
     const deleteWorker = new DeleteWorker(
-      queue,
-      log,
+      this.queue,
+      this.log,
       esClient,
       serverOptions,
-      gitOps,
+      this.gitOps,
       cancellationService,
       lspService,
       repoServiceFactory
     ).bind();
     const updateWorker = new UpdateWorker(
-      queue,
-      log,
+      this.queue,
+      this.log,
       esClient,
       serverOptions,
-      gitOps,
+      this.gitOps,
       repoServiceFactory,
       cancellationService
     ).bind();
 
     // Initialize schedulers.
-    const cloneScheduler = new CloneScheduler(cloneWorker, serverOptions, esClient, log);
-    const updateScheduler = new UpdateScheduler(updateWorker, serverOptions, esClient, log);
-    const indexScheduler = new IndexScheduler(indexWorker, serverOptions, esClient, log);
-    updateScheduler.start();
-    indexScheduler.start();
-
+    const cloneScheduler = new CloneScheduler(cloneWorker, serverOptions, esClient, this.log);
+    this.updateScheduler = new UpdateScheduler(updateWorker, serverOptions, esClient, this.log);
+    this.indexScheduler = new IndexScheduler(indexWorker, serverOptions, esClient, this.log);
+    this.updateScheduler.start();
+    this.indexScheduler.start();
     // Check if the repository is local on the file system.
     // This should be executed once at the startup time of Kibana.
     cloneScheduler.schedule();
@@ -274,16 +276,16 @@ export class CodePlugin {
       repoConfigController,
       serverOptions
     );
-    repositorySearchRoute(codeServerRouter, log);
-    documentSearchRoute(codeServerRouter, log);
-    symbolSearchRoute(codeServerRouter, log);
-    fileRoute(codeServerRouter, gitOps);
-    workspaceRoute(codeServerRouter, serverOptions, gitOps);
-    symbolByQnameRoute(codeServerRouter, log);
+    repositorySearchRoute(codeServerRouter, this.log);
+    documentSearchRoute(codeServerRouter, this.log);
+    symbolSearchRoute(codeServerRouter, this.log);
+    fileRoute(codeServerRouter, this.gitOps);
+    workspaceRoute(codeServerRouter, serverOptions, this.gitOps);
+    symbolByQnameRoute(codeServerRouter, this.log);
     installRoute(codeServerRouter, lspService);
     lspRoute(codeServerRouter, lspService, serverOptions);
     setupRoute(codeServerRouter);
-    statusRoute(codeServerRouter, gitOps, lspService);
+    statusRoute(codeServerRouter, this.gitOps, lspService);
   }
 
   private async retryUntilAvailable<T>(

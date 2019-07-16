@@ -4,17 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { CoreSetup } from 'src/core/server';
-
 import { ServerFacade, ServerRouteFacade, RouteOptionsFacade } from '..';
 
 export class CodeServerRouter {
-  public server: ServerFacade;
-
-  constructor(readonly core: CoreSetup) {
-    const { server } = core.http as any;
-    this.server = server;
-  }
+  constructor(readonly server: ServerFacade) {}
 
   route(route: CodeRoute) {
     const routeOptions: RouteOptionsFacade = (route.options || {}) as RouteOptionsFacade;

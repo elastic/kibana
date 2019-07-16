@@ -20,7 +20,7 @@ import { TEXT_FILE_LIMIT } from '../../common/file';
 import { detectLanguage } from '../utils/detect_language';
 
 export function statusRoute(
-  server: CodeServerRouter,
+  router: CodeServerRouter,
   gitOps: GitOperations,
   lspService: LspService
 ) {
@@ -80,7 +80,7 @@ export function statusRoute(
     }
   }
 
-  server.route({
+  router.route({
     path: '/api/code/repo/{uri*3}/status/{ref}/{path*}',
     method: 'GET',
     async handler(req: RequestFacade) {

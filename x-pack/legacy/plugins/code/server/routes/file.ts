@@ -33,7 +33,7 @@ export function fileRoute(server: CodeServerRouter, gitOps: GitOperations) {
     }
   }
 
-  server.route({
+  router.route({
     path: '/api/code/repo/{uri*3}/tree/{ref}/{path*}',
     method: 'GET',
     async handler(req: RequestFacade) {
@@ -63,7 +63,7 @@ export function fileRoute(server: CodeServerRouter, gitOps: GitOperations) {
     },
   });
 
-  server.route({
+  router.route({
     path: '/api/code/repo/{uri*3}/blob/{ref}/{path*}',
     method: 'GET',
     async handler(req: RequestFacade, h: ResponseToolkitFacade) {
@@ -123,10 +123,10 @@ export function fileRoute(server: CodeServerRouter, gitOps: GitOperations) {
     },
   });
 
-  server.route({
+  router.route({
     path: '/app/code/repo/{uri*3}/raw/{ref}/{path*}',
     method: 'GET',
-    async handler(req, h: ResponseToolkitFacade) {
+    async handler(req: RequestFacade, h: ResponseToolkitFacade) {
       const { uri, path, ref } = req.params;
       const revision = decodeRevisionString(ref);
       const repoUri = await getRepoUriFromMeta(req, uri);
@@ -150,13 +150,13 @@ export function fileRoute(server: CodeServerRouter, gitOps: GitOperations) {
     },
   });
 
-  server.route({
+  router.route({
     path: '/api/code/repo/{uri*3}/history/{ref}',
     method: 'GET',
     handler: historyHandler,
   });
 
-  server.route({
+  router.route({
     path: '/api/code/repo/{uri*3}/history/{ref}/{path*}',
     method: 'GET',
     handler: historyHandler,
@@ -204,10 +204,11 @@ export function fileRoute(server: CodeServerRouter, gitOps: GitOperations) {
       }
     }
   }
-  server.route({
+
+  router.route({
     path: '/api/code/repo/{uri*3}/references',
     method: 'GET',
-    async handler(req) {
+    async handler(req: RequestFacade) {
       const uri = req.params.uri;
       const repoUri = await getRepoUriFromMeta(req, uri);
       if (!repoUri) {
@@ -225,10 +226,10 @@ export function fileRoute(server: CodeServerRouter, gitOps: GitOperations) {
     },
   });
 
-  server.route({
+  router.route({
     path: '/api/code/repo/{uri*3}/diff/{revision}',
     method: 'GET',
-    async handler(req) {
+    async handler(req: RequestFacade) {
       const { uri, revision } = req.params;
       const repoUri = await getRepoUriFromMeta(req, uri);
       if (!repoUri) {
@@ -247,10 +248,10 @@ export function fileRoute(server: CodeServerRouter, gitOps: GitOperations) {
     },
   });
 
-  server.route({
+  router.route({
     path: '/api/code/repo/{uri*3}/blame/{revision}/{path*}',
     method: 'GET',
-    async handler(req) {
+    async handler(req: RequestFacade) {
       const { uri, path, revision } = req.params;
       const repoUri = await getRepoUriFromMeta(req, uri);
       if (!repoUri) {

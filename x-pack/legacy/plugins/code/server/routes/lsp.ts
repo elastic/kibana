@@ -32,7 +32,7 @@ import {
 import { detectLanguage } from '../utils/detect_language';
 import { EsClientWithRequest } from '../utils/esclient_with_request';
 import { promiseTimeout } from '../utils/timeout';
-import { ResponseToolkitFacade } from '../..';
+import { RequestFacade, ResponseToolkitFacade } from '../..';
 
 const LANG_SERVER_ERROR = 'language server error';
 
@@ -45,7 +45,7 @@ export function lspRoute(
 
   server.route({
     path: '/api/code/lsp/textDocument/{method}',
-    async handler(req, h: ResponseToolkitFacade) {
+    async handler(req: RequestFacade, h: ResponseToolkitFacade) {
       if (typeof req.payload === 'object' && req.payload != null) {
         const method = req.params.method;
         if (method) {
@@ -92,7 +92,7 @@ export function lspRoute(
   server.route({
     path: '/api/code/lsp/findReferences',
     method: 'POST',
-    async handler(req, h: ResponseToolkitFacade) {
+    async handler(req: RequestFacade, h: ResponseToolkitFacade) {
       try {
         // @ts-ignore
         const { textDocument, position } = req.payload;
@@ -201,11 +201,11 @@ export function lspRoute(
   });
 }
 
-export function symbolByQnameRoute(server: CodeServerRouter, log: Logger) {
-  server.route({
+export function symbolByQnameRoute(router: CodeServerRouter, log: Logger) {
+  router.route({
     path: '/api/code/lsp/symbol/{qname}',
     method: 'GET',
-    async handler(req) {
+    async handler(req: RequestFacade) {
       try {
         const symbolSearchClient = new SymbolSearchClient(new EsClientWithRequest(req), log);
         const res = await symbolSearchClient.findByQname(req.params.qname);

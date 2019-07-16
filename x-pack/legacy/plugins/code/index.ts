@@ -107,7 +107,7 @@ export const code = (kibana: any) =>
         codeNodeUrl: Joi.string(),
       }).default();
     },
-    init: (server: ServerFacade, options: any) => {
+    init(server: ServerFacade, options: any) {
       if (!options.ui.enabled) {
         return;
       }
@@ -119,7 +119,7 @@ export const code = (kibana: any) =>
 
       // Set up with the new platform plugin lifecycle API.
       const plugin = codePlugin(initializerContext);
-      codePlugin(initializerContext).setup(coreSetup, options);
+      plugin.setup(coreSetup, options);
 
       // @ts-ignore
       const kbnServer = this.kbnServer;
