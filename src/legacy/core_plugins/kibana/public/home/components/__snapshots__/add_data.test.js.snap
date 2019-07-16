@@ -71,7 +71,7 @@ exports[`apmUiEnabled 1`] = `
         icon={
           <EuiIcon
             className="homAddData__icon"
-            type="apmApp"
+            type="logoAPM"
           />
         }
         layout="vertical"
@@ -113,7 +113,7 @@ exports[`apmUiEnabled 1`] = `
         icon={
           <EuiIcon
             className="homAddData__icon"
-            type="loggingApp"
+            type="logoLogging"
           />
         }
         layout="vertical"
@@ -155,7 +155,7 @@ exports[`apmUiEnabled 1`] = `
         icon={
           <EuiIcon
             className="homAddData__icon"
-            type="monitoringApp"
+            type="logoMetrics"
           />
         }
         layout="vertical"
@@ -171,25 +171,25 @@ exports[`apmUiEnabled 1`] = `
         className="homAddData__card"
         description={
           <span
-            id="aria-describedby.addSecurityButtonLabel"
+            id="aria-describedby.addSiemButtonLabel"
           >
             Centralize security events for interactive investigation in ready-to-go visualizations.
           </span>
         }
         footer={
           <EuiButton
-            aria-describedby="aria-describedby.addSecurityButtonLabel"
+            aria-describedby="aria-describedby.addSiemButtonLabel"
             className="homAddData__button"
             color="primary"
             fill={false}
-            href="#/home/tutorial_directory/security"
+            href="#/home/tutorial_directory/siem"
             iconSide="left"
             size="m"
             type="button"
           >
             <FormattedMessage
               defaultMessage="Add security events"
-              id="kbn.home.addData.security.addSecurityEventsButtonLabel"
+              id="kbn.home.addData.siem.addSiemEventsButtonLabel"
               values={Object {}}
             />
           </EuiButton>
@@ -197,12 +197,12 @@ exports[`apmUiEnabled 1`] = `
         icon={
           <EuiIcon
             className="homAddData__icon"
-            type="securityApp"
+            type="logoSecurity"
           />
         }
         layout="vertical"
         textAlign="center"
-        title="Security analytics"
+        title="SIEM"
         titleElement="span"
       />
     </EuiFlexItem>
@@ -362,7 +362,7 @@ exports[`isNewKibanaInstance 1`] = `
         icon={
           <EuiIcon
             className="homAddData__icon"
-            type="loggingApp"
+            type="logoLogging"
           />
         }
         layout="vertical"
@@ -404,7 +404,7 @@ exports[`isNewKibanaInstance 1`] = `
         icon={
           <EuiIcon
             className="homAddData__icon"
-            type="monitoringApp"
+            type="logoMetrics"
           />
         }
         layout="vertical"
@@ -420,25 +420,25 @@ exports[`isNewKibanaInstance 1`] = `
         className="homAddData__card"
         description={
           <span
-            id="aria-describedby.addSecurityButtonLabel"
+            id="aria-describedby.addSiemButtonLabel"
           >
             Centralize security events for interactive investigation in ready-to-go visualizations.
           </span>
         }
         footer={
           <EuiButton
-            aria-describedby="aria-describedby.addSecurityButtonLabel"
+            aria-describedby="aria-describedby.addSiemButtonLabel"
             className="homAddData__button"
             color="primary"
             fill={false}
-            href="#/home/tutorial_directory/security"
+            href="#/home/tutorial_directory/siem"
             iconSide="left"
             size="m"
             type="button"
           >
             <FormattedMessage
               defaultMessage="Add security events"
-              id="kbn.home.addData.security.addSecurityEventsButtonLabel"
+              id="kbn.home.addData.siem.addSiemEventsButtonLabel"
               values={Object {}}
             />
           </EuiButton>
@@ -446,12 +446,12 @@ exports[`isNewKibanaInstance 1`] = `
         icon={
           <EuiIcon
             className="homAddData__icon"
-            type="securityApp"
+            type="logoSecurity"
           />
         }
         layout="vertical"
         textAlign="center"
-        title="Security analytics"
+        title="SIEM"
         titleElement="span"
       />
     </EuiFlexItem>
@@ -611,7 +611,7 @@ exports[`mlEnabled 1`] = `
         icon={
           <EuiIcon
             className="homAddData__icon"
-            type="apmApp"
+            type="logoAPM"
           />
         }
         layout="vertical"
@@ -653,7 +653,7 @@ exports[`mlEnabled 1`] = `
         icon={
           <EuiIcon
             className="homAddData__icon"
-            type="loggingApp"
+            type="logoLogging"
           />
         }
         layout="vertical"
@@ -695,7 +695,7 @@ exports[`mlEnabled 1`] = `
         icon={
           <EuiIcon
             className="homAddData__icon"
-            type="monitoringApp"
+            type="logoMetrics"
           />
         }
         layout="vertical"
@@ -711,25 +711,25 @@ exports[`mlEnabled 1`] = `
         className="homAddData__card"
         description={
           <span
-            id="aria-describedby.addSecurityButtonLabel"
+            id="aria-describedby.addSiemButtonLabel"
           >
             Centralize security events for interactive investigation in ready-to-go visualizations.
           </span>
         }
         footer={
           <EuiButton
-            aria-describedby="aria-describedby.addSecurityButtonLabel"
+            aria-describedby="aria-describedby.addSiemButtonLabel"
             className="homAddData__button"
             color="primary"
             fill={false}
-            href="#/home/tutorial_directory/security"
+            href="#/home/tutorial_directory/siem"
             iconSide="left"
             size="m"
             type="button"
           >
             <FormattedMessage
               defaultMessage="Add security events"
-              id="kbn.home.addData.security.addSecurityEventsButtonLabel"
+              id="kbn.home.addData.siem.addSiemEventsButtonLabel"
               values={Object {}}
             />
           </EuiButton>
@@ -737,12 +737,12 @@ exports[`mlEnabled 1`] = `
         icon={
           <EuiIcon
             className="homAddData__icon"
-            type="securityApp"
+            type="logoSecurity"
           />
         }
         layout="vertical"
         textAlign="center"
-        title="Security analytics"
+        title="SIEM"
         titleElement="span"
       />
     </EuiFlexItem>
@@ -940,7 +940,7 @@ exports[`render 1`] = `
         icon={
           <EuiIcon
             className="homAddData__icon"
-            type="loggingApp"
+            type="logoLogging"
           />
         }
         layout="vertical"
@@ -982,7 +982,7 @@ exports[`render 1`] = `
         icon={
           <EuiIcon
             className="homAddData__icon"
-            type="monitoringApp"
+            type="logoMetrics"
           />
         }
         layout="vertical"
@@ -998,25 +998,25 @@ exports[`render 1`] = `
         className="homAddData__card"
         description={
           <span
-            id="aria-describedby.addSecurityButtonLabel"
+            id="aria-describedby.addSiemButtonLabel"
           >
             Centralize security events for interactive investigation in ready-to-go visualizations.
           </span>
         }
         footer={
           <EuiButton
-            aria-describedby="aria-describedby.addSecurityButtonLabel"
+            aria-describedby="aria-describedby.addSiemButtonLabel"
             className="homAddData__button"
             color="primary"
             fill={false}
-            href="#/home/tutorial_directory/security"
+            href="#/home/tutorial_directory/siem"
             iconSide="left"
             size="m"
             type="button"
           >
             <FormattedMessage
               defaultMessage="Add security events"
-              id="kbn.home.addData.security.addSecurityEventsButtonLabel"
+              id="kbn.home.addData.siem.addSiemEventsButtonLabel"
               values={Object {}}
             />
           </EuiButton>
@@ -1024,12 +1024,12 @@ exports[`render 1`] = `
         icon={
           <EuiIcon
             className="homAddData__icon"
-            type="securityApp"
+            type="logoSecurity"
           />
         }
         layout="vertical"
         textAlign="center"
-        title="Security analytics"
+        title="SIEM"
         titleElement="span"
       />
     </EuiFlexItem>

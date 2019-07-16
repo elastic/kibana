@@ -50,7 +50,7 @@ const requestTypeOptions = [
 export class CreateSourceEditor extends Component {
 
   static propTypes = {
-    onSelect: PropTypes.func.isRequired,
+    onSourceConfigChange: PropTypes.func.isRequired,
   };
 
   state = {
@@ -141,7 +141,7 @@ export class CreateSourceEditor extends Component {
     const sourceConfig = (indexPatternId && geoField)
       ? { indexPatternId, geoField, requestType: requestType.value }
       : null;
-    this.props.onSelect(sourceConfig);
+    this.props.onSourceConfigChange(sourceConfig);
   };
 
   _onNoIndexPatterns = () => {

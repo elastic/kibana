@@ -163,6 +163,6 @@ export interface RequestOptions extends RequestBasicOptions {
 
 export interface RequestOptionsPaginated extends RequestBasicOptions {
   pagination: PaginationInputPaginated;
-  fields: ReadonlyArray<string>;
+  fields: readonly string[];
   sortField?: SortField;
 }
