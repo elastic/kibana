@@ -56,7 +56,7 @@ export default {
     '!src/legacy/core_plugins/**/__snapshots__/**/*',
   ],
   moduleNameMapper: {
-    '^plugins/watcher/models/(.*)': '<rootDir/x-pack/legacy/plugins/watcher/public/models/$1',
+    '^plugins/watcher/models/(.*)': '<rootDir>/x-pack/legacy/plugins/watcher/public/models/$1',
     '^plugins/([^\/.]*)(.*)': '<rootDir>/src/legacy/core_plugins/$1/public$2',
     '^ui/(.*)': '<rootDir>/src/legacy/ui/public/$1',
     '^uiExports/(.*)': '<rootDir>/src/dev/jest/mocks/file_mock.js',

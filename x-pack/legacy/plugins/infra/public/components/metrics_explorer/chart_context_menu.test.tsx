@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { MetricsExplorerChartContextMenu, createNodeDetailLink } from './chart_context_menu';
-import { mountWithIntl } from '../../utils/enzyme_helpers';
+import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { options, source, timeRange } from '../../utils/fixtures/metrics_explorer';
 import { UICapabilities } from 'ui/capabilities';
 import { InfraNodeType } from '../../graphql/types';

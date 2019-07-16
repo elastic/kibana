@@ -29,7 +29,7 @@
         "x-pack/legacy/plugins/spaces/public/*"
       ],
       "test_utils/*": [
-        "x-pack/test_utils/*"
+        "src/test_utils/public/*"
       ],
       "monitoring/common/*": [
         "x-pack/monitoring/common/*"
