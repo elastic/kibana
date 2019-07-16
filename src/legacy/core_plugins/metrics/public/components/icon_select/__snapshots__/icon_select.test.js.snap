@@ -89,9 +89,8 @@ exports[`src/legacy/core_plugins/metrics/public/components/icon_select/icon_sele
 
 exports[`src/legacy/core_plugins/metrics/public/components/icon_select/icon_select.js <IconView /> should render and match a snapshot 1`] = `
 <span>
-  <span
-    aria-hidden="true"
-    className="kuiIcon fa-comment"
+  <EuiIcon
+    type="editorComment"
   />
    Comment
 </span>
