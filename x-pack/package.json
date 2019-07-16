@@ -193,7 +193,7 @@
     "json-stable-stringify": "^1.0.1",
     "jsonwebtoken": "^8.3.0",
     "jstimezonedetect": "1.0.5",
-    "lodash": "npm:@elastic/lodash@3.10.1-kibana1",
+    "lodash": "npm:@elastic/lodash@3.10.1-kibana3",
     "lodash.keyby": "^4.6.0",
     "lodash.lowercase": "^4.3.0",
     "lodash.mean": "^4.1.0",

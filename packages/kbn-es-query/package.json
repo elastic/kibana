@@ -10,7 +10,7 @@
     "kbn:watch": "yarn build --watch"
   },
   "dependencies": {
-    "lodash": "npm:@elastic/lodash@3.10.1-kibana1"
+    "lodash": "npm:@elastic/lodash@3.10.1-kibana3"
   },
   "devDependencies": {
     "@kbn/babel-preset": "1.0.0",
