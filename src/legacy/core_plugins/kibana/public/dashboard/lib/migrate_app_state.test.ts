@@ -18,6 +18,9 @@
  */
 
 import '../np_core.test.mocks';
+jest.mock('../../../../ui_metric/public', () => ({
+  createUiStatsReporter: jest.fn(() => jest.fn()),
+}));
 
 import { SavedDashboardPanel } from '../types';
 import { migrateAppState } from './migrate_app_state';

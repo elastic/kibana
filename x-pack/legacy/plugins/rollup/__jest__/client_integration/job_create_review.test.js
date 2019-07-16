@@ -20,7 +20,7 @@ jest.mock('ui/chrome', () => ({
 jest.mock('lodash/function/debounce', () => fn => fn);
 
 jest.mock('../../../../../../src/legacy/core_plugins/ui_metric/public', () => ({
-  createUiStatsReporter: jest.fn(),
+  createUiStatsReporter: jest.fn(() => jest.fn()),
 }));
 
 const { setup } = pageHelpers.jobCreate;
