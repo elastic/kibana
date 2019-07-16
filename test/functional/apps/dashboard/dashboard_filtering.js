@@ -48,6 +48,7 @@ export default function ({ getService, getPageObjects }) {
         await dashboardAddPanel.addEverySavedSearch('"Filter Bytes Test"');
 
         await dashboardAddPanel.closeAddPanel();
+
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.dashboard.waitForRenderComplete();
         await filterBar.addFilter('bytes', 'is', '12345678');
@@ -216,7 +217,8 @@ export default function ({ getService, getPageObjects }) {
         await dashboardExpect.tsvbMarkdownWithValuesExists(['7,209.286']);
       });
 
-      it('saved searches', async () => {
+      // FLAKY: https://github.com/elastic/kibana/issues/41087
+      it.skip('saved searches', async () => {
         await dashboardExpect.savedSearchRowCount(1);
       });
 

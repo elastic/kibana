@@ -29,6 +29,7 @@
 import _ from 'lodash';
 import { IndexedArray } from '../indexed_array';
 import { AggConfig } from './agg_config';
+import { AggGroupNames } from './editors/default/agg_groups';
 
 function removeParentAggs(obj) {
   for(const prop in obj) {
@@ -185,7 +186,7 @@ class AggConfigs extends IndexedArray {
 
         parseParentAggs(dslLvlCursor, dsl);
 
-        if (config.type.type === 'buckets' && i < list.length - 1) {
+        if (config.type.type === AggGroupNames.Buckets && i < list.length - 1) {
         // buckets that are not the last item in the list accept sub-aggs
           subAggs = dsl.aggs || (dsl.aggs = {});
         }
@@ -215,7 +216,7 @@ class AggConfigs extends IndexedArray {
       return aggs ? requestValuesAggs.concat(aggs) : requestValuesAggs;
     }, []);
     //move metrics to the end
-    return _.sortBy(aggregations, agg => agg.type.type === 'metrics' ? 1 : 0);
+    return _.sortBy(aggregations, agg => agg.type.type === AggGroupNames.Metrics ? 1 : 0);
   }
 
   /**

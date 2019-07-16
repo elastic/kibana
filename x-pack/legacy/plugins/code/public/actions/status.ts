@@ -24,6 +24,7 @@ export enum RepoState {
   CLONE_ERROR,
   DELETE_ERROR,
   INDEX_ERROR,
+  UNKNOWN,
 }
 
 export interface RepoStatus {

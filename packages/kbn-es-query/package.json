@@ -11,7 +11,7 @@
     "kbn:watch": "node scripts/build --source-maps --watch"
   },
   "dependencies": {
-    "lodash": "npm:@elastic/lodash@3.10.1-kibana1",
+    "lodash": "npm:@elastic/lodash@3.10.1-kibana3",
     "moment-timezone": "^0.5.14",
     "@kbn/i18n": "1.0.0"
   },
