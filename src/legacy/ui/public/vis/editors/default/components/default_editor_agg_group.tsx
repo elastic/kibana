@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useReducer } from 'react';
 import {
   EuiTitle,
   EuiDragDropContext,
@@ -34,11 +34,11 @@ import { DefaultEditorAgg } from './default_editor_agg';
 import { DefaultEditorAggAdd } from './default_editor_agg_add';
 import { DefaultEditorAggCommonProps } from './default_editor_agg_common_props';
 import {
-  AggsState,
   isInvalidAggsTouched,
   isAggRemovable,
   calcAggIsTooLow,
 } from './default_editor_agg_group_helper';
+import { aggGroupReducer, initAggsState, AGGS_ACTION_KEYS } from './default_editor_agg_group_state';
 import { Schema } from '../schemas';
 
 interface DefaultEditorAggGroupProps extends DefaultEditorAggCommonProps {
@@ -82,22 +82,7 @@ function DefaultEditorAggGroup({
     });
   }
 
-  const [aggsState, setAggsState] = useState(
-    (): AggsState =>
-      group.reduce((newState, item) => {
-        newState[item.id] = { touched: false, valid: true };
-        return newState;
-      }, {})
-  );
-
-  useEffect(() => {
-    setAggsState(
-      group.reduce((newState, item) => {
-        newState[item.id] = aggsState[item.id] || { touched: false, valid: true };
-        return newState;
-      }, {})
-    );
-  }, [group.length]);
+  const [aggsState, setAggsState] = useReducer(aggGroupReducer, group, initAggsState);
 
   const isGroupValid = Object.entries(aggsState).every(([, item]) => item.valid);
   const isAllAggsTouched = isInvalidAggsTouched(aggsState);
@@ -121,25 +106,19 @@ function DefaultEditorAggGroup({
   };
 
   const setTouchedHandler = (aggId: number, touched: boolean) => {
-    const newState = Object.assign({}, aggsState);
-    if (newState[aggId]) {
-      newState[aggId].touched = touched;
-    } else {
-      newState[aggId] = { valid: true, touched };
-    }
-
-    setAggsState(newState);
+    setAggsState({
+      type: AGGS_ACTION_KEYS.TOUCHED,
+      payload: touched,
+      aggId,
+    });
   };
 
   const setValidityHandler = (aggId: number, valid: boolean) => {
-    const newState = Object.assign({}, aggsState);
-    if (newState[aggId]) {
-      newState[aggId].valid = valid;
-    } else {
-      newState[aggId] = { touched: false, valid };
-    }
-
-    setAggsState(newState);
+    setAggsState({
+      type: AGGS_ACTION_KEYS.VALID,
+      payload: valid,
+      aggId,
+    });
   };
 
   return (
