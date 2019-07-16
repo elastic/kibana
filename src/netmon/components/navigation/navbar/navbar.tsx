@@ -113,9 +113,10 @@ const Navbar = (props: InjectedProps) => {
   const logoUrl = useLogoUrl();
   const currentUser = useCurrentUser();
 
-  const isLicensed = !!currentUser && currentUser.licensed;
   const isLoggedIn = !!currentUser;
-  const isAdmin = currentUser && currentUser.role === 'admin';
+  const isLicensed = !!currentUser && currentUser.licensed;
+  const isAdmin = !!currentUser && currentUser.role === 'admin';
+  const username = currentUser ? currentUser.username : '';
 
   const checkTimeInSyncAndLicensed = useCallback(checkTimeInSync(isLicensed), [isLicensed]);
   useEvent(Events.eventNames.licenseCheck, checkLicenseStatus);
@@ -124,6 +125,10 @@ const Navbar = (props: InjectedProps) => {
 
   useEffect(
     () => {
+      if (!currentUser) {
+        return;
+      }
+
       Events.licenseCheck();
       Events.passwordCheck();
       Events.timeSyncCheck();
@@ -136,7 +141,7 @@ const Navbar = (props: InjectedProps) => {
   return (
     <div className="nm-section">
       <div className={classnames(classes.navbarMain, 'Day')}>
-        <nav className="navbar navbar-fixed-top">
+        <nav className="navbar navbar-fixed-top" data-testid="navbar">
           <a className="navbar-brand" href="" onClick={() => onTabSelected(analyzeTab)}>
             {!!logoUrl && <img alt="Brand" src={logoUrl} />}
           </a>
@@ -176,7 +181,7 @@ const Navbar = (props: InjectedProps) => {
               <span className="navbar-right">
                 <ul>
                   {isAdmin && <ManageMachineMenu />}
-                  <UserMenu />
+                  <UserMenu username={username} />
                   <HelpMenu />
                 </ul>
               </span>

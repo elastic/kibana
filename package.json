@@ -356,7 +356,7 @@
     "@types/styled-components": "^3.0.2",
     "@types/supertest": "^2.0.5",
     "@types/type-detect": "^4.0.1",
-    "@types/uuid": "^3.4.4",
+    "@types/uuid": "^3.4.5",
     "@types/vinyl-fs": "^2.4.11",
     "@types/zen-observable": "^0.8.0",
     "@typescript-eslint/eslint-plugin": "1.13.0",

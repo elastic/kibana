@@ -1,6 +1,5 @@
 import * as React from 'react';
 import injectSheet, { WithSheet } from 'react-jss';
-import { useCurrentUser } from '../../../hooks/auth_hooks';
 import Auth from '../../../services/Auth';
 
 const styles = {
@@ -9,12 +8,14 @@ const styles = {
   },
 };
 
-type InjectedProps = WithSheet<typeof styles, {}>;
+export type Props = {
+  username: string;
+};
+
+type InjectedProps = Props & WithSheet<typeof styles, {}>;
 
 const UserMenu = (props: InjectedProps) => {
-  const { classes } = props;
-
-  const currentUser = useCurrentUser();
+  const { classes, username } = props;
 
   const signOut = () => {
     Auth.logout();
@@ -44,7 +45,7 @@ const UserMenu = (props: InjectedProps) => {
             onClick={e => e.stopPropagation()}
           >
             <i className="fa fa-user" aria-hidden="true" />
-            {currentUser && currentUser.username}
+            {username}
           </a>
           <a
             data-testid="user-dropdown-sign-out"

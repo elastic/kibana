@@ -1,4 +1,5 @@
 import * as _ from 'lodash';
+import uuid from 'uuid/v4';
 import HTTP from '../common/http';
 import Notification from './Notification/Notification';
 
@@ -13,6 +14,8 @@ class Auth {
   private HTTP: HTTP;
   private subscribers: Set<(user: IUser | undefined) => void> = new Set();
   public currentUser: IUser | undefined = undefined;
+  private loggingOut: boolean = false;
+  private inFlightUserRequests: Set<string> = new Set();
 
   constructor() {
     this.HTTP = new HTTP();
@@ -84,35 +87,29 @@ class Auth {
       });
   }
 
-  private isTimeToResetPass(): Promise<boolean> {
-    if (this.currentUser) {
-      return Promise.resolve(this.currentUser.timeToResetPass);
-    }
-    return this.getCurrentUser()
-      .then(user => {
-        if (user && user.timeToResetPass) {
-          return Promise.resolve(true);
-        }
-        return Promise.resolve(false);
-      })
-      .catch(err => {
-        return Promise.resolve(false);
-      });
-  }
-
   public clearCurrentUser(): void {
     this.currentUser = undefined;
     this.notifySubscribers();
   }
 
   public logout() {
+    this.loggingOut = true;
+    this.inFlightUserRequests.clear();
     this.recordLogoutInAuditLog();
     this.clearClientData();
+    this.loggingOut = false;
   }
 
   public async getCurrentUser(): Promise<any> {
+    if (this.loggingOut) {
+      return undefined;
+    }
+
     let shouldNotify: boolean = true;
     try {
+      const requestId = uuid();
+      this.inFlightUserRequests.add(requestId);
+
       const response = await this.HTTP.fetch('/data/api/auth/');
       const json = await response.json();
 
@@ -120,10 +117,20 @@ class Auth {
 
       shouldNotify = !_.isEqual(newUser, this.currentUser);
 
+      // this check does not cover all race conditions with logging out
+      // however, the authentication token will be cleared on logout, meaning
+      // that no new requests could be authenticated with the old user
+      // NEED TO REFACTOR AUTH CACHING TO SOLVE RACE CONDITIONS
+      if (!this.inFlightUserRequests.has(requestId)) {
+        return this.currentUser;
+      }
+
       this.currentUser = newUser;
+
+      this.inFlightUserRequests.delete(requestId);
     } catch (err) {
       console.error('An error occurred looking up the current user', err);
-      return null;
+      return undefined;
     }
 
     try {
