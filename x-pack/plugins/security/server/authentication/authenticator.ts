@@ -241,7 +241,7 @@ export class Authenticator {
     // 2. Also provider can specifically ask to clear state by setting it to `null` even if
     // authentication attempt didn't fail (e.g. custom realm could "pin" client/request identity to
     // a server-side only session established during multi step login that relied on intermediate
-    // client-side state).
+    // client-side state which isn't needed anymore).
     if (
       authenticationResult.shouldClearState() ||
       (authenticationResult.failed() && getErrorStatusCode(authenticationResult.error) === 401)

@@ -86,7 +86,7 @@ describe('setupAuthentication()', () => {
 
   afterEach(() => jest.clearAllMocks());
 
-  it('properly registers auth handler', async () => {
+  it('properly initializes session storage and registers auth handler', async () => {
     const config = {
       encryptionKey: 'ab'.repeat(16),
       secureCookies: true,
@@ -98,14 +98,20 @@ describe('setupAuthentication()', () => {
 
     expect(mockSetupAuthenticationParams.core.http.registerAuth).toHaveBeenCalledTimes(1);
     expect(mockSetupAuthenticationParams.core.http.registerAuth).toHaveBeenCalledWith(
-      expect.any(Function),
-      {
-        encryptionKey: config.encryptionKey,
-        isSecure: config.secureCookies,
-        name: config.cookieName,
-        validate: expect.any(Function),
-      }
+      expect.any(Function)
     );
+
+    expect(
+      mockSetupAuthenticationParams.core.http.createCookieSessionStorageFactory
+    ).toHaveBeenCalledTimes(1);
+    expect(
+      mockSetupAuthenticationParams.core.http.createCookieSessionStorageFactory
+    ).toHaveBeenCalledWith({
+      encryptionKey: config.encryptionKey,
+      isSecure: config.secureCookies,
+      name: config.cookieName,
+      validate: expect.any(Function),
+    });
   });
 
   describe('authentication handler', () => {

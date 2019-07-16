@@ -46,7 +46,12 @@ describe('KerberosAuthenticationProvider', () => {
 
     it('does not handle requests that can be authenticated without `Negotiate` header.', async () => {
       const request = httpServerMock.createKibanaRequest();
-      mockScopedClusterClient(mockOptions.client)
+      mockScopedClusterClient(
+        mockOptions.client,
+        sinon.match({
+          headers: { authorization: `Negotiate ${Buffer.from('__fake__').toString('base64')}` },
+        })
+      )
         .callAsCurrentUser.withArgs('shield.authenticate')
         .resolves({});
 
@@ -57,7 +62,12 @@ describe('KerberosAuthenticationProvider', () => {
 
     it('does not handle requests if backend does not support Kerberos.', async () => {
       const request = httpServerMock.createKibanaRequest();
-      mockScopedClusterClient(mockOptions.client)
+      mockScopedClusterClient(
+        mockOptions.client,
+        sinon.match({
+          headers: { authorization: `Negotiate ${Buffer.from('__fake__').toString('base64')}` },
+        })
+      )
         .callAsCurrentUser.withArgs('shield.authenticate')
         .rejects(ElasticsearchErrorHelpers.decorateNotAuthorizedError(new Error()));
 
@@ -82,7 +92,12 @@ describe('KerberosAuthenticationProvider', () => {
 
     it('fails with `Negotiate` challenge if backend supports Kerberos.', async () => {
       const request = httpServerMock.createKibanaRequest();
-      mockScopedClusterClient(mockOptions.client)
+      mockScopedClusterClient(
+        mockOptions.client,
+        sinon.match({
+          headers: { authorization: `Negotiate ${Buffer.from('__fake__').toString('base64')}` },
+        })
+      )
         .callAsCurrentUser.withArgs('shield.authenticate')
         .rejects(
           ElasticsearchErrorHelpers.decorateNotAuthorizedError(
@@ -117,10 +132,6 @@ describe('KerberosAuthenticationProvider', () => {
       const request = httpServerMock.createKibanaRequest({
         headers: { authorization: 'negotiate spnego' },
       });
-
-      mockScopedClusterClient(mockOptions.client)
-        .callAsCurrentUser.withArgs('shield.authenticate')
-        .rejects(new errors.ServiceUnavailable());
 
       mockScopedClusterClient(
         mockOptions.client,
@@ -320,7 +331,12 @@ describe('KerberosAuthenticationProvider', () => {
           body: { error: { reason: 'token document is missing and must be present' } },
         });
 
-      mockScopedClusterClient(mockOptions.client, sinon.match({ headers: {} }))
+      mockScopedClusterClient(
+        mockOptions.client,
+        sinon.match({
+          headers: { authorization: `Negotiate ${Buffer.from('__fake__').toString('base64')}` },
+        })
+      )
         .callAsCurrentUser.withArgs('shield.authenticate')
         .rejects(
           ElasticsearchErrorHelpers.decorateNotAuthorizedError(

@@ -10,7 +10,6 @@ import {
   CoreSetup,
   KibanaRequest,
   LoggerFactory,
-  SessionStorageFactory,
 } from '../../../../../src/core/server';
 import { AuthenticatedUser } from '../../common/model';
 import { ConfigType } from '../config';
@@ -60,73 +59,68 @@ export async function setupAuthentication({
       .callAsCurrentUser('shield.authenticate')) as AuthenticatedUser;
   };
 
-  const { sessionStorageFactory } = (await core.http.registerAuth<ProviderSession>(
-    async (request, t) => {
-      if (!authenticator) {
-        throw new Error('Authenticator is not initialized!');
-      }
-
-      // If security is disabled continue with no user credentials and delete the client cookie as well.
-      if (isSecurityFeatureDisabled()) {
-        return t.authenticated();
-      }
-
-      let authenticationResult;
-      try {
-        authenticationResult = await authenticator.authenticate(request);
-      } catch (err) {
-        authLogger.error(err);
-        return t.rejected(wrapError(err));
-      }
-
-      if (authenticationResult.succeeded()) {
-        return t.authenticated({
-          state: (authenticationResult.user as unknown) as Record<string, unknown>,
-          headers: authenticationResult.authHeaders,
-        });
-      }
-
-      if (authenticationResult.redirected()) {
-        // Some authentication mechanisms may require user to be redirected to another location to
-        // initiate or complete authentication flow. It can be Kibana own login page for basic
-        // authentication (username and password) or arbitrary external page managed by 3rd party
-        // Identity Provider for SSO authentication mechanisms. Authentication provider is the one who
-        // decides what location user should be redirected to.
-        return t.redirected(authenticationResult.redirectURL!);
-      }
-
-      if (authenticationResult.failed()) {
-        authLogger.info(`Authentication attempt failed: ${authenticationResult.error!.message}`);
-
-        const error = wrapError(authenticationResult.error);
-        if (authenticationResult.challenges) {
-          error.output.headers['WWW-Authenticate'] = authenticationResult.challenges as any;
-        }
-
-        return t.rejected(error);
-      }
-
-      return t.rejected(Boom.unauthorized());
-    },
-    {
-      encryptionKey: config.encryptionKey,
-      isSecure: config.secureCookies,
-      name: config.cookieName,
-      validate: (sessionValue: ProviderSession) =>
-        !(sessionValue.expires && sessionValue.expires < Date.now()),
-    }
-  )) as { sessionStorageFactory: SessionStorageFactory<ProviderSession> };
-
-  authLogger.debug('Successfully registered core authentication handler.');
-
   const authenticator = new Authenticator({
     clusterClient,
     basePath: core.http.basePath,
     config: { sessionTimeout: config.sessionTimeout, authc: config.authc },
     isSystemAPIRequest: (request: KibanaRequest) => getLegacyAPI().isSystemAPIRequest(request),
     loggers,
-    sessionStorageFactory,
+    sessionStorageFactory: await core.http.createCookieSessionStorageFactory({
+      encryptionKey: config.encryptionKey,
+      isSecure: config.secureCookies,
+      name: config.cookieName,
+      validate: (sessionValue: ProviderSession) =>
+        !(sessionValue.expires && sessionValue.expires < Date.now()),
+    }),
   });
+
+  authLogger.debug('Successfully initialized authenticator.');
+
+  core.http.registerAuth(async (request, t) => {
+    // If security is disabled continue with no user credentials and delete the client cookie as well.
+    if (isSecurityFeatureDisabled()) {
+      return t.authenticated();
+    }
+
+    let authenticationResult;
+    try {
+      authenticationResult = await authenticator.authenticate(request);
+    } catch (err) {
+      authLogger.error(err);
+      return t.rejected(wrapError(err));
+    }
+
+    if (authenticationResult.succeeded()) {
+      return t.authenticated({
+        state: (authenticationResult.user as unknown) as Record<string, unknown>,
+        headers: authenticationResult.authHeaders,
+      });
+    }
+
+    if (authenticationResult.redirected()) {
+      // Some authentication mechanisms may require user to be redirected to another location to
+      // initiate or complete authentication flow. It can be Kibana own login page for basic
+      // authentication (username and password) or arbitrary external page managed by 3rd party
+      // Identity Provider for SSO authentication mechanisms. Authentication provider is the one who
+      // decides what location user should be redirected to.
+      return t.redirected(authenticationResult.redirectURL!);
+    }
+
+    if (authenticationResult.failed()) {
+      authLogger.info(`Authentication attempt failed: ${authenticationResult.error!.message}`);
+
+      const error = wrapError(authenticationResult.error);
+      if (authenticationResult.challenges) {
+        error.output.headers['WWW-Authenticate'] = authenticationResult.challenges as any;
+      }
+
+      return t.rejected(error);
+    }
+
+    return t.rejected(Boom.unauthorized());
+  });
+
+  authLogger.debug('Successfully registered core authentication handler.');
 
   return {
     login: authenticator.login.bind(authenticator),

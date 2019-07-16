@@ -133,47 +133,21 @@ describe('Authenticator', () => {
       expect(authenticationResult.authHeaders).toEqual({ authorization: 'Basic .....' });
     });
 
-    it('creates session whenever authentication provider returns state for system API requests', async () => {
+    it('creates session whenever authentication provider returns state', async () => {
       const user = mockAuthenticatedUser();
       const request = httpServerMock.createKibanaRequest();
       const authorization = `Basic ${Buffer.from('foo:bar').toString('base64')}`;
 
-      mockOptions.isSystemAPIRequest.mockReturnValue(true);
       mockBasicAuthenticationProvider.login.mockResolvedValue(
         AuthenticationResult.succeeded(user, { state: { authorization } })
       );
 
-      const systemAPIAuthenticationResult = await authenticator.login(request, {
+      const authenticationResult = await authenticator.login(request, {
         provider: 'basic',
         value: {},
       });
-      expect(systemAPIAuthenticationResult.succeeded()).toBe(true);
-      expect(systemAPIAuthenticationResult.user).toEqual(user);
-
-      expect(mockSessionStorage.set).toHaveBeenCalledTimes(1);
-      expect(mockSessionStorage.set).toHaveBeenCalledWith({
-        expires: null,
-        state: { authorization },
-        provider: 'basic',
-      });
-    });
-
-    it('creates session whenever authentication provider returns state for non-system API requests', async () => {
-      const user = mockAuthenticatedUser();
-      const request = httpServerMock.createKibanaRequest();
-      const authorization = `Basic ${Buffer.from('foo:bar').toString('base64')}`;
-
-      mockOptions.isSystemAPIRequest.mockReturnValue(false);
-      mockBasicAuthenticationProvider.login.mockResolvedValue(
-        AuthenticationResult.succeeded(user, { state: { authorization } })
-      );
-
-      const systemAPIAuthenticationResult = await authenticator.login(request, {
-        provider: 'basic',
-        value: {},
-      });
-      expect(systemAPIAuthenticationResult.succeeded()).toBe(true);
-      expect(systemAPIAuthenticationResult.user).toEqual(user);
+      expect(authenticationResult.succeeded()).toBe(true);
+      expect(authenticationResult.user).toEqual(user);
 
       expect(mockSessionStorage.set).toHaveBeenCalledTimes(1);
       expect(mockSessionStorage.set).toHaveBeenCalledWith({
@@ -213,6 +187,25 @@ describe('Authenticator', () => {
         credentials,
         null
       );
+
+      expect(mockSessionStorage.set).not.toHaveBeenCalled();
+      expect(mockSessionStorage.clear).toHaveBeenCalled();
+    });
+
+    it('clears session if provider asked to do so.', async () => {
+      const user = mockAuthenticatedUser();
+      const request = httpServerMock.createKibanaRequest();
+
+      mockBasicAuthenticationProvider.login.mockResolvedValue(
+        AuthenticationResult.succeeded(user, { state: null })
+      );
+
+      const authenticationResult = await authenticator.login(request, {
+        provider: 'basic',
+        value: {},
+      });
+      expect(authenticationResult.succeeded()).toBe(true);
+      expect(authenticationResult.user).toEqual(user);
 
       expect(mockSessionStorage.set).not.toHaveBeenCalled();
       expect(mockSessionStorage.clear).toHaveBeenCalled();
