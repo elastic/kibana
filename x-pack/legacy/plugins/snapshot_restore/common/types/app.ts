@@ -5,7 +5,9 @@
  */
 
 export interface AppPermissions {
-  hasPermission: boolean;
-  missingClusterPrivileges: string[];
-  missingIndexPrivileges: string[];
+  hasAllPrivileges: boolean;
+  missingPrivileges: {
+    cluster: string[];
+    index: string[];
+  };
 }

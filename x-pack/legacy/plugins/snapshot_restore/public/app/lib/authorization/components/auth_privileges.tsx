@@ -28,9 +28,8 @@ const toArray = (value: string | string[]): string[] =>
   Array.isArray(value) ? (value as string[]) : ([value] as string[]);
 
 export const AuthPrivileges = ({ requiredPrivileges, children }: Props) => {
-  const { isLoaded, privileges } = useContext(AuthorizationContext);
+  const { isLoading, privileges } = useContext(AuthorizationContext);
 
-  const isLoading = !isLoaded;
   const privilegesToArray: Privilege[] = toArray(requiredPrivileges).map(p => {
     const [section, privilege] = p.split('.');
     if (!privilege) {

@@ -23,17 +23,13 @@ export function getXpackMainPlugin() {
   return xpackMainPlugin;
 }
 
-const extractMissingPrivileges = (privilegesObject: { [key: string]: boolean }): string[] => {
-  return Object.keys(privilegesObject).reduce(
-    (privileges: string[], privilegeName: string): string[] => {
-      if (!privilegesObject[privilegeName]) {
-        privileges.push(privilegeName);
-      }
-      return privileges;
-    },
-    []
-  );
-};
+const extractMissingPrivileges = (privilegesObject: { [key: string]: boolean } = {}): string[] =>
+  Object.keys(privilegesObject).reduce((privileges: string[], privilegeName: string): string[] => {
+    if (!privilegesObject[privilegeName]) {
+      privileges.push(privilegeName);
+    }
+    return privileges;
+  }, []);
 
 export const getPermissionsHandler: RouterRouteHandler = async (
   req,
@@ -47,9 +43,11 @@ export const getPermissionsHandler: RouterRouteHandler = async (
   }
 
   const permissionsResult: AppPermissions = {
-    hasPermission: true,
-    missingClusterPrivileges: [],
-    missingIndexPrivileges: [],
+    hasAllPrivileges: true,
+    missingPrivileges: {
+      cluster: [],
+      index: [],
+    },
   };
 
   const securityInfo = xpackInfo && xpackInfo.isAvailable() && xpackInfo.feature('security');
@@ -68,8 +66,8 @@ export const getPermissionsHandler: RouterRouteHandler = async (
   });
 
   // Find missing cluster privileges and set overall app permissions
-  permissionsResult.missingClusterPrivileges = extractMissingPrivileges(cluster || {});
-  permissionsResult.hasPermission = hasPermission;
+  permissionsResult.missingPrivileges.cluster = extractMissingPrivileges(cluster);
+  permissionsResult.hasAllPrivileges = hasPermission;
 
   // Get all index privileges the user has
   const { indices } = await callWithRequest('transport.request', {
@@ -92,7 +90,7 @@ export const getPermissionsHandler: RouterRouteHandler = async (
 
   // If they don't, return list of required index privileges
   if (!oneIndexWithAllPrivileges) {
-    permissionsResult.missingIndexPrivileges = [...APP_RESTORE_INDEX_PRIVILEGES];
+    permissionsResult.missingPrivileges.index = [...APP_RESTORE_INDEX_PRIVILEGES];
   }
 
   return permissionsResult;

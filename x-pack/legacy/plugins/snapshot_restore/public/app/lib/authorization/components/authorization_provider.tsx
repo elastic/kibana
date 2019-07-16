@@ -8,7 +8,7 @@ import React, { createContext } from 'react';
 import { useLoadPermissions } from '../services';
 
 interface Authorization {
-  isLoaded: boolean;
+  isLoading: boolean;
   apiError: {
     data: {
       error: string;
@@ -27,7 +27,7 @@ export interface MissingPrivileges {
 }
 
 const initialValue: Authorization = {
-  isLoaded: false,
+  isLoading: true,
   apiError: null,
   privileges: {
     hasAllPrivileges: true,
@@ -43,25 +43,12 @@ interface Props {
 }
 
 export const AuthorizationProvider = ({ permissionEndpoint, children }: Props) => {
-  const { error, data: permissionsData } = useLoadPermissions(permissionEndpoint);
+  const { loading, error, data: permissionsData } = useLoadPermissions(permissionEndpoint);
 
-  const isLoaded = typeof permissionsData !== 'undefined';
-
-  // Note: here we have to serialize the HTTP response
-  // If we move forward with proposal, we would need to update the SR server response
-  // to implement the interface below so we don't need the serialization.
   const value = {
-    isLoaded,
+    isLoading: loading,
+    privileges: loading ? { hasAllPrivileges: true, missingPrivileges: {} } : permissionsData,
     apiError: error ? error : null,
-    privileges: {
-      hasAllPrivileges: isLoaded ? permissionsData.hasPermission : true,
-      missingPrivileges: isLoaded
-        ? {
-            cluster: permissionsData.missingClusterPrivileges,
-            index: permissionsData.missingIndexPrivileges,
-          }
-        : {},
-    },
   };
 
   return <AuthorizationContext.Provider value={value}>{children}</AuthorizationContext.Provider>;
