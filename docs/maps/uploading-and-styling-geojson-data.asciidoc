@@ -1,0 +1,173 @@
+[role="xpack"]
+[[uploading-and-styling-geojson-data]]
+== Uploading & Styling GeoJSON Data
+
+The *Maps* Application makes it easy to import GeoJSON documents into an
+Elasticsearch index using the Upload GeoJSON vector file feature.
+
+[role="screenshot"]
+image::maps/images/fu_gs_select_source_file_upload.png[]
+
+[float]
+=== Prerequisites
+Before you start this tutorial, download the following GeoJSON sample data files:
+
+* https://raw.githubusercontent.com/elastic/examples/master/Maps/Getting%20Started%20Examples/geojson_upload_and_styling/logan_international_airport.geojson[Logan International Airport]
+* https://raw.githubusercontent.com/elastic/examples/master/Maps/Getting%20Started%20Examples/geojson_upload_and_styling/bangor_international_airport.geojson[Bangor International Airport]
+* https://raw.githubusercontent.com/elastic/examples/master/Maps/Getting%20Started%20Examples/geojson_upload_and_styling/lightning_detected.geojson[Lightning detected]
+* https://raw.githubusercontent.com/elastic/examples/master/Maps/Getting%20Started%20Examples/geojson_upload_and_styling/original_flight_path.geojson[Original flight path]
+* https://raw.githubusercontent.com/elastic/examples/master/Maps/Getting%20Started%20Examples/geojson_upload_and_styling/modified_flight_path.geojson[Modified flight path]
+
+
+This data represents two real airports, fictitious lightning detected and two
+fictitious airplane routes. These files are good examples of some of the types
+of vector data which can easily be uploaded to Kibana and indexed in
+Elasticsearch for display in the Maps application.
+
+[float]
+=== Take-away skills
+In this tutorial, you'll learn to:
+
+* Upload GeoJSON Files to Kibana, index them in {es}, and display
+them as layers in a map
+* Style vector layers individually to help tell a better story
+* Add an additional heatmap layer using the newly indexed {es} data
+
+[role="xpack"]
+[[maps-create]]
+=== Creating a new map
+
+The first thing to do is to create a new map.
+
+. If you haven't already, open *Maps*.
+. On the maps list page, click *Create map*.
++
+A new map is created using a base tile layer.
++
+[role="screenshot"]
+image::maps/images/gs_create_new_map.png[]
+
+[role="xpack"]
+[[maps-index-vector-data]]
+=== Indexing vector data with the Maps Application
+
+With your new map in place, now you'll want to add some data. Before we
+start adding data, let's zoom in on the New England area in the northeast
+United States. Since we'll be working with flights in this area, this should
+set the map up for a good view of the added data.
+
+==== Steps to upload and index a GeoJSON File (use for each of the following sections where indicated)
+. Below the map legend, click *Add layer*.
+. From the list of layer types, click *Upload GeoJSON vector file*.
+. Upload the file indicated according the section instructions. This should
+auto-populate the fields *Index type* and *Index  name* with the values
+`geo_point` and `logan_international_airport` respectively. These defaults will
+work well for this example.
+. The *Import file* button on the lower right shoulElasticsearchd now be active. Go ahead and
+click it.
+. You'll see some activity as the GeoJSON Upload utility creates a new index
+and index pattern for the dataset. When the process is complete, you should
+receive messages indicating both the creation of the new index and index pattern
+were successful. The *Add layer* button in the bottom right should now be
+active. Go ahead and click it.
+
+==== Add first vector layers by uploading two airport GeoJSON files
+. Complete the *Steps to upload and index a GeoJSON File* using the file
+`logan_international_airport.geojson`
+. You've now imported and indexed your first layer! You should now see the
+*Layer Settings* section. These settings are pretty flexible, so please feel
+free to experiment a bit on these and later settings. Minimally, it's
+helpful to adjust a couple of settings. If left unpopulated, *Layer name* will
+default to the layer's index pattern. For a better looking result, name the
+layer "Logan Int. Airport"
+. Scroll down to the *Layer Style* section. The default circle marker is being
+used as symbology for the layer. Change *Symbol type* to *Icon*. Handily enough,
+"Airfield" has been auto-selected, which works reasonable well. If you click on
+the field, you'll see some other available options however. The one below it,
+"Airport" might work better. Go ahead and click that.
+. Next adjust the color. You can keep the default color, or adjust
+the *Fill color* to a color of your choosing.
+. Similarly, if the default symbol size of "10" seems sufficient, than leave it
+as is. "20" might be a good alternative value for this example, it can be
+updated in the *Symbol size* field.
+. Click *Save & close*
+. Repeat these steps for the airport file `bangor_international_airport.geojson`,
+update the label name, color and size however you'd like for this dataset to
+differentiate it from the previous one!
+
+==== Add vector layer for recent lightning strikes detected in this area
+. Complete the *Steps to upload and index a GeoJSON File* using the file
+`lightning_detected.geojson`
+. Set *Layer name* to "Lightning Strikes".
+. Scroll down to the *Layer Style* section. Again the default circle marker is
+being used as symbology for the layer. Let's stick with this marker and update
+the *Fill color* to a shade of yellow.
+. The border color defaults to a shade of white, which works fine, but feel free
+to change it to something you like better by clicking on *Border color*.
+. Like the symbol size, the default circle marker has a default size of "10".
+You can again adjust this up or down by clicking on the  *Symbol size* field.
+. Click *Save & close*
+
+==== Add vector layer for the standard airplane path from Boston to Bangor
+. Complete the *Steps to upload and index a GeoJSON File* using the file
+`original_flight_path.geojson`
+. Set *Layer name* to "Original Flight Path".
+. Scroll down to the *Layer Style* section. This dataset uses default line
+styling. Looking at the map, it's evident that this line goes right through a
+high-density area of lightning strikes. Click on *Border color* and change the
+color to a shade of red as a visual indicator that this won't be a preferred
+route.
+. Feel free to change the *Border width* to a size that looks appropriate.
+. Click *Save & close*
+
+==== Add vector layer for updated airplane flight path avoiding lightning strikes
+. Complete the *Steps to upload and index a GeoJSON File* using the file
+`modified_flight_path.geojson`
+. Set *Layer name* to "Modified Flight Path".
+. Scroll down to the *Layer Style* section. On the map, this flight path nicely
+avoids the aread of lightning strikes and should be the preferred route. Click
+*Border color* and change the color to a shade of green as a visual indicator
+that this will be the chose flight path.
+. Again, feel free to change the *Border width* to a size that looks appropriate.
+. Click *Save & close*
+
+==== Save map and review
+Now that your map is complete, you'll want to save it so others can use it.
+
+. In the application toolbar, click *Save*.
+. Enter `Tutorial geojson upload` for the title.
+. Click *Confirm Save*.
++
+
+
+[role="xpack"]
+[[maps-add-heatmap-and-organize]]
+=== Organizing layers and leveraging aggregations on indexed data
+Looking over the map, it's actually fairly complete and could be considered
+done, but there are a few more additions and tweaks that can be made to tell a
+better story with our newly indexed data.
+
+Looking at the `Lightning detected` layer, it's pretty clear where lightning has
+struck. What's a little less clear, is if there have been more lightning 
+strikes in some areas vs. others, or in other words, where the real lightning 
+hot spots are. One advantage of now having indexed `geo_point` data for the 
+lightning strikes is that we can now perform aggregations on the data. 
+
+==== Add heatmap aggregation layer for lightning strikes
+. Below the map legend, click *Add layer*.
+. From the list of layer types, click *Grid aggregation*.
+. Since you've indexed `lightning_detected.geojson` using the index name & 
+pattern `lightning_detected`, that data is available to us as a `geo_point`
+aggregation. Go ahead and select the *Index pattern* `lightning_detected`
+. Next click *Show as* and select `heat map`.
+. Click *Add layer* to add the Heat map layer.
+. On the *Layer Settings* panel, go ahead and update the *Layer name* to be
+"Lightning intensity"
+. The remaining default settings are pretty good, but there are a couple other
+settings you might like to change. Under *Source Settings* > *Grid resolution*
+you can select from different heat map resolutions. The default "Coarse" looks
+pretty good, but feel free to select a different resolution.
+. Another setting that's worth playing around with is *Layer Style* >
+*Color range*. Again the default looks pretty good, but feel free to choose a
+different color range.
+. When you're finished modifying settings, click *Save & close*
