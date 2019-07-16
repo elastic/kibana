@@ -27,11 +27,13 @@ export type TransactionBreakdownAPIResponse = PromiseReturnType<
 export async function getTransactionBreakdown({
   setup,
   serviceName,
-  transactionName
+  transactionName,
+  transactionType
 }: {
   setup: Setup;
   serviceName: string;
   transactionName?: string;
+  transactionType: string;
 }) {
   const { uiFiltersES, client, config, start, end } = setup;
 
@@ -93,7 +95,7 @@ export async function getTransactionBreakdown({
             {
               term: {
                 [TRANSACTION_TYPE]: {
-                  value: 'request'
+                  value: transactionType
                 }
               }
             },
