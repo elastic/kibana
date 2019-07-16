@@ -30,8 +30,8 @@ import {
 import { AggType } from 'ui/agg_types';
 import { Vis, VisState, AggParams } from '../../../';
 import { AggConfig } from '../../../agg_config';
-// @ts-ignore
 import { aggGroupNameMaps } from '../agg_group_names';
+import { AggGroupNames } from '../agg_groups';
 import { DefaultEditorAgg } from './default_editor_agg';
 import { DefaultEditorAggAdd } from './default_editor_agg_add';
 import {
@@ -44,7 +44,7 @@ import { Schema } from '../schemas';
 
 interface DefaultEditorAggGroupProps {
   formIsTouched: boolean;
-  groupName: string;
+  groupName: AggGroupNames;
   lastParentPipelineAggTitle: string;
   metricAggs: AggConfig[];
   state: VisState;

@@ -45,8 +45,6 @@ uiModules
   .directive('visEditorAggGroup', function () {
     return {
       restrict: 'E',
-      // We can't use scope binding here yet, since quiet a lot of child directives arbitrary access
-      // parent scope values right now. So we cannot easy change this, until we remove the whole directive.
       scope: true,
       require: '?^ngModel',
       template: function () {

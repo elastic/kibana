@@ -18,8 +18,13 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { AggGroupNames } from './agg_groups';
 
 export const aggGroupNameMaps = () => ({
-  metrics: i18n.translate('common.ui.vis.editors.aggGroups.metricsText', { defaultMessage: 'Metrics' }),
-  buckets: i18n.translate('common.ui.vis.editors.aggGroups.bucketsText', { defaultMessage: 'Buckets' })
+  [AggGroupNames.Metrics]: i18n.translate('common.ui.vis.editors.aggGroups.metricsText', {
+    defaultMessage: 'Metrics',
+  }),
+  [AggGroupNames.Buckets]: i18n.translate('common.ui.vis.editors.aggGroups.bucketsText', {
+    defaultMessage: 'Buckets',
+  }),
 });
