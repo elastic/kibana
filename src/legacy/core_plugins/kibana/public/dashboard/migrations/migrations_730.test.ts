@@ -55,22 +55,23 @@ test('dashboard migration 7.3.0 migrates filters to query on search source', () 
   const newDoc = migrations730(doc, mockLogger);
 
   expect(newDoc).toMatchInlineSnapshot(`
-Object {
-  "attributes": Object {
-    "description": "",
-    "kibanaSavedObjectMeta": Object {
-      "searchSourceJSON": "{\\"filter\\":[],\\"highlightAll\\":true,\\"version\\":true,\\"query\\":{\\"query\\":\\"n: 6\\",\\"language\\":\\"lucene\\"}}",
-    },
-    "panelsJSON": "[{\\"id\\":\\"1\\",\\"type\\":\\"visualization\\",\\"foo\\":true},{\\"id\\":\\"2\\",\\"type\\":\\"visualization\\",\\"bar\\":true}]",
-    "timeRestore": false,
-    "useMargins": true,
-    "version": 1,
-  },
-  "id": "1",
-  "references": Array [],
-  "type": "dashboard",
-}
-`);
+    Object {
+      "attributes": Object {
+        "description": "",
+        "kibanaSavedObjectMeta": Object {
+          "searchSourceJSON": "{\\"filter\\":[],\\"highlightAll\\":true,\\"version\\":true,\\"query\\":{\\"query\\":\\"n: 6\\",\\"language\\":\\"lucene\\"}}",
+        },
+        "panelsJSON": "[{\\"id\\":\\"1\\",\\"type\\":\\"visualization\\",\\"foo\\":true},{\\"id\\":\\"2\\",\\"type\\":\\"visualization\\",\\"bar\\":true}]",
+        "timeRestore": false,
+        "title": "hi",
+        "useMargins": true,
+        "version": 1,
+      },
+      "id": "1",
+      "references": Array [],
+      "type": "dashboard",
+    }
+  `);
 });
 
 // See https://github.com/elastic/kibana/issues/41240 - this can happen.
