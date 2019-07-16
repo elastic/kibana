@@ -6,7 +6,6 @@
 
 import React from 'react';
 import {
-  EuiSelect,
   EuiForm,
   EuiFormRow,
   EuiButton,
@@ -21,30 +20,7 @@ import { isEmpty } from 'lodash';
 import { FETCH_STATUS } from '../../../../hooks/useFetcher';
 import { Config } from '../SettingsList';
 import { ENVIRONMENT_NOT_DEFINED } from '../../../../../common/environment_filter_values';
-
-const NO_SELECTION = 'NO_SELECTION';
-const EuiSelectWithPlaceholder: typeof EuiSelect = props => (
-  <EuiSelect
-    {...props}
-    options={[
-      { text: props.placeholder, value: NO_SELECTION },
-      ...props.options
-    ]}
-    value={isEmpty(props.value) ? NO_SELECTION : props.value}
-    onChange={e => {
-      if (props.onChange) {
-        props.onChange(
-          Object.assign(e, {
-            target: Object.assign(e.target, {
-              value:
-                e.target.value === NO_SELECTION ? undefined : e.target.value
-            })
-          })
-        );
-      }
-    }}
-  />
-);
+import { SelectWithPlaceholder } from '../../../shared/SelectWithPlaceholder';
 
 const selectPlaceholderLabel = `- ${i18n.translate(
   'xpack.apm.settings.agentConf.flyOut.selectPlaceholder',
@@ -62,7 +38,6 @@ export function AddSettingFlyoutBody({
   setServiceName,
   sampleRate,
   setSampleRate,
-  sampleRateFloat,
   serviceNames,
   serviceNamesStatus,
   environments,
@@ -73,12 +48,11 @@ export function AddSettingFlyoutBody({
   selectedConfig: Config | null;
   onDelete: () => void;
   environment?: string;
-  setEnvironment: React.Dispatch<React.SetStateAction<string | undefined>>;
+  setEnvironment: (env: string | undefined) => void;
   serviceName?: string;
-  setServiceName: React.Dispatch<React.SetStateAction<string | undefined>>;
-  sampleRate?: string;
-  setSampleRate: React.Dispatch<React.SetStateAction<string | undefined>>;
-  sampleRateFloat: number;
+  setServiceName: (env: string | undefined) => void;
+  sampleRate: string;
+  setSampleRate: (env: string) => void;
   serviceNames: string[];
   serviceNamesStatus?: FETCH_STATUS;
   environments: Array<{
@@ -133,7 +107,7 @@ export function AddSettingFlyoutBody({
             }
           )}
         >
-          <EuiSelectWithPlaceholder
+          <SelectWithPlaceholder
             placeholder={selectPlaceholderLabel}
             isLoading={serviceNamesStatus === 'loading'}
             options={serviceNames.map(text => ({ text }))}
@@ -175,11 +149,11 @@ export function AddSettingFlyoutBody({
                 environment &&
                 isSelectedEnvironmentValid &&
                 environmentStatus === 'success') ||
-              isNaN(sampleRateFloat)
+              isEmpty(sampleRate)
             )
           }
         >
-          <EuiSelectWithPlaceholder
+          <SelectWithPlaceholder
             placeholder={selectPlaceholderLabel}
             isLoading={environmentStatus === 'loading'}
             options={environmentOptions}
@@ -228,10 +202,10 @@ export function AddSettingFlyoutBody({
           isInvalid={
             !(
               (Boolean(selectedConfig) &&
-                (isNaN(sampleRateFloat) || isSampleRateValid)) ||
+                (isEmpty(sampleRate) || isSampleRateValid)) ||
               (!selectedConfig &&
                 (!(serviceName || environment) ||
-                  (isNaN(sampleRateFloat) || isSampleRateValid)))
+                  (isEmpty(sampleRate) || isSampleRateValid)))
             )
           }
         >
@@ -242,7 +216,7 @@ export function AddSettingFlyoutBody({
                 defaultMessage: 'Set sample rate'
               }
             )}
-            value={sampleRate === undefined ? '' : sampleRate}
+            value={sampleRate}
             onChange={e => {
               e.preventDefault();
               setSampleRate(e.target.value);

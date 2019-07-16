@@ -200,6 +200,8 @@ export function initSettingsApi(core: InternalCoreSetup) {
           };
         }
 
+        await createApmAgentConfigurationIndex(server);
+
         const setup = setupRequest(req);
         const payload = req.payload as Payload;
         const serviceName = payload.service.name;
