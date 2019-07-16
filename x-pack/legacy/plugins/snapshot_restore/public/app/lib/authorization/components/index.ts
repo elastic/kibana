@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { AuthorizationProvider } from './authorization_provider';
+export { AuthorizationProvider, AuthorizationContext } from './authorization_provider';
 
 export { WithPrivileges } from './with_privileges';
 

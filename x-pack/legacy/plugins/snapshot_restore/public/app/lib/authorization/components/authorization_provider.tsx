@@ -7,12 +7,15 @@
 import React, { createContext } from 'react';
 import { useLoadPermissions } from '../services';
 
-// This is wrong as we are accesing outside of the lib root folder
-// just temporary until we have our "shared ES UI" plugin in place
-import { SectionError } from '../../../components';
-
 interface Authorization {
   isLoaded: boolean;
+  apiError: {
+    data: {
+      error: string;
+      cause?: string[];
+      message?: string;
+    };
+  } | null;
   permissions: {
     hasAllPermissions: boolean;
     missingPrivileges: MissingPrivileges;
@@ -25,6 +28,7 @@ export interface MissingPrivileges {
 
 const initialValue: Authorization = {
   isLoaded: false,
+  apiError: null,
   permissions: {
     hasAllPermissions: true,
     missingPrivileges: {},
@@ -35,15 +39,10 @@ export const AuthorizationContext = createContext<Authorization>(initialValue);
 
 interface Props {
   permissionEndpoint: string;
-  FormattedMessage: typeof ReactIntl.FormattedMessage;
   children: React.ReactNode;
 }
 
-export const AuthorizationProvider = ({
-  permissionEndpoint,
-  FormattedMessage,
-  children,
-}: Props) => {
+export const AuthorizationProvider = ({ permissionEndpoint, children }: Props) => {
   const { error, data: permissionsData } = useLoadPermissions(permissionEndpoint);
 
   const isLoaded = typeof permissionsData !== 'undefined';
@@ -53,6 +52,7 @@ export const AuthorizationProvider = ({
   // to implement the interface below so we don't need the serialization.
   const value = {
     isLoaded,
+    apiError: error ? error : null,
     permissions: {
       hasAllPermissions: isLoaded ? permissionsData.hasPermission : true,
       missingPrivileges: isLoaded
@@ -64,17 +64,5 @@ export const AuthorizationProvider = ({
     },
   };
 
-  return error ? (
-    <SectionError
-      title={
-        <FormattedMessage
-          id="xpack.snapshotRestore.app.checkingPermissionsErrorMessage"
-          defaultMessage="Error checking permissions"
-        />
-      }
-      error={error}
-    />
-  ) : (
-    <AuthorizationContext.Provider value={value}>{children}</AuthorizationContext.Provider>
-  );
+  return <AuthorizationContext.Provider value={value}>{children}</AuthorizationContext.Provider>;
 };

@@ -36,7 +36,7 @@ export const useAppDependencies = () => {
 
 const getAppProviders = (deps: AppDependencies) => {
   const {
-    i18n: { Context: I18nContext, FormattedMessage },
+    i18n: { Context: I18nContext },
   } = deps.core;
 
   // Create App dependencies context and get its provider
@@ -45,7 +45,6 @@ const getAppProviders = (deps: AppDependencies) => {
   return ({ children }: { children: ReactNode }) => (
     <AuthorizationProvider
       permissionEndpoint={httpService.addBasePath(`${API_BASE_PATH}permissions`)}
-      FormattedMessage={FormattedMessage}
     >
       <I18nContext>
         <HashRouter>

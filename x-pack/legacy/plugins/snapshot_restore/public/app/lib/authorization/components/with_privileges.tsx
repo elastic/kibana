@@ -10,13 +10,11 @@ import { AuthorizationContext, MissingPrivileges } from './authorization_provide
 
 interface Props {
   privileges: string | string[];
-  children: (
-    childrenProps: {
-      isLoading: boolean;
-      hasPrivileges: boolean;
-      missingPrivileges: string[] | MissingPrivileges;
-    }
-  ) => JSX.Element;
+  children: (childrenProps: {
+    isLoading: boolean;
+    hasPrivileges: boolean;
+    missingPrivileges: string[] | MissingPrivileges;
+  }) => JSX.Element;
 }
 
 const hasPrivilege = (missingPrivileges: string[] | undefined) => {
