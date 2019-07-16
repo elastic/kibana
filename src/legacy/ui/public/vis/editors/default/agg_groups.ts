@@ -17,17 +17,7 @@
  * under the License.
  */
 
-import chrome from 'ui/chrome';
-import { metadata } from 'ui/metadata';
-import { ajaxStream as ajax, BatchOpts } from './ajax_stream';
-
-const defaultHeaders = {
-  'Content-Type': 'application/json',
-  'kbn-version': metadata.version,
-};
-
-export { BatchOpts } from './ajax_stream';
-
-export function ajaxStream<T>(opts: BatchOpts<T>) {
-  return ajax(chrome.getBasePath(), defaultHeaders, new XMLHttpRequest(), opts);
+export enum AggGroupNames {
+  Buckets = 'buckets',
+  Metrics = 'metrics',
 }

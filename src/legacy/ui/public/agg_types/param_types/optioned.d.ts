@@ -17,4 +17,23 @@
  * under the License.
  */
 
-import './tool_bar_pager_text';
+import { IndexedArray } from '../../indexed_array';
+
+interface OptionedValueProp {
+  value: string;
+  text: string;
+}
+
+interface SelectOptions<T> extends IndexedArray<T> {
+  byValue: {
+    [key: string]: T;
+  };
+}
+
+interface OptionedParamEditorProps<T = OptionedValueProp> {
+  aggParam: {
+    options: SelectOptions<T>;
+  };
+}
+
+export { OptionedValueProp, OptionedParamEditorProps };

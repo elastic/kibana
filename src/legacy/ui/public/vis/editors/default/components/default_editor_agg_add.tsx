@@ -31,10 +31,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { AggConfig } from 'ui/vis';
 import { Schema } from '../schemas';
-
-const GROUP_NAMES = {
-  BUCKETS: 'buckets',
-};
+import { AggGroupNames } from '../agg_groups';
 
 interface DefaultEditorAggAddProps {
   group?: AggConfig[];
@@ -74,7 +71,7 @@ function DefaultEditorAggAdd({
   );
 
   const groupNameLabel =
-    groupName === GROUP_NAMES.BUCKETS
+    groupName === AggGroupNames.Buckets
       ? i18n.translate('common.ui.vis.editors.aggAdd.bucketLabel', { defaultMessage: 'bucket' })
       : i18n.translate('common.ui.vis.editors.aggAdd.metricLabel', { defaultMessage: 'metric' });
 
@@ -84,7 +81,7 @@ function DefaultEditorAggAdd({
   };
 
   return stats.max > stats.count ? (
-    <EuiFlexGroup justifyContent="center">
+    <EuiFlexGroup justifyContent="center" responsive={false}>
       <EuiFlexItem grow={false}>
         <EuiPopover
           id={`addGroupButtonPopover_${groupName}`}
@@ -95,14 +92,14 @@ function DefaultEditorAggAdd({
           closePopover={() => setIsPopoverOpen(false)}
         >
           <EuiPopoverTitle>
-            {(groupName !== GROUP_NAMES.BUCKETS || (!stats.count && !stats.deprecate)) && (
+            {(groupName !== AggGroupNames.Buckets || (!stats.count && !stats.deprecate)) && (
               <FormattedMessage
                 id="common.ui.vis.editors.aggAdd.addGroupButtonLabel"
                 defaultMessage="Add {groupNameLabel}"
                 values={{ groupNameLabel }}
               />
             )}
-            {groupName === GROUP_NAMES.BUCKETS && stats.count > 0 && !stats.deprecate && (
+            {groupName === AggGroupNames.Buckets && stats.count > 0 && !stats.deprecate && (
               <FormattedMessage
                 id="common.ui.vis.editors.aggAdd.addSubGroupButtonLabel"
                 defaultMessage="Add sub-{groupNameLabel}"

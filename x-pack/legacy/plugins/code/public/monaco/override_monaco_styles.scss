@@ -10,3 +10,7 @@ textarea.inputarea {
   cursor: pointer;
   background-color: $euiColorLightestShade;
 }
+
+.code-line-decoration + .cldr.folding {
+  left: -124px !important;
+}
