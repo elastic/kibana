@@ -22,6 +22,7 @@ import { EuiFormLabel } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { AggParamEditorProps, DefaultEditorAggParams } from '../../vis/editors/default';
 import { AggConfig } from '../../vis';
+import { AggGroupNames } from '../../vis/editors/default/agg_groups';
 
 function SubMetricParamEditor({
   agg,
@@ -42,7 +43,7 @@ function SubMetricParamEditor({
   const type = aggParam.name;
 
   const aggTitle = type === 'customMetric' ? metricTitle : bucketTitle;
-  const aggGroup = type === 'customMetric' ? 'metrics' : 'buckets';
+  const aggGroup = type === 'customMetric' ? AggGroupNames.Metrics : AggGroupNames.Buckets;
 
   useEffect(() => {
     setValue(agg.params[type] || agg.type.params.byName[type].makeAgg(agg));
