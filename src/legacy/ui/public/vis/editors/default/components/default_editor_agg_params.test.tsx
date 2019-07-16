@@ -112,7 +112,7 @@ describe('DefaultEditorAggParams component', () => {
       setTouched,
       setValidity,
       onAggErrorChanged,
-    };
+    } as any;
   });
 
   it('should init with the default set of params', () => {

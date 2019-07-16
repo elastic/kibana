@@ -58,14 +58,14 @@ describe('DefaultEditorAggParams helpers', () => {
         },
         schema: {},
       };
-      const params = getAggParamsToRender({ agg, editorConfig, responseValueAggs, state });
+      const params = getAggParamsToRender({ agg, editorConfig, responseValueAggs, state } as any);
 
       expect(params).toEqual(emptyParams);
     });
 
     it('should not create any param if there is no agg type', () => {
       agg = {};
-      const params = getAggParamsToRender({ agg, editorConfig, responseValueAggs, state });
+      const params = getAggParamsToRender({ agg, editorConfig, responseValueAggs, state } as any);
 
       expect(params).toEqual(emptyParams);
     });
@@ -81,7 +81,7 @@ describe('DefaultEditorAggParams helpers', () => {
           hidden: true,
         },
       };
-      const params = getAggParamsToRender({ agg, editorConfig, responseValueAggs, state });
+      const params = getAggParamsToRender({ agg, editorConfig, responseValueAggs, state } as any);
 
       expect(params).toEqual(emptyParams);
     });
@@ -95,7 +95,7 @@ describe('DefaultEditorAggParams helpers', () => {
           hideCustomLabel: true,
         },
       };
-      const params = getAggParamsToRender({ agg, editorConfig, responseValueAggs, state });
+      const params = getAggParamsToRender({ agg, editorConfig, responseValueAggs, state } as any);
 
       expect(params).toEqual(emptyParams);
     });
@@ -129,7 +129,7 @@ describe('DefaultEditorAggParams helpers', () => {
           field: 'field',
         },
       };
-      const params = getAggParamsToRender({ agg, editorConfig, responseValueAggs, state });
+      const params = getAggParamsToRender({ agg, editorConfig, responseValueAggs, state } as any);
 
       expect(params).toEqual({
         basic: [
