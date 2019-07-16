@@ -41,7 +41,7 @@ To track multiple metrics within a single request, provide an array of events, e
 ### Disallowed characters
 
 The colon character (`:`) should not be used in app name or event names. Colons play
-a sepcial role in how metrics are stored as saved objects.
+a special role in how metrics are stored as saved objects.
 
 ### Tracking timed interactions
 
