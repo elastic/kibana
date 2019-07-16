@@ -23,6 +23,7 @@ interface CreateCustomTest extends CreateTest {
 interface CreateTests {
   spaceAware: CreateTest;
   notSpaceAware: CreateTest;
+  createSpace: CreateTest;
   custom?: CreateCustomTest;
 }
 
@@ -41,6 +42,14 @@ export function createTestSuiteFactory(es: any, esArchiver: any, supertest: Supe
       statusCode: 403,
       error: 'Forbidden',
       message: `Unable to create ${type}`,
+    });
+  };
+
+  const expectBadRequestForSpace = (resp: { [key: string]: any }) => {
+    expect(resp.body).to.eql({
+      message: "Unsupported saved object type: 'space': Bad Request",
+      statusCode: 400,
+      error: 'Bad Request',
     });
   };
 
@@ -123,6 +132,8 @@ export function createTestSuiteFactory(es: any, esArchiver: any, supertest: Supe
 
   const expectSpaceAwareRbacForbidden = createExpectRbacForbidden(spaceAwareType);
 
+  const expectSpaceTypeRbacForbidden = createExpectRbacForbidden('space');
+
   const makeCreateTest = (describeFn: DescribeFn) => (
     description: string,
     definition: CreateTestDefinition
@@ -157,6 +168,19 @@ export function createTestSuiteFactory(es: any, esArchiver: any, supertest: Supe
           .then(tests.notSpaceAware.response);
       });
 
+      it(`should return ${tests.createSpace.statusCode} for the 'space' type`, async () => {
+        await supertest
+          .post(`${getUrlPrefix(spaceId)}/api/saved_objects/space`)
+          .auth(user.username, user.password)
+          .send({
+            attributes: {
+              name: `Can't be created via the Saved Objects API`,
+            },
+          })
+          .expect(tests.createSpace.statusCode)
+          .then(tests.createSpace.response);
+      });
+
       if (tests.custom) {
         it(tests.custom.description, async () => {
           await supertest
@@ -180,5 +204,7 @@ export function createTestSuiteFactory(es: any, esArchiver: any, supertest: Supe
     expectNotSpaceAwareRbacForbidden,
     expectNotSpaceAwareResults,
     expectSpaceAwareRbacForbidden,
+    expectBadRequestForSpace,
+    expectSpaceTypeRbacForbidden,
   };
 }
