@@ -15,7 +15,7 @@ import { TooltipSelector } from '../../../components/tooltip_selector';
 
 import { indexPatternService } from '../../../../kibana_services';
 import { i18n } from '@kbn/i18n';
-import { getTermsFields } from '../../../utils/get_terms_fields';
+import { getTermsFields } from '../../../../index_pattern_util';
 import { ValidatedRange } from '../../../components/validated_range';
 
 export class UpdateSourceEditor extends Component {

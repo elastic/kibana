@@ -18,7 +18,7 @@ import { ES_SEARCH, ES_GEO_FIELD_TYPE, ES_SIZE_LIMIT } from '../../../../../comm
 import { i18n } from '@kbn/i18n';
 import { getDataSourceLabel } from '../../../../../common/i18n_getters';
 import { ESTooltipProperty } from '../../tooltips/es_tooltip_property';
-import { getTermsFields } from '../../../utils/get_terms_fields';
+import { getTermsFields } from '../../../../index_pattern_util';
 
 import { DEFAULT_FILTER_BY_MAP_BOUNDS } from './constants';
 
