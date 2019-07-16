@@ -80,6 +80,7 @@
     "**/@types/node": "10.12.27",
     "**/@types/hapi": "^17.0.18",
     "**/typescript": "^3.3.3333",
+    "**/cypress/lodash": "4.17.13",
     "**/@elastic/eui/**/core-js": "2.5.3"
   },
   "workspaces": {
@@ -182,7 +183,7 @@
     "leaflet.heat": "0.2.0",
     "less": "^2.7.3",
     "less-loader": "4.1.0",
-    "lodash": "npm:@elastic/lodash@3.10.1-kibana1",
+    "lodash": "npm:@elastic/lodash@3.10.1-kibana3",
     "lodash.clonedeep": "^4.5.0",
     "lru-cache": "4.1.1",
     "markdown-it": "^8.4.1",
