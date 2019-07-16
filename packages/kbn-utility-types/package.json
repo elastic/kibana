@@ -3,9 +3,12 @@
   "version": "1.0.0",
   "private": true,
   "license": "Apache-2.0",
-  "files": ["target"],
+  "main": "target",
   "types": "target/index.d.ts",
-  "typings": "target/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "kbn:watch": "tsc --watch"
+  },
   "dependencies": {
     "utility-types": "^3.7.0"
   }
