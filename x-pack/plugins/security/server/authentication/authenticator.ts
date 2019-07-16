@@ -242,10 +242,10 @@ export class Authenticator {
     // authentication attempt didn't fail (e.g. custom realm could "pin" client/request identity to
     // a server-side only session established during multi step login that relied on intermediate
     // client-side state which isn't needed anymore).
-    if (
+    const shouldClearSession =
       authenticationResult.shouldClearState() ||
-      (authenticationResult.failed() && getErrorStatusCode(authenticationResult.error) === 401)
-    ) {
+      (authenticationResult.failed() && getErrorStatusCode(authenticationResult.error) === 401);
+    if (existingSession && shouldClearSession) {
       sessionStorage.clear();
     } else if (authenticationResult.shouldUpdateState()) {
       sessionStorage.set({
