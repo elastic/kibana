@@ -58,7 +58,7 @@ export interface SubAggParamsProp {
   onAggTypeChange: (agg: AggConfig, aggType: AggType) => void;
   onAggErrorChanged: (agg: AggConfig, error?: string) => void;
 }
-interface DefaultEditorAggParamsProps extends SubAggParamsProp {
+export interface DefaultEditorAggParamsProps extends SubAggParamsProp {
   agg: AggConfig;
   aggIndex?: number;
   aggIsTooLow?: boolean;
