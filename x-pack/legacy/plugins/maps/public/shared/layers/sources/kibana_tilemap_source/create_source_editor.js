@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Component } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import {
   EuiFieldText,
@@ -14,62 +14,34 @@ import {
 import { getKibanaTileMap } from '../../../../meta';
 import { i18n } from '@kbn/i18n';
 
-export class CreateSourceEditor extends Component {
+export function CreateSourceEditor({ onSourceConfigChange }) {
 
-  state = {
-    url: null
-  };
+  const tilemap = getKibanaTileMap();
 
-  _loadUrl = async () => {
-    const tilemap = getKibanaTileMap();
-    if (this._isMounted) {
-      this.setState(
-        { url: tilemap.url },
-        () => {
-          if (this.state.url) {
-            this.props.previewTilemap();
-          }
-        }
-      );
-    }
-  };
-
-  componentWillUnmount() {
-    this._isMounted = false;
+  if (tilemap.url) {
+    onSourceConfigChange();
   }
 
-  componentDidMount() {
-    this._isMounted = true;
-    this._loadUrl();
-  }
-
-  render() {
-
-    if (this.state.url === null) {//still loading
-      return null;
-    }
-
-    return (
-      <EuiFormRow
-        label={
-          i18n.translate('xpack.maps.source.kbnTMS.kbnTMS.urlLabel', {
-            defaultMessage: 'Tilemap url'
-          })
-        }
-        helpText={this.state.url ? null : i18n.translate('xpack.maps.source.kbnTMS.noLayerAvailableHelptext', {
-          defaultMessage: 'No tilemap layer is available. Ask your system administrator to set "map.tilemap.url" in kibana.yml.'
+  return (
+    <EuiFormRow
+      label={
+        i18n.translate('xpack.maps.source.kbnTMS.kbnTMS.urlLabel', {
+          defaultMessage: 'Tilemap url'
         })
-        }
-      >
-        <EuiFieldText
-          readOnly
-          value={this.state.url}
-        />
-      </EuiFormRow>
-    );
-  }
+      }
+      helpText={tilemap.url ? null : i18n.translate('xpack.maps.source.kbnTMS.noLayerAvailableHelptext', {
+        defaultMessage: 'No tilemap layer is available. Ask your system administrator to set "map.tilemap.url" in kibana.yml.'
+      })
+      }
+    >
+      <EuiFieldText
+        readOnly
+        value={tilemap.url}
+      />
+    </EuiFormRow>
+  );
 }
 
 CreateSourceEditor.propTypes = {
-  previewTilemap: PropTypes.func.isRequired
+  onSourceConfigChange: PropTypes.func.isRequired
 };
