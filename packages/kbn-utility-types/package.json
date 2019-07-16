@@ -1,0 +1,9 @@
+{
+  "name": "@kbn/utility-types",
+  "version": "0.0.0",
+  "private": true,
+  "license": "Apache-2.0",
+  "dependencies": {
+    "utility-types": "^3.7.0"
+  }
+}
