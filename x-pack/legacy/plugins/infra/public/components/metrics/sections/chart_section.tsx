@@ -30,7 +30,7 @@ interface Props {
   intl: InjectedIntl;
 }
 
-export const ChartSectionNew = injectI18n(
+export const ChartSection = injectI18n(
   ({ onChangeRangeTime, section, metric, intl, stopLiveStreaming, isLiveStreaming }: Props) => {
     const { visConfig } = section;
     const formatter = get(visConfig, 'formatter', InfraFormatterType.number);
