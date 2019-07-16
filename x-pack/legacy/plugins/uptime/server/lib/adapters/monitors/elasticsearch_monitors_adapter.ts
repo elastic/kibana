@@ -197,11 +197,10 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
             aggs: {
               latest: {
                 top_hits: {
-                  sort: [
-                    {
-                      '@timestamp': { order: 'desc' },
-                    },
-                  ],
+                  sort: [{ '@timestamp': { order: 'desc' } }],
+                  _source: {
+                    includes: ['summary.*', 'monitor.id', '@timestamp', 'observer.geo.name'],
+                  },
                   size: 1,
                 },
               },
