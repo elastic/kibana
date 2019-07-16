@@ -12,6 +12,7 @@ import { HeatmapLegend } from './components/heatmap/legend/heatmap_legend';
 import { DEFAULT_HEATMAP_COLOR_RAMP_NAME } from './components/heatmap/heatmap_constants';
 import { getColorRampStops } from './color_utils';
 import { i18n } from '@kbn/i18n';
+import { EuiIcon } from '@elastic/eui';
 
 export class HeatmapStyle extends AbstractStyle {
 
@@ -54,6 +55,15 @@ export class HeatmapStyle extends AbstractStyle {
       <HeatmapLegend
         colorRampName={this._descriptor.colorRampName}
         label={label}
+      />
+    );
+  }
+
+  getIcon() {
+    return (
+      <EuiIcon
+        size="m"
+        type="heatmap"
       />
     );
   }

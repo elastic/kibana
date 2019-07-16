@@ -188,9 +188,7 @@ describe('execute()', () => {
     const executorOptions: ActionTypeExecutorOptions = { config, params, services };
     sendEmailMock.mockReset();
     await actionType.executor(executorOptions);
-    expect(sendEmailMock.mock.calls).toMatchInlineSnapshot(`
-Array [
-  Array [
+    expect(sendEmailMock.mock.calls[0][1]).toMatchInlineSnapshot(`
     Object {
       "content": Object {
         "message": "a message to you",
@@ -213,9 +211,7 @@ Array [
         "service": "__json",
         "user": "bob",
       },
-    },
-  ],
-]
+    }
 `);
   });
 });
