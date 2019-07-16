@@ -14,8 +14,9 @@ import {
   InfraLogItem,
   InfraLogMessageSegment,
   InfraLogSummaryBucket,
+  InfraLogSummaryHighlightBucket,
 } from '../../../graphql/types';
-import { InfraDateRangeAggregationBucket, InfraFrameworkRequest } from '../../adapters/framework';
+import { InfraFrameworkRequest } from '../../adapters/framework';
 import {
   InfraSourceConfiguration,
   InfraSources,
@@ -217,8 +218,44 @@ export class InfraLogEntriesDomain {
       bucketSize,
       filterQuery
     );
-    const buckets = dateRangeBuckets.map(convertDateRangeBucketToSummaryBucket);
-    return buckets;
+    return dateRangeBuckets;
+  }
+
+  public async getLogSummaryHighlightBucketsBetween(
+    request: InfraFrameworkRequest,
+    sourceId: string,
+    start: number,
+    end: number,
+    bucketSize: number,
+    highlightQueries: LogEntryQuery[],
+    filterQuery?: LogEntryQuery
+  ): Promise<InfraLogSummaryHighlightBucket[][]> {
+    const { configuration } = await this.libs.sources.getSourceConfiguration(request, sourceId);
+    const summaries = await Promise.all(
+      highlightQueries.map(async highlightQuery => {
+        const query = filterQuery
+          ? {
+              bool: {
+                must: [filterQuery, highlightQuery],
+              },
+            }
+          : highlightQuery;
+        const summaryBuckets = await this.adapter.getContainedLogSummaryBuckets(
+          request,
+          configuration,
+          start,
+          end,
+          bucketSize,
+          query
+        );
+        const summaryHighlightBuckets = summaryBuckets
+          .filter(logSummaryBucketHasEntries)
+          .map(convertLogSummaryBucketToSummaryHighlightBucket);
+        return summaryHighlightBuckets;
+      })
+    );
+
+    return summaries;
   }
 
   public async getLogItem(
@@ -283,7 +320,7 @@ export interface LogEntriesAdapter {
     end: number,
     bucketSize: number,
     filterQuery?: LogEntryQuery
-  ): Promise<InfraDateRangeAggregationBucket[]>;
+  ): Promise<LogSummaryBucket[]>;
 
   getLogItem(
     request: InfraFrameworkRequest,
@@ -299,6 +336,13 @@ export interface LogEntryDocument {
   gid: string;
   highlights: Highlights;
   key: TimeKey;
+}
+
+export interface LogSummaryBucket {
+  entriesCount: number;
+  start: number;
+  end: number;
+  topEntryKeys: TimeKey[];
 }
 
 const convertLogDocumentToEntry = (
@@ -331,12 +375,16 @@ const convertLogDocumentToEntry = (
   }),
 });
 
-const convertDateRangeBucketToSummaryBucket = (
-  bucket: InfraDateRangeAggregationBucket
-): InfraLogSummaryBucket => ({
-  entriesCount: bucket.doc_count,
-  start: bucket.from || 0,
-  end: bucket.to || 0,
+const logSummaryBucketHasEntries = (bucket: LogSummaryBucket) =>
+  bucket.entriesCount > 0 && bucket.topEntryKeys.length > 0;
+
+const convertLogSummaryBucketToSummaryHighlightBucket = (
+  bucket: LogSummaryBucket
+): InfraLogSummaryHighlightBucket => ({
+  entriesCount: bucket.entriesCount,
+  start: bucket.start,
+  end: bucket.end,
+  representativeKey: bucket.topEntryKeys[0],
 });
 
 const getRequiredFields = (

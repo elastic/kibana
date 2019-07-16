@@ -66,6 +66,8 @@ export interface InfraSource {
   logEntryHighlights: InfraLogEntryInterval[];
   /** A consecutive span of summary buckets within an interval */
   logSummaryBetween: InfraLogSummaryInterval;
+  /** Spans of summary highlight buckets within an interval */
+  logSummaryHighlightsBetween: InfraLogSummaryHighlightInterval[];
 
   logItem: InfraLogItem;
   /** A snapshot of nodes */
@@ -267,6 +269,30 @@ export interface InfraLogSummaryBucket {
   end: number;
   /** The number of entries inside the bucket */
   entriesCount: number;
+}
+/** A consecutive sequence of log summary highlight buckets */
+export interface InfraLogSummaryHighlightInterval {
+  /** The millisecond timestamp corresponding to the start of the interval covered by the summary */
+  start?: number | null;
+  /** The millisecond timestamp corresponding to the end of the interval covered by the summary */
+  end?: number | null;
+  /** The query the log entries were filtered by */
+  filterQuery?: string | null;
+  /** The query the log entries were highlighted with */
+  highlightQuery?: string | null;
+  /** A list of the log entries */
+  buckets: InfraLogSummaryHighlightBucket[];
+}
+/** A log summary highlight bucket */
+export interface InfraLogSummaryHighlightBucket {
+  /** The start timestamp of the bucket */
+  start: number;
+  /** The end timestamp of the bucket */
+  end: number;
+  /** The number of highlighted entries inside the bucket */
+  entriesCount: number;
+  /** The time key of a representative of the highlighted log entries in this bucket */
+  representativeKey: InfraTimeKey;
 }
 
 export interface InfraLogItem {
@@ -495,6 +521,18 @@ export interface LogSummaryBetweenInfraSourceArgs {
   /** The query to filter the log entries by */
   filterQuery?: string | null;
 }
+export interface LogSummaryHighlightsBetweenInfraSourceArgs {
+  /** The millisecond timestamp that corresponds to the start of the interval */
+  start: number;
+  /** The millisecond timestamp that corresponds to the end of the interval */
+  end: number;
+  /** The size of each bucket in milliseconds */
+  bucketSize: number;
+  /** The query to filter the log entries by */
+  filterQuery?: string | null;
+  /** The highlighting to apply to the log entries */
+  highlightQueries: string[];
+}
 export interface LogItemInfraSourceArgs {
   id: string;
 }
@@ -672,6 +710,12 @@ export namespace InfraSourceResolvers {
     logEntryHighlights?: LogEntryHighlightsResolver<InfraLogEntryInterval[], TypeParent, Context>;
     /** A consecutive span of summary buckets within an interval */
     logSummaryBetween?: LogSummaryBetweenResolver<InfraLogSummaryInterval, TypeParent, Context>;
+    /** Spans of summary highlight buckets within an interval */
+    logSummaryHighlightsBetween?: LogSummaryHighlightsBetweenResolver<
+      InfraLogSummaryHighlightInterval[],
+      TypeParent,
+      Context
+    >;
 
     logItem?: LogItemResolver<InfraLogItem, TypeParent, Context>;
     /** A snapshot of nodes */
@@ -781,6 +825,24 @@ export namespace InfraSourceResolvers {
     bucketSize: number;
     /** The query to filter the log entries by */
     filterQuery?: string | null;
+  }
+
+  export type LogSummaryHighlightsBetweenResolver<
+    R = InfraLogSummaryHighlightInterval[],
+    Parent = InfraSource,
+    Context = InfraContext
+  > = Resolver<R, Parent, Context, LogSummaryHighlightsBetweenArgs>;
+  export interface LogSummaryHighlightsBetweenArgs {
+    /** The millisecond timestamp that corresponds to the start of the interval */
+    start: number;
+    /** The millisecond timestamp that corresponds to the end of the interval */
+    end: number;
+    /** The size of each bucket in milliseconds */
+    bucketSize: number;
+    /** The query to filter the log entries by */
+    filterQuery?: string | null;
+    /** The highlighting to apply to the log entries */
+    highlightQueries: string[];
   }
 
   export type LogItemResolver<
@@ -1431,6 +1493,84 @@ export namespace InfraLogSummaryBucketResolvers {
   export type EntriesCountResolver<
     R = number,
     Parent = InfraLogSummaryBucket,
+    Context = InfraContext
+  > = Resolver<R, Parent, Context>;
+}
+/** A consecutive sequence of log summary highlight buckets */
+export namespace InfraLogSummaryHighlightIntervalResolvers {
+  export interface Resolvers<
+    Context = InfraContext,
+    TypeParent = InfraLogSummaryHighlightInterval
+  > {
+    /** The millisecond timestamp corresponding to the start of the interval covered by the summary */
+    start?: StartResolver<number | null, TypeParent, Context>;
+    /** The millisecond timestamp corresponding to the end of the interval covered by the summary */
+    end?: EndResolver<number | null, TypeParent, Context>;
+    /** The query the log entries were filtered by */
+    filterQuery?: FilterQueryResolver<string | null, TypeParent, Context>;
+    /** The query the log entries were highlighted with */
+    highlightQuery?: HighlightQueryResolver<string | null, TypeParent, Context>;
+    /** A list of the log entries */
+    buckets?: BucketsResolver<InfraLogSummaryHighlightBucket[], TypeParent, Context>;
+  }
+
+  export type StartResolver<
+    R = number | null,
+    Parent = InfraLogSummaryHighlightInterval,
+    Context = InfraContext
+  > = Resolver<R, Parent, Context>;
+  export type EndResolver<
+    R = number | null,
+    Parent = InfraLogSummaryHighlightInterval,
+    Context = InfraContext
+  > = Resolver<R, Parent, Context>;
+  export type FilterQueryResolver<
+    R = string | null,
+    Parent = InfraLogSummaryHighlightInterval,
+    Context = InfraContext
+  > = Resolver<R, Parent, Context>;
+  export type HighlightQueryResolver<
+    R = string | null,
+    Parent = InfraLogSummaryHighlightInterval,
+    Context = InfraContext
+  > = Resolver<R, Parent, Context>;
+  export type BucketsResolver<
+    R = InfraLogSummaryHighlightBucket[],
+    Parent = InfraLogSummaryHighlightInterval,
+    Context = InfraContext
+  > = Resolver<R, Parent, Context>;
+}
+/** A log summary highlight bucket */
+export namespace InfraLogSummaryHighlightBucketResolvers {
+  export interface Resolvers<Context = InfraContext, TypeParent = InfraLogSummaryHighlightBucket> {
+    /** The start timestamp of the bucket */
+    start?: StartResolver<number, TypeParent, Context>;
+    /** The end timestamp of the bucket */
+    end?: EndResolver<number, TypeParent, Context>;
+    /** The number of highlighted entries inside the bucket */
+    entriesCount?: EntriesCountResolver<number, TypeParent, Context>;
+    /** The time key of a representative of the highlighted log entries in this bucket */
+    representativeKey?: RepresentativeKeyResolver<InfraTimeKey, TypeParent, Context>;
+  }
+
+  export type StartResolver<
+    R = number,
+    Parent = InfraLogSummaryHighlightBucket,
+    Context = InfraContext
+  > = Resolver<R, Parent, Context>;
+  export type EndResolver<
+    R = number,
+    Parent = InfraLogSummaryHighlightBucket,
+    Context = InfraContext
+  > = Resolver<R, Parent, Context>;
+  export type EntriesCountResolver<
+    R = number,
+    Parent = InfraLogSummaryHighlightBucket,
+    Context = InfraContext
+  > = Resolver<R, Parent, Context>;
+  export type RepresentativeKeyResolver<
+    R = InfraTimeKey,
+    Parent = InfraLogSummaryHighlightBucket,
     Context = InfraContext
   > = Resolver<R, Parent, Context>;
 }

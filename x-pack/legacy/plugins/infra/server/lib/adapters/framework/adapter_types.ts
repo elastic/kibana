@@ -149,15 +149,21 @@ export interface SortedSearchHit extends SearchHit {
   };
 }
 
-export interface InfraDateRangeAggregationBucket {
+export type InfraDateRangeAggregationBucket<NestedAggregation extends object = {}> = {
   from?: number;
   to?: number;
   doc_count: number;
   key: string;
+} & NestedAggregation;
+
+export interface InfraDateRangeAggregationResponse<NestedAggregation extends object = {}> {
+  buckets: Array<InfraDateRangeAggregationBucket<NestedAggregation>>;
 }
 
-export interface InfraDateRangeAggregationResponse {
-  buckets: InfraDateRangeAggregationBucket[];
+export interface InfraTopHitsAggregationResponse {
+  hits: {
+    hits: [];
+  };
 }
 
 export interface InfraMetadataAggregationBucket {

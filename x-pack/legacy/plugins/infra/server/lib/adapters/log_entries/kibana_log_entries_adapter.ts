@@ -4,7 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+/* eslint-disable @typescript-eslint/no-empty-interface */
+
 import { timeMilliseconds } from 'd3-time';
+import * as runtimeTypes from 'io-ts';
 import first from 'lodash/fp/first';
 import get from 'lodash/fp/get';
 import has from 'lodash/fp/has';
@@ -16,14 +19,10 @@ import {
   LogEntriesAdapter,
   LogEntryDocument,
   LogEntryQuery,
+  LogSummaryBucket,
 } from '../../domains/log_entries_domain';
 import { InfraSourceConfiguration } from '../../sources';
-import {
-  InfraDateRangeAggregationBucket,
-  InfraDateRangeAggregationResponse,
-  InfraFrameworkRequest,
-  SortedSearchHit,
-} from '../framework';
+import { InfraFrameworkRequest, SortedSearchHit } from '../framework';
 import { InfraBackendFrameworkAdapter } from '../framework';
 
 const DAY_MILLIS = 24 * 60 * 60 * 1000;
@@ -111,7 +110,7 @@ export class InfraKibanaLogEntriesAdapter implements LogEntriesAdapter {
     end: number,
     bucketSize: number,
     filterQuery?: LogEntryQuery
-  ): Promise<InfraDateRangeAggregationBucket[]> {
+  ): Promise<LogSummaryBucket[]> {
     const bucketIntervalStarts = timeMilliseconds(new Date(start), new Date(end), bucketSize);
 
     const query = {
@@ -128,6 +127,18 @@ export class InfraKibanaLogEntriesAdapter implements LogEntriesAdapter {
                 from: bucketIntervalStart.getTime(),
                 to: bucketIntervalStart.getTime() + bucketSize,
               })),
+            },
+            aggregations: {
+              top_hits_by_key: {
+                top_hits: {
+                  size: 1,
+                  sort: [
+                    { [sourceConfiguration.fields.timestamp]: 'asc' },
+                    { [sourceConfiguration.fields.tiebreaker]: 'asc' },
+                  ],
+                  _source: false,
+                },
+              },
             },
           },
         },
@@ -148,17 +159,23 @@ export class InfraKibanaLogEntriesAdapter implements LogEntriesAdapter {
           },
         },
         size: 0,
+        track_total_hits: false,
       },
     };
 
-    const response = await this.framework.callWithRequest<
-      any,
-      { count_by_date?: InfraDateRangeAggregationResponse }
-    >(request, 'search', query);
+    const response = await this.framework.callWithRequest<any, {}>(request, 'search', query);
 
-    return response.aggregations && response.aggregations.count_by_date
-      ? response.aggregations.count_by_date.buckets
-      : [];
+    return LogSummaryResponseRuntimeType.decode(response)
+      .map(logSummaryResponse =>
+        logSummaryResponse.aggregations.count_by_date.buckets.map(
+          convertDateRangeBucketToSummaryBucket
+        )
+      )
+      .getOrElse([]);
+
+    // return response.aggregations && response.aggregations.count_by_date
+    //   ? response.aggregations.count_by_date.buckets
+    //   : [];
   }
 
   public async getLogItem(
@@ -322,5 +339,51 @@ const convertHitToLogEntryDocument = (fields: string[]) => (
   },
 });
 
+const convertDateRangeBucketToSummaryBucket = (
+  bucket: LogSummaryDateRangeBucket
+): LogSummaryBucket => ({
+  entriesCount: bucket.doc_count,
+  start: bucket.from || 0,
+  end: bucket.to || 0,
+  topEntryKeys: bucket.top_hits_by_key.hits.hits.map(hit => ({
+    tiebreaker: hit.sort[1],
+    time: hit.sort[0],
+  })),
+});
+
 const createQueryFilterClauses = (filterQuery: LogEntryQuery | undefined) =>
   filterQuery ? [filterQuery] : [];
+
+const LogSummaryDateRangeBucketRuntimeType = runtimeTypes.intersection([
+  runtimeTypes.type({
+    doc_count: runtimeTypes.number,
+    key: runtimeTypes.string,
+    top_hits_by_key: runtimeTypes.type({
+      hits: runtimeTypes.type({
+        hits: runtimeTypes.array(
+          runtimeTypes.type({
+            sort: runtimeTypes.tuple([runtimeTypes.number, runtimeTypes.number]),
+          })
+        ),
+      }),
+    }),
+  }),
+  runtimeTypes.partial({
+    from: runtimeTypes.number,
+    to: runtimeTypes.number,
+  }),
+]);
+
+export interface LogSummaryDateRangeBucket
+  extends runtimeTypes.TypeOf<typeof LogSummaryDateRangeBucketRuntimeType> {}
+
+const LogSummaryResponseRuntimeType = runtimeTypes.type({
+  aggregations: runtimeTypes.type({
+    count_by_date: runtimeTypes.type({
+      buckets: runtimeTypes.array(LogSummaryDateRangeBucketRuntimeType),
+    }),
+  }),
+});
+
+export interface LogSummaryResponse
+  extends runtimeTypes.TypeOf<typeof LogSummaryResponseRuntimeType> {}

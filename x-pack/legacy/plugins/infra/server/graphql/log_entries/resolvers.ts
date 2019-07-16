@@ -45,6 +45,11 @@ export type InfraSourceLogSummaryBetweenResolver = ChildResolverOf<
   QuerySourceResolver
 >;
 
+export type InfraSourceLogSummaryHighlightsBetweenResolver = ChildResolverOf<
+  InfraResolverOf<InfraSourceResolvers.LogSummaryHighlightsBetweenResolver>,
+  QuerySourceResolver
+>;
+
 export type InfraSourceLogItem = ChildResolverOf<
   InfraResolverOf<InfraSourceResolvers.LogItemResolver>,
   QuerySourceResolver
@@ -58,6 +63,7 @@ export const createLogEntriesResolvers = (libs: {
     logEntriesBetween: InfraSourceLogEntriesBetweenResolver;
     logEntryHighlights: InfraSourceLogEntryHighlightsResolver;
     logSummaryBetween: InfraSourceLogSummaryBetweenResolver;
+    logSummaryHighlightsBetween: InfraSourceLogSummaryHighlightsBetweenResolver;
     logItem: InfraSourceLogItem;
   };
   InfraLogEntryColumn: {
@@ -160,6 +166,23 @@ export const createLogEntriesResolvers = (libs: {
         buckets,
       };
     },
+    async logSummaryHighlightsBetween(source, args, { req }) {
+      const summaryHighlightSets = await libs.logEntries.getLogSummaryHighlightBucketsBetween(
+        req,
+        source.id,
+        args.start,
+        args.end,
+        args.bucketSize,
+        args.highlightQueries.map(parseFilterQuery).filter(isDefined),
+        parseFilterQuery(args.filterQuery)
+      );
+
+      return summaryHighlightSets.map(buckets => ({
+        start: buckets.length > 0 ? buckets[0].start : null,
+        end: buckets.length > 0 ? buckets[buckets.length - 1].end : null,
+        buckets,
+      }));
+    },
     async logItem(source, args, { req }) {
       const sourceConfiguration = SourceConfigurationRuntimeType.decode(
         source.configuration
@@ -217,6 +240,8 @@ const isConstantSegment = (
 
 const isFieldSegment = (segment: InfraLogMessageSegment): segment is InfraLogMessageFieldSegment =>
   'field' in segment && 'value' in segment && 'highlights' in segment;
+
+const isDefined = <Value>(value?: Value): value is Value => typeof value !== 'undefined';
 
 const parseHighlightInputs = (highlightInputs: InfraLogEntryHighlightInput[]) =>
   highlightInputs
