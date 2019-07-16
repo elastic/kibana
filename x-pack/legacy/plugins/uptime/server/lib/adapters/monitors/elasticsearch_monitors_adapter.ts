@@ -235,7 +235,7 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
           summary: { up, down },
           monitor: { id },
         } = source;
-        const timestamp = get(source, '@timestamp');
+        const timestamp = get(source, '@timestamp', 0);
         const location = get(source, 'observer.geo.name', '');
 
         let idSummary = summaryByIdLocation[id];
@@ -261,11 +261,15 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
         continue;
       }
       const locationInfo = summaryByIdLocation[id];
-      const { up: locationUp, down: locationDown } = reduce(locationInfo, (acc, value, key) => {
-        acc.up += value.up;
-        acc.down += value.down;
-        return acc;
-      }, {up: 0, down: 0});
+      const { up: locationUp, down: locationDown } = reduce(
+        locationInfo,
+        (acc, value, key) => {
+          acc.up += value.up;
+          acc.down += value.down;
+          return acc;
+        },
+        { up: 0, down: 0 }
+      );
 
       if (locationDown === 0) {
         up++;
