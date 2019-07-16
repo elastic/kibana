@@ -26,6 +26,7 @@ export const DEFAULT_CSP_RULES = Object.freeze([
   `script-src 'unsafe-eval' 'nonce-{nonce}'`,
   'worker-src blob:',
   'child-src blob:',
+  `style-src 'unsafe-inline' 'self'`,
 ]);
 
 export async function generateCSPNonce() {
