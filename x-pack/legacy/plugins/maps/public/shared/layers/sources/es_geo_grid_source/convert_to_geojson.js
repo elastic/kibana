@@ -6,11 +6,7 @@
 
 import { RENDER_AS } from './render_as';
 import { getTileBoundingBox } from './geo_tile_utils';
-
-const EMPTY_FEATURE_COLLECTION = {
-  type: 'FeatureCollection',
-  features: []
-};
+import { EMPTY_FEATURE_COLLECTION } from '../../../../../common/constants';
 
 export function convertToGeoJson({ table, renderAs }) {
 
