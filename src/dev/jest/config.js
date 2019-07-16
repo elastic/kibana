@@ -37,6 +37,9 @@ export default {
     '<rootDir>/packages',
     '<rootDir>/src/test_utils',
     '<rootDir>/test/functional/services/remote',
+    '<rootDir>/x-pack/plugins',
+    '<rootDir>/x-pack/legacy/plugins',
+    '<rootDir>/x-pack/legacy/server',
   ],
   collectCoverageFrom: [
     'packages/kbn-ui-framework/src/components/**/*.js',
@@ -59,6 +62,12 @@ export default {
     '^test_utils/(.*)': '<rootDir>/src/test_utils/public/$1',
     '\\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga)$': '<rootDir>/src/dev/jest/mocks/file_mock.js',
     '\\.(css|less|scss)$': '<rootDir>/src/dev/jest/mocks/style_mock.js',
+
+    '^test_utils/enzyme_helpers': '<rootDir>/x-pack/test_utils/enzyme_helpers.tsx',
+    '^plugins/watcher/models/(.*)': '<rootDir/x-pack/legacy/plugins/watcher/public/models/$1',
+    '^legacy/plugins/xpack_main/(.*);': '<rootDir>/x-pack/legacy/plugins/xpack_main/public/$1',
+    '^src/core/(.*)': `<rootDir>/src/core/$1`,
+
   },
   setupFiles: [
     '<rootDir>/src/dev/jest/setup/babel_polyfill.js',
