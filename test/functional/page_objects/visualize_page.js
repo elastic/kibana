@@ -332,19 +332,22 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
+    async isChecked(selector) {
+      const checkbox = await testSubjects.find(selector);
+      return await checkbox.isSelected();
+    }
+
     async checkCheckbox(selector) {
-      const element = await testSubjects.find(selector);
-      const isSelected = await element.isSelected();
-      if(!isSelected) {
+      const isChecked = await this.isChecked(selector);
+      if (!isChecked) {
         log.debug(`checking checkbox ${selector}`);
         await testSubjects.click(selector);
       }
     }
 
     async uncheckCheckbox(selector) {
-      const element = await testSubjects.find(selector);
-      const isSelected = await element.isSelected();
-      if(isSelected) {
+      const isChecked = await this.isChecked(selector);
+      if (isChecked) {
         log.debug(`unchecking checkbox ${selector}`);
         await testSubjects.click(selector);
       }
@@ -1255,6 +1258,9 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
       return result;
     }
 
+    async removeDimension(agg) {
+      await testSubjects.click(`aggregationEditor${agg} removeDimensionBtn`);
+    }
   }
 
   return new VisualizePage();

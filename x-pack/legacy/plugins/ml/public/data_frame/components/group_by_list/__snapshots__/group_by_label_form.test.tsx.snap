@@ -44,6 +44,7 @@ exports[`Data Frame: <GroupByLabelForm /> Date histogram aggregation 1`] = `
         />
       }
       closePopover={[Function]}
+      display="inlineBlock"
       hasArrow={true}
       id="mlIntervalFormPopover"
       isOpen={false}
@@ -127,6 +128,7 @@ exports[`Data Frame: <GroupByLabelForm /> Histogram aggregation 1`] = `
         />
       }
       closePopover={[Function]}
+      display="inlineBlock"
       hasArrow={true}
       id="mlIntervalFormPopover"
       isOpen={false}
@@ -199,6 +201,7 @@ exports[`Data Frame: <GroupByLabelForm /> Terms aggregation 1`] = `
         />
       }
       closePopover={[Function]}
+      display="inlineBlock"
       hasArrow={true}
       id="mlIntervalFormPopover"
       isOpen={false}
