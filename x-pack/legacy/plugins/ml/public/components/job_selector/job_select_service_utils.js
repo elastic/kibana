@@ -155,8 +155,12 @@ export function getGroupsFromJobs(jobs) {
 }
 
 export function normalizeTimes(jobs, dateFormatTz, ganttBarWidth) {
-  const min = Math.min(...jobs.map(job => +job.timeRange.from));
-  const max = Math.max(...jobs.map(job => +job.timeRange.to));
+  const jobsWithTimeRange = jobs.filter((job) => {
+    return (job.timeRange.to !== undefined) && (job.timeRange.from !== undefined);
+  });
+
+  const min = Math.min(...jobsWithTimeRange.map(job => +job.timeRange.from));
+  const max = Math.max(...jobsWithTimeRange.map(job => +job.timeRange.to));
   const ganttScale = d3.scale.linear().domain([min, max]).range([1, ganttBarWidth]);
 
   jobs.forEach(job => {
@@ -180,6 +184,13 @@ export function normalizeTimes(jobs, dateFormatTz, ganttBarWidth) {
           fromString,
           toString,
         }
+      });
+    } else {
+      job.timeRange.widthPx = 0;
+      job.timeRange.fromPx = 0;
+      job.timeRange.toPx = 0;
+      job.timeRange.label = i18n.translate('xpack.ml.jobSelector.noResultsForJobLabel', {
+        defaultMessage: 'No results'
       });
     }
   });

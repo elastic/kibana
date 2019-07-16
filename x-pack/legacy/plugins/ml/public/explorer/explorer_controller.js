@@ -30,6 +30,7 @@ import { checkGetJobsPrivilege } from '../privilege/check_privilege';
 import { getIndexPatterns, loadIndexPatterns } from '../util/index_utils';
 import { MlTimeBuckets } from 'plugins/ml/util/ml_time_buckets';
 import { explorer$ } from './explorer_dashboard_service';
+import { mlTimefilterRefresh$ } from '../services/timefilter_refresh_service';
 import { mlFieldFormatService } from 'plugins/ml/services/field_format_service';
 import { mlJobService } from '../services/job_service';
 import { refreshIntervalWatcher } from '../util/refresh_interval_watcher';
@@ -203,6 +204,12 @@ module.controller('MlExplorerController', function (
     }
   });
 
+  const timefilterRefreshServiceSub = mlTimefilterRefresh$.subscribe(() => {
+    if ($scope.jobSelectionUpdateInProgress === false) {
+      explorer$.next({ action: EXPLORER_ACTION.RELOAD });
+    }
+  });
+
   // Refresh all the data when the time range is altered.
   $scope.$listenAndDigestAsync(timefilter, 'fetch', () => {
     if ($scope.jobSelectionUpdateInProgress === false) {
@@ -287,6 +294,7 @@ module.controller('MlExplorerController', function (
   $scope.$on('$destroy', () => {
     explorerSubscriber.unsubscribe();
     jobSelectServiceSub.unsubscribe();
+    timefilterRefreshServiceSub.unsubscribe();
     refreshWatcher.cancel();
     $(window).off('resize', jqueryRedrawOnResize);
     // Cancel listening for updates to the global nav state.

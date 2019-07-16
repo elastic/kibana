@@ -12,7 +12,7 @@ import { SnapshotRestore } from '../../../../../../common/types';
 import { UIM_RESTORE_LIST_EXPAND_INDEX } from '../../../../constants';
 import { useAppDependencies } from '../../../../index';
 import { uiMetricService } from '../../../../services/ui_metric';
-import { formatDate } from '../../../../services/text';
+import { FormattedDateTime } from '../../../../components';
 import { ShardsTable } from './shards_table';
 
 interface Props {
@@ -170,7 +170,7 @@ export const RestoreTable: React.FunctionComponent<Props> = ({ restores }) => {
         { isComplete }: SnapshotRestore
       ) => {
         return isComplete ? (
-          formatDate(latestActivityTimeInMillis)
+          <FormattedDateTime epochMs={latestActivityTimeInMillis} />
         ) : (
           <FormattedMessage
             id="xpack.snapshotRestore.restoreList.table.lastActivityColumn.nowLabel"

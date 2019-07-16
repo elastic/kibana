@@ -26,16 +26,16 @@ export function escount(): ExpressionFunction<'escount', Filter, Arguments, any>
       types: ['filter'],
     },
     args: {
-      index: {
-        types: ['string'],
-        default: '_all',
-        help: argHelp.index,
-      },
       query: {
         types: ['string'],
         aliases: ['_', 'q'],
         help: argHelp.query,
         default: '"-_index:.kibana"',
+      },
+      index: {
+        types: ['string'],
+        default: '_all',
+        help: argHelp.index,
       },
     },
     fn: (context, args, handlers) => {

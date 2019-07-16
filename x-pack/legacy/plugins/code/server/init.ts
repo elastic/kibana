@@ -9,7 +9,6 @@ import * as _ from 'lodash';
 import { i18n } from '@kbn/i18n';
 
 import { XPackMainPlugin } from '../../xpack_main/xpack_main';
-import { checkRepos } from './check_repos';
 import { GitOperations } from './git_operations';
 import { LspIndexerFactory, RepositoryIndexInitializerFactory, tryMigrateIndices } from './indexer';
 import { EsClient, Esqueue } from './lib/esqueue';
@@ -28,7 +27,7 @@ import { repositoryRoute } from './routes/repository';
 import { documentSearchRoute, repositorySearchRoute, symbolSearchRoute } from './routes/search';
 import { setupRoute } from './routes/setup';
 import { workspaceRoute } from './routes/workspace';
-import { IndexScheduler, UpdateScheduler } from './scheduler';
+import { CloneScheduler, IndexScheduler, UpdateScheduler } from './scheduler';
 import { CodeServerRouter } from './security';
 import { ServerOptions } from './server_options';
 import { ServerLoggerFactory } from './utils/server_logger_factory';
@@ -227,14 +226,16 @@ async function initCodeNode(server: Server, serverOptions: ServerOptions, log: L
   ).bind();
 
   // Initialize schedulers.
+  const cloneScheduler = new CloneScheduler(cloneWorker, serverOptions, esClient, log);
   const updateScheduler = new UpdateScheduler(updateWorker, serverOptions, esClient, log);
   const indexScheduler = new IndexScheduler(indexWorker, serverOptions, esClient, log);
   updateScheduler.start();
   if (!serverOptions.disableIndexScheduler) {
     indexScheduler.start();
   }
-  // check code node repos on disk
-  await checkRepos(cloneWorker, esClient, serverOptions, log);
+  // Check if the repository is local on the file system.
+  // This should be executed once at the startup time of Kibana.
+  cloneScheduler.schedule();
 
   const codeServerRouter = new CodeServerRouter(server);
   // Add server routes and initialize the plugin here

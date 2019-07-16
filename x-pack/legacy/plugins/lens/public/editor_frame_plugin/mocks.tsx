@@ -13,7 +13,7 @@ export function createMockVisualization(): jest.Mocked<Visualization> {
   return {
     getPersistableState: jest.fn(_state => ({})),
     getSuggestions: jest.fn(_options => []),
-    initialize: jest.fn(_state => ({})),
+    initialize: jest.fn((_datasource, _state?) => ({})),
     renderConfigPanel: jest.fn(),
     toExpression: jest.fn((_state, _datasource) => null),
   };
@@ -38,7 +38,7 @@ export function createMockDatasource(): DatasourceMock {
     getDatasourceSuggestionsFromCurrentState: jest.fn(_state => []),
     getPersistableState: jest.fn(),
     getPublicAPI: jest.fn((_state, _setState) => publicAPIMock),
-    initialize: jest.fn(_state => Promise.resolve()),
+    initialize: jest.fn((_state?) => Promise.resolve()),
     renderDataPanel: jest.fn(),
     toExpression: jest.fn(_state => null),
 
