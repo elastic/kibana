@@ -72,7 +72,7 @@ export class ESGeoGridSource extends AbstractESSource {
   }
 
   static renderEditor({ onPreviewSource, inspectorAdapters }) {
-    const onSelect = (sourceConfig) => {
+    const onSourceConfigChange = (sourceConfig) => {
       if (!sourceConfig) {
         onPreviewSource(null);
         return;
@@ -83,7 +83,7 @@ export class ESGeoGridSource extends AbstractESSource {
       onPreviewSource(source);
     };
 
-    return (<CreateSourceEditor onSelect={onSelect}/>);
+    return (<CreateSourceEditor onSourceConfigChange={onSourceConfigChange}/>);
   }
 
   renderSourceSettingsEditor({ onChange }) {

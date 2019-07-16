@@ -6,49 +6,75 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const INTEGRATIONS = i18n.translate('xpack.siem.components.mlPopup.integrationTitle', {
-  defaultMessage: 'Integrations',
-});
-
-export const MACHINE_LEARNING = i18n.translate(
-  'xpack.siem.components.mlPopup.machineLearningTitle',
+export const ANOMALY_DETECTION = i18n.translate(
+  'xpack.siem.components.mlPopup.anomalyDetectionButtonLabel',
   {
-    defaultMessage: 'Machine Learning',
+    defaultMessage: 'Anomaly detection',
   }
 );
 
-export const ML_DESCRIPTION = i18n.translate(
-  'xpack.siem.components.mlPopup.machineLearningDescription',
+export const ANOMALY_DETECTION_TITLE = i18n.translate(
+  'xpack.siem.components.mlPopup.anomalyDetectionTitle',
   {
-    defaultMessage:
-      "View the results of machine learning jobs such as Anomalous Events, Hosts & IP's throughout the SIEM App.",
+    defaultMessage: 'Anomaly Detection Settings',
   }
 );
 
-export const CREATE_JOBS = i18n.translate('xpack.siem.components.mlPopup.createJobsTitle', {
-  defaultMessage: 'Create jobs',
+export const UPGRADE_TITLE = i18n.translate('xpack.siem.components.mlPopup.upgradeTitle', {
+  defaultMessage: 'Upgrade to Elastic Platinum',
 });
 
-export const CREATING_JOBS = i18n.translate('xpack.siem.components.mlPopup.creatingJobsTitle', {
-  defaultMessage: 'Creating jobs...',
-});
-
-export const JOB_DETAILS = i18n.translate('xpack.siem.components.mlPopup.jobDetailsTitle', {
-  defaultMessage: 'Job Details',
-});
-
-export const JOB_DETAILS_TOOL_TIP = i18n.translate(
-  'xpack.siem.components.mlPopup.jobDetailsToolTip',
+export const UPGRADE_DESCRIPTION = i18n.translate(
+  'xpack.siem.components.mlPopup.upgradeDescription',
   {
     defaultMessage:
-      "Running ML Jobs can be resource intensive. Ensure your cluster's ml nodes are adequately configured before starting the jobs below.",
+      'In order to access SIEM’s anomaly detection features, you must be subscribed to an Elastic Platinum license. With it, you’ll have the ability to run Machine Learning jobs to view anomalous events throughout SIEM.',
   }
 );
 
-export const SHOW_ALL_JOBS = i18n.translate('xpack.siem.components.mlPopup.showAllJobs', {
-  defaultMessage: 'Show all SIEM jobs',
+export const UPGRADE_BUTTON = i18n.translate('xpack.siem.components.mlPopup.upgradeButtonLabel', {
+  defaultMessage: 'Subscription Options',
 });
 
-export const SHOW_SIEM_JOBS = i18n.translate('xpack.siem.components.mlPopup.showSiemJobsLabel', {
-  defaultMessage: 'Show only embedded jobs',
+export const FILTER_PLACEHOLDER = i18n.translate(
+  'xpack.siem.components.mlPopup.filterPlaceholder',
+  {
+    defaultMessage: 'e.g. rare_process_linux',
+  }
+);
+
+export const SHOW_ELASTIC_JOBS = i18n.translate('xpack.siem.components.mlPopup.showAllJobsLabel', {
+  defaultMessage: 'Elastic Jobs',
 });
+
+export const SHOW_CUSTOM_JOBS = i18n.translate('xpack.siem.components.mlPopup.showSiemJobsLabel', {
+  defaultMessage: 'Custom Jobs',
+});
+
+export const COLUMN_JOB_NAME = i18n.translate(
+  'xpack.siem.components.mlPopup.jobsTable.jobNameColumn',
+  {
+    defaultMessage: 'Job Name',
+  }
+);
+
+export const COLUMN_RUN_JOB = i18n.translate(
+  'xpack.siem.components.mlPopup.jobsTable.runJobColumn',
+  {
+    defaultMessage: 'Run Job',
+  }
+);
+
+export const NO_ITEMS_TEXT = i18n.translate(
+  'xpack.siem.components.mlPopup.jobsTable.noItemsDescription',
+  {
+    defaultMessage: 'No SIEM Machine Learning Jobs Found',
+  }
+);
+
+export const CREATE_CUSTOM_JOB = i18n.translate(
+  'xpack.siem.components.mlPopup.jobsTable.createCustomJobButtonLabel',
+  {
+    defaultMessage: 'Create custom job',
+  }
+);
