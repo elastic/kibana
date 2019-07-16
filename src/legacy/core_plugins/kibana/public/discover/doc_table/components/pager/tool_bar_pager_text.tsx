@@ -16,5 +16,23 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import React from 'react';
+import { FormattedMessage } from '@kbn/i18n/react';
 
-import './tool_bar_pager_buttons';
+interface Props {
+  startItem: number;
+  endItem: number;
+  totalItems: number;
+}
+
+export function ToolBarPagerText({ startItem, endItem, totalItems }: Props) {
+  return (
+    <div className="kuiToolBarText" data-test-subj="toolBarPagerText">
+      <FormattedMessage
+        id="kbn.docTable.pagerControl.pagesCountLabel"
+        defaultMessage="{startItem}&ndash;{endItem} of {totalItems}"
+        values={{ startItem, endItem, totalItems }}
+      />
+    </div>
+  );
+}

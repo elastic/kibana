@@ -17,5 +17,12 @@
  * under the License.
  */
 
-import './components/tool_bar_pager_text/tool_bar_pager_text';
-import './components/tool_bar_pager_buttons/tool_bar_pager_buttons';
+import { ajaxStream as ajax, BatchOpts } from './ajax_stream';
+
+export const ajaxStream = (version: string, basePath: string) => <T>(opts: BatchOpts<T>) => {
+  const defaultHeaders = {
+    'Content-Type': 'application/json',
+    'kbn-version': version,
+  };
+  return ajax(basePath, defaultHeaders, new XMLHttpRequest(), opts);
+};

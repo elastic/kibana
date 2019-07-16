@@ -18,31 +18,16 @@
  */
 
 import { uiModules } from 'ui/modules';
-import template from './tool_bar_pager_buttons.html';
+import { ToolBarPagerText } from './tool_bar_pager_text';
+import { ToolBarPagerButtons } from './tool_bar_pager_buttons';
+import { wrapInI18nContext } from 'ui/i18n';
 
 const app = uiModules.get('kibana');
 
-app.directive('toolBarPagerButtons', function () {
-  return {
-    restrict: 'E',
-    replace: true,
-    template: template,
-    scope: {
-      hasNextPage: '=',
-      hasPreviousPage: '=',
-      onPageNext: '=',
-      onPagePrevious: '=',
-    },
-    controllerAs: 'toolBarPagerButtons',
-    bindToController: true,
-    controller: class ToolBarPagerButtonsController {
-      nextPage = () => {
-        this.onPageNext();
-      };
+app.directive('toolBarPagerText', function (reactDirective) {
+  return reactDirective(wrapInI18nContext(ToolBarPagerText));
+});
 
-      previousPage = () => {
-        this.onPagePrevious();
-      };
-    }
-  };
+app.directive('toolBarPagerButtons', function (reactDirective) {
+  return reactDirective(wrapInI18nContext(ToolBarPagerButtons));
 });
