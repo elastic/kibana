@@ -70,6 +70,7 @@ create and manage jobs and post data to them. For more information, see
 {ref}/ml-apis.html[Machine Learning APIs].
 ===============================
 
+////
 Ready to get some hands-on experience? See
 {stack-ov}/ml-getting-started.html[Getting Started with Machine Learning].
 
@@ -79,3 +80,4 @@ advanced jobs:
 * https://www.elastic.co/videos/machine-learning-tutorial-creating-a-single-metric-job[Machine Learning for the Elastic Stack: Creating a single metric job]
 * https://www.elastic.co/videos/machine-learning-tutorial-creating-a-multi-metric-job[Machine Learning for the Elastic Stack: Creating a multi-metric job]
 * https://www.elastic.co/videos/machine-learning-lab-3-detect-outliers-in-a-population[Machine Learning for the Elastic Stack: Detect Outliers in a Population]
+////

@@ -85,25 +85,25 @@ describe('validateActionTypeParams()', () => {
     expect(() => {
       validateActionTypeParams(actionType, {});
     }).toThrowErrorMatchingInlineSnapshot(
-      `"The actionParams is invalid: child \\"message\\" fails because [\\"message\\" is required]"`
+      `"The actionParams is invalid: [message]: expected value of type [string] but got [undefined]"`
     );
 
     expect(() => {
       validateActionTypeParams(actionType, { message: 1 });
     }).toThrowErrorMatchingInlineSnapshot(
-      `"The actionParams is invalid: child \\"message\\" fails because [\\"message\\" must be a string]"`
+      `"The actionParams is invalid: [message]: expected value of type [string] but got [number]"`
     );
 
     expect(() => {
       validateActionTypeParams(actionType, { message: 'x', tags: 2 });
     }).toThrowErrorMatchingInlineSnapshot(
-      `"The actionParams is invalid: child \\"tags\\" fails because [\\"tags\\" must be an array]"`
+      `"The actionParams is invalid: [tags]: expected value of type [array] but got [number]"`
     );
 
     expect(() => {
       validateActionTypeParams(actionType, { message: 'x', tags: [2] });
     }).toThrowErrorMatchingInlineSnapshot(
-      `"The actionParams is invalid: child \\"tags\\" fails because [\\"tags\\" at position 0 fails because [\\"0\\" must be a string]]"`
+      `"The actionParams is invalid: [tags.0]: expected value of type [string] but got [number]"`
     );
   });
 });

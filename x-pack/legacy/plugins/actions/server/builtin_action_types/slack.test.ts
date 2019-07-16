@@ -85,13 +85,13 @@ describe('validateParams()', () => {
     expect(() => {
       validateActionTypeParams(actionType, {});
     }).toThrowErrorMatchingInlineSnapshot(
-      `"The actionParams is invalid: child \\"message\\" fails because [\\"message\\" is required]"`
+      `"The actionParams is invalid: [message]: expected value of type [string] but got [undefined]"`
     );
 
     expect(() => {
       validateActionTypeParams(actionType, { message: 1 });
     }).toThrowErrorMatchingInlineSnapshot(
-      `"The actionParams is invalid: child \\"message\\" fails because [\\"message\\" must be a string]"`
+      `"The actionParams is invalid: [message]: expected value of type [string] but got [number]"`
     );
   });
 });
@@ -107,13 +107,13 @@ describe('validateActionTypeConfig()', () => {
     expect(() => {
       validateActionTypeConfig(actionType, {});
     }).toThrowErrorMatchingInlineSnapshot(
-      `"The following actionTypeConfig attributes are invalid: webhookUrl [any.required]"`
+      `"The actionTypeConfig is invalid: [webhookUrl]: expected value of type [string] but got [undefined]"`
     );
 
     expect(() => {
       validateActionTypeConfig(actionType, { webhookUrl: 1 });
     }).toThrowErrorMatchingInlineSnapshot(
-      `"The following actionTypeConfig attributes are invalid: webhookUrl [string.base]"`
+      `"The actionTypeConfig is invalid: [webhookUrl]: expected value of type [string] but got [number]"`
     );
   });
 });
