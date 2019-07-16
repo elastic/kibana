@@ -84,6 +84,7 @@
 
       <!-- remove button -->
       <button
+        data-test-subj="removeDimensionBtn"
         ng-if="canRemove(agg)"
         aria-label="{{::'common.ui.vis.editors.agg.removeDimensionButtonAriaLabel' | i18n: { defaultMessage: 'Remove Dimension' } }}"
         ng-if="stats.count > stats.min"

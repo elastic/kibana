@@ -36,7 +36,7 @@ If you don't have a repository, you're prompted to register one. The
 *Register repository* wizard supports three repository types
 out of the box: shared file system, read-only URL, and source-only.  
 For details about these repositories and their settings, 
-see {ref}/modules-snapshots.html#_repositories[Repositories]. For an example, 
+see {ref}/modules-snapshots.html#snapshots-repositories[Repositories]. For an example, 
 see <<snapshot-repositories-example, registering a shared file system repository>>.
 
 To use other repositories, such as S3, you can install plugins. See  
@@ -52,7 +52,7 @@ into each snapshot for further investigation.
 image:management/snapshot-restore/images/snapshot_details.png["Snapshot details"]
 
 To create snapshots, use the Kibana <<console-kibana, Console>>. The 
-{ref}//modules-snapshots.html#_snapshot[snapshot API]
+{ref}//modules-snapshots.html#snapshots-take-snapshot[snapshot API]
 takes the current state and data in your index or cluster, and then saves it to a 
 shared repository. 
 
@@ -133,7 +133,7 @@ The repository currently doesn’t have any snapshots.
 
 [float]
 ==== Add a snapshot to the repository
-Use the {ref}//modules-snapshots.html#_snapshot[snapshot API] to create a snapshot.
+Use the {ref}//modules-snapshots.html#snapshots-take-snapshot[snapshot API] to create a snapshot.
 
 . Go to *Dev Tools > Console*.
 . Create the snapshot. 
