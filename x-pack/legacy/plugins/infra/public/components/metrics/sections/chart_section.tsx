@@ -19,7 +19,9 @@ import {
   getChartName,
   getChartColor,
   getChartType,
+  seriesHasLessThen2DataPoints,
 } from './helpers';
+import { ErrorMessage } from './error_message';
 
 interface Props {
   section: InfraMetricLayoutSection;
@@ -55,6 +57,37 @@ export const ChartSection = injectI18n(
       },
       [onChangeRangeTime, isLiveStreaming, stopLiveStreaming]
     );
+
+    if (!metric) {
+      return (
+        <ErrorMessage
+          title={intl.formatMessage({
+            id: 'xpack.infra.ChartSection.missingMetricDataTitle',
+            defaultMessage: 'Missing Data',
+          })}
+          body={intl.formatMessage({
+            id: 'xpack.infra.ChartSection.missingMetricDataTitle',
+            defaultMessage: 'The data for this chart is missing.',
+          })}
+        />
+      );
+    }
+
+    if (metric.series.some(seriesHasLessThen2DataPoints)) {
+      return (
+        <ErrorMessage
+          title={intl.formatMessage({
+            id: 'xpack.infra.ChartSection.notEnoughDataPointsToRenderTitle',
+            defaultMessage: 'Not Enough Data',
+          })}
+          body={intl.formatMessage({
+            id: 'xpack.infra.ChartSection.notEnoughDataPointsToRenderText',
+            defaultMessage:
+              'Not enough data points to render chart, try increasing the time range.',
+          })}
+        />
+      );
+    }
 
     return (
       <EuiPageContentBody>

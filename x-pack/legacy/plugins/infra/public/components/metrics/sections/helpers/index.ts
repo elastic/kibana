@@ -24,7 +24,7 @@ export const getFormatter = (formatter: InfraFormatterType, template: string) =>
 /**
  * Does a series have more then two points?
  */
-const seriesHasLessThen2DataPoints = (series: InfraDataSeries): boolean => {
+export const seriesHasLessThen2DataPoints = (series: InfraDataSeries): boolean => {
   return series.data.length < 2;
 };
 
