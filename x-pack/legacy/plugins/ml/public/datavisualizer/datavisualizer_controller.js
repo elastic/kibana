@@ -588,7 +588,7 @@ module
             if (err.statusCode === 500) {
               toastNotifications.addDanger(
                 i18n.translate('xpack.ml.datavisualizer.fieldsInternalServerErrorTitle', {
-                  defaultMessage: 'Error loading data for fields in index {index}. {message}. bob' +
+                  defaultMessage: 'Error loading data for fields in index {index}. {message}. ' +
                     'The request may have timed out. Try using a smaller sample size or narrowing the time range.',
                   values: {
                     index: indexPattern.title,
