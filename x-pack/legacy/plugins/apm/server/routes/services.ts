@@ -10,8 +10,9 @@ import { AgentName } from '../../typings/es_schemas/ui/fields/Agent';
 import { createApmTelementry, storeApmTelemetry } from '../lib/apm_telemetry';
 import { withDefaultValidators } from '../lib/helpers/input_validation';
 import { setupRequest } from '../lib/helpers/setup_request';
-import { getService } from '../lib/services/get_service';
+import { getServiceAgentName } from '../lib/services/get_service_agent_name';
 import { getServices } from '../lib/services/get_services';
+import { getServiceTransactionTypes } from '../lib/services/get_service_transaction_types';
 
 const ROOT = '/api/apm/services';
 const defaultErrorHandler = (err: Error) => {
@@ -48,7 +49,7 @@ export function initServicesApi(core: InternalCoreSetup) {
 
   server.route({
     method: 'GET',
-    path: `${ROOT}/{serviceName}`,
+    path: `${ROOT}/{serviceName}/agent_name`,
     options: {
       validate: {
         query: withDefaultValidators()
@@ -58,7 +59,25 @@ export function initServicesApi(core: InternalCoreSetup) {
     handler: req => {
       const setup = setupRequest(req);
       const { serviceName } = req.params;
-      return getService(serviceName, setup).catch(defaultErrorHandler);
+      return getServiceAgentName(serviceName, setup).catch(defaultErrorHandler);
+    }
+  });
+
+  server.route({
+    method: 'GET',
+    path: `${ROOT}/{serviceName}/transaction_types`,
+    options: {
+      validate: {
+        query: withDefaultValidators()
+      },
+      tags: ['access:apm']
+    },
+    handler: req => {
+      const setup = setupRequest(req);
+      const { serviceName } = req.params;
+      return getServiceTransactionTypes(serviceName, setup).catch(
+        defaultErrorHandler
+      );
     }
   });
 }

@@ -6,7 +6,7 @@
 
 import { TransactionBreakdownAPIResponse } from '../../../../server/lib/transactions/breakdown';
 import { TimeSeriesAPIResponse } from '../../../../server/lib/transactions/charts';
-import { ITransactionDistributionAPIResponse } from '../../../../server/lib/transactions/distribution';
+import { TransactionDistributionAPIResponse } from '../../../../server/lib/transactions/distribution';
 import { callApi } from '../callApi';
 import { getUiFiltersES } from '../../ui_filters/get_ui_filters_es';
 import { UIFilters } from '../../../../typings/ui-filters';
@@ -55,7 +55,7 @@ export async function loadTransactionDistribution({
   traceId?: string;
   uiFilters: UIFilters;
 }) {
-  return callApi<ITransactionDistributionAPIResponse>({
+  return callApi<TransactionDistributionAPIResponse>({
     pathname: `/api/apm/services/${serviceName}/transaction_groups/distribution`,
     query: {
       start,

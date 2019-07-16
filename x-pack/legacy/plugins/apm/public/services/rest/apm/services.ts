@@ -4,11 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ServiceAPIResponse } from '../../../../server/lib/services/get_service';
+import { ServiceAgentNameAPIResponse } from '../../../../server/lib/services/get_service_agent_name';
 import { ServiceListAPIResponse } from '../../../../server/lib/services/get_services';
 import { callApi } from '../callApi';
 import { getUiFiltersES } from '../../ui_filters/get_ui_filters_es';
 import { UIFilters } from '../../../../typings/ui-filters';
+import { ServiceTransactionTypesAPIResponse } from '../../../../server/lib/services/get_service_transaction_types';
 
 export async function loadServiceList({
   start,
@@ -29,23 +30,43 @@ export async function loadServiceList({
   });
 }
 
-export async function loadServiceDetails({
+export async function loadServiceAgentName({
   serviceName,
   start,
-  end,
-  uiFilters
+  end
 }: {
   serviceName: string;
   start: string;
   end: string;
-  uiFilters: UIFilters;
 }) {
-  return callApi<ServiceAPIResponse>({
-    pathname: `/api/apm/services/${serviceName}`,
+  const { agentName } = await callApi<ServiceAgentNameAPIResponse>({
+    pathname: `/api/apm/services/${serviceName}/agent_name`,
     query: {
       start,
-      end,
-      uiFiltersES: await getUiFiltersES(uiFilters)
+      end
     }
   });
+
+  return agentName;
+}
+
+export async function loadServiceTransactionTypes({
+  serviceName,
+  start,
+  end
+}: {
+  serviceName: string;
+  start: string;
+  end: string;
+}) {
+  const { transactionTypes } = await callApi<
+    ServiceTransactionTypesAPIResponse
+  >({
+    pathname: `/api/apm/services/${serviceName}/transaction_types`,
+    query: {
+      start,
+      end
+    }
+  });
+  return transactionTypes;
 }

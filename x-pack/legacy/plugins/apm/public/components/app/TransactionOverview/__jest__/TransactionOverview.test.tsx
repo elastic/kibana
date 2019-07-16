@@ -7,8 +7,10 @@
 import React from 'react';
 import { queryByLabelText, render } from 'react-testing-library';
 import { TransactionOverview } from '..';
-import * as hooks from '../../../../hooks/useLocation';
+import * as useLocationHook from '../../../../hooks/useLocation';
 import { history } from '../../../../utils/history';
+import { IUrlParams } from '../../../../context/UrlParamsContext/types';
+import * as useServiceTransactionTypesHook from '../../../../hooks/useServiceTransactionTypes';
 
 jest.mock('ui/kfetch');
 
@@ -25,18 +27,20 @@ afterAll(() => {
 function setup({
   urlParams,
   serviceTransactionTypes
-}: Parameters<typeof TransactionOverview>[0]) {
+}: {
+  urlParams: IUrlParams;
+  serviceTransactionTypes: string[];
+}) {
   jest.spyOn(history, 'replace');
-  jest.spyOn(hooks, 'useLocation').mockReturnValue({ pathname: '' } as any);
-  jest.spyOn(hooks, 'useLocation').mockReturnValue({ pathname: '' } as any);
+  jest
+    .spyOn(useLocationHook, 'useLocation')
+    .mockReturnValue({ pathname: '' } as any);
 
-  const { container } = render(
-    <TransactionOverview
-      urlParams={urlParams}
-      serviceTransactionTypes={serviceTransactionTypes}
-    />
-  );
+  jest
+    .spyOn(useServiceTransactionTypesHook, 'useServiceTransactionTypes')
+    .mockReturnValue(serviceTransactionTypes);
 
+  const { container } = render(<TransactionOverview urlParams={urlParams} />);
   return { container };
 }
 
