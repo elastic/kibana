@@ -9,26 +9,27 @@ import { RouteComponentProps } from 'react-router';
 import { ActionCreator } from 'typescript-fsa';
 import { StaticIndexPattern } from 'ui/index_patterns';
 
+import { Dispatch } from 'redux';
 import { hostsModel, KueryFilterQuery, networkModel, SerializedFilterQuery } from '../../store';
 import { UrlInputsModel } from '../../store/inputs/model';
 import { InputsModelId } from '../../store/inputs/constants';
 
 import { CONSTANTS } from './constants';
+import { DispatchUpdateTimeline } from '../open_timeline/types';
 
-export const LOCATION_KEYS: LocationKeysType[] = [
-  CONSTANTS.hostsDetails,
-  CONSTANTS.hostsPage,
-  CONSTANTS.networkDetails,
-  CONSTANTS.networkPage,
+export type UrlStateType = 'host' | 'network' | 'overview' | 'timeline';
+
+export const ALL_URL_STATE_KEYS: KeyUrlState[] = [
+  CONSTANTS.kqlQuery,
+  CONSTANTS.timerange,
+  CONSTANTS.timelineId,
 ];
 
-export const URL_STATE_KEYS: KeyUrlState[] = [CONSTANTS.kqlQuery, CONSTANTS.timerange];
-
-export const LOCATION_MAPPED_TO_MODEL: LocationMappedToModel = {
-  [CONSTANTS.networkPage]: networkModel.NetworkType.page,
-  [CONSTANTS.networkDetails]: networkModel.NetworkType.details,
-  [CONSTANTS.hostsPage]: hostsModel.HostsType.page,
-  [CONSTANTS.hostsDetails]: hostsModel.HostsType.details,
+export const URL_STATE_KEYS: Record<UrlStateType, KeyUrlState[]> = {
+  host: [CONSTANTS.kqlQuery, CONSTANTS.timerange, CONSTANTS.timelineId],
+  network: [CONSTANTS.kqlQuery, CONSTANTS.timerange, CONSTANTS.timelineId],
+  timeline: [CONSTANTS.timelineId, CONSTANTS.timerange],
+  overview: [CONSTANTS.timelineId],
 };
 
 export type LocationTypes =
@@ -36,51 +37,25 @@ export type LocationTypes =
   | CONSTANTS.networkPage
   | CONSTANTS.hostsDetails
   | CONSTANTS.hostsPage
-  | null;
-
-export type LocationTypesNoNull =
-  | CONSTANTS.networkDetails
-  | CONSTANTS.networkPage
-  | CONSTANTS.hostsDetails
-  | CONSTANTS.hostsPage;
-
-export interface KqlQueryObject {
-  [CONSTANTS.networkDetails]: KqlQuery;
-  [CONSTANTS.networkPage]: KqlQuery;
-  [CONSTANTS.hostsDetails]: KqlQuery;
-  [CONSTANTS.hostsPage]: KqlQuery;
-  [key: string]: KqlQuery;
-}
-
-export interface LocationMappedToModel {
-  [CONSTANTS.hostsDetails]: hostsModel.HostsType.details;
-  [CONSTANTS.hostsPage]: hostsModel.HostsType.page;
-  [CONSTANTS.networkDetails]: networkModel.NetworkType.details;
-  [CONSTANTS.networkPage]: networkModel.NetworkType.page;
-  [key: string]:
-    | networkModel.NetworkType.page
-    | networkModel.NetworkType.details
-    | hostsModel.HostsType.details
-    | hostsModel.HostsType.page;
-}
-
-export type LocationKeysType = keyof LocationMappedToModel;
+  | CONSTANTS.overviewPage
+  | CONSTANTS.timelinePage
+  | CONSTANTS.unknown;
 
 export interface KqlQuery {
   filterQuery: KueryFilterQuery | null;
-  queryLocation: LocationTypes;
-  type: networkModel.NetworkType | hostsModel.HostsType;
+  queryLocation: LocationTypes | null;
 }
 
 export interface UrlState {
-  [CONSTANTS.kqlQuery]: KqlQueryObject;
+  [CONSTANTS.kqlQuery]: KqlQuery;
   [CONSTANTS.timerange]: UrlInputsModel;
+  [CONSTANTS.timelineId]: string;
 }
 export type KeyUrlState = keyof UrlState;
 
-export interface UrlStateProps {
-  children: (args: { isInitializing: boolean }) => React.ReactNode;
-  indexPattern: StaticIndexPattern;
+export interface UrlStateProps<TCache = object> {
+  isInitializing: boolean;
+  indexPattern?: StaticIndexPattern;
   mapToUrlState?: (value: string) => UrlState;
   onChange?: (urlState: UrlState, previousUrlState: UrlState) => void;
   onInitialize?: (urlState: UrlState) => void;
@@ -88,9 +63,15 @@ export interface UrlStateProps {
 
 export interface UrlStateStateToPropsType {
   urlState: UrlState;
+  queryLocation: LocationTypes;
 }
 
 export interface UrlStateDispatchToPropsType {
+  addGlobalLinkTo: ActionCreator<{ linkToId: InputsModelId }>;
+  addTimelineLinkTo: ActionCreator<{ linkToId: InputsModelId }>;
+  dispatch: Dispatch;
+  removeGlobalLinkTo: ActionCreator<void>;
+  removeTimelineLinkTo: ActionCreator<void>;
   setHostsKql: ActionCreator<{
     filterQuery: SerializedFilterQuery;
     hostsType: hostsModel.HostsType;
@@ -115,6 +96,11 @@ export interface UrlStateDispatchToPropsType {
   }>;
   toggleTimelineLinkTo: ActionCreator<{
     linkToId: InputsModelId;
+  }>;
+  updateTimeline: DispatchUpdateTimeline;
+  updateTimelineIsLoading: ActionCreator<{
+    id: string;
+    isLoading: boolean;
   }>;
 }
 

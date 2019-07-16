@@ -77,7 +77,7 @@ export const updateTimeline = actionCreator<{
 
 export const addTimeline = actionCreator<{
   id: string;
-  timeline: TimelineResult;
+  timeline: TimelineModel;
 }>('ADD_TIMELINE');
 
 export const startTimelineSaving = actionCreator<{

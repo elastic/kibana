@@ -27,6 +27,7 @@ import { createStore } from '../store';
 import { GlobalToaster, ManageGlobalToaster } from '../components/toasters';
 import { MlCapabilitiesProvider } from '../components/ml/permissions/ml_capabilities_provider';
 import { useKibanaUiSetting } from '../lib/settings/use_kibana_ui_setting';
+import { ApolloClientContext } from '../utils/apollo_context';
 
 const startApp = (libs: AppFrontendLibs) => {
   const history = createHashHistory();
@@ -43,18 +44,20 @@ const startApp = (libs: AppFrontendLibs) => {
           <ManageGlobalToaster>
             <ReduxStoreProvider store={store}>
               <ApolloProvider client={libs.apolloClient}>
-                <ThemeProvider
-                  theme={() => ({
-                    eui: darkMode ? euiDarkVars : euiLightVars,
-                    darkMode,
-                  })}
-                >
-                  <MlCapabilitiesProvider>
-                    <PageRouter history={history} />
-                  </MlCapabilitiesProvider>
-                </ThemeProvider>
-                <ErrorToastDispatcher />
-                <GlobalToaster />
+                <ApolloClientContext.Provider value={libs.apolloClient}>
+                  <ThemeProvider
+                    theme={() => ({
+                      eui: darkMode ? euiDarkVars : euiLightVars,
+                      darkMode,
+                    })}
+                  >
+                    <MlCapabilitiesProvider>
+                      <PageRouter history={history} />
+                    </MlCapabilitiesProvider>
+                  </ThemeProvider>
+                  <ErrorToastDispatcher />
+                  <GlobalToaster />
+                </ApolloClientContext.Provider>
               </ApolloProvider>
             </ReduxStoreProvider>
           </ManageGlobalToaster>

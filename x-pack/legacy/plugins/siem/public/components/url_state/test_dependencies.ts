@@ -110,6 +110,7 @@ export const defaultProps: UrlStateContainerPropTypes = {
         type: networkModel.NetworkType.page,
       },
     },
+    [CONSTANTS.timelineId]: '',
   },
   setAbsoluteTimerange: (jest.fn() as unknown) as ActionCreator<{
     from: number;

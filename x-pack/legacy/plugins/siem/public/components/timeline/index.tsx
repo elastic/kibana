@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { isEqual } from 'lodash/fp';
+import { isEqual, get } from 'lodash/fp';
 import * as React from 'react';
 import { connect } from 'react-redux';
 import { ActionCreator } from 'typescript-fsa';

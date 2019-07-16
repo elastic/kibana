@@ -4,11 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { isEmpty } from 'lodash/fp';
 import { decode, encode, RisonValue } from 'rison-node';
 import { Location } from 'history';
 import { QueryString } from 'ui/utils/query_string';
-import { KqlQuery, LocationTypes } from './types';
 import { CONSTANTS } from './constants';
+import { LocationTypes, UrlStateType } from './types';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const decodeRisonUrlState = (value: string | undefined): RisonValue | any | undefined => {
@@ -38,6 +39,17 @@ export const replaceStateKeyInQueryString = <UrlState extends any>(
   urlState: UrlState | undefined
 ) => (queryString: string) => {
   const previousQueryValues = QueryString.decode(queryString);
+  if (
+    isEmpty(urlState) ||
+    (urlState && urlState.filterQuery === null) ||
+    (urlState && urlState.filterQuery != null && urlState.filterQuery.expression === '')
+  ) {
+    delete previousQueryValues[stateKey];
+    return QueryString.encode({
+      ...previousQueryValues,
+    });
+  }
+
   // ಠ_ಠ Code was copied from x-pack/legacy/plugins/infra/public/utils/url_state.tsx ಠ_ಠ
   // Remove this if these utilities are promoted to kibana core
   const encodedUrlState =
@@ -59,33 +71,55 @@ export const replaceQueryStringInLocation = (location: Location, queryString: st
   }
 };
 
-export const getCurrentLocation = (pathname: string): LocationTypes | null => {
+export const getUrlType = (pathname: string): UrlStateType => {
+  const removeSlash = pathname.replace(/\/$/, '');
+  const trailingPath = removeSlash.match(/([^\/]+$)/);
+  if (trailingPath !== null) {
+    if (trailingPath[0] === 'hosts' || pathname.match(/^\/hosts\/.+$/) != null) {
+      return 'host';
+    } else if (trailingPath[0] === 'network' || pathname.match(/^\/network\/.+$/) != null) {
+      return 'network';
+    } else if (trailingPath[0] === 'overview') {
+      return 'overview';
+    } else if (trailingPath[0] === 'timelines') {
+      return 'timeline';
+    }
+  }
+  return 'overview';
+};
+
+export const getCurrentLocation = (pathname: string): LocationTypes => {
   const removeSlash = pathname.replace(/\/$/, '');
   const trailingPath = removeSlash.match(/([^\/]+$)/);
   if (trailingPath !== null) {
     if (trailingPath[0] === 'hosts') {
       return CONSTANTS.hostsPage;
-    }
-    if (trailingPath[0] === 'network') {
-      return CONSTANTS.networkPage;
-    }
-    if (pathname.match(/hosts\/.*?/)) {
+    } else if (pathname.match(/^\/hosts\/.+$/) != null) {
       return CONSTANTS.hostsDetails;
-    }
-    if (pathname.match(/network\/ip\/.*?/)) {
+    } else if (trailingPath[0] === 'network') {
+      return CONSTANTS.networkPage;
+    } else if (pathname.match(/^\/network\/.+$/) != null) {
       return CONSTANTS.networkDetails;
+    } else if (trailingPath[0] === 'overview') {
+      return CONSTANTS.overviewPage;
+    } else if (trailingPath[0] === 'timelines') {
+      return CONSTANTS.timelinePage;
     }
   }
-  return null;
+  return CONSTANTS.unknown;
+  // throw new Error(`'Unknown pathName in else if statement': ${pathname}`);
 };
 
-export const isKqlForRoute = (pathname: string, kql: KqlQuery): boolean => {
+export const isKqlForRoute = (
+  pathname: string,
+  queryLocation: LocationTypes | null = null
+): boolean => {
   const currentLocation = getCurrentLocation(pathname);
   if (
-    (currentLocation === CONSTANTS.hostsPage && kql.queryLocation === CONSTANTS.hostsPage) ||
-    (currentLocation === CONSTANTS.networkPage && kql.queryLocation === CONSTANTS.networkPage) ||
-    (currentLocation === CONSTANTS.hostsDetails && kql.queryLocation === CONSTANTS.hostsDetails) ||
-    (currentLocation === CONSTANTS.networkDetails && kql.queryLocation === CONSTANTS.networkDetails)
+    (currentLocation === CONSTANTS.hostsPage && queryLocation === CONSTANTS.hostsPage) ||
+    (currentLocation === CONSTANTS.networkPage && queryLocation === CONSTANTS.networkPage) ||
+    (currentLocation === CONSTANTS.hostsDetails && queryLocation === CONSTANTS.hostsDetails) ||
+    (currentLocation === CONSTANTS.networkDetails && queryLocation === CONSTANTS.networkDetails)
   ) {
     return true;
   }
