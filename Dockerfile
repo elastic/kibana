@@ -6,11 +6,8 @@ RUN curl -sSL https://dl.google.com/linux/linux_signing_key.pub | apt-key add - 
   && apt-get update \
   && apt-get install -y google-chrome-unstable fonts-ipafont-gothic fonts-wqy-zenhei fonts-thai-tlwg fonts-kacst ttf-freefont \
   --no-install-recommends \
-  && rm -rf /var/lib/apt/lists/* \
-  && rm -rf /tmp/tmp* \
-  && rm -rf /tmp/apt*
+  && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 # rm is so that Kaniko wont try to add tmp files to the image
-
 
 WORKDIR /app
 
@@ -66,9 +63,19 @@ COPY --chown=kibana:kibana test/plugin_functional/plugins/kbn_tp_sample_panel_ac
 COPY --chown=kibana:kibana test/plugin_functional/plugins/kbn_tp_visualize_embedding/package.json /app/test/plugin_functional/plugins/kbn_tp_visualize_embedding/package.json
 COPY --chown=kibana:kibana test/interpreter_functional/plugins/kbn_tp_run_pipeline/package.json /app/test/interpreter_functional/plugins/kbn_tp_run_pipeline/package.json
 
+# For kaniko...
+USER root
+RUN chown -R kibana:kibana /app
+USER kibana
+
 RUN yarn install --frozen-lockfile
 
 COPY --chown=kibana:kibana . /app
+
+# For kaniko...
+USER root
+RUN chown -R kibana:kibana /app
+USER kibana
 
 RUN yarn kbn bootstrap --frozen-lockfile
 
