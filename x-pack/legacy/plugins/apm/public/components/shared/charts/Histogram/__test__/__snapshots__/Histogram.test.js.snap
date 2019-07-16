@@ -29,11 +29,16 @@ exports[`Histogram Initially should have default markup 1`] = `
       onMouseEnter={[Function]}
       onMouseLeave={[Function]}
       onMouseMove={[Function]}
+      onMouseUp={[Function]}
+      onTouchCancel={[Function]}
+      onTouchEnd={[Function]}
+      onTouchMove={[Function]}
+      onTouchStart={[Function]}
       onWheel={[Function]}
       width={800}
     >
       <g
-        className="rv-xy-plot__grid-lines"
+        className="rv-xy-plot__grid-lines undefined"
         transform="translate(80,16)"
       >
         <line
@@ -949,6 +954,10 @@ exports[`Histogram Initially should have default markup 1`] = `
       </g>
       <g
         className=" rv-voronoi"
+        onTouchCancel={[Function]}
+        onTouchEnd={[Function]}
+        onTouchMove={[Function]}
+        onTouchStart={[Function]}
       >
         <path
           className="rv-voronoi__cell "
@@ -1444,7 +1453,7 @@ exports[`Histogram when hovering over a non-empty bucket should have correct mar
 
 <div
   className="rv-hint  rv-hint--horizontalAlign-right
-     rv-hint--verticalAlign-bottom"
+     rv-hint--verticalAlign-bottom undefined"
   style={
     Object {
       "left": 268.57142857142856,

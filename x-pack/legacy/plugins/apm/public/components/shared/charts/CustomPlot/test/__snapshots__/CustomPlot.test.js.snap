@@ -69,6 +69,11 @@ Array [
           onMouseEnter={[Function]}
           onMouseLeave={[Function]}
           onMouseMove={[Function]}
+          onMouseUp={[Function]}
+          onTouchCancel={[Function]}
+          onTouchEnd={[Function]}
+          onTouchMove={[Function]}
+          onTouchStart={[Function]}
           onWheel={[Function]}
           width={800}
         >
@@ -230,7 +235,7 @@ Array [
             </g>
           </g>
           <g
-            className="rv-xy-plot__grid-lines"
+            className="rv-xy-plot__grid-lines undefined"
             transform="translate(80,16)"
           >
             <line
@@ -2117,6 +2122,11 @@ Array [
           onMouseEnter={[Function]}
           onMouseLeave={[Function]}
           onMouseMove={[Function]}
+          onMouseUp={[Function]}
+          onTouchCancel={[Function]}
+          onTouchEnd={[Function]}
+          onTouchMove={[Function]}
+          onTouchStart={[Function]}
           onWheel={[Function]}
           width={800}
         />
@@ -2149,11 +2159,20 @@ Array [
           onMouseEnter={[Function]}
           onMouseLeave={[Function]}
           onMouseMove={[Function]}
+          onMouseUp={[Function]}
+          onTouchCancel={[Function]}
+          onTouchEnd={[Function]}
+          onTouchMove={[Function]}
+          onTouchStart={[Function]}
           onWheel={[Function]}
           width={800}
         >
           <g
             className=" rv-voronoi"
+            onTouchCancel={[Function]}
+            onTouchEnd={[Function]}
+            onTouchMove={[Function]}
+            onTouchStart={[Function]}
           >
             <path
               className="rv-voronoi__cell "
@@ -2946,6 +2965,11 @@ Array [
           onMouseEnter={[Function]}
           onMouseLeave={[Function]}
           onMouseMove={[Function]}
+          onMouseUp={[Function]}
+          onTouchCancel={[Function]}
+          onTouchEnd={[Function]}
+          onTouchMove={[Function]}
+          onTouchStart={[Function]}
           onWheel={[Function]}
           width={800}
         >
@@ -3107,7 +3131,7 @@ Array [
             </g>
           </g>
           <g
-            className="rv-xy-plot__grid-lines"
+            className="rv-xy-plot__grid-lines undefined"
             transform="translate(80,16)"
           >
             <line
@@ -4994,6 +5018,11 @@ Array [
           onMouseEnter={[Function]}
           onMouseLeave={[Function]}
           onMouseMove={[Function]}
+          onMouseUp={[Function]}
+          onTouchCancel={[Function]}
+          onTouchEnd={[Function]}
+          onTouchMove={[Function]}
+          onTouchStart={[Function]}
           onWheel={[Function]}
           width={800}
         >
@@ -5054,7 +5083,7 @@ Array [
             />
           </g>
           <g
-            className="rv-xy-plot__grid-lines"
+            className="rv-xy-plot__grid-lines undefined"
             transform="translate(80,16)"
           >
             <line
@@ -5068,7 +5097,7 @@ Array [
         </svg>
         <div
           className="rv-hint  rv-hint--horizontalAlign-right
-     rv-hint--verticalAlign-bottom"
+     rv-hint--verticalAlign-bottom undefined"
           style={
             Object {
               "left": 440,
@@ -5186,11 +5215,20 @@ Array [
           onMouseEnter={[Function]}
           onMouseLeave={[Function]}
           onMouseMove={[Function]}
+          onMouseUp={[Function]}
+          onTouchCancel={[Function]}
+          onTouchEnd={[Function]}
+          onTouchMove={[Function]}
+          onTouchStart={[Function]}
           onWheel={[Function]}
           width={800}
         >
           <g
             className=" rv-voronoi"
+            onTouchCancel={[Function]}
+            onTouchEnd={[Function]}
+            onTouchMove={[Function]}
+            onTouchStart={[Function]}
           >
             <path
               className="rv-voronoi__cell "
@@ -5849,6 +5887,11 @@ Array [
           onMouseEnter={[Function]}
           onMouseLeave={[Function]}
           onMouseMove={[Function]}
+          onMouseUp={[Function]}
+          onTouchCancel={[Function]}
+          onTouchEnd={[Function]}
+          onTouchMove={[Function]}
+          onTouchStart={[Function]}
           onWheel={[Function]}
           width={100}
         >
@@ -6212,6 +6255,11 @@ Array [
           onMouseEnter={[Function]}
           onMouseLeave={[Function]}
           onMouseMove={[Function]}
+          onMouseUp={[Function]}
+          onTouchCancel={[Function]}
+          onTouchEnd={[Function]}
+          onTouchMove={[Function]}
+          onTouchStart={[Function]}
           onWheel={[Function]}
           width={100}
         />

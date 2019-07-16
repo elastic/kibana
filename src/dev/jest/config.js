@@ -56,6 +56,7 @@ export default {
     '!src/legacy/core_plugins/**/__snapshots__/**/*',
   ],
   moduleNameMapper: {
+    '^plugins/watcher/models/(.*)': '<rootDir/x-pack/legacy/plugins/watcher/public/models/$1',
     '^plugins/([^\/.]*)(.*)': '<rootDir>/src/legacy/core_plugins/$1/public$2',
     '^ui/(.*)': '<rootDir>/src/legacy/ui/public/$1',
     '^uiExports/(.*)': '<rootDir>/src/dev/jest/mocks/file_mock.js',
@@ -64,7 +65,6 @@ export default {
     '\\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga)$': '<rootDir>/src/dev/jest/mocks/file_mock.js',
     '\\.(css|less|scss)$': '<rootDir>/src/dev/jest/mocks/style_mock.js',
 
-    '^plugins/watcher/models/(.*)': '<rootDir/x-pack/legacy/plugins/watcher/public/models/$1',
     '^legacy/plugins/xpack_main/(.*);': '<rootDir>/x-pack/legacy/plugins/xpack_main/public/$1',
     '^src/core/(.*)': `<rootDir>/src/core/$1`,
 

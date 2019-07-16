@@ -74,6 +74,11 @@ exports[`Timeline should render with data 1`] = `
               onMouseEnter={[Function]}
               onMouseLeave={[Function]}
               onMouseMove={[Function]}
+              onMouseUp={[Function]}
+              onTouchCancel={[Function]}
+              onTouchEnd={[Function]}
+              onTouchMove={[Function]}
+              onTouchStart={[Function]}
               onWheel={[Function]}
               width={1000}
             >
@@ -646,11 +651,16 @@ exports[`Timeline should render with data 1`] = `
             onMouseEnter={[Function]}
             onMouseLeave={[Function]}
             onMouseMove={[Function]}
+            onMouseUp={[Function]}
+            onTouchCancel={[Function]}
+            onTouchEnd={[Function]}
+            onTouchMove={[Function]}
+            onTouchStart={[Function]}
             onWheel={[Function]}
             width={1000}
           >
             <g
-              className="rv-xy-plot__grid-lines"
+              className="rv-xy-plot__grid-lines undefined"
               transform="translate(50,100)"
             >
               <line
@@ -787,7 +797,7 @@ exports[`Timeline should render with data 1`] = `
               />
             </g>
             <g
-              className="rv-xy-plot__grid-lines"
+              className="rv-xy-plot__grid-lines undefined"
               transform="translate(50,100)"
             >
               <line
@@ -828,7 +838,7 @@ exports[`Timeline should render with data 1`] = `
               />
             </g>
             <g
-              className="rv-xy-plot__grid-lines"
+              className="rv-xy-plot__grid-lines undefined"
               transform="translate(50,100)"
             >
               <line
