@@ -263,7 +263,7 @@
 }
 
 .codeBlame__item {
-  padding: $euiSizeXS $euiSizeS;
+  padding: 0 $euiSizeM 0 $euiSizeL;
   border-top: $euiBorderThin;
   &.codeBlame__item--first {
     border-top: none;
@@ -288,5 +288,7 @@
 
 .code-line-decoration {
   border-right: $euiBorderThick;
+  margin-left: $euiSize;
+  border-left: $euiBorderThin;
   width: 316px !important;
 }

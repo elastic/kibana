@@ -37,7 +37,7 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
 
   const isW3CEnabled = (driver as any).executor_.w3c === true;
 
-  if (!isW3CEnabled) {
+  if (browserType === Browsers.Chrome) {
     // The logs endpoint has not been defined in W3C Spec browsers other than Chrome don't have access to this endpoint.
     // See: https://github.com/w3c/webdriver/issues/406
     // See: https://w3c.github.io/webdriver/#endpoints
@@ -171,40 +171,33 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
       xOffset?: number,
       yOffset?: number
     ): Promise<void> {
-      switch (this.browserType) {
-        case Browsers.Firefox: {
-          // Workaround for scrolling bug in Firefox
-          // https://github.com/mozilla/geckodriver/issues/776
+      if (this.isW3CEnabled) {
+        // Workaround for scrolling bug in W3C mode: move pointer to { x: 0, y: 0 }
+        // https://github.com/mozilla/geckodriver/issues/776
+        await this.getActions()
+          .move({ x: 0, y: 0 })
+          .perform();
+        if (element instanceof WebElementWrapper) {
           await this.getActions()
-            .move({ x: 0, y: 0 })
+            .move({ x: xOffset || 10, y: yOffset || 10, origin: element._webElement })
             .perform();
-          if (element instanceof WebElementWrapper) {
-            await this.getActions()
-              .move({ x: xOffset || 10, y: yOffset || 10, origin: element._webElement })
-              .perform();
-          } else {
-            await this.getActions()
-              .move({ origin: { x: xOffset, y: yOffset } })
-              .perform();
-          }
-          break;
+        } else {
+          await this.getActions()
+            .move({ origin: { x: xOffset, y: yOffset } })
+            .perform();
         }
-        case Browsers.Chrome: {
-          if (element instanceof WebElementWrapper) {
-            await this.getActions()
-              .pause(this.getActions().mouse)
-              .move({ origin: element._webElement })
-              .perform();
-          } else {
-            await this.getActions()
-              .pause(this.getActions().mouse)
-              .move({ origin: { x: xOffset, y: yOffset } })
-              .perform();
-          }
-          break;
+      } else {
+        if (element instanceof WebElementWrapper) {
+          await this.getActions()
+            .pause(this.getActions().mouse)
+            .move({ origin: element._webElement })
+            .perform();
+        } else {
+          await this.getActions()
+            .pause(this.getActions().mouse)
+            .move({ origin: { x: xOffset, y: yOffset } })
+            .perform();
         }
-        default:
-          throw new Error(`unsupported browser: ${this.browserType}`);
       }
     }
 
