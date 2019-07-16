@@ -470,14 +470,7 @@ exports[`<PrivilegeSpaceForm> renders without crashing 1`] = `
                     "normal-feature-read",
                   ],
                 },
-                "reserved": Object {
-                  "onlyReservedFeature": Array [
-                    "only-reserved",
-                  ],
-                  "reservedAndNormalFeature": Array [
-                    "reserved-and-normal-reserved",
-                  ],
-                },
+                "reserved": Object {},
                 "space": Object {
                   "all": Array [
                     "normal-feature-all",

@@ -29,18 +29,15 @@ const buildProps = (
       all: ['normal-feature-all', 'normal-feature-read'],
       read: ['normal-feature-read'],
     },
-    reserved: {
-      onlyReservedFeature: ['only-reserved'],
-      reservedAndNormalFeature: ['reserved-and-normal-reserved'],
-    },
+    reserved: {},
     features: {
       normal: {
         all: ['normal-feature-all', 'normal-feature-read'],
         read: ['normal-feature-read'],
       },
-      reservedAndNormalFeature: {
-        all: ['reserved-and-normal-all', 'reserved-and-normal-read'],
-        read: ['reserved-and-normal-read'],
+      excludedFromBase: {
+        all: ['excluded-from-base-all', 'excluded-from-base-read'],
+        read: ['excluded-from-base-read'],
       },
     },
   };
