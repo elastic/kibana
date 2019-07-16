@@ -15,7 +15,7 @@ import {
   HostLastFirstSeenRequestOptions,
 } from '../../lib/hosts';
 import { getFields } from '../../utils/build_query';
-import { createOptions } from '../../utils/build_query/create_options';
+import { createOptionsPaginated } from '../../utils/build_query/create_options';
 import { QuerySourceResolver } from '../sources/resolvers';
 
 type QueryHostsResolver = ChildResolverOf<
@@ -49,7 +49,7 @@ export const createHostsResolvers = (
   Source: {
     async Hosts(source, args, { req }, info) {
       const options: HostsRequestOptions = {
-        ...createOptions(source, args, info),
+        ...createOptionsPaginated(source, args, info),
         sort: args.sort,
         defaultIndex: args.defaultIndex,
       };

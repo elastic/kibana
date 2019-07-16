@@ -21,6 +21,7 @@ import styled from 'styled-components';
 
 import { Direction } from '../../graphql/types';
 import { AuthTableColumns } from '../page/hosts/authentications_table';
+import { HostsTableColumns } from '../page/hosts/hosts_table';
 import { HeaderPanel } from '../header_panel';
 import { LoadingPanel } from '../loading';
 import { useStateToaster } from '../toasters';
@@ -46,14 +47,14 @@ export interface Criteria {
   sort?: SortingBasicTable;
 }
 
-declare type HostsTableColumns = [
+declare type HostsTableColumnsTest = [
   Columns<string>,
   Columns<string>,
   Columns<string>,
   Columns<string>
 ];
 
-declare type BasicTableColumns = AuthTableColumns | HostsTableColumns;
+declare type BasicTableColumns = AuthTableColumns | HostsTableColumnsTest | HostsTableColumns;
 
 declare type SiemTables = BasicTableProps<BasicTableColumns>;
 

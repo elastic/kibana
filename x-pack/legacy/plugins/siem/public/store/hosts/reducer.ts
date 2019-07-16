@@ -29,8 +29,9 @@ export const initialHostsState: HostsState = {
     queries: {
       authentications: { limit: DEFAULT_TABLE_LIMIT, activePage: DEFAULT_TABLE_ACTIVE_PAGE },
       hosts: {
-        limit: DEFAULT_TABLE_LIMIT,
+        activePage: DEFAULT_TABLE_ACTIVE_PAGE,
         direction: Direction.desc,
+        limit: DEFAULT_TABLE_LIMIT,
         sortField: HostsFields.lastSeen,
       },
       events: { limit: DEFAULT_TABLE_LIMIT },
@@ -43,8 +44,9 @@ export const initialHostsState: HostsState = {
     queries: {
       authentications: { limit: DEFAULT_TABLE_LIMIT, activePage: DEFAULT_TABLE_ACTIVE_PAGE },
       hosts: {
-        limit: DEFAULT_TABLE_LIMIT,
+        activePage: DEFAULT_TABLE_ACTIVE_PAGE,
         direction: Direction.desc,
+        limit: DEFAULT_TABLE_LIMIT,
         sortField: HostsFields.lastSeen,
       },
       events: { limit: DEFAULT_TABLE_LIMIT },

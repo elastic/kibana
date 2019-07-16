@@ -13,7 +13,7 @@ import {
   SourceConfiguration,
   TimerangeInput,
 } from '../../graphql/types';
-import { FrameworkRequest, RequestOptions } from '../framework';
+import { FrameworkRequest, RequestOptionsPaginated } from '../framework';
 import { Hit, Hits, SearchHit } from '../types';
 
 export interface HostsAdapter {
@@ -39,7 +39,7 @@ export interface HostHit extends Hit {
 
 export type HostHits = Hits<number, HostHit>;
 
-export interface HostsRequestOptions extends RequestOptions {
+export interface HostsRequestOptions extends RequestOptionsPaginated {
   sort: HostsSortField;
   defaultIndex: string[];
 }

@@ -114,23 +114,23 @@ const HostsComponent = pure<HostsComponentProps>(({ filterQuery, setAbsoluteRang
                         totalCount,
                         loading,
                         pageInfo,
-                        loadMore,
+                        loadPage,
                         id,
                         inspect,
                         refetch,
                       }) => (
                         <HostsTableManage
+                          data={hosts}
+                          fakeTotalCount={getOr(50, 'fakeTotalCount', pageInfo)}
                           id={id}
-                          inspect={inspect}
                           indexPattern={indexPattern}
+                          inspect={inspect}
+                          loading={loading}
+                          loadPage={loadPage}
                           refetch={refetch}
                           setQuery={setQuery}
-                          loading={loading}
-                          data={hosts}
+                          showMorePagesIndicator={getOr(false, 'showMorePagesIndicator', pageInfo)}
                           totalCount={totalCount}
-                          hasNextPage={getOr(false, 'hasNextPage', pageInfo)!}
-                          nextCursor={getOr(null, 'endCursor.value', pageInfo)}
-                          loadMore={loadMore}
                           type={hostsModel.HostsType.page}
                         />
                       )}

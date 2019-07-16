@@ -872,7 +872,7 @@ export interface HostsData {
 
   totalCount: number;
 
-  pageInfo: PageInfo;
+  pageInfo: PageInfoPaginated;
 
   inspect?: Inspect | null;
 }
@@ -1825,7 +1825,7 @@ export interface HostsSourceArgs {
 
   timerange: TimerangeInput;
 
-  pagination: PaginationInput;
+  pagination: PaginationInputPaginated;
 
   sort: HostsSortField;
 
@@ -2635,7 +2635,7 @@ export namespace GetHostsTableQuery {
   export type Variables = {
     sourceId: string;
     timerange: TimerangeInput;
-    pagination: PaginationInput;
+    pagination: PaginationInputPaginated;
     sort: HostsSortField;
     filterQuery?: string | null;
     defaultIndex: string[];
@@ -2711,17 +2711,13 @@ export namespace GetHostsTableQuery {
   };
 
   export type PageInfo = {
-    __typename?: 'PageInfo';
+    __typename?: 'PageInfoPaginated';
 
-    endCursor?: EndCursor | null;
+    activePage: number;
 
-    hasNextPage?: boolean | null;
-  };
+    fakeTotalCount: number;
 
-  export type EndCursor = {
-    __typename?: 'CursorType';
-
-    value?: string | null;
+    showMorePagesIndicator: boolean;
   };
 
   export type Inspect = {

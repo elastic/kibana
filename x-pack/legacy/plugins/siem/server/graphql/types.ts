@@ -901,7 +901,7 @@ export interface HostsData {
 
   totalCount: number;
 
-  pageInfo: PageInfo;
+  pageInfo: PageInfoPaginated;
 
   inspect?: Inspect | null;
 }
@@ -1854,7 +1854,7 @@ export interface HostsSourceArgs {
 
   timerange: TimerangeInput;
 
-  pagination: PaginationInput;
+  pagination: PaginationInputPaginated;
 
   sort: HostsSortField;
 
@@ -2606,7 +2606,7 @@ export namespace SourceResolvers {
 
     timerange: TimerangeInput;
 
-    pagination: PaginationInput;
+    pagination: PaginationInputPaginated;
 
     sort: HostsSortField;
 
@@ -5271,7 +5271,7 @@ export namespace HostsDataResolvers {
 
     totalCount?: TotalCountResolver<number, TypeParent, Context>;
 
-    pageInfo?: PageInfoResolver<PageInfo, TypeParent, Context>;
+    pageInfo?: PageInfoResolver<PageInfoPaginated, TypeParent, Context>;
 
     inspect?: InspectResolver<Inspect | null, TypeParent, Context>;
   }
@@ -5286,11 +5286,11 @@ export namespace HostsDataResolvers {
     Parent,
     Context
   >;
-  export type PageInfoResolver<R = PageInfo, Parent = HostsData, Context = SiemContext> = Resolver<
-    R,
-    Parent,
-    Context
-  >;
+  export type PageInfoResolver<
+    R = PageInfoPaginated,
+    Parent = HostsData,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
   export type InspectResolver<
     R = Inspect | null,
     Parent = HostsData,

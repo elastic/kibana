@@ -86,8 +86,8 @@ const rowItems: ItemsPerRow[] = [
 
 const AuthenticationTableComponent = pure<AuthenticationTableProps>(
   ({
-    fakeTotalCount,
     data,
+    fakeTotalCount,
     id,
     limit,
     loading,

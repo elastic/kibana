@@ -26,7 +26,12 @@ export const mockGetHostsOptions: HostsRequestOptions = {
   },
   timerange: { interval: '12h', to: 1554824274610, from: 1554737874610 },
   sort: { field: HostsFields.lastSeen, direction: Direction.asc },
-  pagination: { limit: 10, cursor: null, tiebreaker: null },
+  pagination: {
+    activePage: 1,
+    cursorStart: 10,
+    fakePossibleCount: 50,
+    querySize: 10,
+  },
   filterQuery: {},
   fields: [
     'totalCount',

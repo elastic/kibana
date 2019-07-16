@@ -28,7 +28,7 @@ export interface BasicQueryPaginated {
   limit: number;
 }
 
-export interface HostsQuery extends BasicQuery {
+export interface HostsQuery extends BasicQueryPaginated {
   direction: Direction;
   sortField: HostsFields;
 }

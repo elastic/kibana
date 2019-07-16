@@ -24,8 +24,8 @@ import { HostsTable } from './index';
 import { mockData } from './mock';
 import { KibanaConfigContext } from '../../../../lib/adapters/framework/kibana_framework_adapter';
 
-describe('Load More Table Component', () => {
-  const loadMore = jest.fn();
+describe('Hosts Table', () => {
+  const loadPage = jest.fn();
   const state: State = mockGlobalState;
 
   let store = createStore(state, apolloClientObservable);
@@ -43,10 +43,14 @@ describe('Load More Table Component', () => {
               data={mockData.Hosts.edges}
               id="hostsQuery"
               indexPattern={mockIndexPattern}
-              hasNextPage={getOr(false, 'hasNextPage', mockData.Hosts.pageInfo)!}
+              fakeTotalCount={getOr(50, 'fakeTotalCount', mockData.Hosts.pageInfo)!}
               loading={false}
-              loadMore={loadMore}
-              nextCursor={getOr(null, 'endCursor.value', mockData.Hosts.pageInfo)}
+              loadPage={loadPage}
+              showMorePagesIndicator={getOr(
+                false,
+                'showMorePagesIndicator',
+                mockData.Hosts.pageInfo
+              )}
               totalCount={mockData.Hosts.totalCount}
               type={hostsModel.HostsType.page}
             />
@@ -67,9 +71,13 @@ describe('Load More Table Component', () => {
               loading={false}
               data={mockData.Hosts.edges}
               totalCount={mockData.Hosts.totalCount}
-              hasNextPage={getOr(false, 'hasNextPage', mockData.Hosts.pageInfo)!}
-              nextCursor={getOr(null, 'endCursor.value', mockData.Hosts.pageInfo)}
-              loadMore={loadMore}
+              fakeTotalCount={getOr(50, 'fakeTotalCount', mockData.Hosts.pageInfo)!}
+              showMorePagesIndicator={getOr(
+                false,
+                'showMorePagesIndicator',
+                mockData.Hosts.pageInfo
+              )}
+              loadPage={loadPage}
               type={hostsModel.HostsType.page}
             />
           </TestProviders>
@@ -86,9 +94,13 @@ describe('Load More Table Component', () => {
                 loading={false}
                 data={mockData.Hosts.edges}
                 totalCount={mockData.Hosts.totalCount}
-                hasNextPage={getOr(false, 'hasNextPage', mockData.Hosts.pageInfo)!}
-                nextCursor={getOr(null, 'endCursor.value', mockData.Hosts.pageInfo)}
-                loadMore={loadMore}
+                fakeTotalCount={getOr(50, 'fakeTotalCount', mockData.Hosts.pageInfo)!}
+                showMorePagesIndicator={getOr(
+                  false,
+                  'showMorePagesIndicator',
+                  mockData.Hosts.pageInfo
+                )}
+                loadPage={loadPage}
                 type={hostsModel.HostsType.page}
               />
             </TestProviders>
