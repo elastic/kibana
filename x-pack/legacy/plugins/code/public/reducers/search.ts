@@ -98,7 +98,8 @@ export const search = handleActions<SearchState, SearchPayload>(
             draft.repositories = new Set();
           }
           draft.isLoading = true;
-          draft.error = undefined;
+          delete draft.error;
+          delete draft.documentSearchResults;
         }
       }),
     [String(documentSearchSuccess)]: (state: SearchState, action: Action<DocumentSearchResult>) =>
@@ -170,6 +171,8 @@ export const search = handleActions<SearchState, SearchPayload>(
         if (action.payload) {
           draft.query = action.payload.query;
           draft.isLoading = true;
+          delete draft.error;
+          delete draft.repositorySearchResults;
         }
       }),
     [String(repositorySearchSuccess)]: (

@@ -129,6 +129,7 @@ export class CollectorSet {
         .catch(err => {
           this._log.warn(err);
           this._log.warn(`Unable to fetch data from ${collectorType} collector`);
+          return {};
         });
     });
     return Promise.all(fetchPromises);
