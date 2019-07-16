@@ -44,7 +44,7 @@ export const LogColumnsConfigurationPanel: React.FunctionComponent<
   const onDragEnd = useCallback(
     ({ source, destination }: DropResult) =>
       destination && moveLogColumn(source.index, destination.index),
-    []
+    [moveLogColumn]
   );
 
   return (
