@@ -132,15 +132,15 @@ describe('BulkUploader', () => {
         const loggingCalls = server.log.getCalls();
         expect(loggingCalls.length).to.be.greaterThan(2); // should be 3-5: start, fetch, skip, fetch, skip
         expect(loggingCalls[0].args).to.eql([
-          ['info', 'monitoring', 'kibana-monitoring'],
+          ['info', 'monitoring-ui', 'kibana-monitoring'],
           'Starting monitoring stats collection',
         ]);
         expect(loggingCalls[1].args).to.eql([
-          ['debug', 'monitoring', 'kibana-monitoring'],
+          ['debug', 'monitoring-ui', 'kibana-monitoring'],
           'Skipping bulk uploading because not all collectors are ready',
         ]);
         expect(loggingCalls[loggingCalls.length - 1].args).to.eql([
-          ['info', 'monitoring', 'kibana-monitoring'],
+          ['info', 'monitoring-ui', 'kibana-monitoring'],
           'Monitoring stats collection is stopped',
         ]);
 
