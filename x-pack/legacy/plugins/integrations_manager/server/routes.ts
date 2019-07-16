@@ -5,44 +5,33 @@
  */
 import { PLUGIN_ID } from '../common/constants';
 import { ServerRoute } from '../common/types';
-import {
-  API_LIST_PATTERN,
-  API_INFO_PATTERN,
-  API_INSTALL_PATTERN,
-  API_DELETE_PATTERN,
-} from '../common/routes';
-
-import {
-  handleGetInfo,
-  handleGetList,
-  handleRequestDelete,
-  handleRequestInstall,
-} from './integrations';
+import * as CommonRoutes from '../common/routes';
+import * as Integrations from './integrations/handlers';
 
 // Manager public API paths
 export const routes: ServerRoute[] = [
   {
     method: 'GET',
-    path: API_LIST_PATTERN,
+    path: CommonRoutes.API_LIST_PATTERN,
     options: { tags: [`access:${PLUGIN_ID}`], json: { space: 2 } },
-    handler: handleGetList,
+    handler: Integrations.handleGetList,
   },
   {
     method: 'GET',
-    path: API_INFO_PATTERN,
+    path: CommonRoutes.API_INFO_PATTERN,
     options: { tags: [`access:${PLUGIN_ID}`], json: { space: 2 } },
-    handler: handleGetInfo,
+    handler: Integrations.handleGetInfo,
   },
   {
     method: 'GET',
-    path: API_INSTALL_PATTERN,
+    path: CommonRoutes.API_INSTALL_PATTERN,
     options: { tags: [`access:${PLUGIN_ID}`], json: { space: 2 } },
-    handler: handleRequestInstall,
+    handler: Integrations.handleRequestInstall,
   },
   {
     method: 'GET',
-    path: API_DELETE_PATTERN,
+    path: CommonRoutes.API_DELETE_PATTERN,
     options: { tags: [`access:${PLUGIN_ID}`], json: { space: 2 } },
-    handler: handleRequestDelete,
+    handler: Integrations.handleRequestDelete,
   },
 ];
