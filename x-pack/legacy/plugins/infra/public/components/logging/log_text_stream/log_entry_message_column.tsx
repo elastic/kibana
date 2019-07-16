@@ -10,21 +10,33 @@ import { css } from '../../../../../../common/eui_styled_components';
 import {
   isConstantSegment,
   isFieldSegment,
+  isHighlightMessageColumn,
+  isMessageColumn,
+  LogEntryColumn,
+  LogEntryHighlightColumn,
   LogEntryMessageSegment,
 } from '../../../utils/log_entry';
+import { highlightFieldValue, HighlightMarker } from './highlighting';
 import { LogEntryColumnContent } from './log_entry_column';
 import { hoveredContentStyle } from './text_styles';
 
 interface LogEntryMessageColumnProps {
-  segments: LogEntryMessageSegment[];
+  columnValue: LogEntryColumn;
+  highlights: LogEntryHighlightColumn[];
+  isHighlighted: boolean;
   isHovered: boolean;
   isWrapped: boolean;
-  isHighlighted: boolean;
 }
 
 export const LogEntryMessageColumn = memo<LogEntryMessageColumnProps>(
-  ({ isHighlighted, isHovered, isWrapped, segments }) => {
-    const message = useMemo(() => segments.map(formatMessageSegment).join(''), [segments]);
+  ({ columnValue, highlights, isHighlighted, isHovered, isWrapped }) => {
+    const message = useMemo(
+      () =>
+        isMessageColumn(columnValue)
+          ? formatMessageSegments(columnValue.message, highlights)
+          : null,
+      [columnValue, highlights]
+    );
 
     return (
       <MessageColumnContent
@@ -61,9 +73,25 @@ const MessageColumnContent = LogEntryColumnContent.extend.attrs<{
   ${props => (props.isWrapped ? wrappedContentStyle : unwrappedContentStyle)};
 `;
 
-const formatMessageSegment = (messageSegment: LogEntryMessageSegment): string => {
+const formatMessageSegments = (
+  messageSegments: LogEntryMessageSegment[],
+  highlights: LogEntryHighlightColumn[]
+) =>
+  messageSegments.map((messageSegment, index) =>
+    formatMessageSegment(
+      messageSegment,
+      highlights.map(highlight =>
+        isHighlightMessageColumn(highlight) ? highlight.message[index].highlights : []
+      )
+    )
+  );
+
+const formatMessageSegment = (
+  messageSegment: LogEntryMessageSegment,
+  [firstHighlight = []]: string[][] // we only support one highlight for now
+): React.ReactNode => {
   if (isFieldSegment(messageSegment)) {
-    return messageSegment.value;
+    return highlightFieldValue(messageSegment.value, firstHighlight, HighlightMarker);
   } else if (isConstantSegment(messageSegment)) {
     return messageSegment.constant;
   }

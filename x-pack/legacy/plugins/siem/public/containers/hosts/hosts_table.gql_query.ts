@@ -14,6 +14,7 @@ export const HostsTableQuery = gql`
     $sort: HostsSortField!
     $filterQuery: String
     $defaultIndex: [String!]!
+    $inspect: Boolean!
   ) {
     source(id: $sourceId) {
       id
@@ -47,6 +48,10 @@ export const HostsTableQuery = gql`
             value
           }
           hasNextPage
+        }
+        inspect @include(if: $inspect) {
+          dsl
+          response
         }
       }
     }

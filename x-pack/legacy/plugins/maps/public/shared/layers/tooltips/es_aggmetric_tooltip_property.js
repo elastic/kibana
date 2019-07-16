@@ -9,8 +9,8 @@ import { ESTooltipProperty } from './es_tooltip_property';
 
 export class ESAggMetricTooltipProperty extends ESTooltipProperty {
 
-  constructor(propertyName, rawValue, indexPattern, metricField) {
-    super(propertyName, rawValue, indexPattern);
+  constructor(propertyKey, propertyName, rawValue, indexPattern, metricField) {
+    super(propertyKey, propertyName, rawValue, indexPattern);
     this._metricField = metricField;
   }
   isFilterable() {

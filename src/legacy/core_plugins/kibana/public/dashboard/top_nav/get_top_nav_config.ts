@@ -18,25 +18,23 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { DashboardViewMode } from '../dashboard_view_mode';
+import { ViewMode } from '../../../../embeddable_api/public';
 import { TopNavIds } from './top_nav_ids';
 import { NavAction } from '../types';
 
 /**
- * @param {DashboardMode} dashboardMode.
- * @param actions {Object} - A mapping of TopNavIds to an action function that should run when the
+ * @param actions - A mapping of TopNavIds to an action function that should run when the
  * corresponding top nav is clicked.
- * @param hideWriteControls {boolean} if true, does not include any controls that allow editing or creating objects.
- * @return {Array<kbnTopNavConfig>} - Returns an array of objects for a top nav configuration, based on the
- * mode.
+ * @param hideWriteControls if true, does not include any controls that allow editing or creating objects.
+ * @return an array of objects for a top nav configuration, based on the mode.
  */
 export function getTopNavConfig(
-  dashboardMode: DashboardViewMode,
+  dashboardMode: ViewMode,
   actions: { [key: string]: NavAction },
   hideWriteControls: boolean
 ) {
   switch (dashboardMode) {
-    case DashboardViewMode.VIEW:
+    case ViewMode.VIEW:
       return hideWriteControls
         ? [
             getFullScreenConfig(actions[TopNavIds.FULL_SCREEN]),
@@ -48,7 +46,7 @@ export function getTopNavConfig(
             getCloneConfig(actions[TopNavIds.CLONE]),
             getEditConfig(actions[TopNavIds.ENTER_EDIT_MODE]),
           ];
-    case DashboardViewMode.EDIT:
+    case ViewMode.EDIT:
       return [
         getSaveConfig(actions[TopNavIds.SAVE]),
         getViewConfig(actions[TopNavIds.EXIT_EDIT_MODE]),

@@ -101,13 +101,15 @@ describe('docViews', function () {
 
     it('should have the field name in the first column', function () {
       _.each(_.keys(flattened), function (field) {
-        expect($elem.find('td[title="' + field + '"]').length).to.be(1);
+        expect($elem.find('[data-test-subj="tableDocViewRow-' + field + '"]').length).to.be(1);
       });
     });
 
     it('should have the a value for each field', function () {
       _.each(_.keys(flattened), function (field) {
-        const cellValue = $elem.find('td[title="' + field + '"]').siblings().find('.kbnDocViewer__value').text();
+        const cellValue = $elem
+          .find('[data-test-subj="tableDocViewRow-' + field + '"]')
+          .find('.kbnDocViewer__value').text();
 
         // This sucks, but testing the filter chain is too hairy ATM
         expect(cellValue.length).to.be.greaterThan(0);
@@ -117,73 +119,49 @@ describe('docViews', function () {
 
     describe('filtering', function () {
       it('should apply a filter when clicking filterable fields', function () {
-        const cell = $elem.find('td[title="bytes"]').prev();
+        const row = $elem.find('[data-test-subj="tableDocViewRow-bytes"]');
 
-        cell.find('.fa-search-plus').first().click();
+        row.find('.fa-search-plus').first().click();
         expect($scope.filter.calledOnce).to.be(true);
-        cell.find('.fa-search-minus').first().click();
+        row.find('.fa-search-minus').first().click();
         expect($scope.filter.calledTwice).to.be(true);
-        cell.find('.fa-asterisk').first().click();
+        row.find('.fa-asterisk').first().click();
         expect($scope.filter.calledThrice).to.be(true);
       });
 
       it('should NOT apply a filter when clicking non-filterable fields', function () {
-        const cell = $elem.find('td[title="area"]').prev();
+        const row = $elem.find('[data-test-subj="tableDocViewRow-area"]');
 
-        cell.find('.fa-search-plus').first().click();
+        row.find('.fa-search-plus').first().click();
         expect($scope.filter.calledOnce).to.be(false);
-        cell.find('.fa-search-minus').first().click();
+        row.find('.fa-search-minus').first().click();
         expect($scope.filter.calledTwice).to.be(false);
-        cell.find('.fa-asterisk').first().click();
+        row.find('.fa-asterisk').first().click();
         expect($scope.filter.calledOnce).to.be(true);
       });
     });
 
     describe('warnings', function () {
       it('displays a warning about field name starting with underscore', function () {
-        const cells = $elem.find('td[title="_underscore"]').siblings();
-        expect(cells.find('.kbnDocViewer__underscore').length).to.be(1);
-        expect(cells.find('.kbnDocViewer__noMapping').length).to.be(0);
-        expect(cells.find('.kbnDocViewer__objectArray').length).to.be(0);
+        const row = $elem.find('[data-test-subj="tableDocViewRow-_underscore"]');
+        expect(row.find('.kbnDocViewer__underscore').length).to.be(1);
+        expect(row.find('.kbnDocViewer__noMapping').length).to.be(0);
+        expect(row.find('.kbnDocViewer__objectArray').length).to.be(0);
       });
 
       it('displays a warning about missing mappings', function () {
-        const cells = $elem.find('td[title="noMapping"]').siblings();
-        expect(cells.find('.kbnDocViewer__underscore').length).to.be(0);
-        expect(cells.find('.kbnDocViewer__noMapping').length).to.be(1);
-        expect(cells.find('.kbnDocViewer__objectArray').length).to.be(0);
+        const row = $elem.find('[data-test-subj="tableDocViewRow-noMapping"]');
+        expect(row.find('.kbnDocViewer__underscore').length).to.be(0);
+        expect(row.find('.kbnDocViewer__noMapping').length).to.be(1);
+        expect(row.find('.kbnDocViewer__objectArray').length).to.be(0);
       });
 
       it('displays a warning about objects in arrays', function () {
-        const cells = $elem.find('td[title="objectArray"]').siblings();
-        expect(cells.find('.kbnDocViewer__underscore').length).to.be(0);
-        expect(cells.find('.kbnDocViewer__noMapping').length).to.be(0);
-        expect(cells.find('.kbnDocViewer__objectArray').length).to.be(1);
+        const row = $elem.find('[data-test-subj="tableDocViewRow-objectArray"]');
+        expect(row.find('.kbnDocViewer__underscore').length).to.be(0);
+        expect(row.find('.kbnDocViewer__noMapping').length).to.be(0);
+        expect(row.find('.kbnDocViewer__objectArray').length).to.be(1);
       });
-    });
-
-  });
-
-  describe('JSON', function () {
-    beforeEach(function () {
-      initView(docViews.byName.JSON);
-    });
-    it('has pretty JSON', function () {
-      expect($scope.hitJson).to.equal(angular.toJson(hit, true));
-    });
-
-    it('should have a global ACE object', function () {
-      expect(window.ace).to.be.a(Object);
-    });
-
-    it('should have one ACE div', function () {
-      expect($elem.find('div[id="json-ace"]').length).to.be(1);
-    });
-
-    it('should contain the same code as hitJson', function () {
-      const editor = window.ace.edit($elem.find('div[id="json-ace"]')[0]);
-      const code = editor.getSession().getValue();
-      expect(code).to.equal($scope.hitJson);
     });
   });
 });

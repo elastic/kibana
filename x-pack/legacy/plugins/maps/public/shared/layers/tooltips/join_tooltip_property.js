@@ -20,6 +20,10 @@ export class JoinTooltipProperty extends TooltipProperty {
     return true;
   }
 
+  getPropertyKey() {
+    return this._tooltipProperty.getPropertyKey();
+  }
+
   getPropertyName() {
     return this._tooltipProperty.getPropertyName();
   }

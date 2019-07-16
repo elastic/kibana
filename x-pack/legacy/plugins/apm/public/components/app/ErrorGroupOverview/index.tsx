@@ -12,58 +12,45 @@ import {
   EuiTitle
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { Location } from 'history';
 import React from 'react';
 import { useFetcher } from '../../../hooks/useFetcher';
 import {
   loadErrorDistribution,
   loadErrorGroupList
 } from '../../../services/rest/apm/error_groups';
-import { IUrlParams } from '../../../context/UrlParamsContext/types';
-import { useUiFilters } from '../../../context/UrlParamsContext';
 import { ErrorDistribution } from '../ErrorGroupDetails/Distribution';
 import { ErrorGroupList } from './List';
+import { useUrlParams } from '../../../hooks/useUrlParams';
 
-interface ErrorGroupOverviewProps {
-  urlParams: IUrlParams;
-  location: Location;
-}
+const ErrorGroupOverview: React.SFC = () => {
+  const {
+    urlParams: { serviceName, start, end, sortField, sortDirection },
+    uiFilters
+  } = useUrlParams();
 
-const ErrorGroupOverview: React.SFC<ErrorGroupOverviewProps> = ({
-  urlParams,
-  location
-}) => {
-  const { serviceName, start, end, sortField, sortDirection } = urlParams;
-  const uiFilters = useUiFilters(urlParams);
-  const { data: errorDistributionData } = useFetcher(
-    () => {
-      if (serviceName && start && end) {
-        return loadErrorDistribution({
-          serviceName,
-          start,
-          end,
-          uiFilters
-        });
-      }
-    },
-    [serviceName, start, end, uiFilters]
-  );
+  const { data: errorDistributionData } = useFetcher(() => {
+    if (serviceName && start && end) {
+      return loadErrorDistribution({
+        serviceName,
+        start,
+        end,
+        uiFilters
+      });
+    }
+  }, [serviceName, start, end, uiFilters]);
 
-  const { data: errorGroupListData } = useFetcher(
-    () => {
-      if (serviceName && start && end) {
-        return loadErrorGroupList({
-          serviceName,
-          start,
-          end,
-          sortField,
-          sortDirection,
-          uiFilters
-        });
-      }
-    },
-    [serviceName, start, end, sortField, sortDirection, uiFilters]
-  );
+  const { data: errorGroupListData } = useFetcher(() => {
+    if (serviceName && start && end) {
+      return loadErrorGroupList({
+        serviceName,
+        start,
+        end,
+        sortField,
+        sortDirection,
+        uiFilters
+      });
+    }
+  }, [serviceName, start, end, sortField, sortDirection, uiFilters]);
 
   if (!errorDistributionData || !errorGroupListData) {
     return null;
@@ -95,11 +82,7 @@ const ErrorGroupOverview: React.SFC<ErrorGroupOverviewProps> = ({
         </EuiTitle>
         <EuiSpacer size="s" />
 
-        <ErrorGroupList
-          urlParams={urlParams}
-          items={errorGroupListData}
-          location={location}
-        />
+        <ErrorGroupList items={errorGroupListData} />
       </EuiPanel>
     </React.Fragment>
   );

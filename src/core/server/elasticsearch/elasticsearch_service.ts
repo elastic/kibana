@@ -18,7 +18,8 @@
  */
 
 import { ConnectableObservable, Observable, Subscription } from 'rxjs';
-import { filter, map, publishReplay, switchMap } from 'rxjs/operators';
+import { filter, first, map, publishReplay, switchMap } from 'rxjs/operators';
+import { merge } from 'lodash';
 import { CoreService } from '../../types';
 import { CoreContext } from '../core_context';
 import { Logger } from '../logging';
@@ -44,8 +45,27 @@ export interface ElasticsearchServiceSetup {
   readonly legacy: {
     readonly config$: Observable<ElasticsearchConfig>;
   };
-
-  readonly createClient: (type: string, config: ElasticsearchClientConfig) => ClusterClient;
+  /**
+   * Create application specific Elasticsearch cluster API client with customized config.
+   *
+   * @param type Unique identifier of the client
+   * @param clientConfig A config consists of Elasticsearch JS client options and
+   * valid sub-set of Elasticsearch service config.
+   * We fill all the missing properties in the `clientConfig` using the default
+   * Elasticsearch config so that we don't depend on default values set and
+   * controlled by underlying Elasticsearch JS client.
+   * We don't run validation against passed config expect it to be valid.
+   *
+   * @example
+   * ```js
+   * const client = elasticsearch.createCluster('my-app-name', config);
+   * const data = await client.callAsInternalUser();
+   * ```
+   */
+  readonly createClient: (
+    type: string,
+    clientConfig?: Partial<ElasticsearchClientConfig>
+  ) => ClusterClient;
   readonly adminClient$: Observable<ClusterClient>;
   readonly dataClient$: Observable<ClusterClient>;
 }
@@ -101,14 +121,17 @@ export class ElasticsearchService implements CoreService<ElasticsearchServiceSet
 
     this.subscription = clients$.connect();
 
+    const config = await this.config$.pipe(first()).toPromise();
+
     return {
       legacy: { config$: clients$.pipe(map(clients => clients.config)) },
 
       adminClient$: clients$.pipe(map(clients => clients.adminClient)),
       dataClient$: clients$.pipe(map(clients => clients.dataClient)),
 
-      createClient: (type: string, clientConfig: ElasticsearchClientConfig) => {
-        return this.createClusterClient(type, clientConfig, deps.http.auth.getAuthHeaders);
+      createClient: (type: string, clientConfig: Partial<ElasticsearchClientConfig> = {}) => {
+        const finalConfig = merge({}, config, clientConfig);
+        return this.createClusterClient(type, finalConfig, deps.http.auth.getAuthHeaders);
       },
     };
   }

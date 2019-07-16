@@ -40,7 +40,7 @@ export function getDataFrameCreateBreadcrumbs() {
     DATA_FRAME_HOME,
     {
       text: i18n.translate('xpack.ml.dataFrameBreadcrumbs.dataFrameCreateLabel', {
-        defaultMessage: 'Create data frame',
+        defaultMessage: 'Create transform',
       }),
       href: '',
     },

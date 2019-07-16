@@ -23,6 +23,8 @@ import _ from 'lodash';
 import { State } from 'ui/state_management/state';
 import { FilterManager } from './filter_manager';
 
+type GetAppStateFunc = () => State | undefined | null;
+
 /**
  * FilterStateManager is responsible for watching for filter changes
  * and syncing with FilterManager, as well as syncing FilterManager changes
@@ -31,12 +33,12 @@ import { FilterManager } from './filter_manager';
 export class FilterStateManager {
   filterManager: FilterManager;
   globalState: State;
-  getAppState: () => State;
+  getAppState: GetAppStateFunc;
   prevGlobalFilters: Filter[] | undefined;
   prevAppFilters: Filter[] | undefined;
   interval: NodeJS.Timeout | undefined;
 
-  constructor(globalState: State, getAppState: () => State, filterManager: FilterManager) {
+  constructor(globalState: State, getAppState: GetAppStateFunc, filterManager: FilterManager) {
     this.getAppState = getAppState;
     this.globalState = globalState;
     this.filterManager = filterManager;
@@ -63,7 +65,7 @@ export class FilterStateManager {
       if (stateUndefined) return;
 
       const globalFilters = this.globalState.filters || [];
-      const appFilters = appState.filters || [];
+      const appFilters = (appState && appState.filters) || [];
 
       const globalFilterChanged = !(
         this.prevGlobalFilters && _.isEqual(this.prevGlobalFilters, globalFilters)
@@ -96,7 +98,9 @@ export class FilterStateManager {
     // Update Angular state before saving State objects (which save it to URL)
     const partitionedFilters = this.filterManager.getPartitionedFilters();
     const appState = this.getAppState();
-    appState.filters = partitionedFilters.appFilters;
+    if (appState) {
+      appState.filters = partitionedFilters.appFilters;
+    }
     this.globalState.filters = partitionedFilters.globalFilters;
     this.saveState();
   }

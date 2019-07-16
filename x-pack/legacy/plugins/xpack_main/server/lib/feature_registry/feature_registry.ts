@@ -335,9 +335,7 @@ function validateFeature(feature: FeatureWithAllOrReadPrivileges) {
       ([managementSectionId, managementEntry]) => {
         if (!management[managementSectionId]) {
           throw new Error(
-            `Feature privilege ${
-              feature.id
-            }.${privilegeId} has unknown management section: ${managementSectionId}`
+            `Feature privilege ${feature.id}.${privilegeId} has unknown management section: ${managementSectionId}`
           );
         }
 

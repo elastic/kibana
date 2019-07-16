@@ -4,19 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FC, useEffect, useState } from 'react';
+import React, { FC, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiInMemoryTable, EuiInMemoryTableProps, SortDirection } from '@elastic/eui';
+import { SortDirection } from '@elastic/eui';
 import { getFlattenedFields } from '../../../../components/source_index_preview/common';
 import { ml } from '../../../../../services/ml_api_service';
 
-import { DataFramePreviewRequest } from '../../../../common';
+import { DataFramePreviewRequest, useRefreshTransformList } from '../../../../common';
 import { DataFrameTransformWithId } from '../../../../common/job';
-
-interface CompressedTableProps extends EuiInMemoryTableProps {
-  compressed: boolean;
-  error: any;
-}
+import { TransformTable } from './transform_table';
 
 interface Column {
   field: string;
@@ -26,7 +22,6 @@ interface Column {
 }
 
 interface Props {
-  lastUpdate: number;
   transformConfig: DataFrameTransformWithId;
 }
 
@@ -49,7 +44,7 @@ export function sortColumns(groupByArr: string[]) {
 function getDataFromTransform(
   transformConfig: DataFrameTransformWithId
 ): { previewRequest: DataFramePreviewRequest; groupByArr: string[] | [] } {
-  const index = transformConfig.source.index[0];
+  const index = transformConfig.source.index;
   const pivot = transformConfig.pivot;
   const groupByArr = [];
 
@@ -71,71 +66,108 @@ function getDataFromTransform(
   return { groupByArr, previewRequest };
 }
 
-export const PreviewPane: FC<Props> = ({ transformConfig, lastUpdate }) => {
+export const PreviewPane: FC<Props> = ({ transformConfig }) => {
   const [dataFramePreviewData, setDataFramePreviewData] = useState([]);
   const [columns, setColumns] = useState<Column[] | []>([]);
-  const [sort, setSort] = useState({});
-  const [isLoading, setIsLoading] = useState(true);
+  const [pageIndex, setPageIndex] = useState(0);
+  const [pageSize, setPageSize] = useState(10);
+  const [sortField, setSortField] = useState<string>('');
+  const [sortDirection, setSortDirection] = useState<string>(SortDirection.ASC);
+  const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
 
-  async function getPreview() {
-    try {
-      const { previewRequest, groupByArr } = getDataFromTransform(transformConfig);
-      const resp: any = await ml.dataFrame.getDataFrameTransformsPreview(previewRequest);
+  const getPreviewFactory = () => {
+    let concurrentLoads = 0;
 
-      if (resp.preview.length > 0) {
-        const columnKeys = getFlattenedFields(resp.preview[0]);
-        columnKeys.sort(sortColumns(groupByArr));
-        const tableColumns = columnKeys.map(k => {
-          return {
-            field: k,
-            name: k,
-            sortable: false,
-            truncateText: true,
-          };
-        });
-        const sorting = {
-          sort: {
-            field: tableColumns[0].field,
-            direction: SortDirection.ASC,
-          },
-        };
+    return async function getPreview() {
+      try {
+        concurrentLoads++;
 
-        setDataFramePreviewData(resp.preview);
-        setColumns(tableColumns);
-        setSort(sorting);
+        if (concurrentLoads > 1) {
+          return;
+        }
+
+        const { previewRequest, groupByArr } = getDataFromTransform(transformConfig);
+        setIsLoading(true);
+        const resp: any = await ml.dataFrame.getDataFrameTransformsPreview(previewRequest);
         setIsLoading(false);
+
+        if (resp.preview.length > 0) {
+          const columnKeys = getFlattenedFields(resp.preview[0]);
+          columnKeys.sort(sortColumns(groupByArr));
+          const tableColumns = columnKeys.map(k => {
+            return {
+              field: k,
+              name: k,
+              sortable: true,
+              truncateText: true,
+            };
+          });
+
+          setDataFramePreviewData(resp.preview);
+          setColumns(tableColumns);
+          setSortField(sortField);
+          setSortDirection(sortDirection);
+        }
+        concurrentLoads--;
+
+        if (concurrentLoads > 0) {
+          concurrentLoads = 0;
+          getPreview();
+        }
+      } catch (error) {
+        setIsLoading(false);
+        setErrorMessage(
+          i18n.translate('xpack.ml.dfJobsList.jobDetails.previewPane.errorMessage', {
+            defaultMessage: 'Preview could not be loaded',
+          })
+        );
       }
-    } catch (error) {
-      setIsLoading(false);
-      setErrorMessage(
-        i18n.translate('xpack.ml.dfJobsList.jobDetails.previewPane.errorMessage', {
-          defaultMessage: 'Preview could not be loaded',
-        })
-      );
-    }
-  }
+    };
+  };
 
-  useEffect(
-    () => {
-      getPreview();
+  useRefreshTransformList({ onRefresh: getPreviewFactory() });
+
+  const pagination = {
+    initialPageIndex: pageIndex,
+    initialPageSize: pageSize,
+    totalItemCount: dataFramePreviewData.length,
+    pageSizeOptions: [10, 20],
+    hidePerPageOptions: false,
+  };
+
+  const sorting = {
+    sort: {
+      field: sortField,
+      direction: sortDirection,
     },
-    [lastUpdate]
-  );
+  };
 
-  const CompressedTable = (EuiInMemoryTable as any) as FC<CompressedTableProps>;
+  const onTableChange = ({
+    page = { index: 0, size: 10 },
+    sort = { field: columns[0].field, direction: SortDirection.ASC },
+  }: {
+    page: { index: number; size: number };
+    sort: { field: string; direction: string };
+  }) => {
+    const { index, size } = page;
+    setPageIndex(index);
+    setPageSize(size);
+
+    const { field, direction } = sort;
+    setSortField(field);
+    setSortDirection(direction);
+  };
 
   return (
-    <CompressedTable
+    <TransformTable
       loading={dataFramePreviewData.length === 0 && isLoading === true}
       compressed
       items={dataFramePreviewData}
       columns={columns}
-      pagination={{
-        initialPageSize: 5,
-        pageSizeOptions: [5, 10, 25],
-      }}
-      sorting={sort}
+      onChange={onTableChange}
+      pagination={pagination}
+      sorting={sorting}
       error={errorMessage}
     />
   );

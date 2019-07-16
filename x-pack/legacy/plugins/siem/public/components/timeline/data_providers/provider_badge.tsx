@@ -28,7 +28,7 @@ const ProviderBadgeStyled = styled(EuiBadge)`
     font-weight: 200;
   }
   &.globalFilterItem {
-    line-height: 28px;
+    white-space: nowrap;
     &.globalFilterItem-isDisabled {
       text-decoration: line-through;
       font-weight: 400;

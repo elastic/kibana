@@ -22,7 +22,7 @@ import { LogTextStreamLoadingItemView } from './loading_item_view';
 import { LogEntryRow } from './log_entry_row';
 import { MeasurableItemView } from './measurable_item_view';
 import { VerticalScrollPanel } from './vertical_scroll_panel';
-import { getColumnWidths, LogEntryColumnWidth } from './log_entry_column';
+import { getColumnWidths, LogEntryColumnWidths } from './log_entry_column';
 import { useMeasuredCharacterDimensions } from './text_styles';
 
 interface ScrollableLogTextStreamViewProps {
@@ -38,15 +38,13 @@ interface ScrollableLogTextStreamViewProps {
   lastLoadedTime: number | null;
   target: TimeKey | null;
   jumpToTarget: (target: TimeKey) => any;
-  reportVisibleInterval: (
-    params: {
-      pagesBeforeStart: number;
-      pagesAfterEnd: number;
-      startKey: TimeKey | null;
-      middleKey: TimeKey | null;
-      endKey: TimeKey | null;
-    }
-  ) => any;
+  reportVisibleInterval: (params: {
+    pagesBeforeStart: number;
+    pagesAfterEnd: number;
+    startKey: TimeKey | null;
+    middleKey: TimeKey | null;
+    endKey: TimeKey | null;
+  }) => any;
   loadNewerItems: () => void;
   setFlyoutItem: (id: string) => void;
   setFlyoutVisibility: (visible: boolean) => void;
@@ -188,6 +186,7 @@ class ScrollableLogTextStreamViewClass extends React.PureComponent<
                                     openFlyoutWithItem={this.handleOpenFlyout}
                                     boundingBoxRef={itemMeasureRef}
                                     logEntry={item.logEntry}
+                                    highlights={item.highlights}
                                     scale={scale}
                                     wrap={wrap}
                                     isHighlighted={
@@ -280,9 +279,10 @@ export const ScrollableLogTextStreamView = injectI18n(ScrollableLogTextStreamVie
  * written as a hook.
  */
 const WithColumnWidths: React.FunctionComponent<{
-  children: (
-    params: { columnWidths: LogEntryColumnWidth[]; CharacterDimensionsProbe: React.ComponentType }
-  ) => React.ReactElement<any> | null;
+  children: (params: {
+    columnWidths: LogEntryColumnWidths;
+    CharacterDimensionsProbe: React.ComponentType;
+  }) => React.ReactElement<any> | null;
   columnConfigurations: LogColumnConfiguration[];
   scale: TextScale;
 }> = ({ children, columnConfigurations, scale }) => {

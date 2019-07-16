@@ -119,6 +119,11 @@ export const MoreRowItems = styled(EuiIcon)`
 
 export const OverviewWrapper = styled(EuiFlexGroup)`
   position: relative;
+  .euiButtonIcon {
+    position: absolute;
+    top: -10px;
+    right: 10px;
+  }
 `;
 
 export const LoadingOverlay = styled.div`

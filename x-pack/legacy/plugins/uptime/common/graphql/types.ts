@@ -754,13 +754,6 @@ export interface GetMonitorStatesQueryArgs {
 
   filters?: string | null;
 }
-export interface GetStatesIndexStatusQueryArgs {
-  dateRangeStart: string;
-
-  dateRangeEnd: string;
-
-  filters?: string | null;
-}
 
 // ====================================================
 // END: Typescript template

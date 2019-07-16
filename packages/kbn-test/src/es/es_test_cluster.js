@@ -54,7 +54,7 @@ export function createEsTestCluster(options = {}) {
 
   const cluster = new Cluster(log);
 
-  return new class EsTestCluster {
+  return new (class EsTestCluster {
     getStartTimeout() {
       const second = 1000;
       const minute = second * 60;
@@ -121,7 +121,7 @@ export function createEsTestCluster(options = {}) {
 
       return format(parts);
     }
-  }();
+  })();
 }
 
 /**

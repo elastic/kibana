@@ -12,14 +12,17 @@ import { connect } from 'react-redux';
 import chrome from 'ui/chrome';
 import { DEFAULT_INDEX_KEY } from '../../../common/constants';
 import { Direction, Ecs, GetEventsQuery, PageInfo } from '../../graphql/types';
-import { hostsModel, hostsSelectors, inputsModel, State } from '../../store';
+import { hostsModel, hostsSelectors, inputsModel, State, inputsSelectors } from '../../store';
 import { createFilter, getDefaultFetchPolicy } from '../helpers';
 import { QueryTemplate, QueryTemplateProps } from '../query_template';
 
 import { eventsQuery } from './index.gql_query';
 
+const ID = 'eventsQuery';
+
 export interface EventsArgs {
   id: string;
+  inspect: inputsModel.InspectQuery;
   events: Ecs[];
   loading: boolean;
   loadMore: (cursor: string, tiebreaker: string) => void;
@@ -34,6 +37,7 @@ export interface OwnProps extends QueryTemplateProps {
 }
 
 export interface EventsComponentReduxProps {
+  isInspected: boolean;
   limit: number;
 }
 
@@ -48,7 +52,8 @@ class EventsComponentQuery extends QueryTemplate<
     const {
       children,
       filterQuery,
-      id = 'eventsQuery',
+      id = ID,
+      isInspected,
       limit,
       skip,
       sourceId,
@@ -79,6 +84,7 @@ class EventsComponentQuery extends QueryTemplate<
             to: endDate!,
           },
           defaultIndex: chrome.getUiSettingsClient().get(DEFAULT_INDEX_KEY),
+          inspect: isInspected,
         }}
       >
         {({ data, loading, fetchMore, refetch }) => {
@@ -110,6 +116,7 @@ class EventsComponentQuery extends QueryTemplate<
           }));
           return children!({
             id,
+            inspect: getOr(null, 'source.Events.inspect', data),
             refetch,
             loading,
             totalCount: getOr(0, 'source.Events.totalCount', data),
@@ -125,8 +132,13 @@ class EventsComponentQuery extends QueryTemplate<
 
 const makeMapStateToProps = () => {
   const getEventsSelector = hostsSelectors.eventsSelector();
-  const mapStateToProps = (state: State, { type }: OwnProps) => {
-    return getEventsSelector(state, type);
+  const getQuery = inputsSelectors.globalQueryByIdSelector();
+  const mapStateToProps = (state: State, { type, id = ID }: OwnProps) => {
+    const { isInspected } = getQuery(state, id);
+    return {
+      ...getEventsSelector(state, type),
+      isInspected,
+    };
   };
   return mapStateToProps;
 };

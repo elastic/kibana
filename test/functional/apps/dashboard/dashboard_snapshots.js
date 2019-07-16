@@ -26,7 +26,8 @@ export default function ({ getService, getPageObjects, updateBaselines }) {
   const dashboardPanelActions = getService('dashboardPanelActions');
   const dashboardAddPanel = getService('dashboardAddPanel');
 
-  describe('dashboard snapshots', function describeIndexTests() {
+  // FLAKY: https://github.com/elastic/kibana/issues/40173
+  describe.skip('dashboard snapshots', function describeIndexTests() {
     before(async function () {
       // We use a really small window to minimize differences across os's and browsers.
       await browser.setWindowSize(1000, 700);

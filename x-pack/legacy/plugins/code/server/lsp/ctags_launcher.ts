@@ -47,7 +47,16 @@ export class CtagsLauncher extends AbstractLauncher {
   }
 
   async spawnProcess(installationPath: string, port: number, log: Logger) {
-    // TODO(pcxu): add spawn command here for ctags langserver
-    return spawn('');
+    const p = spawn(process.execPath, [installationPath, `--socket=${port.toString()}`], {
+      detached: false,
+      stdio: 'pipe',
+    });
+    p.stdout.on('data', data => {
+      log.stdout(data.toString());
+    });
+    p.stderr.on('data', data => {
+      log.stderr(data.toString());
+    });
+    return p;
   }
 }

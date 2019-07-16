@@ -29,16 +29,13 @@ export const TruncateHeightSection: React.SFC<Props> = ({
   const [showToggle, setShowToggle] = useState(true);
   const [isOpen, setIsOpen] = useState(false);
 
-  useEffect(
-    () => {
-      if (contentContainerEl.current) {
-        const shouldShow =
-          contentContainerEl.current.scrollHeight > previewHeight;
-        setShowToggle(shouldShow);
-      }
-    },
-    [children, previewHeight]
-  );
+  useEffect(() => {
+    if (contentContainerEl.current) {
+      const shouldShow =
+        contentContainerEl.current.scrollHeight > previewHeight;
+      setShowToggle(shouldShow);
+    }
+  }, [children, previewHeight]);
 
   return (
     <Fragment>

@@ -5,7 +5,7 @@
  */
 
 import { EuiDescriptionList, EuiFlexItem } from '@elastic/eui';
-import React from 'react';
+import React, { useContext, useState } from 'react';
 import { pure } from 'recompose';
 import styled from 'styled-components';
 
@@ -28,10 +28,14 @@ import { LoadingOverlay, OverviewWrapper } from '../../index';
 import { LoadingPanel } from '../../../loading';
 import { Anomalies, NarrowDateRange } from '../../../ml/types';
 import { AnomalyScores } from '../../../ml/score/anomaly_scores';
+import { MlCapabilitiesContext } from '../../../ml/permissions/ml_capabilities_provider';
+import { hasMlUserPermissions } from '../../../ml/permissions/has_ml_user_permissions';
+import { InspectButton } from '../../../inspect';
 
 interface OwnProps {
   data: IpOverviewData;
   flowTarget: FlowTarget;
+  id: string;
   ip: string;
   loading: boolean;
   isLoadingAnomaliesData: boolean;
@@ -62,6 +66,7 @@ const getDescriptionList = (descriptionList: DescriptionList[], key: number) => 
 
 export const IpOverview = pure<IpOverviewProps>(
   ({
+    id,
     ip,
     data,
     loading,
@@ -72,35 +77,46 @@ export const IpOverview = pure<IpOverviewProps>(
     anomaliesData,
     narrowDateRange,
   }) => {
+    const [showInspect, setShowInspect] = useState(false);
+    const capabilities = useContext(MlCapabilitiesContext);
+    const userPermissions = hasMlUserPermissions(capabilities);
     const typeData: Overview = data[flowTarget]!;
+    const column: DescriptionList[] = [
+      {
+        title: i18n.LOCATION,
+        description: locationRenderer(
+          [`${flowTarget}.geo.city_name`, `${flowTarget}.geo.region_name`],
+          data
+        ),
+      },
+      {
+        title: i18n.AUTONOMOUS_SYSTEM,
+        description: typeData
+          ? autonomousSystemRenderer(typeData.autonomousSystem, flowTarget)
+          : getEmptyTagValue(),
+      },
+    ];
+
+    const firstColumn: DescriptionList[] = userPermissions
+      ? [
+          ...column,
+          {
+            title: i18n.MAX_ANOMALY_SCORE_BY_JOB,
+            description: (
+              <AnomalyScores
+                anomalies={anomaliesData}
+                startDate={startDate}
+                endDate={endDate}
+                isLoading={isLoadingAnomaliesData}
+                narrowDateRange={narrowDateRange}
+              />
+            ),
+          },
+        ]
+      : column;
+
     const descriptionLists: Readonly<DescriptionList[][]> = [
-      [
-        {
-          title: i18n.LOCATION,
-          description: locationRenderer(
-            [`${flowTarget}.geo.city_name`, `${flowTarget}.geo.region_name`],
-            data
-          ),
-        },
-        {
-          title: i18n.AUTONOMOUS_SYSTEM,
-          description: typeData
-            ? autonomousSystemRenderer(typeData.autonomousSystem, flowTarget)
-            : getEmptyTagValue(),
-        },
-        {
-          title: i18n.MAX_ANOMALY_SCORE_BY_JOB,
-          description: (
-            <AnomalyScores
-              anomalies={anomaliesData}
-              startDate={startDate}
-              endDate={endDate}
-              isLoading={isLoadingAnomaliesData}
-              narrowDateRange={narrowDateRange}
-            />
-          ),
-        },
-      ],
+      firstColumn,
       [
         { title: i18n.FIRST_SEEN, description: dateRenderer('firstSeen', typeData) },
         { title: i18n.LAST_SEEN, description: dateRenderer('lastSeen', typeData) },
@@ -123,7 +139,10 @@ export const IpOverview = pure<IpOverviewProps>(
       ],
     ];
     return (
-      <OverviewWrapper>
+      <OverviewWrapper
+        onMouseEnter={() => setShowInspect(true)}
+        onMouseLeave={() => setShowInspect(false)}
+      >
         {loading && (
           <>
             <LoadingOverlay />
@@ -137,6 +156,12 @@ export const IpOverview = pure<IpOverviewProps>(
             />
           </>
         )}
+        <InspectButton
+          queryId={id}
+          show={showInspect}
+          title={i18n.INSPECT_TITLE}
+          inspectIndex={0}
+        />
         {descriptionLists.map((descriptionList, index) =>
           getDescriptionList(descriptionList, index)
         )}

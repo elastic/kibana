@@ -11,7 +11,6 @@ import { HistoryTabs } from '../../shared/HistoryTabs';
 import { ErrorGroupOverview } from '../ErrorGroupOverview';
 import { TransactionOverview } from '../TransactionOverview';
 import { ServiceMetrics } from './ServiceMetrics';
-import { useLocation } from '../../../hooks/useLocation';
 
 interface Props {
   transactionTypes: string[];
@@ -26,7 +25,6 @@ export function ServiceDetailTabs({
   isRumAgent,
   agentName
 }: Props) {
-  const location = useLocation();
   const { serviceName } = urlParams;
   const headTransactionType = transactionTypes[0];
   const transactionsTab = {
@@ -51,7 +49,7 @@ export function ServiceDetailTabs({
     }),
     path: `/${serviceName}/errors`,
     render: () => {
-      return <ErrorGroupOverview urlParams={urlParams} location={location} />;
+      return <ErrorGroupOverview />;
     },
     name: 'errors'
   };
@@ -60,9 +58,7 @@ export function ServiceDetailTabs({
       defaultMessage: 'Metrics'
     }),
     path: `/${serviceName}/metrics`,
-    render: () => (
-      <ServiceMetrics urlParams={urlParams} agentName={agentName} />
-    ),
+    render: () => <ServiceMetrics agentName={agentName} />,
     name: 'metrics'
   };
   const tabs = isRumAgent

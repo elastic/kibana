@@ -24,7 +24,7 @@ and fill opacity. This visualization also supports time shifting to compare two
 time periods. This visualization also supports annotations which can be loaded from
 a separate index based on a query.
 
-image:images/tsvb-timeseries.png["Time Series Visualization"]
+image:images/tsvb-screenshot.png["Time Series Visualization"]
 
 
 ==== Metric
@@ -216,4 +216,4 @@ the mustache template variable into the markdown at the cursor position. The mus
 syntax uses the Handlebar.js processor which is an extended version of the Mustache
 template language.
 
-image:images/tsvb-markdown-tab.png["Markdown Tab"]
+image:images/tsvb-markdown.png["Markdown Tab"]

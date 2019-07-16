@@ -11,6 +11,7 @@ export function createJestConfig({
   return {
     rootDir: xPackKibanaDirectory,
     roots: [
+      '<rootDir>/plugins',
       '<rootDir>/legacy/plugins',
       '<rootDir>/legacy/server',
     ],
@@ -22,7 +23,7 @@ export function createJestConfig({
     ],
     moduleNameMapper: {
       '^ui/(.*)': `${kibanaDirectory}/src/legacy/ui/public/$1`,
-      'uiExports/(.*)': `${kibanaDirectory}/src/dev/jest/mocks/file_mocks.js`,
+      'uiExports/(.*)': `${kibanaDirectory}/src/dev/jest/mocks/file_mock.js`,
       '^src/core/(.*)': `${kibanaDirectory}/src/core/$1`,
       '^plugins/watcher/models/(.*)': `${xPackKibanaDirectory}/legacy/plugins/watcher/public/models/$1`,
       '^plugins/([^\/.]*)(.*)': `${kibanaDirectory}/src/legacy/core_plugins/$1/public$2`,

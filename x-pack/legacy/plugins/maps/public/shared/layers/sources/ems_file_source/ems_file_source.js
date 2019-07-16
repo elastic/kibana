@@ -13,6 +13,7 @@ import { EMSFileCreateSourceEditor } from './create_source_editor';
 import { i18n } from '@kbn/i18n';
 import { getDataSourceLabel } from '../../../../../common/i18n_getters';
 import { UpdateSourceEditor } from './update_source_editor';
+import { TooltipProperty } from '../../tooltips/tooltip_property';
 
 export class EMSFileSource extends AbstractVectorSource {
 
@@ -34,12 +35,12 @@ export class EMSFileSource extends AbstractVectorSource {
   }
 
   static renderEditor({ onPreviewSource, inspectorAdapters }) {
-    const onChange = (selectedId) => {
-      const emsFileSourceDescriptor = EMSFileSource.createDescriptor({ id: selectedId });
-      const emsFileSource = new EMSFileSource(emsFileSourceDescriptor, inspectorAdapters);
-      onPreviewSource(emsFileSource);
+    const onSourceConfigChange = (sourceConfig) => {
+      const sourceDescriptor = EMSFileSource.createDescriptor(sourceConfig);
+      const source = new EMSFileSource(sourceDescriptor, inspectorAdapters);
+      onPreviewSource(source);
     };
-    return <EMSFileCreateSourceEditor onChange={onChange}/>;
+    return <EMSFileCreateSourceEditor onSourceConfigChange={onSourceConfigChange}/>;
   }
 
   constructor(descriptor, inspectorAdapters) {
@@ -134,8 +135,8 @@ export class EMSFileSource extends AbstractVectorSource {
   }
 
   async filterAndFormatPropertiesToHtml(properties) {
-    const newProperties = {};
     const meta = await this._getEmsVectorFileMeta();
+    const tooltipProperties = [];
     for (const key in properties) {
       if (properties.hasOwnProperty(key) && this._descriptor.tooltipProperties.indexOf(key) > -1) {
         let newFieldName = key;
@@ -145,10 +146,10 @@ export class EMSFileSource extends AbstractVectorSource {
             break;
           }
         }
-        newProperties[newFieldName] = properties[key];
+        tooltipProperties.push(new TooltipProperty(key, newFieldName, properties[key]));
       }
     }
-    return super.filterAndFormatPropertiesToHtml(newProperties);
+    return tooltipProperties;
   }
 
   async getSupportedShapeTypes() {

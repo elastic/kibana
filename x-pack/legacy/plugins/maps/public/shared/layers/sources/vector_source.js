@@ -103,7 +103,7 @@ export class AbstractVectorSource extends AbstractSource {
       if (key.startsWith('__kbn')) {//these are system properties and should be ignored
         continue;
       }
-      tooltipProperties.push(new TooltipProperty(key, properties[key]));
+      tooltipProperties.push(new TooltipProperty(key, key, properties[key]));
     }
     return tooltipProperties;
   }

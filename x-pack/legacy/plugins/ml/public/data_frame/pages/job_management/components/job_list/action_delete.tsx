@@ -14,20 +14,21 @@ import {
   EUI_MODAL_CONFIRM_BUTTON,
 } from '@elastic/eui';
 
+import { deleteJob } from './job_service';
+
 import {
   checkPermission,
   createPermissionFailureMessage,
 } from '../../../../../privilege/check_privilege';
 
-import { DataFrameJobListRow, DATA_FRAME_RUNNING_STATE } from './common';
+import { DataFrameJobListRow, DATA_FRAME_TASK_STATE } from './common';
 
 interface DeleteActionProps {
   item: DataFrameJobListRow;
-  deleteJob(d: DataFrameJobListRow): void;
 }
 
-export const DeleteAction: SFC<DeleteActionProps> = ({ deleteJob, item }) => {
-  const disabled = item.state.task_state === DATA_FRAME_RUNNING_STATE.STARTED;
+export const DeleteAction: SFC<DeleteActionProps> = ({ item }) => {
+  const disabled = item.state.task_state === DATA_FRAME_TASK_STATE.STARTED;
 
   const canDeleteDataFrameJob: boolean = checkPermission('canDeleteDataFrameJob');
 
@@ -64,7 +65,7 @@ export const DeleteAction: SFC<DeleteActionProps> = ({ deleteJob, item }) => {
         content={
           disabled
             ? i18n.translate('xpack.ml.dataframe.jobsList.deleteActionDisabledToolTipContent', {
-                defaultMessage: 'Stop the data frame job in order to delete it.',
+                defaultMessage: 'Stop the data frame transform in order to delete it.',
               })
             : createPermissionFailureMessage('canStartStopDataFrameJob')
         }
@@ -103,7 +104,7 @@ export const DeleteAction: SFC<DeleteActionProps> = ({ deleteJob, item }) => {
           >
             <p>
               {i18n.translate('xpack.ml.dataframe.jobsList.deleteModalBody', {
-                defaultMessage: `Are you sure you want to delete this job? The job's destination index and optional Kibana index pattern will not be deleted.`,
+                defaultMessage: `Are you sure you want to delete this transform? The transform's destination index and optional Kibana index pattern will not be deleted.`,
               })}
             </p>
           </EuiConfirmModal>
