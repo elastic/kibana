@@ -164,6 +164,7 @@ exports[`TelemetryOptIn should display when telemetry not opted in 1`] = `
                 }
                 className="eui-AlignBaseline"
                 closePopover={[Function]}
+                display="inlineBlock"
                 hasArrow={true}
                 id="readMorePopover"
                 isOpen={false}
@@ -256,6 +257,7 @@ exports[`TelemetryOptIn should display when telemetry not opted in 1`] = `
                   }
                   className="eui-AlignBaseline"
                   closePopover={[Function]}
+                  display="inlineBlock"
                   hasArrow={true}
                   id="readMorePopover"
                   isOpen={false}
@@ -321,6 +323,7 @@ exports[`TelemetryOptIn should display when telemetry not opted in 1`] = `
               }
               className="eui-AlignBaseline"
               closePopover={[Function]}
+              display="inlineBlock"
               hasArrow={true}
               id="readMorePopover"
               isOpen={false}
