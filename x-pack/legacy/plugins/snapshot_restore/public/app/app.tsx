@@ -36,7 +36,7 @@ export const App: React.FunctionComponent = () => {
       error={apiError}
     />
   ) : (
-    <WithPrivileges privileges="cluster">
+    <WithPrivileges requiredPrivileges="cluster.*">
       {({ isLoading, hasPrivileges, missingPrivileges }) =>
         isLoading ? (
           <SectionLoading>
@@ -76,7 +76,7 @@ export const App: React.FunctionComponent = () => {
           <EuiPageContent>
             <NotAuthorizedSection
               sectionName="Snapshot and Restore"
-              missingPrivileges={missingPrivileges as string[]}
+              missingPrivileges={missingPrivileges.cluster!}
               privilegeType="cluster"
               FormattedMessage={FormattedMessage}
             />

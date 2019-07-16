@@ -197,7 +197,7 @@ export const RestoreList: React.FunctionComponent = () => {
   }
 
   return (
-    <WithPrivileges privileges="index">
+    <WithPrivileges requiredPrivileges="index.*">
       {({ hasPrivileges, missingPrivileges }) => (
         <Fragment>
           {hasPrivileges ? (
@@ -205,7 +205,7 @@ export const RestoreList: React.FunctionComponent = () => {
           ) : (
             <NotAuthorizedSection
               sectionName="snapshot restore status"
-              missingPrivileges={missingPrivileges as string[]}
+              missingPrivileges={missingPrivileges.index!}
               privilegeType="index"
               FormattedMessage={FormattedMessage}
             />

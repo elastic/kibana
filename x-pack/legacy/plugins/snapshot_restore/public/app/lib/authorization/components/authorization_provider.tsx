@@ -16,8 +16,8 @@ interface Authorization {
       message?: string;
     };
   } | null;
-  permissions: {
-    hasAllPermissions: boolean;
+  privileges: {
+    hasAllPrivileges: boolean;
     missingPrivileges: MissingPrivileges;
   };
 }
@@ -29,8 +29,8 @@ export interface MissingPrivileges {
 const initialValue: Authorization = {
   isLoaded: false,
   apiError: null,
-  permissions: {
-    hasAllPermissions: true,
+  privileges: {
+    hasAllPrivileges: true,
     missingPrivileges: {},
   },
 };
@@ -53,8 +53,8 @@ export const AuthorizationProvider = ({ permissionEndpoint, children }: Props) =
   const value = {
     isLoaded,
     apiError: error ? error : null,
-    permissions: {
-      hasAllPermissions: isLoaded ? permissionsData.hasPermission : true,
+    privileges: {
+      hasAllPrivileges: isLoaded ? permissionsData.hasPermission : true,
       missingPrivileges: isLoaded
         ? {
             cluster: permissionsData.missingClusterPrivileges,

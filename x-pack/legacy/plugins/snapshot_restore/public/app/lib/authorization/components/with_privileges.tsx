@@ -9,41 +9,75 @@ import { useContext } from 'react';
 import { AuthorizationContext, MissingPrivileges } from './authorization_provider';
 
 interface Props {
-  privileges: string | string[];
+  /**
+   * Each required privilege must have the format "section.privilege".
+   * To indicate that *all* privileges from a section are required, we can use the asterix
+   * e.g. "index.*"
+   */
+  requiredPrivileges: string | string[];
   children: (childrenProps: {
     isLoading: boolean;
     hasPrivileges: boolean;
-    missingPrivileges: string[] | MissingPrivileges;
+    missingPrivileges: MissingPrivileges;
   }) => JSX.Element;
 }
 
-const hasPrivilege = (missingPrivileges: string[] | undefined) => {
-  if (!Array.isArray(missingPrivileges) || missingPrivileges.length === 0) {
-    return true;
-  }
-  return false;
-};
+type Privilege = [string, string];
 
-export const WithPrivileges = ({ privileges, children }: Props) => {
-  const { isLoaded, permissions } = useContext(AuthorizationContext);
+const toArray = (value: string | string[]): string[] =>
+  Array.isArray(value) ? (value as string[]) : ([value] as string[]);
+
+export const WithPrivileges = ({ requiredPrivileges, children }: Props) => {
+  const { isLoaded, privileges } = useContext(AuthorizationContext);
 
   const isLoading = !isLoaded;
-  const arrayProvided = Array.isArray(privileges);
-  const privilegesToArray = arrayProvided ? (privileges as string[]) : ([privileges] as string[]);
+  const privilegesToArray: Privilege[] = toArray(requiredPrivileges).map(p => {
+    const [section, privilege] = p.split('.');
+    if (!privilege) {
+      // Oh! we forgot to use the dot "." notation.
+      throw new Error('Required privilege must have the format "section.privilege"');
+    }
+    return [section, privilege];
+  });
 
   const hasPrivileges = isLoading
     ? false
-    : privilegesToArray.every(privilege => hasPrivilege(permissions.missingPrivileges[privilege]));
+    : privilegesToArray.every(privilege => {
+        const [section, requiredPrivilege] = privilege;
+        if (!privileges.missingPrivileges[section]) {
+          // if the section does not exist in our missingPriviledges, everything is OK
+          return true;
+        }
+        if (privileges.missingPrivileges[section]!.length === 0) {
+          return true;
+        }
+        if (requiredPrivilege === '*') {
+          // If length > 0 and we require them all... KO
+          return false;
+        }
+        // If we require _some_ privilege, we make sure that the one
+        // we require is *not* in the missingPrivilege array
+        return !privileges.missingPrivileges[section]!.includes(requiredPrivilege);
+      });
 
-  const missingPrivileges = arrayProvided
-    ? privilegesToArray.reduce(
-        (acc, privilege) => {
-          acc[privilege] = permissions.missingPrivileges[privilege] || [];
-          return acc;
-        },
-        {} as MissingPrivileges
-      )
-    : permissions.missingPrivileges[privileges as string] || [];
+  const missingPrivileges = privilegesToArray.reduce(
+    (acc, [section, privilege]) => {
+      let missing: string[] = acc[section] || [];
+
+      if (privilege === '*') {
+        missing = privileges.missingPrivileges[section] || [];
+      } else if (
+        privileges.missingPrivileges[section] &&
+        privileges.missingPrivileges[section]!.includes(privilege)
+      ) {
+        missing.push(privilege);
+      }
+
+      acc[section] = missing;
+      return acc;
+    },
+    {} as MissingPrivileges
+  );
 
   return children({ isLoading, hasPrivileges, missingPrivileges });
 };
