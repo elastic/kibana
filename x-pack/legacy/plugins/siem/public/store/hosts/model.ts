@@ -12,7 +12,19 @@ export enum HostsType {
   details = 'details',
 }
 
+export enum HostsTableType {
+  authentications = 'authentications',
+  hosts = 'hosts',
+  events = 'events',
+  uncommonProcesses = 'uncommonProcesses',
+}
+
 export interface BasicQuery {
+  limit: number;
+}
+
+export interface BasicQueryPaginated {
+  activePage: number;
   limit: number;
 }
 
@@ -22,7 +34,7 @@ export interface HostsQuery extends BasicQuery {
 }
 
 interface Queries {
-  authentications: BasicQuery;
+  authentications: BasicQueryPaginated;
   hosts: HostsQuery;
   events: BasicQuery;
   uncommonProcesses: BasicQuery;

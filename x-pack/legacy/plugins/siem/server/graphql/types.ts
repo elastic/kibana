@@ -229,7 +229,7 @@ export interface AuthenticationsData {
 
   totalCount: number;
 
-  pageInfo: PageInfo;
+  pageInfo: PageInfoPaginated;
 
   inspect?: Inspect | null;
 }
@@ -348,10 +348,12 @@ export interface CursorType {
   tiebreaker?: string | null;
 }
 
-export interface PageInfo {
-  endCursor?: CursorType | null;
+export interface PageInfoPaginated {
+  activePage: number;
 
-  hasNextPage?: boolean | null;
+  fakeTotalCount: number;
+
+  showMorePagesIndicator: boolean;
 }
 
 export interface Inspect {
@@ -826,6 +828,12 @@ export interface SshEcsFields {
   method?: ToStringArray | null;
 
   signature?: ToStringArray | null;
+}
+
+export interface PageInfo {
+  endCursor?: CursorType | null;
+
+  hasNextPage?: boolean | null;
 }
 
 export interface TimelineData {
@@ -1559,6 +1567,17 @@ export interface TimerangeInput {
   from: number;
 }
 
+export interface PaginationInputPaginated {
+  /** The activePage parameter defines the page of results you want to fetch */
+  activePage: number;
+  /** The cursorStart parameter defines the start of the results to be displayed */
+  cursorStart: number;
+  /** The fakePossibleCount parameter determines the total count in order to show 5 additional pages */
+  fakePossibleCount: number;
+  /** The querySize parameter is the number of items to be returned */
+  querySize: number;
+}
+
 export interface PaginationInput {
   /** The limit parameter allows you to configure the maximum amount of items to be returned */
   limit: number;
@@ -1784,7 +1803,7 @@ export interface GetAllTimelineQueryArgs {
 export interface AuthenticationsSourceArgs {
   timerange: TimerangeInput;
 
-  pagination: PaginationInput;
+  pagination: PaginationInputPaginated;
 
   filterQuery?: string | null;
 
@@ -2503,7 +2522,7 @@ export namespace SourceResolvers {
   export interface AuthenticationsArgs {
     timerange: TimerangeInput;
 
-    pagination: PaginationInput;
+    pagination: PaginationInputPaginated;
 
     filterQuery?: string | null;
 
@@ -3012,7 +3031,7 @@ export namespace AuthenticationsDataResolvers {
 
     totalCount?: TotalCountResolver<number, TypeParent, Context>;
 
-    pageInfo?: PageInfoResolver<PageInfo, TypeParent, Context>;
+    pageInfo?: PageInfoResolver<PageInfoPaginated, TypeParent, Context>;
 
     inspect?: InspectResolver<Inspect | null, TypeParent, Context>;
   }
@@ -3028,7 +3047,7 @@ export namespace AuthenticationsDataResolvers {
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type PageInfoResolver<
-    R = PageInfo,
+    R = PageInfoPaginated,
     Parent = AuthenticationsData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
@@ -3418,21 +3437,28 @@ export namespace CursorTypeResolvers {
   > = Resolver<R, Parent, Context>;
 }
 
-export namespace PageInfoResolvers {
-  export interface Resolvers<Context = SiemContext, TypeParent = PageInfo> {
-    endCursor?: EndCursorResolver<CursorType | null, TypeParent, Context>;
+export namespace PageInfoPaginatedResolvers {
+  export interface Resolvers<Context = SiemContext, TypeParent = PageInfoPaginated> {
+    activePage?: ActivePageResolver<number, TypeParent, Context>;
 
-    hasNextPage?: HasNextPageResolver<boolean | null, TypeParent, Context>;
+    fakeTotalCount?: FakeTotalCountResolver<number, TypeParent, Context>;
+
+    showMorePagesIndicator?: ShowMorePagesIndicatorResolver<boolean, TypeParent, Context>;
   }
 
-  export type EndCursorResolver<
-    R = CursorType | null,
-    Parent = PageInfo,
+  export type ActivePageResolver<
+    R = number,
+    Parent = PageInfoPaginated,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
-  export type HasNextPageResolver<
-    R = boolean | null,
-    Parent = PageInfo,
+  export type FakeTotalCountResolver<
+    R = number,
+    Parent = PageInfoPaginated,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type ShowMorePagesIndicatorResolver<
+    R = boolean,
+    Parent = PageInfoPaginated,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
 }
@@ -5020,6 +5046,25 @@ export namespace SshEcsFieldsResolvers {
   export type SignatureResolver<
     R = ToStringArray | null,
     Parent = SshEcsFields,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+}
+
+export namespace PageInfoResolvers {
+  export interface Resolvers<Context = SiemContext, TypeParent = PageInfo> {
+    endCursor?: EndCursorResolver<CursorType | null, TypeParent, Context>;
+
+    hasNextPage?: HasNextPageResolver<boolean | null, TypeParent, Context>;
+  }
+
+  export type EndCursorResolver<
+    R = CursorType | null,
+    Parent = PageInfo,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type HasNextPageResolver<
+    R = boolean | null,
+    Parent = PageInfo,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
 }
