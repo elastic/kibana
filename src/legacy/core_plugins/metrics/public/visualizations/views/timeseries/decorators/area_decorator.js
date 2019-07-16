@@ -20,7 +20,7 @@
 import React from 'react';
 import { getSpecId, getGroupId, ScaleType, AreaSeries } from '@elastic/charts';
 import { getSeriesColors, getAreaStyles } from '../utils/series_styles';
-import { PanelEntities } from '../model/panel';
+import { ChartsEntities } from '../model/charts';
 import { X_ACCESSOR_INDEX, Y_ACCESSOR_INDEXES } from '../../../constants';
 
 export function AreaSeriesDecorator({
@@ -61,7 +61,7 @@ export function AreaSeriesDecorator({
   return <AreaSeries {...seriesSettings} />;
 }
 
-AreaSeriesDecorator.propTypes = PanelEntities.AreaChart;
+AreaSeriesDecorator.propTypes = ChartsEntities.AreaChart;
 
 AreaSeriesDecorator.defaultProps = {
   yScaleType: ScaleType.Linear,

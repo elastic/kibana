@@ -20,7 +20,7 @@
 import React from 'react';
 import { getSpecId, getGroupId, ScaleType, BarSeries } from '@elastic/charts';
 import { getSeriesColors, getBarStyles } from '../utils/series_styles';
-import { PanelEntities } from '../model/panel';
+import { ChartsEntities } from '../model/charts';
 import { X_ACCESSOR_INDEX, Y_ACCESSOR_INDEXES } from '../../../constants';
 
 export function BarSeriesDecorator({
@@ -60,7 +60,7 @@ export function BarSeriesDecorator({
   return <BarSeries {...seriesSettings} />;
 }
 
-BarSeriesDecorator.propTypes = PanelEntities.BarChart;
+BarSeriesDecorator.propTypes = ChartsEntities.BarChart;
 
 BarSeriesDecorator.defaultProps = {
   yScaleType: ScaleType.Linear,

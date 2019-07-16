@@ -60,7 +60,7 @@ const AreaChart = {
   }).isRequired,
 };
 
-export const PanelEntities = {
+export const ChartsEntities = {
   BarChart,
   AreaChart,
 };

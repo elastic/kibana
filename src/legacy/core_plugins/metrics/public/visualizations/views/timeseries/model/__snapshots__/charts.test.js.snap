@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`src/legacy/core_plugins/metrics/public/visualizations/views/timeseries/model/panel.js PanelEntities should match a snapshot of PanelEntities 1`] = `
+exports[`src/legacy/core_plugins/metrics/public/visualizations/views/timeseries/model/charts.js ChartsEntities should match a snapshot of ChartsEntities 1`] = `
 Object {
   "AreaChart": Object {
     "color": [Function],

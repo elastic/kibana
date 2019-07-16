@@ -17,12 +17,12 @@
  * under the License.
  */
 
-import { PanelEntities } from './panel';
+import { ChartsEntities } from './charts';
 
-describe('src/legacy/core_plugins/metrics/public/visualizations/views/timeseries/model/panel.js', () => {
-  describe('PanelEntities', () => {
-    test('should match a snapshot of PanelEntities', () => {
-      expect(PanelEntities).toMatchSnapshot();
+describe('src/legacy/core_plugins/metrics/public/visualizations/views/timeseries/model/charts.js', () => {
+  describe('ChartsEntities', () => {
+    test('should match a snapshot of ChartsEntities', () => {
+      expect(ChartsEntities).toMatchSnapshot();
     });
   });
 });
