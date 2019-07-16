@@ -7,13 +7,14 @@
 import React, { Fragment, useEffect } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 
-import { EuiEmptyPrompt } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiButton } from '@elastic/eui';
 import { SlmPolicy } from '../../../../../common/types';
 import { SectionError, SectionLoading } from '../../../components';
 import { BASE_PATH, UIM_POLICY_LIST_LOAD } from '../../../constants';
 import { useAppDependencies } from '../../../index';
 import { useLoadPolicies } from '../../../services/http';
 import { uiMetricService } from '../../../services/ui_metric';
+import { linkToAddPolicy } from '../../../services/navigation';
 
 import { PolicyDetails } from './policy_details';
 import { PolicyTable } from './policy_table';
@@ -103,6 +104,19 @@ export const PolicyList: React.FunctionComponent<RouteComponentProps<MatchParams
               />
             </p>
           </Fragment>
+        }
+        actions={
+          <EuiButton
+            href={linkToAddPolicy()}
+            fill
+            iconType="plusInCircle"
+            data-test-subj="createPolicyButton"
+          >
+            <FormattedMessage
+              id="xpack.snapshotRestore.createPolicyButton"
+              defaultMessage="Create a policy"
+            />
+          </EuiButton>
         }
         data-test-subj="emptyPrompt"
       />

@@ -15,6 +15,7 @@ import {
   EuiTitle,
   EuiTabs,
   EuiTab,
+  EuiButton,
 } from '@elastic/eui';
 
 import { SlmPolicy } from '../../../../../../common/types';
@@ -25,6 +26,7 @@ import {
 } from '../../../../constants';
 import { useLoadPolicy } from '../../../../services/http';
 import { uiMetricService } from '../../../../services/ui_metric';
+import { linkToEditPolicy } from '../../../../services/navigation';
 
 import { SectionError, SectionLoading } from '../../../../components';
 import { TabSummary, TabHistory } from './tabs';
@@ -170,6 +172,20 @@ export const PolicyDetails: React.FunctionComponent<Props> = ({ policyName, onCl
             />
           </EuiButtonEmpty>
         </EuiFlexItem>
+        {policyDetails ? (
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup alignItems="center">
+              <EuiFlexItem grow={false}>
+                <EuiButton href={linkToEditPolicy(policyName)} fill color="primary">
+                  <FormattedMessage
+                    id="xpack.snapshotRestore.policyDetails.editButtonLabel"
+                    defaultMessage="Edit"
+                  />
+                </EuiButton>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        ) : null}
       </EuiFlexGroup>
     );
   };

@@ -47,3 +47,11 @@ export function linkToRestoreSnapshot(repositoryName: string, snapshotName: stri
 export function linkToPolicy(policyName: string) {
   return `#${BASE_PATH}/policies/${encodeURIComponent(policyName)}`;
 }
+
+export function linkToEditPolicy(policyName: string) {
+  return `#${BASE_PATH}/edit_policy/${encodeURIComponent(policyName)}`;
+}
+
+export function linkToAddPolicy() {
+  return `#${BASE_PATH}/add_policy`;
+}

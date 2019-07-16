@@ -5,13 +5,22 @@
  */
 
 import React from 'react';
-import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiInMemoryTable, EuiLink } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiInMemoryTable,
+  EuiLink,
+  EuiToolTip,
+  EuiButtonIcon,
+} from '@elastic/eui';
 
 import { SlmPolicy } from '../../../../../../common/types';
 import { UIM_POLICY_SHOW_DETAILS_CLICK } from '../../../../constants';
 import { useAppDependencies } from '../../../../index';
 import { FormattedDateTime } from '../../../../components';
 import { uiMetricService } from '../../../../services/ui_metric';
+import { linkToAddPolicy, linkToEditPolicy } from '../../../../services/navigation';
 
 interface Props {
   policies: SlmPolicy[];
@@ -85,6 +94,40 @@ export const PolicyTable: React.FunctionComponent<Props> = ({
         <FormattedDateTime epochMs={nextExecutionMillis} />
       ),
     },
+    {
+      name: i18n.translate('xpack.snapshotRestore.policyList.table.actionsColumnTitle', {
+        defaultMessage: 'Actions',
+      }),
+      actions: [
+        {
+          render: ({ name }: SlmPolicy) => {
+            const label = i18n.translate(
+              'xpack.snapshotRestore.policyList.table.actionEditTooltip',
+              { defaultMessage: 'Edit' }
+            );
+
+            return (
+              <EuiToolTip content={label}>
+                <EuiButtonIcon
+                  aria-label={i18n.translate(
+                    'xpack.snapshotRestore.policyList.table.actionEditAriaLabel',
+                    {
+                      defaultMessage: 'Edit poicy `{name}`',
+                      values: { name },
+                    }
+                  )}
+                  iconType="pencil"
+                  color="primary"
+                  href={linkToEditPolicy(name)}
+                  data-test-subj="editPolicyButton"
+                />
+              </EuiToolTip>
+            );
+          },
+        },
+      ],
+      width: '100px',
+    },
   ];
 
   const sorting = {
@@ -112,6 +155,19 @@ export const PolicyTable: React.FunctionComponent<Props> = ({
             <FormattedMessage
               id="xpack.snapshotRestore.policyList.table.reloadPoliciesButton"
               defaultMessage="Reload"
+            />
+          </EuiButton>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiButton
+            href={linkToAddPolicy()}
+            fill
+            iconType="plusInCircle"
+            data-test-subj="createPolicyButton"
+          >
+            <FormattedMessage
+              id="xpack.snapshotRestore.policyList.table.addPolicyButton"
+              defaultMessage="Create a policy"
             />
           </EuiButton>
         </EuiFlexItem>
