@@ -37,6 +37,7 @@ uiModules
         exportTitle: '=?',
         showTotal: '=',
         totalFunc: '=',
+        percentageCol: '=',
         filter: '=',
       },
       compile: function ($el) {
