@@ -15,6 +15,8 @@ import {
 import { hasMlUserPermissions } from '../permissions/has_ml_user_permissions';
 import { MlCapabilitiesContext } from '../permissions/ml_capabilities_provider';
 import { useSiemJobs } from '../../ml_popover/hooks/use_siem_jobs';
+import { useStateToaster } from '../../toasters';
+import { errorToToaster } from '../api/error_to_toaster';
 
 interface Args {
   influencers?: InfluencerInput[];
@@ -75,6 +77,7 @@ export const useAnomaliesTableData = ({
   const config = useContext(KibanaConfigContext);
   const capabilities = useContext(MlCapabilitiesContext);
   const userPermissions = hasMlUserPermissions(capabilities);
+  const [, dispatchToaster] = useStateToaster();
 
   const fetchFunc = async (
     influencersInput: InfluencerInput[],
@@ -83,25 +86,30 @@ export const useAnomaliesTableData = ({
     latestMs: number
   ) => {
     if (userPermissions && !skip && siemJobs.length > 0) {
-      const data = await anomaliesTableData(
-        {
-          jobIds: siemJobs,
-          criteriaFields: criteriaFieldsInput,
-          aggregationInterval: 'auto',
-          threshold: getThreshold(config, threshold),
-          earliestMs,
-          latestMs,
-          influencers: influencersInput,
-          dateFormatTz: getTimeZone(config),
-          maxRecords: 500,
-          maxExamples: 10,
-        },
-        {
-          'kbn-version': config.kbnVersion,
-        }
-      );
-      setTableData(data);
-      setLoading(false);
+      try {
+        const data = await anomaliesTableData(
+          {
+            jobIds: siemJobs,
+            criteriaFields: criteriaFieldsInput,
+            aggregationInterval: 'auto',
+            threshold: getThreshold(config, threshold),
+            earliestMs,
+            latestMs,
+            influencers: influencersInput,
+            dateFormatTz: getTimeZone(config),
+            maxRecords: 500,
+            maxExamples: 10,
+          },
+          {
+            'kbn-version': config.kbnVersion,
+          }
+        );
+        setTableData(data);
+        setLoading(false);
+      } catch (error) {
+        errorToToaster({ error, dispatchToaster });
+        setLoading(false);
+      }
     } else if (!userPermissions) {
       setLoading(false);
     } else {

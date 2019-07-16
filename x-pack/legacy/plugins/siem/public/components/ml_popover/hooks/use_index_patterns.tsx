@@ -7,6 +7,8 @@
 import { useContext, useEffect, useState } from 'react';
 import { getIndexPatterns } from '../api';
 import { KibanaConfigContext } from '../../../lib/adapters/framework/kibana_framework_adapter';
+import { useStateToaster } from '../../toasters';
+import { errorToToaster } from '../../ml/api/error_to_toaster';
 
 type Return = [boolean, string];
 
@@ -14,14 +16,20 @@ export const useIndexPatterns = (refreshToggle = false): Return => {
   const [indexPattern, setIndexPattern] = useState<string>('');
   const [isLoading, setIsLoading] = useState(true);
   const config = useContext(KibanaConfigContext);
+  const [, dispatchToaster] = useStateToaster();
 
   const fetchFunc = async () => {
-    const data = await getIndexPatterns({
-      'kbn-version': config.kbnVersion,
-    });
+    try {
+      const data = await getIndexPatterns({
+        'kbn-version': config.kbnVersion,
+      });
 
-    setIndexPattern(data);
-    setIsLoading(false);
+      setIndexPattern(data);
+      setIsLoading(false);
+    } catch (error) {
+      errorToToaster({ error, dispatchToaster });
+      setIsLoading(false);
+    }
   };
 
   useEffect(() => {

@@ -10,6 +10,8 @@ import { Group } from '.././types';
 import { KibanaConfigContext } from '../../../lib/adapters/framework/kibana_framework_adapter';
 import { hasMlUserPermissions } from '../../ml/permissions/has_ml_user_permissions';
 import { MlCapabilitiesContext } from '../../ml/permissions/ml_capabilities_provider';
+import { useStateToaster } from '../../toasters';
+import { errorToToaster } from '../../ml/api/error_to_toaster';
 
 type Return = [boolean, string[]];
 
@@ -24,16 +26,21 @@ export const useSiemJobs = (refetchData: boolean): Return => {
   const config = useContext(KibanaConfigContext);
   const capabilities = useContext(MlCapabilitiesContext);
   const userPermissions = hasMlUserPermissions(capabilities);
+  const [, dispatchToaster] = useStateToaster();
 
   const fetchFunc = async () => {
     if (userPermissions) {
-      const data = await groupsData({
-        'kbn-version': config.kbnVersion,
-      });
+      try {
+        const data = await groupsData({
+          'kbn-version': config.kbnVersion,
+        });
 
-      const siemJobIds = getSiemJobIdsFromGroupsData(data);
+        const siemJobIds = getSiemJobIdsFromGroupsData(data);
 
-      setSiemJobs(siemJobIds);
+        setSiemJobs(siemJobIds);
+      } catch (error) {
+        errorToToaster({ error, dispatchToaster });
+      }
     }
     setLoading(false);
   };
