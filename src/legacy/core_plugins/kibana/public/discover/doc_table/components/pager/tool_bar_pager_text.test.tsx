@@ -17,24 +17,16 @@
  * under the License.
  */
 
-import { uiModules } from 'ui/modules';
-import template from './tool_bar_pager_text.html';
+import React from 'react';
+import { renderWithIntl } from 'test_utils/enzyme_helpers';
+import { ToolBarPagerText } from './tool_bar_pager_text';
 
-const app = uiModules.get('kibana');
-
-app.directive('toolBarPagerText', function () {
-  return {
-    restrict: 'E',
-    replace: true,
-    template: template,
-    scope: {
-      startItem: '=',
-      endItem: '=',
-      totalItems: '=',
-    },
-    controllerAs: 'toolBarPagerText',
-    bindToController: true,
-    controller: class ToolBarPagerTextController {
-    }
+test('it renders ToolBarPagerText without crashing', () => {
+  const props = {
+    startItem: 1,
+    endItem: 2,
+    totalItems: 3,
   };
+  const wrapper = renderWithIntl(<ToolBarPagerText {...props} />);
+  expect(wrapper).toMatchSnapshot();
 });
