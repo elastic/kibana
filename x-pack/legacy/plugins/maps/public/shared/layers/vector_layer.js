@@ -352,7 +352,8 @@ export class VectorLayer extends AbstractLayer {
 
     const searchFilters = {
       ...dataFilters,
-      fieldNames: joinSource.getFieldNames(), sourceQuery: joinSource.getWhereQuery(),
+      fieldNames: joinSource.getFieldNames(),
+      sourceQuery: joinSource.getWhereQuery(),
       applyGlobalQuery: this.getApplyGlobalQuery(),
     };
     const canSkip = await this._canSkipSourceUpdate(joinSource, sourceDataId, searchFilters);
