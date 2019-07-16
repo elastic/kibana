@@ -22,10 +22,7 @@ import {
   RoleKibanaPrivilege,
 } from '../../../../../../../../common/model';
 import { KibanaPrivilegeCalculatorFactory } from '../../../../../../../lib/kibana_privilege_calculator';
-import {
-  hasAssignedFeaturePrivileges,
-  isGlobalPrivilegeDefinition,
-} from '../../../../../../../lib/privilege_utils';
+import { isGlobalPrivilegeDefinition } from '../../../../../../../lib/privilege_utils';
 import { copyRole } from '../../../../../../../lib/role_utils';
 import { CUSTOM_PRIVILEGE_VALUE } from '../../../../lib/constants';
 import { SpacesPopoverList } from '../../../spaces_popover_list';
@@ -183,16 +180,24 @@ export class PrivilegeSpaceTable extends Component<Props, State> {
         field: 'privileges',
         name: 'Privileges',
         render: (privileges: RoleKibanaPrivilege, record: TableRow) => {
-          const hasCustomizations = hasAssignedFeaturePrivileges(privileges);
           const effectivePrivilege = effectivePrivileges[record.spacesIndex];
           const basePrivilege = effectivePrivilege.base;
 
-          const featureEntries = Object.values(allowedPrivileges[record.spacesIndex].feature);
-          const isAllowedCustomizations = featureEntries.some(entry => {
-            return entry != null && (entry.canUnassign || entry.privileges.length > 1);
-          });
+          const hasAllowedCustomizations = Object.entries(privileges.feature).some(
+            ([featureId, featurePrivileges]) => {
+              const allowedFeaturePrivileges =
+                allowedPrivileges[record.spacesIndex].feature[featureId];
+              return (
+                allowedFeaturePrivileges &&
+                allowedFeaturePrivileges.canUnassign &&
+                allowedFeaturePrivileges.privileges.some(privilege =>
+                  featurePrivileges.includes(privilege)
+                )
+              );
+            }
+          );
 
-          const showCustomize = hasCustomizations && isAllowedCustomizations;
+          const showCustomize = hasAllowedCustomizations;
 
           if (effectivePrivilege.reserved != null && effectivePrivilege.reserved.length > 0) {
             return <PrivilegeDisplay privilege={effectivePrivilege.reserved} />;
