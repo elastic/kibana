@@ -245,7 +245,14 @@ export const SourceIndexPreview: React.SFC<Props> = React.memo(({ cellClick, que
               }
             )}
           >
-            <EuiBadge>array</EuiBadge>
+            <EuiBadge>
+              {i18n.translate(
+                'xpack.ml.dataframe.sourceIndexPreview.dataFrameSourceIndexArrayBadgeContent',
+                {
+                  defaultMessage: 'array',
+                }
+              )}
+            </EuiBadge>
           </EuiToolTip>
         );
       } else if (typeof d === 'object' && d !== null) {
@@ -261,7 +268,14 @@ export const SourceIndexPreview: React.SFC<Props> = React.memo(({ cellClick, que
               }
             )}
           >
-            <EuiBadge>object</EuiBadge>
+            <EuiBadge>
+              {i18n.translate(
+                'xpack.ml.dataframe.sourceIndexPreview.dataFrameSourceIndexObjectBadgeContent',
+                {
+                  defaultMessage: 'object',
+                }
+              )}
+            </EuiBadge>
           </EuiToolTip>
         );
       }
