@@ -8,6 +8,8 @@ import { storiesOf } from '@storybook/react';
 import React from 'react';
 import { PrettyDuration } from '..';
 
-storiesOf('renderers/TimeFilter/components/PrettyDuration', module)
-  .add('with relative dates', () => <PrettyDuration from="now-7d" to="now" />)
-  .add('with absolute dates', () => <PrettyDuration from="01/01/2019" to="02/01/2019" />);
+storiesOf('renderers/TimeFilter/components/PrettyDuration', module).add(
+  'with relative dates',
+  () => <PrettyDuration from="now-7d" to="now" />
+);
+// .add('with absolute dates', () => <PrettyDuration from="01/01/2019" to="02/01/2019" />);
