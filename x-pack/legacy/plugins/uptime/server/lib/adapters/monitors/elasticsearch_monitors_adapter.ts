@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get, set } from 'lodash';
+import { get, set, reduce } from 'lodash';
 import { INDEX_NAMES } from '../../../../common/constants';
 import {
   ErrorListItem,
@@ -261,16 +261,11 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
         continue;
       }
       const locationInfo = summaryByIdLocation[id];
-      let locationUp = 0;
-      let locationDown = 0;
-      for (const locationName in locationInfo) {
-        if (!locationInfo.hasOwnProperty(locationName)) {
-          continue;
-        }
-        const locationData = locationInfo[locationName];
-        locationUp += locationData.up;
-        locationDown += locationData.down;
-      }
+      const { up: locationUp, down: locationDown } = reduce(locationInfo, (acc, value, key) => {
+        acc.up += value.up;
+        acc.down += value.down;
+        return acc;
+      }, {up: 0, down: 0});
 
       if (locationDown === 0) {
         up++;
