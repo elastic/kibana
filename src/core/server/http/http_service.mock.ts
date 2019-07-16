@@ -56,9 +56,9 @@ const createSetupContractMock = () => {
     isTlsEnabled: false,
   };
   setupContract.createNewServer.mockResolvedValue({} as HttpServerSetup);
-  setupContract.registerAuth.mockResolvedValue({
-    sessionStorageFactory: sessionStorageMock.createFactory(),
-  });
+  setupContract.createCookieSessionStorageFactory.mockResolvedValue(
+    sessionStorageMock.createFactory()
+  );
   return setupContract;
 };
 
