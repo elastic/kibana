@@ -62,11 +62,11 @@ export const ChartSection = injectI18n(
       return (
         <ErrorMessage
           title={intl.formatMessage({
-            id: 'xpack.infra.ChartSection.missingMetricDataTitle',
+            id: 'xpack.infra.chartSection.missingMetricDataText',
             defaultMessage: 'Missing Data',
           })}
           body={intl.formatMessage({
-            id: 'xpack.infra.ChartSection.missingMetricDataTitle',
+            id: 'xpack.infra.chartSection.missingMetricDataBody',
             defaultMessage: 'The data for this chart is missing.',
           })}
         />
@@ -77,11 +77,11 @@ export const ChartSection = injectI18n(
       return (
         <ErrorMessage
           title={intl.formatMessage({
-            id: 'xpack.infra.ChartSection.notEnoughDataPointsToRenderTitle',
+            id: 'xpack.infra.chartSection.notEnoughDataPointsToRenderTitle',
             defaultMessage: 'Not Enough Data',
           })}
           body={intl.formatMessage({
-            id: 'xpack.infra.ChartSection.notEnoughDataPointsToRenderText',
+            id: 'xpack.infra.chartSection.notEnoughDataPointsToRenderText',
             defaultMessage:
               'Not enough data points to render chart, try increasing the time range.',
           })}
