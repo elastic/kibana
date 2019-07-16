@@ -6,14 +6,14 @@
 
 import React, { FC, Fragment, useState, useEffect } from 'react';
 import { EuiSuperDatePicker } from '@elastic/eui';
-import { TimeHistory, TimeRange } from 'src/legacy/ui/public/timefilter/time_history';
-import { Timefilter } from 'ui/timefilter';
+import { TimeRange } from 'src/legacy/ui/public/timefilter/time_history';
+import { timefilter } from 'ui/timefilter';
+import { timeHistory } from 'ui/timefilter/time_history';
+
+import { mlTimefilterRefresh$ } from '../../../services/timefilter_refresh_service';
 
 interface Props {
   dateFormat: string;
-  forceRefresh: () => void;
-  timeHistory: TimeHistory;
-  timefilter: Timefilter;
 }
 
 interface Duration {
@@ -21,7 +21,7 @@ interface Duration {
   end: string;
 }
 
-function getRecentlyUsedRanges(timeHistory: TimeHistory): Duration[] {
+function getRecentlyUsedRanges(): Duration[] {
   return timeHistory.get().map(({ from, to }: TimeRange) => {
     return {
       start: from,
@@ -30,10 +30,10 @@ function getRecentlyUsedRanges(timeHistory: TimeHistory): Duration[] {
   });
 }
 
-export const TopNav: FC<Props> = ({ dateFormat, forceRefresh, timeHistory, timefilter }) => {
+export const TopNav: FC<Props> = ({ dateFormat }) => {
   const [refreshInterval, setRefreshInterval] = useState(timefilter.getRefreshInterval());
   const [time, setTime] = useState(timefilter.getTime());
-  const [recentlyUsedRanges, setRecentlyUsedRanges] = useState(getRecentlyUsedRanges(timeHistory));
+  const [recentlyUsedRanges, setRecentlyUsedRanges] = useState(getRecentlyUsedRanges());
   const [isAutoRefreshSelectorEnabled, setIsAutoRefreshSelectorEnabled] = useState(
     timefilter.isAutoRefreshSelectorEnabled
   );
@@ -70,7 +70,7 @@ export const TopNav: FC<Props> = ({ dateFormat, forceRefresh, timeHistory, timef
     // Update timefilter for controllers listening for changes
     timefilter.setTime(newTime);
     setTime(newTime);
-    setRecentlyUsedRanges(getRecentlyUsedRanges(timeHistory));
+    setRecentlyUsedRanges(getRecentlyUsedRanges());
   }
 
   function updateInterval({
@@ -101,7 +101,7 @@ export const TopNav: FC<Props> = ({ dateFormat, forceRefresh, timeHistory, timef
             isAutoRefreshOnly={!isTimeRangeSelectorEnabled}
             refreshInterval={refreshInterval.value}
             onTimeChange={updateFilter}
-            onRefresh={forceRefresh}
+            onRefresh={() => mlTimefilterRefresh$.next()}
             onRefreshChange={updateInterval}
             recentlyUsedRanges={recentlyUsedRanges}
             dateFormat={dateFormat}
