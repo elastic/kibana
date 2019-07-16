@@ -263,7 +263,7 @@ export const StepDetailsForm: SFC<Props> = React.memo(({ overrides = {}, onChang
                 target="_blank"
               >
                 {i18n.translate(
-                  'xpack.ml.dataframe.definePivotForm.destinationIndexInvalidErrorLink',
+                  'xpack.ml.dataframe.stepDetailsForm.destinationIndexInvalidErrorLink',
                   {
                     defaultMessage: 'Learn more about index name limitations.',
                   }

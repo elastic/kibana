@@ -121,7 +121,7 @@ export const Wizard: SFC = React.memo(() => {
 
   const stepsConfig = [
     {
-      title: i18n.translate('xpack.ml.dataframe.transformsWizard.definePivotStepTitle', {
+      title: i18n.translate('xpack.ml.dataframe.transformsWizard.stepDefineTitle', {
         defaultMessage: 'Define pivot',
       }),
       children: (
@@ -134,7 +134,7 @@ export const Wizard: SFC = React.memo(() => {
       ),
     },
     {
-      title: i18n.translate('xpack.ml.dataframe.transformsWizard.StepDetailsTitle', {
+      title: i18n.translate('xpack.ml.dataframe.transformsWizard.stepDetailsTitle', {
         defaultMessage: 'Transform details',
       }),
       children: (
@@ -155,7 +155,7 @@ export const Wizard: SFC = React.memo(() => {
       status: currentStep >= WIZARD_STEPS.DETAILS ? undefined : ('incomplete' as EuiStepStatus),
     },
     {
-      title: i18n.translate('xpack.ml.dataframe.transformsWizard.createStepTitle', {
+      title: i18n.translate('xpack.ml.dataframe.transformsWizard.stepCreateTitle', {
         defaultMessage: 'Create',
       }),
       children: (

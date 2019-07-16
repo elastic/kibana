@@ -42,7 +42,7 @@ export const StepDefineSummary: SFC<StepDefineExposedState> = ({
           {kibanaContext.currentSavedSearch.id === undefined && typeof search === 'string' && (
             <Fragment>
               <EuiFormRow
-                label={i18n.translate('xpack.ml.dataframe.definePivotSummary.indexPatternLabel', {
+                label={i18n.translate('xpack.ml.dataframe.stepDefineSummary.indexPatternLabel', {
                   defaultMessage: 'Index pattern',
                 })}
               >
@@ -50,7 +50,7 @@ export const StepDefineSummary: SFC<StepDefineExposedState> = ({
               </EuiFormRow>
               {displaySearch !== emptySearch && (
                 <EuiFormRow
-                  label={i18n.translate('xpack.ml.dataframe.definePivotSummary.queryLabel', {
+                  label={i18n.translate('xpack.ml.dataframe.stepDefineSummary.queryLabel', {
                     defaultMessage: 'Query',
                   })}
                 >
@@ -62,7 +62,7 @@ export const StepDefineSummary: SFC<StepDefineExposedState> = ({
 
           {kibanaContext.currentSavedSearch.id !== undefined && (
             <EuiFormRow
-              label={i18n.translate('xpack.ml.dataframe.definePivotForm.savedSearchLabel', {
+              label={i18n.translate('xpack.ml.dataframe.stepDefineSummary.savedSearchLabel', {
                 defaultMessage: 'Saved search',
               })}
             >
@@ -71,7 +71,7 @@ export const StepDefineSummary: SFC<StepDefineExposedState> = ({
           )}
 
           <EuiFormRow
-            label={i18n.translate('xpack.ml.dataframe.definePivotSummary.groupByLabel', {
+            label={i18n.translate('xpack.ml.dataframe.stepDefineSummary.groupByLabel', {
               defaultMessage: 'Group by',
             })}
           >
@@ -79,7 +79,7 @@ export const StepDefineSummary: SFC<StepDefineExposedState> = ({
           </EuiFormRow>
 
           <EuiFormRow
-            label={i18n.translate('xpack.ml.dataframe.definePivotSummary.aggregationsLabel', {
+            label={i18n.translate('xpack.ml.dataframe.stepDefineSummary.aggregationsLabel', {
               defaultMessage: 'Aggregations',
             })}
           >

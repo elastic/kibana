@@ -154,7 +154,7 @@ export function createPermissionFailureMessage(privilegeType: keyof Privileges) 
       }
     );
   } else if (privilegeType === 'canDeleteDataFrame') {
-    message = i18n.translate('xpack.ml.privilege.noPermission.deleteFrameTransformTooltip', {
+    message = i18n.translate('xpack.ml.privilege.noPermission.deleteDataFrameTransformTooltip', {
       defaultMessage: 'You do not have permission to delete data frame transforms.',
     });
   }
