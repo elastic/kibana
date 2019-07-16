@@ -36,7 +36,6 @@ function SizeParamEditor({
   showValidation,
   setValidity,
   setTouched,
-  wrappedWithInlineComp,
 }: SizeParamEditorProps) {
   const label = (
     <>

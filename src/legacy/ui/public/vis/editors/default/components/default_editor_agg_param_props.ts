@@ -44,6 +44,5 @@ export interface AggParamCommonProps<T> {
 }
 
 export interface AggParamEditorProps<T> extends AggParamCommonProps<T> {
-  wrappedWithInlineComp?: boolean;
   setValue(value?: T): void;
 }

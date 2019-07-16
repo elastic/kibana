@@ -43,7 +43,6 @@ function TopAggregateParamEditor({
   setValue,
   setValidity,
   setTouched,
-  wrappedWithInlineComp,
 }: AggParamEditorProps<AggregateValueProp> & SelectParamEditorProps<AggregateValueProp>) {
   const isFirstRun = useRef(true);
   const fieldType = agg.params.field && agg.params.field.type;
