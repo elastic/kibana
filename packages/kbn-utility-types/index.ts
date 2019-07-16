@@ -37,3 +37,8 @@ export interface ObservableLike<T> {
 export type UnwrapObservable<T extends ObservableLike<any>> = T extends ObservableLike<infer U>
   ? U
   : never;
+
+/**
+ * Same as `Promise` type, but it flat maps the wrapped type.
+ */
+export type ShallowPromise<T> = T extends Promise<infer U> ? Promise<U> : Promise<T>;

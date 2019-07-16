@@ -18,6 +18,7 @@ type B = UnwrapPromise<A>; // string
 
 ## Reference
 
-- `UnwrapPromise<T>` &mdash; returns wrapped type of a promise.
-- `UnwrapObservable<T>` &mdash; returns wrapped type of an observable.
-- `ObservableLike<T>` &mdash; minimal interface for an object resembling an `Observable`.
+- `UnwrapPromise<T>` &mdash; Returns wrapped type of a promise.
+- `UnwrapObservable<T>` &mdash; Returns wrapped type of an observable.
+- `ShallowPromise<T>` &mdash; Same as `Promise` type, but it flat maps the wrapped type.
+- `ObservableLike<T>` &mdash; Minimal interface for an object resembling an `Observable`.
