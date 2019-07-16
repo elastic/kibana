@@ -11,99 +11,66 @@ import { i18n } from '@kbn/i18n';
 import {
   EmbeddableFactory,
   embeddableFactories,
-  ErrorEmbeddable
-} from '../../../../../../src/legacy/core_plugins/embeddable_api/public/index';
-import { MapEmbeddable } from './map_embeddable';
-import { indexPatternService } from '../kibana_services';
+  ErrorEmbeddable,
+  EmbeddableInput,
+  IContainer
+} from '../../../../../../../src/legacy/core_plugins/embeddable_api/public/index';
+import { LensEmbeddable } from './lens_embeddable';
+import { SavedObjectIndexStore } from '../../persistence';
 
-import { createMapPath, MAP_SAVED_OBJECT_TYPE, APP_ICON } from '../../common/constants';
-import { createMapStore } from '../reducers/store';
-import { addLayerWithoutDataSync } from '../actions/map_actions';
-import { getQueryableUniqueIndexPatternIds } from '../selectors/map_selectors';
-import '../angular/services/gis_map_saved_object_loader';
-import 'ui/vis/map/service_settings';
 
-export class MapEmbeddableFactory extends EmbeddableFactory {
-  type = MAP_SAVED_OBJECT_TYPE;
+export class LensEmbeddableFactory extends EmbeddableFactory {
+  type = 'lens';
 
   constructor() {
     super({
       savedObjectMetaData: {
-        name: i18n.translate('xpack.maps.mapSavedObjectLabel', {
-          defaultMessage: 'Map',
+        name: i18n.translate('xpack.lens.lensSavedObjectLabel', {
+          defaultMessage: 'Lens Visualization',
         }),
-        type: MAP_SAVED_OBJECT_TYPE,
-        getIconForSavedObject: () => APP_ICON,
+        type: 'lens',
+        getIconForSavedObject: () => 'happyFace',
       },
     });
   }
   isEditable() {
-    return capabilities.get().maps.save;
+    // TODO make it possible
+    return false;
   }
 
   // Not supported yet for maps types.
   canCreateNew() { return false; }
 
   getDisplayName() {
-    return i18n.translate('xpack.maps.embeddableDisplayName', {
-      defaultMessage: 'map',
+    return i18n.translate('xpack.lens.embeddableDisplayName', {
+      defaultMessage: 'lens',
     });
-  }
-
-  async _getIndexPatterns(layerListJSON) {
-    // Need to extract layerList from store to get queryable index pattern ids
-    const store = createMapStore();
-    try {
-      JSON.parse(layerListJSON).forEach(layerDescriptor => {
-        store.dispatch(addLayerWithoutDataSync(layerDescriptor));
-      });
-    } catch (error) {
-      throw new Error(i18n.translate('xpack.maps.mapEmbeddableFactory', {
-        defaultMessage: 'Unable to load map, malformed saved object',
-      }));
-    }
-    const queryableIndexPatternIds = getQueryableUniqueIndexPatternIds(store.getState());
-
-    const promises = queryableIndexPatternIds.map(async (indexPatternId) => {
-      try {
-        return await indexPatternService.get(indexPatternId);
-      } catch (error) {
-        // Unable to load index pattern, better to not throw error so map embeddable can render
-        // Error will be surfaced by map embeddable since it too will be unable to locate the index pattern
-        return null;
-      }
-    });
-    const indexPatterns = await Promise.all(promises);
-    return _.compact(indexPatterns);
   }
 
   async createFromSavedObject(
-    savedObjectId,
-    input,
-    parent
+    savedObjectId: string,
+    input: Partial<EmbeddableInput>,
+    parent?: IContainer
   ) {
-    const $injector = await chrome.dangerouslyGetActiveInjector();
-    const savedObjectLoader = $injector.get('gisMapSavedObjectLoader');
+    const store = new SavedObjectIndexStore(chrome.getSavedObjectsClient());
+    const savedVis = await store.load(savedObjectId);
 
-    const savedMap = await savedObjectLoader.get(savedObjectId);
-    const indexPatterns = await this._getIndexPatterns(savedMap.layerListJSON);
-
-    return new MapEmbeddable(
+    // TODO do I need to pass in edit url stuff?
+    return new LensEmbeddable(
       {
-        savedMap,
-        editUrl: chrome.addBasePath(createMapPath(savedObjectId)),
-        indexPatterns,
-        editable: this.isEditable(),
+        savedVis,
+        id: savedObjectId
       },
       input,
       parent
     );
   }
 
-  async create(input) {
-    window.location.href = chrome.addBasePath(createMapPath(''));
-    return new ErrorEmbeddable('Maps can only be created from a saved object', input);
+  async create(input: EmbeddableInput) {
+        // TODO fix this
+    window.location.href = chrome.addBasePath('lens/abc');
+    return new ErrorEmbeddable('Lens can only be created from a saved object', input);
   }
 }
 
-embeddableFactories.set(MAP_SAVED_OBJECT_TYPE, new MapEmbeddableFactory());
+embeddableFactories.set('lens', new LensEmbeddableFactory());

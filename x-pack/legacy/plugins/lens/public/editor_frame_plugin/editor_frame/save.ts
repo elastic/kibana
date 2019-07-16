@@ -6,14 +6,16 @@
 
 import { Action, EditorFrameState } from './state_management';
 import { Document } from '../../persistence/saved_object_store';
+import { buildExpression } from './expression_helpers';
+import { Datasource, Visualization } from '../../types';
 
 export interface Props {
-  datasource: { getPersistableState: (state: unknown) => unknown };
+  datasource: Datasource;
   dispatch: (value: Action) => void;
   redirectTo: (path: string) => void;
   state: EditorFrameState;
   store: { save: (doc: Document) => Promise<{ id: string }> };
-  visualization: { getPersistableState: (state: unknown) => unknown };
+  visualization: Visualization;
 }
 
 export async function save({
@@ -26,6 +28,8 @@ export async function save({
 }: Props) {
   try {
     dispatch({ type: 'SAVING', isSaving: true });
+
+    const expression = buildExpression(visualization, state.visualization.state, datasource, state.datasource.state, datasource.getPublicAPI(state.datasource.state, () => {}));
 
     const doc = await store.save({
       id: state.persistedId,
