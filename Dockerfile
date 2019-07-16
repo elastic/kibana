@@ -7,7 +7,8 @@ RUN curl -sSL https://dl.google.com/linux/linux_signing_key.pub | apt-key add - 
   && apt-get install -y google-chrome-unstable fonts-ipafont-gothic fonts-wqy-zenhei fonts-thai-tlwg fonts-kacst ttf-freefont \
   --no-install-recommends \
   && rm -rf /var/lib/apt/lists/* \
-  && rm -rf /tmp/tmp*
+  && rm -rf /tmp/tmp* \
+  && rm -rf /tmp/apt*
 # rm is so that Kaniko wont try to add tmp files to the image
 
 
