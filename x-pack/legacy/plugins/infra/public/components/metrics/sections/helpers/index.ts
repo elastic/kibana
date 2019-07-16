@@ -33,7 +33,7 @@ export const seriesHasLessThen2DataPoints = (series: InfraDataSeries): boolean =
  */
 export const getMaxMinTimestamp = (metric: InfraMetricData): [number, number] => {
   if (metric.series.some(seriesHasLessThen2DataPoints)) {
-    throw new Error('Series must be larger then 2 points');
+    return [0, 0];
   }
   const values = metric.series.reduce(
     (acc, item) => {
