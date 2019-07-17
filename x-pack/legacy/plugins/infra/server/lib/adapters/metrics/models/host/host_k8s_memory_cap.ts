@@ -4,9 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { InfraMetricModelCreator, InfraMetricModelMetricType } from '../../adapter_types';
+import {
+  InfraMetricModelCreator,
+  InfraMetricModelMetricType,
+  InfraMetricModel,
+} from '../../adapter_types';
 
-export const hostK8sMemoryCap: InfraMetricModelCreator = (timeField, indexPattern, interval) => ({
+export const hostK8sMemoryCap: InfraMetricModelCreator = (
+  timeField,
+  indexPattern,
+  interval
+): InfraMetricModel => ({
   id: 'hostK8sMemoryCap',
   map_field_to: 'kubernetes.node.name',
   requires: ['kubernetes.node'],
