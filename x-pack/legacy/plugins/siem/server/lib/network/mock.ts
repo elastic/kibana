@@ -24,8 +24,8 @@ export const mockOptions: NetworkTopNFlowRequestOptions = {
   pagination: {
     activePage: 0,
     cursorStart: 0,
-    fakePossibleCount: 10,
-    querySize: 2,
+    fakePossibleCount: 50,
+    querySize: 10,
   },
   filterQuery: {},
   fields: [
@@ -69,8 +69,8 @@ export const mockRequest = {
       pagination: {
         activePage: 0,
         cursorStart: 0,
-        fakePossibleCount: 10,
-        querySize: 2,
+        fakePossibleCount: 50,
+        querySize: 10,
       },
       sourceId: 'default',
       timerange: { interval: '12h', from: 1549765830772, to: 1549852230772 },
@@ -109,11 +109,11 @@ export const mockRequest = {
             __typename
           }
           pageInfo {
-            endCursor {
-              value
-              __typename
-            }
-            hasNextPage
+            activePage
+            __typename
+            fakeTotalCount
+            __typename
+            showMorePagesIndicator
             __typename
           }
           __typename
@@ -647,7 +647,7 @@ export const mockResult = {
   ],
   pageInfo: {
     activePage: 0,
-    fakeTotalCount: 10,
+    fakeTotalCount: 50,
     showMorePagesIndicator: true,
   },
   totalCount: 545,

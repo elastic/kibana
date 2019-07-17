@@ -64,12 +64,14 @@ export const mockGlobalState: State = {
     page: {
       queries: {
         topNFlow: {
+          activePage: 0,
           limit: 10,
           flowTarget: FlowTarget.source,
           flowDirection: FlowDirection.uniDirectional,
           topNFlowSort: { field: NetworkTopNFlowFields.bytes, direction: Direction.desc },
         },
         dns: {
+          activePage: 0,
           limit: 10,
           dnsSortField: { field: NetworkDnsFields.queryCount, direction: Direction.desc },
           isPtrIncluded: false,
