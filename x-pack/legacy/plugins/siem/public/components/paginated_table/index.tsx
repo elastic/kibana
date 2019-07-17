@@ -120,7 +120,7 @@ export const PaginatedTable = memo<SiemTables>(
   }) => {
     const [activePage, setActivePage] = useState(0);
     const [showInspect, setShowInspect] = useState(false);
-    const [isEmptyTable, setEmptyTable] = useState(pageOfItems.length === 0);
+    const [isEmptyTable, setEmptyTable] = useState(headerCount === -1);
     const [isPopoverOpen, setPopoverOpen] = useState(false);
     const pageCount = Math.ceil(totalCount / limit);
     const dispatchToaster = useStateToaster()[1];
@@ -159,7 +159,7 @@ export const PaginatedTable = memo<SiemTables>(
       loadPage(newActivePage);
       updateActivePage(newActivePage);
     };
-    if (!isEmpty(pageOfItems) && isEmptyTable) {
+    if (headerCount >= 0 && isEmptyTable) {
       setEmptyTable(false);
     }
 

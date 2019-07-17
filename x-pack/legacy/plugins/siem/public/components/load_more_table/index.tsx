@@ -97,7 +97,6 @@ interface BasicTableProps<T, U = T, V = T, W = T, X = T, Y = T, Z = T, AA = T, A
 interface BasicTableState {
   isEmptyTable: boolean;
   isPopoverOpen: boolean;
-  paginationLoading: boolean;
   showInspect: boolean;
 }
 
@@ -121,7 +120,6 @@ export class LoadMoreTable<T, U, V, W, X, Y, Z, AA, AB> extends React.PureCompon
   public readonly state = {
     isEmptyTable: this.props.pageOfItems.length === 0,
     isPopoverOpen: false,
-    paginationLoading: false,
     showInspect: false,
   };
 
