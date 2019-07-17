@@ -22,29 +22,40 @@ import {
   DASHBOARD_CONTAINER_TYPE,
   DashboardContainer,
   DashboardContainerFactory,
-} from 'plugins/dashboard_embeddable_container';
+} from 'src/legacy/core_plugins/dashboard_embeddable_container/public/np_ready/public';
 
 import {
   ErrorEmbeddable,
   ViewMode,
   isErrorEmbeddable,
   EmbeddablePanel,
-  embeddableFactories,
-} from 'plugins/embeddable_api';
+  GetActionsCompatibleWithTrigger,
+  GetEmbeddableFactory,
+  GetEmbeddableFactories,
+} from 'src/legacy/core_plugins/embeddable_api/public/np_ready/public';
 
+import { CoreStart } from 'src/core/public';
 import { dashboardInput } from './dashboard_input';
+
+interface Props {
+  getActions: GetActionsCompatibleWithTrigger;
+  getEmbeddableFactory: GetEmbeddableFactory;
+  getAllEmbeddableFactories: GetEmbeddableFactories;
+  overlays: CoreStart['overlays'];
+  notifications: CoreStart['notifications'];
+}
 
 interface State {
   loaded: boolean;
   viewMode: ViewMode;
 }
 
-export class DashboardContainerExample extends React.Component<{}, State> {
+export class DashboardContainerExample extends React.Component<Props, State> {
   private mounted = false;
   private container: DashboardContainer | ErrorEmbeddable | undefined;
 
-  public constructor() {
-    super({});
+  public constructor(props: Props) {
+    super(props);
     this.state = {
       viewMode: ViewMode.VIEW,
       loaded: false,
@@ -53,7 +64,7 @@ export class DashboardContainerExample extends React.Component<{}, State> {
 
   public async componentDidMount() {
     this.mounted = true;
-    const dashboardFactory = embeddableFactories.get(
+    const dashboardFactory = this.props.getEmbeddableFactory(
       DASHBOARD_CONTAINER_TYPE
     ) as DashboardContainerFactory;
     if (dashboardFactory) {
@@ -92,7 +103,14 @@ export class DashboardContainerExample extends React.Component<{}, State> {
         {!this.state.loaded || !this.container ? (
           <EuiLoadingChart size="l" mono />
         ) : (
-          <EmbeddablePanel embeddable={this.container} />
+          <EmbeddablePanel
+            embeddable={this.container}
+            getActions={this.props.getActions}
+            getEmbeddableFactory={this.props.getEmbeddableFactory}
+            getAllEmbeddableFactories={this.props.getAllEmbeddableFactories}
+            overlays={this.props.overlays}
+            notifications={this.props.notifications}
+          />
         )}
       </div>
     );

@@ -17,17 +17,10 @@
  * under the License.
  */
 
-import {
-  actionRegistry,
-  attachAction,
-  CONTEXT_MENU_TRIGGER,
-  triggerRegistry,
-} from 'plugins/embeddable_api';
-import { EditModeAction } from '../../../../../../src/legacy/core_plugins/embeddable_api/public/test_samples';
+import { CONTEXT_MENU_TRIGGER } from 'src/legacy/core_plugins/embeddable_api/public/np_ready/public';
+import { setup } from 'src/legacy/core_plugins/embeddable_api/public/np_ready/public/legacy';
+import { EditModeAction } from 'src/legacy/core_plugins/embeddable_api/public/np_ready/public/lib/test_samples/actions/edit_mode_action';
 
 const editModeAction = new EditModeAction();
-actionRegistry.set(editModeAction.id, editModeAction);
-attachAction(triggerRegistry, {
-  triggerId: CONTEXT_MENU_TRIGGER,
-  actionId: editModeAction.id,
-});
+setup.registerAction(editModeAction);
+setup.attachAction(CONTEXT_MENU_TRIGGER, editModeAction.id);

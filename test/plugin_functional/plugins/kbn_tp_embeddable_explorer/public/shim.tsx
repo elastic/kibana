@@ -16,11 +16,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { embeddableFactories, EmbeddableFactory } from 'plugins/embeddable_api';
 
 import 'ui/autoload/all';
 import 'uiExports/embeddableFactories';
 import 'uiExports/embeddableActions';
+
+import { Plugin } from 'src/legacy/core_plugins/embeddable_api/public/np_ready/public';
+import { embeddablePluginMock } from 'src/legacy/core_plugins/embeddable_api/public/np_ready/public/mocks';
 
 import uiRoutes from 'ui/routes';
 
@@ -29,19 +31,16 @@ import { uiModules } from 'ui/modules';
 import template from './index.html';
 
 export interface PluginShim {
-  embeddableAPI: {
-    embeddableFactories: Map<string, EmbeddableFactory>;
-  };
+  embeddable: ReturnType<Plugin['setup']>;
 }
 
 export interface CoreShim {
   onRenderComplete: (listener: () => void) => void;
 }
 
-const pluginShim: PluginShim = {
-  embeddableAPI: {
-    embeddableFactories,
-  },
+const { setup } = embeddablePluginMock.createInstance();
+const plugins: PluginShim = {
+  embeddable: setup,
 };
 
 let rendered = false;
@@ -71,6 +70,6 @@ uiRoutes.when('/', {
 export function createShim(): { core: CoreShim; plugins: PluginShim } {
   return {
     core: coreShim,
-    plugins: pluginShim,
+    plugins,
   };
 }

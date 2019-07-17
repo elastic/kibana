@@ -19,16 +19,24 @@
 
 import React from 'react';
 import { EuiFieldText, EuiFormRow } from '@elastic/eui';
-import { EmbeddablePanel, embeddableFactories, EmbeddableFactory } from 'plugins/embeddable_api';
-import { Subscription } from 'rxjs';
+import { CoreStart } from 'src/core/public';
 import {
-  HelloWorldContainer,
-  CONTACT_CARD_EMBEDDABLE,
-  HELLO_WORLD_EMBEDDABLE_TYPE,
-} from '../../../../../../src/legacy/core_plugins/embeddable_api/public/test_samples';
+  EmbeddablePanel,
+  GetEmbeddableFactory,
+  GetActionsCompatibleWithTrigger,
+  GetEmbeddableFactories,
+} from 'src/legacy/core_plugins/embeddable_api/public/np_ready/public';
+import { Subscription } from 'rxjs';
+import { HelloWorldContainer } from 'src/legacy/core_plugins/embeddable_api/public/np_ready/public/lib/test_samples/embeddables/hello_world_container';
+import { CONTACT_CARD_EMBEDDABLE } from 'src/legacy/core_plugins/embeddable_api/public/np_ready/public/lib/test_samples/embeddables/contact_card/contact_card_embeddable_factory';
+import { HELLO_WORLD_EMBEDDABLE_TYPE } from 'src/legacy/core_plugins/embeddable_api/public/np_ready/public/lib/test_samples/embeddables/hello_world/hello_world_embeddable';
 
 interface Props {
-  embeddableFactories: Map<string, EmbeddableFactory>;
+  getActions: GetActionsCompatibleWithTrigger;
+  getEmbeddableFactory: GetEmbeddableFactory;
+  getAllEmbeddableFactories: GetEmbeddableFactories;
+  overlays: CoreStart['overlays'];
+  notifications: CoreStart['notifications'];
 }
 
 export class HelloWorldContainerExample extends React.Component<Props, { lastName?: string }> {
@@ -60,7 +68,7 @@ export class HelloWorldContainerExample extends React.Component<Props, { lastNam
           },
         },
       },
-      embeddableFactories
+      this.props.getEmbeddableFactory
     );
     this.state = {
       lastName: this.container.getInput().lastName,
@@ -99,7 +107,14 @@ export class HelloWorldContainerExample extends React.Component<Props, { lastNam
             onChange={e => this.container.updateInput({ lastName: e.target.value })}
           />
         </EuiFormRow>
-        <EmbeddablePanel embeddable={this.container} />
+        <EmbeddablePanel
+          embeddable={this.container}
+          getActions={this.props.getActions}
+          getEmbeddableFactory={this.props.getEmbeddableFactory}
+          getAllEmbeddableFactories={this.props.getAllEmbeddableFactories}
+          overlays={this.props.overlays}
+          notifications={this.props.notifications}
+        />
       </div>
     );
   }
