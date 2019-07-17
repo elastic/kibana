@@ -70,7 +70,7 @@ export function FieldSelect({
       label: i18n.translate('xpack.lens.indexPattern.documentField', {
         defaultMessage: 'Document',
       }),
-      value: fieldlessColumn.operationId,
+      value: { operationId: fieldlessColumn.operationId, dataType: fieldlessColumn.dataType },
       className: classNames({
         'lnsConfigPanel__fieldOption--incompatible': !isCompatibleWithCurrentOperation(
           fieldlessColumn
@@ -135,15 +135,12 @@ export function FieldSelect({
           return;
         }
 
-        const column: IndexPatternColumn = filteredColumns.find(({ operationId }) => {
-          const { value } = choices[0];
+        const selectedOperationId = ((choices[0].value as unknown) as { operationId: string })
+          .operationId;
 
-          if (typeof value === 'string') {
-            return operationId === choices[0].value;
-          } else if (typeof value === 'object') {
-            return operationId === ((value as unknown) as { operationId: string }).operationId;
-          }
-        })!;
+        const column: IndexPatternColumn = filteredColumns.find(
+          ({ operationId }) => operationId === selectedOperationId
+        )!;
 
         onChangeColumn(column);
       }}
