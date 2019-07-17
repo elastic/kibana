@@ -15,13 +15,7 @@ import {
   StartDatafeedResponse,
   StopDatafeedResponse,
 } from './types';
-import { throwIfNotOk } from '../ml/api/throw_if_not_ok';
-
-const emptyStartDatafeedResponse: StartDatafeedResponse = {};
-
-const emptyStopDatafeeds: [StopDatafeedResponse, CloseJobsResponse] = [{}, {}];
-
-const emptyJob: Job[] = [];
+import { throwIfNotOk, throwIfErrorAttached } from '../ml/api/throw_if_not_ok';
 
 const emptyIndexPattern: string = '';
 
@@ -109,7 +103,9 @@ export const startDatafeeds = async (
     },
   });
   await throwIfNotOk(response);
-  return await response.json();
+  const json = await response.json();
+  throwIfErrorAttached(json, datafeedIds);
+  return json;
 };
 
 /**

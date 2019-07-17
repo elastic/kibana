@@ -111,13 +111,13 @@ export const MlPopover = React.memo(() => {
       try {
         await startDatafeeds([`datafeed-${jobName}`], headers, startTime);
       } catch (error) {
-        errorToToaster({ error, dispatchToaster });
+        errorToToaster({ title: 'Start job failure', error, dispatchToaster });
       }
     } else {
       try {
         await stopDatafeeds([`datafeed-${jobName}`], headers);
       } catch (error) {
-        errorToToaster({ error, dispatchToaster });
+        errorToToaster({ title: 'Stop job failure', error, dispatchToaster });
       }
     }
     dispatch({ type: 'refresh' });
@@ -127,8 +127,8 @@ export const MlPopover = React.memo(() => {
   const embeddedJobIds = getJobsToInstall(configTemplates);
 
   // Jobs currently installed retrieved via ml jobs_summary api for 'siem' group
-  const siemJobs = jobSummaryData.map(job => job.id);
-  const installedJobIds = embeddedJobIds.filter(job => siemJobs.includes(job));
+  const siemGroupJobIds = jobSummaryData != null ? jobSummaryData.map(job => job.id) : [];
+  const installedJobIds = embeddedJobIds.filter(job => siemGroupJobIds.includes(job));
 
   // Config templates that still need to be installed and have a defaultIndexPattern that is configured
   const configTemplatesToInstall = getConfigTemplatesToInstall(
@@ -149,7 +149,7 @@ export const MlPopover = React.memo(() => {
   // Install Config Templates as effect of opening popover
   useEffect(() => {
     if (
-      jobSummaryData.length &&
+      jobSummaryData != null &&
       configuredIndexPattern !== '' &&
       configTemplatesToInstall.length > 0
     ) {
@@ -170,7 +170,7 @@ export const MlPopover = React.memo(() => {
           setIsCreatingJobs(false);
           dispatch({ type: 'refresh' });
         } catch (error) {
-          errorToToaster({ error, dispatchToaster });
+          errorToToaster({ title: 'Create job failure', error, dispatchToaster });
           setIsCreatingJobs(false);
         }
       };

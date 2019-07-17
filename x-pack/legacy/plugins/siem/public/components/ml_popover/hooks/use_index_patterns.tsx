@@ -27,7 +27,7 @@ export const useIndexPatterns = (refreshToggle = false): Return => {
       setIndexPattern(data);
       setIsLoading(false);
     } catch (error) {
-      errorToToaster({ error, dispatchToaster });
+      errorToToaster({ title: 'Index pattern fetch failure', error, dispatchToaster });
       setIsLoading(false);
     }
   };

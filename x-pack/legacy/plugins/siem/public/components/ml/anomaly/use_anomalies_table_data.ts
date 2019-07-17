@@ -107,10 +107,12 @@ export const useAnomaliesTableData = ({
         setTableData(data);
         setLoading(false);
       } catch (error) {
-        errorToToaster({ error, dispatchToaster });
+        errorToToaster({ title: 'Anomalies table fetch failure', error, dispatchToaster });
         setLoading(false);
       }
     } else if (!userPermissions) {
+      setLoading(false);
+    } else if (siemJobs.length === 0) {
       setLoading(false);
     } else {
       setTableData(null);

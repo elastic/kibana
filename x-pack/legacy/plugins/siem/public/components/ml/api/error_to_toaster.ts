@@ -7,6 +7,7 @@
 import { isError, isString } from 'lodash/fp';
 import uuid from 'uuid';
 import { ActionToaster, AppToast } from '../../toasters';
+import { ToasterErrorsType, ToasterErrors } from './throw_if_not_ok';
 
 export type ErrorTypes = Error | string | unknown;
 
@@ -22,17 +23,27 @@ export const errorToToaster = ({
   error,
   color = 'danger',
   iconType = 'alert',
-  toastLifeTimeMs = 10000,
   additionalErrors = [],
   dispatchToaster,
 }: ErrorToToasterArgs) => {
-  if (isAnError(error)) {
+  if (isToasterError(error)) {
     const toast: AppToast = {
       id,
       title,
       color,
       iconType,
-      toastLifeTimeMs,
+      errors: [...additionalErrors, ...error.messages],
+    };
+    dispatchToaster({
+      type: 'addToaster',
+      toast,
+    });
+  } else if (isAnError(error)) {
+    const toast: AppToast = {
+      id,
+      title,
+      color,
+      iconType,
       errors: [...additionalErrors, error.message],
     };
     dispatchToaster({
@@ -45,7 +56,6 @@ export const errorToToaster = ({
       title,
       color,
       iconType,
-      toastLifeTimeMs,
       errors: [...additionalErrors, 'Network Error'],
     };
     dispatchToaster({
@@ -56,6 +66,9 @@ export const errorToToaster = ({
 };
 
 // TODO: Use this or delete it
-export const isAString = (error: ErrorTypes): error is string => isString(error);
+export const isAString = (error: unknown): error is string => isString(error);
 
-export const isAnError = (error: ErrorTypes): error is Error => isError(error);
+export const isAnError = (error: unknown): error is Error => isError(error);
+
+export const isToasterError = (error: unknown): error is ToasterErrorsType =>
+  error instanceof ToasterErrors;

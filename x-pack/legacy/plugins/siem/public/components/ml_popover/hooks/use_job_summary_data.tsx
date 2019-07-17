@@ -13,7 +13,7 @@ import { MlCapabilitiesContext } from '../../ml/permissions/ml_capabilities_prov
 import { useStateToaster } from '../../toasters';
 import { errorToToaster } from '../../ml/api/error_to_toaster';
 
-type Return = [boolean, Job[]];
+type Return = [boolean, Job[] | null];
 
 export const getSiemJobsFromJobsSummary = (data: Job[]) =>
   data.reduce((jobs: Job[], job: Job) => {
@@ -21,7 +21,7 @@ export const getSiemJobsFromJobsSummary = (data: Job[]) =>
   }, []);
 
 export const useJobSummaryData = (jobIds: string[] = [], refreshToggle = false): Return => {
-  const [jobSummaryData, setJobSummaryData] = useState<Job[]>([]);
+  const [jobSummaryData, setJobSummaryData] = useState<Job[] | null>(null);
   const [loading, setLoading] = useState(true);
   const config = useContext(KibanaConfigContext);
   const capabilities = useContext(MlCapabilitiesContext);
@@ -40,7 +40,7 @@ export const useJobSummaryData = (jobIds: string[] = [], refreshToggle = false):
 
         setJobSummaryData(siemJobs);
       } catch (error) {
-        errorToToaster({ error, dispatchToaster });
+        errorToToaster({ title: 'Use job summary fetch failure', error, dispatchToaster });
       }
     }
     setLoading(false);

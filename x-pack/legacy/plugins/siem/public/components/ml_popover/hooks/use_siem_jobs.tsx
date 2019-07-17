@@ -39,7 +39,7 @@ export const useSiemJobs = (refetchData: boolean): Return => {
 
         setSiemJobs(siemJobIds);
       } catch (error) {
-        errorToToaster({ error, dispatchToaster });
+        errorToToaster({ title: 'SIEM job fetch failure', error, dispatchToaster });
       }
     }
     setLoading(false);

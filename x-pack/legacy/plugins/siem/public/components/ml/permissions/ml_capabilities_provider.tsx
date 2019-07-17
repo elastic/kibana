@@ -25,6 +25,7 @@ export const MlCapabilitiesProvider = React.memo<{ children: JSX.Element }>(({ c
       setCapabilities(mlCapabilities);
     } catch (error) {
       errorToToaster({
+        title: 'Machine learning permissions failure',
         error,
         dispatchToaster,
       });
