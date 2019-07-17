@@ -17,7 +17,6 @@
  * under the License.
  */
 import React from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { EuiToolTip } from '@elastic/eui';
@@ -26,103 +25,99 @@ import { getAriaSortLabel, getSortHeaderClass } from './helpers';
 import { shortenDottedString } from '../../../../../common/utils/shorten_dotted_string';
 
 interface Props {
-  name: string;
+  colLeftIdx: number; // idx of the column to the left, -1 if moving is not possible
+  colRightIdx: number; // idx of the column to the right, -1 if moving is not possible
   displayName: string;
-  sortOrder: [string, string];
-  onMoveColumnRight?: (name: string) => void;
-  onMoveColumnLeft?: (name: string) => void;
+  isRemoveable: boolean;
+  isSortable: boolean;
+  name: string;
+  onChangeSortOrder?: (name: string) => void;
+  onMoveColumn?: (name: string, idx: number) => void;
   onRemoveColumn?: (name: string) => void;
-  onCycleSortOrder?: (name: string) => void;
+  sortOrder: [string, string];
 }
 
 export function TableHeaderColumn({
-  name,
+  colLeftIdx,
+  colRightIdx,
   displayName,
-  sortOrder,
+  isRemoveable,
+  isSortable,
+  name,
+  onChangeSortOrder,
+  onMoveColumn,
   onRemoveColumn,
-  onMoveColumnLeft,
-  onMoveColumnRight,
-  onCycleSortOrder,
+  sortOrder,
 }: Props) {
+  const buttons = [
+    {
+      active: isSortable,
+      ariaLabel: getAriaSortLabel(name, sortOrder),
+      className: getSortHeaderClass(name, sortOrder),
+      onClick: () => onChangeSortOrder && onChangeSortOrder(name),
+      testSubject: `docTableHeaderFieldSort_${name}`,
+      tooltip: i18n.translate('kbn.docTable.tableHeader.sortByColumnTooltip', {
+        defaultMessage: 'Sort by {columnName}',
+        values: { columnName: displayName },
+      }),
+    },
+    {
+      active: isRemoveable,
+      ariaLabel: i18n.translate('kbn.docTable.tableHeader.removeColumnButtonAriaLabel', {
+        defaultMessage: 'Remove {columnName} column',
+        values: { columnName: name },
+      }),
+      className: 'fa fa-remove kbnDocTableHeader__move',
+      onClick: () => onRemoveColumn && onRemoveColumn(name),
+      testSubject: `docTableRemoveHeader-${name}`,
+      tooltip: i18n.translate('kbn.docTable.tableHeader.removeColumnButtonTooltip', {
+        defaultMessage: 'Remove Column',
+        values: { columnName: displayName },
+      }),
+    },
+    {
+      active: colLeftIdx >= 0,
+      ariaLabel: i18n.translate('kbn.docTable.tableHeader.moveColumnLeftButtonAriaLabel', {
+        defaultMessage: 'Move {columnName} column to the left',
+        values: { columnName: name },
+      }),
+      className: 'fa fa-angle-double-left kbnDocTableHeader__move',
+      onClick: () => onMoveColumn && onMoveColumn(name, colLeftIdx),
+      tooltip: i18n.translate('kbn.docTable.tableHeader.moveColumnLeftButtonTooltip', {
+        defaultMessage: 'Move column to the left',
+      }),
+    },
+    {
+      active: colRightIdx >= 0,
+      ariaLabel: i18n.translate('kbn.docTable.tableHeader.moveColumnRightButtonAriaLabel', {
+        defaultMessage: 'Move {columnName} column to the right',
+        values: { columnName: name },
+      }),
+      className: 'fa fa-angle-double-right kbnDocTableHeader__move',
+      onClick: () => onMoveColumn && onMoveColumn(name, colRightIdx),
+      tooltip: i18n.translate('kbn.docTable.tableHeader.moveColumnRightButtonTooltip', {
+        defaultMessage: 'Move column to the right',
+      }),
+    },
+  ];
+
   return (
     <th key={name} data-test-subj="docTableHeaderField">
       <span data-test-subj={`docTableHeader-${name}`}>
         {displayName}
-        {onCycleSortOrder && (
-          <EuiToolTip
-            content={i18n.translate('kbn.docTable.tableHeader.sortByColumnTooltip', {
-              defaultMessage: 'Sort by {columnName}',
-              values: { columnName: displayName },
-            })}
-          >
-            <button
-              data-test-subj={`docTableHeaderFieldSort_${name}`}
-              id={`docTableHeaderFieldSort${name}`}
-              aria-label={getAriaSortLabel(name, sortOrder)}
-              className={getSortHeaderClass(name, sortOrder)}
-              onClick={() => onCycleSortOrder && onCycleSortOrder(name)}
-            ></button>
-          </EuiToolTip>
-        )}
+        {buttons
+          .filter(button => button.active)
+          .map(button => (
+            <EuiToolTip content={button.tooltip}>
+              <button
+                aria-label={button.ariaLabel}
+                className={button.className}
+                data-test-subj={button.testSubject}
+                onClick={button.onClick}
+              />
+            </EuiToolTip>
+          ))}
       </span>
-      {onRemoveColumn && (
-        <EuiToolTip
-          content={
-            <FormattedMessage
-              id="kbn.docTable.tableHeader.removeColumnButtonTooltip"
-              defaultMessage="Remove column"
-            />
-          }
-        >
-          <button
-            className="fa fa-remove kbnDocTableHeader__move"
-            onClick={() => onRemoveColumn(name)}
-            aria-label={i18n.translate('kbn.docTable.tableHeader.removeColumnButtonAriaLabel', {
-              defaultMessage: 'Remove {columnName} column',
-              values: { columnName: name },
-            })}
-            data-test-subj="docTableRemoveHeader-{{name}}"
-          ></button>
-        </EuiToolTip>
-      )}
-      {onMoveColumnLeft && (
-        <EuiToolTip
-          content={
-            <FormattedMessage
-              id="kbn.docTable.tableHeader.moveColumnLeftButtonTooltip"
-              defaultMessage="Move column to the left"
-            />
-          }
-        >
-          <button
-            className="fa fa-angle-double-left kbnDocTableHeader__move"
-            onClick={() => onMoveColumnLeft(name)}
-            aria-label={i18n.translate('kbn.docTable.tableHeader.moveColumnLeftButtonAriaLabel', {
-              defaultMessage: 'Move {columnName} column to the left',
-              values: { columnName: name },
-            })}
-          ></button>
-        </EuiToolTip>
-      )}
-      {onMoveColumnRight && (
-        <EuiToolTip
-          content={
-            <FormattedMessage
-              id="kbn.docTable.tableHeader.moveColumnRightButtonTooltip"
-              defaultMessage="Move column to the right"
-            />
-          }
-        >
-          <button
-            className="fa fa-angle-double-right kbnDocTableHeader__move"
-            onClick={() => onMoveColumnRight(name)}
-            aria-label={i18n.translate('kbn.docTable.tableHeader.moveColumnRightButtonAriaLabel', {
-              defaultMessage: 'Move {columnName} column to the right',
-              values: { columnName: name },
-            })}
-          ></button>
-        </EuiToolTip>
-      )}
     </th>
   );
 }

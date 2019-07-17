@@ -18,12 +18,10 @@
  */
 import React from 'react';
 import { isFunction, get } from 'lodash';
+import { IndexPattern } from 'ui/index_patterns';
 // @ts-ignore
-import { IndexPattern } from 'src/legacy/core_plugins/data/public';
 import { shortenDottedString } from '../../../../../common/utils/shorten_dotted_string';
-
 import { TableHeaderColumn } from './table_header_column';
-import { TableHeaderTimeColumn } from './table_header_time_column';
 import { SortOrder } from './helpers';
 
 interface Props {
@@ -56,37 +54,46 @@ export function TableHeader({
     onChangeSortOrder(colName, newDirection);
   }
 
+  const columnData = columns.map((name, idx) => {
+    return {
+      name,
+      displayName: isShortDots ? shortenDottedString(name) : name,
+      isSortable:
+        isFunction(onChangeSortOrder) &&
+        get(indexPattern, ['fields', 'byName', name, 'sortable'], false),
+      isRemoveable: isFunction(onRemoveColumn) && (name !== '_source' || columns.length > 1),
+      colLeftIdx: idx - 1 < 0 ? -1 : idx - 1,
+      colRightIdx: idx + 1 >= columns.length ? -1 : idx + 1,
+    };
+  });
+
+  const displayedColumns =
+    timeFieldName && !hideTimeColumn
+      ? [
+          {
+            name: timeFieldName,
+            displayName: 'Time',
+            isSortable: true,
+            isRemoveable: false,
+            colLeftIdx: -1,
+            colRightIdx: -1,
+          },
+          ...columnData,
+        ]
+      : columnData;
+
   return (
     <tr>
       <td style={{ width: '1%' }}></td>
-      {timeFieldName && !hideTimeColumn && (
-        <TableHeaderTimeColumn
-          sortOrder={sortOrder}
-          onCycleSortOrder={cycleSortOrder}
-          timeFieldName={timeFieldName}
-        />
-      )}
-      {columns.map((name: string, idx: number) => {
-        const canRemoveColumn =
-          isFunction(onRemoveColumn) && (name !== '_source' || columns.length > 1);
-        const isSortable =
-          isFunction(onChangeSortOrder) &&
-          get(indexPattern, ['fields', 'byName', name, 'sortable'], false);
-
-        const colLeftIdx = idx - 1 < 0 ? -1 : idx - 1;
-        const colRightIdx = idx + 1 >= columns.length ? -1 : idx + 1;
-        const displayName = isShortDots ? shortenDottedString(name) : name;
-
+      {displayedColumns.map(col => {
         return (
           <TableHeaderColumn
-            key={name}
-            name={name}
-            displayName={displayName}
+            key={col.name}
             sortOrder={sortOrder}
-            onCycleSortOrder={isSortable ? () => cycleSortOrder(name) : undefined}
-            onMoveColumnLeft={colLeftIdx >= 0 ? () => onMoveColumn(name, colLeftIdx) : undefined}
-            onMoveColumnRight={colRightIdx >= 0 ? () => onMoveColumn(name, colRightIdx) : undefined}
-            onRemoveColumn={canRemoveColumn ? () => onRemoveColumn(name) : undefined}
+            {...col}
+            onMoveColumn={onMoveColumn}
+            onRemoveColumn={onRemoveColumn}
+            onChangeSortOrder={cycleSortOrder}
           />
         );
       })}
