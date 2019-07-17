@@ -77,15 +77,16 @@ describe('metric_suggestions', () => {
 
     expect(rest).toHaveLength(0);
     expect(suggestion).toMatchInlineSnapshot(`
-Object {
-  "datasourceSuggestionId": 0,
-  "score": 1,
-  "state": Object {
-    "accessor": "bytes",
-    "title": "Avg bytes",
-  },
-  "title": "Avg bytes",
-}
-`);
+      Object {
+        "datasourceSuggestionId": 0,
+        "previewIcon": "visMetric",
+        "score": 1,
+        "state": Object {
+          "accessor": "bytes",
+          "title": "Avg bytes",
+        },
+        "title": "Avg bytes",
+      }
+    `);
   });
 });
