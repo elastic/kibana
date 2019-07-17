@@ -182,7 +182,7 @@ function DefaultEditorAgg({
       });
     }
     return (
-      <div>
+      <div {...dragHandleProps}>
         {actionIcons.map(icon => {
           if (icon.id === 'dragHandle') {
             return (
@@ -216,7 +216,7 @@ function DefaultEditorAgg({
   };
 
   const buttonContent = (
-    <EuiFlexGroup gutterSize="xs" alignItems="center">
+    <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
       <EuiFlexItem grow={false} className="eui-textTruncate">
         {agg.schema.title}
       </EuiFlexItem>
@@ -255,7 +255,6 @@ function DefaultEditorAgg({
       data-test-subj={`visEditorAggAccordion${agg.id}`}
       extraAction={renderAggButtons()}
       onToggle={onToggle}
-      {...dragHandleProps}
     >
       <>
         <EuiSpacer size="m" />
