@@ -123,6 +123,8 @@ export class MultiMetricJobCreator extends JobCreator {
           if (currentModelMemoryLimit === this._lastEstimatedModelMemoryLimit) {
             this.modelMemoryLimit = DEFAULT_MODEL_MEMORY_LIMIT;
           }
+          // eslint-disable-next-line no-console
+          console.error('Model memory limit could not be calculated', error);
         }
       }
     }

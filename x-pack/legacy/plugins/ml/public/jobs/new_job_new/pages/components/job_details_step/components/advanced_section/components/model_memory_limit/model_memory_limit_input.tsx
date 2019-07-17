@@ -22,11 +22,7 @@ export const ModelMemoryLimitInput: FC = () => {
 
   return (
     <Description>
-      <EuiFieldText
-        // placeholder="Job Id"
-        value={modelMemoryLimit}
-        onChange={e => setModelMemoryLimit(e.target.value)}
-      />
+      <EuiFieldText value={modelMemoryLimit} onChange={e => setModelMemoryLimit(e.target.value)} />
     </Description>
   );
 };

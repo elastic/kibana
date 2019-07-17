@@ -4,13 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FC } from 'react';
+import React, { FC, Fragment } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiAccordion, EuiSpacer } from '@elastic/eui';
 import { ModelPlotSwitch } from './components/model_plot';
 import { DedicatedIndexSwitch } from './components/dedicated_index';
 import { ModelMemoryLimitInput } from './components/model_memory_limit';
 
-const ButtonContent = <div>Advanced</div>;
+const ButtonContent = <Fragment>Advanced</Fragment>;
 
 interface Props {
   advancedExpanded: boolean;

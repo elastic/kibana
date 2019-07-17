@@ -7,14 +7,11 @@
 import React, { FC, useState, useContext, useEffect } from 'react';
 import { EuiSwitch } from '@elastic/eui';
 import { JobCreatorContext } from '../../../../../job_creator_context';
-import { isPopulationJobCreator } from '../../../../../../../common/job_creator';
 import { Description } from './description';
 
 export const ModelPlotSwitch: FC = () => {
   const { jobCreator, jobCreatorUpdate } = useContext(JobCreatorContext);
   const [modelPlotEnabled, setModelPlotEnabled] = useState(jobCreator.modelPlot);
-
-  const disableSwitch = isPopulationJobCreator(jobCreator);
 
   useEffect(() => {
     jobCreator.modelPlot = modelPlotEnabled;
@@ -27,12 +24,7 @@ export const ModelPlotSwitch: FC = () => {
 
   return (
     <Description>
-      <EuiSwitch
-        name="switch"
-        checked={modelPlotEnabled}
-        onChange={toggleModelPlot}
-        disabled={disableSwitch}
-      />
+      <EuiSwitch name="switch" checked={modelPlotEnabled} onChange={toggleModelPlot} />
     </Description>
   );
 };
