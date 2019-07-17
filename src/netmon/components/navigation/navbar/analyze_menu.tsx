@@ -19,28 +19,28 @@ const AnalyzeMenu = () => {
         <a
           data-testid="analyze-dropdown-discover"
           className="dropdown-item"
-          href="/kibana7/app/kibana#/discover"
+          href="/analyze/app/kibana#/discover"
         >
           Discover
         </a>
         <a
           data-testid="analyze-dropdown-visualize"
           className="dropdown-item"
-          href="/kibana7/app/kibana#/visualize"
+          href="/analyze/app/kibana#/visualize"
         >
           Visualize
         </a>
         <a
           data-testid="analyze-dropdown-dashboards"
           className="dropdown-item"
-          href="/kibana7/app/kibana#/dashboards?title=Analyze%20Dashboard"
+          href="/analyze/app/kibana#/dashboards?title=Analyze%20Dashboard"
         >
           Dashboards
         </a>
         <a
           data-testid="analyze-dropdown-dashboard-settings"
           className="dropdown-item"
-          href="/kibana7/app/kibana#/management/kibana/objects"
+          href="/analyze/app/kibana#/management/kibana/objects"
         >
           Dashboard Settings
         </a>
