@@ -29,11 +29,11 @@ export interface Privileges {
   // File Data Visualizer
   canFindFileStructure: boolean;
   // Data Frames
-  canGetDataFrameJobs: boolean;
-  canDeleteDataFrameJob: boolean;
-  canPreviewDataFrameJob: boolean;
-  canCreateDataFrameJob: boolean;
-  canStartStopDataFrameJob: boolean;
+  canGetDataFrame: boolean;
+  canDeleteDataFrame: boolean;
+  canPreviewDataFrame: boolean;
+  canCreateDataFrame: boolean;
+  canStartStopDataFrame: boolean;
 }
 
 export function getDefaultPrivileges(): Privileges {
@@ -61,10 +61,10 @@ export function getDefaultPrivileges(): Privileges {
     // File Data Visualizer
     canFindFileStructure: false,
     // Data Frames
-    canGetDataFrameJobs: false,
-    canDeleteDataFrameJob: false,
-    canPreviewDataFrameJob: false,
-    canCreateDataFrameJob: false,
-    canStartStopDataFrameJob: false,
+    canGetDataFrame: false,
+    canDeleteDataFrame: false,
+    canPreviewDataFrame: false,
+    canCreateDataFrame: false,
+    canStartStopDataFrame: false,
   };
 }
