@@ -96,16 +96,6 @@ export default function ({ getService, getPageObjects }) {
       expect(linkDirectsToNewIndex).to.be(true);
     });
 
-    it('should still allow layer add if some failures occurred', async () => {
-      await loadFileAndIndex('multi_polygon_with_invalid_geometries.json');
-      const indexResults = await PageObjects.maps.getIndexResults();
-      const failures = indexResults.failures.length;
-      expect(failures).to.be.greaterThan(0);
-
-      const layerAddReady = await PageObjects.maps.importLayerReadyForAdd();
-      expect(layerAddReady).to.be(true);
-    });
-
     const GEO_POINT = 'geo_point';
     const pointFiles = ['point.json', 'multi_point.json'];
     pointFiles.forEach(async pointFile => {
