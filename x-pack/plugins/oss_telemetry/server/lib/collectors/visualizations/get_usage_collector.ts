@@ -42,7 +42,9 @@ export function getUsageCollector(server: HapiServer) {
     let isReady = false;
     try {
       isReady = await isTaskManagerReady(server);
-    } catch (err) {} // eslint-disable-line
+    } catch (err) {
+      // Do nothing
+    }
 
     if (isReady) {
       isCollectorReady = true;
