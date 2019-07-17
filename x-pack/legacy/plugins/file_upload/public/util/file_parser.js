@@ -8,9 +8,38 @@ import _ from 'lodash';
 import { geoJsonCleanAndValidate } from './geo_json_clean_and_validate';
 import { i18n } from '@kbn/i18n';
 
-export async function parseFile(file, previewCallback = null, transformDetails,
-  FileReader = window.FileReader) {
+export async function readFile(file) {
+  const readPromise = new Promise((resolve, reject) => {
+    if (!file) {
+      reject(new Error(i18n.translate(
+        'xpack.fileUpload.fileParser.noFileProvided', {
+          defaultMessage: 'Error, no file provided',
+        })));
+    }
+    const fr = new window.FileReader();
+    fr.onload = e => resolve(e.target.result);
+    fr.onerror = () => {
+      fr.abort();
+      reject(new Error(i18n.translate(
+        'xpack.fileUpload.fileParser.errorReadingFile', {
+          defaultMessage: 'Error reading file',
+        })));
+    };
+    fr.readAsText(file);
+  });
 
+  return await readPromise;
+}
+
+export function jsonPreview(json, previewFunction) {
+  // Call preview (if any)
+  if (json && previewFunction) {
+    const defaultName = _.get(json, 'name', 'Import File');
+    previewFunction(_.cloneDeep(json), defaultName);
+  }
+}
+
+export async function parseFile(file, transformDetails, previewCallback = null) {
   let cleanAndValidate;
   if (typeof transformDetails === 'object') {
     cleanAndValidate = transformDetails.cleanAndValidate;
@@ -31,25 +60,11 @@ export async function parseFile(file, previewCallback = null, transformDetails,
     }
   }
 
-  return new Promise((resolve, reject) => {
-    const fr = new FileReader();
-    fr.onload = ({ target: { result } }) => {
-      try {
-        const parsedJson = JSON.parse(result);
-        // Clean & validate
-        const cleanAndValidJson = cleanAndValidate(parsedJson);
-        if (!cleanAndValidJson) {
-          return;
-        }
-        if (previewCallback) {
-          const defaultName = _.get(cleanAndValidJson, 'name', 'Import File');
-          previewCallback(cleanAndValidJson, defaultName);
-        }
-        resolve(cleanAndValidJson);
-      } catch (e) {
-        reject(e);
-      }
-    };
-    fr.readAsText(file);
-  });
+  const rawResults = await readFile(file);
+  const parsedJson = JSON.parse(rawResults);
+  const jsonResult = cleanAndValidate(parsedJson);
+  jsonPreview(jsonResult, previewCallback);
+
+  return jsonResult;
 }
+

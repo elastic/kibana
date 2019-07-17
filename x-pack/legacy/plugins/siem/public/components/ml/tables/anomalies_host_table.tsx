@@ -78,6 +78,7 @@ export const AnomaliesHostTable = React.memo<AnomaliesHostTableProps>(
             <HeaderPanel
               subtitle={`${i18n.SHOWING}: ${hosts.length.toLocaleString()} ${i18n.ANOMALIES}`}
               title={i18n.ANOMALIES}
+              tooltip={i18n.TOOLTIP}
             />
             <BasicTable items={hosts} columns={columns} pagination={pagination} sorting={sorting} />
           </BasicTableContainer>

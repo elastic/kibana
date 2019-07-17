@@ -24,9 +24,9 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { AggParamEditorProps } from 'ui/vis/editors/default';
 import { AggConfig } from 'ui/vis';
 import { AggParam } from '../agg_param';
-import { SelectValueProp, SelectParamEditorProps } from '../param_types/select';
+import { OptionedValueProp, OptionedParamEditorProps } from '../param_types/optioned';
 
-interface AggregateValueProp extends SelectValueProp {
+interface AggregateValueProp extends OptionedValueProp {
   isCompatible(aggConfig: AggConfig): boolean;
 }
 
@@ -44,7 +44,7 @@ function TopAggregateParamEditor({
   setValidity,
   setTouched,
   wrappedWithInlineComp,
-}: AggParamEditorProps<AggregateValueProp> & SelectParamEditorProps<AggregateValueProp>) {
+}: AggParamEditorProps<AggregateValueProp> & OptionedParamEditorProps<AggregateValueProp>) {
   const isFirstRun = useRef(true);
   const fieldType = agg.params.field && agg.params.field.type;
   const emptyValue = { text: '', value: 'EMPTY_VALUE', disabled: true, hidden: true };
