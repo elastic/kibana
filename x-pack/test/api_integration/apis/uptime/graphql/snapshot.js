@@ -4,13 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from '@kbn/expect';
 import { snapshotQueryString } from '../../../../../legacy/plugins/uptime/public/queries';
-import snapshot from './fixtures/snapshot';
-import snapshotFilteredByDown from './fixtures/snapshot_filtered_by_down';
-import snapshotFilteredByUp from './fixtures/snapshot_filtered_by_up';
-import snapshotEmpty from './fixtures/snapshot_empty';
-import fs from 'fs';
+import { expectFixtureEql } from './expect_fixture_eql';
 
 export default function ({ getService }) {
   describe('snapshot query', () => {
@@ -32,8 +27,7 @@ export default function ({ getService }) {
         .set('kbn-xsrf', 'foo')
         .send({ ...getSnapshotQuery });
 
-      fs.writeFileSync('test/api_integration/apis/uptime/graphql/fixtures/snapshot.json', JSON.stringify(data, null, 2)) 
-      expect(data).to.eql(snapshot);
+      expectFixtureEql(data, 'snapshot');
     });
 
     it('will fetch a monitor snapshot filtered by down status', async () => {
@@ -53,8 +47,7 @@ export default function ({ getService }) {
         .set('kbn-xsrf', 'foo')
         .send({ ...getSnapshotQuery });
 
-      fs.writeFileSync('test/api_integration/apis/uptime/graphql/fixtures/snapshot_filtered_by_down.json', JSON.stringify(data, null, 2)) 
-      expect(data).to.eql(snapshotFilteredByDown);
+      expectFixtureEql(data, 'snapshot_filtered_by_down');
     });
 
     it('will fetch a monitor snapshot filtered by up status', async () => {
@@ -75,8 +68,7 @@ export default function ({ getService }) {
         .send({ ...getSnapshotQuery });
 
 
-      fs.writeFileSync('test/api_integration/apis/uptime/graphql/fixtures/snapshot_filtered_by_up.json', JSON.stringify(data, null, 2)) 
-      expect(data).to.eql(snapshotFilteredByUp);
+      expectFixtureEql(data, 'snapshot_filtered_by_up');
     });
 
     it('returns null histogram data when no data present', async () => {
@@ -97,8 +89,7 @@ export default function ({ getService }) {
         .send({ ...getSnapshotQuery });
 
 
-      fs.writeFileSync('test/api_integration/apis/uptime/graphql/fixtures/snapshot_empty.json', JSON.stringify(data, null, 2)) 
-      expect(data).to.eql(snapshotEmpty);
+      expectFixtureEql(data, 'snapshot_empty');
     });
     // TODO: test for host, port, etc.
   });

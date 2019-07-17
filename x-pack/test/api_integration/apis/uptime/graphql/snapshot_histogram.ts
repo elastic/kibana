@@ -4,12 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from '@kbn/expect';
 import { snapshotHistogramQueryString } from '../../../../../legacy/plugins/uptime/public/queries/snapshot_histogram_query';
-import snapshotHistogram from './fixtures/snapshot_histogram.json';
-import snapshotHistogramById from './fixtures/snapshot_histogram_by_id.json';
-import snapshotHistogramByFilter from './fixtures/snapshot_histogram_by_filter.json';
-import fs from 'fs';
+import { expectFixtureEql } from './expect_fixture_eql';
 
 // eslint-disable-next-line import/no-default-export
 export default function({ getService }: { getService: any }) {
@@ -32,8 +28,7 @@ export default function({ getService }: { getService: any }) {
         .post('/api/uptime/graphql')
         .set('kbn-xsrf', 'foo')
         .send({ ...getSnapshotHistogramQuery });
-
-      expect(data).to.eql(snapshotHistogram);
+      expectFixtureEql(data, 'snapshot_histogram');
     });
 
     it('will fetch histogram data for a given monitor id', async () => {
@@ -53,9 +48,7 @@ export default function({ getService }: { getService: any }) {
         .post('/api/uptime/graphql')
         .set('kbn-xsrf', 'foo')
         .send({ ...getSnapshotHistogramQuery });
-
-      fs.writeFileSync('/Users/andrewcholakian/projects/kibana/x-pack/test/api_integration/apis/uptime/graphql/fixtures/snapshot_histogram_by_id.json', JSON.stringify(data, null, 2)) 
-      expect(data).to.eql(snapshotHistogramById);
+      expectFixtureEql(data, 'snapshot_histogram_by_id');
     });
 
     it('will fetch histogram data for a given filter', async () => {
@@ -76,9 +69,7 @@ export default function({ getService }: { getService: any }) {
         .post('/api/uptime/graphql')
         .set('kbn-xsrf', 'foo')
         .send({ ...getSnapshotHistogramQuery });
-
-      fs.writeFileSync('/Users/andrewcholakian/projects/kibana/x-pack/test/api_integration/apis/uptime/graphql/fixtures/snapshot_histogram_by_filter.json', JSON.stringify(data, null, 2)) 
-      expect(data).to.eql(snapshotHistogramByFilter);
+      expectFixtureEql(data, 'snapshot_histogram_by_filter');
     });
   });
 }
