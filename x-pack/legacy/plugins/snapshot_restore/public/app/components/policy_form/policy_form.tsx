@@ -16,10 +16,12 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiButtonEmpty,
+  EuiLink,
 } from '@elastic/eui';
 import { SlmPolicyPayload, Repository } from '../../../../common/types';
 import { useLoadRepositories } from '../../services/http';
 import { linkToAddRepository } from '../../services/navigation';
+import { documentationLinksService } from '../../services/documentation';
 import { useAppDependencies } from '../../index';
 import { SectionLoading, SectionError } from '../';
 
@@ -98,7 +100,7 @@ export const PolicyForm: React.FunctionComponent<Props> = ({
           defaultMessage="A unique name for the policy."
         />
       }
-      idAria="policyRepositoryDescription"
+      idAria="policyNameDescription"
       fullWidth
     >
       <EuiFormRow
@@ -121,6 +123,14 @@ export const PolicyForm: React.FunctionComponent<Props> = ({
               name: e.target.value,
             });
           }}
+          placeholder={i18n.translate(
+            'xpack.snapshotRestore.policyForm.fields.policyNamePlaceholder',
+            {
+              defaultMessage: 'daily-snapshots',
+              description:
+                'Example SLM policy name. Similar to index names, do not use spaces in translation.',
+            }
+          )}
           data-test-subj="nameInput"
           disabled={isEditing}
         />
@@ -296,10 +306,85 @@ export const PolicyForm: React.FunctionComponent<Props> = ({
     );
   };
 
+  const renderSnapshotNameField = () => (
+    <EuiDescribedFormGroup
+      title={
+        <EuiTitle size="s">
+          <h3>
+            <FormattedMessage
+              id="xpack.snapshotRestore.policyForm.fields.snapshotNameDescriptionTitle"
+              defaultMessage="Snapshot name"
+            />
+          </h3>
+        </EuiTitle>
+      }
+      description={
+        <FormattedMessage
+          id="xpack.snapshotRestore.policyForm.fields.snapshotNameDescription"
+          defaultMessage="Name for the automatic snapshots taken by this policy.
+            Supports date math expressions to easily identify snapshots."
+        />
+      }
+      idAria="policySnapshotNameDescription"
+      fullWidth
+    >
+      <EuiFormRow
+        label={
+          <FormattedMessage
+            id="xpack.snapshotRestore.policyForm.fields.policySnapshotNameLabel"
+            defaultMessage="Snapshot name"
+          />
+        }
+        describedByIds={['policySnapshotNameDescription']}
+        isInvalid={Boolean(errors.snapshotName)}
+        error={errors.snapshotName}
+        helpText={
+          <FormattedMessage
+            id="xpack.snapshotRestore.policyForm.fields.policySnapshotNameHelpText"
+            defaultMessage="Supports date math expressions. {docLink}"
+            values={{
+              docLink: (
+                <EuiLink
+                  href={documentationLinksService.getDateMathIndexNamesUrl()}
+                  target="_blank"
+                >
+                  <FormattedMessage
+                    id="xpack.snapshotRestore.policyForm.fields.policySnapshotNameHelpTextDocLink"
+                    defaultMessage="Learn more"
+                  />
+                </EuiLink>
+              ),
+            }}
+          />
+        }
+        fullWidth
+      >
+        <EuiFieldText
+          defaultValue={policy.snapshotName}
+          fullWidth
+          onChange={e => {
+            updatePolicy({
+              snapshotName: e.target.value,
+            });
+          }}
+          placeholder={i18n.translate(
+            'xpack.snapshotRestore.policyForm.fields.policySnapshotNamePlaceholder',
+            {
+              defaultMessage: '<daily-snap-\\{now/d\\}>',
+              description:
+                'Example date math snapshot name. Keeping the same syntax is important: <SOME-TRANSLATION-{now/d}>',
+            }
+          )}
+          data-test-subj="snapshotNameInput"
+        />
+      </EuiFormRow>
+    </EuiDescribedFormGroup>
+  );
   return (
     <EuiForm>
       {renderNameField()}
       {renderRepositoryField()}
+      {renderSnapshotNameField()}
       {renderActions()}
     </EuiForm>
   );

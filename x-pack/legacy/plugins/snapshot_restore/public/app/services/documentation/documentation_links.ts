@@ -56,6 +56,10 @@ class DocumentationLinksService {
   public getIndexSettingsUrl() {
     return `${this.esDocBasePath}/index-modules.html`;
   }
+
+  public getDateMathIndexNamesUrl() {
+    return `${this.esDocBasePath}/date-math-index-names.html`;
+  }
 }
 
 export const documentationLinksService = new DocumentationLinksService();
