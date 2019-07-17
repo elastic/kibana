@@ -27,11 +27,10 @@ import {
 import { NavigationMenu } from '../../../components/navigation_menu/navigation_menu';
 
 interface PageProps {
-  dateFormat: string;
   goToKibana: () => void;
   retry: () => void;
 }
-export const Page: FC<PageProps> = ({ dateFormat, goToKibana, retry }) => (
+export const Page: FC<PageProps> = ({ goToKibana, retry }) => (
   <Fragment>
     <NavigationMenu tabId="access-denied" />
     <EuiPage>

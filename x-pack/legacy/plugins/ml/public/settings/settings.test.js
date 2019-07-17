@@ -6,15 +6,47 @@
 
 
 
-jest.mock('ui/chrome', () => ({
-  getBasePath: jest.fn()
-}));
-
 import { shallowWithIntl, mountWithIntl } from 'test_utils/enzyme_helpers';
 import React from 'react';
 
 import { Settings } from './settings';
 
+// The mocks for ui/chrome and ui/timefilter are copied from charts_utils.test.js
+// TODO: Refactor the involved tests to avoid this duplication
+jest.mock(
+  'ui/chrome',
+  () => ({
+    addBasePath: () => '/api/ml',
+    getBasePath: () => {
+      return '<basepath>';
+    },
+    getInjected: () => {},
+    getUiSettingsClient: () => {
+      return {
+        get: (key) => {
+          switch (key) {
+            case 'dateFormat':
+            case 'timepicker:timeDefaults':
+              return {};
+            case 'timepicker:refreshIntervalDefaults':
+              return { pause: false, value: 0 };
+            default:
+              throw new Error(`Unexpected config key: ${key}`);
+          }
+        },
+      };
+    },
+  }),
+  { virtual: true }
+);
+
+jest.mock(
+  'ui/persisted_log/recently_accessed',
+  () => ({
+    recentlyAccessed: {},
+  }),
+  { virtual: true }
+);
 
 describe('Settings', () => {
 

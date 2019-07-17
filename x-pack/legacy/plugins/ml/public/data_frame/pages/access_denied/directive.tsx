@@ -23,7 +23,6 @@ module.directive('mlDataFrameAccessDenied', ($injector: InjectorService) => {
     scope: {},
     restrict: 'E',
     link: (scope: ng.IScope, element: ng.IAugmentedJQuery) => {
-      const config = $injector.get<any>('config');
       const kbnBaseUrl = $injector.get<string>('kbnBaseUrl');
       const kbnUrl = $injector.get<any>('kbnUrl');
 
@@ -35,9 +34,10 @@ module.directive('mlDataFrameAccessDenied', ($injector: InjectorService) => {
         kbnUrl.redirect('/data_frames');
       };
 
-      const props = { dateFormat: config.get('dateFormat'), goToKibana, retry };
-
-      ReactDOM.render(<I18nContext>{React.createElement(Page, props)}</I18nContext>, element[0]);
+      ReactDOM.render(
+        <I18nContext>{React.createElement(Page, { goToKibana, retry })}</I18nContext>,
+        element[0]
+      );
 
       element.on('$destroy', () => {
         ReactDOM.unmountComponentAtNode(element[0]);

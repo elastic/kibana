@@ -4,22 +4,61 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { shallowWithIntl, mountWithIntl } from 'test_utils/enzyme_helpers';
+import React from 'react';
+import { ml } from '../../../services/ml_api_service';
 
+import { CalendarsList } from './calendars_list';
+
+// The mocks for ui/chrome and ui/timefilter are copied from charts_utils.test.js
+// TODO: Refactor the involved tests to avoid this duplication
+jest.mock(
+  'ui/chrome',
+  () => ({
+    addBasePath: () => '/api/ml',
+    getBasePath: () => {
+      return '<basepath>';
+    },
+    getInjected: () => {},
+    getUiSettingsClient: () => {
+      return {
+        get: (key) => {
+          switch (key) {
+            case 'dateFormat':
+            case 'timepicker:timeDefaults':
+              return {};
+            case 'timepicker:refreshIntervalDefaults':
+              return { pause: false, value: 0 };
+            default:
+              throw new Error(`Unexpected config key: ${key}`);
+          }
+        },
+      };
+    },
+  }),
+  { virtual: true }
+);
+
+jest.mock(
+  'ui/persisted_log/recently_accessed',
+  () => ({
+    recentlyAccessed: {},
+  }),
+  { virtual: true }
+);
 
 jest.mock('../../../privilege/check_privilege', () => ({
   checkPermission: () => true
 }));
 jest.mock('../../../license/check_license', () => ({
-  hasLicenseExpired: () => false
+  hasLicenseExpired: () => false,
+  isFullLicense: () => false
 }));
 jest.mock('../../../privilege/get_privileges', () => ({
   getPrivileges: () => {}
 }));
 jest.mock('../../../ml_nodes_check/check_ml_nodes', () => ({
   mlNodesAvailable: () => true
-}));
-jest.mock('ui/chrome', () => ({
-  getBasePath: jest.fn()
 }));
 jest.mock('../../../services/ml_api_service', () => ({
   ml: {
@@ -29,12 +68,6 @@ jest.mock('../../../services/ml_api_service', () => ({
     delete: jest.fn(),
   }
 }));
-
-import { shallowWithIntl, mountWithIntl } from 'test_utils/enzyme_helpers';
-import React from 'react';
-import { ml } from '../../../services/ml_api_service';
-
-import { CalendarsList } from './calendars_list';
 
 const testingState = {
   loading: false,
