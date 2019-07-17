@@ -190,7 +190,6 @@ export interface Visualization<T = unknown, P = unknown> {
 
   renderConfigPanel: (domElement: Element, props: VisualizationProps<T>) => void;
 
-  // toExpression: (state: T, datasource: DatasourcePublicAPI) => Ast | string | null;
   toExpression: (state: T, frame: FramePublicAPI) => Ast | string | null;
 
   // The frame will call this function on all visualizations when the table changes, or when

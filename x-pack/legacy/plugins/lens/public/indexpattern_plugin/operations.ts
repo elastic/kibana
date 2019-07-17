@@ -6,7 +6,7 @@
 
 import { Storage } from 'ui/storage';
 import { DataSetup } from '../../../../../../src/legacy/core_plugins/data/public';
-import { DimensionLayer, DimensionPriority } from '../types';
+import { DimensionPriority } from '../types';
 import {
   IndexPatternColumn,
   IndexPatternField,

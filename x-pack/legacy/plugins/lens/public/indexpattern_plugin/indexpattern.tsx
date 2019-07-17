@@ -20,7 +20,6 @@ import { Query } from '../../../../../../src/legacy/core_plugins/data/public/que
 import { getIndexPatterns } from './loader';
 import { toExpression } from './to_expression';
 import { IndexPatternDimensionPanel } from './dimension_panel';
-import { buildColumnForOperationType, getOperationTypesForField } from './operations';
 import { IndexPatternDatasourcePluginPlugins } from './plugin';
 import { IndexPatternDataPanel } from './datapanel';
 import { Datasource, DataType } from '..';

@@ -76,9 +76,15 @@ describe('editor_frame plugin', () => {
 
     it('should load the document, if persistedId is defined', async () => {
       const doc: Document = {
-        datasourceType: 'indexpattern',
+        // datasourceType: 'indexpattern',
         id: 'hoi',
-        state: { datasource: 'foo', visualization: 'bar' },
+        activeDatasourceId: 'indexpattern',
+        state: {
+          datasourceStates: {
+            indexpattern: 'foo',
+          },
+          visualization: 'bar',
+        },
         title: 'shazm',
         visualizationType: 'fanci',
         type: 'lens',
@@ -184,9 +190,15 @@ describe('editor_frame plugin', () => {
       const component = mount(
         <InitializedEditor
           doc={{
-            datasourceType: 'b',
+            // datasourceType: 'b',
+            activeDatasourceId: 'b',
             visualizationType: 'd',
-            state: { visualization: 'viz', datasource: 'data' },
+            state: {
+              visualization: 'viz',
+              datasourceStates: {
+                b: 'data',
+              },
+            },
             title: 'ttt',
           }}
           datasources={{ a: createMockDatasource(), b: createMockDatasource() }}

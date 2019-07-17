@@ -32,27 +32,36 @@ describe('state_helpers', () => {
           orderDirection: 'asc',
           size: 5,
         },
+        indexPatternId: '',
       };
 
       const state: IndexPatternPrivateState = {
         indexPatterns: {},
         currentIndexPatternId: '1',
-        columnOrder: ['col1', 'col2'],
-        columns: {
-          col1: termsColumn,
-          col2: {
-            operationId: 'op1',
-            label: 'Count',
-            dataType: 'number',
-            isBucketed: false,
+        layers: {
+          first: {
+            indexPatternId: '1',
+            columnOrder: ['col1', 'col2'],
+            columns: {
+              col1: termsColumn,
+              col2: {
+                operationId: 'op1',
+                label: 'Count',
+                dataType: 'number',
+                isBucketed: false,
 
-            // Private
-            operationType: 'count',
+                // Private
+                operationType: 'count',
+                indexPatternId: '1',
+              },
+            },
           },
         },
       };
 
-      expect(deleteColumn(state, 'col2').columns).toEqual({
+      expect(
+        deleteColumn({ state, columnId: 'col2', layerId: 'first' }).layers.first.columns
+      ).toEqual({
         col1: termsColumn,
       });
     });
@@ -72,27 +81,38 @@ describe('state_helpers', () => {
           orderDirection: 'asc',
           size: 5,
         },
+        indexPatternId: '',
       };
 
       const state: IndexPatternPrivateState = {
         indexPatterns: {},
         currentIndexPatternId: '1',
-        columnOrder: ['col1', 'col2'],
-        columns: {
-          col1: termsColumn,
-          col2: {
-            operationId: 'op1',
-            label: 'Count',
-            dataType: 'number',
-            isBucketed: false,
+        layers: {
+          first: {
+            indexPatternId: '1',
+            columnOrder: ['col1', 'col2'],
+            columns: {
+              col1: termsColumn,
+              col2: {
+                operationId: 'op1',
+                label: 'Count',
+                dataType: 'number',
+                isBucketed: false,
 
-            // Private
-            operationType: 'count',
+                // Private
+                operationType: 'count',
+                indexPatternId: '1',
+              },
+            },
           },
         },
       };
 
-      deleteColumn(state, 'col2');
+      deleteColumn({
+        state,
+        columnId: 'col2',
+        layerId: 'first',
+      });
 
       expect(operationDefinitionMap.terms.onOtherColumnChanged).toHaveBeenCalledWith(termsColumn, {
         col1: termsColumn,
@@ -114,18 +134,26 @@ describe('state_helpers', () => {
           interval: '1d',
         },
         sourceField: 'timestamp',
+        indexPatternId: '1',
       };
 
       const state: IndexPatternPrivateState = {
         indexPatterns: {},
         currentIndexPatternId: '1',
-        columnOrder: ['col1'],
-        columns: {
-          col1: currentColumn,
+        layers: {
+          first: {
+            indexPatternId: '1',
+            columnOrder: ['col1'],
+            columns: {
+              col1: currentColumn,
+            },
+          },
         },
       };
 
-      expect(updateColumnParam(state, currentColumn, 'interval', 'M').columns.col1).toEqual({
+      expect(
+        updateColumnParam(state, 'first', currentColumn, 'interval', 'M').layers.first.columns.col1
+      ).toEqual({
         ...currentColumn,
         params: { interval: 'M' },
       });
@@ -137,43 +165,56 @@ describe('state_helpers', () => {
       const state: IndexPatternPrivateState = {
         indexPatterns: {},
         currentIndexPatternId: '1',
-        columnOrder: ['col1', 'col2'],
-        columns: {
-          col1: {
-            operationId: 'op1',
-            label: 'Average of bytes',
-            dataType: 'number',
-            isBucketed: false,
+        layers: {
+          first: {
+            indexPatternId: '1',
+            columnOrder: ['col1', 'col2'],
+            columns: {
+              col1: {
+                operationId: 'op1',
+                label: 'Average of bytes',
+                dataType: 'number',
+                isBucketed: false,
 
-            // Private
-            operationType: 'avg',
-            sourceField: 'bytes',
-          },
-          col2: {
-            operationId: 'op1',
-            label: 'Max of bytes',
-            dataType: 'number',
-            isBucketed: false,
+                // Private
+                operationType: 'avg',
+                sourceField: 'bytes',
+                indexPatternId: '1',
+              },
+              col2: {
+                operationId: 'op1',
+                label: 'Max of bytes',
+                dataType: 'number',
+                isBucketed: false,
 
-            // Private
-            operationType: 'max',
-            sourceField: 'bytes',
+                // Private
+                operationType: 'max',
+                sourceField: 'bytes',
+                indexPatternId: '1',
+              },
+            },
           },
         },
       };
       expect(
-        changeColumn(state, 'col2', {
-          operationId: 'op1',
-          label: 'Date histogram of timestamp',
-          dataType: 'date',
-          isBucketed: true,
+        changeColumn({
+          state,
+          columnId: 'col2',
+          layerId: 'first',
+          newColumn: {
+            operationId: 'op1',
+            label: 'Date histogram of timestamp',
+            dataType: 'date',
+            isBucketed: true,
 
-          // Private
-          operationType: 'date_histogram',
-          params: {
-            interval: '1d',
+            // Private
+            operationType: 'date_histogram',
+            params: {
+              interval: '1d',
+            },
+            sourceField: 'timestamp',
+            indexPatternId: '1',
           },
-          sourceField: 'timestamp',
         })
       ).toEqual(
         expect.objectContaining({
@@ -186,37 +227,49 @@ describe('state_helpers', () => {
       const state: IndexPatternPrivateState = {
         indexPatterns: {},
         currentIndexPatternId: '1',
-        columnOrder: ['col1'],
-        columns: {
-          col1: {
-            operationId: 'op1',
-            label: 'Date histogram of timestamp',
-            dataType: 'date',
-            isBucketed: true,
+        layers: {
+          first: {
+            indexPatternId: '1',
+            columnOrder: ['col1'],
+            columns: {
+              col1: {
+                operationId: 'op1',
+                label: 'Date histogram of timestamp',
+                dataType: 'date',
+                isBucketed: true,
 
-            // Private
-            operationType: 'date_histogram',
-            sourceField: 'timestamp',
-            params: {
-              interval: 'h',
+                // Private
+                operationType: 'date_histogram',
+                sourceField: 'timestamp',
+                params: {
+                  interval: 'h',
+                },
+                indexPatternId: '1',
+              },
             },
           },
         },
       };
       expect(
-        changeColumn(state, 'col2', {
-          operationId: 'op2',
-          label: 'Date histogram of order_date',
-          dataType: 'date',
-          isBucketed: true,
+        changeColumn({
+          state,
+          layerId: 'first',
+          columnId: 'col2',
+          newColumn: {
+            operationId: 'op2',
+            label: 'Date histogram of order_date',
+            dataType: 'date',
+            isBucketed: true,
 
-          // Private
-          operationType: 'date_histogram',
-          sourceField: 'order_date',
-          params: {
-            interval: 'w',
+            // Private
+            operationType: 'date_histogram',
+            sourceField: 'order_date',
+            params: {
+              interval: 'w',
+            },
+            indexPatternId: '1',
           },
-        }).columns.col1
+        }).layers.first.columns.col1
       ).toEqual(
         expect.objectContaining({
           params: { interval: 'h' },
@@ -239,6 +292,7 @@ describe('state_helpers', () => {
           orderDirection: 'asc',
           size: 5,
         },
+        indexPatternId: '1',
       };
 
       const newColumn: AvgIndexPatternColumn = {
@@ -250,27 +304,39 @@ describe('state_helpers', () => {
         // Private
         operationType: 'avg',
         sourceField: 'bytes',
+        indexPatternId: '1',
       };
 
       const state: IndexPatternPrivateState = {
         indexPatterns: {},
         currentIndexPatternId: '1',
-        columnOrder: ['col1', 'col2'],
-        columns: {
-          col1: termsColumn,
-          col2: {
-            operationId: 'op1',
-            label: 'Count',
-            dataType: 'number',
-            isBucketed: false,
+        layers: {
+          first: {
+            indexPatternId: '1',
+            columnOrder: ['col1', 'col2'],
+            columns: {
+              col1: termsColumn,
+              col2: {
+                operationId: 'op1',
+                label: 'Count',
+                dataType: 'number',
+                isBucketed: false,
 
-            // Private
-            operationType: 'count',
+                // Private
+                operationType: 'count',
+                indexPatternId: '1',
+              },
+            },
           },
         },
       };
 
-      changeColumn(state, 'col2', newColumn);
+      changeColumn({
+        state,
+        layerId: 'first',
+        columnId: 'col2',
+        newColumn,
+      });
 
       expect(operationDefinitionMap.terms.onOtherColumnChanged).toHaveBeenCalledWith(termsColumn, {
         col1: termsColumn,
@@ -299,6 +365,7 @@ describe('state_helpers', () => {
             params: {
               interval: 'h',
             },
+            indexPatternId: '1',
           },
         })
       ).toEqual(['col1']);
@@ -323,6 +390,7 @@ describe('state_helpers', () => {
               },
               orderDirection: 'asc',
             },
+            indexPatternId: '1',
           },
           col2: {
             operationId: 'op2',
@@ -333,6 +401,7 @@ describe('state_helpers', () => {
             // Private
             operationType: 'avg',
             sourceField: 'bytes',
+            indexPatternId: '1',
           },
           col3: {
             operationId: 'op3',
@@ -346,6 +415,7 @@ describe('state_helpers', () => {
             params: {
               interval: '1d',
             },
+            indexPatternId: '1',
           },
         })
       ).toEqual(['col1', 'col3', 'col2']);
@@ -371,6 +441,7 @@ describe('state_helpers', () => {
               orderDirection: 'asc',
             },
             suggestedPriority: 2,
+            indexPatternId: '1',
           },
           col2: {
             operationId: 'op2',
@@ -382,6 +453,7 @@ describe('state_helpers', () => {
             operationType: 'avg',
             sourceField: 'bytes',
             suggestedPriority: 0,
+            indexPatternId: '1',
           },
           col3: {
             operationId: 'op3',
@@ -396,6 +468,7 @@ describe('state_helpers', () => {
             params: {
               interval: '1d',
             },
+            indexPatternId: '1',
           },
         })
       ).toEqual(['col3', 'col1', 'col2']);

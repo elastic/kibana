@@ -16,6 +16,7 @@ describe('date_histogram', () => {
 
   beforeEach(() => {
     state = {
+      currentIndexPatternId: '1',
       indexPatterns: {
         1: {
           id: '1',
@@ -31,21 +32,26 @@ describe('date_histogram', () => {
           ],
         },
       },
-      currentIndexPatternId: '1',
-      columnOrder: ['col1'],
-      columns: {
-        col1: {
-          operationId: 'op1',
-          label: 'Value of timestamp',
-          dataType: 'date',
-          isBucketed: true,
+      layers: {
+        first: {
+          indexPatternId: '1',
+          columnOrder: ['col1'],
+          columns: {
+            col1: {
+              operationId: 'op1',
+              label: 'Value of timestamp',
+              dataType: 'date',
+              isBucketed: true,
 
-          // Private
-          operationType: 'date_histogram',
-          params: {
-            interval: 'w',
+              // Private
+              operationType: 'date_histogram',
+              params: {
+                interval: 'w',
+              },
+              sourceField: 'timestamp',
+              indexPatternId: '1',
+            },
           },
-          sourceField: 'timestamp',
         },
       },
     };
@@ -53,28 +59,42 @@ describe('date_histogram', () => {
 
   describe('buildColumn', () => {
     it('should create column object with default params', () => {
-      const column = dateHistogramOperation.buildColumn('op', {}, 0, {
-        name: 'timestamp',
-        type: 'date',
-        esTypes: ['date'],
-        aggregatable: true,
-        searchable: true,
+      const column = dateHistogramOperation.buildColumn({
+        operationId: 'op',
+        columns: {},
+        suggestedPriority: 0,
+        layerId: 'first',
+        indexPatternId: '1',
+        field: {
+          name: 'timestamp',
+          type: 'date',
+          esTypes: ['date'],
+          aggregatable: true,
+          searchable: true,
+        },
       });
       expect(column.params.interval).toEqual('h');
     });
 
     it('should create column object with restrictions', () => {
-      const column = dateHistogramOperation.buildColumn('op', {}, 0, {
-        name: 'timestamp',
-        type: 'date',
-        esTypes: ['date'],
-        aggregatable: true,
-        searchable: true,
-        aggregationRestrictions: {
-          date_histogram: {
-            agg: 'date_histogram',
-            time_zone: 'UTC',
-            calendar_interval: '1y',
+      const column = dateHistogramOperation.buildColumn({
+        operationId: 'op',
+        columns: {},
+        suggestedPriority: 0,
+        layerId: 'first',
+        indexPatternId: '1',
+        field: {
+          name: 'timestamp',
+          type: 'date',
+          esTypes: ['date'],
+          aggregatable: true,
+          searchable: true,
+          aggregationRestrictions: {
+            date_histogram: {
+              agg: 'date_histogram',
+              time_zone: 'UTC',
+              calendar_interval: '1y',
+            },
           },
         },
       });
@@ -86,7 +106,7 @@ describe('date_histogram', () => {
   describe('toEsAggsConfig', () => {
     it('should reflect params correctly', () => {
       const esAggsConfig = dateHistogramOperation.toEsAggsConfig(
-        state.columns.col1 as DateHistogramIndexPatternColumn,
+        state.layers.first.columns.col1 as DateHistogramIndexPatternColumn,
         'col1'
       );
       expect(esAggsConfig).toEqual(
@@ -104,7 +124,7 @@ describe('date_histogram', () => {
     it('should render current value', () => {
       const setStateSpy = jest.fn();
       const instance = shallow(
-        <InlineOptions state={state} setState={setStateSpy} columnId="col1" />
+        <InlineOptions state={state} setState={setStateSpy} columnId="col1" layerId="first" />
       );
 
       expect(instance.find(EuiRange).prop('value')).toEqual(1);
@@ -113,7 +133,7 @@ describe('date_histogram', () => {
     it('should update state with the interval value', () => {
       const setStateSpy = jest.fn();
       const instance = shallow(
-        <InlineOptions state={state} setState={setStateSpy} columnId="col1" />
+        <InlineOptions state={state} setState={setStateSpy} columnId="col1" layerId="first" />
       );
 
       instance.find(EuiRange).prop('onChange')!({
@@ -123,12 +143,18 @@ describe('date_histogram', () => {
       } as React.ChangeEvent<HTMLInputElement>);
       expect(setStateSpy).toHaveBeenCalledWith({
         ...state,
-        columns: {
-          ...state.columns,
-          col1: {
-            ...state.columns.col1,
-            params: {
-              interval: 'd',
+        layers: {
+          ...state.layers,
+          first: {
+            ...state.layers.first,
+            columns: {
+              ...state.layers.first.columns,
+              col1: {
+                ...state.layers.first.columns.col1,
+                params: {
+                  interval: 'd',
+                },
+              },
             },
           },
         },
@@ -161,6 +187,7 @@ describe('date_histogram', () => {
           }}
           setState={setStateSpy}
           columnId="col1"
+          layerId="first"
         />
       );
 

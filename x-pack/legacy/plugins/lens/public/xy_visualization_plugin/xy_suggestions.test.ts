@@ -52,14 +52,14 @@ describe('xy_suggestions', () => {
   // Helper that plucks out the important part of a suggestion for
   // most test assertions
   function suggestionSubset(suggestion: VisualizationSuggestion<State>) {
-    const { seriesType, splitSeriesAccessors, x, y } = suggestion.state;
-
-    return {
-      seriesType,
-      splitSeriesAccessors,
-      x: x.accessor,
-      y: y.accessors,
-    };
+    return suggestion.state.layers.map(
+      ({ seriesType, splitSeriesAccessors, xAccessor, accessors }) => ({
+        seriesType,
+        splitSeriesAccessors,
+        x: xAccessor,
+        y: accessors,
+      })
+    );
   }
 
   test('ignores invalid combinations', () => {
@@ -103,16 +103,18 @@ describe('xy_suggestions', () => {
 
     expect(rest).toHaveLength(0);
     expect(suggestionSubset(suggestion)).toMatchInlineSnapshot(`
-      Object {
-        "seriesType": "bar",
-        "splitSeriesAccessors": Array [
-          "aaa",
-        ],
-        "x": "date",
-        "y": Array [
-          "bytes",
-        ],
-      }
+      Array [
+        Object {
+          "seriesType": "bar",
+          "splitSeriesAccessors": Array [
+            "aaa",
+          ],
+          "x": "date",
+          "y": Array [
+            "bytes",
+          ],
+        },
+      ]
     `);
   });
 
@@ -129,18 +131,20 @@ describe('xy_suggestions', () => {
 
     expect(rest).toHaveLength(0);
     expect(suggestionSubset(suggestion)).toMatchInlineSnapshot(`
-                  Object {
-                    "seriesType": "line",
-                    "splitSeriesAccessors": Array [
-                      "product",
-                    ],
-                    "x": "date",
-                    "y": Array [
-                      "price",
-                      "quantity",
-                    ],
-                  }
-            `);
+      Array [
+        Object {
+          "seriesType": "line",
+          "splitSeriesAccessors": Array [
+            "product",
+          ],
+          "x": "date",
+          "y": Array [
+            "price",
+            "quantity",
+          ],
+        },
+      ]
+    `);
   });
 
   test('supports multiple suggestions', () => {
@@ -163,26 +167,30 @@ describe('xy_suggestions', () => {
     expect(rest).toHaveLength(0);
     expect([suggestionSubset(s1), suggestionSubset(s2)]).toMatchInlineSnapshot(`
       Array [
-        Object {
-          "seriesType": "bar",
-          "splitSeriesAccessors": Array [
-            "bbb",
-          ],
-          "x": "date",
-          "y": Array [
-            "price",
-          ],
-        },
-        Object {
-          "seriesType": "bar",
-          "splitSeriesAccessors": Array [
-            "ccc",
-          ],
-          "x": "country",
-          "y": Array [
-            "count",
-          ],
-        },
+        Array [
+          Object {
+            "seriesType": "bar",
+            "splitSeriesAccessors": Array [
+              "bbb",
+            ],
+            "x": "date",
+            "y": Array [
+              "price",
+            ],
+          },
+        ],
+        Array [
+          Object {
+            "seriesType": "bar",
+            "splitSeriesAccessors": Array [
+              "ccc",
+            ],
+            "x": "country",
+            "y": Array [
+              "count",
+            ],
+          },
+        ],
       ]
     `);
   });
@@ -200,16 +208,18 @@ describe('xy_suggestions', () => {
     });
 
     expect(suggestionSubset(suggestion)).toMatchInlineSnapshot(`
-      Object {
-        "seriesType": "bar",
-        "splitSeriesAccessors": Array [
-          "ddd",
-        ],
-        "x": "quantity",
-        "y": Array [
-          "price",
-        ],
-      }
+      Array [
+        Object {
+          "seriesType": "bar",
+          "splitSeriesAccessors": Array [
+            "ddd",
+          ],
+          "x": "quantity",
+          "y": Array [
+            "price",
+          ],
+        },
+      ]
     `);
   });
 
@@ -237,16 +247,18 @@ describe('xy_suggestions', () => {
     });
 
     expect(suggestionSubset(suggestion)).toMatchInlineSnapshot(`
-      Object {
-        "seriesType": "bar",
-        "splitSeriesAccessors": Array [
-          "eee",
-        ],
-        "x": "mybool",
-        "y": Array [
-          "num votes",
-        ],
-      }
+      Array [
+        Object {
+          "seriesType": "bar",
+          "splitSeriesAccessors": Array [
+            "eee",
+          ],
+          "x": "mybool",
+          "y": Array [
+            "num votes",
+          ],
+        },
+      ]
     `);
   });
 

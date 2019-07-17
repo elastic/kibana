@@ -94,6 +94,7 @@ function getSuggestion(
     layers: [
       {
         layerId: 'first',
+        datasourceId: '',
         xAccessor: xValue.columnId,
         seriesType: splitBy && isDate ? 'line' : 'bar',
         splitSeriesAccessors: splitBy && isDate ? [splitBy.columnId] : [generateId()],

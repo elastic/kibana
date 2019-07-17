@@ -185,7 +185,7 @@ export type SeriesType =
   | 'horizontal_bar_stacked'
   | 'area_stacked';
 
-type LayerConfig = AxisConfig & {
+export type LayerConfig = AxisConfig & {
   layerId: string;
   datasourceId: string;
 

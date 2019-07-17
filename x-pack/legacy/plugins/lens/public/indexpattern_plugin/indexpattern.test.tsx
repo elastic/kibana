@@ -126,21 +126,27 @@ describe('IndexPattern Data Source', () => {
 
     persistedState = {
       currentIndexPatternId: '1',
-      columnOrder: ['col1'],
-      columns: {
-        col1: {
-          operationId: 'op1',
-          label: 'My Op',
-          dataType: 'string',
-          isBucketed: true,
+      layers: {
+        first: {
+          indexPatternId: '1',
+          columnOrder: ['col1'],
+          columns: {
+            col1: {
+              operationId: 'op1',
+              label: 'My Op',
+              dataType: 'string',
+              isBucketed: true,
 
-          // Private
-          operationType: 'terms',
-          sourceField: 'op',
-          params: {
-            size: 5,
-            orderBy: { type: 'alphabetical' },
-            orderDirection: 'asc',
+              // Private
+              operationType: 'terms',
+              sourceField: 'op',
+              params: {
+                size: 5,
+                orderBy: { type: 'alphabetical' },
+                orderDirection: 'asc',
+              },
+              indexPatternId: '1',
+            },
           },
         },
       },
@@ -178,40 +184,47 @@ describe('IndexPattern Data Source', () => {
   describe('#toExpression', () => {
     it('should generate an empty expression when no columns are selected', async () => {
       const state = await indexPatternDatasource.initialize();
-      expect(indexPatternDatasource.toExpression(state)).toEqual(null);
+      expect(indexPatternDatasource.toExpression(state, 'first')).toEqual(null);
     });
 
     it('should generate an expression for an aggregated query', async () => {
       const queryPersistedState: IndexPatternPersistedState = {
         currentIndexPatternId: '1',
-        columnOrder: ['col1', 'col2'],
-        columns: {
-          col1: {
-            operationId: 'op1',
-            label: 'Count of Documents',
-            dataType: 'number',
-            isBucketed: false,
+        layers: {
+          first: {
+            indexPatternId: '1',
+            columnOrder: ['col1', 'col2'],
+            columns: {
+              col1: {
+                operationId: 'op1',
+                label: 'Count of Documents',
+                dataType: 'number',
+                isBucketed: false,
 
-            // Private
-            operationType: 'count',
-          },
-          col2: {
-            operationId: 'op2',
-            label: 'Date',
-            dataType: 'date',
-            isBucketed: true,
+                // Private
+                operationType: 'count',
+                indexPatternId: '1',
+              },
+              col2: {
+                operationId: 'op2',
+                label: 'Date',
+                dataType: 'date',
+                isBucketed: true,
 
-            // Private
-            operationType: 'date_histogram',
-            sourceField: 'timestamp',
-            params: {
-              interval: '1d',
+                // Private
+                operationType: 'date_histogram',
+                sourceField: 'timestamp',
+                params: {
+                  interval: '1d',
+                },
+                indexPatternId: '1',
+              },
             },
           },
         },
       };
       const state = await indexPatternDatasource.initialize(queryPersistedState);
-      expect(indexPatternDatasource.toExpression(state)).toMatchInlineSnapshot(`
+      expect(indexPatternDatasource.toExpression(state, 'first')).toMatchInlineSnapshot(`
 "esaggs
       index=\\"1\\"
       metricsAtAllLevels=false
@@ -228,8 +241,7 @@ describe('IndexPattern Data Source', () => {
       beforeEach(async () => {
         initialState = await indexPatternDatasource.initialize({
           currentIndexPatternId: '1',
-          columnOrder: [],
-          columns: {},
+          layers: {},
         });
       });
 
@@ -348,8 +360,6 @@ describe('IndexPattern Data Source', () => {
       it('should not make any suggestions for a number without a time field', async () => {
         const state: IndexPatternPrivateState = {
           currentIndexPatternId: '1',
-          columnOrder: [],
-          columns: {},
           indexPatterns: {
             1: {
               id: '1',
@@ -362,6 +372,13 @@ describe('IndexPattern Data Source', () => {
                   searchable: true,
                 },
               ],
+            },
+          },
+          layers: {
+            first: {
+              indexPatternId: '1',
+              columnOrder: [],
+              columns: {},
             },
           },
         };
@@ -424,8 +441,13 @@ describe('IndexPattern Data Source', () => {
       expect(
         indexPatternDatasource.getDatasourceSuggestionsFromCurrentState({
           indexPatterns: expectedIndexPatterns,
-          columnOrder: [],
-          columns: {},
+          layers: {
+            first: {
+              indexPatternId: '1',
+              columnOrder: [],
+              columns: {},
+            },
+          },
           currentIndexPatternId: '1',
         })
       ).toEqual([]);
@@ -489,6 +511,7 @@ describe('IndexPattern Data Source', () => {
           operationType: 'max',
           sourceField: 'baz',
           suggestedPriority: 0,
+          indexPatternId: '1',
         };
         const columns: Record<string, IndexPatternColumn> = {
           a: {
@@ -507,8 +530,13 @@ describe('IndexPattern Data Source', () => {
         const api = indexPatternDatasource.getPublicAPI(
           {
             ...initialState,
-            columnOrder: ['a', 'b', 'c'],
-            columns,
+            layers: {
+              ...initialState.layers,
+              first: {
+                ...initialState.layers.first,
+                columnOrder: ['a', 'b', 'c'],
+              },
+            },
           },
           setState
         );

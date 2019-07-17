@@ -10,10 +10,13 @@ export interface Document {
   id?: string;
   type?: string;
   visualizationType: string | null;
-  datasourceType: string | null;
+  activeDatasourceId: string | null;
+  // datasourceType: string | null;
   title: string;
+  // The state is saved as a JSON string for now
   state: {
-    datasource: unknown;
+    datasourceStates: Record<string, unknown>;
+    // datasource: unknown;
     visualization: unknown;
   };
 }
