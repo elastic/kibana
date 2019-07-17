@@ -27,6 +27,12 @@ import React from 'react';
 import { Subscription } from 'rxjs';
 import ReactGridLayout, { Layout } from 'react-grid-layout';
 import sizeMe from 'react-sizeme';
+import {
+  GetActionsCompatibleWithTrigger,
+  GetEmbeddableFactory,
+  GetEmbeddableFactories,
+} from 'src/legacy/core_plugins/embeddable_api/public/np_ready/public';
+import { CoreStart } from 'src/core/public';
 import { ViewMode, EmbeddableChildPanel } from '../../embeddable_api';
 import {
   DASHBOARD_GRID_COLUMN_COUNT,
@@ -116,6 +122,11 @@ const ResponsiveSizedGrid = sizeMe(config)(ResponsiveGrid);
 
 export interface DashboardGridProps extends ReactIntl.InjectedIntlProps {
   container: DashboardContainer;
+  getActions: GetActionsCompatibleWithTrigger;
+  getEmbeddableFactory: GetEmbeddableFactory;
+  getAllEmbeddableFactories: GetEmbeddableFactories;
+  overlays: CoreStart['overlays'];
+  notifications: CoreStart['notifications'];
 }
 
 interface State {
@@ -269,6 +280,11 @@ class DashboardGridUi extends React.Component<DashboardGridProps, State> {
           <EmbeddableChildPanel
             embeddableId={panel.explicitInput.id}
             container={this.props.container}
+            getActions={this.props.getActions}
+            getEmbeddableFactory={this.props.getEmbeddableFactory}
+            getAllEmbeddableFactories={this.props.getAllEmbeddableFactories}
+            overlays={this.props.overlays}
+            notifications={this.props.notifications}
           />
         </div>
       );

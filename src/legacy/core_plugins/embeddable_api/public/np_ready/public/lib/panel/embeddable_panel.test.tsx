@@ -146,7 +146,14 @@ test('HelloWorldContainer in view mode hides edit mode actions', async () => {
 
   const component = mount(
     <I18nProvider>
-      <EmbeddablePanel embeddable={embeddable} />
+      <EmbeddablePanel
+        embeddable={embeddable}
+        getActions={(() => undefined) as any}
+        getAllEmbeddableFactories={(() => []) as any}
+        getEmbeddableFactory={(() => undefined) as any}
+        notifications={{} as any}
+        overlays={{} as any}
+      />
     </I18nProvider>
   );
 
@@ -173,7 +180,14 @@ test('HelloWorldContainer in edit mode shows edit mode actions', async () => {
 
   const component = mount(
     <I18nProvider>
-      <EmbeddablePanel embeddable={embeddable} />
+      <EmbeddablePanel
+        embeddable={embeddable}
+        getActions={(() => undefined) as any}
+        getAllEmbeddableFactories={(() => []) as any}
+        getEmbeddableFactory={(() => undefined) as any}
+        notifications={{} as any}
+        overlays={{} as any}
+      />
     </I18nProvider>
   );
 
@@ -224,7 +238,14 @@ test('Updates when hidePanelTitles is toggled', async () => {
 
   const component = mount(
     <I18nProvider>
-      <EmbeddablePanel embeddable={embeddable} />
+      <EmbeddablePanel
+        embeddable={embeddable}
+        getActions={(() => undefined) as any}
+        getAllEmbeddableFactories={(() => []) as any}
+        getEmbeddableFactory={(() => undefined) as any}
+        notifications={{} as any}
+        overlays={{} as any}
+      />
     </I18nProvider>
   );
 

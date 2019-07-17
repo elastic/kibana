@@ -20,10 +20,21 @@ import React, { Component, RefObject } from 'react';
 import { Subscription } from 'rxjs';
 
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { CoreStart } from 'src/core/public';
 import { IContainer, PanelState, EmbeddableChildPanel } from '../..';
+import {
+  GetActionsCompatibleWithTrigger,
+  GetEmbeddableFactory,
+  GetEmbeddableFactories,
+} from '../../types';
 
 interface Props {
   container: IContainer;
+  getActions: GetActionsCompatibleWithTrigger;
+  getEmbeddableFactory: GetEmbeddableFactory;
+  getAllEmbeddableFactories: GetEmbeddableFactories;
+  overlays: CoreStart['overlays'];
+  notifications: CoreStart['notifications'];
 }
 
 interface State {
@@ -96,6 +107,11 @@ export class HelloWorldContainerComponent extends Component<Props, State> {
           <EmbeddableChildPanel
             container={this.props.container}
             embeddableId={panelState.explicitInput.id}
+            getActions={this.props.getActions}
+            getEmbeddableFactory={this.props.getEmbeddableFactory}
+            getAllEmbeddableFactories={this.props.getAllEmbeddableFactories}
+            overlays={this.props.overlays}
+            notifications={this.props.notifications}
           />
         </EuiFlexItem>
       );

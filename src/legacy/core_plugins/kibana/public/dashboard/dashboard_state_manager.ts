@@ -27,8 +27,8 @@ import { AppStateClass as TAppStateClass } from 'ui/state_management/app_state';
 import { migrateLegacyQuery } from 'ui/utils/migrate_legacy_query';
 import { Moment } from 'moment';
 
-import { DashboardContainer } from '../../../dashboard_embeddable_container/public';
-import { ViewMode } from '../../../embeddable_api/public';
+import { DashboardContainer } from 'src/legacy/core_plugins/dashboard_embeddable_container/public/np_ready/public';
+import { ViewMode } from 'src/legacy/core_plugins/embeddable_api/public/np_ready/public';
 import { Query } from '../../../data/public';
 
 import { getAppStateDefaults, migrateAppState } from './lib';
