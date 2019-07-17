@@ -24,14 +24,14 @@ export const mockGlobalState: State = {
   app: {
     notesById: {},
     errors: [
-      { id: 'error-id-1', title: 'title-1', message: 'error-message-1' },
-      { id: 'error-id-2', title: 'title-2', message: 'error-message-2' },
+      { id: 'error-id-1', title: 'title-1', message: ['error-message-1'] },
+      { id: 'error-id-2', title: 'title-2', message: ['error-message-2'] },
     ],
   },
   hosts: {
     page: {
       queries: {
-        authentications: { limit: 10 },
+        authentications: { activePage: 0, limit: 10 },
         hosts: {
           limit: 10,
           direction: Direction.desc,
@@ -45,7 +45,7 @@ export const mockGlobalState: State = {
     },
     details: {
       queries: {
-        authentications: { limit: 10 },
+        authentications: { activePage: 0, limit: 10 },
         hosts: {
           limit: 10,
           direction: Direction.desc,

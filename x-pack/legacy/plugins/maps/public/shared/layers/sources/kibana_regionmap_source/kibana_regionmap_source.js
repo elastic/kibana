@@ -23,23 +23,23 @@ export class KibanaRegionmapSource extends AbstractVectorSource {
   ;
   static icon = 'logoKibana';
 
-  static createDescriptor(options) {
+  static createDescriptor({ name }) {
     return {
       type: KibanaRegionmapSource.type,
-      name: options.name
+      name: name
     };
   }
 
   static renderEditor = ({ onPreviewSource, inspectorAdapters }) => {
-    const onSelect = (layerConfig) => {
-      const sourceDescriptor = KibanaRegionmapSource.createDescriptor(layerConfig);
+    const onSourceConfigChange = (sourceConfig) => {
+      const sourceDescriptor = KibanaRegionmapSource.createDescriptor(sourceConfig);
       const source = new KibanaRegionmapSource(sourceDescriptor, inspectorAdapters);
       onPreviewSource(source);
     };
 
     return (
       <CreateSourceEditor
-        onSelect={onSelect}
+        onSourceConfigChange={onSourceConfigChange}
       />
     );
   };

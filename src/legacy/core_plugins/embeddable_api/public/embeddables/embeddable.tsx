@@ -65,6 +65,9 @@ export abstract class Embeddable<
 
     if (parent) {
       this.parentSubscription = Rx.merge(parent.getInput$(), parent.getOutput$()).subscribe(() => {
+        // Make sure this panel hasn't been removed immediately after it was added, but before it finished loading.
+        if (!parent.getInput().panels[this.id]) return;
+
         const newInput = parent.getInputForChild<TEmbeddableInput>(this.id);
         this.onResetInput(newInput);
       });
