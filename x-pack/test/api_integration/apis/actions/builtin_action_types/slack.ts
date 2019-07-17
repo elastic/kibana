@@ -72,7 +72,7 @@ export default function slackTest({ getService }: KibanaFunctionalTestDefaultPro
             statusCode: 400,
             error: 'Bad Request',
             message:
-              'The following actionTypeConfig attributes are invalid: webhookUrl [any.required]',
+              'The actionTypeConfig is invalid: [webhookUrl]: expected value of type [string] but got [undefined]',
           });
         });
     });

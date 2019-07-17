@@ -48,8 +48,8 @@ import {
   ANNOTATION_MASK_ID,
   getAnnotationBrush,
   getAnnotationLevels,
+  getAnnotationWidth,
   renderAnnotations,
-
   highlightFocusChartAnnotation,
   unhighlightFocusChartAnnotation
 } from './timeseries_chart_annotations';
@@ -416,12 +416,22 @@ const TimeseriesChartIntl = injectI18n(class TimeseriesChart extends React.Compo
     if (annotationsEnabled) {
       const annotateBrush = this.annotateBrush.bind(this);
 
+      let brushX = 0;
+      let brushWidth = 0;
+
+      if (this.props.annotation !== null) {
+        // If the annotation brush is showing, set it to the same position
+        brushX = this.focusXScale(this.props.annotation.timestamp);
+        brushWidth = getAnnotationWidth(this.props.annotation, this.focusXScale);
+      }
+
       fcsGroup.append('g')
         .attr('class', 'mlAnnotationBrush')
         .call(annotateBrush)
         .selectAll('rect')
-        .attr('x', 0)
+        .attr('x', brushX)
         .attr('y', focusZoomPanelHeight)
+        .attr('width', brushWidth)
         .attr('height', focusChartHeight);
 
       fcsGroup.append('g').classed('mlAnnotations', true);

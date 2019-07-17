@@ -6,17 +6,21 @@
 
 import Mustache from 'mustache';
 import { InfraFormatterType, InfraWaffleMapDataFormat } from '../../lib/lib';
-import { createDataFormatter } from './data';
+import { createBytesFormatter } from './bytes';
 import { formatNumber } from './number';
 import { formatPercent } from './percent';
 
 export const FORMATTERS = {
   [InfraFormatterType.number]: formatNumber,
-  [InfraFormatterType.abbreviatedNumber]: createDataFormatter(
+  // Because the implimentation for formatting large numbers is the same as formatting
+  // bytes we are re-using the same code, we just format the number using the abbreviated number format.
+  [InfraFormatterType.abbreviatedNumber]: createBytesFormatter(
     InfraWaffleMapDataFormat.abbreviatedNumber
   ),
-  [InfraFormatterType.bytes]: createDataFormatter(InfraWaffleMapDataFormat.bytesDecimal),
-  [InfraFormatterType.bits]: createDataFormatter(InfraWaffleMapDataFormat.bitsDecimal),
+  // bytes in bytes formatted string out
+  [InfraFormatterType.bytes]: createBytesFormatter(InfraWaffleMapDataFormat.bytesDecimal),
+  // bytes in bits formatted string out
+  [InfraFormatterType.bits]: createBytesFormatter(InfraWaffleMapDataFormat.bitsDecimal),
   [InfraFormatterType.percent]: formatPercent,
 };
 

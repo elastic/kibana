@@ -11,9 +11,7 @@ import {
   Commit,
   Diff as NodeGitDiff,
   Error as NodeGitError,
-  Object,
   Oid,
-  Reference,
   Repository,
   Tree,
   TreeEntry,
@@ -22,12 +20,17 @@ import Boom from 'boom';
 import LruCache from 'lru-cache';
 import * as Path from 'path';
 import * as fs from 'fs';
+import * as isogit from 'isomorphic-git';
+import { CommitDescription, TreeDescription } from 'isomorphic-git';
+import { isBinaryFileSync } from 'isbinaryfile';
 
 import { GitBlame } from '../common/git_blame';
 import { CommitDiff, Diff, DiffKind } from '../common/git_diff';
 import { FileTree, FileTreeItemType, RepositoryUri, sortFileTree } from '../model';
 import { CommitInfo, ReferenceInfo, ReferenceType } from '../model/commit';
 import { detectLanguage } from './utils/detect_language';
+
+isogit.plugins.set('fs', fs);
 
 export const HEAD = 'HEAD';
 const REFS_HEADS = 'refs/heads/';
@@ -115,49 +118,51 @@ export class GitOperations {
   }
 
   public async fileContent(uri: RepositoryUri, path: string, revision: string = 'master') {
-    const commit = await this.getCommit(uri, revision);
-    const entry: TreeEntry = await checkExists(
-      () => commit.getEntry(path),
-      `file ${uri}/${path} not found `
-    );
-    if (entry.isFile() || entry.filemode() === TreeEntry.FILEMODE.LINK) {
-      return await entry.getBlob();
-    } else {
-      throw Boom.unsupportedMediaType(`${uri}/${path} is not a file.`);
+    const gitdir = this.repoDir(uri);
+    const commit: CommitInfo = await this.getCommitOr404(uri, revision);
+    const file = await isogit.readObject({
+      gitdir,
+      oid: commit.id,
+      filepath: path,
+      format: 'content',
+    });
+    if (file && file.type === 'blob') {
+      return {
+        isBinary() {
+          return isBinaryFileSync(file.object as Buffer);
+        },
+        content() {
+          return file.object as Buffer;
+        },
+        rawsize() {
+          return (file.object as Buffer).length;
+        },
+      };
     }
+    throw Boom.unsupportedMediaType(`${uri}/${path} is not a file.`);
   }
 
   public async getCommit(uri: RepositoryUri, revision: string): Promise<Commit> {
+    const info = await this.getCommitOr404(uri, revision);
     const repo = await this.openRepo(uri);
-    if (revision.toUpperCase() === HEAD) {
-      return await repo.getHeadCommit();
-    }
-    // branches and tags
-    const refs = [`refs/remotes/origin/${revision}`, `refs/tags/${revision}`];
-    const commit = await this.findCommitByRefs(repo, refs);
-    if (commit === null) {
-      return (await checkExists(
-        () => this.findCommit(repo, revision),
-        `revision or branch ${revision} not found in ${repo.path()}`
-      )) as Commit;
-    }
-    return commit;
+    return (await checkExists(
+      () => this.findCommit(repo, info.id),
+      `revision or branch ${revision} not found in ${uri}`
+    )) as Commit;
   }
 
   public async getDefaultBranch(uri: RepositoryUri): Promise<string> {
-    const repo = await this.openRepo(uri);
-    const ref = await repo.getReference(HEAD);
-    const name = ref.name();
-    if (name.startsWith(REFS_HEADS)) {
-      return name.substr(REFS_HEADS.length);
+    const gitdir = this.repoDir(uri);
+    const ref = await isogit.resolveRef({ gitdir, ref: HEAD, depth: 2 });
+    if (ref.startsWith(REFS_HEADS)) {
+      return ref.substr(REFS_HEADS.length);
     }
-    return name;
+    return ref;
   }
 
   public async getHeadRevision(uri: RepositoryUri): Promise<string> {
-    const repo = await this.openRepo(uri);
-    const commit = await repo.getHeadCommit();
-    return commit.sha();
+    const gitdir = this.repoDir(uri);
+    return await isogit.resolveRef({ gitdir, ref: HEAD, depth: 10 });
   }
 
   public async blame(uri: RepositoryUri, revision: string, path: string): Promise<GitBlame[]> {
@@ -196,8 +201,7 @@ export class GitOperations {
       return Promise.resolve(repo);
     }
 
-    const repoDir = Path.join(this.repoRoot, uri);
-    this.checkPath(repoDir);
+    const repoDir = this.repoDir(uri);
     const repo = await checkExists<Repository>(
       () => Repository.open(repoDir),
       `repo ${uri} not found`
@@ -206,30 +210,43 @@ export class GitOperations {
     return Promise.resolve(repo);
   }
 
+  private repoDir(uri: RepositoryUri) {
+    const repoDir = Path.join(this.repoRoot, uri);
+    this.checkPath(repoDir);
+    return repoDir;
+  }
+
   private checkPath(path: string) {
     if (!fs.realpathSync(path).startsWith(fs.realpathSync(this.repoRoot))) {
       throw new Error('invalid path');
     }
   }
   public async countRepoFiles(uri: RepositoryUri, revision: string): Promise<number> {
-    const commit = await this.getCommit(uri, revision);
-    const tree = await commit.getTree();
     let count = 0;
+    const commit = await this.getCommitOr404(uri, revision);
+    const gitdir = this.repoDir(uri);
+    const commitObject = await isogit.readObject({ gitdir, oid: commit.id });
+    const treeId = (commitObject.object as CommitDescription).tree;
 
-    async function walk(t: Tree) {
-      for (const e of t.entries()) {
-        if (e.isFile() && e.filemode() !== TreeEntry.FILEMODE.LINK) {
-          count++;
-        } else if (e.isDirectory()) {
-          const subFolder = await e.getTree();
-          await walk(subFolder);
-        } else {
-          // ignore other files
+    async function walk(oid: string) {
+      const { object } = await isogit.readObject({ gitdir, oid });
+      const tree = object as TreeDescription;
+      for (const entry of tree.entries) {
+        if (entry.type === 'tree') {
+          await walk(entry.oid);
+        } else if (entry.type === 'blob') {
+          const type = GitOperations.mode2type(entry.mode);
+          if (type === FileTreeItemType.File) {
+            const blob = await isogit.readObject({ gitdir, oid: entry.oid, format: 'content' });
+            if (!isBinaryFileSync(blob.object as Buffer)) {
+              count++;
+            }
+          }
         }
       }
     }
 
-    await walk(tree);
+    await walk(treeId);
     return count;
   }
 
@@ -237,27 +254,53 @@ export class GitOperations {
     uri: RepositoryUri,
     revision: string
   ): Promise<AsyncIterableIterator<FileTree>> {
-    const commit = await this.getCommit(uri, revision);
-    const tree = await commit.getTree();
-
-    async function* walk(t: Tree): AsyncIterableIterator<FileTree> {
-      for (const e of t.entries()) {
-        if (e.isFile() && e.filemode() !== TreeEntry.FILEMODE.LINK) {
-          const blob = await e.getBlob();
-          // Ignore binary files
-          if (!blob.isBinary()) {
-            yield entry2Tree(e);
+    async function* walk(oid: string, prefix: string = ''): AsyncIterableIterator<FileTree> {
+      const { object } = await isogit.readObject({ gitdir, oid });
+      const tree = object as TreeDescription;
+      for (const entry of tree.entries) {
+        const path = prefix ? `${prefix}/${entry.path}` : entry.path;
+        if (entry.type === 'tree') {
+          yield* walk(entry.oid, path);
+        } else if (entry.type === 'blob') {
+          const type = GitOperations.mode2type(entry.mode);
+          if (type === FileTreeItemType.File) {
+            const blob = await isogit.readObject({ gitdir, oid: entry.oid, format: 'content' });
+            if (!isBinaryFileSync(blob.object as Buffer)) {
+              yield {
+                name: entry.path,
+                type,
+                path,
+                repoUri: uri,
+                sha1: entry.oid,
+              } as FileTree;
+            }
           }
-        } else if (e.isDirectory()) {
-          const subFolder = await e.getTree();
-          await (yield* walk(subFolder));
-        } else {
-          // ignore other files
         }
       }
     }
 
-    return await walk(tree);
+    const commit = await this.getCommitOr404(uri, revision);
+    const gitdir = this.repoDir(uri);
+    const commitObject = await isogit.readObject({ gitdir, oid: commit.id });
+    const treeId = (commitObject.object as CommitDescription).tree;
+    return await walk(treeId);
+  }
+
+  static mode2type(mode: string): FileTreeItemType {
+    switch (mode) {
+      case '100755':
+      case '100644':
+        return FileTreeItemType.File;
+      case '120000':
+        return FileTreeItemType.Link;
+      case '40000':
+      case '040000':
+        return FileTreeItemType.Directory;
+      case '160000':
+        return FileTreeItemType.Submodule;
+      default:
+        throw new Error('unknown mode: ' + mode);
+    }
   }
 
   /**
@@ -269,6 +312,7 @@ export class GitOperations {
    * @param limit pagination parameter, limit the number of node's children.
    * @param resolveParents whether the return value should always start from root
    * @param childrenDepth how depth should the children walk.
+   * @param flatten
    */
   public async fileTree(
     uri: RepositoryUri,
@@ -539,37 +583,107 @@ export class GitOperations {
     return fileTree;
   }
 
-  private async findCommit(repo: Repository, revision: string): Promise<Commit | null> {
+  private async findCommit(repo: Repository, oid: string): Promise<Commit | null> {
     try {
-      const obj = await Object.lookupPrefix(
-        repo,
-        Oid.fromString(revision),
-        revision.length,
-        Object.TYPE.COMMIT
-      );
-      if (obj) {
-        return repo.getCommit(obj.id());
-      }
-      return null;
+      return repo.getCommit(Oid.fromString(oid));
     } catch (e) {
       return null;
     }
   }
 
-  private async findCommitByRefs(repo: Repository, refs: string[]): Promise<Commit | null> {
-    if (refs.length === 0) {
-      return null;
-    }
-    const [ref, ...rest] = refs;
-    try {
-      return await repo.getReferenceCommit(ref);
-    } catch (e) {
-      if (e.errno === NodeGitError.CODE.ENOTFOUND) {
-        return await this.findCommitByRefs(repo, rest);
-      } else {
-        throw e;
+  public async getBranchAndTags(repoUri: string): Promise<ReferenceInfo[]> {
+    const gitdir = this.repoDir(repoUri);
+    const remoteBranches = await isogit.listBranches({ gitdir, remote: 'origin' });
+    const results: ReferenceInfo[] = [];
+    for (const name of remoteBranches) {
+      const reference = `refs/remotes/origin/${name}`;
+      const commit = await this.getCommitInfo(repoUri, reference);
+      if (commit) {
+        results.push({
+          name,
+          reference,
+          type: ReferenceType.REMOTE_BRANCH,
+          commit,
+        });
       }
     }
+    const tags = await isogit.listTags({ gitdir });
+    for (const name of tags) {
+      const reference = `refs/tags/${name}`;
+      const commit = await this.getCommitInfo(repoUri, reference);
+      if (commit) {
+        results.push({
+          name,
+          reference,
+          type: ReferenceType.TAG,
+          commit,
+        });
+      }
+    }
+    return results;
+  }
+
+  public async getCommitOr404(repoUri: string, ref: string): Promise<CommitInfo> {
+    const commit = await this.getCommitInfo(repoUri, ref);
+    if (!commit) {
+      throw Boom.notFound(`repo ${repoUri} or ${ref} not found`);
+    }
+    return commit;
+  }
+
+  public async getCommitInfo(repoUri: string, ref: string): Promise<CommitInfo | null> {
+    const gitdir = this.repoDir(repoUri);
+    // depth: avoid infinite loop
+    let obj: isogit.GitObjectDescription | null = null;
+    let oid: string = '';
+    if (/^[0-9a-f]{5,40}$/.test(ref)) {
+      // it's possible ref is sha-1 object id
+      try {
+        oid = ref;
+        if (oid.length < 40) {
+          oid = await isogit.expandOid({ gitdir, oid });
+        }
+        obj = await isogit.readObject({ gitdir, oid, format: 'parsed' });
+      } catch (e) {
+        // expandOid or readObject failed
+      }
+    }
+    // test if it is a reference
+    if (!obj) {
+      try {
+        // try local branches or tags
+        oid = await isogit.resolveRef({ gitdir, ref, depth: 10 });
+      } catch (e) {
+        // try remote branches
+        try {
+          oid = await isogit.resolveRef({ gitdir, ref: `origin/${ref}`, depth: 10 });
+        } catch (e1) {
+          // no match
+        }
+      }
+      if (oid) {
+        obj = await isogit.readObject({ gitdir, oid, format: 'parsed' });
+      }
+    }
+    if (obj) {
+      if (obj.type === 'commit') {
+        const commit = obj.object as isogit.CommitDescription;
+        return {
+          id: obj.oid,
+          author: commit.author.name,
+          committer: commit.committer.name,
+          message: commit.message,
+          updated: new Date(commit.committer.timestamp * 1000),
+          parents: commit.parent,
+        } as CommitInfo;
+      } else if (obj.type === 'tag') {
+        const tag = obj.object as isogit.TagDescription;
+        if (tag.type === 'commit') {
+          return await this.getCommitInfo(repoUri, tag.object);
+        }
+      }
+    }
+    return null;
   }
 }
 
@@ -577,40 +691,9 @@ export function commitInfo(commit: Commit): CommitInfo {
   return {
     updated: commit.date(),
     message: commit.message(),
+    author: commit.author().name(),
     committer: commit.committer().name(),
     id: commit.sha().substr(0, 7),
     parents: commit.parents().map(oid => oid.toString().substring(0, 7)),
-  };
-}
-const REMOTE_PREFIX = 'origin/';
-
-export async function referenceInfo(ref: Reference): Promise<ReferenceInfo | null> {
-  const repository = ref.owner();
-  let commit: CommitInfo | undefined;
-  try {
-    const object = await ref.peel(Object.TYPE.COMMIT);
-    commit = commitInfo(await repository.getCommit(object.id()));
-  } catch {
-    return null;
-  }
-  let type: ReferenceType;
-  let name = ref.shorthand();
-  if (ref.isTag()) {
-    type = ReferenceType.TAG;
-  } else if (ref.isRemote()) {
-    if (name.startsWith(REMOTE_PREFIX)) {
-      name = name.substr(REMOTE_PREFIX.length);
-    }
-    type = ReferenceType.REMOTE_BRANCH;
-  } else if (ref.isBranch()) {
-    type = ReferenceType.BRANCH;
-  } else {
-    type = ReferenceType.OTHER;
-  }
-  return {
-    name,
-    reference: ref.name(),
-    commit,
-    type,
   };
 }

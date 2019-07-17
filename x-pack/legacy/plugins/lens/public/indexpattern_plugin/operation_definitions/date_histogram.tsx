@@ -45,6 +45,7 @@ export const dateHistogramOperation: OperationDefinition<DateHistogramIndexPatte
   },
   buildColumn(
     operationId: string,
+    columns: {},
     suggestedOrder?: DimensionPriority,
     field?: IndexPatternField
   ): DateHistogramIndexPatternColumn {

@@ -64,7 +64,7 @@ describe('filter_ratio', () => {
 
   describe('buildColumn', () => {
     it('should create column object with default params', () => {
-      const column = filterRatioOperation.buildColumn('op', 0);
+      const column = filterRatioOperation.buildColumn('op', {}, 0);
       expect(column.params.numerator).toEqual({ query: '', language: 'kuery' });
       expect(column.params.denominator).toEqual({ query: '', language: 'kuery' });
     });

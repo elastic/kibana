@@ -15,6 +15,7 @@ import 'uiExports/fieldFormats';
 import 'uiExports/inspectorViews';
 import 'uiExports/search';
 import 'uiExports/embeddableFactories';
+import 'uiExports/embeddableActions';
 import 'ui/agg_types';
 
 import { capabilities } from 'ui/capabilities';

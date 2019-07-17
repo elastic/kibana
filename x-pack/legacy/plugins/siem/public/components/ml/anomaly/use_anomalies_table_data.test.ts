@@ -5,7 +5,7 @@
  */
 
 import { InfluencerInput } from '../types';
-import { influencersToString, getThreshold } from './use_anomalies_table_data';
+import { influencersOrCriteriaToString, getThreshold } from './use_anomalies_table_data';
 import { AppKibanaFrameworkAdapter } from '../../../lib/adapters/framework/kibana_framework_adapter';
 
 describe('use_anomalies_table_data', () => {
@@ -16,7 +16,7 @@ describe('use_anomalies_table_data', () => {
         fieldValue: 'value-1',
       },
     ];
-    const influencerString = influencersToString(influencers);
+    const influencerString = influencersOrCriteriaToString(influencers);
     expect(influencerString).toEqual('field-1:value-1');
   });
 
@@ -31,18 +31,13 @@ describe('use_anomalies_table_data', () => {
         fieldValue: 'value-2',
       },
     ];
-    const influencerString = influencersToString(influencers);
+    const influencerString = influencersOrCriteriaToString(influencers);
     expect(influencerString).toEqual('field-1:value-1field-2:value-2');
   });
 
   test('should return an empty string when the array is empty', () => {
     const influencers: InfluencerInput[] = [];
-    const influencerString = influencersToString(influencers);
-    expect(influencerString).toEqual('');
-  });
-
-  test('should return an empty string when passed null', () => {
-    const influencerString = influencersToString(null);
+    const influencerString = influencersOrCriteriaToString(influencers);
     expect(influencerString).toEqual('');
   });
 

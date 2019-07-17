@@ -18,7 +18,11 @@ export const countOperation: OperationDefinition<CountIndexPatternColumn> = {
   isApplicableForField: ({ aggregationRestrictions, type }) => {
     return false;
   },
-  buildColumn(operationId: string, suggestedOrder?: DimensionPriority): CountIndexPatternColumn {
+  buildColumn(
+    operationId: string,
+    columns: {},
+    suggestedOrder?: DimensionPriority
+  ): CountIndexPatternColumn {
     return {
       operationId,
       label: i18n.translate('xpack.lens.indexPattern.countOf', {
