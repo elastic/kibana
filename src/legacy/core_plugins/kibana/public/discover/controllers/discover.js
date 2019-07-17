@@ -236,7 +236,7 @@ function discoverController(
 
   const getTopNavLinks = () => {
     const newSearch = {
-      key: 'new',
+      id: 'new',
       label: i18n.translate('kbn.discover.localMenu.localMenu.newSearchTitle', {
         defaultMessage: 'New',
       }),
@@ -248,7 +248,7 @@ function discoverController(
     };
 
     const saveSearch = {
-      key: 'save',
+      id: 'save',
       label: i18n.translate('kbn.discover.localMenu.saveTitle', {
         defaultMessage: 'Save',
       }),
@@ -288,7 +288,7 @@ function discoverController(
     };
 
     const openSearch = {
-      key: 'open',
+      id: 'open',
       label: i18n.translate('kbn.discover.localMenu.openTitle', {
         defaultMessage: 'Open',
       }),
@@ -306,7 +306,7 @@ function discoverController(
     };
 
     const shareSearch = {
-      key: 'share',
+      id: 'share',
       label: i18n.translate('kbn.discover.localMenu.shareTitle', {
         defaultMessage: 'Share',
       }),
@@ -314,7 +314,7 @@ function discoverController(
         defaultMessage: 'Share Search',
       }),
       testId: 'shareTopNavButton',
-      run: async (menuItem, navController, anchorElement) => { // eslint-disable-line no-unused-vars
+      run: async (anchorElement) => {
         const sharingData = await this.getSharingData();
         showShareContextMenu({
           anchorElement,
@@ -334,7 +334,7 @@ function discoverController(
     };
 
     const inspectSearch = {
-      key: 'inspect',
+      id: 'inspect',
       label: i18n.translate('kbn.discover.localMenu.inspectTitle', {
         defaultMessage: 'Inspect',
       }),

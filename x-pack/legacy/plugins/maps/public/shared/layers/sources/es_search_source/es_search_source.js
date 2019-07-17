@@ -33,7 +33,7 @@ export class ESSearchSource extends AbstractESSource {
   });
 
   static renderEditor({ onPreviewSource, inspectorAdapters }) {
-    const onSelect = (sourceConfig) => {
+    const onSourceConfigChange = (sourceConfig) => {
       if (!sourceConfig) {
         onPreviewSource(null);
         return;
@@ -45,7 +45,7 @@ export class ESSearchSource extends AbstractESSource {
       }, inspectorAdapters);
       onPreviewSource(source);
     };
-    return (<CreateSourceEditor onSelect={onSelect}/>);
+    return (<CreateSourceEditor onSourceConfigChange={onSourceConfigChange}/>);
   }
 
   constructor(descriptor, inspectorAdapters) {

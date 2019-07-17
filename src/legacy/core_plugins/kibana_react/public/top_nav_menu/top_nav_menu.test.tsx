@@ -50,9 +50,7 @@ describe('TopNavMenu', () => {
     },
   ];
 
-  beforeEach(() => {});
-
-  it('Should render nothing', () => {
+  it('Should render nothing when no config is provided', () => {
     const component = shallowWithIntl(<TopNavMenu name="test" />);
     expect(component.find(TOP_NAV_ITEM_SELECTOR).length).toBe(0);
     expect(component.find(SEARCH_BAR_SELECTOR).length).toBe(0);

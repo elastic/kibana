@@ -48,7 +48,7 @@ export class EMSFileCreateSourceEditor extends React.Component {
     this.setState({ selectedOption: selectedOptions[0] });
 
     const emsFileId = selectedOptions[0].value;
-    this.props.onChange(emsFileId);
+    this.props.onSourceConfigChange({ id: emsFileId });
   }
 
   render() {

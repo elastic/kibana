@@ -150,7 +150,7 @@ function VisEditor(
   };
 
   $scope.topNavMenu = [...(capabilities.get().visualize.save ? [{
-    key: i18n.translate('kbn.topNavMenu.saveVisualizationButtonLabel', { defaultMessage: 'save' }),
+    id: i18n.translate('kbn.topNavMenu.saveVisualizationButtonLabel', { defaultMessage: 'save' }),
     description: i18n.translate('kbn.visualize.topNavMenu.saveVisualizationButtonAriaLabel', {
       defaultMessage: 'Save Visualization',
     }),
@@ -203,12 +203,12 @@ function VisEditor(
       showSaveModal(saveModal);
     }
   }] : []), {
-    key: i18n.translate('kbn.topNavMenu.shareVisualizationButtonLabel', { defaultMessage: 'share' }),
+    id: i18n.translate('kbn.topNavMenu.shareVisualizationButtonLabel', { defaultMessage: 'share' }),
     description: i18n.translate('kbn.visualize.topNavMenu.shareVisualizationButtonAriaLabel', {
       defaultMessage: 'Share Visualization',
     }),
     testId: 'shareTopNavButton',
-    run: (menuItem, navController, anchorElement) => {
+    run: (anchorElement) => {
       const hasUnappliedChanges = vis.dirty;
       const hasUnsavedChanges = $appStatus.dirty;
       showShareContextMenu({
@@ -226,7 +226,7 @@ function VisEditor(
       });
     }
   }, {
-    key: i18n.translate('kbn.topNavMenu.openInspectorButtonLabel', { defaultMessage: 'inspect' }),
+    id: i18n.translate('kbn.topNavMenu.openInspectorButtonLabel', { defaultMessage: 'inspect' }),
     description: i18n.translate('kbn.visualize.topNavMenu.openInspectorButtonAriaLabel', {
       defaultMessage: 'Open Inspector for visualization',
     }),
@@ -249,7 +249,7 @@ function VisEditor(
       }
     }
   }, {
-    key: i18n.translate('kbn.topNavMenu.refreshButtonLabel', { defaultMessage: 'refresh' }),
+    id: i18n.translate('kbn.topNavMenu.refreshButtonLabel', { defaultMessage: 'refresh' }),
     description: i18n.translate('kbn.visualize.topNavMenu.refreshButtonAriaLabel', {
       defaultMessage: 'Refresh',
     }),
@@ -353,21 +353,11 @@ function VisEditor(
 
     $scope.showSearchBarInline = () => {
       // Show inline with menu, if it's only the timepicker \ autorefresh component
-      return ($scope.showQueryBarTimePicker() ||
-              $scope.showAutoRefreshOnly()) &&
-        !$scope.showQueryInput() &&
-        !$scope.showFilterBar();
+      return !$scope.showQueryInput() && !$scope.showFilterBar();
     };
 
     $scope.showFilterBar = () => {
       return vis.type.options.showFilterBar;
-    };
-
-    $scope.showQueryBar = () => {
-      // Show querybar if input or timepicker are required.
-      return $scope.showQueryInput() ||
-            $scope.showQueryBarTimePicker() ||
-            $scope.showAutoRefreshOnly();
     };
 
     $scope.showQueryInput = () => {
@@ -376,10 +366,6 @@ function VisEditor(
 
     $scope.showQueryBarTimePicker = () => {
       return vis.type.options.showTimePicker;
-    };
-
-    $scope.showAutoRefreshOnly = () => {
-      return !$scope.showQueryBarTimePicker();
     };
 
     $scope.timeRange = timefilter.getTime();

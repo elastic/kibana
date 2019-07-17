@@ -18,6 +18,7 @@
  */
 
 import React, { useState, useEffect, Fragment } from 'react';
+import { isEmpty, isEqual, mapValues, omit, pick } from 'lodash';
 import {
   EuiButtonIcon,
   EuiFlexGroup,
@@ -30,9 +31,8 @@ import { FormattedMessage } from '@kbn/i18n/react';
 
 export interface InputListConfig {
   defaultValue: InputItemModel;
-  defaultEmptyValue: InputItemModel;
   validateClass: new (value: string) => { toString(): string };
-  getModelValue(item: InputObject): InputItemModel;
+  getModelValue(item?: InputObject): InputItemModel;
   getRemoveBtnAriaLabel(model: InputModel): string;
   onChangeFn(model: InputModel): InputObject;
   hasInvalidValuesFn(model: InputModel): boolean;
@@ -41,11 +41,7 @@ export interface InputListConfig {
     index: number,
     onChangeFn: (index: number, value: string, modelName: string) => void
   ): React.ReactNode;
-  validateModel(
-    validateFn: (value: string | undefined, modelObj: InputItem) => void,
-    object: InputObject,
-    model: InputModel
-  ): void;
+  modelNames: string | string[];
 }
 interface InputModelBase {
   id: string;
@@ -74,120 +70,108 @@ interface InputListProps {
 }
 
 const generateId = htmlIdGenerator();
+const validateValue = (inputValue: string | undefined, config: InputListConfig) => {
+  const result = {
+    model: inputValue || '',
+    isInvalid: false,
+  };
+  if (!inputValue) {
+    result.isInvalid = false;
+    return result;
+  }
+  try {
+    const InputObject = config.validateClass;
+    result.model = new InputObject(inputValue).toString();
+    result.isInvalid = false;
+    return result;
+  } catch (e) {
+    result.isInvalid = true;
+    return result;
+  }
+};
 
 function InputList({ config, list, onChange, setValidity }: InputListProps) {
-  const [models, setModels] = useState(
-    list.length
-      ? list.map(
+  const [models, setModels] = useState(() =>
+    list.map(
+      item =>
+        ({
+          id: generateId(),
+          ...config.getModelValue(item),
+        } as InputModel)
+    )
+  );
+  const hasInvalidValues = models.some(config.hasInvalidValuesFn);
+
+  const updateValues = (modelList: InputModel[]) => {
+    setModels(modelList);
+    onChange(modelList.map(config.onChangeFn));
+  };
+  const onChangeValue = (index: number, value: string, modelName: string) => {
+    const { model, isInvalid } = validateValue(value, config);
+    updateValues(
+      models.map((range, arrayIndex) =>
+        arrayIndex === index
+          ? {
+              ...range,
+              [modelName]: {
+                value,
+                model,
+                isInvalid,
+              },
+            }
+          : range
+      )
+    );
+  };
+  const onDelete = (id: string) => updateValues(models.filter(model => model.id !== id));
+  const onAdd = () =>
+    updateValues([
+      ...models,
+      {
+        id: generateId(),
+        ...config.getModelValue(),
+      } as InputModel,
+    ]);
+
+  useEffect(() => {
+    // resposible for setting up an initial value when there is no default value
+    if (!list.length) {
+      updateValues([
+        {
+          id: generateId(),
+          ...config.defaultValue,
+        } as InputModel,
+      ]);
+    }
+  }, []);
+
+  useEffect(() => {
+    setValidity(!hasInvalidValues);
+  }, [hasInvalidValues]);
+
+  useEffect(() => {
+    // responsible for discarding changes
+    if (
+      list.length !== models.length ||
+      list.some((item, index) => {
+        // make model to be the same shape as stored value
+        const model: InputObject = mapValues(pick(models[index], config.modelNames), 'model');
+
+        // we need to skip empty values since they are not stored in saved object
+        return !isEqual(item, omit(model, isEmpty));
+      })
+    ) {
+      setModels(
+        list.map(
           item =>
             ({
               id: generateId(),
               ...config.getModelValue(item),
             } as InputModel)
         )
-      : [
-          {
-            id: generateId(),
-            ...config.defaultValue,
-          } as InputModel,
-        ]
-  );
-
-  const onUpdate = (modelList: InputModel[]) => {
-    setModels(modelList);
-    onChange(modelList.map(config.onChangeFn));
-  };
-
-  const onChangeValue = (index: number, value: string, modelName: string) => {
-    const range = models[index][modelName];
-    const { model, isInvalid } = validateValue(value);
-    range.value = value;
-    range.model = model;
-    range.isInvalid = isInvalid;
-    onUpdate(models);
-  };
-  const onDelete = (id: string) => {
-    const newArray = models.filter(model => model.id !== id);
-    onUpdate(newArray);
-  };
-
-  const onAdd = () => {
-    const newArray = [
-      ...models,
-      {
-        id: generateId(),
-        ...config.defaultEmptyValue,
-      } as InputModel,
-    ];
-    onUpdate(newArray);
-  };
-
-  const getUpdatedModels = (objList: InputObject[], modelList: InputModel[]) => {
-    if (!objList.length) {
-      return modelList;
+      );
     }
-    return objList.map((item, index) => {
-      const model = modelList[index] || {
-        id: generateId(),
-        ...config.getModelValue(item),
-      };
-
-      config.validateModel(validateItem, item, model);
-
-      return model;
-    });
-  };
-
-  const validateItem = (value: string | undefined, modelObj: InputItem) => {
-    const { model, isInvalid } = validateValue(value);
-    if (value !== modelObj.model) {
-      modelObj.value = model;
-    }
-    modelObj.model = model;
-    modelObj.isInvalid = isInvalid;
-  };
-
-  const validateValue = (inputValue: string | undefined) => {
-    const result = {
-      model: inputValue || '',
-      isInvalid: false,
-    };
-    if (!inputValue) {
-      result.isInvalid = false;
-      return result;
-    }
-    try {
-      const InputObject = config.validateClass;
-      result.model = new InputObject(inputValue).toString();
-      result.isInvalid = false;
-      return result;
-    } catch (e) {
-      result.isInvalid = true;
-      return result;
-    }
-  };
-
-  const hasInvalidValues = (modelList: InputModel[]) => {
-    return !!modelList.find(config.hasInvalidValuesFn);
-  };
-
-  // responsible for discarding changes
-  useEffect(() => {
-    setModels(getUpdatedModels(list, models));
   }, [list]);
-
-  useEffect(() => {
-    setValidity(!hasInvalidValues(models));
-  }, [models]);
-
-  // resposible for setting up an initial value when there is no default value
-  useEffect(() => {
-    onChange(models.map(config.onChangeFn));
-  }, []);
-
-  if (!list || !list.length) {
-    return null;
-  }
 
   return (
     <>

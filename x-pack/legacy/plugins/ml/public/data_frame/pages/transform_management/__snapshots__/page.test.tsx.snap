@@ -1,0 +1,62 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Data Frame: Job List <Page /> Minimal initialization 1`] = `
+<EuiPage
+  data-test-subj="mlPageDataFrame"
+  restrictWidth={false}
+>
+  <EuiPageBody
+    restrictWidth={false}
+  >
+    <EuiPageContentHeader
+      responsive={true}
+    >
+      <EuiPageContentHeaderSection>
+        <EuiTitle>
+          <h1>
+            <FormattedMessage
+              defaultMessage="Data frame transforms"
+              id="xpack.ml.dataframe.transformList.dataFrameTitle"
+              values={Object {}}
+            />
+            <span>
+               
+            </span>
+            <EuiBetaBadge
+              label="Beta"
+              tooltipContent="Data frames are a beta feature. We'd love to hear your feedback."
+            />
+          </h1>
+        </EuiTitle>
+      </EuiPageContentHeaderSection>
+      <EuiPageContentHeaderSection>
+        <EuiFlexGroup
+          alignItems="center"
+        >
+          <EuiFlexItem>
+            <RefreshTransformListButton
+              isLoading={false}
+              onClick={[Function]}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <CreateTransformButton />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiPageContentHeaderSection>
+    </EuiPageContentHeader>
+    <EuiPageContentBody>
+      <EuiSpacer
+        size="l"
+      />
+      <EuiPanel
+        grow={true}
+        hasShadow={false}
+        paddingSize="m"
+      >
+        <DataFrameTransformList />
+      </EuiPanel>
+    </EuiPageContentBody>
+  </EuiPageBody>
+</EuiPage>
+`;

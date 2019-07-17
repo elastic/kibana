@@ -24,7 +24,7 @@ import { i18n } from '@kbn/i18n';
 import { capabilities } from 'ui/capabilities';
 import { docTitle } from 'ui/doc_title';
 import { SavedObjectRegistryProvider } from 'ui/saved_objects/saved_object_registry';
-import { notify, fatalError, toastNotifications } from 'ui/notify';
+import { fatalError, toastNotifications } from 'ui/notify';
 import { timezoneProvider } from 'ui/vis/lib/timezone';
 import { recentlyAccessed } from 'ui/persisted_log';
 import { timefilter } from 'ui/timefilter';
@@ -65,8 +65,6 @@ require('plugins/timelion/services/_saved_sheet');
 require('./vis');
 
 SavedObjectRegistryProvider.register(require('plugins/timelion/services/saved_sheet_register'));
-
-const unsafeNotifications = notify._notifs;
 
 require('ui/routes').enable();
 
@@ -165,7 +163,7 @@ app.controller('timelion', function (
   function getTopNavMenu() {
 
     const newSheetAction = {
-      key: 'new',
+      id: 'new',
       label: i18n.translate('timelion.topNavMenu.newSheetButtonLabel', {
         defaultMessage: 'New',
       }),
@@ -177,7 +175,7 @@ app.controller('timelion', function (
     };
 
     const addSheetAction = {
-      key: 'add',
+      id: 'add',
       label: i18n.translate('timelion.topNavMenu.addChartButtonLabel', {
         defaultMessage: 'Add',
       }),
@@ -191,7 +189,7 @@ app.controller('timelion', function (
     };
 
     const saveSheetAction = {
-      key: 'save',
+      id: 'save',
       label: i18n.translate('timelion.topNavMenu.saveSheetButtonLabel', {
         defaultMessage: 'Save',
       }),
@@ -205,7 +203,7 @@ app.controller('timelion', function (
     };
 
     const deleteSheetAction = {
-      key: 'delete',
+      id: 'delete',
       label: i18n.translate('timelion.topNavMenu.deleteSheetButtonLabel', {
         defaultMessage: 'Delete',
       }),
@@ -255,7 +253,7 @@ app.controller('timelion', function (
     };
 
     const openSheetAction = {
-      key: 'open',
+      id: 'open',
       label: i18n.translate('timelion.topNavMenu.openSheetButtonLabel', {
         defaultMessage: 'Open',
       }),
@@ -269,7 +267,7 @@ app.controller('timelion', function (
     };
 
     const optionsAction = {
-      key: 'options',
+      id: 'options',
       label: i18n.translate('timelion.topNavMenu.optionsButtonLabel', {
         defaultMessage: 'Options',
       }),
@@ -283,7 +281,7 @@ app.controller('timelion', function (
     };
 
     const helpAction = {
-      key: 'help',
+      id: 'help',
       label: i18n.translate('timelion.topNavMenu.helpButtonLabel', {
         defaultMessage: 'Help',
       }),
@@ -421,7 +419,6 @@ app.controller('timelion', function (
 
     httpResult
       .then(function (resp) {
-        dismissNotifications();
         $scope.stats = resp.stats;
         $scope.sheet = resp.sheet;
         _.each(resp.sheet, function (cell) {
@@ -488,10 +485,6 @@ app.controller('timelion', function (
         }
       });
     });
-  }
-
-  function dismissNotifications() {
-    unsafeNotifications.splice(0, unsafeNotifications.length);
   }
 
   init();

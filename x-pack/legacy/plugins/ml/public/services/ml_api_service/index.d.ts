@@ -24,11 +24,11 @@ declare interface Ml {
   dataFrame: {
     getDataFrameTransforms(jobId?: string): Promise<any>;
     getDataFrameTransformsStats(jobId?: string): Promise<any>;
-    createDataFrameTransformsJob(jobId: string, jobConfig: any): Promise<any>;
-    deleteDataFrameTransformsJob(jobId: string): Promise<any>;
+    createDataFrameTransform(jobId: string, jobConfig: any): Promise<any>;
+    deleteDataFrameTransform(jobId: string): Promise<any>;
     getDataFrameTransformsPreview(payload: any): Promise<any>;
-    startDataFrameTransformsJob(jobId: string, force?: boolean): Promise<any>;
-    stopDataFrameTransformsJob(
+    startDataFrameTransform(jobId: string, force?: boolean): Promise<any>;
+    stopDataFrameTransform(
       jobId: string,
       force?: boolean,
       waitForCompletion?: boolean

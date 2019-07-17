@@ -13,6 +13,7 @@ import {
   routeChange,
   setNotFound,
 } from '../actions';
+import { routePathChange, repoChange, revisionChange, filePathChange } from '../actions/route';
 
 export interface FileState {
   file?: FetchFileResponse;
@@ -22,6 +23,12 @@ export interface FileState {
 const initialState: FileState = {
   isNotFound: false,
 };
+
+const clearState = (state: FileState) =>
+  produce<FileState>(state, draft => {
+    draft.file = undefined;
+    draft.isNotFound = initialState.isNotFound;
+  });
 
 type FilePayload = FetchFileResponse & boolean;
 
@@ -44,6 +51,10 @@ export const file = handleActions<FileState, FilePayload>(
       produce<FileState>(state, draft => {
         draft.isNotFound = false;
       }),
+    [String(routePathChange)]: clearState,
+    [String(repoChange)]: clearState,
+    [String(revisionChange)]: clearState,
+    [String(filePathChange)]: clearState,
   },
   initialState
 );
