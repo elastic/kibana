@@ -24,7 +24,6 @@ import {
   TaskDictionary,
   validateRunResult,
 } from './task';
-import { RemoveResult } from './task_store';
 
 export interface TaskRunner {
   numWorkers: number;
@@ -38,7 +37,7 @@ export interface TaskRunner {
 interface Updatable {
   readonly maxAttempts: number;
   update(doc: ConcreteTaskInstance): Promise<ConcreteTaskInstance>;
-  remove(id: string): Promise<RemoveResult>;
+  remove(id: string): Promise<void>;
 }
 
 interface Opts {

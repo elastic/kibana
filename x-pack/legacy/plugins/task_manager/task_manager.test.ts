@@ -7,6 +7,11 @@
 import _ from 'lodash';
 import sinon from 'sinon';
 import { TaskManager } from './task_manager';
+import { SavedObjectsClientMock } from 'src/core/server/mocks';
+import { SavedObjectsSerializer, SavedObjectsSchema } from 'src/core/server';
+
+const savedObjectsClient = SavedObjectsClientMock.create();
+const serializer = new SavedObjectsSerializer(new SavedObjectsSchema());
 
 describe('TaskManager', () => {
   let clock: sinon.SinonFakeTimers;
@@ -28,7 +33,12 @@ describe('TaskManager', () => {
 
   test('disallows schedule before init', async () => {
     const { opts } = testOpts();
-    const client = new TaskManager(opts.kbnServer, opts.server, opts.config);
+    const client = new TaskManager({
+      kbnServer: opts.kbnServer,
+      config: opts.config,
+      savedObjectsRepository: savedObjectsClient,
+      serializer,
+    });
     const task = {
       taskType: 'foo',
       params: {},
@@ -39,19 +49,34 @@ describe('TaskManager', () => {
 
   test('disallows fetch before init', async () => {
     const { opts } = testOpts();
-    const client = new TaskManager(opts.kbnServer, opts.server, opts.config);
+    const client = new TaskManager({
+      kbnServer: opts.kbnServer,
+      config: opts.config,
+      savedObjectsRepository: savedObjectsClient,
+      serializer,
+    });
     await expect(client.fetch({})).rejects.toThrow(/^NotInitialized: .*/i);
   });
 
   test('disallows remove before init', async () => {
     const { opts } = testOpts();
-    const client = new TaskManager(opts.kbnServer, opts.server, opts.config);
+    const client = new TaskManager({
+      kbnServer: opts.kbnServer,
+      config: opts.config,
+      savedObjectsRepository: savedObjectsClient,
+      serializer,
+    });
     await expect(client.remove('23')).rejects.toThrow(/^NotInitialized: .*/i);
   });
 
   test('allows middleware registration before init', () => {
     const { opts } = testOpts();
-    const client = new TaskManager(opts.kbnServer, opts.server, opts.config);
+    const client = new TaskManager({
+      kbnServer: opts.kbnServer,
+      config: opts.config,
+      savedObjectsRepository: savedObjectsClient,
+      serializer,
+    });
     const middleware = {
       beforeSave: async (saveOpts: any) => saveOpts,
       beforeRun: async (runOpts: any) => runOpts,
@@ -61,7 +86,12 @@ describe('TaskManager', () => {
 
   test('disallows middleware registration after init', async () => {
     const { $test, opts } = testOpts();
-    const client = new TaskManager(opts.kbnServer, opts.server, opts.config);
+    const client = new TaskManager({
+      kbnServer: opts.kbnServer,
+      config: opts.config,
+      savedObjectsRepository: savedObjectsClient,
+      serializer,
+    });
     const middleware = {
       beforeSave: async (saveOpts: any) => saveOpts,
       beforeRun: async (runOpts: any) => runOpts,
@@ -94,20 +124,20 @@ describe('TaskManager', () => {
         afterPluginsInit(callback: any) {
           $test.afterPluginsInit = callback;
         },
-      },
-      server: {
-        log: sinon.spy(),
-        decorate(...args: any[]) {
-          _.set(opts, args.slice(0, -1), _.last(args));
-        },
-        plugins: {
-          elasticsearch: {
-            getCluster() {
-              return { callWithInternalUser: callCluster };
-            },
-            status: {
-              on(eventName: string, callback: () => any) {
-                $test.events[eventName] = callback;
+        server: {
+          log: sinon.spy(),
+          decorate(...args: any[]) {
+            _.set(opts, args.slice(0, -1), _.last(args));
+          },
+          plugins: {
+            elasticsearch: {
+              getCluster() {
+                return { callWithInternalUser: callCluster };
+              },
+              status: {
+                on(eventName: string, callback: () => any) {
+                  $test.events[eventName] = callback;
+                },
               },
             },
           },

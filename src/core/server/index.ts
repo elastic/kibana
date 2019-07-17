@@ -87,6 +87,7 @@ export {
 } from './plugins';
 
 export {
+  RawSavedObjectDoc,
   SavedObject,
   SavedObjectAttributes,
   SavedObjectReference,
@@ -103,6 +104,8 @@ export {
   SavedObjectsFindOptions,
   SavedObjectsFindResponse,
   SavedObjectsMigrationVersion,
+  SavedObjectsSchema,
+  SavedObjectsSerializer,
   SavedObjectsService,
   SavedObjectsUpdateOptions,
   SavedObjectsUpdateResponse,

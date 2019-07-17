@@ -241,14 +241,9 @@ export interface ConcreteTaskInstance extends TaskInstance {
   id: string;
 
   /**
-   * The sequence number from the Elaticsearch document.
+   * The saved object version from the Elaticsearch document.
    */
-  sequenceNumber: number;
-
-  /**
-   * The primary term from the Elaticsearch document.
-   */
-  primaryTerm: number;
+  version?: string;
 
   /**
    * The date and time that this task was originally scheduled. This is used
