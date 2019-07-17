@@ -95,7 +95,7 @@ interface BasicTableProps<T, U = T, V = T, W = T, X = T, Y = T, Z = T, AA = T, A
 }
 
 interface BasicTableState {
-  isEmptyTable: boolean;
+  loadingInitial: boolean;
   isPopoverOpen: boolean;
   showInspect: boolean;
 }
@@ -118,7 +118,7 @@ export class LoadMoreTable<T, U, V, W, X, Y, Z, AA, AB> extends React.PureCompon
   BasicTableState
 > {
   public readonly state = {
-    isEmptyTable: this.props.headerCount === -1,
+    loadingInitial: this.props.headerCount === -1,
     isPopoverOpen: false,
     showInspect: false,
   };
@@ -127,10 +127,10 @@ export class LoadMoreTable<T, U, V, W, X, Y, Z, AA, AB> extends React.PureCompon
     props: BasicTableProps<T, U, V, W, X, Y, Z, AA, AB>,
     state: BasicTableState
   ) {
-    if (state.isEmptyTable && props.headerCount >= 0) {
+    if (state.loadingInitial && props.headerCount >= 0) {
       return {
         ...state,
-        isEmptyTable: false,
+        loadingInitial: false,
       };
     }
     return null;
@@ -155,7 +155,7 @@ export class LoadMoreTable<T, U, V, W, X, Y, Z, AA, AB> extends React.PureCompon
       sorting = null,
       updateLimitPagination,
     } = this.props;
-    const { isEmptyTable } = this.state;
+    const { loadingInitial } = this.state;
 
     const button = (
       <EuiButtonEmpty
@@ -192,9 +192,9 @@ export class LoadMoreTable<T, U, V, W, X, Y, Z, AA, AB> extends React.PureCompon
       >
         <HeaderPanel
           id={id}
-          showInspect={!(loading && isEmptyTable) && this.state.showInspect}
+          showInspect={!(loading && loadingInitial) && this.state.showInspect}
           subtitle={
-            !(loading && isEmptyTable) &&
+            !(loading && loadingInitial) &&
             `${i18n.SHOWING}: ${headerCount.toLocaleString()} ${headerUnit}`
           }
           title={headerTitle}
@@ -203,7 +203,7 @@ export class LoadMoreTable<T, U, V, W, X, Y, Z, AA, AB> extends React.PureCompon
           {headerSupplement}
         </HeaderPanel>
 
-        {loading && isEmptyTable ? (
+        {loading && loadingInitial ? (
           <EuiLoadingContent data-test-subj="InitialLoadingPanelLoadMoreTable" lines={10} />
         ) : (
           <>

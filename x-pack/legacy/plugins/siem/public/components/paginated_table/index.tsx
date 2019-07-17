@@ -120,7 +120,7 @@ export const PaginatedTable = memo<SiemTables>(
   }) => {
     const [activePage, setActivePage] = useState(0);
     const [showInspect, setShowInspect] = useState(false);
-    const [isEmptyTable, setEmptyTable] = useState(headerCount === -1);
+    const [loadingInitial, setLoadingInitial] = useState(headerCount === -1);
     const [isPopoverOpen, setPopoverOpen] = useState(false);
     const pageCount = Math.ceil(totalCount / limit);
     const dispatchToaster = useStateToaster()[1];
@@ -159,8 +159,8 @@ export const PaginatedTable = memo<SiemTables>(
       loadPage(newActivePage);
       updateActivePage(newActivePage);
     };
-    if (headerCount >= 0 && isEmptyTable) {
-      setEmptyTable(false);
+    if (headerCount >= 0 && loadingInitial) {
+      setLoadingInitial(false);
     }
 
     const button = (
@@ -200,9 +200,9 @@ export const PaginatedTable = memo<SiemTables>(
       >
         <HeaderPanel
           id={id}
-          showInspect={!(loading && isEmptyTable) && showInspect}
+          showInspect={!(loading && loadingInitial) && showInspect}
           subtitle={
-            !(loading && isEmptyTable) &&
+            !(loading && loadingInitial) &&
             `${i18n.SHOWING}: ${headerCount.toLocaleString()} ${headerUnit}`
           }
           title={headerTitle}
@@ -211,7 +211,7 @@ export const PaginatedTable = memo<SiemTables>(
           {headerSupplement}
         </HeaderPanel>
 
-        {loading && isEmptyTable ? (
+        {loading && loadingInitial ? (
           <EuiLoadingContent data-test-subj="InitialLoadingPanelPaginatedTable" lines={10} />
         ) : (
           <>
