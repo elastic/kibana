@@ -13,8 +13,10 @@ export default function serverLogTest({ getService }: KibanaFunctionalTestDefaul
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
 
-  describe('create server-log action', () => {
+  describe('server-log action', () => {
     after(() => esArchiver.unload('empty_kibana'));
+
+    let serverLogActionId: string;
 
     it('should return 200 when creating a builtin server-log action', async () => {
       const { body: createdAction } = await supertest
@@ -29,6 +31,7 @@ export default function serverLogTest({ getService }: KibanaFunctionalTestDefaul
         })
         .expect(200);
 
+      serverLogActionId = createdAction.id;
       expect(createdAction).to.eql({
         id: createdAction.id,
       });
@@ -51,6 +54,20 @@ export default function serverLogTest({ getService }: KibanaFunctionalTestDefaul
         updated_at: fetchedAction.updated_at,
         version: fetchedAction.version,
       });
+    });
+
+    it('should handle firing the action', async () => {
+      const { body: result } = await supertest
+        .post(`/api/action/${serverLogActionId}/_fire`)
+        .set('kbn-xsrf', 'foo')
+        .send({
+          params: {
+            message: 'message posted by firing an action during a test',
+          },
+        })
+        .expect(200);
+
+      expect(result.status).to.eql('ok');
     });
   });
 }

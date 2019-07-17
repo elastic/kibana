@@ -5,7 +5,7 @@
  */
 
 import React, { FC, useState } from 'react';
-import { EuiTabs, EuiTab } from '@elastic/eui';
+import { EuiTabs, EuiTab, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import chrome from 'ui/chrome';
 
@@ -13,10 +13,6 @@ interface Tab {
   id: string;
   name: any;
   disabled: boolean;
-}
-
-interface TestSubjMap {
-  [key: string]: string;
 }
 
 interface Props {
@@ -71,23 +67,20 @@ function getTabs(disableLinks: boolean): Tab[] {
   ];
 }
 
-const TAB_TEST_SUBJ_MAP: TestSubjMap = {
-  jobs: 'mlTabJobManagement',
-  explorer: 'mlTabAnomalyExplorer',
-  timeseriesexplorer: 'mlTabSingleMetricViewer',
-  data_frames: 'mlTabDataFrames',
-  datavisualizer: 'mlTabDataVisualizer',
-  settings: 'mlTabSettings',
-};
-
-function moveToSelectedTab(selectedTabId: string) {
-  window.location.href = `${chrome.getBasePath()}/app/ml#/${selectedTabId}`;
+enum TAB_TEST_SUBJECT {
+  jobs = 'mlTabJobManagement',
+  explorer = 'mlTabAnomalyExplorer',
+  timeseriesexplorer = 'mlTabSingleMetricViewer',
+  data_frames = 'mlTabDataFrames', // eslint-disable-line
+  datavisualizer = 'mlTabDataVisualizer',
+  settings = 'mlTabSettings',
 }
+
+type TAB_TEST_SUBJECTS = keyof typeof TAB_TEST_SUBJECT;
 
 export const Tabs: FC<Props> = ({ tabId, disableLinks }) => {
   const [selectedTabId, setSelectedTabId] = useState(tabId);
   function onSelectedTabChanged(id: string) {
-    moveToSelectedTab(id);
     setSelectedTabId(id);
   }
 
@@ -95,18 +88,26 @@ export const Tabs: FC<Props> = ({ tabId, disableLinks }) => {
 
   return (
     <EuiTabs>
-      {tabs.map((tab: Tab) => (
-        <EuiTab
-          className="mlNavigationMenu__tab"
-          onClick={() => onSelectedTabChanged(tab.id)}
-          isSelected={tab.id === selectedTabId}
-          disabled={tab.disabled}
-          key={`${tab.id}-key`}
-          data-test-subj={TAB_TEST_SUBJ_MAP[tab.id]}
-        >
-          {tab.name}
-        </EuiTab>
-      ))}
+      {tabs.map((tab: Tab) => {
+        const id = tab.id;
+        return (
+          <EuiLink
+            data-test-subj={TAB_TEST_SUBJECT[id as TAB_TEST_SUBJECTS]}
+            href={`${chrome.getBasePath()}/app/ml#/${id}`}
+            key={`${id}-key`}
+            color="text"
+          >
+            <EuiTab
+              className="mlNavigationMenu__tab"
+              onClick={() => onSelectedTabChanged(id)}
+              isSelected={id === selectedTabId}
+              disabled={tab.disabled}
+            >
+              {tab.name}
+            </EuiTab>
+          </EuiLink>
+        );
+      })}
     </EuiTabs>
   );
 };
