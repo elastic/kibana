@@ -14,6 +14,8 @@ import 'uiExports/fieldFormats';
 import 'uiExports/search';
 import 'uiExports/visRequestHandlers';
 import 'uiExports/visResponseHandlers';
+// Used for kibana_context function
+import 'uiExports/savedObjectTypes';
 
 import { render, unmountComponentAtNode } from 'react-dom';
 import { IScope } from 'angular';

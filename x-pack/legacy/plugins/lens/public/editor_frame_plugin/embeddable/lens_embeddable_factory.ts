@@ -6,6 +6,9 @@
 
 import _ from 'lodash';
 import chrome from 'ui/chrome';
+import { data } from '../../../../../../../src/legacy/core_plugins/data/public/setup';
+
+export const indexPatternService = data.indexPatterns.indexPatterns;
 import { capabilities } from 'ui/capabilities';
 import { i18n } from '@kbn/i18n';
 import {
@@ -49,7 +52,6 @@ export class LensEmbeddableFactory extends EmbeddableFactory {
     return capabilities.get().lens.save as boolean;
   }
 
-  // Not supported yet for maps types.
   canCreateNew() {
     return false;
   }
@@ -68,12 +70,23 @@ export class LensEmbeddableFactory extends EmbeddableFactory {
     const store = new SavedObjectIndexStore(chrome.getSavedObjectsClient());
     const savedVis = await store.load(savedObjectId);
 
-    // TODO do I need to pass in edit url stuff?
+    const promises = savedVis.state.datasourceMetaData.filterableIndexPatterns.map(async (indexPatternId) => {
+      try {
+        return await indexPatternService.get(indexPatternId);
+      } catch (error) {
+        // Unable to load index pattern, better to not throw error so map embeddable can render
+        // Error will be surfaced by map embeddable since it too will be unable to locate the index pattern
+        return null;
+      }
+    });
+    const indexPatterns = await Promise.all(promises);
+
     return new LensEmbeddable(
       {
         savedVis,
         editUrl: chrome.addBasePath(getEditPath(savedObjectId)),
         editable: this.isEditable(),
+        indexPatterns
       },
       input,
       parent
@@ -81,8 +94,6 @@ export class LensEmbeddableFactory extends EmbeddableFactory {
   }
 
   async create(input: EmbeddableInput) {
-    // TODO fix this
-    window.location.href = chrome.addBasePath('lens/abc');
     return new ErrorEmbeddable('Lens can only be created from a saved object', input);
   }
 }

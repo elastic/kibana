@@ -40,6 +40,7 @@ export async function save({
       datasourceType: state.datasource.activeId,
       expression: expression ? toExpression(expression) : '',
       state: {
+        datasourceMetaData: datasource.getMetaData(state.datasource.state),
         datasource: datasource.getPersistableState(state.datasource.state),
         visualization: visualization.getPersistableState(state.visualization.state),
       },

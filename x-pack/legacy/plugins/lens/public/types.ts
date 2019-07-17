@@ -43,6 +43,10 @@ export interface DatasourceSuggestion<T = unknown> {
   table: TableSuggestion;
 }
 
+export interface DatasourceMetaData {
+  filterableIndexPatterns: string[];
+}
+
 /**
  * Interface for the datasource registry
  */
@@ -58,6 +62,8 @@ export interface Datasource<T = unknown, P = unknown> {
   renderDataPanel: (domElement: Element, props: DatasourceDataPanelProps<T>) => void;
 
   toExpression: (state: T) => Ast | string | null;
+
+  getMetaData: (state: T) => DatasourceMetaData;
 
   getDatasourceSuggestionsForField: (state: T, field: unknown) => Array<DatasourceSuggestion<T>>;
   getDatasourceSuggestionsFromCurrentState: (state: T) => Array<DatasourceSuggestion<T>>;

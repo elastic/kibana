@@ -266,6 +266,12 @@ export function getIndexPatternDatasource({
 
     toExpression,
 
+    getMetaData(state: IndexPatternPrivateState) {
+      return {
+        filterableIndexPatterns: state.currentIndexPatternId ? [state.currentIndexPatternId] : []
+      };
+    },
+
     renderDataPanel(
       domElement: Element,
       props: DatasourceDataPanelProps<IndexPatternPrivateState>

@@ -10,27 +10,38 @@ import React, { useState, useEffect } from 'react';
 import { I18nContext } from 'ui/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiFlexGroup, EuiFlexItem, EuiText, EuiIcon } from '@elastic/eui';
+import { TimeRange } from 'ui/timefilter/time_history';
+import { Query } from 'src/legacy/core_plugins/data/public';
+import { Filter } from '@kbn/es-query';
 import { ExpressionRenderer } from '../../../../../../../src/legacy/core_plugins/data/public';
+import { prependKibanaContext } from '../../editor_frame_plugin/editor_frame/expression_helpers';
 
 export interface ExpressionWrapperProps {
   ExpressionRenderer: ExpressionRenderer;
   expression: string;
+  context: {
+    timeRange?: TimeRange;
+    query?: Query;
+    filters?: Filter[];
+  };
 }
 
 export function ExpressionWrapper({
   ExpressionRenderer: ExpressionRendererComponent,
   expression,
+  context,
 }: ExpressionWrapperProps) {
   const [expressionError, setExpressionError] = useState<unknown>(undefined);
+  const contextualizedExpression = prependKibanaContext(expression, context);
   useEffect(() => {
     // reset expression error if component attempts to run it again
     if (expressionError) {
       setExpressionError(undefined);
     }
-  }, [expression]);
+  }, [contextualizedExpression]);
   return (
     <I18nContext>
-      {expressionError ? (
+      {contextualizedExpression === null || expressionError ? (
         <EuiFlexGroup direction="column" alignItems="center" justifyContent="center">
           <EuiFlexItem>
             <EuiIcon type="alert" color="danger" />
@@ -47,11 +58,9 @@ export function ExpressionWrapper({
       ) : (
         <ExpressionRendererComponent
           className="lnsExpressionOutput"
-          // TODO get the expression out of the saved vis
-          expression={expression}
+          expression={contextualizedExpression}
           onRenderFailure={(e: unknown) => {
             setExpressionError(e);
-            // TODO error handling
           }}
         />
       )}

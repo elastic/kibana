@@ -5,6 +5,7 @@
  */
 
 import { SavedObjectAttributes } from 'target/types/server';
+import { DatasourceMetaData } from '../types';
 
 export interface Document {
   id?: string;
@@ -14,6 +15,7 @@ export interface Document {
   title: string;
   expression: string;
   state: {
+    datasourceMetaData: DatasourceMetaData;
     datasource: unknown;
     visualization: unknown;
   };
