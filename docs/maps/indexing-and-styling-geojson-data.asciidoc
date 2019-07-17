@@ -1,6 +1,6 @@
 [role="xpack"]
-[[uploading-and-styling-geojson-data]]
-== Uploading & Styling GeoJSON Data
+[[indexing-and-styling-geojson-data]]
+== Indexing & Styling GeoJSON Data
 
 The *Maps* Application makes it easy to import GeoJSON documents into an
 Elasticsearch index using the *Upload GeoJSON vector file* feature.
