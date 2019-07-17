@@ -41,6 +41,10 @@ interface TypeOptions {
   charByChar: boolean;
 }
 
+interface ClearOptions {
+  withJS: boolean;
+}
+
 const RETRY_CLICK_MAX_ATTEMPTS = 3;
 const RETRY_CLICK_RETRY_ON_ERRORS = [
   'ElementClickInterceptedError',
@@ -206,19 +210,23 @@ export class WebElementWrapper {
    * is neither a text INPUT element nor a TEXTAREA element.
    * https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/webdriver_exports_WebElement.html#clear
    *
-   * @return {Promise<void>}
+   * @param {{ withJS: boolean }} options option to clear input with JS: `arguments[0].value=''`
+   * @default { withJS: false }
    */
-  async clearValue() {
-    // https://bugs.chromium.org/p/chromedriver/issues/detail?id=2702
-    // await wrapper.webElement.clear();
+  async clearValue(options: ClearOptions = { withJS: false }) {
     await this.retryCall(async function clearValue(wrapper) {
-      await wrapper.driver.executeScript(`arguments[0].value=''`, wrapper._webElement);
+      if (wrapper.browserType === Browsers.Chrome || options.withJS) {
+        // https://bugs.chromium.org/p/chromedriver/issues/detail?id=2702
+        await wrapper.driver.executeScript(`arguments[0].value=''`, wrapper._webElement);
+      } else {
+        await wrapper._webElement.clear();
+      }
     });
   }
 
   /**
    * Clear the value of this element using Keyboard
-   * @param {{ charByChar: boolean }} options
+   * @param {{ charByChar: boolean }} options to input characters one by one
    * @default { charByChar: false }
    */
   async clearValueWithKeyboard(options: TypeOptions = { charByChar: false }) {
