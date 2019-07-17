@@ -57,13 +57,13 @@ export interface ProxyServiceStart {
 
 export const ProxyConfig = {
   schema: schema.object({
-    updateInterval: schema.number(),
-    timeoutThreshold: schema.maybe(schema.number()),
-    port: schema.number(),
-    maxRetry: schema.number(),
-    cert: schema.string(),
-    key: schema.string(),
-    ca: schema.string(),
+    updateInterval: schema.number({ defaultValue: 1500 }),
+    timeoutThreshold: schema.maybe(schema.number({ defaultValue: 1500 })),
+    port: schema.number({ defaultValue: 5602 }),
+    maxRetry: schema.number({ defaultValue: 0 }),
+    cert: schema.maybe(schema.string()),
+    key: schema.maybe(schema.string()),
+    ca: schema.maybe(schema.string()),
     cipherSuites: schema.arrayOf(schema.string(), {
       defaultValue: cryptoConstants.defaultCoreCipherList.split(':'),
     }),
@@ -76,7 +76,8 @@ export const ProxyConfig = {
 
 export type ProxyPluginType = TypeOf<typeof ProxyConfig.schema>;
 
-export class ProxyService implements Plugin<ProxyServiceSetup, ProxyServiceStart> {
+export class ProxyService
+  implements Plugin<ProxyServiceSetup | undefined, ProxyServiceStart | undefined> {
   public nodeName: string;
   private clusterDocClient: NewClusterDocClient | OldClusterDocClient;
   private port = 0;
@@ -85,6 +86,7 @@ export class ProxyService implements Plugin<ProxyServiceSetup, ProxyServiceStart
   private httpAgent: HTTPAgent = new HTTPAgent({ keepAlive: true });
   private allowUnauthAgent: HTTPAgent = new HTTPAgent({ keepAlive: true });
   private wreck: typeof Wreck = Wreck;
+  private disabled: boolean = false; // if a user doesn't provide SSL configuration, we need to skip running the proxy
   private readonly log: Logger;
   private readonly config$: Observable<ProxyPluginType>;
 
@@ -104,22 +106,27 @@ export class ProxyService implements Plugin<ProxyServiceSetup, ProxyServiceStart
     const config = await this.config$.pipe(first()).toPromise();
     this.setConfig(config);
 
-    const ssl = await this.configureSSL(config);
-    this.wreck = Wreck.defaults({
-      agent: {
-        https: this.httpsAgent,
-        http: this.httpAgent,
-        httpsAllowUnauthorized: this.allowUnauthAgent,
-      },
-    });
+    try {
+      const ssl = await this.configureSSL(config);
+      this.wreck = Wreck.defaults({
+        agent: {
+          https: this.httpsAgent,
+          http: this.httpAgent,
+          httpsAllowUnauthorized: this.allowUnauthAgent,
+        },
+      });
 
-    const httpSetup = await core.http.createNewServer(config.port, ssl);
+      const httpSetup = await core.http.createNewServer(config.port, ssl);
 
-    const setup: ProxyServiceSetup = {
-      httpSetup,
-    };
+      const setup: ProxyServiceSetup = {
+        httpSetup,
+      };
 
-    return setup;
+      return setup;
+    } catch (err) {
+      this.disabled = true;
+      return;
+    }
   }
 
   private async configureSSL(config: ProxyPluginType) {
@@ -127,14 +134,22 @@ export class ProxyService implements Plugin<ProxyServiceSetup, ProxyServiceStart
     let tlsKey;
     let tlsCa;
 
+    if (!config.cert || !config.key) {
+      this.log.warn(
+        'Unable to read SSL cerificate information: configuration was missing cert or key'
+      );
+      throw new Error('You must provide valid paths for cert, key and ca');
+    }
+
+    const tasks = [readFileAsync(config.cert), readFileAsync(config.key)];
+
+    if (config.ca) {
+      tasks.push(readFileAsync(config.ca));
+    }
     try {
-      [tlsCert, tlsKey, tlsCa] = await Promise.all([
-        readFileAsync(config.cert),
-        readFileAsync(config.key),
-        readFileAsync(config.ca),
-      ]);
+      [tlsCert, tlsKey, tlsCa] = await Promise.all(tasks);
     } catch (err) {
-      this.log.fatal('Unable to read SSL cerificate information', err);
+      this.log.warn('Unable to read SSL cerificate information', err);
       throw new Error('You must provide valid paths for cert, key and ca');
     }
 
@@ -164,6 +179,7 @@ export class ProxyService implements Plugin<ProxyServiceSetup, ProxyServiceStart
   }
 
   public async start() {
+    if (this.disabled) return;
     await this.clusterDocClient.start();
     const start: ProxyServiceStart = {
       assignResource: this.assignResource.bind(this),
