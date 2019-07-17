@@ -30,18 +30,16 @@ describe('TopNavMenu', () => {
       run: jest.fn(),
     };
 
-    const clickHandler = jest.fn();
-
-    const component = shallowWithIntl(<TopNavMenuItem {...data} onClick={clickHandler} />);
+    const component = shallowWithIntl(<TopNavMenuItem {...data} />);
     expect(component.prop('isDisabled')).toEqual(false);
 
     const event = { currentTarget: { value: 'a' } };
     component.simulate('click', event);
-    expect(clickHandler).toBeCalledTimes(1);
-    expect(clickHandler).toHaveBeenCalledWith(data.id, data.run, event.currentTarget);
+    expect(data.run).toBeCalledTimes(1);
+    expect(data.run).toHaveBeenCalledWith(event.currentTarget);
 
     component.simulate('click', event);
-    expect(clickHandler).toBeCalledTimes(2);
+    expect(data.run).toBeCalledTimes(2);
   });
 
   it('Should render item with all attributes', () => {
@@ -54,13 +52,12 @@ describe('TopNavMenu', () => {
       run: jest.fn(),
     };
 
-    const clickHandler = jest.fn();
-    const component = shallowWithIntl(<TopNavMenuItem {...data} onClick={clickHandler} />);
+    const component = shallowWithIntl(<TopNavMenuItem {...data} />);
     expect(component.prop('isDisabled')).toEqual(false);
 
     const event = { currentTarget: { value: 'a' } };
     component.simulate('click', event);
-    expect(clickHandler).toHaveBeenCalled();
+    expect(data.run).toHaveBeenCalled();
   });
 
   it('Should render disabled item and it shouldnt be clickable', () => {
@@ -71,14 +68,12 @@ describe('TopNavMenu', () => {
       run: jest.fn(),
     };
 
-    const clickHandler = jest.fn();
-
-    const component = shallowWithIntl(<TopNavMenuItem {...data} onClick={clickHandler} />);
+    const component = shallowWithIntl(<TopNavMenuItem {...data} />);
     expect(component.prop('isDisabled')).toEqual(true);
 
     const event = { currentTarget: { value: 'a' } };
     component.simulate('click', event);
-    expect(clickHandler).toHaveBeenCalledTimes(0);
+    expect(data.run).toHaveBeenCalledTimes(0);
   });
 
   it('Should render item with disable function and it shouldnt be clickable', () => {
@@ -89,13 +84,11 @@ describe('TopNavMenu', () => {
       run: jest.fn(),
     };
 
-    const clickHandler = jest.fn();
-
-    const component = shallowWithIntl(<TopNavMenuItem {...data} onClick={clickHandler} />);
+    const component = shallowWithIntl(<TopNavMenuItem {...data} />);
     expect(component.prop('isDisabled')).toEqual(true);
 
     const event = { currentTarget: { value: 'a' } };
     component.simulate('click', event);
-    expect(clickHandler).toHaveBeenCalledTimes(0);
+    expect(data.run).toHaveBeenCalledTimes(0);
   });
 });

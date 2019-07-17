@@ -208,7 +208,7 @@ function VisEditor(
       defaultMessage: 'Share Visualization',
     }),
     testId: 'shareTopNavButton',
-    run: (menuItem, navController, anchorElement) => {
+    run: (anchorElement) => {
       const hasUnappliedChanges = vis.dirty;
       const hasUnsavedChanges = $appStatus.dirty;
       showShareContextMenu({

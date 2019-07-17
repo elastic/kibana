@@ -17,7 +17,7 @@
  * under the License.
  */
 
-export type TopNavMenuAction = (menuItem: any, navController: any, anchorElement: any) => void;
+export type TopNavMenuAction = (anchorElement: EventTarget) => void;
 
 export interface TopNavMenuData {
   // key is to be deprecated and replaced with ID.

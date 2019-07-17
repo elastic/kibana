@@ -21,7 +21,7 @@ import React from 'react';
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n/react';
-import { TopNavMenuData, TopNavMenuAction } from './top_nav_menu_data';
+import { TopNavMenuData } from './top_nav_menu_data';
 import { TopNavMenuItem } from './top_nav_menu_item';
 import { SearchBar, SearchBarProps } from '../../../../core_plugins/data/public';
 
@@ -52,14 +52,10 @@ export function TopNavMenu(props: Props) {
       }
       return (
         <EuiFlexItem grow={false} key={i}>
-          <TopNavMenuItem onClick={menuItemClickHandler} {...menuItem} />
+          <TopNavMenuItem {...menuItem} />
         </EuiFlexItem>
       );
     });
-  }
-
-  function menuItemClickHandler(key: string, action: TopNavMenuAction, target?: any) {
-    action(null, null, target);
   }
 
   function renderSearchBar() {

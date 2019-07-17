@@ -21,13 +21,9 @@ import { capitalize, isFunction } from 'lodash';
 import React, { MouseEvent } from 'react';
 import { EuiButtonEmpty, EuiToolTip } from '@elastic/eui';
 
-import { TopNavMenuData, TopNavMenuAction } from './top_nav_menu_data';
+import { TopNavMenuData } from './top_nav_menu_data';
 
-interface Props extends TopNavMenuData {
-  onClick: (key: string, action: TopNavMenuAction, target?: EventTarget) => void;
-}
-
-export function TopNavMenuItem(props: Props) {
+export function TopNavMenuItem(props: TopNavMenuData) {
   function isDisabled(): boolean {
     const val = isFunction(props.disableButton) ? props.disableButton() : props.disableButton;
     return val!;
@@ -40,7 +36,7 @@ export function TopNavMenuItem(props: Props) {
 
   function handleClick(e: MouseEvent<HTMLButtonElement>) {
     if (isDisabled()) return;
-    props.onClick(props.id!, props.run, e.currentTarget);
+    props.run(e.currentTarget);
   }
 
   const btn = (

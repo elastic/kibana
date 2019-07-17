@@ -552,7 +552,7 @@ export class DashboardAppController {
        * When de-angularizing this code, please call the underlaying action function
        * directly and not via the top nav object.
        **/
-      navActions[TopNavIds.ADD](null, null, null);
+      navActions[TopNavIds.ADD]();
     };
     $scope.enterEditMode = () => {
       dashboardStateManager.setFullScreenMode(false);
@@ -561,7 +561,7 @@ export class DashboardAppController {
        * When de-angularizing this code, please call the underlaying action function
        * directly and not via the top nav object.
        **/
-      navActions[TopNavIds.ENTER_EDIT_MODE](null, null, null);
+      navActions[TopNavIds.ENTER_EDIT_MODE]();
     };
     const navActions: {
       [key: string]: NavAction;
@@ -651,7 +651,7 @@ export class DashboardAppController {
       }
     };
 
-    navActions[TopNavIds.OPTIONS] = (menuItem, navController, anchorElement) => {
+    navActions[TopNavIds.OPTIONS] = anchorElement => {
       showOptionsPopover({
         anchorElement,
         useMargins: dashboardStateManager.getUseMargins(),
@@ -664,7 +664,7 @@ export class DashboardAppController {
         },
       });
     };
-    navActions[TopNavIds.SHARE] = (menuItem, navController, anchorElement) => {
+    navActions[TopNavIds.SHARE] = anchorElement => {
       showShareContextMenu({
         anchorElement,
         allowEmbed: true,
