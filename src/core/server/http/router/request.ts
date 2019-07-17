@@ -86,11 +86,15 @@ export class KibanaRequest<Params = unknown, Query = unknown, Body = unknown> {
     }
 
     const params =
-      routeSchemas.params === undefined ? {} : routeSchemas.params.validate(req.params);
+      routeSchemas.params === undefined
+        ? {}
+        : routeSchemas.params.validate(req.params, {}, 'params');
 
-    const query = routeSchemas.query === undefined ? {} : routeSchemas.query.validate(req.query);
+    const query =
+      routeSchemas.query === undefined ? {} : routeSchemas.query.validate(req.query, {}, 'query');
 
-    const body = routeSchemas.body === undefined ? {} : routeSchemas.body.validate(req.payload);
+    const body =
+      routeSchemas.body === undefined ? {} : routeSchemas.body.validate(req.payload, {}, 'body');
 
     return { query, params, body };
   }
