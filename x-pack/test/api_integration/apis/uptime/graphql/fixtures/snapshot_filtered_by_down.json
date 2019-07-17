@@ -1,3 +1,10 @@
 {
-  "snapshot": null
+  "snapshot": {
+    "counts": {
+      "down": 2,
+      "mixed": 0,
+      "up": 0,
+      "total": 10
+    }
+  }
 }
