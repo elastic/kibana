@@ -22,7 +22,6 @@ describe('MetricConfigPanel', () => {
 
   function testState(): State {
     return {
-      title: 'Test Metric',
       accessor: 'foo',
     };
   }
@@ -33,32 +32,6 @@ describe('MetricConfigPanel', () => {
       .first()
       .props();
   }
-
-  test('allows editing the chart title', () => {
-    const testSetTitle = (title: string) => {
-      const setState = jest.fn();
-      const component = mount(
-        <MetricConfigPanel
-          dragDropContext={dragDropContext}
-          datasource={mockDatasource()}
-          setState={setState}
-          state={testState()}
-        />
-      );
-
-      (testSubj(component, 'lnsMetric_title').onChange as Function)({ target: { value: title } });
-
-      expect(setState).toHaveBeenCalledTimes(1);
-      return setState.mock.calls[0][0];
-    };
-
-    expect(testSetTitle('Hoi')).toMatchObject({
-      title: 'Hoi',
-    });
-    expect(testSetTitle('There!')).toMatchObject({
-      title: 'There!',
-    });
-  });
 
   test('the value dimension panel only accepts singular numeric operations', () => {
     const datasource = {

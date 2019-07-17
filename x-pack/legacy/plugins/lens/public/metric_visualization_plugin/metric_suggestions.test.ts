@@ -83,7 +83,6 @@ describe('metric_suggestions', () => {
         "score": 1,
         "state": Object {
           "accessor": "bytes",
-          "title": "Avg bytes",
         },
         "title": "Avg bytes",
       }

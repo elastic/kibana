@@ -5,16 +5,15 @@
  */
 
 import { metricVisualization } from './metric_visualization';
-import { DatasourcePublicAPI } from '../types';
 import { State } from './types';
 import { createMockDatasource } from '../editor_frame_plugin/mocks';
 import { generateId } from '../id_generator';
+import { DatasourcePublicAPI } from '../types';
 
 jest.mock('../id_generator');
 
 function exampleState(): State {
   return {
-    title: 'Foo',
     accessor: 'a',
   };
 }
@@ -27,12 +26,9 @@ describe('metric_visualization', () => {
       const initialState = metricVisualization.initialize(mockDatasource.publicAPIMock);
 
       expect(initialState.accessor).toBeDefined();
-      expect(initialState.title).toBeDefined();
-
       expect(initialState).toMatchInlineSnapshot(`
         Object {
           "accessor": "test-id1",
-          "title": "Empty Metric Chart",
         }
       `);
     });
@@ -52,8 +48,19 @@ describe('metric_visualization', () => {
 
   describe('#toExpression', () => {
     it('should map to a valid AST', () => {
-      expect(metricVisualization.toExpression(exampleState(), {} as DatasourcePublicAPI))
-        .toMatchInlineSnapshot(`
+      const datasource: DatasourcePublicAPI = {
+        ...createMockDatasource().publicAPIMock,
+        getOperationForColumnId(_: string) {
+          return {
+            id: 'a',
+            dataType: 'number',
+            isBucketed: false,
+            label: 'shazm',
+          };
+        },
+      };
+
+      expect(metricVisualization.toExpression(exampleState(), datasource)).toMatchInlineSnapshot(`
         Object {
           "chain": Array [
             Object {
@@ -62,7 +69,7 @@ describe('metric_visualization', () => {
                   "a",
                 ],
                 "title": Array [
-                  "Foo",
+                  "shazm",
                 ],
               },
               "function": "lens_metric_chart",

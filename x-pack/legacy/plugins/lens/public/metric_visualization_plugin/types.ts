@@ -6,7 +6,6 @@
 
 export interface MetricConfig {
   accessor: string;
-  title: string;
 }
 
 export type State = MetricConfig;

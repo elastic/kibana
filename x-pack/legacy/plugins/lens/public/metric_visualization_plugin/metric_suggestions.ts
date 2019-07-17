@@ -34,7 +34,6 @@ function getSuggestion(table: TableSuggestion): VisualizationSuggestion<State> {
     datasourceSuggestionId: table.datasourceSuggestionId,
     previewIcon: 'visMetric',
     state: {
-      title,
       accessor: col.columnId,
     },
   };

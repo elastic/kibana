@@ -19,7 +19,6 @@ export const metricVisualization: Visualization<State, PersistableState> = {
   initialize(_, state) {
     return (
       state || {
-        title: 'Empty Metric Chart',
         accessor: generateId(),
       }
     );
@@ -35,17 +34,20 @@ export const metricVisualization: Visualization<State, PersistableState> = {
       domElement
     ),
 
-  toExpression: state => ({
-    type: 'expression',
-    chain: [
-      {
-        type: 'function',
-        function: 'lens_metric_chart',
-        arguments: {
-          title: [state.title],
-          accessor: [state.accessor],
+  toExpression(state, datasource) {
+    const operation = datasource.getOperationForColumnId(state.accessor);
+    return {
+      type: 'expression',
+      chain: [
+        {
+          type: 'function',
+          function: 'lens_metric_chart',
+          arguments: {
+            title: [(operation && operation.label) || ''],
+            accessor: [state.accessor],
+          },
         },
-      },
-    ],
-  }),
+      ],
+    };
+  },
 };
