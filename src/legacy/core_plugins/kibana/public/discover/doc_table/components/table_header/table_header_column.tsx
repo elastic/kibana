@@ -72,7 +72,6 @@ export function TableHeaderColumn({
       testSubject: `docTableRemoveHeader-${name}`,
       tooltip: i18n.translate('kbn.docTable.tableHeader.removeColumnButtonTooltip', {
         defaultMessage: 'Remove Column',
-        values: { columnName: displayName },
       }),
     },
     {
