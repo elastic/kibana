@@ -26,8 +26,8 @@ import './components/table_header';
 import './components/table_row';
 import { dispatchRenderComplete } from 'ui/render_complete';
 import { uiModules } from 'ui/modules';
-import './pager_control';
-import './pager';
+import './components/pager';
+import './lib/pager';
 import { getRequestInspectorStats, getResponseInspectorStats } from 'ui/courier/utils/courier_inspector_utils';
 import { toastNotifications } from 'ui/notify';
 

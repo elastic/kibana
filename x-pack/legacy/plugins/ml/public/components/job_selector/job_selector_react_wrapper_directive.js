@@ -18,16 +18,10 @@ import { BehaviorSubject } from 'rxjs';
 import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml');
 
-
 module
   .directive('mlJobSelectorReactWrapper', function (globalState, config, mlJobSelectService) {
     function link(scope, element, attrs) {
       const { jobIds, selectedGroups } = getSelectedJobIds(globalState);
-      const oldSelectedJobIds = mlJobSelectService.getValue().selection;
-
-      if (jobIds && !(_.isEqual(oldSelectedJobIds, jobIds))) {
-        mlJobSelectService.next({ selection: jobIds, groups: selectedGroups });
-      }
 
       const props = {
         config,
@@ -56,5 +50,18 @@ module
   })
   .service('mlJobSelectService', function (globalState) {
     const { jobIds, selectedGroups } = getSelectedJobIds(globalState);
-    return new BehaviorSubject({ selection: jobIds, groups: selectedGroups, resetSelection: false });
+    const mlJobSelectService = new BehaviorSubject({ selection: jobIds, groups: selectedGroups, resetSelection: false });
+
+    // Subscribe to changes to globalState and trigger
+    // a mlJobSelectService update if the job selection changed.
+    globalState.on('save_with_changes', () => {
+      const { newJobIds, newSelectedGroups } = getSelectedJobIds(globalState);
+      const oldSelectedJobIds = mlJobSelectService.getValue().selection;
+
+      if (newJobIds && !(_.isEqual(oldSelectedJobIds, newJobIds))) {
+        mlJobSelectService.next({ selection: newJobIds, groups: newSelectedGroups });
+      }
+    });
+
+    return mlJobSelectService;
   });
