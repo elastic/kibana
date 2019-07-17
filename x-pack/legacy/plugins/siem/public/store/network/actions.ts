@@ -25,7 +25,7 @@ export const updateTableActivePage = actionCreator<{
   activePage: number;
   networkType: NetworkType;
   tableType: NetworkTableType;
-}>('UPDATE_DNS_LIMIT');
+}>('UPDATE_NETWORK_TABLE_ACTIVE_PAGE');
 
 export const updateDnsLimit = actionCreator<{
   limit: number;
