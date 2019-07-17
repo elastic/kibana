@@ -2,7 +2,7 @@
 
 TypeScript utility types for usage in Kibana.
 
-- This package re-exports everything in [`utility-types`](https://github.com/piotrwitek/utility-types)
+- This package re-exports a subset of the items in [`utility-types`](https://github.com/piotrwitek/utility-types)
 - You can also add more utility types here.
 
 
