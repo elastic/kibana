@@ -13,22 +13,24 @@ import { isFullLicense } from '../../license/check_license';
 import { TopNav } from './top_nav';
 import { Tabs } from './tabs';
 
+const tabSupport = [
+  'jobs',
+  'settings',
+  'data_frames',
+  'datavisualizer',
+  'filedatavisualizer',
+  'timeseriesexplorer',
+  'access-denied',
+  'explorer',
+];
+
 interface Props {
   tabId: string;
 }
 
 export const NavigationMenu: FC<Props> = ({ tabId }) => {
   const disableLinks = isFullLicense() === false;
-
-  const showTabs =
-    tabId === 'jobs' ||
-    tabId === 'settings' ||
-    tabId === 'data_frames' ||
-    tabId === 'datavisualizer' ||
-    tabId === 'filedatavisualizer' ||
-    tabId === 'timeseriesexplorer' ||
-    tabId === 'access-denied' ||
-    tabId === 'explorer';
+  const showTabs = tabSupport.includes(tabId);
 
   return (
     <Fragment>
