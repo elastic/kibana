@@ -20,6 +20,7 @@
     "typescript": "3.5.1"
   },
   "dependencies": {
+    "@babel/plugin-transform-regenerator": "^7.4.5",
     "@kbn/dev-utils": "1.0.0"
   }
 }
