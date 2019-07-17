@@ -22,7 +22,7 @@ import { TopNavMenu } from './top_nav_menu';
 import { TopNavMenuData } from './top_nav_menu_data';
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 
-jest.mock('../../../../core_plugins/data/public', () => {
+jest.mock('../search_bar', () => {
   return {
     SearchBar: () => <div className="searchBar"></div>,
     SearchBarProps: {},
