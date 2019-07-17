@@ -61,7 +61,7 @@ async function attemptToCreateCommand(log: ToolingLog, browserType: Browsers) {
   const attemptId = ++attemptCounter;
   log.debug('[webdriver] Creating session');
 
-  const buildDriverInstance = async () => {
+  const buildDriverInstance = () => {
     switch (browserType) {
       case 'chrome':
         const chromeCapabilities = Capabilities.chrome();
@@ -76,7 +76,13 @@ async function attemptToCreateCommand(log: ToolingLog, browserType: Browsers) {
         if (process.env.TEST_BROWSER_HEADLESS) {
           // Use --disable-gpu to avoid an error from a missing Mesa library, as per
           // See: https://chromium.googlesource.com/chromium/src/+/lkgr/headless/README.md
-          chromeOptions.push('headless', 'disable-gpu');
+          // TODO: Several of these options aren't required for headless mode specifically, they're good for Docker. Need to split them out
+          chromeOptions.push(
+            'headless',
+            'disable-gpu',
+            'disable-dev-shm-usage',
+            'disable-infobars' // Disables "Browser is being run by automation" message
+          );
         }
         chromeCapabilities.set('goog:chromeOptions', {
           w3c: false,
@@ -86,7 +92,12 @@ async function attemptToCreateCommand(log: ToolingLog, browserType: Browsers) {
         return new Builder()
           .forBrowser(browserType)
           .withCapabilities(chromeCapabilities)
-          .setChromeService(new chrome.ServiceBuilder(chromeDriver.path).enableVerboseLogging())
+          .setChromeService(
+            new chrome.ServiceBuilder(chromeDriver.path)
+              .enableVerboseLogging()
+              // .loggingTo('') // TODO need to specify an output file to actually take advantage of verbose logging
+              .addArguments('--whitelisted-ips=127.0.0.1') // TODO this is only needed for docker
+          )
           .build();
       case 'firefox':
         const firefoxOptions = new firefox.Options();
@@ -104,7 +115,7 @@ async function attemptToCreateCommand(log: ToolingLog, browserType: Browsers) {
     }
   };
 
-  const session = await buildDriverInstance();
+  const session = buildDriverInstance();
 
   if (throttleOption === 'true' && browserType === 'chrome') {
     // Only chrome supports this option.
