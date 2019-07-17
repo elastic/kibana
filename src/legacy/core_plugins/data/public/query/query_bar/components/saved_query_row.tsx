@@ -76,18 +76,17 @@ export const SavedQueryRow: FunctionComponent<Props> = ({
     } else {
       rowContent = (
         <Fragment>
-          <EuiFlexGroup>
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty href={''} color="text">
-                {savedQuery.title}
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty onClick={onClearSavedQuery} color="text">
-                <EuiIcon type="crossInACircleFilled" />
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-          </EuiFlexGroup>
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup gutterSize="none">
+              <EuiFlexItem>{savedQuery.title}</EuiFlexItem>
+              <EuiFlexItem>
+                <EuiButtonEmpty onClick={onClearSavedQuery} color="text">
+                  <EuiIcon type="crossInACircleFilled" />
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+
           {showSaveQuery && (
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty data-test-subj="savedQuerySaveAsNew" onClick={onSaveNew}>
@@ -110,11 +109,11 @@ export const SavedQueryRow: FunctionComponent<Props> = ({
 
   if (rowContent) {
     return (
-      <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+      <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" gutterSize="none">
         {rowContent}
       </EuiFlexGroup>
     );
   } else {
-    return <Fragment></Fragment>;
+    return null;
   }
 };

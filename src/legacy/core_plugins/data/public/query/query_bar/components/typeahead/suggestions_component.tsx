@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import { isEmpty } from 'lodash';
 import React, { Component } from 'react';
 import { AutocompleteSuggestion } from 'ui/autocomplete_providers';
 import { SuggestionComponent } from './suggestion_component';
@@ -37,7 +36,7 @@ export class SuggestionsComponent extends Component<Props> {
   private parentNode: HTMLDivElement | null = null;
 
   public render() {
-    if (!this.props.show || isEmpty(this.props.suggestions)) {
+    if (!this.props.show) {
       return null;
     }
 

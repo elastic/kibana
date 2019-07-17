@@ -64,6 +64,9 @@ export const SuggestionComponent: FunctionComponent<Props> = props => {
       ref={props.innerRef}
       id={props.ariaId}
       aria-selected={props.selected}
+      data-test-subj={`autocompleteSuggestion-${
+        props.suggestion.type
+      }-${props.suggestion.text.replace(/\s/g, '-')}`}
     >
       <div className={'kbnSuggestionItem kbnSuggestionItem--' + props.suggestion.type}>
         <div className="kbnSuggestionItem__type">

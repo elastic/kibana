@@ -487,6 +487,22 @@ export class QueryBarInputUI extends Component<Props, State> {
       'showSaveQuery',
     ]);
 
+    const savedQueryRow =
+      this.props.onSave &&
+      this.props.onSaveNew &&
+      this.props.onClearSavedQuery &&
+      this.props.isDirty !== undefined ? (
+        <SavedQueryRow
+          query={this.props.query}
+          savedQuery={this.props.savedQuery}
+          showSaveQuery={this.props.showSaveQuery}
+          onSave={this.props.onSave}
+          onSaveNew={this.props.onSaveNew}
+          isDirty={this.props.isDirty}
+          onClearSavedQuery={this.props.onClearSavedQuery}
+        />
+      ) : null;
+
     return (
       <EuiOutsideClickDetector onOutsideClick={this.onOutsideClick}>
         <div
@@ -555,28 +571,16 @@ export class QueryBarInputUI extends Component<Props, State> {
           </div>
 
           <SuggestionsComponent
-            show={this.state.isSuggestionsVisible}
+            show={
+              this.state.isSuggestionsVisible &&
+              (savedQueryRow !== null || this.state.suggestions.length > 0)
+            }
             suggestions={this.state.suggestions.slice(0, this.state.suggestionLimit)}
             index={this.state.index}
             onClick={this.onClickSuggestion}
             onMouseEnter={this.onMouseEnterSuggestion}
             loadMore={this.increaseLimit}
-            append={
-              this.props.onSave &&
-              this.props.onSaveNew &&
-              this.props.onClearSavedQuery &&
-              this.props.isDirty !== undefined ? (
-                <SavedQueryRow
-                  query={this.props.query}
-                  savedQuery={this.props.savedQuery}
-                  showSaveQuery={this.props.showSaveQuery}
-                  onSave={this.props.onSave}
-                  onSaveNew={this.props.onSaveNew}
-                  isDirty={this.props.isDirty}
-                  onClearSavedQuery={this.props.onClearSavedQuery}
-                />
-              ) : null
-            }
+            append={savedQueryRow}
           />
         </div>
       </EuiOutsideClickDetector>
