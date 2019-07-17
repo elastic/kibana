@@ -26,9 +26,6 @@ export function taskManager(kibana) {
           .description('How often, in milliseconds, the task manager will look for more work.')
           .min(1000)
           .default(3000),
-        index: Joi.string()
-          .description('The name of the index used to store task information.')
-          .default('.kibana_task_manager'),
         max_workers: Joi.number()
           .description('The maximum number of tasks that this Kibana instance will run simultaneously.')
           .min(1) // disable the task manager rather than trying to specify it with 0 workers
