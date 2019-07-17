@@ -74,6 +74,6 @@ export class Collector {
   }
 
   isReady() {
-    throw `isReady() must be implemented in ${this.type} collector`;
+    throw new Error(`isReady() must be implemented in ${this.type} collector`);
   }
 }

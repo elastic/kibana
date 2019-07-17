@@ -192,4 +192,14 @@ export class CollectorSet {
   map(mapFn) {
     return this._collectors.map(mapFn);
   }
+
+  some(someFn) {
+    return this._collectors.some(someFn);
+  }
+
+  async asyncEach(eachFn) {
+    for (const collector of this._collectors) {
+      await eachFn(collector);
+    }
+  }
 }

@@ -45,6 +45,7 @@ export function getOpsStatsCollector(server, kbnServer) {
         ...kbnServer.metrics // latest metrics captured from the ops event listener in src/server/status/index
       };
     },
+    isReady: () => true,
     ignoreForInternalUploader: true, // Ignore this one from internal uploader. A different stats collector is used there.
   });
 }
