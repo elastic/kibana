@@ -236,7 +236,6 @@ function DefaultEditorAggParams({
                 defaultMessage: 'Advanced',
               }
             )}
-            paddingSize="none"
           >
             <EuiSpacer size="m" />
             {params.advanced.map((param: ParamInstance) => {

@@ -248,7 +248,6 @@ function DefaultEditorAgg({
       initialIsOpen={isEditorOpen}
       buttonContent={buttonContent}
       className="visEditorSidebar__section visEditorSidebar__collapsible visEditorSidebar__collapsible--marginBottom"
-      paddingSize="s"
       aria-label={i18n.translate('common.ui.vis.editors.agg.toggleEditorButtonAriaLabel', {
         defaultMessage: 'Toggle {schema} editor',
         values: { schema: agg.schema.title },
