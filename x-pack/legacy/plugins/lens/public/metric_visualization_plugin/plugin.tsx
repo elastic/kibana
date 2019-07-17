@@ -10,8 +10,7 @@ import { metricVisualization } from './metric_visualization';
 import {
   renderersRegistry,
   functionsRegistry,
-  // @ts-ignore untyped dependency
-} from '../../../../../src/legacy/core_plugins/interpreter/public/registries';
+} from '../../../../../../src/legacy/core_plugins/interpreter/public/registries';
 import { ExpressionFunction } from '../../../../../../src/legacy/core_plugins/interpreter/public';
 import { metricChart, metricChartRenderer } from './metric_expression';
 
