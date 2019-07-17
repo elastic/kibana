@@ -88,8 +88,24 @@ function DefaultEditorAggGroup({
   const isAllAggsTouched = isInvalidAggsTouched(aggsState);
 
   useEffect(() => {
+    // when isAllAggsTouched is true, it means that all invalid aggs are touched and we will set ngModel's touched to true
+    // which indicates that Apply button can be changed to Error button (when all invalid ngModels are touched)
     setTouched(isAllAggsTouched);
   }, [isAllAggsTouched]);
+
+  useEffect(() => {
+    // when not all invalid aggs are touched and formIsTouched becomes true, it means that Apply button was clicked.
+    // and in such case we set touched state to true for all aggs
+    if (formIsTouched && !isAllAggsTouched) {
+      Object.keys(aggsState).map(([aggId]) => {
+        setAggsState({
+          type: AGGS_ACTION_KEYS.TOUCHED,
+          payload: true,
+          aggId: Number(aggId),
+        });
+      });
+    }
+  }, [formIsTouched]);
 
   useEffect(() => {
     setValidity(isGroupValid);
@@ -143,9 +159,7 @@ function DefaultEditorAggGroup({
                     aggIndex={index}
                     aggIsTooLow={calcAggIsTooLow(agg, index, group)}
                     dragHandleProps={provided.dragHandleProps}
-                    formIsTouched={
-                      formIsTouched || (aggsState[agg.id] && aggsState[agg.id].touched)
-                    }
+                    formIsTouched={aggsState[agg.id] ? aggsState[agg.id].touched : false}
                     groupName={groupName}
                     isDraggable={stats.count > 1}
                     isLastBucket={index === group.length - 1}
