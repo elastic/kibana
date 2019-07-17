@@ -23,25 +23,21 @@ export default function ({ getPageObjects }) {
 
     beforeEach(async () => {
       await PageObjects.maps.clickAddLayer();
-      // Verify panel page element is open
       const panelOpen = await PageObjects.maps.isLayerAddPanelOpen();
       expect(panelOpen).to.be(true);
-      // Select upload source
+
       await PageObjects.maps.selectGeoJsonUploadSource();
-      // Upload file
       await PageObjects.maps.uploadJsonFileForIndexing(
         path.join(__dirname, FILE_LOAD_DIR, DEFAULT_LOAD_FILE_NAME)
       );
       await PageObjects.maps.waitForLayersToLoad();
-      // Check file upload in TOC
       const layerLoadedInToc = await PageObjects.maps
         .doesLayerExist(IMPORT_FILE_PREVIEW_NAME);
       expect(layerLoadedInToc).to.be(true);
-      // Check file is loaded in file picker
+
       const filePickerLoadedFile = await PageObjects.maps
         .hasFilePickerLoadedFile(DEFAULT_LOAD_FILE_NAME);
       expect(filePickerLoadedFile).to.be(true);
-
     });
 
     afterEach(async () => {
@@ -50,12 +46,10 @@ export default function ({ getPageObjects }) {
 
     it('should close & remove preview layer on clicking "Cancel" after uploading file',
       async () => {
-        // Click cancel
         await PageObjects.maps.cancelLayerAdd();
-        // Verify panel isn't open
         const panelOpen = await PageObjects.maps.isLayerAddPanelOpen();
         expect(panelOpen).to.be(false);
-        // Verify layer has been removed
+
         await PageObjects.maps.waitForLayerDeleted(IMPORT_FILE_PREVIEW_NAME);
         const layerLoadedInToc = await PageObjects.maps.doesLayerExist(IMPORT_FILE_PREVIEW_NAME);
         expect(layerLoadedInToc).to.be(false);
