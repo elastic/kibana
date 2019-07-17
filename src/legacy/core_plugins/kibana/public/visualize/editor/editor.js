@@ -353,21 +353,11 @@ function VisEditor(
 
     $scope.showSearchBarInline = () => {
       // Show inline with menu, if it's only the timepicker \ autorefresh component
-      return ($scope.showQueryBarTimePicker() ||
-              $scope.showAutoRefreshOnly()) &&
-        !$scope.showQueryInput() &&
-        !$scope.showFilterBar();
+      return !$scope.showQueryInput() && !$scope.showFilterBar();
     };
 
     $scope.showFilterBar = () => {
       return vis.type.options.showFilterBar;
-    };
-
-    $scope.showQueryBar = () => {
-      // Show querybar if input or timepicker are required.
-      return $scope.showQueryInput() ||
-            $scope.showQueryBarTimePicker() ||
-            $scope.showAutoRefreshOnly();
     };
 
     $scope.showQueryInput = () => {
@@ -376,10 +366,6 @@ function VisEditor(
 
     $scope.showQueryBarTimePicker = () => {
       return vis.type.options.showTimePicker;
-    };
-
-    $scope.showAutoRefreshOnly = () => {
-      return !$scope.showQueryBarTimePicker();
     };
 
     $scope.timeRange = timefilter.getTime();
