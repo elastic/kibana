@@ -28,11 +28,6 @@ jest.mock('ui/index_patterns', () => {
   return { INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE };
 });
 
-jest.mock('../../../../../../src/legacy/core_plugins/ui_metric/public', () => ({
-  createUiStatsReporter: jest.fn(() => jest.fn()),
-  METRIC_TYPE: require('@kbn/analytics').METRIC_TYPE,
-}));
-
 const { setup } = pageHelpers.home;
 
 describe('<CrossClusterReplicationHome />', () => {

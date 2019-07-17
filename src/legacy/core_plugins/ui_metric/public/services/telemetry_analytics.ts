@@ -33,7 +33,11 @@ export const createUiStatsReporter = (appName: string) => (
   type: UiStatsMetricType,
   events: string | string[],
   count?: number
-) => telemetryReporter.reportUiStats(appName, type, events, count);
+): void => {
+  if (telemetryReporter) {
+    return telemetryReporter.reportUiStats(appName, type, events, count);
+  }
+};
 
 interface AnalyicsReporterConfig {
   localStorage: any;

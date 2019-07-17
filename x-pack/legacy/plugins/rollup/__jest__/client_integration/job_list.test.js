@@ -28,11 +28,6 @@ jest.mock('ui/chrome', () => ({
   }
 }));
 
-jest.mock('../../../../../../src/legacy/core_plugins/ui_metric/public', () => ({
-  createUiStatsReporter: jest.fn(() => jest.fn()),
-  METRIC_TYPE: require('@kbn/analytics').METRIC_TYPE,
-}));
-
 jest.mock('../../public/crud_app/services', () => {
   const services = require.requireActual('../../public/crud_app/services');
   return {

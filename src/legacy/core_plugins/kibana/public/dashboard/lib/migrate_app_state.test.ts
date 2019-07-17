@@ -18,10 +18,6 @@
  */
 
 import '../np_core.test.mocks';
-jest.mock('../../../../ui_metric/public', () => ({
-  createUiStatsReporter: jest.fn(() => jest.fn()),
-  METRIC_TYPE: require('@kbn/analytics').METRIC_TYPE,
-}));
 
 import { SavedDashboardPanel } from '../types';
 import { migrateAppState } from './migrate_app_state';
