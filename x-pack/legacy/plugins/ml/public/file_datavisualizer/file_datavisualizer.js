@@ -6,14 +6,19 @@
 
 import { FileDataVisualizerView } from './components/file_datavisualizer_view';
 
-import React from 'react';
+import React, { Fragment } from 'react';
 import { timefilter } from 'ui/timefilter';
+
+import { NavigationMenu } from '../components/navigation_menu/navigation_menu';
 
 export function FileDataVisualizerPage({ indexPatterns, kibanaConfig }) {
   timefilter.disableTimeRangeSelector();
   timefilter.disableAutoRefreshSelector();
 
   return (
-    <FileDataVisualizerView indexPatterns={indexPatterns} kibanaConfig={kibanaConfig} />
+    <Fragment>
+      <NavigationMenu tabId="datavisualizer" />
+      <FileDataVisualizerView indexPatterns={indexPatterns} kibanaConfig={kibanaConfig} />
+    </Fragment>
   );
 }
