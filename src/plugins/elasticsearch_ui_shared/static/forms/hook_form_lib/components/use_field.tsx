@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 
 import { Form, Field as FieldType, FieldConfig } from '../types';
 import { useField } from '../hooks';
@@ -45,14 +45,16 @@ export const UseField = ({
     config = form.readFieldConfigFromSchema(path);
   }
 
-  const defaultValueOnForm = form.getDefaultValueField(path);
-  const defaultValueProvided = defaultValue;
+  // Read the default value for the field from the "defaultValues" object
+  // provided when initating the form.
+  const defaultValueOnForm = form.__getFieldDefaultValue(path);
 
-  const _defaultValue = config.inputSerializer
-    ? config.inputSerializer(defaultValueProvided, defaultValueOnForm)
-    : typeof defaultValueProvided !== 'undefined'
-    ? defaultValueProvided
-    : defaultValueOnForm;
+  // Read the default value from the props
+  const defaultValueOnProps = defaultValue;
+
+  const _defaultValue = config.deSerializer
+    ? config.deSerializer(defaultValueOnProps || defaultValueOnForm)
+    : defaultValueOnProps || defaultValueOnForm;
 
   // Don't modify the config object
   const configCopy =
@@ -71,6 +73,14 @@ export const UseField = ({
   }
 
   const field = useField(form, path, configCopy);
+
+  // Remove field from form when it is unmounted
+  useEffect(
+    () => () => {
+      form.removeField(path);
+    },
+    []
+  );
 
   // Children prevails over anything else provided.
   if (children) {

@@ -29,6 +29,7 @@ import {
   EuiPanel,
   EuiComboBoxOptionProps,
 } from '@elastic/eui';
+
 import {
   Field as FieldType,
   FIELD_TYPES,
@@ -200,7 +201,7 @@ export const Field = ({ field, fieldProps = {} }: Props) => {
 
   return (
     <EuiFormRow
-      label={field.label}
+      label={field.type !== 'toggle' && field.label}
       helpText={field.helpText}
       error={errorMessage}
       isInvalid={isInvalid}
