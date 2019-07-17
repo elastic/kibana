@@ -14,6 +14,7 @@ import { Home } from '../../Home';
 import { BreadcrumbRoute } from '../ProvideBreadcrumbs';
 import { RouteName } from './route_names';
 import { SettingsList } from '../../Settings/SettingsList';
+import { toQuery } from '../../../shared/Links/url_helpers';
 
 interface RouteParams {
   serviceName: string;
@@ -108,7 +109,10 @@ export const routes: BreadcrumbRoute[] = [
     exact: true,
     path: '/services/:serviceName/transactions/view',
     component: TransactionDetails,
-    breadcrumb: ({ match }) => 'Transaction',
+    breadcrumb: ({ location }) => {
+      const query = toQuery(location.search);
+      return query.transactionName as string;
+    },
     name: RouteName.TRANSACTION_NAME
   },
 
