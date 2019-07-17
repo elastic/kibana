@@ -41,7 +41,6 @@ exports[`DefaultEditorAggParams component should init with the default set of pa
     subAggParams={
       Object {
         "formIsTouched": false,
-        "onAggErrorChanged": [MockFunction],
         "onAggParamsChange": [MockFunction],
         "onAggTypeChange": [MockFunction],
       }
@@ -72,7 +71,6 @@ exports[`DefaultEditorAggParams component should init with the default set of pa
       subAggParams={
         Object {
           "formIsTouched": false,
-          "onAggErrorChanged": [MockFunction],
           "onAggParamsChange": [MockFunction],
           "onAggTypeChange": [MockFunction],
         }
