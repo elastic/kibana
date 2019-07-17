@@ -198,7 +198,7 @@ export const RestoreList: React.FunctionComponent = () => {
 
   return (
     <AuthPrivileges requiredPrivileges="index.*">
-      {({ hasPrivileges, missingPrivileges }) =>
+      {({ hasPrivileges, requiredPrivilegesMissing }) =>
         hasPrivileges ? (
           <section data-test-subj="restoreList">{content}</section>
         ) : (
@@ -215,8 +215,8 @@ export const RestoreList: React.FunctionComponent = () => {
                 defaultMessage="To view snapshot restore status, you must have {privilegesCount,
                   plural, one {this index privilege} other {these index privileges}} for one or more indices: {missingPrivileges}."
                 values={{
-                  missingPrivileges: missingPrivileges.index!.join(', '),
-                  privilegesCount: missingPrivileges.index!.length,
+                  missingPrivileges: requiredPrivilegesMissing.index!.join(', '),
+                  privilegesCount: requiredPrivilegesMissing.index!.length,
                 }}
               />
             }

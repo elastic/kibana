@@ -18,7 +18,7 @@ interface Props {
   children: (childrenProps: {
     isLoading: boolean;
     hasPrivileges: boolean;
-    missingPrivileges: MissingPrivileges;
+    requiredPrivilegesMissing: MissingPrivileges;
   }) => JSX.Element;
 }
 
@@ -30,7 +30,7 @@ const toArray = (value: string | string[]): string[] =>
 export const AuthPrivileges = ({ requiredPrivileges, children }: Props) => {
   const { isLoading, privileges } = useContext(AuthorizationContext);
 
-  const privilegesToArray: Privilege[] = toArray(requiredPrivileges).map(p => {
+  const requiredPrivilegesToArray: Privilege[] = toArray(requiredPrivileges).map(p => {
     const [section, privilege] = p.split('.');
     if (!privilege) {
       // Oh! we forgot to use the dot "." notation.
@@ -41,7 +41,7 @@ export const AuthPrivileges = ({ requiredPrivileges, children }: Props) => {
 
   const hasPrivileges = isLoading
     ? false
-    : privilegesToArray.every(privilege => {
+    : requiredPrivilegesToArray.every(privilege => {
         const [section, requiredPrivilege] = privilege;
         if (!privileges.missingPrivileges[section]) {
           // if the section does not exist in our missingPriviledges, everything is OK
@@ -59,24 +59,22 @@ export const AuthPrivileges = ({ requiredPrivileges, children }: Props) => {
         return !privileges.missingPrivileges[section]!.includes(requiredPrivilege);
       });
 
-  const missingPrivileges = privilegesToArray.reduce(
+  const requiredPrivilegesMissing = requiredPrivilegesToArray.reduce(
     (acc, [section, privilege]) => {
-      let missing: string[] = acc[section] || [];
-
       if (privilege === '*') {
-        missing = privileges.missingPrivileges[section] || [];
+        acc[section] = privileges.missingPrivileges[section] || [];
       } else if (
         privileges.missingPrivileges[section] &&
         privileges.missingPrivileges[section]!.includes(privilege)
       ) {
-        missing.push(privilege);
+        const missing: string[] = acc[section] || [];
+        acc[section] = [...missing, privilege];
       }
 
-      acc[section] = missing;
       return acc;
     },
     {} as MissingPrivileges
   );
 
-  return children({ isLoading, hasPrivileges, missingPrivileges });
+  return children({ isLoading, hasPrivileges, requiredPrivilegesMissing });
 };

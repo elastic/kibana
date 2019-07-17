@@ -37,7 +37,7 @@ export const App: React.FunctionComponent = () => {
     />
   ) : (
     <AuthPrivileges requiredPrivileges="cluster.*">
-      {({ isLoading, hasPrivileges, missingPrivileges }) =>
+      {({ isLoading, hasPrivileges, requiredPrivilegesMissing }) =>
         isLoading ? (
           <SectionLoading>
             <FormattedMessage
@@ -87,8 +87,8 @@ export const App: React.FunctionComponent = () => {
                   defaultMessage="To use Snapshot and Restore, you must have {privilegesCount,
                     plural, one {this cluster privilege} other {these cluster privileges}}: {missingPrivileges}."
                   values={{
-                    missingPrivileges: missingPrivileges.cluster!.join(', '),
-                    privilegesCount: missingPrivileges.cluster!.length,
+                    missingPrivileges: requiredPrivilegesMissing.cluster!.join(', '),
+                    privilegesCount: requiredPrivilegesMissing.cluster!.length,
                   }}
                 />
               }
