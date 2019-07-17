@@ -78,41 +78,36 @@ export async function getTransactionBreakdown({
     }
   };
 
+  const filters = [
+    {
+      term: {
+        [SERVICE_NAME]: {
+          value: serviceName
+        }
+      }
+    },
+    {
+      term: {
+        [TRANSACTION_TYPE]: {
+          value: transactionType
+        }
+      }
+    },
+    { range: rangeFilter(start, end) },
+    ...uiFiltersES
+  ];
+
+  if (transactionName) {
+    filters.push({ term: { [TRANSACTION_NAME]: { value: transactionName } } });
+  }
+
   const params = {
     index: config.get<string>('apm_oss.metricsIndices'),
     body: {
       size: 0,
       query: {
         bool: {
-          must: [
-            {
-              term: {
-                [SERVICE_NAME]: {
-                  value: serviceName
-                }
-              }
-            },
-            {
-              term: {
-                [TRANSACTION_TYPE]: {
-                  value: transactionType
-                }
-              }
-            },
-            { range: rangeFilter(start, end) },
-            ...uiFiltersES,
-            ...(transactionName
-              ? [
-                  {
-                    term: {
-                      [TRANSACTION_NAME]: {
-                        value: transactionName
-                      }
-                    }
-                  }
-                ]
-              : [])
-          ]
+          must: filters
         }
       },
       aggs: {
