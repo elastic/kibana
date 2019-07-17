@@ -6,6 +6,8 @@
 
 import { has } from 'lodash/fp';
 
+import * as i18n from './translations';
+
 export interface MessageBody {
   error?: string;
   message?: string;
@@ -40,12 +42,12 @@ export const throwIfNotOk = async (response: Response): Promise<void> => {
     const body = await parseJsonFromBody(response);
     if (body != null && body.message) {
       if (body.statusCode != null) {
-        throw new ToasterErrors([body.message, `Status Code: ${body.statusCode}`]);
+        throw new ToasterErrors([body.message, `${i18n.STATUS_CODE} ${body.statusCode}`]);
       } else {
         throw new ToasterErrors([body.message]);
       }
     } else {
-      throw new ToasterErrors([`Network Error: ${response.statusText}`]);
+      throw new ToasterErrors([`${i18n.NETWORK_ERROR} ${response.statusText}`]);
     }
   }
 };
@@ -78,7 +80,7 @@ export const throwIfErrorAttached = (
         ...accum,
         dataFeed.error.msg,
         tryParseResponse(dataFeed.error.response),
-        `Status Code: ${dataFeed.error.statusCode}`,
+        `${i18n.STATUS_CODE} ${dataFeed.error.statusCode}`,
       ];
       return accum;
     } else {
