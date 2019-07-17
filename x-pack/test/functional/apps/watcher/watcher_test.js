@@ -49,7 +49,7 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.watcher.deleteWatch(watchID);
       await testSubjects.click('confirmModalConfirmButton');
       await PageObjects.header.waitUntilLoadingHasFinished();
-      retry.try(async () => {
+      await retry.try(async () => {
         const row = await find.byCssSelector('.euiTableRow');
         const cell = await row.findByCssSelector('td:nth-child(1)');
         expect(cell.getVisibleText()).to.equal('No watches to show');
