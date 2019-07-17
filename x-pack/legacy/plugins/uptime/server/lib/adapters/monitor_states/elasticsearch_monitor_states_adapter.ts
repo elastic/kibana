@@ -4,9 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get, set, sortBy } from 'lodash';
+import { get, flatten, set, sortBy } from 'lodash';
 import { DatabaseAdapter } from '../database';
-import { UMMonitorStatesAdapter } from './adapter_types';
+import {
+  UMMonitorStatesAdapter,
+  LegacyMonitorStatesRecentCheckGroupsQueryResult,
+  LegacyMonitorStatesQueryResult,
+} from './adapter_types';
 import {
   MonitorSummary,
   SummaryHistogram,
@@ -22,17 +26,6 @@ const checksSortBy = (check: Check) => [
   get<string>(check, 'monitor.ip'),
 ];
 
-interface LegacyMonitorStatesQueryResult {
-  result: any;
-  statusFilter?: any;
-  afterKey: any | null;
-}
-
-interface LegacyMonitorStatesRecentCheckGroupsQueryResult {
-  checkGroups: string[];
-  afterKey: any | null;
-}
-
 export class ElasticsearchMonitorStatesAdapter implements UMMonitorStatesAdapter {
   constructor(private readonly database: DatabaseAdapter) {
     this.database = database;
@@ -45,98 +38,109 @@ export class ElasticsearchMonitorStatesAdapter implements UMMonitorStatesAdapter
     query: any,
     searchAfter?: any
   ): Promise<LegacyMonitorStatesRecentCheckGroupsQueryResult> {
-    const body = {
-      query: {
-        bool: {
-          filter: [
-            {
-              // We check for summary.up to ensure that the check group
-              // is complete. Summary fields are only present on
-              // completed check groups.
-              exists: {
-                field: 'summary.up',
-              },
-            },
-            query,
-          ],
-        },
-      },
-      sort: [
-        {
-          '@timestamp': 'desc',
-        },
-      ],
-      size: 0,
-      aggs: {
-        monitors: {
-          composite: {
-            size: LEGACY_STATES_QUERY_SIZE,
-            sources: [
+    const checkGroupsById = new Map<string, string[]>();
+    let count = 0;
+    let afterKey: any;
+    while (checkGroupsById.size < 51) {
+      count++;
+      console.log('execution', count, checkGroupsById.size);
+
+      const body = {
+        query: {
+          bool: {
+            filter: [
               {
-                monitor_id: {
-                  terms: {
-                    field: 'monitor.id',
-                  },
+                // We check for summary.up to ensure that the check group
+                // is complete. Summary fields are only present on
+                // completed check groups.
+                exists: {
+                  field: 'summary.up',
                 },
               },
+              query,
             ],
           },
-          aggs: {
-            top: {
-              top_hits: {
-                sort: [
-                  {
-                    '@timestamp': 'desc',
+        },
+        sort: [
+          {
+            '@timestamp': 'desc',
+          },
+        ],
+        size: 0,
+        aggs: {
+          monitors: {
+            composite: {
+              size: 150,
+              sources: [
+                {
+                  monitor_id: {
+                    terms: {
+                      field: 'monitor.id',
+                    },
                   },
-                ],
-                _source: {
-                  includes: ['monitor.check_group', '@timestamp', 'agent.id'],
                 },
-                // The idea here is that we want to get enough documents to get all
-                // possible agent IDs. Doing that in a deterministic way is hard,
-                // but all agent IDs should be represented in the top 50 results in most cases.
-                // There's an edge case here where a user has accidentally configured
-                // two agents to run on different schedules, but that's an issue on the user side.
-                size: 50,
+                {
+                  location: {
+                    terms: {
+                      field: 'observer.geo.name',
+                    },
+                  },
+                },
+              ],
+            },
+            aggs: {
+              top: {
+                top_hits: {
+                  sort: [
+                    {
+                      '@timestamp': 'desc',
+                    },
+                  ],
+                  _source: {
+                    includes: ['monitor.check_group', '@timestamp'],
+                  },
+                  size: 1,
+                },
               },
             },
           },
         },
-      },
-    };
+      };
+      if (searchAfter) {
+        set(body, 'aggs.monitors.composite.after', searchAfter);
+      }
+      const params = {
+        index: INDEX_NAMES.HEARTBEAT,
+        body,
+      };
 
-    if (searchAfter) {
-      set(body, 'aggs.monitors.composite.after', searchAfter);
+      const result = await this.database.search(request, params);
+      afterKey = get<any | null>(result, 'aggregations.monitors.after_key', null);
+      const buckets = get<any>(result, 'aggregations.monitors.buckets', []);
+      let index = 0;
+      while (buckets[index] && checkGroupsById.size < 51) {
+        const id = get<string>(buckets[index], 'key.monitor_id');
+        const checkGroup = get<string>(
+          buckets[index],
+          'top.hits.hits[0]._source.monitor.check_group'
+        );
+        const value = checkGroupsById.get(id);
+        if (!value) {
+          checkGroupsById.set(id, [checkGroup]);
+          // console.log('adding ' + checkGroup + ' to thing');
+        } else if (value.indexOf(checkGroup) < 0) {
+          checkGroupsById.set(id, [...value, checkGroup]);
+        }
+        index++;
+        // console.log('checkgroup size', checkGroupsById.size);
+        // console.log(index);
+        // console.log(buckets[index] === undefined);
+      }
+      // console.log(JSON.stringify(checkGroupsById, null, 2));
     }
 
-    const params = {
-      index: INDEX_NAMES.HEARTBEAT,
-      body,
-    };
-
-    const result = await this.database.search(request, params);
-
-    const checkGroups = result.aggregations.monitors.buckets.flatMap((bucket: any) => {
-      const topHits = get<any[]>(bucket, 'top.hits.hits', []);
-
-      const latestAgentGroup: { [key: string]: { timestamp: string; checkGroup: string } } = {};
-      topHits.forEach(({ _source: source }) => {
-        // We set the agent group to the first thing we see since it's already sorted
-        // by timestamp descending
-        if (!latestAgentGroup[source.agent.id]) {
-          latestAgentGroup[source.agent.id] = {
-            timestamp: source['@timestamp'],
-            checkGroup: source.monitor.check_group,
-          };
-        }
-      });
-
-      return Object.values(latestAgentGroup).map(({ checkGroup }) => checkGroup);
-    });
-
-    const afterKey = get<any | null>(result, 'aggregations.monitors.after_key', null);
     return {
-      checkGroups,
+      checkGroups: flatten(Array.from(checkGroupsById.values())),
       afterKey,
     };
   }
@@ -166,6 +170,7 @@ export class ElasticsearchMonitorStatesAdapter implements UMMonitorStatesAdapter
       searchAfter
     );
 
+    console.log('after key', searchAfter)
     const params = {
       index: INDEX_NAMES.HEARTBEAT,
       body: {
@@ -386,6 +391,7 @@ export class ElasticsearchMonitorStatesAdapter implements UMMonitorStatesAdapter
   ): Promise<MonitorSummary[]> {
     const monitors: any[] = [];
     let searchAfter: any | null = null;
+    let ccc = 0;
     do {
       const { result, statusFilter, afterKey } = await this.runLegacyMonitorStatesQuery(
         request,
@@ -395,7 +401,10 @@ export class ElasticsearchMonitorStatesAdapter implements UMMonitorStatesAdapter
         searchAfter
       );
       monitors.push(...this.getMonitorBuckets(result, statusFilter));
+      console.log('monitors length', monitors.length);
       searchAfter = afterKey;
+      console.log('getstates function', ccc)
+      ccc++;
     } while (searchAfter !== null && monitors.length < LEGACY_STATES_QUERY_SIZE);
 
     const monitorIds: string[] = [];

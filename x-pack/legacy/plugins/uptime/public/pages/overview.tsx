@@ -121,7 +121,7 @@ export const OverviewPage = ({
         <EuiSpacer size="s" />
         <EuiFlexGroup gutterSize="s">
           <EuiFlexItem grow={4}>
-            <Snapshot variables={sharedProps} />
+            {/* <Snapshot variables={sharedProps} /> */}
           </EuiFlexItem>
           <EuiFlexItem grow={8}>
             <SnapshotHistogram
