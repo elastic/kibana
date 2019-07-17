@@ -87,7 +87,7 @@ export const START_JOB_FAILURE = i18n.translate(
 );
 
 export const STOP_JOB_FAILURE = i18n.translate('xpack.siem.containers.errors.stopJobFailureTitle', {
-  defaultMessage: 'stop job failure',
+  defaultMessage: 'Stop job failure',
 });
 
 export const CREATE_JOB_FAILURE = i18n.translate(
