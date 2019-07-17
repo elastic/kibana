@@ -33,7 +33,7 @@ const AnalyzeMenu = () => {
         <a
           data-testid="analyze-dropdown-dashboards"
           className="dropdown-item"
-          href="/kibana7/app/kibana#/dashboards?title=Analyze-Dashboard"
+          href="/kibana7/app/kibana#/dashboards?title=Analyze%20Dashboard"
         >
           Dashboards
         </a>

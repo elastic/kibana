@@ -9,7 +9,7 @@ export const analyzeTab: Tab = {
 export const alarmsTab: Tab = {
   id: 'alarms',
   display: 'Alarms',
-  path: '/kibana7/app/kibana#/dashboards?title=Alarms-Dashboard',
+  path: '/kibana7/app/kibana#/dashboards?title=Alarms%20Dashboard',
   noactive: true,
 };
 
