@@ -345,6 +345,14 @@ export function GisPageProvider({ getService, getPageObjects }) {
       return await testSubjects.exists('layerAddForm');
     }
 
+    async waitForLayerAddPanelClosed() {
+      let layerAddPanelOpen = false;
+      await retry.waitForWithTimeout('Layer add panel closed', 1000, async () => {
+        layerAddPanelOpen = await this.isLayerAddPanelOpen();
+        return !layerAddPanelOpen;
+      });
+    }
+
     async cancelLayerAdd(layerName) {
       log.debug(`Cancel layer add`);
       const cancelExists = await testSubjects.exists('layerAddCancelButton');

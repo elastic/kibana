@@ -20,8 +20,6 @@ export default function ({ getService, getPageObjects }) {
   const indexPoint = async () => await loadFileAndIndex(DEFAULT_LOAD_POINT_FILE_NAME);
 
   async function loadFileAndIndex(loadFileName) {
-    await PageObjects.maps.clickAddLayer();
-    await PageObjects.maps.selectGeoJsonUploadSource();
     log.debug(`Uploading ${loadFileName} for indexing`);
     await PageObjects.maps.uploadJsonFileForIndexing(
       path.join(__dirname, FILE_LOAD_DIR, loadFileName)
@@ -41,8 +39,14 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.maps.openNewMap();
     });
 
+    beforeEach(async () => {
+      await PageObjects.maps.clickAddLayer();
+      await PageObjects.maps.selectGeoJsonUploadSource();
+    });
+
     afterEach(async () => {
       await PageObjects.maps.cancelLayerAdd();
+      await PageObjects.maps.waitForLayerAddPanelClosed();
     });
 
     it('should not activate add layer button until indexing succeeds', async () => {
