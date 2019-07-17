@@ -6,15 +6,18 @@
 
 import { SnapshotConfig, SnapshotConfigEs } from './snapshot';
 
-export interface SlmPolicy {
+export interface SlmPolicyPayload {
   name: string;
-  version: number;
-  modifiedDate: string;
-  modifiedDateMillis: number;
   snapshotName: string;
   schedule: string;
   repository: string;
   config: SnapshotConfig;
+}
+
+export interface SlmPolicy extends SlmPolicyPayload {
+  version: number;
+  modifiedDate: string;
+  modifiedDateMillis: number;
   nextExecution: string;
   nextExecutionMillis: number;
   lastSuccess?: {

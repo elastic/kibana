@@ -15,6 +15,8 @@ class BreadcrumbService {
     repositoryAdd: {},
     repositoryEdit: {},
     restoreSnapshot: {},
+    policyAdd: {},
+    policyEdit: {},
   };
 
   public init(chrome: any, managementBreadcrumb: any): void {
@@ -32,6 +34,12 @@ class BreadcrumbService {
     };
     this.breadcrumbs.restoreSnapshot = {
       text: textService.breadcrumbs.restoreSnapshot,
+    };
+    this.breadcrumbs.policyAdd = {
+      text: textService.breadcrumbs.policyAdd,
+    };
+    this.breadcrumbs.policyEdit = {
+      text: textService.breadcrumbs.policyEdit,
     };
   }
 

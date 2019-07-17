@@ -109,3 +109,4 @@ export const UIM_POLICY_LIST_LOAD = 'policy_list_load';
 export const UIM_POLICY_SHOW_DETAILS_CLICK = 'policy_show_details_click';
 export const UIM_POLICY_DETAIL_PANEL_SUMMARY_TAB = 'policy_detail_panel_summary_tab';
 export const UIM_POLICY_DETAIL_PANEL_HISTORY_TAB = 'policy_detail_panel_last_success_tab';
+export const UIM_POLICY_CREATE = 'policy_create';

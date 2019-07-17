@@ -60,6 +60,12 @@ class TextService {
       restoreSnapshot: i18n.translate('xpack.snapshotRestore.restoreSnapshot.breadcrumbTitle', {
         defaultMessage: 'Restore snapshot',
       }),
+      policyAdd: i18n.translate('xpack.snapshotRestore.addPolicy.breadcrumbTitle', {
+        defaultMessage: 'Add policy',
+      }),
+      policyEdit: i18n.translate('xpack.snapshotRestore.editPolicy.breadcrumbTitle', {
+        defaultMessage: 'Edit policy',
+      }),
     };
   }
 
