@@ -52,6 +52,8 @@ const getAggResultBuckets = (aggConfigs, response, aggWithOtherBucket, key) => {
   for (const i in keyParts) {
     if (keyParts[i]) {
       const responseAggs = _.values(responseAgg);
+      // If you have multi aggs, we cannot just assume the first one is the `other` bucket,
+      // so we need to loop over each agg until we find it.
       for (let aggId = 0; aggId < responseAggs.length; aggId++) {
         const agg = responseAggs[aggId];
         const aggKey = _.keys(responseAgg)[aggId];
@@ -67,7 +69,9 @@ const getAggResultBuckets = (aggConfigs, response, aggWithOtherBucket, key) => {
       }
     }
   }
-  if (responseAgg[aggWithOtherBucket.id]) return responseAgg[aggWithOtherBucket.id].buckets;
+  if (responseAgg[aggWithOtherBucket.id]) {
+    return responseAgg[aggWithOtherBucket.id].buckets;
+  }
   return [];
 };
 
@@ -113,17 +117,11 @@ const getOtherAggTerms = (requestAgg, key, otherAgg) => {
 };
 
 
-const buildOtherBucketAgg = (aggConfigs, aggWithOtherBucket, response) => {
+export const buildOtherBucketAgg = (aggConfigs, aggWithOtherBucket, response) => {
   const bucketAggs = aggConfigs.filter(agg => agg.type.type === AggGroupNames.Buckets);
   const index = bucketAggs.findIndex(agg => agg.id === aggWithOtherBucket.id);
   const aggs = aggConfigs.toDsl();
   const indexPattern = aggWithOtherBucket.params.field.indexPattern;
-
-  const aggBucketResults = response.aggregations[bucketAggs[0].id].buckets.length > 0;
-  if (!aggBucketResults) {
-    // No buckets data in this response
-    return false;
-  }
 
   // create filters aggregation
   const filterAgg = aggConfigs.createAggConfig({
@@ -142,8 +140,15 @@ const buildOtherBucketAgg = (aggConfigs, aggWithOtherBucket, response) => {
     filters: filterAgg.toDsl(),
   };
 
-  // create filters for all parent aggregation buckets
+  let noAggBucketResults = false;
+
+  // recursively create filters for all parent aggregation buckets
   const walkBucketTree = (aggIndex, aggs, aggId, filters, key) => {
+    // make sure there are actually results for the buckets
+    if (aggs[aggId].buckets.length < 1) {
+      noAggBucketResults = true;
+    }
+
     const agg = aggs[aggId];
     const newAggIndex = aggIndex + 1;
     const newAgg = bucketAggs[newAggIndex];
@@ -176,6 +181,11 @@ const buildOtherBucketAgg = (aggConfigs, aggWithOtherBucket, response) => {
   };
   walkBucketTree(0, response.aggregations, bucketAggs[0].id, [], '');
 
+  // bail if there were no bucket results
+  if (noAggBucketResults) {
+    return false;
+  }
+
   return () => {
     return {
       'other-filter': resultAgg
@@ -183,7 +193,7 @@ const buildOtherBucketAgg = (aggConfigs, aggWithOtherBucket, response) => {
   };
 };
 
-const mergeOtherBucketAggResponse = (aggsConfig, response, otherResponse, otherAgg, requestAgg) => {
+export const mergeOtherBucketAggResponse = (aggsConfig, response, otherResponse, otherAgg, requestAgg) => {
   const updatedResponse = _.cloneDeep(response);
   _.each(otherResponse.aggregations['other-filter'].buckets, (bucket, key) => {
     if (!bucket.doc_count) return;
@@ -204,17 +214,11 @@ const mergeOtherBucketAggResponse = (aggsConfig, response, otherResponse, otherA
   return updatedResponse;
 };
 
-const updateMissingBucket = (response, aggConfigs, agg) => {
+export const updateMissingBucket = (response, aggConfigs, agg) => {
   const updatedResponse = _.cloneDeep(response);
   const aggResultBuckets = getAggConfigResultMissingBuckets(updatedResponse.aggregations, agg.id);
   aggResultBuckets.forEach(bucket => {
     bucket.key = '__missing__';
   });
   return updatedResponse;
-};
-
-export {
-  buildOtherBucketAgg,
-  mergeOtherBucketAggResponse,
-  updateMissingBucket,
 };
