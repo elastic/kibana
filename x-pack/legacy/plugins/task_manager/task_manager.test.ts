@@ -129,6 +129,9 @@ describe('TaskManager', () => {
           decorate(...args: any[]) {
             _.set(opts, args.slice(0, -1), _.last(args));
           },
+          kibanaMigrator: {
+            awaitMigration: jest.fn(),
+          },
           plugins: {
             elasticsearch: {
               getCluster() {
