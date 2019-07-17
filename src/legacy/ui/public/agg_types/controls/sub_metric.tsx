@@ -22,11 +22,12 @@ import { EuiFormLabel } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { AggParamEditorProps, DefaultEditorAggParams } from '../../vis/editors/default';
 import { AggConfig } from '../../vis';
+import { AggGroupNames } from '../../vis/editors/default/agg_groups';
 
 function SubMetricParamEditor({
   agg,
   aggParam,
-  responseValueAggs,
+  metricAggs,
   state,
   setValue,
   setValidity,
@@ -42,7 +43,7 @@ function SubMetricParamEditor({
   const type = aggParam.name;
 
   const aggTitle = type === 'customMetric' ? metricTitle : bucketTitle;
-  const aggGroup = type === 'customMetric' ? 'metrics' : 'buckets';
+  const aggGroup = type === 'customMetric' ? AggGroupNames.Metrics : AggGroupNames.Buckets;
 
   useEffect(() => {
     setValue(agg.params[type] || agg.type.params.byName[type].makeAgg(agg));
@@ -63,7 +64,7 @@ function SubMetricParamEditor({
         className="visEditorAgg__subAgg"
         formIsTouched={subAggParams.formIsTouched}
         indexPattern={agg.getIndexPattern()}
-        responseValueAggs={responseValueAggs}
+        metricAggs={metricAggs}
         state={state}
         onAggParamsChange={(...rest) => {
           // to force update when sub-agg params are changed
@@ -71,7 +72,6 @@ function SubMetricParamEditor({
           subAggParams.onAggParamsChange(...rest);
         }}
         onAggTypeChange={subAggParams.onAggTypeChange}
-        onAggErrorChanged={subAggParams.onAggErrorChanged}
         setValidity={setValidity}
         setTouched={setTouched}
       />
