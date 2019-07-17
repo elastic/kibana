@@ -163,7 +163,7 @@ app.controller('timelion', function (
   function getTopNavMenu() {
 
     const newSheetAction = {
-      key: 'new',
+      id: 'new',
       label: i18n.translate('timelion.topNavMenu.newSheetButtonLabel', {
         defaultMessage: 'New',
       }),
@@ -175,7 +175,7 @@ app.controller('timelion', function (
     };
 
     const addSheetAction = {
-      key: 'add',
+      id: 'add',
       label: i18n.translate('timelion.topNavMenu.addChartButtonLabel', {
         defaultMessage: 'Add',
       }),
@@ -189,7 +189,7 @@ app.controller('timelion', function (
     };
 
     const saveSheetAction = {
-      key: 'save',
+      id: 'save',
       label: i18n.translate('timelion.topNavMenu.saveSheetButtonLabel', {
         defaultMessage: 'Save',
       }),
@@ -203,7 +203,7 @@ app.controller('timelion', function (
     };
 
     const deleteSheetAction = {
-      key: 'delete',
+      id: 'delete',
       label: i18n.translate('timelion.topNavMenu.deleteSheetButtonLabel', {
         defaultMessage: 'Delete',
       }),
@@ -253,7 +253,7 @@ app.controller('timelion', function (
     };
 
     const openSheetAction = {
-      key: 'open',
+      id: 'open',
       label: i18n.translate('timelion.topNavMenu.openSheetButtonLabel', {
         defaultMessage: 'Open',
       }),
@@ -267,7 +267,7 @@ app.controller('timelion', function (
     };
 
     const optionsAction = {
-      key: 'options',
+      id: 'options',
       label: i18n.translate('timelion.topNavMenu.optionsButtonLabel', {
         defaultMessage: 'Options',
       }),
@@ -281,7 +281,7 @@ app.controller('timelion', function (
     };
 
     const helpAction = {
-      key: 'help',
+      id: 'help',
       label: i18n.translate('timelion.topNavMenu.helpButtonLabel', {
         defaultMessage: 'Help',
       }),

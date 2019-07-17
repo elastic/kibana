@@ -32,14 +32,30 @@ type Props = Partial<SearchBarProps> & {
   showSearchBarInline?: boolean;
 };
 
+/*
+ * Top Nav Menu is a convenience wrapper component for:
+ * - Top navigation menu - configured by an array of `TopNavMenuData` objects
+ * - Search Bar - which includes Filter Bar \ Query Input \ Timepicker.
+ *
+ * See SearchBar documentation to learn more about its properties.
+ *
+ **/
+
 export function TopNavMenu(props: Props) {
   function renderItems() {
     if (!props.config) return;
-    return props.config.map((menuItem, i) => (
-      <EuiFlexItem grow={false} key={i}>
-        <TopNavMenuItem data={menuItem} onClick={menuItemClickHandler} />
-      </EuiFlexItem>
-    ));
+    return props.config.map((menuItem, i) => {
+      if (menuItem.key && !menuItem.id) {
+        // Copy key into id, as it's a reserved react propery.
+        // In the future, ID should be used, rather than key.
+        menuItem.id = menuItem.key;
+      }
+      return (
+        <EuiFlexItem grow={false} key={i}>
+          <TopNavMenuItem onClick={menuItemClickHandler} {...menuItem} />
+        </EuiFlexItem>
+      );
+    });
   }
 
   function menuItemClickHandler(key: string, action: TopNavMenuAction, target?: any) {

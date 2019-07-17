@@ -23,24 +23,22 @@ import { TopNavMenuData } from './top_nav_menu_data';
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 
 describe('TopNavMenu', () => {
-  beforeEach(() => {});
-
   it('Should render and click an item', () => {
     const data: TopNavMenuData = {
-      key: 'test',
+      id: 'test',
       label: 'test',
       run: jest.fn(),
     };
 
     const clickHandler = jest.fn();
 
-    const component = shallowWithIntl(<TopNavMenuItem data={data} onClick={clickHandler} />);
-    expect(component).toMatchSnapshot();
+    const component = shallowWithIntl(<TopNavMenuItem {...data} onClick={clickHandler} />);
+    expect(component.prop('isDisabled')).toEqual(false);
 
     const event = { currentTarget: { value: 'a' } };
     component.simulate('click', event);
     expect(clickHandler).toBeCalledTimes(1);
-    expect(clickHandler).toHaveBeenCalledWith(data.key, data.run, event.currentTarget);
+    expect(clickHandler).toHaveBeenCalledWith(data.id, data.run, event.currentTarget);
 
     component.simulate('click', event);
     expect(clickHandler).toBeCalledTimes(2);
@@ -48,7 +46,7 @@ describe('TopNavMenu', () => {
 
   it('Should render item with all attributes', () => {
     const data: TopNavMenuData = {
-      key: 'test',
+      id: 'test',
       label: 'test',
       description: 'description',
       testId: 'test-class-name',
@@ -57,9 +55,8 @@ describe('TopNavMenu', () => {
     };
 
     const clickHandler = jest.fn();
-
-    const component = shallowWithIntl(<TopNavMenuItem data={data} onClick={clickHandler} />);
-    expect(component).toMatchSnapshot();
+    const component = shallowWithIntl(<TopNavMenuItem {...data} onClick={clickHandler} />);
+    expect(component.prop('isDisabled')).toEqual(false);
 
     const event = { currentTarget: { value: 'a' } };
     component.simulate('click', event);
@@ -68,7 +65,7 @@ describe('TopNavMenu', () => {
 
   it('Should render disabled item and it shouldnt be clickable', () => {
     const data: TopNavMenuData = {
-      key: 'test',
+      id: 'test',
       label: 'test',
       disableButton: true,
       run: jest.fn(),
@@ -76,8 +73,8 @@ describe('TopNavMenu', () => {
 
     const clickHandler = jest.fn();
 
-    const component = shallowWithIntl(<TopNavMenuItem data={data} onClick={clickHandler} />);
-    expect(component).toMatchSnapshot();
+    const component = shallowWithIntl(<TopNavMenuItem {...data} onClick={clickHandler} />);
+    expect(component.prop('isDisabled')).toEqual(true);
 
     const event = { currentTarget: { value: 'a' } };
     component.simulate('click', event);
@@ -86,7 +83,7 @@ describe('TopNavMenu', () => {
 
   it('Should render item with disable function and it shouldnt be clickable', () => {
     const data: TopNavMenuData = {
-      key: 'test',
+      id: 'test',
       label: 'test',
       disableButton: () => true,
       run: jest.fn(),
@@ -94,8 +91,8 @@ describe('TopNavMenu', () => {
 
     const clickHandler = jest.fn();
 
-    const component = shallowWithIntl(<TopNavMenuItem data={data} onClick={clickHandler} />);
-    expect(component).toMatchSnapshot();
+    const component = shallowWithIntl(<TopNavMenuItem {...data} onClick={clickHandler} />);
+    expect(component.prop('isDisabled')).toEqual(true);
 
     const event = { currentTarget: { value: 'a' } };
     component.simulate('click', event);

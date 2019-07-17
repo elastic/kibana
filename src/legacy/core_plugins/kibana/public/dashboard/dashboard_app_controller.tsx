@@ -547,12 +547,20 @@ export class DashboardAppController {
 
     $scope.showAddPanel = () => {
       dashboardStateManager.setFullScreenMode(false);
-      // Temp solution for triggering menu click.
+      /*
+       * Temp solution for triggering menu click.
+       * When de-angularizing this code, please call the underlaying action function
+       * directly and not via the top nav object.
+       **/
       navActions[TopNavIds.ADD](null, null, null);
     };
     $scope.enterEditMode = () => {
       dashboardStateManager.setFullScreenMode(false);
-      // Temp solution for triggering menu click.
+      /*
+       * Temp solution for triggering menu click.
+       * When de-angularizing this code, please call the underlaying action function
+       * directly and not via the top nav object.
+       **/
       navActions[TopNavIds.ENTER_EDIT_MODE](null, null, null);
     };
     const navActions: {

@@ -158,15 +158,20 @@ class SearchBarUI extends Component<SearchBarProps, State> {
           defaultMessage: 'Select to show',
         });
 
+    const filterCount = this.getFilterLength();
     const filterTriggerButton = (
       <EuiFilterButton
         onClick={this.toggleFiltersVisible}
         isSelected={this.state.isFiltersVisible}
         hasActiveFilters={this.state.isFiltersVisible}
-        numFilters={this.getFilterLength() ? this.getFilterLength() : undefined}
+        numFilters={filterCount ? this.getFilterLength() : undefined}
         aria-controls="GlobalFilterGroup"
         aria-expanded={!!this.state.isFiltersVisible}
-        title={`${this.getFilterLength()} ${filtersAppliedText} ${clickToShowOrHideText}`}
+        title={
+          filterCount
+            ? `${this.getFilterLength()} ${filtersAppliedText} ${clickToShowOrHideText}`
+            : ''
+        }
       >
         Filters
       </EuiFilterButton>
