@@ -11,11 +11,11 @@ import { LogEntryHighlightsQuery } from '../../../graphql/types';
 import { DependencyError, useApolloClient } from '../../../utils/apollo_context';
 import { LogEntryHighlightsMap } from '../../../utils/log_entry';
 import { useTrackedPromise } from '../../../utils/use_tracked_promise';
-import { logEntryHighlightsQuery } from './log_highlights.gql_query';
+import { logEntryHighlightsQuery } from './log_entry_highlights.gql_query';
 
 export type LogEntryHighlights = LogEntryHighlightsQuery.Query['source']['logEntryHighlights'];
 
-export const useHighlightsFetcher = (
+export const useLogEntryHighlights = (
   sourceId: string,
   sourceVersion: string | undefined,
   startKey: TimeKey | null,

@@ -14,7 +14,7 @@ import { logSummaryHighlightsQuery } from './log_summary_highlights.gql_query';
 
 export type LogSummaryHighlights = LogSummaryHighlightsQuery.Query['source']['logSummaryHighlightsBetween'];
 
-export const useSummaryHighlights = (
+export const useLogSummaryHighlights = (
   sourceId: string,
   sourceVersion: string | undefined,
   start: number | null,
@@ -24,11 +24,11 @@ export const useSummaryHighlights = (
   highlightTerms: string[]
 ) => {
   const apolloClient = useApolloClient();
-  const [summaryHighlights, setSummaryHighlights] = useState<LogSummaryHighlights | undefined>(
-    undefined
-  );
+  const [logSummaryHighlights, setLogSummaryHighlights] = useState<
+    LogSummaryHighlights | undefined
+  >(undefined);
 
-  const [loadSummaryHighlightsRequest, loadSummaryHighlights] = useTrackedPromise(
+  const [loadLogSummaryHighlightsRequest, loadLogSummaryHighlights] = useTrackedPromise(
     {
       cancelPreviousOn: 'resolution',
       createPromise: async () => {
@@ -60,30 +60,30 @@ export const useSummaryHighlights = (
         });
       },
       onResolve: response => {
-        setSummaryHighlights(response.data.source.logSummaryHighlightsBetween);
+        setLogSummaryHighlights(response.data.source.logSummaryHighlightsBetween);
       },
     },
     [apolloClient, sourceId, start, end, bucketSize, filterQuery, highlightTerms]
   );
 
-  const debouncedLoadSummaryHighlights = useMemo(() => debounce(loadSummaryHighlights, 275), [
-    loadSummaryHighlights,
+  const debouncedLoadSummaryHighlights = useMemo(() => debounce(loadLogSummaryHighlights, 275), [
+    loadLogSummaryHighlights,
   ]);
 
   useEffect(() => {
-    setSummaryHighlights(undefined);
+    setLogSummaryHighlights(undefined);
   }, [highlightTerms]);
 
   useEffect(() => {
     if (highlightTerms.filter(highlightTerm => highlightTerm.length > 0).length && start && end) {
       debouncedLoadSummaryHighlights();
     } else {
-      setSummaryHighlights(undefined);
+      setLogSummaryHighlights(undefined);
     }
   }, [highlightTerms, start, end, bucketSize, filterQuery, sourceVersion]);
 
   return {
-    summaryHighlights,
-    loadSummaryHighlightsRequest,
+    logSummaryHighlights,
+    loadLogSummaryHighlightsRequest,
   };
 };
