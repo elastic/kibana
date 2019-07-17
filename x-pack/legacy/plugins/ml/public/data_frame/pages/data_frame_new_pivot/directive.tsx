@@ -34,7 +34,6 @@ module.directive('mlNewDataFrame', ($injector: InjectorService) => {
     scope: {},
     restrict: 'E',
     link: (scope: ng.IScope, element: ng.IAugmentedJQuery) => {
-      const config = $injector.get<any>('config');
       const indexPatterns = $injector.get('indexPatterns');
       const kbnBaseUrl = $injector.get<string>('kbnBaseUrl');
       const kibanaConfig = $injector.get('config');
@@ -58,7 +57,7 @@ module.directive('mlNewDataFrame', ($injector: InjectorService) => {
       ReactDOM.render(
         <I18nContext>
           <KibanaContext.Provider value={kibanaContext}>
-            {React.createElement(Page, { dateFormat: config.get('dateFormat') })}
+            {React.createElement(Page)}
           </KibanaContext.Provider>
         </I18nContext>,
         element[0]

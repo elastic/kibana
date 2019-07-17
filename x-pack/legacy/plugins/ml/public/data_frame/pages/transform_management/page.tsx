@@ -29,17 +29,13 @@ import { CreateTransformButton } from './components/create_transform_button';
 import { DataFrameTransformList } from './components/transform_list';
 import { RefreshTransformListButton } from './components/refresh_transform_list_button';
 
-interface PageProps {
-  dateFormat: string;
-}
-
-export const Page: FC<PageProps> = ({ dateFormat }) => {
+export const Page: FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const { refresh } = useRefreshTransformList({ isLoading: setIsLoading });
 
   return (
     <Fragment>
-      <NavigationMenu dateFormat={dateFormat} tabId="data_frames" />
+      <NavigationMenu tabId="data_frames" />
       <EuiPage data-test-subj="mlPageDataFrame">
         <EuiPageBody>
           <EuiPageContentHeader>

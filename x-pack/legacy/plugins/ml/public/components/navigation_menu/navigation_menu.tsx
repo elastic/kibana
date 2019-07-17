@@ -14,16 +14,13 @@ import { TopNav } from './top_nav';
 import { Tabs } from './tabs';
 
 interface Props {
-  dateFormat: string;
   tabId: string;
 }
 
-export const NavigationMenu: FC<Props> = ({ dateFormat, tabId }) => {
+export const NavigationMenu: FC<Props> = ({ tabId }) => {
   const disableLinks = isFullLicense() === false;
 
-  let showTabs = false;
-
-  if (
+  const showTabs =
     tabId === 'jobs' ||
     tabId === 'settings' ||
     tabId === 'data_frames' ||
@@ -31,16 +28,13 @@ export const NavigationMenu: FC<Props> = ({ dateFormat, tabId }) => {
     tabId === 'filedatavisualizer' ||
     tabId === 'timeseriesexplorer' ||
     tabId === 'access-denied' ||
-    tabId === 'explorer'
-  ) {
-    showTabs = true;
-  }
+    tabId === 'explorer';
 
   return (
     <Fragment>
       <EuiFlexGroup justifyContent="flexEnd" gutterSize="xs">
         <EuiFlexItem grow={false}>
-          <TopNav dateFormat={dateFormat} />
+          <TopNav />
         </EuiFlexItem>
       </EuiFlexGroup>
       {showTabs && <Tabs tabId={tabId} disableLinks={disableLinks} />}

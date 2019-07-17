@@ -23,13 +23,9 @@ import {
 import { NavigationMenu } from '../../../components/navigation_menu/navigation_menu';
 import { Wizard } from './components/wizard';
 
-interface PageProps {
-  dateFormat: string;
-}
-
-export const Page: FC<PageProps> = ({ dateFormat }) => (
+export const Page: FC = () => (
   <Fragment>
-    <NavigationMenu dateFormat={dateFormat} tabId="new_data_frame" />
+    <NavigationMenu tabId="new_data_frame" />
     <EuiPage>
       <EuiPageBody>
         <EuiPageContentHeader>

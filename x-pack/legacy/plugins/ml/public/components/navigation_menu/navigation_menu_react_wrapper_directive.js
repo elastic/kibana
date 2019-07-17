@@ -13,19 +13,12 @@ const module = uiModules.get('apps/ml');
 
 import 'ui/directives/kbn_href';
 
-module.directive('mlNavMenu', function (config) {
+module.directive('mlNavMenu', function () {
   return {
     restrict: 'E',
     transclude: true,
     link: function (scope, element, attrs) {
-      const { name } = attrs;
-
-      const props = {
-        dateFormat: config.get('dateFormat'),
-        tabId: name,
-      };
-
-      ReactDOM.render(React.createElement(NavigationMenu, props),
+      ReactDOM.render(React.createElement(NavigationMenu, { tabId: attrs.name }),
         element[0]
       );
 

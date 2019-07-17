@@ -33,7 +33,7 @@ interface PageProps {
 }
 export const Page: FC<PageProps> = ({ dateFormat, goToKibana, retry }) => (
   <Fragment>
-    <NavigationMenu dateFormat={dateFormat} tabId="access-denied" />
+    <NavigationMenu tabId="access-denied" />
     <EuiPage>
       <EuiPageBody>
         <EuiPageContentHeader>

@@ -10,11 +10,10 @@ import { TimeRange } from 'src/legacy/ui/public/timefilter/time_history';
 import { timefilter } from 'ui/timefilter';
 import { timeHistory } from 'ui/timefilter/time_history';
 
-import { mlTimefilterRefresh$ } from '../../../services/timefilter_refresh_service';
+import uiChrome from 'ui/chrome';
+const config = uiChrome.getUiSettingsClient();
 
-interface Props {
-  dateFormat: string;
-}
+import { mlTimefilterRefresh$ } from '../../../services/timefilter_refresh_service';
 
 interface Duration {
   start: string;
@@ -30,7 +29,7 @@ function getRecentlyUsedRanges(): Duration[] {
   });
 }
 
-export const TopNav: FC<Props> = ({ dateFormat }) => {
+export const TopNav: FC = () => {
   const [refreshInterval, setRefreshInterval] = useState(timefilter.getRefreshInterval());
   const [time, setTime] = useState(timefilter.getTime());
   const [recentlyUsedRanges, setRecentlyUsedRanges] = useState(getRecentlyUsedRanges());
@@ -104,7 +103,7 @@ export const TopNav: FC<Props> = ({ dateFormat }) => {
             onRefresh={() => mlTimefilterRefresh$.next()}
             onRefreshChange={updateInterval}
             recentlyUsedRanges={recentlyUsedRanges}
-            dateFormat={dateFormat}
+            dateFormat={config.get('dateFormat')}
           />
         </div>
       )}
