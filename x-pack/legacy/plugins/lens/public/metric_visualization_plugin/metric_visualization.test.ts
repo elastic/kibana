@@ -10,6 +10,8 @@ import { State } from './types';
 import { createMockDatasource } from '../editor_frame_plugin/mocks';
 import { generateId } from '../id_generator';
 
+jest.mock('../id_generator');
+
 function exampleState(): State {
   return {
     title: 'Foo',
@@ -21,18 +23,18 @@ describe('metric_visualization', () => {
   describe('#initialize', () => {
     it('loads default state', () => {
       const mockDatasource = createMockDatasource();
-      (generateId as jest.Mock).mockReturnValueOnce('test-id1').mockReturnValueOnce('test-id2');
+      (generateId as jest.Mock).mockReturnValueOnce('test-id1');
       const initialState = metricVisualization.initialize(mockDatasource.publicAPIMock);
 
       expect(initialState.accessor).toBeDefined();
       expect(initialState.title).toBeDefined();
 
       expect(initialState).toMatchInlineSnapshot(`
-Object {
-  "accessor": "test-id2",
-  "title": "Empty Metric Chart",
-}
-`);
+        Object {
+          "accessor": "test-id1",
+          "title": "Empty Metric Chart",
+        }
+      `);
     });
 
     it('loads from persisted state', () => {
@@ -52,24 +54,24 @@ Object {
     it('should map to a valid AST', () => {
       expect(metricVisualization.toExpression(exampleState(), {} as DatasourcePublicAPI))
         .toMatchInlineSnapshot(`
-Object {
-  "chain": Array [
-    Object {
-      "arguments": Object {
-        "accessor": Array [
-          "a",
-        ],
-        "title": Array [
-          "Foo",
-        ],
-      },
-      "function": "lens_metric_chart",
-      "type": "function",
-    },
-  ],
-  "type": "expression",
-}
-`);
+        Object {
+          "chain": Array [
+            Object {
+              "arguments": Object {
+                "accessor": Array [
+                  "a",
+                ],
+                "title": Array [
+                  "Foo",
+                ],
+              },
+              "function": "lens_metric_chart",
+              "type": "function",
+            },
+          ],
+          "type": "expression",
+        }
+      `);
     });
   });
 });
