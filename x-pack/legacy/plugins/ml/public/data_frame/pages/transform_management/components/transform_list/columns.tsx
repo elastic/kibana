@@ -22,6 +22,7 @@ import {
   DATA_FRAME_TASK_STATE,
   DataFrameTransformListColumn,
   DataFrameTransformListRow,
+  DataFrameTransformState,
 } from './common';
 import { getActions } from './actions';
 
@@ -30,6 +31,29 @@ enum TASK_STATE_COLOR {
   started = 'primary',
   stopped = 'hollow',
 }
+
+export const getTaskStateBadge = (
+  state: DataFrameTransformState['task_state'],
+  reason?: DataFrameTransformState['reason']
+) => {
+  const color = TASK_STATE_COLOR[state];
+
+  if (state === DATA_FRAME_TASK_STATE.FAILED && reason !== undefined) {
+    return (
+      <EuiToolTip content={reason}>
+        <EuiBadge className="mlTaskStateBadge" color={color}>
+          {state}
+        </EuiBadge>
+      </EuiToolTip>
+    );
+  }
+
+  return (
+    <EuiBadge className="mlTaskStateBadge" color={color}>
+      {state}
+    </EuiBadge>
+  );
+};
 
 export const getColumns = (
   expandedRowItemIds: DataFrameTransformId[],
@@ -104,17 +128,7 @@ export const getColumns = (
       sortable: (item: DataFrameTransformListRow) => item.state.task_state,
       truncateText: true,
       render(item: DataFrameTransformListRow) {
-        const color = TASK_STATE_COLOR[item.state.task_state];
-
-        if (item.state.task_state === DATA_FRAME_TASK_STATE.FAILED) {
-          return (
-            <EuiToolTip content={item.state.reason}>
-              <EuiBadge color={color}>{item.state.task_state}</EuiBadge>
-            </EuiToolTip>
-          );
-        }
-
-        return <EuiBadge color={color}>{item.state.task_state}</EuiBadge>;
+        return getTaskStateBadge(item.state.task_state, item.state.reason);
       },
       width: '100px',
     },

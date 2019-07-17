@@ -16,11 +16,13 @@ import {
   useRefreshTransformList,
 } from '../../../../common';
 import { checkPermission } from '../../../../../privilege/check_privilege';
+import { getTaskStateBadge } from './columns';
 
 import {
   DataFrameTransformListColumn,
   DataFrameTransformListRow,
   ItemIdToExpandedRowMap,
+  DATA_FRAME_TASK_STATE,
 } from './common';
 import { getTransformsFactory } from '../../services/transform_service';
 import { getColumns } from './columns';
@@ -143,6 +145,25 @@ export const DataFrameTransformList: SFC = () => {
     hidePerPageOptions: false,
   };
 
+  const search = {
+    box: {
+      incremental: true,
+    },
+    filters: [
+      {
+        type: 'field_value_selection',
+        field: 'state.task_state',
+        name: i18n.translate('xpack.ml.dataframe.statusFilter', { defaultMessage: 'Status' }),
+        multiSelect: 'or',
+        options: Object.values(DATA_FRAME_TASK_STATE).map(val => ({
+          value: val,
+          name: val,
+          view: getTaskStateBadge(val),
+        })),
+      },
+    ],
+  };
+
   const onTableChange = ({
     page = { index: 0, size: 10 },
     sort = { field: DataFrameTransformListColumn.id, direction: SortDirection.ASC },
@@ -174,6 +195,7 @@ export const DataFrameTransformList: SFC = () => {
         onChange={onTableChange}
         pagination={pagination}
         sorting={sorting}
+        search={search}
         data-test-subj="mlDataFramesTableTransforms"
       />
     </Fragment>
