@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { functionsRegistry } from '../../interpreter/public/registries';
+import { npSetup } from 'ui/new_platform';
 import { visualizations, VisualizationsSetup } from '../../visualizations/public';
 import { DataSetup } from '../../data/public';
 import { LegacyDependenciesPlugin } from './shim';
@@ -31,11 +31,7 @@ export interface VegaPluginSetupDependencies {
 }
 
 export const plugins: Readonly<VegaPluginSetupDependencies> = {
-  data: {
-    expressions: {
-      registerFunction: (fn: any) => functionsRegistry.register(fn),
-    },
-  },
+  data: npSetup.plugins.data,
   visualizations,
 
   // Temporary solution
