@@ -40,7 +40,7 @@ export const createVegaFn = (dependencies) => ({
     },
   },
   async fn(context, args) {
-    const vegaRequestHandler = createVegaRequestHandler(dependencies);
+    const vegaRequestHandler = await createVegaRequestHandler(dependencies);
 
     const response = await vegaRequestHandler({
       timeRange: get(context, 'timeRange', null),

@@ -34,6 +34,9 @@ declare interface Chrome extends ChromeNavLinks {
   helpExtension: HelpExtensionApi;
   addBasePath<T = string>(path: T): T;
   dangerouslyGetActiveInjector(): Promise<IInjector>;
+  veryDangerouslyGetActiveInjector(): IInjector;
+  targetDomElement: HTMLElement | null;
+  waitForBootstrap: Promise<HTMLElement>;
   getBasePath(): string;
   getXsrfToken(): string;
   getKibanaVersion(): string;

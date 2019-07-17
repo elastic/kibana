@@ -23,26 +23,24 @@ import { initVegaLegacyModule } from './vega_legacy_module';
 
 /** @internal */
 export interface LegacyDependenciesPluginSetup {
-  es: any;
-  serviceSettings: any;
+  es: () => Promise<any>;
+  serviceSettings: () => Promise<any>;
 }
 
 export class LegacyDependenciesPlugin implements Plugin<any, any> {
-  public async setup() {
+  public setup() {
     // Init kibana/vega AngularJS module.
     initVegaLegacyModule();
 
-    const $injector = await chrome.dangerouslyGetActiveInjector();
-
     return {
       // Client of Elastic Search.
-      es: $injector.get('es'),
+      es: async () => (await chrome.dangerouslyGetActiveInjector()).get('es'),
 
       // Settings for EMSClient.
       // EMSClient, which currently lives in the tile_map vis,
       //  will probably end up being exposed from the future vis_type_maps plugin,
       //  which would register both the tile_map and the region_map vis plugins.
-      serviceSettings: $injector.get('serviceSettings'),
+      serviceSettings: () => chrome.veryDangerouslyGetActiveInjector().get('serviceSettings'),
     } as LegacyDependenciesPluginSetup;
   }
 

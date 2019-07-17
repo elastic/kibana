@@ -83,7 +83,9 @@ initChromeThemeApi(chrome);
 
 npStart.core.chrome.setAppTitle(chrome.getAppTitle());
 
-const waitForBootstrap = new Promise(resolve => {
+chrome.targetDomElement = null;
+
+chrome.waitForBootstrap = new Promise(resolve => {
   chrome.bootstrap = function (targetDomElement) {
     // import chrome nav controls and hacks now so that they are executed after
     // everything else, can safely import the chrome, and interact with services
@@ -100,6 +102,7 @@ const waitForBootstrap = new Promise(resolve => {
     targetDomElement.setAttribute('ng-class', '{ \'hidden-chrome\': !chrome.getVisible() }');
     targetDomElement.className = 'app-wrapper';
     angular.bootstrap(targetDomElement, ['kibana']);
+    chrome.targetDomElement = targetDomElement;
     resolve(targetDomElement);
   };
 });
@@ -119,11 +122,18 @@ const waitForBootstrap = new Promise(resolve => {
  * tests. Look into 'src/test_utils/public/stub_get_active_injector' for more information.
  */
 chrome.dangerouslyGetActiveInjector = () => {
-  return waitForBootstrap.then((targetDomElement) => {
+  return chrome.waitForBootstrap.then((targetDomElement) => {
     const $injector = angular.element(targetDomElement).injector();
     if (!$injector) {
       return Promise.reject('targetDomElement had no angular context after bootstrapping');
     }
     return $injector;
   });
+};
+
+chrome.veryDangerouslyGetActiveInjector = () => {
+  if (!chrome.targetDomElement) throw new Error('Have not bootstrapped yet.');
+  const $injector = angular.element(chrome.targetDomElement).injector();
+  if (!$injector) throw new Error('targetDomElement had no angular context after bootstrapping');
+  return $injector;
 };
