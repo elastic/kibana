@@ -119,14 +119,14 @@ const xJsonRules = {
   ],
 };
 
-class XJsonHighlightRules {
-  $rules = xJsonRules;
+function XJsonHighlightRules(this: any) {
+  this.$rules = xJsonRules;
 }
 
 oop.inherits(XJsonHighlightRules, JsonHighlightRules);
 
 export function getRules() {
-  const ruleset: any = new XJsonHighlightRules();
+  const ruleset: any = new (XJsonHighlightRules as any)();
   ruleset.embedRules(TextHighlightRules, 'text-', [
     {
       token: 'punctuation.end_triple_quote',
