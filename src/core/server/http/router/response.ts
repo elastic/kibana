@@ -16,19 +16,89 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { IncomingHttpHeaders } from 'http';
+import { Stream } from 'stream';
 
-// TODO Needs _some_ work
-export type StatusCode = 200 | 202 | 204 | 400;
+import { ResponseError } from './response_error';
 
-export class KibanaResponse<T> {
-  constructor(readonly status: StatusCode, readonly payload?: T) {}
+export class KibanaResponse<T extends HttpResponsePayload | ResponseError> {
+  constructor(
+    readonly status: number,
+    readonly payload?: T,
+    readonly options: HttpResponseOptions = {}
+  ) {}
+}
+
+type KnownKeys<T> = {
+  [K in keyof T]: string extends K ? never : number extends K ? never : K;
+} extends { [_ in keyof T]: infer U }
+  ? U
+  : never;
+
+type KnownHeaders = KnownKeys<IncomingHttpHeaders>;
+/**
+ * @public
+ */
+export interface HttpResponseOptions {
+  headers?: { [header in KnownHeaders]?: string | string[] } & {
+    [header: string]: string | string[];
+  };
+}
+
+/**
+ * @public
+ */
+export type HttpResponsePayload = undefined | string | Record<string, any> | Buffer | Stream;
+
+/**
+ * @public
+ */
+export interface CustomResponseOptions extends HttpResponseOptions {
+  statusCode: number;
 }
 
 export const responseFactory = {
-  accepted: <T extends { [key: string]: any }>(payload: T) => new KibanaResponse(202, payload),
-  badRequest: <T extends Error>(err: T) => new KibanaResponse(400, err),
-  noContent: () => new KibanaResponse<void>(204),
-  ok: <T extends { [key: string]: any }>(payload: T) => new KibanaResponse(200, payload),
+  // Success
+  ok: <T extends HttpResponsePayload>(payload: T, options: HttpResponseOptions = {}) =>
+    new KibanaResponse(200, payload, options),
+  accepted: <T extends HttpResponsePayload>(payload?: T, options: HttpResponseOptions = {}) =>
+    new KibanaResponse(202, payload, options),
+  noContent: (options: HttpResponseOptions = {}) => new KibanaResponse(204, undefined, options),
+
+  custom: <T extends HttpResponsePayload | ResponseError>(
+    payload: T,
+    options: CustomResponseOptions
+  ) => {
+    if (!options || !options.statusCode) {
+      throw new Error(`options.statusCode is expected to be set. given options: ${options}`);
+    }
+    const { statusCode: code, ...rest } = options;
+    return new KibanaResponse(code, payload, rest);
+  },
+
+  // Redirection
+  redirected: (url: string, options: HttpResponseOptions = {}) =>
+    new KibanaResponse(302, url, options),
+
+  // Client error
+  badRequest: <T extends ResponseError>(err: T, options: HttpResponseOptions = {}) =>
+    new KibanaResponse(400, err, options),
+  unauthorized: <T extends ResponseError>(err: T, options: HttpResponseOptions = {}) =>
+    new KibanaResponse(401, err, options),
+
+  forbidden: <T extends ResponseError>(err: T, options: HttpResponseOptions = {}) =>
+    new KibanaResponse(403, err, options),
+  notFound: <T extends ResponseError>(err: T, options: HttpResponseOptions = {}) =>
+    new KibanaResponse(404, err, options),
+  conflict: <T extends ResponseError>(err: T, options: HttpResponseOptions = {}) =>
+    new KibanaResponse(409, err, options),
+
+  // Server error
+  internal: <T extends ResponseError>(err: T, options: HttpResponseOptions = {}) =>
+    new KibanaResponse(500, err, options),
 };
 
+/**
+ * @public
+ */
 export type ResponseFactory = typeof responseFactory;
