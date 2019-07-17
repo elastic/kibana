@@ -6,7 +6,7 @@
 
 import React, { Fragment, FC, useContext, useEffect, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
-import { WizardNav } from '../../../../../data_frame/components/wizard_nav';
+import { WizardNav } from '../../../../../data_frame/pages/data_frame_new_pivot/components/wizard_nav';
 import { JobIdInput } from './components/job_id';
 import { JobDescriptionInput } from './components/job_description';
 import { GroupsInput } from './components/groups';

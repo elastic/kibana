@@ -6,7 +6,7 @@
 
 import React, { Fragment, FC, useContext, useState, useEffect } from 'react';
 import { EuiButton, EuiButtonEmpty, EuiHorizontalRule } from '@elastic/eui';
-import { WizardNav } from '../../../../../data_frame/components/wizard_nav';
+import { WizardNav } from '../../../../../data_frame/pages/data_frame_new_pivot/components/wizard_nav';
 import { WIZARD_STEPS, StepProps } from '../step_types';
 import { JobCreatorContext } from '../job_creator_context';
 import { KibanaContext, isKibanaContext } from '../../../../../data_frame/common/kibana_context';
