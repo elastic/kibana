@@ -13,6 +13,8 @@ import { MlCapabilitiesContext } from '../../ml/permissions/ml_capabilities_prov
 import { useStateToaster } from '../../toasters';
 import { errorToToaster } from '../../ml/api/error_to_toaster';
 
+import * as i18n from './translations';
+
 type Return = [boolean, string[]];
 
 export const getSiemJobIdsFromGroupsData = (data: Group[]) =>
@@ -39,7 +41,7 @@ export const useSiemJobs = (refetchData: boolean): Return => {
 
         setSiemJobs(siemJobIds);
       } catch (error) {
-        errorToToaster({ title: 'SIEM job fetch failure', error, dispatchToaster });
+        errorToToaster({ title: i18n.SIEM_JOB_FETCH_FAILURE, error, dispatchToaster });
       }
     }
     setLoading(false);

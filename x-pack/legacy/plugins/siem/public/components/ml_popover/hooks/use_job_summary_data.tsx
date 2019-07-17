@@ -13,6 +13,8 @@ import { MlCapabilitiesContext } from '../../ml/permissions/ml_capabilities_prov
 import { useStateToaster } from '../../toasters';
 import { errorToToaster } from '../../ml/api/error_to_toaster';
 
+import * as i18n from './translations';
+
 type Return = [boolean, Job[] | null];
 
 export const getSiemJobsFromJobsSummary = (data: Job[]) =>
@@ -40,7 +42,7 @@ export const useJobSummaryData = (jobIds: string[] = [], refreshToggle = false):
 
         setJobSummaryData(siemJobs);
       } catch (error) {
-        errorToToaster({ title: 'Use job summary fetch failure', error, dispatchToaster });
+        errorToToaster({ title: i18n.JOB_SUMMARY_FETCH_FAILURE, error, dispatchToaster });
       }
     }
     setLoading(false);

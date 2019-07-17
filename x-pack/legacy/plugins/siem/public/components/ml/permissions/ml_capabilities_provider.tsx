@@ -12,6 +12,8 @@ import { emptyMlCapabilities } from '../empty_ml_capabilities';
 import { errorToToaster } from '../api/error_to_toaster';
 import { useStateToaster } from '../../toasters';
 
+import * as i18n from './translations';
+
 export const MlCapabilitiesContext = React.createContext<MlCapabilities>(emptyMlCapabilities);
 
 export const MlCapabilitiesProvider = React.memo<{ children: JSX.Element }>(({ children }) => {
@@ -25,7 +27,7 @@ export const MlCapabilitiesProvider = React.memo<{ children: JSX.Element }>(({ c
       setCapabilities(mlCapabilities);
     } catch (error) {
       errorToToaster({
-        title: 'Machine learning permissions failure',
+        title: i18n.MACHINE_LEARNING_PERMISSIONS_FAILURE,
         error,
         dispatchToaster,
       });

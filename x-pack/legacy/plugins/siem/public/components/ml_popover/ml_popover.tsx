@@ -111,13 +111,13 @@ export const MlPopover = React.memo(() => {
       try {
         await startDatafeeds([`datafeed-${jobName}`], headers, startTime);
       } catch (error) {
-        errorToToaster({ title: 'Start job failure', error, dispatchToaster });
+        errorToToaster({ title: i18n.START_JOB_FAILURE, error, dispatchToaster });
       }
     } else {
       try {
         await stopDatafeeds([`datafeed-${jobName}`], headers);
       } catch (error) {
-        errorToToaster({ title: 'Stop job failure', error, dispatchToaster });
+        errorToToaster({ title: i18n.STOP_JOB_FAILURE, error, dispatchToaster });
       }
     }
     dispatch({ type: 'refresh' });
@@ -170,7 +170,7 @@ export const MlPopover = React.memo(() => {
           setIsCreatingJobs(false);
           dispatch({ type: 'refresh' });
         } catch (error) {
-          errorToToaster({ title: 'Create job failure', error, dispatchToaster });
+          errorToToaster({ title: i18n.CREATE_JOB_FAILURE, error, dispatchToaster });
           setIsCreatingJobs(false);
         }
       };

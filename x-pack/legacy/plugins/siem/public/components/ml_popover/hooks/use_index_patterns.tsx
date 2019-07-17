@@ -10,6 +10,8 @@ import { KibanaConfigContext } from '../../../lib/adapters/framework/kibana_fram
 import { useStateToaster } from '../../toasters';
 import { errorToToaster } from '../../ml/api/error_to_toaster';
 
+import * as i18n from './translations';
+
 type Return = [boolean, string];
 
 export const useIndexPatterns = (refreshToggle = false): Return => {
@@ -27,7 +29,7 @@ export const useIndexPatterns = (refreshToggle = false): Return => {
       setIndexPattern(data);
       setIsLoading(false);
     } catch (error) {
-      errorToToaster({ title: 'Index pattern fetch failure', error, dispatchToaster });
+      errorToToaster({ title: i18n.INDEX_PATTERN_FETCH_FAILURE, error, dispatchToaster });
       setIsLoading(false);
     }
   };

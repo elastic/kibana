@@ -18,6 +18,8 @@ import { useSiemJobs } from '../../ml_popover/hooks/use_siem_jobs';
 import { useStateToaster } from '../../toasters';
 import { errorToToaster } from '../api/error_to_toaster';
 
+import * as i18n from './translations';
+
 interface Args {
   influencers?: InfluencerInput[];
   endDate: number;
@@ -107,7 +109,7 @@ export const useAnomaliesTableData = ({
         setTableData(data);
         setLoading(false);
       } catch (error) {
-        errorToToaster({ title: 'Anomalies table fetch failure', error, dispatchToaster });
+        errorToToaster({ title: i18n.SIEM_TABLE_FETCH_FAILURE, error, dispatchToaster });
         setLoading(false);
       }
     } else if (!userPermissions) {
