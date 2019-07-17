@@ -18,6 +18,7 @@
 .lnsPageMainContent {
   display: flex;
   overflow: auto;
+  flex-grow: 1;
 }
 
 .lnsSidebar {
