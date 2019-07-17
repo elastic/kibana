@@ -12,6 +12,7 @@ export class AppTestingFrameworkAdapter implements AppFrameworkAdapter {
   public dateFormat?: string;
   public dateFormatTz?: string;
   public indexPattern?: string;
+  public anomalyScore?: number;
   public kbnVersion?: string;
   public scaledDateFormat?: string;
   public timezone?: string;

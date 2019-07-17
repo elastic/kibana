@@ -23,9 +23,9 @@ export const useSiemJobs = (refetchData: boolean): Return => {
   const [loading, setLoading] = useState(true);
   const config = useContext(KibanaConfigContext);
   const capabilities = useContext(MlCapabilitiesContext);
+  const userPermissions = hasMlUserPermissions(capabilities);
 
   const fetchFunc = async () => {
-    const userPermissions = hasMlUserPermissions(capabilities);
     if (userPermissions) {
       const data = await groupsData({
         'kbn-version': config.kbnVersion,
@@ -41,7 +41,7 @@ export const useSiemJobs = (refetchData: boolean): Return => {
   useEffect(() => {
     setLoading(true);
     fetchFunc();
-  }, [refetchData]);
+  }, [refetchData, userPermissions]);
 
   return [loading, siemJobs];
 };

@@ -4,12 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiGlobalToastList, EuiGlobalToastListToast as Toast } from '@elastic/eui';
+import { EuiGlobalToastListToast as Toast, EuiButtonIcon } from '@elastic/eui';
 import copy from 'copy-to-clipboard';
 import * as React from 'react';
 import uuid from 'uuid';
 
 import * as i18n from './translations';
+import { useStateToaster } from '../../components/toasters';
 
 export type OnCopy = ({
   content,
@@ -38,44 +39,9 @@ interface Props {
   toastLifeTimeMs?: number;
 }
 
-interface State {
-  toasts: Toast[];
-}
-
-export class Clipboard extends React.PureComponent<Props, State> {
-  constructor(props: Props) {
-    super(props);
-
-    this.state = {
-      toasts: [],
-    };
-  }
-
-  public render() {
-    const { toastLifeTimeMs = 5000 } = this.props;
-
-    // TODO: 1 error is: Visible, non-interactive elements with click handlers must have at least one keyboard listener
-    // TODO: 2 error is: Elements with the 'button' interactive role must be focusable
-    // TODO: Investigate this error
-    /* eslint-disable */
-    return (
-      <>
-        <div role="button" data-test-subj="clipboard" onClick={this.onClick}>
-          {this.props.children}
-        </div>
-        <EuiGlobalToastList
-          toasts={this.state.toasts}
-          dismissToast={this.removeToast}
-          toastLifeTimeMs={toastLifeTimeMs}
-        />
-      </>
-    );
-    /* eslint-enable */
-  }
-
-  private onClick = (event: React.MouseEvent<HTMLDivElement>) => {
-    const { content, onCopy, titleSummary } = this.props;
-
+export const Clipboard = ({ children, content, onCopy, titleSummary, toastLifeTimeMs }: Props) => {
+  const dispatchToaster = useStateToaster()[1];
+  const onClick = (event: React.MouseEvent<HTMLButtonElement>) => {
     event.preventDefault();
     event.stopPropagation();
 
@@ -86,15 +52,23 @@ export class Clipboard extends React.PureComponent<Props, State> {
     }
 
     if (isSuccess) {
-      this.setState(prevState => ({
-        toasts: [...prevState.toasts, getSuccessToast({ titleSummary })],
-      }));
+      dispatchToaster({
+        type: 'addToaster',
+        toast: { toastLifeTimeMs, ...getSuccessToast({ titleSummary }) },
+      });
     }
   };
 
-  private removeToast = (removedToast: Toast): void => {
-    this.setState(prevState => ({
-      toasts: prevState.toasts.filter(toast => toast.id !== removedToast.id),
-    }));
-  };
-}
+  return (
+    <EuiButtonIcon
+      aria-label={i18n.COPY_TO_THE_CLIPBOARD}
+      color="subdued"
+      data-test-subj="clipboard"
+      iconSize="s"
+      iconType="copyClipboard"
+      onClick={onClick}
+    >
+      {children}
+    </EuiButtonIcon>
+  );
+};
