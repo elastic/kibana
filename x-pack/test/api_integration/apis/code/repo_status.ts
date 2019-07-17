@@ -23,8 +23,7 @@ export default function repoStatusTests({ getService }: KibanaFunctionalTestDefa
   const TEST_REPO = 'github.com/elastic/TypeScript-Node-Starter';
   const TEST_REPO_URL = `https://${TEST_REPO}.git`;
 
-  // FAILING: https://github.com/elastic/kibana/issues/41336
-  describe.skip('repo status', () => {
+  describe('repo status', () => {
     after(async () => {
       await supertest
         .delete(`${DELETE_API}/${TEST_REPO}`)

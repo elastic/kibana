@@ -18,8 +18,7 @@ export default function manageRepositoriesFunctionalTests({
   const log = getService('log');
   const PageObjects = getPageObjects(['common', 'header', 'security', 'code', 'home']);
 
-  // FAILING: https://github.com/elastic/kibana/issues/41337
-  describe.skip('Manage Repositories', () => {
+  describe('Manage Repositories', () => {
     const repositoryListSelector = 'codeRepositoryList codeRepositoryItem';
 
     describe('Manage Repositories', () => {
