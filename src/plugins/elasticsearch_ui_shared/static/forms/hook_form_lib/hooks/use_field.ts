@@ -66,7 +66,7 @@ export const useField = (form: Form, path: string, config: FieldConfig = {}) => 
     errorDisplayDelay = form.options.errorDisplayDelay,
   } = config;
 
-  const { outputSerializer } = config;
+  const { serializer = (value: unknown) => value } = config;
 
   const [value, setStateValue] = useState(
     typeof defaultValue === 'function' ? defaultValue() : defaultValue
@@ -175,7 +175,7 @@ export const useField = (form: Form, path: string, config: FieldConfig = {}) => 
           path,
         });
 
-        if (validationResult && exitOnFail === true) {
+        if (validationResult && exitOnFail !== false) {
           throw validationResult;
         }
       } catch (error) {
@@ -231,7 +231,7 @@ export const useField = (form: Form, path: string, config: FieldConfig = {}) => 
           path,
         });
 
-        if (validationResult && exitOnFail === true) {
+        if (validationResult && exitOnFail !== false) {
           throw validationResult;
         }
       } catch (error) {
@@ -314,7 +314,12 @@ export const useField = (form: Form, path: string, config: FieldConfig = {}) => 
    */
   const setValue: Field['setValue'] = newValue => {
     onValueChange();
-    setStateValue(runFormatters(newValue));
+
+    const formattedValue = runFormatters(newValue);
+    setStateValue(formattedValue);
+
+    // Update the form data observable
+    form.__updateFormDataAt(path, getOutputValue(formattedValue));
   };
 
   /**
@@ -330,8 +335,7 @@ export const useField = (form: Form, path: string, config: FieldConfig = {}) => 
     setValue(newValue);
   };
 
-  const getOutputValue: Field['getOutputValue'] = () =>
-    outputSerializer ? outputSerializer(value) : value;
+  const getOutputValue: Field['getOutputValue'] = (rawValue = value) => serializer(rawValue);
 
   /**
    * As we can have multiple validation types (FIELD, ASYNC, ARRAY_ITEM), this

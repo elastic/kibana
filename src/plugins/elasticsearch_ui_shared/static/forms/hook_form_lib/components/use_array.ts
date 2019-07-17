@@ -37,7 +37,7 @@ interface Row {
 }
 
 export const UseArray = ({ path, form, children }: Props) => {
-  const defaultValues = form.getDefaultValueField(path) as any[];
+  const defaultValues = form.__getFieldDefaultValue(path) as any[];
   const uniqueId = useRef(0);
 
   const getInitialRowsFromValues = (values: any[]): Row[] =>

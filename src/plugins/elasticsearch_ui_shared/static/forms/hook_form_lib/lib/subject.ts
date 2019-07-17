@@ -17,6 +17,33 @@
  * under the License.
  */
 
-export * from './use_field';
-export * from './use_array';
-export * from './form_data_provider';
+type Listener<T> = (value: T) => void;
+
+export interface Subscription {
+  unsubscribe: () => void;
+}
+
+export class Subject<T> {
+  private callbacks: Set<Listener<T>> = new Set();
+  value: T;
+
+  constructor(value: T) {
+    this.value = value;
+  }
+
+  subscribe(fn: Listener<T>): Subscription {
+    this.callbacks.add(fn);
+
+    fn(this.value);
+
+    const unsubscribe = () => this.callbacks.delete(fn);
+    return {
+      unsubscribe,
+    };
+  }
+
+  next(value: T) {
+    this.value = value;
+    this.callbacks.forEach(fn => fn(value));
+  }
+}

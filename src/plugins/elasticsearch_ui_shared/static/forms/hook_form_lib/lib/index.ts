@@ -17,6 +17,4 @@
  * under the License.
  */
 
-export * from './use_field';
-export * from './use_array';
-export * from './form_data_provider';
+export { Subject, Subscription } from './subject';

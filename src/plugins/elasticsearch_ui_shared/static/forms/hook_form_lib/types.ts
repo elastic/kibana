@@ -17,23 +17,27 @@
  * under the License.
  */
 
-import { ChangeEvent, FormEvent, MouseEvent } from 'react';
+import { ChangeEvent, FormEvent, MouseEvent, MutableRefObject } from 'react';
+import { Subject } from './lib';
+
 export interface Form<T = FormData> {
   readonly isSubmitted: boolean;
   readonly isSubmitting: boolean;
   readonly isValid: boolean;
   readonly options: FormOptions;
-  onSubmit: (e: FormEvent<HTMLFormElement> | MouseEvent) => void;
+  onSubmit: (e?: FormEvent<HTMLFormElement> | MouseEvent) => Promise<{ data: T; isValid: boolean }>;
   addField: (field: Field) => void;
   removeField: (fieldNames: string | string[]) => void;
   removeFieldsStartingWith: (pattern: string) => void;
   validateFields: (fieldNames?: string[]) => Promise<boolean>;
-  getFormData: (options?: { unflatten?: boolean }) => T | Record<string, unknown>;
+  getFormData: (options?: { unflatten?: boolean }) => T;
   getFields: () => FieldsMap;
   setFieldValue: (fieldName: string, value: FieldValue) => void;
   setFieldErrors: (fieldName: string, errors: ValidationError[]) => void;
-  getDefaultValueField: (fieldName: string) => unknown;
   readFieldConfigFromSchema: (fieldName: string) => FieldConfig;
+  readonly __formData$: MutableRefObject<Subject<T>>;
+  __updateFormDataAt: (field: string, value: unknown) => T;
+  __getFieldDefaultValue: (fieldName: string) => unknown;
 }
 
 export interface FormSchema<T = FormData> {
@@ -45,9 +49,11 @@ type FormSchemaEntry<T> =
   | { [key: string]: FieldConfig<T> | Array<FieldConfig<T>> | FormSchemaEntry<T> };
 
 export interface FormConfig<T = FormData> {
-  onSubmit: (data: T, isFormValid: boolean) => void;
+  onSubmit?: (data: T, isFormValid: boolean) => void;
   schema?: FormSchema<T>;
-  defaultValues?: Partial<T>;
+  defaultValue?: Partial<T>;
+  serializer?: SerializerFunc<T>;
+  deSerializer?: SerializerFunc;
   options?: FormOptions;
 }
 
@@ -70,7 +76,7 @@ export interface Field {
   readonly isValidating: boolean;
   readonly isUpdating: boolean;
   readonly form: Form;
-  getErrorsMessages: (errorType?: 'field' | string) => string | null;
+  getErrorsMessages: (validationType?: 'field' | string) => string | null;
   onChange: (event: ChangeEvent<{ name?: string; value: string; checked?: boolean }>) => void;
   validate: (validateData?: {
     formData?: any;
@@ -78,7 +84,7 @@ export interface Field {
   }) => FieldValidateResponse | Promise<FieldValidateResponse>;
   setErrors: (errors: ValidationError[]) => void;
   clearErrors: (type?: string | string[]) => void;
-  getOutputValue: () => unknown;
+  getOutputValue: (rawValue?: unknown) => unknown;
   setValue: (value: FieldValue) => void;
 }
 
@@ -91,8 +97,8 @@ export interface FieldConfig<T = FormData> {
   readonly validations?: Array<ValidationConfig<T>>;
   readonly validationsArrayItems?: Array<ValidationConfig<T>>;
   readonly formatters?: FormatterFunc[];
-  readonly inputSerializer?: InputSerializerFunc;
-  readonly outputSerializer?: OutputSerializerFunc;
+  readonly deSerializer?: SerializerFunc;
+  readonly serializer?: SerializerFunc;
   readonly fieldsToValidateOnChange?: string[];
   readonly isValidationAsync?: boolean;
   readonly errorDisplayDelay?: number;
@@ -115,7 +121,7 @@ export type ValidationFunc<T = any> = (data: {
   path: string;
   value: unknown;
   formData: T;
-  errors: ReadonlyArray<ValidationError>;
+  errors: readonly ValidationError[];
 }) => ValidationError | void | undefined | Promise<ValidationError | void | undefined>;
 
 export interface FieldValidateResponse {
@@ -123,14 +129,9 @@ export interface FieldValidateResponse {
   errors: ValidationError[];
 }
 
-export type InputSerializerFunc<T = unknown> = (
-  defaultValue: unknown,
-  formDataValue?: unknown
-) => T;
+export type SerializerFunc<T = unknown> = (value: any) => T;
 
-export type OutputSerializerFunc<T = unknown> = (value: any) => T;
-
-type FormData = Record<string, string>;
+export type FormData = Record<string, unknown>;
 
 type FormatterFunc = (value: any) => unknown;
 

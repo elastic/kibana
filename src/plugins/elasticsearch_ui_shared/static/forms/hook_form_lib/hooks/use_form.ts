@@ -19,21 +19,32 @@
 
 import { useState, useRef } from 'react';
 
-import { Form, FieldConfig, FieldsMap, FormConfig } from '../types';
+import { Form, FormData, FieldConfig, FieldsMap, FormConfig } from '../types';
 import { getAt, mapFormFields, unflattenObject } from '../utils';
+import { Subject } from '../lib';
 
 const DEFAULT_ERROR_DISPLAY_TIMEOUT = 500;
 
 export const useForm = <T = FormData>({
   onSubmit,
   schema,
-  defaultValues = {},
+  defaultValue = {},
+  serializer = (data: any) => data,
+  deSerializer = (data: any) => data,
   options = { errorDisplayDelay: DEFAULT_ERROR_DISPLAY_TIMEOUT, stripEmptyFields: true },
 }: FormConfig<T>): { form: Form<T> } => {
+  const defaultValueDeSerialized =
+    Object.keys(defaultValue).length === 0 ? defaultValue : deSerializer(defaultValue);
   const [isSubmitted, setSubmitted] = useState(false);
   const [isSubmitting, setSubmitting] = useState(false);
   const [isValid, setIsValid] = useState(true);
   const fieldsRefs = useRef<FieldsMap>({});
+
+  // formData$ is an observable we can subscribe to in order to receive live
+  // update of the form data. As an observable it does not trigger any React
+  // render. The <FormDataProvider> component is in charge of reading this observable
+  // and updating its state to trigger the necessary view render.
+  const formData$ = useRef<Subject<T>>(new Subject<T>({} as T));
 
   // -- HELPERS
   // ----------------------------------
@@ -56,7 +67,7 @@ export const useForm = <T = FormData>({
 
   // -- API
   // ----------------------------------
-  const getFormData: Form['getFormData'] = (getDataOptions = { unflatten: true }) =>
+  const getFormData: Form<T>['getFormData'] = (getDataOptions = { unflatten: true }) =>
     getDataOptions.unflatten
       ? (unflattenObject(
           mapFormFields(stripEmptyFields(fieldsRefs.current), field => field.getOutputValue())
@@ -66,8 +77,14 @@ export const useForm = <T = FormData>({
             ...acc,
             [key]: field.getOutputValue(),
           }),
-          {}
+          {} as T
         );
+
+  const updateFormDataAt: Form<T>['__updateFormDataAt'] = (path, value) => {
+    const currentFormData = formData$.current.value;
+    formData$.current.next({ ...currentFormData, [path]: value });
+    return formData$.current.value;
+  };
 
   const validateFields: Form['validateFields'] = async fieldNames => {
     const fieldsToValidate = fieldNames
@@ -88,11 +105,23 @@ export const useForm = <T = FormData>({
 
   const addField: Form['addField'] = field => {
     fieldsRefs.current[field.path] = field;
+
+    // Only update the formData if the path does not exist (= it is the _first_ time
+    // the field is added), to avoid entering an infinite loop when the form is re-rendered.
+    if (!{}.hasOwnProperty.call(formData$.current.value, field.path)) {
+      updateFormDataAt(field.path, field.getOutputValue());
+    }
   };
 
   const removeField: Form['removeField'] = _fieldNames => {
     const fieldNames = Array.isArray(_fieldNames) ? _fieldNames : [_fieldNames];
-    fieldNames.forEach(name => delete fieldsRefs.current[name]);
+    const currentFormData = { ...formData$.current.value } as FormData;
+
+    fieldNames.forEach(name => {
+      delete fieldsRefs.current[name];
+      delete currentFormData[name];
+    });
+    formData$.current.next(currentFormData as T);
 
     // Wait next tick to make sure all the fields have their
     // values updated after the DOM has been updated
@@ -132,8 +161,8 @@ export const useForm = <T = FormData>({
     fieldsRefs.current[fieldName].setErrors(errors);
   };
 
-  const getDefaultValueField: Form['getDefaultValueField'] = fieldName =>
-    getAt(fieldName, defaultValues, false);
+  const getFieldDefaultValue: Form['__getFieldDefaultValue'] = fieldName =>
+    getAt(fieldName, defaultValueDeSerialized, false);
 
   const readFieldConfigFromSchema: Form['readFieldConfigFromSchema'] = fieldName => {
     const config = (getAt(fieldName, schema ? schema : {}, false) as FieldConfig) || {};
@@ -141,34 +170,44 @@ export const useForm = <T = FormData>({
     return config;
   };
 
-  const onSubmitForm: Form['onSubmit'] = async e => {
-    e.preventDefault();
+  const onSubmitForm: Form<T>['onSubmit'] = async e => {
+    if (e) {
+      e.preventDefault();
+    }
 
     setSubmitting(true);
     setSubmitted(true); // User has attempted to submit the form at least once
 
     const isFormValid = await validateFields();
-    await onSubmit(getFormData() as T, isFormValid);
+    const formData = serializer(getFormData() as T);
+
+    if (onSubmit) {
+      await onSubmit(formData, isFormValid);
+    }
 
     setSubmitting(false);
+
+    return { data: formData, isValid: isFormValid };
   };
 
   const form: Form<T> = {
     onSubmit: onSubmitForm,
+    isSubmitted,
+    isSubmitting,
+    isValid,
     addField,
     removeField,
     removeFieldsStartingWith,
     getFields,
     setFieldValue,
     setFieldErrors,
-    getDefaultValueField,
     readFieldConfigFromSchema,
     getFormData,
     validateFields,
-    isSubmitted,
-    isSubmitting,
-    isValid,
     options,
+    __formData$: formData$,
+    __updateFormDataAt: updateFormDataAt,
+    __getFieldDefaultValue: getFieldDefaultValue,
   };
 
   return {
