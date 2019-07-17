@@ -5,9 +5,14 @@
  */
 
 import { schema, TypeOf } from '@kbn/config-schema';
-import { IncomingWebhook } from '@slack/webhook';
+import { IncomingWebhook, IncomingWebhookResult } from '@slack/webhook';
 
-import { ActionType, ActionTypeExecutorOptions, ExecutorType } from '../types';
+import {
+  ActionType,
+  ActionTypeExecutorOptions,
+  ActionTypeExecutorResult,
+  ExecutorType,
+} from '../types';
 
 // config definition
 
@@ -50,11 +55,82 @@ export const actionType = getActionType();
 
 // action executor
 
-async function slackExecutor(execOptions: ActionTypeExecutorOptions): Promise<any> {
+async function slackExecutor(
+  execOptions: ActionTypeExecutorOptions
+): Promise<ActionTypeExecutorResult> {
   const config = execOptions.config as ActionTypeConfigType;
   const params = execOptions.params as ActionParamsType;
 
-  const webhook = new IncomingWebhook(config.webhookUrl);
+  let result: IncomingWebhookResult;
+  const { webhookUrl } = config;
+  const { message } = params;
 
-  return await webhook.send(params.message);
+  try {
+    const webhook = new IncomingWebhook(webhookUrl);
+    result = await webhook.send(message);
+  } catch (err) {
+    if (err.original == null || err.original.response == null) {
+      return errorResult(err.message);
+    }
+
+    const { status, statusText, headers } = err.original.response;
+
+    // special handling for 5xx
+    if (status >= 500) {
+      return retryResult(err.message);
+    }
+
+    // special handling for rate limiting
+    if (status === 429) {
+      const retryAfterString = headers['retry-after'];
+      if (retryAfterString != null) {
+        const retryAfter = parseInt(retryAfterString, 10);
+        if (!isNaN(retryAfter)) {
+          return retryResultSeconds(err.message, retryAfter);
+        }
+      }
+    }
+
+    return errorResult(`${err.message} - ${statusText}`);
+  }
+
+  if (result == null) {
+    return errorResult(`unexpected null response from slack`);
+  }
+
+  if (result.text !== 'ok') {
+    return errorResult(`unexpected text response from slack (expecting 'ok')`);
+  }
+
+  return successResult(result);
+}
+
+function successResult(data: any): ActionTypeExecutorResult {
+  return { status: 'ok', data };
+}
+
+function errorResult(message: string): ActionTypeExecutorResult {
+  return {
+    status: 'error',
+    message: `an error occurred posting a slack message: ${message}`,
+  };
+}
+
+function retryResult(message: string): ActionTypeExecutorResult {
+  return {
+    status: 'error',
+    message: `an error occurred posting a slack message, retrying later`,
+    retry: true,
+  };
+}
+
+function retryResultSeconds(message: string, retryAfter: number = 60): ActionTypeExecutorResult {
+  const retryEpoch = Date.now() + retryAfter * 1000;
+  const retry = new Date(retryEpoch);
+  const retryString = retry.toISOString();
+  return {
+    status: 'error',
+    message: `an error occurred posting a slack message, retry at ${retryString}: ${message}`,
+    retry,
+  };
 }

@@ -29,13 +29,25 @@ export interface ActionsPlugin {
   fire(options: { id: string; params: Record<string, any>; basePath: string }): Promise<void>;
 }
 
+// the parameters passed to an action type executor function
 export interface ActionTypeExecutorOptions {
   services: Services;
   config: Record<string, any>;
   params: Record<string, any>;
 }
 
-export type ExecutorType = (options: ActionTypeExecutorOptions) => Promise<any>;
+// the result returned from an action type executor function
+export interface ActionTypeExecutorResult {
+  status: 'ok' | 'error';
+  message?: string;
+  data?: any;
+  retry?: null | boolean | Date;
+}
+
+// signature of the action type executor function
+export type ExecutorType = (
+  options: ActionTypeExecutorOptions
+) => Promise<ActionTypeExecutorResult>;
 
 export interface ActionType {
   id: string;
