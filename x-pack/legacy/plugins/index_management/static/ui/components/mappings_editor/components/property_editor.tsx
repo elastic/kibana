@@ -13,6 +13,7 @@ import {
 import { Field } from '../../../../../../../../../src/plugins/elasticsearch_ui_shared/static/forms/components';
 
 import { parametersDefinition, dataTypesDefinition, DataType } from '../config';
+import { hasNestedProperties } from '../helpers';
 import { PropertyBasicParameters } from './property_basic_parameters';
 import { PropertiesManager } from './properties_manager';
 
@@ -23,9 +24,6 @@ interface Props {
   isDeletable?: boolean;
   isAnonymous?: boolean;
 }
-
-const hasNestedProperties = (selectedDatatype: DataType) =>
-  selectedDatatype === 'object' || selectedDatatype === 'nested';
 
 export const PropertyEditor = ({
   form,

@@ -17,7 +17,7 @@ import {
 
 import { schema } from './form.schema';
 import { PropertiesManager } from './components';
-import { propertiesArrayToObject } from './helpers';
+import { propertiesArrayToObject, propertiesObjectToArray } from './helpers';
 
 interface Props {
   setGetDataHandler: (handler: () => Promise<{ isValid: boolean; data: Mappings }>) => void;
@@ -30,26 +30,26 @@ export interface Mappings {
   [key: string]: any;
 }
 
-const serializeData = (data: Record<string, unknown>): Record<string, unknown> => {
-  return {
-    ...data,
-    properties: propertiesArrayToObject(data.properties as any[]),
-  };
-};
+const serializer = (data: Record<string, unknown>): Record<string, unknown> => ({
+  ...data,
+  properties: propertiesArrayToObject(data.properties as any[]),
+});
+
+const deSerializer = (data: Record<string, unknown>): Record<string, unknown> => ({
+  ...data,
+  properties: propertiesObjectToArray(data.properties as { [key: string]: any }),
+});
 
 export const MappingsEditor = ({
   setGetDataHandler,
   FormattedMessage,
   areErrorsVisible = true,
-  defaultValue = {},
+  defaultValue,
 }: Props) => {
-  const { form } = useForm({ schema });
+  const { form } = useForm({ schema, serializer, deSerializer, defaultValue });
 
   useEffect(() => {
-    setGetDataHandler(async () => {
-      const { data, isValid } = await form.onSubmit();
-      return { data: serializeData(data), isValid };
-    });
+    setGetDataHandler(form.onSubmit);
   }, [form]);
 
   return (
