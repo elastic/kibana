@@ -144,6 +144,7 @@ const MinimapBorder = euiStyled.line`
 `;
 
 const TimeCursor = euiStyled.line`
+  pointer-events: none;
   stroke-width: 1px;
   stroke: ${props =>
     props.theme.darkMode
