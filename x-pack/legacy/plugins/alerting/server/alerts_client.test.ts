@@ -739,7 +739,7 @@ describe('delete()', () => {
       success: true,
     });
     const result = await alertsClient.delete({ id: '1' });
-    expect(result).toBeUndefined();
+    expect(result).toEqual({ success: true });
     expect(savedObjectsClient.delete).toHaveBeenCalledTimes(1);
     expect(savedObjectsClient.delete.mock.calls[0]).toMatchInlineSnapshot(`
                               Array [
