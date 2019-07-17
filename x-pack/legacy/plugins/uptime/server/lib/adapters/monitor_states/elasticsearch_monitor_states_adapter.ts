@@ -67,6 +67,13 @@ export class ElasticsearchMonitorStatesAdapter implements UMMonitorStatesAdapter
       aggs: {
         monitors: {
           composite: {
+            /**
+             * The goal here is to fetch more than enough check groups to reach the target
+             * amount in one query.
+             *
+             * For larger cardinalities, we can only count on being able to fetch 10000 docs,
+             * so we will have to run this query multiple times.
+             */
             size: Math.min(size * 3, 10000),
             sources: [
               {
