@@ -23,7 +23,6 @@ import { timefilter } from 'ui/timefilter';
 
 const template = `
   <div class="euiSpacer euiSpacer--s" />
-  <ml-nav-menu name="settings" />
   <ml-settings />
 `;
 
