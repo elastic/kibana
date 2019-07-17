@@ -11,7 +11,7 @@ import { EditorFrameSetupPlugins } from './plugin';
 
 export function createMockVisualization(): jest.Mocked<Visualization> {
   return {
-    getPersistableState: jest.fn(_state => ({})),
+    getPersistableState: jest.fn(_state => _state),
     getSuggestions: jest.fn(_options => []),
     initialize: jest.fn((_datasource, _state?) => ({})),
     renderConfigPanel: jest.fn(),
@@ -36,11 +36,12 @@ export function createMockDatasource(): DatasourceMock {
   return {
     getDatasourceSuggestionsForField: jest.fn((_state, item) => []),
     getDatasourceSuggestionsFromCurrentState: jest.fn(_state => []),
-    getPersistableState: jest.fn(),
+    getPersistableState: jest.fn(x => x),
     getPublicAPI: jest.fn((_state, _setState) => publicAPIMock),
     initialize: jest.fn((_state?) => Promise.resolve()),
     renderDataPanel: jest.fn(),
     toExpression: jest.fn(_state => null),
+    getMetaData: jest.fn(_state => ({ filterableIndexPatterns: [] })),
 
     // this is an additional property which doesn't exist on real datasources
     // but can be used to validate whether specific API mock functions are called

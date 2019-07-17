@@ -328,7 +328,9 @@ describe('editor_frame state management', () => {
           doc: {
             datasourceType: 'a',
             id: 'b',
+            expression: '',
             state: {
+              datasourceMetaData: { filterableIndexPatterns: [] },
               datasource: { foo: 'c' },
               visualization: { bar: 'd' },
             },

@@ -27,7 +27,9 @@ describe('LensStore', () => {
         title: 'Hello',
         visualizationType: 'bar',
         datasourceType: 'indexpattern',
+        expression: '',
         state: {
+          datasourceMetaData: { filterableIndexPatterns: [] },
           datasource: { type: 'index_pattern', indexPattern: '.kibana_test' },
           visualization: { x: 'foo', y: 'baz' },
         },
@@ -49,7 +51,9 @@ describe('LensStore', () => {
         datasourceType: 'indexpattern',
         title: 'Hello',
         visualizationType: 'bar',
+        expression: '',
         state: JSON.stringify({
+          datasourceMetaData: { filterableIndexPatterns: [] },
           datasource: { type: 'index_pattern', indexPattern: '.kibana_test' },
           visualization: { x: 'foo', y: 'baz' },
         }),
@@ -63,7 +67,9 @@ describe('LensStore', () => {
         title: 'Even the very wise cannot see all ends.',
         visualizationType: 'line',
         datasourceType: 'indexpattern',
+        expression: '',
         state: {
+          datasourceMetaData: { filterableIndexPatterns: [] },
           datasource: { type: 'index_pattern', indexPattern: 'lotr' },
           visualization: { gear: ['staff', 'pointy hat'] },
         },
@@ -74,7 +80,9 @@ describe('LensStore', () => {
         title: 'Even the very wise cannot see all ends.',
         visualizationType: 'line',
         datasourceType: 'indexpattern',
+        expression: '',
         state: {
+          datasourceMetaData: { filterableIndexPatterns: [] },
           datasource: { type: 'index_pattern', indexPattern: 'lotr' },
           visualization: { gear: ['staff', 'pointy hat'] },
         },
@@ -85,7 +93,9 @@ describe('LensStore', () => {
         title: 'Even the very wise cannot see all ends.',
         visualizationType: 'line',
         datasourceType: 'indexpattern',
+        expression: '',
         state: JSON.stringify({
+          datasourceMetaData: { filterableIndexPatterns: [] },
           datasource: { type: 'index_pattern', indexPattern: 'lotr' },
           visualization: { gear: ['staff', 'pointy hat'] },
         }),

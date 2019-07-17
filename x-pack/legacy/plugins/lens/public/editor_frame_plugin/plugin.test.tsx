@@ -78,7 +78,14 @@ describe('editor_frame plugin', () => {
       const doc: Document = {
         datasourceType: 'indexpattern',
         id: 'hoi',
-        state: { datasource: 'foo', visualization: 'bar' },
+        expression: '',
+        state: {
+          datasource: 'foo',
+          visualization: 'bar',
+          datasourceMetaData: {
+            filterableIndexPatterns: [],
+          },
+        },
         title: 'shazm',
         visualizationType: 'fanci',
         type: 'lens',
@@ -186,7 +193,14 @@ describe('editor_frame plugin', () => {
           doc={{
             datasourceType: 'b',
             visualizationType: 'd',
-            state: { visualization: 'viz', datasource: 'data' },
+            expression: '',
+            state: {
+              visualization: 'viz',
+              datasource: 'data',
+              datasourceMetaData: {
+                filterableIndexPatterns: [],
+              },
+            },
             title: 'ttt',
           }}
           datasources={{ a: createMockDatasource(), b: createMockDatasource() }}

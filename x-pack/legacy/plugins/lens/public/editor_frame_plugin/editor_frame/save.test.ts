@@ -6,13 +6,14 @@
 
 import { save, Props } from './save';
 import { Action } from './state_management';
+import { createMockDatasource, createMockVisualization } from '../mocks';
 
 describe('save editor frame state', () => {
   const saveArgs: Props = {
     dispatch: jest.fn(),
     redirectTo: jest.fn(),
-    datasource: { getPersistableState: x => x },
-    visualization: { getPersistableState: x => x },
+    datasource: createMockDatasource(),
+    visualization: createMockVisualization(),
     state: {
       title: 'aaa',
       datasource: { activeId: '1', isLoading: false, state: {} },
@@ -88,29 +89,26 @@ describe('save editor frame state', () => {
     const store = {
       save: jest.fn(async () => ({ id: 'bar' })),
     };
+    const datasource = createMockDatasource();
+    datasource.getPersistableState.mockImplementation(state => ({
+      stuff: `${state}_datsource_persisted`,
+    }));
+
+    const visualization = createMockVisualization();
+    visualization.getPersistableState.mockImplementation(state => ({
+      stuff: `${state}_vis_persisted`,
+    }));
     await save({
       ...saveArgs,
       store,
-      datasource: {
-        getPersistableState(state) {
-          return {
-            stuff: `${state}_datsource_persisted`,
-          };
-        },
-      },
+      datasource,
       state: {
         title: 'bbb',
         datasource: { activeId: '1', isLoading: false, state: '2' },
         saving: false,
         visualization: { activeId: '3', state: '4' },
       },
-      visualization: {
-        getPersistableState(state) {
-          return {
-            things: `${state}_vis_persisted`,
-          };
-        },
-      },
+      visualization,
     });
 
     expect(store.save).toHaveBeenCalledWith({
