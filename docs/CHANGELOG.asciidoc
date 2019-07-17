@@ -485,6 +485,7 @@ Visualizations::
 == {kib} 7.0.0
 
 [float]
+[[known-issues-7.0.0]]
 === Known issues
 
 Monitoring::
