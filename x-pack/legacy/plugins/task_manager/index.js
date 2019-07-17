@@ -7,7 +7,7 @@
 import { SavedObjectsSerializer, SavedObjectsSchema } from '../../../../src/core/server';
 import { TaskManager } from './task_manager';
 import mappings from './mappings.json';
-import migrations from './migrations';
+import { migrations } from './migrations';
 import { TASK_MANAGER_INDEX } from './constants';
 
 export function taskManager(kibana) {

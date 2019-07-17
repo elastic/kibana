@@ -4,11 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export default {
+import { SavedObject } from 'src/core/server';
+
+export const migrations = {
   task: {
-    '7.4.0': (doc) => {
-      doc.updated_at = new Date().toISOString();
-      return doc;
-    }
-  }
+    '7.4.0': (doc: SavedObject) => ({
+      ...doc,
+      updated_at: new Date().toISOString(),
+    }),
+  },
 };
