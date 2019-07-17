@@ -14,7 +14,7 @@ import {
   EuiFormErrorText,
   EuiFormHelpText,
 } from '@elastic/eui';
-import { MetricsEditor } from '../../../../shared/components/metrics_editor';
+import { MetricsEditor } from '../../../../components/metrics_editor';
 import { FormattedMessage } from '@kbn/i18n/react';
 export class MetricsExpression extends Component {
 

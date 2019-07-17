@@ -8,6 +8,7 @@ import { schema } from '@kbn/config-schema';
 
 import { ActionTypeRegistry } from './action_type_registry';
 import { ActionsClient } from './actions_client';
+import { ExecutorType } from './types';
 import { taskManagerMock } from '../../task_manager/task_manager.mock';
 import { EncryptedSavedObjectsPlugin } from '../../encrypted_saved_objects';
 import { SavedObjectsClientMock } from '../../../../../src/core/server/mocks';
@@ -34,6 +35,10 @@ const actionTypeRegistryParams = {
   encryptedSavedObjectsPlugin: mockEncryptedSavedObjectsPlugin,
 };
 
+const executor: ExecutorType = async options => {
+  return { status: 'ok' };
+};
+
 beforeEach(() => jest.resetAllMocks());
 
 describe('create()', () => {
@@ -49,7 +54,7 @@ describe('create()', () => {
       id: 'my-action-type',
       name: 'My action type',
       unencryptedAttributes: [],
-      async executor() {},
+      executor,
     });
     const actionsClient = new ActionsClient({
       actionTypeRegistry,
@@ -101,7 +106,7 @@ describe('create()', () => {
           param1: schema.string(),
         }),
       },
-      async executor() {},
+      executor,
     });
     await expect(
       actionsClient.create({
@@ -147,7 +152,7 @@ describe('create()', () => {
       id: 'my-action-type',
       name: 'My action type',
       unencryptedAttributes: ['a', 'c'],
-      async executor() {},
+      executor,
     });
     const actionsClient = new ActionsClient({
       actionTypeRegistry,
@@ -281,7 +286,7 @@ describe('update()', () => {
       id: 'my-action-type',
       name: 'My action type',
       unencryptedAttributes: [],
-      async executor() {},
+      executor,
     });
     const actionsClient = new ActionsClient({
       actionTypeRegistry,
@@ -343,7 +348,7 @@ describe('update()', () => {
           param1: schema.string(),
         }),
       },
-      async executor() {},
+      executor,
     });
     savedObjectsClient.get.mockResolvedValueOnce({
       id: 'my-action',
@@ -379,7 +384,7 @@ describe('update()', () => {
       id: 'my-action-type',
       name: 'My action type',
       unencryptedAttributes: ['a', 'c'],
-      async executor() {},
+      executor,
     });
     const actionsClient = new ActionsClient({
       actionTypeRegistry,
