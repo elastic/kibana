@@ -9,6 +9,7 @@ import { snapshotHistogramQueryString } from '../../../../../legacy/plugins/upti
 import snapshotHistogram from './fixtures/snapshot_histogram.json';
 import snapshotHistogramById from './fixtures/snapshot_histogram_by_id.json';
 import snapshotHistogramByFilter from './fixtures/snapshot_histogram_by_filter.json';
+import fs from 'fs';
 
 // eslint-disable-next-line import/no-default-export
 export default function({ getService }: { getService: any }) {
@@ -53,6 +54,7 @@ export default function({ getService }: { getService: any }) {
         .set('kbn-xsrf', 'foo')
         .send({ ...getSnapshotHistogramQuery });
 
+      fs.writeFileSync('/Users/andrewcholakian/projects/kibana/x-pack/test/api_integration/apis/uptime/graphql/fixtures/snapshot_histogram_by_id.json', JSON.stringify(data, null, 2)) 
       expect(data).to.eql(snapshotHistogramById);
     });
 
@@ -75,6 +77,7 @@ export default function({ getService }: { getService: any }) {
         .set('kbn-xsrf', 'foo')
         .send({ ...getSnapshotHistogramQuery });
 
+      fs.writeFileSync('/Users/andrewcholakian/projects/kibana/x-pack/test/api_integration/apis/uptime/graphql/fixtures/snapshot_histogram_by_filter.json', JSON.stringify(data, null, 2)) 
       expect(data).to.eql(snapshotHistogramByFilter);
     });
   });

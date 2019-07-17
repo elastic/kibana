@@ -10,6 +10,7 @@ import snapshot from './fixtures/snapshot';
 import snapshotFilteredByDown from './fixtures/snapshot_filtered_by_down';
 import snapshotFilteredByUp from './fixtures/snapshot_filtered_by_up';
 import snapshotEmpty from './fixtures/snapshot_empty';
+import fs from 'fs';
 
 export default function ({ getService }) {
   describe('snapshot query', () => {
@@ -30,6 +31,8 @@ export default function ({ getService }) {
         .post('/api/uptime/graphql')
         .set('kbn-xsrf', 'foo')
         .send({ ...getSnapshotQuery });
+
+      fs.writeFileSync('test/api_integration/apis/uptime/graphql/fixtures/snapshot.json', JSON.stringify(data, null, 2)) 
       expect(data).to.eql(snapshot);
     });
 
@@ -49,6 +52,8 @@ export default function ({ getService }) {
         .post('/api/uptime/graphql')
         .set('kbn-xsrf', 'foo')
         .send({ ...getSnapshotQuery });
+
+      fs.writeFileSync('test/api_integration/apis/uptime/graphql/fixtures/snapshot_filtered_by_down.json', JSON.stringify(data, null, 2)) 
       expect(data).to.eql(snapshotFilteredByDown);
     });
 
@@ -68,6 +73,9 @@ export default function ({ getService }) {
         .post('/api/uptime/graphql')
         .set('kbn-xsrf', 'foo')
         .send({ ...getSnapshotQuery });
+
+
+      fs.writeFileSync('test/api_integration/apis/uptime/graphql/fixtures/snapshot_filtered_by_up.json', JSON.stringify(data, null, 2)) 
       expect(data).to.eql(snapshotFilteredByUp);
     });
 
@@ -87,6 +95,9 @@ export default function ({ getService }) {
         .post('/api/uptime/graphql')
         .set('kbn-xsrf', 'foo')
         .send({ ...getSnapshotQuery });
+
+
+      fs.writeFileSync('test/api_integration/apis/uptime/graphql/fixtures/snapshot_empty.json', JSON.stringify(data, null, 2)) 
       expect(data).to.eql(snapshotEmpty);
     });
     // TODO: test for host, port, etc.
