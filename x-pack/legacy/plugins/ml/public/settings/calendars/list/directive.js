@@ -23,7 +23,6 @@ import { I18nContext } from 'ui/i18n';
 
 const template = `
   <div class="euiSpacer euiSpacer--s" />
-  <ml-nav-menu name="settings" />
   <ml-calendars-list />
 `;
 
