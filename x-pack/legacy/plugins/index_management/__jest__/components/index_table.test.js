@@ -37,6 +37,11 @@ jest.mock('react-ace', () => {
 jest.mock('brace/theme/textmate', () => 'brace/theme/textmate');
 jest.mock('brace/ext/language_tools', () => 'brace/ext/language_tools');
 
+jest.mock('../../../../ui_metric/public', () => ({
+  createUiStatsReporter: jest.fn(() => jest.fn()),
+  METRIC_TYPE: require('@kbn/analytics').METRIC_TYPE,
+}));
+
 setHttpClient(axios.create({ adapter: axiosXhrAdapter }));
 let server = null;
 
