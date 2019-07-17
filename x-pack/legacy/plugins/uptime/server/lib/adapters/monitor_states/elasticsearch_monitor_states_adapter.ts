@@ -17,7 +17,7 @@ import {
   Check,
   StatesIndexStatus,
 } from '../../../../common/graphql/types';
-import { INDEX_NAMES, STATES } from '../../../../common/constants';
+import { INDEX_NAMES, STATES, QUERY } from '../../../../common/constants';
 import { getHistogramInterval, getFilteredQueryAndStatusFilter } from '../../helper';
 
 type SortChecks = (check: Check) => string[];
@@ -71,10 +71,13 @@ export class ElasticsearchMonitorStatesAdapter implements UMMonitorStatesAdapter
              * The goal here is to fetch more than enough check groups to reach the target
              * amount in one query.
              *
-             * For larger cardinalities, we can only count on being able to fetch 10000 docs,
-             * so we will have to run this query multiple times.
+             * For larger cardinalities, we can only count on being able to fetch max bucket
+             * size, so we will have to run this query multiple times.
+             *
+             * Multiplying `size` by 2 assumes that there will be less than three locations
+             * for the deployment, if needed the query will be run subsequently.
              */
-            size: Math.min(size * 3, 10000),
+            size: Math.min(size * 2, QUERY.DEFAULT_AGGS_CAP),
             sources: [
               {
                 monitor_id: {
@@ -144,7 +147,7 @@ export class ElasticsearchMonitorStatesAdapter implements UMMonitorStatesAdapter
     searchAfter?: any,
     size: number = 50
   ): Promise<LegacyMonitorStatesQueryResult> {
-    size = Math.min(size, 10000);
+    size = Math.min(size, QUERY.DEFAULT_AGGS_CAP);
     const { query, statusFilter } = getFilteredQueryAndStatusFilter(
       dateRangeStart,
       dateRangeEnd,
