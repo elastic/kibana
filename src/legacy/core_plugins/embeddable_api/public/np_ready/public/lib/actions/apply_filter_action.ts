@@ -19,11 +19,13 @@
 
 import { i18n } from '@kbn/i18n';
 import { Filter } from '@kbn/es-query';
-import { IEmbeddable } from '../embeddables';
+import { IEmbeddable, EmbeddableInput } from '../embeddables';
 import { Action, ActionContext } from './action';
 import { IncompatibleActionError } from '../errors';
 
 export const APPLY_FILTER_ACTION = 'APPLY_FILTER_ACTION';
+
+type RootEmbeddable = IEmbeddable<EmbeddableInput & { filters: Filter[] }>;
 
 export class ApplyFilterAction extends Action<IEmbeddable, { filters: Filter[] }> {
   public readonly type = APPLY_FILTER_ACTION;
@@ -39,8 +41,9 @@ export class ApplyFilterAction extends Action<IEmbeddable, { filters: Filter[] }
   }
 
   public async isCompatible(context: ActionContext<IEmbeddable, { filters: Filter[] }>) {
+    const root = context.embeddable.getRoot() as RootEmbeddable;
     return Boolean(
-      context.embeddable.getRoot().getInput().filters !== undefined &&
+      root.getInput().filters !== undefined &&
         context.triggerContext &&
         context.triggerContext.filters !== undefined
     );
@@ -53,7 +56,7 @@ export class ApplyFilterAction extends Action<IEmbeddable, { filters: Filter[] }
     if (!triggerContext) {
       throw new Error('Applying a filter requires a filter as context');
     }
-    const root = embeddable.getRoot();
+    const root = embeddable.getRoot() as RootEmbeddable;
 
     if (!this.isCompatible({ triggerContext, embeddable })) {
       throw new IncompatibleActionError();

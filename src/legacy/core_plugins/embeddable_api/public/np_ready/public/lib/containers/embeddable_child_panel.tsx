@@ -23,15 +23,26 @@ import React from 'react';
 import { EuiLoadingChart } from '@elastic/eui';
 import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import { Subscription } from 'rxjs';
+import { CoreStart } from 'src/core/public';
 import { ErrorEmbeddable, IEmbeddable } from '../embeddables';
 import { EmbeddablePanel } from '../panel';
 import { IContainer } from './i_container';
+import {
+  GetActionsCompatibleWithTrigger,
+  GetEmbeddableFactory,
+  GetEmbeddableFactories,
+} from '../types';
 
 export interface EmbeddableChildPanelUiProps {
   intl: InjectedIntl;
   embeddableId: string;
   className?: string;
   container: IContainer;
+  getActions: GetActionsCompatibleWithTrigger;
+  getEmbeddableFactory: GetEmbeddableFactory;
+  getAllEmbeddableFactories: GetEmbeddableFactories;
+  overlays: CoreStart['overlays'];
+  notifications: CoreStart['notifications'];
 }
 
 interface State {
@@ -85,7 +96,14 @@ class EmbeddableChildPanelUi extends React.Component<EmbeddableChildPanelUiProps
         {this.state.loading || !this.embeddable ? (
           <EuiLoadingChart size="l" mono />
         ) : (
-          <EmbeddablePanel embeddable={this.embeddable} />
+          <EmbeddablePanel
+            embeddable={this.embeddable}
+            getActions={this.props.getActions}
+            getEmbeddableFactory={this.props.getEmbeddableFactory}
+            getAllEmbeddableFactories={this.props.getAllEmbeddableFactories}
+            overlays={this.props.overlays}
+            notifications={this.props.notifications}
+          />
         )}
       </div>
     );

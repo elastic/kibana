@@ -17,7 +17,12 @@
  * under the License.
  */
 
-import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from 'kibana/public';
+import {
+  PluginInitializerContext,
+  CoreSetup,
+  CoreStart,
+  Plugin,
+} from '../../../../../../core/public';
 import { TriggerRegistry, ActionRegistry, EmbeddableFactoryRegistry } from './types';
 import { createEmbeddables, Embeddables } from './api';
 

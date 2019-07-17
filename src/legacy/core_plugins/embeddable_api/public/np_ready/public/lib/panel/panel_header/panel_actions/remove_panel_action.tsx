@@ -21,7 +21,8 @@ import { i18n } from '@kbn/i18n';
 import { EuiIcon } from '@elastic/eui';
 import { ContainerInput, IContainer } from '../../../containers';
 import { ViewMode } from '../../../types';
-import { Action, ActionContext, IncompatibleActionError } from '../../../actions';
+import { Action, ActionContext } from '../../../actions';
+import { IncompatibleActionError } from '../../../errors';
 
 export const REMOVE_PANEL_ACTION = 'deletePanel';
 

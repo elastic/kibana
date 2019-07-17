@@ -19,7 +19,7 @@
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
-import { CoreSetup } from 'kibana/public';
+import { CoreSetup } from 'src/core/public';
 
 // TODO: This needs to be adapted for NP.
 /*

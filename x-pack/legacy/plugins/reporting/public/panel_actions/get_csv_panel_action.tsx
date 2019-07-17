@@ -12,22 +12,20 @@ import { kfetch } from 'ui/kfetch';
 import { toastNotifications } from 'ui/notify';
 import chrome from 'ui/chrome';
 import { EuiIcon } from '@elastic/eui';
-import {
-  ISearchEmbeddable,
-  SEARCH_EMBEDDABLE_TYPE,
-} from '../../../../../../src/legacy/core_plugins/kibana/public/discover/embeddable';
 
 import {
   Action,
-  actionRegistry,
   ActionContext,
   ViewMode,
   IncompatibleActionError,
   IEmbeddable,
-  triggerRegistry,
-  attachAction,
   CONTEXT_MENU_TRIGGER,
-} from '../../../../../../src/legacy/core_plugins/embeddable_api/public';
+} from 'src/legacy/core_plugins/embeddable_api/public/np_ready/public';
+import { setup } from 'src/legacy/core_plugins/embeddable_api/public/np_ready/public/legacy';
+import {
+  ISearchEmbeddable,
+  SEARCH_EMBEDDABLE_TYPE,
+} from '../../../../../../src/legacy/core_plugins/kibana/public/discover/embeddable';
 import { API_BASE_URL_V1 } from '../../common/constants';
 
 const API_BASE_URL = `${API_BASE_URL_V1}/generate/immediate/csv/saved-object`;
@@ -176,6 +174,6 @@ class GetCsvReportPanelAction extends Action<ISearchEmbeddable> {
   }
 }
 
-actionRegistry.set(CSV_REPORTING_ACTION, new GetCsvReportPanelAction());
-
-attachAction(triggerRegistry, { triggerId: CONTEXT_MENU_TRIGGER, actionId: CSV_REPORTING_ACTION });
+const action = new GetCsvReportPanelAction();
+setup.registerAction(action);
+setup.attachAction(CONTEXT_MENU_TRIGGER, action.id);
