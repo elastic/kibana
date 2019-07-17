@@ -365,7 +365,7 @@ module.exports = {
      * Jest specific rules
      */
     {
-      files: ['**/*.test.{js,ts,tsx}', '**/integration_tests/**/*.test.{js,ts,tsx}'],
+      files: ['**/*.test.{js,ts,tsx}'],
       rules: {
         'jest/valid-describe': 'error',
       },
