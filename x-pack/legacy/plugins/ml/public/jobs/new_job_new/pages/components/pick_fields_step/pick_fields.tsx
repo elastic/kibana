@@ -7,7 +7,7 @@
 import React, { Fragment, FC, useContext, useEffect, useState } from 'react';
 
 import { JobCreatorContext } from '../job_creator_context';
-import { WizardNav } from '../../../../../data_frame/components/wizard_nav';
+import { WizardNav } from '../../../../../data_frame/pages/data_frame_new_pivot/components/wizard_nav';
 import { WIZARD_STEPS, StepProps } from '../step_types';
 import { JOB_TYPE } from '../../../common/job_creator/util/constants';
 import { SingleMetricView } from './components/single_metric_view';

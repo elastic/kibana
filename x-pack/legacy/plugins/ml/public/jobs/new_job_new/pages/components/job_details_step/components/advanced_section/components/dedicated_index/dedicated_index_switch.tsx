@@ -5,22 +5,26 @@
  */
 
 import React, { FC, useState, useContext, useEffect } from 'react';
-import { EuiFieldText } from '@elastic/eui';
-import { JobCreatorContext } from '../../../job_creator_context';
+import { EuiSwitch } from '@elastic/eui';
+import { JobCreatorContext } from '../../../../../job_creator_context';
 import { Description } from './description';
 
-export const JobIdInput: FC = () => {
+export const DedicatedIndexSwitch: FC = () => {
   const { jobCreator, jobCreatorUpdate } = useContext(JobCreatorContext);
-  const [jobId, setJobId] = useState(jobCreator.jobId);
+  const [useDedicatedIndex, setUseDedicatedIndex] = useState(jobCreator.useDedicatedIndex);
 
   useEffect(() => {
-    jobCreator.jobId = jobId;
+    jobCreator.useDedicatedIndex = useDedicatedIndex;
     jobCreatorUpdate();
-  }, [jobId]);
+  }, [useDedicatedIndex]);
+
+  function toggleModelPlot() {
+    setUseDedicatedIndex(!useDedicatedIndex);
+  }
 
   return (
     <Description>
-      <EuiFieldText placeholder="Job Id" value={jobId} onChange={e => setJobId(e.target.value)} />
+      <EuiSwitch name="switch" checked={useDedicatedIndex} onChange={toggleModelPlot} />
     </Description>
   );
 };
