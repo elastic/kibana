@@ -17,7 +17,7 @@ import {
   Check,
   StatesIndexStatus,
 } from '../../../../common/graphql/types';
-import { INDEX_NAMES, LEGACY_STATES_QUERY_SIZE } from '../../../../common/constants';
+import { INDEX_NAMES, STATES } from '../../../../common/constants';
 import { getHistogramInterval, getFilteredQueryAndStatusFilter } from '../../helper';
 
 type SortChecks = (check: Check) => string[];
@@ -516,7 +516,7 @@ export class ElasticsearchMonitorStatesAdapter implements UMMonitorStatesAdapter
           by_id: {
             terms: {
               field: 'monitor.id',
-              size: LEGACY_STATES_QUERY_SIZE,
+              size: STATES.LEGACY_STATES_QUERY_SIZE,
             },
             aggs: {
               histogram: {
@@ -595,7 +595,7 @@ export class ElasticsearchMonitorStatesAdapter implements UMMonitorStatesAdapter
         dateRangeEnd,
         filters,
         searchAfter,
-        35000
+        STATES.MAX_MONITORS
       );
       searchAfter = afterKey;
       this.getMonitorBuckets(result, statusFilter).reduce((acc: SnapshotCount, monitor: any) => {

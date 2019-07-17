@@ -24,5 +24,9 @@ export const QUERY = {
   ],
 };
 
-// Number of results returned for a legacy states query
-export const LEGACY_STATES_QUERY_SIZE = 50;
+export const STATES = {
+  // Number of results returned for a legacy states query
+  LEGACY_STATES_QUERY_SIZE: 50,
+  // The maximum number of monitors that should be supported
+  MAX_MONITORS: 35000,
+};
