@@ -130,7 +130,11 @@ monaco.editor.defineTheme('euiColors', {
   base: 'vs',
   inherit: true,
   rules: [
-    { token: '', foreground: themeName.euiColorDarkestShade, background: themeName.euiColorEmptyShade },
+    {
+      token: '',
+      foreground: themeName.euiColorDarkestShade,
+      background: themeName.euiColorEmptyShade,
+    },
     { token: 'invalid', foreground: themeName.euiColorAccent },
     { token: 'emphasis', fontStyle: 'italic' },
     { token: 'strong', fontStyle: 'bold' },
