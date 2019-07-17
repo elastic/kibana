@@ -245,7 +245,37 @@ export const SourceIndexPreview: React.SFC<Props> = React.memo(({ cellClick, que
               }
             )}
           >
-            <EuiBadge>array</EuiBadge>
+            <EuiBadge>
+              {i18n.translate(
+                'xpack.ml.dataframe.sourceIndexPreview.dataFrameSourceIndexArrayBadgeContent',
+                {
+                  defaultMessage: 'array',
+                }
+              )}
+            </EuiBadge>
+          </EuiToolTip>
+        );
+      } else if (typeof d === 'object' && d !== null) {
+        // If the cells data is an object, display a 'object' badge with a
+        // tooltip that explains that this type of field is not supported in this table.
+        return (
+          <EuiToolTip
+            content={i18n.translate(
+              'xpack.ml.dataframe.sourceIndexPreview.dataFrameSourceIndexObjectToolTipContent',
+              {
+                defaultMessage:
+                  'The full content of this object based column is available in the expanded row.',
+              }
+            )}
+          >
+            <EuiBadge>
+              {i18n.translate(
+                'xpack.ml.dataframe.sourceIndexPreview.dataFrameSourceIndexObjectBadgeContent',
+                {
+                  defaultMessage: 'object',
+                }
+              )}
+            </EuiBadge>
           </EuiToolTip>
         );
       }
