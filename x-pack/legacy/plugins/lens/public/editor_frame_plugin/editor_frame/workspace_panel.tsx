@@ -125,8 +125,8 @@ export function WorkspacePanel({
             </EuiFlexItem>
           )}
           <EuiFlexItem>
-          <EuiCodeBlock>{JSON.stringify(expressionError, null, 2)}</EuiCodeBlock>
-              </EuiFlexItem>
+            <EuiCodeBlock>{JSON.stringify(expressionError, null, 2)}</EuiCodeBlock>
+          </EuiFlexItem>
         </EuiFlexGroup>
       );
     } else {

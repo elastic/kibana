@@ -26,9 +26,7 @@ export const lens: LegacyPluginInitializer = kibana => {
         description: 'Explore and visualize data.',
         main: `plugins/${PLUGIN_ID}/index`,
       },
-      embeddableFactories: [
-        'plugins/lens/app_plugin/embeddable/lens_embeddable_factory'
-      ],
+      embeddableFactories: ['plugins/lens/register_embeddable'],
       styleSheetPaths: resolve(__dirname, 'public/index.scss'),
       mappings,
       visTypes: ['plugins/lens/register_vis_type_alias'],

@@ -9,7 +9,11 @@ import { render, unmountComponentAtNode } from 'react-dom';
 import { I18nProvider } from '@kbn/i18n/react';
 import { CoreSetup } from 'src/core/public';
 import { HashRouter, Switch, Route, RouteComponentProps } from 'react-router-dom';
-import chrome from 'ui/chrome';
+import chrome, { Chrome } from 'ui/chrome';
+import {
+  EmbeddablePlugin,
+  embeddablePlugin,
+} from '../../../../../../src/legacy/core_plugins/embeddable_api/public';
 import {
   DataSetup,
   ExpressionRenderer,
@@ -25,9 +29,12 @@ import {
 import { EditorFrame } from './editor_frame';
 import { SavedObjectIndexStore, SavedObjectStore, Document } from '../persistence';
 import { InitializableComponent } from './initializable_component';
+import { LensEmbeddableFactory } from './embeddable/embeddable_factory';
 
 export interface EditorFrameSetupPlugins {
   data: DataSetup;
+  chrome: Chrome;
+  embeddables: EmbeddablePlugin;
 }
 
 interface InitializationResult {
@@ -54,13 +61,14 @@ export class EditorFramePlugin {
   constructor() {}
 
   private ExpressionRenderer: ExpressionRenderer | null = null;
+  private chrome: Chrome | null = null;
   private readonly datasources: Record<string, Datasource> = {};
   private readonly visualizations: Record<string, Visualization> = {};
 
   private createInstance(): EditorFrameInstance {
     let domElement: Element;
 
-    const store = new SavedObjectIndexStore(chrome.getSavedObjectsClient());
+    const store = new SavedObjectIndexStore(this.chrome!.getSavedObjectsClient());
 
     function unmount() {
       if (domElement) {
@@ -114,6 +122,11 @@ export class EditorFramePlugin {
 
   public setup(_core: CoreSetup | null, plugins: EditorFrameSetupPlugins): EditorFrameSetup {
     this.ExpressionRenderer = plugins.data.expressions.ExpressionRenderer;
+    this.chrome = plugins.chrome;
+    plugins.embeddables.addEmbeddableFactory(
+      new LensEmbeddableFactory(plugins.chrome, plugins.data.indexPatterns)
+    );
+
     return {
       createInstance: this.createInstance.bind(this),
       registerDatasource: (name, datasource) => {
@@ -135,6 +148,8 @@ const editorFrame = new EditorFramePlugin();
 export const editorFrameSetup = () =>
   editorFrame.setup(null, {
     data,
+    chrome,
+    embeddables: embeddablePlugin,
   });
 
 export const editorFrameStop = () => editorFrame.stop();

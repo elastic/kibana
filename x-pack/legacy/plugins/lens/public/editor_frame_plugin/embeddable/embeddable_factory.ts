@@ -5,38 +5,28 @@
  */
 
 import _ from 'lodash';
-import chrome from 'ui/chrome';
-import { data } from '../../../../../../../src/legacy/core_plugins/data/public/setup';
+import { Chrome } from 'ui/chrome';
 
-export const indexPatternService = data.indexPatterns.indexPatterns;
 import { capabilities } from 'ui/capabilities';
 import { i18n } from '@kbn/i18n';
+import { DataSetup } from 'src/legacy/core_plugins/data/public';
 import {
   EmbeddableFactory,
-  embeddableFactories,
   ErrorEmbeddable,
   EmbeddableInput,
   IContainer,
 } from '../../../../../../../src/legacy/core_plugins/embeddable_api/public/index';
-import { LensEmbeddable } from './lens_embeddable';
+import { LensEmbeddable } from './embeddable';
 import { SavedObjectIndexStore, DOC_TYPE } from '../../persistence';
-import { indexPatternDatasourceSetup } from '../../indexpattern_plugin';
-import { xyVisualizationSetup } from '../../xy_visualization_plugin';
-import { editorFrameSetup } from '../../editor_frame_plugin';
-import { datatableVisualizationSetup } from '../../datatable_visualization_plugin';
 import { getEditPath } from '../../../common';
-
-// bootstrap shimmed plugins to register everything necessary to the expression.
-// the new platform will take care of this once in place
-indexPatternDatasourceSetup();
-datatableVisualizationSetup();
-xyVisualizationSetup();
-editorFrameSetup();
 
 export class LensEmbeddableFactory extends EmbeddableFactory {
   type = DOC_TYPE;
 
-  constructor() {
+  private chrome: Chrome;
+  private indexPatternService: DataSetup['indexPatterns']['indexPatterns'];
+
+  constructor(chrome: Chrome, indexPatternService: DataSetup['indexPatterns']['indexPatterns']) {
     super({
       savedObjectMetaData: {
         name: i18n.translate('xpack.lens.lensSavedObjectLabel', {
@@ -46,6 +36,8 @@ export class LensEmbeddableFactory extends EmbeddableFactory {
         getIconForSavedObject: () => 'faceHappy',
       },
     });
+    this.chrome = chrome;
+    this.indexPatternService = indexPatternService;
   }
 
   public isEditable() {
@@ -67,26 +59,28 @@ export class LensEmbeddableFactory extends EmbeddableFactory {
     input: Partial<EmbeddableInput> & { id: string },
     parent?: IContainer
   ) {
-    const store = new SavedObjectIndexStore(chrome.getSavedObjectsClient());
+    const store = new SavedObjectIndexStore(this.chrome.getSavedObjectsClient());
     const savedVis = await store.load(savedObjectId);
 
-    const promises = savedVis.state.datasourceMetaData.filterableIndexPatterns.map(async (indexPatternId) => {
-      try {
-        return await indexPatternService.get(indexPatternId);
-      } catch (error) {
-        // Unable to load index pattern, better to not throw error so map embeddable can render
-        // Error will be surfaced by map embeddable since it too will be unable to locate the index pattern
-        return null;
+    const promises = savedVis.state.datasourceMetaData.filterableIndexPatterns.map(
+      async indexPatternId => {
+        try {
+          return await this.indexPatternService.get(indexPatternId);
+        } catch (error) {
+          // Unable to load index pattern, better to not throw error so map embeddable can render
+          // Error will be surfaced by map embeddable since it too will be unable to locate the index pattern
+          return null;
+        }
       }
-    });
+    );
     const indexPatterns = await Promise.all(promises);
 
     return new LensEmbeddable(
       {
         savedVis,
-        editUrl: chrome.addBasePath(getEditPath(savedObjectId)),
+        editUrl: this.chrome.addBasePath(getEditPath(savedObjectId)),
         editable: this.isEditable(),
-        indexPatterns
+        indexPatterns,
       },
       input,
       parent
@@ -97,5 +91,3 @@ export class LensEmbeddableFactory extends EmbeddableFactory {
     return new ErrorEmbeddable('Lens can only be created from a saved object', input);
   }
 }
-
-embeddableFactories.set('lens', new LensEmbeddableFactory());

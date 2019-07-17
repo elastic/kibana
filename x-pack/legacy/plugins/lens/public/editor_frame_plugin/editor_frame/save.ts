@@ -4,11 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { toExpression } from '@kbn/interpreter/target/common';
 import { Action, EditorFrameState } from './state_management';
 import { Document } from '../../persistence/saved_object_store';
 import { buildExpression } from './expression_helpers';
 import { Datasource, Visualization } from '../../types';
-import { toExpression } from '@kbn/interpreter/target/common';
 
 export interface Props {
   datasource: Datasource;
@@ -30,7 +30,13 @@ export async function save({
   try {
     dispatch({ type: 'SAVING', isSaving: true });
 
-    const expression = buildExpression(visualization, state.visualization.state, datasource, state.datasource.state, datasource.getPublicAPI(state.datasource.state, () => {}));
+    const expression = buildExpression(
+      visualization,
+      state.visualization.state,
+      datasource,
+      state.datasource.state,
+      datasource.getPublicAPI(state.datasource.state, () => {})
+    );
 
     const doc = await store.save({
       id: state.persistedId,

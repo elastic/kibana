@@ -268,7 +268,7 @@ export function getIndexPatternDatasource({
 
     getMetaData(state: IndexPatternPrivateState) {
       return {
-        filterableIndexPatterns: state.currentIndexPatternId ? [state.currentIndexPatternId] : []
+        filterableIndexPatterns: state.currentIndexPatternId ? [state.currentIndexPatternId] : [],
       };
     },
 

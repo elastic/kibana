@@ -9,5 +9,5 @@ export const PLUGIN_ID = 'lens';
 export const BASE_URL = 'app/lens';
 
 export function getEditPath(id: string) {
-  return `/${BASE_URL}#/edit/${encodeURIComponent(id)}`
+  return `/${BASE_URL}#/edit/${encodeURIComponent(id)}`;
 }

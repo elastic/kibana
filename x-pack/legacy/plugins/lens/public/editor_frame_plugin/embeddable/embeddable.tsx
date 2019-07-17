@@ -11,6 +11,7 @@ import { render, unmountComponentAtNode } from 'react-dom';
 import { TimeRange } from 'ui/timefilter/time_history';
 import { Query, StaticIndexPattern } from 'src/legacy/core_plugins/data/public';
 import { Filter } from '@kbn/es-query';
+import { Subscription } from 'rxjs';
 import {
   Embeddable,
   EmbeddableOutput,
@@ -20,7 +21,6 @@ import {
 import { Document, DOC_TYPE } from '../../persistence';
 import { data } from '../../../../../../../src/legacy/core_plugins/data/public/setup';
 import { ExpressionWrapper } from './expression_wrapper';
-import { Subscription } from 'rxjs';
 
 const ExpressionRendererComponent = data.expressions.ExpressionRenderer;
 
@@ -64,27 +64,31 @@ export class LensEmbeddable extends Embeddable<LensEmbeddableInput, LensEmbeddab
         savedObjectId: savedVis.id!,
         editable,
         editUrl,
-        indexPatterns
+        indexPatterns,
       },
       parent
     );
 
     this.savedVis = savedVis;
-    this.subscription = this.getInput$().subscribe((input) => this.onContainerStateChanged(input));
+    this.subscription = this.getInput$().subscribe(input => this.onContainerStateChanged(input));
     this.onContainerStateChanged(initialInput);
   }
 
   onContainerStateChanged(containerState: LensEmbeddableInput) {
-    const cleanedFilters = containerState.filters ? containerState.filters.filter(filter => !filter.meta.disabled) : undefined;
-    if (!_.isEqual(containerState.timeRange, this.prevTimeRange) ||
-        !_.isEqual(containerState.query, this.prevQuery) ||
-        !_.isEqual(cleanedFilters, this.prevFilters)) {
-        this.prevTimeRange = containerState.timeRange;
-        this.prevQuery = containerState.query;
-        this.prevFilters = cleanedFilters;
-        if (this.domNode) {
-          this.render(this.domNode);
-        }
+    const cleanedFilters = containerState.filters
+      ? containerState.filters.filter(filter => !filter.meta.disabled)
+      : undefined;
+    if (
+      !_.isEqual(containerState.timeRange, this.prevTimeRange) ||
+      !_.isEqual(containerState.query, this.prevQuery) ||
+      !_.isEqual(cleanedFilters, this.prevFilters)
+    ) {
+      this.prevTimeRange = containerState.timeRange;
+      this.prevQuery = containerState.query;
+      this.prevFilters = cleanedFilters;
+      if (this.domNode) {
+        this.render(this.domNode);
+      }
     }
   }
 
