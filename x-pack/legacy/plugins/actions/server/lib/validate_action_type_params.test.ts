@@ -6,6 +6,11 @@
 
 import { schema } from '@kbn/config-schema';
 import { validateActionTypeParams } from './validate_action_type_params';
+import { ExecutorType } from '../types';
+
+const executor: ExecutorType = async options => {
+  return { status: 'ok' };
+};
 
 test('should return passed in params when validation not defined', () => {
   const result = validateActionTypeParams(
@@ -13,7 +18,7 @@ test('should return passed in params when validation not defined', () => {
       id: 'my-action-type',
       name: 'My action type',
       unencryptedAttributes: [],
-      async executor() {},
+      executor,
     },
     {
       foo: true,
@@ -36,7 +41,7 @@ test('should validate and apply defaults when params is valid', () => {
           param2: schema.string({ defaultValue: 'default-value' }),
         }),
       },
-      async executor() {},
+      executor,
     },
     { param1: 'value' }
   );
@@ -58,7 +63,7 @@ test('should validate and throw error when params is invalid', () => {
             param1: schema.string(),
           }),
         },
-        async executor() {},
+        executor,
       },
       {}
     )
