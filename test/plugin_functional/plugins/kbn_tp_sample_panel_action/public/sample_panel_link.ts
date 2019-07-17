@@ -18,11 +18,9 @@
  */
 import {
   Action,
-  actionRegistry,
-  triggerRegistry,
   CONTEXT_MENU_TRIGGER,
-  attachAction,
-} from 'plugins/embeddable_api';
+} from 'src/legacy/core_plugins/embeddable_api/public/np_ready/public';
+import { setup } from 'src/legacy/core_plugins/embeddable_api/public/np_ready/public/legacy';
 
 class SamplePanelLink extends Action {
   public readonly type = 'samplePanelLink';
@@ -44,6 +42,6 @@ class SamplePanelLink extends Action {
   };
 }
 
-actionRegistry.set('samplePanelLink', new SamplePanelLink());
-
-attachAction(triggerRegistry, { triggerId: CONTEXT_MENU_TRIGGER, actionId: 'samplePanelLink' });
+const action = new SamplePanelLink();
+setup.registerAction(action);
+setup.attachAction(CONTEXT_MENU_TRIGGER, action.id);

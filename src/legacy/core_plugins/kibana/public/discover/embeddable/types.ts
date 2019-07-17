@@ -26,7 +26,7 @@ import {
   EmbeddableInput,
   EmbeddableOutput,
   IEmbeddable,
-} from '../../../../embeddable_api/public/index';
+} from '../../../../embeddable_api/public/np_ready/public';
 
 export interface SearchInput extends EmbeddableInput {
   timeRange: TimeRange;

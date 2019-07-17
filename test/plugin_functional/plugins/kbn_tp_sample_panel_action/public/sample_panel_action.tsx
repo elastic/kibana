@@ -21,13 +21,11 @@ import React from 'react';
 import { npStart } from 'ui/new_platform';
 
 import {
-  ActionContext,
-  actionRegistry,
   Action,
-  triggerRegistry,
-  attachAction,
+  ActionContext,
   CONTEXT_MENU_TRIGGER,
-} from 'plugins/embeddable_api';
+} from 'src/legacy/core_plugins/embeddable_api/public/np_ready/public';
+import { setup } from 'src/legacy/core_plugins/embeddable_api/public/np_ready/public/legacy';
 
 class SamplePanelAction extends Action {
   public readonly type = 'samplePanelAction';
@@ -62,5 +60,6 @@ class SamplePanelAction extends Action {
   };
 }
 
-actionRegistry.set('samplePanelAction', new SamplePanelAction());
-attachAction(triggerRegistry, { triggerId: CONTEXT_MENU_TRIGGER, actionId: 'samplePanelAction' });
+const action = new SamplePanelAction();
+setup.registerAction(action);
+setup.attachAction(CONTEXT_MENU_TRIGGER, action.id);
