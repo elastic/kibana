@@ -10,6 +10,9 @@ import { AssetReference, AssetType, InstallationAttributes } from '../../common/
 import * as Registry from '../registry';
 import { CallESAsCurrentUser, assetUsesObjects, getInstallationObject } from './index';
 
+type ArchiveAsset = Pick<SavedObject, 'attributes' | 'migrationVersion' | 'references'>;
+type SavedObjectToBe = Required<SavedObjectsBulkCreateObject>;
+
 export async function installIntegration(options: {
   savedObjectsClient: SavedObjectsClientContract;
   pkgkey: string;
@@ -83,15 +86,12 @@ async function installObjects({
   savedObjectsClient: SavedObjectsClientContract;
   pkgkey: string;
   asset: AssetType;
-}): Promise<AssetReference[]> {
-  const filter = (entry: Registry.ArchiveEntry) => asset === Registry.pathParts(entry.path).type;
-  const toBeSavedObjects = await getObjects(pkgkey, filter);
-  const createResults = await savedObjectsClient.bulkCreate<InstallationAttributes>(
-    toBeSavedObjects,
-    { overwrite: true }
-  );
+}) {
+  const isSameType = ({ path }: Registry.ArchiveEntry) => asset === Registry.pathParts(path).type;
+  const toBeSavedObjects = await getObjects(pkgkey, isSameType);
+  const createResults = await savedObjectsClient.bulkCreate(toBeSavedObjects, { overwrite: true });
   const createdObjects = createResults.saved_objects;
-  const installed = createdObjects.map(({ id, type }) => ({ id, type }));
+  const installed = createdObjects.map(toAssetReference);
 
   return installed;
 }
@@ -131,12 +131,18 @@ async function installPipeline({
   return { id, type };
 }
 
+function toAssetReference({ id, type }: SavedObject) {
+  const reference: AssetReference = { id, type };
+
+  return reference;
+}
+
 async function getObjects(
   pkgkey: string,
   filter = (entry: Registry.ArchiveEntry): boolean => true
-): Promise<SavedObject[]> {
+): Promise<SavedObjectToBe[]> {
   // Create a Map b/c some values, especially index-patterns, are referenced multiple times
-  const objects: Map<string, SavedObject> = new Map();
+  const objects: Map<string, SavedObjectToBe> = new Map();
 
   // Get paths which match the given filter
   const paths = await Registry.getArchiveInfo(pkgkey, filter);
@@ -147,9 +153,9 @@ async function getObjects(
 
   // Each of those objects might have `references` property like [{id, type, name}]
   for (const object of rootObjects) {
-    // For each of those objects
+    // For each of those objects, if they have references
     for (const reference of object.references) {
-      // Get the objects they reference. Call same function with a new filter
+      // Get the referenced objects. Call same function with a new filter
       const referencedObjects = await getObjects(pkgkey, (entry: Registry.ArchiveEntry) => {
         // Skip anything we've already stored
         if (objects.has(reference.id)) return false;
@@ -173,7 +179,7 @@ async function getObjects(
 
 // the assets from the registry are malformed
 // https://github.com/elastic/integrations-registry/issues/42
-function ensureJsonValues(obj: SavedObject) {
+function ensureJsonValues(obj: SavedObjectToBe) {
   const { attributes } = obj;
   if (
     attributes.kibanaSavedObjectMeta &&
@@ -183,6 +189,7 @@ function ensureJsonValues(obj: SavedObject) {
       attributes.kibanaSavedObjectMeta.searchSourceJSON
     );
   }
+
   ['optionsJSON', 'panelsJSON', 'uiStateJSON', 'visState']
     .filter(key => typeof attributes[key] !== 'string')
     .forEach(key => (attributes[key] = JSON.stringify(attributes[key])));
@@ -196,14 +203,15 @@ function getObject(key: string) {
   // cache values are buffers. convert to string / JSON
   const json = buffer.toString('utf8');
   // convert that to an object & address issues with the formatting of some parts
-  const asset = ensureJsonValues(JSON.parse(json));
+  const asset: ArchiveAsset = ensureJsonValues(JSON.parse(json));
 
   const { type, file } = Registry.pathParts(key);
-  const savedObject: SavedObject = {
-    type: asset.type || type,
-    id: asset.id || file.replace('.json', ''),
-    attributes: asset,
+  const savedObject: SavedObjectToBe = {
+    type,
+    id: file.replace('.json', ''),
+    attributes: asset.attributes,
     references: asset.references || [],
+    migrationVersion: asset.migrationVersion || {},
   };
 
   return savedObject;
