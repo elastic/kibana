@@ -15,6 +15,7 @@ describe('getTransactionBreakdown', () => {
 
     const response = await getTransactionBreakdown({
       serviceName: 'myServiceName',
+      transactionType: 'request',
       setup: {
         start: 0,
         end: 500000,
@@ -37,6 +38,7 @@ describe('getTransactionBreakdown', () => {
 
     const response = await getTransactionBreakdown({
       serviceName: 'myServiceName',
+      transactionType: 'request',
       setup: {
         start: 0,
         end: 500000,
@@ -76,6 +78,7 @@ describe('getTransactionBreakdown', () => {
 
     const response = await getTransactionBreakdown({
       serviceName: 'myServiceName',
+      transactionType: 'request',
       setup: {
         start: 0,
         end: 500000,
@@ -114,6 +117,7 @@ describe('getTransactionBreakdown', () => {
 
     const response = await getTransactionBreakdown({
       serviceName: 'myServiceName',
+      transactionType: 'request',
       setup: {
         start: 0,
         end: 500000,

@@ -8,7 +8,7 @@ import { schema, TypeOf, Type } from '@kbn/config-schema';
 import nodemailerServices from 'nodemailer/lib/well-known/services.json';
 
 import { sendEmail, JSON_TRANSPORT_SERVICE } from './lib/send_email';
-import { ActionType, ActionTypeExecutorOptions } from '../types';
+import { ActionType, ActionTypeExecutorOptions, ActionTypeExecutorResult } from '../types';
 
 const PORT_MAX = 256 * 256 - 1;
 
@@ -107,9 +107,10 @@ export const actionType: ActionType = {
 
 // action executor
 
-async function executor(execOptions: ActionTypeExecutorOptions): Promise<any> {
+async function executor(execOptions: ActionTypeExecutorOptions): Promise<ActionTypeExecutorResult> {
   const config = execOptions.config as ActionTypeConfigType;
   const params = execOptions.params as ActionParamsType;
+  const services = execOptions.services;
 
   const transport: any = {
     user: config.user,
@@ -138,7 +139,18 @@ async function executor(execOptions: ActionTypeExecutorOptions): Promise<any> {
     },
   };
 
-  return await sendEmail(sendEmailOptions);
+  let result;
+
+  try {
+    result = await sendEmail(services, sendEmailOptions);
+  } catch (err) {
+    return {
+      status: 'error',
+      message: `error sending email: ${err.message}`,
+    };
+  }
+
+  return { status: 'ok', data: result };
 }
 
 // utilities
