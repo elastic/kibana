@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useMemo, useContext } from 'react';
+import React, { useMemo, useContext, memo } from 'react';
 import { EuiSelect } from '@elastic/eui';
 import { NativeRenderer } from '../../native_renderer';
 import { Action } from './state_management';
@@ -46,7 +46,7 @@ function getSuggestedVisualizationState(
   // return visualization.initialize(frame, suggestions[0].state);
 }
 
-export function ConfigPanelWrapper(props: ConfigPanelWrapperProps) {
+export const ConfigPanelWrapper = memo(function ConfigPanelWrapper(props: ConfigPanelWrapperProps) {
   const context = useContext(DragContext);
   const setVisualizationState = useMemo(
     () => (newState: unknown) => {
@@ -94,4 +94,4 @@ export function ConfigPanelWrapper(props: ConfigPanelWrapperProps) {
       )}
     </>
   );
-}
+});

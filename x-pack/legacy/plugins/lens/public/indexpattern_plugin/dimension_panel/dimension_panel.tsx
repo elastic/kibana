@@ -5,7 +5,7 @@
  */
 
 import _ from 'lodash';
-import React from 'react';
+import React, { memo, useMemo } from 'react';
 import { EuiFlexItem, EuiFlexGroup, EuiButtonIcon } from '@elastic/eui';
 import { Storage } from 'ui/storage';
 import { i18n } from '@kbn/i18n';
@@ -34,9 +34,21 @@ export type IndexPatternDimensionPanelProps = DatasourceDimensionPanelProps & {
   layerId: string;
 };
 
-export function IndexPatternDimensionPanel(props: IndexPatternDimensionPanelProps) {
+export const IndexPatternDimensionPanel = memo(function IndexPatternDimensionPanel(
+  props: IndexPatternDimensionPanelProps
+) {
   const layerId = props.layerId;
-  const columns = getPotentialColumns(props, props.suggestedPriority);
+  const indexPatternId = props.state.layers[layerId].indexPatternId;
+  const columns = useMemo(
+    () =>
+      getPotentialColumns({
+        fields: props.state.indexPatterns[indexPatternId].fields,
+        suggestedPriority: props.suggestedPriority,
+        layer: props.state.layers[layerId],
+        layerId,
+      }),
+    [indexPatternId, props.suggestedPriority, layerId]
+  );
 
   const filteredColumns = columns.filter(col => {
     return props.filterOperations(columnToOperation(col));
@@ -70,7 +82,15 @@ export function IndexPatternDimensionPanel(props: IndexPatternDimensionPanelProp
             return;
           }
 
-          props.setState(changeColumn(props.state, layerId, props.columnId, column));
+          props.setState(
+            changeColumn({
+              state: props.state,
+              layerId,
+              // layers: props.state.layers,
+              columnId: props.columnId,
+              newColumn: column,
+            })
+          );
         }}
       >
         <EuiFlexGroup alignItems="center">
@@ -93,7 +113,13 @@ export function IndexPatternDimensionPanel(props: IndexPatternDimensionPanelProp
                     defaultMessage: 'Remove',
                   })}
                   onClick={() => {
-                    props.setState(deleteColumn(props.state, layerId, props.columnId));
+                    props.setState(
+                      deleteColumn({
+                        state: props.state,
+                        layerId,
+                        columnId: props.columnId,
+                      })
+                    );
                   }}
                 />
               </EuiFlexItem>
@@ -103,4 +129,4 @@ export function IndexPatternDimensionPanel(props: IndexPatternDimensionPanelProp
       </DragDrop>
     </ChildDragDropProvider>
   );
-}
+});

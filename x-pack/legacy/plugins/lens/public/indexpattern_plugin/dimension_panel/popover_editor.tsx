@@ -105,7 +105,14 @@ export function PopoverEditor(props: PopoverEditorProps) {
                   !hasField(selectedColumn) ||
                   col.sourceField === selectedColumn.sourceField)
             )!;
-            setState(changeColumn(state, layerId, columnId, newColumn));
+            setState(
+              changeColumn({
+                state,
+                layerId,
+                columnId,
+                newColumn,
+              })
+            );
           },
         })
       ),
@@ -148,10 +155,23 @@ export function PopoverEditor(props: PopoverEditorProps) {
             selectedColumn={selectedColumn}
             incompatibleSelectedOperationType={incompatibleSelectedOperationType}
             onDeleteColumn={() => {
-              setState(deleteColumn(state, layerId, columnId));
+              setState(
+                deleteColumn({
+                  state,
+                  layerId,
+                  columnId,
+                })
+              );
             }}
             onChangeColumn={column => {
-              setState(changeColumn(state, layerId, columnId, column));
+              setState(
+                changeColumn({
+                  state,
+                  layerId,
+                  columnId,
+                  newColumn: column,
+                })
+              );
               setInvalidOperationType(null);
             }}
           />
@@ -196,9 +216,14 @@ export function PopoverEditor(props: PopoverEditorProps) {
                     value={selectedColumn.label}
                     onChange={e => {
                       setState(
-                        changeColumn(state, layerId, columnId, {
-                          ...selectedColumn,
-                          label: e.target.value,
+                        changeColumn({
+                          state,
+                          layerId,
+                          columnId,
+                          newColumn: {
+                            ...selectedColumn,
+                            label: e.target.value,
+                          },
                         })
                       );
                     }}

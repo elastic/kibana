@@ -14,14 +14,12 @@ import { Datasource, Visualization, FramePublicAPI } from '../../types';
 import { DragDrop, DragContext } from '../../drag_drop';
 import { getSuggestions, toSwitchAction } from './suggestion_helpers';
 import { buildExpression } from './expression_helpers';
+import { debouncedComponent } from '../../debounced_component';
 
 export interface WorkspacePanelProps {
-  // activeDatasource: Datasource;
-  // datasourceState: unknown;
   activeVisualizationId: string | null;
   visualizationMap: Record<string, Visualization>;
   visualizationState: unknown;
-  // datasourcePublicAPI: DatasourcePublicAPI;
   activeDatasourceId: string | null;
   datasourceMap: Record<string, Datasource>;
   datasourceStates: Record<
@@ -36,14 +34,14 @@ export interface WorkspacePanelProps {
   ExpressionRenderer: ExpressionRenderer;
 }
 
-export function WorkspacePanel({
-  // activeDatasource,
+export const WorkspacePanel = debouncedComponent(InnerWorkspacePanel);
+
+// Exported for testing purposes only.
+export function InnerWorkspacePanel({
   activeDatasourceId,
   activeVisualizationId,
-  // datasourceState,
   visualizationMap,
   visualizationState,
-  // datasourcePublicAPI,
   datasourceMap,
   datasourceStates,
   framePublicAPI,
@@ -96,24 +94,14 @@ export function WorkspacePanel({
         return buildExpression({
           visualization: activeVisualization,
           visualizationState,
-          // activeDatasource,
           datasourceMap,
           datasourceStates,
-          // datasourceState,
           framePublicAPI,
-          // datasourcePublicAPI
         });
       } catch (e) {
         setExpressionError(e.toString());
       }
-    }, [
-      activeVisualization,
-      visualizationState,
-      activeDatasourceId,
-      // activeDatasource,
-      datasourceStates,
-      // datasourcePublicAPI,
-    ]);
+    }, [activeVisualization, visualizationState, activeDatasourceId, datasourceStates]);
 
     useEffect(() => {
       // reset expression error if component attempts to run it again

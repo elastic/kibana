@@ -150,6 +150,7 @@ describe('getOperationTypesForField', () => {
         currentIndexPatternId: '1',
         layers: {
           first: {
+            indexPatternId: '1',
             columnOrder: ['col1'],
             columns: {
               col1: {
@@ -161,6 +162,7 @@ describe('getOperationTypesForField', () => {
                 // Private
                 operationType: 'date_histogram',
                 sourceField: 'timestamp',
+                indexPatternId: '1',
                 params: {
                   interval: 'h',
                 },
@@ -172,13 +174,22 @@ describe('getOperationTypesForField', () => {
     });
 
     it('should include priority', () => {
-      const columns = getPotentialColumns({ state, suggestedPriority: 1, layerId: 'first' });
+      const columns = getPotentialColumns({
+        fields: state.indexPatterns[state.currentIndexPatternId].fields,
+        suggestedPriority: 1,
+        layerId: 'first',
+        layer: state.layers.first,
+      });
 
       expect(columns.every(col => col.suggestedPriority === 1)).toEqual(true);
     });
 
     it('should list operations by field for a regular index pattern', () => {
-      const columns = getPotentialColumns({ state, layerId: 'first' });
+      const columns = getPotentialColumns({
+        fields: state.indexPatterns[state.currentIndexPatternId].fields,
+        layerId: 'first',
+        layer: state.layers.first,
+      });
 
       expect(
         columns.map(col => [hasField(col) ? col.sourceField : '_documents_', col.operationType])

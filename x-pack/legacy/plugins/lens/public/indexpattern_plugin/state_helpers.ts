@@ -70,27 +70,30 @@ function adjustColumnReferencesForChangedColumn(
   return newColumns;
 }
 
-export function changeColumn(
-  state: IndexPatternPrivateState,
-  layerId: string,
-  columnId: string,
-  newColumn: IndexPatternColumn,
-  { keepParams }: { keepParams: boolean } = { keepParams: true }
-) {
+export function changeColumn({
+  state,
+  layerId,
+  columnId,
+  newColumn,
+  // extra,
+  keepParams,
+}: {
+  state: IndexPatternPrivateState;
+  layerId: string;
+  columnId: string;
+  newColumn: IndexPatternColumn;
+  keepParams?: boolean;
+}): IndexPatternPrivateState {
   const oldColumn = state.layers[layerId].columns[columnId];
 
   const updatedColumn =
-    keepParams &&
+    (typeof keepParams === 'boolean' ? keepParams : true) &&
     oldColumn &&
     oldColumn.operationType === newColumn.operationType &&
     'params' in oldColumn
       ? ({ ...newColumn, params: oldColumn.params } as IndexPatternColumn)
       : newColumn;
 
-  // const newColumns: Record<string, IndexPatternColumn> = {
-  //   ...state.layers[layerId].columns,
-  //   [columnId]: updatedColumn,
-  // };
   const newColumns = adjustColumnReferencesForChangedColumn(
     {
       ...state.layers[layerId].columns,
@@ -112,7 +115,15 @@ export function changeColumn(
   };
 }
 
-export function deleteColumn(state: IndexPatternPrivateState, layerId: string, columnId: string) {
+export function deleteColumn({
+  state,
+  layerId,
+  columnId,
+}: {
+  state: IndexPatternPrivateState;
+  layerId: string;
+  columnId: string;
+}): IndexPatternPrivateState {
   const newColumns = adjustColumnReferencesForChangedColumn(
     state.layers[layerId].columns,
     columnId
@@ -135,7 +146,7 @@ export function deleteColumn(state: IndexPatternPrivateState, layerId: string, c
 export function getColumnOrder(columns: Record<string, IndexPatternColumn>): string[] {
   const entries = Object.entries(columns);
 
-  const [aggregations, metrics] = _.partition(entries, col => col[1].isBucketed);
+  const [aggregations, metrics] = _.partition(entries, ([id, col]) => col.isBucketed);
 
   return aggregations
     .sort(([id, col], [id2, col2]) => {
