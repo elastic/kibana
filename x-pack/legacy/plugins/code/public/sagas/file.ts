@@ -247,7 +247,10 @@ function* handleFetchFile(action: Action<FetchFilePayload>) {
       yield put(setNotFound(true));
       yield put(fetchFileFailed(new Error('file not found')));
     } else {
-      yield put(fetchFileSuccess(results));
+      const path = yield select(currentPathSelector);
+      if (path === action.payload!.path) {
+        yield put(fetchFileSuccess(results));
+      }
     }
   } catch (err) {
     yield put(fetchFileFailed(err));

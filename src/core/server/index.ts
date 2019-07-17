@@ -128,6 +128,7 @@ export interface CoreSetup {
     ) => ClusterClient;
   };
   http: {
+    createCookieSessionStorageFactory: HttpServiceSetup['createCookieSessionStorageFactory'];
     registerOnPreAuth: HttpServiceSetup['registerOnPreAuth'];
     registerAuth: HttpServiceSetup['registerAuth'];
     registerOnPostAuth: HttpServiceSetup['registerOnPostAuth'];
