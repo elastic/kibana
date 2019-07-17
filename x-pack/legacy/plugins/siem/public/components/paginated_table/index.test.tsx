@@ -65,7 +65,7 @@ describe('Paginated Table Component', () => {
         <ThemeProvider theme={theme}>
           <PaginatedTable
             columns={getHostsColumns()}
-            headerCount={1}
+            headerCount={-1}
             headerSupplement={<p>{'My test supplement.'}</p>}
             headerTitle="Hosts"
             headerTooltip="My test tooltip"

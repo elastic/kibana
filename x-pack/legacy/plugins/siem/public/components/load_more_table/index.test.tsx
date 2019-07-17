@@ -50,7 +50,7 @@ describe('Load More Table Component', () => {
           <LoadMoreTable
             columns={getHostsColumns()}
             hasNextPage={mockData.Hosts.pageInfo.hasNextPage!}
-            headerCount={1}
+            headerCount={-1}
             headerSupplement={<p>{'My test supplement.'}</p>}
             headerTitle="Hosts"
             headerTooltip="My test tooltip"
