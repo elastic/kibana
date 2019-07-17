@@ -396,7 +396,7 @@ export class ElasticsearchMonitorStatesAdapter implements UMMonitorStatesAdapter
       );
       monitors.push(...this.getMonitorBuckets(result, statusFilter));
       searchAfter = afterKey;
-    } while (searchAfter !== null && monitors.length < size);
+    } while (searchAfter !== null && monitors.length < 50);
 
     const monitorIds: string[] = [];
     const summaries: MonitorSummary[] = monitors.map((monitor: any) => {
@@ -578,50 +578,6 @@ export class ElasticsearchMonitorStatesAdapter implements UMMonitorStatesAdapter
       };
       return map;
     }, {});
-  }
-
-  public async getSummaryCount(
-    request: any,
-    dateRangeStart: string,
-    dateRangeEnd: string,
-    filters?: string | null
-  ): Promise<SnapshotCount> {
-    // TODO: adapt this to the states index in future release
-    // const { count } = await this.database.count(request, { index: 'heartbeat-states-8.0.0' });
-    // return { count };
-
-    const count: SnapshotCount = {
-      up: 0,
-      down: 0,
-      mixed: 0,
-      total: 0,
-    };
-
-    let searchAfter: any | null = null;
-    do {
-      const { afterKey, result, statusFilter } = await this.runLegacyMonitorStatesQuery(
-        request,
-        dateRangeStart,
-        dateRangeEnd,
-        filters,
-        searchAfter,
-        STATES.MAX_MONITORS
-      );
-      searchAfter = afterKey;
-      this.getMonitorBuckets(result, statusFilter).reduce((acc: SnapshotCount, monitor: any) => {
-        const status = get<string | undefined>(monitor, 'state.value.monitor.status', undefined);
-        if (status === 'up') {
-          acc.up++;
-        } else if (status === 'down') {
-          acc.down++;
-        } else if (status === 'mixed') {
-          acc.mixed++;
-        }
-        acc.total++;
-        return acc;
-      }, count);
-    } while (searchAfter !== null);
-    return count;
   }
 
   public async statesIndexExists(request: any): Promise<StatesIndexStatus> {
