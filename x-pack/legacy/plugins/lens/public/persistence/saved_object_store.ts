@@ -12,13 +12,14 @@ export interface Document {
   visualizationType: string | null;
   datasourceType: string | null;
   title: string;
+  expression: string;
   state: {
     datasource: unknown;
     visualization: unknown;
   };
 }
 
-const DOC_TYPE = 'lens';
+export const DOC_TYPE = 'lens';
 
 interface SavedObjectClient {
   create: (type: string, object: SavedObjectAttributes) => Promise<{ id: string }>;

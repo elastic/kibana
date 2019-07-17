@@ -6,34 +6,57 @@
 
 import _ from 'lodash';
 import React from 'react';
-import { Provider } from 'react-redux';
 import { render, unmountComponentAtNode } from 'react-dom';
 
-import { Embeddable, EmbeddableOutput, IContainer, EmbeddableInput } from '../../../../../../../src/legacy/core_plugins/embeddable_api/public/index';
-import { I18nContext } from 'ui/i18n';
-import { Document } from '../../persistence';
+import {
+  Embeddable,
+  EmbeddableOutput,
+  IContainer,
+  EmbeddableInput,
+} from '../../../../../../../src/legacy/core_plugins/embeddable_api/public/index';
+import { Document, DOC_TYPE } from '../../persistence';
 import { data } from '../../../../../../../src/legacy/core_plugins/data/public/setup';
+import { ExpressionWrapper } from './expression_wrapper';
 
 const ExpressionRendererComponent = data.expressions.ExpressionRenderer;
 
-export interface LensEmbeddableInput extends EmbeddableInput {
+export interface LensEmbeddableConfiguration {
   savedVis: Document;
+  editUrl: string;
+  editable: boolean;
 }
 
+export interface LensEmbeddableInput extends EmbeddableInput {
+  // timeRange?: TimeRange;
+  // query?: Query;
+  // filters?: Filter[];
+}
 
-export class LensEmbeddable extends Embeddable<LensEmbeddableInput> {
-  type = 'lens';
+export interface LensEmbeddableOutput extends EmbeddableOutput {}
+
+export class LensEmbeddable extends Embeddable<LensEmbeddableInput, LensEmbeddableOutput> {
+  type = DOC_TYPE;
 
   private savedVis: Document;
   private domNode: HTMLElement | Element | undefined;
 
-  constructor(input: LensEmbeddableInput, output: EmbeddableOutput, parent?: IContainer) {
+  constructor(
+    { savedVis, editUrl, editable }: LensEmbeddableConfiguration,
+    initialInput: LensEmbeddableInput,
+    parent?: IContainer
+  ) {
     super(
-      input,
-      output,
-      parent);
+      initialInput,
+      {
+        defaultTitle: savedVis.title,
+        savedObjectId: savedVis.id!,
+        editable,
+        editUrl
+      },
+      parent
+    );
 
-      this.savedVis = input.savedVis;
+    this.savedVis = savedVis;
   }
 
   /**
@@ -44,14 +67,12 @@ export class LensEmbeddable extends Embeddable<LensEmbeddableInput> {
   render(domNode: HTMLElement | Element) {
     this.domNode = domNode;
     render(
-        <ExpressionRendererComponent
-          className="lnsExpressionOutput"
-          // TODO get the expression out of the saved vis
-          expression={''}
-          onRenderFailure={(e: unknown) => {
-            // TODO error handling
-          }}
-        />, domNode);
+      <ExpressionWrapper
+        ExpressionRenderer={ExpressionRendererComponent}
+        expression={this.savedVis.expression}
+      />,
+      domNode
+    );
   }
 
   destroy() {

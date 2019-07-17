@@ -12,6 +12,9 @@
       },
       "state": {
         "type": "text"
+      },
+      "expression": {
+        "type": "text"
       }
     }
   }

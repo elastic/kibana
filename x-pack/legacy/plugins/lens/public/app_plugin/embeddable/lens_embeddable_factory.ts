@@ -13,14 +13,25 @@ import {
   embeddableFactories,
   ErrorEmbeddable,
   EmbeddableInput,
-  IContainer
+  IContainer,
 } from '../../../../../../../src/legacy/core_plugins/embeddable_api/public/index';
 import { LensEmbeddable } from './lens_embeddable';
-import { SavedObjectIndexStore } from '../../persistence';
+import { SavedObjectIndexStore, DOC_TYPE } from '../../persistence';
+import { indexPatternDatasourceSetup } from '../../indexpattern_plugin';
+import { xyVisualizationSetup } from '../../xy_visualization_plugin';
+import { editorFrameSetup } from '../../editor_frame_plugin';
+import { datatableVisualizationSetup } from '../../datatable_visualization_plugin';
+import { getEditPath } from '../../../common';
 
+// bootstrap shimmed plugins to register everything necessary to the expression.
+// the new platform will take care of this once in place
+indexPatternDatasourceSetup();
+datatableVisualizationSetup();
+xyVisualizationSetup();
+editorFrameSetup();
 
 export class LensEmbeddableFactory extends EmbeddableFactory {
-  type = 'lens';
+  type = DOC_TYPE;
 
   constructor() {
     super({
@@ -28,18 +39,20 @@ export class LensEmbeddableFactory extends EmbeddableFactory {
         name: i18n.translate('xpack.lens.lensSavedObjectLabel', {
           defaultMessage: 'Lens Visualization',
         }),
-        type: 'lens',
-        getIconForSavedObject: () => 'happyFace',
+        type: DOC_TYPE,
+        getIconForSavedObject: () => 'faceHappy',
       },
     });
   }
-  isEditable() {
-    // TODO make it possible
-    return false;
+
+  public isEditable() {
+    return capabilities.get().lens.save as boolean;
   }
 
   // Not supported yet for maps types.
-  canCreateNew() { return false; }
+  canCreateNew() {
+    return false;
+  }
 
   getDisplayName() {
     return i18n.translate('xpack.lens.embeddableDisplayName', {
@@ -49,7 +62,7 @@ export class LensEmbeddableFactory extends EmbeddableFactory {
 
   async createFromSavedObject(
     savedObjectId: string,
-    input: Partial<EmbeddableInput>,
+    input: Partial<EmbeddableInput> & { id: string },
     parent?: IContainer
   ) {
     const store = new SavedObjectIndexStore(chrome.getSavedObjectsClient());
@@ -59,7 +72,8 @@ export class LensEmbeddableFactory extends EmbeddableFactory {
     return new LensEmbeddable(
       {
         savedVis,
-        id: savedObjectId
+        editUrl: chrome.addBasePath(getEditPath(savedObjectId)),
+        editable: this.isEditable(),
       },
       input,
       parent
@@ -67,7 +81,7 @@ export class LensEmbeddableFactory extends EmbeddableFactory {
   }
 
   async create(input: EmbeddableInput) {
-        // TODO fix this
+    // TODO fix this
     window.location.href = chrome.addBasePath('lens/abc');
     return new ErrorEmbeddable('Lens can only be created from a saved object', input);
   }

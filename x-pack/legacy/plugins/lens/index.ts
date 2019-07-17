@@ -9,7 +9,7 @@ import { Server } from 'hapi';
 import { resolve } from 'path';
 import { LegacyPluginInitializer } from 'src/legacy/types';
 import mappings from './mappings.json';
-import { PLUGIN_ID } from './common';
+import { PLUGIN_ID, getEditPath } from './common';
 
 const NOT_INTERNATIONALIZED_PRODUCT_NAME = 'Lens Visualizations';
 
@@ -27,7 +27,7 @@ export const lens: LegacyPluginInitializer = kibana => {
         main: `plugins/${PLUGIN_ID}/index`,
       },
       embeddableFactories: [
-        'plugins/lens/app_plugin/embeddable/embeddable_factory'
+        'plugins/lens/app_plugin/embeddable/lens_embeddable_factory'
       ],
       styleSheetPaths: resolve(__dirname, 'public/index.scss'),
       mappings,
@@ -38,7 +38,7 @@ export const lens: LegacyPluginInitializer = kibana => {
           isImportableAndExportable: true,
           getTitle: (obj: { attributes: { title: string } }) => obj.attributes.title,
           getInAppUrl: (obj: { id: string }) => ({
-            path: `/app/lens#/edit/${encodeURIComponent(obj.id)}`,
+            path: getEditPath(obj.id),
             uiCapabilitiesPath: 'lens.show',
           }),
         },
@@ -69,7 +69,7 @@ export const lens: LegacyPluginInitializer = kibana => {
               all: [],
               read: [],
             },
-            ui: ['show'],
+            ui: ['save', 'show'],
           },
           read: {
             api: [PLUGIN_ID],

@@ -8,6 +8,7 @@ import { Action, EditorFrameState } from './state_management';
 import { Document } from '../../persistence/saved_object_store';
 import { buildExpression } from './expression_helpers';
 import { Datasource, Visualization } from '../../types';
+import { toExpression } from '@kbn/interpreter/target/common';
 
 export interface Props {
   datasource: Datasource;
@@ -37,6 +38,7 @@ export async function save({
       type: 'lens',
       visualizationType: state.visualization.activeId,
       datasourceType: state.datasource.activeId,
+      expression: expression ? toExpression(expression) : '',
       state: {
         datasource: datasource.getPersistableState(state.datasource.state),
         visualization: visualization.getPersistableState(state.visualization.state),
