@@ -133,7 +133,7 @@ class DomainsComponentQuery extends QueryTemplate<
             inspect: getOr(null, 'source.Domains.inspect', data),
             refetch,
             loading,
-            totalCount: getOr(0, 'source.Domains.totalCount', data),
+            totalCount: getOr(-1, 'source.Domains.totalCount', data),
             domains,
             pageInfo: getOr({}, 'source.Domains.pageInfo', data),
             loadMore: this.wrappedLoadMore,

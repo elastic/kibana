@@ -133,7 +133,7 @@ class NetworkTopNFlowComponentQuery extends QueryTemplate<
             inspect: getOr(null, 'source.NetworkTopNFlow.inspect', data),
             refetch,
             loading,
-            totalCount: getOr(0, 'source.NetworkTopNFlow.totalCount', data),
+            totalCount: getOr(-1, 'source.NetworkTopNFlow.totalCount', data),
             networkTopNFlow,
             pageInfo: getOr({}, 'source.NetworkTopNFlow.pageInfo', data),
             loadMore: this.wrappedLoadMore,

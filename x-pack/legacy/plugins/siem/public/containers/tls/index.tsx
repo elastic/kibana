@@ -119,7 +119,7 @@ class TlsComponentQuery extends QueryTemplate<TlsProps, GetTlsQuery.Query, GetTl
             inspect: getOr(null, 'source.Tls.inspect', data),
             refetch,
             loading,
-            totalCount: getOr(0, 'source.Tls.totalCount', data),
+            totalCount: getOr(-1, 'source.Tls.totalCount', data),
             tls,
             pageInfo: getOr({}, 'source.Tls.pageInfo', data),
             loadMore: this.wrappedLoadMore,

@@ -119,7 +119,7 @@ class EventsComponentQuery extends QueryTemplate<
             inspect: getOr(null, 'source.Events.inspect', data),
             refetch,
             loading,
-            totalCount: getOr(0, 'source.Events.totalCount', data),
+            totalCount: getOr(-1, 'source.Events.totalCount', data),
             pageInfo: getOr({}, 'source.Events.pageInfo', data),
             events,
             loadMore: this.wrappedLoadMore,

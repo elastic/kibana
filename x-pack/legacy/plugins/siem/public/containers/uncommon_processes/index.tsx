@@ -117,7 +117,7 @@ class UncommonProcessesComponentQuery extends QueryTemplate<
             inspect: getOr(null, 'source.UncommonProcesses.inspect', data),
             loading,
             refetch,
-            totalCount: getOr(0, 'source.UncommonProcesses.totalCount', data),
+            totalCount: getOr(-1, 'source.UncommonProcesses.totalCount', data),
             uncommonProcesses,
             pageInfo: getOr({}, 'source.UncommonProcesses.pageInfo', data),
             loadMore: this.wrappedLoadMore,

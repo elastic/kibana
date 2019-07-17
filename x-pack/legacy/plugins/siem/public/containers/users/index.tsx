@@ -129,7 +129,7 @@ class UsersComponentQuery extends QueryTemplate<
             inspect: getOr(null, 'source.Users.inspect', data),
             refetch,
             loading,
-            totalCount: getOr(0, 'source.Users.totalCount', data),
+            totalCount: getOr(-1, 'source.Users.totalCount', data),
             users,
             pageInfo: getOr({}, 'source.Users.pageInfo', data),
             loadMore: this.wrappedLoadMore,

@@ -118,7 +118,7 @@ export class LoadMoreTable<T, U, V, W, X, Y, Z, AA, AB> extends React.PureCompon
   BasicTableState
 > {
   public readonly state = {
-    isEmptyTable: this.props.pageOfItems.length === 0,
+    isEmptyTable: this.props.headerCount === -1,
     isPopoverOpen: false,
     showInspect: false,
   };
@@ -127,7 +127,7 @@ export class LoadMoreTable<T, U, V, W, X, Y, Z, AA, AB> extends React.PureCompon
     props: BasicTableProps<T, U, V, W, X, Y, Z, AA, AB>,
     state: BasicTableState
   ) {
-    if (state.isEmptyTable && !isEmpty(props.pageOfItems)) {
+    if (state.isEmptyTable && props.headerCount >= 0) {
       return {
         ...state,
         isEmptyTable: false,

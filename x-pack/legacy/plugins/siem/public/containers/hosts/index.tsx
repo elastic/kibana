@@ -146,7 +146,7 @@ class HostsComponentQuery extends QueryTemplate<
             inspect: getOr(null, 'source.Hosts.inspect', data),
             refetch,
             loading,
-            totalCount: getOr(0, 'source.Hosts.totalCount', data),
+            totalCount: getOr(-1, 'source.Hosts.totalCount', data),
             hosts: this.memoizedHosts(JSON.stringify(variables), get('source', data)),
             startDate,
             endDate,

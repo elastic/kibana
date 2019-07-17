@@ -128,7 +128,7 @@ class NetworkDnsComponentQuery extends QueryTemplate<
             inspect: getOr(null, 'source.NetworkDns.inspect', data),
             refetch,
             loading,
-            totalCount: getOr(0, 'source.NetworkDns.totalCount', data),
+            totalCount: getOr(-1, 'source.NetworkDns.totalCount', data),
             networkDns,
             pageInfo: getOr({}, 'source.NetworkDns.pageInfo', data),
             loadMore: this.wrappedLoadMore,
