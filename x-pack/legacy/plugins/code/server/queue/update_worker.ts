@@ -59,7 +59,7 @@ export class UpdateWorker extends AbstractGitWorker {
     });
 
     if (cancellationToken) {
-      this.cancellationService.registerCancelableUpdateJob(
+      await this.cancellationService.registerCancelableUpdateJob(
         repo.uri,
         cancellationToken,
         updateJobPromise

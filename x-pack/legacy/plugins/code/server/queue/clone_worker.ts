@@ -94,7 +94,7 @@ export class CloneWorker extends AbstractGitWorker {
     );
 
     if (cancellationToken) {
-      this.cancellationService.registerCancelableCloneJob(
+      await this.cancellationService.registerCancelableCloneJob(
         repo.uri,
         cancellationToken,
         cloneJobPromise

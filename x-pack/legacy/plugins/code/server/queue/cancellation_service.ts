@@ -56,7 +56,7 @@ export class CancellationSerivce {
     token: CancellationToken,
     jobPromise: Promise<any>
   ) {
-    await this.registerCancelableJob(this.updateCancellationMap, repoUri, token, jobPromise);
+    await this.registerCancelableJob(this.indexCancellationMap, repoUri, token, jobPromise);
   }
 
   private async registerCancelableJob(
@@ -67,10 +67,7 @@ export class CancellationSerivce {
   ) {
     // Try to cancel the job first.
     await this.cancelJob(jobMap, repoUri);
-    this.cloneCancellationMap.set(repoUri, {
-      token,
-      jobPromise,
-    });
+    jobMap.set(repoUri, { token, jobPromise });
   }
 
   private async cancelJob(jobMap: Map<RepositoryUri, CancellableJob>, repoUri: RepositoryUri) {
@@ -82,7 +79,7 @@ export class CancellationSerivce {
       // 2. waiting on the actual job promise to be resolved
       await jobPromise;
       // 3. remove the record from the cancellation service
-      this.cloneCancellationMap.delete(repoUri);
+      jobMap.delete(repoUri);
     }
   }
 }

@@ -103,7 +103,7 @@ export class IndexWorker extends AbstractWorker {
         const indexJobPromise = indexer.start(progressReporter, checkpointReq);
 
         if (cancellationToken) {
-          this.cancellationService.registerCancelableIndexJob(
+          await this.cancellationService.registerCancelableIndexJob(
             uri,
             cancellationToken,
             indexJobPromise
