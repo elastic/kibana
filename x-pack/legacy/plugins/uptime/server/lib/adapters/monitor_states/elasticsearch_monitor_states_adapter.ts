@@ -382,8 +382,7 @@ export class ElasticsearchMonitorStatesAdapter implements UMMonitorStatesAdapter
         dateRangeStart,
         dateRangeEnd,
         filters,
-        searchAfter,
-        50
+        searchAfter
       );
       monitors.push(...this.getMonitorBuckets(result, statusFilter));
       searchAfter = afterKey;
