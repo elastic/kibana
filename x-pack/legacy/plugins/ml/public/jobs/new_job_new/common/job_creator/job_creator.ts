@@ -143,18 +143,20 @@ export class JobCreator {
     return this._job_config.description;
   }
 
-  public addGroup(group: string) {
-    if (this._job_config.groups.includes(group) === false) {
-      this._job_config.groups.push(group);
-    }
-  }
-
   public get groups(): string[] {
     return this._job_config.groups;
   }
 
   public set groups(groups: string[]) {
     this._job_config.groups = groups;
+  }
+
+  public get calendars(): string[] {
+    return this._job_config.calendars || [];
+  }
+
+  public set calendars(calendars: string[]) {
+    this._job_config.calendars = calendars;
   }
 
   public set modelPlot(enable: boolean) {

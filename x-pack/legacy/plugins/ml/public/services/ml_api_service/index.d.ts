@@ -47,6 +47,14 @@ declare interface Ml {
 
   getTimeFieldRange(obj: object): Promise<any>;
   calculateModelMemoryLimit(obj: object): Promise<{ modelMemoryLimit: string }>;
+  calendars(): Promise<
+    Array<{
+      calendar_id: string;
+      description: string;
+      events: any[];
+      job_ids: string[];
+    }>
+  >;
 
   jobs: {
     jobsSummary(jobIds: string[]): Promise<object>;
