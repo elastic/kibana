@@ -9916,7 +9916,6 @@
     "xpack.snapshotRestore.addRepositoryTitle": "注册存储库",
     "xpack.snapshotRestore.app.checkingPermissionsDescription": "正在检查权限......",
     "xpack.snapshotRestore.app.checkingPermissionsErrorMessage": "检查权限时出错",
-    "xpack.snapshotRestore.app.deniedPermissionDescription": "要使用“快照存储库”，必须具有{clusterPrivilegesCount, plural, one {以下集群权限} other {以下集群权限}}：{clusterPrivileges}。",
     "xpack.snapshotRestore.app.deniedPermissionTitle": "您缺少集群权限",
     "xpack.snapshotRestore.appName": "快照存储库",
     "xpack.snapshotRestore.dataPlaceholderLabel": "-",
