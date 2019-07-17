@@ -19,10 +19,10 @@ the name of a dashboard they've viewed, or the timestamp of the interaction.
 To track a user interaction, import the `createUiStatsReporter` helper function from UI Metric app:
 
 ```js
-import { METRIC_TYPE } from '@kbn/analytics';
-import { createUiStatsReporter } from 'relative/path/to/src/legacy/core_plugins/ui_metric/public';
+import { createUiStatsReporter, METRIC_TYPE } from 'relative/path/to/src/legacy/core_plugins/ui_metric/public';
 const trackMetric = createUiStatsReporter(`<AppName>`);
-trackMetric(METRIC_TYPE.*, `<EventName>`);
+trackMetric(METRIC_TYPE.CLICK, `<EventName>`);
+trackMetric('click', `<EventName>`);
 ```
 
 Metric Types:

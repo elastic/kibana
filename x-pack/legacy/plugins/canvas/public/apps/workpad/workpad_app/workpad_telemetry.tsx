@@ -6,9 +6,8 @@
 
 import React, { useState, useEffect } from 'react';
 import { connect } from 'react-redux';
-import { METRIC_TYPE } from '@kbn/analytics';
 // @ts-ignore: Local Untyped
-import { trackCanvasUiMetric } from '../../../lib/ui_metric';
+import { trackCanvasUiMetric, METRIC_TYPE } from '../../../lib/ui_metric';
 // @ts-ignore: Local Untyped
 import { getElementCounts } from '../../../state/selectors/workpad';
 // @ts-ignore: Local Untyped

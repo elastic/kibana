@@ -7,7 +7,6 @@
 import React, { PureComponent, Fragment } from 'react';
 import PropTypes from 'prop-types';
 import { i18n } from '@kbn/i18n';
-import { METRIC_TYPE } from '@kbn/analytics';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiButton,
@@ -20,7 +19,7 @@ import {
 
 import routing from '../../../services/routing';
 import { extractQueryParams } from '../../../services/query_params';
-import { trackUiMetric } from '../../../services/track_ui_metric';
+import { trackUiMetric, METRIC_TYPE } from '../../../services/track_ui_metric';
 import { API_STATUS, UIM_AUTO_FOLLOW_PATTERN_LIST_LOAD } from '../../../constants';
 import { SectionLoading, SectionError, SectionUnauthorized } from '../../../components';
 import { AutoFollowPatternTable, DetailPanel } from './components';

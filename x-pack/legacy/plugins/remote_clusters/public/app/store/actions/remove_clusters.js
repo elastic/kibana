@@ -5,7 +5,6 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { METRIC_TYPE } from '@kbn/analytics';
 
 import { toasts } from '../../services/notification';
 import { UIM_CLUSTER_REMOVE, UIM_CLUSTER_REMOVE_MANY } from '../../constants';
@@ -13,6 +12,7 @@ import { UIM_CLUSTER_REMOVE, UIM_CLUSTER_REMOVE_MANY } from '../../constants';
 import {
   removeClusterRequest as sendRemoveClusterRequest,
   trackUiMetric,
+  METRIC_TYPE,
 } from '../../services';
 
 import {

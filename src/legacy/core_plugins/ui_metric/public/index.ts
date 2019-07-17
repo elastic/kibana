@@ -18,3 +18,4 @@
  */
 
 export { createUiStatsReporter } from './services/telemetry_analytics';
+export { METRIC_TYPE } from '@kbn/analytics';

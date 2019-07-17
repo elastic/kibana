@@ -39,7 +39,7 @@ export default function(kibana: any) {
       injectDefaultVars(server: Server) {
         const config = server.config();
         return {
-          debug: config.get('ui_metric.debug'),
+          debugUiMetric: config.get('ui_metric.debug'),
         };
       },
       mappings: require('./mappings.json'),

@@ -8,7 +8,6 @@ import React, { PureComponent, Fragment } from 'react';
 import PropTypes from 'prop-types';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { METRIC_TYPE } from '@kbn/analytics';
 import {
   EuiHealth,
   EuiIcon,
@@ -24,7 +23,7 @@ import {
   FollowerIndexUnfollowProvider
 } from '../../../../../components';
 import routing from '../../../../../services/routing';
-import { trackUiMetric } from '../../../../../services/track_ui_metric';
+import { trackUiMetric, METRIC_TYPE } from '../../../../../services/track_ui_metric';
 import { ContextMenu } from '../context_menu';
 
 export class FollowerIndicesTable extends PureComponent {

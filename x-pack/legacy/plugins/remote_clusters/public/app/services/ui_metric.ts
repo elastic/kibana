@@ -4,11 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { METRIC_TYPE } from '@kbn/analytics';
 import { UIM_APP_NAME } from '../constants';
-import { createUiStatsReporter } from '../../../../../../../src/legacy/core_plugins/ui_metric/public';
+import {
+  createUiStatsReporter,
+  METRIC_TYPE,
+} from '../../../../../../../src/legacy/core_plugins/ui_metric/public';
 
 export let trackUiMetric: ReturnType<typeof createUiStatsReporter>;
+export { METRIC_TYPE };
 
 export function init(getReporter: typeof createUiStatsReporter): void {
   trackUiMetric = getReporter(UIM_APP_NAME);

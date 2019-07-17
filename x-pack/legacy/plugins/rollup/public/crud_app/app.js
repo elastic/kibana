@@ -10,8 +10,7 @@ import { HashRouter, Switch, Route, Redirect } from 'react-router-dom';
 
 import { UIM_APP_LOAD } from '../../common';
 import { CRUD_APP_BASE_PATH } from './constants';
-import { registerRouter, setUserHasLeftApp, trackUiMetric } from './services';
-import { METRIC_TYPE } from '@kbn/analytics';
+import { registerRouter, setUserHasLeftApp, trackUiMetric, METRIC_TYPE } from './services';
 import { JobList, JobCreate } from './sections';
 
 class ShareRouter extends Component {

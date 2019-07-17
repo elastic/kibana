@@ -7,9 +7,8 @@ import { EuiTab, EuiTabs, EuiLink } from '@elastic/eui';
 import * as React from 'react';
 import styled from 'styled-components';
 
-import { METRIC_TYPE } from '@kbn/analytics';
 import { getHostsUrl, getNetworkUrl, getOverviewUrl, getTimelinesUrl } from '../../link_to';
-import { trackUiAction as track } from '../../../lib/track_usage';
+import { trackUiAction as track, METRIC_TYPE } from '../../../lib/track_usage';
 
 import * as i18n from '../translations';
 

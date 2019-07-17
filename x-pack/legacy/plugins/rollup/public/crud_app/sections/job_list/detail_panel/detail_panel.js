@@ -7,7 +7,6 @@
 import React, { Component, Fragment } from 'react';
 import PropTypes from 'prop-types';
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
-import { METRIC_TYPE } from '@kbn/analytics';
 
 import {
   EuiErrorBoundary,
@@ -34,7 +33,7 @@ import {
   UIM_DETAIL_PANEL_METRICS_TAB_CLICK,
   UIM_DETAIL_PANEL_JSON_TAB_CLICK,
 } from '../../../../../common';
-import { trackUiMetric } from '../../../services';
+import { trackUiMetric, METRIC_TYPE } from '../../../services';
 
 import {
   JobActionMenu,

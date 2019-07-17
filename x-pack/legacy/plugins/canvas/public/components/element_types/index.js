@@ -8,7 +8,6 @@ import PropTypes from 'prop-types';
 import { compose, withProps, withState } from 'recompose';
 import { connect } from 'react-redux';
 import { camelCase } from 'lodash';
-import { METRIC_TYPE } from '@kbn/analytics';
 import { cloneSubgraphs } from '../../lib/clone_subgraphs';
 import * as customElementService from '../../lib/custom_element_service';
 import { elementsRegistry } from '../../lib/elements_registry';
@@ -16,7 +15,7 @@ import { notify } from '../../lib/notify';
 import { selectToplevelNodes } from '../../state/actions/transient';
 import { insertNodes, addElement } from '../../state/actions/elements';
 import { getSelectedPage } from '../../state/selectors/workpad';
-import { trackCanvasUiMetric } from '../../lib/ui_metric';
+import { trackCanvasUiMetric, METRIC_TYPE } from '../../lib/ui_metric';
 import { ElementTypes as Component } from './element_types';
 
 const customElementAdded = 'elements-custom-added';

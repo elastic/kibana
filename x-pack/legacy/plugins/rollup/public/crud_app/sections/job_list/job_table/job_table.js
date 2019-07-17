@@ -8,7 +8,6 @@ import React, { Component, Fragment } from 'react';
 import PropTypes from 'prop-types';
 import { i18n }  from '@kbn/i18n';
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
-import { METRIC_TYPE } from '@kbn/analytics';
 
 import {
   EuiCheckbox,
@@ -31,7 +30,7 @@ import {
 } from '@elastic/eui';
 
 import { UIM_SHOW_DETAILS_CLICK } from '../../../../../common';
-import { trackUiMetric } from '../../../services';
+import { trackUiMetric, METRIC_TYPE } from '../../../services';
 import { JobActionMenu, JobStatus } from '../../components';
 
 const COLUMNS = [{

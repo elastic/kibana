@@ -4,12 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { createUiStatsReporter } from '../../../../../../../src/legacy/core_plugins/ui_metric/public';
-import { METRIC_TYPE } from '@kbn/analytics';
+import { createUiStatsReporter, METRIC_TYPE } from '../../../../../../../src/legacy/core_plugins/ui_metric/public';
 import { UIM_APP_NAME } from '../constants';
 
 export const trackUiMetric = createUiStatsReporter(UIM_APP_NAME);
-
+export { METRIC_TYPE };
 /**
  * Transparently return provided request Promise, while allowing us to track
  * a successful completion of the request.

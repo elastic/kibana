@@ -31,7 +31,7 @@ export type Metric = UiStatsMetric<UiStatsMetricType>;
 export type MetricType = keyof typeof METRIC_TYPE;
 
 export enum METRIC_TYPE {
-  CLICK,
-  LOADED,
-  COUNT,
+  COUNT = 'count',
+  LOADED = 'loaded',
+  CLICK = 'click',
 }

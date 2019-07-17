@@ -20,8 +20,7 @@
 import semver from 'semver';
 import chrome from 'ui/chrome';
 import { i18n } from '@kbn/i18n';
-import { METRIC_TYPE } from '@kbn/analytics';
-import { createUiStatsReporter } from '../../../../ui_metric/public';
+import { createUiStatsReporter, METRIC_TYPE } from '../../../../ui_metric/public';
 import {
   DashboardAppState,
   SavedDashboardPanelTo60,
