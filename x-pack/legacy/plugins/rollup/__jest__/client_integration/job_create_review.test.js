@@ -21,6 +21,7 @@ jest.mock('lodash/function/debounce', () => fn => fn);
 
 jest.mock('../../../../../../src/legacy/core_plugins/ui_metric/public', () => ({
   createUiStatsReporter: jest.fn(() => jest.fn()),
+  METRIC_TYPE: require('@kbn/analytics').METRIC_TYPE,
 }));
 
 const { setup } = pageHelpers.jobCreate;

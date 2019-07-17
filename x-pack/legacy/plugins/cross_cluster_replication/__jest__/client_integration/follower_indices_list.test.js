@@ -21,6 +21,7 @@ jest.mock('ui/index_patterns', () => {
 
 jest.mock('../../../../../../src/legacy/core_plugins/ui_metric/public', () => ({
   createUiStatsReporter: jest.fn(() => jest.fn()),
+  METRIC_TYPE: require('@kbn/analytics').METRIC_TYPE,
 }));
 
 const { setup } = pageHelpers.followerIndexList;
