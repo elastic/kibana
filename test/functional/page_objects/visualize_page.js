@@ -600,7 +600,7 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
     }
 
     async toggleAggregationEditor(agg) {
-      await testSubjects.click(`visEditorAggAccordion${agg} toggleEditor`);
+      await find.clickByCssSelector(`[data-test-subj="visEditorAggAccordion${agg}"] .euiAccordion__button`);
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
