@@ -11,7 +11,6 @@ import { withLogFilter } from '../with_log_filter';
 import { withStreamItems } from '../with_stream_items';
 import { withLogPosition } from '../with_log_position';
 import { LogHighlightsState } from './log_highlights';
-import { WithSummary } from '../log_summary/with_summary';
 
 // Bridges Redux container state with Hooks state. Once state is moved fully from
 // Redux to Hooks this can be removed.
@@ -60,28 +59,10 @@ export const LogHighlightsFilterQueryBridge = withLogFilter(
   }
 );
 
-export const LogHighlightsSummaryBridge = () => {
-  return (
-    <WithSummary>
-      {({ start, end }) => {
-        const { setSummaryStart, setSummaryEnd } = useContext(LogHighlightsState.Context);
-
-        useEffect(() => {
-          setSummaryStart(start);
-          setSummaryEnd(end);
-        }, [start, end]);
-
-        return null;
-      }}
-    </WithSummary>
-  );
-};
-
 export const LogHighlightsBridge = ({ indexPattern }: { indexPattern: any }) => (
   <>
     <LogHighlightsStreamItemsBridge />
     <LogHighlightsPositionBridge />
     <LogHighlightsFilterQueryBridge indexPattern={indexPattern} />
-    <LogHighlightsSummaryBridge />
   </>
 );

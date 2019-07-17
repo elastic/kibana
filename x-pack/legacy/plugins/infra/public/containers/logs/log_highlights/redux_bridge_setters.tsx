@@ -13,8 +13,6 @@ export const useReduxBridgeSetters = () => {
   const [filterQuery, setFilterQuery] = useState<string | null>(null);
   const [visibleMidpoint, setVisibleMidpoint] = useState<TimeKey | null>(null);
   const [jumpToTarget, setJumpToTarget] = useState<(target: TimeKey) => void>(() => undefined);
-  const [summaryStart, setSummaryStart] = useState<number | null>(null);
-  const [summaryEnd, setSummaryEnd] = useState<number | null>(null);
 
   return {
     startKey,
@@ -27,9 +25,5 @@ export const useReduxBridgeSetters = () => {
     setVisibleMidpoint,
     jumpToTarget,
     setJumpToTarget,
-    summaryStart,
-    setSummaryStart,
-    summaryEnd,
-    setSummaryEnd,
   };
 };

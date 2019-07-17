@@ -11,6 +11,7 @@ import { useHighlightsFetcher } from './data_fetching';
 import { useNextAndPrevious } from './next_and_previous';
 import { useReduxBridgeSetters } from './redux_bridge_setters';
 import { useSummaryHighlights } from './summary_highlights';
+import { useLogSummaryBufferInterval } from '../log_summary';
 import { LogViewConfiguration } from '../log_view_configuration';
 
 export const useLogHighlightsState = ({
@@ -33,13 +34,17 @@ export const useLogHighlightsState = ({
     setVisibleMidpoint,
     jumpToTarget,
     setJumpToTarget,
-    setSummaryStart,
-    setSummaryEnd,
-    summaryStart,
-    summaryEnd,
   } = useReduxBridgeSetters();
 
   const { intervalSize: summaryIntervalSize } = useContext(LogViewConfiguration.Context);
+  const {
+    start: summaryStart,
+    end: summaryEnd,
+    bucketSize: summaryBucketSize,
+  } = useLogSummaryBufferInterval(
+    visibleMidpoint ? visibleMidpoint.time : null,
+    summaryIntervalSize
+  );
 
   const {
     logEntryHighlights,
@@ -52,7 +57,7 @@ export const useLogHighlightsState = ({
     sourceVersion,
     summaryStart,
     summaryEnd,
-    summaryIntervalSize,
+    summaryBucketSize,
     filterQuery,
     highlightTerms
   );
@@ -84,8 +89,6 @@ export const useLogHighlightsState = ({
     goToPreviousHighlight,
     goToNextHighlight,
     setJumpToTarget,
-    setSummaryStart,
-    setSummaryEnd,
     summaryHighlights,
     loadSummaryHighlightsRequest,
   };
