@@ -47,7 +47,7 @@ export const pivotGroupByFieldSupport = {
 };
 
 interface GroupByConfigBase {
-  field: FieldName;
+  agg: PIVOT_SUPPORTED_GROUP_BY_AGGS;
   aggName: AggName;
   dropDownName: string;
 }
@@ -57,42 +57,65 @@ export const histogramIntervalFormatRegex = /^([1-9][0-9]*((\.)([0-9]+))?|([0](\
 // Don't allow intervals of '0', don't allow floating intervals.
 export const dateHistogramIntervalFormatRegex = /^[1-9][0-9]*(ms|s|m|h|d|w|M|q|y)$/;
 
-export enum DATE_HISTOGRAM_FORMAT {
-  ms = 'yyyy-MM-dd HH:mm:ss.SSS',
-  s = 'yyyy-MM-dd HH:mm:ss',
-  m = 'yyyy-MM-dd HH:mm',
-  h = 'yyyy-MM-dd HH:00',
-  d = 'yyyy-MM-dd',
-  M = 'yyyy-MM-01',
-  y = 'yyyy',
-}
-
 interface GroupByDateHistogram extends GroupByConfigBase {
   agg: PIVOT_SUPPORTED_GROUP_BY_AGGS.DATE_HISTOGRAM;
-  format?: DATE_HISTOGRAM_FORMAT;
+  field: FieldName;
   calendar_interval: string;
 }
 
 interface GroupByHistogram extends GroupByConfigBase {
   agg: PIVOT_SUPPORTED_GROUP_BY_AGGS.HISTOGRAM;
+  field: FieldName;
   interval: string;
 }
 
 interface GroupByTerms extends GroupByConfigBase {
   agg: PIVOT_SUPPORTED_GROUP_BY_AGGS.TERMS;
+  field: FieldName;
 }
 
 export type GroupByConfigWithInterval = GroupByDateHistogram | GroupByHistogram;
-export type PivotGroupByConfig = GroupByDateHistogram | GroupByHistogram | GroupByTerms;
+export type GroupByConfigWithUiSupport = GroupByDateHistogram | GroupByHistogram | GroupByTerms;
+
+export type PivotGroupByConfig =
+  | GroupByConfigBase
+  | GroupByDateHistogram
+  | GroupByHistogram
+  | GroupByTerms;
+export type PivotGroupByConfigWithUiSupportDict = Dictionary<GroupByConfigWithUiSupport>;
 export type PivotGroupByConfigDict = Dictionary<PivotGroupByConfig>;
 
 export function isGroupByDateHistogram(arg: any): arg is GroupByDateHistogram {
-  return arg.hasOwnProperty('calendar_interval');
+  return (
+    arg.hasOwnProperty('agg') &&
+    arg.hasOwnProperty('field') &&
+    arg.hasOwnProperty('calendar_interval') &&
+    arg.agg === PIVOT_SUPPORTED_GROUP_BY_AGGS.DATE_HISTOGRAM
+  );
 }
 
 export function isGroupByHistogram(arg: any): arg is GroupByHistogram {
-  return arg.hasOwnProperty('interval');
+  return (
+    arg.hasOwnProperty('agg') &&
+    arg.hasOwnProperty('field') &&
+    arg.hasOwnProperty('interval') &&
+    arg.agg === PIVOT_SUPPORTED_GROUP_BY_AGGS.HISTOGRAM
+  );
 }
+
+export function isGroupByTerms(arg: any): arg is GroupByTerms {
+  return (
+    arg.hasOwnProperty('agg') &&
+    arg.hasOwnProperty('field') &&
+    arg.agg === PIVOT_SUPPORTED_GROUP_BY_AGGS.TERMS
+  );
+}
+
+export function isPivotGroupByConfigWithUiSupport(arg: any): arg is GroupByConfigWithUiSupport {
+  return isGroupByDateHistogram(arg) || isGroupByHistogram(arg) || isGroupByTerms(arg);
+}
+
+export type GenericAgg = object;
 
 export interface TermsAgg {
   terms: {
@@ -110,10 +133,21 @@ export interface HistogramAgg {
 export interface DateHistogramAgg {
   date_histogram: {
     field: FieldName;
-    format?: DATE_HISTOGRAM_FORMAT;
     calendar_interval: string;
   };
 }
 
-type PivotGroupBy = TermsAgg | HistogramAgg | DateHistogramAgg;
+export type PivotGroupBy = GenericAgg | TermsAgg | HistogramAgg | DateHistogramAgg;
 export type PivotGroupByDict = Dictionary<PivotGroupBy>;
+
+export function getEsAggFromGroupByConfig(groupByConfig: GroupByConfigBase): GenericAgg {
+  const esAgg = { ...groupByConfig };
+
+  delete esAgg.agg;
+  delete esAgg.aggName;
+  delete esAgg.dropDownName;
+
+  return {
+    [groupByConfig.agg]: esAgg,
+  };
+}

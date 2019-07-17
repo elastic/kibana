@@ -54,20 +54,48 @@ export const pivotAggsFieldSupport = {
   [KBN_FIELD_TYPES.CONFLICT]: [PIVOT_SUPPORTED_AGGS.VALUE_COUNT],
 };
 
-type PivotAgg = {
+export type PivotAgg = {
   [key in PIVOT_SUPPORTED_AGGS]?: {
     field: FieldName;
-  }
+  };
 };
 
 export type PivotAggDict = { [key in AggName]: PivotAgg };
 
 // The internal representation of an aggregation definition.
-export interface PivotAggsConfig {
+export interface PivotAggsConfigBase {
   agg: PIVOT_SUPPORTED_AGGS;
-  field: FieldName;
   aggName: AggName;
   dropDownName: string;
 }
 
+export interface PivotAggsConfigWithUiSupport extends PivotAggsConfigBase {
+  field: FieldName;
+}
+
+export function isPivotAggsConfigWithUiSupport(arg: any): arg is PivotAggsConfigWithUiSupport {
+  return (
+    arg.hasOwnProperty('agg') &&
+    arg.hasOwnProperty('aggName') &&
+    arg.hasOwnProperty('dropDownName') &&
+    arg.hasOwnProperty('field') &&
+    pivotSupportedAggs.includes(arg.agg)
+  );
+}
+
+export type PivotAggsConfig = PivotAggsConfigBase | PivotAggsConfigWithUiSupport;
+
+export type PivotAggsConfigWithUiSupportDict = Dictionary<PivotAggsConfigWithUiSupport>;
 export type PivotAggsConfigDict = Dictionary<PivotAggsConfig>;
+
+export function getEsAggFromAggConfig(groupByConfig: PivotAggsConfigBase): PivotAgg {
+  const esAgg = { ...groupByConfig };
+
+  delete esAgg.agg;
+  delete esAgg.aggName;
+  delete esAgg.dropDownName;
+
+  return {
+    [groupByConfig.agg]: esAgg,
+  };
+}

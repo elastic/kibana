@@ -12,6 +12,7 @@ export class DataRequest {
       ...descriptor
     };
   }
+
   getData() {
     return this._descriptor.data;
   }
@@ -22,6 +23,10 @@ export class DataRequest {
 
   getMeta() {
     return _.get(this._descriptor, 'dataMeta', {});
+  }
+
+  hasData() {
+    return !!this._descriptor.data;
   }
 
   hasDataOrRequestInProgress() {

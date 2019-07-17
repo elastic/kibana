@@ -15,10 +15,10 @@ import {
   DropDownLabel,
   DropDownOption,
   FieldName,
-  PivotAggsConfigDict,
+  GroupByConfigWithUiSupport,
+  PivotAggsConfigWithUiSupportDict,
   pivotAggsFieldSupport,
-  PivotGroupByConfig,
-  PivotGroupByConfigDict,
+  PivotGroupByConfigWithUiSupportDict,
   pivotGroupByFieldSupport,
   PIVOT_SUPPORTED_GROUP_BY_AGGS,
 } from '../../common';
@@ -33,7 +33,7 @@ function getDefaultGroupByConfig(
   dropDownName: string,
   fieldName: FieldName,
   groupByAgg: PIVOT_SUPPORTED_GROUP_BY_AGGS
-): PivotGroupByConfig {
+): GroupByConfigWithUiSupport {
   switch (groupByAgg) {
     case PIVOT_SUPPORTED_GROUP_BY_AGGS.TERMS:
       return {
@@ -66,11 +66,11 @@ const illegalEsAggNameChars = /[[\]>]/g;
 export function getPivotDropdownOptions(indexPattern: IndexPattern) {
   // The available group by options
   const groupByOptions: EuiComboBoxOptionProps[] = [];
-  const groupByOptionsData: PivotGroupByConfigDict = {};
+  const groupByOptionsData: PivotGroupByConfigWithUiSupportDict = {};
 
   // The available aggregations
   const aggOptions: EuiComboBoxOptionProps[] = [];
-  const aggOptionsData: PivotAggsConfigDict = {};
+  const aggOptionsData: PivotAggsConfigWithUiSupportDict = {};
 
   const ignoreFieldNames = ['_id', '_index', '_type'];
   const fields = indexPattern.fields

@@ -15,7 +15,7 @@ import {
   isGroupByDateHistogram,
   isGroupByHistogram,
   PivotGroupByConfig,
-  PivotGroupByConfigDict,
+  PivotGroupByConfigWithUiSupportDict,
 } from '../../common';
 
 import { PopoverForm } from './popover_form';
@@ -23,7 +23,7 @@ import { PopoverForm } from './popover_form';
 interface Props {
   item: PivotGroupByConfig;
   otherAggNames: AggName[];
-  options: PivotGroupByConfigDict;
+  options: PivotGroupByConfigWithUiSupportDict;
   deleteHandler(l: string): void;
   onChange(item: PivotGroupByConfig): void;
 }

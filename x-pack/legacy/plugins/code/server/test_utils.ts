@@ -5,6 +5,7 @@
  */
 
 import fs from 'fs';
+import { Server } from 'hapi';
 import * as os from 'os';
 import path from 'path';
 
@@ -32,7 +33,7 @@ const TEST_OPTIONS = {
     enableMavenImport: true,
     enableGradleImport: true,
     installNodeDependency: true,
-    enableGitCertCheck: false,
+    enableGitCertCheck: true,
     gitProtocolWhitelist: ['ssh', 'https', 'git'],
   },
   repos: [],
@@ -52,4 +53,18 @@ export function createTestServerOption() {
   };
 
   return new ServerOptions(TEST_OPTIONS, config);
+}
+
+export function createTestHapiServer() {
+  const server = new Server();
+  // @ts-ignore
+  server.config = () => {
+    return {
+      get(key: string) {
+        if (key === 'env.dev') return false;
+        else return true;
+      },
+    };
+  };
+  return server;
 }

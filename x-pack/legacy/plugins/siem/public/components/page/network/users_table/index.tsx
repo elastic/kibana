@@ -23,6 +23,7 @@ interface OwnProps {
   flowTarget: FlowTarget;
   loading: boolean;
   hasNextPage: boolean;
+  id: string;
   nextCursor: string;
   totalCount: number;
   loadMore: (cursor: string) => void;
@@ -77,6 +78,7 @@ class UsersTableComponent extends React.PureComponent<UsersTableProps> {
       limit,
       loading,
       loadMore,
+      id,
       totalCount,
       nextCursor,
       updateUsersLimit,
@@ -91,6 +93,7 @@ class UsersTableComponent extends React.PureComponent<UsersTableProps> {
         headerCount={totalCount}
         headerTitle={i18n.USERS}
         headerUnit={i18n.UNIT(totalCount)}
+        id={id}
         itemsPerRow={rowItems}
         limit={limit}
         loading={loading}

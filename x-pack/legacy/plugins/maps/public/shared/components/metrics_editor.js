@@ -7,107 +7,63 @@
 import React, { Fragment } from 'react';
 import PropTypes from 'prop-types';
 import { i18n } from '@kbn/i18n';
-
-
+import { FormattedMessage } from '@kbn/i18n/react';
 import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFormLabel,
   EuiButtonIcon,
+  EuiButton,
+  EuiPanel,
 } from '@elastic/eui';
-
-import {
-  MetricSelect,
-  METRIC_AGGREGATION_VALUES,
-} from './metric_select';
-import { SingleFieldSelect } from './single_field_select';
+import { MetricEditor } from './metric_editor';
 
 export function MetricsEditor({ fields, metrics, onChange, allowMultipleMetrics, metricsFilter }) {
 
-  function onMetricChange(metric, index) {
-    onChange([
-      ...metrics.slice(0, index),
-      metric,
-      ...metrics.slice(index + 1)
-    ]);
-  }
-
   function renderMetrics() {
     return metrics.map((metric, index) => {
-      const onAggChange = (metricAggregationType) => {
-        const updatedMetric = {
-          ...metric,
-          type: metricAggregationType,
-        };
-        onMetricChange(updatedMetric, index);
+      const onMetricChange = (metric) => {
+        onChange([
+          ...metrics.slice(0, index),
+          metric,
+          ...metrics.slice(index + 1)
+        ]);
       };
-      const onFieldChange = (fieldName) => {
-        const updatedMetric = {
-          ...metric,
-          field: fieldName,
-        };
-        onMetricChange(updatedMetric, index);
-      };
+
       const onRemove = () => {
         onChange([
           ...metrics.slice(0, index),
           ...metrics.slice(index + 1)
         ]);
       };
-      let fieldSelect;
-      if (metric.type && metric.type !== 'count') {
-        const filterNumberFields = (field) => {
-          return field.type === 'number';
-        };
-        fieldSelect = (
-          <EuiFlexItem>
-            <SingleFieldSelect
-              placeholder={i18n.translate('xpack.maps.metricsEditor.selectFieldPlaceholder', {
-                defaultMessage: 'Select field'
-              })}
-              value={metric.field}
-              onChange={onFieldChange}
-              filterField={filterNumberFields}
-              fields={fields}
-              isClearable={false}
-            />
-          </EuiFlexItem>
-        );
-      }
+
       let removeButton;
       if (index > 0) {
         removeButton = (
-          <EuiFlexItem grow={false}>
-            <EuiButtonIcon
-              iconType="trash"
-              color="danger"
-              aria-label={i18n.translate('xpack.maps.metricsEditor.deleteMetricAriaLabel', {
-                defaultMessage: 'Delete metric'
-              })}
-              title={i18n.translate('xpack.maps.metricsEditor.deleteMetricButtonLabel', {
-                defaultMessage: 'Delete metric'
-              })}
-              onClick={onRemove}
-            />
-          </EuiFlexItem>
+          <EuiButtonIcon
+            iconType="trash"
+            color="danger"
+            aria-label={i18n.translate('xpack.maps.metricsEditor.deleteMetricAriaLabel', {
+              defaultMessage: 'Delete metric'
+            })}
+            title={i18n.translate('xpack.maps.metricsEditor.deleteMetricButtonLabel', {
+              defaultMessage: 'Delete metric'
+            })}
+            onClick={onRemove}
+          />
         );
       }
       return (
-        <EuiFlexGroup alignItems="center" key={index}>
-
-          <EuiFlexItem>
-            <MetricSelect
-              onChange={onAggChange}
-              value={metric.type}
-              metricsFilter={metricsFilter}
-            />
-          </EuiFlexItem>
-
-          {fieldSelect}
-
-          {removeButton}
-
-        </EuiFlexGroup>
+        <EuiPanel
+          key={index}
+          className="mapMetricEditorPanel"
+          paddingSize="s"
+        >
+          <MetricEditor
+            onChange={onMetricChange}
+            metric={metric}
+            fields={fields}
+            metricsFilter={metricsFilter}
+            removeButton={removeButton}
+          />
+        </EuiPanel>
       );
     });
   }
@@ -125,42 +81,31 @@ export function MetricsEditor({ fields, metrics, onChange, allowMultipleMetrics,
       return null;
     }
 
-    return (<EuiButtonIcon
-      iconType="plusInCircle"
-      onClick={addMetric}
-      aria-label={i18n.translate('xpack.maps.metricsEditor.addMetricAriaLabel', {
-        defaultMessage: 'Add metric'
-      })}
-      title={i18n.translate('xpack.maps.metricsEditor.addMetricButtonLabel', {
-        defaultMessage: 'Add metric'
-      })}
-    />);
+    return (
+      <EuiButton
+        onClick={addMetric}
+        style={{ topMargin: '4px' }}
+      >
+        <FormattedMessage
+          id="xpack.maps.metricsEditor.addMetricButtonLabel"
+          defaultMessage="Add metric"
+        />
+      </EuiButton>
+    );
   }
 
 
   return (
     <Fragment>
-      <EuiFlexGroup alignItems="center">
-        <EuiFlexItem grow={true}>
-          <EuiFormLabel style={{ marginBottom: 0 }}>
-            Metrics
-          </EuiFormLabel>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          {renderAddMetricButton()}
-        </EuiFlexItem>
-      </EuiFlexGroup>
-
       {renderMetrics()}
+
+      {renderAddMetricButton()}
     </Fragment>
   );
 }
 
 MetricsEditor.propTypes = {
-  metrics: PropTypes.arrayOf(PropTypes.shape({
-    type: PropTypes.oneOf(METRIC_AGGREGATION_VALUES),
-    field: PropTypes.string,
-  })),
+  metrics: PropTypes.array,
   fields: PropTypes.object,  // indexPattern.fields IndexedArray object
   onChange: PropTypes.func.isRequired,
   allowMultipleMetrics: PropTypes.bool,

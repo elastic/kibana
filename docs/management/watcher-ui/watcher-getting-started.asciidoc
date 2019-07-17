@@ -1,0 +1,46 @@
+[role="xpack"]
+[[watcher-getting-started]]
+=== View watch history and status
+The Watcher overview page lists your watches and includes details such as state,
+last fired, and last triggered.  A watch has one of four states:
+
+* *Firing.* The watch is triggered and actively performing the associated actions.
+* *Error.* The watch is not working properly.
+* *OK.* The watch is not actively firing but working properly.
+* *Disabled.* The watch will not fire under any circumstances.
+
+From this page you can drill down into a watch to investigate its history
+and status.  
+
+[float]
+==== View watch history
+
+The *Execution history* tab shows each time the watch is triggered and the 
+results of the query, whether the condition was met, and what actions were taken. 
+
+[role="screenshot"]
+image:management/watcher-ui/images/execution-history.png["Execution history tab"]
+
+[float]
+==== Acknowledge action status
+
+The *Action statuses* tab lists all actions associated with the watch and 
+the state of each action. If the action is firing, you can acknowledge the 
+watch to prevent too many executions of the same action for the same watch. 
+See {stack-ov}/actions.html#actions-ack-throttle[Acknowledgement and Throttling] for details. 
+
+[role="screenshot"]
+image:management/watcher-ui/images/alerts-status.png["Action status tab"]
+
+[float]
+==== Deactivate and delete a watch
+
+Actions for deactivating and deleting a watch are on each watch detail page:
+
+* *Deactivate a watch* if you know a situation is planned that will 
+cause a false alarm. You can reactivate the watch when the situation is resolved. 
+* *Delete a watch* to permanently remove it from the system. You can delete 
+the watch you are currently viewing, or go to the Watcher overview, and 
+delete watches in bulk. 
+
+

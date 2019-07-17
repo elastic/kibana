@@ -15,12 +15,14 @@ import 'uiExports/fieldFormats';
 import 'uiExports/inspectorViews';
 import 'uiExports/search';
 import 'uiExports/embeddableFactories';
+import 'uiExports/embeddableActions';
 import 'ui/agg_types';
 
 import { capabilities } from 'ui/capabilities';
 import chrome from 'ui/chrome';
 import routes from 'ui/routes';
 import 'ui/kbn_top_nav';
+import 'ui/angular-bootstrap'; // required for kbn-top-nav button tooltips
 import { uiModules } from 'ui/modules';
 import { docTitle } from 'ui/doc_title';
 import 'ui/autoload/styles';

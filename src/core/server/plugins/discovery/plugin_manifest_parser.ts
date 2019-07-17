@@ -118,9 +118,7 @@ export async function parseManifest(pluginPath: string, packageInfo: PackageInfo
     throw PluginDiscoveryError.invalidManifest(
       manifestPath,
       new Error(
-        `The "configPath" in plugin manifest for "${
-          manifest.id
-        }" should either be a string or an array of strings.`
+        `The "configPath" in plugin manifest for "${manifest.id}" should either be a string or an array of strings.`
       )
     );
   }
@@ -133,11 +131,7 @@ export async function parseManifest(pluginPath: string, packageInfo: PackageInfo
     throw PluginDiscoveryError.incompatibleVersion(
       manifestPath,
       new Error(
-        `Plugin "${
-          manifest.id
-        }" is only compatible with Kibana version "${expectedKibanaVersion}", but used Kibana version is "${
-          packageInfo.version
-        }".`
+        `Plugin "${manifest.id}" is only compatible with Kibana version "${expectedKibanaVersion}", but used Kibana version is "${packageInfo.version}".`
       )
     );
   }
@@ -148,9 +142,7 @@ export async function parseManifest(pluginPath: string, packageInfo: PackageInfo
     throw PluginDiscoveryError.invalidManifest(
       manifestPath,
       new Error(
-        `Both "server" and "ui" are missing or set to "false" in plugin manifest for "${
-          manifest.id
-        }", but at least one of these must be set to "true".`
+        `Both "server" and "ui" are missing or set to "false" in plugin manifest for "${manifest.id}", but at least one of these must be set to "true".`
       )
     );
   }
@@ -160,9 +152,7 @@ export async function parseManifest(pluginPath: string, packageInfo: PackageInfo
     throw PluginDiscoveryError.invalidManifest(
       manifestPath,
       new Error(
-        `Manifest for plugin "${
-          manifest.id
-        }" contains the following unrecognized properties: ${unknownManifestKeys}.`
+        `Manifest for plugin "${manifest.id}" contains the following unrecognized properties: ${unknownManifestKeys}.`
       )
     );
   }

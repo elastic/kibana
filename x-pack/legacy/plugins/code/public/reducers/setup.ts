@@ -15,13 +15,13 @@ export interface SetupState {
 
 const initialState: SetupState = {};
 
-export const setup = handleActions(
+export const setup = handleActions<SetupState>(
   {
-    [String(checkSetupFailed)]: (state: SetupState) =>
+    [String(checkSetupFailed)]: state =>
       produce<SetupState>(state, draft => {
         draft.ok = false;
       }),
-    [String(checkSetupSuccess)]: (state: SetupState) =>
+    [String(checkSetupSuccess)]: state =>
       produce<SetupState>(state, draft => {
         draft.ok = true;
       }),

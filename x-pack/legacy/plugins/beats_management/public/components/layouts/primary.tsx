@@ -20,7 +20,7 @@ import React, { Component, ReactNode } from 'react';
 import styled from 'styled-components';
 import { BreadcrumbConsumer } from '../navigation/breadcrumb';
 
-type RenderCallback = ((component: () => JSX.Element) => void);
+type RenderCallback = (component: () => JSX.Element) => void;
 interface PrimaryLayoutProps {
   title: string | React.ReactNode;
   actionSection?: React.ReactNode;

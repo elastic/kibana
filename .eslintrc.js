@@ -140,11 +140,13 @@ module.exports = {
                   'src/core/public/**/*',
                   '!src/core/public/index.ts',
                   '!src/core/public/mocks.ts',
+                  '!src/core/public/*.test.mocks.ts',
                   '!src/core/public/utils/**/*',
 
                   'src/core/server/**/*',
                   '!src/core/server/index.ts',
                   '!src/core/server/mocks.ts',
+                  '!src/core/server/*.test.mocks.ts',
 
                   'src/plugins/**/public/**/*',
                   '!src/plugins/**/public/index*',
@@ -306,7 +308,6 @@ module.exports = {
     {
       files: [
         'test/functional/services/lib/web_element_wrapper/scroll_into_view_if_necessary.js',
-        'test/visual_regression/services/visual_testing/take_percy_snapshot.js',
         '**/browser_exec_scripts/**/*.js',
       ],
       rules: {

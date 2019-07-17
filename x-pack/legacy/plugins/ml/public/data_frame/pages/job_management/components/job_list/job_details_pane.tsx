@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { SFC } from 'react';
+import React, { Fragment, SFC } from 'react';
 
 import {
   EuiDescriptionList,
@@ -52,19 +52,23 @@ export const JobDetailsPane: SFC<JobDetailsPaneProps> = ({ sections }) => {
   return (
     <EuiFlexGroup>
       <EuiFlexItem>
-        <EuiSpacer size="s" />
         {sections
           .filter(s => s.position === 'left')
           .map(s => (
-            <Section section={s} key={s.title} />
+            <Fragment key={s.title}>
+              <EuiSpacer size="s" />
+              <Section section={s} />
+            </Fragment>
           ))}
       </EuiFlexItem>
       <EuiFlexItem>
-        <EuiSpacer size="s" />
         {sections
           .filter(s => s.position === 'right')
           .map(s => (
-            <Section section={s} key={s.title} />
+            <Fragment key={s.title}>
+              <EuiSpacer size="s" />
+              <Section section={s} />
+            </Fragment>
           ))}
       </EuiFlexItem>
     </EuiFlexGroup>

@@ -39,6 +39,7 @@ exports[`Data Frame: <DefinePivotSummary /> Minimal initialization 1`] = `
           },
         }
       }
+      isAdvancedEditorEnabled={false}
       search="the-query"
       valid={true}
     />

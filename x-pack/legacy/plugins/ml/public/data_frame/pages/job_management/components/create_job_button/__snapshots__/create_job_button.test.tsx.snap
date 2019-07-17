@@ -8,6 +8,7 @@ exports[`Data Frame: Job List <CreateJobButton /> Minimal initialization 1`] = `
 >
   <EuiButton
     color="primary"
+    data-test-subj="mlDataFramesButtonCreate"
     disabled={true}
     fill={true}
     iconSide="left"
@@ -17,7 +18,7 @@ exports[`Data Frame: Job List <CreateJobButton /> Minimal initialization 1`] = `
     type="button"
   >
     <FormattedMessage
-      defaultMessage="Create data frame"
+      defaultMessage="Create transform"
       id="xpack.ml.dataframe.jobsList.createDataFrameButton"
       values={Object {}}
     />

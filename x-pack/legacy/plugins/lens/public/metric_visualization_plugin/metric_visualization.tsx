@@ -11,15 +11,16 @@ import { getSuggestions } from './metric_suggestions';
 import { MetricConfigPanel } from './metric_config_panel';
 import { Visualization } from '../types';
 import { State, PersistableState } from './types';
+import { generateId } from '../id_generator';
 
 export const metricVisualization: Visualization<State, PersistableState> = {
   getSuggestions,
 
-  initialize(datasource, state) {
+  initialize(_, state) {
     return (
       state || {
         title: 'Empty Metric Chart',
-        accessor: datasource.generateColumnId(),
+        accessor: generateId(),
       }
     );
   },

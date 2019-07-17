@@ -23,7 +23,13 @@ describe('suggestion helpers', () => {
         vis1: {
           ...mockVisualization,
           getSuggestions: () => [
-            { datasourceSuggestionId: 0, score: 0.5, title: 'Test', state: suggestedState },
+            {
+              datasourceSuggestionId: 0,
+              score: 0.5,
+              title: 'Test',
+              state: suggestedState,
+              previewIcon: 'empty',
+            },
           ],
         },
       },
@@ -43,14 +49,32 @@ describe('suggestion helpers', () => {
         vis1: {
           ...mockVisualization1,
           getSuggestions: () => [
-            { datasourceSuggestionId: 0, score: 0.5, title: 'Test', state: {} },
-            { datasourceSuggestionId: 0, score: 0.5, title: 'Test2', state: {} },
+            {
+              datasourceSuggestionId: 0,
+              score: 0.5,
+              title: 'Test',
+              state: {},
+              previewIcon: 'empty',
+            },
+            {
+              datasourceSuggestionId: 0,
+              score: 0.5,
+              title: 'Test2',
+              state: {},
+              previewIcon: 'empty',
+            },
           ],
         },
         vis2: {
           ...mockVisualization2,
           getSuggestions: () => [
-            { datasourceSuggestionId: 0, score: 0.5, title: 'Test3', state: {} },
+            {
+              datasourceSuggestionId: 0,
+              score: 0.5,
+              title: 'Test3',
+              state: {},
+              previewIcon: 'empty',
+            },
           ],
         },
       },
@@ -69,14 +93,32 @@ describe('suggestion helpers', () => {
         vis1: {
           ...mockVisualization1,
           getSuggestions: () => [
-            { datasourceSuggestionId: 0, score: 0.2, title: 'Test', state: {} },
-            { datasourceSuggestionId: 0, score: 0.8, title: 'Test2', state: {} },
+            {
+              datasourceSuggestionId: 0,
+              score: 0.2,
+              title: 'Test',
+              state: {},
+              previewIcon: 'empty',
+            },
+            {
+              datasourceSuggestionId: 0,
+              score: 0.8,
+              title: 'Test2',
+              state: {},
+              previewIcon: 'empty',
+            },
           ],
         },
         vis2: {
           ...mockVisualization2,
           getSuggestions: () => [
-            { datasourceSuggestionId: 0, score: 0.6, title: 'Test3', state: {} },
+            {
+              datasourceSuggestionId: 0,
+              score: 0.6,
+              title: 'Test3',
+              state: {},
+              previewIcon: 'empty',
+            },
           ],
         },
       },
@@ -119,14 +161,32 @@ describe('suggestion helpers', () => {
         vis1: {
           ...mockVisualization1,
           getSuggestions: () => [
-            { datasourceSuggestionId: 0, score: 0.3, title: 'Test', state: {} },
-            { datasourceSuggestionId: 1, score: 0.2, title: 'Test2', state: {} },
+            {
+              datasourceSuggestionId: 0,
+              score: 0.3,
+              title: 'Test',
+              state: {},
+              previewIcon: 'empty',
+            },
+            {
+              datasourceSuggestionId: 1,
+              score: 0.2,
+              title: 'Test2',
+              state: {},
+              previewIcon: 'empty',
+            },
           ],
         },
         vis2: {
           ...mockVisualization2,
           getSuggestions: () => [
-            { datasourceSuggestionId: 1, score: 0.1, title: 'Test3', state: {} },
+            {
+              datasourceSuggestionId: 1,
+              score: 0.1,
+              title: 'Test3',
+              state: {},
+              previewIcon: 'empty',
+            },
           ],
         },
       },

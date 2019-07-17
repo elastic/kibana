@@ -16,7 +16,8 @@ import {
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
-import { keymap, ShortcutMap, ShortcutNameSpace } from '../../lib/keymap';
+import { keymap } from '../../lib/keymap';
+import { ShortcutMap, ShortcutNameSpace } from '../../../types';
 import { getClientPlatform } from '../../lib/get_client_platform';
 import { getId } from '../../lib/get_id';
 import { getPrettyShortcut } from '../../lib/get_pretty_shortcut';
@@ -42,14 +43,16 @@ const getDescriptionListItems = (shortcuts: ShortcutMap[]): DescriptionListItem[
       return {
         title: shortcutKeyMap.help,
         description: osShortcuts.reduce((acc: JSX.Element[], shortcut, i): JSX.Element[] => {
+          // replace +'s with spaces so we can display the plus symbol for the plus key
+          shortcut = shortcut.replace(/\+/g, ' ');
           if (i !== 0) {
             acc.push(<span key={getId('span')}> or </span>);
           }
           acc.push(
             <span key={getId('span')}>
               {getPrettyShortcut(shortcut)
-                .split(/(\+)/g) // splits the array by '+' and keeps the '+'s as elements in the array
-                .map(key => (key === '+' ? ` ` : <EuiCode key={getId('shortcut')}>{key}</EuiCode>))}
+                .split(/( )/g)
+                .map(key => (key === ' ' ? key : <EuiCode key={getId('shortcut')}>{key}</EuiCode>))}
             </span>
           );
           return acc;

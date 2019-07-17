@@ -29,7 +29,7 @@ export function Settings({
   canGetCalendars
 }) {
   return (
-    <EuiPage className="mlSettingsPage">
+    <EuiPage className="mlSettingsPage" data-test-subj="mlPageSettings">
       <EuiPageBody className="mlSettingsPage__body">
         <EuiPageContent
           className="mlSettingsPage__content"
@@ -49,7 +49,7 @@ export function Settings({
           <EuiFlexGroup gutterSize="xl">
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
-                data-testid="ml_calendar_mng_button"
+                data-test-subj="ml_calendar_mng_button"
                 size="l"
                 color="primary"
                 href={`${chrome.getBasePath()}/app/ml#/settings/calendars_list`}
@@ -64,7 +64,7 @@ export function Settings({
 
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
-                data-testid="ml_filter_lists_button"
+                data-test-subj="ml_filter_lists_button"
                 size="l"
                 color="primary"
                 href={`${chrome.getBasePath()}/app/ml#/settings/filter_lists`}

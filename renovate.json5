@@ -224,6 +224,15 @@
         enabled: false,
       },
       {
+        groupSlug: 'jsts',
+        groupName: 'jsts related packages',
+        packageNames: [
+          'jsts',
+          '@types/jsts',
+        ],
+        allowedVersions: '^1.6.2',
+      },
+      {
         groupSlug: 'json-stable-stringify',
         groupName: 'json-stable-stringify related packages',
         packageNames: [
@@ -472,14 +481,6 @@
         ],
       },
       {
-        groupSlug: 'puppeteer-core',
-        groupName: 'puppeteer-core related packages',
-        packageNames: [
-          'puppeteer-core',
-          '@types/puppeteer-core',
-        ],
-      },
-      {
         groupSlug: 'request',
         groupName: 'request related packages',
         packageNames: [
@@ -664,6 +665,14 @@
         ],
       },
       {
+        groupSlug: 'nodemailer',
+        groupName: 'nodemailer related packages',
+        packageNames: [
+          'nodemailer',
+          '@types/nodemailer',
+        ],
+      },
+      {
         groupSlug: 'object-hash',
         groupName: 'object-hash related packages',
         packageNames: [
@@ -693,6 +702,14 @@
         packageNames: [
           'proper-lockfile',
           '@types/proper-lockfile',
+        ],
+      },
+      {
+        groupSlug: 'puppeteer',
+        groupName: 'puppeteer related packages',
+        packageNames: [
+          'puppeteer',
+          '@types/puppeteer',
         ],
       },
       {

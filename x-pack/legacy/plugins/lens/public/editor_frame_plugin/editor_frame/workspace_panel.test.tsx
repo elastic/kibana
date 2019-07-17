@@ -14,9 +14,10 @@ import {
   createExpressionRendererMock,
   DatasourceMock,
 } from '../mocks';
-import { WorkspacePanel, WorkspacePanelProps } from './workspace_panel';
+import { InnerWorkspacePanel, WorkspacePanelProps } from './workspace_panel';
 import { mountWithIntl as mount } from 'test_utils/enzyme_helpers';
 import { ReactWrapper } from 'enzyme';
+import { DragDrop } from '../../drag_drop';
 
 const waitForPromises = () => new Promise(resolve => setTimeout(resolve));
 
@@ -42,7 +43,7 @@ describe('workspace_panel', () => {
 
   it('should render an explanatory text if no visualization is active', () => {
     instance = mount(
-      <WorkspacePanel
+      <InnerWorkspacePanel
         activeDatasource={mockDatasource}
         datasourceState={{}}
         activeVisualizationId={null}
@@ -62,7 +63,7 @@ describe('workspace_panel', () => {
 
   it('should render an explanatory text if the visualization does not produce an expression', () => {
     instance = mount(
-      <WorkspacePanel
+      <InnerWorkspacePanel
         activeDatasource={{ ...mockDatasource, toExpression: () => 'datasource' }}
         datasourceState={{}}
         activeVisualizationId="vis"
@@ -82,7 +83,7 @@ describe('workspace_panel', () => {
 
   it('should render an explanatory text if the datasource does not produce an expression', () => {
     instance = mount(
-      <WorkspacePanel
+      <InnerWorkspacePanel
         activeDatasource={{ ...mockDatasource, toExpression: () => null }}
         datasourceState={{}}
         activeVisualizationId="vis"
@@ -102,7 +103,7 @@ describe('workspace_panel', () => {
 
   it('should render the resulting expression using the expression renderer', () => {
     instance = mount(
-      <WorkspacePanel
+      <InnerWorkspacePanel
         activeDatasource={{
           ...mockDatasource,
           toExpression: () => 'datasource',
@@ -141,7 +142,7 @@ Object {
   describe('expression failures', () => {
     it('should show an error message if the expression fails to parse', () => {
       instance = mount(
-        <WorkspacePanel
+        <InnerWorkspacePanel
           activeDatasource={{
             ...mockDatasource,
             toExpression: () => 'datasource ||',
@@ -169,7 +170,7 @@ Object {
       });
 
       instance = mount(
-        <WorkspacePanel
+        <InnerWorkspacePanel
           activeDatasource={{
             ...mockDatasource,
             toExpression: () => 'datasource',
@@ -202,7 +203,7 @@ Object {
       });
 
       instance = mount(
-        <WorkspacePanel
+        <InnerWorkspacePanel
           activeDatasource={{
             ...mockDatasource,
             toExpression: () => 'datasource',
@@ -238,7 +239,7 @@ Object {
       });
 
       instance = mount(
-        <WorkspacePanel
+        <InnerWorkspacePanel
           activeDatasource={{
             ...mockDatasource,
             toExpression: () => 'datasource',
@@ -281,7 +282,7 @@ Object {
     beforeEach(() => {
       mockDispatch = jest.fn();
       instance = mount(
-        <WorkspacePanel
+        <InnerWorkspacePanel
           activeDatasource={mockDatasource}
           datasourceState={{}}
           activeVisualizationId={null}
@@ -314,10 +315,11 @@ Object {
           title: 'my title',
           state: {},
           datasourceSuggestionId: 0,
+          previewIcon: 'empty',
         },
       ]);
 
-      instance.childAt(0).prop('onDrop')({
+      instance.find(DragDrop).prop('onDrop')!({
         name: '@timestamp',
         type: 'date',
         searchable: false,
@@ -365,16 +367,18 @@ Object {
             isFirst: true,
           },
           datasourceSuggestionId: 1,
+          previewIcon: 'empty',
         },
         {
           score: 0.5,
           title: 'second suggestion',
           state: {},
           datasourceSuggestionId: 0,
+          previewIcon: 'empty',
         },
       ]);
 
-      instance.childAt(0).prop('onDrop')({
+      instance.find(DragDrop).prop('onDrop')!({
         name: '@timestamp',
         type: 'date',
         searchable: false,
@@ -392,7 +396,7 @@ Object {
     });
 
     it("should do nothing when the visualization can't use the suggestions", () => {
-      instance.childAt(0).prop('onDrop')({
+      instance.find(DragDrop).prop('onDrop')!({
         name: '@timestamp',
         type: 'date',
         searchable: false,

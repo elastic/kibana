@@ -6,7 +6,9 @@
 
 import { getOperationTypesForField, getPotentialColumns } from './operations';
 import { IndexPatternPrivateState } from './indexpattern';
-import { hasField } from './state_helpers';
+import { hasField } from './utils';
+
+jest.mock('./loader');
 
 const expectedIndexPatterns = {
   1: {
@@ -166,13 +168,16 @@ describe('getOperationTypesForField', () => {
     });
 
     it('should include priority', () => {
-      const columns = getPotentialColumns(state, 1);
+      const columns = getPotentialColumns(
+        state.indexPatterns[state.currentIndexPatternId].fields,
+        1
+      );
 
       expect(columns.every(col => col.suggestedOrder === 1)).toEqual(true);
     });
 
     it('should list operations by field for a regular index pattern', () => {
-      const columns = getPotentialColumns(state);
+      const columns = getPotentialColumns(state.indexPatterns[state.currentIndexPatternId].fields);
 
       expect(
         columns.map(col => [hasField(col) ? col.sourceField : '_documents_', col.operationType])
@@ -205,6 +210,10 @@ Array [
   Array [
     "timestamp",
     "date_histogram",
+  ],
+  Array [
+    "_documents_",
+    "filter_ratio",
   ],
 ]
 `);

@@ -1,6 +1,7 @@
 {
   "indices.get_settings": {
     "url_params": {
+      "master_timeout": "",
       "ignore_unavailable": "__flag__",
       "allow_no_indices": "__flag__",
       "expand_wildcards": [

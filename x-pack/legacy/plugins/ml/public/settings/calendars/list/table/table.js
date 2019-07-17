@@ -96,7 +96,7 @@ export const CalendarsListTable = injectI18n(function CalendarsListTable({
       (
         <EuiButton
           size="s"
-          data-testid="new_calendar_button"
+          data-test-subj="mlCalendarButtonCreate"
           key="new_calendar_button"
           href={`${chrome.getBasePath()}/app/ml#/settings/calendars_list/new_calendar`}
           isDisabled={(canCreateCalendar === false || mlNodesAvailable === false)}
@@ -140,6 +140,7 @@ export const CalendarsListTable = injectI18n(function CalendarsListTable({
         loading={loading}
         selection={tableSelection}
         isSelectable={true}
+        data-test-subj="mlCalendarTable"
       />
     </React.Fragment>
   );

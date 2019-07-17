@@ -8,7 +8,7 @@
 import { EuiBreadcrumbs } from '@elastic/eui';
 import React from 'react';
 import { MainRouteParams } from '../../common/types';
-import { encodeRevisionString } from '../../utils/url';
+import { encodeRevisionString } from '../../../common/uri_util';
 
 interface Props {
   routeParams: MainRouteParams;

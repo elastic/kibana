@@ -18,9 +18,10 @@ export interface CoreStart
 |  --- | --- | --- |
 |  [application](./kibana-plugin-public.corestart.application.md) | <code>Pick&lt;ApplicationStart, 'capabilities'&gt;</code> | [ApplicationStart](./kibana-plugin-public.applicationstart.md) |
 |  [chrome](./kibana-plugin-public.corestart.chrome.md) | <code>ChromeStart</code> | [ChromeStart](./kibana-plugin-public.chromestart.md) |
+|  [docLinks](./kibana-plugin-public.corestart.doclinks.md) | <code>DocLinksStart</code> | [DocLinksStart](./kibana-plugin-public.doclinksstart.md) |
 |  [http](./kibana-plugin-public.corestart.http.md) | <code>HttpStart</code> | [HttpStart](./kibana-plugin-public.httpstart.md) |
 |  [i18n](./kibana-plugin-public.corestart.i18n.md) | <code>I18nStart</code> | [I18nStart](./kibana-plugin-public.i18nstart.md) |
 |  [notifications](./kibana-plugin-public.corestart.notifications.md) | <code>NotificationsStart</code> | [NotificationsStart](./kibana-plugin-public.notificationsstart.md) |
 |  [overlays](./kibana-plugin-public.corestart.overlays.md) | <code>OverlayStart</code> | [OverlayStart](./kibana-plugin-public.overlaystart.md) |
-|  [uiSettings](./kibana-plugin-public.corestart.uisettings.md) | <code>UiSettingsStart</code> | [UiSettingsStart](./kibana-plugin-public.uisettingsstart.md) |
+|  [uiSettings](./kibana-plugin-public.corestart.uisettings.md) | <code>UiSettingsClientContract</code> | [UiSettingsClient](./kibana-plugin-public.uisettingsclient.md) |
 

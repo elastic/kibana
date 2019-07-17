@@ -37,6 +37,7 @@ export type ExpressionRendererProps = Pick<
    * this callback is called with the given result.
    */
   onRenderFailure?: (result: Result) => void;
+  className?: string;
 };
 
 export type ExpressionRenderer = React.FC<ExpressionRendererProps>;
@@ -44,25 +45,24 @@ export type ExpressionRenderer = React.FC<ExpressionRendererProps>;
 export const createRenderer = (run: ExpressionRunner): ExpressionRenderer => ({
   expression,
   onRenderFailure,
+  className,
   ...options
 }: ExpressionRendererProps) => {
   const mountpoint: React.MutableRefObject<null | HTMLDivElement> = useRef(null);
 
-  useEffect(
-    () => {
-      if (mountpoint.current) {
-        run(expression, { ...options, element: mountpoint.current }).catch(result => {
-          if (onRenderFailure) {
-            onRenderFailure(result);
-          }
-        });
-      }
-    },
-    [expression, mountpoint.current]
-  );
+  useEffect(() => {
+    if (mountpoint.current) {
+      run(expression, { ...options, element: mountpoint.current }).catch(result => {
+        if (onRenderFailure) {
+          onRenderFailure(result);
+        }
+      });
+    }
+  }, [expression, mountpoint.current]);
 
   return (
     <div
+      className={className}
       ref={el => {
         mountpoint.current = el;
       }}

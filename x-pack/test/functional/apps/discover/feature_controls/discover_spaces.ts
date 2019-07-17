@@ -143,5 +143,27 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
         await PageObjects.discover.expectMissingFieldListItemVisualize('bytes');
       });
     });
+
+    describe('space with index pattern management disabled', async () => {
+      before(async () => {
+        await spacesService.create({
+          id: 'custom_space',
+          name: 'custom_space',
+          disabledFeatures: ['indexPatterns'],
+        });
+      });
+
+      after(async () => {
+        await spacesService.delete('custom_space');
+      });
+
+      it('Navigates to Kibana home rather than index pattern management when no index patterns exist', async () => {
+        await PageObjects.common.navigateToUrl('discover', '', {
+          basePath: '/s/custom_space',
+          ensureCurrentUrl: false,
+        });
+        await testSubjects.existOrFail('homeApp', 10000);
+      });
+    });
   });
 }

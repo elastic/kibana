@@ -28,6 +28,7 @@ image::maps/images/global_search_bar.png[]
 You can apply a search request to individual layers by setting `Filters` in the layer details panel.
 Click the *Add filter* button to add a filter to a layer.
 
+NOTE: Layer filters are not applied to *term joins*. You can apply a search request to *term joins* by setting the *where* clause in the join definition.
 
 [role="screenshot"]
 image::maps/images/layer_search.png[]

@@ -60,7 +60,7 @@ const DefinePivotStep: SFC<DefinePivotStepProps> = ({
       <div ref={definePivotRef} />
       {isCurrentStep && (
         <Fragment>
-          <DefinePivotForm onChange={setPivot} overrides={pivotState} />
+          <DefinePivotForm onChange={setPivot} overrides={{ ...pivotState }} />
           <WizardNav
             next={() => setCurrentStep(WIZARD_STEPS.JOB_DETAILS)}
             nextActive={pivotState.valid}
@@ -97,6 +97,8 @@ export const Wizard: SFC = React.memo(() => {
       <JobDetailsSummary {...jobDetailsState} />
     );
 
+  const jobConfig = getDataFrameRequest(indexPattern.title, pivotState, jobDetailsState);
+
   // The JOB_CREATE state
   const [jobCreateState, setJobCreate] = useState(getDefaultJobCreateState);
 
@@ -105,7 +107,7 @@ export const Wizard: SFC = React.memo(() => {
       <JobCreateForm
         createIndexPattern={jobDetailsState.createIndexPattern}
         jobId={jobDetailsState.jobId}
-        jobConfig={getDataFrameRequest(indexPattern.title, pivotState, jobDetailsState)}
+        jobConfig={jobConfig}
         onChange={setJobCreate}
         overrides={jobCreateState}
       />
@@ -141,7 +143,7 @@ export const Wizard: SFC = React.memo(() => {
     },
     {
       title: i18n.translate('xpack.ml.dataframe.transformsWizard.jobDetailsStepTitle', {
-        defaultMessage: 'Job details',
+        defaultMessage: 'Transform details',
       }),
       children: (
         <Fragment>

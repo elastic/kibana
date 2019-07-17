@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { HTMLAttributes } from 'react';
 
-export interface NativeRendererProps<T> {
+export interface NativeRendererProps<T> extends HTMLAttributes<HTMLDivElement> {
   render: (domElement: Element, props: T) => void;
   nativeProps: T;
   tag?: string;
@@ -20,8 +20,9 @@ export interface NativeRendererProps<T> {
  *
  * @param props
  */
-export function NativeRenderer<T>({ render, nativeProps, tag }: NativeRendererProps<T>) {
+export function NativeRenderer<T>({ render, nativeProps, tag, ...rest }: NativeRendererProps<T>) {
   return React.createElement(tag || 'div', {
+    ...rest,
     ref: el => el && render(el, nativeProps),
   });
 }

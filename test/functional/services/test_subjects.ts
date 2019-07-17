@@ -134,21 +134,6 @@ export function TestSubjectsProvider({ getService }: FtrProviderContext) {
       });
     }
 
-    public async getPropertyAll(selector: string, property: string): Promise<string[]> {
-      log.debug(`TestSubjects.getPropertyAll(${selector}, ${property})`);
-      return await this._mapAll(selector, async (element: WebElementWrapper) => {
-        return (await element.getProperty(property)) as string;
-      });
-    }
-
-    public async getProperty(selector: string, property: string): Promise<string> {
-      log.debug(`TestSubjects.getProperty(${selector}, ${property})`);
-      return await retry.try(async () => {
-        const element = await this.find(selector);
-        return (await element.getProperty(property)) as string;
-      });
-    }
-
     public async getAttributeAll(selector: string, attribute: string): Promise<string[]> {
       log.debug(`TestSubjects.getAttributeAll(${selector}, ${attribute})`);
       return await this._mapAll(selector, async (element: WebElementWrapper) => {

@@ -12,7 +12,7 @@ import { LspRestClient, TextDocumentMethods } from '../../common/lsp_client';
 import { loadStructure, loadStructureFailed, loadStructureSuccess } from '../actions';
 import { ServerNotInitialized } from '../../common/lsp_error_codes';
 import { languageServerInitializing } from '../actions/language_server';
-import { SymbolWithMembers } from '../reducers/symbol';
+import { SymbolWithMembers } from '../actions/structure';
 import { matchContainerName } from '../utils/symbol_utils';
 
 const STRUCTURE_TREE_POLLING_INTERVAL_SEC = 3;
@@ -31,7 +31,7 @@ const sortSymbol = (a: SymbolWithMembers, b: SymbolWithMembers) => {
   }
 };
 
-const generateStructureTree: (symbols: SymbolInformation[]) => any = symbols => {
+const generateStructureTree: (symbols: SymbolInformation[]) => SymbolWithMembers[] = symbols => {
   const structureTree: SymbolWithMembers[] = [];
 
   function findContainer(

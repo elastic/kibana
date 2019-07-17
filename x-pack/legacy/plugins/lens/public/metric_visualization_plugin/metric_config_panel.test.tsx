@@ -17,10 +17,7 @@ describe('MetricConfigPanel', () => {
   const dragDropContext = { dragging: undefined, setDragging: jest.fn() };
 
   function mockDatasource(): DatasourcePublicAPI {
-    return {
-      ...createMockDatasource().publicAPIMock,
-      generateColumnId: () => 'TESTID',
-    };
+    return createMockDatasource().publicAPIMock;
   }
 
   function testState(): State {

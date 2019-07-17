@@ -10,7 +10,7 @@ import React from 'react';
 import chrome from 'ui/chrome';
 import { getAPMHref } from '../../shared/Links/APMLink';
 import { Breadcrumb, ProvideBreadcrumbs } from './ProvideBreadcrumbs';
-import { routes } from './routeConfig';
+import { routes } from './route_config';
 
 interface Props {
   location: Location;

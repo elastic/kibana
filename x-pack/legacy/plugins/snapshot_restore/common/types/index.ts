@@ -4,5 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+export * from './app';
 export * from './repository';
 export * from './snapshot';
+export * from './restore';

@@ -15,7 +15,10 @@ import { notify } from '../../lib/notify';
 import { selectToplevelNodes } from '../../state/actions/transient';
 import { insertNodes, addElement } from '../../state/actions/elements';
 import { getSelectedPage } from '../../state/selectors/workpad';
+import { trackCanvasUiMetric } from '../../lib/ui_metric';
 import { ElementTypes as Component } from './element_types';
+
+const customElementAdded = 'elements-custom-added';
 
 const mapStateToProps = state => ({ pageId: getSelectedPage(state) });
 
@@ -48,6 +51,7 @@ const mergeProps = (stateProps, dispatchProps, ownProps) => {
         selectToplevelNodes(clonedNodes); // then select the cloned node(s)
       }
       onClose();
+      trackCanvasUiMetric(customElementAdded);
     },
     // custom element search
     findCustomElements: async text => {

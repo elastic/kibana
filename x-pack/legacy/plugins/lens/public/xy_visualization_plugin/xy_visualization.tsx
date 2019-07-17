@@ -12,6 +12,8 @@ import { getSuggestions } from './xy_suggestions';
 import { XYConfigPanel } from './xy_config_panel';
 import { Visualization } from '../types';
 import { State, PersistableState } from './types';
+import { toExpression } from './to_expression';
+import { generateId } from '../id_generator';
 
 export const xyVisualization: Visualization<State, PersistableState> = {
   getSuggestions,
@@ -19,23 +21,22 @@ export const xyVisualization: Visualization<State, PersistableState> = {
   initialize(datasource, state) {
     return (
       state || {
-        seriesType: 'line',
+        seriesType: 'bar',
         title: 'Empty XY Chart',
         legend: { isVisible: true, position: Position.Right },
         x: {
-          accessor: datasource.generateColumnId(),
+          accessor: generateId(),
           position: Position.Bottom,
           showGridlines: false,
           title: 'X',
         },
         y: {
-          accessors: [datasource.generateColumnId()],
+          accessors: [generateId()],
           position: Position.Left,
           showGridlines: false,
           title: 'Y',
         },
-        splitSeriesAccessors: [],
-        stackAccessors: [],
+        splitSeriesAccessors: [generateId()],
       }
     );
   },
@@ -50,68 +51,5 @@ export const xyVisualization: Visualization<State, PersistableState> = {
       domElement
     ),
 
-  toExpression: state => ({
-    type: 'expression',
-    chain: [
-      {
-        type: 'function',
-        function: 'lens_xy_chart',
-        arguments: {
-          seriesType: [state.seriesType],
-          title: [state.title],
-          legend: [
-            {
-              type: 'expression',
-              chain: [
-                {
-                  type: 'function',
-                  function: 'lens_xy_legendConfig',
-                  arguments: {
-                    isVisible: [state.legend.isVisible],
-                    position: [state.legend.position],
-                  },
-                },
-              ],
-            },
-          ],
-          x: [
-            {
-              type: 'expression',
-              chain: [
-                {
-                  type: 'function',
-                  function: 'lens_xy_xConfig',
-                  arguments: {
-                    title: [state.x.title],
-                    showGridlines: [state.x.showGridlines],
-                    position: [state.x.position],
-                    accessor: [state.x.accessor],
-                  },
-                },
-              ],
-            },
-          ],
-          y: [
-            {
-              type: 'expression',
-              chain: [
-                {
-                  type: 'function',
-                  function: 'lens_xy_yConfig',
-                  arguments: {
-                    title: [state.y.title],
-                    showGridlines: [state.y.showGridlines],
-                    position: [state.y.position],
-                    accessors: state.y.accessors,
-                  },
-                },
-              ],
-            },
-          ],
-          splitSeriesAccessors: state.splitSeriesAccessors,
-          stackAccessors: state.stackAccessors,
-        },
-      },
-    ],
-  }),
+  toExpression,
 };

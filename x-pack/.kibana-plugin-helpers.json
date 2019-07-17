@@ -11,6 +11,7 @@
     "yarn.lock",
     "tsconfig.json",
     "index.js",
+    "plugins/**/*",
     "legacy/plugins/reporting/.phantom/*",
     "legacy/plugins/reporting/.chromium/*",
     "legacy/common/**/*",

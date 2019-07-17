@@ -14,6 +14,8 @@ import {
   EUI_MODAL_CONFIRM_BUTTON,
 } from '@elastic/eui';
 
+import { startJob } from './job_service';
+
 import {
   checkPermission,
   createPermissionFailureMessage,
@@ -23,10 +25,9 @@ import { DataFrameJobListRow, isCompletedBatchJob } from './common';
 
 interface StartActionProps {
   item: DataFrameJobListRow;
-  startJob(d: DataFrameJobListRow): void;
 }
 
-export const StartAction: SFC<StartActionProps> = ({ startJob, item }) => {
+export const StartAction: SFC<StartActionProps> = ({ item }) => {
   const canStartStopDataFrameJob: boolean = checkPermission('canStartStopDataFrameJob');
 
   const [isModalVisible, setModalVisible] = useState(false);
@@ -66,7 +67,7 @@ export const StartAction: SFC<StartActionProps> = ({ startJob, item }) => {
           !canStartStopDataFrameJob
             ? createPermissionFailureMessage('canStartStopDataFrameJob')
             : i18n.translate('xpack.ml.dataframe.jobsList.completeBatchJobToolTip', {
-                defaultMessage: '{jobId} is a completed batch job and cannot be restarted.',
+                defaultMessage: '{jobId} is a completed batch transform and cannot be restarted.',
                 values: { jobId: item.config.id },
               })
         }
@@ -100,7 +101,7 @@ export const StartAction: SFC<StartActionProps> = ({ startJob, item }) => {
             <p>
               {i18n.translate('xpack.ml.dataframe.jobsList.startModalBody', {
                 defaultMessage:
-                  'A data frame job will increase search and indexing load in your cluster. Please stop the job if excessive load is experienced. Are you sure you want to start this job?',
+                  'A data frame transform will increase search and indexing load in your cluster. Please stop the transform if excessive load is experienced. Are you sure you want to start this transform?',
               })}
             </p>
           </EuiConfirmModal>

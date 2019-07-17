@@ -71,6 +71,8 @@ export const code = (kibana: any) =>
           requestTimeoutMs: Joi.number().default(moment.duration(10, 'second').asMilliseconds()),
           // if we want the language server run in seperately
           detach: Joi.boolean().default(false),
+          // enable oom_score_adj on linux
+          oomScoreAdj: Joi.boolean().default(true),
         }).default(),
         repos: Joi.array().default([]),
         security: Joi.object({
@@ -92,7 +94,7 @@ export const code = (kibana: any) =>
           enableGitCertCheck: Joi.boolean().default(true),
         }).default(),
         maxWorkspace: Joi.number().default(5), // max workspace folder for each language server
-        disableIndexScheduler: Joi.boolean().default(true), // Temp option to disable index scheduler.
+        disableIndexScheduler: Joi.boolean().default(false),
         enableGlobalReference: Joi.boolean().default(false), // Global reference as optional feature for now
         codeNodeUrl: Joi.string(),
       }).default();

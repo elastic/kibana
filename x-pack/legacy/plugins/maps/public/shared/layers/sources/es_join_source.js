@@ -11,6 +11,7 @@ import { Schemas } from 'ui/vis/editors/default/schemas';
 import { AggConfigs } from 'ui/vis/agg_configs';
 import { i18n } from '@kbn/i18n';
 import { ESTooltipProperty } from '../tooltips/es_tooltip_property';
+import { ES_SIZE_LIMIT } from '../../../../common/constants';
 
 const TERMS_AGG_NAME = 'join';
 
@@ -77,6 +78,10 @@ export class ESJoinSource extends AbstractESSource {
 
   getTerm() {
     return this._descriptor.term;
+  }
+
+  getWhereQuery() {
+    return this._descriptor.whereQuery;
   }
 
   _formatMetricKey(metric) {
@@ -171,7 +176,7 @@ export class ESJoinSource extends AbstractESSource {
         schema: 'segment',
         params: {
           field: this._descriptor.term,
-          size: 10000
+          size: ES_SIZE_LIMIT
         }
       }
     ];
@@ -192,9 +197,15 @@ export class ESJoinSource extends AbstractESSource {
       if (!indexPattern) {
         return null;
       }
-      return new ESTooltipProperty(propertyName, rawValue, indexPattern);
+      return new ESTooltipProperty(propertyName, propertyName, rawValue, indexPattern);
     } catch (e) {
       return null;
     }
+  }
+
+  getFieldNames() {
+    return this.getMetricFields().map(({ propertyKey }) => {
+      return propertyKey;
+    });
   }
 }

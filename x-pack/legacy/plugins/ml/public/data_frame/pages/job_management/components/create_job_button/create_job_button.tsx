@@ -30,10 +30,11 @@ export const CreateJobButton: SFC = () => {
       onClick={moveToDataFrameWizard}
       iconType="plusInCircle"
       size="s"
+      data-test-subj="mlDataFramesButtonCreate"
     >
       <FormattedMessage
         id="xpack.ml.dataframe.jobsList.createDataFrameButton"
-        defaultMessage="Create data frame"
+        defaultMessage="Create transform"
       />
     </EuiButton>
   );

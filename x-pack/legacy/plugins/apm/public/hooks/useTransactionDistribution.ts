@@ -28,32 +28,29 @@ export function useTransactionDistribution(urlParams: IUrlParams) {
   } = urlParams;
   const uiFilters = useUiFilters(urlParams);
 
-  const { data = INITIAL_DATA, status, error } = useFetcher(
-    () => {
-      if (serviceName && start && end && transactionType && transactionName) {
-        return loadTransactionDistribution({
-          serviceName,
-          start,
-          end,
-          transactionType,
-          transactionName,
-          transactionId,
-          traceId,
-          uiFilters
-        });
-      }
-    },
-    [
-      serviceName,
-      start,
-      end,
-      transactionType,
-      transactionName,
-      transactionId,
-      traceId,
-      uiFilters
-    ]
-  );
+  const { data = INITIAL_DATA, status, error } = useFetcher(() => {
+    if (serviceName && start && end && transactionType && transactionName) {
+      return loadTransactionDistribution({
+        serviceName,
+        start,
+        end,
+        transactionType,
+        transactionName,
+        transactionId,
+        traceId,
+        uiFilters
+      });
+    }
+  }, [
+    serviceName,
+    start,
+    end,
+    transactionType,
+    transactionName,
+    transactionId,
+    traceId,
+    uiFilters
+  ]);
 
   return { data, status, error };
 }

@@ -28,45 +28,42 @@ const leftJoin = new LeftInnerJoin({
   }
 });
 
-describe('joinPropertiesToFeatureCollection', () => {
+describe('joinPropertiesToFeature', () => {
   const COUNT_PROPERTY_NAME = '__kbnjoin__count_groupby_kibana_sample_data_logs.geo.dest';
 
   it('Should add join property to features in feature collection', () => {
-    const featureCollection = {
-      features: [
-        {
-          properties: {
-            iso2: 'CN',
-          }
-        }
-      ]
-    };
+    const feature = {
+      properties: {
+        iso2: 'CN',
+      }
+    }
+    ;
     const propertiesMap = new Map();
     propertiesMap.set('CN', { [COUNT_PROPERTY_NAME]: 61 });
 
-    leftJoin.joinPropertiesToFeatureCollection(featureCollection, propertiesMap);
-    expect(featureCollection.features[0].properties).toEqual({
+    leftJoin.joinPropertiesToFeature(feature, propertiesMap, [{
+      propertyKey: COUNT_PROPERTY_NAME
+    }]);
+    expect(feature.properties).toEqual({
       iso2: 'CN',
       [COUNT_PROPERTY_NAME]: 61,
     });
   });
 
-  it('Should delete previous join property values from features in feature collection', () => {
-    const featureCollection = {
-      features: [
-        {
-          properties: {
-            iso2: 'CN',
-            [COUNT_PROPERTY_NAME]: 61,
-            [`__kbn__scaled(${COUNT_PROPERTY_NAME})`]: 1,
-          }
-        }
-      ]
+  it('Should delete previous join property values from feature', () => {
+    const feature = {
+      properties: {
+        iso2: 'CN',
+        [COUNT_PROPERTY_NAME]: 61,
+        [`__kbn__scaled(${COUNT_PROPERTY_NAME})`]: 1,
+      }
     };
     const propertiesMap = new Map();
 
-    leftJoin.joinPropertiesToFeatureCollection(featureCollection, propertiesMap);
-    expect(featureCollection.features[0].properties).toEqual({
+    leftJoin.joinPropertiesToFeature(feature, propertiesMap, [{
+      propertyKey: COUNT_PROPERTY_NAME
+    }]);
+    expect(feature.properties).toEqual({
       iso2: 'CN',
     });
   });

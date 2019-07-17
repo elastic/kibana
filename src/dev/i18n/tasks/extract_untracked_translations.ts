@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { createFailError } from '../../run';
 import {
   I18nConfig,
   matchEntriesWithExctractors,
@@ -24,7 +25,6 @@ import {
   readFileAsync,
   ErrorReporter,
 } from '..';
-import { createFailError } from '../../run';
 
 function filterEntries(entries: string[], exclude: string[]) {
   return entries.filter((entry: string) =>

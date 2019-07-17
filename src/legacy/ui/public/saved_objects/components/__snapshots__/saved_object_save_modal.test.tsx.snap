@@ -28,7 +28,7 @@ exports[`SavedObjectSaveModal should render matching snapshot 1`] = `
         <EuiForm>
           <EuiFormRow
             describedByIds={Array []}
-            fullWidth={false}
+            fullWidth={true}
             hasEmptyLabelSpace={false}
             label={
               <FormattedMessage
@@ -43,7 +43,7 @@ exports[`SavedObjectSaveModal should render matching snapshot 1`] = `
               autoFocus={true}
               compressed={false}
               data-test-subj="savedObjectTitle"
-              fullWidth={false}
+              fullWidth={true}
               isInvalid={false}
               isLoading={false}
               onChange={[Function]}

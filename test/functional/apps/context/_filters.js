@@ -38,7 +38,8 @@ export default function ({ getService, getPageObjects }) {
       });
     });
 
-    it('should be addable via expanded doc table rows', async function () {
+    // FLAKY: https://github.com/elastic/kibana/issues/39927
+    it.skip('should be addable via expanded doc table rows', async function () {
       const table = await docTable.getTable();
       const anchorRow = await docTable.getAnchorRow(table);
 

@@ -7,22 +7,22 @@
 import _ from 'lodash';
 import React from 'react';
 import { render } from 'react-dom';
-import { Chrome } from 'ui/chrome';
-import { ToastNotifications } from 'ui/notify/toasts/toast_notifications';
-import { EuiComboBox } from '@elastic/eui';
-import uuid from 'uuid';
-import { Datasource, DataType } from '..';
+import { I18nProvider } from '@kbn/i18n/react';
 import {
   DatasourceDimensionPanelProps,
   DatasourceDataPanelProps,
   DimensionPriority,
   DatasourceSuggestion,
+  Operation,
 } from '../types';
+import { Query } from '../../../../../../src/legacy/core_plugins/data/public/query';
 import { getIndexPatterns } from './loader';
-import { ChildDragDropProvider, DragDrop } from '../drag_drop';
 import { toExpression } from './to_expression';
 import { IndexPatternDimensionPanel } from './dimension_panel';
 import { buildColumnForOperationType, getOperationTypesForField } from './operations';
+import { IndexPatternDatasourcePluginPlugins } from './plugin';
+import { IndexPatternDataPanel } from './datapanel';
+import { Datasource, DataType } from '..';
 
 export type OperationType = IndexPatternColumn['operationType'];
 
@@ -33,7 +33,8 @@ export type IndexPatternColumn =
   | AvgIndexPatternColumn
   | MinIndexPatternColumn
   | MaxIndexPatternColumn
-  | CountIndexPatternColumn;
+  | CountIndexPatternColumn
+  | FilterRatioIndexPatternColumn;
 
 export interface BaseIndexPatternColumn {
   // Public
@@ -71,6 +72,15 @@ export interface TermsIndexPatternColumn extends FieldBasedIndexPatternColumn {
   params: {
     size: number;
     orderBy: { type: 'alphabetical' } | { type: 'column'; columnId: string };
+    orderDirection: 'asc' | 'desc';
+  };
+}
+
+export interface FilterRatioIndexPatternColumn extends BaseIndexPatternColumn {
+  operationType: 'filter_ratio';
+  params: {
+    numerator: Query;
+    denominator: Query;
   };
 }
 
@@ -122,50 +132,7 @@ export type IndexPatternPrivateState = IndexPatternPersistedState & {
   indexPatterns: Record<string, IndexPattern>;
 };
 
-export function IndexPatternDataPanel(props: DatasourceDataPanelProps<IndexPatternPrivateState>) {
-  return (
-    <ChildDragDropProvider {...props.dragDropContext}>
-      Index Pattern Data Source
-      <div>
-        <EuiComboBox
-          data-test-subj="indexPattern-switcher"
-          options={Object.values(props.state.indexPatterns).map(({ title, id }) => ({
-            label: title,
-            value: id,
-          }))}
-          selectedOptions={
-            props.state.currentIndexPatternId
-              ? [
-                  {
-                    label: props.state.indexPatterns[props.state.currentIndexPatternId].title,
-                    value: props.state.indexPatterns[props.state.currentIndexPatternId].id,
-                  },
-                ]
-              : undefined
-          }
-          singleSelection={{ asPlainText: true }}
-          isClearable={false}
-          onChange={choices => {
-            props.setState({
-              ...props.state,
-              currentIndexPatternId: choices[0].value as string,
-            });
-          }}
-        />
-        <div>
-          {props.state.currentIndexPatternId &&
-            props.state.indexPatterns[props.state.currentIndexPatternId].fields.map(field => (
-              <DragDrop key={field.name} value={field} draggable>
-                {field.name}
-              </DragDrop>
-            ))}
-        </div>
-      </div>
-    </ChildDragDropProvider>
-  );
-}
-
-export function columnToOperation(column: IndexPatternColumn) {
+export function columnToOperation(column: IndexPatternColumn): Operation {
   const { dataType, label, isBucketed, operationId } = column;
   return {
     id: operationId,
@@ -211,7 +178,18 @@ function addRestrictionsToFields(
   };
 }
 
-export function getIndexPatternDatasource(chrome: Chrome, toastNotifications: ToastNotifications) {
+function removeProperty<T>(prop: string, object: Record<string, T>): Record<string, T> {
+  const result = { ...object };
+  delete result[prop];
+  return result;
+}
+
+export function getIndexPatternDatasource({
+  chrome,
+  toastNotifications,
+  data,
+  storage,
+}: IndexPatternDatasourcePluginPlugins) {
   // Not stateful. State is persisted to the frame
   const indexPatternDatasource: Datasource<IndexPatternPrivateState, IndexPatternPersistedState> = {
     async initialize(state?: IndexPatternPersistedState) {
@@ -248,7 +226,12 @@ export function getIndexPatternDatasource(chrome: Chrome, toastNotifications: To
       domElement: Element,
       props: DatasourceDataPanelProps<IndexPatternPrivateState>
     ) {
-      render(<IndexPatternDataPanel {...props} />, domElement);
+      render(
+        <I18nProvider>
+          <IndexPatternDataPanel {...props} />
+        </I18nProvider>,
+        domElement
+      );
     },
 
     getPublicAPI(state, setState) {
@@ -262,25 +245,30 @@ export function getIndexPatternDatasource(chrome: Chrome, toastNotifications: To
           }
           return columnToOperation(state.columns[columnId]);
         },
-        generateColumnId: () => {
-          // TODO: Come up with a more compact form of generating unique column ids
-          return uuid.v4();
-        },
-
         renderDimensionPanel: (domElement: Element, props: DatasourceDimensionPanelProps) => {
           render(
-            <IndexPatternDimensionPanel
-              state={state}
-              setState={newState => setState(newState)}
-              {...props}
-            />,
+            <I18nProvider>
+              <IndexPatternDimensionPanel
+                state={state}
+                setState={newState => setState(newState)}
+                dataPlugin={data}
+                storage={storage}
+                {...props}
+              />
+            </I18nProvider>,
             domElement
           );
         },
 
-        removeColumnInTableSpec: (columnId: string) => [],
-        moveColumnTo: (columnId: string, targetIndex: number) => {},
-        duplicateColumn: (columnId: string) => [],
+        removeColumnInTableSpec: (columnId: string) => {
+          setState({
+            ...state,
+            columnOrder: state.columnOrder.filter(id => id !== columnId),
+            columns: removeProperty(columnId, state.columns),
+          });
+        },
+        moveColumnTo: () => {},
+        duplicateColumn: () => [],
       };
     },
 
@@ -299,9 +287,18 @@ export function getIndexPatternDatasource(chrome: Chrome, toastNotifications: To
       const hasBucket = operations.find(op => op === 'date_histogram' || op === 'terms');
 
       if (hasBucket) {
-        const column = buildColumnForOperationType(0, hasBucket, undefined, field);
+        const countColumn = buildColumnForOperationType(1, 'count', state.columns);
 
-        const countColumn = buildColumnForOperationType(1, 'count');
+        // let column know about count column
+        const column = buildColumnForOperationType(
+          0,
+          hasBucket,
+          {
+            col2: countColumn,
+          },
+          undefined,
+          field
+        );
 
         const suggestion: DatasourceSuggestion<IndexPatternPrivateState> = {
           state: {
@@ -336,9 +333,21 @@ export function getIndexPatternDatasource(chrome: Chrome, toastNotifications: To
           f => f.name === currentIndexPattern.timeFieldName
         )!;
 
-        const column = buildColumnForOperationType(0, operations[0], undefined, field);
+        const column = buildColumnForOperationType(
+          0,
+          operations[0],
+          state.columns,
+          undefined,
+          field
+        );
 
-        const dateColumn = buildColumnForOperationType(1, 'date_histogram', undefined, dateField);
+        const dateColumn = buildColumnForOperationType(
+          1,
+          'date_histogram',
+          state.columns,
+          undefined,
+          dateField
+        );
 
         const suggestion: DatasourceSuggestion<IndexPatternPrivateState> = {
           state: {
@@ -372,8 +381,26 @@ export function getIndexPatternDatasource(chrome: Chrome, toastNotifications: To
       return [];
     },
 
-    getDatasourceSuggestionsFromCurrentState(state) {
-      return [];
+    getDatasourceSuggestionsFromCurrentState(
+      state
+    ): Array<DatasourceSuggestion<IndexPatternPrivateState>> {
+      if (!state.columnOrder.length) {
+        return [];
+      }
+      return [
+        {
+          state,
+
+          table: {
+            columns: state.columnOrder.map(id => ({
+              columnId: id,
+              operation: columnToOperation(state.columns[id]),
+            })),
+            isMultiRow: true,
+            datasourceSuggestionId: 0,
+          },
+        },
+      ];
     },
   };
 

@@ -4,10 +4,102 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { updateColumnParam, getColumnOrder, changeColumn } from './state_helpers';
-import { IndexPatternPrivateState, DateHistogramIndexPatternColumn } from './indexpattern';
+import { updateColumnParam, changeColumn, getColumnOrder, deleteColumn } from './state_helpers';
+import {
+  IndexPatternPrivateState,
+  DateHistogramIndexPatternColumn,
+  TermsIndexPatternColumn,
+  AvgIndexPatternColumn,
+} from './indexpattern';
+import { operationDefinitionMap } from './operations';
+
+jest.mock('./operations');
 
 describe('state_helpers', () => {
+  describe('deleteColumn', () => {
+    it('should remove column', () => {
+      const termsColumn: TermsIndexPatternColumn = {
+        operationId: 'op2',
+        label: 'Top values of source',
+        dataType: 'string',
+        isBucketed: true,
+
+        // Private
+        operationType: 'terms',
+        sourceField: 'source',
+        params: {
+          orderBy: { type: 'alphabetical' },
+          orderDirection: 'asc',
+          size: 5,
+        },
+      };
+
+      const state: IndexPatternPrivateState = {
+        indexPatterns: {},
+        currentIndexPatternId: '1',
+        columnOrder: ['col1', 'col2'],
+        columns: {
+          col1: termsColumn,
+          col2: {
+            operationId: 'op1',
+            label: 'Count',
+            dataType: 'number',
+            isBucketed: false,
+
+            // Private
+            operationType: 'count',
+          },
+        },
+      };
+
+      expect(deleteColumn(state, 'col2').columns).toEqual({
+        col1: termsColumn,
+      });
+    });
+
+    it('should execute adjustments for other columns', () => {
+      const termsColumn: TermsIndexPatternColumn = {
+        operationId: 'op2',
+        label: 'Top values of source',
+        dataType: 'string',
+        isBucketed: true,
+
+        // Private
+        operationType: 'terms',
+        sourceField: 'source',
+        params: {
+          orderBy: { type: 'alphabetical' },
+          orderDirection: 'asc',
+          size: 5,
+        },
+      };
+
+      const state: IndexPatternPrivateState = {
+        indexPatterns: {},
+        currentIndexPatternId: '1',
+        columnOrder: ['col1', 'col2'],
+        columns: {
+          col1: termsColumn,
+          col2: {
+            operationId: 'op1',
+            label: 'Count',
+            dataType: 'number',
+            isBucketed: false,
+
+            // Private
+            operationType: 'count',
+          },
+        },
+      };
+
+      deleteColumn(state, 'col2');
+
+      expect(operationDefinitionMap.terms.onOtherColumnChanged).toHaveBeenCalledWith(termsColumn, {
+        col1: termsColumn,
+      });
+    });
+  });
+
   describe('updateColumnParam', () => {
     it('should set the param for the given column', () => {
       const currentColumn: DateHistogramIndexPatternColumn = {
@@ -89,6 +181,102 @@ describe('state_helpers', () => {
         })
       );
     });
+
+    it('should carry over params from old column if the operation type stays the same', () => {
+      const state: IndexPatternPrivateState = {
+        indexPatterns: {},
+        currentIndexPatternId: '1',
+        columnOrder: ['col1'],
+        columns: {
+          col1: {
+            operationId: 'op1',
+            label: 'Date histogram of timestamp',
+            dataType: 'date',
+            isBucketed: true,
+
+            // Private
+            operationType: 'date_histogram',
+            sourceField: 'timestamp',
+            params: {
+              interval: 'h',
+            },
+          },
+        },
+      };
+      expect(
+        changeColumn(state, 'col2', {
+          operationId: 'op2',
+          label: 'Date histogram of order_date',
+          dataType: 'date',
+          isBucketed: true,
+
+          // Private
+          operationType: 'date_histogram',
+          sourceField: 'order_date',
+          params: {
+            interval: 'w',
+          },
+        }).columns.col1
+      ).toEqual(
+        expect.objectContaining({
+          params: { interval: 'h' },
+        })
+      );
+    });
+
+    it('should execute adjustments for other columns', () => {
+      const termsColumn: TermsIndexPatternColumn = {
+        operationId: 'op2',
+        label: 'Top values of source',
+        dataType: 'string',
+        isBucketed: true,
+
+        // Private
+        operationType: 'terms',
+        sourceField: 'source',
+        params: {
+          orderBy: { type: 'alphabetical' },
+          orderDirection: 'asc',
+          size: 5,
+        },
+      };
+
+      const newColumn: AvgIndexPatternColumn = {
+        operationId: 'op1',
+        label: 'Average of bytes',
+        dataType: 'number',
+        isBucketed: false,
+
+        // Private
+        operationType: 'avg',
+        sourceField: 'bytes',
+      };
+
+      const state: IndexPatternPrivateState = {
+        indexPatterns: {},
+        currentIndexPatternId: '1',
+        columnOrder: ['col1', 'col2'],
+        columns: {
+          col1: termsColumn,
+          col2: {
+            operationId: 'op1',
+            label: 'Count',
+            dataType: 'number',
+            isBucketed: false,
+
+            // Private
+            operationType: 'count',
+          },
+        },
+      };
+
+      changeColumn(state, 'col2', newColumn);
+
+      expect(operationDefinitionMap.terms.onOtherColumnChanged).toHaveBeenCalledWith(termsColumn, {
+        col1: termsColumn,
+        col2: newColumn,
+      });
+    });
   });
 
   describe('getColumnOrder', () => {
@@ -133,6 +321,7 @@ describe('state_helpers', () => {
               orderBy: {
                 type: 'alphabetical',
               },
+              orderDirection: 'asc',
             },
           },
           col2: {
@@ -179,6 +368,7 @@ describe('state_helpers', () => {
               orderBy: {
                 type: 'alphabetical',
               },
+              orderDirection: 'asc',
             },
             suggestedOrder: 2,
           },

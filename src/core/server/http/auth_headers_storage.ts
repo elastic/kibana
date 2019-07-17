@@ -17,7 +17,7 @@
  * under the License.
  */
 import { Request } from 'hapi';
-import { KibanaRequest, getIncomingMessage } from './router';
+import { KibanaRequest, ensureRawRequest } from './router';
 import { AuthHeaders } from './lifecycle/auth';
 
 /**
@@ -27,11 +27,11 @@ import { AuthHeaders } from './lifecycle/auth';
 export type GetAuthHeaders = (request: KibanaRequest | Request) => AuthHeaders | undefined;
 
 export class AuthHeadersStorage {
-  private authHeadersCache = new WeakMap<ReturnType<typeof getIncomingMessage>, AuthHeaders>();
+  private authHeadersCache = new WeakMap<Request, AuthHeaders>();
   public set = (request: KibanaRequest | Request, headers: AuthHeaders) => {
-    this.authHeadersCache.set(getIncomingMessage(request), headers);
+    this.authHeadersCache.set(ensureRawRequest(request), headers);
   };
   public get: GetAuthHeaders = request => {
-    return this.authHeadersCache.get(getIncomingMessage(request));
+    return this.authHeadersCache.get(ensureRawRequest(request));
   };
 }

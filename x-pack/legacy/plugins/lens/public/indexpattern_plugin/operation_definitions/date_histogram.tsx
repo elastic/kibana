@@ -45,6 +45,7 @@ export const dateHistogramOperation: OperationDefinition<DateHistogramIndexPatte
   },
   buildColumn(
     operationId: string,
+    columns: {},
     suggestedOrder?: DimensionPriority,
     field?: IndexPatternField
   ): DateHistogramIndexPatternColumn {
@@ -92,7 +93,7 @@ export const dateHistogramOperation: OperationDefinition<DateHistogramIndexPatte
       extended_bounds: {},
     },
   }),
-  inlineOptions: ({ state, setState, columnId }) => {
+  paramEditor: ({ state, setState, columnId }) => {
     const column = state.columns[columnId] as DateHistogramIndexPatternColumn;
 
     const field =
@@ -112,7 +113,6 @@ export const dateHistogramOperation: OperationDefinition<DateHistogramIndexPatte
     function numericToInterval(i: number) {
       return intervals[i];
     }
-
     return (
       <EuiForm>
         <EuiFormRow

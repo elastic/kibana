@@ -24,7 +24,7 @@ describe('BasicAuthenticationProvider', () => {
     let callWithRequest: sinon.SinonStub;
     beforeEach(() => {
       const providerOptions = mockAuthenticationProviderOptions();
-      callWithRequest = providerOptions.client.callWithRequest as sinon.SinonStub;
+      callWithRequest = providerOptions.client.callWithRequest;
       provider = new BasicAuthenticationProvider(providerOptions);
     });
 

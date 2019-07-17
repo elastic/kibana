@@ -12,6 +12,7 @@ import { setWorkpad } from '../../state/actions/workpad';
 import { setAssets, resetAssets } from '../../state/actions/assets';
 import { setPage } from '../../state/actions/pages';
 import { getWorkpad } from '../../state/selectors/workpad';
+import { setZoomScale } from '../../state/actions/transient';
 import { WorkpadApp } from './workpad_app';
 
 export const routes = [
@@ -51,6 +52,9 @@ export const routes = [
               const { assets, ...workpad } = fetchedWorkpad;
               dispatch(setWorkpad(workpad));
               dispatch(setAssets(assets));
+
+              // reset transient properties when changing workpads
+              dispatch(setZoomScale(1));
             } catch (err) {
               notify.error(err, { title: `Couldn't load workpad with ID` });
               return router.redirectTo('home');

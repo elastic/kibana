@@ -6,33 +6,37 @@
 
 import { EuiDescriptionList, EuiFlexItem } from '@elastic/eui';
 import { getOr } from 'lodash/fp';
-import React from 'react';
-import { pure } from 'recompose';
+import React, { useContext, useState } from 'react';
 import styled from 'styled-components';
 
-import { HostItem } from '../../../../graphql/types';
+import { DescriptionList } from '../../../../../common/utility_types';
 import { getEmptyTagValue } from '../../../empty_value';
+import { DefaultFieldRenderer, hostIdRenderer } from '../../../field_renderers/field_renderers';
+import { InspectButton } from '../../../inspect';
+import { HostItem } from '../../../../graphql/types';
+import { LoadingPanel } from '../../../loading';
+import { IPDetailsLink } from '../../../links';
+import { MlCapabilitiesContext } from '../../../ml/permissions/ml_capabilities_provider';
+import { hasMlUserPermissions } from '../../../ml/permissions/has_ml_user_permissions';
+import { AnomalyScores } from '../../../ml/score/anomaly_scores';
+import { Anomalies, NarrowDateRange } from '../../../ml/types';
+import { LoadingOverlay, OverviewWrapper } from '../../index';
+import { FirstLastSeenHost, FirstLastSeenHostType } from '../first_last_seen_host';
 
 import * as i18n from './translations';
-import { FirstLastSeenHost, FirstLastSeenHostType } from '../first_last_seen_host';
-import { DefaultFieldRenderer, hostIdRenderer } from '../../../field_renderers/field_renderers';
-import { LoadingPanel } from '../../../loading';
-import { LoadingOverlay, OverviewWrapper } from '../../index';
-import { IPDetailsLink } from '../../../links';
 
-interface DescriptionList {
-  title: string;
-  description: JSX.Element;
-}
-
-interface OwnProps {
+interface HostSummaryProps {
   data: HostItem;
+  id: string;
   loading: boolean;
+  isLoadingAnomaliesData: boolean;
+  anomaliesData: Anomalies | null;
+  startDate: number;
+  endDate: number;
+  narrowDateRange: NarrowDateRange;
 }
 
-type HostSummaryProps = OwnProps;
-
-const DescriptionList = styled(EuiDescriptionList)`
+const DescriptionListStyled = styled(EuiDescriptionList)`
   ${({ theme }) => `
     dt {
       font-size: ${theme.eui.euiFontSizeXS} !important;
@@ -42,21 +46,34 @@ const DescriptionList = styled(EuiDescriptionList)`
 
 const getDescriptionList = (descriptionList: DescriptionList[], key: number) => (
   <EuiFlexItem key={key}>
-    <DescriptionList listItems={descriptionList} />
+    <DescriptionListStyled listItems={descriptionList} />
   </EuiFlexItem>
 );
 
-export const HostOverview = pure<HostSummaryProps>(({ data, loading }) => {
-  const getDefaultRenderer = (fieldName: string, fieldData: HostItem) => (
-    <DefaultFieldRenderer
-      rowItems={getOr([], fieldName, fieldData)}
-      attrName={fieldName}
-      idPrefix="host-overview"
-    />
-  );
+export const HostOverview = React.memo<HostSummaryProps>(
+  ({
+    data,
+    loading,
+    id,
+    startDate,
+    endDate,
+    isLoadingAnomaliesData,
+    anomaliesData,
+    narrowDateRange,
+  }) => {
+    const [showInspect, setShowInspect] = useState(false);
+    const capabilities = useContext(MlCapabilitiesContext);
+    const userPermissions = hasMlUserPermissions(capabilities);
 
-  const descriptionLists: Readonly<DescriptionList[][]> = [
-    [
+    const getDefaultRenderer = (fieldName: string, fieldData: HostItem) => (
+      <DefaultFieldRenderer
+        rowItems={getOr([], fieldName, fieldData)}
+        attrName={fieldName}
+        idPrefix="host-overview"
+      />
+    );
+
+    const column: DescriptionList[] = [
       {
         title: i18n.HOST_ID,
         description: data.host
@@ -87,67 +104,99 @@ export const HostOverview = pure<HostSummaryProps>(({ data, loading }) => {
             getEmptyTagValue()
           ),
       },
-    ],
-    [
-      {
-        title: i18n.IP_ADDRESSES,
-        description: (
-          <DefaultFieldRenderer
-            rowItems={getOr([], 'host.ip', data)}
-            attrName={'host.ip'}
-            idPrefix="host-overview"
-            render={ip => (ip != null ? <IPDetailsLink ip={ip} /> : getEmptyTagValue())}
-          />
-        ),
-      },
-      {
-        title: i18n.MAC_ADDRESSES,
-        description: getDefaultRenderer('host.mac', data),
-      },
-      { title: i18n.PLATFORM, description: getDefaultRenderer('host.os.platform', data) },
-    ],
-    [
-      { title: i18n.OS, description: getDefaultRenderer('host.os.name', data) },
-      { title: i18n.FAMILY, description: getDefaultRenderer('host.os.family', data) },
-      { title: i18n.VERSION, description: getDefaultRenderer('host.os.version', data) },
-      { title: i18n.ARCHITECTURE, description: getDefaultRenderer('host.architecture', data) },
-    ],
-    [
-      {
-        title: i18n.CLOUD_PROVIDER,
-        description: getDefaultRenderer('cloud.provider', data),
-      },
-      {
-        title: i18n.REGION,
-        description: getDefaultRenderer('cloud.region', data),
-      },
-      {
-        title: i18n.INSTANCE_ID,
-        description: getDefaultRenderer('cloud.instance.id', data),
-      },
-      {
-        title: i18n.MACHINE_TYPE,
-        description: getDefaultRenderer('cloud.machine.type', data),
-      },
-    ],
-  ];
+    ];
+    const firstColumn = userPermissions
+      ? [
+          ...column,
+          {
+            title: i18n.MAX_ANOMALY_SCORE_BY_JOB,
+            description: (
+              <AnomalyScores
+                anomalies={anomaliesData}
+                startDate={startDate}
+                endDate={endDate}
+                isLoading={isLoadingAnomaliesData}
+                narrowDateRange={narrowDateRange}
+              />
+            ),
+          },
+        ]
+      : column;
 
-  return (
-    <OverviewWrapper>
-      {loading && (
-        <>
-          <LoadingOverlay />
-          <LoadingPanel
-            height="100%"
-            width="100%"
-            text=""
-            position="absolute"
-            zIndex={3}
-            data-test-subj="LoadingPanelLoadMoreTable"
-          />
-        </>
-      )}
-      {descriptionLists.map((descriptionList, index) => getDescriptionList(descriptionList, index))}
-    </OverviewWrapper>
-  );
-});
+    const descriptionLists: Readonly<DescriptionList[][]> = [
+      firstColumn,
+      [
+        {
+          title: i18n.IP_ADDRESSES,
+          description: (
+            <DefaultFieldRenderer
+              rowItems={getOr([], 'host.ip', data)}
+              attrName={'host.ip'}
+              idPrefix="host-overview"
+              render={ip => (ip != null ? <IPDetailsLink ip={ip} /> : getEmptyTagValue())}
+            />
+          ),
+        },
+        {
+          title: i18n.MAC_ADDRESSES,
+          description: getDefaultRenderer('host.mac', data),
+        },
+        { title: i18n.PLATFORM, description: getDefaultRenderer('host.os.platform', data) },
+      ],
+      [
+        { title: i18n.OS, description: getDefaultRenderer('host.os.name', data) },
+        { title: i18n.FAMILY, description: getDefaultRenderer('host.os.family', data) },
+        { title: i18n.VERSION, description: getDefaultRenderer('host.os.version', data) },
+        { title: i18n.ARCHITECTURE, description: getDefaultRenderer('host.architecture', data) },
+      ],
+      [
+        {
+          title: i18n.CLOUD_PROVIDER,
+          description: getDefaultRenderer('cloud.provider', data),
+        },
+        {
+          title: i18n.REGION,
+          description: getDefaultRenderer('cloud.region', data),
+        },
+        {
+          title: i18n.INSTANCE_ID,
+          description: getDefaultRenderer('cloud.instance.id', data),
+        },
+        {
+          title: i18n.MACHINE_TYPE,
+          description: getDefaultRenderer('cloud.machine.type', data),
+        },
+      ],
+    ];
+
+    return (
+      <OverviewWrapper
+        onMouseEnter={() => setShowInspect(true)}
+        onMouseLeave={() => setShowInspect(false)}
+      >
+        {loading && (
+          <>
+            <LoadingOverlay />
+            <LoadingPanel
+              height="100%"
+              width="100%"
+              text=""
+              position="absolute"
+              zIndex={3}
+              data-test-subj="LoadingPanelLoadMoreTable"
+            />
+          </>
+        )}
+        <InspectButton
+          queryId={id}
+          show={showInspect}
+          title={i18n.INSPECT_TITLE}
+          inspectIndex={0}
+        />
+        {descriptionLists.map((descriptionList, index) =>
+          getDescriptionList(descriptionList, index)
+        )}
+      </OverviewWrapper>
+    );
+  }
+);

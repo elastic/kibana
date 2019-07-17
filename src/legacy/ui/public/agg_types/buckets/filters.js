@@ -55,14 +55,14 @@ export const filtersBucketAgg = new BucketAggType({
         });
 
         const outFilters = _.transform(inFilters, function (filters, filter) {
-          let input = _.cloneDeep(filter.input);
+          const input = _.cloneDeep(filter.input);
 
-          if (!input || !input.query) {
+          if (!input) {
             console.log('malformed filter agg params, missing "input" query'); // eslint-disable-line no-console
             return;
           }
 
-          const query = input = buildEsQuery(aggConfig.getIndexPattern(), [input], [], config);
+          const query = buildEsQuery(aggConfig.getIndexPattern(), [input], [], config);
 
           if (!query) {
             console.log('malformed filter agg params, missing "query" on input'); // eslint-disable-line no-console
@@ -73,7 +73,7 @@ export const filtersBucketAgg = new BucketAggType({
           const label = filter.label
             || matchAllLabel
             || (typeof filter.input.query === 'string' ? filter.input.query : angular.toJson(filter.input.query));
-          filters[label] = { query: input };
+          filters[label] = { query };
         }, {});
 
         if (!_.size(outFilters)) return;

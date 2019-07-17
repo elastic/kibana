@@ -7,7 +7,6 @@ exports[`Data Frame: Job List Expanded Row <JobDetailsPane /> Minimal initializa
       size="s"
     />
     <Section
-      key="the-section-title"
       section={
         Object {
           "items": Array [
@@ -22,11 +21,7 @@ exports[`Data Frame: Job List Expanded Row <JobDetailsPane /> Minimal initializa
       }
     />
   </EuiFlexItem>
-  <EuiFlexItem>
-    <EuiSpacer
-      size="s"
-    />
-  </EuiFlexItem>
+  <EuiFlexItem />
 </EuiFlexGroup>
 `;
 

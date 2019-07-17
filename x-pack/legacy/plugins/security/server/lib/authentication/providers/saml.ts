@@ -7,10 +7,10 @@
 import Boom from 'boom';
 import { Legacy } from 'kibana';
 import { canRedirectRequest } from '../../can_redirect_request';
-import { getErrorStatusCode } from '../../errors';
 import { AuthenticatedUser } from '../../../../common/model';
 import { AuthenticationResult } from '../authentication_result';
 import { DeauthenticationResult } from '../deauthentication_result';
+import { Tokens, TokenPair } from '../tokens';
 import {
   AuthenticationProviderOptions,
   BaseAuthenticationProvider,
@@ -20,7 +20,7 @@ import {
 /**
  * The state supported by the provider (for the SAML handshake or established session).
  */
-interface ProviderState {
+interface ProviderState extends Partial<TokenPair> {
   /**
    * Unique identifier of the SAML request initiated the handshake.
    */
@@ -30,18 +30,6 @@ interface ProviderState {
    * URL to redirect user to after successful SAML handshake.
    */
   nextURL?: string;
-
-  /**
-   * Access token issued as the result of successful SAML handshake and that should be provided with
-   * every request to Elasticsearch on behalf of the authenticated user. This token will eventually expire.
-   */
-  accessToken?: string;
-
-  /**
-   * Once access token expires the refresh token is used to get a new pair of access/refresh tokens
-   * without any user involvement. If not used this token will eventually expire as well.
-   */
-  refreshToken?: string;
 }
 
 /**
@@ -57,25 +45,6 @@ interface SAMLRequestQuery {
 type RequestWithSAMLPayload = RequestWithLoginAttempt & {
   payload: { SAMLResponse: string; RelayState?: string };
 };
-
-/**
- * If request with access token fails with `401 Unauthorized` then this token is no
- * longer valid and we should try to refresh it. Another use case that we should
- * temporarily support (until elastic/elasticsearch#38866 is fixed) is when token
- * document has been removed and ES responds with `500 Internal Server Error`.
- * @param err Error returned from Elasticsearch.
- */
-function isAccessTokenExpiredError(err?: any) {
-  const errorStatusCode = getErrorStatusCode(err);
-  return (
-    errorStatusCode === 401 ||
-    (errorStatusCode === 500 &&
-      err &&
-      err.body &&
-      err.body.error &&
-      err.body.error.reason === 'token document is missing and must be present')
-  );
-}
 
 /**
  * Checks whether request payload contains SAML response from IdP.
@@ -142,7 +111,10 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
 
     if (state && authenticationResult.notHandled()) {
       authenticationResult = await this.authenticateViaState(request, state);
-      if (authenticationResult.failed() && isAccessTokenExpiredError(authenticationResult.error)) {
+      if (
+        authenticationResult.failed() &&
+        Tokens.isAccessTokenExpiredError(authenticationResult.error)
+      ) {
         authenticationResult = await this.authenticateViaRefreshToken(request, state);
       }
     }
@@ -348,10 +320,11 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
 
     // Now let's invalidate tokens from the existing session.
     try {
-      await this.performIdPInitiatedLocalLogout(
-        existingState.accessToken!,
-        existingState.refreshToken!
-      );
+      this.debug('Perform IdP initiated local logout.');
+      await this.options.tokens.invalidate({
+        accessToken: existingState.accessToken!,
+        refreshToken: existingState.refreshToken!,
+      });
     } catch (err) {
       this.debug(`Failed to perform IdP initiated local logout: ${err.message}`);
       return AuthenticationResult.failed(err);
@@ -433,28 +406,38 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
       return AuthenticationResult.notHandled();
     }
 
+    let refreshedTokenPair: TokenPair | null;
     try {
-      // Token should be refreshed by the same user that obtained that token.
-      const {
-        access_token: newAccessToken,
-        refresh_token: newRefreshToken,
-      } = await this.options.client.callWithInternalUser('shield.getAccessToken', {
-        body: { grant_type: 'refresh_token', refresh_token: refreshToken },
-      });
+      refreshedTokenPair = await this.options.tokens.refresh(refreshToken);
+    } catch (err) {
+      return AuthenticationResult.failed(err);
+    }
 
-      this.debug('Access token has been successfully refreshed.');
+    // When user has neither valid access nor refresh token, the only way to resolve this issue is to get new
+    // SAML LoginResponse and exchange it for a new access/refresh token pair. To do that we initiate a new SAML
+    // handshake. Obviously we can't do that for AJAX requests, so we just reply with `400` and clear error message.
+    // There are two reasons for `400` and not `401`: Elasticsearch search responds with `400` so it seems logical
+    // to do the same on Kibana side and `401` would force user to logout and do full SLO if it's supported.
+    if (refreshedTokenPair === null) {
+      if (canRedirectRequest(request)) {
+        this.debug('Both access and refresh tokens are expired. Re-initiating SAML handshake.');
+        return this.authenticateViaHandshake(request);
+      }
 
-      request.headers.authorization = `Bearer ${newAccessToken}`;
+      return AuthenticationResult.failed(
+        Boom.badRequest('Both access and refresh tokens are expired.')
+      );
+    }
+
+    try {
+      request.headers.authorization = `Bearer ${refreshedTokenPair.accessToken}`;
 
       const user = await this.options.client.callWithRequest(request, 'shield.authenticate');
 
       this.debug('Request has been authenticated via refreshed token.');
-      return AuthenticationResult.succeeded(user, {
-        accessToken: newAccessToken,
-        refreshToken: newRefreshToken,
-      });
+      return AuthenticationResult.succeeded(user, refreshedTokenPair);
     } catch (err) {
-      this.debug(`Failed to refresh access token: ${err.message}`);
+      this.debug(`Failed to authenticate user using newly refreshed access token: ${err.message}`);
 
       // Reset `Authorization` header we've just set. We know for sure that it hasn't been defined before,
       // otherwise it would have been used or completely rejected by the `authenticateViaHeader`.
@@ -462,35 +445,6 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
       // entirely, otherwise `authorization` header without value will cause `callWithRequest` to fail if
       // it's called with this request once again down the line (e.g. in the next authentication provider).
       delete request.headers.authorization;
-
-      // There are at least two common cases when refresh token request can fail:
-      // 1. Refresh token is valid only for 24 hours and if it hasn't been used it expires.
-      //
-      // 2. Refresh token is one-time use token and if it has been used already, it is treated in the same way as
-      // expired token. Even though it's an edge case, there are several perfectly valid scenarios when it can
-      // happen. E.g. when several simultaneous AJAX request has been sent to Kibana, but access token has expired
-      // already, so the first request that reaches Kibana uses refresh token to get a new access token, but the
-      // second concurrent request has no idea about that and tries to refresh access token as well. All ends well
-      // when first request refreshes access token and updates session cookie with fresh access/refresh token pair.
-      // But if user navigates to another page _before_ AJAX request (the one that triggered token refresh) responds
-      // with updated cookie, then user will have only that old cookie with expired access token and refresh token
-      // that has been used already.
-      //
-      // When user has neither valid access nor refresh token, the only way to resolve this issue is to get new
-      // SAML LoginResponse and exchange it for a new access/refresh token pair. To do that we initiate a new SAML
-      // handshake. Obviously we can't do that for AJAX requests, so we just reply with `400` and clear error message.
-      // There are two reasons for `400` and not `401`: Elasticsearch search responds with `400` so it seems logical
-      // to do the same on Kibana side and `401` would force user to logout and do full SLO if it's supported.
-      if (getErrorStatusCode(err) === 400) {
-        if (canRedirectRequest(request)) {
-          this.debug('Both access and refresh tokens are expired. Re-initiating SAML handshake.');
-          return this.authenticateViaHandshake(request);
-        }
-
-        return AuthenticationResult.failed(
-          Boom.badRequest('Both access and refresh tokens are expired.')
-        );
-      }
 
       return AuthenticationResult.failed(err);
     }
@@ -527,49 +481,6 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
     } catch (err) {
       this.debug(`Failed to initiate SAML handshake: ${err.message}`);
       return AuthenticationResult.failed(err);
-    }
-  }
-
-  /**
-   * Invalidates access and refresh tokens without calling `saml/logout`.
-   * @param accessToken Access token to invalidate.
-   * @param refreshToken Refresh token to invalidate.
-   */
-  private async performIdPInitiatedLocalLogout(accessToken: string, refreshToken: string) {
-    this.debug('Local logout has been initiated by the Identity Provider.');
-
-    // First invalidate old access token.
-    const {
-      invalidated_tokens: invalidatedAccessTokensCount,
-    } = await this.options.client.callWithInternalUser('shield.deleteAccessToken', {
-      body: { token: accessToken },
-    });
-
-    if (invalidatedAccessTokensCount === 0) {
-      this.debug('User access token was already invalidated.');
-    } else if (invalidatedAccessTokensCount === 1) {
-      this.debug('User access token has been successfully invalidated.');
-    } else {
-      this.debug(
-        `${invalidatedAccessTokensCount} user access tokens were invalidated, this is unexpected.`
-      );
-    }
-
-    // Then invalidate old refresh token.
-    const {
-      invalidated_tokens: invalidatedRefreshTokensCount,
-    } = await this.options.client.callWithInternalUser('shield.deleteAccessToken', {
-      body: { refresh_token: refreshToken },
-    });
-
-    if (invalidatedRefreshTokensCount === 0) {
-      this.debug('User refresh token was already invalidated.');
-    } else if (invalidatedRefreshTokensCount === 1) {
-      this.debug('User refresh token has been successfully invalidated.');
-    } else {
-      this.debug(
-        `${invalidatedRefreshTokensCount} user refresh tokens were invalidated, this is unexpected.`
-      );
     }
   }
 

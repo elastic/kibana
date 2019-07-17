@@ -20,7 +20,7 @@ import { loadNewJobDefaults } from 'plugins/ml/jobs/new_job/utils/new_job_defaul
 
 import uiRoutes from 'ui/routes';
 
-const template = `<ml-nav-menu name="jobs" /><jobs-page />`;
+const template = `<ml-nav-menu name="jobs" /><jobs-page  data-test-subj="mlPageJobManagement" />`;
 
 uiRoutes
   .when('/jobs/?', {

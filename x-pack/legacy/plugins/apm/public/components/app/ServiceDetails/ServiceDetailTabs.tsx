@@ -11,7 +11,6 @@ import { HistoryTabs } from '../../shared/HistoryTabs';
 import { ErrorGroupOverview } from '../ErrorGroupOverview';
 import { TransactionOverview } from '../TransactionOverview';
 import { ServiceMetrics } from './ServiceMetrics';
-import { useLocation } from '../../../hooks/useLocation';
 
 interface Props {
   transactionTypes: string[];
@@ -26,11 +25,10 @@ export function ServiceDetailTabs({
   isRumAgent,
   agentName
 }: Props) {
-  const location = useLocation();
   const { serviceName } = urlParams;
   const headTransactionType = transactionTypes[0];
   const transactionsTab = {
-    name: i18n.translate('xpack.apm.serviceDetails.transactionsTabLabel', {
+    title: i18n.translate('xpack.apm.serviceDetails.transactionsTabLabel', {
       defaultMessage: 'Transactions'
     }),
     path: headTransactionType
@@ -42,23 +40,26 @@ export function ServiceDetailTabs({
         urlParams={urlParams}
         serviceTransactionTypes={transactionTypes}
       />
-    )
+    ),
+    name: 'transactions'
   };
   const errorsTab = {
-    name: i18n.translate('xpack.apm.serviceDetails.errorsTabLabel', {
+    title: i18n.translate('xpack.apm.serviceDetails.errorsTabLabel', {
       defaultMessage: 'Errors'
     }),
     path: `/${serviceName}/errors`,
     render: () => {
-      return <ErrorGroupOverview urlParams={urlParams} location={location} />;
-    }
+      return <ErrorGroupOverview />;
+    },
+    name: 'errors'
   };
   const metricsTab = {
-    name: i18n.translate('xpack.apm.serviceDetails.metricsTabLabel', {
+    title: i18n.translate('xpack.apm.serviceDetails.metricsTabLabel', {
       defaultMessage: 'Metrics'
     }),
     path: `/${serviceName}/metrics`,
-    render: () => <ServiceMetrics urlParams={urlParams} agentName={agentName} />
+    render: () => <ServiceMetrics agentName={agentName} />,
+    name: 'metrics'
   };
   const tabs = isRumAgent
     ? [transactionsTab, errorsTab]

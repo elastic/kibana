@@ -20,7 +20,10 @@ export const useUrlParams = (
   const currentParams: any = qs.parse(search[0] === '?' ? search.slice(1) : search);
 
   const updateUrl = (updatedParams: any) => {
-    const updatedSearch = qs.stringify({ ...currentParams, ...updatedParams });
+    const updatedSearch = qs.stringify({
+      ...currentParams,
+      ...updatedParams,
+    });
     history.push({
       pathname,
       search: updatedSearch,

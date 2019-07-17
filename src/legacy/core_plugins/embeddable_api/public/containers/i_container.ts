@@ -27,9 +27,7 @@ import {
 import { IEmbeddable } from '../embeddables/i_embeddable';
 
 export interface PanelState<
-  E extends { [key: string]: unknown } & { id: string } = { [key: string]: unknown } & {
-    id: string;
-  }
+  E extends { id: string; [key: string]: unknown } = { id: string; [key: string]: unknown }
 > {
   savedObjectId?: string;
 
@@ -40,7 +38,7 @@ export interface PanelState<
   // Stores input for this embeddable that is specific to this embeddable. Other parts of embeddable input
   // will be derived from the container's input. **Any state in here will override any state derived from
   // the container.**
-  explicitInput: E;
+  explicitInput: Partial<E> & { id: string };
 }
 
 export interface ContainerOutput extends EmbeddableOutput {

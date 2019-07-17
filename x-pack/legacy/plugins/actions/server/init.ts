@@ -16,6 +16,7 @@ import {
   getRoute,
   updateRoute,
   listActionTypesRoute,
+  fireRoute,
 } from './routes';
 
 import { registerBuiltInActionTypes } from './builtin_action_types';
@@ -33,7 +34,7 @@ export function init(server: Legacy.Server) {
     attributesToExcludeFromAAD: new Set(['description']),
   });
 
-  function getServices(basePath: string): Services {
+  function getServices(basePath: string, overwrites: Partial<Services> = {}): Services {
     // Fake request is here to allow creating a scoped saved objects client
     // and use it when security is disabled. This will be replaced when the
     // future phase of API tokens is complete.
@@ -42,9 +43,10 @@ export function init(server: Legacy.Server) {
       getBasePath: () => basePath,
     };
     return {
-      log: server.log,
+      log: server.log.bind(server),
       callCluster: callWithInternalUser,
       savedObjectsClient: server.savedObjects.getScopedSavedObjectsClient(fakeRequest),
+      ...overwrites,
     };
   }
 
@@ -64,6 +66,11 @@ export function init(server: Legacy.Server) {
   findRoute(server);
   updateRoute(server);
   listActionTypesRoute(server);
+  fireRoute({
+    server,
+    actionTypeRegistry,
+    getServices,
+  });
 
   const fireFn = createFireFunction({
     taskManager: taskManager!,

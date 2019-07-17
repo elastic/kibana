@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiPage, EuiPageSideBar, EuiPageBody, EuiHorizontalRule } from '@elastic/eui';
 import { RootDragDropProvider } from '../../drag_drop';
 
 export interface FrameLayoutProps {
@@ -13,20 +13,26 @@ export interface FrameLayoutProps {
   configPanel?: React.ReactNode;
   suggestionsPanel?: React.ReactNode;
   workspacePanel?: React.ReactNode;
+  navPanel?: React.ReactNode;
 }
 
 export function FrameLayout(props: FrameLayoutProps) {
   return (
     <RootDragDropProvider>
-      <EuiFlexGroup>
-        {/* TODO style this and add workspace prop and loading flags */}
-        <EuiFlexItem grow={null}>{props.dataPanel}</EuiFlexItem>
-        <EuiFlexItem grow={5}>{props.workspacePanel}</EuiFlexItem>
-        <EuiFlexItem grow={null}>
-          {props.configPanel}
-          {props.suggestionsPanel}
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      <EuiPage className="lnsPage">
+        <header className="lnsHeader">{props.navPanel}</header>
+        <EuiHorizontalRule margin="s" />
+        <div className="lnsPageMainContent">
+          <EuiPageSideBar className="lnsSidebar">{props.dataPanel}</EuiPageSideBar>
+          <EuiPageBody className="lnsPageBody" restrictWidth={false}>
+            {props.workspacePanel}
+          </EuiPageBody>
+          <EuiPageSideBar className="lnsSidebar lnsSidebar--right">
+            {props.configPanel}
+            {props.suggestionsPanel}
+          </EuiPageSideBar>
+        </div>
+      </EuiPage>
     </RootDragDropProvider>
   );
 }

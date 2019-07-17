@@ -8,9 +8,9 @@ import Boom from 'boom';
 import type from 'type-detect';
 import { Legacy } from 'kibana';
 import { canRedirectRequest } from '../../can_redirect_request';
-import { getErrorStatusCode } from '../../errors';
 import { AuthenticationResult } from '../authentication_result';
 import { DeauthenticationResult } from '../deauthentication_result';
+import { Tokens, TokenPair } from '../tokens';
 import {
   AuthenticationProviderOptions,
   BaseAuthenticationProvider,
@@ -21,7 +21,7 @@ import {
 /**
  * The state supported by the provider (for the OpenID Connect handshake or established session).
  */
-interface ProviderState {
+interface ProviderState extends Partial<TokenPair> {
   /**
    * Unique identifier of the OpenID Connect request initiated the handshake used to mitigate
    * replay attacks.
@@ -38,18 +38,6 @@ interface ProviderState {
    * URL to redirect user to after successful OpenID Connect handshake.
    */
   nextURL?: string;
-
-  /**
-   * Elasticsearch access token issued as the result of successful OpenID Connect handshake and that should be provided
-   * with every request to Elasticsearch on behalf of the authenticated user. This token will eventually expire.
-   */
-  accessToken?: string;
-
-  /**
-   * Once the elasticsearch access token expires the refresh token is used to get a new pair of access/refresh tokens
-   * without any user involvement. If not used this token will eventually expire as well.
-   */
-  refreshToken?: string;
 }
 
 /**
@@ -88,23 +76,6 @@ function isOIDCIncomingRequest(request: RequestWithLoginAttempt): request is OID
       (!!(request.query as any).iss ||
         !!(request.query as any).code ||
         !!(request.query as any).error))
-  );
-}
-
-/**
- * Checks the error returned by Elasticsearch as the result of `authenticate` call and returns `true` if request
- * has been rejected because of expired token, otherwise returns `false`.
- * @param err Error returned from Elasticsearch.
- */
-function isAccessTokenExpiredError(err?: any) {
-  const errorStatusCode = getErrorStatusCode(err);
-  return (
-    errorStatusCode === 401 ||
-    (errorStatusCode === 500 &&
-      err &&
-      err.body &&
-      err.body.error &&
-      err.body.error.reason === 'token document is missing and must be present')
   );
 }
 
@@ -154,7 +125,10 @@ export class OIDCAuthenticationProvider extends BaseAuthenticationProvider {
 
     if (state && authenticationResult.notHandled()) {
       authenticationResult = await this.authenticateViaState(request, state);
-      if (authenticationResult.failed() && isAccessTokenExpiredError(authenticationResult.error)) {
+      if (
+        authenticationResult.failed() &&
+        Tokens.isAccessTokenExpiredError(authenticationResult.error)
+      ) {
         authenticationResult = await this.authenticateViaRefreshToken(request, state);
       }
     }
@@ -406,29 +380,41 @@ export class OIDCAuthenticationProvider extends BaseAuthenticationProvider {
       return AuthenticationResult.notHandled();
     }
 
+    let refreshedTokenPair: TokenPair | null;
     try {
-      // Token should be refreshed by the same user that obtained that token.
-      const {
-        access_token: newAccessToken,
-        refresh_token: newRefreshToken,
-      } = await this.options.client.callWithInternalUser('shield.getAccessToken', {
-        body: { grant_type: 'refresh_token', refresh_token: refreshToken },
-      });
+      refreshedTokenPair = await this.options.tokens.refresh(refreshToken);
+    } catch (err) {
+      return AuthenticationResult.failed(err);
+    }
 
-      this.debug('Elasticsearch access token has been successfully refreshed.');
+    // When user has neither valid access nor refresh token, the only way to resolve this issue is to redirect
+    // user to OpenID Connect provider, re-initiate the authentication flow and get a new access/refresh token
+    // pair as result. Obviously we can't do that for AJAX requests, so we just reply with `400` and clear error
+    // message. There are two reasons for `400` and not `401`: Elasticsearch search responds with `400` so it
+    // seems logical to do the same on Kibana side and `401` would force user to logout and do full SLO if it's
+    // supported.
+    if (refreshedTokenPair === null) {
+      if (canRedirectRequest(request)) {
+        this.debug(
+          'Both elasticsearch access and refresh tokens are expired. Re-initiating OpenID Connect authentication.'
+        );
+        return this.initiateOIDCAuthentication(request, { realm: this.realm });
+      }
 
-      request.headers.authorization = `Bearer ${newAccessToken}`;
+      return AuthenticationResult.failed(
+        Boom.badRequest('Both access and refresh tokens are expired.')
+      );
+    }
+
+    try {
+      request.headers.authorization = `Bearer ${refreshedTokenPair.accessToken}`;
 
       const user = await this.options.client.callWithRequest(request, 'shield.authenticate');
 
       this.debug('Request has been authenticated via refreshed token.');
-
-      return AuthenticationResult.succeeded(user, {
-        accessToken: newAccessToken,
-        refreshToken: newRefreshToken,
-      });
+      return AuthenticationResult.succeeded(user, refreshedTokenPair);
     } catch (err) {
-      this.debug(`Failed to refresh elasticsearch access token: ${err.message}`);
+      this.debug(`Failed to authenticate user using newly refreshed access token: ${err.message}`);
 
       // Reset `Authorization` header we've just set. We know for sure that it hasn't been defined before,
       // otherwise it would have been used or completely rejected by the `authenticateViaHeader`.
@@ -436,38 +422,6 @@ export class OIDCAuthenticationProvider extends BaseAuthenticationProvider {
       // entirely, otherwise `authorization` header without value will cause `callWithRequest` to fail if
       // it's called with this request once again down the line (e.g. in the next authentication provider).
       delete request.headers.authorization;
-
-      // There are at least two common cases when refresh token request can fail:
-      // 1. Refresh token is valid only for 24 hours and if it hasn't been used it expires.
-      //
-      // 2. Refresh token is one-time use token and if it has been used already, it is treated in the same way as
-      // expired token. Even though it's an edge case, there are several perfectly valid scenarios when it can
-      // happen. E.g. when several simultaneous AJAX request has been sent to Kibana, but elasticsearch access token has
-      // expired already, so the first request that reaches Kibana uses refresh token to get a new elasticsearch access
-      // token, but the second concurrent request has no idea about that and tries to refresh access token as well. All
-      // ends well when first request refreshes the elasticsearch access token and updates session cookie with fresh
-      // access/refresh token pair. But if user navigates to another page _before_ AJAX request (the one that triggered
-      // token refresh)responds with updated cookie, then user will have only that old cookie with expired elasticsearch
-      // access token and refresh token that has been used already.
-      //
-      // When user has neither valid access nor refresh token, the only way to resolve this issue is to re-initiate the
-      // OpenID Connect authentication by requesting a new authentication request to send to the OpenID Connect Provider
-      // and exchange it's forthcoming response for a new Elasticsearch access/refresh token pair. In case this is an
-      // AJAX request, we just reply with `400` and clear error message.
-      // There are two reasons for `400` and not `401`: Elasticsearch search responds with `400` so it seems logical
-      // to do the same on Kibana side and `401` would force user to logout and do full SLO if it's supported.
-      if (getErrorStatusCode(err) === 400) {
-        if (canRedirectRequest(request)) {
-          this.debug(
-            'Both elasticsearch access and refresh tokens are expired. Re-initiating OpenID Connect authentication.'
-          );
-          return this.initiateOIDCAuthentication(request, { realm: this.realm });
-        }
-
-        return AuthenticationResult.failed(
-          Boom.badRequest('Both elasticsearch access and refresh tokens are expired.')
-        );
-      }
 
       return AuthenticationResult.failed(err);
     }

@@ -1,6 +1,7 @@
 {
   "allPings": {
     "total": 9231,
+    "locations": ["N/A"],
     "pings": [
       {
         "timestamp": "2019-01-28T18:43:16.078Z",
@@ -14,7 +15,8 @@
           "scheme": null,
           "status": "up",
           "type": "tcp"
-        }
+        },
+        "observer": null
       },
       {
         "timestamp": "2019-01-28T18:43:15.077Z",
@@ -31,7 +33,8 @@
           "scheme": null,
           "status": "down",
           "type": "http"
-        }
+        },
+        "observer": null
       },
       {
         "timestamp": "2019-01-28T18:43:15.077Z",
@@ -45,7 +48,8 @@
           "scheme": null,
           "status": "up",
           "type": "tcp"
-        }
+        },
+        "observer": null
       },
       {
         "timestamp": "2019-01-28T18:43:15.077Z",
@@ -59,7 +63,8 @@
           "scheme": null,
           "status": "up",
           "type": "http"
-        }
+        },
+        "observer": null
       },
       {
         "timestamp": "2019-01-28T18:43:15.077Z",
@@ -73,7 +78,8 @@
           "scheme": null,
           "status": "up",
           "type": "http"
-        }
+        },
+        "observer": null
       },
       {
         "timestamp": "2019-01-28T18:43:15.077Z",
@@ -87,7 +93,8 @@
           "scheme": null,
           "status": "up",
           "type": "http"
-        }
+        },
+        "observer": null
       },
       {
         "timestamp": "2019-01-28T18:43:14.080Z",
@@ -101,7 +108,8 @@
           "scheme": null,
           "status": "up",
           "type": "tcp"
-        }
+        },
+        "observer": null
       },
       {
         "timestamp": "2019-01-28T18:43:13.075Z",
@@ -115,7 +123,8 @@
           "scheme": null,
           "status": "up",
           "type": "tcp"
-        }
+        },
+        "observer": null
       },
       {
         "timestamp": "2019-01-28T18:43:13.074Z",
@@ -129,7 +138,8 @@
           "scheme": null,
           "status": "up",
           "type": "http"
-        }
+        },
+        "observer": null
       },
       {
         "timestamp": "2019-01-28T18:43:13.074Z",
@@ -143,7 +153,8 @@
           "scheme": null,
           "status": "up",
           "type": "http"
-        }
+        },
+        "observer": null
       },
       {
         "timestamp": "2019-01-28T18:43:12.075Z",
@@ -157,7 +168,8 @@
           "scheme": null,
           "status": "up",
           "type": "tcp"
-        }
+        },
+        "observer": null
       },
       {
         "timestamp": "2019-01-28T18:43:11.075Z",
@@ -171,7 +183,8 @@
           "scheme": null,
           "status": "up",
           "type": "tcp"
-        }
+        },
+        "observer": null
       },
       {
         "timestamp": "2019-01-28T18:43:11.074Z",
@@ -188,7 +201,8 @@
           "scheme": null,
           "status": "down",
           "type": "http"
-        }
+        },
+        "observer": null
       },
       {
         "timestamp": "2019-01-28T18:43:11.074Z",
@@ -202,7 +216,8 @@
           "scheme": null,
           "status": "up",
           "type": "http"
-        }
+        },
+        "observer": null
       },
       {
         "timestamp": "2019-01-28T18:43:11.074Z",
@@ -216,7 +231,8 @@
           "scheme": null,
           "status": "up",
           "type": "http"
-        }
+        },
+        "observer": null
       },
       {
         "timestamp": "2019-01-28T18:43:10.075Z",
@@ -230,7 +246,8 @@
           "scheme": null,
           "status": "up",
           "type": "tcp"
-        }
+        },
+        "observer": null
       },
       {
         "timestamp": "2019-01-28T18:43:10.074Z",
@@ -244,7 +261,8 @@
           "scheme": null,
           "status": "up",
           "type": "http"
-        }
+        },
+        "observer": null
       },
       {
         "timestamp": "2019-01-28T18:43:09.079Z",
@@ -258,7 +276,8 @@
           "scheme": null,
           "status": "up",
           "type": "tcp"
-        }
+        },
+        "observer": null
       },
       {
         "timestamp": "2019-01-28T18:43:08.075Z",
@@ -272,7 +291,8 @@
           "scheme": null,
           "status": "up",
           "type": "tcp"
-        }
+        },
+        "observer": null
       },
       {
         "timestamp": "2019-01-28T18:43:07.078Z",
@@ -286,7 +306,8 @@
           "scheme": null,
           "status": "up",
           "type": "tcp"
-        }
+        },
+        "observer": null
       },
       {
         "timestamp": "2019-01-28T18:43:07.078Z",
@@ -303,7 +324,8 @@
           "scheme": null,
           "status": "down",
           "type": "http"
-        }
+        },
+        "observer": null
       },
       {
         "timestamp": "2019-01-28T18:43:07.078Z",
@@ -317,7 +339,8 @@
           "scheme": null,
           "status": "up",
           "type": "http"
-        }
+        },
+        "observer": null
       },
       {
         "timestamp": "2019-01-28T18:43:07.078Z",
@@ -331,7 +354,8 @@
           "scheme": null,
           "status": "up",
           "type": "http"
-        }
+        },
+        "observer": null
       },
       {
         "timestamp": "2019-01-28T18:43:07.078Z",
@@ -345,7 +369,8 @@
           "scheme": null,
           "status": "up",
           "type": "http"
-        }
+        },
+        "observer": null
       },
       {
         "timestamp": "2019-01-28T18:43:07.078Z",
@@ -359,7 +384,8 @@
           "scheme": null,
           "status": "up",
           "type": "http"
-        }
+        },
+        "observer": null
       },
       {
         "timestamp": "2019-01-28T18:43:07.078Z",
@@ -373,7 +399,8 @@
           "scheme": null,
           "status": "down",
           "type": "http"
-        }
+        },
+        "observer": null
       },
       {
         "timestamp": "2019-01-28T18:43:06.075Z",
@@ -387,7 +414,8 @@
           "scheme": null,
           "status": "up",
           "type": "tcp"
-        }
+        },
+        "observer": null
       },
       {
         "timestamp": "2019-01-28T18:43:05.076Z",
@@ -401,7 +429,8 @@
           "scheme": null,
           "status": "up",
           "type": "tcp"
-        }
+        },
+        "observer": null
       },
       {
         "timestamp": "2019-01-28T18:43:05.076Z",
@@ -415,7 +444,8 @@
           "scheme": null,
           "status": "up",
           "type": "http"
-        }
+        },
+        "observer": null
       },
       {
         "timestamp": "2019-01-28T18:43:04.077Z",
@@ -429,7 +459,8 @@
           "scheme": null,
           "status": "up",
           "type": "tcp"
-        }
+        },
+        "observer": null
       },
       {
         "timestamp": "2019-01-28T18:43:04.077Z",
@@ -443,7 +474,8 @@
           "scheme": null,
           "status": "up",
           "type": "http"
-        }
+        },
+        "observer": null
       },
       {
         "timestamp": "2019-01-28T18:43:04.077Z",
@@ -457,7 +489,8 @@
           "scheme": null,
           "status": "up",
           "type": "http"
-        }
+        },
+        "observer": null
       },
       {
         "timestamp": "2019-01-28T18:43:03.077Z",
@@ -471,7 +504,8 @@
           "scheme": null,
           "status": "up",
           "type": "tcp"
-        }
+        },
+        "observer": null
       },
       {
         "timestamp": "2019-01-28T18:43:03.077Z",
@@ -488,7 +522,8 @@
           "scheme": null,
           "status": "down",
           "type": "http"
-        }
+        },
+        "observer": null
       },
       {
         "timestamp": "2019-01-28T18:43:03.077Z",
@@ -502,7 +537,8 @@
           "scheme": null,
           "status": "up",
           "type": "http"
-        }
+        },
+        "observer": null
       },
       {
         "timestamp": "2019-01-28T18:43:03.077Z",
@@ -516,7 +552,8 @@
           "scheme": null,
           "status": "up",
           "type": "http"
-        }
+        },
+        "observer": null
       },
       {
         "timestamp": "2019-01-28T18:43:03.077Z",
@@ -530,7 +567,8 @@
           "scheme": null,
           "status": "down",
           "type": "http"
-        }
+        },
+        "observer": null
       },
       {
         "timestamp": "2019-01-28T18:43:02.080Z",
@@ -544,7 +582,8 @@
           "scheme": null,
           "status": "up",
           "type": "tcp"
-        }
+        },
+        "observer": null
       },
       {
         "timestamp": "2019-01-28T18:43:01.077Z",
@@ -558,7 +597,8 @@
           "scheme": null,
           "status": "up",
           "type": "tcp"
-        }
+        },
+        "observer": null
       },
       {
         "timestamp": "2019-01-28T18:43:01.077Z",
@@ -572,7 +612,8 @@
           "scheme": null,
           "status": "up",
           "type": "http"
-        }
+        },
+        "observer": null
       },
       {
         "timestamp": "2019-01-28T18:43:01.077Z",
@@ -586,7 +627,8 @@
           "scheme": null,
           "status": "up",
           "type": "http"
-        }
+        },
+        "observer": null
       },
       {
         "timestamp": "2019-01-28T18:43:00.078Z",
@@ -600,7 +642,8 @@
           "scheme": null,
           "status": "up",
           "type": "tcp"
-        }
+        },
+        "observer": null
       },
       {
         "timestamp": "2019-01-28T18:43:00.078Z",
@@ -614,7 +657,8 @@
           "scheme": null,
           "status": "up",
           "type": "http"
-        }
+        },
+        "observer": null
       },
       {
         "timestamp": "2019-01-28T18:42:59.075Z",
@@ -631,7 +675,8 @@
           "scheme": null,
           "status": "down",
           "type": "http"
-        }
+        },
+        "observer": null
       },
       {
         "timestamp": "2019-01-28T18:42:59.075Z",
@@ -645,7 +690,8 @@
           "scheme": null,
           "status": "up",
           "type": "tcp"
-        }
+        },
+        "observer": null
       },
       {
         "timestamp": "2019-01-28T18:42:59.075Z",
@@ -659,7 +705,8 @@
           "scheme": null,
           "status": "up",
           "type": "http"
-        }
+        },
+        "observer": null
       },
       {
         "timestamp": "2019-01-28T18:42:59.075Z",
@@ -673,7 +720,8 @@
           "scheme": null,
           "status": "up",
           "type": "http"
-        }
+        },
+        "observer": null
       },
       {
         "timestamp": "2019-01-28T18:42:59.075Z",
@@ -687,7 +735,8 @@
           "scheme": null,
           "status": "down",
           "type": "http"
-        }
+        },
+        "observer": null
       },
       {
         "timestamp": "2019-01-28T18:42:58.075Z",
@@ -701,7 +750,8 @@
           "scheme": null,
           "status": "up",
           "type": "tcp"
-        }
+        },
+        "observer": null
       },
       {
         "timestamp": "2019-01-28T18:42:58.074Z",
@@ -715,7 +765,8 @@
           "scheme": null,
           "status": "up",
           "type": "http"
-        }
+        },
+        "observer": null
       }
     ]
   }

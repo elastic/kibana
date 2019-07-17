@@ -1,49 +1,72 @@
 [role="xpack"]
 [[canvas-workpad]]
-=== Using the workpad
+=== Create a workpad
 
-Now that you have a workpad with sample data that you can mess with, let’s mess with it. 
-We’ll start out by making a few stylistic changes. 
+When you create a workpad, you'll start with a blank page, or you can choose a workpad that is already started for you. 
 
-. Click the gauge chart in the top left of the workpad (fun fact, these are actually pie charts). 
-Try clicking on the small red slice. If you click the number, you'll notice that
-you’ve actually selected a number element, not the gauge itself. 
-+ 
-This element is now selected. Off to the right, you'll see that the side bar has changed. 
-This is where you can make changes to the element.
+. Open *Canvas*.
+
+. Choose one of the following options:
+
+* To start with a single, blank workpad, click *Create workpad*.
+
+* To create a workpad from a template, select *Templates*, then select a preconfigured template.
+
+* To import an existing workpad, click and drag a workpad JSON file to the *Import workpad JSON file* field.
+
+For advanced workpad examples, add a {kibana-ref}/add-sample-data.html[sample Kibana data set], then select *Canvas* from the *View Data* dropdown list.
+
+For more workpad inspiration, go to the link:https://www.elastic.co/blog/[Elastic Blog]. 
+
+[float]
+=== Personalize your workpad
+
+To personalize your workpad, use the editor on the right.
+
+. Add a *Name* to your workpad, for example, `My Canvas Workpad`.
+
+. In the *Width* and *Height* fields, specify the size of your workpad. 
+
+. Select the layout for your workpad. 
 +
-[role="screenshot"]
-image::images/canvas_workpad_edit_style.png[]
+For example, click *720p* for a traditional presentation layout.
 
-. Try changing the color palette. Easy right? Click the Back button in your 
-browser to undo your change.
-
-. Try dragging the chart around the page. Grab the resize handles to make 
-the chart bigger and smaller.
-
-. Now click somewhere off of the element, but not on another element, 
-to deselect it. 
+. Click the *Background color* picker, then select the background color for your workpad.
 +
-You will notice the sidebar changing again. You now have 
-access to the page and workpad-level settings. Feel free to change the page 
-background color or rename your workpad.
+image::images/canvas-background-color-picker.gif[]
 
-Speaking of pages, Canvas workpads can have multiple pages.
+. If you already know that you want to apply styles to the entire workpad, use the *Global CCS overrides*.
 
-. Click the arrow to the right of the *Page 1 of 2* text in the toolbar at the bottom
-of the page. You'll see a whole new view of the the eCommerce data.
-. Click the *Page 2 of 2* text to see a live preview of all of the pages in your 
-workpad.
-. Click the (+) button to create a new, blank page.
-. Click the *Add element* button in the top right hand corner of the page.
-. Add an *Area Chart.*
+.. Expand *Global CCS overrides*.
+
+.. Enter the CCS, then click *Apply stylesheet*.
+
+[float]
+=== Share your workpad
+
+When you are ready to share your workpad, create a PDF, or export your workpad to another author.
+
+[float]
+==== Create a PDF of your workpad
+
+To view your workpad outside of Kibana, generate a PDF. 
+
+. If you are using a basic license, enable reporting in your `config/kibana.yml` file.
+
+. From your workpad, click the *Share workpad* icon in the upper left corner, then select *PDF reports*.
+
+. Click *Generate PDF*. 
 +
-[role="screenshot"]
-image::images/canvas_workpad_3_page.png[]
+image::images/canvas-generate-pdf.gif[]
 
-You now have a three-page workpad, and a new element connected 
-to some demo data.  Your next step is to wire your new element 
-up to some real data; you can click on the *Data* tab in the right sidebar menu 
-and click "Change your data source" to start working with your Elasticsearch data.
+[float]
+==== Export your workpad
 
+To share your workpads with another author, export your workpads as JSON files.
 
+. Go to the *Canvas workpads* page. 
+
+. Choose one of the following options:
+* To export a single workpad, click the *Export* icon next to the workpad you want to export.
+
+* To export multiple workpads, select the workpads you want to export, then click *Export*.

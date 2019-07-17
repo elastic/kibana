@@ -23,6 +23,7 @@ import { AppFrontendLibs } from '../lib/lib';
 import { PageRouter } from '../routes';
 import { createStore } from '../store';
 import { GlobalToaster, ManageGlobalToaster } from '../components/toasters';
+import { MlCapabilitiesProvider } from '../components/ml/permissions/ml_capabilities_provider';
 
 export const startApp = async (libs: AppFrontendLibs) => {
   const history = createHashHistory();
@@ -44,7 +45,9 @@ export const startApp = async (libs: AppFrontendLibs) => {
                 })}
               >
                 <KibanaConfigContext.Provider value={libs.framework}>
-                  <PageRouter history={history} />
+                  <MlCapabilitiesProvider>
+                    <PageRouter history={history} />
+                  </MlCapabilitiesProvider>
                 </KibanaConfigContext.Provider>
               </ThemeProvider>
               <ErrorToastDispatcher />

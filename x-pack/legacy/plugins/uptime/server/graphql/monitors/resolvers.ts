@@ -19,6 +19,8 @@ import {
   MonitorPageTitle,
   Ping,
   Snapshot,
+  HistogramDataPoint,
+  GetSnapshotHistogramQueryArgs,
 } from '../../../common/graphql/types';
 import { UMServerLibs } from '../../lib/lib';
 import { CreateUMGraphQLResolvers, UMContext } from '../types';
@@ -74,12 +76,20 @@ export type UMGetMontiorPageTitleResolver = UMResolver<
   UMContext
 >;
 
+export type UMGetSnapshotHistogram = UMResolver<
+  HistogramDataPoint[] | Promise<HistogramDataPoint[]>,
+  any,
+  GetSnapshotHistogramQueryArgs,
+  UMContext
+>;
+
 export const createMonitorsResolvers: CreateUMGraphQLResolvers = (
   libs: UMServerLibs
 ): {
   Query: {
     getMonitors: UMGetMonitorsResolver;
     getSnapshot: UMSnapshotResolver;
+    getSnapshotHistogram: UMGetSnapshotHistogram;
     getMonitorChartsData: UMGetMonitorChartsResolver;
     getLatestMonitors: UMLatestMonitorsResolver;
     getFilterBar: UMGetFilterBarResolver;
@@ -88,15 +98,18 @@ export const createMonitorsResolvers: CreateUMGraphQLResolvers = (
   };
 } => ({
   Query: {
-    // @ts-ignore TODO update typings and remove this comment
     async getMonitors(resolver, { dateRangeStart, dateRangeEnd, filters }, { req }): Promise<any> {
       const result = await libs.monitors.getMonitors(req, dateRangeStart, dateRangeEnd, filters);
       return {
         monitors: result,
       };
     },
-    async getSnapshot(resolver, { dateRangeStart, dateRangeEnd, filters }, { req }): Promise<any> {
-      const { up, down, total } = await libs.monitors.getSnapshotCount(
+    async getSnapshot(
+      resolver,
+      { dateRangeStart, dateRangeEnd, filters },
+      { req }
+    ): Promise<Snapshot> {
+      const counts = await libs.monitorStates.getSummaryCount(
         req,
         dateRangeStart,
         dateRangeEnd,
@@ -104,11 +117,21 @@ export const createMonitorsResolvers: CreateUMGraphQLResolvers = (
       );
 
       return {
-        up,
-        down,
-        total,
-        histogram: await libs.pings.getPingHistogram(req, dateRangeStart, dateRangeEnd, filters),
+        counts,
       };
+    },
+    async getSnapshotHistogram(
+      resolver,
+      { dateRangeStart, dateRangeEnd, filters, monitorId },
+      { req }
+    ): Promise<HistogramDataPoint[]> {
+      return await libs.pings.getPingHistogram(
+        req,
+        dateRangeStart,
+        dateRangeEnd,
+        filters,
+        monitorId
+      );
     },
     async getMonitorChartsData(
       resolver,

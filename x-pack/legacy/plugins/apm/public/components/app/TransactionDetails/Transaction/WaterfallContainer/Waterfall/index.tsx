@@ -136,7 +136,6 @@ export class Waterfall extends Component<Props> {
           <Timeline
             agentMarks={this.props.agentMarks}
             duration={waterfall.duration}
-            traceRootDuration={waterfall.traceRootDuration}
             height={waterfallHeight}
             margins={TIMELINE_MARGINS}
           />

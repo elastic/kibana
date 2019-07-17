@@ -25,7 +25,7 @@ import { kfetch } from 'ui/kfetch';
 import { ajaxStream } from 'ui/ajax_stream';
 import { functions } from './functions';
 import { visualization } from './renderers/visualization';
-import { typeSpecs } from '../common/types';
+import { typeSpecs } from '../../../../plugins/data/common/expressions/expression_types';
 
 // Expose kbnInterpreter.register(specs) and kbnInterpreter.registries() globally so that plugins
 // can register without a transpile step.

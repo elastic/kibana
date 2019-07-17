@@ -54,19 +54,16 @@ function RawJsonParamEditor({
     setValidity(isValidJson(textValue));
   };
 
-  useEffect(
-    () => {
-      setValidity(isValid);
-    },
-    [isValid]
-  );
+  useEffect(() => {
+    setValidity(isValid);
+  }, [isValid]);
 
   return (
     <EuiFormRow
       label={label}
       isInvalid={showValidation ? !isValid : false}
       fullWidth={true}
-      className="visEditorSidebar__aggParamFormRow"
+      compressed
     >
       <EuiTextArea
         id={`visEditorRawJson${agg.id}`}

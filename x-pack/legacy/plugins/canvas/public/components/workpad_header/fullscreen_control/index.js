@@ -9,7 +9,11 @@ import { setFullscreen, selectToplevelNodes } from '../../../state/actions/trans
 import { enableAutoplay } from '../../../state/actions/workpad';
 import { getFullscreen } from '../../../state/selectors/app';
 import { getAutoplay } from '../../../state/selectors/workpad';
+import { trackCanvasUiMetric } from '../../../lib/ui_metric';
 import { FullscreenControl as Component } from './fullscreen_control';
+
+const LaunchedFullScreen = 'workpad-full-screen-launch';
+const LaunchedFullScreenAutoplay = 'workpad-full-screen-launch-with-autoplay';
 
 const mapStateToProps = state => ({
   isFullscreen: getFullscreen(state),
@@ -24,7 +28,27 @@ const mapDispatchToProps = dispatch => ({
   enableAutoplay: enabled => dispatch(enableAutoplay(enabled)),
 });
 
+const mergeProps = (stateProps, dispatchProps, ownProps) => {
+  return {
+    ...ownProps,
+    ...stateProps,
+    ...dispatchProps,
+    setFullscreen: value => {
+      dispatchProps.setFullscreen(value);
+
+      if (value === true) {
+        trackCanvasUiMetric(
+          stateProps.autoplayEnabled
+            ? [LaunchedFullScreen, LaunchedFullScreenAutoplay]
+            : LaunchedFullScreen
+        );
+      }
+    },
+  };
+};
+
 export const FullscreenControl = connect(
   mapStateToProps,
-  mapDispatchToProps
+  mapDispatchToProps,
+  mergeProps
 )(Component);

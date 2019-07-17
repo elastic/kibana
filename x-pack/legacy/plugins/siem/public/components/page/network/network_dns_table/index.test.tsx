@@ -32,12 +32,13 @@ describe('NetworkTopNFlow Table Component', () => {
       const wrapper = shallow(
         <ReduxStoreProvider store={store}>
           <NetworkDnsTable
-            loading={false}
             data={mockData.NetworkDns.edges}
-            totalCount={mockData.NetworkDns.totalCount}
             hasNextPage={getOr(false, 'hasNextPage', mockData.NetworkDns.pageInfo)!}
-            nextCursor={getOr(null, 'endCursor.value', mockData.NetworkDns.pageInfo)}
+            id="dns"
+            loading={false}
             loadMore={loadMore}
+            nextCursor={getOr(null, 'endCursor.value', mockData.NetworkDns.pageInfo)}
+            totalCount={mockData.NetworkDns.totalCount}
             type={networkModel.NetworkType.page}
           />
         </ReduxStoreProvider>
@@ -53,12 +54,13 @@ describe('NetworkTopNFlow Table Component', () => {
         <MockedProvider>
           <TestProviders store={store}>
             <NetworkDnsTable
-              loading={false}
               data={mockData.NetworkDns.edges}
-              totalCount={mockData.NetworkDns.totalCount}
               hasNextPage={getOr(false, 'hasNextPage', mockData.NetworkDns.pageInfo)!}
-              nextCursor={getOr(null, 'endCursor.value', mockData.NetworkDns.pageInfo)}
+              id="dns"
+              loading={false}
               loadMore={loadMore}
+              nextCursor={getOr(null, 'endCursor.value', mockData.NetworkDns.pageInfo)}
+              totalCount={mockData.NetworkDns.totalCount}
               type={networkModel.NetworkType.page}
             />
           </TestProviders>

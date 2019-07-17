@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useMemo, useContext } from 'react';
+import React, { useMemo, useContext, memo } from 'react';
 import { EuiSelect } from '@elastic/eui';
 import { NativeRenderer } from '../../native_renderer';
 import { Action } from './state_management';
@@ -19,7 +19,31 @@ interface ConfigPanelWrapperProps {
   datasourcePublicAPI: DatasourcePublicAPI;
 }
 
-export function ConfigPanelWrapper(props: ConfigPanelWrapperProps) {
+function getSuggestedVisualizationState(
+  visualization: Visualization,
+  datasource: DatasourcePublicAPI
+) {
+  const suggestions = visualization.getSuggestions({
+    tables: [
+      {
+        datasourceSuggestionId: 0,
+        isMultiRow: true,
+        columns: datasource.getTableSpec().map(col => ({
+          ...col,
+          operation: datasource.getOperationForColumnId(col.columnId)!,
+        })),
+      },
+    ],
+  });
+
+  if (!suggestions.length) {
+    return visualization.initialize(datasource);
+  }
+
+  return visualization.initialize(datasource, suggestions[0].state);
+}
+
+export const ConfigPanelWrapper = memo(function ConfigPanelWrapper(props: ConfigPanelWrapperProps) {
   const context = useContext(DragContext);
   const setVisualizationState = useMemo(
     () => (newState: unknown) => {
@@ -41,14 +65,14 @@ export function ConfigPanelWrapper(props: ConfigPanelWrapperProps) {
         }))}
         value={props.activeVisualizationId || undefined}
         onChange={e => {
+          const newState = getSuggestedVisualizationState(
+            props.visualizationMap[e.target.value],
+            props.datasourcePublicAPI
+          );
           props.dispatch({
             type: 'SWITCH_VISUALIZATION',
             newVisualizationId: e.target.value,
-            // TODO we probably want to have a separate API to "force" a visualization switch
-            // which isn't a result of a picked suggestion
-            initialState: props.visualizationMap[e.target.value].initialize(
-              props.datasourcePublicAPI
-            ),
+            initialState: newState,
           });
         }}
       />
@@ -65,4 +89,4 @@ export function ConfigPanelWrapper(props: ConfigPanelWrapperProps) {
       )}
     </>
   );
-}
+});

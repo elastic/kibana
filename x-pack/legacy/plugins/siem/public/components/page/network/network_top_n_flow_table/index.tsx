@@ -29,6 +29,7 @@ import * as i18n from './translations';
 
 interface OwnProps {
   data: NetworkTopNFlowEdges[];
+  id: string;
   indexPattern: StaticIndexPattern;
   loading: boolean;
   hasNextPage: boolean;
@@ -93,6 +94,7 @@ class NetworkTopNFlowTableComponent extends React.PureComponent<NetworkTopNFlowT
     const {
       data,
       hasNextPage,
+      id,
       indexPattern,
       limit,
       loading,
@@ -124,7 +126,7 @@ class NetworkTopNFlowTableComponent extends React.PureComponent<NetworkTopNFlowT
         hasNextPage={hasNextPage}
         headerCount={totalCount}
         headerSupplement={
-          <EuiFlexGroup alignItems="center">
+          <EuiFlexGroup alignItems="center" gutterSize="m">
             <EuiFlexItem grow={false}>
               <SelectTypeItem
                 grow={false}
@@ -156,6 +158,7 @@ class NetworkTopNFlowTableComponent extends React.PureComponent<NetworkTopNFlowT
         }
         headerTitle={i18n.TOP_TALKERS}
         headerUnit={i18n.UNIT(totalCount)}
+        id={id}
         itemsPerRow={rowItems}
         limit={limit}
         loading={loading}

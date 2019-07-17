@@ -79,10 +79,19 @@ export class LspService {
   }
 
   public supportLanguage(lang: string) {
-    return this.controller.supportLanguage(lang);
+    return this.controller.getLanguageServerDef(lang) !== null;
+  }
+
+  public getLanguageSeverDef(lang: string) {
+    return this.controller.getLanguageServerDef(lang);
   }
 
   public languageServerStatus(lang: string): LanguageServerStatus {
     return this.controller.status(lang);
+  }
+
+  public async initializeState(repoUri: string, revision: string) {
+    const workspacePath = await this.workspaceHandler.revisionDir(repoUri, revision);
+    return await this.controller.initializeState(workspacePath);
   }
 }

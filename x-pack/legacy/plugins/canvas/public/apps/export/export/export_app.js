@@ -37,7 +37,15 @@ export class ExportApp extends React.PureComponent {
             </Link>
           </div>
           <div className="canvasExport__stageContent">
-            <WorkpadPage isSelected page={activePage} height={height} width={width} />
+            <WorkpadPage
+              isSelected
+              key={activePage.id}
+              pageId={activePage.id}
+              height={height}
+              width={width}
+              registerLayout={() => {}}
+              unregisterLayout={() => {}}
+            />
           </div>
         </div>
       </div>

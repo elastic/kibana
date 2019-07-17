@@ -8,13 +8,18 @@ import React, { Fragment } from 'react';
 
 import { EuiPanel, EuiSpacer } from '@elastic/eui';
 
-import { AggName, PivotGroupByConfig, PivotGroupByConfigDict } from '../../common';
+import {
+  AggName,
+  PivotGroupByConfig,
+  PivotGroupByConfigDict,
+  PivotGroupByConfigWithUiSupportDict,
+} from '../../common';
 
 import { GroupByLabelForm } from './group_by_label_form';
 
 interface ListProps {
   list: PivotGroupByConfigDict;
-  options: PivotGroupByConfigDict;
+  options: PivotGroupByConfigWithUiSupportDict;
   deleteHandler(l: string): void;
   onChange(id: string, item: PivotGroupByConfig): void;
 }

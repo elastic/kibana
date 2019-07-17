@@ -10,8 +10,8 @@ import {
   EuiFormRow,
   EuiSwitch,
 } from '@elastic/eui';
-import { MultiFieldSelect } from '../../../components/multi_field_select';
 import { SingleFieldSelect } from '../../../components/single_field_select';
+import { TooltipSelector } from '../../../components/tooltip_selector';
 
 import { indexPatternService } from '../../../../kibana_services';
 import { i18n } from '@kbn/i18n';
@@ -94,12 +94,11 @@ export class UpdateSourceEditor extends Component {
       }
     }
   }
-
-  onTooltipPropertiesSelect = (propertyNames) => {
+  _onTooltipPropertiesChange = (propertyNames) => {
     this.props.onChange({ propName: 'tooltipProperties', value: propertyNames });
   };
 
-  onFilterByMapBoundsChange = event => {
+  _onFilterByMapBoundsChange = event => {
     this.props.onChange({ propName: 'filterByMapBounds', value: event.target.checked });
   };
 
@@ -194,23 +193,11 @@ export class UpdateSourceEditor extends Component {
   render() {
     return (
       <Fragment>
-        <EuiFormRow
-          label={
-            i18n.translate('xpack.maps.source.esSearch.fieldsLabel', {
-              defaultMessage: `Fields to display in tooltip`
-            })
-          }
-        >
-          <MultiFieldSelect
-            placeholder={i18n.translate('xpack.maps.source.esSearch.fieldsPlaceholder', {
-              defaultMessage: `Select fields`
-            })
-            }
-            value={this.props.tooltipProperties}
-            onChange={this.onTooltipPropertiesSelect}
-            fields={this.state.tooltipFields}
-          />
-        </EuiFormRow>
+        <TooltipSelector
+          value={this.props.tooltipProperties}
+          onChange={this._onTooltipPropertiesChange}
+          fields={this.state.tooltipFields}
+        />
 
         <EuiFormRow>
           <EuiSwitch
@@ -221,7 +208,7 @@ export class UpdateSourceEditor extends Component {
 
             }
             checked={this.props.filterByMapBounds}
-            onChange={this.onFilterByMapBoundsChange}
+            onChange={this._onFilterByMapBoundsChange}
           />
         </EuiFormRow>
 

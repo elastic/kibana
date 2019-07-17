@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { getOr, omit, uniq, isEmpty, isEqualWith } from 'lodash/fp';
+import { getOr, omit, uniq, isEmpty, isEqualWith, defaultsDeep, pickBy, isNil } from 'lodash/fp';
 
 import { ColumnHeader } from '../../components/timeline/body/column_headers/column_header';
 import { getColumnWidthFromType } from '../../components/timeline/body/helpers';
@@ -17,6 +17,7 @@ import { KueryFilterQuery, SerializedFilterQuery } from '../model';
 
 import { KqlMode, timelineDefaults, TimelineModel } from './model';
 import { TimelineById, TimelineState } from './types';
+import { TimelineResult } from '../../graphql/types';
 
 const EMPTY_TIMELINE_BY_ID: TimelineById = {}; // stable reference
 
@@ -102,12 +103,31 @@ export const addTimelineNoteToEvent = ({
   };
 };
 
+interface AddTimelineParams {
+  id: string;
+  timeline: TimelineResult;
+}
+
+/**
+ * Add a saved object timeline to the store
+ * and default the value to what need to be if values are null
+ */
+export const addTimelineToStore = ({ id, timeline }: AddTimelineParams): TimelineById => ({
+  //  TODO: revisit this when we support multiple timelines
+  [id]: {
+    ...defaultsDeep(timelineDefaults, pickBy(v => !isNil(v), timeline)),
+    id: timeline.savedObjectId || '',
+    show: true,
+  },
+});
+
 interface AddNewTimelineParams {
   columns: ColumnHeader[];
   id: string;
   show?: boolean;
   timelineById: TimelineById;
 }
+
 /** Adds a new `Timeline` to the provided collection of `TimelineById` */
 export const addNewTimeline = ({
   columns,

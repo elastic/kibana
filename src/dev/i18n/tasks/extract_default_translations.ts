@@ -18,8 +18,8 @@
  */
 
 import chalk from 'chalk';
-import { ErrorReporter, extractMessagesFromPathToMap, filterConfigPaths, I18nConfig } from '..';
 import { createFailError } from '../../run';
+import { ErrorReporter, extractMessagesFromPathToMap, filterConfigPaths, I18nConfig } from '..';
 
 export function extractDefaultMessages({
   path,

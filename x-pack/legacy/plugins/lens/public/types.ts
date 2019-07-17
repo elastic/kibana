@@ -10,8 +10,10 @@ import { DragContextState } from './drag_drop';
 // eslint-disable-next-line
 export interface EditorFrameOptions {}
 
+export type ErrorCallback = (e: { message: string }) => void;
+
 export interface EditorFrameInstance {
-  mount: (element: Element) => void;
+  mount: (element: Element, props: { onError: ErrorCallback }) => void;
   unmount: () => void;
 }
 
@@ -69,12 +71,11 @@ export interface Datasource<T = unknown, P = unknown> {
 export interface DatasourcePublicAPI {
   getTableSpec: () => TableSpec;
   getOperationForColumnId: (columnId: string) => Operation | null;
-  generateColumnId: () => string;
 
   // Render can be called many times
   renderDimensionPanel: (domElement: Element, props: DatasourceDimensionPanelProps) => void;
 
-  removeColumnInTableSpec: (columnId: string) => TableSpec;
+  removeColumnInTableSpec: (columnId: string) => void;
   moveColumnTo: (columnId: string, targetIndex: number) => void;
   duplicateColumn: (columnId: string) => TableSpec;
 }
@@ -154,6 +155,8 @@ export interface VisualizationSuggestion<T = unknown> {
   title: string;
   state: T;
   datasourceSuggestionId: number;
+  previewExpression?: Ast | string;
+  previewIcon: string;
 }
 
 export interface Visualization<T = unknown, P = unknown> {

@@ -57,7 +57,7 @@ test('Execute update job', async () => {
     esClient as EsClient,
     {
       security: {
-        enableGitCertCheck: false,
+        enableGitCertCheck: true,
       },
     } as ServerOptions,
     {} as GitOperations,
@@ -97,7 +97,7 @@ test('On update job completed because of cancellation ', async () => {
     esClient as EsClient,
     {
       security: {
-        enableGitCertCheck: false,
+        enableGitCertCheck: true,
       },
     } as ServerOptions,
     {} as GitOperations,

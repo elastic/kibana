@@ -20,7 +20,8 @@ export default function spaceSelectorFunctonalTests({
     'spaceSelector',
   ]);
 
-  describe('Spaces', () => {
+  describe('Spaces', function() {
+    this.tags('smoke');
     describe('Space Selector', () => {
       before(async () => await esArchiver.load('spaces/selector'));
       after(async () => await esArchiver.unload('spaces/selector'));

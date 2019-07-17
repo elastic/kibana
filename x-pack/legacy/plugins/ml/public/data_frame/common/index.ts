@@ -8,6 +8,7 @@ export * from './aggregations';
 export * from './fields';
 export * from './dropdown';
 export * from './kibana_context';
+export * from './job';
 export * from './navigation';
 export * from './pivot_aggs';
 export * from './pivot_group_by';

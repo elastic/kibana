@@ -18,6 +18,12 @@
       </div>
     </div>
   </kbn-top-nav>
+  <div class="timApp__menus">
+    <timelion-help ng-show="menus.showHelp"></timelion-help>
+    <timelion-save ng-show="menus.showSave"></timelion-save>
+    <timelion-load ng-show="menus.showLoad"></timelion-load>
+    <timelion-options ng-show="menus.showOptions"></timelion-options>
+  </div>
 
   <div class="timApp__container">
     <div>

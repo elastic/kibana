@@ -6,6 +6,7 @@
 
 import { callWithRequestFactory } from '../client/call_with_request_factory';
 import { wrapError } from '../client/errors';
+import { transformAuditMessagesProvider } from '../models/data_frame/transform_audit_messages';
 
 export function dataFrameRoutes({ commonRouteConfig, elasticsearchPlugin, route }) {
 
@@ -15,6 +16,20 @@ export function dataFrameRoutes({ commonRouteConfig, elasticsearchPlugin, route 
     handler(request) {
       const callWithRequest = callWithRequestFactory(elasticsearchPlugin, request);
       return callWithRequest('ml.getDataFrameTransforms')
+        .catch(resp => wrapError(resp));
+    },
+    config: {
+      ...commonRouteConfig
+    }
+  });
+
+  route({
+    method: 'GET',
+    path: '/api/ml/_data_frame/transforms/{jobId}',
+    handler(request) {
+      const callWithRequest = callWithRequestFactory(elasticsearchPlugin, request);
+      const { jobId } = request.params;
+      return callWithRequest('ml.getDataFrameTransforms', { jobId })
         .catch(resp => wrapError(resp));
     },
     config: {
@@ -95,8 +110,15 @@ export function dataFrameRoutes({ commonRouteConfig, elasticsearchPlugin, route 
     path: '/api/ml/_data_frame/transforms/{jobId}/_start',
     handler(request) {
       const callWithRequest = callWithRequestFactory(elasticsearchPlugin, request);
-      const { jobId } = request.params;
-      return callWithRequest('ml.startDataFrameTransformsJob', { jobId })
+      const options = {
+        jobId: request.params.jobId
+      };
+
+      if (request.query.force !== undefined) {
+        options.force = request.query.force;
+      }
+
+      return callWithRequest('ml.startDataFrameTransformsJob', options)
         .catch(resp => wrapError(resp));
     },
     config: {
@@ -112,11 +134,31 @@ export function dataFrameRoutes({ commonRouteConfig, elasticsearchPlugin, route 
       const options = {
         jobId: request.params.jobId
       };
-      const force = request.query.force;
-      if (force !== undefined) {
-        options.force = force;
+
+      if (request.query.force !== undefined) {
+        options.force = request.query.force;
       }
+
+      if (request.query.wait_for_completion !== undefined) {
+        options.waitForCompletion = request.query.wait_for_completion;
+      }
+
       return callWithRequest('ml.stopDataFrameTransformsJob', options)
+        .catch(resp => wrapError(resp));
+    },
+    config: {
+      ...commonRouteConfig
+    }
+  });
+
+  route({
+    method: 'GET',
+    path: '/api/ml/_data_frame/transforms/{transformId}/messages',
+    handler(request) {
+      const callWithRequest = callWithRequestFactory(elasticsearchPlugin, request);
+      const { getTransformAuditMessages } = transformAuditMessagesProvider(callWithRequest);
+      const { transformId } = request.params;
+      return getTransformAuditMessages(transformId)
         .catch(resp => wrapError(resp));
     },
     config: {

@@ -8,6 +8,7 @@ import { metricVisualization } from './metric_visualization';
 import { DatasourcePublicAPI } from '../types';
 import { State } from './types';
 import { createMockDatasource } from '../editor_frame_plugin/mocks';
+import { generateId } from '../id_generator';
 
 function exampleState(): State {
   return {
@@ -20,9 +21,7 @@ describe('metric_visualization', () => {
   describe('#initialize', () => {
     it('loads default state', () => {
       const mockDatasource = createMockDatasource();
-      mockDatasource.publicAPIMock.generateColumnId
-        .mockReturnValue('test-id1')
-        .mockReturnValueOnce('test-id2');
+      (generateId as jest.Mock).mockReturnValueOnce('test-id1').mockReturnValueOnce('test-id2');
       const initialState = metricVisualization.initialize(mockDatasource.publicAPIMock);
 
       expect(initialState.accessor).toBeDefined();

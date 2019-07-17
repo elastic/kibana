@@ -8,6 +8,7 @@ import { Legacy } from 'kibana';
 import { AuthenticationResult } from '../authentication_result';
 import { DeauthenticationResult } from '../deauthentication_result';
 import { LoginAttempt } from '../login_attempt';
+import { Tokens } from '../tokens';
 
 /**
  * Describes a request complemented with `loginAttempt` method.
@@ -23,6 +24,7 @@ export interface AuthenticationProviderOptions {
   basePath: string;
   client: Legacy.Plugins.elasticsearch.Cluster;
   log: (tags: string[], message: string) => void;
+  tokens: PublicMethodsOf<Tokens>;
 }
 
 /**

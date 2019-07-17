@@ -296,6 +296,92 @@ describe('CSV Execute Job', function () {
     });
   });
 
+  describe('Cells with formula values', async () => {
+    it('returns `csv_contains_formulas` when cells contain formulas', async function () {
+      mockServer.config().get.withArgs('xpack.reporting.csv.checkForFormulas').returns(true);
+      callWithRequestStub.onFirstCall().returns({
+        hits: {
+          hits: [{ _source: { 'one': '=SUM(A1:A2)', 'two': 'bar' } }]
+        },
+        _scroll_id: 'scrollId'
+      });
+
+      const executeJob = executeJobFactory(mockServer);
+      const jobParams = {
+        headers: encryptedHeaders,
+        fields: [ 'one', 'two' ],
+        conflictedTypesFields: [],
+        searchRequest: { index: null, body: null },
+      };
+      const { csv_contains_formulas: csvContainsFormulas } = await executeJob(jobParams, cancellationToken);
+
+      expect(csvContainsFormulas).to.equal(true);
+    });
+
+    it('returns warnings when headings contain formulas', async function () {
+      mockServer.config().get.withArgs('xpack.reporting.csv.checkForFormulas').returns(true);
+      callWithRequestStub.onFirstCall().returns({
+        hits: {
+          hits: [{ _source: { '=SUM(A1:A2)': 'foo', 'two': 'bar' } }]
+        },
+        _scroll_id: 'scrollId'
+      });
+
+      const executeJob = executeJobFactory(mockServer);
+      const jobParams = {
+        headers: encryptedHeaders,
+        fields: [ '=SUM(A1:A2)', 'two' ],
+        conflictedTypesFields: [],
+        searchRequest: { index: null, body: null },
+      };
+      const { csv_contains_formulas: csvContainsFormulas } = await executeJob(jobParams, cancellationToken);
+
+      expect(csvContainsFormulas).to.equal(true);
+    });
+
+    it('returns no warnings when cells have no formulas', async function () {
+      mockServer.config().get.withArgs('xpack.reporting.csv.checkForFormulas').returns(true);
+      callWithRequestStub.onFirstCall().returns({
+        hits: {
+          hits: [{ _source: { 'one': 'foo', 'two': 'bar' } }]
+        },
+        _scroll_id: 'scrollId'
+      });
+
+      const executeJob = executeJobFactory(mockServer);
+      const jobParams = {
+        headers: encryptedHeaders,
+        fields: [ 'one', 'two' ],
+        conflictedTypesFields: [],
+        searchRequest: { index: null, body: null },
+      };
+      const { csv_contains_formulas: csvContainsFormulas } = await executeJob(jobParams, cancellationToken);
+
+      expect(csvContainsFormulas).to.equal(false);
+    });
+
+    it('returns no warnings when configured not to', async () => {
+      mockServer.config().get.withArgs('xpack.reporting.csv.checkForFormulas').returns(false);
+      callWithRequestStub.onFirstCall().returns({
+        hits: {
+          hits: [{ _source: { 'one': '=SUM(A1:A2)', 'two': 'bar' } }]
+        },
+        _scroll_id: 'scrollId'
+      });
+
+      const executeJob = executeJobFactory(mockServer);
+      const jobParams = {
+        headers: encryptedHeaders,
+        fields: [ 'one', 'two' ],
+        conflictedTypesFields: [],
+        searchRequest: { index: null, body: null },
+      };
+      const { csv_contains_formulas: csvContainsFormulas } = await executeJob(jobParams, cancellationToken);
+
+      expect(csvContainsFormulas).to.equal(false);
+    });
+  });
+
   describe('Elasticsearch call errors', function () {
     it('should reject Promise if search call errors out', async function () {
       callWithRequestStub.rejects(new Error());

@@ -29,13 +29,12 @@ import {
   revealPosition,
   fetchRepos,
   turnOnDefaultRepoScope,
-  openTreePath,
   fetchRootRepoTree,
 } from '../actions';
 import { loadRepo, loadRepoFailed, loadRepoSuccess } from '../actions/status';
 import { PathTypes } from '../common/types';
 import { RootState } from '../reducers';
-import { getPathOfTree } from '../reducers/file';
+import { getPathOfTree } from '../reducers/file_tree';
 import {
   fileSelector,
   getTree,
@@ -44,6 +43,7 @@ import {
   repoScopeSelector,
   urlQueryStringSelector,
   createTreeSelector,
+  getTreeRevision,
 } from '../selectors';
 import { history } from '../utils/url';
 import { mainRoutePattern } from './patterns';
@@ -182,28 +182,22 @@ function* handleMainRouteChange(action: Action<Match>) {
       }
     }
     yield call(handleFile, repoUri, file, revision);
-    const commits = yield select((state: RootState) => state.file.treeCommits[file]);
+    const commits = yield select((state: RootState) => state.revision.treeCommits[file]);
     if (commits === undefined) {
       yield put(fetchTreeCommits({ revision, uri: repoUri, path: file }));
     }
   }
   const lastRequestPath = yield select(lastRequestPathSelector);
   const currentTree: FileTree = yield select(getTree);
+  const currentTreeRevision: string = yield select(getTreeRevision);
   // repo changed
-  if (currentTree.repoUri !== repoUri) {
+  if (currentTree.repoUri !== repoUri || revision !== currentTreeRevision) {
     yield put(resetRepoTree());
     yield put(fetchRepoCommits({ uri: repoUri, revision }));
     yield put(fetchRootRepoTree({ uri: repoUri, revision }));
   }
   const tree = yield select(getTree);
   const isDir = pathType === PathTypes.tree;
-  const openPath = isDir
-    ? file
-    : (file || '')
-        .split('/')
-        .slice(0, -1)
-        .join('/');
-  yield put(openTreePath(openPath || ''));
   function isTreeLoaded(isDirectory: boolean, targetTree: FileTree | null) {
     if (!isDirectory) {
       return !!targetTree;

@@ -25,6 +25,8 @@ import { LoadingPanel } from '../loading';
 
 import * as i18n from './translations';
 
+const DEFAULT_DATA_TEST_SUBJ = 'load-more-table';
+
 export interface ItemsPerRow {
   text: string;
   numberOfRow: number;
@@ -73,11 +75,13 @@ interface BasicTableProps<T, U = T, V = T, W = T, X = T, Y = T, Z = T, AA = T, A
         Columns<AB>
       ];
   hasNextPage: boolean;
+  dataTestSubj?: string;
   headerCount: number;
   headerSupplement?: React.ReactElement;
   headerTitle: string | React.ReactElement;
   headerTooltip?: string;
   headerUnit: string | React.ReactElement;
+  id?: string;
   itemsPerRow?: ItemsPerRow[];
   limit: number;
   loading: boolean;
@@ -94,16 +98,19 @@ interface BasicTableState {
   isEmptyTable: boolean;
   isPopoverOpen: boolean;
   paginationLoading: boolean;
+  showInspect: boolean;
 }
 
-export interface Columns<T> {
+type Func<T> = (arg: T) => string | number;
+
+export interface Columns<T, U = T> {
   field?: string;
   name: string | React.ReactNode;
   isMobileHeader?: boolean;
-  sortable?: boolean;
+  sortable?: boolean | Func<T>;
   truncateText?: boolean;
   hideForMobile?: boolean;
-  render?: (item: T) => void;
+  render?: (item: T, node: U) => void;
   width?: string;
 }
 
@@ -115,6 +122,7 @@ export class LoadMoreTable<T, U, V, W, X, Y, Z, AA, AB> extends React.PureCompon
     isEmptyTable: this.props.pageOfItems.length === 0,
     isPopoverOpen: false,
     paginationLoading: false,
+    showInspect: false,
   };
 
   static getDerivedStateFromProps<T, U, V, W, X, Y, Z, AA, AB>(
@@ -133,12 +141,14 @@ export class LoadMoreTable<T, U, V, W, X, Y, Z, AA, AB> extends React.PureCompon
   public render() {
     const {
       columns,
+      dataTestSubj = DEFAULT_DATA_TEST_SUBJ,
       hasNextPage,
       headerCount,
       headerSupplement,
       headerTitle,
       headerTooltip,
       headerUnit,
+      id,
       itemsPerRow,
       limit,
       loading,
@@ -190,7 +200,11 @@ export class LoadMoreTable<T, U, V, W, X, Y, Z, AA, AB> extends React.PureCompon
         </EuiContextMenuItem>
       ));
     return (
-      <EuiPanel>
+      <EuiPanel
+        data-test-subj={dataTestSubj}
+        onMouseEnter={this.mouseEnter}
+        onMouseLeave={this.mouseLeave}
+      >
         <BasicTableContainer>
           {loading && (
             <>
@@ -207,7 +221,9 @@ export class LoadMoreTable<T, U, V, W, X, Y, Z, AA, AB> extends React.PureCompon
           )}
 
           <HeaderPanel
-            subtitle={`${i18n.SHOWING}: ${headerCount.toLocaleString()} ${headerUnit}`}
+            id={id}
+            showInspect={this.state.showInspect}
+            subtitle={<>{`${i18n.SHOWING}: ${headerCount.toLocaleString()} ${headerUnit}`}</>}
             title={headerTitle}
             tooltip={headerTooltip}
           >
@@ -281,6 +297,20 @@ export class LoadMoreTable<T, U, V, W, X, Y, Z, AA, AB> extends React.PureCompon
     );
   }
 
+  private mouseEnter = () => {
+    this.setState(prevState => ({
+      ...prevState,
+      showInspect: true,
+    }));
+  };
+
+  private mouseLeave = () => {
+    this.setState(prevState => ({
+      ...prevState,
+      showInspect: false,
+    }));
+  };
+
   private onButtonClick = () => {
     this.setState(prevState => ({
       ...prevState,
@@ -309,7 +339,7 @@ const FooterAction = styled.div`
  *   The getOr is just there to simplify the test
  *   So we do NOT need to wrap it around TestProvider
  */
-const BackgroundRefetch = styled.div`
+export const BackgroundRefetch = styled.div`
   background-color: ${props => getOr('#ffffff', 'theme.eui.euiColorLightShade', props)};
   margin: -5px;
   height: calc(100% + 10px);

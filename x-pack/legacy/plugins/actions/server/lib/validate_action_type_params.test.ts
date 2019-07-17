@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Joi from 'joi';
+import { schema } from '@kbn/config-schema';
 import { validateActionTypeParams } from './validate_action_type_params';
 
 test('should return passed in params when validation not defined', () => {
@@ -12,6 +12,7 @@ test('should return passed in params when validation not defined', () => {
     {
       id: 'my-action-type',
       name: 'My action type',
+      unencryptedAttributes: [],
       async executor() {},
     },
     {
@@ -28,13 +29,12 @@ test('should validate and apply defaults when params is valid', () => {
     {
       id: 'my-action-type',
       name: 'My action type',
+      unencryptedAttributes: [],
       validate: {
-        params: Joi.object()
-          .keys({
-            param1: Joi.string().required(),
-            param2: Joi.string().default('default-value'),
-          })
-          .required(),
+        params: schema.object({
+          param1: schema.string(),
+          param2: schema.string({ defaultValue: 'default-value' }),
+        }),
       },
       async executor() {},
     },
@@ -52,18 +52,17 @@ test('should validate and throw error when params is invalid', () => {
       {
         id: 'my-action-type',
         name: 'My action type',
+        unencryptedAttributes: [],
         validate: {
-          params: Joi.object()
-            .keys({
-              param1: Joi.string().required(),
-            })
-            .required(),
+          params: schema.object({
+            param1: schema.string(),
+          }),
         },
         async executor() {},
       },
       {}
     )
   ).toThrowErrorMatchingInlineSnapshot(
-    `"params invalid: child \\"param1\\" fails because [\\"param1\\" is required]"`
+    `"The actionParams is invalid: [param1]: expected value of type [string] but got [undefined]"`
   );
 });

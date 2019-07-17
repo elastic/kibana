@@ -32,7 +32,6 @@ function getBucket(
   const sampleSource = idx(bucket, _ => _.sample.hits.hits[0]._source) as
     | Transaction
     | undefined;
-
   const isSampled = idx(sampleSource, _ => _.transaction.sampled);
   const sample = {
     traceId: idx(sampleSource, _ => _.trace.id),

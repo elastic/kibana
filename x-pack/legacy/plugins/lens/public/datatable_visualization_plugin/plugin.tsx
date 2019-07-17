@@ -11,7 +11,6 @@ import { datatableVisualization } from './visualization';
 import {
   renderersRegistry,
   functionsRegistry,
-  // @ts-ignore untyped dependency
 } from '../../../../../../src/legacy/core_plugins/interpreter/public/registries';
 import { InterpreterSetup, RenderFunction } from '../interpreter_types';
 import { datatable, datatableColumns, datatableRenderer } from './expression';

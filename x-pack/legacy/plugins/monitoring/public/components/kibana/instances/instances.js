@@ -41,7 +41,14 @@ const getColumns = (kbnUrl, scope) => {
       field: 'status',
       render: (status, kibana) => (
         <div
-          title={`Instance status: ${status}`}
+          title={
+            i18n.translate('xpack.monitoring.kibana.listing.instanceStatusTitle', {
+              defaultMessage: 'Instance status: {kibanaStatus}',
+              values: {
+                kibanaStatus: status
+              }
+            })
+          }
           className="monTableCell__status"
         >
           <KibanaStatusIcon status={status} availability={kibana.availability} />&nbsp;

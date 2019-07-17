@@ -27,6 +27,8 @@ import { getBoolFilter } from './get_bool_filter';
 import { useLocation } from '../../../hooks/useLocation';
 import { useUrlParams } from '../../../hooks/useUrlParams';
 import { history } from '../../../utils/history';
+import { useMatchedRoutes } from '../../../hooks/useMatchedRoutes';
+import { RouteName } from '../../app/Main/route_config/route_names';
 
 const Container = styled.div`
   margin-bottom: 10px;
@@ -48,10 +50,23 @@ export function KueryBar() {
   });
   const { urlParams } = useUrlParams();
   const location = useLocation();
+  const matchedRoutes = useMatchedRoutes();
+
   const apmIndexPatternTitle = chrome.getInjected('apmIndexPatternTitle');
   const indexPatternMissing =
     !state.isLoadingIndexPattern && !state.indexPattern;
   let currentRequestCheck;
+
+  const exampleMap: { [key: string]: string } = {
+    [RouteName.TRANSACTIONS]: 'transaction.duration.us > 300000',
+    [RouteName.ERRORS]: 'http.response.status_code >= 400',
+    [RouteName.METRICS]: 'process.pid = "1234"'
+  };
+
+  // sets queryExample to the first matched example query, else default example
+  const queryExample =
+    matchedRoutes.map(({ name }) => exampleMap[name]).find(Boolean) ||
+    'transaction.duration.us > 300000 AND http.response.status_code >= 400';
 
   useEffect(() => {
     let didCancel = false;
@@ -143,6 +158,7 @@ export function KueryBar() {
         onChange={onChange}
         onSubmit={onSubmit}
         suggestions={state.suggestions}
+        queryExample={queryExample}
       />
 
       {indexPatternMissing && (

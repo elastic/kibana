@@ -29,9 +29,9 @@ import React, { ChangeEvent } from 'react';
 import { connect } from 'react-redux';
 import { capabilities } from 'ui/capabilities';
 import { Repository } from '../../../model';
-import { closeToast, importRepo } from '../../actions';
-import { RepoStatus, RootState } from '../../reducers';
-import { ToastType } from '../../reducers/repository';
+import { closeToast, importRepo, RepoStatus } from '../../actions';
+import { RootState } from '../../reducers';
+import { ToastType } from '../../reducers/repository_management';
 import { isImportRepositoryURLInvalid } from '../../utils/url';
 import { ProjectItem } from './project_item';
 import { ProjectSettings } from './project_settings';
@@ -190,7 +190,6 @@ class CodeProjectTab extends React.PureComponent<Props, State> {
     const { projects, status, toastMessage, showToast, toastType } = this.props;
     const projectsCount = projects.length;
     const modal = this.state.showImportProjectModal && this.renderImportModal();
-
     const sortedProjects = projects.sort(sortFunctionsFactory(status)[this.state.sortOption]);
 
     const repoList = sortedProjects.map((repo: Repository) => (
@@ -267,12 +266,12 @@ class CodeProjectTab extends React.PureComponent<Props, State> {
 }
 
 const mapStateToProps = (state: RootState) => ({
-  projects: state.repository.repositories,
+  projects: state.repositoryManagement.repositories,
   status: state.status.status,
-  importLoading: state.repository.importLoading,
-  toastMessage: state.repository.toastMessage,
-  toastType: state.repository.toastType,
-  showToast: state.repository.showToast,
+  importLoading: state.repositoryManagement.importLoading,
+  toastMessage: state.repositoryManagement.toastMessage,
+  toastType: state.repositoryManagement.toastType,
+  showToast: state.repositoryManagement.showToast,
 });
 
 const mapDispatchToProps = {

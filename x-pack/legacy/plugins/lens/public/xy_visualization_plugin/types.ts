@@ -58,6 +58,7 @@ interface AxisConfig {
   title: string;
   showGridlines: boolean;
   position: Position;
+  hide?: boolean;
 }
 
 const axisConfig: { [key in keyof AxisConfig]: ArgumentType<AxisConfig[key]> } = {
@@ -80,11 +81,21 @@ const axisConfig: { [key in keyof AxisConfig]: ArgumentType<AxisConfig[key]> } =
       defaultMessage: 'The position of the axis',
     }),
   },
+  hide: {
+    types: ['boolean'],
+    default: false,
+    help: 'Show / hide axis',
+  },
 };
 
-export interface YConfig extends AxisConfig {
+export interface YState extends AxisConfig {
   accessors: string[];
 }
+
+export type YConfig = AxisConfig &
+  YState & {
+    labels: string[];
+  };
 
 type YConfigResult = YConfig & { type: 'lens_xy_yConfig' };
 
@@ -103,6 +114,11 @@ export const yConfig: ExpressionFunction<'lens_xy_yConfig', null, YConfig, YConf
       help: i18n.translate('xpack.lens.xyChart.accessors.help', {
         defaultMessage: 'The columns to display on the y axis.',
       }),
+      multi: true,
+    },
+    labels: {
+      types: ['string'],
+      help: '',
       multi: true,
     },
   },
@@ -145,17 +161,30 @@ export const xConfig: ExpressionFunction<'lens_xy_xConfig', null, XConfig, XConf
   },
 };
 
-export type SeriesType = 'bar' | 'horizontal_bar' | 'line' | 'area';
+export type SeriesType =
+  | 'bar'
+  | 'horizontal_bar'
+  | 'line'
+  | 'area'
+  | 'bar_stacked'
+  | 'horizontal_bar_stacked'
+  | 'area_stacked';
 
 export interface XYArgs {
   seriesType: SeriesType;
-  title: string;
   legend: LegendConfig;
   y: YConfig;
   x: XConfig;
   splitSeriesAccessors: string[];
-  stackAccessors: string[];
 }
 
-export type State = XYArgs;
-export type PersistableState = XYArgs;
+export interface XYState {
+  seriesType: SeriesType;
+  legend: LegendConfig;
+  y: YState;
+  x: XConfig;
+  splitSeriesAccessors: string[];
+}
+
+export type State = XYState;
+export type PersistableState = XYState;

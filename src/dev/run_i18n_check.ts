@@ -69,7 +69,7 @@ run(
     const list = new Listr(
       [
         {
-          title: 'Checking For Untracked Messages',
+          title: 'Checking For Untracked Messages based on .i18nrc.json',
           task: () => new Listr(extractUntrackedMessages(srcPaths, config), { exitOnError: true }),
         },
         {

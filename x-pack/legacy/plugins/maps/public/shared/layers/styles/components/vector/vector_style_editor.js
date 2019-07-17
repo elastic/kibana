@@ -175,19 +175,19 @@ export class VectorStyleEditor extends Component {
     return (
       <Fragment>
 
-        {this._renderFillColor()}
-        <EuiSpacer size="m" />
-
-        {lineColor}
-
-        {lineWidth}
-
         <VectorStyleSymbolEditor
           styleOptions={this.props.styleProperties.symbol.options}
           handlePropertyChange={this.props.handlePropertyChange}
           symbolOptions={SYMBOL_OPTIONS}
           isDarkMode={chrome.getUiSettingsClient().get('theme:darkMode', false)}
         />
+
+        {this._renderFillColor()}
+        <EuiSpacer size="m" />
+
+        {lineColor}
+
+        {lineWidth}
 
         {iconOrientation}
 

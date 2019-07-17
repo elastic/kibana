@@ -20,15 +20,17 @@ interface GroupingAggregation {
   };
 }
 
+const EMPTY_RESPONSE = {
+  series: [{ id: 'ALL', columns: [], rows: [] }],
+  pageInfo: { total: 0, afterKey: null },
+};
+
 export const getGroupings = async (
   search: <Aggregation>(options: object) => Promise<InfraDatabaseSearchResponse<{}, Aggregation>>,
   options: MetricsExplorerRequest
 ): Promise<MetricsExplorerResponse> => {
   if (!options.groupBy) {
-    return {
-      series: [{ id: 'ALL', columns: [], rows: [] }],
-      pageInfo: { total: 0, afterKey: null },
-    };
+    return EMPTY_RESPONSE;
   }
   const limit = options.limit || 9;
   const params = {
@@ -98,6 +100,9 @@ export const getGroupings = async (
   }
 
   const response = await search<GroupingAggregation>(params);
+  if (response.hits.total.value === 0) {
+    return { ...EMPTY_RESPONSE, series: [] };
+  }
   if (!response.aggregations) {
     throw new Error('Aggregations should be present.');
   }

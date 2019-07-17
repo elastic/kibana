@@ -22,7 +22,6 @@ import {
   DetailItem,
   EcsEdges,
   EventsData,
-  KpiItem,
   LastEventTimeData,
   TimelineData,
   TimelineDetailsData,
@@ -31,7 +30,7 @@ import {
 import { getDocumentation, getIndexAlias, hasDocumentation } from '../../utils/beat_schema';
 import { baseCategoryFields } from '../../utils/beat_schema/8.0.0';
 import { reduceFields } from '../../utils/build_query/reduce_fields';
-import { mergeFieldsWithHit } from '../../utils/build_query';
+import { mergeFieldsWithHit, inspectStringifyObject } from '../../utils/build_query';
 import { eventFieldsMap } from '../ecs_fields';
 import {
   FrameworkAdapter,
@@ -58,19 +57,14 @@ export class ElasticsearchEventsAdapter implements EventsAdapter {
   public async getEvents(request: FrameworkRequest, options: RequestOptions): Promise<EventsData> {
     const queryOptions = cloneDeep(options);
     queryOptions.fields = reduceFields(options.fields, eventFieldsMap);
+
+    const dsl = buildQuery(queryOptions);
     const response = await this.framework.callWithRequest<EventHit, TermAggregation>(
       request,
       'search',
-      buildQuery(queryOptions)
+      dsl
     );
 
-    const kpiEventType: KpiItem[] =
-      response.aggregations && response.aggregations.count_event_type
-        ? response.aggregations.count_event_type.buckets.map(item => ({
-            value: item.key,
-            count: item.doc_count,
-          }))
-        : [];
     const { limit } = options.pagination;
     const totalCount = getOr(0, 'hits.total.value', response);
     const hits = response.hits.hits;
@@ -80,7 +74,17 @@ export class ElasticsearchEventsAdapter implements EventsAdapter {
     const hasNextPage = eventsEdges.length === limit + 1;
     const edges = hasNextPage ? eventsEdges.splice(0, limit) : eventsEdges;
     const lastCursor = get('cursor', last(edges));
-    return { kpiEventType, edges, totalCount, pageInfo: { hasNextPage, endCursor: lastCursor } };
+    const inspect = {
+      dsl: [inspectStringifyObject(dsl)],
+      response: [inspectStringifyObject(response)],
+    };
+
+    return {
+      inspect,
+      edges,
+      pageInfo: { hasNextPage, endCursor: lastCursor },
+      totalCount,
+    };
   }
 
   public async getTimelineData(
@@ -93,10 +97,12 @@ export class ElasticsearchEventsAdapter implements EventsAdapter {
       ...reduceFields(queryOptions.fields, eventFieldsMap),
     ]);
     delete queryOptions.fieldRequested;
+
+    const dsl = buildQuery(queryOptions);
     const response = await this.framework.callWithRequest<EventHit, TermAggregation>(
       request,
       'search',
-      buildQuery(queryOptions)
+      dsl
     );
     const { limit } = options.pagination;
     const totalCount = getOr(0, 'hits.total.value', response);
@@ -107,29 +113,35 @@ export class ElasticsearchEventsAdapter implements EventsAdapter {
     const hasNextPage = timelineEdges.length === limit + 1;
     const edges = hasNextPage ? timelineEdges.splice(0, limit) : timelineEdges;
     const lastCursor = get('cursor', last(edges));
-    return { edges, totalCount, pageInfo: { hasNextPage, endCursor: lastCursor } };
+    const inspect = {
+      dsl: [inspectStringifyObject(dsl)],
+      response: [inspectStringifyObject(response)],
+    };
+
+    return { edges, inspect, pageInfo: { hasNextPage, endCursor: lastCursor }, totalCount };
   }
 
   public async getTimelineDetails(
     request: FrameworkRequest,
     options: RequestDetailsOptions
   ): Promise<TimelineDetailsData> {
+    const dsl = buildDetailsQuery(options.indexName, options.eventId);
     const [mapResponse, searchResponse] = await Promise.all([
       this.framework.callWithRequest(request, 'indices.getMapping', {
         allowNoIndices: true,
         ignoreUnavailable: true,
         index: options.indexName,
       }),
-      this.framework.callWithRequest<EventHit, TermAggregation>(
-        request,
-        'search',
-        buildDetailsQuery(options.indexName, options.eventId)
-      ),
+      this.framework.callWithRequest<EventHit, TermAggregation>(request, 'search', dsl),
     ]);
 
     const sourceData = getOr({}, 'hits.hits.0._source', searchResponse);
     const hitsData = getOr({}, 'hits.hits.0', searchResponse);
     delete hitsData._source;
+    const inspect = {
+      dsl: [inspectStringifyObject(dsl)],
+      response: [inspectStringifyObject(searchResponse)],
+    };
 
     return {
       data: getSchemaFromData(
@@ -140,6 +152,7 @@ export class ElasticsearchEventsAdapter implements EventsAdapter {
         getDataFromHits(merge(sourceData, hitsData)),
         getIndexAlias(options.defaultIndex, options.indexName)
       ),
+      inspect,
     };
   }
 
@@ -147,20 +160,25 @@ export class ElasticsearchEventsAdapter implements EventsAdapter {
     request: FrameworkRequest,
     options: LastEventTimeRequestOptions
   ): Promise<LastEventTimeData> {
+    const dsl = buildLastEventTimeQuery(options);
     const response = await this.framework.callWithRequest<LastEventTimeHit, TermAggregation>(
       request,
       'search',
-      buildLastEventTimeQuery(options)
+      dsl
     );
-
+    const inspect = {
+      dsl: [inspectStringifyObject(dsl)],
+      response: [inspectStringifyObject(response)],
+    };
     return {
+      inspect,
       lastSeen: getOr(null, 'aggregations.last_seen_event.value_as_string', response),
     };
   }
 }
 
 export const formatEventsData = (
-  fields: ReadonlyArray<string>,
+  fields: readonly string[],
   hit: EventHit,
   fieldMap: Readonly<Record<string, string>>
 ) =>
@@ -184,8 +202,8 @@ export const formatEventsData = (
   );
 
 export const formatTimelineData = (
-  dataFields: ReadonlyArray<string>,
-  ecsFields: ReadonlyArray<string>,
+  dataFields: readonly string[],
+  ecsFields: readonly string[],
   hit: EventHit,
   fieldMap: Readonly<Record<string, string>>
 ) =>
@@ -224,8 +242,8 @@ const mergeTimelineFieldsWithHit = <T>(
   flattenedFields: T,
   fieldMap: Readonly<Record<string, string>>,
   hit: { _source: {} },
-  dataFields: ReadonlyArray<string>,
-  ecsFields: ReadonlyArray<string>
+  dataFields: readonly string[],
+  ecsFields: readonly string[]
 ) => {
   if (fieldMap[fieldName] != null || dataFields.includes(fieldName)) {
     const esField = dataFields.includes(fieldName) ? fieldName : fieldMap[fieldName];

@@ -156,6 +156,8 @@ export class Typeahead extends Component {
   };
 
   render() {
+    const { queryExample } = this.props;
+
     return (
       <ClickOutside
         onClickOutside={this.onClickOutside}
@@ -171,10 +173,9 @@ export class Typeahead extends Component {
               'xpack.apm.kueryBar.searchPlaceholder',
               {
                 defaultMessage:
-                  'Search transactions and errors… (E.g. {queryExample})',
+                  'Search transactions, errors and metrics… (E.g. {queryExample})',
                 values: {
-                  queryExample:
-                    'transaction.duration.us > 300000 AND http.response.status_code >= 400'
+                  queryExample
                 }
               }
             )}
@@ -224,7 +225,8 @@ Typeahead.propTypes = {
   disabled: PropTypes.bool,
   onChange: PropTypes.func.isRequired,
   onSubmit: PropTypes.func.isRequired,
-  suggestions: PropTypes.array.isRequired
+  suggestions: PropTypes.array.isRequired,
+  queryExample: PropTypes.string.isRequired
 };
 
 Typeahead.defaultProps = {
