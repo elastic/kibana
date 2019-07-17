@@ -12,6 +12,9 @@ import { PageLoading } from 'plugins/monitoring/components';
 import { timefilter } from 'ui/timefilter';
 import { I18nContext } from 'ui/i18n';
 import { PromiseWithCancel } from '../../common/cancel_promise';
+import dateMath from '@elastic/datemath';
+import { toastNotifications } from 'ui/notify';
+import { i18n } from '@kbn/i18n';
 
 /**
  * Class to manage common instantiation behaviors in a view controller
@@ -39,6 +42,21 @@ import { PromiseWithCancel } from '../../common/cancel_promise';
  *   }
  * });
  */
+
+//Limit range to no less than 30 seconds, because of: https://github.com/elastic/kibana/issues/36738
+const MAX_RANGE_SECONDS = 30;
+const VALID_RANGE = { from: `now-${MAX_RANGE_SECONDS}s`, to: 'now', mode: 'relative' };
+const invalidTimeRange = (dateRange) => dateRange.to.unix() - dateRange.from.unix() < MAX_RANGE_SECONDS;
+const showInvalidRangeToast = () => {
+  toastNotifications.addWarning({
+    title: i18n.translate('xpack.monitoring.invalid.timeRangeToastTitle', { defaultMessage: 'Invalid Time Range' }),
+    text: i18n.translate('xpack.monitoring.invalid.timeRangeToastText', {
+      defaultMessage: 'A valid time range has to be {maxRangeSeconds} seconds or more',
+      values: { maxRangeSeconds: MAX_RANGE_SECONDS }
+    })
+  });
+};
+
 export class MonitoringViewBaseController {
   /**
    * Create a view controller
@@ -110,6 +128,22 @@ export class MonitoringViewBaseController {
       timefilter.enableAutoRefreshSelector();
     }
 
+    const updateHandler = () => {
+      const { from, to } = timefilter.getTime();
+      const parsedRange = {
+        from: dateMath.parse(from),
+        to: dateMath.parse(to),
+      };
+
+      if (invalidTimeRange(parsedRange)) {
+        timefilter.setTime(VALID_RANGE);
+        showInvalidRangeToast();
+      }
+    };
+    timefilter.on('timeUpdate', updateHandler);
+    timefilter.on('refreshIntervalUpdate', updateHandler);
+    updateHandler();
+
     this.updateData = () => {
       if (this.updateDataPromise) {
         // Do not sent another request if one is inflight
@@ -133,6 +167,8 @@ export class MonitoringViewBaseController {
     });
     $executor.start($scope);
     $scope.$on('$destroy', () => {
+      timefilter.off('timeUpdate', updateHandler);
+      timefilter.off('refreshIntervalUpdate', updateHandler);
       clearTimeout(deferTimer);
       removePopstateHandler();
       if (this.reactNodeId) { // WIP https://github.com/elastic/x-pack-kibana/issues/5198
@@ -146,11 +182,11 @@ export class MonitoringViewBaseController {
       removePopstateHandler();
       const { to, from } = xaxis;
       const fromTime = moment(from);
-      const minSecondsRange = 40;
       const toTime = moment(to);
 
-      //Limit range to no less than minSecondsRange, because of: https://github.com/elastic/kibana/issues/36738
-      if (toTime.unix() - fromTime.unix() < minSecondsRange) {
+      if (invalidTimeRange({ from: fromTime, to: toTime })) {
+        showInvalidRangeToast();
+        addPopstateHandler();
         return;
       }
 
