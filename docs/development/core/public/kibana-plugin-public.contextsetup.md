@@ -20,30 +20,122 @@ export interface ContextSetup
 
 ## Remarks
 
-A `ContextContainer` can be used by any Core service or plugin (known as the "service owner") which wishes to expose APIs in a handler function. The container object will manage registering context providers and building a context object for a handler with all of the contexts that should be exposed to the handler's plugin. This is dependent on the dependencies that the handler's plugin declares.
+A [ContextContainer](./kibana-plugin-public.contextcontainer.md) can be used by any Core service or plugin (known as the "service owner") which wishes to expose APIs in a handler function. The container object will manage registering context providers and building a context object for a handler with all of the contexts that should be exposed to the handler's plugin. This is dependent on the dependencies that the handler's plugin declares.
 
 Contexts providers are executed in the order they were registered. Each provider gets access to context values provided by any plugins that it depends on.
 
-## Example
-
-How to create your own context
+In order to configure a handler with context, you must call the [ContextContainer.createHandler()](./kibana-plugin-public.contextcontainer.createhandler.md) function. This function must be called \_while the calling plugin's lifecycle method is still running\_ or else you risk configuring the handler for the wrong plugin, or not plugin at all (the latter will throw an error).
 
 ```ts
+// GOOD
 class MyPlugin {
+  private readonly handlers = new Map();
+
   setup(core) {
-    this.myHandlers = new Map<string, Handler>();
-    this.contextContainer = core.createContextContainer();
+    this.contextContainer = core.context.createContextContainer();
+    return {
+      registerRoute(path, handler) {
+        this.handlers.set(
+          path,
+          this.contextContainer.createHandler(handler)
+        );
+      }
+    }
+  }
+}
+
+// BAD
+class MyPlugin {
+  private readonly handlers = new Map();
+
+  setup(core) {
+    this.contextContainer = core.context.createContextContainer();
+    return {
+      // When the promise isn't returned, it's possible `createHandler` won't be called until after the lifecycle
+      // hook is completed.
+      registerRoute(path, handler) {
+        doAsyncThing().then(() => this.handlers.set(
+          path,
+          this.contextContainer.createHandler(handler)
+        ));
+      }
+    }
+  }
+}
+
+// ALSO GOOD
+class MyPlugin {
+  private readonly handlers = new Map();
+
+  setup(core) {
+    this.contextContainer = core.context.createContextContainer();
+    return {
+      // Returning a Promise also works, but only if calling plugins wait for it to resolve before returning from
+      // their lifecycle hooks.
+      async registerRoute(path, handler) {
+        await doAsyncThing();
+        this.handlers.set(
+          path,
+          this.contextContainer.createHandler(handler)
+        );
+      }
+    }
+  }
+}
+
+```
+
+## Example
+
+Say we're creating a plugin for rendering visualizations that allows new rendering methods to be registered. If we want to offer context to these rendering methods, we can leverage the ContextService to manage these contexts.
+
+```ts
+export interface VizRenderContext {
+  core: {
+    i18n: I18nStart;
+    uiSettings: UISettingsClientContract;
+  }
+  [contextName: string]: unknown;
+}
+
+export type VizRenderer = (context: VizRenderContext, domElement: HTMLElement) => () => void;
+
+class VizRenderingPlugin {
+  private readonly vizRenderers = new Map<string, ((domElement: HTMLElement) => () => void)>();
+
+  setup(core) {
+    this.contextContainer = core.createContextContainer<
+      VizRenderContext,
+      ReturnType<VizRenderer>,
+      [HTMLElement]
+    >();
+
     return {
       registerContext: this.contextContainer.register,
-      registerHandler: (endpoint, handler) =>
-        // `createHandler` must be called immediately.
-        this.myHandlers.set(endpoint, this.contextContainer.createHandler(handler)),
+      registerVizRenderer: (renderMethod: string, renderer: VizTypeRenderer) =>
+        // `createHandler` must be called immediately during the calling plugin's lifecycle method.
+        this.vizRenderers.set(renderMethod, this.contextContainer.createHandler(renderer)),
     };
   }
 
-  start() {
+  start(core) {
+    // Register the core context available to all renderers
+    this.contextContainer.register('core', () => ({
+      i18n: core.i18n,
+      uiSettings: core.uiSettings
+    }));
+
     return {
       registerContext: this.contextContainer.register,
+      // The handler can now be called directly with only an `HTMLElement` and will automaticallly
+      // have the `context` argument supplied.
+      renderVizualization: (renderMethod: string, domElement: HTMLElement) => {
+        if (!this.vizRenderer.has(renderMethod)) {
+          throw new Error(`Render method ${renderMethod} has not be registered`);
+        }
+
+        return this.vizRenderers.get(renderMethod)(domElement);
+      }
     };
   }
 }

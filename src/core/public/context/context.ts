@@ -61,13 +61,75 @@ type Promisify<T> = T extends Promise<infer U> ? Promise<U> : Promise<T>;
  * An object that handles registration of context providers and building of new context objects.
  *
  * @remarks
- * A `ContextContainer` can be used by any Core service or plugin (known as the "service owner") which wishes to expose
+ * A {@link ContextContainer} can be used by any Core service or plugin (known as the "service owner") which wishes to expose
  * APIs in a handler function. The container object will manage registering context providers and building a context
  * object for a handler with all of the contexts that should be exposed to the handler's plugin. This is dependent on
  * the dependencies that the handler's plugin declares.
  *
  * Contexts providers are executed in the order they were registered. Each provider gets access to context values
  * provided by any plugins that it depends on.
+ *
+ * In order to configure a handler with context, you must call the {@link ContextContainer.createHandler} function. This
+ * function must be called _while the calling plugin's lifecycle method is still running_ or else you risk configuring
+ * the handler for the wrong plugin, or not plugin at all (the latter will throw an error).
+ *
+ * ```ts
+ * // GOOD
+ * class MyPlugin {
+ *   private readonly handlers = new Map();
+ *
+ *   setup(core) {
+ *     this.contextContainer = core.context.createContextContainer();
+ *     return {
+ *       registerRoute(path, handler) {
+ *         this.handlers.set(
+ *           path,
+ *           this.contextContainer.createHandler(handler)
+ *         );
+ *       }
+ *     }
+ *   }
+ * }
+ *
+ * // BAD
+ * class MyPlugin {
+ *   private readonly handlers = new Map();
+ *
+ *   setup(core) {
+ *     this.contextContainer = core.context.createContextContainer();
+ *     return {
+ *       // When the promise isn't returned, it's possible `createHandler` won't be called until after the lifecycle
+ *       // hook is completed.
+ *       registerRoute(path, handler) {
+ *         doAsyncThing().then(() => this.handlers.set(
+ *           path,
+ *           this.contextContainer.createHandler(handler)
+ *         ));
+ *       }
+ *     }
+ *   }
+ * }
+ *
+ * // ALSO GOOD
+ * class MyPlugin {
+ *   private readonly handlers = new Map();
+ *
+ *   setup(core) {
+ *     this.contextContainer = core.context.createContextContainer();
+ *     return {
+ *       // Returning a Promise also works, but only if calling plugins wait for it to resolve before returning from
+ *       // their lifecycle hooks.
+ *       async registerRoute(path, handler) {
+ *         await doAsyncThing();
+ *         this.handlers.set(
+ *           path,
+ *           this.contextContainer.createHandler(handler)
+ *         );
+ *       }
+ *     }
+ *   }
+ * }
+ * ```
  *
  *
  * @public
