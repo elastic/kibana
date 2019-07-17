@@ -144,6 +144,8 @@ export interface Source {
   TimelineDetails: TimelineDetailsData;
 
   LastEventTime: LastEventTimeData;
+
+  EventsOverTime: EventsOverTimeData;
   /** Gets Hosts based on timerange and specified criteria, or all events in the timerange if no criteria is specified */
   Hosts: HostsData;
 
@@ -364,8 +366,6 @@ export interface Inspect {
 
 export interface EventsData {
   edges: EcsEdges[];
-
-  totalCount: number;
 
   pageInfo: PageInfo;
 
@@ -894,6 +894,22 @@ export interface LastEventTimeData {
   lastSeen?: Date | null;
 
   inspect?: Inspect | null;
+}
+
+export interface EventsOverTimeData {
+  inspect?: Inspect | null;
+
+  eventsOverTime?: EventsOverTimeBuckets[] | null;
+
+  totalCount: number;
+}
+
+export interface EventsOverTimeBuckets {
+  key?: number | null;
+
+  key_as_string?: string | null;
+
+  doc_count?: number | null;
 }
 
 export interface HostsData {
@@ -1849,6 +1865,13 @@ export interface LastEventTimeSourceArgs {
 
   defaultIndex: string[];
 }
+export interface EventsOverTimeSourceArgs {
+  timerange: TimerangeInput;
+
+  filterQuery?: string | null;
+
+  defaultIndex: string[];
+}
 export interface HostsSourceArgs {
   id?: string | null;
 
@@ -2465,6 +2488,8 @@ export namespace SourceResolvers {
     TimelineDetails?: TimelineDetailsResolver<TimelineDetailsData, TypeParent, Context>;
 
     LastEventTime?: LastEventTimeResolver<LastEventTimeData, TypeParent, Context>;
+
+    EventsOverTime?: EventsOverTimeResolver<EventsOverTimeData, TypeParent, Context>;
     /** Gets Hosts based on timerange and specified criteria, or all events in the timerange if no criteria is specified */
     Hosts?: HostsResolver<HostsData, TypeParent, Context>;
 
@@ -2591,6 +2616,19 @@ export namespace SourceResolvers {
     indexKey: LastEventIndexKey;
 
     details: LastTimeDetails;
+
+    defaultIndex: string[];
+  }
+
+  export type EventsOverTimeResolver<
+    R = EventsOverTimeData,
+    Parent = Source,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context, EventsOverTimeArgs>;
+  export interface EventsOverTimeArgs {
+    timerange: TimerangeInput;
+
+    filterQuery?: string | null;
 
     defaultIndex: string[];
   }
@@ -3486,19 +3524,12 @@ export namespace EventsDataResolvers {
   export interface Resolvers<Context = SiemContext, TypeParent = EventsData> {
     edges?: EdgesResolver<EcsEdges[], TypeParent, Context>;
 
-    totalCount?: TotalCountResolver<number, TypeParent, Context>;
-
     pageInfo?: PageInfoResolver<PageInfo, TypeParent, Context>;
 
     inspect?: InspectResolver<Inspect | null, TypeParent, Context>;
   }
 
   export type EdgesResolver<R = EcsEdges[], Parent = EventsData, Context = SiemContext> = Resolver<
-    R,
-    Parent,
-    Context
-  >;
-  export type TotalCountResolver<R = number, Parent = EventsData, Context = SiemContext> = Resolver<
     R,
     Parent,
     Context
@@ -5261,6 +5292,58 @@ export namespace LastEventTimeDataResolvers {
   export type InspectResolver<
     R = Inspect | null,
     Parent = LastEventTimeData,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+}
+
+export namespace EventsOverTimeDataResolvers {
+  export interface Resolvers<Context = SiemContext, TypeParent = EventsOverTimeData> {
+    inspect?: InspectResolver<Inspect | null, TypeParent, Context>;
+
+    eventsOverTime?: EventsOverTimeResolver<EventsOverTimeBuckets[] | null, TypeParent, Context>;
+
+    totalCount?: TotalCountResolver<number, TypeParent, Context>;
+  }
+
+  export type InspectResolver<
+    R = Inspect | null,
+    Parent = EventsOverTimeData,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type EventsOverTimeResolver<
+    R = EventsOverTimeBuckets[] | null,
+    Parent = EventsOverTimeData,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type TotalCountResolver<
+    R = number,
+    Parent = EventsOverTimeData,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+}
+
+export namespace EventsOverTimeBucketsResolvers {
+  export interface Resolvers<Context = SiemContext, TypeParent = EventsOverTimeBuckets> {
+    key?: KeyResolver<number | null, TypeParent, Context>;
+
+    key_as_string?: KeyAsStringResolver<string | null, TypeParent, Context>;
+
+    doc_count?: DocCountResolver<number | null, TypeParent, Context>;
+  }
+
+  export type KeyResolver<
+    R = number | null,
+    Parent = EventsOverTimeBuckets,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type KeyAsStringResolver<
+    R = string | null,
+    Parent = EventsOverTimeBuckets,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type DocCountResolver<
+    R = number | null,
+    Parent = EventsOverTimeBuckets,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
 }

@@ -78,9 +78,13 @@ export const areachartConfigs = (from: number, to: number) => ({
   },
 });
 export const barchartConfigs = {
+  settings: {
+    rotation: 90,
+  },
   series: {
     xScaleType: ScaleType.Ordinal,
     yScaleType: ScaleType.Linear,
+    stackAccessors: ['y'],
   },
   axis: {
     xTickFormatter: numberFormatter,

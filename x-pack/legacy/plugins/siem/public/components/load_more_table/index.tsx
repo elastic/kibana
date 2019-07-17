@@ -43,6 +43,8 @@ export interface Criteria {
   sort?: SortingBasicTable;
 }
 
+export type LoadMoreTableWrapperType = JSX.IntrinsicElements | React.ReactElement;
+
 // Using telescoping templates to remove 'any' that was polluting downstream column type checks
 interface BasicTableProps<T, U = T, V = T, W = T, X = T, Y = T, Z = T, AA = T, AB = T> {
   columns:
@@ -76,11 +78,11 @@ interface BasicTableProps<T, U = T, V = T, W = T, X = T, Y = T, Z = T, AA = T, A
       ];
   hasNextPage: boolean;
   dataTestSubj?: string;
-  headerCount: number;
+  headerCount?: number;
   headerSupplement?: React.ReactElement;
-  headerTitle: string | React.ReactElement;
+  headerTitle?: string | React.ReactElement;
   headerTooltip?: string;
-  headerUnit: string | React.ReactElement;
+  headerUnit?: string | React.ReactElement;
   id?: string;
   itemsPerRow?: ItemsPerRow[];
   limit: number;
@@ -92,6 +94,7 @@ interface BasicTableProps<T, U = T, V = T, W = T, X = T, Y = T, Z = T, AA = T, A
   pageOfItems: any[];
   sorting?: SortingBasicTable;
   updateLimitPagination: (limit: number) => void;
+  wrapper?: LoadMoreTableWrapperType;
 }
 
 interface BasicTableState {
@@ -157,19 +160,20 @@ export class LoadMoreTable<T, U, V, W, X, Y, Z, AA, AB> extends React.PureCompon
       pageOfItems,
       sorting = null,
       updateLimitPagination,
+      wrapper: Wrapper = EuiPanel,
     } = this.props;
     const { isEmptyTable } = this.state;
 
     if (loading && isEmptyTable) {
       return (
-        <EuiPanel>
+        <Wrapper>
           <LoadingPanel
             height="auto"
             width="100%"
             text={`${i18n.LOADING} ${loadingTitle ? loadingTitle : headerTitle}`}
             data-test-subj="InitialLoadingPanelLoadMoreTable"
           />
-        </EuiPanel>
+        </Wrapper>
       );
     }
 
@@ -200,7 +204,7 @@ export class LoadMoreTable<T, U, V, W, X, Y, Z, AA, AB> extends React.PureCompon
         </EuiContextMenuItem>
       ));
     return (
-      <EuiPanel
+      <Wrapper
         data-test-subj={dataTestSubj}
         onMouseEnter={this.mouseEnter}
         onMouseLeave={this.mouseLeave}
@@ -223,7 +227,11 @@ export class LoadMoreTable<T, U, V, W, X, Y, Z, AA, AB> extends React.PureCompon
           <HeaderPanel
             id={id}
             showInspect={this.state.showInspect}
-            subtitle={<>{`${i18n.SHOWING}: ${headerCount.toLocaleString()} ${headerUnit}`}</>}
+            subtitle={
+              headerCount != null ? (
+                <>{`${i18n.SHOWING}: ${headerCount.toLocaleString()} ${headerUnit}`}</>
+              ) : null
+            }
             title={headerTitle}
             tooltip={headerTooltip}
           >
@@ -293,7 +301,7 @@ export class LoadMoreTable<T, U, V, W, X, Y, Z, AA, AB> extends React.PureCompon
             </FooterAction>
           )}
         </BasicTableContainer>
-      </EuiPanel>
+      </Wrapper>
     );
   }
 

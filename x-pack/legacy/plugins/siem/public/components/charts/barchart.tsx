@@ -35,7 +35,7 @@ export const BarChartBaseComponent = React.memo<{
 
   return chartConfigs.width && chartConfigs.height ? (
     <Chart>
-      <Settings rotation={90} theme={getTheme()} />
+      <Settings rotation={getOr(0, 'configs.settings.rotation', chartConfigs)} theme={getTheme()} />
       {data.map(series => {
         const barSeriesKey = series.key;
         const barSeriesSpecId = getSpecId(barSeriesKey);
@@ -52,7 +52,7 @@ export const BarChartBaseComponent = React.memo<{
             timeZone={browserTimezone}
             splitSeriesAccessors={['g']}
             data={series.value!}
-            stackAccessors={['y']}
+            stackAccessors={get('configs.series.stackAccessors', chartConfigs)}
             customSeriesColors={getSeriesStyle(barSeriesKey, series.color, seriesType)}
           />
         );

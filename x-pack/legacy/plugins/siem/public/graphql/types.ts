@@ -115,6 +115,8 @@ export interface Source {
   TimelineDetails: TimelineDetailsData;
 
   LastEventTime: LastEventTimeData;
+
+  EventsOverTime: EventsOverTimeData;
   /** Gets Hosts based on timerange and specified criteria, or all events in the timerange if no criteria is specified */
   Hosts: HostsData;
 
@@ -335,8 +337,6 @@ export interface Inspect {
 
 export interface EventsData {
   edges: EcsEdges[];
-
-  totalCount: number;
 
   pageInfo: PageInfo;
 
@@ -865,6 +865,22 @@ export interface LastEventTimeData {
   lastSeen?: Date | null;
 
   inspect?: Inspect | null;
+}
+
+export interface EventsOverTimeData {
+  inspect?: Inspect | null;
+
+  eventsOverTime?: EventsOverTimeBuckets[] | null;
+
+  totalCount: number;
+}
+
+export interface EventsOverTimeBuckets {
+  key?: number | null;
+
+  key_as_string?: string | null;
+
+  doc_count?: number | null;
 }
 
 export interface HostsData {
@@ -1820,6 +1836,13 @@ export interface LastEventTimeSourceArgs {
 
   defaultIndex: string[];
 }
+export interface EventsOverTimeSourceArgs {
+  timerange: TimerangeInput;
+
+  filterQuery?: string | null;
+
+  defaultIndex: string[];
+}
 export interface HostsSourceArgs {
   id?: string | null;
 
@@ -2400,6 +2423,56 @@ export namespace GetDomainsQuery {
   };
 }
 
+export namespace GetEventsOverTimeQuery {
+  export type Variables = {
+    sourceId: string;
+    timerange: TimerangeInput;
+    defaultIndex: string[];
+    filterQuery?: string | null;
+    inspect: boolean;
+  };
+
+  export type Query = {
+    __typename?: 'Query';
+
+    source: Source;
+  };
+
+  export type Source = {
+    __typename?: 'Source';
+
+    id: string;
+
+    EventsOverTime: EventsOverTime;
+  };
+
+  export type EventsOverTime = {
+    __typename?: 'EventsOverTimeData';
+
+    eventsOverTime?: _EventsOverTime[] | null;
+
+    totalCount: number;
+
+    inspect?: Inspect | null;
+  };
+
+  export type _EventsOverTime = {
+    __typename?: 'EventsOverTimeBuckets';
+
+    x?: number | null;
+
+    y?: number | null;
+  };
+
+  export type Inspect = {
+    __typename?: 'Inspect';
+
+    dsl: string[];
+
+    response: string[];
+  };
+}
+
 export namespace GetEventsQuery {
   export type Variables = {
     sourceId: string;
@@ -2427,8 +2500,6 @@ export namespace GetEventsQuery {
 
   export type Events = {
     __typename?: 'EventsData';
-
-    totalCount: number;
 
     pageInfo: PageInfo;
 

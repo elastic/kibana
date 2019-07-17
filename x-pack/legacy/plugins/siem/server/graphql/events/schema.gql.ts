@@ -11,7 +11,6 @@ export const eventsSchema = gql`
 
   type EventsData {
     edges: [EcsEdges!]!
-    totalCount: Float!
     pageInfo: PageInfo!
     inspect: Inspect
   }
@@ -65,6 +64,18 @@ export const eventsSchema = gql`
     inspect: Inspect
   }
 
+  type EventsOverTimeBuckets {
+    key: Float
+    key_as_string: String
+    doc_count: Float
+  }
+
+  type EventsOverTimeData {
+    inspect: Inspect
+    eventsOverTime: [EventsOverTimeBuckets!]
+    totalCount: Float!
+  }
+
   enum LastEventIndexKey {
     hostDetails
     hosts
@@ -100,5 +111,10 @@ export const eventsSchema = gql`
       details: LastTimeDetails!
       defaultIndex: [String!]!
     ): LastEventTimeData!
+    EventsOverTime(
+      timerange: TimerangeInput!
+      filterQuery: String
+      defaultIndex: [String!]!
+    ): EventsOverTimeData!
   }
 `;

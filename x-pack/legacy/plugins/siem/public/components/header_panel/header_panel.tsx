@@ -36,7 +36,7 @@ export interface HeaderPanelProps {
 export const HeaderPanel = pure<HeaderPanelProps>(
   ({ border, children, id, showInspect = false, subtitle, title, tooltip }) => (
     <Header border={border}>
-      <EuiFlexGroup alignItems="center" gutterSize="m">
+      <EuiFlexGroup alignItems="flexStart" gutterSize="m" direction="column">
         <EuiFlexItem>
           <EuiFlexGroup alignItems="center" gutterSize="none">
             <EuiFlexItem grow={false}>
@@ -54,9 +54,11 @@ export const HeaderPanel = pure<HeaderPanelProps>(
             {subtitle}
           </EuiText>
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          {id && <InspectButton queryId={id} inspectIndex={0} show={showInspect} title={title} />}
-        </EuiFlexItem>
+        {id && (
+          <EuiFlexItem grow={false}>
+            <InspectButton queryId={id} inspectIndex={0} show={showInspect} title={title} />
+          </EuiFlexItem>
+        )}
         {children && <EuiFlexItem grow={false}>{children}</EuiFlexItem>}
       </EuiFlexGroup>
     </Header>

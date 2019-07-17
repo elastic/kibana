@@ -25,7 +25,6 @@ export const eventsQuery = gql`
         filterQuery: $filterQuery
         defaultIndex: $defaultIndex
       ) {
-        totalCount
         pageInfo {
           endCursor {
             value

@@ -81,9 +81,6 @@ const EventsTableComponent = pure<EventsTableProps>(
     <LoadMoreTable
       columns={getEventsColumnsCurated(type)}
       hasNextPage={hasNextPage}
-      headerCount={totalCount}
-      headerTitle={i18n.EVENTS}
-      headerUnit={i18n.UNIT(totalCount)}
       id={id}
       itemsPerRow={rowItems}
       limit={limit}
@@ -94,6 +91,7 @@ const EventsTableComponent = pure<EventsTableProps>(
       updateLimitPagination={newLimit =>
         updateLimitPagination({ limit: newLimit, hostsType: type })
       }
+      wrapper="div"
     />
   )
 );

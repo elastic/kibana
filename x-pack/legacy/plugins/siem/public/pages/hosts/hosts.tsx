@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiSpacer } from '@elastic/eui';
+import { EuiSpacer, EuiPanel } from '@elastic/eui';
 import { getOr } from 'lodash/fp';
 import React from 'react';
 import { connect } from 'react-redux';
@@ -41,12 +41,15 @@ import { AnomaliesHostTable } from '../../components/ml/tables/anomalies_host_ta
 import { setAbsoluteRangeDatePicker as dispatchSetAbsoluteRangeDatePicker } from '../../store/inputs/actions';
 import { InputsModelId } from '../../store/inputs/constants';
 import { scoreIntervalToDateTime } from '../../components/ml/score/score_interval_to_datetime';
+import { EventsOverTimeQuery } from '../../containers/events/events_over_time';
+import { EventsOverTimeHistogram } from '../../components/page/hosts/events_over_time';
 
 const AuthenticationTableManage = manageQuery(AuthenticationTable);
 const HostsTableManage = manageQuery(HostsTable);
 const EventsTableManage = manageQuery(EventsTable);
 const UncommonProcessTableManage = manageQuery(UncommonProcessTable);
 const KpiHostsComponentManage = manageQuery(KpiHostsComponent);
+const EventsOverTimeManage = manageQuery(EventsOverTimeHistogram);
 
 interface HostsComponentReduxProps {
   filterQuery: string;
@@ -227,40 +230,63 @@ const HostsComponent = pure<HostsComponentProps>(({ filterQuery, setAbsoluteRang
 
                     <EuiSpacer />
 
-                    <EventsQuery
-                      endDate={to}
-                      filterQuery={filterQuery}
-                      skip={isInitializing}
-                      sourceId="default"
-                      startDate={from}
-                      type={hostsModel.HostsType.page}
-                    >
-                      {({
-                        events,
-                        loading,
-                        id,
-                        inspect,
-                        refetch,
-                        totalCount,
-                        pageInfo,
-                        loadMore,
-                      }) => (
-                        <EventsTableManage
-                          id={id}
-                          inspect={inspect}
-                          refetch={refetch}
-                          setQuery={setQuery}
-                          data={events!}
-                          loading={loading}
-                          totalCount={totalCount}
-                          nextCursor={getOr(null, 'endCursor.value', pageInfo)}
-                          tiebreaker={getOr(null, 'endCursor.tiebreaker', pageInfo)!}
-                          hasNextPage={getOr(false, 'hasNextPage', pageInfo)!}
-                          loadMore={loadMore}
-                          type={hostsModel.HostsType.page}
-                        />
-                      )}
-                    </EventsQuery>
+                    <EuiPanel>
+                      <EventsOverTimeQuery
+                        endDate={to}
+                        filterQuery={filterQuery}
+                        sourceId="default"
+                        startDate={from}
+                        type={hostsModel.HostsType.page}
+                      >
+                        {({ eventsOverTime, loading, id, inspect, refetch }) => (
+                          <EventsOverTimeManage
+                            id={id}
+                            inspect={inspect}
+                            refetch={refetch}
+                            setQuery={setQuery}
+                            data={eventsOverTime!}
+                            loading={loading}
+                            startDate={from}
+                            endDate={to}
+                          />
+                        )}
+                      </EventsOverTimeQuery>
+
+                      <EventsQuery
+                        endDate={to}
+                        filterQuery={filterQuery}
+                        skip={isInitializing}
+                        sourceId="default"
+                        startDate={from}
+                        type={hostsModel.HostsType.page}
+                      >
+                        {({
+                          events,
+                          loading,
+                          id,
+                          inspect,
+                          refetch,
+                          totalCount,
+                          pageInfo,
+                          loadMore,
+                        }) => (
+                          <EventsTableManage
+                            id={id}
+                            inspect={inspect}
+                            refetch={refetch}
+                            setQuery={setQuery}
+                            data={events!}
+                            loading={loading}
+                            totalCount={totalCount}
+                            nextCursor={getOr(null, 'endCursor.value', pageInfo)}
+                            tiebreaker={getOr(null, 'endCursor.tiebreaker', pageInfo)!}
+                            hasNextPage={getOr(false, 'hasNextPage', pageInfo)!}
+                            loadMore={loadMore}
+                            type={hostsModel.HostsType.page}
+                          />
+                        )}
+                      </EventsQuery>
+                    </EuiPanel>
                   </>
                 )}
               </UseUrlState>
