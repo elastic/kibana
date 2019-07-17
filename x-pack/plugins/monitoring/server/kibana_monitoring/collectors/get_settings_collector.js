@@ -87,6 +87,7 @@ export function getSettingsCollector(server) {
 
   return collectorSet.makeStatsCollector({
     type: KIBANA_SETTINGS_TYPE,
+    isReady: () => true,
     async fetch(callCluster) {
       let kibanaSettingsData;
       const defaultAdminEmail = await checkForEmailValue(config, callCluster, this.log);

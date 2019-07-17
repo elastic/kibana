@@ -36,7 +36,8 @@ export function makeApmUsageCollector(server: KibanaHapiServer): void {
       } catch (err) {
         return createApmTelementry();
       }
-    }
+    },
+    isReady: () => true
   });
   server.usage.collectorSet.register(apmUsageCollector);
 }

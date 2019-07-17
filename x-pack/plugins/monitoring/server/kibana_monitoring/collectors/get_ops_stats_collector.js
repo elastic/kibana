@@ -80,6 +80,7 @@ export function getOpsStatsCollector(server, kbnServer) {
   return collectorSet.makeStatsCollector({
     type: KIBANA_STATS_TYPE_MONITORING,
     init: opsMonitor.start,
+    isReady: () => buffer.hasEvents(),
     fetch: async () => {
       return await buffer.flush();
     }

@@ -22,6 +22,7 @@ export class UsageCollector {
 
     return collectorSet.makeUsageCollector({
       type: KIBANA_REPORTING_TYPE,
+      isReady: () => true,
       fetch: async () => {
         return this.getReport();
       },
