@@ -19,8 +19,6 @@
 
 import React, { FunctionComponent, Fragment } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiButtonEmpty, EuiIcon } from '@elastic/eui';
-import chrome from 'ui/chrome';
-import { capabilities } from 'ui/capabilities';
 import { SavedQueryAttributes } from '../../../search/search_bar';
 import { Query } from '../index';
 
@@ -58,7 +56,7 @@ export const SavedQueryRow: FunctionComponent<Props> = ({
         <Fragment>
           <EuiFlexGroup>
             <EuiFlexItem grow={false}>
-              <EuiButtonEmpty onClick={onSave}>
+              <EuiButtonEmpty data-test-subj="savedQuerySaveChanges" onClick={onSave}>
                 Save changes to query: {savedQuery.title}
               </EuiButtonEmpty>
             </EuiFlexItem>
@@ -69,7 +67,9 @@ export const SavedQueryRow: FunctionComponent<Props> = ({
             </EuiFlexItem>
           </EuiFlexGroup>
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty onClick={onSaveNew}>Save as new</EuiButtonEmpty>
+            <EuiButtonEmpty data-test-subj="savedQuerySaveAsNew" onClick={onSaveNew}>
+              Save as new
+            </EuiButtonEmpty>
           </EuiFlexItem>
         </Fragment>
       );
@@ -90,7 +90,9 @@ export const SavedQueryRow: FunctionComponent<Props> = ({
           </EuiFlexGroup>
           {showSaveQuery && (
             <EuiFlexItem grow={false}>
-              <EuiButtonEmpty onClick={onSaveNew}>Save as new</EuiButtonEmpty>
+              <EuiButtonEmpty data-test-subj="savedQuerySaveAsNew" onClick={onSaveNew}>
+                Save as new
+              </EuiButtonEmpty>
             </EuiFlexItem>
           )}
         </Fragment>
@@ -99,16 +101,8 @@ export const SavedQueryRow: FunctionComponent<Props> = ({
   } else if (query.query.length !== 0 && showSaveQuery) {
     rowContent = (
       <EuiFlexItem grow={false}>
-        <EuiButtonEmpty onClick={onSave}>Save this query for reuse</EuiButtonEmpty>
-      </EuiFlexItem>
-    );
-  } else if (capabilities.get().savedObjectsManagement.read) {
-    rowContent = (
-      <EuiFlexItem grow={false}>
-        <EuiButtonEmpty
-          href={chrome.addBasePath(`/app/kibana#/management/kibana/objects?type=query`)}
-        >
-          Manage Saved Queries
+        <EuiButtonEmpty data-test-subj="savedQuerySaveNew" onClick={onSave}>
+          Save this query for reuse
         </EuiButtonEmpty>
       </EuiFlexItem>
     );

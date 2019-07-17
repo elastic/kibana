@@ -74,6 +74,7 @@ export const SaveQueryForm: FunctionComponent<Props> = ({
           onChange={event => {
             setTitle(event.target.value);
           }}
+          data-test-subj="saveQueryFormTitle"
         />
       </EuiFormRow>
 
@@ -84,6 +85,7 @@ export const SaveQueryForm: FunctionComponent<Props> = ({
           onChange={event => {
             setDescription(event.target.value);
           }}
+          data-test-subj="saveQueryFormDescription"
         />
       </EuiFormRow>
       {!!showFilterOption && (
@@ -95,6 +97,7 @@ export const SaveQueryForm: FunctionComponent<Props> = ({
             onChange={() => {
               setShouldIncludeFilters(!shouldIncludeFilters);
             }}
+            data-test-subj="saveQueryFormIncludeFiltersOption"
           />
         </EuiFormRow>
       )}
@@ -108,6 +111,7 @@ export const SaveQueryForm: FunctionComponent<Props> = ({
             onChange={() => {
               setIncludeTimefilter(!shouldIncludeTimefilter);
             }}
+            data-test-subj="saveQueryFormIncludeTimeFilterOption"
           />
         </EuiFormRow>
       )}
@@ -136,6 +140,7 @@ export const SaveQueryForm: FunctionComponent<Props> = ({
               })
             }
             fill
+            data-test-subj="savedQueryFormSaveButton"
           >
             Save
           </EuiButton>

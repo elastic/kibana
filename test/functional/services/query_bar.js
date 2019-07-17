@@ -60,6 +60,31 @@ export function QueryBarProvider({ getService, getPageObjects }) {
       await testSubjects.click('querySubmitButton');
     }
 
+    async saveNewQuery(title, description, includeFilters, includeTimeFilter) {
+      await testSubjects.click('savedQuerySaveNew');
+      await this.submitSaveQueryForm(title, description, includeFilters, includeTimeFilter);
+    }
+
+    async submitSaveQueryForm(title, description, includeFilters, includeTimeFilter) {
+      await testSubjects.setValue('saveQueryFormTitle', title);
+      await testSubjects.setValue('saveQueryFormDescription', description);
+
+      const currentIncludeFiltersValue = (await testSubjects.getAttribute('saveQueryFormIncludeFiltersOption', 'checked')) === 'true';
+      if (currentIncludeFiltersValue !== includeFilters) {
+        await testSubjects.click('saveQueryFormIncludeFiltersOption');
+      }
+
+      const currentIncludeTimeFilterValue = (await testSubjects.getAttribute('saveQueryFormIncludeTimeFilterOption', 'checked')) === 'true';
+      if (currentIncludeTimeFilterValue !== includeTimeFilter) {
+        await testSubjects.click('saveQueryFormIncludeTimeFilterOption');
+      }
+
+      await testSubjects.click('savedQueryFormSaveButton');
+    }
+
+    async openSuggestionsDropDown() {
+      await testSubjects.click('queryInput');
+    }
   }
 
   return new QueryBar();
