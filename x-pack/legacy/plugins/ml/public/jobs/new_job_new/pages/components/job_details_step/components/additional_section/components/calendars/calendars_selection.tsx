@@ -20,8 +20,7 @@ export const CalendarsSelection: FC = () => {
   async function loadCalendars() {
     setIsLoading(true);
     const calendars = await ml.calendars();
-    const o = calendars.map(c => ({ label: c.calendar_id }));
-    setOptions(o);
+    setOptions(calendars.map(c => ({ label: c.calendar_id })));
     setSelectedOptions(selectedCalendars.map(c => ({ label: c })));
     setIsLoading(false);
   }
