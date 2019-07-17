@@ -30,7 +30,7 @@
 }
 
 .lnsFieldListPanel__list-wrapper {
-  @include euiOverflowShadow($euiPageBackgroundColor);
+  @include euiOverflowShadow;
   margin-top: 2px; // form control shadow
   position: relative;
   flex-grow: 1;
