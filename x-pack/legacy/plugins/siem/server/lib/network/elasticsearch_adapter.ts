@@ -9,6 +9,7 @@ import { get, getOr } from 'lodash/fp';
 import {
   FlowDirection,
   FlowTarget,
+  NetworkDnsData,
   NetworkDnsEdges,
   NetworkTopNFlowData,
   NetworkTopNFlowEdges,
@@ -62,9 +63,9 @@ export class ElasticsearchNetworkAdapter implements NetworkAdapter {
   public async getNetworkDns(
     request: FrameworkRequest,
     options: NetworkDnsRequestOptions
-  ): Promise<NetworkTopNFlowData> {
+  ): Promise<NetworkDnsData> {
     const dsl = buildDnsQuery(options);
-    const response = await this.framework.callWithRequest<NetworkTopNFlowData, TermAggregation>(
+    const response = await this.framework.callWithRequest<NetworkDnsData, TermAggregation>(
       request,
       'search',
       dsl

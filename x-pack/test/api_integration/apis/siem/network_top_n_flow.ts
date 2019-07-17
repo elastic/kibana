@@ -117,7 +117,7 @@ const networkTopNFlowTests: KbnTestProvider = ({ getService }) => {
               pagination: {
                 activePage: 0,
                 cursorStart: 0,
-                fakePossibleCount: 50,
+                fakePossibleCount: 10,
                 querySize: 10,
               },
               defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
@@ -129,7 +129,7 @@ const networkTopNFlowTests: KbnTestProvider = ({ getService }) => {
             expect(networkTopNFlow.edges.length).to.be(EDGE_LENGTH);
             expect(networkTopNFlow.totalCount).to.be(10);
             expect(networkTopNFlow.edges[0].node.destination).to.be(null);
-            expect(networkTopNFlow.pageInfo.fakeTotalCount).to.equal(50);
+            expect(networkTopNFlow.pageInfo.fakeTotalCount).to.equal(10);
           });
       });
 
@@ -269,7 +269,7 @@ const networkTopNFlowTests: KbnTestProvider = ({ getService }) => {
             expect(networkTopNFlow.edges.length).to.be(1);
             expect(networkTopNFlow.totalCount).to.be(1);
             expect(networkTopNFlow.edges[0].node.server).to.be(null);
-            expect(networkTopNFlow.pageInfo.fakeTotalCount).to.equal(50);
+            expect(networkTopNFlow.pageInfo.fakeTotalCount).to.equal(1);
           });
       });
 
@@ -302,7 +302,7 @@ const networkTopNFlowTests: KbnTestProvider = ({ getService }) => {
             expect(networkTopNFlow.edges.length).to.be(1);
             expect(networkTopNFlow.totalCount).to.be(1);
             expect(networkTopNFlow.edges[0].node.client).to.be(null);
-            expect(networkTopNFlow.pageInfo.fakeTotalCount).to.equal(50);
+            expect(networkTopNFlow.pageInfo.fakeTotalCount).to.equal(1);
           });
       });
     });
