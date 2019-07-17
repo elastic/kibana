@@ -20,7 +20,7 @@
 import React from 'react';
 import { mountWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
 import { TopAggregateParamEditor } from './top_aggregate';
-import { SelectValueProp } from '../param_types/select';
+import { OptionedValueProp } from '../param_types/optioned';
 
 describe('TopAggregateParamEditor', () => {
   let agg: any;
@@ -51,7 +51,7 @@ describe('TopAggregateParamEditor', () => {
     ];
     Object.defineProperty(options, 'byValue', {
       get: () =>
-        options.reduce((acc: { [key: string]: any }, option: SelectValueProp) => {
+        options.reduce((acc: { [key: string]: any }, option: OptionedValueProp) => {
           acc[option.value] = { ...option };
 
           return acc;
