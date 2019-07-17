@@ -378,7 +378,7 @@ export class VectorLayer extends AbstractLayer {
     } catch (e) {
       onLoadError(sourceDataId, requestToken, `Join error: ${e.message}`);
       return {
-        dataHasChanged: false,
+        dataHasChanged: true,
         join: join,
         propertiesMap: null
       };
