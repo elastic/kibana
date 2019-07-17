@@ -11,10 +11,10 @@ export function initializeEditor(targetElement: HTMLDivElement, licenseEnabled: 
   const editor: ace.Editor = ace.acequire('ace/ace').edit(targetElement);
 
   installXJsonMode(editor);
-
   editor.$blockScrolling = Infinity;
-  editor.setReadOnly(!licenseEnabled);
+
   if (!licenseEnabled) {
+    editor.setReadOnly(true);
     editor.container.style.pointerEvents = 'none';
     editor.container.style.opacity = '0.5';
     editor.renderer.setStyle('disabled');

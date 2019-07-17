@@ -10,8 +10,7 @@ const { JsonHighlightRules } = ace.acequire('ace/mode/json_highlight_rules');
 const { TextHighlightRules } = ace.acequire('ace/mode/text_highlight_rules');
 
 /*
- * FYI: The rules below were copied from ./src/legacy/core_plugins/console/public/src/
- * sense_editor/mode/x_json_highlight_rules.js
+ * The rules below were copied from ./src/legacy/core_plugins/console/public/src/sense_editor/mode/x_json_highlight_rules.js
  *
  * It is very likely that this code will move (or be removed) in future but for now
  * it enables syntax highlight for extended json.

@@ -5,8 +5,8 @@
  */
 
 import ace from 'brace';
-import * as xJsonRules from './x_json_highlight_rules';
 
+import * as xJsonRules from './x_json_highlight_rules';
 import workerSrc from '!!raw-loader!./worker.js';
 
 const oop = ace.acequire('ace/lib/oop');
@@ -29,7 +29,7 @@ class XJsonMode {
 // 1. We first inherit
 oop.inherits(XJsonMode, JSONMode);
 
-// 2. Then clobber `createWorker` method to install our worker source.
+// 2. Then clobber `createWorker` method to install our worker source. Per ace's wiki: https://github.com/ajaxorg/ace/wiki/Syntax-validation
 (XJsonMode.prototype as any).createWorker = function(session: ace.IEditSession) {
   const xJsonWorker = new WorkerClient(
     ['ace'],
