@@ -29,7 +29,7 @@ import {
 
 import { Vis } from '../../../';
 import { AggConfig } from '../../../agg_config';
-import { aggGroupNameMaps } from '../agg_group_names';
+import { aggGroupNamesMap } from '../agg_groups';
 import { DefaultEditorAgg } from './default_editor_agg';
 import { DefaultEditorAggAdd } from './default_editor_agg_add';
 import { DefaultEditorAggCommonProps } from './default_editor_agg_common_props';
@@ -63,7 +63,7 @@ function DefaultEditorAggGroup({
   setTouched,
   setValidity,
 }: DefaultEditorAggGroupProps) {
-  const groupNameLabel = aggGroupNameMaps()[groupName];
+  const groupNameLabel = aggGroupNamesMap()[groupName];
   const group: AggConfig[] = state.aggs.bySchemaGroup[groupName] || [];
 
   const schemas = vis.type.schemas[groupName];
