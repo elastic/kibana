@@ -41,8 +41,9 @@ export const mockGetHostsOptions: HostsRequestOptions = {
     'host.os.name',
     'host.os.version',
     'edges.cursor.value',
-    'pageInfo.endCursor.value',
-    'pageInfo.hasNextPage',
+    'pageInfo.activePage',
+    'pageInfo.fakeTotalCount',
+    'pageInfo.showMorePagesIndicator',
   ],
 };
 

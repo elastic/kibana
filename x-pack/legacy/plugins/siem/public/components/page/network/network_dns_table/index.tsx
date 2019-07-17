@@ -119,7 +119,7 @@ class NetworkDnsTableComponent extends React.PureComponent<NetworkDnsTableProps>
           })
         }
         updateLimitPagination={newLimit => updateDnsLimit({ limit: newLimit, networkType: type })}
-        updateProps={{ isPtrIncluded, totalCount }}
+        updateProps={{ isPtrIncluded, totalCount, dnsSortField }}
       />
     );
   }
