@@ -17,9 +17,21 @@
  * under the License.
  */
 
-export * from './empty_field';
-export * from './min_length';
-export * from './min_selection';
-export * from './url';
-export * from './index_name';
-export * from './contains_char';
+import { ValidationFunc } from '../hook_form_lib';
+import { containsChars } from '../../validators/string';
+import { formatError } from '../errors';
+
+export const containsCharsField = (chars: string | string[]) => (
+  ...args: Parameters<ValidationFunc>
+): ReturnType<ValidationFunc> => {
+  const [{ value }] = args;
+
+  const { doesContain, charsFound } = containsChars(chars)(value as string);
+
+  if (doesContain) {
+    return {
+      ...formatError('CONTAINS_INVALID_CHARS', 'The field contains invalid characters.'),
+      charsFound,
+    };
+  }
+};
