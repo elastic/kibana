@@ -17,6 +17,9 @@ import { RepositoryObjectClient } from '../search';
 import { EsClientWithRequest } from '../utils/esclient_with_request';
 import { TEXT_FILE_LIMIT } from '../../common/file';
 import { decodeRevisionString } from '../../common/uri_util';
+import { DistributedCode } from '../distributed/distributed_code';
+import { getGitServiceHandler, GitServiceDefinition } from '../distributed/apis';
+import { LocalHandlerAdapter } from '../distributed/local_handler_adapter';
 
 export function fileRoute(router: CodeServerRouter, gitOps: GitOperations) {
   async function getRepoUriFromMeta(
@@ -32,6 +35,10 @@ export function fileRoute(router: CodeServerRouter, gitOps: GitOperations) {
       return undefined;
     }
   }
+
+  const distributedCode = new DistributedCode(new LocalHandlerAdapter());
+  distributedCode.registerHandler(GitServiceDefinition, getGitServiceHandler(gitOps));
+  const gitService = distributedCode.serviceFor(GitServiceDefinition);
 
   router.route({
     path: '/api/code/repo/{uri*3}/tree/{ref}/{path*}',
@@ -50,9 +57,17 @@ export function fileRoute(router: CodeServerRouter, gitOps: GitOperations) {
       if (!repoUri) {
         return Boom.notFound(`repo ${uri} not found`);
       }
-
+      const endpoint = await distributedCode.locate(req, uri);
       try {
-        return await gitOps.fileTree(repoUri, path, revision, skip, limit, withParents, flatten);
+        return await gitService.fileTree(endpoint, {
+          repoUri,
+          path,
+          revision,
+          skip,
+          limit,
+          withParents,
+          flatten,
+        });
       } catch (e) {
         if (e.isBoom) {
           return e;
