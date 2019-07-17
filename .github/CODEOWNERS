@@ -43,6 +43,11 @@
 /x-pack/legacy/plugins/encrypted_saved_objects/  @elastic/kibana-security
 /src/legacy/server/csp/ @elastic/kibana-security
 
+# Kibana Stack Services
+/x-pack/legacy/plugins/telemetry @elastic/kibana-stack-services
+/x-pack/legacy/plugins/alerting @elastic/kibana-stack-services
+/x-pack/legacy/plugins/actions @elastic/kibana-stack-services
+
 # Design
 **/*.scss  @elastic/kibana-design
 

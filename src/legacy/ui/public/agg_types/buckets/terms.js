@@ -174,7 +174,7 @@ export const termsBucketAgg = new BucketAggType({
     },
     {
       name: 'order',
-      type: 'select',
+      type: 'optioned',
       default: 'desc',
       editorComponent: wrapWithInlineComp(OrderParamEditor),
       options: [

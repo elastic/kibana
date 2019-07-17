@@ -5,17 +5,14 @@
  */
 
 import _ from 'lodash';
-import React from 'react';
 import { AbstractLayer } from './layer';
-import { EuiIcon } from '@elastic/eui';
+import { VectorLayer } from './vector_layer';
 import { HeatmapStyle } from './styles/heatmap_style';
-import { SOURCE_DATA_ID_ORIGIN } from '../../../common/constants';
-import { isRefreshOnlyQuery } from './util/is_refresh_only_query';
-import { i18n } from '@kbn/i18n';
+import { EMPTY_FEATURE_COLLECTION } from '../../../common/constants';
 
 const SCALED_PROPERTY_NAME = '__kbn_heatmap_weight__';//unique name to store scaled value for weighting
 
-export class HeatmapLayer extends AbstractLayer {
+export class HeatmapLayer extends VectorLayer {
 
   static type = 'HEATMAP';
 
@@ -34,36 +31,26 @@ export class HeatmapLayer extends AbstractLayer {
     }
   }
 
-  getIndexPatternIds() {
-    return this._source.getIndexPatternIds();
-  }
-
   _getPropKeyOfSelectedMetric() {
     const metricfields = this._source.getMetricFields();
     return metricfields[0].propertyKey;
   }
 
-  _getMbLayerId() {
+  _getHeatmapLayerId() {
     return this.getId() + '_heatmap';
   }
 
   getMbLayerIds() {
-    return [this._getMbLayerId()];
+    return [this._getHeatmapLayerId()];
   }
 
   syncLayerWithMB(mbMap) {
+    super._syncSourceBindingWithMb(mbMap);
 
-    const mbSource = mbMap.getSource(this.getId());
-    const mbLayerId = this._getMbLayerId();
-
-    if (!mbSource) {
-      mbMap.addSource(this.getId(), {
-        type: 'geojson',
-        data: { 'type': 'FeatureCollection', 'features': [] }
-      });
-
+    const heatmapLayerId = this._getHeatmapLayerId();
+    if (!mbMap.getLayer(heatmapLayerId)) {
       mbMap.addLayer({
-        id: mbLayerId,
+        id: heatmapLayerId,
         type: 'heatmap',
         source: this.getId(),
         paint: {}
@@ -74,7 +61,7 @@ export class HeatmapLayer extends AbstractLayer {
     const sourceDataRequest = this.getSourceDataRequest();
     const featureCollection = sourceDataRequest ? sourceDataRequest.getData() : null;
     if (!featureCollection) {
-      mbSourceAfter.setData({ 'type': 'FeatureCollection', 'features': [] });
+      mbSourceAfter.setData(EMPTY_FEATURE_COLLECTION);
       return;
     }
 
@@ -91,122 +78,19 @@ export class HeatmapLayer extends AbstractLayer {
       mbSourceAfter.setData(featureCollection);
     }
 
-    mbMap.setLayoutProperty(mbLayerId, 'visibility', this.isVisible() ? 'visible' : 'none');
+    mbMap.setLayoutProperty(heatmapLayerId, 'visibility', this.isVisible() ? 'visible' : 'none');
     this._style.setMBPaintProperties({
       mbMap,
-      layerId: mbLayerId,
+      layerId: heatmapLayerId,
       propertyName: SCALED_PROPERTY_NAME,
       resolution: this._source.getGridResolution()
     });
-    mbMap.setPaintProperty(mbLayerId, 'heatmap-opacity', this.getAlpha());
-    mbMap.setLayerZoomRange(mbLayerId, this._descriptor.minZoom, this._descriptor.maxZoom);
-  }
-
-  async getBounds(dataFilters) {
-    const searchFilters = this._getSearchFilters(dataFilters);
-    return await this._source.getBoundsForFilters(searchFilters);
-  }
-
-  async syncData({ startLoading, stopLoading, onLoadError, dataFilters }) {
-    if (!this.isVisible() || !this.showAtZoomLevel(dataFilters.zoom)) {
-      return;
-    }
-
-    if (!dataFilters.buffer) {
-      return;
-    }
-
-    const searchFilters = this._getSearchFilters(dataFilters);
-
-    const sourceDataRequest = this.getSourceDataRequest();
-    const meta = sourceDataRequest ? sourceDataRequest.getMeta() : {};
-
-    const isSamePrecision = meta.geogridPrecision === searchFilters.geogridPrecision;
-
-    const isSameTime = _.isEqual(meta.timeFilters, searchFilters.timeFilters);
-
-    const updateDueToRefreshTimer = searchFilters.refreshTimerLastTriggeredAt
-      && !_.isEqual(meta.refreshTimerLastTriggeredAt, searchFilters.refreshTimerLastTriggeredAt);
-
-    const updateDueToExtent = this.updateDueToExtent(this._source, meta, searchFilters);
-
-    let updateDueToQuery = false;
-    let updateDueToFilters = false;
-    if (searchFilters.applyGlobalQuery) {
-      updateDueToQuery = !_.isEqual(meta.query, searchFilters.query);
-      updateDueToFilters = !_.isEqual(meta.filters, searchFilters.filters);
-    } else {
-      // Global filters and query are not applied to layer search request so no re-fetch required.
-      // Exception is "Refresh" query.
-      updateDueToQuery = isRefreshOnlyQuery(meta.query, searchFilters.query);
-    }
-    const updateDueToSourceQuery = searchFilters.sourceQuery
-      && !_.isEqual(meta.sourceQuery, searchFilters.sourceQuery);
-    const updateDueToApplyGlobalQuery = meta.applyGlobalQuery !== searchFilters.applyGlobalQuery;
-
-    const updateDueToMetricChange = !_.isEqual(meta.metric, searchFilters.metric);
-
-    if (isSamePrecision
-      && isSameTime
-      && !updateDueToExtent
-      && !updateDueToRefreshTimer
-      && !updateDueToQuery
-      && !updateDueToSourceQuery
-      && !updateDueToApplyGlobalQuery
-      && !updateDueToFilters
-      && !updateDueToMetricChange
-    ) {
-      return;
-    }
-
-    await this._fetchNewData({ startLoading, stopLoading, onLoadError, searchFilters });
-  }
-
-  _getSearchFilters(dataFilters) {
-    return {
-      ...dataFilters,
-      sourceQuery: this.getQuery(),
-      applyGlobalQuery: this.getApplyGlobalQuery(),
-      geogridPrecision: this._source.getGeoGridPrecision(dataFilters.zoom),
-      metric: this._getPropKeyOfSelectedMetric()
-    };
-  }
-
-  async _fetchNewData({ startLoading, stopLoading, onLoadError, searchFilters }) {
-    const requestToken = Symbol(`layer-source-refresh: this.getId()`);
-    startLoading(SOURCE_DATA_ID_ORIGIN, requestToken, searchFilters);
-    try {
-      const layerName = await this.getDisplayName();
-      const data = await this._source.getGeoJsonPoints(layerName, searchFilters);
-      stopLoading(SOURCE_DATA_ID_ORIGIN, requestToken, data);
-    } catch (error) {
-      onLoadError(SOURCE_DATA_ID_ORIGIN, requestToken, error.message);
-    }
+    mbMap.setPaintProperty(heatmapLayerId, 'heatmap-opacity', this.getAlpha());
+    mbMap.setLayerZoomRange(heatmapLayerId, this._descriptor.minZoom, this._descriptor.maxZoom);
   }
 
   getLayerTypeIconName() {
     return 'heatmap';
-  }
-
-  getCustomIconAndTooltipContent() {
-    const sourceDataRequest = this.getSourceDataRequest();
-    const featureCollection = sourceDataRequest ? sourceDataRequest.getData() : null;
-    if (!featureCollection || featureCollection.features.length === 0) {
-      return {
-        icon: (
-          <EuiIcon
-            size="m"
-            color="subdued"
-            type="minusInCircle"
-          />
-        ),
-        tooltipContent: i18n.translate('xpack.maps.heatmapLayer.noResultsFoundTooltip', {
-          defaultMessage: `No results found.`
-        })
-      };
-    }
-
-    return super.getCustomIconAndTooltipContent();
   }
 
   hasLegendDetails() {
