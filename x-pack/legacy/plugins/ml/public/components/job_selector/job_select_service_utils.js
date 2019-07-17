@@ -35,6 +35,9 @@ function getInvalidJobIds(ids) {
 }
 
 function loadJobIdsFromGlobalState(globalState) { // jobIds, groups
+  // fetch to get the latest state
+  globalState.fetch();
+
   const jobIds = [];
   let groups = [];
 

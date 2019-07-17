@@ -80,13 +80,13 @@ export default function emailTest({ getService }: KibanaFunctionalTestDefaultPro
         })
         .expect(200)
         .then((resp: any) => {
-          expect(resp.body.message.messageId).to.be.a('string');
-          expect(resp.body.messageId).to.be.a('string');
+          expect(resp.body.data.message.messageId).to.be.a('string');
+          expect(resp.body.data.messageId).to.be.a('string');
 
-          delete resp.body.message.messageId;
-          delete resp.body.messageId;
+          delete resp.body.data.message.messageId;
+          delete resp.body.data.messageId;
 
-          expect(resp.body).to.eql({
+          expect(resp.body.data).to.eql({
             envelope: {
               from: 'bob@example.com',
               to: ['kibana-action-test@elastic.co'],
@@ -102,11 +102,32 @@ export default function emailTest({ getService }: KibanaFunctionalTestDefaultPro
               cc: null,
               bcc: null,
               subject: 'email-subject',
-              html: 'email-message',
+              html: '<p>email-message</p>\n',
               text: 'email-message',
               headers: {},
             },
           });
+        });
+    });
+
+    it('should render html from markdown', async () => {
+      await supertest
+        .post(`/api/action/${createdActionId}/_fire`)
+        .set('kbn-xsrf', 'foo')
+        .send({
+          params: {
+            to: ['kibana-action-test@elastic.co'],
+            subject: 'message with markdown',
+            message: '_italic_ **bold** https://elastic.co link',
+          },
+        })
+        .expect(200)
+        .then((resp: any) => {
+          const { text, html } = resp.body.data.message;
+          expect(text).to.eql('_italic_ **bold** https://elastic.co link');
+          expect(html).to.eql(
+            '<p><em>italic</em> <strong>bold</strong> <a href="https://elastic.co">https://elastic.co</a> link</p>\n'
+          );
         });
     });
 
@@ -132,7 +153,4 @@ export default function emailTest({ getService }: KibanaFunctionalTestDefaultPro
         });
     });
   });
-
-  // TODO: once we have the HTTP API fire action, test that with a webhook url pointing
-  // back to the Kibana server
 }
