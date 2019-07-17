@@ -72,7 +72,7 @@ export const tryParseResponse = (response: string): string => {
 export const throwIfErrorAttached = (
   json: Record<string, Record<string, unknown>>,
   dataFeedIds: string[]
-) => {
+): void => {
   const errors = dataFeedIds.reduce<string[]>((accum, dataFeedId) => {
     const dataFeed = json[dataFeedId];
     if (isMlErrorMsg(dataFeed)) {
