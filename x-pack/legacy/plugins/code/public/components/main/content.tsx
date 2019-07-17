@@ -30,7 +30,7 @@ import {
   currentTreeSelector,
   hasMoreCommitsSelector,
   repoUriSelector,
-  statusSelector,
+  repoStatusSelector,
 } from '../../selectors';
 import { encodeRevisionString } from '../../../common/uri_util';
 import { history } from '../../utils/url';
@@ -402,7 +402,7 @@ const mapStateToProps = (state: RootState) => ({
   branches: state.revision.branches,
   hasMoreCommits: hasMoreCommitsSelector(state),
   loadingCommits: state.revision.loadingCommits,
-  repoStatus: statusSelector(state, repoUriSelector(state)),
+  repoStatus: repoStatusSelector(state, repoUriSelector(state)),
   searchOptions: state.search.searchOptions,
   query: state.search.query,
   currentRepository: state.repository.repository,
