@@ -14,7 +14,7 @@ export interface MessageBody {
   statusCode?: number;
 }
 
-export interface MlErrorMsg {
+export interface MlStartJobError {
   error: {
     msg: string;
     response: string;
@@ -75,7 +75,7 @@ export const throwIfErrorAttached = (
 ): void => {
   const errors = dataFeedIds.reduce<string[]>((accum, dataFeedId) => {
     const dataFeed = json[dataFeedId];
-    if (isMlErrorMsg(dataFeed)) {
+    if (isMlStartJobError(dataFeed)) {
       accum = [
         ...accum,
         dataFeed.error.msg,
@@ -95,5 +95,5 @@ export const throwIfErrorAttached = (
 // use the "in operator" and regular type guards to do a narrow once this issue is fixed below:
 // https://github.com/microsoft/TypeScript/issues/21732
 // Otherwise for now, has will work ok even though it casts 'unknown' to 'any'
-export const isMlErrorMsg = (value: unknown): value is MlErrorMsg =>
+export const isMlStartJobError = (value: unknown): value is MlStartJobError =>
   has('error.msg', value) && has('error.response', value) && has('error.statusCode', value);

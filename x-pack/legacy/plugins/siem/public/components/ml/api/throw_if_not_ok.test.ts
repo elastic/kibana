@@ -12,7 +12,7 @@ import {
   MessageBody,
   tryParseResponse,
   throwIfErrorAttached,
-  isMlErrorMsg,
+  isMlStartJobError,
   ToasterErrors,
 } from './throw_if_not_ok';
 
@@ -94,7 +94,7 @@ describe('throw_if_not_ok', () => {
           statusCode: 400,
         },
       };
-      expect(isMlErrorMsg(json)).toEqual(true);
+      expect(isMlStartJobError(json)).toEqual(true);
     });
 
     test('It returns false to a ml error msg if it is missing msg', () => {
@@ -104,7 +104,7 @@ describe('throw_if_not_ok', () => {
           statusCode: 400,
         },
       };
-      expect(isMlErrorMsg(json)).toEqual(false);
+      expect(isMlStartJobError(json)).toEqual(false);
     });
 
     test('It returns false to a ml error msg if it is missing response', () => {
@@ -114,7 +114,7 @@ describe('throw_if_not_ok', () => {
           statusCode: 400,
         },
       };
-      expect(isMlErrorMsg(json)).toEqual(false);
+      expect(isMlStartJobError(json)).toEqual(false);
     });
 
     test('It returns false to a ml error msg if it is missing statusCode', () => {
@@ -124,12 +124,12 @@ describe('throw_if_not_ok', () => {
           response: 'some response',
         },
       };
-      expect(isMlErrorMsg(json)).toEqual(false);
+      expect(isMlStartJobError(json)).toEqual(false);
     });
 
     test('It returns false to a ml error msg if it is missing error completely', () => {
       const json: Record<string, Record<string, unknown>> = {};
-      expect(isMlErrorMsg(json)).toEqual(false);
+      expect(isMlStartJobError(json)).toEqual(false);
     });
   });
 
