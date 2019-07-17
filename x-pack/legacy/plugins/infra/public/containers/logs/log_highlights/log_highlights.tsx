@@ -5,12 +5,13 @@
  */
 
 import createContainer from 'constate-latest';
-import { useState } from 'react';
+import { useState, useContext } from 'react';
 
 import { useHighlightsFetcher } from './data_fetching';
 import { useNextAndPrevious } from './next_and_previous';
 import { useReduxBridgeSetters } from './redux_bridge_setters';
 import { useSummaryHighlights } from './summary_highlights';
+import { LogViewConfiguration } from '../log_view_configuration';
 
 export const useLogHighlightsState = ({
   sourceId,
@@ -38,6 +39,8 @@ export const useLogHighlightsState = ({
     summaryEnd,
   } = useReduxBridgeSetters();
 
+  const { intervalSize: summaryIntervalSize } = useContext(LogViewConfiguration.Context);
+
   const {
     logEntryHighlights,
     logEntryHighlightsById,
@@ -49,6 +52,7 @@ export const useLogHighlightsState = ({
     sourceVersion,
     summaryStart,
     summaryEnd,
+    summaryIntervalSize,
     filterQuery,
     highlightTerms
   );

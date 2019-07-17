@@ -715,6 +715,55 @@ export namespace LogEntryHighlightsQuery {
   export type Entries = InfraLogEntryHighlightFields.Fragment;
 }
 
+export namespace LogSummaryHighlightsQuery {
+  export type Variables = {
+    sourceId?: string | null;
+    start: number;
+    end: number;
+    bucketSize: number;
+    highlightQueries: string[];
+    filterQuery?: string | null;
+  };
+
+  export type Query = {
+    __typename?: 'Query';
+
+    source: Source;
+  };
+
+  export type Source = {
+    __typename?: 'InfraSource';
+
+    id: string;
+
+    logSummaryHighlightsBetween: LogSummaryHighlightsBetween[];
+  };
+
+  export type LogSummaryHighlightsBetween = {
+    __typename?: 'InfraLogSummaryHighlightInterval';
+
+    start?: number | null;
+
+    end?: number | null;
+
+    buckets: Buckets[];
+  };
+
+  export type Buckets = {
+    __typename?: 'InfraLogSummaryHighlightBucket';
+
+    start: number;
+
+    end: number;
+
+    entriesCount: number;
+
+    representativeKey: RepresentativeKey;
+  };
+
+  export type RepresentativeKey = InfraTimeKeyFields.Fragment;
+}
+
 export namespace LogSummary {
   export type Variables = {
     sourceId?: string | null;
