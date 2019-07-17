@@ -17,17 +17,17 @@
  * under the License.
  */
 
-import chrome from 'ui/chrome';
-import { metadata } from 'ui/metadata';
-import { ajaxStream as ajax, BatchOpts } from './ajax_stream';
+import { uiModules } from 'ui/modules';
+import { ToolBarPagerText } from './tool_bar_pager_text';
+import { ToolBarPagerButtons } from './tool_bar_pager_buttons';
+import { wrapInI18nContext } from 'ui/i18n';
 
-const defaultHeaders = {
-  'Content-Type': 'application/json',
-  'kbn-version': metadata.version,
-};
+const app = uiModules.get('kibana');
 
-export { BatchOpts } from './ajax_stream';
+app.directive('toolBarPagerText', function (reactDirective) {
+  return reactDirective(wrapInI18nContext(ToolBarPagerText));
+});
 
-export function ajaxStream<T>(opts: BatchOpts<T>) {
-  return ajax(chrome.getBasePath(), defaultHeaders, new XMLHttpRequest(), opts);
-}
+app.directive('toolBarPagerButtons', function (reactDirective) {
+  return reactDirective(wrapInI18nContext(ToolBarPagerButtons));
+});
