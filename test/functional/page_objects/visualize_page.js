@@ -407,7 +407,7 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
     }
 
     async clickMetricEditor() {
-      await find.clickByCssSelector('button[data-test-subj="toggleEditor"]');
+      await find.clickByCssSelector('[group-name="metrics"] .euiAccordion__button');
     }
 
     async clickMetricByIndex(index) {
