@@ -73,7 +73,7 @@ export class SearchMarker extends React.PureComponent<SearchMarkerProps, SearchM
           <SearchMarkerTooltip markerPosition={hoveredPosition}>
             <FormattedMessage
               id="xpack.infra.logs.searchResultTooltip"
-              defaultMessage="{bucketCount, plural, one {# search result} other {# search results}}"
+              defaultMessage="{bucketCount, plural, one {# highlighted entry} other {# highlighted entries}}"
               values={{
                 bucketCount: bucket.entriesCount,
               }}
@@ -107,15 +107,15 @@ const SearchMarkerGroup = euiStyled.g`
 `;
 
 const SearchMarkerBackgroundRect = euiStyled.rect`
-  fill: ${props => props.theme.eui.euiColorSecondary};
+  fill: ${props => props.theme.eui.euiColorAccent};
   opacity: 0;
   transition: opacity ${props => props.theme.eui.euiAnimSpeedNormal} ease-in;
 
   ${SearchMarkerGroup}:hover & {
-    opacity: 0.2;
+    opacity: 0.3;
   }
 `;
 
 const SearchMarkerForegroundRect = euiStyled.rect`
-  fill: ${props => props.theme.eui.euiColorSecondary};
+  fill: ${props => props.theme.eui.euiColorAccent};
 `;
