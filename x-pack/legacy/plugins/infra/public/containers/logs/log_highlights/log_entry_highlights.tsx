@@ -24,9 +24,7 @@ export const useLogEntryHighlights = (
   highlightTerms: string[]
 ) => {
   const apolloClient = useApolloClient();
-  const [logEntryHighlights, setLogEntryHighlights] = useState<LogEntryHighlights | undefined>(
-    undefined
-  );
+  const [logEntryHighlights, setLogEntryHighlights] = useState<LogEntryHighlights>([]);
   const [loadLogEntryHighlightsRequest, loadLogEntryHighlights] = useTrackedPromise(
     {
       cancelPreviousOn: 'resolution',
@@ -69,7 +67,7 @@ export const useLogEntryHighlights = (
   );
 
   useEffect(() => {
-    setLogEntryHighlights(undefined);
+    setLogEntryHighlights([]);
   }, [highlightTerms]);
 
   useEffect(() => {
@@ -80,29 +78,24 @@ export const useLogEntryHighlights = (
     ) {
       loadLogEntryHighlights();
     } else {
-      setLogEntryHighlights(undefined);
+      setLogEntryHighlights([]);
     }
   }, [highlightTerms, startKey, endKey, filterQuery, sourceVersion]);
 
   const logEntryHighlightsById = useMemo(
     () =>
-      logEntryHighlights
-        ? logEntryHighlights.reduce<LogEntryHighlightsMap>(
-            (accumulatedLogEntryHighlightsById, { entries }) => {
-              return entries.reduce<LogEntryHighlightsMap>(
-                (singleHighlightLogEntriesById, entry) => {
-                  const highlightsForId = singleHighlightLogEntriesById[entry.gid] || [];
-                  return {
-                    ...singleHighlightLogEntriesById,
-                    [entry.gid]: [...highlightsForId, entry],
-                  };
-                },
-                accumulatedLogEntryHighlightsById
-              );
-            },
-            {}
-          )
-        : {},
+      logEntryHighlights.reduce<LogEntryHighlightsMap>(
+        (accumulatedLogEntryHighlightsById, { entries }) => {
+          return entries.reduce<LogEntryHighlightsMap>((singleHighlightLogEntriesById, entry) => {
+            const highlightsForId = singleHighlightLogEntriesById[entry.gid] || [];
+            return {
+              ...singleHighlightLogEntriesById,
+              [entry.gid]: [...highlightsForId, entry],
+            };
+          }, accumulatedLogEntryHighlightsById);
+        },
+        {}
+      ),
     [logEntryHighlights]
   );
 

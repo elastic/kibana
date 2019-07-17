@@ -9,12 +9,11 @@ import * as React from 'react';
 
 import euiStyled from '../../../../../../common/eui_styled_components';
 import { LogEntryTime } from '../../../../common/log_entry';
-// import { SearchSummaryBucket } from '../../../../common/log_search_summary';
 import { DensityChart } from './density_chart';
 import { HighlightedInterval } from './highlighted_interval';
-// import { SearchMarkers } from './search_markers';
+import { SearchMarkers } from './search_markers';
 import { TimeRuler } from './time_ruler';
-import { SummaryBucket } from './types';
+import { SummaryBucket, SummaryHighlightBucket } from './types';
 
 interface LogMinimapProps {
   className?: string;
@@ -26,7 +25,7 @@ interface LogMinimapProps {
   jumpToTarget: (params: LogEntryTime) => any;
   intervalSize: number;
   summaryBuckets: SummaryBucket[];
-  // searchSummaryBuckets?: SearchSummaryBucket[];
+  summaryHighlightBuckets?: SummaryHighlightBucket[];
   target: number | null;
   width: number;
 }
@@ -81,9 +80,9 @@ export class LogMinimap extends React.Component<LogMinimapProps, LogMinimapState
       className,
       height,
       highlightedInterval,
-      // jumpToTarget,
+      jumpToTarget,
       summaryBuckets,
-      // searchSummaryBuckets,
+      summaryHighlightBuckets,
       width,
     } = this.props;
 
@@ -119,17 +118,17 @@ export class LogMinimap extends React.Component<LogMinimapProps, LogMinimapState
             width={width}
           />
         ) : null}
-        <TimeCursor x1={0} x2={width} y1={timeCursorY} y2={timeCursorY} />
-        {/* <g transform={`translate(${width * 0.5}, 0)`}>
+        <g transform={`translate(${width * 0.5}, 0)`}>
           <SearchMarkers
-            buckets={searchSummaryBuckets || []}
+            buckets={summaryHighlightBuckets || []}
             start={minTime}
             end={maxTime}
             width={width / 2}
             height={height}
             jumpToTarget={jumpToTarget}
           />
-        </g> */}
+        </g>
+        <TimeCursor x1={0} x2={width} y1={timeCursorY} y2={timeCursorY} />
       </MinimapWrapper>
     );
   }

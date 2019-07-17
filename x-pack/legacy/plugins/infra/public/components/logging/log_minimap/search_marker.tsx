@@ -9,11 +9,11 @@ import * as React from 'react';
 
 import euiStyled, { keyframes } from '../../../../../../common/eui_styled_components';
 import { LogEntryTime } from '../../../../common/log_entry';
-import { SearchSummaryBucket } from '../../../../common/log_search_summary';
 import { SearchMarkerTooltip } from './search_marker_tooltip';
+import { SummaryHighlightBucket } from './types';
 
 interface SearchMarkerProps {
-  bucket: SearchSummaryBucket;
+  bucket: SummaryHighlightBucket;
   height: number;
   width: number;
   jumpToTarget: (target: LogEntryTime) => void;
@@ -31,7 +31,7 @@ export class SearchMarker extends React.PureComponent<SearchMarkerProps, SearchM
   public handleClick: React.MouseEventHandler<SVGGElement> = evt => {
     evt.stopPropagation();
 
-    this.props.jumpToTarget(this.props.bucket.representative.fields);
+    this.props.jumpToTarget(this.props.bucket.representativeKey);
   };
 
   public handleMouseEnter: React.MouseEventHandler<SVGGElement> = evt => {
@@ -51,7 +51,7 @@ export class SearchMarker extends React.PureComponent<SearchMarkerProps, SearchM
     const { hoveredPosition } = this.state;
 
     const bulge =
-      bucket.count > 1 ? (
+      bucket.entriesCount > 1 ? (
         <SearchMarkerForegroundRect x="-2" y="-2" width="4" height={height + 2} rx="2" ry="2" />
       ) : (
         <>
@@ -75,7 +75,7 @@ export class SearchMarker extends React.PureComponent<SearchMarkerProps, SearchM
               id="xpack.infra.logs.searchResultTooltip"
               defaultMessage="{bucketCount, plural, one {# search result} other {# search results}}"
               values={{
-                bucketCount: bucket.count,
+                bucketCount: bucket.entriesCount,
               }}
             />
           </SearchMarkerTooltip>

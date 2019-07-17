@@ -26,7 +26,6 @@ export const withStreamItems = connect(
     entries: logEntriesSelectors.selectEntries(state),
     entriesStart: logEntriesSelectors.selectEntriesStart(state),
     entriesEnd: logEntriesSelectors.selectEntriesEnd(state),
-    // items: selectItems(state),
   }),
   bindPlainActionCreators({
     loadNewerEntries: logEntriesActions.loadNewerEntries,
@@ -73,27 +72,6 @@ export const WithStreamItems = withStreamItems(
     });
   }
 );
-
-// export const WithStreamItemsOld = asChildFunctionRenderer(withStreamItems, {
-//   onInitialize: props => {
-//     if (!props.isReloading && !props.isLoadingMore) {
-//       props.reloadEntries();
-//     }
-//   },
-// });
-
-// const selectItems = createSelector(
-//   logEntriesSelectors.selectEntries,
-//   logEntriesSelectors.selectIsReloadingEntries,
-//   logPositionSelectors.selectIsAutoReloading,
-//   // searchResultsSelectors.selectSearchResultsById,
-//   (logEntries, isReloading, isAutoReloading /* , searchResults */) =>
-//     isReloading && !isAutoReloading
-//       ? []
-//       : logEntries.map(logEntry =>
-//           createLogEntryStreamItem(logEntry /* , searchResults[logEntry.gid] || null */)
-//         )
-// );
 
 const createLogEntryStreamItem = (
   logEntry: LogEntry,

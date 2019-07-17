@@ -29,7 +29,7 @@ import { Source } from '../../containers/source';
 
 import { LogsToolbar } from './page_toolbar';
 import { SourceConfigurationFlyoutState } from '../../components/source_configuration';
-import { LogHighlightsBridge } from '../../containers/logs/log_highlights';
+import { LogHighlightsBridge, LogHighlightsState } from '../../containers/logs/log_highlights';
 
 export const LogsPageLogsContent: React.FunctionComponent = () => {
   const { derivedIndexPattern, source, sourceId, version } = useContext(Source.Context);
@@ -44,6 +44,7 @@ export const LogsPageLogsContent: React.FunctionComponent = () => {
     isLoading,
   } = useContext(LogFlyoutState.Context);
   const { showLogsConfiguration } = useContext(SourceConfigurationFlyoutState.Context);
+  const { logSummaryHighlights } = useContext(LogHighlightsState.Context);
 
   return (
     <>
@@ -128,6 +129,9 @@ export const LogsPageLogsContent: React.FunctionComponent = () => {
                           intervalSize={intervalSize}
                           jumpToTarget={jumpToTargetPosition}
                           summaryBuckets={buckets}
+                          summaryHighlightBuckets={
+                            logSummaryHighlights.length > 0 ? logSummaryHighlights[0].buckets : []
+                          }
                           target={visibleMidpointTime}
                         />
                       )}

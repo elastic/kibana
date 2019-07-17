@@ -24,9 +24,7 @@ export const useLogSummaryHighlights = (
   highlightTerms: string[]
 ) => {
   const apolloClient = useApolloClient();
-  const [logSummaryHighlights, setLogSummaryHighlights] = useState<
-    LogSummaryHighlights | undefined
-  >(undefined);
+  const [logSummaryHighlights, setLogSummaryHighlights] = useState<LogSummaryHighlights>([]);
 
   const [loadLogSummaryHighlightsRequest, loadLogSummaryHighlights] = useTrackedPromise(
     {
@@ -71,14 +69,14 @@ export const useLogSummaryHighlights = (
   ]);
 
   useEffect(() => {
-    setLogSummaryHighlights(undefined);
+    setLogSummaryHighlights([]);
   }, [highlightTerms]);
 
   useEffect(() => {
     if (highlightTerms.filter(highlightTerm => highlightTerm.length > 0).length && start && end) {
       debouncedLoadSummaryHighlights();
     } else {
-      setLogSummaryHighlights(undefined);
+      setLogSummaryHighlights([]);
     }
   }, [highlightTerms, start, end, bucketSize, filterQuery, sourceVersion]);
 
