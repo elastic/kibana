@@ -21,11 +21,6 @@ export interface Body {
   maxExamples: number;
 }
 
-export const empty: Anomalies = {
-  anomalies: [],
-  interval: 'second',
-};
-
 export const anomaliesTableData = async (
   body: Body,
   headers: Record<string, string | undefined>

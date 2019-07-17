@@ -4,26 +4,22 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { isError, isString } from 'lodash/fp';
+import { isError } from 'lodash/fp';
 import uuid from 'uuid';
 import { ActionToaster, AppToast } from '../../toasters';
 import { ToasterErrorsType, ToasterErrors } from './throw_if_not_ok';
 
-export type ErrorTypes = Error | string | unknown;
-
 export type ErrorToToasterArgs = Partial<AppToast> & {
-  error: ErrorTypes;
+  error: unknown;
   dispatchToaster: React.Dispatch<ActionToaster>;
-  additionalErrors?: string[];
 };
 
 export const errorToToaster = ({
   id = uuid.v4(),
-  title = 'Data Fetch Failure',
+  title,
   error,
   color = 'danger',
   iconType = 'alert',
-  additionalErrors = [],
   dispatchToaster,
 }: ErrorToToasterArgs) => {
   if (isToasterError(error)) {
@@ -32,7 +28,7 @@ export const errorToToaster = ({
       title,
       color,
       iconType,
-      errors: [...additionalErrors, ...error.messages],
+      errors: error.messages,
     };
     dispatchToaster({
       type: 'addToaster',
@@ -44,7 +40,7 @@ export const errorToToaster = ({
       title,
       color,
       iconType,
-      errors: [...additionalErrors, error.message],
+      errors: [error.message],
     };
     dispatchToaster({
       type: 'addToaster',
@@ -56,7 +52,7 @@ export const errorToToaster = ({
       title,
       color,
       iconType,
-      errors: [...additionalErrors, 'Network Error'],
+      errors: ['Network Error'],
     };
     dispatchToaster({
       type: 'addToaster',
@@ -64,9 +60,6 @@ export const errorToToaster = ({
     });
   }
 };
-
-// TODO: Use this or delete it
-export const isAString = (error: unknown): error is string => isString(error);
 
 export const isAnError = (error: unknown): error is Error => isError(error);
 
