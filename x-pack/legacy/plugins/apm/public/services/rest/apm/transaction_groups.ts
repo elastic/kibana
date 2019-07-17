@@ -101,12 +101,14 @@ export async function loadTransactionBreakdown({
   start,
   end,
   transactionName,
+  transactionType,
   uiFilters
 }: {
   serviceName: string;
   start: string;
   end: string;
   transactionName?: string;
+  transactionType: string;
   uiFilters: UIFilters;
 }) {
   return callApi<TransactionBreakdownAPIResponse>({
@@ -115,6 +117,7 @@ export async function loadTransactionBreakdown({
       start,
       end,
       transactionName,
+      transactionType,
       uiFiltersES: await getUiFiltersES(uiFilters)
     }
   });

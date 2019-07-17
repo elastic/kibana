@@ -19,6 +19,7 @@
 
 import _ from 'lodash';
 import { buildExistsFilter, buildPhrasesFilter, buildQueryFromFilters } from '@kbn/es-query';
+import { AggGroupNames } from '../../vis/editors/default/agg_groups';
 
 /**
  * walks the aggregation DSL and returns DSL starting at aggregation with id of startFromAggId
@@ -101,7 +102,7 @@ const getOtherAggTerms = (requestAgg, key, otherAgg) => {
 
 
 const buildOtherBucketAgg = (aggConfigs, aggWithOtherBucket, response) => {
-  const bucketAggs = aggConfigs.filter(agg => agg.type.type === 'buckets');
+  const bucketAggs = aggConfigs.filter(agg => agg.type.type === AggGroupNames.Buckets);
   const index = bucketAggs.findIndex(agg => agg.id === aggWithOtherBucket.id);
   const aggs = aggConfigs.toDsl();
   const indexPattern = aggWithOtherBucket.params.field.indexPattern;
