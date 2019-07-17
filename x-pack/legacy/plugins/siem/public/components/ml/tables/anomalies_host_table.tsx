@@ -76,6 +76,7 @@ export const AnomaliesHostTable = React.memo<AnomaliesHostTableProps>(
               `${i18n.SHOWING}: ${pagination.totalItemCount.toLocaleString()} ${i18n.ANOMALIES}`
             }
             title={i18n.ANOMALIES}
+            tooltip={i18n.TOOLTIP}
           />
 
           {loading && loadingInitial ? (
@@ -89,7 +90,9 @@ export const AnomaliesHostTable = React.memo<AnomaliesHostTableProps>(
                 sorting={sorting}
               />
 
-              {loading && <Loader overlay size="xl" />}
+              {loading && (
+                <Loader data-test-subj="anomalies-host-table-loading-panel" overlay size="xl" />
+              )}
             </>
           )}
         </Panel>

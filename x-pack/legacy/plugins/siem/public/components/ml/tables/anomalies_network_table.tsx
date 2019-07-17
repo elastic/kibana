@@ -74,6 +74,7 @@ export const AnomaliesNetworkTable = React.memo<AnomaliesNetworkTableProps>(
               `${i18n.SHOWING}: ${pagination.totalItemCount.toLocaleString()} ${i18n.ANOMALIES}`
             }
             title={i18n.ANOMALIES}
+            tooltip={i18n.TOOLTIP}
           />
 
           {loading && loadingInitial ? (
@@ -87,7 +88,9 @@ export const AnomaliesNetworkTable = React.memo<AnomaliesNetworkTableProps>(
                 sorting={sorting}
               />
 
-              {loading && <Loader overlay size="xl" />}
+              {loading && (
+                <Loader data-test-subj="anomalies-network-table-loading-panel" overlay size="xl" />
+              )}
             </>
           )}
         </Panel>
