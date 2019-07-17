@@ -4,9 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { shallow } from 'enzyme';
-import React from 'react';
-import { EuiComboBox } from '@elastic/eui';
 import chromeMock from 'ui/chrome';
 import { data as dataMock } from '../../../../../../src/legacy/core_plugins/data/public/setup';
 import { localStorage as storageMock } from 'ui/storage/storage_service';
@@ -16,11 +13,9 @@ import {
   getIndexPatternDatasource,
   IndexPatternPersistedState,
   IndexPatternPrivateState,
-  IndexPatternDataPanel,
   IndexPatternColumn,
 } from './indexpattern';
 import { DatasourcePublicAPI, Operation, Datasource } from '../types';
-import { createMockedDragDropContext } from './mocks';
 
 jest.mock('./loader');
 // chrome, notify, storage are used by ./plugin
@@ -168,51 +163,6 @@ describe('IndexPattern Data Source', () => {
       expect(state).toEqual({
         ...persistedState,
         indexPatterns: expectedIndexPatterns,
-      });
-    });
-  });
-
-  describe('#renderDataPanel', () => {
-    let state: IndexPatternPrivateState;
-
-    beforeEach(async () => {
-      state = await indexPatternDatasource.initialize(persistedState);
-    });
-
-    it('should match snapshot', () => {
-      expect(
-        shallow(
-          <IndexPatternDataPanel
-            dragDropContext={createMockedDragDropContext()}
-            state={state}
-            setState={() => {}}
-          />
-        )
-      ).toMatchSnapshot();
-    });
-
-    it('should call setState when the index pattern is switched', async () => {
-      const setState = jest.fn();
-
-      const wrapper = shallow(
-        <IndexPatternDataPanel
-          dragDropContext={createMockedDragDropContext()}
-          {...{ state, setState }}
-        />
-      );
-
-      const comboBox = wrapper.find(EuiComboBox);
-
-      comboBox.prop('onChange')!([
-        {
-          label: expectedIndexPatterns['2'].title,
-          value: '2',
-        },
-      ]);
-
-      expect(setState).toHaveBeenCalledWith({
-        ...state,
-        currentIndexPatternId: '2',
       });
     });
   });

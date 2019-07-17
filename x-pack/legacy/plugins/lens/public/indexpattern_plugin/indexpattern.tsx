@@ -7,7 +7,6 @@
 import _ from 'lodash';
 import React from 'react';
 import { render } from 'react-dom';
-import { EuiComboBox } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n/react';
 import {
   DatasourceDimensionPanelProps,
@@ -18,11 +17,11 @@ import {
 } from '../types';
 import { Query } from '../../../../../../src/legacy/core_plugins/data/public/query';
 import { getIndexPatterns } from './loader';
-import { ChildDragDropProvider, DragDrop } from '../drag_drop';
 import { toExpression } from './to_expression';
 import { IndexPatternDimensionPanel } from './dimension_panel';
 import { buildColumnForOperationType, getOperationTypesForField } from './operations';
 import { IndexPatternDatasourcePluginPlugins } from './plugin';
+import { IndexPatternDataPanel } from './datapanel';
 import { Datasource, DataType } from '..';
 
 export type OperationType = IndexPatternColumn['operationType'];
@@ -133,49 +132,6 @@ export type IndexPatternPrivateState = IndexPatternPersistedState & {
   indexPatterns: Record<string, IndexPattern>;
 };
 
-export function IndexPatternDataPanel(props: DatasourceDataPanelProps<IndexPatternPrivateState>) {
-  return (
-    <ChildDragDropProvider {...props.dragDropContext}>
-      Index Pattern Data Source
-      <div>
-        <EuiComboBox
-          data-test-subj="indexPattern-switcher"
-          options={Object.values(props.state.indexPatterns).map(({ title, id }) => ({
-            label: title,
-            value: id,
-          }))}
-          selectedOptions={
-            props.state.currentIndexPatternId
-              ? [
-                  {
-                    label: props.state.indexPatterns[props.state.currentIndexPatternId].title,
-                    value: props.state.indexPatterns[props.state.currentIndexPatternId].id,
-                  },
-                ]
-              : undefined
-          }
-          singleSelection={{ asPlainText: true }}
-          isClearable={false}
-          onChange={choices => {
-            props.setState({
-              ...props.state,
-              currentIndexPatternId: choices[0].value as string,
-            });
-          }}
-        />
-        <div>
-          {props.state.currentIndexPatternId &&
-            props.state.indexPatterns[props.state.currentIndexPatternId].fields.map(field => (
-              <DragDrop key={field.name} value={field} draggable>
-                {field.name}
-              </DragDrop>
-            ))}
-        </div>
-      </div>
-    </ChildDragDropProvider>
-  );
-}
-
 export function columnToOperation(column: IndexPatternColumn): Operation {
   const { dataType, label, isBucketed, operationId } = column;
   return {
@@ -270,7 +226,12 @@ export function getIndexPatternDatasource({
       domElement: Element,
       props: DatasourceDataPanelProps<IndexPatternPrivateState>
     ) {
-      render(<IndexPatternDataPanel {...props} />, domElement);
+      render(
+        <I18nProvider>
+          <IndexPatternDataPanel {...props} />
+        </I18nProvider>,
+        domElement
+      );
     },
 
     getPublicAPI(state, setState) {
@@ -306,8 +267,8 @@ export function getIndexPatternDatasource({
             columns: removeProperty(columnId, state.columns),
           });
         },
-        moveColumnTo: (columnId: string, targetIndex: number) => {},
-        duplicateColumn: (columnId: string) => [],
+        moveColumnTo: () => {},
+        duplicateColumn: () => [],
       };
     },
 
