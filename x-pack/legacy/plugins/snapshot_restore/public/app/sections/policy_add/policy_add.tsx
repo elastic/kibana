@@ -15,7 +15,10 @@ import { BASE_PATH } from '../../constants';
 import { breadcrumbService } from '../../services/navigation';
 import { addPolicy } from '../../services/http';
 
-export const PolicyAdd: React.FunctionComponent<RouteComponentProps> = ({ history }) => {
+export const PolicyAdd: React.FunctionComponent<RouteComponentProps> = ({
+  history,
+  location: { pathname },
+}) => {
   const {
     core: {
       i18n: { FormattedMessage },
@@ -83,6 +86,7 @@ export const PolicyAdd: React.FunctionComponent<RouteComponentProps> = ({ histor
         <EuiSpacer size="l" />
         <PolicyForm
           policy={emptyPolicy}
+          currentUrl={pathname}
           isSaving={isSaving}
           saveError={renderSaveError()}
           clearSaveError={clearSaveError}

@@ -18,8 +18,10 @@ export function linkToEditRepository(repositoryName: string) {
   return `#${BASE_PATH}/edit_repository/${encodeURIComponent(repositoryName)}`;
 }
 
-export function linkToAddRepository() {
-  return `#${BASE_PATH}/add_repository`;
+export function linkToAddRepository(redirect?: string) {
+  return `#${BASE_PATH}/add_repository${
+    redirect ? `?redirect=${encodeURIComponent(redirect)}` : ''
+  }`;
 }
 
 export function linkToSnapshots(repositoryName?: string, policyName?: string) {

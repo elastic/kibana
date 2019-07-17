@@ -5,6 +5,7 @@
  */
 import React, { useEffect, useState } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
+import { parse } from 'querystring';
 
 import { EuiPageBody, EuiPageContent, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { Repository, EmptyRepository } from '../../../../common/types';
@@ -15,7 +16,10 @@ import { useAppDependencies } from '../../index';
 import { breadcrumbService } from '../../services/navigation';
 import { addRepository } from '../../services/http';
 
-export const RepositoryAdd: React.FunctionComponent<RouteComponentProps> = ({ history }) => {
+export const RepositoryAdd: React.FunctionComponent<RouteComponentProps> = ({
+  history,
+  location: { search },
+}) => {
   const {
     core: {
       i18n: { FormattedMessage },
@@ -39,7 +43,8 @@ export const RepositoryAdd: React.FunctionComponent<RouteComponentProps> = ({ hi
     if (error) {
       setSaveError(error);
     } else {
-      history.push(`${BASE_PATH}/${section}/${name}`);
+      const { redirect } = parse(search.replace(/^\?/, ''));
+      history.push(redirect ? (redirect as string) : `${BASE_PATH}/${section}/${name}`);
     }
   };
 
