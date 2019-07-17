@@ -113,22 +113,16 @@ export class ElasticsearchMonitorStatesAdapter implements UMMonitorStatesAdapter
 
     const result = await this.database.search(request, params);
     afterKey = get<any | null>(result, 'aggregations.monitors.after_key', null);
-    const buckets = get<any>(result, 'aggregations.monitors.buckets', []);
-    let index = 0;
-    while (buckets[index]) {
-      const id = get<string>(buckets[index], 'key.monitor_id');
-      const checkGroup = get<string>(
-        buckets[index],
-        'top.hits.hits[0]._source.monitor.check_group'
-      );
+    get<any>(result, 'aggregations.monitors.buckets', []).forEach((bucket: any) => {
+      const id = get<string>(bucket, 'key.monitor_id');
+      const checkGroup = get<string>(bucket, 'top.hits.hits[0]._source.monitor.check_group');
       const value = checkGroupsById.get(id);
       if (!value) {
         checkGroupsById.set(id, [checkGroup]);
       } else if (value.indexOf(checkGroup) < 0) {
         checkGroupsById.set(id, [...value, checkGroup]);
       }
-      index++;
-    }
+    });
     return {
       checkGroups: flatten(Array.from(checkGroupsById.values())),
       afterKey,
