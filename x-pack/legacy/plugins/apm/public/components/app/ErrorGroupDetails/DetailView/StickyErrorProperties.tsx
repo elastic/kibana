@@ -42,7 +42,7 @@ function TransactionLink({
 
   return (
     <APMLink
-      path={`/${transaction.service.name}/transactions/view`}
+      path={`/services/${transaction.service.name}/transactions/view`}
       query={{
         transactionId: transaction.transaction.id,
         traceId: transaction.trace.id,
