@@ -21,11 +21,15 @@ export const DeleteTemplatesModal = ({
 }) => {
   const numTemplatesToDelete = templatesToDelete.length;
 
+  if (!numTemplatesToDelete) {
+    return null;
+  }
+
   const hasSystemTemplate = Boolean(
     templatesToDelete.find(templateName => templateName.startsWith('.'))
   );
 
-  const handleDeleteTemplates = async () => {
+  const handleDeleteTemplates = () => {
     deleteTemplates(templatesToDelete).then(({ data: { templatesDeleted, errors }, error }) => {
       const hasDeletedTemplates = templatesDeleted && templatesDeleted.length;
 
@@ -33,8 +37,7 @@ export const DeleteTemplatesModal = ({
         const successMessage = i18n.translate(
           'xpack.idxMgmt.deleteTemplatesModal.successNotificationMessageText',
           {
-            defaultMessage:
-              'Deleted {numSuccesses, number} {numSuccesses, plural, one {template} other {templates}}',
+            defaultMessage: 'Deleted {numSuccesses, plural, one {# template} other {# templates}}',
             values: { numSuccesses: templatesDeleted.length },
           }
         );
@@ -71,10 +74,6 @@ export const DeleteTemplatesModal = ({
   };
 
   const [isDeleteConfirmed, setIsDeleteConfirmed] = useState<boolean>(false);
-
-  if (!numTemplatesToDelete) {
-    return null;
-  }
 
   return (
     <EuiOverlayMask>

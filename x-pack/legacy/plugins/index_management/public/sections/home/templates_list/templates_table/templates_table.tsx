@@ -19,11 +19,7 @@ interface Props {
 const Checkmark = ({ tableCellData }: { tableCellData: object }) => {
   const isChecked = Object.entries(tableCellData).length > 0;
 
-  if (isChecked) {
-    return <EuiIcon type="check" />;
-  }
-
-  return null;
+  return isChecked ? <EuiIcon type="check" /> : null;
 };
 
 export const TemplatesTable: React.FunctionComponent<Props> = ({ templates, reload }) => {
