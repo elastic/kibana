@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiPanel } from '@elastic/eui';
-import React, { useContext } from 'react';
+import { EuiLoadingContent, EuiPanel } from '@elastic/eui';
+import React, { useContext, useState } from 'react';
 import styled, { css } from 'styled-components';
 
 import { useAnomaliesTableData } from '../anomaly/use_anomalies_table_data';
@@ -42,6 +42,7 @@ export const AnomaliesHostTable = React.memo<AnomaliesHostTableProps>(
     });
 
     const hosts = convertAnomaliesToHosts(tableData, hostName);
+
     const interval = getIntervalFromAnomalies(tableData);
     const columns = getAnomaliesHostTableColumnsCurated(
       type,
@@ -53,10 +54,16 @@ export const AnomaliesHostTable = React.memo<AnomaliesHostTableProps>(
     const pagination = {
       pageIndex: 0,
       pageSize: 10,
-      totalItemCount: getSizeFromAnomalies(tableData),
+      totalItemCount: getSizeFromAnomalies(tableData) || -1,
       pageSizeOptions: [5, 10, 20, 50],
       hidePerPageOptions: false,
     };
+
+    const [loadingInitial, setLoadingInitial] = useState(pagination.totalItemCount === -1);
+
+    if (pagination.totalItemCount >= 0 && loadingInitial) {
+      setLoadingInitial(false);
+    }
 
     if (!hasMlUserPermissions(capabilities)) {
       return null;
@@ -64,13 +71,27 @@ export const AnomaliesHostTable = React.memo<AnomaliesHostTableProps>(
       return (
         <Panel>
           <HeaderPanel
-            subtitle={`${i18n.SHOWING}: ${hosts.length.toLocaleString()} ${i18n.ANOMALIES}`}
+            subtitle={
+              !(loading && loadingInitial) &&
+              `${i18n.SHOWING}: ${pagination.totalItemCount.toLocaleString()} ${i18n.ANOMALIES}`
+            }
             title={i18n.ANOMALIES}
           />
 
-          <BasicTable items={hosts} columns={columns} pagination={pagination} sorting={sorting} />
+          {loading && loadingInitial ? (
+            <EuiLoadingContent data-test-subj="InitialLoadingPanelPaginatedTable" lines={10} />
+          ) : (
+            <>
+              <BasicTable
+                items={hosts}
+                columns={columns}
+                pagination={pagination}
+                sorting={sorting}
+              />
 
-          {loading && <Loader overlay size="xl" />}
+              {loading && <Loader overlay size="xl" />}
+            </>
+          )}
         </Panel>
       );
     }
