@@ -36,109 +36,99 @@ export class ElasticsearchMonitorStatesAdapter implements UMMonitorStatesAdapter
   private async runLegacyMonitorStatesRecentCheckGroupsQuery(
     request: any,
     query: any,
-    searchAfter?: any
+    searchAfter?: any,
+    size: number = 50
   ): Promise<LegacyMonitorStatesRecentCheckGroupsQueryResult> {
     const checkGroupsById = new Map<string, string[]>();
-    let count = 0;
-    let afterKey: any;
-    while (checkGroupsById.size < 51) {
-      count++;
-      console.log('execution', count, checkGroupsById.size);
+    let afterKey: any = searchAfter;
 
-      const body = {
-        query: {
-          bool: {
-            filter: [
+    const body = {
+      query: {
+        bool: {
+          filter: [
+            {
+              // We check for summary.up to ensure that the check group
+              // is complete. Summary fields are only present on
+              // completed check groups.
+              exists: {
+                field: 'summary.up',
+              },
+            },
+            query,
+          ],
+        },
+      },
+      sort: [
+        {
+          '@timestamp': 'desc',
+        },
+      ],
+      size: 0,
+      aggs: {
+        monitors: {
+          composite: {
+            size: Math.min(size * 3, 10000),
+            sources: [
               {
-                // We check for summary.up to ensure that the check group
-                // is complete. Summary fields are only present on
-                // completed check groups.
-                exists: {
-                  field: 'summary.up',
+                monitor_id: {
+                  terms: {
+                    field: 'monitor.id',
+                  },
                 },
               },
-              query,
+              {
+                location: {
+                  terms: {
+                    field: 'observer.geo.name',
+                  },
+                },
+              },
             ],
           },
-        },
-        sort: [
-          {
-            '@timestamp': 'desc',
-          },
-        ],
-        size: 0,
-        aggs: {
-          monitors: {
-            composite: {
-              size: 150,
-              sources: [
-                {
-                  monitor_id: {
-                    terms: {
-                      field: 'monitor.id',
-                    },
+          aggs: {
+            top: {
+              top_hits: {
+                sort: [
+                  {
+                    '@timestamp': 'desc',
                   },
+                ],
+                _source: {
+                  includes: ['monitor.check_group', '@timestamp'],
                 },
-                {
-                  location: {
-                    terms: {
-                      field: 'observer.geo.name',
-                    },
-                  },
-                },
-              ],
-            },
-            aggs: {
-              top: {
-                top_hits: {
-                  sort: [
-                    {
-                      '@timestamp': 'desc',
-                    },
-                  ],
-                  _source: {
-                    includes: ['monitor.check_group', '@timestamp'],
-                  },
-                  size: 1,
-                },
+                size: 1,
               },
             },
           },
         },
-      };
-      if (searchAfter) {
-        set(body, 'aggs.monitors.composite.after', searchAfter);
-      }
-      const params = {
-        index: INDEX_NAMES.HEARTBEAT,
-        body,
-      };
-
-      const result = await this.database.search(request, params);
-      afterKey = get<any | null>(result, 'aggregations.monitors.after_key', null);
-      const buckets = get<any>(result, 'aggregations.monitors.buckets', []);
-      let index = 0;
-      while (buckets[index] && checkGroupsById.size < 51) {
-        const id = get<string>(buckets[index], 'key.monitor_id');
-        const checkGroup = get<string>(
-          buckets[index],
-          'top.hits.hits[0]._source.monitor.check_group'
-        );
-        const value = checkGroupsById.get(id);
-        if (!value) {
-          checkGroupsById.set(id, [checkGroup]);
-          // console.log('adding ' + checkGroup + ' to thing');
-        } else if (value.indexOf(checkGroup) < 0) {
-          checkGroupsById.set(id, [...value, checkGroup]);
-        }
-        index++;
-        // console.log('checkgroup size', checkGroupsById.size);
-        // console.log(index);
-        // console.log(buckets[index] === undefined);
-      }
-      // console.log(JSON.stringify(checkGroupsById, null, 2));
+      },
+    };
+    if (afterKey) {
+      set(body, 'aggs.monitors.composite.after', afterKey);
     }
+    const params = {
+      index: INDEX_NAMES.HEARTBEAT,
+      body,
+    };
 
+    const result = await this.database.search(request, params);
+    afterKey = get<any | null>(result, 'aggregations.monitors.after_key', null);
+    const buckets = get<any>(result, 'aggregations.monitors.buckets', []);
+    let index = 0;
+    while (buckets[index]) {
+      const id = get<string>(buckets[index], 'key.monitor_id');
+      const checkGroup = get<string>(
+        buckets[index],
+        'top.hits.hits[0]._source.monitor.check_group'
+      );
+      const value = checkGroupsById.get(id);
+      if (!value) {
+        checkGroupsById.set(id, [checkGroup]);
+      } else if (value.indexOf(checkGroup) < 0) {
+        checkGroupsById.set(id, [...value, checkGroup]);
+      }
+      index++;
+    }
     return {
       checkGroups: flatten(Array.from(checkGroupsById.values())),
       afterKey,
@@ -150,8 +140,10 @@ export class ElasticsearchMonitorStatesAdapter implements UMMonitorStatesAdapter
     dateRangeStart: string,
     dateRangeEnd: string,
     filters?: string | null,
-    searchAfter?: any
+    searchAfter?: any,
+    size: number = 50
   ): Promise<LegacyMonitorStatesQueryResult> {
+    size = Math.min(size, 10000);
     const { query, statusFilter } = getFilteredQueryAndStatusFilter(
       dateRangeStart,
       dateRangeEnd,
@@ -167,10 +159,9 @@ export class ElasticsearchMonitorStatesAdapter implements UMMonitorStatesAdapter
     const { checkGroups, afterKey } = await this.runLegacyMonitorStatesRecentCheckGroupsQuery(
       request,
       query,
-      searchAfter
+      searchAfter,
+      size
     );
-
-    console.log('after key', searchAfter)
     const params = {
       index: INDEX_NAMES.HEARTBEAT,
       body: {
@@ -189,7 +180,7 @@ export class ElasticsearchMonitorStatesAdapter implements UMMonitorStatesAdapter
         aggs: {
           monitors: {
             composite: {
-              size: LEGACY_STATES_QUERY_SIZE,
+              size,
               sources: [
                 {
                   monitor_id: {
@@ -391,21 +382,18 @@ export class ElasticsearchMonitorStatesAdapter implements UMMonitorStatesAdapter
   ): Promise<MonitorSummary[]> {
     const monitors: any[] = [];
     let searchAfter: any | null = null;
-    let ccc = 0;
     do {
       const { result, statusFilter, afterKey } = await this.runLegacyMonitorStatesQuery(
         request,
         dateRangeStart,
         dateRangeEnd,
         filters,
-        searchAfter
+        searchAfter,
+        50
       );
       monitors.push(...this.getMonitorBuckets(result, statusFilter));
-      console.log('monitors length', monitors.length);
       searchAfter = afterKey;
-      console.log('getstates function', ccc)
-      ccc++;
-    } while (searchAfter !== null && monitors.length < LEGACY_STATES_QUERY_SIZE);
+    } while (searchAfter !== null && monitors.length < 50);
 
     const monitorIds: string[] = [];
     const summaries: MonitorSummary[] = monitors.map((monitor: any) => {
@@ -587,6 +575,50 @@ export class ElasticsearchMonitorStatesAdapter implements UMMonitorStatesAdapter
       };
       return map;
     }, {});
+  }
+
+  public async getSummaryCount(
+    request: any,
+    dateRangeStart: string,
+    dateRangeEnd: string,
+    filters?: string | null
+  ): Promise<SnapshotCount> {
+    // TODO: adapt this to the states index in future release
+    // const { count } = await this.database.count(request, { index: 'heartbeat-states-8.0.0' });
+    // return { count };
+
+    const count: SnapshotCount = {
+      up: 0,
+      down: 0,
+      mixed: 0,
+      total: 0,
+    };
+
+    let searchAfter: any | null = null;
+    do {
+      const { afterKey, result, statusFilter } = await this.runLegacyMonitorStatesQuery(
+        request,
+        dateRangeStart,
+        dateRangeEnd,
+        filters,
+        searchAfter,
+        35000
+      );
+      searchAfter = afterKey;
+      this.getMonitorBuckets(result, statusFilter).reduce((acc: SnapshotCount, monitor: any) => {
+        const status = get<string | undefined>(monitor, 'state.value.monitor.status', undefined);
+        if (status === 'up') {
+          acc.up++;
+        } else if (status === 'down') {
+          acc.down++;
+        } else if (status === 'mixed') {
+          acc.mixed++;
+        }
+        acc.total++;
+        return acc;
+      }, count);
+    } while (searchAfter !== null);
+    return count;
   }
 
   public async statesIndexExists(request: any): Promise<StatesIndexStatus> {
