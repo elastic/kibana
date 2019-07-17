@@ -23,8 +23,8 @@ import chrome from 'ui/chrome';
 import { createAnalyticsReporter, setTelemetryReporter } from '../services/telemetry_analytics';
 
 function telemetryInit($injector: any) {
-  const debug = $injector.get('debugUiMetric', false);
   const localStorage = $injector.get('localStorage');
+  const debug = chrome.getInjected('debugUiMetric');
   const $http = $injector.get('$http');
   const basePath = chrome.getBasePath();
   const uiReporter = createAnalyticsReporter({ localStorage, $http, basePath, debug });
