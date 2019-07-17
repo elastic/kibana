@@ -20,7 +20,7 @@
 /* eslint-disable max-classes-per-file */
 
 import '../ui_capabilities.test.mocks';
-import '../../../../../core/public/ui_new_platform.test.mocks';
+jest.mock('ui/new_platform');
 
 import { skip } from 'rxjs/operators';
 import { ContactCardEmbeddable, FilterableEmbeddable } from '../test_samples/index';

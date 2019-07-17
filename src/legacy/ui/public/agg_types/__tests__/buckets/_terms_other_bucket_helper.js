@@ -165,20 +165,16 @@ describe('Terms Agg Other bucket helper', () => {
         filters: {
           filters: {
             '': {
-              'bool': {
-                'must': [{
-                  'exists': {
-                    'field': 'machine.os.raw',
-                  }
-                }],
-                'filter': [],
-                'should': [],
-                'must_not': [
-                  { 'match_phrase': { 'machine.os.raw': { 'query': 'ios' } } },
-                  { 'match_phrase': { 'machine.os.raw': { 'query': 'win xp' } } }
+              bool: {
+                must: [{ exists: { field: 'machine.os.raw' } }],
+                filter: [],
+                should: [],
+                must_not: [
+                  { match_phrase: { 'machine.os.raw': { query: 'ios' } } },
+                  { match_phrase: { 'machine.os.raw': { query: 'win xp' } } }
                 ]
               }
-            }
+            },
           }
         }
       };
@@ -192,39 +188,36 @@ describe('Terms Agg Other bucket helper', () => {
       const expectedResponse = {
         'other-filter': {
           aggs: undefined,
-          'filters': {
-            'filters': {
+          filters: {
+            filters: {
               '-IN': {
-                'bool': {
-                  'must': [
-                    { match_phrase: { 'geo.src': { 'query': 'IN' } } },
-                    {
-                      'exists': {
-                        'field': 'machine.os.raw',
-                      }
-                    }
-                  ], 'filter': [],
-                  'should': [],
-                  'must_not': [
-                    { 'match_phrase': { 'machine.os.raw': { 'query': 'ios' } } },
-                    { 'match_phrase': { 'machine.os.raw': { 'query': 'win xp' } } }
+                bool: {
+                  must: [
+                    { match_phrase: { 'geo.src': { query: 'IN' } } },
+                    { exists: { field: 'machine.os.raw' } }
+                  ],
+                  filter: [],
+                  should: [],
+                  must_not: [
+                    { match_phrase: { 'machine.os.raw': { query: 'ios' } } },
+                    { match_phrase: { 'machine.os.raw': { query: 'win xp' } } }
                   ]
                 }
-              }, '-US': {
-                'bool': {
-                  'must': [
-                    { 'match_phrase': { 'geo.src': { 'query': 'US' } } },
-                    {
-                      'exists': {
-                        'field': 'machine.os.raw',
-                      }
-                    }
-                  ], 'filter': [], 'should': [], 'must_not': [
-                    { 'match_phrase': { 'machine.os.raw': { 'query': 'ios' } } },
-                    { 'match_phrase': { 'machine.os.raw': { 'query': 'win xp' } } }
+              },
+              '-US': {
+                bool: {
+                  must: [
+                    { match_phrase: { 'geo.src': { query: 'US' } } },
+                    { exists: { field: 'machine.os.raw' } }
+                  ],
+                  filter: [],
+                  should: [],
+                  must_not: [
+                    { match_phrase: { 'machine.os.raw': { query: 'ios' } } },
+                    { match_phrase: { 'machine.os.raw': { query: 'win xp' } } }
                   ]
                 }
-              }
+              },
             }
           }
         }

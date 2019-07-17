@@ -21,7 +21,7 @@ import { deepFreeze } from '../../../utils/';
 import { MixedApp } from '../application_service';
 
 const createStartContractMock = (
-  apps: ReadonlyArray<MixedApp> = []
+  apps: readonly MixedApp[] = []
 ): jest.Mocked<CapabilitiesStart> => ({
   availableApps: apps,
   capabilities: deepFreeze({

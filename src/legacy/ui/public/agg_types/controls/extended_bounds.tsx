@@ -61,14 +61,11 @@ function ExtendedBoundsParamEditor({
     });
   }
 
-  useEffect(
-    () => {
-      setValidity(isValid);
+  useEffect(() => {
+    setValidity(isValid);
 
-      return () => setValidity(true);
-    },
-    [isValid]
-  );
+    return () => setValidity(true);
+  }, [isValid]);
 
   const handleChange = (ev: ChangeEvent<HTMLInputElement>, name: string) => {
     setValue({
@@ -78,39 +75,52 @@ function ExtendedBoundsParamEditor({
   };
 
   return (
-    <EuiFormRow fullWidth={true} isInvalid={showValidation ? !isValid : false} error={error}>
-      <EuiFlexGroup gutterSize="s">
-        <EuiFlexItem>
-          <EuiFieldNumber
-            value={isUndefined(value.min) ? '' : value.min}
-            onChange={ev => handleChange(ev, 'min')}
-            onBlur={setTouched}
-            fullWidth={true}
-            isInvalid={showValidation ? !isValid : false}
-            aria-label={minLabel}
-            prepend={
-              <EuiText size="xs">
-                <strong>{minLabel}</strong>
-              </EuiText>
-            }
-          />
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiFieldNumber
-            value={isUndefined(value.max) ? '' : value.max}
-            onChange={ev => handleChange(ev, 'max')}
-            onBlur={setTouched}
-            fullWidth={true}
-            isInvalid={showValidation ? !isValid : false}
-            aria-label={maxLabel}
-            prepend={
-              <EuiText size="xs">
-                <strong>{maxLabel}</strong>
-              </EuiText>
-            }
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
+    <EuiFormRow
+      fullWidth={true}
+      isInvalid={showValidation ? !isValid : false}
+      error={error}
+      compressed
+    >
+      <>
+        {/*
+          We have to put it into React.Fragment to avoid errors:
+          EuiFormRow will try to put "compressed" as attribute into a EuiFlexGroup div
+        */}
+        <EuiFlexGroup gutterSize="s">
+          <EuiFlexItem>
+            <EuiFieldNumber
+              value={isUndefined(value.min) ? '' : value.min}
+              onChange={ev => handleChange(ev, 'min')}
+              onBlur={setTouched}
+              fullWidth={true}
+              isInvalid={showValidation ? !isValid : false}
+              aria-label={minLabel}
+              prepend={
+                <EuiText size="xs">
+                  <strong>{minLabel}</strong>
+                </EuiText>
+              }
+              compressed
+            />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiFieldNumber
+              value={isUndefined(value.max) ? '' : value.max}
+              onChange={ev => handleChange(ev, 'max')}
+              onBlur={setTouched}
+              fullWidth={true}
+              isInvalid={showValidation ? !isValid : false}
+              aria-label={maxLabel}
+              prepend={
+                <EuiText size="xs">
+                  <strong>{maxLabel}</strong>
+                </EuiText>
+              }
+              compressed
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </>
     </EuiFormRow>
   );
 }

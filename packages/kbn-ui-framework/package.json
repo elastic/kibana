@@ -17,7 +17,7 @@
   "dependencies": {
     "classnames": "2.2.6",
     "focus-trap-react": "^3.1.1",
-    "lodash": "npm:@elastic/lodash@3.10.1-kibana1",
+    "lodash": "npm:@elastic/lodash@3.10.1-kibana3",
     "prop-types": "15.6.0",
     "react": "^16.2.0",
     "react-ace": "^5.9.0",
@@ -34,7 +34,7 @@
     "@babel/polyfill": "7.4.4",
     "@elastic/eui": "0.0.55",
     "@kbn/babel-preset": "1.0.0",
-    "autoprefixer": "6.7.7",
+    "autoprefixer": "9.6.1",
     "babel-loader": "8.0.6",
     "brace": "0.11.1",
     "chalk": "^2.4.1",

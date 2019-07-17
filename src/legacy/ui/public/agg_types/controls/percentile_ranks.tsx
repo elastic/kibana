@@ -49,7 +49,7 @@ function PercentileRanksEditor({
       fullWidth={true}
       id={`visEditorPercentileRanksLabel${agg.id}`}
       isInvalid={showValidation ? !isValid : false}
-      className="visEditorSidebar__aggParamFormRow"
+      compressed
       data-test-subj="visEditorPercentileRanks"
     >
       <NumberList

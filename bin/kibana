@@ -24,4 +24,4 @@ fi
 BASE_NODE_OPTIONS="--no-warnings --max-http-header-size=65536"
 PARSED_NODE_OPTIONS="${NODE_OPTIONS:+" $NODE_OPTIONS"}"
 
-NODE_OPTIONS="${BASE_NODE_OPTIONS}${PARSED_NODE_OPTIONS}" NODE_ENV=production BROWSERSLIST_IGNORE_OLD_DATA=true exec "${NODE}" "${DIR}/src/cli" ${@}
+NODE_OPTIONS="${BASE_NODE_OPTIONS}${PARSED_NODE_OPTIONS}" NODE_ENV=production exec "${NODE}" "${DIR}/src/cli" ${@}

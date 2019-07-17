@@ -19,7 +19,7 @@ export type GlobalSelectors<GlobalState, LocalSelectors extends Selectors> = {
   [selectorName in keyof LocalSelectors]: Selector<
     GlobalState,
     ReturnType<LocalSelectors[selectorName]>
-  >
+  >;
 };
 
 export const globalizeSelector = <
@@ -66,5 +66,5 @@ export const bindPlainActionCreators = <WrappedActionCreators extends ActionCrea
   actionCreators: WrappedActionCreators
 ) => (dispatch: Dispatch) =>
   (bindActionCreators(actionCreators, dispatch) as unknown) as {
-    [P in keyof WrappedActionCreators]: PlainActionCreator<WrappedActionCreators[P]>
+    [P in keyof WrappedActionCreators]: PlainActionCreator<WrappedActionCreators[P]>;
   };

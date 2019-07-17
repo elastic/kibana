@@ -33,7 +33,7 @@ export interface NavControl {
   name: string;
   order: number;
   side: NavControlSide;
-  render: (targetDomElement: HTMLDivElement) => (() => void);
+  render: (targetDomElement: HTMLDivElement) => () => void;
 }
 
 export type ChromeHeaderNavControlsRegistry = UIRegistry<NavControl> &

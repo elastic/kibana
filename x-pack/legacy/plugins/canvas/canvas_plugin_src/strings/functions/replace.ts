@@ -7,23 +7,24 @@
 import { i18n } from '@kbn/i18n';
 import { replace } from '../../functions/common/replace';
 import { FunctionHelp } from '.';
-import { FunctionFactory } from '../../functions/types';
+import { FunctionFactory } from '../../../types';
+import { JS } from '../constants';
 
 export const help: FunctionHelp<FunctionFactory<typeof replace>> = {
   help: i18n.translate('xpack.canvas.functions.replaceImageHelpText', {
-    defaultMessage: 'Use a regular expression to replace parts of a string',
+    defaultMessage: 'Use a regular expression to replace parts of a string.',
   }),
   args: {
     pattern: i18n.translate('xpack.canvas.functions.replace.args.patternHelpText', {
       defaultMessage:
-        'The text or pattern of a {js} regular expression, eg "{example}". You can use capture groups here.',
+        'The text or pattern of a {JS} regular expression. For example, {example}. You can use capturing groups here.',
       values: {
-        js: 'JavaScript',
-        example: '[aeiou]',
+        JS,
+        example: '`"[aeiou]"`',
       },
     }),
     flags: i18n.translate('xpack.canvas.functions.replace.args.flagsHelpText', {
-      defaultMessage: 'Specify flags. See {url} for reference.',
+      defaultMessage: 'Specify flags. See {url}.',
       values: {
         url:
           'https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/RegExp',
@@ -31,9 +32,9 @@ export const help: FunctionHelp<FunctionFactory<typeof replace>> = {
     }),
     replacement: i18n.translate('xpack.canvas.functions.replace.args.replacementHelpText', {
       defaultMessage:
-        'The replacement for the matching parts of string. Capture groups can be accessed by their index, eg {example}',
+        'The replacement for the matching parts of string. Capturing groups can be accessed by their index. For example, {example}.',
       values: {
-        example: '$1',
+        example: '`"$1"`',
       },
     }),
   },

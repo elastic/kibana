@@ -17,10 +17,11 @@
  * under the License.
  */
 
+import { set } from 'lodash';
+import { dateHistogramInterval } from '../../../../../../data/common';
 import { getBucketSize } from '../../helpers/get_bucket_size';
 import { offsetTime } from '../../offset_time';
 import { getIntervalAndTimefield } from '../../get_interval_and_timefield';
-import { set } from 'lodash';
 
 export function dateHistogram(req, panel, series, esQueryConfig, indexPatternObject, capabilities) {
   return next => doc => {
@@ -31,13 +32,13 @@ export function dateHistogram(req, panel, series, esQueryConfig, indexPatternObj
 
     set(doc, `aggs.${series.id}.aggs.timeseries.date_histogram`, {
       field: timeField,
-      interval: intervalString,
       min_doc_count: 0,
       time_zone: timezone,
       extended_bounds: {
         min: from.valueOf(),
         max: to.valueOf(),
       },
+      ...dateHistogramInterval(intervalString),
     });
     set(doc, `aggs.${series.id}.meta`, {
       timeField,
@@ -45,6 +46,7 @@ export function dateHistogram(req, panel, series, esQueryConfig, indexPatternObj
       bucketSize,
       seriesId: series.id,
     });
+
     return next(doc);
   };
 }

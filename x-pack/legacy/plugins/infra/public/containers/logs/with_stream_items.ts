@@ -116,12 +116,9 @@ const createLogEntryStreamItem = (
  */
 export const ReduxSourceIdBridge = withStreamItems(
   ({ setSourceId, sourceId }: { setSourceId: (sourceId: string) => void; sourceId: string }) => {
-    useEffect(
-      () => {
-        setSourceId(sourceId);
-      },
-      [setSourceId, sourceId]
-    );
+    useEffect(() => {
+      setSourceId(sourceId);
+    }, [setSourceId, sourceId]);
 
     return null;
   }

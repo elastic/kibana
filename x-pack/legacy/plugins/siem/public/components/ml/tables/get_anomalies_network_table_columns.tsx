@@ -5,7 +5,8 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
+import moment from 'moment';
 import { Columns } from '../../load_more_table';
 import { Anomaly, NarrowDateRange, AnomaliesByNetwork } from '../types';
 import { getRowItemDraggable } from '../../tables/helpers';
@@ -14,7 +15,12 @@ import { createCompoundNetworkKey } from './create_compound_key';
 import { IPDetailsLink } from '../../links';
 
 import * as i18n from './translations';
-import { AnomalyScore } from '../score/anomaly_score';
+import { getEntries } from '../get_entries';
+import { DraggableScore } from '../score/draggable_score';
+import { createExplorerLink } from '../links/create_explorer_link';
+import { LocalizedDateTooltip } from '../../localized_date_tooltip';
+import { PreferenceFormattedDate } from '../../formatted_date';
+import { NetworkType } from '../../../store/network/model';
 
 export const getAnomaliesNetworkTableColumns = (
   startDate: number,
@@ -24,9 +30,10 @@ export const getAnomaliesNetworkTableColumns = (
 ): [
   Columns<AnomaliesByNetwork['ip'], AnomaliesByNetwork>,
   Columns<Anomaly['severity'], AnomaliesByNetwork>,
+  Columns<Anomaly['jobId'], AnomaliesByNetwork>,
   Columns<Anomaly['entityValue'], AnomaliesByNetwork>,
   Columns<Anomaly['influencers'], AnomaliesByNetwork>,
-  Columns<Anomaly['jobId']>
+  Columns<Anomaly['time'], AnomaliesByNetwork>
 ] => [
   {
     name: i18n.NETWORK_NAME,
@@ -41,16 +48,25 @@ export const getAnomaliesNetworkTableColumns = (
       }),
   },
   {
+    name: i18n.DETECTOR,
+    field: 'anomaly.jobId',
+    sortable: true,
+    render: (jobId, anomaliesByHost) => (
+      <EuiLink
+        href={`${createExplorerLink(anomaliesByHost.anomaly, startDate, endDate)}`}
+        target="_blank"
+      >
+        {jobId}
+      </EuiLink>
+    ),
+  },
+  {
     name: i18n.SCORE,
     field: 'anomaly.severity',
     sortable: true,
     render: (_, anomaliesByNetwork) => (
-      <AnomalyScore
-        startDate={startDate}
-        endDate={endDate}
-        jobKey={`anomalies-network-table-severity-${createCompoundNetworkKey(anomaliesByNetwork)}`}
-        narrowDateRange={narrowDateRange}
-        interval={interval}
+      <DraggableScore
+        id={`anomalies-network-table-severity-${createCompoundNetworkKey(anomaliesByNetwork)}`}
         score={anomaliesByNetwork.anomaly}
       />
     ),
@@ -75,8 +91,9 @@ export const getAnomaliesNetworkTableColumns = (
     render: (influencers, anomaliesByNetwork) => (
       <EuiFlexGroup direction="column" gutterSize="none" responsive={false}>
         {influencers.map(influencer => {
-          const entityName = Object.keys(influencer)[0];
-          const entityValue = Object.values(influencer)[0];
+          const [key, value] = getEntries(influencer);
+          const entityName = key != null ? key : '';
+          const entityValue = value != null ? value : '';
           return (
             <EuiFlexItem
               key={`${entityName}-${entityValue}-${createCompoundNetworkKey(anomaliesByNetwork)}`}
@@ -96,8 +113,30 @@ export const getAnomaliesNetworkTableColumns = (
     ),
   },
   {
-    name: i18n.DETECTOR,
-    field: 'anomaly.jobId',
+    name: i18n.TIME_STAMP,
+    field: 'anomaly.time',
     sortable: true,
+    render: time => (
+      <LocalizedDateTooltip date={moment(new Date(time)).toDate()}>
+        <PreferenceFormattedDate value={new Date(time)} />
+      </LocalizedDateTooltip>
+    ),
   },
 ];
+
+export const getAnomaliesNetworkTableColumnsCurated = (
+  pageType: NetworkType,
+  startDate: number,
+  endDate: number,
+  interval: string,
+  narrowDateRange: NarrowDateRange
+) => {
+  const columns = getAnomaliesNetworkTableColumns(startDate, endDate, interval, narrowDateRange);
+
+  // Columns to exclude from ip details pages
+  if (pageType === 'details') {
+    return columns.filter(column => column.name !== i18n.NETWORK_NAME);
+  } else {
+    return columns;
+  }
+};

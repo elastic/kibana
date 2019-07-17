@@ -5,7 +5,8 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
+import moment from 'moment';
 import { Columns } from '../../load_more_table';
 import { AnomaliesByHost, Anomaly, NarrowDateRange } from '../types';
 import { getRowItemDraggable } from '../../tables/helpers';
@@ -14,7 +15,12 @@ import { createCompoundHostKey } from './create_compound_key';
 import { HostDetailsLink } from '../../links';
 
 import * as i18n from './translations';
-import { AnomalyScore } from '../score/anomaly_score';
+import { getEntries } from '../get_entries';
+import { DraggableScore } from '../score/draggable_score';
+import { createExplorerLink } from '../links/create_explorer_link';
+import { LocalizedDateTooltip } from '../../localized_date_tooltip';
+import { PreferenceFormattedDate } from '../../formatted_date';
+import { HostsType } from '../../../store/hosts/model';
 
 export const getAnomaliesHostTableColumns = (
   startDate: number,
@@ -24,9 +30,10 @@ export const getAnomaliesHostTableColumns = (
 ): [
   Columns<AnomaliesByHost['hostName'], AnomaliesByHost>,
   Columns<Anomaly['severity'], AnomaliesByHost>,
+  Columns<Anomaly['jobId'], AnomaliesByHost>,
   Columns<Anomaly['entityValue'], AnomaliesByHost>,
   Columns<Anomaly['influencers'], AnomaliesByHost>,
-  Columns<Anomaly['jobId']>
+  Columns<Anomaly['time'], AnomaliesByHost>
 ] => [
   {
     name: i18n.HOST_NAME,
@@ -43,16 +50,25 @@ export const getAnomaliesHostTableColumns = (
       }),
   },
   {
+    name: i18n.DETECTOR,
+    field: 'anomaly.jobId',
+    sortable: true,
+    render: (jobId, anomaliesByHost) => (
+      <EuiLink
+        href={`${createExplorerLink(anomaliesByHost.anomaly, startDate, endDate)}`}
+        target="_blank"
+      >
+        {jobId}
+      </EuiLink>
+    ),
+  },
+  {
     name: i18n.SCORE,
     field: 'anomaly.severity',
     sortable: true,
     render: (_, anomaliesByHost) => (
-      <AnomalyScore
-        startDate={startDate}
-        endDate={endDate}
-        jobKey={`anomalies-host-table-severity-${createCompoundHostKey(anomaliesByHost)}`}
-        narrowDateRange={narrowDateRange}
-        interval={interval}
+      <DraggableScore
+        id={`anomalies-host-table-severity-${createCompoundHostKey(anomaliesByHost)}`}
         score={anomaliesByHost.anomaly}
       />
     ),
@@ -77,8 +93,9 @@ export const getAnomaliesHostTableColumns = (
     render: (influencers, anomaliesByHost) => (
       <EuiFlexGroup direction="column" gutterSize="none" responsive={false}>
         {influencers.map(influencer => {
-          const entityName = Object.keys(influencer)[0];
-          const entityValue = Object.values(influencer)[0];
+          const [key, value] = getEntries(influencer);
+          const entityName = key != null ? key : '';
+          const entityValue = value != null ? value : '';
           return (
             <EuiFlexItem
               key={`${entityName}-${entityValue}-${createCompoundHostKey(anomaliesByHost)}`}
@@ -102,8 +119,30 @@ export const getAnomaliesHostTableColumns = (
     ),
   },
   {
-    name: i18n.DETECTOR,
-    field: 'anomaly.jobId',
+    name: i18n.TIME_STAMP,
+    field: 'anomaly.time',
     sortable: true,
+    render: time => (
+      <LocalizedDateTooltip date={moment(new Date(time)).toDate()}>
+        <PreferenceFormattedDate value={new Date(time)} />
+      </LocalizedDateTooltip>
+    ),
   },
 ];
+
+export const getAnomaliesHostTableColumnsCurated = (
+  pageType: HostsType,
+  startDate: number,
+  endDate: number,
+  interval: string,
+  narrowDateRange: NarrowDateRange
+) => {
+  const columns = getAnomaliesHostTableColumns(startDate, endDate, interval, narrowDateRange);
+
+  // Columns to exclude from host details pages
+  if (pageType === 'details') {
+    return columns.filter(column => column.name !== i18n.HOST_NAME);
+  } else {
+    return columns;
+  }
+};

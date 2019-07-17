@@ -69,17 +69,14 @@ export const MetricsExplorerChartContextMenu = injectI18n(
   ({ intl, onFilter, options, series, source, timeRange, uiCapabilities }: Props) => {
     const [isPopoverOpen, setPopoverState] = useState(false);
     const supportFiltering = options.groupBy != null && onFilter != null;
-    const handleFilter = useCallback(
-      () => {
-        // onFilter needs check for Typescript even though it's
-        // covered by supportFiltering variable
-        if (supportFiltering && onFilter) {
-          onFilter(`${options.groupBy}: "${series.id}"`);
-        }
-        setPopoverState(false);
-      },
-      [supportFiltering, options.groupBy, series.id, onFilter]
-    );
+    const handleFilter = useCallback(() => {
+      // onFilter needs check for Typescript even though it's
+      // covered by supportFiltering variable
+      if (supportFiltering && onFilter) {
+        onFilter(`${options.groupBy}: "${series.id}"`);
+      }
+      setPopoverState(false);
+    }, [supportFiltering, options.groupBy, series.id, onFilter]);
 
     const tsvbUrl = createTSVBLink(source, options, series, timeRange);
 

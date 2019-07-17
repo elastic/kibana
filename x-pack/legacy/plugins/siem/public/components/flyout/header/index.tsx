@@ -48,21 +48,19 @@ interface StateReduxProps {
 
 interface DispatchProps {
   associateNote: (noteId: string) => void;
-  applyDeltaToWidth?: (
-    {
-      id,
-      delta,
-      bodyClientWidthPixels,
-      maxWidthPercent,
-      minWidthPixels,
-    }: {
-      id: string;
-      delta: number;
-      bodyClientWidthPixels: number;
-      maxWidthPercent: number;
-      minWidthPixels: number;
-    }
-  ) => void;
+  applyDeltaToWidth?: ({
+    id,
+    delta,
+    bodyClientWidthPixels,
+    maxWidthPercent,
+    minWidthPixels,
+  }: {
+    id: string;
+    delta: number;
+    bodyClientWidthPixels: number;
+    maxWidthPercent: number;
+    minWidthPixels: number;
+  }) => void;
   createTimeline: ActionCreator<{ id: string; show?: boolean }>;
   toggleLock: ActionCreator<{ linkToId: InputsModelId }>;
   updateDescription: ActionCreator<{ id: string; description: string }>;

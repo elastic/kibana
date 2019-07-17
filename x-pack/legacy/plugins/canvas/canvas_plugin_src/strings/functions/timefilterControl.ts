@@ -7,24 +7,21 @@
 import { i18n } from '@kbn/i18n';
 import { timefilterControl } from '../../functions/common/timefilterControl';
 import { FunctionHelp } from '.';
-import { FunctionFactory } from '../../functions/types';
+import { FunctionFactory } from '../../../types';
 
 export const help: FunctionHelp<FunctionFactory<typeof timefilterControl>> = {
   help: i18n.translate('xpack.canvas.functions.timefilterControlHelpText', {
-    defaultMessage: 'Configure a {timefilter} control element',
-    values: {
-      timefilter: 'timefilter',
-    },
+    defaultMessage: 'Configures a time filter control element.',
   }),
   args: {
     column: i18n.translate('xpack.canvas.functions.timefilterControl.args.columnHelpText', {
-      defaultMessage: 'The column or field to attach the filter to',
+      defaultMessage: 'The column or field that you want to filter.',
     }),
     compact: i18n.translate('xpack.canvas.functions.timefilterControl.args.compactHelpText', {
-      defaultMessage: 'Show the time filter as a button that triggers a popover',
+      defaultMessage: 'Shows the time filter as a button, which triggers a popover.',
     }),
     filterGroup: i18n.translate('xpack.canvas.functions.dropdownControl.args.filterGroupHelpText', {
-      defaultMessage: 'Group name for the filter',
+      defaultMessage: 'The group name for the filter.',
     }),
   },
 };

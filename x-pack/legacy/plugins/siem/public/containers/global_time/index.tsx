@@ -15,19 +15,17 @@ import { InputsModelId } from '../../store/inputs/constants';
 interface GlobalTimeArgs {
   from: number;
   to: number;
-  setQuery: (
-    {
-      id,
-      inspect,
-      loading,
-      refetch,
-    }: {
-      id: string;
-      inspect: inputsModel.InspectQuery | null;
-      loading: boolean;
-      refetch: inputsModel.Refetch;
-    }
-  ) => void;
+  setQuery: ({
+    id,
+    inspect,
+    loading,
+    refetch,
+  }: {
+    id: string;
+    inspect: inputsModel.InspectQuery | null;
+    loading: boolean;
+    refetch: inputsModel.Refetch;
+  }) => void;
 }
 
 interface OwnProps {

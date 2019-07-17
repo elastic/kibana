@@ -28,6 +28,11 @@ import {
   RollupPageProvider,
   UptimePageProvider,
   LicenseManagementPageProvider,
+  IndexManagementPageProvider,
+  IndexLifecycleManagementPageProvider,
+  SnapshotRestorePageProvider,
+  CrossClusterReplicationPageProvider,
+  RemoteClustersPageProvider,
 } from './page_objects';
 
 import {
@@ -104,14 +109,19 @@ export default async function ({ readConfigFile }) {
       resolve(__dirname, './apps/status_page'),
       resolve(__dirname, './apps/timelion'),
       resolve(__dirname, './apps/upgrade_assistant'),
-      resolve(__dirname, './apps/code'),
+      // resolve(__dirname, './apps/code'),
       resolve(__dirname, './apps/visualize'),
       resolve(__dirname, './apps/uptime'),
       resolve(__dirname, './apps/saved_objects_management'),
       resolve(__dirname, './apps/dev_tools'),
       resolve(__dirname, './apps/apm'),
       resolve(__dirname, './apps/index_patterns'),
-      resolve(__dirname, './apps/license_management')
+      resolve(__dirname, './apps/license_management'),
+      resolve(__dirname, './apps/index_management'),
+      resolve(__dirname, './apps/index_lifecycle_management'),
+      resolve(__dirname, './apps/snapshot_restore'),
+      resolve(__dirname, './apps/cross_cluster_replication'),
+      resolve(__dirname, './apps/remote_clusters'),
     ],
 
     // define the name and providers for services that should be
@@ -178,7 +188,12 @@ export default async function ({ readConfigFile }) {
       code: CodeHomePageProvider,
       uptime: UptimePageProvider,
       rollup: RollupPageProvider,
-      licenseManagement: LicenseManagementPageProvider
+      licenseManagement: LicenseManagementPageProvider,
+      indexManagement: IndexManagementPageProvider,
+      indexLifecycleManagement: IndexLifecycleManagementPageProvider,
+      snapshotRestore: SnapshotRestorePageProvider,
+      crossClusterReplication: CrossClusterReplicationPageProvider,
+      remoteClusters: RemoteClustersPageProvider
     },
 
     servers: kibanaFunctionalConfig.get('servers'),
@@ -196,6 +211,7 @@ export default async function ({ readConfigFile }) {
         '--status.allowAnonymous=true',
         '--server.uuid=5b2de169-2785-441b-ae8c-186a1936b17d',
         '--xpack.maps.showMapsInspectorAdapter=true',
+        '--xpack.maps.preserveDrawingBuffer=true',
         '--xpack.telemetry.banner=false',
         '--xpack.reporting.queue.pollInterval=3000', // make it explicitly the default
         '--xpack.reporting.csv.maxSizeBytes=2850', // small-ish limit for cutting off a 1999 byte report
@@ -279,6 +295,26 @@ export default async function ({ readConfigFile }) {
       licenseManagement: {
         pathname: '/app/kibana',
         hash: '/management/elasticsearch/license_management',
+      },
+      indexManagement: {
+        pathname: '/app/kibana',
+        hash: '/management/elasticsearch/index_management',
+      },
+      indexLifecycleManagement: {
+        pathname: '/app/kibana',
+        hash: '/management/elasticsearch/index_lifecycle_management',
+      },
+      snapshotRestore: {
+        pathname: '/app/kibana',
+        hash: '/management/elasticsearch/snapshot_restore',
+      },
+      crossClusterReplication: {
+        pathname: '/app/kibana',
+        hash: '/management/elasticsearch/cross_cluster_replication',
+      },
+      remoteClusters: {
+        pathname: '/app/kibana',
+        hash: '/management/elasticsearch/remote_clusters',
       },
       apm: {
         pathname: '/app/apm',

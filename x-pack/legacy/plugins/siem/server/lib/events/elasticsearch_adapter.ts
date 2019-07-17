@@ -22,7 +22,6 @@ import {
   DetailItem,
   EcsEdges,
   EventsData,
-  KpiItem,
   LastEventTimeData,
   TimelineData,
   TimelineDetailsData,
@@ -66,13 +65,6 @@ export class ElasticsearchEventsAdapter implements EventsAdapter {
       dsl
     );
 
-    const kpiEventType: KpiItem[] =
-      response.aggregations && response.aggregations.count_event_type
-        ? response.aggregations.count_event_type.buckets.map(item => ({
-            value: item.key,
-            count: item.doc_count,
-          }))
-        : [];
     const { limit } = options.pagination;
     const totalCount = getOr(0, 'hits.total.value', response);
     const hits = response.hits.hits;
@@ -90,7 +82,6 @@ export class ElasticsearchEventsAdapter implements EventsAdapter {
     return {
       inspect,
       edges,
-      kpiEventType,
       pageInfo: { hasNextPage, endCursor: lastCursor },
       totalCount,
     };
@@ -187,7 +178,7 @@ export class ElasticsearchEventsAdapter implements EventsAdapter {
 }
 
 export const formatEventsData = (
-  fields: ReadonlyArray<string>,
+  fields: readonly string[],
   hit: EventHit,
   fieldMap: Readonly<Record<string, string>>
 ) =>
@@ -211,8 +202,8 @@ export const formatEventsData = (
   );
 
 export const formatTimelineData = (
-  dataFields: ReadonlyArray<string>,
-  ecsFields: ReadonlyArray<string>,
+  dataFields: readonly string[],
+  ecsFields: readonly string[],
   hit: EventHit,
   fieldMap: Readonly<Record<string, string>>
 ) =>
@@ -251,8 +242,8 @@ const mergeTimelineFieldsWithHit = <T>(
   flattenedFields: T,
   fieldMap: Readonly<Record<string, string>>,
   hit: { _source: {} },
-  dataFields: ReadonlyArray<string>,
-  ecsFields: ReadonlyArray<string>
+  dataFields: readonly string[],
+  ecsFields: readonly string[]
 ) => {
   if (fieldMap[fieldName] != null || dataFields.includes(fieldName)) {
     const esField = dataFields.includes(fieldName) ? fieldName : fieldMap[fieldName];
