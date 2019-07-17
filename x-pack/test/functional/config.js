@@ -84,6 +84,7 @@ export default async function ({ readConfigFile }) {
         '--stats.maximumWaitTimeForAllCollectorsInS=0',
         '--xpack.security.encryptionKey="wuGNaIhoMpk5sO4UBxgr3NyW1sFcLgIf"', // server restarts should not invalidate active sessions
         '--xpack.encrypted_saved_objects.encryptionKey="DkdXazszSCYexXqz4YktBGHCRkV6hyNK"',
+        '--xpack.code.ui.enabled=true', // Enable Code UI just in tests
         '--timelion.ui.enabled=true',
       ],
     },
