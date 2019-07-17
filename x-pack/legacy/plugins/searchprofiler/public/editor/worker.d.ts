@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-declare module '!!raw-loader!./worker.js'
+declare module '!!raw-loader!./worker.js';
