@@ -647,6 +647,7 @@ function discoverController(
           $scope.updateTime();
         }
 
+        init.complete = true;
         $state.replace();
       });
   });
@@ -697,6 +698,9 @@ function discoverController(
   }
 
   $scope.opts.fetch = $scope.fetch = function () {
+    // ignore requests to fetch before the app inits
+    if (!init.complete) return;
+
     $scope.fetchError = undefined;
 
     $scope.updateTime();
@@ -826,7 +830,7 @@ function discoverController(
     kbnUrl.change('/discover');
   };
 
-  async function getXOpaqueIdPrefix() {
+  const getXOpaqueIdPrefix = _.once(async () => {
     try {
       const ShieldUser = $injector.get('ShieldUser');
       const user = await ShieldUser.getCurrent().$promise;
@@ -834,7 +838,7 @@ function discoverController(
     } catch (e) {
       return '';
     }
-  }
+  });
 
   async function getXOpaqueId() {
     const prefix = await getXOpaqueIdPrefix();
