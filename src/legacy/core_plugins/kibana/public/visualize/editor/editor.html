@@ -33,7 +33,7 @@
     show-query-bar is set to "true".
   -->
   <kbn-top-nav-v2 
-    name="visualize" 
+    app-name="'visualize'"
     config="topNavMenu"
     show-search-bar="true"
     show-query-bar="true" 
@@ -45,7 +45,6 @@
     query="state.query"
     screen-title="state.vis.title"
     on-query-submit="updateQueryAndFetch"
-    app-name="'visualize'"
     index-patterns="[indexPattern]"
     filters="filters"
     on-filters-updated="onFiltersUpdated"

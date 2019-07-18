@@ -4,7 +4,7 @@
 >
   <!-- Local nav. -->
   <kbn-top-nav-v2 
-    name="dashboard" 
+    app-name="'dashboard'"
     config="topNavMenu" 
     
     show-search-bar="chrome.getVisible()"
@@ -14,7 +14,6 @@
     query="model.query"
     screen-title="screenTitle"
     on-query-submit="updateQueryAndFetch"
-    app-name="'dashboard'"
     index-patterns="indexPatterns"
     filters="model.filters"
     on-filters-updated="onFiltersUpdated"

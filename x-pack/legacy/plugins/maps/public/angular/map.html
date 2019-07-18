@@ -2,13 +2,12 @@
   <div id="maps-top-nav">
     <div>
       <kbn-top-nav-v2 
-        name="map" 
+        app-name="'maps'"
         config="topNavMenu"
         show-search-bar="chrome.getVisible()"
         show-filter-bar="false"
         show-date-picker="showDatePicker"
         query="query"
-        app-name="'maps'"
         on-query-submit="updateQueryAndDispatch"
         index-patterns="indexPatterns"
         date-range-from="time.from"
