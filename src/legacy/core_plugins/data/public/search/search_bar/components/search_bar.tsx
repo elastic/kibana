@@ -108,6 +108,37 @@ class SearchBarUI extends Component<SearchBarProps, State> {
     return this.props.showFilterBar && this.props.filters && this.props.indexPatterns;
   }
 
+  private getFilterTriggerButton() {
+    const filtersAppliedText = this.props.intl.formatMessage({
+      id: 'data.search.searchBar.filtersButtonFiltersAppliedTitle',
+      defaultMessage: 'filters applied.',
+    });
+    const clickToShowOrHideText = this.state.isFiltersVisible
+      ? this.props.intl.formatMessage({
+          id: 'data.search.searchBar.filtersButtonClickToShowTitle',
+          defaultMessage: 'Select to hide',
+        })
+      : this.props.intl.formatMessage({
+          id: 'data.search.searchBar.filtersButtonClickToHideTitle',
+          defaultMessage: 'Select to show',
+        });
+
+    const filterCount = this.getFilterLength();
+    return (
+      <EuiFilterButton
+        onClick={this.toggleFiltersVisible}
+        isSelected={this.state.isFiltersVisible}
+        hasActiveFilters={this.state.isFiltersVisible}
+        numFilters={filterCount ? this.getFilterLength() : undefined}
+        aria-controls="GlobalFilterGroup"
+        aria-expanded={!!this.state.isFiltersVisible}
+        title={`${filterCount ? filtersAppliedText : ''} ${clickToShowOrHideText}`}
+      >
+        Filters
+      </EuiFilterButton>
+    );
+  }
+
   public setFilterBarHeight = () => {
     requestAnimationFrame(() => {
       const height =
@@ -144,43 +175,6 @@ class SearchBarUI extends Component<SearchBarProps, State> {
   }
 
   public render() {
-    const filtersAppliedText = this.props.intl.formatMessage({
-      id: 'data.search.searchBar.filtersButtonFiltersAppliedTitle',
-      defaultMessage: 'filters applied.',
-    });
-    const clickToShowOrHideText = this.state.isFiltersVisible
-      ? this.props.intl.formatMessage({
-          id: 'data.search.searchBar.filtersButtonClickToShowTitle',
-          defaultMessage: 'Select to hide',
-        })
-      : this.props.intl.formatMessage({
-          id: 'data.search.searchBar.filtersButtonClickToHideTitle',
-          defaultMessage: 'Select to show',
-        });
-
-    const filterCount = this.getFilterLength();
-    const filterTriggerButton = (
-      <EuiFilterButton
-        onClick={this.toggleFiltersVisible}
-        isSelected={this.state.isFiltersVisible}
-        hasActiveFilters={this.state.isFiltersVisible}
-        numFilters={filterCount ? this.getFilterLength() : undefined}
-        aria-controls="GlobalFilterGroup"
-        aria-expanded={!!this.state.isFiltersVisible}
-        title={
-          filterCount
-            ? `${this.getFilterLength()} ${filtersAppliedText} ${clickToShowOrHideText}`
-            : ''
-        }
-      >
-        Filters
-      </EuiFilterButton>
-    );
-
-    const classes = classNames('globalFilterGroup__wrapper', {
-      'globalFilterGroup__wrapper-isVisible': this.state.isFiltersVisible,
-    });
-
     let queryBar;
     if (this.shouldRenderQueryBar()) {
       queryBar = (
@@ -191,7 +185,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
           appName={this.props.appName}
           indexPatterns={this.props.indexPatterns}
           store={this.props.store!}
-          prepend={this.props.showFilterBar ? filterTriggerButton : ''}
+          prepend={this.props.showFilterBar ? this.getFilterTriggerButton() : ''}
           showDatePicker={this.props.showDatePicker}
           showQueryInput={this.props.showQueryInput}
           dateRangeFrom={this.props.dateRangeFrom}
@@ -206,13 +200,16 @@ class SearchBarUI extends Component<SearchBarProps, State> {
 
     let filterBar;
     if (this.shouldRenderFilterBar()) {
+      const filterGroupClasses = classNames('globalFilterGroup__wrapper', {
+        'globalFilterGroup__wrapper-isVisible': this.state.isFiltersVisible,
+      });
       filterBar = (
         <div
           id="GlobalFilterGroup"
           ref={node => {
             this.filterBarWrapperRef = node;
           }}
-          className={classes}
+          className={filterGroupClasses}
         >
           <div
             ref={node => {
