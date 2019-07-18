@@ -102,9 +102,6 @@ export const xyChartRenderer: RenderFunction<XYChartProps> = {
 };
 
 export function XYChart({ data, args }: XYChartProps) {
-  if (data.rows.length === 0) {
-    return <p>No data found</p>;
-  }
   const { legend, x, y, splitSeriesAccessors, seriesType } = args;
   // TODO: Stop mapping data once elastic-charts allows axis naming
   // https://github.com/elastic/elastic-charts/issues/245
