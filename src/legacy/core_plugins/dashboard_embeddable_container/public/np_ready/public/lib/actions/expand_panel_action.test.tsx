@@ -32,8 +32,11 @@ import {
 } from '../../../../../../embeddable_api/public/np_ready/public/lib/test_samples/embeddables/contact_card/contact_card_embeddable';
 
 const __embeddableFactories = new Map<string, EmbeddableFactory>();
-__embeddableFactories.set(CONTACT_CARD_EMBEDDABLE, new ContactCardEmbeddableFactory());
-const getFactory: GetEmbeddableFactory = (id: string) => __embeddableFactories.get(id);
+__embeddableFactories.set(
+  CONTACT_CARD_EMBEDDABLE,
+  new ContactCardEmbeddableFactory({} as any, (() => null) as any)
+);
+const getEmbeddableFactory: GetEmbeddableFactory = (id: string) => __embeddableFactories.get(id);
 
 let container: DashboardContainer;
 let embeddable: ContactCardEmbeddable;
@@ -48,7 +51,7 @@ beforeEach(async () => {
         }),
       },
     }),
-    getFactory
+    { getEmbeddableFactory } as any
   );
 
   const contactCardEmbeddable = await container.addNewEmbeddable<
@@ -80,7 +83,10 @@ test('Is not compatible when embeddable is not in a dashboard container', async 
   const action = new ExpandPanelAction();
   expect(
     await action.isCompatible({
-      embeddable: new ContactCardEmbeddable({ firstName: 'sue', id: '123' }),
+      embeddable: new ContactCardEmbeddable(
+        { firstName: 'sue', id: '123' },
+        { execAction: (() => null) as any }
+      ),
     })
   ).toBe(false);
 });

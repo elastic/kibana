@@ -44,14 +44,16 @@ test('DashboardContainer in edit mode shows edit mode actions', async () => {
   const editModeAction = new EditModeAction();
   setup.registerAction(editModeAction);
   setup.attachAction(CONTEXT_MENU_TRIGGER, editModeAction.id);
-  setup.registerEmbeddableFactory(CONTACT_CARD_EMBEDDABLE, new ContactCardEmbeddableFactory());
+  setup.registerEmbeddableFactory(
+    CONTACT_CARD_EMBEDDABLE,
+    new ContactCardEmbeddableFactory({} as any, (() => null) as any)
+  );
 
   const start = doStart();
 
-  const container = new DashboardContainer(
-    getSampleDashboardInput({ viewMode: ViewMode.VIEW }),
-    start.getEmbeddableFactory
-  );
+  const container = new DashboardContainer(getSampleDashboardInput({ viewMode: ViewMode.VIEW }), {
+    getEmbeddableFactory: start.getEmbeddableFactory,
+  } as any);
 
   const embeddable = await container.addNewEmbeddable<
     ContactCardEmbeddableInput,

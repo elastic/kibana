@@ -48,10 +48,7 @@ export class DashboardContainerFactory extends EmbeddableFactory<
   public readonly type = DASHBOARD_CONTAINER_TYPE;
   private allowEditing: boolean;
 
-  constructor(
-    private readonly options: DashboardOptions,
-    private readonly viewportProps: ViewportProps
-  ) {
+  constructor(options: DashboardOptions, private readonly viewportProps: ViewportProps) {
     super({ savedObjectMetaData: options.savedObjectMetaData });
     this.allowEditing = options.capabilities.createNew && options.capabilities.showWriteControls;
   }

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from 'kibana/public';
+import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from 'src/core/public';
 import { CONTEXT_MENU_TRIGGER, Plugin as EmbeddablePlugin } from './lib/embeddable_api';
 import { ExpandPanelAction, DashboardContainerFactory, DashboardCapabilities } from './lib';
 
@@ -39,12 +39,21 @@ export class DashboardEmbeddableContainerPublicPlugin
     embeddable.attachAction(CONTEXT_MENU_TRIGGER, expandPanelAction.id);
   }
 
-  public start({ application }: CoreStart, { embeddable }: StartDependencies) {
+  public start(
+    { application, notifications, overlays }: CoreStart,
+    { embeddable }: StartDependencies
+  ) {
     const dashboardOptions = {
       capabilities: (application.capabilities.dashboard as unknown) as DashboardCapabilities,
       getFactory: embeddable.getEmbeddableFactory,
     };
-    const factory = new DashboardContainerFactory(dashboardOptions);
+    const factory = new DashboardContainerFactory(dashboardOptions, {
+      getActions: embeddable.getTriggerCompatibleActions,
+      getAllEmbeddableFactories: embeddable.getEmbeddableFactories,
+      getEmbeddableFactory: embeddable.getEmbeddableFactory,
+      notifications,
+      overlays,
+    });
     embeddable.registerEmbeddableFactory(factory.type, factory);
   }
 
