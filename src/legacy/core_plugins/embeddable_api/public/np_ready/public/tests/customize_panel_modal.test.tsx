@@ -20,33 +20,44 @@
 // @ts-ignore
 import { findTestSubject } from '@elastic/eui/lib/test';
 import * as React from 'react';
-import { CustomizePanelModal } from './customize_panel_modal';
-import { Container, isErrorEmbeddable } from '../../../..';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { Container, isErrorEmbeddable } from '../lib';
 import {
   ContactCardEmbeddable,
   ContactCardEmbeddableInput,
   ContactCardEmbeddableOutput,
-} from '../../../../test_samples/embeddables/contact_card/contact_card_embeddable';
-import { EmbeddableFactory } from '../../../../embeddables';
-import { GetEmbeddableFactory } from '../../../../types';
+} from '../lib/test_samples/embeddables/contact_card/contact_card_embeddable';
 import {
   CONTACT_CARD_EMBEDDABLE,
   ContactCardEmbeddableFactory,
-} from '../../../../test_samples/embeddables/contact_card/contact_card_embeddable_factory';
-import { HelloWorldContainer } from '../../../../test_samples/embeddables/hello_world_container';
+} from '../lib/test_samples/embeddables/contact_card/contact_card_embeddable_factory';
+import { HelloWorldContainer } from '../lib/test_samples/embeddables/hello_world_container';
+import { coreMock } from '../../../../../../../core/public/mocks';
+import { testPlugin } from './test_plugin';
+import { EmbeddableApi } from '../api';
+import { CustomizePanelModal } from '../lib/panel/panel_header/panel_actions/customize_title/customize_panel_modal';
 
-jest.mock('ui/new_platform');
-
+let api: EmbeddableApi;
 let container: Container;
 let embeddable: ContactCardEmbeddable;
 
 beforeEach(async () => {
-  const __embeddableFactories = new Map<string, EmbeddableFactory>();
-  const getFactory: GetEmbeddableFactory = (id: string) => __embeddableFactories.get(id);
-  __embeddableFactories.set(CONTACT_CARD_EMBEDDABLE, new ContactCardEmbeddableFactory());
+  const { doStart, coreStart } = testPlugin(coreMock.createSetup(), coreMock.createStart());
+  api = doStart();
 
-  container = new HelloWorldContainer({ id: '123', panels: {} }, getFactory);
+  const contactCardFactory = new ContactCardEmbeddableFactory({}, api.executeTriggerActions);
+  api.registerEmbeddableFactory(contactCardFactory.type, contactCardFactory);
+
+  container = new HelloWorldContainer(
+    { id: '123', panels: {} },
+    {
+      getActions: api.getTriggerCompatibleActions,
+      getEmbeddableFactory: api.getEmbeddableFactory,
+      getAllEmbeddableFactories: api.getEmbeddableFactories,
+      overlays: coreStart.overlays,
+      notifications: coreStart.notifications,
+    }
+  );
   const contactCardEmbeddable = await container.addNewEmbeddable<
     ContactCardEmbeddableInput,
     ContactCardEmbeddableOutput,

@@ -62,3 +62,6 @@ export class EmbeddablePublicPlugin implements Plugin<any, any> {
 
   public stop() {}
 }
+
+export type Setup = ReturnType<EmbeddablePublicPlugin['setup']>;
+export type Start = ReturnType<EmbeddablePublicPlugin['start']>;
