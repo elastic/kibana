@@ -17,7 +17,7 @@
  * under the License.
  */
 import { Client } from 'elasticsearch';
-import { get } from 'lodash';
+import { get, intersection, isObject } from 'lodash';
 import { Request } from 'hapi';
 
 import { ElasticsearchErrorHelpers } from './errors';
@@ -28,7 +28,6 @@ import {
   ElasticsearchClientConfig,
   parseElasticsearchClientConfig,
 } from './elasticsearch_client_config';
-import { ScopedClusterClient } from './scoped_cluster_client';
 
 /**
  * Support Legacy platform request for the period of migration.
@@ -112,7 +111,7 @@ export interface FakeRequest {
 /**
  * Represents an Elasticsearch cluster API client and allows to call API on behalf
  * of the internal Kibana user and the actual user that is derived from the request
- * headers (via `asScoped(...)`).
+ * headers.
  *
  * @public
  */
@@ -148,7 +147,7 @@ export class ClusterClient {
    * @param clientParams - A dictionary of parameters that will be passed directly to the Elasticsearch JS client.
    * @param options - Options that affect the way we call the API and process the result.
    */
-  public callAsInternalUser = async (
+  public callWithInternalUser = async (
     endpoint: string,
     clientParams: Record<string, unknown> = {},
     options?: CallAPIOptions
@@ -156,6 +155,56 @@ export class ClusterClient {
     this.assertIsNotClosed();
 
     return await callAPI(this.client, endpoint, clientParams, options);
+  };
+
+  /**
+   * Calls specified `endpoint` with provided `clientParams` on behalf of the
+   * user initiated request to the Kibana server (via HTTP request headers).
+   * @param request - Request to borrow HTTP headers from
+   * @param endpoint - String descriptor of the endpoint e.g. `cluster.getSettings` or `ping`.
+   * @param clientParams - A dictionary of parameters that will be passed directly to the Elasticsearch JS client.
+   * @param options - Options that affect the way we call the API and process the result.
+   */
+  public callWithRequest = async (
+    request: KibanaRequest | LegacyRequest | FakeRequest,
+    endpoint: string,
+    clientParams: Record<string, unknown> = {},
+    options?: CallAPIOptions
+  ) => {
+    this.assertIsNotClosed();
+    // It'd have been quite expensive to create and configure client for every incoming
+    // request since it involves parsing of the config, reading of the SSL certificate and
+    // key files etc. Moreover scoped client needs two Elasticsearch JS clients at the same
+    // time: one to support `callWithInternalUser` and another one for `callWithRequest`.
+    // To reduce that overhead we create one scoped client per cluster client and share it
+    // between all scoped client instances.
+    if (this.scopedClient === undefined) {
+      this.scopedClient = new Client(
+        parseElasticsearchClientConfig(this.config, this.log, {
+          auth: false,
+          ignoreCertAndKey: !this.config.ssl || !this.config.ssl.alwaysPresentCertificate,
+        })
+      );
+    }
+
+    const requestHeaders = filterHeaders(
+      this.getHeaders(request),
+      this.config.requestHeadersWhitelist
+    );
+    const customHeaders: any = clientParams.headers;
+
+    if (isObject(customHeaders)) {
+      const duplicates = intersection(Object.keys(requestHeaders), Object.keys(customHeaders));
+      duplicates.forEach(duplicate => {
+        if (requestHeaders[duplicate] !== (customHeaders as any)[duplicate]) {
+          throw Error(`Cannot override default header ${duplicate}.`);
+        }
+      });
+    }
+
+    clientParams.headers = Object.assign({}, clientParams.headers, requestHeaders);
+
+    return await callAPI(this.scopedClient!, endpoint, clientParams, options);
   };
 
   /**
@@ -174,55 +223,6 @@ export class ClusterClient {
       this.scopedClient.close();
     }
   }
-
-  /**
-   * Creates an instance of `ScopedClusterClient` based on the configuration the
-   * current cluster client that exposes additional `callAsCurrentUser` method
-   * scoped to the provided req. Consumers shouldn't worry about closing
-   * scoped client instances, these will be automatically closed as soon as the
-   * original cluster client isn't needed anymore and closed.
-   * @param request - Request the `ScopedClusterClient` instance will be scoped to.
-   * Supports request optionality, Legacy.Request & FakeRequest for BWC with LegacyPlatform
-   */
-  public asScoped(request?: KibanaRequest | LegacyRequest | FakeRequest) {
-    // It'd have been quite expensive to create and configure client for every incoming
-    // request since it involves parsing of the config, reading of the SSL certificate and
-    // key files etc. Moreover scoped client needs two Elasticsearch JS clients at the same
-    // time: one to support `callAsInternalUser` and another one for `callAsCurrentUser`.
-    // To reduce that overhead we create one scoped client per cluster client and share it
-    // between all scoped client instances.
-    if (this.scopedClient === undefined) {
-      this.scopedClient = new Client(
-        parseElasticsearchClientConfig(this.config, this.log, {
-          auth: false,
-          ignoreCertAndKey: !this.config.ssl || !this.config.ssl.alwaysPresentCertificate,
-        })
-      );
-    }
-
-    return new ScopedClusterClient(
-      this.callAsInternalUser,
-      this.callAsCurrentUser,
-      filterHeaders(this.getHeaders(request), this.config.requestHeadersWhitelist)
-    );
-  }
-
-  /**
-   * Calls specified endpoint with provided clientParams on behalf of the
-   * user initiated request to the Kibana server (via HTTP request headers).
-   * @param endpoint - String descriptor of the endpoint e.g. `cluster.getSettings` or `ping`.
-   * @param clientParams - A dictionary of parameters that will be passed directly to the Elasticsearch JS client.
-   * @param options - Options that affect the way we call the API and process the result.
-   */
-  private callAsCurrentUser = async (
-    endpoint: string,
-    clientParams: Record<string, unknown> = {},
-    options?: CallAPIOptions
-  ) => {
-    this.assertIsNotClosed();
-
-    return await callAPI(this.scopedClient!, endpoint, clientParams, options);
-  };
 
   private assertIsNotClosed() {
     if (this.isClosed) {
