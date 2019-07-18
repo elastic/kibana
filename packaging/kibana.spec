@@ -28,6 +28,7 @@ fi
 #installs dependencies and runs the build
 cd %{name}
 npm install yarn
+./node_modules/yarn/bin/yarn
 ./node_modules/yarn/bin/yarn kbn bootstrap
 node scripts/build --rpm --oss --skip-archives --release --verbose
 
