@@ -51,10 +51,18 @@ module.directive('kbnTopNavV2', () => {
       const linkFn = ($scope, _, $attr) => {
         $scope.store = localStorage;
 
-        // Watch the disableButton functions
+        // Watch config changes
         $scope.$watch(() => {
           const config = $scope.$eval($attr.config);
           return config.map((item) => {
+            // Copy key into id, as it's a reserved react propery.
+            // This is done for Angular directive backward compatibility.
+            // In React only id is recognized.
+            if (item.key && !item.id) {
+              item.id = item.key;
+            }
+
+            // Watch the disableButton functions
             if (typeof item.disableButton === 'function') {
               return item.disableButton();
             }

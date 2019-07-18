@@ -45,12 +45,6 @@ export function TopNavMenu(props: Props) {
   function renderItems() {
     if (!props.config) return;
     return props.config.map((menuItem, i) => {
-      if (menuItem.key && !menuItem.id) {
-        // Copy key into id, as it's a reserved react propery.
-        // This is done for 3rd party developer backward compatibility.
-        // In the future, ID should be used, rather than key.
-        menuItem.id = menuItem.key;
-      }
       return (
         <EuiFlexItem grow={false} key={`nav-menu-${i}`}>
           <TopNavMenuItem {...menuItem} />
