@@ -52,7 +52,7 @@ export class LayerTocActions extends Component {
 
   _renderPopoverToggleButton() {
     const { icon, tooltipContent, areResultsTrimmed } = this.props.layer.getIconAndTooltipContent(this.props.zoom);
-    const displayName =  areResultsTrimmed ? `${this.props.displayName} *` : this.props.displayName;
+    const footNote = areResultsTrimmed ? <span dangerouslySetInnerHTML={{ __html: `&dagger;` }} /> : null;//eslint-disable-line react/no-danger
     const displayClassName = areResultsTrimmed ? `mapTocEntry-exceedLimit` : null;
     return (
       <EuiToolTip
@@ -70,7 +70,7 @@ export class LayerTocActions extends Component {
         >
           <span className="mapTocEntry__layerNameIcon">{icon}</span>
           <span className={displayClassName}>
-            {displayName}
+            {this.props.displayName}{footNote}
           </span>
         </EuiButtonEmpty>
 
