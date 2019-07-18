@@ -16,8 +16,13 @@ import {
   secondsFromDate,
 } from './intervals';
 
-const mockedNow = new Date('2019-06-03T18:55:25.982Z');
-sinon.useFakeTimers(mockedNow.valueOf());
+let fakeTimer: sinon.SinonFakeTimers;
+
+beforeAll(() => {
+  fakeTimer = sinon.useFakeTimers();
+});
+
+afterAll(() => fakeTimer.restore());
 
 describe('taskIntervals', () => {
   describe('assertValidInterval', () => {

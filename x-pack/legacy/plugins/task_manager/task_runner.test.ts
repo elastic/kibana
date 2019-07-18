@@ -10,8 +10,13 @@ import { minutesFromNow, secondsFromNow } from './lib/intervals';
 import { ConcreteTaskInstance } from './task';
 import { TaskManagerRunner } from './task_runner';
 
-const mockedNow = new Date('2019-06-03T18:55:25.982Z');
-const clock = sinon.useFakeTimers(mockedNow.valueOf());
+let fakeTimer: sinon.SinonFakeTimers;
+
+beforeAll(() => {
+  fakeTimer = sinon.useFakeTimers();
+});
+
+afterAll(() => fakeTimer.restore());
 
 describe('TaskManagerRunner', () => {
   test('provides details about the task that is running', () => {
@@ -179,7 +184,7 @@ describe('TaskManagerRunner', () => {
           createTaskRunner: () => ({
             async run() {
               const promise = new Promise(r => setTimeout(r, 1000));
-              clock.tick(1000);
+              fakeTimer.tick(1000);
               await promise;
             },
             async cancel() {
