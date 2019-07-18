@@ -20,6 +20,9 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { statusTitle } from './common_beats_instructions';
 import { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } from 'ui/documentation_links';
 
+const UNDETECTED_BEAT_TYPE = 'beat';
+const DEFAULT_BEAT_FOR_URLS = 'metricbeat';
+
 export function getBeatsInstructionsForEnablingMetricbeat(product, _meta, {
   esMonitoringUrl,
   hasCheckedStatus,
@@ -65,7 +68,7 @@ export function getBeatsInstructionsForEnablingMetricbeat(product, _meta, {
     title: i18n.translate('xpack.monitoring.metricbeatMigration.beatsInstructions.installMetricbeatTitle', {
       defaultMessage: 'Install Metricbeat on the same server as this {beatType}',
       values: {
-        beatType
+        beatType: beatType || UNDETECTED_BEAT_TYPE
       }
     }),
     children: (
@@ -84,6 +87,9 @@ export function getBeatsInstructionsForEnablingMetricbeat(product, _meta, {
       </EuiText>
     )
   };
+
+  const httpEndpointUrl = `${ELASTIC_WEBSITE_URL}guide/en/beats/${beatType || DEFAULT_BEAT_FOR_URLS}`
+    + `/${DOC_LINK_VERSION}/http-endpoint.html`;
 
   const enableMetricbeatModuleStep = {
     title: i18n.translate('xpack.monitoring.metricbeatMigration.beatsInstructions.enableMetricbeatModuleTitle', {
@@ -110,7 +116,7 @@ export function getBeatsInstructionsForEnablingMetricbeat(product, _meta, {
                 file: (
                   <Monospace>modules.d/beat-xpack.yml</Monospace>
                 ),
-                beatType
+                beatType: beatType || UNDETECTED_BEAT_TYPE
               }}
             />
           </p>
@@ -127,7 +133,9 @@ export function getBeatsInstructionsForEnablingMetricbeat(product, _meta, {
                   defaultMessage="In order for Metricbeat to collect metrics from the running {beatType}, you need to {link}."
                   values={{
                     link: (
-                      <EuiLink href={`${ELASTIC_WEBSITE_URL}guide/en/beats/${beatType}/${DOC_LINK_VERSION}/http-endpoint.html`}>
+                      <EuiLink
+                        href={httpEndpointUrl}
+                      >
                         <FormattedMessage
                           id="xpack.monitoring.metricbeatMigration.beatsInstructions.enableMetricbeatModuleHttpEnabledDirectionsLinkText"
                           defaultMessage="enable an HTTP endpoint"
@@ -137,7 +145,7 @@ export function getBeatsInstructionsForEnablingMetricbeat(product, _meta, {
                     file: (
                       <Monospace>modules.d/beat-xpack.yml</Monospace>
                     ),
-                    beatType
+                    beatType: beatType || UNDETECTED_BEAT_TYPE
                   }}
                 />
               </p>
