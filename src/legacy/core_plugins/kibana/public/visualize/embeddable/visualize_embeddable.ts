@@ -30,8 +30,8 @@ import {
 import { Subscription } from 'rxjs';
 import * as Rx from 'rxjs';
 import { TimeRange } from 'ui/timefilter/time_history';
-import { Query } from 'src/legacy/core_plugins/data/public';
 import { Filter } from '@kbn/es-query';
+import { Query } from '../../../../data/public';
 import {
   EmbeddableInput,
   EmbeddableOutput,
@@ -39,7 +39,7 @@ import {
   Container,
   APPLY_FILTER_TRIGGER,
   Trigger,
-} from 'src/legacy/core_plugins/embeddable_api/public/np_ready/public';
+} from '../../../../embeddable_api/public/np_ready/public';
 import { VISUALIZE_EMBEDDABLE_TYPE } from './constants';
 
 const getKeys = <T extends {}>(o: T): Array<keyof T> => Object.keys(o) as Array<keyof T>;

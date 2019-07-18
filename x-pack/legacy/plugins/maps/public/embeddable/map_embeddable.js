@@ -10,7 +10,7 @@ import { Provider } from 'react-redux';
 import { render, unmountComponentAtNode } from 'react-dom';
 import 'mapbox-gl/dist/mapbox-gl.css';
 
-import { Embeddable } from '../../../../../../src/legacy/core_plugins/embeddable_api/public/shim/public';
+import { Embeddable } from '../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public';
 import { I18nContext } from 'ui/i18n';
 
 import { GisMap } from '../connected_components/gis_map';

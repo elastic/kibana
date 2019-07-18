@@ -17,6 +17,7 @@
  * under the License.
  */
 import React from 'react';
+// TODO: Remove this.
 import { npStart } from 'ui/new_platform';
 import { ActionContext } from '../../../../actions';
 import { CustomizePanelModal } from './customize_panel_modal';

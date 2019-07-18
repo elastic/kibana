@@ -20,8 +20,8 @@ import {
   IncompatibleActionError,
   IEmbeddable,
   CONTEXT_MENU_TRIGGER,
-} from 'src/legacy/core_plugins/embeddable_api/public/np_ready/public';
-import { setup } from 'src/legacy/core_plugins/embeddable_api/public/np_ready/public/legacy';
+} from '../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public';
+import { setup } from '../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public/legacy';
 import {
   ISearchEmbeddable,
   SEARCH_EMBEDDABLE_TYPE,

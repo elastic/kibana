@@ -16,6 +16,8 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
+// TODO: Remove this.
 import { Adapters } from 'ui/inspector';
 import { Filter } from '@kbn/es-query';
 import { IContainer } from '../../containers';

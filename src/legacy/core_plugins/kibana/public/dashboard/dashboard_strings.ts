@@ -18,7 +18,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ViewMode } from 'src/legacy/core_plugins/embeddable_api/public/np_ready/public';
+import { ViewMode } from '../../../embeddable_api/public/np_ready/public';
 
 /**
  * @param title {string} the current title of the dashboard

@@ -21,6 +21,7 @@ import { EuiIcon } from '@elastic/eui';
 import React from 'react';
 
 import { i18n } from '@kbn/i18n';
+// TODO: Remove this.
 import { Inspector } from 'ui/inspector';
 import { Action, ActionContext } from '../../../actions';
 

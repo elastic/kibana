@@ -59,8 +59,8 @@ import {
   ErrorEmbeddable,
   Container,
   EmbeddableOutput,
-} from 'src/legacy/core_plugins/embeddable_api/public/np_ready/public';
-import { setup } from 'src/legacy/core_plugins/embeddable_api/public/np_ready/public/legacy';
+} from '../../../../embeddable_api/public/np_ready/public';
+import { setup } from '../../../../embeddable_api/public/np_ready/public/legacy';
 import { showNewVisModal } from '../wizard';
 import { SavedVisualizations } from '../types';
 import { DisabledLabEmbeddable } from './disabled_lab_embeddable';

@@ -19,6 +19,7 @@
 
 import React from 'react';
 
+// TODO: Remove this.
 import { npStart } from 'ui/new_platform';
 import { EuiFlyout } from '@elastic/eui';
 import { Action } from '../..';
