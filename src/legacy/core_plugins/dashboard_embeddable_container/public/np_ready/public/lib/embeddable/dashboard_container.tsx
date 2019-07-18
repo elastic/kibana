@@ -19,13 +19,13 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
+import { uniq } from 'lodash';
 import { I18nProvider } from '@kbn/i18n/react';
 import { Filter } from '@kbn/es-query';
 import { CoreStart } from 'src/core/public';
 import { IndexPattern } from '../../../../../../../ui/public/index_patterns';
 import { RefreshInterval } from '../../../../../../../ui/public/timefilter/timefilter';
 import { TimeRange } from '../../../../../../../ui/public/timefilter/time_history';
-import { uniq } from 'lodash';
 
 import {
   Container,
