@@ -7,7 +7,6 @@
 import { ServiceAgentNameAPIResponse } from '../../../../server/lib/services/get_service_agent_name';
 import { ServiceListAPIResponse } from '../../../../server/lib/services/get_services';
 import { callApi } from '../callApi';
-import { getUiFiltersES } from '../../ui_filters/get_ui_filters_es';
 import { UIFilters } from '../../../../typings/ui-filters';
 import { ServiceTransactionTypesAPIResponse } from '../../../../server/lib/services/get_service_transaction_types';
 
@@ -25,7 +24,7 @@ export async function loadServiceList({
     query: {
       start,
       end,
-      uiFiltersES: await getUiFiltersES(uiFilters)
+      uiFilters: JSON.stringify(uiFilters)
     }
   });
 }

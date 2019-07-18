@@ -34,10 +34,10 @@ export function initTransactionGroupsApi(core: InternalCoreSetup) {
       },
       tags: ['access:apm']
     },
-    handler: req => {
+    handler: async req => {
       const { serviceName } = req.params;
       const { transactionType } = req.query as { transactionType: string };
-      const setup = setupRequest(req);
+      const setup = await setupRequest(req);
 
       return getTransactionGroupList(
         {
@@ -62,8 +62,8 @@ export function initTransactionGroupsApi(core: InternalCoreSetup) {
       },
       tags: ['access:apm']
     },
-    handler: req => {
-      const setup = setupRequest(req);
+    handler: async req => {
+      const setup = await setupRequest(req);
       const { serviceName } = req.params;
       const { transactionType, transactionName } = req.query as {
         transactionType?: string;
@@ -93,8 +93,8 @@ export function initTransactionGroupsApi(core: InternalCoreSetup) {
       },
       tags: ['access:apm']
     },
-    handler: req => {
-      const setup = setupRequest(req);
+    handler: async req => {
+      const setup = await setupRequest(req);
       const { serviceName } = req.params;
       const {
         transactionType,
@@ -130,8 +130,8 @@ export function initTransactionGroupsApi(core: InternalCoreSetup) {
         })
       }
     },
-    handler: req => {
-      const setup = setupRequest(req);
+    handler: async req => {
+      const setup = await setupRequest(req);
       const { serviceName } = req.params;
       const { transactionName, transactionType } = req.query as {
         transactionName?: string;

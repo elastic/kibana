@@ -33,7 +33,7 @@ export function initServicesApi(core: InternalCoreSetup) {
       tags: ['access:apm']
     },
     handler: async req => {
-      const setup = setupRequest(req);
+      const setup = await setupRequest(req);
       const services = await getServices(setup).catch(defaultErrorHandler);
 
       // Store telemetry data derived from services
@@ -56,8 +56,8 @@ export function initServicesApi(core: InternalCoreSetup) {
       },
       tags: ['access:apm']
     },
-    handler: req => {
-      const setup = setupRequest(req);
+    handler: async req => {
+      const setup = await setupRequest(req);
       const { serviceName } = req.params;
       return getServiceAgentName(serviceName, setup).catch(defaultErrorHandler);
     }
@@ -72,8 +72,8 @@ export function initServicesApi(core: InternalCoreSetup) {
       },
       tags: ['access:apm']
     },
-    handler: req => {
-      const setup = setupRequest(req);
+    handler: async req => {
+      const setup = await setupRequest(req);
       const { serviceName } = req.params;
       return getServiceTransactionTypes(serviceName, setup).catch(
         defaultErrorHandler
