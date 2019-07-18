@@ -10,32 +10,44 @@ import { Chart, BarSeries, Axis, Position, getSpecId, ScaleType, Settings } from
 import { getAxisId } from '@elastic/charts';
 import { getOr, get } from 'lodash/fp';
 import {
-  ChartConfigsData,
+  ChartSeriesData,
   WrappedByAutoSizer,
   ChartHolder,
   SeriesType,
   getSeriesStyle,
   getTheme,
-  ChartSeriesConfigs,
+  ChartConfigs,
   browserTimezone,
 } from './common';
 import { AutoSizer } from '../auto_sizer';
 
 // Bar chart rotation: https://ela.st/chart-rotations
 export const BarChartBaseComponent = React.memo<{
-  data: ChartConfigsData[];
+  data: ChartSeriesData[];
   width: number | null | undefined;
   height: number | null | undefined;
-  configs?: ChartSeriesConfigs | undefined;
+  configs?: ChartConfigs | undefined;
 }>(({ data, ...chartConfigs }) => {
   const xTickFormatter = get('configs.axis.xTickFormatter', chartConfigs);
   const yTickFormatter = get('configs.axis.yTickFormatter', chartConfigs);
   const xAxisId = getAxisId(`stat-items-barchart-${data[0].key}-x`);
   const yAxisId = getAxisId(`stat-items-barchart-${data[0].key}-y`);
+  const defaultSettings = {
+    rotation: 0,
+    rendering: 'canvas',
+    animatedData: false,
+    showLegend: false,
+    showLegendDisplayValue: false,
+    debug: false,
+  };
+  const settings = {
+    ...defaultSettings,
+    ...get('configs.settings', chartConfigs),
+  };
 
   return chartConfigs.width && chartConfigs.height ? (
     <Chart>
-      <Settings rotation={getOr(0, 'configs.settings.rotation', chartConfigs)} theme={getTheme()} />
+      <Settings {...settings} theme={getTheme()} />
       {data.map(series => {
         const barSeriesKey = series.key;
         const barSeriesSpecId = getSpecId(barSeriesKey);
@@ -58,32 +70,24 @@ export const BarChartBaseComponent = React.memo<{
         );
       })}
 
-      {xTickFormatter ? (
-        <Axis
-          id={xAxisId}
-          position={Position.Bottom}
-          showOverlappingTicks={false}
-          tickSize={0}
-          tickFormat={xTickFormatter}
-        />
-      ) : (
-        <Axis id={xAxisId} position={Position.Bottom} showOverlappingTicks={false} tickSize={0} />
-      )}
+      <Axis
+        id={xAxisId}
+        position={Position.Bottom}
+        showOverlappingTicks={false}
+        tickSize={0}
+        tickFormat={xTickFormatter}
+      />
 
-      {yTickFormatter ? (
-        <Axis id={yAxisId} position={Position.Left} tickSize={0} tickFormat={yTickFormatter} />
-      ) : (
-        <Axis id={yAxisId} position={Position.Left} tickSize={0} />
-      )}
+      <Axis id={yAxisId} position={Position.Left} tickSize={0} tickFormat={yTickFormatter} />
     </Chart>
   ) : null;
 });
 
 export const BarChartWithCustomPrompt = React.memo<{
-  data: ChartConfigsData[] | null | undefined;
+  data: ChartSeriesData[] | null | undefined;
   height: number | null | undefined;
   width: number | null | undefined;
-  configs?: ChartSeriesConfigs | undefined;
+  configs?: ChartConfigs | undefined;
 }>(({ data, height, width, configs }) => {
   return data &&
     data.length &&
@@ -98,8 +102,8 @@ export const BarChartWithCustomPrompt = React.memo<{
 });
 
 export const BarChart = React.memo<{
-  barChart: ChartConfigsData[] | null | undefined;
-  configs?: ChartSeriesConfigs | undefined;
+  barChart: ChartSeriesData[] | null | undefined;
+  configs?: ChartConfigs | undefined;
 }>(({ barChart, configs }) => (
   <AutoSizer detectAnyWindowResize={false} content>
     {({ measureRef, content: { height, width } }) => (

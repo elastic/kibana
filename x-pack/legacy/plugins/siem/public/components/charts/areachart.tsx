@@ -17,12 +17,12 @@ import {
 } from '@elastic/charts';
 import { getOr, get } from 'lodash/fp';
 import {
-  ChartConfigsData,
+  ChartSeriesData,
   ChartHolder,
   getSeriesStyle,
   WrappedByAutoSizer,
   getTheme,
-  ChartSeriesConfigs,
+  ChartConfigs,
   browserTimezone,
 } from './common';
 import { AutoSizer } from '../auto_sizer';
@@ -59,20 +59,31 @@ const getSeriesLineStyle = (color: string | undefined) => {
 
 // https://ela.st/multi-areaseries
 export const AreaChartBaseComponent = React.memo<{
-  data: ChartConfigsData[];
+  data: ChartSeriesData[];
   width: number | null | undefined;
   height: number | null | undefined;
-  configs?: ChartSeriesConfigs | undefined;
+  configs?: ChartConfigs | undefined;
 }>(({ data, ...chartConfigs }) => {
   const xTickFormatter = get('configs.axis.xTickFormatter', chartConfigs);
   const yTickFormatter = get('configs.axis.yTickFormatter', chartConfigs);
   const xAxisId = getAxisId(`group-${data[0].key}-x`);
   const yAxisId = getAxisId(`group-${data[0].key}-y`);
-
+  const defaultSettings = {
+    rotation: 0,
+    rendering: 'canvas',
+    animatedData: false,
+    showLegend: false,
+    showLegendDisplayValue: false,
+    debug: false,
+  };
+  const settings = {
+    ...defaultSettings,
+    ...get('configs.settings', chartConfigs),
+  };
   return chartConfigs.width && chartConfigs.height ? (
     <div style={{ height: chartConfigs.height, width: chartConfigs.width, position: 'relative' }}>
       <Chart>
-        <Settings theme={getTheme()} />
+        <Settings {...settings} theme={getTheme()} />
         {data.map(series => {
           const seriesKey = series.key;
           const seriesSpecId = getSpecId(seriesKey);
@@ -93,33 +104,25 @@ export const AreaChartBaseComponent = React.memo<{
           ) : null;
         })}
 
-        {xTickFormatter ? (
-          <Axis
-            id={xAxisId}
-            position={Position.Bottom}
-            showOverlappingTicks={false}
-            tickFormat={xTickFormatter}
-            tickSize={0}
-          />
-        ) : (
-          <Axis id={xAxisId} position={Position.Bottom} showOverlappingTicks={false} tickSize={0} />
-        )}
+        <Axis
+          id={xAxisId}
+          position={Position.Bottom}
+          showOverlappingTicks={false}
+          tickFormat={xTickFormatter}
+          tickSize={0}
+        />
 
-        {yTickFormatter ? (
-          <Axis id={yAxisId} position={Position.Left} tickSize={0} tickFormat={yTickFormatter} />
-        ) : (
-          <Axis id={yAxisId} position={Position.Left} tickSize={0} />
-        )}
+        <Axis id={yAxisId} position={Position.Left} tickSize={0} tickFormat={yTickFormatter} />
       </Chart>
     </div>
   ) : null;
 });
 
 export const AreaChartWithCustomPrompt = React.memo<{
-  data: ChartConfigsData[] | null | undefined;
+  data: ChartSeriesData[] | null | undefined;
   height: number | null | undefined;
   width: number | null | undefined;
-  configs?: ChartSeriesConfigs | undefined;
+  configs?: ChartConfigs | undefined;
 }>(({ data, height, width, configs }) => {
   return data != null &&
     data.length &&
@@ -136,8 +139,8 @@ export const AreaChartWithCustomPrompt = React.memo<{
 });
 
 export const AreaChart = React.memo<{
-  areaChart: ChartConfigsData[] | null | undefined;
-  configs?: ChartSeriesConfigs | undefined;
+  areaChart: ChartSeriesData[] | null | undefined;
+  configs?: ChartConfigs | undefined;
 }>(({ areaChart, configs }) => (
   <AutoSizer detectAnyWindowResize={false} content>
     {({ measureRef, content: { height, width } }) => (

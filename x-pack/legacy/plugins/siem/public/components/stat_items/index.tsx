@@ -21,7 +21,7 @@ import styled from 'styled-components';
 import { KpiHostsData, KpiNetworkData } from '../../graphql/types';
 import { AreaChart } from '../charts/areachart';
 import { BarChart } from '../charts/barchart';
-import { ChartConfigsData, ChartData, ChartSeriesConfigs } from '../charts/common';
+import { ChartSeriesData, ChartData, ChartConfigs } from '../charts/common';
 import { getEmptyTagValue } from '../empty_value';
 
 import { InspectButton } from '../inspect';
@@ -53,16 +53,15 @@ export interface StatItems {
   enableBarChart?: boolean;
   grow?: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | true | false | null;
   index: number;
-  areachartConfigs?: ChartSeriesConfigs;
-  barchartConfigs?: ChartSeriesConfigs;
+  areachartConfigs?: ChartConfigs;
+  barchartConfigs?: ChartConfigs;
 }
 
 export interface StatItemsProps extends StatItems {
-  areaChart?: ChartConfigsData[];
-  barChart?: ChartConfigsData[];
+  areaChart?: ChartSeriesData[];
+  barChart?: ChartSeriesData[];
   from: number;
   id: string;
-
   to: number;
 }
 
@@ -99,7 +98,7 @@ export const addValueToFields = (
 export const addValueToAreaChart = (
   fields: StatItem[],
   data: KpiHostsData | KpiNetworkData
-): ChartConfigsData[] =>
+): ChartSeriesData[] =>
   fields
     .filter(field => get(`${field.key}Histogram`, data) != null)
     .map(field => ({
@@ -111,9 +110,9 @@ export const addValueToAreaChart = (
 export const addValueToBarChart = (
   fields: StatItem[],
   data: KpiHostsData | KpiNetworkData
-): ChartConfigsData[] => {
+): ChartSeriesData[] => {
   if (fields.length === 0) return [];
-  return fields.reduce((acc: ChartConfigsData[], field: StatItem, idx: number) => {
+  return fields.reduce((acc: ChartSeriesData[], field: StatItem, idx: number) => {
     const { key, color } = field;
     const y: number | null = getOr(null, key, data);
     const x: string = get(`${idx}.name`, fields) || getOr('', `${idx}.description`, fields);

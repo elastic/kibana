@@ -5,21 +5,22 @@
  */
 import { EuiFlexGroup, EuiText, EuiFlexItem } from '@elastic/eui';
 import React from 'react';
+import chrome from 'ui/chrome';
 import styled from 'styled-components';
 import {
   CustomSeriesColorsMap,
   DataSeriesColorsValues,
   getSpecId,
   mergeWithDefaultTheme,
-  PartialTheme,
-  LIGHT_THEME,
   DARK_THEME,
+  LIGHT_THEME,
+  PartialTheme,
   ScaleType,
 } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
 import { TickFormatter } from '@elastic/charts/dist/lib/series/specs';
-import chrome from 'ui/chrome';
 import moment from 'moment-timezone';
+import { SettingSpecProps } from '@elastic/charts/dist/specs/settings';
 
 const chartHeight = 74;
 const FlexGroup = styled(EuiFlexGroup)`
@@ -45,7 +46,7 @@ export interface ChartData {
   g?: number | string;
 }
 
-export interface ChartSeriesConfigs {
+export interface ChartConfigs {
   series?: {
     xScaleType?: ScaleType | undefined;
     yScaleType?: ScaleType | undefined;
@@ -54,14 +55,13 @@ export interface ChartSeriesConfigs {
     xTickFormatter?: TickFormatter | undefined;
     yTickFormatter?: TickFormatter | undefined;
   };
+  settings?: Partial<SettingSpecProps>;
 }
 
-export interface ChartConfigsData {
+export interface ChartSeriesData {
   key: string;
   value: ChartData[] | [] | null;
   color?: string | undefined;
-  areachartConfigs?: ChartSeriesConfigs | undefined;
-  barchartConfigs?: ChartSeriesConfigs | undefined;
 }
 
 export const WrappedByAutoSizer = styled.div`
