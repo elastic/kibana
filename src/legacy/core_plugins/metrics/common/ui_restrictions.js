@@ -17,19 +17,33 @@
  * under the License.
  */
 
-import { dropLastBucket } from '../series/drop_last_bucket';
-import { isLastValueTimerangeMode } from '../../helpers/get_timerange_mode';
+/**
+ * UI Restrictions keys
+ * @constant
+ * @public
+ */
+export const RESTRICTIONS_KEYS = {
+  /**
+   * Key for getting the white listed group by fields from the UIRestrictions object.
+   */
+  WHITE_LISTED_GROUP_BY_FIELDS: 'whiteListedGroupByFields',
 
-export function dropLastBucketFn(bucket, panel, series) {
-  return next => results => {
-    const shouldDropLastBucket = isLastValueTimerangeMode(panel);
+  /**
+   * Key for getting the white listed metrics from the UIRestrictions object.
+   */
+  WHITE_LISTED_METRICS: 'whiteListedMetrics',
 
-    if (shouldDropLastBucket) {
-      const fn = dropLastBucket({ aggregations: bucket }, panel, series);
+  /**
+   * Key for getting  the white listed Time Range modes from the UIRestrictions object.
+   */
+  WHITE_LISTED_TIMERANGE_MODES: 'whiteListedTimerangeModes',
+};
 
-      return fn(next)(results);
-    }
-
-    return next(results);
-  };
-}
+/**
+ * Default value for the UIRestriction
+ * @constant
+ * @public
+ */
+export const DEFAULT_UI_RESTRICTION = {
+  '*': true,
+};
