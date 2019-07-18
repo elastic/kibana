@@ -1,15 +1,14 @@
 <discover-app class="app-container">
   <!-- Local nav. -->
 
-  <kbn-top-nav2 
-    name="discover" 
+  <kbn-top-nav-v2 
+    app-name="'discover'"
     config="topNavMenu"
     show-search-bar="true"
     show-date-picker="enableTimeRangeSelector"
     query="state.query"
     screen-title="screenTitle"
     on-query-submit="updateQueryAndFetch"
-    app-name="'discover'"
     index-patterns="[indexPattern]"
     filters="filters"
     on-filters-updated="onFiltersUpdated"
@@ -19,7 +18,7 @@
     refresh-interval="refreshInterval.value"
     on-refresh-change="onRefreshChange"
   >
-  </kbn-top-nav2>
+  </kbn-top-nav-v2>
   
   <main class="container-fluid">
     <div class="row">

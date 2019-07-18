@@ -32,9 +32,7 @@ jest.mock('../../../../data/public', () => {
   };
 });
 
-const noop = () => {
-  return;
-};
+const noop = jest.fn();
 
 const createMockWebStorage = () => ({
   clear: jest.fn(),
@@ -113,7 +111,7 @@ describe('SearchBar', () => {
     expect(component.find(QUERY_BAR).length).toBe(0);
   });
 
-  it('Should render filter bar, when required fields are probided', () => {
+  it('Should render filter bar, when required fields are provided', () => {
     const component = mountWithIntl(
       <SearchBar.WrappedComponent
         uiSettings={setupMock.uiSettings}

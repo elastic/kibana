@@ -17,41 +17,48 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import { capitalize, isFunction } from 'lodash';
 import React, { MouseEvent } from 'react';
-import { EuiButtonEmpty } from '@elastic/eui';
+import { EuiButtonEmpty, EuiToolTip } from '@elastic/eui';
 
-import { TopNavMenuData, TopNavMenuAction } from './top_nav_menu_data';
+import { TopNavMenuData } from './top_nav_menu_data';
 
-interface Props {
-  data: TopNavMenuData;
-  onClick: (key: string, action: TopNavMenuAction, target?: any) => void;
-}
-
-export function TopNavMenuItem(props: Props) {
-  const menuData = props.data;
-
+export function TopNavMenuItem(props: TopNavMenuData) {
   function isDisabled(): boolean {
-    const val =
-      typeof menuData.disableButton === 'function'
-        ? menuData.disableButton()
-        : menuData.disableButton;
-    return val || false;
+    const val = isFunction(props.disableButton) ? props.disableButton() : props.disableButton;
+    return val!;
   }
 
-  function handleClick(e: MouseEvent) {
+  function getTooltip(): string {
+    const val = isFunction(props.tooltip) ? props.tooltip() : props.tooltip;
+    return val!;
+  }
+
+  function handleClick(e: MouseEvent<HTMLButtonElement>) {
     if (isDisabled()) return;
-    props.onClick(menuData.key, menuData.run, e.currentTarget);
+    props.run(e.currentTarget);
   }
 
-  return (
+  const btn = (
     <EuiButtonEmpty
       size="xs"
       isDisabled={isDisabled()}
       onClick={handleClick}
-      data-test-subj={menuData.testId}
+      data-test-subj={props.testId}
     >
-      {_.capitalize(menuData.label || menuData.key)}
+      {capitalize(props.label || props.id!)}
     </EuiButtonEmpty>
   );
+
+  const tooltip = getTooltip();
+  if (tooltip) {
+    return <EuiToolTip content={tooltip}>{btn}</EuiToolTip>;
+  } else {
+    return btn;
+  }
 }
+
+TopNavMenuItem.defaultProps = {
+  disableButton: false,
+  tooltip: '',
+};

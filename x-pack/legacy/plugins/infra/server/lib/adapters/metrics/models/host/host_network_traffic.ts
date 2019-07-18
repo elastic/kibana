@@ -4,9 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { InfraMetricModelCreator, InfraMetricModelMetricType } from '../../adapter_types';
+import {
+  InfraMetricModelCreator,
+  InfraMetricModelMetricType,
+  InfraMetricModel,
+} from '../../adapter_types';
 
-export const hostNetworkTraffic: InfraMetricModelCreator = (timeField, indexPattern, interval) => ({
+export const hostNetworkTraffic: InfraMetricModelCreator = (
+  timeField,
+  indexPattern,
+  interval
+): InfraMetricModel => ({
   id: 'hostNetworkTraffic',
   requires: ['system.network'],
   index_pattern: indexPattern,
@@ -45,7 +53,6 @@ export const hostNetworkTraffic: InfraMetricModelCreator = (timeField, indexPatt
     },
     {
       id: 'rx',
-      label: 'Inbound (RX)',
       metrics: [
         {
           field: 'system.network.in.bytes',

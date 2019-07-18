@@ -22,7 +22,7 @@ import React from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n/react';
 import { UiSettingsClientContract } from 'kibana/public';
-import { TopNavMenuData, TopNavMenuAction } from './top_nav_menu_data';
+import { TopNavMenuData } from './top_nav_menu_data';
 import { TopNavMenuItem } from './top_nav_menu_item';
 import { SearchBar, SearchBarProps } from '../search_bar';
 
@@ -34,18 +34,31 @@ type Props = Partial<SearchBarProps> & {
   showSearchBarInline?: boolean;
 };
 
+/*
+ * Top Nav Menu is a convenience wrapper component for:
+ * - Top navigation menu - configured by an array of `TopNavMenuData` objects
+ * - Search Bar - which includes Filter Bar \ Query Input \ Timepicker.
+ *
+ * See SearchBar documentation to learn more about its properties.
+ *
+ **/
+
 export function TopNavMenu(props: Props) {
   function renderItems() {
     if (!props.config) return;
-    return props.config.map((menuItem, i) => (
-      <EuiFlexItem grow={false} key={i}>
-        <TopNavMenuItem data={menuItem} onClick={menuItemClickHandler} />
-      </EuiFlexItem>
-    ));
-  }
-
-  function menuItemClickHandler(key: string, action: TopNavMenuAction, target?: any) {
-    action(null, null, target);
+    return props.config.map((menuItem, i) => {
+      if (menuItem.key && !menuItem.id) {
+        // Copy key into id, as it's a reserved react propery.
+        // This is done for 3rd party developer backward compatibility.
+        // In the future, ID should be used, rather than key.
+        menuItem.id = menuItem.key;
+      }
+      return (
+        <EuiFlexItem grow={false} key={`nav-menu-${i}`}>
+          <TopNavMenuItem {...menuItem} />
+        </EuiFlexItem>
+      );
+    });
   }
 
   function renderSearchBar() {
@@ -86,9 +99,10 @@ export function TopNavMenu(props: Props) {
             justifyContent="spaceBetween"
             gutterSize="none"
             wrap={true}
+            alignItems="center"
             className="topNavMenu"
           >
-            <EuiFlexGroup justifyContent="flexStart" gutterSize="none">
+            <EuiFlexGroup justifyContent="flexStart" gutterSize="none" responsive={false}>
               {renderItems()}
             </EuiFlexGroup>
             <EuiFlexItem grow={false}>{renderSearchBar()}</EuiFlexItem>
@@ -103,6 +117,7 @@ export function TopNavMenu(props: Props) {
             justifyContent="flexStart"
             gutterSize="none"
             className="topNavMenu"
+            responsive={false}
           >
             {renderItems()}
           </EuiFlexGroup>

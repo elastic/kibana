@@ -123,7 +123,7 @@ export default function createActionTests({ getService }: KibanaFunctionalTestDe
             statusCode: 400,
             error: 'Bad Request',
             message:
-              'The following actionTypeConfig attributes are invalid: encrypted [any.required]',
+              'The actionTypeConfig is invalid: [encrypted]: expected value of type [string] but got [undefined]',
           });
         });
     });

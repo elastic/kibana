@@ -26,12 +26,12 @@ import chrome from 'ui/chrome';
 
 const module = uiModules.get('kibana');
 
-module.directive('kbnTopNav2', () => {
+module.directive('kbnTopNavV2', () => {
   return {
     restrict: 'E',
     template: '',
     compile: (elem) => {
-      const child = document.createElement('kbn-top-nav2-helper');
+      const child = document.createElement('kbn-top-nav-v2-helper');
 
       // Copy attributes to the child directive
       for (const attr of elem[0].attributes) {
@@ -74,7 +74,7 @@ module.directive('kbnTopNav2', () => {
   };
 });
 
-module.directive('kbnTopNav2Helper', (reactDirective) => {
+module.directive('kbnTopNavV2Helper', (reactDirective) => {
   return reactDirective(
     wrapInI18nContext(TopNavMenu),
     [
