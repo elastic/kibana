@@ -8,16 +8,7 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { Position } from '@elastic/charts';
-import {
-  EuiFieldText,
-  EuiButton,
-  EuiButtonGroup,
-  EuiForm,
-  EuiFormRow,
-  EuiSwitch,
-  EuiPanel,
-  IconType,
-} from '@elastic/eui';
+import { EuiButton, EuiButtonGroup, EuiForm, EuiFormRow, EuiPanel, IconType } from '@elastic/eui';
 import { State, SeriesType, LayerConfig } from './types';
 import { VisualizationProps } from '../types';
 import { NativeRenderer } from '../native_renderer';
@@ -73,29 +64,6 @@ const chartTypeIcons: Array<{ id: SeriesType; label: string; iconType: IconType 
       defaultMessage: 'Stacked Horizontal Bar',
     }),
     iconType: 'visBarHorizontal',
-  },
-];
-
-const positionIcons = [
-  {
-    id: Position.Left,
-    label: 'Left',
-    iconType: 'arrowLeft',
-  },
-  {
-    id: Position.Top,
-    label: 'Top',
-    iconType: 'arrowUp',
-  },
-  {
-    id: Position.Bottom,
-    label: 'Bottom',
-    iconType: 'arrowDown',
-  },
-  {
-    id: Position.Right,
-    label: 'Right',
-    iconType: 'arrowRight',
   },
 ];
 

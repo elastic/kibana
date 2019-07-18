@@ -9,7 +9,7 @@ import { ReactWrapper } from 'enzyme';
 import { mountWithIntl as mount } from 'test_utils/enzyme_helpers';
 import { EuiButtonGroupProps } from '@elastic/eui';
 import { XYConfigPanel } from './xy_config_panel';
-import { DatasourcePublicAPI, DatasourceDimensionPanelProps, Operation } from '../types';
+import { DatasourceDimensionPanelProps, Operation } from '../types';
 import { State, SeriesType } from './types';
 import { Position } from '@elastic/charts';
 import { NativeRendererProps } from '../native_renderer';
@@ -20,18 +20,6 @@ jest.mock('../id_generator');
 
 describe('XYConfigPanel', () => {
   const dragDropContext = { dragging: undefined, setDragging: jest.fn() };
-
-  function mockDatasource(): DatasourcePublicAPI {
-    return {
-      duplicateColumn: () => [],
-      getOperationForColumnId: () => null,
-      getTableSpec: () => [],
-      moveColumnTo: () => {},
-      removeColumnInTableSpec: () => [],
-      renderDimensionPanel: () => {},
-      renderLayerPanel: () => {},
-    };
-  }
 
   function testState(): State {
     return {

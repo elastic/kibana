@@ -7,9 +7,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiForm, EuiFormRow, EuiRange, EuiSelect } from '@elastic/eui';
-import { DimensionLayer } from '../../types';
-import { IndexPatternField, TermsIndexPatternColumn, IndexPatternColumn } from '../indexpattern';
-import { DimensionPriority } from '../../types';
+import { TermsIndexPatternColumn, IndexPatternColumn } from '../indexpattern';
 import { OperationDefinition } from '../operations';
 import { updateColumnParam } from '../state_helpers';
 
