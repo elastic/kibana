@@ -17,7 +17,8 @@
  * under the License.
  */
 
-export const clusterClientMock = jest.fn();
-jest.doMock('../../elasticsearch/scoped_cluster_client', () => ({
-  ScopedClusterClient: clusterClientMock,
+export const MockClient = jest.fn();
+jest.mock('elasticsearch', () => ({
+  ...jest.requireActual('elasticsearch'),
+  Client: MockClient,
 }));

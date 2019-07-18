@@ -19,18 +19,12 @@
 
 import { BehaviorSubject } from 'rxjs';
 import { ClusterClient } from './cluster_client';
-import { ScopedClusterClient } from './scoped_cluster_client';
 import { ElasticsearchConfig } from './elasticsearch_config';
 import { ElasticsearchService, ElasticsearchServiceSetup } from './elasticsearch_service';
 
-const createScopedClusterClientMock = (): jest.Mocked<PublicMethodsOf<ScopedClusterClient>> => ({
-  callAsInternalUser: jest.fn(),
-  callAsCurrentUser: jest.fn(),
-});
-
 const createClusterClientMock = (): jest.Mocked<PublicMethodsOf<ClusterClient>> => ({
-  callAsInternalUser: jest.fn(),
-  asScoped: jest.fn().mockImplementation(createScopedClusterClientMock),
+  callWithInternalUser: jest.fn(),
+  callWithRequest: jest.fn(),
   close: jest.fn(),
 });
 
@@ -63,5 +57,4 @@ export const elasticsearchServiceMock = {
   create: createMock,
   createSetupContract: createSetupContractMock,
   createClusterClient: createClusterClientMock,
-  createScopedClusterClient: createScopedClusterClientMock,
 };

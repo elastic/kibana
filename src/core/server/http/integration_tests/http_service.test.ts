@@ -19,7 +19,7 @@
 import Boom from 'boom';
 import { Request } from 'hapi';
 import { first } from 'rxjs/operators';
-import { clusterClientMock } from './http_service.test.mocks';
+import { MockClient } from './http_service.test.mocks';
 
 import { Router } from '../router';
 import * as kbnTestServer from '../../../../test_utils/kbn_server';
@@ -37,6 +37,8 @@ interface StorageData {
 describe('http service', () => {
   describe('setup contract', () => {
     describe('#registerAuth()', () => {
+      let mockEsClientInstance: { ping: jest.Mock; close: jest.Mock };
+
       const sessionDurationMs = 1000;
       const cookieOptions = {
         name: 'sid',
@@ -49,11 +51,13 @@ describe('http service', () => {
       let root: ReturnType<typeof kbnTestServer.createRoot>;
       beforeEach(async () => {
         root = kbnTestServer.createRoot();
+        mockEsClientInstance = { ping: jest.fn().mockResolvedValue({}), close: jest.fn() };
+        MockClient.mockImplementation(() => mockEsClientInstance);
       }, 30000);
 
       afterEach(async () => {
-        clusterClientMock.mockClear();
         await root.shutdown();
+        // MockClient.mockClear();
       });
 
       it('runs auth for legacy routes and proxy request to legacy server route handlers', async () => {
@@ -173,7 +177,7 @@ describe('http service', () => {
         const router = new Router('/new-platform');
         router.get({ path: '/', validate: false }, async (req, res) => {
           const client = await elasticsearch.dataClient$.pipe(first()).toPromise();
-          client.asScoped(req);
+          client.callWithRequest(req, 'ping');
           return res.ok({ header: 'ok' });
         });
         registerRouter(router);
@@ -181,9 +185,8 @@ describe('http service', () => {
         await root.start();
 
         await kbnTestServer.request.get(root, '/new-platform/').expect(200);
-        expect(clusterClientMock).toBeCalledTimes(1);
-        const [firstCall] = clusterClientMock.mock.calls;
-        const [, , headers] = firstCall;
+        expect(mockEsClientInstance.ping).toBeCalledTimes(1);
+        const [[{ headers }]] = mockEsClientInstance.ping.mock.calls;
         expect(headers).toEqual(authHeaders);
       });
 
@@ -195,7 +198,7 @@ describe('http service', () => {
         const router = new Router('/new-platform');
         router.get({ path: '/', validate: false }, async (req, res) => {
           const client = await elasticsearch.dataClient$.pipe(first()).toPromise();
-          client.asScoped(req);
+          client.callWithRequest(req, 'ping');
           return res.ok({ header: 'ok' });
         });
         registerRouter(router);
@@ -207,9 +210,8 @@ describe('http service', () => {
           .set('Authorization', authorizationHeader)
           .expect(200);
 
-        expect(clusterClientMock).toBeCalledTimes(1);
-        const [firstCall] = clusterClientMock.mock.calls;
-        const [, , headers] = firstCall;
+        expect(mockEsClientInstance.ping).toHaveBeenCalledTimes(1);
+        const [[{ headers }]] = mockEsClientInstance.ping.mock.calls;
         expect(headers).toEqual({
           authorization: authorizationHeader,
         });

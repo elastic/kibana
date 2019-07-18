@@ -86,7 +86,7 @@ const createMockDeps = (settings: MockServerSettings = {}) => {
     savedObjects: (mockServer.savedObjects as unknown) as SavedObjectsService,
     elasticsearch: ({
       dataClient$: Rx.of({
-        callAsInternalUser: jest.fn(),
+        callWithInternalUser: jest.fn(),
       }),
     } as unknown) as ElasticsearchServiceSetup,
   };

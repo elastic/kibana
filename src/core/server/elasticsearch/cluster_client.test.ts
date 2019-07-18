@@ -19,11 +19,7 @@
 
 import { ElasticsearchConfig } from './elasticsearch_config';
 
-import {
-  MockClient,
-  mockParseElasticsearchClientConfig,
-  MockScopedClusterClient,
-} from './cluster_client.test.mocks';
+import { MockClient, mockParseElasticsearchClientConfig } from './cluster_client.test.mocks';
 
 import { errors } from 'elasticsearch';
 import { get } from 'lodash';
@@ -52,7 +48,7 @@ test('#constructor creates client with parsed config', () => {
   expect(MockClient).toHaveBeenCalledWith(mockEsClientConfig);
 });
 
-describe('#callAsInternalUser', () => {
+describe('#callWithInternalUser', () => {
   let mockEsClientInstance: {
     close: jest.Mock;
     ping: jest.Mock;
@@ -75,7 +71,7 @@ describe('#callAsInternalUser', () => {
     clusterClient.close();
 
     await expect(
-      clusterClient.callAsInternalUser('ping', {})
+      clusterClient.callWithInternalUser('ping', {})
     ).rejects.toThrowErrorMatchingInlineSnapshot(
       `"Cluster client cannot be used after it has been closed."`
     );
@@ -83,7 +79,7 @@ describe('#callAsInternalUser', () => {
 
   test('fails if endpoint is invalid', async () => {
     await expect(
-      clusterClient.callAsInternalUser('pong', {})
+      clusterClient.callWithInternalUser('pong', {})
     ).rejects.toThrowErrorMatchingInlineSnapshot(`"called with an invalid endpoint: pong"`);
   });
 
@@ -97,7 +93,7 @@ describe('#callAsInternalUser', () => {
       });
     });
 
-    const mockResult = await clusterClient.callAsInternalUser('ping', mockParams);
+    const mockResult = await clusterClient.callWithInternalUser('ping', mockParams);
     expect(mockResult.response).toBe(mockResponse);
     expect(mockResult.context).toBe(mockEsClientInstance);
     expect(mockEsClientInstance.ping).toHaveBeenCalledTimes(1);
@@ -114,7 +110,10 @@ describe('#callAsInternalUser', () => {
       });
     });
 
-    const mockResult = await clusterClient.callAsInternalUser('security.authenticate', mockParams);
+    const mockResult = await clusterClient.callWithInternalUser(
+      'security.authenticate',
+      mockParams
+    );
     expect(mockResult.response).toBe(mockResponse);
     expect(mockResult.context).toBe(mockEsClientInstance.security);
     expect(mockEsClientInstance.security.authenticate).toHaveBeenCalledTimes(1);
@@ -126,14 +125,14 @@ describe('#callAsInternalUser', () => {
     mockEsClientInstance.ping.mockRejectedValue(mockError);
 
     await expect(
-      clusterClient.callAsInternalUser('ping', undefined, { wrap401Errors: false })
+      clusterClient.callWithInternalUser('ping', undefined, { wrap401Errors: false })
     ).rejects.toBe(mockError);
 
     const mockAuthenticationError = { message: 'authentication error', statusCode: 401 };
     mockEsClientInstance.ping.mockRejectedValue(mockAuthenticationError);
 
     await expect(
-      clusterClient.callAsInternalUser('ping', undefined, { wrap401Errors: false })
+      clusterClient.callWithInternalUser('ping', undefined, { wrap401Errors: false })
     ).rejects.toBe(mockAuthenticationError);
   });
 
@@ -141,17 +140,17 @@ describe('#callAsInternalUser', () => {
     const mockError = { message: 'some error' };
     mockEsClientInstance.ping.mockRejectedValue(mockError);
 
-    await expect(clusterClient.callAsInternalUser('ping')).rejects.toBe(mockError);
+    await expect(clusterClient.callWithInternalUser('ping')).rejects.toBe(mockError);
     await expect(
-      clusterClient.callAsInternalUser('ping', undefined, { wrap401Errors: true })
+      clusterClient.callWithInternalUser('ping', undefined, { wrap401Errors: true })
     ).rejects.toBe(mockError);
 
     const mockAuthorizationError = { message: 'authentication error', statusCode: 403 };
     mockEsClientInstance.ping.mockRejectedValue(mockAuthorizationError);
 
-    await expect(clusterClient.callAsInternalUser('ping')).rejects.toBe(mockAuthorizationError);
+    await expect(clusterClient.callWithInternalUser('ping')).rejects.toBe(mockAuthorizationError);
     await expect(
-      clusterClient.callAsInternalUser('ping', undefined, { wrap401Errors: true })
+      clusterClient.callWithInternalUser('ping', undefined, { wrap401Errors: true })
     ).rejects.toBe(mockAuthorizationError);
 
     const mockAuthenticationError = new (errors.AuthenticationException as any)(
@@ -160,9 +159,9 @@ describe('#callAsInternalUser', () => {
     );
     mockEsClientInstance.ping.mockRejectedValue(mockAuthenticationError);
 
-    await expect(clusterClient.callAsInternalUser('ping')).rejects.toBe(mockAuthenticationError);
+    await expect(clusterClient.callWithInternalUser('ping')).rejects.toBe(mockAuthenticationError);
     await expect(
-      clusterClient.callAsInternalUser('ping', undefined, { wrap401Errors: true })
+      clusterClient.callWithInternalUser('ping', undefined, { wrap401Errors: true })
     ).rejects.toStrictEqual(mockAuthenticationError);
   });
 
@@ -174,7 +173,7 @@ describe('#callAsInternalUser', () => {
     mockValue.abort = jest.fn();
     mockEsClientInstance.ping.mockReturnValue(mockValue);
 
-    const promise = clusterClient.callAsInternalUser('ping', undefined, {
+    const promise = clusterClient.callWithInternalUser('ping', undefined, {
       wrap401Errors: false,
       signal: controller.signal,
     });
@@ -202,12 +201,12 @@ describe('#callAsInternalUser', () => {
       .mockRejectedValueOnce(mockAuthenticationError)
       .mockRejectedValueOnce(mockAuthenticationErrorWithHeader);
 
-    await expect(clusterClient.callAsInternalUser('ping')).rejects.toBe(mockAuthenticationError);
+    await expect(clusterClient.callWithInternalUser('ping')).rejects.toBe(mockAuthenticationError);
     expect(get(mockAuthenticationError, 'output.headers.WWW-Authenticate')).toBe(
       'Basic realm="Authorization Required"'
     );
 
-    await expect(clusterClient.callAsInternalUser('ping')).rejects.toBe(
+    await expect(clusterClient.callWithInternalUser('ping')).rejects.toBe(
       mockAuthenticationErrorWithHeader
     );
     expect(get(mockAuthenticationErrorWithHeader, 'output.headers.WWW-Authenticate')).toBe(
@@ -216,7 +215,7 @@ describe('#callAsInternalUser', () => {
   });
 });
 
-describe('#asScoped', () => {
+describe('#callWithRequest', () => {
   let mockEsClientInstance: { ping: jest.Mock; close: jest.Mock };
   let mockScopedEsClientInstance: { ping: jest.Mock; close: jest.Mock };
 
@@ -237,31 +236,37 @@ describe('#asScoped', () => {
       requestHeadersWhitelist: ['one', 'two'],
     } as any;
 
-    clusterClient = new ClusterClient(mockEsConfig, mockLogger);
+    // TODO call separately
     jest.clearAllMocks();
   });
 
   test('creates additional Elasticsearch client only once', () => {
-    const firstScopedClusterClient = clusterClient.asScoped(
-      httpServerMock.createRawRequest({ headers: { one: '1' } })
+    clusterClient = new ClusterClient(mockEsConfig, mockLogger);
+    expect(mockParseElasticsearchClientConfig).toHaveBeenCalledTimes(1);
+    expect(MockClient).toHaveBeenCalledTimes(1);
+
+    const firstScopedClusterClient = clusterClient.callWithRequest(
+      httpServerMock.createRawRequest({ headers: { one: '1' } }),
+      'ping'
     );
 
     expect(firstScopedClusterClient).toBeDefined();
-    expect(mockParseElasticsearchClientConfig).toHaveBeenCalledTimes(1);
+    expect(mockParseElasticsearchClientConfig).toHaveBeenCalledTimes(2);
     expect(mockParseElasticsearchClientConfig).toHaveBeenLastCalledWith(mockEsConfig, mockLogger, {
       auth: false,
       ignoreCertAndKey: true,
     });
 
-    expect(MockClient).toHaveBeenCalledTimes(1);
+    expect(MockClient).toHaveBeenCalledTimes(2);
     expect(MockClient).toHaveBeenCalledWith(
       mockParseElasticsearchClientConfig.mock.results[0].value
     );
 
     jest.clearAllMocks();
 
-    const secondScopedClusterClient = clusterClient.asScoped(
-      httpServerMock.createRawRequest({ headers: { two: '2' } })
+    const secondScopedClusterClient = clusterClient.callWithRequest(
+      httpServerMock.createRawRequest({ headers: { two: '2' } }),
+      'ping'
     );
 
     expect(secondScopedClusterClient).toBeDefined();
@@ -275,7 +280,10 @@ describe('#asScoped', () => {
     clusterClient = new ClusterClient(mockEsConfig, mockLogger);
 
     mockParseElasticsearchClientConfig.mockClear();
-    clusterClient.asScoped(httpServerMock.createRawRequest({ headers: { one: '1' } }));
+    clusterClient.callWithRequest(
+      httpServerMock.createRawRequest({ headers: { one: '1' } }),
+      'ping'
+    );
 
     expect(mockParseElasticsearchClientConfig).toHaveBeenCalledTimes(1);
     expect(mockParseElasticsearchClientConfig).toHaveBeenLastCalledWith(mockEsConfig, mockLogger, {
@@ -288,7 +296,10 @@ describe('#asScoped', () => {
     clusterClient = new ClusterClient(mockEsConfig, mockLogger);
 
     mockParseElasticsearchClientConfig.mockClear();
-    clusterClient.asScoped(httpServerMock.createRawRequest({ headers: { one: '1' } }));
+    clusterClient.callWithRequest(
+      httpServerMock.createRawRequest({ headers: { one: '1' } }),
+      'ping'
+    );
 
     expect(mockParseElasticsearchClientConfig).toHaveBeenCalledTimes(1);
     expect(mockParseElasticsearchClientConfig).toHaveBeenLastCalledWith(mockEsConfig, mockLogger, {
@@ -301,7 +312,10 @@ describe('#asScoped', () => {
     clusterClient = new ClusterClient(mockEsConfig, mockLogger);
 
     mockParseElasticsearchClientConfig.mockClear();
-    clusterClient.asScoped(httpServerMock.createRawRequest({ headers: { one: '1' } }));
+    clusterClient.callWithRequest(
+      httpServerMock.createRawRequest({ headers: { one: '1' } }),
+      'ping'
+    );
 
     expect(mockParseElasticsearchClientConfig).toHaveBeenCalledTimes(1);
     expect(mockParseElasticsearchClientConfig).toHaveBeenLastCalledWith(mockEsConfig, mockLogger, {
@@ -310,98 +324,117 @@ describe('#asScoped', () => {
     });
   });
 
-  test('passes only filtered headers to the scoped cluster client', () => {
-    clusterClient.asScoped(
-      httpServerMock.createRawRequest({ headers: { zero: '0', one: '1', two: '2', three: '3' } })
+  test('passes only filtered headers to the cluster client', () => {
+    clusterClient = new ClusterClient(mockEsConfig, mockLogger);
+    clusterClient.callWithRequest(
+      httpServerMock.createRawRequest({ headers: { zero: '0', one: '1', two: '2', three: '3' } }),
+      'ping'
     );
 
-    expect(MockScopedClusterClient).toHaveBeenCalledTimes(1);
-    expect(MockScopedClusterClient).toHaveBeenCalledWith(
-      expect.any(Function),
-      expect.any(Function),
-      { one: '1', two: '2' }
-    );
+    expect(mockScopedEsClientInstance.ping).toHaveBeenCalledTimes(1);
+    const [[{ headers }]] = mockScopedEsClientInstance.ping.mock.calls;
+    expect(headers).toEqual({ one: '1', two: '2' });
   });
 
   test('both scoped and internal API caller fail if cluster client is closed', async () => {
-    clusterClient.asScoped(
-      httpServerMock.createRawRequest({ headers: { zero: '0', one: '1', two: '2', three: '3' } })
+    clusterClient = new ClusterClient(mockEsConfig, mockLogger);
+    clusterClient.callWithRequest(
+      httpServerMock.createRawRequest({ headers: { zero: '0', one: '1', two: '2', three: '3' } }),
+      'ping'
     );
 
     clusterClient.close();
 
-    const [[internalAPICaller, scopedAPICaller]] = MockScopedClusterClient.mock.calls;
-    await expect(internalAPICaller('ping')).rejects.toThrowErrorMatchingInlineSnapshot(
+    await expect(
+      clusterClient.callWithInternalUser('ping')
+    ).rejects.toThrowErrorMatchingInlineSnapshot(
       `"Cluster client cannot be used after it has been closed."`
     );
 
-    await expect(scopedAPICaller('ping', {})).rejects.toThrowErrorMatchingInlineSnapshot(
+    await expect(
+      clusterClient.callWithRequest(httpServerMock.createRawRequest({ headers: {} }), 'ping')
+    ).rejects.toThrowErrorMatchingInlineSnapshot(
       `"Cluster client cannot be used after it has been closed."`
     );
   });
 
   test('does not fail when scope to not defined request', async () => {
     clusterClient = new ClusterClient(mockEsConfig, mockLogger);
-    clusterClient.asScoped();
-    expect(MockScopedClusterClient).toHaveBeenCalledTimes(1);
-    expect(MockScopedClusterClient).toHaveBeenCalledWith(
-      expect.any(Function),
-      expect.any(Function),
-      {}
-    );
+    clusterClient.callWithRequest(undefined as any, 'ping');
+    expect(mockScopedEsClientInstance.ping).toHaveBeenCalledTimes(1);
+    const [[{ headers }]] = mockScopedEsClientInstance.ping.mock.calls;
+    expect(headers).toEqual({});
   });
 
   test('does not fail when scope to a request without headers', async () => {
     clusterClient = new ClusterClient(mockEsConfig, mockLogger);
-    clusterClient.asScoped({} as any);
-    expect(MockScopedClusterClient).toHaveBeenCalledTimes(1);
-    expect(MockScopedClusterClient).toHaveBeenCalledWith(
-      expect.any(Function),
-      expect.any(Function),
-      {}
-    );
+    clusterClient.callWithRequest({} as any, 'ping');
+    expect(mockScopedEsClientInstance.ping).toHaveBeenCalledTimes(1);
+    const [[{ headers }]] = mockScopedEsClientInstance.ping.mock.calls;
+    expect(headers).toEqual({});
   });
 
   test('calls getAuthHeaders and filters results for a real request', async () => {
     clusterClient = new ClusterClient(mockEsConfig, mockLogger, () => ({ one: '1', three: '3' }));
-    clusterClient.asScoped(httpServerMock.createRawRequest({ headers: { two: '2' } }));
-    expect(MockScopedClusterClient).toHaveBeenCalledTimes(1);
-    expect(MockScopedClusterClient).toHaveBeenCalledWith(
-      expect.any(Function),
-      expect.any(Function),
-      { one: '1', two: '2' }
+    clusterClient.callWithRequest(
+      httpServerMock.createRawRequest({ headers: { two: '2' } }),
+      'ping'
     );
+    expect(mockScopedEsClientInstance.ping).toHaveBeenCalledTimes(1);
+    const [[{ headers }]] = mockScopedEsClientInstance.ping.mock.calls;
+    expect(headers).toEqual({ one: '1', two: '2' });
   });
 
   test('getAuthHeaders results rewrite extends a request headers', async () => {
     clusterClient = new ClusterClient(mockEsConfig, mockLogger, () => ({ one: 'foo' }));
-    clusterClient.asScoped(httpServerMock.createRawRequest({ headers: { one: '1', two: '2' } }));
-    expect(MockScopedClusterClient).toHaveBeenCalledTimes(1);
-    expect(MockScopedClusterClient).toHaveBeenCalledWith(
-      expect.any(Function),
-      expect.any(Function),
-      { one: 'foo', two: '2' }
+    clusterClient.callWithRequest(
+      httpServerMock.createRawRequest({ headers: { one: '1', two: '2' } }),
+      'ping'
     );
+    expect(mockScopedEsClientInstance.ping).toHaveBeenCalledTimes(1);
+    const [[{ headers }]] = mockScopedEsClientInstance.ping.mock.calls;
+    expect(headers).toEqual({ one: 'foo', two: '2' });
   });
 
   test("doesn't call getAuthHeaders for a fake request", async () => {
     const getAuthHeaders = jest.fn();
     clusterClient = new ClusterClient(mockEsConfig, mockLogger, getAuthHeaders);
-    clusterClient.asScoped({ headers: { one: '1', two: '2', three: '3' } });
+    clusterClient.callWithRequest({ headers: { one: '1', two: '2', three: '3' } }, 'ping');
 
     expect(getAuthHeaders).not.toHaveBeenCalled();
   });
 
   test('filters a fake request headers', async () => {
     clusterClient = new ClusterClient(mockEsConfig, mockLogger);
-    clusterClient.asScoped({ headers: { one: '1', two: '2', three: '3' } });
+    clusterClient.callWithRequest({ headers: { one: '1', two: '2', three: '3' } }, 'ping');
 
-    expect(MockScopedClusterClient).toHaveBeenCalledTimes(1);
-    expect(MockScopedClusterClient).toHaveBeenCalledWith(
-      expect.any(Function),
-      expect.any(Function),
-      { one: '1', two: '2' }
+    expect(mockScopedEsClientInstance.ping).toHaveBeenCalledTimes(1);
+    const [[{ headers }]] = mockScopedEsClientInstance.ping.mock.calls;
+    expect(headers).toEqual({ one: '1', two: '2' });
+  });
+
+  test('allows passing additional headers', async () => {
+    clusterClient = new ClusterClient(mockEsConfig, mockLogger);
+    clusterClient.callWithRequest({ headers: { one: '1' } }, 'ping', {
+      headers: { additionalHeader: 'Oh Yes!' },
+    });
+
+    expect(mockScopedEsClientInstance.ping).toHaveBeenCalledTimes(1);
+    const [[{ headers }]] = mockScopedEsClientInstance.ping.mock.calls;
+    expect(headers).toEqual({ one: '1', additionalHeader: 'Oh Yes!' });
+  });
+
+  test('cannot override request headers', async () => {
+    clusterClient = new ClusterClient(mockEsConfig, mockLogger);
+    const call = () =>
+      clusterClient.callWithRequest({ headers: { one: '1' } }, 'ping', {
+        headers: { one: 'override' },
+      });
+
+    expect(call()).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"Cannot override default header one."`
     );
+    expect(mockScopedEsClientInstance.ping).toHaveBeenCalledTimes(0);
   });
 });
 
@@ -432,7 +465,10 @@ describe('#close', () => {
   });
 
   test('closes both internal and scoped underlying Elasticsearch clients', () => {
-    clusterClient.asScoped(httpServerMock.createRawRequest({ headers: { one: '1' } }));
+    clusterClient.callWithRequest(
+      httpServerMock.createRawRequest({ headers: { one: '1' } }),
+      'ping'
+    );
 
     expect(mockEsClientInstance.close).not.toHaveBeenCalled();
     expect(mockScopedEsClientInstance.close).not.toHaveBeenCalled();
@@ -443,7 +479,10 @@ describe('#close', () => {
   });
 
   test('does not call close on already closed client', () => {
-    clusterClient.asScoped(httpServerMock.createRawRequest({ headers: { one: '1' } }));
+    clusterClient.callWithRequest(
+      httpServerMock.createRawRequest({ headers: { one: '1' } }),
+      'ping'
+    );
 
     clusterClient.close();
     mockEsClientInstance.close.mockClear();
