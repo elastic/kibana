@@ -17,15 +17,19 @@ import {
 } from '../../graphql/types';
 import { KueryFilterQuery, SerializedFilterQuery } from '../model';
 
-import { NetworkTableType, NetworkType } from './model';
+import { IpDetailsTableType, NetworkTableType, NetworkType } from './model';
 
 const actionCreator = actionCreatorFactory('x-pack/siem/local/network');
 
-export const updateTableActivePage = actionCreator<{
+export const updateNetworkPageTableActivePage = actionCreator<{
   activePage: number;
-  networkType: NetworkType;
   tableType: NetworkTableType;
-}>('UPDATE_NETWORK_TABLE_ACTIVE_PAGE');
+}>('UPDATE_NETWORK_PAGE_TABLE_ACTIVE_PAGE');
+
+export const updateIpDetailsTableActivePage = actionCreator<{
+  activePage: number;
+  tableType: IpDetailsTableType;
+}>('UPDATE_NETWORK_DETAILS_TABLE_ACTIVE_PAGE');
 
 export const updateDnsLimit = actionCreator<{
   limit: number;

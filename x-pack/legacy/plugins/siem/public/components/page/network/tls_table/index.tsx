@@ -36,8 +36,7 @@ interface TlsTableReduxProps {
 interface TlsTableDispatchProps {
   updateTableActivePage: ActionCreator<{
     activePage: number;
-    networkType: networkModel.NetworkType;
-    tableType: networkModel.NetworkTableType;
+    tableType: networkModel.IpDetailsTableType;
   }>;
   updateTlsLimit: ActionCreator<{
     limit: number;
@@ -100,7 +99,6 @@ class TlsTableComponent extends React.PureComponent<TlsTableProps> {
         updateActivePage={newPage =>
           updateTableActivePage({
             activePage: newPage,
-            networkType: type,
             tableType,
           })
         }
@@ -137,7 +135,7 @@ const makeMapStateToProps = () => {
 export const TlsTable = connect(
   makeMapStateToProps,
   {
-    updateTableActivePage: networkActions.updateTableActivePage,
+    updateTableActivePage: networkActions.updateIpDetailsTableActivePage,
     updateTlsLimit: networkActions.updateTlsLimit,
     updateTlsSort: networkActions.updateTlsSort,
   }

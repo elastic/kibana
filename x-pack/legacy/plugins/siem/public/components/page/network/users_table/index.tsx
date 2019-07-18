@@ -39,8 +39,7 @@ interface UsersTableReduxProps {
 interface UsersTableDispatchProps {
   updateTableActivePage: ActionCreator<{
     activePage: number;
-    networkType: networkModel.NetworkType;
-    tableType: networkModel.NetworkTableType;
+    tableType: networkModel.IpDetailsTableType;
   }>;
   updateUsersLimit: ActionCreator<{
     limit: number;
@@ -105,7 +104,6 @@ class UsersTableComponent extends React.PureComponent<UsersTableProps> {
         updateActivePage={newPage =>
           updateTableActivePage({
             activePage: newPage,
-            networkType: type,
             tableType,
           })
         }
@@ -142,7 +140,7 @@ const makeMapStateToProps = () => {
 export const UsersTable = connect(
   makeMapStateToProps,
   {
-    updateTableActivePage: networkActions.updateTableActivePage,
+    updateTableActivePage: networkActions.updateIpDetailsTableActivePage,
     updateUsersLimit: networkActions.updateUsersLimit,
     updateUsersSort: networkActions.updateUsersSort,
   }

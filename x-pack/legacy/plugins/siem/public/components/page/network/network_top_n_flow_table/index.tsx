@@ -51,7 +51,6 @@ interface NetworkTopNFlowTableReduxProps {
 interface NetworkTopNFlowTableDispatchProps {
   updateTableActivePage: ActionCreator<{
     activePage: number;
-    networkType: networkModel.NetworkType;
     tableType: networkModel.NetworkTableType;
   }>;
   updateTopNFlowDirection: ActionCreator<{
@@ -171,7 +170,6 @@ class NetworkTopNFlowTableComponent extends React.PureComponent<NetworkTopNFlowT
         updateActivePage={newPage =>
           updateTableActivePage({
             activePage: newPage,
-            networkType: type,
             tableType,
           })
         }
@@ -217,7 +215,7 @@ export const NetworkTopNFlowTable = connect(
     updateTopNFlowSort: networkActions.updateTopNFlowSort,
     updateTopNFlowTarget: networkActions.updateTopNFlowTarget,
     updateTopNFlowDirection: networkActions.updateTopNFlowDirection,
-    updateTableActivePage: networkActions.updateTableActivePage,
+    updateTableActivePage: networkActions.updateNetworkPageTableActivePage,
   }
 )(NetworkTopNFlowTableComponent);
 

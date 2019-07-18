@@ -52,7 +52,6 @@ interface NetworkDnsTableDispatchProps {
   }>;
   updateTableActivePage: ActionCreator<{
     activePage: number;
-    networkType: networkModel.NetworkType;
     tableType: networkModel.NetworkTableType;
   }>;
 }
@@ -114,7 +113,6 @@ class NetworkDnsTableComponent extends React.PureComponent<NetworkDnsTableProps>
         updateActivePage={newPage =>
           updateTableActivePage({
             activePage: newPage,
-            networkType: type,
             tableType,
           })
         }
@@ -152,7 +150,7 @@ const makeMapStateToProps = () => {
 export const NetworkDnsTable = connect(
   makeMapStateToProps,
   {
-    updateTableActivePage: networkActions.updateTableActivePage,
+    updateTableActivePage: networkActions.updateNetworkPageTableActivePage,
     updateDnsLimit: networkActions.updateDnsLimit,
     updateDnsSort: networkActions.updateDnsSort,
     updateIsPtrIncluded: networkActions.updateIsPtrIncluded,

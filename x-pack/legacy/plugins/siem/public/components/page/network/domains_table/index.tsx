@@ -62,8 +62,7 @@ interface DomainsTableDispatchProps {
   }>;
   updateTableActivePage: ActionCreator<{
     activePage: number;
-    networkType: networkModel.NetworkType;
-    tableType: networkModel.NetworkTableType;
+    tableType: networkModel.IpDetailsTableType;
   }>;
 }
 
@@ -136,7 +135,6 @@ class DomainsTableComponent extends React.PureComponent<DomainsTableProps> {
         updateActivePage={newPage =>
           updateTableActivePage({
             activePage: newPage,
-            networkType: type,
             tableType,
           })
         }
@@ -182,7 +180,7 @@ export const DomainsTable = connect(
     updateDomainsLimit: networkActions.updateDomainsLimit,
     updateDomainsDirection: networkActions.updateDomainsFlowDirection,
     updateDomainsSort: networkActions.updateDomainsSort,
-    updateTableActivePage: networkActions.updateTableActivePage,
+    updateTableActivePage: networkActions.updateIpDetailsTableActivePage,
   }
 )(DomainsTableComponent);
 
