@@ -62,7 +62,7 @@ export class MapEmbeddable extends Embeddable {
   onContainerStateChanged(containerState) {
     if (!_.isEqual(containerState.timeRange, this._prevTimeRange) ||
         !_.isEqual(containerState.query, this._prevQuery) ||
-        !_.isEqual(containerState.filters, this._prevFilters)) {
+        !_.isEqual(containerState.filters.filter(filter => !filter.meta.disabled), this._prevFilters)) {
       this._dispatchSetQuery(containerState);
     }
 
@@ -74,9 +74,9 @@ export class MapEmbeddable extends Embeddable {
   _dispatchSetQuery({ query, timeRange, filters }) {
     this._prevTimeRange = timeRange;
     this._prevQuery = query;
-    this._prevFilters = filters;
+    this._prevFilters = filters.filter(filter => !filter.meta.disabled);
     this._store.dispatch(setQuery({
-      filters: filters.filter(filter => !filter.meta.disabled),
+      filters: this._prevFilters,
       query,
       timeFilters: timeRange,
     }));

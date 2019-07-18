@@ -67,6 +67,23 @@ export interface VisualizeOutput extends EmbeddableOutput {
   savedObjectId: string;
 }
 
+function areFilterChangesFetchRelevant(oldFilters: Filter[], newFilters: Filter[]) {
+  if (oldFilters.length !== newFilters.length) {
+    return true;
+  }
+
+  for (let i = 0; i < oldFilters.length; i++) {
+    const oldFilter = oldFilters[i];
+    const newFilter = newFilters[i];
+
+    if (oldFilter.meta.disabled !== newFilter.meta.disabled) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
 export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOutput> {
   private savedVisualization: VisSavedObject;
   private loader: VisualizeLoader;
@@ -112,7 +129,6 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
     this.uiState.on('change', this.uiStateChangeHandler);
 
     this.subscription = Rx.merge(this.getOutput$(), this.getInput$()).subscribe(() => {
-      this.reload();
       this.handleChanges();
     });
   }
@@ -157,19 +173,25 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
     const updatedParams: VisualizeUpdateParams = {};
 
     // Check if timerange has changed
-    if (this.input.timeRange !== this.timeRange) {
+    if (!_.isEqual(this.input.timeRange, this.timeRange)) {
       this.timeRange = _.cloneDeep(this.input.timeRange);
       updatedParams.timeRange = this.timeRange;
     }
 
     // Check if filters has changed
-    if (this.input.filters !== this.filters) {
-      updatedParams.filters = this.input.filters;
+    if (!_.isEqual(this.input.filters, this.filters)) {
+      if (
+        !this.filters ||
+        !this.input.filters ||
+        areFilterChangesFetchRelevant(this.filters, this.input.filters)
+      ) {
+        updatedParams.filters = this.input.filters;
+      }
       this.filters = this.input.filters;
     }
 
     // Check if query has changed
-    if (this.input.query !== this.query) {
+    if (!_.isEqual(this.input.query, this.query)) {
       updatedParams.query = this.input.query;
       this.query = this.input.query;
     }
@@ -183,6 +205,7 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
 
     if (this.handler && !_.isEmpty(updatedParams)) {
       this.handler.update(updatedParams);
+      this.handler.reload();
     }
   }
 
