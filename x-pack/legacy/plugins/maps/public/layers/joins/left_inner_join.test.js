@@ -116,5 +116,30 @@ describe('joinPropertiesToFeature', () => {
     });
   });
 
+  it('Should handle falsy values', () => {
+
+    const leftJoin = new LeftInnerJoin({
+      leftField: 'code',
+      right: rightSource
+    });
+
+    const feature = {//this feature does not have the iso2 field
+      properties: {
+        code: 0
+      }
+    }
+    ;
+    const propertiesMap = new Map();
+    propertiesMap.set('0', { [COUNT_PROPERTY_NAME]: 61 });
+
+    leftJoin.joinPropertiesToFeature(feature, propertiesMap, [{
+      propertyKey: COUNT_PROPERTY_NAME
+    }]);
+    expect(feature.properties).toEqual({
+      code: 0,
+      [COUNT_PROPERTY_NAME]: 61
+    });
+  });
+
 
 });
