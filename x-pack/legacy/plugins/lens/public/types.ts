@@ -45,6 +45,7 @@ export interface TableSuggestion {
 export interface DatasourceSuggestion<T = unknown> {
   state: T;
   table: TableSuggestion;
+  layerId: string;
 }
 
 /**
@@ -70,7 +71,7 @@ export interface Datasource<T = unknown, P = unknown> {
   getDatasourceSuggestionsForField: (state: T, field: unknown) => Array<DatasourceSuggestion<T>>;
   getDatasourceSuggestionsFromCurrentState: (state: T) => Array<DatasourceSuggestion<T>>;
 
-  getPublicAPI: (state: T, setState: (newState: T) => void) => DatasourcePublicAPI;
+  getPublicAPI: (state: T, setState: (newState: T) => void, layerId: string) => DatasourcePublicAPI;
 }
 
 /**
@@ -177,7 +178,7 @@ export interface VisualizationSuggestion<T = unknown> {
 
 export interface FramePublicAPI {
   datasourceLayers: Record<string, DatasourcePublicAPI>;
-  layerIdToDatasource: Record<string, string>;
+  // layerIdToDatasource: Record<string, string>;
   // Adds a new layer. This triggers a re-render
   addNewLayer: () => string;
 }

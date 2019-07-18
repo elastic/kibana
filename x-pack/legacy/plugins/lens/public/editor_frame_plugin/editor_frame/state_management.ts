@@ -20,7 +20,7 @@ export interface EditorFrameState {
   datasourceMap: Record<string, Datasource<unknown, unknown>>;
   datasourceStates: Record<string, { state: unknown; isLoading: boolean }>;
   activeDatasourceId: string | null;
-  layerIdToDatasource: FramePublicAPI['layerIdToDatasource'];
+  // layerIdToDatasource: FramePublicAPI['layerIdToDatasource'];
 }
 
 export type Action =
@@ -66,10 +66,6 @@ export type Action =
       type: 'CREATE_LAYER';
       newLayerId: string;
       newDatasourceState: unknown;
-    }
-  | {
-      type: 'UPDATE_LAYERS';
-      layerToDatasourceId: Record<string, string>;
     };
 
 export const getInitialState = (props: EditorFrameProps): EditorFrameState => {
@@ -90,7 +86,7 @@ export const getInitialState = (props: EditorFrameProps): EditorFrameState => {
       state: null,
       activeId: props.initialVisualizationId,
     },
-    layerIdToDatasource: {},
+    // layerIdToDatasource: {},
   };
 };
 
@@ -109,16 +105,16 @@ export const reducer = (state: EditorFrameState, action: Action): EditorFrameSta
         ...state,
         persistedId: action.doc.id,
         title: action.doc.title,
-        datasourceStates: action.doc.datasourceType
+        datasourceStates: action.doc.activeDatasourceId
           ? {
               ...state.datasourceStates,
-              [action.doc.datasourceType]: {
+              [action.doc.activeDatasourceId]: {
                 isLoading: true,
-                state: action.doc.state.datasource,
+                state: action.doc.state.datasourceStates[action.doc.activeDatasourceId],
               },
             }
           : state.datasourceStates,
-        activeDatasourceId: action.doc.datasourceType || null,
+        activeDatasourceId: action.doc.activeDatasourceId || null,
 
         visualization: {
           ...state.visualization,
@@ -153,11 +149,6 @@ export const reducer = (state: EditorFrameState, action: Action): EditorFrameSta
           state: action.initialState,
         },
       };
-    case 'UPDATE_LAYERS':
-      return {
-        ...state,
-        layerIdToDatasource: action.layerToDatasourceId,
-      };
     case 'UPDATE_DATASOURCE_STATE':
       return {
         ...state,
@@ -183,10 +174,10 @@ export const reducer = (state: EditorFrameState, action: Action): EditorFrameSta
     case 'CREATE_LAYER':
       return {
         ...state,
-        layerIdToDatasource: {
-          ...state.layerIdToDatasource,
-          [action.newLayerId]: state.activeDatasourceId!,
-        },
+        // layerIdToDatasource: {
+        //   ...state.layerIdToDatasource,
+        //   [action.newLayerId]: state.activeDatasourceId!,
+        // },
         datasourceStates: {
           ...state.datasourceStates,
           [state.activeDatasourceId!]: {

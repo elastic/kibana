@@ -216,11 +216,14 @@ describe('state_helpers', () => {
             indexPatternId: '1',
           },
         })
-      ).toEqual(
-        expect.objectContaining({
-          columnOrder: ['col2', 'col1'],
-        })
-      );
+      ).toEqual({
+        ...state,
+        layers: {
+          first: expect.objectContaining({
+            columnOrder: ['col2', 'col1'],
+          }),
+        },
+      });
     });
 
     it('should carry over params from old column if the operation type stays the same', () => {

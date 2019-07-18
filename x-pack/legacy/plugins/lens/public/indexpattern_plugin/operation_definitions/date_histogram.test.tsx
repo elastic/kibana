@@ -73,7 +73,7 @@ describe('date_histogram', () => {
           searchable: true,
         },
       });
-      expect(column.params.interval).toEqual('h');
+      expect(column.params.interval).toEqual('d');
     });
 
     it('should create column object with restrictions', () => {

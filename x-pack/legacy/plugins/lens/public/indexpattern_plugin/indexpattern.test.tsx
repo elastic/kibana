@@ -159,8 +159,7 @@ describe('IndexPattern Data Source', () => {
       expect(state).toEqual({
         currentIndexPatternId: '1',
         indexPatterns: expectedIndexPatterns,
-        columns: {},
-        columnOrder: [],
+        layers: {},
       });
     });
 
@@ -486,7 +485,7 @@ describe('IndexPattern Data Source', () => {
 
     beforeEach(async () => {
       const initialState = await indexPatternDatasource.initialize(persistedState);
-      publicAPI = indexPatternDatasource.getPublicAPI(initialState, () => {});
+      publicAPI = indexPatternDatasource.getPublicAPI(initialState, () => {}, 'first');
     });
 
     describe('getTableSpec', () => {
@@ -531,20 +530,21 @@ describe('IndexPattern Data Source', () => {
           {
             ...initialState,
             layers: {
-              ...initialState.layers,
               first: {
                 ...initialState.layers.first,
+                columns,
                 columnOrder: ['a', 'b', 'c'],
               },
             },
           },
-          setState
+          setState,
+          'first'
         );
 
         api.removeColumnInTableSpec('b');
 
-        expect(setState.mock.calls[0][0].columnOrder).toEqual(['a', 'c']);
-        expect(setState.mock.calls[0][0].columns).toEqual({
+        expect(setState.mock.calls[0][0].layers.first.columnOrder).toEqual(['a', 'c']);
+        expect(setState.mock.calls[0][0].layers.first.columns).toEqual({
           a: columns.a,
           c: columns.c,
         });

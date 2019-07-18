@@ -209,7 +209,7 @@ describe('filter_ratio', () => {
 
       expect(setState).toHaveBeenCalledWith({
         ...state,
-        laeyrs: {
+        layers: {
           ...state.layers,
           first: {
             ...state.layers.first,
