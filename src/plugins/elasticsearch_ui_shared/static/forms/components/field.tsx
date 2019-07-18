@@ -70,45 +70,22 @@ export const Field = ({ field, fieldProps = {} }: Props) => {
       !field.isUpdating && field.errors.length ? (field.errors[0].message as string) : null;
   }
 
-  /**
-   * There is a strange behaviour in the EUI Combobox component:
-   * If the value to be added is immediately set (without any timeout)
-   * by hitting the keyboard "ENTER" key, the event bubbles and the pill that is added
-   * receive the same keyDown ENTER event. This triggers immediately the close icon button on the pill
-   * that triggers the "remove item" callback.
-   * The behaviour does not occur with the "onBlur" as no Key is pressed.
-   *
-   * This needs to be investigated.
-   */
   const onCreateComboOption = async (value: string) => {
-    // Note: for now, we assume that all validations for a comboBox are synchronous
-    // This could change in the future, but not before we fix the current issue with the ENTER key
-    // Asynchronous validation would add another place to look at to understand the event change problem,
-    // so I prefer to limit the number of places to look at while debugging.
-    // Once we get the comboBox to work as expected with synchronous validations,
-    // we can see if asynchronous validation can also work (and if it makes sense to allow it).
+    // Note: for now, we assume that all validations for a comboBox array item are synchronous
+    // If there is a need to support asynchronous validation, we'll work on it.
     const { isValid } = field.validate({
       value,
       validationType: VALIDATION_TYPES.ARRAY_ITEM,
     }) as FieldValidateResponse;
 
     if (!isValid) {
-      setTimeout(() => {
-        field.setValue(field.value as string[]);
-      });
+      field.setValue(field.value as string[]);
       return;
     }
 
     const newValue = [...(field.value as string[]), value];
 
-    setTimeout(() => {
-      field.setValue(newValue);
-    });
-
-    // The following line should be the correct way to update the value
-    // but it does not currently work when hitting the "ENTER" key
-
-    // field.setValue(newValue);
+    field.setValue(newValue);
   };
 
   const onComboChange = (options: EuiComboBoxOptionProps[]) => {

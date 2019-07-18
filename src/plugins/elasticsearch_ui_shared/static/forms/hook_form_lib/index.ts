@@ -19,6 +19,8 @@
 
 import * as formatters from './field_formatters';
 
+// Only export the useForm hook. The "useField" hook is for internal use
+// as the consumer of the library must use the <UseField /> component
 export { useForm } from './hooks';
 
 export * from './components';
