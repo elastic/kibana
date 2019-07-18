@@ -20,13 +20,8 @@
 // @ts-ignore
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { nextTick } from 'test_utils/enzyme_helpers';
-import {
-  isErrorEmbeddable,
-  ViewMode,
-  EmbeddableFactory,
-  GetEmbeddableFactory,
-} from '../embeddable_api';
-import { DashboardContainer } from './dashboard_container';
+import { isErrorEmbeddable, ViewMode, EmbeddableFactory } from '../embeddable_api';
+import { DashboardContainer, ViewportProps } from './dashboard_container';
 import { getSampleDashboardInput, getSampleDashboardPanel } from '../test_helpers';
 import {
   CONTACT_CARD_EMBEDDABLE,
@@ -38,11 +33,18 @@ import {
   ContactCardEmbeddableOutput,
 } from '../../../../../../embeddable_api/public/np_ready/public/lib/test_samples/embeddables/contact_card/contact_card_embeddable';
 
-let getFactory: GetEmbeddableFactory;
+const viewportProps: ViewportProps = {
+  getActions: (() => []) as any,
+  getAllEmbeddableFactories: (() => []) as any,
+  getEmbeddableFactory: undefined as any,
+  notifications: {} as any,
+  overlays: {} as any,
+};
+
 beforeEach(() => {
   const __embeddableFactories = new Map<string, EmbeddableFactory>();
   __embeddableFactories.set(CONTACT_CARD_EMBEDDABLE, new ContactCardEmbeddableFactory());
-  getFactory = (id: string) => __embeddableFactories.get(id);
+  viewportProps.getEmbeddableFactory = (id: string) => __embeddableFactories.get(id);
 });
 
 test('DashboardContainer initializes embeddables', async done => {
@@ -55,7 +57,7 @@ test('DashboardContainer initializes embeddables', async done => {
         }),
       },
     }),
-    getFactory
+    viewportProps
   );
 
   const subscription = container.getOutput$().subscribe(output => {
@@ -77,7 +79,7 @@ test('DashboardContainer initializes embeddables', async done => {
 });
 
 test('DashboardContainer.addNewEmbeddable', async () => {
-  const container = new DashboardContainer(getSampleDashboardInput(), getFactory);
+  const container = new DashboardContainer(getSampleDashboardInput(), viewportProps);
   const embeddable = await container.addNewEmbeddable<ContactCardEmbeddableInput>(
     CONTACT_CARD_EMBEDDABLE,
     {
@@ -107,7 +109,7 @@ test('Container view mode change propagates to existing children', async () => {
         }),
       },
     }),
-    getFactory
+    viewportProps
   );
   await nextTick();
 
@@ -118,7 +120,7 @@ test('Container view mode change propagates to existing children', async () => {
 });
 
 test('Container view mode change propagates to new children', async () => {
-  const container = new DashboardContainer(getSampleDashboardInput(), getFactory);
+  const container = new DashboardContainer(getSampleDashboardInput(), viewportProps);
   const embeddable = await container.addNewEmbeddable<
     ContactCardEmbeddableInput,
     ContactCardEmbeddableOutput,

@@ -52,14 +52,13 @@ export class HelloWorldContainer extends Container<InheritedInput, HelloWorldCon
 
   constructor(
     input: ContainerInput<{ firstName: string; lastName: string }>,
-    getFactory: GetEmbeddableFactory,
     private readonly getActions: GetActionsCompatibleWithTrigger,
     private readonly getEmbeddableFactory: GetEmbeddableFactory,
     private readonly getAllEmbeddableFactories: GetEmbeddableFactories,
     private readonly overlays: CoreStart['overlays'],
     private readonly notifications: CoreStart['notifications']
   ) {
-    super(input, { embeddableLoaded: {} }, getFactory);
+    super(input, { embeddableLoaded: {} }, getEmbeddableFactory);
   }
 
   public getInheritedInput(id: string) {

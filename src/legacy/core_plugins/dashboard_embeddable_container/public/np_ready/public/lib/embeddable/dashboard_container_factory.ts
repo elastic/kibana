@@ -27,7 +27,7 @@ import {
   Container,
   GetEmbeddableFactory,
 } from '../embeddable_api';
-import { DashboardContainer, DashboardContainerInput } from './dashboard_container';
+import { DashboardContainer, DashboardContainerInput, ViewportProps } from './dashboard_container';
 
 export const DASHBOARD_CONTAINER_TYPE = 'dashboard';
 
@@ -48,7 +48,10 @@ export class DashboardContainerFactory extends EmbeddableFactory<
   public readonly type = DASHBOARD_CONTAINER_TYPE;
   private allowEditing: boolean;
 
-  constructor(private readonly options: DashboardOptions) {
+  constructor(
+    private readonly options: DashboardOptions,
+    private readonly viewportProps: ViewportProps
+  ) {
     super({ savedObjectMetaData: options.savedObjectMetaData });
     this.allowEditing = options.capabilities.createNew && options.capabilities.showWriteControls;
   }
@@ -75,6 +78,6 @@ export class DashboardContainerFactory extends EmbeddableFactory<
     initialInput: DashboardContainerInput,
     parent?: Container
   ): Promise<DashboardContainer | ErrorEmbeddable> {
-    return new DashboardContainer(initialInput, this.options.getFactory, parent);
+    return new DashboardContainer(initialInput, this.viewportProps, parent);
   }
 }

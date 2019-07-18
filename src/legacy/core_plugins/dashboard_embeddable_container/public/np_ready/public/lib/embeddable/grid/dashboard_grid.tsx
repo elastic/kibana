@@ -26,6 +26,7 @@ import _ from 'lodash';
 import React from 'react';
 import { Subscription } from 'rxjs';
 import ReactGridLayout, { Layout } from 'react-grid-layout';
+// @ts-ignore
 import sizeMe from 'react-sizeme';
 import {
   GetActionsCompatibleWithTrigger,

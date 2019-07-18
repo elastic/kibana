@@ -86,7 +86,6 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
 
   constructor(
     initialInput: DashboardContainerInput,
-    getFactory: GetEmbeddableFactory,
     private readonly viewportProps: ViewportProps,
     parent?: Container
   ) {
@@ -99,7 +98,7 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
         ...initialInput,
       },
       { embeddableLoaded: {} },
-      getFactory,
+      viewportProps.getEmbeddableFactory,
       parent
     );
   }

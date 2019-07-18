@@ -24,9 +24,9 @@ import { skip } from 'rxjs/operators';
 import { mount } from 'enzyme';
 import { I18nProvider } from '@kbn/i18n/react';
 import { nextTick } from 'test_utils/enzyme_helpers';
-import { EmbeddableFactory, GetEmbeddableFactory } from '../../embeddable_api';
+import { EmbeddableFactory } from '../../embeddable_api';
 import { DashboardViewport, DashboardViewportProps } from './dashboard_viewport';
-import { DashboardContainer } from '../dashboard_container';
+import { DashboardContainer, ViewportProps } from '../dashboard_container';
 import { getSampleDashboardInput } from '../../test_helpers';
 import {
   CONTACT_CARD_EMBEDDABLE,
@@ -36,9 +36,17 @@ import {
 let dashboardContainer: DashboardContainer | undefined;
 
 function getProps(props?: Partial<DashboardViewportProps>): DashboardViewportProps {
+  const viewportProps: ViewportProps = {
+    getActions: (() => []) as any,
+    getAllEmbeddableFactories: (() => []) as any,
+    getEmbeddableFactory: undefined as any,
+    notifications: {} as any,
+    overlays: {} as any,
+  };
+
   const __embeddableFactories = new Map<string, EmbeddableFactory>();
   __embeddableFactories.set(CONTACT_CARD_EMBEDDABLE, new ContactCardEmbeddableFactory());
-  const getFactory: GetEmbeddableFactory = (id: string) => __embeddableFactories.get(id);
+  viewportProps.getEmbeddableFactory = (id: string) => __embeddableFactories.get(id);
 
   dashboardContainer = new DashboardContainer(
     getSampleDashboardInput({
@@ -55,10 +63,11 @@ function getProps(props?: Partial<DashboardViewportProps>): DashboardViewportPro
         },
       },
     }),
-    getFactory
+    viewportProps
   );
   const defaultTestProps: DashboardViewportProps = {
     container: dashboardContainer,
+    ...viewportProps,
   };
   return Object.assign(defaultTestProps, props);
 }
