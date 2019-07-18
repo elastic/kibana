@@ -67,21 +67,8 @@ export interface VisualizeOutput extends EmbeddableOutput {
   savedObjectId: string;
 }
 
-function areFilterChangesFetchRelevant(oldFilters: Filter[], newFilters: Filter[]) {
-  if (oldFilters.length !== newFilters.length) {
-    return true;
-  }
-
-  for (let i = 0; i < oldFilters.length; i++) {
-    const oldFilter = oldFilters[i];
-    const newFilter = newFilters[i];
-
-    if (oldFilter.meta.disabled !== newFilter.meta.disabled) {
-      return true;
-    }
-  }
-
-  return false;
+function getEnabledFilters(filters?: Filter[]) {
+  return filters ? filters.filter(filter => !filter.meta.disabled) : undefined;
 }
 
 export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOutput> {
@@ -179,15 +166,10 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
     }
 
     // Check if filters has changed
-    if (!_.isEqual(this.input.filters, this.filters)) {
-      if (
-        !this.filters ||
-        !this.input.filters ||
-        areFilterChangesFetchRelevant(this.filters, this.input.filters)
-      ) {
-        updatedParams.filters = this.input.filters;
-      }
-      this.filters = this.input.filters;
+    const enabledFilters = getEnabledFilters(this.input.filters);
+    if (!_.isEqual(enabledFilters, this.filters)) {
+      updatedParams.filters = enabledFilters;
+      this.filters = enabledFilters;
     }
 
     // Check if query has changed
@@ -217,7 +199,7 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
   public render(domNode: HTMLElement) {
     this.timeRange = _.cloneDeep(this.input.timeRange);
     this.query = this.input.query;
-    this.filters = this.input.filters;
+    this.filters = getEnabledFilters(this.input.filters);
 
     this.transferCustomizationsToUiState();
 
@@ -234,8 +216,8 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
       // Append visualization to container instead of replacing its content
       append: true,
       timeRange: _.cloneDeep(this.input.timeRange),
-      query: this.input.query,
-      filters: this.input.filters,
+      query: this.query,
+      filters: this.filters,
       cssClass: `panel-content panel-content--fullWidth`,
       dataAttrs,
     };
