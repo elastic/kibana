@@ -18,14 +18,13 @@
  */
 
 import PropTypes from 'prop-types';
-import React from 'react';
+import React, { useContext } from 'react';
 import { DataFormatPicker } from '../../data_format_picker';
 import { createSelectHandler } from '../../lib/create_select_handler';
 import { YesNo } from '../../yes_no';
 import { createTextHandler } from '../../lib/create_text_handler';
 import { IndexPattern } from '../../index_pattern';
 import { data } from 'plugins/data/setup';
-const { QueryBarInput } = data.query.ui;
 import { Storage } from 'ui/storage';
 import {
   htmlIdGenerator,
@@ -42,11 +41,17 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 import { getDefaultQueryLanguage } from '../../lib/get_default_query_language';
+import { isPercentDisabled } from '../../lib/stacked';
+import { SeriesQuantityContext } from '../../../contexts/series_quantity_context';
+import { STACKED_OPTIONS } from '../../../visualizations/constants/chart';
+
+const { QueryBarInput } = data.query.ui;
 const localStorage = new Storage(window.localStorage);
 
 export const TimeseriesConfig = injectI18n(function(props) {
   const handleSelectChange = createSelectHandler(props.onChange);
   const handleTextChange = createTextHandler(props.onChange);
+  const seriesQuantity = useContext(SeriesQuantityContext);
   const defaults = {
     fill: '',
     line_width: '',
@@ -56,7 +61,7 @@ export const TimeseriesConfig = injectI18n(function(props) {
     split_color_mode: 'gradient',
     axis_min: '',
     axis_max: '',
-    stacked: 'none',
+    stacked: STACKED_OPTIONS.NONE,
     steps: 0,
   };
   const model = { ...defaults, ...props.model };
@@ -74,6 +79,7 @@ export const TimeseriesConfig = injectI18n(function(props) {
     {
       label: intl.formatMessage({ id: 'tsvb.timeSeries.percentLabel', defaultMessage: 'Percent' }),
       value: 'percent',
+      disabled: isPercentDisabled(seriesQuantity),
     },
   ];
   const selectedStackedOption = stackedOptions.find(option => {
@@ -126,6 +132,7 @@ export const TimeseriesConfig = injectI18n(function(props) {
   });
 
   let type;
+
   if (model.chart_type === 'line') {
     type = (
       <EuiFlexGroup gutterSize="s" responsive={false} wrap={true}>

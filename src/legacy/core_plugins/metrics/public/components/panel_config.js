@@ -28,6 +28,7 @@ import { MarkdownPanelConfig as markdown } from './panel_config/markdown';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { FormValidationContext } from '../contexts/form_validation_context';
 import { UIRestrictionsContext } from '../contexts/ui_restriction_context';
+import { SeriesQuantityContext } from '../contexts/series_quantity_context';
 
 const types = {
   timeseries,
@@ -46,20 +47,22 @@ export function PanelConfig(props) {
   const Component = types[model.type];
   const [formValidationResults] = useState({});
   const [uiRestrictions, setUIRestrictions] = useState(null);
+  const [seriesQuantity, setSeriesQuantity] = useState(0);
 
   useEffect(() => {
     model.isModelInvalid = !checkModelValidity(formValidationResults);
   });
 
   useEffect(() => {
-    const visDataSubscription = props.visData$.subscribe(visData =>
-      setUIRestrictions(get(visData, 'uiRestrictions', null))
-    );
+    const visDataSubscription = props.visData$.subscribe(visData => {
+      setUIRestrictions(get(visData, 'uiRestrictions', null));
+      setSeriesQuantity(get(visData, `${model.id}.series`, []).length);
+    });
 
     return function cleanup() {
       visDataSubscription.unsubscribe();
     };
-  }, [props.visData$]);
+  }, [model.id, props.visData$]);
 
   const updateControlValidity = (controlKey, isControlValid) => {
     formValidationResults[controlKey] = isControlValid;
@@ -69,7 +72,9 @@ export function PanelConfig(props) {
     return (
       <FormValidationContext.Provider value={updateControlValidity}>
         <UIRestrictionsContext.Provider value={uiRestrictions}>
-          <Component {...props} />
+          <SeriesQuantityContext.Provider value={seriesQuantity}>
+            <Component {...props} />
+          </SeriesQuantityContext.Provider>
         </UIRestrictionsContext.Provider>
       </FormValidationContext.Provider>
     );
