@@ -211,7 +211,7 @@ export default function ({ getService, getPageObjects }) {
 
       });
 
-      describe('Only request data around extent of map option', async () => {
+      describe('Only request data around extent of map option', () => {
 
         it('when checked adds filters to aggregation', async () => {
           const vizName1 = 'Visualization TileMap';

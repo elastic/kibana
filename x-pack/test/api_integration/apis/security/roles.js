@@ -74,7 +74,7 @@ export default function ({ getService }) {
         });
       });
 
-      it(`should ${basic ? 'not' : ''} create a role with kibana and FLS/DLS elasticsearch 
+      it(`should ${basic ? 'not' : ''} create a role with kibana and FLS/DLS elasticsearch
       privileges on ${basic ? 'basic' : 'trial'} licenses`, async () => {
         await supertest.put('/api/security/role/role_with_privileges_dls_fls')
           .set('kbn-xsrf', 'xxx')
@@ -191,7 +191,7 @@ export default function ({ getService }) {
         });
       });
 
-      it(`should ${basic ? 'not' : ''} update a role adding DLS and TLS priviledges 
+      it(`should ${basic ? 'not' : ''} update a role adding DLS and TLS priviledges
       when using ${basic ? 'basic' : 'trial'} license`, async () => {
 
         await es.shield.putRole({
