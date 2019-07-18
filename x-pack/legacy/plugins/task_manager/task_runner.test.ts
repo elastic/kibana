@@ -11,11 +11,7 @@ import { ConcreteTaskInstance } from './task';
 import { TaskManagerRunner } from './task_runner';
 
 const mockedNow = new Date('2019-06-03T18:55:25.982Z');
-(global as any).Date = class Date extends global.Date {
-  static now() {
-    return mockedNow.getTime();
-  }
-};
+const clock = sinon.useFakeTimers(mockedNow.valueOf());
 
 describe('TaskManagerRunner', () => {
   test('provides details about the task that is running', () => {
@@ -182,7 +178,9 @@ describe('TaskManagerRunner', () => {
         bar: {
           createTaskRunner: () => ({
             async run() {
-              await new Promise(r => setTimeout(r, 1000));
+              const promise = new Promise(r => setTimeout(r, 1000));
+              clock.tick(1000);
+              await promise;
             },
             async cancel() {
               wasCancelled = true;
@@ -193,7 +191,7 @@ describe('TaskManagerRunner', () => {
     });
 
     const promise = runner.run();
-    await new Promise(r => setInterval(r, 1));
+    await Promise.resolve();
     await runner.cancel();
     await promise;
 

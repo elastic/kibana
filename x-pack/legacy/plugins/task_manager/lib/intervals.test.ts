@@ -5,6 +5,7 @@
  */
 
 import _ from 'lodash';
+import sinon from 'sinon';
 import {
   assertValidInterval,
   intervalFromNow,
@@ -16,14 +17,7 @@ import {
 } from './intervals';
 
 const mockedNow = new Date('2019-06-03T18:55:25.982Z');
-(global as any).Date = class Date extends global.Date {
-  static now() {
-    return mockedNow.getTime();
-  }
-  valueOf() {
-    return mockedNow.valueOf();
-  }
-};
+sinon.useFakeTimers(mockedNow.valueOf());
 
 describe('taskIntervals', () => {
   describe('assertValidInterval', () => {
