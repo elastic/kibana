@@ -9,35 +9,59 @@ import { xyChart, XYChart } from './xy_expression';
 import { KibanaDatatable } from '../types';
 import React from 'react';
 import { shallow } from 'enzyme';
-import { XYArgs, LegendConfig, legendConfig, XConfig, xConfig, YConfig, yConfig } from './types';
+import { XYArgs, LegendConfig, legendConfig, layerConfig, LayerConfig } from './types';
 
 function sampleArgs() {
   const data: KibanaDatatable = {
     type: 'kibana_datatable',
-    columns: [{ id: 'a', name: 'a' }, { id: 'b', name: 'b' }, { id: 'c', name: 'c' }],
-    rows: [{ a: 1, b: 2, c: 3 }, { a: 1, b: 5, c: 4 }],
+    columns: [{ id: 'first', name: '' }],
+    rows: [
+      {
+        first: {
+          type: 'kibana_datatable',
+          columns: [{ id: 'a', name: 'a' }, { id: 'b', name: 'b' }, { id: 'c', name: 'c' }],
+          rows: [{ a: 1, b: 2, c: 3 }, { a: 1, b: 5, c: 4 }],
+        },
+      },
+    ],
   };
 
   const args: XYArgs = {
-    seriesType: 'line',
+    // seriesType: 'line',
     legend: {
       isVisible: false,
       position: Position.Top,
     },
-    y: {
-      accessors: ['a', 'b'],
-      labels: ['Label A', 'Label B'],
-      position: Position.Left,
-      showGridlines: false,
-      title: 'A and B',
-    },
-    x: {
-      accessor: 'c',
-      position: Position.Bottom,
-      showGridlines: false,
-      title: 'C',
-    },
-    splitSeriesAccessors: [],
+    layers: [
+      {
+        layerId: 'first',
+        datasourceId: 'indexpattern',
+        seriesType: 'line',
+
+        xAccessor: 'c',
+        accessors: ['a', 'b'],
+        labels: ['Label A', 'Label B'],
+        position: Position.Left,
+        showGridlines: false,
+        title: 'A and B',
+
+        splitSeriesAccessors: [],
+      },
+    ],
+    // y: {
+    //   accessors: ['a', 'b'],
+    //   labels: ['Label A', 'Label B'],
+    //   position: Position.Left,
+    //   showGridlines: false,
+    //   title: 'A and B',
+    // },
+    // x: {
+    //   accessor: 'c',
+    //   position: Position.Bottom,
+    //   showGridlines: false,
+    //   title: 'C',
+    // },
+    // splitSeriesAccessors: [],
   };
 
   return { data, args };
@@ -57,31 +81,22 @@ describe('xy_expression', () => {
       });
     });
 
-    test('xConfig produces the correct arguments', () => {
-      const args: XConfig = {
-        accessor: 'foo',
-        position: Position.Right,
-        showGridlines: true,
-        title: 'Foooo!',
+    test('layerConfig produces the correct arguments', () => {
+      const args: LayerConfig = {
+        layerId: 'first',
+        datasourceId: 'indexpattern',
+        seriesType: 'line',
+        xAccessor: 'c',
+        accessors: ['a', 'b'],
+        labels: ['Label A', 'Label B'],
+        position: Position.Left,
+        showGridlines: false,
+        title: 'A and B',
+        splitSeriesAccessors: [],
       };
 
-      expect(xConfig.fn(null, args, {})).toEqual({
-        type: 'lens_xy_xConfig',
-        ...args,
-      });
-    });
-
-    test('yConfig produces the correct arguments', () => {
-      const args: YConfig = {
-        accessors: ['bar'],
-        labels: [''],
-        position: Position.Bottom,
-        showGridlines: true,
-        title: 'Barrrrrr!',
-      };
-
-      expect(yConfig.fn(null, args, {})).toEqual({
-        type: 'lens_xy_yConfig',
+      expect(layerConfig.fn(null, args, {})).toEqual({
+        type: 'lens_xy_layerConfig',
         ...args,
       });
     });
@@ -103,7 +118,12 @@ describe('xy_expression', () => {
     test('it renders line', () => {
       const { data, args } = sampleArgs();
 
-      const component = shallow(<XYChart data={data} args={{ ...args, seriesType: 'line' }} />);
+      const component = shallow(
+        <XYChart
+          data={data}
+          args={{ ...args, layers: [{ ...args.layers[0], seriesType: 'line' }] }}
+        />
+      );
       expect(component).toMatchSnapshot();
       expect(component.find(LineSeries)).toHaveLength(1);
     });
@@ -111,7 +131,13 @@ describe('xy_expression', () => {
     test('it renders bar', () => {
       const { data, args } = sampleArgs();
 
-      const component = shallow(<XYChart data={data} args={{ ...args, seriesType: 'bar' }} />);
+      // const component = shallow(<XYChart data={data} args={{ ...args, seriesType: 'bar' }} />);
+      const component = shallow(
+        <XYChart
+          data={data}
+          args={{ ...args, layers: [{ ...args.layers[0], seriesType: 'bar' }] }}
+        />
+      );
       expect(component).toMatchSnapshot();
       expect(component.find(BarSeries)).toHaveLength(1);
     });
@@ -119,7 +145,13 @@ describe('xy_expression', () => {
     test('it renders area', () => {
       const { data, args } = sampleArgs();
 
-      const component = shallow(<XYChart data={data} args={{ ...args, seriesType: 'area' }} />);
+      // const component = shallow(<XYChart data={data} args={{ ...args, seriesType: 'area' }} />);
+      const component = shallow(
+        <XYChart
+          data={data}
+          args={{ ...args, layers: [{ ...args.layers[0], seriesType: 'bar' }] }}
+        />
+      );
       expect(component).toMatchSnapshot();
       expect(component.find(AreaSeries)).toHaveLength(1);
     });
@@ -127,8 +159,14 @@ describe('xy_expression', () => {
     test('it renders horizontal bar', () => {
       const { data, args } = sampleArgs();
 
+      // const component = shallow(
+      //   <XYChart data={data} args={{ ...args, seriesType: 'horizontal_bar' }} />
+      // );
       const component = shallow(
-        <XYChart data={data} args={{ ...args, seriesType: 'horizontal_bar' }} />
+        <XYChart
+          data={data}
+          args={{ ...args, layers: [{ ...args.layers[0], seriesType: 'horizontal_bar' }] }}
+        />
       );
       expect(component).toMatchSnapshot();
       expect(component.find(BarSeries)).toHaveLength(1);
@@ -137,8 +175,14 @@ describe('xy_expression', () => {
     test('it renders stacked bar', () => {
       const { data, args } = sampleArgs();
 
+      // const component = shallow(
+      //   <XYChart data={data} args={{ ...args, seriesType: 'bar_stacked' }} />
+      // );
       const component = shallow(
-        <XYChart data={data} args={{ ...args, seriesType: 'bar_stacked' }} />
+        <XYChart
+          data={data}
+          args={{ ...args, layers: [{ ...args.layers[0], seriesType: 'bar_stacked' }] }}
+        />
       );
       expect(component).toMatchSnapshot();
       expect(component.find(BarSeries)).toHaveLength(1);
@@ -148,8 +192,14 @@ describe('xy_expression', () => {
     test('it renders stacked area', () => {
       const { data, args } = sampleArgs();
 
+      // const component = shallow(
+      //   <XYChart data={data} args={{ ...args, seriesType: 'area_stacked' }} />
+      // );
       const component = shallow(
-        <XYChart data={data} args={{ ...args, seriesType: 'area_stacked' }} />
+        <XYChart
+          data={data}
+          args={{ ...args, layers: [{ ...args.layers[0], seriesType: 'area_stacked' }] }}
+        />
       );
       expect(component).toMatchSnapshot();
       expect(component.find(AreaSeries)).toHaveLength(1);
@@ -159,8 +209,14 @@ describe('xy_expression', () => {
     test('it renders stacked horizontal bar', () => {
       const { data, args } = sampleArgs();
 
+      // const component = shallow(
+      //   <XYChart data={data} args={{ ...args, seriesType: 'horizontal_bar_stacked' }} />
+      // );
       const component = shallow(
-        <XYChart data={data} args={{ ...args, seriesType: 'horizontal_bar_stacked' }} />
+        <XYChart
+          data={data}
+          args={{ ...args, layers: [{ ...args.layers[0], seriesType: 'horizontal_bar_stacked' }] }}
+        />
       );
       expect(component).toMatchSnapshot();
       expect(component.find(BarSeries)).toHaveLength(1);
@@ -171,7 +227,13 @@ describe('xy_expression', () => {
     test('it remaps rows based on the labels', () => {
       const { data, args } = sampleArgs();
 
-      const chart = shallow(<XYChart data={data} args={{ ...args, seriesType: 'bar' }} />);
+      // const chart = shallow(<XYChart data={data} args={{ ...args, seriesType: 'bar' }} />);
+      const chart = shallow(
+        <XYChart
+          data={data}
+          args={{ ...args, layers: [{ ...args.layers[0], seriesType: 'bar' }] }}
+        />
+      );
       const barSeries = chart.find(BarSeries);
 
       expect(barSeries.prop('yAccessors')).toEqual(['Label A', 'Label B']);

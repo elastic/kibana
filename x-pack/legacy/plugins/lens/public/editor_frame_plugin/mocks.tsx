@@ -6,16 +6,17 @@
 
 import React from 'react';
 import { DataSetup, ExpressionRendererProps } from 'src/legacy/core_plugins/data/public';
-import { DatasourcePublicAPI, Visualization, Datasource } from '../types';
+import { DatasourcePublicAPI, FramePublicAPI, Visualization, Datasource } from '../types';
 import { EditorFrameSetupPlugins } from './plugin';
 
 export function createMockVisualization(): jest.Mocked<Visualization> {
   return {
     getPersistableState: jest.fn(_state => ({})),
     getSuggestions: jest.fn(_options => []),
-    initialize: jest.fn((_datasource, _state?) => ({})),
+    initialize: jest.fn((_frame, _state?) => ({})),
     renderConfigPanel: jest.fn(),
-    toExpression: jest.fn((_state, _datasource) => null),
+    toExpression: jest.fn((_state, _frame) => null),
+    getLayerIds: jest.fn(_state => []),
   };
 }
 
@@ -28,6 +29,7 @@ export function createMockDatasource(): DatasourceMock {
     getTableSpec: jest.fn(() => []),
     getOperationForColumnId: jest.fn(),
     renderDimensionPanel: jest.fn(),
+    renderLayerPanel: jest.fn(),
     removeColumnInTableSpec: jest.fn(),
     moveColumnTo: jest.fn(),
     duplicateColumn: jest.fn(),
@@ -40,11 +42,23 @@ export function createMockDatasource(): DatasourceMock {
     getPublicAPI: jest.fn((_state, _setState) => publicAPIMock),
     initialize: jest.fn((_state?) => Promise.resolve()),
     renderDataPanel: jest.fn(),
-    toExpression: jest.fn(_state => null),
+    toExpression: jest.fn((_frame, _state) => null),
+    insertLayer: jest.fn((_state, _newLayerId) => {}),
+    getLayers: jest.fn(_state => []),
 
     // this is an additional property which doesn't exist on real datasources
     // but can be used to validate whether specific API mock functions are called
     publicAPIMock,
+  };
+}
+
+export type FrameMock = jest.Mocked<FramePublicAPI>;
+
+export function createMockFramePublicAPI(): FrameMock {
+  return {
+    datasourceLayers: {},
+    layerIdToDatasource: {},
+    addNewLayer: jest.fn(() => ''),
   };
 }
 

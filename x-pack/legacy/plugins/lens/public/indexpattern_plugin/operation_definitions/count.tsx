@@ -6,7 +6,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { CountIndexPatternColumn } from '../indexpattern';
-import { DimensionPriority } from '../../types';
+import { DimensionPriority, DimensionLayer } from '../../types';
 import { OperationDefinition } from '../operations';
 
 export const countOperation: OperationDefinition<CountIndexPatternColumn> = {
@@ -15,14 +15,8 @@ export const countOperation: OperationDefinition<CountIndexPatternColumn> = {
     defaultMessage: 'Count',
   }),
   isApplicableWithoutField: true,
-  isApplicableForField: ({ aggregationRestrictions, type }) => {
-    return false;
-  },
-  buildColumn(
-    operationId: string,
-    columns: {},
-    suggestedOrder?: DimensionPriority
-  ): CountIndexPatternColumn {
+  isApplicableForField: () => false,
+  buildColumn({ operationId, suggestedPriority, indexPatternId }) {
     return {
       operationId,
       label: i18n.translate('xpack.lens.indexPattern.countOf', {
@@ -30,8 +24,10 @@ export const countOperation: OperationDefinition<CountIndexPatternColumn> = {
       }),
       dataType: 'number',
       operationType: 'count',
-      suggestedOrder,
+      suggestedPriority,
       isBucketed: false,
+      indexPatternId,
+      // layer,
     };
   },
   toEsAggsConfig: (column, columnId) => ({

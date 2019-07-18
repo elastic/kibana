@@ -4,11 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useEffect, useReducer, useMemo } from 'react';
+import React, { useEffect, useReducer } from 'react';
 import { EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ExpressionRenderer } from '../../../../../../../src/legacy/core_plugins/data/public';
-import { Datasource, Visualization } from '../../types';
+import { Datasource, DatasourcePublicAPI, FramePublicAPI, Visualization } from '../../types';
 import { reducer, getInitialState } from './state_management';
 import { DataPanelWrapper } from './data_panel_wrapper';
 import { ConfigPanelWrapper } from './config_panel_wrapper';
@@ -18,12 +18,14 @@ import { WorkspacePanel } from './workspace_panel';
 import { SavedObjectStore, Document } from '../../persistence/saved_object_store';
 import { save } from './save';
 import { WorkspacePanelWrapper } from './workspace_panel_wrapper';
+import { generateId } from '../../id_generator';
 
 export interface EditorFrameProps {
   doc?: Document;
   store: SavedObjectStore;
   datasourceMap: Record<string, Datasource>;
   visualizationMap: Record<string, Visualization>;
+  // layerToDatasourceId: Record<string, string>;
   redirectTo: (path: string) => void;
   initialDatasourceId: string | null;
   initialVisualizationId: string | null;
@@ -35,28 +37,78 @@ export function EditorFrame(props: EditorFrameProps) {
   const [state, dispatch] = useReducer(reducer, props, getInitialState);
   const { onError } = props;
 
-  // create public datasource api for current state
-  // as soon as datasource is available and memoize it
-  const datasourcePublicAPI = useMemo(
-    () =>
-      state.datasource.activeId && !state.datasource.isLoading
-        ? props.datasourceMap[state.datasource.activeId].getPublicAPI(
-            state.datasource.state,
-            (newState: unknown) => {
+  const allLoaded = Object.values(state.datasourceStates).every(({ isLoading }) => !isLoading);
+
+  // Initialize current datasource and all active datasources
+  useEffect(() => {
+    if (!allLoaded) {
+      Object.entries(state.datasourceMap).forEach(([datasourceId, datasource]) => {
+        if (state.datasourceStates[datasourceId].isLoading) {
+          datasource
+            .initialize(props.doc && props.doc.state.datasource)
+            .then(datasourceState => {
               dispatch({
                 type: 'UPDATE_DATASOURCE_STATE',
-                newState,
+                newState: datasourceState,
               });
-            }
-          )
-        : undefined,
-    [
-      props.datasourceMap,
-      state.datasource.isLoading,
-      state.datasource.activeId,
-      state.datasource.state,
-    ]
-  );
+            })
+            .catch(onError);
+        }
+      });
+    }
+  }, [props.doc, Object.keys(state.datasourceStates), state.activeDatasourceId]);
+
+  const datasourceEntries: Array<[string, DatasourcePublicAPI]> = Object.keys(
+    state.datasourceMap
+  ).map(key => {
+    const ds = state.datasourceMap[key];
+    return [
+      key,
+      ds.getPublicAPI(state.datasourceStates[key].state, (newState: unknown) => {
+        dispatch({
+          type: 'UPDATE_DATASOURCE_STATE',
+          newState,
+        });
+      }),
+    ];
+  });
+
+  const layerToDatasourceId: Record<string, string> = {};
+  const datasourceLayers: Record<string, DatasourcePublicAPI> = {};
+  datasourceEntries.forEach(([id, publicAPI]) => {
+    const stateWrapper = state.datasourceStates[id];
+    if (stateWrapper.isLoading) {
+      return;
+    }
+    const dsState = stateWrapper.state;
+    const layers = state.datasourceMap[id].getLayers(dsState);
+
+    layers.forEach(layer => {
+      layerToDatasourceId[layer] = id;
+      datasourceLayers[layer] = publicAPI;
+    });
+  });
+
+  const framePublicAPI: FramePublicAPI = {
+    layerIdToDatasource: layerToDatasourceId,
+    datasourceLayers,
+    addNewLayer: () => {
+      const newLayerId = generateId();
+
+      const newState = state.datasourceMap[state.activeDatasourceId!].insertLayer(
+        state.datasourceStates[state.activeDatasourceId!].state,
+        newLayerId
+      );
+
+      dispatch({
+        type: 'CREATE_LAYER',
+        newLayerId,
+        newDatasourceState: newState,
+      });
+
+      return newLayerId;
+    },
+  };
 
   useEffect(() => {
     if (props.doc) {
@@ -72,48 +124,22 @@ export function EditorFrame(props: EditorFrameProps) {
     }
   }, [props.doc]);
 
-  // Initialize current datasource
+  // Initialize visualization as soon as all datasource is ready
   useEffect(() => {
-    let datasourceGotSwitched = false;
-    if (state.datasource.isLoading && state.datasource.activeId) {
-      props.datasourceMap[state.datasource.activeId]
-        .initialize(props.doc && props.doc.state.datasource)
-        .then(datasourceState => {
-          if (!datasourceGotSwitched) {
-            dispatch({
-              type: 'UPDATE_DATASOURCE_STATE',
-              newState: datasourceState,
-            });
-          }
-        })
-        .catch(onError);
-
-      return () => {
-        datasourceGotSwitched = true;
-      };
-    }
-  }, [props.doc, state.datasource.activeId, state.datasource.isLoading]);
-
-  // Initialize visualization as soon as datasource is ready
-  useEffect(() => {
-    if (
-      datasourcePublicAPI &&
-      state.visualization.state === null &&
-      state.visualization.activeId !== null
-    ) {
+    if (allLoaded && state.visualization.state === null && state.visualization.activeId !== null) {
       const initialVisualizationState = props.visualizationMap[
         state.visualization.activeId
-      ].initialize(datasourcePublicAPI);
+      ].initialize(framePublicAPI);
       dispatch({
         type: 'UPDATE_VISUALIZATION_STATE',
         newState: initialVisualizationState,
       });
     }
-  }, [datasourcePublicAPI, state.visualization.activeId, state.visualization.state]);
+  }, [allLoaded, state.visualization.activeId, state.visualization.state]);
 
   const datasource =
-    state.datasource.activeId && !state.datasource.isLoading
-      ? props.datasourceMap[state.datasource.activeId]
+    state.activeDatasourceId && !state.datasourceStates[state.activeDatasourceId].isLoading
+      ? props.datasourceMap[state.activeDatasourceId]
       : undefined;
 
   const visualization = state.visualization.activeId
@@ -138,7 +164,7 @@ export function EditorFrame(props: EditorFrameProps) {
                   }).catch(onError);
                 }
               }}
-              disabled={state.saving || !state.datasource.activeId || !state.visualization.activeId}
+              disabled={state.saving || !state.activeDatasourceId || !state.visualization.activeId}
             >
               {i18n.translate('xpack.lens.editorFrame.Save', {
                 defaultMessage: 'Save',
@@ -149,9 +175,17 @@ export function EditorFrame(props: EditorFrameProps) {
         dataPanel={
           <DataPanelWrapper
             datasourceMap={props.datasourceMap}
-            activeDatasource={state.datasource.activeId}
-            datasourceState={state.datasource.state}
-            datasourceIsLoading={state.datasource.isLoading}
+            activeDatasource={state.activeDatasourceId}
+            datasourceState={
+              state.activeDatasourceId
+                ? state.datasourceStates[state.activeDatasourceId].state
+                : null
+            }
+            datasourceIsLoading={
+              state.activeDatasourceId
+                ? state.datasourceStates[state.activeDatasourceId].isLoading
+                : true
+            }
             dispatch={dispatch}
           />
         }
@@ -159,18 +193,20 @@ export function EditorFrame(props: EditorFrameProps) {
           <ConfigPanelWrapper
             visualizationMap={props.visualizationMap}
             activeVisualizationId={state.visualization.activeId}
-            datasourcePublicAPI={datasourcePublicAPI!}
+            // datasourcePublicAPI={datasourcePublicAPI!}
             dispatch={dispatch}
             visualizationState={state.visualization.state}
+            framePublicAPI={framePublicAPI}
           />
         }
         workspacePanel={
           <WorkspacePanelWrapper title={state.title} dispatch={dispatch}>
             <WorkspacePanel
-              activeDatasource={datasource}
+              activeDatasourceId={state.activeDatasourceId}
               activeVisualizationId={state.visualization.activeId}
-              datasourcePublicAPI={datasourcePublicAPI!}
-              datasourceState={state.datasource.state}
+              datasourceMap={state.datasourceMap}
+              datasourceStates={state.datasourceStates}
+              framePublicAPI={framePublicAPI}
               visualizationState={state.visualization.state}
               visualizationMap={props.visualizationMap}
               dispatch={dispatch}
@@ -182,7 +218,11 @@ export function EditorFrame(props: EditorFrameProps) {
           <SuggestionPanel
             activeDatasource={datasource}
             activeVisualizationId={state.visualization.activeId}
-            datasourceState={state.datasource.state}
+            datasourceState={
+              state.activeDatasourceId
+                ? state.datasourceStates[state.activeDatasourceId].state
+                : null
+            }
             visualizationState={state.visualization.state}
             visualizationMap={props.visualizationMap}
             dispatch={dispatch}
@@ -197,9 +237,15 @@ export function EditorFrame(props: EditorFrameProps) {
     <FrameLayout
       dataPanel={
         <DataPanelWrapper
-          activeDatasource={state.datasource.activeId}
-          datasourceIsLoading={state.datasource.isLoading}
-          datasourceState={state.datasource.state}
+          activeDatasource={state.activeDatasourceId}
+          datasourceIsLoading={
+            state.activeDatasourceId
+              ? state.datasourceStates[state.activeDatasourceId].isLoading
+              : true
+          }
+          datasourceState={
+            state.activeDatasourceId ? state.datasourceStates[state.activeDatasourceId].state : null
+          }
           datasourceMap={props.datasourceMap}
           dispatch={dispatch}
         />

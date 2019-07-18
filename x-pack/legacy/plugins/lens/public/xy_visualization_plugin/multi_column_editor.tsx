@@ -21,6 +21,8 @@ interface Props {
   filterOperations: (op: Operation) => boolean;
   suggestedPriority?: 0 | 1 | 2 | undefined;
   testSubj: string;
+  // layer: number;
+  layerId: string;
 }
 
 export function MultiColumnEditor({
@@ -32,6 +34,7 @@ export function MultiColumnEditor({
   filterOperations,
   suggestedPriority,
   testSubj,
+  layerId,
 }: Props) {
   return (
     <>
@@ -45,6 +48,7 @@ export function MultiColumnEditor({
               dragDropContext,
               filterOperations,
               suggestedPriority,
+              layerId,
             }}
           />
           {i === accessors.length - 1 ? null : (

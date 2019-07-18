@@ -9,7 +9,7 @@ import { Position } from '@elastic/charts';
 import { Ast } from '@kbn/interpreter/target/common';
 import { Operation } from '../types';
 import { State } from './types';
-import { createMockDatasource } from '../editor_frame_plugin/mocks';
+import { createMockDatasource, createMockFramePublicAPI } from '../editor_frame_plugin/mocks';
 import { generateId } from '../id_generator';
 
 jest.mock('../id_generator');
@@ -17,20 +17,20 @@ jest.mock('../id_generator');
 function exampleState(): State {
   return {
     legend: { position: Position.Bottom, isVisible: true },
-    seriesType: 'area',
-    splitSeriesAccessors: [],
-    x: {
-      accessor: 'a',
-      position: Position.Bottom,
-      showGridlines: true,
-      title: 'Baz',
-    },
-    y: {
-      accessors: ['b', 'c'],
-      position: Position.Left,
-      showGridlines: true,
-      title: 'Bar',
-    },
+    layers: [
+      {
+        layerId: 'first',
+        datasourceId: '',
+        labels: [''],
+        seriesType: 'area',
+        splitSeriesAccessors: [],
+        position: Position.Bottom,
+        showGridlines: true,
+        title: 'Baz',
+        xAccessor: 'a',
+        accessors: ['b', 'c'],
+      },
+    ],
   };
 }
 
@@ -41,12 +41,13 @@ describe('xy_visualization', () => {
         .mockReturnValueOnce('test-id1')
         .mockReturnValueOnce('test-id2')
         .mockReturnValue('test-id3');
-      const mockDatasource = createMockDatasource();
-      const initialState = xyVisualization.initialize(mockDatasource.publicAPIMock);
+      const mockFrame = createMockFramePublicAPI();
+      const initialState = xyVisualization.initialize(mockFrame);
 
-      expect(initialState.x.accessor).toBeDefined();
-      expect(initialState.y.accessors[0]).toBeDefined();
-      expect(initialState.x.accessor).not.toEqual(initialState.y.accessors[0]);
+      expect(initialState.layers).toHaveLength(1);
+      expect(initialState.layers[0].xAccessor).toBeDefined();
+      expect(initialState.layers[0].accessors[0]).toBeDefined();
+      expect(initialState.layers[0].xAccessor).not.toEqual(initialState.layers[0].accessors[0]);
 
       expect(initialState).toMatchInlineSnapshot(`
         Object {
@@ -78,9 +79,9 @@ describe('xy_visualization', () => {
     });
 
     it('loads from persisted state', () => {
-      expect(
-        xyVisualization.initialize(createMockDatasource().publicAPIMock, exampleState())
-      ).toEqual(exampleState());
+      expect(xyVisualization.initialize(createMockFramePublicAPI(), exampleState())).toEqual(
+        exampleState()
+      );
     });
   });
 
@@ -93,7 +94,7 @@ describe('xy_visualization', () => {
   describe('#toExpression', () => {
     it('should map to a valid AST', () => {
       expect(
-        xyVisualization.toExpression(exampleState(), createMockDatasource().publicAPIMock)
+        xyVisualization.toExpression(exampleState(), createMockFramePublicAPI())
       ).toMatchSnapshot();
     });
 
@@ -110,7 +111,7 @@ describe('xy_visualization', () => {
 
       const expression = xyVisualization.toExpression(
         exampleState(),
-        mockDatasource.publicAPIMock
+        createMockFramePublicAPI()
       )! as Ast;
 
       expect(mockDatasource.publicAPIMock.getOperationForColumnId).toHaveBeenCalledTimes(2);

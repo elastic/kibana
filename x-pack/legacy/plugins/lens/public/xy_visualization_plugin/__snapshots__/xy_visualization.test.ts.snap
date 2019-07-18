@@ -5,6 +5,52 @@ Object {
   "chain": Array [
     Object {
       "arguments": Object {
+        "layers": Array [
+          Object {
+            "chain": Array [
+              Object {
+                "arguments": Object {
+                  "accessors": Array [
+                    "b",
+                    "c",
+                  ],
+                  "datasourceId": Array [
+                    "",
+                  ],
+                  "hide": Array [
+                    false,
+                  ],
+                  "labels": Array [
+                    "b",
+                    "c",
+                  ],
+                  "layerId": Array [
+                    "first",
+                  ],
+                  "position": Array [
+                    "bottom",
+                  ],
+                  "seriesType": Array [
+                    "area",
+                  ],
+                  "showGridlines": Array [
+                    true,
+                  ],
+                  "splitSeriesAccessors": Array [],
+                  "title": Array [
+                    "Baz",
+                  ],
+                  "xAccessor": Array [
+                    "a",
+                  ],
+                },
+                "function": "lens_xy_layer",
+                "type": "function",
+              },
+            ],
+            "type": "expression",
+          },
+        ],
         "legend": Array [
           Object {
             "chain": Array [
@@ -18,71 +64,6 @@ Object {
                   ],
                 },
                 "function": "lens_xy_legendConfig",
-                "type": "function",
-              },
-            ],
-            "type": "expression",
-          },
-        ],
-        "seriesType": Array [
-          "area",
-        ],
-        "splitSeriesAccessors": Array [],
-        "x": Array [
-          Object {
-            "chain": Array [
-              Object {
-                "arguments": Object {
-                  "accessor": Array [
-                    "a",
-                  ],
-                  "hide": Array [
-                    false,
-                  ],
-                  "position": Array [
-                    "bottom",
-                  ],
-                  "showGridlines": Array [
-                    true,
-                  ],
-                  "title": Array [
-                    "Baz",
-                  ],
-                },
-                "function": "lens_xy_xConfig",
-                "type": "function",
-              },
-            ],
-            "type": "expression",
-          },
-        ],
-        "y": Array [
-          Object {
-            "chain": Array [
-              Object {
-                "arguments": Object {
-                  "accessors": Array [
-                    "b",
-                    "c",
-                  ],
-                  "hide": Array [
-                    false,
-                  ],
-                  "labels": Array [
-                    "b",
-                    "c",
-                  ],
-                  "position": Array [
-                    "left",
-                  ],
-                  "showGridlines": Array [
-                    true,
-                  ],
-                  "title": Array [
-                    "Bar",
-                  ],
-                },
-                "function": "lens_xy_yConfig",
                 "type": "function",
               },
             ],

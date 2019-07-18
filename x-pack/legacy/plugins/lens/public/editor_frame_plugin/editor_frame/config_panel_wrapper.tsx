@@ -8,7 +8,7 @@ import React, { useMemo, useContext, memo } from 'react';
 import { EuiSelect } from '@elastic/eui';
 import { NativeRenderer } from '../../native_renderer';
 import { Action } from './state_management';
-import { Visualization, DatasourcePublicAPI } from '../../types';
+import { Visualization, DatasourcePublicAPI, FramePublicAPI } from '../../types';
 import { DragContext } from '../../drag_drop';
 
 interface ConfigPanelWrapperProps {
@@ -16,31 +16,34 @@ interface ConfigPanelWrapperProps {
   visualizationMap: Record<string, Visualization>;
   activeVisualizationId: string | null;
   dispatch: (action: Action) => void;
-  datasourcePublicAPI: DatasourcePublicAPI;
+  // datasourcePublicAPI: DatasourcePublicAPI;
+  framePublicAPI: FramePublicAPI;
 }
 
 function getSuggestedVisualizationState(
-  visualization: Visualization,
-  datasource: DatasourcePublicAPI
+  frame: FramePublicAPI,
+  visualization: Visualization
+  // datasource: DatasourcePublicAPI
 ) {
-  const suggestions = visualization.getSuggestions({
-    tables: [
-      {
-        datasourceSuggestionId: 0,
-        isMultiRow: true,
-        columns: datasource.getTableSpec().map(col => ({
-          ...col,
-          operation: datasource.getOperationForColumnId(col.columnId)!,
-        })),
-      },
-    ],
-  });
+  const suggestions = [];
+  // const suggestions = visualization.getSuggestions({
+  //   tables: [
+  //     {
+  //       datasourceSuggestionId: 0,
+  //       isMultiRow: true,
+  //       columns: datasource.getTableSpec().map(col => ({
+  //         ...col,
+  //         operation: datasource.getOperationForColumnId(col.columnId)!,
+  //       })),
+  //     },
+  //   ],
+  // });
 
   if (!suggestions.length) {
-    return visualization.initialize(datasource);
+    return visualization.initialize(frame);
   }
 
-  return visualization.initialize(datasource, suggestions[0].state);
+  // return visualization.initialize(frame, suggestions[0].state);
 }
 
 export const ConfigPanelWrapper = memo(function ConfigPanelWrapper(props: ConfigPanelWrapperProps) {
@@ -66,8 +69,9 @@ export const ConfigPanelWrapper = memo(function ConfigPanelWrapper(props: Config
         value={props.activeVisualizationId || undefined}
         onChange={e => {
           const newState = getSuggestedVisualizationState(
-            props.visualizationMap[e.target.value],
-            props.datasourcePublicAPI
+            props.framePublicAPI,
+            props.visualizationMap[e.target.value]
+            // props.datasourcePublicAPI
           );
           props.dispatch({
             type: 'SWITCH_VISUALIZATION',
@@ -83,7 +87,8 @@ export const ConfigPanelWrapper = memo(function ConfigPanelWrapper(props: Config
             dragDropContext: context,
             state: props.visualizationState,
             setState: setVisualizationState,
-            datasource: props.datasourcePublicAPI,
+            // datasource: props.datasourcePublicAPI,
+            frame: props.framePublicAPI,
           }}
         />
       )}

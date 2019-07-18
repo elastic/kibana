@@ -6,15 +6,26 @@
 
 import { Ast } from '@kbn/interpreter/common';
 import { State } from './types';
-import { DatasourcePublicAPI } from '../types';
+import { FramePublicAPI } from '../types';
 
-export const toExpression = (state: State, datasource: DatasourcePublicAPI): Ast => {
+// export const toExpression = (state: State, datasource: DatasourcePublicAPI): Ast => {
+export const toExpression = (state: State, frame: FramePublicAPI): Ast | null => {
   const labels: Partial<Record<string, string>> = {};
-  state.y.accessors.forEach(columnId => {
-    const operation = datasource.getOperationForColumnId(columnId);
-    if (operation && operation.label) {
-      labels[columnId] = operation.label;
+  if (!state || !state.layers.length) {
+    return null;
+  }
+  // const datasource = frame.datasourceLayers.first;
+  state.layers.forEach(layer => {
+    const datasource = frame.datasourceLayers[layer.layerId];
+    if (!datasource) {
+      return;
     }
+    layer.accessors.forEach(columnId => {
+      const operation = datasource.getOperationForColumnId(columnId);
+      if (operation && operation.label) {
+        labels[columnId] = operation.label;
+      }
+    });
   });
 
   return buildExpression(state, labels);
@@ -30,7 +41,6 @@ export const buildExpression = (
       type: 'function',
       function: 'lens_xy_chart',
       arguments: {
-        seriesType: [state.seriesType],
         legend: [
           {
             type: 'expression',
@@ -46,46 +56,50 @@ export const buildExpression = (
             ],
           },
         ],
-        x: [
-          {
-            type: 'expression',
-            chain: [
-              {
-                type: 'function',
-                function: 'lens_xy_xConfig',
-                arguments: {
-                  title: [state.x.title],
-                  showGridlines: [state.x.showGridlines],
-                  position: [state.x.position],
-                  accessor: [state.x.accessor],
-                  hide: [Boolean(state.x.hide)],
-                },
+        // x: [
+        //   {
+        //     type: 'expression',
+        //     chain: [
+        //       {
+        //         type: 'function',
+        //         function: 'lens_xy_xConfig',
+        //         arguments: {
+        //           title: [state.x.title],
+        //           showGridlines: [state.x.showGridlines],
+        //           position: [state.x.position],
+        //           accessor: [state.x.accessor],
+        //           hide: [Boolean(state.x.hide)],
+        //         },
+        //       },
+        //     ],
+        //   },
+        // ],
+        layers: state.layers.map(layer => ({
+          type: 'expression',
+          chain: [
+            {
+              type: 'function',
+              function: 'lens_xy_layer',
+              arguments: {
+                layerId: [layer.layerId],
+                datasourceId: [layer.datasourceId],
+
+                title: [layer.title],
+                showGridlines: [layer.showGridlines],
+                position: [layer.position],
+                hide: [Boolean(layer.hide)],
+
+                xAccessor: [layer.xAccessor],
+                splitSeriesAccessors: layer.splitSeriesAccessors,
+                seriesType: [layer.seriesType],
+                labels: layer.accessors.map(accessor => {
+                  return columnLabels[accessor] || accessor;
+                }),
+                accessors: layer.accessors,
               },
-            ],
-          },
-        ],
-        y: [
-          {
-            type: 'expression',
-            chain: [
-              {
-                type: 'function',
-                function: 'lens_xy_yConfig',
-                arguments: {
-                  title: [state.y.title],
-                  showGridlines: [state.y.showGridlines],
-                  position: [state.y.position],
-                  accessors: state.y.accessors,
-                  hide: [Boolean(state.y.hide)],
-                  labels: state.y.accessors.map(accessor => {
-                    return columnLabels[accessor] || accessor;
-                  }),
-                },
-              },
-            ],
-          },
-        ],
-        splitSeriesAccessors: state.splitSeriesAccessors,
+            },
+          ],
+        })),
       },
     },
   ],
