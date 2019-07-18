@@ -51,18 +51,6 @@ export class JobValidator {
     this._validateTimeout = setTimeout(() => {}, 0);
   }
 
-  private _resetBasicValidations() {
-    this._validationSummary.basic = true;
-    Object.values(this._basicValidations).forEach(v => {
-      v.valid = true;
-      delete v.message;
-    });
-  }
-
-  private _isOverallBasicValid() {
-    return Object.values(this._basicValidations).some(v => v.valid === false) === false;
-  }
-
   public validate() {
     const formattedJobConfig = this._jobCreator.formattedJobJson;
     // only validate if the config has changed
@@ -80,6 +68,14 @@ export class JobValidator {
     });
   }
 
+  private _resetBasicValidations() {
+    this._validationSummary.basic = true;
+    Object.values(this._basicValidations).forEach(v => {
+      v.valid = true;
+      delete v.message;
+    });
+  }
+
   private _runBasicValidation() {
     this._resetBasicValidations();
 
@@ -89,6 +85,14 @@ export class JobValidator {
 
     populateValidationMessages(validationResults, this._basicValidations, jobConfig);
     this._validationSummary.basic = this._isOverallBasicValid();
+  }
+
+  private _isOverallBasicValid() {
+    return Object.values(this._basicValidations).some(v => v.valid === false) === false;
+  }
+
+  public get validationSummary(): ValidationSummary {
+    return this._validationSummary;
   }
 
   public get bucketSpan(): Validation {
