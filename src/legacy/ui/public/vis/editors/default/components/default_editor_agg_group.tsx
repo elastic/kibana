@@ -29,7 +29,7 @@ import {
 
 import { Vis } from '../../../';
 import { AggConfig } from '../../../agg_config';
-import { aggGroupNamesMap } from '../agg_groups';
+import { aggGroupNamesMap, AggGroupNames } from '../agg_groups';
 import { DefaultEditorAgg } from './default_editor_agg';
 import { DefaultEditorAggAdd } from './default_editor_agg_add';
 import { DefaultEditorAggCommonProps } from './default_editor_agg_common_props';
@@ -162,7 +162,7 @@ function DefaultEditorAggGroup({
                     formIsTouched={aggsState[agg.id] ? aggsState[agg.id].touched : false}
                     groupName={groupName}
                     isDraggable={stats.count > 1}
-                    isLastBucket={index === group.length - 1}
+                    isLastBucket={groupName === AggGroupNames.Buckets && index === group.length - 1}
                     isRemovable={isAggRemovable(agg, group)}
                     lastParentPipelineAggTitle={lastParentPipelineAggTitle}
                     metricAggs={metricAggs}

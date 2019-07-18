@@ -595,7 +595,7 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
     }
 
     async toggleDisabledAgg(agg) {
-      await testSubjects.click(`visEditorAggAccordion${agg} disableAggregationBtn`);
+      await testSubjects.click(`visEditorAggAccordion${agg} toggleDisableAggregationBtn`);
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
 

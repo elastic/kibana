@@ -73,8 +73,8 @@ function DefaultEditorAgg({
   const showError = !isEditorOpen && !validState;
   let disabledParams;
   let aggError;
-  const isLastBucketAgg =
-    groupName === 'buckets' && lastParentPipelineAggTitle && isLastBucket && agg.type;
+  // When a Parent Pipeline agg is selected and this agg is the last bucket.
+  const isLastBucketAgg = isLastBucket && lastParentPipelineAggTitle && agg.type;
 
   const SchemaComponent = agg.schema.editorComponent;
 
@@ -103,13 +103,8 @@ function DefaultEditorAgg({
     }
   }, [lastParentPipelineAggTitle, isLastBucket, agg.type]);
 
-  // Returns a description of the aggregation, for display in the collapsed agg header
-  const getDescription = () => {
-    if (!agg.type || !agg.type.makeLabel) {
-      return '';
-    }
-    return agg.type.makeLabel(agg) || '';
-  };
+  // A description of the aggregation, for displaying in the collapsed agg header
+  const aggDescription = agg.type && agg.type.makeLabel ? agg.type.makeLabel(agg) : '';
 
   const onToggle = (isOpen: boolean) => {
     setIsEditorOpen(isOpen);
@@ -132,13 +127,10 @@ function DefaultEditorAgg({
         color: 'text',
         type: 'eye',
         onClick: () => onToggleEnableAgg(agg, false),
-        ariaLabel: i18n.translate('common.ui.vis.editors.agg.disableAggButtonAriaLabel', {
-          defaultMessage: 'Disable aggregation',
-        }),
         tooltip: i18n.translate('common.ui.vis.editors.agg.disableAggButtonTooltip', {
           defaultMessage: 'Disable aggregation',
         }),
-        dataTestSubj: 'disableAggregationBtn',
+        dataTestSubj: 'toggleDisableAggregationBtn',
       });
     }
     if (!agg.enabled) {
@@ -147,13 +139,10 @@ function DefaultEditorAgg({
         color: 'text',
         type: 'eyeClosed',
         onClick: () => onToggleEnableAgg(agg, true),
-        ariaLabel: i18n.translate('common.ui.vis.editors.agg.enableAggButtonAriaLabel', {
-          defaultMessage: 'Enable aggregation',
-        }),
         tooltip: i18n.translate('common.ui.vis.editors.agg.enableAggButtonTooltip', {
           defaultMessage: 'Enable aggregation',
         }),
-        dataTestSubj: 'disableAggregationBtn',
+        dataTestSubj: 'toggleDisableAggregationBtn',
       });
     }
     if (isDraggable) {
@@ -172,9 +161,6 @@ function DefaultEditorAgg({
         color: 'danger',
         type: 'cross',
         onClick: () => removeAgg(agg),
-        ariaLabel: i18n.translate('common.ui.vis.editors.agg.removeDimensionButtonAriaLabel', {
-          defaultMessage: 'Remove dimension',
-        }),
         tooltip: i18n.translate('common.ui.vis.editors.agg.removeDimensionButtonTooltip', {
           defaultMessage: 'Remove dimension',
         }),
@@ -191,7 +177,7 @@ function DefaultEditorAgg({
                 type={icon.type}
                 content={icon.tooltip}
                 iconProps={{
-                  ['aria-label']: icon.ariaLabel,
+                  ['aria-label']: icon.tooltip,
                   ['data-test-subj']: icon.dataTestSubj,
                 }}
                 position="bottom"
@@ -205,7 +191,7 @@ function DefaultEditorAgg({
                 iconType={icon.type}
                 color={icon.color as Color}
                 onClick={icon.onClick}
-                aria-label={icon.ariaLabel}
+                aria-label={icon.tooltip}
                 data-test-subj={icon.dataTestSubj}
               />
             </EuiToolTip>
@@ -221,7 +207,7 @@ function DefaultEditorAgg({
       <EuiFlexItem className="eui-textTruncate">
         {showDescription && (
           <EuiText size="s" color="subdued">
-            <p className="eui-textTruncate">{getDescription()}</p>
+            <p className="eui-textTruncate">{aggDescription}</p>
           </EuiText>
         )}
         {showError && (

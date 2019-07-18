@@ -24,7 +24,7 @@ import { AggGroupNames } from '../agg_groups';
 export interface DefaultEditorAggCommonProps {
   formIsTouched: boolean;
   groupName: AggGroupNames;
-  lastParentPipelineAggTitle: string;
+  lastParentPipelineAggTitle?: string;
   metricAggs: AggConfig[];
   state: VisState;
   onAggParamsChange: (agg: AggParams, paramName: string, value: unknown) => void;
