@@ -397,7 +397,7 @@ export class ElasticsearchMonitorStatesAdapter implements UMMonitorStatesAdapter
       );
       monitors.push(...this.getMonitorBuckets(result, statusFilter));
       searchAfter = afterKey;
-    } while (searchAfter !== null && monitors.length < 50);
+    } while (searchAfter !== null && monitors.length < STATES.LEGACY_STATES_QUERY_SIZE);
 
     const monitorIds: string[] = [];
     const summaries: MonitorSummary[] = monitors.map((monitor: any) => {
