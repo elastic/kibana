@@ -47,18 +47,22 @@ interface HelloWorldContainerInput extends ContainerInput {
   lastName?: string;
 }
 
+interface HelloWorldContainerOptions {
+  getActions: GetActionsCompatibleWithTrigger;
+  getEmbeddableFactory: GetEmbeddableFactory;
+  getAllEmbeddableFactories: GetEmbeddableFactories;
+  overlays: CoreStart['overlays'];
+  notifications: CoreStart['notifications'];
+}
+
 export class HelloWorldContainer extends Container<InheritedInput, HelloWorldContainerInput> {
   public readonly type = HELLO_WORLD_CONTAINER;
 
   constructor(
     input: ContainerInput<{ firstName: string; lastName: string }>,
-    private readonly getActions: GetActionsCompatibleWithTrigger,
-    private readonly getEmbeddableFactory: GetEmbeddableFactory,
-    private readonly getAllEmbeddableFactories: GetEmbeddableFactories,
-    private readonly overlays: CoreStart['overlays'],
-    private readonly notifications: CoreStart['notifications']
+    private readonly options: HelloWorldContainerOptions
   ) {
-    super(input, { embeddableLoaded: {} }, getEmbeddableFactory);
+    super(input, { embeddableLoaded: {} }, options.getEmbeddableFactory);
   }
 
   public getInheritedInput(id: string) {
@@ -75,11 +79,11 @@ export class HelloWorldContainer extends Container<InheritedInput, HelloWorldCon
       <I18nProvider>
         <HelloWorldContainerComponent
           container={this}
-          getActions={this.getActions}
-          getAllEmbeddableFactories={this.getAllEmbeddableFactories}
-          getEmbeddableFactory={this.getEmbeddableFactory}
-          overlays={this.overlays}
-          notifications={this.notifications}
+          getActions={this.options.getActions}
+          getAllEmbeddableFactories={this.options.getAllEmbeddableFactories}
+          getEmbeddableFactory={this.options.getEmbeddableFactory}
+          overlays={this.options.overlays}
+          notifications={this.options.notifications}
         />
       </I18nProvider>,
       node

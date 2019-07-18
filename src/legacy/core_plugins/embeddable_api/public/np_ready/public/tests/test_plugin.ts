@@ -17,26 +17,31 @@
  * under the License.
  */
 
+import { CoreSetup, CoreStart } from 'src/core/public';
 import { EmbeddablePublicPlugin } from '../plugin';
 
 export interface TestPluginReturn {
   plugin: EmbeddablePublicPlugin;
-  core: any;
+  coreSetup: CoreSetup;
+  coreStart: CoreStart;
   setup: ReturnType<EmbeddablePublicPlugin['setup']>;
-  doStart: () => ReturnType<EmbeddablePublicPlugin['start']>;
+  doStart: (anotherCoreStart?: CoreStart) => ReturnType<EmbeddablePublicPlugin['start']>;
 }
 
-export const testPlugin = (): TestPluginReturn => {
+export const testPlugin = (
+  coreSetup: CoreSetup = {} as CoreSetup,
+  coreStart: CoreStart = {} as CoreStart
+): TestPluginReturn => {
   const plugin = new EmbeddablePublicPlugin({});
-  const core = {} as any;
-  const setup = plugin.setup(core);
+  const setup = plugin.setup(coreSetup);
 
   return {
     plugin,
-    core,
+    coreSetup,
+    coreStart,
     setup,
-    doStart: () => {
-      const start = plugin.start(core);
+    doStart: (anotherCoreStart: CoreStart = coreStart) => {
+      const start = plugin.start(anotherCoreStart);
       return start;
     },
   };

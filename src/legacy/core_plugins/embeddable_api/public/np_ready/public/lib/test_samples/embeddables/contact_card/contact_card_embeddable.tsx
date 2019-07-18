@@ -23,6 +23,7 @@ import { Container } from '../../../containers';
 import { EmbeddableOutput, Embeddable, EmbeddableInput } from '../../../embeddables';
 import { CONTACT_CARD_EMBEDDABLE } from './contact_card_embeddable_factory';
 import { ContactCardEmbeddableComponent } from './contact_card';
+import { ExecuteTriggerActions } from '../../../types';
 
 export interface ContactCardEmbeddableInput extends EmbeddableInput {
   firstName: string;
@@ -33,6 +34,10 @@ export interface ContactCardEmbeddableInput extends EmbeddableInput {
 export interface ContactCardEmbeddableOutput extends EmbeddableOutput {
   fullName: string;
   originalLastName?: string;
+}
+
+export interface ContactCardEmbeddableOptions {
+  execAction: ExecuteTriggerActions;
 }
 
 function getFullName(input: ContactCardEmbeddableInput) {
@@ -49,7 +54,11 @@ export class ContactCardEmbeddable extends Embeddable<
   private node?: Element;
   public readonly type: string = CONTACT_CARD_EMBEDDABLE;
 
-  constructor(initialInput: ContactCardEmbeddableInput, parent?: Container) {
+  constructor(
+    initialInput: ContactCardEmbeddableInput,
+    private readonly options: ContactCardEmbeddableOptions,
+    parent?: Container
+  ) {
     super(
       initialInput,
       {
@@ -71,7 +80,10 @@ export class ContactCardEmbeddable extends Embeddable<
 
   public render(node: HTMLElement) {
     this.node = node;
-    ReactDom.render(<ContactCardEmbeddableComponent embeddable={this} />, node);
+    ReactDom.render(
+      <ContactCardEmbeddableComponent embeddable={this} execTrigger={this.options.execAction} />,
+      node
+    );
   }
 
   public destroy() {

@@ -19,44 +19,58 @@
 
 import * as Rx from 'rxjs';
 import { skip } from 'rxjs/operators';
-import { isErrorEmbeddable, EmbeddableOutput, EmbeddableFactory } from '../embeddables';
-import { ContainerInput } from './i_container';
-import { ViewMode, GetEmbeddableFactory } from '../types';
+import { isErrorEmbeddable, EmbeddableOutput, ContainerInput, ViewMode } from '../lib';
 import {
   FilterableEmbeddableInput,
   FilterableEmbeddable,
   FILTERABLE_EMBEDDABLE,
-} from '../test_samples/embeddables/filterable_embeddable';
-import { ERROR_EMBEDDABLE_TYPE } from '../embeddables/error_embeddable';
+} from '../lib/test_samples/embeddables/filterable_embeddable';
+import { ERROR_EMBEDDABLE_TYPE } from '../lib/embeddables/error_embeddable';
 import { Filter, FilterStateStore } from '@kbn/es-query';
-import { PanelNotFoundError } from '../errors';
-import { FilterableEmbeddableFactory } from '../test_samples/embeddables/filterable_embeddable_factory';
-import { CONTACT_CARD_EMBEDDABLE } from '../test_samples/embeddables/contact_card/contact_card_embeddable_factory';
-import { SlowContactCardEmbeddableFactory } from '../test_samples/embeddables/contact_card/slow_contact_card_embeddable_factory';
-import { HELLO_WORLD_EMBEDDABLE_TYPE } from '../test_samples/embeddables/hello_world/hello_world_embeddable';
-import { HelloWorldEmbeddableFactory } from '../test_samples/embeddables/hello_world/hello_world_embeddable_factory';
-import { HelloWorldContainer } from '../test_samples/embeddables/hello_world_container';
+import { PanelNotFoundError } from '../lib/errors';
+import { FilterableEmbeddableFactory } from '../lib/test_samples/embeddables/filterable_embeddable_factory';
+import { CONTACT_CARD_EMBEDDABLE } from '../lib/test_samples/embeddables/contact_card/contact_card_embeddable_factory';
+import { SlowContactCardEmbeddableFactory } from '../lib/test_samples/embeddables/contact_card/slow_contact_card_embeddable_factory';
+import { HELLO_WORLD_EMBEDDABLE_TYPE } from '../lib/test_samples/embeddables/hello_world/hello_world_embeddable';
+import { HelloWorldEmbeddableFactory } from '../lib/test_samples/embeddables/hello_world/hello_world_embeddable_factory';
+import { HelloWorldContainer } from '../lib/test_samples/embeddables/hello_world_container';
 import {
   ContactCardEmbeddableInput,
   ContactCardEmbeddableOutput,
   ContactCardEmbeddable,
-} from '../test_samples/embeddables/contact_card/contact_card_embeddable';
+} from '../lib/test_samples/embeddables/contact_card/contact_card_embeddable';
 import {
   FilterableContainer,
   FilterableContainerInput,
-} from '../test_samples/embeddables/filterable_container';
-
-const __embeddableFactories = new Map<string, EmbeddableFactory>();
-__embeddableFactories.set(FILTERABLE_EMBEDDABLE, new FilterableEmbeddableFactory());
-__embeddableFactories.set(CONTACT_CARD_EMBEDDABLE, new SlowContactCardEmbeddableFactory());
-__embeddableFactories.set(HELLO_WORLD_EMBEDDABLE_TYPE, new HelloWorldEmbeddableFactory());
-const getFactory: GetEmbeddableFactory = (id: string) => __embeddableFactories.get(id);
+} from '../lib/test_samples/embeddables/filterable_container';
+import { coreMock } from '../../../../../../../core/public/mocks';
+import { testPlugin } from './test_plugin';
 
 async function creatHelloWorldContainerAndEmbeddable(
   containerInput: ContainerInput = { id: 'hello', panels: {} },
   embeddableInput = {}
 ) {
-  const container = new HelloWorldContainer(containerInput as any, getFactory);
+  const coreSetup = coreMock.createSetup();
+  const coreStart = coreMock.createStart();
+  const { setup, doStart } = testPlugin(coreSetup, coreStart);
+  const start = doStart();
+
+  setup.registerEmbeddableFactory(FILTERABLE_EMBEDDABLE, new FilterableEmbeddableFactory());
+  setup.registerEmbeddableFactory(
+    CONTACT_CARD_EMBEDDABLE,
+    new SlowContactCardEmbeddableFactory({
+      execAction: start.executeTriggerActions,
+    })
+  );
+  setup.registerEmbeddableFactory(HELLO_WORLD_EMBEDDABLE_TYPE, new HelloWorldEmbeddableFactory());
+
+  const container = new HelloWorldContainer(containerInput as any, {
+    getActions: start.getTriggerCompatibleActions,
+    getEmbeddableFactory: start.getEmbeddableFactory,
+    getAllEmbeddableFactories: start.getEmbeddableFactories,
+    overlays: coreStart.overlays,
+    notifications: coreStart.notifications,
+  });
   const embeddable = await container.addNewEmbeddable<
     ContactCardEmbeddableInput,
     ContactCardEmbeddableOutput,
@@ -67,10 +81,11 @@ async function creatHelloWorldContainerAndEmbeddable(
     throw new Error('Error adding embeddable');
   }
 
-  return { container, embeddable };
+  return { container, embeddable, coreSetup, coreStart, setup, start };
 }
 
 test('Container initializes embeddables', async done => {
+  const { start, coreStart } = await creatHelloWorldContainerAndEmbeddable();
   const container = new HelloWorldContainer(
     {
       id: 'hello',
@@ -81,7 +96,11 @@ test('Container initializes embeddables', async done => {
         },
       },
     },
-    getFactory
+    start.getTriggerCompatibleActions,
+    start.getEmbeddableFactory,
+    start.getEmbeddableFactories,
+    coreStart.overlays,
+    coreStart.notifications
   );
 
   const subscription = container.getOutput$().subscribe(() => {
@@ -123,6 +142,7 @@ test('Container.addNewEmbeddable', async () => {
 });
 
 test('Container.removeEmbeddable removes and cleans up', async done => {
+  const { start, coreStart } = await creatHelloWorldContainerAndEmbeddable();
   const container = new HelloWorldContainer(
     {
       id: 'hello',
@@ -133,7 +153,13 @@ test('Container.removeEmbeddable removes and cleans up', async done => {
         },
       },
     },
-    getFactory
+    {
+      getActions: start.getTriggerCompatibleActions,
+      getEmbeddableFactory: start.getEmbeddableFactory,
+      getAllEmbeddableFactories: start.getEmbeddableFactories,
+      overlays: coreStart.overlays,
+      notifications: coreStart.notifications,
+    }
   );
   const embeddable = await container.addNewEmbeddable<
     ContactCardEmbeddableInput,
@@ -181,17 +207,19 @@ test('Container.input$ is notified when child embeddable input is updated', asyn
     }
   );
 
-  if (isErrorEmbeddable(embeddable)) {
-    expect(false).toBe(true);
-    return;
-  }
+  expect(isErrorEmbeddable(embeddable)).toBe(false);
 
   const changes = jest.fn();
+
+  expect(changes).toHaveBeenCalledTimes(0);
+
   const subscription = container.getInput$().subscribe(changes);
+
+  expect(changes).toHaveBeenCalledTimes(1);
 
   embeddable.updateInput({ lastName: 'Z' });
 
-  expect(changes).toBeCalledTimes(2);
+  expect(changes).toHaveBeenCalledTimes(2);
 
   expect(embeddable.getInput().lastName === 'Z');
 
@@ -217,10 +245,7 @@ test('Container.input$', async () => {
     }
   );
 
-  if (isErrorEmbeddable(embeddable)) {
-    expect(false).toBe(true);
-    return;
-  }
+  expect(isErrorEmbeddable(embeddable)).toBe(false);
 
   const changes = jest.fn();
   const input = container.getInput();
@@ -245,10 +270,7 @@ test('Container.getInput$ not triggered if state is the same', async () => {
     }
   );
 
-  if (isErrorEmbeddable(embeddable)) {
-    expect(false).toBe(true);
-    return;
-  }
+  expect(isErrorEmbeddable(embeddable)).toBe(false);
 
   const changes = jest.fn();
   const input = container.getInput();
@@ -281,7 +303,7 @@ test('Container view mode change propagates to children', async () => {
 });
 
 test(`Container updates its state when a child's input is updated`, async done => {
-  const { container, embeddable } = await creatHelloWorldContainerAndEmbeddable(
+  const { container, embeddable, start, coreStart } = await creatHelloWorldContainerAndEmbeddable(
     { id: 'hello', panels: {}, viewMode: ViewMode.VIEW },
     {
       id: '123',
@@ -289,9 +311,7 @@ test(`Container updates its state when a child's input is updated`, async done =
     }
   );
 
-  if (isErrorEmbeddable(embeddable)) {
-    throw new Error('Error adding embeddable');
-  }
+  expect(isErrorEmbeddable(embeddable)).toBe(false);
 
   const containerSubscription = Rx.merge(container.getInput$(), container.getOutput$()).subscribe(
     () => {
@@ -305,7 +325,13 @@ test(`Container updates its state when a child's input is updated`, async done =
         // Make sure a brand new container built off the output of container also creates an embeddable
         // with "Dr.", not the default the embeddable was first added with. Makes sure changed input
         // is preserved with the container.
-        const containerClone = new HelloWorldContainer(container.getInput(), getFactory);
+        const containerClone = new HelloWorldContainer(container.getInput(), {
+          getActions: start.getTriggerCompatibleActions,
+          getAllEmbeddableFactories: start.getEmbeddableFactories,
+          getEmbeddableFactory: start.getEmbeddableFactory,
+          notifications: coreStart.notifications,
+          overlays: coreStart.overlays,
+        });
         const cloneSubscription = Rx.merge(
           containerClone.getOutput$(),
           containerClone.getInput$()
@@ -366,9 +392,7 @@ test(`Can subscribe to children embeddable updates`, async done => {
     }
   );
 
-  if (isErrorEmbeddable(embeddable)) {
-    throw new Error('Error adding embeddable');
-  }
+  expect(isErrorEmbeddable(embeddable)).toBe(false);
 
   const subscription = embeddable.getInput$().subscribe((input: ContactCardEmbeddableInput) => {
     if (input.nameTitle === 'Dr.') {
@@ -387,9 +411,7 @@ test('Test nested reactions', async done => {
     }
   );
 
-  if (isErrorEmbeddable(embeddable)) {
-    throw new Error('Error adding embeddable');
-  }
+  expect(isErrorEmbeddable(embeddable)).toBe(false);
 
   const containerSubscription = container.getInput$().subscribe(input => {
     const embeddableNameTitle = embeddable.getInput().nameTitle;
@@ -418,6 +440,7 @@ test('Test nested reactions', async done => {
 });
 
 test('Explicit embeddable input mapped to undefined will default to inherited', async () => {
+  const { start } = await creatHelloWorldContainerAndEmbeddable();
   const derivedFilter: Filter = {
     $state: { store: FilterStateStore.APP_STATE },
     meta: { disabled: false, alias: 'name', negate: false },
@@ -425,7 +448,7 @@ test('Explicit embeddable input mapped to undefined will default to inherited', 
   };
   const container = new FilterableContainer(
     { id: 'hello', panels: {}, filters: [derivedFilter] },
-    getFactory
+    start.getEmbeddableFactory
   );
   const embeddable = await container.addNewEmbeddable<
     FilterableEmbeddableInput,
@@ -449,7 +472,7 @@ test('Explicit embeddable input mapped to undefined will default to inherited', 
 });
 
 test('Explicit embeddable input mapped to undefined with no inherited value will get passed to embeddable', async done => {
-  const container = new HelloWorldContainer({ id: 'hello', panels: {} }, getFactory);
+  const { container } = await creatHelloWorldContainerAndEmbeddable({ id: 'hello', panels: {} });
 
   const embeddable = await container.addNewEmbeddable<
     FilterableEmbeddableInput,
@@ -479,7 +502,11 @@ test('Explicit embeddable input mapped to undefined with no inherited value will
 });
 
 test('Panel removed from input state', async done => {
-  const container = new FilterableContainer({ id: 'hello', panels: {}, filters: [] }, getFactory);
+  const { container } = await creatHelloWorldContainerAndEmbeddable({
+    id: 'hello',
+    panels: {},
+    filters: [],
+  } as any);
 
   const embeddable = await container.addNewEmbeddable<
     FilterableEmbeddableInput,
@@ -508,7 +535,10 @@ test('Panel removed from input state', async done => {
 });
 
 test('Panel added to input state', async done => {
-  const container = new FilterableContainer({ id: 'hello', panels: {}, filters: [] }, getFactory);
+  const container = new FilterableContainer(
+    { id: 'hello', panels: {}, filters: [] },
+    getEmbeddableFactory
+  );
 
   const embeddable = await container.addNewEmbeddable<
     FilterableEmbeddableInput,
@@ -522,7 +552,10 @@ test('Panel added to input state', async done => {
     FilterableEmbeddable
   >(FILTERABLE_EMBEDDABLE, {});
 
-  const container2 = new FilterableContainer({ id: 'hello', panels: {}, filters: [] }, getFactory);
+  const container2 = new FilterableContainer(
+    { id: 'hello', panels: {}, filters: [] },
+    getEmbeddableFactory
+  );
 
   const subscription = container2
     .getOutput$()
@@ -540,17 +573,12 @@ test('Panel added to input state', async done => {
   container2.updateInput(container.getInput());
 });
 
-test('Container changes made directly after adding a new embeddable are propagated', async done => {
-  const container = new HelloWorldContainer(
-    { id: 'hello', panels: {}, viewMode: ViewMode.EDIT },
-    getFactory
-  );
-
-  __embeddableFactories.clear();
-  __embeddableFactories.set(
-    CONTACT_CARD_EMBEDDABLE,
-    new SlowContactCardEmbeddableFactory({ loadTickCount: 3 })
-  );
+xtest('Container changes made directly after adding a new embeddable are propagated', async done => {
+  const { container } = await creatHelloWorldContainerAndEmbeddable({
+    id: 'hello',
+    panels: {},
+    viewMode: ViewMode.EDIT,
+  });
 
   const subscription = Rx.merge(container.getOutput$(), container.getInput$())
     .pipe(skip(2))
@@ -578,19 +606,16 @@ test('Container changes made directly after adding a new embeddable are propagat
 });
 
 test('container stores ErrorEmbeddables when a factory for a child cannot be found (so the panel can be removed)', async done => {
-  const container = new HelloWorldContainer(
-    {
-      id: 'hello',
-      panels: {
-        '123': {
-          type: 'IDontExist',
-          explicitInput: { id: '123' },
-        },
+  const { container } = await creatHelloWorldContainerAndEmbeddable({
+    id: 'hello',
+    panels: {
+      '123': {
+        type: 'IDontExist',
+        explicitInput: { id: '123' },
       },
-      viewMode: ViewMode.EDIT,
     },
-    getFactory
-  );
+    viewMode: ViewMode.EDIT,
+  });
 
   container.getOutput$().subscribe(() => {
     if (container.getOutput().embeddableLoaded['123']) {
@@ -602,20 +627,17 @@ test('container stores ErrorEmbeddables when a factory for a child cannot be fou
 });
 
 test('container stores ErrorEmbeddables when a saved object cannot be found', async done => {
-  const container = new HelloWorldContainer(
-    {
-      id: 'hello',
-      panels: {
-        '123': {
-          type: 'vis',
-          explicitInput: { id: '123' },
-          savedObjectId: '456',
-        },
+  const { container } = await creatHelloWorldContainerAndEmbeddable({
+    id: 'hello',
+    panels: {
+      '123': {
+        type: 'vis',
+        explicitInput: { id: '123' },
+        savedObjectId: '456',
       },
-      viewMode: ViewMode.EDIT,
     },
-    getFactory
-  );
+    viewMode: ViewMode.EDIT,
+  });
 
   container.getOutput$().subscribe(() => {
     if (container.getOutput().embeddableLoaded['123']) {
@@ -627,20 +649,17 @@ test('container stores ErrorEmbeddables when a saved object cannot be found', as
 });
 
 test('ErrorEmbeddables get updated when parent does', async done => {
-  const container = new HelloWorldContainer(
-    {
-      id: 'hello',
-      panels: {
-        '123': {
-          type: 'vis',
-          explicitInput: { id: '123' },
-          savedObjectId: '456',
-        },
+  const { container } = await creatHelloWorldContainerAndEmbeddable({
+    id: 'hello',
+    panels: {
+      '123': {
+        type: 'vis',
+        explicitInput: { id: '123' },
+        savedObjectId: '456',
       },
-      viewMode: ViewMode.EDIT,
     },
-    getFactory
-  );
+    viewMode: ViewMode.EDIT,
+  });
 
   container.getOutput$().subscribe(() => {
     if (container.getOutput().embeddableLoaded['123']) {
@@ -656,31 +675,32 @@ test('ErrorEmbeddables get updated when parent does', async done => {
   });
 });
 
-test('untilEmbeddableLoaded throws an error if there is no such child panel in the container', () => {
+test('untilEmbeddableLoaded throws an error if there is no such child panel in the container', async () => {
+  const { container } = await creatHelloWorldContainerAndEmbeddable({
+    id: 'hello',
+    panels: {},
+  });
+
+  expect(container.untilEmbeddableLoaded('idontexist')).rejects.toThrowError();
+});
+
+test.only('untilEmbeddableLoaded resolves if child is has an type that does not exist', async done => {
+  const coreSetup = coreMock.createSetup();
+  const coreStart = coreMock.createStart();
+  const { doStart } = testPlugin(coreSetup, coreStart);
+  const start = doStart();
   const container = new HelloWorldContainer(
     {
       id: 'hello',
       panels: {},
     },
-    getFactory
-  );
-
-  expect(container.untilEmbeddableLoaded('idontexist')).rejects.toThrowError();
-});
-
-test('untilEmbeddableLoaded resolves if child is has an type that does not exist', async done => {
-  __embeddableFactories.clear();
-  const container = new HelloWorldContainer(
     {
-      id: 'hello',
-      panels: {
-        '123': {
-          type: HELLO_WORLD_EMBEDDABLE_TYPE,
-          explicitInput: { id: '123' },
-        },
-      },
-    },
-    getFactory
+      getActions: start.getTriggerCompatibleActions,
+      getEmbeddableFactory: start.getEmbeddableFactory,
+      getAllEmbeddableFactories: start.getEmbeddableFactories,
+      overlays: coreStart.overlays,
+      notifications: coreStart.notifications,
+    }
   );
 
   const child = await container.untilEmbeddableLoaded('123');
@@ -703,7 +723,11 @@ test('untilEmbeddableLoaded resolves if child is loaded in the container', async
         },
       },
     },
-    getFactory
+    getActions,
+    getEmbeddableFactory,
+    getAllEmbeddableFactories,
+    overlays,
+    notifications
   );
 
   const child = await container.untilEmbeddableLoaded('123');
@@ -729,7 +753,11 @@ test('untilEmbeddableLoaded rejects with an error if child is subsequently remov
         },
       },
     },
-    getFactory
+    getActions,
+    getEmbeddableFactory,
+    getAllEmbeddableFactories,
+    overlays,
+    notifications
   );
 
   container.untilEmbeddableLoaded('123').catch(error => {
@@ -757,7 +785,11 @@ test('adding a panel then subsequently removing it before its loaded removes the
         },
       },
     },
-    getFactory
+    getActions,
+    getEmbeddableFactory,
+    getAllEmbeddableFactories,
+    overlays,
+    notifications
   );
 
   // Final state should be that the panel is removed.

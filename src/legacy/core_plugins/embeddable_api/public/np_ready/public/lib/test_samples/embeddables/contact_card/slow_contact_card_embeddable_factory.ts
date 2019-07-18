@@ -20,6 +20,12 @@
 import { Container, EmbeddableFactory } from '../../..';
 import { ContactCardEmbeddable, ContactCardEmbeddableInput } from './contact_card_embeddable';
 import { CONTACT_CARD_EMBEDDABLE } from './contact_card_embeddable_factory';
+import { ExecuteTriggerActions } from '../../../types';
+
+interface SlowContactCardEmbeddableFactoryOptions {
+  execAction: ExecuteTriggerActions;
+  loadTickCount?: number;
+}
 
 export class SlowContactCardEmbeddableFactory extends EmbeddableFactory<
   ContactCardEmbeddableInput
@@ -27,7 +33,7 @@ export class SlowContactCardEmbeddableFactory extends EmbeddableFactory<
   private loadTickCount = 0;
   public readonly type = CONTACT_CARD_EMBEDDABLE;
 
-  constructor(options: { loadTickCount?: number } = {}) {
+  constructor(private readonly options: SlowContactCardEmbeddableFactoryOptions) {
     super();
     if (options.loadTickCount) {
       this.loadTickCount = options.loadTickCount;
@@ -46,6 +52,6 @@ export class SlowContactCardEmbeddableFactory extends EmbeddableFactory<
     for (let i = 0; i < this.loadTickCount; i++) {
       await Promise.resolve();
     }
-    return new ContactCardEmbeddable(initialInput, parent);
+    return new ContactCardEmbeddable(initialInput, { execAction: this.options.execAction }, parent);
   }
 }

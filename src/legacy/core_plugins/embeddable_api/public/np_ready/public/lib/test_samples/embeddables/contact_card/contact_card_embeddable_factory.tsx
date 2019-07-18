@@ -24,11 +24,20 @@ import { EmbeddableFactory } from '../../../embeddables';
 import { Container } from '../../../containers';
 import { ContactCardEmbeddable, ContactCardEmbeddableInput } from './contact_card_embeddable';
 import { ContactCardInitializer } from './contact_card_initializer';
+import { EmbeddableFactoryOptions } from '../../../embeddables/embeddable_factory';
+import { ExecuteTriggerActions } from '../../../types';
 
 export const CONTACT_CARD_EMBEDDABLE = 'CONTACT_CARD_EMBEDDABLE';
 
 export class ContactCardEmbeddableFactory extends EmbeddableFactory<ContactCardEmbeddableInput> {
   public readonly type = CONTACT_CARD_EMBEDDABLE;
+
+  constructor(
+    options: EmbeddableFactoryOptions<any>,
+    private readonly execTrigger: ExecuteTriggerActions
+  ) {
+    super(options);
+  }
 
   public isEditable() {
     return true;
@@ -61,6 +70,8 @@ export class ContactCardEmbeddableFactory extends EmbeddableFactory<ContactCardE
   }
 
   public async create(initialInput: ContactCardEmbeddableInput, parent?: Container) {
-    return new ContactCardEmbeddable(initialInput, parent);
+    return new ContactCardEmbeddable(initialInput, {
+      execAction: this.execTrigger,
+    });
   }
 }

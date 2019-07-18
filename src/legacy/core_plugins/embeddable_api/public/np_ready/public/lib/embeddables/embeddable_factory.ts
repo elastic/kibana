@@ -40,6 +40,10 @@ export interface OutputSpec {
   [key: string]: PropertySpec;
 }
 
+export interface EmbeddableFactoryOptions<T> {
+  savedObjectMetaData?: SavedObjectMetaData<T>;
+}
+
 /**
  * The EmbeddableFactory creates and initializes an embeddable instance
  */
@@ -67,11 +71,7 @@ export abstract class EmbeddableFactory<
    */
   public readonly isContainerType: boolean = false;
 
-  constructor({
-    savedObjectMetaData,
-  }: {
-    savedObjectMetaData?: SavedObjectMetaData<TSavedObjectAttributes>;
-  } = {}) {
+  constructor({ savedObjectMetaData }: EmbeddableFactoryOptions<TSavedObjectAttributes> = {}) {
     this.savedObjectMetaData = savedObjectMetaData;
   }
 
