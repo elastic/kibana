@@ -159,7 +159,10 @@ export const RestoreSnapshotStepLogistics: React.FunctionComponent<StepProps> = 
                   updateRestoreSettings({ indices: undefined });
                 } else {
                   updateRestoreSettings({
-                    indices: [...(cachedRestoreSettings.indices || [])],
+                    indices:
+                      selectIndicesMode === 'custom'
+                        ? restoreIndexPattern
+                        : [...(cachedRestoreSettings.indices || [])],
                   });
                 }
               }}
@@ -208,7 +211,7 @@ export const RestoreSnapshotStepLogistics: React.FunctionComponent<StepProps> = 
                             }}
                           >
                             <FormattedMessage
-                              id="xpack.snapshotRestore.restoreForm.stepLogistics.indicesToggleCustomLink"
+                              id="xpack.snapshotRestore.restoreForm.stepLogistics.indicesToggleListLink"
                               defaultMessage="Select indices"
                             />
                           </EuiLink>
