@@ -28,7 +28,11 @@ exports[`LayerTocActions is rendered 1`] = `
             mockIcon
           </span>
         </span>
-        layer 1
+        <span
+          className={null}
+        >
+          layer 1
+        </span>
       </EuiButtonEmpty>
     </EuiToolTip>
   }
@@ -125,7 +129,11 @@ exports[`LayerTocActions should disable fit to data when supportsFitToBounds is 
             mockIcon
           </span>
         </span>
-        layer 1
+        <span
+          className={null}
+        >
+          layer 1
+        </span>
       </EuiButtonEmpty>
     </EuiToolTip>
   }
@@ -222,7 +230,11 @@ exports[`LayerTocActions should not show edit actions in read only mode 1`] = `
             mockIcon
           </span>
         </span>
-        layer 1
+        <span
+          className={null}
+        >
+          layer 1
+        </span>
       </EuiButtonEmpty>
     </EuiToolTip>
   }
