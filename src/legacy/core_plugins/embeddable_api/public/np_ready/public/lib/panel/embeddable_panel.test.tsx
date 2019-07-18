@@ -44,14 +44,14 @@ import {
 const __actionRegistry = new Map<string, Action>();
 const __triggerRegistry = new Map<string, Trigger>();
 const __embeddableFactories = new Map<string, EmbeddableFactory>();
-const getFactory: GetEmbeddableFactory = (id: string) => __embeddableFactories.get(id);
+const getEmbeddableFactory: GetEmbeddableFactory = (id: string) => __embeddableFactories.get(id);
 
 const editModeAction = new EditModeAction();
 const trigger: Trigger = {
   id: CONTEXT_MENU_TRIGGER,
   actionIds: [editModeAction.id],
 };
-const embeddableFactory = new ContactCardEmbeddableFactory();
+const embeddableFactory = new ContactCardEmbeddableFactory({} as any, (() => null) as any);
 
 __actionRegistry.set(editModeAction.id, editModeAction);
 __triggerRegistry.set(trigger.id, trigger);
@@ -68,7 +68,7 @@ test('HelloWorldContainer initializes embeddables', async done => {
         },
       },
     },
-    getFactory
+    { getEmbeddableFactory } as any
   );
 
   const subscription = container.getOutput$().subscribe(() => {
@@ -90,7 +90,9 @@ test('HelloWorldContainer initializes embeddables', async done => {
 });
 
 test('HelloWorldContainer.addNewEmbeddable', async () => {
-  const container = new HelloWorldContainer({ id: '123', panels: {} }, getFactory);
+  const container = new HelloWorldContainer({ id: '123', panels: {} }, {
+    getEmbeddableFactory,
+  } as any);
   const embeddable = await container.addNewEmbeddable<ContactCardEmbeddableInput>(
     CONTACT_CARD_EMBEDDABLE,
     {
@@ -111,10 +113,9 @@ test('HelloWorldContainer.addNewEmbeddable', async () => {
 });
 
 test('Container view mode change propagates to children', async () => {
-  const container = new HelloWorldContainer(
-    { id: '123', panels: {}, viewMode: ViewMode.VIEW },
-    getFactory
-  );
+  const container = new HelloWorldContainer({ id: '123', panels: {}, viewMode: ViewMode.VIEW }, {
+    getEmbeddableFactory,
+  } as any);
   const embeddable = await container.addNewEmbeddable<
     ContactCardEmbeddableInput,
     ContactCardEmbeddableOutput,
@@ -131,10 +132,9 @@ test('Container view mode change propagates to children', async () => {
 });
 
 test('HelloWorldContainer in view mode hides edit mode actions', async () => {
-  const container = new HelloWorldContainer(
-    { id: '123', panels: {}, viewMode: ViewMode.VIEW },
-    getFactory
-  );
+  const container = new HelloWorldContainer({ id: '123', panels: {}, viewMode: ViewMode.VIEW }, {
+    getEmbeddableFactory,
+  } as any);
 
   const embeddable = await container.addNewEmbeddable<
     ContactCardEmbeddableInput,
@@ -165,10 +165,9 @@ test('HelloWorldContainer in view mode hides edit mode actions', async () => {
 });
 
 test('HelloWorldContainer in edit mode shows edit mode actions', async () => {
-  const container = new HelloWorldContainer(
-    { id: '123', panels: {}, viewMode: ViewMode.VIEW },
-    getFactory
-  );
+  const container = new HelloWorldContainer({ id: '123', panels: {}, viewMode: ViewMode.VIEW }, {
+    getEmbeddableFactory,
+  } as any);
 
   const embeddable = await container.addNewEmbeddable<
     ContactCardEmbeddableInput,
@@ -224,7 +223,7 @@ test('HelloWorldContainer in edit mode shows edit mode actions', async () => {
 test('Updates when hidePanelTitles is toggled', async () => {
   const container = new HelloWorldContainer(
     { id: '123', panels: {}, viewMode: ViewMode.VIEW, hidePanelTitles: false },
-    getFactory
+    { getEmbeddableFactory } as any
   );
 
   const embeddable = await container.addNewEmbeddable<

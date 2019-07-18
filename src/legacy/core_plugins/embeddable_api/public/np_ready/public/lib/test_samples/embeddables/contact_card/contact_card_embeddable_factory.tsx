@@ -70,8 +70,12 @@ export class ContactCardEmbeddableFactory extends EmbeddableFactory<ContactCardE
   }
 
   public async create(initialInput: ContactCardEmbeddableInput, parent?: Container) {
-    return new ContactCardEmbeddable(initialInput, {
-      execAction: this.execTrigger,
-    });
+    return new ContactCardEmbeddable(
+      initialInput,
+      {
+        execAction: this.execTrigger,
+      },
+      parent
+    );
   }
 }

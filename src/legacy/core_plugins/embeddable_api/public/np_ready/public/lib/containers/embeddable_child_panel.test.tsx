@@ -33,10 +33,15 @@ import {
 
 test('EmbeddableChildPanel renders an embeddable when it is done loading', async () => {
   const __embeddableFactories = new Map<string, EmbeddableFactory>();
-  __embeddableFactories.set(CONTACT_CARD_EMBEDDABLE, new SlowContactCardEmbeddableFactory());
-  const getFactory: GetEmbeddableFactory = (id: string) => __embeddableFactories.get(id);
+  __embeddableFactories.set(
+    CONTACT_CARD_EMBEDDABLE,
+    new SlowContactCardEmbeddableFactory({ execAction: (() => null) as any })
+  );
+  const getEmbeddableFactory: GetEmbeddableFactory = (id: string) => __embeddableFactories.get(id);
 
-  const container = new HelloWorldContainer({ id: 'hello', panels: {} }, getFactory);
+  const container = new HelloWorldContainer({ id: 'hello', panels: {} }, {
+    getEmbeddableFactory,
+  } as any);
   const newEmbeddable = await container.addNewEmbeddable<
     ContactCardEmbeddableInput,
     ContactCardEmbeddableOutput,
@@ -76,13 +81,13 @@ test('EmbeddableChildPanel renders an embeddable when it is done loading', async
 });
 
 test(`EmbeddableChildPanel renders an error message if the factory doesn't exist`, async () => {
-  const getFactory: GetEmbeddableFactory = () => undefined;
+  const getEmbeddableFactory: GetEmbeddableFactory = () => undefined;
   const container = new HelloWorldContainer(
     {
       id: 'hello',
       panels: { '1': { type: 'idontexist', explicitInput: { id: '1' } } },
     },
-    getFactory
+    { getEmbeddableFactory } as any
   );
 
   const component = mountWithIntl(

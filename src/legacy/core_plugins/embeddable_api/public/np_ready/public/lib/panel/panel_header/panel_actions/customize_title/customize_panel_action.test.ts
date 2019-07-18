@@ -40,9 +40,12 @@ let embeddable: ContactCardEmbeddable;
 
 function createHelloWorldContainer(input = { id: '123', panels: {} }) {
   const __embeddableFactories = new Map<string, EmbeddableFactory>();
-  const getFactory: GetEmbeddableFactory = (id: string) => __embeddableFactories.get(id);
-  __embeddableFactories.set(CONTACT_CARD_EMBEDDABLE, new ContactCardEmbeddableFactory());
-  return new HelloWorldContainer(input, getFactory);
+  const getEmbeddableFactory: GetEmbeddableFactory = (id: string) => __embeddableFactories.get(id);
+  __embeddableFactories.set(
+    CONTACT_CARD_EMBEDDABLE,
+    new ContactCardEmbeddableFactory({}, (() => {}) as any)
+  );
+  return new HelloWorldContainer(input, { getEmbeddableFactory } as any);
 }
 
 beforeEach(async () => {
