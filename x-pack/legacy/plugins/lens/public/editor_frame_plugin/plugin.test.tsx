@@ -13,7 +13,7 @@ import {
   createMockVisualization,
 } from './mocks';
 import { SavedObjectStore, Document } from '../persistence';
-import { shallow, mount } from 'enzyme';
+import { mountWithIntl as mount, shallowWithIntl as shallow } from 'test_utils/enzyme_helpers';
 
 jest.mock('ui/chrome', () => ({
   getSavedObjectsClient: jest.fn(),
@@ -21,6 +21,8 @@ jest.mock('ui/chrome', () => ({
 
 // mock away actual data plugin to prevent all of it being loaded
 jest.mock('../../../../../../src/legacy/core_plugins/data/public/setup', () => {});
+jest.mock('../../../../../../src/legacy/core_plugins/embeddable_api/public', () => {});
+jest.mock('./embeddable/embeddable_factory', () => ({ LensEmbeddableFactory: class Mock {} }));
 
 function mockStore(): SavedObjectStore {
   return {

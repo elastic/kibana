@@ -266,22 +266,31 @@ describe('editor_frame', () => {
       instance.update();
 
       expect(instance.find(expressionRendererMock).prop('expression')).toMatchInlineSnapshot(`
-Object {
-  "chain": Array [
-    Object {
-      "arguments": Object {},
-      "function": "datasource",
-      "type": "function",
-    },
-    Object {
-      "arguments": Object {},
-      "function": "vis",
-      "type": "function",
-    },
-  ],
-  "type": "expression",
-}
-`);
+        Object {
+          "chain": Array [
+            Object {
+              "arguments": Object {
+                "filters": Array [],
+                "query": Array [],
+                "timeRange": Array [],
+              },
+              "function": "kibana_context",
+              "type": "function",
+            },
+            Object {
+              "arguments": Object {},
+              "function": "datasource",
+              "type": "function",
+            },
+            Object {
+              "arguments": Object {},
+              "function": "vis",
+              "type": "function",
+            },
+          ],
+          "type": "expression",
+        }
+      `);
     });
   });
 

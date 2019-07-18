@@ -121,22 +121,31 @@ describe('workspace_panel', () => {
     );
 
     expect(instance.find(expressionRendererMock).prop('expression')).toMatchInlineSnapshot(`
-Object {
-  "chain": Array [
-    Object {
-      "arguments": Object {},
-      "function": "datasource",
-      "type": "function",
-    },
-    Object {
-      "arguments": Object {},
-      "function": "vis",
-      "type": "function",
-    },
-  ],
-  "type": "expression",
-}
-`);
+      Object {
+        "chain": Array [
+          Object {
+            "arguments": Object {
+              "filters": Array [],
+              "query": Array [],
+              "timeRange": Array [],
+            },
+            "function": "kibana_context",
+            "type": "function",
+          },
+          Object {
+            "arguments": Object {},
+            "function": "datasource",
+            "type": "function",
+          },
+          Object {
+            "arguments": Object {},
+            "function": "vis",
+            "type": "function",
+          },
+        ],
+        "type": "expression",
+      }
+    `);
   });
 
   describe('expression failures', () => {
@@ -159,7 +168,7 @@ Object {
         />
       );
 
-      expect(instance.find('[data-test-subj="expression-failure"]')).toHaveLength(1);
+      expect(instance.find('EuiFlexItem[data-test-subj="expression-failure"]')).toHaveLength(1);
       expect(instance.find(expressionRendererMock)).toHaveLength(0);
     });
 
@@ -192,7 +201,7 @@ Object {
 
       instance.update();
 
-      expect(instance.find('[data-test-subj="expression-failure"]')).toHaveLength(1);
+      expect(instance.find('EuiFlexItem[data-test-subj="expression-failure"]')).toHaveLength(1);
       expect(instance.find(expressionRendererMock)).toHaveLength(0);
     });
 

@@ -40,7 +40,9 @@ describe('LensStore', () => {
         title: 'Hello',
         visualizationType: 'bar',
         datasourceType: 'indexpattern',
+        expression: '',
         state: {
+          datasourceMetaData: { filterableIndexPatterns: [] },
           datasource: { type: 'index_pattern', indexPattern: '.kibana_test' },
           visualization: { x: 'foo', y: 'baz' },
         },

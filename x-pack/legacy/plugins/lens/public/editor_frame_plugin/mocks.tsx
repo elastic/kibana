@@ -70,5 +70,11 @@ export function createMockDependencies() {
         run: jest.fn(_ => Promise.resolve({ type: 'render', as: 'test', value: undefined })),
       },
     },
+    embeddables: {
+      addEmbeddableFactory: jest.fn(),
+    },
+    chrome: {
+      getSavedObjectsClient: () => {},
+    },
   } as unknown) as MockedDependencies;
 }

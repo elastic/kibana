@@ -96,7 +96,7 @@ describe('save editor frame state', () => {
 
     const visualization = createMockVisualization();
     visualization.getPersistableState.mockImplementation(state => ({
-      stuff: `${state}_vis_persisted`,
+      things: `${state}_vis_persisted`,
     }));
     await save({
       ...saveArgs,
@@ -114,8 +114,12 @@ describe('save editor frame state', () => {
     expect(store.save).toHaveBeenCalledWith({
       datasourceType: '1',
       id: undefined,
+      expression: '',
       state: {
         datasource: { stuff: '2_datsource_persisted' },
+        datasourceMetaData: {
+          filterableIndexPatterns: [],
+        },
         visualization: { things: '4_vis_persisted' },
       },
       title: 'bbb',
