@@ -1,7 +1,16 @@
+os:
+  - linux
+  - osx
+addons:
+  apt:
+    sources:
+      - ppa:git-core/ppa
+    packages:
+      - git
 language: node_js
 node_js:
-  - "8"
-  - "10"
+  - '8'
+  - '10'
 cache: yarn
 before_script:
   - yarn

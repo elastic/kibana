@@ -14,7 +14,9 @@ export interface Config {
 
   // both
   all?: boolean;
+  author?: string;
   apiHostname?: string;
+  commitsCount?: number;
   gitHostname?: string;
   labels?: string[];
   multiple?: boolean;

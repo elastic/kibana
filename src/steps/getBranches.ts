@@ -1,7 +1,7 @@
-import { BackportOptions } from '../options/options';
-import { promptForBranches } from '../services/prompts';
 import isEmpty from 'lodash.isempty';
+import { BackportOptions } from '../options/options';
 import { BranchChoice } from '../types/Config';
+import { promptForBranches } from '../services/prompts';
 
 export function getBranches(options: BackportOptions) {
   if (!isEmpty(options.branches)) {

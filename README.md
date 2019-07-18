@@ -87,7 +87,9 @@ The above commands will start an interactive prompt. You can use the `arrow keys
 | --accessToken   | Github access token                     |                                 | string  |
 | --all           | Show commits from other than me         | false                           | boolean |
 | --apiHostname   | Hostname for the Github API             | api.github.com                  | string  |
+| --author        | Filter commits by author                | _Current user_                  | string  |
 | --branch        | Branch to backport to                   |                                 | string  |
+| --commitsCount  | Number of commits to choose from        | 10                              | number  |
 | --gitHostname   | Hostname for Git remotes                | github.com                      | string  |
 | --labels        | Pull request labels                     |                                 | string  |
 | --multiple      | Select multiple branches and/or commits | false                           | boolean |

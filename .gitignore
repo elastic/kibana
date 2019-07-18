@@ -4,3 +4,4 @@
 /dist
 /yarn-error.log
 .DS_Store
+/test/integration/mock-environment

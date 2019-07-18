@@ -1,0 +1,421 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`run through steps exec should be called with correct args 1`] = `
+Array [
+  Array [
+    "git remote rm origin",
+    Object {
+      "cwd": "/myHomeDir/.backport/repositories/elastic/kibana",
+    },
+  ],
+  Array [
+    "git remote rm sqren",
+    Object {
+      "cwd": "/myHomeDir/.backport/repositories/elastic/kibana",
+    },
+  ],
+  Array [
+    "git remote add sqren https://myAccessToken@github.com/sqren/kibana.git",
+    Object {
+      "cwd": "/myHomeDir/.backport/repositories/elastic/kibana",
+    },
+  ],
+  Array [
+    "git remote rm elastic",
+    Object {
+      "cwd": "/myHomeDir/.backport/repositories/elastic/kibana",
+    },
+  ],
+  Array [
+    "git remote add elastic https://myAccessToken@github.com/elastic/kibana.git",
+    Object {
+      "cwd": "/myHomeDir/.backport/repositories/elastic/kibana",
+    },
+  ],
+  Array [
+    "git reset --hard && git clean -d --force && git fetch elastic 6.x && git checkout -B backport/6.x/commit-2e63475c elastic/6.x --no-track",
+    Object {
+      "cwd": "/myHomeDir/.backport/repositories/elastic/kibana",
+    },
+  ],
+  Array [
+    "git fetch elastic master:master --force && git cherry-pick 2e63475c483f7844b0f2833bc57fdee32095bacb",
+    Object {
+      "cwd": "/myHomeDir/.backport/repositories/elastic/kibana",
+    },
+  ],
+  Array [
+    "git push sqren backport/6.x/commit-2e63475c:backport/6.x/commit-2e63475c --force",
+    Object {
+      "cwd": "/myHomeDir/.backport/repositories/elastic/kibana",
+    },
+  ],
+  Array [
+    "git checkout master && git branch -D backport/6.x/commit-2e63475c",
+    Object {
+      "cwd": "/myHomeDir/.backport/repositories/elastic/kibana",
+    },
+  ],
+]
+`;
+
+exports[`run through steps git clone should be called with correct args 1`] = `
+Array [
+  Array [
+    "git clone https://myAccessToken@github.com/elastic/kibana.git --progress",
+    Object {
+      "cwd": "/myHomeDir/.backport/repositories/elastic",
+      "maxBuffer": 104857600,
+    },
+    [Function],
+  ],
+]
+`;
+
+exports[`run through steps prompt calls should match snapshot 1`] = `
+Array [
+  Array [
+    Array [
+      Object {
+        "choices": Array [
+          Object {
+            "name": "[90m1.[39m Add 👻 (2e63475c) ",
+            "short": "2e63475c",
+            "value": Object {
+              "existingBackports": Array [],
+              "message": "Add 👻 (2e63475c)",
+              "pullNumber": undefined,
+              "sha": "2e63475c483f7844b0f2833bc57fdee32095bacb",
+            },
+          },
+          Object {
+            "name": "[90m2.[39m Add witch (#85) ",
+            "short": "#85",
+            "value": Object {
+              "existingBackports": Array [],
+              "message": "Add witch (#85)",
+              "pullNumber": 85,
+              "sha": "f3b618b9421fdecdb36862f907afbdd6344b361d",
+            },
+          },
+          Object {
+            "name": "[90m3.[39m Add SF mention (#80) [32m6.3[39m",
+            "short": "#80",
+            "value": Object {
+              "existingBackports": Array [
+                Object {
+                  "branch": "6.3",
+                  "state": "MERGED",
+                },
+              ],
+              "message": "Add SF mention (#80)",
+              "pullNumber": 80,
+              "sha": "79cf18453ec32a4677009dcbab1c9c8c73fc14fe",
+            },
+          },
+          Object {
+            "name": "[90m4.[39m Add backport config (3827bbba) ",
+            "short": "3827bbba",
+            "value": Object {
+              "existingBackports": Array [],
+              "message": "Add backport config (3827bbba)",
+              "pullNumber": undefined,
+              "sha": "3827bbbaf39914eda4f02f6940189844375fd097",
+            },
+          },
+          Object {
+            "name": "[90m5.[39m Initial commit (5ea0da55) ",
+            "short": "5ea0da55",
+            "value": Object {
+              "existingBackports": Array [],
+              "message": "Initial commit (5ea0da55)",
+              "pullNumber": undefined,
+              "sha": "5ea0da550ac191029459289d67f99ad7d310812b",
+            },
+          },
+        ],
+        "message": "Select commit to backport",
+        "name": "promptResult",
+        "pageSize": 5,
+        "type": "list",
+      },
+    ],
+  ],
+  Array [
+    Array [
+      Object {
+        "choices": Array [
+          Object {
+            "name": "6.x",
+          },
+          Object {
+            "name": "6.0",
+          },
+          Object {
+            "name": "5.6",
+          },
+          Object {
+            "name": "5.5",
+          },
+          Object {
+            "name": "5.4",
+          },
+        ],
+        "message": "Select branch to backport to",
+        "name": "promptResult",
+        "type": "list",
+      },
+    ],
+  ],
+]
+`;
+
+exports[`run through steps should make correct POST requests 1`] = `
+[MockFunction] {
+  "calls": Array [
+    Array [
+      "https://api.github.com/graphql",
+      Object {
+        "query": "
+    query getIdByLogin($login: String!) {
+      user(login: $login) {
+        id
+      }
+    }
+  ",
+        "variables": Object {
+          "login": "sqren",
+        },
+      },
+      Object {
+        "headers": Object {
+          "Authorization": "bearer myAccessToken",
+          "Content-Type": "application/json",
+        },
+      },
+    ],
+    Array [
+      "https://api.github.com/graphql",
+      Object {
+        "query": "
+    query getCommitsByAuthorQuery(
+      $repoOwner: String!
+      $repoName: String!
+      $commitsCount: Int!
+      $authorId: ID
+    ) {
+      repository(owner: $repoOwner, name: $repoName) {
+        ref(qualifiedName: \\"master\\") {
+          target {
+            ... on Commit {
+              history(first: $commitsCount, author: { id: $authorId }) {
+                edges {
+                  node {
+                    oid
+                    message
+                    associatedPullRequests(first: 1) {
+                      edges {
+                        node {
+                          number
+                          timelineItems(
+                            last: 20
+                            itemTypes: CROSS_REFERENCED_EVENT
+                          ) {
+                            edges {
+                              node {
+                                ... on CrossReferencedEvent {
+                                  source {
+                                    __typename
+                                    ... on PullRequest {
+                                      state
+                                      baseRefName
+                                      commits(first: 20) {
+                                        edges {
+                                          node {
+                                            commit {
+                                              message
+                                            }
+                                          }
+                                        }
+                                      }
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  ",
+        "variables": Object {
+          "authorId": "sqren_author_id",
+          "commitsCount": 10,
+          "repoName": "kibana",
+          "repoOwner": "elastic",
+        },
+      },
+      Object {
+        "headers": Object {
+          "Authorization": "bearer myAccessToken",
+          "Content-Type": "application/json",
+        },
+      },
+    ],
+    Array [
+      "https://api.github.com/repos/elastic/kibana/pulls?access_token=myAccessToken",
+      Object {
+        "base": "6.x",
+        "body": "Backports the following commits to 6.x:
+ - Add 👻 (2e63475c)
+
+myPrDescription",
+        "head": "sqren:backport/6.x/commit-2e63475c",
+        "title": "myPrTitle 6.x Add 👻 (2e63475c)",
+      },
+    ],
+  ],
+  "results": Array [
+    Object {
+      "type": "return",
+      "value": Object {
+        "data": Object {
+          "data": Object {
+            "user": Object {
+              "id": "sqren_author_id",
+            },
+          },
+        },
+      },
+    },
+    Object {
+      "type": "return",
+      "value": Object {
+        "data": Object {
+          "data": Object {
+            "repository": Object {
+              "ref": Object {
+                "target": Object {
+                  "history": Object {
+                    "edges": Array [
+                      Object {
+                        "node": Object {
+                          "associatedPullRequests": Object {
+                            "edges": Array [],
+                          },
+                          "message": "Add 👻",
+                          "oid": "2e63475c483f7844b0f2833bc57fdee32095bacb",
+                        },
+                      },
+                      Object {
+                        "node": Object {
+                          "associatedPullRequests": Object {
+                            "edges": Array [
+                              Object {
+                                "node": Object {
+                                  "number": 85,
+                                  "timelineItems": Object {
+                                    "edges": Array [],
+                                  },
+                                },
+                              },
+                            ],
+                          },
+                          "message": "Add witch (#85)",
+                          "oid": "f3b618b9421fdecdb36862f907afbdd6344b361d",
+                        },
+                      },
+                      Object {
+                        "node": Object {
+                          "associatedPullRequests": Object {
+                            "edges": Array [
+                              Object {
+                                "node": Object {
+                                  "number": 80,
+                                  "timelineItems": Object {
+                                    "edges": Array [
+                                      Object {
+                                        "node": Object {
+                                          "source": Object {
+                                            "__typename": "PullRequest",
+                                            "baseRefName": "6.3",
+                                            "commits": Object {
+                                              "edges": Array [
+                                                Object {
+                                                  "node": Object {
+                                                    "commit": Object {
+                                                      "message": "Add SF mention (#80)
+
+* Add SF mention
+
+* Add several emojis!",
+                                                    },
+                                                  },
+                                                },
+                                              ],
+                                            },
+                                            "state": "MERGED",
+                                          },
+                                        },
+                                      },
+                                    ],
+                                  },
+                                },
+                              },
+                            ],
+                          },
+                          "message": "Add SF mention (#80)
+
+* Add SF mention
+
+* Add several emojis!",
+                          "oid": "79cf18453ec32a4677009dcbab1c9c8c73fc14fe",
+                        },
+                      },
+                      Object {
+                        "node": Object {
+                          "associatedPullRequests": Object {
+                            "edges": Array [],
+                          },
+                          "message": "Add backport config",
+                          "oid": "3827bbbaf39914eda4f02f6940189844375fd097",
+                        },
+                      },
+                      Object {
+                        "node": Object {
+                          "associatedPullRequests": Object {
+                            "edges": Array [],
+                          },
+                          "message": "Initial commit",
+                          "oid": "5ea0da550ac191029459289d67f99ad7d310812b",
+                        },
+                      },
+                    ],
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+    Object {
+      "type": "return",
+      "value": Object {
+        "data": Object {
+          "html_url": "pull request url",
+          "number": 1337,
+        },
+      },
+    },
+  ],
+}
+`;

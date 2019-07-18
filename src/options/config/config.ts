@@ -1,8 +1,8 @@
+import isString from 'lodash.isstring';
+import { Config } from '../../types/Config';
+import { PromiseReturnType } from '../../types/commons';
 import { getGlobalConfig } from './globalConfig';
 import { getProjectConfig } from './projectConfig';
-import { PromiseReturnType } from '../../types/commons';
-import { Config } from '../../types/Config';
-import isString from 'lodash.isstring';
 
 export type OptionsFromConfigFiles = PromiseReturnType<
   typeof getOptionsFromConfigFiles

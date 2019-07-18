@@ -118,6 +118,12 @@ CLI: `--prTitle "My PR Title"`
 Pull request description.
 Will be added to the end of the pull request description.
 
+For people who often need to add the same description to PRs they can create a bash alias:
+
+```sh
+alias backport-skip-ci='backport --prDescription "[skip-ci]"'
+```
+
 CLI: `--prDescription "skip-ci"`
 
 #### `gitHostname`

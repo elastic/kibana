@@ -28,12 +28,12 @@
   "license": "MIT",
   "scripts": {
     "cover": "jest --coverage",
-    "format": "prettier \"./src/**/*.ts\" --write",
-    "lint": "tsc -p ./test/tsconfig.json && eslint ./src/**/*.ts",
+    "format": "prettier \"./{src,test}/**/*.ts\" --write",
+    "lint": "tsc --project ./test/tsconfig.json && eslint ./src/**/*.ts ./test/**/*.ts",
     "postinstall": "test -f ./dist/scripts/runPostinstall.js && node ./dist/scripts/runPostinstall.js || echo 'Dist folder missing'",
     "prepublishOnly": "tsc",
     "publish-dry-run": "tar -tf $(npm pack)",
-    "test": "jest",
+    "test": "jest --config ./jest.config.js",
     "start": "ts-node --transpile-only ./src/index.ts"
   },
   "lint-staged": {
@@ -55,26 +55,6 @@
     "type": "git",
     "url": "git+https://github.com/sqren/backport.git"
   },
-  "jest": {
-    "testURL": "http://localhost/",
-    "setupFiles": [
-      "./test/setup.js"
-    ],
-    "transform": {
-      "^.+\\.tsx?$": "ts-jest"
-    },
-    "testRegex": "test.ts$",
-    "moduleFileExtensions": [
-      "ts",
-      "js",
-      "json"
-    ],
-    "globals": {
-      "ts-jest": {
-        "diagnostics": false
-      }
-    }
-  },
   "greenkeeper": {
     "ignore": [
       "@types/node"
@@ -84,49 +64,47 @@
     "node": ">=8.0.0"
   },
   "dependencies": {
-    "axios": "^0.18.0",
-    "find-up": "^3.0.0",
-    "inquirer": "^6.3.1",
+    "axios": "^0.19.0",
+    "del": "^5.0.0",
+    "find-up": "^4.1.0",
+    "inquirer": "^6.5.0",
     "lodash.flatten": "^4.4.0",
     "lodash.get": "^4.4.2",
     "lodash.isempty": "^4.4.0",
     "lodash.isstring": "^4.0.1",
-    "mkdirp": "^0.5.1",
+    "make-dir": "^3.0.0",
     "ora": "^3.4.0",
-    "rimraf": "^2.6.3",
-    "strip-json-comments": "^3.0.0",
-    "yargs": "^13.2.2"
+    "strip-json-comments": "^3.0.1",
+    "yargs": "^13.3.0"
   },
   "devDependencies": {
-    "@types/core-js": "^2.5.0",
-    "@types/find-up": "^2.1.1",
-    "@types/inquirer": "^6.0.0",
-    "@types/jest": "^24.0.11",
+    "@types/core-js": "^2.5.2",
+    "@types/find-up": "^4.0.0",
+    "@types/inquirer": "^6.0.3",
+    "@types/jest": "^24.0.15",
     "@types/lodash.flatten": "^4.4.6",
     "@types/lodash.get": "^4.4.6",
     "@types/lodash.isempty": "^4.4.6",
     "@types/lodash.isstring": "^4.0.6",
     "@types/lodash.last": "^3.0.6",
-    "@types/mkdirp": "^0.5.2",
-    "@types/nock": "^10.0.0",
+    "@types/nock": "^10.0.3",
     "@types/node": "^10.14.4",
-    "@types/rimraf": "^2.0.2",
-    "@types/strip-json-comments": "^0.0.30",
+    "@types/strip-json-comments": "^3.0.0",
     "@types/yargs": "^13.0.0",
-    "@typescript-eslint/eslint-plugin": "^1.7.0",
-    "@typescript-eslint/parser": "^1.7.0",
-    "axios-mock-adapter": "^1.16.0",
-    "eslint": "^5.16.0",
-    "eslint-config-prettier": "^4.1.0",
-    "eslint-plugin-prettier": "^3.0.1",
-    "husky": "^2.0.0",
-    "jest": "^24.7.1",
-    "lint-staged": "^8.1.5",
+    "@typescript-eslint/eslint-plugin": "^1.12.0",
+    "@typescript-eslint/parser": "^1.12.0",
+    "eslint": "^6.0.1",
+    "eslint-config-prettier": "^6.0.0",
+    "eslint-plugin-import": "^2.18.0",
+    "eslint-plugin-prettier": "^3.1.0",
+    "husky": "^3.0.0",
+    "jest": "^24.8.0",
+    "lint-staged": "^9.2.0",
     "lodash.last": "^3.0.0",
     "nock": "^10.0.6",
-    "prettier": "^1.17.0",
+    "prettier": "^1.18.2",
     "ts-jest": "^24.0.2",
-    "ts-node": "^8.1.0",
-    "typescript": "^3.4.5"
+    "ts-node": "^8.3.0",
+    "typescript": "^3.5.3"
   }
 }

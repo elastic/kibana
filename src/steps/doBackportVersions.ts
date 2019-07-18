@@ -1,35 +1,30 @@
+import chalk from 'chalk';
 import ora from 'ora';
-import { confirmPrompt } from '../services/prompts';
-import {
-  addLabelsToPullRequest,
-  createPullRequest,
-  Commit,
-  getShortSha
-} from '../services/github';
+import { BackportOptions } from '../options/options';
+import { CommitSelected } from '../services/github/Commit';
 import { HandledError } from '../services/HandledError';
-import { getRepoPath } from '../services/env';
-import { log } from '../services/logger';
+import { addLabelsToPullRequest } from '../services/github/addLabelsToPullRequest';
 import {
   cherrypick,
-  createAndCheckoutBranch,
+  createFeatureBranch,
+  deleteFeatureBranch,
   isIndexDirty,
-  push,
-  resetAndPullMaster
+  pushFeatureBranch
 } from '../services/git';
-import { BackportOptions } from '../options/options';
+import { confirmPrompt } from '../services/prompts';
+import { createPullRequest } from '../services/github/createPullRequest';
+import { getRepoPath } from '../services/env';
+import { getShortSha } from '../services/github/commitFormatters';
+import { log } from '../services/logger';
 
 export function doBackportVersions(
   options: BackportOptions,
-  commits: Commit[],
+  commits: CommitSelected[],
   branches: string[]
 ) {
   return sequentially(branches, async baseBranch => {
     try {
-      const pullRequest = await doBackportVersion(options, {
-        commits,
-        baseBranch
-      });
-      log(`View pull request: ${pullRequest.html_url}`);
+      await doBackportVersion(options, { commits, baseBranch });
     } catch (e) {
       if (e.name === 'HandledError') {
         console.error(e.message);
@@ -47,18 +42,23 @@ export async function doBackportVersion(
     commits,
     baseBranch
   }: {
-    commits: Commit[];
+    commits: CommitSelected[];
     baseBranch: string;
   }
 ) {
   const featureBranch = getFeatureBranchName(baseBranch, commits);
-  const refValues = commits.map(commit => getReferenceLong(commit)).join(', ');
-  log(`Backporting ${refValues} to ${baseBranch}:`);
+  const commitMessages = commits
+    .map(commit => ` - ${commit.message}`)
+    .join('\n');
+  log(
+    `\n${chalk.bold(
+      `Backporting the following commits to ${baseBranch}:`
+    )}\n${commitMessages}\n`
+  );
 
-  await withSpinner({ text: 'Pulling latest changes' }, async () => {
-    await resetAndPullMaster(options);
-    await createAndCheckoutBranch(options, baseBranch, featureBranch);
-  });
+  await withSpinner({ text: 'Pulling latest changes' }, () =>
+    createFeatureBranch(options, baseBranch, featureBranch)
+  );
 
   await sequentially(commits, commit =>
     cherrypickAndConfirm(options, commit.sha)
@@ -66,16 +66,18 @@ export async function doBackportVersion(
 
   await withSpinner(
     { text: `Pushing branch ${options.username}:${featureBranch}` },
-    () => push(options, featureBranch)
+    () => pushFeatureBranch(options, featureBranch)
   );
 
-  return withSpinner({ text: 'Creating pull request' }, async () => {
+  await deleteFeatureBranch(options, featureBranch);
+
+  await withSpinner({ text: 'Creating pull request' }, async spinner => {
     const payload = getPullRequestPayload(options, baseBranch, commits);
     const pullRequest = await createPullRequest(options, payload);
     if (options.labels.length > 0) {
       await addLabelsToPullRequest(options, pullRequest.number);
     }
-    return pullRequest;
+    spinner.text = `Created pull request: ${pullRequest.html_url}`;
   });
 }
 
@@ -86,22 +88,16 @@ function sequentially<T>(items: T[], handler: (item: T) => Promise<void>) {
   }, Promise.resolve());
 }
 
-function getFeatureBranchName(baseBranch: string, commits: Commit[]) {
+function getFeatureBranchName(baseBranch: string, commits: CommitSelected[]) {
   const refValues = commits
-    .map(commit => getReferenceShort(commit))
+    .map(commit =>
+      commit.pullNumber
+        ? `pr-${commit.pullNumber}`
+        : `commit-${getShortSha(commit.sha)}`
+    )
     .join('_')
     .slice(0, 200);
   return `backport/${baseBranch}/${refValues}`;
-}
-
-export function getReferenceLong(commit: Commit) {
-  return commit.pullNumber ? `#${commit.pullNumber}` : getShortSha(commit.sha);
-}
-
-function getReferenceShort(commit: Commit) {
-  return commit.pullNumber
-    ? `pr-${commit.pullNumber}`
-    : `commit-${getShortSha(commit.sha)}`;
 }
 
 async function cherrypickAndConfirm(options: BackportOptions, sha: string) {
@@ -116,9 +112,7 @@ async function cherrypickAndConfirm(options: BackportOptions, sha: string) {
         options
       )} and when all conflicts have been resolved and staged run:`
     );
-    log(`
-    git cherry-pick --continue
-    `);
+    log(`\ngit cherry-pick --continue\n`);
 
     const hasConflict = e.cmd.includes('git cherry-pick');
     if (!hasConflict) {
@@ -145,38 +139,30 @@ async function resolveConflictsOrAbort(options: BackportOptions) {
 
 function getPullRequestTitle(
   baseBranch: string,
-  commits: Commit[],
+  commits: CommitSelected[],
   prTitle: string
 ) {
-  const commitMessages = commits
-    .map(commit => commit.message)
-    .join(' | ')
-    .slice(0, 200);
-
-  // prTitle could include baseBranch or commitMessages in template literal
+  const commitMessages = commits.map(commit => commit.message).join(' | ');
   return prTitle
     .replace('{baseBranch}', baseBranch)
-    .replace('{commitMessages}', commitMessages);
+    .replace('{commitMessages}', commitMessages)
+    .slice(0, 240);
 }
 
-export function getPullRequestPayload(
+function getPullRequestPayload(
   { prDescription, prTitle, username }: BackportOptions,
   baseBranch: string,
-  commits: Commit[]
+  commits: CommitSelected[]
 ) {
   const featureBranch = getFeatureBranchName(baseBranch, commits);
-  const commitRefs = commits
-    .map(commit => {
-      const ref = getReferenceLong(commit);
-      return ` - ${commit.message.replace(`(${ref})`, '')} (${ref})`;
-    })
+  const commitMessages = commits
+    .map(commit => ` - ${commit.message}`)
     .join('\n');
-
   const bodySuffix = prDescription ? `\n\n${prDescription}` : '';
 
   return {
     title: getPullRequestTitle(baseBranch, commits, prTitle),
-    body: `Backports the following commits to ${baseBranch}:\n${commitRefs}${bodySuffix}`,
+    body: `Backports the following commits to ${baseBranch}:\n${commitMessages}${bodySuffix}`,
     head: `${username}:${featureBranch}`,
     base: `${baseBranch}`
   };
@@ -184,12 +170,12 @@ export function getPullRequestPayload(
 
 async function withSpinner<T>(
   { text }: { text: string },
-  fn: () => Promise<T>
+  fn: (spinner: ora.Ora) => Promise<T>
 ): Promise<T> {
   const spinner = ora(text).start();
 
   try {
-    const res = await fn();
+    const res = await fn(spinner);
     spinner.succeed();
     return res;
   } catch (e) {

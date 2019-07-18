@@ -1,6 +1,7 @@
-import { readConfigFile } from './readConfigFile';
-import { mkdirp, chmod, writeFile } from '../../services/rpc';
+import makeDir from 'make-dir';
+import { chmod, writeFile } from '../../services/fs-promisified';
 import { getGlobalConfigPath, getReposPath } from '../../services/env';
+import { readConfigFile } from './readConfigFile';
 
 export async function getGlobalConfig() {
   await maybeCreateGlobalConfigAndFolder();
@@ -12,7 +13,7 @@ export async function maybeCreateGlobalConfigAndFolder() {
   const reposPath = getReposPath();
   const globalConfigPath = getGlobalConfigPath();
   const configTemplate = await getConfigTemplate();
-  await mkdirp(reposPath);
+  await makeDir(reposPath);
   const didCreate = await maybeCreateGlobalConfig(
     globalConfigPath,
     configTemplate

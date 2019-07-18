@@ -4,7 +4,7 @@ import { OptionsFromConfigFiles } from './config/config';
 export type OptionsFromCliArgs = ReturnType<typeof getOptionsFromCliArgs>;
 export function getOptionsFromCliArgs(
   configOptions: OptionsFromConfigFiles,
-  argv: typeof process.argv
+  argv: string[]
 ) {
   const cliArgs = yargs(argv)
     .usage('$0 [args]')
@@ -24,12 +24,22 @@ export function getOptionsFromCliArgs(
       description: 'Hostname for the Github API',
       type: 'string'
     })
+    .option('author', {
+      default: configOptions.author,
+      description: 'Show commits by specific author',
+      type: 'string'
+    })
     .option('branches', {
       default: [] as string[],
       description: 'Branch(es) to backport to',
       type: 'array',
       alias: 'branch',
       string: true // ensure `6.0` is not coerced to `6`
+    })
+    .option('commitsCount', {
+      default: configOptions.commitsCount,
+      description: 'Number of commits to choose from',
+      type: 'number'
     })
     .option('gitHostname', {
       default: configOptions.gitHostname,
@@ -89,6 +99,8 @@ export function getOptionsFromCliArgs(
     accessToken: cliArgs.accessToken,
     all: cliArgs.all,
     apiHostname: cliArgs.apiHostname,
+    author: cliArgs.author,
+    commitsCount: cliArgs.commitsCount,
     branchChoices: configOptions.branchChoices,
     branches: cliArgs.branches,
     gitHostname: cliArgs.gitHostname,

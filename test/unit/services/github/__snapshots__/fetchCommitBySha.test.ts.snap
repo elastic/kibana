@@ -1,0 +1,17 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`fetchCommitBySha should return single commit with pull request 1`] = `
+Array [
+  Array [
+    "https://api.github.com/search/commits?q=hash:myCommitSha%20repo:elastic/kibana&per_page=1&access_token=myAccessToken",
+    Object {
+      "headers": Object {
+        "Accept": "application/vnd.github.cloak-preview",
+      },
+    },
+  ],
+  Array [
+    "https://api.github.com/search/issues?q=repo:elastic/kibana+myCommitSha+base:master&access_token=myAccessToken",
+  ],
+]
+`;

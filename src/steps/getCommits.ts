@@ -1,12 +1,10 @@
-import { BackportOptions } from '../options/options';
-import {
-  fetchCommitBySha,
-  fetchCommitsByAuthor,
-  getShortSha
-} from '../services/github';
-import { promptForCommits } from '../services/prompts';
 import isEmpty from 'lodash.isempty';
+import { BackportOptions } from '../options/options';
+import { promptForCommits } from '../services/prompts';
 import ora = require('ora');
+import { fetchCommitBySha } from '../services/github/fetchCommitBySha';
+import { fetchCommitsByAuthor } from '../services/github/fetchCommitsByAuthor';
+import { getShortSha } from '../services/github/commitFormatters';
 
 export async function getCommits(options: BackportOptions) {
   if (options.sha) {
@@ -37,7 +35,7 @@ async function getCommitsByPrompt(options: BackportOptions) {
     if (isEmpty(commits)) {
       const warningText = options.all
         ? 'There are no commits in this repository'
-        : 'There are no commits by you in this repository';
+        : `There are no commits by "${options.author}" in this repository. Try with \`--all\` for commits by all users or \`--author=<username>\` for commits from a specific user`;
 
       spinner.fail(warningText);
       process.exit(1);

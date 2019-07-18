@@ -17,13 +17,18 @@
       "name": "Jest",
       "type": "node",
       "request": "launch",
-      "args": ["--runInBand", "${file}"],
+      "args": [
+        "--runInBand",
+        "${file}",
+        "--config",
+        "${workspaceRoot}/jest.unit.config.js"
+      ],
       "port": 9229,
       "address": "localhost",
       "stopOnEntry": false,
       "runtimeExecutable": null,
       "sourceMaps": true,
-      "program": "${workspaceRoot}/node_modules/jest/bin/jest.js",
+      "program": "${workspaceRoot}/node_modules/.bin/jest",
       "runtimeArgs": ["--inspect-brk"],
       "cwd": "${workspaceRoot}"
     }

@@ -1,7 +1,9 @@
+import chalk from 'chalk';
 import inquirer, { Question } from 'inquirer';
 import isEmpty from 'lodash.isempty';
-import { Commit } from './github';
 import { BranchChoice } from '../types/Config';
+import { CommitChoice } from './github/Commit';
+import { getHumanReadableReference } from './github/commitFormatters';
 
 async function prompt<T = never>(options: Question) {
   const { promptResult } = (await inquirer.prompt([
@@ -11,16 +13,27 @@ async function prompt<T = never>(options: Question) {
 }
 
 export async function promptForCommits(
-  commits: Commit[],
+  commits: CommitChoice[],
   isMultipleChoice: boolean
-): Promise<Commit[]> {
-  const choices = commits.map((c, i) => ({
-    name: `${i + 1}. ${c.message}`,
-    short: c.message,
-    value: c
-  }));
+): Promise<CommitChoice[]> {
+  const choices = commits.map((c, i) => {
+    const backportTags = c.existingBackports
+      .map(item => {
+        const styling = item.state === 'MERGED' ? chalk.green : chalk.gray;
+        return styling(item.branch);
+      })
+      .join(', ');
 
-  const res = await prompt<Commit[]>({
+    const position = chalk.gray(`${i + 1}.`);
+
+    return {
+      name: `${position} ${c.message} ${backportTags}`,
+      short: getHumanReadableReference(c),
+      value: c
+    };
+  });
+
+  const res = await prompt<CommitChoice[]>({
     choices,
     message: 'Select commit to backport',
     pageSize: Math.min(10, commits.length),
