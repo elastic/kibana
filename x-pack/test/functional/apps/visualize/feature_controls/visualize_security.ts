@@ -22,6 +22,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
   const testSubjects = getService('testSubjects');
   const appsMenu = getService('appsMenu');
   const globalNav = getService('globalNav');
+  const queryBar = getService('queryBar');
 
   describe('feature controls security', () => {
     before(async () => {
@@ -113,6 +114,26 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
       it('Permalinks shows create short-url button', async () => {
         await PageObjects.share.openShareMenuItem('Permalinks');
         await PageObjects.share.createShortUrlExistOrFail();
+        // close menu
+        await PageObjects.share.clickShareTopNavButton();
+      });
+
+      it('show the save query button in the query bar in dirty state with no query loaded', async () => {
+        await queryBar.setQuery('response');
+        await testSubjects.existOrFail('savedQuerySaveNew');
+      });
+
+      it('show the save as new query button in the query bar with non-dirty state and query loaded', async () => {
+        await queryBar.setQuery('response:200 ');
+        await queryBar.saveNewQuery('OK Responses', '200 OK', true, true);
+        await queryBar.openSuggestionsDropDown();
+        await testSubjects.existOrFail('savedQuerySaveAsNew');
+      });
+
+      it('show the save changes to existing and save as new buttons in the query bar with a dirty state and a query loaded', async () => {
+        await queryBar.setQuery('response:404 ');
+        await testSubjects.existOrFail('savedQuerySaveChanges');
+        await testSubjects.existOrFail('savedQuerySaveAsNew');
       });
     });
 
@@ -195,6 +216,24 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
       it(`Permalinks doesn't show create short-url button`, async () => {
         await PageObjects.share.openShareMenuItem('Permalinks');
         await PageObjects.share.createShortUrlMissingOrFail();
+      });
+
+      it('does not show the save query button in the query bar in dirty state with no query loaded', async () => {
+        await queryBar.setQuery('response');
+        await testSubjects.missingOrFail('savedQuerySaveNew');
+      });
+
+      it('does not show the save as new query button in the query bar with non-dirty state and query loaded', async () => {
+        await queryBar.setQuery('OK Jpgs');
+        await testSubjects.click('autocompleteSuggestion-savedQuery-OK-Jpgs');
+        await queryBar.openSuggestionsDropDown();
+        await testSubjects.missingOrFail('savedQuerySaveAsNew');
+      });
+
+      it('does not show the save changes to existing or save as new button in the query bar with a dirty state and a query loaded', async () => {
+        await queryBar.setQuery('response:404 ');
+        await testSubjects.missingOrFail('savedQuerySaveChanges');
+        await testSubjects.missingOrFail('savedQuerySaveAsNew');
       });
     });
 
