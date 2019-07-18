@@ -20,6 +20,7 @@ import { Query } from '../../../../../../src/legacy/core_plugins/data/public/que
 import { getIndexPatterns } from './loader';
 import { toExpression } from './to_expression';
 import { IndexPatternDimensionPanel } from './dimension_panel';
+import { buildColumnForOperationType, getOperationTypesForField } from './operations';
 import { IndexPatternDatasourcePluginPlugins } from './plugin';
 import { IndexPatternDataPanel } from './datapanel';
 import { Datasource, DataType } from '..';
@@ -256,14 +257,15 @@ export function getIndexPatternDatasource({
       );
     },
 
-    getPublicAPI(state, setState) {
+    getPublicAPI(state, setState, layerId) {
       return {
         // supportsLayers: true,
         // supportsLayerJoin: true,
 
         getTableSpec: () => {
+          return state.layers[layerId].columnOrder.map(colId => ({ columnId: colId }));
           // return state.columnOrder.map(colId => ({ columnId: colId }));
-          return [];
+          // return [];
         },
         getOperationForColumnId: (columnId: string) => {
           const layer = Object.values(state.layers).find(l =>
@@ -307,11 +309,17 @@ export function getIndexPatternDatasource({
         },
 
         removeColumnInTableSpec: (columnId: string) => {
-          // setState({
-          //   ...state,
-          //   columnOrder: state.columnOrder.filter(id => id !== columnId),
-          //   columns: removeProperty(columnId, state.columns),
-          // });
+          setState({
+            ...state,
+            layers: {
+              ...state.layers,
+              [layerId]: {
+                ...state.layers[layerId],
+                columnOrder: state.layers[layerId].columnOrder.filter(id => id !== columnId),
+                columns: removeProperty(columnId, state.layers[layerId].columns),
+              },
+            },
+          });
         },
         moveColumnTo: () => {},
         duplicateColumn: () => [],

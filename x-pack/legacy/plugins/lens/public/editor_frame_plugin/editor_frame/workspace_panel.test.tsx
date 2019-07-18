@@ -109,9 +109,9 @@ describe('workspace_panel', () => {
 
   it('should render the resulting expression using the expression renderer', () => {
     const framePublicAPI = createMockFramePublicAPI();
-    framePublicAPI.layerIdToDatasource = {
-      first: 'mock',
-    };
+    // framePublicAPI.layerIdToDatasource = {
+    //   first: 'mock',
+    // };
     framePublicAPI.datasourceLayers = {
       first: mockDatasource.publicAPIMock,
     };
@@ -349,6 +349,7 @@ Object {
         {
           state: {},
           table: expectedTable,
+          layerId: '1',
         },
       ]);
       mockVisualization.getSuggestions.mockReturnValueOnce([
@@ -391,6 +392,7 @@ Object {
             isMultiRow: true,
             columns: [],
           },
+          layerId: '1',
         },
         {
           state: {},
@@ -399,6 +401,7 @@ Object {
             isMultiRow: true,
             columns: [],
           },
+          layerId: '1',
         },
       ]);
       mockVisualization.getSuggestions.mockReturnValueOnce([

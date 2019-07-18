@@ -103,7 +103,6 @@ export class EditorFramePlugin {
                   store={store}
                   datasources={this.datasources}
                   visualizations={this.visualizations}
-                  // layerToDatasourceId={this.layerToDatasourceId}
                   expressionRenderer={this.ExpressionRenderer!}
                 />
               )}
@@ -216,8 +215,7 @@ export function InitializedEditor({
       store={store}
       datasourceMap={datasources}
       visualizationMap={visualizations}
-      // layerToDatasourceId={layerToDatasourceId}
-      initialDatasourceId={(doc && doc.datasourceType) || firstDatasourceId || null}
+      initialDatasourceId={(doc && doc.activeDatasourceId) || firstDatasourceId || null}
       initialVisualizationId={(doc && doc.visualizationType) || firstVisualizationId || null}
       ExpressionRenderer={expressionRenderer}
       redirectTo={path => routeProps.history.push(path)}

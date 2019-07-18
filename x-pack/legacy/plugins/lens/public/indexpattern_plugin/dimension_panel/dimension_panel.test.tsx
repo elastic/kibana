@@ -81,20 +81,26 @@ describe('IndexPatternDimensionPanel', () => {
     state = {
       indexPatterns: expectedIndexPatterns,
       currentIndexPatternId: '1',
-      columnOrder: ['col1'],
-      columns: {
-        col1: {
-          operationId: 'op1',
-          label: 'Date Histogram of timestamp',
-          dataType: 'date',
-          isBucketed: true,
+      layers: {
+        first: {
+          indexPatternId: '1',
+          columnOrder: ['col1'],
+          columns: {
+            col1: {
+              operationId: 'op1',
+              label: 'Date Histogram of timestamp',
+              dataType: 'date',
+              isBucketed: true,
 
-          // Private
-          operationType: 'date_histogram',
-          params: {
-            interval: '1d',
+              // Private
+              operationType: 'date_histogram',
+              params: {
+                interval: '1d',
+              },
+              sourceField: 'timestamp',
+              indexPatternId: '1',
+            },
           },
-          sourceField: 'timestamp',
         },
       },
     };
@@ -108,6 +114,7 @@ describe('IndexPatternDimensionPanel', () => {
       state,
       setState,
       columnId: 'col1',
+      layerId: 'first',
       filterOperations: () => true,
       dataPlugin: data,
       storage: localStorage,
@@ -135,10 +142,13 @@ describe('IndexPatternDimensionPanel', () => {
   it('should pass the right arguments to getPotentialColumns', async () => {
     wrapper = shallow(<IndexPatternDimensionPanel {...defaultProps} suggestedPriority={1} />);
 
-    expect(getPotentialColumns as jest.Mock).toHaveBeenCalledWith(
-      state.indexPatterns[state.currentIndexPatternId].fields,
-      1
-    );
+    // expect(getPotentialColumns as jest.Mock).toHaveBeenCalledWith({
+    expect(getPotentialColumns).toHaveBeenCalledWith({
+      fields: state.indexPatterns[state.currentIndexPatternId].fields,
+      suggestedPriority: 1,
+      layerId: 'first',
+      layer: state.layers.first,
+    });
   });
 
   it('should call the filterOperations function', () => {
@@ -198,17 +208,23 @@ describe('IndexPatternDimensionPanel', () => {
         {...defaultProps}
         state={{
           ...state,
-          columns: {
-            ...state.columns,
-            col1: {
-              operationId: 'op1',
-              label: 'Max of bytes',
-              dataType: 'number',
-              isBucketed: false,
+          layers: {
+            first: {
+              ...state.layers.first,
+              columns: {
+                ...state.layers.first.columns,
+                col1: {
+                  operationId: 'op1',
+                  label: 'Max of bytes',
+                  dataType: 'number',
+                  isBucketed: false,
 
-              // Private
-              operationType: 'max',
-              sourceField: 'bytes',
+                  // Private
+                  operationType: 'max',
+                  sourceField: 'bytes',
+                  indexPatternId: '1',
+                },
+              },
             },
           },
         }}
@@ -235,17 +251,23 @@ describe('IndexPatternDimensionPanel', () => {
         {...defaultProps}
         state={{
           ...state,
-          columns: {
-            ...state.columns,
-            col1: {
-              operationId: 'op1',
-              label: 'Max of bytes',
-              dataType: 'number',
-              isBucketed: false,
+          layers: {
+            first: {
+              ...state.layers.first,
+              columns: {
+                ...state.layers.first.columns,
+                col1: {
+                  operationId: 'op1',
+                  label: 'Max of bytes',
+                  dataType: 'number',
+                  isBucketed: false,
 
-              // Private
-              operationType: 'max',
-              sourceField: 'bytes',
+                  // Private
+                  operationType: 'max',
+                  sourceField: 'bytes',
+                  indexPatternId: '1',
+                },
+              },
             },
           },
         }}
@@ -269,17 +291,23 @@ describe('IndexPatternDimensionPanel', () => {
   it('should keep the operation when switching to another field compatible with this operation', () => {
     const initialState: IndexPatternPrivateState = {
       ...state,
-      columns: {
-        ...state.columns,
-        col1: {
-          operationId: 'op1',
-          label: 'Max of bytes',
-          dataType: 'number',
-          isBucketed: false,
+      layers: {
+        first: {
+          ...state.layers.first,
+          columns: {
+            ...state.layers.first.columns,
+            col1: {
+              operationId: 'op1',
+              label: 'Max of bytes',
+              dataType: 'number',
+              isBucketed: false,
 
-          // Private
-          operationType: 'max',
-          sourceField: 'bytes',
+              // Private
+              operationType: 'max',
+              sourceField: 'bytes',
+              indexPatternId: '1',
+            },
+          },
         },
       },
     };
@@ -297,13 +325,18 @@ describe('IndexPatternDimensionPanel', () => {
 
     expect(setState).toHaveBeenCalledWith({
       ...initialState,
-      columns: {
-        ...state.columns,
-        col1: expect.objectContaining({
-          operationType: 'max',
-          sourceField: 'memory',
-          // Other parts of this don't matter for this test
-        }),
+      layers: {
+        first: {
+          ...state.layers.first,
+          columns: {
+            ...state.layers.first.columns,
+            col1: expect.objectContaining({
+              operationType: 'max',
+              sourceField: 'memory',
+              // Other parts of this don't matter for this test
+            }),
+          },
+        },
       },
     });
   });
@@ -322,13 +355,18 @@ describe('IndexPatternDimensionPanel', () => {
 
     expect(setState).toHaveBeenCalledWith({
       ...state,
-      columns: {
-        ...state.columns,
-        col1: expect.objectContaining({
-          operationType: 'terms',
-          sourceField: 'source',
-          // Other parts of this don't matter for this test
-        }),
+      layers: {
+        first: {
+          ...state.layers.first,
+          columns: {
+            ...state.layers.first.columns,
+            col1: expect.objectContaining({
+              operationType: 'terms',
+              sourceField: 'source',
+              // Other parts of this don't matter for this test
+            }),
+          },
+        },
       },
     });
   });
@@ -339,17 +377,23 @@ describe('IndexPatternDimensionPanel', () => {
         {...defaultProps}
         state={{
           ...state,
-          columns: {
-            ...state.columns,
-            col1: {
-              operationId: 'op1',
-              label: 'Max of bytes',
-              dataType: 'number',
-              isBucketed: false,
+          layers: {
+            first: {
+              ...state.layers.first,
+              columns: {
+                ...state.layers.first.columns,
+                col1: {
+                  operationId: 'op1',
+                  label: 'Max of bytes',
+                  dataType: 'number',
+                  isBucketed: false,
 
-              // Private
-              operationType: 'max',
-              sourceField: 'bytes',
+                  // Private
+                  operationType: 'max',
+                  sourceField: 'bytes',
+                  indexPatternId: '1',
+                },
+              },
             },
           },
         }}
@@ -364,13 +408,18 @@ describe('IndexPatternDimensionPanel', () => {
 
     expect(setState).toHaveBeenCalledWith({
       ...state,
-      columns: {
-        ...state.columns,
-        col1: expect.objectContaining({
-          operationType: 'min',
-          sourceField: 'bytes',
-          // Other parts of this don't matter for this test
-        }),
+      layers: {
+        first: {
+          ...state.layers.first,
+          columns: {
+            ...state.layers.first.columns,
+            col1: expect.objectContaining({
+              operationType: 'min',
+              sourceField: 'bytes',
+              // Other parts of this don't matter for this test
+            }),
+          },
+        },
       },
     });
   });
@@ -402,12 +451,17 @@ describe('IndexPatternDimensionPanel', () => {
 
     expect(setState).toHaveBeenCalledWith({
       ...state,
-      columns: {
-        ...state.columns,
-        col1: expect.objectContaining({
-          label: 'New Label',
-          // Other parts of this don't matter for this test
-        }),
+      layers: {
+        first: {
+          ...state.layers.first,
+          columns: {
+            ...state.layers.first.columns,
+            col1: expect.objectContaining({
+              label: 'New Label',
+              // Other parts of this don't matter for this test
+            }),
+          },
+        },
       },
     });
   });
@@ -504,11 +558,17 @@ describe('IndexPatternDimensionPanel', () => {
 
       expect(setState).toHaveBeenCalledWith({
         ...state,
-        columns: {
-          col1: expect.objectContaining({
-            sourceField: 'source',
-            operationType: 'terms',
-          }),
+        layers: {
+          first: {
+            ...state.layers.first,
+            columns: {
+              ...state.layers.first.columns,
+              col1: expect.objectContaining({
+                sourceField: 'source',
+                operationType: 'terms',
+              }),
+            },
+          },
         },
       });
     });
@@ -530,15 +590,20 @@ describe('IndexPatternDimensionPanel', () => {
 
     expect(setState).toHaveBeenCalledWith({
       ...state,
-      columns: {
-        ...state.columns,
-        col2: expect.objectContaining({
-          sourceField: 'bytes',
-          operationType: 'avg',
-          // Other parts of this don't matter for this test
-        }),
+      layers: {
+        first: {
+          ...state.layers.first,
+          columns: {
+            ...state.layers.first.columns,
+            col2: expect.objectContaining({
+              sourceField: 'bytes',
+              operationType: 'avg',
+              // Other parts of this don't matter for this test
+            }),
+          },
+          columnOrder: ['col1', 'col2'],
+        },
       },
-      columnOrder: ['col1', 'col2'],
     });
   });
 
@@ -596,31 +661,42 @@ describe('IndexPatternDimensionPanel', () => {
 
     expect(setState).toHaveBeenCalledWith({
       ...state,
-      columns: {
-        ...state.columns,
-        col2: expect.objectContaining({
-          sourceField: 'bytes',
-          // Other parts of this don't matter for this test
-        }),
+      layers: {
+        first: {
+          ...state.layers.first,
+          columns: {
+            ...state.layers.first.columns,
+            col2: expect.objectContaining({
+              sourceField: 'bytes',
+              // Other parts of this don't matter for this test
+            }),
+          },
+          columnOrder: ['col1', 'col2'],
+        },
       },
-      columnOrder: ['col1', 'col2'],
     });
   });
 
   it('should use helper function when changing the function', () => {
     const initialState: IndexPatternPrivateState = {
       ...state,
-      columns: {
-        ...state.columns,
-        col1: {
-          operationId: 'op1',
-          label: 'Max of bytes',
-          dataType: 'number',
-          isBucketed: false,
+      layers: {
+        first: {
+          ...state.layers.first,
+          columns: {
+            ...state.layers.first.columns,
+            col1: {
+              operationId: 'op1',
+              label: 'Max of bytes',
+              dataType: 'number',
+              isBucketed: false,
 
-          // Private
-          operationType: 'max',
-          sourceField: 'bytes',
+              // Private
+              operationType: 'max',
+              sourceField: 'bytes',
+              indexPatternId: '1',
+            },
+          },
         },
       },
     };
@@ -635,14 +711,15 @@ describe('IndexPatternDimensionPanel', () => {
         .prop('onClick')!({} as React.MouseEvent<{}, MouseEvent>);
     });
 
-    expect(changeColumn).toHaveBeenCalledWith(
-      initialState,
-      'col1',
-      expect.objectContaining({
+    expect(changeColumn).toHaveBeenCalledWith({
+      state: initialState,
+      columnId: 'col1',
+      layerId: 'first',
+      newColumn: expect.objectContaining({
         sourceField: 'bytes',
         operationType: 'min',
-      })
-    );
+      }),
+    });
   });
 
   it('should clear the dimension with the clear button', () => {
@@ -658,8 +735,13 @@ describe('IndexPatternDimensionPanel', () => {
 
     expect(setState).toHaveBeenCalledWith({
       ...state,
-      columns: {},
-      columnOrder: [],
+      layers: {
+        first: {
+          indexPatternId: '1',
+          columns: {},
+          columnOrder: [],
+        },
+      },
     });
   });
 
@@ -674,16 +756,38 @@ describe('IndexPatternDimensionPanel', () => {
 
     expect(setState).toHaveBeenCalledWith({
       ...state,
-      columns: {},
-      columnOrder: [],
+      layers: {
+        first: {
+          indexPatternId: '1',
+          columns: {},
+          columnOrder: [],
+        },
+      },
     });
   });
 
   describe('drag and drop', () => {
-    function dragDropState() {
+    function dragDropState(): IndexPatternPrivateState {
+      // return {0
+      //   ...state,
+      //   // currentIndexPatternId: 'foo',
+      //   // indexPatterns: {
+      //   //   foo: {
+      //   //     id: 'foo',
+      //   //     title: 'Foo pattern',
+      //   //     fields: [
+      //   //       {
+      //   //         aggregatable: true,
+      //   //         name: 'bar',
+      //   //         searchable: true,
+      //   //         type: 'number',
+      //   //       },
+      //   //     ],
+      //   //   },
+      //   // },
+      // };
       return {
-        ...state,
-        currentIndexPatternId: 'foo',
+        // indexPatterns: expectedIndexPatterns,
         indexPatterns: {
           foo: {
             id: 'foo',
@@ -698,11 +802,51 @@ describe('IndexPatternDimensionPanel', () => {
             ],
           },
         },
+        currentIndexPatternId: '1',
+        layers: {
+          myLayer: {
+            indexPatternId: 'foo',
+            columnOrder: ['col1'],
+            columns: {
+              col1: {
+                operationId: 'op1',
+                label: 'Date Histogram of timestamp',
+                dataType: 'date',
+                isBucketed: true,
+
+                // Private
+                operationType: 'date_histogram',
+                params: {
+                  interval: '1d',
+                },
+                sourceField: 'timestamp',
+                indexPatternId: 'foo',
+              },
+            },
+          },
+        },
       };
+
+      // setState = jest.fn();
+
+      // dragDropContext = createMockedDragDropContext();
+
+      // defaultProps = {
+      //   dragDropContext,
+      //   state,
+      //   setState,
+      //   columnId: 'col1',
+      //   layerId: 'first',
+      //   filterOperations: () => true,
+      //   dataPlugin: data,
+      //   storage: localStorage,
+      // };
     }
 
     it('is not droppable if no drag is happening', () => {
-      wrapper = mount(<IndexPatternDimensionPanel {...defaultProps} state={dragDropState()} />);
+      wrapper = mount(
+        <IndexPatternDimensionPanel {...defaultProps} state={dragDropState()} layerId="myLayer" />
+      );
 
       expect(
         wrapper
@@ -721,6 +865,7 @@ describe('IndexPatternDimensionPanel', () => {
             dragging: { name: 'bar' },
           }}
           state={dragDropState()}
+          layerId="myLayer"
         />
       );
 
@@ -742,6 +887,7 @@ describe('IndexPatternDimensionPanel', () => {
           }}
           state={dragDropState()}
           filterOperations={() => false}
+          layerId="myLayer"
         />
       );
 
@@ -763,6 +909,7 @@ describe('IndexPatternDimensionPanel', () => {
           }}
           state={dragDropState()}
           filterOperations={op => op.dataType === 'number'}
+          layerId="myLayer"
         />
       );
 
@@ -787,6 +934,7 @@ describe('IndexPatternDimensionPanel', () => {
           state={testState}
           columnId={'col2'}
           filterOperations={op => op.dataType === 'number'}
+          layerId="myLayer"
         />
       );
 
@@ -800,17 +948,22 @@ describe('IndexPatternDimensionPanel', () => {
       });
 
       expect(setState).toBeCalledTimes(1);
-      expect(setState).toHaveBeenCalledWith(
-        expect.objectContaining({
-          columns: expect.objectContaining({
-            ...testState.columns,
-            col2: expect.objectContaining({
-              dataType: 'number',
-              sourceField: 'bar',
-            }),
-          }),
-        })
-      );
+      expect(setState).toHaveBeenCalledWith({
+        ...testState,
+        layers: {
+          myLayer: {
+            ...testState.layers.myLayer,
+            columnOrder: ['col1', 'col2'],
+            columns: {
+              ...testState.layers.myLayer.columns,
+              col2: expect.objectContaining({
+                dataType: 'number',
+                sourceField: 'bar',
+              }),
+            },
+          },
+        },
+      });
     });
 
     it('updates a column when a field is dropped', () => {
@@ -825,6 +978,7 @@ describe('IndexPatternDimensionPanel', () => {
           }}
           state={testState}
           filterOperations={op => op.dataType === 'number'}
+          layerId="myLayer"
         />
       );
 
@@ -838,16 +992,19 @@ describe('IndexPatternDimensionPanel', () => {
       });
 
       expect(setState).toBeCalledTimes(1);
-      expect(setState).toHaveBeenCalledWith(
-        expect.objectContaining({
-          columns: expect.objectContaining({
-            col1: expect.objectContaining({
-              dataType: 'number',
-              sourceField: 'bar',
+      expect(setState).toHaveBeenCalledWith({
+        ...testState,
+        layers: {
+          myLayer: expect.objectContaining({
+            columns: expect.objectContaining({
+              col1: expect.objectContaining({
+                dataType: 'number',
+                sourceField: 'bar',
+              }),
             }),
           }),
-        })
-      );
+        },
+      });
     });
 
     it('ignores drops of incompatible fields', () => {
@@ -862,6 +1019,7 @@ describe('IndexPatternDimensionPanel', () => {
           }}
           state={testState}
           filterOperations={op => op.dataType === 'number'}
+          layerId="myLayer"
         />
       );
 

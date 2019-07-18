@@ -39,7 +39,7 @@ export function createMockDatasource(): DatasourceMock {
     getDatasourceSuggestionsForField: jest.fn((_state, item) => []),
     getDatasourceSuggestionsFromCurrentState: jest.fn(_state => []),
     getPersistableState: jest.fn(),
-    getPublicAPI: jest.fn((_state, _setState) => publicAPIMock),
+    getPublicAPI: jest.fn((_state, _setState, _layerId) => publicAPIMock),
     initialize: jest.fn((_state?) => Promise.resolve()),
     renderDataPanel: jest.fn(),
     toExpression: jest.fn((_frame, _state) => null),
@@ -57,7 +57,7 @@ export type FrameMock = jest.Mocked<FramePublicAPI>;
 export function createMockFramePublicAPI(): FrameMock {
   return {
     datasourceLayers: {},
-    layerIdToDatasource: {},
+    // layerIdToDatasource: {},
     addNewLayer: jest.fn(() => ''),
   };
 }

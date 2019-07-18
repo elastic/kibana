@@ -332,6 +332,7 @@ describe('terms', () => {
         ...state,
         layers: {
           first: {
+            ...state.layers.first,
             columns: {
               ...state.layers.first.columns,
               col1: {
@@ -371,6 +372,7 @@ describe('terms', () => {
         ...state,
         layers: {
           first: {
+            ...state.layers.first,
             columns: {
               ...state.layers.first.columns,
               col1: {

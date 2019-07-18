@@ -45,7 +45,7 @@ export function EditorFrame(props: EditorFrameProps) {
       Object.entries(state.datasourceMap).forEach(([datasourceId, datasource]) => {
         if (state.datasourceStates[datasourceId].isLoading) {
           datasource
-            .initialize(props.doc && props.doc.state.datasource)
+            .initialize(props.doc && props.doc.state.datasourceStates[datasourceId])
             .then(datasourceState => {
               dispatch({
                 type: 'UPDATE_DATASOURCE_STATE',
@@ -58,24 +58,25 @@ export function EditorFrame(props: EditorFrameProps) {
     }
   }, [props.doc, Object.keys(state.datasourceStates), state.activeDatasourceId]);
 
-  const datasourceEntries: Array<[string, DatasourcePublicAPI]> = Object.keys(
-    state.datasourceMap
-  ).map(key => {
-    const ds = state.datasourceMap[key];
-    return [
-      key,
-      ds.getPublicAPI(state.datasourceStates[key].state, (newState: unknown) => {
-        dispatch({
-          type: 'UPDATE_DATASOURCE_STATE',
-          newState,
-        });
-      }),
-    ];
-  });
+  // const datasourceEntries: Array<[string, DatasourcePublicAPI]> = Object.keys(
+  //   state.datasourceMap
+  // ).map(key => {
+  //   const ds = state.datasourceMap[key];
+  //   return [
+  //     key,
+  //     ds.getPublicAPI(state.datasourceStates[key].state, (newState: unknown) => {
+  //       dispatch({
+  //         type: 'UPDATE_DATASOURCE_STATE',
+  //         newState,
+  //       });
+  //     }),
+  //   ];
+  // });
 
-  const layerToDatasourceId: Record<string, string> = {};
+  // const layerToDatasourceId: Record<string, string> = {};
   const datasourceLayers: Record<string, DatasourcePublicAPI> = {};
-  datasourceEntries.forEach(([id, publicAPI]) => {
+  // datasourceEntries.forEach(([id, publicAPI]) => {
+  Object.keys(state.datasourceMap).forEach(id => {
     const stateWrapper = state.datasourceStates[id];
     if (stateWrapper.isLoading) {
       return;
@@ -84,13 +85,24 @@ export function EditorFrame(props: EditorFrameProps) {
     const layers = state.datasourceMap[id].getLayers(dsState);
 
     layers.forEach(layer => {
-      layerToDatasourceId[layer] = id;
+      const publicAPI = state.datasourceMap[id].getPublicAPI(
+        dsState,
+        (newState: unknown) => {
+          dispatch({
+            type: 'UPDATE_DATASOURCE_STATE',
+            newState,
+          });
+        },
+        layer
+      );
+
+      // layerToDatasourceId[layer] = id;
       datasourceLayers[layer] = publicAPI;
     });
   });
 
   const framePublicAPI: FramePublicAPI = {
-    layerIdToDatasource: layerToDatasourceId,
+    // layerIdToDatasource: layerToDatasourceId,
     datasourceLayers,
     addNewLayer: () => {
       const newLayerId = generateId();
@@ -155,7 +167,8 @@ export function EditorFrame(props: EditorFrameProps) {
               onClick={() => {
                 if (datasource && visualization) {
                   save({
-                    datasource,
+                    // datasource,
+                    activeDatasources: props.datasourceMap,
                     dispatch,
                     visualization,
                     state,
