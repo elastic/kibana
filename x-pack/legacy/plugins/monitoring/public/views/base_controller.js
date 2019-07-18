@@ -136,7 +136,13 @@ export class MonitoringViewBaseController {
       };
 
       if (invalidTimeRange(parsedRange)) {
-        timefilter.setTime(VALID_RANGE);
+        if (to === 'now') {
+          timefilter.setTime(VALID_RANGE);
+        } else {
+          const { from } = parsedRange;
+          const range = { from, to: from.clone().add(MAX_RANGE_SECONDS, 'seconds'), mode: 'absolute' };
+          timefilter.setTime(range);
+        }
         showInvalidRangeToast();
       }
     };
