@@ -88,7 +88,19 @@ export function PopoverEditor(props: PopoverEditorProps) {
           }),
           'data-test-subj': `lns-indexPatternDimension-${operationType}`,
           onClick() {
-            if (!selectedColumn || !compatibleWithCurrentField) {
+            if (!selectedColumn) {
+              const possibleColumns = _.uniq(
+                filteredColumns.filter(col => col.operationType === operationType),
+                'sourceField'
+              );
+              if (possibleColumns.length === 1) {
+                setState(changeColumn(state, columnId, possibleColumns[0]));
+              } else {
+                setInvalidOperationType(operationType);
+              }
+              return;
+            }
+            if (!compatibleWithCurrentField) {
               setInvalidOperationType(operationType);
               return;
             }
@@ -178,6 +190,16 @@ export function PopoverEditor(props: PopoverEditorProps) {
                     />
                   </p>
                 </EuiCallOut>
+              )}
+              {incompatibleSelectedOperationType && !selectedColumn && (
+                <EuiCallOut
+                  size="s"
+                  data-test-subj="indexPattern-fieldless-operation"
+                  title={i18n.translate('xpack.lens.indexPattern.fieldlessOperationLabel', {
+                    defaultMessage: 'Choose a field the operation is applied to',
+                  })}
+                  iconType="alert"
+                ></EuiCallOut>
               )}
               {!incompatibleSelectedOperationType && ParamEditor && (
                 <ParamEditor
