@@ -33,12 +33,13 @@ import { createCSPRuleString, DEFAULT_CSP_RULES, generateCSPNonce } from './';
 // the nature of a change in defaults during a PR review.
 test('default CSP rules', () => {
   expect(DEFAULT_CSP_RULES).toMatchInlineSnapshot(`
-Array [
-  "script-src 'unsafe-eval' 'nonce-{nonce}'",
-  "worker-src blob:",
-  "child-src blob:",
-]
-`);
+    Array [
+      "script-src 'unsafe-eval' 'nonce-{nonce}'",
+      "worker-src blob:",
+      "child-src blob:",
+      "style-src 'unsafe-inline' 'self'",
+    ]
+  `);
 });
 
 test('generateCSPNonce() creates a 16 character string', async () => {
