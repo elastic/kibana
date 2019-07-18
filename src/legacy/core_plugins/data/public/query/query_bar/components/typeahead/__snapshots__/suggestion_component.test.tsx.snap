@@ -4,6 +4,7 @@ exports[`SuggestionComponent Should display the suggestion and use the provided 
 <div
   aria-selected={false}
   className="kbnTypeahead__item"
+  data-test-subj="autocompleteSuggestion-value-as-promised,-not-helpful"
   id="suggestion-1"
   onClick={[Function]}
   onMouseEnter={[Function]}
@@ -37,6 +38,7 @@ exports[`SuggestionComponent Should make the element active if the selected prop
 <div
   aria-selected={true}
   className="kbnTypeahead__item active"
+  data-test-subj="autocompleteSuggestion-value-as-promised,-not-helpful"
   id="suggestion-1"
   onClick={[Function]}
   onMouseEnter={[Function]}

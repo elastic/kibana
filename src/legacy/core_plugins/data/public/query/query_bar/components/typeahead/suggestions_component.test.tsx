@@ -60,7 +60,7 @@ describe('SuggestionsComponent', () => {
     expect(component.isEmptyRender()).toBe(true);
   });
 
-  it('Should not display anything if there are no suggestions', () => {
+  it('Should display the saved query row if there are no suggestions and the show prop is true', () => {
     const component = shallow(
       <SuggestionsComponent
         index={0}
@@ -71,8 +71,7 @@ describe('SuggestionsComponent', () => {
         loadMore={noop}
       />
     );
-
-    expect(component.isEmptyRender()).toBe(true);
+    expect(component.isEmptyRender()).toBe(false);
   });
 
   it('Should display given suggestions if the show prop is true', () => {
