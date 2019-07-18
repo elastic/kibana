@@ -64,6 +64,10 @@ export class ESPewPewSource extends AbstractESSource {
     return false;
   }
 
+  isGeoGridPrecisionAware() {
+    return true;
+  }
+
   async getSupportedShapeTypes() {
     return [VECTOR_SHAPE_TYPES.LINE];
   }
