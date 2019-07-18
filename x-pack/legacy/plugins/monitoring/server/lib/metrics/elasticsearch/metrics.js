@@ -62,7 +62,7 @@ const nodeCpuUtilizationLabel = i18n.translate('xpack.monitoring.metrics.esNode.
   defaultMessage: 'CPU Utilization'
 });
 const nodeGcCount = i18n.translate('xpack.monitoring.metrics.esNode.gsCountTitle', {
-  defaultMessage: 'GC Count'
+  defaultMessage: 'GC Events (per sec)'
 });
 const nodeGcDuration = i18n.translate('xpack.monitoring.metrics.esNode.gsDurationTitle', {
   defaultMessage: 'GC Duration'
