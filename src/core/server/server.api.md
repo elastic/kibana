@@ -20,9 +20,6 @@ import { Type } from '@kbn/config-schema';
 import { TypeOf } from '@kbn/config-schema';
 import { Url } from 'url';
 
-// @public (undocumented)
-export type APICaller = (endpoint: string, clientParams: Record<string, unknown>, options?: CallAPIOptions) => Promise<unknown>;
-
 // Warning: (ae-forgotten-export) The symbol "AuthResult" needs to be exported by the entry point index.d.ts
 // 
 // @public (undocumented)
@@ -60,8 +57,8 @@ export interface CallAPIOptions {
 // @public
 export class ClusterClient {
     constructor(config: ElasticsearchClientConfig, log: Logger, getAuthHeaders?: GetAuthHeaders);
-    asScoped(request?: KibanaRequest | LegacyRequest | FakeRequest): ScopedClusterClient;
-    callAsInternalUser: (endpoint: string, clientParams?: Record<string, unknown>, options?: CallAPIOptions | undefined) => Promise<any>;
+    callWithInternalUser: (endpoint: string, clientParams?: Record<string, unknown>, options?: CallAPIOptions | undefined) => Promise<any>;
+    callWithRequest: (request: Request | KibanaRequest<unknown, unknown, unknown> | FakeRequest, endpoint: string, clientParams?: Record<string, unknown>, options?: CallAPIOptions | undefined) => Promise<any>;
     close(): void;
     }
 
@@ -666,13 +663,6 @@ export interface SavedObjectsUpdateResponse<T extends SavedObjectAttributes = an
     // (undocumented)
     attributes: Partial<T>;
 }
-
-// @public
-export class ScopedClusterClient {
-    constructor(internalAPICaller: APICaller, scopedAPICaller: APICaller, headers?: Record<string, string | string[] | undefined> | undefined);
-    callAsCurrentUser(endpoint: string, clientParams?: Record<string, unknown>, options?: CallAPIOptions): Promise<unknown>;
-    callAsInternalUser(endpoint: string, clientParams?: Record<string, unknown>, options?: CallAPIOptions): Promise<unknown>;
-    }
 
 // @public
 export interface SessionStorage<T> {

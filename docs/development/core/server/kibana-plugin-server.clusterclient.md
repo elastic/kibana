@@ -4,7 +4,7 @@
 
 ## ClusterClient class
 
-Represents an Elasticsearch cluster API client and allows to call API on behalf of the internal Kibana user and the actual user that is derived from the request headers (via `asScoped(...)`<!-- -->).
+Represents an Elasticsearch cluster API client and allows to call API on behalf of the internal Kibana user and the actual user that is derived from the request headers.
 
 <b>Signature:</b>
 
@@ -22,12 +22,12 @@ export declare class ClusterClient
 
 |  Property | Modifiers | Type | Description |
 |  --- | --- | --- | --- |
-|  [callAsInternalUser](./kibana-plugin-server.clusterclient.callasinternaluser.md) |  | <code>(endpoint: string, clientParams?: Record&lt;string, unknown&gt;, options?: CallAPIOptions &#124; undefined) =&gt; Promise&lt;any&gt;</code> | Calls specified endpoint with provided clientParams on behalf of the Kibana internal user. |
+|  [callWithInternalUser](./kibana-plugin-server.clusterclient.callwithinternaluser.md) |  | <code>(endpoint: string, clientParams?: Record&lt;string, unknown&gt;, options?: CallAPIOptions &#124; undefined) =&gt; Promise&lt;any&gt;</code> | Calls specified endpoint with provided clientParams on behalf of the Kibana internal user. |
+|  [callWithRequest](./kibana-plugin-server.clusterclient.callwithrequest.md) |  | <code>(request: Request &#124; KibanaRequest&lt;unknown, unknown, unknown&gt; &#124; FakeRequest, endpoint: string, clientParams?: Record&lt;string, unknown&gt;, options?: CallAPIOptions &#124; undefined) =&gt; Promise&lt;any&gt;</code> | Calls specified <code>endpoint</code> with provided <code>clientParams</code> on behalf of the user initiated request to the Kibana server (via HTTP request headers). |
 
 ## Methods
 
 |  Method | Modifiers | Description |
 |  --- | --- | --- |
-|  [asScoped(request)](./kibana-plugin-server.clusterclient.asscoped.md) |  | Creates an instance of <code>ScopedClusterClient</code> based on the configuration the current cluster client that exposes additional <code>callAsCurrentUser</code> method scoped to the provided req. Consumers shouldn't worry about closing scoped client instances, these will be automatically closed as soon as the original cluster client isn't needed anymore and closed. |
 |  [close()](./kibana-plugin-server.clusterclient.close.md) |  | Closes the cluster client. After that client cannot be used and one should create a new client instance to be able to interact with Elasticsearch API. |
 
