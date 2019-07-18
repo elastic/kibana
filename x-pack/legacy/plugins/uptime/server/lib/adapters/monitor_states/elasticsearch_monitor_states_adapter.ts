@@ -90,6 +90,7 @@ export class ElasticsearchMonitorStatesAdapter implements UMMonitorStatesAdapter
                 location: {
                   terms: {
                     field: 'observer.geo.name',
+                    missing_bucket: true,
                   },
                 },
               },
