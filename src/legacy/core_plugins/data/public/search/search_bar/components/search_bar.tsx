@@ -17,33 +17,22 @@
  * under the License.
  */
 
-// @ts-ignore
-import {
-  EuiFilterButton,
-  EuiPopover,
-  EuiPopoverTitle,
-  EuiButtonEmpty,
-  EuiButton,
-  EuiFlexGroup,
-  EuiFlexItem,
-} from '@elastic/eui';
 import { Filter } from '@kbn/es-query';
-import { InjectedIntl, injectI18n, FormattedMessage } from '@kbn/i18n/react';
+import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import classNames from 'classnames';
 import React, { Component } from 'react';
 import ResizeObserver from 'resize-observer-polyfill';
-import chrome from 'ui/chrome';
 import { IndexPattern } from 'ui/index_patterns';
 import { Storage } from 'ui/storage';
 import { get, isEqual } from 'lodash';
 
 import { toastNotifications } from 'ui/notify';
-import { capabilities } from 'ui/capabilities';
 import { Query, QueryBar } from '../../../query/query_bar';
 import { FilterBar } from '../../../filter/filter_bar';
 import { SavedQuery, SavedQueryAttributes } from '../index';
 import { saveQuery } from '../lib/saved_query_service';
 import { SavedQueryMeta, SaveQueryForm } from './save_query_form';
+import { SavedQueryManager } from './saved_query_manager';
 
 interface DateRange {
   from: string;
@@ -197,24 +186,6 @@ class SearchBarUI extends Component<Props, State> {
   public ro = new ResizeObserver(this.setFilterBarHeight);
   /* eslint-enable */
 
-  public showSavedQueryPopover = () => {
-    this.setState({
-      showSavedQueryPopover: true,
-    });
-  };
-
-  public hideSavedQueryPopover = () => {
-    this.setState({
-      showSavedQueryPopover: false,
-    });
-  };
-
-  public toggleSavedQueryPopover = () => {
-    this.setState({
-      showSavedQueryPopover: !this.state.showSavedQueryPopover,
-    });
-  };
-
   public onSave = async (savedQueryMeta: SavedQueryMeta, saveAsNew = false) => {
     const savedQueryAttributes: SavedQueryAttributes = {
       title: savedQueryMeta.title,
@@ -351,94 +322,14 @@ class SearchBarUI extends Component<Props, State> {
   }
 
   public render() {
-    const filtersAppliedText = this.props.intl.formatMessage({
-      id: 'data.search.searchBar.filtersButtonFiltersAppliedTitle',
-      defaultMessage: 'filters applied.',
-    });
-    const clickToShowOrHideText = this.state.isFiltersVisible
-      ? this.props.intl.formatMessage({
-          id: 'data.search.searchBar.filtersButtonClickToShowTitle',
-          defaultMessage: 'Select to hide',
-        })
-      : this.props.intl.formatMessage({
-          id: 'data.search.searchBar.filtersButtonClickToHideTitle',
-          defaultMessage: 'Select to show',
-        });
-
-    const savedQueryDescriptionText = this.props.intl.formatMessage({
-      id: 'data.search.searchBar.savedQueryDescriptionText',
-      defaultMessage: 'Saved queries allow you to store sets of queries, filters and time filters.',
-    });
-
-    const savedQueryPopoverTitleText = this.props.intl.formatMessage({
-      id: 'data.search.searchBar.savedQueryPopoverTitleText',
-      defaultMessage: 'Saved Queries',
-    });
-
-    const filterTriggerButton = (
-      <EuiFilterButton
-        onClick={this.toggleSavedQueryPopover}
-        isSelected={this.state.isFiltersVisible}
-        hasActiveFilters={this.state.isFiltersVisible}
-        numFilters={this.props.filters.length > 0 ? this.props.filters.length : undefined}
-        aria-controls="GlobalFilterGroup"
-        aria-expanded={!!this.state.isFiltersVisible}
-        title={`${this.props.filters.length} ${filtersAppliedText} ${clickToShowOrHideText}`}
-      >
-        Manage
-      </EuiFilterButton>
-    );
-
-    const savedQueryPopover = (
-      <EuiPopover
-        id="savedQueryPopover"
-        button={filterTriggerButton}
-        isOpen={this.state.showSavedQueryPopover}
-        closePopover={this.hideSavedQueryPopover}
-        anchorPosition="downLeft"
-      >
-        <EuiPopoverTitle>{savedQueryPopoverTitleText}</EuiPopoverTitle>
-
-        <EuiFlexGroup>
-          <p>{savedQueryDescriptionText}</p>
-        </EuiFlexGroup>
-
-        <EuiFlexGroup direction="rowReverse" alignItems="center">
-          {this.props.showSaveQuery && (
-            <EuiFlexItem grow={false}>
-              <EuiButton
-                fill
-                onClick={() => {
-                  if (this.props.savedQuery) {
-                    this.onInitiateSave();
-                  } else {
-                    this.onInitiateSaveNew();
-                  }
-                }}
-              >
-                <FormattedMessage
-                  id="data.search.searchBar.savedQueryPopoverSaveButtonText"
-                  defaultMessage="Save"
-                />
-              </EuiButton>
-            </EuiFlexItem>
-          )}
-          {capabilities.get().savedObjectsManagement.read && (
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty
-                flush="right"
-                href={chrome.addBasePath(`/app/kibana#/management/kibana/objects?type=query`)}
-              >
-                <FormattedMessage
-                  id="data.search.searchBar.savedQueryPopoverManageQueriesButtonText"
-                  defaultMessage="Manage queries"
-                />
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-          )}
-          <EuiFlexItem />
-        </EuiFlexGroup>
-      </EuiPopover>
+    const savedQueryManager = (
+      <SavedQueryManager
+        isDirty={this.isDirty()}
+        showSaveQuery={this.props.showSaveQuery}
+        savedQuery={this.props.savedQuery}
+        onSave={this.onInitiateSave}
+        onSaveAsNew={this.onInitiateSaveNew}
+      ></SavedQueryManager>
     );
 
     const classes = classNames('globalFilterGroup__wrapper', {
@@ -456,7 +347,7 @@ class SearchBarUI extends Component<Props, State> {
             appName={this.props.appName}
             indexPatterns={this.props.indexPatterns}
             store={this.props.store}
-            prepend={this.props.showFilterBar ? savedQueryPopover : ''}
+            prepend={this.props.showFilterBar ? savedQueryManager : ''}
             showDatePicker={this.props.showDatePicker}
             dateRangeFrom={this.state.dateRangeFrom}
             dateRangeTo={this.state.dateRangeTo}
