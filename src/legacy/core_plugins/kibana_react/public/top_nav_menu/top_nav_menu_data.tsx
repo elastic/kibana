@@ -20,9 +20,6 @@
 export type TopNavMenuAction = (anchorElement: EventTarget) => void;
 
 export interface TopNavMenuData {
-  // key is to be deprecated and replaced with ID.
-  // It's a reserved React property https://reactjs.org/warnings/special-props.html
-  key?: string;
   id?: string;
   label: string;
   run: TopNavMenuAction;
