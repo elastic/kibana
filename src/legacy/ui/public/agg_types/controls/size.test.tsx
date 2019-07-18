@@ -20,15 +20,16 @@
 import React from 'react';
 import { mountWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
 import { EuiIconTip } from '@elastic/eui';
-import { SizeParamEditor } from './size';
+import { SizeParamEditor, SizeParamEditorProps } from './size';
+import { aggParamCommonPropsMock } from './test_utils';
 
 describe('SizeParamEditor', () => {
-  let defaultProps: any;
+  let defaultProps: SizeParamEditorProps;
 
   beforeEach(() => {
     defaultProps = {
+      ...aggParamCommonPropsMock,
       value: '',
-      showValidation: false,
       setValue: jest.fn(),
       setValidity: jest.fn(),
       setTouched: jest.fn(),
@@ -45,7 +46,7 @@ describe('SizeParamEditor', () => {
     const iconTip = <EuiIconTip position="right" content={'test'} type="questionInCircle" />;
     const comp = shallowWithIntl(<SizeParamEditor {...defaultProps} iconTip={iconTip} />);
 
-    expect(comp).toMatchSnapshot();
+    expect(comp.props().label.props.children[1]).toEqual(iconTip);
   });
 
   it('should change its validity due to passed props', () => {
@@ -82,9 +83,6 @@ describe('SizeParamEditor', () => {
 
     expect(defaultProps.setValue).toBeCalledWith('');
     expect(defaultProps.setValue).toHaveBeenCalledTimes(2);
-
-    input.simulate('blur');
-    expect(defaultProps.setTouched).toHaveBeenCalled();
   });
 
   it('should call setTouched on blur', () => {

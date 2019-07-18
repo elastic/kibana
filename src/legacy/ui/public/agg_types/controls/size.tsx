@@ -23,7 +23,7 @@ import { AggParamEditorProps } from 'ui/vis/editors/default';
 import { EuiFormRow, EuiFieldNumber } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-interface SizeParamEditorProps extends AggParamEditorProps<number | ''> {
+export interface SizeParamEditorProps extends AggParamEditorProps<number | ''> {
   iconTip?: React.ReactNode;
   disabled?: boolean;
 }

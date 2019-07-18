@@ -19,39 +19,41 @@
 
 import React from 'react';
 import { mountWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
-import { TopAggregateParamEditor } from './top_aggregate';
-import { OptionedValueProp } from '../param_types/optioned';
+import { AggConfig } from 'ui/vis';
+import {
+  AggregateValueProp,
+  TopAggregateParamEditor,
+  TopAggregateParamEditorProps,
+} from './top_aggregate';
+import { aggParamCommonPropsMock } from './test_utils';
 
 describe('TopAggregateParamEditor', () => {
-  let agg: any;
+  let agg: AggConfig;
   let aggParam: any;
-  let defaultProps: any;
-  let options: any;
+  let defaultProps: TopAggregateParamEditorProps;
+  let options: AggregateValueProp[];
 
   beforeEach(() => {
     options = [
       {
         text: 'Min',
-        isCompatible: jest.fn((aggr: any) => aggr.params.field.type === 'number'),
-        disabled: true,
+        isCompatible: jest.fn((aggr: AggConfig) => aggr.params.field.type === 'number'),
         value: 'min',
       },
       {
         text: 'Max',
-        isCompatible: jest.fn((aggr: any) => aggr.params.field.type === 'number'),
-        disabled: true,
+        isCompatible: jest.fn((aggr: AggConfig) => aggr.params.field.type === 'number'),
         value: 'max',
       },
       {
         text: 'Average',
-        isCompatible: jest.fn((aggr: any) => aggr.params.field.type === 'string'),
-        disabled: true,
+        isCompatible: jest.fn((aggr: AggConfig) => aggr.params.field.type === 'string'),
         value: 'average',
       },
     ];
     Object.defineProperty(options, 'byValue', {
       get: () =>
-        options.reduce((acc: { [key: string]: any }, option: OptionedValueProp) => {
+        options.reduce((acc: { [key: string]: AggregateValueProp }, option: AggregateValueProp) => {
           acc[option.value] = { ...option };
 
           return acc;
@@ -69,10 +71,9 @@ describe('TopAggregateParamEditor', () => {
       getAggParams: jest.fn(() => [{ name: 'aggregate', options }]),
     };
     defaultProps = {
+      ...aggParamCommonPropsMock,
       agg,
       aggParam,
-      value: '',
-      showValidation: false,
       setValue: jest.fn(),
       setValidity: jest.fn(),
       setTouched: jest.fn(),
@@ -98,18 +99,20 @@ describe('TopAggregateParamEditor', () => {
 
   it('should change its validity due to passed props', () => {
     const comp = mountWithIntl(
-      <TopAggregateParamEditor {...defaultProps} value={{ value: 'min' }} />
+      <TopAggregateParamEditor {...defaultProps} value={{ value: 'min' } as AggregateValueProp} />
     );
 
     expect(defaultProps.setValidity).toHaveBeenCalledWith(true);
 
     comp.setProps({ showValidation: true, value: undefined });
 
+    expect(comp.children().props()).toHaveProperty('isInvalid', true);
     expect(defaultProps.setValidity).toHaveBeenCalledWith(false);
 
-    comp.setProps({ showValidation: true, value: { value: 'max' } });
+    comp.setProps({ value: { value: 'max' } });
     const select = comp.find('select');
 
+    expect(comp.children().props()).toHaveProperty('isInvalid', false);
     expect(defaultProps.setValidity).toHaveBeenCalledWith(true);
     expect(defaultProps.setValidity).toHaveBeenCalledTimes(3);
     expect(select.children()).toHaveLength(3);
@@ -118,7 +121,7 @@ describe('TopAggregateParamEditor', () => {
 
   it('should call setValue on change', () => {
     const comp = mountWithIntl(
-      <TopAggregateParamEditor {...defaultProps} value={{ value: 'min' }} />
+      <TopAggregateParamEditor {...defaultProps} value={{ value: 'min' } as AggregateValueProp} />
     );
     const select = comp.find('select');
 
@@ -134,7 +137,7 @@ describe('TopAggregateParamEditor', () => {
 
   it('should reflect on fieldType changes', () => {
     const comp = mountWithIntl(
-      <TopAggregateParamEditor {...defaultProps} value={{ value: 'min' }} />
+      <TopAggregateParamEditor {...defaultProps} value={{ value: 'min' } as AggregateValueProp} />
     );
 
     // should not be called on the first render
