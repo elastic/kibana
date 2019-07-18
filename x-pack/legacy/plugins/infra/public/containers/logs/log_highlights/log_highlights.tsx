@@ -40,6 +40,7 @@ export const useLogHighlightsState = ({
   } = useHighlightsFetcher(sourceId, sourceVersion, startKey, endKey, filterQuery, highlightTerms);
 
   const {
+    currentHighlightKey,
     hasPreviousHighlight,
     hasNextHighlight,
     goToPreviousHighlight,
@@ -61,6 +62,7 @@ export const useLogHighlightsState = ({
     logEntryHighlightsById,
     loadLogEntryHighlightsRequest,
     setVisibleMidpoint,
+    currentHighlightKey,
     hasPreviousHighlight,
     hasNextHighlight,
     goToPreviousHighlight,
