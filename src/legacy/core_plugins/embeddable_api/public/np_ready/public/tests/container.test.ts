@@ -45,6 +45,7 @@ import {
 } from '../lib/test_samples/embeddables/filterable_container';
 import { coreMock } from '../../../../../../../core/public/mocks';
 import { testPlugin } from './test_plugin';
+import { of } from './helpers';
 
 async function creatHelloWorldContainerAndEmbeddable(
   containerInput: ContainerInput = { id: 'hello', panels: {} },
@@ -55,14 +56,15 @@ async function creatHelloWorldContainerAndEmbeddable(
   const { setup, doStart } = testPlugin(coreSetup, coreStart);
   const start = doStart();
 
-  setup.registerEmbeddableFactory(FILTERABLE_EMBEDDABLE, new FilterableEmbeddableFactory());
-  setup.registerEmbeddableFactory(
-    CONTACT_CARD_EMBEDDABLE,
-    new SlowContactCardEmbeddableFactory({
-      execAction: start.executeTriggerActions,
-    })
-  );
-  setup.registerEmbeddableFactory(HELLO_WORLD_EMBEDDABLE_TYPE, new HelloWorldEmbeddableFactory());
+  const filterableFactory = new FilterableEmbeddableFactory();
+  const slowContactCardFactory = new SlowContactCardEmbeddableFactory({
+    execAction: start.executeTriggerActions,
+  });
+  const helloWorldFactory = new HelloWorldEmbeddableFactory();
+
+  setup.registerEmbeddableFactory(filterableFactory.type, filterableFactory);
+  setup.registerEmbeddableFactory(slowContactCardFactory.type, slowContactCardFactory);
+  setup.registerEmbeddableFactory(helloWorldFactory.type, helloWorldFactory);
 
   const container = new HelloWorldContainer(containerInput as any, {
     getActions: start.getTriggerCompatibleActions,
@@ -85,32 +87,14 @@ async function creatHelloWorldContainerAndEmbeddable(
 }
 
 test('Container initializes embeddables', async done => {
-  const { start, coreStart } = await creatHelloWorldContainerAndEmbeddable();
-  const container = new HelloWorldContainer(
-    {
-      id: 'hello',
-      panels: {
-        '123': {
-          explicitInput: { firstName: 'Sam', lastName: 'Tarley', id: '123' },
-          type: CONTACT_CARD_EMBEDDABLE,
-        },
+  const { container } = await creatHelloWorldContainerAndEmbeddable({
+    id: 'hello',
+    panels: {
+      '123': {
+        explicitInput: { id: '123' },
+        type: CONTACT_CARD_EMBEDDABLE,
       },
     },
-    start.getTriggerCompatibleActions,
-    start.getEmbeddableFactory,
-    start.getEmbeddableFactories,
-    coreStart.overlays,
-    coreStart.notifications
-  );
-
-  const subscription = container.getOutput$().subscribe(() => {
-    if (container.getOutput().embeddableLoaded['123']) {
-      const embeddable = container.getChild<ContactCardEmbeddable>('123');
-      expect(embeddable).toBeDefined();
-      expect(embeddable.id).toBe('123');
-      subscription.unsubscribe();
-      done();
-    }
   });
 
   if (container.getOutput().embeddableLoaded['123']) {
@@ -501,7 +485,7 @@ test('Explicit embeddable input mapped to undefined with no inherited value will
   embeddable.updateInput({ filters: undefined });
 });
 
-test('Panel removed from input state', async done => {
+test('Panel removed from input state', async () => {
   const { container } = await creatHelloWorldContainerAndEmbeddable({
     id: 'hello',
     panels: {},
@@ -521,24 +505,19 @@ test('Panel removed from input state', async done => {
     panels: filteredPanels,
   };
 
-  const subscription = container
-    .getOutput$()
-    .pipe(skip(1))
-    .subscribe(() => {
-      expect(container.getChild(embeddable.id)).toBeUndefined();
-      expect(container.getOutput().embeddableLoaded[embeddable.id]).toBeUndefined();
-      subscription.unsubscribe();
-      done();
-    });
-
   container.updateInput(newInput);
+  await new Promise(r => setTimeout(r, 1));
+
+  expect(container.getChild(embeddable.id)).toBeUndefined();
+  expect(container.getOutput().embeddableLoaded[embeddable.id]).toBeUndefined();
 });
 
-test('Panel added to input state', async done => {
-  const container = new FilterableContainer(
-    { id: 'hello', panels: {}, filters: [] },
-    getEmbeddableFactory
-  );
+test('Panel added to input state', async () => {
+  const { container, start } = await creatHelloWorldContainerAndEmbeddable({
+    id: 'hello',
+    panels: {},
+    filters: [],
+  } as any);
 
   const embeddable = await container.addNewEmbeddable<
     FilterableEmbeddableInput,
@@ -554,31 +533,44 @@ test('Panel added to input state', async done => {
 
   const container2 = new FilterableContainer(
     { id: 'hello', panels: {}, filters: [] },
-    getEmbeddableFactory
+    start.getEmbeddableFactory
   );
 
-  const subscription = container2
-    .getOutput$()
-    .pipe(skip(2))
-    .subscribe(() => {
-      expect(container.getChild(embeddable.id)).toBeDefined();
-      expect(container.getOutput().embeddableLoaded[embeddable.id]).toBe(true);
-      expect(container.getChild(embeddable2.id)).toBeDefined();
-      expect(container.getOutput().embeddableLoaded[embeddable2.id]).toBe(true);
-      subscription.unsubscribe();
-      done();
-    });
-
-  // Container 1 has the panel in it's array, copy it to container2.
   container2.updateInput(container.getInput());
+  await new Promise(r => setTimeout(r, 1));
+
+  expect(container.getChild(embeddable.id)).toBeDefined();
+  expect(container.getOutput().embeddableLoaded[embeddable.id]).toBe(true);
+  expect(container.getChild(embeddable2.id)).toBeDefined();
+  expect(container.getOutput().embeddableLoaded[embeddable2.id]).toBe(true);
 });
 
-xtest('Container changes made directly after adding a new embeddable are propagated', async done => {
-  const { container } = await creatHelloWorldContainerAndEmbeddable({
-    id: 'hello',
-    panels: {},
-    viewMode: ViewMode.EDIT,
+test('Container changes made directly after adding a new embeddable are propagated', async done => {
+  const coreSetup = coreMock.createSetup();
+  const coreStart = coreMock.createStart();
+  const { doStart } = testPlugin(coreSetup, coreStart);
+  const start = doStart();
+
+  const container = new HelloWorldContainer(
+    {
+      id: 'hello',
+      panels: {},
+      viewMode: ViewMode.EDIT,
+    },
+    {
+      getActions: start.getTriggerCompatibleActions,
+      getEmbeddableFactory: start.getEmbeddableFactory,
+      getAllEmbeddableFactories: start.getEmbeddableFactories,
+      overlays: coreStart.overlays,
+      notifications: coreStart.notifications,
+    }
+  );
+
+  const factory = new SlowContactCardEmbeddableFactory({
+    loadTickCount: 3,
+    execAction: start.executeTriggerActions,
   });
+  start.registerEmbeddableFactory(factory.type, factory);
 
   const subscription = Rx.merge(container.getOutput$(), container.getInput$())
     .pipe(skip(2))
@@ -675,7 +667,7 @@ test('ErrorEmbeddables get updated when parent does', async done => {
   });
 });
 
-test('untilEmbeddableLoaded throws an error if there is no such child panel in the container', async () => {
+test('untilEmbeddableLoaded() throws an error if there is no such child panel in the container', async () => {
   const { container } = await creatHelloWorldContainerAndEmbeddable({
     id: 'hello',
     panels: {},
@@ -684,10 +676,8 @@ test('untilEmbeddableLoaded throws an error if there is no such child panel in t
   expect(container.untilEmbeddableLoaded('idontexist')).rejects.toThrowError();
 });
 
-test.only('untilEmbeddableLoaded resolves if child is has an type that does not exist', async done => {
-  const coreSetup = coreMock.createSetup();
-  const coreStart = coreMock.createStart();
-  const { doStart } = testPlugin(coreSetup, coreStart);
+test('untilEmbeddableLoaded() throws an error if there is no such child panel in the container - 2', async () => {
+  const { doStart, coreStart } = testPlugin(coreMock.createSetup(), coreMock.createStart());
   const start = doStart();
   const container = new HelloWorldContainer(
     {
@@ -703,16 +693,16 @@ test.only('untilEmbeddableLoaded resolves if child is has an type that does not 
     }
   );
 
-  const child = await container.untilEmbeddableLoaded('123');
-  expect(child).toBeDefined();
-  expect(child.type).toBe(ERROR_EMBEDDABLE_TYPE);
-  done();
+  const [, error] = await of(container.untilEmbeddableLoaded('123'));
+  expect(error).toBeInstanceOf(Error);
+  expect(error.message).toMatchInlineSnapshot(`"Panel not found"`);
 });
 
-test('untilEmbeddableLoaded resolves if child is loaded in the container', async done => {
-  __embeddableFactories.clear();
-  __embeddableFactories.set(HELLO_WORLD_EMBEDDABLE_TYPE, new HelloWorldEmbeddableFactory());
-
+test('untilEmbeddableLoaded() resolves if child is loaded in the container', async done => {
+  const { setup, doStart, coreStart } = testPlugin(coreMock.createSetup(), coreMock.createStart());
+  const factory = new HelloWorldEmbeddableFactory();
+  setup.registerEmbeddableFactory(factory.type, factory);
+  const start = doStart();
   const container = new HelloWorldContainer(
     {
       id: 'hello',
@@ -723,11 +713,13 @@ test('untilEmbeddableLoaded resolves if child is loaded in the container', async
         },
       },
     },
-    getActions,
-    getEmbeddableFactory,
-    getAllEmbeddableFactories,
-    overlays,
-    notifications
+    {
+      getActions: start.getTriggerCompatibleActions,
+      getEmbeddableFactory: start.getEmbeddableFactory,
+      getAllEmbeddableFactories: start.getEmbeddableFactories,
+      overlays: coreStart.overlays,
+      notifications: coreStart.notifications,
+    }
   );
 
   const child = await container.untilEmbeddableLoaded('123');
@@ -737,12 +729,13 @@ test('untilEmbeddableLoaded resolves if child is loaded in the container', async
 });
 
 test('untilEmbeddableLoaded rejects with an error if child is subsequently removed', async done => {
-  __embeddableFactories.clear();
-  __embeddableFactories.set(
-    CONTACT_CARD_EMBEDDABLE,
-    new SlowContactCardEmbeddableFactory({ loadTickCount: 3 })
-  );
-
+  const { doStart, coreStart } = testPlugin(coreMock.createSetup(), coreMock.createStart());
+  const start = doStart();
+  const factory = new SlowContactCardEmbeddableFactory({
+    loadTickCount: 3,
+    execAction: start.executeTriggerActions,
+  });
+  start.registerEmbeddableFactory(factory.type, factory);
   const container = new HelloWorldContainer(
     {
       id: 'hello',
@@ -753,11 +746,13 @@ test('untilEmbeddableLoaded rejects with an error if child is subsequently remov
         },
       },
     },
-    getActions,
-    getEmbeddableFactory,
-    getAllEmbeddableFactories,
-    overlays,
-    notifications
+    {
+      getActions: start.getTriggerCompatibleActions,
+      getEmbeddableFactory: start.getEmbeddableFactory,
+      getAllEmbeddableFactories: start.getEmbeddableFactories,
+      overlays: coreStart.overlays,
+      notifications: coreStart.notifications,
+    }
   );
 
   container.untilEmbeddableLoaded('123').catch(error => {
@@ -769,12 +764,13 @@ test('untilEmbeddableLoaded rejects with an error if child is subsequently remov
 });
 
 test('adding a panel then subsequently removing it before its loaded removes the panel', async done => {
-  __embeddableFactories.clear();
-  __embeddableFactories.set(
-    CONTACT_CARD_EMBEDDABLE,
-    new SlowContactCardEmbeddableFactory({ loadTickCount: 1 })
-  );
-
+  const { doStart, coreStart } = testPlugin(coreMock.createSetup(), coreMock.createStart());
+  const start = doStart();
+  const factory = new SlowContactCardEmbeddableFactory({
+    loadTickCount: 1,
+    execAction: start.executeTriggerActions,
+  });
+  start.registerEmbeddableFactory(factory.type, factory);
   const container = new HelloWorldContainer(
     {
       id: 'hello',
@@ -785,11 +781,13 @@ test('adding a panel then subsequently removing it before its loaded removes the
         },
       },
     },
-    getActions,
-    getEmbeddableFactory,
-    getAllEmbeddableFactories,
-    overlays,
-    notifications
+    {
+      getActions: start.getTriggerCompatibleActions,
+      getEmbeddableFactory: start.getEmbeddableFactory,
+      getAllEmbeddableFactories: start.getEmbeddableFactories,
+      overlays: coreStart.overlays,
+      notifications: coreStart.notifications,
+    }
   );
 
   // Final state should be that the panel is removed.

@@ -32,15 +32,18 @@ import { HelloWorldEmbeddableFactory } from '../lib/test_samples/embeddables/hel
 import { FilterableContainer } from '../lib/test_samples/embeddables/filterable_container';
 import { isErrorEmbeddable } from '../lib';
 import { HelloWorldContainer } from '../lib/test_samples/embeddables/hello_world_container';
+// eslint-disable-next-line
+import { coreMock } from '../../../../../../../core/public/mocks';
 
-const { setup, doStart } = testPlugin();
-setup.registerEmbeddableFactory(FILTERABLE_EMBEDDABLE, new FilterableEmbeddableFactory());
-setup.registerEmbeddableFactory(
-  CONTACT_CARD_EMBEDDABLE,
-  new SlowContactCardEmbeddableFactory({ loadTickCount: 2 })
-);
-setup.registerEmbeddableFactory(HELLO_WORLD_EMBEDDABLE_TYPE, new HelloWorldEmbeddableFactory());
+const { setup, doStart, coreStart } = testPlugin(coreMock.createSetup(), coreMock.createStart());
 const start = doStart();
+setup.registerEmbeddableFactory(FILTERABLE_EMBEDDABLE, new FilterableEmbeddableFactory());
+const factory = new SlowContactCardEmbeddableFactory({
+  loadTickCount: 2,
+  execAction: start.executeTriggerActions,
+});
+setup.registerEmbeddableFactory(CONTACT_CARD_EMBEDDABLE, factory);
+setup.registerEmbeddableFactory(HELLO_WORLD_EMBEDDABLE_TYPE, new HelloWorldEmbeddableFactory());
 
 test('Explicit embeddable input mapped to undefined will default to inherited', async () => {
   const derivedFilter: Filter = {
@@ -72,7 +75,13 @@ test('Explicit embeddable input mapped to undefined will default to inherited', 
 test('Explicit embeddable input mapped to undefined with no inherited value will get passed to embeddable', async done => {
   const container = new HelloWorldContainer(
     { id: 'hello', panels: {} },
-    start.getEmbeddableFactory
+    {
+      getActions: start.getTriggerCompatibleActions,
+      getAllEmbeddableFactories: start.getEmbeddableFactories,
+      getEmbeddableFactory: start.getEmbeddableFactory,
+      notifications: coreStart.notifications,
+      overlays: coreStart.overlays,
+    }
   );
 
   const embeddable = await container.addNewEmbeddable<any, any, any>(FILTERABLE_EMBEDDABLE, {});
@@ -112,7 +121,13 @@ test('Explicit input tests in async situations', (done: () => void) => {
         },
       },
     },
-    start.getEmbeddableFactory
+    {
+      getActions: start.getTriggerCompatibleActions,
+      getAllEmbeddableFactories: start.getEmbeddableFactories,
+      getEmbeddableFactory: start.getEmbeddableFactory,
+      notifications: coreStart.notifications,
+      overlays: coreStart.overlays,
+    }
   );
 
   container.updateInput({ lastName: 'lolol' });

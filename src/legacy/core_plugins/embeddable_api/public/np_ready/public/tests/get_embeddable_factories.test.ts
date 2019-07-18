@@ -39,7 +39,7 @@ test('returns existing embeddable factories', () => {
   const { length } = [...start.getEmbeddableFactories()];
 
   const factory1 = new FilterableContainerFactory({} as any);
-  const factory2 = new ContactCardEmbeddableFactory({} as any);
+  const factory2 = new ContactCardEmbeddableFactory({} as any, (() => null) as any);
   setup.registerEmbeddableFactory(factory1.type, factory1);
   setup.registerEmbeddableFactory(factory2.type, factory2);
 
