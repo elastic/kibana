@@ -4,77 +4,57 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-
-import { shallowWithIntl, mountWithIntl } from 'test_utils/enzyme_helpers';
+import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import React from 'react';
+
+import {
+  navigationMenuMock,
+  NavigationMenuContext
+} from '../util/context_utils';
 
 import { Settings } from './settings';
 
-// The mocks for ui/chrome and ui/timefilter are copied from charts_utils.test.js
-// TODO: Refactor the involved tests to avoid this duplication
-jest.mock(
-  'ui/chrome',
-  () => ({
-    addBasePath: () => '/api/ml',
-    getBasePath: () => {
-      return '<basepath>';
-    },
-    getInjected: () => {},
-    getUiSettingsClient: () => {
-      return {
-        get: (key) => {
-          switch (key) {
-            case 'dateFormat':
-            case 'timepicker:timeDefaults':
-              return {};
-            case 'timepicker:refreshIntervalDefaults':
-              return { pause: false, value: 0 };
-            default:
-              throw new Error(`Unexpected config key: ${key}`);
-          }
-        },
-      };
-    },
-  }),
-  { virtual: true }
-);
-
-jest.mock(
-  'ui/persisted_log/recently_accessed',
-  () => ({
-    recentlyAccessed: {},
-  }),
-  { virtual: true }
+const wrapComponent = (component) => (
+  <NavigationMenuContext.Provider value={navigationMenuMock}>
+    {component}
+  </NavigationMenuContext.Provider>
 );
 
 describe('Settings', () => {
 
-  test('Renders settings page', () => {
-    const wrapper = shallowWithIntl(
-      <Settings canGetFilters={true} canGetCalendars={true}/>
+  test('Renders settings page with all buttons enabled.', () => {
+    const wrapper = mountWithIntl(
+      wrapComponent(<Settings canGetFilters={true} canGetCalendars={true}/>)
     );
 
-    expect(wrapper).toMatchSnapshot();
+    const filterButton = wrapper.find('[data-test-subj="ml_filter_lists_button"]').find('EuiButtonEmpty');
+    expect(filterButton.prop('isDisabled')).toBe(false);
+
+    const calendarButton = wrapper.find('[data-test-subj="ml_calendar_mng_button"]').find('EuiButtonEmpty');
+    expect(calendarButton.prop('isDisabled')).toBe(false);
   });
 
   test('Filter Lists button disabled if canGetFilters is false', () => {
     const wrapper = mountWithIntl(
-      <Settings canGetFilters={false} canGetCalendars={true}/>
+      wrapComponent(<Settings canGetFilters={false} canGetCalendars={true}/>)
     );
 
-    const button = wrapper.find('[data-test-subj="ml_filter_lists_button"]');
-    const filterButton = button.find('EuiButtonEmpty');
+    const filterButton = wrapper.find('[data-test-subj="ml_filter_lists_button"]').find('EuiButtonEmpty');
     expect(filterButton.prop('isDisabled')).toBe(true);
+
+    const calendarButton = wrapper.find('[data-test-subj="ml_calendar_mng_button"]').find('EuiButtonEmpty');
+    expect(calendarButton.prop('isDisabled')).toBe(false);
   });
 
   test('Calendar management button disabled if canGetCalendars is false', () => {
     const wrapper = mountWithIntl(
-      <Settings canGetFilters={true} canGetCalendars={false} />
+      wrapComponent(<Settings canGetFilters={true} canGetCalendars={false}/>)
     );
 
-    const button = wrapper.find('[data-test-subj="ml_calendar_mng_button"]');
-    const calendarButton = button.find('EuiButtonEmpty');
+    const filterButton = wrapper.find('[data-test-subj="ml_filter_lists_button"]').find('EuiButtonEmpty');
+    expect(filterButton.prop('isDisabled')).toBe(false);
+
+    const calendarButton = wrapper.find('[data-test-subj="ml_calendar_mng_button"]').find('EuiButtonEmpty');
     expect(calendarButton.prop('isDisabled')).toBe(true);
   });
 

@@ -7,18 +7,28 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { NavigationMenu } from './navigation_menu';
+
 import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml');
 
 import 'ui/directives/kbn_href';
+import chrome from 'ui/chrome';
+import { timefilter } from 'ui/timefilter';
+import { timeHistory } from 'ui/timefilter/time_history';
+
+import { NavigationMenuContext } from '../../util/context_utils';
+
+import { NavigationMenu } from './navigation_menu';
 
 module.directive('mlNavMenu', function () {
   return {
     restrict: 'E',
     transclude: true,
     link: function (scope, element, attrs) {
-      ReactDOM.render(React.createElement(NavigationMenu, { tabId: attrs.name }),
+      ReactDOM.render(
+        <NavigationMenuContext.Provider value={{ chrome, timefilter, timeHistory }}>
+          {React.createElement(NavigationMenu, { tabId: attrs.name })}
+        </NavigationMenuContext.Provider>,
         element[0]
       );
 

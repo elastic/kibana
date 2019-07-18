@@ -6,9 +6,13 @@
 
 import { FileDataVisualizerView } from './components/file_datavisualizer_view';
 
-import React, { Fragment } from 'react';
-import { timefilter } from 'ui/timefilter';
+import React from 'react';
 
+import chrome from 'ui/chrome';
+import { timefilter } from 'ui/timefilter';
+import { timeHistory } from 'ui/timefilter/time_history';
+
+import { NavigationMenuContext } from '../util/context_utils';
 import { NavigationMenu } from '../components/navigation_menu/navigation_menu';
 
 export function FileDataVisualizerPage({ indexPatterns, kibanaConfig }) {
@@ -16,9 +20,9 @@ export function FileDataVisualizerPage({ indexPatterns, kibanaConfig }) {
   timefilter.disableAutoRefreshSelector();
 
   return (
-    <Fragment>
+    <NavigationMenuContext.Provider value={{ chrome, timefilter, timeHistory }}>
       <NavigationMenu tabId="datavisualizer" />
       <FileDataVisualizerView indexPatterns={indexPatterns} kibanaConfig={kibanaConfig} />
-    </Fragment>
+    </NavigationMenuContext.Provider>
   );
 }

@@ -6,7 +6,7 @@
 
 
 
-import React, { Fragment } from 'react';
+import React, { Fragment, useContext } from 'react';
 import { PropTypes } from 'prop-types';
 
 import {
@@ -20,9 +20,9 @@ import {
   EuiTitle
 } from '@elastic/eui';
 
-import chrome from 'ui/chrome';
-
 import { FormattedMessage } from '@kbn/i18n/react';
+
+import { NavigationMenuContext } from '../util/context_utils';
 
 import { NavigationMenu } from '../components/navigation_menu/navigation_menu';
 
@@ -30,6 +30,8 @@ export function Settings({
   canGetFilters,
   canGetCalendars
 }) {
+  const basePath = useContext(NavigationMenuContext).chrome.getBasePath();
+
   return (
     <Fragment>
       <NavigationMenu tabId="settings" />
@@ -56,7 +58,7 @@ export function Settings({
                   data-test-subj="ml_calendar_mng_button"
                   size="l"
                   color="primary"
-                  href={`${chrome.getBasePath()}/app/ml#/settings/calendars_list`}
+                  href={`${basePath}/app/ml#/settings/calendars_list`}
                   isDisabled={canGetCalendars === false}
                 >
                   <FormattedMessage
@@ -71,7 +73,7 @@ export function Settings({
                   data-test-subj="ml_filter_lists_button"
                   size="l"
                   color="primary"
-                  href={`${chrome.getBasePath()}/app/ml#/settings/filter_lists`}
+                  href={`${basePath}/app/ml#/settings/filter_lists`}
                   isDisabled={canGetFilters === false}
                 >
                   <FormattedMessage

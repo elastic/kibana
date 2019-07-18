@@ -22,8 +22,11 @@ import {
 
 import { isFullLicense } from '../../license/check_license';
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
+import chrome from 'ui/chrome';
 import { timefilter } from 'ui/timefilter';
+import { timeHistory } from 'ui/timefilter/time_history';
 
+import { NavigationMenuContext } from '../../util/context_utils';
 import { NavigationMenu } from '../../components/navigation_menu/navigation_menu';
 
 function startTrialDescription() {
@@ -34,32 +37,27 @@ function startTrialDescription() {
         defaultMessage="To experience the full Machine Learning features that a {platinumSubscriptionLink} offers, start a 30-day trial."
         values={{
           platinumSubscriptionLink: (
-            <EuiLink
-              href="https://www.elastic.co/subscriptions"
-              target="_blank"
-            >
+            <EuiLink href="https://www.elastic.co/subscriptions" target="_blank">
               <FormattedMessage
                 id="xpack.ml.datavisualizer.startTrial.platinumSubscriptionTitle"
                 defaultMessage="Platinum subscription"
               />
             </EuiLink>
-          )
+          ),
         }}
       />
     </span>
   );
 }
 
-
 export const DatavisualizerSelector = injectI18n(function (props) {
-
   timefilter.disableTimeRangeSelector();
   timefilter.disableAutoRefreshSelector();
 
-  const startTrialVisible = (isFullLicense() === false);
+  const startTrialVisible = isFullLicense() === false;
 
   return (
-    <Fragment>
+    <NavigationMenuContext.Provider value={{ chrome, timefilter, timeHistory }}>
       <NavigationMenu tabId="datavisualizer" />
       <EuiPage restrictWidth={1000}>
         <EuiPageBody>
@@ -106,7 +104,7 @@ export const DatavisualizerSelector = injectI18n(function (props) {
                 }
                 betaBadgeLabel={props.intl.formatMessage({
                   id: 'xpack.ml.datavisualizer.selector.experimentalBadgeLabel',
-                  defaultMessage: 'Experimental'
+                  defaultMessage: 'Experimental',
                 })}
                 betaBadgeTooltipContent={
                   <FormattedMessage
@@ -115,10 +113,7 @@ export const DatavisualizerSelector = injectI18n(function (props) {
                   />
                 }
                 footer={
-                  <EuiButton
-                    target="_self"
-                    href="#/filedatavisualizer"
-                  >
+                  <EuiButton target="_self" href="#/filedatavisualizer">
                     <FormattedMessage
                       id="xpack.ml.datavisualizer.selector.uploadFileButtonLabel"
                       defaultMessage="Upload file"
@@ -144,10 +139,7 @@ export const DatavisualizerSelector = injectI18n(function (props) {
                   />
                 }
                 footer={
-                  <EuiButton
-                    target="_self"
-                    href="#datavisualizer_index_select"
-                  >
+                  <EuiButton target="_self" href="#datavisualizer_index_select">
                     <FormattedMessage
                       id="xpack.ml.datavisualizer.selector.selectIndexButtonLabel"
                       defaultMessage="Select index"
@@ -158,38 +150,38 @@ export const DatavisualizerSelector = injectI18n(function (props) {
               />
             </EuiFlexItem>
           </EuiFlexGroup>
-          {startTrialVisible === true &&
-          <React.Fragment>
-            <EuiSpacer size="xxl" />
-            <EuiSpacer size="xxl" />
-            <EuiFlexGroup justifyContent="spaceAround" gutterSize="xl">
-              <EuiFlexItem grow={false} style={{ width: '600px' }}>
-                <EuiCard
-                  title={
-                    <FormattedMessage
-                      id="xpack.ml.datavisualizer.selector.startTrialTitle"
-                      defaultMessage="Start trial"
-                    />
-                  }
-                  description={startTrialDescription()}
-                  footer={
-                    <EuiButton
-                      target="_blank"
-                      href="kibana#/management/elasticsearch/license_management/home"
-                    >
+          {startTrialVisible === true && (
+            <Fragment>
+              <EuiSpacer size="xxl" />
+              <EuiSpacer size="xxl" />
+              <EuiFlexGroup justifyContent="spaceAround" gutterSize="xl">
+                <EuiFlexItem grow={false} style={{ width: '600px' }}>
+                  <EuiCard
+                    title={
                       <FormattedMessage
-                        id="xpack.ml.datavisualizer.selector.startTrialButtonLabel"
+                        id="xpack.ml.datavisualizer.selector.startTrialTitle"
                         defaultMessage="Start trial"
                       />
-                    </EuiButton>
-                  }
-                />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </React.Fragment>
-          }
+                    }
+                    description={startTrialDescription()}
+                    footer={
+                      <EuiButton
+                        target="_blank"
+                        href="kibana#/management/elasticsearch/license_management/home"
+                      >
+                        <FormattedMessage
+                          id="xpack.ml.datavisualizer.selector.startTrialButtonLabel"
+                          defaultMessage="Start trial"
+                        />
+                      </EuiButton>
+                    }
+                  />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </Fragment>
+          )}
         </EuiPageBody>
       </EuiPage>
-    </Fragment>
+    </NavigationMenuContext.Provider>
   );
 });
