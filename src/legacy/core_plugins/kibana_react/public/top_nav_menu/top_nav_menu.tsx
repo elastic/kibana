@@ -96,6 +96,7 @@ export function TopNavMenu(props: Props) {
             justifyContent="spaceBetween"
             gutterSize="none"
             wrap={true}
+            alignItems="center"
             className="topNavMenu"
           >
             <EuiFlexGroup justifyContent="flexStart" gutterSize="none" responsive={false}>
