@@ -8,7 +8,7 @@ import React, { Fragment, SFC, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
-import { EuiButtonEmpty, EuiCallOut, EuiEmptyPrompt, SortDirection } from '@elastic/eui';
+import { EuiBadge, EuiButtonEmpty, EuiCallOut, EuiEmptyPrompt, SortDirection } from '@elastic/eui';
 
 import {
   DataFrameTransformId,
@@ -23,6 +23,7 @@ import {
   DataFrameTransformListRow,
   ItemIdToExpandedRowMap,
   DATA_FRAME_TASK_STATE,
+  DATA_FRAME_MODE,
 } from './common';
 import { getTransformsFactory } from '../../services/transform_service';
 import { getColumns } from './columns';
@@ -159,6 +160,21 @@ export const DataFrameTransformList: SFC = () => {
           value: val,
           name: val,
           view: getTaskStateBadge(val),
+        })),
+      },
+      {
+        type: 'field_value_selection',
+        field: 'config.mode',
+        name: i18n.translate('xpack.ml.dataframe.modeFilter', { defaultMessage: 'Mode' }),
+        multiSelect: false,
+        options: Object.values(DATA_FRAME_MODE).map(val => ({
+          value: val,
+          name: val,
+          view: (
+            <EuiBadge className="mlTaskModeBadge" color="hollow">
+              {val}
+            </EuiBadge>
+          ),
         })),
       },
     ],

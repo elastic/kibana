@@ -14,6 +14,11 @@ export enum DATA_FRAME_TASK_STATE {
   STOPPED = 'stopped',
 }
 
+export enum DATA_FRAME_MODE {
+  BATCH = 'batch',
+  CONTINUOUS = 'continuous',
+}
+
 export interface DataFrameTransformState {
   checkpoint: number;
   current_position: Dictionary<any>;

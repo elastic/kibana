@@ -134,11 +134,10 @@ export const getColumns = (
     },
     {
       name: i18n.translate('xpack.ml.dataframe.mode', { defaultMessage: 'Mode' }),
-      sortable: (item: DataFrameTransformListRow) =>
-        typeof item.config.sync !== 'undefined' ? 'continuous' : 'batch',
+      sortable: (item: DataFrameTransformListRow) => item.config.mode,
       truncateText: true,
       render(item: DataFrameTransformListRow) {
-        const mode = typeof item.config.sync !== 'undefined' ? 'continuous' : 'batch';
+        const mode = item.config.mode;
         const color = 'hollow';
         return <EuiBadge color={color}>{mode}</EuiBadge>;
       },
