@@ -31,7 +31,7 @@ export default function ({ getPageObjects, getService }) {
       expect(mapboxStyle.sources[VECTOR_SOURCE_ID].data.features.length).to.equal(10);
     });
 
-    describe('configuration', async () => {
+    describe('configuration', () => {
       before(async () => {
         await PageObjects.maps.openLayerPanel('logstash');
         // Can not use testSubjects because data-test-subj is placed range input and number input
@@ -52,7 +52,7 @@ export default function ({ getPageObjects, getService }) {
       });
     });
 
-    describe('query', async () => {
+    describe('query', () => {
       before(async () => {
         await PageObjects.maps.setAndSubmitQuery('machine.os.raw : "win 8"');
       });

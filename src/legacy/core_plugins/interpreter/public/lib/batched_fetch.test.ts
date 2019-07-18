@@ -17,17 +17,17 @@
  * under the License.
  */
 
-import { batchedFetch } from './batched_fetch';
+import { batchedFetch, Request } from './batched_fetch';
 
-const serialize = o => JSON.stringify(o);
+const serialize = (o: any) => JSON.stringify(o);
 
 const ajaxStream = jest.fn(async ({ body, onResponse }) => {
   const { functions } = JSON.parse(body);
-  functions.map(({ id, functionName, context, args }) =>
+  functions.map(({ id, functionName, context, args }: Request) =>
     onResponse({
       id,
       statusCode: context,
-      result: context >= 400 ? { err: {} } : `${functionName}${context}${args}`,
+      result: Number(context) >= 400 ? { err: {} } : `${functionName}${context}${args}`,
     })
   );
 });

@@ -16,28 +16,16 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { extractNanos } from '../date_conversion';
 
-import expect from '@kbn/expect';
-
-export default function ({ getService, getPageObjects }) {
-  const esArchiver = getService('esArchiver');
-  const pieChart = getService('pieChart');
-  const queryBar = getService('queryBar');
-  const PageObjects = getPageObjects(['dashboard', 'discover']);
-
-  describe('dashboard query bar', () => {
-    before(async () => {
-      await PageObjects.dashboard.loadSavedDashboard('dashboard with filter');
-    });
-
-    it('causes panels to reload when refresh is clicked', async () => {
-      await esArchiver.unload('dashboard/current/data');
-
-      await queryBar.clickQuerySubmitButton();
-      const headers = await PageObjects.discover.getColumnHeaders();
-      expect(headers.length).to.be(0);
-
-      await pieChart.expectPieSliceCount(0);
-    });
+describe('function extractNanos', function() {
+  test('extract nanos of 2014-01-01', function() {
+    expect(extractNanos('2014-01-01')).toBe('000000000');
   });
-}
+  test('extract nanos of 2014-01-01T12:12:12.234Z', function() {
+    expect(extractNanos('2014-01-01T12:12:12.234Z')).toBe('234000000');
+  });
+  test('extract nanos of 2014-01-01T12:12:12.234123321Z', function() {
+    expect(extractNanos('2014-01-01T12:12:12.234123321Z')).toBe('234123321');
+  });
+});
