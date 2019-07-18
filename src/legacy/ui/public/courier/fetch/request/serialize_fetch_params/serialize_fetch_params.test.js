@@ -81,7 +81,7 @@ describe('headers', () => {
     return JSON.parse(requestParts[0]);
   };
 
-  describe('search request preference', async () => {
+  describe('search request preference', () => {
     test('should be set to sessionId when courier:setRequestPreference is "sessionId"', async () => {
       const config = {
         get: () => {
