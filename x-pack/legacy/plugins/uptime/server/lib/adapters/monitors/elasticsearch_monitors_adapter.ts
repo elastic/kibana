@@ -169,7 +169,11 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
     const params = {
       index: INDEX_NAMES.HEARTBEAT,
       body: {
-        query,
+        query: {
+          bool: {
+            filter: [{ exists: { field: 'summary.up' } }, query],
+          },
+        },
         size: 0,
         aggs: {
           ids: {
