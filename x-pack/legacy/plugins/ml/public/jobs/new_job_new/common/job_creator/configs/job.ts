@@ -16,6 +16,7 @@ export interface Job {
   data_description: DataDescription;
   description: string;
   groups: string[];
+  calendars?: string[];
   model_plot_config?: ModelPlotConfig;
   model_snapshot_retention_days?: number;
   renormalization_window_days?: number;
