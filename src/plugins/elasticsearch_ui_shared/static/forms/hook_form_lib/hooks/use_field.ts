@@ -106,28 +106,15 @@ export const useField = (form: Form, path: string, config: FieldConfig = {}) => 
    */
   const filterErrors = (
     _errors: ValidationError[],
-    validationType: string | string[] = VALIDATION_TYPES.FIELD
+    validationTypeToFilterOut: string | string[] = VALIDATION_TYPES.FIELD
   ): ValidationError[] => {
-    const validationTypeToArray = Array.isArray(validationType)
-      ? (validationType as string[])
-      : ([validationType] as string[]);
+    const validationTypeToArray = Array.isArray(validationTypeToFilterOut)
+      ? (validationTypeToFilterOut as string[])
+      : ([validationTypeToFilterOut] as string[]);
 
-    const doWeFilterOutFieldValidationType = validationTypeToArray.some(
-      _type => _type === VALIDATION_TYPES.FIELD
+    return _errors.filter(error =>
+      validationTypeToArray.every(_type => error.validationType !== _type)
     );
-
-    return _errors.filter(error => {
-      const doesNotHaveValidationTypeDefined =
-        {}.hasOwnProperty.call(error, 'validationType') === false;
-
-      // If no validation type set for the error (the default type is "field")
-      // we filter out the error _if_ we are filtering out field errors
-      if (doesNotHaveValidationTypeDefined) {
-        return !doWeFilterOutFieldValidationType;
-      }
-
-      return validationTypeToArray.every(_type => error.validationType !== _type);
-    });
   };
 
   const runFormatters = (input: unknown): unknown => {
@@ -157,15 +144,25 @@ export const useField = (form: Form, path: string, config: FieldConfig = {}) => 
   const validateSync = ({
     formData,
     value: valueToValidate,
+    validationTypeToValidate,
   }: {
     formData: any;
     value: unknown;
+    validationTypeToValidate?: string;
   }): ValidationError[] => {
     const validationErrors: ValidationError[] = [];
     let skip = false;
 
-    const doValidate = ({ validator, exitOnFail }: ValidationConfig) => {
-      if (skip) {
+    const runValidation = ({
+      validator,
+      exitOnFail,
+      type: validationType = VALIDATION_TYPES.FIELD,
+    }: ValidationConfig) => {
+      if (
+        skip ||
+        (typeof validationTypeToValidate !== 'undefined' &&
+          validationType !== validationTypeToValidate)
+      ) {
         return;
       }
       let validationResult;
@@ -192,7 +189,7 @@ export const useField = (form: Form, path: string, config: FieldConfig = {}) => 
 
     // Execute each validations for the field sequencially
     validations.forEach(validation => {
-      const validationResult = doValidate(validation);
+      const validationResult = runValidation(validation);
 
       if (validationResult) {
         const error = getValidationErrorWithMessage(validation, validationResult);
@@ -209,9 +206,11 @@ export const useField = (form: Form, path: string, config: FieldConfig = {}) => 
   const validateAsync = async ({
     formData,
     value: valueToValidate,
+    validationTypeToValidate,
   }: {
     formData: any;
     value: unknown;
+    validationTypeToValidate?: string;
   }): Promise<ValidationError[]> => {
     const validationErrors: ValidationError[] = [];
     let skip = false;
@@ -220,8 +219,16 @@ export const useField = (form: Form, path: string, config: FieldConfig = {}) => 
     // we will clear the errors as soon as the field value changes.
     clearErrors([VALIDATION_TYPES.FIELD, VALIDATION_TYPES.ASYNC]);
 
-    const doValidate = async ({ validator, exitOnFail }: ValidationConfig) => {
-      if (skip) {
+    const runValidation = async ({
+      validator,
+      exitOnFail,
+      type: validationType = VALIDATION_TYPES.FIELD,
+    }: ValidationConfig) => {
+      if (
+        skip ||
+        (typeof validationTypeToValidate !== 'undefined' &&
+          validationType !== validationTypeToValidate)
+      ) {
         return;
       }
       let validationResult;
@@ -250,7 +257,7 @@ export const useField = (form: Form, path: string, config: FieldConfig = {}) => 
     await validations.reduce(
       (promise, validation) =>
         promise.then(async () => {
-          const validationResult = await doValidate(validation);
+          const validationResult = await runValidation(validation);
 
           if (validationResult) {
             const error = getValidationErrorWithMessage(validation, validationResult);
@@ -272,10 +279,17 @@ export const useField = (form: Form, path: string, config: FieldConfig = {}) => 
     setErrors(previousErrors => filterErrors(previousErrors, validationType));
   };
 
+  /**
+   * Validate a form field, running all its validations.
+   * If a validationType is provided then only that validation will be executed,
+   * skipping the other type of validation that might exist.
+   */
   const validate: Field['validate'] = (validationData = {}) => {
-    let { formData, value: valueToValidate } = validationData;
-    formData = formData || form.__getFormData({ unflatten: false });
-    valueToValidate = valueToValidate || value;
+    const {
+      formData = form.__getFormData({ unflatten: false }),
+      value: valueToValidate = value,
+      validationType,
+    } = validationData;
 
     setValidating(true);
 
@@ -289,10 +303,10 @@ export const useField = (form: Form, path: string, config: FieldConfig = {}) => 
       if (validateIteration === validateCounter.current) {
         // This is the most recent invocation
         setValidating(false);
+        // Update the errors array
         setErrors(previousErrors => {
-          // We first filter out the "field" errors
-          // Other custom type of error will have to be manually cleared out from inside the application
-          const filteredErrors = filterErrors(previousErrors);
+          // First filter out the validation type we are currently validating
+          const filteredErrors = filterErrors(previousErrors, validationType);
           return [...filteredErrors, ...validationErrors];
         });
       }
@@ -303,9 +317,17 @@ export const useField = (form: Form, path: string, config: FieldConfig = {}) => 
     };
 
     if (isValidationAsync) {
-      return validateAsync({ formData, value: valueToValidate }).then(onValidationResult);
+      return validateAsync({
+        formData,
+        value: valueToValidate,
+        validationTypeToValidate: validationType,
+      }).then(onValidationResult);
     } else {
-      const validationErrors = validateSync({ formData, value: valueToValidate });
+      const validationErrors = validateSync({
+        formData,
+        value: valueToValidate,
+        validationTypeToValidate: validationType,
+      });
       return onValidationResult(validationErrors);
     }
   };
@@ -356,7 +378,8 @@ export const useField = (form: Form, path: string, config: FieldConfig = {}) => 
     const errorMessages = errors.reduce((messages, error) => {
       if (
         error.validationType === validationType ||
-        (validationType === VALIDATION_TYPES.FIELD && !{}.hasOwnProperty.call(error, 'type'))
+        (validationType === VALIDATION_TYPES.FIELD &&
+          !{}.hasOwnProperty.call(error, 'validationType'))
       ) {
         return messages ? `${messages}, ${error.message}` : (error.message as string);
       }

@@ -48,7 +48,7 @@ export const Field = ({ field, fieldProps = {} }: Props) => {
 
   if (field.type === FIELD_TYPES.COMBO_BOX) {
     // Errors for the comboBox value (the "array")
-    const errorMessageField = field.form.isSubmitted ? field.getErrorsMessages() : '';
+    const errorMessageField = field.form.isSubmitted ? field.getErrorsMessages() : null;
 
     // Errors for comboBox option added (the array "item")
     const errorMessageArrayItem = field.getErrorsMessages(VALIDATION_TYPES.ARRAY_ITEM);
@@ -83,11 +83,14 @@ export const Field = ({ field, fieldProps = {} }: Props) => {
   const onCreateComboOption = async (value: string) => {
     // Note: for now, we assume that all validations for a comboBox are synchronous
     // This could change in the future, but not before we fix the current issue with the ENTER key
-    // Asynchronous validation adds another place to look to understand the event change problem,
-    // so I prefer to limit places to look at to fix the issue.
+    // Asynchronous validation would add another place to look at to understand the event change problem,
+    // so I prefer to limit the number of places to look at while debugging.
     // Once we get the comboBox to work as expected with synchronous validations,
-    // we can see if asynchronous validation can also work (and if it would make sense to allow it).
-    const { isValid } = field.validate({ value }) as FieldValidateResponse;
+    // we can see if asynchronous validation can also work (and if it makes sense to allow it).
+    const { isValid } = field.validate({
+      value,
+      validationType: VALIDATION_TYPES.ARRAY_ITEM,
+    }) as FieldValidateResponse;
 
     if (!isValid) {
       setTimeout(() => {

@@ -80,6 +80,7 @@ export interface Field {
   validate: (validateData?: {
     formData?: any;
     value?: unknown;
+    validationType?: string;
   }) => FieldValidateResponse | Promise<FieldValidateResponse>;
   setErrors: (errors: ValidationError[]) => void;
   clearErrors: (type?: string | string[]) => void;
