@@ -154,7 +154,7 @@ exports[`Domains Table Component Rendering it renders the default Domains table 
   ip="10.10.10.10"
   loadPage={[MockFunction]}
   loading={false}
-  showMorePagesIndicator={false}
+  showMorePagesIndicator={true}
   totalCount={1}
   type="details"
 />

@@ -140,7 +140,7 @@ exports[`NetworkTopNFlow Table Component rendering it renders the default Networ
   }
   loadPage={[MockFunction]}
   loading={false}
-  showMorePagesIndicator={false}
+  showMorePagesIndicator={true}
   totalCount={524}
   type="page"
 />
