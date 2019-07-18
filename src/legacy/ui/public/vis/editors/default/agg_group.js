@@ -27,8 +27,8 @@ uiModules
   .directive('visEditorAggGroupWrapper', reactDirective =>
     reactDirective(wrapInI18nContext(DefaultEditorAggGroup), [
       ['metricAggs', { watchDepth: 'reference' }], // we watch reference to identify each aggs change in useEffects
+      ['schemas', { watchDepth: 'collection' }],
       ['state', { watchDepth: 'reference' }],
-      ['vis', { watchDepth: 'reference' }],
       ['addSchema', { watchDepth: 'reference' }],
       ['onAggParamsChange', { watchDepth: 'reference' }],
       ['onAggTypeChange', { watchDepth: 'reference' }],
@@ -55,7 +55,7 @@ uiModules
             last-parent-pipeline-agg-title="lastParentPipelineAggTitle"
             metric-aggs="metricAggs"
             state="state"
-            vis="vis"	
+            schemas="schemas"	
             add-schema="addSchema"	
             on-agg-params-change="onAggParamsChange"
             on-agg-type-change="onAggTypeChange"
@@ -68,6 +68,7 @@ uiModules
       },
       link: function ($scope, $el, attr, ngModelCtrl) {
         $scope.groupName = attr.groupName;
+        $scope.$bind('schemas', attr.schemas);
         // The model can become touched either onBlur event or when the form is submitted.
         // We also watch $touched to identify when the form is submitted.
         $scope.$watch(

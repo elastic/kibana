@@ -27,7 +27,6 @@ import {
   EuiPanel,
 } from '@elastic/eui';
 
-import { Vis } from '../../../';
 import { AggConfig } from '../../../agg_config';
 import { aggGroupNamesMap, AggGroupNames } from '../agg_groups';
 import { DefaultEditorAgg } from './default_editor_agg';
@@ -42,7 +41,7 @@ import { aggGroupReducer, initAggsState, AGGS_ACTION_KEYS } from './default_edit
 import { Schema } from '../schemas';
 
 interface DefaultEditorAggGroupProps extends DefaultEditorAggCommonProps {
-  vis: Vis;
+  schemas: Schema[];
   addSchema: (schems: Schema) => void;
   reorderAggs: (group: AggConfig[]) => void;
 }
@@ -53,7 +52,7 @@ function DefaultEditorAggGroup({
   lastParentPipelineAggTitle,
   metricAggs,
   state,
-  vis,
+  schemas = [],
   addSchema,
   onAggParamsChange,
   onAggTypeChange,
@@ -64,9 +63,8 @@ function DefaultEditorAggGroup({
   setValidity,
 }: DefaultEditorAggGroupProps) {
   const groupNameLabel = aggGroupNamesMap()[groupName];
-  const group: AggConfig[] = state.aggs.bySchemaGroup[groupName] || [];
+  const group: AggConfig[] = state.aggs.bySchemaGroup[groupName];
 
-  const schemas = vis.type.schemas[groupName];
   const stats = {
     min: 0,
     max: 0,
@@ -74,13 +72,11 @@ function DefaultEditorAggGroup({
     deprecate: false,
   };
 
-  if (schemas) {
-    schemas.forEach((schema: Schema) => {
-      stats.min += schema.min;
-      stats.max += schema.max;
-      stats.deprecate = schema.deprecate;
-    });
-  }
+  schemas.forEach((schema: Schema) => {
+    stats.min += schema.min;
+    stats.max += schema.max;
+    stats.deprecate = schema.deprecate;
+  });
 
   const [aggsState, setAggsState] = useReducer(aggGroupReducer, group, initAggsState);
 
