@@ -14,6 +14,7 @@ import { Datasource, Visualization } from '../../types';
 import { getSuggestions, toSwitchAction, Suggestion } from './suggestion_helpers';
 import { ExpressionRenderer } from '../../../../../../../src/legacy/core_plugins/data/public';
 import { prependDatasourceExpression } from './expression_helpers';
+import { debouncedComponent } from '../../debounced_component';
 
 export interface SuggestionPanelProps {
   activeDatasource: Datasource;
@@ -86,7 +87,9 @@ const SuggestionPreview = ({
   );
 };
 
-export function SuggestionPanel({
+export const SuggestionPanel = debouncedComponent(InnerSuggestionPanel, 2000);
+
+function InnerSuggestionPanel({
   activeDatasource,
   datasourceState,
   activeVisualizationId,

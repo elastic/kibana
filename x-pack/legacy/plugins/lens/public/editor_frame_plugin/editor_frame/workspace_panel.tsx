@@ -14,6 +14,7 @@ import { Datasource, Visualization, DatasourcePublicAPI } from '../../types';
 import { DragDrop, DragContext } from '../../drag_drop';
 import { getSuggestions, toSwitchAction } from './suggestion_helpers';
 import { buildExpression } from './expression_helpers';
+import { debouncedComponent } from '../../debounced_component';
 
 export interface WorkspacePanelProps {
   activeDatasource: Datasource;
@@ -26,7 +27,10 @@ export interface WorkspacePanelProps {
   ExpressionRenderer: ExpressionRenderer;
 }
 
-export function WorkspacePanel({
+export const WorkspacePanel = debouncedComponent(InnerWorkspacePanel);
+
+// Exported for testing purposes only.
+export function InnerWorkspacePanel({
   activeDatasource,
   activeVisualizationId,
   datasourceState,

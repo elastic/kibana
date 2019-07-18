@@ -119,26 +119,24 @@ export function buildColumnForOperationType<T extends OperationType>(
 }
 
 export function getPotentialColumns(
-  state: IndexPatternPrivateState,
+  fields: IndexPatternField[],
   suggestedOrder?: DimensionPriority
 ): IndexPatternColumn[] {
-  const fields = state.indexPatterns[state.currentIndexPatternId].fields;
-
-  const columns: IndexPatternColumn[] = fields
+  const result: IndexPatternColumn[] = fields
     .map((field, index) => {
       const validOperations = getOperationTypesForField(field);
 
       return validOperations.map(op =>
-        buildColumnForOperationType(index, op, state.columns, suggestedOrder, field)
+        buildColumnForOperationType(index, op, {}, suggestedOrder, field)
       );
     })
     .reduce((prev, current) => prev.concat(current));
 
   operationDefinitions.forEach(operation => {
     if (operation.isApplicableWithoutField) {
-      columns.push(operation.buildColumn(operation.type, state.columns, suggestedOrder));
+      result.push(operation.buildColumn(operation.type, {}, suggestedOrder));
     }
   });
 
-  return sortByField(columns);
+  return sortByField(result);
 }

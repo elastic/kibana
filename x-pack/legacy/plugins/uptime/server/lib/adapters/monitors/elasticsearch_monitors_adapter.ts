@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get, set } from 'lodash';
+import { get, set, reduce } from 'lodash';
 import { INDEX_NAMES } from '../../../../common/constants';
 import {
   ErrorListItem,
@@ -170,7 +170,11 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
     const params = {
       index: INDEX_NAMES.HEARTBEAT,
       body: {
-        query,
+        query: {
+          bool: {
+            filter: [{ exists: { field: 'summary.up' } }, query],
+          },
+        },
         size: 0,
         aggs: {
           ids: {
@@ -197,11 +201,10 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
             aggs: {
               latest: {
                 top_hits: {
-                  sort: [
-                    {
-                      '@timestamp': { order: 'desc' },
-                    },
-                  ],
+                  sort: [{ '@timestamp': { order: 'desc' } }],
+                  _source: {
+                    includes: ['summary.*', 'monitor.id', '@timestamp', 'observer.geo.name'],
+                  },
                   size: 1,
                 },
               },
@@ -211,9 +214,15 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
       },
     };
 
-    let up: number = 0;
-    let down: number = 0;
     let searchAfter: any = null;
+
+    const summaryByIdLocation: {
+      // ID
+      [key: string]: {
+        // Location
+        [key: string]: { up: number; down: number; timestamp: number };
+      };
+    } = {};
 
     do {
       if (searchAfter) {
@@ -225,20 +234,66 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
 
       idBuckets.forEach(bucket => {
         // We only get the latest doc
-        const status = get(bucket, 'latest.hits.hits[0]._source.monitor.status', null);
-        if (!statusFilter || (statusFilter && statusFilter === status)) {
-          if (status === 'up') {
-            up++;
-          } else {
-            down++;
-          }
+        const source: any = get(bucket, 'latest.hits.hits[0]._source');
+        const {
+          summary: { up, down },
+          monitor: { id },
+        } = source;
+        const timestamp = get(source, '@timestamp', 0);
+        const location = get(source, 'observer.geo.name', '');
+
+        let idSummary = summaryByIdLocation[id];
+        if (!idSummary) {
+          idSummary = {};
+          summaryByIdLocation[id] = idSummary;
+        }
+        const locationSummary = idSummary[location];
+        if (!locationSummary || locationSummary.timestamp < timestamp) {
+          idSummary[location] = { timestamp, up, down };
         }
       });
 
       searchAfter = get(queryResult, 'aggregations.ids.after_key');
     } while (searchAfter);
 
-    return { up, down, total: up + down };
+    let up: number = 0;
+    let mixed: number = 0;
+    let down: number = 0;
+
+    for (const id in summaryByIdLocation) {
+      if (!summaryByIdLocation.hasOwnProperty(id)) {
+        continue;
+      }
+      const locationInfo = summaryByIdLocation[id];
+      const { up: locationUp, down: locationDown } = reduce(
+        locationInfo,
+        (acc, value, key) => {
+          acc.up += value.up;
+          acc.down += value.down;
+          return acc;
+        },
+        { up: 0, down: 0 }
+      );
+
+      if (locationDown === 0) {
+        up++;
+      } else if (locationUp > 0) {
+        mixed++;
+      } else {
+        down++;
+      }
+    }
+
+    const result: any = { up, down, mixed, total: up + down + mixed };
+    if (statusFilter) {
+      for (const status in result) {
+        if (status !== 'total' && status !== statusFilter) {
+          result[status] = 0;
+        }
+      }
+    }
+
+    return result;
   }
 
   /**
