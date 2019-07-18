@@ -47,7 +47,7 @@ interface Props extends RouteComponentProps<MainRouteParams> {
   repoStatus?: RepoStatus;
   tree: FileTree;
   file: FetchFileResponse | undefined;
-  currentTree: FileTree | undefined;
+  currentTree: FileTree | null;
   commits: CommitInfo[];
   branches: ReferenceInfo[];
   hasMoreCommits: boolean;
