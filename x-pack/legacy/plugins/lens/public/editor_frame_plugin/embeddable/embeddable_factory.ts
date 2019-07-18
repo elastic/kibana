@@ -9,24 +9,29 @@ import { Chrome } from 'ui/chrome';
 
 import { capabilities } from 'ui/capabilities';
 import { i18n } from '@kbn/i18n';
-import { DataSetup } from 'src/legacy/core_plugins/data/public';
+import { DataSetup, ExpressionRenderer } from 'src/legacy/core_plugins/data/public';
 import {
-  EmbeddableFactory,
+  EmbeddableFactory as AbstractEmbeddableFactory,
   ErrorEmbeddable,
   EmbeddableInput,
   IContainer,
 } from '../../../../../../../src/legacy/core_plugins/embeddable_api/public/index';
-import { LensEmbeddable } from './embeddable';
+import { Embeddable } from './embeddable';
 import { SavedObjectIndexStore, DOC_TYPE } from '../../persistence';
 import { getEditPath } from '../../../common';
 
-export class LensEmbeddableFactory extends EmbeddableFactory {
+export class EmbeddableFactory extends AbstractEmbeddableFactory {
   type = DOC_TYPE;
 
   private chrome: Chrome;
   private indexPatternService: DataSetup['indexPatterns']['indexPatterns'];
+  private expressionRenderer: ExpressionRenderer;
 
-  constructor(chrome: Chrome, indexPatternService: DataSetup['indexPatterns']['indexPatterns']) {
+  constructor(
+    chrome: Chrome,
+    expressionRenderer: ExpressionRenderer,
+    indexPatternService: DataSetup['indexPatterns']
+  ) {
     super({
       savedObjectMetaData: {
         name: i18n.translate('xpack.lens.lensSavedObjectLabel', {
@@ -37,7 +42,8 @@ export class LensEmbeddableFactory extends EmbeddableFactory {
       },
     });
     this.chrome = chrome;
-    this.indexPatternService = indexPatternService;
+    this.indexPatternService = indexPatternService.indexPatterns;
+    this.expressionRenderer = expressionRenderer;
   }
 
   public isEditable() {
@@ -73,9 +79,12 @@ export class LensEmbeddableFactory extends EmbeddableFactory {
         }
       }
     );
-    const indexPatterns = await Promise.all(promises);
+    const indexPatterns = (await Promise.all(promises)).filter(indexPattern =>
+      Boolean(indexPattern)
+    );
 
-    return new LensEmbeddable(
+    return new Embeddable(
+      this.expressionRenderer,
       {
         savedVis,
         editUrl: this.chrome.addBasePath(getEditPath(savedObjectId)),

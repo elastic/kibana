@@ -9,20 +9,17 @@ import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 
 import { TimeRange } from 'ui/timefilter/time_history';
-import { Query, StaticIndexPattern } from 'src/legacy/core_plugins/data/public';
+import { Query, StaticIndexPattern, ExpressionRenderer } from 'src/legacy/core_plugins/data/public';
 import { Filter } from '@kbn/es-query';
 import { Subscription } from 'rxjs';
 import {
-  Embeddable,
+  Embeddable as AbstractEmbeddable,
   EmbeddableOutput,
   IContainer,
   EmbeddableInput,
 } from '../../../../../../../src/legacy/core_plugins/embeddable_api/public/index';
 import { Document, DOC_TYPE } from '../../persistence';
-import { data } from '../../../../../../../src/legacy/core_plugins/data/public/setup';
 import { ExpressionWrapper } from './expression_wrapper';
-
-const ExpressionRendererComponent = data.expressions.ExpressionRenderer;
 
 export interface LensEmbeddableConfiguration {
   savedVis: Document;
@@ -41,18 +38,23 @@ export interface LensEmbeddableOutput extends EmbeddableOutput {
   indexPatterns?: StaticIndexPattern[];
 }
 
-export class LensEmbeddable extends Embeddable<LensEmbeddableInput, LensEmbeddableOutput> {
+export class Embeddable extends AbstractEmbeddable<LensEmbeddableInput, LensEmbeddableOutput> {
   type = DOC_TYPE;
 
+  private expressionRenderer: ExpressionRenderer;
   private savedVis: Document;
   private domNode: HTMLElement | Element | undefined;
   private subscription: Subscription;
 
-  private prevTimeRange?: TimeRange;
-  private prevQuery?: Query;
-  private prevFilters?: Filter[];
+  private currentContext: {
+    timeRange?: TimeRange;
+    query?: Query;
+    filters?: Filter[];
+    lastReloadRequestTime?: number;
+  } = {};
 
   constructor(
+    expressionRenderer: ExpressionRenderer,
     { savedVis, editUrl, editable, indexPatterns }: LensEmbeddableConfiguration,
     initialInput: LensEmbeddableInput,
     parent?: IContainer
@@ -69,6 +71,8 @@ export class LensEmbeddable extends Embeddable<LensEmbeddableInput, LensEmbeddab
       parent
     );
 
+    this.expressionRenderer = expressionRenderer;
+
     this.savedVis = savedVis;
     this.subscription = this.getInput$().subscribe(input => this.onContainerStateChanged(input));
     this.onContainerStateChanged(initialInput);
@@ -79,13 +83,17 @@ export class LensEmbeddable extends Embeddable<LensEmbeddableInput, LensEmbeddab
       ? containerState.filters.filter(filter => !filter.meta.disabled)
       : undefined;
     if (
-      !_.isEqual(containerState.timeRange, this.prevTimeRange) ||
-      !_.isEqual(containerState.query, this.prevQuery) ||
-      !_.isEqual(cleanedFilters, this.prevFilters)
+      !_.isEqual(containerState.timeRange, this.currentContext.timeRange) ||
+      !_.isEqual(containerState.query, this.currentContext.query) ||
+      !_.isEqual(cleanedFilters, this.currentContext.filters)
     ) {
-      this.prevTimeRange = containerState.timeRange;
-      this.prevQuery = containerState.query;
-      this.prevFilters = cleanedFilters;
+      this.currentContext = {
+        timeRange: containerState.timeRange,
+        query: containerState.query,
+        lastReloadRequestTime: this.currentContext.lastReloadRequestTime,
+        filters: cleanedFilters,
+      };
+
       if (this.domNode) {
         this.render(this.domNode);
       }
@@ -101,13 +109,9 @@ export class LensEmbeddable extends Embeddable<LensEmbeddableInput, LensEmbeddab
     this.domNode = domNode;
     render(
       <ExpressionWrapper
-        ExpressionRenderer={ExpressionRendererComponent}
+        ExpressionRenderer={this.expressionRenderer}
         expression={this.savedVis.expression}
-        context={{
-          timeRange: this.prevTimeRange,
-          filters: this.prevFilters,
-          query: this.prevQuery,
-        }}
+        context={this.currentContext}
       />,
       domNode
     );
@@ -124,6 +128,11 @@ export class LensEmbeddable extends Embeddable<LensEmbeddableInput, LensEmbeddab
   }
 
   reload() {
+    this.currentContext = {
+      ...this.currentContext,
+      lastReloadRequestTime: Date.now(),
+    };
+
     if (this.domNode) {
       this.render(this.domNode);
     }

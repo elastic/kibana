@@ -29,7 +29,7 @@ import {
 import { EditorFrame } from './editor_frame';
 import { SavedObjectIndexStore, SavedObjectStore, Document } from '../persistence';
 import { InitializableComponent } from './initializable_component';
-import { LensEmbeddableFactory } from './embeddable/embeddable_factory';
+import { EmbeddableFactory } from './embeddable/embeddable_factory';
 
 export interface EditorFrameSetupPlugins {
   data: DataSetup;
@@ -124,7 +124,7 @@ export class EditorFramePlugin {
     this.ExpressionRenderer = plugins.data.expressions.ExpressionRenderer;
     this.chrome = plugins.chrome;
     plugins.embeddables.addEmbeddableFactory(
-      new LensEmbeddableFactory(plugins.chrome, plugins.data.indexPatterns)
+      new EmbeddableFactory(plugins.chrome, this.ExpressionRenderer, plugins.data.indexPatterns)
     );
 
     return {

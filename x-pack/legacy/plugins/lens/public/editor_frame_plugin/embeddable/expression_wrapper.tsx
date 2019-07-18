@@ -5,9 +5,9 @@
  */
 
 import _ from 'lodash';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 
-import { I18nContext } from 'ui/i18n';
+import { I18nProvider } from '@kbn/i18n/react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiFlexGroup, EuiFlexItem, EuiText, EuiIcon } from '@elastic/eui';
 import { TimeRange } from 'ui/timefilter/time_history';
@@ -23,6 +23,7 @@ export interface ExpressionWrapperProps {
     timeRange?: TimeRange;
     query?: Query;
     filters?: Filter[];
+    lastReloadRequestTime?: number;
   };
 }
 
@@ -32,7 +33,10 @@ export function ExpressionWrapper({
   context,
 }: ExpressionWrapperProps) {
   const [expressionError, setExpressionError] = useState<unknown>(undefined);
-  const contextualizedExpression = prependKibanaContext(expression, context);
+  const contextualizedExpression = useMemo(() => prependKibanaContext(expression, context), [
+    expression,
+    context,
+  ]);
   useEffect(() => {
     // reset expression error if component attempts to run it again
     if (expressionError) {
@@ -40,7 +44,7 @@ export function ExpressionWrapper({
     }
   }, [contextualizedExpression]);
   return (
-    <I18nContext>
+    <I18nProvider>
       {contextualizedExpression === null || expressionError ? (
         <EuiFlexGroup direction="column" alignItems="center" justifyContent="center">
           <EuiFlexItem>
@@ -64,6 +68,6 @@ export function ExpressionWrapper({
           }}
         />
       )}
-    </I18nContext>
+    </I18nProvider>
   );
 }
