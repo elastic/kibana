@@ -37,7 +37,7 @@ describe.skip('<IndexManagementHome />', () => {
     server.restore();
   });
 
-  describe('on component mount', async () => {
+  describe('on component mount', () => {
     beforeEach(async () => {
       httpRequestsMockHelpers.setLoadIndicesResponse([]);
 

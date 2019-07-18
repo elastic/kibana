@@ -25,6 +25,8 @@ import { CoreStart } from 'src/core/public';
 import { IndexPattern } from '../../../../../../../ui/public/index_patterns';
 import { RefreshInterval } from '../../../../../../../ui/public/timefilter/timefilter';
 import { TimeRange } from '../../../../../../../ui/public/timefilter/time_history';
+import { uniq } from 'lodash';
+
 import {
   Container,
   ContainerInput,
@@ -133,7 +135,7 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
         }
       }
     });
-    return indexPatterns;
+    return uniq(indexPatterns, 'id');
   }
 
   protected getInheritedInput(id: string): InheritedChildInput {
