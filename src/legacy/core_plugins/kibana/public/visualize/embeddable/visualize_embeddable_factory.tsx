@@ -60,6 +60,7 @@ import {
   Container,
   EmbeddableOutput,
 } from 'src/legacy/core_plugins/embeddable_api/public/np_ready/public';
+import { setup } from 'src/legacy/core_plugins/embeddable_api/public/np_ready/public/legacy';
 import { showNewVisModal } from '../wizard';
 import { SavedVisualizations } from '../types';
 import { DisabledLabEmbeddable } from './disabled_lab_embeddable';
@@ -77,10 +78,17 @@ export class VisualizeEmbeddableFactory extends EmbeddableFactory<
   VisualizeEmbeddable | DisabledLabEmbeddable,
   VisualizationAttributes
 > {
-  private visTypes?: VisTypesRegistry;
   public readonly type = VISUALIZE_EMBEDDABLE_TYPE;
 
-  constructor() {
+  static async createVisualizeEmbeddableFactory(): Promise<VisualizeEmbeddableFactory> {
+    const $injector = await chrome.dangerouslyGetActiveInjector();
+    const Private = $injector.get<IPrivate>('Private');
+    const visTypes = Private(VisTypesRegistryProvider);
+
+    return new VisualizeEmbeddableFactory(visTypes);
+  }
+
+  constructor(private visTypes: VisTypesRegistry) {
     super({
       savedObjectMetaData: {
         name: i18n.translate('kbn.visualize.savedObjectName', { defaultMessage: 'Visualization' }),
@@ -116,7 +124,6 @@ export class VisualizeEmbeddableFactory extends EmbeddableFactory<
         },
       },
     });
-    this.initializeVisTypes();
   }
 
   public isEditable() {
@@ -127,12 +134,6 @@ export class VisualizeEmbeddableFactory extends EmbeddableFactory<
     return i18n.translate('kbn.embeddable.visualizations.displayName', {
       defaultMessage: 'visualization',
     });
-  }
-
-  public async initializeVisTypes() {
-    const $injector = await chrome.dangerouslyGetActiveInjector();
-    const Private = $injector.get<IPrivate>('Private');
-    this.visTypes = Private(VisTypesRegistryProvider);
   }
 
   public async createFromSavedObject(
@@ -187,5 +188,6 @@ export class VisualizeEmbeddableFactory extends EmbeddableFactory<
   }
 }
 
-import { setup } from '../../../../embeddable_api/public/np_ready/public/legacy';
-setup.registerEmbeddableFactory(VISUALIZE_EMBEDDABLE_TYPE, new VisualizeEmbeddableFactory());
+VisualizeEmbeddableFactory.createVisualizeEmbeddableFactory().then(embeddableFactory => {
+  setup.registerEmbeddableFactory(VISUALIZE_EMBEDDABLE_TYPE, embeddableFactory);
+});
