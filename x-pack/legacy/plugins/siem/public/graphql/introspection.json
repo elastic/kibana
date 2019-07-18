@@ -1229,7 +1229,11 @@
                 "type": {
                   "kind": "NON_NULL",
                   "name": null,
-                  "ofType": { "kind": "INPUT_OBJECT", "name": "PaginationInput", "ofType": null }
+                  "ofType": {
+                    "kind": "INPUT_OBJECT",
+                    "name": "PaginationInputPaginated",
+                    "ofType": null
+                  }
                 },
                 "defaultValue": null
               },
@@ -1332,7 +1336,11 @@
                 "type": {
                   "kind": "NON_NULL",
                   "name": null,
-                  "ofType": { "kind": "INPUT_OBJECT", "name": "PaginationInput", "ofType": null }
+                  "ofType": {
+                    "kind": "INPUT_OBJECT",
+                    "name": "PaginationInputPaginated",
+                    "ofType": null
+                  }
                 },
                 "defaultValue": null
               },
@@ -1425,7 +1433,11 @@
                 "type": {
                   "kind": "NON_NULL",
                   "name": null,
-                  "ofType": { "kind": "INPUT_OBJECT", "name": "PaginationInput", "ofType": null }
+                  "ofType": {
+                    "kind": "INPUT_OBJECT",
+                    "name": "PaginationInputPaginated",
+                    "ofType": null
+                  }
                 },
                 "defaultValue": null
               },
@@ -6268,7 +6280,7 @@
             "type": {
               "kind": "NON_NULL",
               "name": null,
-              "ofType": { "kind": "OBJECT", "name": "PageInfo", "ofType": null }
+              "ofType": { "kind": "OBJECT", "name": "PageInfoPaginated", "ofType": null }
             },
             "isDeprecated": false,
             "deprecationReason": null
@@ -6624,7 +6636,7 @@
             "type": {
               "kind": "NON_NULL",
               "name": null,
-              "ofType": { "kind": "OBJECT", "name": "PageInfo", "ofType": null }
+              "ofType": { "kind": "OBJECT", "name": "PageInfoPaginated", "ofType": null }
             },
             "isDeprecated": false,
             "deprecationReason": null
@@ -6873,7 +6885,7 @@
             "type": {
               "kind": "NON_NULL",
               "name": null,
-              "ofType": { "kind": "OBJECT", "name": "PageInfo", "ofType": null }
+              "ofType": { "kind": "OBJECT", "name": "PageInfoPaginated", "ofType": null }
             },
             "isDeprecated": false,
             "deprecationReason": null

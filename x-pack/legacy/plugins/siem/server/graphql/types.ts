@@ -987,7 +987,7 @@ export interface DomainsData {
 
   totalCount: number;
 
-  pageInfo: PageInfo;
+  pageInfo: PageInfoPaginated;
 
   inspect?: Inspect | null;
 }
@@ -1039,7 +1039,7 @@ export interface TlsData {
 
   totalCount: number;
 
-  pageInfo: PageInfo;
+  pageInfo: PageInfoPaginated;
 
   inspect?: Inspect | null;
 }
@@ -1071,7 +1071,7 @@ export interface UsersData {
 
   totalCount: number;
 
-  pageInfo: PageInfo;
+  pageInfo: PageInfoPaginated;
 
   inspect?: Inspect | null;
 }
@@ -1904,7 +1904,7 @@ export interface DomainsSourceArgs {
 
   ip: string;
 
-  pagination: PaginationInput;
+  pagination: PaginationInputPaginated;
 
   sort: DomainsSortField;
 
@@ -1923,7 +1923,7 @@ export interface TlsSourceArgs {
 
   ip: string;
 
-  pagination: PaginationInput;
+  pagination: PaginationInputPaginated;
 
   sort: TlsSortField;
 
@@ -1940,7 +1940,7 @@ export interface UsersSourceArgs {
 
   ip: string;
 
-  pagination: PaginationInput;
+  pagination: PaginationInputPaginated;
 
   sort: UsersSortField;
 
@@ -2682,7 +2682,7 @@ export namespace SourceResolvers {
 
     ip: string;
 
-    pagination: PaginationInput;
+    pagination: PaginationInputPaginated;
 
     sort: DomainsSortField;
 
@@ -2708,7 +2708,7 @@ export namespace SourceResolvers {
 
     ip: string;
 
-    pagination: PaginationInput;
+    pagination: PaginationInputPaginated;
 
     sort: TlsSortField;
 
@@ -2732,7 +2732,7 @@ export namespace SourceResolvers {
 
     ip: string;
 
-    pagination: PaginationInput;
+    pagination: PaginationInputPaginated;
 
     sort: UsersSortField;
 
@@ -5562,7 +5562,7 @@ export namespace DomainsDataResolvers {
 
     totalCount?: TotalCountResolver<number, TypeParent, Context>;
 
-    pageInfo?: PageInfoResolver<PageInfo, TypeParent, Context>;
+    pageInfo?: PageInfoResolver<PageInfoPaginated, TypeParent, Context>;
 
     inspect?: InspectResolver<Inspect | null, TypeParent, Context>;
   }
@@ -5578,7 +5578,7 @@ export namespace DomainsDataResolvers {
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type PageInfoResolver<
-    R = PageInfo,
+    R = PageInfoPaginated,
     Parent = DomainsData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
@@ -5734,7 +5734,7 @@ export namespace TlsDataResolvers {
 
     totalCount?: TotalCountResolver<number, TypeParent, Context>;
 
-    pageInfo?: PageInfoResolver<PageInfo, TypeParent, Context>;
+    pageInfo?: PageInfoResolver<PageInfoPaginated, TypeParent, Context>;
 
     inspect?: InspectResolver<Inspect | null, TypeParent, Context>;
   }
@@ -5749,11 +5749,11 @@ export namespace TlsDataResolvers {
     Parent,
     Context
   >;
-  export type PageInfoResolver<R = PageInfo, Parent = TlsData, Context = SiemContext> = Resolver<
-    R,
-    Parent,
-    Context
-  >;
+  export type PageInfoResolver<
+    R = PageInfoPaginated,
+    Parent = TlsData,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
   export type InspectResolver<
     R = Inspect | null,
     Parent = TlsData,
@@ -5840,7 +5840,7 @@ export namespace UsersDataResolvers {
 
     totalCount?: TotalCountResolver<number, TypeParent, Context>;
 
-    pageInfo?: PageInfoResolver<PageInfo, TypeParent, Context>;
+    pageInfo?: PageInfoResolver<PageInfoPaginated, TypeParent, Context>;
 
     inspect?: InspectResolver<Inspect | null, TypeParent, Context>;
   }
@@ -5855,11 +5855,11 @@ export namespace UsersDataResolvers {
     Parent,
     Context
   >;
-  export type PageInfoResolver<R = PageInfo, Parent = UsersData, Context = SiemContext> = Resolver<
-    R,
-    Parent,
-    Context
-  >;
+  export type PageInfoResolver<
+    R = PageInfoPaginated,
+    Parent = UsersData,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
   export type InspectResolver<
     R = Inspect | null,
     Parent = UsersData,

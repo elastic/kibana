@@ -22,11 +22,10 @@ export enum NetworkType {
 
 export enum NetworkTableType {
   dns = 'dns',
+  domains = 'domains',
+  tls = 'tls',
   topNFlow = 'topNFlow',
-}
-
-export interface BasicQuery {
-  limit: number;
+  users = 'users',
 }
 
 export interface BasicQueryPaginated {
@@ -47,8 +46,8 @@ export interface DnsQuery extends BasicQueryPaginated {
 }
 
 interface NetworkQueries {
-  [NetworkTableType.topNFlow]: TopNFlowQuery;
   [NetworkTableType.dns]: DnsQuery;
+  [NetworkTableType.topNFlow]: TopNFlowQuery;
 }
 
 export interface NetworkPageModel {
@@ -58,23 +57,23 @@ export interface NetworkPageModel {
 }
 
 // IP Details Models
-export interface DomainsQuery extends BasicQuery {
+export interface DomainsQuery extends BasicQueryPaginated {
   flowDirection: FlowDirection;
   domainsSortField: DomainsSortField;
 }
 
-export interface TlsQuery extends BasicQuery {
+export interface TlsQuery extends BasicQueryPaginated {
   tlsSortField: TlsSortField;
 }
 
-export interface UsersQuery extends BasicQuery {
+export interface UsersQuery extends BasicQueryPaginated {
   usersSortField: UsersSortField;
 }
 
 interface IpOverviewQueries {
-  domains: DomainsQuery;
-  tls: TlsQuery;
-  users: UsersQuery;
+  [NetworkTableType.domains]: DomainsQuery;
+  [NetworkTableType.tls]: TlsQuery;
+  [NetworkTableType.users]: UsersQuery;
 }
 
 export interface NetworkDetailsModel {

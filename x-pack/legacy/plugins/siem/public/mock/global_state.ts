@@ -86,15 +86,18 @@ export const mockGlobalState: State = {
       flowTarget: FlowTarget.source,
       queries: {
         domains: {
+          activePage: 0,
           limit: 10,
           flowDirection: FlowDirection.uniDirectional,
           domainsSortField: { field: DomainsFields.bytes, direction: Direction.desc },
         },
         tls: {
+          activePage: 0,
           limit: 10,
           tlsSortField: { field: TlsFields._id, direction: Direction.desc },
         },
         users: {
+          activePage: 0,
           limit: 10,
           usersSortField: { field: UsersFields.name, direction: Direction.asc },
         },

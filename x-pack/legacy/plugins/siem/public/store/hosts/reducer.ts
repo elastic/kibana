@@ -16,37 +16,55 @@ import {
   updateTableActivePage,
   updateTableLimit,
 } from './actions';
-import { HostsModel } from './model';
+import { HostsModel, HostsTableType } from './model';
 
 export type HostsState = HostsModel;
 
 export const initialHostsState: HostsState = {
   page: {
     queries: {
-      authentications: { activePage: DEFAULT_TABLE_ACTIVE_PAGE, limit: DEFAULT_TABLE_LIMIT },
-      hosts: {
+      [HostsTableType.authentications]: {
+        activePage: DEFAULT_TABLE_ACTIVE_PAGE,
+        limit: DEFAULT_TABLE_LIMIT,
+      },
+      [HostsTableType.hosts]: {
         activePage: DEFAULT_TABLE_ACTIVE_PAGE,
         direction: Direction.desc,
         limit: DEFAULT_TABLE_LIMIT,
         sortField: HostsFields.lastSeen,
       },
-      events: { activePage: DEFAULT_TABLE_ACTIVE_PAGE, limit: DEFAULT_TABLE_LIMIT },
-      uncommonProcesses: { activePage: DEFAULT_TABLE_ACTIVE_PAGE, limit: DEFAULT_TABLE_LIMIT },
+      [HostsTableType.events]: {
+        activePage: DEFAULT_TABLE_ACTIVE_PAGE,
+        limit: DEFAULT_TABLE_LIMIT,
+      },
+      [HostsTableType.uncommonProcesses]: {
+        activePage: DEFAULT_TABLE_ACTIVE_PAGE,
+        limit: DEFAULT_TABLE_LIMIT,
+      },
     },
     filterQuery: null,
     filterQueryDraft: null,
   },
   details: {
     queries: {
-      authentications: { activePage: DEFAULT_TABLE_ACTIVE_PAGE, limit: DEFAULT_TABLE_LIMIT },
-      hosts: {
+      [HostsTableType.authentications]: {
+        activePage: DEFAULT_TABLE_ACTIVE_PAGE,
+        limit: DEFAULT_TABLE_LIMIT,
+      },
+      [HostsTableType.hosts]: {
         activePage: DEFAULT_TABLE_ACTIVE_PAGE,
         direction: Direction.desc,
         limit: DEFAULT_TABLE_LIMIT,
         sortField: HostsFields.lastSeen,
       },
-      events: { activePage: DEFAULT_TABLE_ACTIVE_PAGE, limit: DEFAULT_TABLE_LIMIT },
-      uncommonProcesses: { activePage: DEFAULT_TABLE_ACTIVE_PAGE, limit: DEFAULT_TABLE_LIMIT },
+      [HostsTableType.events]: {
+        activePage: DEFAULT_TABLE_ACTIVE_PAGE,
+        limit: DEFAULT_TABLE_LIMIT,
+      },
+      [HostsTableType.uncommonProcesses]: {
+        activePage: DEFAULT_TABLE_ACTIVE_PAGE,
+        limit: DEFAULT_TABLE_LIMIT,
+      },
     },
     filterQuery: null,
     filterQueryDraft: null,

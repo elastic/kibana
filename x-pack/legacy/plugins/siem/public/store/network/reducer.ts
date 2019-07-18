@@ -39,15 +39,14 @@ import {
   updateUsersSort,
 } from './actions';
 import { helperUpdateTopNFlowDirection } from './helper';
-import { NetworkModel, NetworkType } from './model';
-import { networkModel } from './index';
+import { NetworkModel, NetworkTableType, NetworkType } from './model';
 
 export type NetworkState = NetworkModel;
 
 export const initialNetworkState: NetworkState = {
   page: {
     queries: {
-      [networkModel.NetworkTableType.topNFlow]: {
+      [NetworkTableType.topNFlow]: {
         activePage: DEFAULT_TABLE_ACTIVE_PAGE,
         limit: DEFAULT_TABLE_LIMIT,
         topNFlowSort: {
@@ -57,7 +56,7 @@ export const initialNetworkState: NetworkState = {
         flowTarget: FlowTarget.source,
         flowDirection: FlowDirection.uniDirectional,
       },
-      [networkModel.NetworkTableType.dns]: {
+      [NetworkTableType.dns]: {
         activePage: DEFAULT_TABLE_ACTIVE_PAGE,
         limit: DEFAULT_TABLE_LIMIT,
         dnsSortField: {
@@ -72,7 +71,8 @@ export const initialNetworkState: NetworkState = {
   },
   details: {
     queries: {
-      domains: {
+      [NetworkTableType.domains]: {
+        activePage: DEFAULT_TABLE_ACTIVE_PAGE,
         flowDirection: FlowDirection.uniDirectional,
         limit: DEFAULT_TABLE_LIMIT,
         domainsSortField: {
@@ -80,14 +80,16 @@ export const initialNetworkState: NetworkState = {
           direction: Direction.desc,
         },
       },
-      tls: {
+      [NetworkTableType.tls]: {
+        activePage: DEFAULT_TABLE_ACTIVE_PAGE,
         limit: DEFAULT_TABLE_LIMIT,
         tlsSortField: {
           field: TlsFields._id,
           direction: Direction.desc,
         },
       },
-      users: {
+      [NetworkTableType.users]: {
+        activePage: DEFAULT_TABLE_ACTIVE_PAGE,
         limit: DEFAULT_TABLE_LIMIT,
         usersSortField: {
           field: UsersFields.name,
@@ -121,7 +123,7 @@ export const networkReducer = reducerWithInitialState(initialNetworkState)
       ...state[networkType],
       queries: {
         ...state[networkType].queries,
-        [networkModel.NetworkTableType.dns]: {
+        [NetworkTableType.dns]: {
           ...state[NetworkType.page].queries.dns,
           limit,
         },
@@ -134,7 +136,7 @@ export const networkReducer = reducerWithInitialState(initialNetworkState)
       ...state[networkType],
       queries: {
         ...state[networkType].queries,
-        [networkModel.NetworkTableType.dns]: {
+        [NetworkTableType.dns]: {
           ...state[NetworkType.page].queries.dns,
           dnsSortField,
         },
@@ -147,7 +149,7 @@ export const networkReducer = reducerWithInitialState(initialNetworkState)
       ...state[networkType],
       queries: {
         ...state[networkType].queries,
-        [networkModel.NetworkTableType.dns]: {
+        [NetworkTableType.dns]: {
           ...state[NetworkType.page].queries.dns,
           isPtrIncluded,
         },
@@ -160,7 +162,7 @@ export const networkReducer = reducerWithInitialState(initialNetworkState)
       ...state[networkType],
       queries: {
         ...state[networkType].queries,
-        [networkModel.NetworkTableType.topNFlow]: {
+        [NetworkTableType.topNFlow]: {
           ...state[NetworkType.page].queries.topNFlow,
           limit,
         },
@@ -173,7 +175,7 @@ export const networkReducer = reducerWithInitialState(initialNetworkState)
       ...state[networkType],
       queries: {
         ...state[networkType].queries,
-        [networkModel.NetworkTableType.topNFlow]: {
+        [NetworkTableType.topNFlow]: {
           ...state[NetworkType.page].queries.topNFlow,
           ...helperUpdateTopNFlowDirection(
             state[NetworkType.page].queries.topNFlow.flowTarget,
@@ -189,7 +191,7 @@ export const networkReducer = reducerWithInitialState(initialNetworkState)
       ...state[networkType],
       queries: {
         ...state[networkType].queries,
-        [networkModel.NetworkTableType.topNFlow]: {
+        [NetworkTableType.topNFlow]: {
           ...state[NetworkType.page].queries.topNFlow,
           topNFlowSort,
         },
@@ -202,7 +204,7 @@ export const networkReducer = reducerWithInitialState(initialNetworkState)
       ...state[NetworkType.page],
       queries: {
         ...state[NetworkType.page].queries,
-        [networkModel.NetworkTableType.topNFlow]: {
+        [NetworkTableType.topNFlow]: {
           ...state[NetworkType.page].queries.topNFlow,
           flowTarget,
           topNFlowSort: {
@@ -241,7 +243,7 @@ export const networkReducer = reducerWithInitialState(initialNetworkState)
       ...state[NetworkType.details],
       queries: {
         ...state[NetworkType.details].queries,
-        domains: {
+        [NetworkTableType.domains]: {
           ...state[NetworkType.details].queries.domains,
           limit,
         },
@@ -254,7 +256,7 @@ export const networkReducer = reducerWithInitialState(initialNetworkState)
       ...state[NetworkType.details],
       queries: {
         ...state[NetworkType.details].queries,
-        tls: {
+        [NetworkTableType.tls]: {
           ...state[NetworkType.details].queries.tls,
           limit,
         },
@@ -267,7 +269,7 @@ export const networkReducer = reducerWithInitialState(initialNetworkState)
       ...state[NetworkType.details],
       queries: {
         ...state[NetworkType.details].queries,
-        domains: {
+        [NetworkTableType.domains]: {
           ...state[NetworkType.details].queries.domains,
           flowDirection,
         },
@@ -280,7 +282,7 @@ export const networkReducer = reducerWithInitialState(initialNetworkState)
       ...state[NetworkType.details],
       queries: {
         ...state[NetworkType.details].queries,
-        domains: {
+        [NetworkTableType.domains]: {
           ...state[NetworkType.details].queries.domains,
           domainsSortField,
         },
@@ -293,7 +295,7 @@ export const networkReducer = reducerWithInitialState(initialNetworkState)
       ...state[NetworkType.details],
       queries: {
         ...state[NetworkType.details].queries,
-        tls: {
+        [NetworkTableType.tls]: {
           ...state[NetworkType.details].queries.tls,
           tlsSortField,
         },
@@ -306,7 +308,7 @@ export const networkReducer = reducerWithInitialState(initialNetworkState)
       ...state[NetworkType.details],
       queries: {
         ...state[NetworkType.details].queries,
-        users: {
+        [NetworkTableType.users]: {
           ...state[NetworkType.details].queries.users,
           limit,
         },
@@ -319,7 +321,7 @@ export const networkReducer = reducerWithInitialState(initialNetworkState)
       ...state[NetworkType.details],
       queries: {
         ...state[NetworkType.details].queries,
-        users: {
+        [NetworkTableType.users]: {
           ...state[NetworkType.details].queries.users,
           usersSortField,
         },

@@ -958,7 +958,7 @@ export interface DomainsData {
 
   totalCount: number;
 
-  pageInfo: PageInfo;
+  pageInfo: PageInfoPaginated;
 
   inspect?: Inspect | null;
 }
@@ -1010,7 +1010,7 @@ export interface TlsData {
 
   totalCount: number;
 
-  pageInfo: PageInfo;
+  pageInfo: PageInfoPaginated;
 
   inspect?: Inspect | null;
 }
@@ -1042,7 +1042,7 @@ export interface UsersData {
 
   totalCount: number;
 
-  pageInfo: PageInfo;
+  pageInfo: PageInfoPaginated;
 
   inspect?: Inspect | null;
 }
@@ -1875,7 +1875,7 @@ export interface DomainsSourceArgs {
 
   ip: string;
 
-  pagination: PaginationInput;
+  pagination: PaginationInputPaginated;
 
   sort: DomainsSortField;
 
@@ -1894,7 +1894,7 @@ export interface TlsSourceArgs {
 
   ip: string;
 
-  pagination: PaginationInput;
+  pagination: PaginationInputPaginated;
 
   sort: TlsSortField;
 
@@ -1911,7 +1911,7 @@ export interface UsersSourceArgs {
 
   ip: string;
 
-  pagination: PaginationInput;
+  pagination: PaginationInputPaginated;
 
   sort: UsersSortField;
 
@@ -2296,7 +2296,7 @@ export namespace GetDomainsQuery {
     flowDirection: FlowDirection;
     flowTarget: FlowTarget;
     ip: string;
-    pagination: PaginationInput;
+    pagination: PaginationInputPaginated;
     sort: DomainsSortField;
     timerange: TimerangeInput;
     defaultIndex: string[];
@@ -2388,17 +2388,13 @@ export namespace GetDomainsQuery {
   };
 
   export type PageInfo = {
-    __typename?: 'PageInfo';
+    __typename?: 'PageInfoPaginated';
 
-    endCursor?: EndCursor | null;
+    activePage: number;
 
-    hasNextPage?: boolean | null;
-  };
+    fakeTotalCount: number;
 
-  export type EndCursor = {
-    __typename?: 'CursorType';
-
-    value?: string | null;
+    showMorePagesIndicator: boolean;
   };
 
   export type Inspect = {
@@ -5001,7 +4997,7 @@ export namespace GetTlsQuery {
     filterQuery?: string | null;
     flowTarget: FlowTarget;
     ip: string;
-    pagination: PaginationInput;
+    pagination: PaginationInputPaginated;
     sort: TlsSortField;
     timerange: TimerangeInput;
     defaultIndex: string[];
@@ -5065,17 +5061,13 @@ export namespace GetTlsQuery {
   };
 
   export type PageInfo = {
-    __typename?: 'PageInfo';
+    __typename?: 'PageInfoPaginated';
 
-    endCursor?: EndCursor | null;
+    activePage: number;
 
-    hasNextPage?: boolean | null;
-  };
+    fakeTotalCount: number;
 
-  export type EndCursor = {
-    __typename?: 'CursorType';
-
-    value?: string | null;
+    showMorePagesIndicator: boolean;
   };
 
   export type Inspect = {
@@ -5198,7 +5190,7 @@ export namespace GetUsersQuery {
     filterQuery?: string | null;
     flowTarget: FlowTarget;
     ip: string;
-    pagination: PaginationInput;
+    pagination: PaginationInputPaginated;
     sort: UsersSortField;
     timerange: TimerangeInput;
     defaultIndex: string[];
@@ -5266,17 +5258,13 @@ export namespace GetUsersQuery {
   };
 
   export type PageInfo = {
-    __typename?: 'PageInfo';
+    __typename?: 'PageInfoPaginated';
 
-    endCursor?: EndCursor | null;
+    activePage: number;
 
-    hasNextPage?: boolean | null;
-  };
+    fakeTotalCount: number;
 
-  export type EndCursor = {
-    __typename?: 'CursorType';
-
-    value?: string | null;
+    showMorePagesIndicator: boolean;
   };
 
   export type Inspect = {
