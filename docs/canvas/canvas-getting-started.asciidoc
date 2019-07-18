@@ -154,9 +154,9 @@ Here are some things to try:
 
 //* Learn more about:
 
-//** {kibana-ref}/canvas-workpad[Workpads]
+** {kibana-ref}/canvas-workpad[Workpads]
+** {kibana-ref}/canvas-elements[Elements]
 //** Assets
 //** Data sources
-//** Elements
 
 * Deep dive into the {kibana-ref}/canvas-function-reference.html[expression language and functions] that drive Canvas.
