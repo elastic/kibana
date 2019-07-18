@@ -117,6 +117,7 @@ export interface DatasourceDimensionPanelProps {
   // Visualizations can hint at the role this dimension would play, which
   // affects the default ordering of the query
   suggestedPriority?: DimensionPriority;
+  onRemove?: (accessor: string) => void;
 }
 
 export interface DatasourceLayerPanelProps {
