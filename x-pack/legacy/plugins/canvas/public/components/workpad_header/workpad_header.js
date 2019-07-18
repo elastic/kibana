@@ -103,7 +103,12 @@ export class WorkpadHeader extends React.PureComponent {
     return (
       <div>
         {isModalVisible ? this._elementAdd() : null}
-        <EuiFlexGroup gutterSize="s" alignItems="center" justifyContent="spaceBetween">
+        <EuiFlexGroup
+          gutterSize="s"
+          alignItems="center"
+          justifyContent="spaceBetween"
+          className="canvasLayout__stageHeaderInner"
+        >
           <EuiFlexItem grow={false}>
             <EuiFlexGroup alignItems="center" gutterSize="xs">
               <EuiFlexItem grow={false}>

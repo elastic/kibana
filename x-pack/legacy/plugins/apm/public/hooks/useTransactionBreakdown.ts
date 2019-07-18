@@ -11,7 +11,7 @@ import { loadTransactionBreakdown } from '../services/rest/apm/transaction_group
 
 export function useTransactionBreakdown() {
   const {
-    urlParams: { serviceName, start, end, transactionName },
+    urlParams: { serviceName, start, end, transactionName, transactionType },
     uiFilters
   } = useUrlParams();
 
@@ -20,12 +20,13 @@ export function useTransactionBreakdown() {
     error,
     status
   } = useFetcher(() => {
-    if (serviceName && start && end) {
+    if (serviceName && start && end && transactionType) {
       return loadTransactionBreakdown({
         start,
         end,
         serviceName,
         transactionName,
+        transactionType,
         uiFilters
       });
     }

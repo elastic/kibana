@@ -364,6 +364,16 @@ module.exports = {
     },
 
     /**
+     * Jest specific rules
+     */
+    {
+      files: ['**/*.test.{js,ts,tsx}'],
+      rules: {
+        'jest/valid-describe': 'error',
+      },
+    },
+
+    /**
      * APM overrides
      */
     {
