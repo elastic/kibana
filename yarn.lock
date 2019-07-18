@@ -1644,10 +1644,10 @@
     tabbable "^1.1.0"
     uuid "^3.1.0"
 
-"@elastic/eui@12.2.0":
-  version "12.2.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-12.2.0.tgz#9307c4416e03d28cff88fca886a2c76e261c884a"
-  integrity sha512-0AFbXRpe1NpYbpOnHzjrkiS221wYtcKBRHSl75rtXs70A/aV/QKB3n5rARin6qUdUSjpIghaCumJNMbmvfX7uw==
+"@elastic/eui@12.2.1":
+  version "12.2.1"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-12.2.1.tgz#caa304da7e5bec4458496945e439a12e5012171e"
+  integrity sha512-DcwxlDP8dhnolLV8N0khyEDJHg5ODWwU97bY8bq/LAWq7B5FFyRVxMKYFPb8CM3SL1EYORjME9UMFoOSG9q3/w==
   dependencies:
     "@types/lodash" "^4.14.116"
     "@types/numeral" "^0.0.25"
@@ -3468,7 +3468,7 @@
     "@babel/parser" "^7.1.0"
     "@babel/types" "^7.0.0"
 
-"@types/babel__traverse@*", "@types/babel__traverse@^7.0.6":
+"@types/babel__traverse@*":
   version "7.0.6"
   resolved "https://registry.yarnpkg.com/@types/babel__traverse/-/babel__traverse-7.0.6.tgz#328dd1a8fc4cfe3c8458be9477b219ea158fd7b2"
   integrity sha512-XYVgHF2sQ0YblLRMLNPB3CkFMewzFmlDsH/TneZFHUXDlABQgh88uOxuez7ZcXxayLFrqLwtDH1t+FmlFwNZxw==
