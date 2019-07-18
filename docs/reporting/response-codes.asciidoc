@@ -12,12 +12,11 @@ generation happens asynchronously from queuing.
   `POST` as the HTTP method, or if your request is missing the `kbn-version` header,
   Kibana will return a code `400` status response for the request.
 
-- **`503` (Service Unavailable)**: When using the `path` to request the download, you will get
-  a `503` status response if report generation hasn't completed yet. In that case,
-  retry after the number of seconds in the `Retry-After` header in the download API
-  response until the report is complete.
+- **`503` (Service Unavailable)**: When using the `path` to request the download, you
+  will get a `503` status response if report generation hasn't completed yet. Before
+  trying again to download the report, have your script wait for the amount of time
+  suggested in the `Retry-After` HTTP header of response with `503` status.
 
 - **`500` (Internal Server Error)**: When using the `path` to request the download, you
   will get a `500` status response if the report isn't available due to an error when
-  generating the report. More information will be available in the Reporting management
-  page in Kibana, at: *Management > Kibana > Reporting*
+  generating the report. More information is available at **Management > Kibana > Reporting**.
