@@ -17,22 +17,45 @@
  * under the License.
  */
 
-import { FUNCTIONS_URL } from './consts';
 import _ from 'lodash';
+import { FUNCTIONS_URL } from './consts';
+
+// TODO: Import this type from kibana_util.
+type AjaxStream = any;
+
+export interface Options {
+  ajaxStream: any;
+  serialize: any;
+  ms?: number;
+}
+
+export type Batch = Record<string, BatchEntry>;
+
+export interface BatchEntry {
+  future: any;
+  request: Request;
+}
+
+export interface Request {
+  id?: number;
+  functionName: string;
+  args: any;
+  context: string;
+}
 
 /**
  * Create a function which executes an Expression function on the
  * server as part of a larger batch of executions.
  */
-export function batchedFetch({ ajaxStream, serialize, ms = 10 }) {
+export function batchedFetch({ ajaxStream, serialize, ms = 10 }: Options) {
   // Uniquely identifies each function call in a batch operation
   // so that the appropriate promise can be resolved / rejected later.
   let id = 0;
 
   // A map like { id: { future, request } }, which is used to
   // track all of the function calls in a batch operation.
-  let batch = {};
-  let timeout;
+  let batch: Batch = {};
+  let timeout: any;
 
   const nextId = () => ++id;
 
@@ -47,19 +70,19 @@ export function batchedFetch({ ajaxStream, serialize, ms = 10 }) {
     reset();
   };
 
-  return ({ functionName, context, args }) => {
+  return ({ functionName, context, args }: any) => {
     if (!timeout) {
       timeout = setTimeout(runBatch, ms);
     }
 
-    const request = {
+    const request: Request = {
       functionName,
       args,
       context: serialize(context),
     };
 
     // Check to see if this is a duplicate server function.
-    const duplicate = Object.values(batch).find(batchedRequest =>
+    const duplicate: any = Object.values(batch).find((batchedRequest: any) =>
       _.isMatch(batchedRequest.request, request)
     );
 
@@ -70,10 +93,10 @@ export function batchedFetch({ ajaxStream, serialize, ms = 10 }) {
 
     // If not, create a new promise, id, and add it to the batched collection.
     const future = createFuture();
-    const id = nextId();
-    request.id = id;
+    const newId = nextId();
+    request.id = newId;
 
-    batch[id] = {
+    batch[newId] = {
       future,
       request,
     };
@@ -105,14 +128,14 @@ function createFuture() {
  * Runs the specified batch of functions on the server, then resolves
  * the related promises.
  */
-async function processBatch(ajaxStream, batch) {
+async function processBatch(ajaxStream: AjaxStream, batch: Batch) {
   try {
     await ajaxStream({
       url: FUNCTIONS_URL,
       body: JSON.stringify({
         functions: Object.values(batch).map(({ request }) => request),
       }),
-      onResponse({ id, statusCode, result }) {
+      onResponse({ id, statusCode, result }: any) {
         const { future } = batch[id];
 
         if (statusCode >= 400) {
