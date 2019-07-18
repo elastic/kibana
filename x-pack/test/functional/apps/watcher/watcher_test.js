@@ -12,7 +12,6 @@ const watchName = 'watch Name';
 const updatedName = 'updatedName';
 export default function ({ getService, getPageObjects }) {
   const browser = getService('browser');
-  const find = getService('find');
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
   const log = getService('log');
@@ -50,9 +49,9 @@ export default function ({ getService, getPageObjects }) {
       await testSubjects.click('confirmModalConfirmButton');
       await PageObjects.header.waitUntilLoadingHasFinished();
       await retry.try(async () => {
-        const row = await find.byCssSelector('.euiTableRow');
-        const cell = await row.findByCssSelector('td:nth-child(1)');
-        expect(cell.getVisibleText()).to.equal('No watches to show');
+        const emptyPrompt = await testSubjects.find('emptyPrompt');
+        const emptyPromptText = await emptyPrompt.getVisibleText();
+        expect(emptyPromptText).to.contain('You don’t have any watches yet\n');
       });
     });
   });
