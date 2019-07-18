@@ -51,7 +51,7 @@ export function intervalFromDate(date: Date, interval?: string): Date | undefine
  * @param mins The number of mintues from now
  */
 export function minutesFromNow(mins: number): Date {
-  return minutesFromDate(new Date(Date.now()), mins);
+  return minutesFromDate(new Date(), mins);
 }
 
 /**
@@ -74,7 +74,7 @@ export function minutesFromDate(date: Date, mins: number): Date {
  * @param secs The number of seconds from now
  */
 export function secondsFromNow(secs: number): Date {
-  return secondsFromDate(new Date(Date.now()), secs);
+  return secondsFromDate(new Date(), secs);
 }
 
 /**

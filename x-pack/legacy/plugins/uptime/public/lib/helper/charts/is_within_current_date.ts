@@ -23,7 +23,7 @@
  * isWithinCurrentDate(from, to); // returns true
  */
 export const isWithinCurrentDate = (dateRangeStart: number, dateRangeEnd: number) => {
-  const today = new Date(Date.now());
+  const today = new Date();
   const min = today.setHours(0, 0, 0, 0).valueOf();
   const max = today.setHours(23, 59, 59, 999).valueOf();
   return dateRangeStart > min && dateRangeStart < max && dateRangeEnd < max;

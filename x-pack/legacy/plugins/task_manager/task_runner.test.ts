@@ -82,7 +82,7 @@ describe('TaskManagerRunner', () => {
       instance: {
         interval: '10m',
         status: 'running',
-        startedAt: new Date(Date.now()),
+        startedAt: new Date(),
       },
       definitions: {
         bar: {
@@ -407,8 +407,8 @@ describe('TaskManagerRunner', () => {
           taskType: 'bar',
           sequenceNumber: 32,
           primaryTerm: 32,
-          runAt: new Date(Date.now()),
-          scheduledAt: new Date(Date.now()),
+          runAt: new Date(),
+          scheduledAt: new Date(),
           startedAt: null,
           retryAt: null,
           attempts: 0,
