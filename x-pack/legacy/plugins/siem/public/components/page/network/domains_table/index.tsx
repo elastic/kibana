@@ -25,7 +25,7 @@ import { Criteria, ItemsPerRow, PaginatedTable, SortingBasicTable } from '../../
 
 import { getDomainsColumns } from './columns';
 import * as i18n from './translations';
-const tableType = networkModel.NetworkTableType.domains;
+const tableType = networkModel.IpDetailsTableType.domains;
 
 interface OwnProps {
   data: DomainsEdges[];

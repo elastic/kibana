@@ -17,7 +17,7 @@ import { Criteria, ItemsPerRow, PaginatedTable, SortingBasicTable } from '../../
 import { getUsersColumns } from './columns';
 import * as i18n from './translations';
 import { assertUnreachable } from '../../../../lib/helpers';
-const tableType = networkModel.NetworkTableType.users;
+const tableType = networkModel.IpDetailsTableType.users;
 
 interface OwnProps {
   data: UsersEdges[];
