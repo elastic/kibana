@@ -5,6 +5,7 @@
  */
 
 import { set } from 'lodash';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { SavedObjectsRepository } from 'src/core/server/saved_objects/service/lib/repository';
 import {
   UPGRADE_ASSISTANT_DOC_ID,
