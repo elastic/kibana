@@ -55,14 +55,26 @@ export const RestoreSnapshotStepLogistics: React.FunctionComponent<StepProps> = 
       (index): Option => ({
         label: index,
         checked:
-          isAllIndices || (restoreIndices && restoreIndices.includes(index)) ? 'on' : undefined,
+          isAllIndices ||
+          typeof restoreIndices === 'string' ||
+          (Array.isArray(restoreIndices) && restoreIndices.includes(index))
+            ? 'on'
+            : undefined,
       })
     )
+  );
+
+  // State for using selectable indices list or custom pattern
+  const [selectIndicesMode, setSelectIndicesMode] = useState<'list' | 'custom'>(
+    typeof restoreIndices === 'string' || snapshotIndices.length > 100 ? 'custom' : 'list'
   );
 
   // State for setting renaming indices patterns
   const [isRenamingIndices, setIsRenamingIndices] = useState<boolean>(
     Boolean(renamePattern || renameReplacement)
+  );
+  const [restoreIndexPattern, setRestoreIndexPattern] = useState<string>(
+    typeof restoreIndices === 'string' ? restoreIndices : ''
   );
 
   // Caching state for togglable settings
@@ -156,89 +168,146 @@ export const RestoreSnapshotStepLogistics: React.FunctionComponent<StepProps> = 
               <Fragment>
                 <EuiSpacer size="m" />
                 <EuiFormRow
+                  className="snapshotRestore__restoreForm__stepLogistics__indicesFieldWrapper"
                   label={
-                    <FormattedMessage
-                      id="xpack.snapshotRestore.restoreForm.stepLogistics.selectIndicesLabel"
-                      defaultMessage="Select indices"
-                    />
+                    selectIndicesMode === 'list' ? (
+                      <EuiFlexGroup justifyContent="spaceBetween">
+                        <EuiFlexItem grow={false}>
+                          <FormattedMessage
+                            id="xpack.snapshotRestore.restoreForm.stepLogistics.selectIndicesLabel"
+                            defaultMessage="Select indices"
+                          />
+                        </EuiFlexItem>
+                        <EuiFlexItem grow={false}>
+                          <EuiLink
+                            onClick={() => {
+                              setSelectIndicesMode('custom');
+                              updateRestoreSettings({ indices: restoreIndexPattern });
+                            }}
+                          >
+                            <FormattedMessage
+                              id="xpack.snapshotRestore.restoreForm.stepLogistics.indicesToggleCustomLink"
+                              defaultMessage="Custom pattern"
+                            />
+                          </EuiLink>
+                        </EuiFlexItem>
+                      </EuiFlexGroup>
+                    ) : (
+                      <EuiFlexGroup justifyContent="spaceBetween">
+                        <EuiFlexItem grow={false}>
+                          <FormattedMessage
+                            id="xpack.snapshotRestore.restoreForm.stepLogistics.indicesPatternLabel"
+                            defaultMessage="Index pattern"
+                          />
+                        </EuiFlexItem>
+                        <EuiFlexItem grow={false}>
+                          <EuiLink
+                            onClick={() => {
+                              setSelectIndicesMode('list');
+                              updateRestoreSettings({ indices: cachedRestoreSettings.indices });
+                            }}
+                          >
+                            <FormattedMessage
+                              id="xpack.snapshotRestore.restoreForm.stepLogistics.indicesToggleCustomLink"
+                              defaultMessage="Select indices"
+                            />
+                          </EuiLink>
+                        </EuiFlexItem>
+                      </EuiFlexGroup>
+                    )
                   }
                   helpText={
-                    <FormattedMessage
-                      id="xpack.snapshotRestore.restoreForm.stepLogistics.selectIndicesHelpText"
-                      defaultMessage="{count} {count, plural, one {index} other {indices}} will be restored. {selectOrDeselectAllLink}"
-                      values={{
-                        count: restoreIndices && restoreIndices.length,
-                        selectOrDeselectAllLink:
-                          restoreIndices && restoreIndices.length > 0 ? (
-                            <EuiLink
-                              onClick={() => {
-                                indicesOptions.forEach((option: Option) => {
-                                  option.checked = undefined;
-                                });
-                                updateRestoreSettings({ indices: [] });
-                                setCachedRestoreSettings({
-                                  ...cachedRestoreSettings,
-                                  indices: [],
-                                });
-                              }}
-                            >
-                              <FormattedMessage
-                                id="xpack.snapshotRestore.restoreForm.stepLogistics.deselectAllIndicesLink"
-                                defaultMessage="Deselect all"
-                              />
-                            </EuiLink>
-                          ) : (
-                            <EuiLink
-                              onClick={() => {
-                                indicesOptions.forEach((option: Option) => {
-                                  option.checked = 'on';
-                                });
-                                updateRestoreSettings({ indices: [...snapshotIndices] });
-                                setCachedRestoreSettings({
-                                  ...cachedRestoreSettings,
-                                  indices: [...snapshotIndices],
-                                });
-                              }}
-                            >
-                              <FormattedMessage
-                                id="xpack.snapshotRestore.restoreForm.stepLogistics.selectAllIndicesLink"
-                                defaultMessage="Select all"
-                              />
-                            </EuiLink>
-                          ),
-                      }}
-                    />
+                    selectIndicesMode === 'list' ? (
+                      <FormattedMessage
+                        id="xpack.snapshotRestore.restoreForm.stepLogistics.selectIndicesHelpText"
+                        defaultMessage="{count} {count, plural, one {index} other {indices}} will be restored. {selectOrDeselectAllLink}"
+                        values={{
+                          count: restoreIndices && restoreIndices.length,
+                          selectOrDeselectAllLink:
+                            restoreIndices && restoreIndices.length > 0 ? (
+                              <EuiLink
+                                onClick={() => {
+                                  indicesOptions.forEach((option: Option) => {
+                                    option.checked = undefined;
+                                  });
+                                  updateRestoreSettings({ indices: [] });
+                                  setCachedRestoreSettings({
+                                    ...cachedRestoreSettings,
+                                    indices: [],
+                                  });
+                                }}
+                              >
+                                <FormattedMessage
+                                  id="xpack.snapshotRestore.restoreForm.stepLogistics.deselectAllIndicesLink"
+                                  defaultMessage="Deselect all"
+                                />
+                              </EuiLink>
+                            ) : (
+                              <EuiLink
+                                onClick={() => {
+                                  indicesOptions.forEach((option: Option) => {
+                                    option.checked = 'on';
+                                  });
+                                  updateRestoreSettings({ indices: [...snapshotIndices] });
+                                  setCachedRestoreSettings({
+                                    ...cachedRestoreSettings,
+                                    indices: [...snapshotIndices],
+                                  });
+                                }}
+                              >
+                                <FormattedMessage
+                                  id="xpack.snapshotRestore.restoreForm.stepLogistics.selectAllIndicesLink"
+                                  defaultMessage="Select all"
+                                />
+                              </EuiLink>
+                            ),
+                        }}
+                      />
+                    ) : null
                   }
                   isInvalid={Boolean(errors.indices)}
                   error={errors.indices}
                 >
-                  <EuiSelectable
-                    allowExclusions={false}
-                    options={indicesOptions}
-                    onChange={options => {
-                      const newSelectedIndices: string[] = [];
-                      options.forEach(({ label, checked }) => {
-                        if (checked === 'on') {
-                          newSelectedIndices.push(label);
-                        }
-                      });
-                      setIndicesOptions(options);
-                      updateRestoreSettings({ indices: [...newSelectedIndices] });
-                      setCachedRestoreSettings({
-                        ...cachedRestoreSettings,
-                        indices: [...newSelectedIndices],
-                      });
-                    }}
-                    searchable
-                    height={300}
-                  >
-                    {(list, search) => (
-                      <EuiPanel paddingSize="s" hasShadow={false}>
-                        {search}
-                        {list}
-                      </EuiPanel>
-                    )}
-                  </EuiSelectable>
+                  {selectIndicesMode === 'list' ? (
+                    <EuiSelectable
+                      allowExclusions={false}
+                      options={indicesOptions}
+                      onChange={options => {
+                        const newSelectedIndices: string[] = [];
+                        options.forEach(({ label, checked }) => {
+                          if (checked === 'on') {
+                            newSelectedIndices.push(label);
+                          }
+                        });
+                        setIndicesOptions(options);
+                        updateRestoreSettings({ indices: [...newSelectedIndices] });
+                        setCachedRestoreSettings({
+                          ...cachedRestoreSettings,
+                          indices: [...newSelectedIndices],
+                        });
+                      }}
+                      searchable
+                      height={300}
+                    >
+                      {(list, search) => (
+                        <EuiPanel paddingSize="s" hasShadow={false}>
+                          {search}
+                          {list}
+                        </EuiPanel>
+                      )}
+                    </EuiSelectable>
+                  ) : (
+                    <EuiFieldText
+                      value={restoreIndexPattern}
+                      placeholder="logstash-*,index_name"
+                      onChange={e => {
+                        setRestoreIndexPattern(e.target.value);
+                        updateRestoreSettings({
+                          indices: e.target.value,
+                        });
+                      }}
+                    />
+                  )}
                 </EuiFormRow>
               </Fragment>
             )}
