@@ -2,14 +2,13 @@
   <!-- Local nav. -->
 
   <kbn-top-nav-v2 
-    name="discover" 
+    app-name="'discover'"
     config="topNavMenu"
     show-search-bar="true"
     show-date-picker="enableTimeRangeSelector"
     query="state.query"
     screen-title="screenTitle"
     on-query-submit="updateQueryAndFetch"
-    app-name="'discover'"
     index-patterns="[indexPattern]"
     filters="filters"
     on-filters-updated="onFiltersUpdated"
