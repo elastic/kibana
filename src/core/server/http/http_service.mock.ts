@@ -41,6 +41,7 @@ const createSetupContractMock = () => {
   const setupContract: ServiceSetupMockType = {
     // we can mock some hapi server method when we need it
     server: {} as Server,
+    createCookieSessionStorageFactory: jest.fn(),
     registerOnPreAuth: jest.fn(),
     registerAuth: jest.fn(),
     registerOnPostAuth: jest.fn(),
@@ -55,9 +56,9 @@ const createSetupContractMock = () => {
     isTlsEnabled: false,
   };
   setupContract.createNewServer.mockResolvedValue({} as HttpServerSetup);
-  setupContract.registerAuth.mockResolvedValue({
-    sessionStorageFactory: sessionStorageMock.createFactory(),
-  });
+  setupContract.createCookieSessionStorageFactory.mockResolvedValue(
+    sessionStorageMock.createFactory()
+  );
   return setupContract;
 };
 
