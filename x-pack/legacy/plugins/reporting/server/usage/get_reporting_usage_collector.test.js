@@ -70,7 +70,7 @@ test('sets enabled to false when reporting is turned off', async () => {
   expect(usageStats.enabled).toBe(false);
 });
 
-describe('with a basic license', async () => {
+describe('with a basic license', () => {
   let usageStats;
   beforeAll(async () => {
     const serverWithBasicLicenseMock = getServerMock();
@@ -93,7 +93,7 @@ describe('with a basic license', async () => {
   });
 });
 
-describe('with no license', async () => {
+describe('with no license', () => {
   let usageStats;
   beforeAll(async () => {
     const serverWithNoLicenseMock = getServerMock();
@@ -116,7 +116,7 @@ describe('with no license', async () => {
   });
 });
 
-describe('with platinum license', async () => {
+describe('with platinum license', () => {
   let usageStats;
   beforeAll(async () => {
     const serverWithPlatinumLicenseMock = getServerMock();
