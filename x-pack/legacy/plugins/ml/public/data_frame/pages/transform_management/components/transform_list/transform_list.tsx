@@ -24,6 +24,7 @@ import {
   ItemIdToExpandedRowMap,
   DATA_FRAME_TASK_STATE,
   DATA_FRAME_MODE,
+  Query,
 } from './common';
 import { getTransformsFactory } from '../../services/transform_service';
 import { getColumns } from './columns';
@@ -47,12 +48,21 @@ function getItemIdToExpandedRowMap(
   );
 }
 
+function stringMatch(str: string | undefined, substr: string) {
+  return (
+    typeof str === 'string' &&
+    typeof substr === 'string' &&
+    (str.toLowerCase().match(substr.toLowerCase()) === null) === false
+  );
+}
+
 export const DataFrameTransformList: SFC = () => {
   const [isInitialized, setIsInitialized] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [blockRefresh, setBlockRefresh] = useState(false);
 
   const [transforms, setTransforms] = useState<DataFrameTransformListRow[]>([]);
+  const [filteredTransforms, setFilteredTransforms] = useState<DataFrameTransformListRow[]>([]);
   const [expandedRowItemIds, setExpandedRowItemIds] = useState<DataFrameTransformId[]>([]);
 
   const [errorMessage, setErrorMessage] = useState<any>(undefined);
@@ -69,6 +79,7 @@ export const DataFrameTransformList: SFC = () => {
     !checkPermission('canStartStopDataFrame');
 
   const getTransforms = getTransformsFactory(
+    setFilteredTransforms,
     setTransforms,
     setErrorMessage,
     setIsInitialized,
@@ -78,6 +89,75 @@ export const DataFrameTransformList: SFC = () => {
   useRefreshTransformList({ isLoading: setIsLoading, onRefresh: () => getTransforms(true) });
   // Call useRefreshInterval() after the subscription above is set up.
   useRefreshInterval(setBlockRefresh);
+
+  const onQueryChange = ({ query }: { query: Query }) => {
+    setIsLoading(true);
+    const clauses = query.ast.clauses;
+
+    if (clauses.length === 0) {
+      setFilteredTransforms(transforms);
+      setIsLoading(false);
+      return;
+    }
+    // keep count of the number of matches we make as we're looping over the clauses
+    // we only want to return transforms which match all clauses, i.e. each search term is ANDed
+    // { transform-one:  { transform: { id: transform-one, config: {}, state: {}, ... }, count: 0 }, transform-two: {...} }
+    const matches: { [key: string]: any } = transforms.reduce((p, c) => {
+      p[c.id] = {
+        transform: c,
+        count: 0,
+      };
+      return p;
+    }, {});
+
+    clauses.forEach(c => {
+      // the search term could be negated with a minus, e.g. -bananas
+      const bool = c.match === 'must';
+      let ts = [];
+
+      if (c.type === 'term') {
+        // filter term based clauses, e.g. bananas
+        // match on id and description
+        // if the term has been negated, AND the matches
+        if (bool === true) {
+          ts = transforms.filter(
+            transform =>
+              stringMatch(transform.id, c.value) === bool ||
+              stringMatch(transform.config.description, c.value) === bool
+          );
+        } else {
+          ts = transforms.filter(
+            transform =>
+              stringMatch(transform.id, c.value) === bool &&
+              stringMatch(transform.config.description, c.value) === bool
+          );
+        }
+      } else {
+        // filter other clauses, i.e. the mode and status filters
+        if (Array.isArray(c.value)) {
+          // the status value is an array of string(s) e.g. ['failed', 'stopped']
+          ts = transforms.filter(transform => c.value.includes(transform.state.task_state));
+        } else {
+          ts = transforms.filter(transform => transform.config.mode === c.value);
+        }
+      }
+
+      ts.forEach(t => matches[t.id].count++);
+    });
+
+    // loop through the matches and return only those jobs which have match all the clauses
+    const filtered = [];
+    for (const key in matches) {
+      if (matches.hasOwnProperty(key)) {
+        if ((matches[key] && matches[key].count) >= clauses.length) {
+          filtered.push(matches[key].transform);
+        }
+      }
+    }
+
+    setFilteredTransforms(filtered);
+    setIsLoading(false);
+  };
 
   // Before the transforms have been loaded for the first time, display the loading indicator only.
   // Otherwise a user would see 'No data frame transforms found' during the initial loading.
@@ -147,6 +227,7 @@ export const DataFrameTransformList: SFC = () => {
   };
 
   const search = {
+    onChange: onQueryChange,
     box: {
       incremental: true,
     },
@@ -205,7 +286,7 @@ export const DataFrameTransformList: SFC = () => {
         hasActions={false}
         isExpandable={true}
         isSelectable={false}
-        items={transforms}
+        items={filteredTransforms}
         itemId={DataFrameTransformListColumn.id}
         itemIdToExpandedRowMap={itemIdToExpandedRowMap}
         onChange={onTableChange}

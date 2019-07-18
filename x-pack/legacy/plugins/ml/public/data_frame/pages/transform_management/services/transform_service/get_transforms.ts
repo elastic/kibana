@@ -60,6 +60,7 @@ type GetDataFrameTransformsStatsResponse =
 export type GetTransforms = (forceRefresh?: boolean) => void;
 
 export const getTransformsFactory = (
+  setFilteredTransforms: React.Dispatch<React.SetStateAction<DataFrameTransformListRow[]>>,
   setTransforms: React.Dispatch<React.SetStateAction<DataFrameTransformListRow[]>>,
   setErrorMessage: React.Dispatch<
     React.SetStateAction<GetDataFrameTransformsStatsResponseError | undefined>
@@ -113,6 +114,7 @@ export const getTransformsFactory = (
         );
 
         setTransforms(tableRows);
+        setFilteredTransforms(tableRows);
         setErrorMessage(undefined);
         setIsInitialized(true);
         refreshTransformList$.next(REFRESH_TRANSFORM_LIST_STATE.IDLE);
@@ -122,6 +124,7 @@ export const getTransformsFactory = (
         refreshTransformList$.next(REFRESH_TRANSFORM_LIST_STATE.ERROR);
         refreshTransformList$.next(REFRESH_TRANSFORM_LIST_STATE.IDLE);
         setTransforms([]);
+        setFilteredTransforms([]);
         setErrorMessage(e);
         setIsInitialized(true);
       }

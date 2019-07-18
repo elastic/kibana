@@ -19,6 +19,20 @@ export enum DATA_FRAME_MODE {
   CONTINUOUS = 'continuous',
 }
 
+interface Clause {
+  type: string;
+  value: string;
+  match: string;
+}
+
+export interface Query {
+  ast: {
+    clauses: Clause[];
+  };
+  text: string;
+  syntax: any;
+}
+
 export interface DataFrameTransformState {
   checkpoint: number;
   current_position: Dictionary<any>;
