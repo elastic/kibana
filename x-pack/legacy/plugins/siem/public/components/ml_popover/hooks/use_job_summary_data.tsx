@@ -11,7 +11,7 @@ import { KibanaConfigContext } from '../../../lib/adapters/framework/kibana_fram
 import { hasMlUserPermissions } from '../../ml/permissions/has_ml_user_permissions';
 import { MlCapabilitiesContext } from '../../ml/permissions/ml_capabilities_provider';
 
-type Return = [boolean, Job[]];
+type Return = [boolean, Job[] | null];
 
 export const getSiemJobsFromJobsSummary = (data: Job[]) =>
   data.reduce((jobs: Job[], job: Job) => {
@@ -19,7 +19,7 @@ export const getSiemJobsFromJobsSummary = (data: Job[]) =>
   }, []);
 
 export const useJobSummaryData = (jobIds: string[] = [], refreshToggle = false): Return => {
-  const [jobSummaryData, setJobSummaryData] = useState<Job[]>([]);
+  const [jobSummaryData, setJobSummaryData] = useState<Job[] | null>(null);
   const [loading, setLoading] = useState(true);
   const config = useContext(KibanaConfigContext);
   const capabilities = useContext(MlCapabilitiesContext);

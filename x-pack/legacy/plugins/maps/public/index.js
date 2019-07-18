@@ -32,7 +32,7 @@ import './angular/services/gis_map_saved_object_loader';
 import './angular/map_controller';
 import listingTemplate from './angular/listing_ng_wrapper.html';
 import mapTemplate from './angular/map.html';
-import { MapListing } from './shared/components/map_listing';
+import { MapListing } from './components/map_listing';
 import { recentlyAccessed } from 'ui/persisted_log';
 
 const app = uiModules.get('app/maps', ['ngRoute', 'react']);
