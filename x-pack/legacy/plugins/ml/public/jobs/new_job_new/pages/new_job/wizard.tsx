@@ -64,19 +64,14 @@ export const Wizard: FC<Props> = ({
     s => s + 1,
     0
   );
-  const jobValidatorUpdate = () => setJobValidatorUpdate(jobValidatorUpdated);
+
+  async function validate() {
+    await jobValidator.validate();
+    setJobValidatorUpdate(jobValidatorUpdated);
+  }
 
   useEffect(() => {
-    const subscription = jobValidator.subscribeToValidation((validationSummary: any) => {
-      jobValidatorUpdate();
-    });
-    return () => {
-      subscription.unsubscribe();
-    };
-  }, []);
-
-  useEffect(() => {
-    jobValidator.validate();
+    validate();
   }, [jobCreatorUpdated]);
 
   const jobCreatorContext: JobCreatorContextValue = {

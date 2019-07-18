@@ -4,26 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { BehaviorSubject } from 'rxjs';
-
-// import { newJobLimits } from 'plugins/ml/jobs/new_job/utils/new_job_defaults';
-// import { basicJobValidation } from 'plugins/ml/../common/util/job_utils';
 import { basicJobValidation } from '../../../../../common/util/job_utils';
 import { newJobLimits } from '../../../new_job/utils/new_job_defaults';
-// import { ml } from '../../../../services/ml_api_service';
-// import { mlJobService } from '../../../../services/job_service';
 import { JobCreator } from '../job_creator';
-// import { DatafeedId, JobId } from '../job_creator/configs';
-// import { DATAFEED_STATE } from '../../../../../common/constants/states';
-// import { ALLOWED_DATA_UNITS } from '../../../../../common/constants/validation';
-// import { Job } from '../../common/job_creator/configs';
 import { populateValidationMessages } from './util';
 
-interface ValidationSummary {
+export interface ValidationSummary {
   basic: boolean;
   advanced: boolean;
 }
-export type ValidationSubscriber = (validationSummary: ValidationSummary) => void;
 
 export interface Validation {
   valid: boolean;
@@ -41,7 +30,6 @@ export interface BasicValidations {
 export class JobValidator {
   private _jobCreator: JobCreator;
   private _validationSummary: ValidationSummary;
-  private _validationSummary$: BehaviorSubject<ValidationSummary>;
   private _lastJobConfig: string;
   private _validateTimeout: NodeJS.Timeout;
 
@@ -60,7 +48,6 @@ export class JobValidator {
       basic: false,
       advanced: false,
     };
-    this._validationSummary$ = new BehaviorSubject(this._validationSummary);
     this._validateTimeout = setTimeout(() => {}, 0);
   }
 
@@ -79,14 +66,18 @@ export class JobValidator {
   public validate() {
     const formattedJobConfig = this._jobCreator.formattedJobJson;
     // only validate if the config has changed
-    if (formattedJobConfig !== this._lastJobConfig) {
-      clearTimeout(this._validateTimeout);
-      this._lastJobConfig = formattedJobConfig;
-      this._validateTimeout = setTimeout(() => {
-        this._runBasicValidation();
-        this._validationSummary$.next(this._validationSummary);
-      }, 500);
-    }
+    return new Promise((resolve: () => void) => {
+      if (formattedJobConfig !== this._lastJobConfig) {
+        clearTimeout(this._validateTimeout);
+        this._lastJobConfig = formattedJobConfig;
+        this._validateTimeout = setTimeout(() => {
+          this._runBasicValidation();
+          resolve();
+        }, 500);
+      } else {
+        resolve();
+      }
+    });
   }
 
   private _runBasicValidation() {
@@ -98,10 +89,6 @@ export class JobValidator {
 
     populateValidationMessages(validationResults, this._basicValidations, jobConfig);
     this._validationSummary.basic = this._isOverallBasicValid();
-  }
-
-  public subscribeToValidation(func: ValidationSubscriber) {
-    return this._validationSummary$.subscribe(func);
   }
 
   public get bucketSpan(): Validation {

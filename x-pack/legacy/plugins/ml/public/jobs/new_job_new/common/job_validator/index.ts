@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { JobValidator, Validation, BasicValidations } from './job_validator';
+export { JobValidator, Validation, BasicValidations, ValidationSummary } from './job_validator';

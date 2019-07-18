@@ -40,7 +40,6 @@ export const PopulationDetectors: FC<Props> = ({ isActive, setIsValid }) => {
     chartLoader,
     chartInterval,
     resultsLoader,
-    jobValidator,
   } = useContext(JobCreatorContext);
 
   if (isPopulationJobCreator(jc) === false) {
