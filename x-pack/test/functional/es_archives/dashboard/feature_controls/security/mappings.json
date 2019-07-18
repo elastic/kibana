@@ -481,6 +481,32 @@
                 "type": "text"
               }
             }
+          },
+          "query": {
+            "properties": {
+              "title": {
+                "type": "text"
+              },
+              "description": {
+                "type": "text"
+              },
+              "query": {
+                "properties": {
+                  "language": {
+                    "type": "text"
+                  },
+                  "query": {
+                    "type": "text"
+                  }
+                }
+              },
+              "filters": {
+                "type": "text"
+              },
+              "timefilter": {
+                "type": "text"
+              }
+            }
           }
         }
       }
