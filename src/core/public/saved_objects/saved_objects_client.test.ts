@@ -64,15 +64,15 @@ describe('SavedObjectsClient', () => {
     test('makes HTTP call', async () => {
       await savedObjectsClient.get(doc.type, doc.id);
       expect(http.fetch.mock.calls[0]).toMatchInlineSnapshot(`
-Array [
-  "/api/saved_objects/_bulk_get",
-  Object {
-    "body": "[{\\"id\\":\\"AVwSwFxtcMV38qjDZoQg\\",\\"type\\":\\"config\\"}]",
-    "method": "POST",
-    "query": undefined,
-  },
-]
-`);
+        Array [
+          "/api/saved_objects/_bulk_get",
+          Object {
+            "body": "[{\\"id\\":\\"AVwSwFxtcMV38qjDZoQg\\",\\"type\\":\\"config\\"}]",
+            "method": "POST",
+            "query": undefined,
+          },
+        ]
+      `);
     });
 
     test('batches several #get calls into a single HTTP call', async () => {
@@ -84,17 +84,17 @@ Array [
       savedObjectsClient.get('type1', doc.id);
       await savedObjectsClient.get('type0', doc.id);
       expect(http.fetch.mock.calls).toMatchInlineSnapshot(`
-Array [
-  Array [
-    "/api/saved_objects/_bulk_get",
-    Object {
-      "body": "[{\\"id\\":\\"AVwSwFxtcMV38qjDZoQg\\",\\"type\\":\\"type1\\"},{\\"id\\":\\"AVwSwFxtcMV38qjDZoQg\\",\\"type\\":\\"type0\\"}]",
-      "method": "POST",
-      "query": undefined,
-    },
-  ],
-]
-`);
+        Array [
+          Array [
+            "/api/saved_objects/_bulk_get",
+            Object {
+              "body": "[{\\"id\\":\\"AVwSwFxtcMV38qjDZoQg\\",\\"type\\":\\"type1\\"},{\\"id\\":\\"AVwSwFxtcMV38qjDZoQg\\",\\"type\\":\\"type0\\"}]",
+              "method": "POST",
+              "query": undefined,
+            },
+          ],
+        ]
+      `);
     });
 
     test('resolves with SimpleSavedObject instance', async () => {
@@ -127,15 +127,15 @@ Array [
     test('makes HTTP call', async () => {
       await expect(savedObjectsClient.delete('index-pattern', 'logstash-*')).resolves.toEqual({});
       expect(http.fetch.mock.calls[0]).toMatchInlineSnapshot(`
-Array [
-  "/api/saved_objects/index-pattern/logstash-*",
-  Object {
-    "body": undefined,
-    "method": "DELETE",
-    "query": undefined,
-  },
-]
-`);
+        Array [
+          "/api/saved_objects/index-pattern/logstash-*",
+          Object {
+            "body": undefined,
+            "method": "DELETE",
+            "query": undefined,
+          },
+        ]
+      `);
     });
   });
 
@@ -168,17 +168,17 @@ Array [
     test('makes HTTP call', () => {
       savedObjectsClient.update('index-pattern', 'logstash-*', attributes, options);
       expect(http.fetch.mock.calls).toMatchInlineSnapshot(`
-Array [
-  Array [
-    "/api/saved_objects/index-pattern/logstash-*",
-    Object {
-      "body": "{\\"attributes\\":{\\"foo\\":\\"Foo\\",\\"bar\\":\\"Bar\\"},\\"version\\":\\"1\\"}",
-      "method": "PUT",
-      "query": undefined,
-    },
-  ],
-]
-`);
+        Array [
+          Array [
+            "/api/saved_objects/index-pattern/logstash-*",
+            Object {
+              "body": "{\\"attributes\\":{\\"foo\\":\\"Foo\\",\\"bar\\":\\"Bar\\"},\\"version\\":\\"1\\"}",
+              "method": "PUT",
+              "query": undefined,
+            },
+          ],
+        ]
+      `);
     });
 
     test('rejects when HTTP call fails', async () => {
@@ -230,37 +230,37 @@ Array [
     test('makes HTTP call with ID', () => {
       savedObjectsClient.create('index-pattern', attributes, { id: 'myId' });
       expect(http.fetch.mock.calls).toMatchInlineSnapshot(`
-Array [
-  Array [
-    "/api/saved_objects/index-pattern/myId",
-    Object {
-      "body": "{\\"attributes\\":{\\"foo\\":\\"Foo\\",\\"bar\\":\\"Bar\\"}}",
-      "method": "POST",
-      "query": Object {
-        "overwrite": undefined,
-      },
-    },
-  ],
-]
-`);
+        Array [
+          Array [
+            "/api/saved_objects/index-pattern/myId",
+            Object {
+              "body": "{\\"attributes\\":{\\"foo\\":\\"Foo\\",\\"bar\\":\\"Bar\\"}}",
+              "method": "POST",
+              "query": Object {
+                "overwrite": undefined,
+              },
+            },
+          ],
+        ]
+      `);
     });
 
     test('makes HTTP call without ID', () => {
       savedObjectsClient.create('index-pattern', attributes);
       expect(http.fetch.mock.calls).toMatchInlineSnapshot(`
-Array [
-  Array [
-    "/api/saved_objects/index-pattern",
-    Object {
-      "body": "{\\"attributes\\":{\\"foo\\":\\"Foo\\",\\"bar\\":\\"Bar\\"}}",
-      "method": "POST",
-      "query": Object {
-        "overwrite": undefined,
-      },
-    },
-  ],
-]
-`);
+        Array [
+          Array [
+            "/api/saved_objects/index-pattern",
+            Object {
+              "body": "{\\"attributes\\":{\\"foo\\":\\"Foo\\",\\"bar\\":\\"Bar\\"}}",
+              "method": "POST",
+              "query": Object {
+                "overwrite": undefined,
+              },
+            },
+          ],
+        ]
+      `);
     });
 
     test('rejects when HTTP call fails', async () => {
@@ -288,37 +288,37 @@ Array [
     test('makes HTTP call', async () => {
       await savedObjectsClient.bulkCreate([doc]);
       expect(http.fetch.mock.calls).toMatchInlineSnapshot(`
-Array [
-  Array [
-    "/api/saved_objects/_bulk_create",
-    Object {
-      "body": "[{\\"id\\":\\"AVwSwFxtcMV38qjDZoQg\\",\\"type\\":\\"config\\",\\"attributes\\":{\\"title\\":\\"Example title\\"},\\"version\\":\\"foo\\"}]",
-      "method": "POST",
-      "query": Object {
-        "overwrite": false,
-      },
-    },
-  ],
-]
-`);
+        Array [
+          Array [
+            "/api/saved_objects/_bulk_create",
+            Object {
+              "body": "[{\\"id\\":\\"AVwSwFxtcMV38qjDZoQg\\",\\"type\\":\\"config\\",\\"attributes\\":{\\"title\\":\\"Example title\\"},\\"version\\":\\"foo\\"}]",
+              "method": "POST",
+              "query": Object {
+                "overwrite": false,
+              },
+            },
+          ],
+        ]
+      `);
     });
 
     test('makes HTTP call with overwrite query paramater', async () => {
       await savedObjectsClient.bulkCreate([doc], { overwrite: true });
       expect(http.fetch.mock.calls).toMatchInlineSnapshot(`
-Array [
-  Array [
-    "/api/saved_objects/_bulk_create",
-    Object {
-      "body": "[{\\"id\\":\\"AVwSwFxtcMV38qjDZoQg\\",\\"type\\":\\"config\\",\\"attributes\\":{\\"title\\":\\"Example title\\"},\\"version\\":\\"foo\\"}]",
-      "method": "POST",
-      "query": Object {
-        "overwrite": true,
-      },
-    },
-  ],
-]
-`);
+        Array [
+          Array [
+            "/api/saved_objects/_bulk_create",
+            Object {
+              "body": "[{\\"id\\":\\"AVwSwFxtcMV38qjDZoQg\\",\\"type\\":\\"config\\",\\"attributes\\":{\\"title\\":\\"Example title\\"},\\"version\\":\\"foo\\"}]",
+              "method": "POST",
+              "query": Object {
+                "overwrite": true,
+              },
+            },
+          ],
+        ]
+      `);
     });
   });
 
@@ -342,67 +342,73 @@ Array [
       expect(result.total).toBe(1);
     });
 
-    test('makes HTTP call translating options into snake case query parameters', () => {
+    test('makes HTTP call correctly mapping options into snake case query parameters', () => {
       const options = {
-        type: 'index-pattern',
-        search: 'what is the meaning of life?|life',
-        searchFields: ['title^5', 'body'],
-        page: 10,
-        perPage: 100,
+        defaultSearchOperator: 'OR' as const,
         fields: ['title'],
         hasReference: { id: '1', type: 'reference' },
+        page: 10,
+        perPage: 100,
+        search: 'what is the meaning of life?|life',
+        searchFields: ['title^5', 'body'],
+        sortField: 'sort_field',
+        type: 'index-pattern',
       };
 
       savedObjectsClient.find(options);
       expect(http.fetch.mock.calls).toMatchInlineSnapshot(`
-Array [
-  Array [
-    "/api/saved_objects/_find",
-    Object {
-      "body": undefined,
-      "method": "GET",
-      "query": Object {
-        "fields": Array [
-          "title",
-        ],
-        "has_reference": Object {
-          "id": "1",
-          "type": "reference",
-        },
-        "page": 10,
-        "per_page": 100,
-        "search": "what is the meaning of life?|life",
-        "search_fields": Array [
-          "title^5",
-          "body",
-        ],
-        "type": "index-pattern",
-      },
-    },
-  ],
-]
-`);
+        Array [
+          Array [
+            "/api/saved_objects/_find",
+            Object {
+              "body": undefined,
+              "method": "GET",
+              "query": Object {
+                "default_search_operator": "OR",
+                "fields": Array [
+                  "title",
+                ],
+                "has_reference": Object {
+                  "id": "1",
+                  "type": "reference",
+                },
+                "page": 10,
+                "per_page": 100,
+                "search": "what is the meaning of life?|life",
+                "search_fields": Array [
+                  "title^5",
+                  "body",
+                ],
+                "sort_field": "sort_field",
+                "type": "index-pattern",
+              },
+            },
+          ],
+        ]
+      `);
     });
 
     test('ignores invalid options', () => {
       const options = {
         invalid: true,
+        namespace: 'default',
+        sortOrder: 'sort', // Not currently supported by API
       };
 
       // @ts-ignore
       savedObjectsClient.find(options);
       expect(http.fetch.mock.calls).toMatchInlineSnapshot(`
-Array [
-  Array [
-    "/api/saved_objects/_find",
-    Object {
-      "body": undefined,
-      "method": "GET",
-      "query": Object {},
-    },
-  ],
-]
-`);
+        Array [
+          Array [
+            "/api/saved_objects/_find",
+            Object {
+              "body": undefined,
+              "method": "GET",
+              "query": Object {},
+            },
+          ],
+        ]
+      `);
     });
   });
 });

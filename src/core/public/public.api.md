@@ -582,7 +582,7 @@ export class SavedObjectsClient {
     }[]) => Promise<SavedObjectsBatchResponse<SavedObjectAttributes>>;
     create: <T extends SavedObjectAttributes>(type: string, attributes: T, options?: SavedObjectsCreateOptions) => Promise<SimpleSavedObject<T>>;
     delete: (type: string, id: string) => Promise<{}>;
-    find: <T extends SavedObjectAttributes>(options?: SavedObjectsFindOptions) => Promise<SavedObjectsFindResponse<T>>;
+    find: <T extends SavedObjectAttributes>(options?: Pick<SavedObjectsFindOptions, "search" | "type" | "defaultSearchOperator" | "searchFields" | "sortField" | "hasReference" | "page" | "perPage" | "fields">) => Promise<SavedObjectsFindResponse<T>>;
     get: <T extends SavedObjectAttributes>(type: string, id: string) => Promise<SimpleSavedObject<T>>;
     update<T extends SavedObjectAttributes>(type: string, id: string, attributes: T, { version, migrationVersion, references }?: SavedObjectsUpdateOptions): Promise<SimpleSavedObject<T>>;
 }

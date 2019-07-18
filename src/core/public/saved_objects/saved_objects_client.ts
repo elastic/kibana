@@ -25,7 +25,7 @@ import {
   SavedObjectAttributes,
   SavedObjectReference,
   SavedObjectsClientContract as SavedObjectsApi,
-  SavedObjectsFindOptions,
+  SavedObjectsFindOptions as SavedObjectFindOptionsServer,
   SavedObjectsMigrationVersion,
 } from '../../server/types';
 // TODO: Migrate to an error modal powered by the NP?
@@ -35,6 +35,8 @@ import {
 } from '../../../legacy/ui/public/error_auto_create_index/error_auto_create_index';
 import { SimpleSavedObject } from './simple_saved_object';
 import { HttpFetchQuery, HttpSetup } from '../http';
+
+type SavedObjectsFindOptions = Omit<SavedObjectFindOptionsServer, 'namespace' | 'sortOrder'>;
 
 export {
   SavedObject,
@@ -252,10 +254,10 @@ export class SavedObjectsClient {
     });
     return request.then(resp => {
       resp.saved_objects = resp.saved_objects.map(d => this.createSavedObject(d));
-      return pickAndRenameKeys<PromiseType<ReturnType<SavedObjectsApi['bulkCreate']>>>(
-        { saved_objects: 'savedObjects' },
-        resp
-      ) as SavedObjectsBatchResponse;
+      return pickAndRenameKeys<
+        PromiseType<ReturnType<SavedObjectsApi['bulkCreate']>>,
+        SavedObjectsBatchResponse
+      >({ saved_objects: 'savedObjects' }, resp) as SavedObjectsBatchResponse;
     });
   };
 
@@ -292,18 +294,16 @@ export class SavedObjectsClient {
     options: SavedObjectsFindOptions = {}
   ): Promise<SavedObjectsFindResponse<T>> => {
     const path = this.getPath(['_find']);
-    const query = pickAndRenameKeys<SavedObjectsFindOptions>(
+    const query = pickAndRenameKeys<SavedObjectsFindOptions, any>(
       {
-        defaultSearchOperator: 'defaultSearchOperator',
+        defaultSearchOperator: 'default_search_operator',
         fields: 'fields',
         hasReference: 'has_reference',
-        namespace: 'namespace',
         page: 'page',
         perPage: 'per_page',
         search: 'search',
         searchFields: 'search_fields',
-        sortField: 'sortField',
-        sortOrder: 'sortOrder',
+        sortField: 'sort_field',
         type: 'type',
       },
       options
@@ -316,7 +316,10 @@ export class SavedObjectsClient {
     });
     return request.then(resp => {
       resp.saved_objects = resp.saved_objects.map(d => this.createSavedObject(d));
-      return pickAndRenameKeys<PromiseType<ReturnType<SavedObjectsApi['find']>>>(
+      return pickAndRenameKeys<
+        PromiseType<ReturnType<SavedObjectsApi['find']>>,
+        SavedObjectsFindResponse
+      >(
         {
           saved_objects: 'savedObjects',
           total: 'total',
@@ -372,10 +375,10 @@ export class SavedObjectsClient {
     });
     return request.then(resp => {
       resp.saved_objects = resp.saved_objects.map(d => this.createSavedObject(d));
-      return pickAndRenameKeys<PromiseType<ReturnType<SavedObjectsApi['bulkGet']>>>(
-        { saved_objects: 'savedObjects' },
-        resp
-      ) as SavedObjectsBatchResponse;
+      return pickAndRenameKeys<
+        PromiseType<ReturnType<SavedObjectsApi['bulkGet']>>,
+        SavedObjectsBatchResponse
+      >({ saved_objects: 'savedObjects' }, resp) as SavedObjectsBatchResponse;
     });
   };
 
@@ -445,8 +448,8 @@ export class SavedObjectsClient {
  * @param keysMap - a map of the form `{oldKey: newKey}`
  * @param obj - the object whose own properties will be renamed
  */
-const pickAndRenameKeys = <T extends Record<string, any>>(
-  keysMap: Record<keyof T, any>,
+const pickAndRenameKeys = <T extends Record<string, any>, U extends Record<string, any>>(
+  keysMap: Record<keyof T, keyof U>,
   obj: Record<string, any>
 ) =>
   Object.keys(obj).reduce((acc, key) => {
