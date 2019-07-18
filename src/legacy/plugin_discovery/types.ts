@@ -66,6 +66,7 @@ export interface LegacyPluginOptions {
     home: string[];
     mappings: any;
     savedObjectSchemas: SavedObjectsSchemaDefinition;
+    savedObjectsManagement: any;
     embeddableActions?: string[];
     embeddableFactories?: string[];
   }>;

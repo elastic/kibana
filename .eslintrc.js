@@ -601,7 +601,7 @@ module.exports = {
      * Lens overrides
      */
     {
-      files: ['x-pack/plugins/lens/**/*.ts', 'x-pack/plugins/lens/**/*.tsx'],
+      files: ['x-pack/legacy/plugins/lens/**/*.ts', 'x-pack/legacy/plugins/lens/**/*.tsx'],
       rules: {
         '@typescript-eslint/no-explicit-any': 'error',
       },
