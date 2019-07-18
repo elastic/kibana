@@ -199,6 +199,8 @@ class CodeContent extends React.PureComponent<Props> {
           />
         </EuiFlexGroup>
       );
+    } else if (this.shouldRenderCloneProgress()) {
+      return null;
     } else {
       return (
         <EuiFlexGroup direction="row" alignItems="center" gutterSize="none">
