@@ -50,15 +50,11 @@
   flex-grow: 1;
 }
 
-.mapLayTocActions__popoverAnchor {
+.mapLayTocActions__popoverAnchor, .mapLayTocActions__tooltipAnchor{
   max-width: 100%;
 }
 
 .mapTocEntry-notVisible .mapTocEntry__layerName {
-  opacity: 0.5;
-}
-
-.mapTocEntry-exceedLimit {
   opacity: 0.5;
 }
 
