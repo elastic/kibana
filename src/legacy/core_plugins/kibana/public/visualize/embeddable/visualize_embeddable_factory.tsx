@@ -78,10 +78,17 @@ export class VisualizeEmbeddableFactory extends EmbeddableFactory<
   VisualizeEmbeddable | DisabledLabEmbeddable,
   VisualizationAttributes
 > {
-  private visTypes?: VisTypesRegistry;
   public readonly type = VISUALIZE_EMBEDDABLE_TYPE;
 
-  constructor() {
+  static async createVisualizeEmbeddableFactory(): Promise<VisualizeEmbeddableFactory> {
+    const $injector = await chrome.dangerouslyGetActiveInjector();
+    const Private = $injector.get<IPrivate>('Private');
+    const visTypes = Private(VisTypesRegistryProvider);
+
+    return new VisualizeEmbeddableFactory(visTypes);
+  }
+
+  constructor(private visTypes: VisTypesRegistry) {
     super({
       savedObjectMetaData: {
         name: i18n.translate('kbn.visualize.savedObjectName', { defaultMessage: 'Visualization' }),
@@ -117,7 +124,6 @@ export class VisualizeEmbeddableFactory extends EmbeddableFactory<
         },
       },
     });
-    this.initializeVisTypes();
   }
 
   public isEditable() {
@@ -128,12 +134,6 @@ export class VisualizeEmbeddableFactory extends EmbeddableFactory<
     return i18n.translate('kbn.embeddable.visualizations.displayName', {
       defaultMessage: 'visualization',
     });
-  }
-
-  public async initializeVisTypes() {
-    const $injector = await chrome.dangerouslyGetActiveInjector();
-    const Private = $injector.get<IPrivate>('Private');
-    this.visTypes = Private(VisTypesRegistryProvider);
   }
 
   public async createFromSavedObject(
@@ -188,4 +188,6 @@ export class VisualizeEmbeddableFactory extends EmbeddableFactory<
   }
 }
 
-embeddableFactories.set(VISUALIZE_EMBEDDABLE_TYPE, new VisualizeEmbeddableFactory());
+VisualizeEmbeddableFactory.createVisualizeEmbeddableFactory().then(embeddableFactory => {
+  embeddableFactories.set(VISUALIZE_EMBEDDABLE_TYPE, embeddableFactory);
+});
