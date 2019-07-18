@@ -84,7 +84,7 @@ export function TableHeader({
 
   return (
     <tr>
-      <td style={{ width: '1%' }}></td>
+      <th style={{ width: '24px' }}></th>
       {displayedColumns.map(col => {
         return (
           <TableHeaderColumn

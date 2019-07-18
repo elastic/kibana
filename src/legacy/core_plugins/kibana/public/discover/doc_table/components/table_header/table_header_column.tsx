@@ -106,7 +106,7 @@ export function TableHeaderColumn({
         {displayName}
         {buttons
           .filter(button => button.active)
-          .map((button,idx) => (
+          .map((button, idx) => (
             <EuiToolTip content={button.tooltip} key={`button_${idx}`}>
               <button
                 aria-label={button.ariaLabel}
