@@ -19,9 +19,14 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { I18nProvider } from '@kbn/i18n/react';
+import { CoreStart } from 'src/core/public';
 import { Container, ViewMode, ContainerInput } from '../..';
 import { HelloWorldContainerComponent } from './hello_world_container_component';
-import { GetEmbeddableFactory } from '../../types';
+import {
+  GetEmbeddableFactory,
+  GetActionsCompatibleWithTrigger,
+  GetEmbeddableFactories,
+} from '../../types';
 
 export const HELLO_WORLD_CONTAINER = 'HELLO_WORLD_CONTAINER';
 
@@ -47,7 +52,12 @@ export class HelloWorldContainer extends Container<InheritedInput, HelloWorldCon
 
   constructor(
     input: ContainerInput<{ firstName: string; lastName: string }>,
-    getFactory: GetEmbeddableFactory
+    getFactory: GetEmbeddableFactory,
+    private readonly getActions: GetActionsCompatibleWithTrigger,
+    private readonly getEmbeddableFactory: GetEmbeddableFactory,
+    private readonly getAllEmbeddableFactories: GetEmbeddableFactories,
+    private readonly overlays: CoreStart['overlays'],
+    private readonly notifications: CoreStart['notifications']
   ) {
     super(input, { embeddableLoaded: {} }, getFactory);
   }
@@ -64,7 +74,14 @@ export class HelloWorldContainer extends Container<InheritedInput, HelloWorldCon
   public render(node: HTMLElement) {
     ReactDOM.render(
       <I18nProvider>
-        <HelloWorldContainerComponent container={this} />
+        <HelloWorldContainerComponent
+          container={this}
+          getActions={this.getActions}
+          getAllEmbeddableFactories={this.getAllEmbeddableFactories}
+          getEmbeddableFactory={this.getEmbeddableFactory}
+          overlays={this.overlays}
+          notifications={this.notifications}
+        />
       </I18nProvider>,
       node
     );

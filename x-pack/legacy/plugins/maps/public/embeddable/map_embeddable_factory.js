@@ -12,7 +12,7 @@ import {
   EmbeddableFactory,
   embeddableFactories,
   ErrorEmbeddable
-} from '../../../../../../src/legacy/core_plugins/embeddable_api/public/shim/public';
+} from '../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public';
 import { MapEmbeddable } from './map_embeddable';
 import { indexPatternService } from '../kibana_services';
 

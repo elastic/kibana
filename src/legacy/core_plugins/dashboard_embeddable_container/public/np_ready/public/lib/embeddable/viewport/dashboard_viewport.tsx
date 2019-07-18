@@ -19,6 +19,12 @@
 
 import React from 'react';
 import { Subscription } from 'rxjs';
+import {
+  GetActionsCompatibleWithTrigger,
+  GetEmbeddableFactory,
+  GetEmbeddableFactories,
+} from 'src/legacy/core_plugins/embeddable_api/public/np_ready/public';
+import { CoreStart } from 'src/core/public';
 import { PanelState } from '../../embeddable_api';
 import { DashboardContainer } from '../dashboard_container';
 import { DashboardGrid } from '../grid';
@@ -36,6 +42,11 @@ const ExitFullScreenButton: React.FC<any> = props => (
 
 export interface DashboardViewportProps {
   container: DashboardContainer;
+  getActions: GetActionsCompatibleWithTrigger;
+  getEmbeddableFactory: GetEmbeddableFactory;
+  getAllEmbeddableFactories: GetEmbeddableFactories;
+  overlays: CoreStart['overlays'];
+  notifications: CoreStart['notifications'];
 }
 
 interface State {
@@ -104,7 +115,14 @@ export class DashboardViewport extends React.Component<DashboardViewportProps, S
         {this.state.isFullScreenMode && (
           <ExitFullScreenButton onExitFullScreenMode={this.onExitFullScreenMode} />
         )}
-        <DashboardGrid container={container} />
+        <DashboardGrid
+          container={container}
+          getActions={this.props.getActions}
+          getAllEmbeddableFactories={this.props.getAllEmbeddableFactories}
+          getEmbeddableFactory={this.props.getEmbeddableFactory}
+          notifications={this.props.notifications}
+          overlays={this.props.overlays}
+        />
       </div>
     );
   }

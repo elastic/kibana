@@ -21,6 +21,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { I18nProvider } from '@kbn/i18n/react';
 import { Filter } from '@kbn/es-query';
+import { CoreStart } from 'src/core/public';
 import { IndexPattern } from '../../../../../../../ui/public/index_patterns';
 import { RefreshInterval } from '../../../../../../../ui/public/timefilter/timefilter';
 import { TimeRange } from '../../../../../../../ui/public/timefilter/time_history';
@@ -33,6 +34,8 @@ import {
   EmbeddableFactory,
   IEmbeddable,
   GetEmbeddableFactory,
+  GetActionsCompatibleWithTrigger,
+  GetEmbeddableFactories,
 } from '../../../../../../embeddable_api/public/np_ready/public';
 import { DASHBOARD_CONTAINER_TYPE } from './dashboard_container_factory';
 import { createPanelState } from './panel';
@@ -70,12 +73,21 @@ export interface InheritedChildInput extends IndexSignature {
   id: string;
 }
 
+export interface ViewportProps {
+  getActions: GetActionsCompatibleWithTrigger;
+  getEmbeddableFactory: GetEmbeddableFactory;
+  getAllEmbeddableFactories: GetEmbeddableFactories;
+  overlays: CoreStart['overlays'];
+  notifications: CoreStart['notifications'];
+}
+
 export class DashboardContainer extends Container<InheritedChildInput, DashboardContainerInput> {
   public readonly type = DASHBOARD_CONTAINER_TYPE;
 
   constructor(
     initialInput: DashboardContainerInput,
     getFactory: GetEmbeddableFactory,
+    private readonly viewportProps: ViewportProps,
     parent?: Container
   ) {
     super(
@@ -106,7 +118,7 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
   public render(dom: HTMLElement) {
     ReactDOM.render(
       <I18nProvider>
-        <DashboardViewport container={this} />
+        <DashboardViewport container={this} {...this.viewportProps} />
       </I18nProvider>,
       dom
     );

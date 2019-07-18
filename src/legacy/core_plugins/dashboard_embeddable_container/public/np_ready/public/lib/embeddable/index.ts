@@ -21,7 +21,7 @@ export { DASHBOARD_CONTAINER_TYPE, DashboardContainerFactory } from './dashboard
 export { DashboardContainer, DashboardContainerInput } from './dashboard_container';
 export { createPanelState } from './panel';
 
-export { DashboardPanelState } from './types';
+export { DashboardPanelState, GridData } from './types';
 
 export {
   DASHBOARD_GRID_COLUMN_COUNT,
