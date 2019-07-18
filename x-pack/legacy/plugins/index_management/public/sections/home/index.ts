@@ -4,6 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const API_BASE_PATH = '/api/index_management';
-
-export const INDEX_PATTERNS = ['test*'];
+export { IndexManagementHome } from './home';
