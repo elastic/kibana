@@ -8982,6 +8982,7 @@
     "xpack.rollupJobs.jobStatus.indexingLabel": "索引",
     "xpack.rollupJobs.jobStatus.startedLabel": "已开始",
     "xpack.rollupJobs.jobStatus.stoppedLabel": "已停止",
+    "xpack.rollupJobs.jobStatus.unknownLabel": "未知",
     "xpack.rollupJobs.jobTable.headers.delayHeader": "延迟",
     "xpack.rollupJobs.jobTable.headers.groupsHeader": "组",
     "xpack.rollupJobs.jobTable.headers.indexPatternHeader": "索引模式",
