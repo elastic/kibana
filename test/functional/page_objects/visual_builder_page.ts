@@ -393,8 +393,7 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
     }
 
     public async clickMetricPanelOptions() {
-      const button = await testSubjects.find('metricEditorPanelOptionsBtn');
-      await button.click();
+      await testSubjects.click('metricEditorPanelOptionsBtn');
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
@@ -406,11 +405,7 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
     }
 
     public async selectIndexPatternTimeField(timeField: string) {
-      const el = await testSubjects.find('comboBoxSearchInput');
-      await el.clearValue();
-      await el.type(timeField);
-      await el.pressKeys(browser.keys.RETURN);
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await comboBox.set('metricsIndexPatternFieldsSelect', timeField);
     }
 
     /**

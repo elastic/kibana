@@ -17,19 +17,6 @@
  * under the License.
  */
 
-import { dropLastBucket } from '../series/drop_last_bucket';
-import { isLastValueTimerangeMode } from '../../helpers/get_timerange_mode';
+import React from 'react';
 
-export function dropLastBucketFn(bucket, panel, series) {
-  return next => results => {
-    const shouldDropLastBucket = isLastValueTimerangeMode(panel);
-
-    if (shouldDropLastBucket) {
-      const fn = dropLastBucket({ aggregations: bucket }, panel, series);
-
-      return fn(next)(results);
-    }
-
-    return next(results);
-  };
-}
+export const UIRestrictionsContext = React.createContext();
