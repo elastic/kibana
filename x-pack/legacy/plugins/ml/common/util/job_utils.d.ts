@@ -7,6 +7,12 @@
 export function calculateDatafeedFrequencyDefaultSeconds(bucketSpanSeconds: number): number;
 
 export function isTimeSeriesViewJob(job: any): boolean;
+export function basicJobValidation(
+  job: any,
+  fields: any[] | undefined,
+  limits: any,
+  skipMmlCheck?: boolean
+): any[];
 
 export const ML_MEDIAN_PERCENTS: number;
 

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FC, useContext, useReducer, useState } from 'react';
+import React, { FC, useContext, useReducer, useState, useEffect } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
@@ -32,6 +32,7 @@ import {
 } from '../../common/job_creator';
 import { ChartLoader } from '../../common/chart_loader';
 import { ResultsLoader } from '../../common/results_loader';
+import { JobValidator } from '../../common/job_validator';
 import { newJobCapsService } from '../../../../services/new_job_capabilities_service';
 
 interface Props {
@@ -39,6 +40,7 @@ interface Props {
   chartLoader: ChartLoader;
   resultsLoader: ResultsLoader;
   chartInterval: MlTimeBuckets;
+  jobValidator: JobValidator;
   existingJobsAndGroups: ExistingJobsAndGroups;
 }
 
@@ -47,6 +49,7 @@ export const Wizard: FC<Props> = ({
   chartLoader,
   resultsLoader,
   chartInterval,
+  jobValidator,
   existingJobsAndGroups,
 }) => {
   const kibanaContext = useContext(KibanaContext);
@@ -57,6 +60,25 @@ export const Wizard: FC<Props> = ({
   const [jobCreatorUpdated, setJobCreatorUpdate] = useReducer<(s: number) => number>(s => s + 1, 0);
   const jobCreatorUpdate = () => setJobCreatorUpdate(jobCreatorUpdated);
 
+  const [jobValidatorUpdated, setJobValidatorUpdate] = useReducer<(s: number) => number>(
+    s => s + 1,
+    0
+  );
+  const jobValidatorUpdate = () => setJobValidatorUpdate(jobValidatorUpdated);
+
+  useEffect(() => {
+    const subscription = jobValidator.subscribeToValidation((validationSummary: any) => {
+      jobValidatorUpdate();
+    });
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, []);
+
+  useEffect(() => {
+    jobValidator.validate();
+  }, [jobCreatorUpdated]);
+
   const jobCreatorContext: JobCreatorContextValue = {
     jobCreatorUpdated,
     jobCreatorUpdate,
@@ -64,6 +86,8 @@ export const Wizard: FC<Props> = ({
     chartLoader,
     resultsLoader,
     chartInterval,
+    jobValidator,
+    jobValidatorUpdated,
     fields: newJobCapsService.fields,
     aggs: newJobCapsService.aggs,
     existingJobsAndGroups,

@@ -10,17 +10,33 @@ import { JobCreatorContext } from '../../../job_creator_context';
 import { Description } from './description';
 
 export const JobIdInput: FC = () => {
-  const { jobCreator, jobCreatorUpdate } = useContext(JobCreatorContext);
+  const { jobCreator, jobCreatorUpdate, jobValidator, jobValidatorUpdated } = useContext(
+    JobCreatorContext
+  );
   const [jobId, setJobId] = useState(jobCreator.jobId);
+  const [validation, setValidation] = useState(jobValidator.jobId);
 
   useEffect(() => {
     jobCreator.jobId = jobId;
     jobCreatorUpdate();
   }, [jobId]);
 
+  useEffect(() => {
+    const isEmptyId = jobId === '';
+    setValidation({
+      valid: isEmptyId === true || jobValidator.jobId.valid,
+      message: isEmptyId === false ? jobValidator.jobId.message : '',
+    });
+  }, [jobValidatorUpdated]);
+
   return (
-    <Description>
-      <EuiFieldText placeholder="Job Id" value={jobId} onChange={e => setJobId(e.target.value)} />
+    <Description validation={validation}>
+      <EuiFieldText
+        placeholder="Job Id"
+        value={jobId}
+        onChange={e => setJobId(e.target.value)}
+        isInvalid={validation.valid === false}
+      />
     </Description>
   );
 };

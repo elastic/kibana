@@ -11,8 +11,15 @@ import { JobCreatorContext } from '../../../job_creator_context';
 import { Description } from './description';
 
 export const BucketSpan: FC = () => {
-  const { jobCreator, jobCreatorUpdate, jobCreatorUpdated } = useContext(JobCreatorContext);
+  const {
+    jobCreator,
+    jobCreatorUpdate,
+    jobCreatorUpdated,
+    jobValidator,
+    jobValidatorUpdated,
+  } = useContext(JobCreatorContext);
   const [bucketSpan, setBucketSpan] = useState(jobCreator.bucketSpan);
+  const [validation, setValidation] = useState(jobValidator.bucketSpan);
 
   useEffect(() => {
     jobCreator.bucketSpan = bucketSpan;
@@ -23,9 +30,17 @@ export const BucketSpan: FC = () => {
     setBucketSpan(jobCreator.bucketSpan);
   }, [jobCreatorUpdated]);
 
+  useEffect(() => {
+    setValidation(jobValidator.bucketSpan);
+  }, [jobValidatorUpdated]);
+
   return (
-    <Description>
-      <BucketSpanInput setBucketSpan={setBucketSpan} bucketSpan={bucketSpan} />
+    <Description validation={validation}>
+      <BucketSpanInput
+        setBucketSpan={setBucketSpan}
+        bucketSpan={bucketSpan}
+        isInvalid={validation.valid === false}
+      />
     </Description>
   );
 };

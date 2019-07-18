@@ -40,6 +40,7 @@ export const PopulationDetectors: FC<Props> = ({ isActive, setIsValid }) => {
     chartLoader,
     chartInterval,
     resultsLoader,
+    jobValidator,
   } = useContext(JobCreatorContext);
 
   if (isPopulationJobCreator(jc) === false) {
@@ -262,7 +263,7 @@ export const PopulationDetectors: FC<Props> = ({ isActive, setIsValid }) => {
           fields={fields}
           detectorChangeHandler={detectorChangeHandler}
           selectedOptions={selectedOptions}
-          removeOptions={aggFieldPairList}
+          removeOptions={[]}
         />
       )}
       {isActive === false && (

@@ -4,9 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment, FC } from 'react';
-import { EuiComboBox, EuiComboBoxOptionProps } from '@elastic/eui';
+import React, { FC, useContext, useState, useEffect } from 'react';
+import { EuiComboBox, EuiComboBoxOptionProps, EuiFormRow } from '@elastic/eui';
 
+import { JobCreatorContext } from '../../../job_creator_context';
 import { Field, Aggregation, AggFieldPair } from '../../../../../../../../common/types/fields';
 
 // The display label used for an aggregation e.g. sum(bytes).
@@ -35,6 +36,8 @@ interface Props {
 }
 
 export const AggSelect: FC<Props> = ({ fields, changeHandler, selectedOptions, removeOptions }) => {
+  const { jobValidator, jobValidatorUpdated } = useContext(JobCreatorContext);
+  const [validation, setValidation] = useState(jobValidator.duplicateDetectors);
   // create list of labels based on already selected detectors
   // so they can be removed from the dropdown list
   const removeLabels = removeOptions.map(o => `${o.agg.title}(${o.field.name})`);
@@ -56,15 +59,20 @@ export const AggSelect: FC<Props> = ({ fields, changeHandler, selectedOptions, r
     return aggOption;
   });
 
+  useEffect(() => {
+    setValidation(jobValidator.duplicateDetectors);
+  }, [jobValidatorUpdated]);
+
   return (
-    <Fragment>
+    <EuiFormRow error={validation.message} isInvalid={validation.valid === false}>
       <EuiComboBox
         singleSelection={{ asPlainText: true }}
         options={options}
         selectedOptions={selectedOptions}
         onChange={changeHandler}
         isClearable={false}
+        isInvalid={validation.valid === false}
       />
-    </Fragment>
+    </EuiFormRow>
   );
 };
