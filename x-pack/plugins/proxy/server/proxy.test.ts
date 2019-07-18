@@ -165,8 +165,9 @@ test('handles allocate and unallocate', async () => {
   const proxy = new ProxyService({ config: configService({}), env, logger });
   await proxy.setup(core, {});
   const proxyStart = await proxy.start();
-  await proxyStart.assignResource('/foo/bar', 'code', RouteState.Started, proxy.nodeName);
-  await proxyStart.unassignResource('/foo/bar');
+  expect(proxyStart).toBeTruthy();
+  await proxyStart!.assignResource('/foo/bar', 'code', RouteState.Started, proxy.nodeName);
+  await proxyStart!.unassignResource('/foo/bar');
   expect(clusterDocClient.assignResource.mock.calls.length).toBe(1);
   expect(clusterDocClient.unassignResource.mock.calls.length).toBe(1);
 
@@ -201,8 +202,9 @@ test('proxy resource', async () => {
   const proxy = new ProxyService({ config: configService({}), env, logger });
   await proxy.setup(core, {});
   const proxyStart = await proxy.start();
-  await proxyStart.assignResource('/foo/bar', 'code', RouteState.Started, proxy.nodeName);
-  const agent = proxyStart.proxyResource('/foo/bar');
+  expect(proxyStart).toBeTruthy();
+  await proxyStart!.assignResource('/foo/bar', 'code', RouteState.Started, proxy.nodeName);
+  const agent = proxyStart!.proxyResource('/foo/bar');
   const r = httpServerMock.createRawRequest({
     headers: {},
     url: new URL('https://beep/foo/bar'),
@@ -216,7 +218,7 @@ test('proxy resource', async () => {
   expect(clusterDocClient.getNodeForResource.mock.calls.length).toBe(1);
   expect(mockWreck.request.mock.calls.length).toBe(1);
 
-  await proxyStart.proxyRequest(req, '/foo/bar');
+  await proxyStart!.proxyRequest(req, '/foo/bar');
   expect(clusterDocClient.getNodeForResource.mock.calls.length).toBe(2);
   expect(mockWreck.request.mock.calls.length).toBe(2);
 

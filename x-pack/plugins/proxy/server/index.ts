@@ -10,5 +10,7 @@ export { ProxyPluginType } from './proxy';
 export { RouteState } from './cluster_doc';
 
 export const config = ProxyConfig;
-export const plugin: PluginInitializer<ProxyServiceSetup, ProxyServiceStart> = initializerContext =>
-  new ProxyService(initializerContext);
+export const plugin: PluginInitializer<
+  ProxyServiceSetup | undefined,
+  ProxyServiceStart | undefined
+> = initializerContext => new ProxyService(initializerContext);

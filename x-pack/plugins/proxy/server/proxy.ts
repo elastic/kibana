@@ -32,8 +32,7 @@ import {
 } from '../../../../src/core/server';
 
 import { RouteState, RoutingNode } from './cluster_doc';
-import { ClusterDocClient as NewClusterDocClient } from './cluster_doc';
-import { ClusterDocClient as OldClusterDocClient } from './cluster_doc_original';
+import { ClusterDocClient } from './cluster_doc';
 
 // When we upgrade to typescript 3.5 we can remove this
 type Omit<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>;
@@ -79,7 +78,7 @@ export type ProxyPluginType = TypeOf<typeof ProxyConfig.schema>;
 export class ProxyService
   implements Plugin<ProxyServiceSetup | undefined, ProxyServiceStart | undefined> {
   public nodeName: string;
-  private clusterDocClient: NewClusterDocClient | OldClusterDocClient;
+  private clusterDocClient: ClusterDocClient;
   private port = 0;
 
   private httpsAgent: HTTPSAgent = new HTTPSAgent({ keepAlive: true });
@@ -90,14 +89,10 @@ export class ProxyService
   private readonly log: Logger;
   private readonly config$: Observable<ProxyPluginType>;
 
-  constructor(initializerContext: PluginInitializerContext, originalClient: boolean = false) {
+  constructor(initializerContext: PluginInitializerContext) {
     this.config$ = initializerContext.config.create<ProxyPluginType>();
     this.log = initializerContext.logger.get('proxy');
-    if (originalClient) {
-      this.clusterDocClient = new OldClusterDocClient(initializerContext);
-    } else {
-      this.clusterDocClient = new NewClusterDocClient(initializerContext);
-    }
+    this.clusterDocClient = new ClusterDocClient(initializerContext);
     this.nodeName = this.clusterDocClient.nodeName;
   }
 
