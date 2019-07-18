@@ -19,31 +19,31 @@
 
 /**
  * Output transforms are functions that will be called
- * with the form field value whenever we access the form data object. (with `form.getFormData()`)
+ * with the form field value whenever we access the form data object. (with `form.__getFormData()`)
  *
  * This allows us to have a different object/array as field `value`
  * from the desired outputed form data.
  *
  * Example:
  * ```ts
- * myField.value === [{ label: 'index_1', isSelected: true }, { label: 'index_2', isSelected: false }]
- * const outputTransform = (value) => (
+ * myField.value = [{ label: 'index_1', isSelected: true }, { label: 'index_2', isSelected: false }]
+ * const serializer = (value) => (
  *   value.filter(v => v.selected).map(v => v.label)
  * );
  *
- * // When outputing the form data we will receive the following array
- * form.getFormData() -> { myField: ['index_1'] }
+ * // When serializing the form data, the following array will be returned
+ * form.__getFormData() -> { myField: ['index_1'] }
  * ````
  */
 
 import { Option } from '@elastic/eui/src/components/selectable/types';
-import { OutputSerializerFunc } from '../hook_form_lib';
+import { SerializerFunc } from '../hook_form_lib';
 
 /**
  * Return an array of labels of all the options that are selected
  *
  * @param value The Eui Selectable options array
  */
-export const multiSelectOptionsToSelectedValue: OutputSerializerFunc<string[]> = (
+export const multiSelectOptionsToSelectedValue: SerializerFunc<string[]> = (
   options: Option[]
 ): string[] => options.filter(option => option.checked === 'on').map(option => option.label);

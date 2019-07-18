@@ -17,24 +17,5 @@
  * under the License.
  */
 
-import { Option } from '@elastic/eui/src/components/selectable/types';
-
-import { ValidationFunc } from '../hook_form_lib';
-import { hasMinLengthArray } from '../../validators/array';
-import { minSelectionError } from '../errors';
-import { multiSelectOptionsToSelectedValue } from '../serializers/output_serializers';
-
-/**
- * Validator to validate that a EuiSelectable has a minimum number
- * of items selected.
- * @param total Minimum number of items
- */
-export const minSelectionField = (total = 0) => (
-  ...args: Parameters<ValidationFunc>
-): ReturnType<ValidationFunc> => {
-  const [{ value }] = args;
-
-  return hasMinLengthArray(total)(multiSelectOptionsToSelectedValue(value as Option[]))
-    ? undefined
-    : minSelectionError(total);
-};
+export * from './de_serializers';
+export * from './serializers';

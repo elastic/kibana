@@ -17,17 +17,19 @@
  * under the License.
  */
 import { Option } from '@elastic/eui/src/components/selectable/types';
-import { InputSerializerFunc } from '../hook_form_lib';
+import { SerializerFunc } from '../hook_form_lib';
 
-export const multiSelectSelectedValueToOptions: InputSerializerFunc = (
-  defaultValue,
-  defaultFormValue
-) => {
+type FuncType = (selectOptions: Option[]) => SerializerFunc;
+
+// This deSerializer takes the previously selected options and map them
+// against the default select options values.
+export const multiSelectSelectedValueToOptions: FuncType = selectOptions => defaultFormValue => {
+  // If there are no default form value, it means that no previous value has been selected.
   if (!defaultFormValue) {
-    return defaultValue;
+    return selectOptions;
   }
 
-  return (defaultValue as Option[]).map(option => ({
+  return (selectOptions as Option[]).map(option => ({
     ...option,
     checked: (defaultFormValue as string[]).includes(option.label) ? 'on' : undefined,
   }));
