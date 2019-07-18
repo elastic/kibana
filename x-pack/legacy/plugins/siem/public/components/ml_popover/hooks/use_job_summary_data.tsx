@@ -10,6 +10,10 @@ import { Job } from '../types';
 import { KibanaConfigContext } from '../../../lib/adapters/framework/kibana_framework_adapter';
 import { hasMlUserPermissions } from '../../ml/permissions/has_ml_user_permissions';
 import { MlCapabilitiesContext } from '../../ml/permissions/ml_capabilities_provider';
+import { useStateToaster } from '../../toasters';
+import { errorToToaster } from '../../ml/api/error_to_toaster';
+
+import * as i18n from './translations';
 
 type Return = [boolean, Job[] | null];
 
@@ -18,16 +22,17 @@ export const getSiemJobsFromJobsSummary = (data: Job[]) =>
     return job.groups.includes('siem') ? [...jobs, job] : jobs;
   }, []);
 
-export const useJobSummaryData = (jobIds: string[], refetchSummaryData = false): Return => {
+export const useJobSummaryData = (jobIds: string[] = [], refreshToggle = false): Return => {
   const [jobSummaryData, setJobSummaryData] = useState<Job[] | null>(null);
   const [loading, setLoading] = useState(true);
   const config = useContext(KibanaConfigContext);
   const capabilities = useContext(MlCapabilitiesContext);
+  const userPermissions = hasMlUserPermissions(capabilities);
+  const [, dispatchToaster] = useStateToaster();
 
   const fetchFunc = async () => {
-    if (jobIds.length > 0) {
-      const userPermissions = hasMlUserPermissions(capabilities);
-      if (userPermissions) {
+    if (userPermissions) {
+      try {
         const data: Job[] = await jobsSummary(jobIds, {
           'kbn-version': config.kbnVersion,
         });
@@ -36,6 +41,8 @@ export const useJobSummaryData = (jobIds: string[], refetchSummaryData = false):
         const siemJobs = getSiemJobsFromJobsSummary(data);
 
         setJobSummaryData(siemJobs);
+      } catch (error) {
+        errorToToaster({ title: i18n.JOB_SUMMARY_FETCH_FAILURE, error, dispatchToaster });
       }
     }
     setLoading(false);
@@ -44,7 +51,7 @@ export const useJobSummaryData = (jobIds: string[], refetchSummaryData = false):
   useEffect(() => {
     setLoading(true);
     fetchFunc();
-  }, [jobIds.join(','), refetchSummaryData]);
+  }, [refreshToggle, userPermissions]);
 
   return [loading, jobSummaryData];
 };

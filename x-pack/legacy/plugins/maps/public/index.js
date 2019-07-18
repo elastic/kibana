@@ -15,6 +15,7 @@ import 'uiExports/fieldFormats';
 import 'uiExports/inspectorViews';
 import 'uiExports/search';
 import 'uiExports/embeddableFactories';
+import 'uiExports/embeddableActions';
 import 'ui/agg_types';
 
 import { capabilities } from 'ui/capabilities';
@@ -32,7 +33,7 @@ import './angular/services/gis_map_saved_object_loader';
 import './angular/map_controller';
 import listingTemplate from './angular/listing_ng_wrapper.html';
 import mapTemplate from './angular/map.html';
-import { MapListing } from './shared/components/map_listing';
+import { MapListing } from './components/map_listing';
 import { recentlyAccessed } from 'ui/persisted_log';
 
 import { data } from 'plugins/data/setup';

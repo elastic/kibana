@@ -9,10 +9,10 @@ import rison from 'rison-node';
 import chrome from 'ui/chrome';
 
 export function moveToDataFrameWizard() {
-  window.location.href = '#/data_frames/new_job';
+  window.location.href = '#/data_frames/new_transform';
 }
 
-export function moveToDataFrameJobsList() {
+export function moveToDataFrameTransformList() {
   window.location.href = '#/data_frames';
 }
 

@@ -60,16 +60,18 @@ export interface RawAlertAction extends SavedObjectAttributes {
 }
 
 export interface Alert {
+  enabled: boolean;
   alertTypeId: string;
-  interval: number;
+  interval: string;
   actions: AlertAction[];
   alertTypeParams: Record<string, any>;
   scheduledTaskId?: string;
 }
 
 export interface RawAlert extends SavedObjectAttributes {
+  enabled: boolean;
   alertTypeId: string;
-  interval: number;
+  interval: string;
   actions: RawAlertAction[];
   alertTypeParams: SavedObjectAttributes;
   scheduledTaskId?: string;

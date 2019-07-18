@@ -12,7 +12,7 @@ export function getMetricsDateHistogramParams(start: number, end: number) {
     field: '@timestamp',
 
     // ensure minimum bucket size of 30s since this is the default resolution for metric data
-    interval: `${Math.max(bucketSize, 30)}s`,
+    fixed_interval: `${Math.max(bucketSize, 30)}s`,
 
     min_doc_count: 0,
     extended_bounds: { min: start, max: end }

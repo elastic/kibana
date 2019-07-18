@@ -60,6 +60,7 @@ export interface InfraMetricModelSeries {
   terms_field?: string;
   terms_size?: number;
   terms_order_by?: string;
+  filter?: string;
 }
 
 export interface InfraMetricModelBasicMetric {

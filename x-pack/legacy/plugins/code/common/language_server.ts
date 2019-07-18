@@ -26,21 +26,16 @@ export interface LanguageServer {
 
 export const CTAGS_SUPPORT_LANGS = [
   'c',
-  'clojure',
   'cpp',
   'csharp',
-  'kotlin',
   'lua',
   'pascal',
   'perl',
   'php',
-  'powershell',
   'python',
   'ruby',
-  'rust',
   'scheme',
   'shell',
   'sql',
-  'swift',
   'tcl',
 ];
