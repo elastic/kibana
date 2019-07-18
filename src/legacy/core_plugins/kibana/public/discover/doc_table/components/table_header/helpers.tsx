@@ -35,8 +35,10 @@ export function getAriaSortLabel(columnName: string, sortOrder: SortOrder) {
 }
 
 export function getSortHeaderClass(columnName: string, sortOrder: SortOrder) {
-  const defaultClass = ['fa', 'fa-sort-up', 'kbnDocTableHeader__sortChange'];
+  const directionClass =
+    Array.isArray(sortOrder) && columnName === sortOrder[0] && sortOrder[1] === 'desc'
+      ? 'fa-sort-down'
+      : 'fa-sort-up';
 
-  if (!sortOrder || columnName !== sortOrder[0]) return defaultClass.join(' ');
-  return ['fa', sortOrder[1] === 'asc' ? 'fa-sort-up' : 'fa-sort-down'].join(' ');
+  return `kbnDocTableHeader__sortChange fa ${directionClass}`;
 }
