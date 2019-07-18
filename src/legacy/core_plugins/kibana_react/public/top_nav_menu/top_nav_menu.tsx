@@ -98,7 +98,7 @@ export function TopNavMenu(props: Props) {
             wrap={true}
             className="topNavMenu"
           >
-            <EuiFlexGroup justifyContent="flexStart" gutterSize="none">
+            <EuiFlexGroup justifyContent="flexStart" gutterSize="none" responsive={false}>
               {renderItems()}
             </EuiFlexGroup>
             <EuiFlexItem grow={false}>{renderSearchBar()}</EuiFlexItem>
@@ -113,6 +113,7 @@ export function TopNavMenu(props: Props) {
             justifyContent="flexStart"
             gutterSize="none"
             className="topNavMenu"
+            responsive={false}
           >
             {renderItems()}
           </EuiFlexGroup>
