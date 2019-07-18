@@ -59,8 +59,11 @@ function generator({ artifactTarball, versionTag, license, usePublicArtifact  })
   # Add Reporting dependencies.
   RUN yum update -y && yum install -y fontconfig freetype && yum clean all
 
-  # Add an init process
-  RUN curl -o /usr/local/bin/dumb-init https://github.com/Yelp/dumb-init/releases/download/v1.2.2/dumb-init_1.2.2_amd64 && chmod +x /usr/local/bin/dumb-init
+  # Add an init process, check the checksum to make sure it's a match
+  RUN curl -L -o /usr/local/bin/dumb-init https://github.com/Yelp/dumb-init/releases/download/v1.2.2/dumb-init_1.2.2_amd64
+  RUN echo "37f2c1f0372a45554f1b89924fbb134fc24c3756efaedf11e07f599494e0eff9  /usr/local/bin/dumb-init" | sha256sum -c -
+  RUN chmod +x /usr/local/bin/dumb-init
+
 
   # Bring in Kibana from the initial stage.
   COPY --from=prep_files --chown=1000:0 /usr/share/kibana /usr/share/kibana
