@@ -1,0 +1,74 @@
+[role="xpack"]
+[[canvas-elements]]
+== Customize your workpad with elements
+
+Elements are the core building blocks of your workpad. When you add elements to your workpad, you can use the elements that come with Canvas, or create your own.
+
+[float]
+[[add-canvas-element]]
+== Add a Canvas element to your workpad
+
+. Click *Add Element*, then select the best element to show off your data. 
++
+image::images/canvas-element-select.gif[]
+
+. Elements come preselected with default styles and demo data so that you can familiarize yourself with the element. Play around with the default settings and see what the element can do. 
+
+[float]
+[[connect-element-data]]
+=== Connect your own data
+
+When you are ready, connect the element to your own data using the panel on the right.
+
+. Make sure that the element is selected, then select *Data*.
+
+. Click *Change your data source*.
+
+. Click on the type of data source you want to use.
+
+. Specify the data source options, then click *Preview*.
+
+. If the element looks correct, click *Save*.
+
+[float]
+[[element-display-options]]
+
+=== Choose the display options
+
+. Make sure that the element is selected, then select *Display*.
+
+. For each element type, the display options are different. To expand the options, click *+*.
+
+. For advanced display options, expand and use the *Element style* options.
+
+. To move the element, click and drag it across your workpad.
+
+. To resize the element, select the sizing icons, then drag to the size you want.
+
+
+
+[float]
+[[create-custom-element]]
+== Create a custom element
+
+[float]
+== Add more pages to your workpad
+
+Add more pages to your workpad, then select the page transition.
+
+. Click *Page 1*, then click the *+* icon.
+
+. From the *Transition* drop-down list, select the page transition you want to use. 
+
+//TODO insert image
+
+Once you're ready to show off what you've created, use the presentation options in the upper left corner. These options control things such as data refresh intervals, display modes, and sharing capabilities.
+
+In the top menu area, just above the page, there are a number of controls. On the left side of the top menu, you will find presentation-related features that control things such as data refresh intervals, display modes, and sharing capabilities. These will come in handy once you’re ready to show off your creation!
+
+We'll talk more about how to import and export workpads in Sharing workpads, but keep in mind that you can import workpad JSON files by dragging them onto the Canvas home page. Maybe your data-loving friends have some that they care share!
+
+
+TIP: To view your workpad in fullscreen mode, click the *Enter fullscreen mode* icon in the upper left corner.
+
+No need to worry about cluttering up your space with too many workpads. The bulk editing actions allow you to clean up whenever you need.
