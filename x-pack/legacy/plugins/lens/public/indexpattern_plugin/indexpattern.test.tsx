@@ -16,8 +16,10 @@ import {
   IndexPatternColumn,
 } from './indexpattern';
 import { DatasourcePublicAPI, Operation, Datasource } from '../types';
+import { generateId } from '../id_generator';
 
 jest.mock('./loader');
+jest.mock('../id_generator');
 // chrome, notify, storage are used by ./plugin
 jest.mock('ui/chrome');
 jest.mock('ui/notify');
@@ -242,6 +244,7 @@ describe('IndexPattern Data Source', () => {
           currentIndexPatternId: '1',
           layers: {},
         });
+        (generateId as jest.Mock).mockReturnValueOnce('suggestedLayer');
       });
 
       it('should apply a bucketed aggregation for a string field', () => {
@@ -255,14 +258,18 @@ describe('IndexPattern Data Source', () => {
         expect(suggestions).toHaveLength(1);
         expect(suggestions[0].state).toEqual(
           expect.objectContaining({
-            columnOrder: ['col1', 'col2'],
-            columns: {
-              col1: expect.objectContaining({
-                operationType: 'terms',
-                sourceField: 'source',
-              }),
-              col2: expect.objectContaining({
-                operationType: 'count',
+            layers: {
+              suggestedLayer: expect.objectContaining({
+                columnOrder: ['col1', 'col2'],
+                columns: {
+                  col1: expect.objectContaining({
+                    operationType: 'terms',
+                    sourceField: 'source',
+                  }),
+                  col2: expect.objectContaining({
+                    operationType: 'count',
+                  }),
+                },
               }),
             },
           })
@@ -279,6 +286,7 @@ describe('IndexPattern Data Source', () => {
             }),
           ],
         });
+        expect(suggestions[0].layerId).toEqual('suggestedLayer');
       });
 
       it('should apply a bucketed aggregation for a date field', () => {
@@ -292,14 +300,18 @@ describe('IndexPattern Data Source', () => {
         expect(suggestions).toHaveLength(1);
         expect(suggestions[0].state).toEqual(
           expect.objectContaining({
-            columnOrder: ['col1', 'col2'],
-            columns: {
-              col1: expect.objectContaining({
-                operationType: 'date_histogram',
-                sourceField: 'timestamp',
-              }),
-              col2: expect.objectContaining({
-                operationType: 'count',
+            layers: {
+              suggestedLayer: expect.objectContaining({
+                columnOrder: ['col1', 'col2'],
+                columns: {
+                  col1: expect.objectContaining({
+                    operationType: 'date_histogram',
+                    sourceField: 'timestamp',
+                  }),
+                  col2: expect.objectContaining({
+                    operationType: 'count',
+                  }),
+                },
               }),
             },
           })
@@ -329,15 +341,19 @@ describe('IndexPattern Data Source', () => {
         expect(suggestions).toHaveLength(1);
         expect(suggestions[0].state).toEqual(
           expect.objectContaining({
-            columnOrder: ['col1', 'col2'],
-            columns: {
-              col1: expect.objectContaining({
-                sourceField: 'timestamp',
-                operationType: 'date_histogram',
-              }),
-              col2: expect.objectContaining({
-                sourceField: 'bytes',
-                operationType: 'min',
+            layers: {
+              suggestedLayer: expect.objectContaining({
+                columnOrder: ['col1', 'col2'],
+                columns: {
+                  col1: expect.objectContaining({
+                    operationType: 'date_histogram',
+                    sourceField: 'timestamp',
+                  }),
+                  col2: expect.objectContaining({
+                    operationType: 'min',
+                    sourceField: 'bytes',
+                  }),
+                },
               }),
             },
           })
@@ -475,6 +491,7 @@ describe('IndexPattern Data Source', () => {
               },
             ],
           },
+          layerId: 'first',
         },
       ]);
     });

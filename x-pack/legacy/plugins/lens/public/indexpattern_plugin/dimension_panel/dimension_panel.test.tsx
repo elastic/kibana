@@ -609,13 +609,11 @@ describe('IndexPatternDimensionPanel', () => {
 
   it('should select operation directly if only one field is possible', () => {
     const initialState = {
-      ...defaultProps.state,
+      ...state,
       indexPatterns: {
         1: {
-          ...defaultProps.state.indexPatterns['1'],
-          fields: defaultProps.state.indexPatterns['1'].fields.filter(
-            field => field.name !== 'memory'
-          ),
+          ...state.indexPatterns['1'],
+          fields: state.indexPatterns['1'].fields.filter(field => field.name !== 'memory'),
         },
       },
     };
@@ -630,15 +628,20 @@ describe('IndexPatternDimensionPanel', () => {
 
     expect(setState).toHaveBeenCalledWith({
       ...initialState,
-      columns: {
-        ...state.columns,
-        col2: expect.objectContaining({
-          sourceField: 'bytes',
-          operationType: 'avg',
-          // Other parts of this don't matter for this test
-        }),
+      layers: {
+        first: {
+          ...initialState.layers.first,
+          columns: {
+            ...initialState.layers.first.columns,
+            col2: expect.objectContaining({
+              sourceField: 'bytes',
+              operationType: 'avg',
+              // Other parts of this don't matter for this test
+            }),
+          },
+          columnOrder: ['col1', 'col2'],
+        },
       },
-      columnOrder: ['col1', 'col2'],
     });
   });
 

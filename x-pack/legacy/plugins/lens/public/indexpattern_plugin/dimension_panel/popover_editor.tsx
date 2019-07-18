@@ -95,7 +95,14 @@ export function PopoverEditor(props: PopoverEditorProps) {
                 'sourceField'
               );
               if (possibleColumns.length === 1) {
-                setState(changeColumn(state, columnId, possibleColumns[0]));
+                setState(
+                  changeColumn({
+                    state,
+                    layerId,
+                    columnId,
+                    newColumn: possibleColumns[0],
+                  })
+                );
               } else {
                 setInvalidOperationType(operationType);
               }
