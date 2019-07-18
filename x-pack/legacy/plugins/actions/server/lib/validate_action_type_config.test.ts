@@ -6,6 +6,11 @@
 
 import { schema } from '@kbn/config-schema';
 import { validateActionTypeConfig } from './validate_action_type_config';
+import { ExecutorType } from '../types';
+
+const executor: ExecutorType = async options => {
+  return { status: 'ok' };
+};
 
 test('should return passed in config when validation not defined', () => {
   const result = validateActionTypeConfig(
@@ -13,7 +18,7 @@ test('should return passed in config when validation not defined', () => {
       id: 'my-action-type',
       name: 'My action type',
       unencryptedAttributes: [],
-      async executor() {},
+      executor,
     },
     {
       foo: true,
@@ -34,7 +39,7 @@ test('should validate and apply defaults when actionTypeConfig is valid', () => 
           param2: schema.string({ defaultValue: 'default-value' }),
         }),
       },
-      async executor() {},
+      executor,
     },
     { param1: 'value' }
   );
@@ -58,7 +63,7 @@ test('should validate and throw error when actionTypeConfig is invalid', () => {
             }),
           }),
         },
-        async executor() {},
+        executor,
       },
       {
         obj: {},
