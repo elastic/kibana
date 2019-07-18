@@ -620,9 +620,9 @@ import { CoreSetup, CoreStart, Plugin } from '../../../../core/public';
 import { FooSetup, FooStart } from '../../../../legacy/core_plugins/foo/public';
 
 /** @public */
-export type DemoSetup = ReturnType<DemoPublicPlugin['setup']>;
+export type DemoSetup = {}
 /** @public */
-export type DemoStart = ReturnType<DemoPublicPlugin['start']>;
+export type DemoStart = {}
 
 /** @internal */
 export interface DemoSetupPlugins {
@@ -678,7 +678,7 @@ import { DemoSetup, DemoStart, DemoSetupPlugins, DemoStartPlugins, DemoPublicPlu
 export const plugin: PluginInitializer<DemoSetup, DemoStart, DemoSetupPlugins, DemoStartPlugins> = (
   initializerContext: PluginInitializerContext
 ) => {
-  return new DataPublicPlugin();
+  return new DemoPublicPlugin();
 };
 
 const myPureFn = (x: number): number => x + 1;
@@ -708,6 +708,14 @@ import { plugin } from '.';
 import { setup as fooSetup, start as fooStart } from '../../foo/public/legacy'; // assumes `foo` lives in `legacy/core_plugins`
 
 const pluginInstance = plugin({} as PluginInitializerContext);
+const shimCoreSetup = {
+  ...npSetup.core,
+  bar: {}, // shim for a core service that hasn't migrated yet
+};
+const shimCoreStart = {
+  ...npStart.core,
+  bar: {},
+};
 const shimSetupPlugins = {
   ...npSetup.plugins,
   foo: fooSetup,
@@ -717,9 +725,11 @@ const shimStartPlugins = {
   foo: fooStart,
 };
 
-export const setup = pluginInstance.setup(npSetup.core, shimSetupPlugins);
-export const start = pluginInstance.start(npStart.core, shimStartPlugins);
+export const setup = pluginInstance.setup(shimCoreSetup, shimSetupPlugins);
+export const start = pluginInstance.start(shimCoreStart, shimStartPlugins);
 ```
+
+> As you build your shims, you may be wondering where you will find some legacy services in the new platform. Skip to [the tables below](#how-do-i-build-my-shim-for-new-platform-services) for a list of some of the more common legacy services and where we currently expect them to live.
 
 Notice how in the example above, we are importing the `setup` and `start` contracts from the legacy shim provided by `foo` plugin; we could just as easily be importing modules from `ui/public` here as well.
 
@@ -817,7 +827,7 @@ With the previous steps resolved, this final step should be easy, but the exact 
 
 For a few plugins, some of these steps (such as angular removal) could be a months-long process. In those cases, it may be helpful from an organizational perspective to maintain a clear separation of code that is and isn't "ready" for the new platform.
 
-One convention that is useful for this is creating a dedicated `public/new_platform` directory to house the code that is ready to migrate, and gradually move more and more code into it until the rest of your plugin is essentially empty. At that point, you'll be able to copy your `index.ts`, `plugin.ts`, and the contents of `./new_platform` over into your plugin in the new platform, leaving your legacy shim behind. This carries the added benefit of providing a way for us to introduce helpful tooling in the future, such as custom eslint rules, which could be run against that specific directory to ensure your code is ready to migrate.
+One convention that is useful for this is creating a dedicated `public/np_ready` directory to house the code that is ready to migrate, and gradually move more and more code into it until the rest of your plugin is essentially empty. At that point, you'll be able to copy your `index.ts`, `plugin.ts`, and the contents of `./np_ready` over into your plugin in the new platform, leaving your legacy shim behind. This carries the added benefit of providing a way for us to introduce helpful tooling in the future, such as [custom eslint rules](https://github.com/elastic/kibana/pull/40537), which could be run against that specific directory to ensure your code is ready to migrate.
 
 ## Frequently asked questions
 
