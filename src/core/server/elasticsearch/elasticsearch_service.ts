@@ -59,7 +59,7 @@ export interface ElasticsearchServiceSetup {
    * @example
    * ```js
    * const client = elasticsearch.createCluster('my-app-name', config);
-   * const data = await client.callAsInternalUser();
+   * const data = await client.callWithInternalUser();
    * ```
    */
   readonly createClient: (

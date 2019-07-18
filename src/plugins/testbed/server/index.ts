@@ -50,7 +50,7 @@ class Plugin {
         })
       ),
       pingElasticsearch$: core.elasticsearch.adminClient$.pipe(
-        mergeMap(client => client.callAsInternalUser('ping'))
+        mergeMap(client => client.callWithInternalUser('ping'))
       ),
     };
   }

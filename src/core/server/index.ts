@@ -49,12 +49,9 @@ export { ConfigService } from './config';
 export {
   CallAPIOptions,
   ClusterClient,
-  Headers,
-  ScopedClusterClient,
   ElasticsearchClientConfig,
   ElasticsearchError,
   ElasticsearchErrorHelpers,
-  APICaller,
   FakeRequest,
   LegacyRequest,
 } from './elasticsearch';
@@ -64,6 +61,7 @@ export {
   AuthResultData,
   AuthToolkit,
   GetAuthHeaders,
+  Headers,
   KibanaRequest,
   KibanaRequestRoute,
   OnPreAuthHandler,

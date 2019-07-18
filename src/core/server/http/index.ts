@@ -21,6 +21,7 @@ export { config, HttpConfig, HttpConfigType } from './http_config';
 export { HttpService, HttpServiceSetup, HttpServiceStart } from './http_service';
 export { GetAuthHeaders } from './auth_headers_storage';
 export {
+  Headers,
   isRealRequest,
   KibanaRequest,
   KibanaRequestRoute,

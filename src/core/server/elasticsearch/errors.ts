@@ -66,7 +66,7 @@ function decorate(
  * Handle errors
  * ```js
  * try {
- *   await client.asScoped(request).callAsCurrentUser(...);
+ *   await client.callWithRequest(request, ...)
  * } catch (err) {
  *   if (ElasticsearchErrorHelpers.isNotAuthorizedError(err)) {
  *     const authHeader = err.output.headers['WWW-Authenticate'];
