@@ -97,6 +97,7 @@ const FIELDS = [
   'version',
   'fields',
   'index',
+  'xOpaqueId'
 ];
 
 function parseInitialFields(initialFields) {
@@ -488,6 +489,9 @@ export function SearchSourceProvider(Promise, Private, config) {
           break;
         case 'fields':
           data[key] = _.uniq([...(data[key] || []), ...val]);
+          break;
+        case 'xOpaqueId':
+          data.headers = { 'X-Opaque-Id': val };
           break;
         default:
           addToBody();

@@ -192,7 +192,8 @@ function discoverController(
   courier,
   kbnUrl,
   localStorage,
-  uiCapabilities
+  uiCapabilities,
+  $injector
 ) {
   const visualizeLoader = Private(VisualizeLoaderProvider);
   let visualizeHandler;
@@ -646,7 +647,6 @@ function discoverController(
           $scope.updateTime();
         }
 
-        init.complete = true;
         $state.replace();
       });
   });
@@ -697,9 +697,6 @@ function discoverController(
   }
 
   $scope.opts.fetch = $scope.fetch = function () {
-    // ignore requests to fetch before the app inits
-    if (!init.complete) return;
-
     $scope.fetchError = undefined;
 
     $scope.updateTime();
@@ -829,12 +826,32 @@ function discoverController(
     kbnUrl.change('/discover');
   };
 
+  async function getXOpaqueIdPrefix() {
+    try {
+      const ShieldUser = $injector.get('ShieldUser');
+      const user = await ShieldUser.getCurrent().$promise;
+      return user.username;
+    } catch (e) {
+      return '';
+    }
+  }
+
+  async function getXOpaqueId() {
+    const prefix = await getXOpaqueIdPrefix();
+    const type = savedSearch.getEsType();
+    const id = savedSearch.id || '';
+    return [prefix.split(':').join(''), type, id].join(':');
+  }
+
   $scope.updateDataSource = Promise.method(function updateDataSource() {
-    $scope.searchSource
-      .setField('size', $scope.opts.sampleSize)
-      .setField('sort', getSort($state.sort, $scope.indexPattern))
-      .setField('query', !$state.query ? null : $state.query)
-      .setField('filter', queryFilter.getFilters());
+    getXOpaqueId().then(xOpaqueId => {
+      $scope.searchSource
+        .setField('size', $scope.opts.sampleSize)
+        .setField('sort', getSort($state.sort, $scope.indexPattern))
+        .setField('query', !$state.query ? null : $state.query)
+        .setField('filter', queryFilter.getFilters())
+        .setField('xOpaqueId', xOpaqueId);
+    });
   });
 
   $scope.setSortOrder = function setSortOrder(columnName, direction) {

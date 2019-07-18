@@ -74,11 +74,16 @@ export const defaultSearchStrategy = {
       };
     }
 
+    const headers = searchRequests.reduce((result, request) => {
+      return { ...result, ...request.fetchParams.headers };
+    }, {});
+
     const msearchParams = {
       rest_total_hits_as_int: true,
       // If we want to include frozen indexes we need to specify ignore_throttled: false
       ignore_throttled: !includeFrozen,
       body: serializedFetchParams,
+      headers
     };
 
     if (maxConcurrentShardRequests !== 0) {
