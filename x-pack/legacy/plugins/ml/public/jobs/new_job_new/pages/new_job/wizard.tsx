@@ -65,13 +65,12 @@ export const Wizard: FC<Props> = ({
     0
   );
 
-  async function validate() {
-    await jobValidator.validate();
-    setJobValidatorUpdate(jobValidatorUpdated);
-  }
-
   useEffect(() => {
-    validate();
+    // IIFE to run the validation. the useEffect callback can't be async
+    (async () => {
+      await jobValidator.validate();
+      setJobValidatorUpdate(jobValidatorUpdated);
+    })();
   }, [jobCreatorUpdated]);
 
   const jobCreatorContext: JobCreatorContextValue = {

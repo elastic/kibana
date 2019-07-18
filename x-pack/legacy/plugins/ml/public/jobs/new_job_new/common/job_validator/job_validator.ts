@@ -9,6 +9,11 @@ import { newJobLimits } from '../../../new_job/utils/new_job_defaults';
 import { JobCreator } from '../job_creator';
 import { populateValidationMessages } from './util';
 
+// delay start of validation to allow the user to make changes
+// e.g. if they are typing in a new value, try not to validate
+// after every keystroke
+const VALIDATION_DELAY_MS = 500;
+
 export interface ValidationSummary {
   basic: boolean;
   advanced: boolean;
@@ -53,15 +58,15 @@ export class JobValidator {
 
   public validate() {
     const formattedJobConfig = this._jobCreator.formattedJobJson;
-    // only validate if the config has changed
     return new Promise((resolve: () => void) => {
+      // only validate if the config has changed
       if (formattedJobConfig !== this._lastJobConfig) {
         clearTimeout(this._validateTimeout);
         this._lastJobConfig = formattedJobConfig;
         this._validateTimeout = setTimeout(() => {
           this._runBasicValidation();
           resolve();
-        }, 500);
+        }, VALIDATION_DELAY_MS);
       } else {
         resolve();
       }
