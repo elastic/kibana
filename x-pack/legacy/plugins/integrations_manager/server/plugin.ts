@@ -45,7 +45,7 @@ export class Plugin {
       // merge route.options.bind, defined or otherwise, into pluginContext
       // routes can add extra values or override pluginContext values (e.g. spies, etc)
       if (!route.options) route.options = {};
-      route.options.bind = Object.assign(pluginContext, route.options.bind);
+      route.options.bind = Object.assign({}, pluginContext, route.options.bind);
 
       return route;
     });
