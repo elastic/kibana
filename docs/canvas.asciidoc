@@ -34,10 +34,4 @@ include::canvas/canvas-workpad.asciidoc[]
 
 include::canvas/canvas-function-reference.asciidoc[]
 
-include::canvas/canvas-common-functions.asciidoc[]
-
-include::canvas/canvas-server-functions.asciidoc[]
-
-include::canvas/canvas-client-functions.asciidoc[]
-
 include::canvas/canvas-tinymath-functions.asciidoc[]

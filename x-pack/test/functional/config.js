@@ -30,7 +30,9 @@ import {
   LicenseManagementPageProvider,
   IndexManagementPageProvider,
   IndexLifecycleManagementPageProvider,
-  SnapshotRestorePageProvider
+  SnapshotRestorePageProvider,
+  CrossClusterReplicationPageProvider,
+  RemoteClustersPageProvider,
 } from './page_objects';
 
 import {
@@ -117,7 +119,9 @@ export default async function ({ readConfigFile }) {
       resolve(__dirname, './apps/license_management'),
       resolve(__dirname, './apps/index_management'),
       resolve(__dirname, './apps/index_lifecycle_management'),
-      resolve(__dirname, './apps/snapshot_restore')
+      resolve(__dirname, './apps/snapshot_restore'),
+      resolve(__dirname, './apps/cross_cluster_replication'),
+      resolve(__dirname, './apps/remote_clusters'),
     ],
 
     // define the name and providers for services that should be
@@ -187,7 +191,9 @@ export default async function ({ readConfigFile }) {
       licenseManagement: LicenseManagementPageProvider,
       indexManagement: IndexManagementPageProvider,
       indexLifecycleManagement: IndexLifecycleManagementPageProvider,
-      snapshotRestore: SnapshotRestorePageProvider
+      snapshotRestore: SnapshotRestorePageProvider,
+      crossClusterReplication: CrossClusterReplicationPageProvider,
+      remoteClusters: RemoteClustersPageProvider
     },
 
     servers: kibanaFunctionalConfig.get('servers'),
@@ -301,6 +307,14 @@ export default async function ({ readConfigFile }) {
       snapshotRestore: {
         pathname: '/app/kibana',
         hash: '/management/elasticsearch/snapshot_restore',
+      },
+      crossClusterReplication: {
+        pathname: '/app/kibana',
+        hash: '/management/elasticsearch/cross_cluster_replication',
+      },
+      remoteClusters: {
+        pathname: '/app/kibana',
+        hash: '/management/elasticsearch/remote_clusters',
       },
       apm: {
         pathname: '/app/apm',

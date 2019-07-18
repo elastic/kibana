@@ -10,3 +10,4 @@ export { RawKibanaPrivileges, RawKibanaFeaturePrivileges } from './raw_kibana_pr
 export { KibanaPrivileges } from './kibana_privileges';
 export { User, EditUser, getUserDisplayName } from './user';
 export { AuthenticatedUser, canUserChangePassword } from './authenticated_user';
+export { BuiltinESPrivileges } from './builtin_es_privileges';

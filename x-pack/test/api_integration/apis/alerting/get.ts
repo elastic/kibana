@@ -45,6 +45,7 @@ export default function createGetTests({ getService }: KibanaFunctionalTestDefau
             id: alertId,
             alertTypeId: 'test.noop',
             interval: '10s',
+            enabled: true,
             actions: [
               {
                 group: 'default',

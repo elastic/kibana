@@ -103,10 +103,7 @@ export class ElasticsearchHostsAdapter implements HostsAdapter {
   }
 }
 
-export const formatHostEdgesData = (
-  fields: ReadonlyArray<string>,
-  bucket: HostAggEsItem
-): HostsEdges =>
+export const formatHostEdgesData = (fields: readonly string[], bucket: HostAggEsItem): HostsEdges =>
   fields.reduce<HostsEdges>(
     (flattenedFields, fieldName) => {
       const hostId = get('key', bucket);
@@ -128,7 +125,7 @@ export const formatHostEdgesData = (
     }
   );
 
-const formatHostItem = (fields: ReadonlyArray<string>, bucket: HostAggEsItem): HostItem =>
+const formatHostItem = (fields: readonly string[], bucket: HostAggEsItem): HostItem =>
   fields.reduce<HostItem>((flattenedFields, fieldName) => {
     const fieldValue = getHostFieldValue(fieldName, bucket);
     if (fieldValue != null) {

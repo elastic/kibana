@@ -45,6 +45,7 @@ uiModules
         showTotal: '=',
         totalFunc: '=',
         filter: '=',
+        percentageCol: '=',
       },
       controllerAs: 'paginatedTable',
       controller: function ($scope) {

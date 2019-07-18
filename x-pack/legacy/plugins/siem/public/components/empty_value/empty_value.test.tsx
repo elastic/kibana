@@ -28,8 +28,9 @@ describe('EmptyValue', () => {
     expect(toJson(wrapper)).toMatchSnapshot();
   });
 
-  describe('#getEmptyValue', () =>
-    test('should return an empty value', () => expect(getEmptyValue()).toBe('--')));
+  describe('#getEmptyValue', () => {
+    test('should return an empty value', () => expect(getEmptyValue()).toBe('--'));
+  });
 
   describe('#getEmptyString', () => {
     test('should turn into an empty string place holder', () => {

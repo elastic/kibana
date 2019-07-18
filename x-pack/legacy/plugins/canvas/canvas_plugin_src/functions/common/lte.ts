@@ -37,7 +37,6 @@ export function lte(): ExpressionFunction<'lte', Context, Arguments, boolean> {
         return false;
       }
 
-      // @ts-ignore #35433 This is a wonky comparison for nulls
       return context <= value;
     },
   };

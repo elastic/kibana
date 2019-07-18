@@ -201,7 +201,7 @@ describe('elasticsearch_adapter', () => {
     };
 
     test('it formats a uncommon process data with a source of name correctly', () => {
-      const fields: ReadonlyArray<string> = ['process.name'];
+      const fields: readonly string[] = ['process.name'];
       const data = formatUncommonProcessesData(fields, hit, processFieldsMap);
       const expected: UncommonProcessesEdges = {
         cursor: { tiebreaker: null, value: 'cursor-1' },
@@ -221,7 +221,7 @@ describe('elasticsearch_adapter', () => {
     });
 
     test('it formats a uncommon process data with a source of name and title correctly', () => {
-      const fields: ReadonlyArray<string> = ['process.name', 'process.title'];
+      const fields: readonly string[] = ['process.name', 'process.title'];
       const data = formatUncommonProcessesData(fields, hit, processFieldsMap);
       const expected: UncommonProcessesEdges = {
         cursor: { tiebreaker: null, value: 'cursor-1' },
@@ -242,7 +242,7 @@ describe('elasticsearch_adapter', () => {
     });
 
     test('it formats a uncommon process data without any data if fields is empty', () => {
-      const fields: ReadonlyArray<string> = [];
+      const fields: readonly string[] = [];
       const data = formatUncommonProcessesData(fields, hit, processFieldsMap);
       const expected: UncommonProcessesEdges = {
         cursor: {
