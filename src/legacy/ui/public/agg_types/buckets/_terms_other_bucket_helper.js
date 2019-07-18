@@ -147,6 +147,7 @@ export const buildOtherBucketAgg = (aggConfigs, aggWithOtherBucket, response) =>
     // make sure there are actually results for the buckets
     if (aggs[aggId].buckets.length < 1) {
       noAggBucketResults = true;
+      return;
     }
 
     const agg = aggs[aggId];
