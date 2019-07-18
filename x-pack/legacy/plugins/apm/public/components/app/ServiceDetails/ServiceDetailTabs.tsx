@@ -10,7 +10,7 @@ import { IUrlParams } from '../../../context/UrlParamsContext/types';
 import { HistoryTabs } from '../../shared/HistoryTabs';
 import { ErrorGroupOverview } from '../ErrorGroupOverview';
 import { TransactionOverview } from '../TransactionOverview';
-import { ServiceMetrics } from './ServiceMetrics';
+import { ServiceMetrics } from '../ServiceMetrics';
 
 interface Props {
   transactionTypes: string[];
