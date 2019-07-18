@@ -5,9 +5,12 @@
  */
 
 import {
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiLoadingSpinner,
   // @ts-ignore
   EuiLoadingSpinnerSize,
+  EuiText,
 } from '@elastic/eui';
 import React from 'react';
 import { pure } from 'recompose';
@@ -15,9 +18,7 @@ import styled, { css } from 'styled-components';
 
 const Aside = styled.aside<{ overlay?: boolean; overlayBackground?: string }>`
   ${props => css`
-    align-items: center;
-    display: flex;
-    justify-content: center;
+    padding: ${props.theme.eui.paddingSizes.m};
 
     ${props.overlay &&
       `
@@ -26,12 +27,25 @@ const Aside = styled.aside<{ overlay?: boolean; overlayBackground?: string }>`
       };
       bottom: 0;
       left: 0;
-      opacity: 0.9; //Using opacity instead of rgba because styled components don't appear to support rgba with hex colors
+      opacity: 0.9; // Michael - Using opacity instead of rgba because styled components don't support hex colors in rgba
       position: absolute;
       right: 0;
       top: 0;
       z-index: 3;
     `}
+  `}
+`;
+
+const FlexGroup = styled(EuiFlexGroup).attrs({
+  alignItems: 'center',
+  direction: 'column',
+  gutterSize: 's',
+  justifyContent: 'center',
+})<{ overlay?: boolean }>`
+  ${({ overlay }) =>
+    overlay &&
+    `
+    height: 100%;
   `}
 `;
 
@@ -41,8 +55,20 @@ export interface LoaderProps {
   size?: EuiLoadingSpinnerSize;
 }
 
-export const Loader = pure<LoaderProps>(({ overlay, overlayBackground, size }) => (
+export const Loader = pure<LoaderProps>(({ children, overlay, overlayBackground, size }) => (
   <Aside overlay={overlay} overlayBackground={overlayBackground}>
-    <EuiLoadingSpinner size={size} />
+    <FlexGroup overlay={overlay}>
+      <EuiFlexItem grow={false}>
+        <EuiLoadingSpinner size={size} />
+      </EuiFlexItem>
+
+      {children && (
+        <EuiFlexItem grow={false}>
+          <EuiText color="subdued" size="s">
+            <p>{children}</p>
+          </EuiText>
+        </EuiFlexItem>
+      )}
+    </FlexGroup>
   </Aside>
 ));

@@ -69,7 +69,7 @@ export const AnomaliesHostTable = React.memo<AnomaliesHostTableProps>(
       return null;
     } else {
       return (
-        <Panel>
+        <Panel loading={loading}>
           <HeaderPanel
             subtitle={
               !(loading && loadingInitial) &&
@@ -103,12 +103,11 @@ export const AnomaliesHostTable = React.memo<AnomaliesHostTableProps>(
 );
 
 const Panel = styled(EuiPanel)<{ loading?: boolean }>`
-  ${props => css`
-    position: relative;
+  position: relative;
 
-    ${props.loading &&
-      `
-      overflow: hidden;
-    `}
+  ${({ loading }) =>
+    loading &&
+    `
+    overflow: hidden;
   `}
 `;

@@ -187,6 +187,7 @@ export class LoadMoreTable<T, U, V, W, X, Y, Z, AA, AB> extends React.PureCompon
     return (
       <Panel
         data-test-subj={dataTestSubj}
+        loading={loading}
         onMouseEnter={this.mouseEnter}
         onMouseLeave={this.mouseLeave}
       >
@@ -307,13 +308,12 @@ export class LoadMoreTable<T, U, V, W, X, Y, Z, AA, AB> extends React.PureCompon
 }
 
 const Panel = styled(EuiPanel)<{ loading?: boolean }>`
-  ${props => css`
-    position: relative;
+  position: relative;
 
-    ${props.loading &&
-      `
-      overflow: hidden;
-    `}
+  ${({ loading }) =>
+    loading &&
+    `
+    overflow: hidden;
   `}
 `;
 

@@ -67,7 +67,7 @@ export const AnomaliesNetworkTable = React.memo<AnomaliesNetworkTableProps>(
       return null;
     } else {
       return (
-        <Panel>
+        <Panel loading={loading}>
           <HeaderPanel
             subtitle={
               !(loading && loadingInitial) &&
@@ -101,12 +101,11 @@ export const AnomaliesNetworkTable = React.memo<AnomaliesNetworkTableProps>(
 );
 
 const Panel = styled(EuiPanel)<{ loading?: boolean }>`
-  ${props => css`
-    position: relative;
+  position: relative;
 
-    ${props.loading &&
-      `
-      overflow: hidden;
-    `}
+  ${({ loading }) =>
+    loading &&
+    `
+    overflow: hidden;
   `}
 `;
