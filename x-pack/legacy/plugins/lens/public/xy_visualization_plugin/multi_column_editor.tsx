@@ -4,11 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
-import { EuiButtonIcon, EuiButton } from '@elastic/eui';
+import React, { useEffect } from 'react';
+import { EuiButtonIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { NativeRenderer } from '../native_renderer';
-import { generateId } from '../id_generator';
 import { DatasourcePublicAPI, Operation } from '../types';
 import { DragContextState } from '../drag_drop';
 
@@ -17,7 +16,7 @@ interface Props {
   datasource: DatasourcePublicAPI;
   dragDropContext: DragContextState;
   onRemove: (accessor: string) => void;
-  onAdd: (accessor: string) => void;
+  onAdd: () => void;
   filterOperations: (op: Operation) => boolean;
   suggestedPriority?: 0 | 1 | 2 | undefined;
   testSubj: string;
@@ -36,6 +35,14 @@ export function MultiColumnEditor({
   testSubj,
   layerId,
 }: Props) {
+  const lastOperation = datasource.getOperationForColumnId(accessors[accessors.length - 1]);
+
+  useEffect(() => {
+    if (lastOperation !== null) {
+      setTimeout(onAdd);
+    }
+  }, [lastOperation]);
+
   return (
     <>
       {accessors.map((accessor, i) => (
@@ -68,11 +75,6 @@ export function MultiColumnEditor({
           )}
         </div>
       ))}
-      <EuiButton
-        data-test-subj={`lnsXY_${testSubj}_add`}
-        onClick={() => onAdd(generateId())}
-        iconType="plusInCircle"
-      />
     </>
   );
 }

@@ -384,11 +384,14 @@ export function XYConfigPanel(props: VisualizationProps<State>) {
                 accessors={layer.splitSeriesAccessors}
                 datasource={frame.datasourceLayers[layer.layerId]}
                 dragDropContext={props.dragDropContext}
-                onAdd={accessor =>
+                onAdd={() =>
                   setState(
                     updateLayer(
                       state,
-                      { ...layer, splitSeriesAccessors: [...layer.splitSeriesAccessors, accessor] },
+                      {
+                        ...layer,
+                        splitSeriesAccessors: [...layer.splitSeriesAccessors, generateId()],
+                      },
                       index
                     )
                   )
@@ -450,13 +453,13 @@ export function XYConfigPanel(props: VisualizationProps<State>) {
                     accessors={layer.accessors}
                     datasource={frame.datasourceLayers[layer.layerId]}
                     dragDropContext={props.dragDropContext}
-                    onAdd={accessor =>
+                    onAdd={() =>
                       setState(
                         updateLayer(
                           state,
                           {
                             ...layer,
-                            accessors: [...layer.accessors, accessor],
+                            accessors: [...layer.accessors, generateId()],
                           },
                           index
                         )

@@ -17,6 +17,7 @@ import {
   EuiFormRow,
   EuiFieldText,
   EuiLink,
+  EuiButton,
 } from '@elastic/eui';
 import classNames from 'classnames';
 import { IndexPatternColumn, OperationType } from '../indexpattern';
@@ -137,19 +138,24 @@ export function PopoverEditor(props: PopoverEditorProps) {
       className="lnsConfigPanel__summaryPopover"
       anchorClassName="lnsConfigPanel__summaryPopoverAnchor"
       button={
-        <EuiLink
-          className="lnsConfigPanel__summaryLink"
-          onClick={() => {
-            setPopoverOpen(true);
-          }}
-          data-test-subj="indexPattern-configure-dimension"
-        >
-          {selectedColumn
-            ? selectedColumn.label
-            : i18n.translate('xpack.lens.indexPattern.configureDimensionLabel', {
-                defaultMessage: 'Configure dimension',
-              })}
-        </EuiLink>
+        selectedColumn ? (
+          <EuiLink
+            className="lnsConfigPanel__summaryLink"
+            onClick={() => {
+              setPopoverOpen(true);
+            }}
+            data-test-subj="indexPattern-configure-dimension"
+          >
+            {selectedColumn.label}
+          </EuiLink>
+        ) : (
+          <EuiButton
+            className="lnsConfigPanel__summaryLink"
+            data-test-subj="indexPattern-configure-dimension"
+            onClick={() => setPopoverOpen(true)}
+            iconType="plusInCircle"
+          />
+        )
       }
       isOpen={isPopoverOpen}
       closePopover={() => {
