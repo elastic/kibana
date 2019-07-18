@@ -8,12 +8,12 @@ to allow the request.
 
 The following example queues CSV report generation using the `POST` URL with cURL:
 
-[source,shell]
+["source","sh",subs="attributes"]
 ---------------------------------------------------------
 curl \
 -XPOST \ <1>
 -u elastic \ <2>
--H 'kbn-version: 8.0.0' \ <3>
+-H 'kbn-version: {version}' \ <3>
 'http://0.0.0.0:5601/api/reporting/generate/csv?jobParams=...' <4>
 ---------------------------------------------------------
 // CONSOLE
