@@ -216,10 +216,8 @@ function DefaultEditorAgg({
   };
 
   const buttonContent = (
-    <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
-      <EuiFlexItem grow={false} className="eui-textTruncate">
-        {agg.schema.title}
-      </EuiFlexItem>
+    <EuiFlexGroup gutterSize="xs" alignItems="baseline" responsive={false}>
+      <EuiFlexItem grow={false}>{agg.schema.title}</EuiFlexItem>
       <EuiFlexItem className="eui-textTruncate">
         {showDescription && (
           <EuiText size="s" color="subdued">

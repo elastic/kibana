@@ -221,11 +221,12 @@
 }
 
 // to apply truncated string with ellipsis for agg description
-vis-editor-agg-group-wrapper .visEditorSidebar__section > .euiFlexGroup > .euiFlexItem:first-child {
-  overflow: hidden;
-  padding: 0 0 1px 2px;
-
-  .euiAccordion__buttonContent {
+.visEditorSidebar__aggGroup .euiAccordion {
+  & > .euiFlexGroup > .euiFlexItem:first-child, .euiAccordion__buttonContent, .visEditorSidebar__accordionChild {
     overflow: hidden;
+  }
+
+  & > .euiFlexGroup > .euiFlexItem:first-child {
+    padding: 0 0 1px 2px;
   }
 }

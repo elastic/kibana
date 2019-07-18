@@ -152,6 +152,7 @@
     <div class="visEditorSidebar__config" ng-show="sidebar.section == 'data'">
       <!-- metrics -->
       <vis-editor-agg-group
+        class="visEditorSidebar__aggGroup"
         ng-if="vis.type.schemas.metrics"
         group-name="metrics"
         ng-model="_internalNgModelState"
@@ -160,6 +161,7 @@
       <div class="euiSpacer euiSpacer--s"></div>
       <!-- buckets -->
       <vis-editor-agg-group
+        class="visEditorSidebar__aggGroup"
         ng-if="vis.type.schemas.buckets"
         group-name="buckets"
         ng-model="_internalNgModelState"
