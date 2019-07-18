@@ -39,6 +39,6 @@ export class FilterableContainerFactory extends EmbeddableFactory<FilterableCont
   }
 
   public async create(initialInput: FilterableContainerInput, parent?: Container) {
-    return new FilterableContainer(initialInput, parent);
+    return new FilterableContainer(initialInput, () => undefined as any, parent);
   }
 }

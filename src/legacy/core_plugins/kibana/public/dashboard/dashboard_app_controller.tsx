@@ -59,14 +59,14 @@ import {
   DashboardContainerFactory,
   DashboardContainerInput,
   DashboardPanelState,
-} from '../../../dashboard_embeddable_container/public';
+} from '../../../dashboard_embeddable_container/public/np_ready/public';
 import {
   isErrorEmbeddable,
-  embeddableFactories,
   ErrorEmbeddable,
   ViewMode,
   openAddPanelFlyout,
-} from '../../../embeddable_api/public';
+} from '../../../embeddable_api/public/np_ready/public';
+import { start } from '../../../embeddable_api/public/np_ready/public/legacy';
 import { DashboardAppState, NavAction, ConfirmModalFn, SavedDashboardPanel } from './types';
 
 import { showOptionsPopover } from './top_nav/show_options_popover';
@@ -223,7 +223,7 @@ export class DashboardAppController {
     let outputSubscription: Subscription | undefined;
 
     const dashboardDom = document.getElementById('dashboardViewport');
-    const dashboardFactory = embeddableFactories.get(
+    const dashboardFactory = start.getEmbeddableFactory(
       DASHBOARD_CONTAINER_TYPE
     ) as DashboardContainerFactory;
     dashboardFactory
@@ -350,7 +350,9 @@ export class DashboardAppController {
       const differences: Partial<DashboardContainerInput> = {};
       Object.keys(containerInput).forEach(key => {
         const containerValue = (containerInput as { [key: string]: unknown })[key];
-        const appStateValue = (appStateDashboardInput as { [key: string]: unknown })[key];
+        const appStateValue = ((appStateDashboardInput as unknown) as { [key: string]: unknown })[
+          key
+        ];
         if (!_.isEqual(containerValue, appStateValue)) {
           (differences as { [key: string]: unknown })[key] = appStateValue;
         }
@@ -637,7 +639,7 @@ export class DashboardAppController {
     };
     navActions[TopNavIds.ADD] = () => {
       if (dashboardContainer && !isErrorEmbeddable(dashboardContainer)) {
-        openAddPanelFlyout(dashboardContainer);
+        openAddPanelFlyout(dashboardContainer as any);
       }
     };
 

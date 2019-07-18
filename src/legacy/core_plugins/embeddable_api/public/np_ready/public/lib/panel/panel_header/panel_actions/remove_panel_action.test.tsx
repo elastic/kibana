@@ -77,11 +77,14 @@ test('Is not compatible when embeddable is not in a parent', async () => {
   const action = new RemovePanelAction();
   expect(
     await action.isCompatible({
-      embeddable: new ContactCardEmbeddable({
-        firstName: 'Sandor',
-        lastName: 'Clegane',
-        id: '123',
-      }),
+      embeddable: new ContactCardEmbeddable(
+        {
+          firstName: 'Sandor',
+          lastName: 'Clegane',
+          id: '123',
+        },
+        { execAction: (() => null) as any }
+      ),
     })
   ).toBe(false);
 });

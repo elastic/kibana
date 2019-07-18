@@ -52,7 +52,10 @@ class OutputTestEmbeddable extends Embeddable<EmbeddableInput, Output> {
 }
 
 test('Embeddable calls input subscribers when changed', async done => {
-  const hello = new ContactCardEmbeddable({ id: '123', firstName: 'Brienne', lastName: 'Tarth' });
+  const hello = new ContactCardEmbeddable(
+    { id: '123', firstName: 'Brienne', lastName: 'Tarth' },
+    { execAction: (() => null) as any }
+  );
 
   const subscription = hello
     .getInput$()

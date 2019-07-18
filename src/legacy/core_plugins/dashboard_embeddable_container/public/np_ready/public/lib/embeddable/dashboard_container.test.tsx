@@ -43,7 +43,10 @@ const viewportProps: ViewportProps = {
 
 beforeEach(() => {
   const __embeddableFactories = new Map<string, EmbeddableFactory>();
-  __embeddableFactories.set(CONTACT_CARD_EMBEDDABLE, new ContactCardEmbeddableFactory());
+  __embeddableFactories.set(
+    CONTACT_CARD_EMBEDDABLE,
+    new ContactCardEmbeddableFactory({} as any, (() => null) as any)
+  );
   viewportProps.getEmbeddableFactory = (id: string) => __embeddableFactories.get(id);
 });
 

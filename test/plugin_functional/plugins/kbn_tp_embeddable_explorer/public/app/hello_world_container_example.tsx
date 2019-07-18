@@ -68,11 +68,13 @@ export class HelloWorldContainerExample extends React.Component<Props, { lastNam
           },
         },
       },
-      this.props.getActions,
-      this.props.getEmbeddableFactory,
-      this.props.getAllEmbeddableFactories,
-      this.props.overlays,
-      this.props.notifications
+      {
+        getActions: this.props.getActions,
+        getEmbeddableFactory: this.props.getEmbeddableFactory,
+        getAllEmbeddableFactories: this.props.getAllEmbeddableFactories,
+        overlays: this.props.overlays,
+        notifications: this.props.notifications,
+      }
     );
     this.state = {
       lastName: this.container.getInput().lastName,

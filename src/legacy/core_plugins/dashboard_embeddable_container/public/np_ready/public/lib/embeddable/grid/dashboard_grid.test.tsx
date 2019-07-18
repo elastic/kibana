@@ -36,8 +36,11 @@ let dashboardContainer: DashboardContainer | undefined;
 
 function getProps(props?: Partial<DashboardGridProps>): DashboardGridProps {
   const __embeddableFactories = new Map<string, EmbeddableFactory>();
-  __embeddableFactories.set(CONTACT_CARD_EMBEDDABLE, new ContactCardEmbeddableFactory());
-  const getFactory: GetEmbeddableFactory = (id: string) => __embeddableFactories.get(id);
+  __embeddableFactories.set(
+    CONTACT_CARD_EMBEDDABLE,
+    new ContactCardEmbeddableFactory({} as any, (() => {}) as any)
+  );
+  const getEmbeddableFactory: GetEmbeddableFactory = (id: string) => __embeddableFactories.get(id);
 
   dashboardContainer = new DashboardContainer(
     getSampleDashboardInput({
@@ -54,11 +57,16 @@ function getProps(props?: Partial<DashboardGridProps>): DashboardGridProps {
         },
       },
     }),
-    getFactory
+    { getEmbeddableFactory } as any
   );
   const defaultTestProps: DashboardGridProps = {
     container: dashboardContainer,
     intl: null as any,
+    getActions: (() => []) as any,
+    getAllEmbeddableFactories: (() => []) as any,
+    getEmbeddableFactory: (() => {}) as any,
+    notifications: {} as any,
+    overlays: {} as any,
   };
   return Object.assign(defaultTestProps, props);
 }

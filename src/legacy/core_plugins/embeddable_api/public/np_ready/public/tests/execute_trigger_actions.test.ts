@@ -79,7 +79,10 @@ test('executes a single action mapped to a trigger', async () => {
   setup.registerAction(action);
 
   const context = {
-    embeddable: new ContactCardEmbeddable({ id: '123', firstName: 'Stacey', lastName: 'G' }),
+    embeddable: new ContactCardEmbeddable(
+      { id: '123', firstName: 'Stacey', lastName: 'G' },
+      { execAction: (() => null) as any }
+    ),
     triggerContext: {},
   };
   const start = doStart();
@@ -99,7 +102,10 @@ test('throws an error if there are no compatible actions to execute', async () =
   setup.registerTrigger(trigger);
 
   const context = {
-    embeddable: new ContactCardEmbeddable({ id: '123', firstName: 'Stacey', lastName: 'G' }),
+    embeddable: new ContactCardEmbeddable(
+      { id: '123', firstName: 'Stacey', lastName: 'G' },
+      { execAction: (() => null) as any }
+    ),
     triggerContext: {},
   };
   const start = doStart();
@@ -119,11 +125,14 @@ test('does not execute an incompatible action', async () => {
     actionIds: ['test1'],
   };
   const action = new TestAction('test1', ({ embeddable }) => embeddable.id === 'executeme');
-  const embeddable = new ContactCardEmbeddable({
-    id: 'executeme',
-    firstName: 'Stacey',
-    lastName: 'G',
-  });
+  const embeddable = new ContactCardEmbeddable(
+    {
+      id: 'executeme',
+      firstName: 'Stacey',
+      lastName: 'G',
+    },
+    {} as any
+  );
   setup.registerTrigger(trigger);
   setup.registerAction(action);
 
@@ -146,11 +155,14 @@ test('shows a context menu when more than one action is mapped to a trigger', as
   };
   const action1 = new TestAction('test1', () => true);
   const action2 = new TestAction('test2', () => true);
-  const embeddable = new ContactCardEmbeddable({
-    id: 'executeme',
-    firstName: 'Stacey',
-    lastName: 'G',
-  });
+  const embeddable = new ContactCardEmbeddable(
+    {
+      id: 'executeme',
+      firstName: 'Stacey',
+      lastName: 'G',
+    },
+    {} as any
+  );
   setup.registerTrigger(trigger);
   setup.registerAction(action1);
   setup.registerAction(action2);

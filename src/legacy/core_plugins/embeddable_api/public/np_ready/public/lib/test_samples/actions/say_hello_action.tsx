@@ -17,8 +17,9 @@
  * under the License.
  */
 
-import { Action, ActionContext, IncompatibleActionError } from '../../actions';
+import { Action, ActionContext } from '../../actions';
 import { EmbeddableInput, Embeddable, EmbeddableOutput, IEmbeddable } from '../../embeddables';
+import { IncompatibleActionError } from '../../errors';
 
 export const SAY_HELLO_ACTION = 'SAY_HELLO_ACTION';
 
