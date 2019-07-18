@@ -14,7 +14,7 @@ import {
   createExpressionRendererMock,
   DatasourceMock,
 } from '../mocks';
-import { WorkspacePanel, WorkspacePanelProps } from './workspace_panel';
+import { InnerWorkspacePanel, WorkspacePanelProps } from './workspace_panel';
 import { mountWithIntl as mount } from 'test_utils/enzyme_helpers';
 import { ReactWrapper } from 'enzyme';
 import { DragDrop } from '../../drag_drop';
@@ -43,7 +43,7 @@ describe('workspace_panel', () => {
 
   it('should render an explanatory text if no visualization is active', () => {
     instance = mount(
-      <WorkspacePanel
+      <InnerWorkspacePanel
         activeDatasource={mockDatasource}
         datasourceState={{}}
         activeVisualizationId={null}
@@ -63,7 +63,7 @@ describe('workspace_panel', () => {
 
   it('should render an explanatory text if the visualization does not produce an expression', () => {
     instance = mount(
-      <WorkspacePanel
+      <InnerWorkspacePanel
         activeDatasource={{ ...mockDatasource, toExpression: () => 'datasource' }}
         datasourceState={{}}
         activeVisualizationId="vis"
@@ -83,7 +83,7 @@ describe('workspace_panel', () => {
 
   it('should render an explanatory text if the datasource does not produce an expression', () => {
     instance = mount(
-      <WorkspacePanel
+      <InnerWorkspacePanel
         activeDatasource={{ ...mockDatasource, toExpression: () => null }}
         datasourceState={{}}
         activeVisualizationId="vis"
@@ -103,7 +103,7 @@ describe('workspace_panel', () => {
 
   it('should render the resulting expression using the expression renderer', () => {
     instance = mount(
-      <WorkspacePanel
+      <InnerWorkspacePanel
         activeDatasource={{
           ...mockDatasource,
           toExpression: () => 'datasource',
@@ -151,7 +151,7 @@ describe('workspace_panel', () => {
   describe('expression failures', () => {
     it('should show an error message if the expression fails to parse', () => {
       instance = mount(
-        <WorkspacePanel
+        <InnerWorkspacePanel
           activeDatasource={{
             ...mockDatasource,
             toExpression: () => 'datasource ||',
@@ -179,7 +179,7 @@ describe('workspace_panel', () => {
       });
 
       instance = mount(
-        <WorkspacePanel
+        <InnerWorkspacePanel
           activeDatasource={{
             ...mockDatasource,
             toExpression: () => 'datasource',
@@ -212,7 +212,7 @@ describe('workspace_panel', () => {
       });
 
       instance = mount(
-        <WorkspacePanel
+        <InnerWorkspacePanel
           activeDatasource={{
             ...mockDatasource,
             toExpression: () => 'datasource',
@@ -248,7 +248,7 @@ describe('workspace_panel', () => {
       });
 
       instance = mount(
-        <WorkspacePanel
+        <InnerWorkspacePanel
           activeDatasource={{
             ...mockDatasource,
             toExpression: () => 'datasource',
@@ -291,7 +291,7 @@ describe('workspace_panel', () => {
     beforeEach(() => {
       mockDispatch = jest.fn();
       instance = mount(
-        <WorkspacePanel
+        <InnerWorkspacePanel
           activeDatasource={mockDatasource}
           datasourceState={{}}
           activeVisualizationId={null}
