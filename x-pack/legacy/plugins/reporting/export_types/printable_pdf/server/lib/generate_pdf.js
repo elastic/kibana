@@ -13,7 +13,7 @@ import { oncePerServer } from '../../../../server/lib/once_per_server';
 import { screenshotsObservableFactory } from '../../../common/lib/screenshots';
 import { createLayout } from '../../../common/layouts';
 
-const getTimeRange = (urlScreenshots) => {
+const getTimeRange = urlScreenshots => {
   const grouped = groupBy(urlScreenshots.map(u => u.timeRange));
   const values = Object.values(grouped);
   if (values.length === 1) {
@@ -27,27 +27,35 @@ const formatDate = (date, timezone) => {
   return moment.tz(date, timezone).format('llll');
 };
 
-
 function generatePdfObservableFn(server) {
   const screenshotsObservable = screenshotsObservableFactory(server);
   const captureConcurrency = 1;
 
   const urlScreenshotsObservable = (urls, conditionalHeaders, layout, browserTimezone) => {
     return Rx.from(urls).pipe(
-      mergeMap(url => screenshotsObservable(url, conditionalHeaders, layout, browserTimezone),  // eslint-disable-line no-unused-vars
-        (outer, inner) => inner,
+      mergeMap(url => screenshotsObservable(url, conditionalHeaders, layout, browserTimezone),
         captureConcurrency
       )
     );
   };
 
-
-  const createPdfWithScreenshots = async ({ title, browserTimezone, urlScreenshots, layout, logo }) => {
+  const createPdfWithScreenshots = async ({
+    title,
+    browserTimezone,
+    urlScreenshots,
+    layout,
+    logo,
+  }) => {
     const pdfOutput = pdf.create(layout, logo);
 
     if (title) {
       const timeRange = getTimeRange(urlScreenshots);
-      title += (timeRange) ? ` — ${formatDate(timeRange.from, browserTimezone)} to ${formatDate(timeRange.to, browserTimezone)}` : '';
+      title += timeRange
+        ? ` — ${formatDate(timeRange.from, browserTimezone)} to ${formatDate(
+          timeRange.to,
+          browserTimezone
+        )}`
+        : '';
       pdfOutput.setTitle(title);
     }
 
@@ -65,16 +73,28 @@ function generatePdfObservableFn(server) {
     return buffer;
   };
 
-
-  return function generatePdfObservable(title, urls, browserTimezone, conditionalHeaders, layoutParams, logo) {
-
+  return function generatePdfObservable(
+    title,
+    urls,
+    browserTimezone,
+    conditionalHeaders,
+    layoutParams,
+    logo
+  ) {
     const layout = createLayout(server, layoutParams);
 
-    const screenshots$ = urlScreenshotsObservable(urls, conditionalHeaders, layout, browserTimezone);
+    const screenshots$ = urlScreenshotsObservable(
+      urls,
+      conditionalHeaders,
+      layout,
+      browserTimezone
+    );
 
     return screenshots$.pipe(
       toArray(),
-      mergeMap(urlScreenshots => createPdfWithScreenshots({ title, browserTimezone, urlScreenshots, layout, logo }))
+      mergeMap(urlScreenshots =>
+        createPdfWithScreenshots({ title, browserTimezone, urlScreenshots, layout, logo })
+      )
     );
   };
 }

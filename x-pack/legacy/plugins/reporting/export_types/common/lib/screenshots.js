@@ -13,7 +13,7 @@ import { LevelLogger } from '../../../server/lib/level_logger';
 import { i18n } from '@kbn/i18n';
 
 const fsp = {
-  readFile: promisify(fs.readFile, fs)
+  readFile: promisify(fs.readFile, fs),
 };
 
 export function screenshotsObservableFactory(server) {
@@ -43,7 +43,7 @@ export function screenshotsObservableFactory(server) {
     const filePath = layout.getCssOverridesPath();
     const buffer = await fsp.readFile(filePath);
     await browser.evaluate({
-      fn: function (css) {
+      fn: (css) => {
         const node = document.createElement('style');
         node.type = 'text/css';
         node.innerHTML = css; // eslint-disable-line no-unsanitized/property
@@ -57,28 +57,36 @@ export function screenshotsObservableFactory(server) {
     // the dashboard is using the `itemsCountAttribute` attribute to let us
     // know how many items to expect since gridster incrementally adds panels
     // we have to use this hint to wait for all of them
-    await browser.waitForSelector(`${layout.selectors.renderComplete},[${layout.selectors.itemsCountAttribute}]`);
+    await browser.waitForSelector(
+      `${layout.selectors.renderComplete},[${layout.selectors.itemsCountAttribute}]`
+    );
   };
 
   const checkForToastMessage = async (browser, layout) => {
     await browser.waitForSelector(layout.selectors.toastHeader, { silent: true });
     const toastHeaderText = await browser.evaluate({
-      fn: function (selector) {
+      fn: (selector) => {
         const nodeList = document.querySelectorAll(selector);
         return nodeList.item(0).innerText;
       },
       args: [layout.selectors.toastHeader],
     });
-    throw new Error(i18n.translate('xpack.reporting.exportTypes.printablePdf.screenshots.unexpectedErrorMessage', {
-      defaultMessage: 'Encountered an unexpected message on the page: {toastHeaderText}', values: { toastHeaderText }
-    }));
+    throw new Error(
+      i18n.translate(
+        'xpack.reporting.exportTypes.printablePdf.screenshots.unexpectedErrorMessage',
+        {
+          defaultMessage: 'Encountered an unexpected message on the page: {toastHeaderText}',
+          values: { toastHeaderText },
+        }
+      )
+    );
   };
 
   const getNumberOfItems = async (browser, layout) => {
     // returns the value of the `itemsCountAttribute` if it's there, otherwise
     // we just count the number of `itemSelector`
     const itemsCount = await browser.evaluate({
-      fn: function (selector, countAttribute) {
+      fn: (selector, countAttribute) => {
         const elementWithCount = document.querySelector(`[${countAttribute}]`);
         if (elementWithCount) {
           return parseInt(elementWithCount.getAttribute(countAttribute));
@@ -93,11 +101,11 @@ export function screenshotsObservableFactory(server) {
 
   const waitForElementsToBeInDOM = async (browser, itemsCount, layout) => {
     await browser.waitFor({
-      fn: function (selector) {
+      fn: (selector) => {
         return document.querySelectorAll(selector).length;
       },
       args: [layout.selectors.renderComplete],
-      toEqual: itemsCount
+      toEqual: itemsCount,
     });
   };
 
@@ -114,20 +122,20 @@ export function screenshotsObservableFactory(server) {
 
   const waitForRenderComplete = async (browser, layout) => {
     await browser.evaluate({
-      fn: function (selector, visLoadDelay) {
+      fn: (selector, visLoadDelay) => {
         // wait for visualizations to finish loading
         const visualizations = document.querySelectorAll(selector);
         const visCount = visualizations.length;
         const renderedTasks = [];
 
         function waitForRender(visualization) {
-          return new Promise(function (resolve) {
+          return new Promise((resolve) => {
             visualization.addEventListener('renderComplete', () => resolve());
           });
         }
 
         function waitForRenderDelay() {
-          return new Promise(function (resolve) {
+          return new Promise((resolve) => {
             setTimeout(resolve, visLoadDelay);
           });
         }
@@ -151,7 +159,6 @@ export function screenshotsObservableFactory(server) {
         // bumping to 250.
         const hackyWaitForVisualizations = () => new Promise(r => setTimeout(r, 250));
 
-
         return Promise.all(renderedTasks).then(hackyWaitForVisualizations);
       },
       args: [layout.selectors.renderComplete, captureConfig.loadDelay],
@@ -161,7 +168,7 @@ export function screenshotsObservableFactory(server) {
 
   const getTimeRange = async (browser, layout) => {
     const timeRange = await browser.evaluate({
-      fn: function (fromAttribute, toAttribute) {
+      fn: (fromAttribute, toAttribute) => {
         const fromElement = document.querySelector(`[${fromAttribute}]`);
         const toElement = document.querySelector(`[${toAttribute}]`);
 
@@ -185,7 +192,7 @@ export function screenshotsObservableFactory(server) {
 
   const getElementPositionAndAttributes = async (browser, layout) => {
     const elementsPositionAndAttributes = await browser.evaluate({
-      fn: function (selector, attributes) {
+      fn: (selector, attributes) => {
         const elements = document.querySelectorAll(selector);
 
         // NodeList isn't an array, just an iterator, unable to use .map/.forEach
@@ -203,18 +210,17 @@ export function screenshotsObservableFactory(server) {
               },
               scroll: {
                 x: window.scrollX,
-                y: window.scrollY
-              }
+                y: window.scrollY,
+              },
             },
             attributes: Object.keys(attributes).reduce((result, key) => {
               const attribute = attributes[key];
               result[key] = element.getAttribute(attribute);
               return result;
-            }, {})
+            }, {}),
           });
         }
         return results;
-
       },
       args: [layout.selectors.screenshot, { title: 'data-title', description: 'data-description' }],
       returnByValue: true,
@@ -225,19 +231,21 @@ export function screenshotsObservableFactory(server) {
   const getScreenshots = async ({ browser, elementsPositionAndAttributes }) => {
     const screenshots = [];
     for (const item of elementsPositionAndAttributes) {
-      const base64EncodedData = await asyncDurationLogger('screenshot', browser.screenshot(item.position));
+      const base64EncodedData = await asyncDurationLogger(
+        'screenshot',
+        browser.screenshot(item.position)
+      );
 
       screenshots.push({
         base64EncodedData,
         title: item.attributes.title,
-        description: item.attributes.description
+        description: item.attributes.description,
       });
     }
     return screenshots;
   };
 
   return function screenshotsObservable(url, conditionalHeaders, layout, browserTimezone) {
-
     return Rx.defer(async () => await getPort()).pipe(
       mergeMap(bridgePort => {
         logger.debug(`Creating browser driver factory`);
@@ -251,7 +259,6 @@ export function screenshotsObservableFactory(server) {
       }),
       tap(() => logger.debug('Driver factory created')),
       mergeMap(({ driver$, exit$, message$, consoleMessage$ }) => {
-
         message$.subscribe(line => {
           logger.debug(line, ['browser']);
         });
@@ -262,21 +269,16 @@ export function screenshotsObservableFactory(server) {
 
         const screenshot$ = driver$.pipe(
           tap(() => logger.debug(`opening ${url}`)),
-          mergeMap(
-            browser => openUrl(browser, url, conditionalHeaders),
-            browser => browser
+          mergeMap(browser => openUrl(browser, url, conditionalHeaders), browser => browser),
+          tap(() =>
+            logger.debug('waiting for elements or items count attribute; or not found to interrupt')
           ),
-          tap(() => logger.debug('injecting custom css')),
           mergeMap(
-            browser => injectCustomCss(browser, layout),
-            browser => browser
-          ),
-          tap(() => logger.debug('waiting for elements or items count attribute; or not found to interrupt')),
-          mergeMap(
-            browser => Rx.race(
-              Rx.from(waitForElementOrItemsCountAttribute(browser, layout)),
-              Rx.from(checkForToastMessage(browser, layout))
-            ),
+            browser =>
+              Rx.race(
+                Rx.from(waitForElementOrItemsCountAttribute(browser, layout)),
+                Rx.from(checkForToastMessage(browser, layout))
+              ),
             browser => browser
           ),
           tap(() => logger.debug('determining how many items we have')),
@@ -287,29 +289,34 @@ export function screenshotsObservableFactory(server) {
           tap(() => logger.debug('setting viewport')),
           mergeMap(
             ({ browser, itemsCount }) => setViewport(browser, itemsCount, layout),
-            ({ browser, itemsCount }) => ({ browser, itemsCount }),
+            ({ browser, itemsCount }) => ({ browser, itemsCount })
           ),
           tap(({ itemsCount }) => logger.debug(`waiting for ${itemsCount} to be in the DOM`)),
           mergeMap(
             ({ browser, itemsCount }) => waitForElementsToBeInDOM(browser, itemsCount, layout),
             ({ browser, itemsCount }) => ({ browser, itemsCount })
           ),
+          // Waiting till _after_ elements have rendered before injecting our CSS
+          // allows for them to be displayed properly in many cases
+          tap(() => logger.debug('injecting custom css')),
+          mergeMap(
+            ({ browser }) => injectCustomCss(browser, layout),
+            ({ browser }) => ({ browser })
+          ),
           tap(() => logger.debug('positioning elements')),
-          mergeMap(
-            ({ browser }) => positionElements(browser, layout),
-            ({ browser }) => browser
-          ),
+          mergeMap(({ browser }) => positionElements(browser, layout), ({ browser }) => browser),
           tap(() => logger.debug('waiting for rendering to complete')),
-          mergeMap(
-            browser => waitForRenderComplete(browser, layout),
-            browser => browser
-          ),
+          mergeMap(browser => waitForRenderComplete(browser, layout), browser => browser),
           tap(() => logger.debug('rendering is complete')),
           mergeMap(
             browser => getTimeRange(browser, layout),
             (browser, timeRange) => ({ browser, timeRange })
           ),
-          tap(({ timeRange }) => logger.debug(timeRange ? `timeRange from ${timeRange.from} to ${timeRange.to}` : 'no timeRange')),
+          tap(({ timeRange }) =>
+            logger.debug(
+              timeRange ? `timeRange from ${timeRange.from} to ${timeRange.to}` : 'no timeRange'
+            )
+          ),
           mergeMap(
             ({ browser }) => getElementPositionAndAttributes(browser, layout),
             ({ browser, timeRange }, elementsPositionAndAttributes) => {
@@ -318,7 +325,8 @@ export function screenshotsObservableFactory(server) {
           ),
           tap(() => logger.debug(`taking screenshots`)),
           mergeMap(
-            ({ browser, elementsPositionAndAttributes }) => getScreenshots({ browser, elementsPositionAndAttributes }),
+            ({ browser, elementsPositionAndAttributes }) =>
+              getScreenshots({ browser, elementsPositionAndAttributes }),
             ({ timeRange }, screenshots) => ({ timeRange, screenshots })
           )
         );
@@ -329,4 +337,3 @@ export function screenshotsObservableFactory(server) {
     );
   };
 }
-
