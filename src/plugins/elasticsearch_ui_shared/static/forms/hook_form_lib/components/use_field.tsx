@@ -42,19 +42,12 @@ export const UseField = ({
   children,
 }: Props) => {
   if (!config) {
-    config = form.readFieldConfigFromSchema(path);
+    config = form.__readFieldConfigFromSchema(path);
   }
 
-  // Read the default value for the field from the "defaultValues" object
-  // provided when initating the form.
-  const defaultValueOnForm = form.__getFieldDefaultValue(path);
-
-  // Read the default value from the props
-  const defaultValueOnProps = defaultValue;
-
-  const _defaultValue = config.deSerializer
-    ? config.deSerializer(defaultValueOnProps || defaultValueOnForm)
-    : defaultValueOnProps || defaultValueOnForm;
+  // Default value on props takes over any possible default value
+  // provided when initiating the form.
+  const _defaultValue = defaultValue || form.__getFieldDefaultValue(path);
 
   // Don't modify the config object
   const configCopy =
@@ -77,7 +70,7 @@ export const UseField = ({
   // Remove field from form when it is unmounted
   useEffect(
     () => () => {
-      form.removeField(path);
+      form.__removeField(path);
     },
     []
   );

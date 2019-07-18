@@ -26,18 +26,17 @@ export interface Form<T = FormData> {
   readonly isValid: boolean;
   readonly options: FormOptions;
   onSubmit: (e?: FormEvent<HTMLFormElement> | MouseEvent) => Promise<{ data: T; isValid: boolean }>;
-  addField: (field: Field) => void;
-  removeField: (fieldNames: string | string[]) => void;
-  removeFieldsStartingWith: (pattern: string) => void;
-  validateFields: (fieldNames?: string[]) => Promise<boolean>;
-  getFormData: (options?: { unflatten?: boolean }) => T;
-  getFields: () => FieldsMap;
   setFieldValue: (fieldName: string, value: FieldValue) => void;
   setFieldErrors: (fieldName: string, errors: ValidationError[]) => void;
-  readFieldConfigFromSchema: (fieldName: string) => FieldConfig;
   readonly __formData$: MutableRefObject<Subject<T>>;
+  __addField: (field: Field) => void;
+  __removeField: (fieldNames: string | string[]) => void;
+  __validateFields: (fieldNames?: string[]) => Promise<boolean>;
+  __getFormData: (options?: { unflatten?: boolean }) => T;
+  __removeFieldsStartingWith: (pattern: string) => void;
   __updateFormDataAt: (field: string, value: unknown) => T;
   __getFieldDefaultValue: (fieldName: string) => unknown;
+  __readFieldConfigFromSchema: (fieldName: string) => FieldConfig;
 }
 
 export interface FormSchema<T = FormData> {

@@ -83,7 +83,7 @@ export const UseArray = ({ path, form, children }: Props) => {
       return updatePrefixes(updatedRows);
     });
 
-    form.removeFieldsStartingWith(`${path}.${rowIndexToDelete}`);
+    form.__removeFieldsStartingWith(`${path}.${rowIndexToDelete}`);
   };
 
   return children({ rows, addRow, removeRow });

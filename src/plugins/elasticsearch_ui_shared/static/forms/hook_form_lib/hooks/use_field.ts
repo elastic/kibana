@@ -66,10 +66,13 @@ export const useField = (form: Form, path: string, config: FieldConfig = {}) => 
     errorDisplayDelay = form.options.errorDisplayDelay,
   } = config;
 
-  const { serializer = (value: unknown) => value } = config;
+  const {
+    serializer = (value: unknown) => value,
+    deSerializer = (value: unknown) => value,
+  } = config;
 
   const [value, setStateValue] = useState(
-    typeof defaultValue === 'function' ? defaultValue() : defaultValue
+    typeof defaultValue === 'function' ? deSerializer(defaultValue()) : deSerializer(defaultValue)
   );
   const [errors, setErrors] = useState<ValidationError[]>([]);
   const [isPristine, setPristine] = useState(true);
@@ -271,7 +274,7 @@ export const useField = (form: Form, path: string, config: FieldConfig = {}) => 
 
   const validate: Field['validate'] = (validationData = {}) => {
     let { formData, value: valueToValidate } = validationData;
-    formData = formData || form.getFormData({ unflatten: false });
+    formData = formData || form.__getFormData({ unflatten: false });
     valueToValidate = valueToValidate || value;
 
     setValidating(true);
@@ -370,7 +373,7 @@ export const useField = (form: Form, path: string, config: FieldConfig = {}) => 
       // Avoid validate on mount
       return;
     }
-    form.validateFields(fieldsToValidateOnChange);
+    form.__validateFields(fieldsToValidateOnChange);
   }, [value]);
 
   const field: Field = {
@@ -393,7 +396,7 @@ export const useField = (form: Form, path: string, config: FieldConfig = {}) => 
     getErrorsMessages,
   };
 
-  form.addField(field);
+  form.__addField(field);
 
   return field;
 };

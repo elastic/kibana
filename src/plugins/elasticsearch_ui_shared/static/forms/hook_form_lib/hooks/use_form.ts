@@ -41,8 +41,9 @@ export const useForm = <T = FormData>({
   const fieldsRefs = useRef<FieldsMap>({});
 
   // formData$ is an observable we can subscribe to in order to receive live
-  // update of the form data. As an observable it does not trigger any React
-  // render. The <FormDataProvider> component is in charge of reading this observable
+  // update of the raw form data. As an observable it does not trigger any React
+  // render().
+  // The <FormDataProvider> component is the one in charge of reading this observable
   // and updating its state to trigger the necessary view render.
   const formData$ = useRef<Subject<T>>(new Subject<T>({} as T));
 
@@ -67,7 +68,7 @@ export const useForm = <T = FormData>({
 
   // -- API
   // ----------------------------------
-  const getFormData: Form<T>['getFormData'] = (getDataOptions = { unflatten: true }) =>
+  const getFormData: Form<T>['__getFormData'] = (getDataOptions = { unflatten: true }) =>
     getDataOptions.unflatten
       ? (unflattenObject(
           mapFormFields(stripEmptyFields(fieldsRefs.current), field => field.getOutputValue())
@@ -86,7 +87,7 @@ export const useForm = <T = FormData>({
     return formData$.current.value;
   };
 
-  const validateFields: Form['validateFields'] = async fieldNames => {
+  const validateFields: Form<T>['__validateFields'] = async fieldNames => {
     const fieldsToValidate = fieldNames
       ? fieldNames.map(name => fieldsRefs.current[name]).filter(field => field !== undefined)
       : fieldsToArray().filter(field => field.isPristine);
@@ -103,7 +104,7 @@ export const useForm = <T = FormData>({
     return isFormValid;
   };
 
-  const addField: Form['addField'] = field => {
+  const addField: Form<T>['__addField'] = field => {
     fieldsRefs.current[field.path] = field;
 
     // Only update the formData if the path does not exist (= it is the _first_ time
@@ -113,7 +114,7 @@ export const useForm = <T = FormData>({
     }
   };
 
-  const removeField: Form['removeField'] = _fieldNames => {
+  const removeField: Form<T>['__removeField'] = _fieldNames => {
     const fieldNames = Array.isArray(_fieldNames) ? _fieldNames : [_fieldNames];
     const currentFormData = { ...formData$.current.value } as FormData;
 
@@ -137,7 +138,7 @@ export const useForm = <T = FormData>({
    *
    * @param pattern The path pattern to match
    */
-  const removeFieldsStartingWith: Form['removeFieldsStartingWith'] = pattern => {
+  const removeFieldsStartingWith: Form<T>['__removeFieldsStartingWith'] = pattern => {
     Object.keys(fieldsRefs.current).forEach(key => {
       if (key.startsWith(pattern)) {
         delete fieldsRefs.current[key];
@@ -150,21 +151,18 @@ export const useForm = <T = FormData>({
       validateFields();
     });
   };
-
-  const getFields: Form['getFields'] = () => fieldsRefs.current;
-
-  const setFieldValue: Form['setFieldValue'] = (fieldName, value) => {
+  const setFieldValue: Form<T>['setFieldValue'] = (fieldName, value) => {
     fieldsRefs.current[fieldName].setValue(value);
   };
 
-  const setFieldErrors: Form['setFieldErrors'] = (fieldName, errors) => {
+  const setFieldErrors: Form<T>['setFieldErrors'] = (fieldName, errors) => {
     fieldsRefs.current[fieldName].setErrors(errors);
   };
 
   const getFieldDefaultValue: Form['__getFieldDefaultValue'] = fieldName =>
     getAt(fieldName, defaultValueDeSerialized, false);
 
-  const readFieldConfigFromSchema: Form['readFieldConfigFromSchema'] = fieldName => {
+  const readFieldConfigFromSchema: Form<T>['__readFieldConfigFromSchema'] = fieldName => {
     const config = (getAt(fieldName, schema ? schema : {}, false) as FieldConfig) || {};
 
     return config;
@@ -191,21 +189,20 @@ export const useForm = <T = FormData>({
   };
 
   const form: Form<T> = {
-    onSubmit: onSubmitForm,
     isSubmitted,
     isSubmitting,
     isValid,
-    addField,
-    removeField,
-    removeFieldsStartingWith,
-    getFields,
+    options,
+    onSubmit: onSubmitForm,
     setFieldValue,
     setFieldErrors,
-    readFieldConfigFromSchema,
-    getFormData,
-    validateFields,
-    options,
+    __readFieldConfigFromSchema: readFieldConfigFromSchema,
+    __getFormData: getFormData,
+    __addField: addField,
+    __removeField: removeField,
     __formData$: formData$,
+    __validateFields: validateFields,
+    __removeFieldsStartingWith: removeFieldsStartingWith,
     __updateFormDataAt: updateFormDataAt,
     __getFieldDefaultValue: getFieldDefaultValue,
   };
