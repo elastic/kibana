@@ -4,6 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { MainPage } from './main';
-export { MonitorPage } from './monitor';
-export { OverviewPage } from './overview';
+import { useState } from 'react';
+
+export function useTest(id: string) {
+  const [f, setF] = useState<number>(0);
+  console.log(f);
+  return 0;
+}

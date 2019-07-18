@@ -5,6 +5,7 @@
  */
 
 import qs from 'querystring';
+import React, { useMemo } from 'react';
 import { UptimeUrlParams, getSupportedUrlParams } from '../lib/helper';
 
 interface Location {
@@ -12,14 +13,24 @@ interface Location {
   search: string;
 }
 
-export const useUrlParams = (
+export function useUrlParams(
   history: any,
   location: Location
-): [UptimeUrlParams, (updatedParams: any) => string] => {
+): [UptimeUrlParams, (updatedParams: any) => string] {
   const { pathname, search } = location;
   const currentParams: any = qs.parse(search[0] === '?' ? search.slice(1) : search);
 
   const updateUrl = (updatedParams: any) => {
+    console.log(updatedParams);
+    const c = useMemo(
+      () =>
+        qs.stringify({
+          ...currentParams,
+          ...updatedParams,
+        }),
+      [currentParams, updatedParams]
+    );
+    console.log('c', c);
     const updatedSearch = qs.stringify({
       ...currentParams,
       ...updatedParams,

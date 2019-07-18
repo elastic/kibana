@@ -4,37 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import DateMath from '@elastic/datemath';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  // @ts-ignore missing typings for EuiHeaderLink
-  EuiHeaderLink,
-  // @ts-ignore missing typings for EuiHeaderLinks
-  EuiHeaderLogo,
-  // @ts-ignore missing typings for EuiHeaderLogo
-  EuiHeaderSectionItem,
-  // @ts-ignore missing typings for EuiHeaderSectionItem
-  EuiPage,
-  EuiSpacer,
-  // @ts-ignore missing typings for EuiSuperDatePicker
-  EuiSuperDatePicker,
-  EuiTitle,
-} from '@elastic/eui';
-import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
-import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
-import { i18n } from '@kbn/i18n';
-import React, { useEffect, useState } from 'react';
-import { ApolloProvider } from 'react-apollo';
-import { BrowserRouter as Router, Route, RouteComponentProps, Switch } from 'react-router-dom';
-import { capabilities } from 'ui/capabilities';
+import React from 'react';
+import { BrowserRouter as Router, Route, RouteComponentProps } from 'react-router-dom';
 import { I18nContext } from 'ui/i18n';
 import { UMBreadcrumb } from './breadcrumbs';
 import { UMGraphQLClient, UMUpdateBreadcrumbs, UMUpdateBadge } from './lib/lib';
-import { MonitorPage, OverviewPage } from './pages';
-import { UptimeRefreshContext, UptimeSettingsContext } from './contexts';
-import { UptimeDatePicker } from './components/functional/uptime_date_picker';
-import { useUrlParams } from './hooks';
+import { MainPage } from './pages';
 
 export interface UptimeAppColors {
   danger: string;
@@ -61,144 +36,16 @@ export interface UptimeAppProps {
 }
 
 const Application = (props: UptimeAppProps) => {
-  const {
-    basePath,
-    client,
-    darkMode,
-    isApmAvailable,
-    isInfraAvailable,
-    isLogsAvailable,
-    logMonitorPageLoad,
-    logOverviewPageLoad,
-    renderGlobalHelpControls,
-    routerBasename,
-    setBreadcrumbs,
-    setBadge,
-  } = props;
-
-  let colors: UptimeAppColors;
-  if (darkMode) {
-    colors = {
-      danger: euiDarkVars.euiColorDanger,
-      mean: euiDarkVars.euiColorPrimary,
-      range: euiDarkVars.euiFocusBackgroundColor,
-      success: euiDarkVars.euiColorSuccess,
-      warning: euiDarkVars.euiColorWarning,
-    };
-  } else {
-    colors = {
-      danger: euiLightVars.euiColorDanger,
-      mean: euiLightVars.euiColorPrimary,
-      range: euiLightVars.euiFocusBackgroundColor,
-      success: euiLightVars.euiColorSuccess,
-      warning: euiLightVars.euiColorWarning,
-    };
-  }
-
-  const [lastRefresh, setLastRefresh] = useState<number>(Date.now());
-  const [headingText, setHeadingText] = useState<string | undefined>(undefined);
-
-  useEffect(() => {
-    renderGlobalHelpControls();
-    setBadge(
-      !capabilities.get().uptime.save
-        ? {
-            text: i18n.translate('xpack.uptime.badge.readOnly.text', {
-              defaultMessage: 'Read only',
-            }),
-            tooltip: i18n.translate('xpack.uptime.badge.readOnly.tooltip', {
-              defaultMessage: 'Unable to save',
-            }),
-            iconType: 'glasses',
-          }
-        : undefined
-    );
-  }, []);
-
-  const refreshApp = () => {
-    setLastRefresh(Date.now());
-  };
+  const { routerBasename } = props;
 
   return (
     <I18nContext>
       <Router basename={routerBasename}>
         <Route
           path="/"
-          render={(rootRouteProps: RouteComponentProps) => {
-            const [
-              { autorefreshInterval, autorefreshIsPaused, dateRangeStart, dateRangeEnd },
-            ] = useUrlParams(rootRouteProps.history, rootRouteProps.location);
-            const absoluteStartDate = DateMath.parse(dateRangeStart);
-            const absoluteEndDate = DateMath.parse(dateRangeEnd);
-            return (
-              <ApolloProvider client={client}>
-                <UptimeSettingsContext.Provider
-                  value={{
-                    absoluteStartDate: absoluteStartDate ? absoluteStartDate.valueOf() : 0,
-                    absoluteEndDate: absoluteEndDate ? absoluteEndDate.valueOf() : 1,
-                    autorefreshInterval,
-                    autorefreshIsPaused,
-                    basePath,
-                    colors,
-                    dateRangeStart,
-                    dateRangeEnd,
-                    isApmAvailable,
-                    isInfraAvailable,
-                    isLogsAvailable,
-                    refreshApp,
-                    setHeadingText,
-                  }}
-                >
-                  <UptimeRefreshContext.Provider value={{ lastRefresh }}>
-                    <EuiPage className="app-wrapper-panel " data-test-subj="uptimeApp">
-                      <div>
-                        <EuiFlexGroup
-                          alignItems="center"
-                          justifyContent="spaceBetween"
-                          gutterSize="s"
-                        >
-                          <EuiFlexItem grow={false}>
-                            <EuiTitle>
-                              <h1>{headingText}</h1>
-                            </EuiTitle>
-                          </EuiFlexItem>
-                          <EuiFlexItem grow={false}>
-                            <UptimeDatePicker refreshApp={refreshApp} {...rootRouteProps} />
-                          </EuiFlexItem>
-                        </EuiFlexGroup>
-                        <EuiSpacer size="s" />
-                        <Switch>
-                          <Route
-                            exact
-                            path="/"
-                            render={routerProps => (
-                              <OverviewPage
-                                basePath={basePath}
-                                logOverviewPageLoad={logOverviewPageLoad}
-                                setBreadcrumbs={setBreadcrumbs}
-                                {...routerProps}
-                              />
-                            )}
-                          />
-                          <Route
-                            path="/monitor/:id/:location?"
-                            render={routerProps => (
-                              <MonitorPage
-                                logMonitorPageLoad={logMonitorPageLoad}
-                                query={client.query}
-                                setBreadcrumbs={setBreadcrumbs}
-                                {...routerProps}
-                              />
-                            )}
-                          />
-                        </Switch>
-                      </div>
-                    </EuiPage>
-                  </UptimeRefreshContext.Provider>
-                </UptimeSettingsContext.Provider>
-              </ApolloProvider>
-            );
-          }}
+          render={(rootRouteProps: RouteComponentProps) => (
+            <MainPage {...props} rootRouteProps={rootRouteProps} />
+          )}
         />
       </Router>
     </I18nContext>
