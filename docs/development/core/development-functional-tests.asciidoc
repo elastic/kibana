@@ -32,7 +32,7 @@ There are three ways to run the tests depending on your goals:
 ** Description: Runs tests against instances of Elasticsearch & Kibana started some other way (like Elastic Cloud, or an instance you are managing in some other way).
 ** just executes the functional tests
 ** url, credentials, etc. for Elasticsearch and Kibana are specified via environment variables
-** Here's an example that runs against an Elastic Cloud instance. Note that you should run the same branch of tests as the version of Kibana you're testing.
+** Here's an example that runs against an Elastic Cloud instance. Note that you must run the same branch of tests as the version of Kibana you're testing.
 +
 ["source","shell"]
 ----------
@@ -59,6 +59,20 @@ export TEST_ES_PORT=9200
 export TEST_ES_USER=elastic
 export TEST_ES_PASS=<password>
 node scripts/functional_test_runner
+----------
+
+** Selenium tests can be run in headless mode by setting the environment variable below.  Unset this variable to show the browser.
++
+["source", "shell"]
+----------
+export TEST_BROWSER_HEADLESS=1
+----------
+
+** When running against cloud deployment, some tests are not applicable use --exclude-tag to skip those tests.  An example shell file can be found at:  {blob}test/scripts/jenkins_kibana.sh[test/scripts/jenkins_kibana.sh]
++
+["source", "shell"]
+----------
+node scripts/functional_test_runner --exclude-tag skipCloud
 ----------
 
 [float]
