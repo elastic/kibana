@@ -1,7 +1,7 @@
 {
   "presets": ["@babel/typescript", "@kbn/babel-preset/webpack_preset"],
   "plugins": [
-    "@babel/plugin-transform-regenerator",
+    "@babel/plugin-transform-runtime",
     "@babel/plugin-proposal-export-default-from"
   ]
 }
