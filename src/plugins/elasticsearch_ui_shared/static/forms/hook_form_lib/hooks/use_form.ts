@@ -196,14 +196,14 @@ export const useForm = <T = FormData>({
     onSubmit: onSubmitForm,
     setFieldValue,
     setFieldErrors,
-    __readFieldConfigFromSchema: readFieldConfigFromSchema,
+    __formData$: formData$,
     __getFormData: getFormData,
+    __updateFormDataAt: updateFormDataAt,
+    __readFieldConfigFromSchema: readFieldConfigFromSchema,
     __addField: addField,
     __removeField: removeField,
-    __formData$: formData$,
     __validateFields: validateFields,
     __removeFieldsStartingWith: removeFieldsStartingWith,
-    __updateFormDataAt: updateFormDataAt,
     __getFieldDefaultValue: getFieldDefaultValue,
   };
 
