@@ -129,7 +129,9 @@ export function uiRegistry(spec) {
     if (isInstantiated) {
       const [provider] = getInvokedProviders([privateModule]);
 
-      modules.push(provider);
+      if (provider) {
+        modules.push(provider);
+      }
     }
 
     return registry;
