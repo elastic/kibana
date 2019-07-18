@@ -44,7 +44,7 @@ type Props = Partial<SearchBarProps> & {
 export function TopNavMenu(props: Props) {
   function renderItems() {
     if (!props.config) return;
-    return props.config.map((menuItem, i) => {
+    return props.config.map((menuItem: TopNavMenuData, i: number) => {
       return (
         <EuiFlexItem grow={false} key={`nav-menu-${i}`}>
           <TopNavMenuItem {...menuItem} />
