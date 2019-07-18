@@ -11,7 +11,8 @@ import {
   EuiPopover,
   EuiContextMenu,
   EuiIcon,
-  EuiToolTip
+  EuiToolTip,
+  EuiIconTip
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
@@ -52,7 +53,9 @@ export class LayerTocActions extends Component {
 
   _renderPopoverToggleButton() {
     const { icon, tooltipContent, areResultsTrimmed } = this.props.layer.getIconAndTooltipContent(this.props.zoom);
-    const footNote = areResultsTrimmed ? <span dangerouslySetInnerHTML={{ __html: `&dagger;` }} /> : null;//eslint-disable-line react/no-danger
+    const infoButton = areResultsTrimmed ? (<EuiIconTip
+      type="iInCircle"
+    />) : null;
     const displayClassName = areResultsTrimmed ? `mapTocEntry-exceedLimit` : null;
     return (
       <EuiToolTip
@@ -70,7 +73,7 @@ export class LayerTocActions extends Component {
         >
           <span className="mapTocEntry__layerNameIcon">{icon}</span>
           <span className={displayClassName}>
-            {this.props.displayName}{footNote}
+            {this.props.displayName}{infoButton}
           </span>
         </EuiButtonEmpty>
 
