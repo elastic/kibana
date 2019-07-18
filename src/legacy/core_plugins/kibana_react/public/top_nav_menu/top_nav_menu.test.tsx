@@ -34,17 +34,17 @@ describe('TopNavMenu', () => {
   const SEARCH_BAR_SELECTOR = 'SearchBar';
   const menuItems: TopNavMenuData[] = [
     {
-      key: 'test',
+      id: 'test',
       label: 'test',
       run: jest.fn(),
     },
     {
-      key: 'test2',
+      id: 'test2',
       label: 'test2',
       run: jest.fn(),
     },
     {
-      key: 'test3',
+      id: 'test3',
       label: 'test3',
       run: jest.fn(),
     },
