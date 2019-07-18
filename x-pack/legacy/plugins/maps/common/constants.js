@@ -32,7 +32,7 @@ export const GEOJSON_FILE = 'GEOJSON_FILE';
 
 export const DECIMAL_DEGREES_PRECISION = 5; // meters precision
 export const ZOOM_PRECISION = 2;
-export const ES_SIZE_LIMIT = 2000;
+export const ES_SIZE_LIMIT = 10000;
 
 export const FEATURE_ID_PROPERTY_NAME = '__kbn__feature_id__';
 export const FEATURE_VISIBLE_PROPERTY_NAME = '__kbn__isvisible__';
