@@ -74,7 +74,7 @@ describe('<FollowerIndicesList />', () => {
     });
   });
 
-  describe('when there are follower indices', async () => {
+  describe('when there are follower indices', () => {
     let find;
     let exists;
     let component;

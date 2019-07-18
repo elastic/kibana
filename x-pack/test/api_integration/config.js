@@ -22,6 +22,8 @@ import {
   SpacesServiceProvider,
 } from '../common/services';
 
+import { SLACK_ACTION_SIMULATOR_URI } from './fixtures/plugins/actions';
+
 export async function getApiIntegrationConfig({ readConfigFile }) {
 
   const kibanaAPITestsConfig = await readConfigFile(require.resolve('../../../test/api_integration/config.js'));
@@ -60,6 +62,8 @@ export async function getApiIntegrationConfig({ readConfigFile }) {
         ...xPackFunctionalTestsConfig.get('kbnTestServer.serverArgs'),
         '--optimize.enabled=false',
         `--plugin-path=${path.join(__dirname, 'fixtures', 'plugins', 'alerts')}`,
+        `--plugin-path=${path.join(__dirname, 'fixtures', 'plugins', 'actions')}`,
+        `--server.xsrf.whitelist=${JSON.stringify([SLACK_ACTION_SIMULATOR_URI])}`,
       ],
     },
     esTestCluster: {
