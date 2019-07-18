@@ -22,6 +22,9 @@ export function clusterSetupStatusRoute(server) {
         params: Joi.object({
           clusterUuid: Joi.string().required()
         }),
+        query: Joi.object({
+          skipLiveData: Joi.boolean().default(false)
+        }),
         payload: Joi.object({
           timeRange: Joi.object({
             min: Joi.date().required(),
@@ -39,7 +42,7 @@ export function clusterSetupStatusRoute(server) {
       try {
         await verifyMonitoringAuth(req);
         const indexPatterns = getIndexPatterns(server);
-        status = await getCollectionStatus(req, indexPatterns, req.params.clusterUuid);
+        status = await getCollectionStatus(req, indexPatterns, req.params.clusterUuid, req.query.skipLiveData);
       } catch (err) {
         throw handleError(err, req);
       }

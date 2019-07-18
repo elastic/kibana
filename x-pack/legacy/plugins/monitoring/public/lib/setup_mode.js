@@ -29,9 +29,10 @@ export const getSetupModeState = () => setupModeState;
 export const setNewlyDiscoveredClusterUuid = clusterUuid => {
   const globalState = angularState.injector.get('globalState');
   const executor = angularState.injector.get('$executor');
-  globalState.cluster_uuid = clusterUuid;
-  globalState.save();
-  angularState.scope.$apply();
+  angularState.scope.$apply(() => {
+    globalState.cluster_uuid = clusterUuid;
+    globalState.save();
+  });
   executor.run();
 };
 

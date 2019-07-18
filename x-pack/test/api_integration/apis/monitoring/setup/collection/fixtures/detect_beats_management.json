@@ -6,12 +6,7 @@
     "detected": {
       "doesExist": true
     },
-    "byUuid": {
-      "5b2de169-2785-441b-ae8c-186a1936b17d": {
-        "instance": {},
-        "isNetNewUser": true
-      }
-    }
+    "byUuid": {}
   },
   "beats": {
     "totalUniqueInstanceCount": 0,
@@ -47,15 +42,10 @@
     "detected": {
       "doesExist": true
     },
-    "byUuid": {
-      "VXvI05dzSQefxNVLyzzfPw": {
-        "node": {},
-        "isNetNewUser": true
-      }
-    }
+    "byUuid": {}
   },
   "_meta": {
     "secondsAgo": 30,
-    "clusterUuid": "tPT_S3AjR1mHmGW0JWfSPw"
+    "clusterUuid": null
   }
 }

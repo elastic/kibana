@@ -19,6 +19,9 @@ export function clustersSetupStatusRoute(server) {
     path: '/api/monitoring/v1/setup/collection',
     config: {
       validate: {
+        query: Joi.object({
+          skipLiveData: Joi.boolean().default(false)
+        }),
         payload: Joi.object({
           timeRange: Joi.object({
             min: Joi.date().required(),
@@ -36,7 +39,7 @@ export function clustersSetupStatusRoute(server) {
       try {
         await verifyMonitoringAuth(req);
         const indexPatterns = getIndexPatterns(server);
-        status = await getCollectionStatus(req, indexPatterns);
+        status = await getCollectionStatus(req, indexPatterns, null, req.query.skipLiveData);
       } catch (err) {
         throw handleError(err, req);
       }

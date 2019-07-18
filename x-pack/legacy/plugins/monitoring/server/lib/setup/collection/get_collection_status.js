@@ -269,7 +269,7 @@ async function getLiveElasticsearchClusterUuid(req) {
  * @param {*} indexPatterns Map of index patterns to search against (will be all .monitoring-* indices)
  * @param {*} clusterUuid Optional and will be used to filter down the query if used
  */
-export const getCollectionStatus = async (req, indexPatterns, clusterUuid) => {
+export const getCollectionStatus = async (req, indexPatterns, clusterUuid, skipLiveData) => {
   const config = req.server.config();
   const kibanaUuid = config.get('server.uuid');
 
@@ -289,9 +289,9 @@ export const getCollectionStatus = async (req, indexPatterns, clusterUuid) => {
     await detectProducts(req)
   ]);
 
-  const liveClusterUuid = await getLiveElasticsearchClusterUuid(req);
-  const liveEsNodes = await getLivesNodes(req);
-  const liveKibanaInstance = await getLiveKibanaInstance(req);
+  const liveClusterUuid = skipLiveData ? null : await getLiveElasticsearchClusterUuid(req);
+  const liveEsNodes = skipLiveData ? [] : await getLivesNodes(req);
+  const liveKibanaInstance = skipLiveData ? {} : await getLiveKibanaInstance(req);
   const indicesBuckets = get(recentDocuments, 'aggregations.indices.buckets', []);
 
   const status = PRODUCTS.reduce((products, product) => {
@@ -322,12 +322,15 @@ export const getCollectionStatus = async (req, indexPatterns, clusterUuid) => {
     }
 
     if (product.name === KIBANA_SYSTEM_ID && liveKibanaInstance) {
-      productStatus.byUuid = {
-        [get(liveKibanaInstance, 'kibana.uuid')]: {
-          instance: liveKibanaInstance,
-          isNetNewUser: true
-        }
-      };
+      const kibanaLiveUuid = get(liveKibanaInstance, 'kibana.uuid');
+      if (kibanaLiveUuid) {
+        productStatus.byUuid = {
+          [kibanaLiveUuid]: {
+            instance: liveKibanaInstance,
+            isNetNewUser: true
+          }
+        };
+      }
     }
 
     // If there is no data, then they are a net new user

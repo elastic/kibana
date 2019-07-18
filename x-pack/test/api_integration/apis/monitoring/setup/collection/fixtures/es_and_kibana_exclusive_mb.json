@@ -8,7 +8,6 @@
       "5b2de169-2785-441b-ae8c-186a1936b17d": {
         "lastTimestamp": 1554821587077,
         "isPrimary": true,
-        "instance": {},
         "isNetNewUser": false,
         "isFullyMigrated": true
       }
@@ -53,10 +52,6 @@
     "totalUniquePartiallyMigratedCount": 0,
     "detected": null,
     "byUuid": {
-      "VXvI05dzSQefxNVLyzzfPw": {
-        "node": {},
-        "isNetNewUser": true
-      },
       "agI8JhXhShasvuDgq0VxRg": {
         "lastTimestamp": 1554821579822,
         "isFullyMigrated": true,
@@ -66,6 +61,6 @@
   },
   "_meta": {
     "secondsAgo": 30,
-    "clusterUuid": "tPT_S3AjR1mHmGW0JWfSPw"
+    "clusterUuid": null
   }
 }

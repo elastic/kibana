@@ -6,7 +6,7 @@
 
 import expect from '@kbn/expect';
 import fixture from './fixtures/detect_apm';
-import { removeNodesAndInstances } from './lib/remove_nodes_and_instances';
+
 
 export default function ({ getService }) {
   const supertest = getService('supertest');
@@ -28,13 +28,13 @@ export default function ({ getService }) {
     });
 
     it('should get collection status', async () => {
-      const result = await supertest
-        .post('/api/monitoring/v1/setup/collection')
+      const { body } = await supertest
+        .post('/api/monitoring/v1/setup/collection?skipLiveData=true')
         .set('kbn-xsrf', 'xxx')
         .send({ timeRange })
         .expect(200);
 
-      const body = removeNodesAndInstances(result.body);
+
       expect(body).to.eql(fixture);
     });
   });

@@ -7,7 +7,6 @@
     "byUuid": {
       "5b2de169-2785-441b-ae8c-186a1936b17d": {
         "isPrimary": true,
-        "instance": {},
         "isNetNewUser": false,
         "isPartiallyMigrated": true,
         "lastInternallyCollectedTimestamp": 1554821412725
@@ -53,10 +52,6 @@
     "totalUniquePartiallyMigratedCount": 1,
     "detected": null,
     "byUuid": {
-      "VXvI05dzSQefxNVLyzzfPw": {
-        "node": {},
-        "isNetNewUser": true
-      },
       "agI8JhXhShasvuDgq0VxRg": {
         "isPartiallyMigrated": true,
         "lastInternallyCollectedTimestamp": 1554821411520,
@@ -66,6 +61,6 @@
   },
   "_meta": {
     "secondsAgo": 30,
-    "clusterUuid": "tPT_S3AjR1mHmGW0JWfSPw"
+    "clusterUuid": null
   }
 }
