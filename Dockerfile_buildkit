@@ -1,3 +1,6 @@
+# syntax = docker/dockerfile-upstream:master-experimental
+# xsyntax = docker/dockerfile:experimental
+
 FROM node:10.15.2
 
 # dumb-init
@@ -15,6 +18,8 @@ RUN curl -sSL https://dl.google.com/linux/linux_signing_key.pub | apt-key add - 
 
 WORKDIR /app
 
+# RUN apt-get install git
+# RUN addgroup -g 1100 -S kibana && adduser -u 1100 -S kibana -G kibana # alpine
 RUN groupadd -r kibana && useradd -r -g kibana kibana && mkdir /home/kibana && chown kibana:kibana /home/kibana
 RUN chown kibana /app
 USER kibana
@@ -61,9 +66,18 @@ COPY --chown=kibana:kibana test/plugin_functional/plugins/kbn_tp_sample_panel_ac
 COPY --chown=kibana:kibana test/plugin_functional/plugins/kbn_tp_visualize_embedding/package.json /app/test/plugin_functional/plugins/kbn_tp_visualize_embedding/package.json
 COPY --chown=kibana:kibana test/interpreter_functional/plugins/kbn_tp_run_pipeline/package.json /app/test/interpreter_functional/plugins/kbn_tp_run_pipeline/package.json
 
-RUN yarn install --frozen-lockfile
+# # For kaniko...
+# USER root
+# RUN chown -R kibana:kibana /app
+# USER kibana
+
+RUN --mount=type=cache,id=npm,uid=999,gid=999,target=node_modules yarn install --frozen-lockfile
 
 COPY --chown=kibana:kibana . /app
+
+USER root
+RUN chown -R kibana:kibana /app
+USER kibana
 
 RUN yarn kbn bootstrap --frozen-lockfile
 
