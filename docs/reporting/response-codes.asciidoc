@@ -13,9 +13,10 @@ generation happens asynchronously from queuing.
   Kibana will return a code `400` status response for the request.
 
 - **`503` (Service Unavailable)**: When using the `path` to request the download, you
-  will get a `503` status response if report generation hasn't completed yet. Before
-  trying again to download the report, have your script wait for the amount of time
-  suggested in the `Retry-After` HTTP header of response with `503` status.
+  will get a `503` status response if report generation hasn't completed yet. The
+  response will include a `Retry-After` header. You can have your script wait the
+  suggested number of seconds provided in the `Retry-After` header, waiting as many
+  times as needed, until the report is complete.
 
 - **`500` (Internal Server Error)**: When using the `path` to request the download, you
   will get a `500` status response if the report isn't available due to an error when
