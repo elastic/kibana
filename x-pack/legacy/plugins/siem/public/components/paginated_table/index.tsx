@@ -152,6 +152,12 @@ export const PaginatedTable = memo<SiemTables>(
       }
     }, effectDeps);
 
+    useEffect(() => {
+      if (!isEmpty(pageOfItems) && isEmptyTable) {
+        setEmptyTable(false);
+      }
+    }, [pageOfItems]);
+
     const onButtonClick = () => {
       setPopoverOpen(!isPopoverOpen);
     };
@@ -179,9 +185,7 @@ export const PaginatedTable = memo<SiemTables>(
       loadPage(newActivePage);
       updateActivePage(newActivePage);
     };
-    if (!isEmpty(pageOfItems) && isEmptyTable) {
-      setEmptyTable(false);
-    }
+
     if (loading && isEmptyTable) {
       return (
         <EuiPanel>
