@@ -33,20 +33,25 @@ export class Plugin {
   public setup(core: CoreSetup) {
     const { http, elasticsearch } = core;
     const { server } = http;
-    const context: PluginContext = {
+    const pluginContext: PluginContext = {
       esClient: elasticsearch.createClient(PLUGIN_ID),
     };
 
-    // map routes to handlers
-    routes.forEach(route => {
-      // make these items available to handlers via h.context
-      // https://github.com/hapijs/hapi/blob/master/API.md#route.options.bind
-      // aligns closely with approach proposed in handler RFC
-      // https://github.com/epixa/kibana/blob/rfc-handlers/rfcs/text/0003_handler_interface.md
+    // make pluginContext entries available to handlers via h.context
+    // https://github.com/hapijs/hapi/blob/master/API.md#route.options.bind
+    // aligns closely with approach proposed in handler RFC
+    // https://github.com/epixa/kibana/blob/rfc-handlers/rfcs/text/0003_handler_interface.md
+    const routesWithContext = routes.map(function injectRouteContext(route) {
+      // merge route.options.bind, defined or otherwise, into pluginContext
+      // routes can add extra values or override pluginContext values (e.g. spies, etc)
       if (!route.options) route.options = {};
-      if (!route.options.bind) route.options.bind = context;
-      server.route(route);
+      route.options.bind = Object.assign(pluginContext, route.options.bind);
+
+      return route;
     });
+
+    // map routes to handlers
+    server.route(routesWithContext);
 
     // the JS API for other consumers
     return {
