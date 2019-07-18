@@ -9,8 +9,17 @@ import { InfraSnapshotRequestOptions } from './snapshot';
 import { NAME_FIELDS } from '../constants';
 import { getIntervalInSeconds } from '../../utils/get_interval_in_seconds';
 
+interface GroupBySource {
+  [id: string]: {
+    terms: {
+      field: string | null | undefined;
+      missing_bucket?: boolean;
+    };
+  };
+}
+
 export const getGroupedNodesSources = (options: InfraSnapshotRequestOptions) => {
-  const sources = options.groupBy.map(gb => {
+  const sources: GroupBySource[] = options.groupBy.map(gb => {
     return { [`${gb.field}`]: { terms: { field: gb.field } } };
   });
   sources.push({
@@ -19,7 +28,7 @@ export const getGroupedNodesSources = (options: InfraSnapshotRequestOptions) => 
     },
   });
   sources.push({
-    name: { terms: { field: NAME_FIELDS[options.nodeType] } },
+    name: { terms: { field: NAME_FIELDS[options.nodeType], missing_bucket: true } },
   });
   return sources;
 };
