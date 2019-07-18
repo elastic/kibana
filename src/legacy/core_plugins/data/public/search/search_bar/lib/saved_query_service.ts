@@ -83,6 +83,19 @@ export const saveQuery = async (attributes: SavedQueryAttributes, id?: string) =
   return parseSavedQueryObject(rawQueryResponse);
 };
 
+export const getAllSavedQueries = async (): Promise<SavedQuery[]> => {
+  const savedObjectsClient = chrome.getSavedObjectsClient();
+
+  const response = await savedObjectsClient.find<SerializedSavedQueryAttributes>({
+    type: 'query',
+  });
+
+  return response.savedObjects.map(
+    (savedObject: { id: string; attributes: SerializedSavedQueryAttributes }) =>
+      parseSavedQueryObject(savedObject)
+  );
+};
+
 export const findSavedQueries = async (searchText: string = ''): Promise<SavedQuery[]> => {
   const savedObjectsClient = chrome.getSavedObjectsClient();
 

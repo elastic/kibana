@@ -27,25 +27,39 @@ import {
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
-import React, { FunctionComponent, useState } from 'react';
+import React, { FunctionComponent, useEffect, useState } from 'react';
+import { sortBy } from 'lodash';
 import { SavedQuery } from '../index';
+import { getAllSavedQueries } from '../lib/saved_query_service';
 
 interface Props {
   showSaveQuery?: boolean;
-  savedQuery?: SavedQuery;
+  loadedSavedQuery?: SavedQuery;
   isDirty: boolean;
   onSave: () => void;
   onSaveAsNew: () => void;
+  onLoad: (savedQuery: SavedQuery) => void;
 }
 
 export const SavedQueryManager: FunctionComponent<Props> = ({
   showSaveQuery,
-  savedQuery,
+  loadedSavedQuery,
   isDirty,
   onSave,
   onSaveAsNew,
+  onLoad,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
+  const [savedQueries, setSavedQueries] = useState([] as SavedQuery[]);
+
+  useEffect(() => {
+    const fetchQueries = async () => {
+      const allSavedQueries = await getAllSavedQueries();
+      const sortedAllSavedQueries = sortBy(allSavedQueries, 'attributes.title');
+      setSavedQueries(sortedAllSavedQueries);
+    };
+    fetchQueries();
+  }, []);
 
   const savedQueryDescriptionText = i18n.translate(
     'data.search.searchBar.savedQueryDescriptionText',
@@ -73,6 +87,22 @@ export const SavedQueryManager: FunctionComponent<Props> = ({
     </EuiButtonEmpty>
   );
 
+  const savedQueryRows = savedQueries.map(savedQuery => {
+    return (
+      <li key={savedQuery.id}>
+        <EuiButtonEmpty
+          onClick={() => {
+            onLoad(savedQuery);
+            setIsOpen(false);
+          }}
+          flush="left"
+        >
+          {savedQuery.attributes.title}
+        </EuiButtonEmpty>
+      </li>
+    );
+  });
+
   return (
     <EuiPopover
       id="savedQueryPopover"
@@ -86,7 +116,13 @@ export const SavedQueryManager: FunctionComponent<Props> = ({
       <EuiPopoverTitle>{savedQueryPopoverTitleText}</EuiPopoverTitle>
 
       <EuiFlexGroup>
-        <p>{savedQueryDescriptionText}</p>
+        <EuiFlexItem>{savedQueryDescriptionText}</EuiFlexItem>
+      </EuiFlexGroup>
+
+      <EuiFlexGroup>
+        <EuiFlexItem>
+          <ul>{savedQueryRows}</ul>
+        </EuiFlexItem>
       </EuiFlexGroup>
 
       <EuiFlexGroup direction="rowReverse" alignItems="center">
@@ -95,7 +131,7 @@ export const SavedQueryManager: FunctionComponent<Props> = ({
             <EuiButton
               fill
               onClick={() => {
-                if (savedQuery) {
+                if (loadedSavedQuery) {
                   onSave();
                 } else {
                   onSaveAsNew();

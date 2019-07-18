@@ -134,5 +134,9 @@ describe('saved query service', () => {
       }
       expect(error).not.toBe(null);
     });
+
+    it('should test all the other service methods', () => {
+      throw new Error('implement me');
+    });
   });
 });

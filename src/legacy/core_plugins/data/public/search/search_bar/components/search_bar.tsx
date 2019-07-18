@@ -326,9 +326,10 @@ class SearchBarUI extends Component<Props, State> {
       <SavedQueryManager
         isDirty={this.isDirty()}
         showSaveQuery={this.props.showSaveQuery}
-        savedQuery={this.props.savedQuery}
+        loadedSavedQuery={this.props.savedQuery}
         onSave={this.onInitiateSave}
         onSaveAsNew={this.onInitiateSaveNew}
+        onLoad={this.onLoadSavedQuery}
       ></SavedQueryManager>
     );
 
