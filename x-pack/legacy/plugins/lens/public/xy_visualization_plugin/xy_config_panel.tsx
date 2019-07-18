@@ -18,7 +18,7 @@ import {
   EuiPanel,
   IconType,
 } from '@elastic/eui';
-import { State, SeriesType } from './types';
+import { State, SeriesType, LayerConfig } from './types';
 import { VisualizationProps } from '../types';
 import { NativeRenderer } from '../native_renderer';
 import { MultiColumnEditor } from './multi_column_editor';
@@ -108,6 +108,21 @@ function updateLayer(state: State, layer: UnwrapArray<State['layers']>, index: n
   return {
     ...state,
     layers: newLayers,
+  };
+}
+
+function newLayerState(layerId: string): LayerConfig {
+  return {
+    layerId,
+    datasourceId: 'indexpattern', // TODO: Don't hard code
+    xAccessor: generateId(),
+    seriesType: 'bar_stacked',
+    accessors: [generateId()],
+    title: '',
+    showGridlines: false,
+    position: Position.Left,
+    labels: [''],
+    splitSeriesAccessors: [generateId()],
   };
 }
 
@@ -491,25 +506,9 @@ export function XYConfigPanel(props: VisualizationProps<State>) {
         <EuiButton
           data-test-subj={`lnsXY_layer_add`}
           onClick={() => {
-            const newId = frame.addNewLayer();
-
             setState({
               ...state,
-              layers: [
-                ...state.layers,
-                {
-                  layerId: newId,
-                  datasourceId: 'indexpattern', // TODO: Don't hard code
-                  xAccessor: generateId(),
-                  seriesType: 'bar_stacked',
-                  accessors: [generateId()],
-                  title: '',
-                  showGridlines: false,
-                  position: Position.Left,
-                  labels: [''],
-                  splitSeriesAccessors: [],
-                },
-              ],
+              layers: [...state.layers, newLayerState(frame.addNewLayer())],
             });
           }}
           iconType="plusInCircle"
