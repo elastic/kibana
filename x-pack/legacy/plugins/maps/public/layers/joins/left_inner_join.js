@@ -56,8 +56,9 @@ export class LeftInnerJoin {
       delete feature.properties[stylePropertyName];
     }
     const joinKey = feature.properties[this._descriptor.leftField];
-    if (propertiesMap && propertiesMap.has((joinKey.toString()))) {
-      Object.assign(feature.properties,  propertiesMap.get(joinKey));
+    const coercedKey = joinKey ? joinKey.toString() : null;
+    if (propertiesMap && coercedKey !== null && propertiesMap.has(coercedKey)) {
+      Object.assign(feature.properties,  propertiesMap.get(coercedKey));
       return true;
     } else {
       return false;
