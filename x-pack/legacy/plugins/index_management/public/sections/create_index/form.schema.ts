@@ -7,11 +7,11 @@
 import {
   emptyField,
   minLengthField,
-  minSelectionField,
+  minSelectableSelectionField,
   indexNameField,
 } from '../../../../../../../src/plugins/elasticsearch_ui_shared/static/forms/field_validators';
-import { multiSelectSelectedValueToOptions } from '../../../../../../../src/plugins/elasticsearch_ui_shared/static/forms/serializers/input_serializers';
-import { multiSelectOptionsToSelectedValue } from '../../../../../../../src/plugins/elasticsearch_ui_shared/static/forms/serializers/output_serializers';
+import { multiSelectSelectedValueToOptions } from '../../../../../../../src/plugins/elasticsearch_ui_shared/static/forms/lib';
+import { multiSelectOptionsToSelectedValue } from '../../../../../../../src/plugins/elasticsearch_ui_shared/static/forms/lib';
 import {
   FormSchema,
   FIELD_TYPES,
@@ -148,8 +148,12 @@ export const formSchema: FormSchema<MyForm> = {
     helpText: 'Small demo of a multi select field',
     type: FIELD_TYPES.MULTI_SELECT,
     errorDisplayDelay: 0,
-    validations: [{ validator: minSelectionField(2) }],
-    inputSerializer: multiSelectSelectedValueToOptions,
-    outputSerializer: multiSelectOptionsToSelectedValue,
+    validations: [{ validator: minSelectableSelectionField(2) }],
+    deSerializer: multiSelectSelectedValueToOptions([
+      { label: 'index_1' },
+      { label: 'index_2' },
+      { label: 'index_3' },
+    ]),
+    serializer: multiSelectOptionsToSelectedValue,
   },
 };

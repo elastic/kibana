@@ -51,11 +51,11 @@ const inlineConfig: FieldConfig<MyForm> = {
 };
 
 export const Form3 = ({
-  defaultValues,
+  defaultValue,
   title,
 }: {
   title?: string;
-  defaultValues?: Record<string, any>;
+  defaultValue?: Record<string, any>;
 }) => {
   const onSubmit: FormConfig<MyForm>['onSubmit'] = (formData, isValid) => {
     console.log('Submitting form...');
@@ -63,8 +63,8 @@ export const Form3 = ({
     console.log('Is form valid:', isValid);
   };
 
-  const { form } = useForm<MyForm>({ onSubmit, schema: formSchema, defaultValues });
-  const isEditing = typeof defaultValues !== 'undefined';
+  const { form } = useForm<MyForm>({ onSubmit, schema: formSchema, defaultValue });
+  const isEditing = typeof defaultValue !== 'undefined';
 
   return (
     <form noValidate>
@@ -188,7 +188,6 @@ export const Form3 = ({
         path="selectedIndices"
         form={form}
         component={FormRow}
-        defaultValue={[{ label: 'index_1' }, { label: 'index_2' }, { label: 'index_3' }]}
         componentProps={{
           title: 'Indices to backup',
           description: 'Choose any indices than you want to include in your backup',

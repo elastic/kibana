@@ -37,7 +37,7 @@ export const HookFormPOC = () => {
         <EuiSpacer size="xl" />
         <Form3
           title="4. Same form but with initilal values"
-          defaultValues={{
+          defaultValue={{
             name: 'hello12',
             elastic: {
               coWorkers: [
