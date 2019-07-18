@@ -101,13 +101,13 @@ export function TableHeaderColumn({
   ];
 
   return (
-    <th key={name} data-test-subj="docTableHeaderField">
+    <th data-test-subj="docTableHeaderField">
       <span data-test-subj={`docTableHeader-${name}`}>
         {displayName}
         {buttons
           .filter(button => button.active)
-          .map(button => (
-            <EuiToolTip content={button.tooltip}>
+          .map((button,idx) => (
+            <EuiToolTip content={button.tooltip} key={`button_${idx}`}>
               <button
                 aria-label={button.ariaLabel}
                 className={button.className}
