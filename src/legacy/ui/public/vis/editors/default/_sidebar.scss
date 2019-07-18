@@ -220,13 +220,18 @@
   margin-bottom: $euiSizeS;
 }
 
-// to apply truncated string with ellipsis for agg description
 .visEditorSidebar__aggGroup .euiAccordion {
-  & > .euiFlexGroup > .euiFlexItem:first-child, .euiAccordion__buttonContent, .visEditorSidebar__accordionChild {
+  // to apply truncated string with ellipsis for agg description
+  & > .euiFlexGroup > .euiFlexItem:first-child,
+  .euiAccordion__buttonContent,
+  // prevent appearing scroll bar in .euiAccordion__childWrapper due to negative margin on some children's EuiFlexGroup
+  .euiForm > .euiFormRow:first-child,
+  [aria-controls="advancedAccordion"] {
     overflow: hidden;
   }
 
-  & > .euiFlexGroup > .euiFlexItem:first-child {
+  // prevent hiding a part of the border of accordion caret icon on focus
+  & > .euiFlexGroup > .euiFlexItem:first-child > button {
     padding: 0 0 1px 2px;
   }
 }
