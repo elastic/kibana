@@ -24,6 +24,8 @@ import { ShowingCount } from './jobs_table/showing_count';
 import { PopoverDescription } from './popover_description';
 import { getConfigTemplatesToInstall, getJobsToDisplay, getJobsToInstall } from './helpers';
 import { configTemplates, siemJobPrefix } from './config_templates';
+import { useStateToaster } from '../toasters';
+import { errorToToaster } from '../ml/api/error_to_toaster';
 
 const PopoverContentsDiv = styled.div`
   max-width: 550px;
@@ -89,6 +91,7 @@ export const MlPopover = React.memo(() => {
   const [isLoadingJobSummaryData, jobSummaryData] = useJobSummaryData([], refreshToggle);
   const [isCreatingJobs, setIsCreatingJobs] = useState(false);
   const [filterQuery, setFilterQuery] = useState('');
+  const [, dispatchToaster] = useStateToaster();
 
   const [, configuredIndexPattern] = useIndexPatterns(refreshToggle);
   const config = useContext(KibanaConfigContext);
@@ -105,9 +108,17 @@ export const MlPopover = React.memo(() => {
 
     if (enable) {
       const startTime = Math.max(latestTimestampMs, maxStartTime);
-      await startDatafeeds([`datafeed-${jobName}`], headers, startTime);
+      try {
+        await startDatafeeds([`datafeed-${jobName}`], headers, startTime);
+      } catch (error) {
+        errorToToaster({ title: i18n.START_JOB_FAILURE, error, dispatchToaster });
+      }
     } else {
-      await stopDatafeeds([`datafeed-${jobName}`], headers);
+      try {
+        await stopDatafeeds([`datafeed-${jobName}`], headers);
+      } catch (error) {
+        errorToToaster({ title: i18n.STOP_JOB_FAILURE, error, dispatchToaster });
+      }
     }
     dispatch({ type: 'refresh' });
   };
@@ -116,8 +127,8 @@ export const MlPopover = React.memo(() => {
   const embeddedJobIds = getJobsToInstall(configTemplates);
 
   // Jobs currently installed retrieved via ml jobs_summary api for 'siem' group
-  const siemJobs = jobSummaryData.map(job => job.id);
-  const installedJobIds = embeddedJobIds.filter(job => siemJobs.includes(job));
+  const siemGroupJobIds = jobSummaryData != null ? jobSummaryData.map(job => job.id) : [];
+  const installedJobIds = embeddedJobIds.filter(job => siemGroupJobIds.includes(job));
 
   // Config templates that still need to be installed and have a defaultIndexPattern that is configured
   const configTemplatesToInstall = getConfigTemplatesToInstall(
@@ -138,25 +149,30 @@ export const MlPopover = React.memo(() => {
   // Install Config Templates as effect of opening popover
   useEffect(() => {
     if (
-      jobSummaryData.length &&
+      jobSummaryData != null &&
       configuredIndexPattern !== '' &&
       configTemplatesToInstall.length > 0
     ) {
       const setupJobs = async () => {
         setIsCreatingJobs(true);
-        await Promise.all(
-          configTemplatesToInstall.map(configTemplate => {
-            return setupMlJob({
-              configTemplate: configTemplate.name,
-              indexPatternName: configTemplate.defaultIndexPattern,
-              groups: ['siem'],
-              prefix: siemJobPrefix,
-              headers,
-            });
-          })
-        );
-        setIsCreatingJobs(false);
-        dispatch({ type: 'refresh' });
+        try {
+          await Promise.all(
+            configTemplatesToInstall.map(configTemplate => {
+              return setupMlJob({
+                configTemplate: configTemplate.name,
+                indexPatternName: configTemplate.defaultIndexPattern,
+                groups: ['siem'],
+                prefix: siemJobPrefix,
+                headers,
+              });
+            })
+          );
+          setIsCreatingJobs(false);
+          dispatch({ type: 'refresh' });
+        } catch (error) {
+          errorToToaster({ title: i18n.CREATE_JOB_FAILURE, error, dispatchToaster });
+          setIsCreatingJobs(false);
+        }
       };
       setupJobs();
     }

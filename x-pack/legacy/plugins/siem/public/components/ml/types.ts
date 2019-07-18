@@ -120,11 +120,11 @@ export interface MlCapabilities {
     canCreateFilter: boolean;
     canDeleteFilter: boolean;
     canFindFileStructure: boolean;
-    canGetDataFrameJobs: boolean;
-    canDeleteDataFrameJob: boolean;
-    canPreviewDataFrameJob: boolean;
-    canCreateDataFrameJob: boolean;
-    canStartStopDataFrameJob: boolean;
+    canGetDataFrame: boolean;
+    canDeleteDataFrame: boolean;
+    canPreviewDataFrame: boolean;
+    canCreateDataFrame: boolean;
+    canStartStopDataFrame: boolean;
   };
   isPlatinumOrTrialLicense: boolean;
   mlFeatureEnabledInSpace: boolean;
