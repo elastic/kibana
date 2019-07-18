@@ -102,7 +102,7 @@ export const DataFrameTransformList: SFC = () => {
     // keep count of the number of matches we make as we're looping over the clauses
     // we only want to return transforms which match all clauses, i.e. each search term is ANDed
     // { transform-one:  { transform: { id: transform-one, config: {}, state: {}, ... }, count: 0 }, transform-two: {...} }
-    const matches: { [key: string]: any } = transforms.reduce((p, c) => {
+    const matches: { [key: string]: any } = transforms.reduce((p: { [key: string]: any }, c) => {
       p[c.id] = {
         transform: c,
         count: 0,
