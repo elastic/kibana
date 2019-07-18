@@ -12,7 +12,7 @@
 
 import Joi from 'joi';
 import Boom from 'boom';
-import { minutesFromNow, intervalFromDate, intervalFromNow } from './lib/intervals';
+import { intervalFromDate, intervalFromNow } from './lib/intervals';
 import { Logger } from './lib/logger';
 import { BeforeRunFunction } from './lib/middleware';
 import {
@@ -24,6 +24,8 @@ import {
   TaskDictionary,
   validateRunResult,
 } from './task';
+
+const defaultBackoffPerFailure = 5 * 60 * 1000;
 
 export interface TaskRunner {
   numWorkers: number;
@@ -178,10 +180,7 @@ export class TaskManagerRunner implements TaskRunner {
         startedAt: now,
         attempts,
         retryAt: new Date(
-          timeoutDate.getTime() +
-            (this.definition.getRetryDelay
-              ? this.definition.getRetryDelay(attempts, Boom.clientTimeout()) * 1000
-              : attempts * 5 * 60 * 1000) // incrementally backs off an extra 5m per failure
+          timeoutDate.getTime() + this.getRetryDelay(attempts, Boom.clientTimeout())
         ),
       });
 
@@ -234,11 +233,7 @@ export class TaskManagerRunner implements TaskRunner {
       runAt = result.runAt;
     } else if (result.error) {
       // when result.error is truthy, then we're retrying because it failed
-      runAt = this.definition.getRetryDelay
-        ? new Date(
-            Date.now() + this.definition.getRetryDelay(this.instance.attempts, result.error) * 1000
-          )
-        : minutesFromNow(this.instance.attempts * 5); // incrementally backs off an extra 5m per failure
+      runAt = new Date(Date.now() + this.getRetryDelay(this.instance.attempts, result.error));
     } else {
       runAt = intervalFromDate(startedAt, this.instance.interval)!;
     }
@@ -289,6 +284,13 @@ export class TaskManagerRunner implements TaskRunner {
 
     const maxAttempts = this.definition.maxAttempts || this.store.maxAttempts;
     return this.instance.attempts < maxAttempts ? 'idle' : 'failed';
+  }
+
+  private getRetryDelay(attempts: number, error: any) {
+    if (this.definition.getRetryDelay) {
+      return this.definition.getRetryDelay(attempts, error) * 1000;
+    }
+    return attempts * defaultBackoffPerFailure;
   }
 }
 
