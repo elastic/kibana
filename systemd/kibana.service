@@ -1,0 +1,43 @@
+[Unit]
+Description=Kibana 7
+BindsTo=probemanager.service
+Wants=elasticsearch.service
+After=elasticsearch.service
+Wants=cassandra.service
+After=cassandra.service
+Wants=probemanager.service
+Before=probemanager.service
+Wants=probetransmogrifier.service
+Before=probetransmogrifier.service
+
+[Service]
+Type=simple
+
+User=nginx
+Group=nginx
+
+# Run ExecStartPre with root-permissions
+PermissionsStartOnly=true
+
+# Ensure KibanaStartup.log file exists and is owned by nginx
+ExecStartPre=/usr/bin/touch /var/log/probe/KibanaStartup.log
+ExecStartPre=/usr/bin/chown nginx:nginx /var/log/probe/KibanaStartup.log
+
+Environment=CONFIG_PATH=/usr/local/kibana-7.2.0-linux-x64/config/kibana.yml
+Environment=NODE_ENV=production
+
+WorkingDirectory=/usr/local/kibana-7.2.0-linux-x64
+
+ExecStart=/usr/local/kibana-7.2.0-linux-x64/bin/kibana
+
+#ExecStartPost=/usr/bin/python /usr/local/kibana-7.2.0-linux-x64/scripts/setDefaultIndex.py
+#ExecStartPost=/usr/bin/python /usr/local/kibana-7.2.0-linux-x64/scripts/loadAssets.py
+
+TimeoutStopSec=30
+
+Restart=on-failure
+RestartSec=10
+
+[Install]
+WantedBy=elasticsearch.service
+

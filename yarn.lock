@@ -12908,7 +12908,7 @@ form-data@^2.5.0:
 
 form-data@~2.1.1:
   version "2.1.4"
-  resolved "https://registry.yarnpkg.com/form-data/-/form-data-2.1.4.tgz#33c183acf193276ecaa98143a69e94bfee1750d1"
+  resolved "https://logrhythm.jfrog.io/logrhythm/api/npm/npm-virtual/form-data/-/form-data-2.1.4.tgz#33c183acf193276ecaa98143a69e94bfee1750d1"
   integrity sha1-M8GDrPGTJ27KqYFDpp6Uv+4XUNE=
   dependencies:
     asynckit "^0.4.0"
@@ -15062,7 +15062,7 @@ http-proxy@^1.17.0:
 
 http-signature@~1.1.0:
   version "1.1.1"
-  resolved "https://registry.yarnpkg.com/http-signature/-/http-signature-1.1.1.tgz#df72e267066cd0ac67fb76adf8e134a8fbcf91bf"
+  resolved "https://logrhythm.jfrog.io/logrhythm/api/npm/npm-virtual/http-signature/-/http-signature-1.1.1.tgz#df72e267066cd0ac67fb76adf8e134a8fbcf91bf"
   integrity sha1-33LiZwZs0Kxn+3at+OE0qPvPkb8=
   dependencies:
     assert-plus "^0.2.0"
@@ -19300,7 +19300,7 @@ mime-db@1.x.x, mime-db@~1.37.0:
 
 mime-db@~1.38.0:
   version "1.38.0"
-  resolved "https://registry.yarnpkg.com/mime-db/-/mime-db-1.38.0.tgz#1a2aab16da9eb167b49c6e4df2d9c68d63d8e2ad"
+  resolved "https://logrhythm.jfrog.io/logrhythm/api/npm/npm-virtual/mime-db/-/mime-db-1.38.0.tgz#1a2aab16da9eb167b49c6e4df2d9c68d63d8e2ad"
   integrity sha512-bqVioMFFzc2awcdJZIzR3HjZFX20QhilVS7hytkKrv7xFAn8bM1gzc/FOX2awLISvWe0PV8ptFKcon+wZ5qYkg==
 
 mime-types@^2.1.12, mime-types@~2.1.17, mime-types@~2.1.18, mime-types@~2.1.19:
@@ -22281,7 +22281,7 @@ prop-types-exact@^1.2.0:
 
 prop-types@15.6.0:
   version "15.6.0"
-  resolved "https://registry.yarnpkg.com/prop-types/-/prop-types-15.6.0.tgz#ceaf083022fc46b4a35f69e13ef75aed0d639856"
+  resolved "https://logrhythm.jfrog.io/logrhythm/api/npm/npm-virtual/prop-types/-/prop-types-15.6.0.tgz#ceaf083022fc46b4a35f69e13ef75aed0d639856"
   integrity sha1-zq8IMCL8RrSjX2nhPvda7Q1jmFY=
   dependencies:
     fbjs "^0.8.16"
@@ -22634,7 +22634,7 @@ qs@^6.6.0:
 
 qs@~6.4.0:
   version "6.4.0"
-  resolved "https://registry.yarnpkg.com/qs/-/qs-6.4.0.tgz#13e26d28ad6b0ffaa91312cd3bf708ed351e7233"
+  resolved "https://logrhythm.jfrog.io/logrhythm/api/npm/npm-virtual/qs/-/qs-6.4.0.tgz#13e26d28ad6b0ffaa91312cd3bf708ed351e7233"
   integrity sha1-E+JtKK1rD/qpExLNO/cI7TUecjM=
 
 query-string@^4.1.0, query-string@^4.2.2:
@@ -26430,7 +26430,7 @@ stringify-object@^3.2.1:
 
 stringstream@~0.0.4, stringstream@~0.0.5:
   version "0.0.6"
-  resolved "https://registry.yarnpkg.com/stringstream/-/stringstream-0.0.6.tgz#7880225b0d4ad10e30927d167a1d6f2fd3b33a72"
+  resolved "https://logrhythm.jfrog.io/logrhythm/api/npm/npm-virtual/stringstream/-/stringstream-0.0.6.tgz#7880225b0d4ad10e30927d167a1d6f2fd3b33a72"
   integrity sha512-87GEBAkegbBcweToUrdzf3eLhWNg06FJTebl4BVJz/JgWy8CvEr9dRtX5qWphiynMSQlxxi+QqN0z5T32SLlhA==
 
 strip-ansi@*, strip-ansi@5.2.0, strip-ansi@^5.1.0, strip-ansi@^5.2.0:
