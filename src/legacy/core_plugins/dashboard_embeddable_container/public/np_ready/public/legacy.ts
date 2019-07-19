@@ -17,6 +17,7 @@
  * under the License.
  */
 
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { npSetup, npStart } from 'ui/new_platform';
 import { plugin } from '.';
 import {

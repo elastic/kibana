@@ -17,7 +17,46 @@
  * under the License.
  */
 
+import { IconType } from '@elastic/eui';
+import {
+  SavedObject as SavedObjectType,
+  SavedObjectAttributes,
+} from '../../../../../../../core/server';
+
 export interface DashboardCapabilities {
   showWriteControls: boolean;
   createNew: boolean;
+}
+
+// TODO: Replace Saved object interfaces by the once Core will provide when it is ready.
+export type SavedObjectAttribute =
+  | string
+  | number
+  | boolean
+  | null
+  | undefined
+  | SavedObjectAttributes
+  | SavedObjectAttributes[];
+
+export interface SimpleSavedObject<T extends SavedObjectAttributes> {
+  attributes: T;
+  _version?: SavedObjectType<T>['version'];
+  id: SavedObjectType<T>['id'];
+  type: SavedObjectType<T>['type'];
+  migrationVersion: SavedObjectType<T>['migrationVersion'];
+  error: SavedObjectType<T>['error'];
+  references: SavedObjectType<T>['references'];
+  get(key: string): any;
+  set(key: string, value: any): T;
+  has(key: string): boolean;
+  save(): Promise<SimpleSavedObject<T>>;
+  delete(): void;
+}
+
+export interface SavedObjectMetaData<T extends SavedObjectAttributes> {
+  type: string;
+  name: string;
+  getIconForSavedObject(savedObject: SimpleSavedObject<T>): IconType;
+  getTooltipForSavedObject?(savedObject: SimpleSavedObject<T>): string;
+  showSavedObject?(savedObject: SimpleSavedObject<T>): boolean;
 }
