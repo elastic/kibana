@@ -24,7 +24,6 @@ export interface UptimeUrlParams {
 
 const {
   AUTOREFRESH_INTERVAL,
-  AUTOREFRESH_MINIMUM,
   AUTOREFRESH_IS_PAUSED,
   DATE_RANGE_START,
   DATE_RANGE_END,
@@ -55,10 +54,7 @@ export const getSupportedUrlParams = (params: {
   } = params;
 
   return {
-    autorefreshInterval: Math.min(
-      parseUrlInt(autorefreshInterval, AUTOREFRESH_INTERVAL),
-      AUTOREFRESH_MINIMUM
-    ),
+    autorefreshInterval: parseUrlInt(autorefreshInterval, AUTOREFRESH_INTERVAL),
     autorefreshIsPaused: parseIsPaused(autorefreshIsPaused, AUTOREFRESH_IS_PAUSED),
     dateRangeStart: dateRangeStart || DATE_RANGE_START,
     dateRangeEnd: dateRangeEnd || DATE_RANGE_END,

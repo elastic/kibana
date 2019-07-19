@@ -3,7 +3,7 @@
 exports[`useUrlParams accepts router props, updates URL params, and returns the current params 1`] = `
 <Fragment>
   <div>
-    {"autorefreshInterval":15000,"autorefreshIsPaused":false,"dateRangeStart":"now-12d","dateRangeEnd":"now","search":"","selectedPingStatus":"down"}
+    {"autorefreshInterval":60000,"autorefreshIsPaused":false,"dateRangeStart":"now-12d","dateRangeEnd":"now","search":"","selectedPingStatus":"down"}
   </div>
   <button
     id="setRouter"

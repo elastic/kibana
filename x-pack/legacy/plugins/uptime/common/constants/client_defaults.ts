@@ -7,8 +7,6 @@
 export const CLIENT_DEFAULTS = {
   // 60 seconds
   AUTOREFRESH_INTERVAL: 60 * 1000,
-  // autorefresh shouldn't occur faster than 15 seconds
-  AUTOREFRESH_MINIMUM: 15 * 1000,
   // polling defaults to "on"
   AUTOREFRESH_IS_PAUSED: false,
   COMMONLY_USED_DATE_RANGES: [
