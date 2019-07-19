@@ -74,7 +74,7 @@ Historical data offers infinite scrolling.
 
 [float]
 [[logs-highlight]]
-== Highlight a phrase in the logs stream
+=== Highlight a phrase in the logs stream
 To find instances of a particular word or phrase in the logs stream, click the Highlights button in the toolbar and enter your search terms.
 
 [role="screenshot"]
