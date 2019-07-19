@@ -9,9 +9,11 @@ import { BasicValidations } from './job_validator';
 import { Job } from '../job_creator/configs';
 import { ALLOWED_DATA_UNITS } from '../../../../../common/constants/validation';
 import { newJobLimits } from '../../../new_job/utils/new_job_defaults';
+import { ValidationResults, ValidationMessage } from '../../../../../common/util/job_utils';
+import { ExistingJobsAndGroups } from '../../../../services/job_service';
 
 export function populateValidationMessages(
-  validationResults: any,
+  validationResults: ValidationResults,
   basicValidations: BasicValidations,
   jobConfig: Job
 ) {
@@ -22,7 +24,7 @@ export function populateValidationMessages(
   } else if (validationResults.contains('job_id_invalid')) {
     basicValidations.jobId.valid = false;
     const msg = i18n.translate(
-      'xpack.ml.newJob.simple.validateJob.jobNameAllowedCharactersDescription',
+      'xpack.ml.newJob.wizard.validateJob.jobNameAllowedCharactersDescription',
       {
         defaultMessage:
           'Job name can contain lowercase alphanumeric (a-z and 0-9), hyphens or underscores; ' +
@@ -30,18 +32,32 @@ export function populateValidationMessages(
       }
     );
     basicValidations.jobId.message = msg;
+  } else if (validationResults.contains('job_id_already_exists')) {
+    basicValidations.jobId.valid = false;
+    const msg = i18n.translate('xpack.ml.newJob.wizard.validateJob.jobNameAlreadyExists', {
+      defaultMessage:
+        'Job ID already exists. A job ID cannot be the same as an existing job or group.',
+    });
+    basicValidations.jobId.message = msg;
   }
 
   if (validationResults.contains('job_group_id_invalid')) {
     basicValidations.groupIds.valid = false;
     const msg = i18n.translate(
-      'xpack.ml.newJob.simple.validateJob.jobGroupAllowedCharactersDescription',
+      'xpack.ml.newJob.wizard.validateJob.jobGroupAllowedCharactersDescription',
       {
         defaultMessage:
           'Job group names can contain lowercase alphanumeric (a-z and 0-9), hyphens or underscores; ' +
           'must start and end with an alphanumeric character',
       }
     );
+    basicValidations.groupIds.message = msg;
+  } else if (validationResults.contains('job_group_id_already_exists')) {
+    basicValidations.groupIds.valid = false;
+    const msg = i18n.translate('xpack.ml.newJob.wizard.validateJob.groupNameAlreadyExists', {
+      defaultMessage:
+        'Group ID already exists. A group ID cannot be the same as an existing job or group.',
+    });
     basicValidations.groupIds.message = msg;
   }
 
@@ -51,7 +67,7 @@ export function populateValidationMessages(
       ...ALLOWED_DATA_UNITS,
     ].pop()}`;
     const msg = i18n.translate(
-      'xpack.ml.newJob.simple.validateJob.modelMemoryLimitUnitsInvalidErrorMessage',
+      'xpack.ml.newJob.wizard.validateJob.modelMemoryLimitUnitsInvalidErrorMessage',
       {
         defaultMessage: 'Model memory limit data unit unrecognized. It must be {str}',
         values: { str },
@@ -63,7 +79,7 @@ export function populateValidationMessages(
   if (validationResults.contains('model_memory_limit_invalid')) {
     basicValidations.modelMemoryLimit.valid = false;
     const msg = i18n.translate(
-      'xpack.ml.newJob.simple.validateJob.modelMemoryLimitRangeInvalidErrorMessage',
+      'xpack.ml.newJob.wizard.validateJob.modelMemoryLimitRangeInvalidErrorMessage',
       {
         defaultMessage:
           'Model memory limit cannot be higher than the maximum value of {maxModelMemoryLimit}',
@@ -76,7 +92,7 @@ export function populateValidationMessages(
   if (validationResults.contains('detectors_duplicates')) {
     basicValidations.duplicateDetectors.valid = false;
     const msg = i18n.translate(
-      'xpack.ml.newJob.simple.validateJob.duplicatedDetectorsErrorMessage',
+      'xpack.ml.newJob.wizard.validateJob.duplicatedDetectorsErrorMessage',
       {
         defaultMessage: 'Duplicate detectors were found.',
       }
@@ -87,7 +103,7 @@ export function populateValidationMessages(
   if (validationResults.contains('bucket_span_empty')) {
     basicValidations.bucketSpan.valid = false;
     const msg = i18n.translate(
-      'xpack.ml.newJob.simple.validateJob.bucketSpanMustBeSetErrorMessage',
+      'xpack.ml.newJob.wizard.validateJob.bucketSpanMustBeSetErrorMessage',
       {
         defaultMessage: '{bucketSpan} must be set',
         values: { bucketSpan: 'bucket_span' },
@@ -98,7 +114,7 @@ export function populateValidationMessages(
   } else if (validationResults.contains('bucket_span_invalid')) {
     basicValidations.bucketSpan.valid = false;
     const msg = i18n.translate(
-      'xpack.ml.newJob.advanced.validateJob.bucketSpanInvalidTimeIntervalFormatErrorMessage',
+      'xpack.ml.newJob.wizard.validateJob.bucketSpanInvalidTimeIntervalFormatErrorMessage',
       {
         defaultMessage:
           '{bucketSpan} is not a valid time interval format e.g. {tenMinutes}, {oneHour}. It also needs to be higher than zero.',
@@ -112,4 +128,34 @@ export function populateValidationMessages(
 
     basicValidations.bucketSpan.message = msg;
   }
+}
+
+export function checkForExistingJobAndGroupIds(
+  jobId: string,
+  groupIds: string[],
+  existingJobsAndGroups: ExistingJobsAndGroups
+): ValidationResults {
+  const messages: ValidationMessage[] = [];
+
+  // check that job id does not already exist as a job or group or a newly created group
+  if (
+    existingJobsAndGroups.jobIds.includes(jobId) ||
+    existingJobsAndGroups.groupIds.includes(jobId) ||
+    groupIds.includes(jobId)
+  ) {
+    messages.push({ id: 'job_id_already_exists' });
+  }
+
+  // check that groups that have been newly added in this job do not already exist as job ids
+  const newGroups = groupIds.filter(g => !existingJobsAndGroups.groupIds.includes(g));
+  if (existingJobsAndGroups.jobIds.some(g => newGroups.includes(g))) {
+    messages.push({ id: 'job_group_id_already_exists' });
+  }
+
+  return {
+    messages,
+    valid: messages.length === 0,
+    contains: (id: string) => messages.some(m => id === m.id),
+    find: (id: string) => messages.find(m => id === m.id),
+  };
 }

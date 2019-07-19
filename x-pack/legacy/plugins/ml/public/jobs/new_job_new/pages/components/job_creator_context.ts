@@ -15,11 +15,7 @@ import {
 import { ChartLoader } from '../../common/chart_loader';
 import { ResultsLoader } from '../../common/results_loader';
 import { JobValidator } from '../../common/job_validator';
-
-export interface ExistingJobsAndGroups {
-  jobs: string[];
-  groups: string[];
-}
+import { ExistingJobsAndGroups } from '../../../../services/job_service';
 
 export interface JobCreatorContextValue {
   jobCreatorUpdated: number;

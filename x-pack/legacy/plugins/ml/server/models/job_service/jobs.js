@@ -345,13 +345,13 @@ export function jobsProvider(callWithRequest) {
   async function getAllJobAndGroupIds() {
     const { getAllGroups } = groupsProvider(callWithRequest);
     const jobs = await callWithRequest('ml.jobs');
-    const allJobIds = jobs.jobs.map(job => job.job_id);
+    const jobIds = jobs.jobs.map(job => job.job_id);
     const groups = await getAllGroups();
-    const allGroupIds = groups.map(group => group.id);
+    const groupIds = groups.map(group => group.id);
 
     return {
-      jobs: allJobIds,
-      groups: allGroupIds,
+      jobIds,
+      groupIds,
     };
   }
 

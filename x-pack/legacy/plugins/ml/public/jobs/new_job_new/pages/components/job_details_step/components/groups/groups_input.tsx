@@ -24,7 +24,7 @@ export const GroupsInput: FC = () => {
     jobCreatorUpdate();
   }, [selectedGroups.join()]);
 
-  const options: EuiComboBoxOptionProps[] = existingJobsAndGroups.groups.map((g: string) => ({
+  const options: EuiComboBoxOptionProps[] = existingJobsAndGroups.groupIds.map((g: string) => ({
     label: g,
     color: tabColor(g),
   }));

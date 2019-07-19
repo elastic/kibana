@@ -4,10 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { basicJobValidation } from '../../../../../common/util/job_utils';
+import {
+  basicJobValidation,
+  ValidationResults,
+  ValidationMessage,
+} from '../../../../../common/util/job_utils';
 import { newJobLimits } from '../../../new_job/utils/new_job_defaults';
 import { JobCreator } from '../job_creator';
-import { populateValidationMessages } from './util';
+import { populateValidationMessages, checkForExistingJobAndGroupIds } from './util';
+import { ExistingJobsAndGroups } from '../../../../services/job_service';
 
 // delay start of validation to allow the user to make changes
 // e.g. if they are typing in a new value, try not to validate
@@ -37,7 +42,7 @@ export class JobValidator {
   private _validationSummary: ValidationSummary;
   private _lastJobConfig: string;
   private _validateTimeout: NodeJS.Timeout;
-
+  private _existingJobsAndGroups: ExistingJobsAndGroups;
   private _basicValidations: BasicValidations = {
     jobId: { valid: true },
     groupIds: { valid: true },
@@ -46,7 +51,7 @@ export class JobValidator {
     duplicateDetectors: { valid: true },
   };
 
-  constructor(jobCreator: JobCreator) {
+  constructor(jobCreator: JobCreator, existingJobsAndGroups: ExistingJobsAndGroups) {
     this._jobCreator = jobCreator;
     this._lastJobConfig = this._jobCreator.formattedJobJson;
     this._validationSummary = {
@@ -54,6 +59,7 @@ export class JobValidator {
       advanced: false,
     };
     this._validateTimeout = setTimeout(() => {}, 0);
+    this._existingJobsAndGroups = existingJobsAndGroups;
   }
 
   public validate() {
@@ -86,9 +92,19 @@ export class JobValidator {
 
     const jobConfig = this._jobCreator.jobConfig;
     const limits = newJobLimits();
-    const validationResults = basicJobValidation(jobConfig, undefined, limits);
 
-    populateValidationMessages(validationResults, this._basicValidations, jobConfig);
+    // run standard basic validation
+    const basicResults = basicJobValidation(jobConfig, undefined, limits);
+    populateValidationMessages(basicResults, this._basicValidations, jobConfig);
+
+    // run addition job and group id validation
+    const idResults = checkForExistingJobAndGroupIds(
+      this._jobCreator.jobId,
+      this._jobCreator.groups,
+      this._existingJobsAndGroups
+    );
+    populateValidationMessages(idResults, this._basicValidations, jobConfig);
+
     this._validationSummary.basic = this._isOverallBasicValid();
   }
 

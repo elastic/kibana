@@ -18,12 +18,9 @@ import { JobDetailsStep } from '../components/job_details_step';
 import { SummaryStep } from '../components/summary_step';
 import { MlTimeBuckets } from '../../../../util/ml_time_buckets';
 
-import {
-  JobCreatorContext,
-  JobCreatorContextValue,
-  ExistingJobsAndGroups,
-} from '../components/job_creator_context';
+import { JobCreatorContext, JobCreatorContextValue } from '../components/job_creator_context';
 import { KibanaContext, isKibanaContext } from '../../../../data_frame/common/kibana_context';
+import { ExistingJobsAndGroups } from '../../../../services/job_service';
 
 import {
   SingleMetricJobCreator,
