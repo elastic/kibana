@@ -5,7 +5,7 @@
  */
 
 import { get, set, reduce } from 'lodash';
-import { INDEX_NAMES } from '../../../../common/constants';
+import { INDEX_NAMES, QUERY } from '../../../../common/constants';
 import {
   ErrorListItem,
   FilterBar,
@@ -196,7 +196,7 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
                   },
                 },
               ],
-              size: 10000,
+              size: QUERY.DEFAULT_AGGS_CAP,
             },
             aggs: {
               latest: {
