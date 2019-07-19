@@ -24,7 +24,6 @@ import { shortenDottedString } from '../../../../../common/utils/shorten_dotted_
 import { TableHeaderColumn } from './table_header_column';
 import { SortOrder, getDisplayedColumns } from './helpers';
 
-
 interface Props {
   columns: string[];
   hideTimeColumn: boolean;
