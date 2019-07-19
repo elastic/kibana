@@ -2,7 +2,10 @@
   "extends": "../../tsconfig.json",
   "compilerOptions": {
     "declaration": true,
-    "outDir": "target"
+    "outDir": "target",
+    "types": [
+      "node"
+    ]
   },
   "include": ["index.ts"]
 }

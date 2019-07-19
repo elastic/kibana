@@ -7,9 +7,13 @@
   "types": "target/index.d.ts",
   "scripts": {
     "build": "tsc",
-    "kbn:watch": "tsc --watch"
+    "kbn:watch": "tsc --watch",
+    "test": "tsd"
   },
   "dependencies": {
     "utility-types": "^3.7.0"
+  },
+  "devDependencies": {
+    "tsd": "^0.7.4"
   }
 }
