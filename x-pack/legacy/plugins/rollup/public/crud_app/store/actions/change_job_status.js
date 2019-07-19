@@ -36,8 +36,7 @@ export const startJobs = (jobIds) => async (dispatch) => {
     return showApiError(
       error,
       i18n.translate('xpack.rollupJobs.startJobsAction.errorTitle', {
-        defaultMessage: 'Error starting rollup {pluralized}',
-        values: { pluralized: jobIds.length <= 1 ? 'job' : 'jobs' },
+        defaultMessage: 'Error starting rollup jobs',
       })
     );
   }
