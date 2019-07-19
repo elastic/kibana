@@ -168,22 +168,23 @@ export class EmbeddablePanel extends React.Component<Props, State> {
       embeddable: this.props.embeddable,
     });
 
-    const createGetUserData = (overlays: CoreStart['overlays']) => async function getUserData(context: ActionContext) {
-      return new Promise<{ title: string | undefined }>(resolve => {
-        const session = overlays.openModal(
-          <CustomizePanelModal
-            embeddable={context.embeddable}
-            updateTitle={title => {
-              session.close();
-              resolve({ title });
-            }}
-          />,
-          {
-            'data-test-subj': 'customizePanel',
-          }
-        );
-      });
-    };
+    const createGetUserData = (overlays: CoreStart['overlays']) =>
+      async function getUserData(context: ActionContext) {
+        return new Promise<{ title: string | undefined }>(resolve => {
+          const session = overlays.openModal(
+            <CustomizePanelModal
+              embeddable={context.embeddable}
+              updateTitle={title => {
+                session.close();
+                resolve({ title });
+              }}
+            />,
+            {
+              'data-test-subj': 'customizePanel',
+            }
+          );
+        });
+      };
 
     // These actions are exposed on the context menu for every embeddable, they bypass the trigger
     // registry.

@@ -29,8 +29,8 @@ type GetUserData = (context: ActionContext) => Promise<{ title: string | undefin
 
 export class CustomizePanelTitleAction extends Action {
   public readonly type = CUSTOMIZE_PANEL_ACTION_ID;
-  
-  constructor(private readonly getDataFromUser: GetUserData ) {
+
+  constructor(private readonly getDataFromUser: GetUserData) {
     super(CUSTOMIZE_PANEL_ACTION_ID);
     this.order = 10;
   }
