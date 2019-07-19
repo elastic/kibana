@@ -8,7 +8,7 @@
 import { ESJoinSource } from '../sources/es_join_source';
 import { VectorStyle } from '../styles/vector_style';
 
-export class LeftInnerJoin {
+export class InnerJoin {
 
   constructor(joinDescriptor, inspectorAdapters) {
     this._descriptor = joinDescriptor;
