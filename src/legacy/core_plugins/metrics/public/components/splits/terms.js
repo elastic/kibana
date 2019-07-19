@@ -90,7 +90,7 @@ export const SplitByTermsUI = ({
   const selectedFieldType = get(selectedField, 'type');
   const seriesQuantity = useContext(SeriesQuantityContext);
 
-  if (isPercentDisabled(seriesQuantity) && model.stacked === STACKED_OPTIONS.PERCENT) {
+  if (isPercentDisabled(seriesQuantity[model.id]) && model.stacked === STACKED_OPTIONS.PERCENT) {
     onChange({ ['stacked']: STACKED_OPTIONS.NONE });
   }
 

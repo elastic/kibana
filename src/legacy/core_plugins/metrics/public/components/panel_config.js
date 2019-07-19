@@ -47,7 +47,7 @@ export function PanelConfig(props) {
   const Component = types[model.type];
   const [formValidationResults] = useState({});
   const [uiRestrictions, setUIRestrictions] = useState(null);
-  const [seriesQuantity, setSeriesQuantity] = useState(0);
+  const [seriesQuantity, setSeriesQuantity] = useState({});
 
   useEffect(() => {
     model.isModelInvalid = !checkModelValidity(formValidationResults);
@@ -55,8 +55,16 @@ export function PanelConfig(props) {
 
   useEffect(() => {
     const visDataSubscription = props.visData$.subscribe(visData => {
+      const series = get(visData, `${model.id}.series`, []);
+      const counter = {};
+      const seriesQuantity = series.reduce((acc, value) => {
+        counter[value.seriesId] = counter[value.seriesId] + 1 || 1;
+        acc[value.seriesId] = counter[value.seriesId];
+        return acc;
+      }, {});
+
+      setSeriesQuantity(seriesQuantity);
       setUIRestrictions(get(visData, 'uiRestrictions', null));
-      setSeriesQuantity(get(visData, `${model.id}.series`, []).length);
     });
 
     return function cleanup() {

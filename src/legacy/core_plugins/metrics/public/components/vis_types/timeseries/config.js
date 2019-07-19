@@ -79,7 +79,7 @@ export const TimeseriesConfig = injectI18n(function(props) {
     {
       label: intl.formatMessage({ id: 'tsvb.timeSeries.percentLabel', defaultMessage: 'Percent' }),
       value: 'percent',
-      disabled: isPercentDisabled(seriesQuantity),
+      disabled: isPercentDisabled(seriesQuantity[model.id]),
     },
   ];
   const selectedStackedOption = stackedOptions.find(option => {
