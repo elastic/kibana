@@ -176,7 +176,7 @@ class NetworkTopNFlowTableComponent extends React.PureComponent<NetworkTopNFlowT
         updateLimitPagination={newLimit =>
           updateTopNFlowLimit({ limit: newLimit, networkType: type })
         }
-        updateProps={{ flowDirection, flowTarget, totalCount }}
+        updateProps={{ flowDirection, flowTarget, totalCount, topNFlowSort, field }}
       />
     );
   }
