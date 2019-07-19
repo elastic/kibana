@@ -42,7 +42,7 @@ function setupService() {
   return { httpService, fatalErrors, http };
 }
 
-describe('http requests', async () => {
+describe('http requests', () => {
   afterEach(() => {
     fetchMock.restore();
   });
@@ -250,7 +250,7 @@ describe('http requests', async () => {
   });
 });
 
-describe('addLoadingCount()', async () => {
+describe('addLoadingCount()', () => {
   it('subscribes to passed in sources, unsubscribes on stop', () => {
     const { httpService, http } = setupService();
 
@@ -289,7 +289,7 @@ describe('addLoadingCount()', async () => {
   });
 });
 
-describe('getLoadingCount$()', async () => {
+describe('getLoadingCount$()', () => {
   it('emits 0 initially, the right count when sources emit their own count, and ends with zero', async () => {
     const { httpService, http } = setupService();
 

@@ -49,7 +49,7 @@ const mockTooltipProperties = [
   new MockTooltipProperty('foo', 'bar', false)
 ];
 
-describe('FeatureTooltip', async () => {
+describe('FeatureTooltip', () => {
 
   test('should not show close button and not show filter button', async () => {
     const component = shallow(
