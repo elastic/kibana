@@ -19,7 +19,7 @@ import {
 } from '@elastic/charts';
 import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/types';
 import { XYArgs } from './types';
-import { LensMultiTable, KibanaDatatable } from '../types';
+import { LensMultiTable } from '../types';
 import { RenderFunction } from '../interpreter_types';
 
 export interface XYChartProps {
@@ -49,7 +49,7 @@ export const xyChart: ExpressionFunction<'lens_xy_chart', LensMultiTable, XYArgs
     },
   },
   context: {
-    types: ['kibana_datatable'],
+    types: ['lens_multitable'],
   },
   fn(data: LensMultiTable, args: XYArgs) {
     return {

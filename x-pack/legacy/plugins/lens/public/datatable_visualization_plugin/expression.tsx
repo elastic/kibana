@@ -56,7 +56,7 @@ export const datatable: ExpressionFunction<
     },
   },
   context: {
-    types: ['kibana_datatable'],
+    types: ['lens_multitable'],
   },
   fn(data: KibanaDatatable, args: Args) {
     return {
