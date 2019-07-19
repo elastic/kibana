@@ -22,21 +22,17 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { Action, ActionContext } from '../../../../actions';
 import { ViewMode } from '../../../../types';
-import { getUserData } from './get_user_data';
 
 const CUSTOMIZE_PANEL_ACTION_ID = 'CUSTOMIZE_PANEL_ACTION_ID';
 
+type GetUserData = (context: ActionContext) => Promise<{ title: string | undefined }>;
+
 export class CustomizePanelTitleAction extends Action {
   public readonly type = CUSTOMIZE_PANEL_ACTION_ID;
-  private getDataFromUser: (context: ActionContext) => Promise<{ title: string | undefined }>;
-  constructor(
-    getDataFromUser: (
-      context: ActionContext
-    ) => Promise<{ title: string | undefined }> = getUserData
-  ) {
+  
+  constructor(private readonly getDataFromUser: GetUserData ) {
     super(CUSTOMIZE_PANEL_ACTION_ID);
     this.order = 10;
-    this.getDataFromUser = getDataFromUser;
   }
 
   public getDisplayName() {

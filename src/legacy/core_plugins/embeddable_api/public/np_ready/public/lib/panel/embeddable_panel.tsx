@@ -37,7 +37,8 @@ import { AddPanelAction } from './panel_header/panel_actions/add_panel/add_panel
 import { CustomizePanelTitleAction } from './panel_header/panel_actions/customize_title/customize_panel_action';
 import { PanelHeader } from './panel_header/panel_header';
 import { InspectPanelAction } from './panel_header/panel_actions/inspect_panel_action';
-import { EditPanelAction, Action } from '../actions';
+import { EditPanelAction, Action, ActionContext } from '../actions';
+import { CustomizePanelModal } from './panel_header/panel_actions/customize_title/customize_panel_modal';
 
 interface Props {
   embeddable: IEmbeddable<any, any>;
@@ -167,10 +168,27 @@ export class EmbeddablePanel extends React.Component<Props, State> {
       embeddable: this.props.embeddable,
     });
 
+    const createGetUserData = (overlays: CoreStart['overlays']) => async function getUserData(context: ActionContext) {
+      return new Promise<{ title: string | undefined }>(resolve => {
+        const session = overlays.openModal(
+          <CustomizePanelModal
+            embeddable={context.embeddable}
+            updateTitle={title => {
+              session.close();
+              resolve({ title });
+            }}
+          />,
+          {
+            'data-test-subj': 'customizePanel',
+          }
+        );
+      });
+    };
+
     // These actions are exposed on the context menu for every embeddable, they bypass the trigger
     // registry.
     const extraActions = [
-      new CustomizePanelTitleAction(),
+      new CustomizePanelTitleAction(createGetUserData(this.props.overlays)),
       new AddPanelAction(
         this.props.getEmbeddableFactory,
         this.props.getAllEmbeddableFactories,
