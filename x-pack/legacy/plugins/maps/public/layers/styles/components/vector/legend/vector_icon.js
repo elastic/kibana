@@ -89,6 +89,11 @@ function extractColorFromStyleProperty(colorStyleProperty, defaultColor) {
     return colorStyleProperty.options.color;
   }
 
+  // Do not showing dynamic color unless configuration is complete
+  if (!colorStyleProperty.options.field || !colorStyleProperty.options.field.name) {
+    return defaultColor;
+  }
+
   // return middle of gradient for dynamic style property
   return getColorRampCenterColor(colorStyleProperty.options.color);
 }
