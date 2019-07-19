@@ -121,7 +121,14 @@ export const SavedQueryManager: FunctionComponent<Props> = ({
 
       <EuiFlexGroup>
         <EuiFlexItem>
-          <ul>{savedQueryRows}</ul>
+          {savedQueries.length > 0 ? (
+            <ul>{savedQueryRows}</ul>
+          ) : (
+            <p>
+              There are no saved queries. You can save search snippets and filters for later use.{' '}
+              this, enter a query and click 'Save query for reuse'.
+            </p>
+          )}
         </EuiFlexItem>
       </EuiFlexGroup>
 
