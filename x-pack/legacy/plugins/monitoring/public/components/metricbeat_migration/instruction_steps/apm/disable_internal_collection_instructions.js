@@ -36,7 +36,7 @@ export function getApmInstructionsForDisablingInternalCollection(product, meta, 
           <p>
             <FormattedMessage
               id="xpack.monitoring.metricbeatMigration.apmInstructions.disableInternalCollection.description"
-              defaultMessage="Add the following setting in the APM server\'s configuration file ({file}):"
+              defaultMessage="Add the following setting in the APM server's configuration file ({file}):"
               values={{
                 file: (
                   <Monospace>apm-server.yml</Monospace>

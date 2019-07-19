@@ -97,15 +97,15 @@ export function ApmServerInstances({ apms, setupMode }) {
       <Fragment>
         <EuiCallOut
           title={i18n.translate('xpack.monitoring.apm.instances.metricbeatMigration.detectedInstanceTitle', {
-            defaultMessage: 'APM instance detected',
+            defaultMessage: 'APM server detected',
           })}
           color="warning"
           iconType="help"
         >
           <p>
             {i18n.translate('xpack.monitoring.apm.instances.metricbeatMigration.detectedInstanceDescription', {
-              defaultMessage: `Based on your indices, we think you might have an apm instance. Click the 'Setup monitoring'
-              button below to start monitoring this instance.`
+              defaultMessage: `Based on your indices, we think you might have an apm server. Click the 'Setup monitoring'
+              button below to start monitoring this apm server.`
             })}
           </p>
         </EuiCallOut>
@@ -135,7 +135,7 @@ export function ApmServerInstances({ apms, setupMode }) {
             uuidField="uuid"
             nameField="name"
             setupNewButtonLabel={i18n.translate('xpack.monitoring.apm.metricbeatMigration.setupNewButtonLabel', {
-              defaultMessage: 'Setup monitoring for new APM server instance'
+              defaultMessage: 'Setup monitoring for new APM server'
             })}
             search={{
               box: {
