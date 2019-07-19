@@ -13,7 +13,7 @@ export const IndexManagementPageProvider = ({
 
   return {
     async sectionHeadingText() {
-      return await testSubjects.getVisibleText('sectionHeading');
+      return await testSubjects.getVisibleText('appTitle');
     },
     async reloadIndicesButton() {
       return await testSubjects.find('reloadIndicesButton');
