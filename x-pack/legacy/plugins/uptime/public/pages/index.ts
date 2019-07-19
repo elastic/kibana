@@ -4,6 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { MainPage } from './main';
 export { MonitorPage } from './monitor';
 export { OverviewPage } from './overview';

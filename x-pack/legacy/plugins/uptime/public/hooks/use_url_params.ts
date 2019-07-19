@@ -5,7 +5,9 @@
  */
 
 import qs from 'querystring';
-import React, { useMemo } from 'react';
+import { useState } from 'react';
+import { RouteComponentProps } from 'react-router';
+import { History } from 'history';
 import { UptimeUrlParams, getSupportedUrlParams } from '../lib/helper';
 
 interface Location {
@@ -13,35 +15,43 @@ interface Location {
   search: string;
 }
 
-export function useUrlParams(
-  history: any,
-  location: Location
-): [UptimeUrlParams, (updatedParams: any) => string] {
-  const { pathname, search } = location;
-  const currentParams: any = qs.parse(search[0] === '?' ? search.slice(1) : search);
+type GetUrlParams = () => UptimeUrlParams;
+type UpdateUrlParams = (updatedParams: { [key: string]: string | number | boolean }) => void;
+type SetRouter = (routerProps: RouteComponentProps) => void;
 
-  const updateUrl = (updatedParams: any) => {
-    console.log(updatedParams);
-    const c = useMemo(
-      () =>
-        qs.stringify({
-          ...currentParams,
-          ...updatedParams,
-        }),
-      [currentParams, updatedParams]
-    );
-    console.log('c', c);
-    const updatedSearch = qs.stringify({
-      ...currentParams,
-      ...updatedParams,
-    });
-    history.push({
-      pathname,
-      search: updatedSearch,
-    });
+export function useUrlParams(): [GetUrlParams, UpdateUrlParams, SetRouter] {
+  const [locationState, setLocation] = useState<Location | undefined>(undefined);
+  const [historyState, setHistory] = useState<History | undefined>(undefined);
+  const [urlParams, setUrlParams] = useState<{ [key: string]: string } | undefined>(undefined);
 
-    return `${pathname}?${updatedSearch}`;
+  const getUrlParams: GetUrlParams = () => {
+    let currentParams = {};
+    if (locationState) {
+      const { search } = locationState;
+      currentParams = qs.parse(search[0] === '?' ? search.slice(1) : search);
+    }
+    return getSupportedUrlParams(currentParams);
   };
 
-  return [getSupportedUrlParams(currentParams), updateUrl];
-};
+  const updateUrlParams: UpdateUrlParams = updatedParams => {
+    if (locationState && historyState) {
+      const { pathname } = locationState;
+      const updatedSearch = {
+        ...urlParams,
+        ...updatedParams,
+      };
+      setUrlParams(updatedSearch);
+      historyState.push({
+        pathname,
+        search: qs.stringify(updatedSearch),
+      });
+    }
+  };
+
+  const setRouter: SetRouter = ({ history, location }) => {
+    setHistory(history);
+    setLocation(location);
+  };
+
+  return [getUrlParams, updateUrlParams, setRouter];
+}
