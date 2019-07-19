@@ -71,7 +71,6 @@ describe('joinPropertiesToFeature', () => {
     });
   });
 
-
   it('Should coerce to string before joining', () => {
 
     const leftJoin = new LeftInnerJoin({
@@ -83,8 +82,7 @@ describe('joinPropertiesToFeature', () => {
       properties: {
         zipcode: 40204
       }
-    }
-    ;
+    };
     const propertiesMap = new Map();
     propertiesMap.set('40204', { [COUNT_PROPERTY_NAME]: 61 });
 
@@ -103,8 +101,7 @@ describe('joinPropertiesToFeature', () => {
       properties: {
         zipcode: 40204
       }
-    }
-    ;
+    };
     const propertiesMap = new Map();
     propertiesMap.set('40204', { [COUNT_PROPERTY_NAME]: 61 });
 
@@ -123,7 +120,7 @@ describe('joinPropertiesToFeature', () => {
       right: rightSource
     });
 
-    const feature = {//this feature does not have the iso2 field
+    const feature = {
       properties: {
         code: 0
       }
