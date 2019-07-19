@@ -17,11 +17,17 @@
  * under the License.
  */
 
-import React from 'react';
+import { AggConfig, VisState } from 'ui/vis';
+import { EditorConfig } from 'ui/vis/editors/config/types';
+import { SubAggParamsProp } from 'ui/vis/editors/default/components/default_editor_agg_params';
+import { AggParam } from '..';
 
-const wrapWithInlineComp = Component => props => (
-  <div className={`visEditorAggParam--half visEditorAggParam--half-${props.aggParam.name}`}>
-    <Component {...props}/>
-  </div>);
-
-export { wrapWithInlineComp };
+export const aggParamCommonPropsMock = {
+  agg: {} as AggConfig,
+  aggParam: {} as AggParam,
+  editorConfig: {} as EditorConfig,
+  metricAggs: [] as AggConfig[],
+  subAggParams: {} as SubAggParamsProp,
+  state: {} as VisState,
+  showValidation: false,
+};
