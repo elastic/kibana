@@ -105,8 +105,7 @@ export function populateValidationMessages(
     const msg = i18n.translate(
       'xpack.ml.newJob.wizard.validateJob.bucketSpanMustBeSetErrorMessage',
       {
-        defaultMessage: '{bucketSpan} must be set',
-        values: { bucketSpan: 'bucket_span' },
+        defaultMessage: 'Bucket span must be set',
       }
     );
 
