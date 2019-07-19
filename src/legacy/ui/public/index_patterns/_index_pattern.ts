@@ -80,6 +80,7 @@ export class IndexPattern implements StaticIndexPattern {
   public fields: FieldList;
   public timeFieldName: string | undefined;
   public formatHit: any;
+  public formatField: any;
   public flattenHit: any;
   public metaFields: string[];
 
