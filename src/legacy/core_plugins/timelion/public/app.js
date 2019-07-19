@@ -24,7 +24,7 @@ import { i18n } from '@kbn/i18n';
 import { capabilities } from 'ui/capabilities';
 import { docTitle } from 'ui/doc_title';
 import { SavedObjectRegistryProvider } from 'ui/saved_objects/saved_object_registry';
-import { notify, fatalError, toastNotifications } from 'ui/notify';
+import { fatalError, toastNotifications } from 'ui/notify';
 import { timezoneProvider } from 'ui/vis/lib/timezone';
 import { recentlyAccessed } from 'ui/persisted_log';
 import { timefilter } from 'ui/timefilter';
@@ -65,8 +65,6 @@ require('plugins/timelion/services/_saved_sheet');
 require('./vis');
 
 SavedObjectRegistryProvider.register(require('plugins/timelion/services/saved_sheet_register'));
-
-const unsafeNotifications = notify._notifs;
 
 require('ui/routes').enable();
 
@@ -392,7 +390,6 @@ app.controller('timelion', function (
 
     httpResult
       .then(function (resp) {
-        dismissNotifications();
         $scope.stats = resp.stats;
         $scope.sheet = resp.sheet;
         _.each(resp.sheet, function (cell) {
@@ -459,10 +456,6 @@ app.controller('timelion', function (
         }
       });
     });
-  }
-
-  function dismissNotifications() {
-    unsafeNotifications.splice(0, unsafeNotifications.length);
   }
 
   init();
