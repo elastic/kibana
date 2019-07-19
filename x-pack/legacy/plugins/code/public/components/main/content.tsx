@@ -30,7 +30,7 @@ import {
   currentTreeSelector,
   hasMoreCommitsSelector,
   repoUriSelector,
-  statusSelector,
+  repoStatusSelector,
 } from '../../selectors';
 import { encodeRevisionString } from '../../../common/uri_util';
 import { history } from '../../utils/url';
@@ -47,7 +47,7 @@ interface Props extends RouteComponentProps<MainRouteParams> {
   repoStatus?: RepoStatus;
   tree: FileTree;
   file: FetchFileResponse | undefined;
-  currentTree: FileTree | undefined;
+  currentTree: FileTree | null;
   commits: CommitInfo[];
   branches: ReferenceInfo[];
   hasMoreCommits: boolean;
@@ -199,6 +199,8 @@ class CodeContent extends React.PureComponent<Props> {
           />
         </EuiFlexGroup>
       );
+    } else if (this.shouldRenderCloneProgress()) {
+      return null;
     } else {
       return (
         <EuiFlexGroup direction="row" alignItems="center" gutterSize="none">
@@ -402,7 +404,7 @@ const mapStateToProps = (state: RootState) => ({
   branches: state.revision.branches,
   hasMoreCommits: hasMoreCommitsSelector(state),
   loadingCommits: state.revision.loadingCommits,
-  repoStatus: statusSelector(state, repoUriSelector(state)),
+  repoStatus: repoStatusSelector(state, repoUriSelector(state)),
   searchOptions: state.search.searchOptions,
   query: state.search.query,
   currentRepository: state.repository.repository,
