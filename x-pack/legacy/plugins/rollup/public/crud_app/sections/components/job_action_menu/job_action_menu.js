@@ -21,6 +21,7 @@ import {
 
 import { ConfirmDeleteModal } from './confirm_delete_modal';
 import { flattenPanelTree } from '../../../services';
+import { ConfirmCloneModal } from './confirm_clone_modal';
 
 class JobActionMenuUi extends Component {
   static propTypes = {
@@ -47,7 +48,8 @@ class JobActionMenuUi extends Component {
 
     this.state = {
       isPopoverOpen: false,
-      showDeleteConfirmation: false
+      showDeleteConfirmation: false,
+      showCloneConfirmation: false
     };
   }
 
@@ -93,6 +95,20 @@ class JobActionMenuUi extends Component {
         },
       });
     }
+
+    items.push({
+      name: intl.formatMessage({
+        id: 'xpack.rollupJobs.jobActionMenu.cloneJobLabel',
+        defaultMessage: 'Clone {isSingleSelection, plural, one {job} other {jobs}}',
+      }, {
+        isSingleSelection
+      }),
+      icon: <EuiIcon type="copy" />,
+      onClick: () => {
+        this.closePopover();
+        this.openCloneConfirmationModal();
+      }
+    });
 
     if (this.canDeleteJobs()) {
       items.push({
@@ -142,6 +158,15 @@ class JobActionMenuUi extends Component {
     this.setState({ showDeleteConfirmation: true });
   };
 
+  openCloneConfirmationModal = () => {
+    this.setState({ showCloneConfirmation: true });
+  };
+
+  closeCloneConfirmationModal = () => {
+    this.setState({ showCloneConfirmation: false });
+  };
+
+
   canStartJobs() {
     const { jobs } = this.props;
     return jobs.some(job => job.status === 'stopped');
@@ -186,6 +211,20 @@ class JobActionMenuUi extends Component {
       />
     );
   };
+
+  cloneConfirmDialog() {
+    const { jobs } = this.props;
+    if (this.state.showCloneConfirmation) {
+      return (
+        <ConfirmCloneModal
+          onClose={() => this.closeCloneConfirmationModal()}
+          jobs={jobs}
+        />
+      );
+    }
+
+    return null;
+  }
 
   isSingleSelection = () => {
     return this.props.jobs.length === 1;
@@ -247,6 +286,7 @@ class JobActionMenuUi extends Component {
 
     return (
       <div>
+        {this.cloneConfirmDialog()}
         {this.confirmDeleteModal()}
         <EuiPopover
           button={button}
