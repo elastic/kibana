@@ -167,17 +167,20 @@ export class Field implements FieldType {
     return obj.create();
   }
 
-  get indexed() {
+  /** @deprecated */
+  public get indexed() {
     throw new Error(
       'field.indexed has been removed, see https://github.com/elastic/kibana/pull/11969'
     );
   }
-  get analyzed() {
+  /** @deprecated */
+  public get analyzed() {
     throw new Error(
       'field.analyzed has been removed, see https://github.com/elastic/kibana/pull/11969'
     );
   }
-  get doc_values() { // eslint-disable-line
+  /** @deprecated */
+  public get doc_values() { // eslint-disable-line
     throw new Error(
       'field.doc_values has been removed, see https://github.com/elastic/kibana/pull/11969'
     );

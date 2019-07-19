@@ -26,6 +26,7 @@ import { Filter, FilterStateStore } from '@kbn/es-query';
 import { FilterStateManager } from './filter_state_manager';
 import { FilterManager } from './filter_manager';
 
+import { IndexPatterns } from 'ui/index_patterns';
 import { getFilter } from './test_helpers/get_stub_filter';
 import { StubIndexPatterns } from './test_helpers/stub_index_pattern';
 import { StubState } from './test_helpers/stub_state';
@@ -78,7 +79,7 @@ describe('filter_manager', () => {
     appStateStub = new StubState();
     globalStateStub = new StubState();
     indexPatterns = new StubIndexPatterns();
-    filterManager = new FilterManager(indexPatterns as any);
+    filterManager = new FilterManager(indexPatterns as IndexPatterns);
     readyFilters = getFiltersArray();
 
     // FilterStateManager is tested indirectly.

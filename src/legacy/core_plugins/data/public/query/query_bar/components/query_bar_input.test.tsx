@@ -28,6 +28,7 @@ import React from 'react';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { QueryLanguageSwitcher } from './language_switcher';
 import { QueryBarInput, QueryBarInputUI } from './query_bar_input';
+import { IndexPattern } from '../../../index';
 
 const noop = () => {
   return;
@@ -73,7 +74,7 @@ const mockIndexPattern = {
       searchable: true,
     },
   ],
-} as any;
+} as IndexPattern;
 
 describe('QueryBarInput', () => {
   beforeEach(() => {

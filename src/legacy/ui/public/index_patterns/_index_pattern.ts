@@ -205,7 +205,7 @@ export class IndexPattern implements StaticIndexPattern {
     return this.indexFields(forceFieldRefresh);
   }
 
-  get routes() {
+  public get routes() {
     return getRoutes();
   }
 

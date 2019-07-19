@@ -21,6 +21,7 @@
 import { SearchSourceProvider, SearchSource } from 'ui/courier';
 import { IPrivate } from 'ui/private';
 import { Filter } from '@kbn/es-query';
+import { IndexPatterns, IndexPattern } from 'ui/index_patterns';
 import { reverseSortDir, SortDirection } from './utils/sorting';
 import { extractNanos, convertIsoToMillis } from './utils/date_conversion';
 import { fetchHitsInInterval } from './utils/fetch_hits_in_interval';
@@ -41,7 +42,7 @@ const DAY_MILLIS = 24 * 60 * 60 * 1000;
 // look from 1 day up to 10000 days into the past and future
 const LOOKUP_OFFSETS = [0, 1, 7, 30, 365, 10000].map(days => days * DAY_MILLIS);
 
-function fetchContextProvider(indexPatterns: any, Private: IPrivate) {
+function fetchContextProvider(indexPatterns: IndexPatterns, Private: IPrivate) {
   const SearchSourcePrivate: any = Private(SearchSourceProvider);
 
   return {
@@ -111,7 +112,7 @@ function fetchContextProvider(indexPatterns: any, Private: IPrivate) {
     return documents;
   }
 
-  async function createSearchSource(indexPattern: any, filters: Filter[]) {
+  async function createSearchSource(indexPattern: IndexPattern, filters: Filter[]) {
     return new SearchSourcePrivate()
       .setParent(false)
       .setField('index', indexPattern)

@@ -18,8 +18,8 @@
  */
 
 import { FilterStateStore, toggleFilterNegated } from '@kbn/es-query';
-
 import { fixtures } from '../../../../index_patterns';
+import { IndexPattern, Field } from '../../../../index';
 import {
   buildFilter,
   getFieldFromFilter,
@@ -58,8 +58,8 @@ jest.mock(
 );
 
 const { mockFields, mockIndexPattern } = fixtures;
-const mockedFields = mockFields as any;
-const mockedIndexPattern = mockIndexPattern as any;
+const mockedFields = mockFields as Field[];
+const mockedIndexPattern = mockIndexPattern as IndexPattern;
 
 describe('Filter editor utils', () => {
   describe('getQueryDslFromFilter', () => {

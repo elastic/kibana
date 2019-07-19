@@ -17,11 +17,9 @@
  * under the License.
  */
 
+import { Field, IndexPattern } from 'ui/index_patterns';
 import { CustomFilter, ExistsFilter, PhraseFilter, PhrasesFilter, RangeFilter } from './lib';
 import { RangeFilterParams } from './lib/range_filter';
-
-type Field = any;
-type IndexPattern = any;
 
 export * from './lib';
 

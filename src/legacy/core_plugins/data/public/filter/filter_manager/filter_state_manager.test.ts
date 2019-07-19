@@ -24,6 +24,7 @@ import { FilterStateStore } from '@kbn/es-query';
 import { Subscription } from 'rxjs';
 import { FilterStateManager } from './filter_state_manager';
 
+import { IndexPatterns } from 'ui/index_patterns';
 import { StubState } from './test_helpers/stub_state';
 import { getFilter } from './test_helpers/get_stub_filter';
 import { FilterManager } from './filter_manager';
@@ -57,7 +58,7 @@ describe('filter_state_manager', () => {
     appStateStub = new StubState();
     globalStateStub = new StubState();
     const indexPatterns = new StubIndexPatterns();
-    filterManager = new FilterManager(indexPatterns as any);
+    filterManager = new FilterManager(indexPatterns as IndexPatterns);
   });
 
   afterEach(() => {
