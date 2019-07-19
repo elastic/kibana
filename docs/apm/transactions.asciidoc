@@ -17,7 +17,7 @@ This graph is an easy way to visualize where your application is spending most o
 For example, is your app spending time in external calls, database processing, or application code execution?
 
 The time a transaction took to complete is also recorded and displayed on the chart under the "app" label.
-"App" indicates that something was happening within the application, but we're not sure exactly what.
+"app" indicates that something was happening within the application, but we're not sure exactly what.
 This could be a sign that the agent does not have auto-instrumentation for whatever was happening during that time.
 
 It's important to note that if you have asynchronous spans, the sum of all span times may exceed the duration of the transaction.
