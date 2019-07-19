@@ -54,9 +54,9 @@ export function extractPropertiesMap(rawEsData, propertyNames, countPropertyName
   return propertiesMap;
 }
 
-export class ESJoinSource extends AbstractESSource {
+export class ESTermSource extends AbstractESSource {
 
-  static type = 'ES_JOIN_SOURCE';
+  static type = 'ES_TERM_SOURCE';
 
 
   static renderEditor({}) {
