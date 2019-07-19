@@ -37,7 +37,7 @@ export interface AggParamCommonProps<T> {
   indexedFields?: FieldParamType[];
   showValidation: boolean;
   state: VisState;
-  value: T;
+  value?: T;
   metricAggs: AggConfig[];
   subAggParams: SubAggParamsProp;
   setValidity(isValid: boolean): void;
@@ -45,6 +45,5 @@ export interface AggParamCommonProps<T> {
 }
 
 export interface AggParamEditorProps<T> extends AggParamCommonProps<T> {
-  wrappedWithInlineComp?: boolean;
   setValue(value?: T): void;
 }
