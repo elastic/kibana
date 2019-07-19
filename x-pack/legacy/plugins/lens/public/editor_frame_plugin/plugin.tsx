@@ -217,7 +217,9 @@ export function InitializedEditor({
       datasourceMap={datasources}
       visualizationMap={visualizations}
       // layerToDatasourceId={layerToDatasourceId}
-      initialDatasourceId={(doc && doc.datasourceType) || firstDatasourceId || null}
+      initialDatasourceIds={
+        (doc && Object.keys(doc.state.datasourceStates)) || [firstDatasourceId] || null
+      }
       initialVisualizationId={(doc && doc.visualizationType) || firstVisualizationId || null}
       ExpressionRenderer={expressionRenderer}
       redirectTo={path => routeProps.history.push(path)}

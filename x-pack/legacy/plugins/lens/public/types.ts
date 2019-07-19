@@ -176,7 +176,6 @@ export interface VisualizationSuggestion<T = unknown> {
 
 export interface FramePublicAPI {
   datasourceLayers: Record<string, DatasourcePublicAPI>;
-  layerIdToDatasource: Record<string, string>;
   // Adds a new layer. This triggers a re-render
   addNewLayer: () => string;
 }

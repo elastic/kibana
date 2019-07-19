@@ -41,7 +41,7 @@ export async function save({
       visualizationType: state.visualization.activeId,
       // datasourceType: state.datasource.activeId,
       // datasourceType: state.activeDatasourceId,
-      activeDatasourceId: state.activeDatasourceId,
+      // activeDatasourceId: state.activeDatasourceId,
       state: {
         // datasource: datasource.getPersistableState(state.datasource.state),
         datasourceStates,

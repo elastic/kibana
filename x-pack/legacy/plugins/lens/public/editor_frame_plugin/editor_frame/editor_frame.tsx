@@ -27,7 +27,7 @@ export interface EditorFrameProps {
   visualizationMap: Record<string, Visualization>;
   // layerToDatasourceId: Record<string, string>;
   redirectTo: (path: string) => void;
-  initialDatasourceId: string | null;
+  initialDatasourceIds: string[] | null;
   initialVisualizationId: string | null;
   ExpressionRenderer: ExpressionRenderer;
   onError: (e: { message: string }) => void;
@@ -42,60 +42,58 @@ export function EditorFrame(props: EditorFrameProps) {
   // Initialize current datasource and all active datasources
   useEffect(() => {
     if (!allLoaded) {
-      Object.entries(state.datasourceMap).forEach(([datasourceId, datasource]) => {
+      Object.entries(props.datasourceMap).forEach(([datasourceId, datasource]) => {
         if (state.datasourceStates[datasourceId].isLoading) {
           datasource
-            .initialize(props.doc && props.doc.state.datasource)
+            .initialize(state.datasourceStates[datasourceId].state || undefined)
             .then(datasourceState => {
               dispatch({
                 type: 'UPDATE_DATASOURCE_STATE',
                 newState: datasourceState,
+                datasourceId,
               });
             })
             .catch(onError);
         }
       });
     }
-  }, [props.doc, Object.keys(state.datasourceStates), state.activeDatasourceId]);
+  }, [allLoaded]);
 
-  const datasourceEntries: Array<[string, DatasourcePublicAPI]> = Object.keys(
-    state.datasourceMap
-  ).map(key => {
-    const ds = state.datasourceMap[key];
+  const datasourcePublicAPIs: Array<[string, DatasourcePublicAPI]> = Object.entries(
+    props.datasourceMap
+  ).map(([key, ds]) => {
     return [
       key,
       ds.getPublicAPI(state.datasourceStates[key].state, (newState: unknown) => {
         dispatch({
           type: 'UPDATE_DATASOURCE_STATE',
           newState,
+          datasourceId: key,
         });
       }),
     ];
   });
 
-  const layerToDatasourceId: Record<string, string> = {};
   const datasourceLayers: Record<string, DatasourcePublicAPI> = {};
-  datasourceEntries.forEach(([id, publicAPI]) => {
+  datasourcePublicAPIs.forEach(([id, publicAPI]) => {
     const stateWrapper = state.datasourceStates[id];
     if (stateWrapper.isLoading) {
       return;
     }
     const dsState = stateWrapper.state;
-    const layers = state.datasourceMap[id].getLayers(dsState);
+    const layers = props.datasourceMap[id].getLayers(dsState);
 
     layers.forEach(layer => {
-      layerToDatasourceId[layer] = id;
       datasourceLayers[layer] = publicAPI;
     });
   });
 
   const framePublicAPI: FramePublicAPI = {
-    layerIdToDatasource: layerToDatasourceId,
     datasourceLayers,
     addNewLayer: () => {
       const newLayerId = generateId();
 
-      const newState = state.datasourceMap[state.activeDatasourceId!].insertLayer(
+      const newState = props.datasourceMap[state.activeDatasourceId!].insertLayer(
         state.datasourceStates[state.activeDatasourceId!].state,
         newLayerId
       );
@@ -146,7 +144,7 @@ export function EditorFrame(props: EditorFrameProps) {
     ? props.visualizationMap[state.visualization.activeId]
     : undefined;
 
-  if (datasource) {
+  if (datasource && allLoaded) {
     return (
       <FrameLayout
         navPanel={
@@ -155,7 +153,13 @@ export function EditorFrame(props: EditorFrameProps) {
               onClick={() => {
                 if (datasource && visualization) {
                   save({
-                    datasource,
+                    activeDatasources: Object.keys(state.datasourceStates).reduce(
+                      (datasourceMap, datasourceId) => ({
+                        ...datasourceMap,
+                        [datasourceId]: props.datasourceMap[datasourceId],
+                      }),
+                      {}
+                    ),
                     dispatch,
                     visualization,
                     state,
@@ -204,7 +208,7 @@ export function EditorFrame(props: EditorFrameProps) {
             <WorkspacePanel
               activeDatasourceId={state.activeDatasourceId}
               activeVisualizationId={state.visualization.activeId}
-              datasourceMap={state.datasourceMap}
+              datasourceMap={props.datasourceMap}
               datasourceStates={state.datasourceStates}
               framePublicAPI={framePublicAPI}
               visualizationState={state.visualization.state}

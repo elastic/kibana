@@ -57,7 +57,6 @@ export type FrameMock = jest.Mocked<FramePublicAPI>;
 export function createMockFramePublicAPI(): FrameMock {
   return {
     datasourceLayers: {},
-    layerIdToDatasource: {},
     addNewLayer: jest.fn(() => ''),
   };
 }

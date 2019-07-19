@@ -7,9 +7,6 @@
       "visualizationType": {
         "type": "keyword"
       },
-      "datasourceType": {
-        "type": "keyword"
-      },
       "state": {
         "type": "text"
       }

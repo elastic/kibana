@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { Datasource, FramePublicAPI } from '../../types';
 import { EditorFrameProps } from '../editor_frame';
 import { Document } from '../../persistence/saved_object_store';
 
@@ -17,10 +17,9 @@ export interface EditorFrameState {
     activeId: string | null;
     state: unknown;
   };
-  datasourceMap: Record<string, Datasource<unknown, unknown>>;
   datasourceStates: Record<string, { state: unknown; isLoading: boolean }>;
   activeDatasourceId: string | null;
-  layerIdToDatasource: FramePublicAPI['layerIdToDatasource'];
+  layerIdToDatasource: Record<string, string>;
 }
 
 export type Action =
@@ -43,6 +42,7 @@ export type Action =
   | {
       type: 'UPDATE_DATASOURCE_STATE';
       newState: unknown;
+      datasourceId: string;
     }
   | {
       type: 'UPDATE_VISUALIZATION_STATE';
@@ -76,16 +76,18 @@ export const getInitialState = (props: EditorFrameProps): EditorFrameState => {
   return {
     saving: false,
     title: i18n.translate('xpack.lens.chartTitle', { defaultMessage: 'New visualization' }),
-    datasourceMap: props.datasourceMap,
-    datasourceStates: props.initialDatasourceId
-      ? {
-          [props.initialDatasourceId]: {
-            state: null,
-            isLoading: Boolean(props.initialDatasourceId),
-          },
-        }
+    datasourceStates: props.doc
+      ? _.mapValues(props.doc.state.datasourceStates, state => ({ isLoading: true, state }))
+      : props.initialDatasourceIds
+      ? props.initialDatasourceIds.reduce(
+          (stateMap, datasourceId) => ({
+            ...stateMap,
+            [datasourceId]: { state: null, isLoading: true },
+          }),
+          {}
+        )
       : {},
-    activeDatasourceId: props.initialDatasourceId,
+    activeDatasourceId: props.initialDatasourceIds ? props.initialDatasourceIds[0] : null,
     visualization: {
       state: null,
       activeId: props.initialVisualizationId,
@@ -109,17 +111,17 @@ export const reducer = (state: EditorFrameState, action: Action): EditorFrameSta
         ...state,
         persistedId: action.doc.id,
         title: action.doc.title,
-        datasourceStates: action.doc.datasourceType
-          ? {
-              ...state.datasourceStates,
-              [action.doc.datasourceType]: {
-                isLoading: true,
-                state: action.doc.state.datasource,
-              },
-            }
-          : state.datasourceStates,
-        activeDatasourceId: action.doc.datasourceType || null,
-
+        datasourceStates: Object.entries(action.doc.state.datasourceStates).reduce(
+          (stateMap, [datasourceId, datasourceState]) => ({
+            ...stateMap,
+            [datasourceId]: {
+              isLoading: true,
+              state: datasourceState,
+            },
+          }),
+          {}
+        ),
+        activeDatasourceId: Object.keys(action.doc.state.datasourceStates)[0],
         visualization: {
           ...state.visualization,
           activeId: action.doc.visualizationType,
@@ -163,7 +165,7 @@ export const reducer = (state: EditorFrameState, action: Action): EditorFrameSta
         ...state,
         datasourceStates: {
           ...state.datasourceStates,
-          [state.activeDatasourceId!]: {
+          [action.datasourceId]: {
             state: action.newState,
             isLoading: false,
           },
