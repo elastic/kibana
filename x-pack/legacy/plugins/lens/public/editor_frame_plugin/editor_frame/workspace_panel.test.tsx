@@ -91,8 +91,6 @@ describe('workspace_panel', () => {
         datasourceStates={{}}
         datasourceMap={{}}
         framePublicAPI={createMockFramePublicAPI()}
-        // activeDatasource={{ ...mockDatasource, toExpression: () => null }}
-        // datasourceState={{}}
         activeVisualizationId="vis"
         visualizationMap={{
           vis: { ...mockVisualization, toExpression: () => 'vis' },
@@ -109,16 +107,11 @@ describe('workspace_panel', () => {
 
   it('should render the resulting expression using the expression renderer', () => {
     const framePublicAPI = createMockFramePublicAPI();
-    // framePublicAPI.layerIdToDatasource = {
-    //   first: 'mock',
-    // };
     framePublicAPI.datasourceLayers = {
       first: mockDatasource.publicAPIMock,
     };
-    // const mockDatasource = createMockDatasource();
     mockDatasource.toExpression.mockReturnValue('datasource');
 
-    // framePublicAPI.datasourceLayers
     instance = mount(
       <InnerWorkspacePanel
         activeDatasourceId={'mock'}
@@ -132,11 +125,6 @@ describe('workspace_panel', () => {
           mock: mockDatasource,
         }}
         framePublicAPI={framePublicAPI}
-        // activeDatasource={{
-        //   ...mockDatasource,
-        //   toExpression: () => 'datasource',
-        // }}
-        // datasourceState={{}}
         activeVisualizationId="vis"
         visualizationMap={{
           vis: { ...mockVisualization, toExpression: () => 'vis' },
@@ -174,11 +162,6 @@ Object {
           datasourceStates={{}}
           datasourceMap={{}}
           framePublicAPI={createMockFramePublicAPI()}
-          // activeDatasource={{
-          //   ...mockDatasource,
-          //   toExpression: () => 'datasource ||',
-          // }}
-          // datasourceState={{}}
           activeVisualizationId="vis"
           visualizationMap={{
             vis: { ...mockVisualization, toExpression: () => 'vis' },
@@ -205,11 +188,6 @@ Object {
           datasourceStates={{}}
           datasourceMap={{}}
           framePublicAPI={createMockFramePublicAPI()}
-          // activeDatasource={{
-          //   ...mockDatasource,
-          //   toExpression: () => 'datasource',
-          // }}
-          // datasourceState={{}}
           activeVisualizationId="vis"
           visualizationMap={{
             vis: { ...mockVisualization, toExpression: () => 'vis' },
@@ -241,11 +219,6 @@ Object {
           datasourceStates={{}}
           datasourceMap={{}}
           framePublicAPI={createMockFramePublicAPI()}
-          // activeDatasource={{
-          //   ...mockDatasource,
-          //   toExpression: () => 'datasource',
-          // }}
-          // datasourceState={{}}
           activeVisualizationId="vis"
           visualizationMap={{
             vis: { ...mockVisualization, toExpression: () => 'vis' },
@@ -280,11 +253,6 @@ Object {
           datasourceStates={{}}
           datasourceMap={{}}
           framePublicAPI={createMockFramePublicAPI()}
-          // activeDatasource={{
-          //   ...mockDatasource,
-          //   toExpression: () => 'datasource',
-          // }}
-          // datasourceState={{}}
           activeVisualizationId="vis"
           visualizationMap={{
             vis: { ...mockVisualization, toExpression: () => 'vis' },
@@ -320,14 +288,20 @@ Object {
 
     beforeEach(() => {
       mockDispatch = jest.fn();
+      // const mockDatasource = createMockDatasource();
       instance = mount(
         <InnerWorkspacePanel
           activeDatasourceId={'mock'}
-          datasourceStates={{}}
-          datasourceMap={{}}
+          datasourceStates={{
+            mock: {
+              state: {},
+              isLoading: false,
+            },
+          }}
+          datasourceMap={{
+            mock: mockDatasource,
+          }}
           framePublicAPI={createMockFramePublicAPI()}
-          // activeDatasource={mockDatasource}
-          // datasourceState={{}}
           activeVisualizationId={null}
           visualizationMap={{
             vis: mockVisualization,

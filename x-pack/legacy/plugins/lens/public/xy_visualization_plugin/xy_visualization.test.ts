@@ -91,9 +91,11 @@ describe('xy_visualization', () => {
 
   describe('#toExpression', () => {
     it('should map to a valid AST', () => {
-      expect(
-        xyVisualization.toExpression(exampleState(), createMockFramePublicAPI())
-      ).toMatchSnapshot();
+      const frame = createMockFramePublicAPI();
+      frame.datasourceLayers = {
+        first: createMockDatasource().publicAPIMock,
+      };
+      expect(xyVisualization.toExpression(exampleState(), frame)).toMatchSnapshot();
     });
 
     it('should default to labeling all columns with their column label', () => {
@@ -107,10 +109,12 @@ describe('xy_visualization', () => {
           label: 'Second',
         } as Operation);
 
-      const expression = xyVisualization.toExpression(
-        exampleState(),
-        createMockFramePublicAPI()
-      )! as Ast;
+      const frame = createMockFramePublicAPI();
+      frame.datasourceLayers = {
+        first: mockDatasource.publicAPIMock,
+      };
+
+      const expression = xyVisualization.toExpression(exampleState(), frame)! as Ast;
 
       expect(mockDatasource.publicAPIMock.getOperationForColumnId).toHaveBeenCalledTimes(2);
       expect(mockDatasource.publicAPIMock.getOperationForColumnId).toHaveBeenCalledWith('b');

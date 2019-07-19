@@ -8,7 +8,7 @@ import React, { useMemo, useContext, memo } from 'react';
 import { EuiSelect } from '@elastic/eui';
 import { NativeRenderer } from '../../native_renderer';
 import { Action } from './state_management';
-import { Visualization, FramePublicAPI } from '../../types';
+import { Visualization, FramePublicAPI, VisualizationSuggestion } from '../../types';
 import { DragContext } from '../../drag_drop';
 
 interface ConfigPanelWrapperProps {
@@ -24,25 +24,33 @@ function getSuggestedVisualizationState(
   visualization: Visualization
   // datasource: DatasourcePublicAPI
 ) {
-  const suggestions = [];
-  // const suggestions = visualization.getSuggestions({
-  //   tables: [
-  //     {
-  //       datasourceSuggestionId: 0,
-  //       isMultiRow: true,
-  //       columns: datasource.getTableSpec().map(col => ({
-  //         ...col,
-  //         operation: datasource.getOperationForColumnId(col.columnId)!,
-  //       })),
-  //     },
-  //   ],
-  // });
+  const datasources = Object.entries(frame.datasourceLayers);
 
-  if (!suggestions.length) {
+  let results: VisualizationSuggestion[] = [];
+
+  datasources.forEach(([layerId, datasource]) => {
+    const suggestions = visualization.getSuggestions({
+      layerId,
+      tables: [
+        {
+          datasourceSuggestionId: 0,
+          isMultiRow: true,
+          columns: datasource.getTableSpec().map(col => ({
+            ...col,
+            operation: datasource.getOperationForColumnId(col.columnId)!,
+          })),
+        },
+      ],
+    });
+
+    results = results.concat(suggestions);
+  });
+
+  if (!results.length) {
     return visualization.initialize(frame);
   }
 
-  // return visualization.initialize(frame, suggestions[0].state);
+  return visualization.initialize(frame, results[0].state);
 }
 
 export const ConfigPanelWrapper = memo(function ConfigPanelWrapper(props: ConfigPanelWrapperProps) {

@@ -36,13 +36,18 @@ export function EditorFrame(props: EditorFrameProps) {
   const [state, dispatch] = useReducer(reducer, props, getInitialState);
   const { onError } = props;
 
-  const allLoaded = Object.values(state.datasourceStates).every(({ isLoading }) => !isLoading);
+  const allLoaded = Object.values(state.datasourceStates).every(
+    ({ isLoading }) => typeof isLoading === 'boolean' && !isLoading
+  );
 
   // Initialize current datasource and all active datasources
   useEffect(() => {
     if (!allLoaded) {
       Object.entries(props.datasourceMap).forEach(([datasourceId, datasource]) => {
-        if (state.datasourceStates[datasourceId].isLoading) {
+        if (
+          !state.datasourceStates[datasourceId] ||
+          state.datasourceStates[datasourceId].isLoading
+        ) {
           datasource
             .initialize(state.datasourceStates[datasourceId].state || undefined)
             .then(datasourceState => {
@@ -61,7 +66,7 @@ export function EditorFrame(props: EditorFrameProps) {
   const datasourceLayers: Record<string, DatasourcePublicAPI> = {};
   Object.keys(props.datasourceMap).forEach(id => {
     const stateWrapper = state.datasourceStates[id];
-    if (stateWrapper.isLoading) {
+    if (!stateWrapper || stateWrapper.isLoading) {
       return;
     }
     const dsState = stateWrapper.state;
@@ -79,8 +84,6 @@ export function EditorFrame(props: EditorFrameProps) {
         },
         layer
       );
-
-      // layerToDatasourceId[layer] = id;
 
       datasourceLayers[layer] = publicAPI;
     });
@@ -218,13 +221,16 @@ export function EditorFrame(props: EditorFrameProps) {
         }
         suggestionsPanel={
           <SuggestionPanel
-            activeDatasource={datasource}
+            // activeDatasource={datasource}
+            activeDatasourceId={state.activeDatasourceId}
             activeVisualizationId={state.visualization.activeId}
-            datasourceState={
-              state.activeDatasourceId
-                ? state.datasourceStates[state.activeDatasourceId].state
-                : null
-            }
+            // datasourceState={
+            //   state.activeDatasourceId
+            //     ? state.datasourceStates[state.activeDatasourceId].state
+            //     : null
+            // }
+            datasourceMap={props.datasourceMap}
+            datasourceStates={state.datasourceStates}
             visualizationState={state.visualization.state}
             visualizationMap={props.visualizationMap}
             dispatch={dispatch}

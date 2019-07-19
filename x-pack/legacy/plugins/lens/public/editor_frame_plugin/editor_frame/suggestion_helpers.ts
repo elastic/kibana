@@ -32,26 +32,26 @@ export function getSuggestions(
   activeVisualizationId: string | null,
   visualizationState: unknown
 ): Suggestion[] {
-  const datasourceTables = datasourceTableSuggestions.map(({ table }) => table);
+  // const datasourceTables = datasourceTableSuggestions.map(({ table }) => table);
 
-  return (
-    Object.entries(visualizationMap)
-      .map(([visualizationId, visualization]) => {
-        return visualization
-          .getSuggestions({
-            tables: datasourceTables,
-            state: visualizationId === activeVisualizationId ? visualizationState : undefined,
-          })
-          .map(({ datasourceSuggestionId, ...suggestion }) => ({
-            ...suggestion,
-            visualizationId,
-            datasourceState: datasourceTableSuggestions[datasourceSuggestionId].state,
-          }));
-      })
-      // TODO why is flatMap not available here?
-      .reduce((globalList, currentList) => [...globalList, ...currentList], [])
-      .sort(({ score: scoreA }, { score: scoreB }) => scoreB - scoreA)
-  );
+  return Object.entries(visualizationMap)
+    .map(([visualizationId, visualization]) => {
+      return visualization
+        .getSuggestions({
+          // suggestions: datasourceTableSuggestions.map(({ table }) => table),
+          // suggestions: datasourceTableSuggestions,
+          tables: [],
+          layerId: '',
+          state: visualizationId === activeVisualizationId ? visualizationState : undefined,
+        })
+        .map(({ datasourceSuggestionId, ...suggestion }) => ({
+          ...suggestion,
+          visualizationId,
+          datasourceState: datasourceTableSuggestions[datasourceSuggestionId].state,
+        }));
+    })
+    .reduce((globalList, currentList) => [...globalList, ...currentList], [])
+    .sort(({ score: scoreA }, { score: scoreB }) => scoreB - scoreA);
 }
 
 export function toSwitchAction(suggestion: Suggestion): Action {

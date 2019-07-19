@@ -10,20 +10,14 @@ Object {
             "chain": Array [
               Object {
                 "arguments": Object {
-                  "accessors": Array [
-                    "b",
-                    "c",
-                  ],
+                  "accessors": Array [],
                   "datasourceId": Array [
                     "",
                   ],
                   "hide": Array [
                     false,
                   ],
-                  "labels": Array [
-                    "b",
-                    "c",
-                  ],
+                  "labels": Array [],
                   "layerId": Array [
                     "first",
                   ],
@@ -36,7 +30,9 @@ Object {
                   "showGridlines": Array [
                     true,
                   ],
-                  "splitSeriesAccessors": Array [],
+                  "splitAccessor": Array [
+                    "d",
+                  ],
                   "title": Array [
                     "Baz",
                   ],

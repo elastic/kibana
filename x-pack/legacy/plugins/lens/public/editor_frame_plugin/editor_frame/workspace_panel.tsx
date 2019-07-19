@@ -50,9 +50,12 @@ export function InnerWorkspacePanel({
 }: WorkspacePanelProps) {
   const dragDropContext = useContext(DragContext);
   function onDrop(item: unknown) {
+    if (!activeDatasourceId) {
+      return;
+    }
     const datasourceSuggestions = datasourceMap[
-      activeDatasourceId!
-    ].getDatasourceSuggestionsForField(datasourceStates[activeDatasourceId!].state, item);
+      activeDatasourceId
+    ].getDatasourceSuggestionsForField(datasourceStates[activeDatasourceId].state, item);
 
     const suggestions = getSuggestions(
       datasourceSuggestions,

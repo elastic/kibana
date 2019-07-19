@@ -59,8 +59,17 @@ describe('suggestion_panel', () => {
     ] as Suggestion[]);
 
     defaultProps = {
-      activeDatasource: mockDatasource,
-      datasourceState: {},
+      // activeDatasource: mockDatasource,
+      activeDatasourceId: 'mock',
+      datasourceMap: {
+        mock: mockDatasource,
+      },
+      datasourceStates: {
+        mock: {
+          isLoading: false,
+          state: {},
+        },
+      },
       activeVisualizationId: 'vis',
       visualizationMap: {
         vis: mockVisualization,

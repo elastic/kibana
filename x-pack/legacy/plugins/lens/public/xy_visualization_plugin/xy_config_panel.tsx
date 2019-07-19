@@ -121,6 +121,9 @@ export function XYConfigPanel(props: VisualizationProps<State>) {
                   onClick={() => {
                     setState({ ...state, layers: state.layers.filter(l => l !== layer) });
                   }}
+                  aria-label={i18n.translate('xpack.lens.xyChart.removeLayer', {
+                    defaultMessage: 'Remove layer',
+                  })}
                 />
                 <NativeRenderer
                   data-test-subj="lnsXY_layerHeader"

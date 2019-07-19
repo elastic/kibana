@@ -153,7 +153,7 @@ describe('editor_frame', () => {
       expect(mockVisualization.initialize).toHaveBeenCalled();
     });
 
-    it('should pass the public datasource api into visualization initialize', async () => {
+    it('should pass the public frame api into visualization initialize', async () => {
       act(() => {
         mount(
           <EditorFrame
@@ -175,7 +175,10 @@ describe('editor_frame', () => {
 
       await waitForPromises();
 
-      expect(mockVisualization.initialize).toHaveBeenCalledWith(mockDatasource.publicAPIMock);
+      expect(mockVisualization.initialize).toHaveBeenCalledWith({
+        datasourceLayers: {},
+        addNewLayer: expect.any(Function),
+      });
     });
 
     it('should render data panel after initialization is complete', async () => {
