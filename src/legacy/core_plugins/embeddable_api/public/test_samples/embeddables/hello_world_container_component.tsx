@@ -37,7 +37,7 @@ export class HelloWorldContainerComponent extends Component<Props, State> {
   private inputSubscription?: Subscription;
   private outputSubscription?: Subscription;
 
-  public constructor(props: Props) {
+  constructor(props: Props) {
     super(props);
 
     Object.values(this.props.container.getInput().panels).forEach(panelState => {
