@@ -28,6 +28,16 @@ export interface DashboardCapabilities {
   createNew: boolean;
 }
 
+export interface RefreshInterval {
+  pause: boolean;
+  value: number;
+}
+
+export interface TimeRange {
+  from: string;
+  to: string;
+}
+
 // TODO: Replace Saved object interfaces by the once Core will provide when it is ready.
 export type SavedObjectAttribute =
   | string
@@ -59,4 +69,25 @@ export interface SavedObjectMetaData<T extends SavedObjectAttributes> {
   getIconForSavedObject(savedObject: SimpleSavedObject<T>): IconType;
   getTooltipForSavedObject?(savedObject: SimpleSavedObject<T>): string;
   showSavedObject?(savedObject: SimpleSavedObject<T>): boolean;
+}
+
+// TODO: Replace `IndexPattern` by correct NP import when it is available.
+export interface Field {
+  name: string;
+  type: string;
+  // esTypes might be undefined on old index patterns that have not been refreshed since we added
+  // this prop. It is also undefined on scripted fields.
+  esTypes?: string[];
+  aggregatable: boolean;
+  filterable: boolean;
+  searchable: boolean;
+  parent?: string;
+  subType?: string;
+}
+
+export interface IndexPattern {
+  id: string;
+  fields: Field[];
+  title: string;
+  timeFieldName?: string;
 }

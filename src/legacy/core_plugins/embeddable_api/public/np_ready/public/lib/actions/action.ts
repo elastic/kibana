@@ -38,7 +38,7 @@ export abstract class Action<
    * Higher numbers are displayed first.
    */
   public order: number = 0;
-  
+
   public abstract readonly type: string;
   constructor(public readonly id: string) {}
 

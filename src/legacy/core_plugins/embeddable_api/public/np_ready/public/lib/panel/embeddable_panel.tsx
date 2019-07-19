@@ -20,12 +20,17 @@ import { EuiContextMenuPanelDescriptor, EuiPanel } from '@elastic/eui';
 import classNames from 'classnames';
 import React from 'react';
 import { Subscription } from 'rxjs';
+import { CoreStart } from '../../../../../../../../core/public';
 import { buildContextMenuForActions } from '../context_menu_actions';
-import { CoreStart } from 'src/core/public';
 
 import { CONTEXT_MENU_TRIGGER } from '../triggers';
 import { IEmbeddable } from '../embeddables/i_embeddable';
-import { ViewMode, GetActionsCompatibleWithTrigger, GetEmbeddableFactory, GetEmbeddableFactories } from '../types';
+import {
+  ViewMode,
+  GetActionsCompatibleWithTrigger,
+  GetEmbeddableFactory,
+  GetEmbeddableFactories,
+} from '../types';
 
 import { RemovePanelAction } from './panel_header/panel_actions';
 import { AddPanelAction } from './panel_header/panel_actions/add_panel/add_panel_action';
@@ -36,11 +41,11 @@ import { EditPanelAction, Action } from '../actions';
 
 interface Props {
   embeddable: IEmbeddable<any, any>;
-  getActions: GetActionsCompatibleWithTrigger,
-  getEmbeddableFactory: GetEmbeddableFactory,
-  getAllEmbeddableFactories: GetEmbeddableFactories,
-  overlays: CoreStart['overlays'],
-  notifications: CoreStart['notifications'],
+  getActions: GetActionsCompatibleWithTrigger;
+  getEmbeddableFactory: GetEmbeddableFactory;
+  getAllEmbeddableFactories: GetEmbeddableFactories;
+  overlays: CoreStart['overlays'];
+  notifications: CoreStart['notifications'];
 }
 
 interface State {
@@ -166,7 +171,12 @@ export class EmbeddablePanel extends React.Component<Props, State> {
     // registry.
     const extraActions = [
       new CustomizePanelTitleAction(),
-      new AddPanelAction(this.props.getEmbeddableFactory, this.props.getAllEmbeddableFactories, this.props.overlays, this.props.notifications),
+      new AddPanelAction(
+        this.props.getEmbeddableFactory,
+        this.props.getAllEmbeddableFactories,
+        this.props.overlays,
+        this.props.notifications
+      ),
       new InspectPanelAction(),
       new RemovePanelAction(),
       new EditPanelAction(this.props.getEmbeddableFactory),
