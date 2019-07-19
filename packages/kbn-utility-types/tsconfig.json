@@ -7,5 +7,5 @@
       "node"
     ]
   },
-  "include": ["index.ts"]
+  "include": ["index.ts", "test-d/**/*"]
 }
