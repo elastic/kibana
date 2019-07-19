@@ -38,7 +38,7 @@ function getProps(props?: Partial<DashboardGridProps>): DashboardGridProps {
   const __embeddableFactories = new Map<string, EmbeddableFactory>();
   __embeddableFactories.set(
     CONTACT_CARD_EMBEDDABLE,
-    new ContactCardEmbeddableFactory({} as any, (() => {}) as any)
+    new ContactCardEmbeddableFactory({} as any, (() => {}) as any, {} as any)
   );
   const getEmbeddableFactory: GetEmbeddableFactory = (id: string) => __embeddableFactories.get(id);
 

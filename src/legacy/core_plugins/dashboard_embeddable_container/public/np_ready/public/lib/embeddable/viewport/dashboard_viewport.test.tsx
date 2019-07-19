@@ -47,7 +47,7 @@ function getProps(props?: Partial<DashboardViewportProps>): DashboardViewportPro
   const __embeddableFactories = new Map<string, EmbeddableFactory>();
   __embeddableFactories.set(
     CONTACT_CARD_EMBEDDABLE,
-    new ContactCardEmbeddableFactory({}, (() => null) as any)
+    new ContactCardEmbeddableFactory({}, (() => null) as any, {} as any)
   );
   viewportProps.getEmbeddableFactory = (id: string) => __embeddableFactories.get(id);
 

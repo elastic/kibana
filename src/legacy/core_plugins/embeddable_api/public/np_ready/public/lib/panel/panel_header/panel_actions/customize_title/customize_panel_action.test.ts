@@ -43,7 +43,7 @@ function createHelloWorldContainer(input = { id: '123', panels: {} }) {
   const getEmbeddableFactory: GetEmbeddableFactory = (id: string) => __embeddableFactories.get(id);
   __embeddableFactories.set(
     CONTACT_CARD_EMBEDDABLE,
-    new ContactCardEmbeddableFactory({}, (() => {}) as any)
+    new ContactCardEmbeddableFactory({}, (() => {}) as any, {} as any)
   );
   return new HelloWorldContainer(input, { getEmbeddableFactory } as any);
 }

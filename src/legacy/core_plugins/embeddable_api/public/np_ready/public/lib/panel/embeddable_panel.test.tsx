@@ -51,7 +51,11 @@ const trigger: Trigger = {
   id: CONTEXT_MENU_TRIGGER,
   actionIds: [editModeAction.id],
 };
-const embeddableFactory = new ContactCardEmbeddableFactory({} as any, (() => null) as any);
+const embeddableFactory = new ContactCardEmbeddableFactory(
+  {} as any,
+  (() => null) as any,
+  {} as any
+);
 
 __actionRegistry.set(editModeAction.id, editModeAction);
 __triggerRegistry.set(trigger.id, trigger);

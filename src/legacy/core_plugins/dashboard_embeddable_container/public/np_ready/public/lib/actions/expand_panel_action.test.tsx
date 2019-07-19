@@ -34,7 +34,7 @@ import {
 const __embeddableFactories = new Map<string, EmbeddableFactory>();
 __embeddableFactories.set(
   CONTACT_CARD_EMBEDDABLE,
-  new ContactCardEmbeddableFactory({} as any, (() => null) as any)
+  new ContactCardEmbeddableFactory({} as any, (() => null) as any, {} as any)
 );
 const getEmbeddableFactory: GetEmbeddableFactory = (id: string) => __embeddableFactories.get(id);
 

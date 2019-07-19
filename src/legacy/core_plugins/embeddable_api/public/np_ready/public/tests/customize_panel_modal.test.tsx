@@ -45,7 +45,11 @@ beforeEach(async () => {
   const { doStart, coreStart } = testPlugin(coreMock.createSetup(), coreMock.createStart());
   api = doStart();
 
-  const contactCardFactory = new ContactCardEmbeddableFactory({}, api.executeTriggerActions);
+  const contactCardFactory = new ContactCardEmbeddableFactory(
+    {},
+    api.executeTriggerActions,
+    {} as any
+  );
   api.registerEmbeddableFactory(contactCardFactory.type, contactCardFactory);
 
   container = new HelloWorldContainer(

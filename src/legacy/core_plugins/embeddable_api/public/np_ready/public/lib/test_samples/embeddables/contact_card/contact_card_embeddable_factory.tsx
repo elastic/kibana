@@ -19,13 +19,13 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { npStart } from 'ui/new_platform';
 import { EmbeddableFactory } from '../../../embeddables';
 import { Container } from '../../../containers';
 import { ContactCardEmbeddable, ContactCardEmbeddableInput } from './contact_card_embeddable';
 import { ContactCardInitializer } from './contact_card_initializer';
 import { EmbeddableFactoryOptions } from '../../../embeddables/embeddable_factory';
 import { ExecuteTriggerActions } from '../../../types';
+import { CoreStart } from '../../../../../../../../../../core/public';
 
 export const CONTACT_CARD_EMBEDDABLE = 'CONTACT_CARD_EMBEDDABLE';
 
@@ -34,7 +34,8 @@ export class ContactCardEmbeddableFactory extends EmbeddableFactory<ContactCardE
 
   constructor(
     options: EmbeddableFactoryOptions<any>,
-    private readonly execTrigger: ExecuteTriggerActions
+    private readonly execTrigger: ExecuteTriggerActions,
+    private readonly overlays: CoreStart['overlays']
   ) {
     super(options);
   }
@@ -51,7 +52,7 @@ export class ContactCardEmbeddableFactory extends EmbeddableFactory<ContactCardE
 
   public getExplicitInput(): Promise<Partial<ContactCardEmbeddableInput>> {
     return new Promise(resolve => {
-      const modalSession = npStart.core.overlays.openModal(
+      const modalSession = this.overlays.openModal(
         <ContactCardInitializer
           onCancel={() => {
             modalSession.close();
