@@ -30,7 +30,7 @@ test('SayHelloAction is not compatible with not matching embeddables', async () 
 });
 
 test('HelloWorldAction inherits isCompatible from base action', async () => {
-  const helloWorldAction = new HelloWorldAction();
+  const helloWorldAction = new HelloWorldAction({} as any);
   const emptyEmbeddable = new EmptyEmbeddable({ id: '234' });
   const isCompatible = await helloWorldAction.isCompatible({ embeddable: emptyEmbeddable });
   expect(isCompatible).toBe(true);

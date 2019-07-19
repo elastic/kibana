@@ -18,17 +18,16 @@
  */
 
 import React from 'react';
-
-// TODO: Remove this.
-import { npStart } from 'ui/new_platform';
 import { EuiFlyout } from '@elastic/eui';
+import { CoreStart } from '../../../../../../../../../core/public';
 import { Action } from '../..';
 
 export const HELLO_WORLD_ACTION_ID = 'HELLO_WORLD_ACTION_ID';
 
 export class HelloWorldAction extends Action {
   public readonly type = HELLO_WORLD_ACTION_ID;
-  constructor() {
+
+  constructor(private readonly overlays: CoreStart['overlays']) {
     super(HELLO_WORLD_ACTION_ID);
   }
 
@@ -37,7 +36,7 @@ export class HelloWorldAction extends Action {
   }
 
   public execute() {
-    const flyoutSession = npStart.core.overlays.openFlyout(
+    const flyoutSession = this.overlays.openFlyout(
       <EuiFlyout ownFocus onClose={() => flyoutSession && flyoutSession.close()}>
         Hello World, I am a hello world action!
       </EuiFlyout>,

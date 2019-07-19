@@ -37,7 +37,7 @@ beforeEach(() => {
 
 test('can register and get actions', async () => {
   const { setup, plugin } = embeddables;
-  const helloWorldAction = new HelloWorldAction();
+  const helloWorldAction = new HelloWorldAction({} as any);
   const length = (plugin as any).actions.size;
 
   setup.registerAction(helloWorldAction);
@@ -50,7 +50,7 @@ test('can register and get actions', async () => {
 test('getTriggerCompatibleActions returns attached actions', async () => {
   const { setup, doStart } = embeddables;
   const embeddable = new EmptyEmbeddable({ id: '123' });
-  const helloWorldAction = new HelloWorldAction();
+  const helloWorldAction = new HelloWorldAction({} as any);
 
   setup.registerAction(helloWorldAction);
 
