@@ -16,29 +16,24 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { timefilter } from 'ui/timefilter';
+import { buildEsQuery, getEsQueryConfig } from '@kbn/es-query';
 
 import { VegaParser } from './data_model/vega_parser';
 import { SearchCache } from './data_model/search_cache';
 import { TimeCache } from './data_model/time_cache';
-import { timefilter } from 'ui/timefilter';
-import { buildEsQuery, getEsQueryConfig } from '@kbn/es-query';
 
-export function VegaRequestHandlerProvider(es, serviceSettings, config, esShardTimeout) {
+export function createVegaRequestHandler({ uiSettings, es, serviceSettings }) {
   const searchCache = new SearchCache(es, { max: 10, maxAge: 4 * 1000 });
   const timeCache = new TimeCache(timefilter, 3 * 1000);
 
+  return ({ timeRange, filters, query, visParams }) => {
+    timeCache.setTimeRange(timeRange);
 
-  return {
+    const esQueryConfigs = getEsQueryConfig(uiSettings);
+    const filtersDsl = buildEsQuery(undefined, query, filters, esQueryConfigs);
+    const vp = new VegaParser(visParams.spec, searchCache, timeCache, filtersDsl, serviceSettings);
 
-    name: 'vega',
-
-    handler({ timeRange, filters, query, visParams }) {
-      timeCache.setTimeRange(timeRange);
-      const esQueryConfigs = getEsQueryConfig(config);
-      const filtersDsl = buildEsQuery(undefined, query, filters, esQueryConfigs);
-      const vp = new VegaParser(visParams.spec, searchCache, timeCache, filtersDsl, serviceSettings, esShardTimeout);
-      return vp.parseAsync();
-    }
-
+    return vp.parseAsync();
   };
 }

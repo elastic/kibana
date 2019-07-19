@@ -6,7 +6,13 @@ exports[`LayerTocActions is rendered 1`] = `
   anchorPosition="leftUp"
   button={
     <EuiToolTip
-      content="simulated tooltip content at zoom: 0"
+      anchorClassName="mapLayTocActions__tooltipAnchor"
+      content={
+        <React.Fragment>
+           
+          simulated tooltip content at zoom: 0
+        </React.Fragment>
+      }
       delay="regular"
       position="top"
       title="layer 1"
@@ -103,7 +109,13 @@ exports[`LayerTocActions should disable fit to data when supportsFitToBounds is 
   anchorPosition="leftUp"
   button={
     <EuiToolTip
-      content="simulated tooltip content at zoom: 0"
+      anchorClassName="mapLayTocActions__tooltipAnchor"
+      content={
+        <React.Fragment>
+           
+          simulated tooltip content at zoom: 0
+        </React.Fragment>
+      }
       delay="regular"
       position="top"
       title="layer 1"
@@ -200,7 +212,13 @@ exports[`LayerTocActions should not show edit actions in read only mode 1`] = `
   anchorPosition="leftUp"
   button={
     <EuiToolTip
-      content="simulated tooltip content at zoom: 0"
+      anchorClassName="mapLayTocActions__tooltipAnchor"
+      content={
+        <React.Fragment>
+           
+          simulated tooltip content at zoom: 0
+        </React.Fragment>
+      }
       delay="regular"
       position="top"
       title="layer 1"
