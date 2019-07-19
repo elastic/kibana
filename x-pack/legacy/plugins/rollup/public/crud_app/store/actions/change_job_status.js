@@ -33,9 +33,13 @@ export const startJobs = (jobIds) => async (dispatch) => {
       type: UPDATE_JOB_FAILURE,
     });
 
-    return showApiError(error, i18n.translate('xpack.rollupJobs.startJobsAction.errorTitle', {
-      defaultMessage: 'Error starting rollup jobs',
-    }));
+    return showApiError(
+      error,
+      i18n.translate('xpack.rollupJobs.startJobsAction.errorTitle', {
+        defaultMessage: 'Error starting rollup {pluralized}',
+        values: { pluralized: jobIds.length <= 1 ? 'job' : 'jobs' },
+      })
+    );
   }
 
   dispatch({

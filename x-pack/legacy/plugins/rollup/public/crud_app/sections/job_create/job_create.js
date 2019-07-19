@@ -82,7 +82,7 @@ export class JobCreateUi extends Component {
     createJob: PropTypes.func,
     isSaving: PropTypes.bool,
     createJobError: PropTypes.node,
-  }
+  };
 
   constructor(props) {
     super(props);
@@ -422,6 +422,9 @@ export class JobCreateUi extends Component {
         [STEP_METRICS]: {
           metrics,
         },
+        [STEP_REVIEW]: {
+          startJobAfterCreation,
+        }
       },
     } = this.state;
 
@@ -439,6 +442,7 @@ export class JobCreateUi extends Component {
       histogram,
       histogramInterval,
       metrics,
+      startJobAfterCreation,
     };
   }
 
@@ -614,6 +618,8 @@ export class JobCreateUi extends Component {
       case STEP_REVIEW:
         return (
           <StepReview
+            fields={currentStepFields}
+            onFieldsChange={this.onFieldsChange}
             job={this.getAllFields()}
           />
         );

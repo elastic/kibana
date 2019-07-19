@@ -8,13 +8,7 @@ import React, { Component, Fragment } from 'react';
 import PropTypes from 'prop-types';
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 
-import {
-  EuiErrorBoundary,
-  EuiSpacer,
-  EuiTab,
-  EuiTabs,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiErrorBoundary, EuiSpacer, EuiTab, EuiTabs, EuiTitle, EuiCheckbox } from '@elastic/eui';
 
 import { serializeJob } from '../../../services';
 
@@ -38,8 +32,10 @@ const JOB_DETAILS_TABS = [
 
 export class StepReviewUi extends Component {
   static propTypes = {
+    fields: PropTypes.object.isRequired,
     job: PropTypes.object.isRequired,
-  }
+    onFieldsChange: PropTypes.func.isRequired,
+  };
 
   constructor(props) {
     super(props);
@@ -94,19 +90,28 @@ export class StepReviewUi extends Component {
 
     return (
       <Fragment>
-        <EuiTabs>
-          {renderedTabs}
-        </EuiTabs>
+        <EuiTabs>{renderedTabs}</EuiTabs>
         <EuiSpacer size="m" />
       </Fragment>
     );
   }
 
+  onToggleStartAfterCreate = () => {
+    const {
+      onFieldsChange,
+      fields: { startJobAfterCreation },
+    } = this.props;
+
+    onFieldsChange({ startJobAfterCreation: !startJobAfterCreation });
+  };
+
   render() {
-    const { job } = this.props;
+    const {
+      job,
+      fields: { startJobAfterCreation },
+    } = this.props;
     const { selectedTab } = this.state;
     const json = serializeJob(job);
-
     return (
       <Fragment>
         <EuiTitle data-test-subj="rollupJobCreateReviewTitle">
@@ -122,12 +127,24 @@ export class StepReviewUi extends Component {
         {this.renderTabs()}
 
         <EuiErrorBoundary>
-          <JobDetails
-            job={job}
-            json={json}
-            tab={selectedTab}
-          />
+          <JobDetails job={job} json={json} tab={selectedTab} />
         </EuiErrorBoundary>
+
+        <EuiSpacer size="m" />
+
+        <EuiCheckbox
+          id="stepReviewToggleJobCreationAfterStart"
+          checked={startJobAfterCreation}
+          label={
+            <span>
+              <FormattedMessage
+                id="xpack.rollupJobs.create.startJobImmediately"
+                defaultMessage="Start job immediately"
+              />
+            </span>
+          }
+          onChange={() => this.onToggleStartAfterCreate()}
+        />
       </Fragment>
     );
   }
