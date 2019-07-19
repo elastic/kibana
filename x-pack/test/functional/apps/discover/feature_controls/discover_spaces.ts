@@ -117,7 +117,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
       });
     });
 
-    describe('space with Visualize disabled', async () => {
+    describe('space with Visualize disabled', () => {
       before(async () => {
         // we need to load the following in every situation as deleting
         // a space deletes all of the associated saved objects
@@ -144,7 +144,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
       });
     });
 
-    describe('space with index pattern management disabled', async () => {
+    describe('space with index pattern management disabled', () => {
       before(async () => {
         await spacesService.create({
           id: 'custom_space',

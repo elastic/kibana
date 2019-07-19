@@ -1,16 +1,37 @@
 {
   "allPings": {
-    "total": 3371,
-    "locations": ["N/A"],
+    "total": 3373,
+    "locations": [
+      "N/A"
+    ],
     "pings": [
       {
         "timestamp": "2019-01-28T17:47:06.077Z",
         "http": null,
         "error": null,
         "monitor": {
-          "duration": { "us": 1452 },
+          "duration": {
+            "us": 1452
+          },
           "id": "auto-tcp-0X81440A68E839814C",
           "ip": "127.0.0.1",
+          "name": "",
+          "scheme": null,
+          "status": "up",
+          "type": "tcp"
+        },
+        "observer": null
+      },
+      {
+        "timestamp": "2019-01-28T17:47:07.075Z",
+        "http": null,
+        "error": null,
+        "monitor": {
+          "duration": {
+            "us": 1094
+          },
+          "id": "auto-tcp-0X81440A68E839814C",
+          "ip": "127.0.1.0",
           "name": "",
           "scheme": null,
           "status": "up",
@@ -26,7 +47,9 @@
           "type": "io"
         },
         "monitor": {
-          "duration": { "us": 1094 },
+          "duration": {
+            "us": 1094
+          },
           "id": "auto-tcp-0X81440A68E839814C",
           "ip": "127.0.0.1",
           "name": "",
@@ -44,7 +67,9 @@
           "type": "io"
         },
         "monitor": {
-          "duration": { "us": 1430 },
+          "duration": {
+            "us": 1430
+          },
           "id": "auto-tcp-0X81440A68E839814C",
           "ip": "127.0.0.1",
           "name": "",
@@ -62,25 +87,9 @@
           "type": "io"
         },
         "monitor": {
-          "duration": { "us": 1370 },
-          "id": "auto-tcp-0X81440A68E839814C",
-          "ip": "127.0.0.1",
-          "name": "",
-          "scheme": null,
-          "status": "down",
-          "type": "tcp"
-        },
-        "observer": null
-      },
-      {
-        "timestamp": "2019-01-28T17:47:10.075Z",
-        "http": null,
-        "error": {
-          "message": "dial tcp 127.0.0.1:9200: connect: connection refused",
-          "type": "io"
-        },
-        "monitor": {
-          "duration": { "us": 1922 },
+          "duration": {
+            "us": 1370
+          },
           "id": "auto-tcp-0X81440A68E839814C",
           "ip": "127.0.0.1",
           "name": "",

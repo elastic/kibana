@@ -78,3 +78,21 @@ export const CREATE_CUSTOM_JOB = i18n.translate(
     defaultMessage: 'Create custom job',
   }
 );
+
+export const START_JOB_FAILURE = i18n.translate(
+  'xpack.siem.components.mlPopup.errors.startJobFailureTitle',
+  {
+    defaultMessage: 'Start job failure',
+  }
+);
+
+export const STOP_JOB_FAILURE = i18n.translate('xpack.siem.containers.errors.stopJobFailureTitle', {
+  defaultMessage: 'Stop job failure',
+});
+
+export const CREATE_JOB_FAILURE = i18n.translate(
+  'xpack.siem.components.mlPopup.errors.createJobFailureTitle',
+  {
+    defaultMessage: 'Create job failure',
+  }
+);

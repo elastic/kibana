@@ -159,9 +159,13 @@ export class VectorLayer extends AbstractLayer {
         })
       };
     }
+
+
+    const { tooltipContent, areResultsTrimmed } = this._source.getSourceTooltipContent(sourceDataRequest);
     return {
       icon: this._style.getIcon(),
-      tooltipContent: this._source.getSourceTooltipContent(sourceDataRequest)
+      tooltipContent: tooltipContent,
+      areResultsTrimmed: areResultsTrimmed
     };
 
   }
@@ -373,7 +377,7 @@ export class VectorLayer extends AbstractLayer {
     } catch (e) {
       onLoadError(sourceDataId, requestToken, `Join error: ${e.message}`);
       return {
-        dataHasChanged: false,
+        dataHasChanged: true,
         join: join,
         propertiesMap: null
       };
