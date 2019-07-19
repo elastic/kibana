@@ -19,7 +19,7 @@ export enum DATA_FRAME_MODE {
   CONTINUOUS = 'continuous',
 }
 
-interface Clause {
+export interface Clause {
   type: string;
   value: string;
   match: string;

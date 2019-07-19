@@ -88,7 +88,10 @@ export const DataFrameTransformList: SFC = () => {
     blockRefresh
   );
   // Subscribe to the refresh observable to trigger reloading the transform list.
-  useRefreshTransformList({ isLoading: setIsLoading, onRefresh: () => getTransforms(true) });
+  useRefreshTransformList({
+    isLoading: setIsLoading,
+    onRefresh: () => getTransforms(true),
+  });
   // Call useRefreshInterval() after the subscription above is set up.
   useRefreshInterval(setBlockRefresh);
 
@@ -96,7 +99,7 @@ export const DataFrameTransformList: SFC = () => {
     if (error) {
       setSearchError(error.message);
     } else {
-      let clauses = [];
+      let clauses: Clause[] = [];
       if (query && query.ast !== undefined && query.ast.clauses !== undefined) {
         clauses = query.ast.clauses;
       }
@@ -110,7 +113,7 @@ export const DataFrameTransformList: SFC = () => {
     // keep count of the number of matches we make as we're looping over the clauses
     // we only want to return transforms which match all clauses, i.e. each search term is ANDed
     // { transform-one:  { transform: { id: transform-one, config: {}, state: {}, ... }, count: 0 }, transform-two: {...} }
-    const matches: { [key: string]: any } = transforms.reduce((p: { [key: string]: any }, c) => {
+    const matches: Record<string, any> = transforms.reduce((p: { [key: string]: any }, c) => {
       p[c.id] = {
         transform: c,
         count: 0,
@@ -153,15 +156,10 @@ export const DataFrameTransformList: SFC = () => {
       ts.forEach(t => matches[t.id].count++);
     });
 
-    // loop through the matches and return only those jobs which have match all the clauses
-    const filtered = [];
-    for (const key in matches) {
-      if (matches.hasOwnProperty(key)) {
-        if ((matches[key] && matches[key].count) >= clauses.length) {
-          filtered.push(matches[key].transform);
-        }
-      }
-    }
+    // loop through the matches and return only transforms which have match all the clauses
+    const filtered = Object.values(matches)
+      .filter(m => (m && m.count) >= clauses.length)
+      .map(m => m.transform);
 
     setFilteredTransforms(filtered);
     setIsLoading(false);
