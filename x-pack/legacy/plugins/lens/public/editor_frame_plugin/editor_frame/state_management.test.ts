@@ -31,7 +31,7 @@ describe('editor_frame state management', () => {
 
     it('should store initial datasource and visualization', () => {
       const initialState = getInitialState(props);
-      expect(initialState.datasource.activeId).toEqual('testDatasource');
+      expect(initialState.activeDatasourceId).toEqual('testDatasource');
       expect(initialState.visualization.activeId).toEqual('testVis');
     });
 
@@ -57,11 +57,13 @@ describe('editor_frame state management', () => {
       const newVisState = {};
       const newState = reducer(
         {
-          datasource: {
-            activeId: 'testDatasource',
-            state: {},
-            isLoading: false,
+          datasourceStates: {
+            testDatasource: {
+              state: {},
+              isLoading: false,
+            },
           },
+          activeDatasourceId: 'testDatasource',
           saving: false,
           title: 'aaa',
           visualization: {
@@ -82,11 +84,13 @@ describe('editor_frame state management', () => {
       const newDatasourceState = {};
       const newState = reducer(
         {
-          datasource: {
-            activeId: 'testDatasource',
-            state: {},
-            isLoading: false,
+          datasourceStates: {
+            testDatasource: {
+              state: {},
+              isLoading: false,
+            },
           },
+          activeDatasourceId: 'testDatasource',
           saving: false,
           title: 'bbb',
           visualization: {
@@ -97,10 +101,11 @@ describe('editor_frame state management', () => {
         {
           type: 'UPDATE_DATASOURCE_STATE',
           newState: newDatasourceState,
+          datasourceId: 'testDatasource',
         }
       );
 
-      expect(newState.datasource.state).toBe(newDatasourceState);
+      expect(newState.datasourceStates.testDatasource.state).toBe(newDatasourceState);
     });
 
     it('should should switch active visualization', () => {
@@ -108,11 +113,13 @@ describe('editor_frame state management', () => {
       const newVisState = {};
       const newState = reducer(
         {
-          datasource: {
-            activeId: 'testDatasource',
-            state: {},
-            isLoading: false,
+          datasourceStates: {
+            testDatasource: {
+              state: {},
+              isLoading: false,
+            },
           },
+          activeDatasourceId: 'testDatasource',
           saving: false,
           title: 'ccc',
           visualization: {
@@ -136,11 +143,13 @@ describe('editor_frame state management', () => {
       const newDatasourceState = {};
       const newState = reducer(
         {
-          datasource: {
-            activeId: 'testDatasource',
-            state: {},
-            isLoading: false,
+          datasourceStates: {
+            testDatasource: {
+              state: {},
+              isLoading: false,
+            },
           },
+          activeDatasourceId: 'testDatasource',
           saving: false,
           title: 'ddd',
           visualization: {
@@ -157,17 +166,20 @@ describe('editor_frame state management', () => {
       );
 
       expect(newState.visualization.state).toBe(newVisState);
-      expect(newState.datasource.state).toBe(newDatasourceState);
+      expect(newState.datasourceStates.testDatasource.state).toBe(newDatasourceState);
     });
 
-    it('should should switch active datasource and purge visualization state', () => {
+    // TODO this behavior is wrong - multiple datasources can be active at once
+    it.skip('should should switch active datasource and purge visualization state', () => {
       const newState = reducer(
         {
-          datasource: {
-            activeId: 'testDatasource',
-            state: {},
-            isLoading: false,
+          datasourceStates: {
+            testDatasource: {
+              state: {},
+              isLoading: false,
+            },
           },
+          activeDatasourceId: 'testDatasource',
           saving: false,
           title: 'eee',
           visualization: {
@@ -183,18 +195,20 @@ describe('editor_frame state management', () => {
 
       expect(newState.visualization.state).toEqual(null);
       expect(newState.visualization.activeId).toBe(null);
-      expect(newState.datasource.activeId).toBe('testDatasource2');
-      expect(newState.datasource.state).toBe(null);
+      expect(newState.activeDatasourceId).toBe('testDatasource2');
+      expect(newState.datasourceStates.testDatasource.state).toBe(null);
     });
 
     it('should mark as saving', () => {
       const newState = reducer(
         {
-          datasource: {
-            activeId: 'a',
-            state: {},
-            isLoading: false,
+          datasourceStates: {
+            a: {
+              state: {},
+              isLoading: false,
+            },
           },
+          activeDatasourceId: 'a',
           saving: false,
           title: 'fff',
           visualization: {
@@ -214,11 +228,13 @@ describe('editor_frame state management', () => {
     it('should mark as saved', () => {
       const newState = reducer(
         {
-          datasource: {
-            activeId: 'a',
-            state: {},
-            isLoading: false,
+          datasourceStates: {
+            a: {
+              state: {},
+              isLoading: false,
+            },
           },
+          activeDatasourceId: 'a',
           saving: false,
           title: 'hhh',
           visualization: {
@@ -238,11 +254,13 @@ describe('editor_frame state management', () => {
     it('should change the persisted id', () => {
       const newState = reducer(
         {
-          datasource: {
-            activeId: 'a',
-            state: {},
-            isLoading: false,
+          datasourceStates: {
+            a: {
+              state: {},
+              isLoading: false,
+            },
           },
+          activeDatasourceId: 'a',
           saving: false,
           title: 'iii',
           visualization: {
@@ -262,11 +280,13 @@ describe('editor_frame state management', () => {
     it('should reset the state', () => {
       const newState = reducer(
         {
-          datasource: {
-            activeId: 'a',
-            state: {},
-            isLoading: false,
+          datasourceStates: {
+            a: {
+              state: {},
+              isLoading: false,
+            },
           },
+          activeDatasourceId: 'a',
           saving: false,
           title: 'jjj',
           visualization: {
@@ -277,11 +297,13 @@ describe('editor_frame state management', () => {
         {
           type: 'RESET',
           state: {
-            datasource: {
-              activeId: 'z',
-              isLoading: false,
-              state: { hola: 'muchacho' },
+            datasourceStates: {
+              z: {
+                isLoading: false,
+                state: { hola: 'muchacho' },
+              },
             },
+            activeDatasourceId: 'z',
             persistedId: 'bar',
             saving: false,
             title: 'lll',
@@ -294,11 +316,13 @@ describe('editor_frame state management', () => {
       );
 
       expect(newState).toMatchObject({
-        datasource: {
-          activeId: 'z',
-          isLoading: false,
-          state: { hola: 'muchacho' },
+        datasourceStates: {
+          z: {
+            isLoading: false,
+            state: { hola: 'muchacho' },
+          },
         },
+        activeDatasourceId: 'z',
         persistedId: 'bar',
         saving: false,
         visualization: {
@@ -311,11 +335,13 @@ describe('editor_frame state management', () => {
     it('should load the state from the doc', () => {
       const newState = reducer(
         {
-          datasource: {
-            activeId: 'a',
-            state: {},
-            isLoading: false,
+          datasourceStates: {
+            a: {
+              state: {},
+              isLoading: false,
+            },
           },
+          activeDatasourceId: 'a',
           saving: false,
           title: 'mmm',
           visualization: {
@@ -326,10 +352,10 @@ describe('editor_frame state management', () => {
         {
           type: 'VISUALIZATION_LOADED',
           doc: {
-            datasourceType: 'a',
             id: 'b',
+            activeDatasourceId: 'a',
             state: {
-              datasource: { foo: 'c' },
+              datasourceStates: { a: { foo: 'c' } },
               visualization: { bar: 'd' },
             },
             title: 'heyo!',
@@ -340,11 +366,13 @@ describe('editor_frame state management', () => {
       );
 
       expect(newState).toEqual({
-        datasource: {
-          activeId: 'a',
-          isLoading: true,
-          state: {
-            foo: 'c',
+        activeDatasourceId: 'a',
+        datasourceStates: {
+          a: {
+            isLoading: true,
+            state: {
+              foo: 'c',
+            },
           },
         },
         persistedId: 'b',

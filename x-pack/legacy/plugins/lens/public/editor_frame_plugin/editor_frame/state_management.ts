@@ -74,12 +74,13 @@ export const getInitialState = (props: EditorFrameProps): EditorFrameState => {
     datasourceStates: props.doc
       ? _.mapValues(props.doc.state.datasourceStates, state => ({ isLoading: true, state }))
       : props.initialDatasourceId
-      ? { 
-        [props.initialDatasourceId]: {
-          state: null,
-          isLoading: true
+      ? {
+          [props.initialDatasourceId]: {
+            state: null,
+            isLoading: true,
+          },
         }
-      }: {},
+      : {},
     activeDatasourceId: props.initialDatasourceId ? props.initialDatasourceId : null,
     visualization: {
       state: null,
@@ -142,6 +143,13 @@ export const reducer = (state: EditorFrameState, action: Action): EditorFrameSta
     case 'SWITCH_VISUALIZATION':
       return {
         ...state,
+        datasourceStates:
+          state.activeDatasourceId && action.datasourceState
+            ? {
+                ...state.datasourceStates,
+                [state.activeDatasourceId]: { state: action.datasourceState, isLoading: false },
+              }
+            : state.datasourceStates,
         visualization: {
           ...state.visualization,
           activeId: action.newVisualizationId,
