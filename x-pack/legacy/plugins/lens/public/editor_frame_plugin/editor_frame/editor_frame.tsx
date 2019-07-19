@@ -60,7 +60,6 @@ export function EditorFrame(props: EditorFrameProps) {
 
   const datasourceLayers: Record<string, DatasourcePublicAPI> = {};
   Object.keys(props.datasourceMap).forEach(id => {
-
     const stateWrapper = state.datasourceStates[id];
     if (stateWrapper.isLoading) {
       return;

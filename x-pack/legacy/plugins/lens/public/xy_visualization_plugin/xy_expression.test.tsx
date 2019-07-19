@@ -6,24 +6,21 @@
 
 import { AreaSeries, BarSeries, Position, LineSeries, Settings } from '@elastic/charts';
 import { xyChart, XYChart } from './xy_expression';
-import { KibanaDatatable } from '../types';
+import { LensMultiTable } from '../types';
 import React from 'react';
 import { shallow } from 'enzyme';
 import { XYArgs, LegendConfig, legendConfig, layerConfig, LayerConfig } from './types';
 
 function sampleArgs() {
-  const data: KibanaDatatable = {
-    type: 'kibana_datatable',
-    columns: [{ id: 'first', name: '' }],
-    rows: [
-      {
-        first: {
-          type: 'kibana_datatable',
-          columns: [{ id: 'a', name: 'a' }, { id: 'b', name: 'b' }, { id: 'c', name: 'c' }],
-          rows: [{ a: 1, b: 2, c: 3 }, { a: 1, b: 5, c: 4 }],
-        },
+  const data: LensMultiTable = {
+    type: 'lens_multitable',
+    tables: {
+      first: {
+        type: 'kibana_datatable',
+        columns: [{ id: 'a', name: 'a' }, { id: 'b', name: 'b' }, { id: 'c', name: 'c' }],
+        rows: [{ a: 1, b: 2, c: 3 }, { a: 1, b: 5, c: 4 }],
       },
-    ],
+    },
   };
 
   const args: XYArgs = {

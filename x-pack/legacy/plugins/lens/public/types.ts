@@ -145,6 +145,11 @@ export interface Operation {
   // Extra meta-information like cardinality, color
 }
 
+export interface LensMultiTable {
+  type: 'lens_multitable';
+  tables: Record<string, KibanaDatatable>;
+}
+
 // This is a temporary type definition, to be replaced with
 // the official Kibana Datatable type definition.
 export interface KibanaDatatable {

@@ -6,7 +6,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/types';
-import { KibanaDatatable } from '../types';
+import { LensMultiTable, KibanaDatatable } from '../types';
 
 interface MergeTables {
   layerIds: string[];
@@ -17,10 +17,10 @@ export const mergeTables: ExpressionFunction<
   'lens_merge_tables',
   null,
   MergeTables,
-  KibanaDatatable
+  LensMultiTable
 > = {
   name: 'lens_merge_tables',
-  type: 'kibana_datatable',
+  type: 'lens_multitable',
   help: i18n.translate('xpack.lens.functions.mergeTables.help', {
     defaultMessage: 'A helper to merge any number of kibana tables into a single table',
   }),
@@ -40,18 +40,13 @@ export const mergeTables: ExpressionFunction<
     types: ['null'],
   },
   fn(_ctx, { layerIds, tables }: MergeTables) {
-    const row: Record<string, KibanaDatatable> = {};
-
+    const resultTables: Record<string, KibanaDatatable> = {};
     tables.forEach((table, index) => {
-      row[layerIds[index]] = table;
+      resultTables[layerIds[index]] = table;
     });
     return {
-      type: 'kibana_datatable',
-      columns: layerIds.map(layerId => ({
-        id: layerId,
-        name: '',
-      })),
-      rows: [row],
+      type: 'lens_multitable',
+      tables: resultTables,
     };
   },
 };

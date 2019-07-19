@@ -28,9 +28,8 @@ describe('lens_merge_tables', () => {
         {}
       )
     ).toEqual({
-      columns: [{ id: 'first', name: '' }, { id: 'second', name: '' }],
-      rows: [{ first: sampleTable1, second: sampleTable2 }],
-      type: 'kibana_datatable',
+      tables: { first: sampleTable1, second: sampleTable2 },
+      type: 'lens_multitable',
     });
   });
 });

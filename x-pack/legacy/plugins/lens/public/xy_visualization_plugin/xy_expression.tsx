@@ -19,11 +19,11 @@ import {
 } from '@elastic/charts';
 import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/types';
 import { XYArgs } from './types';
-import { KibanaDatatable } from '../types';
+import { LensMultiTable, KibanaDatatable } from '../types';
 import { RenderFunction } from '../interpreter_types';
 
 export interface XYChartProps {
-  data: KibanaDatatable;
+  data: LensMultiTable;
   args: XYArgs;
 }
 
@@ -33,7 +33,7 @@ export interface XYRender {
   value: XYChartProps;
 }
 
-export const xyChart: ExpressionFunction<'lens_xy_chart', KibanaDatatable, XYArgs, XYRender> = ({
+export const xyChart: ExpressionFunction<'lens_xy_chart', LensMultiTable, XYArgs, XYRender> = ({
   name: 'lens_xy_chart',
   type: 'render',
   help: 'An X/Y chart',
@@ -51,7 +51,7 @@ export const xyChart: ExpressionFunction<'lens_xy_chart', KibanaDatatable, XYArg
   context: {
     types: ['kibana_datatable'],
   },
-  fn(data: KibanaDatatable, args: XYArgs) {
+  fn(data: LensMultiTable, args: XYArgs) {
     return {
       type: 'render',
       as: 'lens_xy_chart_renderer',
@@ -62,10 +62,10 @@ export const xyChart: ExpressionFunction<'lens_xy_chart', KibanaDatatable, XYArg
     };
   },
   // TODO the typings currently don't support custom type args. As soon as they do, this can be removed
-} as unknown) as ExpressionFunction<'lens_xy_chart', KibanaDatatable, XYArgs, XYRender>;
+} as unknown) as ExpressionFunction<'lens_xy_chart', LensMultiTable, XYArgs, XYRender>;
 
 export interface XYChartProps {
-  data: KibanaDatatable;
+  data: LensMultiTable;
   args: XYArgs;
 }
 
@@ -109,10 +109,7 @@ export function XYChart({ data, args }: XYChartProps) {
       />
 
       {layers.map(({ splitAccessor, seriesType, labels, accessors, xAccessor, layerId }, index) => {
-        const seriesDataRow = data.rows.find(row => row[layerId]);
-        const seriesData = seriesDataRow ? seriesDataRow[layerId] : null;
-
-        if (!seriesData) {
+        if (!data.tables[layerId]) {
           return;
         }
 
@@ -125,7 +122,7 @@ export function XYChart({ data, args }: XYChartProps) {
           id: getSpecId(idForCaching),
           xAccessor,
           yAccessors: labels,
-          data: (seriesData as KibanaDatatable).rows.map(row => {
+          data: data.tables[layerId].rows.map(row => {
             const newRow: typeof row = {};
 
             Object.keys(row).forEach(key => {
