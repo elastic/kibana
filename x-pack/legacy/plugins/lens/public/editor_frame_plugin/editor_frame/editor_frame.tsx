@@ -25,9 +25,8 @@ export interface EditorFrameProps {
   store: SavedObjectStore;
   datasourceMap: Record<string, Datasource>;
   visualizationMap: Record<string, Visualization>;
-  // layerToDatasourceId: Record<string, string>;
   redirectTo: (path: string) => void;
-  initialDatasourceIds: string[] | null;
+  initialDatasourceId: string | null;
   initialVisualizationId: string | null;
   ExpressionRenderer: ExpressionRenderer;
   onError: (e: { message: string }) => void;

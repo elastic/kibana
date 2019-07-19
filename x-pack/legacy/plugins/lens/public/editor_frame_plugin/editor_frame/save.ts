@@ -18,7 +18,6 @@ export interface Props {
 }
 
 export async function save({
-  // datasource,
   activeDatasources,
   dispatch,
   redirectTo,
@@ -39,13 +38,9 @@ export async function save({
       title: state.title,
       type: 'lens',
       visualizationType: state.visualization.activeId,
-      // datasourceType: state.datasource.activeId,
-      // datasourceType: state.activeDatasourceId,
-      // activeDatasourceId: state.activeDatasourceId,
+      activeDatasourceId: state.activeDatasourceId!,
       state: {
-        // datasource: datasource.getPersistableState(state.datasource.state),
         datasourceStates,
-        // datasources: datasource.getPersistableState(state.datasource.state),
         visualization: visualization.getPersistableState(state.visualization.state),
       },
     });

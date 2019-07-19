@@ -73,16 +73,14 @@ export const getInitialState = (props: EditorFrameProps): EditorFrameState => {
     title: i18n.translate('xpack.lens.chartTitle', { defaultMessage: 'New visualization' }),
     datasourceStates: props.doc
       ? _.mapValues(props.doc.state.datasourceStates, state => ({ isLoading: true, state }))
-      : props.initialDatasourceIds
-      ? props.initialDatasourceIds.reduce(
-          (stateMap, datasourceId) => ({
-            ...stateMap,
-            [datasourceId]: { state: null, isLoading: true },
-          }),
-          {}
-        )
-      : {},
-    activeDatasourceId: props.initialDatasourceIds ? props.initialDatasourceIds[0] : null,
+      : props.initialDatasourceId
+      ? { 
+        [props.initialDatasourceId]: {
+          state: null,
+          isLoading: true
+        }
+      }: {},
+    activeDatasourceId: props.initialDatasourceId ? props.initialDatasourceId : null,
     visualization: {
       state: null,
       activeId: props.initialVisualizationId,
@@ -116,7 +114,7 @@ export const reducer = (state: EditorFrameState, action: Action): EditorFrameSta
           }),
           {}
         ),
-        activeDatasourceId: Object.keys(action.doc.state.datasourceStates)[0],
+        activeDatasourceId: action.doc.activeDatasourceId,
         visualization: {
           ...state.visualization,
           activeId: action.doc.visualizationType,
