@@ -67,14 +67,12 @@ function DefaultEditorAggGroup({
   const group: AggConfig[] = state.aggs.bySchemaGroup[groupName] || [];
 
   const stats = {
-    min: 0,
     max: 0,
     count: group.length,
     deprecate: false,
   };
 
   schemas.forEach((schema: Schema) => {
-    stats.min += schema.min;
     stats.max += schema.max;
     stats.deprecate = schema.deprecate;
   });

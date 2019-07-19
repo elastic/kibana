@@ -39,7 +39,6 @@ interface DefaultEditorAggAddProps {
   schemas: Schema[];
   stats: {
     max: number;
-    min: number;
     count: number;
     deprecate: boolean;
   };
