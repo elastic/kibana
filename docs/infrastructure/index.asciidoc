@@ -6,11 +6,17 @@
 --
 Use the interactive Infrastructure UI to monitor your infrastructure and
 identify problems in real time. You can explore metrics and logs for common
-servers, containers, and services. 
+servers, containers, and services.
+
+//////
+Decide if this part covers logs and metrics (with the split coming later) or just metrics.
+The UI is a bit mixed up here.
+A bit more confused because the initial click on the Inventory tab allows you to select logs,
+metrics, APM traces and Uptime, where available.
+//////
 
 [role="screenshot"]
 image::infrastructure/images/infra-sysmon.jpg[Infrastructure Overview in Kibana]
-
 
 [float]
 == Add data
@@ -18,22 +24,32 @@ image::infrastructure/images/infra-sysmon.jpg[Infrastructure Overview in Kibana]
 Kibana provides step-by-step instructions to help you add log data. The
 {infra-guide}[Infrastructure Monitoring Guide] is a good source for more
 detailed information and instructions.
+///
+add more informative link and description.
+Decide if this should be logs and Metrics
+///
 
 [float]
-== Configure data sources 
+== Configure data sources
 
+///// Thsi could be clearer. link to more info
+///// This is only logs and Metrics, APM and uptime are different.
+////// This is the same as Configure source below.
 The `metricbeat-*` index pattern is used to query the data by default.
 If your metrics are located in a different set of indices, or use a
 different timestamp field, you can adjust the source configuration via the user
 interface or the {kib} configuration file.
 
-NOTE: Logs and Infrastructure share a common data source definition in
+// This could be clearer, link to [space] etc
+NOTE: Logs and metrics share a common data source definition in
 each space. Changes in one of them can influence the data displayed in the
 other.
 
 [float]
 === Configure source
 
+// Is "configure source" the same as "configure data sources above"?
+// And why do you want to do this?
 Configure source can be accessed via the corresponding
 image:logs/images/logs-configure-source-gear-icon.png[Configure source icon]
 button in the toolbar:
