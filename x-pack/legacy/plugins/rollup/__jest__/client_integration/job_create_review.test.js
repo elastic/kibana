@@ -4,7 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { setupEnvironment, pageHelpers, nextTick } from './helpers';
+import { setupEnvironment, pageHelpers } from './helpers';
+import _ from 'lodash';
+import { JOBS } from './helpers/constants';
 
 jest.mock('ui/index_patterns', () => {
   const { INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE } = require.requireActual('../../../../../../src/legacy/ui/public/index_patterns/constants'); // eslint-disable-line max-len
@@ -142,15 +144,42 @@ describe('Create Rollup Job, step 6: Review', () => {
 
     describe('without starting job after creation', () => {
       it('should call the "create" Api server endpoint', async () => {
+        httpRequestsMockHelpers.setCreateJobResponse(_.first(JOBS.jobs));
+
         await goToStep(6);
+
         expect(server.requests.find(r => r.url === jobCreateApiPath)).toBe(undefined); // make sure it hasn't been called
         expect(server.requests.find(r => r.url === jobStartApiPath)).toBe(undefined); // make sure it hasn't been called
 
         actions.clickSave();
-        await nextTick();
+        // Given the following anti-jitter sleep x-pack/legacy/plugins/rollup/public/crud_app/store/actions/create_job.js
+        // we add a longer sleep here :(
+        await new Promise(res => setTimeout(res, 750));
 
         expect(server.requests.find(r => r.url === jobCreateApiPath)).not.toBe(undefined); // It has been called!
         expect(server.requests.find(r => r.url === jobStartApiPath)).toBe(undefined); // It has still not been called!
+      });
+    });
+
+    describe('with starting job after creation', () => {
+      it('should call the "create" and "start" Api server endpoints', async () => {
+        httpRequestsMockHelpers.setCreateJobResponse(_.first(JOBS.jobs));
+        httpRequestsMockHelpers.setStartJobResponse();
+
+        await goToStep(6);
+
+        find('rollupJobToggleJobStartAfterCreation').simulate('change', {
+          target: { isChecked: true },
+        });
+
+        expect(server.requests.find(r => r.url === jobStartApiPath)).toBe(undefined); // make sure it hasn't been called
+
+        actions.clickSave();
+        // Given the following anti-jitter sleep x-pack/legacy/plugins/rollup/public/crud_app/store/actions/create_job.js
+        // we add a longer sleep here :(
+        await new Promise(res => setTimeout(res, 750));
+
+        expect(server.requests.find(r => r.url === jobStartApiPath)).not.toBe(undefined); // It has been called!
       });
     });
   });
