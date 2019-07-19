@@ -27,7 +27,7 @@ import { NumberList } from '../number_list';
 function PercentileRanksEditor({
   agg,
   showValidation,
-  value,
+  value = [],
   setTouched,
   setValidity,
   setValue,
@@ -49,7 +49,7 @@ function PercentileRanksEditor({
       fullWidth={true}
       id={`visEditorPercentileRanksLabel${agg.id}`}
       isInvalid={showValidation ? !isValid : false}
-      className="visEditorSidebar__aggParamFormRow"
+      compressed
       data-test-subj="visEditorPercentileRanks"
     >
       <NumberList

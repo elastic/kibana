@@ -35,6 +35,7 @@ import * as i18n from './translations';
 interface OwnProps {
   data: HostsEdges[];
   loading: boolean;
+  id: string;
   indexPattern: StaticIndexPattern;
   hasNextPage: boolean;
   nextCursor: string;
@@ -105,6 +106,7 @@ class HostsTableComponent extends React.PureComponent<HostsTableProps> {
       data,
       direction,
       hasNextPage,
+      id,
       indexPattern,
       limit,
       loading,
@@ -120,6 +122,7 @@ class HostsTableComponent extends React.PureComponent<HostsTableProps> {
         headerCount={totalCount}
         headerTitle={i18n.HOSTS}
         headerUnit={i18n.UNIT(totalCount)}
+        id={id}
         itemsPerRow={rowItems}
         limit={limit}
         loading={loading}

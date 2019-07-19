@@ -14,24 +14,33 @@ import { kpiHostsMapping } from './kpi_hosts_mapping';
 import { kpiHostDetailsMapping } from './kpi_host_details_mapping';
 
 describe('kpiHostsComponent', () => {
+  const ID = 'kpiHost';
+  const from = new Date('2019-06-15T06:00:00.000Z').valueOf();
+  const to = new Date('2019-06-18T06:00:00.000Z').valueOf();
   describe('render', () => {
     test('it should render spinner if it is loading', () => {
       const wrapper: ShallowWrapper = shallow(
-        <KpiHostsComponent data={mockKpiHostsData} loading={true} />
+        <KpiHostsComponent data={mockKpiHostsData} from={from} id={ID} loading={true} to={to} />
       );
       expect(toJson(wrapper)).toMatchSnapshot();
     });
 
     test('it should render KpiHostsData', () => {
       const wrapper: ShallowWrapper = shallow(
-        <KpiHostsComponent data={mockKpiHostsData} loading={false} />
+        <KpiHostsComponent data={mockKpiHostsData} from={from} id={ID} loading={false} to={to} />
       );
       expect(toJson(wrapper)).toMatchSnapshot();
     });
 
     test('it should render KpiHostDetailsData', () => {
       const wrapper: ShallowWrapper = shallow(
-        <KpiHostsComponent data={mockKpiHostDetailsData} loading={false} />
+        <KpiHostsComponent
+          data={mockKpiHostDetailsData}
+          from={from}
+          id={ID}
+          loading={false}
+          to={to}
+        />
       );
       expect(toJson(wrapper)).toMatchSnapshot();
     });
@@ -47,7 +56,7 @@ describe('kpiHostsComponent', () => {
     });
 
     beforeEach(() => {
-      shallow(<KpiHostsComponent data={data} loading={false} />);
+      shallow(<KpiHostsComponent data={data} from={from} id={ID} loading={false} to={to} />);
     });
 
     afterEach(() => {
@@ -59,7 +68,7 @@ describe('kpiHostsComponent', () => {
     });
 
     test(`it should apply correct mapping by given data type`, () => {
-      expect(mockUseKpiMatrixStatus).toBeCalledWith(mapping, data);
+      expect(mockUseKpiMatrixStatus).toBeCalledWith(mapping, data, ID, from, to);
     });
   });
 });

@@ -13,6 +13,7 @@
 
 import $ from 'jquery';
 import moment from 'moment-timezone';
+import { Subscription } from 'rxjs';
 
 import '../components/annotations/annotations_table';
 import '../components/anomalies_table';
@@ -30,9 +31,11 @@ import { checkGetJobsPrivilege } from '../privilege/check_privilege';
 import { getIndexPatterns, loadIndexPatterns } from '../util/index_utils';
 import { MlTimeBuckets } from 'plugins/ml/util/ml_time_buckets';
 import { explorer$ } from './explorer_dashboard_service';
+import { mlTimefilterRefresh$ } from '../services/timefilter_refresh_service';
 import { mlFieldFormatService } from 'plugins/ml/services/field_format_service';
 import { mlJobService } from '../services/job_service';
 import { refreshIntervalWatcher } from '../util/refresh_interval_watcher';
+import { getSelectedJobIds } from '../components/job_selector/job_select_service_utils';
 import { timefilter } from 'ui/timefilter';
 
 import { APP_STATE_ACTION, EXPLORER_ACTION } from './explorer_constants';
@@ -60,6 +63,7 @@ module.controller('MlExplorerController', function (
   AppState,
   Private,
   config,
+  globalState,
 ) {
 
   // Even if they are not used directly anymore in this controller but via imports
@@ -71,6 +75,7 @@ module.controller('MlExplorerController', function (
   $injector.get('mlSelectSeverityService');
 
   const mlJobSelectService = $injector.get('mlJobSelectService');
+  const subscriptions = new Subscription();
 
   // $scope should only contain what's actually still necessary for the angular part.
   // For the moment that's the job selector and the (hidden) filter bar.
@@ -147,7 +152,7 @@ module.controller('MlExplorerController', function (
       // Jobs load via route resolver
       if (mlJobService.jobs.length > 0) {
         // Select any jobs set in the global state (i.e. passed in the URL).
-        const selectedJobIds = mlJobSelectService.getValue().selection;
+        const { jobIds: selectedJobIds } = getSelectedJobIds(globalState);
         let selectedCells;
         let filterData = {};
 
@@ -179,6 +184,14 @@ module.controller('MlExplorerController', function (
           selectedJobIds,
           swimlaneViewByFieldName: $scope.appState.mlExplorerSwimlane.viewByFieldName,
         });
+
+        subscriptions.add(mlJobSelectService.subscribe(({ selection }) => {
+          if (selection !== undefined) {
+            $scope.jobSelectionUpdateInProgress = true;
+            jobSelectionUpdate(EXPLORER_ACTION.JOB_SELECTION_CHANGE, { fullJobs: mlJobService.jobs, selectedJobIds: selection });
+          }
+        }));
+
       } else {
         explorer$.next({
           action: EXPLORER_ACTION.RELOAD,
@@ -191,17 +204,16 @@ module.controller('MlExplorerController', function (
     }
   }
 
-  const explorerSubscriber = explorer$.subscribe(loadJobsListener);
+  subscriptions.add(explorer$.subscribe(loadJobsListener));
 
   // Listen for changes to job selection.
   $scope.jobSelectionUpdateInProgress = false;
 
-  const jobSelectServiceSub = mlJobSelectService.subscribe(({ selection }) => {
-    if (selection !== undefined) {
-      $scope.jobSelectionUpdateInProgress = true;
-      jobSelectionUpdate(EXPLORER_ACTION.JOB_SELECTION_CHANGE, { fullJobs: mlJobService.jobs, selectedJobIds: selection });
+  subscriptions.add(mlTimefilterRefresh$.subscribe(() => {
+    if ($scope.jobSelectionUpdateInProgress === false) {
+      explorer$.next({ action: EXPLORER_ACTION.RELOAD });
     }
-  });
+  }));
 
   // Refresh all the data when the time range is altered.
   $scope.$listenAndDigestAsync(timefilter, 'fetch', () => {
@@ -285,8 +297,7 @@ module.controller('MlExplorerController', function (
   });
 
   $scope.$on('$destroy', () => {
-    explorerSubscriber.unsubscribe();
-    jobSelectServiceSub.unsubscribe();
+    subscriptions.unsubscribe();
     refreshWatcher.cancel();
     $(window).off('resize', jqueryRedrawOnResize);
     // Cancel listening for updates to the global nav state.

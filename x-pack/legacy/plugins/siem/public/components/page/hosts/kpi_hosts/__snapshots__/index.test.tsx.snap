@@ -25,6 +25,7 @@ exports[`kpiHostsComponent render it should render KpiHostDetailsData 1`] = `
       ]
     }
     grow={1}
+    index={0}
     key="authentication"
   />
   <Memo()
@@ -51,6 +52,7 @@ exports[`kpiHostsComponent render it should render KpiHostDetailsData 1`] = `
       ]
     }
     grow={1}
+    index={1}
     key="uniqueIps"
   />
 </EuiFlexGroup>
@@ -72,6 +74,7 @@ exports[`kpiHostsComponent render it should render KpiHostsData 1`] = `
       ]
     }
     grow={2}
+    index={0}
     key="hosts"
   />
   <Memo()
@@ -97,6 +100,7 @@ exports[`kpiHostsComponent render it should render KpiHostsData 1`] = `
       ]
     }
     grow={4}
+    index={1}
     key="authentication"
   />
   <Memo()
@@ -123,6 +127,7 @@ exports[`kpiHostsComponent render it should render KpiHostsData 1`] = `
       ]
     }
     grow={4}
+    index={2}
     key="uniqueIps"
   />
 </EuiFlexGroup>

@@ -13,6 +13,6 @@ import { registerRestoreRoutes } from './restore';
 export const registerRoutes = (router: Router, plugins: Plugins): void => {
   registerAppRoutes(router, plugins);
   registerRepositoriesRoutes(router, plugins);
-  registerSnapshotsRoutes(router);
+  registerSnapshotsRoutes(router, plugins);
   registerRestoreRoutes(router);
 };

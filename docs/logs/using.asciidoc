@@ -80,18 +80,18 @@ Click on a log event in the stream to inspect it.
 [role="screenshot"]
 image::logs/images/logs-stream-click-entry.png[Highlighted log gentry in the stream]
 
-This will display a list of all of the fields associated with this log event.
+All of the fields associated to the log event are displayed.
 
 [role="screenshot"]
-image::logs/images/log-details-flyover.png[Log event document details flyover]
+image::logs/images/log-details-flyover.png[Log event document details]
 
 By clicking the icon next to one of the listed values, you can filter the logs stream to display only events corresponding to that particular value.
 
 [role="screenshot"]
-image::logs/images/log-details-filter.png[Filtering from the log event details flyover]
+image::logs/images/log-details-filter.png[Filtering from the log event details]
 
 [role="screenshot"]
-image::logs/images/logs-stream-filtered-by-value.png[Log console after filtering by a value in the details flyover]
+image::logs/images/logs-stream-filtered-by-value.png[Log console after filtering by a value in the details]
 
 You can use the Actions menu to view any monitor or APM trace that the log event may be associated with.
 

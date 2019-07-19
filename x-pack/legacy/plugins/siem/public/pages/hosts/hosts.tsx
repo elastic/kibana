@@ -85,13 +85,16 @@ const HostsComponent = pure<HostsComponentProps>(({ filterQuery, setAbsoluteRang
                       sourceId="default"
                       startDate={from}
                     >
-                      {({ kpiHosts, loading, id, refetch }) => (
+                      {({ kpiHosts, loading, id, inspect, refetch }) => (
                         <KpiHostsComponentManage
-                          id={id}
-                          setQuery={setQuery}
-                          refetch={refetch}
                           data={kpiHosts}
+                          from={from}
+                          id={id}
+                          inspect={inspect}
                           loading={loading}
+                          refetch={refetch}
+                          setQuery={setQuery}
+                          to={to}
                         />
                       )}
                     </KpiHostsQuery>
@@ -106,9 +109,19 @@ const HostsComponent = pure<HostsComponentProps>(({ filterQuery, setAbsoluteRang
                       startDate={from}
                       type={hostsModel.HostsType.page}
                     >
-                      {({ hosts, totalCount, loading, pageInfo, loadMore, id, refetch }) => (
+                      {({
+                        hosts,
+                        totalCount,
+                        loading,
+                        pageInfo,
+                        loadMore,
+                        id,
+                        inspect,
+                        refetch,
+                      }) => (
                         <HostsTableManage
                           id={id}
+                          inspect={inspect}
                           indexPattern={indexPattern}
                           refetch={refetch}
                           setQuery={setQuery}
@@ -138,20 +151,22 @@ const HostsComponent = pure<HostsComponentProps>(({ filterQuery, setAbsoluteRang
                         totalCount,
                         loading,
                         pageInfo,
-                        loadMore,
+                        loadPage,
                         id,
+                        inspect,
                         refetch,
                       }) => (
                         <AuthenticationTableManage
-                          id={id}
-                          refetch={refetch}
-                          setQuery={setQuery}
-                          loading={loading}
                           data={authentications}
+                          fakeTotalCount={getOr(50, 'fakeTotalCount', pageInfo)}
+                          id={id}
+                          inspect={inspect}
+                          loading={loading}
+                          loadPage={loadPage}
+                          refetch={refetch}
+                          showMorePagesIndicator={getOr(false, 'showMorePagesIndicator', pageInfo)}
+                          setQuery={setQuery}
                           totalCount={totalCount}
-                          nextCursor={getOr(null, 'endCursor.value', pageInfo)}
-                          hasNextPage={getOr(false, 'hasNextPage', pageInfo)!}
-                          loadMore={loadMore}
                           type={hostsModel.HostsType.page}
                         />
                       )}
@@ -174,10 +189,12 @@ const HostsComponent = pure<HostsComponentProps>(({ filterQuery, setAbsoluteRang
                         pageInfo,
                         loadMore,
                         id,
+                        inspect,
                         refetch,
                       }) => (
                         <UncommonProcessTableManage
                           id={id}
+                          inspect={inspect}
                           refetch={refetch}
                           setQuery={setQuery}
                           loading={loading}
@@ -197,6 +214,7 @@ const HostsComponent = pure<HostsComponentProps>(({ filterQuery, setAbsoluteRang
                       startDate={from}
                       endDate={to}
                       skip={isInitializing}
+                      type={hostsModel.HostsType.page}
                       narrowDateRange={(score, interval) => {
                         const fromTo = scoreIntervalToDateTime(score, interval);
                         setAbsoluteRangeDatePicker({
@@ -217,9 +235,19 @@ const HostsComponent = pure<HostsComponentProps>(({ filterQuery, setAbsoluteRang
                       startDate={from}
                       type={hostsModel.HostsType.page}
                     >
-                      {({ events, loading, id, refetch, totalCount, pageInfo, loadMore }) => (
+                      {({
+                        events,
+                        loading,
+                        id,
+                        inspect,
+                        refetch,
+                        totalCount,
+                        pageInfo,
+                        loadMore,
+                      }) => (
                         <EventsTableManage
                           id={id}
+                          inspect={inspect}
                           refetch={refetch}
                           setQuery={setQuery}
                           data={events!}

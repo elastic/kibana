@@ -32,18 +32,18 @@ import { SubAggParamsProp } from './default_editor_agg_params';
 export interface AggParamCommonProps<T> {
   agg: AggConfig;
   aggParam: AggParam;
+  disabled?: boolean;
   editorConfig: EditorConfig;
   indexedFields?: FieldParamType[];
   showValidation: boolean;
   state: VisState;
-  value: T;
-  responseValueAggs: AggConfig[] | null;
+  value?: T;
+  metricAggs: AggConfig[];
   subAggParams: SubAggParamsProp;
   setValidity(isValid: boolean): void;
   setTouched(): void;
 }
 
 export interface AggParamEditorProps<T> extends AggParamCommonProps<T> {
-  wrappedWithInlineComp?: boolean;
   setValue(value?: T): void;
 }

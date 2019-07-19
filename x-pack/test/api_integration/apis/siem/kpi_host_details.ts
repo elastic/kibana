@@ -86,6 +86,7 @@ const kpiHostsTests: KbnTestProvider = ({ getService }) => {
               },
               defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
               hostName: 'zeek-sensor-san-francisco',
+              inspect: false,
             },
           })
           .then(resp => {
@@ -167,6 +168,7 @@ const kpiHostsTests: KbnTestProvider = ({ getService }) => {
               },
               defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
               hostName: 'zeek-sensor-san-francisco',
+              inspect: false,
             },
           })
           .then(resp => {

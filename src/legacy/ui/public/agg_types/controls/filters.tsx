@@ -35,7 +35,7 @@ interface FilterValue {
   id: string;
 }
 
-function FiltersParamEditor({ agg, value, setValue }: AggParamEditorProps<FilterValue[]>) {
+function FiltersParamEditor({ agg, value = [], setValue }: AggParamEditorProps<FilterValue[]>) {
   const [filters, setFilters] = useState(() =>
     value.map(filter => ({ ...filter, id: generateId() }))
   );
@@ -45,18 +45,15 @@ function FiltersParamEditor({ agg, value, setValue }: AggParamEditorProps<Filter
     setValue(filters.map(filter => omit({ ...filter, input: filter.input }, 'id')));
   }, []);
 
-  useEffect(
-    () => {
-      // responsible for discarding changes
-      if (
-        value.length !== filters.length ||
-        value.some((filter, index) => !isEqual(filter, omit(filters[index], 'id')))
-      ) {
-        setFilters(value.map(filter => ({ ...filter, id: generateId() })));
-      }
-    },
-    [value]
-  );
+  useEffect(() => {
+    // responsible for discarding changes
+    if (
+      value.length !== filters.length ||
+      value.some((filter, index) => !isEqual(filter, omit(filters[index], 'id')))
+    ) {
+      setFilters(value.map(filter => ({ ...filter, id: generateId() })));
+    }
+  }, [value]);
 
   const updateFilters = (updatedFilters: FilterValue[]) => {
     // do not set internal id parameter into saved object

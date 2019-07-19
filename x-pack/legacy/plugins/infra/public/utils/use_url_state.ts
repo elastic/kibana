@@ -24,16 +24,13 @@ export const useUrlState = <State>({
 }) => {
   const history = useHistory();
 
-  const urlStateString = useMemo(
-    () => {
-      if (!history) {
-        return;
-      }
+  const urlStateString = useMemo(() => {
+    if (!history) {
+      return;
+    }
 
-      return getParamFromQueryString(getQueryStringFromLocation(history.location), urlStateKey);
-    },
-    [history && history.location, urlStateKey]
-  );
+    return getParamFromQueryString(getQueryStringFromLocation(history.location), urlStateKey);
+  }, [history && history.location, urlStateKey]);
 
   const decodedState = useMemo(() => decodeUrlState(decodeRisonUrlState(urlStateString)), [
     decodeUrlState,

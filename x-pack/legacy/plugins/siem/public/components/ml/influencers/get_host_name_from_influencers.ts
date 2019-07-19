@@ -4,13 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { getEntries } from '../get_entries';
+
 export const getHostNameFromInfluencers = (
-  influencers: Array<Record<string, string>>
+  influencers: Array<Record<string, string>>,
+  hostName?: string
 ): string | null => {
   const recordFound = influencers.find(influencer => {
-    const influencerName = Object.keys(influencer)[0];
+    const [influencerName, influencerValue] = getEntries(influencer);
     if (influencerName === 'host.name') {
-      return true;
+      if (hostName == null) {
+        return true;
+      } else {
+        return influencerValue === hostName;
+      }
     } else {
       return false;
     }

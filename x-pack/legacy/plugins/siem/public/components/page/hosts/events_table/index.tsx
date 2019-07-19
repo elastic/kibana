@@ -12,7 +12,7 @@ import { pure } from 'recompose';
 import { ActionCreator } from 'typescript-fsa';
 
 import { hostsActions } from '../../../../store/actions';
-import { Ecs, EcsEdges } from '../../../../graphql/types';
+import { Ecs } from '../../../../graphql/types';
 import { hostsModel, hostsSelectors, State } from '../../../../store';
 import { getEmptyTagValue, getOrEmptyTag } from '../../../empty_value';
 import { HostDetailsLink, IPDetailsLink } from '../../../links';
@@ -27,6 +27,7 @@ interface OwnProps {
   data: Ecs[];
   loading: boolean;
   hasNextPage: boolean;
+  id: string;
   nextCursor: string;
   tiebreaker: string;
   totalCount: number;
@@ -67,6 +68,7 @@ const EventsTableComponent = pure<EventsTableProps>(
   ({
     data,
     hasNextPage,
+    id,
     limit,
     loading,
     loadMore,
@@ -82,6 +84,7 @@ const EventsTableComponent = pure<EventsTableProps>(
       headerCount={totalCount}
       headerTitle={i18n.EVENTS}
       headerUnit={i18n.UNIT(totalCount)}
+      id={id}
       itemsPerRow={rowItems}
       limit={limit}
       loading={loading}
@@ -113,33 +116,35 @@ export const EventsTable = connect(
 const getEventsColumns = (
   pageType: hostsModel.HostsType
 ): [
-  Columns<EcsEdges>,
-  Columns<EcsEdges>,
-  Columns<EcsEdges>,
-  Columns<EcsEdges>,
-  Columns<EcsEdges>,
-  Columns<EcsEdges>,
-  Columns<EcsEdges>,
-  Columns<EcsEdges>
+  Columns<Ecs>,
+  Columns<Ecs>,
+  Columns<Ecs>,
+  Columns<Ecs>,
+  Columns<Ecs>,
+  Columns<Ecs>,
+  Columns<Ecs>,
+  Columns<Ecs>
 ] => [
   {
+    field: 'node',
     name: i18n.TIMESTAMP,
     sortable: false,
     truncateText: false,
-    render: ({ node }) =>
-      node.timestamp != null ? (
-        <LocalizedDateTooltip date={moment(new Date(node.timestamp)).toDate()}>
-          <PreferenceFormattedDate value={new Date(node.timestamp)} />
+    render: ({ timestamp }) =>
+      timestamp != null ? (
+        <LocalizedDateTooltip date={moment(new Date(timestamp)).toDate()}>
+          <PreferenceFormattedDate value={new Date(timestamp)} />
         </LocalizedDateTooltip>
       ) : (
         getEmptyTagValue()
       ),
   },
   {
+    field: 'node',
     name: i18n.HOST_NAME,
     sortable: false,
     truncateText: false,
-    render: ({ node }) =>
+    render: node =>
       getRowItemDraggables({
         rowItems: getOr(null, 'host.name', node),
         attrName: 'host.name',
@@ -148,10 +153,11 @@ const getEventsColumns = (
       }),
   },
   {
+    field: 'node',
     name: i18n.EVENT_MODULE_DATASET,
     sortable: false,
     truncateText: true,
-    render: ({ node }) => (
+    render: node => (
       <>
         {getRowItemDraggables({
           rowItems: getOr(null, 'event.module', node),
@@ -168,10 +174,11 @@ const getEventsColumns = (
     ),
   },
   {
+    field: 'node',
     name: i18n.EVENT_ACTION,
     sortable: false,
     truncateText: true,
-    render: ({ node }) =>
+    render: node =>
       getRowItemDraggables({
         rowItems: getOr(null, 'event.action', node),
         attrName: 'event.action',
@@ -179,10 +186,11 @@ const getEventsColumns = (
       }),
   },
   {
+    field: 'node',
     name: i18n.USER,
     sortable: false,
     truncateText: true,
-    render: ({ node }) =>
+    render: node =>
       getRowItemDraggables({
         rowItems: getOr(null, 'user.name', node),
         attrName: 'user.name',
@@ -190,10 +198,11 @@ const getEventsColumns = (
       }),
   },
   {
+    field: 'node',
     name: i18n.SOURCE,
     sortable: false,
     truncateText: true,
-    render: ({ node }) => (
+    render: node => (
       <>
         {getRowItemDraggable({
           rowItem: getOr(null, 'source.ip[0]', node),
@@ -207,10 +216,11 @@ const getEventsColumns = (
     ),
   },
   {
+    field: 'node',
     name: i18n.DESTINATION,
     sortable: false,
     truncateText: true,
-    render: ({ node }) => (
+    render: node => (
       <>
         {getRowItemDraggable({
           rowItem: getOr(null, 'destination.ip[0]', node),
@@ -224,11 +234,12 @@ const getEventsColumns = (
     ),
   },
   {
+    field: 'node',
     name: i18n.MESSAGE,
     sortable: false,
     truncateText: true,
     width: '25%',
-    render: ({ node }) => {
+    render: node => {
       const message = getOr(null, 'message[0]', node);
       return message != null ? (
         <OverflowField value={message} showToolTip={false} />

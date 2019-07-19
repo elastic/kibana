@@ -20,7 +20,8 @@ import {
   isJobIdValid,
   ML_MEDIAN_PERCENTS,
   prefixDatafeedId,
-  getSafeAggregationName
+  getSafeAggregationName,
+  getLatestDataOrBucketTimestamp,
 } from '../job_utils';
 
 describe('ML - job utils', () => {
@@ -540,5 +541,17 @@ describe('ML - job utils', () => {
       expect(getSafeAggregationName('foo&bar', 0)).to.be('field_0');
     });
 
+  });
+
+  describe('getLatestDataOrBucketTimestamp', () => {
+    it('returns expected value when no gap in data at end of bucket processing', () => {
+      expect(getLatestDataOrBucketTimestamp(1549929594000, 1549928700000)).to.be(1549929594000);
+    });
+    it('returns expected value when there is a gap in data at end of bucket processing', () => {
+      expect(getLatestDataOrBucketTimestamp(1549929594000, 1562256600000)).to.be(1562256600000);
+    });
+    it('returns expected value when job has not run', () => {
+      expect(getLatestDataOrBucketTimestamp(undefined, undefined)).to.be(undefined);
+    });
   });
 });

@@ -38,11 +38,12 @@ import { HostsEmptyPage } from './hosts_empty_page';
 import { HostsKql } from './kql';
 import * as i18n from './translations';
 import { AnomalyTableProvider } from '../../components/ml/anomaly/anomaly_table_provider';
-import { hostToInfluencers } from '../../components/ml/influencers/host_to_influencers';
 import { setAbsoluteRangeDatePicker as dispatchAbsoluteRangeDatePicker } from '../../store/inputs/actions';
 import { InputsModelId } from '../../store/inputs/constants';
 import { scoreIntervalToDateTime } from '../../components/ml/score/score_interval_to_datetime';
 import { KpiHostDetailsQuery } from '../../containers/kpi_host_details';
+import { AnomaliesHostTable } from '../../components/ml/tables/anomalies_host_table';
+import { hostToCriteria } from '../../components/ml/criteria/host_to_criteria';
 
 const type = hostsModel.HostsType.details;
 
@@ -98,15 +99,17 @@ const HostDetailsComponent = pure<HostDetailsComponentProps>(
                         startDate={from}
                         endDate={to}
                       >
-                        {({ hostOverview, loading, id, refetch }) => (
+                        {({ hostOverview, loading, id, inspect, refetch }) => (
                           <AnomalyTableProvider
-                            influencers={hostToInfluencers(hostOverview)}
+                            criteriaFields={hostToCriteria(hostOverview)}
                             startDate={from}
                             endDate={to}
+                            skip={isInitializing}
                           >
                             {({ isLoadingAnomaliesData, anomaliesData }) => (
                               <HostOverviewManage
                                 id={id}
+                                inspect={inspect}
                                 refetch={refetch}
                                 setQuery={setQuery}
                                 data={hostOverview}
@@ -138,13 +141,16 @@ const HostDetailsComponent = pure<HostDetailsComponentProps>(
                         startDate={from}
                         endDate={to}
                       >
-                        {({ kpiHostDetails, loading, id, refetch }) => (
+                        {({ kpiHostDetails, id, inspect, loading, refetch }) => (
                           <KpiHostDetailsManage
+                            data={kpiHostDetails}
+                            from={from}
                             id={id}
+                            inspect={inspect}
+                            loading={loading}
                             refetch={refetch}
                             setQuery={setQuery}
-                            data={kpiHostDetails}
-                            loading={loading}
+                            to={to}
                           />
                         )}
                       </KpiHostDetailsQuery>
@@ -164,20 +170,26 @@ const HostDetailsComponent = pure<HostDetailsComponentProps>(
                           totalCount,
                           loading,
                           pageInfo,
-                          loadMore,
+                          loadPage,
                           id,
+                          inspect,
                           refetch,
                         }) => (
                           <AuthenticationTableManage
-                            id={id}
-                            refetch={refetch}
-                            setQuery={setQuery}
-                            loading={loading}
                             data={authentications}
+                            fakeTotalCount={getOr(50, 'fakeTotalCount', pageInfo)}
+                            id={id}
+                            inspect={inspect}
+                            loading={loading}
+                            loadPage={loadPage}
+                            refetch={refetch}
+                            showMorePagesIndicator={getOr(
+                              false,
+                              'showMorePagesIndicator',
+                              pageInfo
+                            )}
+                            setQuery={setQuery}
                             totalCount={totalCount}
-                            nextCursor={getOr(null, 'endCursor.value', pageInfo)}
-                            hasNextPage={getOr(false, 'hasNextPage', pageInfo)!}
-                            loadMore={loadMore}
                             type={type}
                           />
                         )}
@@ -200,10 +212,12 @@ const HostDetailsComponent = pure<HostDetailsComponentProps>(
                           pageInfo,
                           loadMore,
                           id,
+                          inspect,
                           refetch,
                         }) => (
                           <UncommonProcessTableManage
                             id={id}
+                            inspect={inspect}
                             refetch={refetch}
                             setQuery={setQuery}
                             loading={loading}
@@ -219,6 +233,24 @@ const HostDetailsComponent = pure<HostDetailsComponentProps>(
 
                       <EuiSpacer />
 
+                      <AnomaliesHostTable
+                        startDate={from}
+                        endDate={to}
+                        skip={isInitializing}
+                        hostName={hostName}
+                        type={type}
+                        narrowDateRange={(score, interval) => {
+                          const fromTo = scoreIntervalToDateTime(score, interval);
+                          setAbsoluteRangeDatePicker({
+                            id: 'global',
+                            from: fromTo.from,
+                            to: fromTo.to,
+                          });
+                        }}
+                      />
+
+                      <EuiSpacer />
+
                       <EventsQuery
                         endDate={to}
                         filterQuery={getFilterQuery(hostName, filterQueryExpression, indexPattern)}
@@ -227,9 +259,19 @@ const HostDetailsComponent = pure<HostDetailsComponentProps>(
                         startDate={from}
                         type={type}
                       >
-                        {({ events, loading, id, refetch, totalCount, pageInfo, loadMore }) => (
+                        {({
+                          events,
+                          loading,
+                          id,
+                          inspect,
+                          refetch,
+                          totalCount,
+                          pageInfo,
+                          loadMore,
+                        }) => (
                           <EventsTableManage
                             id={id}
+                            inspect={inspect}
                             refetch={refetch}
                             setQuery={setQuery}
                             data={events!}

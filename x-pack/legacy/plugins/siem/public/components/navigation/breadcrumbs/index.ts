@@ -52,7 +52,8 @@ export const rootBreadcrumbs: { [name: string]: Breadcrumb[] } = {
 };
 
 export const getBreadcrumbsForRoute = (pathname: string): Breadcrumb[] | null => {
-  const trailingPath = pathname.match(/([^\/]+$)/);
+  const removeSlash = pathname.replace(/\/$/, '');
+  const trailingPath = removeSlash.match(/([^\/]+$)/);
   if (trailingPath !== null) {
     if (Object.keys(rootBreadcrumbs).includes(trailingPath[0])) {
       return rootBreadcrumbs[trailingPath[0]];

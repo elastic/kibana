@@ -17,5 +17,5 @@ export interface RouteConfigOptions
 |  Property | Type | Description |
 |  --- | --- | --- |
 |  [authRequired](./kibana-plugin-server.routeconfigoptions.authrequired.md) | <code>boolean</code> | A flag shows that authentication for a route: enabled when true disabled when false<!-- -->Enabled by default. |
-|  [tags](./kibana-plugin-server.routeconfigoptions.tags.md) | <code>ReadonlyArray&lt;string&gt;</code> | Additional metadata tag strings to attach to the route. |
+|  [tags](./kibana-plugin-server.routeconfigoptions.tags.md) | <code>readonly string[]</code> | Additional metadata tag strings to attach to the route. |
 

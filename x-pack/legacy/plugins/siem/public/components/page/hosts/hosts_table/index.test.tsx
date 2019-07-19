@@ -40,13 +40,14 @@ describe('Load More Table Component', () => {
         <ReduxStoreProvider store={store}>
           <KibanaConfigContext.Provider value={mockFrameworks.default_UTC}>
             <HostsTable
-              indexPattern={mockIndexPattern}
-              loading={false}
               data={mockData.Hosts.edges}
-              totalCount={mockData.Hosts.totalCount}
+              id="hostsQuery"
+              indexPattern={mockIndexPattern}
               hasNextPage={getOr(false, 'hasNextPage', mockData.Hosts.pageInfo)!}
-              nextCursor={getOr(null, 'endCursor.value', mockData.Hosts.pageInfo)}
+              loading={false}
               loadMore={loadMore}
+              nextCursor={getOr(null, 'endCursor.value', mockData.Hosts.pageInfo)}
+              totalCount={mockData.Hosts.totalCount}
               type={hostsModel.HostsType.page}
             />
           </KibanaConfigContext.Provider>
@@ -61,6 +62,7 @@ describe('Load More Table Component', () => {
         <MockedProvider>
           <TestProviders store={store}>
             <HostsTable
+              id="hostsQuery"
               indexPattern={mockIndexPattern}
               loading={false}
               data={mockData.Hosts.edges}
@@ -79,6 +81,7 @@ describe('Load More Table Component', () => {
           <MockedProvider>
             <TestProviders store={store}>
               <HostsTable
+                id="hostsQuery"
                 indexPattern={mockIndexPattern}
                 loading={false}
                 data={mockData.Hosts.edges}

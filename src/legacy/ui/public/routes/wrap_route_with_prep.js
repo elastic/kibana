@@ -19,6 +19,7 @@
 
 import angular from 'angular';
 import _ from 'lodash';
+import { createDefer } from 'ui/promises';
 import { WorkQueue } from './work_queue';
 
 export function wrapRouteWithPrep(route, setup) {
@@ -38,7 +39,7 @@ export function wrapRouteWithPrep(route, setup) {
   // prep is complete
   _.forOwn(route.resolve || {}, function (expr, name) {
     resolve[name] = function ($injector, Promise) {
-      const defer = Promise.defer();
+      const defer = createDefer(Promise);
       userWork.push(defer);
       return defer.promise.then(function () {
         return $injector[angular.isString(expr) ? 'get' : 'invoke'](expr);

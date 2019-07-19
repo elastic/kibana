@@ -19,7 +19,7 @@ import {
   HostsFields,
   PageInfo,
 } from '../../graphql/types';
-import { hostsModel, hostsSelectors, inputsModel, State } from '../../store';
+import { hostsModel, hostsSelectors, inputsModel, State, inputsSelectors } from '../../store';
 import { createFilter } from '../helpers';
 import { QueryTemplate, QueryTemplateProps } from '../query_template';
 
@@ -27,8 +27,11 @@ import { HostsTableQuery } from './hosts_table.gql_query';
 
 export { HostsFilter } from './filter';
 
+const ID = 'hostsQuery';
+
 export interface HostsArgs {
   id: string;
+  inspect: inputsModel.InspectQuery;
   hosts: HostsEdges[];
   totalCount: number;
   pageInfo: PageInfo;
@@ -47,6 +50,7 @@ export interface OwnProps extends QueryTemplateProps {
 }
 
 export interface HostsComponentReduxProps {
+  isInspected: boolean;
   limit: number;
   sortField: HostsFields;
   direction: Direction;
@@ -71,7 +75,8 @@ class HostsComponentQuery extends QueryTemplate<
 
   public render() {
     const {
-      id = 'hostsQuery',
+      id = ID,
+      isInspected,
       children,
       direction,
       filterQuery,
@@ -82,6 +87,7 @@ class HostsComponentQuery extends QueryTemplate<
       sourceId,
       sortField,
     } = this.props;
+
     const variables: GetHostsTableQuery.Variables = {
       sourceId,
       timerange: {
@@ -100,6 +106,7 @@ class HostsComponentQuery extends QueryTemplate<
       },
       filterQuery: createFilter(filterQuery),
       defaultIndex: chrome.getUiSettingsClient().get(DEFAULT_INDEX_KEY),
+      inspect: isInspected,
     };
     return (
       <Query<GetHostsTableQuery.Query, GetHostsTableQuery.Variables>
@@ -136,6 +143,7 @@ class HostsComponentQuery extends QueryTemplate<
           }));
           return children({
             id,
+            inspect: getOr(null, 'source.Hosts.inspect', data),
             refetch,
             loading,
             totalCount: getOr(0, 'source.Hosts.totalCount', data),
@@ -158,8 +166,13 @@ class HostsComponentQuery extends QueryTemplate<
 
 const makeMapStateToProps = () => {
   const getHostsSelector = hostsSelectors.hostsSelector();
-  const mapStateToProps = (state: State, { type }: OwnProps) => {
-    return getHostsSelector(state, type);
+  const getQuery = inputsSelectors.globalQueryByIdSelector();
+  const mapStateToProps = (state: State, { type, id = ID }: OwnProps) => {
+    const { isInspected } = getQuery(state, id);
+    return {
+      ...getHostsSelector(state, type),
+      isInspected,
+    };
   };
   return mapStateToProps;
 };

@@ -38,13 +38,14 @@ describe('NetworkTopNFlow Table Component', () => {
       const wrapper = shallow(
         <ReduxStoreProvider store={store}>
           <NetworkTopNFlowTable
+            data={mockData.NetworkTopNFlow.edges}
+            hasNextPage={getOr(false, 'hasNextPage', mockData.NetworkTopNFlow.pageInfo)!}
+            id="topNFlow"
             indexPattern={mockIndexPattern}
             loading={false}
-            data={mockData.NetworkTopNFlow.edges}
-            totalCount={mockData.NetworkTopNFlow.totalCount}
-            hasNextPage={getOr(false, 'hasNextPage', mockData.NetworkTopNFlow.pageInfo)!}
-            nextCursor={getOr(null, 'endCursor.value', mockData.NetworkTopNFlow.pageInfo)}
             loadMore={loadMore}
+            nextCursor={getOr(null, 'endCursor.value', mockData.NetworkTopNFlow.pageInfo)}
+            totalCount={mockData.NetworkTopNFlow.totalCount}
             type={networkModel.NetworkType.page}
           />
         </ReduxStoreProvider>
@@ -64,13 +65,14 @@ describe('NetworkTopNFlow Table Component', () => {
         <MockedProvider>
           <TestProviders store={store}>
             <NetworkTopNFlowTable
+              data={mockData.NetworkTopNFlow.edges}
+              hasNextPage={getOr(false, 'hasNextPage', mockData.NetworkTopNFlow.pageInfo)!}
+              id="topNFlow"
               indexPattern={mockIndexPattern}
               loading={false}
-              data={mockData.NetworkTopNFlow.edges}
-              totalCount={mockData.NetworkTopNFlow.totalCount}
-              hasNextPage={getOr(false, 'hasNextPage', mockData.NetworkTopNFlow.pageInfo)!}
-              nextCursor={getOr(null, 'endCursor.value', mockData.NetworkTopNFlow.pageInfo)}
               loadMore={loadMore}
+              nextCursor={getOr(null, 'endCursor.value', mockData.NetworkTopNFlow.pageInfo)}
+              totalCount={mockData.NetworkTopNFlow.totalCount}
               type={networkModel.NetworkType.page}
             />
           </TestProviders>
@@ -100,13 +102,14 @@ describe('NetworkTopNFlow Table Component', () => {
         <MockedProvider>
           <TestProviders store={store}>
             <NetworkTopNFlowTable
+              data={mockData.NetworkTopNFlow.edges}
+              hasNextPage={getOr(false, 'hasNextPage', mockData.NetworkTopNFlow.pageInfo)!}
+              id="topNFlow"
               indexPattern={mockIndexPattern}
               loading={false}
-              data={mockData.NetworkTopNFlow.edges}
-              totalCount={mockData.NetworkTopNFlow.totalCount}
-              hasNextPage={getOr(false, 'hasNextPage', mockData.NetworkTopNFlow.pageInfo)!}
-              nextCursor={getOr(null, 'endCursor.value', mockData.NetworkTopNFlow.pageInfo)}
               loadMore={loadMore}
+              nextCursor={getOr(null, 'endCursor.value', mockData.NetworkTopNFlow.pageInfo)}
+              totalCount={mockData.NetworkTopNFlow.totalCount}
               type={networkModel.NetworkType.page}
             />
           </TestProviders>
@@ -141,13 +144,14 @@ describe('NetworkTopNFlow Table Component', () => {
         <MockedProvider>
           <TestProviders store={store}>
             <NetworkTopNFlowTable
+              data={mockData.NetworkTopNFlow.edges}
+              hasNextPage={getOr(false, 'hasNextPage', mockData.NetworkTopNFlow.pageInfo)!}
+              id="topNFlow"
               indexPattern={mockIndexPattern}
               loading={false}
-              data={mockData.NetworkTopNFlow.edges}
-              totalCount={mockData.NetworkTopNFlow.totalCount}
-              hasNextPage={getOr(false, 'hasNextPage', mockData.NetworkTopNFlow.pageInfo)!}
-              nextCursor={getOr(null, 'endCursor.value', mockData.NetworkTopNFlow.pageInfo)}
               loadMore={loadMore}
+              nextCursor={getOr(null, 'endCursor.value', mockData.NetworkTopNFlow.pageInfo)}
+              totalCount={mockData.NetworkTopNFlow.totalCount}
               type={networkModel.NetworkType.page}
             />
           </TestProviders>

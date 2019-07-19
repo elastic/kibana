@@ -270,6 +270,14 @@ export function GisPageProvider({ getService, getPageObjects }) {
       await testSubjects.click('layerVisibilityToggleButton');
     }
 
+    async closeLegend() {
+      const isOpen = await testSubjects.exists('mapLayerTOC');
+      if (isOpen) {
+        await testSubjects.click('mapToggleLegendButton');
+        await testSubjects.waitForDeleted('mapLayerTOC');
+      }
+    }
+
     async clickFitToBounds(layerName) {
       log.debug(`Fit to bounds, layer: ${layerName}`);
       const origView = await this.getView();

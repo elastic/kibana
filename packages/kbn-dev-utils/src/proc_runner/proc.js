@@ -78,7 +78,7 @@ export function createProc(name, { cmd, args, cwd, env, stdin, log }) {
     childProcess.stdin.end();
   }
 
-  return new class Proc {
+  return new (class Proc {
     name = name;
 
     lines$ = Rx.merge(observeLines(childProcess.stdout), observeLines(childProcess.stderr)).pipe(
@@ -156,5 +156,5 @@ export function createProc(name, { cmd, args, cwd, env, stdin, log }) {
         }
       );
     }
-  }();
+  })();
 }

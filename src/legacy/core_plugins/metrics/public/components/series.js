@@ -19,7 +19,7 @@
 
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-import { assign, get } from 'lodash';
+import { assign } from 'lodash';
 
 import { TimeseriesSeries as timeseries } from './vis_types/timeseries/series';
 import { MetricSeries as metric } from './vis_types/metric/series';
@@ -39,17 +39,10 @@ const lookup = {
 };
 
 export class Series extends Component {
-  constructor(props) {
-    super(props);
-
-    this.state = {
-      visible: true,
-      selectedTab: 'metrics',
-      uiRestrictions: undefined,
-    };
-
-    this.visDataSubscription = null;
-  }
+  state = {
+    visible: true,
+    selectedTab: 'metrics',
+  };
 
   switchTab = selectedTab => {
     this.setState({ selectedTab });
@@ -79,16 +72,6 @@ export class Series extends Component {
     });
   };
 
-  componentDidMount() {
-    if (this.props.visData$) {
-      this.visDataSubscription = this.props.visData$.subscribe(visData =>
-        this.setState({
-          uiRestrictions: get(visData, 'uiRestrictions'),
-        })
-      );
-    }
-  }
-
   render() {
     const { panel } = this.props;
     const Component = lookup[panel.type];
@@ -107,7 +90,6 @@ export class Series extends Component {
       panel: this.props.panel,
       selectedTab: this.state.selectedTab,
       style: this.props.style,
-      uiRestrictions: this.state.uiRestrictions,
       switchTab: this.switchTab,
       toggleVisible: this.toggleVisible,
       togglePanelActivation: this.togglePanelActivation,
@@ -124,12 +106,6 @@ export class Series extends Component {
         values={{ panelType: panel.type }}
       />
     );
-  }
-
-  componentWillUnmount() {
-    if (this.visDataSubscription) {
-      this.visDataSubscription.unsubscribe();
-    }
   }
 }
 

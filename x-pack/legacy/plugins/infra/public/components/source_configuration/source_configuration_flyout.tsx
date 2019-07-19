@@ -67,24 +67,21 @@ export const SourceConfigurationFlyout = injectI18n(
       formStateChanges,
     } = useSourceConfigurationFormState(source && source.configuration);
 
-    const persistUpdates = useCallback(
-      async () => {
-        if (sourceExists) {
-          await updateSourceConfiguration(formStateChanges);
-        } else {
-          await createSourceConfiguration(formState);
-        }
-        resetForm();
-      },
-      [
-        sourceExists,
-        updateSourceConfiguration,
-        createSourceConfiguration,
-        resetForm,
-        formState,
-        formStateChanges,
-      ]
-    );
+    const persistUpdates = useCallback(async () => {
+      if (sourceExists) {
+        await updateSourceConfiguration(formStateChanges);
+      } else {
+        await createSourceConfiguration(formState);
+      }
+      resetForm();
+    }, [
+      sourceExists,
+      updateSourceConfiguration,
+      createSourceConfiguration,
+      resetForm,
+      formState,
+      formStateChanges,
+    ]);
 
     const isWriteable = useMemo(() => shouldAllowEdit && source && source.origin !== 'internal', [
       shouldAllowEdit,

@@ -80,6 +80,6 @@ describe('HistoryTabs', () => {
       .at(2)
       .simulate('click');
 
-    expect(pushSpy).toHaveBeenCalledWith({ pathname: '/three' });
+    expect(pushSpy).toHaveBeenCalledWith({ pathname: '/three', search: '' });
   });
 });

@@ -5,21 +5,22 @@
  */
 
 import dateMath from '@elastic/datemath';
-import { get, unionBy } from 'lodash/fp';
+import { get } from 'lodash/fp';
 import { reducerWithInitialState } from 'typescript-fsa-reducers';
 
 import {
   deleteAllQuery,
   setAbsoluteRangeDatePicker,
   setDuration,
+  setInspectionParameter,
   setQuery,
   setRelativeRangeDatePicker,
+  setTimelineRangeDatePicker,
   startAutoReload,
   stopAutoReload,
   toggleTimelineLinkTo,
-  setTimelineRangeDatePicker,
 } from './actions';
-import { toggleLockTimeline, updateInputTimerange } from './helpers';
+import { setIsInspected, toggleLockTimeline, updateInputTimerange, upsertQuery } from './helpers';
 import { InputsModel, TimeRange } from './model';
 
 export type InputsState = InputsModel;
@@ -105,13 +106,9 @@ export const inputsReducer = reducerWithInitialState(initialInputsState)
       query: state.global.query.slice(state.global.query.length),
     },
   }))
-  .case(setQuery, (state, { inputId, id, loading, refetch }) => ({
-    ...state,
-    [inputId]: {
-      ...get(inputId, state),
-      query: unionBy('id', [{ id, loading, refetch }], state[inputId].query),
-    },
-  }))
+  .case(setQuery, (state, { inputId, id, inspect, loading, refetch }) =>
+    upsertQuery({ inputId, id, inspect, loading, refetch, state })
+  )
   .case(setDuration, (state, { id, duration }) => ({
     ...state,
     [id]: {
@@ -143,4 +140,7 @@ export const inputsReducer = reducerWithInitialState(initialInputsState)
     },
   }))
   .case(toggleTimelineLinkTo, (state, { linkToId }) => toggleLockTimeline(linkToId, state))
+  .case(setInspectionParameter, (state, { id, inputId, isInspected, selectedInspectIndex }) =>
+    setIsInspected({ id, inputId, isInspected, selectedInspectIndex, state })
+  )
   .build();

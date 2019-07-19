@@ -24,6 +24,7 @@ export const uncommonProcessesSchema = gql`
     edges: [UncommonProcessesEdges!]!
     totalCount: Float!
     pageInfo: PageInfo!
+    inspect: Inspect
   }
 
   extend type Source {

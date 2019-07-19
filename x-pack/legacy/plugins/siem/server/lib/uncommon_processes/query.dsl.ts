@@ -98,7 +98,7 @@ export const buildQuery = ({
           should: [
             {
               bool: {
-                must: [
+                filter: [
                   {
                     term: {
                       'agent.type': 'auditbeat',
@@ -119,7 +119,7 @@ export const buildQuery = ({
             },
             {
               bool: {
-                must: [
+                filter: [
                   {
                     term: {
                       'agent.type': 'auditbeat',
@@ -140,7 +140,7 @@ export const buildQuery = ({
             },
             {
               bool: {
-                must: [
+                filter: [
                   {
                     term: {
                       'agent.type': 'winlogbeat',
@@ -156,7 +156,7 @@ export const buildQuery = ({
             },
             {
               bool: {
-                must: [
+                filter: [
                   {
                     term: {
                       'winlog.event_id': 1,

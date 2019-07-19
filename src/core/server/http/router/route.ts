@@ -41,7 +41,7 @@ export interface RouteConfigOptions {
   /**
    * Additional metadata tag strings to attach to the route.
    */
-  tags?: ReadonlyArray<string>;
+  tags?: readonly string[];
 }
 
 export interface RouteConfig<P extends ObjectType, Q extends ObjectType, B extends ObjectType> {

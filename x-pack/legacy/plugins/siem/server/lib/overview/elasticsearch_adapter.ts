@@ -7,6 +7,7 @@
 import { getOr } from 'lodash/fp';
 
 import { OverviewHostData, OverviewNetworkData } from '../../graphql/types';
+import { inspectStringifyObject } from '../../utils/build_query';
 import { FrameworkAdapter, FrameworkRequest, RequestBasicOptions } from '../framework';
 import { TermAggregation } from '../types';
 
@@ -20,13 +21,19 @@ export class ElasticsearchOverviewAdapter implements OverviewAdapter {
     request: FrameworkRequest,
     options: RequestBasicOptions
   ): Promise<OverviewNetworkData> {
+    const dsl = buildOverviewNetworkQuery(options);
     const response = await this.framework.callWithRequest<OverviewNetworkHit, TermAggregation>(
       request,
       'search',
-      buildOverviewNetworkQuery(options)
+      dsl
     );
+    const inspect = {
+      dsl: [inspectStringifyObject(dsl)],
+      response: [inspectStringifyObject(response)],
+    };
 
     return {
+      inspect,
       auditbeatSocket: getOr(null, 'aggregations.unique_socket_count.doc_count', response),
       filebeatCisco: getOr(
         null,
@@ -59,13 +66,19 @@ export class ElasticsearchOverviewAdapter implements OverviewAdapter {
     request: FrameworkRequest,
     options: RequestBasicOptions
   ): Promise<OverviewHostData> {
+    const dsl = buildOverviewHostQuery(options);
     const response = await this.framework.callWithRequest<OverviewHostHit, TermAggregation>(
       request,
       'search',
-      buildOverviewHostQuery(options)
+      dsl
     );
+    const inspect = {
+      dsl: [inspectStringifyObject(dsl)],
+      response: [inspectStringifyObject(response)],
+    };
 
     return {
+      inspect,
       auditbeatAuditd: getOr(null, 'aggregations.auditd_count.doc_count', response),
       auditbeatFIM: getOr(null, 'aggregations.fim_count.doc_count', response),
       auditbeatLogin: getOr(null, 'aggregations.system_module.login_count.doc_count', response),
