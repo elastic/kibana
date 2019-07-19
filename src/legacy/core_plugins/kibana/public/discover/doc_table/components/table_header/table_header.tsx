@@ -17,33 +17,34 @@
  * under the License.
  */
 import React from 'react';
-import { isFunction, get } from 'lodash';
-import { IndexPattern } from 'ui/index_patterns';
+import { isFunction } from 'lodash';
+import { IndexPatternEnhanced } from 'ui/index_patterns/_index_pattern';
 // @ts-ignore
 import { shortenDottedString } from '../../../../../common/utils/shorten_dotted_string';
 import { TableHeaderColumn } from './table_header_column';
-import { SortOrder } from './helpers';
+import { SortOrder, getDisplayedColumns } from './helpers';
+
 
 interface Props {
-  indexPattern: IndexPattern;
-  hideTimeColumn: number;
   columns: string[];
-  sortOrder: SortOrder;
+  hideTimeColumn: boolean;
+  indexPattern: IndexPatternEnhanced;
   isShortDots: boolean;
-  onRemoveColumn: (name: string) => void;
   onChangeSortOrder: (name: string, direction: 'asc' | 'desc') => void;
   onMoveColumn: (name: string, index: number) => void;
+  onRemoveColumn: (name: string) => void;
+  sortOrder: SortOrder;
 }
 
 export function TableHeader({
-  indexPattern,
-  hideTimeColumn,
   columns,
-  onRemoveColumn,
-  onChangeSortOrder,
-  sortOrder,
+  hideTimeColumn,
+  indexPattern,
   isShortDots,
+  onChangeSortOrder,
   onMoveColumn,
+  onRemoveColumn,
+  sortOrder,
 }: Props) {
   const { timeFieldName } = indexPattern;
 
@@ -54,38 +55,24 @@ export function TableHeader({
     onChangeSortOrder(colName, newDirection);
   }
 
-  const columnData = columns.map((name, idx) => {
+  function columnMapper(name: string, idx: number) {
+    const field = indexPattern.getFieldByName(name);
     return {
       name,
       displayName: isShortDots ? shortenDottedString(name) : name,
-      isSortable:
-        isFunction(onChangeSortOrder) &&
-        get(indexPattern, ['fields', 'byName', name, 'sortable'], false),
+      isSortable: isFunction(onChangeSortOrder) && field && field.sortable,
       isRemoveable: isFunction(onRemoveColumn) && (name !== '_source' || columns.length > 1),
       colLeftIdx: idx - 1 < 0 ? -1 : idx - 1,
       colRightIdx: idx + 1 >= columns.length ? -1 : idx + 1,
     };
-  });
-
-  const displayedColumns =
-    timeFieldName && !hideTimeColumn
-      ? [
-          {
-            name: timeFieldName,
-            displayName: 'Time',
-            isSortable: true,
-            isRemoveable: false,
-            colLeftIdx: -1,
-            colRightIdx: -1,
-          },
-          ...columnData,
-        ]
-      : columnData;
+  }
+  const usedTimeField = timeFieldName && !hideTimeColumn ? timeFieldName : '';
+  const displayedColumns = getDisplayedColumns(columns, columnMapper, usedTimeField);
 
   return (
-    <tr>
+    <tr data-test-subj="docTableHeader">
       <th style={{ width: '24px' }}></th>
-      {displayedColumns.map(col => {
+      {displayedColumns.map((col: any) => {
         return (
           <TableHeaderColumn
             key={col.name}

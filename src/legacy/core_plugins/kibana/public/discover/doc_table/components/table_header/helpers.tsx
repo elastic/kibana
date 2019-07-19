@@ -42,3 +42,27 @@ export function getSortHeaderClass(columnName: string, sortOrder: SortOrder) {
 
   return `kbnDocTableHeader__sortChange fa ${directionClass}`;
 }
+
+export function getTimeColumn(timeFieldName: string) {
+  return {
+    name: timeFieldName,
+    displayName: 'Time',
+    isSortable: true,
+    isRemoveable: false,
+    colLeftIdx: -1,
+    colRightIdx: -1,
+  };
+}
+
+export function prependTimeColumn(list: Array<Record<string, any>>, timeFieldName: string) {
+  return [getTimeColumn(timeFieldName), ...list];
+}
+
+export function getDisplayedColumns(
+  columns: any,
+  columnMapperFn: (name: string, idx: number) => Record<string, any>,
+  timeFieldName: string
+) {
+  const columnData = columns.map(columnMapperFn);
+  return timeFieldName ? prependTimeColumn(columnData, timeFieldName) : columnData;
+}

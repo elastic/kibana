@@ -34,7 +34,7 @@ interface Props {
   onChangeSortOrder?: (name: string) => void;
   onMoveColumn?: (name: string, idx: number) => void;
   onRemoveColumn?: (name: string) => void;
-  sortOrder: [string, string];
+  sortOrder: [string, string]; // name of the current sort field + sortdirection
 }
 
 export function TableHeaderColumn({
@@ -49,6 +49,7 @@ export function TableHeaderColumn({
   onRemoveColumn,
   sortOrder,
 }: Props) {
+  // action buttons displayed on the left side of the column name
   const buttons = [
     {
       active: isSortable,
@@ -82,6 +83,7 @@ export function TableHeaderColumn({
       }),
       className: 'fa fa-angle-double-left kbnDocTableHeader__move',
       onClick: () => onMoveColumn && onMoveColumn(name, colLeftIdx),
+      testSubject: `docTableMoveLeftHeader-${name}`,
       tooltip: i18n.translate('kbn.docTable.tableHeader.moveColumnLeftButtonTooltip', {
         defaultMessage: 'Move column to the left',
       }),
@@ -94,6 +96,7 @@ export function TableHeaderColumn({
       }),
       className: 'fa fa-angle-double-right kbnDocTableHeader__move',
       onClick: () => onMoveColumn && onMoveColumn(name, colRightIdx),
+      testSubject: `docTableMoveRightHeader-${name}`,
       tooltip: i18n.translate('kbn.docTable.tableHeader.moveColumnRightButtonTooltip', {
         defaultMessage: 'Move column to the right',
       }),
@@ -107,7 +110,11 @@ export function TableHeaderColumn({
         {buttons
           .filter(button => button.active)
           .map((button, idx) => (
-            <EuiToolTip content={button.tooltip} key={`button_${idx}`}>
+            <EuiToolTip
+              id={`docTableHeader-${name}-tt`}
+              content={button.tooltip}
+              key={`button-${idx}`}
+            >
               <button
                 aria-label={button.ariaLabel}
                 className={button.className}
