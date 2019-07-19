@@ -274,7 +274,7 @@ const HostDetailsComponent = pure<HostDetailsComponentProps>(
                           totalCount,
                         }) => (
                           <EventsTableManage
-                            data={events!}
+                            data={events}
                             fakeTotalCount={getOr(50, 'fakeTotalCount', pageInfo)}
                             id={id}
                             inspect={inspect}

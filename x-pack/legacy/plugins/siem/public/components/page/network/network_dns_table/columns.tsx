@@ -18,7 +18,7 @@ import { PreferenceFormattedBytes } from '../../../formatted_bytes';
 import { Provider } from '../../../timeline/data_providers/provider';
 
 import * as i18n from './translations';
-export declare type NetworkDnsColumns = [
+export type NetworkDnsColumns = [
   Columns<NetworkDnsItem['dnsName']>,
   Columns<NetworkDnsItem['queryCount']>,
   Columns<NetworkDnsItem['uniqueDomains']>,

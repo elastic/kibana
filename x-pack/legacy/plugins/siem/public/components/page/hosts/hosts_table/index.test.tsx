@@ -43,7 +43,7 @@ describe('Hosts Table', () => {
               data={mockData.Hosts.edges}
               id="hostsQuery"
               indexPattern={mockIndexPattern}
-              fakeTotalCount={getOr(50, 'fakeTotalCount', mockData.Hosts.pageInfo)!}
+              fakeTotalCount={getOr(50, 'fakeTotalCount', mockData.Hosts.pageInfo)}
               loading={false}
               loadPage={loadPage}
               showMorePagesIndicator={getOr(
@@ -71,7 +71,7 @@ describe('Hosts Table', () => {
               loading={false}
               data={mockData.Hosts.edges}
               totalCount={mockData.Hosts.totalCount}
-              fakeTotalCount={getOr(50, 'fakeTotalCount', mockData.Hosts.pageInfo)!}
+              fakeTotalCount={getOr(50, 'fakeTotalCount', mockData.Hosts.pageInfo)}
               showMorePagesIndicator={getOr(
                 false,
                 'showMorePagesIndicator',
@@ -94,7 +94,7 @@ describe('Hosts Table', () => {
                 loading={false}
                 data={mockData.Hosts.edges}
                 totalCount={mockData.Hosts.totalCount}
-                fakeTotalCount={getOr(50, 'fakeTotalCount', mockData.Hosts.pageInfo)!}
+                fakeTotalCount={getOr(50, 'fakeTotalCount', mockData.Hosts.pageInfo)}
                 showMorePagesIndicator={getOr(
                   false,
                   'showMorePagesIndicator',

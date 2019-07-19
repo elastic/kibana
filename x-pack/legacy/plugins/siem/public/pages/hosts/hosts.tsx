@@ -246,7 +246,7 @@ const HostsComponent = pure<HostsComponentProps>(({ filterQuery, setAbsoluteRang
                         loadPage,
                       }) => (
                         <EventsTableManage
-                          data={events!}
+                          data={events}
                           fakeTotalCount={getOr(50, 'fakeTotalCount', pageInfo)}
                           id={id}
                           inspect={inspect}

@@ -33,7 +33,7 @@ describe('Load More Events Table Component', () => {
         <ReduxStoreProvider store={store}>
           <EventsTable
             data={mockData.Events.edges.map(i => i.node)}
-            fakeTotalCount={getOr(50, 'fakeTotalCount', mockData.Events.pageInfo)!}
+            fakeTotalCount={getOr(50, 'fakeTotalCount', mockData.Events.pageInfo)}
             id="events"
             loading={false}
             loadPage={loadPage}

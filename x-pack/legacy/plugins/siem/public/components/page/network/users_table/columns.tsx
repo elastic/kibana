@@ -11,7 +11,7 @@ import { Columns } from '../../../load_more_table';
 import * as i18n from './translations';
 import { getRowItemDraggables, getRowItemDraggable } from '../../../tables/helpers';
 
-export declare type UsersColumns = [
+export type UsersColumns = [
   Columns<UsersItem['name']>,
   Columns<UsersItem['id']>,
   Columns<UsersItem['groupName']>,

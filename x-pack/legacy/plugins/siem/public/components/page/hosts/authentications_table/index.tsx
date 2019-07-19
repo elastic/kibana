@@ -56,7 +56,7 @@ interface AuthenticationTableDispatchProps {
   }>;
 }
 
-export declare type AuthTableColumns = [
+export type AuthTableColumns = [
   Columns<AuthenticationsEdges>,
   Columns<AuthenticationsEdges>,
   Columns<AuthenticationsEdges>,

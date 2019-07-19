@@ -33,7 +33,7 @@ describe('NetworkTopNFlow Table Component', () => {
         <ReduxStoreProvider store={store}>
           <NetworkDnsTable
             data={mockData.NetworkDns.edges}
-            fakeTotalCount={getOr(50, 'fakeTotalCount', mockData.NetworkDns.pageInfo)!}
+            fakeTotalCount={getOr(50, 'fakeTotalCount', mockData.NetworkDns.pageInfo)}
             id="dns"
             loading={false}
             loadPage={loadPage}
@@ -59,7 +59,7 @@ describe('NetworkTopNFlow Table Component', () => {
           <TestProviders store={store}>
             <NetworkDnsTable
               data={mockData.NetworkDns.edges}
-              fakeTotalCount={getOr(50, 'fakeTotalCount', mockData.NetworkDns.pageInfo)!}
+              fakeTotalCount={getOr(50, 'fakeTotalCount', mockData.NetworkDns.pageInfo)}
               id="dns"
               loading={false}
               loadPage={loadPage}

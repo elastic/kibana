@@ -32,7 +32,7 @@ import * as i18n from './translations';
 import { getRowItemDraggables } from '../../../tables/helpers';
 import { PreferenceFormattedBytes } from '../../../formatted_bytes';
 
-export declare type NetworkTopNFlowColumns = [
+export type NetworkTopNFlowColumns = [
   Columns<NetworkTopNFlowEdges>,
   Columns<NetworkTopNFlowEdges>,
   Columns<TopNFlowNetworkEcsField['direction']>,

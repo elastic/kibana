@@ -47,7 +47,7 @@ interface UncommonProcessTableDispatchProps {
   }>;
 }
 
-export declare type UncommonProcessTableColumns = [
+export type UncommonProcessTableColumns = [
   Columns<UncommonProcessesEdges>,
   Columns<UncommonProcessesEdges>,
   Columns<UncommonProcessesEdges>,

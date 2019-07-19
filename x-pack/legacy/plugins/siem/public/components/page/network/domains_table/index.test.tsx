@@ -40,7 +40,7 @@ describe('Domains Table Component', () => {
         <ReduxStoreProvider store={store}>
           <DomainsTable
             data={mockDomainsData.edges}
-            fakeTotalCount={getOr(50, 'fakeTotalCount', mockDomainsData.pageInfo)!}
+            fakeTotalCount={getOr(50, 'fakeTotalCount', mockDomainsData.pageInfo)}
             flowTarget={FlowTarget.source}
             id="domains"
             indexPattern={mockIndexPattern}
@@ -69,7 +69,7 @@ describe('Domains Table Component', () => {
           <TestProviders store={store}>
             <DomainsTable
               data={mockDomainsData.edges}
-              fakeTotalCount={getOr(50, 'fakeTotalCount', mockDomainsData.pageInfo)!}
+              fakeTotalCount={getOr(50, 'fakeTotalCount', mockDomainsData.pageInfo)}
               flowTarget={FlowTarget.source}
               id="domains"
               indexPattern={mockIndexPattern}

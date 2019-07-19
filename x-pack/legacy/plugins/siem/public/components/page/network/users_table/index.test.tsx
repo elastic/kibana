@@ -35,7 +35,7 @@ describe('Users Table Component', () => {
           <UsersTable
             data={mockUsersData.edges}
             flowTarget={FlowTarget.source}
-            fakeTotalCount={getOr(50, 'fakeTotalCount', mockUsersData.pageInfo)!}
+            fakeTotalCount={getOr(50, 'fakeTotalCount', mockUsersData.pageInfo)}
             id="user"
             loading={false}
             loadPage={loadPage}
@@ -58,7 +58,7 @@ describe('Users Table Component', () => {
             <UsersTable
               data={mockUsersData.edges}
               flowTarget={FlowTarget.source}
-              fakeTotalCount={getOr(50, 'fakeTotalCount', mockUsersData.pageInfo)!}
+              fakeTotalCount={getOr(50, 'fakeTotalCount', mockUsersData.pageInfo)}
               id="user"
               loading={false}
               loadPage={loadPage}

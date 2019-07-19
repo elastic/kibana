@@ -25,7 +25,7 @@ describe('Uncommon Process Table Component', () => {
         <TestProviders>
           <UncommonProcessTable
             data={mockData.UncommonProcess.edges}
-            fakeTotalCount={getOr(50, 'fakeTotalCount', mockData.UncommonProcess.pageInfo)!}
+            fakeTotalCount={getOr(50, 'fakeTotalCount', mockData.UncommonProcess.pageInfo)}
             id="uncommonProcess"
             loading={false}
             loadPage={loadPage}
@@ -48,7 +48,7 @@ describe('Uncommon Process Table Component', () => {
         <TestProviders>
           <UncommonProcessTable
             data={mockData.UncommonProcess.edges}
-            fakeTotalCount={getOr(50, 'fakeTotalCount', mockData.UncommonProcess.pageInfo)!}
+            fakeTotalCount={getOr(50, 'fakeTotalCount', mockData.UncommonProcess.pageInfo)}
             id="uncommonProcess"
             loading={false}
             loadPage={loadPage}
@@ -77,7 +77,7 @@ describe('Uncommon Process Table Component', () => {
         <TestProviders>
           <UncommonProcessTable
             data={mockData.UncommonProcess.edges}
-            fakeTotalCount={getOr(50, 'fakeTotalCount', mockData.UncommonProcess.pageInfo)!}
+            fakeTotalCount={getOr(50, 'fakeTotalCount', mockData.UncommonProcess.pageInfo)}
             id="uncommonProcess"
             loading={false}
             loadPage={loadPage}
@@ -107,7 +107,7 @@ describe('Uncommon Process Table Component', () => {
         <TestProviders>
           <UncommonProcessTable
             data={mockData.UncommonProcess.edges}
-            fakeTotalCount={getOr(50, 'fakeTotalCount', mockData.UncommonProcess.pageInfo)!}
+            fakeTotalCount={getOr(50, 'fakeTotalCount', mockData.UncommonProcess.pageInfo)}
             id="uncommonProcess"
             loading={false}
             loadPage={loadPage}
@@ -137,7 +137,7 @@ describe('Uncommon Process Table Component', () => {
         <TestProviders>
           <UncommonProcessTable
             data={mockData.UncommonProcess.edges}
-            fakeTotalCount={getOr(50, 'fakeTotalCount', mockData.UncommonProcess.pageInfo)!}
+            fakeTotalCount={getOr(50, 'fakeTotalCount', mockData.UncommonProcess.pageInfo)}
             id="uncommonProcess"
             loading={false}
             loadPage={loadPage}
@@ -167,7 +167,7 @@ describe('Uncommon Process Table Component', () => {
         <TestProviders>
           <UncommonProcessTable
             data={mockData.UncommonProcess.edges}
-            fakeTotalCount={getOr(50, 'fakeTotalCount', mockData.UncommonProcess.pageInfo)!}
+            fakeTotalCount={getOr(50, 'fakeTotalCount', mockData.UncommonProcess.pageInfo)}
             id="uncommonProcess"
             loading={false}
             loadPage={loadPage}
@@ -197,7 +197,7 @@ describe('Uncommon Process Table Component', () => {
         <TestProviders>
           <UncommonProcessTable
             data={mockData.UncommonProcess.edges}
-            fakeTotalCount={getOr(50, 'fakeTotalCount', mockData.UncommonProcess.pageInfo)!}
+            fakeTotalCount={getOr(50, 'fakeTotalCount', mockData.UncommonProcess.pageInfo)}
             id="uncommonProcess"
             loading={false}
             loadPage={loadPage}
@@ -226,7 +226,7 @@ describe('Uncommon Process Table Component', () => {
         <TestProviders>
           <UncommonProcessTable
             data={mockData.UncommonProcess.edges}
-            fakeTotalCount={getOr(50, 'fakeTotalCount', mockData.UncommonProcess.pageInfo)!}
+            fakeTotalCount={getOr(50, 'fakeTotalCount', mockData.UncommonProcess.pageInfo)}
             id="uncommonProcess"
             loading={false}
             loadPage={loadPage}
@@ -255,7 +255,7 @@ describe('Uncommon Process Table Component', () => {
         <TestProviders>
           <UncommonProcessTable
             data={mockData.UncommonProcess.edges}
-            fakeTotalCount={getOr(50, 'fakeTotalCount', mockData.UncommonProcess.pageInfo)!}
+            fakeTotalCount={getOr(50, 'fakeTotalCount', mockData.UncommonProcess.pageInfo)}
             id="uncommonProcess"
             loading={false}
             loadPage={loadPage}

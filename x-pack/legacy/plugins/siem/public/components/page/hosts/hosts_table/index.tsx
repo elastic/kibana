@@ -69,7 +69,7 @@ interface HostsTableDispatchProps {
   }>;
 }
 
-export declare type HostsTableColumns = [
+export type HostsTableColumns = [
   Columns<HostFields['name']>,
   Columns<HostItem['lastSeen']>,
   Columns<OsFields['name']>,

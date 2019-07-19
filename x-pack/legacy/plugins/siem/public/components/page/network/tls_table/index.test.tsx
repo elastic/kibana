@@ -33,7 +33,7 @@ describe('Tls Table Component', () => {
         <ReduxStoreProvider store={store}>
           <TlsTable
             data={mockTlsData.edges}
-            fakeTotalCount={getOr(50, 'fakeTotalCount', mockTlsData.pageInfo)!}
+            fakeTotalCount={getOr(50, 'fakeTotalCount', mockTlsData.pageInfo)}
             id="tls"
             loading={false}
             loadPage={loadPage}
@@ -55,7 +55,7 @@ describe('Tls Table Component', () => {
           <TestProviders store={store}>
             <TlsTable
               data={mockTlsData.edges}
-              fakeTotalCount={getOr(50, 'fakeTotalCount', mockTlsData.pageInfo)!}
+              fakeTotalCount={getOr(50, 'fakeTotalCount', mockTlsData.pageInfo)}
               id="tls"
               loading={false}
               loadPage={loadPage}

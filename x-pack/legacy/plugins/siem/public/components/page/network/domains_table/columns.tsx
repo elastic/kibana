@@ -34,7 +34,7 @@ import { AddToKql } from '../../add_to_kql';
 
 import * as i18n from './translations';
 
-export declare type DomainsColumns = [
+export type DomainsColumns = [
   Columns<DomainsItem['domainName']>,
   Columns<DomainsNetworkField['direction']>,
   Columns<DomainsNetworkField['bytes']>,

@@ -52,7 +52,7 @@ interface EventsTableDispatchProps {
   }>;
 }
 
-export declare type EventsTableColumns = [
+export type EventsTableColumns = [
   Columns<Ecs>,
   Columns<Ecs>,
   Columns<Ecs>,

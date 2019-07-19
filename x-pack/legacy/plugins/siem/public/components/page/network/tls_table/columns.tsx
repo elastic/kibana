@@ -15,7 +15,7 @@ import { PreferenceFormattedDate } from '../../../formatted_date';
 
 import * as i18n from './translations';
 
-export declare type TlsColumns = [
+export type TlsColumns = [
   Columns<TlsNode>,
   Columns<TlsNode>,
   Columns<TlsNode['_id']>,
