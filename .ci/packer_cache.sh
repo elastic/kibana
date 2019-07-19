@@ -14,17 +14,6 @@ node scripts/es snapshot --license=oss --download-only;
 # download reporting browsers
 (cd "x-pack" && yarn gulp prepare);
 
-# cache the chromedriver archive
-chromedriverDistVersion="$(node -e "console.log(require('chromedriver').version)")"
-chromedriverPkgVersion="$(node -e "console.log(require('./package.json').devDependencies.chromedriver)")"
-if [ -z "$chromedriverDistVersion" ] || [ -z "$chromedriverPkgVersion" ]; then
-  echo "UNABLE TO DETERMINE CHROMEDRIVER VERSIONS"
-  exit 1
-fi
-mkdir -p .chromedriver
-curl "https://chromedriver.storage.googleapis.com/$chromedriverDistVersion/chromedriver_linux64.zip" > .chromedriver/chromedriver.zip
-echo "$chromedriverPkgVersion" > .chromedriver/pkgVersion
-
 # archive cacheable directories
 mkdir -p "$HOME/.kibana/bootstrap_cache"
 tar -cf "$HOME/.kibana/bootstrap_cache/$branch.tar" \
@@ -34,8 +23,7 @@ tar -cf "$HOME/.kibana/bootstrap_cache/$branch.tar" \
   x-pack/legacy/plugins/*/node_modules \
   x-pack/legacy/plugins/reporting/.chromium \
   test/plugin_functional/plugins/*/node_modules \
-  .es \
-  .chromedriver;
+  .es;
 
 echo "created $HOME/.kibana/bootstrap_cache/$branch.tar"
 
