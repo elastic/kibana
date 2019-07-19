@@ -28,7 +28,7 @@ export default function ({ getPageObjects, getService }) {
 
     function makeRequestTestsForGeoPrecision(LAYER_ID) {
 
-      describe('geoprecision - requests', async () => {
+      describe('geoprecision - requests', () => {
         let beforeTimestamp;
         beforeEach(async () => {
           await PageObjects.maps.setView(DATA_CENTER_LAT, DATA_CENTER_LON, 1);
@@ -48,7 +48,7 @@ export default function ({ getPageObjects, getService }) {
         });
       });
 
-      describe('geoprecision - data', async ()=> {
+      describe('geoprecision - data', ()=> {
 
         beforeEach(async () => {
           await PageObjects.maps.setView(DATA_CENTER_LAT, DATA_CENTER_LON, 1);

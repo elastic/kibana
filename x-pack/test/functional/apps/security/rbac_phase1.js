@@ -14,7 +14,7 @@ export default function ({ getService, getPageObjects }) {
   const browser = getService('browser');
   const kibanaServer = getService('kibanaServer');
 
-  describe('rbac ', async function () {
+  describe('rbac ', function () {
     before(async () => {
       await browser.setWindowSize(1600, 1000);
       log.debug('users');

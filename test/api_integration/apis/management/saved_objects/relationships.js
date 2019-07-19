@@ -44,7 +44,7 @@ export default function ({ getService }) {
       indexPatterns: GENERIC_RESPONSE_SCHEMA,
     });
 
-    describe('searches', async () => {
+    describe('searches', () => {
       it('should validate search response schema', async () => {
         await supertest
           .get(`/api/kibana/management/saved_objects/relationships/search/960372e0-3224-11e8-a572-ffca06da1357`)
@@ -83,7 +83,7 @@ export default function ({ getService }) {
       });
     });
 
-    describe('dashboards', async () => {
+    describe('dashboards', () => {
       const DASHBOARD_RESPONSE_SCHEMA = Joi.object().keys({
         visualizations: GENERIC_RESPONSE_SCHEMA,
       });
@@ -126,7 +126,7 @@ export default function ({ getService }) {
       });
     });
 
-    describe('visualizations', async () => {
+    describe('visualizations', () => {
       const VISUALIZATIONS_RESPONSE_SCHEMA = Joi.object().keys({
         dashboards: GENERIC_RESPONSE_SCHEMA,
       });
@@ -164,7 +164,7 @@ export default function ({ getService }) {
       });
     });
 
-    describe('index patterns', async () => {
+    describe('index patterns', () => {
       const INDEX_PATTERN_RESPONSE_SCHEMA = Joi.object().keys({
         searches: GENERIC_RESPONSE_SCHEMA,
         visualizations: GENERIC_RESPONSE_SCHEMA,
