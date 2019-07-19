@@ -108,6 +108,7 @@ export const actionType: ActionType = {
 // action executor
 
 async function executor(execOptions: ActionTypeExecutorOptions): Promise<ActionTypeExecutorResult> {
+  const id = execOptions.id;
   const config = execOptions.config as ActionTypeConfigType;
   const params = execOptions.params as ActionParamsType;
   const services = execOptions.services;
@@ -146,7 +147,7 @@ async function executor(execOptions: ActionTypeExecutorOptions): Promise<ActionT
   } catch (err) {
     return {
       status: 'error',
-      message: `error sending email: ${err.message}`,
+      message: `error in action ${id} sending email: ${err.message}`,
     };
   }
 
