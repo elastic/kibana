@@ -9,20 +9,59 @@ import PropTypes from 'prop-types';
 
 import { EuiSuperSelect } from '@elastic/eui';
 import { COLOR_GRADIENTS } from '../../../color_utils';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { EuiColorStops } from './color_stops';
 
-export function ColorRampSelect({ color, onChange }) {
-  const onColorRampChange = (selectedColorRampString) => {
+const CUSTOM_COLOR_RAMP = 'CUSTOM_COLOR_RAMP';
+
+export function ColorRampSelect({ color, customColorRamp, onChange, useCustomColorRamp }) {
+  const onColorRampChange = (selectedValue) => {
+    const useCustomColorRamp = selectedValue === CUSTOM_COLOR_RAMP;
     onChange({
-      color: selectedColorRampString
+      color: useCustomColorRamp ? null : selectedValue,
+      useCustomColorRamp
     });
   };
+
+  const onCustomColorRampChange = ({ colorStops, isInvalid }) => {
+    onChange({
+      customColorRamp: colorStops
+    });
+  };
+
+  let colorStopsInput;
+  if (useCustomColorRamp) {
+    colorStopsInput = (
+      <EuiColorStops
+        colorStops={customColorRamp}
+        onChange={onCustomColorRampChange}
+      />
+    );
+  }
+
+  const colorRampOptions = [
+    {
+      value: CUSTOM_COLOR_RAMP,
+      inputDisplay: (
+        <FormattedMessage
+          id="xpack.maps.style.customColorRampLabel"
+          defaultMessage="Custom color ramp"
+        />
+      )
+    },
+    ...COLOR_GRADIENTS
+  ];
+
   return (
-    <EuiSuperSelect
-      options={COLOR_GRADIENTS}
-      onChange={onColorRampChange}
-      valueOfSelected={color}
-      hasDividers={true}
-    />
+    <>
+      <EuiSuperSelect
+        options={colorRampOptions}
+        onChange={onColorRampChange}
+        valueOfSelected={useCustomColorRamp ? CUSTOM_COLOR_RAMP : color}
+        hasDividers={true}
+      />
+      {colorStopsInput}
+    </>
   );
 }
 

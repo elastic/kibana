@@ -334,6 +334,9 @@ export class VectorStyle extends AbstractStyle {
         } else if (styleName === 'iconOrientation') {
           supportsFeatureState = false;
           isScaled = false;
+        } else if ((styleName === 'fillColor' || styleName === 'lineColor')
+          && options.useCustomColorRamp) {
+          isScaled = false;
         }
 
         return {
@@ -417,8 +420,7 @@ export class VectorStyle extends AbstractStyle {
     return hasGeoJsonProperties;
   }
 
-  _getMBDataDrivenColor({ fieldName, color }) {
-    const colorStops = getColorRampStops(color);
+  _getMBDataDrivenColor({ fieldName, colorStops }) {
     const targetName = VectorStyle.getComputedFieldName(fieldName);
     return [
       'interpolate',
@@ -448,14 +450,24 @@ export class VectorStyle extends AbstractStyle {
 
     const isDynamicConfigComplete = _.has(styleDescriptor, 'options.field.name')
       && _.has(styleDescriptor, 'options.color');
-    if (isDynamicConfigComplete) {
-      return this._getMBDataDrivenColor({
-        fieldName: styleDescriptor.options.field.name,
-        color: styleDescriptor.options.color,
-      });
+    if (!isDynamicConfigComplete) {
+      return null;
     }
 
-    return null;
+    if (styleDescriptor.options.useCustomColorRamp &&
+      !styleDescriptor.options.customColorRamp ||
+      styleDescriptor.options.customColorRamp.length < 2) {
+      return null;
+    }
+
+    return this._getMBDataDrivenColor({
+      fieldName: styleDescriptor.options.field.name,
+      colorStops: styleDescriptor.options.useCustomColorRamp
+        ? styleDescriptor.options.customColorRamp.reduce((accumulatedStops, nextStop) => {
+          return [...accumulatedStops, nextStop.stop, nextStop.color];
+        }, [])
+        : getColorRampStops(styleDescriptor.options.color)
+    });
   }
 
   _isSizeDynamicConfigComplete(styleDescriptor) {

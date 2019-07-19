@@ -90,6 +90,16 @@ function extractColorFromStyleProperty(colorStyleProperty, defaultColor) {
   }
 
   // return middle of gradient for dynamic style property
+
+  if (colorStyleProperty.options.useCustomColorRamp) {
+    if (!colorStyleProperty.options.customColorRamp ||
+      colorStyleProperty.options.customColorRamp.length < 2) {
+      return defaultColor;
+    }
+    const middleIndex = Math.ceil(colorStyleProperty.options.customColorRamp.length / 2);
+    return colorStyleProperty.options.customColorRamp[middleIndex].color;
+  }
+
   return getColorRampCenterColor(colorStyleProperty.options.color);
 }
 
