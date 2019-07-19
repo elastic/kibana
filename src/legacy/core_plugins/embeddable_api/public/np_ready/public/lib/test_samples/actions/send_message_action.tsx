@@ -17,19 +17,19 @@
  * under the License.
  */
 import React from 'react';
-// TODO: Remove this.
-import { npStart } from 'ui/new_platform';
 import { EuiFlyoutBody } from '@elastic/eui';
 import { Action, ActionContext, IncompatibleActionError } from '../..';
 import { Embeddable, EmbeddableInput } from '../../embeddables';
 import { GetMessageModal } from './get_message_modal';
 import { FullNameEmbeddableOutput, hasFullNameOutput } from './say_hello_action';
+import { CoreStart } from '../../../../../../../../../core/public';
 
 export const SEND_MESSAGE_ACTION = 'SEND_MESSAGE_ACTION';
 
 export class SendMessageAction extends Action {
   public readonly type = SEND_MESSAGE_ACTION;
-  constructor() {
+
+  constructor(private readonly overlays: CoreStart['overlays']) {
     super(SEND_MESSAGE_ACTION);
   }
 
@@ -50,7 +50,7 @@ export class SendMessageAction extends Action {
     const greeting = `Hello, ${context.embeddable.getOutput().fullName}`;
 
     const content = message ? `${greeting}. ${message}` : greeting;
-    npStart.core.overlays.openFlyout(<EuiFlyoutBody>{content}</EuiFlyoutBody>);
+    this.overlays.openFlyout(<EuiFlyoutBody>{content}</EuiFlyoutBody>);
   }
 
   async execute(
@@ -63,7 +63,7 @@ export class SendMessageAction extends Action {
       throw new IncompatibleActionError();
     }
 
-    const modal = npStart.core.overlays.openModal(
+    const modal = this.overlays.openModal(
       <GetMessageModal
         onCancel={() => modal.close()}
         onDone={message => {
