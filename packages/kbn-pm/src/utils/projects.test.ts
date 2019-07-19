@@ -224,7 +224,7 @@ describe('#topologicallyBatchProjects', () => {
     expect(expectedBatches).toMatchSnapshot();
   });
 
-  describe('batchByWorkspace = true', async () => {
+  describe('batchByWorkspace = true', () => {
     test('batches projects topologically based on their project dependencies and workspaces', async () => {
       const batches = topologicallyBatchProjects(projects, graph, { batchByWorkspace: true });
 
