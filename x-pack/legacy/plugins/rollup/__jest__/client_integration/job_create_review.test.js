@@ -25,7 +25,7 @@ jest.mock('../../../../../../src/legacy/core_plugins/ui_metric/public', () => ({
 
 const { setup } = pageHelpers.jobCreate;
 
-describe('Create Rollup Job, step 5: Metrics', () => {
+describe('Create Rollup Job, step 6: Review', () => {
   let server;
   let httpRequestsMockHelpers;
   let find;
@@ -47,7 +47,6 @@ describe('Create Rollup Job, step 5: Metrics', () => {
   beforeEach(() => {
     // Set "default" mock responses by not providing any arguments
     httpRequestsMockHelpers.setIndexPatternValidityResponse();
-
     ({
       find,
       exists,
@@ -138,16 +137,21 @@ describe('Create Rollup Job, step 5: Metrics', () => {
   });
 
   describe('save()', () => {
-    it('should call the "create" Api server endpoint', async () => {
-      await goToStep(6);
+    const jobCreateApiPath = '/api/rollup/create';
+    const jobStartApiPath = '/api/rollup/start';
 
-      const jobCreateApiPath = '/api/rollup/create';
-      expect(server.requests.find(r => r.url === jobCreateApiPath)).toBe(undefined); // make sure it hasn't been called
+    describe('without starting job after creation', () => {
+      it('should call the "create" Api server endpoint', async () => {
+        await goToStep(6);
+        expect(server.requests.find(r => r.url === jobCreateApiPath)).toBe(undefined); // make sure it hasn't been called
+        expect(server.requests.find(r => r.url === jobStartApiPath)).toBe(undefined); // make sure it hasn't been called
 
-      actions.clickSave();
-      await nextTick();
+        actions.clickSave();
+        await nextTick();
 
-      expect(server.requests.find(r => r.url === jobCreateApiPath)).not.toBe(undefined); // It has been called!
+        expect(server.requests.find(r => r.url === jobCreateApiPath)).not.toBe(undefined); // It has been called!
+        expect(server.requests.find(r => r.url === jobStartApiPath)).toBe(undefined); // It has still not been called!
+      });
     });
   });
 });

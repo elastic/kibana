@@ -96,7 +96,7 @@ export class StepReviewUi extends Component {
     );
   }
 
-  onToggleStartAfterCreate = () => {
+  onClickStartAfterCreate = () => {
     const {
       onFieldsChange,
       fields: { startJobAfterCreation },
@@ -133,7 +133,8 @@ export class StepReviewUi extends Component {
         <EuiSpacer size="m" />
 
         <EuiCheckbox
-          id="stepReviewToggleJobCreationAfterStart"
+          id="rollupJobToggleJobStartAfterCreation"
+          data-test-subj="rollupJobToggleJobStartAfterCreation"
           checked={startJobAfterCreation}
           label={
             <span>
@@ -143,7 +144,7 @@ export class StepReviewUi extends Component {
               />
             </span>
           }
-          onChange={() => this.onToggleStartAfterCreate()}
+          onChange={() => this.onClickStartAfterCreate()}
         />
       </Fragment>
     );
