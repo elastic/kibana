@@ -6,6 +6,7 @@
 
 export enum RepoFileStatus {
   LANG_SERVER_IS_INITIALIZING = 'Language server is initializing.',
+  LANG_SERVER_INITIALIZED = 'Language server initialized.',
   INDEXING = 'Indexing in progress',
   FILE_NOT_SUPPORTED = 'Current file is not of a supported language.',
   REVISION_NOT_INDEXED = 'Current revision is not indexed.',
@@ -60,8 +61,9 @@ export const REPO_FILE_STATUS_SEVERITY = {
 export interface StatusReport {
   repoStatus?: RepoFileStatus.INDEXING | RepoFileStatus.REVISION_NOT_INDEXED;
   fileStatus?: RepoFileStatus.FILE_NOT_SUPPORTED | RepoFileStatus.FILE_IS_TOO_BIG;
-  langServerType: LangServerType;
+  langServerType?: LangServerType;
   langServerStatus?:
     | RepoFileStatus.LANG_SERVER_IS_INITIALIZING
-    | RepoFileStatus.LANG_SERVER_NOT_INSTALLED;
+    | RepoFileStatus.LANG_SERVER_NOT_INSTALLED
+    | RepoFileStatus.LANG_SERVER_INITIALIZED;
 }
