@@ -134,25 +134,8 @@ else
   echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
 fi
 
-###
-### use the geckodriver cache if it exists
-###
-if [ -d "$dir/.geckodriver" ]; then
-  branchPkgVersion="$(node -e "console.log(require('./package.json').devDependencies.geckodriver)")"
-  cachedPkgVersion="$(cat "$dir/.geckodriver/pkgVersion")"
-  if [ "$cachedPkgVersion" == "$branchPkgVersion" ]; then
-    export GECKODRIVER_FILEPATH="$dir/.geckodriver/geckodriver.tar.gz"
-    echo " -- Using geckodriver cache at '$GECKODRIVER_FILEPATH'"
-  else
-    echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-    echo "  SKIPPING GECKODRIVER CACHE: cached($cachedPkgVersion) branch($branchPkgVersion)"
-    echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-  fi
-else
-  echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-  echo "  GECKODRIVER CACHE NOT FOUND"
-  echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-fi
+# use a proxy to fetch geckodriver asset
+export GECKODRIVER_CDNURL="https://us-central1-elastic-kibana-184716.cloudfunctions.net/geckodriver_cache"
 
 ###
 ### install dependencies
