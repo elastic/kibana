@@ -15,14 +15,24 @@ import { MultiMetricView } from './components/multi_metric_view';
 import { PopulationView } from './components/population_view';
 
 export const PickFieldsStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) => {
-  const { jobCreator, jobCreatorUpdated } = useContext(JobCreatorContext);
+  const { jobCreator, jobCreatorUpdated, jobValidator, jobValidatorUpdated } = useContext(
+    JobCreatorContext
+  );
   const [nextActive, setNextActive] = useState(false);
   const [jobType, setJobType] = useState(jobCreator.type);
 
-  // this shouldn't really change, but just in case we need to...
   useEffect(() => {
+    // this shouldn't really change, but just in case we need to...
     setJobType(jobCreator.type);
   }, [jobCreatorUpdated]);
+
+  useEffect(() => {
+    const active =
+      jobCreator.detectors.length > 0 &&
+      jobValidator.bucketSpan.valid &&
+      jobValidator.duplicateDetectors.valid;
+    setNextActive(active);
+  }, [jobValidatorUpdated]);
 
   return (
     <Fragment>
