@@ -171,7 +171,7 @@ const FieldLogColumnConfigurationPanel: React.FunctionComponent<{
   <EuiPanel data-test-subj={`logColumnPanel fieldLogColumnPanel fieldLogColumnPanel:${field}`}>
     <EuiFlexGroup>
       <EuiFlexItem grow={false}>
-        <div {...dragHandleProps}>
+        <div data-test-subj="moveLogColumnHandle" {...dragHandleProps}>
           <EuiIcon type="grab" />
         </div>
       </EuiFlexItem>
@@ -202,7 +202,7 @@ const ExplainedLogColumnConfigurationPanel: React.FunctionComponent<{
   >
     <EuiFlexGroup>
       <EuiFlexItem grow={false}>
-        <div {...dragHandleProps}>
+        <div data-test-subj="moveLogColumnHandle" {...dragHandleProps}>
           <EuiIcon type="grab" />
         </div>
       </EuiFlexItem>
