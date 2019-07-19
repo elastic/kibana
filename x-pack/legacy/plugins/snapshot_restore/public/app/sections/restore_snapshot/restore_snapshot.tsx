@@ -11,7 +11,7 @@ import { SnapshotDetails, RestoreSettings } from '../../../../common/types';
 import { BASE_PATH } from '../../constants';
 import { SectionError, SectionLoading, RestoreSnapshotForm } from '../../components';
 import { useAppDependencies } from '../../index';
-import { breadcrumbService } from '../../services/navigation';
+import { breadcrumbService, docTitleService } from '../../services/navigation';
 import { useLoadSnapshot, executeRestore } from '../../services/http';
 
 interface MatchParams {
@@ -30,9 +30,10 @@ export const RestoreSnapshot: React.FunctionComponent<RouteComponentProps<MatchP
   } = useAppDependencies();
   const { FormattedMessage } = i18n;
 
-  // Set breadcrumb
+  // Set breadcrumb and page title
   useEffect(() => {
     breadcrumbService.setBreadcrumbs('restoreSnapshot');
+    docTitleService.setTitle('restoreSnapshot');
   }, []);
 
   // Snapshot details state with default empty snapshot

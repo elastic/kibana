@@ -6,6 +6,10 @@
 
 import { BASE_PATH } from '../../constants';
 
+export function linkToHome() {
+  return `#${BASE_PATH}`;
+}
+
 export function linkToRepositories() {
   return `#${BASE_PATH}/repositories`;
 }
@@ -46,6 +50,10 @@ export function linkToRestoreSnapshot(repositoryName: string, snapshotName: stri
   )}`;
 }
 
+export function linkToPolicies() {
+  return `#${BASE_PATH}/policies`;
+}
+
 export function linkToPolicy(policyName: string) {
   return `#${BASE_PATH}/policies/${encodeURIComponent(policyName)}`;
 }
@@ -56,4 +64,8 @@ export function linkToEditPolicy(policyName: string) {
 
 export function linkToAddPolicy() {
   return `#${BASE_PATH}/add_policy`;
+}
+
+export function linkToRestoreStatus() {
+  return `#${BASE_PATH}/restore_status`;
 }

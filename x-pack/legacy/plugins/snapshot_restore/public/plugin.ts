@@ -11,7 +11,7 @@ import { AppCore, AppPlugins } from './app/types';
 import template from './index.html';
 import { Core, Plugins } from './shim';
 
-import { breadcrumbService } from './app/services/navigation';
+import { breadcrumbService, docTitleService } from './app/services/navigation';
 import { documentationLinksService } from './app/services/documentation';
 import { httpService } from './app/services/http';
 import { textService } from './app/services/text';
@@ -21,7 +21,7 @@ const REACT_ROOT_ID = 'snapshotRestoreReactRoot';
 
 export class Plugin {
   public start(core: Core, plugins: Plugins): void {
-    const { i18n, routing, http, chrome, notification, documentation } = core;
+    const { i18n, routing, http, chrome, notification, documentation, docTitle } = core;
     const { management, uiMetric } = plugins;
 
     // Register management section
@@ -40,6 +40,7 @@ export class Plugin {
     breadcrumbService.init(chrome, management.constants.BREADCRUMB);
     documentationLinksService.init(documentation.esDocBasePath, documentation.esPluginDocBasePath);
     uiMetricService.init(uiMetric.createUiStatsReporter);
+    docTitleService.init(docTitle.change);
 
     const unmountReactApp = (): void => {
       const elem = document.getElementById(REACT_ROOT_ID);

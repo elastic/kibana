@@ -13,7 +13,7 @@ import { Repository, EmptyRepository } from '../../../../common/types';
 import { RepositoryForm, SectionError } from '../../components';
 import { BASE_PATH, Section } from '../../constants';
 import { useAppDependencies } from '../../index';
-import { breadcrumbService } from '../../services/navigation';
+import { breadcrumbService, docTitleService } from '../../services/navigation';
 import { addRepository } from '../../services/http';
 
 export const RepositoryAdd: React.FunctionComponent<RouteComponentProps> = ({
@@ -29,9 +29,10 @@ export const RepositoryAdd: React.FunctionComponent<RouteComponentProps> = ({
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [saveError, setSaveError] = useState<any>(null);
 
-  // Set breadcrumb
+  // Set breadcrumb and page title
   useEffect(() => {
     breadcrumbService.setBreadcrumbs('repositoryAdd');
+    docTitleService.setTitle('repositoryAdd');
   }, []);
 
   const onSave = async (newRepository: Repository | EmptyRepository) => {

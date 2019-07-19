@@ -12,7 +12,7 @@ import { SlmPolicyPayload } from '../../../../common/types';
 import { PolicyForm, SectionError } from '../../components';
 import { useAppDependencies } from '../../index';
 import { BASE_PATH } from '../../constants';
-import { breadcrumbService } from '../../services/navigation';
+import { breadcrumbService, docTitleService } from '../../services/navigation';
 import { addPolicy } from '../../services/http';
 
 export const PolicyAdd: React.FunctionComponent<RouteComponentProps> = ({
@@ -27,9 +27,10 @@ export const PolicyAdd: React.FunctionComponent<RouteComponentProps> = ({
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [saveError, setSaveError] = useState<any>(null);
 
-  // Set breadcrumb
+  // Set breadcrumb and page title
   useEffect(() => {
     breadcrumbService.setBreadcrumbs('policyAdd');
+    docTitleService.setTitle('policyAdd');
   }, []);
 
   const onSave = async (newPolicy: SlmPolicyPayload) => {
