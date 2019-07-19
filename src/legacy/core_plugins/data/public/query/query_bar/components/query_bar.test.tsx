@@ -119,7 +119,7 @@ describe('QueryBar', () => {
     expect(component.find(TIMEPICKER_SELECTOR).length).toBe(1);
   });
 
-  it('Should disable timepicker when asked', () => {
+  it('Should not show timepicker when asked', () => {
     const component = shallowWithIntl(
       <QueryBar.WrappedComponent
         onSubmit={noop}

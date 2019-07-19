@@ -29,7 +29,6 @@ type Props = Partial<SearchBarProps> & {
   name: string;
   config?: TopNavMenuData[];
   showSearchBar?: boolean;
-  showSearchBarInline?: boolean;
 };
 
 /*
@@ -82,40 +81,20 @@ export function TopNavMenu(props: Props) {
   }
 
   function renderLayout() {
-    if (props.showSearchBarInline) {
-      return (
-        <div className="topNavMenu__wrapper">
-          <EuiFlexGroup
-            data-test-subj="top-nav"
-            justifyContent="spaceBetween"
-            gutterSize="none"
-            wrap={true}
-            alignItems="center"
-            className="topNavMenu"
-          >
-            <EuiFlexGroup justifyContent="flexStart" gutterSize="none" responsive={false}>
-              {renderItems()}
-            </EuiFlexGroup>
-            <EuiFlexItem grow={false}>{renderSearchBar()}</EuiFlexItem>
-          </EuiFlexGroup>
-        </div>
-      );
-    } else {
-      return (
-        <span className="topNavMenu__wrapper">
-          <EuiFlexGroup
-            data-test-subj="top-nav"
-            justifyContent="flexStart"
-            gutterSize="none"
-            className="topNavMenu"
-            responsive={false}
-          >
-            {renderItems()}
-          </EuiFlexGroup>
-          {renderSearchBar()}
-        </span>
-      );
-    }
+    return (
+      <span className="kbnTopNavMenu__wrapper">
+        <EuiFlexGroup
+          data-test-subj="top-nav"
+          justifyContent="flexStart"
+          gutterSize="none"
+          className="kbnTopNavMenu"
+          responsive={false}
+        >
+          {renderItems()}
+        </EuiFlexGroup>
+        {renderSearchBar()}
+      </span>
+    );
   }
 
   return <I18nProvider>{renderLayout()}</I18nProvider>;
@@ -123,7 +102,6 @@ export function TopNavMenu(props: Props) {
 
 TopNavMenu.defaultProps = {
   showSearchBar: false,
-  showSearchBarInline: false,
   showQueryBar: true,
   showQueryInput: true,
   showDatePicker: true,

@@ -36,8 +36,18 @@ discover-app {
 }
 
 .dscResultCount {
+  display: flex;
+  justify-content: center;
   padding-top: $euiSizeXS;
   padding-left: $euiSizeM;
+
+  .dscResultHits {
+    padding-left: $euiSizeXS; 
+  }
+
+  > button {
+    padding-left: $euiSizeM; 
+  }
 }
 
 .dscTimechart__header {

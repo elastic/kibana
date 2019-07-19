@@ -74,13 +74,4 @@ describe('TopNavMenu', () => {
     expect(component.find(TOP_NAV_ITEM_SELECTOR).length).toBe(0);
     expect(component.find(`span > ${SEARCH_BAR_SELECTOR}`).length).toBe(1);
   });
-
-  it('Should render search bar inline', () => {
-    const component = shallowWithIntl(
-      <TopNavMenu name="test" showSearchBar={true} showSearchBarInline={true} />
-    );
-
-    expect(component.find(TOP_NAV_ITEM_SELECTOR).length).toBe(0);
-    expect(component.find(`EuiFlexItem > ${SEARCH_BAR_SELECTOR}`).length).toBe(1);
-  });
 });

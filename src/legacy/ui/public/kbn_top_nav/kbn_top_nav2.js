@@ -107,8 +107,6 @@ module.directive('kbnTopNavV2Helper', (reactDirective) => {
       'showQueryInput',
       'showDatePicker',
 
-      'showSearchBarInline',
-
       'appName',
       'screenTitle',
       'dateRangeFrom',

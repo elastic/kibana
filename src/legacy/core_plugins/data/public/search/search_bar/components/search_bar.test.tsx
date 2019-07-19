@@ -95,7 +95,7 @@ describe('SearchBar', () => {
     expect(component.find(QUERY_BAR).length).toBe(1);
   });
 
-  it('Should render empty when timepicker disabled and no options provided', () => {
+  it('Should render empty when timepicker is off and no options provided', () => {
     const component = mountWithIntl(
       <SearchBar.WrappedComponent
         appName={'test'}
