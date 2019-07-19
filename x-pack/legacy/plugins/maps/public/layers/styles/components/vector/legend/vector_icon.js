@@ -89,7 +89,7 @@ function extractColorFromStyleProperty(colorStyleProperty, defaultColor) {
     return colorStyleProperty.options.color;
   }
 
-  // Do not showing dynamic color unless configuration is complete
+  // Do not use dynamic color unless configuration is complete
   if (!colorStyleProperty.options.field || !colorStyleProperty.options.field.name) {
     return defaultColor;
   }
