@@ -13,37 +13,30 @@ import { XYConfigPanel } from './xy_config_panel';
 import { Visualization } from '../types';
 import { State, PersistableState } from './types';
 import { toExpression } from './to_expression';
+import { generateId } from '../id_generator';
 
 export const xyVisualization: Visualization<State, PersistableState> = {
   getSuggestions,
 
-  initialize(_, state) {
+  initialize(frame, state) {
     return (
       state || {
-        // seriesType: 'bar',
         title: 'Empty XY Chart',
         legend: { isVisible: true, position: Position.Right },
-        // x: {
-        //   accessor: generateId(),
-        //   position: Position.Bottom,
-        //   showGridlines: false,
-        //   title: 'X',
-        // },
-        // layers: [
-        //   {
-        //     layerId: 'first',
-        //     xAccessor: generateId(),
-        //     seriesType: 'bar_stacked',
-        //     accessors: [generateId()],
-        //     position: Position.Left,
-        //     showGridlines: false,
-        //     title: 'Y',
-        //     labels: [''],
-        //     // splitSeriesAccessors: [generateId()],
-        //     splitSeriesAccessors: [],
-        //   },
-        // ],
-        layers: [],
+        layers: [
+          {
+            layerId: frame.addNewLayer(),
+            accessors: [generateId()],
+            datasourceId: '',
+            labels: [],
+            position: Position.Top,
+            seriesType: 'bar',
+            showGridlines: false,
+            splitSeriesAccessors: [generateId()],
+            title: '',
+            xAccessor: generateId(),
+          },
+        ],
       }
     );
   },
