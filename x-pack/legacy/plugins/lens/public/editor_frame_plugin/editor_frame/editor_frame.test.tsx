@@ -30,6 +30,7 @@ function generateSuggestion(datasourceSuggestionId = 1, state = {}): DatasourceS
       datasourceSuggestionId: 1,
       isMultiRow: true,
     },
+    layerId: 'first',
   };
 }
 

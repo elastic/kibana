@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiForm, EuiFormRow, EuiRange } from '@elastic/eui';
 import { IndexPatternField, DateHistogramIndexPatternColumn } from '../indexpattern';
-import { DimensionLayer, DimensionPriority } from '../../types';
+import { DimensionPriority } from '../../types';
 import { OperationDefinition } from '../operations';
 import { updateColumnParam } from '../state_helpers';
 
@@ -46,17 +46,12 @@ export const dateHistogramOperation: OperationDefinition<DateHistogramIndexPatte
   buildColumn({
     operationId,
     suggestedPriority,
-    layerId,
-    columns,
     indexPatternId,
     field,
   }: {
     operationId: string;
     suggestedPriority: DimensionPriority | undefined;
-    // layer: DimensionLayer,
-    layerId: string;
     indexPatternId: string;
-    columns: {};
     field?: IndexPatternField;
   }): DateHistogramIndexPatternColumn {
     if (!field) {
@@ -78,7 +73,6 @@ export const dateHistogramOperation: OperationDefinition<DateHistogramIndexPatte
       suggestedPriority,
       sourceField: field.name,
       isBucketed: true,
-      // layerId,
       params: {
         interval,
         timeZone,

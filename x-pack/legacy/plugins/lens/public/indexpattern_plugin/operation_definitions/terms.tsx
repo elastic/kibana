@@ -46,13 +46,6 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn> = {
     );
   },
   buildColumn({ operationId, suggestedPriority, columns, field, indexPatternId }) {
-    // }: {
-    //   operationId: string;
-    //   suggestedPriority: DimensionPriority | undefined;
-    //   layerId: string;
-    //   columns: Partial<Record<string, IndexPatternColumn>>;
-    //   field?: IndexPatternField;
-    // }): TermsIndexPatternColumn {
     const existingMetricColumn = Object.entries(columns)
       .filter(([_columnId, column]) => column && isSortableByColumn(column))
       .map(([id]) => id)[0];
@@ -66,7 +59,6 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn> = {
       sourceField: field ? field.name : '',
       isBucketed: true,
       indexPatternId,
-      // layerId,
       params: {
         size: 5,
         orderBy: existingMetricColumn

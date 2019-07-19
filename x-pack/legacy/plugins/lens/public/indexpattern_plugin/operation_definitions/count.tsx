@@ -6,7 +6,6 @@
 
 import { i18n } from '@kbn/i18n';
 import { CountIndexPatternColumn } from '../indexpattern';
-import { DimensionPriority, DimensionLayer } from '../../types';
 import { OperationDefinition } from '../operations';
 
 export const countOperation: OperationDefinition<CountIndexPatternColumn> = {
@@ -27,7 +26,6 @@ export const countOperation: OperationDefinition<CountIndexPatternColumn> = {
       suggestedPriority,
       isBucketed: false,
       indexPatternId,
-      // layer,
     };
   },
   toEsAggsConfig: (column, columnId) => ({

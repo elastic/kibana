@@ -9,10 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiButton, EuiFormRow } from '@elastic/eui';
 import { Query } from '../../../../../../../src/legacy/core_plugins/data/public/query';
-// import { FilterRatioIndexPatternColumn } from '../indexpattern';
-import { DimensionLayer } from '../../types';
-import { FilterRatioIndexPatternColumn, IndexPatternColumn } from '../indexpattern';
-import { DimensionPriority } from '../../types';
+import { FilterRatioIndexPatternColumn } from '../indexpattern';
 import { OperationDefinition } from '../operations';
 import { updateColumnParam } from '../state_helpers';
 
@@ -23,13 +20,7 @@ export const filterRatioOperation: OperationDefinition<FilterRatioIndexPatternCo
   }),
   isApplicableWithoutField: true,
   isApplicableForField: () => false,
-  buildColumn({ operationId, suggestedPriority, indexPatternId, columns, layerId }) {
-    //   operationId: string,
-    //   suggestedPriority: DimensionPriority | undefined,
-    //   columns: Partial<Record<string, IndexPatternColumn>>,
-    //   // layer: DimensionLayer
-    //   layerId: string
-    // ): FilterRatioIndexPatternColumn {
+  buildColumn({ operationId, suggestedPriority, indexPatternId }) {
     return {
       operationId,
       label: i18n.translate('xpack.lens.indexPattern.filterRatio', {
@@ -40,7 +31,6 @@ export const filterRatioOperation: OperationDefinition<FilterRatioIndexPatternCo
       suggestedPriority,
       isBucketed: false,
       indexPatternId,
-      // layer,
       params: {
         numerator: { language: 'kuery', query: '' },
         denominator: { language: 'kuery', query: '' },

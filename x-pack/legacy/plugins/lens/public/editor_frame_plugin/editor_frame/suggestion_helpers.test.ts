@@ -8,9 +8,14 @@ import { getSuggestions } from './suggestion_helpers';
 import { createMockVisualization } from '../mocks';
 import { TableSuggestion } from '../../types';
 
-const generateSuggestion = (datasourceSuggestionId: number = 1, state = {}) => ({
+const generateSuggestion = (
+  datasourceSuggestionId: number = 1,
+  state = {},
+  layerId: string = 'first'
+) => ({
   state,
   table: { datasourceSuggestionId, columns: [], isMultiRow: false },
+  layerId,
 });
 
 describe('suggestion helpers', () => {
@@ -136,7 +141,10 @@ describe('suggestion helpers', () => {
     const table1: TableSuggestion = { datasourceSuggestionId: 0, columns: [], isMultiRow: true };
     const table2: TableSuggestion = { datasourceSuggestionId: 1, columns: [], isMultiRow: true };
     getSuggestions(
-      [{ state: {}, table: table1 }, { state: {}, table: table2 }],
+      [
+        { state: {}, table: table1, layerId: 'first' },
+        { state: {}, table: table2, layerId: 'first' },
+      ],
       {
         vis1: mockVisualization1,
         vis2: mockVisualization2,

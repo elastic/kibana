@@ -8,7 +8,7 @@ import React, { useMemo, useContext, memo } from 'react';
 import { EuiSelect } from '@elastic/eui';
 import { NativeRenderer } from '../../native_renderer';
 import { Action } from './state_management';
-import { Visualization, DatasourcePublicAPI, FramePublicAPI } from '../../types';
+import { Visualization, FramePublicAPI } from '../../types';
 import { DragContext } from '../../drag_drop';
 
 interface ConfigPanelWrapperProps {
@@ -16,7 +16,6 @@ interface ConfigPanelWrapperProps {
   visualizationMap: Record<string, Visualization>;
   activeVisualizationId: string | null;
   dispatch: (action: Action) => void;
-  // datasourcePublicAPI: DatasourcePublicAPI;
   framePublicAPI: FramePublicAPI;
 }
 
@@ -71,7 +70,6 @@ export const ConfigPanelWrapper = memo(function ConfigPanelWrapper(props: Config
           const newState = getSuggestedVisualizationState(
             props.framePublicAPI,
             props.visualizationMap[e.target.value]
-            // props.datasourcePublicAPI
           );
           props.dispatch({
             type: 'SWITCH_VISUALIZATION',
@@ -87,7 +85,6 @@ export const ConfigPanelWrapper = memo(function ConfigPanelWrapper(props: Config
             dragDropContext: context,
             state: props.visualizationState,
             setState: setVisualizationState,
-            // datasource: props.datasourcePublicAPI,
             frame: props.framePublicAPI,
           }}
         />
