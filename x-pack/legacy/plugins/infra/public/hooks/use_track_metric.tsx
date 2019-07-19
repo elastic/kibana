@@ -17,20 +17,19 @@ import { trackUiMetric } from '../../../../../../src/legacy/core_plugins/ui_metr
 
 type ObservabilityApp = 'infra_metrics' | 'infra_logs' | 'apm' | 'uptime';
 
-interface TrackProps {
+interface TrackOptions {
   app: ObservabilityApp;
   delay?: number; // in ms
-  effectDependencies?: unknown[];
 }
 
-type TrackMetricProps = TrackProps & { metric: string };
+type EffectDeps = unknown[];
 
-export function useTrackMetric({
-  app,
-  metric,
-  delay = 0,
-  effectDependencies = [],
-}: TrackMetricProps) {
+type TrackMetricOptions = TrackOptions & { metric: string };
+
+export function useTrackMetric(
+  { app, metric, delay = 0 }: TrackMetricOptions,
+  effectDependencies: EffectDeps = []
+) {
   useEffect(() => {
     let decoratedMetric = metric;
     if (delay > 0) {
@@ -46,8 +45,11 @@ export function useTrackMetric({
  * Its metrics will be found at:
  * stack_stats.kibana.plugins.ui_metric.{app}.pageview__{path}(__delayed_{n}ms)?
  */
-type TrackPageviewProps = TrackProps & { path: string };
+type TrackPageviewProps = TrackOptions & { path: string };
 
-export function useTrackPageview({ path, ...rest }: TrackPageviewProps) {
-  useTrackMetric({ ...rest, metric: `pageview__${path}` });
+export function useTrackPageview(
+  { path, ...rest }: TrackPageviewProps,
+  effectDependencies: EffectDeps = []
+) {
+  useTrackMetric({ ...rest, metric: `pageview__${path}` }, effectDependencies);
 }
