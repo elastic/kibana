@@ -59,23 +59,9 @@ export function EditorFrame(props: EditorFrameProps) {
     }
   }, [allLoaded]);
 
-  const datasourcePublicAPIs: Array<[string, DatasourcePublicAPI]> = Object.entries(
-    props.datasourceMap
-  ).map(([key, ds]) => {
-    return [
-      key,
-      ds.getPublicAPI(state.datasourceStates[key].state, (newState: unknown) => {
-        dispatch({
-          type: 'UPDATE_DATASOURCE_STATE',
-          newState,
-          datasourceId: key,
-        });
-      }),
-    ];
-  });
-
   const datasourceLayers: Record<string, DatasourcePublicAPI> = {};
-  datasourcePublicAPIs.forEach(([id, publicAPI]) => {
+  Object.keys(props.datasourceMap).forEach(id => {
+
     const stateWrapper = state.datasourceStates[id];
     if (stateWrapper.isLoading) {
       return;
@@ -84,6 +70,20 @@ export function EditorFrame(props: EditorFrameProps) {
     const layers = props.datasourceMap[id].getLayers(dsState);
 
     layers.forEach(layer => {
+      const publicAPI = props.datasourceMap[id].getPublicAPI(
+        dsState,
+        (newState: unknown) => {
+          dispatch({
+            type: 'UPDATE_DATASOURCE_STATE',
+            datasourceId: id,
+            newState,
+          });
+        },
+        layer
+      );
+
+      // layerToDatasourceId[layer] = id;
+
       datasourceLayers[layer] = publicAPI;
     });
   });

@@ -10,7 +10,7 @@ import { EuiFlexItem, EuiFlexGroup, EuiButtonIcon } from '@elastic/eui';
 import { Storage } from 'ui/storage';
 import { i18n } from '@kbn/i18n';
 import { DataSetup } from '../../../../../../../src/legacy/core_plugins/data/public';
-import { DatasourceDimensionPanelProps, DimensionLayer } from '../../types';
+import { DatasourceDimensionPanelProps } from '../../types';
 import {
   IndexPatternColumn,
   IndexPatternPrivateState,
@@ -120,6 +120,9 @@ export const IndexPatternDimensionPanel = memo(function IndexPatternDimensionPan
                         columnId: props.columnId,
                       })
                     );
+                    if (props.onRemove) {
+                      props.onRemove(props.columnId);
+                    }
                   }}
                 />
               </EuiFlexItem>

@@ -8,17 +8,8 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { Position } from '@elastic/charts';
-import {
-  EuiFieldText,
-  EuiButton,
-  EuiButtonGroup,
-  EuiForm,
-  EuiFormRow,
-  EuiSwitch,
-  EuiPanel,
-  IconType,
-} from '@elastic/eui';
-import { State, SeriesType } from './types';
+import { EuiButton, EuiButtonGroup, EuiForm, EuiFormRow, EuiPanel, IconType } from '@elastic/eui';
+import { State, SeriesType, LayerConfig } from './types';
 import { VisualizationProps } from '../types';
 import { NativeRenderer } from '../native_renderer';
 import { MultiColumnEditor } from './multi_column_editor';
@@ -76,29 +67,6 @@ const chartTypeIcons: Array<{ id: SeriesType; label: string; iconType: IconType 
   },
 ];
 
-const positionIcons = [
-  {
-    id: Position.Left,
-    label: 'Left',
-    iconType: 'arrowLeft',
-  },
-  {
-    id: Position.Top,
-    label: 'Top',
-    iconType: 'arrowUp',
-  },
-  {
-    id: Position.Bottom,
-    label: 'Bottom',
-    iconType: 'arrowDown',
-  },
-  {
-    id: Position.Right,
-    label: 'Right',
-    iconType: 'arrowRight',
-  },
-];
-
 type UnwrapArray<T> = T extends Array<infer P> ? P : T;
 
 function updateLayer(state: State, layer: UnwrapArray<State['layers']>, index: number): State {
@@ -108,6 +76,21 @@ function updateLayer(state: State, layer: UnwrapArray<State['layers']>, index: n
   return {
     ...state,
     layers: newLayers,
+  };
+}
+
+function newLayerState(layerId: string): LayerConfig {
+  return {
+    layerId,
+    datasourceId: 'indexpattern', // TODO: Don't hard code
+    xAccessor: generateId(),
+    seriesType: 'bar_stacked',
+    accessors: [generateId()],
+    title: '',
+    showGridlines: false,
+    position: Position.Left,
+    labels: [''],
+    splitSeriesAccessors: [generateId()],
   };
 }
 
@@ -369,11 +352,14 @@ export function XYConfigPanel(props: VisualizationProps<State>) {
                 accessors={layer.splitSeriesAccessors}
                 datasource={frame.datasourceLayers[layer.layerId]}
                 dragDropContext={props.dragDropContext}
-                onAdd={accessor =>
+                onAdd={() =>
                   setState(
                     updateLayer(
                       state,
-                      { ...layer, splitSeriesAccessors: [...layer.splitSeriesAccessors, accessor] },
+                      {
+                        ...layer,
+                        splitSeriesAccessors: [...layer.splitSeriesAccessors, generateId()],
+                      },
                       index
                     )
                   )
@@ -435,13 +421,13 @@ export function XYConfigPanel(props: VisualizationProps<State>) {
                     accessors={layer.accessors}
                     datasource={frame.datasourceLayers[layer.layerId]}
                     dragDropContext={props.dragDropContext}
-                    onAdd={accessor =>
+                    onAdd={() =>
                       setState(
                         updateLayer(
                           state,
                           {
                             ...layer,
-                            accessors: [...layer.accessors, accessor],
+                            accessors: [...layer.accessors, generateId()],
                           },
                           index
                         )
@@ -491,25 +477,9 @@ export function XYConfigPanel(props: VisualizationProps<State>) {
         <EuiButton
           data-test-subj={`lnsXY_layer_add`}
           onClick={() => {
-            const newId = frame.addNewLayer();
-
             setState({
               ...state,
-              layers: [
-                ...state.layers,
-                {
-                  layerId: newId,
-                  datasourceId: 'indexpattern', // TODO: Don't hard code
-                  xAccessor: generateId(),
-                  seriesType: 'bar_stacked',
-                  accessors: [generateId()],
-                  title: '',
-                  showGridlines: false,
-                  position: Position.Left,
-                  labels: [''],
-                  splitSeriesAccessors: [],
-                },
-              ],
+              layers: [...state.layers, newLayerState(frame.addNewLayer())],
             });
           }}
           iconType="plusInCircle"

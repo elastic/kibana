@@ -103,7 +103,6 @@ export class EditorFramePlugin {
                   store={store}
                   datasources={this.datasources}
                   visualizations={this.visualizations}
-                  // layerToDatasourceId={this.layerToDatasourceId}
                   expressionRenderer={this.ExpressionRenderer!}
                 />
               )}
@@ -216,7 +215,6 @@ export function InitializedEditor({
       store={store}
       datasourceMap={datasources}
       visualizationMap={visualizations}
-      // layerToDatasourceId={layerToDatasourceId}
       initialDatasourceIds={
         (doc && Object.keys(doc.state.datasourceStates)) || [firstDatasourceId] || null
       }

@@ -13,12 +13,11 @@ import { XYConfigPanel } from './xy_config_panel';
 import { Visualization } from '../types';
 import { State, PersistableState } from './types';
 import { toExpression } from './to_expression';
-import { generateId } from '../id_generator';
 
 export const xyVisualization: Visualization<State, PersistableState> = {
   getSuggestions,
 
-  initialize(frame, state) {
+  initialize(_, state) {
     return (
       state || {
         // seriesType: 'bar',

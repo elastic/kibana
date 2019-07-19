@@ -140,55 +140,36 @@ export function buildColumnForOperationType<T extends OperationType>({
 }
 
 export function getPotentialColumns({
-  // state,
-  // suggestedPriority,
   fields,
   suggestedPriority,
   layerId,
   layer,
 }: {
   fields: IndexPatternField[];
-  // state: IndexPatternPrivateState;
   suggestedPriority?: DimensionPriority;
   layerId: string;
   layer: IndexPatternLayer;
 }): IndexPatternColumn[] {
-  // const result: IndexPatternColumn[] = fields
-  // const indexPattern = state.layers[layerId].indexPatternId;
-
-  // const fields = state.indexPatterns[indexPattern].fields;
-
-  // const columns: IndexPatternColumn[] = fields
-  // =======
-  // export function getPotentialColumns(
-  //   fields: IndexPatternField[],
-  //   suggestedOrder?: DimensionPriority
-  // ): IndexPatternColumn[] {
-  // const result: IndexPatternColumn[] = fields
-  // >>>>>>> origin/feature/lens
   const result: IndexPatternColumn[] = fields
     .map((field, index) => {
       const validOperations = getOperationTypesForField(field);
 
-      return validOperations.map(
-        op =>
-          buildColumnForOperationType({
-            index,
-            op,
-            columns: layer.columns,
-            suggestedPriority,
-            field,
-            indexPatternId: layer.indexPatternId,
-            layerId,
-          })
-        // buildColumnForOperationType(index, op, {}, suggestedOrder, field)
+      return validOperations.map(op =>
+        buildColumnForOperationType({
+          index,
+          op,
+          columns: layer.columns,
+          suggestedPriority,
+          field,
+          indexPatternId: layer.indexPatternId,
+          layerId,
+        })
       );
     })
     .reduce((prev, current) => prev.concat(current));
 
   operationDefinitions.forEach(operation => {
     if (operation.isApplicableWithoutField) {
-      // columns.push(
       result.push(
         operation.buildColumn({
           operationId: operation.type,
@@ -198,7 +179,6 @@ export function getPotentialColumns({
           indexPatternId: layer.indexPatternId,
         })
       );
-      // result.push(operation.buildColumn(operation.type, {}, suggestedOrder));
     }
   });
 

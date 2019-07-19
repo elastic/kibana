@@ -119,7 +119,7 @@ function InnerSuggestionPanel({
           />
         </h3>
       </EuiTitle>
-      {suggestions.map((suggestion, index) => {
+      {/* TODO handle suggestions as discussed suggestions.map((suggestion, index) => {
         const previewExpression = suggestion.previewExpression
           ? prependDatasourceExpression(
               suggestion.previewExpression,
@@ -136,7 +136,7 @@ function InnerSuggestionPanel({
             key={`${suggestion.visualizationId}-${suggestion.title}`}
           />
         );
-      })}
+      })*/}
     </div>
   );
 }

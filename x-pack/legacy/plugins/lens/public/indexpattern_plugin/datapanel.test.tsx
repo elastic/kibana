@@ -18,20 +18,26 @@ jest.mock('./loader');
 
 const initialState: IndexPatternPrivateState = {
   currentIndexPatternId: '1',
-  columnOrder: ['col1'],
-  columns: {
-    col1: {
-      operationId: 'op1',
-      label: 'My Op',
-      dataType: 'string',
-      isBucketed: true,
-      operationType: 'terms',
-      sourceField: 'op',
-      params: {
-        size: 5,
-        orderDirection: 'asc',
-        orderBy: {
-          type: 'alphabetical',
+  layers: {
+    first: {
+      indexPatternId: '1',
+      columnOrder: ['col1'],
+      columns: {
+        col1: {
+          operationId: 'op1',
+          label: 'My Op',
+          dataType: 'string',
+          isBucketed: true,
+          operationType: 'terms',
+          sourceField: 'op',
+          params: {
+            size: 5,
+            orderDirection: 'asc',
+            orderBy: {
+              type: 'alphabetical',
+            },
+          },
+          indexPatternId: '1',
         },
       },
     },

@@ -45,6 +45,7 @@ export interface TableSuggestion {
 export interface DatasourceSuggestion<T = unknown> {
   state: T;
   table: TableSuggestion;
+  layerId: string;
 }
 
 /**
@@ -70,7 +71,7 @@ export interface Datasource<T = unknown, P = unknown> {
   getDatasourceSuggestionsForField: (state: T, field: unknown) => Array<DatasourceSuggestion<T>>;
   getDatasourceSuggestionsFromCurrentState: (state: T) => Array<DatasourceSuggestion<T>>;
 
-  getPublicAPI: (state: T, setState: (newState: T) => void) => DatasourcePublicAPI;
+  getPublicAPI: (state: T, setState: (newState: T) => void, layerId: string) => DatasourcePublicAPI;
 }
 
 /**
@@ -117,6 +118,7 @@ export interface DatasourceDimensionPanelProps {
   // Visualizations can hint at the role this dimension would play, which
   // affects the default ordering of the query
   suggestedPriority?: DimensionPriority;
+  onRemove?: (accessor: string) => void;
 }
 
 export interface DatasourceLayerPanelProps {

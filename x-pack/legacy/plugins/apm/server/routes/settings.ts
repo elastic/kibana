@@ -27,8 +27,6 @@ const defaultErrorHandler = (err: Error) => {
 export function initSettingsApi(core: InternalCoreSetup) {
   const { server } = core.http;
 
-  createApmAgentConfigurationIndex(server);
-
   // get list of configurations
   server.route({
     method: 'GET',
@@ -42,6 +40,8 @@ export function initSettingsApi(core: InternalCoreSetup) {
       tags: ['access:apm']
     },
     handler: async req => {
+      await createApmAgentConfigurationIndex(server);
+
       const setup = setupRequest(req);
       return await listConfigurations({
         setup
@@ -113,6 +113,21 @@ export function initSettingsApi(core: InternalCoreSetup) {
     }
   });
 
+  const agentConfigPayloadValidation = {
+    settings: Joi.object({
+      transaction_sample_rate: Joi.number()
+        .min(0)
+        .max(1)
+        .precision(3)
+        .required()
+        .options({ convert: false })
+    }),
+    service: Joi.object({
+      name: Joi.string().required(),
+      environment: Joi.string()
+    })
+  };
+
   // create configuration
   server.route({
     method: 'POST',
@@ -121,7 +136,8 @@ export function initSettingsApi(core: InternalCoreSetup) {
       validate: {
         query: {
           _debug: Joi.bool()
-        }
+        },
+        payload: agentConfigPayloadValidation
       },
       tags: ['access:apm']
     },
@@ -143,7 +159,8 @@ export function initSettingsApi(core: InternalCoreSetup) {
       validate: {
         query: {
           _debug: Joi.bool()
-        }
+        },
+        payload: agentConfigPayloadValidation
       },
       tags: ['access:apm']
     },
@@ -182,6 +199,8 @@ export function initSettingsApi(core: InternalCoreSetup) {
             environment?: string;
           };
         }
+
+        await createApmAgentConfigurationIndex(server);
 
         const setup = setupRequest(req);
         const payload = req.payload as Payload;

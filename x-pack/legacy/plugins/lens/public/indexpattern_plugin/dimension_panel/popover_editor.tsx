@@ -17,6 +17,7 @@ import {
   EuiFormRow,
   EuiFieldText,
   EuiLink,
+  EuiButton,
 } from '@elastic/eui';
 import classNames from 'classnames';
 import { IndexPatternColumn, OperationType } from '../indexpattern';
@@ -88,7 +89,26 @@ export function PopoverEditor(props: PopoverEditorProps) {
           }),
           'data-test-subj': `lns-indexPatternDimension-${operationType}`,
           onClick() {
-            if (!selectedColumn || !compatibleWithCurrentField) {
+            if (!selectedColumn) {
+              const possibleColumns = _.uniq(
+                filteredColumns.filter(col => col.operationType === operationType),
+                'sourceField'
+              );
+              if (possibleColumns.length === 1) {
+                setState(
+                  changeColumn({
+                    state,
+                    layerId,
+                    columnId,
+                    newColumn: possibleColumns[0],
+                  })
+                );
+              } else {
+                setInvalidOperationType(operationType);
+              }
+              return;
+            }
+            if (!compatibleWithCurrentField) {
               setInvalidOperationType(operationType);
               return;
             }
@@ -125,19 +145,24 @@ export function PopoverEditor(props: PopoverEditorProps) {
       className="lnsConfigPanel__summaryPopover"
       anchorClassName="lnsConfigPanel__summaryPopoverAnchor"
       button={
-        <EuiLink
-          className="lnsConfigPanel__summaryLink"
-          onClick={() => {
-            setPopoverOpen(true);
-          }}
-          data-test-subj="indexPattern-configure-dimension"
-        >
-          {selectedColumn
-            ? selectedColumn.label
-            : i18n.translate('xpack.lens.indexPattern.configureDimensionLabel', {
-                defaultMessage: 'Configure dimension',
-              })}
-        </EuiLink>
+        selectedColumn ? (
+          <EuiLink
+            className="lnsConfigPanel__summaryLink"
+            onClick={() => {
+              setPopoverOpen(true);
+            }}
+            data-test-subj="indexPattern-configure-dimension"
+          >
+            {selectedColumn.label}
+          </EuiLink>
+        ) : (
+          <EuiButton
+            className="lnsConfigPanel__summaryLink"
+            data-test-subj="indexPattern-configure-dimension"
+            onClick={() => setPopoverOpen(true)}
+            iconType="plusInCircle"
+          />
+        )
       }
       isOpen={isPopoverOpen}
       closePopover={() => {
@@ -198,6 +223,16 @@ export function PopoverEditor(props: PopoverEditorProps) {
                     />
                   </p>
                 </EuiCallOut>
+              )}
+              {incompatibleSelectedOperationType && !selectedColumn && (
+                <EuiCallOut
+                  size="s"
+                  data-test-subj="indexPattern-fieldless-operation"
+                  title={i18n.translate('xpack.lens.indexPattern.fieldlessOperationLabel', {
+                    defaultMessage: 'Choose a field the operation is applied to',
+                  })}
+                  iconType="alert"
+                ></EuiCallOut>
               )}
               {!incompatibleSelectedOperationType && ParamEditor && (
                 <ParamEditor

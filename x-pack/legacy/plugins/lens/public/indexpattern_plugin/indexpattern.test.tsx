@@ -16,8 +16,10 @@ import {
   IndexPatternColumn,
 } from './indexpattern';
 import { DatasourcePublicAPI, Operation, Datasource } from '../types';
+import { generateId } from '../id_generator';
 
 jest.mock('./loader');
+jest.mock('../id_generator');
 // chrome, notify, storage are used by ./plugin
 jest.mock('ui/chrome');
 jest.mock('ui/notify');
@@ -159,8 +161,7 @@ describe('IndexPattern Data Source', () => {
       expect(state).toEqual({
         currentIndexPatternId: '1',
         indexPatterns: expectedIndexPatterns,
-        columns: {},
-        columnOrder: [],
+        layers: {},
       });
     });
 
@@ -243,6 +244,7 @@ describe('IndexPattern Data Source', () => {
           currentIndexPatternId: '1',
           layers: {},
         });
+        (generateId as jest.Mock).mockReturnValueOnce('suggestedLayer');
       });
 
       it('should apply a bucketed aggregation for a string field', () => {
@@ -256,14 +258,18 @@ describe('IndexPattern Data Source', () => {
         expect(suggestions).toHaveLength(1);
         expect(suggestions[0].state).toEqual(
           expect.objectContaining({
-            columnOrder: ['col1', 'col2'],
-            columns: {
-              col1: expect.objectContaining({
-                operationType: 'terms',
-                sourceField: 'source',
-              }),
-              col2: expect.objectContaining({
-                operationType: 'count',
+            layers: {
+              suggestedLayer: expect.objectContaining({
+                columnOrder: ['col1', 'col2'],
+                columns: {
+                  col1: expect.objectContaining({
+                    operationType: 'terms',
+                    sourceField: 'source',
+                  }),
+                  col2: expect.objectContaining({
+                    operationType: 'count',
+                  }),
+                },
               }),
             },
           })
@@ -280,6 +286,7 @@ describe('IndexPattern Data Source', () => {
             }),
           ],
         });
+        expect(suggestions[0].layerId).toEqual('suggestedLayer');
       });
 
       it('should apply a bucketed aggregation for a date field', () => {
@@ -293,14 +300,18 @@ describe('IndexPattern Data Source', () => {
         expect(suggestions).toHaveLength(1);
         expect(suggestions[0].state).toEqual(
           expect.objectContaining({
-            columnOrder: ['col1', 'col2'],
-            columns: {
-              col1: expect.objectContaining({
-                operationType: 'date_histogram',
-                sourceField: 'timestamp',
-              }),
-              col2: expect.objectContaining({
-                operationType: 'count',
+            layers: {
+              suggestedLayer: expect.objectContaining({
+                columnOrder: ['col1', 'col2'],
+                columns: {
+                  col1: expect.objectContaining({
+                    operationType: 'date_histogram',
+                    sourceField: 'timestamp',
+                  }),
+                  col2: expect.objectContaining({
+                    operationType: 'count',
+                  }),
+                },
               }),
             },
           })
@@ -330,15 +341,19 @@ describe('IndexPattern Data Source', () => {
         expect(suggestions).toHaveLength(1);
         expect(suggestions[0].state).toEqual(
           expect.objectContaining({
-            columnOrder: ['col1', 'col2'],
-            columns: {
-              col1: expect.objectContaining({
-                sourceField: 'timestamp',
-                operationType: 'date_histogram',
-              }),
-              col2: expect.objectContaining({
-                sourceField: 'bytes',
-                operationType: 'min',
+            layers: {
+              suggestedLayer: expect.objectContaining({
+                columnOrder: ['col1', 'col2'],
+                columns: {
+                  col1: expect.objectContaining({
+                    operationType: 'date_histogram',
+                    sourceField: 'timestamp',
+                  }),
+                  col2: expect.objectContaining({
+                    operationType: 'min',
+                    sourceField: 'bytes',
+                  }),
+                },
               }),
             },
           })
@@ -476,6 +491,7 @@ describe('IndexPattern Data Source', () => {
               },
             ],
           },
+          layerId: 'first',
         },
       ]);
     });
@@ -486,7 +502,7 @@ describe('IndexPattern Data Source', () => {
 
     beforeEach(async () => {
       const initialState = await indexPatternDatasource.initialize(persistedState);
-      publicAPI = indexPatternDatasource.getPublicAPI(initialState, () => {});
+      publicAPI = indexPatternDatasource.getPublicAPI(initialState, () => {}, 'first');
     });
 
     describe('getTableSpec', () => {
@@ -531,20 +547,21 @@ describe('IndexPattern Data Source', () => {
           {
             ...initialState,
             layers: {
-              ...initialState.layers,
               first: {
                 ...initialState.layers.first,
+                columns,
                 columnOrder: ['a', 'b', 'c'],
               },
             },
           },
-          setState
+          setState,
+          'first'
         );
 
         api.removeColumnInTableSpec('b');
 
-        expect(setState.mock.calls[0][0].columnOrder).toEqual(['a', 'c']);
-        expect(setState.mock.calls[0][0].columns).toEqual({
+        expect(setState.mock.calls[0][0].layers.first.columnOrder).toEqual(['a', 'c']);
+        expect(setState.mock.calls[0][0].layers.first.columns).toEqual({
           a: columns.a,
           c: columns.c,
         });

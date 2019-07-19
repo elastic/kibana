@@ -19,7 +19,6 @@ export interface EditorFrameState {
   };
   datasourceStates: Record<string, { state: unknown; isLoading: boolean }>;
   activeDatasourceId: string | null;
-  layerIdToDatasource: Record<string, string>;
 }
 
 export type Action =
@@ -66,10 +65,6 @@ export type Action =
       type: 'CREATE_LAYER';
       newLayerId: string;
       newDatasourceState: unknown;
-    }
-  | {
-      type: 'UPDATE_LAYERS';
-      layerToDatasourceId: Record<string, string>;
     };
 
 export const getInitialState = (props: EditorFrameProps): EditorFrameState => {
@@ -92,7 +87,7 @@ export const getInitialState = (props: EditorFrameProps): EditorFrameState => {
       state: null,
       activeId: props.initialVisualizationId,
     },
-    layerIdToDatasource: {},
+    // layerIdToDatasource: {},
   };
 };
 
@@ -155,11 +150,6 @@ export const reducer = (state: EditorFrameState, action: Action): EditorFrameSta
           state: action.initialState,
         },
       };
-    case 'UPDATE_LAYERS':
-      return {
-        ...state,
-        layerIdToDatasource: action.layerToDatasourceId,
-      };
     case 'UPDATE_DATASOURCE_STATE':
       return {
         ...state,
@@ -185,10 +175,10 @@ export const reducer = (state: EditorFrameState, action: Action): EditorFrameSta
     case 'CREATE_LAYER':
       return {
         ...state,
-        layerIdToDatasource: {
-          ...state.layerIdToDatasource,
-          [action.newLayerId]: state.activeDatasourceId!,
-        },
+        // layerIdToDatasource: {
+        //   ...state.layerIdToDatasource,
+        //   [action.newLayerId]: state.activeDatasourceId!,
+        // },
         datasourceStates: {
           ...state.datasourceStates,
           [state.activeDatasourceId!]: {
