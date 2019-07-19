@@ -11,7 +11,7 @@ export const LOADING = i18n.translate('xpack.siem.loadingMoreTable.loadingDescri
 });
 
 export const LOAD_MORE = i18n.translate('xpack.siem.loadingMoreTable.loadMoreDescription', {
-  defaultMessage: 'Load More',
+  defaultMessage: 'Load more',
 });
 
 export const SHOWING = i18n.translate('xpack.siem.loadingMoreTable.showing', {
