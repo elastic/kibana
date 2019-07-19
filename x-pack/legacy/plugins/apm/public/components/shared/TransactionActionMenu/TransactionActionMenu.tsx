@@ -107,7 +107,7 @@ export const TransactionActionMenu: FunctionComponent<Props> = (
         { defaultMessage: 'Show trace logs' }
       ),
       condition: true,
-      hash: `/link-to/logs`,
+      path: `/link-to/logs`,
       query: { time, filter: `trace.id:${transaction.trace.id}` }
     },
     {
