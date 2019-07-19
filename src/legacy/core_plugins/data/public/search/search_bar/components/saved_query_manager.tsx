@@ -145,34 +145,36 @@ export const SavedQueryManager: FunctionComponent<Props> = ({
         </EuiText>
       )}
       {query.query !== '' ? (
-        <EuiFlexGroup direction="rowReverse" alignItems="center">
-          {showSaveQuery && (
-            <EuiFlexItem grow={false}>
-              <EuiButton
-                fill
-                onClick={() => {
-                  if (loadedSavedQuery) {
-                    onSave();
-                  } else {
-                    onSaveAsNew();
-                  }
-                }}
-              >
-                {isDirty && loadedSavedQuery
-                  ? i18n.translate('data.search.searchBar.savedQueryPopoverSaveChangesButtonText', {
-                      defaultMessage: 'Save changes',
-                    })
-                  : i18n.translate('data.search.searchBar.savedQueryPopoverSaveButtonText', {
-                      defaultMessage: 'Save',
-                    })}
-              </EuiButton>
-            </EuiFlexItem>
-          )}
+        <EuiFlexGroup direction="rowReverse" alignItems="center" justifyContent="flexEnd">
           {showSaveQuery && isDirty && loadedSavedQuery && (
             <EuiFlexItem grow={false}>
-              <EuiButton onClick={() => onSaveAsNew()}>
-                {i18n.translate('data.search.searchBar.savedQueryPopoverSaveAsNewButtonText', {
-                  defaultMessage: 'Save As New',
+              <EuiFlexGroup>
+                <EuiFlexItem grow={false}>
+                  <EuiButton onClick={() => onSaveAsNew()}>
+                    {i18n.translate('data.search.searchBar.savedQueryPopoverSaveAsNewButtonText', {
+                      defaultMessage: 'Save As New',
+                    })}
+                  </EuiButton>
+                </EuiFlexItem>
+
+                <EuiFlexItem>
+                  <EuiButton fill onClick={() => onSave()}>
+                    {i18n.translate(
+                      'data.search.searchBar.savedQueryPopoverSaveChangesButtonText',
+                      {
+                        defaultMessage: 'Save changes',
+                      }
+                    )}
+                  </EuiButton>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
+          )}
+          {showSaveQuery && !isDirty && (
+            <EuiFlexItem grow={false}>
+              <EuiButton fill onClick={() => onSave()}>
+                {i18n.translate('data.search.searchBar.savedQueryPopoverSaveButtonText', {
+                  defaultMessage: 'Save',
                 })}
               </EuiButton>
             </EuiFlexItem>
