@@ -117,10 +117,6 @@ uiModules
     };
   });
 
-function getEnabledFilters(filters) {
-  return filters ? filters.filter(filter => !filter.meta.disabled) : undefined;
-}
-
 function VisEditor(
   $scope,
   $element,
@@ -309,7 +305,7 @@ function VisEditor(
     return appState;
   }());
 
-  $scope.filters = getEnabledFilters(queryFilter.getFilters());
+  $scope.filters = queryFilter.getFilters();
 
   $scope.onFiltersUpdated = filters => {
     // The filters will automatically be set when the queryFilter emits an update event (see below)
@@ -422,11 +418,8 @@ function VisEditor(
     // update the searchSource when filters update
     const filterUpdateSubscription = subscribeWithScope($scope, queryFilter.getUpdates$(), {
       next: () => {
-        const oldFilters = $scope.filters;
-        $scope.filters = getEnabledFilters(queryFilter.getFilters());
-        if (!_.isEqual(oldFilters, $scope.filters)) {
-          $scope.fetch();
-        }
+        $scope.filters = queryFilter.getFilters();
+        $scope.fetch();
       }
     });
 

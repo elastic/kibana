@@ -80,6 +80,7 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
   private query?: Query;
   private title?: string;
   private filters?: Filter[];
+  private visCustomizations: VisualizeInput['vis'];
   private subscription: Subscription;
   public readonly type = VISUALIZE_EMBEDDABLE_TYPE;
 
@@ -141,14 +142,17 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
     // pass anything from here to the handler.update method
     const visCustomizations = this.input.vis;
     if (visCustomizations) {
-      // Turn this off or the uiStateChangeHandler will fire for every modification.
-      this.uiState.off('change', this.uiStateChangeHandler);
-      this.uiState.clearAllKeys();
-      this.uiState.set('vis', visCustomizations);
-      getKeys(visCustomizations).forEach(key => {
-        this.uiState.set(key, visCustomizations[key]);
-      });
-      this.uiState.on('change', this.uiStateChangeHandler);
+      if (!_.isEqual(visCustomizations, this.visCustomizations)) {
+        this.visCustomizations = visCustomizations;
+        // Turn this off or the uiStateChangeHandler will fire for every modification.
+        this.uiState.off('change', this.uiStateChangeHandler);
+        this.uiState.clearAllKeys();
+        this.uiState.set('vis', visCustomizations);
+        getKeys(visCustomizations).forEach(key => {
+          this.uiState.set(key, visCustomizations[key]);
+        });
+        this.uiState.on('change', this.uiStateChangeHandler);
+      }
     } else {
       this.uiState.clearAllKeys();
     }
