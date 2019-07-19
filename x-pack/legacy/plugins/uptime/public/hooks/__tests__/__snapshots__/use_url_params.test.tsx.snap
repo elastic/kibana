@@ -1,0 +1,27 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`useUrlParams accepts router props, updates URL params, and returns the current params 1`] = `
+<Fragment>
+  <div>
+    {"autorefreshInterval":15000,"autorefreshIsPaused":false,"dateRangeStart":"now-12d","dateRangeEnd":"now","search":"","selectedPingStatus":"down"}
+  </div>
+  <button
+    id="setRouter"
+    onClick={[Function]}
+  >
+    Set router
+  </button>
+  <button
+    id="setUrlParams"
+    onClick={[Function]}
+  >
+    Set url params
+  </button>
+  <button
+    id="getUrlParams"
+    onClick={[Function]}
+  >
+    Get url params
+  </button>
+</Fragment>
+`;

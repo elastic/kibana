@@ -19,7 +19,9 @@ type GetUrlParams = () => UptimeUrlParams;
 type UpdateUrlParams = (updatedParams: { [key: string]: string | number | boolean }) => void;
 type SetRouter = (routerProps: RouteComponentProps) => void;
 
-export function useUrlParams(): [GetUrlParams, UpdateUrlParams, SetRouter] {
+export type UptimeUrlParamsHook = () => [GetUrlParams, UpdateUrlParams, SetRouter];
+
+export const useUrlParams: UptimeUrlParamsHook = () => {
   const [locationState, setLocation] = useState<Location | undefined>(undefined);
   const [historyState, setHistory] = useState<History | undefined>(undefined);
   const [urlParams, setUrlParams] = useState<{ [key: string]: string } | undefined>(undefined);
@@ -30,7 +32,7 @@ export function useUrlParams(): [GetUrlParams, UpdateUrlParams, SetRouter] {
       const { search } = locationState;
       currentParams = qs.parse(search[0] === '?' ? search.slice(1) : search);
     }
-    return getSupportedUrlParams(currentParams);
+    return getSupportedUrlParams({ ...urlParams, ...currentParams });
   };
 
   const updateUrlParams: UpdateUrlParams = updatedParams => {
@@ -54,4 +56,4 @@ export function useUrlParams(): [GetUrlParams, UpdateUrlParams, SetRouter] {
   };
 
   return [getUrlParams, updateUrlParams, setRouter];
-}
+};
