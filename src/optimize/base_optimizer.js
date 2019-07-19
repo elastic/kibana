@@ -395,7 +395,7 @@ export default class BaseOptimizer {
                   presets: [
                     BABEL_PRESET_PATH,
                   ],
-                  plugins: [ 'istanbul' ]
+                  plugins: [ '@kbn/elastic-idx/babel', 'istanbul' ]
                 },
               }
             ]),
