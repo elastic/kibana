@@ -120,7 +120,7 @@ describe('Load More Table Component', () => {
           .find('[data-test-subj="loadingMoreButton"]')
           .first()
           .text()
-      ).toContain('Load More');
+      ).toContain('Load more');
     });
 
     test('it renders the Loading... in the more load button when fetching new data', () => {
