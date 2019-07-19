@@ -24,13 +24,15 @@ import {
   EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiText,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
-import React, { FunctionComponent, useEffect, useState } from 'react';
+import React, { FunctionComponent, useEffect, useState, Fragment } from 'react';
 import { sortBy } from 'lodash';
 import { SavedQuery } from '../index';
 import { getAllSavedQueries } from '../lib/saved_query_service';
+import { Query } from '../../../query';
 
 interface Props {
   showSaveQuery?: boolean;
@@ -39,6 +41,8 @@ interface Props {
   onSave: () => void;
   onSaveAsNew: () => void;
   onLoad: (savedQuery: SavedQuery) => void;
+  query: Query;
+  onClearSavedQuery: () => void;
 }
 
 export const SavedQueryManager: FunctionComponent<Props> = ({
@@ -48,6 +52,8 @@ export const SavedQueryManager: FunctionComponent<Props> = ({
   onSave,
   onSaveAsNew,
   onLoad,
+  query,
+  onClearSavedQuery,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [savedQueries, setSavedQueries] = useState([] as SavedQuery[]);
@@ -59,7 +65,7 @@ export const SavedQueryManager: FunctionComponent<Props> = ({
       setSavedQueries(sortedAllSavedQueries);
     };
     fetchQueries();
-  }, []);
+  }); // we need the effect to trigger on every render because saved queries change and we need the updates.
 
   const savedQueryDescriptionText = i18n.translate(
     'data.search.searchBar.savedQueryDescriptionText',
@@ -99,6 +105,11 @@ export const SavedQueryManager: FunctionComponent<Props> = ({
         >
           {savedQuery.attributes.title}
         </EuiButtonEmpty>
+        <EuiButtonEmpty
+          onClick={() => alert(`saved query ${savedQuery.id} to be deleted`)}
+          iconType="trash"
+          color="danger"
+        />
       </li>
     );
   });
@@ -114,49 +125,70 @@ export const SavedQueryManager: FunctionComponent<Props> = ({
       anchorPosition="downLeft"
     >
       <EuiPopoverTitle>{savedQueryPopoverTitleText}</EuiPopoverTitle>
-
-      <EuiFlexGroup>
-        <EuiFlexItem>{savedQueryDescriptionText}</EuiFlexItem>
-      </EuiFlexGroup>
-
-      <EuiFlexGroup>
-        <EuiFlexItem>
-          {savedQueries.length > 0 ? (
-            <ul>{savedQueryRows}</ul>
-          ) : (
-            <p>
-              There are no saved queries. You can save search snippets and filters for later use.{' '}
-              this, enter a query and click 'Save query for reuse'.
-            </p>
+      {savedQueries.length > 0 ? (
+        <Fragment>
+          <EuiFlexGroup wrap>
+            <EuiFlexItem>{savedQueryDescriptionText}</EuiFlexItem>
+          </EuiFlexGroup>
+          <EuiFlexGroup>
+            <EuiFlexItem>
+              <ul>{savedQueryRows}</ul>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </Fragment>
+      ) : (
+        <EuiText grow={false}>
+          <p>
+            There are no saved queries. You can save search snippets and filters for later use.{' '}
+            this, enter a query and click 'Save query for reuse'.
+          </p>
+        </EuiText>
+      )}
+      {query.query !== '' ? (
+        <EuiFlexGroup direction="rowReverse" alignItems="center">
+          {showSaveQuery && (
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                fill
+                onClick={() => {
+                  if (loadedSavedQuery) {
+                    onSave();
+                  } else {
+                    onSaveAsNew();
+                  }
+                }}
+              >
+                {isDirty && loadedSavedQuery
+                  ? i18n.translate('data.search.searchBar.savedQueryPopoverSaveChangesButtonText', {
+                      defaultMessage: 'Save changes',
+                    })
+                  : i18n.translate('data.search.searchBar.savedQueryPopoverSaveButtonText', {
+                      defaultMessage: 'Save',
+                    })}
+              </EuiButton>
+            </EuiFlexItem>
           )}
-        </EuiFlexItem>
-      </EuiFlexGroup>
-
-      <EuiFlexGroup direction="rowReverse" alignItems="center">
-        {showSaveQuery && (
+          {showSaveQuery && isDirty && loadedSavedQuery && (
+            <EuiFlexItem grow={false}>
+              <EuiButton onClick={() => onSaveAsNew()}>
+                {i18n.translate('data.search.searchBar.savedQueryPopoverSaveAsNewButtonText', {
+                  defaultMessage: 'Save As New',
+                })}
+              </EuiButton>
+            </EuiFlexItem>
+          )}
           <EuiFlexItem grow={false}>
-            <EuiButton
-              fill
-              onClick={() => {
-                if (loadedSavedQuery) {
-                  onSave();
-                } else {
-                  onSaveAsNew();
-                }
-              }}
-            >
-              {isDirty
-                ? i18n.translate('data.search.searchBar.savedQueryPopoverSaveChangesButtonText', {
-                    defaultMessage: 'Save changes',
-                  })
-                : i18n.translate('data.search.searchBar.savedQueryPopoverSaveButtonText', {
-                    defaultMessage: 'Save',
-                  })}
-            </EuiButton>
+            <EuiButtonEmpty onClick={() => onClearSavedQuery()}>
+              {loadedSavedQuery &&
+                i18n.translate('data.search.searchBar.savedQueryPopoverClearButtonText', {
+                  defaultMessage: 'Clear',
+                })}
+            </EuiButtonEmpty>
           </EuiFlexItem>
-        )}
-        <EuiFlexItem />
-      </EuiFlexGroup>
+        </EuiFlexGroup>
+      ) : (
+        ''
+      )}
     </EuiPopover>
   );
 };
