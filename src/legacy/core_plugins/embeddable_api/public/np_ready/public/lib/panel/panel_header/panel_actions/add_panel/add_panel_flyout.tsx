@@ -41,6 +41,7 @@ import {
   EuiTitle,
   EuiText,
 } from '@elastic/eui';
+
 import { IContainer } from '../../../../containers';
 import { EmbeddableFactoryNotFoundError } from '../../../../errors';
 import { GetEmbeddableFactory, GetEmbeddableFactories } from '../../../../types';
