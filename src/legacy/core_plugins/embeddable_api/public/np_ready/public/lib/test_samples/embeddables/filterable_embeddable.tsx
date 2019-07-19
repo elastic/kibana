@@ -17,8 +17,6 @@
  * under the License.
  */
 
-// TODO: Remove this.
-import { Adapters } from 'ui/inspector';
 import { Filter } from '@kbn/es-query';
 import { IContainer } from '../../containers';
 import { EmbeddableOutput, EmbeddableInput, Embeddable } from '../../embeddables';
@@ -35,8 +33,8 @@ export class FilterableEmbeddable extends Embeddable<FilterableEmbeddableInput, 
     super(initialInput, {}, parent);
   }
 
-  public getInspectorAdapters() {
-    const inspectorAdapters: Adapters = {
+  public getInspectorAdapters(): Record<string, string> {
+    const inspectorAdapters: Record<string, string> = {
       filters: `My filters are ${JSON.stringify(this.input.filters)}`,
     };
     return inspectorAdapters;
