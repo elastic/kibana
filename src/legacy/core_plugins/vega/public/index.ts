@@ -17,22 +17,9 @@
  * under the License.
  */
 
-import { resolve } from 'path';
+import { PluginInitializerContext } from '../../../../core/public';
+import { VegaPlugin as Plugin } from './plugin';
 
-export default kibana => new kibana.Plugin({
-  id: 'vega',
-  require: ['elasticsearch'],
-
-  uiExports: {
-    visTypes: ['plugins/vega/vega_type'],
-    interpreter: ['plugins/vega/vega_fn'],
-    injectDefaultVars: server => ({ vegaConfig: server.config().get('vega') }),
-    styleSheetPaths: resolve(__dirname, 'public/index.scss'),
-  },
-
-  config: (Joi) => Joi.object({
-    enabled: Joi.boolean().default(true),
-    enableExternalUrls: Joi.boolean().default(false)
-  }).default(),
-
-});
+export function plugin(initializerContext: PluginInitializerContext) {
+  return new Plugin(initializerContext);
+}
