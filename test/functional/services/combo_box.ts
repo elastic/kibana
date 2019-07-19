@@ -218,8 +218,13 @@ export function ComboBoxProvider({ getService, getPageObjects }: FtrProviderCont
      * @param comboBoxElement
      */
     public async openOptionsList(comboBoxElement: WebElementWrapper): Promise<void> {
-      const toggleBtn = await comboBoxElement.findByCssSelector('[data-test-subj="comboBoxInput"]');
-      await toggleBtn.click();
+      const isOptionsListOpen = await testSubjects.exists('comboBoxOptionsList');
+      if (!isOptionsListOpen) {
+        const toggleBtn = await comboBoxElement.findByCssSelector(
+          '[data-test-subj="comboBoxToggleListButton"]'
+        );
+        await toggleBtn.click();
+      }
     }
 
     /**
