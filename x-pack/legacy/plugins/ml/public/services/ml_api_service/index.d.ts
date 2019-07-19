@@ -7,6 +7,7 @@
 import { Annotation } from '../../../common/types/annotations';
 import { Privileges } from '../../../common/types/privileges';
 import { DslName, AggFieldNamePair } from '../../../common/types/fields';
+import { ExistingJobsAndGroups } from '../job_service';
 
 // TODO This is not a complete representation of all methods of `ml.*`.
 // It just satisfies needs for other parts of the code area which use
@@ -89,7 +90,7 @@ declare interface Ml {
       aggFieldNamePairs: AggFieldNamePair[],
       splitFieldName: string
     ): Promise<any>;
-    getAllJobAndGroupIds(): Promise<any>;
+    getAllJobAndGroupIds(): Promise<ExistingJobsAndGroups>;
     getLookBackProgress(
       jobId: string,
       start: number,

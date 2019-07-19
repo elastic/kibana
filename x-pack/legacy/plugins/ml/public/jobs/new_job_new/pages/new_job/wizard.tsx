@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FC, useContext, useReducer, useState } from 'react';
+import React, { FC, useContext, useReducer, useState, useEffect } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
@@ -18,12 +18,9 @@ import { JobDetailsStep } from '../components/job_details_step';
 import { SummaryStep } from '../components/summary_step';
 import { MlTimeBuckets } from '../../../../util/ml_time_buckets';
 
-import {
-  JobCreatorContext,
-  JobCreatorContextValue,
-  ExistingJobsAndGroups,
-} from '../components/job_creator_context';
+import { JobCreatorContext, JobCreatorContextValue } from '../components/job_creator_context';
 import { KibanaContext, isKibanaContext } from '../../../../data_frame/common/kibana_context';
+import { ExistingJobsAndGroups } from '../../../../services/job_service';
 
 import {
   SingleMetricJobCreator,
@@ -32,6 +29,7 @@ import {
 } from '../../common/job_creator';
 import { ChartLoader } from '../../common/chart_loader';
 import { ResultsLoader } from '../../common/results_loader';
+import { JobValidator } from '../../common/job_validator';
 import { newJobCapsService } from '../../../../services/new_job_capabilities_service';
 
 interface Props {
@@ -39,6 +37,7 @@ interface Props {
   chartLoader: ChartLoader;
   resultsLoader: ResultsLoader;
   chartInterval: MlTimeBuckets;
+  jobValidator: JobValidator;
   existingJobsAndGroups: ExistingJobsAndGroups;
 }
 
@@ -47,6 +46,7 @@ export const Wizard: FC<Props> = ({
   chartLoader,
   resultsLoader,
   chartInterval,
+  jobValidator,
   existingJobsAndGroups,
 }) => {
   const kibanaContext = useContext(KibanaContext);
@@ -57,6 +57,19 @@ export const Wizard: FC<Props> = ({
   const [jobCreatorUpdated, setJobCreatorUpdate] = useReducer<(s: number) => number>(s => s + 1, 0);
   const jobCreatorUpdate = () => setJobCreatorUpdate(jobCreatorUpdated);
 
+  const [jobValidatorUpdated, setJobValidatorUpdate] = useReducer<(s: number) => number>(
+    s => s + 1,
+    0
+  );
+
+  useEffect(() => {
+    // IIFE to run the validation. the useEffect callback can't be async
+    (async () => {
+      await jobValidator.validate();
+      setJobValidatorUpdate(jobValidatorUpdated);
+    })();
+  }, [jobCreatorUpdated]);
+
   const jobCreatorContext: JobCreatorContextValue = {
     jobCreatorUpdated,
     jobCreatorUpdate,
@@ -64,6 +77,8 @@ export const Wizard: FC<Props> = ({
     chartLoader,
     resultsLoader,
     chartInterval,
+    jobValidator,
+    jobValidatorUpdated,
     fields: newJobCapsService.fields,
     aggs: newJobCapsService.aggs,
     existingJobsAndGroups,

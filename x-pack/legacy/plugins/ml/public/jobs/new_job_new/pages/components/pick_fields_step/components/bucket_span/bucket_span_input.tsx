@@ -10,14 +10,16 @@ import { EuiFieldText } from '@elastic/eui';
 interface Props {
   bucketSpan: string;
   setBucketSpan: (bs: string) => void;
+  isInvalid: boolean;
 }
 
-export const BucketSpanInput: FC<Props> = ({ bucketSpan, setBucketSpan }) => {
+export const BucketSpanInput: FC<Props> = ({ bucketSpan, setBucketSpan, isInvalid }) => {
   return (
     <EuiFieldText
       placeholder="Bucket span"
       value={bucketSpan}
       onChange={e => setBucketSpan(e.target.value)}
+      isInvalid={isInvalid}
     />
   );
 };

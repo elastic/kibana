@@ -20,9 +20,10 @@ export const SummaryStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) =>
     return null;
   }
 
-  const { jobCreator } = useContext(JobCreatorContext);
+  const { jobCreator, jobValidator, jobValidatorUpdated } = useContext(JobCreatorContext);
   const [progress, setProgress] = useState(0);
   const [showJsonFlyout, setShowJsonFlyout] = useState(false);
+  const [isValid, setIsValid] = useState(jobValidator.validationSummary.basic);
 
   function setProgressWrapper(p: number) {
     setProgress(p);
@@ -51,6 +52,10 @@ export const SummaryStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) =>
     setShowJsonFlyout(!showJsonFlyout);
   }
 
+  useEffect(() => {
+    setIsValid(jobValidator.validationSummary.basic);
+  }, [jobValidatorUpdated]);
+
   return (
     <Fragment>
       {isCurrentStep && (
@@ -70,7 +75,7 @@ export const SummaryStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) =>
           <EuiHorizontalRule />
           {progress < 100 && (
             <Fragment>
-              <EuiButton onClick={start} isDisabled={progress > 0}>
+              <EuiButton onClick={start} isDisabled={progress > 0} disabled={isValid === false}>
                 Create job
               </EuiButton>
               &emsp;

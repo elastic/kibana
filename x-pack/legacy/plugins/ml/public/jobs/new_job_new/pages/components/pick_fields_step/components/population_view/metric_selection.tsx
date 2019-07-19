@@ -262,7 +262,7 @@ export const PopulationDetectors: FC<Props> = ({ isActive, setIsValid }) => {
           fields={fields}
           detectorChangeHandler={detectorChangeHandler}
           selectedOptions={selectedOptions}
-          removeOptions={aggFieldPairList}
+          removeOptions={[]}
         />
       )}
       {isActive === false && (

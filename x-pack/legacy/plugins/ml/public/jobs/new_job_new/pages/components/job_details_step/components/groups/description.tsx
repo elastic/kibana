@@ -6,12 +6,14 @@
 
 import React, { Fragment, memo, FC } from 'react';
 import { EuiDescribedFormGroup, EuiFormRow } from '@elastic/eui';
+import { Validation } from '../../../../../common/job_validator';
 
 interface Props {
   children: JSX.Element;
+  validation: Validation;
 }
 
-export const Description: FC<Props> = memo(({ children }) => {
+export const Description: FC<Props> = memo(({ children, validation }) => {
   const title = 'Groups';
   return (
     <EuiDescribedFormGroup
@@ -24,7 +26,12 @@ export const Description: FC<Props> = memo(({ children }) => {
         </Fragment>
       }
     >
-      <EuiFormRow label={title} describedByIds={['single-example-aria']}>
+      <EuiFormRow
+        label={title}
+        describedByIds={['single-example-aria']}
+        error={validation.message}
+        isInvalid={validation.valid === false}
+      >
         {children}
       </EuiFormRow>
     </EuiDescribedFormGroup>

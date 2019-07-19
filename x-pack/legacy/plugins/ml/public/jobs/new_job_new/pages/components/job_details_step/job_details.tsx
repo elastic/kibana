@@ -30,12 +30,16 @@ export const JobDetailsStep: FC<Props> = ({
   additionalExpanded,
   setAdditionalExpanded,
 }) => {
-  const { jobCreator, jobCreatorUpdated } = useContext(JobCreatorContext);
+  const { jobValidator, jobValidatorUpdated } = useContext(JobCreatorContext);
   const [nextActive, setNextActive] = useState(false);
 
   useEffect(() => {
-    setNextActive(jobCreator.jobId !== '');
-  }, [jobCreatorUpdated]);
+    const active =
+      jobValidator.jobId.valid &&
+      jobValidator.modelMemoryLimit.valid &&
+      jobValidator.groupIds.valid;
+    setNextActive(active);
+  }, [jobValidatorUpdated]);
 
   return (
     <Fragment>

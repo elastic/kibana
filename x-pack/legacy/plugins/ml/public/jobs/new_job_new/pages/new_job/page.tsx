@@ -20,17 +20,19 @@ import {
 } from '../../common/job_creator/util/constants';
 import { ChartLoader } from '../../common/chart_loader';
 import { ResultsLoader } from '../../common/results_loader';
+import { JobValidator } from '../../common/job_validator';
 import { KibanaContext, isKibanaContext } from '../../../../data_frame/common/kibana_context';
 import { getTimeFilterRange } from '../../../../components/full_time_range_selector';
 import { MlTimeBuckets } from '../../../../util/ml_time_buckets';
 import { newJobDefaults } from '../../../new_job/utils/new_job_defaults';
+import { ExistingJobsAndGroups } from '../../../../services/job_service';
 
 const PAGE_WIDTH = 1200; // document.querySelector('.single-metric-job-container').width();
 const BAR_TARGET = PAGE_WIDTH > 2000 ? 1000 : PAGE_WIDTH / 2;
 const MAX_BARS = BAR_TARGET + (BAR_TARGET / 100) * 100; // 100% larger than bar target
 
 export interface PageProps {
-  existingJobsAndGroups: any;
+  existingJobsAndGroups: ExistingJobsAndGroups;
   jobType: JOB_TYPE;
 }
 
@@ -76,6 +78,8 @@ export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
     kibanaContext.combinedQuery
   );
 
+  const jobValidator = new JobValidator(jobCreator, existingJobsAndGroups);
+
   const resultsLoader = new ResultsLoader(jobCreator, chartInterval, chartLoader);
 
   useEffect(() => {
@@ -95,6 +99,7 @@ export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
               chartLoader={chartLoader}
               resultsLoader={resultsLoader}
               chartInterval={chartInterval}
+              jobValidator={jobValidator}
               existingJobsAndGroups={existingJobsAndGroups}
             />
           </EuiPageContentBody>

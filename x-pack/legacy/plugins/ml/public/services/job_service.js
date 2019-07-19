@@ -740,17 +740,13 @@ class JobService {
 
 
   async getJobAndGroupIds() {
-    const existingJobsAndGroups = {
-      jobs: [],
-      groups: [],
-    };
     try {
-      const { jobs: tempJobs, groups } = await ml.jobs.getAllJobAndGroupIds();
-      existingJobsAndGroups.jobs = tempJobs;
-      existingJobsAndGroups.groups = groups;
-      return existingJobsAndGroups;
+      return await ml.jobs.getAllJobAndGroupIds();
     } catch (error) {
-      return existingJobsAndGroups;
+      return {
+        jobIds: [],
+        groupIds: [],
+      };
     }
   }
 }

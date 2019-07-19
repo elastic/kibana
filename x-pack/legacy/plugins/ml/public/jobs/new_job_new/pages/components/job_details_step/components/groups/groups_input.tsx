@@ -12,16 +12,19 @@ import { tabColor } from '../../../../../../../../common/util/group_color_utils'
 import { Description } from './description';
 
 export const GroupsInput: FC = () => {
-  const { jobCreator, jobCreatorUpdate } = useContext(JobCreatorContext);
+  const { jobCreator, jobCreatorUpdate, jobValidator, jobValidatorUpdated } = useContext(
+    JobCreatorContext
+  );
   const { existingJobsAndGroups } = useContext(JobCreatorContext);
   const [selectedGroups, setSelectedGroups] = useState(jobCreator.groups);
+  const [validation, setValidation] = useState(jobValidator.groupIds);
 
   useEffect(() => {
     jobCreator.groups = selectedGroups;
     jobCreatorUpdate();
   }, [selectedGroups.join()]);
 
-  const options: EuiComboBoxOptionProps[] = existingJobsAndGroups.groups.map((g: string) => ({
+  const options: EuiComboBoxOptionProps[] = existingJobsAndGroups.groupIds.map((g: string) => ({
     label: g,
     color: tabColor(g),
   }));
@@ -58,8 +61,12 @@ export const GroupsInput: FC = () => {
     setSelectedGroups([...selectedOptions, newGroup].map(g => g.label));
   }
 
+  useEffect(() => {
+    setValidation(jobValidator.groupIds);
+  }, [jobValidatorUpdated]);
+
   return (
-    <Description>
+    <Description validation={validation}>
       <EuiComboBox
         placeholder={i18n.translate('xpack.ml.newJob.wizard.jobGroupSelectPlaceholder', {
           defaultMessage: 'Select or create groups',
@@ -69,8 +76,7 @@ export const GroupsInput: FC = () => {
         onChange={onChange}
         onCreateOption={onCreateGroup}
         isClearable={true}
-        // isInvalid={groupsValidationError !== ''}
-        // error={groupsValidationError}
+        isInvalid={validation.valid === false}
       />
     </Description>
   );
