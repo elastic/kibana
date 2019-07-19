@@ -455,8 +455,8 @@ export class VectorStyle extends AbstractStyle {
     }
 
     if (styleDescriptor.options.useCustomColorRamp &&
-      !styleDescriptor.options.customColorRamp ||
-      styleDescriptor.options.customColorRamp.length < 2) {
+      (!styleDescriptor.options.customColorRamp ||
+      !styleDescriptor.options.customColorRamp.length)) {
       return null;
     }
 

@@ -93,7 +93,7 @@ function extractColorFromStyleProperty(colorStyleProperty, defaultColor) {
 
   if (colorStyleProperty.options.useCustomColorRamp) {
     if (!colorStyleProperty.options.customColorRamp ||
-      colorStyleProperty.options.customColorRamp.length < 2) {
+      !colorStyleProperty.options.customColorRamp.length) {
       return defaultColor;
     }
     const middleIndex = Math.floor(colorStyleProperty.options.customColorRamp.length / 2);
