@@ -435,7 +435,14 @@ export class SavedObjectsClient {
       return Promise.reject(new Error('body not permitted for GET requests'));
     }
 
-    return this.http.fetch(path, { method, query, body: JSON.stringify(body) });
+    return this.http.fetch(path, { method, query, body: JSON.stringify(body) }).catch(err => {
+      // To ensure we don't break backwards compatibility, we keep the old
+      // kfetch error format of `{res: {status: number}}` whereas `http.fetch`
+      // uses `{response: {status: number}}`
+
+      const kfetchError = Object.assign(err, { res: err.response });
+      return Promise.reject(kfetchError);
+    });
   }
 }
 
