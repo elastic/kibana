@@ -17,20 +17,24 @@
  * under the License.
  */
 
+import { PluginInitializerContext } from 'kibana/public';
+import { npSetup, npStart } from 'ui/new_platform';
 
-import 'ngreact';
+import { visualizations } from '../../visualizations/public';
+import { VegaPluginSetupDependencies } from './plugin';
+import { LegacyDependenciesPlugin } from './shim';
+import { plugin } from '.';
 
-import { wrapInI18nContext } from 'ui/i18n';
-import { uiModules } from 'ui/modules';
-const module = uiModules.get('kibana/vega', ['react']);
+const plugins: Readonly<VegaPluginSetupDependencies> = {
+  visualizations,
+  data: npSetup.plugins.data,
 
-import { VegaHelpMenu } from './vega_help_menu';
-import { VegaActionsMenu } from './vega_action_menu';
+  // Temporary solution
+  // It will be removed when all dependent services are migrated to the new platform.
+  __LEGACY: new LegacyDependenciesPlugin(),
+};
 
-module.directive('vegaActionsMenu', function (reactDirective) {
-  return reactDirective(wrapInI18nContext(VegaActionsMenu));
-});
+const pluginInstance = plugin({} as PluginInitializerContext);
 
-module.directive('vegaHelpMenu', function (reactDirective) {
-  return reactDirective(wrapInI18nContext(VegaHelpMenu));
-});
+export const setup = pluginInstance.setup(npSetup.core, plugins);
+export const start = pluginInstance.start(npStart.core);
