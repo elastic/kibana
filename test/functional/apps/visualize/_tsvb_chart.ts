@@ -95,24 +95,20 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe.skip('switch index patterns', () => {
-      before(async () => {
+    describe('switch index patterns', () => {
+      beforeEach(async () => {
         log.debug('Load kibana_sample_data_flights data');
         await esArchiver.loadIfNeeded('kibana_sample_data_flights');
-        await PageObjects.visualBuilder.resetPage(
-          '2015-09-19 06:31:44.000',
-          '2018-10-31 00:0:00.000'
-        );
+        await PageObjects.visualBuilder.resetPage();
         await PageObjects.visualBuilder.clickMetric();
+        await PageObjects.visualBuilder.checkMetricTabIsPresent();
       });
       after(async () => {
         await esArchiver.unload('kibana_sample_data_flights');
       });
       it('should be able to switch between index patterns', async () => {
-        const expectedMetricValue = '156';
         const value = await PageObjects.visualBuilder.getMetricValue();
-        log.debug(`metric value: ${value}`);
-        expect(value).to.eql(expectedMetricValue);
+        expect(value).to.eql('156');
         await PageObjects.visualBuilder.clickMetricPanelOptions();
         const fromTime = '2018-10-22 00:00:00.000';
         const toTime = '2018-10-28 23:59:59.999';
@@ -120,7 +116,6 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.visualBuilder.setIndexPatternValue('kibana_sample_data_flights');
         await PageObjects.visualBuilder.selectIndexPatternTimeField('timestamp');
         const newValue = await PageObjects.visualBuilder.getMetricValue();
-        log.debug(`metric value: ${newValue}`);
         expect(newValue).to.eql('10');
       });
     });
