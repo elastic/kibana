@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiLoadingContent, EuiPanel } from '@elastic/eui';
-import React, { useContext, useState } from 'react';
+import { EuiPanel } from '@elastic/eui';
+import React, { useContext } from 'react';
 import styled from 'styled-components';
 import { useAnomaliesTableData } from '../anomaly/use_anomalies_table_data';
 import { HeaderPanel } from '../../header_panel';
