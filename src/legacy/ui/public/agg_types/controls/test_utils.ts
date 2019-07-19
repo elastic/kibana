@@ -17,22 +17,17 @@
  * under the License.
  */
 
-import { resolve } from 'path';
+import { AggConfig, VisState } from 'ui/vis';
+import { EditorConfig } from 'ui/vis/editors/config/types';
+import { SubAggParamsProp } from 'ui/vis/editors/default/components/default_editor_agg_params';
+import { AggParam } from '..';
 
-export default kibana => new kibana.Plugin({
-  id: 'vega',
-  require: ['elasticsearch'],
-
-  uiExports: {
-    visTypes: ['plugins/vega/vega_type'],
-    interpreter: ['plugins/vega/vega_fn'],
-    injectDefaultVars: server => ({ vegaConfig: server.config().get('vega') }),
-    styleSheetPaths: resolve(__dirname, 'public/index.scss'),
-  },
-
-  config: (Joi) => Joi.object({
-    enabled: Joi.boolean().default(true),
-    enableExternalUrls: Joi.boolean().default(false)
-  }).default(),
-
-});
+export const aggParamCommonPropsMock = {
+  agg: {} as AggConfig,
+  aggParam: {} as AggParam,
+  editorConfig: {} as EditorConfig,
+  metricAggs: [] as AggConfig[],
+  subAggParams: {} as SubAggParamsProp,
+  state: {} as VisState,
+  showValidation: false,
+};

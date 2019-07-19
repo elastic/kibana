@@ -9,6 +9,11 @@ RED='\033[0;31m'
 C_RESET='\033[0m' # Reset color
 
 ###
+### Pin to working 7.x snapshot
+###
+export TEST_ES_SNAPSHOT_VERSION=7.4.0-87a7e5e3
+
+###
 ### Since the Jenkins logging output collector doesn't look like a TTY
 ### Node/Chalk and other color libs disable their color output. But Jenkins
 ### can handle color fine, so this forces https://github.com/chalk/supports-color
@@ -129,25 +134,8 @@ else
   echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
 fi
 
-###
-### use the geckodriver cache if it exists
-###
-if [ -d "$dir/.geckodriver" ]; then
-  branchPkgVersion="$(node -e "console.log(require('./package.json').devDependencies.geckodriver)")"
-  cachedPkgVersion="$(cat "$dir/.geckodriver/pkgVersion")"
-  if [ "$cachedPkgVersion" == "$branchPkgVersion" ]; then
-    export GECKODRIVER_FILEPATH="$dir/.geckodriver/geckodriver.tar.gz"
-    echo " -- Using geckodriver cache at '$GECKODRIVER_FILEPATH'"
-  else
-    echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-    echo "  SKIPPING GECKODRIVER CACHE: cached($cachedPkgVersion) branch($branchPkgVersion)"
-    echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-  fi
-else
-  echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-  echo "  GECKODRIVER CACHE NOT FOUND"
-  echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-fi
+# use a proxy to fetch geckodriver asset
+export GECKODRIVER_CDNURL="https://us-central1-elastic-kibana-184716.cloudfunctions.net/geckodriver_cache"
 
 ###
 ### install dependencies

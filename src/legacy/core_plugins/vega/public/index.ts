@@ -17,20 +17,9 @@
  * under the License.
  */
 
+import { PluginInitializerContext } from '../../../../core/public';
+import { VegaPlugin as Plugin } from './plugin';
 
-import 'ngreact';
-
-import { wrapInI18nContext } from 'ui/i18n';
-import { uiModules } from 'ui/modules';
-const module = uiModules.get('kibana/vega', ['react']);
-
-import { VegaHelpMenu } from './vega_help_menu';
-import { VegaActionsMenu } from './vega_action_menu';
-
-module.directive('vegaActionsMenu', function (reactDirective) {
-  return reactDirective(wrapInI18nContext(VegaActionsMenu));
-});
-
-module.directive('vegaHelpMenu', function (reactDirective) {
-  return reactDirective(wrapInI18nContext(VegaHelpMenu));
-});
+export function plugin(initializerContext: PluginInitializerContext) {
+  return new Plugin(initializerContext);
+}
