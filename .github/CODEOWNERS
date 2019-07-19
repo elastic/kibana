@@ -49,6 +49,7 @@
 /x-pack/legacy/plugins/telemetry @elastic/kibana-stack-services
 /x-pack/legacy/plugins/alerting @elastic/kibana-stack-services
 /x-pack/legacy/plugins/actions @elastic/kibana-stack-services
+/x-pack/legacy/plugins/task_manager @elastic/kibana-stack-services
 
 # Design
 **/*.scss  @elastic/kibana-design

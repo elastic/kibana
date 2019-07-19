@@ -72,7 +72,7 @@ describe('<AutoFollowPatternList />', () => {
     });
   });
 
-  describe('when there are auto-follow patterns', async () => {
+  describe('when there are auto-follow patterns', () => {
     let find;
     let exists;
     let component;
