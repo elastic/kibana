@@ -19,7 +19,7 @@ export const SHOWING = i18n.translate('xpack.siem.loadingMoreTable.showing', {
 });
 
 export const ROWS = i18n.translate('xpack.siem.loadingMoreTable.rows', {
-  defaultMessage: 'Rows',
+  defaultMessage: 'Rows per page',
 });
 
 export const TOAST_TITLE = i18n.translate('xpack.siem.unableToLoadMoreResults.title', {
