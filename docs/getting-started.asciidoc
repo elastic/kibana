@@ -17,9 +17,6 @@ Manually load a data set and build your own visualizations and dashboard.
 
 Before you begin, make sure you've <<install, installed Kibana>> and established
 a {kibana-ref}/connect-to-elasticsearch.html[connection to Elasticsearch].
-You might also be interested in the
-https://www.elastic.co/webinars/getting-started-kibana[Getting Started with Kibana]
-video tutorial.
 
 If you are running our https://cloud.elastic.co[hosted Elasticsearch Service] 
 on Elastic Cloud, you can access Kibana with a single click.
@@ -52,7 +49,5 @@ include::getting-started/tutorial-discovering.asciidoc[]
 include::getting-started/tutorial-visualizing.asciidoc[]
 
 include::getting-started/tutorial-dashboard.asciidoc[]
-
-include::getting-started/tutorial-inspect.asciidoc[]
 
 include::getting-started/wrapping-up.asciidoc[]

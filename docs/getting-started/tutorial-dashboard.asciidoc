@@ -7,21 +7,22 @@ this tutorial.
 
 . Open *Dashboard*.
 . Click *Create new dashboard*.
-. Click *Add*.
+. Click *Add* in the menu bar.
 . Add *Bar Example*, *Map Example*, *Markdown Example*, and *Pie Example*.
-
-
++
 Your sample dashboard look like this:
-
++
 [role="screenshot"]
 image::images/tutorial-dashboard.png[]
 
+. Try out the editing controls.
++
 You can rearrange the visualizations by clicking a the header of a
 visualization and dragging. The gear icon in the top right of a visualization
 displays controls for editing and deleting the visualization.  A resize control
 is on the lower right.
 
-To get a link to share or HTML code to embed the dashboard in a web page, save
+. To get a link to share or HTML code to embed the dashboard in a web page, save
 the dashboard and click  *Share*.
 
-*Save* your dashboard.
+. *Save* your dashboard.
