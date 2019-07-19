@@ -4,11 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  basicJobValidation,
-  ValidationResults,
-  ValidationMessage,
-} from '../../../../../common/util/job_utils';
+import { basicJobValidation } from '../../../../../common/util/job_utils';
 import { newJobLimits } from '../../../new_job/utils/new_job_defaults';
 import { JobCreator } from '../job_creator';
 import { populateValidationMessages, checkForExistingJobAndGroupIds } from './util';
