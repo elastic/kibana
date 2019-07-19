@@ -17,6 +17,9 @@ function relativeToAbsolute(url) {
 
 export async function createMbMapInstance({ node, initialView, scrollZoom }) {
   const makiUrl = relativeToAbsolute(chrome.addBasePath(MAKI_SPRITE_PATH));
+
+  console.log('makiUrl', makiUrl);
+
   return new Promise((resolve) => {
     const options = {
       attributionControl: false,
