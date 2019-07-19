@@ -17,12 +17,9 @@
  * under the License.
  */
 
-import { expectType, expectError } from 'tsd';
+import { expectType } from 'tsd';
 import { UnwrapObservable, ObservableLike } from '../index';
 
 type STRING = UnwrapObservable<ObservableLike<string>>;
 
 expectType<STRING>('adf');
-
-const expectString = (str: STRING) => null;
-expectError(expectString(123));

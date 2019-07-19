@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { expectType, expectError } from 'tsd';
+import { expectType } from 'tsd';
 import { ShallowPromise } from '../index';
 
 type P1 = ShallowPromise<string>;
@@ -29,7 +29,3 @@ expectType<P1>(Promise.resolve<string>('a'));
 expectType<P2>(Promise.resolve<string>('a'));
 expectType<P3>(Promise.resolve<string>('a'));
 expectType<P4>(Promise.resolve<number>(123));
-
-const stringPromise = (promise: P1) => null;
-expectError(stringPromise(Promise.resolve<number>(123)));
-expectError(stringPromise(Promise.resolve<Promise<string>>(Promise.resolve('a'))));

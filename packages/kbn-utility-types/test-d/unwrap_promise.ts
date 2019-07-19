@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { expectType, expectError } from 'tsd';
+import { expectType } from 'tsd';
 import { UnwrapPromise } from '../index';
 
 type STRING = UnwrapPromise<Promise<string>>;
@@ -25,6 +25,3 @@ type TUPLE = UnwrapPromise<Promise<[number, number]>>;
 
 expectType<STRING>('adf');
 expectType<TUPLE>([1, 2]);
-
-const expectString = (str: STRING) => null;
-expectError(expectString(123));
