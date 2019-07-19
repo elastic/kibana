@@ -8,13 +8,12 @@ import { Ast } from '@kbn/interpreter/common';
 import { State } from './types';
 import { FramePublicAPI } from '../types';
 
-// export const toExpression = (state: State, datasource: DatasourcePublicAPI): Ast => {
 export const toExpression = (state: State, frame: FramePublicAPI): Ast | null => {
   const labels: Partial<Record<string, string>> = {};
   if (!state || !state.layers.length) {
     return null;
   }
-  // const datasource = frame.datasourceLayers.first;
+
   state.layers.forEach(layer => {
     const datasource = frame.datasourceLayers[layer.layerId];
     if (!datasource) {
@@ -28,7 +27,17 @@ export const toExpression = (state: State, frame: FramePublicAPI): Ast | null =>
     });
   });
 
-  return buildExpression(state, labels);
+  const stateWithValidAccessors = {
+    ...state,
+    layers: state.layers.map(layer => ({
+      ...layer,
+      accessors: layer.accessors.filter(accessor =>
+        Boolean(frame.datasourceLayers[layer.layerId].getOperationForColumnId(accessor))
+      ),
+    })),
+  };
+
+  return buildExpression(stateWithValidAccessors, labels);
 };
 
 export const buildExpression = (
@@ -56,24 +65,6 @@ export const buildExpression = (
             ],
           },
         ],
-        // x: [
-        //   {
-        //     type: 'expression',
-        //     chain: [
-        //       {
-        //         type: 'function',
-        //         function: 'lens_xy_xConfig',
-        //         arguments: {
-        //           title: [state.x.title],
-        //           showGridlines: [state.x.showGridlines],
-        //           position: [state.x.position],
-        //           accessor: [state.x.accessor],
-        //           hide: [Boolean(state.x.hide)],
-        //         },
-        //       },
-        //     ],
-        //   },
-        // ],
         layers: state.layers.map(layer => ({
           type: 'expression',
           chain: [
@@ -90,7 +81,7 @@ export const buildExpression = (
                 hide: [Boolean(layer.hide)],
 
                 xAccessor: [layer.xAccessor],
-                splitSeriesAccessors: layer.splitSeriesAccessors,
+                splitAccessor: [layer.splitAccessor],
                 seriesType: [layer.seriesType],
                 labels: layer.accessors.map(accessor => {
                   return columnLabels[accessor] || accessor;

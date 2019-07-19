@@ -29,7 +29,7 @@ describe('XYConfigPanel', () => {
           seriesType: 'bar',
           layerId: 'first',
           datasourceId: '',
-          splitSeriesAccessors: [],
+          splitAccessor: 'baz',
           xAccessor: 'foo',
           position: Position.Bottom,
           showGridlines: true,
@@ -52,7 +52,6 @@ describe('XYConfigPanel', () => {
     const component = mount(
       <XYConfigPanel
         dragDropContext={dragDropContext}
-        // datasource={mockDatasource()}
         frame={createMockFramePublicAPI()}
         setState={() => {}}
         state={testState()}
@@ -86,10 +85,9 @@ describe('XYConfigPanel', () => {
     const component = mount(
       <XYConfigPanel
         dragDropContext={dragDropContext}
-        // datasource={mockDatasource()}
         frame={createMockFramePublicAPI()}
         setState={() => {}}
-        state={{ ...state, layers: [{ ...state.layers[0], splitSeriesAccessors: ['c'] }] }}
+        state={{ ...state, layers: [{ ...state.layers[0], splitAccessor: 'c' }] }}
       />
     );
 
@@ -108,10 +106,8 @@ describe('XYConfigPanel', () => {
       const component = mount(
         <XYConfigPanel
           dragDropContext={dragDropContext}
-          // datasource={mockDatasource()}
           frame={createMockFramePublicAPI()}
           setState={setState}
-          // state={{ ...state, seriesType: fromSeriesType }}
           state={{ ...state, layers: [{ ...state.layers[0], seriesType: fromSeriesType }] }}
         />
       );
@@ -151,7 +147,6 @@ describe('XYConfigPanel', () => {
       const component = mount(
         <XYConfigPanel
           dragDropContext={dragDropContext}
-          // datasource={mockDatasource()}
           frame={createMockFramePublicAPI()}
           setState={setState}
           state={{ ...state, legend: { ...state.legend, isVisible } }}
@@ -178,7 +173,6 @@ describe('XYConfigPanel', () => {
       const component = mount(
         <XYConfigPanel
           dragDropContext={dragDropContext}
-          // datasource={mockDatasource()}
           frame={createMockFramePublicAPI()}
           setState={setState}
           state={testState()}
@@ -211,7 +205,6 @@ describe('XYConfigPanel', () => {
       const component = mount(
         <XYConfigPanel
           dragDropContext={dragDropContext}
-          // datasource={mockDatasource()}
           frame={createMockFramePublicAPI()}
           setState={setState}
           state={testState()}
@@ -233,15 +226,10 @@ describe('XYConfigPanel', () => {
   });
 
   test('the x dimension panel accepts any operations', () => {
-    // const datasource = {
-    //   ...mockDatasource(),
-    //   renderDimensionPanel: jest.fn(),
-    // };
     const state = testState();
     const component = mount(
       <XYConfigPanel
         dragDropContext={dragDropContext}
-        // datasource={datasource}
         frame={createMockFramePublicAPI()}
         setState={jest.fn()}
         state={{ ...state, layers: [{ ...state.layers[0], xAccessor: 'shazm' }] }}
@@ -274,10 +262,8 @@ describe('XYConfigPanel', () => {
       const component = mount(
         <XYConfigPanel
           dragDropContext={dragDropContext}
-          // datasource={mockDatasource()}
           frame={createMockFramePublicAPI()}
           setState={setState}
-          // state={{ ...state, x: { ...state.x, showGridlines } }}
           state={{ ...state, layers: [{ ...state.layers[0], showGridlines }] }}
         />
       );
@@ -302,7 +288,6 @@ describe('XYConfigPanel', () => {
       const component = mount(
         <XYConfigPanel
           dragDropContext={dragDropContext}
-          // datasource={mockDatasource()}
           frame={createMockFramePublicAPI()}
           setState={setState}
           state={testState()}
@@ -324,18 +309,12 @@ describe('XYConfigPanel', () => {
   });
 
   test('the y dimension panel accepts numeric operations', () => {
-    // const datasource = {
-    //   ...mockDatasource(),
-    //   renderDimensionPanel: jest.fn(),
-    // };
     const state = testState();
     const component = mount(
       <XYConfigPanel
         dragDropContext={dragDropContext}
-        // datasource={datasource}
         frame={createMockFramePublicAPI()}
         setState={jest.fn()}
-        // state={{ ...state, y: { ...state.y, accessors: ['a', 'b', 'c'] } }}
         state={{ ...state, layers: [{ ...state.layers[0], accessors: ['a', 'b', 'c'] }] }}
       />
     );
@@ -392,10 +371,8 @@ describe('XYConfigPanel', () => {
     const component = mount(
       <XYConfigPanel
         dragDropContext={dragDropContext}
-        // datasource={mockDatasource()}
         frame={createMockFramePublicAPI()}
         setState={setState}
-        // state={{ ...state, y: { ...state.y, accessors: ['a', 'b', 'c'] } }}
         state={{ ...state, layers: [{ ...state.layers[0], accessors: ['a', 'b', 'c'] }] }}
       />
     );
@@ -407,54 +384,4 @@ describe('XYConfigPanel', () => {
       y: { accessors: ['a', 'b', 'c', 'zed'] },
     });
   });
-
-  test('allows adding split dimensions', () => {
-    (generateId as jest.Mock).mockReturnValueOnce('foo');
-    const setState = jest.fn();
-    const state = testState();
-    const component = mount(
-      <XYConfigPanel
-        dragDropContext={dragDropContext}
-        // datasource={mockDatasource()}
-        frame={createMockFramePublicAPI()}
-        setState={setState}
-        // state={{ ...state, splitSeriesAccessors: ['a', 'b', 'c'] }}
-        state={{ ...state, layers: [{ ...state.layers[0], accessors: ['a', 'b', 'c'] }] }}
-      />
-    );
-
-    (testSubj(component, 'lnsXY_splitSeriesDimensionPanel_add').onClick as Function)();
-
-    expect(setState).toHaveBeenCalledTimes(1);
-    expect(setState.mock.calls[0][0]).toMatchObject({
-      splitSeriesAccessors: ['a', 'b', 'c', 'foo'],
-    });
-  });
-
-  // test('allows toggling the y axis gridlines', () => {
-  //   const toggleYGridlines = (showGridlines: boolean) => {
-  //     const setState = jest.fn();
-  //     const state = testState();
-  //     const component = mount(
-  //       <XYConfigPanel
-  //         dragDropContext={dragDropContext}
-  //         datasource={mockDatasource()}
-  //         setState={setState}
-  //         state={{ ...state, y: { ...state.y, showGridlines } }}
-  //       />
-  //     );
-
-  //     (testSubj(component, 'lnsXY_yShowGridlines').onChange as Function)();
-
-  //     expect(setState).toHaveBeenCalledTimes(1);
-  //     return setState.mock.calls[0][0];
-  //   };
-
-  //   expect(toggleYGridlines(true)).toMatchObject({
-  //     y: { showGridlines: false },
-  //   });
-  //   expect(toggleYGridlines(false)).toMatchObject({
-  //     y: { showGridlines: true },
-  //   });
-  // });
 });

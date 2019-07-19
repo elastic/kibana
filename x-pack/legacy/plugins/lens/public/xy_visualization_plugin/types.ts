@@ -152,10 +152,10 @@ export const layerConfig: ExpressionFunction<
       ],
       help: 'The type of chart to display.',
     },
-    splitSeriesAccessors: {
+    splitAccessor: {
       types: ['string'],
-      help: 'The columns to split by',
-      multi: true,
+      help: 'The column to split by',
+      multi: false,
     },
     accessors: {
       types: ['string'],
@@ -188,31 +188,21 @@ export type SeriesType =
 export type LayerConfig = AxisConfig & {
   layerId: string;
   datasourceId: string;
-
   xAccessor: string;
-
   accessors: string[];
   labels: string[];
   seriesType: SeriesType;
-  splitSeriesAccessors: string[];
+  splitAccessor: string;
 };
 
 export interface XYArgs {
-  // seriesType: SeriesType;
   legend: LegendConfig;
-  // y: YConfig;
-  // x: XConfig;
-  // splitSeriesAccessors: string[];
   layers: LayerConfig[];
 }
 
 export interface XYState {
-  // seriesType: SeriesType;
   legend: LegendConfig;
-  // y: YState;
-  // x: XConfig;
   layers: LayerConfig[];
-  // splitSeriesAccessors: string[];
 }
 
 export type State = XYState;

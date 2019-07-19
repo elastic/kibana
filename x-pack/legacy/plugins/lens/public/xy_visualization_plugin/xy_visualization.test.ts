@@ -23,7 +23,7 @@ function exampleState(): State {
         datasourceId: '',
         labels: [''],
         seriesType: 'area',
-        splitSeriesAccessors: [],
+        splitAccessor: 'd',
         position: Position.Bottom,
         showGridlines: true,
         title: 'Baz',
@@ -51,29 +51,27 @@ describe('xy_visualization', () => {
 
       expect(initialState).toMatchInlineSnapshot(`
         Object {
+          "layers": Array [
+            Object {
+              "accessors": Array [
+                "test-id1",
+              ],
+              "datasourceId": "",
+              "labels": Array [],
+              "layerId": "",
+              "position": "top",
+              "seriesType": "bar",
+              "showGridlines": false,
+              "splitAccessor": "test-id2",
+              "title": "",
+              "xAccessor": "test-id3",
+            },
+          ],
           "legend": Object {
             "isVisible": true,
             "position": "right",
           },
-          "seriesType": "bar",
-          "splitSeriesAccessors": Array [
-            "test-id3",
-          ],
           "title": "Empty XY Chart",
-          "x": Object {
-            "accessor": "test-id1",
-            "position": "bottom",
-            "showGridlines": false,
-            "title": "X",
-          },
-          "y": Object {
-            "accessors": Array [
-              "test-id2",
-            ],
-            "position": "left",
-            "showGridlines": false,
-            "title": "Y",
-          },
         }
       `);
     });

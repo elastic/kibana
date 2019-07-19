@@ -84,20 +84,13 @@ function getSuggestion(
   const title = `${yTitle} ${preposition} ${xTitle}`;
   const state: State = {
     legend: { isVisible: true, position: Position.Right },
-    // seriesType: splitBy && isDate ? 'line' : 'bar',
-    // x: {
-    //   accessor: xValue.columnId,
-    //   position: Position.Bottom,
-    //   showGridlines: false,
-    //   title: xTitle,
-    // },
     layers: [
       {
         layerId: 'first',
         datasourceId: '',
         xAccessor: xValue.columnId,
         seriesType: splitBy && isDate ? 'line' : 'bar',
-        splitSeriesAccessors: splitBy && isDate ? [splitBy.columnId] : [generateId()],
+        splitAccessor: splitBy && isDate ? splitBy.columnId : generateId(),
         accessors: yValues.map(col => col.columnId),
         labels: [''],
         position: Position.Left,
@@ -123,10 +116,6 @@ function getSuggestion(
     previewExpression: buildExpression(
       {
         ...state,
-        // x: {
-        //   ...state.x,
-        //   hide: true,
-        // },
         layers: state.layers.map(layer => ({ ...layer, hide: true })),
         legend: {
           ...state.legend,

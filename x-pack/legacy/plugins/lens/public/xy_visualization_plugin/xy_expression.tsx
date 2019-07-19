@@ -42,19 +42,6 @@ export const xyChart: ExpressionFunction<'lens_xy_chart', KibanaDatatable, XYArg
       types: ['lens_xy_legendConfig'],
       help: 'Configure the chart legend.',
     },
-    // y: {
-    //   types: ['lens_xy_yConfig'],
-    //   help: 'The y axis configuration',
-    // },
-    x: {
-      types: ['lens_xy_xConfig'],
-      help: 'The x axis configuration',
-    },
-    // splitSeriesAccessors: {
-    //   types: ['string'],
-    //   multi: true,
-    //   help: 'The columns used to split the series.',
-    // },
     layers: {
       types: ['lens_xy_layer'],
       help: 'Layers of visual series',
@@ -108,7 +95,6 @@ export function XYChart({ data, args }: XYChartProps) {
       <Axis
         id={getAxisId('x')}
         position={Position.Bottom}
-        // title={layers.title}
         title={'X'}
         showGridLines={false}
         hide={layers[0].hide}
@@ -122,52 +108,49 @@ export function XYChart({ data, args }: XYChartProps) {
         hide={layers[0].hide}
       />
 
-      {layers.map(
-        ({ splitSeriesAccessors, seriesType, labels, accessors, xAccessor, layerId }, index) => {
-          const seriesDataRow = data.rows.find(row => row[layerId]);
-          const seriesData = seriesDataRow ? seriesDataRow[layerId] : null;
+      {layers.map(({ splitAccessor, seriesType, labels, accessors, xAccessor, layerId }, index) => {
+        const seriesDataRow = data.rows.find(row => row[layerId]);
+        const seriesData = seriesDataRow ? seriesDataRow[layerId] : null;
 
-          if (!seriesData) {
-            return;
-          }
-
-          const idForCaching = accessors.concat([xAccessor], splitSeriesAccessors).join(',');
-
-          const seriesProps = {
-            key: index,
-            splitSeriesAccessors,
-            stackAccessors: seriesType.includes('stacked') ? [xAccessor] : [],
-            id: getSpecId(idForCaching),
-            xAccessor,
-            yAccessors: labels,
-            data: (seriesData as KibanaDatatable).rows.map(row => {
-              const newRow: typeof row = {};
-
-              // Remap data to { 'Count of documents': 5 }
-              Object.keys(row).forEach(key => {
-                const labelIndex = accessors.indexOf(key);
-                if (labelIndex > -1) {
-                  newRow[labels[labelIndex]] = row[key];
-                } else {
-                  newRow[key] = row[key];
-                }
-              });
-              return newRow;
-            }),
-          };
-
-          return seriesType === 'line' ? (
-            <LineSeries {...seriesProps} />
-          ) : seriesType === 'bar' ||
-            seriesType === 'bar_stacked' ||
-            seriesType === 'horizontal_bar' ||
-            seriesType === 'horizontal_bar_stacked' ? (
-            <BarSeries {...seriesProps} />
-          ) : (
-            <AreaSeries {...seriesProps} />
-          );
+        if (!seriesData) {
+          return;
         }
-      )}
+
+        const idForCaching = accessors.concat([xAccessor, splitAccessor]).join(',');
+
+        const seriesProps = {
+          key: index,
+          splitSeriesAccessors: [splitAccessor],
+          stackAccessors: seriesType.includes('stacked') ? [xAccessor] : [],
+          id: getSpecId(idForCaching),
+          xAccessor,
+          yAccessors: labels,
+          data: (seriesData as KibanaDatatable).rows.map(row => {
+            const newRow: typeof row = {};
+
+            Object.keys(row).forEach(key => {
+              const labelIndex = accessors.indexOf(key);
+              if (labelIndex > -1) {
+                newRow[labels[labelIndex]] = row[key];
+              } else {
+                newRow[key] = row[key];
+              }
+            });
+            return newRow;
+          }),
+        };
+
+        return seriesType === 'line' ? (
+          <LineSeries {...seriesProps} />
+        ) : seriesType === 'bar' ||
+          seriesType === 'bar_stacked' ||
+          seriesType === 'horizontal_bar' ||
+          seriesType === 'horizontal_bar_stacked' ? (
+          <BarSeries {...seriesProps} />
+        ) : (
+          <AreaSeries {...seriesProps} />
+        );
+      })}
     </Chart>
   );
 }

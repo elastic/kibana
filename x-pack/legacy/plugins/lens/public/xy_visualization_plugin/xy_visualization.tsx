@@ -32,7 +32,7 @@ export const xyVisualization: Visualization<State, PersistableState> = {
             position: Position.Top,
             seriesType: 'bar',
             showGridlines: false,
-            splitSeriesAccessors: [generateId()],
+            splitAccessor: generateId(),
             title: '',
             xAccessor: generateId(),
           },

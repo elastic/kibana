@@ -52,14 +52,12 @@ describe('xy_suggestions', () => {
   // Helper that plucks out the important part of a suggestion for
   // most test assertions
   function suggestionSubset(suggestion: VisualizationSuggestion<State>) {
-    return suggestion.state.layers.map(
-      ({ seriesType, splitSeriesAccessors, xAccessor, accessors }) => ({
-        seriesType,
-        splitSeriesAccessors,
-        x: xAccessor,
-        y: accessors,
-      })
-    );
+    return suggestion.state.layers.map(({ seriesType, splitAccessor, xAccessor, accessors }) => ({
+      seriesType,
+      splitAccessor,
+      x: xAccessor,
+      y: accessors,
+    }));
   }
 
   test('ignores invalid combinations', () => {
@@ -106,9 +104,7 @@ describe('xy_suggestions', () => {
       Array [
         Object {
           "seriesType": "bar",
-          "splitSeriesAccessors": Array [
-            "aaa",
-          ],
+          "splitAccessor": "aaa",
           "x": "date",
           "y": Array [
             "bytes",
@@ -134,9 +130,7 @@ describe('xy_suggestions', () => {
       Array [
         Object {
           "seriesType": "line",
-          "splitSeriesAccessors": Array [
-            "product",
-          ],
+          "splitAccessor": "product",
           "x": "date",
           "y": Array [
             "price",
@@ -170,9 +164,7 @@ describe('xy_suggestions', () => {
         Array [
           Object {
             "seriesType": "bar",
-            "splitSeriesAccessors": Array [
-              "bbb",
-            ],
+            "splitAccessor": "bbb",
             "x": "date",
             "y": Array [
               "price",
@@ -182,9 +174,7 @@ describe('xy_suggestions', () => {
         Array [
           Object {
             "seriesType": "bar",
-            "splitSeriesAccessors": Array [
-              "ccc",
-            ],
+            "splitAccessor": "ccc",
             "x": "country",
             "y": Array [
               "count",
@@ -211,9 +201,7 @@ describe('xy_suggestions', () => {
       Array [
         Object {
           "seriesType": "bar",
-          "splitSeriesAccessors": Array [
-            "ddd",
-          ],
+          "splitAccessor": "ddd",
           "x": "quantity",
           "y": Array [
             "price",
@@ -250,9 +238,7 @@ describe('xy_suggestions', () => {
       Array [
         Object {
           "seriesType": "bar",
-          "splitSeriesAccessors": Array [
-            "eee",
-          ],
+          "splitAccessor": "eee",
           "x": "mybool",
           "y": Array [
             "num votes",

@@ -27,7 +27,6 @@ function sampleArgs() {
   };
 
   const args: XYArgs = {
-    // seriesType: 'line',
     legend: {
       isVisible: false,
       position: Position.Top,
@@ -44,24 +43,9 @@ function sampleArgs() {
         position: Position.Left,
         showGridlines: false,
         title: 'A and B',
-
-        splitSeriesAccessors: [],
+        splitAccessor: 'd',
       },
     ],
-    // y: {
-    //   accessors: ['a', 'b'],
-    //   labels: ['Label A', 'Label B'],
-    //   position: Position.Left,
-    //   showGridlines: false,
-    //   title: 'A and B',
-    // },
-    // x: {
-    //   accessor: 'c',
-    //   position: Position.Bottom,
-    //   showGridlines: false,
-    //   title: 'C',
-    // },
-    // splitSeriesAccessors: [],
   };
 
   return { data, args };
@@ -92,7 +76,7 @@ describe('xy_expression', () => {
         position: Position.Left,
         showGridlines: false,
         title: 'A and B',
-        splitSeriesAccessors: [],
+        splitAccessor: 'd',
       };
 
       expect(layerConfig.fn(null, args, {})).toEqual({
@@ -130,8 +114,6 @@ describe('xy_expression', () => {
 
     test('it renders bar', () => {
       const { data, args } = sampleArgs();
-
-      // const component = shallow(<XYChart data={data} args={{ ...args, seriesType: 'bar' }} />);
       const component = shallow(
         <XYChart
           data={data}
@@ -144,8 +126,6 @@ describe('xy_expression', () => {
 
     test('it renders area', () => {
       const { data, args } = sampleArgs();
-
-      // const component = shallow(<XYChart data={data} args={{ ...args, seriesType: 'area' }} />);
       const component = shallow(
         <XYChart
           data={data}
@@ -158,10 +138,6 @@ describe('xy_expression', () => {
 
     test('it renders horizontal bar', () => {
       const { data, args } = sampleArgs();
-
-      // const component = shallow(
-      //   <XYChart data={data} args={{ ...args, seriesType: 'horizontal_bar' }} />
-      // );
       const component = shallow(
         <XYChart
           data={data}
@@ -174,10 +150,6 @@ describe('xy_expression', () => {
 
     test('it renders stacked bar', () => {
       const { data, args } = sampleArgs();
-
-      // const component = shallow(
-      //   <XYChart data={data} args={{ ...args, seriesType: 'bar_stacked' }} />
-      // );
       const component = shallow(
         <XYChart
           data={data}
@@ -191,10 +163,6 @@ describe('xy_expression', () => {
 
     test('it renders stacked area', () => {
       const { data, args } = sampleArgs();
-
-      // const component = shallow(
-      //   <XYChart data={data} args={{ ...args, seriesType: 'area_stacked' }} />
-      // );
       const component = shallow(
         <XYChart
           data={data}
@@ -208,10 +176,6 @@ describe('xy_expression', () => {
 
     test('it renders stacked horizontal bar', () => {
       const { data, args } = sampleArgs();
-
-      // const component = shallow(
-      //   <XYChart data={data} args={{ ...args, seriesType: 'horizontal_bar_stacked' }} />
-      // );
       const component = shallow(
         <XYChart
           data={data}
@@ -226,8 +190,6 @@ describe('xy_expression', () => {
 
     test('it remaps rows based on the labels', () => {
       const { data, args } = sampleArgs();
-
-      // const chart = shallow(<XYChart data={data} args={{ ...args, seriesType: 'bar' }} />);
       const chart = shallow(
         <XYChart
           data={data}
