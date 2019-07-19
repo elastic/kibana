@@ -37,7 +37,11 @@ type InheritedInput = {
   lastName: string;
 };
 
-export class HelloWorldContainer extends Container<InheritedInput> {
+interface HelloWorldContainerInput extends ContainerInput {
+  lastName?: string;
+}
+
+export class HelloWorldContainer extends Container<InheritedInput, HelloWorldContainerInput> {
   public readonly type = HELLO_WORLD_CONTAINER;
 
   constructor(input: ContainerInput, embeddableFactories: Map<string, EmbeddableFactory>) {
@@ -48,7 +52,7 @@ export class HelloWorldContainer extends Container<InheritedInput> {
     return {
       id,
       viewMode: this.input.viewMode || ViewMode.EDIT,
-      lastName: 'foo',
+      lastName: this.input.lastName || 'foo',
     };
   }
 

@@ -89,9 +89,11 @@ export interface CoreSetup {
     elasticsearch: {
         adminClient$: Observable<ClusterClient>;
         dataClient$: Observable<ClusterClient>;
+        createClient: (type: string, clientConfig?: Partial<ElasticsearchClientConfig>) => ClusterClient;
     };
     // (undocumented)
     http: {
+        createCookieSessionStorageFactory: HttpServiceSetup['createCookieSessionStorageFactory'];
         registerOnPreAuth: HttpServiceSetup['registerOnPreAuth'];
         registerAuth: HttpServiceSetup['registerAuth'];
         registerOnPostAuth: HttpServiceSetup['registerOnPostAuth'];

@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const GIS_API_PATH = 'api/maps';
 export const EMS_DATA_FILE_PATH = 'ems/file';
 export const EMS_DATA_TMS_PATH = 'ems/tms';
 export const EMS_META_PATH = 'ems/meta';
@@ -15,7 +14,10 @@ export const MAP_SAVED_OBJECT_TYPE = 'map';
 export const APP_ID = 'maps';
 export const APP_ICON = 'gisApp';
 
-export const MAP_BASE_URL = `/app/maps#/map`;
+export const MAP_APP_PATH = `app/${APP_ID}`;
+export const GIS_API_PATH = `api/${APP_ID}`;
+
+export const MAP_BASE_URL = `/${MAP_APP_PATH}#/${MAP_SAVED_OBJECT_TYPE}`;
 
 export function createMapPath(id) {
   return `${MAP_BASE_URL}/${id}`;
@@ -48,4 +50,9 @@ export const GEO_JSON_TYPE = {
   POLYGON: 'Polygon',
   MULTI_POLYGON: 'MultiPolygon',
   GEOMETRY_COLLECTION: 'GeometryCollection',
+};
+
+export const EMPTY_FEATURE_COLLECTION = {
+  type: 'FeatureCollection',
+  features: []
 };

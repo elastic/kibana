@@ -7,7 +7,7 @@
 import { SourceResolvers } from '../../graphql/types';
 import { Authentications } from '../../lib/authentications';
 import { AppResolverOf, ChildResolverOf } from '../../lib/framework';
-import { createOptions } from '../../utils/build_query/create_options';
+import { createOptionsPaginated } from '../../utils/build_query/create_options';
 import { QuerySourceResolver } from '../sources/resolvers';
 
 type QueryAuthenticationsResolver = ChildResolverOf<
@@ -28,7 +28,7 @@ export const createAuthenticationsResolvers = (
 } => ({
   Source: {
     async Authentications(source, args, { req }, info) {
-      const options = createOptions(source, args, info);
+      const options = createOptionsPaginated(source, args, info);
       return libs.authentications.getAuthentications(req, options);
     },
   },

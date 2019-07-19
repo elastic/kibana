@@ -24,6 +24,7 @@
   * [How can I avoid passing Core services deeply within my UI component tree?](#how-can-i-avoid-passing-core-services-deeply-within-my-ui-component-tree)
   * [How is "common" code shared on both the client and server?](#how-is-common-code-shared-on-both-the-client-and-server)
   * [When does code go into a plugin, core, or packages?](#when-does-code-go-into-a-plugin-core-or-packages)
+  * [How do I build my shim for New Platform services?](#how-do-i-build-my-shim-for-new-platform-services)
 * [How to](#how-to)
   * [Configure plugin](#configure-plugin)
   * [Mock core services in tests](#mock-core-services-in-tests)
@@ -825,6 +826,81 @@ After plugins, core is where most of the rest of the code in Kibana will exist. 
 
 The packages directory should have the least amount of code in Kibana. Just because some piece of code is not stateful doesn't mean it should go into packages. The packages directory exists to aid us in our quest to centralize as many of our owned dependencies in this single monorepo, so it's the logical place to put things like Kibana specific forks of node modules or vendor dependencies.
 
+### How do I build my shim for New Platform services?
+
+Many of the utilities you're using to build your plugins are available in the New Platform or in New Platform plugins. To help you build the shim for these new services, use the tables below to find where the New Platform equivalent lives.
+
+
+#### Client-side
+
+##### Core services
+In client code, `core` can be imported in legacy plugins via the `ui/new_platform` module.
+
+```ts
+import { npStart: { core } } from 'ui/new_platform';
+```
+
+| Legacy Platform                                       | New Platform                   | Notes                                                                                                                                          |
+|-------------------------------------------------------|--------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------|
+| `chrome.addBasePath`                                  | `core.http.basePath.prepend`   |                                                                                                                                                |
+| `chrome.breadcrumbs.set`                              | `core.chrome.setBreadcrumbs`   |                                                                                                                                                |
+| `chrome.getUiSettingsClient`                          | `core.uiSettings`              |                                                                                                                                                |
+| `chrome.helpExtension.set`                            | `core.chrome.setHelpExtension` |                                                                                                                                                |
+| `chrome.setVisible`                                   | `core.chrome.setVisible`       |                                                                                                                                                |
+| `chrome.getInjected`                                  | --                             | Not available, we'd like to hear about your usecase.                                                                                           |
+| `chrome.setRootTemplate` / `chrome.setRootController` | --                             | Use application mounting via `core.application.register` (coming soon).                                                                        |
+| `import { recentlyAccessed } from 'ui/persisted_log'` | `core.chrome.recentlyAccessed` |                                                                                                                                                |
+| `ui/documentation_links`                              | `core.docLinks`                |                                                                                                                                                |
+| `ui/kfetch`                                           | `core.http`                    | API is nearly identical                                                                                                                        |
+| `ui/metadata`                                         | `core.injectedMetadata`        | May be removed in the future. If you have a necessary usecase, please let us know.                                                             |
+| `ui/notify`                                           | `core.notifications`           | Currently only supports toast messages. Banners coming soon.                                                                                   |
+| `ui/routes`                                           | --                             | There is no global routing mechanism. Each app [configures its own routing](/rfcs/text/0004_application_service_mounting.md#complete-example). |
+
+_See also: [Public's CoreStart API Docs](/docs/development/core/public/kibana-plugin-public.corestart.md)_
+
+##### Plugins for shared application services
+In client code, we have a series of plugins which house shared application services that are being built in the shape of the new platform, but still technically reside in the legacy world. If your plugin depends on any of the APIs below, you'll need to add a dependency on the new platform plugin which will house them moving forward.
+
+The contracts for these plugins are exposed for you to consume in your own plugin; we have created dedicated exports for the `setup` and `start` contracts in a file called `legacy`. By passing these contracts to your plugin's `setup` and `start` methods, you can mimic the functionality that will eventually be provided in the new platform.
+
+```ts
+import { setup, start } from '../core_plugins/data/public/legacy';
+import { setup, start } from '../core_plugins/embeddables/public/legacy';
+import { setup, start } from '../core_plugins/visualizations/public/legacy';
+```
+
+| Legacy Platform                                        | New Platform                               | Notes                                                                                                                              |
+|--------------------------------------------------------|--------------------------------------------|------------------------------------------------------------------------------------------------------------------------------------|
+| `core_plugins/interpreter`                             | `data.expressions`                         | still in progress                                                                                                                  |
+| `import 'ui/apply_filters'`                            | `data.filter.loadLegacyDirectives`         | `loadLegacyDirectives()` should be called explicitly where you previously relied on importing for side effects                     |
+| `import 'ui/filter_bar'`                               | `data.filter.loadLegacyDirectives`         | `loadLegacyDirectives()` should be called explicitly where you previously relied on importing for side effects                     |
+| `import 'ui/query_bar'`                                | `data.query.loadLegacyDirectives`          | `loadLegacyDirectives()` should be called explicitly where you previously relied on importing for side effects                     |
+| `import 'ui/search_bar'`                               | `data.search.loadLegacyDirectives`         | `loadLegacyDirectives()` should be called explicitly where you previously relied on importing for side effects                     |
+| `import { QueryBar } from 'ui/query_bar'`              | `data.query.ui.QueryBar`                   | --                                                                                                                                 |
+| `import { SearchBar } from 'ui/search_bar'`            | `data.search.ui.SearchBar`                 | --                                                                                                                                 |
+| `ui/courier`                                           | `data.search`                              | still in progress                                                                                                                  |
+| `ui/embeddable`                                        | `embeddables`                              | still in progress                                                                                                                  |
+| `ui/filter_manager`                                    | `data.filter`                              | --                                                                                                                                 |
+| `ui/index_patterns`                                    | `data.indexPatterns`                       | still in progress                                                                                                                  |
+| `ui/registry/vis_types`                                | `visualizations.types`                     | --                                                                                                                                 |
+| `ui/vis`                                               | `visualizations.types`                     | --                                                                                                                                 |
+| `ui/vis/vis_factory`                                   | `visualizations.types`                     | --                                                                                                                                 |
+| `ui/vis/vis_filters`                                   | `visualizations.filters`                   | --                                                                                                                                 |
+
+
+#### Server-side
+
+##### Core services
+In server code, `core` can be accessed from either `server.newPlatform` or `kbnServer.newPlatform`. There are not currently very many services available on the server-side:
+
+| Legacy Platform                                    | New Platform                      | Notes                                              |
+|----------------------------------------------------|-----------------------------------|----------------------------------------------------|
+| `request.getBasePath()`                            | `core.http.basePath.get`          |                                                    |
+| `server.plugins.elasticsearch.getCluster('data')`  | `core.elasticsearch.dataClient$`  | Handlers will also include a pre-configured client |
+| `server.plugins.elasticsearch.getCluster('admin')` | `core.elasticsearch.adminClient$` | Handlers will also include a pre-configured client |
+| `request.getBasePath()`                            | `core.http.basePath`              |                                                    |
+
+_See also: [Server's CoreSetup API Docs](/docs/development/core/server/kibana-plugin-server.coresetup.md)_
 
 ## How to
 

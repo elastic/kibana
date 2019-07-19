@@ -6,30 +6,48 @@
 
 import _ from 'lodash';
 import chrome from 'ui/chrome';
-import { EmbeddableFactory } from 'ui/embeddable';
+import { capabilities } from 'ui/capabilities';
+import { i18n } from '@kbn/i18n';
+import {
+  EmbeddableFactory,
+  embeddableFactories,
+  ErrorEmbeddable
+} from '../../../../../../src/legacy/core_plugins/embeddable_api/public/index';
 import { MapEmbeddable } from './map_embeddable';
 import { indexPatternService } from '../kibana_services';
-import { i18n } from '@kbn/i18n';
+
 import { createMapPath, MAP_SAVED_OBJECT_TYPE, APP_ICON } from '../../common/constants';
 import { createMapStore } from '../reducers/store';
 import { addLayerWithoutDataSync } from '../actions/map_actions';
 import { getQueryableUniqueIndexPatternIds } from '../selectors/map_selectors';
-import { capabilities } from 'ui/capabilities';
+import '../angular/services/gis_map_saved_object_loader';
+import 'ui/vis/map/service_settings';
 
 export class MapEmbeddableFactory extends EmbeddableFactory {
+  type = MAP_SAVED_OBJECT_TYPE;
 
-  constructor(gisMapSavedObjectLoader) {
+  constructor() {
     super({
-      name: 'map',
       savedObjectMetaData: {
         name: i18n.translate('xpack.maps.mapSavedObjectLabel', {
           defaultMessage: 'Map',
         }),
         type: MAP_SAVED_OBJECT_TYPE,
-        getIconForSavedObject: () => APP_ICON
+        getIconForSavedObject: () => APP_ICON,
       },
     });
-    this._savedObjectLoader = gisMapSavedObjectLoader;
+  }
+  isEditable() {
+    return capabilities.get().maps.save;
+  }
+
+  // Not supported yet for maps types.
+  canCreateNew() { return false; }
+
+  getDisplayName() {
+    return i18n.translate('xpack.maps.embeddableDisplayName', {
+      defaultMessage: 'map',
+    });
   }
 
   async _getIndexPatterns(layerListJSON) {
@@ -59,20 +77,33 @@ export class MapEmbeddableFactory extends EmbeddableFactory {
     return _.compact(indexPatterns);
   }
 
-  async create(panelMetadata, onEmbeddableStateChanged) {
-    const savedMap = await this._savedObjectLoader.get(panelMetadata.id);
+  async createFromSavedObject(
+    savedObjectId,
+    input,
+    parent
+  ) {
+    const $injector = await chrome.dangerouslyGetActiveInjector();
+    const savedObjectLoader = $injector.get('gisMapSavedObjectLoader');
 
+    const savedMap = await savedObjectLoader.get(savedObjectId);
     const indexPatterns = await this._getIndexPatterns(savedMap.layerListJSON);
 
-    const editable = capabilities.get().maps.save;
+    return new MapEmbeddable(
+      {
+        savedMap,
+        editUrl: chrome.addBasePath(createMapPath(savedObjectId)),
+        indexPatterns,
+        editable: this.isEditable(),
+      },
+      input,
+      parent
+    );
+  }
 
-    return new MapEmbeddable({
-      onEmbeddableStateChanged,
-      embeddableConfig: panelMetadata.embeddableConfig,
-      savedMap,
-      editUrl: chrome.addBasePath(createMapPath(panelMetadata.id)),
-      editable,
-      indexPatterns,
-    });
+  async create(input) {
+    window.location.href = chrome.addBasePath(createMapPath(''));
+    return new ErrorEmbeddable('Maps can only be created from a saved object', input);
   }
 }
+
+embeddableFactories.set(MAP_SAVED_OBJECT_TYPE, new MapEmbeddableFactory());
