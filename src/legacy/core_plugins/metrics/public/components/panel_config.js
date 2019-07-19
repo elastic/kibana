@@ -44,14 +44,14 @@ export function PanelConfig(props) {
   const { model } = props;
   const Component = types[model.type];
   const [formValidationResults] = useState({});
-  const [visData, visDataVisData] = useState({});
+  const [visData, setVisData] = useState({});
 
   useEffect(() => {
     model.isModelInvalid = !checkModelValidity(formValidationResults);
   });
 
   useEffect(() => {
-    const visDataSubscription = props.visData$.subscribe((visData = {}) => visDataVisData(visData));
+    const visDataSubscription = props.visData$.subscribe((visData = {}) => setVisData(visData));
 
     return function cleanup() {
       visDataSubscription.unsubscribe();
