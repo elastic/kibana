@@ -125,17 +125,23 @@ export const datatableRenderer: RenderFunction<DatatableProps> = {
 };
 
 function DatatableComponent(props: DatatableProps) {
+  // TODO: We should probalby change data.rows to be data.layers, since
+  // each row is actually an array of layer objects
+  const firstLayer = props.data.rows[0];
+  const firstTable = firstLayer && (Object.values(firstLayer)[0] as KibanaDatatable);
+
   return (
     <EuiBasicTable
+      className="lnsDataTable"
       columns={props.args.columns.columnIds
-        .map((id, index) => {
+        .map((field, index) => {
           return {
-            field: props.args.columns.columnIds[index],
+            field,
             name: props.args.columns.labels[index],
           };
         })
         .filter(({ field }) => !!field)}
-      items={props.data.rows}
+      items={firstTable ? firstTable.rows : []}
     />
   );
 }

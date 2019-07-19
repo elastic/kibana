@@ -6,130 +6,71 @@
 
 import React from 'react';
 import { render } from 'react-dom';
-import {
-  EuiButtonIcon,
-  EuiForm,
-  EuiFieldText,
-  EuiFormRow,
-  EuiButton,
-  EuiFlexGroup,
-  EuiFlexItem,
-} from '@elastic/eui';
+import { EuiForm, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { I18nProvider } from '@kbn/i18n/react';
+import { MultiColumnEditor } from '../multi_column_editor';
 import {
   SuggestionRequest,
   Visualization,
   VisualizationProps,
   VisualizationSuggestion,
 } from '../types';
-import { NativeRenderer } from '../native_renderer';
 import { generateId } from '../id_generator';
 
-export interface DatatableVisualizationState {
-  columns: Array<{
-    id: string;
-    label: string;
-  }>;
+export interface LayerState {
+  layerId: string;
+  columns: string[];
 }
 
-export function DatatableConfigPanel(props: VisualizationProps<DatatableVisualizationState>) {
-  const { state, datasource, setState } = props;
+export interface DatatableVisualizationState {
+  layers: LayerState[];
+}
 
+function newLayerState(layerId: string): LayerState {
+  return {
+    layerId,
+    columns: [generateId()],
+  };
+}
+
+function updateColumns(
+  state: DatatableVisualizationState,
+  layer: LayerState,
+  fn: (columns: string[]) => string[]
+) {
+  const columns = fn(layer.columns);
+  const updatedLayer = { ...layer, columns };
+  const layers = state.layers.map(l => (l.layerId === layer.layerId ? updatedLayer : l));
+  return { ...state, layers };
+}
+
+export function DataTableLayer({
+  layer,
+  frame,
+  state,
+  setState,
+  dragDropContext,
+}: { layer: LayerState } & VisualizationProps<DatatableVisualizationState>) {
+  const datasource = frame.datasourceLayers[layer.layerId];
   return (
-    <EuiForm className="lnsConfigPanel">
-      {state.columns.map(({ id, label }, index) => {
-        const operation = datasource.getOperationForColumnId(id);
-        return (
-          <>
-            <EuiFormRow
-              key={id}
-              label={i18n.translate('xpack.lens.datatable.columnLabel', {
-                defaultMessage: 'Column',
-              })}
-            >
-              <EuiFieldText
-                data-test-subj="lnsDatatable-columnLabel"
-                value={label || ''}
-                onChange={e => {
-                  const newColumns = [...state.columns];
-                  newColumns[index] = { ...newColumns[index], label: e.target.value };
-                  setState({
-                    ...state,
-                    columns: newColumns,
-                  });
-                }}
-                placeholder={
-                  operation
-                    ? operation.label
-                    : i18n.translate('xpack.lens.datatable.columnTitlePlaceholder', {
-                        defaultMessage: 'Title',
-                      })
-                }
-                aria-label={i18n.translate('xpack.lens.datatable.columnTitlePlaceholder', {
-                  defaultMessage: 'Title',
-                })}
-              />
-            </EuiFormRow>
-
-            <EuiFormRow>
-              <EuiFlexGroup>
-                <EuiFlexItem grow={true}>
-                  <NativeRenderer
-                    data-test-subj="lnsDatatable_dimensionPanel"
-                    render={datasource.renderDimensionPanel}
-                    nativeProps={{
-                      columnId: id,
-                      dragDropContext: props.dragDropContext,
-                      filterOperations: () => true,
-                    }}
-                  />
-                </EuiFlexItem>
-
-                <EuiFlexItem grow={false}>
-                  <EuiButtonIcon
-                    size="s"
-                    color="warning"
-                    data-test-subj={`lnsDatatable_dimensionPanelRemove_${id}`}
-                    iconType="trash"
-                    onClick={() => {
-                      datasource.removeColumnInTableSpec(id);
-                      const newColumns = [...state.columns];
-                      newColumns.splice(index, 1);
-                      setState({
-                        ...state,
-                        columns: newColumns,
-                      });
-                    }}
-                    aria-label={i18n.translate('xpack.lens.datatable.removeColumnAriaLabel', {
-                      defaultMessage: 'Remove',
-                    })}
-                  />
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiFormRow>
-          </>
-        );
-      })}
-
-      <div>
-        <EuiButton
-          data-test-subj="lnsDatatable_dimensionPanel_add"
-          onClick={() => {
-            const newColumns = [...state.columns];
-            newColumns.push({
-              id: generateId(),
-              label: '',
-            });
-            setState({
-              ...state,
-              columns: newColumns,
-            });
-          }}
-          iconType="plusInCircle"
-        />
-      </div>
-    </EuiForm>
+    <EuiFormRow
+      label={i18n.translate('xpack.lens.datatable.columns', { defaultMessage: 'Columns' })}
+    >
+      <MultiColumnEditor
+        accessors={layer.columns}
+        datasource={datasource}
+        dragDropContext={dragDropContext}
+        filterOperations={() => true}
+        layerId={layer.layerId}
+        onAdd={() => setState(updateColumns(state, layer, columns => [...columns, generateId()]))}
+        onRemove={column =>
+          setState(updateColumns(state, layer, columns => columns.filter(c => c !== column)))
+        }
+        testSubj="datatable_columns"
+        data-test-subj="datatable_multicolumnEditor"
+      />
+    </EuiFormRow>
   );
 }
 
@@ -137,17 +78,17 @@ export const datatableVisualization: Visualization<
   DatatableVisualizationState,
   DatatableVisualizationState
 > = {
-  initialize(datasource, state) {
+  initialize(frame, state) {
+    const layerId = Object.keys(frame.datasourceLayers)[0] || frame.addNewLayer();
     return (
       state || {
-        columns: [
-          {
-            id: generateId(),
-            label: '',
-          },
-        ],
+        layers: [newLayerState(layerId)],
       }
     );
+  },
+
+  getLayerIds(state) {
+    return state.layers.map(l => l.layerId);
   },
 
   getPersistableState: state => state,
@@ -170,10 +111,12 @@ export const datatableVisualization: Visualization<
         score: 1,
         datasourceSuggestionId: table.datasourceSuggestionId,
         state: {
-          columns: table.columns.map(col => ({
-            id: col.columnId,
-            label: col.operation.label,
-          })),
+          layers: [
+            {
+              layerId: `${generateId()}`,
+              columns: table.columns.map(col => col.columnId),
+            },
+          ],
         },
         previewIcon: 'visTable',
       };
@@ -183,41 +126,53 @@ export const datatableVisualization: Visualization<
   renderConfigPanel: (domElement, props) =>
     render(
       <I18nProvider>
-        <DatatableConfigPanel {...props} />
+        <EuiForm className="lnsConfigPanel">
+          {props.state.layers.map(layer => (
+            <DataTableLayer layer={layer} {...props} />
+          ))}
+        </EuiForm>
       </I18nProvider>,
       domElement
     ),
 
-  toExpression: (state, datasource) => ({
-    type: 'expression',
-    chain: [
-      {
-        type: 'function',
-        function: 'lens_datatable',
-        arguments: {
-          columns: [
-            {
-              type: 'expression',
-              chain: [
-                {
-                  type: 'function',
-                  function: 'lens_datatable_columns',
-                  arguments: {
-                    columnIds: state.columns.map(({ id }) => id),
-                    labels: state.columns.map(({ id, label }) => {
-                      if (label) {
-                        return label;
-                      }
-                      const operation = datasource.getOperationForColumnId(id);
-                      return operation ? operation.label : '';
-                    }),
+  toExpression(state, frame) {
+    const layer = state.layers[0];
+    const datasource = frame.datasourceLayers[layer.layerId];
+    const operations = layer.columns
+      .map(columnId => ({ columnId, operation: datasource.getOperationForColumnId(columnId) }))
+      .filter(o => o.operation);
+
+    return {
+      type: 'expression',
+      chain: [
+        {
+          type: 'function',
+          function: 'lens_datatable',
+          arguments: {
+            columns: [
+              {
+                type: 'expression',
+                chain: [
+                  {
+                    type: 'function',
+                    function: 'lens_datatable_columns',
+                    arguments: {
+                      columnIds: operations.map(o => o.columnId),
+                      labels: operations.map(
+                        o =>
+                          o.operation!.label ||
+                          i18n.translate('xpack.lens.datatable.na', {
+                            defaultMessage: 'N/A',
+                          })
+                      ),
+                    },
                   },
-                },
-              ],
-            },
-          ],
+                ],
+              },
+            ],
+          },
         },
-      },
-    ],
-  }),
+      ],
+    };
+  },
 };

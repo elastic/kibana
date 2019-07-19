@@ -8,79 +8,79 @@ import React from 'react';
 import { createMockDatasource } from '../editor_frame_plugin/mocks';
 import {
   DatatableVisualizationState,
-  DatatableConfigPanel,
   datatableVisualization,
+  DataTableLayer,
 } from './visualization';
 import { mount } from 'enzyme';
-import { act } from 'react-dom/test-utils';
-import { Operation, DataType } from '../types';
+import { Operation, DataType, FramePublicAPI } from '../types';
 import { generateId } from '../id_generator';
 
 jest.mock('../id_generator');
 
+function mockFrame(): FramePublicAPI {
+  return {
+    addNewLayer: () => 'aaa',
+    datasourceLayers: {},
+  };
+}
+
 describe('Datatable Visualization', () => {
   describe('#initialize', () => {
     it('should initialize from the empty state', () => {
-      const datasource = createMockDatasource();
       (generateId as jest.Mock).mockReturnValueOnce('id');
-      expect(datatableVisualization.initialize(datasource.publicAPIMock)).toEqual({
-        columns: [{ id: 'id', label: '' }],
+      expect(datatableVisualization.initialize(mockFrame(), undefined)).toEqual({
+        layers: [
+          {
+            layerId: 'aaa',
+            columns: ['id'],
+          },
+        ],
       });
     });
 
     it('should initialize from a persisted state', () => {
-      const datasource = createMockDatasource();
       const expectedState: DatatableVisualizationState = {
-        columns: [{ id: 'saved', label: 'label' }],
+        layers: [
+          {
+            layerId: 'foo',
+            columns: ['saved'],
+          },
+        ],
       };
-      expect(datatableVisualization.initialize(datasource.publicAPIMock, expectedState)).toEqual(
-        expectedState
-      );
+      expect(datatableVisualization.initialize(mockFrame(), expectedState)).toEqual(expectedState);
     });
   });
 
   describe('#getPersistableState', () => {
     it('should persist the internal state', () => {
       const expectedState: DatatableVisualizationState = {
-        columns: [{ id: 'saved', label: 'label' }],
+        layers: [
+          {
+            layerId: 'baz',
+            columns: ['a', 'b', 'c'],
+          },
+        ],
       };
       expect(datatableVisualization.getPersistableState(expectedState)).toEqual(expectedState);
     });
   });
 
-  describe('DatatableConfigPanel', () => {
-    it('should update the column label', () => {
-      const setState = jest.fn();
-      const wrapper = mount(
-        <DatatableConfigPanel
-          dragDropContext={{ dragging: undefined, setDragging: () => {} }}
-          datasource={createMockDatasource().publicAPIMock}
-          setState={setState}
-          state={{ columns: [{ id: 'saved', label: 'label' }] }}
-        />
-      );
-
-      const labelEditor = wrapper.find('[data-test-subj="lnsDatatable-columnLabel"]').at(1);
-
-      act(() => {
-        labelEditor.simulate('change', { target: { value: 'New Label' } });
-      });
-
-      expect(setState).toHaveBeenCalledWith({
-        columns: [{ id: 'saved', label: 'New Label' }],
-      });
-    });
-
-    it('should allow all operations to be shown', () => {
+  describe('DataTableLayer', () => {
+    it('allows all kinds of operations', () => {
       const setState = jest.fn();
       const datasource = createMockDatasource();
+      const layer = { layerId: 'a', columns: ['b', 'c'] };
 
       mount(
-        <DatatableConfigPanel
+        <DataTableLayer
           dragDropContext={{ dragging: undefined, setDragging: () => {} }}
-          datasource={datasource.publicAPIMock}
+          frame={{
+            addNewLayer: jest.fn(),
+            datasourceLayers: { a: datasource.publicAPIMock },
+          }}
+          layer={layer}
           setState={setState}
-          state={{ columns: [{ id: 'saved', label: 'label' }] }}
+          state={{ layers: [layer] }}
         />
       );
 
@@ -105,52 +105,72 @@ describe('Datatable Visualization', () => {
       );
     });
 
-    it('should remove a column', () => {
+    it('allows columns to be removed', () => {
       const setState = jest.fn();
-      const wrapper = mount(
-        <DatatableConfigPanel
+      const datasource = createMockDatasource();
+      const layer = { layerId: 'a', columns: ['b', 'c'] };
+      const component = mount(
+        <DataTableLayer
           dragDropContext={{ dragging: undefined, setDragging: () => {} }}
-          datasource={createMockDatasource().publicAPIMock}
+          frame={{
+            addNewLayer: jest.fn(),
+            datasourceLayers: { a: datasource.publicAPIMock },
+          }}
+          layer={layer}
           setState={setState}
-          state={{ columns: [{ id: 'saved', label: '' }, { id: 'second', label: '' }] }}
+          state={{ layers: [layer] }}
         />
       );
 
-      act(() => {
-        wrapper
-          .find('[data-test-subj="lnsDatatable_dimensionPanelRemove_saved"]')
-          .first()
-          .simulate('click');
-      });
+      const onRemove = component
+        .find('[data-test-subj="datatable_multicolumnEditor"]')
+        .first()
+        .prop('onRemove') as (k: string) => {};
+
+      onRemove('b');
 
       expect(setState).toHaveBeenCalledWith({
-        columns: [{ id: 'second', label: '' }],
+        layers: [
+          {
+            layerId: 'a',
+            columns: ['c'],
+          },
+        ],
       });
     });
 
-    it('should be able to add more columns', () => {
+    it('allows columns to be added', () => {
+      (generateId as jest.Mock).mockReturnValueOnce('d');
       const setState = jest.fn();
       const datasource = createMockDatasource();
-      const wrapper = mount(
-        <DatatableConfigPanel
+      const layer = { layerId: 'a', columns: ['b', 'c'] };
+      const component = mount(
+        <DataTableLayer
           dragDropContext={{ dragging: undefined, setDragging: () => {} }}
-          datasource={datasource.publicAPIMock}
+          frame={{
+            addNewLayer: jest.fn(),
+            datasourceLayers: { a: datasource.publicAPIMock },
+          }}
+          layer={layer}
           setState={setState}
-          state={{ columns: [{ id: 'saved', label: 'label' }] }}
+          state={{ layers: [layer] }}
         />
       );
 
-      (generateId as jest.Mock).mockReturnValueOnce('newId');
+      const onAdd = component
+        .find('[data-test-subj="datatable_multicolumnEditor"]')
+        .first()
+        .prop('onAdd') as () => {};
 
-      act(() => {
-        wrapper
-          .find('[data-test-subj="lnsDatatable_dimensionPanel_add"]')
-          .first()
-          .simulate('click');
-      });
+      onAdd();
 
       expect(setState).toHaveBeenCalledWith({
-        columns: [{ id: 'saved', label: 'label' }, { id: 'newId', label: '' }],
+        layers: [
+          {
+            layerId: 'a',
+            columns: ['b', 'c', 'd'],
+          },
+        ],
       });
     });
   });

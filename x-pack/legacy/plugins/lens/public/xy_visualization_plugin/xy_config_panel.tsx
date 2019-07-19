@@ -12,7 +12,7 @@ import { EuiButton, EuiButtonGroup, EuiForm, EuiFormRow, EuiPanel, IconType } fr
 import { State, SeriesType, LayerConfig } from './types';
 import { VisualizationProps } from '../types';
 import { NativeRenderer } from '../native_renderer';
-import { MultiColumnEditor } from './multi_column_editor';
+import { MultiColumnEditor } from '../multi_column_editor';
 import { generateId } from '../id_generator';
 
 const chartTypeIcons: Array<{ id: SeriesType; label: string; iconType: IconType }> = [
