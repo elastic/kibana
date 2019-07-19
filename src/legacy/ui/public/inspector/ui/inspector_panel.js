@@ -92,7 +92,7 @@ class InspectorPanel extends Component {
           >
             <EuiFlexItem grow={true}>
               <EuiTitle size="s">
-                <h1>{ title }</h1>
+                <h1>{ title } 0 lol</h1>
               </EuiTitle>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
