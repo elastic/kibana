@@ -226,7 +226,8 @@
   .euiAccordion__buttonContent,
   // prevent appearing scroll bar in .euiAccordion__childWrapper due to negative margin on some children's EuiFlexGroup
   .euiForm > .euiFormRow:first-child,
-  [aria-controls="advancedAccordion"] {
+  [aria-controls="advancedAccordion"], 
+  .visEditorAgg__flexGroupWrapper {
     overflow: hidden;
   }
 

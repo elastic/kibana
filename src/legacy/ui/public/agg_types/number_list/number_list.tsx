@@ -133,7 +133,7 @@ function NumberList({
   };
 
   return (
-    <>
+    <div className="visEditorAgg__flexGroupWrapper">
       {models.map((model, arrayIndex) => (
         <Fragment key={model.id}>
           <NumberRow
@@ -165,7 +165,7 @@ function NumberList({
           />
         </EuiButtonEmpty>
       </EuiFlexItem>
-    </>
+    </div>
   );
 }
 
