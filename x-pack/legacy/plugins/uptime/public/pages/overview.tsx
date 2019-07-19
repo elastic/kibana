@@ -20,6 +20,7 @@ import { UMUpdateBreadcrumbs } from '../lib/lib';
 import { UptimeSettingsContext } from '../contexts';
 import { useUrlParams } from '../hooks';
 import { stringifyUrlParams } from '../lib/helper/stringify_url_params';
+import { useTrackPageview } from '../../../infra/public';
 
 interface OverviewPageProps {
   basePath: string;
@@ -69,6 +70,9 @@ export const OverviewPage = ({ basePath, logOverviewPageLoad, setBreadcrumbs }: 
       );
     }
   }, []);
+
+  useTrackPageview({ app: 'uptime', path: 'overview' });
+  useTrackPageview({ app: 'uptime', path: 'overview', delay: 15000 });
 
   const filterQueryString = search || '';
   let error: any;
