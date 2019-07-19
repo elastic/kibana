@@ -150,7 +150,7 @@ export class InfraLogEntriesDomain {
         const query = filterQuery
           ? {
               bool: {
-                must: [filterQuery, highlight.query],
+                filter: [filterQuery, highlight.query],
               },
             }
           : highlight.query;
