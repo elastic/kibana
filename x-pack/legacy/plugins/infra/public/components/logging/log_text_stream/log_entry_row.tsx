@@ -167,6 +167,7 @@ export const LogEntryRow = ({
                 <LogEntryFieldColumn
                   columnValue={column}
                   highlights={highlightsByColumnId[column.columnId] || []}
+                  isActiveHighlight={isActiveHighlight}
                   isHighlighted={isHighlighted}
                   isHovered={isHovered}
                   isWrapped={wrap}
