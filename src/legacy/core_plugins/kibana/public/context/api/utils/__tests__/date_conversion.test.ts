@@ -16,29 +16,16 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import React from 'react';
-import { EmbeddablePanel } from 'plugins/embeddable_api';
-import { HelloWorldEmbeddable } from '../../../../../../src/legacy/core_plugins/embeddable_api/public/test_samples';
+import { extractNanos } from '../date_conversion';
 
-export class ContactCardEmbeddableExample extends React.Component<{}> {
-  private embeddable: HelloWorldEmbeddable;
-
-  constructor() {
-    super({});
-    this.embeddable = new HelloWorldEmbeddable({ id: 'hello' });
-  }
-
-  public componentWillUnmount() {
-    if (this.embeddable) {
-      this.embeddable.destroy();
-    }
-  }
-
-  public render() {
-    return (
-      <div className="app-container dshAppContainer">
-        <EmbeddablePanel embeddable={this.embeddable} />
-      </div>
-    );
-  }
-}
+describe('function extractNanos', function() {
+  test('extract nanos of 2014-01-01', function() {
+    expect(extractNanos('2014-01-01')).toBe('000000000');
+  });
+  test('extract nanos of 2014-01-01T12:12:12.234Z', function() {
+    expect(extractNanos('2014-01-01T12:12:12.234Z')).toBe('234000000');
+  });
+  test('extract nanos of 2014-01-01T12:12:12.234123321Z', function() {
+    expect(extractNanos('2014-01-01T12:12:12.234123321Z')).toBe('234123321');
+  });
+});

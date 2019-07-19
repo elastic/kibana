@@ -16,29 +16,18 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import React from 'react';
-import { EmbeddablePanel } from 'plugins/embeddable_api';
-import { HelloWorldEmbeddable } from '../../../../../../src/legacy/core_plugins/embeddable_api/public/test_samples';
 
-export class ContactCardEmbeddableExample extends React.Component<{}> {
-  private embeddable: HelloWorldEmbeddable;
+import { AggConfig, VisState } from 'ui/vis';
+import { EditorConfig } from 'ui/vis/editors/config/types';
+import { SubAggParamsProp } from 'ui/vis/editors/default/components/default_editor_agg_params';
+import { AggParam } from '..';
 
-  constructor() {
-    super({});
-    this.embeddable = new HelloWorldEmbeddable({ id: 'hello' });
-  }
-
-  public componentWillUnmount() {
-    if (this.embeddable) {
-      this.embeddable.destroy();
-    }
-  }
-
-  public render() {
-    return (
-      <div className="app-container dshAppContainer">
-        <EmbeddablePanel embeddable={this.embeddable} />
-      </div>
-    );
-  }
-}
+export const aggParamCommonPropsMock = {
+  agg: {} as AggConfig,
+  aggParam: {} as AggParam,
+  editorConfig: {} as EditorConfig,
+  metricAggs: [] as AggConfig[],
+  subAggParams: {} as SubAggParamsProp,
+  state: {} as VisState,
+  showValidation: false,
+};
