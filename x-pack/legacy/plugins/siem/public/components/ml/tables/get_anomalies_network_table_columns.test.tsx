@@ -64,7 +64,7 @@ describe('get_anomalies_network_table_columns', () => {
     expect(columns.some(col => col.name === i18n.NETWORK_NAME)).toEqual(false);
   });
 
-  test('on the network page, we should not have an escaped id for the severity with underscores for draggables', () => {
+  test('on network page, we should escape the draggable id', () => {
     const columns = getAnomaliesNetworkTableColumnsCurated(
       NetworkType.page,
       startDate,

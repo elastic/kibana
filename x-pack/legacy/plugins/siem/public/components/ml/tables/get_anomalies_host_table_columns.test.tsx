@@ -64,7 +64,7 @@ describe('get_anomalies_host_table_columns', () => {
     expect(columns.some(col => col.name === i18n.HOST_NAME)).toEqual(false);
   });
 
-  test('on host page, we should not have an escaped id for the severity with underscores for draggables', () => {
+  test('on host page, we should escape the draggable id', () => {
     const columns = getAnomaliesHostTableColumnsCurated(
       HostsType.page,
       startDate,
