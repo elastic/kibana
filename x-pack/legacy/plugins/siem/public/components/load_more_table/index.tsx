@@ -159,7 +159,7 @@ export class LoadMoreTable<T, U, V, W, X, Y, Z, AA, AB> extends React.PureCompon
 
     const button = (
       <EuiButtonEmpty
-        size="s"
+        size="xs"
         color="text"
         iconType="arrowDown"
         iconSide="right"
@@ -225,13 +225,8 @@ export class LoadMoreTable<T, U, V, W, X, Y, Z, AA, AB> extends React.PureCompon
 
             {hasNextPage && (
               <FooterAction>
-                <EuiFlexGroup
-                  gutterSize="none"
-                  alignItems="flexStart"
-                  justifyContent="flexStart"
-                  direction="row"
-                >
-                  <EuiFlexItem grow={false}>
+                <EuiFlexGroup alignItems="flexStart">
+                  <EuiFlexItem>
                     {!isEmpty(itemsPerRow) && (
                       <EuiPopover
                         id="customizablePagination"
@@ -248,23 +243,16 @@ export class LoadMoreTable<T, U, V, W, X, Y, Z, AA, AB> extends React.PureCompon
                       </EuiPopover>
                     )}
                   </EuiFlexItem>
-                  <EuiFlexItem>
-                    <EuiFlexGroup
-                      gutterSize="none"
-                      alignItems="flexStart"
-                      justifyContent="center"
-                      direction="row"
+
+                  <EuiFlexItem grow={false}>
+                    <EuiButton
+                      data-test-subj="loadingMoreButton"
+                      isLoading={loading}
+                      onClick={this.props.loadMore}
+                      size="s"
                     >
-                      <EuiFlexItem grow={false}>
-                        <EuiButton
-                          data-test-subj="loadingMoreButton"
-                          isLoading={loading}
-                          onClick={this.props.loadMore}
-                        >
-                          {loading ? `${i18n.LOADING}` : i18n.LOAD_MORE}
-                        </EuiButton>
-                      </EuiFlexItem>
-                    </EuiFlexGroup>
+                      {loading ? `${i18n.LOADING}` : i18n.LOAD_MORE}
+                    </EuiButton>
                   </EuiFlexItem>
                 </EuiFlexGroup>
               </FooterAction>
@@ -326,6 +314,5 @@ const BasicTable = styled(EuiBasicTable)`
 `;
 
 const FooterAction = styled.div`
-  margin-top: 0.5rem;
-  width: 100%;
+  margin-top: ${props => props.theme.eui.euiSize};
 `;

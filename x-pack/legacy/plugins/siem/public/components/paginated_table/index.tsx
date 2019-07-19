@@ -165,7 +165,7 @@ export const PaginatedTable = memo<SiemTables>(
 
     const button = (
       <EuiButtonEmpty
-        size="s"
+        size="xs"
         color="text"
         iconType="arrowDown"
         iconSide="right"
@@ -252,6 +252,7 @@ export const PaginatedTable = memo<SiemTables>(
                       </EuiPopover>
                     )}
                 </EuiFlexItem>
+
                 <PaginationWrapper grow={false}>
                   <EuiPagination
                     data-test-subj="numberedPagination"
@@ -291,8 +292,7 @@ const BasicTable = styled(EuiBasicTable)`
 `;
 
 const FooterAction = styled.div`
-  margin-top: 0.5rem;
-  width: 100%;
+  margin-top: ${props => props.theme.eui.euiSize};
 `;
 
 const PaginationEuiFlexItem = styled(EuiFlexItem)`
