@@ -23,6 +23,7 @@ interface Props {
 }
 
 const quickRanges = [
+  { from: 'now/d', to: 'now', display: 'Today' },
   { from: 'now-24h', to: 'now', display: 'Last 24 hours' },
   { from: 'now-7d', to: 'now', display: 'Last 7 days' },
   { from: 'now-14d', to: 'now', display: 'Last 2 weeks' },
