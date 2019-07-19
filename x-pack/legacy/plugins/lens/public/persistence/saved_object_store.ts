@@ -11,6 +11,7 @@ export interface Document {
   type?: string;
   visualizationType: string | null;
   title: string;
+  activeDatasourceId: string;
   // The state is saved as a JSON string for now
   state: {
     datasourceStates: Record<string, unknown>;

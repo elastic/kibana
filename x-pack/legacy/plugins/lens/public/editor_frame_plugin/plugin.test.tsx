@@ -76,7 +76,6 @@ describe('editor_frame plugin', () => {
 
     it('should load the document, if persistedId is defined', async () => {
       const doc: Document = {
-        // datasourceType: 'indexpattern',
         id: 'hoi',
         activeDatasourceId: 'indexpattern',
         state: {
@@ -190,7 +189,6 @@ describe('editor_frame plugin', () => {
       const component = mount(
         <InitializedEditor
           doc={{
-            // datasourceType: 'b',
             activeDatasourceId: 'b',
             visualizationType: 'd',
             state: {

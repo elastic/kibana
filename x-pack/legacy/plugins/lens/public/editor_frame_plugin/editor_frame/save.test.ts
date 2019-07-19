@@ -12,16 +12,21 @@ describe('save editor frame state', () => {
   const saveArgs: Props = {
     dispatch: jest.fn(),
     redirectTo: jest.fn(),
-    activeDatasources: {},
-    // datasource: { getPersistableState: x => x },
+    activeDatasources: {
+      indexpattern: {
+        getPersistableState: x => x,
+      },
+    },
     visualization: { getPersistableState: x => x },
     state: {
       title: 'aaa',
-      // datasource: { activeId: '1', isLoading: false, state: {} },
-      datasourceMap: {},
-      datasourceStates: {},
+      datasourceStates: {
+        indexpattern: {
+          state: 'hello',
+          isLoading: false,
+        },
+      },
       activeDatasourceId: 'indexpattern',
-      // layerIdToDatasource: {},
       saving: false,
       visualization: { activeId: '2', state: {} },
     },
@@ -40,20 +45,13 @@ describe('save editor frame state', () => {
         (action.type === 'SAVING' && action.isSaving && saved) ||
         (action.type === 'SAVING' && !action.isSaving && !saved)
       ) {
-        throw new Error('Saving status was incorrectly set');
+        throw new Error('Saving status was incorrectly set' + action.isSaving + ' ' + saved);
       }
     });
 
     await save({
       ...saveArgs,
       dispatch,
-      // state: {
-      //   ...saveArgs.state,
-      // title: 'aaa',
-      // datasource: { activeId: '1', isLoading: false, state: {} },
-      // saving: false,
-      // visualization: { activeId: '2', state: {} },
-      // },
       store: {
         async save() {
           saved = true;
@@ -73,12 +71,6 @@ describe('save editor frame state', () => {
       save({
         ...saveArgs,
         dispatch,
-        // state: {
-        //   title: 'aaa',
-        //   datasource: { activeId: '1', isLoading: false, state: {} },
-        //   saving: false,
-        //   visualization: { activeId: '2', state: {} },
-        // },
         store: {
           async save() {
             throw new Error('aw shnap!');
@@ -99,41 +91,24 @@ describe('save editor frame state', () => {
     datasource.getPersistableState.mockImplementation(state => ({
       stuff: `${state}_datasource_persisted`,
     }));
+
     await save({
       ...saveArgs,
+      activeDatasources: {
+        indexpattern: datasource,
+      },
       store,
-      // state: {
-      //   title: 'bbb',
-      //   // datasource: { activeId: '1', isLoading: false, state: '2' },
-      //   datasourceStates
-      //   saving: false,
-      //   visualization: { activeId: '3', state: '4' },
-      // },
-
       state: {
         title: 'bbb',
-        // datasource: { activeId: '1', isLoading: false, state: {} },
         datasourceStates: {
           indexpattern: {
-            state: 'hello',
+            state: '2',
             isLoading: false,
           },
         },
-        datasourceMap: {
-          // indexpattern: createMockDatasource()
-          //   getPersistableState(state) {
-          //     return {
-          //       stuff: `${state}_datsource_persisted`,
-          //     };
-          //   },
-          // },
-          indexpattern: datasource,
-        },
-        // datasourceStates: {},
         activeDatasourceId: 'indexpattern',
-        // layerIdToDatasource: {},
         saving: false,
-        visualization: { activeId: '2', state: {} },
+        visualization: { activeId: '3', state: '4' },
       },
 
       visualization: {
@@ -146,11 +121,9 @@ describe('save editor frame state', () => {
     });
 
     expect(store.save).toHaveBeenCalledWith({
-      // datasourceType: '1',
       activeDatasourceId: 'indexpattern',
       id: undefined,
       state: {
-        // datasource: { stuff: '2_datsource_persisted' },
         datasourceStates: {
           indexpattern: {
             stuff: '2_datasource_persisted',
@@ -164,52 +137,64 @@ describe('save editor frame state', () => {
     });
   });
 
-  // it('redirects to the edit screen if the id changes', async () => {
-  //   const redirectTo = jest.fn();
-  //   const dispatch = jest.fn();
-  //   await save({
-  //     ...saveArgs,
-  //     dispatch,
-  //     redirectTo,
-  //     state: {
-  //       title: 'ccc',
-  //       datasource: { activeId: '1', isLoading: false, state: {} },
-  //       saving: false,
-  //       visualization: { activeId: '2', state: {} },
-  //     },
-  //     store: {
-  //       async save() {
-  //         return { id: 'bazinga' };
-  //       },
-  //     },
-  //   });
+  it('redirects to the edit screen if the id changes', async () => {
+    const redirectTo = jest.fn();
+    const dispatch = jest.fn();
+    await save({
+      ...saveArgs,
+      dispatch,
+      redirectTo,
+      state: {
+        title: 'ccc',
+        datasourceStates: {
+          indexpattern: {
+            state: {},
+            isLoading: false,
+          },
+        },
+        activeDatasourceId: 'indexpattern',
+        saving: false,
+        visualization: { activeId: '2', state: {} },
+      },
+      store: {
+        async save() {
+          return { id: 'bazinga' };
+        },
+      },
+    });
 
-  //   expect(dispatch).toHaveBeenCalledWith({ type: 'UPDATE_PERSISTED_ID', id: 'bazinga' });
-  //   expect(redirectTo).toHaveBeenCalledWith('/edit/bazinga');
-  // });
+    expect(dispatch).toHaveBeenCalledWith({ type: 'UPDATE_PERSISTED_ID', id: 'bazinga' });
+    expect(redirectTo).toHaveBeenCalledWith('/edit/bazinga');
+  });
 
-  // it('does not redirect to the edit screen if the id does not change', async () => {
-  //   const redirectTo = jest.fn();
-  //   const dispatch = jest.fn();
-  //   await save({
-  //     ...saveArgs,
-  //     dispatch,
-  //     redirectTo,
-  //     state: {
-  //       title: 'ddd',
-  //       datasource: { activeId: '1', isLoading: false, state: {} },
-  //       persistedId: 'foo',
-  //       saving: false,
-  //       visualization: { activeId: '2', state: {} },
-  //     },
-  //     store: {
-  //       async save() {
-  //         return { id: 'foo' };
-  //       },
-  //     },
-  //   });
+  it('does not redirect to the edit screen if the id does not change', async () => {
+    const redirectTo = jest.fn();
+    const dispatch = jest.fn();
+    await save({
+      ...saveArgs,
+      dispatch,
+      redirectTo,
+      state: {
+        title: 'ddd',
+        datasourceStates: {
+          indexpattern: {
+            state: {},
+            isLoading: false,
+          },
+        },
+        activeDatasourceId: 'indexpattern',
+        persistedId: 'foo',
+        saving: false,
+        visualization: { activeId: '2', state: {} },
+      },
+      store: {
+        async save() {
+          return { id: 'foo' };
+        },
+      },
+    });
 
-  //   expect(dispatch.mock.calls.some(({ type }) => type === 'UPDATE_PERSISTED_ID')).toBeFalsy();
-  //   expect(redirectTo).not.toHaveBeenCalled();
-  // });
+    expect(dispatch.mock.calls.some(({ type }) => type === 'UPDATE_PERSISTED_ID')).toBeFalsy();
+    expect(redirectTo).not.toHaveBeenCalled();
+  });
 });
