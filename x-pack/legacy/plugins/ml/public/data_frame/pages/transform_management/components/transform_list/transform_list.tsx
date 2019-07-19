@@ -25,6 +25,7 @@ import {
   DATA_FRAME_TASK_STATE,
   DATA_FRAME_MODE,
   Query,
+  Clause,
 } from './common';
 import { getTransformsFactory } from '../../services/transform_service';
 import { getColumns } from './columns';
@@ -66,6 +67,7 @@ export const DataFrameTransformList: SFC = () => {
   const [expandedRowItemIds, setExpandedRowItemIds] = useState<DataFrameTransformId[]>([]);
 
   const [errorMessage, setErrorMessage] = useState<any>(undefined);
+  const [searchError, setSearchError] = useState<any>(undefined);
 
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(10);
@@ -90,15 +92,21 @@ export const DataFrameTransformList: SFC = () => {
   // Call useRefreshInterval() after the subscription above is set up.
   useRefreshInterval(setBlockRefresh);
 
-  const onQueryChange = ({ query }: { query: Query }) => {
-    setIsLoading(true);
-    const clauses = query.ast.clauses;
-
-    if (clauses.length === 0) {
-      setFilteredTransforms(transforms);
-      setIsLoading(false);
-      return;
+  const onQueryChange = ({ query, error }: { query: Query; error: any }) => {
+    if (error) {
+      setSearchError(error.message);
+    } else {
+      let clauses = [];
+      if (query && query.ast !== undefined && query.ast.clauses !== undefined) {
+        clauses = query.ast.clauses;
+      }
+      setSearchError(undefined);
+      filterTransforms(clauses);
     }
+  };
+
+  const filterTransforms = (clauses: Clause[]) => {
+    setIsLoading(true);
     // keep count of the number of matches we make as we're looping over the clauses
     // we only want to return transforms which match all clauses, i.e. each search term is ANDed
     // { transform-one:  { transform: { id: transform-one, config: {}, state: {}, ... }, count: 0 }, transform-two: {...} }
@@ -283,6 +291,7 @@ export const DataFrameTransformList: SFC = () => {
       <TransformTable
         className="mlTransformTable"
         columns={columns}
+        error={searchError}
         hasActions={false}
         isExpandable={true}
         isSelectable={false}
