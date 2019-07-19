@@ -1,4 +1,5 @@
 #!/usr/bin/env groovy
+import groovy.json.JsonSlurper
 
 // Licensed to Elasticsearch B.V. under one or more contributor
 // license agreements. See the NOTICE file distributed with
@@ -71,19 +72,14 @@ pipeline {
      Checkout the code and stash it, to use it on other stages.
      */
     stage('Initializing') {
-      //  agent { label 'linux && immutable' }
-      agent any
+      agent { label 'immutable' }
       environment {
         HOME = "${env.WORKSPACE}"
       }
       stages {
         stage('Checkout') {
           steps {
-//            script {
-//              def d = load("${env.GROOVY_SRC}/dump.groovy")
-//              d.dumpEnv()
-//            }
-          //  checkoutES()
+            checkoutES()
             checkoutKibana()
           }
         }
@@ -94,21 +90,10 @@ pipeline {
         }
       }
     }
-
   }
 }
 
 def checkoutKibana() {
-  // useCache('source') {
-  //   dir("${BASE_DIR}"){
-  //     checkout([$class: 'GitSCM', branches: [[name: params.branch_specifier]],,
-  //       repo: "${GIT_URL}",
-  //       credentialsId: "${JOB_GIT_CREDENTIALS}",
-  //       reference: "/var/lib/jenkins/.git-references/kibana.git")
-  //     sh 'pwd'
-  //     stash allowEmpty: true, name: 'source', excludes: "${BASE_DIR}/.git,node/**", useDefaultExcludes: false
-  //   }
-  // }
   useCache('source'){
     dir("${BASE_DIR}"){
       checkout([$class: 'GitSCM', branches: [[name: params.branch_specifier]],
@@ -119,7 +104,7 @@ def checkoutKibana() {
   }
 
   dir("${BASE_DIR}") {
-    def packageJson = readJSON(file: 'package.json')
+    def packageJson = new JsonSlurper().parse(new File('package.json'))
     env.NODE_VERSION = packageJson.engines.node
     env.YARN_VERSION = packageJson.engines.yarn
   }
@@ -224,17 +209,6 @@ def useCache(String name, Closure body) {
     currentBuild.result = "SUCCESS"
   }
   return isCacheUsed
-}
-
-def readJSON(params){
-  def jsonSlurper = new groovy.json.JsonSlurper()
-  def jsonText = params.text
-//  sh '### params.file: ${params.file}'
-//  if(params.file){
-//    File f = new File("src/test/resources/${params.file}")
-//    jsonText = f.getText()
-//  }
-  return jsonSlurper.parseText(jsonText)
 }
 /**
   Define NodeJs environment variables.
