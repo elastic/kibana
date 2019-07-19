@@ -4856,8 +4856,6 @@
     "xpack.idxMgmt.indexTable.headers.storageSizeHeader": "ストレージサイズ",
     "xpack.idxMgmt.indexTable.invalidSearchErrorMessage": "無効な検索: {errorMessage}",
     "xpack.idxMgmt.indexTable.reloadIndicesButton": "インデックスを再読み込み",
-    "xpack.idxMgmt.indexTable.sectionDescription": "Elasticsearch インデックスを個々に、または一斉に更新します",
-    "xpack.idxMgmt.indexTable.sectionHeading": "インデックス管理",
     "xpack.idxMgmt.indexTable.serverErrorTitle": "インデックスの読み込み中にエラーが発生",
     "xpack.idxMgmt.indexTable.systemIndicesSearchIndicesAriaLabel": "インデックスの検索",
     "xpack.idxMgmt.indexTable.systemIndicesSearchInputPlaceholder": "検索",

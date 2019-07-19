@@ -4856,8 +4856,6 @@
     "xpack.idxMgmt.indexTable.headers.storageSizeHeader": "存储大小",
     "xpack.idxMgmt.indexTable.invalidSearchErrorMessage": "无效搜索：{errorMessage}",
     "xpack.idxMgmt.indexTable.reloadIndicesButton": "重载索引",
-    "xpack.idxMgmt.indexTable.sectionDescription": "单个或批量更新您的 Elasticsearch 索引。",
-    "xpack.idxMgmt.indexTable.sectionHeading": "索引管理",
     "xpack.idxMgmt.indexTable.serverErrorTitle": "加载索引时出错",
     "xpack.idxMgmt.indexTable.systemIndicesSearchIndicesAriaLabel": "搜索索引",
     "xpack.idxMgmt.indexTable.systemIndicesSearchInputPlaceholder": "搜索",
