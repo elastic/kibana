@@ -63,7 +63,8 @@ function DefaultEditorAggGroup({
   setValidity,
 }: DefaultEditorAggGroupProps) {
   const groupNameLabel = aggGroupNamesMap()[groupName];
-  const group: AggConfig[] = state.aggs.bySchemaGroup[groupName];
+  // e.g. buckets can have no aggs
+  const group: AggConfig[] = state.aggs.bySchemaGroup[groupName] || [];
 
   const stats = {
     min: 0,
