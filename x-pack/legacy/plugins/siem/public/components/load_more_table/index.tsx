@@ -18,7 +18,7 @@ import {
 } from '@elastic/eui';
 import { isEmpty, noop } from 'lodash/fp';
 import React from 'react';
-import styled, { css } from 'styled-components';
+import styled from 'styled-components';
 
 import { Direction } from '../../graphql/types';
 import { HeaderPanel } from '../header_panel';
@@ -193,18 +193,17 @@ export class LoadMoreTable<T, U, V, W, X, Y, Z, AA, AB> extends React.PureCompon
       >
         <HeaderPanel
           id={id}
-          showInspect={!(loading && loadingInitial) && this.state.showInspect}
+          showInspect={!loadingInitial && this.state.showInspect}
           subtitle={
-            !(loading && loadingInitial) &&
-            `${i18n.SHOWING}: ${headerCount.toLocaleString()} ${headerUnit}`
+            !loadingInitial && `${i18n.SHOWING}: ${headerCount.toLocaleString()} ${headerUnit}`
           }
           title={headerTitle}
           tooltip={headerTooltip}
         >
-          {headerSupplement}
+          {!loadingInitial && headerSupplement}
         </HeaderPanel>
 
-        {loading && loadingInitial ? (
+        {loadingInitial ? (
           <EuiLoadingContent data-test-subj="InitialLoadingPanelLoadMoreTable" lines={10} />
         ) : (
           <>

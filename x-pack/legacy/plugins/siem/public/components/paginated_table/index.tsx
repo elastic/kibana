@@ -18,7 +18,7 @@ import {
 } from '@elastic/eui';
 import { noop } from 'lodash/fp';
 import React, { memo, useState, useEffect } from 'react';
-import styled, { css } from 'styled-components';
+import styled from 'styled-components';
 
 import { Direction } from '../../graphql/types';
 import { AuthTableColumns } from '../page/hosts/authentications_table';
@@ -201,18 +201,17 @@ export const PaginatedTable = memo<SiemTables>(
       >
         <HeaderPanel
           id={id}
-          showInspect={!(loading && loadingInitial) && showInspect}
+          showInspect={!loadingInitial && showInspect}
           subtitle={
-            !(loading && loadingInitial) &&
-            `${i18n.SHOWING}: ${headerCount.toLocaleString()} ${headerUnit}`
+            !loadingInitial && `${i18n.SHOWING}: ${headerCount.toLocaleString()} ${headerUnit}`
           }
           title={headerTitle}
           tooltip={headerTooltip}
         >
-          {headerSupplement}
+          {!loadingInitial && headerSupplement}
         </HeaderPanel>
 
-        {loading && loadingInitial ? (
+        {loadingInitial ? (
           <EuiLoadingContent data-test-subj="InitialLoadingPanelPaginatedTable" lines={10} />
         ) : (
           <>

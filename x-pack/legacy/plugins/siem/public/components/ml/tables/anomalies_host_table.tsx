@@ -6,7 +6,7 @@
 
 import { EuiLoadingContent, EuiPanel } from '@elastic/eui';
 import React, { useContext, useState } from 'react';
-import styled, { css } from 'styled-components';
+import styled from 'styled-components';
 
 import { useAnomaliesTableData } from '../anomaly/use_anomalies_table_data';
 import { HeaderPanel } from '../../header_panel';
@@ -54,16 +54,10 @@ export const AnomaliesHostTable = React.memo<AnomaliesHostTableProps>(
     const pagination = {
       pageIndex: 0,
       pageSize: 10,
-      totalItemCount: getSizeFromAnomalies(tableData) || -1,
+      totalItemCount: getSizeFromAnomalies(tableData),
       pageSizeOptions: [5, 10, 20, 50],
       hidePerPageOptions: false,
     };
-
-    const [loadingInitial, setLoadingInitial] = useState(pagination.totalItemCount === -1);
-
-    if (pagination.totalItemCount >= 0 && loadingInitial) {
-      setLoadingInitial(false);
-    }
 
     if (!hasMlUserPermissions(capabilities)) {
       return null;
@@ -71,29 +65,17 @@ export const AnomaliesHostTable = React.memo<AnomaliesHostTableProps>(
       return (
         <Panel loading={loading}>
           <HeaderPanel
-            subtitle={
-              !(loading && loadingInitial) &&
-              `${i18n.SHOWING}: ${pagination.totalItemCount.toLocaleString()} ${i18n.ANOMALIES}`
-            }
+            subtitle={`${i18n.SHOWING}: ${pagination.totalItemCount.toLocaleString()} ${
+              i18n.ANOMALIES
+            }`}
             title={i18n.ANOMALIES}
             tooltip={i18n.TOOLTIP}
           />
 
-          {loading && loadingInitial ? (
-            <EuiLoadingContent data-test-subj="InitialLoadingPanelPaginatedTable" lines={10} />
-          ) : (
-            <>
-              <BasicTable
-                items={hosts}
-                columns={columns}
-                pagination={pagination}
-                sorting={sorting}
-              />
+          <BasicTable items={hosts} columns={columns} pagination={pagination} sorting={sorting} />
 
-              {loading && (
-                <Loader data-test-subj="anomalies-host-table-loading-panel" overlay size="xl" />
-              )}
-            </>
+          {loading && (
+            <Loader data-test-subj="anomalies-host-table-loading-panel" overlay size="xl" />
           )}
         </Panel>
       );
