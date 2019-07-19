@@ -46,7 +46,7 @@ You cannot change the space identifier once you create the space.
 {kib} also has an <<spaces-api, experimental API>> if you prefer to create spaces programatically.
 
 [float]
-==== Delete a spaces
+==== Delete a space
 
 Deleting a space permanently removes the space and all of its contents. 
 You can't delete the default space, but you can customize it to your liking.
@@ -57,8 +57,8 @@ You can't delete the default space, but you can customize it to your liking.
 
 You have control over which features are visible in each space. 
 For example, you might hide Dev Tools 
-in your "Executive" space, show Stack Monitoring only in your "Admin" space,
-and give certain users access to only Dashboard and Canvas. Controlling feature 
+in your "Executive" space or show Stack Monitoring only in your "Admin" space.
+Controlling feature 
 visibility is part of the add and edit workflow.
 
 Feature controls is not a security feature. To secure access 
@@ -90,7 +90,7 @@ interface to copy objects from one space to another.
 
 . Navigate to the space that contains your saved objects.
 . Export your saved objects via the import/export interface.
-. Navigate to the space you are importing to.
+. Navigate to the space where you want to import the objects.
 . Import your saved objects via the import/export interface.
 . (Optional) Delete the saved objects from the space you exported from, if you don't want to keep a copy there.
 
