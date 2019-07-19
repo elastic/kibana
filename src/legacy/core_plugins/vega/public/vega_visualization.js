@@ -16,118 +16,111 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
-import { i18n }  from '@kbn/i18n';
+import chrome from 'ui/chrome';
+import { i18n } from '@kbn/i18n';
 import { toastNotifications } from 'ui/notify';
 import { VegaView } from './vega_view/vega_view';
 import { VegaMapView } from './vega_view/vega_map_view';
-import { SavedObjectsClientProvider, findObjectByTitle } from 'ui/saved_objects';
+import { findObjectByTitle } from 'ui/saved_objects';
 
-// $rootScope is for the removeFilter() workaround, see vega_view/vega_base_view.js
-export function VegaVisualizationProvider(Private, vegaConfig, serviceSettings, $rootScope) {
+export const createVegaVisualization = ({ serviceSettings }) => class VegaVisualization {
+  constructor(el, vis) {
+    this.savedObjectsClient =  chrome.getSavedObjectsClient();
+    this._el = el;
+    this._vis = vis;
+  }
 
-  const savedObjectsClient = Private(SavedObjectsClientProvider);
-
-  return class VegaVisualization {
-    constructor(el, vis) {
-      this._el = el;
-      this._vis = vis;
-    }
-
-    /**
-     * Find index pattern by its title, of if not given, gets default
-     * @param {string} [index]
-     * @returns {Promise<string>} index id
-     */
-    async findIndex(index) {
-      let idxObj;
-      if (index) {
-        idxObj = await findObjectByTitle(savedObjectsClient, 'index-pattern', index);
-        if (!idxObj) {
-          throw new Error(i18n.translate('vega.visualization.indexNotFoundErrorMessage', {
-            defaultMessage: 'Index {index} not found',
-            values: { index: `"${index}"` },
-          }));
-        }
-      } else {
-        idxObj = await this._vis.API.indexPatterns.getDefault();
-        if (!idxObj) {
-          throw new Error(i18n.translate('vega.visualization.unableToFindDefaultIndexErrorMessage', {
-            defaultMessage: 'Unable to find default index',
-          }));
-        }
-      }
-      return idxObj.id;
-    }
-
-    /**
-     *
-     * @param {VegaParser} visData
-     * @param {*} status
-     * @returns {Promise<void>}
-     */
-    async render(visData, visParams, status) {
-      if (!visData && !this._vegaView) {
-        toastNotifications.addWarning(i18n.translate('vega.visualization.unableToRenderWithoutDataWarningMessage', {
-          defaultMessage: 'Unable to render without data',
+  /**
+   * Find index pattern by its title, of if not given, gets default
+   * @param {string} [index]
+   * @returns {Promise<string>} index id
+   */
+  async findIndex(index) {
+    let idxObj;
+    if (index) {
+      idxObj = await findObjectByTitle(this.savedObjectsClient, 'index-pattern', index);
+      if (!idxObj) {
+        throw new Error(i18n.translate('vega.visualization.indexNotFoundErrorMessage', {
+          defaultMessage: 'Index {index} not found',
+          values: { index: `"${index}"` },
         }));
-        return;
       }
-
-      try {
-
-        await this._render(visData, status);
-
-      } catch (error) {
-        if (this._vegaView) {
-          this._vegaView.onError(error);
-        } else {
-          toastNotifications.addError(error, {
-            title: i18n.translate('vega.visualization.renderErrorTitle', {
-              defaultMessage: 'Vega error',
-            }),
-          });
-        }
+    } else {
+      idxObj = await this._vis.API.indexPatterns.getDefault();
+      if (!idxObj) {
+        throw new Error(i18n.translate('vega.visualization.unableToFindDefaultIndexErrorMessage', {
+          defaultMessage: 'Unable to find default index',
+        }));
       }
     }
+    return idxObj.id;
+  }
 
-    async _render(vegaParser, status) {
-      if (vegaParser && (status.data || !this._vegaView)) {
+  /**
+   *
+   * @param {VegaParser} visData
+   * @param {*} status
+   * @returns {Promise<void>}
+   */
+  async render(visData, visParams, status) {
+    if (!visData && !this._vegaView) {
+      toastNotifications.addWarning(i18n.translate('vega.visualization.unableToRenderWithoutDataWarningMessage', {
+        defaultMessage: 'Unable to render without data',
+      }));
+      return;
+    }
 
-        // New data received, rebuild the graph
-        if (this._vegaView) {
-          await this._vegaView.destroy();
-          this._vegaView = null;
-        }
+    try {
 
-        const vegaViewParams = {
-          vegaConfig,
-          parentEl: this._el,
-          vegaParser,
-          serviceSettings,
-          queryfilter: this._vis.API.queryFilter,
-          timefilter: this._vis.API.timeFilter,
-          findIndex: this.findIndex.bind(this),
-          $rootScope,
-        };
+      await this._render(visData, status);
 
-        if (vegaParser.useMap) {
-          this._vegaView = new VegaMapView(vegaViewParams);
-        } else {
-          this._vegaView = new VegaView(vegaViewParams);
-        }
-        await this._vegaView.init();
-
-      } else if (status.resize) {
-
-        // the graph has been resized
-        await this._vegaView.resize();
-
+    } catch (error) {
+      if (this._vegaView) {
+        this._vegaView.onError(error);
+      } else {
+        toastNotifications.addError(error, {
+          title: i18n.translate('vega.visualization.renderErrorTitle', {
+            defaultMessage: 'Vega error',
+          }),
+        });
       }
     }
+  }
 
-    destroy() {
-      return this._vegaView && this._vegaView.destroy();
+  async _render(vegaParser, status) {
+    if (vegaParser && (status.data || !this._vegaView)) {
+
+      // New data received, rebuild the graph
+      if (this._vegaView) {
+        await this._vegaView.destroy();
+        this._vegaView = null;
+      }
+
+      const vegaViewParams = {
+        parentEl: this._el,
+        vegaParser,
+        serviceSettings,
+        queryfilter: this._vis.API.queryFilter,
+        timefilter: this._vis.API.timeFilter,
+        findIndex: this.findIndex.bind(this),
+      };
+
+      if (vegaParser.useMap) {
+        this._vegaView = new VegaMapView(vegaViewParams);
+      } else {
+        this._vegaView = new VegaView(vegaViewParams);
+      }
+      await this._vegaView.init();
+
+    } else if (status.resize) {
+
+      // the graph has been resized
+      await this._vegaView.resize();
+
     }
-  };
-}
+  }
+
+  destroy() {
+    return this._vegaView && this._vegaView.destroy();
+  }
+};
