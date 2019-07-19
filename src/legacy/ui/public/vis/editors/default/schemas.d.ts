@@ -18,12 +18,13 @@
  */
 
 import { AggParam } from '../../../agg_types';
+import { AggGroupNames } from './agg_groups';
 
 export interface Schema {
   aggFilter: string | string[];
   deprecate: boolean;
   editor: boolean | string;
-  group: 'metrics' | 'buckets';
+  group: AggGroupNames;
   max: number;
   min: number;
   name: string;

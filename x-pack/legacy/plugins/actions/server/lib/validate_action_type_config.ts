@@ -15,17 +15,10 @@ export function validateActionTypeConfig<T extends Record<string, any>>(
   if (!validator) {
     return config;
   }
-  const { error, value } = validator.validate(config);
-  if (error) {
-    if (error.details == null) {
-      throw Boom.badRequest(`The actionTypeConfig is invalid: ${error.message}`);
-    }
-    const invalidPaths = error.details.map(
-      (details: any) => `${details.path.join('.')} [${details.type}]`
-    );
-    throw Boom.badRequest(
-      `The following actionTypeConfig attributes are invalid: ${invalidPaths.join(', ')}`
-    );
+
+  try {
+    return validator.validate(config);
+  } catch (err) {
+    throw Boom.badRequest(`The actionTypeConfig is invalid: ${err.message}`);
   }
-  return value;
 }

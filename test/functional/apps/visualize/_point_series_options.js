@@ -184,7 +184,7 @@ export default function ({ getService, getPageObjects }) {
       });
     });
 
-    describe('timezones', async function () {
+    describe('timezones', function () {
       const expectedLabels = [
         '2015-09-20 00:00',
         '2015-09-21 00:00',

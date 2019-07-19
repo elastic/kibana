@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Services, ActionTypeRegistryContract } from '../types';
+import { Services, ActionTypeRegistryContract, ActionTypeExecutorResult } from '../types';
 import { validateActionTypeConfig } from './validate_action_type_config';
 import { validateActionTypeParams } from './validate_action_type_params';
 import { EncryptedSavedObjectsPlugin } from '../../../encrypted_saved_objects';
@@ -25,7 +25,7 @@ export async function execute({
   services,
   params,
   encryptedSavedObjectsPlugin,
-}: ExecuteOptions) {
+}: ExecuteOptions): Promise<ActionTypeExecutorResult> {
   // TODO: Ensure user can read the action before processing
   const action = await encryptedSavedObjectsPlugin.getDecryptedAsInternalUser('action', actionId, {
     namespace,
@@ -38,8 +38,11 @@ export async function execute({
   const validatedConfig = validateActionTypeConfig(actionType, mergedActionTypeConfig);
   const validatedParams = validateActionTypeParams(actionType, params);
 
-  let result;
-  let error;
+  let result: ActionTypeExecutorResult | null = null;
+
+  const { actionTypeId, description } = action.attributes;
+  const actionLabel = `${actionId} - ${actionTypeId} - ${description}`;
+
   try {
     result = await actionType.executor({
       services,
@@ -47,33 +50,17 @@ export async function execute({
       params: validatedParams,
     });
   } catch (err) {
-    error = err;
-  }
-
-  const { actionTypeId, description } = action.attributes;
-  const actionLabel = `${actionId} - ${actionTypeId} - ${description}`;
-
-  if (error != null) {
     services.log(
       ['warning', 'x-pack', 'actions'],
-      `action executed unsuccessfully: ${actionLabel} - ${error.message}`
+      `action executed unsuccessfully: ${actionLabel} - ${err.message}`
     );
-    throw error;
+    throw err;
   }
 
   services.log(['debug', 'x-pack', 'actions'], `action executed successfully: ${actionLabel}`);
 
-  // return result if it's JSONable, otherwise a simple success object
-  const simpleResult = { status: 'ok' };
+  // return basic response if none provided
+  if (result == null) return { status: 'ok' };
 
-  if (result == null || typeof result !== 'object') {
-    return simpleResult;
-  }
-
-  try {
-    JSON.stringify(result);
-    return result;
-  } catch (err) {
-    return simpleResult;
-  }
+  return result;
 }
