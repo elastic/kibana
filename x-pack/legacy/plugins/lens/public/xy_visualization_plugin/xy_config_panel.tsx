@@ -8,7 +8,15 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { Position } from '@elastic/charts';
-import { EuiButton, EuiButtonGroup, EuiForm, EuiFormRow, EuiPanel, IconType } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiButtonGroup,
+  EuiForm,
+  EuiFormRow,
+  EuiPanel,
+  IconType,
+  EuiButtonIcon,
+} from '@elastic/eui';
 import { State, SeriesType, LayerConfig } from './types';
 import { VisualizationProps } from '../types';
 import { NativeRenderer } from '../native_renderer';
@@ -246,11 +254,19 @@ export function XYConfigPanel(props: VisualizationProps<State>) {
                 defaultMessage: 'Layer',
               })}
             >
-              <NativeRenderer
-                data-test-subj="lnsXY_layerHeader"
-                render={props.frame.datasourceLayers[layer.layerId].renderLayerPanel}
-                nativeProps={{ layerId: layer.layerId }}
-              />
+              <>
+                <EuiButtonIcon
+                  iconType="trash"
+                  onClick={() => {
+                    setState({ ...state, layers: state.layers.filter(l => l !== layer) });
+                  }}
+                />
+                <NativeRenderer
+                  data-test-subj="lnsXY_layerHeader"
+                  render={props.frame.datasourceLayers[layer.layerId].renderLayerPanel}
+                  nativeProps={{ layerId: layer.layerId }}
+                />
+              </>
             </EuiFormRow>
 
             <EuiFormRow
