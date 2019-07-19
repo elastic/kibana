@@ -61,6 +61,7 @@ export const DataFrameTransformList: SFC = () => {
   const [isInitialized, setIsInitialized] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [blockRefresh, setBlockRefresh] = useState(false);
+  const [filterActive, setFilterActive] = useState(false);
 
   const [transforms, setTransforms] = useState<DataFrameTransformListRow[]>([]);
   const [filteredTransforms, setFilteredTransforms] = useState<DataFrameTransformListRow[]>([]);
@@ -81,7 +82,6 @@ export const DataFrameTransformList: SFC = () => {
     !checkPermission('canStartStopDataFrame');
 
   const getTransforms = getTransformsFactory(
-    setFilteredTransforms,
     setTransforms,
     setErrorMessage,
     setIsInitialized,
@@ -103,8 +103,13 @@ export const DataFrameTransformList: SFC = () => {
       if (query && query.ast !== undefined && query.ast.clauses !== undefined) {
         clauses = query.ast.clauses;
       }
+      if (clauses.length > 0) {
+        setFilterActive(true);
+        filterTransforms(clauses);
+      } else {
+        setFilterActive(false);
+      }
       setSearchError(undefined);
-      filterTransforms(clauses);
     }
   };
 
@@ -113,7 +118,7 @@ export const DataFrameTransformList: SFC = () => {
     // keep count of the number of matches we make as we're looping over the clauses
     // we only want to return transforms which match all clauses, i.e. each search term is ANDed
     // { transform-one:  { transform: { id: transform-one, config: {}, state: {}, ... }, count: 0 }, transform-two: {...} }
-    const matches: Record<string, any> = transforms.reduce((p: { [key: string]: any }, c) => {
+    const matches: Record<string, any> = transforms.reduce((p: Record<string, any>, c) => {
       p[c.id] = {
         transform: c,
         count: 0,
@@ -293,7 +298,7 @@ export const DataFrameTransformList: SFC = () => {
         hasActions={false}
         isExpandable={true}
         isSelectable={false}
-        items={filteredTransforms}
+        items={filterActive ? filteredTransforms : transforms}
         itemId={DataFrameTransformListColumn.id}
         itemIdToExpandedRowMap={itemIdToExpandedRowMap}
         onChange={onTableChange}
