@@ -20,7 +20,6 @@ import React from 'react';
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { EuiToolTip } from '@elastic/eui';
-import { getAriaSortLabel, getSortHeaderClass } from './helpers';
 // @ts-ignore
 import { shortenDottedString } from '../../../../../common/utils/shorten_dotted_string';
 
@@ -31,10 +30,10 @@ interface Props {
   isRemoveable: boolean;
   isSortable: boolean;
   name: string;
-  onChangeSortOrder?: (name: string) => void;
+  onChangeSortOrder?: (name: string, direction: 'asc' | 'desc') => void;
   onMoveColumn?: (name: string, idx: number) => void;
   onRemoveColumn?: (name: string) => void;
-  sortOrder: [string, string]; // name of the current sort field + sortdirection
+  sortDirection: 'asc' | 'desc' | ''; // asc|desc -> field is sorted in this direction, else ''
 }
 
 export function TableHeaderColumn({
@@ -47,21 +46,45 @@ export function TableHeaderColumn({
   onChangeSortOrder,
   onMoveColumn,
   onRemoveColumn,
-  sortOrder,
+  sortDirection,
 }: Props) {
-  // action buttons displayed on the left side of the column name
+  const btnSortIcon = sortDirection === 'desc' ? 'fa fa-sort-down' : 'fa fa-sort-up';
+  const btnSortClassName =
+    sortDirection !== '' ? btnSortIcon : `kbnDocTableHeader__sortChange ${btnSortIcon}`;
+
+  // action buttons displayed on the right side of the column name
   const buttons = [
+    // Sort Button
     {
       active: isSortable,
-      ariaLabel: getAriaSortLabel(name, sortOrder),
-      className: getSortHeaderClass(name, sortOrder),
-      onClick: () => onChangeSortOrder && onChangeSortOrder(name),
+      ariaLabel:
+        sortDirection === 'asc'
+          ? i18n.translate('kbn.docTable.tableHeader.sortByColumnDescendingAriaLabel', {
+              defaultMessage: 'Sort {columnName} descending',
+              values: { columnName: name },
+            })
+          : i18n.translate('kbn.docTable.tableHeader.sortByColumnAscendingAriaLabel', {
+              defaultMessage: 'Sort {columnName} ascending',
+              values: { columnName: name },
+            }),
+      className: btnSortClassName,
+      onClick: () => {
+        /**
+         * cycle sorting direction
+         * asc -> desc, desc -> asc, default: asc
+         */
+        if (typeof onChangeSortOrder === 'function') {
+          const newDirection = sortDirection === 'asc' ? 'desc' : 'asc';
+          onChangeSortOrder(name, newDirection);
+        }
+      },
       testSubject: `docTableHeaderFieldSort_${name}`,
       tooltip: i18n.translate('kbn.docTable.tableHeader.sortByColumnTooltip', {
         defaultMessage: 'Sort by {columnName}',
-        values: { columnName: displayName },
+        values: { columnName: name },
       }),
     },
+    // Remove Button
     {
       active: isRemoveable,
       ariaLabel: i18n.translate('kbn.docTable.tableHeader.removeColumnButtonAriaLabel', {
@@ -75,6 +98,7 @@ export function TableHeaderColumn({
         defaultMessage: 'Remove Column',
       }),
     },
+    // Move Left Button
     {
       active: colLeftIdx >= 0,
       ariaLabel: i18n.translate('kbn.docTable.tableHeader.moveColumnLeftButtonAriaLabel', {
@@ -88,6 +112,7 @@ export function TableHeaderColumn({
         defaultMessage: 'Move column to the left',
       }),
     },
+    // Move Right Button
     {
       active: colRightIdx >= 0,
       ariaLabel: i18n.translate('kbn.docTable.tableHeader.moveColumnRightButtonAriaLabel', {

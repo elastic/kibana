@@ -144,3 +144,60 @@ describe('TableHeader with time column', () => {
     expect(props.onMoveColumn).toHaveBeenCalledWith('last', 1);
   });
 });
+
+describe('TableHeader without time column', () => {
+  const props = getMockProps({ hideTimeColumn: true });
+
+  const wrapper = mountWithIntl(
+    <table>
+      <thead>
+        <TableHeader {...props} />
+      </thead>
+    </table>
+  );
+
+  test('renders correctly', () => {
+    const docTableHeader = findTestSubject(wrapper, 'docTableHeader');
+    expect(docTableHeader.getDOMNode()).toMatchSnapshot();
+  });
+
+  test('first column is removeable', () => {
+    const removeButton = findTestSubject(wrapper, 'docTableRemoveHeader-first');
+    expect(removeButton.length).toBe(1);
+    removeButton.simulate('click');
+    expect(props.onRemoveColumn).toHaveBeenCalledWith('first');
+  });
+
+  test('first column is not moveable to the left', () => {
+    const moveButtonLeft = findTestSubject(wrapper, 'docTableMoveLeftHeader-first');
+    expect(moveButtonLeft.length).toBe(0);
+  });
+
+  test('first column is moveable to the right', () => {
+    const moveButtonRight = findTestSubject(wrapper, 'docTableMoveRightHeader-first');
+    expect(moveButtonRight.length).toBe(1);
+    moveButtonRight.simulate('click');
+    expect(props.onMoveColumn).toHaveBeenCalledWith('first', 1);
+  });
+
+  test('middle column is moveable to the left', () => {
+    const moveButtonLeft = findTestSubject(wrapper, 'docTableMoveLeftHeader-middle');
+    expect(moveButtonLeft.length).toBe(1);
+    moveButtonLeft.simulate('click');
+    expect(props.onMoveColumn).toHaveBeenCalledWith('middle', 0);
+  });
+
+  test('middle column is moveable to the right', () => {
+    const moveButtonRight = findTestSubject(wrapper, 'docTableMoveRightHeader-middle');
+    expect(moveButtonRight.length).toBe(1);
+    moveButtonRight.simulate('click');
+    expect(props.onMoveColumn).toHaveBeenCalledWith('middle', 2);
+  });
+
+  test('last column moveable to the left', () => {
+    const moveButtonLeft = findTestSubject(wrapper, 'docTableMoveLeftHeader-last');
+    expect(moveButtonLeft.length).toBe(1);
+    moveButtonLeft.simulate('click');
+    expect(props.onMoveColumn).toHaveBeenCalledWith('last', 1);
+  });
+});

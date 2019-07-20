@@ -16,34 +16,27 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { i18n } from '@kbn/i18n';
+import { IndexPatternEnhanced } from 'ui/index_patterns/_index_pattern';
+// @ts-ignore
+import { shortenDottedString } from '../../../../../common/utils/shorten_dotted_string';
 
-export type SortOrder = [string, string];
-
-export function getAriaSortLabel(columnName: string, sortOrder: SortOrder) {
-  const [currentColumnName, currentDirection = 'asc'] = sortOrder;
-  if (name === currentColumnName && currentDirection === 'asc') {
-    return i18n.translate('kbn.docTable.tableHeader.sortByColumnDescendingAriaLabel', {
-      defaultMessage: 'Sort {columnName} descending',
-      values: { columnName },
-    });
-  }
-  return i18n.translate('kbn.docTable.tableHeader.sortByColumnAscendingAriaLabel', {
-    defaultMessage: 'Sort {columnName} ascending',
-    values: { columnName },
-  });
+export type SortOrder = [string, 'asc' | 'desc'];
+export interface ColumnProps {
+  name: string;
+  displayName: string;
+  isSortable: boolean;
+  isRemoveable: boolean;
+  colLeftIdx: number;
+  colRightIdx: number;
 }
 
-export function getSortHeaderClass(columnName: string, sortOrder: SortOrder) {
-  const directionClass =
-    Array.isArray(sortOrder) && columnName === sortOrder[0] && sortOrder[1] === 'desc'
-      ? 'fa-sort-down'
-      : 'fa-sort-up';
-
-  return `kbnDocTableHeader__sortChange fa ${directionClass}`;
-}
-
-export function getTimeColumn(timeFieldName: string) {
+/**
+ * Returns properties necessary to display the time column
+ * If it's an IndexPattern with timefield, the time column is
+ * prepended, not moveable and removeable
+ * @param timeFieldName
+ */
+export function getTimeColumn(timeFieldName: string): ColumnProps {
   return {
     name: timeFieldName,
     displayName: 'Time',
@@ -53,16 +46,36 @@ export function getTimeColumn(timeFieldName: string) {
     colRightIdx: -1,
   };
 }
-
-export function prependTimeColumn(list: Array<Record<string, any>>, timeFieldName: string) {
-  return [getTimeColumn(timeFieldName), ...list];
-}
-
+/**
+ * A given array of column names returns an array of properties
+ * necessary to display the columns. If the given indexPattern
+ * has a timefield, a time column is prepended
+ * @param columns
+ * @param indexPattern
+ * @param hideTimeField
+ * @param isShortDots
+ */
 export function getDisplayedColumns(
-  columns: any,
-  columnMapperFn: (name: string, idx: number) => Record<string, any>,
-  timeFieldName: string
+  columns: string[],
+  indexPattern: IndexPatternEnhanced,
+  hideTimeField: boolean,
+  isShortDots: boolean
 ) {
-  const columnData = columns.map(columnMapperFn);
-  return timeFieldName ? prependTimeColumn(columnData, timeFieldName) : columnData;
+  if (!Array.isArray(columns) || typeof indexPattern !== 'object' || !indexPattern.getFieldByName) {
+    return [];
+  }
+  const columnProps = columns.map((column, idx) => {
+    const field = indexPattern.getFieldByName(column);
+    return {
+      name: column,
+      displayName: isShortDots ? shortenDottedString(column) : column,
+      isSortable: field && field.sortable ? true : false,
+      isRemoveable: column !== '_source' || columns.length > 1,
+      colLeftIdx: idx - 1 < 0 ? -1 : idx - 1,
+      colRightIdx: idx + 1 >= columns.length ? -1 : idx + 1,
+    };
+  });
+  return !hideTimeField && indexPattern.timeFieldName
+    ? [getTimeColumn(indexPattern.timeFieldName), ...columnProps]
+    : columnProps;
 }

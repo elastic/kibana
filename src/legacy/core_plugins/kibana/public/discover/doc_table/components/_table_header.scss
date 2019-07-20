@@ -1,8 +1,9 @@
+.kbnDocTableHeader button {
+  margin-left: 3px;
+}
 .kbnDocTableHeader__move,
 .kbnDocTableHeader__sortChange {
   opacity: 0;
-  margin-left: 3px;
-
   th:hover &,
   &:focus {
     opacity: 1;

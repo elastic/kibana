@@ -17,7 +17,6 @@
  * under the License.
  */
 import React from 'react';
-import { isFunction } from 'lodash';
 import { IndexPatternEnhanced } from 'ui/index_patterns/_index_pattern';
 // @ts-ignore
 import { shortenDottedString } from '../../../../../common/utils/shorten_dotted_string';
@@ -45,41 +44,21 @@ export function TableHeader({
   onRemoveColumn,
   sortOrder,
 }: Props) {
-  const { timeFieldName } = indexPattern;
-
-  function cycleSortOrder(colName: string) {
-    const [currColumnName, currDirection = 'asc'] = sortOrder;
-    const newDirection = colName === currColumnName && currDirection === 'asc' ? 'desc' : 'asc';
-
-    onChangeSortOrder(colName, newDirection);
-  }
-
-  function columnMapper(name: string, idx: number) {
-    const field = indexPattern.getFieldByName(name);
-    return {
-      name,
-      displayName: isShortDots ? shortenDottedString(name) : name,
-      isSortable: isFunction(onChangeSortOrder) && field && field.sortable,
-      isRemoveable: isFunction(onRemoveColumn) && (name !== '_source' || columns.length > 1),
-      colLeftIdx: idx - 1 < 0 ? -1 : idx - 1,
-      colRightIdx: idx + 1 >= columns.length ? -1 : idx + 1,
-    };
-  }
-  const usedTimeField = timeFieldName && !hideTimeColumn ? timeFieldName : '';
-  const displayedColumns = getDisplayedColumns(columns, columnMapper, usedTimeField);
+  const displayedColumns = getDisplayedColumns(columns, indexPattern, hideTimeColumn, isShortDots);
+  const [currColumnName, currDirection = 'asc'] = sortOrder;
 
   return (
-    <tr data-test-subj="docTableHeader">
+    <tr data-test-subj="docTableHeader" className="kbnDocTableHeader">
       <th style={{ width: '24px' }}></th>
-      {displayedColumns.map((col: any) => {
+      {displayedColumns.map(col => {
         return (
           <TableHeaderColumn
             key={col.name}
-            sortOrder={sortOrder}
             {...col}
+            sortDirection={col.name === currColumnName ? currDirection : ''}
             onMoveColumn={onMoveColumn}
             onRemoveColumn={onRemoveColumn}
-            onChangeSortOrder={cycleSortOrder}
+            onChangeSortOrder={onChangeSortOrder}
           />
         );
       })}
