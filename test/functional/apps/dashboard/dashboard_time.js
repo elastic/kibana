@@ -56,7 +56,7 @@ export default function ({ getPageObjects, getService }) {
       });
     });
 
-    describe('dashboard with stored timed', async function () {
+    describe('dashboard with stored timed', function () {
       it('is saved with time', async function () {
         await PageObjects.dashboard.switchToEditMode();
         await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);

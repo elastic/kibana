@@ -4,10 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from '@kbn/expect';
 import { monitorStatesQueryString } from '../../../../../legacy/plugins/uptime/public/queries/monitor_states_query';
-import monitorStates from './fixtures/monitor_states.json';
-import monitorStatesIdFiltered from './fixtures/monitor_states_id_filtered.json';
+import { expectFixtureEql } from './expect_fixture_eql';
 
 // eslint-disable-next-line import/no-default-export
 export default function({ getService }: { getService: any }) {
@@ -31,7 +29,7 @@ export default function({ getService }: { getService: any }) {
         .set('kbn-xsrf', 'foo')
         .send({ ...getMonitorStatesQuery });
 
-      expect(data).to.eql(monitorStates);
+      expectFixtureEql(data, 'monitor_states');
     });
 
     it('will fetch monitor state data for the given filters and range', async () => {
@@ -53,7 +51,7 @@ export default function({ getService }: { getService: any }) {
         .set('kbn-xsrf', 'foo')
         .send({ ...getMonitorStatesQuery });
 
-      expect(data).to.eql(monitorStatesIdFiltered);
+      expectFixtureEql(data, 'monitor_states_id_filtered');
     });
   });
 }
