@@ -73,19 +73,18 @@ describe('EsQueryParser.populateData', () => {
 
   beforeEach(() => {
     searchStub = sinon.stub();
-    parser = new EsQueryParser({}, { search: searchStub }, undefined, undefined, 1234);
+    parser = new EsQueryParser({}, { search: searchStub }, undefined, undefined);
 
     searchStub.returns(Promise.resolve([{}, {}]));
   });
   it('should set the timeout for each request', async () => {
     await parser.populateData([{ url: { body: { } }, dataObject: {} }, { url: { body: {} }, dataObject: {} }]);
-    expect(searchStub.firstCall.args[0][0].body.timeout).to.eql('1234ms');
-    expect(searchStub.firstCall.args[0][1].body.timeout).to.eql('1234ms');
+    expect(searchStub.firstCall.args[0][0].body.timeout).to.be.defined;
   });
 
   it('should remove possible timeout parameters on a request', async () => {
     await parser.populateData([{ url: { timeout: '500h', body: { timeout: '500h' } }, dataObject: {} }]);
-    expect(searchStub.firstCall.args[0][0].body.timeout).to.eql('1234ms');
+    expect(searchStub.firstCall.args[0][0].body.timeout).to.be.defined;
     expect(searchStub.firstCall.args[0][0].timeout).to.be(undefined);
   });
 });
