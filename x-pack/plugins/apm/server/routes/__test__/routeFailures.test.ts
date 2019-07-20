@@ -13,7 +13,7 @@ import { initTracesApi } from '../traces';
 describe('route handlers should fail with a Boom error', () => {
   let consoleErrorSpy: any;
 
-  async function testRouteFailures(init: (core: CoreSetup) => void) {
+  function testRouteFailures(init: (core: CoreSetup) => void) {
     const mockServer = { route: jest.fn() };
     const mockCore = ({
       http: {
@@ -65,15 +65,15 @@ describe('route handlers should fail with a Boom error', () => {
     consoleErrorSpy.mockRestore();
   });
 
-  describe('error routes', async () => {
-    await testRouteFailures(initErrorsApi);
+  describe('error routes', () => {
+    testRouteFailures(initErrorsApi);
   });
 
-  describe('service routes', async () => {
-    await testRouteFailures(initServicesApi);
+  describe('service routes', () => {
+    testRouteFailures(initServicesApi);
   });
 
-  describe('trace routes', async () => {
-    await testRouteFailures(initTracesApi);
+  describe('trace routes', () => {
+    testRouteFailures(initTracesApi);
   });
 });

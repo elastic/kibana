@@ -185,7 +185,7 @@ export default function ({ getService, getPageObjects }) {
       });
     });
 
-    describe('x axis labels', async function () {
+    describe('x axis labels', function () {
       const expectedLabels = [
         '2015-09-20 00:00',
         '2015-09-21 00:00',

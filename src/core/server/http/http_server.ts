@@ -22,7 +22,7 @@ import { Request, Server, ServerOptions } from 'hapi';
 import { modifyUrl } from '../../utils';
 import { Logger } from '../logging';
 import { HttpConfig } from './http_config';
-import { createServer, getServerOptions } from './http_tools';
+import { createServer, getListenerOptions, getServerOptions } from './http_tools';
 import { adoptToHapiAuthFormat, AuthenticationHandler } from './lifecycle/auth';
 import { adoptToHapiOnRequestFormat, OnRequestHandler } from './lifecycle/on_request';
 import { Router, KibanaRequest } from './router';
@@ -101,7 +101,8 @@ export class HttpServer {
 
   public setup(config: HttpConfig): HttpServerSetup {
     const serverOptions = getServerOptions(config);
-    this.server = createServer(serverOptions);
+    const listenerOptions = getListenerOptions(config);
+    this.server = createServer(serverOptions, listenerOptions);
 
     return {
       options: serverOptions,
