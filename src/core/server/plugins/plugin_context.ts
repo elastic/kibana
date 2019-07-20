@@ -118,6 +118,7 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>(
       createClient: deps.elasticsearch.createClient,
     },
     http: {
+      createCookieSessionStorageFactory: deps.http.createCookieSessionStorageFactory,
       registerOnPreAuth: deps.http.registerOnPreAuth,
       registerAuth: deps.http.registerAuth,
       registerOnPostAuth: deps.http.registerOnPostAuth,

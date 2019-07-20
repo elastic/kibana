@@ -36,7 +36,6 @@ jest.mock(
 
 import { migratePanelsTo730 } from './migrate_to_730_panels';
 import { SavedDashboardPanelTo60, SavedDashboardPanel730ToLatest } from '../types';
-import { DEFAULT_PANEL_WIDTH, DEFAULT_PANEL_HEIGHT } from '../dashboard_constants';
 import {
   RawSavedDashboardPanelTo60,
   RawSavedDashboardPanel610,
@@ -44,6 +43,10 @@ import {
   RawSavedDashboardPanel630,
   RawSavedDashboardPanel640To720,
 } from './types';
+import {
+  DEFAULT_PANEL_WIDTH,
+  DEFAULT_PANEL_HEIGHT,
+} from '../../../../dashboard_embeddable_container/public';
 
 test('6.0 migrates uiState, sort, scales, and gridData', async () => {
   const uiState = {
