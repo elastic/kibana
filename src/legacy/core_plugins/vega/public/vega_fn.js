@@ -17,13 +17,11 @@
  * under the License.
  */
 
-import { functionsRegistry } from 'plugins/interpreter/registries';
 import { get } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import chrome from 'ui/chrome';
-import { VegaRequestHandlerProvider } from './vega_request_handler';
+import { createVegaRequestHandler } from './vega_request_handler';
 
-export const vega = () => ({
+export const createVegaFn = (dependencies) => ({
   name: 'vega',
   type: 'render',
   context: {
@@ -33,7 +31,7 @@ export const vega = () => ({
     ],
   },
   help: i18n.translate('vega.function.help', {
-    defaultMessage: 'Vega visualization'
+    defaultMessage: 'Vega visualization',
   }),
   args: {
     spec: {
@@ -42,16 +40,14 @@ export const vega = () => ({
     },
   },
   async fn(context, args) {
-    const $injector = await chrome.dangerouslyGetActiveInjector();
-    const Private = $injector.get('Private');
-    const vegaRequestHandler = Private(VegaRequestHandlerProvider).handler;
+    const vegaRequestHandler = createVegaRequestHandler(dependencies);
 
     const response = await vegaRequestHandler({
       timeRange: get(context, 'timeRange', null),
       query: get(context, 'query', null),
       filters: get(context, 'filters', null),
       visParams: { spec: args.spec },
-      forceFetch: true
+      forceFetch: true,
     });
 
     return {
@@ -61,11 +57,9 @@ export const vega = () => ({
         visData: response,
         visType: 'vega',
         visConfig: {
-          spec: args.spec
+          spec: args.spec,
         },
-      }
+      },
     };
-  }
+  },
 });
-
-functionsRegistry.register(vega);

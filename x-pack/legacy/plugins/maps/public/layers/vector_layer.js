@@ -159,9 +159,13 @@ export class VectorLayer extends AbstractLayer {
         })
       };
     }
+
+
+    const { tooltipContent, areResultsTrimmed } = this._source.getSourceTooltipContent(sourceDataRequest);
     return {
       icon: this._style.getIcon(),
-      tooltipContent: this._source.getSourceTooltipContent(sourceDataRequest)
+      tooltipContent: tooltipContent,
+      areResultsTrimmed: areResultsTrimmed
     };
 
   }
