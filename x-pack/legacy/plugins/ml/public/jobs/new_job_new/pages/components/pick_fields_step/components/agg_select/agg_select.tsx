@@ -40,7 +40,7 @@ export const AggSelect: FC<Props> = ({ fields, changeHandler, selectedOptions, r
   const [validation, setValidation] = useState(jobValidator.duplicateDetectors);
   // create list of labels based on already selected detectors
   // so they can be removed from the dropdown list
-  const removeLabels = removeOptions.map(o => `${o.agg.title}(${o.field.name})`);
+  const removeLabels = removeOptions.map(createLabel);
 
   const options: EuiComboBoxOptionProps[] = fields.map(f => {
     const aggOption: DropDownOption = { label: f.name, options: [] };
@@ -76,3 +76,7 @@ export const AggSelect: FC<Props> = ({ fields, changeHandler, selectedOptions, r
     </EuiFormRow>
   );
 };
+
+export function createLabel(pair: AggFieldPair | null): string {
+  return pair === null ? '' : `${pair.agg.title}(${pair.field.name})`;
+}

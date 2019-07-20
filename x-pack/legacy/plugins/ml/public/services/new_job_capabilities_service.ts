@@ -46,22 +46,22 @@ class NewJobCapsService {
     this._includeCountAgg = includeCountAgg;
   }
 
-  get fields(): Field[] {
+  public get fields(): Field[] {
     return this._fields;
   }
 
-  get aggs(): Aggregation[] {
+  public get aggs(): Aggregation[] {
     return this._aggs;
   }
 
-  get newJobCaps(): NewJobCaps {
+  public get newJobCaps(): NewJobCaps {
     return {
       fields: this._fields,
       aggs: this._aggs,
     };
   }
 
-  get categoryFields(): Field[] {
+  public get categoryFields(): Field[] {
     return this._fields.filter(f => categoryFieldTypes.includes(f.type));
   }
 

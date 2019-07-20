@@ -77,35 +77,14 @@ export const TimeRangeStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) 
 
   return (
     <Fragment>
-      <div
-        style={{
-          visibility: isCurrentStep ? 'inherit' : 'hidden',
-          position: isCurrentStep ? 'inherit' : 'absolute',
-        }}
-      >
-        <EventRateChart
-          eventRateChartData={eventRateChartData}
-          height="300px"
-          width="100%"
-          showAxis={true}
-        />
-      </div>
-      <div
-        style={{
-          visibility: isCurrentStep ? 'hidden' : 'inherit',
-          position: isCurrentStep ? 'absolute' : 'inherit',
-        }}
-      >
-        <EventRateChart
-          eventRateChartData={eventRateChartData}
-          height="70px"
-          width="100%"
-          showAxis={false}
-        />
-      </div>
-
       {isCurrentStep && (
         <Fragment>
+          <EventRateChart
+            eventRateChartData={eventRateChartData}
+            height="300px"
+            width="100%"
+            showAxis={true}
+          />
           <FullTimeRangeSelector
             indexPattern={kibanaContext.currentIndexPattern}
             query={kibanaContext.combinedQuery}

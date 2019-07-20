@@ -12,7 +12,7 @@ import { Results, ModelItem, Anomaly } from '../../../../../common/results_loade
 import { LineChartData } from '../../../../../common/chart_loader';
 import { DropDownLabel, DropDownProps } from '../agg_select';
 import { newJobCapsService } from '../../../../../../../services/new_job_capabilities_service';
-import { AggFieldPair, EVENT_RATE_FIELD_ID } from '../../../../../../../../common/types/fields';
+import { AggFieldPair } from '../../../../../../../../common/types/fields';
 import { defaultChartSettings, ChartSettings } from '../../../charts/common/settings';
 import { MetricSelector } from './metric_selector';
 import { JobProgress } from '../job_progress';
@@ -40,7 +40,9 @@ export const MultiMetricDetectors: FC<Props> = ({ isActive, setIsValid }) => {
 
   const { fields } = newJobCapsService;
   const [selectedOptions, setSelectedOptions] = useState<DropDownProps>([{ label: '' }]);
-  const [aggFieldPairList, setAggFieldPairList] = useState<AggFieldPair[]>([]);
+  const [aggFieldPairList, setAggFieldPairList] = useState<AggFieldPair[]>(
+    jobCreator.aggFieldPairs
+  );
   const [lineChartsData, setLineChartsData] = useState<LineChartData>({});
   const [modelData, setModelData] = useState<Record<number, ModelItem[]>>([]);
   const [anomalyData, setAnomalyData] = useState<Record<number, Anomaly[]>>([]);
@@ -91,8 +93,7 @@ export const MultiMetricDetectors: FC<Props> = ({ isActive, setIsValid }) => {
   useEffect(() => {
     jobCreator.removeAllDetectors();
     aggFieldPairList.forEach(pair => {
-      const field = pair.field.id === EVENT_RATE_FIELD_ID ? null : pair.field;
-      jobCreator.addDetector(pair.agg, field);
+      jobCreator.addDetector(pair.agg, pair.field);
     });
     jobCreator.calculateModelMemoryLimit();
     jobCreatorUpdate();

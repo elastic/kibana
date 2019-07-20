@@ -69,9 +69,7 @@ export const SummaryStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) =>
             <br />
             {jobCreator.bucketSpan}
           </Fragment>
-          {progress === 0 && (
-            <WizardNav previous={() => setCurrentStep(WIZARD_STEPS.JOB_DETAILS)} />
-          )}
+          {progress === 0 && <WizardNav previous={() => setCurrentStep(WIZARD_STEPS.VALIDATION)} />}
           <EuiHorizontalRule />
           {progress < 100 && (
             <Fragment>

@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { AggSelect, DropDownLabel, DropDownOption, DropDownProps, createLabel } from './agg_select';
+export { ValidationStep } from './validation';
