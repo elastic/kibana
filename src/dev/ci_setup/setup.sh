@@ -16,10 +16,6 @@ C_RESET='\033[0m' # Reset color
 ###
 export FORCE_COLOR=1
 
-### To run the test suite against a different version of Elasticsearch than
-### the default, uncomment this line, and change the version.
-# export ES_SNAPSHOT_VERSION=7.0.0
-
 ###
 ### check that we seem to be in a kibana project
 ###
@@ -33,7 +29,6 @@ fi
 
 export KIBANA_DIR="$dir"
 export XPACK_DIR="$KIBANA_DIR/x-pack"
-export NODE_OPTIONS="--max_old_space_size=2048"
 
 parentDir="$(cd "$KIBANA_DIR/.."; pwd)"
 export PARENT_DIR="$parentDir"
@@ -44,8 +39,8 @@ export KIBANA_PKG_BRANCH="$kbnBranch"
 echo " -- KIBANA_DIR='$KIBANA_DIR'"
 echo " -- XPACK_DIR='$XPACK_DIR'"
 echo " -- PARENT_DIR='$PARENT_DIR'"
-echo " -- NODE_OPTIONS='$NODE_OPTIONS'"
 echo " -- KIBANA_PKG_BRANCH='$KIBANA_PKG_BRANCH'"
+echo " -- TEST_ES_SNAPSHOT_VERSION='$TEST_ES_SNAPSHOT_VERSION'"
 
 ###
 ### download node
@@ -95,7 +90,6 @@ fi
 ### "install" node into this shell
 ###
 export PATH="$nodeBin:$PATH"
-hash -r
 
 ###
 ### downloading yarn
@@ -113,10 +107,10 @@ yarn config set yarn-offline-mirror "$cacheDir/yarn-offline-cache"
 ###
 yarnGlobalDir="$(yarn global bin)"
 export PATH="$PATH:$yarnGlobalDir"
-hash -r
 
-# use a proxy to fetch geckodriver asset
-export GECKODRIVER_CDNURL="https://us-central1-elastic-kibana-184716.cloudfunctions.net/geckodriver_cache"
+# use a proxy to fetch chromedriver/geckodriver asset
+export GECKODRIVER_CDNURL="https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache"
+export CHROMEDRIVER_CDNURL="https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache"
 
 ###
 ### install dependencies
