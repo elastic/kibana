@@ -117,10 +117,10 @@ export const withUnconnectedElementsLoadedTelemetry = function<P extends object>
         resolvedArgsAreForWorkpad
       ) {
         if (telemetryElementCounts.error > 0) {
-          trackMetric(METRIC_TYPE.LOADED, WorkpadLoadedWithErrorsMetric);
+          trackMetric(METRIC_TYPE.LOADED, [WorkpadLoadedMetric, WorkpadLoadedWithErrorsMetric]);
+        } else {
+          trackMetric(METRIC_TYPE.LOADED, WorkpadLoadedMetric);
         }
-        trackMetric(METRIC_TYPE.LOADED, WorkpadLoadedMetric);
-
         setHasReported(true);
       }
     });
