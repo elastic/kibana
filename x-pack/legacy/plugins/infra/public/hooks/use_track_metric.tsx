@@ -5,7 +5,10 @@
  */
 
 import { useEffect } from 'react';
-import { trackUiMetric } from '../../../../../../src/legacy/core_plugins/ui_metric/public';
+import {
+  createUiStatsReporter,
+  METRIC_TYPE,
+} from '../../../../../../src/legacy/core_plugins/ui_metric/public';
 
 /**
  * Note: The UI Metric plugin will take care of sending this data to the telemetry server.
@@ -19,15 +22,16 @@ type ObservabilityApp = 'infra_metrics' | 'infra_logs' | 'apm' | 'uptime';
 
 interface TrackOptions {
   app: ObservabilityApp;
+  metricType?: METRIC_TYPE;
   delay?: number; // in ms
 }
-
 type EffectDeps = unknown[];
 
 type TrackMetricOptions = TrackOptions & { metric: string };
 
+export { METRIC_TYPE };
 export function useTrackMetric(
-  { app, metric, delay = 0 }: TrackMetricOptions,
+  { app, metric, metricType = METRIC_TYPE.COUNT, delay = 0 }: TrackMetricOptions,
   effectDependencies: EffectDeps = []
 ) {
   useEffect(() => {
@@ -35,7 +39,8 @@ export function useTrackMetric(
     if (delay > 0) {
       decoratedMetric += `__delayed_${delay}ms`;
     }
-    const id = setTimeout(() => trackUiMetric(app, decoratedMetric), Math.max(delay, 0));
+    const trackUiMetric = createUiStatsReporter(app);
+    const id = setTimeout(() => trackUiMetric(metricType, decoratedMetric), Math.max(delay, 0));
     return () => clearTimeout(id);
   }, effectDependencies);
 }

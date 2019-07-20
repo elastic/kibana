@@ -31,11 +31,11 @@ export const getTelemetryReporter = () => {
 
 export const createUiStatsReporter = (appName: string) => (
   type: UiStatsMetricType,
-  events: string | string[],
+  eventNames: string | string[],
   count?: number
 ): void => {
   if (telemetryReporter) {
-    return telemetryReporter.reportUiStats(appName, type, events, count);
+    return telemetryReporter.reportUiStats(appName, type, eventNames, count);
   }
 };
 
