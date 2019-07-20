@@ -25,10 +25,11 @@ interface Props extends RouteComponentProps<MainRouteParams> {
 }
 
 export class CodeFileTree extends React.Component<Props> {
-  public componentDidMount(): void {
-    const { path } = this.props.match.params;
+  constructor(props: Props) {
+    super(props);
+    const { path } = props.match.params;
     if (path) {
-      this.props.openTreePath(path);
+      props.openTreePath(path);
     }
   }
 

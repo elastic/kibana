@@ -13,17 +13,17 @@ import { http } from '../../services/http_service';
 const basePath = chrome.addBasePath('/api/ml');
 
 export const dataFrame = {
-  getDataFrameTransforms(jobId) {
-    const jobIdString = jobId !== undefined ? `/${jobId}` : '';
+  getDataFrameTransforms(transformId) {
+    const transformIdString = transformId !== undefined ? `/${transformId}` : '';
     return http({
-      url: `${basePath}/_data_frame/transforms${jobIdString}`,
+      url: `${basePath}/_data_frame/transforms${transformIdString}`,
       method: 'GET'
     });
   },
-  getDataFrameTransformsStats(jobId) {
-    if (jobId !== undefined) {
+  getDataFrameTransformsStats(transformId) {
+    if (transformId !== undefined) {
       return http({
-        url: `${basePath}/_data_frame/transforms/${jobId}/_stats`,
+        url: `${basePath}/_data_frame/transforms/${transformId}/_stats`,
         method: 'GET'
       });
     }
@@ -33,16 +33,16 @@ export const dataFrame = {
       method: 'GET'
     });
   },
-  createDataFrameTransformsJob(jobId, jobConfig) {
+  createDataFrameTransform(transformId, transformConfig) {
     return http({
-      url: `${basePath}/_data_frame/transforms/${jobId}`,
+      url: `${basePath}/_data_frame/transforms/${transformId}`,
       method: 'PUT',
-      data: jobConfig
+      data: transformConfig
     });
   },
-  deleteDataFrameTransformsJob(jobId) {
+  deleteDataFrameTransform(transformId) {
     return http({
-      url: `${basePath}/_data_frame/transforms/${jobId}`,
+      url: `${basePath}/_data_frame/transforms/${transformId}`,
       method: 'DELETE',
     });
   },
@@ -53,15 +53,15 @@ export const dataFrame = {
       data: obj
     });
   },
-  startDataFrameTransformsJob(jobId, force = false) {
+  startDataFrameTransform(transformId, force = false) {
     return http({
-      url: `${basePath}/_data_frame/transforms/${jobId}/_start?force=${force}`,
+      url: `${basePath}/_data_frame/transforms/${transformId}/_start?force=${force}`,
       method: 'POST',
     });
   },
-  stopDataFrameTransformsJob(jobId, force = false, waitForCompletion = false) {
+  stopDataFrameTransform(transformId, force = false, waitForCompletion = false) {
     return http({
-      url: `${basePath}/_data_frame/transforms/${jobId}/_stop?force=${force}&wait_for_completion=${waitForCompletion}`,
+      url: `${basePath}/_data_frame/transforms/${transformId}/_stop?force=${force}&wait_for_completion=${waitForCompletion}`,
       method: 'POST',
     });
   },
