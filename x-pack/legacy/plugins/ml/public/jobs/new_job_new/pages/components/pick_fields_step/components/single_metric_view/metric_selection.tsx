@@ -86,7 +86,6 @@ export const SingleMetricDetectors: FC<Props> = ({ isActive, setIsValid }) => {
 
   useEffect(() => {
     if (aggFieldPair !== null) {
-      // const field = aggFieldPair.field.id === EVENT_RATE_FIELD_ID ? null : aggFieldPair.field;
       jobCreator.setDetector(aggFieldPair.agg, aggFieldPair.field);
       jobCreatorUpdate();
       loadChart();

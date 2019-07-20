@@ -15,8 +15,6 @@ import { KIBANA_AGGREGATION } from '../../../../../common/constants/aggregation_
 import { JOB_TYPE, CREATED_BY_LABEL } from './util/constants';
 
 export class SingleMetricJobCreator extends JobCreator {
-  // private _field: Field | null = null;
-  // private _aggregation: Aggregation | null = null;
   protected _type: JOB_TYPE = JOB_TYPE.SINGLE_METRIC;
 
   constructor(indexPattern: IndexPatternWithType, savedSearch: SavedSearch, query: object) {
@@ -35,9 +33,6 @@ export class SingleMetricJobCreator extends JobCreator {
     } else {
       this._editDetector(dtr, agg, field, 0);
     }
-
-    // this._field = field;
-    // this._aggregation = agg;
 
     this._createDatafeedAggregations();
   }
