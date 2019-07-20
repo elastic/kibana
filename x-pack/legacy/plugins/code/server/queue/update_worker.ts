@@ -48,16 +48,25 @@ export class UpdateWorker extends AbstractGitWorker {
       cancellationToken.on(() => {
         cancelled = true;
       });
-      this.cancellationService.registerUpdateJobToken(repo.uri, cancellationToken);
     }
 
-    return await repoService.update(repo, () => {
+    const updateJobPromise = repoService.update(repo, () => {
       if (cancelled) {
         // return false to stop the clone progress
         return false;
       }
       return true;
     });
+
+    if (cancellationToken) {
+      await this.cancellationService.registerCancelableUpdateJob(
+        repo.uri,
+        cancellationToken,
+        updateJobPromise
+      );
+    }
+
+    return await updateJobPromise;
   }
 
   public async onJobCompleted(job: Job, res: CloneWorkerResult) {
