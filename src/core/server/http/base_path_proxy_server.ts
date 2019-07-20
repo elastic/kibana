@@ -38,11 +38,11 @@ export class BasePathProxyServer {
   private server?: Server;
   private httpsAgent?: HttpsAgent;
 
-  get basePath() {
+  public get basePath() {
     return this.httpConfig.basePath;
   }
 
-  get targetPort() {
+  public get targetPort() {
     return this.devConfig.basePathProxyTargetPort;
   }
 
