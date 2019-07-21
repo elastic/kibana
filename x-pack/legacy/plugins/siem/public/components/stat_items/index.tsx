@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ScaleType, niceTimeFormatter } from '@elastic/charts';
+import { ScaleType, niceTimeFormatter, Rotation } from '@elastic/charts';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -76,9 +76,12 @@ export const areachartConfigs = (from: number, to: number) => ({
     yTickFormatter: numberFormatter,
   },
 });
+
+const statItemBarchartRotation: Rotation = 90;
+
 export const barchartConfigs = {
   settings: {
-    rotation: 90,
+    rotation: statItemBarchartRotation,
   },
   series: {
     xScaleType: ScaleType.Ordinal,

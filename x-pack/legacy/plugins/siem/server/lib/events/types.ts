@@ -80,3 +80,9 @@ export interface RequestDetailsOptions {
   eventId: string;
   defaultIndex: string[];
 }
+
+export interface EventsOverTimeHistogram {
+  key_as_string: string;
+  key: number;
+  doc_count: number;
+}

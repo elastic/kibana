@@ -251,7 +251,7 @@ const HostsComponent = pure<HostsComponentProps>(({ filterQuery, setAbsoluteRang
                           />
                         )}
                       </EventsOverTimeQuery>
-
+                      <EuiSpacer />
                       <EventsQuery
                         endDate={to}
                         filterQuery={filterQuery}

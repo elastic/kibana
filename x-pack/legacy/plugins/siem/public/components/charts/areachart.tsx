@@ -17,13 +17,14 @@ import {
 } from '@elastic/charts';
 import { getOr, get } from 'lodash/fp';
 import {
-  ChartSeriesData,
-  ChartHolder,
-  getSeriesStyle,
-  WrappedByAutoSizer,
-  getTheme,
-  ChartConfigs,
   browserTimezone,
+  chartDefaultSettings,
+  ChartConfigs,
+  ChartHolder,
+  ChartSeriesData,
+  getSeriesStyle,
+  getTheme,
+  WrappedByAutoSizer,
 } from './common';
 import { AutoSizer } from '../auto_sizer';
 
@@ -68,16 +69,9 @@ export const AreaChartBaseComponent = React.memo<{
   const yTickFormatter = get('configs.axis.yTickFormatter', chartConfigs);
   const xAxisId = getAxisId(`group-${data[0].key}-x`);
   const yAxisId = getAxisId(`group-${data[0].key}-y`);
-  const defaultSettings = {
-    rotation: 0,
-    rendering: 'canvas',
-    animatedData: false,
-    showLegend: false,
-    showLegendDisplayValue: false,
-    debug: false,
-  };
+
   const settings = {
-    ...defaultSettings,
+    ...chartDefaultSettings,
     ...get('configs.settings', chartConfigs),
   };
   return chartConfigs.width && chartConfigs.height ? (

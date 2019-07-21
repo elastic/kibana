@@ -899,17 +899,15 @@ export interface LastEventTimeData {
 export interface EventsOverTimeData {
   inspect?: Inspect | null;
 
-  eventsOverTime?: EventsOverTimeBuckets[] | null;
+  eventsOverTime: EventsOverTimeHistogramData[];
 
   totalCount: number;
 }
 
-export interface EventsOverTimeBuckets {
-  key?: number | null;
+export interface EventsOverTimeHistogramData {
+  x: number;
 
-  key_as_string?: string | null;
-
-  doc_count?: number | null;
+  y: number;
 }
 
 export interface HostsData {
@@ -5300,7 +5298,7 @@ export namespace EventsOverTimeDataResolvers {
   export interface Resolvers<Context = SiemContext, TypeParent = EventsOverTimeData> {
     inspect?: InspectResolver<Inspect | null, TypeParent, Context>;
 
-    eventsOverTime?: EventsOverTimeResolver<EventsOverTimeBuckets[] | null, TypeParent, Context>;
+    eventsOverTime?: EventsOverTimeResolver<EventsOverTimeHistogramData[], TypeParent, Context>;
 
     totalCount?: TotalCountResolver<number, TypeParent, Context>;
   }
@@ -5311,7 +5309,7 @@ export namespace EventsOverTimeDataResolvers {
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type EventsOverTimeResolver<
-    R = EventsOverTimeBuckets[] | null,
+    R = EventsOverTimeHistogramData[],
     Parent = EventsOverTimeData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
@@ -5322,28 +5320,21 @@ export namespace EventsOverTimeDataResolvers {
   > = Resolver<R, Parent, Context>;
 }
 
-export namespace EventsOverTimeBucketsResolvers {
-  export interface Resolvers<Context = SiemContext, TypeParent = EventsOverTimeBuckets> {
-    key?: KeyResolver<number | null, TypeParent, Context>;
+export namespace EventsOverTimeHistogramDataResolvers {
+  export interface Resolvers<Context = SiemContext, TypeParent = EventsOverTimeHistogramData> {
+    x?: XResolver<number, TypeParent, Context>;
 
-    key_as_string?: KeyAsStringResolver<string | null, TypeParent, Context>;
-
-    doc_count?: DocCountResolver<number | null, TypeParent, Context>;
+    y?: YResolver<number, TypeParent, Context>;
   }
 
-  export type KeyResolver<
-    R = number | null,
-    Parent = EventsOverTimeBuckets,
+  export type XResolver<
+    R = number,
+    Parent = EventsOverTimeHistogramData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
-  export type KeyAsStringResolver<
-    R = string | null,
-    Parent = EventsOverTimeBuckets,
-    Context = SiemContext
-  > = Resolver<R, Parent, Context>;
-  export type DocCountResolver<
-    R = number | null,
-    Parent = EventsOverTimeBuckets,
+  export type YResolver<
+    R = number,
+    Parent = EventsOverTimeHistogramData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
 }

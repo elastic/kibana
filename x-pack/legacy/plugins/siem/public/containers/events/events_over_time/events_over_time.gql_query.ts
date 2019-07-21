@@ -22,8 +22,8 @@ export const EventsOverTimeGqlQuery = gql`
         defaultIndex: $defaultIndex
       ) {
         eventsOverTime {
-          x: key
-          y: doc_count
+          x
+          y
         }
         totalCount
         inspect @include(if: $inspect) {

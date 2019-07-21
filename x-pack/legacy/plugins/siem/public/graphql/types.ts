@@ -870,17 +870,15 @@ export interface LastEventTimeData {
 export interface EventsOverTimeData {
   inspect?: Inspect | null;
 
-  eventsOverTime?: EventsOverTimeBuckets[] | null;
+  eventsOverTime: EventsOverTimeHistogramData[];
 
   totalCount: number;
 }
 
-export interface EventsOverTimeBuckets {
-  key?: number | null;
+export interface EventsOverTimeHistogramData {
+  x: number;
 
-  key_as_string?: string | null;
-
-  doc_count?: number | null;
+  y: number;
 }
 
 export interface HostsData {
@@ -2449,7 +2447,7 @@ export namespace GetEventsOverTimeQuery {
   export type EventsOverTime = {
     __typename?: 'EventsOverTimeData';
 
-    eventsOverTime?: _EventsOverTime[] | null;
+    eventsOverTime: _EventsOverTime[];
 
     totalCount: number;
 
@@ -2457,11 +2455,11 @@ export namespace GetEventsOverTimeQuery {
   };
 
   export type _EventsOverTime = {
-    __typename?: 'EventsOverTimeBuckets';
+    __typename?: 'EventsOverTimeHistogramData';
 
-    x?: number | null;
+    x: number;
 
-    y?: number | null;
+    y: number;
   };
 
   export type Inspect = {

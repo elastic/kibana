@@ -64,15 +64,14 @@ export const eventsSchema = gql`
     inspect: Inspect
   }
 
-  type EventsOverTimeBuckets {
-    key: Float
-    key_as_string: String
-    doc_count: Float
+  type EventsOverTimeHistogramData {
+    x: Float!
+    y: Float!
   }
 
   type EventsOverTimeData {
     inspect: Inspect
-    eventsOverTime: [EventsOverTimeBuckets!]
+    eventsOverTime: [EventsOverTimeHistogramData!]!
     totalCount: Float!
   }
 

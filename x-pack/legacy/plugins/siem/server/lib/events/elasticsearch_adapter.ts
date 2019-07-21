@@ -51,8 +51,10 @@ import {
   LastEventTimeHit,
   LastEventTimeRequestOptions,
   RequestDetailsOptions,
+  EventsOverTimeHistogram,
 } from './types';
 import { buildEventsOverTimeQuery } from './query.events_over_time.dsl';
+import { EventsOverTimeHistogramData } from '../../../public/graphql/types';
 
 export class ElasticsearchEventsAdapter implements EventsAdapter {
   constructor(private readonly framework: FrameworkAdapter) { }
@@ -188,6 +190,7 @@ export class ElasticsearchEventsAdapter implements EventsAdapter {
       dsl
     );
     const totalCount = getOr(0, 'hits.total.value', response);
+    const eventsOverTimeBucket = getOr(null, 'aggregations.events.buckets', response);
     const inspect = {
       dsl: [inspectStringifyObject(dsl)],
       response: [inspectStringifyObject(response)],
@@ -195,11 +198,22 @@ export class ElasticsearchEventsAdapter implements EventsAdapter {
     // console.log('response', JSON.stringify(response))
     return {
       inspect,
-      eventsOverTime: getOr(null, 'aggregations.events.buckets', response),
+      eventsOverTime: formatEventsOverTimeData(eventsOverTimeBucket),
       totalCount,
     };
   }
 }
+
+const formatEventsOverTimeData = (
+  data: Array<EventsOverTimeHistogram>
+): EventsOverTimeHistogramData[] | null => {
+  return data && data.length > 0
+    ? data.map<EventsOverTimeHistogramData>(({ key, doc_count }) => ({
+      x: key,
+      y: doc_count,
+    }))
+    : null;
+};
 
 export const formatEventsData = (
   fields: readonly string[],

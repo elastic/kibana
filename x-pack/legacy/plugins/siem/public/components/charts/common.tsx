@@ -18,7 +18,7 @@ import {
   ScaleType,
 } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
-import { TickFormatter } from '@elastic/charts/dist/lib/series/specs';
+import { TickFormatter, Rotation, Rendering } from '@elastic/charts/dist/lib/series/specs';
 import moment from 'moment-timezone';
 import { SettingSpecProps } from '@elastic/charts/dist/specs/settings';
 
@@ -45,6 +45,18 @@ export interface ChartData {
   y0?: number;
   g?: number | string;
 }
+
+export const chartDefaultRotation: Rotation = 0;
+const chartDefaultRendering: Rendering = 'canvas';
+
+export const chartDefaultSettings = {
+  rotation: chartDefaultRotation,
+  rendering: chartDefaultRendering,
+  animatedData: false,
+  showLegend: false,
+  showLegendDisplayValue: false,
+  debug: false,
+};
 
 export interface ChartConfigs {
   series?: {

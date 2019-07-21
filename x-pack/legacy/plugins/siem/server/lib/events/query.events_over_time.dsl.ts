@@ -35,7 +35,7 @@ export const buildEventsOverTimeQuery = ({
         events: {
           auto_date_histogram: {
             field: '@timestamp',
-            buckets: '24',
+            buckets: '36',
           },
         },
       },

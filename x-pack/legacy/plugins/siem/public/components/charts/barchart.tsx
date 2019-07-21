@@ -10,14 +10,15 @@ import { Chart, BarSeries, Axis, Position, getSpecId, ScaleType, Settings } from
 import { getAxisId } from '@elastic/charts';
 import { getOr, get } from 'lodash/fp';
 import {
-  ChartSeriesData,
-  WrappedByAutoSizer,
+  browserTimezone,
+  chartDefaultSettings,
+  ChartConfigs,
   ChartHolder,
-  SeriesType,
+  ChartSeriesData,
   getSeriesStyle,
   getTheme,
-  ChartConfigs,
-  browserTimezone,
+  SeriesType,
+  WrappedByAutoSizer,
 } from './common';
 import { AutoSizer } from '../auto_sizer';
 
@@ -32,16 +33,9 @@ export const BarChartBaseComponent = React.memo<{
   const yTickFormatter = get('configs.axis.yTickFormatter', chartConfigs);
   const xAxisId = getAxisId(`stat-items-barchart-${data[0].key}-x`);
   const yAxisId = getAxisId(`stat-items-barchart-${data[0].key}-y`);
-  const defaultSettings = {
-    rotation: 0,
-    rendering: 'canvas',
-    animatedData: false,
-    showLegend: false,
-    showLegendDisplayValue: false,
-    debug: false,
-  };
+
   const settings = {
-    ...defaultSettings,
+    ...chartDefaultSettings,
     ...get('configs.settings', chartConfigs),
   };
 

@@ -970,8 +970,14 @@ exports[`Stat Items Component rendering kpis with charts it renders the default 
                                 "xTickFormatter": [Function],
                               },
                               "series": Object {
+                                "stackAccessors": Array [
+                                  "y",
+                                ],
                                 "xScaleType": "ordinal",
                                 "yScaleType": "linear",
+                              },
+                              "settings": Object {
+                                "rotation": 90,
                               },
                             }
                           }

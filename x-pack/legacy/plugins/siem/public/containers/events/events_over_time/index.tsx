@@ -18,7 +18,7 @@ import { QueryTemplate, QueryTemplateProps } from '../../query_template';
 import { EventsOverTimeGqlQuery } from './events_over_time.gql_query';
 import { GetEventsOverTimeQuery, EventsOverTimeData } from '../../../graphql/types';
 
-const ID = 'EventsOverTimeQuery';
+const ID = 'eventsOverTimeQuery';
 
 export interface EventsArgs {
   id: string;
@@ -77,7 +77,7 @@ class EventsOverTimeComponentQuery extends QueryTemplate<
           const eventsOverTime = getOr({}, `source.EventsOverTime`, data);
           return children!({
             id,
-            inspect: getOr(null, 'source.inspect', data),
+            inspect: getOr(null, 'inspect', eventsOverTime),
             refetch,
             loading,
             eventsOverTime,

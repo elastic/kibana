@@ -4,22 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import { ScaleType, niceTimeFormatter } from '@elastic/charts';
 
 import { getOr, head, last } from 'lodash/fp';
 import { BarChart } from '../../../charts/barchart';
-import { ChartData } from '../../../charts/common';
 import { EventsOverTimeData } from '../../../../graphql/types';
 import { LoadingPanel } from '../../../loading';
 import * as i18n from './translation';
 import { HeaderPanel } from '../../../header_panel';
+import { ChartSeriesData } from '../../../charts/common';
 
 const loadingPanelHeight = '274px';
 export const getBarchartConfigs = (from: number, to: number) => ({
-  settings: {
-    rotation: 0,
-  },
   series: {
     xScaleType: ScaleType.Time,
     yScaleType: ScaleType.Linear,
@@ -30,28 +27,41 @@ export const getBarchartConfigs = (from: number, to: number) => ({
   },
 });
 
-export const EventsOverTimeHistogram = React.memo<{
-  data: EventsOverTimeData | null | undefined;
+export const EventsOverTimeHistogram = ({
+  id,
+  loading,
+  data,
+  startDate,
+  endDate,
+}: {
+  id: string;
+  data: EventsOverTimeData;
   loading: boolean;
   startDate: number;
   endDate: number;
-}>(({ loading, data, startDate, endDate }) => {
-  const eventsOverTime = getOr([], `eventsOverTime`, data);
-  const totalCount = getOr(0, `totalCount`, data);
-  const bucketStartDate = getOr(startDate, 'key', head(eventsOverTime));
-  const bucketEndDate = getOr(endDate, 'key', last(eventsOverTime));
+}) => {
+  const eventsOverTime = getOr([], 'eventsOverTime', data);
+  const totalCount = getOr(0, 'totalCount', data);
+  const bucketStartDate = getOr(startDate, 'x', head(eventsOverTime));
+  const bucketEndDate = getOr(endDate, 'x', last(eventsOverTime));
+  const [showInspect, setShowInspect] = useState(false);
   const barchartConfigs = getBarchartConfigs(bucketStartDate!, bucketEndDate!);
-  const barChartData = [
+  const onChartHover = () => {
+    setShowInspect(!showInspect);
+  };
+  const barChartData: ChartSeriesData[] = [
     {
       key: 'eventsOverTime',
-      value: eventsOverTime as ChartData[],
+      value: eventsOverTime,
     },
   ];
   // console.log('eventstime', loading, JSON.stringify(barChartData));
   return (
     <>
       <HeaderPanel
+        id={id}
         title={i18n.EVENTS}
+        showInspect={showInspect}
         subtitle={<>{`${i18n.SHOWING}: ${totalCount.toLocaleString()} ${i18n.UNIT(totalCount)}`}</>}
       />
       {loading ? (
@@ -61,8 +71,10 @@ export const EventsOverTimeHistogram = React.memo<{
           width="100%"
         />
       ) : (
-        <BarChart barChart={barChartData} configs={barchartConfigs} />
+        <div onMouseOver={onChartHover} onFocus={onChartHover}>
+          <BarChart barChart={barChartData} configs={barchartConfigs} />
+        </div>
       )}
     </>
   );
-});
+};

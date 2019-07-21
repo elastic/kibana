@@ -43,8 +43,7 @@ export interface Criteria {
   sort?: SortingBasicTable;
 }
 
-export type LoadMoreTableWrapperType = JSX.IntrinsicElements | React.ReactElement;
-
+export type LoadMoreTableWrapperType = string;
 // Using telescoping templates to remove 'any' that was polluting downstream column type checks
 interface BasicTableProps<T, U = T, V = T, W = T, X = T, Y = T, Z = T, AA = T, AB = T> {
   columns:
@@ -163,7 +162,6 @@ export class LoadMoreTable<T, U, V, W, X, Y, Z, AA, AB> extends React.PureCompon
       wrapper: Wrapper = EuiPanel,
     } = this.props;
     const { isEmptyTable } = this.state;
-
     if (loading && isEmptyTable) {
       return (
         <Wrapper>
