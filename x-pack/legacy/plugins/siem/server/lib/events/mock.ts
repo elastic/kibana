@@ -3575,3 +3575,99 @@ export const mockTimelineDetailsResult = {
     },
   ],
 };
+
+export const mockEventsOverTimeDsl = {
+  mockEventsOverTimeDsl: 'mockEventsOverTimeDsl',
+};
+
+export const mockEventsOverTimeRequest = {
+  auth: {
+    isAuthenticated: true,
+    isAuthorized: false,
+    credentials: {
+      username: 'elastic',
+      roles: ['superuser'],
+      full_name: null,
+      email: null,
+      metadata: {
+        _reserved: true,
+      },
+      enabled: true,
+      authentication_realm: {
+        name: 'reserved',
+        type: 'reserved',
+      },
+      lookup_realm: {
+        name: 'reserved',
+        type: 'reserved',
+      },
+    },
+    strategy: 'session',
+    mode: 'required',
+    error: null,
+  },
+  params: {},
+  payload: {
+    operationName: 'GetEventsOverTimeQuery',
+    variables: {
+      filterQuery: '',
+      sourceId: 'default',
+      timerange: {
+        interval: '12h',
+        from: 1563479603694,
+        to: 1563566003694,
+      },
+      defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+      inspect: true,
+    },
+    query:
+      'query GetEventsOverTimeQuery($sourceId: ID!, $timerange: TimerangeInput!, $defaultIndex: [String!]!, $filterQuery: String, $inspect: Boolean!) {\n  source(id: $sourceId) {\n    id\n    EventsOverTime(timerange: $timerange, filterQuery: $filterQuery, defaultIndex: $defaultIndex) {\n      eventsOverTime {\n        x\n        y\n        __typename\n      }\n      totalCount\n      inspect @include(if: $inspect) {\n        dsl\n        response\n        __typename\n      }\n      __typename\n    }\n    __typename\n  }\n}\n',
+  },
+  query: {},
+};
+
+export const mockEventsOverTimeOptions = {
+  defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+  sourceConfiguration: {
+    fields: {
+      container: 'docker.container.name',
+      host: 'beat.hostname',
+      message: ['message', '@message'],
+      pod: 'kubernetes.pod.name',
+      tiebreaker: '_doc',
+      timestamp: '@timestamp',
+    },
+  },
+  timerange: {
+    interval: '12h',
+    to: 1563566003694,
+    from: 1563479603694,
+  },
+  filterQuery: {},
+  fields: ['eventsOverTime.x', 'eventsOverTime.y', 'totalCount', 'inspect.dsl', 'inspect.response'],
+};
+
+export const mockEventsOverTimeResponse = {
+  took: 332,
+  timed_out: false,
+  _shards: { total: 28, successful: 28, skipped: 0, failed: 0 },
+  hits: { total: { value: 2974978, relation: 'eq' }, max_score: null, hits: [] },
+  aggregations: {
+    events: {
+      buckets: [
+        { key_as_string: '2019-07-18T19:00:00.000Z', key: 1563476400000, doc_count: 62475 },
+        { key_as_string: '2019-07-18T20:00:00.000Z', key: 1563480000000, doc_count: 252322 },
+      ],
+      interval: '1h',
+    },
+  },
+};
+
+export const mockEventsOverTimeResult = {
+  inspect: {
+    dsl: [JSON.stringify(mockEventsOverTimeDsl, null, 2)],
+    response: [JSON.stringify(mockEventsOverTimeResponse, null, 2)],
+  },
+  eventsOverTime: [{ x: 1563476400000, y: 62475 }, { x: 1563480000000, y: 252322 }],
+  totalCount: mockEventsOverTimeResponse.hits.total.value,
+};

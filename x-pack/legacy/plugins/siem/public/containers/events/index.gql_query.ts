@@ -15,6 +15,7 @@ export const eventsQuery = gql`
     $filterQuery: String
     $defaultIndex: [String!]!
     $inspect: Boolean!
+    $totalCount: Boolean!
   ) {
     source(id: $sourceId) {
       id
@@ -25,6 +26,7 @@ export const eventsQuery = gql`
         filterQuery: $filterQuery
         defaultIndex: $defaultIndex
       ) {
+        totalCount @include(if: $totalCount)
         pageInfo {
           endCursor {
             value

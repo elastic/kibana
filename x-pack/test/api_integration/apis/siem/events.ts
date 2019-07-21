@@ -8,11 +8,12 @@ import expect from '@kbn/expect';
 
 import { eventsQuery } from '../../../../legacy/plugins/siem/public/containers/events/index.gql_query';
 import { LastEventTimeGqlQuery } from '../../../../legacy/plugins/siem/public/containers/events/last_event_time/last_event_time.gql_query';
-
+import { EventsOverTimeGqlQuery } from '../../../../legacy/plugins/siem/public/containers/events/events_over_time/events_over_time.gql_query';
 import {
   Direction,
   GetEventsQuery,
   GetLastEventTimeQuery,
+  GetEventsOverTimeQuery,
 } from '../../../../legacy/plugins/siem/public/graphql/types';
 import { KbnTestProvider } from './types';
 
@@ -55,6 +56,7 @@ const eventsTests: KbnTestProvider = ({ getService }) => {
               },
               defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
               inspect: false,
+              totalCount: true,
             },
           })
           .then(resp => {
@@ -87,6 +89,7 @@ const eventsTests: KbnTestProvider = ({ getService }) => {
               },
               defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
               inspect: false,
+              totalCount: true,
             },
           })
           .then(resp => {
@@ -338,6 +341,176 @@ const eventsTests: KbnTestProvider = ({ getService }) => {
                 lastSeen: '2018-11-27T02:59:00.461Z',
               });
             });
+        });
+      });
+    });
+
+    describe('events over time', () => {
+      describe('packetbeat', () => {
+        before(() => esArchiver.load('packetbeat/default'));
+        after(() => esArchiver.unload('packetbeat/default'));
+        it('Gets events over time - hosts', () => {
+          return client
+            .query<GetEventsOverTimeQuery.Query>({
+              query: EventsOverTimeGqlQuery,
+              variables: {
+                sourceId: 'default',
+                indexKey: 'hosts',
+                details: {},
+                defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+              },
+            })
+            .then(resp => {
+              const eventsOverTime = resp.data.source.EventsOverTime.eventsOverTime;
+              const totalCount = resp.data.source.EventsOverTime.totalCount;
+              expect(eventsOverTime).to.eql([
+                {
+                  __typename: 'EventsOverTimeHistogramData',
+                  x: '2019-04-26T21:45:14.012Z',
+                  y: '',
+                },
+              ]);
+              expect(totalCount).equal(TOTAL_COUNT);
+            });
+        });
+
+        it('Gets events over time - host details', () => {
+          return client
+            .query<GetEventsOverTimeQuery.Query>({
+              query: EventsOverTimeGqlQuery,
+              variables: {
+                sourceId: 'default',
+                indexKey: 'hostDetails',
+                details: {
+                  hostName: 'zeek-sensor-amsterdam',
+                },
+                defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+              },
+            })
+            .then(resp => {
+              const eventsOverTime = resp.data.source.EventsOverTime.eventsOverTime;
+              const totalCount = resp.data.source.EventsOverTime.totalCount;
+              expect(eventsOverTime).to.eql([
+                {
+                  __typename: 'EventsOverTimeHistogramData',
+                  x: '2019-02-19T23:26:46.720Z',
+                  y: '',
+                },
+              ]);
+              expect(totalCount).equal(TOTAL_COUNT);
+            });
+        });
+      });
+      describe('filebeat', () => {
+        before(() => esArchiver.load('filebeat/default'));
+        after(() => esArchiver.unload('filebeat/default'));
+        it('Gets events over time - hosts', () => {
+          return client
+            .query<GetEventsOverTimeQuery.Query>({
+              query: EventsOverTimeGqlQuery,
+              variables: {
+                sourceId: 'default',
+                indexKey: 'hosts',
+                details: {},
+                defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+              },
+            })
+            .then(resp => {
+              const eventsOverTime = resp.data.source.EventsOverTime.eventsOverTime;
+              const totalCount = resp.data.source.EventsOverTime.totalCount;
+              expect(eventsOverTime).to.eql([
+                {
+                  __typename: 'EventsOverTimeHistogramData',
+                  x: '2019-04-26T21:45:14.012Z',
+                  y: '',
+                },
+              ]);
+              expect(totalCount).equal(TOTAL_COUNT);
+            });
+        });
+
+        it('Gets events over time - host details', () => {
+          return client
+            .query<GetEventsOverTimeQuery.Query>({
+              query: EventsOverTimeGqlQuery,
+              variables: {
+                sourceId: 'default',
+                indexKey: 'hostDetails',
+                details: {
+                  hostName: 'raspberrypi',
+                },
+                defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+              },
+            })
+            .then(resp => {
+              const eventsOverTime = resp.data.source.EventsOverTime.eventsOverTime;
+              const totalCount = resp.data.source.EventsOverTime.totalCount;
+
+              expect(eventsOverTime).to.eql([
+                {
+                  __typename: 'EventsOverTimeHistogramData',
+                  x: '2019-02-10T03:00:13.001Z',
+                  y: '',
+                },
+              ]);
+              expect(totalCount).equal(TOTAL_COUNT);
+            });
+        });
+
+        describe('auditbeat (hosts only)', () => {
+          before(() => esArchiver.load('auditbeat/default'));
+          after(() => esArchiver.unload('auditbeat/default'));
+          it('Gets events over time - hosts', () => {
+            return client
+              .query<GetEventsOverTimeQuery.Query>({
+                query: EventsOverTimeGqlQuery,
+                variables: {
+                  sourceId: 'default',
+                  indexKey: 'hosts',
+                  details: {},
+                  defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+                },
+              })
+              .then(resp => {
+                const eventsOverTime = resp.data.source.EventsOverTime.eventsOverTime;
+                const totalCount = resp.data.source.EventsOverTime.totalCount;
+
+                expect(eventsOverTime).to.eql([
+                  {
+                    __typename: 'EventsOverTimeHistogramData',
+                    x: '2019-04-26T21:45:14.012Z',
+                    y: '',
+                  },
+                ]);
+                expect(totalCount).equal(TOTAL_COUNT);
+              });
+          });
+          it('Gets events over time - host details', () => {
+            return client
+              .query<GetEventsOverTimeQuery.Query>({
+                query: EventsOverTimeGqlQuery,
+                variables: {
+                  sourceId: 'default',
+                  indexKey: 'hostDetails',
+                  details: {
+                    hostName: 'demo-stack-nginx-01',
+                  },
+                  defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+                },
+              })
+              .then(resp => {
+                const eventsOverTime = resp.data.source.EventsOverTime.eventsOverTime;
+                const totalCount = resp.data.source.EventsOverTime.totalCount;
+                expect(eventsOverTime).to.eql([
+                  {
+                    __typename: 'EventsOverTimeHistogramData',
+                    x: '2018-11-27T02:59:00.461Z',
+                    y: '',
+                  },
+                ]);
+                expect(totalCount).equal(TOTAL_COUNT);
+              });
+          });
         });
       });
     });

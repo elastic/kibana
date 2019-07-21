@@ -338,6 +338,8 @@ export interface Inspect {
 export interface EventsData {
   edges: EcsEdges[];
 
+  totalCount: number;
+
   pageInfo: PageInfo;
 
   inspect?: Inspect | null;
@@ -2480,6 +2482,7 @@ export namespace GetEventsQuery {
     filterQuery?: string | null;
     defaultIndex: string[];
     inspect: boolean;
+    totalCount: boolean;
   };
 
   export type Query = {
@@ -2498,6 +2501,8 @@ export namespace GetEventsQuery {
 
   export type Events = {
     __typename?: 'EventsData';
+
+    totalCount: number;
 
     pageInfo: PageInfo;
 

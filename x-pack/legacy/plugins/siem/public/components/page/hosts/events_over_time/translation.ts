@@ -13,7 +13,7 @@ export const EVENTS = i18n.translate('xpack.siem.eventsOverTime.eventsTitle', {
 export const LOADING_EVENTS_OVER_TIME = i18n.translate(
   'xpack.siem.eventsOverTime.loadingEventsOverTimeTitle',
   {
-    defaultMessage: 'Loading events over time',
+    defaultMessage: 'Loading events histogram',
   }
 );
 

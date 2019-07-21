@@ -11,6 +11,7 @@ export const eventsSchema = gql`
 
   type EventsData {
     edges: [EcsEdges!]!
+    totalCount: Float!
     pageInfo: PageInfo!
     inspect: Inspect
   }

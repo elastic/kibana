@@ -54,11 +54,9 @@ export const HeaderPanel = pure<HeaderPanelProps>(
         </EuiText>
 
         <EuiFlexGroup alignItems="flexEnd" gutterSize="m" direction="column">
-          {id && (
-            <EuiFlexItem grow={false} className="eui-textRight">
-              <InspectButton queryId={id} inspectIndex={0} show={showInspect} title={title} />
-            </EuiFlexItem>
-          )}
+          <EuiFlexItem grow={false} className="eui-textRight">
+            {id && <InspectButton queryId={id} inspectIndex={0} show={showInspect} title={title} />}
+          </EuiFlexItem>
           {children && <EuiFlexItem grow={false}>{children}</EuiFlexItem>}
         </EuiFlexGroup>
       </>

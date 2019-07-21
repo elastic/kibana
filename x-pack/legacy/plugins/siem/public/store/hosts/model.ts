@@ -37,7 +37,6 @@ interface Queries {
   authentications: BasicQueryPaginated;
   hosts: HostsQuery;
   events: BasicQuery;
-  eventsOverTime: BasicQuery;
   uncommonProcesses: BasicQuery;
 }
 

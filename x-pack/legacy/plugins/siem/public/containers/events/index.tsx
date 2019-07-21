@@ -85,6 +85,7 @@ class EventsComponentQuery extends QueryTemplate<
           },
           defaultIndex: chrome.getUiSettingsClient().get(DEFAULT_INDEX_KEY),
           inspect: isInspected,
+          totalCount: false,
         }}
       >
         {({ data, loading, fetchMore, refetch }) => {

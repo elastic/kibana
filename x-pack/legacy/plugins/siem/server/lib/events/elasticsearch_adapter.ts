@@ -57,7 +57,7 @@ import { buildEventsOverTimeQuery } from './query.events_over_time.dsl';
 import { EventsOverTimeHistogramData } from '../../../public/graphql/types';
 
 export class ElasticsearchEventsAdapter implements EventsAdapter {
-  constructor(private readonly framework: FrameworkAdapter) { }
+  constructor(private readonly framework: FrameworkAdapter) {}
 
   public async getEvents(request: FrameworkRequest, options: RequestOptions): Promise<EventsData> {
     const queryOptions = cloneDeep(options);
@@ -71,6 +71,7 @@ export class ElasticsearchEventsAdapter implements EventsAdapter {
     );
 
     const { limit } = options.pagination;
+    const totalCount = getOr(0, 'hits.total.value', response);
     const hits = response.hits.hits;
     const eventsEdges: EcsEdges[] = hits.map(hit =>
       formatEventsData(options.fields, hit, eventFieldsMap)
@@ -87,6 +88,7 @@ export class ElasticsearchEventsAdapter implements EventsAdapter {
       inspect,
       edges,
       pageInfo: { hasNextPage, endCursor: lastCursor },
+      totalCount,
     };
   }
 
@@ -195,7 +197,6 @@ export class ElasticsearchEventsAdapter implements EventsAdapter {
       dsl: [inspectStringifyObject(dsl)],
       response: [inspectStringifyObject(response)],
     };
-    // console.log('response', JSON.stringify(response))
     return {
       inspect,
       eventsOverTime: formatEventsOverTimeData(eventsOverTimeBucket),
@@ -204,15 +205,15 @@ export class ElasticsearchEventsAdapter implements EventsAdapter {
   }
 }
 
-const formatEventsOverTimeData = (
-  data: Array<EventsOverTimeHistogram>
-): EventsOverTimeHistogramData[] | null => {
+export const formatEventsOverTimeData = (
+  data: EventsOverTimeHistogram[]
+): EventsOverTimeHistogramData[] => {
   return data && data.length > 0
     ? data.map<EventsOverTimeHistogramData>(({ key, doc_count }) => ({
-      x: key,
-      y: doc_count,
-    }))
-    : null;
+        x: key,
+        y: doc_count,
+      }))
+    : [];
 };
 
 export const formatEventsData = (
@@ -291,22 +292,22 @@ const mergeTimelineFieldsWithHit = <T>(
           ...get('node', flattenedFields),
           data: dataFields.includes(fieldName)
             ? [
-              ...get('node.data', flattenedFields),
-              {
-                field: fieldName,
-                value: specialFields.includes(esField)
-                  ? get(esField, hit)
-                  : get(esField, hit._source),
-              },
-            ]
+                ...get('node.data', flattenedFields),
+                {
+                  field: fieldName,
+                  value: specialFields.includes(esField)
+                    ? get(esField, hit)
+                    : get(esField, hit._source),
+                },
+              ]
             : get('node.data', flattenedFields),
           ecs: ecsFields.includes(fieldName)
             ? {
-              ...get('node.ecs', flattenedFields),
-              ...fieldName
-                .split('.')
-                .reduceRight((obj, next) => ({ [next]: obj }), get(esField, hit._source)),
-            }
+                ...get('node.ecs', flattenedFields),
+                ...fieldName
+                  .split('.')
+                  .reduceRight((obj, next) => ({ [next]: obj }), get(esField, hit._source)),
+              }
             : get('node.ecs', flattenedFields),
         },
       };
@@ -354,28 +355,28 @@ const getSchemaFromData = (
 ): DetailItem[] =>
   !isEmpty(properties)
     ? Object.keys(properties).reduce<DetailItem[]>((accumulator, property) => {
-      const item = get(property, properties);
-      const field = path ? `${path}.${property}` : property;
-      const dataFilterItem = data.filter(dataItem => dataItem.field === field);
-      if (item.properties == null && dataFilterItem.length === 1) {
-        const dataItem = dataFilterItem[0];
-        const dataFromMapping = {
-          type: get([property, 'type'], properties),
-        };
-        return [
-          ...accumulator,
-          {
-            ...dataItem,
-            ...(hasDocumentation(index, field)
-              ? merge(getDocumentation(index, field), dataFromMapping)
-              : dataFromMapping),
-          },
-        ];
-      } else if (item.properties != null) {
-        return [...accumulator, ...getSchemaFromData(item.properties, data, index, field)];
-      }
-      return accumulator;
-    }, [])
+        const item = get(property, properties);
+        const field = path ? `${path}.${property}` : property;
+        const dataFilterItem = data.filter(dataItem => dataItem.field === field);
+        if (item.properties == null && dataFilterItem.length === 1) {
+          const dataItem = dataFilterItem[0];
+          const dataFromMapping = {
+            type: get([property, 'type'], properties),
+          };
+          return [
+            ...accumulator,
+            {
+              ...dataItem,
+              ...(hasDocumentation(index, field)
+                ? merge(getDocumentation(index, field), dataFromMapping)
+                : dataFromMapping),
+            },
+          ];
+        } else if (item.properties != null) {
+          return [...accumulator, ...getSchemaFromData(item.properties, data, index, field)];
+        }
+        return accumulator;
+      }, [])
     : data;
 
 const addBasicElasticSearchProperties = () => ({

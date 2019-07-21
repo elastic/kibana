@@ -1,0 +1,224 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Load More Events Table Component rendering it renders BarChart if data available 1`] = `
+<Provider
+  store={
+    Object {
+      "dispatch": [Function],
+      "getState": [Function],
+      "replaceReducer": [Function],
+      "subscribe": [Function],
+      Symbol(observable): [Function],
+    }
+  }
+>
+  <EventsOverTimeHistogram
+    data={
+      Object {
+        "eventsOverTime": Array [
+          Object {
+            "x": 1563476400000,
+            "y": 62475,
+          },
+          Object {
+            "x": 1563480000000,
+            "y": 252322,
+          },
+        ],
+        "inspect": null,
+        "totalCount": 0,
+      }
+    }
+    endDate={1563480000000}
+    id="eventsOverTimeQuery"
+    loading={false}
+    startDate={1563476400000}
+  >
+    <HeaderPanel
+      id="eventsOverTimeQuery"
+      showInspect={false}
+      subtitle={
+        <React.Fragment>
+          Showing: 0 Events
+        </React.Fragment>
+      }
+      title="Events"
+    >
+      <div
+        className="headerPanel"
+      />
+    </HeaderPanel>
+    <div
+      onFocus={[Function]}
+      onMouseOver={[Function]}
+    >
+      <BarChart
+        barChart={
+          Array [
+            Object {
+              "key": "eventsOverTime",
+              "value": Array [
+                Object {
+                  "x": 1563476400000,
+                  "y": 62475,
+                },
+                Object {
+                  "x": 1563480000000,
+                  "y": 252322,
+                },
+              ],
+            },
+          ]
+        }
+        configs={
+          Object {
+            "axis": Object {
+              "xTickFormatter": [Function],
+              "yTickFormatter": [Function],
+            },
+            "series": Object {
+              "xScaleType": "time",
+              "yScaleType": "linear",
+            },
+          }
+        }
+      >
+        <div
+          className="barchart"
+        />
+      </BarChart>
+    </div>
+  </EventsOverTimeHistogram>
+</Provider>
+`;
+
+exports[`Load More Events Table Component rendering it renders loading pannel 1`] = `
+<Provider
+  store={
+    Object {
+      "dispatch": [Function],
+      "getState": [Function],
+      "replaceReducer": [Function],
+      "subscribe": [Function],
+      Symbol(observable): [Function],
+    }
+  }
+>
+  <EventsOverTimeHistogram
+    data={
+      Object {
+        "eventsOverTime": Array [],
+        "inspect": null,
+        "totalCount": 0,
+      }
+    }
+    endDate={1563480000000}
+    id="eventsOverTimeQuery"
+    loading={true}
+    startDate={1563476400000}
+  >
+    <HeaderPanel
+      id="eventsOverTimeQuery"
+      showInspect={false}
+      subtitle={
+        <React.Fragment>
+          Showing: 0 Events
+        </React.Fragment>
+      }
+      title="Events"
+    >
+      <div
+        className="headerPanel"
+      />
+    </HeaderPanel>
+    <pure(Component)
+      height="274px"
+      text="Loading events histogram"
+      width="100%"
+    >
+      <Component
+        height="274px"
+        text="Loading events histogram"
+        width="100%"
+      >
+        <styled.div
+          className="app-loading"
+          height="274px"
+          position="relative"
+          width="100%"
+          zIndex="inherit"
+        >
+          <div
+            className="app-loading sc-htpNat cUwPjP"
+            height="274px"
+            width="100%"
+          >
+            <styled.div>
+              <div
+                className="sc-bxivhb bugpeY"
+              >
+                <EuiPanel
+                  className=""
+                  grow={true}
+                  hasShadow={false}
+                  paddingSize="m"
+                >
+                  <div
+                    className="euiPanel euiPanel--paddingMedium"
+                  >
+                    <EuiFlexGroup
+                      alignItems="center"
+                      direction="row"
+                      gutterSize="none"
+                    >
+                      <div
+                        className="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+                      >
+                        <Styled(EuiFlexItem)
+                          grow={false}
+                        >
+                          <EuiFlexItem
+                            className="sc-bwzfXH brFRaP"
+                            grow={false}
+                          >
+                            <div
+                              className="euiFlexItem euiFlexItem--flexGrowZero sc-bwzfXH brFRaP"
+                            >
+                              <EuiLoadingSpinner
+                                size="m"
+                              >
+                                <span
+                                  className="euiLoadingSpinner euiLoadingSpinner--medium"
+                                />
+                              </EuiLoadingSpinner>
+                            </div>
+                          </EuiFlexItem>
+                        </Styled(EuiFlexItem)>
+                        <EuiFlexItem
+                          grow={false}
+                        >
+                          <div
+                            className="euiFlexItem euiFlexItem--flexGrowZero"
+                          >
+                            <EuiText>
+                              <div
+                                className="euiText euiText--medium"
+                              >
+                                Loading events histogram
+                              </div>
+                            </EuiText>
+                          </div>
+                        </EuiFlexItem>
+                      </div>
+                    </EuiFlexGroup>
+                  </div>
+                </EuiPanel>
+              </div>
+            </styled.div>
+          </div>
+        </styled.div>
+      </Component>
+    </pure(Component)>
+  </EventsOverTimeHistogram>
+</Provider>
+`;

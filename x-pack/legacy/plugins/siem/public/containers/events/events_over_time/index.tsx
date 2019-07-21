@@ -11,7 +11,7 @@ import { connect } from 'react-redux';
 
 import chrome from 'ui/chrome';
 import { DEFAULT_INDEX_KEY } from '../../../../common/constants';
-import { hostsSelectors, inputsModel, State, inputsSelectors, hostsModel } from '../../../store';
+import { inputsModel, State, inputsSelectors, hostsModel } from '../../../store';
 import { createFilter, getDefaultFetchPolicy } from '../../helpers';
 import { QueryTemplate, QueryTemplateProps } from '../../query_template';
 
@@ -91,12 +91,10 @@ class EventsOverTimeComponentQuery extends QueryTemplate<
 }
 
 const makeMapStateToProps = () => {
-  const getEventsOverTimeSelector = hostsSelectors.eventsOverTimeSelector();
   const getQuery = inputsSelectors.globalQueryByIdSelector();
   const mapStateToProps = (state: State, { type, id = ID }: OwnProps) => {
     const { isInspected } = getQuery(state, id);
     return {
-      ...getEventsOverTimeSelector(state, type),
       isInspected,
     };
   };

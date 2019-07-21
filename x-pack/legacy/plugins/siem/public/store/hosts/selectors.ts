@@ -33,12 +33,6 @@ export const eventsSelector = () =>
     hosts => hosts.queries.events
   );
 
-export const eventsOverTimeSelector = () =>
-  createSelector(
-    selectHosts,
-    hosts => hosts.queries.eventsOverTime
-  );
-
 export const uncommonProcessesSelector = () =>
   createSelector(
     selectHosts,

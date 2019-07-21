@@ -367,6 +367,8 @@ export interface Inspect {
 export interface EventsData {
   edges: EcsEdges[];
 
+  totalCount: number;
+
   pageInfo: PageInfo;
 
   inspect?: Inspect | null;
@@ -3522,12 +3524,19 @@ export namespace EventsDataResolvers {
   export interface Resolvers<Context = SiemContext, TypeParent = EventsData> {
     edges?: EdgesResolver<EcsEdges[], TypeParent, Context>;
 
+    totalCount?: TotalCountResolver<number, TypeParent, Context>;
+
     pageInfo?: PageInfoResolver<PageInfo, TypeParent, Context>;
 
     inspect?: InspectResolver<Inspect | null, TypeParent, Context>;
   }
 
   export type EdgesResolver<R = EcsEdges[], Parent = EventsData, Context = SiemContext> = Resolver<
+    R,
+    Parent,
+    Context
+  >;
+  export type TotalCountResolver<R = number, Parent = EventsData, Context = SiemContext> = Resolver<
     R,
     Parent,
     Context

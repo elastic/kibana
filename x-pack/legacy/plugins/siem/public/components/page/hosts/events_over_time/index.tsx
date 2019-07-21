@@ -44,8 +44,8 @@ export const EventsOverTimeHistogram = ({
   const totalCount = getOr(0, 'totalCount', data);
   const bucketStartDate = getOr(startDate, 'x', head(eventsOverTime));
   const bucketEndDate = getOr(endDate, 'x', last(eventsOverTime));
-  const [showInspect, setShowInspect] = useState(false);
   const barchartConfigs = getBarchartConfigs(bucketStartDate!, bucketEndDate!);
+  const [showInspect, setShowInspect] = useState(false);
   const onChartHover = () => {
     setShowInspect(!showInspect);
   };
@@ -55,7 +55,6 @@ export const EventsOverTimeHistogram = ({
       value: eventsOverTime,
     },
   ];
-  // console.log('eventstime', loading, JSON.stringify(barChartData));
   return (
     <>
       <HeaderPanel

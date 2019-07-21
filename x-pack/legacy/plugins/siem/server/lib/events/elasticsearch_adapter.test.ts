@@ -3,13 +3,14 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { EcsEdges, TimelineDetailsData } from '../../graphql/types';
+import { EcsEdges, TimelineDetailsData, EventsOverTimeData } from '../../graphql/types';
 import { eventFieldsMap } from '../ecs_fields';
 import { FrameworkAdapter, FrameworkRequest } from '../framework';
 
 import {
   ElasticsearchEventsAdapter,
   formatEventsData,
+  formatEventsOverTimeData,
   formatTimelineData,
 } from './elasticsearch_adapter';
 import {
@@ -20,6 +21,10 @@ import {
   mockResponseMap,
   mockResponseSearchTimelineDetails,
   mockTimelineDetailsResult,
+  mockEventsOverTimeOptions,
+  mockEventsOverTimeResult,
+  mockEventsOverTimeResponse,
+  mockEventsOverTimeDsl,
 } from './mock';
 import { EventHit } from './types';
 
@@ -27,6 +32,12 @@ jest.mock('./query.dsl', () => {
   return {
     buildQuery: jest.fn(() => mockQueryDsl),
     buildDetailsQuery: jest.fn(() => mockDetailsQueryDsl),
+  };
+});
+
+jest.mock('./query.events_over_time.dsl', () => {
+  return {
+    buildEventsOverTimeQuery: jest.fn(() => mockEventsOverTimeDsl),
   };
 });
 
@@ -536,6 +547,49 @@ describe('events elasticsearch_adapter', () => {
       );
 
       expect(data).toEqual(mockTimelineDetailsResult);
+    });
+  });
+
+  describe('Events Over Time', () => {
+    test('Happy Path ', async () => {
+      const mockCallWithRequest = jest.fn();
+      mockCallWithRequest.mockImplementation((req: FrameworkRequest, method: string) => {
+        return mockEventsOverTimeResponse;
+      });
+      const mockFramework: FrameworkAdapter = {
+        version: 'mock',
+        callWithRequest: mockCallWithRequest,
+        exposeStaticDir: jest.fn(),
+        registerGraphQLEndpoint: jest.fn(),
+        getIndexPatternsService: jest.fn(),
+        getSavedObjectsService: jest.fn(),
+      };
+      jest.doMock('../framework', () => ({
+        callWithRequest: mockCallWithRequest,
+      }));
+
+      const EsEventsAdapter = new ElasticsearchEventsAdapter(mockFramework);
+      const data: EventsOverTimeData = await EsEventsAdapter.getEventsOverTime(
+        mockRequest as FrameworkRequest,
+        mockEventsOverTimeOptions
+      );
+
+      expect(data).toEqual(mockEventsOverTimeResult);
+    });
+  });
+
+  describe.each([
+    [[], []],
+    [
+      [
+        { key_as_string: '2019-07-18T19:00:00.000Z', key: 1563476400000, doc_count: 62475 },
+        { key_as_string: '2019-07-18T20:00:00.000Z', key: 1563480000000, doc_count: 252322 },
+      ],
+      [{ x: 1563476400000, y: 62475 }, { x: 1563480000000, y: 252322 }],
+    ],
+  ])('formatEventsOverTimeData', (data, expected) => {
+    test(`it formats correctly`, () => {
+      expect(formatEventsOverTimeData(data)).toEqual(expected);
     });
   });
 });
