@@ -42,7 +42,6 @@ export enum InfraMetricModelMetricType {
   cardinality = 'cardinality',
   series_agg = 'series_agg', // eslint-disable-line @typescript-eslint/camelcase
   positive_only = 'positive_only', // eslint-disable-line @typescript-eslint/camelcase
-  cumulative_sum = 'cumulative_sum', // eslint-disable-line @typescript-eslint/camelcase
   derivative = 'derivative',
   count = 'count',
 }
