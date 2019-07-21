@@ -7,20 +7,20 @@
 import { i18n } from '@kbn/i18n';
 import { demodata } from '../../functions/server/demodata';
 import { FunctionHelp } from '.';
-import { FunctionFactory } from '../../functions/types';
+import { FunctionFactory } from '../../../types';
 import { DemoRows } from '../../functions/server/demodata/get_demo_rows';
 
 export const help: FunctionHelp<FunctionFactory<typeof demodata>> = {
   help: i18n.translate('xpack.canvas.functions.demodataHelpText', {
     defaultMessage:
-      'A mock data set that includes project {ci} times with usernames, countries and run phases',
+      'A mock data set that includes project {ci} times with usernames, countries, and run phases.',
     values: {
       ci: 'CI',
     },
   }),
   args: {
     type: i18n.translate('xpack.canvas.functions.demodata.args.typeHelpText', {
-      defaultMessage: 'The name of the demo data set to use',
+      defaultMessage: 'The name of the demo data set to use.',
     }),
   },
 };

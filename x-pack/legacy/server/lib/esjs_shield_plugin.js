@@ -488,5 +488,14 @@
         fmt: '/_security/user/_has_privileges'
       }
     });
+
+    shield.getBuiltinPrivileges = ca({
+      params: {},
+      urls: [
+        {
+          fmt: '/_security/privilege/_builtin'
+        }
+      ]
+    });
   };
 }));

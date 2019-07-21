@@ -19,7 +19,55 @@
 import { Request, ResponseToolkit } from 'hapi';
 import { merge } from 'lodash';
 
-import { KibanaRequest } from './router';
+import querystring from 'querystring';
+
+import { schema } from '@kbn/config-schema';
+
+import { KibanaRequest, RouteMethod } from './router';
+
+interface RequestFixtureOptions {
+  headers?: Record<string, string>;
+  params?: Record<string, unknown>;
+  body?: Record<string, unknown>;
+  query?: Record<string, unknown>;
+  path?: string;
+  method?: RouteMethod;
+}
+
+function createKibanaRequestMock({
+  path = '/path',
+  headers = { accept: 'something/html' },
+  params = {},
+  body = {},
+  query = {},
+  method = 'get',
+}: RequestFixtureOptions = {}) {
+  const queryString = querystring.stringify(query);
+  return KibanaRequest.from(
+    {
+      headers,
+      params,
+      query,
+      payload: body,
+      path,
+      method,
+      url: {
+        path,
+        query: queryString,
+        search: queryString ? `?${queryString}` : queryString,
+      },
+      route: { settings: {} },
+      raw: {
+        req: {},
+      },
+    } as any,
+    {
+      params: schema.object({}, { allowUnknowns: true }),
+      body: schema.object({}, { allowUnknowns: true }),
+      query: schema.object({}, { allowUnknowns: true }),
+    }
+  );
+}
 
 type DeepPartial<T> = T extends any[]
   ? DeepPartialArray<T[number]>
@@ -54,7 +102,7 @@ function createRawResponseToolkitMock(customization: DeepPartial<ResponseToolkit
 }
 
 export const httpServerMock = {
-  createKibanaRequest: () => KibanaRequest.from(createRawRequestMock()),
+  createKibanaRequest: createKibanaRequestMock,
   createRawRequest: createRawRequestMock,
   createRawResponseToolkit: createRawResponseToolkitMock,
 };

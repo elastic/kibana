@@ -17,13 +17,10 @@
  * under the License.
  */
 
-import { EmbeddableFactory } from 'ui/embeddable';
 import { AppState } from 'ui/state_management/app_state';
-import { UIRegistry } from 'ui/registry/_registry';
 import { Filter } from '@kbn/es-query';
 import { Query } from 'src/legacy/core_plugins/data/public';
 import { AppState as TAppState } from 'ui/state_management/app_state';
-import { DashboardViewMode } from './dashboard_view_mode';
 import {
   RawSavedDashboardPanelTo60,
   RawSavedDashboardPanel610,
@@ -33,9 +30,7 @@ import {
   RawSavedDashboardPanel730ToLatest,
 } from './migrations/types';
 
-export interface EmbeddableFactoryRegistry extends UIRegistry<EmbeddableFactory> {
-  byName: { [key: string]: EmbeddableFactory };
-}
+import { ViewMode } from '../../../embeddable_api/public';
 
 export type NavAction = (menuItem: any, navController: any, anchorElement: any) => void;
 
@@ -117,7 +112,7 @@ export interface DashboardAppStateParameters {
   };
   query: Query | string;
   filters: Filter[];
-  viewMode: DashboardViewMode;
+  viewMode: ViewMode;
 }
 
 // This could probably be improved if we flesh out AppState more... though AppState will be going away

@@ -18,24 +18,22 @@ import { PromiseReturnType } from '../../../../typings/common';
 import { Setup } from '../../helpers/setup_request';
 import { rangeFilter } from '../../helpers/range_filter';
 import { getMetricsDateHistogramParams } from '../../helpers/metrics';
-import { MAX_KPIS } from './constants';
+import { MAX_KPIS, COLORS } from './constants';
 
 export type TransactionBreakdownAPIResponse = PromiseReturnType<
   typeof getTransactionBreakdown
 >;
 
-interface TimeseriesMap {
-  [key: string]: Array<{ x: number; y: number | null }>;
-}
-
 export async function getTransactionBreakdown({
   setup,
   serviceName,
-  transactionName
+  transactionName,
+  transactionType
 }: {
   setup: Setup;
   serviceName: string;
   transactionName?: string;
+  transactionType: string;
 }) {
   const { uiFiltersES, client, config, start, end } = setup;
 
@@ -80,41 +78,36 @@ export async function getTransactionBreakdown({
     }
   };
 
+  const filters = [
+    {
+      term: {
+        [SERVICE_NAME]: {
+          value: serviceName
+        }
+      }
+    },
+    {
+      term: {
+        [TRANSACTION_TYPE]: {
+          value: transactionType
+        }
+      }
+    },
+    { range: rangeFilter(start, end) },
+    ...uiFiltersES
+  ];
+
+  if (transactionName) {
+    filters.push({ term: { [TRANSACTION_NAME]: { value: transactionName } } });
+  }
+
   const params = {
     index: config.get<string>('apm_oss.metricsIndices'),
     body: {
       size: 0,
       query: {
         bool: {
-          must: [
-            {
-              term: {
-                [SERVICE_NAME]: {
-                  value: serviceName
-                }
-              }
-            },
-            {
-              term: {
-                [TRANSACTION_TYPE]: {
-                  value: 'request'
-                }
-              }
-            },
-            { range: rangeFilter(start, end) },
-            ...uiFiltersES,
-            ...(transactionName
-              ? [
-                  {
-                    term: {
-                      [TRANSACTION_NAME]: {
-                        value: transactionName
-                      }
-                    }
-                  }
-                ]
-              : [])
-          ]
+          must: filters
         }
       },
       aggs: {
@@ -154,11 +147,18 @@ export async function getTransactionBreakdown({
     return breakdowns;
   };
 
-  const kpis = sortByOrder(
+  const visibleKpis = sortByOrder(
     formatBucket(resp.aggregations),
     'percentage',
     'desc'
   ).slice(0, MAX_KPIS);
+
+  const kpis = sortByOrder(visibleKpis, 'name').map((kpi, index) => {
+    return {
+      ...kpi,
+      color: COLORS[index % COLORS.length]
+    };
+  });
 
   const kpiNames = kpis.map(kpi => kpi.name);
 
@@ -168,26 +168,38 @@ export async function getTransactionBreakdown({
       const time = bucket.key;
 
       return kpiNames.reduce((p, kpiName) => {
-        const value = formattedValues.find(val => val.name === kpiName) || {
+        const { name, percentage } = formattedValues.find(
+          val => val.name === kpiName
+        ) || {
           name: kpiName,
           percentage: null
         };
 
-        const { name, percentage } = value;
         if (!p[name]) {
           p[name] = [];
         }
         return {
           ...p,
-          [value.name]: p[name].concat({ x: time, y: percentage })
+          [name]: p[name].concat({
+            x: time,
+            y: percentage
+          })
         };
       }, prev);
     },
-    {} as TimeseriesMap
+    {} as Record<string, Array<{ x: number; y: number | null }>>
   );
+
+  const timeseries = kpis.map(kpi => ({
+    title: kpi.name,
+    color: kpi.color,
+    type: 'areaStacked',
+    data: timeseriesPerSubtype[kpi.name],
+    hideLegend: true
+  }));
 
   return {
     kpis,
-    timeseries_per_subtype: timeseriesPerSubtype
+    timeseries
   };
 }
