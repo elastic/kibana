@@ -175,7 +175,7 @@ class ValidateJob extends Component {
 
   componentDidMount() {
     if(this.props.embedded === true) {
-      this.openModal();
+      this.validate();
     }
   }
 
@@ -185,7 +185,7 @@ class ValidateJob extends Component {
     this.setState(newState);
   };
 
-  openModal = () => {
+  validate = () => {
     const job = this.props.getJobConfig();
     const getDuration = this.props.getDuration;
     const duration = (typeof getDuration === 'function') ? getDuration() : undefined;
@@ -245,7 +245,7 @@ class ValidateJob extends Component {
         {embedded === false &&
           <div>
             <EuiButton
-              onClick={this.openModal}
+              onClick={this.validate}
               size="s"
               fill={fill}
               iconType={isCurrentJobConfig ? this.state.ui.iconType : defaultIconType}
