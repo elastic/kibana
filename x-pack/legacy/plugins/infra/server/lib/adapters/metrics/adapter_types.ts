@@ -37,6 +37,7 @@ export enum InfraMetricModelMetricType {
   cardinality = 'cardinality',
   series_agg = 'series_agg', // eslint-disable-line @typescript-eslint/camelcase
   positive_only = 'positive_only', // eslint-disable-line @typescript-eslint/camelcase
+  cumulative_sum = 'cumulative_sum', // eslint-disable-line @typescript-eslint/camelcase
   derivative = 'derivative',
   count = 'count',
 }
@@ -60,7 +61,7 @@ export interface InfraMetricModelSeries {
   terms_field?: string;
   terms_size?: number;
   terms_order_by?: string;
-  filter?: string;
+  filter?: { query: string; language: string };
 }
 
 export interface InfraMetricModelBasicMetric {
