@@ -38,9 +38,9 @@ export async function checkConfigNamespacePrefix(configPath: string) {
   }
 }
 
-export async function mergeConfig(
-  configPath: string,
-  config: I18nConfig = { exclude: [], translations: [], paths: {} }
+export async function assignConfigFromPath(
+  config: I18nConfig = { exclude: [], translations: [], paths: {} },
+  configPath: string
 ) {
   const additionalConfig: I18nConfig = {
     paths: {},
@@ -60,8 +60,6 @@ export async function mergeConfig(
   for (const translations of additionalConfig.translations) {
     config.translations.push(normalizePath(resolve(configPath, '..', translations)));
   }
-
-  return config;
 }
 
 /**

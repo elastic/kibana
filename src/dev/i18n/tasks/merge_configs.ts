@@ -18,7 +18,7 @@
  */
 
 import { resolve, join } from 'path';
-import { ErrorReporter, I18nConfig, mergeConfig, arrayify } from '..';
+import { ErrorReporter, I18nConfig, assignConfigFromPath, arrayify } from '..';
 
 export function mergeConfigs(additionalConfigPaths: string | string[] = []) {
   const root = join(__dirname, '../../../../');
@@ -30,7 +30,7 @@ export function mergeConfigs(additionalConfigPaths: string | string[] = []) {
   return configPaths.map(configPath => ({
     task: async (context: { reporter: ErrorReporter; config?: I18nConfig }) => {
       try {
-        context.config = await mergeConfig(configPath, context.config);
+        await assignConfigFromPath(context.config, configPath);
       } catch (err) {
         const { reporter } = context;
         const reporterWithContext = reporter.withContext({ name: configPath });
