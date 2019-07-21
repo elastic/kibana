@@ -12,10 +12,9 @@
     ]
   },
   "include": [
-    "./src/**/*.ts",
-    "./index.d.ts"
+    "./src/**/*.ts"
   ],
   "exclude": [
-    "lib"
+    "target"
   ]
 }
