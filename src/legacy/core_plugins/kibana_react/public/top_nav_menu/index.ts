@@ -17,4 +17,5 @@
  * under the License.
  */
 
-export * from './search_bar';
+export { TopNavMenu } from './top_nav_menu';
+export { TopNavMenuData } from './top_nav_menu_data';
