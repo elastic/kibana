@@ -35,7 +35,7 @@ interface FilterValue {
   id: string;
 }
 
-function FiltersParamEditor({ agg, value, setValue }: AggParamEditorProps<FilterValue[]>) {
+function FiltersParamEditor({ agg, value = [], setValue }: AggParamEditorProps<FilterValue[]>) {
   const [filters, setFilters] = useState(() =>
     value.map(filter => ({ ...filter, id: generateId() }))
   );

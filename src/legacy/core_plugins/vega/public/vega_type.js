@@ -17,30 +17,24 @@
  * under the License.
  */
 
-import { i18n }  from '@kbn/i18n';
-import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
-import { VisFactoryProvider } from 'ui/vis/vis_factory';
+import { i18n } from '@kbn/i18n';
 import { DefaultEditorSize } from 'ui/vis/editor_size';
 import { Status } from 'ui/vis/update_status';
 import { defaultFeedbackMessage } from 'ui/vis/default_feedback_message';
 
-import { VegaRequestHandlerProvider } from './vega_request_handler';
-import { VegaVisualizationProvider } from './vega_visualization';
+import { createVegaRequestHandler } from './vega_request_handler';
+import { createVegaVisualization } from './vega_visualization';
 
-// Editor-specific code
-import 'brace/mode/hjson';
-import 'brace/ext/searchbox';
-import './vega_editor_controller';
-import './help_menus/vega_help_menu_directives';
 import vegaEditorTemplate from './vega_editor_template.html';
 import defaultSpec from '!!raw-loader!./default.spec.hjson';
 
-VisTypesRegistryProvider.register((Private) => {
-  const VisFactory = Private(VisFactoryProvider);
-  const vegaRequestHandler = Private(VegaRequestHandlerProvider).handler;
-  const VegaVisualization = Private(VegaVisualizationProvider);
+import { visFactory } from '../../visualizations/public';
 
-  return VisFactory.createBaseVisualization({
+export const createVegaTypeDefinition = (dependencies) => {
+  const requestHandler = createVegaRequestHandler(dependencies);
+  const visualization = createVegaVisualization(dependencies);
+
+  return visFactory.createBaseVisualization({
     name: 'vega',
     title: 'Vega',
     description: i18n.translate('vega.type.vegaDescription', {
@@ -54,9 +48,9 @@ VisTypesRegistryProvider.register((Private) => {
       enableAutoApply: true,
       defaultSize: DefaultEditorSize.MEDIUM,
     },
-    visualization: VegaVisualization,
+    visualization,
+    requestHandler,
     requiresUpdateStatus: [Status.DATA, Status.RESIZE],
-    requestHandler: vegaRequestHandler,
     responseHandler: 'none',
     options: {
       showIndexSelection: false,
@@ -66,4 +60,4 @@ VisTypesRegistryProvider.register((Private) => {
     stage: 'experimental',
     feedbackMessage: defaultFeedbackMessage,
   });
-});
+};
