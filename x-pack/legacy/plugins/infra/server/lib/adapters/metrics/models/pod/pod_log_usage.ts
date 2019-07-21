@@ -4,9 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { InfraMetricModelCreator, InfraMetricModelMetricType } from '../../adapter_types';
+import {
+  InfraMetricModelCreator,
+  InfraMetricModelMetricType,
+  InfraMetricModel,
+} from '../../adapter_types';
 
-export const podLogUsage: InfraMetricModelCreator = (timeField, indexPattern, interval) => ({
+export const podLogUsage: InfraMetricModelCreator = (
+  timeField,
+  indexPattern,
+  interval
+): InfraMetricModel => ({
   id: 'podLogUsage',
   requires: ['kubernetes.pod'],
   index_pattern: indexPattern,

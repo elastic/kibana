@@ -14,7 +14,7 @@ import {
 import PropTypes from 'prop-types';
 import React, { Fragment, PureComponent } from 'react';
 import { ConfirmModal } from '../confirm_modal';
-import { AssetType } from './asset';
+import { AssetType } from '../../../types';
 import { AssetModal } from './asset_modal';
 
 interface Props {

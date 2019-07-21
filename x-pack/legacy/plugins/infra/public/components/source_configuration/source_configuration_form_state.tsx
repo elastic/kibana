@@ -49,13 +49,10 @@ export const useSourceConfigurationFormState = (configuration?: SourceConfigurat
     [indicesConfigurationFormState.errors, logColumnsConfigurationFormState.errors]
   );
 
-  const resetForm = useCallback(
-    () => {
-      indicesConfigurationFormState.resetForm();
-      logColumnsConfigurationFormState.resetForm();
-    },
-    [indicesConfigurationFormState.resetForm, logColumnsConfigurationFormState.formState]
-  );
+  const resetForm = useCallback(() => {
+    indicesConfigurationFormState.resetForm();
+    logColumnsConfigurationFormState.resetForm();
+  }, [indicesConfigurationFormState.resetForm, logColumnsConfigurationFormState.formState]);
 
   const isFormDirty = useMemo(
     () => indicesConfigurationFormState.isFormDirty || logColumnsConfigurationFormState.isFormDirty,

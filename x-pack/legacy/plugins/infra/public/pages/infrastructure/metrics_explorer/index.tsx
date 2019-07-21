@@ -13,6 +13,7 @@ import { MetricsExplorerToolbar } from '../../../components/metrics_explorer/too
 import { SourceQuery } from '../../../../common/graphql/types';
 import { NoData } from '../../../components/empty_states';
 import { useMetricsExplorerState } from './use_metric_explorer_state';
+import { useTrackPageview } from '../../../hooks/use_track_metric';
 
 interface MetricsExplorerPageProps {
   intl: InjectedIntl;
@@ -41,8 +42,11 @@ export const MetricsExplorerPage = injectI18n(
       handleLoadMore,
     } = useMetricsExplorerState(source, derivedIndexPattern);
 
+    useTrackPageview({ app: 'infra_metrics', path: 'metrics_explorer' });
+    useTrackPageview({ app: 'infra_metrics', path: 'metrics_explorer', delay: 15000 });
+
     return (
-      <div>
+      <React.Fragment>
         <DocumentTitle
           title={(previousTitle: string) =>
             intl.formatMessage(
@@ -93,7 +97,7 @@ export const MetricsExplorerPage = injectI18n(
             onTimeChange={handleTimeChange}
           />
         )}
-      </div>
+      </React.Fragment>
     );
   }
 );

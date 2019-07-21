@@ -32,13 +32,10 @@ export const useMetricsExplorerState = (
     refreshSignal
   );
 
-  const handleRefresh = useCallback(
-    () => {
-      setAfterKey(null);
-      setRefreshSignal(refreshSignal + 1);
-    },
-    [refreshSignal]
-  );
+  const handleRefresh = useCallback(() => {
+    setAfterKey(null);
+    setRefreshSignal(refreshSignal + 1);
+  }, [refreshSignal]);
 
   const handleTimeChange = useCallback(
     (start: string, end: string) => {

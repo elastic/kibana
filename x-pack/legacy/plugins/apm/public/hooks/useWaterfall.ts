@@ -14,14 +14,11 @@ const INITIAL_DATA = { trace: [], errorsPerTransaction: {} };
 
 export function useWaterfall(urlParams: IUrlParams) {
   const { traceId, start, end, transactionId } = urlParams;
-  const { data = INITIAL_DATA, status, error } = useFetcher(
-    () => {
-      if (traceId && start && end) {
-        return loadTrace({ traceId, start, end });
-      }
-    },
-    [traceId, start, end]
-  );
+  const { data = INITIAL_DATA, status, error } = useFetcher(() => {
+    if (traceId && start && end) {
+      return loadTrace({ traceId, start, end });
+    }
+  }, [traceId, start, end]);
 
   const waterfall = useMemo(() => getWaterfall(data, transactionId), [
     data,

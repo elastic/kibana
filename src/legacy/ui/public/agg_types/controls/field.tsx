@@ -78,16 +78,13 @@ function FieldParamEditor({
 
   const isValid = !!value && !errors.length;
 
-  useEffect(
-    () => {
-      setValidity(isValid);
+  useEffect(() => {
+    setValidity(isValid);
 
-      if (!!errors.length) {
-        setTouched();
-      }
-    },
-    [isValid]
-  );
+    if (!!errors.length) {
+      setTouched();
+    }
+  }, [isValid]);
 
   useEffect(() => {
     // set field if only one available
@@ -110,7 +107,7 @@ function FieldParamEditor({
       isInvalid={showValidation ? !isValid : false}
       fullWidth={true}
       error={errors}
-      className="visEditorSidebar__aggParamFormRow"
+      compressed
     >
       <EuiComboBox
         placeholder={i18n.translate('common.ui.aggTypes.field.selectFieldPlaceholder', {

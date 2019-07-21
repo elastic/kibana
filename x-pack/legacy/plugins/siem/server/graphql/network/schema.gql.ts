@@ -44,7 +44,6 @@ export const networkSchema = gql`
 
   type NetworkTopNFlowItem {
     _id: String
-    timestamp: Date
     source: TopNFlowItem
     destination: TopNFlowItem
     client: TopNFlowItem
@@ -83,7 +82,6 @@ export const networkSchema = gql`
     dnsBytesOut: Float
     dnsName: String
     queryCount: Float
-    timestamp: Date
     uniqueDomains: Float
   }
 

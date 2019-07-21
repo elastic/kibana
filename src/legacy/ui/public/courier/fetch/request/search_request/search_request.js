@@ -21,6 +21,7 @@ import moment from 'moment';
 
 import { searchRequestQueue } from '../../../search_request_queue';
 
+import { createDefer } from 'ui/promises';
 import { i18n } from '@kbn/i18n';
 
 export function SearchRequestProvider(Promise) {
@@ -37,8 +38,8 @@ export function SearchRequestProvider(Promise) {
 
       this.errorHandler = errorHandler;
       this.source = source;
-      this.defer = defer || Promise.defer();
-      this.abortedDefer = Promise.defer();
+      this.defer = defer || createDefer(Promise);
+      this.abortedDefer = createDefer(Promise);
       this.type = 'search';
 
       // Track execution time.

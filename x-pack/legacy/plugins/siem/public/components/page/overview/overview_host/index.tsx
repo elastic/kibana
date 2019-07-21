@@ -21,19 +21,17 @@ import { OverviewHostStats } from '../overview_host_stats';
 export interface OwnProps {
   startDate: number;
   endDate: number;
-  setQuery: (
-    {
-      id,
-      inspect,
-      loading,
-      refetch,
-    }: {
-      id: string;
-      inspect: inputsModel.InspectQuery | null;
-      loading: boolean;
-      refetch: inputsModel.Refetch;
-    }
-  ) => void;
+  setQuery: ({
+    id,
+    inspect,
+    loading,
+    refetch,
+  }: {
+    id: string;
+    inspect: inputsModel.InspectQuery | null;
+    loading: boolean;
+    refetch: inputsModel.Refetch;
+  }) => void;
 }
 
 const OverviewHostStatsManage = manageQuery(OverviewHostStats);

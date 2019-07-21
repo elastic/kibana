@@ -543,15 +543,9 @@ function discoverController(
 
     $scope.updateDataSource()
       .then(function () {
-        $scope.$listen(timefilter, 'fetch', function () {
-          $scope.fetch();
-        });
-        $scope.$listen(timefilter, 'refreshIntervalUpdate', () => {
-          $scope.updateRefreshInterval();
-        });
-        $scope.$listen(timefilter, 'timeUpdate', () => {
-          $scope.updateTime();
-        });
+        $scope.$listen(timefilter, 'autoRefreshFetch', $scope.fetch);
+        $scope.$listen(timefilter, 'refreshIntervalUpdate', $scope.updateRefreshInterval);
+        $scope.$listen(timefilter, 'timeUpdate', $scope.updateTime);
 
         $scope.$watchCollection('state.sort', function (sort) {
           if (!sort) return;
@@ -710,20 +704,30 @@ function discoverController(
 
     $scope.updateTime();
 
+    // Abort any in-progress requests before fetching again
+    $scope.searchSource.cancelQueued();
+
     $scope.updateDataSource()
       .then(setupVisualization)
       .then(function () {
         $state.save();
         $scope.fetchStatus = fetchStatuses.LOADING;
         logInspectorRequest();
-        return courier.fetch();
+        return $scope.searchSource.fetch();
       })
+      .then(onResults)
       .catch((error) => {
-        toastNotifications.addError(error, {
-          title: i18n.translate('kbn.discover.discoverError', {
-            defaultMessage: 'Discover error',
-          }),
-        });
+        const fetchError = getPainlessError(error);
+
+        if (fetchError) {
+          $scope.fetchError = fetchError;
+        } else {
+          toastNotifications.addError(error, {
+            title: i18n.translate('kbn.discover.errorLoadingData', {
+              defaultMessage: 'Error loading data',
+            }),
+          });
+        }
       });
   };
 
@@ -769,8 +773,6 @@ function discoverController(
     });
 
     $scope.fetchStatus = fetchStatuses.COMPLETE;
-
-    return $scope.searchSource.onResults().then(onResults);
   }
 
   let inspectorRequest;
@@ -795,29 +797,6 @@ function discoverController(
       .stats(getResponseInspectorStats($scope.searchSource, resp))
       .ok({ json: resp });
   }
-
-  function startSearching() {
-    return $scope.searchSource.onResults()
-      .then(onResults)
-      .catch((error) => {
-        const fetchError = getPainlessError(error);
-
-        if (fetchError) {
-          $scope.fetchError = fetchError;
-        } else {
-          toastNotifications.addError(error, {
-            title: i18n.translate('kbn.discover.errorLoadingData', {
-              defaultMessage: 'Error loading data',
-            }),
-          });
-        }
-
-        // Restart. This enables auto-refresh functionality.
-        startSearching();
-      });
-  }
-
-  startSearching();
 
   $scope.updateTime = function () {
     $scope.timeRange = {

@@ -381,7 +381,7 @@ export default function ({ getService, getPageObjects }) {
       }
     });
 
-    describe('query #2, which has an empty time range', async () => {
+    describe('query #2, which has an empty time range', () => {
       const fromTime = '1999-06-11 09:22:11.000';
       const toTime = '1999-06-12 11:21:04.000';
 
@@ -402,7 +402,7 @@ export default function ({ getService, getPageObjects }) {
       });
     });
 
-    describe('filter editor', async function () {
+    describe('filter editor', function () {
       it('should add a phrases filter', async function () {
         await filterBar.addFilter('extension.raw', 'is one of', 'jpg');
         expect(await filterBar.hasFilter('extension.raw', 'jpg')).to.be(true);

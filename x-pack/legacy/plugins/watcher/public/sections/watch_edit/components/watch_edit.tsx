@@ -127,16 +127,13 @@ export const WatchEdit = ({
     getWatch();
   }, []);
 
-  useEffect(
-    () => {
-      chrome.breadcrumbs.set([
-        MANAGEMENT_BREADCRUMB,
-        listBreadcrumb,
-        id ? editBreadcrumb : createBreadcrumb,
-      ]);
-    },
-    [id]
-  );
+  useEffect(() => {
+    chrome.breadcrumbs.set([
+      MANAGEMENT_BREADCRUMB,
+      listBreadcrumb,
+      id ? editBreadcrumb : createBreadcrumb,
+    ]);
+  }, [id]);
 
   const errorCode = getPageErrorCode(loadError);
   if (errorCode) {

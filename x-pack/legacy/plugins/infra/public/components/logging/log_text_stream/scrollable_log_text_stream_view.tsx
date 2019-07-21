@@ -38,15 +38,13 @@ interface ScrollableLogTextStreamViewProps {
   lastLoadedTime: number | null;
   target: TimeKey | null;
   jumpToTarget: (target: TimeKey) => any;
-  reportVisibleInterval: (
-    params: {
-      pagesBeforeStart: number;
-      pagesAfterEnd: number;
-      startKey: TimeKey | null;
-      middleKey: TimeKey | null;
-      endKey: TimeKey | null;
-    }
-  ) => any;
+  reportVisibleInterval: (params: {
+    pagesBeforeStart: number;
+    pagesAfterEnd: number;
+    startKey: TimeKey | null;
+    middleKey: TimeKey | null;
+    endKey: TimeKey | null;
+  }) => any;
   loadNewerItems: () => void;
   setFlyoutItem: (id: string) => void;
   setFlyoutVisibility: (visible: boolean) => void;
@@ -281,9 +279,10 @@ export const ScrollableLogTextStreamView = injectI18n(ScrollableLogTextStreamVie
  * written as a hook.
  */
 const WithColumnWidths: React.FunctionComponent<{
-  children: (
-    params: { columnWidths: LogEntryColumnWidths; CharacterDimensionsProbe: React.ComponentType }
-  ) => React.ReactElement<any> | null;
+  children: (params: {
+    columnWidths: LogEntryColumnWidths;
+    CharacterDimensionsProbe: React.ComponentType;
+  }) => React.ReactElement<any> | null;
   columnConfigurations: LogColumnConfiguration[];
   scale: TextScale;
 }> = ({ children, columnConfigurations, scale }) => {

@@ -15,7 +15,8 @@ export default ({ getPageObjects, getService }: KibanaFunctionalTestDefaultProvi
   const infraSourceConfigurationFlyout = getService('infraSourceConfigurationFlyout');
   const pageObjects = getPageObjects(['infraLogs']);
 
-  describe('Logs Page', () => {
+  describe('Logs Page', function() {
+    this.tags('smoke');
     before(async () => {
       await esArchiver.load('empty_kibana');
     });

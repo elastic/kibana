@@ -6,14 +6,8 @@
 
 import { AnomaliesByHost, AnomaliesByNetwork } from '../types';
 
-export const createCompoundHostKey = (anomaliesByHost: AnomaliesByHost): string => {
-  return `${anomaliesByHost.hostName}-${anomaliesByHost.anomaly.entityName}-${
-    anomaliesByHost.anomaly.entityValue
-  }-${anomaliesByHost.anomaly.severity}-${anomaliesByHost.anomaly.jobId}`;
-};
+export const createCompoundHostKey = (anomaliesByHost: AnomaliesByHost): string =>
+  `${anomaliesByHost.hostName}-${anomaliesByHost.anomaly.entityName}-${anomaliesByHost.anomaly.entityValue}-${anomaliesByHost.anomaly.severity}-${anomaliesByHost.anomaly.jobId}`;
 
-export const createCompoundNetworkKey = (anomaliesByNetwork: AnomaliesByNetwork): string => {
-  return `${anomaliesByNetwork.ip}-${anomaliesByNetwork.anomaly.entityName}-${
-    anomaliesByNetwork.anomaly.entityValue
-  }-${anomaliesByNetwork.anomaly.severity}-${anomaliesByNetwork.anomaly.jobId}`;
-};
+export const createCompoundNetworkKey = (anomaliesByNetwork: AnomaliesByNetwork): string =>
+  `${anomaliesByNetwork.ip}-${anomaliesByNetwork.anomaly.entityName}-${anomaliesByNetwork.anomaly.entityValue}-${anomaliesByNetwork.anomaly.severity}-${anomaliesByNetwork.anomaly.jobId}`;

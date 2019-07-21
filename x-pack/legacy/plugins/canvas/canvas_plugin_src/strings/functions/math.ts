@@ -7,27 +7,28 @@
 import { i18n } from '@kbn/i18n';
 import { math } from '../../functions/common/math';
 import { FunctionHelp } from '.';
-import { FunctionFactory } from '../../functions/types';
+import { FunctionFactory } from '../../../types';
+import { DATATABLE, CONTEXT, TINYMATH, TINYMATH_URL } from '../constants';
 
 export const help: FunctionHelp<FunctionFactory<typeof math>> = {
   help: i18n.translate('xpack.canvas.functions.mathHelpText', {
     defaultMessage:
-      'Interpret a math expression, with a number or {datatable} as context. {Datatable} ' +
-      'columns are available by their column name. If you pass in a number it is available ' +
-      'as "{value}" (without the quotes)',
+      'Interprets a {TINYMATH} math expression using a number or {DATATABLE} as {CONTEXT}. ' +
+      'The {DATATABLE} columns are available by their column name. ' +
+      'If the {CONTEXT} is a number it is available as {value}.',
     values: {
-      datatable: 'datatable',
-      Datatable: 'Datatable',
-      value: 'value',
+      TINYMATH,
+      CONTEXT,
+      DATATABLE,
+      value: '`value`',
     },
   }),
   args: {
     expression: i18n.translate('xpack.canvas.functions.math.args.expressionHelpText', {
-      defaultMessage: 'An evaluated {tinymath} expression. (See {url})',
+      defaultMessage: 'An evaluated {TINYMATH} expression. See {TINYMATH_URL}.',
       values: {
-        tinymath: 'TinyMath',
-        url:
-          '[TinyMath Functions](https://www.elastic.co/guide/en/kibana/current/canvas-tinymath-functions.html)',
+        TINYMATH,
+        TINYMATH_URL,
       },
     }),
   },
