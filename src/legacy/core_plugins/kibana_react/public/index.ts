@@ -17,4 +17,10 @@
  * under the License.
  */
 
-export * from './search_bar';
+// TODO these are imports from the old plugin world.
+// Once the new platform is ready, they can get removed
+// and handled by the platform itself in the setup method
+// of the ExpressionExectorService
+
+/** @public types */
+export { TopNavMenu, TopNavMenuData } from './top_nav_menu';

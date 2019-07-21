@@ -17,4 +17,15 @@
  * under the License.
  */
 
-export * from './search_bar';
+export type TopNavMenuAction = (anchorElement: EventTarget) => void;
+
+export interface TopNavMenuData {
+  id?: string;
+  label: string;
+  run: TopNavMenuAction;
+  description?: string;
+  testId?: string;
+  className?: string;
+  disableButton?: boolean | (() => boolean);
+  tooltip?: string | (() => string);
+}
