@@ -110,7 +110,7 @@ export interface Columns<T, U = T> {
   sortable?: boolean | Func<T>;
   truncateText?: boolean;
   hideForMobile?: boolean;
-  render?: (item: T, node: U) => void;
+  render?: (item: T, node: U) => React.ReactNode;
   width?: string;
 }
 
