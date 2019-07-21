@@ -29,6 +29,11 @@ export interface InfraMetricsAdapter {
   ): Promise<InfraMetricData[]>;
 }
 
+export enum InfraMetricsQueryType {
+  lucene = 'lucene',
+  kuery = 'kuery',
+}
+
 export enum InfraMetricModelMetricType {
   avg = 'avg',
   max = 'max',
@@ -61,7 +66,7 @@ export interface InfraMetricModelSeries {
   terms_field?: string;
   terms_size?: number;
   terms_order_by?: string;
-  filter?: { query: string; language: string };
+  filter?: { query: string; language: InfraMetricsQueryType };
 }
 
 export interface InfraMetricModelBasicMetric {
