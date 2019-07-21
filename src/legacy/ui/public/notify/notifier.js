@@ -20,7 +20,7 @@
 import _ from 'lodash';
 import { metadata } from '../metadata';
 import { formatMsg, formatStack } from './lib';
-import '../render_directive';
+import '../directives/render_directive';
 import { i18n } from '@kbn/i18n';
 
 const notifs = [];
