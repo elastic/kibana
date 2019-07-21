@@ -18,7 +18,7 @@
  */
 
 import angular from 'angular';
-import { uiModules } from '../modules';
+import { uiModules } from '../../modules';
 
 uiModules.get('kibana')
   .config(function ($provide) {

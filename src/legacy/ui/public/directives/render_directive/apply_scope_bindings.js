@@ -19,7 +19,7 @@
 
 import { forOwn, noop } from 'lodash';
 
-import '../../bind';
+import '../../directives/bind';
 
 const bindingRE = /^(=|=\?|&|@)([a-zA-Z0-9_$]+)?$/;
 
