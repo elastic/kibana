@@ -14,13 +14,10 @@
   },
   "devDependencies": {
     "@babel/cli": "7.4.4",
-    "@babel/plugin-transform-runtime": "^7.5.5",
-    "@babel/preset-env": "^7.5.5",
-    "@babel/preset-typescript": "^7.3.3",
+    "@kbn/babel-preset": "1.0.0",
     "typescript": "3.5.1"
   },
   "dependencies": {
-    "@babel/runtime": "^7.5.5",
     "@kbn/dev-utils": "1.0.0"
   }
 }

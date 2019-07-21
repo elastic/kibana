@@ -1,20 +1,3 @@
 {
-  "presets": [
-    [
-      "@babel/preset-env",
-      {
-        "targets": {
-          "browsers": ["last 2 versions"]
-        }
-      }
-    ],
-    "@babel/preset-typescript"
-  ],
-  "plugins": [
-    ["@babel/plugin-transform-runtime",
-      {
-        "regenerator": false
-      }
-    ]
-  ]
+  "presets": ["@kbn/babel-preset/webpack_preset"]
 }
