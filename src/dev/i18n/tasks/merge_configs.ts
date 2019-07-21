@@ -30,7 +30,7 @@ export function mergeConfigs(additionalConfigPaths: string | string[] = []) {
   return configPaths.map(configPath => ({
     task: async (context: { reporter: ErrorReporter; config?: I18nConfig }) => {
       try {
-        await assignConfigFromPath(context.config, configPath);
+        context.config = await assignConfigFromPath(context.config, configPath);
       } catch (err) {
         const { reporter } = context;
         const reporterWithContext = reporter.withContext({ name: configPath });

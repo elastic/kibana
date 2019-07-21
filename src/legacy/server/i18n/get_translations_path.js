@@ -19,7 +19,7 @@
 
 import { promisify } from 'util';
 import { readFile } from 'fs';
-import { resolve } from 'path';
+import { resolve, dirname } from 'path';
 import globby from 'globby';
 
 const readFileAsync = promisify(readFile);
@@ -29,16 +29,17 @@ export async function getTranslationPaths({ cwd, glob }) {
   const translationPaths = [];
 
   for (const entry of entries) {
-    const entyFullPath = resolve(cwd, entry);
+    const entryFullPath = resolve(cwd, entry);
+    const pluginBasePath = dirname(entryFullPath);
     try {
-      const content = await readFileAsync(entyFullPath, 'utf8');
+      const content = await readFileAsync(entryFullPath, 'utf8');
       const { translations } = JSON.parse(content);
       translations.forEach(translation => {
-        const translationFullPath = resolve(cwd, translation);
+        const translationFullPath = resolve(pluginBasePath, translation);
         translationPaths.push(translationFullPath);
       });
     } catch (err) {
-      throw new Error(`Failed to parse .i18nrc.json file at ${entyFullPath}`);
+      throw new Error(`Failed to parse .i18nrc.json file at ${entryFullPath}`);
     }
   }
 

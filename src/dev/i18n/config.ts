@@ -60,6 +60,8 @@ export async function assignConfigFromPath(
   for (const translations of additionalConfig.translations) {
     config.translations.push(normalizePath(resolve(configPath, '..', translations)));
   }
+
+  return config;
 }
 
 /**
