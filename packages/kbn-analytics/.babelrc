@@ -3,20 +3,17 @@
     [
       "@babel/preset-env",
       {
-        "modules": false,
         "targets": {
-          "browsers": ["last 2 versions", "safari >= 7"]
+          "browsers": ["last 2 versions"]
         }
       }
     ],
     "@babel/preset-typescript"
   ],
   "plugins": [
-    "add-module-exports",
-    "@babel/plugin-transform-modules-commonjs",
     ["@babel/plugin-transform-runtime",
       {
-        "regenerator": true
+        "regenerator": false
       }
     ]
   ]

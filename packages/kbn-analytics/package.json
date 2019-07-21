@@ -14,11 +14,9 @@
   },
   "devDependencies": {
     "@babel/cli": "7.4.4",
-    "@babel/plugin-transform-modules-commonjs": "^7.5.0",
     "@babel/plugin-transform-runtime": "^7.5.5",
     "@babel/preset-env": "^7.5.5",
     "@babel/preset-typescript": "^7.3.3",
-    "babel-plugin-add-module-exports": "^1.0.2",
     "typescript": "3.5.1"
   },
   "dependencies": {
