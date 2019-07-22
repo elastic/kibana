@@ -20,7 +20,7 @@
 import { Readable } from 'stream';
 import { collectSavedObjects } from './collect_saved_objects';
 import { extractErrors } from './extract_errors';
-import { ImportError } from './types';
+import { SavedObjectsImportError } from './types';
 import { validateReferences } from './validate_references';
 import { SavedObjectsClientContract } from '../';
 
@@ -36,7 +36,7 @@ export interface ImportSavedObjectsOptions {
 export interface ImportResponse {
   success: boolean;
   successCount: number;
-  errors?: ImportError[];
+  errors?: SavedObjectsImportError[];
 }
 
 export async function importSavedObjects({
@@ -47,7 +47,7 @@ export async function importSavedObjects({
   supportedTypes,
   namespace,
 }: ImportSavedObjectsOptions): Promise<ImportResponse> {
-  let errorAccumulator: ImportError[] = [];
+  let errorAccumulator: SavedObjectsImportError[] = [];
 
   // Get the objects to import
   const {

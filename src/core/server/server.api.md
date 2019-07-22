@@ -636,6 +636,25 @@ export interface SavedObjectsFindResponse<T extends SavedObjectAttributes = any>
     total: number;
 }
 
+// Warning: (ae-missing-release-tag) "SavedObjectsImportError" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+// 
+// @public (undocumented)
+export interface SavedObjectsImportError {
+    // Warning: (ae-forgotten-export) The symbol "ConflictError" needs to be exported by the entry point index.d.ts
+    // Warning: (ae-forgotten-export) The symbol "UnsupportedTypeError" needs to be exported by the entry point index.d.ts
+    // Warning: (ae-forgotten-export) The symbol "MissingReferencesError" needs to be exported by the entry point index.d.ts
+    // Warning: (ae-forgotten-export) The symbol "UnknownError" needs to be exported by the entry point index.d.ts
+    // 
+    // (undocumented)
+    error: ConflictError | UnsupportedTypeError | MissingReferencesError | UnknownError;
+    // (undocumented)
+    id: string;
+    // (undocumented)
+    title?: string;
+    // (undocumented)
+    type: string;
+}
+
 // @public
 export interface SavedObjectsMigrationVersion {
     // (undocumented)

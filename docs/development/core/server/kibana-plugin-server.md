@@ -60,6 +60,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [SavedObjectsCreateOptions](./kibana-plugin-server.savedobjectscreateoptions.md) |  |
 |  [SavedObjectsFindOptions](./kibana-plugin-server.savedobjectsfindoptions.md) |  |
 |  [SavedObjectsFindResponse](./kibana-plugin-server.savedobjectsfindresponse.md) |  |
+|  [SavedObjectsImportError](./kibana-plugin-server.savedobjectsimporterror.md) |  |
 |  [SavedObjectsMigrationVersion](./kibana-plugin-server.savedobjectsmigrationversion.md) | A dictionary of saved object type -<!-- -->&gt; version used to determine what migrations need to be applied to a saved object. |
 |  [SavedObjectsService](./kibana-plugin-server.savedobjectsservice.md) |  |
 |  [SavedObjectsUpdateOptions](./kibana-plugin-server.savedobjectsupdateoptions.md) |  |

@@ -107,6 +107,7 @@ export {
   SavedObjectsService,
   SavedObjectsUpdateOptions,
   SavedObjectsUpdateResponse,
+  SavedObjectsImportError,
 } from './saved_objects';
 
 export { RecursiveReadonly } from '../utils';

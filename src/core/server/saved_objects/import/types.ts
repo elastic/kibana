@@ -54,7 +54,7 @@ export interface MissingReferencesError {
   }>;
 }
 
-export interface ImportError {
+export interface SavedObjectsImportError {
   id: string;
   type: string;
   title?: string;

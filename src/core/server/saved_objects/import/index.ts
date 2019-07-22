@@ -23,3 +23,4 @@ export {
   ImportResponse,
 } from './import_saved_objects';
 export { resolveImportErrors } from './resolve_import_errors';
+export { SavedObjectsImportError } from './types';

@@ -23,7 +23,7 @@ import { collectSavedObjects } from './collect_saved_objects';
 import { createObjectsFilter } from './create_objects_filter';
 import { extractErrors } from './extract_errors';
 import { splitOverwrites } from './split_overwrites';
-import { ImportError, Retry } from './types';
+import { SavedObjectsImportError, Retry } from './types';
 import { validateReferences } from './validate_references';
 
 interface ResolveImportErrorsOptions {
@@ -37,7 +37,7 @@ interface ResolveImportErrorsOptions {
 interface ImportResponse {
   success: boolean;
   successCount: number;
-  errors?: ImportError[];
+  errors?: SavedObjectsImportError[];
 }
 
 export async function resolveImportErrors({
@@ -48,7 +48,7 @@ export async function resolveImportErrors({
   supportedTypes,
 }: ResolveImportErrorsOptions): Promise<ImportResponse> {
   let successCount = 0;
-  let errorAccumulator: ImportError[] = [];
+  let errorAccumulator: SavedObjectsImportError[] = [];
   const filter = createObjectsFilter(retries);
 
   // Get the objects to resolve errors
