@@ -12,7 +12,7 @@ jest.useFakeTimers();
 
 describe('RootDragDropProvider', () => {
   test('reuses contexts for each render', () => {
-    const contexts: any[] = [];
+    const contexts: Array<{}> = [];
     const TestComponent = ({ name }: { name: string }) => {
       const context = useContext(DragContext);
       contexts.push(context);

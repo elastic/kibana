@@ -23,7 +23,7 @@ import { NativeRenderer } from '../native_renderer';
 import { MultiColumnEditor } from '../multi_column_editor';
 import { generateId } from '../id_generator';
 
-const chartTypeIcons: Array<{ id: SeriesType; label: string; iconType: IconType }> = [
+export const chartTypeIcons: Array<{ id: SeriesType; label: string; iconType: IconType }> = [
   {
     id: 'line',
     label: i18n.translate('xpack.lens.xyVisualization.lineChartLabel', {

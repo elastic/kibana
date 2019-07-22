@@ -18,9 +18,12 @@ import {
   Position,
 } from '@elastic/charts';
 import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/types';
-import { XYArgs } from './types';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText, IconType } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { LensMultiTable } from '../types';
+import { XYArgs, SeriesType } from './types';
 import { RenderFunction } from '../interpreter_types';
+import { chartTypeIcons } from './xy_config_panel';
 
 export interface XYChartProps {
   data: LensMultiTable;
@@ -88,8 +91,31 @@ export const xyChartRenderer: RenderFunction<XYChartProps> = {
   },
 };
 
+function getIconForSeriesType(seriesType: SeriesType): IconType {
+  return chartTypeIcons.find(chartTypeIcon => chartTypeIcon.id === seriesType)!.iconType;
+}
+
 export function XYChart({ data, args }: XYChartProps) {
   const { legend, layers } = args;
+
+  if (Object.values(data.tables).some(table => table.rows.length === 0)) {
+    const icon: IconType = layers.length > 0 ? getIconForSeriesType(layers[0].seriesType) : 'bar';
+    return (
+      <EuiFlexGroup gutterSize="s" direction="column" alignItems="center" justifyContent="center">
+        <EuiFlexItem>
+          <EuiIcon type={icon} color="subdued" size="l" />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiText color="subdued" size="xs">
+            <FormattedMessage
+              id="xpack.lens.xyVisualization.noDataLabel"
+              defaultMessage="No results found"
+            />
+          </EuiText>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
+  }
 
   return (
     <Chart className="lnsChart">

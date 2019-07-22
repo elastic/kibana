@@ -22,12 +22,13 @@ import { register, registryFactory } from '@kbn/interpreter/common';
 import { npSetup } from 'ui/new_platform';
 import { initializeInterpreter } from './lib/interpreter';
 import { registries } from './registries';
-import { kfetch } from 'ui/kfetch';
+
 import { ajaxStream } from './lib/ajax_stream';
 import { functions } from './functions';
 import { visualization } from './renderers/visualization';
 import { typeSpecs } from '../../../../plugins/data/common/expressions/expression_types';
 
+const { http } = npSetup.core;
 const KIBANA_VERSION = npSetup.core.injectedMetadata.getKibanaVersion();
 const KIBANA_BASE_PATH = npSetup.core.injectedMetadata.getBasePath();
 
@@ -46,7 +47,7 @@ let _interpreterPromise;
 
 const initialize = async () => {
   initializeInterpreter({
-    kfetch,
+    http,
     ajaxStream: ajaxStream(KIBANA_VERSION, KIBANA_BASE_PATH),
     typesRegistry: registries.types,
     functionsRegistry: registries.browserFunctions,

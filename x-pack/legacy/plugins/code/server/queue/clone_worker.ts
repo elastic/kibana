@@ -76,20 +76,31 @@ export class CloneWorker extends AbstractGitWorker {
       cancellationToken.on(() => {
         cancelled = true;
       });
-      this.cancellationService.registerCloneJobToken(repo.uri, cancellationToken);
     }
 
-    return await repoService.clone(repo, (progress: number, cloneProgress?: CloneProgress) => {
-      if (cancelled) {
-        // return false to stop the clone progress
-        return false;
+    const cloneJobPromise = repoService.clone(
+      repo,
+      (progress: number, cloneProgress?: CloneProgress) => {
+        if (cancelled) {
+          // return false to stop the clone progress
+          return false;
+        }
+        // For clone job payload, it only has the url. Populate back the
+        // repository uri before update progress.
+        job.payload.uri = repo.uri;
+        this.updateProgress(job, progress, undefined, cloneProgress);
+        return true;
       }
-      // For clone job payload, it only has the url. Populate back the
-      // repository uri before update progress.
-      job.payload.uri = repo.uri;
-      this.updateProgress(job, progress, undefined, cloneProgress);
-      return true;
-    });
+    );
+
+    if (cancellationToken) {
+      await this.cancellationService.registerCancelableCloneJob(
+        repo.uri,
+        cancellationToken,
+        cloneJobPromise
+      );
+    }
+    return await cloneJobPromise;
   }
 
   public async onJobCompleted(job: Job, res: CloneWorkerResult) {
