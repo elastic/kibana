@@ -21,9 +21,6 @@ export default function ({ getPageObjects }) {
 
     beforeEach(async () => {
       await PageObjects.maps.clickAddLayer();
-      const panelOpen = await PageObjects.maps.isLayerAddPanelOpen();
-      expect(panelOpen).to.be(true);
-
       await PageObjects.maps.selectGeoJsonUploadSource();
       await PageObjects.maps.uploadJsonFileForIndexing(
         path.join(__dirname, FILE_LOAD_DIR, DEFAULT_LOAD_FILE_NAME)
