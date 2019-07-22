@@ -35,6 +35,8 @@ import { AggListForm } from '../aggregation_list';
 import { GroupByListForm } from '../group_by_list';
 import { SourceIndexPreview } from '../source_index_preview';
 import { PivotPreview } from './pivot_preview';
+// @ts-ignore: could not find declaration file for module
+import { KqlFilterBar } from '../../../../../components/kql_filter_bar';
 
 import {
   AggName,
@@ -199,15 +201,23 @@ export const StepDefineForm: SFC<Props> = React.memo(({ overrides = {}, onChange
 
   // The search filter
   const [search, setSearch] = useState(defaults.search);
+  const [searchQuery, setSearchQuery] = useState(defaults.search);
+  const [useKQL] = useState(true);
 
   const addToSearch = (newSearch: string) => {
     const currentDisplaySearch = search === defaultSearch ? emptySearch : search;
     setSearch(`${currentDisplaySearch} ${newSearch}`.trim());
   };
-
+  // TODO: rename influencersFilterQuery and remove placeholder on kql component
   const searchHandler = (d: Record<string, any>) => {
-    const newSearch = d.queryText === emptySearch ? defaultSearch : d.queryText;
+    const { influencersFilterQuery, queryString } = d;
+    const newSearch = queryString === emptySearch ? defaultSearch : queryString;
+    const newSearchQuery =
+      influencersFilterQuery.match_all && Object.keys(influencersFilterQuery.match_all).length === 0
+        ? defaultSearch
+        : influencersFilterQuery;
     setSearch(newSearch);
+    setSearchQuery(newSearchQuery);
   };
 
   // The list of selected group by fields
@@ -285,7 +295,7 @@ export const StepDefineForm: SFC<Props> = React.memo(({ overrides = {}, onChange
 
   const pivotAggsArr = dictionaryToArray(aggList);
   const pivotGroupByArr = dictionaryToArray(groupByList);
-  const pivotQuery = getPivotQuery(search);
+  const pivotQuery = useKQL ? getPivotQuery(searchQuery) : getPivotQuery(search);
 
   // Advanced editor state
   const [isAdvancedEditorSwitchModalVisible, setAdvancedEditorSwitchModalVisible] = useState(false);
@@ -411,54 +421,53 @@ export const StepDefineForm: SFC<Props> = React.memo(({ overrides = {}, onChange
     <EuiFlexGroup>
       <EuiFlexItem grow={false} style={{ minWidth: '420px' }}>
         <EuiForm>
-          {kibanaContext.currentSavedSearch.id === undefined && typeof search === 'string' && (
-            <Fragment>
-              <EuiFormRow
-                label={i18n.translate('xpack.ml.dataframe.stepDefineForm.indexPatternLabel', {
-                  defaultMessage: 'Index pattern',
-                })}
-                helpText={
-                  disabledQuery
-                    ? i18n.translate('xpack.ml.dataframe.stepDefineForm.indexPatternHelpText', {
-                        defaultMessage:
-                          'An optional query for this index pattern is not supported. The number of supported index fields is {maxIndexFields} whereas this index has {numIndexFields} fields.',
-                        values: {
-                          maxIndexFields,
-                          numIndexFields,
-                        },
-                      })
-                    : ''
-                }
-              >
-                <span>{kibanaContext.currentIndexPattern.title}</span>
-              </EuiFormRow>
-              {!disabledQuery && (
+          {kibanaContext.currentSavedSearch.id === undefined &&
+            (typeof search === 'string' || typeof search === 'object') && (
+              <Fragment>
                 <EuiFormRow
-                  label={i18n.translate('xpack.ml.dataframe.stepDefineForm.queryLabel', {
-                    defaultMessage: 'Query',
+                  label={i18n.translate('xpack.ml.dataframe.stepDefineForm.indexPatternLabel', {
+                    defaultMessage: 'Index pattern',
                   })}
-                  helpText={i18n.translate('xpack.ml.dataframe.stepDefineForm.queryHelpText', {
-                    defaultMessage: 'Use a query string to filter the source data (optional).',
-                  })}
+                  helpText={
+                    disabledQuery
+                      ? i18n.translate('xpack.ml.dataframe.stepDefineForm.indexPatternHelpText', {
+                          defaultMessage:
+                            'An optional query for this index pattern is not supported. The number of supported index fields is {maxIndexFields} whereas this index has {numIndexFields} fields.',
+                          values: {
+                            maxIndexFields,
+                            numIndexFields,
+                          },
+                        })
+                      : ''
+                  }
                 >
-                  <EuiSearchBar
-                    defaultQuery={search === defaultSearch ? emptySearch : search}
-                    box={{
-                      placeholder: i18n.translate(
+                  <span>{kibanaContext.currentIndexPattern.title}</span>
+                </EuiFormRow>
+                {!disabledQuery && (
+                  <EuiFormRow
+                    label={i18n.translate('xpack.ml.dataframe.stepDefineForm.queryLabel', {
+                      defaultMessage: 'Query',
+                    })}
+                    helpText={i18n.translate('xpack.ml.dataframe.stepDefineForm.queryHelpText', {
+                      defaultMessage: 'Use a query string to filter the source data (optional).',
+                    })}
+                  >
+                    <KqlFilterBar
+                      indexPattern={indexPattern}
+                      onSubmit={searchHandler}
+                      initialValue={search === defaultSearch ? emptySearch : search}
+                      placeholder={i18n.translate(
                         'xpack.ml.dataframe.stepDefineForm.queryPlaceholder',
                         {
                           defaultMessage: 'e.g. {example}',
                           values: { example: 'method:GET -is:active' },
                         }
-                      ),
-                      incremental: false,
-                    }}
-                    onChange={searchHandler}
-                  />
-                </EuiFormRow>
-              )}
-            </Fragment>
-          )}
+                      )}
+                    />
+                  </EuiFormRow>
+                )}
+              </Fragment>
+            )}
 
           {kibanaContext.currentSavedSearch.id !== undefined && (
             <EuiFormRow
