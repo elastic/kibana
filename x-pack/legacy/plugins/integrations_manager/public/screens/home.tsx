@@ -5,15 +5,18 @@
  */
 import React, { useState, useEffect } from 'react';
 import { EuiPanel, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
-import { getIntegrationsList } from '../data';
+import { getIntegrationsGroupedByStatus } from '../data';
 import { IntegrationListGrid } from '../components/integration_list_grid';
-import { IntegrationList } from '../../common/types';
+import { IntegrationsGroupedByStatus } from '../../common/types';
 
 export function Home() {
-  const [list, setList] = useState<IntegrationList>([]);
+  const [map, setMap] = useState<IntegrationsGroupedByStatus>({
+    installed: [],
+    not_installed: [],
+  });
 
   useEffect(() => {
-    getIntegrationsList().then(setList);
+    getIntegrationsGroupedByStatus().then(setMap);
   }, []);
 
   return (
@@ -21,12 +24,20 @@ export function Home() {
       <EuiTitle>
         <h1>Elastic Integrations Manager</h1>
       </EuiTitle>
-      <EuiSpacer />
-      <EuiText>
-        <h3>Available Integrations</h3>
-      </EuiText>
-      <EuiSpacer />
-      {list ? <IntegrationListGrid list={list} /> : null}
+      {map
+        ? Object.entries(map).map(([status, list]) => {
+            return (
+              <>
+                <EuiSpacer />
+                <EuiText>
+                  <h3>{status}</h3>
+                </EuiText>
+                <EuiSpacer />
+                <IntegrationListGrid list={list} />
+              </>
+            );
+          })
+        : null}
     </EuiPanel>
   );
 }
