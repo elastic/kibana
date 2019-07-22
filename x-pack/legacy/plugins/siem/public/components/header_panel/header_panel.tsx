@@ -36,30 +36,28 @@ export interface HeaderPanelProps {
 export const HeaderPanel = pure<HeaderPanelProps>(
   ({ border, children, id, showInspect = false, subtitle, title, tooltip }) => (
     <Header border={border}>
-      <>
-        <EuiFlexGroup alignItems="flexStart" gutterSize="none">
+      <EuiFlexGroup alignItems="flexStart" gutterSize="none">
+        <EuiFlexItem grow={false}>
+          <EuiTitle>
+            <h2 data-test-subj="page_headline_title">{title}</h2>
+          </EuiTitle>
+        </EuiFlexItem>
+        {tooltip && (
           <EuiFlexItem grow={false}>
-            <EuiTitle>
-              <h2 data-test-subj="page_headline_title">{title}</h2>
-            </EuiTitle>
+            <EuiIconTip color="subdued" content={tooltip} position="top" size="l" />
           </EuiFlexItem>
-          {tooltip && (
-            <EuiFlexItem grow={false}>
-              <EuiIconTip color="subdued" content={tooltip} position="top" size="l" />
-            </EuiFlexItem>
-          )}
-        </EuiFlexGroup>
-        <EuiText color="subdued" size="s">
-          {subtitle}
-        </EuiText>
+        )}
+      </EuiFlexGroup>
+      <EuiText color="subdued" size="s">
+        {subtitle}
+      </EuiText>
 
-        <EuiFlexGroup alignItems="flexEnd" gutterSize="m" direction="column">
-          <EuiFlexItem grow={false} className="eui-textRight">
-            {id && <InspectButton queryId={id} inspectIndex={0} show={showInspect} title={title} />}
-          </EuiFlexItem>
-          {children && <EuiFlexItem grow={false}>{children}</EuiFlexItem>}
-        </EuiFlexGroup>
-      </>
+      <EuiFlexGroup alignItems="flexEnd" gutterSize="m" direction="column">
+        <EuiFlexItem grow={false} className="eui-textRight">
+          {id && <InspectButton queryId={id} inspectIndex={0} show={showInspect} title={title} />}
+        </EuiFlexItem>
+        {children && <EuiFlexItem grow={false}>{children}</EuiFlexItem>}
+      </EuiFlexGroup>
     </Header>
   )
 );

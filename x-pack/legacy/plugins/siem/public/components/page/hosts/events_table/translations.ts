@@ -10,12 +10,6 @@ export const EVENTS = i18n.translate('xpack.siem.eventsTable.eventsTitle', {
   defaultMessage: 'Events',
 });
 
-export const UNIT = (totalCount: number) =>
-  i18n.translate('xpack.siem.eventsTable.unit', {
-    values: { totalCount },
-    defaultMessage: `{totalCount, plural, =1 {Event} other {Events}}`,
-  });
-
 export const TIMESTAMP = i18n.translate('xpack.siem.eventsTable.timestampTitle', {
   defaultMessage: 'Timestamp',
 });
