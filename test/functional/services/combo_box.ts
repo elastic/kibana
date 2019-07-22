@@ -18,6 +18,8 @@
  */
 import { FtrProviderContext } from '../ftr_provider_context';
 import { WebElementWrapper } from './lib/web_element_wrapper';
+// @ts-ignore not supported yet
+import { scrollIntoViewIfNecessary } from './lib/web_element_wrapper/scroll_into_view_if_necessary';
 
 export function ComboBoxProvider({ getService, getPageObjects }: FtrProviderContext) {
   const config = getService('config');
@@ -59,6 +61,7 @@ export function ComboBoxProvider({ getService, getPageObjects }: FtrProviderCont
       }
 
       await this._filterOptionsList(comboBoxElement, value);
+      comboBoxElement.scrollIntoViewIfNecessary();
       await this.openOptionsList(comboBoxElement);
 
       if (value !== undefined) {
