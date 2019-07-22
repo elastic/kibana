@@ -130,6 +130,10 @@ export const PaginatedTable = memo<SiemTables>(
         setActivePage(0);
         updateActivePage(0);
       }
+
+      if (headerCount >= 0 && loadingInitial) {
+        setLoadingInitial(false);
+      }
     }, effectDeps);
 
     const onButtonClick = () => {
@@ -159,9 +163,6 @@ export const PaginatedTable = memo<SiemTables>(
       loadPage(newActivePage);
       updateActivePage(newActivePage);
     };
-    if (headerCount >= 0 && loadingInitial) {
-      setLoadingInitial(false);
-    }
 
     const button = (
       <EuiButtonEmpty
