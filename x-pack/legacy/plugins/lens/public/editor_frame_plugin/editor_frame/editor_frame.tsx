@@ -100,9 +100,9 @@ export function EditorFrame(props: EditorFrameProps) {
       );
 
       dispatch({
-        type: 'CREATE_LAYER',
-        newLayerId,
-        newDatasourceState: newState,
+        type: 'UPDATE_DATASOURCE_STATE',
+        datasourceId: state.activeDatasourceId!,
+        newState,
       });
 
       return newLayerId;
@@ -136,7 +136,7 @@ export function EditorFrame(props: EditorFrameProps) {
     }
   }, [allLoaded, state.visualization.activeId, state.visualization.state]);
 
-  const datasource =
+  const activeDatasource =
     state.activeDatasourceId && !state.datasourceStates[state.activeDatasourceId].isLoading
       ? props.datasourceMap[state.activeDatasourceId]
       : undefined;
@@ -145,14 +145,14 @@ export function EditorFrame(props: EditorFrameProps) {
     ? props.visualizationMap[state.visualization.activeId]
     : undefined;
 
-  if (datasource && allLoaded) {
+  if (allLoaded) {
     return (
       <FrameLayout
         navPanel={
           <nav>
             <EuiLink
               onClick={() => {
-                if (datasource && visualization) {
+                if (activeDatasource && visualization) {
                   save({
                     activeDatasources: Object.keys(state.datasourceStates).reduce(
                       (datasourceMap, datasourceId) => ({

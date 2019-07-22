@@ -60,11 +60,6 @@ export type Action =
   | {
       type: 'SWITCH_DATASOURCE';
       newDatasourceId: string;
-    }
-  | {
-      type: 'CREATE_LAYER';
-      newLayerId: string;
-      newDatasourceState: unknown;
     };
 
 export const getInitialState = (props: EditorFrameProps): EditorFrameState => {
@@ -170,21 +165,6 @@ export const reducer = (state: EditorFrameState, action: Action): EditorFrameSta
         visualization: {
           ...state.visualization,
           state: action.newState,
-        },
-      };
-    case 'CREATE_LAYER':
-      return {
-        ...state,
-        // layerIdToDatasource: {
-        //   ...state.layerIdToDatasource,
-        //   [action.newLayerId]: state.activeDatasourceId!,
-        // },
-        datasourceStates: {
-          ...state.datasourceStates,
-          [state.activeDatasourceId!]: {
-            state: action.newDatasourceState,
-            isLoading: false,
-          },
         },
       };
     default:
