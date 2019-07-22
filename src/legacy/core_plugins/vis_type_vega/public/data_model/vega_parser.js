@@ -78,7 +78,7 @@ export class VegaParser {
       this.spec = hjson.parse(this.spec, { legacyRoot: false });
     }
     if (!_.isPlainObject(this.spec)) {
-      throw new Error(i18n.translate('vega.vegaParser.invalidVegaSpecErrorMessage', {
+      throw new Error(i18n.translate('visTypeVega.vegaParser.invalidVegaSpecErrorMessage', {
         defaultMessage: 'Invalid Vega specification',
       }));
     }
@@ -131,7 +131,7 @@ export class VegaParser {
           this.spec.projections.length !== 1 ||
           this.spec.projections[0].name !== 'projection'
         ) {
-          throw new Error(i18n.translate('vega.vegaParser.VLCompilerShouldHaveGeneratedSingleProtectionObjectErrorMessage', {
+          throw new Error(i18n.translate('visTypeVega.vegaParser.VLCompilerShouldHaveGeneratedSingleProtectionObjectErrorMessage', {
             defaultMessage: 'Internal error: Vega-Lite compiler should have generated a single projection object',
           }));
         }
@@ -185,7 +185,7 @@ export class VegaParser {
         delete this.spec.width;
         delete this.spec.height;
       } else {
-        this._onWarning(i18n.translate('vega.vegaParser.widthAndHeightParamsAreIgnoredWithAutosizeFitWarningMessage', {
+        this._onWarning(i18n.translate('visTypeVega.vegaParser.widthAndHeightParamsAreIgnoredWithAutosizeFitWarningMessage', {
           defaultMessage: 'The {widthParam} and {heightParam} params are ignored with {autosizeParam}',
           values: {
             autosizeParam: 'autosize=fit',
@@ -207,7 +207,7 @@ export class VegaParser {
       if (this._config.controlsLocation === undefined) {
         this.containerDir = 'column';
       } else {
-        throw new Error(i18n.translate('vega.vegaParser.unrecognizedControlsLocationValueErrorMessage', {
+        throw new Error(i18n.translate('visTypeVega.vegaParser.unrecognizedControlsLocationValueErrorMessage', {
           defaultMessage: 'Unrecognized {controlsLocationParam} value. Expecting one of [{locToDirMap}]',
           values: { locToDirMap: `"${locToDirMap.keys().join('", "')}"`, controlsLocationParam: 'controlsLocation' }
         }));
@@ -215,7 +215,7 @@ export class VegaParser {
     }
     const dir = this._config.controlsDirection;
     if (dir !== undefined && dir !== 'horizontal' && dir !== 'vertical') {
-      throw new Error(i18n.translate('vega.vegaParser.unrecognizedDirValueErrorMessage', {
+      throw new Error(i18n.translate('visTypeVega.vegaParser.unrecognizedDirValueErrorMessage', {
         defaultMessage: 'Unrecognized {dirParam} value. Expecting one of [{expectedValues}]',
         values: { expectedValues: '"horizontal", "vertical"', dirParam: 'dir' },
       }));
@@ -234,12 +234,12 @@ export class VegaParser {
       result = this.spec._hostConfig;
       delete this.spec._hostConfig;
       if (!_.isPlainObject(result)) {
-        throw new Error(i18n.translate('vega.vegaParser.hostConfigValueTypeErrorMessage', {
+        throw new Error(i18n.translate('visTypeVega.vegaParser.hostConfigValueTypeErrorMessage', {
           defaultMessage: 'If present, {configName} must be an object',
           values: { configName: '"_hostConfig"' },
         }));
       }
-      this._onWarning(i18n.translate('vega.vegaParser.hostConfigIsDeprecatedWarningMessage', {
+      this._onWarning(i18n.translate('visTypeVega.vegaParser.hostConfigIsDeprecatedWarningMessage', {
         defaultMessage: '{deprecatedConfigName} has been deprecated. Use {newConfigName} instead.',
         values: {
           deprecatedConfigName: '"_hostConfig"',
@@ -251,7 +251,7 @@ export class VegaParser {
       result = this.spec.config.kibana;
       delete this.spec.config.kibana;
       if (!_.isPlainObject(result)) {
-        throw new Error(i18n.translate('vega.vegaParser.kibanaConfigValueTypeErrorMessage', {
+        throw new Error(i18n.translate('visTypeVega.vegaParser.kibanaConfigValueTypeErrorMessage', {
           defaultMessage: 'If present, {configName} must be an object',
           values: { configName: 'config.kibana' },
         }));
@@ -270,7 +270,7 @@ export class VegaParser {
     if (result.position === undefined) {
       result.position = 'top';
     } else if (['top', 'right', 'bottom', 'left'].indexOf(result.position) === -1) {
-      throw new Error(i18n.translate('vega.vegaParser.unexpectedValueForPositionConfigurationErrorMessage', {
+      throw new Error(i18n.translate('visTypeVega.vegaParser.unexpectedValueForPositionConfigurationErrorMessage', {
         defaultMessage: 'Unexpected value for the {configurationName} configuration',
         values: { configurationName: 'result.position' },
       }));
@@ -279,7 +279,7 @@ export class VegaParser {
     if (result.padding === undefined) {
       result.padding = 16;
     } else if (typeof result.padding !== 'number') {
-      throw new Error(i18n.translate('vega.vegaParser.paddingConfigValueTypeErrorMessage', {
+      throw new Error(i18n.translate('visTypeVega.vegaParser.paddingConfigValueTypeErrorMessage', {
         defaultMessage: '{configName} is expected to be a number',
         values: { configName: 'config.kibana.result.padding' },
       }));
@@ -291,7 +291,7 @@ export class VegaParser {
     } else if (typeof result.centerOnMark === 'boolean') {
       result.centerOnMark = result.centerOnMark ? Number.MAX_VALUE : -1;
     } else if (typeof result.centerOnMark !== 'number') {
-      throw new Error(i18n.translate('vega.vegaParser.centerOnMarkConfigValueTypeErrorMessage', {
+      throw new Error(i18n.translate('visTypeVega.vegaParser.centerOnMarkConfigValueTypeErrorMessage', {
         defaultMessage: '{configName} is expected to be {trueValue}, {falseValue}, or a number',
         values: { configName: 'config.kibana.result.centerOnMark', trueValue: 'true', falseValue: 'false' },
       }));
@@ -318,7 +318,7 @@ export class VegaParser {
           res[name] = parsed;
           return;
         }
-        this._onWarning(i18n.translate('vega.vegaParser.someKibanaConfigurationIsNoValidWarningMessage', {
+        this._onWarning(i18n.translate('visTypeVega.vegaParser.someKibanaConfigurationIsNoValidWarningMessage', {
           defaultMessage: '{configName} is not valid',
           values: { configName: `config.kibana.${name}` },
         }));
@@ -335,7 +335,7 @@ export class VegaParser {
     // `false` is a valid value
     res.mapStyle = this._config.mapStyle === undefined ? `default` : this._config.mapStyle;
     if (res.mapStyle !== `default` && res.mapStyle !== false) {
-      this._onWarning(i18n.translate('vega.vegaParser.mapStyleValueTypeWarningMessage', {
+      this._onWarning(i18n.translate('visTypeVega.vegaParser.mapStyleValueTypeWarningMessage', {
         defaultMessage: '{mapStyleConfigName} may either be {mapStyleConfigFirstAllowedValue} or {mapStyleConfigSecondAllowedValue}',
         values: {
           mapStyleConfigName: 'config.kibana.mapStyle',
@@ -354,7 +354,7 @@ export class VegaParser {
       if (!Array.isArray(maxBounds) || maxBounds.length !== 4 ||
         !maxBounds.every(v => typeof v === 'number' && Number.isFinite(v))
       ) {
-        this._onWarning(i18n.translate('vega.vegaParser.maxBoundsValueTypeWarningMessage', {
+        this._onWarning(i18n.translate('visTypeVega.vegaParser.maxBoundsValueTypeWarningMessage', {
           defaultMessage: '{maxBoundsConfigName} must be an array with four numbers',
           values: {
             maxBoundsConfigName: 'config.kibana.maxBounds',
@@ -373,7 +373,7 @@ export class VegaParser {
     if (val === undefined) {
       dstObj[paramName] = dflt;
     } else if (typeof val !== 'boolean') {
-      this._onWarning(i18n.translate('vega.vegaParser.someKibanaParamValueTypeWarningMessage', {
+      this._onWarning(i18n.translate('visTypeVega.vegaParser.someKibanaParamValueTypeWarningMessage', {
         defaultMessage: '{configName} must be a boolean value',
         values: {
           configName: `config.kibana.${paramName}`
@@ -392,7 +392,7 @@ export class VegaParser {
    */
   _parseSchema() {
     if (!this.spec.$schema) {
-      this._onWarning(i18n.translate('vega.vegaParser.inputSpecDoesNotSpecifySchemaWarningMessage', {
+      this._onWarning(i18n.translate('visTypeVega.vegaParser.inputSpecDoesNotSpecifySchemaWarningMessage', {
         defaultMessage: 'The input spec does not specify a {schemaParam}, defaulting to {defaultSchema}',
         values: { defaultSchema: `"${DEFAULT_SCHEMA}"`, schemaParam: '"$schema"' },
       }));
@@ -404,7 +404,7 @@ export class VegaParser {
     const libVersion = isVegaLite ? vegaLite.version : vega.version;
 
     if (versionCompare(schema.version, libVersion) > 0) {
-      this._onWarning(i18n.translate('vega.vegaParser.notValidLibraryVersionForInputSpecWarningMessage', {
+      this._onWarning(i18n.translate('visTypeVega.vegaParser.notValidLibraryVersionForInputSpecWarningMessage', {
         defaultMessage: 'The input spec uses {schemaLibrary} {schemaVersion}, but current version of {schemaLibrary} is {libraryVersion}.',
         values: {
           schemaLibrary: schema.library,
@@ -436,7 +436,7 @@ export class VegaParser {
 
       const parser = this._urlParsers[type];
       if (parser === undefined) {
-        throw new Error(i18n.translate('vega.vegaParser.notSupportedUrlTypeErrorMessage', {
+        throw new Error(i18n.translate('visTypeVega.vegaParser.notSupportedUrlTypeErrorMessage', {
           defaultMessage: '{urlObject} is not supported',
           values: {
             urlObject: 'url: {"%type%": "${type}"}',
@@ -475,7 +475,7 @@ export class VegaParser {
       if (key === 'data' && _.isPlainObject(obj.url)) {
         // Assume that any  "data": {"url": {...}}  is a request for data
         if (obj.values !== undefined || obj.source !== undefined) {
-          throw new Error(i18n.translate('vega.vegaParser.dataExceedsSomeParamsUseTimesLimitErrorMessage', {
+          throw new Error(i18n.translate('visTypeVega.vegaParser.dataExceedsSomeParamsUseTimesLimitErrorMessage', {
             defaultMessage: 'Data must not have more than one of {urlParam}, {valuesParam}, and {sourceParam}',
             values: {
               urlParam: '"url"',
