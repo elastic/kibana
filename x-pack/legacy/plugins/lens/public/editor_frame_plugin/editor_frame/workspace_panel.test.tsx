@@ -460,13 +460,13 @@ describe('workspace_panel', () => {
       const expectedTable = {
         datasourceSuggestionId: 0,
         isMultiRow: true,
+        layerId: '1',
         columns: [],
       };
       mockDatasource.getDatasourceSuggestionsForField.mockReturnValueOnce([
         {
           state: {},
           table: expectedTable,
-          layerId: '1',
         },
       ]);
       mockVisualization.getSuggestions.mockReturnValueOnce([
@@ -508,8 +508,8 @@ describe('workspace_panel', () => {
             datasourceSuggestionId: 0,
             isMultiRow: true,
             columns: [],
+            layerId: '1',
           },
-          layerId: '1',
         },
         {
           state: {},
@@ -517,8 +517,8 @@ describe('workspace_panel', () => {
             datasourceSuggestionId: 1,
             isMultiRow: true,
             columns: [],
+            layerId: '1',
           },
-          layerId: '1',
         },
       ]);
       mockVisualization.getSuggestions.mockReturnValueOnce([

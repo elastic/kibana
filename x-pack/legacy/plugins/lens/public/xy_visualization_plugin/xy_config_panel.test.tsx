@@ -10,7 +10,7 @@ import { mountWithIntl as mount } from 'test_utils/enzyme_helpers';
 import { EuiButtonGroupProps } from '@elastic/eui';
 import { XYConfigPanel } from './xy_config_panel';
 import { DatasourceDimensionPanelProps, Operation, FramePublicAPI } from '../types';
-import { State, SeriesType } from './types';
+import { State } from './types';
 import { Position } from '@elastic/charts';
 import { NativeRendererProps } from '../native_renderer';
 import { generateId } from '../id_generator';

@@ -400,9 +400,8 @@ export function getIndexPatternDatasource({
             ],
             isMultiRow: true,
             datasourceSuggestionId: 0,
+            layerId,
           },
-
-          layerId,
         };
 
         return [suggestion];
@@ -460,9 +459,8 @@ export function getIndexPatternDatasource({
             ],
             isMultiRow: true,
             datasourceSuggestionId: 0,
+            layerId,
           },
-
-          layerId,
         };
 
         return [suggestion];
@@ -491,8 +489,8 @@ export function getIndexPatternDatasource({
               })),
               isMultiRow: true,
               datasourceSuggestionId: index,
+              layerId,
             },
-            layerId,
           };
         })
         .reduce((prev, current) => (current ? prev.concat([current]) : prev), [] as Array<

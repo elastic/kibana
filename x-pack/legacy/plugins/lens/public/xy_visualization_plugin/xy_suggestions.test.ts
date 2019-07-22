@@ -70,18 +70,30 @@ describe('xy_suggestions', () => {
     expect(
       getSuggestions({
         tables: [
-          { datasourceSuggestionId: 0, isMultiRow: true, columns: [dateCol('a')] },
+          {
+            datasourceSuggestionId: 0,
+            isMultiRow: true,
+            columns: [dateCol('a')],
+            layerId: 'first',
+          },
           {
             datasourceSuggestionId: 1,
             isMultiRow: true,
             columns: [strCol('foo'), strCol('bar')],
+            layerId: 'first',
           },
           {
             datasourceSuggestionId: 2,
             isMultiRow: false,
             columns: [strCol('foo'), numCol('bar')],
+            layerId: 'first',
           },
-          { datasourceSuggestionId: 3, isMultiRow: true, columns: [unknownCol(), numCol('bar')] },
+          {
+            datasourceSuggestionId: 3,
+            isMultiRow: true,
+            columns: [unknownCol(), numCol('bar')],
+            layerId: 'first',
+          },
         ],
       })
     ).toEqual([]);
@@ -95,6 +107,7 @@ describe('xy_suggestions', () => {
           datasourceSuggestionId: 0,
           isMultiRow: true,
           columns: [numCol('bytes'), dateCol('date')],
+          layerId: 'first',
         },
       ],
     });
@@ -121,6 +134,7 @@ describe('xy_suggestions', () => {
           datasourceSuggestionId: 1,
           isMultiRow: true,
           columns: [numCol('price'), numCol('quantity'), dateCol('date'), strCol('product')],
+          layerId: 'first',
         },
       ],
     });
@@ -149,11 +163,13 @@ describe('xy_suggestions', () => {
           datasourceSuggestionId: 0,
           isMultiRow: true,
           columns: [numCol('price'), dateCol('date')],
+          layerId: 'first',
         },
         {
           datasourceSuggestionId: 1,
           isMultiRow: true,
           columns: [numCol('count'), strCol('country')],
+          layerId: 'first',
         },
       ],
     });
@@ -193,6 +209,7 @@ describe('xy_suggestions', () => {
           datasourceSuggestionId: 1,
           isMultiRow: true,
           columns: [numCol('quantity'), numCol('price')],
+          layerId: 'first',
         },
       ],
     });
@@ -230,6 +247,7 @@ describe('xy_suggestions', () => {
               },
             },
           ],
+          layerId: 'first',
         },
       ],
     });
@@ -255,6 +273,7 @@ describe('xy_suggestions', () => {
           datasourceSuggestionId: 0,
           isMultiRow: true,
           columns: [numCol('bytes'), dateCol('date')],
+          layerId: 'first',
         },
       ],
     });

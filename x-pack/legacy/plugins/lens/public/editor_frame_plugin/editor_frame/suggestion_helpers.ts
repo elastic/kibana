@@ -5,7 +5,7 @@
  */
 
 import { Ast } from '@kbn/interpreter/common';
-import { Visualization, DatasourceSuggestion } from '../../types';
+import { Visualization, DatasourceSuggestion, TableSuggestion } from '../../types';
 import { Action } from './state_management';
 
 export interface Suggestion {
@@ -32,22 +32,22 @@ export function getSuggestions(
   activeVisualizationId: string | null,
   visualizationState: unknown
 ): Suggestion[] {
-  // const datasourceTables = datasourceTableSuggestions.map(({ table }) => table);
+  const datasourceTables: TableSuggestion[] = datasourceTableSuggestions.map(({ table }) => table);
 
   return Object.entries(visualizationMap)
     .map(([visualizationId, visualization]) => {
       return visualization
         .getSuggestions({
-          // suggestions: datasourceTableSuggestions.map(({ table }) => table),
-          // suggestions: datasourceTableSuggestions,
-          tables: [],
-          layerId: '',
+          tables: datasourceTables,
           state: visualizationId === activeVisualizationId ? visualizationState : undefined,
         })
         .map(({ datasourceSuggestionId, ...suggestion }) => ({
           ...suggestion,
           visualizationId,
-          datasourceState: datasourceTableSuggestions[datasourceSuggestionId].state,
+          datasourceState: datasourceTableSuggestions.find(
+            datasourceSuggestion =>
+              datasourceSuggestion.table.datasourceSuggestionId === datasourceSuggestionId
+          )!.state,
         }));
     })
     .reduce((globalList, currentList) => [...globalList, ...currentList], [])

@@ -29,8 +29,8 @@ function generateSuggestion(datasourceSuggestionId = 1, state = {}): DatasourceS
       columns: [],
       datasourceSuggestionId: 1,
       isMultiRow: true,
+      layerId: 'first',
     },
-    layerId: 'first',
   };
 }
 
@@ -247,6 +247,7 @@ describe('editor_frame', () => {
     });
 
     it('should render the resulting expression using the expression renderer', async () => {
+      mockDatasource.getLayers.mockReturnValue(['first']);
       const instance = mount(
         <EditorFrame
           {...defaultProps}
@@ -270,22 +271,38 @@ describe('editor_frame', () => {
       instance.update();
 
       expect(instance.find(expressionRendererMock).prop('expression')).toMatchInlineSnapshot(`
-Object {
-  "chain": Array [
-    Object {
-      "arguments": Object {},
-      "function": "datasource",
-      "type": "function",
-    },
-    Object {
-      "arguments": Object {},
-      "function": "vis",
-      "type": "function",
-    },
-  ],
-  "type": "expression",
-}
-`);
+        Object {
+          "chain": Array [
+            Object {
+              "arguments": Object {
+                "layerIds": Array [
+                  "first",
+                ],
+                "tables": Array [
+                  Object {
+                    "chain": Array [
+                      Object {
+                        "arguments": Object {},
+                        "function": "datasource",
+                        "type": "function",
+                      },
+                    ],
+                    "type": "expression",
+                  },
+                ],
+              },
+              "function": "lens_merge_tables",
+              "type": "function",
+            },
+            Object {
+              "arguments": Object {},
+              "function": "vis",
+              "type": "function",
+            },
+          ],
+          "type": "expression",
+        }
+      `);
     });
   });
 
@@ -361,6 +378,7 @@ Object {
     });
 
     it('should re-render config panel with updated datasource api after datasource state update', async () => {
+      mockDatasource.getLayers.mockReturnValue(['first']);
       mount(
         <EditorFrame
           {...defaultProps}
@@ -393,7 +411,11 @@ Object {
       expect(mockVisualization.renderConfigPanel).toHaveBeenLastCalledWith(
         expect.any(Element),
         expect.objectContaining({
-          datasource: updatedPublicAPI,
+          frame: expect.objectContaining({
+            datasourceLayers: {
+              first: updatedPublicAPI,
+            },
+          }),
         })
       );
     });
@@ -401,6 +423,8 @@ Object {
 
   describe('datasource public api communication', () => {
     it('should pass the datasource api to the visualization', async () => {
+      mockDatasource.getLayers.mockReturnValue(['first']);
+
       mount(
         <EditorFrame
           {...defaultProps}
@@ -420,13 +444,18 @@ Object {
 
       expect(mockVisualization.renderConfigPanel).toHaveBeenCalledWith(
         expect.any(Element),
-        expect.objectContaining({ datasource: mockDatasource.publicAPIMock })
+        expect.objectContaining({
+          frame: expect.objectContaining({
+            datasourceLayers: { first: mockDatasource.publicAPIMock },
+          }),
+        })
       );
     });
 
     it('should give access to the datasource state in the datasource factory function', async () => {
       const datasourceState = {};
       mockDatasource.initialize.mockResolvedValue(datasourceState);
+      mockDatasource.getLayers.mockReturnValue(['first']);
 
       mount(
         <EditorFrame
@@ -447,11 +476,13 @@ Object {
 
       expect(mockDatasource.getPublicAPI).toHaveBeenCalledWith(
         datasourceState,
-        expect.any(Function)
+        expect.any(Function),
+        'first'
       );
     });
 
     it('should re-create the public api after state has been set', async () => {
+      mockDatasource.getLayers.mockReturnValue(['first']);
       mount(
         <EditorFrame
           {...defaultProps}
@@ -470,21 +501,24 @@ Object {
       await waitForPromises();
 
       const updatedState = {};
-      const setDatasourceState = (mockDatasource.getPublicAPI as jest.Mock).mock.calls[0][1];
+      const setDatasourceState = mockDatasource.getPublicAPI.mock.calls[0][1];
       act(() => {
         setDatasourceState(updatedState);
       });
 
       expect(mockDatasource.getPublicAPI).toHaveBeenLastCalledWith(
         updatedState,
-        expect.any(Function)
+        expect.any(Function),
+        'first'
       );
     });
   });
 
   describe('switching', () => {
     let instance: ReactWrapper;
+
     beforeEach(async () => {
+      mockDatasource.getLayers.mockReturnValue(['first']);
       instance = mount(
         <EditorFrame
           {...defaultProps}
@@ -577,12 +611,8 @@ Object {
           .simulate('change', { target: { value: 'testVis2' } });
       });
 
-      expect(mockDatasource.publicAPIMock.getTableSpec).toHaveBeenCalled();
       expect(mockVisualization2.getSuggestions).toHaveBeenCalled();
-      expect(mockVisualization2.initialize).toHaveBeenCalledWith(
-        mockDatasource.publicAPIMock,
-        initialState
-      );
+      expect(mockVisualization2.initialize).toHaveBeenCalledWith(expect.anything(), initialState);
       expect(mockVisualization2.renderConfigPanel).toHaveBeenCalledWith(
         expect.any(Element),
         expect.objectContaining({ state: { initial: true } })
@@ -600,7 +630,9 @@ Object {
 
       expect(mockDatasource.publicAPIMock.getTableSpec).toHaveBeenCalled();
       expect(mockVisualization2.getSuggestions).toHaveBeenCalled();
-      expect(mockVisualization2.initialize).toHaveBeenCalledWith(mockDatasource.publicAPIMock);
+      expect(mockVisualization2.initialize).toHaveBeenCalledWith(
+        expect.objectContaining({ datasourceLayers: { first: mockDatasource.publicAPIMock } })
+      );
       expect(mockVisualization2.renderConfigPanel).toHaveBeenCalledWith(
         expect.any(Element),
         expect.objectContaining({ state: { initial: true } })
@@ -665,14 +697,14 @@ Object {
               ...mockVisualization,
               getSuggestions: () => [
                 {
-                  datasourceSuggestionId: 0,
+                  datasourceSuggestionId: 1,
                   score: 0.5,
                   state: {},
                   title: 'Suggestion2',
                   previewIcon: 'empty',
                 },
                 {
-                  datasourceSuggestionId: 0,
+                  datasourceSuggestionId: 1,
                   score: 0.8,
                   state: {},
                   title: 'Suggestion1',
@@ -684,14 +716,14 @@ Object {
               ...mockVisualization,
               getSuggestions: () => [
                 {
-                  datasourceSuggestionId: 0,
+                  datasourceSuggestionId: 1,
                   score: 0.4,
                   state: {},
                   title: 'Suggestion4',
                   previewIcon: 'empty',
                 },
                 {
-                  datasourceSuggestionId: 0,
+                  datasourceSuggestionId: 1,
                   score: 0.45,
                   state: {},
                   title: 'Suggestion3',
@@ -736,7 +768,7 @@ Object {
               ...mockVisualization,
               getSuggestions: () => [
                 {
-                  datasourceSuggestionId: 0,
+                  datasourceSuggestionId: 1,
                   score: 0.8,
                   state: suggestionVisState,
                   title: 'Suggestion1',
@@ -792,14 +824,14 @@ Object {
               ...mockVisualization,
               getSuggestions: () => [
                 {
-                  datasourceSuggestionId: 0,
+                  datasourceSuggestionId: 1,
                   score: 0.2,
                   state: {},
                   title: 'Suggestion1',
                   previewIcon: 'empty',
                 },
                 {
-                  datasourceSuggestionId: 0,
+                  datasourceSuggestionId: 1,
                   score: 0.8,
                   state: suggestionVisState,
                   title: 'Suggestion2',
@@ -849,14 +881,14 @@ Object {
               ...mockVisualization,
               getSuggestions: () => [
                 {
-                  datasourceSuggestionId: 0,
+                  datasourceSuggestionId: 1,
                   score: 0.2,
                   state: {},
                   title: 'Suggestion1',
                   previewIcon: 'empty',
                 },
                 {
-                  datasourceSuggestionId: 0,
+                  datasourceSuggestionId: 1,
                   score: 0.6,
                   state: {},
                   title: 'Suggestion2',
@@ -868,7 +900,7 @@ Object {
               ...mockVisualization2,
               getSuggestions: () => [
                 {
-                  datasourceSuggestionId: 0,
+                  datasourceSuggestionId: 1,
                   score: 0.8,
                   state: suggestionVisState,
                   title: 'Suggestion3',

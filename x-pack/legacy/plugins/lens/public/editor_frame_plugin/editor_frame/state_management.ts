@@ -127,18 +127,12 @@ export const reducer = (state: EditorFrameState, action: Action): EditorFrameSta
         ...state,
         datasourceStates: {
           ...state.datasourceStates,
-          [action.newDatasourceId]: {
+          [action.newDatasourceId]: state.datasourceStates[action.newDatasourceId] || {
             state: null,
             isLoading: true,
           },
         },
         activeDatasourceId: action.newDatasourceId,
-        visualization: {
-          ...state.visualization,
-          // purge visualization on datasource switch
-          state: null,
-          activeId: null,
-        },
       };
     case 'SWITCH_VISUALIZATION':
       return {

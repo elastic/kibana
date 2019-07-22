@@ -45,7 +45,7 @@ export function EditorFrame(props: EditorFrameProps) {
     if (!allLoaded) {
       Object.entries(props.datasourceMap).forEach(([datasourceId, datasource]) => {
         if (
-          !state.datasourceStates[datasourceId] ||
+          state.datasourceStates[datasourceId] &&
           state.datasourceStates[datasourceId].isLoading
         ) {
           datasource
@@ -198,7 +198,6 @@ export function EditorFrame(props: EditorFrameProps) {
           <ConfigPanelWrapper
             visualizationMap={props.visualizationMap}
             activeVisualizationId={state.visualization.activeId}
-            // datasourcePublicAPI={datasourcePublicAPI!}
             dispatch={dispatch}
             visualizationState={state.visualization.state}
             framePublicAPI={framePublicAPI}
@@ -221,14 +220,8 @@ export function EditorFrame(props: EditorFrameProps) {
         }
         suggestionsPanel={
           <SuggestionPanel
-            // activeDatasource={datasource}
             activeDatasourceId={state.activeDatasourceId}
             activeVisualizationId={state.visualization.activeId}
-            // datasourceState={
-            //   state.activeDatasourceId
-            //     ? state.datasourceStates[state.activeDatasourceId].state
-            //     : null
-            // }
             datasourceMap={props.datasourceMap}
             datasourceStates={state.datasourceStates}
             visualizationState={state.visualization.state}

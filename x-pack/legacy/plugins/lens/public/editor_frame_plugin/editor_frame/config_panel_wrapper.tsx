@@ -30,7 +30,6 @@ function getSuggestedVisualizationState(
 
   datasources.forEach(([layerId, datasource]) => {
     const suggestions = visualization.getSuggestions({
-      layerId,
       tables: [
         {
           datasourceSuggestionId: 0,
@@ -39,6 +38,7 @@ function getSuggestedVisualizationState(
             ...col,
             operation: datasource.getOperationForColumnId(col.columnId)!,
           })),
+          layerId,
         },
       ],
     });

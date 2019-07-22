@@ -82,5 +82,10 @@ export function createMockDependencies() {
         run: jest.fn(_ => Promise.resolve({ type: 'render', as: 'test', value: undefined })),
       },
     },
+    interpreter: {
+      functionsRegistry: {
+        register: jest.fn(),
+      },
+    },
   } as unknown) as MockedDependencies;
 }

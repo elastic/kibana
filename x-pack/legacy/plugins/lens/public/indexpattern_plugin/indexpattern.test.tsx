@@ -285,8 +285,8 @@ describe('IndexPattern Data Source', () => {
               columnId: 'col2',
             }),
           ],
+          layerId: 'suggestedLayer',
         });
-        expect(suggestions[0].layerId).toEqual('suggestedLayer');
       });
 
       it('should apply a bucketed aggregation for a date field', () => {
@@ -327,6 +327,7 @@ describe('IndexPattern Data Source', () => {
               columnId: 'col2',
             }),
           ],
+          layerId: 'suggestedLayer',
         });
       });
 
@@ -369,6 +370,7 @@ describe('IndexPattern Data Source', () => {
               columnId: 'col2',
             }),
           ],
+          layerId: 'suggestedLayer',
         });
       });
 
@@ -490,8 +492,8 @@ describe('IndexPattern Data Source', () => {
                 },
               },
             ],
+            layerId: 'first',
           },
-          layerId: 'first',
         },
       ]);
     });

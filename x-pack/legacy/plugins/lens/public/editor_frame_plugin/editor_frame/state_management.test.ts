@@ -169,8 +169,7 @@ describe('editor_frame state management', () => {
       expect(newState.datasourceStates.testDatasource.state).toBe(newDatasourceState);
     });
 
-    // TODO this behavior is wrong - multiple datasources can be active at once
-    it.skip('should should switch active datasource and purge visualization state', () => {
+    it('should should switch active datasource and initialize new state', () => {
       const newState = reducer(
         {
           datasourceStates: {
@@ -193,10 +192,40 @@ describe('editor_frame state management', () => {
         }
       );
 
-      expect(newState.visualization.state).toEqual(null);
-      expect(newState.visualization.activeId).toBe(null);
-      expect(newState.activeDatasourceId).toBe('testDatasource2');
-      expect(newState.datasourceStates.testDatasource.state).toBe(null);
+      expect(newState.activeDatasourceId).toEqual('testDatasource2');
+      expect(newState.datasourceStates.testDatasource2.isLoading).toEqual(true);
+    });
+
+    it('not initialize already initialized datasource on switch', () => {
+      const datasource2State = {};
+      const newState = reducer(
+        {
+          datasourceStates: {
+            testDatasource: {
+              state: {},
+              isLoading: false,
+            },
+            testDatasource2: {
+              state: datasource2State,
+              isLoading: false,
+            },
+          },
+          activeDatasourceId: 'testDatasource',
+          saving: false,
+          title: 'eee',
+          visualization: {
+            activeId: 'testVis',
+            state: {},
+          },
+        },
+        {
+          type: 'SWITCH_DATASOURCE',
+          newDatasourceId: 'testDatasource2',
+        }
+      );
+
+      expect(newState.activeDatasourceId).toEqual('testDatasource2');
+      expect(newState.datasourceStates.testDatasource2.state).toBe(datasource2State);
     });
 
     it('should mark as saving', () => {

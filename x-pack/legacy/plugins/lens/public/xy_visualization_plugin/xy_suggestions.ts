@@ -42,10 +42,13 @@ export function getSuggestions(
         columns.some(col => col.operation.dataType === 'number') &&
         !columns.some(col => !columnSortOrder.hasOwnProperty(col.operation.dataType))
     )
-    .map(table => getSuggestionForColumns(table));
+    .map(table => getSuggestionForColumns(table, opts.state));
 }
 
-function getSuggestionForColumns(table: TableSuggestion): VisualizationSuggestion<State> {
+function getSuggestionForColumns(
+  table: TableSuggestion,
+  currentState?: State
+): VisualizationSuggestion<State> {
   const [buckets, values] = partition(
     prioritizeColumns(table.columns),
     col => col.operation.isBucketed
@@ -53,10 +56,24 @@ function getSuggestionForColumns(table: TableSuggestion): VisualizationSuggestio
 
   if (buckets.length >= 1) {
     const [x, splitBy] = buckets;
-    return getSuggestion(table.datasourceSuggestionId, x, values, splitBy);
+    return getSuggestion(
+      table.datasourceSuggestionId,
+      table.layerId,
+      x,
+      values,
+      splitBy,
+      currentState
+    );
   } else {
     const [x, ...yValues] = values;
-    return getSuggestion(table.datasourceSuggestionId, x, yValues);
+    return getSuggestion(
+      table.datasourceSuggestionId,
+      table.layerId,
+      x,
+      yValues,
+      undefined,
+      currentState
+    );
   }
 }
 
@@ -71,9 +88,11 @@ function prioritizeColumns(columns: TableSuggestionColumn[]) {
 
 function getSuggestion(
   datasourceSuggestionId: number,
+  layerId: string,
   xValue: TableSuggestionColumn,
   yValues: TableSuggestionColumn[],
-  splitBy?: TableSuggestionColumn
+  splitBy?: TableSuggestionColumn,
+  currentState?: State
 ): VisualizationSuggestion<State> {
   const yTitle = yValues.map(col => col.operation.label).join(' & ');
   const xTitle = xValue.operation.label;
@@ -83,10 +102,11 @@ function getSuggestion(
   const preposition = isDate ? 'over' : 'of';
   const title = `${yTitle} ${preposition} ${xTitle}`;
   const state: State = {
-    legend: { isVisible: true, position: Position.Right },
+    legend: currentState ? currentState.legend : { isVisible: true, position: Position.Right },
     layers: [
+      ...(currentState ? currentState.layers.filter(layer => layer.layerId !== layerId) : []),
       {
-        layerId: 'first',
+        layerId,
         datasourceId: '',
         xAccessor: xValue.columnId,
         seriesType: splitBy && isDate ? 'line' : 'bar',

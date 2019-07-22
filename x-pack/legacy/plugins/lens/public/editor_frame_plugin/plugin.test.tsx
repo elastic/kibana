@@ -19,7 +19,8 @@ jest.mock('ui/chrome', () => ({
   getSavedObjectsClient: jest.fn(),
 }));
 
-// mock away actual data plugin to prevent all of it being loaded
+// mock away actual dependencies to prevent all of it being loaded
+jest.mock('../../../../../../src/legacy/core_plugins/interpreter/public/registries', () => {});
 jest.mock('../../../../../../src/legacy/core_plugins/data/public/setup', () => {});
 
 function mockStore(): SavedObjectStore {

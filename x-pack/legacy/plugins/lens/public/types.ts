@@ -40,12 +40,12 @@ export interface TableSuggestion {
   datasourceSuggestionId: number;
   isMultiRow: boolean;
   columns: TableSuggestionColumn[];
+  layerId: string;
 }
 
 export interface DatasourceSuggestion<T = unknown> {
   state: T;
   table: TableSuggestion;
-  layerId: string;
 }
 
 /**
@@ -160,7 +160,6 @@ export interface KibanaDatatable {
 
 export interface VisualizationProps<T = unknown> {
   dragDropContext: DragContextState;
-  // datasource: DatasourcePublicAPI;
   frame: FramePublicAPI;
   state: T;
   setState: (newState: T) => void;
@@ -169,7 +168,6 @@ export interface VisualizationProps<T = unknown> {
 export interface SuggestionRequest<T = unknown> {
   // It is up to the Visualization to rank these tables
   tables: TableSuggestion[];
-  layerId: string;
   state?: T; // State is only passed if the visualization is active
 }
 
