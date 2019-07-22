@@ -17,8 +17,6 @@
  * under the License.
  */
 
-import PropTypes from 'prop-types';
-
 import React, {
   Component,
 } from 'react';
@@ -32,7 +30,7 @@ import {
 
 import { FormattedMessage } from '@kbn/i18n/react';
 
-export class VegaActionsMenu extends Component {
+export class VegaHelpMenu extends Component {
   constructor(props) {
     super(props);
 
@@ -56,12 +54,12 @@ export class VegaActionsMenu extends Component {
   render() {
     const button = (
       <EuiButtonIcon
-        iconType="wrench"
+        iconType="questionInCircle"
         onClick={this.onButtonClick}
         aria-label={
           <FormattedMessage
-            id="vega.editor.vegaEditorOptionsButtonAriaLabel"
-            defaultMessage="Vega editor options"
+            id="visTypeVega.editor.vegaHelpButtonAriaLabel"
+            defaultMessage="Vega help"
           />
         }
       />
@@ -70,22 +68,41 @@ export class VegaActionsMenu extends Component {
     const items = [
       (
         <EuiContextMenuItem
-          key="hjson"
-          onClick={(event) => { this.closePopover(); this.props.formatHJson(event); }}
+          key="vegaHelp"
+          target="_blank"
+          rel="noopener noreferrer"
+          href="https://www.elastic.co/guide/en/kibana/master/vega-graph.html"
+          onClick={() => { this.closePopover(); }}
         >
           <FormattedMessage
-            id="vega.editor.reformatAsHJSONButtonLabel"
-            defaultMessage="Reformat as HJSON"
+            id="visTypeVega.editor.vegaHelpLinkText"
+            defaultMessage="Kibana Vega Help"
           />
         </EuiContextMenuItem>
       ), (
         <EuiContextMenuItem
-          key="json"
-          onClick={(event) => { this.closePopover(); this.props.formatJson(event); }}
+          key="vegaLiteDocs"
+          target="_blank"
+          rel="noopener noreferrer"
+          href="https://vega.github.io/vega-lite/docs/"
+          onClick={() => { this.closePopover(); }}
         >
           <FormattedMessage
-            id="vega.editor.reformatAsJSONButtonLabel"
-            defaultMessage="Reformat as JSON, delete comments"
+            id="visTypeVega.editor.vegaLiteDocumentationLinkText"
+            defaultMessage="Vega-Lite Documentation"
+          />
+        </EuiContextMenuItem>
+      ), (
+        <EuiContextMenuItem
+          key="vegaDoc"
+          target="_blank"
+          rel="noopener noreferrer"
+          href="https://vega.github.io/vega/docs/"
+          onClick={() => { this.closePopover(); }}
+        >
+          <FormattedMessage
+            id="visTypeVega.editor.vegaDocumentationLinkText"
+            defaultMessage="Vega Documentation"
           />
         </EuiContextMenuItem>
       )
@@ -107,8 +124,3 @@ export class VegaActionsMenu extends Component {
     );
   }
 }
-
-VegaActionsMenu.propTypes = {
-  formatHJson: PropTypes.func.isRequired,
-  formatJson: PropTypes.func.isRequired,
-};

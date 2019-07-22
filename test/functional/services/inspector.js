@@ -30,7 +30,7 @@ export function InspectorProvider({ getService }) {
 
   return new class Inspector {
     async getIsEnabled() {
-      const ariaDisabled = await testSubjects.getAttribute('openInspectorButton', 'aria-disabled');
+      const ariaDisabled = await testSubjects.getAttribute('openInspectorButton', 'disabled');
       return ariaDisabled !== 'true';
     }
 

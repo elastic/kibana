@@ -64,7 +64,7 @@ export class VegaEditorController {
     } catch (err) {
       // This is a common case - user tries to format an invalid HJSON text
       toastNotifications.addError(err, {
-        title: i18n.translate('vega.editor.formatError', {
+        title: i18n.translate('visTypeVega.editor.formatError', {
           defaultMessage: 'Error formatting spec',
         }),
       });
