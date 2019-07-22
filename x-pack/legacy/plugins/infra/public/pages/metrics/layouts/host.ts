@@ -104,7 +104,6 @@ export const hostLayoutCreator: InfraMetricLayoutCreator = theme => [
           stacked: true,
           type: InfraMetricLayoutVisualizationType.area,
           formatter: InfraFormatterType.percent,
-          bounds: { min: 0, max: 1 },
           seriesOverrides: {
             user: { color: theme.eui.euiColorVis0 },
             system: { color: theme.eui.euiColorVis2 },

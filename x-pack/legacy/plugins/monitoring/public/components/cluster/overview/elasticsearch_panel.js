@@ -139,6 +139,7 @@ export function ElasticsearchPanel(props) {
   const clusterStats = props.cluster_stats || {};
   const nodes = clusterStats.nodes;
   const indices = clusterStats.indices;
+  const setupMode = props.setupMode;
 
   const goToElasticsearch = () => props.changeUrl('elasticsearch');
   const goToNodes = () => props.changeUrl('elasticsearch/nodes');
@@ -174,6 +175,34 @@ export function ElasticsearchPanel(props) {
   };
 
   const licenseText = <LicenseText license={props.license} showLicenseExpiration={props.showLicenseExpiration} />;
+
+  let setupModeNodesData = null;
+  if (setupMode.enabled && setupMode.data) {
+    const elasticsearchData = get(setupMode.data, 'elasticsearch.byUuid');
+    const migratedNodesCount = Object.values(elasticsearchData).filter(node => node.isFullyMigrated).length;
+    const totalNodesCount = Object.values(elasticsearchData).length;
+
+    const badgeColor = migratedNodesCount === totalNodesCount
+      ? 'secondary'
+      : 'danger';
+
+    setupModeNodesData = (
+      <EuiFlexItem grow={false}>
+        <EuiToolTip
+          position="top"
+          content={i18n.translate('xpack.monitoring.cluster.overview.esPanel.setupModeNodesTooltip', {
+            defaultMessage: `These numbers indicate how many detected monitored nodes versus how many
+            detected total nodes. If there are more detected nodes than monitored nodes, click the Nodes
+            link and you will be guided in how to setup monitoring for the missing node.`
+          })}
+        >
+          <EuiBadge color={badgeColor}>
+            {formatNumber(migratedNodesCount, 'int_commas')}/{formatNumber(totalNodesCount, 'int_commas')}
+          </EuiBadge>
+        </EuiToolTip>
+      </EuiFlexItem>
+    );
+  }
 
   return (
     <ClusterItemContainer
@@ -235,20 +264,25 @@ export function ElasticsearchPanel(props) {
 
         <EuiFlexItem>
           <EuiPanel paddingSize="m">
-            <EuiTitle size="s">
-              <h3>
-                <EuiLink
-                  data-test-subj="esNumberOfNodes"
-                  onClick={goToNodes}
-                >
-                  <FormattedMessage
-                    id="xpack.monitoring.cluster.overview.esPanel.nodesTotalLinkLabel"
-                    defaultMessage="Nodes: {nodesTotal}"
-                    values={{ nodesTotal: formatNumber(get(nodes, 'count.total'), 'int_commas') }}
-                  />
-                </EuiLink>
-              </h3>
-            </EuiTitle>
+            <EuiFlexGroup justifyContent="spaceBetween">
+              <EuiFlexItem grow={false}>
+                <EuiTitle size="s">
+                  <h3>
+                    <EuiLink
+                      data-test-subj="esNumberOfNodes"
+                      onClick={goToNodes}
+                    >
+                      <FormattedMessage
+                        id="xpack.monitoring.cluster.overview.esPanel.nodesTotalLinkLabel"
+                        defaultMessage="Nodes: {nodesTotal}"
+                        values={{ nodesTotal: formatNumber(get(nodes, 'count.total'), 'int_commas') }}
+                      />
+                    </EuiLink>
+                  </h3>
+                </EuiTitle>
+              </EuiFlexItem>
+              {setupModeNodesData}
+            </EuiFlexGroup>
             <EuiHorizontalRule margin="m" />
             <EuiDescriptionList type="column">
               <EuiDescriptionListTitle>
