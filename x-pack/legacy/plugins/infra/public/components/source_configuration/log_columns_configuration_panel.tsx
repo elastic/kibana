@@ -146,7 +146,7 @@ const FieldLogColumnConfigurationPanel: React.FunctionComponent<{
         <code>{field}</code>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <RemoveLogColumnButton onClick={remove} />
+        <RemoveLogColumnButton onClick={remove} ariaColumnName={`Field - ${field}`} />
       </EuiFlexItem>
     </EuiFlexGroup>
   </EuiPanel>
@@ -168,7 +168,7 @@ const ExplainedLogColumnConfigurationPanel: React.FunctionComponent<{
         </EuiText>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <RemoveLogColumnButton onClick={removeColumn} />
+        <RemoveLogColumnButton onClick={removeColumn} ariaColumnName={String(fieldName)} />
       </EuiFlexItem>
     </EuiFlexGroup>
   </EuiPanel>
@@ -176,15 +176,21 @@ const ExplainedLogColumnConfigurationPanel: React.FunctionComponent<{
 
 const RemoveLogColumnButton = injectI18n<{
   onClick?: () => void;
-}>(({ intl, onClick }) => {
+  ariaColumnName: string;
+}>(({ intl, onClick, ariaColumnName }) => {
   const removeColumnLabel = intl.formatMessage({
     id: 'xpack.infra.sourceConfiguration.removeLogColumnButtonLabel',
     defaultMessage: 'Remove this column',
   });
 
+  const removeColumnAriaLabel = intl.formatMessage({
+    id: 'xpack.infra.sourceConfiguration.removeLogColumnButtonAriaLabel',
+    defaultMessage: `Remove this column: ${ariaColumnName}`,
+  });
+
   return (
     <EuiButtonIcon
-      aria-label={removeColumnLabel}
+      aria-label={removeColumnAriaLabel}
       color="danger"
       data-test-subj="removeLogColumnButton"
       iconType="trash"
