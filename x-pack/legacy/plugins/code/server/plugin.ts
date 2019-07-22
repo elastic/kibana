@@ -51,23 +51,22 @@ export class CodePlugin {
   private serverOptions: ServerOptions;
   private indexScheduler: IndexScheduler;
   private updateScheduler: UpdateScheduler;
+  private lspService: LspService;
 
   constructor(initializerContext: PluginInitializerContext) {
-    // TODO: instantiate these objects appropriately
     this.gitOps = {} as GitOperations;
     this.queue = {} as Esqueue;
     this.log = {} as Logger;
     this.serverOptions = {} as ServerOptions;
     this.indexScheduler = {} as IndexScheduler;
     this.updateScheduler = {} as UpdateScheduler;
+    this.lspService = {} as LspService;
   }
 
-  // TODO: remove the options param
+  // TODO: options is not a valid param for the setup() api
+  // of the new platform. Will need to pass through the configs
+  // correctly in the new platform.
   public setup(core: CoreSetup, options: any) {
-    // called when plugin is setting up
-    // move all the code in init.ts in here.
-    // registerRoutes(core);
-
     const { server } = core.http as any;
 
     this.log = new Logger(server);
@@ -104,11 +103,8 @@ export class CodePlugin {
     });
   }
 
-  // Assume this runs after all the components of kibana
-  // has been initialized.
-  // TODO: Problem here, CodeStart will not have the register route api.
-  // Let's make it CoreSetup as the param first.
-  //    public start(core: CoreStart)
+  // TODO: CodeStart will not have the register route api.
+  // Let's make it CoreSetup as the param for now.
   public async start(core: CoreSetup) {
     // called after all plugins are set up
     const { server } = core.http as any;
@@ -134,14 +130,14 @@ export class CodePlugin {
     }
   }
 
-  public stop() {
+  public async stop() {
     if (this.isCodeNode) {
       this.gitOps.cleanAllRepo();
       this.indexScheduler.stop();
       this.updateScheduler.stop();
       this.queue.destroy();
+      await this.lspService.shutdown();
     }
-    // called when plugin is torn down, aka window.onbeforeunload
   }
 
   private async initNonCodeNode(url: string, core: CoreSetup) {
@@ -179,7 +175,7 @@ export class CodePlugin {
     this.gitOps = new GitOperations(serverOptions.repoPath);
 
     const installManager = new InstallManager(server, serverOptions);
-    const lspService = new LspService(
+    this.lspService = new LspService(
       '127.0.0.1',
       serverOptions,
       this.gitOps,
@@ -188,13 +184,10 @@ export class CodePlugin {
       new ServerLoggerFactory(server),
       repoConfigController
     );
-    server.events.on('stop', async () => {
-      this.log.debug('shutdown lsp process');
-      await lspService.shutdown();
-    });
+
     // Initialize indexing factories.
     const lspIndexerFactory = new LspIndexerFactory(
-      lspService,
+      this.lspService,
       serverOptions,
       this.gitOps,
       esClient,
@@ -242,7 +235,7 @@ export class CodePlugin {
       serverOptions,
       this.gitOps,
       cancellationService,
-      lspService,
+      this.lspService,
       repoServiceFactory
     ).bind();
     const updateWorker = new UpdateWorker(
@@ -282,10 +275,10 @@ export class CodePlugin {
     fileRoute(codeServerRouter, this.gitOps);
     workspaceRoute(codeServerRouter, serverOptions, this.gitOps);
     symbolByQnameRoute(codeServerRouter, this.log);
-    installRoute(codeServerRouter, lspService);
-    lspRoute(codeServerRouter, lspService, serverOptions);
+    installRoute(codeServerRouter, this.lspService);
+    lspRoute(codeServerRouter, this.lspService, serverOptions);
     setupRoute(codeServerRouter);
-    statusRoute(codeServerRouter, this.gitOps, lspService);
+    statusRoute(codeServerRouter, this.gitOps, this.lspService);
   }
 
   private async retryUntilAvailable<T>(

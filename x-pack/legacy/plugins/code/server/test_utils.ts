@@ -5,6 +5,7 @@
  */
 
 import fs from 'fs';
+import { Server } from 'hapi';
 import * as os from 'os';
 import path from 'path';
 
@@ -55,7 +56,7 @@ export function createTestServerOption() {
 }
 
 export function createTestHapiServer() {
-  const server = {} as ServerFacade;
+  const server: ServerFacade = new Server();
   // @ts-ignore
   server.config = () => {
     return {

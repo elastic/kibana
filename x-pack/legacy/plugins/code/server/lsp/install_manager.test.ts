@@ -6,6 +6,7 @@
 /* eslint-disable no-console */
 
 import fs from 'fs';
+import { Server } from 'hapi';
 import os from 'os';
 import path from 'path';
 import rimraf from 'rimraf';
@@ -24,7 +25,7 @@ const fakeTestDir = path.join(os.tmpdir(), 'foo-');
 
 const options: ServerOptions = {} as ServerOptions;
 
-const server = {} as ServerFacade;
+const server: ServerFacade = new Server();
 server.config = () => {
   return {
     get(key: string): any {

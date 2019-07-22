@@ -127,8 +127,8 @@ export const code = (kibana: any) =>
         await plugin.start(coreSetup);
       });
 
-      server.events.on('stop', () => {
-        plugin.stop();
+      server.events.on('stop', async () => {
+        await plugin.stop();
       });
     },
   });
