@@ -14,11 +14,12 @@ export default function({ getService }: TestInvoker) {
   const esArchiver = getService('esArchiver');
   const es = getService('es');
 
-  const { importTest, createExpectResults, expectUnknownType } = importTestSuiteFactory(
-    es,
-    esArchiver,
-    supertest
-  );
+  const {
+    importTest,
+    createExpectResults,
+    expectUnknownType,
+    expectSpaceType,
+  } = importTestSuiteFactory(es, esArchiver, supertest);
 
   describe('_import', () => {
     importTest('in the current space (space_1)', {
@@ -27,6 +28,10 @@ export default function({ getService }: TestInvoker) {
         default: {
           statusCode: 200,
           response: createExpectResults(SPACES.SPACE_1.spaceId),
+        },
+        spaceType: {
+          statusCode: 200,
+          response: expectSpaceType,
         },
         unknownType: {
           statusCode: 200,
@@ -41,6 +46,10 @@ export default function({ getService }: TestInvoker) {
         default: {
           statusCode: 200,
           response: createExpectResults(SPACES.DEFAULT.spaceId),
+        },
+        spaceType: {
+          statusCode: 200,
+          response: expectSpaceType,
         },
         unknownType: {
           statusCode: 200,

@@ -19,6 +19,7 @@ export default function({ getService }: TestInvoker) {
     createExpectResults,
     expectRbacForbidden,
     expectUnknownType,
+    expectResultsWithUnsupportedSpaceType,
   } = importTestSuiteFactory(es, esArchiver, supertest);
 
   describe('_import', () => {
@@ -26,6 +27,10 @@ export default function({ getService }: TestInvoker) {
       user: AUTHENTICATION.NOT_A_KIBANA_USER,
       tests: {
         default: {
+          statusCode: 403,
+          response: expectRbacForbidden,
+        },
+        spaceType: {
           statusCode: 403,
           response: expectRbacForbidden,
         },
@@ -43,6 +48,11 @@ export default function({ getService }: TestInvoker) {
           statusCode: 200,
           response: createExpectResults(),
         },
+        spaceType: {
+          // import filters out the space type, so the remaining objects will import successfully
+          statusCode: 200,
+          response: expectResultsWithUnsupportedSpaceType,
+        },
         unknownType: {
           statusCode: 200,
           response: expectUnknownType,
@@ -54,6 +64,10 @@ export default function({ getService }: TestInvoker) {
       user: AUTHENTICATION.KIBANA_LEGACY_USER,
       tests: {
         default: {
+          statusCode: 403,
+          response: expectRbacForbidden,
+        },
+        spaceType: {
           statusCode: 403,
           response: expectRbacForbidden,
         },
@@ -71,6 +85,11 @@ export default function({ getService }: TestInvoker) {
           statusCode: 200,
           response: createExpectResults(),
         },
+        spaceType: {
+          // import filters out the space type, so the remaining objects will import successfully
+          statusCode: 200,
+          response: expectResultsWithUnsupportedSpaceType,
+        },
         unknownType: {
           statusCode: 200,
           response: expectUnknownType,
@@ -82,6 +101,10 @@ export default function({ getService }: TestInvoker) {
       user: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_DASHBOARD_ONLY_USER,
       tests: {
         default: {
+          statusCode: 403,
+          response: expectRbacForbidden,
+        },
+        spaceType: {
           statusCode: 403,
           response: expectRbacForbidden,
         },
@@ -99,6 +122,11 @@ export default function({ getService }: TestInvoker) {
           statusCode: 200,
           response: createExpectResults(),
         },
+        spaceType: {
+          // import filters out the space type, so the remaining objects will import successfully
+          statusCode: 200,
+          response: expectResultsWithUnsupportedSpaceType,
+        },
         unknownType: {
           statusCode: 200,
           response: expectUnknownType,
@@ -110,6 +138,10 @@ export default function({ getService }: TestInvoker) {
       user: AUTHENTICATION.KIBANA_RBAC_DASHBOARD_ONLY_USER,
       tests: {
         default: {
+          statusCode: 403,
+          response: expectRbacForbidden,
+        },
+        spaceType: {
           statusCode: 403,
           response: expectRbacForbidden,
         },
@@ -127,6 +159,10 @@ export default function({ getService }: TestInvoker) {
           statusCode: 403,
           response: expectRbacForbidden,
         },
+        spaceType: {
+          statusCode: 403,
+          response: expectRbacForbidden,
+        },
         unknownType: {
           statusCode: 403,
           response: expectRbacForbidden,
@@ -138,6 +174,10 @@ export default function({ getService }: TestInvoker) {
       user: AUTHENTICATION.KIBANA_RBAC_DEFAULT_SPACE_READ_USER,
       tests: {
         default: {
+          statusCode: 403,
+          response: expectRbacForbidden,
+        },
+        spaceType: {
           statusCode: 403,
           response: expectRbacForbidden,
         },
@@ -155,6 +195,10 @@ export default function({ getService }: TestInvoker) {
           statusCode: 403,
           response: expectRbacForbidden,
         },
+        spaceType: {
+          statusCode: 403,
+          response: expectRbacForbidden,
+        },
         unknownType: {
           statusCode: 403,
           response: expectRbacForbidden,
@@ -166,6 +210,10 @@ export default function({ getService }: TestInvoker) {
       user: AUTHENTICATION.KIBANA_RBAC_SPACE_1_READ_USER,
       tests: {
         default: {
+          statusCode: 403,
+          response: expectRbacForbidden,
+        },
+        spaceType: {
           statusCode: 403,
           response: expectRbacForbidden,
         },

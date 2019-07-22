@@ -17,6 +17,7 @@ interface ImportTest {
 
 interface ImportTests {
   default: ImportTest;
+  spaceType: ImportTest;
   unknownType: ImportTest;
 }
 
@@ -53,6 +54,22 @@ export function importTestSuiteFactory(es: any, esArchiver: any, supertest: Supe
     });
   };
 
+  const expectResultsWithUnsupportedSpaceType = async (resp: { [key: string]: any }) => {
+    expect(resp.body).to.eql({
+      success: false,
+      successCount: 2,
+      errors: [
+        {
+          error: {
+            type: 'unsupported_type',
+          },
+          id: '1',
+          type: 'space',
+        },
+      ],
+    });
+  };
+
   const expectUnknownType = (resp: { [key: string]: any }) => {
     expect(resp.body).to.eql({
       success: false,
@@ -62,6 +79,22 @@ export function importTestSuiteFactory(es: any, esArchiver: any, supertest: Supe
           id: '1',
           type: 'wigwags',
           title: 'Wigwags title',
+          error: {
+            type: 'unsupported_type',
+          },
+        },
+      ],
+    });
+  };
+
+  const expectSpaceType = (resp: { [key: string]: any }) => {
+    expect(resp.body).to.eql({
+      success: false,
+      successCount: 2,
+      errors: [
+        {
+          id: '1',
+          type: 'space',
           error: {
             type: 'unsupported_type',
           },
@@ -102,6 +135,30 @@ export function importTestSuiteFactory(es: any, esArchiver: any, supertest: Supe
           .then(tests.default.response);
       });
 
+      describe('space type', () => {
+        it(`should return ${tests.spaceType.statusCode}`, async () => {
+          const data = createImportData(spaceId);
+          data.push({
+            type: 'space',
+            id: '1',
+            attributes: {
+              name: 'My Space',
+            },
+          });
+          await supertest
+            .post(`${getUrlPrefix(spaceId)}/api/saved_objects/_import`)
+            .query({ overwrite: true })
+            .auth(user.username, user.password)
+            .attach(
+              'file',
+              Buffer.from(data.map(obj => JSON.stringify(obj)).join('\n'), 'utf8'),
+              'export.ndjson'
+            )
+            .expect(tests.spaceType.statusCode)
+            .then(tests.spaceType.response);
+        });
+      });
+
       describe('unknown type', () => {
         it(`should return ${tests.unknownType.statusCode}`, async () => {
           const data = createImportData(spaceId);
@@ -135,7 +192,9 @@ export function importTestSuiteFactory(es: any, esArchiver: any, supertest: Supe
   return {
     importTest,
     createExpectResults,
+    expectResultsWithUnsupportedSpaceType,
     expectRbacForbidden,
     expectUnknownType,
+    expectSpaceType,
   };
 }
