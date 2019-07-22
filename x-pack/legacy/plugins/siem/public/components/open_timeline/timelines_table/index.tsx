@@ -145,17 +145,6 @@ export const TimelinesTable = pure<TimelinesTableProps>(
       onSelectionChange,
     };
 
-    console.log(
-      'getTimelinesTableColumns',
-      getTimelinesTableColumns({
-        deleteTimelines,
-        itemIdToExpandedNotesRowMap,
-        onOpenTimeline,
-        onToggleShowNotes,
-        showExtendedColumnsAndActions,
-      })[8]
-    );
-
     return (
       <TimelinesTableContainer data-test-subj="timelines-table-container">
         <EuiBasicTable
