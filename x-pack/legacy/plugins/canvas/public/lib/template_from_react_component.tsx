@@ -5,7 +5,7 @@
  */
 
 import React, { ComponentType, FunctionComponent } from 'react';
-import ReactDom, { unmountComponentAtNode } from 'react-dom';
+import { unmountComponentAtNode, render } from 'react-dom';
 import PropTypes from 'prop-types';
 import { ErrorBoundary } from '../components/enhance/error_boundary';
 
@@ -39,7 +39,7 @@ export const templateFromReactComponent = (Component: ComponentType<any>) => {
   return (domNode: Element, config: Props, handlers: Handlers) => {
     try {
       const el = React.createElement(WrappedComponent, config);
-      ReactDom.render(el, domNode, () => {
+      render(el, domNode, () => {
         handlers.done();
       });
 

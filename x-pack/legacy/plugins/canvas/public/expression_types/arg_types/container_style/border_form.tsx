@@ -57,7 +57,10 @@ export const BorderForm: FunctionComponent<Props> = ({
       return onChange('border', `${borderWidth} ${val} ${borderColor}`);
     }
     if (name === 'borderRadius') {
-      return onChange('border', `${val}px`);
+      if (val === '') {
+        return onChange('borderRadius', `0px`);
+      }
+      return onChange('borderRadius', `${val}px`);
     }
 
     onChange(name, val);

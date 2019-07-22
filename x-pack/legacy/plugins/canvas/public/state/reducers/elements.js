@@ -31,14 +31,14 @@ function getNodeIndexById(page, nodeId, location) {
 function assignNodeProperties(workpadState, pageId, nodeId, props) {
   const pageIndex = getPageIndexById(workpadState, pageId);
   const location = getLocationFromIds(workpadState, pageId, nodeId);
-  let nodesPath = `pages.${pageIndex}.${location}`;
+  const nodesPath = `pages.${pageIndex}.${location}`;
   const nodeIndex = get(workpadState, nodesPath, []).findIndex(node => node.id === nodeId);
 
   if (pageIndex === -1 || nodeIndex === -1) {
     return workpadState;
   }
 
-  return assign(workpadState, (nodesPath += '.' + nodeIndex), props);
+  return assign(workpadState, `${nodesPath}.${nodeIndex}`, props);
 }
 
 function moveNodeLayer(workpadState, pageId, nodeId, movement, location) {

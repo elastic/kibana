@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { SFC } from 'react';
+import React, { FunctionComponent } from 'react';
 import PropTypes from 'prop-types';
 import { EuiSwitch } from '@elastic/eui';
 
@@ -13,7 +13,7 @@ export interface Props {
   argValue: boolean;
 }
 
-export const SimpleTemplate: SFC<Props> = ({ onValueChange, argValue }) => {
+export const SimpleTemplate: FunctionComponent<Props> = ({ onValueChange, argValue }) => {
   return (
     <EuiSwitch checked={Boolean(argValue)} onChange={() => onValueChange(!Boolean(argValue))} />
   );

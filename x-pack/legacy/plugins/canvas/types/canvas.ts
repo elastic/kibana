@@ -4,18 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { ElementPosition } from './elements';
+
 export interface CanvasElement {
   id: string;
-  position: {
-    top: number;
-    left: number;
-    height: number;
-    width: number;
-    angle: number;
-    type: 'element';
-  };
+  position: ElementPosition;
+  type: 'element';
   expression: string;
-  filter: any; // FIX
+  filter: string;
 }
 
 export interface CanvasPage {
