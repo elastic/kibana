@@ -46,7 +46,7 @@ class LocalStorageMock implements Storage {
     return [...this.store.keys()][index] || null;
   }
 
-  get length() {
+  public get length() {
     return this.store.size;
   }
 }

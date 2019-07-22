@@ -274,7 +274,7 @@ describe('features', () => {
     expectGetFeatures: false,
   },
 ].forEach(({ group, expectManageSpaces, expectGetFeatures }) => {
-  describe(group, () => {
+  describe(`${group}`, () => {
     test('actions defined only at the feature are included in `all` and `read`', () => {
       const features: Feature[] = [
         {
