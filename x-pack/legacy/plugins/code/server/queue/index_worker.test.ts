@@ -31,13 +31,13 @@ afterEach(() => {
 test('Execute index job.', async () => {
   // Setup CancellationService
   const cancelIndexJobSpy = sinon.spy();
-  const registerIndexJobTokenSpy = sinon.spy();
+  const registerCancelableIndexJobSpy = sinon.spy();
   const cancellationService = {
     cancelIndexJob: emptyAsyncFunc,
-    registerIndexJobToken: emptyAsyncFunc,
+    registerCancelableIndexJob: emptyAsyncFunc,
   };
   cancellationService.cancelIndexJob = cancelIndexJobSpy;
-  cancellationService.registerIndexJobToken = registerIndexJobTokenSpy;
+  cancellationService.registerCancelableIndexJob = registerCancelableIndexJobSpy;
 
   // Setup EsClient
   const getSpy = sinon.fake.returns(
@@ -102,13 +102,13 @@ test('Execute index job.', async () => {
 test('Execute index job and then cancel.', async () => {
   // Setup CancellationService
   const cancelIndexJobSpy = sinon.spy();
-  const registerIndexJobTokenSpy = sinon.spy();
+  const registerCancelableIndexJobSpy = sinon.spy();
   const cancellationService = {
     cancelIndexJob: emptyAsyncFunc,
-    registerIndexJobToken: emptyAsyncFunc,
+    registerCancelableIndexJob: emptyAsyncFunc,
   };
   cancellationService.cancelIndexJob = cancelIndexJobSpy;
-  cancellationService.registerIndexJobToken = registerIndexJobTokenSpy;
+  cancellationService.registerCancelableIndexJob = registerCancelableIndexJobSpy;
 
   // Setup EsClient
   const getSpy = sinon.fake.returns(
@@ -177,13 +177,13 @@ test('Execute index job and then cancel.', async () => {
 test('Index job skipped/deduplicated if revision matches', async () => {
   // Setup CancellationService
   const cancelIndexJobSpy = sinon.spy();
-  const registerIndexJobTokenSpy = sinon.spy();
+  const registerCancelableIndexJobSpy = sinon.spy();
   const cancellationService = {
     cancelIndexJob: emptyAsyncFunc,
-    registerIndexJobToken: emptyAsyncFunc,
+    registerCancelableIndexJob: emptyAsyncFunc,
   };
   cancellationService.cancelIndexJob = cancelIndexJobSpy;
-  cancellationService.registerIndexJobToken = registerIndexJobTokenSpy;
+  cancellationService.registerCancelableIndexJob = registerCancelableIndexJobSpy;
 
   // Setup EsClient
   const getSpy = sinon.fake.returns(
@@ -250,13 +250,13 @@ test('Index job skipped/deduplicated if revision matches', async () => {
 test('Index job continue if revision matches and checkpoint found', async () => {
   // Setup CancellationService
   const cancelIndexJobSpy = sinon.spy();
-  const registerIndexJobTokenSpy = sinon.spy();
+  const registerCancelableIndexJobSpy = sinon.spy();
   const cancellationService = {
     cancelIndexJob: emptyAsyncFunc,
-    registerIndexJobToken: emptyAsyncFunc,
+    registerCancelableIndexJob: emptyAsyncFunc,
   };
   cancellationService.cancelIndexJob = cancelIndexJobSpy;
-  cancellationService.registerIndexJobToken = registerIndexJobTokenSpy;
+  cancellationService.registerCancelableIndexJob = registerCancelableIndexJobSpy;
 
   // Setup EsClient
   const getSpy = sinon.fake.returns(
