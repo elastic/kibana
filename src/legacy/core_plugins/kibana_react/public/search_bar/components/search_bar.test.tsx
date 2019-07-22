@@ -60,7 +60,7 @@ const mockIndexPattern = {
       searchable: true,
     },
   ],
-};
+} as IndexPattern;
 
 const kqlQuery = {
   query: 'response:200',
