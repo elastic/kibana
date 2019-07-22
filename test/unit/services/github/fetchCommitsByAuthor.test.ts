@@ -3,7 +3,8 @@ import { CommitSelected } from '../../../../src/services/github/Commit';
 import {
   PullRequestEdge,
   fetchCommitsByAuthor,
-  getExistingBackportPRs
+  getExistingBackportPRs,
+  TimelineItemEdge
 } from '../../../../src/services/github/fetchCommitsByAuthor';
 import { commitsWithPullRequestsMock } from './mocks/commitsByAuthorMock';
 import { getDefaultOptions } from './getDefaultOptions';
@@ -123,7 +124,10 @@ describe('getExistingBackportPRs', () => {
   });
 
   it('should return a result when first line of commit message matches', () => {
-    pullRequest.node.timelineItems.edges[0].node.source.commits.edges[0].node.commit.message =
+    const timelineItem = pullRequest.node.timelineItems
+      .edges[0] as TimelineItemEdge;
+
+    timelineItem.node.source.commits.edges[0].node.commit.message =
       'my message (#1234)\n\nsomething else';
     const existingPRs = getExistingBackportPRs(
       'my message (#1234)',

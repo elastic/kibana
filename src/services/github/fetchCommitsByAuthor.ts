@@ -34,12 +34,12 @@ export interface PullRequestEdge {
   node: {
     number: number;
     timelineItems: {
-      edges: TimelineItemEdge[];
+      edges: (TimelineItemEdge | null)[];
     };
   };
 }
 
-interface TimelineItemEdge {
+export interface TimelineItemEdge {
   node: {
     source: {
       __typename: string;
@@ -171,6 +171,7 @@ export function getExistingBackportPRs(
   }
   const firstMessageLine = getFirstCommitMessageLine(message);
   return pullRequest.node.timelineItems.edges
+    .filter(notEmpty)
     .filter(item => {
       const { source } = item.node;
       return (
@@ -190,4 +191,8 @@ export function getExistingBackportPRs(
         state: source.state
       };
     });
+}
+
+function notEmpty<TValue>(value: TValue | null | undefined): value is TValue {
+  return value !== null && value !== undefined;
 }
