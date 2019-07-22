@@ -50,7 +50,7 @@ export class Tokens {
       const {
         access_token: accessToken,
         refresh_token: refreshToken,
-      } = await this.options.client.callAsInternalUser('shield.getAccessToken', {
+      } = await this.options.client.callWithInternalUser('shield.getAccessToken', {
         body: { grant_type: 'refresh_token', refresh_token: existingRefreshToken },
       });
 
@@ -98,7 +98,7 @@ export class Tokens {
     if (refreshToken) {
       let invalidatedTokensCount;
       try {
-        invalidatedTokensCount = (await this.options.client.callAsInternalUser(
+        invalidatedTokensCount = (await this.options.client.callWithInternalUser(
           'shield.deleteAccessToken',
           { body: { refresh_token: refreshToken } }
         )).invalidated_tokens;
@@ -122,7 +122,7 @@ export class Tokens {
     if (accessToken) {
       let invalidatedTokensCount;
       try {
-        invalidatedTokensCount = (await this.options.client.callAsInternalUser(
+        invalidatedTokensCount = (await this.options.client.callWithInternalUser(
           'shield.deleteAccessToken',
           { body: { token: accessToken } }
         )).invalidated_tokens;

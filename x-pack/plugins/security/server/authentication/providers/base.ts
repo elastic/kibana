@@ -85,8 +85,9 @@ export abstract class BaseAuthenticationProvider {
    * @param [authHeaders] Optional `Headers` dictionary to send with the request.
    */
   protected async getUser(request: KibanaRequest, authHeaders: Headers = {}) {
-    return (await this.options.client
-      .asScoped({ headers: { ...request.headers, ...authHeaders } })
-      .callAsCurrentUser('shield.authenticate')) as AuthenticatedUser;
+    return (await this.options.client.callWithRequest(
+      { headers: { ...request.headers, ...authHeaders } },
+      'shield.authenticate'
+    )) as AuthenticatedUser;
   }
 }

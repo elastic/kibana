@@ -56,39 +56,39 @@ describe('Tokens', () => {
 
     it('throws if API call fails with unknown reason', async () => {
       const refreshFailureReason = new errors.ServiceUnavailable('Server is not available');
-      mockClusterClient.callAsInternalUser.mockRejectedValue(refreshFailureReason);
+      mockClusterClient.callWithInternalUser.mockRejectedValue(refreshFailureReason);
 
       await expect(tokens.refresh(refreshToken)).rejects.toBe(refreshFailureReason);
 
-      expect(mockClusterClient.callAsInternalUser).toHaveBeenCalledTimes(1);
-      expect(mockClusterClient.callAsInternalUser).toHaveBeenCalledWith('shield.getAccessToken', {
+      expect(mockClusterClient.callWithInternalUser).toHaveBeenCalledTimes(1);
+      expect(mockClusterClient.callWithInternalUser).toHaveBeenCalledWith('shield.getAccessToken', {
         body: { grant_type: 'refresh_token', refresh_token: refreshToken },
       });
     });
 
     it('returns `null` if refresh token is not valid', async () => {
       const refreshFailureReason = new errors.BadRequest();
-      mockClusterClient.callAsInternalUser.mockRejectedValue(refreshFailureReason);
+      mockClusterClient.callWithInternalUser.mockRejectedValue(refreshFailureReason);
 
       await expect(tokens.refresh(refreshToken)).resolves.toBe(null);
 
-      expect(mockClusterClient.callAsInternalUser).toHaveBeenCalledTimes(1);
-      expect(mockClusterClient.callAsInternalUser).toHaveBeenCalledWith('shield.getAccessToken', {
+      expect(mockClusterClient.callWithInternalUser).toHaveBeenCalledTimes(1);
+      expect(mockClusterClient.callWithInternalUser).toHaveBeenCalledWith('shield.getAccessToken', {
         body: { grant_type: 'refresh_token', refresh_token: refreshToken },
       });
     });
 
     it('returns token pair if refresh API call succeeds', async () => {
       const tokenPair = { accessToken: 'access-token', refreshToken: 'refresh-token' };
-      mockClusterClient.callAsInternalUser.mockResolvedValue({
+      mockClusterClient.callWithInternalUser.mockResolvedValue({
         access_token: tokenPair.accessToken,
         refresh_token: tokenPair.refreshToken,
       });
 
       await expect(tokens.refresh(refreshToken)).resolves.toEqual(tokenPair);
 
-      expect(mockClusterClient.callAsInternalUser).toHaveBeenCalledTimes(1);
-      expect(mockClusterClient.callAsInternalUser).toHaveBeenCalledWith('shield.getAccessToken', {
+      expect(mockClusterClient.callWithInternalUser).toHaveBeenCalledTimes(1);
+      expect(mockClusterClient.callWithInternalUser).toHaveBeenCalledWith('shield.getAccessToken', {
         body: { grant_type: 'refresh_token', refresh_token: refreshToken },
       });
     });
@@ -99,7 +99,7 @@ describe('Tokens', () => {
       const tokenPair = { accessToken: 'foo', refreshToken: 'bar' };
 
       const failureReason = new Error('failed to delete token');
-      mockClusterClient.callAsInternalUser.mockImplementation((methodName, args: any) => {
+      mockClusterClient.callWithInternalUser.mockImplementation((methodName, args: any) => {
         if (args && args.body && args.body.token) {
           return Promise.reject(failureReason);
         }
@@ -109,12 +109,12 @@ describe('Tokens', () => {
 
       await expect(tokens.invalidate(tokenPair)).rejects.toBe(failureReason);
 
-      expect(mockClusterClient.callAsInternalUser).toHaveBeenCalledTimes(2);
-      expect(mockClusterClient.callAsInternalUser).toHaveBeenCalledWith(
+      expect(mockClusterClient.callWithInternalUser).toHaveBeenCalledTimes(2);
+      expect(mockClusterClient.callWithInternalUser).toHaveBeenCalledWith(
         'shield.deleteAccessToken',
         { body: { token: tokenPair.accessToken } }
       );
-      expect(mockClusterClient.callAsInternalUser).toHaveBeenCalledWith(
+      expect(mockClusterClient.callWithInternalUser).toHaveBeenCalledWith(
         'shield.deleteAccessToken',
         { body: { refresh_token: tokenPair.refreshToken } }
       );
@@ -124,7 +124,7 @@ describe('Tokens', () => {
       const tokenPair = { accessToken: 'foo', refreshToken: 'bar' };
 
       const failureReason = new Error('failed to delete token');
-      mockClusterClient.callAsInternalUser.mockImplementation((methodName, args: any) => {
+      mockClusterClient.callWithInternalUser.mockImplementation((methodName, args: any) => {
         if (args && args.body && args.body.refresh_token) {
           return Promise.reject(failureReason);
         }
@@ -134,12 +134,12 @@ describe('Tokens', () => {
 
       await expect(tokens.invalidate(tokenPair)).rejects.toBe(failureReason);
 
-      expect(mockClusterClient.callAsInternalUser).toHaveBeenCalledTimes(2);
-      expect(mockClusterClient.callAsInternalUser).toHaveBeenCalledWith(
+      expect(mockClusterClient.callWithInternalUser).toHaveBeenCalledTimes(2);
+      expect(mockClusterClient.callWithInternalUser).toHaveBeenCalledWith(
         'shield.deleteAccessToken',
         { body: { token: tokenPair.accessToken } }
       );
-      expect(mockClusterClient.callAsInternalUser).toHaveBeenCalledWith(
+      expect(mockClusterClient.callWithInternalUser).toHaveBeenCalledWith(
         'shield.deleteAccessToken',
         { body: { refresh_token: tokenPair.refreshToken } }
       );
@@ -148,16 +148,16 @@ describe('Tokens', () => {
     it('invalidates all provided tokens', async () => {
       const tokenPair = { accessToken: 'foo', refreshToken: 'bar' };
 
-      mockClusterClient.callAsInternalUser.mockResolvedValue({ invalidated_tokens: 1 });
+      mockClusterClient.callWithInternalUser.mockResolvedValue({ invalidated_tokens: 1 });
 
       await expect(tokens.invalidate(tokenPair)).resolves.toBe(undefined);
 
-      expect(mockClusterClient.callAsInternalUser).toHaveBeenCalledTimes(2);
-      expect(mockClusterClient.callAsInternalUser).toHaveBeenCalledWith(
+      expect(mockClusterClient.callWithInternalUser).toHaveBeenCalledTimes(2);
+      expect(mockClusterClient.callWithInternalUser).toHaveBeenCalledWith(
         'shield.deleteAccessToken',
         { body: { token: tokenPair.accessToken } }
       );
-      expect(mockClusterClient.callAsInternalUser).toHaveBeenCalledWith(
+      expect(mockClusterClient.callWithInternalUser).toHaveBeenCalledWith(
         'shield.deleteAccessToken',
         { body: { refresh_token: tokenPair.refreshToken } }
       );
@@ -166,12 +166,12 @@ describe('Tokens', () => {
     it('invalidates only access token if only access token is provided', async () => {
       const tokenPair = { accessToken: 'foo' };
 
-      mockClusterClient.callAsInternalUser.mockResolvedValue({ invalidated_tokens: 1 });
+      mockClusterClient.callWithInternalUser.mockResolvedValue({ invalidated_tokens: 1 });
 
       await expect(tokens.invalidate(tokenPair)).resolves.toBe(undefined);
 
-      expect(mockClusterClient.callAsInternalUser).toHaveBeenCalledTimes(1);
-      expect(mockClusterClient.callAsInternalUser).toHaveBeenCalledWith(
+      expect(mockClusterClient.callWithInternalUser).toHaveBeenCalledTimes(1);
+      expect(mockClusterClient.callWithInternalUser).toHaveBeenCalledWith(
         'shield.deleteAccessToken',
         { body: { token: tokenPair.accessToken } }
       );
@@ -180,12 +180,12 @@ describe('Tokens', () => {
     it('invalidates only refresh token if only refresh token is provided', async () => {
       const tokenPair = { refreshToken: 'foo' };
 
-      mockClusterClient.callAsInternalUser.mockResolvedValue({ invalidated_tokens: 1 });
+      mockClusterClient.callWithInternalUser.mockResolvedValue({ invalidated_tokens: 1 });
 
       await expect(tokens.invalidate(tokenPair)).resolves.toBe(undefined);
 
-      expect(mockClusterClient.callAsInternalUser).toHaveBeenCalledTimes(1);
-      expect(mockClusterClient.callAsInternalUser).toHaveBeenCalledWith(
+      expect(mockClusterClient.callWithInternalUser).toHaveBeenCalledTimes(1);
+      expect(mockClusterClient.callWithInternalUser).toHaveBeenCalledWith(
         'shield.deleteAccessToken',
         { body: { refresh_token: tokenPair.refreshToken } }
       );
@@ -194,16 +194,16 @@ describe('Tokens', () => {
     it('does not fail if none of the tokens were invalidated', async () => {
       const tokenPair = { accessToken: 'foo', refreshToken: 'bar' };
 
-      mockClusterClient.callAsInternalUser.mockResolvedValue({ invalidated_tokens: 0 });
+      mockClusterClient.callWithInternalUser.mockResolvedValue({ invalidated_tokens: 0 });
 
       await expect(tokens.invalidate(tokenPair)).resolves.toBe(undefined);
 
-      expect(mockClusterClient.callAsInternalUser).toHaveBeenCalledTimes(2);
-      expect(mockClusterClient.callAsInternalUser).toHaveBeenCalledWith(
+      expect(mockClusterClient.callWithInternalUser).toHaveBeenCalledTimes(2);
+      expect(mockClusterClient.callWithInternalUser).toHaveBeenCalledWith(
         'shield.deleteAccessToken',
         { body: { token: tokenPair.accessToken } }
       );
-      expect(mockClusterClient.callAsInternalUser).toHaveBeenCalledWith(
+      expect(mockClusterClient.callWithInternalUser).toHaveBeenCalledWith(
         'shield.deleteAccessToken',
         { body: { refresh_token: tokenPair.refreshToken } }
       );
@@ -212,16 +212,16 @@ describe('Tokens', () => {
     it('does not fail if more than one token per access or refresh token were invalidated', async () => {
       const tokenPair = { accessToken: 'foo', refreshToken: 'bar' };
 
-      mockClusterClient.callAsInternalUser.mockResolvedValue({ invalidated_tokens: 5 });
+      mockClusterClient.callWithInternalUser.mockResolvedValue({ invalidated_tokens: 5 });
 
       await expect(tokens.invalidate(tokenPair)).resolves.toBe(undefined);
 
-      expect(mockClusterClient.callAsInternalUser).toHaveBeenCalledTimes(2);
-      expect(mockClusterClient.callAsInternalUser).toHaveBeenCalledWith(
+      expect(mockClusterClient.callWithInternalUser).toHaveBeenCalledTimes(2);
+      expect(mockClusterClient.callWithInternalUser).toHaveBeenCalledWith(
         'shield.deleteAccessToken',
         { body: { token: tokenPair.accessToken } }
       );
-      expect(mockClusterClient.callAsInternalUser).toHaveBeenCalledWith(
+      expect(mockClusterClient.callWithInternalUser).toHaveBeenCalledWith(
         'shield.deleteAccessToken',
         { body: { refresh_token: tokenPair.refreshToken } }
       );

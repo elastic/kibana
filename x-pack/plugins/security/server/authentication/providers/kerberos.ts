@@ -116,7 +116,7 @@ export class KerberosAuthenticationProvider extends BaseAuthenticationProvider {
     // First attempt to exchange SPNEGO token for an access token.
     let tokens: { access_token: string; refresh_token: string };
     try {
-      tokens = await this.options.client.callAsInternalUser('shield.getAccessToken', {
+      tokens = await this.options.client.callWithInternalUser('shield.getAccessToken', {
         body: { grant_type: '_kerberos', kerberos_ticket: kerberosTicket },
       });
     } catch (err) {

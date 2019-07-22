@@ -184,7 +184,7 @@ export class OIDCAuthenticationProvider extends BaseAuthenticationProvider {
       const {
         access_token: accessToken,
         refresh_token: refreshToken,
-      } = await this.options.client.callAsInternalUser('shield.oidcAuthenticate', {
+      } = await this.options.client.callWithInternalUser('shield.oidcAuthenticate', {
         body: {
           state: stateOIDCState,
           nonce: stateNonce,
@@ -239,7 +239,7 @@ export class OIDCAuthenticationProvider extends BaseAuthenticationProvider {
           : params;
       // This operation should be performed on behalf of the user with a privilege that normal
       // user usually doesn't have `cluster:admin/xpack/security/oidc/prepare`.
-      const { state, nonce, redirect } = await this.options.client.callAsInternalUser(
+      const { state, nonce, redirect } = await this.options.client.callWithInternalUser(
         'shield.oidcPrepare',
         { body: oidcPrepareParams }
       );
@@ -405,7 +405,7 @@ export class OIDCAuthenticationProvider extends BaseAuthenticationProvider {
       };
       // This operation should be performed on behalf of the user with a privilege that normal
       // user usually doesn't have `cluster:admin/xpack/security/oidc/logout`.
-      const { redirect } = await this.options.client.callAsInternalUser(
+      const { redirect } = await this.options.client.callWithInternalUser(
         'shield.oidcLogout',
         logoutBody
       );

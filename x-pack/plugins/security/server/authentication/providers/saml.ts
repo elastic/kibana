@@ -261,7 +261,7 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
       const {
         access_token: accessToken,
         refresh_token: refreshToken,
-      } = await this.options.client.callAsInternalUser('shield.samlAuthenticate', {
+      } = await this.options.client.callWithInternalUser('shield.samlAuthenticate', {
         body: {
           ids: stateRequestId ? [stateRequestId] : [],
           content: samlResponse,
@@ -457,7 +457,7 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
     try {
       // This operation should be performed on behalf of the user with a privilege that normal
       // user usually doesn't have `cluster:admin/xpack/security/saml/prepare`.
-      const { id: requestId, redirect } = await this.options.client.callAsInternalUser(
+      const { id: requestId, redirect } = await this.options.client.callWithInternalUser(
         'shield.samlPrepare',
         { body: { realm: this.realm } }
       );
@@ -484,7 +484,7 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
 
     // This operation should be performed on behalf of the user with a privilege that normal
     // user usually doesn't have `cluster:admin/xpack/security/saml/logout`.
-    const { redirect } = await this.options.client.callAsInternalUser('shield.samlLogout', {
+    const { redirect } = await this.options.client.callWithInternalUser('shield.samlLogout', {
       body: { token: accessToken, refresh_token: refreshToken },
     });
 
@@ -503,7 +503,7 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
 
     // This operation should be performed on behalf of the user with a privilege that normal
     // user usually doesn't have `cluster:admin/xpack/security/saml/invalidate`.
-    const { redirect } = await this.options.client.callAsInternalUser('shield.samlInvalidate', {
+    const { redirect } = await this.options.client.callWithInternalUser('shield.samlInvalidate', {
       // Elasticsearch expects `queryString` without leading `?`, so we should strip it with `slice`.
       body: {
         queryString: request.url.search ? request.url.search.slice(1) : '',

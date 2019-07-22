@@ -8,7 +8,7 @@ import sinon from 'sinon';
 
 import { httpServerMock } from '../../../../../../src/core/server/mocks';
 import { mockAuthenticatedUser } from '../../../common/model/authenticated_user.mock';
-import { mockAuthenticationProviderOptions, mockScopedClusterClient } from './base.mock';
+import { mockAuthenticationProviderOptions } from './base.mock';
 
 import { BasicAuthenticationProvider, BasicCredentials } from './basic';
 
@@ -38,8 +38,8 @@ describe('BasicAuthenticationProvider', () => {
       const credentials = { username: 'user', password: 'password' };
       const authorization = generateAuthorizationHeader(credentials.username, credentials.password);
 
-      mockScopedClusterClient(mockOptions.client, sinon.match({ headers: { authorization } }))
-        .callAsCurrentUser.withArgs('shield.authenticate')
+      mockOptions.client.callWithRequest
+        .withArgs(sinon.match({ headers: { authorization } }), 'shield.authenticate')
         .resolves(user);
 
       const authenticationResult = await provider.login(
@@ -59,8 +59,8 @@ describe('BasicAuthenticationProvider', () => {
       const authorization = generateAuthorizationHeader(credentials.username, credentials.password);
 
       const authenticationError = new Error('Some error');
-      mockScopedClusterClient(mockOptions.client, sinon.match({ headers: { authorization } }))
-        .callAsCurrentUser.withArgs('shield.authenticate')
+      mockOptions.client.callWithRequest
+        .withArgs(sinon.match({ headers: { authorization } }), 'shield.authenticate')
         .rejects(authenticationError);
 
       const authenticationResult = await provider.login(request, credentials);
@@ -111,8 +111,8 @@ describe('BasicAuthenticationProvider', () => {
       });
       const user = mockAuthenticatedUser();
 
-      mockScopedClusterClient(mockOptions.client, sinon.match({ headers: request.headers }))
-        .callAsCurrentUser.withArgs('shield.authenticate')
+      mockOptions.client.callWithRequest
+        .withArgs(sinon.match({ headers: request.headers }), 'shield.authenticate')
         .resolves(user);
 
       const authenticationResult = await provider.authenticate(request);
@@ -130,8 +130,8 @@ describe('BasicAuthenticationProvider', () => {
       const user = mockAuthenticatedUser();
       const authorization = generateAuthorizationHeader('user', 'password');
 
-      mockScopedClusterClient(mockOptions.client, sinon.match({ headers: { authorization } }))
-        .callAsCurrentUser.withArgs('shield.authenticate')
+      mockOptions.client.callWithRequest
+        .withArgs(sinon.match({ headers: { authorization } }), 'shield.authenticate')
         .resolves(user);
 
       const authenticationResult = await provider.authenticate(request, { authorization });
@@ -150,7 +150,7 @@ describe('BasicAuthenticationProvider', () => {
 
       const authenticationResult = await provider.authenticate(request, { authorization });
 
-      sinon.assert.notCalled(mockOptions.client.asScoped);
+      sinon.assert.notCalled(mockOptions.client.callWithRequest);
       expect(request.headers.authorization).toBe('Bearer ***');
       expect(authenticationResult.notHandled()).toBe(true);
     });
@@ -160,8 +160,8 @@ describe('BasicAuthenticationProvider', () => {
       const authorization = generateAuthorizationHeader('user', 'password');
 
       const authenticationError = new Error('Forbidden');
-      mockScopedClusterClient(mockOptions.client, sinon.match({ headers: { authorization } }))
-        .callAsCurrentUser.withArgs('shield.authenticate')
+      mockOptions.client.callWithRequest
+        .withArgs(sinon.match({ headers: { authorization } }), 'shield.authenticate')
         .rejects(authenticationError);
 
       const authenticationResult = await provider.authenticate(request, { authorization });
@@ -180,8 +180,8 @@ describe('BasicAuthenticationProvider', () => {
       });
       const user = mockAuthenticatedUser();
 
-      mockScopedClusterClient(mockOptions.client, sinon.match({ headers: request.headers }))
-        .callAsCurrentUser.withArgs('shield.authenticate')
+      mockOptions.client.callWithRequest
+        .withArgs(sinon.match({ headers: request.headers }), 'shield.authenticate')
         .resolves(user);
 
       const authorizationInState = generateAuthorizationHeader('user1', 'password2');

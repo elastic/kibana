@@ -9,11 +9,7 @@ import sinon from 'sinon';
 
 import { httpServerMock } from '../../../../../../src/core/server/mocks';
 import { mockAuthenticatedUser } from '../../../common/model/authenticated_user.mock';
-import {
-  MockAuthenticationProviderOptions,
-  mockAuthenticationProviderOptions,
-  mockScopedClusterClient,
-} from './base.mock';
+import { MockAuthenticationProviderOptions, mockAuthenticationProviderOptions } from './base.mock';
 
 import { KerberosAuthenticationProvider } from './kerberos';
 import { ElasticsearchErrorHelpers } from '../../../../../../src/core/server/elasticsearch';
@@ -38,21 +34,22 @@ describe('KerberosAuthenticationProvider', () => {
 
       const authenticationResult = await provider.authenticate(request, tokenPair);
 
-      sinon.assert.notCalled(mockOptions.client.asScoped);
-      sinon.assert.notCalled(mockOptions.client.callAsInternalUser);
+      sinon.assert.notCalled(mockOptions.client.callWithRequest);
+      sinon.assert.notCalled(mockOptions.client.callWithInternalUser);
       expect(request.headers.authorization).toBe('Basic some:credentials');
       expect(authenticationResult.notHandled()).toBe(true);
     });
 
     it('does not handle requests that can be authenticated without `Negotiate` header.', async () => {
       const request = httpServerMock.createKibanaRequest();
-      mockScopedClusterClient(
-        mockOptions.client,
-        sinon.match({
-          headers: { authorization: `Negotiate ${Buffer.from('__fake__').toString('base64')}` },
-        })
-      )
-        .callAsCurrentUser.withArgs('shield.authenticate')
+
+      mockOptions.client.callWithRequest
+        .withArgs(
+          sinon.match({
+            headers: { authorization: `Negotiate ${Buffer.from('__fake__').toString('base64')}` },
+          }),
+          'shield.authenticate'
+        )
         .resolves({});
 
       const authenticationResult = await provider.authenticate(request, null);
@@ -62,13 +59,13 @@ describe('KerberosAuthenticationProvider', () => {
 
     it('does not handle requests if backend does not support Kerberos.', async () => {
       const request = httpServerMock.createKibanaRequest();
-      mockScopedClusterClient(
-        mockOptions.client,
-        sinon.match({
-          headers: { authorization: `Negotiate ${Buffer.from('__fake__').toString('base64')}` },
-        })
-      )
-        .callAsCurrentUser.withArgs('shield.authenticate')
+      mockOptions.client.callWithRequest
+        .withArgs(
+          sinon.match({
+            headers: { authorization: `Negotiate ${Buffer.from('__fake__').toString('base64')}` },
+          }),
+          'shield.authenticate'
+        )
         .rejects(ElasticsearchErrorHelpers.decorateNotAuthorizedError(new Error()));
 
       const authenticationResult = await provider.authenticate(request, null);
@@ -79,9 +76,10 @@ describe('KerberosAuthenticationProvider', () => {
       const request = httpServerMock.createKibanaRequest();
       const tokenPair = { accessToken: 'token', refreshToken: 'refresh-token' };
 
-      mockScopedClusterClient(mockOptions.client)
-        .callAsCurrentUser.withArgs('shield.authenticate')
+      mockOptions.client.callWithRequest
+        .withArgs(sinon.match.any, 'shield.authenticate')
         .rejects(ElasticsearchErrorHelpers.decorateNotAuthorizedError(new Error()));
+
       mockOptions.tokens.refresh.withArgs(tokenPair.refreshToken).resolves(null);
 
       const authenticationResult = await provider.authenticate(request, tokenPair);
@@ -92,13 +90,13 @@ describe('KerberosAuthenticationProvider', () => {
 
     it('fails with `Negotiate` challenge if backend supports Kerberos.', async () => {
       const request = httpServerMock.createKibanaRequest();
-      mockScopedClusterClient(
-        mockOptions.client,
-        sinon.match({
-          headers: { authorization: `Negotiate ${Buffer.from('__fake__').toString('base64')}` },
-        })
-      )
-        .callAsCurrentUser.withArgs('shield.authenticate')
+      mockOptions.client.callWithRequest
+        .withArgs(
+          sinon.match({
+            headers: { authorization: `Negotiate ${Buffer.from('__fake__').toString('base64')}` },
+          }),
+          'shield.authenticate'
+        )
         .rejects(
           ElasticsearchErrorHelpers.decorateNotAuthorizedError(
             new (errors.AuthenticationException as any)('Unauthorized', {
@@ -116,8 +114,9 @@ describe('KerberosAuthenticationProvider', () => {
 
     it('fails if request authentication is failed with non-401 error.', async () => {
       const request = httpServerMock.createKibanaRequest();
-      mockScopedClusterClient(mockOptions.client)
-        .callAsCurrentUser.withArgs('shield.authenticate')
+
+      mockOptions.client.callWithRequest
+        .withArgs(sinon.match.any, 'shield.authenticate')
         .rejects(new errors.ServiceUnavailable());
 
       const authenticationResult = await provider.authenticate(request, null);
@@ -133,21 +132,21 @@ describe('KerberosAuthenticationProvider', () => {
         headers: { authorization: 'negotiate spnego' },
       });
 
-      mockScopedClusterClient(
-        mockOptions.client,
-        sinon.match({ headers: { authorization: 'Bearer some-token' } })
-      )
-        .callAsCurrentUser.withArgs('shield.authenticate')
+      mockOptions.client.callWithRequest
+        .withArgs(
+          sinon.match({ headers: { authorization: 'Bearer some-token' } }),
+          'shield.authenticate'
+        )
         .resolves(user);
 
-      mockOptions.client.callAsInternalUser
+      mockOptions.client.callWithInternalUser
         .withArgs('shield.getAccessToken')
         .resolves({ access_token: 'some-token', refresh_token: 'some-refresh-token' });
 
       const authenticationResult = await provider.authenticate(request);
 
       sinon.assert.calledWithExactly(
-        mockOptions.client.callAsInternalUser,
+        mockOptions.client.callWithInternalUser,
         'shield.getAccessToken',
         { body: { grant_type: '_kerberos', kerberos_ticket: 'spnego' } }
       );
@@ -168,14 +167,14 @@ describe('KerberosAuthenticationProvider', () => {
       });
 
       const failureReason = ElasticsearchErrorHelpers.decorateNotAuthorizedError(new Error());
-      mockOptions.client.callAsInternalUser
+      mockOptions.client.callWithInternalUser
         .withArgs('shield.getAccessToken')
         .rejects(failureReason);
 
       const authenticationResult = await provider.authenticate(request);
 
       sinon.assert.calledWithExactly(
-        mockOptions.client.callAsInternalUser,
+        mockOptions.client.callWithInternalUser,
         'shield.getAccessToken',
         { body: { grant_type: '_kerberos', kerberos_ticket: 'spnego' } }
       );
@@ -192,21 +191,21 @@ describe('KerberosAuthenticationProvider', () => {
       });
 
       const failureReason = ElasticsearchErrorHelpers.decorateNotAuthorizedError(new Error());
-      mockScopedClusterClient(
-        mockOptions.client,
-        sinon.match({ headers: { authorization: 'Bearer some-token' } })
-      )
-        .callAsCurrentUser.withArgs('shield.authenticate')
+      mockOptions.client.callWithRequest
+        .withArgs(
+          sinon.match({ headers: { authorization: 'Bearer some-token' } }),
+          'shield.authenticate'
+        )
         .rejects(failureReason);
 
-      mockOptions.client.callAsInternalUser
+      mockOptions.client.callWithInternalUser
         .withArgs('shield.getAccessToken')
         .resolves({ access_token: 'some-token', refresh_token: 'some-refresh-token' });
 
       const authenticationResult = await provider.authenticate(request);
 
       sinon.assert.calledWithExactly(
-        mockOptions.client.callAsInternalUser,
+        mockOptions.client.callWithInternalUser,
         'shield.getAccessToken',
         { body: { grant_type: '_kerberos', kerberos_ticket: 'spnego' } }
       );
@@ -226,8 +225,8 @@ describe('KerberosAuthenticationProvider', () => {
       };
 
       const authorization = `Bearer ${tokenPair.accessToken}`;
-      mockScopedClusterClient(mockOptions.client, sinon.match({ headers: { authorization } }))
-        .callAsCurrentUser.withArgs('shield.authenticate')
+      mockOptions.client.callWithRequest
+        .withArgs(sinon.match({ headers: { authorization } }), 'shield.authenticate')
         .resolves(user);
 
       const authenticationResult = await provider.authenticate(request, tokenPair);
@@ -244,22 +243,22 @@ describe('KerberosAuthenticationProvider', () => {
       const request = httpServerMock.createKibanaRequest();
       const tokenPair = { accessToken: 'foo', refreshToken: 'bar' };
 
-      mockScopedClusterClient(
-        mockOptions.client,
-        sinon.match({ headers: { authorization: `Bearer ${tokenPair.accessToken}` } })
-      )
-        .callAsCurrentUser.withArgs('shield.authenticate')
+      mockOptions.client.callWithRequest
+        .withArgs(
+          sinon.match({ headers: { authorization: `Bearer ${tokenPair.accessToken}` } }),
+          'shield.authenticate'
+        )
         .rejects(ElasticsearchErrorHelpers.decorateNotAuthorizedError(new Error()));
 
       mockOptions.tokens.refresh
         .withArgs(tokenPair.refreshToken)
         .resolves({ accessToken: 'newfoo', refreshToken: 'newbar' });
 
-      mockScopedClusterClient(
-        mockOptions.client,
-        sinon.match({ headers: { authorization: 'Bearer newfoo' } })
-      )
-        .callAsCurrentUser.withArgs('shield.authenticate')
+      mockOptions.client.callWithRequest
+        .withArgs(
+          sinon.match({ headers: { authorization: 'Bearer newfoo' } }),
+          'shield.authenticate'
+        )
         .resolves(user);
 
       const authenticationResult = await provider.authenticate(request, tokenPair);
@@ -281,33 +280,38 @@ describe('KerberosAuthenticationProvider', () => {
       };
 
       const failureReason = new errors.InternalServerError('Token is not valid!');
-      const scopedClusterClient = mockScopedClusterClient(
-        mockOptions.client,
-        sinon.match({ headers: { authorization: `Bearer ${tokenPair.accessToken}` } })
-      );
-      scopedClusterClient.callAsCurrentUser.withArgs('shield.authenticate').rejects(failureReason);
+
+      mockOptions.client.callWithRequest
+        .withArgs(
+          sinon.match({ headers: { authorization: `Bearer ${tokenPair.accessToken}` } }),
+          'shield.authenticate'
+        )
+        .rejects(failureReason);
 
       const authenticationResult = await provider.authenticate(request, tokenPair);
 
       expect(request.headers).not.toHaveProperty('authorization');
       expect(authenticationResult.failed()).toBe(true);
       expect(authenticationResult.error).toBe(failureReason);
-      sinon.assert.neverCalledWith(scopedClusterClient.callAsCurrentUser, 'shield.getAccessToken');
+      sinon.assert.neverCalledWith(
+        mockOptions.client.callWithRequest,
+        sinon.match.any,
+        'shield.getAccessToken'
+      );
     });
 
     it('fails with `Negotiate` challenge if both access and refresh tokens from the state are expired and backend supports Kerberos.', async () => {
       const request = httpServerMock.createKibanaRequest();
       const tokenPair = { accessToken: 'expired-token', refreshToken: 'some-valid-refresh-token' };
 
-      mockScopedClusterClient(mockOptions.client)
-        .callAsCurrentUser.withArgs('shield.authenticate')
-        .rejects(
-          ElasticsearchErrorHelpers.decorateNotAuthorizedError(
-            new (errors.AuthenticationException as any)('Unauthorized', {
-              body: { error: { header: { 'WWW-Authenticate': 'Negotiate' } } },
-            })
-          )
-        );
+      mockOptions.client.callWithRequest.withArgs(sinon.match.any, 'shield.authenticate').rejects(
+        ElasticsearchErrorHelpers.decorateNotAuthorizedError(
+          new (errors.AuthenticationException as any)('Unauthorized', {
+            body: { error: { header: { 'WWW-Authenticate': 'Negotiate' } } },
+          })
+        )
+      );
+
       mockOptions.tokens.refresh.withArgs(tokenPair.refreshToken).resolves(null);
 
       const authenticationResult = await provider.authenticate(request, tokenPair);
@@ -321,23 +325,23 @@ describe('KerberosAuthenticationProvider', () => {
       const request = httpServerMock.createKibanaRequest({ headers: {} });
       const tokenPair = { accessToken: 'missing-token', refreshToken: 'missing-refresh-token' };
 
-      mockScopedClusterClient(
-        mockOptions.client,
-        sinon.match({ headers: { authorization: `Bearer ${tokenPair.accessToken}` } })
-      )
-        .callAsCurrentUser.withArgs('shield.authenticate')
+      mockOptions.client.callWithRequest
+        .withArgs(
+          sinon.match({ headers: { authorization: `Bearer ${tokenPair.accessToken}` } }),
+          'shield.authenticate'
+        )
         .rejects({
           statusCode: 500,
           body: { error: { reason: 'token document is missing and must be present' } },
         });
 
-      mockScopedClusterClient(
-        mockOptions.client,
-        sinon.match({
-          headers: { authorization: `Negotiate ${Buffer.from('__fake__').toString('base64')}` },
-        })
-      )
-        .callAsCurrentUser.withArgs('shield.authenticate')
+      mockOptions.client.callWithRequest
+        .withArgs(
+          sinon.match({
+            headers: { authorization: `Negotiate ${Buffer.from('__fake__').toString('base64')}` },
+          }),
+          'shield.authenticate'
+        )
         .rejects(
           ElasticsearchErrorHelpers.decorateNotAuthorizedError(
             new (errors.AuthenticationException as any)('Unauthorized', {
@@ -361,11 +365,11 @@ describe('KerberosAuthenticationProvider', () => {
         headers: { authorization: 'Bearer some-valid-token' },
       });
 
-      mockScopedClusterClient(
-        mockOptions.client,
-        sinon.match({ headers: { authorization: 'Bearer some-valid-token' } })
-      )
-        .callAsCurrentUser.withArgs('shield.authenticate')
+      mockOptions.client.callWithRequest
+        .withArgs(
+          sinon.match({ headers: { authorization: 'Bearer some-valid-token' } }),
+          'shield.authenticate'
+        )
         .resolves(user);
 
       const authenticationResult = await provider.authenticate(request);
@@ -383,11 +387,11 @@ describe('KerberosAuthenticationProvider', () => {
       });
 
       const failureReason = ElasticsearchErrorHelpers.decorateNotAuthorizedError(new Error());
-      mockScopedClusterClient(
-        mockOptions.client,
-        sinon.match({ headers: { authorization: 'Bearer some-invalid-token' } })
-      )
-        .callAsCurrentUser.withArgs('shield.authenticate')
+      mockOptions.client.callWithRequest
+        .withArgs(
+          sinon.match({ headers: { authorization: 'Bearer some-invalid-token' } }),
+          'shield.authenticate'
+        )
         .rejects(failureReason);
 
       const authenticationResult = await provider.authenticate(request);
@@ -407,18 +411,19 @@ describe('KerberosAuthenticationProvider', () => {
       };
 
       const failureReason = ElasticsearchErrorHelpers.decorateNotAuthorizedError(new Error());
-      mockScopedClusterClient(
-        mockOptions.client,
-        sinon.match({ headers: { authorization: 'Bearer some-invalid-token' } })
-      )
-        .callAsCurrentUser.withArgs('shield.authenticate')
+
+      mockOptions.client.callWithRequest
+        .withArgs(
+          sinon.match({ headers: { authorization: 'Bearer some-invalid-token' } }),
+          'shield.authenticate'
+        )
         .rejects(failureReason);
 
-      mockScopedClusterClient(
-        mockOptions.client,
-        sinon.match({ headers: { authorization: `Bearer ${tokenPair.accessToken}` } })
-      )
-        .callAsCurrentUser.withArgs('shield.authenticate')
+      mockOptions.client.callWithRequest
+        .withArgs(
+          sinon.match({ headers: { authorization: `Bearer ${tokenPair.accessToken}` } }),
+          'shield.authenticate'
+        )
         .resolves(user);
 
       const authenticationResult = await provider.authenticate(request, tokenPair);

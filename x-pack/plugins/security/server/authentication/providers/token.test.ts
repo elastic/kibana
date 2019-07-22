@@ -10,11 +10,7 @@ import sinon from 'sinon';
 
 import { httpServerMock } from '../../../../../../src/core/server/mocks';
 import { mockAuthenticatedUser } from '../../../common/model/authenticated_user.mock';
-import {
-  MockAuthenticationProviderOptions,
-  mockAuthenticationProviderOptions,
-  mockScopedClusterClient,
-} from './base.mock';
+import { MockAuthenticationProviderOptions, mockAuthenticationProviderOptions } from './base.mock';
 
 import { TokenAuthenticationProvider } from './token';
 
@@ -35,14 +31,14 @@ describe('TokenAuthenticationProvider', () => {
       const tokenPair = { accessToken: 'foo', refreshToken: 'bar' };
       const authorization = `Bearer ${tokenPair.accessToken}`;
 
-      mockOptions.client.callAsInternalUser
+      mockOptions.client.callWithInternalUser
         .withArgs('shield.getAccessToken', {
           body: { grant_type: 'password', ...credentials },
         })
         .resolves({ access_token: tokenPair.accessToken, refresh_token: tokenPair.refreshToken });
 
-      mockScopedClusterClient(mockOptions.client, sinon.match({ headers: { authorization } }))
-        .callAsCurrentUser.withArgs('shield.authenticate')
+      mockOptions.client.callWithRequest
+        .withArgs(sinon.match({ headers: { authorization } }), 'shield.authenticate')
         .resolves(user);
 
       const authenticationResult = await provider.login(request, credentials);
@@ -58,7 +54,7 @@ describe('TokenAuthenticationProvider', () => {
       const credentials = { username: 'user', password: 'password' };
 
       const authenticationError = new Error('Invalid credentials');
-      mockOptions.client.callAsInternalUser
+      mockOptions.client.callWithInternalUser
         .withArgs('shield.getAccessToken', {
           body: { grant_type: 'password', ...credentials },
         })
@@ -66,7 +62,7 @@ describe('TokenAuthenticationProvider', () => {
 
       const authenticationResult = await provider.login(request, credentials);
 
-      sinon.assert.notCalled(mockOptions.client.asScoped);
+      sinon.assert.notCalled(mockOptions.client.callWithRequest);
 
       expect(request.headers).not.toHaveProperty('authorization');
       expect(authenticationResult.failed()).toBe(true);
@@ -80,18 +76,19 @@ describe('TokenAuthenticationProvider', () => {
       const credentials = { username: 'user', password: 'password' };
       const tokenPair = { accessToken: 'foo', refreshToken: 'bar' };
 
-      mockOptions.client.callAsInternalUser
+      mockOptions.client.callWithInternalUser
         .withArgs('shield.getAccessToken', {
           body: { grant_type: 'password', ...credentials },
         })
         .resolves({ access_token: tokenPair.accessToken, refresh_token: tokenPair.refreshToken });
 
       const authenticationError = new Error('Some error');
-      mockScopedClusterClient(
-        mockOptions.client,
-        sinon.match({ headers: { authorization: `Bearer ${tokenPair.accessToken}` } })
-      )
-        .callAsCurrentUser.withArgs('shield.authenticate')
+
+      mockOptions.client.callWithRequest
+        .withArgs(
+          sinon.match({ headers: { authorization: `Bearer ${tokenPair.accessToken}` } }),
+          'shield.authenticate'
+        )
         .rejects(authenticationError);
 
       const authenticationResult = await provider.login(request, credentials);
@@ -133,8 +130,8 @@ describe('TokenAuthenticationProvider', () => {
       const request = httpServerMock.createKibanaRequest({ headers: { authorization } });
       const user = mockAuthenticatedUser();
 
-      mockScopedClusterClient(mockOptions.client, sinon.match({ headers: { authorization } }))
-        .callAsCurrentUser.withArgs('shield.authenticate')
+      mockOptions.client.callWithRequest
+        .withArgs(sinon.match({ headers: { authorization } }), 'shield.authenticate')
         .resolves(user);
 
       const authenticationResult = await provider.authenticate(request);
@@ -151,8 +148,8 @@ describe('TokenAuthenticationProvider', () => {
       const user = mockAuthenticatedUser();
       const authorization = `Bearer ${tokenPair.accessToken}`;
 
-      mockScopedClusterClient(mockOptions.client, sinon.match({ headers: { authorization } }))
-        .callAsCurrentUser.withArgs('shield.authenticate')
+      mockOptions.client.callWithRequest
+        .withArgs(sinon.match({ headers: { authorization } }), 'shield.authenticate')
         .resolves(user);
 
       const authenticationResult = await provider.authenticate(request, tokenPair);
@@ -169,22 +166,22 @@ describe('TokenAuthenticationProvider', () => {
       const request = httpServerMock.createKibanaRequest();
       const tokenPair = { accessToken: 'foo', refreshToken: 'bar' };
 
-      mockScopedClusterClient(
-        mockOptions.client,
-        sinon.match({ headers: { authorization: `Bearer ${tokenPair.accessToken}` } })
-      )
-        .callAsCurrentUser.withArgs('shield.authenticate')
+      mockOptions.client.callWithRequest
+        .withArgs(
+          sinon.match({ headers: { authorization: `Bearer ${tokenPair.accessToken}` } }),
+          'shield.authenticate'
+        )
         .rejects({ statusCode: 401 });
 
       mockOptions.tokens.refresh
         .withArgs(tokenPair.refreshToken)
         .resolves({ accessToken: 'newfoo', refreshToken: 'newbar' });
 
-      mockScopedClusterClient(
-        mockOptions.client,
-        sinon.match({ headers: { authorization: 'Bearer newfoo' } })
-      )
-        .callAsCurrentUser.withArgs('shield.authenticate')
+      mockOptions.client.callWithRequest
+        .withArgs(
+          sinon.match({ headers: { authorization: 'Bearer newfoo' } }),
+          'shield.authenticate'
+        )
         .resolves(user);
 
       const authenticationResult = await provider.authenticate(request, tokenPair);
@@ -206,13 +203,13 @@ describe('TokenAuthenticationProvider', () => {
       const user = mockAuthenticatedUser();
       const authorization = `Bearer ${tokenPair.accessToken}`;
 
-      mockScopedClusterClient(mockOptions.client, sinon.match({ headers: { authorization } }))
-        .callAsCurrentUser.withArgs('shield.authenticate')
+      mockOptions.client.callWithRequest
+        .withArgs(sinon.match({ headers: { authorization } }), 'shield.authenticate')
         .resolves(user);
 
       const authenticationResult = await provider.authenticate(request, tokenPair);
 
-      sinon.assert.notCalled(mockOptions.client.asScoped);
+      sinon.assert.notCalled(mockOptions.client.callWithRequest);
       expect(request.headers.authorization).toBe('Basic ***');
       expect(authenticationResult.notHandled()).toBe(true);
     });
@@ -224,8 +221,8 @@ describe('TokenAuthenticationProvider', () => {
       const user = mockAuthenticatedUser();
 
       // GetUser will be called with request's `authorization` header.
-      mockScopedClusterClient(mockOptions.client, sinon.match({ headers: { authorization } }))
-        .callAsCurrentUser.withArgs('shield.authenticate')
+      mockOptions.client.callWithRequest
+        .withArgs(sinon.match({ headers: { authorization } }), 'shield.authenticate')
         .resolves(user);
 
       const authenticationResult = await provider.authenticate(request, tokenPair);
@@ -242,8 +239,8 @@ describe('TokenAuthenticationProvider', () => {
       const request = httpServerMock.createKibanaRequest({ headers: { authorization } });
 
       const authenticationError = new errors.InternalServerError('something went wrong');
-      mockScopedClusterClient(mockOptions.client, sinon.match({ headers: { authorization } }))
-        .callAsCurrentUser.withArgs('shield.authenticate')
+      mockOptions.client.callWithRequest
+        .withArgs(sinon.match({ headers: { authorization } }), 'shield.authenticate')
         .rejects(authenticationError);
 
       const authenticationResult = await provider.authenticate(request);
@@ -259,11 +256,11 @@ describe('TokenAuthenticationProvider', () => {
       const request = httpServerMock.createKibanaRequest();
 
       const authenticationError = new errors.InternalServerError('something went wrong');
-      mockScopedClusterClient(
-        mockOptions.client,
-        sinon.match({ headers: { authorization: `Bearer ${tokenPair.accessToken}` } })
-      )
-        .callAsCurrentUser.withArgs('shield.authenticate')
+      mockOptions.client.callWithRequest
+        .withArgs(
+          sinon.match({ headers: { authorization: `Bearer ${tokenPair.accessToken}` } }),
+          'shield.authenticate'
+        )
         .rejects(authenticationError);
 
       const authenticationResult = await provider.authenticate(request, tokenPair);
@@ -279,11 +276,11 @@ describe('TokenAuthenticationProvider', () => {
       const request = httpServerMock.createKibanaRequest();
       const tokenPair = { accessToken: 'foo', refreshToken: 'bar' };
 
-      mockScopedClusterClient(
-        mockOptions.client,
-        sinon.match({ headers: { authorization: `Bearer ${tokenPair.accessToken}` } })
-      )
-        .callAsCurrentUser.withArgs('shield.authenticate')
+      mockOptions.client.callWithRequest
+        .withArgs(
+          sinon.match({ headers: { authorization: `Bearer ${tokenPair.accessToken}` } }),
+          'shield.authenticate'
+        )
         .rejects({ statusCode: 401 });
 
       const refreshError = new errors.InternalServerError('failed to refresh token');
@@ -304,11 +301,11 @@ describe('TokenAuthenticationProvider', () => {
       const request = httpServerMock.createKibanaRequest({ path: '/some-path' });
       const tokenPair = { accessToken: 'foo', refreshToken: 'bar' };
 
-      mockScopedClusterClient(
-        mockOptions.client,
-        sinon.match({ headers: { authorization: `Bearer ${tokenPair.accessToken}` } })
-      )
-        .callAsCurrentUser.withArgs('shield.authenticate')
+      mockOptions.client.callWithRequest
+        .withArgs(
+          sinon.match({ headers: { authorization: `Bearer ${tokenPair.accessToken}` } }),
+          'shield.authenticate'
+        )
         .rejects({
           statusCode: 500,
           body: { error: { reason: 'token document is missing and must be present' } },
@@ -334,11 +331,11 @@ describe('TokenAuthenticationProvider', () => {
       const request = httpServerMock.createKibanaRequest({ path: '/some-path' });
       const tokenPair = { accessToken: 'foo', refreshToken: 'bar' };
 
-      mockScopedClusterClient(
-        mockOptions.client,
-        sinon.match({ headers: { authorization: `Bearer ${tokenPair.accessToken}` } })
-      )
-        .callAsCurrentUser.withArgs('shield.authenticate')
+      mockOptions.client.callWithRequest
+        .withArgs(
+          sinon.match({ headers: { authorization: `Bearer ${tokenPair.accessToken}` } }),
+          'shield.authenticate'
+        )
         .rejects({ statusCode: 401 });
 
       mockOptions.tokens.refresh.withArgs(tokenPair.refreshToken).resolves(null);
@@ -364,11 +361,11 @@ describe('TokenAuthenticationProvider', () => {
       });
       const tokenPair = { accessToken: 'foo', refreshToken: 'bar' };
 
-      mockScopedClusterClient(
-        mockOptions.client,
-        sinon.match({ headers: { authorization: `Bearer ${tokenPair.accessToken}` } })
-      )
-        .callAsCurrentUser.withArgs('shield.authenticate')
+      mockOptions.client.callWithRequest
+        .withArgs(
+          sinon.match({ headers: { authorization: `Bearer ${tokenPair.accessToken}` } }),
+          'shield.authenticate'
+        )
         .rejects({ statusCode: 401 });
 
       mockOptions.tokens.refresh.withArgs(tokenPair.refreshToken).resolves(null);
@@ -390,11 +387,11 @@ describe('TokenAuthenticationProvider', () => {
       const request = httpServerMock.createKibanaRequest();
       const tokenPair = { accessToken: 'foo', refreshToken: 'bar' };
 
-      mockScopedClusterClient(
-        mockOptions.client,
-        sinon.match({ headers: { authorization: `Bearer ${tokenPair.accessToken}` } })
-      )
-        .callAsCurrentUser.withArgs('shield.authenticate')
+      mockOptions.client.callWithRequest
+        .withArgs(
+          sinon.match({ headers: { authorization: `Bearer ${tokenPair.accessToken}` } }),
+          'shield.authenticate'
+        )
         .rejects({ statusCode: 401 });
 
       mockOptions.tokens.refresh
@@ -402,11 +399,11 @@ describe('TokenAuthenticationProvider', () => {
         .resolves({ accessToken: 'newfoo', refreshToken: 'newbar' });
 
       const authenticationError = new errors.AuthenticationException('Some error');
-      mockScopedClusterClient(
-        mockOptions.client,
-        sinon.match({ headers: { authorization: 'Bearer newfoo' } })
-      )
-        .callAsCurrentUser.withArgs('shield.authenticate')
+      mockOptions.client.callWithRequest
+        .withArgs(
+          sinon.match({ headers: { authorization: 'Bearer newfoo' } }),
+          'shield.authenticate'
+        )
         .rejects(authenticationError);
 
       const authenticationResult = await provider.authenticate(request, tokenPair);

@@ -53,7 +53,7 @@ export class TokenAuthenticationProvider extends BaseAuthenticationProvider {
       const {
         access_token: accessToken,
         refresh_token: refreshToken,
-      } = await this.options.client.callAsInternalUser('shield.getAccessToken', {
+      } = await this.options.client.callWithInternalUser('shield.getAccessToken', {
         body: { grant_type: 'password', username, password },
       });
 

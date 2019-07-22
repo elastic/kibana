@@ -27,7 +27,6 @@ import {
   ElasticsearchErrorHelpers,
   KibanaRequest,
   LoggerFactory,
-  ScopedClusterClient,
 } from '../../../../../src/core/server';
 import { AuthenticatedUser } from '../../common/model';
 import { ConfigType, createConfig$ } from '../config';
@@ -54,7 +53,7 @@ describe('setupAuthentication()', () => {
     clusterClient: jest.Mocked<PublicMethodsOf<ClusterClient>>;
   };
   let mockXpackInfo: jest.Mocked<LegacyAPI['xpackInfo']>;
-  let mockScopedClusterClient: jest.Mocked<PublicMethodsOf<ScopedClusterClient>>;
+
   beforeEach(async () => {
     mockXpackInfo = {
       isAvailable: jest.fn().mockReturnValue(true),
@@ -77,11 +76,6 @@ describe('setupAuthentication()', () => {
       loggers: loggingServiceMock.create(),
       getLegacyAPI: jest.fn().mockReturnValue({ xpackInfo: mockXpackInfo }),
     };
-
-    mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
-    mockSetupAuthenticationParams.clusterClient.asScoped.mockReturnValue(
-      (mockScopedClusterClient as unknown) as jest.Mocked<ScopedClusterClient>
-    );
   });
 
   afterEach(() => jest.clearAllMocks());
@@ -254,7 +248,7 @@ describe('setupAuthentication()', () => {
 
     it('fails if `authenticate` call fails', async () => {
       const failureReason = new Error('Something went wrong');
-      mockScopedClusterClient.callAsCurrentUser.mockRejectedValue(failureReason);
+      mockSetupAuthenticationParams.clusterClient.callWithRequest.mockRejectedValue(failureReason);
 
       await expect(getCurrentUser(httpServerMock.createKibanaRequest())).rejects.toBe(
         failureReason
@@ -263,7 +257,7 @@ describe('setupAuthentication()', () => {
 
     it('returns result of `authenticate` call.', async () => {
       const mockUser = mockAuthenticatedUser();
-      mockScopedClusterClient.callAsCurrentUser.mockResolvedValue(mockUser);
+      mockSetupAuthenticationParams.clusterClient.callWithRequest.mockResolvedValue(mockUser);
 
       await expect(getCurrentUser(httpServerMock.createKibanaRequest())).resolves.toBe(mockUser);
     });
@@ -283,21 +277,21 @@ describe('setupAuthentication()', () => {
 
     it('returns `true` if `authenticate` succeeds.', async () => {
       const mockUser = mockAuthenticatedUser();
-      mockScopedClusterClient.callAsCurrentUser.mockResolvedValue(mockUser);
+      mockSetupAuthenticationParams.clusterClient.callWithRequest.mockResolvedValue(mockUser);
 
       await expect(isAuthenticated(httpServerMock.createKibanaRequest())).resolves.toBe(true);
     });
 
     it('returns `false` if `authenticate` fails with 401.', async () => {
       const failureReason = ElasticsearchErrorHelpers.decorateNotAuthorizedError(new Error());
-      mockScopedClusterClient.callAsCurrentUser.mockRejectedValue(failureReason);
+      mockSetupAuthenticationParams.clusterClient.callWithRequest.mockRejectedValue(failureReason);
 
       await expect(isAuthenticated(httpServerMock.createKibanaRequest())).resolves.toBe(false);
     });
 
     it('fails if `authenticate` call fails with unknown reason', async () => {
       const failureReason = new errors.BadRequest();
-      mockScopedClusterClient.callAsCurrentUser.mockRejectedValue(failureReason);
+      mockSetupAuthenticationParams.clusterClient.callWithRequest.mockRejectedValue(failureReason);
 
       await expect(isAuthenticated(httpServerMock.createKibanaRequest())).rejects.toBe(
         failureReason

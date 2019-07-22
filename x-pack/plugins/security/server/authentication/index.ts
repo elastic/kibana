@@ -54,9 +54,10 @@ export async function setupAuthentication({
       return null;
     }
 
-    return (await clusterClient
-      .asScoped(request)
-      .callAsCurrentUser('shield.authenticate')) as AuthenticatedUser;
+    return (await clusterClient.callWithRequest(
+      request,
+      'shield.authenticate'
+    )) as AuthenticatedUser;
   };
 
   const authenticator = new Authenticator({
