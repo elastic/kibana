@@ -28,7 +28,7 @@ jest.mock('fs', () => ({
 import Chance from 'chance';
 import supertest from 'supertest';
 
-import { ByteSizeValue } from '@kbn/config-schema';
+import { ByteSizeValue, schema } from '@kbn/config-schema';
 import { HttpConfig, Router } from '.';
 import { loggingServiceMock } from '../logging/logging_service.mock';
 import { HttpServer } from './http_server';
@@ -189,11 +189,11 @@ test('valid params', async () => {
   router.get(
     {
       path: '/{test}',
-      validate: schema => ({
+      validate: {
         params: schema.object({
           test: schema.string(),
         }),
-      }),
+      },
     },
     (req, res) => {
       return res.ok({ key: req.params.test });
@@ -219,11 +219,11 @@ test('invalid params', async () => {
   router.get(
     {
       path: '/{test}',
-      validate: schema => ({
+      validate: {
         params: schema.object({
           test: schema.number(),
         }),
-      }),
+      },
     },
     (req, res) => {
       return res.ok({ key: req.params.test });
@@ -251,12 +251,12 @@ test('valid query', async () => {
   router.get(
     {
       path: '/',
-      validate: schema => ({
+      validate: {
         query: schema.object({
           bar: schema.string(),
           quux: schema.number(),
         }),
-      }),
+      },
     },
     (req, res) => {
       return res.ok(req.query);
@@ -282,11 +282,11 @@ test('invalid query', async () => {
   router.get(
     {
       path: '/',
-      validate: schema => ({
+      validate: {
         query: schema.object({
           bar: schema.number(),
         }),
-      }),
+      },
     },
     (req, res) => {
       return res.ok(req.query);
@@ -314,12 +314,12 @@ test('valid body', async () => {
   router.post(
     {
       path: '/',
-      validate: schema => ({
+      validate: {
         body: schema.object({
           bar: schema.string(),
           baz: schema.number(),
         }),
-      }),
+      },
     },
     (req, res) => {
       return res.ok(req.body);
@@ -349,11 +349,11 @@ test('invalid body', async () => {
   router.post(
     {
       path: '/',
-      validate: schema => ({
+      validate: {
         body: schema.object({
           bar: schema.number(),
         }),
-      }),
+      },
     },
     (req, res) => {
       return res.ok(req.body);
@@ -382,11 +382,11 @@ test('handles putting', async () => {
   router.put(
     {
       path: '/',
-      validate: schema => ({
+      validate: {
         body: schema.object({
           key: schema.string(),
         }),
-      }),
+      },
     },
     (req, res) => {
       return res.ok(req.body);
@@ -413,11 +413,11 @@ test('handles deleting', async () => {
   router.delete(
     {
       path: '/{id}',
-      validate: schema => ({
+      validate: {
         params: schema.object({
           id: schema.number(),
         }),
-      }),
+      },
     },
     (req, res) => {
       return res.ok({ key: req.params.id });

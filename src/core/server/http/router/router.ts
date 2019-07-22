@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { ObjectType, schema, TypeOf } from '@kbn/config-schema';
+import { ObjectType, TypeOf } from '@kbn/config-schema';
 import { Request, ResponseObject, ResponseToolkit } from 'hapi';
 
 import { KibanaRequest } from './request';
@@ -136,7 +136,7 @@ export class Router {
       );
     }
 
-    return route.validate ? route.validate(schema) : undefined;
+    return route.validate ? route.validate : undefined;
   }
 
   private async handle<P extends ObjectType, Q extends ObjectType, B extends ObjectType>(

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { ObjectType, Schema } from '@kbn/config-schema';
+import { ObjectType } from '@kbn/config-schema';
 /**
  * The set of common HTTP methods supported by Kibana routing.
  * @public
@@ -58,16 +58,10 @@ export interface RouteConfig<P extends ObjectType, Q extends ObjectType, B exten
    *
    * To opt out of validating the request, specify `false`.
    */
-  validate: RouteValidateFactory<P, Q, B> | false;
+  validate: RouteSchemas<P, Q, B> | false;
 
   options?: RouteConfigOptions;
 }
-
-export type RouteValidateFactory<
-  P extends ObjectType,
-  Q extends ObjectType,
-  B extends ObjectType
-> = (schema: Schema) => RouteSchemas<P, Q, B>;
 
 /**
  * RouteSchemas contains the schemas for validating the different parts of a
