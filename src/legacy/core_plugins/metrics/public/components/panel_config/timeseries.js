@@ -370,7 +370,11 @@ class TimeseriesPanelConfigUi extends Component {
           <EuiTab isSelected={selectedTab === 'data'} onClick={() => this.switchTab('data')}>
             <FormattedMessage id="tsvb.timeseries.dataTab.dataButtonLabel" defaultMessage="Data" />
           </EuiTab>
-          <EuiTab isSelected={selectedTab === 'options'} onClick={() => this.switchTab('options')}>
+          <EuiTab
+            isSelected={selectedTab === 'options'}
+            onClick={() => this.switchTab('options')}
+            data-test-subj="timeSeriesEditorPanelOptionsBtn"
+          >
             <FormattedMessage
               id="tsvb.timeseries.optionsTab.panelOptionsButtonLabel"
               defaultMessage="Panel options"
