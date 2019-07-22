@@ -4,10 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Request } from '../../common/types';
-import { ArchiveEntry, pathParts } from '../registry';
+import { AssetType, Request, ResponseToolkit } from '../../common/types';
+import { PluginContext } from '../plugin';
 import { getClient } from '../saved_objects';
-import { getIntegrations, getIntegrationInfo, installAssets, removeInstallation } from './data';
+import {
+  getClusterAccessor,
+  getIntegrationInfo,
+  getIntegrations,
+  installIntegration,
+  removeInstallation,
+} from './index';
+
+interface Extra extends ResponseToolkit {
+  context: PluginContext;
+}
 
 interface PackageRequest extends Request {
   params: {
@@ -24,53 +34,39 @@ interface DeleteAssetRequest extends Request {
 }
 
 type AssetRequestParams = PackageRequest['params'] & {
-  asset: string;
+  asset?: AssetType;
 };
 
-export async function handleGetList(req: Request) {
-  const client = getClient(req);
-  const integrationList = await getIntegrations(client);
+export async function handleGetList(req: Request, extra: Extra) {
+  const savedObjectsClient = getClient(req);
+  const integrationList = await getIntegrations({ savedObjectsClient });
 
   return integrationList;
 }
 
-export async function handleGetInfo(req: PackageRequest) {
+export async function handleGetInfo(req: PackageRequest, extra: Extra) {
   const { pkgkey } = req.params;
-  const client = getClient(req);
-  const installation = await getIntegrationInfo(client, pkgkey);
+  const savedObjectsClient = getClient(req);
+  const integrationInfo = await getIntegrationInfo({ savedObjectsClient, pkgkey });
 
-  return installation;
+  return integrationInfo;
 }
 
-export async function handleRequestInstall(req: InstallAssetRequest) {
+export async function handleRequestInstall(req: InstallAssetRequest, extra: Extra) {
   const { pkgkey, asset } = req.params;
-  const created = [];
+  if (!asset) throw new Error('Unhandled empty/default asset case');
 
-  if (asset === 'dashboard') {
-    const client = getClient(req);
-    const object = await installAssets(client, pkgkey, (entry: ArchiveEntry) => {
-      const { type } = pathParts(entry.path);
-      return type === asset;
-    });
+  const savedObjectsClient = getClient(req);
+  const callCluster = getClusterAccessor(extra.context.esClient, req);
+  const object = await installIntegration({ savedObjectsClient, pkgkey, asset, callCluster });
 
-    created.push(object);
-  }
-
-  return {
-    pkgkey,
-    asset,
-    created,
-  };
+  return object;
 }
 
-export async function handleRequestDelete(req: DeleteAssetRequest) {
-  const { pkgkey, asset } = req.params;
-  const client = getClient(req);
-  const deleted = await removeInstallation(client, pkgkey);
+export async function handleRequestDelete(req: DeleteAssetRequest, extra: Extra) {
+  const { pkgkey } = req.params;
+  const savedObjectsClient = getClient(req);
+  const deleted = await removeInstallation({ savedObjectsClient, pkgkey });
 
-  return {
-    pkgkey,
-    asset,
-    deleted,
-  };
+  return deleted;
 }
