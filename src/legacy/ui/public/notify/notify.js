@@ -19,8 +19,7 @@
 
 import React from 'react';
 import { MarkdownSimple } from 'ui/markdown';
-import { uiModules } from '../modules';
-import { metadata } from '../metadata';
+import chrome from '../chrome';
 import { fatalError } from './fatal_error';
 import { banners } from './banners';
 import './filters/markdown';
@@ -31,16 +30,11 @@ import {
   EuiButton,
 } from '@elastic/eui';
 
-const module = uiModules.get('kibana/notify');
+const config = chrome.getUiSettingsClient();
 
-// if kibana is not included then the notify service can't
-// expect access to config (since it's dependent on kibana)
-if (!!metadata.kbnIndex) {
-  require('ui/config');
-  module.run(function (config) {
-    config.watchAll(() => applyConfig(config));
-  });
-}
+config.getUpdate$().subscribe(() => {
+  applyConfig(config);
+});
 
 let bannerId;
 let bannerTimeoutId;
