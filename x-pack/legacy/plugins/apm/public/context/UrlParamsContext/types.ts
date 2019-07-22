@@ -24,4 +24,6 @@ export interface IUrlParams {
   transactionName?: string;
   transactionType?: string;
   waterfallItemId?: string;
+  page?: number;
+  pageSize?: number;
 }

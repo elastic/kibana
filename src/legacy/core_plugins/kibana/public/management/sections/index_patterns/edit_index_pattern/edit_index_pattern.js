@@ -180,7 +180,10 @@ uiModules.get('apps/management')
     $scope.kbnUrl = Private(KbnUrlProvider);
     $scope.indexPattern = $route.current.locals.indexPattern;
     $scope.indexPatternListProvider = indexPatternListProvider;
-    $scope.indexPattern.tags = indexPatternListProvider.getIndexPatternTags($scope.indexPattern);
+    $scope.indexPattern.tags = indexPatternListProvider.getIndexPatternTags(
+      $scope.indexPattern,
+      $scope.indexPattern.id === config.get('defaultIndex')
+    );
     $scope.getFieldInfo = indexPatternListProvider.getFieldInfo;
     docTitle.change($scope.indexPattern.title);
 

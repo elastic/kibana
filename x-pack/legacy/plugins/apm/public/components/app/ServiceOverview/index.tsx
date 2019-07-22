@@ -30,7 +30,7 @@ export function ServiceOverview() {
     urlParams: { start, end },
     uiFilters
   } = useUrlParams();
-  const { data = initalData } = useFetcher(() => {
+  const { data = initalData, status } = useFetcher(() => {
     if (start && end) {
       return loadServiceList({ start, end, uiFilters });
     }
@@ -75,7 +75,10 @@ export function ServiceOverview() {
       <ServiceList
         items={data.items}
         noItemsMessage={
-          <NoServicesMessage historicalDataFound={data.hasHistoricalData} />
+          <NoServicesMessage
+            historicalDataFound={data.hasHistoricalData}
+            isLoading={status === 'loading'}
+          />
         }
       />
     </EuiPanel>

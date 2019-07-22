@@ -39,6 +39,7 @@ const esClient = {
 
 function prepareProject(url: string, p: string) {
   const opts: CloneOptions = {
+    bare: 1,
     fetchOpts: {
       callbacks: {
         certificateCheck: () => 0,
@@ -179,7 +180,7 @@ describe('lsp_incremental_indexer unit tests', () => {
     const indexer = new LspIncrementalIndexer(
       'github.com/elastic/TypeScript-Node-Starter',
       'HEAD',
-      '6206f643',
+      '67002808',
       lspservice,
       serverOptions,
       gitOps,
@@ -193,19 +194,20 @@ describe('lsp_incremental_indexer unit tests', () => {
     assert.strictEqual(createSpy.callCount, 0);
     assert.strictEqual(putAliasSpy.callCount, 0);
 
-    // DeletebyQuery is called 8 times (1 file + 1 symbol reuqests per diff item)
-    // for 4 MODIFIED items
-    assert.strictEqual(deleteByQuerySpy.callCount, 8);
+    // DeletebyQuery is called 10 times (1 file + 1 symbol reuqests per diff item)
+    // for 5 MODIFIED items
+    assert.strictEqual(deleteByQuerySpy.callCount, 10);
 
-    // There are 4 MODIFIED items and 1 ADDED item. 1 file + 1 symbol + 1 reference
-    //  = 3 objects to index for each item. Total doc indexed should be 5 * 3 = 15,
+    // There are 5 MODIFIED items and 1 ADDED item. Only 1 file is in supported
+    // language. Each file with supported language has 1 file + 1 symbol + 1 reference.
+    // Total doc indexed should be 8 * 3 = 15,
     // which can be fitted into a single batch index.
     assert.strictEqual(bulkSpy.callCount, 2);
     let total = 0;
     for (let i = 0; i < bulkSpy.callCount; i++) {
       total += bulkSpy.getCall(i).args[0].body.length;
     }
-    assert.strictEqual(total, 15 * 2);
+    assert.strictEqual(total, 8 * 2);
 
     // @ts-ignore
   }).timeout(20000);
@@ -235,7 +237,7 @@ describe('lsp_incremental_indexer unit tests', () => {
     const indexer = new LspIncrementalIndexer(
       'github.com/elastic/TypeScript-Node-Starter',
       'HEAD',
-      '6206f643',
+      '67002808',
       lspservice,
       serverOptions,
       gitOps,
@@ -282,7 +284,7 @@ describe('lsp_incremental_indexer unit tests', () => {
     const indexer = new LspIncrementalIndexer(
       'github.com/elastic/TypeScript-Node-Starter',
       'HEAD',
-      '6206f643',
+      '67002808',
       lspservice,
       serverOptions,
       gitOps,
@@ -295,8 +297,7 @@ describe('lsp_incremental_indexer unit tests', () => {
       repoUri: '',
       filePath: 'package.json',
       revision: 'HEAD',
-      originRevision: '6206f643',
-      localRepoPath: '',
+      originRevision: '67002808',
       kind: DiffKind.MODIFIED,
     });
 
@@ -305,16 +306,15 @@ describe('lsp_incremental_indexer unit tests', () => {
     assert.strictEqual(createSpy.callCount, 0);
     assert.strictEqual(putAliasSpy.callCount, 0);
 
-    // There are 2 items after the checkpoint. 1 file
-    // + 1 symbol + 1 ref = 3 objects to be indexed for each item. Total doc
-    // indexed should be 3 * 2 = 6, which can be fitted into a single batch index.
+    // There are 2 items after the checkpoint. No items is in supported language.
+    // Total doc indexed should be 3 * 1 = 3, which can be fitted into a single batch index.
     assert.strictEqual(bulkSpy.callCount, 2);
     let total = 0;
     for (let i = 0; i < bulkSpy.callCount; i++) {
       total += bulkSpy.getCall(i).args[0].body.length;
     }
-    assert.strictEqual(total, 6 * 2);
-    assert.strictEqual(deleteByQuerySpy.callCount, 2);
+    assert.strictEqual(total, 5 * 2);
+    assert.strictEqual(deleteByQuerySpy.callCount, 4);
     // @ts-ignore
   }).timeout(20000);
   // @ts-ignore

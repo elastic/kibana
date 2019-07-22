@@ -62,7 +62,7 @@ export const insideAABB = ({ x, y, a, b }) => (transformMatrix, aa, bb) => {
  *
  */
 
-const planeTuple = transformMatrix => {
+const planeTuple = (transformMatrix, x, y) => {
   // for unknown perf gain, this could be cached per shape
   const centerPoint = normalize(mvMultiply(transformMatrix, ORIGIN));
   const rightPoint = normalize(mvMultiply(transformMatrix, RIGHT));
@@ -81,12 +81,12 @@ const planeTuple = transformMatrix => {
   const z0 = centerPoint[2] + rightSlope * A0 + upSlope * invY1 * (centerPoint[1] + A0 * y0);
   const zx = A1 * (rightSlope + upSlope * y0 * invY1);
   const zy = -upSlope * invY1 + A2 * (rightSlope + upSlope * y0 * invY1);
-  const planeVector = [zx, zy, z0];
+  const planeVector = y1 === 0 ? [x, y, centerPoint[2], 1] : [zx, zy, z0];
   return { inverseProjection, planeVector };
 };
 
 const rectangleAtPoint = ({ transformMatrix, a, b }, x, y) => {
-  const { inverseProjection, planeVector } = planeTuple(transformMatrix);
+  const { inverseProjection, planeVector } = planeTuple(transformMatrix, x, y);
 
   // Determine z (depth) by composing the x, y vector out of local unit x and unit y vectors; by knowing the
   // scalar multipliers for the unit x and unit y vectors, we can determine z from their respective 'slope' (gradient)

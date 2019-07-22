@@ -9,13 +9,7 @@ import gql from 'graphql-tag';
 export const eventsSchema = gql`
   scalar EsValue
 
-  type KpiItem {
-    value: String
-    count: Float!
-  }
-
   type EventsData {
-    kpiEventType: [KpiItem!]
     edges: [EcsEdges!]!
     totalCount: Float!
     pageInfo: PageInfo!

@@ -1,0 +1,19 @@
+[[release-highlights-7.3.0]]
+== 7.3.0 release highlights
+++++
+<titleabbrev>7.3.0</titleabbrev>
+++++
+
+Each release of {kib} brings new features and product improvements. 
+Here are the highlights of the feature and user experience changes in 7.3.0.
+
+Refer to the {kib} <<breaking-changes-7.3, breaking changes>> and <<release-notes-7.3.0, 
+release notes>> for a list of bug fixes and other changes.
+
+coming[7.3.0]
+
+//NOTE: The notable-highlights tagged regions are re-used in the
+//Installation and Upgrade Guide
+
+// tag::notable-highlights[]
+// end::notable-highlights[]

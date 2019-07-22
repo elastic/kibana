@@ -70,7 +70,7 @@ function getProviderOptions(server: Legacy.Server) {
     basePath: config.get<string>('server.basePath'),
     tokens: new Tokens({ client, log }),
 
-    ...config.get('xpack.security.public'),
+    ...config.get<any>('xpack.security.public'),
   };
 }
 

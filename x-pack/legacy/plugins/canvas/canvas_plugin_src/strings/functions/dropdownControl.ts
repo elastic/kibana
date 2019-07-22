@@ -7,25 +7,25 @@
 import { i18n } from '@kbn/i18n';
 import { dropdownControl } from '../../functions/common/dropdownControl';
 import { FunctionHelp } from '.';
-import { FunctionFactory } from '../../functions/types';
+import { FunctionFactory } from '../../../types';
 
 export const help: FunctionHelp<FunctionFactory<typeof dropdownControl>> = {
   help: i18n.translate('xpack.canvas.functions.dropdownControlHelpText', {
-    defaultMessage: 'Configure a drop down filter control element',
+    defaultMessage: 'Configures a drop-down filter control element.',
   }),
   args: {
     filterColumn: i18n.translate(
       'xpack.canvas.functions.dropdownControl.args.filterColumnHelpText',
       {
-        defaultMessage: 'The column or field to attach the filter to',
+        defaultMessage: 'The column or field that you want to filter.',
       }
     ),
     valueColumn: i18n.translate('xpack.canvas.functions.dropdownControl.args.valueColumnHelpText', {
       defaultMessage:
-        'The datatable column from which to extract the unique values for the drop down',
+        'The column or field from which to extract the unique values for the drop-down control.',
     }),
     filterGroup: i18n.translate('xpack.canvas.functions.dropdownControl.args.filterGroupHelpText', {
-      defaultMessage: 'Group name for the filter',
+      defaultMessage: 'The group name for the filter.',
     }),
   },
 };

@@ -19,6 +19,7 @@ import {
   SymbolWithMembers,
 } from '../actions';
 import { languageServerInitializing } from '../actions/language_server';
+import { routePathChange, repoChange, revisionChange, filePathChange } from '../actions/route';
 
 export interface SymbolState {
   symbols: { [key: string]: SymbolInformation[] };
@@ -38,6 +39,17 @@ const initialState: SymbolState = {
   languageServerInitializing: false,
 };
 
+const clearState = (state: SymbolState) =>
+  produce<SymbolState>(state, draft => {
+    draft.symbols = initialState.symbols;
+    draft.loading = initialState.loading;
+    draft.structureTree = initialState.structureTree;
+    draft.closedPaths = initialState.closedPaths;
+    draft.languageServerInitializing = initialState.languageServerInitializing;
+    draft.error = undefined;
+    draft.lastRequestPath = undefined;
+  });
+
 type SymbolPayload = string & SymbolsPayload & Error;
 
 export const symbol = handleActions<SymbolState, SymbolPayload>(
@@ -51,9 +63,7 @@ export const symbol = handleActions<SymbolState, SymbolPayload>(
       produce<SymbolState>(state, draft => {
         draft.loading = false;
         const { path, data, structureTree } = action.payload!;
-        // @ts-ignore
         draft.structureTree[path] = structureTree;
-        // @ts-ignore
         draft.symbols = {
           ...state.symbols,
           [path]: data,
@@ -73,7 +83,6 @@ export const symbol = handleActions<SymbolState, SymbolPayload>(
       produce<SymbolState>(state, draft => {
         const path = action.payload!;
         if (!state.closedPaths.includes(path)) {
-          // @ts-ignore
           draft.closedPaths.push(path);
         }
       }),
@@ -88,6 +97,10 @@ export const symbol = handleActions<SymbolState, SymbolPayload>(
       produce<SymbolState>(state, draft => {
         draft.languageServerInitializing = true;
       }),
+    [String(routePathChange)]: clearState,
+    [String(repoChange)]: clearState,
+    [String(revisionChange)]: clearState,
+    [String(filePathChange)]: clearState,
   },
   initialState
 );

@@ -31,6 +31,7 @@ const packageInfo = {
   buildNum: 1,
   buildSha: '',
   version: '7.0.0-alpha1',
+  dist: false,
 };
 
 afterEach(() => {

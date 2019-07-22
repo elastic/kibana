@@ -40,7 +40,6 @@ export const languageServer = handleActions<LanguageServerState, LanguageServerP
       action: Action<LanguageServer[]>
     ) =>
       produce<LanguageServerState>(state, draft => {
-        // @ts-ignore
         draft.languageServers = action.payload!;
         draft.loading = false;
       }),
@@ -59,7 +58,6 @@ export const languageServer = handleActions<LanguageServerState, LanguageServerP
     ) =>
       produce<LanguageServerState>(state, draft => {
         draft.installServerLoading[action.payload!] = false;
-        // @ts-ignore
         draft.languageServers.find(ls => ls.name === action.payload)!.status =
           LanguageServerStatus.READY;
       }),

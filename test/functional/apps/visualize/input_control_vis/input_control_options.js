@@ -171,8 +171,8 @@ export default function ({ getService, getPageObjects }) {
 
         // Expect control to be disabled because no terms could be gathered with time filter applied
         const input = await find.byCssSelector('[data-test-subj="inputControl0"] input');
-        const isDisabled = await input.getProperty('disabled');
-        expect(isDisabled).to.equal(true);
+        const isDisabled = await input.getAttribute('disabled');
+        expect(isDisabled).to.equal('true');
       });
 
       it('should re-create control when global time filter is updated', async () => {

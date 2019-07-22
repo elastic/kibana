@@ -10,7 +10,7 @@ const isString = (val: any): boolean => typeof val === 'string';
 
 export function pivotObjectArray<
   RowType extends { [key: string]: any },
-  ReturnColumns extends string = keyof RowType
+  ReturnColumns extends string = Extract<keyof RowType, string>
 >(
   rows: RowType[],
   columns?: string[]

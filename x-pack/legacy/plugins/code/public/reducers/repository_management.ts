@@ -68,7 +68,6 @@ export const repositoryManagement = handleActions<
     [String(fetchReposSuccess)]: (state, action: Action<Repository[]>) =>
       produce<RepositoryManagementState>(state, draft => {
         draft.loading = false;
-        // @ts-ignore
         draft.repositories = action.payload || [];
       }),
     [String(fetchReposFailed)]: (state, action: Action<Error>) => {
@@ -83,7 +82,6 @@ export const repositoryManagement = handleActions<
     },
     [String(deleteRepoFinished)]: (state, action: Action<string>) =>
       produce<RepositoryManagementState>(state, draft => {
-        // @ts-ignore
         draft.repositories = state.repositories.filter(repo => repo.uri !== action.payload);
       }),
     [String(importRepo)]: state =>
@@ -96,7 +94,6 @@ export const repositoryManagement = handleActions<
         draft.showToast = true;
         draft.toastType = ToastType.success;
         draft.toastMessage = `${action.payload!.name} has been successfully submitted!`;
-        // @ts-ignore
         draft.repositories = [...state.repositories, action.payload!];
       }),
     [String(importRepoFailed)]: (state, action: Action<any>) =>
@@ -121,12 +118,10 @@ export const repositoryManagement = handleActions<
       }),
     [String(fetchRepoConfigSuccess)]: (state, action: Action<RepoConfigs>) =>
       produce<RepositoryManagementState>(state, draft => {
-        // @ts-ignore
         draft.repoConfigs = action.payload;
       }),
     [String(loadConfigsSuccess)]: (state, action: Action<RepoLangserverConfigs>) =>
       produce<RepositoryManagementState>(state, draft => {
-        // @ts-ignore
         draft.repoLangseverConfigs = action.payload!;
       }),
   },

@@ -1,0 +1,11 @@
+include::versions.asciidoc[]
+
+= Uptime monitoring guide
+
+include::{asciidoc-dir}/../../shared/attributes.asciidoc[]
+
+include::overview.asciidoc[]
+
+include::install.asciidoc[]
+
+include::security.asciidoc[]

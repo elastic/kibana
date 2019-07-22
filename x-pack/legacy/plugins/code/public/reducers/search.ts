@@ -74,7 +74,6 @@ export const search = handleActions<SearchState, SearchPayload>(
     [String(changeSearchScope)]: (state: SearchState, action: Action<SearchScope>) =>
       produce<SearchState>(state, draft => {
         if (Object.values(SearchScope).includes(action.payload)) {
-          // @ts-ignore
           draft.scope = action.payload!;
         } else {
           draft.scope = SearchScope.DEFAULT;
@@ -99,7 +98,8 @@ export const search = handleActions<SearchState, SearchPayload>(
             draft.repositories = new Set();
           }
           draft.isLoading = true;
-          draft.error = undefined;
+          delete draft.error;
+          delete draft.documentSearchResults;
         }
       }),
     [String(documentSearchSuccess)]: (state: SearchState, action: Action<DocumentSearchResult>) =>
@@ -171,6 +171,8 @@ export const search = handleActions<SearchState, SearchPayload>(
         if (action.payload) {
           draft.query = action.payload.query;
           draft.isLoading = true;
+          delete draft.error;
+          delete draft.repositorySearchResults;
         }
       }),
     [String(repositorySearchSuccess)]: (
@@ -193,7 +195,6 @@ export const search = handleActions<SearchState, SearchPayload>(
     },
     [String(saveSearchOptions)]: (state: SearchState, action: Action<SearchOptions>) =>
       produce<SearchState>(state, draft => {
-        // @ts-ignore
         draft.searchOptions = action.payload!;
       }),
     [String(searchReposForScope)]: (state: SearchState, action: Action<RepositorySearchPayload>) =>
@@ -205,7 +206,6 @@ export const search = handleActions<SearchState, SearchPayload>(
       action: Action<RepositorySearchResult>
     ) =>
       produce<SearchState>(state, draft => {
-        // @ts-ignore
         draft.scopeSearchResults = action.payload!;
         draft.isScopeSearchLoading = false;
       }),

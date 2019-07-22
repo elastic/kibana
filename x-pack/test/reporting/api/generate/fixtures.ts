@@ -173,3 +173,8 @@ export const CSV_RESULT_HUGE = `date,year,name,value,"years_ago"
 "1980-01-01T00:00:00.000Z",1980,Feverly,2249,39
 "1980-01-01T00:00:00.000Z",1980,Fecky,2071,39
 `;
+
+export const CSV_RESULT_NANOS = `date,message,"_id"
+"2015-01-01T12:10:30.123456789Z","Hello 2",
+"2015-01-01T12:10:30","Hello 1",
+`;

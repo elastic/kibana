@@ -13,6 +13,7 @@ import {
   CSV_RESULT_SCRIPTED_RESORTED,
   CSV_RESULT_TIMEBASED,
   CSV_RESULT_TIMELESS,
+  CSV_RESULT_NANOS,
 } from './fixtures';
 
 interface GenerateOpts {
@@ -120,6 +121,27 @@ export default function({ getService }: { getService: any }) {
         expect(resText).to.eql(CSV_RESULT_SCRIPTED);
 
         await esArchiver.unload('reporting/scripted');
+      });
+
+      it('Formatted date_nanos data', async () => {
+        await esArchiver.load('reporting/nanos');
+
+        const {
+          status: resStatus,
+          text: resText,
+          type: resType,
+        } = (await generateAPI.getCsvFromSavedSearch(
+          'search:e4035040-a295-11e9-a900-ef10e0ac769e',
+          {
+            state: {},
+          }
+        )) as supertest.Response;
+
+        expect(resStatus).to.eql(200);
+        expect(resType).to.eql('text/csv');
+        expect(resText).to.eql(CSV_RESULT_NANOS);
+
+        await esArchiver.unload('reporting/nanos');
       });
     });
 

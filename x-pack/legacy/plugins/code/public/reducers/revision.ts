@@ -16,6 +16,7 @@ import {
   fetchTreeCommitsSuccess,
   TreeCommitPayload,
 } from '../actions';
+import { routePathChange, repoChange } from '../actions/route';
 
 export interface RevisionState {
   branches: ReferenceInfo[];
@@ -33,13 +34,21 @@ const initialState: RevisionState = {
   commitsFullyLoaded: {},
 };
 
+const clearState = (state: RevisionState) =>
+  produce<RevisionState>(state, draft => {
+    draft.branches = initialState.branches;
+    draft.tags = initialState.tags;
+    draft.treeCommits = initialState.treeCommits;
+    draft.loadingCommits = initialState.loadingCommits;
+    draft.commitsFullyLoaded = initialState.commitsFullyLoaded;
+  });
+
 type RevisionPayload = ReferenceInfo[] & CommitInfo[] & TreeCommitPayload;
 
 export const revision = handleActions<RevisionState, RevisionPayload>(
   {
     [String(fetchRepoCommitsSuccess)]: (state, action: Action<CommitInfo[]>) =>
       produce<RevisionState>(state, draft => {
-        // @ts-ignore
         draft.treeCommits[''] = action.payload!;
         draft.loadingCommits = false;
       }),
@@ -50,9 +59,7 @@ export const revision = handleActions<RevisionState, RevisionPayload>(
     [String(fetchRepoBranchesSuccess)]: (state, action: Action<ReferenceInfo[]>) =>
       produce<RevisionState>(state, draft => {
         const references = action.payload!;
-        // @ts-ignore
         draft.tags = references.filter(r => r.type === ReferenceType.TAG);
-        // @ts-ignore
         draft.branches = references.filter(r => r.type !== ReferenceType.TAG);
       }),
     [String(fetchTreeCommits)]: state =>
@@ -69,14 +76,14 @@ export const revision = handleActions<RevisionState, RevisionPayload>(
         if (commits.length === 0) {
           draft.commitsFullyLoaded[path] = true;
         } else if (append) {
-          // @ts-ignore
           draft.treeCommits[path] = draft.treeCommits[path].concat(commits);
         } else {
-          // @ts-ignore
           draft.treeCommits[path] = commits;
         }
         draft.loadingCommits = false;
       }),
+    [String(routePathChange)]: clearState,
+    [String(repoChange)]: clearState,
   },
   initialState
 );

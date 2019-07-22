@@ -7,6 +7,7 @@ import { FileTree, RepositoryUri } from '../../model';
 import { RootState } from '../reducers';
 
 export const getTree = (state: RootState) => state.fileTree.tree;
+export const getTreeRevision = (state: RootState) => state.fileTree.revision;
 
 export const lastRequestPathSelector: (state: RootState) => string = (state: RootState) =>
   state.symbol.lastRequestPath || '';
@@ -37,7 +38,7 @@ export const repoUriSelector = (state: RootState) => {
 
 export const routeSelector = (state: RootState) => state.route.match;
 
-export const statusSelector = (state: RootState, repoUri: RepositoryUri) => {
+export const repoStatusSelector = (state: RootState, repoUri: RepositoryUri) => {
   return state.status.status[repoUri];
 };
 
@@ -98,3 +99,7 @@ export const currentRepoSelector = (state: RootState) => state.repository.reposi
 export const repoScopeSelector = (state: RootState) => state.search.searchOptions.repoScope;
 
 export const urlQueryStringSelector = (state: RootState) => state.route.match.location.search;
+
+export const previousMatchSelector = (state: RootState) => state.route.previousMatch;
+
+export const statusSelector = (state: RootState) => state.status.repoFileStatus;

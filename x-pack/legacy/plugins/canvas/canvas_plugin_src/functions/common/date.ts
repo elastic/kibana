@@ -20,10 +20,10 @@ export function date(): ExpressionFunction<'date', null, Arguments, number> {
   return {
     name: 'date',
     type: 'number',
+    help,
     context: {
       types: ['null'],
     },
-    help,
     args: {
       value: {
         aliases: ['_'],

@@ -18,7 +18,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { KibanaDatatable, Range } from '../../common/types';
+import { KibanaDatatable, Range } from '../../types';
 import { ExpressionFunction } from '../../types';
 
 const name = 'range';

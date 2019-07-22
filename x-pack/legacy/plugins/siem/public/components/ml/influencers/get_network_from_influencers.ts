@@ -4,22 +4,29 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { DestinationOrSource } from '../types';
+import { DestinationOrSource, isDestinationOrSource } from '../types';
+import { getEntries } from '../get_entries';
 
 export const getNetworkFromInfluencers = (
-  influencers: Array<Record<string, string>>
+  influencers: Array<Record<string, string>>,
+  ip?: string
 ): { ip: string; type: DestinationOrSource } | null => {
   const recordFound = influencers.find(influencer => {
-    const influencerName = Object.keys(influencer)[0];
-    if (influencerName === 'destination.ip' || influencerName === 'source.ip') {
-      return true;
+    const [influencerName, influencerValue] = getEntries(influencer);
+    if (isDestinationOrSource(influencerName)) {
+      if (ip == null) {
+        return true;
+      } else {
+        return influencerValue === ip;
+      }
     } else {
       return false;
     }
   });
+
   if (recordFound != null) {
-    const influencerName = Object.keys(recordFound)[0];
-    if (influencerName === 'destination.ip' || influencerName === 'source.ip') {
+    const [influencerName] = getEntries(recordFound);
+    if (isDestinationOrSource(influencerName)) {
       return { ip: Object.values(recordFound)[0], type: influencerName };
     } else {
       // default to destination.ip

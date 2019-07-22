@@ -23,7 +23,7 @@ import { AggParamEditorProps } from 'ui/vis/editors/default';
 import { EuiFormRow, EuiFieldNumber } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-interface SizeParamEditorProps extends AggParamEditorProps<number | ''> {
+export interface SizeParamEditorProps extends AggParamEditorProps<number | ''> {
   iconTip?: React.ReactNode;
   disabled?: boolean;
 }
@@ -36,7 +36,6 @@ function SizeParamEditor({
   showValidation,
   setValidity,
   setTouched,
-  wrappedWithInlineComp,
 }: SizeParamEditorProps) {
   const label = (
     <>
@@ -55,7 +54,7 @@ function SizeParamEditor({
       label={label}
       fullWidth={true}
       isInvalid={showValidation ? !isValid : false}
-      className={wrappedWithInlineComp ? undefined : 'visEditorSidebar__aggParamFormRow'}
+      compressed
     >
       <EuiFieldNumber
         value={isUndefined(value) ? '' : value}
