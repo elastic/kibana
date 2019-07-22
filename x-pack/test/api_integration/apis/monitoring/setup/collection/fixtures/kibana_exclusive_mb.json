@@ -1,7 +1,4 @@
 {
-  "_meta": {
-    "secondsAgo": 30
-  },
   "kibana": {
     "totalUniqueInstanceCount": 1,
     "totalUniqueFullyMigratedCount": 1,
@@ -9,9 +6,10 @@
     "detected": null,
     "byUuid": {
       "5b2de169-2785-441b-ae8c-186a1936b17d": {
-        "isFullyMigrated": true,
+        "lastTimestamp": 1554821537079,
         "isPrimary": true,
-        "lastTimestamp": 1554821537079
+        "isNetNewUser": false,
+        "isFullyMigrated": true
       }
     }
   },
@@ -22,8 +20,22 @@
     "detected": null,
     "byUuid": {
       "8eba4902-df80-43b0-b6c2-ed8ca290984e": {
+        "lastTimestamp": 1554821536716,
         "isInternalCollector": true,
-        "lastTimestamp": 1554821536716
+        "isNetNewUser": false
+      }
+    }
+  },
+  "logstash": {
+    "totalUniqueInstanceCount": 1,
+    "totalUniqueFullyMigratedCount": 0,
+    "totalUniquePartiallyMigratedCount": 0,
+    "detected": null,
+    "byUuid": {
+      "4134a00e-89e4-4896-a3d4-c3a9aa03a594": {
+        "lastTimestamp": 1554821539784,
+        "isInternalCollector": true,
+        "isNetNewUser": false
       }
     }
   },
@@ -34,18 +46,6 @@
     "detected": null,
     "byUuid": {}
   },
-  "logstash": {
-    "totalUniqueInstanceCount": 1,
-    "totalUniqueFullyMigratedCount": 0,
-    "totalUniquePartiallyMigratedCount": 0,
-    "detected": null,
-    "byUuid": {
-      "4134a00e-89e4-4896-a3d4-c3a9aa03a594": {
-        "isInternalCollector": true,
-        "lastTimestamp": 1554821539784
-      }
-    }
-  },
   "elasticsearch": {
     "totalUniqueInstanceCount": 1,
     "totalUniqueFullyMigratedCount": 0,
@@ -54,8 +54,13 @@
     "byUuid": {
       "agI8JhXhShasvuDgq0VxRg": {
         "isPartiallyMigrated": true,
-        "lastInternallyCollectedTimestamp": 1554821531545
+        "lastInternallyCollectedTimestamp": 1554821531545,
+        "isNetNewUser": false
       }
     }
+  },
+  "_meta": {
+    "secondsAgo": 30,
+    "clusterUuid": null
   }
 }
