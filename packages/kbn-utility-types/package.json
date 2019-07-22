@@ -4,6 +4,7 @@
   "private": true,
   "license": "Apache-2.0",
   "main": "target",
+  "types": "target/index.d.ts",
   "scripts": {
     "build": "tsc",
     "kbn:watch": "tsc --watch",
