@@ -60,8 +60,8 @@ export function ComboBoxProvider({ getService, getPageObjects }: FtrProviderCont
         return;
       }
 
-      await this._filterOptionsList(comboBoxElement, value);
       comboBoxElement.scrollIntoViewIfNecessary();
+      await this._filterOptionsList(comboBoxElement, value);
       await this.openOptionsList(comboBoxElement);
 
       if (value !== undefined) {
