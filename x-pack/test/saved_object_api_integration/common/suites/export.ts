@@ -17,7 +17,7 @@ interface ExportTest {
 
 interface ExportTests {
   spaceAwareType: ExportTest;
-  exportSpace: ExportTest;
+  spaceType: ExportTest;
   noTypeOrObjects: ExportTest;
 }
 
@@ -127,7 +127,7 @@ export function exportTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
       });
 
       describe('space type', () => {
-        it(`should return ${tests.exportSpace.statusCode} with ${tests.exportSpace.description}`, async () => {
+        it(`should return ${tests.spaceType.statusCode} with ${tests.spaceType.description}`, async () => {
           await supertest
             .post(`${getUrlPrefix(spaceId)}/api/saved_objects/_export`)
             .send({
@@ -139,8 +139,8 @@ export function exportTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
               ],
             })
             .auth(user.username, user.password)
-            .expect(tests.exportSpace.statusCode)
-            .then(tests.exportSpace.response);
+            .expect(tests.spaceType.statusCode)
+            .then(tests.spaceType.response);
         });
       });
 

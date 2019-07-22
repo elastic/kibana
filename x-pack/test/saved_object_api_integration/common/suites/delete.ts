@@ -18,7 +18,7 @@ interface DeleteTest {
 interface DeleteTests {
   spaceAware: DeleteTest;
   notSpaceAware: DeleteTest;
-  deleteSpace: DeleteTest;
+  spaceType: DeleteTest;
   invalidId: DeleteTest;
 }
 
@@ -112,12 +112,12 @@ export function deleteTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
           .expect(tests.notSpaceAware.statusCode)
           .then(tests.notSpaceAware.response));
 
-      it(`should return ${tests.deleteSpace.statusCode} when deleting a space doc`, async () =>
+      it(`should return ${tests.spaceType.statusCode} when deleting a space doc`, async () =>
         await supertest
           .delete(`${getUrlPrefix(spaceId)}/api/saved_objects/space/space_1`)
           .auth(user.username, user.password)
-          .expect(tests.deleteSpace.statusCode)
-          .then(tests.deleteSpace.response));
+          .expect(tests.spaceType.statusCode)
+          .then(tests.spaceType.response));
 
       it(`should return ${tests.invalidId.statusCode} when deleting an unknown doc`, async () =>
         await supertest

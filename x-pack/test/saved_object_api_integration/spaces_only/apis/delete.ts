@@ -33,7 +33,7 @@ export default function({ getService }: TestInvoker) {
           statusCode: 200,
           response: expectEmpty,
         },
-        deleteSpace: {
+        spaceType: {
           statusCode: 404,
           response: expectGenericNotFound,
         },
@@ -55,7 +55,7 @@ export default function({ getService }: TestInvoker) {
           statusCode: 200,
           response: expectEmpty,
         },
-        deleteSpace: {
+        spaceType: {
           statusCode: 404,
           response: expectGenericNotFound,
         },
@@ -78,7 +78,7 @@ export default function({ getService }: TestInvoker) {
           statusCode: 200,
           response: expectEmpty,
         },
-        deleteSpace: {
+        spaceType: {
           statusCode: 404,
           response: expectGenericNotFound,
         },

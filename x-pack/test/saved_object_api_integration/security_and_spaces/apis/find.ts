@@ -70,7 +70,7 @@ export default function({ getService }: TestInvoker) {
             statusCode: 403,
             response: createExpectRbacForbidden('globaltype'),
           },
-          findSpace: {
+          spaceType: {
             description: 'forbidden find space message',
             statusCode: 403,
             response: createExpectRbacForbidden('space'),
@@ -112,7 +112,7 @@ export default function({ getService }: TestInvoker) {
             statusCode: 200,
             response: expectNotSpaceAwareResults,
           },
-          findSpace: {
+          spaceType: {
             description: 'empty result',
             statusCode: 200,
             response: createExpectEmpty(1, 20, 0),
@@ -154,7 +154,7 @@ export default function({ getService }: TestInvoker) {
             statusCode: 403,
             response: createExpectRbacForbidden('globaltype'),
           },
-          findSpace: {
+          spaceType: {
             description: 'forbidden find space message',
             statusCode: 403,
             response: createExpectRbacForbidden('space'),
@@ -196,7 +196,7 @@ export default function({ getService }: TestInvoker) {
             statusCode: 200,
             response: expectNotSpaceAwareResults,
           },
-          findSpace: {
+          spaceType: {
             description: 'forbidden find space message',
             statusCode: 403,
             response: createExpectRbacForbidden('space'),
@@ -238,7 +238,7 @@ export default function({ getService }: TestInvoker) {
             statusCode: 200,
             response: expectNotSpaceAwareResults,
           },
-          findSpace: {
+          spaceType: {
             description: 'forbidden find space message',
             statusCode: 403,
             response: createExpectRbacForbidden('space'),
@@ -280,7 +280,7 @@ export default function({ getService }: TestInvoker) {
             statusCode: 200,
             response: expectNotSpaceAwareResults,
           },
-          findSpace: {
+          spaceType: {
             description: 'forbidden find space message',
             statusCode: 403,
             response: createExpectRbacForbidden('space'),
@@ -322,7 +322,7 @@ export default function({ getService }: TestInvoker) {
             statusCode: 200,
             response: expectNotSpaceAwareResults,
           },
-          findSpace: {
+          spaceType: {
             description: 'forbidden find space message',
             statusCode: 403,
             response: createExpectRbacForbidden('space'),
@@ -364,7 +364,7 @@ export default function({ getService }: TestInvoker) {
             statusCode: 200,
             response: expectNotSpaceAwareResults,
           },
-          findSpace: {
+          spaceType: {
             description: 'forbidden find space message',
             statusCode: 403,
             response: createExpectRbacForbidden('space'),
@@ -406,7 +406,7 @@ export default function({ getService }: TestInvoker) {
             statusCode: 200,
             response: expectNotSpaceAwareResults,
           },
-          findSpace: {
+          spaceType: {
             description: 'forbidden find space message',
             statusCode: 403,
             response: createExpectRbacForbidden('space'),
@@ -448,7 +448,7 @@ export default function({ getService }: TestInvoker) {
             statusCode: 403,
             response: createExpectRbacForbidden('globaltype'),
           },
-          findSpace: {
+          spaceType: {
             description: 'forbidden find space message',
             statusCode: 403,
             response: createExpectRbacForbidden('space'),

@@ -23,7 +23,7 @@ interface CreateCustomTest extends CreateTest {
 interface CreateTests {
   spaceAware: CreateTest;
   notSpaceAware: CreateTest;
-  createSpace: CreateTest;
+  spaceType: CreateTest;
   custom?: CreateCustomTest;
 }
 
@@ -168,7 +168,7 @@ export function createTestSuiteFactory(es: any, esArchiver: any, supertest: Supe
           .then(tests.notSpaceAware.response);
       });
 
-      it(`should return ${tests.createSpace.statusCode} for the 'space' type`, async () => {
+      it(`should return ${tests.spaceType.statusCode} for the 'space' type`, async () => {
         await supertest
           .post(`${getUrlPrefix(spaceId)}/api/saved_objects/space`)
           .auth(user.username, user.password)
@@ -177,8 +177,8 @@ export function createTestSuiteFactory(es: any, esArchiver: any, supertest: Supe
               name: `Can't be created via the Saved Objects API`,
             },
           })
-          .expect(tests.createSpace.statusCode)
-          .then(tests.createSpace.response);
+          .expect(tests.spaceType.statusCode)
+          .then(tests.spaceType.response);
       });
 
       if (tests.custom) {

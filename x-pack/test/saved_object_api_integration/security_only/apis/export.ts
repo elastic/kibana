@@ -30,7 +30,7 @@ export default function({ getService }: TestInvoker) {
           statusCode: 403,
           response: createExpectRbacForbidden('visualization'),
         },
-        exportSpace: {
+        spaceType: {
           description: 'exporting space not allowed',
           statusCode: 400,
           response: expectInvalidTypeSpecified,
@@ -51,7 +51,7 @@ export default function({ getService }: TestInvoker) {
           statusCode: 200,
           response: createExpectVisualizationResults(),
         },
-        exportSpace: {
+        spaceType: {
           description: 'exporting space not allowed',
           statusCode: 400,
           response: expectInvalidTypeSpecified,
@@ -72,7 +72,7 @@ export default function({ getService }: TestInvoker) {
           statusCode: 403,
           response: createExpectRbacForbidden('visualization'),
         },
-        exportSpace: {
+        spaceType: {
           description: 'exporting space not allowed',
           statusCode: 400,
           response: expectInvalidTypeSpecified,
@@ -93,7 +93,7 @@ export default function({ getService }: TestInvoker) {
           statusCode: 200,
           response: createExpectVisualizationResults(),
         },
-        exportSpace: {
+        spaceType: {
           description: 'exporting space not allowed',
           statusCode: 400,
           response: expectInvalidTypeSpecified,
@@ -114,7 +114,7 @@ export default function({ getService }: TestInvoker) {
           statusCode: 200,
           response: createExpectVisualizationResults(),
         },
-        exportSpace: {
+        spaceType: {
           description: 'exporting space not allowed',
           statusCode: 400,
           response: expectInvalidTypeSpecified,
@@ -135,7 +135,7 @@ export default function({ getService }: TestInvoker) {
           statusCode: 200,
           response: createExpectVisualizationResults(),
         },
-        exportSpace: {
+        spaceType: {
           description: 'exporting space not allowed',
           statusCode: 400,
           response: expectInvalidTypeSpecified,
@@ -156,7 +156,7 @@ export default function({ getService }: TestInvoker) {
           statusCode: 200,
           response: createExpectVisualizationResults(),
         },
-        exportSpace: {
+        spaceType: {
           description: 'exporting space not allowed',
           statusCode: 400,
           response: expectInvalidTypeSpecified,
@@ -177,7 +177,7 @@ export default function({ getService }: TestInvoker) {
           statusCode: 403,
           response: createExpectRbacForbidden('visualization'),
         },
-        exportSpace: {
+        spaceType: {
           description: 'exporting space not allowed',
           statusCode: 400,
           response: expectInvalidTypeSpecified,
@@ -198,7 +198,7 @@ export default function({ getService }: TestInvoker) {
           statusCode: 403,
           response: createExpectRbacForbidden('visualization'),
         },
-        exportSpace: {
+        spaceType: {
           description: 'exporting space not allowed',
           statusCode: 400,
           response: expectInvalidTypeSpecified,
@@ -219,7 +219,7 @@ export default function({ getService }: TestInvoker) {
           statusCode: 403,
           response: createExpectRbacForbidden('visualization'),
         },
-        exportSpace: {
+        spaceType: {
           description: 'exporting space not allowed',
           statusCode: 400,
           response: expectInvalidTypeSpecified,
@@ -240,7 +240,7 @@ export default function({ getService }: TestInvoker) {
           statusCode: 403,
           response: createExpectRbacForbidden('visualization'),
         },
-        exportSpace: {
+        spaceType: {
           description: 'exporting space not allowed',
           statusCode: 400,
           response: expectInvalidTypeSpecified,
