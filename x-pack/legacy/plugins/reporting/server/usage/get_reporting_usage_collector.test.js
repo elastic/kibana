@@ -58,7 +58,7 @@ function getServerMock(customization) {
 const getResponseMock = (customization = {}) => customization;
 
 describe('license checks', () => {
-  describe('with a basic license', async () => {
+  describe('with a basic license', () => {
     let usageStats;
     beforeAll(async () => {
       const serverWithBasicLicenseMock = getServerMock();
@@ -83,7 +83,7 @@ describe('license checks', () => {
     });
   });
 
-  describe('with no license', async () => {
+  describe('with no license', () => {
     let usageStats;
     beforeAll(async () => {
       const serverWithNoLicenseMock = getServerMock();
@@ -108,7 +108,7 @@ describe('license checks', () => {
     });
   });
 
-  describe('with platinum license', async () => {
+  describe('with platinum license', () => {
     let usageStats;
     beforeAll(async () => {
       const serverWithPlatinumLicenseMock = getServerMock();
@@ -135,7 +135,7 @@ describe('license checks', () => {
     });
   });
 
-  describe('with no usage data', async () => {
+  describe('with no usage data', () => {
     let usageStats;
     beforeAll(async () => {
       const serverWithBasicLicenseMock = getServerMock();

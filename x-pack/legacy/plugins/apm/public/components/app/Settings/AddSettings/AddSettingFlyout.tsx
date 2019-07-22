@@ -59,8 +59,10 @@ export function AddSettingsFlyout({
   const [serviceName, setServiceName] = useState<string | undefined>(
     selectedConfig ? selectedConfig.service.name : undefined
   );
-  const [sampleRate, setSampleRate] = useState<number>(
-    selectedConfig ? parseFloat(selectedConfig.settings.sample_rate) : NaN
+  const [sampleRate, setSampleRate] = useState<string>(
+    selectedConfig
+      ? selectedConfig.settings.transaction_sample_rate.toString()
+      : ''
   );
   const { data: serviceNames = [], status: serviceNamesStatus } = useFetcher<
     string[]
@@ -82,8 +84,10 @@ export function AddSettingsFlyout({
     env =>
       env.name === environment && (Boolean(selectedConfig) || env.available)
   );
-  const isSampleRateValid = sampleRate >= 0 && sampleRate <= 1;
-
+  const sampleRateFloat = parseFloat(sampleRate);
+  const hasCorrectDecimals = Number.isInteger(sampleRateFloat * 1000);
+  const isSampleRateValid =
+    sampleRateFloat >= 0 && sampleRateFloat <= 1 && hasCorrectDecimals;
   return (
     <EuiPortal>
       <EuiFlyout size="s" onClose={onClose} ownFocus={true}>
@@ -182,7 +186,7 @@ export function AddSettingsFlyout({
                   await saveConfig({
                     environment,
                     serviceName,
-                    sampleRate,
+                    sampleRate: sampleRateFloat,
                     configurationId: selectedConfig
                       ? selectedConfig.id
                       : undefined
@@ -264,7 +268,7 @@ async function saveConfig({
 
     const configuration = {
       settings: {
-        sample_rate: sampleRate.toString(10)
+        transaction_sample_rate: sampleRate
       },
       service: {
         name: serviceName,

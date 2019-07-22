@@ -7,6 +7,7 @@
 
 // @ts-ignore
 import { createEsTestCluster } from '@kbn/test';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { Root } from 'src/core/server/root';
 // @ts-ignore
 import * as kbnTestServer from '../../../../../../../../src/test_utils/kbn_server';

@@ -18,7 +18,6 @@
  */
 
 import '../ui_capabilities.test.mocks';
-import '../../../../../core/public/ui_new_platform.test.mocks';
 
 import React from 'react';
 
@@ -47,6 +46,8 @@ import { I18nProvider } from '@kbn/i18n/react';
 import { CONTEXT_MENU_TRIGGER } from '../triggers';
 import { attachAction } from '../triggers/attach_action';
 import { EmbeddableFactory } from '../embeddables';
+
+jest.mock('ui/new_platform');
 
 const editModeAction = new EditModeAction();
 actionRegistry.set(editModeAction.id, editModeAction);

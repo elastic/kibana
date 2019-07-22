@@ -20,7 +20,7 @@
 import { functionWrapper } from '../../interpreter/test_helpers';
 import { regionmap } from './region_map_fn';
 
-jest.mock('ui/new_platform', () => require('../../../ui/public/new_platform/index.test.mocks').mockNewPlatformBackdoor());
+jest.mock('ui/new_platform');
 
 describe('interpreter/functions#regionmap', () => {
   const fn = functionWrapper(regionmap);

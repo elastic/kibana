@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+// @ts-ignore no module definition
 import * as Chrome from 'puppeteer-core';
 import { parse as parseUrl } from 'url';
 import {
@@ -56,7 +57,12 @@ export class HeadlessChromiumDriver {
           },
         });
       } else {
-        this.logger.debug(`No custom headers for ${interceptedRequest.url()}`);
+        let interceptedUrl = interceptedRequest.url();
+        if (interceptedUrl.startsWith('data:')) {
+          // `data:image/xyz;base64` can be very long URLs
+          interceptedUrl = interceptedUrl.substring(0, 100) + '[truncated]';
+        }
+        this.logger.debug(`No custom headers for ${interceptedUrl}`);
         interceptedRequest.continue();
       }
     });
