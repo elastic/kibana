@@ -206,6 +206,18 @@ export class WebElementWrapper {
   }
 
   /**
+   * Focuses this element.
+   *
+   * @return {Promise<void>}
+   */
+  public async focus() {
+    await this.retryCall(async function focus(wrapper) {
+      await wrapper.scrollIntoViewIfNecessary();
+      await wrapper.driver.executeScript(`arguments[0].focus()`, wrapper._webElement);
+    });
+  }
+
+  /**
    * Clear the value of this element. This command has no effect if the underlying DOM element
    * is neither a text INPUT element nor a TEXTAREA element.
    * https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/webdriver_exports_WebElement.html#clear

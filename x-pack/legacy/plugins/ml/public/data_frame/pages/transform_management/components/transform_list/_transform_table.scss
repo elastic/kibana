@@ -14,3 +14,10 @@
     animation: none !important;
   }
 }
+.mlTransformProgressBar {
+  margin-bottom: $euiSizeM;
+}
+
+.mlTaskStateBadge, .mlTaskModeBadge {
+  max-width: 100px;
+}
