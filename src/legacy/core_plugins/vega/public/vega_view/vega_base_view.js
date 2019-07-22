@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import chrome from 'ui/chrome';
 import $ from 'jquery';
 import moment from 'moment';
 import dateMath from '@elastic/datemath';
@@ -27,6 +28,8 @@ import { VISUALIZATION_COLORS } from '@elastic/eui';
 import { i18n }  from '@kbn/i18n';
 import { TooltipHandler } from './vega_tooltip';
 import { buildQueryFilter } from '@kbn/es-query';
+
+import { getEnableExternalUrls } from '../helpers/vega_config_provider';
 
 vega.scheme('elastic', VISUALIZATION_COLORS);
 
@@ -61,9 +64,6 @@ export function bypassExternalUrlCheck(url) {
 
 export class VegaBaseView {
   constructor(opts) {
-    // $rootScope is a temp workaround, see usage below
-    this._$rootScope = opts.$rootScope;
-    this._vegaConfig = opts.vegaConfig;
     this._$parentEl = $(opts.parentEl);
     this._parser = opts.vegaParser;
     this._serviceSettings = opts.serviceSettings;
@@ -75,6 +75,7 @@ export class VegaBaseView {
     this._$messages = null;
     this._destroyHandlers = [];
     this._initialized = false;
+    this._enableExternalUrls = getEnableExternalUrls();
   }
 
   async init() {
@@ -145,7 +146,7 @@ export class VegaBaseView {
         // If uri has a bypass token, the uri was encoded by bypassExternalUrlCheck() above.
         // because user can only supply pure JSON data structure.
         uri = uri.url;
-      } else if (!this._vegaConfig.enableExternalUrls) {
+      } else if (!this._enableExternalUrls) {
         throw new Error(i18n.translate('vega.vegaParser.baseView.externalUrlsAreNotEnabledErrorMessage', {
           defaultMessage: 'External URLs are not enabled. Add   {enableExternalUrls}   to {kibanaConfigFileName}',
           values: {
@@ -271,13 +272,14 @@ export class VegaBaseView {
    * @param {string} [index] as defined in Kibana, or default if missing
    */
   async removeFilterHandler(query, index) {
+    const $injector = await chrome.dangerouslyGetActiveInjector();
     const indexId = await this._findIndex(index);
     const filter = buildQueryFilter(query, indexId);
 
     // This is a workaround for the https://github.com/elastic/kibana/issues/18863
     // Once fixed, replace with a direct call (no await is needed because its not async)
-    //    this._queryfilter.removeFilter(filter);
-    this._$rootScope.$evalAsync(() => {
+    //  this._queryfilter.removeFilter(filter);
+    $injector.get('$rootScope').$evalAsync(() => {
       try {
         this._queryfilter.removeFilter(filter);
       } catch (err) {

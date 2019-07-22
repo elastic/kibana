@@ -38,6 +38,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { SavedObjectAttributes } from 'src/core/server/saved_objects';
 import { EmbeddableFactoryNotFoundError } from '../../../../embeddables/embeddable_factory_not_found_error';
 import { IContainer } from '../../../../containers';
