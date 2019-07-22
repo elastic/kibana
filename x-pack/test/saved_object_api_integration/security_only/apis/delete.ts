@@ -21,6 +21,8 @@ export default function({ getService }: TestInvoker) {
       expectRbacSpaceAwareForbidden,
       expectRbacNotSpaceAwareForbidden,
       expectRbacInvalidIdForbidden,
+      expectRbacSpaceTypeForbidden,
+      expectGenericNotFound,
     } = deleteTestSuiteFactory(esArchiver, supertest);
 
     deleteTest(`user with no access`, {
@@ -33,6 +35,10 @@ export default function({ getService }: TestInvoker) {
         notSpaceAware: {
           statusCode: 403,
           response: expectRbacNotSpaceAwareForbidden,
+        },
+        deleteSpace: {
+          statusCode: 403,
+          response: expectRbacSpaceTypeForbidden,
         },
         invalidId: {
           statusCode: 403,
@@ -52,6 +58,10 @@ export default function({ getService }: TestInvoker) {
           statusCode: 200,
           response: expectEmpty,
         },
+        deleteSpace: {
+          statusCode: 404,
+          response: expectGenericNotFound,
+        },
         invalidId: {
           statusCode: 404,
           response: createExpectUnknownDocNotFound(),
@@ -69,6 +79,10 @@ export default function({ getService }: TestInvoker) {
         notSpaceAware: {
           statusCode: 403,
           response: expectRbacNotSpaceAwareForbidden,
+        },
+        deleteSpace: {
+          statusCode: 403,
+          response: expectRbacSpaceTypeForbidden,
         },
         invalidId: {
           statusCode: 403,
@@ -88,6 +102,10 @@ export default function({ getService }: TestInvoker) {
           statusCode: 200,
           response: expectEmpty,
         },
+        deleteSpace: {
+          statusCode: 403,
+          response: expectRbacSpaceTypeForbidden,
+        },
         invalidId: {
           statusCode: 404,
           response: createExpectUnknownDocNotFound(),
@@ -105,6 +123,10 @@ export default function({ getService }: TestInvoker) {
         notSpaceAware: {
           statusCode: 403,
           response: expectRbacNotSpaceAwareForbidden,
+        },
+        deleteSpace: {
+          statusCode: 403,
+          response: expectRbacSpaceTypeForbidden,
         },
         invalidId: {
           statusCode: 403,
@@ -124,6 +146,10 @@ export default function({ getService }: TestInvoker) {
           statusCode: 200,
           response: expectEmpty,
         },
+        deleteSpace: {
+          statusCode: 403,
+          response: expectRbacSpaceTypeForbidden,
+        },
         invalidId: {
           statusCode: 404,
           response: createExpectUnknownDocNotFound(),
@@ -141,6 +167,10 @@ export default function({ getService }: TestInvoker) {
         notSpaceAware: {
           statusCode: 403,
           response: expectRbacNotSpaceAwareForbidden,
+        },
+        deleteSpace: {
+          statusCode: 403,
+          response: expectRbacSpaceTypeForbidden,
         },
         invalidId: {
           statusCode: 403,
@@ -160,6 +190,10 @@ export default function({ getService }: TestInvoker) {
           statusCode: 403,
           response: expectRbacNotSpaceAwareForbidden,
         },
+        deleteSpace: {
+          statusCode: 403,
+          response: expectRbacSpaceTypeForbidden,
+        },
         invalidId: {
           statusCode: 403,
           response: expectRbacInvalidIdForbidden,
@@ -177,6 +211,10 @@ export default function({ getService }: TestInvoker) {
         notSpaceAware: {
           statusCode: 403,
           response: expectRbacNotSpaceAwareForbidden,
+        },
+        deleteSpace: {
+          statusCode: 403,
+          response: expectRbacSpaceTypeForbidden,
         },
         invalidId: {
           statusCode: 403,
@@ -196,6 +234,10 @@ export default function({ getService }: TestInvoker) {
           statusCode: 403,
           response: expectRbacNotSpaceAwareForbidden,
         },
+        deleteSpace: {
+          statusCode: 403,
+          response: expectRbacSpaceTypeForbidden,
+        },
         invalidId: {
           statusCode: 403,
           response: expectRbacInvalidIdForbidden,
@@ -213,6 +255,10 @@ export default function({ getService }: TestInvoker) {
         notSpaceAware: {
           statusCode: 403,
           response: expectRbacNotSpaceAwareForbidden,
+        },
+        deleteSpace: {
+          statusCode: 403,
+          response: expectRbacSpaceTypeForbidden,
         },
         invalidId: {
           statusCode: 403,

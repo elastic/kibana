@@ -22,6 +22,8 @@ export default function({ getService }: TestInvoker) {
       expectRbacSpaceAwareForbidden,
       expectRbacNotSpaceAwareForbidden,
       expectRbacInvalidIdForbidden,
+      expectGenericNotFound,
+      expectRbacSpaceTypeForbidden,
     } = deleteTestSuiteFactory(esArchiver, supertest);
 
     [
@@ -68,6 +70,10 @@ export default function({ getService }: TestInvoker) {
             statusCode: 403,
             response: expectRbacNotSpaceAwareForbidden,
           },
+          deleteSpace: {
+            statusCode: 403,
+            response: expectRbacSpaceTypeForbidden,
+          },
           invalidId: {
             statusCode: 403,
             response: expectRbacInvalidIdForbidden,
@@ -86,6 +92,10 @@ export default function({ getService }: TestInvoker) {
           notSpaceAware: {
             statusCode: 200,
             response: expectEmpty,
+          },
+          deleteSpace: {
+            statusCode: 404,
+            response: expectGenericNotFound,
           },
           invalidId: {
             statusCode: 404,
@@ -106,6 +116,10 @@ export default function({ getService }: TestInvoker) {
             statusCode: 403,
             response: expectRbacNotSpaceAwareForbidden,
           },
+          deleteSpace: {
+            statusCode: 403,
+            response: expectRbacSpaceTypeForbidden,
+          },
           invalidId: {
             statusCode: 403,
             response: expectRbacInvalidIdForbidden,
@@ -124,6 +138,10 @@ export default function({ getService }: TestInvoker) {
           notSpaceAware: {
             statusCode: 200,
             response: expectEmpty,
+          },
+          deleteSpace: {
+            statusCode: 403,
+            response: expectRbacSpaceTypeForbidden,
           },
           invalidId: {
             statusCode: 404,
@@ -144,6 +162,10 @@ export default function({ getService }: TestInvoker) {
             statusCode: 403,
             response: expectRbacNotSpaceAwareForbidden,
           },
+          deleteSpace: {
+            statusCode: 403,
+            response: expectRbacSpaceTypeForbidden,
+          },
           invalidId: {
             statusCode: 403,
             response: expectRbacInvalidIdForbidden,
@@ -162,6 +184,10 @@ export default function({ getService }: TestInvoker) {
           notSpaceAware: {
             statusCode: 200,
             response: expectEmpty,
+          },
+          deleteSpace: {
+            statusCode: 403,
+            response: expectRbacSpaceTypeForbidden,
           },
           invalidId: {
             statusCode: 404,
@@ -182,6 +208,10 @@ export default function({ getService }: TestInvoker) {
             statusCode: 403,
             response: expectRbacNotSpaceAwareForbidden,
           },
+          deleteSpace: {
+            statusCode: 403,
+            response: expectRbacSpaceTypeForbidden,
+          },
           invalidId: {
             statusCode: 403,
             response: expectRbacInvalidIdForbidden,
@@ -200,6 +230,10 @@ export default function({ getService }: TestInvoker) {
           notSpaceAware: {
             statusCode: 200,
             response: expectEmpty,
+          },
+          deleteSpace: {
+            statusCode: 403,
+            response: expectRbacSpaceTypeForbidden,
           },
           invalidId: {
             statusCode: 404,
@@ -220,6 +254,10 @@ export default function({ getService }: TestInvoker) {
             statusCode: 403,
             response: expectRbacNotSpaceAwareForbidden,
           },
+          deleteSpace: {
+            statusCode: 403,
+            response: expectRbacSpaceTypeForbidden,
+          },
           invalidId: {
             statusCode: 403,
             response: expectRbacInvalidIdForbidden,
@@ -238,6 +276,10 @@ export default function({ getService }: TestInvoker) {
           notSpaceAware: {
             statusCode: 403,
             response: expectRbacNotSpaceAwareForbidden,
+          },
+          deleteSpace: {
+            statusCode: 403,
+            response: expectRbacSpaceTypeForbidden,
           },
           invalidId: {
             statusCode: 403,

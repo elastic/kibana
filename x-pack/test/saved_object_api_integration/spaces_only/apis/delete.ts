@@ -19,6 +19,7 @@ export default function({ getService }: TestInvoker) {
       createExpectUnknownDocNotFound,
       deleteTest,
       expectEmpty,
+      expectGenericNotFound,
     } = deleteTestSuiteFactory(esArchiver, supertest);
 
     deleteTest(`in the default space`, {
@@ -31,6 +32,10 @@ export default function({ getService }: TestInvoker) {
         notSpaceAware: {
           statusCode: 200,
           response: expectEmpty,
+        },
+        deleteSpace: {
+          statusCode: 404,
+          response: expectGenericNotFound,
         },
         invalidId: {
           statusCode: 404,
@@ -50,6 +55,10 @@ export default function({ getService }: TestInvoker) {
           statusCode: 200,
           response: expectEmpty,
         },
+        deleteSpace: {
+          statusCode: 404,
+          response: expectGenericNotFound,
+        },
         invalidId: {
           statusCode: 404,
           response: createExpectUnknownDocNotFound(SPACES.SPACE_1.spaceId),
@@ -68,6 +77,10 @@ export default function({ getService }: TestInvoker) {
         notSpaceAware: {
           statusCode: 200,
           response: expectEmpty,
+        },
+        deleteSpace: {
+          statusCode: 404,
+          response: expectGenericNotFound,
         },
         invalidId: {
           statusCode: 404,
