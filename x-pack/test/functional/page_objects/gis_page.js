@@ -471,8 +471,8 @@ export function GisPageProvider({ getService, getPageObjects }) {
       }
       log.debug(`File selected`);
 
-      // Wait for all the saves to happen
       await PageObjects.header.waitUntilLoadingHasFinished();
+      await this.waitForLayersToLoad();
     }
 
     // Returns first layer by default

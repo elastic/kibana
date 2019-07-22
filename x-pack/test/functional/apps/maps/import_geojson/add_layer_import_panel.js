@@ -13,8 +13,6 @@ export default function ({ getPageObjects }) {
   const IMPORT_FILE_PREVIEW_NAME = 'Import File';
   const FILE_LOAD_DIR = 'test_upload_files';
   const DEFAULT_LOAD_FILE_NAME = 'point.json';
-  const GEO_POINT = 'geo_point';
-  const GEO_SHAPE = 'geo_shape';
 
   describe('Import layer panel', () => {
     before(async () => {
@@ -30,7 +28,13 @@ export default function ({ getPageObjects }) {
       await PageObjects.maps.uploadJsonFileForIndexing(
         path.join(__dirname, FILE_LOAD_DIR, DEFAULT_LOAD_FILE_NAME)
       );
-      await PageObjects.maps.waitForLayersToLoad();
+    });
+
+    afterEach(async () => {
+      await PageObjects.maps.cancelLayerAdd();
+    });
+
+    it('should add GeoJSON file to map', async () => {
       const layerLoadedInToc = await PageObjects.maps
         .doesLayerExist(IMPORT_FILE_PREVIEW_NAME);
       expect(layerLoadedInToc).to.be(true);
@@ -84,55 +88,6 @@ export default function ({ getPageObjects }) {
         // Check that no file is loaded in layer preview
         const layerLoadedInToc = await PageObjects.maps.doesLayerExist(IMPORT_FILE_PREVIEW_NAME);
         expect(layerLoadedInToc).to.be(false);
-      });
-
-    it('should supply the correct index type(s) (geo_point or geo_shape) for the source',
-      async () => {
-        // Confirm point selected for default file, confirm shape also an option
-        let isGeoPointAvab = await PageObjects.maps.indexTypeOptionExists(GEO_POINT);
-        expect(isGeoPointAvab).to.be(true);
-        let isGeoShapeAvab = await PageObjects.maps.indexTypeOptionExists(GEO_SHAPE);
-        expect(isGeoShapeAvab).to.be(true);
-
-        // Upload shape file
-        const polygonJsonFile = 'polygon.json';
-        await PageObjects.maps.uploadJsonFileForIndexing(
-          path.join(__dirname, FILE_LOAD_DIR, polygonJsonFile)
-        );
-        await PageObjects.maps.waitForLayersToLoad();
-
-        // Confirm shape only option
-        isGeoPointAvab = await PageObjects.maps.indexTypeOptionExists(GEO_POINT);
-        expect(isGeoPointAvab).to.be(false);
-        isGeoShapeAvab = await PageObjects.maps.indexTypeOptionExists(GEO_SHAPE);
-        expect(isGeoShapeAvab).to.be(true);
-
-        // Multis
-        // Upload multipoint file
-        const multiPointJsonFile = 'multi_point.json';
-        await PageObjects.maps.uploadJsonFileForIndexing(
-          path.join(__dirname, FILE_LOAD_DIR, multiPointJsonFile)
-        );
-        await PageObjects.maps.waitForLayersToLoad();
-
-        // Confirm point selected for default file, confirm shape also an option
-        isGeoPointAvab = await PageObjects.maps.indexTypeOptionExists(GEO_POINT);
-        expect(isGeoPointAvab).to.be(true);
-        isGeoShapeAvab = await PageObjects.maps.indexTypeOptionExists(GEO_SHAPE);
-        expect(isGeoShapeAvab).to.be(true);
-
-        // Upload multipolygon file
-        const multiPolygonJsonFile = 'multi_polygon.json';
-        await PageObjects.maps.uploadJsonFileForIndexing(
-          path.join(__dirname, FILE_LOAD_DIR, multiPolygonJsonFile)
-        );
-        await PageObjects.maps.waitForLayersToLoad();
-
-        // Confirm point selected for default file, confirm shape also an option
-        isGeoPointAvab = await PageObjects.maps.indexTypeOptionExists(GEO_POINT);
-        expect(isGeoPointAvab).to.be(false);
-        isGeoShapeAvab = await PageObjects.maps.indexTypeOptionExists(GEO_SHAPE);
-        expect(isGeoShapeAvab).to.be(true);
       });
 
     it('should prevent import button from activating unless valid index name provided',

@@ -37,9 +37,8 @@ export function getGeoIndexTypesForFeatures(featureTypes) {
     return [ES_GEO_FIELD_TYPE.GEO_SHAPE];
   } else if (isPoint && featureTypes.length === 1) {
     return [ ES_GEO_FIELD_TYPE.GEO_POINT, ES_GEO_FIELD_TYPE.GEO_SHAPE ];
-  } else {
-    return [ ES_GEO_FIELD_TYPE.GEO_SHAPE ];
   }
+  return [ ES_GEO_FIELD_TYPE.GEO_SHAPE ];
 }
 
 // Reduces & flattens geojson to coordinates and properties (if any)
