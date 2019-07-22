@@ -39,4 +39,3 @@ export interface RollupJob {
   json: { [key: string]: any };
   histogramInterval: number;
 }
-

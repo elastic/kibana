@@ -7,7 +7,6 @@
 import { connect } from 'react-redux';
 
 import { isUpdating } from '../../../store/selectors';
-import first from 'lodash/array/first';
 
 import {
   startJobs,
@@ -39,9 +38,9 @@ const mapDispatchToProps = (dispatch, { jobs }) => {
     cloneJob: (jobConfig) => {
       dispatch(cloneJob(jobConfig));
     },
-    updateJob: (jobConfig) => {
-      dispatch(updateJob(jobConfig));
-    },
+    // updateJob: (jobConfig) => {
+    //   dispatch(updateJob(jobConfig));
+    // },
   };
 };
 
