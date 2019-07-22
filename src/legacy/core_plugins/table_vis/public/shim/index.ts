@@ -17,12 +17,4 @@
  * under the License.
  */
 
-import { UiSettingsClientContract } from 'kibana/public';
-import { LegacyDependenciesPluginSetup } from './legacy_dependencies_plugin';
-
-/** @internal */
-export interface TableVisualizationDependencies extends LegacyDependenciesPluginSetup {
-  uiSettings: UiSettingsClientContract;
-}
-
 export * from './legacy_dependencies_plugin';

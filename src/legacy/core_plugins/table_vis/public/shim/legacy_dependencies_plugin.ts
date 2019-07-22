@@ -31,7 +31,8 @@ export interface LegacyDependenciesPluginSetup {
 }
 
 /** @internal */
-export class LegacyDependenciesPlugin implements Plugin<any, any> {
+export class LegacyDependenciesPlugin
+  implements Plugin<Promise<LegacyDependenciesPluginSetup>, void> {
   public async setup() {
     initTableVisLegacyModule();
 

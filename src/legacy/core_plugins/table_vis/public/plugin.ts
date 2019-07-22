@@ -17,17 +17,38 @@
  * under the License.
  */
 
-import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '../../../../core/public';
-import { TablePluginSetupDependencies } from './setup';
-import { TableVisualizationDependencies } from './shim';
+import {
+  PluginInitializerContext,
+  CoreSetup,
+  CoreStart,
+  Plugin,
+  UiSettingsClientContract,
+} from '../../../../core/public';
+import { LegacyDependenciesPluginSetup } from './shim';
 
 // @ts-ignore
 import { createTableVisFn } from './table_vis_fn';
 // @ts-ignore
 import { createTableVisTypeDefinition } from './table_vis_type';
+import { DataSetup } from '../../data/public';
+import { VisualizationsSetup } from '../../visualizations/public';
+import { LegacyDependenciesPlugin } from './shim';
+
+/** @private */
+export interface TableVisualizationDependencies extends LegacyDependenciesPluginSetup {
+  uiSettings: UiSettingsClientContract;
+}
 
 /** @internal */
-export class TableVisPlugin implements Plugin<any, any> {
+export interface TablePluginSetupDependencies {
+  // TODO: Remove `any` as functionsRegistry will be added to the DataSetup.
+  data: DataSetup | any;
+  visualizations: VisualizationsSetup;
+  __LEGACY: LegacyDependenciesPlugin;
+}
+
+/** @internal */
+export class TableVisPlugin implements Plugin<Promise<void>, void> {
   initializerContext: PluginInitializerContext;
 
   constructor(initializerContext: PluginInitializerContext) {
