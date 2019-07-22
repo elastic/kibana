@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { useContext } from 'react';
 
 import { Chrome } from 'ui/chrome';
 import { Timefilter } from 'ui/timefilter';
@@ -24,6 +24,10 @@ export const NavigationMenuContext = React.createContext<NavigationMenuContextVa
   timefilter: {} as Timefilter,
   timeHistory: {} as TimeHistory,
 });
+
+export const useNavigationMenuContext = () => {
+  return useContext(NavigationMenuContext);
+};
 
 // testing mocks
 export const chromeMock = {

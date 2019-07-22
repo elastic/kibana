@@ -6,7 +6,7 @@
 
 
 
-import React, { Fragment, useContext } from 'react';
+import React, { Fragment } from 'react';
 import { PropTypes } from 'prop-types';
 
 import {
@@ -22,15 +22,14 @@ import {
 
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { NavigationMenuContext } from '../util/context_utils';
-
+import { useNavigationMenuContext } from '../util/context_utils';
 import { NavigationMenu } from '../components/navigation_menu/navigation_menu';
 
 export function Settings({
   canGetFilters,
   canGetCalendars
 }) {
-  const basePath = useContext(NavigationMenuContext).chrome.getBasePath();
+  const basePath = useNavigationMenuContext().chrome.getBasePath();
 
   return (
     <Fragment>

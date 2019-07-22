@@ -4,6 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+jest.mock('../../../components/navigation_menu/navigation_menu', () => ({
+  NavigationMenu: () => <div id="mockNavigationMenu" />
+}));
+
 // Define the required mocks used for loading, saving and validating the filter list.
 jest.mock('./utils', () => ({
   isValidFilterListId: () => true,
@@ -19,7 +23,7 @@ const mockTestFilter = {
   items: ['google.com', 'google.co.uk', 'elastic.co', 'youtube.com'],
   used_by: {
     detectors: ['high info content'],
-    jobs: ['dns_exfiltration']
+    jobs: ['dns_exfiltration'],
   },
 };
 jest.mock('../../../services/ml_api_service', () => ({
@@ -27,47 +31,10 @@ jest.mock('../../../services/ml_api_service', () => ({
     filters: {
       filters: () => {
         return Promise.resolve(mockTestFilter);
-      }
-    }
-  }
+      },
+    },
+  },
 }));
-
-// The mocks for ui/chrome and ui/timefilter are copied from charts_utils.test.js
-// TODO: Refactor the involved tests to avoid this duplication
-jest.mock(
-  'ui/chrome',
-  () => ({
-    addBasePath: () => '/api/ml',
-    getBasePath: () => {
-      return '<basepath>';
-    },
-    getInjected: () => {},
-    getUiSettingsClient: () => {
-      return {
-        get: (key) => {
-          switch (key) {
-            case 'dateFormat':
-            case 'timepicker:timeDefaults':
-              return {};
-            case 'timepicker:refreshIntervalDefaults':
-              return { pause: false, value: 0 };
-            default:
-              throw new Error(`Unexpected config key: ${key}`);
-          }
-        },
-      };
-    },
-  }),
-  { virtual: true }
-);
-
-jest.mock(
-  'ui/persisted_log/recently_accessed',
-  () => ({
-    recentlyAccessed: {},
-  }),
-  { virtual: true }
-);
 
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 import React from 'react';
@@ -76,14 +43,11 @@ import { EditFilterList } from './edit_filter_list';
 
 const props = {
   canCreateFilter: true,
-  canDeleteFilter: true
+  canDeleteFilter: true,
 };
 
 function prepareEditTest() {
-
-  const wrapper = shallowWithIntl(
-    <EditFilterList.WrappedComponent {...props}/>
-  );
+  const wrapper = shallowWithIntl(<EditFilterList.WrappedComponent {...props} />);
 
   // Cannot find a way to generate the snapshot after the Promise in the mock ml.filters
   // has resolved.
@@ -97,11 +61,8 @@ function prepareEditTest() {
 }
 
 describe('EditFilterList', () => {
-
   test('renders the edit page for a new filter list and updates ID', () => {
-    const wrapper = shallowWithIntl(
-      <EditFilterList.WrappedComponent {...props}/>
-    );
+    const wrapper = shallowWithIntl(<EditFilterList.WrappedComponent {...props} />);
     expect(wrapper).toMatchSnapshot();
 
     const instance = wrapper.instance();
@@ -150,5 +111,4 @@ describe('EditFilterList', () => {
     wrapper.update();
     expect(wrapper).toMatchSnapshot();
   });
-
 });

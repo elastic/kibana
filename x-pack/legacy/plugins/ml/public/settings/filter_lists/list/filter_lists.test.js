@@ -4,51 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 import React from 'react';
 
 import { FilterLists } from './filter_lists';
 
-// The mocks for ui/chrome and ui/timefilter are copied from charts_utils.test.js
-// TODO: Refactor the involved tests to avoid this duplication
-jest.mock(
-  'ui/chrome',
-  () => ({
-    addBasePath: () => '/api/ml',
-    getBasePath: () => {
-      return '<basepath>';
-    },
-    getInjected: () => {},
-    getUiSettingsClient: () => {
-      return {
-        get: (key) => {
-          switch (key) {
-            case 'dateFormat':
-            case 'timepicker:timeDefaults':
-              return {};
-            case 'timepicker:refreshIntervalDefaults':
-              return { pause: false, value: 0 };
-            default:
-              throw new Error(`Unexpected config key: ${key}`);
-          }
-        },
-      };
-    },
-  }),
-  { virtual: true }
-);
-
-jest.mock(
-  'ui/persisted_log/recently_accessed',
-  () => ({
-    recentlyAccessed: {},
-  }),
-  { virtual: true }
-);
-
+jest.mock('../../../components/navigation_menu/navigation_menu', () => ({
+  NavigationMenu: () => <div id="mockNavigationMenu" />
+}));
 jest.mock('../../../privilege/check_privilege', () => ({
-  checkPermission: () => true
+  checkPermission: () => true,
 }));
 
 // Mock the call for loading the list of filters.
@@ -65,23 +30,19 @@ jest.mock('../../../services/ml_api_service', () => ({
     filters: {
       filtersStats: () => {
         return Promise.resolve([mockTestFilter]);
-      }
-    }
-  }
+      },
+    },
+  },
 }));
 
 const props = {
   canCreateFilter: true,
-  canDeleteFilter: true
+  canDeleteFilter: true,
 };
 
 describe('Filter Lists', () => {
-
   test('renders a list of filters', () => {
-
-    const wrapper = shallowWithIntl(
-      <FilterLists.WrappedComponent {...props}/>
-    );
+    const wrapper = shallowWithIntl(<FilterLists.WrappedComponent {...props} />);
 
     // Cannot find a way to generate the snapshot after the Promise in the mock ml.filters
     // has resolved.
@@ -91,5 +52,4 @@ describe('Filter Lists', () => {
     wrapper.update();
     expect(wrapper).toMatchSnapshot();
   });
-
 });
