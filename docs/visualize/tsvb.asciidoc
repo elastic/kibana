@@ -9,37 +9,13 @@ NOTE: In Elasticsearch version 7.3.0 and later, the time series data visualizer 
 
 TSVB comes with these types of visualizations:
 
-<<<<<<< HEAD
-<<<<<<< HEAD
 Time Series::
 A histogram visualization that supports area, line, bar, and steps along with 
-<<<<<<< HEAD
 multiple y-axis. Fully customize the colors, points, line thickness, and fill 
 opacity. Compare two time periods by using time shifting, and use annotations 
 that are loaded from a separate index based on a query.
 
 image:images/tsvb-timeseries.png["Time Series Visualization"]
-
-==== Metric
-
-A visualization that displays the latest number in a series. With the Metric 
-visualization, you can use a primary and secondary metric, and customize the 
-labels and backgrounds based on a set of rules.
-=======
-multiple y-axis.
->>>>>>> b5f4090636... Content reorg
-=======
-* *Time Series* — A histogram visualization that supports area, line, bar, and steps along with multiple y-axis.
-<<<<<<< HEAD
->>>>>>> 07e6958c2f... Added task content
-=======
-=======
-Time Series:: A histogram visualization that supports area, line, bar, and steps along with multiple y-axis.
-
-[role="screenshot"]
->>>>>>> b78a57073b... Final clean up
-image:images/tsvb-screenshot.png["Time series visualization"]
->>>>>>> 44691be781... Content conslidation
 
 Metric:: A metric that displays the latest number in a data series.
 
@@ -138,33 +114,12 @@ If you are using the Time Series visualization, add annotation data sources.
 
 Edit the source for the Markdown visualization. 
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-image:images/tsvb-markdown-tab.png["Markdown Tab"]
-=======
-. Select *Table*.
-
-<<<<<<< HEAD
-//TODO replace the following image with a new screenshot
-image:images/tsvb-table.png["Table Visualization"]
->>>>>>> b5f4090636... Content reorg
-=======
-image:images/tsvb-table.png["Table visualization"]
->>>>>>> 391d0d5f9a... Updated image
-=======
 . Select *Markdown*.
 
-<<<<<<< HEAD
 . In the *Markdown* field, enter enter your Markdown text, then press Enter.
->>>>>>> 44691be781... Content conslidation
-=======
+
 . In the editor, enter enter your Markdown text, then press Enter.
 
 . To insert the mustache template variable into the editor, click the variable name.
 +
-<<<<<<< HEAD
-The mustache syntax uses the Handlebar.js processor, which is an extended version of the Mustache template language.
->>>>>>> b78a57073b... Final clean up
-=======
 The http://mustache.github.io/mustache.5.html[mustache syntax] uses the Handlebar.js processor, which is an extended version of the Mustache template language.
->>>>>>> 80f7af6135... Comments from Gail
