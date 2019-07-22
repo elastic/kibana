@@ -111,6 +111,22 @@ const nestedTermResponse = {
   }, 'status': 200
 };
 
+const nestedTermResponseNoResults = {
+  'took': 10,
+  'timed_out': false,
+  '_shards': {
+    'total': 1, 'successful': 1, 'skipped': 0, 'failed': 0
+  }, 'hits': {
+    'total': 0, 'max_score': null, 'hits': []
+  }, 'aggregations': {
+    '1': {
+      'doc_count_error_upper_bound': 0,
+      'sum_other_doc_count': 0,
+      'buckets': []
+    }
+  }, 'status': 200
+};
+
 const singleOtherResponse = {
   'took': 3,
   'timed_out': false,
@@ -224,6 +240,12 @@ describe('Terms Agg Other bucket helper', () => {
       };
 
       expect(agg).to.eql(expectedResponse);
+    });
+
+    it('returns false when nested terms agg has no buckets', () => {
+      init(visConfigNestedTerm);
+      const agg = buildOtherBucketAgg(vis.aggs, vis.aggs[1], nestedTermResponseNoResults);
+      expect(agg).to.eql(false);
     });
   });
 
