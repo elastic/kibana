@@ -53,8 +53,7 @@ export interface RouteConfig<P extends ObjectType, Q extends ObjectType, B exten
   path: string;
 
   /**
-   * A function that will be called when setting up the route and that returns
-   * a schema that every request will be validated against.
+   * A schema created with `@kbn/config-schema` that every request will be validated against.
    *
    * To opt out of validating the request, specify `false`.
    */
