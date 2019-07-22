@@ -144,7 +144,7 @@ app.controller('timelion', function (
 
   $timeout(function () {
     if (config.get('timelion:showTutorial', true)) {
-      $scope.kbnTopNav.open('help');
+      $scope.toggleMenu('showHelp');
     }
   }, 0);
 
@@ -163,7 +163,7 @@ app.controller('timelion', function (
   function getTopNavMenu() {
 
     const newSheetAction = {
-      key: 'new',
+      id: 'new',
       label: i18n.translate('timelion.topNavMenu.newSheetButtonLabel', {
         defaultMessage: 'New',
       }),
@@ -175,19 +175,21 @@ app.controller('timelion', function (
     };
 
     const addSheetAction = {
-      key: 'add',
+      id: 'add',
       label: i18n.translate('timelion.topNavMenu.addChartButtonLabel', {
         defaultMessage: 'Add',
       }),
       description: i18n.translate('timelion.topNavMenu.addChartButtonAriaLabel', {
         defaultMessage: 'Add a chart',
       }),
-      run: function () { $scope.newCell(); },
+      run: function () {
+        $scope.$evalAsync(() => $scope.newCell());
+      },
       testId: 'timelionAddChartButton',
     };
 
     const saveSheetAction = {
-      key: 'save',
+      id: 'save',
       label: i18n.translate('timelion.topNavMenu.saveSheetButtonLabel', {
         defaultMessage: 'Save',
       }),
@@ -195,15 +197,13 @@ app.controller('timelion', function (
         defaultMessage: 'Save Sheet',
       }),
       run: () => {
-        const curState = $scope.menus.showSave;
-        $scope.closeMenus();
-        $scope.menus.showSave = !curState;
+        $scope.$evalAsync(() => $scope.toggleMenu('showSave'));
       },
       testId: 'timelionSaveButton',
     };
 
     const deleteSheetAction = {
-      key: 'delete',
+      id: 'delete',
       label: i18n.translate('timelion.topNavMenu.deleteSheetButtonLabel', {
         defaultMessage: 'Delete',
       }),
@@ -239,18 +239,21 @@ app.controller('timelion', function (
           }),
         };
 
-        confirmModal(
-          i18n.translate('timelion.topNavMenu.delete.modal.warningText', {
-            defaultMessage: `You can't recover deleted sheets.`,
-          }),
-          confirmModalOptions
-        );
+        $scope.$evalAsync(() => {
+          confirmModal(
+            i18n.translate('timelion.topNavMenu.delete.modal.warningText', {
+              defaultMessage: `You can't recover deleted sheets.`,
+            }),
+            confirmModalOptions
+          );
+        });
+
       },
       testId: 'timelionDeleteButton',
     };
 
     const openSheetAction = {
-      key: 'open',
+      id: 'open',
       label: i18n.translate('timelion.topNavMenu.openSheetButtonLabel', {
         defaultMessage: 'Open',
       }),
@@ -258,15 +261,13 @@ app.controller('timelion', function (
         defaultMessage: 'Open Sheet',
       }),
       run: () => {
-        const curState = $scope.menus.showLoad;
-        $scope.closeMenus();
-        $scope.menus.showLoad = !curState;
+        $scope.$evalAsync(() => $scope.toggleMenu('showLoad'));
       },
       testId: 'timelionOpenButton',
     };
 
     const optionsAction = {
-      key: 'options',
+      id: 'options',
       label: i18n.translate('timelion.topNavMenu.optionsButtonLabel', {
         defaultMessage: 'Options',
       }),
@@ -274,15 +275,13 @@ app.controller('timelion', function (
         defaultMessage: 'Options',
       }),
       run: () => {
-        const curState = $scope.menus.showOptions;
-        $scope.closeMenus();
-        $scope.menus.showOptions = !curState;
+        $scope.$evalAsync(() => $scope.toggleMenu('showOptions'));
       },
       testId: 'timelionOptionsButton',
     };
 
     const helpAction = {
-      key: 'help',
+      id: 'help',
       label: i18n.translate('timelion.topNavMenu.helpButtonLabel', {
         defaultMessage: 'Help',
       }),
@@ -290,9 +289,7 @@ app.controller('timelion', function (
         defaultMessage: 'Help',
       }),
       run: () => {
-        const curState = $scope.menus.showHelp;
-        $scope.closeMenus();
-        $scope.menus.showHelp = !curState;
+        $scope.$evalAsync(() => $scope.toggleMenu('showHelp'));
       },
       testId: 'timelionDocsButton',
     };
@@ -303,9 +300,30 @@ app.controller('timelion', function (
     return [newSheetAction, addSheetAction, openSheetAction, optionsAction, helpAction];
   }
 
+  let refresher;
+  const setRefreshData = function () {
+    if (refresher) $timeout.cancel(refresher);
+    const interval = timefilter.getRefreshInterval();
+    if (interval.value > 0 && !interval.pause) {
+      function startRefresh() {
+        refresher = $timeout(function () {
+          if (!$scope.running) $scope.search();
+          startRefresh();
+        }, interval.value);
+      }
+      startRefresh();
+    }
+  };
+
   const init = function () {
     $scope.running = false;
     $scope.search();
+    setRefreshData();
+
+    $scope.model = {
+      timeRange: timefilter.getTime(),
+      refreshInterval: timefilter.getRefreshInterval(),
+    };
 
     $scope.$listen($scope.state, 'fetch_with_changes', $scope.search);
     $scope.$listen(timefilter, 'fetch', $scope.search);
@@ -319,7 +337,7 @@ app.controller('timelion', function (
       dontShowHelp: function () {
         config.set('timelion:showTutorial', false);
         $scope.setPage(0);
-        $scope.kbnTopNav.close('help');
+        $scope.closeMenus();
       }
     };
 
@@ -330,6 +348,12 @@ app.controller('timelion', function (
       showOptions: false,
     };
 
+    $scope.toggleMenu = (menuName) => {
+      const curState = $scope.menus[menuName];
+      $scope.closeMenus();
+      $scope.menus[menuName] = !curState;
+    };
+
     $scope.closeMenus = () => {
       _.forOwn($scope.menus, function (value, key) {
         $scope.menus[key] = false;
@@ -337,20 +361,25 @@ app.controller('timelion', function (
     };
   };
 
-  let refresher;
-  $scope.$listen(timefilter, 'refreshIntervalUpdate', function () {
-    if (refresher) $timeout.cancel(refresher);
-    const interval = timefilter.getRefreshInterval();
-    if (interval.value > 0 && !interval.pause) {
-      function startRefresh() {
-        refresher = $timeout(function () {
-          if (!$scope.running) $scope.search();
-          startRefresh();
-        }, interval.value);
-      }
-      startRefresh();
-    }
-  });
+  $scope.onTimeUpdate = function ({ dateRange }) {
+    $scope.model.timeRange = {
+      ...dateRange
+    };
+    timefilter.setTime(dateRange);
+  };
+
+  $scope.onRefreshChange = function ({ isPaused, refreshInterval }) {
+    $scope.model.refreshInterval = {
+      pause: isPaused,
+      value: refreshInterval,
+    };
+    timefilter.setRefreshInterval({
+      pause: isPaused,
+      value: refreshInterval ? refreshInterval : $scope.refreshInterval.value
+    });
+
+    setRefreshData();
+  };
 
   $scope.$watch(function () { return savedSheet.lastSavedTitle; }, function (newTitle) {
     docTitle.change(savedSheet.id ? newTitle : undefined);

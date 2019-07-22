@@ -84,7 +84,7 @@ export class JsonImportProgress extends Component {
                     />
                   </h4>
                 </EuiTitle>
-                <EuiCodeBlock data-test-subj="indexRespCodeBlock" language="json" paddingSize="s" overflowHeight={200}>
+                <EuiCodeBlock data-test-subj="indexRespCodeBlock" paddingSize="s" overflowHeight={200}>
                   {indexDataJson}
                 </EuiCodeBlock>
                 <EuiSpacer size="m" />
@@ -100,7 +100,7 @@ export class JsonImportProgress extends Component {
                     />
                   </h4>
                 </EuiTitle>
-                <EuiCodeBlock data-test-subj="indexPatternRespCodeBlock" language="json" paddingSize="s" overflowHeight={200}>
+                <EuiCodeBlock data-test-subj="indexPatternRespCodeBlock" paddingSize="s" overflowHeight={200}>
                   {indexPatternJson}
                 </EuiCodeBlock>
                 <EuiSpacer size="m" />
