@@ -4,4 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { AggSelect, DropDownLabel, DropDownOption, DropDownProps, createLabel } from './agg_select';
+import { FC } from 'react';
+declare const ValidateJob: FC<{
+  getJobConfig: any;
+  getDuration: any;
+  mlJobService: any;
+  embedded?: boolean;
+  setIsValid?: (valid: boolean) => void;
+}>;

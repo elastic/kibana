@@ -68,7 +68,7 @@ export const JobDetailsStep: FC<Props> = ({
 
           <WizardNav
             previous={() => setCurrentStep(WIZARD_STEPS.PICK_FIELDS)}
-            next={() => setCurrentStep(WIZARD_STEPS.SUMMARY)}
+            next={() => setCurrentStep(WIZARD_STEPS.VALIDATION)}
             nextActive={nextActive}
           />
         </Fragment>

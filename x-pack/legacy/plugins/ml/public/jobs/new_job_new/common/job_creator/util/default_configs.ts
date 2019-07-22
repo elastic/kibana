@@ -6,7 +6,7 @@
 
 import { Job, Datafeed } from '../configs';
 import { IndexPatternTitle } from '../../../../../../common/types/kibana';
-import { Field, Aggregation } from '../../../../../../common/types/fields';
+import { Field, Aggregation, EVENT_RATE_FIELD_ID } from '../../../../../../common/types/fields';
 import { Detector } from '../configs';
 
 export function createEmptyJob(): Job {
@@ -33,12 +33,12 @@ export function createEmptyDatafeed(indexPatternTitle: IndexPatternTitle): Dataf
   };
 }
 
-export function createBasicDetector(agg: Aggregation, field: Field | null) {
+export function createBasicDetector(agg: Aggregation, field: Field) {
   const dtr: Detector = {
     function: agg.id,
   };
 
-  if (field !== null) {
+  if (field.id !== EVENT_RATE_FIELD_ID) {
     dtr.field_name = field.id;
   }
   return dtr;

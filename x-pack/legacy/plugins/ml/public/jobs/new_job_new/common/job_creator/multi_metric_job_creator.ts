@@ -7,7 +7,7 @@
 import { SavedSearch } from 'src/legacy/core_plugins/kibana/public/discover/types';
 import { JobCreator } from './job_creator';
 import { IndexPatternWithType } from '../../../../../common/types/kibana';
-import { Field, Aggregation, SplitField } from '../../../../../common/types/fields';
+import { Field, Aggregation, SplitField, AggFieldPair } from '../../../../../common/types/fields';
 import { Detector } from './configs';
 import { createBasicDetector } from './util/default_configs';
 import { JOB_TYPE, CREATED_BY_LABEL, DEFAULT_MODEL_MEMORY_LIMIT } from './util/constants';
@@ -48,18 +48,18 @@ export class MultiMetricJobCreator extends JobCreator {
     return this._splitField;
   }
 
-  public addDetector(agg: Aggregation, field: Field | null) {
+  public addDetector(agg: Aggregation, field: Field) {
     const dtr: Detector = this._createDetector(agg, field);
-    this._addDetector(dtr, agg);
+    this._addDetector(dtr, agg, field);
   }
 
-  public editDetector(agg: Aggregation, field: Field | null, index: number) {
+  public editDetector(agg: Aggregation, field: Field, index: number) {
     const dtr: Detector = this._createDetector(agg, field);
-    this._editDetector(dtr, agg, index);
+    this._editDetector(dtr, agg, field, index);
   }
 
   // create a new detector object, applying the overall split field
-  private _createDetector(agg: Aggregation, field: Field | null) {
+  private _createDetector(agg: Aggregation, field: Field) {
     const dtr: Detector = createBasicDetector(agg, field);
 
     if (this._splitField !== null) {
@@ -128,5 +128,12 @@ export class MultiMetricJobCreator extends JobCreator {
         }
       }
     }
+  }
+
+  public get aggFieldPairs(): AggFieldPair[] {
+    return this.detectors.map((d, i) => ({
+      field: this._fields[i],
+      agg: this._aggs[i],
+    }));
   }
 }

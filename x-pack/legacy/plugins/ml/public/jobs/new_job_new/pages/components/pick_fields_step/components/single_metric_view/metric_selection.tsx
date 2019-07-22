@@ -12,9 +12,9 @@ import {
 } from '../../../../../common/job_creator';
 import { Results, ModelItem, Anomaly } from '../../../../../common/results_loader';
 import { LineChartData } from '../../../../../common/chart_loader';
-import { AggSelect, DropDownLabel, DropDownProps } from '../agg_select';
+import { AggSelect, DropDownLabel, DropDownProps, createLabel } from '../agg_select';
 import { newJobCapsService } from '../../../../../../../services/new_job_capabilities_service';
-import { AggFieldPair, EVENT_RATE_FIELD_ID } from '../../../../../../../../common/types/fields';
+import { AggFieldPair } from '../../../../../../../../common/types/fields';
 import { AnomalyChart, CHART_TYPE } from '../../../charts/anomaly_chart';
 import { JobProgress } from '../job_progress';
 
@@ -41,8 +41,10 @@ export const SingleMetricDetectors: FC<Props> = ({ isActive, setIsValid }) => {
   const jobCreator = jc as SingleMetricJobCreator;
 
   const { fields } = newJobCapsService;
-  const [selectedOptions, setSelectedOptions] = useState<DropDownProps>([{ label: '' }]);
-  const [aggFieldPair, setAggFieldPair] = useState<AggFieldPair | null>(null);
+  const [selectedOptions, setSelectedOptions] = useState<DropDownProps>([
+    { label: createLabel(jobCreator.aggFieldPair) },
+  ]);
+  const [aggFieldPair, setAggFieldPair] = useState<AggFieldPair | null>(jobCreator.aggFieldPair);
   const [lineChartsData, setLineChartData] = useState<LineChartData>([]);
   const [modelData, setModelData] = useState<ModelItem[]>([]);
   const [anomalyData, setAnomalyData] = useState<Anomaly[]>([]);
@@ -84,8 +86,7 @@ export const SingleMetricDetectors: FC<Props> = ({ isActive, setIsValid }) => {
 
   useEffect(() => {
     if (aggFieldPair !== null) {
-      const field = aggFieldPair.field.id === EVENT_RATE_FIELD_ID ? null : aggFieldPair.field;
-      jobCreator.setDetector(aggFieldPair.agg, field);
+      jobCreator.setDetector(aggFieldPair.agg, aggFieldPair.field);
       jobCreatorUpdate();
       loadChart();
       setIsValid(aggFieldPair !== null);

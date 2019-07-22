@@ -8,6 +8,7 @@ export enum WIZARD_STEPS {
   TIME_RANGE,
   PICK_FIELDS,
   JOB_DETAILS,
+  VALIDATION,
   SUMMARY,
 }
 

@@ -15,6 +15,7 @@ import { TimeRangeStep } from '../components/time_range_step';
 
 import { PickFieldsStep } from '../components/pick_fields_step';
 import { JobDetailsStep } from '../components/job_details_step';
+import { ValidationStep } from '../components/validation_step';
 import { SummaryStep } from '../components/summary_step';
 import { MlTimeBuckets } from '../../../../util/ml_time_buckets';
 
@@ -130,6 +131,19 @@ export const Wizard: FC<Props> = ({
         />
       ),
       status: currentStep >= WIZARD_STEPS.JOB_DETAILS ? undefined : ('incomplete' as EuiStepStatus),
+    },
+
+    {
+      title: i18n.translate('xpack.ml.newJob.wizard.step.validationTitle', {
+        defaultMessage: 'Validation',
+      }),
+      children: (
+        <ValidationStep
+          isCurrentStep={currentStep === WIZARD_STEPS.VALIDATION}
+          setCurrentStep={setCurrentStep}
+        />
+      ),
+      status: currentStep >= WIZARD_STEPS.VALIDATION ? undefined : ('incomplete' as EuiStepStatus),
     },
 
     {

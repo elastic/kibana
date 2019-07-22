@@ -131,4 +131,8 @@ export class JobValidator {
   public get modelMemoryLimit(): Validation {
     return this._basicValidations.modelMemoryLimit;
   }
+
+  public set advancedValid(valid: boolean) {
+    this._validationSummary.advanced = valid;
+  }
 }

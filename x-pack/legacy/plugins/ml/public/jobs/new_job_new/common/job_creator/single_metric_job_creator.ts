@@ -8,14 +8,13 @@ import { SavedSearch } from 'src/legacy/core_plugins/kibana/public/discover/type
 import { parseInterval } from 'ui/utils/parse_interval';
 import { JobCreator } from './job_creator';
 import { IndexPatternWithType } from '../../../../../common/types/kibana';
-import { Field, Aggregation } from '../../../../../common/types/fields';
+import { Field, Aggregation, AggFieldPair } from '../../../../../common/types/fields';
 import { Detector, BucketSpan } from './configs';
 import { createBasicDetector } from './util/default_configs';
 import { KIBANA_AGGREGATION } from '../../../../../common/constants/aggregation_types';
 import { JOB_TYPE, CREATED_BY_LABEL } from './util/constants';
 
 export class SingleMetricJobCreator extends JobCreator {
-  private _field: Field | null = null;
   protected _type: JOB_TYPE = JOB_TYPE.SINGLE_METRIC;
 
   constructor(indexPattern: IndexPatternWithType, savedSearch: SavedSearch, query: object) {
@@ -26,16 +25,14 @@ export class SingleMetricJobCreator extends JobCreator {
   // only a single detector exists for this job type
   // therefore _addDetector and _editDetector merge into this
   // single setDetector function
-  public setDetector(agg: Aggregation, field: Field | null) {
+  public setDetector(agg: Aggregation, field: Field) {
     const dtr: Detector = createBasicDetector(agg, field);
 
     if (this._detectors.length === 0) {
-      this._addDetector(dtr, agg);
+      this._addDetector(dtr, agg, field);
     } else {
-      this._editDetector(dtr, agg, 0);
+      this._editDetector(dtr, agg, field, 0);
     }
-
-    this._field = field;
 
     this._createDatafeedAggregations();
   }
@@ -72,6 +69,8 @@ export class SingleMetricJobCreator extends JobCreator {
       const bucketSpanSeconds = duration.asSeconds();
       const interval = bucketSpanSeconds * 1000;
 
+      let field = null;
+
       switch (functionName) {
         case KIBANA_AGGREGATION.COUNT:
           this._job_config.analysis_config.summary_count_field_name = 'doc_count';
@@ -97,8 +96,9 @@ export class SingleMetricJobCreator extends JobCreator {
         case KIBANA_AGGREGATION.SUM:
         case KIBANA_AGGREGATION.MIN:
         case KIBANA_AGGREGATION.MAX:
-          if (this._field !== null) {
-            const fieldName = this._field.name;
+          field = this._fields[0];
+          if (field !== null) {
+            const fieldName = field.name;
             this._job_config.analysis_config.summary_count_field_name = 'doc_count';
 
             this._datafeed_config.aggregations = {
@@ -124,8 +124,9 @@ export class SingleMetricJobCreator extends JobCreator {
           }
           break;
         case KIBANA_AGGREGATION.CARDINALITY:
-          if (this._field !== null) {
-            const fieldName = this._field.name;
+          field = this._fields[0];
+          if (field !== null) {
+            const fieldName = field.name;
 
             this._job_config.analysis_config.summary_count_field_name = `dc_${fieldName}`;
 
@@ -162,6 +163,17 @@ export class SingleMetricJobCreator extends JobCreator {
         default:
           break;
       }
+    }
+  }
+
+  public get aggFieldPair(): AggFieldPair | null {
+    if (this._aggs.length === 0) {
+      return null;
+    } else {
+      return {
+        agg: this._aggs[0],
+        field: this._fields[0],
+      };
     }
   }
 }

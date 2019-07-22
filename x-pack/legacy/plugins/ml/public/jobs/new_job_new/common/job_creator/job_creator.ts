@@ -7,7 +7,7 @@
 import { SavedSearch } from 'src/legacy/core_plugins/kibana/public/discover/types';
 import { IndexPatternWithType, IndexPatternTitle } from '../../../../../common/types/kibana';
 import { Job, Datafeed, Detector, JobId, DatafeedId, BucketSpan } from './configs';
-import { Aggregation } from '../../../../../common/types/fields';
+import { Aggregation, Field } from '../../../../../common/types/fields';
 import { createEmptyJob, createEmptyDatafeed } from './util/default_configs';
 import { mlJobService } from '../../../../services/job_service';
 import { JobRunner, ProgressSubscriber } from '../job_runner';
@@ -27,6 +27,7 @@ export class JobCreator {
   protected _end: number = 0;
   protected _subscribers: ProgressSubscriber[];
   protected _aggs: Aggregation[] = [];
+  protected _fields: Field[] = [];
   private _stopAllRefreshPolls: {
     stop: boolean;
   };
@@ -54,25 +55,30 @@ export class JobCreator {
     return this._type;
   }
 
-  protected _addDetector(detector: Detector, agg: Aggregation) {
+  protected _addDetector(detector: Detector, agg: Aggregation, field: Field) {
     this._detectors.push(detector);
     this._aggs.push(agg);
+    this._fields.push(field);
   }
 
-  protected _editDetector(detector: Detector, agg: Aggregation, index: number) {
+  protected _editDetector(detector: Detector, agg: Aggregation, field: Field, index: number) {
     if (this._detectors[index] !== undefined) {
       this._detectors[index] = detector;
       this._aggs[index] = agg;
+      this._fields[index] = field;
     }
   }
 
   protected _removeDetector(index: number) {
     this._detectors.splice(index, 1);
     this._aggs.splice(index, 1);
+    this._fields.splice(index, 1);
   }
 
   public removeAllDetectors() {
     this._detectors.length = 0;
+    this._aggs.length = 0;
+    this._fields.length = 0;
   }
 
   public get detectors(): Detector[] {
@@ -86,6 +92,11 @@ export class JobCreator {
   public getAggregation(index: number): Aggregation | null {
     const agg = this._aggs[index];
     return agg !== undefined ? agg : null;
+  }
+
+  public getField(index: number): Field | null {
+    const field = this._fields[index];
+    return field !== undefined ? field : null;
   }
 
   public set bucketSpan(bucketSpan: BucketSpan) {
