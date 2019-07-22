@@ -26,7 +26,6 @@ import { indexManagement } from './legacy/plugins/index_management';
 import { indexLifecycleManagement } from './legacy/plugins/index_lifecycle_management';
 import { consoleExtensions } from './legacy/plugins/console_extensions';
 import { spaces } from './legacy/plugins/spaces';
-import { notifications } from './legacy/plugins/notifications';
 import { kueryAutocomplete } from './legacy/plugins/kuery_autocomplete';
 import { canvas } from './legacy/plugins/canvas';
 import { infra } from './legacy/plugins/infra';
@@ -70,7 +69,6 @@ module.exports = function (kibana) {
     cloud(kibana),
     indexManagement(kibana),
     consoleExtensions(kibana),
-    notifications(kibana),
     indexLifecycleManagement(kibana),
     kueryAutocomplete(kibana),
     infra(kibana),
