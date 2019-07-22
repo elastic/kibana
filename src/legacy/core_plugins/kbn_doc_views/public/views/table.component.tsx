@@ -22,6 +22,7 @@ import React from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiButtonEmpty, EuiToolTip, EuiButton, EuiButtonToggle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { FieldName } from 'ui/directives/field_name/field_name';
 
 export interface Props {
   columns: string[];
@@ -193,7 +194,7 @@ export function DocViewTable({
               data-field-type={mapping[field] ? mapping[field].type : 'default'}
               className="kbnDocViewer__field"
             >
-              {field}
+              <FieldName field={mapping[field]}></FieldName>
             </td>
             <td>
               <div className="kbnDocViewer__value">
