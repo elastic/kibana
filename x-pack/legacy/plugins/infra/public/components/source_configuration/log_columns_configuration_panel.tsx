@@ -180,7 +180,7 @@ const RemoveLogColumnButton = injectI18n<{
 }>(({ intl, onClick, columnDescription }) => {
   const removeColumnLabel = intl.formatMessage({
     id: 'xpack.infra.sourceConfiguration.removeLogColumnButtonAriaLabel',
-    defaultMessage: `Remove this column: ${columnDescription}`,
+    defaultMessage: 'Remove this column',
   });
 
   return (
@@ -189,7 +189,7 @@ const RemoveLogColumnButton = injectI18n<{
       data-test-subj="removeLogColumnButton"
       iconType="trash"
       onClick={onClick}
-      title={removeColumnLabel}
+      title={`${removeColumnLabel}: ${columnDescription}`}
     />
   );
 });
