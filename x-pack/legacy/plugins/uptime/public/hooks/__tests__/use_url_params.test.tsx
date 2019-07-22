@@ -4,10 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { shallowWithIntl } from 'test_utils/enzyme_helpers';
+import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import React, { useState, Fragment } from 'react';
 import { useUrlParams, UptimeUrlParamsHook } from '../use_url_params';
 import { RouteComponentProps } from 'react-router';
+import { UptimeRefreshContext } from '../../contexts';
 
 interface MockUrlParamsComponentProps {
   hook: UptimeUrlParamsHook;
@@ -17,13 +18,10 @@ let mockRouter: RouteComponentProps;
 
 const UseUrlParamsTestComponent = ({ hook }: MockUrlParamsComponentProps) => {
   const [params, setParams] = useState({});
-  const [getUrlParams, updateUrlParams, setRouter] = hook();
+  const [getUrlParams, updateUrlParams] = hook();
   return (
     <Fragment>
       {Object.keys(params).length > 0 ? <div>{JSON.stringify(params)}</div> : null}
-      <button id="setRouter" onClick={() => setRouter(mockRouter)}>
-        Set router
-      </button>
       <button
         id="setUrlParams"
         onClick={() => {
@@ -61,19 +59,43 @@ describe('useUrlParams', () => {
     };
   });
 
-  it('accepts router props, updates URL params, and returns the current params', async () => {
-    const component = shallowWithIntl(<UseUrlParamsTestComponent hook={useUrlParams} />);
-
-    const setRouterButton = component.find('#setRouter');
-    await setRouterButton.simulate('click');
+  it('accepts router props, updates URL params, and returns the current params', () => {
+    const component = mountWithIntl(
+      <UptimeRefreshContext.Provider
+        value={{ lastRefresh: 123, history: mockRouter.history, location: mockRouter.location }}
+      >
+        <UseUrlParamsTestComponent hook={useUrlParams} />
+      </UptimeRefreshContext.Provider>
+    );
 
     const setUrlParamsButton = component.find('#setUrlParams');
-    await setUrlParamsButton.simulate('click');
+    setUrlParamsButton.simulate('click');
+
+    expect(mockRouter.history.push).toHaveBeenCalledWith({
+      pathname: '',
+      search: 'g=%22%22&dateRangeStart=now-12d&dateRangeEnd=now',
+    });
+  });
+
+  it('gets the expected values using the context', () => {
+    const component = mountWithIntl(
+      <UptimeRefreshContext.Provider
+        value={{
+          lastRefresh: 123,
+          history: mockRouter.history,
+          location: {
+            ...mockRouter.location,
+            search: 'g=%22%22&dateRangeStart=now-19d&dateRangeEnd=now-1m',
+          },
+        }}
+      >
+        <UseUrlParamsTestComponent hook={useUrlParams} />
+      </UptimeRefreshContext.Provider>
+    );
 
     const getUrlParamsButton = component.find('#getUrlParams');
-    await getUrlParamsButton.simulate('click');
+    getUrlParamsButton.simulate('click');
 
     expect(component).toMatchSnapshot();
-    expect(mockRouter.history.push).toHaveBeenCalled();
   });
 });

@@ -1,16 +1,31 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`useUrlParams accepts router props, updates URL params, and returns the current params 1`] = `
-<Fragment>
+exports[`useUrlParams gets the expected values using the context 1`] = `
+<UseUrlParamsTestComponent
+  hook={[Function]}
+  routerProps={
+    Object {
+      "history": Object {
+        "push": [MockFunction],
+      },
+      "location": Object {
+        "hash": "",
+        "pathname": "",
+        "search": "?g=\\"\\"",
+        "state": Object {},
+      },
+      "match": Object {
+        "isExact": true,
+        "params": "",
+        "path": "/",
+        "url": "http://elastic.co",
+      },
+    }
+  }
+>
   <div>
-    {"autorefreshInterval":60000,"autorefreshIsPaused":false,"dateRangeStart":"now-12d","dateRangeEnd":"now","search":"","selectedPingStatus":"down"}
+    {"autorefreshInterval":60000,"autorefreshIsPaused":false,"dateRangeStart":"now-19d","dateRangeEnd":"now-1m","search":"","selectedPingStatus":"down"}
   </div>
-  <button
-    id="setRouter"
-    onClick={[Function]}
-  >
-    Set router
-  </button>
   <button
     id="setUrlParams"
     onClick={[Function]}
@@ -23,5 +38,5 @@ exports[`useUrlParams accepts router props, updates URL params, and returns the 
   >
     Get url params
   </button>
-</Fragment>
+</UseUrlParamsTestComponent>
 `;
