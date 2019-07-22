@@ -14,13 +14,14 @@ import {
 } from '../../../../common';
 
 import { getPivotPreviewDevConsoleStatement, getPivotDropdownOptions } from './common';
+import { IndexPattern } from 'ui/index_patterns';
 
 describe('Data Frame: Define Pivot Common', () => {
   test('getPivotDropdownOptions()', () => {
     // The field name includes the characters []> as well as a leading and ending space charcter
     // which cannot be used for aggregation names. The test results verifies that the characters
     // should still be present in field and dropDownName values, but should be stripped for aggName values.
-    const indexPattern: any = {
+    const indexPattern = {
       id: 'the-index-pattern-id',
       title: 'the-index-pattern-title',
       fields: [
@@ -32,7 +33,7 @@ describe('Data Frame: Define Pivot Common', () => {
           searchable: true,
         },
       ],
-    };
+    } as IndexPattern;
 
     const options = getPivotDropdownOptions(indexPattern);
 

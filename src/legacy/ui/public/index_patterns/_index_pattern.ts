@@ -416,7 +416,7 @@ export class IndexPattern implements StaticIndexPattern {
     return await _create(potentialDuplicateByTitle.id);
   }
 
-  async save(saveAttempts = 0): Promise<any> {
+  async save(saveAttempts: number = 0): Promise<void | Error> {
     if (!this.id) return;
     const body = this.prepBody();
     // What keys changed since they last pulled the index pattern

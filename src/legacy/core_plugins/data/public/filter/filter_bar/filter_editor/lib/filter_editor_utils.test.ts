@@ -185,14 +185,14 @@ describe('Filter editor utils', () => {
   describe('getOperatorOptions', () => {
     it('returns range for number fields', () => {
       const [field] = mockFields.filter(({ type }) => type === 'number');
-      const operatorOptions = getOperatorOptions(field as any);
+      const operatorOptions = getOperatorOptions(field as Field);
       const rangeOperator = operatorOptions.find(operator => operator.type === 'range');
       expect(rangeOperator).not.toBeUndefined();
     });
 
     it('does not return range for string fields', () => {
       const [field] = mockFields.filter(({ type }) => type === 'string');
-      const operatorOptions = getOperatorOptions(field as any);
+      const operatorOptions = getOperatorOptions(field as Field);
       const rangeOperator = operatorOptions.find(operator => operator.type === 'range');
       expect(rangeOperator).toBeUndefined();
     });
