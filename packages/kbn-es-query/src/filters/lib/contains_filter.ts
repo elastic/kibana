@@ -17,10 +17,14 @@
  * under the License.
  */
 
-export * from './contains';
-export * from './exists';
-export * from './phrase';
-export * from './phrases';
-export * from './query';
-export * from './range';
-export * from './lib';
+import { Filter, FilterMeta } from './meta_filter';
+
+export type ContainsFilterMeta = FilterMeta & {
+  params: {
+    value: string;
+  };
+};
+
+export type ContainsFilter = Filter & {
+  meta: ContainsFilterMeta;
+};

@@ -18,12 +18,25 @@
  */
 
 import { Field, IndexPattern } from 'ui/index_patterns';
-import { CustomFilter, ExistsFilter, PhraseFilter, PhrasesFilter, RangeFilter } from './lib';
+import {
+  ContainsFilter,
+  CustomFilter,
+  ExistsFilter,
+  PhraseFilter,
+  PhrasesFilter,
+  RangeFilter,
+} from './lib';
 import { RangeFilterParams } from './lib/range_filter';
 
 export * from './lib';
 
 export function buildExistsFilter(field: Field, indexPattern: IndexPattern): ExistsFilter;
+
+export function buildContainsFilter(
+  field: Field,
+  value: string,
+  indexPattern: IndexPattern
+): ContainsFilter;
 
 export function buildPhraseFilter(
   field: Field,

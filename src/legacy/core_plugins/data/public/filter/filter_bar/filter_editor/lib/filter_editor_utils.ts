@@ -19,10 +19,12 @@
 
 import dateMath from '@elastic/datemath';
 import {
+  buildContainsFilter,
   buildExistsFilter,
   buildPhraseFilter,
   buildPhrasesFilter,
   buildRangeFilter,
+  ContainsFilter,
   FieldFilter,
   Filter,
   FilterMeta,
@@ -70,6 +72,8 @@ export function getOperatorOptions(field: Field) {
 
 export function getFilterParams(filter: Filter) {
   switch (filter.meta.type) {
+    case 'contains':
+      return (filter as ContainsFilter).meta.value;
     case 'phrase':
       return (filter as PhraseFilter).meta.params.query;
     case 'phrases':
@@ -122,6 +126,11 @@ export function isFilterValid(
       return validateParams(params.from, field.type) || validateParams(params.to, field.type);
     case 'exists':
       return true;
+    case 'contains':
+      if (typeof params !== 'string') {
+        return false;
+      }
+      return true;
     default:
       throw new Error(`Unknown operator type: ${operator.type}`);
   }
@@ -158,6 +167,8 @@ function buildBaseFilter(
       return buildRangeFilter(field, newParams, indexPattern);
     case 'exists':
       return buildExistsFilter(field, indexPattern);
+    case 'contains':
+      return buildContainsFilter(field, params, indexPattern);
     default:
       throw new Error(`Unknown operator type: ${operator.type}`);
   }

@@ -17,10 +17,11 @@
  * under the License.
  */
 
-export * from './contains';
-export * from './exists';
-export * from './phrase';
-export * from './phrases';
-export * from './query';
-export * from './range';
-export * from './lib';
+export async function mapContains(filter) {
+  const { type, key, value, params } = filter.meta;
+  if (type !== 'contains') {
+    throw filter;
+  } else {
+    return { type, key, value, params };
+  }
+}

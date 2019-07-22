@@ -94,6 +94,15 @@ export const doesNotExistOperator = {
   negate: true,
 };
 
+export const containsOperator = {
+  message: i18n.translate('data.filter.filterEditor.containsOperatorOptionLabel', {
+    defaultMessage: 'contains',
+  }),
+  type: 'contains',
+  negate: false,
+  fieldTypes: ['string'],
+};
+
 export const FILTER_OPERATORS: Operator[] = [
   isOperator,
   isNotOperator,
@@ -103,4 +112,5 @@ export const FILTER_OPERATORS: Operator[] = [
   isNotBetweenOperator,
   existsOperator,
   doesNotExistOperator,
+  containsOperator,
 ];

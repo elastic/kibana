@@ -50,6 +50,7 @@ import {
   isFilterValid,
 } from './lib/filter_editor_utils';
 import { Operator } from './lib/filter_operators';
+import { ContainsValueInput } from './contains_value_input';
 import { PhraseValueInput } from './phrase_value_input';
 import { PhrasesValuesInput } from './phrases_values_input';
 import { RangeValueInput } from './range_value_input';
@@ -314,6 +315,14 @@ class FilterEditorUI extends Component<Props, State> {
     switch (this.state.selectedOperator.type) {
       case 'exists':
         return '';
+      case 'contains':
+        return (
+          <ContainsValueInput
+            field={this.state.selectedField}
+            value={this.state.params}
+            onChange={this.onParamsChange}
+          />
+        );
       case 'phrase':
         return (
           <PhraseValueInput
@@ -351,7 +360,7 @@ class FilterEditorUI extends Component<Props, State> {
 
   private isUnknownFilterType() {
     const { type } = this.props.filter.meta;
-    return !!type && !['phrase', 'phrases', 'range', 'exists'].includes(type);
+    return !!type && !['phrase', 'phrases', 'range', 'exists', 'contains'].includes(type);
   }
 
   private getIndexPatternFromFilter() {

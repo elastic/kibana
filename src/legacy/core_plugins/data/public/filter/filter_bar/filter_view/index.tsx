@@ -21,7 +21,11 @@ import { EuiBadge } from '@elastic/eui';
 import { Filter, isFilterPinned } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import React, { SFC } from 'react';
-import { existsOperator, isOneOfOperator } from '../filter_editor/lib/filter_operators';
+import {
+  containsOperator,
+  existsOperator,
+  isOneOfOperator,
+} from '../filter_editor/lib/filter_operators';
 
 interface Props {
   filter: Filter;
@@ -90,6 +94,8 @@ export function getFilterDisplayText(filter: Filter) {
       return `${prefix}${filter.meta.key}: ${filter.meta.value}`;
     case 'geo_polygon':
       return `${prefix}${filter.meta.key}: ${filter.meta.value}`;
+    case 'contains':
+      return `${prefix}${filter.meta.key} ${containsOperator.message} ${filter.meta.value}`;
     case 'phrase':
       return `${prefix}${filter.meta.key}: ${filter.meta.value}`;
     case 'phrases':

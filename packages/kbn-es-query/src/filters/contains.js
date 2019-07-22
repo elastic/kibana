@@ -17,10 +17,21 @@
  * under the License.
  */
 
-export * from './contains';
-export * from './exists';
-export * from './phrase';
-export * from './phrases';
-export * from './query';
-export * from './range';
-export * from './lib';
+// Creates an filter where the given field contains the given value
+export function buildContainsFilter(field, value, indexPattern) {
+  const index = indexPattern.id;
+  const type = 'contains';
+  const key = field.name;
+
+  const filter = {
+    meta: { index, type, key, value },
+  };
+  filter.query = {
+    wildcard: {
+      [field.name]: {
+        value: `*${value}*`,
+      },
+    },
+  };
+  return filter;
+}

@@ -21,6 +21,7 @@
 export * from './meta_filter';
 
 // The actual filter types
+import { ContainsFilter } from './contains_filter';
 import { CustomFilter } from './custom_filter';
 import { ExistsFilter } from './exists_filter';
 import { GeoBoundingBoxFilter } from './geo_bounding_box_filter';
@@ -30,6 +31,7 @@ import { PhrasesFilter } from './phrases_filter';
 import { QueryStringFilter } from './query_string_filter';
 import { RangeFilter } from './range_filter';
 export {
+  ContainsFilter,
   CustomFilter,
   ExistsFilter,
   GeoBoundingBoxFilter,
@@ -42,6 +44,7 @@ export {
 
 // Any filter associated with a field (used in the filter bar/editor)
 export type FieldFilter =
+  | ContainsFilter
   | ExistsFilter
   | GeoBoundingBoxFilter
   | GeoPolygonFilter

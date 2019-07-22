@@ -27,6 +27,7 @@ import { mapMissing } from './map_missing';
 import { mapQueryString } from './map_query_string';
 import { mapGeoBoundingBox } from './map_geo_bounding_box';
 import { mapGeoPolygon } from './map_geo_polygon';
+import { mapContains } from './map_contains';
 import { mapDefault } from './map_default';
 import { generateMappingChain } from './generate_mapping_chain';
 
@@ -35,7 +36,7 @@ export async function mapFilter(indexPatterns, filter) {
 
   // Each mapper is a simple promise function that test if the mapper can
   // handle the mapping or not. If it handles it then it will resolve with
-  // and object that has the key and value for the filter. Otherwise it will
+  // an object that has the key and value for the filter. Otherwise it will
   // reject it with the original filter. We had to go down the promise interface
   // because mapTerms and mapRange need access to the indexPatterns to format
   // the values and that's only available through the field formatters.
@@ -57,6 +58,7 @@ export async function mapFilter(indexPatterns, filter) {
     mapQueryString,
     mapGeoBoundingBox(indexPatterns),
     mapGeoPolygon(indexPatterns),
+    mapContains,
     mapDefault,
   ];
 
