@@ -52,7 +52,7 @@ const defaultProps = {
   isLocked: false
 };
 
-describe('FeatureTooltip (single)', async () => {
+describe('FeatureTooltip (single)', () => {
 
   test('should not show close button', async () => {
     const component = shallow(
@@ -91,7 +91,7 @@ describe('FeatureTooltip (single)', async () => {
 
 });
 
-describe('FeatureTooltip (multi)', async () => {
+describe('FeatureTooltip (multi)', () => {
 
   test('should not show close button / should show count', async () => {
     const component = shallow(

@@ -11,10 +11,10 @@ you can restore a snapshot from the repository.
 You’ll find *Snapshot and Restore* under *Management > Elasticsearch*. 
 With this UI, you can:
 
-* View a list of your snapshots and drill down into details
-* Register a repository for storing your snapshots
-* Restore data into your cluster from a snapshot
-* Delete a snapshot to free storage space
+* <<kib-snapshot-register-repository, Register a repository for storing your snapshots>>
+* <<kib-view-snapshot, View a list of your snapshots and drill down into details>>
+* <<kib-restore-snapshot, Restore data into your cluster from a snapshot>>
+* <<kib-delete-snapshot, Delete a snapshot to free storage space>>
 
 [role="screenshot"]
 image:management/snapshot-restore/images/snapshot_list.png["Snapshot list"]
@@ -24,6 +24,7 @@ Before using this feature, you should be familiar with how snapshots work.
 more detailed information.
 
 [float]
+[[kib-snapshot-register-repository]]
 === Register a repository
 
 The *Repositories* view provides an overview of your repositories.  You can 
@@ -36,13 +37,14 @@ If you don't have a repository, you're prompted to register one. The
 *Register repository* wizard supports three repository types
 out of the box: shared file system, read-only URL, and source-only.  
 For details about these repositories and their settings, 
-see {ref}/modules-snapshots.html#_repositories[Repositories]. For an example, 
+see {ref}/modules-snapshots.html#snapshots-repositories[Repositories]. For an example, 
 see <<snapshot-repositories-example, registering a shared file system repository>>.
 
 To use other repositories, such as S3, you can install plugins. See  
 {ref}/modules-snapshots.html#_repository_plugins[Repository plugins].
 
 [float]
+[[kib-view-snapshot]]
 === View your snapshots
 
 The *Snapshots* view gives an overview of your snapshots. You can drill down 
@@ -52,7 +54,7 @@ into each snapshot for further investigation.
 image:management/snapshot-restore/images/snapshot_details.png["Snapshot details"]
 
 To create snapshots, use the Kibana <<console-kibana, Console>>. The 
-{ref}//modules-snapshots.html#_snapshot[snapshot API]
+{ref}//modules-snapshots.html#snapshots-take-snapshot[snapshot API]
 takes the current state and data in your index or cluster, and then saves it to a 
 shared repository. 
 
@@ -62,6 +64,7 @@ All subsequent snapshots save the changes between the existing snapshots and
 the new data.
 
 [float]
+[[kib-restore-snapshot]]
 === Restore a snapshot
 
 The *Restore* wizard walks you through the process of restoring a snapshot 
@@ -77,6 +80,7 @@ see the current state for each shard in the snapshot.
 image:management/snapshot-restore/images/restore-status.png["Snapshot details"]
 
 [float]
+[[kib-delete-snapshot]]
 === Delete a snapshot
 
 Delete snapshots to manage your repository storage space.
@@ -133,7 +137,7 @@ The repository currently doesn’t have any snapshots.
 
 [float]
 ==== Add a snapshot to the repository
-Use the {ref}//modules-snapshots.html#_snapshot[snapshot API] to create a snapshot.
+Use the {ref}//modules-snapshots.html#snapshots-take-snapshot[snapshot API] to create a snapshot.
 
 . Go to *Dev Tools > Console*.
 . Create the snapshot. 
