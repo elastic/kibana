@@ -18,7 +18,6 @@ export default function({ getService }: TestInvoker) {
   const {
     importTest,
     createExpectResults,
-    expectResultsWithUnsupportedSpaceType,
     expectRbacForbidden,
     expectUnknownType,
     expectSpaceType,
