@@ -18,6 +18,7 @@ export default function({ getService }: TestInvoker) {
     resolveImportErrorsTest,
     createExpectResults,
     expectUnknownType,
+    expectSpaceType,
   } = resolveImportErrorsTestSuiteFactory(es, esArchiver, supertest);
 
   describe('_resolve_import_errors', () => {
@@ -27,6 +28,10 @@ export default function({ getService }: TestInvoker) {
         default: {
           statusCode: 200,
           response: createExpectResults(SPACES.SPACE_1.spaceId),
+        },
+        spaceType: {
+          statusCode: 200,
+          response: expectSpaceType,
         },
         unknownType: {
           statusCode: 200,
@@ -41,6 +46,10 @@ export default function({ getService }: TestInvoker) {
         default: {
           statusCode: 200,
           response: createExpectResults(SPACES.DEFAULT.spaceId),
+        },
+        spaceType: {
+          statusCode: 200,
+          response: expectSpaceType,
         },
         unknownType: {
           statusCode: 200,

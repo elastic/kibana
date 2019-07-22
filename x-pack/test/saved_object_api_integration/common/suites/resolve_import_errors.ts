@@ -17,6 +17,7 @@ interface ResolveImportErrorsTest {
 
 interface ResolveImportErrorsTests {
   default: ResolveImportErrorsTest;
+  spaceType: ResolveImportErrorsTest;
   unknownType: ResolveImportErrorsTest;
 }
 
@@ -66,6 +67,22 @@ export function resolveImportErrorsTestSuiteFactory(
           id: '1',
           type: 'wigwags',
           title: 'Wigwags title',
+          error: {
+            type: 'unsupported_type',
+          },
+        },
+      ],
+    });
+  };
+
+  const expectSpaceType = (resp: { [key: string]: any }) => {
+    expect(resp.body).to.eql({
+      success: false,
+      successCount: 1,
+      errors: [
+        {
+          id: '1',
+          type: 'space',
           error: {
             type: 'unsupported_type',
           },
@@ -153,6 +170,43 @@ export function resolveImportErrorsTestSuiteFactory(
             .then(tests.unknownType.response);
         });
       });
+      describe('space type', () => {
+        it(`should return ${tests.spaceType.statusCode}`, async () => {
+          const data = createImportData(spaceId);
+          data.push({
+            type: 'space',
+            id: '1',
+            attributes: {
+              name: 'My Space',
+            },
+          });
+          await supertest
+            .post(`${getUrlPrefix(spaceId)}/api/saved_objects/_resolve_import_errors`)
+            .auth(user.username, user.password)
+            .field(
+              'retries',
+              JSON.stringify([
+                {
+                  type: 'space',
+                  id: '1',
+                  overwrite: true,
+                },
+                {
+                  type: 'dashboard',
+                  id: `${getIdPrefix(spaceId)}a01b2f57-fcfd-4864-b735-09e28f0d815e`,
+                  overwrite: true,
+                },
+              ])
+            )
+            .attach(
+              'file',
+              Buffer.from(data.map(obj => JSON.stringify(obj)).join('\n'), 'utf8'),
+              'export.ndjson'
+            )
+            .expect(tests.spaceType.statusCode)
+            .then(tests.spaceType.response);
+        });
+      });
     });
   };
 
@@ -165,5 +219,6 @@ export function resolveImportErrorsTestSuiteFactory(
     createExpectResults,
     expectRbacForbidden,
     expectUnknownType,
+    expectSpaceType,
   };
 }
