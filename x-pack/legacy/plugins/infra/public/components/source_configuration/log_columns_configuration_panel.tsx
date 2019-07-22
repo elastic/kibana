@@ -179,18 +179,12 @@ const RemoveLogColumnButton = injectI18n<{
   ariaColumnName: string;
 }>(({ intl, onClick, ariaColumnName }) => {
   const removeColumnLabel = intl.formatMessage({
-    id: 'xpack.infra.sourceConfiguration.removeLogColumnButtonLabel',
-    defaultMessage: 'Remove this column',
-  });
-
-  const removeColumnAriaLabel = intl.formatMessage({
     id: 'xpack.infra.sourceConfiguration.removeLogColumnButtonAriaLabel',
     defaultMessage: `Remove this column: ${ariaColumnName}`,
   });
 
   return (
     <EuiButtonIcon
-      aria-label={removeColumnAriaLabel}
       color="danger"
       data-test-subj="removeLogColumnButton"
       iconType="trash"
