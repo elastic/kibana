@@ -76,7 +76,7 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
     public async checkTimeSeriesLegendIsPresent() {
       const isPresent = await find.existsByCssSelector('.echLegend');
       if (!isPresent) {
-        throw new Error(`TimeSeries chart is not loaded`);
+        throw new Error(`TimeSeries legend is not loaded`);
       }
     }
 
