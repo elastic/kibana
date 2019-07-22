@@ -7,6 +7,7 @@
 import React from 'react';
 import chrome from 'ui/chrome';
 import { EuiButton, EuiHorizontalRule, EuiText, EuiSpacer } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { documentationLinks } from '../../lib/documentation_links';
 
 export class HelpMenu extends React.PureComponent {
@@ -16,15 +17,26 @@ export class HelpMenu extends React.PureComponent {
         <EuiHorizontalRule margin="none" />
         <EuiSpacer />
         <EuiText size="s">
-          <p>For Code specific information</p>
+          <p>
+            <FormattedMessage
+              id="xpack.code.helpMenu.helpDescription"
+              defaultMessage="For Code specific information"
+            />
+          </p>
         </EuiText>
         <EuiSpacer />
         <EuiButton fill iconType="popout" href={chrome.addBasePath('/app/code#/setup-guide')}>
-          Setup Guide
+          <FormattedMessage
+            id="xpack.code.helpMenu.setupGuideButtonLabel"
+            defaultMessage="Setup Guide"
+          />
         </EuiButton>
         <EuiSpacer />
         <EuiButton fill iconType="popout" href={documentationLinks.code} target="_blank">
-          Code documentation
+          <FormattedMessage
+            id="xpack.code.helpMenu.codeDocumentationButtonLabel"
+            defaultMessage="Code documentation"
+          />
         </EuiButton>
       </React.Fragment>
     );

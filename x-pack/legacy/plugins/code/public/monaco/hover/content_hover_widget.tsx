@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { I18nProvider } from '@kbn/i18n/react';
 import { editor as Editor, languages, Range as EditorRange } from 'monaco-editor';
 // @ts-ignore
 import { createCancelablePromise } from 'monaco-editor/esm/vs/base/common/async';
@@ -135,11 +136,20 @@ export class ContentHoverWidget extends ContentWidget {
     }
 
     this.showAt(new monaco.Position(renderRange.startLineNumber, startColumn), this.shouldFocus);
-    const element = React.createElement(HoverWidget, props, null);
+
+    const element = (
+      <I18nProvider>
+        <HoverWidget {...props} />
+      </I18nProvider>
+    );
     // @ts-ignore
     ReactDOM.render(element, fragment);
     const buttonFragment = document.createDocumentFragment();
-    const buttons = React.createElement(HoverButtons, props, null);
+    const buttons = (
+      <I18nProvider>
+        <HoverButtons {...props} />
+      </I18nProvider>
+    );
     // @ts-ignore
     ReactDOM.render(buttons, buttonFragment);
     this.updateContents(fragment, buttonFragment);
