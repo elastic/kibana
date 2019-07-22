@@ -6,32 +6,53 @@
 
 import React from 'react';
 import {
-  LineSeries,
   ScaleType,
   getSpecId,
   DataSeriesColorsValues,
   CustomSeriesColorsMap,
+  AreaSeries,
 } from '@elastic/charts';
 import { MetricsExplorerSeries } from '../../../server/routes/metrics_explorer/types';
 import { colorTransformer, MetricsExplorerColor } from '../../../common/color_palette';
 import { createMetricLabel } from './helpers/create_metric_label';
-import { MetricsExplorerOptionsMetric } from '../../containers/metrics_explorer/use_metrics_explorer_options';
+import {
+  MetricsExplorerOptionsMetric,
+  MetricsExplorerChartType,
+} from '../../containers/metrics_explorer/use_metrics_explorer_options';
 
 interface Props {
   metric: MetricsExplorerOptionsMetric;
   id: string | number;
   series: MetricsExplorerSeries;
+  type: MetricsExplorerChartType;
+  stack: boolean;
 }
 
-export const MetricLineSeries = ({ metric, id, series }: Props) => {
+export const MetricExplorerSeriesChart = ({ metric, id, series, type, stack }: Props) => {
   const color =
     (metric.color && colorTransformer(metric.color)) ||
     colorTransformer(MetricsExplorerColor.color0);
-  const seriesLineStyle = {
+
+  const yAccessor = `metric_${id}`;
+  const specId = getSpecId(yAccessor);
+  const colors: DataSeriesColorsValues = {
+    colorValues: [],
+    specId,
+  };
+  const customColors: CustomSeriesColorsMap = new Map();
+  customColors.set(colors, color);
+  const chartId = `series-${series.id}-${yAccessor}`;
+
+  const seriesAreaStyle = {
     line: {
       stroke: color,
       strokeWidth: 2,
       visible: true,
+    },
+    area: {
+      fill: color,
+      opacity: 0.5,
+      visible: type === MetricsExplorerChartType.area,
     },
     border: {
       visible: false,
@@ -46,19 +67,9 @@ export const MetricLineSeries = ({ metric, id, series }: Props) => {
       opacity: 1,
     },
   };
-
-  const yAccessor = `metric_${id}`;
-  const specId = getSpecId(yAccessor);
-  const colors: DataSeriesColorsValues = {
-    colorValues: [],
-    specId,
-  };
-  const customColors: CustomSeriesColorsMap = new Map();
-  customColors.set(colors, color);
-
   return (
-    <LineSeries
-      key={`series-${series.id}-${yAccessor}`}
+    <AreaSeries
+      key={chartId}
       id={specId}
       name={createMetricLabel(metric)}
       xScaleType={ScaleType.Time}
@@ -66,7 +77,8 @@ export const MetricLineSeries = ({ metric, id, series }: Props) => {
       xAccessor="timestamp"
       yAccessors={[yAccessor]}
       data={series.rows}
-      lineSeriesStyle={seriesLineStyle}
+      stackAccessors={stack ? ['timestamp'] : void 0}
+      areaSeriesStyle={seriesAreaStyle}
       customSeriesColors={customColors}
     />
   );
