@@ -5,7 +5,7 @@
  */
 
 import _ from 'lodash';
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 
 import { I18nProvider } from '@kbn/i18n/react';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -14,7 +14,6 @@ import { TimeRange } from 'ui/timefilter/time_history';
 import { Query } from 'src/legacy/core_plugins/data/public';
 import { Filter } from '@kbn/es-query';
 import { ExpressionRenderer } from '../../../../../../../src/legacy/core_plugins/data/public';
-import { prependKibanaContext } from '../../editor_frame_plugin/editor_frame/expression_helpers';
 
 export interface ExpressionWrapperProps {
   ExpressionRenderer: ExpressionRenderer;
@@ -33,19 +32,15 @@ export function ExpressionWrapper({
   context,
 }: ExpressionWrapperProps) {
   const [expressionError, setExpressionError] = useState<unknown>(undefined);
-  const contextualizedExpression = useMemo(() => prependKibanaContext(expression, context), [
-    expression,
-    context,
-  ]);
   useEffect(() => {
     // reset expression error if component attempts to run it again
     if (expressionError) {
       setExpressionError(undefined);
     }
-  }, [contextualizedExpression]);
+  }, [expression, context]);
   return (
     <I18nProvider>
-      {contextualizedExpression === null || expressionError ? (
+      {expression === '' || expressionError ? (
         <EuiFlexGroup direction="column" alignItems="center" justifyContent="center">
           <EuiFlexItem>
             <EuiIcon type="alert" color="danger" />
@@ -62,10 +57,11 @@ export function ExpressionWrapper({
       ) : (
         <ExpressionRendererComponent
           className="lnsExpressionOutput"
-          expression={contextualizedExpression}
+          expression={expression}
           onRenderFailure={(e: unknown) => {
             setExpressionError(e);
           }}
+          getInitialContext={() => context}
         />
       )}
     </I18nProvider>

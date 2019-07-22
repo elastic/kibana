@@ -53,6 +53,7 @@ export function prependKibanaContext(
   return {
     type: 'expression',
     chain: [
+      { type: 'function', function: 'kibana', arguments: {} },
       {
         type: 'function',
         function: 'kibana_context',

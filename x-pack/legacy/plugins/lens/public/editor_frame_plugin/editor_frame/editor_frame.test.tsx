@@ -269,6 +269,11 @@ describe('editor_frame', () => {
         Object {
           "chain": Array [
             Object {
+              "arguments": Object {},
+              "function": "kibana",
+              "type": "function",
+            },
+            Object {
               "arguments": Object {
                 "filters": Array [],
                 "query": Array [],

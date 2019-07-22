@@ -124,6 +124,11 @@ describe('workspace_panel', () => {
       Object {
         "chain": Array [
           Object {
+            "arguments": Object {},
+            "function": "kibana",
+            "type": "function",
+          },
+          Object {
             "arguments": Object {
               "filters": Array [],
               "query": Array [],
@@ -168,7 +173,7 @@ describe('workspace_panel', () => {
         />
       );
 
-      expect(instance.find('EuiFlexItem[data-test-subj="expression-failure"]')).toHaveLength(1);
+      expect(instance.find('[data-test-subj="expression-failure"]').first()).toBeTruthy();
       expect(instance.find(expressionRendererMock)).toHaveLength(0);
     });
 
