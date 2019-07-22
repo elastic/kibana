@@ -104,7 +104,7 @@ export function InnerWorkspacePanel({
       } catch (e) {
         setExpressionError(e.toString());
       }
-    }, [activeVisualization, visualizationState, activeDatasourceId, datasourceStates]);
+    }, [activeVisualization, visualizationState, datasourceMap, datasourceStates]);
 
     useEffect(() => {
       // reset expression error if component attempts to run it again
