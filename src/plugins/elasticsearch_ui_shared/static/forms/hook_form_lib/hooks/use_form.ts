@@ -93,7 +93,7 @@ export const useForm = <T = FormData>({
 
     const formData = getFormData({ unflatten: false });
 
-    await Promise.all(fieldsToValidate.map(field => field.__validate({ formData })));
+    await Promise.all(fieldsToValidate.map(field => field.validate({ formData })));
 
     const isFormValid = fieldsToArray().every(
       field => field.getErrorsMessages() === null && !field.isValidating
@@ -151,11 +151,11 @@ export const useForm = <T = FormData>({
     });
   };
   const setFieldValue: Form<T>['setFieldValue'] = (fieldName, value) => {
-    fieldsRefs.current[fieldName].__setValue(value);
+    fieldsRefs.current[fieldName].setValue(value);
   };
 
   const setFieldErrors: Form<T>['setFieldErrors'] = (fieldName, errors) => {
-    fieldsRefs.current[fieldName].__setErrors(errors);
+    fieldsRefs.current[fieldName].setErrors(errors);
   };
 
   const getFieldDefaultValue: Form['__getFieldDefaultValue'] = fieldName =>

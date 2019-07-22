@@ -277,7 +277,7 @@ export const useField = (form: Form, path: string, config: FieldConfig = {}) => 
 
   // -- API
   // ----------------------------------
-  const clearErrors: Field['__clearErrors'] = (validationType = VALIDATION_TYPES.FIELD) => {
+  const clearErrors: Field['clearErrors'] = (validationType = VALIDATION_TYPES.FIELD) => {
     setErrors(previousErrors => filterErrors(previousErrors, validationType));
   };
 
@@ -286,7 +286,7 @@ export const useField = (form: Form, path: string, config: FieldConfig = {}) => 
    * If a validationType is provided then only that validation will be executed,
    * skipping the other type of validation that might exist.
    */
-  const validate: Field['__validate'] = (validationData = {}) => {
+  const validate: Field['validate'] = (validationData = {}) => {
     const {
       formData = form.__getFormData({ unflatten: false }),
       value: valueToValidate = value,
@@ -339,7 +339,7 @@ export const useField = (form: Form, path: string, config: FieldConfig = {}) => 
    *
    * @param newValue The new value to assign to the field
    */
-  const setValue: Field['__setValue'] = newValue => {
+  const setValue: Field['setValue'] = newValue => {
     onValueChange();
 
     const formattedValue = runFormatters(newValue);
@@ -414,11 +414,11 @@ export const useField = (form: Form, path: string, config: FieldConfig = {}) => 
     isUpdating,
     onChange,
     getErrorsMessages,
-    __setValue: setValue,
-    __setErrors: setErrors,
-    __clearErrors: clearErrors,
+    setValue,
+    setErrors,
+    clearErrors,
+    validate,
     __getOutputValue: getOutputValue,
-    __validate: validate,
   };
 
   form.__addField(field);
