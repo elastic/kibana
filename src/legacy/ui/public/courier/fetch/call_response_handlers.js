@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
+import React from 'react';
 import { toastNotifications } from '../../notify';
 import { RequestFailure } from '../../errors';
 import { RequestStatus } from './req_status';
@@ -39,16 +39,40 @@ export function CallResponseHandlersProvider(Promise) {
         toastNotifications.addWarning({
           title: i18n.translate('common.ui.courier.fetch.requestTimedOutNotificationMessage', {
             defaultMessage: 'Data might be incomplete because your request timed out',
-          })
+          }),
         });
       }
 
       if (response._shards && response._shards.failed) {
+        const failures = Array.isArray(response._shards.failures) ? response._shards.failures : [];
+
         toastNotifications.addWarning({
           title: i18n.translate('common.ui.courier.fetch.shardsFailedNotificationMessage', {
             defaultMessage: '{shardsFailed} of {shardsTotal} shards failed',
-            values: { shardsFailed: response._shards.failed, shardsTotal: response._shards.total }
-          })
+            values: { shardsFailed: response._shards.failed, shardsTotal: response._shards.total },
+          }),
+          text: failures.map((failure, idx) => {
+            return (
+              <div key={idx}>
+                {failure.reason && (
+                  <div>
+                    <b>{failure.reason.type}</b>
+                    <br />
+                    <div>{failure.reason.reason}</div>
+                  </div>
+                )}
+                <div>
+                  <b>Shard:</b> go{failure.shard}
+                </div>
+                <div>
+                  <b>Index:</b> {failure.index}
+                </div>
+                <div>
+                  <b>Node:</b> {failure.node}
+                </div>
+              </div>
+            );
+          }),
         });
       }
 
@@ -65,7 +89,11 @@ export function CallResponseHandlersProvider(Promise) {
         if (searchRequest.filterError(response)) {
           return progress();
         } else {
-          return searchRequest.handleFailure(response.error instanceof SearchError ? response.error : new RequestFailure(null, response));
+          return searchRequest.handleFailure(
+            response.error instanceof SearchError
+              ? response.error
+              : new RequestFailure(null, response)
+          );
         }
       }
 
