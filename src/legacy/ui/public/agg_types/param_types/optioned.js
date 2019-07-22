@@ -26,7 +26,7 @@ function OptionedParamType(config) {
   OptionedParamType.Super.call(this, config);
 
   this.options = new IndexedArray({
-    index: ['val'],
+    index: ['value'],
     immutable: true,
     initialSet: this.options
   });
@@ -38,18 +38,18 @@ function OptionedParamType(config) {
  * @return {any}
  */
 OptionedParamType.prototype.serialize = function (selected) {
-  return selected.val;
+  return selected.value;
 };
 
 /**
  * Take a value that was serialized to the database and
  * return the option that is represents
  *
- * @param  {any} val - the value that was saved
+ * @param  {any} value - the value that was saved
  * @return {object}
  */
-OptionedParamType.prototype.deserialize = function (val) {
-  return this.options.byVal[val];
+OptionedParamType.prototype.deserialize = function (value) {
+  return this.options.byValue[value];
 };
 
 /**
@@ -63,7 +63,7 @@ OptionedParamType.prototype.deserialize = function (val) {
  * @return {undefined}
  */
 OptionedParamType.prototype.write = function (aggConfig, output) {
-  output.params[this.name] = aggConfig.params[this.name].val;
+  output.params[this.name] = aggConfig.params[this.name].value;
 };
 
 export { OptionedParamType };

@@ -7,15 +7,15 @@
 import { i18n } from '@kbn/i18n';
 import { rowCount } from '../../functions/common/rowCount';
 import { FunctionHelp } from '.';
-import { FunctionFactory } from '../../functions/types';
+import { FunctionFactory } from '../../../types';
 
 export const help: FunctionHelp<FunctionFactory<typeof rowCount>> = {
   help: i18n.translate('xpack.canvas.functions.rowCountHelpText', {
     defaultMessage:
-      'Return the number of rows. Pair with {ply} to get the count of unique column ' +
+      'Returns the number of rows. Pair with {plyFn} to get the count of unique column ' +
       'values, or combinations of unique column values.',
     values: {
-      ply: 'ply',
+      plyFn: '`ply`',
     },
   }),
   args: {},

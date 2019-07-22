@@ -17,4 +17,4 @@
  * under the License.
  */
 
-export * from '../../../../plugins/data/common/expressions/types/types';
+export * from '../../../../plugins/data/common/expressions/types';

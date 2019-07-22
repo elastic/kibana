@@ -9,9 +9,20 @@ import actionCreatorFactory from 'typescript-fsa';
 import { HostsSortField } from '../../graphql/types';
 import { KueryFilterQuery, SerializedFilterQuery } from '../model';
 
-import { HostsType } from './model';
-
+import { HostsTableType, HostsType } from './model';
 const actionCreator = actionCreatorFactory('x-pack/siem/local/hosts');
+
+export const updateTableActivePage = actionCreator<{
+  activePage: number;
+  hostsType: HostsType;
+  tableType: HostsTableType;
+}>('UPDATE_HOST_TABLE_ACTIVE_PAGE');
+
+export const updateTableLimit = actionCreator<{
+  hostsType: HostsType;
+  limit: number;
+  tableType: HostsTableType;
+}>('UPDATE_HOST_TABLE_LIMIT');
 
 export const updateAuthenticationsLimit = actionCreator<{ limit: number; hostsType: HostsType }>(
   'UPDATE_AUTHENTICATIONS_LIMIT'

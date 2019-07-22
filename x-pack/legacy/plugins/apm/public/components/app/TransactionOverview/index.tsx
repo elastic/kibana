@@ -28,6 +28,7 @@ import { getHasMLJob } from '../../../services/rest/ml';
 import { history } from '../../../utils/history';
 import { useLocation } from '../../../hooks/useLocation';
 import { ChartsSyncContextProvider } from '../../../context/ChartsSyncContext';
+import { useTrackPageview } from '../../../../../infra/public';
 
 interface Props {
   urlParams: IUrlParams;
@@ -71,6 +72,9 @@ export function TransactionOverview({
   );
 
   const { data: transactionCharts } = useTransactionCharts();
+
+  useTrackPageview({ app: 'apm', path: 'transaction_overview' });
+  useTrackPageview({ app: 'apm', path: 'transaction_overview', delay: 15000 });
 
   // TODO: improve urlParams typings.
   // `serviceName` or `transactionType` will never be undefined here, and this check should not be needed

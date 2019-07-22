@@ -19,7 +19,7 @@ import { createStore, hostsModel, networkModel, State } from '../../../store';
 
 import { AddToKql } from '.';
 
-describe('AddToKql Component', async () => {
+describe('AddToKql Component', () => {
   const state: State = mockGlobalState;
   let store = createStore(state, apolloClientObservable);
 
@@ -87,6 +87,7 @@ describe('AddToKql Component', async () => {
     expect(store.getState().hosts.page).toEqual({
       queries: {
         authentications: {
+          activePage: 0,
           limit: 10,
         },
         hosts: {
