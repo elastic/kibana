@@ -4,12 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ImportError } from 'src/core/server/saved_objects/import/types';
-import { SavedObjectsClientContract, SavedObjectsService } from 'src/core/server';
+import {
+  SavedObjectsClientContract,
+  SavedObjectsService,
+  SavedObjectsImportError,
+} from 'src/core/server';
 import { Readable } from 'stream';
 import { SavedObjectsClientProviderOptions } from 'src/core/server/saved_objects/service/lib/scoped_client_provider';
 import { SpacesClient } from '../spaces_client';
 import { Rereadable } from './rereadable_stream';
+import { spaceIdToNamespace } from '../utils/namespace';
 
 interface CopyOptions {
   objects: Array<{ type: string; id: string }>;
@@ -30,7 +34,7 @@ interface CopyResponse {
   [spaceId: string]: {
     success: boolean;
     successCount: number;
-    errors?: Array<ImportError | CopyToSpaceError>;
+    errors?: Array<SavedObjectsImportError | CopyToSpaceError>;
   };
 }
 
@@ -46,7 +50,9 @@ export function copySavedObjectsToSpacesFactory(
   const { importExport, types, schema } = savedObjectsService;
   const eligibleTypes = types.filter(type => !schema.isNamespaceAgnostic(type));
 
-  const createEmptyFailureResponse = (errors?: Array<ImportError | CopyToSpaceError>) => ({
+  const createEmptyFailureResponse = (
+    errors?: Array<SavedObjectsImportError | CopyToSpaceError>
+  ) => ({
     success: false,
     successCount: 0,
     errors,
@@ -76,7 +82,7 @@ export function copySavedObjectsToSpacesFactory(
       }
 
       const importResponse = await importExport.importSavedObjects({
-        namespace: spaceId,
+        namespace: spaceIdToNamespace(spaceId),
         objectLimit: 10000,
         overwrite: options.overwrite,
         savedObjectsClient,
@@ -95,7 +101,7 @@ export function copySavedObjectsToSpacesFactory(
   };
 
   return async function copySavedObjectsToSpaces(
-    spaces: string[],
+    spaceIds: string[],
     options: CopyOptions
   ): Promise<CopyResponse> {
     const response: CopyResponse = {};
@@ -103,10 +109,10 @@ export function copySavedObjectsToSpacesFactory(
     const objectsStream = await exportRequestedObjects(options);
     const rereadableStream = objectsStream.pipe(new Rereadable());
 
-    let readStream: Readable = rereadableStream;
-    for (const spaceId of spaces) {
+    let readStream: Readable | null = null;
+    for (const spaceId of spaceIds) {
+      readStream = readStream ? rereadableStream.reread() : rereadableStream;
       response[spaceId] = await importObjectsToSpace(spaceId, readStream, options);
-      readStream = rereadableStream.reread();
     }
 
     return response;

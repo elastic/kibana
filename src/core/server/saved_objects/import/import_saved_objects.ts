@@ -59,7 +59,8 @@ export async function importSavedObjects({
   // Validate references
   const { filteredObjects, errors: validationErrors } = await validateReferences(
     objectsFromStream,
-    savedObjectsClient
+    savedObjectsClient,
+    namespace
   );
   errorAccumulator = [...errorAccumulator, ...validationErrors];
 

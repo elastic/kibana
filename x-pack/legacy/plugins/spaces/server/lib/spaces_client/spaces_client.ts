@@ -204,10 +204,10 @@ export class SpacesClient {
     if (!this.useRbac()) {
       return true;
     }
-    const checkPrivileges = this.authorization.checkPrivilegesWithRequest(this.request);
+    const checkPrivileges = this.authorization!.checkPrivilegesWithRequest(this.request);
     const { hasAllRequested } = await checkPrivileges.atSpace(
       spaceId,
-      this.authorization.actions.savedObject.manage
+      this.authorization!.actions.savedObject.manage
     );
 
     return hasAllRequested;

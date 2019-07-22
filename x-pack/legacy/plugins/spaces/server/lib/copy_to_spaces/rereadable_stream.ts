@@ -4,22 +4,23 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import _ from 'lodash';
 import { Transform, TransformCallback, Readable } from 'stream';
 
 export class Rereadable extends Transform {
   private chunks: any[] = [];
 
   constructor() {
-    super({ objectMode: true, writableObjectMode: true, readableObjectMode: true });
+    super({ writableObjectMode: true, readableObjectMode: true });
   }
 
   _transform(chunk: any, encoding: string, callback: TransformCallback) {
-    this.chunks.push(chunk);
+    this.chunks.push(_.cloneDeep(chunk));
     callback(undefined, chunk);
   }
 
   reread() {
-    const queue = this.chunks;
+    const queue = _.cloneDeep(this.chunks);
     return new Readable({
       objectMode: true,
       read(size) {
