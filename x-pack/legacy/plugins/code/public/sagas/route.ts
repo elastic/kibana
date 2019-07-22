@@ -37,33 +37,32 @@ const getRepoFromMatch = (match: Match) =>
 function* handleRoute(action: Action<any>) {
   const currentMatch = action.payload;
   const previousMatch = yield select(previousMatchSelector);
-  if (
-    currentMatch.path !== previousMatch.path &&
-    !(MAIN_ROUTES.includes(currentMatch.path) && MAIN_ROUTES.includes(previousMatch.path))
-  ) {
-    yield put(routePathChange());
-    if (currentMatch.path === ROUTES.MAIN) {
+  if (MAIN_ROUTES.includes(currentMatch.path)) {
+    if (MAIN_ROUTES.includes(previousMatch.path)) {
+      const currentRepo = getRepoFromMatch(currentMatch);
+      const previousRepo = getRepoFromMatch(previousMatch);
+      const currentRevision = currentMatch.params.revision;
+      const previousRevision = previousMatch.params.revision;
+      const currentFilePath = currentMatch.params.path;
+      const previousFilePath = previousMatch.params.path;
+      if (currentRepo !== previousRepo) {
+        yield put(repoChange(currentRepo));
+      }
+      if (currentRevision !== previousRevision) {
+        yield put(revisionChange());
+      }
+      if (currentFilePath !== previousFilePath) {
+        yield put(filePathChange());
+      }
+    } else {
+      yield put(routePathChange());
       const currentRepo = getRepoFromMatch(currentMatch);
       yield put(repoChange(currentRepo));
       yield put(revisionChange());
       yield put(filePathChange());
     }
-  } else if (currentMatch.path === ROUTES.MAIN) {
-    const currentRepo = getRepoFromMatch(currentMatch);
-    const previousRepo = getRepoFromMatch(previousMatch);
-    const currentRevision = currentMatch.params.revision;
-    const previousRevision = previousMatch.params.revision;
-    const currentFilePath = currentMatch.params.path;
-    const previousFilePath = previousMatch.params.path;
-    if (currentRepo !== previousRepo) {
-      yield put(repoChange(currentRepo));
-    }
-    if (currentRevision !== previousRevision) {
-      yield put(revisionChange());
-    }
-    if (currentFilePath !== previousFilePath) {
-      yield put(filePathChange());
-    }
+  } else if (currentMatch.path !== previousMatch.path) {
+    yield put(routePathChange());
   }
 }
 
