@@ -20,6 +20,7 @@
     "detected": null,
     "byUuid": {
       "8eba4902-df80-43b0-b6c2-ed8ca290984e": {
+        "beatType": "metricbeat",
         "lastTimestamp": 1554821536716,
         "isInternalCollector": true,
         "isNetNewUser": false
@@ -61,6 +62,7 @@
   },
   "_meta": {
     "secondsAgo": 30,
+    "isOnCloud": false,
     "clusterUuid": null
   }
 }
