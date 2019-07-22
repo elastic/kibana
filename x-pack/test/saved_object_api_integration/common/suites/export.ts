@@ -17,6 +17,7 @@ interface ExportTest {
 
 interface ExportTests {
   spaceAwareType: ExportTest;
+  exportSpace: ExportTest;
   noTypeOrObjects: ExportTest;
 }
 
@@ -52,6 +53,18 @@ export function exportTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
       error: 'Bad Request',
       message: '"value" must be an object',
       validation: { source: 'payload', keys: ['value'] },
+    });
+  };
+
+  const expectInvalidTypeSpecified = (resp: { [key: string]: any }) => {
+    expect(resp.body).to.eql({
+      statusCode: 400,
+      error: 'Bad Request',
+      message: `child \"objects\" fails because [\"objects\" at position 0 fails because [child \"type\" fails because [\"type\" must be one of [config, globaltype, map, canvas-workpad, canvas-element, index-pattern, visualization, search, dashboard, url]]]]`,
+      validation: {
+        source: 'payload',
+        keys: ['objects.0.type'],
+      },
     });
   };
 
@@ -113,6 +126,24 @@ export function exportTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
           .then(tests.spaceAwareType.response);
       });
 
+      describe('space type', () => {
+        it(`should return ${tests.exportSpace.statusCode} with ${tests.exportSpace.description}`, async () => {
+          await supertest
+            .post(`${getUrlPrefix(spaceId)}/api/saved_objects/_export`)
+            .send({
+              objects: [
+                {
+                  type: 'space',
+                  id: `space_1`,
+                },
+              ],
+            })
+            .auth(user.username, user.password)
+            .expect(tests.exportSpace.statusCode)
+            .then(tests.exportSpace.response);
+        });
+      });
+
       describe('no type or objects', () => {
         it(`should return ${tests.noTypeOrObjects.statusCode} with ${tests.noTypeOrObjects.description}`, async () => {
           await supertest
@@ -132,6 +163,7 @@ export function exportTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
   return {
     createExpectRbacForbidden,
     expectTypeOrObjectsRequired,
+    expectInvalidTypeSpecified,
     createExpectVisualizationResults,
     exportTest,
   };
