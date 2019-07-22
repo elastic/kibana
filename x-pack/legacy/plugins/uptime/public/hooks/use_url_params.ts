@@ -5,57 +5,44 @@
  */
 
 import qs from 'querystring';
-import { useContext, useState } from 'react';
-import { RouteComponentProps } from 'react-router';
-import { History } from 'history';
-import { UptimeSettingsContext } from '../contexts';
+import { useContext } from 'react';
+import { UptimeRefreshContext } from '../contexts';
 import { UptimeUrlParams, getSupportedUrlParams } from '../lib/helper';
-
-interface Location {
-  pathname: string;
-  search: string;
-}
 
 type GetUrlParams = () => UptimeUrlParams;
 type UpdateUrlParams = (updatedParams: { [key: string]: string | number | boolean }) => void;
-type SetRouter = (routerProps: RouteComponentProps) => void;
 
-export type UptimeUrlParamsHook = () => [GetUrlParams, UpdateUrlParams, SetRouter];
+export type UptimeUrlParamsHook = () => [GetUrlParams, UpdateUrlParams];
 
 export const useUrlParams: UptimeUrlParamsHook = () => {
-  const [locationState, setLocation] = useState<Location | undefined>(undefined);
-  const [historyState, setHistory] = useState<History | undefined>(undefined);
-  const [urlParams, setUrlParams] = useState<{ [key: string]: string } | undefined>(undefined);
-  const f = useContext(UptimeSettingsContext);
+  const refreshContext = useContext(UptimeRefreshContext);
 
   const getUrlParams: GetUrlParams = () => {
-    let currentParams = {};
-    if (locationState) {
-      const { search } = locationState;
-      currentParams = qs.parse(search[0] === '?' ? search.slice(1) : search);
+    let search: string | undefined;
+    if (refreshContext.location) {
+      search = refreshContext.location.search;
     }
-    return getSupportedUrlParams({ ...urlParams, ...currentParams });
+
+    const params = search ? { ...qs.parse(search[0] === '?' ? search.slice(1) : search) } : {};
+    return getSupportedUrlParams(params);
   };
 
   const updateUrlParams: UpdateUrlParams = updatedParams => {
-    if (locationState && historyState) {
-      const { pathname } = locationState;
-      const updatedSearch = {
-        ...urlParams,
-        ...updatedParams,
-      };
-      setUrlParams(updatedSearch);
-      historyState.push({
+    if (refreshContext.history && refreshContext.location) {
+      const {
+        history,
+        location: { pathname, search },
+      } = refreshContext;
+      const currentParams: any = qs.parse(search[0] === '?' ? search.slice(1) : search);
+      history.push({
         pathname,
-        search: qs.stringify(updatedSearch),
+        search: qs.stringify({
+          ...currentParams,
+          ...updatedParams,
+        }),
       });
     }
   };
 
-  const setRouter: SetRouter = ({ history, location }) => {
-    setHistory(history);
-    setLocation(location);
-  };
-
-  return [getUrlParams, updateUrlParams, setRouter];
+  return [getUrlParams, updateUrlParams];
 };
