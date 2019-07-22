@@ -45,7 +45,7 @@ export class VegaMapView extends VegaBaseView {
         ...await this._serviceSettings.getAttributesForTMSLayer(baseMapOpts, true, isDarkMode),
       };
       if (!baseMapOpts) {
-        this.onWarn(i18n.translate('vega.mapView.mapStyleNotFoundWarningMessage', {
+        this.onWarn(i18n.translate('visTypeVega.mapView.mapStyleNotFoundWarningMessage', {
           defaultMessage: '{mapStyleParam} was not found',
           values: { mapStyleParam: `"mapStyle": ${JSON.stringify(mapStyle)}` },
         }));
@@ -59,13 +59,13 @@ export class VegaMapView extends VegaBaseView {
       if (value === undefined) {
         value = dflt;
       } else if (value < min) {
-        this.onWarn(i18n.translate('vega.mapView.resettingPropertyToMinValueWarningMessage', {
+        this.onWarn(i18n.translate('visTypeVega.mapView.resettingPropertyToMinValueWarningMessage', {
           defaultMessage: 'Resetting {name} to {min}',
           values: { name: `"${name}"`, min },
         }));
         value = min;
       } else if (value > max) {
-        this.onWarn(i18n.translate('vega.mapView.resettingPropertyToMaxValueWarningMessage', {
+        this.onWarn(i18n.translate('visTypeVega.mapView.resettingPropertyToMaxValueWarningMessage', {
           defaultMessage: 'Resetting {name} to {max}',
           values: { name: `"${name}"`, max },
         }));
@@ -77,7 +77,7 @@ export class VegaMapView extends VegaBaseView {
     let minZoom = validate('minZoom', mapConfig.minZoom, limitMinZ, limitMinZ, limitMaxZ);
     let maxZoom = validate('maxZoom', mapConfig.maxZoom, limitMaxZ, limitMinZ, limitMaxZ);
     if (minZoom > maxZoom) {
-      this.onWarn(i18n.translate('vega.mapView.minZoomAndMaxZoomHaveBeenSwappedWarningMessage', {
+      this.onWarn(i18n.translate('visTypeVega.mapView.minZoomAndMaxZoomHaveBeenSwappedWarningMessage', {
         defaultMessage: '{minZoomPropertyName} and {maxZoomPropertyName} have been swapped',
         values: {
           minZoomPropertyName: '"minZoom"',

@@ -40,7 +40,7 @@ export const createVegaVisualization = ({ serviceSettings }) => class VegaVisual
     if (index) {
       idxObj = await findObjectByTitle(this.savedObjectsClient, 'index-pattern', index);
       if (!idxObj) {
-        throw new Error(i18n.translate('vega.visualization.indexNotFoundErrorMessage', {
+        throw new Error(i18n.translate('visTypeVega.visualization.indexNotFoundErrorMessage', {
           defaultMessage: 'Index {index} not found',
           values: { index: `"${index}"` },
         }));
@@ -48,7 +48,7 @@ export const createVegaVisualization = ({ serviceSettings }) => class VegaVisual
     } else {
       idxObj = await this._vis.API.indexPatterns.getDefault();
       if (!idxObj) {
-        throw new Error(i18n.translate('vega.visualization.unableToFindDefaultIndexErrorMessage', {
+        throw new Error(i18n.translate('visTypeVega.visualization.unableToFindDefaultIndexErrorMessage', {
           defaultMessage: 'Unable to find default index',
         }));
       }
@@ -64,7 +64,7 @@ export const createVegaVisualization = ({ serviceSettings }) => class VegaVisual
    */
   async render(visData, visParams, status) {
     if (!visData && !this._vegaView) {
-      toastNotifications.addWarning(i18n.translate('vega.visualization.unableToRenderWithoutDataWarningMessage', {
+      toastNotifications.addWarning(i18n.translate('visTypeVega.visualization.unableToRenderWithoutDataWarningMessage', {
         defaultMessage: 'Unable to render without data',
       }));
       return;
@@ -79,7 +79,7 @@ export const createVegaVisualization = ({ serviceSettings }) => class VegaVisual
         this._vegaView.onError(error);
       } else {
         toastNotifications.addError(error, {
-          title: i18n.translate('vega.visualization.renderErrorTitle', {
+          title: i18n.translate('visTypeVega.visualization.renderErrorTitle', {
             defaultMessage: 'Vega error',
           }),
         });

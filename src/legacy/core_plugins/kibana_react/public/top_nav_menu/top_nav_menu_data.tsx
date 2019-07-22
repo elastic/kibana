@@ -17,6 +17,15 @@
  * under the License.
  */
 
-import React from 'react';
+export type TopNavMenuAction = (anchorElement: EventTarget) => void;
 
-export const UIRestrictionsContext = React.createContext();
+export interface TopNavMenuData {
+  id?: string;
+  label: string;
+  run: TopNavMenuAction;
+  description?: string;
+  testId?: string;
+  className?: string;
+  disableButton?: boolean | (() => boolean);
+  tooltip?: string | (() => string);
+}

@@ -147,7 +147,7 @@ export class VegaBaseView {
         // because user can only supply pure JSON data structure.
         uri = uri.url;
       } else if (!this._enableExternalUrls) {
-        throw new Error(i18n.translate('vega.vegaParser.baseView.externalUrlsAreNotEnabledErrorMessage', {
+        throw new Error(i18n.translate('visTypeVega.vegaParser.baseView.externalUrlsAreNotEnabledErrorMessage', {
           defaultMessage: 'External URLs are not enabled. Add   {enableExternalUrls}   to {kibanaConfigFileName}',
           values: {
             enableExternalUrls: 'vega.enableExternalUrls: true',
@@ -246,7 +246,7 @@ export class VegaBaseView {
       const handlerFunc = vegaFunctions[funcName];
       if (!handlerFunc || !this[handlerFunc]) {
         // in case functions don't match the list above
-        throw new Error(i18n.translate('vega.vegaParser.baseView.functionIsNotDefinedForGraphErrorMessage', {
+        throw new Error(i18n.translate('visTypeVega.vegaParser.baseView.functionIsNotDefinedForGraphErrorMessage', {
           defaultMessage: '{funcName} is not defined for this graph',
           values: { funcName: `${funcName}()` },
         }));
@@ -325,7 +325,7 @@ export class VegaBaseView {
       const startDate = dateMath.parse(start);
       const endDate = dateMath.parse(end);
       if (!startDate || !endDate || !startDate.isValid() || !endDate.isValid()) {
-        throw new Error(i18n.translate('vega.vegaParser.baseView.timeValuesTypeErrorMessage', {
+        throw new Error(i18n.translate('visTypeVega.vegaParser.baseView.timeValuesTypeErrorMessage', {
           defaultMessage: 'Error setting time filter: both time values must be either relative or absolute dates. {start}, {end}',
           values: {
             start: `start=${JSON.stringify(start)}`,

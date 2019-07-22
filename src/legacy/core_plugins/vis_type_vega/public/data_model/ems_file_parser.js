@@ -36,7 +36,7 @@ export class EmsFileParser {
    */
   parseUrl(obj, url) {
     if (typeof url.name !== 'string') {
-      throw new Error(i18n.translate('vega.emsFileParser.missingNameOfFileErrorMessage', {
+      throw new Error(i18n.translate('visTypeVega.emsFileParser.missingNameOfFileErrorMessage', {
         defaultMessage: '{dataUrlParam} with {dataUrlParamValue} requires {nameParam} parameter (name of the file)',
         values: {
           dataUrlParam: '"data.url"',
@@ -65,7 +65,7 @@ export class EmsFileParser {
     for (const { obj, name } of requests) {
       const foundLayer = layers.find(v => v.name === name);
       if (!foundLayer) {
-        throw new Error(i18n.translate('vega.emsFileParser.emsFileNameDoesNotExistErrorMessage', {
+        throw new Error(i18n.translate('visTypeVega.emsFileParser.emsFileNameDoesNotExistErrorMessage', {
           defaultMessage: '{emsfile} {emsfileName} does not exist',
           values: { emsfileName: JSON.stringify(name), emsfile: 'emsfile' },
         }));

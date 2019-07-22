@@ -567,7 +567,7 @@ Default: `"-_index:.kibana"`
 |`number`
 |The number of documents to retrieve. For better performance, use a smaller data set.
 
-Default: `100`
+Default: `1000`
 
 |`fields`
 |`string`
