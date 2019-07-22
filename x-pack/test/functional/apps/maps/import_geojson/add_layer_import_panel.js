@@ -12,7 +12,7 @@ export default function ({ getPageObjects }) {
 
   const IMPORT_FILE_PREVIEW_NAME = 'Import File';
   const FILE_LOAD_DIR = 'test_upload_files';
-  const DEFAULT_LOAD_FILE_NAME = 'Point.json';
+  const DEFAULT_LOAD_FILE_NAME = 'point.json';
   const GEO_POINT = 'geo_point';
   const GEO_SHAPE = 'geo_shape';
 
@@ -23,25 +23,21 @@ export default function ({ getPageObjects }) {
 
     beforeEach(async () => {
       await PageObjects.maps.clickAddLayer();
-      // Verify panel page element is open
       const panelOpen = await PageObjects.maps.isLayerAddPanelOpen();
       expect(panelOpen).to.be(true);
-      // Select upload source
+
       await PageObjects.maps.selectGeoJsonUploadSource();
-      // Upload file
       await PageObjects.maps.uploadJsonFileForIndexing(
         path.join(__dirname, FILE_LOAD_DIR, DEFAULT_LOAD_FILE_NAME)
       );
       await PageObjects.maps.waitForLayersToLoad();
-      // Check file upload in TOC
       const layerLoadedInToc = await PageObjects.maps
         .doesLayerExist(IMPORT_FILE_PREVIEW_NAME);
       expect(layerLoadedInToc).to.be(true);
-      // Check file is loaded in file picker
+
       const filePickerLoadedFile = await PageObjects.maps
         .hasFilePickerLoadedFile(DEFAULT_LOAD_FILE_NAME);
       expect(filePickerLoadedFile).to.be(true);
-
     });
 
     afterEach(async () => {
@@ -50,12 +46,10 @@ export default function ({ getPageObjects }) {
 
     it('should close & remove preview layer on clicking "Cancel" after uploading file',
       async () => {
-        // Click cancel
         await PageObjects.maps.cancelLayerAdd();
-        // Verify panel isn't open
         const panelOpen = await PageObjects.maps.isLayerAddPanelOpen();
         expect(panelOpen).to.be(false);
-        // Verify layer has been removed
+
         await PageObjects.maps.waitForLayerDeleted(IMPORT_FILE_PREVIEW_NAME);
         const layerLoadedInToc = await PageObjects.maps.doesLayerExist(IMPORT_FILE_PREVIEW_NAME);
         expect(layerLoadedInToc).to.be(false);
@@ -64,7 +58,7 @@ export default function ({ getPageObjects }) {
     it('should replace layer on input change',
       async () => {
         // Upload second file
-        const secondLoadFileName = 'Polygon.json';
+        const secondLoadFileName = 'polygon.json';
         await PageObjects.maps.uploadJsonFileForIndexing(
           path.join(__dirname, FILE_LOAD_DIR, secondLoadFileName)
         );
@@ -78,7 +72,7 @@ export default function ({ getPageObjects }) {
     it('should clear layer on replacement layer load error',
       async () => {
         // Upload second file
-        const secondLoadFileName = 'notJson.txt';
+        const secondLoadFileName = 'not_json.txt';
         await PageObjects.maps.uploadJsonFileForIndexing(
           path.join(__dirname, FILE_LOAD_DIR, secondLoadFileName)
         );
@@ -101,7 +95,7 @@ export default function ({ getPageObjects }) {
         expect(isGeoShapeAvab).to.be(true);
 
         // Upload shape file
-        const polygonJsonFile = 'Polygon.json';
+        const polygonJsonFile = 'polygon.json';
         await PageObjects.maps.uploadJsonFileForIndexing(
           path.join(__dirname, FILE_LOAD_DIR, polygonJsonFile)
         );
@@ -115,7 +109,7 @@ export default function ({ getPageObjects }) {
 
         // Multis
         // Upload multipoint file
-        const multiPointJsonFile = 'MultiPoint.json';
+        const multiPointJsonFile = 'multi_point.json';
         await PageObjects.maps.uploadJsonFileForIndexing(
           path.join(__dirname, FILE_LOAD_DIR, multiPointJsonFile)
         );
@@ -128,7 +122,7 @@ export default function ({ getPageObjects }) {
         expect(isGeoShapeAvab).to.be(true);
 
         // Upload multipolygon file
-        const multiPolygonJsonFile = 'MultiPolygon.json';
+        const multiPolygonJsonFile = 'multi_polygon.json';
         await PageObjects.maps.uploadJsonFileForIndexing(
           path.join(__dirname, FILE_LOAD_DIR, multiPolygonJsonFile)
         );
