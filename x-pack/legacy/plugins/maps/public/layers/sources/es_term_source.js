@@ -65,11 +65,7 @@ export class ESTermSource extends AbstractESSource {
   }
 
   hasCompleteConfig() {
-    if (_.has(this._descriptor, 'indexPatternId') && _.has(this._descriptor, 'term')) {
-      return true;
-    }
-
-    return false;
+    return (_.has(this._descriptor, 'indexPatternId') && _.has(this._descriptor, 'term'));
   }
 
   getIndexPatternIds() {
@@ -107,7 +103,7 @@ export class ESTermSource extends AbstractESSource {
     searchSource.setField('aggs', aggConfigs.toDsl());
 
     const requestName = `${this._descriptor.indexPatternTitle}.${this._descriptor.term}`;
-    const requestDesc = this.getJoinDescription(leftSourceName, leftFieldName);
+    const requestDesc = this._getRequestDescription(leftSourceName, leftFieldName);
     const rawEsData = await this._runEsQuery(requestName, searchSource, requestDesc);
 
     const metricPropertyNames = configStates
@@ -130,7 +126,7 @@ export class ESTermSource extends AbstractESSource {
     return false;
   }
 
-  getJoinDescription(leftSourceName, leftFieldName) {
+  _getRequestDescription(leftSourceName, leftFieldName) {
     const metrics = this._getValidMetrics().map(metric => {
       return metric.type !== 'count' ? `${metric.type} ${metric.field}` : 'count';
     });
