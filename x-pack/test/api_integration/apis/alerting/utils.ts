@@ -10,8 +10,9 @@ const esTestIndexName = '.kibaka-alerting-test-data';
 
 export function getTestAlertData(attributeOverwrites = {}) {
   return {
+    enabled: true,
     alertTypeId: 'test.noop',
-    interval: 10 * 1000,
+    interval: '10s',
     actions: [
       {
         group: 'default',

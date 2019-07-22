@@ -66,12 +66,9 @@ export const SnapshotDetails: React.FunctionComponent<Props> = ({
   const [activeTab, setActiveTab] = useState<string>(TAB_SUMMARY);
 
   // Reset tab when we look at a different snapshot.
-  useEffect(
-    () => {
-      setActiveTab(TAB_SUMMARY);
-    },
-    [repositoryName, snapshotId]
-  );
+  useEffect(() => {
+    setActiveTab(TAB_SUMMARY);
+  }, [repositoryName, snapshotId]);
 
   let tabs;
 

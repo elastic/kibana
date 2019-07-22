@@ -48,11 +48,11 @@ export default function ({ getService, getPageObjects }) {
       });
       await retry.try(async function () {
         const predecessorCountPicker = await PageObjects.context.getPredecessorCountPicker();
-        expect(await predecessorCountPicker.getProperty('value')).to.equal(`${TEST_DEFAULT_CONTEXT_SIZE}`);
+        expect(await predecessorCountPicker.getAttribute('value')).to.equal(`${TEST_DEFAULT_CONTEXT_SIZE}`);
       });
       await retry.try(async function () {
         const successorCountPicker = await PageObjects.context.getSuccessorCountPicker();
-        expect(await successorCountPicker.getProperty('value')).to.equal(`${TEST_DEFAULT_CONTEXT_SIZE}`);
+        expect(await successorCountPicker.getAttribute('value')).to.equal(`${TEST_DEFAULT_CONTEXT_SIZE}`);
       });
     });
 

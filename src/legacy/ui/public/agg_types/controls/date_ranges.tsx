@@ -76,25 +76,19 @@ function DateRangesParamEditor({
     }
   }, []);
 
-  useEffect(
-    () => {
-      // responsible for discarding changes
-      if (
-        value.length !== ranges.length ||
-        value.some((range, index) => !isEqual(range, omit(ranges[index], 'id')))
-      ) {
-        setRanges(value.map(range => ({ ...range, id: generateId() })));
-      }
-    },
-    [value]
-  );
+  useEffect(() => {
+    // responsible for discarding changes
+    if (
+      value.length !== ranges.length ||
+      value.some((range, index) => !isEqual(range, omit(ranges[index], 'id')))
+    ) {
+      setRanges(value.map(range => ({ ...range, id: generateId() })));
+    }
+  }, [value]);
 
-  useEffect(
-    () => {
-      setValidity(!hasInvalidRange);
-    },
-    [hasInvalidRange]
-  );
+  useEffect(() => {
+    setValidity(!hasInvalidRange);
+  }, [hasInvalidRange]);
 
   const updateRanges = (rangeValues: DateRangeValuesModel[]) => {
     // do not set internal id parameter into saved object

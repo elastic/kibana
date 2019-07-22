@@ -14,12 +14,16 @@ export const ANOMALIES = i18n.translate('xpack.siem.anomaliesTable.table.anomali
   defaultMessage: 'Anomalies',
 });
 
+export const TOOLTIP = i18n.translate('xpack.siem.anomaliesTable.table.anomaliesTooltip', {
+  defaultMessage: 'The anomalies table is not filterable via the SIEM global KQL search.',
+});
+
 export const LOADING = i18n.translate('xpack.siem.ml.table.loadingDescription', {
   defaultMessage: 'Loading…',
 });
 
 export const SCORE = i18n.translate('xpack.siem.ml.table.scoreTitle', {
-  defaultMessage: 'Score',
+  defaultMessage: 'Anomaly Score',
 });
 
 export const HOST_NAME = i18n.translate('xpack.siem.ml.table.hostNameTitle', {
@@ -35,9 +39,13 @@ export const ENTITY = i18n.translate('xpack.siem.ml.table.entityTitle', {
 });
 
 export const DETECTOR = i18n.translate('xpack.siem.ml.table.detectorTitle', {
-  defaultMessage: 'Detector',
+  defaultMessage: 'Job Name',
 });
 
 export const NETWORK_NAME = i18n.translate('xpack.siem.ml.table.networkNameTitle', {
   defaultMessage: 'Network IP',
+});
+
+export const TIME_STAMP = i18n.translate('xpack.siem.ml.table.timestampTitle', {
+  defaultMessage: 'Timestamp',
 });

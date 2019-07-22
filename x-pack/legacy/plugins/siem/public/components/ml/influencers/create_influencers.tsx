@@ -8,10 +8,12 @@ import { EuiFlexItem } from '@elastic/eui';
 import React from 'react';
 import { isEmpty } from 'lodash/fp';
 import { Anomaly } from '../types';
+import { getEntries } from '../get_entries';
 
 export const createKeyAndValue = (influencer: Record<string, string>): string => {
-  if (Object.keys(influencer)[0] != null && Object.values(influencer)[0] != null) {
-    return `${Object.keys(influencer)[0]}: “${Object.values(influencer)[0]}”`;
+  const [key, value] = getEntries(influencer);
+  if (key != null && value != null) {
+    return `${key}: "${value}"`;
   } else {
     return '';
   }

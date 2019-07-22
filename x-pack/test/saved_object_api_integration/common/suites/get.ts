@@ -127,9 +127,7 @@ export function getTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>) 
       before(() => esArchiver.load('saved_objects/spaces'));
       after(() => esArchiver.unload('saved_objects/spaces'));
 
-      it(`should return ${
-        tests.spaceAware.statusCode
-      } when getting a space aware doc`, async () => {
+      it(`should return ${tests.spaceAware.statusCode} when getting a space aware doc`, async () => {
         await supertest
           .get(
             `${getUrlPrefix(spaceId)}/api/saved_objects/visualization/${getIdPrefix(
@@ -141,9 +139,7 @@ export function getTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>) 
           .then(tests.spaceAware.response);
       });
 
-      it(`should return ${
-        tests.notSpaceAware.statusCode
-      } when deleting a non-space-aware doc`, async () => {
+      it(`should return ${tests.notSpaceAware.statusCode} when deleting a non-space-aware doc`, async () => {
         await supertest
           .get(`${getUrlPrefix(spaceId)}/api/saved_objects/globaltype/${notSpaceAwareId}`)
           .auth(user.username, user.password)

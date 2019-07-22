@@ -16,7 +16,7 @@ export interface ElasticsearchServiceSetup
 |  Property | Type | Description |
 |  --- | --- | --- |
 |  [adminClient$](./kibana-plugin-server.elasticsearchservicesetup.adminclient$.md) | <code>Observable&lt;ClusterClient&gt;</code> |  |
-|  [createClient](./kibana-plugin-server.elasticsearchservicesetup.createclient.md) | <code>(type: string, config: ElasticsearchClientConfig) =&gt; ClusterClient</code> |  |
+|  [createClient](./kibana-plugin-server.elasticsearchservicesetup.createclient.md) | <code>(type: string, clientConfig?: Partial&lt;ElasticsearchClientConfig&gt;) =&gt; ClusterClient</code> | Create application specific Elasticsearch cluster API client with customized config. |
 |  [dataClient$](./kibana-plugin-server.elasticsearchservicesetup.dataclient$.md) | <code>Observable&lt;ClusterClient&gt;</code> |  |
 |  [legacy](./kibana-plugin-server.elasticsearchservicesetup.legacy.md) | <code>{</code><br/><code>        readonly config$: Observable&lt;ElasticsearchConfig&gt;;</code><br/><code>    }</code> |  |
 

@@ -56,7 +56,7 @@ export async function anomalySeriesFetcher({
         ml_avg_response_times: {
           date_histogram: {
             field: 'timestamp',
-            interval: intervalString,
+            fixed_interval: intervalString,
             min_doc_count: 0,
             extended_bounds: {
               min: newStart,

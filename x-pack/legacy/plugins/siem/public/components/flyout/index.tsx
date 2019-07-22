@@ -47,21 +47,19 @@ interface OwnProps {
 
 interface DispatchProps {
   showTimeline?: ActionCreator<{ id: string; show: boolean }>;
-  applyDeltaToWidth?: (
-    {
-      id,
-      delta,
-      bodyClientWidthPixels,
-      maxWidthPercent,
-      minWidthPixels,
-    }: {
-      id: string;
-      delta: number;
-      bodyClientWidthPixels: number;
-      maxWidthPercent: number;
-      minWidthPixels: number;
-    }
-  ) => void;
+  applyDeltaToWidth?: ({
+    id,
+    delta,
+    bodyClientWidthPixels,
+    maxWidthPercent,
+    minWidthPixels,
+  }: {
+    id: string;
+    delta: number;
+    bodyClientWidthPixels: number;
+    maxWidthPercent: number;
+    minWidthPixels: number;
+  }) => void;
 }
 
 interface StateReduxProps {

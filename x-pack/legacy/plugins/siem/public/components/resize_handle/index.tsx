@@ -9,15 +9,7 @@ import { fromEvent, Observable, Subscription } from 'rxjs';
 import { concatMap, takeUntil } from 'rxjs/operators';
 import styled, { injectGlobal } from 'styled-components';
 
-export type OnResize = (
-  {
-    delta,
-    id,
-  }: {
-    delta: number;
-    id: string;
-  }
-) => void;
+export type OnResize = ({ delta, id }: { delta: number; id: string }) => void;
 
 export const resizeCursorStyle = 'col-resize';
 export const globalResizeCursorClassName = 'global-resize-cursor';

@@ -13,7 +13,7 @@ const layerList = [
     'alpha': 1,
     'sourceDescriptor': {
       'type': 'EMS_TMS',
-      'id': 'road_map'
+      'isAutoSelect': true
     },
     'visible': true,
     'style': {
