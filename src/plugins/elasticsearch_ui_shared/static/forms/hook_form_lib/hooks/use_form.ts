@@ -70,12 +70,12 @@ export const useForm = <T = FormData>({
   const getFormData: Form<T>['__getFormData'] = (getDataOptions = { unflatten: true }) =>
     getDataOptions.unflatten
       ? (unflattenObject(
-          mapFormFields(stripEmptyFields(fieldsRefs.current), field => field.getOutputValue())
+          mapFormFields(stripEmptyFields(fieldsRefs.current), field => field.__getOutputValue())
         ) as T)
       : Object.entries(fieldsRefs.current).reduce(
           (acc, [key, field]) => ({
             ...acc,
-            [key]: field.getOutputValue(),
+            [key]: field.__getOutputValue(),
           }),
           {} as T
         );
@@ -93,7 +93,7 @@ export const useForm = <T = FormData>({
 
     const formData = getFormData({ unflatten: false });
 
-    await Promise.all(fieldsToValidate.map(field => field.validate({ formData })));
+    await Promise.all(fieldsToValidate.map(field => field.__validate({ formData })));
 
     const isFormValid = fieldsToArray().every(
       field => field.getErrorsMessages() === null && !field.isValidating
@@ -109,7 +109,7 @@ export const useForm = <T = FormData>({
     // Only update the formData if the path does not exist (= it is the _first_ time
     // the field is added), to avoid entering an infinite loop when the form is re-rendered.
     if (!{}.hasOwnProperty.call(formData$.current.value, field.path)) {
-      updateFormDataAt(field.path, field.getOutputValue());
+      updateFormDataAt(field.path, field.__getOutputValue());
     }
   };
 
@@ -151,11 +151,11 @@ export const useForm = <T = FormData>({
     });
   };
   const setFieldValue: Form<T>['setFieldValue'] = (fieldName, value) => {
-    fieldsRefs.current[fieldName].setValue(value);
+    fieldsRefs.current[fieldName].__setValue(value);
   };
 
   const setFieldErrors: Form<T>['setFieldErrors'] = (fieldName, errors) => {
-    fieldsRefs.current[fieldName].setErrors(errors);
+    fieldsRefs.current[fieldName].__setErrors(errors);
   };
 
   const getFieldDefaultValue: Form['__getFieldDefaultValue'] = fieldName =>

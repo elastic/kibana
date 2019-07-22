@@ -77,15 +77,15 @@ export interface Field {
   readonly form: Form;
   getErrorsMessages: (validationType?: 'field' | string) => string | null;
   onChange: (event: ChangeEvent<{ name?: string; value: string; checked?: boolean }>) => void;
-  validate: (validateData?: {
+  __validate: (validateData?: {
     formData?: any;
     value?: unknown;
     validationType?: string;
   }) => FieldValidateResponse | Promise<FieldValidateResponse>;
-  setErrors: (errors: ValidationError[]) => void;
-  clearErrors: (type?: string | string[]) => void;
-  getOutputValue: (rawValue?: unknown) => unknown;
-  setValue: (value: FieldValue) => void;
+  __setValue: (value: FieldValue) => void;
+  __setErrors: (errors: ValidationError[]) => void;
+  __clearErrors: (type?: string | string[]) => void;
+  __getOutputValue: (rawValue?: unknown) => unknown;
 }
 
 export interface FieldConfig<T = FormData> {
