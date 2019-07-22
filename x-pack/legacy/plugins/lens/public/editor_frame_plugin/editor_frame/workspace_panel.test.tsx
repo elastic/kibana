@@ -183,7 +183,7 @@ describe('workspace_panel', () => {
     mockDatasource.getLayers.mockReturnValue(['first']);
 
     mockDatasource2.toExpression.mockReturnValue('datasource2');
-    mockDatasource2.getLayers.mockReturnValue(['second']);
+    mockDatasource2.getLayers.mockReturnValue(['second', 'third']);
 
     instance = mount(
       <InnerWorkspacePanel
@@ -215,7 +215,7 @@ describe('workspace_panel', () => {
 
     expect(
       (instance.find(expressionRendererMock).prop('expression') as Ast).chain[0].arguments.layerIds
-    ).toEqual(['first', 'second']);
+    ).toEqual(['first', 'second', 'third']);
     expect(
       (instance.find(expressionRendererMock).prop('expression') as Ast).chain[0].arguments.tables
     ).toMatchInlineSnapshot(`
@@ -225,6 +225,16 @@ describe('workspace_panel', () => {
             Object {
               "arguments": Object {},
               "function": "datasource",
+              "type": "function",
+            },
+          ],
+          "type": "expression",
+        },
+        Object {
+          "chain": Array [
+            Object {
+              "arguments": Object {},
+              "function": "datasource2",
               "type": "function",
             },
           ],
