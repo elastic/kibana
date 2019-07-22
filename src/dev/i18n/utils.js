@@ -324,3 +324,8 @@ export class ErrorReporter {
     );
   }
 }
+
+// export function arrayify<Subj = any>(subj: Subj | Subj[]): Subj[] {
+export function arrayify(subj) {
+  return Array.isArray(subj) ? subj : [subj];
+}

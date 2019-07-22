@@ -20,6 +20,7 @@
 jest.mock('ui/new_platform', () => ({
   npSetup: {
     core: {
+      http: {},
       injectedMetadata: {
         getKibanaVersion: () => '8.0.0',
         getBasePath: () => '/lol',
@@ -49,8 +50,7 @@ jest.mock('./registries', () => ({
   },
 }));
 
-jest.mock('../../../../plugins/kibana_utils/public', () => ({ ajaxStream: jest.fn() }));
-jest.mock('ui/kfetch', () => ({ kfetch: jest.fn() }));
+jest.mock('../../../ui/public/new_platform');
 jest.mock('./functions', () => ({ functions: [{}, {}, {}] }));
 jest.mock('./renderers/visualization', () => ({ visualization: {} }));
 
@@ -73,7 +73,7 @@ describe('interpreter/interpreter', () => {
       expect(initializeInterpreter).toHaveBeenCalledTimes(1);
       expect(initializeInterpreter.mock.calls[0][0]).toMatchObject({
         ajaxStream: expect.any(Function),
-        kfetch: expect.any(Function),
+        http: expect.any(Object),
         typesRegistry: expect.any(Function),
         functionsRegistry: expect.any(Function),
       });
