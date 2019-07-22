@@ -20,7 +20,6 @@ function exampleState(): State {
       {
         layerId: 'first',
         datasourceId: '',
-        labels: [''],
         seriesType: 'area',
         splitAccessor: 'd',
         position: Position.Bottom,
@@ -56,7 +55,6 @@ describe('xy_visualization', () => {
                         "test-id1",
                       ],
                       "datasourceId": "",
-                      "labels": Array [],
                       "layerId": "",
                       "position": "top",
                       "seriesType": "bar",
@@ -113,10 +111,8 @@ describe('xy_visualization', () => {
 
       expect(mockDatasource.publicAPIMock.getOperationForColumnId).toHaveBeenCalledWith('b');
       expect(mockDatasource.publicAPIMock.getOperationForColumnId).toHaveBeenCalledWith('c');
-      expect(expression.chain[0].arguments.layers[0].chain[0].arguments.labels).toEqual([
-        'col_b',
-        'col_c',
-      ]);
+      expect(expression.chain[0].arguments.xTitle).toEqual(['col_a']);
+      expect(expression.chain[0].arguments.yTitle).toEqual(['col_b']);
     });
   });
 });

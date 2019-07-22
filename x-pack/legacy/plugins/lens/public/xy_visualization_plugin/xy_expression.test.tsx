@@ -36,7 +36,6 @@ function sampleArgs() {
 
         xAccessor: 'c',
         accessors: ['a', 'b'],
-        labels: ['Label A', 'Label B'],
         position: Position.Left,
         showGridlines: false,
         title: 'A and B',
@@ -69,7 +68,6 @@ describe('xy_expression', () => {
         seriesType: 'line',
         xAccessor: 'c',
         accessors: ['a', 'b'],
-        labels: ['Label A', 'Label B'],
         position: Position.Left,
         showGridlines: false,
         title: 'A and B',
@@ -183,24 +181,6 @@ describe('xy_expression', () => {
       expect(component.find(BarSeries)).toHaveLength(1);
       expect(component.find(BarSeries).prop('stackAccessors')).toHaveLength(1);
       expect(component.find(Settings).prop('rotation')).toEqual(90);
-    });
-
-    test('it remaps rows based on the labels', () => {
-      const { data, args } = sampleArgs();
-      const chart = shallow(
-        <XYChart
-          data={data}
-          args={{ ...args, layers: [{ ...args.layers[0], seriesType: 'bar' }] }}
-        />
-      );
-      const barSeries = chart.find(BarSeries);
-
-      expect(barSeries.prop('yAccessors')).toEqual(['Label A', 'Label B']);
-      expect(barSeries.prop('data')[0]).toEqual({
-        'Label A': 1,
-        'Label B': 2,
-        c: 3,
-      });
     });
   });
 });

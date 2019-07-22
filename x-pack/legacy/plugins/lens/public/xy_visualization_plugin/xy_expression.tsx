@@ -22,9 +22,14 @@ import { XYArgs } from './types';
 import { LensMultiTable } from '../types';
 import { RenderFunction } from '../interpreter_types';
 
+type ExpressionArgs = XYArgs & {
+  xTitle: string;
+  yTitle: string;
+};
+
 export interface XYChartProps {
   data: LensMultiTable;
-  args: XYArgs;
+  args: ExpressionArgs;
 }
 
 export interface XYRender {
@@ -33,11 +38,24 @@ export interface XYRender {
   value: XYChartProps;
 }
 
-export const xyChart: ExpressionFunction<'lens_xy_chart', LensMultiTable, XYArgs, XYRender> = ({
+export const xyChart: ExpressionFunction<
+  'lens_xy_chart',
+  LensMultiTable,
+  ExpressionArgs,
+  XYRender
+> = ({
   name: 'lens_xy_chart',
   type: 'render',
   help: 'An X/Y chart',
   args: {
+    xTitle: {
+      types: ['string'],
+      help: 'X axis title',
+    },
+    yTitle: {
+      types: ['string'],
+      help: 'Y axis title',
+    },
     legend: {
       types: ['lens_xy_legendConfig'],
       help: 'Configure the chart legend.',
@@ -51,7 +69,7 @@ export const xyChart: ExpressionFunction<'lens_xy_chart', LensMultiTable, XYArgs
   context: {
     types: ['lens_multitable'],
   },
-  fn(data: LensMultiTable, args: XYArgs) {
+  fn(data: LensMultiTable, args: ExpressionArgs) {
     return {
       type: 'render',
       as: 'lens_xy_chart_renderer',
@@ -66,7 +84,7 @@ export const xyChart: ExpressionFunction<'lens_xy_chart', LensMultiTable, XYArgs
 
 export interface XYChartProps {
   data: LensMultiTable;
-  args: XYArgs;
+  args: ExpressionArgs;
 }
 
 export const xyChartRenderer: RenderFunction<XYChartProps> = {
@@ -95,7 +113,7 @@ export function XYChart({ data, args }: XYChartProps) {
       <Axis
         id={getAxisId('x')}
         position={Position.Bottom}
-        title={'X'}
+        title={args.xTitle}
         showGridLines={false}
         hide={layers[0].hide}
       />
@@ -103,12 +121,12 @@ export function XYChart({ data, args }: XYChartProps) {
       <Axis
         id={getAxisId('y')}
         position={Position.Left}
-        title={layers[0].title}
+        title={args.yTitle}
         showGridLines={layers[0].showGridlines}
         hide={layers[0].hide}
       />
 
-      {layers.map(({ splitAccessor, seriesType, labels, accessors, xAccessor, layerId }, index) => {
+      {layers.map(({ splitAccessor, seriesType, accessors, xAccessor, layerId }, index) => {
         if (!data.tables[layerId]) {
           return;
         }
@@ -121,20 +139,8 @@ export function XYChart({ data, args }: XYChartProps) {
           stackAccessors: seriesType.includes('stacked') ? [xAccessor] : [],
           id: getSpecId(idForCaching),
           xAccessor,
-          yAccessors: labels,
-          data: data.tables[layerId].rows.map(row => {
-            const newRow: typeof row = {};
-
-            Object.keys(row).forEach(key => {
-              const labelIndex = accessors.indexOf(key);
-              if (labelIndex > -1) {
-                newRow[labels[labelIndex]] = row[key];
-              } else {
-                newRow[key] = row[key];
-              }
-            });
-            return newRow;
-          }),
+          yAccessors: accessors,
+          data: data.tables[layerId].rows,
         };
 
         return seriesType === 'line' ? (

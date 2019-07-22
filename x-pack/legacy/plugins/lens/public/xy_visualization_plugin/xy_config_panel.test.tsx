@@ -37,7 +37,6 @@ describe('XYConfigPanel', () => {
           showGridlines: true,
           title: 'X',
           accessors: ['bar'],
-          labels: [''],
         },
       ],
     };

@@ -97,7 +97,6 @@ function newLayerState(layerId: string): LayerConfig {
     title: '',
     showGridlines: false,
     position: Position.Left,
-    labels: [''],
     splitAccessor: generateId(),
   };
 }

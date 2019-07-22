@@ -112,20 +112,12 @@ function getSuggestion(
         seriesType: splitBy && isDate ? 'line' : 'bar',
         splitAccessor: splitBy && isDate ? splitBy.columnId : generateId(),
         accessors: yValues.map(col => col.columnId),
-        labels: [''],
         position: Position.Left,
         showGridlines: false,
         title: yTitle,
       },
     ],
   };
-
-  const labels: Partial<Record<string, string>> = {};
-  yValues.forEach(({ columnId, operation: { label } }) => {
-    if (label) {
-      labels[columnId] = label;
-    }
-  });
 
   return {
     title,
@@ -142,7 +134,7 @@ function getSuggestion(
           isVisible: false,
         },
       },
-      labels
+      { xTitle, yTitle }
     ),
   };
 }

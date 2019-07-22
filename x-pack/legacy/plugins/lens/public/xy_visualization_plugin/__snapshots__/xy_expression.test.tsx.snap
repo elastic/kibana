@@ -15,25 +15,23 @@ exports[`xy_expression XYChart component it renders area 1`] = `
     id="x"
     position="bottom"
     showGridLines={false}
-    title="X"
   />
   <inject-AxisSpec-with-chartStore
     id="y"
     position="left"
     showGridLines={false}
-    title="A and B"
   />
   <inject-AreaSeriesSpecComponent-with-chartStore
     data={
       Array [
         Object {
-          "Label A": 1,
-          "Label B": 2,
+          "a": 1,
+          "b": 2,
           "c": 3,
         },
         Object {
-          "Label A": 1,
-          "Label B": 5,
+          "a": 1,
+          "b": 5,
           "c": 4,
         },
       ]
@@ -49,8 +47,8 @@ exports[`xy_expression XYChart component it renders area 1`] = `
     xAccessor="c"
     yAccessors={
       Array [
-        "Label A",
-        "Label B",
+        "a",
+        "b",
       ]
     }
   />
@@ -72,25 +70,23 @@ exports[`xy_expression XYChart component it renders bar 1`] = `
     id="x"
     position="bottom"
     showGridLines={false}
-    title="X"
   />
   <inject-AxisSpec-with-chartStore
     id="y"
     position="left"
     showGridLines={false}
-    title="A and B"
   />
   <inject-BarSeriesSpecComponent-with-chartStore
     data={
       Array [
         Object {
-          "Label A": 1,
-          "Label B": 2,
+          "a": 1,
+          "b": 2,
           "c": 3,
         },
         Object {
-          "Label A": 1,
-          "Label B": 5,
+          "a": 1,
+          "b": 5,
           "c": 4,
         },
       ]
@@ -106,8 +102,8 @@ exports[`xy_expression XYChart component it renders bar 1`] = `
     xAccessor="c"
     yAccessors={
       Array [
-        "Label A",
-        "Label B",
+        "a",
+        "b",
       ]
     }
   />
@@ -129,25 +125,23 @@ exports[`xy_expression XYChart component it renders horizontal bar 1`] = `
     id="x"
     position="bottom"
     showGridLines={false}
-    title="X"
   />
   <inject-AxisSpec-with-chartStore
     id="y"
     position="left"
     showGridLines={false}
-    title="A and B"
   />
   <inject-BarSeriesSpecComponent-with-chartStore
     data={
       Array [
         Object {
-          "Label A": 1,
-          "Label B": 2,
+          "a": 1,
+          "b": 2,
           "c": 3,
         },
         Object {
-          "Label A": 1,
-          "Label B": 5,
+          "a": 1,
+          "b": 5,
           "c": 4,
         },
       ]
@@ -163,8 +157,8 @@ exports[`xy_expression XYChart component it renders horizontal bar 1`] = `
     xAccessor="c"
     yAccessors={
       Array [
-        "Label A",
-        "Label B",
+        "a",
+        "b",
       ]
     }
   />
@@ -186,25 +180,23 @@ exports[`xy_expression XYChart component it renders line 1`] = `
     id="x"
     position="bottom"
     showGridLines={false}
-    title="X"
   />
   <inject-AxisSpec-with-chartStore
     id="y"
     position="left"
     showGridLines={false}
-    title="A and B"
   />
   <inject-LineSeriesSpecComponent-with-chartStore
     data={
       Array [
         Object {
-          "Label A": 1,
-          "Label B": 2,
+          "a": 1,
+          "b": 2,
           "c": 3,
         },
         Object {
-          "Label A": 1,
-          "Label B": 5,
+          "a": 1,
+          "b": 5,
           "c": 4,
         },
       ]
@@ -220,8 +212,8 @@ exports[`xy_expression XYChart component it renders line 1`] = `
     xAccessor="c"
     yAccessors={
       Array [
-        "Label A",
-        "Label B",
+        "a",
+        "b",
       ]
     }
   />
@@ -243,25 +235,23 @@ exports[`xy_expression XYChart component it renders stacked area 1`] = `
     id="x"
     position="bottom"
     showGridLines={false}
-    title="X"
   />
   <inject-AxisSpec-with-chartStore
     id="y"
     position="left"
     showGridLines={false}
-    title="A and B"
   />
   <inject-AreaSeriesSpecComponent-with-chartStore
     data={
       Array [
         Object {
-          "Label A": 1,
-          "Label B": 2,
+          "a": 1,
+          "b": 2,
           "c": 3,
         },
         Object {
-          "Label A": 1,
-          "Label B": 5,
+          "a": 1,
+          "b": 5,
           "c": 4,
         },
       ]
@@ -281,8 +271,8 @@ exports[`xy_expression XYChart component it renders stacked area 1`] = `
     xAccessor="c"
     yAccessors={
       Array [
-        "Label A",
-        "Label B",
+        "a",
+        "b",
       ]
     }
   />
@@ -304,25 +294,23 @@ exports[`xy_expression XYChart component it renders stacked bar 1`] = `
     id="x"
     position="bottom"
     showGridLines={false}
-    title="X"
   />
   <inject-AxisSpec-with-chartStore
     id="y"
     position="left"
     showGridLines={false}
-    title="A and B"
   />
   <inject-BarSeriesSpecComponent-with-chartStore
     data={
       Array [
         Object {
-          "Label A": 1,
-          "Label B": 2,
+          "a": 1,
+          "b": 2,
           "c": 3,
         },
         Object {
-          "Label A": 1,
-          "Label B": 5,
+          "a": 1,
+          "b": 5,
           "c": 4,
         },
       ]
@@ -342,8 +330,8 @@ exports[`xy_expression XYChart component it renders stacked bar 1`] = `
     xAccessor="c"
     yAccessors={
       Array [
-        "Label A",
-        "Label B",
+        "a",
+        "b",
       ]
     }
   />
@@ -365,25 +353,23 @@ exports[`xy_expression XYChart component it renders stacked horizontal bar 1`] =
     id="x"
     position="bottom"
     showGridLines={false}
-    title="X"
   />
   <inject-AxisSpec-with-chartStore
     id="y"
     position="left"
     showGridLines={false}
-    title="A and B"
   />
   <inject-BarSeriesSpecComponent-with-chartStore
     data={
       Array [
         Object {
-          "Label A": 1,
-          "Label B": 2,
+          "a": 1,
+          "b": 2,
           "c": 3,
         },
         Object {
-          "Label A": 1,
-          "Label B": 5,
+          "a": 1,
+          "b": 5,
           "c": 4,
         },
       ]
@@ -403,8 +389,8 @@ exports[`xy_expression XYChart component it renders stacked horizontal bar 1`] =
     xAccessor="c"
     yAccessors={
       Array [
-        "Label A",
-        "Label B",
+        "a",
+        "b",
       ]
     }
   />

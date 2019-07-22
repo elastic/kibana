@@ -28,7 +28,6 @@ export const xyVisualization: Visualization<State, PersistableState> = {
             layerId: frame.addNewLayer(),
             accessors: [generateId()],
             datasourceId: '',
-            labels: [],
             position: Position.Top,
             seriesType: 'bar',
             showGridlines: false,

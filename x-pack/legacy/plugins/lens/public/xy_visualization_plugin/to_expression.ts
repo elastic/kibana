@@ -5,27 +5,35 @@
  */
 
 import { Ast } from '@kbn/interpreter/common';
-import { State } from './types';
+import { State, LayerConfig } from './types';
 import { FramePublicAPI } from '../types';
 
+function xyTitles(layer: LayerConfig, frame: FramePublicAPI) {
+  const defaults = {
+    xTitle: 'x',
+    yTitle: 'y',
+  };
+
+  if (!layer || !layer.accessors.length) {
+    return defaults;
+  }
+  const datasource = frame.datasourceLayers[layer.layerId];
+  if (!datasource) {
+    return defaults;
+  }
+  const x = datasource.getOperationForColumnId(layer.xAccessor);
+  const y = datasource.getOperationForColumnId(layer.accessors[0]);
+
+  return {
+    xTitle: x ? x.label : defaults.xTitle,
+    yTitle: y ? y.label : defaults.yTitle,
+  };
+}
+
 export const toExpression = (state: State, frame: FramePublicAPI): Ast | null => {
-  const labels: Partial<Record<string, string>> = {};
   if (!state || !state.layers.length) {
     return null;
   }
-
-  state.layers.forEach(layer => {
-    const datasource = frame.datasourceLayers[layer.layerId];
-    if (!datasource) {
-      return;
-    }
-    layer.accessors.forEach(columnId => {
-      const operation = datasource.getOperationForColumnId(columnId);
-      if (operation && operation.label) {
-        labels[columnId] = operation.label;
-      }
-    });
-  });
 
   const stateWithValidAccessors = {
     ...state,
@@ -37,12 +45,12 @@ export const toExpression = (state: State, frame: FramePublicAPI): Ast | null =>
     })),
   };
 
-  return buildExpression(stateWithValidAccessors, labels);
+  return buildExpression(stateWithValidAccessors, xyTitles(state.layers[0], frame));
 };
 
 export const buildExpression = (
   state: State,
-  columnLabels: Partial<Record<string, string>>
+  { xTitle, yTitle }: { xTitle: string; yTitle: string }
 ): Ast => ({
   type: 'expression',
   chain: [
@@ -50,6 +58,8 @@ export const buildExpression = (
       type: 'function',
       function: 'lens_xy_chart',
       arguments: {
+        xTitle: [xTitle],
+        yTitle: [yTitle],
         legend: [
           {
             type: 'expression',
@@ -83,9 +93,6 @@ export const buildExpression = (
                 xAccessor: [layer.xAccessor],
                 splitAccessor: [layer.splitAccessor],
                 seriesType: [layer.seriesType],
-                labels: layer.accessors.map(accessor => {
-                  return columnLabels[accessor] || accessor;
-                }),
                 accessors: layer.accessors,
               },
             },

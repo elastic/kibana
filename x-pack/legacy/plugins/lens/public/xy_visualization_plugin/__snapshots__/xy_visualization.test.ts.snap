@@ -17,7 +17,6 @@ Object {
                   "hide": Array [
                     false,
                   ],
-                  "labels": Array [],
                   "layerId": Array [
                     "first",
                   ],
@@ -65,6 +64,12 @@ Object {
             ],
             "type": "expression",
           },
+        ],
+        "xTitle": Array [
+          "x",
+        ],
+        "yTitle": Array [
+          "y",
         ],
       },
       "function": "lens_xy_chart",

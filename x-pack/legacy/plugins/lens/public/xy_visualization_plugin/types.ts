@@ -162,11 +162,6 @@ export const layerConfig: ExpressionFunction<
       help: 'The columns to display on the y axis.',
       multi: true,
     },
-    labels: {
-      types: ['string'],
-      help: '',
-      multi: true,
-    },
   },
   fn: function fn(_context: unknown, args: LayerConfig) {
     return {
@@ -190,7 +185,6 @@ export type LayerConfig = AxisConfig & {
   datasourceId: string;
   xAccessor: string;
   accessors: string[];
-  labels: string[];
   seriesType: SeriesType;
   splitAccessor: string;
 };
