@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-jest.mock('./joins/left_inner_join', () => ({
-  LeftInnerJoin: Object
+jest.mock('./joins/inner_join', () => ({
+  InnerJoin: Object
 }));
 
 jest.mock('./tooltips/join_tooltip_property', () => ({
