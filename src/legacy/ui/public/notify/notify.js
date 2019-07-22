@@ -23,7 +23,6 @@ import { uiModules } from '../modules';
 import { metadata } from '../metadata';
 import { fatalError } from './fatal_error';
 import { banners } from './banners';
-import { Notifier } from './notifier';
 import './filters/markdown';
 import { FormattedMessage } from '@kbn/i18n/react';
 
@@ -33,8 +32,6 @@ import {
 } from '@elastic/eui';
 
 const module = uiModules.get('kibana/notify');
-
-export const notify = new Notifier();
 
 // if kibana is not included then the notify service can't
 // expect access to config (since it's dependent on kibana)
