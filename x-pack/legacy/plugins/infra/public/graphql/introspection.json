@@ -2271,6 +2271,12 @@
             "deprecationReason": null
           },
           {
+            "name": "hostK8sLogRate",
+            "description": "",
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "hostLoad",
             "description": "",
             "isDeprecated": false,

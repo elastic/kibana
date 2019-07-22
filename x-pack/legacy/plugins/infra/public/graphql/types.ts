@@ -541,6 +541,7 @@ export enum InfraMetric {
   hostK8sDiskCap = 'hostK8sDiskCap',
   hostK8sMemoryCap = 'hostK8sMemoryCap',
   hostK8sPodCap = 'hostK8sPodCap',
+  hostK8sLogRate = 'hostK8sLogRate',
   hostLoad = 'hostLoad',
   hostMemoryUsage = 'hostMemoryUsage',
   hostNetworkTraffic = 'hostNetworkTraffic',

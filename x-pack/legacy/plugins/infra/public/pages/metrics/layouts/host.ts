@@ -361,6 +361,32 @@ export const hostLayoutCreator: InfraMetricLayoutCreator = theme => [
           },
         },
       },
+      {
+        id: InfraMetric.hostK8sLogRate,
+        label: i18n.translate(
+          'xpack.infra.metricDetailPage.kubernetesMetricsLayout.nodeLogRateSection.sectionLabel',
+          {
+            defaultMessage: 'Node Log Rate',
+          }
+        ),
+        requires: ['kubernetes.node'],
+        type: InfraMetricLayoutSectionType.chart,
+        visConfig: {
+          formatter: InfraFormatterType.number,
+          formatterTemplate: '{{value}}/s',
+          stacked: true,
+          seriesOverrides: {
+            errorRate: {
+              color: theme.eui.euiColorVis2,
+              type: InfraMetricLayoutVisualizationType.bar,
+            },
+            logRate: {
+              color: theme.eui.euiColorVis1,
+              type: InfraMetricLayoutVisualizationType.bar,
+            },
+          },
+        },
+      },
     ],
   },
   ...nginxLayoutCreator(theme),

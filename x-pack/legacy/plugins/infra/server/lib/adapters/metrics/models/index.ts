@@ -14,6 +14,7 @@ import { hostK8sDiskCap } from './host/host_k8s_disk_cap';
 import { hostK8sMemoryCap } from './host/host_k8s_memory_cap';
 import { hostK8sOverview } from './host/host_k8s_overview';
 import { hostK8sPodCap } from './host/host_k8s_pod_cap';
+import { hostK8sLogRate } from './host/host_k8s_log_rate';
 import { hostLoad } from './host/host_load';
 import { hostMemoryUsage } from './host/host_memory_usage';
 import { hostNetworkTraffic } from './host/host_network_traffic';
@@ -50,6 +51,7 @@ export const metricModels: InfraMetricModels = {
   [InfraMetric.hostK8sDiskCap]: hostK8sDiskCap,
   [InfraMetric.hostK8sMemoryCap]: hostK8sMemoryCap,
   [InfraMetric.hostK8sPodCap]: hostK8sPodCap,
+  [InfraMetric.hostK8sLogRate]: hostK8sLogRate,
   [InfraMetric.hostLoad]: hostLoad,
   [InfraMetric.hostMemoryUsage]: hostMemoryUsage,
   [InfraMetric.hostNetworkTraffic]: hostNetworkTraffic,

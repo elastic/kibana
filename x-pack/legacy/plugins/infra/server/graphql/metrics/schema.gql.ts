@@ -16,6 +16,7 @@ export const metricsSchema: any = gql`
     hostK8sDiskCap
     hostK8sMemoryCap
     hostK8sPodCap
+    hostK8sLogRate
     hostLoad
     hostMemoryUsage
     hostNetworkTraffic
