@@ -139,9 +139,6 @@ export function getBeatsInstructionsForEnablingMetricbeat(product, _meta, {
                         />
                       </EuiLink>
                     ),
-                    file: (
-                      <Monospace>modules.d/beat-xpack.yml</Monospace>
-                    ),
                     beatType: beatType || UNDETECTED_BEAT_TYPE
                   }}
                 />
