@@ -20,6 +20,21 @@ exports[`Storyshots renderers/TimeFilter/components/DatetimeQuickList with child
       <span
         className="euiButtonEmpty__text"
       >
+        Today
+      </span>
+    </span>
+  </button>
+  <button
+    className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--small"
+    onClick={[Function]}
+    type="button"
+  >
+    <span
+      className="euiButtonEmpty__content"
+    >
+      <span
+        className="euiButtonEmpty__text"
+      >
         Last 24 hours
       </span>
     </span>
@@ -125,6 +140,21 @@ exports[`Storyshots renderers/TimeFilter/components/DatetimeQuickList with start
     }
   }
 >
+  <button
+    className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--small"
+    onClick={[Function]}
+    type="button"
+  >
+    <span
+      className="euiButtonEmpty__content"
+    >
+      <span
+        className="euiButtonEmpty__text"
+      >
+        Today
+      </span>
+    </span>
+  </button>
   <button
     className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--small"
     onClick={[Function]}

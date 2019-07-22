@@ -219,7 +219,7 @@ describe('filter_manager', () => {
     });
   });
 
-  describe('add filters', async () => {
+  describe('add filters', () => {
     test('app state should accept a single filter', async function() {
       updateSubscription = filterManager.getUpdates$().subscribe(updateListener);
       const f1 = getFilter(FilterStateStore.APP_STATE, false, false, 'age', 34);
@@ -535,7 +535,7 @@ describe('filter_manager', () => {
     });
   });
 
-  describe('remove filters', async () => {
+  describe('remove filters', () => {
     test('remove on empty should do nothing and not fire events', async () => {
       updateSubscription = filterManager.getUpdates$().subscribe(updateListener);
       await filterManager.removeAll();
