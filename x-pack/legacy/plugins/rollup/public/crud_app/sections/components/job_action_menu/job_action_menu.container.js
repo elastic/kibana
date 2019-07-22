@@ -7,11 +7,13 @@
 import { connect } from 'react-redux';
 
 import { isUpdating } from '../../../store/selectors';
+import first from 'lodash/array/first';
 
 import {
   startJobs,
   stopJobs,
   deleteJobs,
+  cloneJob
 } from '../../../store/actions';
 
 import { JobActionMenu as JobActionMenuComponent } from './job_action_menu';
@@ -33,6 +35,12 @@ const mapDispatchToProps = (dispatch, { jobs }) => {
     },
     deleteJobs: () => {
       dispatch(deleteJobs(jobIds));
+    },
+    cloneJob: (jobConfig) => {
+      dispatch(cloneJob(jobConfig));
+    },
+    updateJob: (jobConfig) => {
+      dispatch(updateJob(jobConfig));
     },
   };
 };

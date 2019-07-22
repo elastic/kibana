@@ -26,6 +26,8 @@ export const isSaving = (state) => state.createJob.isSaving;
 export const getCreateJobError = (state) => state.createJob.error;
 export const isUpdating = (state) => state.updateJob.isUpdating;
 
+export const getCloneJobConfig = (state) => state.cloneJob.job;
+
 export const getJobStatusByJobName = (state, jobName) => {
   const jobs = getJobs(state);
   const { status } = jobs[jobName] || {};

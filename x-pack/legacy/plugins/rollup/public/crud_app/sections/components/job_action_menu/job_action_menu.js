@@ -7,6 +7,7 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
+import first from 'lodash/array/first';
 
 import {
   EuiButton,
@@ -21,35 +22,34 @@ import {
 
 import { ConfirmDeleteModal } from './confirm_delete_modal';
 import { flattenPanelTree } from '../../../services';
-import { ConfirmCloneModal } from './confirm_clone_modal';
 
 class JobActionMenuUi extends Component {
   static propTypes = {
     startJobs: PropTypes.func.isRequired,
     stopJobs: PropTypes.func.isRequired,
     deleteJobs: PropTypes.func.isRequired,
+    cloneJob: PropTypes.func.isRequired,
     isUpdating: PropTypes.bool.isRequired,
     iconSide: PropTypes.string,
     anchorPosition: PropTypes.string,
     label: PropTypes.node,
     iconType: PropTypes.string,
     jobs: PropTypes.array,
-  }
+  };
 
   static defaultProps = {
     iconSide: 'right',
     anchorPosition: 'rightUp',
     iconType: 'arrowDown',
     jobs: [],
-  }
+  };
 
   constructor(props) {
     super(props);
 
     this.state = {
       isPopoverOpen: false,
-      showDeleteConfirmation: false,
-      showCloneConfirmation: false
+      showDeleteConfirmation: false
     };
   }
 
@@ -57,6 +57,7 @@ class JobActionMenuUi extends Component {
     const {
       startJobs,
       stopJobs,
+      cloneJob,
       intl,
     } = this.props;
 
@@ -96,19 +97,39 @@ class JobActionMenuUi extends Component {
       });
     }
 
-    items.push({
-      name: intl.formatMessage({
-        id: 'xpack.rollupJobs.jobActionMenu.cloneJobLabel',
-        defaultMessage: 'Clone {isSingleSelection, plural, one {job} other {jobs}}',
-      }, {
-        isSingleSelection
-      }),
-      icon: <EuiIcon type="copy" />,
-      onClick: () => {
-        this.closePopover();
-        this.openCloneConfirmationModal();
-      }
-    });
+    if (this.canEditJob()) {
+      items.push({
+        name: intl.formatMessage({
+          id: 'xpack.rollupJobs.jobActionMenu.editJobLabel',
+          defaultMessage: 'Edit {isSingleSelection, plural, one {job} other {jobs}}',
+        }, {
+          isSingleSelection
+        }),
+        icon: <EuiIcon type="pencil"/>,
+        onClick: () => {
+          this.closePopover();
+          const { jobs } = this.props;
+          cloneJob(first(jobs));
+        }
+      });
+    }
+
+    if (this.canCloneJob()) {
+      items.push({
+        name: intl.formatMessage({
+          id: 'xpack.rollupJobs.jobActionMenu.cloneJobLabel',
+          defaultMessage: 'Clone {isSingleSelection, plural, one {job} other {jobs}}',
+        }, {
+          isSingleSelection
+        }),
+        icon: <EuiIcon type="copy" />,
+        onClick: () => {
+          this.closePopover();
+          const { jobs } = this.props;
+          cloneJob(first(jobs));
+        }
+      });
+    }
 
     if (this.canDeleteJobs()) {
       items.push({
@@ -158,15 +179,6 @@ class JobActionMenuUi extends Component {
     this.setState({ showDeleteConfirmation: true });
   };
 
-  openCloneConfirmationModal = () => {
-    this.setState({ showCloneConfirmation: true });
-  };
-
-  closeCloneConfirmationModal = () => {
-    this.setState({ showCloneConfirmation: false });
-  };
-
-
   canStartJobs() {
     const { jobs } = this.props;
     return jobs.some(job => job.status === 'stopped');
@@ -175,6 +187,15 @@ class JobActionMenuUi extends Component {
   canStopJobs() {
     const { jobs } = this.props;
     return jobs.some(job => job.status === 'started');
+  }
+
+  canEditJob() {
+    const { jobs } = this.props;
+    return Boolean(jobs && jobs.length === 1);
+  }
+
+  canCloneJob() {
+    return this.canEditJob();
   }
 
   canDeleteJobs() {
@@ -211,20 +232,6 @@ class JobActionMenuUi extends Component {
       />
     );
   };
-
-  cloneConfirmDialog() {
-    const { jobs } = this.props;
-    if (this.state.showCloneConfirmation) {
-      return (
-        <ConfirmCloneModal
-          onClose={() => this.closeCloneConfirmationModal()}
-          jobs={jobs}
-        />
-      );
-    }
-
-    return null;
-  }
 
   isSingleSelection = () => {
     return this.props.jobs.length === 1;
@@ -286,7 +293,6 @@ class JobActionMenuUi extends Component {
 
     return (
       <div>
-        {this.cloneConfirmDialog()}
         {this.confirmDeleteModal()}
         <EuiPopover
           button={button}

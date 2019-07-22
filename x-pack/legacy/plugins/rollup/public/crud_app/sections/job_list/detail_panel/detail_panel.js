@@ -65,13 +65,14 @@ const tabToUiMetricMap = {
 export class DetailPanelUi extends Component {
   static propTypes = {
     isOpen: PropTypes.bool.isRequired,
+    isEditMode: PropTypes.bool.isRequired,
     isLoading: PropTypes.bool,
     job: PropTypes.object,
     jobId: PropTypes.string,
     panelType: PropTypes.oneOf(JOB_DETAILS_TABS),
     closeDetailPanel: PropTypes.func.isRequired,
     openDetailPanel: PropTypes.func.isRequired,
-  }
+  };
 
   static defaultProps = {
     panelType: JOB_DETAILS_TABS[0],
@@ -79,6 +80,7 @@ export class DetailPanelUi extends Component {
 
   constructor(props) {
     super(props);
+    console.log(props);
   }
 
   renderTabs() {

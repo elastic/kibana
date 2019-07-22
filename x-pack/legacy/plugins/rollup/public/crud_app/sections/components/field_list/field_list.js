@@ -22,6 +22,8 @@ export const FieldList = ({
 }) => {
   let message;
 
+  console.log(fields, columns)
+
   if (!fields.length) {
     message = (
       <EuiEmptyPrompt
