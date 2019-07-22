@@ -17,11 +17,8 @@ import {
 } from '@elastic/eui';
 import { Monospace } from '../components/monospace';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { statusTitle } from './common_beats_instructions';
+import { statusTitle, UNDETECTED_BEAT_TYPE, DEFAULT_BEAT_FOR_URLS } from './common_beats_instructions';
 import { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } from 'ui/documentation_links';
-
-const UNDETECTED_BEAT_TYPE = 'beat';
-const DEFAULT_BEAT_FOR_URLS = 'metricbeat';
 
 export function getBeatsInstructionsForEnablingMetricbeat(product, _meta, {
   esMonitoringUrl,

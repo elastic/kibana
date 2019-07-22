@@ -18,7 +18,7 @@ import { formatTimestampToDuration } from '../../../../../common';
 import { CALCULATE_DURATION_SINCE } from '../../../../../common/constants';
 import { Monospace } from '../components/monospace';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { statusTitle } from './common_beats_instructions';
+import { statusTitle, UNDETECTED_BEAT_TYPE } from './common_beats_instructions';
 
 export function getBeatsInstructionsForDisablingInternalCollection(product, meta, {
   checkForMigrationStatus,
@@ -26,9 +26,13 @@ export function getBeatsInstructionsForDisablingInternalCollection(product, meta
   hasCheckedStatus,
   autoCheckIntervalInMs,
 }) {
+  const beatType = product.beatType;
   const disableInternalCollectionStep = {
     title: i18n.translate('xpack.monitoring.metricbeatMigration.beatsInstructions.disableInternalCollection.title', {
-      defaultMessage: 'Disable internal collection of the beat\'s monitoring metrics'
+      defaultMessage: 'Disable internal collection of {beatType}\'s monitoring metrics',
+      values: {
+        beatType: beatType || UNDETECTED_BEAT_TYPE
+      }
     }),
     children: (
       <Fragment>
@@ -36,10 +40,11 @@ export function getBeatsInstructionsForDisablingInternalCollection(product, meta
           <p>
             <FormattedMessage
               id="xpack.monitoring.metricbeatMigration.beatsInstructions.disableInternalCollection.description"
-              defaultMessage="Add the following setting in the beat's configuration file ({file}):"
+              defaultMessage="Add the following setting in {beatType}'s configuration file ({file}):"
               values={{
+                beatType: beatType || UNDETECTED_BEAT_TYPE,
                 file: (
-                  <Monospace>beats.yml</Monospace>
+                  <Monospace>{beatType}.yml</Monospace>
                 )
               }}
             />
@@ -57,7 +62,10 @@ export function getBeatsInstructionsForDisablingInternalCollection(product, meta
           <p>
             <FormattedMessage
               id="xpack.monitoring.metricbeatMigration.beatsInstructions.disableInternalCollection.note"
-              defaultMessage="You'll need to restart the beat after making this change"
+              defaultMessage="You'll need to restart {beatType} after making this change"
+              values={{
+                beatType: beatType || UNDETECTED_BEAT_TYPE
+              }}
             />
           </p>
         </EuiText>
