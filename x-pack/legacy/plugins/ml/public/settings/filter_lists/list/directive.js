@@ -56,7 +56,7 @@ module.directive('mlFilterLists', function () {
       ReactDOM.render(
         <I18nContext>
           <NavigationMenuContext.Provider value={{ chrome, timefilter, timeHistory }}>
-            {React.createElement(FilterLists, props)}
+            <FilterLists {...props} />
           </NavigationMenuContext.Provider>
         </I18nContext>,
         element[0]

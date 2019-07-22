@@ -42,7 +42,7 @@ module.directive('mlDataFrameAccessDenied', ($injector: InjectorService) => {
       ReactDOM.render(
         <I18nContext>
           <NavigationMenuContext.Provider value={{ chrome, timefilter, timeHistory }}>
-            {React.createElement(Page, { goToKibana, retry })}
+            <Page goToKibana={goToKibana} retry={retry} />
           </NavigationMenuContext.Provider>
         </I18nContext>,
         element[0]

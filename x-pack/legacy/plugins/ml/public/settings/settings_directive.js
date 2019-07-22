@@ -59,12 +59,7 @@ module.directive('mlSettings', function () {
       ReactDOM.render(
         <I18nContext>
           <NavigationMenuContext.Provider value={{ chrome, timefilter, timeHistory }} >
-            {React.createElement(
-              Settings, {
-                canGetFilters,
-                canGetCalendars
-              })
-            }
+            <Settings canGetCalendars={canGetCalendars} canGetFilters={canGetFilters} />
           </NavigationMenuContext.Provider>
         </I18nContext>,
         element[0]

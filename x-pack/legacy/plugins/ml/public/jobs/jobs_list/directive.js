@@ -50,7 +50,7 @@ module.directive('jobsPage', function () {
       ReactDOM.render(
         <I18nContext>
           <NavigationMenuContext.Provider value={{ chrome, timefilter, timeHistory }}>
-            {React.createElement(JobsPage, { angularWrapperScope: scope })}
+            <JobsPage angularWrapperScope={scope} />
           </NavigationMenuContext.Provider>
         </I18nContext>,
         element[0]

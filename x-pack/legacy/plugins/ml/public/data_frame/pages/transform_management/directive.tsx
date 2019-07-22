@@ -26,7 +26,7 @@ module.directive('mlDataFramePage', () => {
       ReactDOM.render(
         <I18nContext>
           <NavigationMenuContext.Provider value={{ chrome, timefilter, timeHistory }}>
-            {React.createElement(Page)}
+            <Page />
           </NavigationMenuContext.Provider>
         </I18nContext>,
         element[0]

@@ -66,7 +66,7 @@ module.directive('mlEditFilterList', function ($route) {
       ReactDOM.render(
         <I18nContext>
           <NavigationMenuContext.Provider value={{ chrome, timefilter, timeHistory }}>
-            {React.createElement(EditFilterList, props)}
+            <EditFilterList {...props} />
           </NavigationMenuContext.Provider>
         </I18nContext>,
         element[0]

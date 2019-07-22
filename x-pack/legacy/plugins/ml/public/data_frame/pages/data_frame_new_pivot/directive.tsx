@@ -61,7 +61,7 @@ module.directive('mlNewDataFrame', ($injector: InjectorService) => {
         <I18nContext>
           <NavigationMenuContext.Provider value={{ chrome, timefilter, timeHistory }}>
             <KibanaContext.Provider value={kibanaContext}>
-              {React.createElement(Page)}
+              <Page />
             </KibanaContext.Provider>
           </NavigationMenuContext.Provider>
         </I18nContext>,

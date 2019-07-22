@@ -55,7 +55,7 @@ module.directive('mlCalendarsList', function () {
       ReactDOM.render(
         <I18nContext>
           <NavigationMenuContext.Provider value={{ chrome, timefilter, timeHistory }}>
-            {React.createElement(CalendarsList, props)}
+            <CalendarsList {...props} />
           </NavigationMenuContext.Provider>
         </I18nContext>,
         element[0]

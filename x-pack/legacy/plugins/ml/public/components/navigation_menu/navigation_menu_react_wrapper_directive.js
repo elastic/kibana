@@ -27,7 +27,7 @@ module.directive('mlNavMenu', function () {
     link: function (scope, element, attrs) {
       ReactDOM.render(
         <NavigationMenuContext.Provider value={{ chrome, timefilter, timeHistory }}>
-          {React.createElement(NavigationMenu, { tabId: attrs.name })}
+          <NavigationMenu tabId={attrs.name} />
         </NavigationMenuContext.Provider>,
         element[0]
       );
