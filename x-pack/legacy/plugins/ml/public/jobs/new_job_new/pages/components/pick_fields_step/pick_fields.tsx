@@ -36,23 +36,22 @@ export const PickFieldsStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep })
 
   return (
     <Fragment>
+      {jobType === JOB_TYPE.SINGLE_METRIC && (
+        <SingleMetricView isActive={isCurrentStep} setCanProceed={setNextActive} />
+      )}
+      {jobType === JOB_TYPE.MULTI_METRIC && (
+        <MultiMetricView isActive={isCurrentStep} setCanProceed={setNextActive} />
+      )}
+      {jobType === JOB_TYPE.POPULATION && (
+        <PopulationView isActive={isCurrentStep} setCanProceed={setNextActive} />
+      )}
+
       {isCurrentStep && (
-        <Fragment>
-          {jobType === JOB_TYPE.SINGLE_METRIC && (
-            <SingleMetricView isActive={isCurrentStep} setCanProceed={setNextActive} />
-          )}
-          {jobType === JOB_TYPE.MULTI_METRIC && (
-            <MultiMetricView isActive={isCurrentStep} setCanProceed={setNextActive} />
-          )}
-          {jobType === JOB_TYPE.POPULATION && (
-            <PopulationView isActive={isCurrentStep} setCanProceed={setNextActive} />
-          )}
-          <WizardNav
-            previous={() => setCurrentStep(WIZARD_STEPS.TIME_RANGE)}
-            next={() => setCurrentStep(WIZARD_STEPS.JOB_DETAILS)}
-            nextActive={nextActive}
-          />
-        </Fragment>
+        <WizardNav
+          previous={() => setCurrentStep(WIZARD_STEPS.TIME_RANGE)}
+          next={() => setCurrentStep(WIZARD_STEPS.JOB_DETAILS)}
+          nextActive={nextActive}
+        />
       )}
     </Fragment>
   );
