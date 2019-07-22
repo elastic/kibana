@@ -5,6 +5,8 @@
  */
 
 // This is the Rollup job we will be creating in our tests
+// Components using the JobStatus component should still be able to render
+// despite having a rollup job with an unknown status
 export const JOB_TO_CREATE = {
   id: 'test-job',
   indexPattern: 'test-pattern-*',
@@ -48,8 +50,6 @@ export const JOBS = {
       search_failures: 0,
     },
   },
-  // Components using JobStatus should still be able to render
-  // despite having a rollup job with an unknown status
   {
     config: {
       id: 'my-rollup-job',
