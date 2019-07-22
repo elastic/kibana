@@ -47,12 +47,11 @@ export default function ({ getService, getPageObjects }) {
     it('displays predessors - anchor - successors in right order ', async function () {
       await PageObjects.context.navigateTo(TEST_INDEX_PATTERN, TEST_ANCHOR_TYPE, 'AU_x3-TaGFA8no6Qj999Z');
       const table = await docTable.getTable();
-      const rows = await docTable.getBodyRows(table);
-      const actualRowsText = await Promise.all(rows.map(row => row.getVisibleText()));
+      const actualRowsText = await docTable.getRowsText(table);
       const expectedRowsText = [
-        'Sep 18, 2019 @ 06:50:13.000000000\n-2',
-        'Sep 18, 2019 @ 06:50:12.999999999\n-3',
-        'Sep 19, 2015 @ 06:50:13.000100001\n1'
+        'Sep 18, 2019 @ 06:50:13.000000000-2',
+        'Sep 18, 2019 @ 06:50:12.999999999-3',
+        'Sep 19, 2015 @ 06:50:13.0001000011'
       ];
       expect(actualRowsText).to.eql(expectedRowsText);
     });
@@ -62,18 +61,17 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.context.clickPredecessorLoadMoreButton();
       await PageObjects.context.clickSuccessorLoadMoreButton();
       const table = await docTable.getTable();
-      const rows = await docTable.getBodyRows(table);
-      const actualRowsText = await Promise.all(rows.map(row => row.getVisibleText()));
+      const actualRowsText = await docTable.getRowsText(table);
       const expectedRowsText = [
-        'Sep 22, 2019 @ 23:50:13.253123345\n5',
-        'Sep 18, 2019 @ 06:50:13.000000104\n4',
-        'Sep 18, 2019 @ 06:50:13.000000103\n2',
-        'Sep 18, 2019 @ 06:50:13.000000102\n1',
-        'Sep 18, 2019 @ 06:50:13.000000101\n0',
-        'Sep 18, 2019 @ 06:50:13.000000001\n-1',
-        'Sep 18, 2019 @ 06:50:13.000000000\n-2',
-        'Sep 18, 2019 @ 06:50:12.999999999\n-3',
-        'Sep 19, 2015 @ 06:50:13.000100001\n1'
+        'Sep 22, 2019 @ 23:50:13.2531233455',
+        'Sep 18, 2019 @ 06:50:13.0000001044',
+        'Sep 18, 2019 @ 06:50:13.0000001032',
+        'Sep 18, 2019 @ 06:50:13.0000001021',
+        'Sep 18, 2019 @ 06:50:13.0000001010',
+        'Sep 18, 2019 @ 06:50:13.000000001-1',
+        'Sep 18, 2019 @ 06:50:13.000000000-2',
+        'Sep 18, 2019 @ 06:50:12.999999999-3',
+        'Sep 19, 2015 @ 06:50:13.0001000011'
       ];
       expect(actualRowsText).to.eql(expectedRowsText);
 
