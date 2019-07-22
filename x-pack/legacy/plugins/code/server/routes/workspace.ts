@@ -12,15 +12,17 @@ import { Logger } from '../log';
 import { WorkspaceCommand } from '../lsp/workspace_command';
 import { WorkspaceHandler } from '../lsp/workspace_handler';
 import { ServerOptions } from '../server_options';
-import { EsClientWithRequest } from '../utils/esclient_with_request';
-import { ServerLoggerFactory } from '../utils/server_logger_factory';
 import { CodeServerRouter } from '../security';
+import { CodeServices } from '../distributed/code_services';
+import { WorkspaceDefinition } from '../distributed/apis';
 
 export function workspaceRoute(
   router: CodeServerRouter,
   serverOptions: ServerOptions,
-  gitOps: GitOperations
+  codeServices: CodeServices
 ) {
+  const workspaceService = codeServices.serviceFor(WorkspaceDefinition);
+
   router.route({
     path: '/api/code/workspace',
     method: 'GET',
@@ -39,27 +41,9 @@ export function workspaceRoute(
       const repoConfig = serverOptions.repoConfigs[repoUri];
       const force = !!(req.query as RequestQueryFacade).force;
       if (repoConfig) {
-        const log = new Logger(router.server, ['workspace', repoUri]);
-        const workspaceHandler = new WorkspaceHandler(
-          gitOps,
-          serverOptions.workspacePath,
-          new EsClientWithRequest(req),
-          new ServerLoggerFactory(router.server)
-        );
+        const endpoint = await codeServices.locate(req, repoUri);
         try {
-          const { workspaceDir, workspaceRevision } = await workspaceHandler.openWorkspace(
-            repoUri,
-            revision
-          );
-          const workspaceCmd = new WorkspaceCommand(
-            repoConfig,
-            workspaceDir,
-            workspaceRevision,
-            log
-          );
-          workspaceCmd.runInit(force).then(() => {
-            return '';
-          });
+          await workspaceService.initCmd(endpoint, { repoUri, revision, force, repoConfig });
         } catch (e) {
           if (e.isBoom) {
             return e;

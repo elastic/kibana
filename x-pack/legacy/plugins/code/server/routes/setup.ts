@@ -6,13 +6,17 @@
 
 import { RequestFacade, ResponseToolkitFacade } from '../..';
 import { CodeServerRouter } from '../security';
+import { CodeServices } from '../distributed/code_services';
+import { SetupDefinition } from '../distributed/apis';
 
-export function setupRoute(router: CodeServerRouter) {
+export function setupRoute(router: CodeServerRouter, codeServices: CodeServices) {
+  const setupService = codeServices.serviceFor(SetupDefinition);
   router.route({
     method: 'get',
     path: '/api/code/setup',
-    handler(req: RequestFacade, h: ResponseToolkitFacade) {
-      return h.response('').code(200);
+    async handler(req: RequestFacade) {
+      const endpoint = await codeServices.locate(req, '');
+      return await setupService.setup(endpoint, {});
     },
   });
 }

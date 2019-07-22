@@ -4,8 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Commit, Oid, Revwalk } from '@elastic/nodegit';
 import Boom from 'boom';
+import { DEFAULT_TREE_CHILDREN_LIMIT } from '../git_operations';
+
+import { RequestFacade, RequestQueryFacade, ResponseToolkitFacade } from '../../';
 import fileType from 'file-type';
 
 import { RequestFacade, RequestQueryFacade, ResponseToolkitFacade } from '../../';
@@ -15,13 +17,13 @@ import { detectLanguage } from '../utils/detect_language';
 import { CodeServerRouter } from '../security';
 import { RepositoryObjectClient } from '../search';
 import { EsClientWithRequest } from '../utils/esclient_with_request';
-import { TEXT_FILE_LIMIT } from '../../common/file';
 import { decodeRevisionString } from '../../common/uri_util';
-import { DistributedCode } from '../distributed/distributed_code';
-import { getGitServiceHandler, GitServiceDefinition } from '../distributed/apis';
-import { LocalHandlerAdapter } from '../distributed/local_handler_adapter';
+import { CodeServices } from '../distributed/code_services';
+import { GitServiceDefinition } from '../distributed/apis';
 
-export function fileRoute(router: CodeServerRouter, gitOps: GitOperations) {
+export function fileRoute(router: CodeServerRouter, codeServices: CodeServices) {
+  const gitService = codeServices.serviceFor(GitServiceDefinition);
+
   async function getRepoUriFromMeta(
     req: RequestFacade,
     repoUri: string
@@ -36,11 +38,7 @@ export function fileRoute(router: CodeServerRouter, gitOps: GitOperations) {
     }
   }
 
-  const distributedCode = new DistributedCode(new LocalHandlerAdapter());
-  distributedCode.registerHandler(GitServiceDefinition, getGitServiceHandler(gitOps));
-  const gitService = distributedCode.serviceFor(GitServiceDefinition);
-
-  router.route({
+  server.route({
     path: '/api/code/repo/{uri*3}/tree/{ref}/{path*}',
     method: 'GET',
     async handler(req: RequestFacade) {
@@ -57,10 +55,10 @@ export function fileRoute(router: CodeServerRouter, gitOps: GitOperations) {
       if (!repoUri) {
         return Boom.notFound(`repo ${uri} not found`);
       }
-      const endpoint = await distributedCode.locate(req, uri);
+      const endpoint = await codeServices.locate(req, uri);
       try {
         return await gitService.fileTree(endpoint, {
-          repoUri,
+          uri: repoUri,
           path,
           revision,
           skip,
@@ -88,42 +86,30 @@ export function fileRoute(router: CodeServerRouter, gitOps: GitOperations) {
       if (!repoUri) {
         return Boom.notFound(`repo ${uri} not found`);
       }
+      const endpoint = await codeServices.locate(req, uri);
       try {
-        const blob = await gitOps.fileContent(repoUri, path, decodeURIComponent(revision));
-        if (blob.isBinary()) {
-          const type = fileType(blob.content());
-          if (type && type.mime && type.mime.startsWith('image/')) {
-            const response = h.response(blob.content());
-            response.type(type.mime);
-            return response;
-          } else {
-            // this api will return a empty response with http code 204
-            return h
-              .response('')
-              .type('application/octet-stream')
-              .code(204);
-          }
+        const blob = await gitService.blob(endpoint, {
+          uri,
+          path,
+          line: (req.query as RequestQuery).line as string,
+          revision: decodeURIComponent(revision),
+        });
+
+        if (blob.imageType) {
+          const response = h.response(blob.content);
+          response.type(blob.imageType);
+          return response;
+        } else if (blob.isBinary) {
+          return h
+            .response('')
+            .type('application/octet-stream')
+            .code(204);
         } else {
-          const line = (req.query as RequestQueryFacade).line as string;
-          if (line) {
-            const [from, to] = line.split(',');
-            let fromLine = parseInt(from, 10);
-            let toLine = to === undefined ? fromLine + 1 : parseInt(to, 10);
-            if (fromLine > toLine) {
-              [fromLine, toLine] = [toLine, fromLine];
-            }
-            const lines = extractLines(blob.content(), fromLine, toLine);
-            const lang = await detectLanguage(path, lines);
+          if (blob.content) {
             return h
-              .response(lines)
-              .type(`text/plain`)
-              .header('lang', lang);
-          } else if (blob.content().length <= TEXT_FILE_LIMIT) {
-            const lang = await detectLanguage(path, blob.content());
-            return h
-              .response(blob.content())
-              .type(`text/plain'`)
-              .header('lang', lang);
+              .response(blob.content)
+              .type('text/plain')
+              .header('lang', blob.lang!);
           } else {
             return h.response('').type(`text/big`);
           }
@@ -148,12 +134,14 @@ export function fileRoute(router: CodeServerRouter, gitOps: GitOperations) {
       if (!repoUri) {
         return Boom.notFound(`repo ${uri} not found`);
       }
+      const endpoint = await codeServices.locate(req, uri);
+
       try {
-        const blob = await gitOps.fileContent(repoUri, path, revision);
-        if (blob.isBinary()) {
-          return h.response(blob.content()).type('application/octet-stream');
+        const blob = await gitService.raw(endpoint, { uri: repoUri, path, revision });
+        if (blob.isBinary) {
+          return h.response(blob.content).type('application/octet-stream');
         } else {
-          return h.response(blob.content()).type('text/plain');
+          return h.response(blob.content).type('text/plain');
         }
       } catch (e) {
         if (e.isBoom) {
@@ -188,29 +176,8 @@ export function fileRoute(router: CodeServerRouter, gitOps: GitOperations) {
       if (!repoUri) {
         return Boom.notFound(`repo ${uri} not found`);
       }
-      const repository = await gitOps.openRepo(repoUri);
-      const commit = await gitOps.getCommitInfo(repoUri, revision);
-      if (commit === null) {
-        throw Boom.notFound(`commit ${revision} not found in repo ${uri}`);
-      }
-      const walk = repository.createRevWalk();
-      walk.sorting(Revwalk.SORT.TIME);
-      const commitId = Oid.fromString(commit!.id);
-      walk.push(commitId);
-      let commits: Commit[];
-      if (path) {
-        // magic number 10000: how many commits at the most to iterate in order to find the commits contains the path
-        const results = await walk.fileHistoryWalk(path, count, 10000);
-        commits = results.map(result => result.commit);
-      } else {
-        commits = await walk.getCommits(count);
-      }
-      if (after && commits.length > 0) {
-        if (commits[0].id().equal(commitId)) {
-          commits = commits.slice(1);
-        }
-      }
-      return commits.map(commitInfo);
+      const endpoint = await codeServices.locate(req, uri);
+      return await gitService.history(endpoint, { uri: repoUri, path, revision, count, after });
     } catch (e) {
       if (e.isBoom) {
         return e;
@@ -229,8 +196,10 @@ export function fileRoute(router: CodeServerRouter, gitOps: GitOperations) {
       if (!repoUri) {
         return Boom.notFound(`repo ${uri} not found`);
       }
+      const endpoint = await codeServices.locate(req, uri);
+
       try {
-        return await gitOps.getBranchAndTags(repoUri);
+        return await gitService.branchesAndTags(endpoint, { uri: repoUri });
       } catch (e) {
         if (e.isBoom) {
           return e;
@@ -250,9 +219,12 @@ export function fileRoute(router: CodeServerRouter, gitOps: GitOperations) {
       if (!repoUri) {
         return Boom.notFound(`repo ${uri} not found`);
       }
+      const endpoint = await codeServices.locate(req, uri);
       try {
-        const diff = await gitOps.getCommitDiff(repoUri, decodeRevisionString(revision));
-        return diff;
+        return await gitService.commitDiff(endpoint, {
+          uri: repoUri,
+          revision: decodeRevisionString(revision),
+        });
       } catch (e) {
         if (e.isBoom) {
           return e;
@@ -272,13 +244,14 @@ export function fileRoute(router: CodeServerRouter, gitOps: GitOperations) {
       if (!repoUri) {
         return Boom.notFound(`repo ${uri} not found`);
       }
+      const endpoint = await codeServices.locate(req, uri);
+
       try {
-        const blames = await gitOps.blame(
-          repoUri,
-          decodeRevisionString(decodeURIComponent(revision)),
-          path
-        );
-        return blames;
+        return await gitService.blame(endpoint, {
+          uri: repoUri,
+          revision: decodeRevisionString(decodeURIComponent(revision)),
+          path,
+        });
       } catch (e) {
         if (e.isBoom) {
           return e;

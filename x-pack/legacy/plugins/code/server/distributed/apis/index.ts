@@ -5,3 +5,7 @@
  */
 
 export * from './git_api';
+export * from './lsp_api';
+export * from './workspace_api';
+export * from './setup_api';
+export * from './repository_api';

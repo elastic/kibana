@@ -37,13 +37,8 @@ export type ResponseFor<
   method extends MethodsFor<serviceDefinition>
 > = serviceDefinition[method]['response'];
 
-export interface RequestHeaders {
-  [name: string]: string;
-}
-
 export interface RequestContext {
   path: string;
-  headers: RequestHeaders;
   resource: string;
 }
 

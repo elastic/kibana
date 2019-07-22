@@ -9,9 +9,9 @@ import { LocalEndpoint } from '../local_endpoint';
 
 export class CodeNodeEndpoint extends LocalEndpoint {
   constructor(
-    readonly httpRequest: Request,
-    readonly resource: string,
-    readonly codeNodeUrl: string
+    public readonly httpRequest: Request,
+    public readonly resource: string,
+    public readonly codeNodeUrl: string
   ) {
     super(httpRequest, resource);
   }

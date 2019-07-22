@@ -9,7 +9,7 @@ import { ServiceDefinition, ServiceHandlerFor, ServiceMethodMap } from './servic
 import { DEFAULT_SERVICE_OPTION, HandlerAdapter, ServiceRegisterOptions } from './handler_adpter';
 import { Endpoint } from './resource_locator';
 
-export class DistributedCode {
+export class CodeServices {
   constructor(private readonly adapter: HandlerAdapter) {}
 
   public registerHandler<serviceDefinition extends ServiceDefinition>(

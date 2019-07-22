@@ -15,7 +15,7 @@ export const DEFAULT_SERVICE_OPTION: ServiceRegisterOptions = {
   routePrefix: '/api/code/internal',
 };
 
-export interface HandlerAdapter {
+export interface ServiceHandlerAdapter {
   locator: ResourceLocator;
   getService<DEF extends ServiceDefinition>(serviceDefinition: DEF): ServiceMethodMap<DEF>;
   registerHandler<DEF extends ServiceDefinition>(

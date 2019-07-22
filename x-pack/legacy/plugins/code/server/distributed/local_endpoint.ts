@@ -13,7 +13,6 @@ export class LocalEndpoint implements Endpoint {
 
   toContext(): RequestContext {
     return {
-      headers: this.httpRequest.headers,
       resource: this.resource,
       path: this.httpRequest.path,
     } as RequestContext;

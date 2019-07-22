@@ -5,15 +5,18 @@
  */
 import { Request, Server } from 'hapi';
 import { createTestHapiServer } from '../test_utils';
-import { DistributedCode } from './distributed_code';
 import { LocalHandlerAdapter } from './local_handler_adapter';
 import { CodeServerRouter } from '../security';
 import { RequestContext, ServiceHandlerFor } from './service_definition';
 import { CodeNodeAdapter, RequestPayload } from './multinode/code_node_adapter';
 import { DEFAULT_SERVICE_OPTION } from './handler_adpter';
 import { NonCodeNodeAdapter } from './multinode/non_code_node_adapter';
+import { CodeServices } from './code_services';
+import { Logger } from '../log';
 
 let hapiServer: Server = createTestHapiServer();
+const log = new Logger(hapiServer);
+
 let server: CodeServerRouter = new CodeServerRouter(hapiServer);
 beforeEach(async () => {
   hapiServer = createTestHapiServer();
@@ -41,17 +44,17 @@ export const testServiceHandler: ServiceHandlerFor<typeof TestDefinition> = {
 };
 
 test('local adapter should work', async () => {
-  const dcode = new DistributedCode(new LocalHandlerAdapter());
-  dcode.registerHandler(TestDefinition, testServiceHandler);
-  const testApi = dcode.serviceFor(TestDefinition);
-  const endpoint = await dcode.locate({} as Request, '');
+  const services = new CodeServices(new LocalHandlerAdapter());
+  services.registerHandler(TestDefinition, testServiceHandler);
+  const testApi = services.serviceFor(TestDefinition);
+  const endpoint = await services.locate({} as Request, '');
   const { result } = await testApi.test1(endpoint, { name: 'tester' });
   expect(result).toBe(`hello tester`);
 });
 
 test('multi-node adapter should register routes', async () => {
-  const dcode = new DistributedCode(new CodeNodeAdapter(server));
-  dcode.registerHandler(TestDefinition, testServiceHandler);
+  const services = new CodeServices(new CodeNodeAdapter(server, log));
+  services.registerHandler(TestDefinition, testServiceHandler);
   const prefix = DEFAULT_SERVICE_OPTION.routePrefix;
 
   const path1 = `${prefix}/test1`;
@@ -61,21 +64,27 @@ test('multi-node adapter should register routes', async () => {
     payload: { params: { name: 'tester' } },
   });
   expect(response.statusCode).toBe(200);
-  const { result } = JSON.parse(response.payload);
-  expect(result).toBe(`hello tester`);
+  const { data } = JSON.parse(response.payload);
+  expect(data.result).toBe(`hello tester`);
 });
 
 test('non-code-node could send request to code-node', async () => {
-  const codeNode = new DistributedCode(new CodeNodeAdapter(server));
+  const codeNode = new CodeServices(new CodeNodeAdapter(server, log));
   const codeNodeUrl = 'http://localhost:5601';
-  const nonCodeNodeAdapter = new NonCodeNodeAdapter(codeNodeUrl);
-  const nonCodeNode = new DistributedCode(nonCodeNodeAdapter);
+  const nonCodeNodeAdapter = new NonCodeNodeAdapter(codeNodeUrl, log);
+  const nonCodeNode = new CodeServices(nonCodeNodeAdapter);
   // replace client request fn to hapi.inject
-  nonCodeNodeAdapter.requestFn = async (baseUrl: string, path: string, payload: RequestPayload) => {
+  nonCodeNodeAdapter.requestFn = async (
+    baseUrl: string,
+    path: string,
+    payload: RequestPayload,
+    originRequest: Request
+  ) => {
     expect(baseUrl).toBe(codeNodeUrl);
     const response = await hapiServer.inject({
       method: 'POST',
       url: path,
+      headers: originRequest.headers,
       payload,
     });
     expect(response.statusCode).toBe(200);
@@ -97,6 +106,5 @@ test('non-code-node could send request to code-node', async () => {
 
   const context = await testApi.test2(endpoint, {});
   expect(context.resource).toBe(fakeResource);
-  expect(context.headers).toStrictEqual(fakeRequest.headers);
   expect(context.path).toBe(fakeRequest.path);
 });

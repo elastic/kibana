@@ -5,7 +5,13 @@
  */
 
 import { Request } from 'hapi';
-import { DEFAULT_SERVICE_OPTION, HandlerAdapter, ServiceRegisterOptions } from '../handler_adpter';
+import util from 'util';
+import Boom from 'boom';
+import {
+  DEFAULT_SERVICE_OPTION,
+  ServiceHandlerAdapter,
+  ServiceRegisterOptions,
+} from '../service_handler_adapter';
 import { Endpoint, ResourceLocator } from '../resource_locator';
 import {
   RequestContext,
@@ -16,15 +22,16 @@ import {
 import { CodeServerRouter } from '../../security';
 import { LocalHandlerAdapter } from '../local_handler_adapter';
 import { LocalEndpoint } from '../local_endpoint';
+import { Logger } from '../../log';
 
 export interface RequestPayload {
   context: RequestContext;
   params: any;
 }
 
-export class CodeNodeAdapter implements HandlerAdapter {
+export class CodeNodeAdapter implements ServiceHandlerAdapter {
   localAdapter: LocalHandlerAdapter = new LocalHandlerAdapter();
-  constructor(private readonly server: CodeServerRouter) {}
+  constructor(private readonly server: CodeServerRouter, private readonly log: Logger) {}
 
   locator: ResourceLocator = {
     async locate(httpRequest: Request, resource: string): Promise<Endpoint> {
@@ -54,14 +61,24 @@ export class CodeNodeAdapter implements HandlerAdapter {
       this.server.route({
         method: 'post',
         path,
-        async handler(req: Request) {
+        handler: async (req: Request) => {
           const { context, params } = req.payload as RequestPayload;
+          this.log.debug(`Receiving RPC call ${req.url.path} ${util.inspect(params)}`);
           const endpoint: Endpoint = {
             toContext(): RequestContext {
               return context;
             },
           };
-          return await serviceMethodMap[method](endpoint, params);
+          try {
+            const data = await serviceMethodMap[method](endpoint, params);
+            return { data };
+          } catch (e) {
+            if (!Boom.isBoom(e)) {
+              throw Boom.boomify(e, { statusCode: 500 });
+            } else {
+              throw e;
+            }
+          }
         },
       });
     }
