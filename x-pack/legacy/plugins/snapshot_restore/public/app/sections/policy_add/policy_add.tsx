@@ -46,6 +46,10 @@ export const PolicyAdd: React.FunctionComponent<RouteComponentProps> = ({
     }
   };
 
+  const onCancel = () => {
+    history.push(`${BASE_PATH}/policies`);
+  };
+
   const emptyPolicy: SlmPolicyPayload = {
     name: '',
     snapshotName: '',
@@ -92,6 +96,7 @@ export const PolicyAdd: React.FunctionComponent<RouteComponentProps> = ({
           saveError={renderSaveError()}
           clearSaveError={clearSaveError}
           onSave={onSave}
+          onCancel={onCancel}
         />
       </EuiPageContent>
     </EuiPageBody>

@@ -383,8 +383,8 @@ export const PolicyForm: React.FunctionComponent<Props> = ({
   return (
     <EuiForm>
       {renderNameField()}
-      {renderRepositoryField()}
       {renderSnapshotNameField()}
+      {renderRepositoryField()}
       {renderActions()}
     </EuiForm>
   );
