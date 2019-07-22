@@ -5,8 +5,8 @@
  */
 import React, { useState, useEffect } from 'react';
 import { EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
-import { getIntegrationInfoByKey } from '../data';
 import { IntegrationInfo } from '../../common/types';
+import { getIntegrationInfoByKey } from '../data';
 
 export function Detail(props: { package: string }) {
   const [info, setInfo] = useState<IntegrationInfo | null>(null);
