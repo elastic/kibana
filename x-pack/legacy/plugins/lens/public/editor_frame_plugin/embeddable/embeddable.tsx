@@ -72,7 +72,6 @@ export class Embeddable extends AbstractEmbeddable<LensEmbeddableInput, LensEmbe
     );
 
     this.expressionRenderer = expressionRenderer;
-
     this.savedVis = savedVis;
     this.subscription = this.getInput$().subscribe(input => this.onContainerStateChanged(input));
     this.onContainerStateChanged(initialInput);
