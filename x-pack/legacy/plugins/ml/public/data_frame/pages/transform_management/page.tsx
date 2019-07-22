@@ -52,7 +52,7 @@ export const Page: FC = () => {
                       defaultMessage: `Beta`,
                     })}
                     tooltipContent={i18n.translate(
-                      'xpack.ml.dataframe.transfomList.betaBadgeTooltipContent',
+                      'xpack.ml.dataframe.transformList.betaBadgeTooltipContent',
                       {
                         defaultMessage: `Data frames are a beta feature. We'd love to hear your feedback.`,
                       }
