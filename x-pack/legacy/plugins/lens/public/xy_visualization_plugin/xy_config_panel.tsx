@@ -224,7 +224,8 @@ export function XYConfigPanel(props: VisualizationProps<State>) {
                   )
                 }
                 filterOperations={op => !op.isBucketed && op.dataType === 'number'}
-                testSubj="yDimensionPanel"
+                data-test-subj="lensXY_yDimensionPanel"
+                testSubj="lensXY_yDimensionPanel"
                 layerId={layer.layerId}
               />
             </EuiFormRow>

@@ -6,7 +6,6 @@
 
 import { xyVisualization } from './xy_visualization';
 import { Position } from '@elastic/charts';
-import { Ast } from '@kbn/interpreter/target/common';
 import { Operation } from '../types';
 import { State } from './types';
 import { createMockDatasource, createMockFramePublicAPI } from '../editor_frame_plugin/mocks';
@@ -50,30 +49,30 @@ describe('xy_visualization', () => {
       expect(initialState.layers[0].xAccessor).not.toEqual(initialState.layers[0].accessors[0]);
 
       expect(initialState).toMatchInlineSnapshot(`
-        Object {
-          "layers": Array [
-            Object {
-              "accessors": Array [
-                "test-id1",
-              ],
-              "datasourceId": "",
-              "labels": Array [],
-              "layerId": "",
-              "position": "top",
-              "seriesType": "bar",
-              "showGridlines": false,
-              "splitAccessor": "test-id2",
-              "title": "",
-              "xAccessor": "test-id3",
-            },
-          ],
-          "legend": Object {
-            "isVisible": true,
-            "position": "right",
-          },
-          "title": "Empty XY Chart",
-        }
-      `);
+                Object {
+                  "layers": Array [
+                    Object {
+                      "accessors": Array [
+                        "test-id1",
+                      ],
+                      "datasourceId": "",
+                      "labels": Array [],
+                      "layerId": "",
+                      "position": "top",
+                      "seriesType": "bar",
+                      "showGridlines": false,
+                      "splitAccessor": "test-id2",
+                      "title": "",
+                      "xAccessor": "test-id3",
+                    },
+                  ],
+                  "legend": Object {
+                    "isVisible": true,
+                    "position": "right",
+                  },
+                  "title": "Empty XY Chart",
+                }
+            `);
     });
 
     it('loads from persisted state', () => {
@@ -101,27 +100,22 @@ describe('xy_visualization', () => {
     it('should default to labeling all columns with their column label', () => {
       const mockDatasource = createMockDatasource();
 
-      mockDatasource.publicAPIMock.getOperationForColumnId
-        .mockReturnValueOnce({
-          label: 'First',
-        } as Operation)
-        .mockReturnValueOnce({
-          label: 'Second',
-        } as Operation);
+      mockDatasource.publicAPIMock.getOperationForColumnId.mockImplementation(col => {
+        return { label: `col_${col}` } as Operation;
+      });
 
       const frame = createMockFramePublicAPI();
       frame.datasourceLayers = {
         first: mockDatasource.publicAPIMock,
       };
 
-      const expression = xyVisualization.toExpression(exampleState(), frame)! as Ast;
+      const expression = xyVisualization.toExpression(exampleState(), frame)! as any;
 
-      expect(mockDatasource.publicAPIMock.getOperationForColumnId).toHaveBeenCalledTimes(2);
       expect(mockDatasource.publicAPIMock.getOperationForColumnId).toHaveBeenCalledWith('b');
       expect(mockDatasource.publicAPIMock.getOperationForColumnId).toHaveBeenCalledWith('c');
-      expect((expression.chain[0].arguments.y[0] as Ast).chain[0].arguments.labels).toEqual([
-        'First',
-        'Second',
+      expect(expression.chain[0].arguments.layers[0].chain[0].arguments.labels).toEqual([
+        'col_b',
+        'col_c',
       ]);
     });
   });

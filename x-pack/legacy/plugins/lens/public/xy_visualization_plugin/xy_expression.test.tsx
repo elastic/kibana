@@ -77,7 +77,7 @@ describe('xy_expression', () => {
       };
 
       expect(layerConfig.fn(null, args, {})).toEqual({
-        type: 'lens_xy_layerConfig',
+        type: 'lens_xy_layer',
         ...args,
       });
     });
@@ -126,7 +126,7 @@ describe('xy_expression', () => {
       const component = shallow(
         <XYChart
           data={data}
-          args={{ ...args, layers: [{ ...args.layers[0], seriesType: 'bar' }] }}
+          args={{ ...args, layers: [{ ...args.layers[0], seriesType: 'area' }] }}
         />
       );
       expect(component).toMatchSnapshot();

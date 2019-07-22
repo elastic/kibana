@@ -23,7 +23,7 @@ exports[`xy_expression XYChart component it renders area 1`] = `
     showGridLines={false}
     title="A and B"
   />
-  <inject-BarSeriesSpecComponent-with-chartStore
+  <inject-AreaSeriesSpecComponent-with-chartStore
     data={
       Array [
         Object {
