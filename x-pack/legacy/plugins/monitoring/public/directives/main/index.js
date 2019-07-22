@@ -17,6 +17,7 @@ import { uiModules } from 'ui/modules';
 import template from './index.html';
 import { shortenPipelineHash } from '../../../common/formatting';
 import 'ui/directives/kbn_href';
+import { getSetupModeState } from '../../lib/setup_mode';
 
 const setOptions = (controller) => {
   if (!controller.pipelineVersions || !controller.pipelineVersions.length || !controller.pipelineDropdownElement) {
@@ -117,6 +118,19 @@ export class MonitoringMainController {
   // check whether to show ML tab
   isMlSupported()  {
     return this._licenseService.mlIsSupported();
+  }
+
+  isDisabledTab(product) {
+    const setupMode = getSetupModeState();
+    if (!setupMode.enabled || !setupMode.data) {
+      return false;
+    }
+
+    const data = setupMode.data[product] || {};
+    if (data.totalUniqueInstanceCount === 0) {
+      return true;
+    }
+    return false;
   }
 }
 
