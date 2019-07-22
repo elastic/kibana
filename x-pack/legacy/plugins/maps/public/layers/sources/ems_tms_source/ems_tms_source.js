@@ -9,6 +9,7 @@ import chrome from 'ui/chrome';
 import React from 'react';
 import { AbstractTMSSource } from '../tms_source';
 import { TileLayer } from '../../tile_layer';
+import { VectorTileLayer } from '../../vector_tile_layer';
 
 import { getEmsTMSServices } from '../../../meta';
 import { EMSTMSCreateSourceEditor } from './create_source_editor';
@@ -97,7 +98,7 @@ export class EMSTMSSource extends AbstractTMSSource {
   }
 
   createDefaultLayer(options) {
-    return new TileLayer({
+    return new VectorTileLayer({
       layerDescriptor: this._createDefaultLayerDescriptor(options),
       source: this
     });
