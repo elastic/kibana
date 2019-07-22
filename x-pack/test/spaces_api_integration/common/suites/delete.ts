@@ -164,7 +164,7 @@ export function deleteTestSuiteFactory(es: any, esArchiver: any, supertest: Supe
           .then(tests.exists.response);
       });
 
-      describe(`when the space is reserved`, async () => {
+      describe(`when the space is reserved`, () => {
         it(`should return ${tests.reservedSpace.statusCode}`, async () => {
           return supertest
             .delete(`${getUrlPrefix(spaceId)}/api/spaces/space/default`)

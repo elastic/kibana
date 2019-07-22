@@ -98,13 +98,13 @@ describe('clone_worker_tests', () => {
 
     // Setup CancellationService
     const cancelCloneJobSpy = sinon.spy();
-    const registerCloneJobTokenSpy = sinon.spy();
+    const registerCancelableCloneJobSpy = sinon.spy();
     const cancellationService: any = {
       cancelCloneJob: emptyAsyncFunc,
-      registerCloneJobToken: emptyAsyncFunc,
+      registerCancelableCloneJob: emptyAsyncFunc,
     };
     cancellationService.cancelCloneJob = cancelCloneJobSpy;
-    cancellationService.registerCloneJobToken = registerCloneJobTokenSpy;
+    cancellationService.registerCancelableCloneJob = registerCancelableCloneJobSpy;
 
     const cloneWorker = new CloneWorker(
       esQueue as Esqueue,
@@ -146,13 +146,13 @@ describe('clone_worker_tests', () => {
 
     // Setup CancellationService
     const cancelCloneJobSpy = sinon.spy();
-    const registerCloneJobTokenSpy = sinon.spy();
+    const registerCancelableCloneJobSpy = sinon.spy();
     const cancellationService: any = {
       cancelCloneJob: emptyAsyncFunc,
-      registerCloneJobToken: emptyAsyncFunc,
+      registerCancelableCloneJob: emptyAsyncFunc,
     };
     cancellationService.cancelCloneJob = cancelCloneJobSpy;
-    cancellationService.registerCloneJobToken = registerCloneJobTokenSpy;
+    cancellationService.registerCancelableCloneJob = registerCancelableCloneJobSpy;
 
     const cloneWorker = new CloneWorker(
       esQueue as Esqueue,
@@ -209,13 +209,13 @@ describe('clone_worker_tests', () => {
 
     // Setup CancellationService
     const cancelCloneJobSpy = sinon.spy();
-    const registerCloneJobTokenSpy = sinon.spy();
+    const registerCancelableCloneJobSpy = sinon.spy();
     const cancellationService: any = {
       cancelCloneJob: emptyAsyncFunc,
-      registerCloneJobToken: emptyAsyncFunc,
+      registerCancelableCloneJob: emptyAsyncFunc,
     };
     cancellationService.cancelCloneJob = cancelCloneJobSpy;
-    cancellationService.registerCloneJobToken = registerCloneJobTokenSpy;
+    cancellationService.registerCancelableCloneJob = registerCancelableCloneJobSpy;
 
     const cloneWorker = new CloneWorker(
       esQueue as Esqueue,
@@ -264,13 +264,13 @@ describe('clone_worker_tests', () => {
 
     // Setup CancellationService
     const cancelCloneJobSpy = sinon.spy();
-    const registerCloneJobTokenSpy = sinon.spy();
+    const registerCancelableCloneJobSpy = sinon.spy();
     const cancellationService: any = {
       cancelCloneJob: emptyAsyncFunc,
-      registerCloneJobToken: emptyAsyncFunc,
+      registerCancelableCloneJob: emptyAsyncFunc,
     };
     cancellationService.cancelCloneJob = cancelCloneJobSpy;
-    cancellationService.registerCloneJobToken = registerCloneJobTokenSpy;
+    cancellationService.registerCancelableCloneJob = registerCancelableCloneJobSpy;
 
     const cloneWorker = new CloneWorker(
       esQueue as Esqueue,
@@ -312,13 +312,13 @@ describe('clone_worker_tests', () => {
 
     // Setup CancellationService
     const cancelCloneJobSpy = sinon.spy();
-    const registerCloneJobTokenSpy = sinon.spy();
+    const registerCancelableCloneJobSpy = sinon.spy();
     const cancellationService: any = {
       cancelCloneJob: emptyAsyncFunc,
-      registerCloneJobToken: emptyAsyncFunc,
+      registerCancelableCloneJob: emptyAsyncFunc,
     };
     cancellationService.cancelCloneJob = cancelCloneJobSpy;
-    cancellationService.registerCloneJobToken = registerCloneJobTokenSpy;
+    cancellationService.registerCancelableCloneJob = registerCancelableCloneJobSpy;
 
     const cloneWorker = new CloneWorker(
       esQueue as Esqueue,
