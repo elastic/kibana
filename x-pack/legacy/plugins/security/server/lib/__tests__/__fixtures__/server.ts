@@ -14,6 +14,7 @@ export function serverFixture() {
     log: stub(),
     route: stub(),
     decorate: stub(),
+    ext: stub(),
 
     info: {
       protocol: 'protocol',

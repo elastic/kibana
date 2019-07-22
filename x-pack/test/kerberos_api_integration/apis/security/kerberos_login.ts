@@ -103,6 +103,11 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
           .set('Authorization', `Negotiate ${spnegoToken}`)
           .expect(200);
 
+        // Verify that mutual authentication works.
+        expect(response.headers['www-authenticate']).to.be(
+          'Negotiate oRQwEqADCgEAoQsGCSqGSIb3EgECAg=='
+        );
+
         const cookies = response.headers['set-cookie'];
         expect(cookies).to.have.length(1);
 

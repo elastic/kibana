@@ -218,8 +218,7 @@ export class OIDCAuthenticationProvider extends BaseAuthenticationProvider {
       this.debug('Request has been authenticated via OpenID Connect.');
 
       return AuthenticationResult.redirectTo(stateRedirectURL, {
-        accessToken,
-        refreshToken,
+        state: { accessToken, refreshToken },
       });
     } catch (err) {
       this.debug(`Failed to authenticate request via OpenID Connect: ${err.message}`);
@@ -274,7 +273,7 @@ export class OIDCAuthenticationProvider extends BaseAuthenticationProvider {
       return AuthenticationResult.redirectTo(
         redirect,
         // Store the state and nonce parameters in the session state of the user
-        { state, nonce, nextURL: redirectAfterLogin }
+        { state: { state, nonce, nextURL: redirectAfterLogin } }
       );
     } catch (err) {
       this.debug(`Failed to initiate OpenID Connect authentication: ${err.message}`);
@@ -412,7 +411,7 @@ export class OIDCAuthenticationProvider extends BaseAuthenticationProvider {
       const user = await this.options.client.callWithRequest(request, 'shield.authenticate');
 
       this.debug('Request has been authenticated via refreshed token.');
-      return AuthenticationResult.succeeded(user, refreshedTokenPair);
+      return AuthenticationResult.succeeded(user, { state: refreshedTokenPair });
     } catch (err) {
       this.debug(`Failed to authenticate user using newly refreshed access token: ${err.message}`);
 

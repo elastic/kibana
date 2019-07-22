@@ -8,7 +8,6 @@
  * Represents status that `AuthenticationResult` can be in.
  */
 import { AuthenticatedUser } from '../../../common/model';
-import { getErrorStatusCode } from '../errors';
 
 enum AuthenticationResultStatus {
   /**
@@ -45,6 +44,7 @@ interface AuthenticationOptions {
   redirectURL?: string;
   state?: unknown;
   user?: AuthenticatedUser;
+  authResponseHeaders?: Record<string, string | string[]>;
 }
 
 /**
@@ -62,34 +62,47 @@ export class AuthenticationResult {
   /**
    * Produces `AuthenticationResult` for the case when authentication succeeds.
    * @param user User information retrieved as a result of successful authentication attempt.
+   * @param [authResponseHeaders] Optional dictionary of the HTTP headers with authentication
+   * information that should be specified in the response we send to the client request.
    * @param [state] Optional state to be stored and reused for the next request.
    */
-  public static succeeded(user: AuthenticatedUser, state?: unknown) {
+  public static succeeded(
+    user: AuthenticatedUser,
+    {
+      authResponseHeaders,
+      state,
+    }: Pick<AuthenticationOptions, 'authResponseHeaders' | 'state'> = {}
+  ) {
     if (!user) {
       throw new Error('User should be specified.');
     }
 
-    return new AuthenticationResult(AuthenticationResultStatus.Succeeded, { user, state });
+    return new AuthenticationResult(AuthenticationResultStatus.Succeeded, {
+      user,
+      authResponseHeaders,
+      state,
+    });
   }
 
   /**
    * Produces `AuthenticationResult` for the case when authentication fails.
    * @param error Error that occurred during authentication attempt.
-   * @param [challenges] Optional list of the challenges that will be returned to the user within
-   * `WWW-Authenticate` HTTP header. Multiple challenges will result in multiple headers (one per
-   * challenge) as it's better supported by the browsers than comma separated list within a single
-   * header. Challenges can only be set for errors with `401` error status.
+   * @param [authResponseHeaders] Optional dictionary of the HTTP headers with authentication related
+   * information (e.g. `WWW-Authenticate` with the challenges) that should be specified in the
+   * response we send to the client request.
    */
-  public static failed(error: Error, challenges?: string[]) {
+  public static failed(
+    error: Error,
+    { authResponseHeaders }: Pick<AuthenticationOptions, 'authResponseHeaders'> = {}
+  ) {
     if (!error) {
       throw new Error('Error should be specified.');
     }
 
-    if (challenges != null && getErrorStatusCode(error) !== 401) {
-      throw new Error('Challenges can only be provided with `401 Unauthorized` errors.');
-    }
-
-    return new AuthenticationResult(AuthenticationResultStatus.Failed, { error, challenges });
+    return new AuthenticationResult(AuthenticationResultStatus.Failed, {
+      error,
+      authResponseHeaders,
+    });
   }
 
   /**
@@ -97,7 +110,10 @@ export class AuthenticationResult {
    * @param redirectURL URL that should be used to redirect user to complete authentication.
    * @param [state] Optional state to be stored and reused for the next request.
    */
-  public static redirectTo(redirectURL: string, state?: unknown) {
+  public static redirectTo(
+    redirectURL: string,
+    { state }: Pick<AuthenticationOptions, 'state'> = {}
+  ) {
     if (!redirectURL) {
       throw new Error('Redirect URL must be specified.');
     }
@@ -113,6 +129,19 @@ export class AuthenticationResult {
   }
 
   /**
+   * Optional dictionary of the HTTP headers with authentication related information (e.g.
+   * `WWW-Authenticate` with the challenges) that should be specified in the response we send to
+   * the client request (only available for `succeeded` and `failed` results). It's possible to define
+   * header value as an array of strings since there are cases when it's necessary to send several
+   * headers with the same name, but different values (e.g. in case of `WWW-Authenticate` multiple
+   * challenges will result in multiple headers, one per challenge, as it's better supported by the
+   * browsers than comma separated list within a single header string).
+   */
+  public get authResponseHeaders() {
+    return this.options.authResponseHeaders;
+  }
+
+  /**
    * State associated with the authenticated user (only available for `succeeded`
    * and `redirected` results).
    */
@@ -125,13 +154,6 @@ export class AuthenticationResult {
    */
   public get error() {
     return this.options.error;
-  }
-
-  /**
-   * Challenges that need to be sent to the user within `WWW-Authenticate` HTTP header.
-   */
-  public get challenges() {
-    return this.options.challenges;
   }
 
   /**
