@@ -24,6 +24,9 @@ import { LegacyPluginApi, LegacyPluginInitializer } from '../../../../src/legacy
 
 const vegaPluginInitializer: LegacyPluginInitializer = ({ Plugin }: LegacyPluginApi) =>
   new Plugin({
+    // TODO: ID property should be changed from 'vega' to 'vis_type_vega'
+    // It is required to change the configuration property
+    //   vega.enableExternalUrls -> vis_type_vega.enableExternalUrls
     id: 'vega',
     require: ['kibana', 'elasticsearch', 'visualizations', 'interpreter', 'data'],
     publicDir: resolve(__dirname, 'public'),
