@@ -211,6 +211,9 @@ class ValidateJob extends Component {
             data,
             title: job.job_id
           });
+          if (typeof this.props.setIsValid === 'function') {
+            this.props.setIsValid(data.messages.some(m => m.status === VALIDATION_STATUS.ERROR) === false);
+          }
         });
 
       // wait for 250ms before triggering the loading indicator
@@ -318,6 +321,7 @@ ValidateJob.propTypes = {
   isDisabled: PropTypes.bool,
   mlJobService: PropTypes.object.isRequired,
   embedded: PropTypes.bool,
+  setIsValid: PropTypes.func,
 };
 
 export { ValidateJob };

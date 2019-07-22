@@ -5,4 +5,10 @@
  */
 
 import { FC } from 'react';
-declare const ValidateJob: FC<{ getJobConfig: any; mlJobService: any; embedded?: boolean }>;
+declare const ValidateJob: FC<{
+  getJobConfig: any;
+  getDuration: any;
+  mlJobService: any;
+  embedded?: boolean;
+  setIsValid?: (valid: boolean) => void;
+}>;

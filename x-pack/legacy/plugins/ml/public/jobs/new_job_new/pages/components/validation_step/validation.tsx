@@ -18,16 +18,8 @@ export const ValidationStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep })
     return null;
   }
 
-  const { jobCreator, jobValidator, jobValidatorUpdated } = useContext(JobCreatorContext);
+  const { jobCreator, jobValidator } = useContext(JobCreatorContext);
   const [nextActive, setNextActive] = useState(false);
-
-  useEffect(() => {
-    const active =
-      jobCreator.detectors.length > 0 &&
-      jobValidator.bucketSpan.valid &&
-      jobValidator.duplicateDetectors.valid;
-    setNextActive(active);
-  }, [jobValidatorUpdated]);
 
   function getJobConfig() {
     return {
@@ -36,11 +28,34 @@ export const ValidationStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep })
     };
   }
 
+  function getDuration() {
+    return {
+      start: jobCreator.start,
+      end: jobCreator.end,
+    };
+  }
+
+  // keep a record of the advanced validation in the jobValidator
+  // and disable the next button if any advanced checks have failed.
+  // note, it is not currently possible to get to a state where any of the
+  // advanced validation checks return an error because they are all
+  // caught in previous basic checks
+  function setIsValid(valid: boolean) {
+    jobValidator.advancedValid = valid;
+    setNextActive(valid);
+  }
+
   return (
     <Fragment>
       {isCurrentStep && (
         <Fragment>
-          <ValidateJob getJobConfig={getJobConfig} mlJobService={mlJobService} embedded={true} />
+          <ValidateJob
+            getJobConfig={getJobConfig}
+            getDuration={getDuration}
+            mlJobService={mlJobService}
+            embedded={true}
+            setIsValid={setIsValid}
+          />
           <WizardNav
             previous={() => setCurrentStep(WIZARD_STEPS.JOB_DETAILS)}
             next={() => setCurrentStep(WIZARD_STEPS.SUMMARY)}
