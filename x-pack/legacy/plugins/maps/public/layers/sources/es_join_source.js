@@ -49,7 +49,7 @@ export function extractPropertiesMap(rawEsData, propertyNames, countPropertyName
         properties[propertyName] = _.get(termBucket, [propertyName, 'value']);
       }
     });
-    propertiesMap.set(termBucket.key, properties);
+    propertiesMap.set((termBucket.key).toString(), properties);
   });
   return propertiesMap;
 }
