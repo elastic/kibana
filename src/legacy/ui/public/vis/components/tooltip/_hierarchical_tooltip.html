@@ -17,14 +17,10 @@
   <tbody>
     <tr class="visTooltip__value" ng-repeat="row in rows track by $index">
       <td>
-        <div class="visTooltip__labelContainer">
-          <span ng-bind-html="row.spacer"></span>
-          {{row.field}}
-        </div>
+        <div class="visTooltip__labelContainer"><span ng-bind-html="row.spacer"></span>{{row.field}}</div>
       </td>
       <td>
-        <div class="visTooltip__labelContainer">
-          {{row.bucket}}
+        <div class="visTooltip__labelContainer">{{row.bucket}}
       </td>
       <td>{{row.metric}}</td>
     </tr>

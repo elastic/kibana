@@ -26,9 +26,10 @@ import theme from '@elastic/eui/dist/eui_theme_light.json';
 
 let allContents = [];
 
-const tooltipColumnPadding = Number(theme.euiSizeXS.slice('px')[0]) * 2;
-const tooltipTableMargin = Number(theme.euiSizeS.slice('px')[0]) * 2;
-const tooltipMaxWidth = Number(theme.euiSizeXL.slice('px')[0]) * 10;
+const tooltipColumnPadding = Number(theme.euiSizeXS.split('px')[0]) * 2;
+const tooltipTableMargin = Number(theme.euiSizeS.split('px')[0]) * 2;
+const tooltipMaxWidth = Number(theme.euiSizeXL.split('px')[0]) * 10;
+
 /**
  * Add tooltip and listeners to visualization elements
  *
@@ -101,7 +102,6 @@ Tooltip.prototype.show = function () {
     left: placement.left,
     top: placement.top
   });
-
   const tooltipColumns = $tooltip.find('tbody > tr:nth-of-type(1) > td').length;
   if (tooltipColumns === 2) {
     // on pointseries tooltip
