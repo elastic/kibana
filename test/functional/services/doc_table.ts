@@ -29,7 +29,8 @@ export function DocTableProvider({ getService, getPageObjects }: FtrProviderCont
       return await testSubjects.find('docTable');
     }
 
-    public async getRowsText(table: WebElementWrapper): Promise<string[]> {
+    public async getRowsText(): Promise<string[]> {
+      const table = await this.getTable();
       const $ = await table.parseDomContent();
       return $('[data-test-subj~="docTableRow"]')
         .toArray()
@@ -40,15 +41,18 @@ export function DocTableProvider({ getService, getPageObjects }: FtrProviderCont
         );
     }
 
-    public async getBodyRows(table: WebElementWrapper): Promise<WebElementWrapper[]> {
+    public async getBodyRows(): Promise<WebElementWrapper[]> {
+      const table = await this.getTable();
       return await table.findAllByCssSelector('[data-test-subj~="docTableRow"]');
     }
 
-    public async getAnchorRow(table: WebElementWrapper): Promise<WebElementWrapper> {
+    public async getAnchorRow(): Promise<WebElementWrapper> {
+      const table = await this.getTable();
       return await table.findByCssSelector('[data-test-subj~="docTableAnchorRow"]');
     }
 
-    public async getAnchorDetailsRow(table: WebElementWrapper): Promise<WebElementWrapper> {
+    public async getAnchorDetailsRow(): Promise<WebElementWrapper> {
+      const table = await this.getTable();
       return await table.findByCssSelector(
         '[data-test-subj~="docTableAnchorRow"] + [data-test-subj~="docTableDetailsRow"]'
       );
@@ -58,7 +62,8 @@ export function DocTableProvider({ getService, getPageObjects }: FtrProviderCont
       return await row.findByCssSelector('[data-test-subj~="docTableExpandToggleColumn"]');
     }
 
-    public async getDetailsRows(table: WebElementWrapper): Promise<WebElementWrapper[]> {
+    public async getDetailsRows(): Promise<WebElementWrapper[]> {
+      const table = await this.getTable();
       return await table.findAllByCssSelector(
         '[data-test-subj~="docTableRow"] + [data-test-subj~="docTableDetailsRow"]'
       );
@@ -72,7 +77,8 @@ export function DocTableProvider({ getService, getPageObjects }: FtrProviderCont
       return await row.findAllByCssSelector('[data-test-subj~="docTableField"]');
     }
 
-    public async getHeaderFields(table: WebElementWrapper): Promise<WebElementWrapper[]> {
+    public async getHeaderFields(): Promise<WebElementWrapper[]> {
+      const table = await this.getTable();
       return await table.findAllByCssSelector('[data-test-subj~="docTableHeaderField"]');
     }
 

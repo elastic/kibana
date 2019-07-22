@@ -45,8 +45,7 @@ export default function ({ getService, getPageObjects }) {
     });
 
     it('should open the context view with the selected document as anchor', async function () {
-      const discoverDocTable = await docTable.getTable();
-      const firstRow = (await docTable.getBodyRows(discoverDocTable))[0];
+      const firstRow = (await docTable.getBodyRows())[0];
 
       // get the timestamp of the first row
       const firstTimestamp = await (await docTable.getFields(firstRow))[0]
@@ -54,13 +53,12 @@ export default function ({ getService, getPageObjects }) {
 
       // navigate to the context view
       await (await docTable.getRowExpandToggle(firstRow)).click();
-      const firstDetailsRow = (await docTable.getDetailsRows(discoverDocTable))[0];
+      const firstDetailsRow = (await docTable.getDetailsRows())[0];
       await (await docTable.getRowActions(firstDetailsRow))[0].click();
 
       // check the anchor timestamp in the context view
       await retry.try(async () => {
-        const contextDocTable = await docTable.getTable();
-        const anchorRow = await docTable.getAnchorRow(contextDocTable);
+        const anchorRow = await docTable.getAnchorRow();
         const anchorTimestamp = await (await docTable.getFields(anchorRow))[0]
           .getVisibleText();
         expect(anchorTimestamp).to.equal(firstTimestamp);
@@ -68,9 +66,8 @@ export default function ({ getService, getPageObjects }) {
     });
 
     it('should open the context view with the same columns', async function () {
-      const table = await docTable.getTable();
       await retry.try(async () => {
-        const headerFields = await docTable.getHeaderFields(table);
+        const headerFields = await docTable.getHeaderFields();
         const columnNames = await Promise.all(headerFields.map((headerField) => (
           headerField.getVisibleText()
         )));

@@ -46,12 +46,11 @@ export default function ({ getService, getPageObjects }) {
     });
 
     it('should open the doc view of the selected document', async function () {
-      const discoverDocTable = await docTable.getTable();
-      const firstRow = (await docTable.getBodyRows(discoverDocTable))[0];
+      const firstRow = (await docTable.getBodyRows())[0];
 
       // navigate to the doc view
       await (await docTable.getRowExpandToggle(firstRow)).click();
-      const firstDetailsRow = (await docTable.getDetailsRows(discoverDocTable))[0];
+      const firstDetailsRow = (await docTable.getDetailsRows())[0];
       await (await docTable.getRowActions(firstDetailsRow))[1].click();
 
       const hasDocHit = await testSubjects.exists('doc-hit');

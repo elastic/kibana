@@ -40,12 +40,11 @@ export default function ({ getService, getPageObjects }) {
 
     // FLAKY: https://github.com/elastic/kibana/issues/39927
     it.skip('should be addable via expanded doc table rows', async function () {
-      const table = await docTable.getTable();
-      const anchorRow = await docTable.getAnchorRow(table);
+      const anchorRow = await docTable.getAnchorRow();
 
       await docTable.toggleRowExpanded(anchorRow);
 
-      const anchorDetailsRow = await docTable.getAnchorDetailsRow(table);
+      const anchorDetailsRow = await docTable.getAnchorDetailsRow();
       await docTable.addInclusiveFilter(anchorDetailsRow, TEST_ANCHOR_FILTER_FIELD);
       await PageObjects.context.waitUntilContextLoadingHasFinished();
 
@@ -53,7 +52,7 @@ export default function ({ getService, getPageObjects }) {
 
       expect(await filterBar.hasFilter(TEST_ANCHOR_FILTER_FIELD, TEST_ANCHOR_FILTER_VALUE, true)).to.be(true);
 
-      const rows = await docTable.getBodyRows(table);
+      const rows = await docTable.getBodyRows();
       const hasOnlyFilteredRows = (
         await Promise.all(rows.map(
           async (row) => await (await docTable.getFields(row))[2].getVisibleText()
@@ -63,7 +62,6 @@ export default function ({ getService, getPageObjects }) {
     });
 
     it('should be toggleable via the filter bar', async function () {
-      const table = await docTable.getTable();
       await filterBar.addFilter(TEST_ANCHOR_FILTER_FIELD, 'IS', TEST_ANCHOR_FILTER_VALUE);
       await PageObjects.context.waitUntilContextLoadingHasFinished();
       // disable filter
@@ -72,7 +70,7 @@ export default function ({ getService, getPageObjects }) {
 
       expect(await filterBar.hasFilter(TEST_ANCHOR_FILTER_FIELD, TEST_ANCHOR_FILTER_VALUE, false)).to.be(true);
 
-      const rows = await docTable.getBodyRows(table);
+      const rows = await docTable.getBodyRows();
       const hasOnlyFilteredRows = (
         await Promise.all(rows.map(
           async (row) => await (await docTable.getFields(row))[2].getVisibleText()
