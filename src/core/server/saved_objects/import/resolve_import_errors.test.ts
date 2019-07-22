@@ -96,11 +96,11 @@ describe('resolveImportErrors()', () => {
       supportedTypes: ['index-pattern', 'search', 'visualization', 'dashboard'],
     });
     expect(result).toMatchInlineSnapshot(`
-Object {
-  "success": true,
-  "successCount": 0,
-}
-`);
+      Object {
+        "success": true,
+        "successCount": 0,
+      }
+    `);
     expect(savedObjectsClient.bulkCreate).toMatchInlineSnapshot(`[MockFunction]`);
   });
 
@@ -130,36 +130,39 @@ Object {
       supportedTypes: ['index-pattern', 'search', 'visualization', 'dashboard'],
     });
     expect(result).toMatchInlineSnapshot(`
-Object {
-  "success": true,
-  "successCount": 1,
-}
-`);
+      Object {
+        "success": true,
+        "successCount": 1,
+      }
+    `);
     expect(savedObjectsClient.bulkCreate).toMatchInlineSnapshot(`
-[MockFunction] {
-  "calls": Array [
-    Array [
-      Array [
-        Object {
-          "attributes": Object {
-            "title": "My Visualization",
+      [MockFunction] {
+        "calls": Array [
+          Array [
+            Array [
+              Object {
+                "attributes": Object {
+                  "title": "My Visualization",
+                },
+                "id": "3",
+                "migrationVersion": Object {},
+                "references": Array [],
+                "type": "visualization",
+              },
+            ],
+            Object {
+              "namespace": undefined,
+            },
+          ],
+        ],
+        "results": Array [
+          Object {
+            "type": "return",
+            "value": Promise {},
           },
-          "id": "3",
-          "migrationVersion": Object {},
-          "references": Array [],
-          "type": "visualization",
-        },
-      ],
-    ],
-  ],
-  "results": Array [
-    Object {
-      "type": "return",
-      "value": Promise {},
-    },
-  ],
-}
-`);
+        ],
+      }
+    `);
   });
 
   test('works with overwrites', async () => {
@@ -188,39 +191,40 @@ Object {
       supportedTypes: ['index-pattern', 'search', 'visualization', 'dashboard'],
     });
     expect(result).toMatchInlineSnapshot(`
-Object {
-  "success": true,
-  "successCount": 1,
-}
-`);
-    expect(savedObjectsClient.bulkCreate).toMatchInlineSnapshot(`
-[MockFunction] {
-  "calls": Array [
-    Array [
-      Array [
-        Object {
-          "attributes": Object {
-            "title": "My Index Pattern",
-          },
-          "id": "1",
-          "migrationVersion": Object {},
-          "references": Array [],
-          "type": "index-pattern",
-        },
-      ],
       Object {
-        "overwrite": true,
-      },
-    ],
-  ],
-  "results": Array [
-    Object {
-      "type": "return",
-      "value": Promise {},
-    },
-  ],
-}
-`);
+        "success": true,
+        "successCount": 1,
+      }
+    `);
+    expect(savedObjectsClient.bulkCreate).toMatchInlineSnapshot(`
+      [MockFunction] {
+        "calls": Array [
+          Array [
+            Array [
+              Object {
+                "attributes": Object {
+                  "title": "My Index Pattern",
+                },
+                "id": "1",
+                "migrationVersion": Object {},
+                "references": Array [],
+                "type": "index-pattern",
+              },
+            ],
+            Object {
+              "namespace": undefined,
+              "overwrite": true,
+            },
+          ],
+        ],
+        "results": Array [
+          Object {
+            "type": "return",
+            "value": Promise {},
+          },
+        ],
+      }
+    `);
   });
 
   test('works wtih replaceReferences', async () => {
@@ -255,42 +259,45 @@ Object {
       supportedTypes: ['index-pattern', 'search', 'visualization', 'dashboard'],
     });
     expect(result).toMatchInlineSnapshot(`
-Object {
-  "success": true,
-  "successCount": 1,
-}
-`);
+      Object {
+        "success": true,
+        "successCount": 1,
+      }
+    `);
     expect(savedObjectsClient.bulkCreate).toMatchInlineSnapshot(`
-[MockFunction] {
-  "calls": Array [
-    Array [
-      Array [
-        Object {
-          "attributes": Object {
-            "title": "My Dashboard",
-          },
-          "id": "4",
-          "migrationVersion": Object {},
-          "references": Array [
+      [MockFunction] {
+        "calls": Array [
+          Array [
+            Array [
+              Object {
+                "attributes": Object {
+                  "title": "My Dashboard",
+                },
+                "id": "4",
+                "migrationVersion": Object {},
+                "references": Array [
+                  Object {
+                    "id": "13",
+                    "name": "panel_0",
+                    "type": "visualization",
+                  },
+                ],
+                "type": "dashboard",
+              },
+            ],
             Object {
-              "id": "13",
-              "name": "panel_0",
-              "type": "visualization",
+              "namespace": undefined,
             },
           ],
-          "type": "dashboard",
-        },
-      ],
-    ],
-  ],
-  "results": Array [
-    Object {
-      "type": "return",
-      "value": Promise {},
-    },
-  ],
-}
-`);
+        ],
+        "results": Array [
+          Object {
+            "type": "return",
+            "value": Promise {},
+          },
+        ],
+      }
+    `);
   });
 
   test('extracts errors for conflicts', async () => {
@@ -324,45 +331,45 @@ Object {
       supportedTypes: ['index-pattern', 'search', 'visualization', 'dashboard'],
     });
     expect(result).toMatchInlineSnapshot(`
-Object {
-  "errors": Array [
-    Object {
-      "error": Object {
-        "type": "conflict",
-      },
-      "id": "1",
-      "title": "My Index Pattern",
-      "type": "index-pattern",
-    },
-    Object {
-      "error": Object {
-        "type": "conflict",
-      },
-      "id": "2",
-      "title": "My Search",
-      "type": "search",
-    },
-    Object {
-      "error": Object {
-        "type": "conflict",
-      },
-      "id": "3",
-      "title": "My Visualization",
-      "type": "visualization",
-    },
-    Object {
-      "error": Object {
-        "type": "conflict",
-      },
-      "id": "4",
-      "title": "My Dashboard",
-      "type": "dashboard",
-    },
-  ],
-  "success": false,
-  "successCount": 0,
-}
-`);
+      Object {
+        "errors": Array [
+          Object {
+            "error": Object {
+              "type": "conflict",
+            },
+            "id": "1",
+            "title": "My Index Pattern",
+            "type": "index-pattern",
+          },
+          Object {
+            "error": Object {
+              "type": "conflict",
+            },
+            "id": "2",
+            "title": "My Search",
+            "type": "search",
+          },
+          Object {
+            "error": Object {
+              "type": "conflict",
+            },
+            "id": "3",
+            "title": "My Visualization",
+            "type": "visualization",
+          },
+          Object {
+            "error": Object {
+              "type": "conflict",
+            },
+            "id": "4",
+            "title": "My Dashboard",
+            "type": "dashboard",
+          },
+        ],
+        "success": false,
+        "successCount": 0,
+      }
+    `);
   });
 
   test('validates references', async () => {
@@ -433,59 +440,59 @@ Object {
       supportedTypes: ['index-pattern', 'search', 'visualization', 'dashboard'],
     });
     expect(result).toMatchInlineSnapshot(`
-Object {
-  "errors": Array [
-    Object {
-      "error": Object {
-        "blocking": Array [
-          Object {
-            "id": "3",
-            "type": "visualization",
-          },
-        ],
-        "references": Array [
-          Object {
-            "id": "2",
-            "type": "index-pattern",
-          },
-        ],
-        "type": "missing_references",
-      },
-      "id": "1",
-      "title": "My Search",
-      "type": "search",
-    },
-  ],
-  "success": false,
-  "successCount": 0,
-}
-`);
-    expect(savedObjectsClient.bulkGet).toMatchInlineSnapshot(`
-[MockFunction] {
-  "calls": Array [
-    Array [
-      Array [
-        Object {
-          "fields": Array [
-            "id",
-          ],
-          "id": "2",
-          "type": "index-pattern",
-        },
-      ],
       Object {
-        "namespace": undefined,
-      },
-    ],
-  ],
-  "results": Array [
-    Object {
-      "type": "return",
-      "value": Promise {},
-    },
-  ],
-}
-`);
+        "errors": Array [
+          Object {
+            "error": Object {
+              "blocking": Array [
+                Object {
+                  "id": "3",
+                  "type": "visualization",
+                },
+              ],
+              "references": Array [
+                Object {
+                  "id": "2",
+                  "type": "index-pattern",
+                },
+              ],
+              "type": "missing_references",
+            },
+            "id": "1",
+            "title": "My Search",
+            "type": "search",
+          },
+        ],
+        "success": false,
+        "successCount": 0,
+      }
+    `);
+    expect(savedObjectsClient.bulkGet).toMatchInlineSnapshot(`
+      [MockFunction] {
+        "calls": Array [
+          Array [
+            Array [
+              Object {
+                "fields": Array [
+                  "id",
+                ],
+                "id": "2",
+                "type": "index-pattern",
+              },
+            ],
+            Object {
+              "namespace": undefined,
+            },
+          ],
+        ],
+        "results": Array [
+          Object {
+            "type": "return",
+            "value": Promise {},
+          },
+        ],
+      }
+    `);
   });
 
   test('validates object types', async () => {
@@ -515,21 +522,67 @@ Object {
       supportedTypes: ['index-pattern', 'search', 'visualization', 'dashboard'],
     });
     expect(result).toMatchInlineSnapshot(`
-Object {
-  "errors": Array [
-    Object {
-      "error": Object {
-        "type": "unsupported_type",
-      },
-      "id": "1",
-      "title": "my title",
-      "type": "wigwags",
-    },
-  ],
-  "success": false,
-  "successCount": 0,
-}
-`);
+      Object {
+        "errors": Array [
+          Object {
+            "error": Object {
+              "type": "unsupported_type",
+            },
+            "id": "1",
+            "title": "my title",
+            "type": "wigwags",
+          },
+        ],
+        "success": false,
+        "successCount": 0,
+      }
+    `);
     expect(savedObjectsClient.bulkCreate).toMatchInlineSnapshot(`[MockFunction]`);
+  });
+
+  test('uses namespace when provided', async () => {
+    const readStream = new Readable({
+      objectMode: true,
+      read() {
+        savedObjects.forEach(obj => this.push(obj));
+        this.push(null);
+      },
+    });
+    savedObjectsClient.bulkCreate.mockResolvedValue({
+      saved_objects: savedObjects.filter(obj => obj.type === 'index-pattern' && obj.id === '1'),
+    });
+    const result = await resolveImportErrors({
+      readStream,
+      objectLimit: 4,
+      retries: [
+        {
+          type: 'index-pattern',
+          id: '1',
+          overwrite: true,
+          replaceReferences: [],
+        },
+      ],
+      savedObjectsClient,
+      supportedTypes: ['index-pattern', 'search', 'visualization', 'dashboard'],
+      namespace: 'foo',
+    });
+    expect(result).toMatchInlineSnapshot(`
+      Object {
+        "success": true,
+        "successCount": 1,
+      }
+    `);
+    expect(savedObjectsClient.bulkCreate).toHaveBeenCalledWith(
+      [
+        {
+          attributes: { title: 'My Index Pattern' },
+          id: '1',
+          migrationVersion: {},
+          references: [],
+          type: 'index-pattern',
+        },
+      ],
+      { namespace: 'foo', overwrite: true }
+    );
   });
 });

@@ -32,6 +32,7 @@ interface ResolveImportErrorsOptions {
   savedObjectsClient: SavedObjectsClientContract;
   retries: Retry[];
   supportedTypes: string[];
+  namespace?: string;
 }
 
 interface ImportResponse {
@@ -46,6 +47,7 @@ export async function resolveImportErrors({
   retries,
   savedObjectsClient,
   supportedTypes,
+  namespace,
 }: ResolveImportErrorsOptions): Promise<ImportResponse> {
   let successCount = 0;
   let errorAccumulator: SavedObjectsImportError[] = [];
@@ -89,7 +91,8 @@ export async function resolveImportErrors({
   // Validate references
   const { filteredObjects, errors: validationErrors } = await validateReferences(
     objectsToResolve,
-    savedObjectsClient
+    savedObjectsClient,
+    namespace
   );
   errorAccumulator = [...errorAccumulator, ...validationErrors];
 
@@ -98,6 +101,7 @@ export async function resolveImportErrors({
   if (objectsToOverwrite.length) {
     const bulkCreateResult = await savedObjectsClient.bulkCreate(objectsToOverwrite, {
       overwrite: true,
+      namespace,
     });
     errorAccumulator = [
       ...errorAccumulator,
@@ -106,7 +110,9 @@ export async function resolveImportErrors({
     successCount += bulkCreateResult.saved_objects.filter(obj => !obj.error).length;
   }
   if (objectsToNotOverwrite.length) {
-    const bulkCreateResult = await savedObjectsClient.bulkCreate(objectsToNotOverwrite);
+    const bulkCreateResult = await savedObjectsClient.bulkCreate(objectsToNotOverwrite, {
+      namespace,
+    });
     errorAccumulator = [
       ...errorAccumulator,
       ...extractErrors(bulkCreateResult.saved_objects, objectsToNotOverwrite),
