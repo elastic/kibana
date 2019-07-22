@@ -9,7 +9,7 @@ import ReactDOM from 'react-dom';
 import { i18n } from '@kbn/i18n';
 import { EuiBasicTable } from '@elastic/eui';
 import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/types';
-import { KibanaDatatable } from '../types';
+import { KibanaDatatable, LensMultiTable } from '../types';
 import { RenderFunction } from '../interpreter_types';
 
 export interface DatatableColumns {
@@ -22,7 +22,7 @@ interface Args {
 }
 
 export interface DatatableProps {
-  data: KibanaDatatable;
+  data: LensMultiTable;
   args: Args;
 }
 
@@ -106,11 +106,6 @@ export const datatableColumns: ExpressionFunction<
   },
 };
 
-export interface DatatableProps {
-  data: KibanaDatatable;
-  args: Args;
-}
-
 export const datatableRenderer: RenderFunction<DatatableProps> = {
   name: 'lens_datatable_renderer',
   displayName: i18n.translate('xpack.lens.datatable.visualizationName', {
@@ -127,8 +122,7 @@ export const datatableRenderer: RenderFunction<DatatableProps> = {
 function DatatableComponent(props: DatatableProps) {
   // TODO: We should probalby change data.rows to be data.layers, since
   // each row is actually an array of layer objects
-  const firstLayer = props.data.rows[0];
-  const firstTable = firstLayer && (Object.values(firstLayer)[0] as KibanaDatatable);
+  const [firstTable] = Object.values(props.data.tables);
 
   return (
     <EuiBasicTable

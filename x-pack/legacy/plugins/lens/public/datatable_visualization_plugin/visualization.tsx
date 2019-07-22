@@ -113,7 +113,7 @@ export const datatableVisualization: Visualization<
         state: {
           layers: [
             {
-              layerId: `${generateId()}`,
+              layerId: table.layerId,
               columns: table.columns.map(col => col.columnId),
             },
           ],
