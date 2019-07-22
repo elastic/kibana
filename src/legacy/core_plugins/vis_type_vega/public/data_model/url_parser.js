@@ -37,7 +37,7 @@ export class UrlParser {
   parseUrl(obj, urlObj) {
     let url = urlObj.url;
     if (!url) {
-      throw new Error(i18n.translate('vega.urlParser.dataUrlRequiresUrlParameterInFormErrorMessage', {
+      throw new Error(i18n.translate('visTypeVega.urlParser.dataUrlRequiresUrlParameterInFormErrorMessage', {
         defaultMessage: '{dataUrlParam} requires a {urlParam} parameter in a form "{formLink}"',
         values: {
           dataUrlParam: '"data.url"',
@@ -49,7 +49,7 @@ export class UrlParser {
 
     const query = urlObj.query;
     if (!query) {
-      this._onWarning(i18n.translate('vega.urlParser.urlShouldHaveQuerySubObjectWarningMessage', {
+      this._onWarning(i18n.translate('visTypeVega.urlParser.urlShouldHaveQuerySubObjectWarningMessage', {
         defaultMessage: 'Using a {urlObject} should have a {subObjectName} sub-object',
         values: {
           urlObject: '"url": {"%type%": "url", "url": ...}',
