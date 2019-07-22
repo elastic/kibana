@@ -2,11 +2,10 @@
 == Visualizing your data with TSVB
 
 TSVB is a time series data visualizer that allows you to use the full power of the 
-Elasticsearch aggregation framework. With TSVB, combine an infinite 
-number of aggregations and pipeline aggregations to display complex data in a 
-meaningful way.
+Elasticsearch aggregation framework. With TSVB, you can combine an infinite 
+number of aggregations to display complex data.
 
-NOTE: In Elasticsearch version 7.3.0 and later, the time series data visualizer is now referred to simply as TSVB instead of Time Series Visual Builder.
+NOTE: In Elasticsearch version 7.3.0 and later, the time series data visualizer is now referred to as TSVB instead of Time Series Visual Builder.
 
 TSVB comes with these types of visualizations:
 
@@ -42,7 +41,7 @@ Time Series:: A histogram visualization that supports area, line, bar, and steps
 image:images/tsvb-screenshot.png["Time series visualization"]
 >>>>>>> 44691be781... Content conslidation
 
-Metric:: Displays the latest number in a data series.
+Metric:: A metric that displays the latest number in a data series.
 
 [role="screenshot"]
 image:images/tsvb-metric.png["Metric visualization"]
@@ -68,10 +67,16 @@ Table:: Display data from multiple time series by defining the field group to sh
 image:images/tsvb-table.png["Table visualization"]
 
 [float]
+[[create-tsvb-visualization]]
+=== Create TSVB visualizations
+
+To create a TSVB visualization, choose the data series you want to display, then choose how you want to display the data. The options available are dependent on the visualization.
+
+[float]
 [[tsvb-data-series-options]]
 === Configure the data series
 
-Add multiple data series with multiple aggregations composed together to create a single metric. The options available are dependent on the visualization.
+To create a single metric, add multiple data series with multiple aggregations.
 
 . Select the visualization type.
 
@@ -93,7 +98,7 @@ For series that are grouped by a term, you can specify a mustache variable of `{
 
 .. Select *Metrics*.
 
-.. From the drop down lists, choose your options.
+.. From the dropdown lists, choose your options.
 
 .. To add another metric, click *+*.
 +
@@ -109,7 +114,7 @@ By default, the data series are grouped by everything.
 [[tsvb-panel-options]]
 === Configure the panel
 
-Change the data that you want to display and choose the style options for the panel. The options available are dependent on the visualization.
+Change the data that you want to display and choose the style options for the panel.
 
 . Select *Panel options*.
 
@@ -121,7 +126,7 @@ Change the data that you want to display and choose the style options for the pa
 [[tsvb-add-annotations]]
 === Add annotations
 
-Add annotation data sources for the Time Series visualization.
+If you are using the Time Series visualization, add annotation data sources.
 
 . Select *Annotations*.
 
@@ -157,5 +162,9 @@ image:images/tsvb-table.png["Table visualization"]
 
 . To insert the mustache template variable into the editor, click the variable name.
 +
+<<<<<<< HEAD
 The mustache syntax uses the Handlebar.js processor, which is an extended version of the Mustache template language.
 >>>>>>> b78a57073b... Final clean up
+=======
+The http://mustache.github.io/mustache.5.html[mustache syntax] uses the Handlebar.js processor, which is an extended version of the Mustache template language.
+>>>>>>> 80f7af6135... Comments from Gail
