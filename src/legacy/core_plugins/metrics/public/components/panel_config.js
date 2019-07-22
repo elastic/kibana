@@ -26,6 +26,7 @@ import { GaugePanelConfig as gauge } from './panel_config/gauge';
 import { MarkdownPanelConfig as markdown } from './panel_config/markdown';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { FormValidationContext } from '../contexts/form_validation_context';
+import { VisDataContext } from '../contexts/vis_data_context';
 
 const types = {
   timeseries,
@@ -43,10 +44,19 @@ export function PanelConfig(props) {
   const { model } = props;
   const Component = types[model.type];
   const [formValidationResults] = useState({});
+  const [visData, setVisData] = useState({});
 
   useEffect(() => {
     model.isModelInvalid = !checkModelValidity(formValidationResults);
   });
+
+  useEffect(() => {
+    const visDataSubscription = props.visData$.subscribe((visData = {}) => setVisData(visData));
+
+    return function cleanup() {
+      visDataSubscription.unsubscribe();
+    };
+  }, [props.visData$]);
 
   const updateControlValidity = (controlKey, isControlValid) => {
     formValidationResults[controlKey] = isControlValid;
@@ -55,7 +65,9 @@ export function PanelConfig(props) {
   if (Component) {
     return (
       <FormValidationContext.Provider value={updateControlValidity}>
-        <Component {...props} />
+        <VisDataContext.Provider value={visData}>
+          <Component {...props} />
+        </VisDataContext.Provider>
       </FormValidationContext.Provider>
     );
   }

@@ -10,6 +10,7 @@ import { FETCH_STATUS, useFetcher } from '../../../hooks/useFetcher';
 import { loadTraceList } from '../../../services/rest/apm/traces';
 import { TraceList } from './TraceList';
 import { useUrlParams } from '../../../hooks/useUrlParams';
+import { useTrackPageview } from '../../../../../infra/public';
 
 export function TraceOverview() {
   const { urlParams, uiFilters } = useUrlParams();
@@ -19,6 +20,9 @@ export function TraceOverview() {
       return loadTraceList({ start, end, uiFilters });
     }
   }, [start, end, uiFilters]);
+
+  useTrackPageview({ app: 'apm', path: 'traces_overview' });
+  useTrackPageview({ app: 'apm', path: 'traces_overview', delay: 15000 });
 
   return (
     <EuiPanel>
