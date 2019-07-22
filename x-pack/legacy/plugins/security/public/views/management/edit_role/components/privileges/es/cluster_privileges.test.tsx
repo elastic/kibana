@@ -20,6 +20,12 @@ test('it renders without crashing', () => {
     kibana: [],
   };
 
-  const wrapper = shallow(<ClusterPrivileges role={role} onChange={jest.fn()} />);
+  const wrapper = shallow(
+    <ClusterPrivileges
+      role={role}
+      onChange={jest.fn()}
+      availableClusterPrivileges={['all', 'manage', 'monitor']}
+    />
+  );
   expect(wrapper).toMatchSnapshot();
 });

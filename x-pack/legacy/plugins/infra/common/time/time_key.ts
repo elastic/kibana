@@ -77,3 +77,15 @@ export const getIndexAtTimeKey = <Value>(
 
 export const timeKeyIsBetween = (min: TimeKey, max: TimeKey, operand: TimeKey) =>
   compareTimeKeys(min, operand) <= 0 && compareTimeKeys(max, operand) >= 0;
+
+export const getPreviousTimeKey = (timeKey: TimeKey) => ({
+  ...timeKey,
+  time: timeKey.time,
+  tiebreaker: timeKey.tiebreaker - 1,
+});
+
+export const getNextTimeKey = (timeKey: TimeKey) => ({
+  ...timeKey,
+  time: timeKey.time,
+  tiebreaker: timeKey.tiebreaker + 1,
+});

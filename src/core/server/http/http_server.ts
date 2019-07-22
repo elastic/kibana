@@ -19,9 +19,9 @@
 
 import { Request, Server } from 'hapi';
 
-import { Logger } from '../logging';
+import { Logger, LoggerFactory } from '../logging';
 import { HttpConfig } from './http_config';
-import { createServer, getServerOptions } from './http_tools';
+import { createServer, getListenerOptions, getServerOptions } from './http_tools';
 import { adoptToHapiAuthFormat, AuthenticationHandler } from './lifecycle/auth';
 import { adoptToHapiOnPostAuthFormat, OnPostAuthHandler } from './lifecycle/on_post_auth';
 import { adoptToHapiOnPreAuthFormat, OnPreAuthHandler } from './lifecycle/on_pre_auth';
@@ -39,15 +39,18 @@ export interface HttpServerSetup {
   server: Server;
   registerRouter: (router: Router) => void;
   /**
+   * Creates cookie based session storage factory {@link SessionStorageFactory}
+   */
+  createCookieSessionStorageFactory: <T>(
+    cookieOptions: SessionStorageCookieOptions<T>
+  ) => Promise<SessionStorageFactory<T>>;
+  /**
    * To define custom authentication and/or authorization mechanism for incoming requests.
    * A handler should return a state to associate with the incoming request.
    * The state can be retrieved later via http.auth.get(..)
    * Only one AuthenticationHandler can be registered.
    */
-  registerAuth: <T>(
-    handler: AuthenticationHandler,
-    cookieOptions: SessionStorageCookieOptions<T>
-  ) => Promise<{ sessionStorageFactory: SessionStorageFactory<T> }>;
+  registerAuth: (handler: AuthenticationHandler) => void;
   /**
    * To define custom logic to perform for incoming requests. Runs the handler before Auth
    * hook performs a check that user has access to requested resources, so it's the only
@@ -75,6 +78,7 @@ export interface HttpServerSetup {
     isAuthenticated: AuthStateStorage['isAuthenticated'];
     getAuthHeaders: AuthHeadersStorage['get'];
   };
+  isTlsEnabled: boolean;
 }
 
 export class HttpServer {
@@ -82,13 +86,16 @@ export class HttpServer {
   private config?: HttpConfig;
   private registeredRouters = new Set<Router>();
   private authRegistered = false;
+  private cookieSessionStorageCreated = false;
 
+  private readonly log: Logger;
   private readonly authState: AuthStateStorage;
   private readonly authHeaders: AuthHeadersStorage;
 
-  constructor(private readonly log: Logger) {
+  constructor(private readonly logger: LoggerFactory, private readonly name: string) {
     this.authState = new AuthStateStorage(() => this.authRegistered);
     this.authHeaders = new AuthHeadersStorage();
+    this.log = logger.get('http', 'server', name);
   }
 
   public isListening() {
@@ -106,7 +113,8 @@ export class HttpServer {
 
   public setup(config: HttpConfig): HttpServerSetup {
     const serverOptions = getServerOptions(config);
-    this.server = createServer(serverOptions);
+    const listenerOptions = getListenerOptions(config);
+    this.server = createServer(serverOptions, listenerOptions);
     this.config = config;
 
     const basePathService = new BasePath(config.basePath);
@@ -116,14 +124,16 @@ export class HttpServer {
       registerRouter: this.registerRouter.bind(this),
       registerOnPreAuth: this.registerOnPreAuth.bind(this),
       registerOnPostAuth: this.registerOnPostAuth.bind(this),
-      registerAuth: <T>(fn: AuthenticationHandler, cookieOptions: SessionStorageCookieOptions<T>) =>
-        this.registerAuth(fn, cookieOptions, config.basePath),
+      createCookieSessionStorageFactory: <T>(cookieOptions: SessionStorageCookieOptions<T>) =>
+        this.createCookieSessionStorageFactory(cookieOptions, config.basePath),
+      registerAuth: this.registerAuth.bind(this),
       basePath: basePathService,
       auth: {
         get: this.authState.get,
         isAuthenticated: this.authState.isAuthenticated,
         getAuthHeaders: this.authHeaders.get,
       },
+      isTlsEnabled: config.ssl.enabled,
       // Return server instance with the connection options so that we can properly
       // bridge core and the "legacy" Kibana internally. Once this bridge isn't
       // needed anymore we shouldn't return the instance from this method.
@@ -207,11 +217,27 @@ export class HttpServer {
     this.server.ext('onRequest', adoptToHapiOnPreAuthFormat(fn));
   }
 
-  private async registerAuth<T>(
-    fn: AuthenticationHandler,
+  private async createCookieSessionStorageFactory<T>(
     cookieOptions: SessionStorageCookieOptions<T>,
     basePath?: string
   ) {
+    if (this.server === undefined) {
+      throw new Error('Server is not created yet');
+    }
+    if (this.cookieSessionStorageCreated) {
+      throw new Error('A cookieSessionStorageFactory was already created');
+    }
+    this.cookieSessionStorageCreated = true;
+    const sessionStorageFactory = await createCookieSessionStorageFactory<T>(
+      this.logger.get('http', 'server', this.name, 'cookie-session-storage'),
+      this.server,
+      cookieOptions,
+      basePath
+    );
+    return sessionStorageFactory;
+  }
+
+  private registerAuth<T>(fn: AuthenticationHandler) {
     if (this.server === undefined) {
       throw new Error('Server is not created yet');
     }
@@ -219,12 +245,6 @@ export class HttpServer {
       throw new Error('Auth interceptor was already registered');
     }
     this.authRegistered = true;
-
-    const sessionStorageFactory = await createCookieSessionStorageFactory<T>(
-      this.server,
-      cookieOptions,
-      basePath
-    );
 
     this.server.auth.scheme('login', () => ({
       authenticate: adoptToHapiAuthFormat(fn, (req, { state, headers }) => {
@@ -242,7 +262,5 @@ export class HttpServer {
     // should be applied for all routes if they don't specify auth strategy in route declaration
     // https://github.com/hapijs/hapi/blob/master/API.md#-serverauthdefaultoptions
     this.server.auth.default('session');
-
-    return { sessionStorageFactory };
   }
 }

@@ -18,9 +18,13 @@ import { FlowTarget } from '../../graphql/types';
 import { createStore, State } from '../../store';
 import { cloneDeep } from 'lodash/fp';
 import { mocksSource } from '../../containers/source/mock';
+import { InputsModelId } from '../../store/inputs/constants';
+import { ActionCreator } from 'typescript-fsa';
 
 type Action = 'PUSH' | 'POP' | 'REPLACE';
 const pop: Action = 'POP';
+
+type GlobalWithFetch = NodeJS.Global & { fetch: jest.Mock };
 
 let localSource: Array<{
   request: {};
@@ -64,7 +68,12 @@ const getMockProps = (ip: string) => ({
     state: '',
     hash: '',
   },
-  match: { params: { ip }, isExact: true, path: '', url: '' },
+  match: { params: { ip, search: '' }, isExact: true, path: '', url: '' },
+  setAbsoluteRangeDatePicker: (jest.fn() as unknown) as ActionCreator<{
+    id: InputsModelId;
+    from: number;
+    to: number;
+  }>,
 });
 
 jest.mock('ui/documentation_links', () => ({
@@ -72,6 +81,7 @@ jest.mock('ui/documentation_links', () => ({
     siem: 'http://www.example.com',
   },
 }));
+
 // Suppress warnings about "act" until async/await syntax is supported: https://github.com/facebook/react/issues/14769
 /* eslint-disable no-console */
 const originalError = console.error;
@@ -79,10 +89,19 @@ const originalError = console.error;
 describe('Ip Details', () => {
   beforeAll(() => {
     console.error = jest.fn();
+    (global as GlobalWithFetch).fetch = jest.fn().mockImplementationOnce(() =>
+      Promise.resolve({
+        ok: true,
+        json: () => {
+          return null;
+        },
+      })
+    );
   });
 
   afterAll(() => {
     console.error = originalError;
+    delete (global as GlobalWithFetch).fetch;
   });
   const state: State = mockGlobalState;
 

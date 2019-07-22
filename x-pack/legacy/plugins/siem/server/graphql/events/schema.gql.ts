@@ -9,16 +9,11 @@ import gql from 'graphql-tag';
 export const eventsSchema = gql`
   scalar EsValue
 
-  type KpiItem {
-    value: String
-    count: Float!
-  }
-
   type EventsData {
-    kpiEventType: [KpiItem!]
     edges: [EcsEdges!]!
     totalCount: Float!
     pageInfo: PageInfo!
+    inspect: Inspect
   }
 
   type TimelineNonEcsData {
@@ -42,6 +37,7 @@ export const eventsSchema = gql`
     edges: [TimelineEdges!]!
     totalCount: Float!
     pageInfo: PageInfo!
+    inspect: Inspect
   }
 
   type DetailItem {
@@ -61,10 +57,12 @@ export const eventsSchema = gql`
 
   type TimelineDetailsData {
     data: [DetailItem!]
+    inspect: Inspect
   }
 
   type LastEventTimeData {
     lastSeen: Date
+    inspect: Inspect
   }
 
   enum LastEventIndexKey {

@@ -145,8 +145,8 @@ class AdminPage extends React.PureComponent<Props, State> {
 
 const mapStateToProps = (state: RootState) => ({
   ...state.search,
-  repositories: state.repository.repositories,
-  repositoryLoading: state.repository.loading,
+  repositories: state.repositoryManagement.repositories,
+  repositoryLoading: state.repositoryManagement.loading,
 });
 
 const mapDispatchToProps = {

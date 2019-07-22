@@ -1,1 +1,10 @@
-{ "snapshot": { "up": 0, "down": 0, "total": 0, "histogram": [] } }
+{
+  "snapshot": {
+    "counts": {
+      "down": 0,
+      "mixed": 0,
+      "up": 0,
+      "total": 0
+    }
+  }
+}

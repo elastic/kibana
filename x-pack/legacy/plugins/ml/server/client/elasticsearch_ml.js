@@ -111,6 +111,14 @@ export const elasticsearchJsPlugin = (Client, config, components) => {
   ml.getDataFrameTransforms = ca({
     urls: [
       {
+        fmt: '/_data_frame/transforms/<%=transformId%>',
+        req: {
+          transformId: {
+            type: 'string'
+          }
+        }
+      },
+      {
         fmt: '/_data_frame/transforms/_all?size=1000',
       }
     ],
@@ -120,9 +128,9 @@ export const elasticsearchJsPlugin = (Client, config, components) => {
   ml.getDataFrameTransformsStats = ca({
     urls: [
       {
-        fmt: '/_data_frame/transforms/<%=jobId%>/_stats',
+        fmt: '/_data_frame/transforms/<%=transformId%>/_stats',
         req: {
-          jobId: {
+          transformId: {
             type: 'string'
           }
         }
@@ -137,12 +145,12 @@ export const elasticsearchJsPlugin = (Client, config, components) => {
     method: 'GET'
   });
 
-  ml.createDataFrameTransformsJob = ca({
+  ml.createDataFrameTransform = ca({
     urls: [
       {
-        fmt: '/_data_frame/transforms/<%=jobId%>',
+        fmt: '/_data_frame/transforms/<%=transformId%>',
         req: {
-          jobId: {
+          transformId: {
             type: 'string'
           }
         }
@@ -152,12 +160,12 @@ export const elasticsearchJsPlugin = (Client, config, components) => {
     method: 'PUT'
   });
 
-  ml.deleteDataFrameTransformsJob = ca({
+  ml.deleteDataFrameTransform = ca({
     urls: [
       {
-        fmt: '/_data_frame/transforms/<%=jobId%>',
+        fmt: '/_data_frame/transforms/<%=transformId%>',
         req: {
-          jobId: {
+          transformId: {
             type: 'string'
           }
         }
@@ -176,13 +184,16 @@ export const elasticsearchJsPlugin = (Client, config, components) => {
     method: 'POST'
   });
 
-  ml.startDataFrameTransformsJob = ca({
+  ml.startDataFrameTransform = ca({
     urls: [
       {
-        fmt: '/_data_frame/transforms/<%=jobId%>/_start',
+        fmt: '/_data_frame/transforms/<%=transformId%>/_start?&force=<%=force%>',
         req: {
-          jobId: {
+          transformId: {
             type: 'string'
+          },
+          force: {
+            type: 'boolean'
           }
         }
       }
@@ -190,15 +201,18 @@ export const elasticsearchJsPlugin = (Client, config, components) => {
     method: 'POST'
   });
 
-  ml.stopDataFrameTransformsJob = ca({
+  ml.stopDataFrameTransform = ca({
     urls: [
       {
-        fmt: '/_data_frame/transforms/<%=jobId%>/_stop?&force=<%=force%>',
+        fmt: '/_data_frame/transforms/<%=transformId%>/_stop?&force=<%=force%>&wait_for_completion=<%waitForCompletion%>',
         req: {
-          jobId: {
+          transformId: {
             type: 'string'
           },
           force: {
+            type: 'boolean'
+          },
+          waitForCompletion: {
             type: 'boolean'
           }
         }

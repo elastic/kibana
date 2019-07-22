@@ -4,16 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { I18nServiceType } from '@kbn/i18n/angular';
+import { i18n } from '@kbn/i18n';
 // @ts-ignore: implicit any for JS file
-import { XPackInfoProvider } from 'plugins/xpack_main/services/xpack_info';
+import { xpackInfo } from 'plugins/xpack_main/services/xpack_info';
 import React from 'react';
 import { ShareActionProps } from 'ui/share/share_action';
 import { ShareContextMenuExtensionsRegistryProvider } from 'ui/share/share_action_registry';
 import { ReportingPanelContent } from '../components/reporting_panel_content';
 
-function reportingProvider(Private: any, i18n: I18nServiceType) {
-  const xpackInfo = Private(XPackInfoProvider);
+function reportingProvider() {
   const getShareActions = ({
     objectType,
     objectId,
@@ -34,7 +33,7 @@ function reportingProvider(Private: any, i18n: I18nServiceType) {
 
     const shareActions = [];
     if (xpackInfo.get('features.reporting.csv.showLinks', false)) {
-      const panelTitle = i18n('xpack.reporting.shareContextMenu.csvReportsButtonLabel', {
+      const panelTitle = i18n.translate('xpack.reporting.shareContextMenu.csvReportsButtonLabel', {
         defaultMessage: 'CSV Reports',
       });
 

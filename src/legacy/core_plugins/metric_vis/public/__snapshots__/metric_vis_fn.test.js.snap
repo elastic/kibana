@@ -9,42 +9,27 @@ Object {
       "listenOnChange": true,
     },
     "visConfig": Object {
-      "addLegend": false,
-      "addTooltip": true,
+      "dimensions": Object {
+        "metrics": undefined,
+      },
       "metric": Object {
-        "colorSchema": "Green to Red",
-        "colorsRange": Array [
-          Object {
-            "from": 0,
-            "to": 10000,
-          },
-        ],
+        "colorSchema": "\\"Green to Red\\"",
+        "colorsRange": undefined,
         "invertColors": false,
         "labels": Object {
           "show": true,
         },
-        "metricColorMode": "None",
-        "metrics": Array [
-          Object {
-            "accessor": 0,
-            "aggType": "count",
-            "format": Object {
-              "id": "number",
-            },
-            "params": Object {},
-          },
-        ],
+        "metricColorMode": "\\"None\\"",
         "percentageMode": false,
         "style": Object {
           "bgColor": false,
-          "bgFill": "#000",
+          "bgFill": "\\"#000\\"",
           "fontSize": 60,
           "labelColor": false,
-          "subText": "",
+          "subText": "\\"\\"",
         },
         "useRanges": false,
       },
-      "type": "metric",
     },
     "visData": Object {
       "columns": Array [

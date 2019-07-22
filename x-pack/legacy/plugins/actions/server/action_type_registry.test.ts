@@ -11,6 +11,7 @@ jest.mock('./lib/get_create_task_runner_function', () => ({
 import { taskManagerMock } from '../../task_manager/task_manager.mock';
 import { encryptedSavedObjectsMock } from '../../encrypted_saved_objects/server/plugin.mock';
 import { ActionTypeRegistry } from './action_type_registry';
+import { ExecutorType } from './types';
 import { SavedObjectsClientMock } from '../../../../../src/core/server/mocks';
 
 const mockTaskManager = taskManagerMock.create();
@@ -30,9 +31,12 @@ const actionTypeRegistryParams = {
 
 beforeEach(() => jest.resetAllMocks());
 
+const executor: ExecutorType = async options => {
+  return { status: 'ok' };
+};
+
 describe('register()', () => {
   test('able to register action types', () => {
-    const executor = jest.fn();
     // eslint-disable-next-line @typescript-eslint/no-var-requires
     const { getCreateTaskRunnerFunction } = require('./lib/get_create_task_runner_function');
     getCreateTaskRunnerFunction.mockReturnValueOnce(jest.fn());
@@ -40,6 +44,7 @@ describe('register()', () => {
     actionTypeRegistry.register({
       id: 'my-action-type',
       name: 'My action type',
+      unencryptedAttributes: [],
       executor,
     });
     expect(actionTypeRegistry.has('my-action-type')).toEqual(true);
@@ -57,29 +62,24 @@ Array [
 `);
     expect(getCreateTaskRunnerFunction).toHaveBeenCalledTimes(1);
     const call = getCreateTaskRunnerFunction.mock.calls[0][0];
-    expect(call.actionType).toMatchInlineSnapshot(`
-Object {
-  "executor": [MockFunction],
-  "id": "my-action-type",
-  "name": "My action type",
-}
-`);
+    expect(call.actionTypeRegistry).toBeTruthy();
     expect(call.encryptedSavedObjectsPlugin).toBeTruthy();
     expect(call.getServices).toBeTruthy();
   });
 
   test('throws error if action type already registered', () => {
-    const executor = jest.fn();
     const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
     actionTypeRegistry.register({
       id: 'my-action-type',
       name: 'My action type',
+      unencryptedAttributes: [],
       executor,
     });
     expect(() =>
       actionTypeRegistry.register({
         id: 'my-action-type',
         name: 'My action type',
+        unencryptedAttributes: [],
         executor,
       })
     ).toThrowErrorMatchingInlineSnapshot(
@@ -94,7 +94,8 @@ describe('get()', () => {
     actionTypeRegistry.register({
       id: 'my-action-type',
       name: 'My action type',
-      async executor() {},
+      unencryptedAttributes: [],
+      executor,
     });
     const actionType = actionTypeRegistry.get('my-action-type');
     expect(actionType).toMatchInlineSnapshot(`
@@ -102,6 +103,7 @@ Object {
   "executor": [Function],
   "id": "my-action-type",
   "name": "My action type",
+  "unencryptedAttributes": Array [],
 }
 `);
   });
@@ -120,7 +122,8 @@ describe('list()', () => {
     actionTypeRegistry.register({
       id: 'my-action-type',
       name: 'My action type',
-      async executor() {},
+      unencryptedAttributes: [],
+      executor,
     });
     const actionTypes = actionTypeRegistry.list();
     expect(actionTypes).toEqual([
@@ -139,11 +142,11 @@ describe('has()', () => {
   });
 
   test('returns true after registering an action type', () => {
-    const executor = jest.fn();
     const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
     actionTypeRegistry.register({
       id: 'my-action-type',
       name: 'My action type',
+      unencryptedAttributes: [],
       executor,
     });
     expect(actionTypeRegistry.has('my-action-type'));

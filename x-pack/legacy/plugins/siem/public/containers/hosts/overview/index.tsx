@@ -8,21 +8,29 @@ import { getOr } from 'lodash/fp';
 import React from 'react';
 import { Query } from 'react-apollo';
 import chrome from 'ui/chrome';
+import { connect } from 'react-redux';
 import { DEFAULT_INDEX_KEY } from '../../../../common/constants';
-import { inputsModel } from '../../../store';
+import { inputsModel, inputsSelectors, State } from '../../../store';
 import { getDefaultFetchPolicy } from '../../helpers';
 import { QueryTemplate, QueryTemplateProps } from '../../query_template';
 
 import { HostOverviewQuery } from './host_overview.gql_query';
 import { GetHostOverviewQuery, HostItem } from '../../../graphql/types';
 
+const ID = 'hostOverviewQuery';
+
 export interface HostOverviewArgs {
   id: string;
+  inspect: inputsModel.InspectQuery;
   hostOverview: HostItem;
   loading: boolean;
   refetch: inputsModel.Refetch;
   startDate: number;
   endDate: number;
+}
+
+export interface HostOverviewReduxProps {
+  isInspected: boolean;
 }
 
 export interface OwnProps extends QueryTemplateProps {
@@ -32,14 +40,15 @@ export interface OwnProps extends QueryTemplateProps {
   endDate: number;
 }
 
-export class HostOverviewByNameQuery extends QueryTemplate<
-  OwnProps,
+class HostOverviewByNameComponentQuery extends QueryTemplate<
+  OwnProps & HostOverviewReduxProps,
   GetHostOverviewQuery.Query,
   GetHostOverviewQuery.Variables
 > {
   public render() {
     const {
-      id = 'hostOverviewQuery',
+      id = ID,
+      isInspected,
       children,
       hostName,
       skip,
@@ -62,12 +71,14 @@ export class HostOverviewByNameQuery extends QueryTemplate<
             to: endDate,
           },
           defaultIndex: chrome.getUiSettingsClient().get(DEFAULT_INDEX_KEY),
+          inspect: isInspected,
         }}
       >
         {({ data, loading, refetch }) => {
           const hostOverview = getOr([], 'source.HostOverview', data);
           return children({
             id,
+            inspect: getOr(null, 'source.HostOverview.inspect', data),
             refetch,
             loading,
             hostOverview,
@@ -79,3 +90,18 @@ export class HostOverviewByNameQuery extends QueryTemplate<
     );
   }
 }
+
+const makeMapStateToProps = () => {
+  const getQuery = inputsSelectors.globalQueryByIdSelector();
+  const mapStateToProps = (state: State, { id = ID }: OwnProps) => {
+    const { isInspected } = getQuery(state, id);
+    return {
+      isInspected,
+    };
+  };
+  return mapStateToProps;
+};
+
+export const HostOverviewByNameQuery = connect(makeMapStateToProps)(
+  HostOverviewByNameComponentQuery
+);

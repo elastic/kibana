@@ -10,7 +10,13 @@ import { NetworkTopNFlowData } from '../../graphql/types';
 import { FrameworkAdapter, FrameworkRequest } from '../framework';
 
 import { ElasticsearchNetworkAdapter } from './elasticsearch_adapter';
-import { mockOptions, mockRequest, mockResponse, mockResult } from './mock';
+import { mockOptions, mockRequest, mockResponse, mockResult, mockTopNFlowQueryDsl } from './mock';
+
+jest.mock('./query_top_n_flow.dsl', () => {
+  return {
+    buildTopNFlowQuery: jest.fn(() => mockTopNFlowQueryDsl),
+  };
+});
 
 describe('Network Top N flow elasticsearch_adapter with FlowTarget=source and FlowDirection=uniDirectional', () => {
   describe('Happy Path - get Data', () => {
@@ -63,6 +69,10 @@ describe('Network Top N flow elasticsearch_adapter with FlowTarget=source and Fl
         mockOptions
       );
       expect(data).toEqual({
+        inspect: {
+          dsl: [JSON.stringify(mockTopNFlowQueryDsl, null, 2)],
+          response: [JSON.stringify(mockNoDataResponse, null, 2)],
+        },
         edges: [],
         pageInfo: { endCursor: { tiebreaker: null, value: '10' }, hasNextPage: false },
         totalCount: 0,

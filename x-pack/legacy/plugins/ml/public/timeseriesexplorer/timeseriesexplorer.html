@@ -1,10 +1,10 @@
 <ml-nav-menu name="timeseriesexplorer"></ml-nav-menu>
 <ml-chart-tooltip></ml-chart-tooltip>
-<div class="ml-time-series-explorer" ng-controller="MlTimeSeriesExplorerController">
+<div class="ml-time-series-explorer" ng-controller="MlTimeSeriesExplorerController" data-test-subj="mlPageSingleMetricViewer"  >
 
   <ml-job-selector-react-wrapper timeseriesonly="true" singleselection="true" />
 
-  <div class="no-results-container" ng-if="jobs.length === 0 && loading === false">
+  <div class="no-results-container" ng-if="jobs.length === 0 && loading === false"  data-test-subj="mlNoSingleMetricJobsFound">
     <div class="no-results">
       <div
         i18n-id="xpack.ml.timeSeriesExplorer.noSingleMetricJobsFoundLabel"
@@ -20,7 +20,7 @@
     </div>
   </div>
 
-  <div class="series-controls" ng-show="jobs.length > 0">
+  <div class="series-controls" ng-show="jobs.length > 0" data-test-subj="mlSingleMetricViewerSeriesControls">
     <label
       for="selectDetector"
       class="kuiLabel"
@@ -174,7 +174,7 @@
         </div>
       </div>
 
-      <div class="ml-timeseries-chart">
+      <div class="ml-timeseries-chart" data-test-subj="mlSingleMetricViewerChart">
 
         <ml-timeseries-chart style="width: 1200px; height: 400px;"
           annotations-enabled="showAnnotationsCheckbox"

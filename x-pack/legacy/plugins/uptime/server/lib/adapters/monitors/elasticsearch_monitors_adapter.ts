@@ -4,17 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get, set } from 'lodash';
-import { INDEX_NAMES } from '../../../../common/constants';
+import { get, set, reduce } from 'lodash';
+import { INDEX_NAMES, QUERY } from '../../../../common/constants';
 import {
   ErrorListItem,
   FilterBar,
   LatestMonitor,
   MonitorChart,
-  MonitorKey,
   MonitorPageTitle,
   MonitorSeriesPoint,
   Ping,
+  LocationDurationLine,
 } from '../../../../common/graphql/types';
 import {
   dropLatestBucket,
@@ -85,8 +85,16 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
               fixed_interval: getHistogramInterval(dateRangeStart, dateRangeEnd),
             },
             aggs: {
-              status: { terms: { field: 'monitor.status', size: 2, shard_size: 2 } },
-              duration: { stats: { field: 'monitor.duration.us' } },
+              location: {
+                terms: {
+                  field: 'observer.geo.name',
+                  missing: 'N/A',
+                },
+                aggs: {
+                  status: { terms: { field: 'monitor.status', size: 2, shard_size: 2 } },
+                  duration: { stats: { field: 'monitor.duration.us' } },
+                },
+              },
             },
           },
         },
@@ -94,7 +102,7 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
     };
 
     const result = await this.database.search(request, params);
-    const buckets = dropLatestBucket(get(result, 'aggregations.timeseries.buckets', []));
+    const dateBuckets = dropLatestBucket(get(result, 'aggregations.timeseries.buckets', []));
 
     /**
      * The code below is responsible for formatting the aggregation data we fetched above in a way
@@ -108,34 +116,35 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
      * what the domain size should be.
      */
     const monitorChartsData: MonitorChart = {
-      durationArea: [],
-      durationLine: [],
+      locationDurationLines: [],
       status: [],
       durationMaxValue: 0,
       statusMaxCount: 0,
     };
 
-    buckets.forEach(bucket => {
-      const x = get(bucket, 'key');
-      const docCount = get(bucket, 'doc_count', 0);
-      // update the maximum value for each point
-      monitorChartsData.statusMaxCount = Math.max(docCount, monitorChartsData.statusMaxCount);
-      monitorChartsData.durationMaxValue = Math.max(
-        monitorChartsData.durationMaxValue,
-        get(bucket, 'duration.max', 0)
+    const linesByLocation: { [key: string]: LocationDurationLine } = {};
+    dateBuckets.forEach(dateBucket => {
+      const x = get(dateBucket, 'key');
+      const docCount = get(dateBucket, 'doc_count', 0);
+
+      dateBucket.location.buckets.forEach(
+        (locationBucket: { key: string; duration: { avg: number } }) => {
+          const locationName = locationBucket.key;
+          let ldl: LocationDurationLine = get(linesByLocation, locationName);
+          if (!ldl) {
+            ldl = { name: locationName, line: [] };
+            linesByLocation[locationName] = ldl;
+            monitorChartsData.locationDurationLines.push(ldl);
+          }
+          ldl.line.push({ x, y: get(locationBucket, 'duration.avg', null) });
+        }
       );
 
-      // these points express a range that will be displayed as an area chart
-      monitorChartsData.durationArea.push({
-        x,
-        yMin: get(bucket, 'duration.min', null),
-        yMax: get(bucket, 'duration.max', null),
-      });
-      monitorChartsData.durationLine.push({ x, y: get(bucket, 'duration.avg', null) });
       monitorChartsData.status.push(
-        formatStatusBuckets(x, get(bucket, 'status.buckets', []), docCount)
+        formatStatusBuckets(x, get(dateBucket, 'status.buckets', []), docCount)
       );
     });
+
     return monitorChartsData;
   }
 
@@ -160,7 +169,11 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
     const params = {
       index: INDEX_NAMES.HEARTBEAT,
       body: {
-        query,
+        query: {
+          bool: {
+            filter: [{ exists: { field: 'summary.up' } }, query],
+          },
+        },
         size: 0,
         aggs: {
           ids: {
@@ -182,16 +195,15 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
                   },
                 },
               ],
-              size: 10000,
+              size: QUERY.DEFAULT_AGGS_CAP,
             },
             aggs: {
               latest: {
                 top_hits: {
-                  sort: [
-                    {
-                      '@timestamp': { order: 'desc' },
-                    },
-                  ],
+                  sort: [{ '@timestamp': { order: 'desc' } }],
+                  _source: {
+                    includes: ['summary.*', 'monitor.id', '@timestamp', 'observer.geo.name'],
+                  },
                   size: 1,
                 },
               },
@@ -201,9 +213,15 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
       },
     };
 
-    let up: number = 0;
-    let down: number = 0;
     let searchAfter: any = null;
+
+    const summaryByIdLocation: {
+      // ID
+      [key: string]: {
+        // Location
+        [key: string]: { up: number; down: number; timestamp: number };
+      };
+    } = {};
 
     do {
       if (searchAfter) {
@@ -215,20 +233,66 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
 
       idBuckets.forEach(bucket => {
         // We only get the latest doc
-        const status = get(bucket, 'latest.hits.hits[0]._source.monitor.status', null);
-        if (!statusFilter || (statusFilter && statusFilter === status)) {
-          if (status === 'up') {
-            up++;
-          } else {
-            down++;
-          }
+        const source: any = get(bucket, 'latest.hits.hits[0]._source');
+        const {
+          summary: { up, down },
+          monitor: { id },
+        } = source;
+        const timestamp = get(source, '@timestamp', 0);
+        const location = get(source, 'observer.geo.name', '');
+
+        let idSummary = summaryByIdLocation[id];
+        if (!idSummary) {
+          idSummary = {};
+          summaryByIdLocation[id] = idSummary;
+        }
+        const locationSummary = idSummary[location];
+        if (!locationSummary || locationSummary.timestamp < timestamp) {
+          idSummary[location] = { timestamp, up, down };
         }
       });
 
       searchAfter = get(queryResult, 'aggregations.ids.after_key');
     } while (searchAfter);
 
-    return { up, down, total: up + down };
+    let up: number = 0;
+    let mixed: number = 0;
+    let down: number = 0;
+
+    for (const id in summaryByIdLocation) {
+      if (!summaryByIdLocation.hasOwnProperty(id)) {
+        continue;
+      }
+      const locationInfo = summaryByIdLocation[id];
+      const { up: locationUp, down: locationDown } = reduce(
+        locationInfo,
+        (acc, value, key) => {
+          acc.up += value.up;
+          acc.down += value.down;
+          return acc;
+        },
+        { up: 0, down: 0 }
+      );
+
+      if (locationDown === 0) {
+        up++;
+      } else if (locationUp > 0) {
+        mixed++;
+      } else {
+        down++;
+      }
+    }
+
+    const result: any = { up, down, mixed, total: up + down + mixed };
+    if (statusFilter) {
+      for (const status in result) {
+        if (status !== 'total' && status !== statusFilter) {
+          result[status] = 0;
+        }
+      }
+    }
+
+    return result;
   }
 
   /**
@@ -371,18 +435,17 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
     dateRangeStart: string,
     dateRangeEnd: string
   ): Promise<FilterBar> {
+    const fields: { [key: string]: string } = {
+      ids: 'monitor.id',
+      schemes: 'monitor.type',
+      urls: 'url.full',
+      ports: 'url.port',
+      locations: 'observer.geo.name',
+    };
     const params = {
       index: INDEX_NAMES.HEARTBEAT,
       body: {
-        _source: [
-          'monitor.id',
-          'monitor.type',
-          'url.full',
-          'url.port',
-          'monitor.name',
-          'observer.geo.name',
-        ],
-        size: 1000,
+        size: 0,
         query: {
           range: {
             '@timestamp': {
@@ -391,55 +454,19 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
             },
           },
         },
-        collapse: {
-          field: 'monitor.id',
-        },
-        sort: {
-          '@timestamp': 'desc',
-        },
+        aggs: Object.values(fields).reduce((acc: { [key: string]: any }, field) => {
+          acc[field] = { terms: { field, size: 20 } };
+          return acc;
+        }, {}),
       },
     };
-    const result = await this.database.search(request, params);
-    const ids: MonitorKey[] = [];
-    const ports = new Set<number>();
-    const types = new Set<string>();
-    const names = new Set<string>();
-    const locations = new Set<string>();
+    const { aggregations } = await this.database.search(request, params);
 
-    const hits = get(result, 'hits.hits', []);
-    hits.forEach((hit: any) => {
-      const key: string = get(hit, '_source.monitor.id');
-      const url: string | null = get(hit, '_source.url.full', null);
-      const port: number | undefined = get(hit, '_source.url.port', undefined);
-      const type: string | undefined = get(hit, '_source.monitor.type', undefined);
-      const name: string | null = get(hit, '_source.monitor.name', null);
-      const location: string | null = get(hit, '_source.observer.geo.name', null);
-
-      if (key) {
-        ids.push({ key, url });
-      }
-      if (port) {
-        ports.add(port);
-      }
-      if (type) {
-        types.add(type);
-      }
-      if (name) {
-        names.add(name);
-      }
-      if (location) {
-        locations.add(location);
-      }
-    });
-
-    return {
-      ids,
-      locations: Array.from(locations),
-      names: Array.from(names),
-      ports: Array.from(ports),
-      schemes: Array.from(types),
-      statuses: ['up', 'down'],
-    };
+    return Object.keys(fields).reduce((acc: { [key: string]: any[] }, field) => {
+      const bucketName = fields[field];
+      acc[field] = aggregations[bucketName].buckets.map((b: { key: string | number }) => b.key);
+      return acc;
+    }, {});
   }
 
   /**

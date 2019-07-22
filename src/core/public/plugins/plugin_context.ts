@@ -17,6 +17,8 @@
  * under the License.
  */
 
+import { omit } from 'lodash';
+
 import { DiscoveredPlugin, PluginName } from '../../server';
 import { CoreContext } from '../core_system';
 import { PluginWrapper } from './plugin';
@@ -100,7 +102,7 @@ export function createPluginStartContext<
     },
     docLinks: deps.docLinks,
     http: deps.http,
-    chrome: deps.chrome,
+    chrome: omit(deps.chrome, 'getComponent'),
     i18n: deps.i18n,
     notifications: deps.notifications,
     overlays: deps.overlays,

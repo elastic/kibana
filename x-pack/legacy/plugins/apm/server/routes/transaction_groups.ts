@@ -12,6 +12,7 @@ import { setupRequest } from '../lib/helpers/setup_request';
 import { getTransactionCharts } from '../lib/transactions/charts';
 import { getTransactionDistribution } from '../lib/transactions/distribution';
 import { getTopTransactions } from '../lib/transactions/get_top_transactions';
+import { getTransactionBreakdown } from '../lib/transactions/breakdown';
 
 const defaultErrorHandler = (err: Error) => {
   // eslint-disable-next-line
@@ -110,6 +111,34 @@ export function initTransactionGroupsApi(core: InternalCoreSetup) {
         transactionName,
         transactionId,
         traceId,
+        setup
+      }).catch(defaultErrorHandler);
+    }
+  });
+
+  server.route({
+    method: 'GET',
+    path: `/api/apm/services/{serviceName}/transaction_groups/breakdown`,
+    options: {
+      validate: {
+        query: withDefaultValidators({
+          transactionName: Joi.string(),
+          transactionType: Joi.string().required()
+        })
+      }
+    },
+    handler: req => {
+      const setup = setupRequest(req);
+      const { serviceName } = req.params;
+      const { transactionName, transactionType } = req.query as {
+        transactionName?: string;
+        transactionType: string;
+      };
+
+      return getTransactionBreakdown({
+        serviceName,
+        transactionName,
+        transactionType,
         setup
       }).catch(defaultErrorHandler);
     }

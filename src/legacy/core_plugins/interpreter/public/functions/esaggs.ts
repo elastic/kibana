@@ -37,7 +37,7 @@ const courierRequestHandlerProvider = CourierRequestHandlerProvider;
 const courierRequestHandler = courierRequestHandlerProvider().handler;
 
 import { ExpressionFunction } from '../../types';
-import { KibanaContext, KibanaDatatable } from '../../common/types';
+import { KibanaContext, KibanaDatatable } from '../../common';
 
 const name = 'esaggs';
 

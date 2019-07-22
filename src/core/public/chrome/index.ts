@@ -22,6 +22,7 @@ export {
   ChromeBreadcrumb,
   ChromeService,
   ChromeStart,
+  InternalChromeStart,
   ChromeBrand,
   ChromeHelpExtension,
 } from './chrome_service';

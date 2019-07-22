@@ -39,6 +39,13 @@ export const ifProp = <Pass, Fail>(
   fail: Fail
 ) => (props: object) => (asPropReader(propName)(props) ? pass : fail);
 
-export const tintOrShade = (textColor: 'string', color: 'string', fraction: number) => {
-  return parseToHsl(textColor).lightness > 0.5 ? shade(fraction, color) : tint(fraction, color);
+export const tintOrShade = (
+  textColor: string,
+  color: string,
+  tintFraction: number,
+  shadeFraction: number
+) => {
+  return parseToHsl(textColor).lightness > 0.5
+    ? shade(1 - shadeFraction, color)
+    : tint(1 - tintFraction, color);
 };

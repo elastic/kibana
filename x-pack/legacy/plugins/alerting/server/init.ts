@@ -12,6 +12,8 @@ import {
   getRoute,
   listAlertTypesRoute,
   updateAlertRoute,
+  enableAlertRoute,
+  disableAlertRoute,
 } from './routes';
 import { AlertingPlugin, Services } from './types';
 import { AlertTypeRegistry } from './alert_type_registry';
@@ -29,7 +31,7 @@ export function init(server: Legacy.Server) {
       getBasePath: () => basePath,
     };
     return {
-      log: server.log,
+      log: server.log.bind(server),
       callCluster: callWithInternalUser,
       savedObjectsClient: server.savedObjects.getScopedSavedObjectsClient(fakeRequest),
     };
@@ -50,13 +52,15 @@ export function init(server: Legacy.Server) {
   getRoute(server);
   listAlertTypesRoute(server);
   updateAlertRoute(server);
+  enableAlertRoute(server);
+  disableAlertRoute(server);
 
   // Expose functions
   server.decorate('request', 'getAlertsClient', function() {
     const request = this;
     const savedObjectsClient = request.getSavedObjectsClient();
     const alertsClient = new AlertsClient({
-      log: server.log,
+      log: server.log.bind(server),
       savedObjectsClient,
       alertTypeRegistry,
       taskManager: taskManager!,

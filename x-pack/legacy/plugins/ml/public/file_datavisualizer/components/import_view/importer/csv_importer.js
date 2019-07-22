@@ -5,6 +5,7 @@
  */
 
 
+import { ES_FIELD_TYPES } from '../../../../../common/constants/field_types';
 import { Importer } from './importer';
 import Papa from 'papaparse';
 
@@ -18,17 +19,20 @@ export class CsvImporter extends Importer {
     this.hasHeaderRow = results.has_header_row;
     this.columnNames = results.column_names;
     this.shouldTrimFields = (results.should_trim_fields || false);
+    this.mappings = results.mappings;
   }
 
   async read(csv) {
     try {
       const transform = this.shouldTrimFields ? (f => f.trim()) : (f => f);
+      const dynamicTyping = (c => shouldUseDynamicType(this.columnNames, this.mappings, c));
       const config = {
         header: false,
         skipEmptyLines: 'greedy',
         delimiter: this.delimiter,
         quoteChar: this.quote,
         transform,
+        dynamicTyping,
       };
 
       const parserOutput = Papa.parse(csv, config);
@@ -58,13 +62,38 @@ export class CsvImporter extends Importer {
   }
 }
 
+// parse numeric and boolean fields - treat everything else as a string
+function shouldUseDynamicType(columnNames, mappings, columnNumber) {
+  if (columnNumber >= columnNames.length) {
+    return false;
+  }
+  const columnMapping = mappings[columnNames[columnNumber]];
+  if (columnMapping === undefined || columnMapping.type === undefined) {
+    return false;
+  }
+  switch (columnMapping.type) {
+    case ES_FIELD_TYPES.BOOLEAN:
+    case ES_FIELD_TYPES.LONG:
+    case ES_FIELD_TYPES.INTEGER:
+    case ES_FIELD_TYPES.SHORT:
+    case ES_FIELD_TYPES.BYTE:
+    case ES_FIELD_TYPES.DOUBLE:
+    case ES_FIELD_TYPES.FLOAT:
+    case ES_FIELD_TYPES.HALF_FLOAT:
+    case ES_FIELD_TYPES.SCALED_FLOAT:
+      return true;
+    default:
+      return false;
+  }
+}
+
 function formatToJson(data, columnNames) {
   const docArray = [];
   for (let i = 0; i < data.length; i++) {
     const line = {};
     for (let c = 0; c < columnNames.length; c++) {
       const col = columnNames[c];
-      if (data[i][c] !== undefined && data[i][c] !== '') {
+      if (data[i][c] !== null && data[i][c] !== '') {
         line[col] = data[i][c];
       }
     }

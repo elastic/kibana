@@ -19,11 +19,5 @@
 
 export { Headers, filterHeaders } from './headers';
 export { Router } from './router';
-export {
-  KibanaRequest,
-  KibanaRequestRoute,
-  ensureRawRequest,
-  isRealRequest,
-  getIncomingMessage,
-} from './request';
+export { KibanaRequest, KibanaRequestRoute, ensureRawRequest, isRealRequest } from './request';
 export { RouteMethod, RouteConfigOptions } from './route';

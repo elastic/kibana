@@ -11,7 +11,8 @@ export default function ({ getService, getPageObjects }) {
   const PageObjects = getPageObjects(['security']);
   const testSubjects = getService('testSubjects');
 
-  describe('Security', () => {
+  describe('Security', function () {
+    this.tags('smoke');
     describe('Login Page', () => {
       before(async () => {
         await esArchiver.load('empty_kibana');

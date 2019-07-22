@@ -56,7 +56,7 @@ export const getDomainsColumns = (
     hideForMobile: false,
     sortable: true,
     render: domainName => {
-      const domainNameAttr = `${flowTarget}.domainName`;
+      const domainNameAttr = `${flowTarget}.domain`;
       if (domainName != null) {
         const id = escapeDataProviderId(
           `${tableId}-table-${flowTarget}-${flowDirection}-domain-${domainName}`

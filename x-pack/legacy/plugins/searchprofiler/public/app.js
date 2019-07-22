@@ -10,10 +10,11 @@ import { uiModules } from 'ui/modules';
 import { i18n } from '@kbn/i18n';
 import uiRoutes from 'ui/routes';
 import 'ui/capabilities/route_setup';
-import { notify } from 'ui/notify';
+import { toastNotifications } from 'ui/notify';
+import { formatAngularHttpError } from 'ui/notify/lib';
 
 // License
-import { XPackInfoProvider } from 'plugins/xpack_main/services/xpack_info';
+import { xpackInfo } from 'plugins/xpack_main/services/xpack_info';
 
 // Our imports
 import _ from 'lodash';
@@ -60,7 +61,7 @@ uiModules
     return service;
   });
 
-function profileVizController($scope, $http, HighlightService, Private) {
+function profileVizController($scope, $http, HighlightService) {
   $scope.title = 'Search Profile';
   $scope.description = 'Search profiling and visualization';
   $scope.profileResponse = [];
@@ -76,7 +77,6 @@ function profileVizController($scope, $http, HighlightService, Private) {
   };
   $scope.markers = [];
   $scope.query = defaultQuery;
-  const xpackInfo = Private(XPackInfoProvider);
   $scope.licenseEnabled = xpackInfo.get('features.searchprofiler.enableAppLink');
 
   $scope.aceLoaded = (_editor) => {
@@ -99,7 +99,11 @@ function profileVizController($scope, $http, HighlightService, Private) {
     $scope.resetHighlightPanel();
     let json = checkForParseErrors($scope.query);
     if (json.status === false) {
-      notify.error(json.error);
+      toastNotifications.addError(json.error, {
+        title: i18n.translate('xpack.searchProfiler.errorToastTitle', {
+          defaultMessage: 'JSON parse error',
+        }),
+      });
       return;
     }
     json = json.parsed;
@@ -128,7 +132,7 @@ function profileVizController($scope, $http, HighlightService, Private) {
   $scope.executeRemoteQuery = requestBody => {
     $http.post('../api/searchprofiler/profile', requestBody).then(resp => {
       if (!resp.data.ok) {
-        notify.error(resp.data.err.msg);
+        toastNotifications.addDanger(resp.data.err.msg);
 
         try {
           const regex = /line=([0-9]+) col=([0-9]+)/g;
@@ -144,7 +148,7 @@ function profileVizController($scope, $http, HighlightService, Private) {
       }
 
       $scope.renderProfile(resp.data.resp.profile.shards);
-    }).catch(notify.error);
+    }).catch(reason => toastNotifications.addDanger(formatAngularHttpError(reason)));
   };
 
   $scope.renderProfile = data => {

@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import { InternalCoreSetup, InternalCoreStart } from '..';
 import { PluginName } from '../../server';
 import { CoreService } from '../../types';
 import { CoreContext } from '../core_system';
@@ -27,6 +26,7 @@ import {
   createPluginSetupContext,
   createPluginStartContext,
 } from './plugin_context';
+import { InternalCoreSetup, InternalCoreStart } from '..';
 
 /** @internal */
 export type PluginsServiceSetupDeps = InternalCoreSetup;

@@ -59,7 +59,6 @@ export class InfraSnapshot {
 
     const groupedNodeBuckets = await groupedNodesPromise;
     const nodeMetricBuckets = await nodeMetricsPromise;
-
     return mergeNodeBuckets(groupedNodeBuckets, nodeMetricBuckets, options);
   }
 }

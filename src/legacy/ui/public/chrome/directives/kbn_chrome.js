@@ -31,6 +31,8 @@ import {
 } from '../../notify';
 
 import { I18nContext } from '../../i18n';
+import { npStart } from '../../new_platform';
+import { chromeHeaderNavControlsRegistry, NavControlSide } from '../../registry/chrome_header_nav_controls';
 
 export function kbnChromeProvider(chrome, internals) {
 
@@ -55,13 +57,26 @@ export function kbnChromeProvider(chrome, internals) {
         },
 
         controllerAs: 'chrome',
-        controller($scope, $location) {
+        controller($scope, $location, Private) {
           // Notifications
           $scope.notifList = notify._notifs;
 
           $scope.getFirstPathSegment = () => {
             return $location.path().split('/')[1];
           };
+
+          // Continue to support legacy nav controls not registered with the NP.
+          const navControls = Private(chromeHeaderNavControlsRegistry);
+          (navControls.bySide[NavControlSide.Left] || [])
+            .forEach(navControl => npStart.core.chrome.navControls.registerLeft({
+              order: navControl.order,
+              mount: navControl.render,
+            }));
+          (navControls.bySide[NavControlSide.Right] || [])
+            .forEach(navControl => npStart.core.chrome.navControls.registerRight({
+              order: navControl.order,
+              mount: navControl.render,
+            }));
 
           // Non-scope based code (e.g., React)
 

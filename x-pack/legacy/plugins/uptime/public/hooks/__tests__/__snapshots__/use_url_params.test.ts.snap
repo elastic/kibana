@@ -1,0 +1,12 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`useUrlParams returns the expected params and an update function 1`] = `
+Object {
+  "autorefreshInterval": 60000,
+  "autorefreshIsPaused": false,
+  "dateRangeEnd": "now",
+  "dateRangeStart": "now-15m",
+  "search": "",
+  "selectedPingStatus": "down",
+}
+`;

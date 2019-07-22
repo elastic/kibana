@@ -19,12 +19,15 @@
 
 import * as Rx from 'rxjs';
 import { toArray } from 'rxjs/operators';
+import { shallow } from 'enzyme';
+import React from 'react';
 
 import { applicationServiceMock } from '../application/application_service.mock';
 import { httpServiceMock } from '../http/http_service.mock';
 import { injectedMetadataServiceMock } from '../injected_metadata/injected_metadata_service.mock';
 import { notificationServiceMock } from '../notifications/notifications_service.mock';
 import { ChromeService } from './chrome_service';
+import { docLinksServiceMock } from '../doc_links/doc_links_service.mock';
 
 const store = new Map();
 (window as any).localStorage = {
@@ -33,9 +36,10 @@ const store = new Map();
   removeItem: (key: string) => store.delete(String(key)),
 };
 
-function defaultStartDeps(): any {
+function defaultStartDeps() {
   return {
     application: applicationServiceMock.createStartContract(),
+    docLinks: docLinksServiceMock.createStartContract(),
     http: httpServiceMock.createStartContract(),
     injectedMetadata: injectedMetadataServiceMock.createStartContract(),
     notifications: notificationServiceMock.createStartContract(),
@@ -75,6 +79,16 @@ Array [
     startDeps.injectedMetadata.getCspConfig.mockReturnValue({ warnLegacyBrowsers: false });
     await service.start(startDeps);
     expect(startDeps.notifications.toasts.addWarning).not.toBeCalled();
+  });
+
+  describe('getComponent', () => {
+    it('returns a renderable React component', async () => {
+      const service = new ChromeService({ browserSupportsCsp: true });
+      const start = await service.start(defaultStartDeps());
+      // Have to do some fanagling to get the type system and enzyme to accept this.
+      // Don't capture the snapshot because it's 600+ lines long.
+      expect(shallow(React.createElement(() => start.getComponent()))).toBeDefined();
+    });
   });
 
   describe('brand', () => {

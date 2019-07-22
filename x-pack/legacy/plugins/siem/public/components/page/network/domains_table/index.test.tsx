@@ -39,15 +39,16 @@ describe('Domains Table Component', () => {
       const wrapper = shallow(
         <ReduxStoreProvider store={store}>
           <DomainsTable
-            indexPattern={mockIndexPattern}
-            ip={ip}
-            totalCount={1}
-            loading={false}
-            loadMore={loadMore}
             data={mockDomainsData.edges}
             flowTarget={FlowTarget.source}
             hasNextPage={getOr(false, 'hasNextPage', mockDomainsData.pageInfo)!}
+            id="domains"
+            indexPattern={mockIndexPattern}
+            ip={ip}
+            loading={false}
+            loadMore={loadMore}
             nextCursor={getOr(null, 'endCursor.value', mockDomainsData.pageInfo)}
+            totalCount={1}
             type={networkModel.NetworkType.details}
           />
         </ReduxStoreProvider>
@@ -63,15 +64,16 @@ describe('Domains Table Component', () => {
         <MockedProvider>
           <TestProviders store={store}>
             <DomainsTable
-              indexPattern={mockIndexPattern}
-              ip={ip}
-              totalCount={1}
-              loading={false}
-              loadMore={loadMore}
               data={mockDomainsData.edges}
               flowTarget={FlowTarget.source}
+              indexPattern={mockIndexPattern}
               hasNextPage={getOr(false, 'hasNextPage', mockDomainsData.pageInfo)!}
+              id="domains"
+              ip={ip}
+              loading={false}
+              loadMore={loadMore}
               nextCursor={getOr(null, 'endCursor.value', mockDomainsData.pageInfo)}
+              totalCount={1}
               type={networkModel.NetworkType.details}
             />
           </TestProviders>

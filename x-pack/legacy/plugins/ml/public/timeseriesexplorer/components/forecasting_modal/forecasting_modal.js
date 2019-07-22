@@ -461,6 +461,7 @@ export const ForecastingModal = injectI18n(class ForecastingModal extends Compon
         size="s"
         isDisabled={isForecastingDisabled}
         fill
+        data-test-subj="mlSingleMetricViewerButtonForecast"
       >
         <FormattedMessage
           id="xpack.ml.timeSeriesExplorer.forecastingModal.forecastButtonLabel"

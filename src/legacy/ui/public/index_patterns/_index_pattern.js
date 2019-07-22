@@ -36,23 +36,22 @@ const MAX_ATTEMPTS_TO_RESOLVE_CONFLICTS = 3;
 const type = 'index-pattern';
 
 export class IndexPattern {
-  constructor(id, config, savedObjectsClient, patternCache, fieldsFetcher, getIds) {
+  constructor(id, getConfig, savedObjectsClient, patternCache, fieldsFetcher, getIds) {
     this._setId(id);
-    this.config = config;
+    this.getConfig = getConfig;
     this.savedObjectsClient = savedObjectsClient;
     this.patternCache = patternCache;
     this.fieldsFetcher = fieldsFetcher;
     this.getIds = getIds;
 
-    this.metaFields = config.get('metaFields');
-    this.shortDotsEnable = config.get('shortDots:enable');
+    this.metaFields = getConfig('metaFields');
+    this.shortDotsEnable = getConfig('shortDots:enable');
     this.getComputedFields = getComputedFields.bind(this);
 
     this.flattenHit = flattenHitWrapper(this, this.metaFields);
     this.formatHit = formatHitProvider(this, fieldFormats.getDefaultInstance('string'));
     this.formatField = this.formatHit.formatField;
 
-    const getConfig = cfg => config.get(cfg);
     function serializeFieldFormatMap(flat, format, field) {
       if (format) {
         flat[field] = format;
@@ -286,7 +285,7 @@ export class IndexPattern {
     const _create = async (duplicateId) => {
       if (duplicateId) {
         const duplicatePattern = new IndexPattern(duplicateId,
-          this.config,
+          this.getConfig,
           this.savedObjectsClient,
           this.patternCache,
           this.fieldsFetcher,
@@ -327,7 +326,7 @@ export class IndexPattern {
       .catch(err => {
         if (_.get(err, 'res.status') === 409 && saveAttempts++ < MAX_ATTEMPTS_TO_RESOLVE_CONFLICTS) {
           const samePattern = new IndexPattern(this.id,
-            this.config,
+            this.getConfig,
             this.savedObjectsClient,
             this.patternCache,
             this.fieldsFetcher,

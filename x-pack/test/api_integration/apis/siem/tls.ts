@@ -56,6 +56,7 @@ const tlsTests: KbnTestProvider = ({ getService }) => {
                 cursor: null,
               },
               defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+              inspect: false,
             },
           })
           .then(resp => {
@@ -85,6 +86,7 @@ const tlsTests: KbnTestProvider = ({ getService }) => {
                 cursor: null,
               },
               defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+              inspect: false,
             },
           })
           .then(resp => {

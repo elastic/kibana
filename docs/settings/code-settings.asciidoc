@@ -35,6 +35,9 @@ Whitelist of protocols for git clone address. Defaults to `[ 'https', 'git', 'ss
 `xpack.code.security.enableGitCertCheck`::
 Whether enable HTTPS certificate check when clone from HTTPS URL.
 
+`xpack.code.disableIndexScheduler`::
+Whether automatic index update is disabled. Defaults to `true`.
+
 `xpack.code.maxWorkspace`::
 Maximal number of workspaces each language server allows to span. Defaults to `5`.
 

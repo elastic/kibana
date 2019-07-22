@@ -5,7 +5,7 @@
  */
 
 import createContainer from 'constate-latest';
-import { useState } from 'react';
+import { useState, useEffect, Dispatch, SetStateAction } from 'react';
 import { MetricsExplorerColor } from '../../../common/color_palette';
 import {
   MetricsExplorerAggregation,
@@ -31,20 +31,67 @@ export interface MetricsExplorerTimeOptions {
   interval: string;
 }
 
-const DEFAULT_TIMERANGE: MetricsExplorerTimeOptions = {
+export const DEFAULT_TIMERANGE: MetricsExplorerTimeOptions = {
   from: 'now-1h',
   to: 'now',
   interval: '>=10s',
 };
 
-const DEFAULT_OPTIONS: MetricsExplorerOptions = {
+export const DEFAULT_METRICS: MetricsExplorerOptionsMetric[] = [
+  {
+    aggregation: MetricsExplorerAggregation.avg,
+    field: 'system.cpu.user.pct',
+    color: MetricsExplorerColor.color0,
+  },
+  {
+    aggregation: MetricsExplorerAggregation.avg,
+    field: 'kubernetes.pod.cpu.usage.node.pct',
+    color: MetricsExplorerColor.color1,
+  },
+  {
+    aggregation: MetricsExplorerAggregation.avg,
+    field: 'docker.cpu.total.pct',
+    color: MetricsExplorerColor.color2,
+  },
+];
+
+export const DEFAULT_OPTIONS: MetricsExplorerOptions = {
   aggregation: MetricsExplorerAggregation.avg,
-  metrics: [],
+  metrics: DEFAULT_METRICS,
 };
 
+function parseJsonOrDefault<Obj>(value: string | null, defaultValue: Obj): Obj {
+  if (!value) {
+    return defaultValue;
+  }
+  try {
+    return JSON.parse(value) as Obj;
+  } catch (e) {
+    return defaultValue;
+  }
+}
+
+function useStateWithLocalStorage<State>(
+  key: string,
+  defaultState: State
+): [State, Dispatch<SetStateAction<State>>] {
+  const storageState = localStorage.getItem(key);
+  const [state, setState] = useState<State>(parseJsonOrDefault<State>(storageState, defaultState));
+  useEffect(() => {
+    localStorage.setItem(key, JSON.stringify(state));
+  }, [state]);
+  return [state, setState];
+}
+
 export const useMetricsExplorerOptions = () => {
-  const [options, setOptions] = useState<MetricsExplorerOptions>(DEFAULT_OPTIONS);
-  const [currentTimerange, setTimeRange] = useState<MetricsExplorerTimeOptions>(DEFAULT_TIMERANGE);
+  const [options, setOptions] = useStateWithLocalStorage<MetricsExplorerOptions>(
+    'MetricsExplorerOptions',
+    DEFAULT_OPTIONS
+  );
+  const [currentTimerange, setTimeRange] = useStateWithLocalStorage<MetricsExplorerTimeOptions>(
+    'MetricsExplorerTimeRange',
+    DEFAULT_TIMERANGE
+  );
   const [isAutoReloading, setAutoReloading] = useState<boolean>(false);
   return {
     options,

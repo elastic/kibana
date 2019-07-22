@@ -36,16 +36,10 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
 
   describe('Kerberos authentication', () => {
     before(async () => {
-      // HACK: remove as soon as we have a solution for https://github.com/elastic/elasticsearch/issues/41943.
-      await getService('esSupertest')
-        .post('/_security/role/krb5-user')
-        .send({ cluster: ['cluster:admin/xpack/security/token/create'] })
-        .expect(200);
-
       await getService('esSupertest')
         .post('/_security/role_mapping/krb5')
         .send({
-          roles: ['krb5-user'],
+          roles: ['kibana_user'],
           enabled: true,
           rules: { field: { 'realm.name': 'kerb1' } },
         })
@@ -121,7 +115,7 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
           .set('Cookie', sessionCookie.cookieString())
           .expect(200, {
             username: 'tester@TEST.ELASTIC.CO',
-            roles: ['krb5-user'],
+            roles: ['kibana_user'],
             full_name: null,
             email: null,
             metadata: {
@@ -275,47 +269,69 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
         checkCookieIsSet(sessionCookie);
       });
 
-      it('AJAX call should initiate SPNEGO and clear existing cookie', async function() {
+      it('AJAX call should refresh token and update existing cookie', async function() {
         this.timeout(40000);
 
         // Access token expiration is set to 15s for API integration tests.
         // Let's wait for 20s to make sure token expires.
         await delay(20000);
 
+        // This api call should succeed and automatically refresh token. Returned cookie will contain
+        // the new access and refresh token pair.
         const apiResponse = await supertest
           .get('/api/security/v1/me')
           .set('kbn-xsrf', 'xxx')
           .set('Cookie', sessionCookie.cookieString())
-          .expect(401);
+          .expect(200);
 
         const cookies = apiResponse.headers['set-cookie'];
         expect(cookies).to.have.length(1);
-        checkCookieIsCleared(request.cookie(cookies[0])!);
 
-        expect(apiResponse.headers['www-authenticate']).to.be('Negotiate');
+        const refreshedCookie = request.cookie(cookies[0])!;
+        checkCookieIsSet(refreshedCookie);
+
+        // The first new cookie with fresh pair of access and refresh tokens should work.
+        await supertest
+          .get('/api/security/v1/me')
+          .set('kbn-xsrf', 'xxx')
+          .set('Cookie', refreshedCookie.cookieString())
+          .expect(200);
+
+        expect(apiResponse.headers['www-authenticate']).to.be(undefined);
       });
 
-      it('non-AJAX call should initiate SPNEGO and clear existing cookie', async function() {
+      it('non-AJAX call should refresh token and update existing cookie', async function() {
         this.timeout(40000);
 
         // Access token expiration is set to 15s for API integration tests.
         // Let's wait for 20s to make sure token expires.
         await delay(20000);
 
+        // This request should succeed and automatically refresh token. Returned cookie will contain
+        // the new access and refresh token pair.
         const nonAjaxResponse = await supertest
-          .get('/')
+          .get('/app/kibana')
           .set('Cookie', sessionCookie.cookieString())
-          .expect(401);
+          .expect(200);
 
         const cookies = nonAjaxResponse.headers['set-cookie'];
         expect(cookies).to.have.length(1);
-        checkCookieIsCleared(request.cookie(cookies[0])!);
 
-        expect(nonAjaxResponse.headers['www-authenticate']).to.be('Negotiate');
+        const refreshedCookie = request.cookie(cookies[0])!;
+        checkCookieIsSet(refreshedCookie);
+
+        // The first new cookie with fresh pair of access and refresh tokens should work.
+        await supertest
+          .get('/api/security/v1/me')
+          .set('kbn-xsrf', 'xxx')
+          .set('Cookie', refreshedCookie.cookieString())
+          .expect(200);
+
+        expect(nonAjaxResponse.headers['www-authenticate']).to.be(undefined);
       });
     });
 
-    describe('API access with missing access token document.', () => {
+    describe('API access with missing access token document or expired refresh token.', () => {
       let sessionCookie: Cookie;
 
       beforeEach(async () => {
@@ -331,8 +347,8 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
         checkCookieIsSet(sessionCookie);
 
         // Let's delete tokens from `.security-tokens` index directly to simulate the case when
-        // Elasticsearch automatically removes access token document from the index after some
-        // period of time.
+        // Elasticsearch automatically removes access/refresh token document from the index after
+        // some period of time.
         const esResponse = await getService('es').deleteByQuery({
           index: '.security-tokens',
           q: 'doc_type:token',

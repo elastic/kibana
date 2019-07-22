@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { useContext, useEffect, useState } from 'react';
+import { useContext, useEffect, useState, useMemo } from 'react';
 import { LoadingIndicatorContext } from '../context/LoadingIndicatorContext';
 import { useComponentId } from './useComponentId';
 
@@ -16,8 +16,10 @@ export enum FETCH_STATUS {
 
 export function useFetcher<Response>(
   fn: () => Promise<Response> | undefined,
-  useEffectKey: any[]
+  effectKey: any[],
+  options: { preservePreviousResponse?: boolean } = {}
 ) {
+  const { preservePreviousResponse = true } = options;
   const id = useComponentId();
   const { dispatchStatus } = useContext(LoadingIndicatorContext);
   const [result, setResult] = useState<{
@@ -25,20 +27,27 @@ export function useFetcher<Response>(
     status?: FETCH_STATUS;
     error?: Error;
   }>({});
+  const [counter, setCounter] = useState(0);
 
   useEffect(() => {
     let didCancel = false;
 
-    dispatchStatus({ id, isLoading: true });
-    setResult({
-      data: result.data, // preserve data from previous state while loading next state
-      status: FETCH_STATUS.LOADING,
-      error: undefined
-    });
-
     async function doFetch() {
+      const promise = fn();
+      if (!promise) {
+        return;
+      }
+
+      dispatchStatus({ id, isLoading: true });
+
+      setResult({
+        data: preservePreviousResponse ? result.data : undefined, // preserve data from previous state while loading next state
+        status: FETCH_STATUS.LOADING,
+        error: undefined
+      });
+
       try {
-        const data = await fn();
+        const data = await promise;
         if (!didCancel) {
           dispatchStatus({ id, isLoading: false });
           setResult({
@@ -65,7 +74,16 @@ export function useFetcher<Response>(
       dispatchStatus({ id, isLoading: false });
       didCancel = true;
     };
-  }, useEffectKey);
+  }, [...effectKey, counter]);
 
-  return result || {};
+  return useMemo(
+    () => ({
+      ...result,
+      refresh: () => {
+        // this will invalidate the effectKey and will result in a new request
+        setCounter(counter + 1);
+      }
+    }),
+    [result]
+  );
 }

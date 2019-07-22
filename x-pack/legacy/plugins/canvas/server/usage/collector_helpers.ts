@@ -9,15 +9,7 @@
  * @param cb: callback to do something with a function that has been found
  */
 
-export interface AST {
-  type: string;
-  chain: Array<{
-    function: string;
-    arguments: {
-      [s: string]: AST[];
-    };
-  }>;
-}
+import { AST } from '../../types';
 
 export function collectFns(ast: AST, cb: (functionName: string) => void) {
   if (ast.type === 'expression') {

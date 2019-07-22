@@ -198,8 +198,6 @@ export function JobSelector({
     setSelectedIds(newSelection);
     setNewSelection([]);
     applyTimeRangeFromSelection(allNewSelectionUnique);
-    jobSelectService.next({ selection: allNewSelectionUnique });
-
     setGlobalState(globalState, { selectedIds: allNewSelectionUnique, selectedGroups: groupSelection });
   }
 
@@ -243,7 +241,7 @@ export function JobSelector({
     return (
       <EuiFlexGroup responsive={false} gutterSize="xs" alignItems="center">
         <EuiFlexItem grow={false}>
-          <EuiFlexGroup wrap responsive={false} gutterSize="xs" alignItems="center">
+          <EuiFlexGroup wrap responsive={false} gutterSize="xs" alignItems="center" data-test-subj="mlJobSelectionBadges">
             <IdBadges
               limit={BADGE_LIMIT}
               maps={maps}
@@ -258,6 +256,7 @@ export function JobSelector({
             size="xs"
             iconType="pencil"
             onClick={handleJobSelectionClick}
+            data-test-subj="mlButtonEditJobSelection"
           >
             {i18n.translate('xpack.ml.jobSelector.jobSelectionButton', {
               defaultMessage: 'Edit job selection'
@@ -276,6 +275,7 @@ export function JobSelector({
           onClose={closeFlyout}
           aria-labelledby="jobSelectorFlyout"
           size="l"
+          data-test-subj="mlFlyoutJobSelector"
         >
           <EuiFlyoutHeader hasBorder>
             <EuiTitle size="m">
@@ -307,6 +307,7 @@ export function JobSelector({
                     <EuiButtonEmpty
                       onClick={clearSelection}
                       size="xs"
+                      data-test-subj="mlFlyoutJobSelectorButtonClearSelection"
                     >
                       {i18n.translate('xpack.ml.jobSelector.clearAllFlyoutButton', {
                         defaultMessage: 'Clear all'
@@ -320,6 +321,7 @@ export function JobSelector({
                       })}
                       checked={applyTimeRange}
                       onChange={toggleTimerangeSwitch}
+                      data-test-subj="mlFlyoutJobSelectorSwitchApplyTimeRange"
                     />
                   </EuiFlexItem>
                 </EuiFlexGroup>
@@ -342,6 +344,7 @@ export function JobSelector({
                   onClick={applySelection}
                   fill
                   isDisabled={newSelection.length === 0}
+                  data-test-subj="mlFlyoutJobSelectorButtonApply"
                 >
                   {i18n.translate('xpack.ml.jobSelector.applyFlyoutButton', {
                     defaultMessage: 'Apply'
@@ -352,6 +355,7 @@ export function JobSelector({
                 <EuiButtonEmpty
                   iconType="cross"
                   onClick={closeFlyout}
+                  data-test-subj="mlFlyoutJobSelectorButtonClose"
                 >
                   {i18n.translate('xpack.ml.jobSelector.closeFlyoutButton', {
                     defaultMessage: 'Close'

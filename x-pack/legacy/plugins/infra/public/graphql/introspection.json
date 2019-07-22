@@ -201,12 +201,6 @@
                 "description": "The query to filter the log entries by",
                 "type": { "kind": "SCALAR", "name": "String", "ofType": null },
                 "defaultValue": null
-              },
-              {
-                "name": "highlightQuery",
-                "description": "The query to highlight the log entries with",
-                "type": { "kind": "SCALAR", "name": "String", "ofType": null },
-                "defaultValue": null
               }
             ],
             "type": {
@@ -246,18 +240,81 @@
                 "description": "The query to filter the log entries by",
                 "type": { "kind": "SCALAR", "name": "String", "ofType": null },
                 "defaultValue": null
-              },
-              {
-                "name": "highlightQuery",
-                "description": "The query to highlight the log entries with",
-                "type": { "kind": "SCALAR", "name": "String", "ofType": null },
-                "defaultValue": null
               }
             ],
             "type": {
               "kind": "NON_NULL",
               "name": null,
               "ofType": { "kind": "OBJECT", "name": "InfraLogEntryInterval", "ofType": null }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "logEntryHighlights",
+            "description": "Sequences of log entries matching sets of highlighting queries within an interval",
+            "args": [
+              {
+                "name": "startKey",
+                "description": "The sort key that corresponds to the start of the interval",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": { "kind": "INPUT_OBJECT", "name": "InfraTimeKeyInput", "ofType": null }
+                },
+                "defaultValue": null
+              },
+              {
+                "name": "endKey",
+                "description": "The sort key that corresponds to the end of the interval",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": { "kind": "INPUT_OBJECT", "name": "InfraTimeKeyInput", "ofType": null }
+                },
+                "defaultValue": null
+              },
+              {
+                "name": "filterQuery",
+                "description": "The query to filter the log entries by",
+                "type": { "kind": "SCALAR", "name": "String", "ofType": null },
+                "defaultValue": null
+              },
+              {
+                "name": "highlights",
+                "description": "The highlighting to apply to the log entries",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "LIST",
+                    "name": null,
+                    "ofType": {
+                      "kind": "NON_NULL",
+                      "name": null,
+                      "ofType": {
+                        "kind": "INPUT_OBJECT",
+                        "name": "InfraLogEntryHighlightInput",
+                        "ofType": null
+                      }
+                    }
+                  }
+                },
+                "defaultValue": null
+              }
+            ],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "LIST",
+                "name": null,
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": { "kind": "OBJECT", "name": "InfraLogEntryInterval", "ofType": null }
+                }
+              }
             },
             "isDeprecated": false,
             "deprecationReason": null
@@ -1388,6 +1445,18 @@
         "description": "A special built-in column that contains the log entry's timestamp",
         "fields": [
           {
+            "name": "columnId",
+            "description": "The id of the corresponding column configuration",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": { "kind": "SCALAR", "name": "ID", "ofType": null }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "timestamp",
             "description": "The timestamp",
             "args": [],
@@ -1410,6 +1479,18 @@
         "name": "InfraLogEntryMessageColumn",
         "description": "A special built-in column that contains the log entry's constructed message",
         "fields": [
+          {
+            "name": "columnId",
+            "description": "The id of the corresponding column configuration",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": { "kind": "SCALAR", "name": "ID", "ofType": null }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
           {
             "name": "message",
             "description": "A list of the formatted log entry segments",
@@ -1533,6 +1614,18 @@
         "description": "A column that contains the value of a field of the log entry",
         "fields": [
           {
+            "name": "columnId",
+            "description": "The id of the corresponding column configuration",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": { "kind": "SCALAR", "name": "ID", "ofType": null }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "field",
             "description": "The field name of the column",
             "args": [],
@@ -1555,10 +1648,51 @@
             },
             "isDeprecated": false,
             "deprecationReason": null
+          },
+          {
+            "name": "highlights",
+            "description": "A list of highlighted substrings of the value",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "LIST",
+                "name": null,
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": { "kind": "SCALAR", "name": "String", "ofType": null }
+                }
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
           }
         ],
         "inputFields": null,
         "interfaces": [],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "INPUT_OBJECT",
+        "name": "InfraLogEntryHighlightInput",
+        "description": "",
+        "fields": null,
+        "inputFields": [
+          {
+            "name": "query",
+            "description": "",
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": { "kind": "SCALAR", "name": "String", "ofType": null }
+            },
+            "defaultValue": null
+          }
+        ],
+        "interfaces": null,
         "enumValues": null,
         "possibleTypes": null
       },

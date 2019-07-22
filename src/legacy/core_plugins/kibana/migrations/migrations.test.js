@@ -572,6 +572,32 @@ Object {
 `);
     });
 
+    it('delete savedSearchId when empty string in doc', () => {
+      const doc = {
+        id: '1',
+        attributes: {
+          visState: '{}',
+          kibanaSavedObjectMeta: {
+            searchSourceJSON: '{}',
+          },
+          savedSearchId: '',
+        },
+      };
+      const migratedDoc = migrate(doc);
+      expect(migratedDoc).toMatchInlineSnapshot(`
+Object {
+  "attributes": Object {
+    "kibanaSavedObjectMeta": Object {
+      "searchSourceJSON": "{}",
+    },
+    "visState": "{}",
+  },
+  "id": "1",
+  "references": Array [],
+}
+`);
+    });
+
     it('should return a new object if vis is table and has multiple split aggs', () => {
       const aggs = [
         {

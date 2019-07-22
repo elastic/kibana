@@ -67,7 +67,7 @@ function* handleDeleteRepo(action: Action<string>) {
     yield put(deleteRepoSuccess(action.payload || ''));
     yield put(
       updateDeleteProgress({
-        repoUri: action.payload as string,
+        uri: action.payload!,
         progress: 0,
       })
     );
@@ -82,7 +82,7 @@ function* handleIndexRepo(action: Action<string>) {
     yield put(indexRepoSuccess(action.payload || ''));
     yield put(
       updateIndexProgress({
-        repoUri: action.payload as string,
+        uri: action.payload!,
         progress: 0,
       })
     );

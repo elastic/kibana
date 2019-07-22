@@ -239,7 +239,11 @@ describe('Filter editor utils', () => {
       const filter = buildFilter(mockIndexPattern, mockFields[0], isOperator, params, alias, state);
       expect(filter.meta.negate).toBe(isOperator.negate);
       expect(filter.meta.alias).toBe(alias);
-      expect(filter.$state.store).toBe(state);
+
+      expect(filter.$state).toBeDefined();
+      if (filter.$state) {
+        expect(filter.$state.store).toBe(state);
+      }
     });
 
     it('should build phrases filters', () => {
@@ -257,7 +261,10 @@ describe('Filter editor utils', () => {
       expect(filter.meta.type).toBe(isOneOfOperator.type);
       expect(filter.meta.negate).toBe(isOneOfOperator.negate);
       expect(filter.meta.alias).toBe(alias);
-      expect(filter.$state.store).toBe(state);
+      expect(filter.$state).toBeDefined();
+      if (filter.$state) {
+        expect(filter.$state.store).toBe(state);
+      }
     });
 
     it('should build range filters', () => {
@@ -274,7 +281,10 @@ describe('Filter editor utils', () => {
       );
       expect(filter.meta.negate).toBe(isBetweenOperator.negate);
       expect(filter.meta.alias).toBe(alias);
-      expect(filter.$state.store).toBe(state);
+      expect(filter.$state).toBeDefined();
+      if (filter.$state) {
+        expect(filter.$state.store).toBe(state);
+      }
     });
 
     it('should build exists filters', () => {
@@ -291,7 +301,10 @@ describe('Filter editor utils', () => {
       );
       expect(filter.meta.negate).toBe(existsOperator.negate);
       expect(filter.meta.alias).toBe(alias);
-      expect(filter.$state.store).toBe(state);
+      expect(filter.$state).toBeDefined();
+      if (filter.$state) {
+        expect(filter.$state.store).toBe(state);
+      }
     });
 
     it('should negate based on operator', () => {
@@ -308,7 +321,10 @@ describe('Filter editor utils', () => {
       );
       expect(filter.meta.negate).toBe(doesNotExistOperator.negate);
       expect(filter.meta.alias).toBe(alias);
-      expect(filter.$state.store).toBe(state);
+      expect(filter.$state).toBeDefined();
+      if (filter.$state) {
+        expect(filter.$state.store).toBe(state);
+      }
     });
   });
 });

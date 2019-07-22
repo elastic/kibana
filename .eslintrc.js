@@ -140,11 +140,13 @@ module.exports = {
                   'src/core/public/**/*',
                   '!src/core/public/index.ts',
                   '!src/core/public/mocks.ts',
+                  '!src/core/public/*.test.mocks.ts',
                   '!src/core/public/utils/**/*',
 
                   'src/core/server/**/*',
                   '!src/core/server/index.ts',
                   '!src/core/server/mocks.ts',
+                  '!src/core/server/*.test.mocks.ts',
 
                   'src/plugins/**/public/**/*',
                   '!src/plugins/**/public/index*',
@@ -153,6 +155,21 @@ module.exports = {
                   '!src/plugins/**/server/index*',
                 ],
                 allowSameFolder: true,
+              },
+              {
+                from: ['src/legacy/ui/**/*', 'ui/**/*'],
+                target: [
+                  'src/legacy/core_plugins/**/public/np_ready/**/*',
+                  'src/legacy/core_plugins/**/server/np_ready/**/*',
+                  'x-pack/legacy/plugins/**/public/np_ready/**/*',
+                  'x-pack/legacy/plugins/**/server/np_ready/**/*',
+                ],
+                allowSameFolder: true,
+                errorMessage:
+                  'NP-ready code should not import from /src/legacy/ui/** folder. ' +
+                  'Instead of importing from /src/legacy/ui/** deeply within a np_ready folder, ' +
+                  'import those things once at the top level of your plugin and pass those down, just ' +
+                  'like you pass down `core` and `plugins` objects.',
               },
             ],
           },
@@ -356,6 +373,16 @@ module.exports = {
           'ExportDefaultDeclaration',
           'ExportAllDeclaration',
         ],
+      },
+    },
+
+    /**
+     * Jest specific rules
+     */
+    {
+      files: ['**/*.test.{js,ts,tsx}'],
+      rules: {
+        'jest/valid-describe': 'error',
       },
     },
 

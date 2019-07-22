@@ -16,6 +16,7 @@ import { loadServiceList } from '../../../services/rest/apm/services';
 import { NoServicesMessage } from './NoServicesMessage';
 import { ServiceList } from './ServiceList';
 import { useUrlParams } from '../../../hooks/useUrlParams';
+import { useTrackPageview } from '../../../../../infra/public';
 
 const initalData = {
   items: [],
@@ -30,58 +31,58 @@ export function ServiceOverview() {
     urlParams: { start, end },
     uiFilters
   } = useUrlParams();
-  const { data = initalData } = useFetcher(
-    () => {
-      if (start && end) {
-        return loadServiceList({ start, end, uiFilters });
-      }
-    },
-    [start, end, uiFilters]
-  );
+  const { data = initalData, status } = useFetcher(() => {
+    if (start && end) {
+      return loadServiceList({ start, end, uiFilters });
+    }
+  }, [start, end, uiFilters]);
 
-  useEffect(
-    () => {
-      if (data.hasLegacyData && !hasDisplayedToast) {
-        hasDisplayedToast = true;
-        toastNotifications.addWarning({
-          title: i18n.translate('xpack.apm.serviceOverview.toastTitle', {
-            defaultMessage:
-              'Legacy data was detected within the selected time range'
-          }),
-          text: (
-            <p>
-              {i18n.translate('xpack.apm.serviceOverview.toastText', {
-                defaultMessage:
-                  "You're running Elastic Stack 7.0+ and we've detected incompatible data from a previous 6.x version. If you want to view this data in APM, you should migrate it. See more in "
+  useEffect(() => {
+    if (data.hasLegacyData && !hasDisplayedToast) {
+      hasDisplayedToast = true;
+      toastNotifications.addWarning({
+        title: i18n.translate('xpack.apm.serviceOverview.toastTitle', {
+          defaultMessage:
+            'Legacy data was detected within the selected time range'
+        }),
+        text: (
+          <p>
+            {i18n.translate('xpack.apm.serviceOverview.toastText', {
+              defaultMessage:
+                "You're running Elastic Stack 7.0+ and we've detected incompatible data from a previous 6.x version. If you want to view this data in APM, you should migrate it. See more in "
+            })}
+
+            <EuiLink
+              href={url.format({
+                pathname: chrome.addBasePath('/app/kibana'),
+                hash: '/management/elasticsearch/upgrade_assistant'
               })}
+            >
+              {i18n.translate(
+                'xpack.apm.serviceOverview.upgradeAssistantLink',
+                {
+                  defaultMessage: 'the upgrade assistant'
+                }
+              )}
+            </EuiLink>
+          </p>
+        )
+      });
+    }
+  }, [data.hasLegacyData]);
 
-              <EuiLink
-                href={url.format({
-                  pathname: chrome.addBasePath('/app/kibana'),
-                  hash: '/management/elasticsearch/upgrade_assistant'
-                })}
-              >
-                {i18n.translate(
-                  'xpack.apm.serviceOverview.upgradeAssistantLink',
-                  {
-                    defaultMessage: 'the upgrade assistant'
-                  }
-                )}
-              </EuiLink>
-            </p>
-          )
-        });
-      }
-    },
-    [data.hasLegacyData]
-  );
+  useTrackPageview({ app: 'apm', path: 'services_overview' });
+  useTrackPageview({ app: 'apm', path: 'services_overview', delay: 15000 });
 
   return (
     <EuiPanel>
       <ServiceList
         items={data.items}
         noItemsMessage={
-          <NoServicesMessage historicalDataFound={data.hasHistoricalData} />
+          <NoServicesMessage
+            historicalDataFound={data.hasHistoricalData}
+            isLoading={status === 'loading'}
+          />
         }
       />
     </EuiPanel>

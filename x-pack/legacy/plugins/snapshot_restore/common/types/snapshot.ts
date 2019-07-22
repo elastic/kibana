@@ -11,7 +11,7 @@ export interface SnapshotDetails {
   versionId: number;
   version: string;
   indices: string[];
-  includeGlobalState: number;
+  includeGlobalState: boolean;
   state: string;
   /** e.g. '2019-04-05T21:56:40.438Z' */
   startTime: string;
@@ -22,6 +22,7 @@ export interface SnapshotDetails {
   durationInMillis: number;
   indexFailures: any[];
   shards: SnapshotDetailsShardsStatus;
+  isManagedRepository?: boolean;
 }
 
 interface SnapshotDetailsShardsStatus {

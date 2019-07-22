@@ -19,6 +19,7 @@
 
 export {
   IndexPatternsService,
+  IndexPatterns,
   // types
   IndexPatternsSetup,
   IndexPattern,

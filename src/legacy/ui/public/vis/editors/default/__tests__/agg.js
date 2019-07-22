@@ -80,7 +80,7 @@ describe('Vis-Editor-Agg plugin directive', function () {
 
     // make the element
     $elem = angular.element(
-      '<ng-form vis-editor-agg></ng-form>'
+      '<ng-form ><div vis-editor-agg ng-model="name"></div></ng-form>'
     );
 
     // compile the html

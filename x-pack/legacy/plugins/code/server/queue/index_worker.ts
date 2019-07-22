@@ -98,10 +98,19 @@ export class IndexWorker extends AbstractWorker {
             indexer.cancel();
             cancelled = true;
           });
-          this.cancellationService.registerIndexJobToken(uri, cancellationToken);
         }
         const progressReporter = this.getProgressReporter(uri, revision, index, indexerNumber);
-        return indexer.start(progressReporter, checkpointReq);
+        const indexJobPromise = indexer.start(progressReporter, checkpointReq);
+
+        if (cancellationToken) {
+          await this.cancellationService.registerCancelableIndexJob(
+            uri,
+            cancellationToken,
+            indexJobPromise
+          );
+        }
+
+        return indexJobPromise;
       }
     );
     const stats: IndexStats[] = await Promise.all(indexPromises);
@@ -130,10 +139,22 @@ export class IndexWorker extends AbstractWorker {
       // Skip updating job progress if the job is done because of cancellation.
       return;
     }
+
     this.log.info(`Index worker finished with stats: ${JSON.stringify([...res.stats])}`);
     await super.onJobCompleted(job, res);
     const { uri, revision } = job.payload;
     try {
+      // Double check if the current revision is different from the origin reivsion.
+      // If so, kick off another index job to catch up the data descrepency.
+      const gitStatus = await this.objectClient.getRepositoryGitStatus(uri);
+      if (gitStatus.revision !== revision) {
+        const payload = {
+          uri,
+          revision: gitStatus.revision,
+        };
+        await this.enqueueJob(payload, {});
+      }
+
       return await this.objectClient.updateRepository(uri, { indexedRevision: revision });
     } catch (error) {
       this.log.error(`Update indexed revision in repository object error.`);

@@ -13,12 +13,13 @@ import { pure } from 'recompose';
 import { Breadcrumb } from 'ui/chrome';
 import { StaticIndexPattern } from 'ui/index_patterns';
 
+import { ActionCreator } from 'typescript-fsa';
 import { ESTermQuery } from '../../../common/typed_json';
 import { FiltersGlobal } from '../../components/filters_global';
 import { HeaderPage } from '../../components/header_page';
 import { LastEventTime } from '../../components/last_event_time';
 import { getHostsUrl, HostComponentProps } from '../../components/link_to/redirect_to_hosts';
-import { EventsTable, UncommonProcessTable } from '../../components/page/hosts';
+import { EventsTable, UncommonProcessTable, KpiHostsComponent } from '../../components/page/hosts';
 import { AuthenticationTable } from '../../components/page/hosts/authentications_table';
 import { HostOverview } from '../../components/page/hosts/host_overview';
 import { manageQuery } from '../../components/page/manage_query';
@@ -36,6 +37,13 @@ import { hostsModel, hostsSelectors, State } from '../../store';
 import { HostsEmptyPage } from './hosts_empty_page';
 import { HostsKql } from './kql';
 import * as i18n from './translations';
+import { AnomalyTableProvider } from '../../components/ml/anomaly/anomaly_table_provider';
+import { setAbsoluteRangeDatePicker as dispatchAbsoluteRangeDatePicker } from '../../store/inputs/actions';
+import { InputsModelId } from '../../store/inputs/constants';
+import { scoreIntervalToDateTime } from '../../components/ml/score/score_interval_to_datetime';
+import { KpiHostDetailsQuery } from '../../containers/kpi_host_details';
+import { AnomaliesHostTable } from '../../components/ml/tables/anomalies_host_table';
+import { hostToCriteria } from '../../components/ml/criteria/host_to_criteria';
 
 const type = hostsModel.HostsType.details;
 
@@ -43,9 +51,15 @@ const HostOverviewManage = manageQuery(HostOverview);
 const AuthenticationTableManage = manageQuery(AuthenticationTable);
 const UncommonProcessTableManage = manageQuery(UncommonProcessTable);
 const EventsTableManage = manageQuery(EventsTable);
+const KpiHostDetailsManage = manageQuery(KpiHostsComponent);
 
 interface HostDetailsComponentReduxProps {
   filterQueryExpression: string;
+  setAbsoluteRangeDatePicker: ActionCreator<{
+    id: InputsModelId;
+    from: number;
+    to: number;
+  }>;
 }
 
 type HostDetailsComponentProps = HostDetailsComponentReduxProps & HostComponentProps;
@@ -56,6 +70,7 @@ const HostDetailsComponent = pure<HostDetailsComponentProps>(
       params: { hostName },
     },
     filterQueryExpression,
+    setAbsoluteRangeDatePicker,
   }) => (
     <WithSource sourceId="default">
       {({ indicesExist, indexPattern }) =>
@@ -84,16 +99,61 @@ const HostDetailsComponent = pure<HostDetailsComponentProps>(
                         startDate={from}
                         endDate={to}
                       >
-                        {({ hostOverview, loading, id, refetch }) => (
-                          <HostOverviewManage
-                            id={id}
-                            refetch={refetch}
-                            setQuery={setQuery}
-                            data={hostOverview}
-                            loading={loading}
-                          />
+                        {({ hostOverview, loading, id, inspect, refetch }) => (
+                          <AnomalyTableProvider
+                            criteriaFields={hostToCriteria(hostOverview)}
+                            startDate={from}
+                            endDate={to}
+                            skip={isInitializing}
+                          >
+                            {({ isLoadingAnomaliesData, anomaliesData }) => (
+                              <HostOverviewManage
+                                id={id}
+                                inspect={inspect}
+                                refetch={refetch}
+                                setQuery={setQuery}
+                                data={hostOverview}
+                                anomaliesData={anomaliesData}
+                                isLoadingAnomaliesData={isLoadingAnomaliesData}
+                                loading={loading}
+                                startDate={from}
+                                endDate={to}
+                                narrowDateRange={(score, interval) => {
+                                  const fromTo = scoreIntervalToDateTime(score, interval);
+                                  setAbsoluteRangeDatePicker({
+                                    id: 'global',
+                                    from: fromTo.from,
+                                    to: fromTo.to,
+                                  });
+                                }}
+                              />
+                            )}
+                          </AnomalyTableProvider>
                         )}
                       </HostOverviewByNameQuery>
+
+                      <EuiHorizontalRule />
+
+                      <KpiHostDetailsQuery
+                        sourceId="default"
+                        filterQuery={getFilterQuery(hostName, filterQueryExpression, indexPattern)}
+                        skip={isInitializing}
+                        startDate={from}
+                        endDate={to}
+                      >
+                        {({ kpiHostDetails, id, inspect, loading, refetch }) => (
+                          <KpiHostDetailsManage
+                            data={kpiHostDetails}
+                            from={from}
+                            id={id}
+                            inspect={inspect}
+                            loading={loading}
+                            refetch={refetch}
+                            setQuery={setQuery}
+                            to={to}
+                          />
+                        )}
+                      </KpiHostDetailsQuery>
 
                       <EuiHorizontalRule />
 
@@ -110,20 +170,26 @@ const HostDetailsComponent = pure<HostDetailsComponentProps>(
                           totalCount,
                           loading,
                           pageInfo,
-                          loadMore,
+                          loadPage,
                           id,
+                          inspect,
                           refetch,
                         }) => (
                           <AuthenticationTableManage
-                            id={id}
-                            refetch={refetch}
-                            setQuery={setQuery}
-                            loading={loading}
                             data={authentications}
+                            fakeTotalCount={getOr(50, 'fakeTotalCount', pageInfo)}
+                            id={id}
+                            inspect={inspect}
+                            loading={loading}
+                            loadPage={loadPage}
+                            refetch={refetch}
+                            showMorePagesIndicator={getOr(
+                              false,
+                              'showMorePagesIndicator',
+                              pageInfo
+                            )}
+                            setQuery={setQuery}
                             totalCount={totalCount}
-                            nextCursor={getOr(null, 'endCursor.value', pageInfo)}
-                            hasNextPage={getOr(false, 'hasNextPage', pageInfo)!}
-                            loadMore={loadMore}
                             type={type}
                           />
                         )}
@@ -146,10 +212,12 @@ const HostDetailsComponent = pure<HostDetailsComponentProps>(
                           pageInfo,
                           loadMore,
                           id,
+                          inspect,
                           refetch,
                         }) => (
                           <UncommonProcessTableManage
                             id={id}
+                            inspect={inspect}
                             refetch={refetch}
                             setQuery={setQuery}
                             loading={loading}
@@ -165,6 +233,24 @@ const HostDetailsComponent = pure<HostDetailsComponentProps>(
 
                       <EuiSpacer />
 
+                      <AnomaliesHostTable
+                        startDate={from}
+                        endDate={to}
+                        skip={isInitializing}
+                        hostName={hostName}
+                        type={type}
+                        narrowDateRange={(score, interval) => {
+                          const fromTo = scoreIntervalToDateTime(score, interval);
+                          setAbsoluteRangeDatePicker({
+                            id: 'global',
+                            from: fromTo.from,
+                            to: fromTo.to,
+                          });
+                        }}
+                      />
+
+                      <EuiSpacer />
+
                       <EventsQuery
                         endDate={to}
                         filterQuery={getFilterQuery(hostName, filterQueryExpression, indexPattern)}
@@ -173,9 +259,19 @@ const HostDetailsComponent = pure<HostDetailsComponentProps>(
                         startDate={from}
                         type={type}
                       >
-                        {({ events, loading, id, refetch, totalCount, pageInfo, loadMore }) => (
+                        {({
+                          events,
+                          loading,
+                          id,
+                          inspect,
+                          refetch,
+                          totalCount,
+                          pageInfo,
+                          loadMore,
+                        }) => (
                           <EventsTableManage
                             id={id}
+                            inspect={inspect}
                             refetch={refetch}
                             setQuery={setQuery}
                             data={events!}
@@ -214,7 +310,12 @@ const makeMapStateToProps = () => {
   });
 };
 
-export const HostDetails = connect(makeMapStateToProps)(HostDetailsComponent);
+export const HostDetails = connect(
+  makeMapStateToProps,
+  {
+    setAbsoluteRangeDatePicker: dispatchAbsoluteRangeDatePicker,
+  }
+)(HostDetailsComponent);
 
 export const getBreadcrumbs = (hostId: string): Breadcrumb[] => [
   {

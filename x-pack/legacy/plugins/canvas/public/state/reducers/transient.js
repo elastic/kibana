@@ -48,6 +48,13 @@ export const transientReducer = handleActions(
       };
     },
 
+    [transientActions.setZoomScale]: (transientState, { payload }) => {
+      return {
+        ...transientState,
+        zoomScale: payload || 1,
+      };
+    },
+
     [pageActions.setPage]: transientState => {
       return { ...transientState, selectedToplevelNodes: [] };
     },

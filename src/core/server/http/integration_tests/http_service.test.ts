@@ -58,9 +58,11 @@ describe('http service', () => {
 
       it('runs auth for legacy routes and proxy request to legacy server route handlers', async () => {
         const { http } = await root.setup();
-        const { sessionStorageFactory } = await http.registerAuth<StorageData>((req, t) => {
-          const headers = req.getFilteredHeaders(['authorization']);
-          if (headers.authorization) {
+        const sessionStorageFactory = await http.createCookieSessionStorageFactory<StorageData>(
+          cookieOptions
+        );
+        http.registerAuth((req, t) => {
+          if (req.headers.authorization) {
             const user = { id: '42' };
             const sessionStorage = sessionStorageFactory.asScoped(req);
             sessionStorage.set({ value: user, expires: Date.now() + sessionDurationMs });
@@ -68,7 +70,7 @@ describe('http service', () => {
           } else {
             return t.rejected(Boom.unauthorized());
           }
-        }, cookieOptions);
+        });
         await root.start();
 
         const legacyUrl = '/legacy';
@@ -89,9 +91,11 @@ describe('http service', () => {
       it('passes authHeaders as request headers to the legacy platform', async () => {
         const token = 'Basic: name:password';
         const { http } = await root.setup();
-        const { sessionStorageFactory } = await http.registerAuth<StorageData>((req, t) => {
-          const headers = req.getFilteredHeaders(['authorization']);
-          if (headers.authorization) {
+        const sessionStorageFactory = await http.createCookieSessionStorageFactory<StorageData>(
+          cookieOptions
+        );
+        http.registerAuth((req, t) => {
+          if (req.headers.authorization) {
             const user = { id: '42' };
             const sessionStorage = sessionStorageFactory.asScoped(req);
             sessionStorage.set({ value: user, expires: Date.now() + sessionDurationMs });
@@ -104,7 +108,7 @@ describe('http service', () => {
           } else {
             return t.rejected(Boom.unauthorized());
           }
-        }, cookieOptions);
+        });
         await root.start();
 
         const legacyUrl = '/legacy';
@@ -128,16 +132,18 @@ describe('http service', () => {
         const user = { id: '42' };
 
         const { http } = await root.setup();
-        const { sessionStorageFactory } = await http.registerAuth<StorageData>((req, t) => {
-          const headers = req.getFilteredHeaders(['authorization']);
-          if (headers.authorization) {
+        const sessionStorageFactory = await http.createCookieSessionStorageFactory<StorageData>(
+          cookieOptions
+        );
+        http.registerAuth((req, t) => {
+          if (req.headers.authorization) {
             const sessionStorage = sessionStorageFactory.asScoped(req);
             sessionStorage.set({ value: user, expires: Date.now() + sessionDurationMs });
             return t.authenticated({ state: user });
           } else {
             return t.rejected(Boom.unauthorized());
           }
-        }, cookieOptions);
+        });
         await root.start();
 
         const legacyUrl = '/legacy';
@@ -162,7 +168,7 @@ describe('http service', () => {
 
         await registerAuth((req, t) => {
           return t.authenticated({ headers: authHeaders });
-        }, cookieOptions);
+        });
 
         const router = new Router('/new-platform');
         router.get({ path: '/', validate: false }, async (req, res) => {

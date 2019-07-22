@@ -65,6 +65,7 @@ exports[`Domains Table Component Rendering it renders the default Domains table 
   }
   flowTarget="source"
   hasNextPage={false}
+  id="domains"
   indexPattern={
     Object {
       "fields": Array [

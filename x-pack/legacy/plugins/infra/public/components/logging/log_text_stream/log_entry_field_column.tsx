@@ -8,31 +8,53 @@ import { darken, transparentize } from 'polished';
 import React, { useMemo } from 'react';
 
 import styled, { css } from '../../../../../../common/eui_styled_components';
+import {
+  isFieldColumn,
+  isHighlightFieldColumn,
+  LogEntryColumn,
+  LogEntryHighlightColumn,
+} from '../../../utils/log_entry';
+import { highlightFieldValue, HighlightMarker } from './highlighting';
 import { LogEntryColumnContent } from './log_entry_column';
 
 interface LogEntryFieldColumnProps {
-  encodedValue: string;
+  columnValue: LogEntryColumn;
+  highlights: LogEntryHighlightColumn[];
   isHighlighted: boolean;
   isHovered: boolean;
   isWrapped: boolean;
 }
 
 export const LogEntryFieldColumn: React.FunctionComponent<LogEntryFieldColumnProps> = ({
-  encodedValue,
+  columnValue,
+  highlights: [firstHighlight], // we only support one highlight for now
   isHighlighted,
   isHovered,
   isWrapped,
 }) => {
-  const value = useMemo(() => JSON.parse(encodedValue), [encodedValue]);
+  const value = useMemo(() => (isFieldColumn(columnValue) ? JSON.parse(columnValue.value) : null), [
+    columnValue,
+  ]);
   const formattedValue = Array.isArray(value) ? (
     <ul>
       {value.map((entry, i) => (
-        <CommaSeparatedLi key={`LogEntryFieldColumn-${i}`}>{entry}</CommaSeparatedLi>
+        <CommaSeparatedLi key={`LogEntryFieldColumn-${i}`}>
+          {highlightFieldValue(
+            entry,
+            isHighlightFieldColumn(firstHighlight) ? firstHighlight.highlights : [],
+            HighlightMarker
+          )}
+        </CommaSeparatedLi>
       ))}
     </ul>
   ) : (
-    value
+    highlightFieldValue(
+      value,
+      isHighlightFieldColumn(firstHighlight) ? firstHighlight.highlights : [],
+      HighlightMarker
+    )
   );
+
   return (
     <FieldColumnContent isHighlighted={isHighlighted} isHovered={isHovered} isWrapped={isWrapped}>
       {formattedValue}

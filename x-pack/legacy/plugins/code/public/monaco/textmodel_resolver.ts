@@ -61,7 +61,7 @@ export class TextModelResolverService implements ITextModelService {
       const contentType = response.headers.get('Content-Type');
 
       if (contentType && contentType.startsWith('text/')) {
-        const lang = contentType.split(';')[0].substring('text/'.length);
+        const lang = response.headers.get('lang');
         const text = await response.text();
         return { text, lang };
       }
