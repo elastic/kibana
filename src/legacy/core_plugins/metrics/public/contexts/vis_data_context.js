@@ -19,4 +19,4 @@
 
 import React from 'react';
 
-export const UIRestrictionsContext = React.createContext();
+export const VisDataContext = React.createContext({});
