@@ -8,7 +8,6 @@ import { Action, EditorFrameState } from './state_management';
 import { Document } from '../../persistence/saved_object_store';
 
 export interface Props {
-  // datasource: { getPersistableState: (state: unknown) => unknown };
   activeDatasources: Record<string, { getPersistableState: (state: unknown) => unknown }>;
   dispatch: (value: Action) => void;
   redirectTo: (path: string) => void;

@@ -24,7 +24,6 @@ import {
   EditorFrameSetup,
   EditorFrameInstance,
   ErrorCallback,
-  // DatasourcePublicAPI,
 } from '../types';
 import { EditorFrame } from './editor_frame';
 import { SavedObjectIndexStore, SavedObjectStore, Document } from '../persistence';
@@ -60,7 +59,6 @@ interface RenderProps extends InitializationResult {
   onError: ErrorCallback;
   datasources: Record<string, Datasource>;
   visualizations: Record<string, Visualization>;
-  // layerToDatasourceId: Record<string, string>; // Maps layer ID to datasource ID
   expressionRenderer: ExpressionRenderer;
 }
 
@@ -70,7 +68,6 @@ export class EditorFramePlugin {
   private ExpressionRenderer: ExpressionRenderer | null = null;
   private readonly datasources: Record<string, Datasource> = {};
   private readonly visualizations: Record<string, Visualization> = {};
-  // private readonly layerToDatasourceId: Record<string, string> = {};
 
   private createInstance(): EditorFrameInstance {
     let domElement: Element;
@@ -127,10 +124,7 @@ export class EditorFramePlugin {
     };
   }
 
-  public setup(
-    _core: CoreSetup | null,
-    plugins: EditorFrameSetupPlugins // { interpreter, data, storage, toastNotifications: toast }: IndexPatternDatasourcePluginPlugins
-  ): EditorFrameSetup {
+  public setup(_core: CoreSetup | null, plugins: EditorFrameSetupPlugins): EditorFrameSetup {
     plugins.interpreter.functionsRegistry.register(() => mergeTables);
 
     this.ExpressionRenderer = plugins.data.expressions.ExpressionRenderer;
@@ -198,7 +192,6 @@ export function InitializedEditor({
   store,
   datasources,
   visualizations,
-  // layerToDatasourceId,
   expressionRenderer,
 }: RenderProps) {
   const firstDatasourceId = Object.keys(datasources)[0];

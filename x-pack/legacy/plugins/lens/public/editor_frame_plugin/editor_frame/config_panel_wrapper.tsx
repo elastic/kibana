@@ -19,11 +19,7 @@ interface ConfigPanelWrapperProps {
   framePublicAPI: FramePublicAPI;
 }
 
-function getSuggestedVisualizationState(
-  frame: FramePublicAPI,
-  visualization: Visualization
-  // datasource: DatasourcePublicAPI
-) {
+function getSuggestedVisualizationState(frame: FramePublicAPI, visualization: Visualization) {
   const datasources = Object.entries(frame.datasourceLayers);
 
   let results: VisualizationSuggestion[] = [];

@@ -190,6 +190,8 @@ export type LayerConfig = AxisConfig & {
 };
 
 export interface XYArgs {
+  xTitle: string;
+  yTitle: string;
   legend: LegendConfig;
   layers: LayerConfig[];
 }

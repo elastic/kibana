@@ -75,7 +75,6 @@ export function changeColumn({
   layerId,
   columnId,
   newColumn,
-  // extra,
   keepParams,
 }: {
   state: IndexPatternPrivateState;

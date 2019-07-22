@@ -27,13 +27,9 @@ export interface EditorFrameSetup {
 // Hints the default nesting to the data source. 0 is the highest priority
 export type DimensionPriority = 0 | 1 | 2;
 
-// 0 is the default layer, layers are joined sequentially but there can only be one 'join' layer
-export type DimensionLayer = 'join' | number;
-
 export interface TableSuggestionColumn {
   columnId: string;
   operation: Operation;
-  layer?: DimensionLayer;
 }
 
 export interface TableSuggestion {
@@ -93,7 +89,6 @@ export interface DatasourcePublicAPI {
 export interface TableSpecColumn {
   // Column IDs are the keys for internal state in data sources and visualizations
   columnId: string;
-  layer?: DimensionLayer;
 }
 
 // TableSpec is managed by visualizations
@@ -188,7 +183,6 @@ export interface FramePublicAPI {
 
 export interface Visualization<T = unknown, P = unknown> {
   // For initializing from saved object
-  // initialize: (frame: FramePublicAPI, datasource: DatasourcePublicAPI, state?: P) => T;
   initialize: (frame: FramePublicAPI, state?: P) => T;
 
   getPersistableState: (state: T) => P;

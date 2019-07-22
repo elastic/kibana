@@ -24,6 +24,8 @@ function sampleArgs() {
   };
 
   const args: XYArgs = {
+    xTitle: '',
+    yTitle: '',
     legend: {
       isVisible: false,
       position: Position.Top,

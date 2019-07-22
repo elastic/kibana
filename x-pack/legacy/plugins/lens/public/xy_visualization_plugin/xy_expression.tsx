@@ -22,14 +22,9 @@ import { XYArgs } from './types';
 import { LensMultiTable } from '../types';
 import { RenderFunction } from '../interpreter_types';
 
-type ExpressionArgs = XYArgs & {
-  xTitle: string;
-  yTitle: string;
-};
-
 export interface XYChartProps {
   data: LensMultiTable;
-  args: ExpressionArgs;
+  args: XYArgs;
 }
 
 export interface XYRender {
@@ -38,12 +33,7 @@ export interface XYRender {
   value: XYChartProps;
 }
 
-export const xyChart: ExpressionFunction<
-  'lens_xy_chart',
-  LensMultiTable,
-  ExpressionArgs,
-  XYRender
-> = ({
+export const xyChart: ExpressionFunction<'lens_xy_chart', LensMultiTable, XYArgs, XYRender> = ({
   name: 'lens_xy_chart',
   type: 'render',
   help: 'An X/Y chart',
@@ -69,7 +59,7 @@ export const xyChart: ExpressionFunction<
   context: {
     types: ['lens_multitable'],
   },
-  fn(data: LensMultiTable, args: ExpressionArgs) {
+  fn(data: LensMultiTable, args: XYArgs) {
     return {
       type: 'render',
       as: 'lens_xy_chart_renderer',
@@ -84,7 +74,7 @@ export const xyChart: ExpressionFunction<
 
 export interface XYChartProps {
   data: LensMultiTable;
-  args: ExpressionArgs;
+  args: XYArgs;
 }
 
 export const xyChartRenderer: RenderFunction<XYChartProps> = {

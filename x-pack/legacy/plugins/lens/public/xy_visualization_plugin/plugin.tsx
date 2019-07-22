@@ -25,7 +25,6 @@ class XyVisualizationPlugin {
   setup(_core: CoreSetup | null, { interpreter }: XyVisualizationPluginSetupPlugins) {
     interpreter.functionsRegistry.register(() => legendConfig);
     interpreter.functionsRegistry.register(() => xConfig);
-    // interpreter.functionsRegistry.register(() => yConfig);
     interpreter.functionsRegistry.register(() => layerConfig);
     interpreter.functionsRegistry.register(() => xyChart);
 
