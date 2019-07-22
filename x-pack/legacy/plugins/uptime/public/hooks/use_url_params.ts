@@ -5,9 +5,10 @@
  */
 
 import qs from 'querystring';
-import { useState } from 'react';
+import { useContext, useState } from 'react';
 import { RouteComponentProps } from 'react-router';
 import { History } from 'history';
+import { UptimeSettingsContext } from '../contexts';
 import { UptimeUrlParams, getSupportedUrlParams } from '../lib/helper';
 
 interface Location {
@@ -25,6 +26,7 @@ export const useUrlParams: UptimeUrlParamsHook = () => {
   const [locationState, setLocation] = useState<Location | undefined>(undefined);
   const [historyState, setHistory] = useState<History | undefined>(undefined);
   const [urlParams, setUrlParams] = useState<{ [key: string]: string } | undefined>(undefined);
+  const f = useContext(UptimeSettingsContext);
 
   const getUrlParams: GetUrlParams = () => {
     let currentParams = {};
