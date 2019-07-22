@@ -28,7 +28,7 @@ import { convertMicrosecondsToMilliseconds as microsToMillis } from '../../lib/h
 import { UptimeGraphQLQueryProps, withUptimeGraphQL } from '../higher_order';
 import { pingsQuery } from '../../queries';
 import { LocationName } from './location_name';
-import { Criteria } from './monitor_list';
+import { Criteria, Pagination } from './monitor_list';
 
 interface PingListQueryResult {
   allPings?: PingResults;
@@ -117,34 +117,43 @@ export const PingListComponent = ({
       ),
     },
     {
-      field: 'observer.geo.name',
+      align: 'left',
       dataType: 'number',
+      field: 'observer.geo.name',
       name: i18n.translate('xpack.uptime.pingList.locationNameColumnLabel', {
         defaultMessage: 'Location',
       }),
       render: (location: string) => <LocationName location={location} />,
     },
     {
-      field: 'monitor.ip',
+      align: 'left',
       dataType: 'number',
+      field: 'monitor.ip',
       name: i18n.translate('xpack.uptime.pingList.ipAddressColumnLabel', {
         defaultMessage: 'IP',
       }),
     },
     {
+      align: 'right',
       field: 'monitor.duration.us',
       name: i18n.translate('xpack.uptime.pingList.durationMsColumnLabel', {
         defaultMessage: 'Duration',
       }),
-      render: (duration: number) => microsToMillis(duration),
+      render: (duration: number) =>
+        i18n.translate('xpack.uptime.pingList.durationMsColumnFormatting', {
+          values: { millis: microsToMillis(duration) },
+          defaultMessage: '{millis} ms',
+        }),
     },
     {
+      align: 'left',
       field: 'error.type',
       name: i18n.translate('xpack.uptime.pingList.errorTypeColumnLabel', {
         defaultMessage: 'Error type',
       }),
     },
     {
+      align: 'left',
       field: 'error.message',
       name: i18n.translate('xpack.uptime.pingList.errorMessageColumnLabel', {
         defaultMessage: 'Error message',
@@ -192,6 +201,17 @@ export const PingListComponent = ({
       });
     }
   }
+  const pagination: Pagination = {
+    initialPageSize: 20,
+    pageIndex: 0,
+    pageSize,
+    pageSizeOptions: [5, 10, 20, 50, 100],
+    /**
+     * we're not currently supporting pagination in this component
+     * so the first page is the only page
+     */
+    totalItemCount: pageSize,
+  };
 
   return (
     <Fragment>
@@ -278,12 +298,7 @@ export const PingListComponent = ({
           loading={loading}
           columns={columns}
           items={pings}
-          pagination={{
-            initialPageSize: 20,
-            pageIndex: 0,
-            pageSize,
-            pageSizeOptions: [5, 10, 20, 50, 100],
-          }}
+          pagination={pagination}
           onChange={({ page: { size } }: Criteria) => onPageCountChange(size)}
         />
       </EuiPanel>

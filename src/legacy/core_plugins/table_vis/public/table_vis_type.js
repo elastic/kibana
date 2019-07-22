@@ -46,7 +46,8 @@ export const createTableVisTypeDefinition = (dependencies) => {
           direction: null
         },
         showTotal: false,
-        totalFunc: 'sum'
+        totalFunc: 'sum',
+        percentageCol: '',
       },
       template: tableVisTemplate,
     },
