@@ -22,9 +22,6 @@ function getServerMock(customization?: any) {
   const getLicenseCheckResults = jest.fn().mockReturnValue({});
   const defaultServerMock = {
     plugins: {
-      security: {
-        isAuthenticated: jest.fn().mockReturnValue(true),
-      },
       xpack_main: {
         info: {
           isAvailable: jest.fn().mockReturnValue(true),

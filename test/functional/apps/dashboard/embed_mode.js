@@ -24,7 +24,7 @@ export default function ({ getService, getPageObjects }) {
   const PageObjects = getPageObjects(['dashboard', 'common']);
   const browser = getService('browser');
 
-  describe('embed mode', async () => {
+  describe('embed mode', () => {
     before(async () => {
       await PageObjects.dashboard.loadSavedDashboard('few panels');
     });
