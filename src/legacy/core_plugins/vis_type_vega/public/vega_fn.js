@@ -30,7 +30,7 @@ export const createVegaFn = (dependencies) => ({
       'null',
     ],
   },
-  help: i18n.translate('vega.function.help', {
+  help: i18n.translate('visTypeVega.function.help', {
     defaultMessage: 'Vega visualization',
   }),
   args: {
