@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Key } from 'selenium-webdriver';
 import { KibanaFunctionalTestDefaultProviders } from '../../types/providers';
 import { WebElementWrapper } from '../../../../test/functional/services/lib/web_element_wrapper';
 
@@ -14,6 +13,7 @@ export function InfraSourceConfigurationFlyoutProvider({
   const find = getService('find');
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
+  const browser = getService('browser');
 
   return {
     /**
@@ -90,16 +90,16 @@ export function InfraSourceConfigurationFlyoutProvider({
       );
       await moveLogColumnHandle.focus();
       const movementDifference = destinationIndex - sourceIndex;
-      await moveLogColumnHandle.pressKeys(Key.SPACE);
+      await moveLogColumnHandle.pressKeys(browser.keys.SPACE);
       for (let i = 0; i < Math.abs(movementDifference); i++) {
         await new Promise(res => setTimeout(res, 100));
         if (movementDifference > 0) {
-          await moveLogColumnHandle.pressKeys(Key.ARROW_DOWN);
+          await moveLogColumnHandle.pressKeys(browser.keys.ARROW_DOWN);
         } else {
-          await moveLogColumnHandle.pressKeys(Key.ARROW_UP);
+          await moveLogColumnHandle.pressKeys(browser.keys.ARROW_UP);
         }
       }
-      await moveLogColumnHandle.pressKeys(Key.SPACE);
+      await moveLogColumnHandle.pressKeys(browser.keys.SPACE);
     },
 
     /**
