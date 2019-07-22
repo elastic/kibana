@@ -5,9 +5,10 @@
  */
 
 import { InfraMetricModelCreator, InfraMetricModelMetricType } from '../../adapter_types';
+import { InfraMetric } from '../../../../../graphql/types';
 
 export const containerOverview: InfraMetricModelCreator = (timeField, indexPattern, interval) => ({
-  id: 'containerOverview',
+  id: InfraMetric.containerOverview,
   requires: ['docker'],
   index_pattern: indexPattern,
   interval,
