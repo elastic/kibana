@@ -168,6 +168,7 @@ export function XYConfigPanel(props: VisualizationProps<State>) {
                   columnId: layer.xAccessor,
                   dragDropContext: props.dragDropContext,
                   filterOperations: operation => operation.isBucketed,
+                  suggestedPriority: 1,
                   layerId: layer.layerId,
                 }}
               />
@@ -185,6 +186,7 @@ export function XYConfigPanel(props: VisualizationProps<State>) {
                   columnId: layer.splitAccessor,
                   dragDropContext: props.dragDropContext,
                   filterOperations: operation => operation.isBucketed,
+                  suggestedPriority: 0,
                   layerId: layer.layerId,
                 }}
               />

@@ -92,7 +92,7 @@ describe('XYConfigPanel', () => {
     expect(options.filter(({ isDisabled }) => isDisabled).map(({ id }) => id)).toEqual([]);
   });
 
-  test('the x dimension panel accepts only buckted operations', () => {
+  test('the x dimension panel accepts only bucketed operations', () => {
     // TODO: this should eventually also accept raw operation
     const state = testState();
     const component = mount(
