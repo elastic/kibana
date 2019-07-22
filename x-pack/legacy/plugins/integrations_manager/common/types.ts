@@ -24,11 +24,18 @@ export type InstallationStatus = typeof STATUS_INSTALLED | typeof STATUS_NOT_INS
 export type AssetType =
   | typeof ASSET_TYPE_CONFIG
   | typeof ASSET_TYPE_DASHBOARD
-  | typeof ASSET_TYPE_INGEST_PIPELINE
   | typeof ASSET_TYPE_INDEX_PATTERN
+  | typeof ASSET_TYPE_INGEST_PIPELINE
   | typeof ASSET_TYPE_SEARCH
   | typeof ASSET_TYPE_TIMELION_SHEET
   | typeof ASSET_TYPE_VISUALIZATION;
+
+export const AssetTitleMap = {
+  [ASSET_TYPE_DASHBOARD]: 'Dashboard',
+  [ASSET_TYPE_INDEX_PATTERN]: 'Index Pattern',
+  [ASSET_TYPE_INGEST_PIPELINE]: 'Ingest Pipeline',
+  [ASSET_TYPE_VISUALIZATION]: 'Visualization',
+};
 
 // Registry's response types
 // from /list
@@ -61,6 +68,10 @@ export interface RegistryPackage {
 // from API_LIST_PATTERN
 export type IntegrationList = IntegrationListItem[];
 export type IntegrationListItem = Installable<RegistryListItem>;
+export interface IntegrationsGroupedByStatus {
+  [STATUS_INSTALLED]: IntegrationList;
+  [STATUS_NOT_INSTALLED]: IntegrationList;
+}
 
 // from API_INFO_PATTERN
 export type IntegrationInfo = Installable<RegistryPackage>;
