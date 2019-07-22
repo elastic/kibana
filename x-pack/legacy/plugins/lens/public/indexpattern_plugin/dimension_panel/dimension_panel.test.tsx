@@ -135,8 +135,8 @@ describe('IndexPatternDimensionPanel', () => {
       wrapper
         .find('[data-test-subj="indexPattern-configure-dimension"]')
         .first()
-        .text()
-    ).toEqual('Configure dimension');
+        .prop('iconType')
+    ).toEqual('plusInCircle');
   });
 
   it('should pass the right arguments to getPotentialColumns', async () => {

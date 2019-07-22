@@ -191,6 +191,35 @@ function removeProperty<T>(prop: string, object: Record<string, T>): Record<stri
   return result;
 }
 
+function getIndexPatternIdFromField(
+  state: IndexPatternPrivateState,
+  field: IndexPatternField
+): string | null {
+  if (state.currentIndexPatternId && state.indexPatterns[state.currentIndexPatternId]) {
+    const isMatchingActive = state.indexPatterns[state.currentIndexPatternId].fields.findIndex(f =>
+      _.isEqual(f, field)
+    );
+
+    if (isMatchingActive !== -1) {
+      return state.currentIndexPatternId;
+    }
+  }
+
+  const matchingIndexPattern = Object.values(state.indexPatterns).find(indexPattern => {
+    if (indexPattern.id === state.currentIndexPatternId) {
+      return;
+    }
+
+    const hasMatch = indexPattern.fields.findIndex(f => _.isEqual(f, field));
+
+    if (hasMatch !== -1) {
+      return indexPattern.id;
+    }
+  });
+
+  return matchingIndexPattern ? matchingIndexPattern.id : null;
+}
+
 export function getIndexPatternDatasource({
   chrome,
   toastNotifications,
@@ -272,11 +301,6 @@ export function getIndexPatternDatasource({
             return columnToOperation(layer.columns[columnId]);
           }
           return null;
-
-          // if (!state.columns[columnId]) {
-          //   return null;
-          // }
-          // return columnToOperation(state.columns[columnId]);
         },
         renderDimensionPanel: (domElement: Element, props: DatasourceDimensionPanelProps) => {
           render(
@@ -328,22 +352,32 @@ export function getIndexPatternDatasource({
       const layers = Object.keys(state.layers);
       const field: IndexPatternField = item as IndexPatternField;
 
+      const indexPatternId = getIndexPatternIdFromField(state, field);
+
       let layerId;
       let layer: IndexPatternLayer;
 
-      if (layers.length === 0) {
+      if (indexPatternId) {
+        layerId = layers.find(id => state.layers[id].indexPatternId === indexPatternId);
+      }
+
+      if (!layerId) {
+        // The field we're suggesting on might not match any existing layer. This will always add
+        // a new layer if possible, but that might not be desirable if the layers are too complicated
+        // already
         layerId = generateId();
         layer = {
           indexPatternId: state.currentIndexPatternId,
           columnOrder: [],
           columns: {},
         };
-      } else if (state.layers[layers[0]].columnOrder.length) {
-        // Don't suggest when there are existing columns
-        return [];
       } else {
-        layerId = layers[0];
         layer = state.layers[layerId];
+        if (layer.columnOrder.length) {
+          // We aren't suggesting ways of using the field to replace the existing user configuration
+          // This is a good place for future extension
+          return [];
+        }
       }
 
       const operations = getOperationTypesForField(field);
@@ -376,6 +410,7 @@ export function getIndexPatternDatasource({
           state: {
             ...state,
             layers: {
+              ...state.layers,
               [layerId]: {
                 indexPatternId: state.currentIndexPatternId,
                 columns: {
@@ -435,6 +470,7 @@ export function getIndexPatternDatasource({
           state: {
             ...state,
             layers: {
+              ...state.layers,
               [layerId]: {
                 ...layer,
                 columns: {
