@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { LeftInnerJoin } from './left_inner_join';
+import { InnerJoin } from './inner_join';
 
 jest.mock('ui/vis/editors/default/schemas', () => {
   class MockSchemas {}
@@ -25,7 +25,7 @@ const rightSource = {
   term: 'geo.dest',
 };
 
-const leftJoin = new LeftInnerJoin({
+const leftJoin = new InnerJoin({
   leftField: 'iso2',
   right: rightSource
 });
@@ -73,7 +73,7 @@ describe('joinPropertiesToFeature', () => {
 
   it('Should coerce to string before joining', () => {
 
-    const leftJoin = new LeftInnerJoin({
+    const leftJoin = new InnerJoin({
       leftField: 'zipcode',
       right: rightSource
     });
@@ -115,7 +115,7 @@ describe('joinPropertiesToFeature', () => {
 
   it('Should handle falsy values', () => {
 
-    const leftJoin = new LeftInnerJoin({
+    const leftJoin = new InnerJoin({
       leftField: 'code',
       right: rightSource
     });
