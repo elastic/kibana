@@ -51,9 +51,9 @@ export function PointSeriesTooltipFormatterProvider($compile, $rootScope) {
         const value = datum.yScale ? datum.yScale * datum.y : datum.y;
         if(event.isPercentageMode) {
           const valueInPercent = Math.round(value * 10000) / 100;
-          addDetail(currentSeries.label, `${valueInPercent.toFixed(2)} %`);
+          addDetail(data.yAxisLabel, `${valueInPercent.toFixed(2)} %`);
         } else {
-          addDetail(currentSeries.label, currentSeries.yAxisFormatter(value));
+          addDetail(data.yAxisLabel, currentSeries.yAxisFormatter(value));
         }
       }
       if (datum.z) {
