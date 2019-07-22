@@ -23,6 +23,7 @@
     td,
     th {
       padding: $euiSizeXS;
+      overflow-wrap: break-word;
     }
   }
 }
@@ -40,6 +41,10 @@
   + * {
     margin-top: $euiSizeS;
   }
+}
+.visTooltip__labelContainer,
+.visTooltip__valueContainer {
+  overflow-wrap: break-word;
 }
 
 .visTooltip__headerIcon {

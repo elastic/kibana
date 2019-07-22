@@ -22,9 +22,13 @@ import _ from 'lodash';
 import { Binder } from '../../../binder';
 import { positionTooltip } from './position_tooltip';
 import $ from 'jquery';
+import theme from '@elastic/eui/dist/eui_theme_light.json';
 
 let allContents = [];
 
+const tooltipColumnPadding = Number(theme.euiSizeXS.slice('px')[0]) * 2;
+const tooltipTableMargin = Number(theme.euiSizeS.slice('px')[0]) * 2;
+const tooltipMaxWidth = Number(theme.euiSizeXL.slice('px')[0]) * 10;
 /**
  * Add tooltip and listeners to visualization elements
  *
@@ -97,6 +101,43 @@ Tooltip.prototype.show = function () {
     left: placement.left,
     top: placement.top
   });
+
+  const tooltipColumns = $tooltip.find('tbody > tr:nth-of-type(1) > td').length;
+  if (tooltipColumns === 2) {
+    // on pointseries tooltip
+    const tooltipWidth = $tooltip.outerWidth();
+    const valueColumn = $tooltip.find('tr:nth-of-type(1) > td:nth-child(2)');
+    if (valueColumn.length !== 1) {
+      return;
+    }
+    const valueColumnSize = valueColumn.outerWidth();
+    const isGratherThanHalf = valueColumnSize > tooltipWidth / 2;
+    const containerMaxWidth = isGratherThanHalf
+      ? tooltipWidth / 2 - tooltipTableMargin - tooltipColumnPadding * 2
+      : tooltipWidth - valueColumnSize - tooltipTableMargin - tooltipColumnPadding;
+
+    $tooltip.find('.visTooltip__labelContainer').css({
+      'max-width': containerMaxWidth,
+    });
+    if (isGratherThanHalf && tooltipWidth === tooltipMaxWidth) {
+      $tooltip.find('.visTooltip__valueContainer').css({
+        'max-width': containerMaxWidth,
+      });
+    }
+  } else if(tooltipColumns === 3) {
+    // on hierarchical tooltip
+    const tooltipWidth = $tooltip.outerWidth();
+    const valueColumn = $tooltip.find('tr:nth-of-type(1) > td:nth-child(3)');
+    if (valueColumn.length !== 1) {
+      return;
+    }
+    const valueColumnSize = valueColumn.outerWidth();
+    const containerMaxWidth = (tooltipWidth - valueColumnSize - tooltipTableMargin) / 2 - tooltipColumnPadding;
+
+    $tooltip.find('.visTooltip__labelContainer').css({
+      'max-width': containerMaxWidth
+    });
+  }
 };
 
 /**
