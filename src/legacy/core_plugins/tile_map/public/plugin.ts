@@ -25,6 +25,7 @@ import {
   PluginInitializerContext,
   UiSettingsClientContract,
 } from '../../../../core/public';
+
 import { LegacyDependenciesPlugin, LegacyDependenciesPluginSetup } from './shim';
 
 // @ts-ignore

@@ -18,8 +18,6 @@
  */
 
 import $ from 'jquery';
-
-
 import { i18n } from '@kbn/i18n';
 
 import template from './_tooltip.html';
