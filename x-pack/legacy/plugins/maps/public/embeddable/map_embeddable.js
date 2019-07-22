@@ -30,7 +30,6 @@ import {
 import { DEFAULT_IS_LAYER_TOC_OPEN } from '../reducers/ui';
 import {
   setReadOnly,
-  setFilterable,
   setIsLayerTOCOpen,
   setOpenTOCDetails,
 } from '../actions/ui_actions';
@@ -101,7 +100,6 @@ export class MapEmbeddable extends Embeddable {
    */
   render(domNode) {
     this._store.dispatch(setReadOnly(true));
-    this._store.dispatch(setFilterable(true));
     this._store.dispatch(disableScrollZoom());
 
     if (_.has(this.input, 'isLayerTOCOpen')) {

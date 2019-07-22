@@ -141,7 +141,7 @@ export class GisMap extends Component {
       >
         <EuiFlexItem className="mapMapWrapper">
           <MBMapContainer addFilters={addFilters}/>
-          <ToolbarOverlay/>
+          <ToolbarOverlay addFilters={addFilters}/>
           <WidgetOverlay/>
         </EuiFlexItem>
 
