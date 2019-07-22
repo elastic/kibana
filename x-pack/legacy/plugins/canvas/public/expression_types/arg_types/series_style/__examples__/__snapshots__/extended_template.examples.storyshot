@@ -331,3 +331,17 @@ exports[`Storyshots arguments/SeriesStyle extended 1`] = `
   </div>
 </div>
 `;
+
+exports[`Storyshots arguments/SeriesStyle/components extended: defaults 1`] = `
+<div
+  style={
+    Object {
+      "background": "#fff",
+      "padding": "16px",
+      "width": "323px",
+    }
+  }
+>
+  <div />
+</div>
+`;

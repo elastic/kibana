@@ -71,7 +71,7 @@ storiesOf('arguments/SeriesStyle/components', module)
   .addDecorator(story => (
     <div style={{ width: '323px', padding: '16px', background: '#fff' }}>{story()}</div>
   ))
-  .add('simple: defaults', () => (
+  .add('extended: defaults', () => (
     <ExtendedTemplate
       argValue={defaultExpression}
       labels={[]}

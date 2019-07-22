@@ -274,7 +274,7 @@ exports[`Storyshots arguments/ContainerStyle extended 1`] = `
             </label>
           </div>
           <div
-            className="euiPopover euiPopover--anchorDownCenter euiSuperSelect"
+            className="euiPopover euiPopover--anchorDownCenter euiPopover--displayBlock euiSuperSelect"
             onKeyDown={[Function]}
             onMouseDown={[Function]}
             onMouseUp={[Function]}
@@ -282,7 +282,7 @@ exports[`Storyshots arguments/ContainerStyle extended 1`] = `
             onTouchStart={[Function]}
           >
             <div
-              className="euiPopover__anchor euiSuperSelect__popoverAnchor"
+              className="euiPopover__anchor"
             >
               <input
                 id="generated-id"
@@ -718,7 +718,7 @@ exports[`Storyshots arguments/ContainerStyle/components border form 1`] = `
           </label>
         </div>
         <div
-          className="euiPopover euiPopover--anchorDownCenter euiSuperSelect"
+          className="euiPopover euiPopover--anchorDownCenter euiPopover--displayBlock euiSuperSelect"
           onKeyDown={[Function]}
           onMouseDown={[Function]}
           onMouseUp={[Function]}
@@ -726,7 +726,7 @@ exports[`Storyshots arguments/ContainerStyle/components border form 1`] = `
           onTouchStart={[Function]}
         >
           <div
-            className="euiPopover__anchor euiSuperSelect__popoverAnchor"
+            className="euiPopover__anchor"
           >
             <input
               id="generated-id"
@@ -1174,7 +1174,7 @@ exports[`Storyshots arguments/ContainerStyle/components extended template 1`] = 
             </label>
           </div>
           <div
-            className="euiPopover euiPopover--anchorDownCenter euiSuperSelect"
+            className="euiPopover euiPopover--anchorDownCenter euiPopover--displayBlock euiSuperSelect"
             onKeyDown={[Function]}
             onMouseDown={[Function]}
             onMouseUp={[Function]}
@@ -1182,7 +1182,7 @@ exports[`Storyshots arguments/ContainerStyle/components extended template 1`] = 
             onTouchStart={[Function]}
           >
             <div
-              className="euiPopover__anchor euiSuperSelect__popoverAnchor"
+              className="euiPopover__anchor"
             >
               <input
                 id="generated-id"
