@@ -4,4 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-declare module '!!raw-loader!./worker.js';
+// Satisfy TS's requirements that the module be declared per './index.ts'.
+declare module '!!raw-loader!./worker.js' {
+  const content: string;
+  // eslint-disable-next-line import/no-default-export
+  export default content;
+}
