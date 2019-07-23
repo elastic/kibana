@@ -8978,7 +8978,6 @@
     "xpack.rollupJobs.jobStatus.indexingLabel": "インデックス",
     "xpack.rollupJobs.jobStatus.startedLabel": "開始済み",
     "xpack.rollupJobs.jobStatus.stoppedLabel": "停止中",
-    "xpack.rollupJobs.jobStatus.unknownLabel": "不明",
     "xpack.rollupJobs.jobTable.headers.delayHeader": "遅延",
     "xpack.rollupJobs.jobTable.headers.groupsHeader": "グループ",
     "xpack.rollupJobs.jobTable.headers.indexPatternHeader": "インデックスパターン",
