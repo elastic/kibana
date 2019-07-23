@@ -110,16 +110,16 @@ export class FilterManager {
 
   public getAppFilters() {
     const { appFilters } = this.getPartitionedFilters();
-    return _.cloneDeep(appFilters);
+    return appFilters;
   }
 
   public getGlobalFilters() {
     const { globalFilters } = this.getPartitionedFilters();
-    return _.cloneDeep(globalFilters);
+    return globalFilters;
   }
 
   public getPartitionedFilters(): PartitionedFilters {
-    return FilterManager.partitionFilters(this.filters);
+    return FilterManager.partitionFilters(this.getFilters());
   }
 
   public getUpdates$() {
