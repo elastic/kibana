@@ -80,10 +80,10 @@ export class AggConfigs {
         return Array.isArray(schema.defaults) && schema.defaults.length > 0;
       })
       .each((schema: any) => {
-        if (!this.bySchemaName[schema.name]) {
+        if (!this.aggs.filter((agg: AggConfig) => agg.schema.name === schema.name)) {
           const defaults = schema.defaults.slice(0, schema.max);
           _.each(defaults, defaultState => {
-            const state = _.defaults({ id: AggConfig.nextId(this) }, defaultState);
+            const state = _.defaults({ id: AggConfig.nextId(this.aggs as any) }, defaultState);
             this.aggs.push(new AggConfig(this, state as AggConfigOptions));
           });
         }
@@ -94,7 +94,7 @@ export class AggConfigs {
   setTimeRange(timeRange: any) {
     this.timeRange = timeRange;
 
-    const updateAggTimeRange = (agg) => {
+    const updateAggTimeRange = (agg: AggConfig) => {
       _.each(agg.params, param => {
         if (param instanceof AggConfig) {
           updateAggTimeRange(param);
@@ -114,7 +114,7 @@ export class AggConfigs {
       if (!enabledOnly) return true;
       return agg.enabled;
     };
-    const aggConfigs = new AggConfigs(this.indexPattern, this.raw.filter(filterAggs), this.schemas);
+    const aggConfigs = new AggConfigs(this.indexPattern, this.aggs.filter(filterAggs), this.schemas);
     return aggConfigs;
   }
 
@@ -156,9 +156,9 @@ export class AggConfigs {
 
     if (hierarchical) {
       // collect all metrics, and filter out the ones that we won't be copying
-      nestedMetrics = _(this.byTypeType.metrics)
+      nestedMetrics = _(this.aggs)
         .filter(function (agg) {
-          return agg.type.name !== 'count';
+          return agg.type.type === 'metrics' && agg.type.name !== 'count';
         })
         .map(agg => {
           return {
@@ -185,7 +185,7 @@ export class AggConfigs {
         }
 
         const dsl = dslLvlCursor[config.id] = config.toDsl(this);
-        let subAggs;
+        let subAggs: any;
 
         parseParentAggs(dslLvlCursor, dsl);
 
@@ -195,7 +195,7 @@ export class AggConfigs {
         }
 
         if (subAggs && nestedMetrics) {
-          nestedMetrics.forEach(agg => {
+          nestedMetrics.forEach((agg: any) => {
             subAggs[agg.config.id] = agg.dsl;
             // if a nested metric agg has parent aggs, we have to add them to every level of the tree
             // to make sure "bucket_path" references in the nested metric agg itself are still working
@@ -219,7 +219,7 @@ export class AggConfigs {
       return aggs ? requestValuesAggs.concat(aggs) : requestValuesAggs;
     }, []);
     //move metrics to the end
-    return _.sortBy(aggregations, agg => agg.type.type === AggGroupNames.Metrics ? 1 : 0);
+    return _.sortBy(aggregations, (agg: AggConfig) => agg.type.type === AggGroupNames.Metrics ? 1 : 0);
   }
 
   /**
@@ -234,7 +234,7 @@ export class AggConfigs {
    * @return {array[AggConfig]}
    */
   getResponseAggs() {
-    return this.getRequestAggs().reduce(function (responseValuesAggs, agg) {
+    return this.getRequestAggs().reduce(function (responseValuesAggs, agg: AggConfig) {
       const aggs = agg.getResponseAggs();
       return aggs ? responseValuesAggs.concat(aggs) : responseValuesAggs;
     }, []);

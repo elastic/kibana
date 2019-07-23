@@ -19,7 +19,7 @@
 
 import React from 'react';
 import { mountWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
-import { AggConfig } from 'ui/vis';
+import { AggConfig } from '../../agg_configs';
 import {
   AggregateValueProp,
   TopAggregateParamEditor,

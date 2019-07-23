@@ -22,7 +22,7 @@ import React, { useEffect } from 'react';
 
 import { EuiComboBox, EuiComboBoxOptionProps, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { AggConfig } from 'ui/vis';
+import { AggConfig } from '../../agg_configs';
 import { formatListAsProse, parseCommaSeparatedList } from '../../../../utils';
 import { AggParamEditorProps } from '../../vis/editors/default';
 import { ComboBoxGroupedOption } from '../../vis/editors/default/default_editor_utils';

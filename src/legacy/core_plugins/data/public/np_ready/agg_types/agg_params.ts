@@ -19,6 +19,7 @@
 
 // @ts-ignore
 import { AggParamEditorProps } from 'ui/vis';
+// @ts-ignore
 import { FieldParamType } from './param_types/field';
 // @ts-ignore
 import { OptionedParamType } from './param_types/optioned';

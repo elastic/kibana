@@ -22,8 +22,8 @@ import { EuiFormRow, EuiIconTip, EuiSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { AggParamEditorProps } from 'ui/vis/editors/default';
-import { AggConfig } from 'ui/vis';
-import { AggParam } from '../agg_param';
+import { AggConfig } from '../../agg_configs';
+import { AggParam } from '../agg_params';
 import { OptionedValueProp, OptionedParamEditorProps } from '../param_types/optioned';
 
 export interface AggregateValueProp extends OptionedValueProp {

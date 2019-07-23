@@ -78,6 +78,7 @@ export class AggConfig {
   public id: string;
   public enabled: boolean;
   public params: any;
+  public parent: any;
 
   private __schema: any;
   private __type: any;
@@ -145,7 +146,7 @@ export class AggConfig {
     });
   }
 
-  write(aggs) {
+  write(aggs: AggConfigs) {
     return writeParams(this.type.params, this, aggs);
   }
 
@@ -334,9 +335,8 @@ export class AggConfig {
 
   set type(type) {
     if (this.__typeDecorations) {
-      _.forOwn(this.__typeDecorations, function (prop, name: string) {
-        // @ts-ignore
-        delete this[name];
+      _.forOwn(this.__typeDecorations,  (prop: any, name: any) => {
+        delete this.__typeDecorations[name as string];
       }, this);
     }
 

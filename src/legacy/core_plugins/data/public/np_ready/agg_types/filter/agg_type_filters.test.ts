@@ -18,6 +18,7 @@
  */
 
 import { AggTypeFilters } from './agg_type_filters';
+import { AggType } from '../agg_type';
 
 describe('AggTypeFilters', () => {
   let registry: AggTypeFilters;
@@ -29,13 +30,13 @@ describe('AggTypeFilters', () => {
   });
 
   it('should filter nothing without registered filters', async () => {
-    const aggTypes = [{ name: 'count' }, { name: 'sum' }];
+    const aggTypes = [{ name: 'count' }, { name: 'sum' }] as AggType[];
     const filtered = registry.filter(aggTypes, indexPattern, aggConfig);
     expect(filtered).toEqual(aggTypes);
   });
 
   it('should pass all aggTypes to the registered filter', async () => {
-    const aggTypes = [{ name: 'count' }, { name: 'sum' }];
+    const aggTypes = [{ name: 'count' }, { name: 'sum' }] as AggType[];
     const filter = jest.fn();
     registry.addFilter(filter);
     registry.filter(aggTypes, indexPattern, aggConfig);
@@ -44,7 +45,7 @@ describe('AggTypeFilters', () => {
   });
 
   it('should allow registered filters to filter out aggTypes', async () => {
-    const aggTypes = [{ name: 'count' }, { name: 'sum' }, { name: 'avg' }];
+    const aggTypes = [{ name: 'count' }, { name: 'sum' }, { name: 'avg' }] as AggType[];
     let filtered = registry.filter(aggTypes, indexPattern, aggConfig);
     expect(filtered).toEqual(aggTypes);
 
