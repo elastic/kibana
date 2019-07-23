@@ -459,7 +459,7 @@ export const StepDefineForm: SFC<Props> = React.memo(({ overrides = {}, onChange
                       'xpack.ml.dataframe.stepDefineForm.queryPlaceholder',
                       {
                         defaultMessage: 'e.g. {example}',
-                        values: { example: 'method:GET -is:active' },
+                        values: { example: 'method : "GET" or status : "404"' },
                       }
                     )}
                   />
