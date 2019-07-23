@@ -8,5 +8,6 @@ import { compose } from './libs/compose/kibana';
 
 export const initServerWithKibana = (hapiServer: any) => {
   const libs = compose(hapiServer);
-  libs.framework.log('Ingest is composed -- debug message');
+
+  libs.framework.exposeMethod('create');
 };

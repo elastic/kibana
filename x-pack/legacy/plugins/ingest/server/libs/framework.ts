@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Request } from 'src/legacy/server/kbn_server';
+import { KibanaServerRequest } from './adapters/framework/adapter_types';
 import { BackendFrameworkAdapter } from './adapters/framework/default';
 
 export class BackendFrameworkLib {
@@ -21,7 +21,7 @@ export class BackendFrameworkLib {
   public internalUser = this.adapter.internalUser;
   constructor(private readonly adapter: BackendFrameworkAdapter) {}
 
-  public getCurrentUser(request: Request) {
+  public getCurrentUser(request: KibanaServerRequest) {
     return this.adapter.getUser(request);
   }
   public getSetting(setting: 'defaultUserRoles'): string[];

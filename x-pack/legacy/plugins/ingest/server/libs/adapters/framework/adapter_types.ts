@@ -8,32 +8,31 @@
 
 import { Lifecycle, ResponseToolkit } from 'hapi';
 import * as t from 'io-ts';
-import { Legacy } from 'kibana';
-import { Cluster, ClusterConfig } from 'src/legacy/core_plugins/elasticsearch';
-import { ApmOssPlugin } from 'src/legacy/core_plugins/apm_oss';
-import { Request } from 'src/legacy/server/kbn_server';
-import { XPackInfo } from '../../../../../xpack_main/server/lib/xpack_info';
-import {
-  Feature,
-  FeatureWithAllOrReadPrivileges,
-} from '../../../../../xpack_main/server/lib/feature_registry/feature_registry';
-import { SecurityPlugin } from '../../../../../security';
+import { LICENSES } from '../../../../common/constants/security';
 
 export const internalAuthData = Symbol('internalAuthData');
 export const internalUser: FrameworkInternalUser = {
   kind: 'internal',
 };
 
-export interface KibanaLegacyServer extends Legacy.Server {
+export interface XpackInfo {
+  license: {
+    getType: () => typeof LICENSES[number];
+    /** Is the license expired */
+    isActive: () => boolean;
+    getExpiryDateInMillis: () => number;
+  };
+  feature: (pluginId: string) => any;
+  isAvailable: () => boolean;
+}
+
+export interface KibanaLegacyServer {
   plugins: {
     xpack_main: {
       status: {
         on: (status: 'green' | 'yellow' | 'red', callback: () => void) => void;
       };
-      info: XPackInfo;
-      createXPackInfo(options: any): any;
-      getFeatures(): Feature[];
-      registerFeature(feature: FeatureWithAllOrReadPrivileges): void;
+      info: XpackInfo;
     };
     kibana: {
       status: {
@@ -42,20 +41,18 @@ export interface KibanaLegacyServer extends Legacy.Server {
         };
       };
     };
-    security: SecurityPlugin;
+    security: {
+      getUser: (request: KibanaServerRequest) => any;
+    };
     elasticsearch: {
       status: {
         on: (status: 'green' | 'yellow' | 'red', callback: () => void) => void;
       };
-      getCluster(name: string): Cluster;
-      createCluster(name: string, config: ClusterConfig): Cluster;
-      waitUntilReady(): Promise<void>;
+      getCluster: () => any;
     };
-    spaces: any;
-    apm_oss: ApmOssPlugin;
-    ingest: any;
+    ingest: {};
   };
-  expose: { (key: string, value: any): void; (obj: object): void };
+  expose: (name: string, value: any) => void;
   config: () => any;
   route: (routeConfig: any) => void;
   log: (message: string) => void;
@@ -100,6 +97,7 @@ export const RuntimeKibanaServerRequest = t.interface(
   },
   'KibanaServerRequest'
 );
+export interface KibanaServerRequest extends t.TypeOf<typeof RuntimeKibanaServerRequest> {}
 
 export const RuntimeKibanaUser = t.interface(
   {
@@ -135,27 +133,32 @@ export type FrameworkUser<AuthDataType = any> =
   | FrameworkAuthenticatedUser<AuthDataType>
   | FrameworkUnAuthenticatedUser
   | FrameworkInternalUser;
-export interface FrameworkRequest<KibanaServerRequestGenaric extends Partial<Request> = Request> {
+export interface FrameworkRequest<
+  KibanaServerRequestGenaric extends Partial<KibanaServerRequest> = any
+> {
   user: FrameworkUser<KibanaServerRequestGenaric['headers']>;
   headers: KibanaServerRequestGenaric['headers'];
-  info: Request['info'];
+  info: KibanaServerRequest['info'];
   payload: KibanaServerRequestGenaric['payload'];
   params: KibanaServerRequestGenaric['params'];
   query: KibanaServerRequestGenaric['query'];
 }
 
-export interface FrameworkRouteOptions<RouteResponse extends FrameworkResponse = any> {
+export interface FrameworkRouteOptions<
+  RouteRequest extends FrameworkRequest = FrameworkRequest,
+  RouteResponse extends FrameworkResponse = any
+> {
   path: string;
   method: string | string[];
   vhost?: string;
   licenseRequired?: string[];
   requiredRoles?: string[];
-  handler: FrameworkRouteHandler<Request, RouteResponse>;
+  handler: FrameworkRouteHandler<RouteRequest, RouteResponse>;
   config?: {};
 }
 
 export type FrameworkRouteHandler<
-  RouteRequest extends Request,
+  RouteRequest extends KibanaServerRequest,
   RouteResponse extends FrameworkResponse
 > = (request: FrameworkRequest<RouteRequest>, h: ResponseToolkit) => Promise<RouteResponse>;
 
