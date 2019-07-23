@@ -11,6 +11,8 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 
+import { getSelectedJobIds } from '../components/job_selector/job_select_service_utils';
+
 import { TimeSeriesExplorer } from './timeseriesexplorer';
 
 import { uiModules } from 'ui/modules';
@@ -19,11 +21,24 @@ const module = uiModules.get('apps/ml');
 import { I18nContext } from 'ui/i18n';
 import { mapScopeToProps } from './timeseriesexplorer_utils';
 
-module.directive('mlTimeseriesexplorerReactWrapper', function () {
+module.directive('mlTimeseriesexplorerReactWrapper', function (config, globalState, mlJobSelectService) {
   function link(scope, element) {
     function updateComponent() {
+      const { jobIds, selectedGroups } = getSelectedJobIds(globalState);
       ReactDOM.render(
-        <I18nContext>{React.createElement(TimeSeriesExplorer, mapScopeToProps(scope))}</I18nContext>,
+        <I18nContext>
+          {React.createElement(
+            TimeSeriesExplorer,
+            mapScopeToProps(
+              scope,
+              config,
+              globalState,
+              mlJobSelectService,
+              jobIds,
+              selectedGroups
+            )
+          )}
+        </I18nContext>,
         element[0]
       );
     }

@@ -381,6 +381,6 @@ JobSelector.propTypes = {
   globalState: PropTypes.object,
   jobSelectService: PropTypes.object,
   selectedJobIds: PropTypes.array,
-  singleSelection: PropTypes.string,
-  timeseriesOnly: PropTypes.string
+  singleSelection: PropTypes.bool,
+  timeseriesOnly: PropTypes.bool
 };

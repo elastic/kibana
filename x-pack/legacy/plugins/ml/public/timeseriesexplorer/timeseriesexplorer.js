@@ -31,6 +31,7 @@ import { AnnotationsTable } from '../components/annotations/annotations_table';
 import { AnomaliesTable } from '../components/anomalies_table/anomalies_table';
 import { EntityControl } from './components/entity_control';
 import { ForecastingModal } from './components/forecasting_modal/forecasting_modal';
+import { JobSelector } from '../components/job_selector/job_selector';
 import { LoadingIndicator } from '../components/loading_indicator/loading_indicator';
 import { SelectSeverity } from '../components/controls/select_severity/select_severity';
 import { SelectInterval } from '../components/controls/select_interval/select_interval';
@@ -95,18 +96,23 @@ export const TimeSeriesExplorer = injectI18n(
     previousShowModelBounds = undefined;
     render() {
       const {
-        dataNotChartable,
         chartDetails,
+        config,
+        dataNotChartable,
         detectorId,
         detectors,
         entities,
         entityFieldValueChanged,
         filter,
+        globalState,
         hasResults,
         intl,
         jobs,
+        jobSelectService,
         loadForForecastId,
         saveSeriesPropertiesAndRefresh,
+        selectedJobIds,
+        selectedGroups,
         showAnnotations,
         showAnnotationsCheckbox,
         showForecast,
@@ -153,8 +159,19 @@ export const TimeSeriesExplorer = injectI18n(
       this.previousShowForecast = showForecast;
       this.previousShowModelBounds = showModelBounds;
 
+      const jobSelectorProps = {
+        config,
+        globalState,
+        jobSelectService,
+        selectedJobIds,
+        selectedGroups,
+        singleSelection: true,
+        timeseriesOnly: true,
+      };
+
       return (
         <Fragment>
+          <JobSelector {...jobSelectorProps} />
           <div className="series-controls" data-test-subj="mlSingleMetricViewerSeriesControls">
             <EuiFlexGroup>
               <EuiFlexItem grow={false}>
@@ -245,7 +262,8 @@ export const TimeSeriesExplorer = injectI18n(
               {chartDetails.entityData.count !== 1 && (
                 <span className="entity-count-text">
                   {chartDetails.entityData.entities.map((countData, i) => {
-                    const msg = '{openBrace}{cardinalityValue} distinct {fieldName} {cardinality, plural, one {} other { values}}{closeBrace}';
+                    const msg =
+                      '{openBrace}{cardinalityValue} distinct {fieldName} {cardinality, plural, one {} other { values}}{closeBrace}';
                     return (
                       <FormattedMessage
                         key={countData.fieldName}

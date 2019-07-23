@@ -54,20 +54,25 @@ export function createTimeSeriesJobData(jobs) {
   });
 }
 
-export function mapScopeToProps(scope) {
+export function mapScopeToProps(scope, config, globalState, jobSelectService, selectedJobIds, selectedGroups) {
   return {
-    dataNotChartable: scope.dataNotChartable,
     chartDetails: scope.chartDetails,
+    config,
+    dataNotChartable: scope.dataNotChartable,
     detectorId: scope.detectorId,
     detectorIndexChanged: scope.detectorIndexChanged,
     detectors: scope.detectors,
     entities: scope.entities,
     entityFieldValueChanged: scope.entityFieldValueChanged,
     filter: scope.filter,
+    globalState,
     hasResults: scope.hasResults,
     loadForForecastId: scope.loadForForecastId,
     jobs: scope.jobs,
+    jobSelectService,
     saveSeriesPropertiesAndRefresh: scope.saveSeriesPropertiesAndRefresh,
+    selectedGroups,
+    selectedJobIds,
     showAnnotations: scope.showAnnotations,
     showAnnotationsCheckbox: scope.showAnnotationsCheckbox,
     showForecast: scope.showForecast,
