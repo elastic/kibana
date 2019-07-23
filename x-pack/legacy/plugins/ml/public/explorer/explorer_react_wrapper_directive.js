@@ -26,12 +26,13 @@ module.directive('mlExplorerReactWrapper', function (config, globalState, mlJobS
   function link(scope, element) {
     ReactDOM.render(
       <I18nContext>
-        {React.createElement(Explorer, mapScopeToProps(
+        <Explorer {...mapScopeToProps(
           scope,
           config,
           globalState,
           mlJobSelectService,
-        ))}
+        )}
+        />
       </I18nContext>,
       element[0]
     );

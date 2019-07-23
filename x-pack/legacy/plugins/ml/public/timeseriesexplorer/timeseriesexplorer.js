@@ -26,6 +26,8 @@ import {
   EuiText,
 } from '@elastic/eui';
 
+import { getSelectedJobIds } from '../components/job_selector/job_select_service_utils';
+
 import { AnnotationFlyout } from '../components/annotations/annotation_flyout';
 import { AnnotationsTable } from '../components/annotations/annotations_table';
 import { AnomaliesTable } from '../components/anomalies_table/anomalies_table';
@@ -54,6 +56,13 @@ function getTimeseriesexplorerDefaultState() {
     showModelBounds: true,
   };
 }
+
+const TimeSeriesExplorerPage = ({ children, jobSelectorProps }) => (
+  <Fragment>
+    <JobSelector {...jobSelectorProps} />
+    {children}
+  </Fragment>
+);
 
 export const TimeSeriesExplorer = injectI18n(
   class TimeSeriesExplorer extends React.Component {
@@ -111,8 +120,6 @@ export const TimeSeriesExplorer = injectI18n(
         jobSelectService,
         loadForForecastId,
         saveSeriesPropertiesAndRefresh,
-        selectedJobIds,
-        selectedGroups,
         showAnnotations,
         showAnnotationsCheckbox,
         showForecast,
@@ -132,8 +139,19 @@ export const TimeSeriesExplorer = injectI18n(
 
       const loading = this.props.loading || this.state.loading;
 
+      const { jobIds: selectedJobIds, selectedGroups } = getSelectedJobIds(globalState);
+      const jobSelectorProps = {
+        config,
+        globalState,
+        jobSelectService,
+        selectedJobIds,
+        selectedGroups,
+        singleSelection: true,
+        timeseriesOnly: true,
+      };
+
       if (jobs.length === 0) {
-        return <TimeseriesexplorerNoJobsFound />;
+        return <TimeSeriesExplorerPage jobSelectorProps={jobSelectorProps}><TimeseriesexplorerNoJobsFound /></TimeSeriesExplorerPage>;
       }
 
       const detectorSelectOptions = detectors.map(d => ({
@@ -159,19 +177,8 @@ export const TimeSeriesExplorer = injectI18n(
       this.previousShowForecast = showForecast;
       this.previousShowModelBounds = showModelBounds;
 
-      const jobSelectorProps = {
-        config,
-        globalState,
-        jobSelectService,
-        selectedJobIds,
-        selectedGroups,
-        singleSelection: true,
-        timeseriesOnly: true,
-      };
-
       return (
-        <Fragment>
-          <JobSelector {...jobSelectorProps} />
+        <TimeSeriesExplorerPage jobSelectorProps={jobSelectorProps}>
           <div className="series-controls" data-test-subj="mlSingleMetricViewerSeriesControls">
             <EuiFlexGroup>
               <EuiFlexItem grow={false}>
@@ -399,7 +406,7 @@ export const TimeSeriesExplorer = injectI18n(
 
             </EuiText>
           )}
-        </Fragment>
+        </TimeSeriesExplorerPage>
       );
     }
   }

@@ -54,7 +54,7 @@ export function createTimeSeriesJobData(jobs) {
   });
 }
 
-export function mapScopeToProps(scope, config, globalState, jobSelectService, selectedJobIds, selectedGroups) {
+export function mapScopeToProps(scope, config, globalState, jobSelectService) {
   return {
     chartDetails: scope.chartDetails,
     config,
@@ -71,8 +71,6 @@ export function mapScopeToProps(scope, config, globalState, jobSelectService, se
     jobs: scope.jobs,
     jobSelectService,
     saveSeriesPropertiesAndRefresh: scope.saveSeriesPropertiesAndRefresh,
-    selectedGroups,
-    selectedJobIds,
     showAnnotations: scope.showAnnotations,
     showAnnotationsCheckbox: scope.showAnnotationsCheckbox,
     showForecast: scope.showForecast,
