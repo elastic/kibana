@@ -1,3 +1,4 @@
+/* eslint-disable @kbn/eslint/require-license-header */
 export const styleTest = {
   "version": 8,
   "name": "OSM Bright",

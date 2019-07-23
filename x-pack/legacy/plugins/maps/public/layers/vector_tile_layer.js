@@ -27,7 +27,7 @@ const layersToInclude = styleTest.layers.filter((layer, index) => {
     11,
     12,
     13,
-    // 14,
+    14,
     15,
     16,
     17,
@@ -108,8 +108,8 @@ const layersToInclude = styleTest.layers.filter((layer, index) => {
     90,
 
     91,
-    // 92,
-    // 93,
+    92,
+    93,
     94,
     95,
     96,
@@ -154,13 +154,9 @@ export class VectorTileLayer extends TileLayer {
     return tileLayerDescriptor;
   }
 
-
-  _getMbLayersToInclude() {
-
-  }
-
   _generateMbLayerId(mbLayer) {
-    return this._getMbSourceId() + '_' + mbLayer.id;
+    const escaped = mbLayer.id.replace(/_/g, '');//work-around issue bug
+    return this._getMbSourceId() + '_' + escaped;
   }
 
   getMbLayerIds() {
@@ -196,7 +192,11 @@ export class VectorTileLayer extends TileLayer {
           source: this._getMbSourceId(),
           id: this._generateMbLayerId(layer)
         };
-        mbMap.addLayer(newLayerObject);
+        try {
+          mbMap.addLayer(newLayerObject);
+        } catch(e){
+          console.error(e);
+        }
       });
 
       console.log('done syncing!');
