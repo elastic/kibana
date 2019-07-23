@@ -8,7 +8,7 @@ import turf from 'turf';
 import React from 'react';
 import { AbstractLayer } from './layer';
 import { VectorStyle } from './styles/vector_style';
-import { LeftInnerJoin } from './joins/left_inner_join';
+import { InnerJoin } from './joins/inner_join';
 import {
   GEO_JSON_TYPE,
   FEATURE_ID_PROPERTY_NAME,
@@ -88,7 +88,7 @@ export class VectorLayer extends AbstractLayer {
     this._joins = [];
     if (options.layerDescriptor.joins) {
       options.layerDescriptor.joins.forEach((joinDescriptor) => {
-        this._joins.push(new LeftInnerJoin(joinDescriptor, this._source.getInspectorAdapters()));
+        this._joins.push(new InnerJoin(joinDescriptor, this._source.getInspectorAdapters()));
       });
     }
   }
@@ -159,9 +159,13 @@ export class VectorLayer extends AbstractLayer {
         })
       };
     }
+
+
+    const { tooltipContent, areResultsTrimmed } = this._source.getSourceTooltipContent(sourceDataRequest);
     return {
       icon: this._style.getIcon(),
-      tooltipContent: this._source.getSourceTooltipContent(sourceDataRequest)
+      tooltipContent: tooltipContent,
+      areResultsTrimmed: areResultsTrimmed
     };
 
   }
@@ -426,9 +430,9 @@ export class VectorLayer extends AbstractLayer {
       let isFeatureVisible = true;
       for (let j = 0; j < joinStates.length; j++) {
         const joinState = joinStates[j];
-        const leftInnerJoin = joinState.join;
-        const rightMetricFields = leftInnerJoin.getRightMetricFields();
-        const canJoinOnCurrent = leftInnerJoin.joinPropertiesToFeature(feature, joinState.propertiesMap, rightMetricFields);
+        const InnerJoin = joinState.join;
+        const rightMetricFields = InnerJoin.getRightMetricFields();
+        const canJoinOnCurrent = InnerJoin.joinPropertiesToFeature(feature, joinState.propertiesMap, rightMetricFields);
         isFeatureVisible = isFeatureVisible && canJoinOnCurrent;
       }
 
