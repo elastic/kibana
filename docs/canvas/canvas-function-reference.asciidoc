@@ -1209,17 +1209,21 @@ Aliases: `label`, `text`, `description`
 
 Default: `""`
 
+|`labelFont`
+|`style`
+|The CSS font properties for the label. For example, `font-family` or `font-weight`.
+
+Default: `{font size=14 family="'Open Sans', Helvetica, Arial, sans-serif" color="#000000" align=center}`.
+
 |`metricFont`
 |`style`
 |The CSS font properties for the metric. For example, `font-family` or `font-weight`.
 
 Default: `{font size=48 family="'Open Sans', Helvetica, Arial, sans-serif" color="#000000" align=center lHeight=48}`.
 
-|`labelFont`
-|`style`
-|The CSS font properties for the label. For example, `font-family` or `font-weight`.
-
-Default: `{font size=14 family="'Open Sans', Helvetica, Arial, sans-serif" color="#000000" align=center}`.
+|`metricFormat`
+|`string`
+|A NumeralJS format string. For example, `"0.0a"` or `"0%"`. See http://numeraljs.com/#format.
 |===
 
 *Returns:* `render`

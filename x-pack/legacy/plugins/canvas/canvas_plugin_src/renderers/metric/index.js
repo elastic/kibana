@@ -6,6 +6,7 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
+import numeral from '@elastic/numeral';
 
 export const metric = () => ({
   name: 'metric',
@@ -15,11 +16,12 @@ export const metric = () => ({
   render(domNode, config, handlers) {
     const metricFontStyle = config.metricFont ? config.metricFont.spec : {};
     const labelFontStyle = config.labelFont ? config.labelFont.spec : {};
+    const format = config.metricFormat;
 
     ReactDOM.render(
       <div className="canvasMetric">
         <div className="canvasMetric__metric" style={metricFontStyle}>
-          {config.metric}
+          {format ? numeral(config.metric).format(format) : config.metric}
         </div>
         <div className="canvasMetric__label" style={labelFontStyle}>
           {config.label}

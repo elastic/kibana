@@ -20,6 +20,13 @@ export const metric = () => ({
       default: '""',
     },
     {
+      name: 'labelFont',
+      displayName: 'Label text settings',
+      help: 'Fonts, alignment and color',
+      argType: 'font',
+      default: `{font size=18 family="${openSans.value}" color="#000000" align=center}`,
+    },
+    {
       name: 'metricFont',
       displayName: 'Metric text settings',
       help: 'Fonts, alignment and color',
@@ -27,11 +34,11 @@ export const metric = () => ({
       default: `{font size=48 family="${openSans.value}" color="#000000" align=center lHeight=48}`,
     },
     {
-      name: 'labelFont',
-      displayName: 'Label text settings',
-      help: 'Fonts, alignment and color',
-      argType: 'font',
-      default: `{font size=18 family="${openSans.value}" color="#000000" align=center}`,
+      name: 'metricFormat',
+      displayName: 'Metric Format',
+      help: 'Enter a valid NumeralJS format',
+      argType: 'numberFormat',
+      default: '""',
     },
   ],
 });

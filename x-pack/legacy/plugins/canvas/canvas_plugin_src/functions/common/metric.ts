@@ -14,6 +14,7 @@ type Context = number | string | null;
 interface Arguments {
   label: string;
   metricFont: Style;
+  metricFormat: string | null;
   labelFont: Style;
 }
 
@@ -35,26 +36,31 @@ export function metric(): ExpressionFunction<'metric', Context, Arguments, Rende
         help: argHelp.label,
         default: '""',
       },
-      metricFont: {
-        types: ['style'],
-        help: argHelp.metricFont,
-        default: `{font size=48 family="${openSans.value}" color="#000000" align=center lHeight=48}`,
-      },
       labelFont: {
         types: ['style'],
         help: argHelp.labelFont,
         default: `{font size=14 family="${openSans.value}" color="#000000" align=center}`,
       },
+      metricFont: {
+        types: ['style'],
+        help: argHelp.metricFont,
+        default: `{font size=48 family="${openSans.value}" color="#000000" align=center lHeight=48}`,
+      },
+      metricFormat: {
+        types: ['string', 'null'],
+        help: argHelp.metricFormat,
+      },
     },
-    fn: (context, { label, metricFont, labelFont }) => {
+    fn: (context, { label, labelFont, metricFont, metricFormat }) => {
       return {
         type: 'render',
         as: 'metric',
         value: {
           metric: context === null ? '?' : context,
           label,
-          metricFont,
           labelFont,
+          metricFont,
+          metricFormat,
         },
       };
     },
