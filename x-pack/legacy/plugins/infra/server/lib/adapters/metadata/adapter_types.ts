@@ -14,6 +14,10 @@ export interface InfraMetricsAdapterResponse {
   buckets: InfraMetadataAggregationBucket[];
 }
 
+export interface InfraCloudMetricsAdapterResponse {
+  buckets: InfraMetadataAggregationBucket[];
+}
+
 export interface InfraMetadataAdapter {
   getMetricMetadata(
     req: InfraFrameworkRequest,
@@ -21,6 +25,11 @@ export interface InfraMetadataAdapter {
     nodeId: string,
     nodeType: InfraNodeType
   ): Promise<InfraMetricsAdapterResponse>;
+  getCloudMetricMetadata(
+    req: InfraFrameworkRequest,
+    sourceConfiguration: InfraSourceConfiguration,
+    instanceId: string
+  ): Promise<InfraCloudMetricsAdapterResponse>;
   getNodeInfo(
     req: InfraFrameworkRequest,
     sourceConfiguration: InfraSourceConfiguration,

@@ -4,10 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { get } from 'lodash';
 import { InfraFrameworkRequest, InfraMetadataAggregationBucket } from '../../adapters/framework';
 import { InfraMetadataAdapter } from '../../adapters/metadata';
-import { InfraSources } from '../../sources';
-import { InfraNodeType } from '../../../graphql/types';
+import { InfraSources, InfraSourceConfiguration } from '../../sources';
+import { InfraNodeType, InfraNodeFeature } from '../../../graphql/types';
 
 export class InfraMetadataDomain {
   constructor(
@@ -22,19 +23,37 @@ export class InfraMetadataDomain {
     nodeType: InfraNodeType
   ) {
     const { configuration } = await this.libs.sources.getSourceConfiguration(req, sourceId);
-    const metricsPromise = this.adapter.getMetricMetadata(req, configuration, nodeId, nodeType);
 
-    const metrics = await metricsPromise;
-
+    const metrics = await this.adapter.getMetricMetadata(req, configuration, nodeId, nodeType);
     const metricMetadata = pickMetadata(metrics.buckets).map(entry => {
       return { name: entry, source: 'metrics' };
     });
 
     const info = await this.adapter.getNodeInfo(req, configuration, nodeId, nodeType);
+    const cloudInstanceId = get<string>(info, 'cloud.instance.id');
+
+    const cloudMetricsMetadata = cloudInstanceId
+      ? await this.getCloudMetricsMetadata(req, configuration, cloudInstanceId)
+      : [];
 
     const id = metrics.id;
     const name = metrics.name || id;
-    return { id, name, features: metricMetadata, info };
+    return { id, name, features: metricMetadata.concat(cloudMetricsMetadata), info };
+  }
+
+  private async getCloudMetricsMetadata(
+    req: InfraFrameworkRequest,
+    sourceConfiguration: InfraSourceConfiguration,
+    instanceId: string
+  ): Promise<InfraNodeFeature[]> {
+    const cloudMetrics = await this.adapter.getCloudMetricMetadata(
+      req,
+      sourceConfiguration,
+      instanceId
+    );
+    return pickMetadata(cloudMetrics.buckets).map(entry => {
+      return { name: entry, source: 'metrics' };
+    });
   }
 }
 

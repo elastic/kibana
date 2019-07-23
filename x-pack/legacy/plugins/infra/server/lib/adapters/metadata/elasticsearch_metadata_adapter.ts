@@ -10,9 +10,10 @@ import {
   InfraBackendFrameworkAdapter,
   InfraFrameworkRequest,
   InfraMetadataAggregationResponse,
+  InfraCloudMetricsAdapterResponse,
 } from '../framework';
 import { InfraMetadataAdapter, InfraMetricsAdapterResponse } from './adapter_types';
-import { NAME_FIELDS } from '../../constants';
+import { NAME_FIELDS, CLOUD_METRICS_MODULES } from '../../constants';
 import { InfraNodeInfo, InfraNodeType } from '../../../graphql/types';
 
 export class ElasticsearchMetadataAdapter implements InfraMetadataAdapter {
@@ -79,6 +80,49 @@ export class ElasticsearchMetadataAdapter implements InfraMetadataAdapter {
     };
   }
 
+  public async getCloudMetricMetadata(
+    req: InfraFrameworkRequest,
+    sourceConfiguration: InfraSourceConfiguration,
+    instanceId: string
+  ): Promise<InfraCloudMetricsAdapterResponse> {
+    const metricQuery = {
+      allowNoIndices: true,
+      ignoreUnavailable: true,
+      index: sourceConfiguration.metricAlias,
+      body: {
+        query: {
+          bool: {
+            filter: [{ match: { 'cloud.instance.id': instanceId } }],
+            should: CLOUD_METRICS_MODULES.map(module => ({ match: { 'event.module': module } })),
+          },
+        },
+        size: 0,
+        aggs: {
+          metrics: {
+            terms: {
+              field: 'event.dataset',
+              size: 1000,
+            },
+          },
+        },
+      },
+    };
+
+    const response = await this.framework.callWithRequest<
+      {},
+      {
+        metrics?: InfraMetadataAggregationResponse;
+      }
+    >(req, 'search', metricQuery);
+
+    const buckets =
+      response.aggregations && response.aggregations.metrics
+        ? response.aggregations.metrics.buckets
+        : [];
+
+    return { buckets };
+  }
+
   public async getNodeInfo(
     req: InfraFrameworkRequest,
     sourceConfiguration: InfraSourceConfiguration,
@@ -95,7 +139,7 @@ export class ElasticsearchMetadataAdapter implements InfraMetadataAdapter {
         _source: ['host.*', 'cloud.*'],
         query: {
           bool: {
-            must_not: [{ match: { 'event.module': 'aws' } }],
+            must_not: CLOUD_METRICS_MODULES.map(module => ({ match: { 'event.module': module } })),
             filter: [{ match: { [getIdFieldName(sourceConfiguration, nodeType)]: nodeId } }],
           },
         },
