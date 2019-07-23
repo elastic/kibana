@@ -63,12 +63,13 @@ uiModules
     return service;
   });
 
-function profileVizController($scope, $http, HighlightService) {
+function profileVizController($scope, $timeout, $http, HighlightService) {
   $scope.title = 'Search Profile';
   $scope.description = 'Search profiling and visualization';
   $scope.profileResponse = [];
   $scope.highlight = HighlightService;
   $scope.index = '_all';
+  $scope.query = '';
 
   // TODO this map controls which tab is active, but due to how
   // the tab directive works, we cannot use a single variable to hold the state.
@@ -80,13 +81,25 @@ function profileVizController($scope, $http, HighlightService) {
   $scope.markers = [];
   $scope.licenseEnabled = xpackInfo.get('features.searchprofiler.enableAppLink');
 
-  const editor = initializeEditor($('#SearchProfilerInput')[0], $scope.licenseEnabled);
+
+  const editor = initializeEditor({
+    el: $('#SearchProfilerInput')[0],
+    licenseEnabled: $scope.licenseEnabled,
+  });
+
+  editor.on('change', () => {
+    // Do a safe apply/trigger digest
+    $timeout(() => {
+      $scope.query = editor.getValue();
+    });
+  });
+
   editor.setValue(defaultQuery, 1);
 
-  $scope.hasQuery = () => !!editor.getValue();
+  $scope.hasQuery = () => Boolean($scope.query);
 
   $scope.profile = () => {
-    const query = editor.getValue();
+    const  { query } = $scope;
     if (!$scope.licenseEnabled) {
       return;
     }

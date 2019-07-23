@@ -7,8 +7,16 @@
 import ace from 'brace';
 import { installXJsonMode } from './x_json_mode';
 
-export function initializeEditor(targetElement: HTMLDivElement, licenseEnabled: boolean) {
-  const editor: ace.Editor = ace.acequire('ace/ace').edit(targetElement);
+export function initializeEditor({
+  el,
+  licenseEnabled,
+  initialContent,
+}: {
+  el: HTMLDivElement;
+  licenseEnabled: boolean;
+  initialContent: string;
+}) {
+  const editor: ace.Editor = ace.acequire('ace/ace').edit(el);
 
   installXJsonMode(editor);
   editor.$blockScrolling = Infinity;
