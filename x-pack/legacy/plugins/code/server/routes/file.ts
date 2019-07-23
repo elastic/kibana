@@ -21,14 +21,14 @@ export function fileRoute(server: CodeServerRouter, gitOps: GitOperations) {
   async function getRepoUriFromMeta(
     req: hapi.Request,
     repoUri: string
-  ): Promise<{ repoExist: boolean; repoUri: string }> {
+  ): Promise<string | undefined> {
     const repoObjectClient = new RepositoryObjectClient(new EsClientWithRequest(req));
 
     try {
       const repo = await repoObjectClient.getRepository(repoUri);
-      return { repoExist: true, repoUri: repo.uri };
+      return repo.uri;
     } catch (e) {
-      return { repoExist: false, repoUri: '' };
+      return undefined;
     }
   }
 
@@ -45,8 +45,8 @@ export function fileRoute(server: CodeServerRouter, gitOps: GitOperations) {
       const skip = queries.skip ? parseInt(queries.skip as string, 10) : 0;
       const withParents = 'parents' in queries;
       const flatten = 'flatten' in queries;
-      const { repoExist, repoUri } = await getRepoUriFromMeta(req, uri);
-      if (!repoExist) {
+      const repoUri = await getRepoUriFromMeta(req, uri);
+      if (!repoUri) {
         return Boom.notFound(`repo ${uri} not found`);
       }
 
@@ -68,8 +68,8 @@ export function fileRoute(server: CodeServerRouter, gitOps: GitOperations) {
     async handler(req: hapi.Request, h: hapi.ResponseToolkit) {
       const { uri, path, ref } = req.params;
       const revision = decodeRevisionString(ref);
-      const { repoExist, repoUri } = await getRepoUriFromMeta(req, uri);
-      if (!repoExist) {
+      const repoUri = await getRepoUriFromMeta(req, uri);
+      if (!repoUri) {
         return Boom.notFound(`repo ${uri} not found`);
       }
       try {
@@ -128,8 +128,8 @@ export function fileRoute(server: CodeServerRouter, gitOps: GitOperations) {
     async handler(req, h: hapi.ResponseToolkit) {
       const { uri, path, ref } = req.params;
       const revision = decodeRevisionString(ref);
-      const { repoExist, repoUri } = await getRepoUriFromMeta(req, uri);
-      if (!repoExist) {
+      const repoUri = await getRepoUriFromMeta(req, uri);
+      if (!repoUri) {
         return Boom.notFound(`repo ${uri} not found`);
       }
       try {
@@ -168,8 +168,8 @@ export function fileRoute(server: CodeServerRouter, gitOps: GitOperations) {
     const count = queries.count ? parseInt(queries.count as string, 10) : 10;
     const after = queries.after !== undefined;
     try {
-      const { repoExist, repoUri } = await getRepoUriFromMeta(req, uri);
-      if (!repoExist) {
+      const repoUri = await getRepoUriFromMeta(req, uri);
+      if (!repoUri) {
         return Boom.notFound(`repo ${uri} not found`);
       }
       const repository = await gitOps.openRepo(repoUri);
@@ -208,8 +208,8 @@ export function fileRoute(server: CodeServerRouter, gitOps: GitOperations) {
     method: 'GET',
     async handler(req) {
       const uri = req.params.uri;
-      const { repoExist, repoUri } = await getRepoUriFromMeta(req, uri);
-      if (!repoExist) {
+      const repoUri = await getRepoUriFromMeta(req, uri);
+      if (!repoUri) {
         return Boom.notFound(`repo ${uri} not found`);
       }
       try {
@@ -229,8 +229,8 @@ export function fileRoute(server: CodeServerRouter, gitOps: GitOperations) {
     method: 'GET',
     async handler(req) {
       const { uri, revision } = req.params;
-      const { repoExist, repoUri } = await getRepoUriFromMeta(req, uri);
-      if (!repoExist) {
+      const repoUri = await getRepoUriFromMeta(req, uri);
+      if (!repoUri) {
         return Boom.notFound(`repo ${uri} not found`);
       }
       try {
@@ -251,8 +251,8 @@ export function fileRoute(server: CodeServerRouter, gitOps: GitOperations) {
     method: 'GET',
     async handler(req) {
       const { uri, path, revision } = req.params;
-      const { repoExist, repoUri } = await getRepoUriFromMeta(req, uri);
-      if (!repoExist) {
+      const repoUri = await getRepoUriFromMeta(req, uri);
+      if (!repoUri) {
         return Boom.notFound(`repo ${uri} not found`);
       }
       try {
