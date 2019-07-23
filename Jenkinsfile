@@ -73,6 +73,7 @@ pipeline {
      */
     stage('Initializing') {
       agent { label 'immutable' }
+//      agent any
       environment {
         HOME = "${env.WORKSPACE}"
       }
@@ -104,7 +105,7 @@ def checkoutKibana() {
   }
 
   dir("${BASE_DIR}") {
-    def packageJson = new JsonSlurper().parse(new File('package.json'))
+    def packageJson = new JsonSlurper().parseText("${'cat package.json'.execute().text}".toString())
     env.NODE_VERSION = packageJson.engines.node
     env.YARN_VERSION = packageJson.engines.yarn
   }
