@@ -23,4 +23,4 @@ export { SavedObjectsSchema } from './schema';
 
 export { SavedObjectsManagement } from './management';
 
-export { SavedObjectsSerializer, RawDoc as RawSavedObjectDoc } from './serialization';
+export { SavedObjectsSerializer, RawDoc as SavedObjectsRawDoc } from './serialization';

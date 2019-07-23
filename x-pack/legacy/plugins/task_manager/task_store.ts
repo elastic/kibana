@@ -14,7 +14,7 @@ import {
   SavedObject,
   SavedObjectAttributes,
   SavedObjectsSerializer,
-  RawSavedObjectDoc,
+  SavedObjectsRawDoc,
 } from 'src/core/server';
 import {
   ConcreteTaskInstance,
@@ -240,7 +240,7 @@ export class TaskStore {
     const rawDocs = result.hits.hits;
 
     return {
-      docs: (rawDocs as RawSavedObjectDoc[])
+      docs: (rawDocs as SavedObjectsRawDoc[])
         .map(doc => this.serializer.rawToSavedObject(doc))
         .map(doc => omit(doc, 'namespace') as SavedObject)
         .map(savedObjectToConcreteTaskInstance),

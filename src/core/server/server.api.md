@@ -378,22 +378,6 @@ export interface PluginsServiceStart {
     contracts: Map<PluginName, unknown>;
 }
 
-// Warning: (ae-missing-release-tag) "RawDoc" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
-// 
-// @public
-export interface RawSavedObjectDoc {
-    // (undocumented)
-    _id: string;
-    // (undocumented)
-    _primary_term?: number;
-    // (undocumented)
-    _seq_no?: number;
-    // (undocumented)
-    _source: any;
-    // (undocumented)
-    _type?: string;
-}
-
 // Warning: (ae-forgotten-export) The symbol "RecursiveReadonlyArray" needs to be exported by the entry point index.d.ts
 // 
 // @public (undocumented)
@@ -650,6 +634,22 @@ export interface SavedObjectsMigrationVersion {
     [pluginName: string]: string;
 }
 
+// Warning: (ae-missing-release-tag) "RawDoc" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+// 
+// @public
+export interface SavedObjectsRawDoc {
+    // (undocumented)
+    _id: string;
+    // (undocumented)
+    _primary_term?: number;
+    // (undocumented)
+    _seq_no?: number;
+    // (undocumented)
+    _source: any;
+    // (undocumented)
+    _type?: string;
+}
+
 // Warning: (ae-missing-release-tag) "SavedObjectsSchema" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 // 
 // @public (undocumented)
@@ -670,10 +670,10 @@ export class SavedObjectsSchema {
 export class SavedObjectsSerializer {
     constructor(schema: SavedObjectsSchema);
     generateRawId(namespace: string | undefined, type: string, id?: string): string;
-    isRawSavedObject(rawDoc: RawSavedObjectDoc): any;
+    isRawSavedObject(rawDoc: SavedObjectsRawDoc): any;
     // Warning: (ae-forgotten-export) The symbol "SanitizedSavedObjectDoc" needs to be exported by the entry point index.d.ts
-    rawToSavedObject(doc: RawSavedObjectDoc): SanitizedSavedObjectDoc;
-    savedObjectToRaw(savedObj: SanitizedSavedObjectDoc): RawSavedObjectDoc;
+    rawToSavedObject(doc: SavedObjectsRawDoc): SanitizedSavedObjectDoc;
+    savedObjectToRaw(savedObj: SanitizedSavedObjectDoc): SavedObjectsRawDoc;
     }
 
 // @public (undocumented)
