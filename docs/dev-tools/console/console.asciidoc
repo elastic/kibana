@@ -114,6 +114,9 @@ and click *Apply*, {kib} adds it to the editor at the current cursor position.
 You can configure the Console font size, JSON syntax, 
 and autocomplete suggestions in *Settings*.
 
+[role="screenshot"]
+image::dev-tools/console/images/console-settings.png["Console Settings"]
+
 [float]
 [[keyboard-shortcuts]]
 === Get keyboard shortcuts
