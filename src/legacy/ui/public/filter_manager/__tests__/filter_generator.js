@@ -66,9 +66,6 @@ describe('Filter Manager', function () {
       if (!Array.isArray(filters)) filters = [filters];
       appState.filters = uniqFilters(appState.filters.concat(filters));
     });
-    sinon.stub(queryFilter, 'invertFilter').callsFake((filter) => {
-      filter.meta.negate = !filter.meta.negate;
-    });
   }));
 
   it('should have an `add` function', function () {

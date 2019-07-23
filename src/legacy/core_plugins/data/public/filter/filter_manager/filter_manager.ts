@@ -182,10 +182,6 @@ export class FilterManager {
     }
   }
 
-  public invertFilter(filter: Filter) {
-    filter.meta.negate = !filter.meta.negate;
-  }
-
   public async removeAll() {
     await this.setFilters([]);
   }

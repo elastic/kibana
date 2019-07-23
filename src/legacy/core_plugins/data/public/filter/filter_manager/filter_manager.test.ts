@@ -664,24 +664,9 @@ describe('filter_manager', () => {
   });
 
   describe('invert', () => {
-    test('invert to disabled', async () => {
-      const f1 = getFilter(FilterStateStore.GLOBAL_STATE, false, false, 'age', 34);
-
-      filterManager.invertFilter(f1);
-      await filterManager.addFilters(f1);
-      const newFilters1 = filterManager.getFilters()[0];
-      expect(f1.meta.negate).toBe(true);
-      expect(newFilters1.meta.negate).toBe(true);
-
-      filterManager.invertFilter(f1);
-      await filterManager.addFilters(f1);
-      const newFilters2 = filterManager.getFilters()[0];
-      expect(f1.meta.negate).toBe(false);
-      expect(newFilters2.meta.negate).toBe(false);
-    });
-
     test('should fire the update and fetch events', async function() {
       await filterManager.addFilters(readyFilters);
+      expect(filterManager.getFilters()).toHaveLength(3);
 
       const updateStub = jest.fn();
       const fetchStub = jest.fn();
@@ -693,8 +678,9 @@ describe('filter_manager', () => {
         next: fetchStub,
       });
 
-      filterManager.invertFilter(readyFilters[1]);
+      readyFilters[1].meta.negate = !readyFilters[1].meta.negate;
       await filterManager.addFilters(readyFilters[1]);
+      expect(filterManager.getFilters()).toHaveLength(3);
       expect(fetchStub).toBeCalledTimes(1);
       expect(updateStub).toBeCalledTimes(1);
     });
