@@ -133,11 +133,20 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
           });
       });
 
-      it('should fail if SPNEGO token is rejected', async () => {
+      it('should re-initiate SPNEGO handshake if token is rejected with 401', async () => {
         const spnegoResponse = await supertest
           .get('/api/security/v1/me')
           .set('Authorization', `Negotiate ${Buffer.from('Hello').toString('base64')}`)
           .expect(401);
+        expect(spnegoResponse.headers['set-cookie']).to.be(undefined);
+        expect(spnegoResponse.headers['www-authenticate']).to.be('Negotiate');
+      });
+
+      it('should fail if SPNEGO token is rejected because of unknown reason', async () => {
+        const spnegoResponse = await supertest
+          .get('/api/security/v1/me')
+          .set('Authorization', 'Negotiate (:I am malformed:)')
+          .expect(500);
         expect(spnegoResponse.headers['set-cookie']).to.be(undefined);
         expect(spnegoResponse.headers['www-authenticate']).to.be(undefined);
       });

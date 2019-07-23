@@ -138,19 +138,28 @@ export class KerberosAuthenticationProvider extends BaseAuthenticationProvider {
       // Check if SPNEGO context wasn't established and we have a response token to return to the client.
       const challenge =
         getErrorStatusCode(err) === 401 ? this.getNegotiateChallenge(err) : undefined;
-      if (challenge) {
-        const [, responseToken] = challenge.split(/\s+/);
-        if (responseToken) {
-          this.debug('Negotiation is not completed yet, return response token to the client');
-          return AuthenticationResult.failed(Boom.unauthorized(), {
-            authResponseHeaders: {
-              [WWWAuthenticateHeaderName]: `Negotiate ${responseToken}`,
-            },
-          });
-        }
+      if (!challenge) {
+        return AuthenticationResult.failed(err);
       }
 
-      return AuthenticationResult.failed(err);
+      const challengeParts = challenge.split(/\s+/);
+      if (challengeParts.length > 2) {
+        this.debug('Challenge consists of more than two parts and may be malformed.');
+      }
+
+      let responseChallenge;
+      const [, responseToken] = challengeParts;
+      if (responseToken) {
+        this.debug('Returning response token to the client and continuing SPNEGO handshake.');
+        responseChallenge = `Negotiate ${responseToken}`;
+      } else {
+        this.debug('Re-initiating SPNEGO handshake.');
+        responseChallenge = 'Negotiate';
+      }
+
+      return AuthenticationResult.failed(Boom.unauthorized(), {
+        authResponseHeaders: { [WWWAuthenticateHeaderName]: responseChallenge },
+      });
     }
 
     this.debug('Get token API request to Elasticsearch successful');

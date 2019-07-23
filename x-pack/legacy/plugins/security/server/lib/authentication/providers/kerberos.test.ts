@@ -221,7 +221,7 @@ describe('KerberosAuthenticationProvider', () => {
       });
     });
 
-    it('fails with `Negotiate` if cannot complete context with a response token.', async () => {
+    it('fails with `Negotiate response-token` if cannot complete context with a response token.', async () => {
       const request = requestFixture({ headers: { authorization: 'negotiate spnego' } });
 
       const failureReason = Boom.unauthorized(null, 'Negotiate response-token');
@@ -238,6 +238,26 @@ describe('KerberosAuthenticationProvider', () => {
       expect(authenticationResult.error).toEqual(Boom.unauthorized());
       expect(authenticationResult.authResponseHeaders).toEqual({
         'WWW-Authenticate': 'Negotiate response-token',
+      });
+    });
+
+    it('fails with `Negotiate` if cannot create context using provided SPNEGO token.', async () => {
+      const request = requestFixture({ headers: { authorization: 'negotiate spnego' } });
+
+      const failureReason = Boom.unauthorized(null, 'Negotiate');
+      callWithInternalUser.withArgs('shield.getAccessToken').rejects(failureReason);
+
+      const authenticationResult = await provider.authenticate(request);
+
+      sinon.assert.calledWithExactly(callWithInternalUser, 'shield.getAccessToken', {
+        body: { grant_type: '_kerberos', kerberos_ticket: 'spnego' },
+      });
+
+      expect(request.headers.authorization).toBe('negotiate spnego');
+      expect(authenticationResult.failed()).toBe(true);
+      expect(authenticationResult.error).toEqual(Boom.unauthorized());
+      expect(authenticationResult.authResponseHeaders).toEqual({
+        'WWW-Authenticate': 'Negotiate',
       });
     });
 
