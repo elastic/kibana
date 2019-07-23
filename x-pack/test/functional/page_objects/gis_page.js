@@ -402,6 +402,27 @@ export function GisPageProvider({ getService, getPageObjects }) {
       return await testSubjects.getVisibleText(`layerErrorMessage`);
     }
 
+    async fullScreenModeMenuItemExists() {
+      return await testSubjects.exists('mapsFullScreenMode');
+    }
+
+    async clickFullScreenMode() {
+      log.debug(`clickFullScreenMode`);
+      await testSubjects.click('mapsFullScreenMode');
+    }
+
+    async exitFullScreenLogoButtonExists() {
+      return await testSubjects.exists('exitFullScreenModeLogo');
+    }
+
+    async getExitFullScreenLogoButton() {
+      return await testSubjects.find('exitFullScreenModeLogo');
+    }
+
+    async clickExitFullScreenTextButton() {
+      await testSubjects.click('exitFullScreenModeText');
+    }
+
     async openInspectorMapView() {
       await inspector.openInspectorView('inspectorViewChooserMap');
     }
