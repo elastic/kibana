@@ -76,6 +76,18 @@
       </div>  
     </div>
 
+    <div class="visEditorSidebar__formRow">
+      <label
+        class="visEditorSidebar__formLabel"
+        for="enableClicks"
+        i18n-id="kbnVislibVisTypes.editors.pointSeries.clickable"
+        i18n-default-message="Enable clicks on chart"
+      ></label>
+      <div class="visEditorSidebar__formControl">
+        <input class="kuiCheckBox" id="enableClicks" type="checkbox" ng-model="editorState.params.enableClicks">
+      </div>
+    </div>
+
     <vislib-grid></vislib-grid>
   </div>
 

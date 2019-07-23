@@ -69,7 +69,9 @@ export function VislibVisTypeProvider(Private, $rootScope, $compile) {
 
         this.vis.vislibVis = new vislib.Vis(this.chartEl, visParams);
         this.vis.vislibVis.on('brush', this.vis.API.events.brush);
-        this.vis.vislibVis.on('click', this.vis.API.events.filter);
+        if (this.vis.vislibVis.visConfigArgs.enableClicks) {
+          this.vis.vislibVis.on('click', this.vis.API.events.filter);
+        }
         this.vis.vislibVis.on('renderComplete', resolve);
 
         this.vis.vislibVis.initVisConfig(esResponse, this.vis.getUiState());
@@ -107,7 +109,9 @@ export function VislibVisTypeProvider(Private, $rootScope, $compile) {
     destroy() {
       if (this.vis.vislibVis) {
         this.vis.vislibVis.off('brush', this.vis.API.events.brush);
-        this.vis.vislibVis.off('click', this.vis.API.events.filter);
+        if (this.vis.vislibVis.visConfigArgs.enableClicks) {
+          this.vis.vislibVis.off('click', this.vis.API.events.filter);
+        }
         this.vis.vislibVis.destroy();
         delete this.vis.vislibVis;
       }

@@ -100,7 +100,8 @@ export default function PointSeriesVisType(Private) {
         addTimeMarker: false,
         labels: {
           show: false,
-        }
+        },
+        enableClicks: true
       },
     },
     editorConfig: {
