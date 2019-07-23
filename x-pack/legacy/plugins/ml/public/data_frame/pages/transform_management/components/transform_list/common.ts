@@ -14,6 +14,25 @@ export enum DATA_FRAME_TASK_STATE {
   STOPPED = 'stopped',
 }
 
+export enum DATA_FRAME_MODE {
+  BATCH = 'batch',
+  CONTINUOUS = 'continuous',
+}
+
+export interface Clause {
+  type: string;
+  value: string;
+  match: string;
+}
+
+export interface Query {
+  ast: {
+    clauses: Clause[];
+  };
+  text: string;
+  syntax: any;
+}
+
 export interface DataFrameTransformState {
   checkpoint: number;
   current_position: Dictionary<any>;
