@@ -7,7 +7,12 @@
 import React, { Fragment } from 'react';
 import { get, capitalize } from 'lodash';
 import { formatNumber } from 'plugins/monitoring/lib/format_number';
-import { ClusterItemContainer, HealthStatusIndicator, BytesUsage, BytesPercentageUsage } from './helpers';
+import {
+  ClusterItemContainer,
+  HealthStatusIndicator,
+  BytesUsage,
+  BytesPercentageUsage
+} from './helpers';
 import {
   EuiFlexGrid,
   EuiFlexItem,
@@ -21,6 +26,7 @@ import {
   EuiBadge,
   EuiToolTip,
   EuiFlexGroup,
+  EuiIcon
 } from '@elastic/eui';
 import { LicenseText } from './license_text';
 import { i18n } from '@kbn/i18n';
@@ -151,6 +157,30 @@ export function ElasticsearchPanel(props) {
     <HealthStatusIndicator status={clusterStats.status} />
   );
 
+  const licenseText = <LicenseText license={props.license} showLicenseExpiration={props.showLicenseExpiration} />;
+
+  const setupModeElasticsearchData = get(setupMode.data, 'elasticsearch');
+  let setupModeNodesData = null;
+  if (setupMode.enabled && setupModeElasticsearchData) {
+    const showIcon = setupModeElasticsearchData.totalUniqueFullyMigratedCount !== setupModeElasticsearchData.totalUniqueInstanceCount;
+    if (showIcon) {
+      setupModeNodesData = (
+        <EuiFlexItem grow={false}>
+          <EuiToolTip
+            position="top"
+            content={i18n.translate('xpack.monitoring.cluster.overview.elasticsearchPanel.setupModeNodesTooltip', {
+              defaultMessage: `Some nodes are not monitored by Metricbeat. Click the flag icon for more information.`
+            })}
+          >
+            <EuiLink onClick={goToNodes}>
+              <EuiIcon type="flag" color="warning"/>
+            </EuiLink>
+          </EuiToolTip>
+        </EuiFlexItem>
+      );
+    }
+  }
+
   const showMlJobs = () => {
     // if license doesn't support ML, then `ml === null`
     if (props.ml) {
@@ -158,7 +188,9 @@ export function ElasticsearchPanel(props) {
       return (
         <>
           <EuiDescriptionListTitle>
-            <EuiLink href={gotoURL}>
+            <EuiLink
+              href={gotoURL}
+            >
               <FormattedMessage
                 id="xpack.monitoring.cluster.overview.esPanel.jobsLabel"
                 defaultMessage="Jobs"
@@ -166,43 +198,17 @@ export function ElasticsearchPanel(props) {
             </EuiLink>
           </EuiDescriptionListTitle>
           <EuiDescriptionListDescription data-test-subj="esMlJobs">
-            <EuiLink href={gotoURL}>{props.ml.jobs}</EuiLink>
+            <EuiLink
+              href={gotoURL}
+            >
+              {props.ml.jobs}
+            </EuiLink>
           </EuiDescriptionListDescription>
         </>
       );
     }
     return null;
   };
-
-  const licenseText = <LicenseText license={props.license} showLicenseExpiration={props.showLicenseExpiration} />;
-
-  let setupModeNodesData = null;
-  if (setupMode.enabled && setupMode.data) {
-    const elasticsearchData = get(setupMode.data, 'elasticsearch.byUuid');
-    const migratedNodesCount = Object.values(elasticsearchData).filter(node => node.isFullyMigrated).length;
-    const totalNodesCount = Object.values(elasticsearchData).length;
-
-    const badgeColor = migratedNodesCount === totalNodesCount
-      ? 'secondary'
-      : 'danger';
-
-    setupModeNodesData = (
-      <EuiFlexItem grow={false}>
-        <EuiToolTip
-          position="top"
-          content={i18n.translate('xpack.monitoring.cluster.overview.esPanel.setupModeNodesTooltip', {
-            defaultMessage: `These numbers indicate how many detected monitored nodes versus how many
-            detected total nodes. If there are more detected nodes than monitored nodes, click the Nodes
-            link and you will be guided in how to setup monitoring for the missing node.`
-          })}
-        >
-          <EuiBadge color={badgeColor}>
-            {formatNumber(migratedNodesCount, 'int_commas')}/{formatNumber(totalNodesCount, 'int_commas')}
-          </EuiBadge>
-        </EuiToolTip>
-      </EuiFlexItem>
-    );
-  }
 
   return (
     <ClusterItemContainer
