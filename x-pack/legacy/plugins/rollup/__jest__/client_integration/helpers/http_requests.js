@@ -24,11 +24,11 @@ const registerHttpRequestMockHelpers = server => {
     ]);
   };
 
-  const setCreateJobResponse = (responsePayload) => {
+  const setCreateJobResponse = (responsePayload = {}) => {
     server.respondWith(/\/api\/rollup\/create/, [
       200,
       { 'Content-Type': 'application/json' },
-      JSON.stringify(responsePayload || {}),
+      JSON.stringify(responsePayload),
     ]);
   };
 
