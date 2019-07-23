@@ -14,8 +14,7 @@ import {
   FEATURE_ID_PROPERTY_NAME,
   SOURCE_DATA_ID_ORIGIN,
   FEATURE_VISIBLE_PROPERTY_NAME,
-  EMPTY_FEATURE_COLLECTION,
-  MB_SOURCE_ID_LAYER_ID_PREFIX_DELIMITER
+  EMPTY_FEATURE_COLLECTION
 } from '../../common/constants';
 import _ from 'lodash';
 import { JoinTooltipProperty } from './tooltips/join_tooltip_property';
@@ -677,19 +676,19 @@ export class VectorLayer extends AbstractLayer {
   }
 
   _getMbPointLayerId() {
-    return `${this.getId()}${MB_SOURCE_ID_LAYER_ID_PREFIX_DELIMITER}circle`;
+    return this.makeMbLayerId('circle');
   }
 
   _getMbSymbolLayerId() {
-    return `${this.getId()}${MB_SOURCE_ID_LAYER_ID_PREFIX_DELIMITER}symbol`;
+    return this.makeMbLayerId('symbol');
   }
 
   _getMbLineLayerId() {
-    return `${this.getId()}${MB_SOURCE_ID_LAYER_ID_PREFIX_DELIMITER}line`;
+    return this.makeMbLayerId('line');
   }
 
   _getMbPolygonLayerId() {
-    return `${this.getId()}${MB_SOURCE_ID_LAYER_ID_PREFIX_DELIMITER}fill`;
+    return this.makeMbLayerId('fill');
   }
 
   getMbLayerIds() {
