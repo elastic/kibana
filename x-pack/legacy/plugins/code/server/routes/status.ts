@@ -72,9 +72,10 @@ export function statusRoute(
     } else {
       const state = await lspService.initializeState(repoUri, revision);
       const initState = state[def.name];
-      if (initState !== WorkspaceStatus.Initialized) {
-        report.langServerStatus = RepoFileStatus.LANG_SERVER_IS_INITIALIZING;
-      }
+      report.langServerStatus =
+        initState === WorkspaceStatus.Initialized
+          ? RepoFileStatus.LANG_SERVER_INITIALIZED
+          : RepoFileStatus.LANG_SERVER_IS_INITIALIZING;
     }
   }
 
@@ -83,9 +84,7 @@ export function statusRoute(
     method: 'GET',
     async handler(req: hapi.Request) {
       const { uri, path, ref } = req.params;
-      const report: StatusReport = {
-        langServerType: LangServerType.NONE,
-      };
+      const report: StatusReport = {};
       const repoObjectClient = new RepositoryObjectClient(new EsClientWithRequest(req));
       try {
         // Check if the repository already exists
@@ -94,7 +93,6 @@ export function statusRoute(
         return Boom.notFound(`repo ${uri} not found`);
       }
       await handleRepoStatus(report, uri, ref, repoObjectClient);
-
       if (path) {
         try {
           try {

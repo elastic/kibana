@@ -24,9 +24,9 @@ import { UptimeSettingsContext } from '../contexts';
 import { useUrlParams } from '../hooks';
 import { stringifyUrlParams } from '../lib/helper/stringify_url_params';
 import { BaseLocationOptions } from '../components/functional/ping_list';
+import { useTrackPageview } from '../../../infra/public';
 
 interface MonitorPageProps {
-  history: { push: any };
   location: { pathname: string; search: string };
   logMonitorPageLoad: () => void;
   match: { params: { id: string } };
@@ -38,7 +38,6 @@ interface MonitorPageProps {
 }
 
 export const MonitorPage = ({
-  history,
   location,
   logMonitorPageLoad,
   query,
@@ -48,7 +47,8 @@ export const MonitorPage = ({
   const [monitorId] = useState<string>(decodeURI(parsedPath[0]));
   const [pingListPageCount, setPingListPageCount] = useState<number>(10);
   const { colors, refreshApp, setHeadingText } = useContext(UptimeSettingsContext);
-  const [params, updateUrlParams] = useUrlParams(history, location);
+  const [getUrlParams, updateUrlParams] = useUrlParams();
+  const params = getUrlParams();
   const { dateRangeStart, dateRangeEnd, selectedPingStatus } = params;
 
   useEffect(() => {
@@ -89,6 +89,9 @@ export const MonitorPage = ({
   useEffect(() => {
     logMonitorPageLoad();
   }, []);
+
+  useTrackPageview({ app: 'uptime', path: 'monitor' });
+  useTrackPageview({ app: 'uptime', path: 'monitor', delay: 15000 });
 
   return (
     <Fragment>
