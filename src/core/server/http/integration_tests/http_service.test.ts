@@ -187,7 +187,7 @@ describe('http service', () => {
         expect(headers).toEqual(authHeaders);
       });
 
-      it('pass request authorization header to Elasticsearch if registerAuth was not set', async () => {
+      it('passes request authorization header to Elasticsearch if registerAuth was not set', async () => {
         const authorizationHeader = 'Basic: username:password';
         const { http, elasticsearch } = await root.setup();
         const { registerRouter } = http;
@@ -213,6 +213,56 @@ describe('http service', () => {
         expect(headers).toEqual({
           authorization: authorizationHeader,
         });
+      });
+
+      it('attach security header to a successful response handled by Legacy platform', async () => {
+        const authResponseHeader = {
+          'www-authenticate': 'Negotiate ade0234568a4209af8bc0280289eca',
+        };
+        const { http } = await root.setup();
+        const { registerAuth } = http;
+
+        await registerAuth((req, t) => {
+          return t.authenticated({ responseHeaders: authResponseHeader });
+        });
+
+        await root.start();
+
+        const kbnServer = kbnTestServer.getKbnServer(root);
+        kbnServer.server.route({
+          method: 'GET',
+          path: '/legacy',
+          handler: () => 'ok',
+        });
+
+        const response = await kbnTestServer.request.get(root, '/legacy').expect(200);
+        expect(response.header['www-authenticate']).toBe(authResponseHeader['www-authenticate']);
+      });
+
+      it('attach security header to an error response handled by Legacy platform', async () => {
+        const authResponseHeader = {
+          'www-authenticate': 'Negotiate ade0234568a4209af8bc0280289eca',
+        };
+        const { http } = await root.setup();
+        const { registerAuth } = http;
+
+        await registerAuth((req, t) => {
+          return t.authenticated({ responseHeaders: authResponseHeader });
+        });
+
+        await root.start();
+
+        const kbnServer = kbnTestServer.getKbnServer(root);
+        kbnServer.server.route({
+          method: 'GET',
+          path: '/legacy',
+          handler: () => {
+            throw Boom.badRequest();
+          },
+        });
+
+        const response = await kbnTestServer.request.get(root, '/legacy').expect(400);
+        expect(response.header['www-authenticate']).toBe(authResponseHeader['www-authenticate']);
       });
     });
 
