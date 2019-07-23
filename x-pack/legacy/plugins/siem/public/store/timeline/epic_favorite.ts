@@ -14,7 +14,7 @@ import { filter, mergeMap, withLatestFrom, startWith, takeUntil } from 'rxjs/ope
 
 import { persistTimelineFavoriteMutation } from '../../containers/timeline/favorite/persist.gql_query';
 import { PersistTimelineFavoriteMutation, ResponseFavoriteTimeline } from '../../graphql/types';
-
+import { addError } from '../app/actions';
 import {
   endTimelineSaving,
   updateIsFavorite,
@@ -73,6 +73,9 @@ export const epicPersistTimelineFavorite = (
       action$.pipe(
         withLatestFrom(timeline$),
         filter(([checkAction, updatedTimeline]) => {
+          if (checkAction.type === addError.type) {
+            return true;
+          }
           if (
             checkAction.type === endTimelineSaving.type &&
             updatedTimeline[get('payload.id', checkAction)].savedObjectId != null

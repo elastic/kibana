@@ -29,6 +29,7 @@ import {
   TimelineResult,
 } from '../../graphql/types';
 import { AppApolloClient } from '../../lib/lib';
+import { addError } from '../app/actions';
 import { NotesById } from '../app/model';
 import { TimeRange } from '../inputs/model';
 
@@ -131,6 +132,9 @@ export const createTimelineEpic = <State>(): Epic<
       withLatestFrom(timeline$),
       filter(([action, timeline]) => {
         const timelineId: TimelineModel = timeline[get('payload.id', action)];
+        if (action.type === addError.type) {
+          return true;
+        }
         if (action.type === createTimeline.type) {
           myEpicTimelineId.setTimelineId(null);
           myEpicTimelineId.setTimelineVersion(null);

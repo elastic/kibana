@@ -14,7 +14,7 @@ import { filter, mergeMap, startWith, withLatestFrom, takeUntil } from 'rxjs/ope
 
 import { persistTimelinePinnedEventMutation } from '../../containers/timeline/pinned_event/persist.gql_query';
 import { PersistTimelinePinnedEventMutation, PinnedEvent } from '../../graphql/types';
-
+import { addError } from '../app/actions';
 import {
   pinEvent,
   endTimelineSaving,
@@ -104,6 +104,9 @@ export const epicPersistPinnedEvent = (
       action$.pipe(
         withLatestFrom(timeline$),
         filter(([checkAction, updatedTimeline]) => {
+          if (checkAction.type === addError.type) {
+            return true;
+          }
           if (
             checkAction.type === endTimelineSaving.type &&
             updatedTimeline[get('payload.id', checkAction)].savedObjectId != null
