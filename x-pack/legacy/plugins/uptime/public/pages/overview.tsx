@@ -40,17 +40,12 @@ export type UptimeSearchBarQueryChangeHandler = (queryChangedEvent: {
   queryText?: string;
 }) => void;
 
-export const OverviewPage = ({
-  basePath,
-  logOverviewPageLoad,
-  setBreadcrumbs,
-  history,
-  location,
-}: Props) => {
+export const OverviewPage = ({ basePath, logOverviewPageLoad, setBreadcrumbs }: Props) => {
   const { absoluteStartDate, absoluteEndDate, colors, refreshApp, setHeadingText } = useContext(
     UptimeSettingsContext
   );
-  const [params, updateUrl] = useUrlParams(history, location);
+  const [getUrlParams, updateUrl] = useUrlParams();
+  const params = getUrlParams();
   const {
     dateRangeStart,
     dateRangeEnd,
