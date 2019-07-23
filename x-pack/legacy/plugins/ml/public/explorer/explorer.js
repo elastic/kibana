@@ -41,6 +41,7 @@ import { InfluencersList } from '../components/influencers_list';
 import { ALLOW_CELL_RANGE_SELECTION, dragSelect$, explorer$ } from './explorer_dashboard_service';
 import { mlResultsService } from 'plugins/ml/services/results_service';
 import { LoadingIndicator } from '../components/loading_indicator/loading_indicator';
+import { NavigationMenu } from '../components/navigation_menu/navigation_menu';
 import { CheckboxShowCharts, showCharts$ } from '../components/controls/checkbox_showcharts/checkbox_showcharts';
 import { JobSelector } from '../components/job_selector/job_selector';
 import { SelectInterval, interval$ } from '../components/controls/select_interval/select_interval';
@@ -135,6 +136,7 @@ function mapSwimlaneOptionsToEuiOptions(options) {
 
 const ExplorerPage = ({ children, jobSelectorProps }) => (
   <Fragment>
+    <NavigationMenu tabId="explorer" />
     <JobSelector {...jobSelectorProps} />
     {children}
   </Fragment>
@@ -1088,12 +1090,14 @@ export const Explorer = injectI18n(injectObservablesAsProps(
 
       if (loading === true) {
         return (
-          <LoadingIndicator
-            label={intl.formatMessage({
-              id: 'xpack.ml.explorer.loadingLabel',
-              defaultMessage: 'Loading',
-            })}
-          />
+          <ExplorerPage jobSelectorProps={jobSelectorProps}>
+            <LoadingIndicator
+              label={intl.formatMessage({
+                id: 'xpack.ml.explorer.loadingLabel',
+                defaultMessage: 'Loading',
+              })}
+            />
+          </ExplorerPage>
         );
       }
 

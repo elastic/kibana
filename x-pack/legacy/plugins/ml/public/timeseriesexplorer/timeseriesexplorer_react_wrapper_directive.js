@@ -11,8 +11,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 
-import { TimeSeriesExplorer } from './timeseriesexplorer';
-
 import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml');
 
@@ -23,7 +21,9 @@ import { timefilter } from 'ui/timefilter';
 import { timeHistory } from 'ui/timefilter/time_history';
 
 import { NavigationMenuContext } from '../util/context_utils';
+
 import { mapScopeToProps } from './timeseriesexplorer_utils';
+import { TimeSeriesExplorer } from './timeseriesexplorer';
 
 module.directive('mlTimeseriesexplorerReactWrapper', function (config, globalState, mlJobSelectService) {
   function link(scope, element) {

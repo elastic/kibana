@@ -17,8 +17,6 @@ import { Subscription } from 'rxjs';
 
 import '../components/controls';
 
-import template from './explorer.html';
-
 import uiRoutes from 'ui/routes';
 import {
   createJobs,
@@ -38,8 +36,14 @@ import { timefilter } from 'ui/timefilter';
 
 import { APP_STATE_ACTION, EXPLORER_ACTION } from './explorer_constants';
 
+const template = `
+<ml-chart-tooltip></ml-chart-tooltip>
+<ml-explorer-react-wrapper class="ml-explorer" data-test-subj="mlPageAnomalyExplorer" />
+`;
+
 uiRoutes
   .when('/explorer/?', {
+    controller: 'MlExplorerController',
     template,
     k7Breadcrumbs: getAnomalyExplorerBreadcrumbs,
     resolve: {
