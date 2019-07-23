@@ -18,7 +18,7 @@
  */
 
 import { EuiComboBoxOptionProps } from '@elastic/eui';
-import { AggType } from 'ui/agg_types';
+import { AggType } from '../../../../../core_plugins/data/public/np_ready/agg_types';
 
 // NOTE: we cannot export the interface with export { InterfaceName }
 // as there is currently a bug on babel typescript transform plugin for it

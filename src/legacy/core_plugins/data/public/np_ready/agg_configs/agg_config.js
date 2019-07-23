@@ -27,6 +27,7 @@
 import _ from 'lodash';
 import { fieldFormats } from '../registry/field_formats';
 import { i18n } from '@kbn/i18n';
+import { writeParams } from '../agg_types/agg_params';
 
 class AggConfig {
 
@@ -126,7 +127,7 @@ class AggConfig {
   }
 
   write(aggs) {
-    return this.type.params.write(this, aggs);
+    return writeParams(this.type.params, this, aggs);
   }
 
   isFilterable() {

@@ -29,7 +29,7 @@ import _ from 'lodash';
 import angular from 'angular';
 import defaultEditorTemplate from './default.html';
 import { keyCodes } from '@elastic/eui';
-import { parentPipelineAggHelper } from 'ui/agg_types/metrics/lib/parent_pipeline_agg_helper';
+import { parentPipelineAggHelper } from '../../../../../core_plugins/data/public/np_ready/agg_types/metrics/lib/parent_pipeline_agg_helper';
 import { DefaultEditorSize } from '../../editor_size';
 
 import { VisEditorTypesRegistryProvider } from '../../../registry/vis_editor_types';

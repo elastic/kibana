@@ -43,7 +43,7 @@ import { VisProvider } from 'ui/vis';
 import { FilterBarQueryFilterProvider } from 'ui/filter_manager/query_filter';
 import { vislibSeriesResponseHandlerProvider } from 'ui/vis/response_handlers/vislib';
 import { docTitle } from 'ui/doc_title';
-import { intervalOptions } from 'ui/agg_types/buckets/_interval_options';
+import { intervalOptions } from '../../../../data/public/np_ready/agg_types/buckets/_interval_options';
 import { stateMonitorFactory } from 'ui/state_management/state_monitor_factory';
 import uiRoutes from 'ui/routes';
 import { uiModules } from 'ui/modules';

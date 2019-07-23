@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { AggParam } from '../../../agg_types';
+import { AggParam } from '../../../../../core_plugins/data/public/np_ready/agg_types';
 import { AggGroupNames } from './agg_groups';
 
 export interface Schema {

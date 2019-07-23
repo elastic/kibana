@@ -18,10 +18,11 @@
  */
 
 import _ from 'lodash';
-import { AggParams } from './agg_params';
+import { AggParam, initParams } from './agg_params';
 // @ts-ignore
 import { fieldFormats } from '../../../../../ui/public/registry/field_formats';
 import { i18n } from '@kbn/i18n';
+// @ts-ignore
 import { AggConfig } from '../agg_configs/agg_config';
 
 export interface AggTypeConfig {
@@ -32,7 +33,7 @@ export interface AggTypeConfig {
   ordered?: any;
   hasNoDsl?: boolean;
   createFilter: (aggConfig: AggConfig, key: any) => any;
-  params?: AggParams;
+  params?: [AggParam];
   getRequestAggs?: () => [AggConfig];
   getResponseAggs?: () => [AggConfig];
   customLabels?: boolean;
@@ -113,7 +114,7 @@ export class AggType {
    * @property params
    * @type {AggParams}
    */
-  params: AggParams;
+  params: [AggParam];
   /**
    * Designed for multi-value metric aggs, this method can return a
    * set of AggConfigs that should replace this aggConfig in requests
@@ -180,10 +181,13 @@ export class AggType {
     this.hasNoDsl = !!config.hasNoDsl;
     this.createFilter = config.createFilter;
 
-
-    const params = config.params || [];
-    if (!(params instanceof AggParams)) {
+    // @ts-ignore
+    if (config.params && (config.params[0] instanceof AggParam)) {
+      this.params = config.params;
+    }
+    else {
       // always append the raw JSON param
+      const params = [];
       params.push({
         name: 'json',
         type: 'json',
@@ -200,9 +204,7 @@ export class AggType {
         });
       }
 
-      this.params = new AggParams(params);
-    } else {
-      this.params = params;
+      this.params = initParams(params as any);
     }
 
 

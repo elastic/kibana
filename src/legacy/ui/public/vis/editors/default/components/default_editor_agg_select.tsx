@@ -22,7 +22,7 @@ import React, { useEffect } from 'react';
 import { EuiComboBox, EuiComboBoxOptionProps, EuiFormRow, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { AggType } from 'ui/agg_types';
+import { AggType } from '../../../../../../core_plugins/data/public/np_ready/agg_types';
 import { IndexPattern } from 'ui/index_patterns';
 import { documentationLinks } from '../../../../documentation_links/documentation_links';
 import { ComboBoxGroupedOption } from '../default_editor_utils';

@@ -21,7 +21,7 @@ import sinon from 'sinon';
 import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
 import { VisProvider } from '..';
-import { AggType } from '../../agg_types/agg_type';
+import { AggType } from '../../../../core_plugins/data/public/np_ready/agg_types';
 import { AggConfig } from '../agg_config';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 import { fieldFormats } from '../../registry/field_formats';

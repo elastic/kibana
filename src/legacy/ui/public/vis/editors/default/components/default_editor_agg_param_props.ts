@@ -17,9 +17,9 @@
  * under the License.
  */
 
-import { AggParam } from '../../../../agg_types';
+import { AggParam } from '../../../../../../core_plugins/data/public/np_ready/agg_types;
 import { AggConfig } from '../../../agg_config';
-import { FieldParamType } from '../../../../agg_types/param_types';
+import { FieldParamType } from '../../../../../../core_plugins/data/public/np_ready/agg_types';
 import { EditorConfig } from '../../config/types';
 import { VisState } from '../../../vis';
 import { SubAggParamsProp } from './default_editor_agg_params';

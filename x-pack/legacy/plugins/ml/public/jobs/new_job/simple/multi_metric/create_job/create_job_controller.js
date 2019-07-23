@@ -10,7 +10,7 @@ import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
 import 'ui/angular_ui_select';
 
-import { aggTypes } from 'ui/agg_types';
+import { aggTypes } from '../../../../../../src/legacy/core_plugins/data/public/np_ready/agg_types';
 import { addJobValidationMethods } from 'plugins/ml/../common/util/validation_utils';
 import { parseInterval } from 'plugins/ml/../common/util/parse_interval';
 

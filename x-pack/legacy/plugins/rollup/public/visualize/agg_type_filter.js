@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { aggTypeFilters } from 'ui/agg_types/filter';
+import { aggTypeFilters } from '../../../../../../src/legacy/core_plugins/data/public/np_ready/agg_types/filter';
 
 export function initAggTypeFilter() {
   /**

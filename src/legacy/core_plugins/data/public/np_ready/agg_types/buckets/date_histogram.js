@@ -29,6 +29,7 @@ import { timefilter } from '../../timefilter';
 import { DropPartialsParamEditor } from '../controls/drop_partials';
 import { dateHistogramInterval } from '../../../../core_plugins/data/common';
 import { i18n } from '@kbn/i18n';
+import { writeParams } from '../agg_params';
 
 const config = chrome.getUiSettingsClient();
 const detectedTimezone = moment.tz.guess();
@@ -55,7 +56,7 @@ export const dateHistogramBucketAgg = new BucketAggType({
     date: true
   },
   makeLabel: function (agg) {
-    const output = this.params.write(agg);
+    const output = writeParams(this.params, agg);
     const field = agg.getFieldDisplayName();
     return i18n.translate('common.ui.aggTypes.buckets.dateHistogramLabel', {
       defaultMessage: '{fieldName} per {intervalDescription}',

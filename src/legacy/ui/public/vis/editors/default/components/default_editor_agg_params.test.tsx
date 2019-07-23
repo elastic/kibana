@@ -33,7 +33,7 @@ const mockEditorConfig = {
   },
 };
 
-jest.mock('ui/agg_types', () => ({
+jest.mock('../../../../../../core_plugins/data/public/np_ready/agg_types', () => ({
   aggTypes: {
     byType: {
       metrics: [],

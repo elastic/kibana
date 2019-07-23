@@ -19,7 +19,7 @@
 
 import { prepareJson, prepareString, buildPipelineVisFunction, buildPipeline } from './build_pipeline';
 
-jest.mock('ui/agg_types/buckets/date_histogram', () => ({}));
+jest.mock('../../../../../../core_plugins/data/public/np_ready/agg_types/buckets/date_histogram', () => ({}));
 
 describe('visualize loader pipeline helpers: build pipeline', () => {
   describe('prepareJson', () => {

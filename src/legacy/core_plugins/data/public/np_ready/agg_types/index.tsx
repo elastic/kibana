@@ -17,8 +17,6 @@
  * under the License.
  */
 
-import './agg_params';
-import { IndexedArray } from '../indexed_array';
 // @ts-ignore
 import { countMetricAgg } from './metrics/count';
 // @ts-ignore
@@ -124,9 +122,7 @@ export const aggTypes = {
   ]
 };
 
-export { AggParam, AggParamOption } from './agg_param';
+export { AggParam, AggParamOption } from './agg_params';
 export { AggType } from './agg_type';
 export { FieldParamType } from './param_types';
-
-export { FilterService, FilterSetup } from './agg_types_service';
 

@@ -18,7 +18,7 @@
  */
 
 import { AggConfig, VisState } from 'ui/vis';
-import { FieldParamType, AggType } from 'ui/agg_types';
+import { FieldParamType, AggType } from '../../../../../../core_plugins/data/public/np_ready/agg_types';
 import { IndexPattern } from 'ui/index_patterns';
 import {
   getAggParamsToRender,
@@ -28,7 +28,7 @@ import {
 } from './default_editor_agg_params_helper';
 import { EditorConfig } from '../../config/types';
 
-jest.mock('ui/agg_types', () => ({
+jest.mock('../../../../../../core_plugins/data/public/np_ready/agg_types', () => ({
   aggTypes: {
     byType: {
       metrics: [],

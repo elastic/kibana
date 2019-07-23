@@ -19,10 +19,10 @@
 
 import _ from 'lodash';
 import { IndexedArray } from '../../../indexed_array';
-import { AggParams } from '../../../agg_types/agg_params';
 import { RowsOrColumnsControl } from './controls/rows_or_columns';
 import { RadiusRatioOptionControl } from './controls/radius_ratio_option';
 import { AggGroupNames } from './agg_groups';
+import { initParams } from '../../../../../core_plugins/data/public/np_ready/agg_types/agg_params';
 
 class Schemas {
   constructor(schemas) {
@@ -55,7 +55,7 @@ class Schemas {
         });
 
         // convert the params into a params registry
-        schema.params = new AggParams(schema.params);
+        schema.params = initParams(schema.params);
 
         return schema;
       })

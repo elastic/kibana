@@ -16,7 +16,7 @@ import 'uiExports/inspectorViews';
 import 'uiExports/search';
 import 'uiExports/embeddableFactories';
 import 'uiExports/embeddableActions';
-import 'ui/agg_types';
+import '../../../../../src/legacy/core_plugins/data/public/np_ready/agg_types';
 
 import { capabilities } from 'ui/capabilities';
 import chrome from 'ui/chrome';

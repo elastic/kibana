@@ -35,7 +35,7 @@ import 'ui/kbn_top_nav';
 import 'plugins/kibana/dashboard';
 import 'ui/vislib';
 import 'ui/agg_response';
-import 'ui/agg_types';
+import '../../../../../src/legacy/core_plugins/data/public/np_ready/agg_types';
 import 'ui/timepicker';
 import 'leaflet';
 import { npStart } from 'ui/new_platform';

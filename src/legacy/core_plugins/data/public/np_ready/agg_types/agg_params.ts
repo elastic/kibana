@@ -31,7 +31,7 @@ import { AggConfig } from '../agg_configs/agg_config';
 import { AggConfigs } from '../agg_configs/agg_configs';
 import { AggParamEditorProps } from 'ui/vis';
 
-interface AggParam {
+export interface AggParam {
   editorComponent: React.ComponentType<AggParamEditorProps<unknown>>;
   type: string;
   name: string;
@@ -44,13 +44,15 @@ interface AggParam {
   write?: any;
 }
 
-interface AggParamOption {
+export interface AggParamOption {
   val: string;
   display: string;
   enabled?(agg: AggConfig): void;
 }
 
+
 const paramTypeMap = {
+  // @ts-ignore
   field: FieldParamType,
   optioned: (OptionedParamType),
   string: (StringParamType),
@@ -83,7 +85,7 @@ export const initParams = (params: [AggParamConfig]): [AggParam] => {
  *         output object which is used to create the agg dsl for the search request. All other properties
  *         are dependent on the AggParam#write methods which should be studied for each AggType.
  */
-export const writeParams = (params: [AggParam], aggConfig: AggConfig, aggs: AggConfigs, locals: Record<string, any>) => {
+export const writeParams = (params: [AggParam], aggConfig: AggConfig, aggs?: AggConfigs, locals?: Record<string, any>) => {
   const output = { params: {} as Record<string, any> };
   locals = locals || {};
 

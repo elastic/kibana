@@ -21,7 +21,7 @@ import React, { useReducer, useEffect } from 'react';
 import { EuiForm, EuiAccordion, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { aggTypes, AggType, AggParam } from 'ui/agg_types';
+import { aggTypes, AggType, AggParam } from '../../../../../../core_plugins/data/public/np_ready//agg_types';
 import { AggConfig, VisState, AggParams } from 'ui/vis';
 import { IndexPattern } from 'ui/index_patterns';
 import { DefaultEditorAggSelect } from './default_editor_agg_select';
