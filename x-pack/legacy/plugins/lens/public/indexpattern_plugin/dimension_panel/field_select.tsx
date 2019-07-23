@@ -18,7 +18,9 @@ import { FieldIcon } from '../field_icon';
 import { DataType } from '../../types';
 import { OperationMapping, operationDefinitionMap } from '../operations';
 
-export type FieldChoice = { type: 'field'; field: string } | { type: 'document' };
+export type FieldChoice =
+  | { type: 'field'; field: string; operationType?: OperationType }
+  | { type: 'document' };
 
 export interface FieldSelectProps {
   currentIndexPattern: IndexPattern;
@@ -64,10 +66,10 @@ export function FieldSelect({
     }
 
     const isCurrentOperationApplicableWithoutField =
-      !selectedColumnOperationType ||
-      operationDefinitionMap[selectedColumnOperationType].getPossibleOperationsForDocument(
-        currentIndexPattern
-      ).length > 0;
+      (!selectedColumnOperationType && !incompatibleSelectedOperationType) ||
+      operationDefinitionMap[
+        (selectedColumnOperationType || incompatibleSelectedOperationType)!
+      ].getPossibleOperationsForDocument(currentIndexPattern).length > 0;
 
     const fieldOptions = [];
     const fieldlessColumn = filteredOperations.find(op => op.applicableWithoutField);
@@ -96,6 +98,10 @@ export function FieldSelect({
               type: 'field',
               field,
               dataType: fieldMap[field].type,
+              operationType:
+                selectedColumnOperationType && isCompatibleWithCurrentOperation(field)
+                  ? selectedColumnOperationType
+                  : undefined,
             },
             compatible: isCompatibleWithCurrentOperation(field),
           }))
