@@ -69,7 +69,7 @@ export interface CallAPIOptions {
 async function callAPI(
   client: Client,
   endpoint: string,
-  clientParams: Record<string, unknown> = {},
+  clientParams: Record<string, any> = {},
   options: CallAPIOptions = { wrap401Errors: true }
 ): Promise<any> {
   const clientPath = endpoint.split('.');
@@ -149,7 +149,7 @@ export class ClusterClient {
    */
   public callWithInternalUser = async (
     endpoint: string,
-    clientParams: Record<string, unknown> = {},
+    clientParams: Record<string, any> = {},
     options?: CallAPIOptions
   ) => {
     this.assertIsNotClosed();

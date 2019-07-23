@@ -22,8 +22,10 @@ import { ItemIdToExpandedRowMap } from './common';
 export const ProgressBar = ({ isLoading = false }) => {
   return (
     <Fragment>
-      {isLoading && <EuiProgress size="xs" color="primary" />}
-      {!isLoading && <EuiProgress value={0} max={100} size="xs" />}
+      {isLoading && <EuiProgress className="mlTransformProgressBar" size="xs" color="primary" />}
+      {!isLoading && (
+        <EuiProgress className="mlTransformProgressBar" value={0} max={100} size="xs" />
+      )}
     </Fragment>
   );
 };

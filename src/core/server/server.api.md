@@ -31,7 +31,7 @@ export type AuthHeaders = Record<string, string>;
 // @public
 export interface AuthResultData {
     headers: AuthHeaders;
-    state: Record<string, unknown>;
+    state: Record<string, any>;
 }
 
 // @public
@@ -57,7 +57,7 @@ export interface CallAPIOptions {
 // @public
 export class ClusterClient {
     constructor(config: ElasticsearchClientConfig, log: Logger, getAuthHeaders?: GetAuthHeaders);
-    callWithInternalUser: (endpoint: string, clientParams?: Record<string, unknown>, options?: CallAPIOptions | undefined) => Promise<any>;
+    callWithInternalUser: (endpoint: string, clientParams?: Record<string, any>, options?: CallAPIOptions | undefined) => Promise<any>;
     callWithRequest: (request: KibanaRequest<unknown, unknown, unknown> | LegacyRequest | FakeRequest, endpoint: string, clientParams?: Record<string, unknown>, options?: CallAPIOptions | undefined) => Promise<any>;
     close(): void;
     }

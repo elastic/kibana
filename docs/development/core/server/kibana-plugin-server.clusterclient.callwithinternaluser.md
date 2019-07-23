@@ -9,5 +9,5 @@ Calls specified endpoint with provided clientParams on behalf of the Kibana inte
 <b>Signature:</b>
 
 ```typescript
-callWithInternalUser: (endpoint: string, clientParams?: Record<string, unknown>, options?: CallAPIOptions | undefined) => Promise<any>;
+callWithInternalUser: (endpoint: string, clientParams?: Record<string, any>, options?: CallAPIOptions | undefined) => Promise<any>;
 ```
