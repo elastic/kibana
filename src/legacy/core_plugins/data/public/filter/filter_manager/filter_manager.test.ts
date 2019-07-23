@@ -398,8 +398,8 @@ describe('filter_manager', () => {
     });
 
     test('should fire the update and fetch events', async function() {
-      const updateStub = sinon.stub();
-      const fetchStub = sinon.stub();
+      const updateStub = jest.fn();
+      const fetchStub = jest.fn();
 
       filterManager.getUpdates$().subscribe({
         next: updateStub,
@@ -416,8 +416,8 @@ describe('filter_manager', () => {
       expect(globalStateStub.save.callCount).toBe(1);
 
       // this time, events should be emitted
-      expect(fetchStub.called);
-      expect(updateStub.called);
+      expect(fetchStub).toBeCalledTimes(1);
+      expect(updateStub).toBeCalledTimes(1);
     });
   });
 
@@ -595,8 +595,8 @@ describe('filter_manager', () => {
     });
 
     test('should fire the update and fetch events', async function() {
-      const updateStub = sinon.stub();
-      const fetchStub = sinon.stub();
+      const updateStub = jest.fn();
+      const fetchStub = jest.fn();
 
       await filterManager.addFilters(readyFilters, false);
 
@@ -611,8 +611,8 @@ describe('filter_manager', () => {
       filterManager.removeFilter(readyFilters[0]);
 
       // this time, events should be emitted
-      expect(fetchStub.called);
-      expect(updateStub.called);
+      expect(fetchStub).toBeCalledTimes(1);
+      expect(updateStub).toBeCalledTimes(1);
     });
 
     test('should remove matching filters', async function() {
@@ -666,17 +666,21 @@ describe('filter_manager', () => {
   describe('invert', () => {
     test('invert to disabled', async () => {
       const f1 = getFilter(FilterStateStore.GLOBAL_STATE, false, false, 'age', 34);
-      filterManager.invertFilter(f1);
+      await filterManager.invertFilter(f1);
+      const newFilters1 = filterManager.getFilters()[0];
       expect(f1.meta.negate).toBe(true);
-      filterManager.invertFilter(f1);
+      expect(newFilters1.meta.negate).toBe(true);
+      await filterManager.invertFilter(f1);
+      const newFilters2 = filterManager.getFilters()[0];
       expect(f1.meta.negate).toBe(false);
+      expect(newFilters2.meta.negate).toBe(false);
     });
 
-    test('should fire the update and fetch events', function() {
-      const updateStub = sinon.stub();
-      const fetchStub = sinon.stub();
+    test('should fire the update and fetch events', async function() {
+      await filterManager.addFilters(readyFilters);
 
-      filterManager.addFilters(readyFilters);
+      const updateStub = jest.fn();
+      const fetchStub = jest.fn();
       filterManager.getUpdates$().subscribe({
         next: updateStub,
       });
@@ -685,9 +689,9 @@ describe('filter_manager', () => {
         next: fetchStub,
       });
 
-      filterManager.invertFilter(readyFilters[1]);
-      expect(fetchStub.called);
-      expect(updateStub.called);
+      await filterManager.invertFilter(readyFilters[1]);
+      expect(fetchStub).toBeCalledTimes(1);
+      expect(updateStub).toBeCalledTimes(1);
     });
   });
 

@@ -182,10 +182,13 @@ export class FilterManager {
     }
   }
 
-  public invertFilter(filter: Filter) {
+  public async invertFilter(filter: Filter) {
     const newFilter = _.cloneDeep(filter);
     newFilter.meta.negate = !newFilter.meta.negate;
-    this.addFilters(newFilter);
+    await this.addFilters(newFilter);
+
+    // Update input filter
+    filter.meta.negate = newFilter.meta.negate;
   }
 
   public async removeAll() {
