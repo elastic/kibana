@@ -27,8 +27,8 @@ function buildMetricOperation<T extends FieldBasedIndexPatternColumn>(
       if (fieldType === 'number' && (!aggregationRestrictions || aggregationRestrictions[type])) {
         return [
           {
-            dataType: 'string',
-            isBucketed: true,
+            dataType: 'number',
+            isBucketed: false,
           },
         ];
       }

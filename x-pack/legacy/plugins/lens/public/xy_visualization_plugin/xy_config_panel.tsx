@@ -76,7 +76,8 @@ export const chartTypeIcons: Array<{ id: SeriesType; label: string; iconType: Ic
 ];
 
 const isBucketed = (operation: OperationMetaInformation) => operation.isBucketed;
-const isNumericMetric = (operation: OperationMetaInformation) => !operation.isBucketed && operation.dataType === 'number';
+const isNumericMetric = (operation: OperationMetaInformation) =>
+  !operation.isBucketed && operation.dataType === 'number';
 
 type UnwrapArray<T> = T extends Array<infer P> ? P : T;
 

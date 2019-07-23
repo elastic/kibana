@@ -8,6 +8,7 @@ import { getSuggestions } from './xy_suggestions';
 import { TableSuggestionColumn, VisualizationSuggestion } from '../types';
 import { State } from './types';
 import { generateId } from '../id_generator';
+import { Ast } from '@kbn/interpreter/common';
 
 jest.mock('../id_generator');
 
@@ -277,9 +278,13 @@ describe('xy_suggestions', () => {
       ],
     });
 
-    const expression = suggestion.previewExpression! as any;
+    const expression = suggestion.previewExpression! as Ast;
 
-    expect(expression.chain[0].arguments.legend[0].chain[0].arguments.isVisible[0]).toBeFalsy();
-    expect(expression.chain[0].arguments.layers[0].chain[0].arguments.hide[0]).toBeTruthy();
+    expect(
+      (expression.chain[0].arguments.legend[0] as Ast).chain[0].arguments.isVisible[0]
+    ).toBeFalsy();
+    expect(
+      (expression.chain[0].arguments.layers[0] as Ast).chain[0].arguments.hide[0]
+    ).toBeTruthy();
   });
 });

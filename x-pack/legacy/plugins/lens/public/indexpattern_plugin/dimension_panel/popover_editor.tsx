@@ -275,15 +275,26 @@ export function PopoverEditor(props: PopoverEditorProps) {
             onChoose={choice => {
               const column =
                 choice.type === 'field'
-                  ? buildColumnForField({
-                      // todo fix
-                      index: 0,
-                      columns: props.state.layers[props.layerId].columns,
-                      field: fieldMap[choice.field],
-                      indexPatternId: currentIndexPattern.id,
-                      layerId: props.layerId,
-                      suggestedPriority: props.suggestedPriority,
-                    })
+                  ? incompatibleSelectedOperationType
+                    ? buildColumnForOperationType({
+                        // todo fix
+                        index: 0,
+                        columns: props.state.layers[props.layerId].columns,
+                        field: fieldMap[choice.field],
+                        indexPatternId: currentIndexPattern.id,
+                        layerId: props.layerId,
+                        suggestedPriority: props.suggestedPriority,
+                        op: incompatibleSelectedOperationType,
+                      })
+                    : buildColumnForField({
+                        // todo fix
+                        index: 0,
+                        columns: props.state.layers[props.layerId].columns,
+                        field: fieldMap[choice.field],
+                        indexPatternId: currentIndexPattern.id,
+                        layerId: props.layerId,
+                        suggestedPriority: props.suggestedPriority,
+                      })
                   : buildColumnForDocument({
                       // todo fix
                       index: 0,

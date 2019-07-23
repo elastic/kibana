@@ -41,11 +41,13 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn> = {
   }),
   getPossibleOperationsForDocument: () => [],
   getPossibleOperationsForField: ({ aggregationRestrictions, type }) => {
-    if ( type === 'string' && (!aggregationRestrictions || aggregationRestrictions.terms)) {
-      return [{
-        dataType: 'string',
-        isBucketed: true
-      }];
+    if (type === 'string' && (!aggregationRestrictions || aggregationRestrictions.terms)) {
+      return [
+        {
+          dataType: 'string',
+          isBucketed: true,
+        },
+      ];
     }
     return [];
   },

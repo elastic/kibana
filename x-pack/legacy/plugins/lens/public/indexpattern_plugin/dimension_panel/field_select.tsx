@@ -41,7 +41,7 @@ export function FieldSelect({
   onChoose,
   onDeleteColumn,
 }: FieldSelectProps) {
-  const fieldOptions = useMemo(() => {
+  const memoizedFieldOptions = useMemo(() => {
     const fields = _.uniq(
       filteredOperations.reduce((list, op) => [...list, ...op.applicableFields], [] as string[])
     ).sort();
@@ -93,7 +93,7 @@ export function FieldSelect({
           .map(field => ({
             label: field,
             value: {
-              type: 'document',
+              type: 'field',
               field,
               dataType: fieldMap[field].type,
             },
@@ -132,7 +132,7 @@ export function FieldSelect({
       placeholder={i18n.translate('xpack.lens.indexPattern.fieldPlaceholder', {
         defaultMessage: 'Field',
       })}
-      options={(fieldOptions as unknown) as EuiComboBoxOptionProps[]}
+      options={(memoizedFieldOptions as unknown) as EuiComboBoxOptionProps[]}
       isInvalid={Boolean(incompatibleSelectedOperationType && selectedColumnOperationType)}
       selectedOptions={
         selectedColumnOperationType
@@ -143,7 +143,7 @@ export function FieldSelect({
                   value: { type: 'field', field: selectedColumnSourceField },
                 },
               ]
-            : [fieldOptions[0]]
+            : [memoizedFieldOptions[0]]
           : []
       }
       singleSelection={{ asPlainText: true }}
@@ -153,7 +153,7 @@ export function FieldSelect({
           return;
         }
 
-        onChoose((choices[0] as unknown) as FieldChoice);
+        onChoose((choices[0].value as unknown) as FieldChoice);
       }}
       renderOption={(option, searchValue) => {
         return (
