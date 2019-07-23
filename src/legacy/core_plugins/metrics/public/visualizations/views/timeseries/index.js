@@ -72,9 +72,6 @@ export const TimeSeries = ({
         tooltip={{
           headerFormatter: tooltipFormatter,
         }}
-        xDomain={{
-          minInterval: 1000,
-        }}
       />
 
       {annotations.map(({ id, data, icon, color }) => {

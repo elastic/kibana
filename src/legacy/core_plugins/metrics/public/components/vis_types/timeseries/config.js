@@ -18,7 +18,7 @@
  */
 
 import PropTypes from 'prop-types';
-import React, { useContext } from 'react';
+import React from 'react';
 import { DataFormatPicker } from '../../data_format_picker';
 import { createSelectHandler } from '../../lib/create_select_handler';
 import { YesNo } from '../../yes_no';
@@ -42,7 +42,6 @@ import {
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 import { getDefaultQueryLanguage } from '../../lib/get_default_query_language';
 import { isPercentDisabled } from '../../lib/stacked';
-import { SeriesQuantityContext } from '../../../contexts/series_quantity_context';
 import { STACKED_OPTIONS } from '../../../visualizations/constants/chart';
 
 const { QueryBarInput } = data.query.ui;
@@ -51,7 +50,6 @@ const localStorage = new Storage(window.localStorage);
 export const TimeseriesConfig = injectI18n(function(props) {
   const handleSelectChange = createSelectHandler(props.onChange);
   const handleTextChange = createTextHandler(props.onChange);
-  const seriesQuantity = useContext(SeriesQuantityContext);
   const defaults = {
     fill: '',
     line_width: '',
@@ -79,7 +77,7 @@ export const TimeseriesConfig = injectI18n(function(props) {
     {
       label: intl.formatMessage({ id: 'tsvb.timeSeries.percentLabel', defaultMessage: 'Percent' }),
       value: 'percent',
-      disabled: isPercentDisabled(seriesQuantity[model.id]),
+      disabled: isPercentDisabled(props.seriesQuantity[model.id]),
     },
   ];
   const selectedStackedOption = stackedOptions.find(option => {
@@ -534,4 +532,5 @@ TimeseriesConfig.propTypes = {
   model: PropTypes.object,
   onChange: PropTypes.func,
   indexPatternForQuery: PropTypes.string,
+  seriesQuantity: PropTypes.object,
 };

@@ -18,7 +18,7 @@
  */
 
 import PropTypes from 'prop-types';
-import React, { useContext } from 'react';
+import React from 'react';
 import { get, find } from 'lodash';
 import { GroupBySelect } from './group_by_select';
 import { createTextHandler } from '../lib/create_text_handler';
@@ -38,7 +38,6 @@ import {
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 import { FIELD_TYPES } from '../../../common/field_types';
 import { STACKED_OPTIONS } from '../../visualizations/constants';
-import { SeriesQuantityContext } from '../../contexts/series_quantity_context';
 
 const DEFAULTS = { terms_direction: 'desc', terms_size: 10, terms_order_by: '_count' };
 
@@ -49,6 +48,7 @@ export const SplitByTermsUI = ({
   model: seriesModel,
   fields,
   uiRestrictions,
+  seriesQuantity,
 }) => {
   const htmlId = htmlIdGenerator();
   const handleTextChange = createTextHandler(onChange);
@@ -88,7 +88,6 @@ export const SplitByTermsUI = ({
   });
   const selectedField = find(fields[indexPattern], ({ name }) => name === model.terms_field);
   const selectedFieldType = get(selectedField, 'type');
-  const seriesQuantity = useContext(SeriesQuantityContext);
 
   if (isPercentDisabled(seriesQuantity[model.id]) && model.stacked === STACKED_OPTIONS.PERCENT) {
     onChange({ ['stacked']: STACKED_OPTIONS.NONE });
@@ -226,6 +225,7 @@ SplitByTermsUI.propTypes = {
   indexPattern: PropTypes.string,
   fields: PropTypes.object,
   uiRestrictions: PropTypes.object,
+  seriesQuantity: PropTypes.object,
 };
 
 export const SplitByTerms = injectI18n(SplitByTermsUI);
