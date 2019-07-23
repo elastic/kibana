@@ -17,11 +17,12 @@
  * under the License.
  */
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 import { toastNotifications } from '../../notify';
 import { RequestFailure } from '../../errors';
 import { RequestStatus } from './req_status';
 import { SearchError } from '../search_strategy/search_error';
-import { i18n } from '@kbn/i18n';
+import { ShardFailureOpenModalButton } from './components/shard_failure_open_modal_button';
 
 export function CallResponseHandlersProvider(Promise) {
   const ABORTED = RequestStatus.ABORTED;
@@ -44,35 +45,24 @@ export function CallResponseHandlersProvider(Promise) {
       }
 
       if (response._shards && response._shards.failed) {
-        const failures = Array.isArray(response._shards.failures) ? response._shards.failures : [];
+        const title = i18n.translate('common.ui.courier.fetch.shardsFailedNotificationMessage', {
+          defaultMessage: '{shardsFailed} of {shardsTotal} shards failed',
+          values: {
+            shardsFailed: response._shards.failed,
+            shardsTotal: response._shards.total,
+          },
+        });
+        const text = (
+          <ShardFailureOpenModalButton
+            request={searchRequest.fetchParams.body}
+            response={response}
+            title={title}
+          />
+        );
 
         toastNotifications.addWarning({
-          title: i18n.translate('common.ui.courier.fetch.shardsFailedNotificationMessage', {
-            defaultMessage: '{shardsFailed} of {shardsTotal} shards failed',
-            values: { shardsFailed: response._shards.failed, shardsTotal: response._shards.total },
-          }),
-          text: failures.map((failure, idx) => {
-            return (
-              <div key={idx}>
-                {failure.reason && (
-                  <div>
-                    <b>{failure.reason.type}</b>
-                    <br />
-                    <div>{failure.reason.reason}</div>
-                  </div>
-                )}
-                <div>
-                  <b>Shard:</b> go{failure.shard}
-                </div>
-                <div>
-                  <b>Index:</b> {failure.index}
-                </div>
-                <div>
-                  <b>Node:</b> {failure.node}
-                </div>
-              </div>
-            );
-          }),
+          title,
+          text,
         });
       }
 
