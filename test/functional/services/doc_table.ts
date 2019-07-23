@@ -131,7 +131,7 @@ export function DocTableProvider({ getService, getPageObjects }: FtrProviderCont
       );
     }
 
-    async addInclusiveFilter(
+    public async addInclusiveFilter(
       detailsRow: WebElementWrapper,
       fieldName: WebElementWrapper
     ): Promise<void> {
