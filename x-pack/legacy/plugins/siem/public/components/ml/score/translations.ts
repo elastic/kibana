@@ -35,6 +35,6 @@ export const NARROW_TO_THIS_DATE_RANGE = i18n.translate(
   }
 );
 
-export const TOP_ANOMALY_SUSPECT = i18n.translate('xpack.siem.ml.score.topAnomalySuspectTitle', {
-  defaultMessage: 'Top Anomaly Suspect',
+export const ANOMALOUS_ENTITY = i18n.translate('xpack.siem.ml.score.anomalousEntityTitle', {
+  defaultMessage: 'Anomalous Entity',
 });

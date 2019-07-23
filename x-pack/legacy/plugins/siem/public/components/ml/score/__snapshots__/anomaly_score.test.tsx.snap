@@ -183,7 +183,7 @@ exports[`anomaly_scores renders correctly against snapshot 1`] = `
                   process.name: "du"
                 </EuiFlexItem>
               </EuiFlexGroup>,
-              "title": "Top Anomaly Suspect",
+              "title": "Anomalous Entity",
             },
             Object {
               "description": <EuiFlexGroup
