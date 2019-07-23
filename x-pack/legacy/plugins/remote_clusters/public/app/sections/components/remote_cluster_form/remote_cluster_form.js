@@ -9,7 +9,6 @@ import PropTypes from 'prop-types';
 import { merge } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -29,6 +28,9 @@ import {
   EuiSwitch,
   EuiText,
   EuiTitle,
+  EuiDelayRender,
+  EuiScreenReaderOnly,
+  htmlIdGenerator,
 } from '@elastic/eui';
 
 import {
@@ -43,6 +45,9 @@ const defaultFields = {
   seeds: [],
   skipUnavailable: false,
 };
+
+const ERROR_TITLE_ID = 'removeClustersErrorTitle';
+const ERROR_LIST_ID = 'removeClustersErrorList';
 
 export class RemoteClusterForm extends Component {
   static propTypes = {
@@ -65,6 +70,7 @@ export class RemoteClusterForm extends Component {
     const { fields, disabledFields } = props;
     const fieldsState = merge({}, defaultFields, fields);
 
+    this.generateId = htmlIdGenerator();
     this.state = {
       localSeedErrors: [],
       seedInput: '',
@@ -232,24 +238,20 @@ export class RemoteClusterForm extends Component {
       <EuiDescribedFormGroup
         title={(
           <EuiTitle size="s">
-            <h4>
+            <h2>
               <FormattedMessage
                 id="xpack.remoteClusters.remoteClusterForm.sectionSeedsTitle"
                 defaultMessage="Seed nodes for cluster discovery"
               />
-            </h4>
+            </h2>
           </EuiTitle>
         )}
         description={(
-          <Fragment>
-            <p>
-              <FormattedMessage
-                id="xpack.remoteClusters.remoteClusterForm.sectionSeedsDescription1"
-                defaultMessage="A list of remote cluster nodes to query for the cluster state.
-                  Specify multiple seed nodes so discovery doesn't fail if a node is unavailable."
-              />
-            </p>
-          </Fragment>
+          <FormattedMessage
+            id="xpack.remoteClusters.remoteClusterForm.sectionSeedsDescription1"
+            defaultMessage="A list of remote cluster nodes to query for the cluster state.
+              Specify multiple seed nodes so discovery doesn't fail if a node is unavailable."
+          />
         )}
         fullWidth
       >
@@ -312,12 +314,12 @@ export class RemoteClusterForm extends Component {
       <EuiDescribedFormGroup
         title={(
           <EuiTitle size="s">
-            <h4>
+            <h2>
               <FormattedMessage
                 id="xpack.remoteClusters.remoteClusterForm.sectionSkipUnavailableTitle"
                 defaultMessage="Make remote cluster optional"
               />
-            </h4>
+            </h2>
           </EuiTitle>
         )}
         description={(
@@ -434,6 +436,7 @@ export class RemoteClusterForm extends Component {
             onClick={this.save}
             fill
             disabled={isSaveDisabled}
+            aria-describedby={`${this.generateId(ERROR_TITLE_ID)} ${this.generateId(ERROR_LIST_ID)}`}
           >
             <FormattedMessage
               id="xpack.remoteClusters.remoteClusterForm.saveButtonLabel"
@@ -486,7 +489,7 @@ export class RemoteClusterForm extends Component {
           <EuiCallOut
             title={message}
             icon="cross"
-            color="danger"
+            color="warning"
           >
             {errorBody}
           </EuiCallOut>
@@ -500,27 +503,84 @@ export class RemoteClusterForm extends Component {
   }
 
   renderErrors = () => {
-    const { areErrorsVisible } = this.state;
+    const {
+      areErrorsVisible,
+      fieldsErrors: {
+        name: errorClusterName,
+        seeds: errorsSeeds,
+      },
+      localSeedErrors,
+    } = this.state;
+
     const hasErrors = this.hasErrors();
 
     if (!areErrorsVisible || !hasErrors) {
       return null;
     }
 
+    const errorExplanations = [];
+
+    if (errorClusterName) {
+      errorExplanations.push({
+        key: 'nameExplanation',
+        field: i18n.translate('xpack.remoteClusters.remoteClusterForm.inputNameErrorMessage', {
+          defaultMessage: 'The "Name" field is invalid.',
+        }),
+        error: errorClusterName
+      });
+    }
+
+    if (errorsSeeds) {
+      errorExplanations.push({
+        key: 'seedsExplanation',
+        field: i18n.translate('xpack.remoteClusters.remoteClusterForm.inputSeedsErrorMessage', {
+          defaultMessage: 'The "Seed nodes" field is invalid.',
+        }),
+        error: errorsSeeds
+      });
+    }
+
+    if (localSeedErrors && localSeedErrors.length) {
+      errorExplanations.push({
+        key: 'localSeedExplanation',
+        field: i18n.translate('xpack.remoteClusters.remoteClusterForm.inputLocalSeedErrorMessage', {
+          defaultMessage: 'The "Seed nodes" field is invalid.',
+        }),
+        error: localSeedErrors.join(' '),
+      });
+    }
+
+    const messagesToBeRendered = errorExplanations.length && (
+      <EuiScreenReaderOnly>
+        <dl id={this.generateId(ERROR_LIST_ID)} aria-labelledby={this.generateId(ERROR_TITLE_ID)}>
+          {errorExplanations.map(({ key, field, error }) => (
+            <div key={key}>
+              <dt>{field}</dt>
+              <dd>{error}</dd>
+            </div>
+          ))}
+        </dl>
+      </EuiScreenReaderOnly>
+    );
+
     return (
       <Fragment>
-        <EuiSpacer size="m" />
+        <EuiSpacer size="m" data-test-subj="remoteClusterFormGlobalError" />
         <EuiCallOut
-          data-test-subj="remoteClusterFormGlobalError"
           title={(
-            <FormattedMessage
-              id="xpack.remoteClusters.remoteClusterForm.errorTitle"
-              defaultMessage="Fix errors before continuing."
-            />
+            <h3 id={this.generateId(ERROR_TITLE_ID)}>
+              <FormattedMessage
+                id="xpack.remoteClusters.remoteClusterForm.errorTitle"
+                defaultMessage="Fix errors before continuing."
+              />
+            </h3>
           )}
           color="danger"
           iconType="cross"
         />
+        <EuiDelayRender>
+          {messagesToBeRendered}
+        </EuiDelayRender>
       </Fragment>
     );
   }
@@ -550,12 +610,12 @@ export class RemoteClusterForm extends Component {
           <EuiDescribedFormGroup
             title={(
               <EuiTitle size="s">
-                <h4>
+                <h2>
                   <FormattedMessage
                     id="xpack.remoteClusters.remoteClusterForm.sectionNameTitle"
                     defaultMessage="Name"
                   />
-                </h4>
+                </h2>
               </EuiTitle>
             )}
             description={(

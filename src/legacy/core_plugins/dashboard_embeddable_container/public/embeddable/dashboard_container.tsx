@@ -26,6 +26,7 @@ import { IndexPattern } from 'ui/index_patterns';
 import { Filter } from '@kbn/es-query';
 import { RefreshInterval } from 'ui/timefilter/timefilter';
 import { TimeRange } from 'ui/timefilter/time_history';
+import { uniq } from 'lodash';
 import {
   Container,
   ContainerInput,
@@ -123,7 +124,7 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
         }
       }
     });
-    return indexPatterns;
+    return uniq(indexPatterns, 'id');
   }
 
   protected getInheritedInput(id: string): InheritedChildInput {

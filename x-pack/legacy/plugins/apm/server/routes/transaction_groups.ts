@@ -122,20 +122,23 @@ export function initTransactionGroupsApi(core: InternalCoreSetup) {
     options: {
       validate: {
         query: withDefaultValidators({
-          transactionName: Joi.string()
+          transactionName: Joi.string(),
+          transactionType: Joi.string().required()
         })
       }
     },
     handler: req => {
       const setup = setupRequest(req);
       const { serviceName } = req.params;
-      const { transactionName } = req.query as {
+      const { transactionName, transactionType } = req.query as {
         transactionName?: string;
+        transactionType: string;
       };
 
       return getTransactionBreakdown({
         serviceName,
         transactionName,
+        transactionType,
         setup
       }).catch(defaultErrorHandler);
     }
