@@ -12,19 +12,21 @@ import { ActionCreator } from 'typescript-fsa';
 import { networkActions } from '../../../../store/actions';
 import { NetworkDnsEdges, NetworkDnsFields, NetworkDnsSortField } from '../../../../graphql/types';
 import { networkModel, networkSelectors, State } from '../../../../store';
-import { Criteria, ItemsPerRow, LoadMoreTable } from '../../../load_more_table';
+import { Criteria, ItemsPerRow, PaginatedTable } from '../../../paginated_table';
 
 import { getNetworkDnsColumns } from './columns';
 import { IsPtrIncluded } from './is_ptr_included';
 import * as i18n from './translations';
 
+const tableType = networkModel.NetworkTableType.dns;
+
 interface OwnProps {
   data: NetworkDnsEdges[];
-  loading: boolean;
-  hasNextPage: boolean;
+  fakeTotalCount: number;
   id: string;
-  nextCursor: string;
-  loadMore: (cursor: string) => void;
+  loading: boolean;
+  loadPage: (newActivePage: number) => void;
+  showMorePagesIndicator: boolean;
   totalCount: number;
   type: networkModel.NetworkType;
 }
@@ -48,6 +50,10 @@ interface NetworkDnsTableDispatchProps {
     isPtrIncluded: boolean;
     networkType: networkModel.NetworkType;
   }>;
+  updateTableActivePage: ActionCreator<{
+    activePage: number;
+    tableType: networkModel.NetworkTableType;
+  }>;
 }
 
 type NetworkDnsTableProps = OwnProps & NetworkDnsTableReduxProps & NetworkDnsTableDispatchProps;
@@ -61,14 +67,6 @@ const rowItems: ItemsPerRow[] = [
     text: i18n.ROWS_10,
     numberOfRow: 10,
   },
-  {
-    text: i18n.ROWS_20,
-    numberOfRow: 20,
-  },
-  {
-    text: i18n.ROWS_50,
-    numberOfRow: 50,
-  },
 ];
 
 class NetworkDnsTableComponent extends React.PureComponent<NetworkDnsTableProps> {
@@ -76,21 +74,21 @@ class NetworkDnsTableComponent extends React.PureComponent<NetworkDnsTableProps>
     const {
       data,
       dnsSortField,
-      hasNextPage,
+      fakeTotalCount,
+      id,
       isPtrIncluded,
       limit,
       loading,
-      loadMore,
-      id,
-      nextCursor,
+      loadPage,
+      showMorePagesIndicator,
       totalCount,
       type,
       updateDnsLimit,
+      updateTableActivePage,
     } = this.props;
     return (
-      <LoadMoreTable
+      <PaginatedTable
         columns={getNetworkDnsColumns(type)}
-        hasNextPage={hasNextPage}
         headerCount={totalCount}
         headerSupplement={
           <IsPtrIncluded isPtrIncluded={isPtrIncluded} onChange={this.onChangePtrIncluded} />
@@ -103,14 +101,23 @@ class NetworkDnsTableComponent extends React.PureComponent<NetworkDnsTableProps>
         limit={limit}
         loading={loading}
         loadingTitle={i18n.TOP_DNS_DOMAINS}
-        loadMore={() => loadMore(nextCursor)}
+        loadPage={newActivePage => loadPage(newActivePage)}
         onChange={this.onChange}
         pageOfItems={data}
+        showMorePagesIndicator={showMorePagesIndicator}
         sorting={{
           field: `node.${dnsSortField.field}`,
           direction: dnsSortField.direction,
         }}
+        totalCount={fakeTotalCount}
+        updateActivePage={newPage =>
+          updateTableActivePage({
+            activePage: newPage,
+            tableType,
+          })
+        }
         updateLimitPagination={newLimit => updateDnsLimit({ limit: newLimit, networkType: type })}
+        updateProps={{ isPtrIncluded, totalCount, dnsSortField }}
       />
     );
   }
@@ -143,6 +150,7 @@ const makeMapStateToProps = () => {
 export const NetworkDnsTable = connect(
   makeMapStateToProps,
   {
+    updateTableActivePage: networkActions.updateNetworkPageTableActivePage,
     updateDnsLimit: networkActions.updateDnsLimit,
     updateDnsSort: networkActions.updateDnsSort,
     updateIsPtrIncluded: networkActions.updateIsPtrIncluded,
