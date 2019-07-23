@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { SODatabaseAdapter } from '../so_database/default';
+
 import {
   ConfigurationFile,
   NewConfigurationFile,
@@ -12,6 +14,8 @@ import {
 } from './adapter_types';
 
 export class ConfigAdapter {
+  constructor(private readonly so: SODatabaseAdapter) {}
+
   public async create(
     configuration: NewConfigurationFile
   ): Promise<{ id: string; shared_id: string; version: number }> {
