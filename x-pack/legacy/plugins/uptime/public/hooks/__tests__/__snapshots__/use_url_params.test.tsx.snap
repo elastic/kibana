@@ -3,25 +3,6 @@
 exports[`useUrlParams gets the expected values using the context 1`] = `
 <UseUrlParamsTestComponent
   hook={[Function]}
-  routerProps={
-    Object {
-      "history": Object {
-        "push": [MockFunction],
-      },
-      "location": Object {
-        "hash": "",
-        "pathname": "",
-        "search": "?g=\\"\\"",
-        "state": Object {},
-      },
-      "match": Object {
-        "isExact": true,
-        "params": "",
-        "path": "/",
-        "url": "http://elastic.co",
-      },
-    }
-  }
 >
   <div>
     {"autorefreshInterval":60000,"autorefreshIsPaused":false,"dateRangeStart":"now-19d","dateRangeEnd":"now-1m","search":"","selectedPingStatus":"down"}
