@@ -17,4 +17,5 @@
  * under the License.
  */
 
-export type AggConfig = any;
+// @ts-ignore
+export * from '../../../core_plugins/data/public/np_ready/agg_configs/agg_config';
