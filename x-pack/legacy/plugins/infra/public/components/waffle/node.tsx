@@ -75,7 +75,7 @@ export const Node = injectI18n(
           closePopover={this.closePopover}
           options={options}
           timeRange={newTimerange}
-          popoverPosition="upCenter"
+          popoverPosition="downCenter"
         >
           <EuiToolTip position="top" content={`${node.name} | ${value}`}>
             <NodeContainer
