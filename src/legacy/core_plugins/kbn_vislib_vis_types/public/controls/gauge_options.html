@@ -48,6 +48,18 @@
   <div class="visEditorSidebar__formRow">
     <label
       class="visEditorSidebar__formLabel"
+      for="disableClicks"
+      i18n-id="kbnVislibVisTypes.editors.pointSeries.disableClicks"
+      i18n-default-message="Disable clicks on chart">
+    </label>
+    <div class="visEditorSidebar__formControl">
+      <input class="kuiCheckBox" id="disableClicks" type="checkbox" ng-model="editorState.params.disableClicks">
+    </div>
+  </div>
+
+  <div class="visEditorSidebar__formRow">
+    <label
+      class="visEditorSidebar__formLabel"
       for="displayWarnings"
       i18n-id="kbnVislibVisTypes.controls.gaugeOptions.displayWarningsLabel"
       i18n-default-message="Display warnings"
