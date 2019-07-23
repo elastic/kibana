@@ -261,8 +261,7 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
 
       this.debug('Request has been authenticated via SAML response.');
       return AuthenticationResult.redirectTo(stateRedirectURL || `${this.options.basePath}/`, {
-        accessToken,
-        refreshToken,
+        state: { accessToken, refreshToken },
       });
     } catch (err) {
       this.debug(`Failed to authenticate request via SAML response: ${err.message}`);
@@ -334,10 +333,9 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
         'Authentication initiated by Identity Provider is for a different user than currently authenticated.'
       );
 
-      return AuthenticationResult.redirectTo(
-        `${this.options.basePath}/overwritten_session`,
-        newState
-      );
+      return AuthenticationResult.redirectTo(`${this.options.basePath}/overwritten_session`, {
+        state: newState,
+      });
     }
 
     this.debug(
@@ -431,7 +429,7 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
       const user = await this.options.client.callWithRequest(request, 'shield.authenticate');
 
       this.debug('Request has been authenticated via refreshed token.');
-      return AuthenticationResult.succeeded(user, refreshedTokenPair);
+      return AuthenticationResult.succeeded(user, { state: refreshedTokenPair });
     } catch (err) {
       this.debug(`Failed to authenticate user using newly refreshed access token: ${err.message}`);
 
@@ -475,7 +473,7 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
       return AuthenticationResult.redirectTo(
         redirect,
         // Store request id in the state so that we can reuse it once we receive `SAMLResponse`.
-        { requestId, nextURL: `${request.getBasePath()}${request.url.path}` }
+        { state: { requestId, nextURL: `${request.getBasePath()}${request.url.path}` } }
       );
     } catch (err) {
       this.debug(`Failed to initiate SAML handshake: ${err.message}`);

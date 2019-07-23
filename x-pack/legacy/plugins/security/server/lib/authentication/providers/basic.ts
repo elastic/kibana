@@ -129,7 +129,9 @@ export class BasicAuthenticationProvider extends BaseAuthenticationProvider {
       BasicCredentials.decorateRequest(request, username, password);
       const user = await this.options.client.callWithRequest(request, 'shield.authenticate');
       this.debug('Request has been authenticated via login attempt.');
-      return AuthenticationResult.succeeded(user, { authorization: request.headers.authorization });
+      return AuthenticationResult.succeeded(user, {
+        state: { authorization: request.headers.authorization },
+      });
     } catch (err) {
       this.debug(`Failed to authenticate request via login attempt: ${err.message}`);
       // Reset `Authorization` header we've just set. We know for sure that it hasn't been defined before,

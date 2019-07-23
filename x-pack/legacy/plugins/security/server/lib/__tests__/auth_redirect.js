@@ -103,31 +103,6 @@ describe('lib/auth_redirect', function () {
     sinon.assert.notCalled(h.authenticated);
   });
 
-  it('includes `WWW-Authenticate` header if `authenticate` fails to authenticate user and provides challenges', async () => {
-    const originalEsError = Boom.unauthorized('some message');
-    originalEsError.output.headers['WWW-Authenticate'] = [
-      'Basic realm="Access to prod", charset="UTF-8"',
-      'Basic',
-      'Negotiate'
-    ];
-
-    server.plugins.security.authenticate.withArgs(request).resolves(
-      AuthenticationResult.failed(originalEsError, ['Negotiate'])
-    );
-
-    const response = await authenticate(request, h);
-
-    sinon.assert.calledWithExactly(
-      server.log,
-      ['info', 'authentication'],
-      'Authentication attempt failed: some message'
-    );
-    expect(response.message).to.eql(originalEsError.message);
-    expect(response.output.headers).to.eql({ 'WWW-Authenticate': ['Negotiate'] });
-    sinon.assert.notCalled(h.redirect);
-    sinon.assert.notCalled(h.authenticated);
-  });
-
   it('returns `unauthorized` when authentication can not be handled', async () => {
     server.plugins.security.authenticate.withArgs(request).returns(
       Promise.resolve(AuthenticationResult.notHandled())
@@ -149,6 +124,66 @@ describe('lib/auth_redirect', function () {
 
     sinon.assert.calledWith(h.authenticated, { credentials: {} });
     sinon.assert.notCalled(h.redirect);
+  });
+
+  describe('authResponseHeaders', () => {
+    let onPreResponse;
+    beforeEach(() => {
+      onPreResponse = server.ext.getCall(0).args[1];
+    });
+
+    it('includes custom headers into error response', async () => {
+      server.plugins.security.authenticate.withArgs(request).resolves(
+        AuthenticationResult.failed(
+          Boom.unauthorized('some message'),
+          { authResponseHeaders: { 'WWW-Authenticate': 'Negotiate' } }
+        )
+      );
+
+      const h = hFixture();
+      await authenticate(request, h);
+
+      request.response = Boom.unauthorized('some message');
+      request.response.output.headers = {
+        headerA: 'aValue',
+        headerB: 'bValue'
+      };
+
+      expect(onPreResponse(request, h)).to.be(h.continue);
+      expect(request.response.output.headers).to.eql({
+        headerA: 'aValue',
+        headerB: 'bValue',
+        'WWW-Authenticate': 'Negotiate'
+      });
+    });
+
+    it('includes custom headers into non-error response', async () => {
+      server.plugins.security.authenticate.withArgs(request).resolves(
+        AuthenticationResult.succeeded(
+          credentials,
+          {
+            authResponseHeaders: {
+              'WWW-Authenticate': 'Negotiate response-token',
+              'some-custom-header': 'token',
+            }
+          }
+        )
+      );
+
+      const h = hFixture();
+      await authenticate(request, h);
+
+      request.response = { header: sinon.stub() };
+
+      expect(onPreResponse(request, h)).to.be(h.continue);
+      sinon.assert.calledTwice(request.response.header);
+      sinon.assert.calledWithExactly(
+        request.response.header,
+        'WWW-Authenticate',
+        'Negotiate response-token'
+      );
+      sinon.assert.calledWithExactly(request.response.header,  'some-custom-header', 'token');
+    });
   });
 
 });
