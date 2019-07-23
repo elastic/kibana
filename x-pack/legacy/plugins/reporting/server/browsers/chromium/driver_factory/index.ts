@@ -125,6 +125,7 @@ export class HeadlessChromiumDriverFactory {
       }
 
       safeChildProcess(
+        this.logger,
         {
           async kill() {
             await browser.close();
