@@ -76,8 +76,13 @@ export function removeOrphanedSourcesAndLayers(mbMap, layerList) {
 export function syncLayerOrder(mbMap, layerList) {
   if (layerList && layerList.length) {
     const mbLayers = mbMap.getStyle().layers.slice();
-    const currentLayerOrder = _.uniq( // Consolidate layers and remove suffix
-      mbLayers.map(({ id }) => id.substring(0, id.lastIndexOf('_'))));
+
+    //This assumes that:
+    //- a single source-id identifies a single kibana layer
+    //- all layer-ids have a pattern that is sourceId_layerName, were sourceId cannot have any underscores
+    const currentLayerOrder = _.uniq(
+      mbLayers.map(({ id }) => id.substring(0, id.indexOf('_'))));
+
     const newLayerOrder = layerList.map(l => l.getId())
       .filter(layerId => currentLayerOrder.includes(layerId));
     let netPos = 0;
