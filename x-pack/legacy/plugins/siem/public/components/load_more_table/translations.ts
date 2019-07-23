@@ -6,18 +6,18 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const LOADING = i18n.translate('xpack.siem.loadMoreTable.loading', {
+export const LOADING = i18n.translate('xpack.siem.loadMoreTable.loadingButtonLabel', {
   defaultMessage: 'Loading…',
 });
 
-export const LOAD_MORE = i18n.translate('xpack.siem.loadMoreTable.loadMore', {
+export const LOAD_MORE = i18n.translate('xpack.siem.loadMoreTable.loadMoreButtonLabel', {
   defaultMessage: 'Load more',
 });
 
-export const SHOWING = i18n.translate('xpack.siem.loadMoreTable.showing', {
+export const SHOWING = i18n.translate('xpack.siem.loadMoreTable.showingSubtitle', {
   defaultMessage: 'Showing',
 });
 
-export const ROWS = i18n.translate('xpack.siem.loadMoreTable.rows', {
+export const ROWS = i18n.translate('xpack.siem.loadMoreTable.rowsButtonLabel', {
   defaultMessage: 'Rows per page',
 });
