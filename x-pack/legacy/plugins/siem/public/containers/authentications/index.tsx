@@ -26,14 +26,14 @@ import { authenticationsQuery } from './index.gql_query';
 const ID = 'authenticationQuery';
 
 export interface AuthenticationArgs {
+  authentications: AuthenticationsEdges[];
   id: string;
   inspect: inputsModel.InspectQuery;
-  authentications: AuthenticationsEdges[];
-  totalCount: number;
-  pageInfo: PageInfoPaginated;
   loading: boolean;
   loadPage: (newActivePage: number) => void;
+  pageInfo: PageInfoPaginated;
   refetch: inputsModel.Refetch;
+  totalCount: number;
 }
 
 export interface OwnProps extends QueryTemplatePaginatedProps {
