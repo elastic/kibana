@@ -202,11 +202,6 @@ export class VectorTileLayer extends TileLayer {
       console.log('done syncing!');
     }
 
-
-
-
   }
-
-
 
 }

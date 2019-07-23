@@ -8,6 +8,7 @@ import _ from 'lodash';
 import mapboxgl from 'mapbox-gl';
 import chrome from 'ui/chrome';
 import { MAKI_SPRITE_PATH } from '../../../../common/constants';
+import React from 'react';
 
 function relativeToAbsolute(url) {
   const a = document.createElement('a');
@@ -26,8 +27,8 @@ export async function createMbMapInstance({ node, initialView, scrollZoom }) {
         version: 8,
         sources: {},
         layers: [],
-        // sprite: makiUrl,
-        sprite: 'https://tiles.maps.elastic.co/styles/osm-bright/sprite',
+        sprite: makiUrl,
+        // sprite: 'https://tiles.maps.elastic.co/styles/osm-bright/sprite',
         glyphs: 'https://tiles.maps.elastic.co/fonts/{fontstack}/{range}.pbf'
       },
       scrollZoom,
