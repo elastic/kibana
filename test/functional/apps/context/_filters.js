@@ -29,6 +29,8 @@ const TEST_COLUMN_NAMES = ['extension', 'geo.src'];
 export default function ({ getService, getPageObjects }) {
   const docTable = getService('docTable');
   const filterBar = getService('filterBar');
+  const retry = getService('retry');
+
   const PageObjects = getPageObjects(['common', 'context']);
 
   describe('context filters', function contextSize() {
@@ -38,27 +40,23 @@ export default function ({ getService, getPageObjects }) {
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/39927
-    it.skip('should be addable via expanded doc table rows', async function () {
-      const anchorRow = await docTable.getAnchorRow();
-
-      await docTable.toggleRowExpanded(anchorRow);
+    it('should be addable via expanded doc table rows', async function () {
+      await docTable.toggleRowExpanded({ isAnchorRow: true });
 
       const anchorDetailsRow = await docTable.getAnchorDetailsRow();
       await docTable.addInclusiveFilter(anchorDetailsRow, TEST_ANCHOR_FILTER_FIELD);
       await PageObjects.context.waitUntilContextLoadingHasFinished();
 
-      await docTable.toggleRowExpanded(anchorRow);
+      await docTable.toggleRowExpanded({ isAnchorRow: true });
 
-      expect(await filterBar.hasFilter(TEST_ANCHOR_FILTER_FIELD, TEST_ANCHOR_FILTER_VALUE, true)).to.be(true);
-
-      const rows = await docTable.getBodyRows();
-      const hasOnlyFilteredRows = (
-        await Promise.all(rows.map(
-          async (row) => await (await docTable.getFields(row))[2].getVisibleText()
-        ))
-      ).every((fieldContent) => fieldContent === TEST_ANCHOR_FILTER_VALUE);
-      expect(hasOnlyFilteredRows).to.be(true);
+      await retry.try(async () => {
+        expect(await filterBar.hasFilter(TEST_ANCHOR_FILTER_FIELD, TEST_ANCHOR_FILTER_VALUE, true)).to.be(true);
+        const fields = await docTable.getFields();
+        const hasOnlyFilteredRows = fields
+          .map(row => row[2])
+          .every((fieldContent) => fieldContent === TEST_ANCHOR_FILTER_VALUE);
+        expect(hasOnlyFilteredRows).to.be(true);
+      });
     });
 
     it('should be toggleable via the filter bar', async function () {
@@ -68,15 +66,14 @@ export default function ({ getService, getPageObjects }) {
       await filterBar.toggleFilterEnabled(TEST_ANCHOR_FILTER_FIELD);
       await PageObjects.context.waitUntilContextLoadingHasFinished();
 
-      expect(await filterBar.hasFilter(TEST_ANCHOR_FILTER_FIELD, TEST_ANCHOR_FILTER_VALUE, false)).to.be(true);
-
-      const rows = await docTable.getBodyRows();
-      const hasOnlyFilteredRows = (
-        await Promise.all(rows.map(
-          async (row) => await (await docTable.getFields(row))[2].getVisibleText()
-        ))
-      ).every((fieldContent) => fieldContent === TEST_ANCHOR_FILTER_VALUE);
-      expect(hasOnlyFilteredRows).to.be(false);
+      retry.try(async () => {
+        expect(await filterBar.hasFilter(TEST_ANCHOR_FILTER_FIELD, TEST_ANCHOR_FILTER_VALUE, false)).to.be(true);
+        const fields = await docTable.getFields();
+        const hasOnlyFilteredRows = fields
+          .map(row => row[2])
+          .every((fieldContent) => fieldContent === TEST_ANCHOR_FILTER_VALUE);
+        expect(hasOnlyFilteredRows).to.be(false);
+      });
     });
   });
 }

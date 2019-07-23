@@ -24,6 +24,11 @@ export function DocTableProvider({ getService, getPageObjects }: FtrProviderCont
   const retry = getService('retry');
   const PageObjects = getPageObjects(['common', 'header']);
 
+  interface SelectOptions {
+    isAnchorRow: boolean;
+    rowIndex: number;
+  }
+
   class DocTable {
     public async getTable() {
       return await testSubjects.find('docTable');
@@ -51,6 +56,12 @@ export function DocTableProvider({ getService, getPageObjects }: FtrProviderCont
       return await table.findByCssSelector('[data-test-subj~="docTableAnchorRow"]');
     }
 
+    public async getRow(options: SelectOptions): Promise<WebElementWrapper> {
+      return options.isAnchorRow
+        ? await this.getAnchorRow()
+        : (await this.getBodyRows())[options.rowIndex];
+    }
+
     public async getAnchorDetailsRow(): Promise<WebElementWrapper> {
       const table = await this.getTable();
       return await table.findByCssSelector(
@@ -58,8 +69,12 @@ export function DocTableProvider({ getService, getPageObjects }: FtrProviderCont
       );
     }
 
-    public async getRowExpandToggle(row: WebElementWrapper): Promise<WebElementWrapper> {
-      return await row.findByCssSelector('[data-test-subj~="docTableExpandToggleColumn"]');
+    public async clickRowToggle(
+      options: SelectOptions = { isAnchorRow: false, rowIndex: 0 }
+    ): Promise<void> {
+      const row = await this.getRow(options);
+      const toggle = await row.findByCssSelector('[data-test-subj~="docTableExpandToggleColumn"]');
+      await toggle.click();
     }
 
     public async getDetailsRows(): Promise<WebElementWrapper[]> {
@@ -69,12 +84,31 @@ export function DocTableProvider({ getService, getPageObjects }: FtrProviderCont
       );
     }
 
-    public async getRowActions(row: WebElementWrapper): Promise<WebElementWrapper[]> {
-      return await row.findAllByCssSelector('[data-test-subj~="docTableRowAction"]');
+    public async getRowActions(
+      options: SelectOptions = { isAnchorRow: false, rowIndex: 0 }
+    ): Promise<WebElementWrapper[]> {
+      const detailsRow = options.isAnchorRow
+        ? await this.getAnchorDetailsRow()
+        : (await this.getDetailsRows())[options.rowIndex];
+      return await detailsRow.findAllByCssSelector('[data-test-subj~="docTableRowAction"]');
     }
 
-    public async getFields(row: WebElementWrapper): Promise<WebElementWrapper[]> {
-      return await row.findAllByCssSelector('[data-test-subj~="docTableField"]');
+    public async getFields(
+      options: { isAnchorRow: boolean } = { isAnchorRow: false }
+    ): Promise<WebElementWrapper[]> {
+      const table = await this.getTable();
+      const $ = await table.parseDomContent();
+      const rowLocator = options.isAnchorRow
+        ? '[data-test-subj~="docTableAnchorRow"]'
+        : '[data-test-subj~="docTableRow"]';
+      const rows = $(rowLocator).toArray();
+      const fields = rows.map((row: any) =>
+        $(row)
+          .find('[data-test-subj~="docTableField"]')
+          .toArray()
+          .map((field: any) => $(field).text())
+      );
+      return fields;
     }
 
     public async getHeaderFields(): Promise<WebElementWrapper[]> {
@@ -107,15 +141,18 @@ export function DocTableProvider({ getService, getPageObjects }: FtrProviderCont
       await PageObjects.header.awaitGlobalLoadingIndicatorHidden();
     }
 
-    public async toggleRowExpanded(row: WebElementWrapper): Promise<WebElementWrapper> {
-      const rowExpandToggle = await this.getRowExpandToggle(row);
-      await rowExpandToggle.click();
+    public async toggleRowExpanded(
+      options: SelectOptions = { isAnchorRow: false, rowIndex: 0 }
+    ): Promise<WebElementWrapper> {
+      await this.clickRowToggle(options);
       await PageObjects.header.awaitGlobalLoadingIndicatorHidden();
-
-      const detailsRow = await row.findByXpath(
-        './following-sibling::*[@data-test-subj="docTableDetailsRow"]'
-      );
       return await retry.try(async () => {
+        const row = options.isAnchorRow
+          ? await this.getAnchorRow()
+          : (await this.getBodyRows())[options.rowIndex];
+        const detailsRow = await row.findByXpath(
+          './following-sibling::*[@data-test-subj="docTableDetailsRow"]'
+        );
         return detailsRow.findByCssSelector('[data-test-subj~="docViewer"]');
       });
     }
