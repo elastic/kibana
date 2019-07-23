@@ -17,25 +17,22 @@
  * under the License.
  */
 
-import crypto from 'crypto';
-import { chain } from 'lodash';
+import { Report } from './report';
 
-const protocolMap = {
-  TLSv1: crypto.constants.SSL_OP_NO_TLSv1,
-  'TLSv1.1': crypto.constants.SSL_OP_NO_TLSv1_1,
-  'TLSv1.2': crypto.constants.SSL_OP_NO_TLSv1_2
-};
-
-export default function (supportedProtocols) {
-  if (!supportedProtocols || !supportedProtocols.length) {
-    return null;
+export type Storage = Map<string, any>;
+export class ReportStorageManager {
+  storageKey: string;
+  private storage?: Storage;
+  constructor(storageKey: string, storage?: Storage) {
+    this.storageKey = storageKey;
+    this.storage = storage;
   }
-
-  return chain(protocolMap)
-    .omit(supportedProtocols)
-    .values()
-    .reduce(function (value, sum) {
-      return value | sum;
-    }, 0)
-    .value();
+  public get(): Report | undefined {
+    if (!this.storage) return;
+    return this.storage.get(this.storageKey);
+  }
+  public store(report: Report) {
+    if (!this.storage) return;
+    this.storage.set(this.storageKey, report);
+  }
 }
