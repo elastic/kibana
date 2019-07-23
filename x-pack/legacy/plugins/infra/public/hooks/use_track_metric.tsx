@@ -20,6 +20,20 @@ import {
 
 type ObservabilityApp = 'infra_metrics' | 'infra_logs' | 'apm' | 'uptime';
 
+const trackerCache = new Map<string, ReturnType<typeof createUiStatsReporter>>();
+
+function getTrackerForApp(app: string) {
+  const cached = trackerCache.get(app);
+  if (cached) {
+    return cached;
+  }
+
+  const tracker = createUiStatsReporter(app);
+  trackerCache.set(app, tracker);
+
+  return tracker;
+}
+
 interface TrackOptions {
   app: ObservabilityApp;
   metricType?: METRIC_TYPE;
@@ -39,7 +53,7 @@ export function useTrackMetric(
     if (delay > 0) {
       decoratedMetric += `__delayed_${delay}ms`;
     }
-    const trackUiMetric = createUiStatsReporter(app);
+    const trackUiMetric = getTrackerForApp(app);
     const id = setTimeout(() => trackUiMetric(metricType, decoratedMetric), Math.max(delay, 0));
     return () => clearTimeout(id);
   }, effectDependencies);
