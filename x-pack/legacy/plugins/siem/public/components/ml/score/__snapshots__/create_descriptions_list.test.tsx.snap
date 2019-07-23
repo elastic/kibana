@@ -25,7 +25,7 @@ exports[`create_description_list renders correctly against snapshot 1`] = `
     <EuiSpacer
       size="m"
     />
-    Anomaly Job
+    Job
   </EuiDescriptionListTitle>
   <EuiDescriptionListDescription
     key="description-1"

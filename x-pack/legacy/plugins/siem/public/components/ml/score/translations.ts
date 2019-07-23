@@ -14,7 +14,7 @@ export const MAX_ANOMALY_SCORE = i18n.translate('xpack.siem.ml.score.maxAnomalyS
 });
 
 export const ANOMALY_JOB = i18n.translate('xpack.siem.ml.score.anomalyJobTitle', {
-  defaultMessage: 'Anomaly Job',
+  defaultMessage: 'Job',
 });
 
 export const VIEW_IN_MACHINE_LEARNING = i18n.translate(
