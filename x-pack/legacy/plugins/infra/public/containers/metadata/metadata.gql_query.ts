@@ -16,6 +16,32 @@ export const metadataQuery = gql`
           name
           source
         }
+        info {
+          cloud {
+            instance {
+              id
+              name
+            }
+            provider
+            availability_zone
+            project {
+              id
+            }
+          }
+          host {
+            name
+            os {
+              codename
+              family
+              kernel
+              name
+              platform
+              version
+            }
+            architecture
+            containerized
+          }
+        }
       }
     }
   }

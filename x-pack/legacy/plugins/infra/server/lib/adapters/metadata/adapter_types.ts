@@ -6,6 +6,7 @@
 
 import { InfraSourceConfiguration } from '../../sources';
 import { InfraFrameworkRequest, InfraMetadataAggregationBucket } from '../framework';
+import { InfraNodeInfo, InfraNodeType } from '../../../graphql/types';
 
 export interface InfraMetricsAdapterResponse {
   id: string;
@@ -18,6 +19,12 @@ export interface InfraMetadataAdapter {
     req: InfraFrameworkRequest,
     sourceConfiguration: InfraSourceConfiguration,
     nodeId: string,
-    nodeType: string
+    nodeType: InfraNodeType
   ): Promise<InfraMetricsAdapterResponse>;
+  getNodeInfo(
+    req: InfraFrameworkRequest,
+    sourceConfiguration: InfraSourceConfiguration,
+    nodeId: string,
+    nodeType: InfraNodeType
+  ): Promise<InfraNodeInfo>;
 }

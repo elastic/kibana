@@ -7,6 +7,7 @@
 import { InfraFrameworkRequest, InfraMetadataAggregationBucket } from '../../adapters/framework';
 import { InfraMetadataAdapter } from '../../adapters/metadata';
 import { InfraSources } from '../../sources';
+import { InfraNodeType } from '../../../graphql/types';
 
 export class InfraMetadataDomain {
   constructor(
@@ -18,7 +19,7 @@ export class InfraMetadataDomain {
     req: InfraFrameworkRequest,
     sourceId: string,
     nodeId: string,
-    nodeType: string
+    nodeType: InfraNodeType
   ) {
     const { configuration } = await this.libs.sources.getSourceConfiguration(req, sourceId);
     const metricsPromise = this.adapter.getMetricMetadata(req, configuration, nodeId, nodeType);
@@ -29,9 +30,11 @@ export class InfraMetadataDomain {
       return { name: entry, source: 'metrics' };
     });
 
+    const info = await this.adapter.getNodeInfo(req, configuration, nodeId, nodeType);
+
     const id = metrics.id;
     const name = metrics.name || id;
-    return { id, name, features: metricMetadata };
+    return { id, name, features: metricMetadata, info };
   }
 }
 

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get } from 'lodash';
+import { get, first } from 'lodash';
 import { InfraSourceConfiguration } from '../../sources';
 import {
   InfraBackendFrameworkAdapter,
@@ -13,6 +13,7 @@ import {
 } from '../framework';
 import { InfraMetadataAdapter, InfraMetricsAdapterResponse } from './adapter_types';
 import { NAME_FIELDS } from '../../constants';
+import { InfraNodeInfo, InfraNodeType } from '../../../graphql/types';
 
 export class ElasticsearchMetadataAdapter implements InfraMetadataAdapter {
   private framework: InfraBackendFrameworkAdapter;
@@ -24,9 +25,10 @@ export class ElasticsearchMetadataAdapter implements InfraMetadataAdapter {
     req: InfraFrameworkRequest,
     sourceConfiguration: InfraSourceConfiguration,
     nodeId: string,
-    nodeType: 'host' | 'container' | 'pod'
+    nodeType: InfraNodeType
   ): Promise<InfraMetricsAdapterResponse> {
     const idFieldName = getIdFieldName(sourceConfiguration, nodeType);
+
     const metricQuery = {
       allowNoIndices: true,
       ignoreUnavailable: true,
@@ -58,8 +60,11 @@ export class ElasticsearchMetadataAdapter implements InfraMetadataAdapter {
     };
 
     const response = await this.framework.callWithRequest<
-      any,
-      { metrics?: InfraMetadataAggregationResponse; nodeName?: InfraMetadataAggregationResponse }
+      {},
+      {
+        metrics?: InfraMetadataAggregationResponse;
+        nodeName?: InfraMetadataAggregationResponse;
+      }
     >(req, 'search', metricQuery);
 
     const buckets =
@@ -72,6 +77,40 @@ export class ElasticsearchMetadataAdapter implements InfraMetadataAdapter {
       name: get(response, ['aggregations', 'nodeName', 'buckets', 0, 'key'], nodeId),
       buckets,
     };
+  }
+
+  public async getNodeInfo(
+    req: InfraFrameworkRequest,
+    sourceConfiguration: InfraSourceConfiguration,
+    nodeId: string,
+    nodeType: InfraNodeType
+  ): Promise<InfraNodeInfo> {
+    const params = {
+      allowNoIndices: true,
+      ignoreUnavailable: true,
+      terminateAfter: 1,
+      index: sourceConfiguration.metricAlias,
+      body: {
+        size: 1,
+        _source: ['host.*', 'cloud.*'],
+        query: {
+          bool: {
+            must_not: [{ match: { 'event.module': 'aws' } }],
+            filter: [{ match: { [getIdFieldName(sourceConfiguration, nodeType)]: nodeId } }],
+          },
+        },
+      },
+    };
+    const response = await this.framework.callWithRequest<{ _source: InfraNodeInfo }, {}>(
+      req,
+      'search',
+      params
+    );
+    const firstHit = first(response.hits.hits);
+    if (firstHit) {
+      return firstHit._source;
+    }
+    return {};
   }
 }
 

@@ -132,13 +132,65 @@ export interface InfraIndexField {
   /** Whether the field's values can be aggregated */
   aggregatable: boolean;
 }
-/** One metadata entry for a node. */
+
 export interface InfraNodeMetadata {
   id: string;
 
   name: string;
 
+  info?: InfraNodeInfo | null;
+
   features: InfraNodeFeature[];
+}
+
+export interface InfraNodeInfo {
+  host?: InfraNodeHost | null;
+
+  cloud?: InfraNodeCloud | null;
+}
+
+export interface InfraNodeHost {
+  name?: string | null;
+
+  os?: InfraNodeHostOs | null;
+
+  architecture?: string | null;
+
+  containerized?: boolean | null;
+}
+
+export interface InfraNodeHostOs {
+  codename?: string | null;
+
+  family?: string | null;
+
+  kernel?: string | null;
+
+  name?: string | null;
+
+  platform?: string | null;
+
+  version?: string | null;
+}
+
+export interface InfraNodeCloud {
+  instance?: InfraNodeCloudInstance | null;
+
+  provider?: string | null;
+
+  availability_zone?: string | null;
+
+  project?: InfraNodeCloudProject | null;
+}
+/** One metadata entry for a node. */
+export interface InfraNodeCloudInstance {
+  id?: string | null;
+
+  name?: string | null;
+}
+
+export interface InfraNodeCloudProject {
+  id?: string | null;
 }
 
 export interface InfraNodeFeature {
@@ -744,6 +796,8 @@ export namespace MetadataQuery {
     name: string;
 
     features: Features[];
+
+    info?: Info | null;
   };
 
   export type Features = {
@@ -752,6 +806,68 @@ export namespace MetadataQuery {
     name: string;
 
     source: string;
+  };
+
+  export type Info = {
+    __typename?: 'InfraNodeInfo';
+
+    cloud?: Cloud | null;
+
+    host?: Host | null;
+  };
+
+  export type Cloud = {
+    __typename?: 'InfraNodeCloud';
+
+    instance?: Instance | null;
+
+    provider?: string | null;
+
+    availability_zone?: string | null;
+
+    project?: Project | null;
+  };
+
+  export type Instance = {
+    __typename?: 'InfraNodeCloudInstance';
+
+    id?: string | null;
+
+    name?: string | null;
+  };
+
+  export type Project = {
+    __typename?: 'InfraNodeCloudProject';
+
+    id?: string | null;
+  };
+
+  export type Host = {
+    __typename?: 'InfraNodeHost';
+
+    name?: string | null;
+
+    os?: Os | null;
+
+    architecture?: string | null;
+
+    containerized?: boolean | null;
+  };
+
+  export type Os = {
+    __typename?: 'InfraNodeHostOS';
+
+    codename?: string | null;
+
+    family?: string | null;
+
+    kernel?: string | null;
+
+    name?: string | null;
+
+    platform?: string | null;
+
+    version?: string | null;
   };
 }
 
