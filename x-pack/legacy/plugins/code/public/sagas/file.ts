@@ -179,7 +179,7 @@ function requestCommits(
     options.query = { after: 1 };
   }
   if (count) {
-    options.count = count;
+    options.query = { count };
   }
   return kfetch(options);
 }
