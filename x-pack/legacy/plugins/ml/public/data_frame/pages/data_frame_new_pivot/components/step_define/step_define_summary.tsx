@@ -22,6 +22,7 @@ const emptySearch = '';
 
 export const StepDefineSummary: SFC<StepDefineExposedState> = ({
   search,
+  searchQuery,
   groupByList,
   aggList,
 }) => {
@@ -31,7 +32,7 @@ export const StepDefineSummary: SFC<StepDefineExposedState> = ({
     return null;
   }
 
-  const pivotQuery = getPivotQuery(search);
+  const pivotQuery = getPivotQuery(searchQuery);
 
   const displaySearch = search === defaultSearch ? emptySearch : search;
 

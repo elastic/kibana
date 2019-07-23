@@ -64,6 +64,7 @@ export interface StepDefineExposedState {
   groupByList: PivotGroupByConfigDict;
   isAdvancedEditorEnabled: boolean;
   search: string | SavedSearchQuery;
+  searchQuery: string | SavedSearchQuery;
   valid: boolean;
 }
 
@@ -78,6 +79,10 @@ export function getDefaultStepDefineState(
     groupByList: {} as PivotGroupByConfigDict,
     isAdvancedEditorEnabled: false,
     search:
+      kibanaContext.currentSavedSearch.id !== undefined
+        ? kibanaContext.combinedQuery
+        : defaultSearch,
+    searchQuery:
       kibanaContext.currentSavedSearch.id !== undefined
         ? kibanaContext.combinedQuery
         : defaultSearch,
@@ -201,7 +206,7 @@ export const StepDefineForm: SFC<Props> = React.memo(({ overrides = {}, onChange
 
   // The search filter
   const [search, setSearch] = useState(defaults.search);
-  const [searchQuery, setSearchQuery] = useState(defaults.search);
+  const [searchQuery, setSearchQuery] = useState(defaults.searchQuery);
   const [useKQL] = useState(true);
 
   const addToSearch = (newSearch: string) => {
@@ -402,6 +407,7 @@ export const StepDefineForm: SFC<Props> = React.memo(({ overrides = {}, onChange
       groupByList,
       isAdvancedEditorEnabled,
       search,
+      searchQuery,
       valid,
     });
   }, [
@@ -409,6 +415,7 @@ export const StepDefineForm: SFC<Props> = React.memo(({ overrides = {}, onChange
     JSON.stringify(pivotGroupByArr),
     isAdvancedEditorEnabled,
     search,
+    searchQuery,
     valid,
   ]);
 
