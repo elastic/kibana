@@ -22,11 +22,11 @@ import { i18n } from '@kbn/i18n';
 
 export const geoCentroidMetricAgg = new MetricAggType({
   name: 'geo_centroid',
-  title: i18n.translate('common.ui.aggTypes.metrics.geoCentroidTitle', {
+  title: i18n.translate('data.aggTypes.metrics.geoCentroidTitle', {
     defaultMessage: 'Geo Centroid'
   }),
   makeLabel: function () {
-    return i18n.translate('common.ui.aggTypes.metrics.geoCentroidLabel', {
+    return i18n.translate('data.aggTypes.metrics.geoCentroidLabel', {
       defaultMessage: 'Geo Centroid'
     });
   },

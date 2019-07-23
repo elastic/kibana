@@ -33,21 +33,21 @@ const responseAggConfigProps = {
     return _.get(details, [this.key, 'title']);
   },
   keyedDetails: function (customLabel, fieldDisplayName) {
-    const label = customLabel ? customLabel : i18n.translate('common.ui.aggTypes.metrics.standardDeviation.keyDetailsLabel', {
+    const label = customLabel ? customLabel : i18n.translate('data.aggTypes.metrics.standardDeviation.keyDetailsLabel', {
       defaultMessage: 'Standard Deviation of {fieldDisplayName}',
       values: { fieldDisplayName }
     });
     return {
       std_lower: {
         valProp: ['std_deviation_bounds', 'lower'],
-        title: i18n.translate('common.ui.aggTypes.metrics.standardDeviation.lowerKeyDetailsTitle', {
+        title: i18n.translate('data.aggTypes.metrics.standardDeviation.lowerKeyDetailsTitle', {
           defaultMessage: 'Lower {label}',
           values: { label }
         })
       },
       std_upper: {
         valProp: ['std_deviation_bounds', 'upper'],
-        title: i18n.translate('common.ui.aggTypes.metrics.standardDeviation.upperKeyDetailsTitle', {
+        title: i18n.translate('data.aggTypes.metrics.standardDeviation.upperKeyDetailsTitle', {
           defaultMessage: 'Upper {label}',
           values: { label }
         })
@@ -59,11 +59,11 @@ const responseAggConfigProps = {
 export const stdDeviationMetricAgg = new MetricAggType({
   name: 'std_dev',
   dslName: 'extended_stats',
-  title: i18n.translate('common.ui.aggTypes.metrics.standardDeviationTitle', {
+  title: i18n.translate('data.aggTypes.metrics.standardDeviationTitle', {
     defaultMessage: 'Standard Deviation'
   }),
   makeLabel: function (agg) {
-    return i18n.translate('common.ui.aggTypes.metrics.standardDeviationLabel', {
+    return i18n.translate('data.aggTypes.metrics.standardDeviationLabel', {
       defaultMessage: 'Standard Deviation of {field}',
       values: { field: agg.getFieldDisplayName() }
     });

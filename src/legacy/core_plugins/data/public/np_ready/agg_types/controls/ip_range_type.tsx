@@ -32,13 +32,13 @@ function IpRangeTypeParamEditor({ agg, value, setValue }: AggParamEditorProps<Ip
   const options = [
     {
       id: `visEditorIpRangeFromToLabel${agg.id}`,
-      label: i18n.translate('common.ui.aggTypes.ipRanges.fromToButtonLabel', {
+      label: i18n.translate('data.aggTypes.ipRanges.fromToButtonLabel', {
         defaultMessage: 'From/to',
       }),
     },
     {
       id: `visEditorIpRangeCidrLabel${agg.id}`,
-      label: i18n.translate('common.ui.aggTypes.ipRanges.cidrMasksButtonLabel', {
+      label: i18n.translate('data.aggTypes.ipRanges.cidrMasksButtonLabel', {
         defaultMessage: 'CIDR masks',
       }),
     },
@@ -55,7 +55,7 @@ function IpRangeTypeParamEditor({ agg, value, setValue }: AggParamEditorProps<Ip
         onChange={onClick}
         idSelected={value === IpRangeTypes.FROM_TO ? options[0].id : options[1].id}
         options={options}
-        legend={i18n.translate('common.ui.aggTypes.ipRangesAriaLabel', {
+        legend={i18n.translate('data.aggTypes.ipRangesAriaLabel', {
           defaultMessage: 'IP ranges',
         })}
       />

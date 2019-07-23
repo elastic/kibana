@@ -33,7 +33,7 @@ const valueProps = {
     const format = (field && field.format) || fieldFormats.getDefaultInstance('number');
     const label = this.params.customLabel || this.getFieldDisplayName();
 
-    return i18n.translate('common.ui.aggTypes.metrics.percentileRanks.valuePropsLabel', {
+    return i18n.translate('data.aggTypes.metrics.percentileRanks.valuePropsLabel', {
       defaultMessage: 'Percentile rank {format} of "{label}"',
       values: { format: format.convert(this.key, 'text'), label }
     });
@@ -42,11 +42,11 @@ const valueProps = {
 
 export const percentileRanksMetricAgg = new MetricAggType({
   name: 'percentile_ranks',
-  title: i18n.translate('common.ui.aggTypes.metrics.percentileRanksTitle', {
+  title: i18n.translate('data.aggTypes.metrics.percentileRanksTitle', {
     defaultMessage: 'Percentile Ranks'
   }),
   makeLabel: function (agg) {
-    return i18n.translate('common.ui.aggTypes.metrics.percentileRanksLabel', {
+    return i18n.translate('data.aggTypes.metrics.percentileRanksLabel', {
       defaultMessage: 'Percentile ranks of {field}',
       values: { field: agg.getFieldDisplayName() }
     });

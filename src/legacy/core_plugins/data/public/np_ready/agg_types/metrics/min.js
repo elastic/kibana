@@ -22,11 +22,11 @@ import { i18n } from '@kbn/i18n';
 
 export const minMetricAgg = new MetricAggType({
   name: 'min',
-  title: i18n.translate('common.ui.aggTypes.metrics.minTitle', {
+  title: i18n.translate('data.aggTypes.metrics.minTitle', {
     defaultMessage: 'Min'
   }),
   makeLabel: function (aggConfig) {
-    return i18n.translate('common.ui.aggTypes.metrics.minLabel', {
+    return i18n.translate('data.aggTypes.metrics.minLabel', {
       defaultMessage: 'Min {field}',
       values: { field: aggConfig.getFieldDisplayName() }
     });

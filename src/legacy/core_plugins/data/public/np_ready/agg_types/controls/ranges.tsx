@@ -91,7 +91,7 @@ function RangesParamEditor({ agg, value = [], setValue }: AggParamEditorProps<Ra
     <>
       {ranges.map(({ from, to, id }) => {
         const deleteBtnTitle = i18n.translate(
-          'common.ui.aggTypes.ranges.removeRangeButtonAriaLabel',
+          'data.aggTypes.ranges.removeRangeButtonAriaLabel',
           {
             defaultMessage: 'Remove the range of {from} to {to}',
             values: {
@@ -106,7 +106,7 @@ function RangesParamEditor({ agg, value = [], setValue }: AggParamEditorProps<Ra
             <EuiFlexGroup gutterSize="s" alignItems="center">
               <EuiFlexItem>
                 <EuiFieldNumber
-                  aria-label={i18n.translate('common.ui.aggTypes.ranges.fromLabel', {
+                  aria-label={i18n.translate('data.aggTypes.ranges.fromLabel', {
                     defaultMessage: 'From',
                   })}
                   value={isEmpty(from) ? '' : from}
@@ -121,7 +121,7 @@ function RangesParamEditor({ agg, value = [], setValue }: AggParamEditorProps<Ra
               </EuiFlexItem>
               <EuiFlexItem>
                 <EuiFieldNumber
-                  aria-label={i18n.translate('common.ui.aggTypes.ranges.toLabel', {
+                  aria-label={i18n.translate('data.aggTypes.ranges.toLabel', {
                     defaultMessage: 'To',
                   })}
                   value={isEmpty(to) ? '' : to}
@@ -151,7 +151,7 @@ function RangesParamEditor({ agg, value = [], setValue }: AggParamEditorProps<Ra
       <EuiFlexItem>
         <EuiButtonEmpty iconType="plusInCircleFilled" onClick={onAddRange} size="xs">
           <FormattedMessage
-            id="common.ui.aggTypes.ranges.addRangeButtonLabel"
+            id="data.aggTypes.ranges.addRangeButtonLabel"
             defaultMessage="Add range"
           />
         </EuiButtonEmpty>

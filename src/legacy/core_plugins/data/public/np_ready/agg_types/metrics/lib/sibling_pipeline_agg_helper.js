@@ -37,7 +37,7 @@ const metricAggSchema = (new Schemas([
   {
     group: 'none',
     name: 'metricAgg',
-    title: i18n.translate('common.ui.aggTypes.metrics.metricAggTitle', {
+    title: i18n.translate('data.aggTypes.metrics.metricAggTitle', {
       defaultMessage: 'Metric agg'
     }),
     aggFilter: metricAggFilter
@@ -48,7 +48,7 @@ const bucketAggFilter = [];
 const bucketAggSchema = (new Schemas([
   {
     group: 'none',
-    title: i18n.translate('common.ui.aggTypes.metrics.bucketAggTitle', {
+    title: i18n.translate('data.aggTypes.metrics.bucketAggTitle', {
       defaultMessage: 'Bucket agg'
     }),
     name: 'bucketAgg',
@@ -57,7 +57,7 @@ const bucketAggSchema = (new Schemas([
 ])).all[0];
 
 const siblingPipelineAggHelper = {
-  subtype: i18n.translate('common.ui.aggTypes.metrics.siblingPipelineAggregationsSubtypeTitle', {
+  subtype: i18n.translate('data.aggTypes.metrics.siblingPipelineAggregationsSubtypeTitle', {
     defaultMessage: 'Sibling pipeline aggregations'
   }),
   params: function () {

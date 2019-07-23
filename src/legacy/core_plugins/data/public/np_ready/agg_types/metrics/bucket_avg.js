@@ -23,13 +23,13 @@ import { makeNestedLabel } from './lib/make_nested_label';
 import { siblingPipelineAggHelper } from './lib/sibling_pipeline_agg_helper';
 import { i18n } from '@kbn/i18n';
 
-const overallAverageLabel = i18n.translate('common.ui.aggTypes.metrics.overallAverageLabel', {
+const overallAverageLabel = i18n.translate('data.aggTypes.metrics.overallAverageLabel', {
   defaultMessage: 'overall average'
 });
 
 export const bucketAvgMetricAgg = new MetricAggType({
   name: 'avg_bucket',
-  title: i18n.translate('common.ui.aggTypes.metrics.averageBucketTitle', {
+  title: i18n.translate('data.aggTypes.metrics.averageBucketTitle', {
     defaultMessage: 'Average Bucket'
   }),
   makeLabel: agg => makeNestedLabel(agg, overallAverageLabel),

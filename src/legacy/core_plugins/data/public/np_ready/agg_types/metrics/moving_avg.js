@@ -22,14 +22,14 @@ import { parentPipelineAggHelper } from './lib/parent_pipeline_agg_helper';
 import { makeNestedLabel } from './lib/make_nested_label';
 import { i18n } from '@kbn/i18n';
 
-const movingAvgLabel = i18n.translate('common.ui.aggTypes.metrics.movingAvgLabel', {
+const movingAvgLabel = i18n.translate('data.aggTypes.metrics.movingAvgLabel', {
   defaultMessage: 'moving avg'
 });
 
 export const movingAvgMetricAgg = new MetricAggType({
   name: 'moving_avg',
   dslName: 'moving_fn',
-  title: i18n.translate('common.ui.aggTypes.metrics.movingAvgTitle', {
+  title: i18n.translate('data.aggTypes.metrics.movingAvgTitle', {
     defaultMessage: 'Moving Avg'
   }),
   subtype: parentPipelineAggHelper.subtype,

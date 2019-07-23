@@ -24,7 +24,7 @@ import { i18n } from '@kbn/i18n';
 import { AggParamEditorProps } from 'ui/vis/editors/default';
 
 function AutoPrecisionParamEditor({ value, setValue }: AggParamEditorProps<boolean>) {
-  const label = i18n.translate('common.ui.aggTypes.changePrecisionLabel', {
+  const label = i18n.translate('data.aggTypes.changePrecisionLabel', {
     defaultMessage: 'Change precision on map zoom',
   });
 

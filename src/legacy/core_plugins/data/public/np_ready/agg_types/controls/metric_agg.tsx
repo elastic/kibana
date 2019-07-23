@@ -36,7 +36,7 @@ function MetricAggParamEditor({
   setTouched,
   metricAggs,
 }: AggParamEditorProps<string>) {
-  const label = i18n.translate('common.ui.aggTypes.metricLabel', {
+  const label = i18n.translate('data.aggTypes.metricLabel', {
     defaultMessage: 'Metric',
   });
   const isValid = !!value;
@@ -62,7 +62,7 @@ function MetricAggParamEditor({
     ? metricAggs
         .filter(respAgg => respAgg.type.name !== agg.type.name)
         .map(respAgg => ({
-          text: i18n.translate('common.ui.aggTypes.definiteMetricLabel', {
+          text: i18n.translate('data.aggTypes.definiteMetricLabel', {
             defaultMessage: 'Metric: {safeMakeLabel}',
             values: {
               safeMakeLabel: safeMakeLabel(respAgg),
@@ -74,7 +74,7 @@ function MetricAggParamEditor({
     : [];
 
   options.push({
-    text: i18n.translate('common.ui.aggTypes.customMetricLabel', {
+    text: i18n.translate('data.aggTypes.customMetricLabel', {
       defaultMessage: 'Custom metric',
     }),
     value: 'custom',

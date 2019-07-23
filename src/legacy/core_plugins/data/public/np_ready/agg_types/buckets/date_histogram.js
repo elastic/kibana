@@ -49,7 +49,7 @@ export function setBounds(agg, force) {
 
 export const dateHistogramBucketAgg = new BucketAggType({
   name: 'date_histogram',
-  title: i18n.translate('common.ui.aggTypes.buckets.dateHistogramTitle', {
+  title: i18n.translate('data.aggTypes.buckets.dateHistogramTitle', {
     defaultMessage: 'Date Histogram',
   }),
   ordered: {
@@ -58,7 +58,7 @@ export const dateHistogramBucketAgg = new BucketAggType({
   makeLabel: function (agg) {
     const output = writeParams(this.params, agg);
     const field = agg.getFieldDisplayName();
-    return i18n.translate('common.ui.aggTypes.buckets.dateHistogramLabel', {
+    return i18n.translate('data.aggTypes.buckets.dateHistogramLabel', {
       defaultMessage: '{fieldName} per {intervalDescription}',
       values: {
         fieldName: field,

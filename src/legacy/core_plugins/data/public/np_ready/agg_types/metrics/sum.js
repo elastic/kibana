@@ -22,11 +22,11 @@ import { i18n } from '@kbn/i18n';
 
 export const sumMetricAgg = new MetricAggType({
   name: 'sum',
-  title: i18n.translate('common.ui.aggTypes.metrics.sumTitle', {
+  title: i18n.translate('data.aggTypes.metrics.sumTitle', {
     defaultMessage: 'Sum'
   }),
   makeLabel: function (aggConfig) {
-    return i18n.translate('common.ui.aggTypes.metrics.sumLabel', {
+    return i18n.translate('data.aggTypes.metrics.sumLabel', {
       defaultMessage: 'Sum of {field}',
       values: { field: aggConfig.getFieldDisplayName() }
     });

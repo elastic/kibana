@@ -32,7 +32,7 @@ const metricAggSchema = (new Schemas([
   {
     group: 'none',
     name: 'metricAgg',
-    title: i18n.translate('common.ui.aggTypes.metrics.metricAggTitle', {
+    title: i18n.translate('data.aggTypes.metrics.metricAggTitle', {
       defaultMessage: 'Metric agg'
     }),
     hideCustomLabel: true,
@@ -41,7 +41,7 @@ const metricAggSchema = (new Schemas([
 ])).all[0];
 
 const parentPipelineAggHelper = {
-  subtype: i18n.translate('common.ui.aggTypes.metrics.parentPipelineAggregationsSubtypeTitle', {
+  subtype: i18n.translate('data.aggTypes.metrics.parentPipelineAggregationsSubtypeTitle', {
     defaultMessage: 'Parent Pipeline Aggregations'
   }),
   params: function () {

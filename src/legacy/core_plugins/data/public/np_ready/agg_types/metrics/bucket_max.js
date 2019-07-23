@@ -22,13 +22,13 @@ import { makeNestedLabel } from './lib/make_nested_label';
 import { siblingPipelineAggHelper } from './lib/sibling_pipeline_agg_helper';
 import { i18n } from '@kbn/i18n';
 
-const overallMaxLabel = i18n.translate('common.ui.aggTypes.metrics.overallMaxLabel', {
+const overallMaxLabel = i18n.translate('data.aggTypes.metrics.overallMaxLabel', {
   defaultMessage: 'overall max'
 });
 
 export const bucketMaxMetricAgg = new MetricAggType({
   name: 'max_bucket',
-  title: i18n.translate('common.ui.aggTypes.metrics.maxBucketTitle', {
+  title: i18n.translate('data.aggTypes.metrics.maxBucketTitle', {
     defaultMessage: 'Max Bucket'
   }),
   makeLabel: agg => makeNestedLabel(agg, overallMaxLabel),

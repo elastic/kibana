@@ -44,11 +44,11 @@ function ExtendedBoundsParamEditor({
   showValidation,
   setTouched,
 }: AggParamEditorProps<Bounds>) {
-  const minLabel = i18n.translate('common.ui.aggTypes.extendedBounds.minLabel', {
+  const minLabel = i18n.translate('data.aggTypes.extendedBounds.minLabel', {
     defaultMessage: 'Min',
   });
 
-  const maxLabel = i18n.translate('common.ui.aggTypes.extendedBounds.maxLabel', {
+  const maxLabel = i18n.translate('data.aggTypes.extendedBounds.maxLabel', {
     defaultMessage: 'Max',
   });
 
@@ -56,7 +56,7 @@ function ExtendedBoundsParamEditor({
   let error;
 
   if (!isValid) {
-    error = i18n.translate('common.ui.aggTypes.extendedBounds.errorMessage', {
+    error = i18n.translate('data.aggTypes.extendedBounds.errorMessage', {
       defaultMessage: 'Min should be less than or equal to Max.',
     });
   }

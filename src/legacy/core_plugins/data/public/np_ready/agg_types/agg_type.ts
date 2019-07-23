@@ -196,7 +196,7 @@ export class AggType {
       if (config.customLabels !== false) {
         params.push({
           name: 'customLabel',
-          displayName: i18n.translate('common.ui.aggTypes.string.customLabel', {
+          displayName: i18n.translate('data.aggTypes.string.customLabel', {
             defaultMessage: 'Custom label',
           }),
           type: 'string',

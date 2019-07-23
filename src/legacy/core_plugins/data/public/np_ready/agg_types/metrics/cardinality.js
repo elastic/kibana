@@ -23,11 +23,11 @@ import { i18n } from '@kbn/i18n';
 
 export const cardinalityMetricAgg = new MetricAggType({
   name: 'cardinality',
-  title: i18n.translate('common.ui.aggTypes.metrics.uniqueCountTitle', {
+  title: i18n.translate('data.aggTypes.metrics.uniqueCountTitle', {
     defaultMessage: 'Unique Count'
   }),
   makeLabel: function (aggConfig) {
-    return i18n.translate('common.ui.aggTypes.metrics.uniqueCountLabel', {
+    return i18n.translate('data.aggTypes.metrics.uniqueCountLabel', {
       defaultMessage: 'Unique count of {field}',
       values: { field: aggConfig.getFieldDisplayName() }
     });

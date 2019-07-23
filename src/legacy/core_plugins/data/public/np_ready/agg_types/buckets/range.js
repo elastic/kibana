@@ -29,12 +29,12 @@ const formats = new WeakMap();
 
 export const rangeBucketAgg = new BucketAggType({
   name: 'range',
-  title: i18n.translate('common.ui.aggTypes.buckets.rangeTitle', {
+  title: i18n.translate('data.aggTypes.buckets.rangeTitle', {
     defaultMessage: 'Range',
   }),
   createFilter: createFilterRange,
   makeLabel: function (aggConfig) {
-    return i18n.translate('common.ui.aggTypes.buckets.rangesLabel', {
+    return i18n.translate('data.aggTypes.buckets.rangesLabel', {
       defaultMessage: '{fieldName} ranges',
       values: {
         fieldName: aggConfig.getFieldDisplayName()
@@ -65,7 +65,7 @@ export const rangeBucketAgg = new BucketAggType({
 
     const RangeFormat = FieldFormat.from(function (range) {
       const format = agg.fieldOwnFormatter();
-      return i18n.translate('common.ui.aggTypes.buckets.ranges.rangesFormatMessage', {
+      return i18n.translate('data.aggTypes.buckets.ranges.rangesFormatMessage', {
         defaultMessage: '{from} to {to}',
         values: {
           from: format(range.gte),

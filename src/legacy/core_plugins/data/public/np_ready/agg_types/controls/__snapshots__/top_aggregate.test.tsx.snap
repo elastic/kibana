@@ -11,7 +11,7 @@ exports[`TopAggregateParamEditor should init with the default set of props 1`] =
     <React.Fragment>
       <FormattedMessage
         defaultMessage="Aggregate with"
-        id="common.ui.aggTypes.aggregateWithLabel"
+        id="data.aggTypes.aggregateWithLabel"
         values={Object {}}
       />
        

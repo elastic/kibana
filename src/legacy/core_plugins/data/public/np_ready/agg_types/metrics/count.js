@@ -23,12 +23,12 @@ import { i18n } from '@kbn/i18n';
 
 export const countMetricAgg = new MetricAggType({
   name: 'count',
-  title: i18n.translate('common.ui.aggTypes.metrics.countTitle', {
+  title: i18n.translate('data.aggTypes.metrics.countTitle', {
     defaultMessage: 'Count'
   }),
   hasNoDsl: true,
   makeLabel: function () {
-    return i18n.translate('common.ui.aggTypes.metrics.countLabel', {
+    return i18n.translate('data.aggTypes.metrics.countLabel', {
       defaultMessage: 'Count'
     });
   },

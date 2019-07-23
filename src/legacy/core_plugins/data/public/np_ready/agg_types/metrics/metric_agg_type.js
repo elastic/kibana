@@ -35,7 +35,7 @@ function MetricAggType(config) {
   }, this);
 }
 
-MetricAggType.prototype.subtype = i18n.translate('common.ui.aggTypes.metrics.metricAggregationsSubtypeTitle', {
+MetricAggType.prototype.subtype = i18n.translate('data.aggTypes.metrics.metricAggregationsSubtypeTitle', {
   defaultMessage: 'Metric Aggregations'
 });
 /**

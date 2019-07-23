@@ -24,11 +24,11 @@ import { i18n } from '@kbn/i18n';
 export const medianMetricAgg = new MetricAggType({
   name: 'median',
   dslName: 'percentiles',
-  title: i18n.translate('common.ui.aggTypes.metrics.medianTitle', {
+  title: i18n.translate('data.aggTypes.metrics.medianTitle', {
     defaultMessage: 'Median'
   }),
   makeLabel: function (aggConfig) {
-    return i18n.translate('common.ui.aggTypes.metrics.medianLabel', {
+    return i18n.translate('data.aggTypes.metrics.medianLabel', {
       defaultMessage: 'Median {field}',
       values: { field: aggConfig.getFieldDisplayName() }
     });

@@ -24,7 +24,7 @@ function safeMakeLabel(agg: AggConfig) {
   try {
     return agg.makeLabel();
   } catch (e) {
-    return i18n.translate('common.ui.aggTypes.aggNotValidLabel', {
+    return i18n.translate('data.aggTypes.aggNotValidLabel', {
       defaultMessage: '- agg not valid -',
     });
   }

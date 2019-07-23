@@ -32,7 +32,7 @@ const tzOffset = moment().format('Z');
 
 export const dateRangeBucketAgg = new BucketAggType({
   name: 'date_range',
-  title: i18n.translate('common.ui.aggTypes.buckets.dateRangeTitle', {
+  title: i18n.translate('data.aggTypes.buckets.dateRangeTitle', {
     defaultMessage: 'Date Range',
   }),
   createFilter: createFilterDateRange,

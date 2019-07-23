@@ -24,7 +24,7 @@ import { FieldParamType } from '../param_types';
 import { FieldParamEditor } from './field';
 
 function TopSortFieldParamEditor(props: AggParamEditorProps<FieldParamType>) {
-  const customLabel = i18n.translate('common.ui.aggTypes.sortOnLabel', {
+  const customLabel = i18n.translate('data.aggTypes.sortOnLabel', {
     defaultMessage: 'Sort on',
   });
 

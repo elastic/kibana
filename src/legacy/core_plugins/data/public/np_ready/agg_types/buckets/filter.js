@@ -22,7 +22,7 @@ import { i18n } from '@kbn/i18n';
 
 export const filterBucketAgg = new BucketAggType({
   name: 'filter',
-  title: i18n.translate('common.ui.aggTypes.buckets.filterTitle', {
+  title: i18n.translate('data.aggTypes.buckets.filterTitle', {
     defaultMessage: 'Filter',
   }),
   params: [

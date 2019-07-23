@@ -23,7 +23,7 @@ import { i18n } from '@kbn/i18n';
 
 export const geoTileBucketAgg = new BucketAggType({
   name: 'geotile_grid',
-  title: i18n.translate('common.ui.aggTypes.buckets.geotileGridTitle', {
+  title: i18n.translate('data.aggTypes.buckets.geotileGridTitle', {
     defaultMessage: 'Geotile',
   }),
   params: [

@@ -72,7 +72,7 @@ function isOutsideCollar(bounds, collar) {
 
 export const geoHashBucketAgg = new BucketAggType({
   name: 'geohash_grid',
-  title: i18n.translate('common.ui.aggTypes.buckets.geohashGridTitle', {
+  title: i18n.translate('data.aggTypes.buckets.geohashGridTitle', {
     defaultMessage: 'Geohash',
   }),
   params: [

@@ -32,7 +32,7 @@ import { i18n } from '@kbn/i18n';
 const config = chrome.getUiSettingsClient();
 export const histogramBucketAgg = new BucketAggType({
   name: 'histogram',
-  title: i18n.translate('common.ui.aggTypes.buckets.histogramTitle', {
+  title: i18n.translate('data.aggTypes.buckets.histogramTitle', {
     defaultMessage: 'Histogram',
   }),
   ordered: {},
@@ -101,7 +101,7 @@ export const histogramBucketAgg = new BucketAggType({
             });
           })
           .catch(() => {
-            toastNotifications.addWarning(i18n.translate('common.ui.aggTypes.histogram.missingMaxMinValuesWarning', {
+            toastNotifications.addWarning(i18n.translate('data.aggTypes.histogram.missingMaxMinValuesWarning', {
               // eslint-disable-next-line max-len
               defaultMessage: 'Unable to retrieve max and min values to auto-scale histogram buckets. This may lead to poor visualization performance.'
             }));

@@ -27,7 +27,7 @@ import { i18n } from '@kbn/i18n';
 const valueProps = {
   makeLabel: function () {
     const label = this.params.customLabel || this.getFieldDisplayName();
-    return i18n.translate('common.ui.aggTypes.metrics.percentiles.valuePropsLabel', {
+    return i18n.translate('data.aggTypes.metrics.percentiles.valuePropsLabel', {
       defaultMessage: '{percentile} percentile of {label}',
       values: { percentile: ordinalSuffix(this.key), label }
     });
@@ -36,11 +36,11 @@ const valueProps = {
 
 export const percentilesMetricAgg = new MetricAggType({
   name: 'percentiles',
-  title: i18n.translate('common.ui.aggTypes.metrics.percentilesTitle', {
+  title: i18n.translate('data.aggTypes.metrics.percentilesTitle', {
     defaultMessage: 'Percentiles'
   }),
   makeLabel: function (agg) {
-    return i18n.translate('common.ui.aggTypes.metrics.percentilesLabel', {
+    return i18n.translate('data.aggTypes.metrics.percentilesLabel', {
       defaultMessage: 'Percentiles of {field}',
       values: { field: agg.getFieldDisplayName() }
     });

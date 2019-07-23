@@ -48,7 +48,7 @@ function OrderByParamEditor({
   setTouched,
   metricAggs,
 }: AggParamEditorProps<string>) {
-  const label = i18n.translate('common.ui.aggTypes.orderAgg.orderByLabel', {
+  const label = i18n.translate('data.aggTypes.orderAgg.orderByLabel', {
     defaultMessage: 'Order by',
   });
   const isValid = !!value;
@@ -85,13 +85,13 @@ function OrderByParamEditor({
 
   const defaultOptions = [
     {
-      text: i18n.translate('common.ui.aggTypes.orderAgg.customMetricLabel', {
+      text: i18n.translate('data.aggTypes.orderAgg.customMetricLabel', {
         defaultMessage: 'Custom metric',
       }),
       value: 'custom',
     },
     {
-      text: i18n.translate('common.ui.aggTypes.orderAgg.alphabeticalLabel', {
+      text: i18n.translate('data.aggTypes.orderAgg.alphabeticalLabel', {
         defaultMessage: 'Alphabetical',
       }),
       value: '_key',
@@ -100,7 +100,7 @@ function OrderByParamEditor({
 
   const options = metricAggs
     ? metricAggs.map(respAgg => ({
-        text: i18n.translate('common.ui.aggTypes.orderAgg.metricLabel', {
+        text: i18n.translate('data.aggTypes.orderAgg.metricLabel', {
           defaultMessage: 'Metric: {metric}',
           values: {
             metric: safeMakeLabel(respAgg),

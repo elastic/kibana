@@ -60,7 +60,7 @@ function FilterRow({
   onRemoveFilter,
 }: FilterRowProps) {
   const [showCustomLabel, setShowCustomLabel] = useState(false);
-  const filterLabel = i18n.translate('common.ui.aggTypes.filters.filterLabel', {
+  const filterLabel = i18n.translate('data.aggTypes.filters.filterLabel', {
     defaultMessage: 'Filter {index}',
     values: {
       index: arrayIndex + 1,
@@ -72,7 +72,7 @@ function FilterRow({
       <EuiFlexItem>
         <EuiButtonIcon
           iconType="tag"
-          aria-label={i18n.translate('common.ui.aggTypes.filters.toggleFilterButtonAriaLabel', {
+          aria-label={i18n.translate('data.aggTypes.filters.toggleFilterButtonAriaLabel', {
             defaultMessage: 'Toggle filter label',
           })}
           aria-expanded={showCustomLabel}
@@ -85,7 +85,7 @@ function FilterRow({
           iconType="trash"
           color="danger"
           disabled={disableRemove}
-          aria-label={i18n.translate('common.ui.aggTypes.filters.removeFilterButtonAriaLabel', {
+          aria-label={i18n.translate('data.aggTypes.filters.removeFilterButtonAriaLabel', {
             defaultMessage: 'Remove this filter',
           })}
           onClick={() => onRemoveFilter(id)}
@@ -116,7 +116,7 @@ function FilterRow({
       {showCustomLabel ? (
         <EuiFormRow
           id={`visEditorFilterLabel${arrayIndex}`}
-          label={i18n.translate('common.ui.aggTypes.filters.definiteFilterLabel', {
+          label={i18n.translate('data.aggTypes.filters.definiteFilterLabel', {
             defaultMessage: 'Filter {index} label',
             description:
               "'Filter {index}' represents the name of the filter as a noun, similar to 'label for filter 1'.",
@@ -129,7 +129,7 @@ function FilterRow({
         >
           <EuiFieldText
             value={customLabel}
-            placeholder={i18n.translate('common.ui.aggTypes.filters.labelPlaceholder', {
+            placeholder={i18n.translate('data.aggTypes.filters.labelPlaceholder', {
               defaultMessage: 'Label',
             })}
             onChange={ev => onChangeValue(id, value, ev.target.value)}

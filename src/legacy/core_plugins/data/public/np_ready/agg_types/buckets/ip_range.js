@@ -26,7 +26,7 @@ import { i18n } from '@kbn/i18n';
 
 export const ipRangeBucketAgg = new BucketAggType({
   name: 'ip_range',
-  title: i18n.translate('common.ui.aggTypes.buckets.ipRangeTitle', {
+  title: i18n.translate('data.aggTypes.buckets.ipRangeTitle', {
     defaultMessage: 'IPv4 Range',
   }),
   createFilter: createFilterIpRange,
@@ -37,7 +37,7 @@ export const ipRangeBucketAgg = new BucketAggType({
     return `${from} to ${to}`;
   },
   makeLabel: function (aggConfig) {
-    return i18n.translate('common.ui.aggTypes.buckets.ipRangeLabel', {
+    return i18n.translate('data.aggTypes.buckets.ipRangeLabel', {
       defaultMessage: '{fieldName} IP ranges',
       values: {
         fieldName: aggConfig.getFieldDisplayName()

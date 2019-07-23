@@ -34,7 +34,7 @@ const config = chrome.getUiSettingsClient();
 
 export const filtersBucketAgg = new BucketAggType({
   name: 'filters',
-  title: i18n.translate('common.ui.aggTypes.buckets.filtersTitle', {
+  title: i18n.translate('data.aggTypes.buckets.filtersTitle', {
     defaultMessage: 'Filters',
     description: 'The name of an aggregation, that allows to specify multiple individual filters to group data by.'
   }),

@@ -25,11 +25,11 @@ import { isStringType, migrateIncludeExcludeFormat } from './migrate_include_exc
 
 export const significantTermsBucketAgg = new BucketAggType({
   name: 'significant_terms',
-  title: i18n.translate('common.ui.aggTypes.buckets.significantTermsTitle', {
+  title: i18n.translate('data.aggTypes.buckets.significantTermsTitle', {
     defaultMessage: 'Significant Terms',
   }),
   makeLabel: function (aggConfig) {
-    return i18n.translate('common.ui.aggTypes.buckets.significantTermsLabel', {
+    return i18n.translate('data.aggTypes.buckets.significantTermsLabel', {
       defaultMessage: 'Top {size} unusual terms in {fieldName}',
       values: {
         size: aggConfig.params.size,
@@ -52,7 +52,7 @@ export const significantTermsBucketAgg = new BucketAggType({
     },
     {
       name: 'exclude',
-      displayName: i18n.translate('common.ui.aggTypes.buckets.significantTerms.excludeLabel', {
+      displayName: i18n.translate('data.aggTypes.buckets.significantTerms.excludeLabel', {
         defaultMessage: 'Exclude'
       }),
       type: 'string',
@@ -62,7 +62,7 @@ export const significantTermsBucketAgg = new BucketAggType({
     },
     {
       name: 'include',
-      displayName: i18n.translate('common.ui.aggTypes.buckets.significantTerms.includeLabel', {
+      displayName: i18n.translate('data.aggTypes.buckets.significantTerms.includeLabel', {
         defaultMessage: 'Include'
       }),
       type: 'string',

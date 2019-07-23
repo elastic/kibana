@@ -22,13 +22,13 @@ import { parentPipelineAggHelper } from './lib/parent_pipeline_agg_helper';
 import { makeNestedLabel } from './lib/make_nested_label';
 import { i18n } from '@kbn/i18n';
 
-const cumulativeSumLabel = i18n.translate('common.ui.aggTypes.metrics.cumulativeSumLabel', {
+const cumulativeSumLabel = i18n.translate('data.aggTypes.metrics.cumulativeSumLabel', {
   defaultMessage: 'cumulative sum'
 });
 
 export const cumulativeSumMetricAgg = new MetricAggType({
   name: 'cumulative_sum',
-  title: i18n.translate('common.ui.aggTypes.metrics.cumulativeSumTitle', {
+  title: i18n.translate('data.aggTypes.metrics.cumulativeSumTitle', {
     defaultMessage: 'Cumulative Sum'
   }),
   subtype: parentPipelineAggHelper.subtype,

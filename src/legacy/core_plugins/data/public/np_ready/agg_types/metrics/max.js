@@ -22,11 +22,11 @@ import { i18n } from '@kbn/i18n';
 
 export const maxMetricAgg = new MetricAggType({
   name: 'max',
-  title: i18n.translate('common.ui.aggTypes.metrics.maxTitle', {
+  title: i18n.translate('data.aggTypes.metrics.maxTitle', {
     defaultMessage: 'Max'
   }),
   makeLabel: function (aggConfig) {
-    return i18n.translate('common.ui.aggTypes.metrics.maxLabel', {
+    return i18n.translate('data.aggTypes.metrics.maxLabel', {
       defaultMessage: 'Max {field}',
       values: { field: aggConfig.getFieldDisplayName() }
     });

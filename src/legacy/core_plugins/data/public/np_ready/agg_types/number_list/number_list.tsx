@@ -73,7 +73,7 @@ function NumberList({
       const isOrderValid = validateOrder(updatedModels);
       setAscendingError(
         isOrderValid
-          ? i18n.translate('common.ui.aggTypes.numberList.invalidAscOrderErrorMessage', {
+          ? i18n.translate('data.aggTypes.numberList.invalidAscOrderErrorMessage', {
               defaultMessage: 'The values should be in ascending order.',
             })
           : EMPTY_STRING
@@ -159,7 +159,7 @@ function NumberList({
       <EuiFlexItem>
         <EuiButtonEmpty iconType="plusInCircleFilled" onClick={onAdd} size="xs">
           <FormattedMessage
-            id="common.ui.aggTypes.numberList.addUnitButtonLabel"
+            id="data.aggTypes.numberList.addUnitButtonLabel"
             defaultMessage="Add {unitName}"
             values={{ unitName }}
           />

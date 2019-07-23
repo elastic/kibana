@@ -22,11 +22,11 @@ import { i18n } from '@kbn/i18n';
 
 export const avgMetricAgg = new MetricAggType({
   name: 'avg',
-  title: i18n.translate('common.ui.aggTypes.metrics.averageTitle', {
+  title: i18n.translate('data.aggTypes.metrics.averageTitle', {
     defaultMessage: 'Average'
   }),
   makeLabel: function (aggConfig) {
-    return i18n.translate('common.ui.aggTypes.metrics.averageLabel', {
+    return i18n.translate('data.aggTypes.metrics.averageLabel', {
       defaultMessage: 'Average {field}',
       values: { field: aggConfig.getFieldDisplayName() }
     });
