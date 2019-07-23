@@ -34,7 +34,9 @@ export class Subject<T> {
   subscribe(fn: Listener<T>): Subscription {
     this.callbacks.add(fn);
 
-    fn(this.value);
+    setTimeout(() => {
+      fn(this.value);
+    });
 
     const unsubscribe = () => this.callbacks.delete(fn);
     return {
