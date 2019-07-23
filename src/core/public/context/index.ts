@@ -17,5 +17,5 @@
  * under the License.
  */
 
-export { ContextService, ContextSetup, ContextStart } from './context_service';
+export { ContextService, ContextSetup } from './context_service';
 export { ContextContainer, ContextProvider, Handler } from './context';

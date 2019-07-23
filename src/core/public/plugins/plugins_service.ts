@@ -78,7 +78,7 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
       .forEach(({ id, plugin }) =>
         this.plugins.set(
           id,
-          new PluginWrapper(plugin, createPluginInitializerContext(deps, plugin))
+          new PluginWrapper(plugin, createPluginInitializerContext(this.coreContext, plugin))
         )
       );
 
@@ -88,9 +88,6 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
     // Setup each plugin with required and optional plugin contracts
     const contracts = new Map<string, unknown>();
     for (const [pluginName, plugin] of this.plugins.entries()) {
-      // Set global context variable for current plugin setting up
-      deps.context.setCurrentPlugin(pluginName);
-
       const pluginDepContracts = [...this.pluginDependencies.get(pluginName)!].reduce(
         (depContracts, dependencyName) => {
           // Only set if present. Could be absent if plugin does not have client-side code or is a
@@ -115,9 +112,6 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
       this.satupPlugins.push(pluginName);
     }
 
-    // Exiting plugin context, unset global
-    deps.context.setCurrentPlugin(undefined);
-
     // Expose setup contracts
     return { contracts };
   }
@@ -126,9 +120,6 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
     // Setup each plugin with required and optional plugin contracts
     const contracts = new Map<string, unknown>();
     for (const [pluginName, plugin] of this.plugins.entries()) {
-      // Set global context variable for current plugin setting up
-      deps.context.setCurrentPlugin(pluginName);
-
       const pluginDepContracts = [...this.pluginDependencies.get(pluginName)!].reduce(
         (depContracts, dependencyName) => {
           // Only set if present. Could be absent if plugin does not have client-side code or is a
@@ -150,9 +141,6 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
         )
       );
     }
-
-    // Exiting plugin context, unset global
-    deps.context.setCurrentPlugin(undefined);
 
     // Expose start contracts
     return { contracts };

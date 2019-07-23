@@ -37,13 +37,15 @@ interface MyContext {
   baseCtx: number;
 }
 
+const coreId = Symbol();
+
 describe('ContextContainer', () => {
   it('does not allow the same context to be registered twice', () => {
-    const contextContainer = new ContextContainerImplementation<MyContext, string>(plugins);
-    contextContainer.registerContext('ctxFromA', () => 'aString');
+    const contextContainer = new ContextContainerImplementation<MyContext, string>(plugins, coreId);
+    contextContainer.registerContext(coreId, 'ctxFromA', () => 'aString');
 
     expect(() =>
-      contextContainer.registerContext('ctxFromA', () => 'aString')
+      contextContainer.registerContext(coreId, 'ctxFromA', () => 'aString')
     ).toThrowErrorMatchingInlineSnapshot(
       `"Context provider for ctxFromA has already been registered."`
     );
@@ -51,43 +53,38 @@ describe('ContextContainer', () => {
 
   describe('context building', () => {
     it('resolves dependencies', async () => {
-      const contextContainer = new ContextContainerImplementation<MyContext, string>(plugins);
+      const contextContainer = new ContextContainerImplementation<MyContext, string>(
+        plugins,
+        coreId
+      );
       expect.assertions(8);
-      contextContainer.registerContext('core1', context => {
+      contextContainer.registerContext(coreId, 'core1', context => {
         expect(context).toEqual({});
         return 'core';
       });
 
-      contextContainer.setCurrentPlugin('pluginA');
-      contextContainer.registerContext('ctxFromA', context => {
+      contextContainer.registerContext('pluginA', 'ctxFromA', context => {
         expect(context).toEqual({ core1: 'core' });
         return 'aString';
       });
-      contextContainer.setCurrentPlugin('pluginB');
-      contextContainer.registerContext('ctxFromB', context => {
+      contextContainer.registerContext('pluginB', 'ctxFromB', context => {
         expect(context).toEqual({ core1: 'core', ctxFromA: 'aString' });
         return 299;
       });
-      contextContainer.setCurrentPlugin('pluginC');
-      contextContainer.registerContext('ctxFromC', context => {
+      contextContainer.registerContext('pluginC', 'ctxFromC', context => {
         expect(context).toEqual({ core1: 'core', ctxFromA: 'aString', ctxFromB: 299 });
         return false;
       });
-      contextContainer.setCurrentPlugin('pluginD');
-      contextContainer.registerContext('ctxFromD', context => {
+      contextContainer.registerContext('pluginD', 'ctxFromD', context => {
         expect(context).toEqual({ core1: 'core' });
         return {};
       });
 
-      contextContainer.setCurrentPlugin('pluginC');
       const rawHandler1 = jest.fn<string, []>(() => 'handler1');
-      const handler1 = contextContainer.createHandler(rawHandler1);
+      const handler1 = contextContainer.createHandler('pluginC', rawHandler1);
 
-      contextContainer.setCurrentPlugin('pluginD');
       const rawHandler2 = jest.fn<string, []>(() => 'handler2');
-      const handler2 = contextContainer.createHandler(rawHandler2);
-
-      contextContainer.setCurrentPlugin(undefined);
+      const handler2 = contextContainer.createHandler('pluginD', rawHandler2);
 
       await handler1();
       await handler2();
@@ -107,23 +104,25 @@ describe('ContextContainer', () => {
       });
     });
 
-    it('exposes all previously registered context to Core providers', async () => {
+    it('exposes all core context to core providers', async () => {
       expect.assertions(4);
-      const contextContainer = new ContextContainerImplementation<MyContext, string>(plugins);
+      const contextContainer = new ContextContainerImplementation<MyContext, string>(
+        plugins,
+        coreId
+      );
 
       contextContainer
-        .registerContext('core1', context => {
+        .registerContext(coreId, 'core1', context => {
           expect(context).toEqual({});
           return 'core';
         })
-        .registerContext('core2', context => {
+        .registerContext(coreId, 'core2', context => {
           expect(context).toEqual({ core1: 'core' });
           return 101;
         });
 
-      contextContainer.setCurrentPlugin('pluginA');
       const rawHandler1 = jest.fn<string, []>(() => 'handler1');
-      const handler1 = contextContainer.createHandler(rawHandler1);
+      const handler1 = contextContainer.createHandler('pluginA', rawHandler1);
 
       expect(await handler1()).toEqual('handler1');
 
@@ -134,22 +133,41 @@ describe('ContextContainer', () => {
       });
     });
 
+    it('does not expose plugin contexts to core handler', async () => {
+      const contextContainer = new ContextContainerImplementation<MyContext, string>(
+        plugins,
+        coreId
+      );
+
+      contextContainer
+        .registerContext(coreId, 'core1', context => 'core')
+        .registerContext('pluginA', 'ctxFromA', context => 'aString');
+
+      const rawHandler1 = jest.fn<string, []>(() => 'handler1');
+      const handler1 = contextContainer.createHandler(coreId, rawHandler1);
+
+      expect(await handler1()).toEqual('handler1');
+      // pluginA context should not be present in a core handler
+      expect(rawHandler1).toHaveBeenCalledWith({
+        core1: 'core',
+      });
+    });
+
     it('passes additional arguments to providers', async () => {
       expect.assertions(6);
       const contextContainer = new ContextContainerImplementation<
         MyContext,
         string,
         [string, number]
-      >(plugins);
+      >(plugins, coreId);
 
-      contextContainer.registerContext('core1', (context, str, num) => {
+      contextContainer.registerContext(coreId, 'core1', (context, str, num) => {
         expect(str).toEqual('passed string');
         expect(num).toEqual(77);
         return `core ${str}`;
       });
 
-      contextContainer.setCurrentPlugin('pluginD');
-      contextContainer.registerContext('ctxFromD', (context, str, num) => {
+      contextContainer.registerContext('pluginD', 'ctxFromD', (context, str, num) => {
         expect(str).toEqual('passed string');
         expect(num).toEqual(77);
         return {
@@ -158,7 +176,7 @@ describe('ContextContainer', () => {
       });
 
       const rawHandler1 = jest.fn<string, [MyContext, string, number]>(() => 'handler1');
-      const handler1 = contextContainer.createHandler(rawHandler1);
+      const handler1 = contextContainer.createHandler('pluginD', rawHandler1);
 
       expect(await handler1('passed string', 77)).toEqual('handler1');
 
@@ -176,20 +194,24 @@ describe('ContextContainer', () => {
   });
 
   describe('createHandler', () => {
-    it('throws error if registered outside plugin', async () => {
-      const contextContainer = new ContextContainerImplementation<MyContext, string>(plugins);
-      contextContainer.setCurrentPlugin(undefined);
+    it('throws error if called with a different symbol', async () => {
+      const contextContainer = new ContextContainerImplementation<MyContext, string>(
+        plugins,
+        coreId
+      );
       await expect(() =>
-        contextContainer.createHandler(jest.fn())
-      ).toThrowErrorMatchingInlineSnapshot(`"Cannot create handlers outside a plugin!"`);
+        contextContainer.createHandler(Symbol(), jest.fn())
+      ).toThrowErrorMatchingInlineSnapshot(`"Symbol only allowed for core services"`);
     });
 
     it('returns value from original handler', async () => {
-      const contextContainer = new ContextContainerImplementation<MyContext, string>(plugins);
+      const contextContainer = new ContextContainerImplementation<MyContext, string>(
+        plugins,
+        coreId
+      );
 
-      contextContainer.setCurrentPlugin('pluginA');
       const rawHandler1 = jest.fn(() => 'handler1');
-      const handler1 = contextContainer.createHandler(rawHandler1);
+      const handler1 = contextContainer.createHandler('pluginA', rawHandler1);
 
       expect(await handler1()).toEqual('handler1');
     });
@@ -199,11 +221,10 @@ describe('ContextContainer', () => {
         MyContext,
         string,
         [string, number]
-      >(plugins);
+      >(plugins, coreId);
 
-      contextContainer.setCurrentPlugin('pluginA');
       const rawHandler1 = jest.fn<string, [MyContext, string, number]>(() => 'handler1');
-      const handler1 = contextContainer.createHandler(rawHandler1);
+      const handler1 = contextContainer.createHandler('pluginA', rawHandler1);
 
       await handler1('passed string', 77);
       expect(rawHandler1).toHaveBeenCalledWith({}, 'passed string', 77);

@@ -27,7 +27,6 @@ const createContextMock = () => {
   const contextMock: ContextContainerMock = {
     registerContext: jest.fn(),
     createHandler: jest.fn(),
-    setCurrentPlugin: jest.fn(),
   };
   return contextMock;
 };

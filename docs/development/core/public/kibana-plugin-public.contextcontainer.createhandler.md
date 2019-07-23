@@ -9,20 +9,19 @@ Create a new handler function pre-wired to context for the plugin.
 <b>Signature:</b>
 
 ```typescript
-createHandler(handler: Handler<TContext, THandlerReturn, THandlerParameters>): (...rest: THandlerParameters) => Promisify<THandlerReturn>;
+createHandler(plugin: string | CoreId, handler: Handler<TContext, THandlerReturn, THandlerParameters>): (...rest: THandlerParameters) => Promisify<THandlerReturn>;
 ```
 
 ## Parameters
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
+|  plugin | <code>string &#124; CoreId</code> | The plugin ID for the plugin that registers this context. |
 |  handler | <code>Handler&lt;TContext, THandlerReturn, THandlerParameters&gt;</code> |  |
 
 <b>Returns:</b>
 
 `(...rest: THandlerParameters) => Promisify<THandlerReturn>`
 
-## Remarks
-
-This must be called when the handler is registered by the consuming plugin. If this is called later in the lifecycle it will throw an exception.
+A function that takes `THandlerParameters`<!-- -->, calls `handler` with a new context, and returns a Promise of the `handler` return value.
 

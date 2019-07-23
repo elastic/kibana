@@ -161,6 +161,11 @@ describe('#setup()', () => {
     expect(MockApplicationService.setup).toHaveBeenCalledTimes(1);
   });
 
+  it('calls context#setup()', async () => {
+    await setupCore();
+    expect(MockContextService.setup).toHaveBeenCalledTimes(1);
+  });
+
   it('calls injectedMetadata#setup()', async () => {
     await setupCore();
     expect(MockInjectedMetadataService.setup).toHaveBeenCalledTimes(1);
@@ -215,11 +220,6 @@ describe('#start()', () => {
   it('calls application#start()', async () => {
     await startCore();
     expect(MockApplicationService.start).toHaveBeenCalledTimes(1);
-  });
-
-  it('calls context#start()', async () => {
-    await startCore();
-    expect(MockContextService.start).toHaveBeenCalledTimes(1);
   });
 
   it('calls docLinks#start()', async () => {

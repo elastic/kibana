@@ -9,5 +9,5 @@
 <b>Signature:</b>
 
 ```typescript
-context: Pick<ContextSetup, 'createContextContainer'>;
+context: ContextSetup;
 ```

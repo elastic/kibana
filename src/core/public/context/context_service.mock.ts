@@ -17,37 +17,26 @@
  * under the License.
  */
 
-import { ContextStart, ContextService, ContextSetup } from './context_service';
+import { ContextService, ContextSetup } from './context_service';
 import { contextMock } from './context.mock';
 
 const createSetupContractMock = () => {
   const setupContract: jest.Mocked<ContextSetup> = {
     createContextContainer: jest.fn().mockImplementation(() => contextMock.create()),
-    setCurrentPlugin: jest.fn(),
   };
   return setupContract;
-};
-
-const createStartContractMock = () => {
-  const startContract: jest.Mocked<ContextStart> = {
-    setCurrentPlugin: jest.fn(),
-  };
-  return startContract;
 };
 
 type ContextServiceContract = PublicMethodsOf<ContextService>;
 const createMock = () => {
   const mocked: jest.Mocked<ContextServiceContract> = {
     setup: jest.fn(),
-    start: jest.fn(),
   };
   mocked.setup.mockReturnValue(createSetupContractMock());
-  mocked.start.mockReturnValue(createStartContractMock());
   return mocked;
 };
 
 export const contextServiceMock = {
   create: createMock,
   createSetupContract: createSetupContractMock,
-  createStartContract: createStartContractMock,
 };

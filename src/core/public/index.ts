@@ -66,7 +66,7 @@ import { Plugin, PluginInitializer, PluginInitializerContext } from './plugins';
 import { UiSettingsClient, UiSettingsState, UiSettingsClientContract } from './ui_settings';
 import { ApplicationSetup, Capabilities, ApplicationStart } from './application';
 import { DocLinksStart } from './doc_links';
-import { ContextContainer, ContextProvider, ContextSetup, ContextStart, Handler } from './context';
+import { ContextContainer, ContextProvider, ContextSetup, Handler } from './context';
 
 export { CoreContext, CoreSystem } from './core_system';
 export { RecursiveReadonly } from '../utils';
@@ -95,7 +95,7 @@ export {
  */
 export interface CoreSetup {
   /** {@link ContextSetup} */
-  context: Pick<ContextSetup, 'createContextContainer'>;
+  context: ContextSetup;
   /** {@link FatalErrorsSetup} */
   fatalErrors: FatalErrorsSetup;
   /** {@link HttpSetup} */
@@ -137,14 +137,12 @@ export interface CoreStart {
 /** @internal */
 export interface InternalCoreSetup extends CoreSetup {
   application: ApplicationSetup;
-  context: ContextSetup;
   injectedMetadata: InjectedMetadataSetup;
 }
 
 /** @internal */
 export interface InternalCoreStart extends CoreStart {
   application: ApplicationStart;
-  context: ContextStart;
   injectedMetadata: InjectedMetadataStart;
 }
 

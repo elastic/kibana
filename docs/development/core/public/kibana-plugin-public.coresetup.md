@@ -16,7 +16,7 @@ export interface CoreSetup
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [context](./kibana-plugin-public.coresetup.context.md) | <code>Pick&lt;ContextSetup, 'createContextContainer'&gt;</code> | [ContextSetup](./kibana-plugin-public.contextsetup.md) |
+|  [context](./kibana-plugin-public.coresetup.context.md) | <code>ContextSetup</code> | [ContextSetup](./kibana-plugin-public.contextsetup.md) |
 |  [fatalErrors](./kibana-plugin-public.coresetup.fatalerrors.md) | <code>FatalErrorsSetup</code> | [FatalErrorsSetup](./kibana-plugin-public.fatalerrorssetup.md) |
 |  [http](./kibana-plugin-public.coresetup.http.md) | <code>HttpSetup</code> | [HttpSetup](./kibana-plugin-public.httpsetup.md) |
 |  [notifications](./kibana-plugin-public.coresetup.notifications.md) | <code>NotificationsSetup</code> | [NotificationsSetup](./kibana-plugin-public.notificationssetup.md) |

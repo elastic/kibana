@@ -53,7 +53,7 @@ mockPluginInitializerProvider.mockImplementation(
 
 type DeeplyMocked<T> = { [P in keyof T]: jest.Mocked<T[P]> };
 
-const mockCoreContext: CoreContext = {};
+const mockCoreContext: CoreContext = { coreId: Symbol() };
 let mockSetupDeps: DeeplyMocked<PluginsServiceSetupDeps>;
 let mockSetupContext: DeeplyMocked<CoreSetup>;
 let mockStartDeps: DeeplyMocked<PluginsServiceStartDeps>;
@@ -86,7 +86,6 @@ beforeEach(() => {
   };
   mockStartDeps = {
     application: applicationServiceMock.createStartContract(),
-    context: contextServiceMock.createStartContract(),
     docLinks: docLinksServiceMock.createStartContract(),
     http: httpServiceMock.createStartContract(),
     chrome: chromeServiceMock.createStartContract(),
@@ -97,7 +96,7 @@ beforeEach(() => {
     uiSettings: uiSettingsServiceMock.createStartContract(),
   };
   mockStartContext = {
-    ...omit(mockStartDeps, 'context', 'injectedMetadata'),
+    ...omit(mockStartDeps, 'injectedMetadata'),
     application: {
       capabilities: mockStartDeps.application.capabilities,
     },
@@ -181,13 +180,13 @@ test('`PluginsService.setup` calls loadPluginBundles with http and plugins', asy
   expect(mockLoadPluginBundle).toHaveBeenCalledWith(mockSetupDeps.http.basePath.prepend, 'pluginC');
 });
 
-test('`PluginsService.setup` initalizes plugins with CoreContext', async () => {
+test('`PluginsService.setup` initalizes plugins with PluginIntitializerContext', async () => {
   const pluginsService = new PluginsService(mockCoreContext);
   await pluginsService.setup(mockSetupDeps);
 
-  expect(mockPluginInitializers.get('pluginA')).toHaveBeenCalledWith(mockCoreContext);
-  expect(mockPluginInitializers.get('pluginB')).toHaveBeenCalledWith(mockCoreContext);
-  expect(mockPluginInitializers.get('pluginC')).toHaveBeenCalledWith(mockCoreContext);
+  expect(mockPluginInitializers.get('pluginA')).toHaveBeenCalledWith({});
+  expect(mockPluginInitializers.get('pluginB')).toHaveBeenCalledWith({});
+  expect(mockPluginInitializers.get('pluginC')).toHaveBeenCalledWith({});
 });
 
 test('`PluginsService.setup` exposes dependent setup contracts to plugins', async () => {

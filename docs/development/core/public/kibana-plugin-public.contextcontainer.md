@@ -4,7 +4,7 @@
 
 ## ContextContainer interface
 
-An object that handles registration of context providers and building of new context objects.
+An object that handles registration of context providers and configuring handlers with context.
 
 <b>Signature:</b>
 
@@ -16,16 +16,18 @@ export interface ContextContainer<TContext extends {}, THandlerReturn, THandlerP
 
 |  Method | Description |
 |  --- | --- |
-|  [createHandler(handler)](./kibana-plugin-public.contextcontainer.createhandler.md) | Create a new handler function pre-wired to context for the plugin. |
-|  [registerContext(contextName, provider)](./kibana-plugin-public.contextcontainer.registercontext.md) | Register a new context provider. Throws an exception if more than one provider is registered for the same context key. |
+|  [createHandler(plugin, handler)](./kibana-plugin-public.contextcontainer.createhandler.md) | Create a new handler function pre-wired to context for the plugin. |
+|  [registerContext(plugin, contextName, provider)](./kibana-plugin-public.contextcontainer.registercontext.md) | Register a new context provider. Throws an exception if more than one provider is registered for the same <code>contextName</code>. |
 
 ## Remarks
 
-A [ContextContainer](./kibana-plugin-public.contextcontainer.md) can be used by any Core service or plugin (known as the "service owner") which wishes to expose APIs in a handler function. The container object will manage registering context providers and building a context object for a handler with all of the contexts that should be exposed to the handler's plugin. This is dependent on the dependencies that the handler's plugin declares.
+A [ContextContainer](./kibana-plugin-public.contextcontainer.md) can be used by any Core service or plugin (known as the "service owner") which wishes to expose APIs in a handler function. The container object will manage registering context providers and configuring a handler with all of the contexts that should be exposed to the handler's plugin. This is dependent on the dependencies that the handler's plugin declares.
 
 Contexts providers are executed in the order they were registered. Each provider gets access to context values provided by any plugins that it depends on.
 
-In order to configure a handler with context, you must call the [ContextContainer.createHandler()](./kibana-plugin-public.contextcontainer.createhandler.md) function. This function must be called \_while the calling plugin's lifecycle method is still running\_ or else you risk configuring the handler for the wrong plugin, or not plugin at all (the latter will throw an error).
+In order to configure a handler with context, you must call the [ContextContainer.createHandler()](./kibana-plugin-public.contextcontainer.createhandler.md) function and use the returned handler which will automatically build a context object when called.
+
+When registering context or creating handlers, the \_calling plugin's id\_ must be provided. Note this should NOT be the context service owner, but the plugin that is actually registering the context or handler.
 
 ```ts
 // GOOD
@@ -35,10 +37,13 @@ class MyPlugin {
   setup(core) {
     this.contextContainer = core.context.createContextContainer();
     return {
-      registerRoute(path, handler) {
+      registerContext(plugin, contextName, provider) {
+        this.contextContainer.registerContext(plugin, contextName, provider);
+      },
+      registerRoute(plugin, path, handler) {
         this.handlers.set(
           path,
-          this.contextContainer.createHandler(handler)
+          this.contextContainer.createHandler(plugin, handler)
         );
       }
     }
@@ -52,32 +57,15 @@ class MyPlugin {
   setup(core) {
     this.contextContainer = core.context.createContextContainer();
     return {
-      // When the promise isn't returned, it's possible `createHandler` won't be called until after the lifecycle
-      // hook is completed.
-      registerRoute(path, handler) {
-        doAsyncThing().then(() => this.handlers.set(
-          path,
-          this.contextContainer.createHandler(handler)
-        ));
-      }
-    }
-  }
-}
-
-// ALSO GOOD
-class MyPlugin {
-  private readonly handlers = new Map();
-
-  setup(core) {
-    this.contextContainer = core.context.createContextContainer();
-    return {
-      // Returning a Promise also works, but only if calling plugins wait for it to resolve before returning from
-      // their lifecycle hooks.
-      async registerRoute(path, handler) {
-        await doAsyncThing();
+      registerContext(plugin, contextName, provider) {
+        // This would leak this context to all handlers rather tha only plugins that depend on the calling plugin.
+        this.contextContainer.registerContext('my_plugin', contextName, provider);
+      },
+      registerRoute(plugin, path, handler) {
         this.handlers.set(
           path,
-          this.contextContainer.createHandler(handler)
+          // the handler will not receive any contexts provided by other dependencies of the calling plugin.
+          this.contextContainer.createHandler('my_plugin', handler)
         );
       }
     }

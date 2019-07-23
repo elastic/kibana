@@ -88,7 +88,6 @@ const defaultSetupDeps = {
 };
 
 const applicationStart = applicationServiceMock.createStartContract();
-const contextStart = contextServiceMock.createStartContract();
 const docLinksStart = docLinksServiceMock.createStartContract();
 const httpStart = httpServiceMock.createStartContract();
 const chromeStart = chromeServiceMock.createStartContract();
@@ -101,7 +100,6 @@ const uiSettingsStart = uiSettingsServiceMock.createStartContract();
 const defaultStartDeps = {
   core: {
     application: applicationStart,
-    context: contextStart,
     docLinks: docLinksStart,
     http: httpStart,
     chrome: chromeStart,

@@ -45,8 +45,12 @@ interface Params {
 }
 
 /** @internal */
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface CoreContext {}
+export type CoreId = symbol;
+
+/** @internal */
+export interface CoreContext {
+  coreId: CoreId;
+}
 
 /**
  * The CoreSystem is the root of the new platform, and setups all parts
@@ -105,9 +109,9 @@ export class CoreSystem {
     this.chrome = new ChromeService({ browserSupportsCsp });
     this.docLinks = new DocLinksService();
     this.rendering = new RenderingService();
-    this.context = new ContextService();
 
-    const core: CoreContext = {};
+    const core: CoreContext = { coreId: Symbol('core') };
+    this.context = new ContextService(core);
     this.plugins = new PluginsService(core);
 
     this.legacyPlatform = new LegacyPlatformService({
@@ -166,7 +170,6 @@ export class CoreSystem {
       const http = await this.http.start({ injectedMetadata, fatalErrors: this.fatalErrorsSetup });
       const i18n = await this.i18n.start();
       const application = await this.application.start({ injectedMetadata });
-      const context = await this.context.start();
 
       const coreUiTargetDomElement = document.createElement('div');
       coreUiTargetDomElement.id = 'kibana-body';
@@ -198,7 +201,6 @@ export class CoreSystem {
       const core: InternalCoreStart = {
         application,
         chrome,
-        context,
         docLinks,
         http,
         i18n,

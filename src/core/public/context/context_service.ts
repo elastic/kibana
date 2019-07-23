@@ -18,6 +18,7 @@
  */
 
 import { ContextContainer, ContextContainerImplementation } from './context';
+import { CoreContext } from '../core_system';
 
 interface StartDeps {
   pluginDependencies: ReadonlyMap<string, string[]>;
@@ -25,36 +26,20 @@ interface StartDeps {
 
 /** @internal */
 export class ContextService {
-  private readonly containers = new Set<ContextContainerImplementation<any, any, any>>();
+  constructor(private readonly core: CoreContext) {}
 
   public setup({ pluginDependencies }: StartDeps): ContextSetup {
     return {
-      setCurrentPlugin: this.setCurrentPlugin.bind(this),
       createContextContainer: <
         TContext extends {},
         THandlerReturn,
         THandlerParameters extends any[] = []
-      >() => {
-        const newContainer = new ContextContainerImplementation<
-          TContext,
-          THandlerReturn,
-          THandlerParameters
-        >(pluginDependencies);
-
-        this.containers.add(newContainer);
-        return newContainer;
-      },
+      >() =>
+        new ContextContainerImplementation<TContext, THandlerReturn, THandlerParameters>(
+          pluginDependencies,
+          this.core.coreId
+        ),
     };
-  }
-
-  public start(): ContextStart {
-    return {
-      setCurrentPlugin: this.setCurrentPlugin.bind(this),
-    };
-  }
-
-  private setCurrentPlugin(plugin?: string) {
-    [...this.containers].forEach(container => container.setCurrentPlugin(plugin));
   }
 }
 
@@ -86,27 +71,27 @@ export class ContextService {
  *     >();
  *
  *     return {
- *       registerContext: this.contextContainer.register,
- *       registerVizRenderer: (renderMethod: string, renderer: VizTypeRenderer) =>
- *         // `createHandler` must be called immediately during the calling plugin's lifecycle method.
- *         this.vizRenderers.set(renderMethod, this.contextContainer.createHandler(renderer)),
+ *       registerContext: this.contextContainer.registerContext,
+ *       registerVizRenderer: (plugin: string, renderMethod: string, renderer: VizTypeRenderer) =>
+ *         this.vizRenderers.set(renderMethod, this.contextContainer.createHandler(plugin, renderer)),
  *     };
  *   }
  *
  *   start(core) {
- *     // Register the core context available to all renderers
- *     this.contextContainer.register('core', () => ({
+ *     // Register the core context available to all renderers. Use the VizRendererContext's pluginId as the first arg.
+ *     this.contextContainer.registerContext('viz_rendering', 'core', () => ({
  *       i18n: core.i18n,
  *       uiSettings: core.uiSettings
  *     }));
  *
  *     return {
- *       registerContext: this.contextContainer.register,
+ *       registerContext: this.contextContainer.registerContext,
+ *
  *       // The handler can now be called directly with only an `HTMLElement` and will automaticallly
  *       // have the `context` argument supplied.
  *       renderVizualization: (renderMethod: string, domElement: HTMLElement) => {
  *         if (!this.vizRenderer.has(renderMethod)) {
- *           throw new Error(`Render method ${renderMethod} has not be registered`);
+ *           throw new Error(`Render method '${renderMethod}' has not been registered`);
  *         }
  *
  *         return this.vizRenderers.get(renderMethod)(domElement);
@@ -120,12 +105,6 @@ export class ContextService {
  */
 export interface ContextSetup {
   /**
-   * Must be called by the PluginsService during each plugin's lifecycle methods.
-   * @internal
-   */
-  setCurrentPlugin(plugin?: string): void;
-
-  /**
    * Creates a new {@link ContextContainer} for a service owner.
    */
   createContextContainer<
@@ -133,12 +112,4 @@ export interface ContextSetup {
     THandlerReturn,
     THandlerParmaters extends any[] = []
   >(): ContextContainer<TContext, THandlerReturn, THandlerParmaters>;
-}
-
-/** @internal */
-export interface ContextStart {
-  /**
-   * @internal
-   */
-  setCurrentPlugin(plugin?: string): void;
 }

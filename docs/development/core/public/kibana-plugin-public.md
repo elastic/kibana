@@ -34,8 +34,8 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [ChromeRecentlyAccessed](./kibana-plugin-public.chromerecentlyaccessed.md) | [APIs](./kibana-plugin-public.chromerecentlyaccessed.md) for recently accessed history. |
 |  [ChromeRecentlyAccessedHistoryItem](./kibana-plugin-public.chromerecentlyaccessedhistoryitem.md) |  |
 |  [ChromeStart](./kibana-plugin-public.chromestart.md) | ChromeStart allows plugins to customize the global chrome header UI and enrich the UX with additional information about the current location of the browser. |
-|  [ContextContainer](./kibana-plugin-public.contextcontainer.md) | An object that handles registration of context providers and building of new context objects. |
-|  [ContextSetup](./kibana-plugin-public.contextsetup.md) | An object that handles registration of context providers and building of new context objects. |
+|  [ContextContainer](./kibana-plugin-public.contextcontainer.md) | An object that handles registration of context providers and configuring handlers with context. |
+|  [ContextSetup](./kibana-plugin-public.contextsetup.md) | An object that handles registration of context providers and configuring handlers with context. |
 |  [CoreSetup](./kibana-plugin-public.coresetup.md) | Core services exposed to the <code>Plugin</code> setup lifecycle |
 |  [CoreStart](./kibana-plugin-public.corestart.md) | Core services exposed to the <code>Plugin</code> start lifecycle |
 |  [DocLinksStart](./kibana-plugin-public.doclinksstart.md) |  |
