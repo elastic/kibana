@@ -441,7 +441,6 @@ describe('workspace_panel', () => {
 
     beforeEach(() => {
       mockDispatch = jest.fn();
-      // const mockDatasource = createMockDatasource();
       instance = mount(
         <InnerWorkspacePanel
           activeDatasourceId={'mock'}
