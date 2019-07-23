@@ -7,6 +7,7 @@
 import { Esqueue } from './esqueue';
 import { createWorkerFactory } from './create_worker';
 import { oncePerServer } from './once_per_server';
+import { LevelLogger } from './level_logger';
 import { createTaggedLogger } from './create_tagged_logger'; // TODO remove createTaggedLogger once esqueue is removed
 
 function createQueueFn(server) {
@@ -28,7 +29,8 @@ function createQueueFn(server) {
     const createWorker = createWorkerFactory(server);
     createWorker(queue);
   } else {
-    logger(
+    const logger = LevelLogger.createForServer(server, ['reporting', 'create_queue']);
+    logger.info(
       'xpack.reporting.queue.pollEnabled is set to false. This Kibana instance ' +
       'will not poll for idle jobs to claim and execute. Make sure another ' +
       'Kibana instance with polling enabled is running in this cluster so ' +
