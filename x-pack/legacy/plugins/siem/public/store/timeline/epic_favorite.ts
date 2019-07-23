@@ -20,6 +20,7 @@ import {
   updateIsFavorite,
   updateTimeline,
   startTimelineSaving,
+  showCallOutUnauthorizedMsg,
 } from './actions';
 import { dispatcherTimelinePersistQueue } from './epic_dispatcher_timeline_persistence_queue';
 import { refetchQueries } from './refetch_queries';
@@ -53,7 +54,10 @@ export const epicPersistTimelineFavorite = (
     mergeMap(([result, recentTimelines]) => {
       const savedTimeline = recentTimelines[get('payload.id', action)];
       const response: ResponseFavoriteTimeline = get('data.persistFavorite', result);
+      const callOutMsg = response.code === 403 ? [showCallOutUnauthorizedMsg()] : [];
+
       return [
+        ...callOutMsg,
         updateTimeline({
           id: get('payload.id', action),
           timeline: {

@@ -21,6 +21,7 @@ import {
   unPinEvent,
   updateTimeline,
   startTimelineSaving,
+  showCallOutUnauthorizedMsg,
 } from './actions';
 import { myEpicTimelineId } from './my_epic_timeline_id';
 import { refetchQueries } from './refetch_queries';
@@ -63,6 +64,7 @@ export const epicPersistPinnedEvent = (
     mergeMap(([result, recentTimeline]) => {
       const savedTimeline = recentTimeline[get('payload.id', action)];
       const response: PinnedEvent = get('data.persistPinnedEventOnTimeline', result);
+      const callOutMsg = response.code === 403 ? [showCallOutUnauthorizedMsg()] : [];
 
       return [
         response != null
@@ -94,6 +96,7 @@ export const epicPersistPinnedEvent = (
                 ),
               },
             }),
+        ...callOutMsg,
         endTimelineSaving({
           id: get('payload.id', action),
         }),

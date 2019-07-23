@@ -879,15 +879,7 @@ export interface TimelineDetailsData {
 }
 
 export interface DetailItem {
-  category: string;
-
-  description?: string | null;
-
-  example?: string | null;
-
   field: string;
-
-  type: string;
 
   values?: ToStringArray | null;
 
@@ -5226,42 +5218,14 @@ export namespace TimelineDetailsDataResolvers {
 
 export namespace DetailItemResolvers {
   export interface Resolvers<Context = SiemContext, TypeParent = DetailItem> {
-    category?: CategoryResolver<string, TypeParent, Context>;
-
-    description?: DescriptionResolver<string | null, TypeParent, Context>;
-
-    example?: ExampleResolver<string | null, TypeParent, Context>;
-
     field?: FieldResolver<string, TypeParent, Context>;
-
-    type?: TypeResolver<string, TypeParent, Context>;
 
     values?: ValuesResolver<ToStringArray | null, TypeParent, Context>;
 
     originalValue?: OriginalValueResolver<EsValue | null, TypeParent, Context>;
   }
 
-  export type CategoryResolver<R = string, Parent = DetailItem, Context = SiemContext> = Resolver<
-    R,
-    Parent,
-    Context
-  >;
-  export type DescriptionResolver<
-    R = string | null,
-    Parent = DetailItem,
-    Context = SiemContext
-  > = Resolver<R, Parent, Context>;
-  export type ExampleResolver<
-    R = string | null,
-    Parent = DetailItem,
-    Context = SiemContext
-  > = Resolver<R, Parent, Context>;
   export type FieldResolver<R = string, Parent = DetailItem, Context = SiemContext> = Resolver<
-    R,
-    Parent,
-    Context
-  >;
-  export type TypeResolver<R = string, Parent = DetailItem, Context = SiemContext> = Resolver<
     R,
     Parent,
     Context

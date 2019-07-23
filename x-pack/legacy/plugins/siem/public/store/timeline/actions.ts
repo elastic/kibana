@@ -184,3 +184,5 @@ export const updateAutoSaveMsg = actionCreator<{
   timelineId: string | null;
   newTimelineModel: TimelineModel | null;
 }>('UPDATE_AUTO_SAVE');
+
+export const showCallOutUnauthorizedMsg = actionCreator('SHOW_CALL_OUT_UNAUTHORIzED_MSG');

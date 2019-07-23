@@ -16,6 +16,9 @@ const selectTimelineById = (state: State): TimelineById => state.timeline.timeli
 
 const selectAutoSaveMsg = (state: State): AutoSavedWarningMsg => state.timeline.autoSavedWarningMsg;
 
+const selectcallOutUnauthorizedMsg = (state: State): boolean =>
+  state.timeline.showCallOutUnauthorizedMsg;
+
 export const selectTimeline = (state: State, timelineId: string): TimelineModel =>
   state.timeline.timelineById[timelineId];
 
@@ -28,6 +31,12 @@ export const timelineByIdSelector = createSelector(
   selectTimelineById,
   timelineById => timelineById
 );
+
+export const getShowCallOutUnauthorizedMsg = () =>
+  createSelector(
+    selectcallOutUnauthorizedMsg,
+    showCallOutUnauthorizedMsg => showCallOutUnauthorizedMsg
+  );
 
 export const getTimelineByIdSelector = () =>
   createSelector(

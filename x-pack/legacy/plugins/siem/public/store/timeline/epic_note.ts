@@ -23,6 +23,7 @@ import {
   endTimelineSaving,
   updateTimeline,
   startTimelineSaving,
+  showCallOutUnauthorizedMsg,
 } from './actions';
 import { myEpicTimelineId } from './my_epic_timeline_id';
 import { refetchQueries } from './refetch_queries';
@@ -63,8 +64,10 @@ export const epicPersistNote = (
     mergeMap(([result, recentTimeline, recentNotes]) => {
       const noteIdRedux = get('payload.noteId', action);
       const response: ResponseNote = get('data.persistNote', result);
+      const callOutMsg = response.code === 403 ? [showCallOutUnauthorizedMsg()] : [];
 
       return [
+        ...callOutMsg,
         recentTimeline[get('payload.id', action)].savedObjectId == null
           ? updateTimeline({
               id: get('payload.id', action),

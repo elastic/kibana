@@ -56,6 +56,7 @@ import {
   endTimelineSaving,
   createTimeline,
   addTimeline,
+  showCallOutUnauthorizedMsg,
 } from './actions';
 import { TimelineModel } from './model';
 import { epicPersistNote, timelineNoteActionsType } from './epic_note';
@@ -190,6 +191,7 @@ export const createTimelineEpic = <State>(): Epic<
             mergeMap(([result, recentTimeline]) => {
               const savedTimeline = recentTimeline[get('payload.id', action)];
               const response: ResponseTimeline = get('data.persistTimeline', result);
+              const callOutMsg = response.code === 403 ? [showCallOutUnauthorizedMsg()] : [];
 
               return [
                 response.code === 409
@@ -206,6 +208,7 @@ export const createTimelineEpic = <State>(): Epic<
                         isSaving: false,
                       },
                     }),
+                ...callOutMsg,
                 endTimelineSaving({
                   id: get('payload.id', action),
                 }),

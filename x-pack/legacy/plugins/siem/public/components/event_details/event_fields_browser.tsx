@@ -11,7 +11,8 @@ import {
 import * as React from 'react';
 import { pure } from 'recompose';
 
-import { BrowserFields } from '../../containers/source';
+import { sortBy } from 'lodash';
+import { BrowserFields, getAllFieldsByName, BrowserField } from '../../containers/source';
 import { DetailItem } from '../../graphql/types';
 import { OnUpdateColumns } from '../timeline/events';
 
@@ -27,24 +28,32 @@ interface Props {
   timelineId: string;
 }
 
+export type EventFieldsData = BrowserField & DetailItem;
+
 /** Renders a table view or JSON view of the `ECS` `data` */
 export const EventFieldsBrowser = pure<Props>(
-  ({ browserFields, data, eventId, isLoading, onUpdateColumns, timelineId }) => (
-    <EuiInMemoryTable
-      items={data.map(item => ({
-        ...item,
-        valuesConcatenated: item.values != null ? item.values.join() : '',
-      }))}
-      columns={getColumns({
-        browserFields,
-        eventId,
-        isLoading,
-        onUpdateColumns,
-        timelineId,
-      })}
-      pagination={false}
-      search={search}
-      sorting={true}
-    />
-  )
+  ({ browserFields, data, eventId, isLoading, onUpdateColumns, timelineId }) => {
+    const fieldsByName = getAllFieldsByName(browserFields);
+    return (
+      <EuiInMemoryTable
+        items={sortBy(data, ['field']).map(item => {
+          return {
+            ...item,
+            ...fieldsByName[item.field],
+            valuesConcatenated: item.values != null ? item.values.join() : '',
+          };
+        })}
+        columns={getColumns({
+          browserFields,
+          eventId,
+          isLoading,
+          onUpdateColumns,
+          timelineId,
+        })}
+        pagination={false}
+        search={search}
+        sorting={true}
+      />
+    );
+  }
 );
