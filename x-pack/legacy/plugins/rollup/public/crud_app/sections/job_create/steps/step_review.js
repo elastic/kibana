@@ -96,13 +96,9 @@ export class StepReviewUi extends Component {
     );
   }
 
-  onClickStartAfterCreate = () => {
-    const {
-      onFieldsChange,
-      fields: { startJobAfterCreation },
-    } = this.props;
-
-    onFieldsChange({ startJobAfterCreation: !startJobAfterCreation });
+  onClickStartAfterCreate = (eve) => {
+    const { onFieldsChange } = this.props;
+    onFieldsChange({ startJobAfterCreation: eve.target.checked });
   };
 
   render() {
@@ -144,7 +140,7 @@ export class StepReviewUi extends Component {
               />
             </span>
           }
-          onChange={() => this.onClickStartAfterCreate()}
+          onChange={this.onClickStartAfterCreate}
         />
       </Fragment>
     );
