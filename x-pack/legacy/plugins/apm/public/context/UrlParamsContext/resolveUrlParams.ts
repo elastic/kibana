@@ -73,7 +73,7 @@ export function resolveUrlParams(location: Location, state: TimeUrlParams) {
     detailTab: toString(detailTab),
     flyoutDetailTab: toString(flyoutDetailTab),
     spanId: toNumber(spanId),
-    kuery: kuery && decodeURIComponent(kuery),
+    kuery: kuery && legacyDecodeURIComponent(kuery),
     // path params
     processorEvent,
     serviceName,
