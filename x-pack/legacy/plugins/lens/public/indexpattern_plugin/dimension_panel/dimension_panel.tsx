@@ -11,18 +11,12 @@ import { Storage } from 'ui/storage';
 import { i18n } from '@kbn/i18n';
 import { DataSetup } from '../../../../../../../src/legacy/core_plugins/data/public';
 import { DatasourceDimensionPanelProps } from '../../types';
-import {
-  IndexPatternColumn,
-  IndexPatternPrivateState,
-  columnToOperation,
-  IndexPatternField,
-} from '../indexpattern';
+import { IndexPatternColumn, IndexPatternPrivateState, IndexPatternField } from '../indexpattern';
 
-import { getPotentialOperations, buildColumnForOperationType, buildColumnForField } from '../operations';
+import { getPotentialOperations, buildColumnForField } from '../operations';
 import { PopoverEditor } from './popover_editor';
 import { DragContextState, ChildDragDropProvider, DragDrop } from '../../drag_drop';
 import { changeColumn, deleteColumn } from '../state_helpers';
-import { hasField } from '../utils';
 
 export type IndexPatternDimensionPanelProps = DatasourceDimensionPanelProps & {
   state: IndexPatternPrivateState;
@@ -39,23 +33,27 @@ export const IndexPatternDimensionPanel = memo(function IndexPatternDimensionPan
 ) {
   const layerId = props.layerId;
   const indexPatternId = props.state.layers[layerId].indexPatternId;
-  console.log('rendering with ' + indexPatternId);
-  const operations = useMemo(
-    () => { 
-      console.log('recomputing...');
-      return getPotentialOperations(props.state.indexPatterns[indexPatternId]) },
-[props.state.indexPatterns[indexPatternId]]
-  );
+  const currentIndexPattern = props.state.indexPatterns[indexPatternId];
 
-  const filteredOperations = useMemo(() => operations.filter(operation => {
-    return props.filterOperations(operation.operationMeta);
-  }), [operations, props.filterOperations]);
+  const operations = useMemo(() => {
+    return getPotentialOperations(props.state.indexPatterns[indexPatternId]);
+  }, [props.state.indexPatterns[indexPatternId]]);
+
+  const filteredOperations = useMemo(
+    () =>
+      operations.filter(operation => {
+        return props.filterOperations(operation.operationMeta);
+      }),
+    [operations, props.filterOperations]
+  );
 
   const selectedColumn: IndexPatternColumn | null =
     props.state.layers[layerId].columns[props.columnId] || null;
 
   function hasOperationForField(field: IndexPatternField) {
-    return Boolean(filteredOperations.find(operation => operation.applicableFields.includes(field.name)));
+    return Boolean(
+      filteredOperations.find(operation => operation.applicableFields.includes(field.name))
+    );
   }
 
   function canHandleDrop() {
@@ -82,7 +80,6 @@ export const IndexPatternDimensionPanel = memo(function IndexPatternDimensionPan
             changeColumn({
               state: props.state,
               layerId,
-              // layers: props.state.layers,
               columnId: props.columnId,
               newColumn: buildColumnForField({
                 // TODO think about this
@@ -91,7 +88,7 @@ export const IndexPatternDimensionPanel = memo(function IndexPatternDimensionPan
                 indexPatternId,
                 layerId,
                 suggestedPriority: props.suggestedPriority,
-                field: field as IndexPatternField
+                field: field as IndexPatternField,
               }),
             })
           );
@@ -101,6 +98,7 @@ export const IndexPatternDimensionPanel = memo(function IndexPatternDimensionPan
           <EuiFlexItem grow={true}>
             <PopoverEditor
               {...props}
+              currentIndexPattern={currentIndexPattern}
               selectedColumn={selectedColumn}
               filteredOperations={filteredOperations}
             />

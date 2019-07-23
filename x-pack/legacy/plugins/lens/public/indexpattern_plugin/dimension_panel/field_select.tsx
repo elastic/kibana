@@ -15,22 +15,24 @@ import {
 } from '@elastic/eui';
 import {
   IndexPatternColumn,
-  FieldBasedIndexPatternColumn,
   OperationType,
-  BaseIndexPatternColumn,
   IndexPattern,
   IndexPatternField,
 } from '../indexpattern';
 import { FieldIcon } from '../field_icon';
 import { DataType } from '../../types';
-import { hasField, sortByField } from '../utils';
-import { OperationMapping, operationDefinitionMap, buildColumnForField } from '../operations';
+import { hasField } from '../utils';
+import { OperationMapping, operationDefinitionMap } from '../operations';
+
+export type FieldChoice = { type: 'field'; field: string } | { type: 'document' };
 
 export interface FieldSelectProps {
+  currentIndexPattern: IndexPattern;
+  fieldMap: Record<string, IndexPatternField>;
   incompatibleSelectedOperationType: OperationType | null;
   selectedColumn?: IndexPatternColumn;
   filteredOperations: OperationMapping[];
-  onChangeColumn: (newColumn: IndexPatternColumn) => void;
+  onChoose: (choice: FieldChoice) => void;
   onDeleteColumn: () => void;
 }
 
@@ -38,32 +40,37 @@ export function FieldSelect({
   incompatibleSelectedOperationType,
   selectedColumn,
   filteredOperations,
-  onChangeColumn,
+  currentIndexPattern,
+  fieldMap,
+  onChoose,
   onDeleteColumn,
 }: FieldSelectProps) {
   const fields = _.uniq(
     filteredOperations.reduce((list, op) => [...list, ...op.applicableFields], [] as string[])
   ).sort();
 
-    // TODO pass index pattern here
   function isCompatibleWithCurrentOperation(fieldName: string) {
     if (incompatibleSelectedOperationType) {
-      return operationDefinitionMap[incompatibleSelectedOperationType].getPossibleOperationsForField(
-          ({} as unknown) as IndexPatternField
-        ).length > 0;
+      return (
+        operationDefinitionMap[incompatibleSelectedOperationType].getPossibleOperationsForField(
+          fieldMap[fieldName]
+        ).length > 0
+      );
     }
     return (
       !selectedColumn ||
       (hasField(selectedColumn) &&
         operationDefinitionMap[selectedColumn.operationType].getPossibleOperationsForField(
-          ({} as unknown) as IndexPatternField
+          fieldMap[fieldName]
         ).length > 0)
     );
   }
 
-  const isCurrentOperationApplicableWithoutField = !selectedColumn || operationDefinitionMap[selectedColumn.operationType].getPossibleOperationsForDocument(
-          ({} as unknown) as IndexPattern
-        ).length > 0;
+  const isCurrentOperationApplicableWithoutField =
+    !selectedColumn ||
+    operationDefinitionMap[selectedColumn.operationType].getPossibleOperationsForDocument(
+      currentIndexPattern
+    ).length > 0;
 
   const fieldOptions = [];
   const fieldlessColumn = filteredOperations.find(op => op.applicableWithoutField);
@@ -73,7 +80,7 @@ export function FieldSelect({
       label: i18n.translate('xpack.lens.indexPattern.documentField', {
         defaultMessage: 'Document',
       }),
-      value: { fieldless: true },
+      value: { type: 'document' },
       className: classNames({
         'lnsConfigPanel__fieldOption--incompatible': !isCurrentOperationApplicableWithoutField,
       }),
@@ -88,8 +95,11 @@ export function FieldSelect({
       options: fields
         .map(field => ({
           label: field,
-          // todo pass field data type here
-          value: { field, dataType: 'string' },
+          value: {
+            type: 'document',
+            field,
+            dataType: fieldMap[field].type,
+          },
           compatible: isCompatibleWithCurrentOperation(field),
         }))
         .sort(({ compatible: a }, { compatible: b }) => {
@@ -137,26 +147,7 @@ export function FieldSelect({
           return;
         }
 
-        // TODO build actual column here
-        // const column: IndexPatternColumn = filteredColumns.find(
-        //   ({ operationId }) =>
-        //     operationId === ((choices[0].value as unknown) as { operationId: string }).operationId
-        // )!;
-
-        onChangeColumn(buildColumnForField({
-          // todo check what to do here
-          index: 0,
-          // todo pass columns here
-          columns: {},
-          // todo pass field here
-          field: {} as unknown as IndexPatternField,
-          // todo pass index pattern id here
-          indexPatternId: '',
-          // todo pass layer id here
-          layerId: '',
-          // todo pass suggested priority here
-          suggestedPriority: 0
-        }));
+        onChoose((choices[0] as unknown) as FieldChoice);
       }}
       renderOption={(option, searchValue) => {
         return (

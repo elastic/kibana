@@ -5,7 +5,7 @@
  */
 
 import _ from 'lodash';
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
@@ -32,6 +32,8 @@ import {
   getOperationDisplay,
   OperationMapping,
   buildColumnForOperationType,
+  buildColumnForField,
+  buildColumnForDocument,
 } from '../operations';
 import { deleteColumn, changeColumn } from '../state_helpers';
 import { FieldSelect } from './field_select';
@@ -39,72 +41,22 @@ import { hasField } from '../utils';
 
 const operationPanels = getOperationDisplay();
 
-function getOperationTypes(
-  filteredOperations: OperationMapping[],
-  selectedColumn?: IndexPatternColumn
-) {
-  const possibleOperationTypes = filteredOperations
-    .map(operation => operation.applicableOperationTypes)
-    .reduce((a, b) => [...a, ...b], [])
-    .map(operationType => ({
-      operationType,
-      compatibleWithCurrentField: false,
-    }));
-  const validFieldlessOperationTypes = filteredOperations
-    .map(op => {
-      if (!selectedColumn || (!hasField(selectedColumn) && op.applicableWithoutField)) {
-        // TODO pipe indexpattern here
-        return op.applicableOperationTypes.filter(
-          opType =>
-            operationDefinitionMap[opType].getPossibleOperationsForDocument(
-              ({} as unknown) as IndexPattern
-            ).length !== 0
-        );
-      } else {
-        return [];
-      }
-    })
-    .reduce((a, b) => [...a, ...b], [])
-    .map(opType => ({
-      operationType: opType,
-      compatibleWithCurrentField: true,
-    }));
-  const validFieldBoundOperationTypes = filteredOperations
-    .map(op => {
-      if (
-        !selectedColumn ||
-        (hasField(selectedColumn) && op.applicableFields.includes(selectedColumn.sourceField))
-      ) {
-        // TODO pipe indexpattern here
-        return op.applicableOperationTypes.filter(
-          opType =>
-            !selectedColumn ||
-            operationDefinitionMap[opType].getPossibleOperationsForField(
-              ({} as unknown) as IndexPatternField
-            ).length !== 0
-        );
-      } else {
-        return [];
-      }
-    })
-    .reduce((a, b) => [...a, ...b], [])
-    .map(opType => ({
-      operationType: opType,
-      compatibleWithCurrentField: true,
-    }));
-  return _.uniq(
-    [...validFieldlessOperationTypes, ...validFieldBoundOperationTypes, ...possibleOperationTypes],
-    'operationType'
-  );
-}
-
 export interface PopoverEditorProps extends IndexPatternDimensionPanelProps {
   selectedColumn?: IndexPatternColumn;
   filteredOperations: OperationMapping[];
+  currentIndexPattern: IndexPattern;
 }
 
 export function PopoverEditor(props: PopoverEditorProps) {
-  const { selectedColumn, filteredOperations, state, columnId, setState, layerId } = props;
+  const {
+    selectedColumn,
+    filteredOperations,
+    state,
+    columnId,
+    setState,
+    layerId,
+    currentIndexPattern,
+  } = props;
   const [isPopoverOpen, setPopoverOpen] = useState(false);
   const [
     incompatibleSelectedOperationType,
@@ -114,100 +66,160 @@ export function PopoverEditor(props: PopoverEditorProps) {
   const ParamEditor =
     selectedColumn && operationDefinitionMap[selectedColumn.operationType].paramEditor;
 
+  const fieldMap: Record<string, IndexPatternField> = useMemo(() => {
+    const fields: Record<string, IndexPatternField> = {};
+    currentIndexPattern.fields.forEach(field => {
+      fields[field.name] = field;
+    });
+
+    return fields;
+  }, [currentIndexPattern]);
+
+  function getOperationTypes() {
+    const possibleOperationTypes = filteredOperations
+      .map(operation => operation.applicableOperationTypes)
+      .reduce((a, b) => [...a, ...b], [])
+      .map(operationType => ({
+        operationType,
+        compatibleWithCurrentField: false,
+      }));
+    const validFieldlessOperationTypes = filteredOperations
+      .map(op => {
+        if (!selectedColumn || (!hasField(selectedColumn) && op.applicableWithoutField)) {
+          return op.applicableOperationTypes.filter(
+            opType =>
+              operationDefinitionMap[opType].getPossibleOperationsForDocument(currentIndexPattern)
+                .length !== 0
+          );
+        } else {
+          return [];
+        }
+      })
+      .reduce((a, b) => [...a, ...b], [])
+      .map(opType => ({
+        operationType: opType,
+        compatibleWithCurrentField: true,
+      }));
+    const validFieldBoundOperationTypes = filteredOperations
+      .map(op => {
+        if (
+          !selectedColumn ||
+          (hasField(selectedColumn) && op.applicableFields.includes(selectedColumn.sourceField))
+        ) {
+          return op.applicableOperationTypes.filter(
+            opType =>
+              !selectedColumn ||
+              operationDefinitionMap[opType].getPossibleOperationsForField(
+                fieldMap[selectedColumn.sourceField]
+              ).length !== 0
+          );
+        } else {
+          return [];
+        }
+      })
+      .reduce((a, b) => [...a, ...b], [])
+      .map(opType => ({
+        operationType: opType,
+        compatibleWithCurrentField: true,
+      }));
+    return _.uniq(
+      [
+        ...validFieldlessOperationTypes,
+        ...validFieldBoundOperationTypes,
+        ...possibleOperationTypes,
+      ],
+      'operationType'
+    );
+  }
+
   const sideNavItems = [
     {
       name: '',
       id: '0',
-      items: getOperationTypes(filteredOperations, selectedColumn).map(
-        ({ operationType, compatibleWithCurrentField }) => ({
-          name: operationPanels[operationType].displayName,
-          id: operationType as string,
-          className: classNames('lnsConfigPanel__operation', {
-            'lnsConfigPanel__operation--selected': Boolean(
-              incompatibleSelectedOperationType === operationType ||
-                (!incompatibleSelectedOperationType &&
-                  selectedColumn &&
-                  selectedColumn.operationType === operationType)
-            ),
-            'lnsConfigPanel__operation--incompatible': !compatibleWithCurrentField,
-          }),
-          'data-test-subj': `lns-indexPatternDimension-${operationType}`,
-          onClick() {
-            const indexPatternId = props.state.layers[props.layerId].indexPatternId;
-            if (!selectedColumn) {
-              const possibleFields = _.uniq(
-                filteredOperations
-                  .filter(op => op.applicableOperationTypes.includes(operationType))
-                  .reduce((list, op) => [...list, ...op.applicableFields], [] as string[])
-              );
-              const isFieldlessPossible =
-                filteredOperations.filter(op => op.applicableWithoutField).length > 0;
-              if (
-                possibleFields.length === 1 ||
-                (possibleFields.length === 0 && isFieldlessPossible)
-              ) {
-                setState(
-                  changeColumn({
-                    state,
-                    layerId,
-                    columnId,
-                    newColumn: buildColumnForOperationType({
-                      // todo think about this
-                      index: 0,
-                      columns: props.state.layers[props.layerId].columns,
-                      suggestedPriority: props.suggestedPriority,
-                      layerId: props.layerId,
-                      op: operationType,
-                      indexPatternId,
-                      field:
-                        possibleFields.length === 1
-                          ? props.state.indexPatterns[indexPatternId].fields.find(
-                              field => field.name === possibleFields[0]
-                            )
-                          : undefined,
-                    }),
-                  })
-                );
-              } else {
-                setInvalidOperationType(operationType);
-              }
-              return;
-            }
-            if (!compatibleWithCurrentField) {
-              setInvalidOperationType(operationType);
-              return;
-            }
-            if (incompatibleSelectedOperationType) {
-              setInvalidOperationType(null);
-            }
-            if (selectedColumn.operationType === operationType) {
-              return;
-            }
-            const newColumn: IndexPatternColumn = buildColumnForOperationType({
-              // todo think about this
-              index: 0,
-              columns: props.state.layers[props.layerId].columns,
-              suggestedPriority: props.suggestedPriority,
-              layerId: props.layerId,
-              op: operationType,
-              indexPatternId,
-              field: hasField(selectedColumn)
-                ? props.state.indexPatterns[indexPatternId].fields.find(
-                    field => field.name === selectedColumn.sourceField
-                  )
-                : undefined,
-            });
-            setState(
-              changeColumn({
-                state,
-                layerId,
-                columnId,
-                newColumn,
-              })
+      items: getOperationTypes().map(({ operationType, compatibleWithCurrentField }) => ({
+        name: operationPanels[operationType].displayName,
+        id: operationType as string,
+        className: classNames('lnsConfigPanel__operation', {
+          'lnsConfigPanel__operation--selected': Boolean(
+            incompatibleSelectedOperationType === operationType ||
+              (!incompatibleSelectedOperationType &&
+                selectedColumn &&
+                selectedColumn.operationType === operationType)
+          ),
+          'lnsConfigPanel__operation--incompatible': !compatibleWithCurrentField,
+        }),
+        'data-test-subj': `lns-indexPatternDimension-${operationType}`,
+        onClick() {
+          const indexPatternId = props.state.layers[props.layerId].indexPatternId;
+          if (!selectedColumn) {
+            const possibleFields = _.uniq(
+              filteredOperations
+                .filter(op => op.applicableOperationTypes.includes(operationType))
+                .reduce((list, op) => [...list, ...op.applicableFields], [] as string[])
             );
-          },
-        })
-      ),
+            const isFieldlessPossible =
+              filteredOperations.filter(op => op.applicableWithoutField).length > 0;
+            if (
+              possibleFields.length === 1 ||
+              (possibleFields.length === 0 && isFieldlessPossible)
+            ) {
+              setState(
+                changeColumn({
+                  state,
+                  layerId,
+                  columnId,
+                  newColumn: buildColumnForOperationType({
+                    // todo think about this
+                    index: 0,
+                    columns: props.state.layers[props.layerId].columns,
+                    suggestedPriority: props.suggestedPriority,
+                    layerId: props.layerId,
+                    op: operationType,
+                    indexPatternId,
+                    field:
+                      possibleFields.length === 1
+                        ? fieldMap[possibleFields[0]]
+                        : undefined,
+                  }),
+                })
+              );
+            } else {
+              setInvalidOperationType(operationType);
+            }
+            return;
+          }
+          if (!compatibleWithCurrentField) {
+            setInvalidOperationType(operationType);
+            return;
+          }
+          if (incompatibleSelectedOperationType) {
+            setInvalidOperationType(null);
+          }
+          if (selectedColumn.operationType === operationType) {
+            return;
+          }
+          const newColumn: IndexPatternColumn = buildColumnForOperationType({
+            // todo think about this
+            index: 0,
+            columns: props.state.layers[props.layerId].columns,
+            suggestedPriority: props.suggestedPriority,
+            layerId: props.layerId,
+            op: operationType,
+            indexPatternId,
+            field: hasField(selectedColumn)
+              ? fieldMap[selectedColumn.sourceField]
+              : undefined,
+          });
+          setState(
+            changeColumn({
+              state,
+              layerId,
+              columnId,
+              newColumn,
+            })
+          );
+        },
+      })),
     },
   ];
 
@@ -248,6 +260,8 @@ export function PopoverEditor(props: PopoverEditorProps) {
       <EuiFlexGroup gutterSize="s" direction="column">
         <EuiFlexItem>
           <FieldSelect
+            fieldMap={fieldMap}
+            currentIndexPattern={currentIndexPattern}
             filteredOperations={filteredOperations}
             selectedColumn={selectedColumn}
             incompatibleSelectedOperationType={incompatibleSelectedOperationType}
@@ -260,7 +274,27 @@ export function PopoverEditor(props: PopoverEditorProps) {
                 })
               );
             }}
-            onChangeColumn={column => {
+            onChoose={choice => {
+              const column =
+                choice.type === 'field'
+                  ? buildColumnForField({
+                      // todo fix
+                      index: 0,
+                      columns: props.state.layers[props.layerId].columns,
+                      field: fieldMap[choice.field],
+                      indexPatternId: currentIndexPattern.id,
+                      layerId: props.layerId,
+                      suggestedPriority: props.suggestedPriority,
+                    })
+                  : buildColumnForDocument({
+                      // todo fix
+                      index: 0,
+                      columns: props.state.layers[props.layerId].columns,
+                      indexPattern: currentIndexPattern,
+                      layerId: props.layerId,
+                      suggestedPriority: props.suggestedPriority,
+                    });
+
               setState(
                 changeColumn({
                   state,

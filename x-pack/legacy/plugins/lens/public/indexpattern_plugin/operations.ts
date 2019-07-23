@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import _ from 'lodash';
 import { Storage } from 'ui/storage';
 import { DataSetup } from '../../../../../../src/legacy/core_plugins/data/public';
 import { DimensionPriority, OperationMetaInformation } from '../types';
@@ -105,24 +106,25 @@ export function getOperationDisplay() {
 }
 
 export interface OperationMapping {
-      operationMeta: OperationMetaInformation;
-      applicableFields: string[];
-      applicableWithoutField: boolean;
-      applicableOperationTypes: OperationType[];
+  operationMeta: OperationMetaInformation;
+  applicableFields: string[];
+  applicableWithoutField: boolean;
+  applicableOperationTypes: OperationType[];
 }
 
 export function getOperationTypesForField(field: IndexPatternField) {
-  return operationDefinitions.filter(operationDefinition => operationDefinition.getPossibleOperationsForField(field).length > 0).map(({ type }) => type);
+  return operationDefinitions
+    .filter(
+      operationDefinition => operationDefinition.getPossibleOperationsForField(field).length > 0
+    )
+    .map(({ type }) => type);
 }
 
 export function getPotentialOperations(indexPattern: IndexPattern) {
-  const operations: Map<
-    string,
-    OperationMapping
-  > = new Map();
+  const operations: Map<string, OperationMapping> = new Map();
   operationDefinitions.forEach(operationDefinition => {
     operationDefinition.getPossibleOperationsForDocument(indexPattern).forEach(operationMeta => {
-      const key = JSON.stringify(operationMeta);
+      const key = `${operationMeta.dataType}-${operationMeta.isBucketed}`;
       const currentOperation = operations.get(key);
 
       operations.set(key, {
@@ -139,38 +141,58 @@ export function getPotentialOperations(indexPattern: IndexPattern) {
         ],
       });
     });
+    // TODO: optimize this because of the linear complexity regarding number of fields
     indexPattern.fields.forEach(field => {
       operationDefinition.getPossibleOperationsForField(field).forEach(operationMeta => {
-        const key = JSON.stringify(operationMeta);
+        const key = `${operationMeta.dataType}-${operationMeta.isBucketed}`;
         const currentOperation = operations.get(key);
 
-        operations.set(key, {
-          operationMeta,
-          applicableFields: [
-            ...(currentOperation
-              ? currentOperation.applicableFields.filter(
-                  applicableField => applicableField !== field.name
-                )
-              : []),
-            field.name,
-          ],
-          applicableWithoutField: currentOperation
-            ? currentOperation.applicableWithoutField
-            : false,
-          applicableOperationTypes: [
-            ...(currentOperation
-              ? currentOperation.applicableOperationTypes.filter(
-                  type => type !== operationDefinition.type
-                )
-              : []),
-            operationDefinition.type,
-          ],
-        });
+        if (currentOperation) {
+          currentOperation.applicableFields.push(field.name);
+          currentOperation.applicableOperationTypes.push(operationDefinition.type);
+        } else {
+          operations.set(key, {
+            operationMeta,
+            applicableFields: [field.name],
+            applicableWithoutField: false,
+            applicableOperationTypes: [operationDefinition.type],
+          });
+        }
       });
     });
   });
   // todo there has to be an order to that
-  return Array.from(operations.values());
+  return Array.from(operations.values()).map(operationMapping => ({
+    ...operationMapping,
+    applicableFields: _.uniq(operationMapping.applicableFields),
+    applicableOperationTypes: _.uniq(operationMapping.applicableOperationTypes),
+  }));
+}
+
+export function buildColumnForDocument<T extends OperationType>({
+  index,
+  columns,
+  layerId,
+  indexPattern,
+  suggestedPriority,
+}: {
+  index: number;
+  columns: Partial<Record<string, IndexPatternColumn>>;
+  suggestedPriority: DimensionPriority | undefined;
+  layerId: string;
+  indexPattern: IndexPattern;
+}): IndexPatternColumn {
+  const operationDefinition = operationDefinitions.find(
+    definition => definition.getPossibleOperationsForDocument(indexPattern).length !== 0
+  )!;
+  return buildColumnForOperationType({
+    index,
+    op: operationDefinition.type,
+    columns,
+    layerId,
+    indexPatternId: indexPattern.id,
+    suggestedPriority,
+  });
 }
 
 export function buildColumnForField<T extends OperationType>({
