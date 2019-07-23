@@ -12,7 +12,7 @@ import { ChartSettings } from '../../../charts/common/settings';
 import { LineChartData } from '../../../../../common/chart_loader';
 import { ModelItem, Anomaly } from '../../../../../common/results_loader';
 import { JOB_TYPE } from '../../../../../common/job_creator/util/constants';
-import { SplitCards } from '../split_cards';
+import { SplitCards, useAnimateSplit } from '../split_cards';
 import { DetectorTitle } from '../detector_title';
 import { AnomalyChart, CHART_TYPE } from '../../../charts/anomaly_chart';
 
@@ -26,6 +26,7 @@ interface ChartGridProps {
   anomalyData: Record<number, Anomaly[]>;
   deleteDetector?: (index: number) => void;
   jobType: JOB_TYPE;
+  animate?: boolean;
 }
 
 export const ChartGrid: FC<ChartGridProps> = ({
@@ -39,12 +40,15 @@ export const ChartGrid: FC<ChartGridProps> = ({
   deleteDetector,
   jobType,
 }) => {
+  const animateSplit = useAnimateSplit();
+
   return (
     <SplitCards
       fieldValues={fieldValues}
       splitField={splitField}
       numberOfDetectors={aggFieldPairList.length}
       jobType={jobType}
+      animate={animateSplit}
     >
       <EuiFlexGrid columns={chartSettings.cols}>
         {aggFieldPairList.map((af, i) => (

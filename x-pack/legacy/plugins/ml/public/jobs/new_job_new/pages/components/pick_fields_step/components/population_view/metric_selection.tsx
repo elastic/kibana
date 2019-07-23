@@ -16,7 +16,6 @@ import { newJobCapsService } from '../../../../../../../services/new_job_capabil
 import { Field, AggFieldPair } from '../../../../../../../../common/types/fields';
 import { defaultChartSettings, ChartSettings } from '../../../charts/common/settings';
 import { MetricSelector } from './metric_selector';
-import { JobProgress } from '../job_progress';
 import { SplitFieldSelector } from '../split_field';
 import { MlTimeBuckets } from '../../../../../../../util/ml_time_buckets';
 import { ChartGrid } from './chart_grid';
@@ -53,7 +52,6 @@ export const PopulationDetectors: FC<Props> = ({ isActive, setIsValid }) => {
   const [anomalyData, setAnomalyData] = useState<Record<number, Anomaly[]>>([]);
   const [start, setStart] = useState(jobCreator.start);
   const [end, setEnd] = useState(jobCreator.end);
-  const [progress, setProgress] = useState(resultsLoader.progress);
   const [chartSettings, setChartSettings] = useState(defaultChartSettings);
   const [splitField, setSplitField] = useState(jobCreator.splitField);
   const [fieldValuesPerDetector, setFieldValuesPerDetector] = useState<DetectorFieldValues>({});
@@ -90,7 +88,6 @@ export const PopulationDetectors: FC<Props> = ({ isActive, setIsValid }) => {
 
   useEffect(() => {
     // subscribe to progress and results
-    jobCreator.subscribeToProgress(setProgress);
     const subscription = resultsLoader.subscribeToResults(setResultsWrapper);
     return () => {
       subscription.unsubscribe();
@@ -261,9 +258,6 @@ export const PopulationDetectors: FC<Props> = ({ isActive, setIsValid }) => {
           selectedOptions={selectedOptions}
           removeOptions={[]}
         />
-      )}
-      {isActive === false && (
-        <Fragment>{lineChartsData && <JobProgress progress={progress} />}</Fragment>
       )}
     </Fragment>
   );

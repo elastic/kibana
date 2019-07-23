@@ -4,11 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FC, useContext, useReducer, useState, useEffect } from 'react';
+import React, { Fragment, FC, useContext, useReducer, useState, useEffect } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
-import { EuiSteps, EuiStepStatus } from '@elastic/eui';
+import { EuiStepsHorizontal, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { WIZARD_STEPS } from '../components/step_types';
 
 import { TimeRangeStep } from '../components/time_range_step';
@@ -89,80 +89,144 @@ export const Wizard: FC<Props> = ({
   const [additionalExpanded, setAdditionalExpanded] = useState(false);
 
   const [currentStep, setCurrentStep] = useState(WIZARD_STEPS.TIME_RANGE);
+  const [highestStep, setHighestStep] = useState(WIZARD_STEPS.TIME_RANGE);
+  const [disableSteps, setDisableSteps] = useState(false);
+  const [progress, setProgress] = useState(resultsLoader.progress);
+
+  useEffect(() => {
+    jobCreator.subscribeToProgress(setProgress);
+  }, []);
+
+  useEffect(() => {
+    setDisableSteps(progress > 0);
+  }, [progress]);
+
+  useEffect(() => {
+    if (currentStep >= highestStep) {
+      setHighestStep(currentStep);
+    }
+  }, [currentStep]);
+
+  function jumpToStep(step: WIZARD_STEPS) {
+    if (step <= highestStep) {
+      setCurrentStep(step);
+    }
+  }
 
   const stepsConfig = [
     {
       title: i18n.translate('xpack.ml.newJob.wizard.step.timeRangeTitle', {
         defaultMessage: 'Time range',
       }),
-      children: (
-        <TimeRangeStep
-          isCurrentStep={currentStep === WIZARD_STEPS.TIME_RANGE}
-          setCurrentStep={setCurrentStep}
-        />
-      ),
-      status: currentStep >= WIZARD_STEPS.TIME_RANGE ? undefined : ('incomplete' as EuiStepStatus),
+      onClick: () => jumpToStep(WIZARD_STEPS.TIME_RANGE),
+      isSelected: currentStep === WIZARD_STEPS.TIME_RANGE,
+      isComplete: currentStep > WIZARD_STEPS.TIME_RANGE,
+      disabled: disableSteps,
     },
     {
       title: i18n.translate('xpack.ml.newJob.wizard.step.pickFieldsTitle', {
         defaultMessage: 'Pick fields',
       }),
-      children: (
-        <PickFieldsStep
-          isCurrentStep={currentStep === WIZARD_STEPS.PICK_FIELDS}
-          setCurrentStep={setCurrentStep}
-        />
-      ),
-      status: currentStep >= WIZARD_STEPS.PICK_FIELDS ? undefined : ('incomplete' as EuiStepStatus),
+      onClick: () => jumpToStep(WIZARD_STEPS.PICK_FIELDS),
+      isSelected: currentStep === WIZARD_STEPS.PICK_FIELDS,
+      isComplete: currentStep > WIZARD_STEPS.PICK_FIELDS,
+      disabled: disableSteps,
     },
-
     {
       title: i18n.translate('xpack.ml.newJob.wizard.step.jobDetailsTitle', {
         defaultMessage: 'Job details',
       }),
-      children: (
-        <JobDetailsStep
-          isCurrentStep={currentStep === WIZARD_STEPS.JOB_DETAILS}
-          setCurrentStep={setCurrentStep}
-          advancedExpanded={advancedExpanded}
-          setAdvancedExpanded={setAdvancedExpanded}
-          additionalExpanded={additionalExpanded}
-          setAdditionalExpanded={setAdditionalExpanded}
-        />
-      ),
-      status: currentStep >= WIZARD_STEPS.JOB_DETAILS ? undefined : ('incomplete' as EuiStepStatus),
+      onClick: () => jumpToStep(WIZARD_STEPS.JOB_DETAILS),
+      isSelected: currentStep === WIZARD_STEPS.JOB_DETAILS,
+      isComplete: currentStep > WIZARD_STEPS.JOB_DETAILS,
+      disabled: disableSteps,
     },
-
     {
       title: i18n.translate('xpack.ml.newJob.wizard.step.validationTitle', {
         defaultMessage: 'Validation',
       }),
-      children: (
-        <ValidationStep
-          isCurrentStep={currentStep === WIZARD_STEPS.VALIDATION}
-          setCurrentStep={setCurrentStep}
-        />
-      ),
-      status: currentStep >= WIZARD_STEPS.VALIDATION ? undefined : ('incomplete' as EuiStepStatus),
+      onClick: () => jumpToStep(WIZARD_STEPS.VALIDATION),
+      isSelected: currentStep === WIZARD_STEPS.VALIDATION,
+      isComplete: currentStep > WIZARD_STEPS.VALIDATION,
+      disabled: disableSteps,
     },
-
     {
       title: i18n.translate('xpack.ml.newJob.wizard.step.summaryTitle', {
         defaultMessage: 'Summary',
       }),
-      children: (
-        <SummaryStep
-          isCurrentStep={currentStep === WIZARD_STEPS.SUMMARY}
-          setCurrentStep={setCurrentStep}
-        />
-      ),
-      status: currentStep >= WIZARD_STEPS.SUMMARY ? undefined : ('incomplete' as EuiStepStatus),
+      onClick: () => jumpToStep(WIZARD_STEPS.SUMMARY),
+      isSelected: currentStep === WIZARD_STEPS.SUMMARY,
+      isComplete: currentStep > WIZARD_STEPS.SUMMARY,
+      disabled: disableSteps,
     },
   ];
 
   return (
     <JobCreatorContext.Provider value={jobCreatorContext}>
-      <EuiSteps steps={stepsConfig} />
+      {currentStep !== WIZARD_STEPS.SUMMARY && (
+        <EuiStepsHorizontal steps={stepsConfig} style={{ backgroundColor: 'inherit' }} />
+      )}
+
+      {currentStep === WIZARD_STEPS.TIME_RANGE && (
+        <Fragment>
+          <Title>Time range</Title>
+          <TimeRangeStep
+            isCurrentStep={currentStep === WIZARD_STEPS.TIME_RANGE}
+            setCurrentStep={setCurrentStep}
+          />
+        </Fragment>
+      )}
+      {currentStep === WIZARD_STEPS.PICK_FIELDS && (
+        <Fragment>
+          <Title>Pick fields</Title>
+          <PickFieldsStep
+            isCurrentStep={currentStep === WIZARD_STEPS.PICK_FIELDS}
+            setCurrentStep={setCurrentStep}
+          />
+        </Fragment>
+      )}
+      {currentStep === WIZARD_STEPS.JOB_DETAILS && (
+        <Fragment>
+          <Title>Job details</Title>
+          <JobDetailsStep
+            isCurrentStep={currentStep === WIZARD_STEPS.JOB_DETAILS}
+            setCurrentStep={setCurrentStep}
+            advancedExpanded={advancedExpanded}
+            setAdvancedExpanded={setAdvancedExpanded}
+            additionalExpanded={additionalExpanded}
+            setAdditionalExpanded={setAdditionalExpanded}
+          />
+        </Fragment>
+      )}
+      {currentStep === WIZARD_STEPS.VALIDATION && (
+        <Fragment>
+          <Title>Validation</Title>
+          <ValidationStep
+            isCurrentStep={currentStep === WIZARD_STEPS.VALIDATION}
+            setCurrentStep={setCurrentStep}
+          />
+        </Fragment>
+      )}
+      {currentStep === WIZARD_STEPS.SUMMARY && (
+        <Fragment>
+          <Title>Summary</Title>
+          <SummaryStep
+            isCurrentStep={currentStep === WIZARD_STEPS.SUMMARY}
+            setCurrentStep={setCurrentStep}
+          />
+        </Fragment>
+      )}
     </JobCreatorContext.Provider>
+  );
+};
+
+const Title: FC = ({ children }) => {
+  return (
+    <Fragment>
+      <EuiTitle>
+        <h2>{children}</h2>
+      </EuiTitle>
+      <EuiSpacer />
+    </Fragment>
   );
 };
