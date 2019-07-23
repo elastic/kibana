@@ -36,7 +36,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
 "test": """{ "more": "json" }"""`,
       ];
 
-      const nOkInput = [
+      const notOkInput = [
         `{
 "query": {
 "match_all": {
@@ -62,7 +62,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
       };
 
       await expectHasParseErrorsToBe(false)(okInput);
-      await expectHasParseErrorsToBe(true)(nOkInput);
+      await expectHasParseErrorsToBe(true)(notOkInput);
     });
   });
 }
