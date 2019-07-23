@@ -64,7 +64,7 @@ export const epicPersistPinnedEvent = (
     mergeMap(([result, recentTimeline]) => {
       const savedTimeline = recentTimeline[get('payload.id', action)];
       const response: PinnedEvent = get('data.persistPinnedEventOnTimeline', result);
-      const callOutMsg = response.code === 403 ? [showCallOutUnauthorizedMsg()] : [];
+      const callOutMsg = response && response.code === 403 ? [showCallOutUnauthorizedMsg()] : [];
 
       return [
         response != null
