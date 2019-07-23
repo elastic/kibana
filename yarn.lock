@@ -1659,10 +1659,10 @@
     tabbable "^1.1.0"
     uuid "^3.1.0"
 
-"@elastic/eui@12.3.1":
-  version "12.3.1"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-12.3.1.tgz#89ced2cf43d5363f0cbc9cca76f6fcdfb3466276"
-  integrity sha512-7XQSSsyJTPyJQR+tmo14z/ek7/9PDz7jI/t1sPa14hG8CLYKhOgtYjVFeLM4hHz4F4MLwfwK1t3gMHqFxnvGeQ==
+"@elastic/eui@12.4.0":
+  version "12.4.0"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-12.4.0.tgz#a679c498e5890fea34dab35346212022538fef5d"
+  integrity sha512-b3bY5cRqvbyRa8Uain1drZc6djvxxcZFfx0uQbkHOe9iK+AppHfkqQ5KeXtH3CUF55PZI56DRkVzsBbcOMMtOQ==
   dependencies:
     "@types/lodash" "^4.14.116"
     "@types/numeral" "^0.0.25"
@@ -6711,10 +6711,10 @@ backo2@1.0.2:
   resolved "https://registry.yarnpkg.com/backo2/-/backo2-1.0.2.tgz#31ab1ac8b129363463e35b3ebb69f4dfcfba7947"
   integrity sha1-MasayLEpNjRj41s+u2n038+6eUc=
 
-backport@4.6.0:
-  version "4.6.0"
-  resolved "https://registry.yarnpkg.com/backport/-/backport-4.6.0.tgz#3592a3c4ad6f3b251435cc21494086f2df975ba6"
-  integrity sha512-7rqzXZOEWPYUebfWQDqaLPm4Oe3vCa2OJoYx4nlT18cy911TUKI/Ci+jt1c4JuhRAKX03vCNpncjEHXzNKHoyw==
+backport@4.6.1:
+  version "4.6.1"
+  resolved "https://registry.yarnpkg.com/backport/-/backport-4.6.1.tgz#9e48d53447fa026157f2dc395442960470d963a6"
+  integrity sha512-doReAW1xAHmpv98z+Zh4wDQX0T5/i2TGfkPsHbfmA9E9XGUYcMy2YljPBiCntHvE+/ncBtw4shZu8QJqJIww/w==
   dependencies:
     axios "^0.19.0"
     del "^5.0.0"
@@ -27964,7 +27964,7 @@ typescript-fsa@^2.0.0, typescript-fsa@^2.5.0:
   resolved "https://registry.yarnpkg.com/typescript-fsa/-/typescript-fsa-2.5.0.tgz#1baec01b5e8f5f34c322679d1327016e9e294faf"
   integrity sha1-G67AG16PXzTDImedEycBbp4pT68=
 
-typescript@3.5.3, typescript@^3.0.3, typescript@^3.3.3333, typescript@^3.4.5, typescript@~3.0.3, typescript@~3.3.3333, typescript@~3.4.3:
+typescript@3.5.1, typescript@3.5.3, typescript@^3.0.3, typescript@^3.3.3333, typescript@^3.4.5, typescript@~3.0.3, typescript@~3.3.3333, typescript@~3.4.3:
   version "3.5.3"
   resolved "https://registry.yarnpkg.com/typescript/-/typescript-3.5.3.tgz#c830f657f93f1ea846819e929092f5fe5983e977"
   integrity sha512-ACzBtm/PhXBDId6a6sDJfroT2pOWt/oOnk4/dElG5G33ZL776N3Y6/6bKZJBFpd+b05F3Ct9qDjMeJmRWtE2/g==
