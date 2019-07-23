@@ -176,10 +176,7 @@ export function PopoverEditor(props: PopoverEditorProps) {
                     layerId: props.layerId,
                     op: operationType,
                     indexPatternId,
-                    field:
-                      possibleFields.length === 1
-                        ? fieldMap[possibleFields[0]]
-                        : undefined,
+                    field: possibleFields.length === 1 ? fieldMap[possibleFields[0]] : undefined,
                   }),
                 })
               );
@@ -206,9 +203,7 @@ export function PopoverEditor(props: PopoverEditorProps) {
             layerId: props.layerId,
             op: operationType,
             indexPatternId,
-            field: hasField(selectedColumn)
-              ? fieldMap[selectedColumn.sourceField]
-              : undefined,
+            field: hasField(selectedColumn) ? fieldMap[selectedColumn.sourceField] : undefined,
           });
           setState(
             changeColumn({
@@ -263,7 +258,10 @@ export function PopoverEditor(props: PopoverEditorProps) {
             fieldMap={fieldMap}
             currentIndexPattern={currentIndexPattern}
             filteredOperations={filteredOperations}
-            selectedColumn={selectedColumn}
+            selectedColumnOperationType={selectedColumn && selectedColumn.operationType}
+            selectedColumnSourceField={
+              selectedColumn && hasField(selectedColumn) ? selectedColumn.sourceField : undefined
+            }
             incompatibleSelectedOperationType={incompatibleSelectedOperationType}
             onDeleteColumn={() => {
               setState(
