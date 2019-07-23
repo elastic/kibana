@@ -11,9 +11,6 @@ Object {
               Object {
                 "arguments": Object {
                   "accessors": Array [],
-                  "datasourceId": Array [
-                    "",
-                  ],
                   "hide": Array [
                     false,
                   ],

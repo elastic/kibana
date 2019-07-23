@@ -90,7 +90,6 @@ function updateLayer(state: State, layer: UnwrapArray<State['layers']>, index: n
 function newLayerState(layerId: string): LayerConfig {
   return {
     layerId,
-    datasourceId: 'indexpattern', // TODO: Don't hard code
     xAccessor: generateId(),
     seriesType: 'bar_stacked',
     accessors: [generateId()],
