@@ -58,18 +58,6 @@ export function getDefaultViewBySwimlaneData() {
   };
 }
 
-export function mapScopeToProps(scope, config, globalState, jobSelectService) {
-  return {
-    appStateHandler: scope.appStateHandler,
-    config,
-    dateFormatTz: scope.dateFormatTz,
-    globalState,
-    jobSelectService,
-    mlJobSelectService: scope.mlJobSelectService,
-    MlTimeBuckets: scope.MlTimeBuckets,
-  };
-}
-
 export async function getFilteredTopInfluencers(
   jobIds,
   earliestMs,

@@ -12,7 +12,6 @@
  */
 
 import $ from 'jquery';
-import moment from 'moment-timezone';
 import { Subscription } from 'rxjs';
 
 import '../components/controls';
@@ -64,7 +63,6 @@ module.controller('MlExplorerController', function (
   $timeout,
   AppState,
   Private,
-  config,
   globalState,
 ) {
 
@@ -84,10 +82,6 @@ module.controller('MlExplorerController', function (
   $scope.jobs = [];
   timefilter.enableTimeRangeSelector();
   timefilter.enableAutoRefreshSelector();
-
-  // Pass the timezone to the server for use when aggregating anomalies (by day / hour) for the table.
-  const tzConfig = config.get('dateFormat:tz');
-  $scope.dateFormatTz = (tzConfig !== 'Browser') ? tzConfig : moment.tz.guess();
 
   $scope.MlTimeBuckets = MlTimeBuckets;
 

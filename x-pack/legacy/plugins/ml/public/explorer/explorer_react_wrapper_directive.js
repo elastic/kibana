@@ -11,6 +11,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 
+import moment from 'moment-timezone';
 
 import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml');
@@ -24,20 +25,26 @@ import { NavigationMenuContext } from '../util/context_utils';
 
 import { Explorer } from './explorer';
 import { EXPLORER_ACTION } from './explorer_constants';
-import { mapScopeToProps } from './explorer_utils';
 import { explorer$ } from './explorer_dashboard_service';
 
 module.directive('mlExplorerReactWrapper', function (config, globalState, mlJobSelectService) {
   function link(scope, element) {
+    // Pass the timezone to the server for use when aggregating anomalies (by day / hour) for the table.
+    const tzConfig = config.get('dateFormat:tz');
+    const dateFormatTz = (tzConfig !== 'Browser') ? tzConfig : moment.tz.guess();
+
     ReactDOM.render(
       <I18nContext>
         <NavigationMenuContext.Provider value={{ chrome, timefilter, timeHistory }}>
-          <Explorer {...mapScopeToProps(
-            scope,
+          <Explorer {...{
+            appStateHandler: scope.appStateHandler,
             config,
+            dateFormatTz,
             globalState,
-            mlJobSelectService,
-          )}
+            jobSelectService: mlJobSelectService,
+            mlJobSelectService: scope.mlJobSelectService,
+            MlTimeBuckets: scope.MlTimeBuckets,
+          }}
           />
         </NavigationMenuContext.Provider>
       </I18nContext>,
@@ -45,7 +52,6 @@ module.directive('mlExplorerReactWrapper', function (config, globalState, mlJobS
     );
 
     explorer$.next({ action: EXPLORER_ACTION.LOAD_JOBS });
-
 
     element.on('$destroy', () => {
       ReactDOM.unmountComponentAtNode(element[0]);

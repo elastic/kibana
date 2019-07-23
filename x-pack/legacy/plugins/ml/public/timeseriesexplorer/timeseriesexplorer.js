@@ -108,7 +108,7 @@ export const TimeSeriesExplorer = injectI18n(
     render() {
       const {
         chartDetails,
-        config,
+        dateFormatTz,
         dataNotChartable,
         detectorId,
         detectors,
@@ -143,7 +143,7 @@ export const TimeSeriesExplorer = injectI18n(
 
       const { jobIds: selectedJobIds, selectedGroups } = getSelectedJobIds(globalState);
       const jobSelectorProps = {
-        config,
+        dateFormatTz,
         globalState,
         jobSelectService,
         selectedJobIds,

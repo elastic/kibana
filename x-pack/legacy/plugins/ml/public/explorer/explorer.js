@@ -1045,7 +1045,7 @@ export const Explorer = injectI18n(injectObservablesAsProps(
 
     render() {
       const {
-        config,
+        dateFormatTz,
         globalState,
         intl,
         jobSelectService,
@@ -1081,7 +1081,7 @@ export const Explorer = injectI18n(injectObservablesAsProps(
 
       const { jobIds: selectedJobIds, selectedGroups } = getSelectedJobIds(globalState);
       const jobSelectorProps = {
-        config,
+        dateFormatTz,
         globalState,
         jobSelectService,
         selectedJobIds,

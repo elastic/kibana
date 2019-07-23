@@ -54,56 +54,6 @@ export function createTimeSeriesJobData(jobs) {
   });
 }
 
-export function mapScopeToProps(scope, config, globalState, jobSelectService) {
-  return {
-    chartDetails: scope.chartDetails,
-    config,
-    dataNotChartable: scope.dataNotChartable,
-    detectorId: scope.detectorId,
-    detectorIndexChanged: scope.detectorIndexChanged,
-    detectors: scope.detectors,
-    entities: scope.entities,
-    entityFieldValueChanged: scope.entityFieldValueChanged,
-    filter: scope.filter,
-    globalState,
-    hasResults: scope.hasResults,
-    loadForForecastId: scope.loadForForecastId,
-    jobs: scope.jobs,
-    jobSelectService,
-    saveSeriesPropertiesAndRefresh: scope.saveSeriesPropertiesAndRefresh,
-    showAnnotations: scope.showAnnotations,
-    showAnnotationsCheckbox: scope.showAnnotationsCheckbox,
-    showForecast: scope.showForecast,
-    showForecastCheckbox: scope.showForecastCheckbox,
-    showModelBoundsCheckbox: scope.showModelBoundsCheckbox,
-    selectedJob: scope.selectedJob,
-    tableData: scope.tableData,
-    timefilter: scope.timefilter,
-    toggleShowAnnotations: scope.toggleShowAnnotations,
-    toggleShowForecast: scope.toggleShowForecast,
-
-    // time series chart
-    tsc: {
-      modelPlotEnabled: scope.modelPlotEnabled,
-      contextChartData: scope.contextChartData,
-      contextChartSelected: (selection) => {
-        scope.$root.$broadcast('contextChartSelected', selection);
-      },
-      contextForecastData: scope.contextForecastData,
-      contextAggregationInterval: scope.contextAggregationInterval,
-      swimlaneData: scope.swimlaneData,
-      focusAnnotationData: scope.focusAnnotationData,
-      focusChartData: scope.focusChartData,
-      focusForecastData: scope.focusForecastData,
-      focusAggregationInterval: scope.focusAggregationInterval,
-      zoomFrom: scope.zoomFrom,
-      zoomTo: scope.zoomTo,
-      autoZoomDuration: scope.autoZoomDuration,
-      svgWidth: scope.svgWidth,
-    },
-  };
-}
-
 // Return dataset in format used by the single metric chart.
 // i.e. array of Objects with keys date (JavaScript date) and value,
 // plus lower and upper keys if model plot is enabled for the series.
