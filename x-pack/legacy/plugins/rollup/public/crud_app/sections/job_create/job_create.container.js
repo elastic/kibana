@@ -10,6 +10,7 @@ import { JobCreate as JobCreateView } from './job_create';
 import {
   isSaving,
   getCreateJobError,
+  getCloneJobConfig,
 } from '../../store/selectors';
 
 import {
@@ -21,6 +22,7 @@ const mapStateToProps = (state) => {
   return {
     isSaving: isSaving(state),
     saveError: getCreateJobError(state),
+    jobToClone: getCloneJobConfig(state),
   };
 };
 

@@ -97,23 +97,6 @@ class JobActionMenuUi extends Component {
       });
     }
 
-    if (this.canEditJob()) {
-      items.push({
-        name: intl.formatMessage({
-          id: 'xpack.rollupJobs.jobActionMenu.editJobLabel',
-          defaultMessage: 'Edit {isSingleSelection, plural, one {job} other {jobs}}',
-        }, {
-          isSingleSelection
-        }),
-        icon: <EuiIcon type="pencil"/>,
-        onClick: () => {
-          this.closePopover();
-          const { jobs } = this.props;
-          cloneJob(first(jobs));
-        }
-      });
-    }
-
     if (this.canCloneJob()) {
       items.push({
         name: intl.formatMessage({
@@ -189,13 +172,9 @@ class JobActionMenuUi extends Component {
     return jobs.some(job => job.status === 'started');
   }
 
-  canEditJob() {
+  canCloneJob() {
     const { jobs } = this.props;
     return Boolean(jobs && jobs.length === 1);
-  }
-
-  canCloneJob() {
-    return this.canEditJob();
   }
 
   canDeleteJobs() {

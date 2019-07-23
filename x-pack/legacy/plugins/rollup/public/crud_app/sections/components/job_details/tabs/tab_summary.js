@@ -12,7 +12,6 @@ import {
   EuiDescriptionList,
   EuiDescriptionListTitle,
   EuiDescriptionListDescription,
-  EuiFieldText,
   EuiTitle,
   EuiSpacer,
   EuiIconTip,
@@ -178,11 +177,12 @@ export class TabSummary extends Component {
                   />
                 </EuiDescriptionListTitle>
 
-                <EuiFieldText
+                <EuiDescriptionListDescription
                   className="eui-textBreakWord"
                   data-test-subj="rollupJobDetailLogisticsIndexPatternDescription"
-                  value={indexPattern}
-                />
+                >
+                  {indexPattern}
+                </EuiDescriptionListDescription>
               </EuiFlexItem>
 
               <EuiFlexItem data-test-subj="rollupJobDetailSummaryLogisticItem">
@@ -195,11 +195,12 @@ export class TabSummary extends Component {
                 </EuiDescriptionListTitle>
 
 
-                <EuiFieldText
+                <EuiDescriptionListDescription
                   className="eui-textBreakWord"
-                  value={rollupIndex}
                   data-test-subj="rollupJobDetailLogisticsRollupIndexDescription"
-                />
+                >
+                  {rollupIndex}
+                </EuiDescriptionListDescription>
               </EuiFlexItem>
             </EuiFlexGroup>
 
@@ -221,10 +222,9 @@ export class TabSummary extends Component {
                   />
                 </EuiDescriptionListTitle>
 
-                <EuiFieldText
-                  value={rollupCron}
-                  data-test-subj="rollupJobDetailLogisticsCronDescription"
-                />
+                <EuiDescriptionListDescription data-test-subj="rollupJobDetailLogisticsCronDescription">
+                  {rollupCron}
+                </EuiDescriptionListDescription>
               </EuiFlexItem>
 
               <EuiFlexItem data-test-subj="rollupJobDetailSummaryLogisticItem">
@@ -236,16 +236,14 @@ export class TabSummary extends Component {
                   />
                 </EuiDescriptionListTitle>
 
-                <EuiFieldText
-                  value={rollupDelay}
-                  data-test-subj="rollupJobDetailLogisticsDelayDescription"
-                  placeholder={(
+                <EuiDescriptionListDescription data-test-subj="rollupJobDetailLogisticsDelayDescription">
+                  {rollupDelay || (
                     <FormattedMessage
                       id="xpack.rollupJobs.jobDetails.tabSummary.itemDelay.none"
                       defaultMessage="None"
                     />
                   )}
-                />
+                </EuiDescriptionListDescription>
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiDescriptionList>

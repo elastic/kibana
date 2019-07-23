@@ -38,9 +38,6 @@ const mapDispatchToProps = (dispatch, { jobs }) => {
     cloneJob: (jobConfig) => {
       dispatch(cloneJob(jobConfig));
     },
-    // updateJob: (jobConfig) => {
-    //   dispatch(updateJob(jobConfig));
-    // },
   };
 };
 
