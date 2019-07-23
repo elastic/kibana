@@ -18,7 +18,6 @@ interface Props {
   filterOperations: (op: Operation) => boolean;
   suggestedPriority?: 0 | 1 | 2 | undefined;
   testSubj: string;
-  // layer: number;
   layerId: string;
 }
 
@@ -36,7 +35,7 @@ export function MultiColumnEditor({
   const lastOperation = datasource.getOperationForColumnId(accessors[accessors.length - 1]);
 
   useEffect(() => {
-    if (lastOperation !== null) {
+    if (accessors.length === 0 || lastOperation !== null) {
       setTimeout(onAdd);
     }
   }, [lastOperation]);
