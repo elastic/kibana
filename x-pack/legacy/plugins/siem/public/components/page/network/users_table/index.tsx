@@ -12,21 +12,22 @@ import { ActionCreator } from 'redux';
 import { networkActions } from '../../../../store/network';
 import { FlowTarget, UsersEdges, UsersFields, UsersSortField } from '../../../../graphql/types';
 import { networkModel, networkSelectors, State } from '../../../../store';
-import { Criteria, ItemsPerRow, LoadMoreTable, SortingBasicTable } from '../../../load_more_table';
+import { Criteria, ItemsPerRow, PaginatedTable, SortingBasicTable } from '../../../paginated_table';
 
 import { getUsersColumns } from './columns';
 import * as i18n from './translations';
 import { assertUnreachable } from '../../../../lib/helpers';
+const tableType = networkModel.IpDetailsTableType.users;
 
 interface OwnProps {
   data: UsersEdges[];
   flowTarget: FlowTarget;
-  loading: boolean;
-  hasNextPage: boolean;
+  fakeTotalCount: number;
   id: string;
-  nextCursor: string;
+  loading: boolean;
+  loadPage: (newActivePage: number) => void;
+  showMorePagesIndicator: boolean;
   totalCount: number;
-  loadMore: (cursor: string) => void;
   type: networkModel.NetworkType;
 }
 
@@ -36,6 +37,10 @@ interface UsersTableReduxProps {
 }
 
 interface UsersTableDispatchProps {
+  updateTableActivePage: ActionCreator<{
+    activePage: number;
+    tableType: networkModel.IpDetailsTableType;
+  }>;
   updateUsersLimit: ActionCreator<{
     limit: number;
     networkType: networkModel.NetworkType;
@@ -57,14 +62,6 @@ const rowItems: ItemsPerRow[] = [
     text: i18n.ROWS_10,
     numberOfRow: 10,
   },
-  {
-    text: i18n.ROWS_20,
-    numberOfRow: 20,
-  },
-  {
-    text: i18n.ROWS_50,
-    numberOfRow: 50,
-  },
 ];
 
 export const usersTableId = 'users-table';
@@ -73,23 +70,24 @@ class UsersTableComponent extends React.PureComponent<UsersTableProps> {
   public render() {
     const {
       data,
-      usersSortField,
-      hasNextPage,
+      fakeTotalCount,
+      flowTarget,
+      id,
       limit,
       loading,
-      loadMore,
-      id,
+      loadPage,
+      showMorePagesIndicator,
       totalCount,
-      nextCursor,
-      updateUsersLimit,
-      flowTarget,
       type,
+      updateTableActivePage,
+      updateUsersLimit,
+      usersSortField,
     } = this.props;
 
     return (
-      <LoadMoreTable
+      <PaginatedTable
         columns={getUsersColumns(flowTarget, usersTableId)}
-        hasNextPage={hasNextPage}
+        showMorePagesIndicator={showMorePagesIndicator}
         headerCount={totalCount}
         headerTitle={i18n.USERS}
         headerUnit={i18n.UNIT(totalCount)}
@@ -98,11 +96,19 @@ class UsersTableComponent extends React.PureComponent<UsersTableProps> {
         limit={limit}
         loading={loading}
         loadingTitle={i18n.USERS}
-        loadMore={() => loadMore(nextCursor)}
+        loadPage={newActivePage => loadPage(newActivePage)}
         onChange={this.onChange}
         pageOfItems={data}
         sorting={getSortField(usersSortField)}
+        totalCount={fakeTotalCount}
+        updateActivePage={newPage =>
+          updateTableActivePage({
+            activePage: newPage,
+            tableType,
+          })
+        }
         updateLimitPagination={newLimit => updateUsersLimit({ limit: newLimit, networkType: type })}
+        updateProps={{ flowTarget, totalCount, usersSortField }}
       />
     );
   }
@@ -134,6 +140,7 @@ const makeMapStateToProps = () => {
 export const UsersTable = connect(
   makeMapStateToProps,
   {
+    updateTableActivePage: networkActions.updateIpDetailsTableActivePage,
     updateUsersLimit: networkActions.updateUsersLimit,
     updateUsersSort: networkActions.updateUsersSort,
   }
