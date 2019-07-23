@@ -41,13 +41,9 @@ import { PaginatedTable } from '../paginated_table/paginated_table';
 /** @internal */
 export const initTableVisLegacyModule = once((): void => {
   uiModules
-    .get('kibana/table_vis', ['kibana'])
+    .get('kibana/table_vis', ['kibana', 'RecursionHelper'])
     .controller('KbnTableVisController', TableVisController)
-    .directive('tableVisParams', TableVisParams);
-
-  // todo: not sure that "kibana" is a right module for that directives
-  uiModules
-    .get('kibana', ['RecursionHelper'])
+    .directive('tableVisParams', TableVisParams)
     .directive('kbnAggTable', KbnAggTable)
     .directive('kbnAggTableGroup', KbnAggTableGroup)
     .directive('kbnRows', KbnRows)

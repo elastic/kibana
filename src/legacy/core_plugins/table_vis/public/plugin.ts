@@ -16,6 +16,8 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { VisualizationsSetup } from '../../visualizations/public';
+import { Plugin as DataPublicPlugin } from '../../../../plugins/data/public';
 
 import {
   PluginInitializerContext,
@@ -24,15 +26,13 @@ import {
   Plugin,
   UiSettingsClientContract,
 } from '../../../../core/public';
-import { LegacyDependenciesPluginSetup } from './shim';
+
+import { LegacyDependenciesPluginSetup, LegacyDependenciesPlugin } from './shim';
 
 // @ts-ignore
 import { createTableVisFn } from './table_vis_fn';
 // @ts-ignore
 import { createTableVisTypeDefinition } from './table_vis_type';
-import { DataSetup } from '../../data/public';
-import { VisualizationsSetup } from '../../visualizations/public';
-import { LegacyDependenciesPlugin } from './shim';
 
 /** @private */
 export interface TableVisualizationDependencies extends LegacyDependenciesPluginSetup {
@@ -41,8 +41,7 @@ export interface TableVisualizationDependencies extends LegacyDependenciesPlugin
 
 /** @internal */
 export interface TablePluginSetupDependencies {
-  // TODO: Remove `any` as functionsRegistry will be added to the DataSetup.
-  data: DataSetup | any;
+  data: ReturnType<DataPublicPlugin['setup']>;
   visualizations: VisualizationsSetup;
   __LEGACY: LegacyDependenciesPlugin;
 }
