@@ -108,7 +108,6 @@ export default ({ getPageObjects, getService }: KibanaFunctionalTestDefaultProvi
         const columnHeaderLabels = await infraLogStream.getColumnHeaderLabels();
 
         expect(columnHeaderLabels).to.eql(['host.name', 'Timestamp', '']);
-        expect(columnHeaderLabels).to.eql(['Timestamp', 'host.name', '']);
 
         const logStreamEntries = await infraLogStream.getStreamEntries();
 
