@@ -9,7 +9,6 @@ import PropTypes from 'prop-types';
 import { Suggestions } from '../suggestions';
 import { ClickOutside } from '../click_outside';
 import { EuiFieldSearch, EuiProgress, keyCodes } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 
 export class FilterBar extends Component {
   state = {
@@ -165,17 +164,7 @@ export class FilterBar extends Component {
             style={{
               backgroundImage: 'none'
             }}
-            placeholder={i18n.translate(
-              'xpack.ml.explorer.kueryBar.filterPlaceholder',
-              {
-                defaultMessage:
-                  '{queryExample}',
-                values: {
-                  queryExample:
-                    `${this.props.placeholder}`
-                }
-              }
-            )}
+            placeholder={this.props.placeholder}
             inputRef={node => {
               if (node) {
                 this.inputRef = node;
