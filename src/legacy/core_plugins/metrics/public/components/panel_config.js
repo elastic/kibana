@@ -18,7 +18,6 @@
  */
 import PropTypes from 'prop-types';
 import React, { useState, useEffect } from 'react';
-import { get } from 'lodash';
 import { TimeseriesPanelConfig as timeseries } from './panel_config/timeseries';
 import { MetricPanelConfig as metric } from './panel_config/metric';
 import { TopNPanelConfig as topN } from './panel_config/top_n';
@@ -27,8 +26,7 @@ import { GaugePanelConfig as gauge } from './panel_config/gauge';
 import { MarkdownPanelConfig as markdown } from './panel_config/markdown';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { FormValidationContext } from '../contexts/form_validation_context';
-import { UIRestrictionsContext } from '../contexts/ui_restriction_context';
-import { SeriesQuantityContext } from '../contexts/series_quantity_context';
+import { VisDataContext } from '../contexts/vis_data_context';
 
 const types = {
   timeseries,
@@ -46,26 +44,14 @@ export function PanelConfig(props) {
   const { model } = props;
   const Component = types[model.type];
   const [formValidationResults] = useState({});
-  const [uiRestrictions, setUIRestrictions] = useState(null);
-  const [seriesQuantity, setSeriesQuantity] = useState({});
+  const [visData, setVisData] = useState({});
 
   useEffect(() => {
     model.isModelInvalid = !checkModelValidity(formValidationResults);
   });
 
   useEffect(() => {
-    const visDataSubscription = props.visData$.subscribe(visData => {
-      const series = get(visData, `${model.id}.series`, []);
-      const counter = {};
-      const seriesQuantity = series.reduce((acc, value) => {
-        counter[value.seriesId] = counter[value.seriesId] + 1 || 1;
-        acc[value.seriesId] = counter[value.seriesId];
-        return acc;
-      }, {});
-
-      setSeriesQuantity(seriesQuantity);
-      setUIRestrictions(get(visData, 'uiRestrictions', null));
-    });
+    const visDataSubscription = props.visData$.subscribe((visData = {}) => setVisData(visData));
 
     return function cleanup() {
       visDataSubscription.unsubscribe();
@@ -79,11 +65,9 @@ export function PanelConfig(props) {
   if (Component) {
     return (
       <FormValidationContext.Provider value={updateControlValidity}>
-        <UIRestrictionsContext.Provider value={uiRestrictions}>
-          <SeriesQuantityContext.Provider value={seriesQuantity}>
-            <Component {...props} />
-          </SeriesQuantityContext.Provider>
-        </UIRestrictionsContext.Provider>
+        <VisDataContext.Provider value={visData}>
+          <Component {...props} />
+        </VisDataContext.Provider>
       </FormValidationContext.Provider>
     );
   }

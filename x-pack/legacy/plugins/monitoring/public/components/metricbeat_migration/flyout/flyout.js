@@ -22,10 +22,11 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { getInstructionSteps } from '../instruction_steps';
-import { Storage } from '../../../../../../../../src/legacy/ui/public/storage/storage';
+import { Storage } from 'ui/storage';
 import { STORAGE_KEY, ELASTICSEARCH_CUSTOM_ID } from '../../../../common/constants';
 import { ensureMinimumTime } from '../../../lib/ensure_minimum_time';
 import { i18n } from '@kbn/i18n';
+import { get } from 'lodash';
 import {
   INSTRUCTION_STEP_SET_MONITORING_URL,
   INSTRUCTION_STEP_ENABLE_METRICBEAT,
@@ -33,6 +34,7 @@ import {
 } from '../constants';
 import { KIBANA_SYSTEM_ID } from '../../../../../telemetry/common/constants';
 import { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } from 'ui/documentation_links';
+import { setNewlyDiscoveredClusterUuid } from '../../../lib/setup_mode';
 
 const storage = new Storage(window.localStorage);
 const ES_MONITORING_URL_KEY = `${STORAGE_KEY}.mb_migration.esMonitoringUrl`;
@@ -115,6 +117,12 @@ export class Flyout extends Component {
     this.setState({ esMonitoringUrl });
   }
 
+  finishedFlyout() {
+    const { onClose, meta } = this.props;
+    setNewlyDiscoveredClusterUuid(get(meta, 'clusterUuid'));
+    onClose();
+  }
+
   renderActiveStep() {
     const { product, productName, onClose, meta } = this.props;
     const {
@@ -182,9 +190,19 @@ export class Flyout extends Component {
     let willDisableDoneButton = !product.isFullyMigrated;
     let willShowNextButton = activeStep !== INSTRUCTION_STEP_DISABLE_INTERNAL;
 
-    if (activeStep === INSTRUCTION_STEP_ENABLE_METRICBEAT && productName === ELASTICSEARCH_CUSTOM_ID) {
-      willShowNextButton = false;
-      willDisableDoneButton = !product.isPartiallyMigrated;
+    if (activeStep === INSTRUCTION_STEP_ENABLE_METRICBEAT) {
+      if (productName === ELASTICSEARCH_CUSTOM_ID) {
+        willShowNextButton = false;
+        // ES can be fully migrated for net new users
+        willDisableDoneButton = !product.isPartiallyMigrated && !product.isFullyMigrated;
+      }
+      else {
+        // Do not bother taking them to the disable internal step for non ES use cases
+        // since disabling is an individual action per node, versus ES where it is
+        // a cluster setting
+        willShowNextButton = !product.isFullyMigrated;
+        willDisableDoneButton = !product.isFullyMigrated;
+      }
     }
 
     if (willShowNextButton) {
@@ -225,7 +243,7 @@ export class Flyout extends Component {
         type="submit"
         fill
         isDisabled={willDisableDoneButton}
-        onClick={this.props.onClose}
+        onClick={() => this.finishedFlyout()}
       >
         {i18n.translate('xpack.monitoring.metricbeatMigration.flyout.doneButtonLabel', {
           defaultMessage: 'Done'
@@ -259,7 +277,7 @@ export class Flyout extends Component {
   }
 
   render() {
-    const { onClose, instance, productName } = this.props;
+    const { onClose, instance, productName, product } = this.props;
 
     let instanceType = null;
     let instanceName = instance ? instance.name : null;
@@ -282,6 +300,24 @@ export class Flyout extends Component {
       }
     }
 
+    let title = i18n.translate('xpack.monitoring.metricbeatMigration.flyout.flyoutTitle', {
+      defaultMessage: 'Migrate {instanceName} {instanceType} to Metricbeat',
+      values: {
+        instanceName,
+        instanceType
+      }
+    });
+
+    if (product.isNetNewUser) {
+      title = i18n.translate('xpack.monitoring.metricbeatMigration.flyout.flyoutTitleNewUser', {
+        defaultMessage: 'Monitor {instanceName} {instanceType} with Metricbeat',
+        values: {
+          instanceName,
+          instanceType
+        }
+      });
+    }
+
     return (
       <EuiFlyout
         onClose={onClose}
@@ -290,13 +326,7 @@ export class Flyout extends Component {
         <EuiFlyoutHeader hasBorder>
           <EuiTitle size="m">
             <h2 id="flyoutTitle">
-              {i18n.translate('xpack.monitoring.metricbeatMigration.flyout.flyoutTitle', {
-                defaultMessage: 'Migrate {instanceName} {instanceType} to Metricbeat',
-                values: {
-                  instanceName,
-                  instanceType
-                }
-              })}
+              {title}
             </h2>
           </EuiTitle>
           {this.getDocumentationTitle()}

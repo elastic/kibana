@@ -5,14 +5,14 @@
  */
 
 
-import { ESJoinSource } from '../sources/es_join_source';
+import { ESTermSource } from '../sources/es_term_source';
 import { VectorStyle } from '../styles/vector_style';
 
-export class LeftInnerJoin {
+export class InnerJoin {
 
   constructor(joinDescriptor, inspectorAdapters) {
     this._descriptor = joinDescriptor;
-    this._rightSource = new ESJoinSource(joinDescriptor.right, inspectorAdapters);
+    this._rightSource = new ESTermSource(joinDescriptor.right, inspectorAdapters);
   }
 
   destroy() {
