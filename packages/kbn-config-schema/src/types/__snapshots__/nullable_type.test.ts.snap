@@ -1,0 +1,5 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`includes namespace in failure 1`] = `"[foo-namespace]: value is [foo] but it must have a maximum length of [1]."`;
+
+exports[`validates contained type 1`] = `"value is [foo] but it must have a maximum length of [1]."`;

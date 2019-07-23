@@ -36,6 +36,7 @@ import {
   MapOfOptions,
   MapOfType,
   MaybeType,
+  NullableType,
   NeverType,
   NumberOptions,
   NumberType,
@@ -98,6 +99,10 @@ function never(): Type<never> {
  */
 function maybe<V>(type: Type<V>): Type<V | undefined> {
   return new MaybeType(type);
+}
+
+function nullable<V>(type: Type<V>): Type<V | null> {
+  return new NullableType(type);
 }
 
 function object<P extends Props>(props: P, options?: ObjectTypeOptions<P>): ObjectType<P> {
@@ -191,6 +196,7 @@ export const schema = {
   literal,
   mapOf,
   maybe,
+  nullable,
   never,
   number,
   object,
