@@ -22,6 +22,7 @@ export const FIELD_TYPES = {
   TEXT: 'text',
   NUMBER: 'number',
   TOGGLE: 'toggle',
+  CHECKBOX: 'checkbox',
   COMBO_BOX: 'comboBox',
   SELECT: 'select',
   MULTI_SELECT: 'multiSelect',

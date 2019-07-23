@@ -25,6 +25,7 @@ import {
   EuiSelect,
   EuiComboBox,
   EuiSwitch,
+  EuiCheckbox,
   EuiSelectable,
   EuiPanel,
   EuiComboBoxOptionProps,
@@ -98,6 +99,9 @@ export const Field = ({ field, fieldProps = {} }: Props) => {
     }
   };
 
+  const doDisplayLabelOnTop =
+    field.type !== FIELD_TYPES.TOGGLE && field.type !== FIELD_TYPES.CHECKBOX;
+
   const renderField = () => {
     switch (field.type) {
       case FIELD_TYPES.NUMBER:
@@ -146,6 +150,16 @@ export const Field = ({ field, fieldProps = {} }: Props) => {
             {...fieldProps}
           />
         );
+      case FIELD_TYPES.CHECKBOX:
+        return (
+          <EuiCheckbox
+            label={field.label}
+            checked={field.value as boolean}
+            onChange={field.onChange}
+            id={fieldProps.id}
+            {...fieldProps}
+          />
+        );
       case FIELD_TYPES.MULTI_SELECT:
         return (
           <EuiSelectable
@@ -181,7 +195,7 @@ export const Field = ({ field, fieldProps = {} }: Props) => {
 
   return (
     <EuiFormRow
-      label={field.type !== 'toggle' && field.label}
+      label={doDisplayLabelOnTop && field.label}
       helpText={field.helpText}
       error={errorMessage}
       isInvalid={isInvalid}
