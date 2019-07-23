@@ -16,7 +16,7 @@ import {
   getPages,
   getWorkpad,
 } from '../../../state/selectors/workpad';
-import { trackCanvasUiMetric } from '../../../lib/ui_metric';
+import { trackCanvasUiMetric, METRIC_TYPE } from '../../../lib/ui_metric';
 import {
   LAUNCHED_FULLSCREEN,
   LAUNCHED_FULLSCREEN_AUTOPLAY,
@@ -54,6 +54,7 @@ const mergeProps = (stateProps, dispatchProps, ownProps) => {
 
       if (value === true) {
         trackCanvasUiMetric(
+          METRIC_TYPE.COUNT,
           stateProps.autoplayEnabled
             ? [LAUNCHED_FULLSCREEN, LAUNCHED_FULLSCREEN_AUTOPLAY]
             : LAUNCHED_FULLSCREEN

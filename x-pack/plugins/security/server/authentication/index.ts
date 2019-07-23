@@ -92,7 +92,7 @@ export async function setupAuthentication({
 
     if (authenticationResult.succeeded()) {
       return t.authenticated({
-        state: (authenticationResult.user as unknown) as Record<string, unknown>,
+        state: authenticationResult.user,
         headers: authenticationResult.authHeaders,
       });
     }

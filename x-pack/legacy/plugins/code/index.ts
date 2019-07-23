@@ -55,12 +55,12 @@ export const code = (kibana: any) =>
         queueIndex: Joi.string().default('.code_internal-worker-queue'),
         // 1 hour by default.
         queueTimeoutMs: Joi.number().default(moment.duration(1, 'hour').asMilliseconds()),
-        // The frequency which update scheduler executes. 5 minutes by default.
-        updateFrequencyMs: Joi.number().default(moment.duration(5, 'minute').asMilliseconds()),
+        // The frequency which update scheduler executes. 1 minute by default.
+        updateFrequencyMs: Joi.number().default(moment.duration(1, 'minute').asMilliseconds()),
         // The frequency which index scheduler executes. 1 day by default.
         indexFrequencyMs: Joi.number().default(moment.duration(1, 'day').asMilliseconds()),
-        // The frequency which each repo tries to update. 1 hour by default.
-        updateRepoFrequencyMs: Joi.number().default(moment.duration(1, 'hour').asMilliseconds()),
+        // The frequency which each repo tries to update. 5 minutes by default.
+        updateRepoFrequencyMs: Joi.number().default(moment.duration(5, 'minute').asMilliseconds()),
         // The frequency which each repo tries to index. 1 day by default.
         indexRepoFrequencyMs: Joi.number().default(moment.duration(1, 'day').asMilliseconds()),
         // whether we want to show more logs
