@@ -24,6 +24,7 @@ import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
 import { getFilterGenerator } from '..';
 import { FilterBarQueryFilterProvider } from '../../filter_manager/query_filter';
+import { uniqFilters } from '../../../../core_plugins/data/public/filter/filter_manager/lib/uniq_filters';
 import { getPhraseScript } from '@kbn/es-query';
 let queryFilter;
 let filterGen;
@@ -63,7 +64,7 @@ describe('Filter Manager', function () {
     sinon.stub(queryFilter, 'getAppFilters').callsFake(() => appState.filters);
     sinon.stub(queryFilter, 'addFilters').callsFake((filters) => {
       if (!Array.isArray(filters)) filters = [filters];
-      appState.filters = appState.filters.concat(filters);
+      appState.filters = uniqFilters(appState.filters.concat(filters));
     });
     sinon.stub(queryFilter, 'invertFilter').callsFake((filter) => {
       filter.meta.negate = !filter.meta.negate;
@@ -116,7 +117,10 @@ describe('Filter Manager', function () {
 
     // NOTE: negating exists filters also forces disabled to false
     filterGen.add('myField', 1, '-', 'myIndex');
-    checkAddFilters(0, null, 1);
+    checkAddFilters(1, [{
+      meta: { index: 'myIndex', negate: true, disabled: false },
+      query: { match: { myField: { query: 1, type: 'phrase' } } }
+    }], 1);
     expect(appState.filters).to.have.length(1);
 
     filterGen.add('_exists_', 'myField', '+', 'myIndex');
@@ -127,7 +131,10 @@ describe('Filter Manager', function () {
     expect(appState.filters).to.have.length(2);
 
     filterGen.add('_exists_', 'myField', '-', 'myIndex');
-    checkAddFilters(0, null, 3);
+    checkAddFilters(1, [{
+      meta: { index: 'myIndex', negate: true, disabled: false },
+      exists: { field: 'myField' }
+    }], 3);
     expect(appState.filters).to.have.length(2);
 
     const scriptedField = { name: 'scriptedField', scripted: true, script: 1, lang: 'painless' };
@@ -139,7 +146,10 @@ describe('Filter Manager', function () {
     expect(appState.filters).to.have.length(3);
 
     filterGen.add(scriptedField, 1, '-', 'myIndex');
-    checkAddFilters(0, null, 5);
+    checkAddFilters(1, [{
+      meta: { index: 'myIndex', negate: true, disabled: false, field: 'scriptedField' },
+      script: getPhraseScript(scriptedField, 1)
+    }], 5);
     expect(appState.filters).to.have.length(3);
   });
 
