@@ -19,10 +19,10 @@
 
 import { cloneDeep } from 'lodash';
 // @ts-ignore
-import { setBounds } from '../../../../../core_plugins/data/public/np_ready/agg_types/buckets/date_histogram';
 import { SearchSource } from 'ui/courier';
 import { AggConfig, Vis, VisParams, VisState } from 'ui/vis';
 import moment from 'moment';
+import { setBounds } from '../../../../../core_plugins/data/public/np_ready/agg_types/buckets/date_histogram';
 
 interface SchemaFormat {
   id: string;

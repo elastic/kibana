@@ -20,9 +20,14 @@
 import { get, isEmpty } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { AggConfig, VisState } from 'ui/vis';
-import { aggTypeFilters } from '../../../../../../core_plugins/data/public/np_ready/agg_types/filter';
 import { IndexPattern } from 'ui/index_patterns';
-import { aggTypes, AggParam, FieldParamType, AggType } from '../../../../../../core_plugins/data/public/np_ready/agg_types';
+import { aggTypeFilters } from '../../../../../../core_plugins/data/public/np_ready/agg_types/filter';
+import {
+  aggTypes,
+  AggParam,
+  FieldParamType,
+  AggType,
+} from '../../../../../../core_plugins/data/public/np_ready/agg_types';
 import { aggTypeFieldFilters } from '../../../../../../core_plugins/data/public/np_ready/agg_types/param_types/filter';
 import { groupAggregationsBy } from '../default_editor_utils';
 import { EditorConfig } from '../../config/types';

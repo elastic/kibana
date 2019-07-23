@@ -27,68 +27,71 @@
  */
 
 import _ from 'lodash';
-import { IndexedArray } from '../indexed_array';
-import { AggConfig } from './agg_config';
+import { AggConfig, AggConfigOptions } from './agg_config';
+// @ts-ignore
 import { AggGroupNames } from './editors/default/agg_groups';
+import { IndexPattern } from '../../index_patterns';
 
-function removeParentAggs(obj) {
+function removeParentAggs(obj: any) {
   for(const prop in obj) {
     if (prop === 'parentAggs') delete obj[prop];
     else if (typeof obj[prop] === 'object') removeParentAggs(obj[prop]);
   }
 }
 
-function parseParentAggs(dslLvlCursor, dsl) {
+function parseParentAggs(dslLvlCursor: any, dsl: any) {
   if (dsl.parentAggs) {
     _.each(dsl.parentAggs, (agg, key) => {
-      dslLvlCursor[key] = agg;
+      dslLvlCursor[key as string] = agg;
       parseParentAggs(dslLvlCursor, agg);
     });
   }
 }
 
-class AggConfigs extends IndexedArray {
-  constructor(indexPattern, configStates = [], schemas) {
+export class AggConfigs {
+  public indexPattern: IndexPattern;
+  public schemas: any;
+  public timeRange: any;
+
+  private aggs: Array<AggConfig>;
+
+  constructor(indexPattern: IndexPattern, configStates = [] as any, schemas: any) {
     configStates = AggConfig.ensureIds(configStates);
 
-    super({
-      index: ['id'],
-      group: ['schema.group', 'type.name', 'type.type', 'schema.name'],
-    });
-
+    this.aggs = [];
     this.indexPattern = indexPattern;
     this.schemas = schemas;
 
-    configStates.forEach(params => this.createAggConfig(params));
+    configStates.forEach((params: any) => this.createAggConfig(params));
 
     if (this.schemas) {
       this.initializeDefaultsFromSchemas(schemas);
     }
   }
 
-  initializeDefaultsFromSchemas(schemas) {
+  initializeDefaultsFromSchemas(schemas: any) {
     // Set the defaults for any schema which has them. If the defaults
     // for some reason has more then the max only set the max number
     // of defaults (not sure why a someone define more...
     // but whatever). Also if a schema.name is already set then don't
     // set anything.
     _(schemas)
-      .filter(schema => {
+      .filter((schema: any) => {
         return Array.isArray(schema.defaults) && schema.defaults.length > 0;
       })
-      .each(schema => {
+      .each((schema: any) => {
         if (!this.bySchemaName[schema.name]) {
           const defaults = schema.defaults.slice(0, schema.max);
           _.each(defaults, defaultState => {
             const state = _.defaults({ id: AggConfig.nextId(this) }, defaultState);
-            this.push(new AggConfig(this, state));
+            this.aggs.push(new AggConfig(this, state as AggConfigOptions));
           });
         }
       })
       .commit();
   }
 
-  setTimeRange(timeRange) {
+  setTimeRange(timeRange: any) {
     this.timeRange = timeRange;
 
     const updateAggTimeRange = (agg) => {
@@ -102,12 +105,12 @@ class AggConfigs extends IndexedArray {
       }
     };
 
-    this.forEach(updateAggTimeRange);
+    this.aggs.forEach(updateAggTimeRange);
   }
 
   // clone method will reuse existing AggConfig in the list (will not create new instances)
   clone({ enabledOnly = true } = {}) {
-    const filterAggs = (agg) => {
+    const filterAggs = (agg: AggConfig) => {
       if (!enabledOnly) return true;
       return agg.enabled;
     };
@@ -115,7 +118,7 @@ class AggConfigs extends IndexedArray {
     return aggConfigs;
   }
 
-  createAggConfig(params, { addToAggConfigs = true } = {}) {
+  createAggConfig(params: any, { addToAggConfigs = true } = {}) {
     let aggConfig;
     if (params instanceof AggConfig) {
       aggConfig = params;
@@ -124,7 +127,7 @@ class AggConfigs extends IndexedArray {
       aggConfig = new AggConfig(this, params);
     }
     if (addToAggConfigs) {
-      this.push(aggConfig);
+      this.aggs.push(aggConfig);
     }
     return aggConfig;
   }
@@ -134,12 +137,12 @@ class AggConfigs extends IndexedArray {
    * Ignores the non-array indexes
    * @param aggConfigs an AggConfigs instance
    */
-  jsonDataEquals(aggConfigs) {
-    if (aggConfigs.length !== this.length) {
+  jsonDataEquals(aggConfigs: [AggConfig]) {
+    if (aggConfigs.length !== this.aggs.length) {
       return false;
     }
-    for (let i = 0; i < this.length; i += 1) {
-      if (!_.isEqual(aggConfigs[i].toJSON(), this[i].toJSON())) {
+    for (let i = 0; i < this.aggs.length; i += 1) {
+      if (!_.isEqual(aggConfigs[i].toJSON(), this.aggs[i].toJSON())) {
         return false;
       }
     }
@@ -148,8 +151,8 @@ class AggConfigs extends IndexedArray {
 
   toDsl(hierarchical = false) {
     const dslTopLvl = {};
-    let dslLvlCursor;
-    let nestedMetrics;
+    let dslLvlCursor: any;
+    let nestedMetrics: any;
 
     if (hierarchical) {
       // collect all metrics, and filter out the ones that we won't be copying
@@ -211,7 +214,7 @@ class AggConfigs extends IndexedArray {
 
   getRequestAggs() {
     //collect all the aggregations
-    const aggregations = this.reduce((requestValuesAggs, agg) => {
+    const aggregations = this.aggs.reduce((requestValuesAggs, agg) => {
       const aggs = agg.getRequestAggs();
       return aggs ? requestValuesAggs.concat(aggs) : requestValuesAggs;
     }, []);
@@ -245,22 +248,21 @@ class AggConfigs extends IndexedArray {
    * @param  {string} id - the id of the agg to find
    * @return {AggConfig}
    */
-  getResponseAggById(id) {
+  getResponseAggById(id: string) {
     id = String(id);
-    const reqAgg = _.find(this.getRequestAggs(), function (agg) {
+    const reqAgg = _.find(this.getRequestAggs(), function (agg: AggConfig) {
       return id.substr(0, String(agg.id).length) === agg.id;
     });
     if (!reqAgg) return;
     return _.find(reqAgg.getResponseAggs(), { id: id });
   }
 
-  onSearchRequestStart(searchSource, searchRequest) {
+  onSearchRequestStart(searchSource: any, searchRequest: any) {
     return Promise.all(
-      this.getRequestAggs().map(agg =>
+      // @ts-ignore
+      this.getRequestAggs().map((agg: AggConfig) =>
         agg.onSearchRequestStart(searchSource, searchRequest)
       )
     );
   }
 }
-
-export { AggConfigs };

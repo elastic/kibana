@@ -17,7 +17,10 @@
  * under the License.
  */
 import { AggType } from '../../../../../core_plugins/data/public/np_ready/agg_types';
-import { aggTypeFilters, propFilter } from '../../../../../core_plugins/data/public/np_ready/agg_types/filter';
+import {
+  aggTypeFilters,
+  propFilter,
+} from '../../../../../core_plugins/data/public/np_ready/agg_types/filter';
 import { IndexPattern } from '../../../index_patterns';
 import { AggConfig } from '../../../vis';
 

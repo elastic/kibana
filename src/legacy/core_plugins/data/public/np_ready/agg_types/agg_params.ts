@@ -18,6 +18,7 @@
  */
 
 // @ts-ignore
+import { AggParamEditorProps } from 'ui/vis';
 import { FieldParamType } from './param_types/field';
 // @ts-ignore
 import { OptionedParamType } from './param_types/optioned';
@@ -29,7 +30,6 @@ import { JsonParamType } from './param_types/json';
 import { BaseParamType } from './param_types/base';
 import { AggConfig } from '../agg_configs/agg_config';
 import { AggConfigs } from '../agg_configs/agg_configs';
-import { AggParamEditorProps } from 'ui/vis';
 
 export interface AggParam {
   editorComponent: React.ComponentType<AggParamEditorProps<unknown>>;
@@ -50,14 +50,13 @@ export interface AggParamOption {
   enabled?(agg: AggConfig): void;
 }
 
-
 const paramTypeMap = {
   // @ts-ignore
   field: FieldParamType,
-  optioned: (OptionedParamType),
-  string: (StringParamType),
-  json: (JsonParamType),
-  _default: (BaseParamType)
+  optioned: OptionedParamType,
+  string: StringParamType,
+  json: JsonParamType,
+  _default: BaseParamType,
 } as Record<string, any>;
 
 interface AggParamConfig {
@@ -85,11 +84,16 @@ export const initParams = (params: [AggParamConfig]): [AggParam] => {
  *         output object which is used to create the agg dsl for the search request. All other properties
  *         are dependent on the AggParam#write methods which should be studied for each AggType.
  */
-export const writeParams = (params: [AggParam], aggConfig: AggConfig, aggs?: AggConfigs, locals?: Record<string, any>) => {
+export const writeParams = (
+  params: [AggParam],
+  aggConfig: AggConfig,
+  aggs?: AggConfigs,
+  locals?: Record<string, any>
+) => {
   const output = { params: {} as Record<string, any> };
   locals = locals || {};
 
-  params.forEach(function (param) {
+  params.forEach(function(param) {
     if (param.write) {
       param.write(aggConfig, output, aggs, locals);
     } else {

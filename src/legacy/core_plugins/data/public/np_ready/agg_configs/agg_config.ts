@@ -25,11 +25,21 @@
  */
 
 import _ from 'lodash';
-import { fieldFormats } from '../registry/field_formats';
+// @ts-ignore
+import { fieldFormats } from '../../../../../ui/public/registry/field_formats';
 import { i18n } from '@kbn/i18n';
 import { writeParams } from '../agg_types/agg_params';
+import { AggConfigs } from './agg_configs';
 
-class AggConfig {
+export interface AggConfigOptions {
+  id: string;
+  enabled: boolean;
+  type: string;
+  schema: string;
+  params: any;
+}
+
+export class AggConfig {
 
   /**
    * Ensure that all of the objects in the list have ids, the objects
@@ -38,15 +48,15 @@ class AggConfig {
    * @param  {array[object]} list - a list of objects, objects can be anything really
    * @return {array} - the list that was passed in
    */
-  static ensureIds(list) {
-    const have = [];
-    const haveNot = [];
+  static ensureIds(list: [any]) {
+    const have = [] as any;
+    const haveNot = [] as any;
     list.forEach(function (obj) {
       (obj.id ? have : haveNot).push(obj);
     });
 
     let nextId = AggConfig.nextId(have);
-    haveNot.forEach(function (obj) {
+    haveNot.forEach(function (obj: any) {
       obj.id = String(nextId++);
     });
 
@@ -58,16 +68,25 @@ class AggConfig {
    *
    * @return {array} list - a list of objects with id properties
    */
-  static nextId(list) {
+  static nextId(list: [any]) {
     return 1 + list.reduce(function (max, obj) {
       return Math.max(max, +obj.id || 0);
     }, 0);
   }
 
-  constructor(aggConfigs, opts = {}) {
+  public aggConfigs: AggConfigs;
+  public id: string;
+  public enabled: boolean;
+  public params: any;
+
+  private __schema: any;
+  private __type: any;
+  private __typeDecorations: any;
+  private subAggs: any;
+
+  constructor(aggConfigs: AggConfigs, opts: AggConfigOptions) {
     this.aggConfigs = aggConfigs;
-    this.id = String(opts.id || AggConfig.nextId(aggConfigs));
-    this._opts = opts;
+    this.id = String(opts.id || AggConfig.nextId(aggConfigs.getRequestAggs() as any));
     this.enabled = typeof opts.enabled === 'boolean' ? opts.enabled : true;
 
     // start with empty params so that checks in type/schema setters don't freak
@@ -89,9 +108,9 @@ class AggConfig {
    *                         used when initializing
    * @return {undefined}
    */
-  setParams(from) {
+  setParams(from: any) {
     from = from || this.params || {};
-    const to = this.params = {};
+    const to = this.params = {} as any;
 
     this.getAggParams().forEach(aggParam => {
       let val = from[aggParam.name];
@@ -134,7 +153,7 @@ class AggConfig {
     return _.isFunction(this.type.createFilter);
   }
 
-  createFilter(key, params = {}) {
+  createFilter(key: string, params = {}) {
     if (!this.isFilterable()) {
       throw new TypeError(`The "${this.type.title}" aggregation does not support filtering.`);
     }
@@ -158,13 +177,13 @@ class AggConfig {
    *  @param {Courier.SearchRequest} searchRequest
    *  @return {Promise<undefined>}
    */
-  onSearchRequestStart(searchSource, searchRequest) {
+  onSearchRequestStart(searchSource: any, searchRequest: any) {
     if (!this.type) {
       return Promise.resolve();
     }
 
     return Promise.all(
-      this.type.params.map(param => param.modifyAggConfigOnSearchRequestStart(this, searchSource, searchRequest))
+      this.type.params.map((param: any) => param.modifyAggConfigOnSearchRequestStart(this, searchSource, searchRequest))
     );
   }
 
@@ -177,25 +196,25 @@ class AggConfig {
    * @return {void|Object} - if the config has a dsl representation, it is
    *                         returned, else undefined is returned
    */
-  toDsl(aggConfigs) {
+  toDsl(aggConfigs: AggConfigs) {
     if (this.type.hasNoDsl) return;
-    const output = this.write(aggConfigs);
+    const output = this.write(aggConfigs) as any;
 
-    const configDsl = {};
+    const configDsl = {} as any;
     configDsl[this.type.dslName || this.type.name] = output.params;
 
     // if the config requires subAggs, write them to the dsl as well
     if (this.subAggs && !output.subAggs) output.subAggs = this.subAggs;
     if (output.subAggs) {
       const subDslLvl = configDsl.aggs || (configDsl.aggs = {});
-      output.subAggs.forEach(function nestAdhocSubAggs(subAggConfig) {
+      output.subAggs.forEach(function nestAdhocSubAggs(subAggConfig: any) {
         subDslLvl[subAggConfig.id] = subAggConfig.toDsl(aggConfigs);
       });
     }
 
     if (output.parentAggs) {
       const subDslLvl = configDsl.parentAggs || (configDsl.parentAggs = {});
-      output.parentAggs.forEach(function nestAdhocSubAggs(subAggConfig) {
+      output.parentAggs.forEach(function nestAdhocSubAggs(subAggConfig: any) {
         subDslLvl[subAggConfig.id] = subAggConfig.toDsl(aggConfigs);
       });
     }
@@ -244,11 +263,11 @@ class AggConfig {
     return this.type.getResponseAggs(this) || [this];
   }
 
-  getValue(bucket) {
+  getValue(bucket: any) {
     return this.type.getValue(this, bucket);
   }
 
-  getKey(bucket, key) {
+  getKey(bucket: any, key: string) {
     return this.type.getKey(bucket, key, this);
   }
 
@@ -282,13 +301,13 @@ class AggConfig {
     return _.get(this.aggConfigs, 'timeRange', null);
   }
 
-  fieldFormatter(contentType, defaultFormat) {
+  fieldFormatter(contentType: string, defaultFormat: any) {
     const format = this.type && this.type.getFormat(this);
     if (format) return format.getConverterFor(contentType);
     return this.fieldOwnFormatter(contentType, defaultFormat);
   }
 
-  fieldOwnFormatter(contentType, defaultFormat) {
+  fieldOwnFormatter(contentType: string, defaultFormat: any) {
     const field = this.getField();
     let format = field && field.format;
     if (!format) format = defaultFormat;
@@ -302,7 +321,10 @@ class AggConfig {
   }
 
   fieldIsTimeField() {
-    const timeFieldName = this.getIndexPattern().timeFieldName;
+    const indexPattern = this.getIndexPattern();
+    if (!indexPattern) return false;
+    // @ts-ignore
+    const timeFieldName = indexPattern.timeFieldName;
     return timeFieldName && this.fieldName() === timeFieldName;
   }
 
@@ -312,7 +334,8 @@ class AggConfig {
 
   set type(type) {
     if (this.__typeDecorations) {
-      _.forOwn(this.__typeDecorations, function (prop, name) {
+      _.forOwn(this.__typeDecorations, function (prop, name: string) {
+        // @ts-ignore
         delete this[name];
       }, this);
     }
@@ -330,7 +353,8 @@ class AggConfig {
 
     this.__type = type;
 
-    const fieldParam = _.get(this, 'type.params.byName.field');
+    const fieldParam = _.get(this, 'type.params.byName.field') as any;
+    // @ts-ignore
     const availableFields = fieldParam ? fieldParam.getAvailableFields(this.getIndexPattern().fields) : [];
     // clear out the previous params except for a few special ones
     this.setParams({
@@ -354,5 +378,3 @@ class AggConfig {
     this.__schema = schema;
   }
 }
-
-export { AggConfig };

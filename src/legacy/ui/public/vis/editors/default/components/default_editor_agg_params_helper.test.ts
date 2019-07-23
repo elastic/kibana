@@ -18,7 +18,10 @@
  */
 
 import { AggConfig, VisState } from 'ui/vis';
-import { FieldParamType, AggType } from '../../../../../../core_plugins/data/public/np_ready/agg_types';
+import {
+  FieldParamType,
+  AggType,
+} from '../../../../../../core_plugins/data/public/np_ready/agg_types';
 import { IndexPattern } from 'ui/index_patterns';
 import {
   getAggParamsToRender,

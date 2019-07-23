@@ -35,5 +35,9 @@ export class BaseParamType {
    *  @returns {Promise<undefined>|undefined}
    */
   // eslint-disable-next-line no-unused-vars
-  modifyAggConfigOnSearchRequestStart = function (aggconfig: any, searchSource: any, searchRequest: any) {};
+  modifyAggConfigOnSearchRequestStart = function(
+    aggconfig: any,
+    searchSource: any,
+    searchRequest: any
+  ) {};
 }

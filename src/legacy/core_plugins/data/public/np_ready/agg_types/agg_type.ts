@@ -18,10 +18,10 @@
  */
 
 import _ from 'lodash';
+import { i18n } from '@kbn/i18n';
 import { AggParam, initParams } from './agg_params';
 // @ts-ignore
 import { fieldFormats } from '../../../../../ui/public/registry/field_formats';
-import { i18n } from '@kbn/i18n';
 // @ts-ignore
 import { AggConfig } from '../agg_configs/agg_config';
 
@@ -162,7 +162,6 @@ export class AggType {
    */
   getFormat: any;
 
-
   /**
    * Generic AggType Constructor
    *
@@ -182,36 +181,36 @@ export class AggType {
     this.createFilter = config.createFilter;
 
     // @ts-ignore
-    if (config.params && (config.params[0] instanceof AggParam)) {
+    if (config.params && config.params[0] instanceof AggParam) {
       this.params = config.params;
-    }
-    else {
+    } else {
       // always append the raw JSON param
       const params = [];
       params.push({
         name: 'json',
         type: 'json',
-        advanced: true
+        advanced: true,
       });
       // always append custom label
 
       if (config.customLabels !== false) {
         params.push({
           name: 'customLabel',
-          displayName: i18n.translate('common.ui.aggTypes.string.customLabel', { defaultMessage: 'Custom label' }),
+          displayName: i18n.translate('common.ui.aggTypes.string.customLabel', {
+            defaultMessage: 'Custom label',
+          }),
           type: 'string',
-          write: _.noop
+          write: _.noop,
         });
       }
 
       this.params = initParams(params as any);
     }
 
-
     this.getRequestAggs = config.getRequestAggs || _.noop;
     this.getResponseAggs = config.getResponseAggs || _.noop;
     this.decorateAggConfig = config.decorateAggConfig || null;
     this.postFlightRequest = config.postFlightRequest || _.identity;
     this.getFormat = config.getFormat || getFormat;
-  };
+  }
 }

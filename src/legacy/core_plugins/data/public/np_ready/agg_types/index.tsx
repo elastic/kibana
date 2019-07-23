@@ -105,7 +105,7 @@ export const aggTypes = {
     bucketMinMetricAgg,
     bucketMaxMetricAgg,
     geoBoundsMetricAgg,
-    geoCentroidMetricAgg
+    geoCentroidMetricAgg,
   ],
   buckets: [
     dateHistogramBucketAgg,
@@ -119,10 +119,9 @@ export const aggTypes = {
     significantTermsBucketAgg,
     geoHashBucketAgg,
     geoTileBucketAgg,
-  ]
+  ],
 };
 
 export { AggParam, AggParamOption } from './agg_params';
 export { AggType } from './agg_type';
 export { FieldParamType } from './param_types';
-

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { AggParam } from '../../../../../../core_plugins/data/public/np_ready/agg_types;
+import { AggParam } from '../../../../../../core_plugins/data/public/np_ready/agg_types';
 import { AggConfig } from '../../../agg_config';
 import { FieldParamType } from '../../../../../../core_plugins/data/public/np_ready/agg_types';
 import { EditorConfig } from '../../config/types';
