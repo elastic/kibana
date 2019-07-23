@@ -17,10 +17,11 @@ import { AnomaliesNetworkTableProps } from '../types';
 import { getAnomaliesNetworkTableColumnsCurated } from './get_anomalies_network_table_columns';
 import { getIntervalFromAnomalies } from '../anomaly/get_interval_from_anomalies';
 import { getSizeFromAnomalies } from '../anomaly/get_size_from_anomalies';
-import { dateTimesAreEqual } from './date_time_equality';
 import { hasMlUserPermissions } from '../permissions/has_ml_user_permissions';
 import { MlCapabilitiesContext } from '../permissions/ml_capabilities_provider';
 import { BasicTable } from './basic_table';
+import { networkEquality } from './network_equality';
+import { getCriteriaFromNetworkType } from '../criteria/get_criteria_from_network_type';
 
 const sorting = {
   sort: {
@@ -30,13 +31,13 @@ const sorting = {
 };
 
 export const AnomaliesNetworkTable = React.memo<AnomaliesNetworkTableProps>(
-  ({ startDate, endDate, narrowDateRange, skip, ip, type }): JSX.Element | null => {
+  ({ startDate, endDate, narrowDateRange, skip, ip, type, flowTarget }): JSX.Element | null => {
     const capabilities = useContext(MlCapabilitiesContext);
     const [loading, tableData] = useAnomaliesTableData({
-      influencers: [],
       startDate,
       endDate,
       skip,
+      criteriaFields: getCriteriaFromNetworkType(type, ip, flowTarget),
     });
 
     const networks = convertAnomaliesToNetwork(tableData, ip);
@@ -77,6 +78,7 @@ export const AnomaliesNetworkTable = React.memo<AnomaliesNetworkTableProps>(
             <HeaderPanel
               subtitle={`${i18n.SHOWING}: ${networks.length.toLocaleString()} ${i18n.ANOMALIES}`}
               title={i18n.ANOMALIES}
+              tooltip={i18n.TOOLTIP}
             />
             <BasicTable
               items={networks}
@@ -89,5 +91,5 @@ export const AnomaliesNetworkTable = React.memo<AnomaliesNetworkTableProps>(
       );
     }
   },
-  dateTimesAreEqual
+  networkEquality
 );

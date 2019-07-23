@@ -58,7 +58,7 @@ const REACT_ANCHOR_DOM_ELEMENT_ID = 'react-maps-root';
 
 const app = uiModules.get(MAP_APP_PATH, []);
 
-app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage, AppState, globalState) => {
+app.controller('GisMapController', ($scope, $route, kbnUrl, localStorage, AppState, globalState) => {
 
   const savedMap = $route.current.locals.map;
   let unsubscribe;
@@ -185,8 +185,7 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage
       store.dispatch(setOpenTOCDetails(_.get(uiState, 'openTOCDetails', [])));
     }
 
-    const isDarkMode = config.get('theme:darkMode', false);
-    const layerList = getInitialLayers(savedMap.layerListJSON, isDarkMode);
+    const layerList = getInitialLayers(savedMap.layerListJSON);
     initialLayerListConfig = copyPersistentState(layerList);
     store.dispatch(replaceLayerList(layerList));
     store.dispatch(setRefreshConfig($scope.refreshConfig));
@@ -333,7 +332,8 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage
   timefilter.disableAutoRefreshSelector();
   $scope.showDatePicker = true; // used by query-bar directive to enable timepikcer in query bar
   $scope.topNavMenu = [{
-    key: i18n.translate('xpack.maps.mapController.fullScreenButtonLabel', {
+    id: 'full-screen',
+    label: i18n.translate('xpack.maps.mapController.fullScreenButtonLabel', {
       defaultMessage: `full screen`
     }),
     description: i18n.translate('xpack.maps.mapController.fullScreenDescription', {
@@ -344,7 +344,8 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage
       store.dispatch(enableFullScreen());
     }
   }, {
-    key: i18n.translate('xpack.maps.mapController.openInspectorButtonLabel', {
+    id: 'inspect',
+    label: i18n.translate('xpack.maps.mapController.openInspectorButtonLabel', {
       defaultMessage: `inspect`
     }),
     description: i18n.translate('xpack.maps.mapController.openInspectorDescription', {
@@ -356,7 +357,8 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage
       Inspector.open(inspectorAdapters, {});
     }
   }, ...(capabilities.get().maps.save ? [{
-    key: i18n.translate('xpack.maps.mapController.saveMapButtonLabel', {
+    id: 'save',
+    label: i18n.translate('xpack.maps.mapController.saveMapButtonLabel', {
       defaultMessage: `save`
     }),
     description: i18n.translate('xpack.maps.mapController.saveMapDescription', {
