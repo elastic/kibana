@@ -9520,7 +9520,6 @@
     "xpack.siem.eventsTable.rows": "{numRows} {numRows, plural, =0 {rows} =1 {row} other {rows}}",
     "xpack.siem.eventsTable.sourceTitle": "源",
     "xpack.siem.eventsTable.timestampTitle": "时间戳",
-    "xpack.siem.eventsTable.unit": "{totalCount, plural, =1 {Event} other {Events}}",
     "xpack.siem.eventsTable.userTitle": "用户",
     "xpack.siem.featureRegistry.linkSiemTitle": "SIEM",
     "xpack.siem.fieldBrowser.categoriesCountTitle": "{totalCount} {totalCount, plural, =1 {Category} other {Categories}}",

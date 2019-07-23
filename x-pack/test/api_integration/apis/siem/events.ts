@@ -25,7 +25,58 @@ const HOST_NAME = 'suricata-sensor-amsterdam';
 const TOTAL_COUNT = 1751;
 const EDGE_LENGTH = 2;
 const CURSOR_ID = '1550608953561';
-
+const EVENTS_OVER_TIME = [
+  {
+    x: new Date('2019-02-19T00:00:00.000Z').valueOf(),
+    y: 664,
+    __typename: 'EventsOverTimeHistogramData',
+  },
+  {
+    x: new Date('2019-02-26T00:00:00.000Z').valueOf(),
+    y: 0,
+    __typename: 'EventsOverTimeHistogramData',
+  },
+  {
+    x: new Date('2019-03-05T00:00:00.000Z').valueOf(),
+    y: 0,
+    __typename: 'EventsOverTimeHistogramData',
+  },
+  {
+    x: new Date('2019-03-12T00:00:00.000Z').valueOf(),
+    y: 0,
+    __typename: 'EventsOverTimeHistogramData',
+  },
+  {
+    x: new Date('2019-03-19T00:00:00.000Z').valueOf(),
+    y: 0,
+    __typename: 'EventsOverTimeHistogramData',
+  },
+  {
+    x: new Date('2019-03-26T00:00:00.000Z').valueOf(),
+    y: 0,
+    __typename: 'EventsOverTimeHistogramData',
+  },
+  {
+    x: new Date('2019-04-02T00:00:00.000Z').valueOf(),
+    y: 0,
+    __typename: 'EventsOverTimeHistogramData',
+  },
+  {
+    x: new Date('2019-04-09T00:00:00.000Z').valueOf(),
+    y: 0,
+    __typename: 'EventsOverTimeHistogramData',
+  },
+  {
+    x: new Date('2019-04-16T00:00:00.000Z').valueOf(),
+    y: 0,
+    __typename: 'EventsOverTimeHistogramData',
+  },
+  {
+    x: new Date('2019-04-23T00:00:00.000Z').valueOf(),
+    y: 1,
+    __typename: 'EventsOverTimeHistogramData',
+  },
+];
 const eventsTests: KbnTestProvider = ({ getService }) => {
   const esArchiver = getService('esArchiver');
   const client = getService('siemGraphQLClient');
@@ -355,22 +406,21 @@ const eventsTests: KbnTestProvider = ({ getService }) => {
               query: EventsOverTimeGqlQuery,
               variables: {
                 sourceId: 'default',
-                indexKey: 'hosts',
-                details: {},
+                timerange: {
+                  interval: '12h',
+                  to: TO,
+                  from: FROM,
+                },
                 defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+                filterQuery: '',
+                inspect: false,
               },
             })
             .then(resp => {
               const eventsOverTime = resp.data.source.EventsOverTime.eventsOverTime;
               const totalCount = resp.data.source.EventsOverTime.totalCount;
-              expect(eventsOverTime).to.eql([
-                {
-                  __typename: 'EventsOverTimeHistogramData',
-                  x: '2019-04-26T21:45:14.012Z',
-                  y: '',
-                },
-              ]);
-              expect(totalCount).equal(TOTAL_COUNT);
+              expect(eventsOverTime).to.eql(EVENTS_OVER_TIME);
+              expect(totalCount).equal(665);
             });
         });
 
@@ -380,24 +430,25 @@ const eventsTests: KbnTestProvider = ({ getService }) => {
               query: EventsOverTimeGqlQuery,
               variables: {
                 sourceId: 'default',
-                indexKey: 'hostDetails',
-                details: {
-                  hostName: 'zeek-sensor-amsterdam',
+                timerange: {
+                  interval: '12h',
+                  to: TO,
+                  from: FROM,
                 },
                 defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+                filterQuery: JSON.stringify({
+                  term: {
+                    hostName: 'zeek-sensor-amsterdam',
+                  },
+                }),
+                inspect: false,
               },
             })
             .then(resp => {
               const eventsOverTime = resp.data.source.EventsOverTime.eventsOverTime;
               const totalCount = resp.data.source.EventsOverTime.totalCount;
-              expect(eventsOverTime).to.eql([
-                {
-                  __typename: 'EventsOverTimeHistogramData',
-                  x: '2019-02-19T23:26:46.720Z',
-                  y: '',
-                },
-              ]);
-              expect(totalCount).equal(TOTAL_COUNT);
+              expect(eventsOverTime).to.eql([]);
+              expect(totalCount).equal(0);
             });
         });
       });
@@ -410,22 +461,21 @@ const eventsTests: KbnTestProvider = ({ getService }) => {
               query: EventsOverTimeGqlQuery,
               variables: {
                 sourceId: 'default',
-                indexKey: 'hosts',
-                details: {},
+                timerange: {
+                  interval: '12h',
+                  to: TO,
+                  from: FROM,
+                },
                 defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+                filterQuery: '',
+                inspect: false,
               },
             })
             .then(resp => {
               const eventsOverTime = resp.data.source.EventsOverTime.eventsOverTime;
               const totalCount = resp.data.source.EventsOverTime.totalCount;
-              expect(eventsOverTime).to.eql([
-                {
-                  __typename: 'EventsOverTimeHistogramData',
-                  x: '2019-04-26T21:45:14.012Z',
-                  y: '',
-                },
-              ]);
-              expect(totalCount).equal(TOTAL_COUNT);
+              expect(eventsOverTime).to.eql(EVENTS_OVER_TIME);
+              expect(totalCount).equal(665);
             });
         });
 
@@ -435,25 +485,26 @@ const eventsTests: KbnTestProvider = ({ getService }) => {
               query: EventsOverTimeGqlQuery,
               variables: {
                 sourceId: 'default',
-                indexKey: 'hostDetails',
-                details: {
-                  hostName: 'raspberrypi',
+                timerange: {
+                  interval: '12h',
+                  to: TO,
+                  from: FROM,
                 },
                 defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+                filterQuery: JSON.stringify({
+                  term: {
+                    hostName: 'raspberrypi',
+                  },
+                }),
+                inspect: false,
               },
             })
             .then(resp => {
               const eventsOverTime = resp.data.source.EventsOverTime.eventsOverTime;
               const totalCount = resp.data.source.EventsOverTime.totalCount;
 
-              expect(eventsOverTime).to.eql([
-                {
-                  __typename: 'EventsOverTimeHistogramData',
-                  x: '2019-02-10T03:00:13.001Z',
-                  y: '',
-                },
-              ]);
-              expect(totalCount).equal(TOTAL_COUNT);
+              expect(eventsOverTime).to.eql([]);
+              expect(totalCount).equal(0);
             });
         });
 
@@ -466,23 +517,22 @@ const eventsTests: KbnTestProvider = ({ getService }) => {
                 query: EventsOverTimeGqlQuery,
                 variables: {
                   sourceId: 'default',
-                  indexKey: 'hosts',
-                  details: {},
+                  timerange: {
+                    interval: '12h',
+                    to: TO,
+                    from: FROM,
+                  },
                   defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+                  filterQuery: '',
+                  inspect: false,
                 },
               })
               .then(resp => {
                 const eventsOverTime = resp.data.source.EventsOverTime.eventsOverTime;
                 const totalCount = resp.data.source.EventsOverTime.totalCount;
 
-                expect(eventsOverTime).to.eql([
-                  {
-                    __typename: 'EventsOverTimeHistogramData',
-                    x: '2019-04-26T21:45:14.012Z',
-                    y: '',
-                  },
-                ]);
-                expect(totalCount).equal(TOTAL_COUNT);
+                expect(eventsOverTime).to.eql(EVENTS_OVER_TIME);
+                expect(totalCount).equal(665);
               });
           });
           it('Gets events over time - host details', () => {
@@ -491,24 +541,25 @@ const eventsTests: KbnTestProvider = ({ getService }) => {
                 query: EventsOverTimeGqlQuery,
                 variables: {
                   sourceId: 'default',
-                  indexKey: 'hostDetails',
-                  details: {
-                    hostName: 'demo-stack-nginx-01',
+                  timerange: {
+                    interval: '12h',
+                    to: TO,
+                    from: FROM,
                   },
                   defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+                  filterQuery: JSON.stringify({
+                    term: {
+                      hostName: 'demo-stack-nginx-01',
+                    },
+                  }),
+                  inspect: false,
                 },
               })
               .then(resp => {
                 const eventsOverTime = resp.data.source.EventsOverTime.eventsOverTime;
                 const totalCount = resp.data.source.EventsOverTime.totalCount;
-                expect(eventsOverTime).to.eql([
-                  {
-                    __typename: 'EventsOverTimeHistogramData',
-                    x: '2018-11-27T02:59:00.461Z',
-                    y: '',
-                  },
-                ]);
-                expect(totalCount).equal(TOTAL_COUNT);
+                expect(eventsOverTime).to.eql([]);
+                expect(totalCount).equal(0);
               });
           });
         });

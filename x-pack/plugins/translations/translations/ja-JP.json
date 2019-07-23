@@ -9521,7 +9521,6 @@
     "xpack.siem.eventsTable.rows": "{numRows} {numRows, plural, =0 {rows} =1 {row} other {rows}}",
     "xpack.siem.eventsTable.sourceTitle": "送信元",
     "xpack.siem.eventsTable.timestampTitle": "タイムスタンプ",
-    "xpack.siem.eventsTable.unit": "{totalCount, plural, =1 {Event} other {Events}}",
     "xpack.siem.eventsTable.userTitle": "ユーザー",
     "xpack.siem.featureRegistry.linkSiemTitle": "SIEM",
     "xpack.siem.fieldBrowser.categoriesCountTitle": "{totalCount} {totalCount, plural, =1 {Category} other {Categories}}",
