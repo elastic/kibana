@@ -42,7 +42,8 @@ export interface MapStartPlugins {
   foo: any;
 }
 
-export class MapPlugin implements Plugin<MapSetup, MapStart, MapSetupPlugins, MapStartPlugins> {
+export class RegionMapPlugin
+  implements Plugin<MapSetup, MapStart, MapSetupPlugins, MapStartPlugins> {
   initializerContext: PluginInitializerContext;
 
   constructor(initializerContext: PluginInitializerContext) {

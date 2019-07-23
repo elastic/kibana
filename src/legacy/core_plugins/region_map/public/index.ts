@@ -17,9 +17,9 @@
  * under the License.
  */
 
-import { PluginInitializerContext } from 'kibana/public';
-import { MapPlugin } from './plugin';
+import { PluginInitializerContext } from '../../../../core/public';
+import { RegionMapPlugin as Plugin } from './plugin';
 
 export function plugin(initializerContext: PluginInitializerContext) {
-  return new MapPlugin(initializerContext);
+  return new Plugin(initializerContext);
 }
