@@ -113,6 +113,24 @@ class SearchPage extends React.PureComponent<Props, State> {
     };
   };
 
+  public onSearchScopeChanged = (s: SearchScope) => {
+    this.props.onSearchScopeChanged(s);
+
+    // We currently only have full search for repository and content.
+    if (s === SearchScope.DEFAULT || s === SearchScope.REPOSITORY) {
+      const queries = querystring.parse(history.location.search.replace('?', ''));
+      history.push(
+        url.format({
+          pathname: '/search',
+          query: {
+            ...queries,
+            scope: s,
+          },
+        })
+      );
+    }
+  };
+
   public render() {
     const {
       query,
@@ -220,7 +238,7 @@ class SearchPage extends React.PureComponent<Props, State> {
             <SearchBar
               searchOptions={this.props.searchOptions}
               query={this.props.query}
-              onSearchScopeChanged={this.props.onSearchScopeChanged}
+              onSearchScopeChanged={this.onSearchScopeChanged}
               enableSubmitWhenOptionsChanged={true}
               ref={(element: any) => (this.searchBar = element)}
             />
