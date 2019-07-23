@@ -18,7 +18,6 @@ interface Props {
   filterOperations: (op: Operation) => boolean;
   suggestedPriority?: 0 | 1 | 2 | undefined;
   testSubj: string;
-  // layer: number;
   layerId: string;
 }
 

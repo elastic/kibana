@@ -248,15 +248,6 @@ export function XYConfigPanel(props: VisualizationProps<State>) {
           <FormattedMessage id="xpack.lens.xyChart.addLayerButton" defaultMessage="Add layer" />
         </EuiButton>
       </EuiFormRow>
-
-      <EuiFormRow>
-        <EuiButton>
-          <FormattedMessage
-            id="xpack.lens.xyChart.explainQueryButton"
-            defaultMessage="Explain query"
-          />
-        </EuiButton>
-      </EuiFormRow>
     </EuiForm>
   );
 }
