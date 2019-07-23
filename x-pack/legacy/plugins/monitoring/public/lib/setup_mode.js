@@ -74,6 +74,24 @@ export const updateSetupModeData = async () => {
   notifySetupModeDataChange(oldData);
 };
 
+export const disableElasticsearchInternalCollection = async () => {
+  checkAngularState();
+
+  const http = angularState.injector.get('$http');
+  const globalState = angularState.injector.get('globalState');
+  const clusterUuid = globalState.cluster_uuid;
+  const url = `../api/monitoring/v1/setup/collection/${clusterUuid}/disable_internal_collection`;
+  try {
+    const response = await http.post(url);
+    return response.data;
+  }
+  catch (err) {
+    const Private = angularState.injector.get('Private');
+    const ajaxErrorHandlers = Private(ajaxErrorHandlersProvider);
+    return ajaxErrorHandlers(err);
+  }
+};
+
 export const toggleSetupMode = inSetupMode => {
   return new Promise(async (resolve, reject) => {
     try {

@@ -244,6 +244,27 @@ async function getLiveElasticsearchClusterUuid(req) {
   return clusterUuid;
 }
 
+async function getLiveElasticsearchCollectionEnabled(req) {
+  const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('admin');
+  const response = await callWithRequest(req, 'transport.request', {
+    method: 'GET',
+    path: '/_cluster/settings?include_defaults',
+    filter_path: [
+      'persistent.xpack.monitoring',
+      'transient.xpack.monitoring',
+      'defaults.xpack.monitoring'
+    ]
+  });
+  const sources = ['persistent', 'transient', 'defaults'];
+  for (const source of sources) {
+    const collectionSettings = get(response[source], 'xpack.monitoring.collection');
+    if (collectionSettings && collectionSettings.enabled === 'true') {
+      return true;
+    }
+  }
+  return false;
+}
+
 /**
  * This function will scan all monitoring documents within the past 30s (or a custom time range is supported too)
  * and determine which products fall into one of four states:
@@ -292,6 +313,7 @@ export const getCollectionStatus = async (req, indexPatterns, clusterUuid, skipL
   const liveEsNodes = skipLiveData ? [] : await getLivesNodes(req);
   const liveKibanaInstance = skipLiveData ? {} : await getLiveKibanaInstance(req);
   const indicesBuckets = get(recentDocuments, 'aggregations.indices.buckets', []);
+  const liveClusterInternalCollectionEnabled = await getLiveElasticsearchCollectionEnabled(req);
 
   const status = PRODUCTS.reduce((products, product) => {
     const token = product.token || product.name;
@@ -395,9 +417,11 @@ export const getCollectionStatus = async (req, indexPatterns, clusterUuid, skipL
     }
     // If there are multiple buckets, they are partially upgraded assuming a single mb index exists
     else {
+      const considerAllInstancesMigrated = product.name === ELASTICSEARCH_CUSTOM_ID &&
+        clusterUuid === liveClusterUuid && !liveClusterInternalCollectionEnabled;
       const internalTimestamps = [];
       for (const indexBucket of indexBuckets) {
-        const isFullyMigrated = indexBucket.key.includes(METRICBEAT_INDEX_NAME_UNIQUE_TOKEN);
+        const isFullyMigrated = considerAllInstancesMigrated || indexBucket.key.includes(METRICBEAT_INDEX_NAME_UNIQUE_TOKEN);
         const map = isFullyMigrated ? fullyMigratedUuidsMap : internalCollectorsUuidsMap;
         const otherMap = !isFullyMigrated ? fullyMigratedUuidsMap : internalCollectorsUuidsMap;
 
@@ -477,7 +501,7 @@ export const getCollectionStatus = async (req, indexPatterns, clusterUuid, skipL
 
   status._meta = {
     secondsAgo: NUMBER_OF_SECONDS_AGO_TO_LOOK,
-    clusterUuid: liveClusterUuid,
+    liveClusterUuid,
     isOnCloud: get(req.server.plugins, 'cloud.config.isCloudEnabled', false)
   };
 

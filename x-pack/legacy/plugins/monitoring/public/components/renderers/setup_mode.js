@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React from 'react';
-import { getSetupModeState, initSetupModeState, updateSetupModeData } from '../../lib/setup_mode';
+import { getSetupModeState, initSetupModeState, updateSetupModeData, disableElasticsearchInternalCollection } from '../../lib/setup_mode';
 import { Flyout } from '../metricbeat_migration/flyout';
 import { findNewUuid } from './lib/find_new_uuid';
 
@@ -97,6 +97,11 @@ export class SetupModeRenderer extends React.Component {
     );
   }
 
+  async shortcutToFinishMigration() {
+    await disableElasticsearchInternalCollection();
+    await updateSetupModeData();
+  }
+
   render() {
     const { render, productName } = this.props;
     const setupModeState = getSetupModeState();
@@ -116,9 +121,11 @@ export class SetupModeRenderer extends React.Component {
     return render({
       setupMode: {
         data,
+        meta,
         enabled: setupModeState.enabled,
         productName,
         updateSetupModeData,
+        shortcutToFinishMigration: () => this.shortcutToFinishMigration(),
         openFlyout: (instance, isSettingUpNew) => this.setState({ isFlyoutOpen: true, instance, isSettingUpNew }),
         closeFlyout: () => this.setState({ isFlyoutOpen: false }),
       },

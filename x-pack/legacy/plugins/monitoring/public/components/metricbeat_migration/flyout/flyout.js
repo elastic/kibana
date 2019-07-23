@@ -119,7 +119,7 @@ export class Flyout extends Component {
 
   finishedFlyout() {
     const { onClose, meta } = this.props;
-    setNewlyDiscoveredClusterUuid(get(meta, 'clusterUuid'));
+    setNewlyDiscoveredClusterUuid(get(meta, 'liveClusterUuid'));
     onClose();
   }
 
