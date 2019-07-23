@@ -11,14 +11,10 @@ const angularState = {
   scope: null,
 };
 
-export const setAngularState = ($scope, $injector) => {
-  angularState.scope = $scope;
-  angularState.injector = $injector;
-};
 const checkAngularState = () => {
   if (!angularState.injector || !angularState.scope) {
     throw 'Unable to interact with setup mode because the angular injector was not previously set.'
-      + ' This needs to be set by calling `setAngularState`.';
+      + ' This needs to be set by calling `initSetupModeState`.';
   }
 };
 
@@ -29,6 +25,16 @@ const setupModeState = {
 };
 
 export const getSetupModeState = () => setupModeState;
+
+export const setNewlyDiscoveredClusterUuid = clusterUuid => {
+  const globalState = angularState.injector.get('globalState');
+  const executor = angularState.injector.get('$executor');
+  angularState.scope.$apply(() => {
+    globalState.cluster_uuid = clusterUuid;
+    globalState.save();
+  });
+  executor.run();
+};
 
 export const fetchCollectionData = async () => {
   checkAngularState();
@@ -64,10 +70,14 @@ export const updateSetupModeData = async () => {
 };
 
 export const toggleSetupMode = inSetupMode => {
-  checkAngularState();
+  return new Promise(async (resolve, reject) => {
+    try {
+      checkAngularState();
+    } catch (err) {
+      return reject(err);
+    }
 
-  const globalState = angularState.injector.get('globalState');
-  angularState.scope.$evalAsync(async () => {
+    const globalState = angularState.injector.get('globalState');
     setupModeState.enabled = inSetupMode;
     globalState.inSetupMode = inSetupMode;
     globalState.save();
@@ -77,6 +87,8 @@ export const toggleSetupMode = inSetupMode => {
     if (inSetupMode) {
       await updateSetupModeData();
     }
+
+    resolve();
   });
 };
 
@@ -114,8 +126,9 @@ const setSetupModeMenuItem = () => {
   // angularState.scope.topNavMenu = [...navItems];
 };
 
-export const initSetupModeState = (callback) => {
-  checkAngularState();
+export const initSetupModeState = ($scope, $injector, callback) => {
+  angularState.scope = $scope;
+  angularState.injector = $injector;
   setSetupModeMenuItem();
   callback && setupModeState.callbacks.push(callback);
 
