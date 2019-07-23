@@ -666,11 +666,15 @@ describe('filter_manager', () => {
   describe('invert', () => {
     test('invert to disabled', async () => {
       const f1 = getFilter(FilterStateStore.GLOBAL_STATE, false, false, 'age', 34);
-      await filterManager.invertFilter(f1);
+
+      filterManager.invertFilter(f1);
+      await filterManager.addFilters(f1);
       const newFilters1 = filterManager.getFilters()[0];
       expect(f1.meta.negate).toBe(true);
       expect(newFilters1.meta.negate).toBe(true);
-      await filterManager.invertFilter(f1);
+
+      filterManager.invertFilter(f1);
+      await filterManager.addFilters(f1);
       const newFilters2 = filterManager.getFilters()[0];
       expect(f1.meta.negate).toBe(false);
       expect(newFilters2.meta.negate).toBe(false);
@@ -689,7 +693,8 @@ describe('filter_manager', () => {
         next: fetchStub,
       });
 
-      await filterManager.invertFilter(readyFilters[1]);
+      filterManager.invertFilter(readyFilters[1]);
+      await filterManager.addFilters(readyFilters[1]);
       expect(fetchStub).toBeCalledTimes(1);
       expect(updateStub).toBeCalledTimes(1);
     });

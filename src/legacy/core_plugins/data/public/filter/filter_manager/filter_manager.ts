@@ -105,17 +105,17 @@ export class FilterManager {
   /* Getters */
 
   public getFilters() {
-    return this.filters;
+    return _.cloneDeep(this.filters);
   }
 
   public getAppFilters() {
     const { appFilters } = this.getPartitionedFilters();
-    return appFilters;
+    return _.cloneDeep(appFilters);
   }
 
   public getGlobalFilters() {
     const { globalFilters } = this.getPartitionedFilters();
-    return globalFilters;
+    return _.cloneDeep(globalFilters);
   }
 
   public getPartitionedFilters(): PartitionedFilters {
@@ -182,13 +182,8 @@ export class FilterManager {
     }
   }
 
-  public async invertFilter(filter: Filter) {
-    const newFilter = _.cloneDeep(filter);
-    newFilter.meta.negate = !newFilter.meta.negate;
-    await this.addFilters(newFilter);
-
-    // Update input filter
-    filter.meta.negate = newFilter.meta.negate;
+  public invertFilter(filter: Filter) {
+    filter.meta.negate = !filter.meta.negate;
   }
 
   public async removeAll() {
