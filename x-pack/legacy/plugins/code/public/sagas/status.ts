@@ -98,13 +98,15 @@ function* startPollingStatus(location: FetchFilePayload) {
   while (isEqual(location, currentStatusPath)) {
     const previousStatus: StatusReport = yield select(statusSelector);
     const newStatus: StatusReport = yield call(fetchStatus, location);
-    yield call(compareStatus, previousStatus, newStatus);
-    const delayMs =
-      newStatus.langServerStatus === RepoFileStatus.LANG_SERVER_IS_INITIALIZING
-        ? STATUS_POLLING_FREQ_HIGH_MS
-        : STATUS_POLLING_FREQ_LOW_MS;
+    let delayMs = STATUS_POLLING_FREQ_LOW_MS;
+    if (newStatus) {
+      yield call(compareStatus, previousStatus, newStatus);
+      if (newStatus.langServerStatus === RepoFileStatus.LANG_SERVER_IS_INITIALIZING) {
+        delayMs = STATUS_POLLING_FREQ_HIGH_MS;
+      }
+      currentStatusPath = yield select((state: RootState) => state.status.currentStatusPath);
+    }
     yield call(delay, delayMs);
-    currentStatusPath = yield select((state: RootState) => state.status.currentStatusPath);
   }
 }
 

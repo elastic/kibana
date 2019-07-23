@@ -42,9 +42,9 @@ To create a visualization:
 locations.
 * *Time Series*
 [horizontal]
-<<time-series-intro,Timelion>>:: Compute and combine data from multiple time series
+<<timelion,Timelion>>:: Compute and combine data from multiple time series
 data sets.
-<<time-series-visual-builder,Time Series Visual Builder>>:: Visualize time series data using pipeline aggregations.
+<<TSVB,TSVB>>:: Visualize time series data using pipeline aggregations.
 * *Other*
 [horizontal]
 <<controls,Controls>>:: Controls provide the ability to add interactive inputs to Kibana Dashboards.
@@ -160,7 +160,7 @@ include::visualize/regionmap.asciidoc[]
 
 include::visualize/timelion.asciidoc[]
 
-include::visualize/time-series-visual-builder.asciidoc[]
+include::visualize/tsvb.asciidoc[]
 
 include::visualize/tagcloud.asciidoc[]
 

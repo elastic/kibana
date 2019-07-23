@@ -44,7 +44,6 @@ interface AuthenticationTableReduxProps {
 }
 
 interface AuthenticationTableDispatchProps {
-  updateLimitPagination: ActionCreator<{ limit: number; hostsType: hostsModel.HostsType }>;
   updateTableActivePage: ActionCreator<{
     activePage: number;
     hostsType: hostsModel.HostsType;
@@ -57,7 +56,7 @@ interface AuthenticationTableDispatchProps {
   }>;
 }
 
-export declare type AuthTableColumns = [
+export type AuthTableColumns = [
   Columns<AuthenticationsEdges>,
   Columns<AuthenticationsEdges>,
   Columns<AuthenticationsEdges>,
@@ -86,8 +85,8 @@ const rowItems: ItemsPerRow[] = [
 
 const AuthenticationTableComponent = pure<AuthenticationTableProps>(
   ({
-    fakeTotalCount,
     data,
+    fakeTotalCount,
     id,
     limit,
     loading,
@@ -141,7 +140,6 @@ const makeMapStateToProps = () => {
 export const AuthenticationTable = connect(
   makeMapStateToProps,
   {
-    updateLimitPagination: hostsActions.updateAuthenticationsLimit,
     updateTableActivePage: hostsActions.updateTableActivePage,
     updateTableLimit: hostsActions.updateTableLimit,
   }
