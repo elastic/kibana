@@ -24,14 +24,17 @@ import { getAt, mapFormFields, unflattenObject, Subject } from '../lib';
 
 const DEFAULT_ERROR_DISPLAY_TIMEOUT = 500;
 
-export const useForm = <T = FormData>({
-  onSubmit,
-  schema,
-  defaultValue = {},
-  serializer = (data: any) => data,
-  deSerializer = (data: any) => data,
-  options = { errorDisplayDelay: DEFAULT_ERROR_DISPLAY_TIMEOUT, stripEmptyFields: true },
-}: FormConfig<T>): { form: Form<T> } => {
+export const useForm = <T = FormData>(
+  formConfig: FormConfig<T> | undefined = {}
+): { form: Form<T> } => {
+  const {
+    onSubmit,
+    schema,
+    defaultValue = {},
+    serializer = (data: any) => data,
+    deSerializer = (data: any) => data,
+    options = { errorDisplayDelay: DEFAULT_ERROR_DISPLAY_TIMEOUT, stripEmptyFields: true },
+  } = formConfig;
   const defaultValueDeSerialized =
     Object.keys(defaultValue).length === 0 ? defaultValue : deSerializer(defaultValue);
   const [isSubmitted, setSubmitted] = useState(false);
