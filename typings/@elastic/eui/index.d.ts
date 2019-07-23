@@ -37,4 +37,9 @@ declare module '@elastic/eui' {
     sorting: { sort?: EuiTableCriteria['sort'] };
     [key: string]: any;
   }>;
+  export const EuiDescribedFormGroup: React.ComponentClass<{
+    title: JSX.Element;
+    description?: string | JSX.Element;
+    [key: string]: any;
+  }>;
 }
