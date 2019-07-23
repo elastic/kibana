@@ -27,20 +27,20 @@ export interface DirectionBuckets {
 
 export interface NetworkTopNFlowBuckets {
   key: string;
-  bytes: {
+  bytes_in: {
     value: number;
   };
-  packets: {
+  bytes_out: {
     value: number;
   };
-  ip_count: {
-    value: number;
+  location: {
+    value: string;
   };
   domain: {
     buckets: GenericBuckets[];
   };
-  direction: {
-    buckets: DirectionBuckets[];
+  autonomous_system: {
+    value: string;
   };
 }
 

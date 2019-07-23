@@ -102,6 +102,7 @@ const getTopNFlowEdges = (
   if (options.pagination && options.pagination.querySize >= DEFAULT_MAX_TABLE_QUERY_SIZE) {
     throw new Error(`No query size above ${DEFAULT_MAX_TABLE_QUERY_SIZE}`);
   }
+  console.log('AHHH', JSON.stringify(response));
   if (options.flowDirection === FlowDirection.uniDirectional) {
     return formatTopNFlowEdges(
       getOr([], 'aggregations.top_uni_flow.buckets', response),

@@ -21,7 +21,7 @@ import {
 } from '../../../../graphql/types';
 import { networkModel, networkSelectors, State } from '../../../../store';
 import { FlowDirectionSelect } from '../../../flow_controls/flow_direction_select';
-import { FlowTargetSelect } from '../../../flow_controls/flow_target_select';
+import { FlowTargetFilterGroup } from '../../../flow_controls/flow_target_filter_group';
 import { Criteria, ItemsPerRow, PaginatedTable } from '../../../paginated_table';
 
 import { getNetworkTopNFlowColumns } from './columns';
@@ -130,18 +130,10 @@ class NetworkTopNFlowTableComponent extends React.PureComponent<NetworkTopNFlowT
                 grow={false}
                 data-test-subj={`${NetworkTopNFlowTableId}-select-flow-target`}
               >
-                <FlowTargetSelect
-                  id={NetworkTopNFlowTableId}
-                  isLoading={loading}
-                  selectedDirection={flowDirection}
+                <FlowTargetFilterGroup
                   selectedTarget={flowTarget}
-                  displayTextOverride={[
-                    i18n.BY_SOURCE_IP,
-                    i18n.BY_DESTINATION_IP,
-                    i18n.BY_CLIENT_IP,
-                    i18n.BY_SERVER_IP,
-                  ]}
-                  updateFlowTargetAction={updateTopNFlowTarget}
+                  displayTextOverride={[i18n.BY_SOURCE_IP, i18n.BY_DESTINATION_IP]}
+                  updateFlowTarget={updateTopNFlowTarget}
                 />
               </SelectTypeItem>
             </EuiFlexItem>

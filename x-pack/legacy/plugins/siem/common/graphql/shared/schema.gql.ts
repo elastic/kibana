@@ -47,13 +47,13 @@ export const sharedSchema = gql`
   }
 
   enum FlowTarget {
-    client
+    unified
     destination
-    server
     source
   }
 
   enum FlowDirection {
+    unified
     uniDirectional
     biDirectional
   }

@@ -2119,14 +2119,14 @@ export enum DomainsFields {
 }
 
 export enum FlowDirection {
+  unified = 'unified',
   uniDirectional = 'uniDirectional',
   biDirectional = 'biDirectional',
 }
 
 export enum FlowTarget {
-  client = 'client',
+  unified = 'unified',
   destination = 'destination',
-  server = 'server',
   source = 'source',
 }
 

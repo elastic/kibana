@@ -45,22 +45,6 @@ const getBiDirectionalFilter = (flowDirection: FlowDirection, flowTarget: FlowTa
         },
       },
     ];
-  } else if (
-    flowDirection === FlowDirection.biDirectional &&
-    [FlowTarget.client, FlowTarget.server].includes(flowTarget)
-  ) {
-    return [
-      {
-        exists: {
-          field: 'client.bytes',
-        },
-      },
-      {
-        exists: {
-          field: 'server.bytes',
-        },
-      },
-    ];
   }
   return [];
 };
@@ -100,6 +84,7 @@ export const buildTopNFlowQuery = ({
         ...getCountAgg(flowTarget),
         ...getUniDirectionAggs(flowDirection, networkTopNFlowSort, flowTarget, querySize),
         ...getBiDirectionAggs(flowDirection, networkTopNFlowSort, flowTarget, querySize),
+        ...getAllDirectionAggs(networkTopNFlowSort, flowTarget, querySize),
       },
       query: {
         bool: {
@@ -113,6 +98,91 @@ export const buildTopNFlowQuery = ({
   };
   return dslQuery;
 };
+
+const getAllDirectionAggs = (
+  networkTopNFlowSortField: NetworkTopNFlowSortField,
+  flowTarget: FlowTarget,
+  querySize: number
+) => ({
+  bytes_source: {
+    terms: {
+      field: 'source.ip',
+      size: querySize,
+      order: {
+        bytes_all: 'desc',
+      },
+    },
+    aggs: {
+      bytes_in: {
+        sum: {
+          field: 'destination.bytes',
+        },
+      },
+      bytes_out: {
+        sum: {
+          field: 'source.bytes',
+        },
+      },
+      bytes_all: {
+        sum: {
+          field: 'network.bytes',
+        },
+      },
+    },
+  },
+  bytes_destination: {
+    terms: {
+      field: 'destination.ip',
+      size: querySize,
+      order: {
+        bytes_all: 'desc',
+      },
+    },
+    aggs: {
+      bytes_in: {
+        sum: {
+          field: 'source.bytes',
+        },
+      },
+      bytes_out: {
+        sum: {
+          field: 'destination.bytes',
+        },
+      },
+      bytes_all: {
+        sum: {
+          field: 'network.bytes',
+        },
+      },
+    },
+  },
+  bytes_flow_target: {
+    terms: {
+      field: `${flowTarget}.ip`,
+      size: querySize,
+      order: {
+        bytes_all: 'desc',
+      },
+    },
+    aggs: {
+      bytes_in: {
+        sum: {
+          field: `${getOppositeField(flowTarget)}.bytes`,
+        },
+      },
+      bytes_out: {
+        sum: {
+          field: `${flowTarget}.bytes`,
+        },
+      },
+      bytes_all: {
+        sum: {
+          field: 'network.bytes',
+        },
+      },
+    },
+  },
+});
 
 const getUniDirectionAggs = (
   flowDirection: FlowDirection,
@@ -257,3 +327,4 @@ const getQueryOrder = (networkTopNFlowSortField: NetworkTopNFlowSortField): Quer
   }
   assertUnreachable(networkTopNFlowSortField.field);
 };
+

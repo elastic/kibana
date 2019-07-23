@@ -27,16 +27,12 @@ export const DESTINATION_IP = i18n.translate(
   }
 );
 
-export const CLIENT_IP = i18n.translate('xpack.siem.networkTopNFlowTable.column.clientIpTitle', {
-  defaultMessage: 'Client IP',
+export const IP_TITLE = i18n.translate('xpack.siem.networkTopNFlowTable.column.IpTitle', {
+  defaultMessage: 'IP',
 });
 
-export const SERVER_IP = i18n.translate('xpack.siem.networkTopNFlowTable.column.serverIpTitle', {
-  defaultMessage: 'Server IP',
-});
-
-export const DOMAIN = i18n.translate('xpack.siem.networkTopNFlowTable.column.lastDomainTitle', {
-  defaultMessage: 'Last Domain',
+export const DOMAIN = i18n.translate('xpack.siem.networkTopNFlowTable.column.domainTitle', {
+  defaultMessage: 'Domain',
 });
 
 export const BYTES = i18n.translate('xpack.siem.networkTopNFlowTable.column.bytesTitle', {

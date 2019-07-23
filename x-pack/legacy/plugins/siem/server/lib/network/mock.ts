@@ -145,21 +145,17 @@ export const mockResponse = {
       buckets: [
         {
           key: '1.1.1.1',
-          bytes: {
+          bytes_in: {
             value: 11276023407,
           },
-          packets: {
+          bytes_out: {
             value: 1025631,
           },
-          direction: {
-            buckets: [
-              {
-                key: 'inbound',
-              },
-            ],
+          location: {
+            value: 'San Francisco, CA, USA',
           },
-          ip_count: {
-            value: 1,
+          autonomous_system: {
+            value: 'whatevenisthis',
           },
           domain: {
             buckets: [
@@ -171,24 +167,17 @@ export const mockResponse = {
         },
         {
           key: '2.2.2.2',
-          bytes: {
+          bytes_in: {
             value: 5469323342,
           },
-          packets: {
+          bytes_out: {
             value: 2811441,
           },
-          direction: {
-            buckets: [
-              {
-                key: 'outbound',
-              },
-              {
-                key: 'external',
-              },
-            ],
+          location: {
+            value: 'San Francisco, CA, USA',
           },
-          ip_count: {
-            value: 2,
+          autonomous_system: {
+            value: 'whatevenisthis',
           },
           domain: {
             buckets: [
@@ -200,21 +189,17 @@ export const mockResponse = {
         },
         {
           key: '3.3.3.3',
-          bytes: {
+          bytes_in: {
             value: 3807671322,
           },
-          packets: {
+          bytes_out: {
             value: 4494034,
           },
-          direction: {
-            buckets: [
-              {
-                key: 'outbound',
-              },
-            ],
+          location: {
+            value: 'San Francisco, CA, USA',
           },
-          ip_count: {
-            value: 5,
+          autonomous_system: {
+            value: 'whatevenisthis',
           },
           domain: {
             buckets: [
@@ -229,21 +214,17 @@ export const mockResponse = {
         },
         {
           key: '4.4.4.4',
-          bytes: {
+          bytes_in: {
             value: 166517626,
           },
-          packets: {
+          bytes_out: {
             value: 3194782,
           },
-          direction: {
-            buckets: [
-              {
-                key: 'inbound',
-              },
-            ],
+          location: {
+            value: 'San Francisco, CA, USA',
           },
-          ip_count: {
-            value: 1,
+          autonomous_system: {
+            value: 'whatevenisthis',
           },
           domain: {
             buckets: [
@@ -255,21 +236,17 @@ export const mockResponse = {
         },
         {
           key: '5.5.5.5',
-          bytes: {
+          bytes_in: {
             value: 104785026,
           },
-          packets: {
+          bytes_out: {
             value: 1838597,
           },
-          direction: {
-            buckets: [
-              {
-                key: 'external',
-              },
-            ],
+          location: {
+            value: 'San Francisco, CA, USA',
           },
-          ip_count: {
-            value: 3,
+          autonomous_system: {
+            value: 'whatevenisthis',
           },
           domain: {
             buckets: [
@@ -281,21 +258,17 @@ export const mockResponse = {
         },
         {
           key: '6.6.6.6',
-          bytes: {
+          bytes_in: {
             value: 28804250,
           },
-          packets: {
+          bytes_out: {
             value: 482982,
           },
-          direction: {
-            buckets: [
-              {
-                key: 'inbound',
-              },
-            ],
+          location: {
+            value: 'San Francisco, CA, USA',
           },
-          ip_count: {
-            value: 2,
+          autonomous_system: {
+            value: 'whatevenisthis',
           },
           domain: {
             doc_count_error_upper_bound: 0,
@@ -309,21 +282,17 @@ export const mockResponse = {
         },
         {
           key: '7.7.7.7',
-          bytes: {
+          bytes_in: {
             value: 23032363,
           },
-          packets: {
+          bytes_out: {
             value: 400623,
           },
-          direction: {
-            buckets: [
-              {
-                key: 'inbound',
-              },
-            ],
+          location: {
+            value: 'San Francisco, CA, USA',
           },
-          ip_count: {
-            value: 2,
+          autonomous_system: {
+            value: 'whatevenisthis',
           },
           domain: {
             doc_count_error_upper_bound: 0,
@@ -337,21 +306,17 @@ export const mockResponse = {
         },
         {
           key: '8.8.8.8',
-          bytes: {
+          bytes_in: {
             value: 21424889,
           },
-          packets: {
+          bytes_out: {
             value: 344357,
           },
-          direction: {
-            buckets: [
-              {
-                key: 'inbound',
-              },
-            ],
+          location: {
+            value: 'San Francisco, CA, USA',
           },
-          ip_count: {
-            value: 2,
+          autonomous_system: {
+            value: 'whatevenisthis',
           },
           domain: {
             buckets: [
@@ -363,21 +328,17 @@ export const mockResponse = {
         },
         {
           key: '9.9.9.9',
-          bytes: {
+          bytes_in: {
             value: 19205000,
           },
-          packets: {
+          bytes_out: {
             value: 355663,
           },
-          direction: {
-            buckets: [
-              {
-                key: 'inbound',
-              },
-            ],
+          location: {
+            value: 'San Francisco, CA, USA',
           },
-          ip_count: {
-            value: 2,
+          autonomous_system: {
+            value: 'whatevenisthis',
           },
           domain: {
             buckets: [
@@ -389,21 +350,17 @@ export const mockResponse = {
         },
         {
           key: '10.10.10.10',
-          bytes: {
+          bytes_in: {
             value: 11407633,
           },
-          packets: {
+          bytes_out: {
             value: 199360,
           },
-          direction: {
-            buckets: [
-              {
-                key: 'inbound',
-              },
-            ],
+          location: {
+            value: 'San Francisco, CA, USA',
           },
-          ip_count: {
-            value: 2,
+          autonomous_system: {
+            value: 'whatevenisthis',
           },
           domain: {
             buckets: [
@@ -415,21 +372,17 @@ export const mockResponse = {
         },
         {
           key: '11.11.11.11',
-          bytes: {
+          bytes_in: {
             value: 11393327,
           },
-          direction: {
-            buckets: [
-              {
-                key: 'inbound',
-              },
-            ],
-          },
-          ip_count: {
-            value: 2,
-          },
-          packets: {
+          bytes_out: {
             value: 195914,
+          },
+          location: {
+            value: 'San Francisco, CA, USA',
+          },
+          autonomous_system: {
+            value: 'whatevenisthis',
           },
           domain: {
             buckets: [
@@ -462,8 +415,8 @@ export const mockResult = {
       node: {
         _id: '1.1.1.1',
         network: {
-          bytes: 11276023407,
-          packets: 1025631,
+          bytes_in: 11276023407,
+          bytes_out: 1025631,
           direction: ['inbound'],
         },
         source: {
@@ -481,8 +434,8 @@ export const mockResult = {
       node: {
         _id: '2.2.2.2',
         network: {
-          bytes: 5469323342,
-          packets: 2811441,
+          bytes_in: 5469323342,
+          bytes_out: 2811441,
           direction: ['outbound', 'external'],
         },
         source: {
@@ -500,8 +453,8 @@ export const mockResult = {
       node: {
         _id: '3.3.3.3',
         network: {
-          bytes: 3807671322,
-          packets: 4494034,
+          bytes_in: 3807671322,
+          bytes_out: 4494034,
           direction: ['outbound'],
         },
         source: {
@@ -519,8 +472,8 @@ export const mockResult = {
       node: {
         _id: '4.4.4.4',
         network: {
-          bytes: 166517626,
-          packets: 3194782,
+          bytes_in: 166517626,
+          bytes_out: 3194782,
           direction: ['inbound'],
         },
         source: {
@@ -538,8 +491,8 @@ export const mockResult = {
       node: {
         _id: '5.5.5.5',
         network: {
-          bytes: 104785026,
-          packets: 1838597,
+          bytes_in: 104785026,
+          bytes_out: 1838597,
           direction: ['external'],
         },
         source: {
@@ -557,8 +510,8 @@ export const mockResult = {
       node: {
         _id: '6.6.6.6',
         network: {
-          bytes: 28804250,
-          packets: 482982,
+          bytes_in: 28804250,
+          bytes_out: 482982,
           direction: ['inbound'],
         },
         source: {
@@ -576,8 +529,8 @@ export const mockResult = {
       node: {
         _id: '7.7.7.7',
         network: {
-          bytes: 23032363,
-          packets: 400623,
+          bytes_in: 23032363,
+          bytes_out: 400623,
           direction: ['inbound'],
         },
         source: {
@@ -595,8 +548,8 @@ export const mockResult = {
       node: {
         _id: '8.8.8.8',
         network: {
-          bytes: 21424889,
-          packets: 344357,
+          bytes_in: 21424889,
+          bytes_out: 344357,
           direction: ['inbound'],
         },
         source: {
@@ -614,8 +567,8 @@ export const mockResult = {
       node: {
         _id: '9.9.9.9',
         network: {
-          bytes: 19205000,
-          packets: 355663,
+          bytes_in: 19205000,
+          bytes_out: 355663,
           direction: ['inbound'],
         },
         source: {
@@ -633,8 +586,8 @@ export const mockResult = {
       node: {
         _id: '10.10.10.10',
         network: {
-          bytes: 11407633,
-          packets: 199360,
+          bytes_in: 11407633,
+          bytes_out: 199360,
           direction: ['inbound'],
         },
         source: {
