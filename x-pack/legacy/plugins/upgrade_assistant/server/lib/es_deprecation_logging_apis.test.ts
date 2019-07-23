@@ -21,7 +21,7 @@ describe('getDeprecationLoggingStatus', () => {
 });
 
 describe('setDeprecationLogging', () => {
-  describe('isEnabled = true', async () => {
+  describe('isEnabled = true', () => {
     it('calls cluster.putSettings with logger.deprecation = WARN', async () => {
       const callWithRequest = jest.fn();
       await setDeprecationLogging(callWithRequest, {} as any, true);
@@ -31,7 +31,7 @@ describe('setDeprecationLogging', () => {
     });
   });
 
-  describe('isEnabled = false', async () => {
+  describe('isEnabled = false', () => {
     it('calls cluster.putSettings with logger.deprecation = ERROR', async () => {
       const callWithRequest = jest.fn();
       await setDeprecationLogging(callWithRequest, {} as any, false);
