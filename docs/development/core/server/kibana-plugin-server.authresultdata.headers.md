@@ -4,10 +4,10 @@
 
 ## AuthResultData.headers property
 
-Auth specific headers to authenticate a user against Elasticsearch.
+Auth specific headers attach to a request object. Used to perform a request to Elasticsearch on behalf of an authenticated user.
 
 <b>Signature:</b>
 
 ```typescript
-headers: AuthHeaders;
+headers?: AuthHeaders;
 ```

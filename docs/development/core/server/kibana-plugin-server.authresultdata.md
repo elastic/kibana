@@ -16,6 +16,7 @@ export interface AuthResultData
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [headers](./kibana-plugin-server.authresultdata.headers.md) | <code>AuthHeaders</code> | Auth specific headers to authenticate a user against Elasticsearch. |
+|  [headers](./kibana-plugin-server.authresultdata.headers.md) | <code>AuthHeaders</code> | Auth specific headers attach to a request object. Used to perform a request to Elasticsearch on behalf of an authenticated user. |
+|  [responseHeaders](./kibana-plugin-server.authresultdata.responseheaders.md) | <code>AuthHeaders</code> | Auth specific headers to attach to a response object. Used to send back authentication mechanism related headers to a client to complete the security context. |
 |  [state](./kibana-plugin-server.authresultdata.state.md) | <code>Record&lt;string, any&gt;</code> | Data to associate with an incoming request. Any downstream plugin may get access to the data. |
 

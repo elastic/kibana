@@ -29,17 +29,18 @@ export type APICaller = (endpoint: string, clientParams: Record<string, any>, op
 export type AuthenticationHandler = (request: KibanaRequest, t: AuthToolkit) => AuthResult | Promise<AuthResult>;
 
 // @public
-export type AuthHeaders = Record<string, string>;
+export type AuthHeaders = Record<string, string | string[]>;
 
 // @public
 export interface AuthResultData {
-    headers: AuthHeaders;
-    state: Record<string, any>;
+    headers?: AuthHeaders;
+    responseHeaders?: AuthHeaders;
+    state?: Record<string, any>;
 }
 
 // @public
 export interface AuthToolkit {
-    authenticated: (data?: Partial<AuthResultData>) => AuthResult;
+    authenticated: (data?: AuthResultData) => AuthResult;
     redirected: (url: string) => AuthResult;
     rejected: (error: Error, options?: {
         statusCode?: number;
