@@ -18,7 +18,6 @@
  */
 
 import $ from 'jquery';
-import { getFormat } from '../../../visualize/loader/pipeline_helpers/utilities';
 import template from './_pointseries_tooltip.html';
 
 export function PointSeriesTooltipFormatterProvider($compile, $rootScope) {
@@ -61,8 +60,7 @@ export function PointSeriesTooltipFormatterProvider($compile, $rootScope) {
       }
       if (datum.series && datum.parent) {
         const dimension = datum.parent;
-        const seriesFormatter = getFormat(dimension.format);
-        addDetail(dimension.title, seriesFormatter.convert(datum.series));
+        addDetail(dimension.title, datum.series);
       }
       if (datum.tableRaw) {
         addDetail(datum.tableRaw.title, datum.tableRaw.value);
