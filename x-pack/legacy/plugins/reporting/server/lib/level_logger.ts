@@ -4,11 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Logger } from '../../types';
-
 type ServerLog = (tags: string[], msg: string) => void;
 
-export class LevelLogger implements Logger {
+export class LevelLogger {
   private _logger: any;
   private _tags: string[];
 

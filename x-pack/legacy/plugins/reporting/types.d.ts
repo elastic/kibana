@@ -55,14 +55,6 @@ export interface Size {
   height: number;
 }
 
-export interface Logger {
-  debug: (message: string) => void;
-  error: (message: string) => void;
-  warning: (message: string) => void;
-  clone?: (tags: string[]) => Logger;
-  isVerbose?: boolean;
-}
-
 export interface ViewZoomWidthHeight {
   zoom: number;
   width: number;
@@ -216,3 +208,5 @@ export interface ESQueueInstance {
     workerOptions: ESQueueWorkerOptions
   ) => ESQueueWorker;
 }
+
+export { LevelLogger as Logger } from './server/lib/level_logger';
