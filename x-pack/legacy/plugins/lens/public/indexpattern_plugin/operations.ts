@@ -6,14 +6,14 @@
 
 import { Storage } from 'ui/storage';
 import { DataSetup } from '../../../../../../src/legacy/core_plugins/data/public';
-import { DimensionPriority } from '../types';
+import { DimensionPriority, OperationMetaInformation } from '../types';
 import {
   IndexPatternColumn,
   IndexPatternField,
   IndexPatternPrivateState,
-  IndexPatternLayer,
   OperationType,
   BaseIndexPatternColumn,
+  IndexPattern,
 } from './indexpattern';
 import { termsOperation } from './operation_definitions/terms';
 import {
@@ -25,7 +25,6 @@ import {
 import { dateHistogramOperation } from './operation_definitions/date_histogram';
 import { countOperation } from './operation_definitions/count';
 import { filterRatioOperation } from './operation_definitions/filter_ratio';
-import { sortByField } from './utils';
 
 type PossibleOperationDefinitions<
   U extends IndexPatternColumn = IndexPatternColumn
@@ -70,9 +69,8 @@ export interface ParamEditorProps {
 export interface OperationDefinition<C extends BaseIndexPatternColumn> {
   type: C['operationType'];
   displayName: string;
-  // TODO make this a function dependend on the indexpattern with typeMeta information
-  isApplicableWithoutField: boolean;
-  isApplicableForField: (field: IndexPatternField) => boolean;
+  getPossibleOperationsForDocument: (indexPattern: IndexPattern) => OperationMetaInformation[];
+  getPossibleOperationsForField: (field: IndexPatternField) => OperationMetaInformation[];
   buildColumn: (arg: {
     operationId: string;
     suggestedPriority: DimensionPriority | undefined;
@@ -106,10 +104,102 @@ export function getOperationDisplay() {
   return display;
 }
 
-export function getOperationTypesForField(field: IndexPatternField): OperationType[] {
-  return operationDefinitions
-    .filter(definition => definition.isApplicableForField(field))
-    .map(({ type }) => type);
+export interface OperationMapping {
+      operationMeta: OperationMetaInformation;
+      applicableFields: string[];
+      applicableWithoutField: boolean;
+      applicableOperationTypes: OperationType[];
+}
+
+export function getOperationTypesForField(field: IndexPatternField) {
+  return operationDefinitions.filter(operationDefinition => operationDefinition.getPossibleOperationsForField(field).length > 0).map(({ type }) => type);
+}
+
+export function getPotentialOperations(indexPattern: IndexPattern) {
+  const operations: Map<
+    string,
+    OperationMapping
+  > = new Map();
+  operationDefinitions.forEach(operationDefinition => {
+    operationDefinition.getPossibleOperationsForDocument(indexPattern).forEach(operationMeta => {
+      const key = JSON.stringify(operationMeta);
+      const currentOperation = operations.get(key);
+
+      operations.set(key, {
+        operationMeta,
+        applicableFields: currentOperation ? currentOperation.applicableFields : [],
+        applicableWithoutField: true,
+        applicableOperationTypes: [
+          ...(currentOperation
+            ? currentOperation.applicableOperationTypes.filter(
+                type => type !== operationDefinition.type
+              )
+            : []),
+          operationDefinition.type,
+        ],
+      });
+    });
+    indexPattern.fields.forEach(field => {
+      operationDefinition.getPossibleOperationsForField(field).forEach(operationMeta => {
+        const key = JSON.stringify(operationMeta);
+        const currentOperation = operations.get(key);
+
+        operations.set(key, {
+          operationMeta,
+          applicableFields: [
+            ...(currentOperation
+              ? currentOperation.applicableFields.filter(
+                  applicableField => applicableField !== field.name
+                )
+              : []),
+            field.name,
+          ],
+          applicableWithoutField: currentOperation
+            ? currentOperation.applicableWithoutField
+            : false,
+          applicableOperationTypes: [
+            ...(currentOperation
+              ? currentOperation.applicableOperationTypes.filter(
+                  type => type !== operationDefinition.type
+                )
+              : []),
+            operationDefinition.type,
+          ],
+        });
+      });
+    });
+  });
+  // todo there has to be an order to that
+  return Array.from(operations.values());
+}
+
+export function buildColumnForField<T extends OperationType>({
+  index,
+  columns,
+  field,
+  layerId,
+  indexPatternId,
+  suggestedPriority,
+}: {
+  index: number;
+  field: IndexPatternField;
+  columns: Partial<Record<string, IndexPatternColumn>>;
+  suggestedPriority: DimensionPriority | undefined;
+  layerId: string;
+  indexPatternId: string;
+}): IndexPatternColumn {
+  const operationDefinition = operationDefinitions.find(
+    definition => definition.getPossibleOperationsForField(field).length !== 0
+  )!;
+  return buildColumnForOperationType({
+    index,
+    op: operationDefinition.type,
+    columns,
+    field,
+    layerId,
+    indexPatternId,
+    suggestedPriority,
+  });
 }
 
 export function buildColumnForOperationType<T extends OperationType>({
@@ -137,50 +227,4 @@ export function buildColumnForOperationType<T extends OperationType>({
     layerId,
     indexPatternId,
   });
-}
-
-export function getPotentialColumns({
-  fields,
-  suggestedPriority,
-  layerId,
-  layer,
-}: {
-  fields: IndexPatternField[];
-  suggestedPriority?: DimensionPriority;
-  layerId: string;
-  layer: IndexPatternLayer;
-}): IndexPatternColumn[] {
-  const result: IndexPatternColumn[] = fields
-    .map((field, index) => {
-      const validOperations = getOperationTypesForField(field);
-
-      return validOperations.map(op =>
-        buildColumnForOperationType({
-          index,
-          op,
-          columns: layer.columns,
-          suggestedPriority,
-          field,
-          indexPatternId: layer.indexPatternId,
-          layerId,
-        })
-      );
-    })
-    .reduce((prev, current) => prev.concat(current));
-
-  operationDefinitions.forEach(operation => {
-    if (operation.isApplicableWithoutField) {
-      result.push(
-        operation.buildColumn({
-          operationId: operation.type,
-          suggestedPriority,
-          layerId,
-          columns: layer.columns,
-          indexPatternId: layer.indexPatternId,
-        })
-      );
-    }
-  });
-
-  return sortByField(result);
 }

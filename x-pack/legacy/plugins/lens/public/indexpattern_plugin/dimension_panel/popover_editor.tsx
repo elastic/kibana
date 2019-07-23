@@ -20,9 +20,19 @@ import {
   EuiButton,
 } from '@elastic/eui';
 import classNames from 'classnames';
-import { IndexPatternColumn, OperationType } from '../indexpattern';
+import {
+  IndexPatternColumn,
+  OperationType,
+  IndexPattern,
+  IndexPatternField,
+} from '../indexpattern';
 import { IndexPatternDimensionPanelProps } from './dimension_panel';
-import { operationDefinitionMap, getOperationDisplay } from '../operations';
+import {
+  operationDefinitionMap,
+  getOperationDisplay,
+  OperationMapping,
+  buildColumnForOperationType,
+} from '../operations';
 import { deleteColumn, changeColumn } from '../state_helpers';
 import { FieldSelect } from './field_select';
 import { hasField } from '../utils';
@@ -30,37 +40,71 @@ import { hasField } from '../utils';
 const operationPanels = getOperationDisplay();
 
 function getOperationTypes(
-  filteredColumns: IndexPatternColumn[],
+  filteredOperations: OperationMapping[],
   selectedColumn?: IndexPatternColumn
 ) {
-  const columnsFromField = selectedColumn
-    ? filteredColumns.filter(col => {
-        return (
-          (!hasField(selectedColumn) && !hasField(col)) ||
-          (hasField(selectedColumn) &&
-            hasField(col) &&
-            col.sourceField === selectedColumn.sourceField)
+  const possibleOperationTypes = filteredOperations
+    .map(operation => operation.applicableOperationTypes)
+    .reduce((a, b) => [...a, ...b], [])
+    .map(operationType => ({
+      operationType,
+      compatibleWithCurrentField: false,
+    }));
+  const validFieldlessOperationTypes = filteredOperations
+    .map(op => {
+      if (!selectedColumn || (!hasField(selectedColumn) && op.applicableWithoutField)) {
+        // TODO pipe indexpattern here
+        return op.applicableOperationTypes.filter(
+          opType =>
+            operationDefinitionMap[opType].getPossibleOperationsForDocument(
+              ({} as unknown) as IndexPattern
+            ).length !== 0
         );
-      })
-    : filteredColumns;
-  const possibleOperationTypes = filteredColumns.map(col => ({
-    operationType: col.operationType,
-    compatibleWithCurrentField: false,
-  }));
-  const validOperationTypes = columnsFromField.map(col => ({
-    operationType: col.operationType,
-    compatibleWithCurrentField: true,
-  }));
-  return _.uniq([...validOperationTypes, ...possibleOperationTypes], 'operationType');
+      } else {
+        return [];
+      }
+    })
+    .reduce((a, b) => [...a, ...b], [])
+    .map(opType => ({
+      operationType: opType,
+      compatibleWithCurrentField: true,
+    }));
+  const validFieldBoundOperationTypes = filteredOperations
+    .map(op => {
+      if (
+        !selectedColumn ||
+        (hasField(selectedColumn) && op.applicableFields.includes(selectedColumn.sourceField))
+      ) {
+        // TODO pipe indexpattern here
+        return op.applicableOperationTypes.filter(
+          opType =>
+            !selectedColumn ||
+            operationDefinitionMap[opType].getPossibleOperationsForField(
+              ({} as unknown) as IndexPatternField
+            ).length !== 0
+        );
+      } else {
+        return [];
+      }
+    })
+    .reduce((a, b) => [...a, ...b], [])
+    .map(opType => ({
+      operationType: opType,
+      compatibleWithCurrentField: true,
+    }));
+  return _.uniq(
+    [...validFieldlessOperationTypes, ...validFieldBoundOperationTypes, ...possibleOperationTypes],
+    'operationType'
+  );
 }
 
 export interface PopoverEditorProps extends IndexPatternDimensionPanelProps {
   selectedColumn?: IndexPatternColumn;
-  filteredColumns: IndexPatternColumn[];
+  filteredOperations: OperationMapping[];
 }
 
 export function PopoverEditor(props: PopoverEditorProps) {
-  const { selectedColumn, filteredColumns, state, columnId, setState, layerId } = props;
+  const { selectedColumn, filteredOperations, state, columnId, setState, layerId } = props;
   const [isPopoverOpen, setPopoverOpen] = useState(false);
   const [
     incompatibleSelectedOperationType,
@@ -74,7 +118,7 @@ export function PopoverEditor(props: PopoverEditorProps) {
     {
       name: '',
       id: '0',
-      items: getOperationTypes(filteredColumns, selectedColumn).map(
+      items: getOperationTypes(filteredOperations, selectedColumn).map(
         ({ operationType, compatibleWithCurrentField }) => ({
           name: operationPanels[operationType].displayName,
           id: operationType as string,
@@ -89,18 +133,39 @@ export function PopoverEditor(props: PopoverEditorProps) {
           }),
           'data-test-subj': `lns-indexPatternDimension-${operationType}`,
           onClick() {
+            const indexPatternId = props.state.layers[props.layerId].indexPatternId;
             if (!selectedColumn) {
-              const possibleColumns = _.uniq(
-                filteredColumns.filter(col => col.operationType === operationType),
-                'sourceField'
+              const possibleFields = _.uniq(
+                filteredOperations
+                  .filter(op => op.applicableOperationTypes.includes(operationType))
+                  .reduce((list, op) => [...list, ...op.applicableFields], [] as string[])
               );
-              if (possibleColumns.length === 1) {
+              const isFieldlessPossible =
+                filteredOperations.filter(op => op.applicableWithoutField).length > 0;
+              if (
+                possibleFields.length === 1 ||
+                (possibleFields.length === 0 && isFieldlessPossible)
+              ) {
                 setState(
                   changeColumn({
                     state,
                     layerId,
                     columnId,
-                    newColumn: possibleColumns[0],
+                    newColumn: buildColumnForOperationType({
+                      // todo think about this
+                      index: 0,
+                      columns: props.state.layers[props.layerId].columns,
+                      suggestedPriority: props.suggestedPriority,
+                      layerId: props.layerId,
+                      op: operationType,
+                      indexPatternId,
+                      field:
+                        possibleFields.length === 1
+                          ? props.state.indexPatterns[indexPatternId].fields.find(
+                              field => field.name === possibleFields[0]
+                            )
+                          : undefined,
+                    }),
                   })
                 );
               } else {
@@ -118,13 +183,20 @@ export function PopoverEditor(props: PopoverEditorProps) {
             if (selectedColumn.operationType === operationType) {
               return;
             }
-            const newColumn: IndexPatternColumn = filteredColumns.find(
-              col =>
-                col.operationType === operationType &&
-                (!hasField(col) ||
-                  !hasField(selectedColumn) ||
-                  col.sourceField === selectedColumn.sourceField)
-            )!;
+            const newColumn: IndexPatternColumn = buildColumnForOperationType({
+              // todo think about this
+              index: 0,
+              columns: props.state.layers[props.layerId].columns,
+              suggestedPriority: props.suggestedPriority,
+              layerId: props.layerId,
+              op: operationType,
+              indexPatternId,
+              field: hasField(selectedColumn)
+                ? props.state.indexPatterns[indexPatternId].fields.find(
+                    field => field.name === selectedColumn.sourceField
+                  )
+                : undefined,
+            });
             setState(
               changeColumn({
                 state,
@@ -176,7 +248,7 @@ export function PopoverEditor(props: PopoverEditorProps) {
       <EuiFlexGroup gutterSize="s" direction="column">
         <EuiFlexItem>
           <FieldSelect
-            filteredColumns={filteredColumns}
+            filteredOperations={filteredOperations}
             selectedColumn={selectedColumn}
             incompatibleSelectedOperationType={incompatibleSelectedOperationType}
             onDeleteColumn={() => {

@@ -18,15 +18,18 @@ import {
   FieldBasedIndexPatternColumn,
   OperationType,
   BaseIndexPatternColumn,
+  IndexPattern,
+  IndexPatternField,
 } from '../indexpattern';
 import { FieldIcon } from '../field_icon';
 import { DataType } from '../../types';
 import { hasField, sortByField } from '../utils';
+import { OperationMapping, operationDefinitionMap, buildColumnForField } from '../operations';
 
 export interface FieldSelectProps {
   incompatibleSelectedOperationType: OperationType | null;
   selectedColumn?: IndexPatternColumn;
-  filteredColumns: IndexPatternColumn[];
+  filteredOperations: OperationMapping[];
   onChangeColumn: (newColumn: IndexPatternColumn) => void;
   onDeleteColumn: () => void;
 }
@@ -34,61 +37,60 @@ export interface FieldSelectProps {
 export function FieldSelect({
   incompatibleSelectedOperationType,
   selectedColumn,
-  filteredColumns,
+  filteredOperations,
   onChangeColumn,
   onDeleteColumn,
 }: FieldSelectProps) {
-  const fieldColumns = filteredColumns.filter(hasField) as FieldBasedIndexPatternColumn[];
+  const fields = _.uniq(
+    filteredOperations.reduce((list, op) => [...list, ...op.applicableFields], [] as string[])
+  ).sort();
 
-  const uniqueColumnsByField = sortByField(
-    _.uniq(
-      fieldColumns
-        .filter(col =>
-          incompatibleSelectedOperationType
-            ? col.operationType === incompatibleSelectedOperationType
-            : selectedColumn && col.operationType === selectedColumn.operationType
-        )
-        .concat(fieldColumns),
-      col => col.sourceField
-    )
-  );
-
-  function isCompatibleWithCurrentOperation(col: BaseIndexPatternColumn) {
+    // TODO pass index pattern here
+  function isCompatibleWithCurrentOperation(fieldName: string) {
     if (incompatibleSelectedOperationType) {
-      return col.operationType === incompatibleSelectedOperationType;
+      return operationDefinitionMap[incompatibleSelectedOperationType].getPossibleOperationsForField(
+          ({} as unknown) as IndexPatternField
+        ).length > 0;
     }
-    return !selectedColumn || col.operationType === selectedColumn.operationType;
+    return (
+      !selectedColumn ||
+      (hasField(selectedColumn) &&
+        operationDefinitionMap[selectedColumn.operationType].getPossibleOperationsForField(
+          ({} as unknown) as IndexPatternField
+        ).length > 0)
+    );
   }
 
+  const isCurrentOperationApplicableWithoutField = !selectedColumn || operationDefinitionMap[selectedColumn.operationType].getPossibleOperationsForDocument(
+          ({} as unknown) as IndexPattern
+        ).length > 0;
+
   const fieldOptions = [];
-  const fieldlessColumn =
-    filteredColumns.find(column => !hasField(column) && isCompatibleWithCurrentOperation(column)) ||
-    filteredColumns.find(column => !hasField(column));
+  const fieldlessColumn = filteredOperations.find(op => op.applicableWithoutField);
 
   if (fieldlessColumn) {
     fieldOptions.push({
       label: i18n.translate('xpack.lens.indexPattern.documentField', {
         defaultMessage: 'Document',
       }),
-      value: { operationId: fieldlessColumn.operationId },
+      value: { fieldless: true },
       className: classNames({
-        'lnsConfigPanel__fieldOption--incompatible': !isCompatibleWithCurrentOperation(
-          fieldlessColumn
-        ),
+        'lnsConfigPanel__fieldOption--incompatible': !isCurrentOperationApplicableWithoutField,
       }),
     });
   }
 
-  if (uniqueColumnsByField.length > 0) {
+  if (fields.length > 0) {
     fieldOptions.push({
       label: i18n.translate('xpack.lens.indexPattern.individualFieldsLabel', {
         defaultMessage: 'Individual fields',
       }),
-      options: uniqueColumnsByField
-        .map(col => ({
-          label: col.sourceField,
-          value: { operationId: col.operationId, dataType: col.dataType },
-          compatible: isCompatibleWithCurrentOperation(col),
+      options: fields
+        .map(field => ({
+          label: field,
+          // todo pass field data type here
+          value: { field, dataType: 'string' },
+          compatible: isCompatibleWithCurrentOperation(field),
         }))
         .sort(({ compatible: a }, { compatible: b }) => {
           if (a && !b) {
@@ -135,12 +137,26 @@ export function FieldSelect({
           return;
         }
 
-        const column: IndexPatternColumn = filteredColumns.find(
-          ({ operationId }) =>
-            operationId === ((choices[0].value as unknown) as { operationId: string }).operationId
-        )!;
+        // TODO build actual column here
+        // const column: IndexPatternColumn = filteredColumns.find(
+        //   ({ operationId }) =>
+        //     operationId === ((choices[0].value as unknown) as { operationId: string }).operationId
+        // )!;
 
-        onChangeColumn(column);
+        onChangeColumn(buildColumnForField({
+          // todo check what to do here
+          index: 0,
+          // todo pass columns here
+          columns: {},
+          // todo pass field here
+          field: {} as unknown as IndexPatternField,
+          // todo pass index pattern id here
+          indexPatternId: '',
+          // todo pass layer id here
+          layerId: '',
+          // todo pass suggested priority here
+          suggestedPriority: 0
+        }));
       }}
       renderOption={(option, searchValue) => {
         return (

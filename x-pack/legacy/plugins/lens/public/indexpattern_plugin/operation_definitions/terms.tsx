@@ -39,11 +39,15 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn> = {
   displayName: i18n.translate('xpack.lens.indexPattern.terms', {
     defaultMessage: 'Top Values',
   }),
-  isApplicableWithoutField: false,
-  isApplicableForField: ({ aggregationRestrictions, type }) => {
-    return Boolean(
-      type === 'string' && (!aggregationRestrictions || aggregationRestrictions.terms)
-    );
+  getPossibleOperationsForDocument: () => [],
+  getPossibleOperationsForField: ({ aggregationRestrictions, type }) => {
+    if ( type === 'string' && (!aggregationRestrictions || aggregationRestrictions.terms)) {
+      return [{
+        dataType: 'string',
+        isBucketed: true
+      }];
+    }
+    return [];
   },
   buildColumn({ operationId, suggestedPriority, columns, field, indexPatternId }) {
     const existingMetricColumn = Object.entries(columns)

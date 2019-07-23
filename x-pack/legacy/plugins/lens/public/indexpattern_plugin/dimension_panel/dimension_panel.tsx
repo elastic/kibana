@@ -18,7 +18,7 @@ import {
   IndexPatternField,
 } from '../indexpattern';
 
-import { getPotentialColumns } from '../operations';
+import { getPotentialOperations, buildColumnForOperationType, buildColumnForField } from '../operations';
 import { PopoverEditor } from './popover_editor';
 import { DragContextState, ChildDragDropProvider, DragDrop } from '../../drag_drop';
 import { changeColumn, deleteColumn } from '../state_helpers';
@@ -39,33 +39,30 @@ export const IndexPatternDimensionPanel = memo(function IndexPatternDimensionPan
 ) {
   const layerId = props.layerId;
   const indexPatternId = props.state.layers[layerId].indexPatternId;
-  const columns = useMemo(
-    () =>
-      getPotentialColumns({
-        fields: props.state.indexPatterns[indexPatternId].fields,
-        suggestedPriority: props.suggestedPriority,
-        layer: props.state.layers[layerId],
-        layerId,
-      }),
-    [indexPatternId, props.suggestedPriority, layerId]
+  console.log('rendering with ' + indexPatternId);
+  const operations = useMemo(
+    () => { 
+      console.log('recomputing...');
+      return getPotentialOperations(props.state.indexPatterns[indexPatternId]) },
+[props.state.indexPatterns[indexPatternId]]
   );
 
-  const filteredColumns = columns.filter(col => {
-    return props.filterOperations(columnToOperation(col));
-  });
+  const filteredOperations = useMemo(() => operations.filter(operation => {
+    return props.filterOperations(operation.operationMeta);
+  }), [operations, props.filterOperations]);
 
   const selectedColumn: IndexPatternColumn | null =
     props.state.layers[layerId].columns[props.columnId] || null;
 
-  function findColumnByField(field: IndexPatternField) {
-    return filteredColumns.find(col => hasField(col) && col.sourceField === field.name);
+  function hasOperationForField(field: IndexPatternField) {
+    return Boolean(filteredOperations.find(operation => operation.applicableFields.includes(field.name)));
   }
 
   function canHandleDrop() {
     const { dragging } = props.dragDropContext;
     const field = dragging as IndexPatternField;
 
-    return !!field && !!field.type && !!findColumnByField(field as IndexPatternField);
+    return !!field && !!field.type && !!hasOperationForField(field as IndexPatternField);
   }
 
   return (
@@ -75,9 +72,8 @@ export const IndexPatternDimensionPanel = memo(function IndexPatternDimensionPan
         data-test-subj="indexPattern-dropTarget"
         droppable={canHandleDrop()}
         onDrop={field => {
-          const column = findColumnByField(field as IndexPatternField);
-
-          if (!column) {
+          const operation = hasOperationForField(field as IndexPatternField);
+          if (!operation) {
             // TODO: What do we do if we couldn't find a column?
             return;
           }
@@ -88,7 +84,15 @@ export const IndexPatternDimensionPanel = memo(function IndexPatternDimensionPan
               layerId,
               // layers: props.state.layers,
               columnId: props.columnId,
-              newColumn: column,
+              newColumn: buildColumnForField({
+                // TODO think about this
+                index: 0,
+                columns: props.state.layers[props.layerId].columns,
+                indexPatternId,
+                layerId,
+                suggestedPriority: props.suggestedPriority,
+                field: field as IndexPatternField
+              }),
             })
           );
         }}
@@ -98,7 +102,7 @@ export const IndexPatternDimensionPanel = memo(function IndexPatternDimensionPan
             <PopoverEditor
               {...props}
               selectedColumn={selectedColumn}
-              filteredColumns={filteredColumns}
+              filteredOperations={filteredOperations}
             />
           </EuiFlexItem>
           <EuiFlexItem grow={null}>

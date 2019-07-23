@@ -12,7 +12,6 @@ import { data } from '../../../../../../../src/legacy/core_plugins/data/public/s
 import { localStorage } from 'ui/storage/storage_service';
 import { IndexPatternPrivateState } from '../indexpattern';
 import { changeColumn } from '../state_helpers';
-import { getPotentialColumns } from '../operations';
 import { IndexPatternDimensionPanel, IndexPatternDimensionPanelProps } from './dimension_panel';
 import { DropHandler, DragContextState } from '../../drag_drop';
 import { createMockedDragDropContext } from '../mocks';
@@ -137,18 +136,6 @@ describe('IndexPatternDimensionPanel', () => {
         .first()
         .prop('iconType')
     ).toEqual('plusInCircle');
-  });
-
-  it('should pass the right arguments to getPotentialColumns', async () => {
-    wrapper = shallow(<IndexPatternDimensionPanel {...defaultProps} suggestedPriority={1} />);
-
-    // expect(getPotentialColumns as jest.Mock).toHaveBeenCalledWith({
-    expect(getPotentialColumns).toHaveBeenCalledWith({
-      fields: state.indexPatterns[state.currentIndexPatternId].fields,
-      suggestedPriority: 1,
-      layerId: 'first',
-      layer: state.layers.first,
-    });
   });
 
   it('should call the filterOperations function', () => {
