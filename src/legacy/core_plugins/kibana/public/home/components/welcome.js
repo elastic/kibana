@@ -39,7 +39,7 @@ import {
 } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n/react';
-
+import { TelemetryOptIn } from './telemetry_opt_in';
 /**
  * Shows a full-screen welcome page that gives helpful quick links to beginners.
  */
@@ -66,7 +66,7 @@ export class Welcome extends React.Component {
         <div className="homWelcome">
           <header className="homWelcome__header">
             <div className="homWelcome__content eui-textCenter">
-              <EuiSpacer size="xxl" />
+              <EuiSpacer size="xl" />
               <span className="homWelcome__logo">
                 <EuiIcon type="logoKibana" size="xxl" />
               </span>
@@ -80,7 +80,7 @@ export class Welcome extends React.Component {
                   <FormattedMessage id="kbn.home.welcomeDescription" defaultMessage="Your window into the Elastic Stack"/>
                 </p>
               </EuiText>
-              <EuiSpacer size="xl" />
+              <EuiSpacer size="m" />
             </div>
           </header>
           <div className="homWelcome__content homWelcome-body">
@@ -115,6 +115,8 @@ export class Welcome extends React.Component {
                     </footer>
                   }
                 />
+                <EuiSpacer size="m" />
+                <TelemetryOptIn />
               </EuiFlexItem>
             </EuiFlexGroup>
           </div>

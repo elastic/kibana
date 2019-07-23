@@ -18,9 +18,19 @@
  */
 
 import { uiModules } from 'ui/modules';
+import { npStart } from 'ui/new_platform';
+import { TelemetryOptInProvider } from '../../../../../../x-pack/legacy/plugins/telemetry/public/services/telemetry_opt_in'
 
 export let indexPatternService;
+export const telemetryService = {};
 
 uiModules.get('kibana').run(($injector) => {
   indexPatternService = $injector.get('indexPatterns');
+  const Private = $injector.get('Private');
+  const telemetryOptInProvider = Private(TelemetryOptInProvider);
+  const telemetryEnabled = npStart.core.injectedMetadata.getInjectedVar('telemetryEnabled');
+  const telemetryBanner = npStart.core.injectedMetadata.getInjectedVar('telemetryBanner');
+  telemetryService.telemetryEnabled = telemetryEnabled;
+  telemetryService.telemetryBanner = telemetryBanner;
+  telemetryService.telemetryOptInProvider = telemetryOptInProvider;
 });

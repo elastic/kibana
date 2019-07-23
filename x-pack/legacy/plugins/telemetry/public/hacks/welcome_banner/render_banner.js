@@ -9,7 +9,7 @@ import React from 'react';
 import { banners } from 'ui/notify';
 
 import { clickBanner } from './click_banner';
-import { OptInBanner } from './opt_in_banner_component';
+import { OptInBanner } from '../../components/opt_in_banner_component';
 
 /**
  * Render the Telemetry Opt-in banner.
