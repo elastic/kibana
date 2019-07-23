@@ -57,6 +57,7 @@ export interface Datasource<T = unknown, P = unknown> {
   getPersistableState: (state: T) => P;
 
   insertLayer: (state: T, newLayerId: string) => T;
+  removeLayer: (state: T, layerId: string) => T;
   getLayers: (state: T) => string[];
 
   renderDataPanel: (domElement: Element, props: DatasourceDataPanelProps<T>) => void;
@@ -176,8 +177,9 @@ export interface VisualizationSuggestion<T = unknown> {
 
 export interface FramePublicAPI {
   datasourceLayers: Record<string, DatasourcePublicAPI>;
-  // Adds a new layer. This triggers a re-render
+  // Adds a new layer. This has a side effect of updating the datasource state
   addNewLayer: () => string;
+  removeLayer: (layerId: string) => void;
 }
 
 export interface Visualization<T = unknown, P = unknown> {

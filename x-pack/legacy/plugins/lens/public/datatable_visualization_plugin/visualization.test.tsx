@@ -20,6 +20,7 @@ jest.mock('../id_generator');
 function mockFrame(): FramePublicAPI {
   return {
     addNewLayer: () => 'aaa',
+    removeLayer: () => {},
     datasourceLayers: {},
   };
 }
@@ -76,6 +77,7 @@ describe('Datatable Visualization', () => {
           dragDropContext={{ dragging: undefined, setDragging: () => {} }}
           frame={{
             addNewLayer: jest.fn(),
+            removeLayer: jest.fn(),
             datasourceLayers: { a: datasource.publicAPIMock },
           }}
           layer={layer}
@@ -114,6 +116,7 @@ describe('Datatable Visualization', () => {
           dragDropContext={{ dragging: undefined, setDragging: () => {} }}
           frame={{
             addNewLayer: jest.fn(),
+            removeLayer: jest.fn(),
             datasourceLayers: { a: datasource.publicAPIMock },
           }}
           layer={layer}
@@ -149,6 +152,7 @@ describe('Datatable Visualization', () => {
           dragDropContext={{ dragging: undefined, setDragging: () => {} }}
           frame={{
             addNewLayer: jest.fn(),
+            removeLayer: jest.fn(),
             datasourceLayers: { a: datasource.publicAPIMock },
           }}
           layer={layer}

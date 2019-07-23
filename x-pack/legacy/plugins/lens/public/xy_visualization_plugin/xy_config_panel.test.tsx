@@ -219,4 +219,64 @@ describe('XYConfigPanel', () => {
       ],
     });
   });
+
+  describe('layers', () => {
+    it('adds layers', () => {
+      frame.addNewLayer = jest.fn().mockReturnValue('newLayerId');
+      (generateId as jest.Mock).mockReturnValue('accessor');
+      const setState = jest.fn();
+      const state = testState();
+      const component = mount(
+        <XYConfigPanel
+          dragDropContext={dragDropContext}
+          frame={frame}
+          setState={setState}
+          state={state}
+        />
+      );
+
+      component
+        .find('[data-test-subj="lnsXY_layer_add"]')
+        .first()
+        .simulate('click');
+
+      expect(frame.addNewLayer).toHaveBeenCalled();
+      expect(setState).toHaveBeenCalledTimes(1);
+      expect(generateId).toHaveBeenCalledTimes(4);
+      expect(setState.mock.calls[0][0]).toMatchObject({
+        layers: [
+          ...state.layers,
+          expect.objectContaining({
+            layerId: 'newLayerId',
+            xAccessor: 'accessor',
+            accessors: ['accessor'],
+            splitAccessor: 'accessor',
+          }),
+        ],
+      });
+    });
+    it('removes layers', () => {
+      const setState = jest.fn();
+      const state = testState();
+      const component = mount(
+        <XYConfigPanel
+          dragDropContext={dragDropContext}
+          frame={frame}
+          setState={setState}
+          state={state}
+        />
+      );
+
+      component
+        .find('[data-test-subj="lnsXY_layer_remove"]')
+        .first()
+        .simulate('click');
+
+      expect(frame.removeLayer).toHaveBeenCalled();
+      expect(setState).toHaveBeenCalledTimes(1);
+      expect(setState.mock.calls[0][0]).toMatchObject({
+        layers: [],
+      });
+    });
+  });
 });

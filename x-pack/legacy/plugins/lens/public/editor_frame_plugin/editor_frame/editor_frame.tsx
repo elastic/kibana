@@ -107,6 +107,17 @@ export function EditorFrame(props: EditorFrameProps) {
 
       return newLayerId;
     },
+    removeLayer: (layerId: string) => {
+      const newState = props.datasourceMap[state.activeDatasourceId!].removeLayer(
+        state.datasourceStates[state.activeDatasourceId!].state,
+        layerId
+      );
+      dispatch({
+        type: 'UPDATE_DATASOURCE_STATE',
+        datasourceId: state.activeDatasourceId!,
+        newState,
+      });
+    },
   };
 
   useEffect(() => {

@@ -269,6 +269,15 @@ export function getIndexPatternDatasource({
       };
     },
 
+    removeLayer(state: IndexPatternPrivateState, layerId: string) {
+      const newLayers = { ...state.layers };
+      delete newLayers[layerId];
+      return {
+        ...state,
+        layers: newLayers,
+      };
+    },
+
     getLayers(state: IndexPatternPrivateState) {
       return Object.keys(state.layers);
     },

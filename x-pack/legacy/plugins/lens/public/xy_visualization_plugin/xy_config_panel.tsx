@@ -116,7 +116,9 @@ export function XYConfigPanel(props: VisualizationProps<State>) {
               <>
                 <EuiButtonIcon
                   iconType="trash"
+                  data-test-subj="lnsXY_layer_remove"
                   onClick={() => {
+                    frame.removeLayer(layer.layerId);
                     setState({ ...state, layers: state.layers.filter(l => l !== layer) });
                   }}
                   aria-label={i18n.translate('xpack.lens.xyChart.removeLayer', {

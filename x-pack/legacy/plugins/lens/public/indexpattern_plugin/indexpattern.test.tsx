@@ -784,6 +784,37 @@ describe('IndexPattern Data Source', () => {
     });
   });
 
+  describe('#removeLayer', () => {
+    it('should remove a layer', () => {
+      const state = {
+        indexPatterns: expectedIndexPatterns,
+        layers: {
+          first: {
+            indexPatternId: '1',
+            columnOrder: [],
+            columns: {},
+          },
+          second: {
+            indexPatternId: '2',
+            columnOrder: [],
+            columns: {},
+          },
+        },
+        currentIndexPatternId: '1',
+      };
+      expect(indexPatternDatasource.removeLayer(state, 'first')).toEqual({
+        ...state,
+        layers: {
+          second: {
+            indexPatternId: '2',
+            columnOrder: [],
+            columns: {},
+          },
+        },
+      });
+    });
+  });
+
   describe('#getLayers', () => {
     it('should list the current layers', () => {
       expect(
