@@ -26,9 +26,7 @@ import React, { Component } from 'react';
 import ResizeObserver from 'resize-observer-polyfill';
 import { Storage } from 'ui/storage';
 
-import { IndexPattern } from '../../../index_patterns';
-import { Query, QueryBar } from '../../../query/query_bar';
-import { FilterBar } from '../../../filter/filter_bar';
+import { IndexPattern, Query, QueryBar, FilterBar } from '../../../../data/public';
 
 interface DateRange {
   from: string;
@@ -110,16 +108,16 @@ class SearchBarUI extends Component<SearchBarProps, State> {
 
   private getFilterTriggerButton() {
     const filtersAppliedText = this.props.intl.formatMessage({
-      id: 'data.search.searchBar.filtersButtonFiltersAppliedTitle',
+      id: 'kibana_react.search.searchBar.filtersButtonFiltersAppliedTitle',
       defaultMessage: 'filters applied.',
     });
     const clickToShowOrHideText = this.state.isFiltersVisible
       ? this.props.intl.formatMessage({
-          id: 'data.search.searchBar.filtersButtonClickToShowTitle',
+          id: 'kibana_react.search.searchBar.filtersButtonClickToShowTitle',
           defaultMessage: 'Select to hide',
         })
       : this.props.intl.formatMessage({
-          id: 'data.search.searchBar.filtersButtonClickToHideTitle',
+          id: 'kibana_react.search.searchBar.filtersButtonClickToHideTitle',
           defaultMessage: 'Select to show',
         });
 
