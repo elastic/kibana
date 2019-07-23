@@ -99,8 +99,6 @@ Observability::
 * [Uptime] Add telemetry collector {pull}34437[#34437]
 * [Uptime] Add link for logs host integration {pull}38010[#38010]
 * [Fixes #40589] [Uptime] Add link to Uptime documentation from header help menu {pull}40645[#40645]
-Other::
-* Add dateHistogramInterval utility {pull}39091[#39091]
 Platform::
 * Query Filter \ Filter Manager: de-angularize and move to data plugin {pull}37311[#37311]
 * Introduce setting to disable batching in courier {pull}39470[#39470]
@@ -117,6 +115,9 @@ SIEM::
 * Enhance inspect modal  {pull}40530[#40530]
 Security::
 * [Fixes #38563] Security - Allow roles to be cloned {pull}39303[#39303]
+Visualize::
+* Add dateHistogramInterval utility {pull}39091[#39091]
+
 
 [float]
 [[bug-7.3.0]]
