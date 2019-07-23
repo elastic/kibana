@@ -15,13 +15,29 @@ export default function ({ getService, getPageObjects }) {
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
   const log = getService('log');
+  const esSupertest = getService('esSupertest');
   const PageObjects = getPageObjects(['security', 'common', 'header', 'settings', 'watcher']);
 
   describe('watcher_test', function () {
     before('initialize tests', async () => {
+       // There may be system watches if monitoring was previously enabled
+      // These cannot be deleted via the UI, so we need to delete via the API
+      const watches = await esSupertest.get('/.watches/_search');
+
+      try {
+        const watchJSON = JSON.parse(watches.res.text);
+
+        watchJSON.hits.hits.forEach(async hit => {
+          if (hit._id) {
+            await esSupertest.delete(`/_watcher/watch/${hit._id}`);
+          }
+        });
+      } catch (e) {
+        // silently swallow error
+      }
+      
       await browser.setWindowSize(1600, 1000);
       await PageObjects.common.navigateToApp('watcher');
-      await PageObjects.watcher.clearAllWatches();
     });
 
     it('create and save a new watch', async () => {
