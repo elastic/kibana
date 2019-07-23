@@ -126,7 +126,7 @@ export default function indexTest({ getService }: KibanaFunctionalTestDefaultPro
         .send({
           params: {
             index: ES_TEST_INDEX_NAME,
-            body: { testing: [1, 2, 3] },
+            documents: [{ testing: [1, 2, 3] }],
             refresh: true,
           },
         })
@@ -145,7 +145,7 @@ export default function indexTest({ getService }: KibanaFunctionalTestDefaultPro
         .send({
           params: {
             index: ES_TEST_INDEX_NAME,
-            body: [{ testing: [1, 2, 3] }, { Testing: [4, 5, 6] }],
+            documents: [{ testing: [1, 2, 3] }, { Testing: [4, 5, 6] }],
             refresh: true,
           },
         })
@@ -178,7 +178,7 @@ export default function indexTest({ getService }: KibanaFunctionalTestDefaultPro
         .send({
           params: {
             index: ES_TEST_INDEX_NAME,
-            body: { refresh: 'not set' },
+            documents: [{ refresh: 'not set' }],
           },
         })
         .expect(200);
@@ -194,7 +194,7 @@ export default function indexTest({ getService }: KibanaFunctionalTestDefaultPro
         .send({
           params: {
             index: ES_TEST_INDEX_NAME,
-            body: { refresh: 'true' },
+            documents: [{ refresh: 'true' }],
             refresh: true,
           },
         })
@@ -215,7 +215,7 @@ export default function indexTest({ getService }: KibanaFunctionalTestDefaultPro
         .send({
           params: {
             indeX: ES_TEST_INDEX_NAME,
-            body: { testing: [1, 2, 3] },
+            documents: [{ testing: [1, 2, 3] }],
           },
         })
         .expect(200);
@@ -230,7 +230,7 @@ export default function indexTest({ getService }: KibanaFunctionalTestDefaultPro
         .set('kbn-xsrf', 'foo')
         .send({
           params: {
-            body: { testing: [1, 2, 3] },
+            documents: [{ testing: [1, 2, 3] }],
           },
         })
         .expect(200);

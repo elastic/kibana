@@ -108,39 +108,40 @@ describe('params validation', () => {
   test('params validation succeeds when params is valid', () => {
     const params: Record<string, any> = {
       index: 'testing-123',
-      doc_id: 'document-id',
-      execution_time_field: 'field-used-for-time',
+      executionTimeField: 'field-used-for-time',
       refresh: true,
-      body: { rando: 'thing' },
+      documents: [{ rando: 'thing' }],
     };
     expect(validateActionTypeParams(actionType, params)).toMatchInlineSnapshot(`
         Object {
-          "body": Object {
-            "rando": "thing",
-          },
-          "doc_id": "document-id",
-          "execution_time_field": "field-used-for-time",
+          "documents": Array [
+            Object {
+              "rando": "thing",
+            },
+          ],
+          "executionTimeField": "field-used-for-time",
           "index": "testing-123",
           "refresh": true,
         }
     `);
 
     delete params.index;
-    delete params.doc_id;
-    delete params.execution_time_field;
     delete params.refresh;
+    delete params.executionTimeField;
     expect(validateActionTypeParams(actionType, params)).toMatchInlineSnapshot(`
         Object {
-          "body": Object {
-            "rando": "thing",
-          },
+          "documents": Array [
+            Object {
+              "rando": "thing",
+            },
+          ],
         }
     `);
   });
 
   test('params validation fails when params is not valid', () => {
     expect(() => {
-      validateActionTypeParams(actionType, { body: {}, jim: 'bob' });
+      validateActionTypeParams(actionType, { documents: [{}], jim: 'bob' });
     }).toThrowErrorMatchingInlineSnapshot(
       `"The actionParams is invalid: [jim]: definition for this key is missing"`
     );
@@ -148,7 +149,7 @@ describe('params validation', () => {
     expect(() => {
       validateActionTypeParams(actionType, {});
     }).toThrowErrorMatchingInlineSnapshot(
-      `"The actionParams is invalid: [body]: expected at least one defined value but got [undefined]"`
+      `"The actionParams is invalid: [documents]: expected value of type [array] but got [undefined]"`
     );
 
     expect(() => {
@@ -158,15 +159,9 @@ describe('params validation', () => {
     );
 
     expect(() => {
-      validateActionTypeParams(actionType, { doc_id: 42 });
+      validateActionTypeParams(actionType, { executionTimeField: true });
     }).toThrowErrorMatchingInlineSnapshot(
-      `"The actionParams is invalid: [doc_id]: expected value of type [string] but got [number]"`
-    );
-
-    expect(() => {
-      validateActionTypeParams(actionType, { execution_time_field: true });
-    }).toThrowErrorMatchingInlineSnapshot(
-      `"The actionParams is invalid: [execution_time_field]: expected value of type [string] but got [boolean]"`
+      `"The actionParams is invalid: [executionTimeField]: expected value of type [string] but got [boolean]"`
     );
 
     expect(() => {
@@ -176,12 +171,10 @@ describe('params validation', () => {
     );
 
     expect(() => {
-      validateActionTypeParams(actionType, { body: 'should be an object' });
-    }).toThrowErrorMatchingInlineSnapshot(`
-"The actionParams is invalid: [body]: types that failed validation:
-- [body.0]: expected value of type [object] but got [string]
-- [body.1]: expected value of type [array] but got [string]"
-`);
+      validateActionTypeParams(actionType, { documents: ['should be an object'] });
+    }).toThrowErrorMatchingInlineSnapshot(
+      `"The actionParams is invalid: [documents.0]: expected value of type [object] but got [string]"`
+    );
   });
 });
 
@@ -195,9 +188,8 @@ describe('execute()', () => {
     config = { index: null };
     params = {
       index: 'index-via-param',
-      body: { jim: 'bob' },
-      doc_id: undefined,
-      execution_time_field: undefined,
+      documents: [{ jim: 'bob' }],
+      executionTimeField: undefined,
       refresh: undefined,
     };
 
@@ -230,9 +222,8 @@ describe('execute()', () => {
     config = { index: 'index-via-config' };
     params = {
       index: undefined,
-      body: { jimbob: 'jr' },
-      doc_id: 'id-to-use-for-document',
-      execution_time_field: 'field_to_use_for_time',
+      documents: [{ jimbob: 'jr' }],
+      executionTimeField: 'field_to_use_for_time',
       refresh: true,
     };
 
@@ -251,7 +242,6 @@ describe('execute()', () => {
             Object {
               "body": Array [
                 Object {
-                  "_id": "id-to-use-for-document",
                   "index": Object {},
                 },
                 Object {
@@ -269,9 +259,8 @@ describe('execute()', () => {
     config = { index: 'index-via-config' };
     params = {
       index: 'index-via-param',
-      body: { jim: 'bob' },
-      doc_id: undefined,
-      execution_time_field: undefined,
+      documents: [{ jim: 'bob' }],
+      executionTimeField: undefined,
       refresh: undefined,
     };
 
@@ -302,9 +291,8 @@ describe('execute()', () => {
     config = { index: null };
     params = {
       index: 'index-via-param',
-      body: [{ a: 1 }, { b: 2 }],
-      doc_id: undefined,
-      execution_time_field: undefined,
+      documents: [{ a: 1 }, { b: 2 }],
+      executionTimeField: undefined,
       refresh: undefined,
     };
 
