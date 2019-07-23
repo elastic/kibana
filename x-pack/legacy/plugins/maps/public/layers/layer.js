@@ -268,8 +268,8 @@ export class AbstractLayer {
     return false;
   }
 
-  syncLayerWithMb() {
-    //no-op by default
+  syncLayerWithMB() {
+    throw new Error('Should implement AbstractLayer#syncLayerWithMB');
   }
 
   updateDueToExtent(source, prevMeta = {}, nextMeta = {}) {

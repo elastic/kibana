@@ -26,7 +26,7 @@ import { i18n } from '@kbn/i18n';
 import _ from 'lodash';
 
 const getSortHandler = (type) => (item) => _.get(item, [type, 'summary', 'lastVal']);
-const getColumns = showCgroupMetricsElasticsearch => {
+const getColumns = (showCgroupMetricsElasticsearch, setupMode) => {
   const cols = [];
 
   const cpuUsageColumnTitle = i18n.translate('xpack.monitoring.elasticsearch.nodes.cpuUsageColumnTitle', {
@@ -40,32 +40,46 @@ const getColumns = showCgroupMetricsElasticsearch => {
     width: '20%',
     field: 'name',
     sortable: true,
-    render: (value, node) => (
-      <div>
-        <div className="monTableCell__name">
-          <EuiText size="m">
-            <EuiToolTip
-              position="bottom"
-              content={node.nodeTypeLabel}
-            >
-              <span className={`fa ${node.nodeTypeClass}`} />
-            </EuiToolTip>
-            &nbsp;
-            <span data-test-subj="name">
-              <EuiLink
-                href={`#/elasticsearch/nodes/${node.resolver}`}
-                data-test-subj={`nodeLink-${node.resolver}`}
+    render: (value, node) => {
+      let nameLink = (
+        <EuiLink
+          href={`#/elasticsearch/nodes/${node.resolver}`}
+          data-test-subj={`nodeLink-${node.resolver}`}
+        >
+          {value}
+        </EuiLink>
+      );
+
+      if (setupMode && setupMode.enabled) {
+        const list = _.get(setupMode, 'data.byUuid', {});
+        const status = list[node.resolver] || {};
+        if (status.isNetNewUser) {
+          nameLink = value;
+        }
+      }
+
+      return (
+        <div>
+          <div className="monTableCell__name">
+            <EuiText size="m">
+              <EuiToolTip
+                position="bottom"
+                content={node.nodeTypeLabel}
               >
-                {value}
-              </EuiLink>
-            </span>
-          </EuiText>
+                <span className={`fa ${node.nodeTypeClass}`} />
+              </EuiToolTip>
+              &nbsp;
+              <span data-test-subj="name">
+                {nameLink}
+              </span>
+            </EuiText>
+          </div>
+          <div className="monTableCell__transportAddress">
+            {extractIp(node.transport_address)}
+          </div>
         </div>
-        <div className="monTableCell__transportAddress">
-          {extractIp(node.transport_address)}
-        </div>
-      </div>
-    )
+      );
+    }
   });
 
   cols.push({
@@ -207,13 +221,36 @@ const getColumns = showCgroupMetricsElasticsearch => {
   return cols;
 };
 
-export function ElasticsearchNodes({ clusterStatus, nodes, showCgroupMetricsElasticsearch, ...props }) {
-  const columns = getColumns(showCgroupMetricsElasticsearch);
+export function ElasticsearchNodes({ clusterStatus, showCgroupMetricsElasticsearch, ...props }) {
   const { sorting, pagination, onTableChange, setupMode } = props;
+  const columns = getColumns(showCgroupMetricsElasticsearch, setupMode);
 
+  // Merge the nodes data with the setup data if enabled
+  const nodes = props.nodes || [];
+  if (setupMode.enabled && setupMode.data) {
+    // We want to create a seamless experience for the user by merging in the setup data
+    // and the node data from monitoring indices in the likely scenario where some nodes
+    // are using MB collection and some are using no collection
+    const nodesByUuid = nodes.reduce((byUuid, node) => ({
+      ...byUuid,
+      [node.id || node.resolver]: node
+    }), {});
+
+    nodes.push(...Object.entries(setupMode.data.byUuid)
+      .reduce((nodes, [nodeUuid, instance]) => {
+        if (!nodesByUuid[nodeUuid]) {
+          nodes.push(instance.node);
+        }
+        return nodes;
+      }, []));
+  }
+
+  let netNewUserMessage = null;
   let disableInternalCollectionForMigrationMessage = null;
   if (setupMode.data) {
-    if (setupMode.data.totalUniquePartiallyMigratedCount === setupMode.data.totalUniqueInstanceCount) {
+    // Think net new user scenario
+    const hasInstances = setupMode.data.totalUniqueInstanceCount > 0;
+    if (hasInstances && setupMode.data.totalUniquePartiallyMigratedCount === setupMode.data.totalUniqueInstanceCount) {
       disableInternalCollectionForMigrationMessage = (
         <Fragment>
           <EuiCallOut
@@ -239,16 +276,50 @@ export function ElasticsearchNodes({ clusterStatus, nodes, showCgroupMetricsElas
         </Fragment>
       );
     }
+    else if (!hasInstances) {
+      netNewUserMessage = (
+        <Fragment>
+          <EuiCallOut
+            title={i18n.translate('xpack.monitoring.elasticsearch.nodes.metribeatMigration.netNewUserTitle', {
+              defaultMessage: 'No monitoring data detected',
+            })}
+            color="danger"
+            iconType="cross"
+          >
+            <p>
+              {i18n.translate('xpack.monitoring.elasticsearch.nodes.metribeatMigration.netNewUserDescription', {
+                defaultMessage: `We did not detect any monitoring data, but we did detect the following Elasticsearch nodes.
+                Each detected node is listed below along with a Setup button. Clicking this button will guide you through
+                the process of enabling monitoring for each node.`
+              })}
+            </p>
+          </EuiCallOut>
+          <EuiSpacer size="m"/>
+        </Fragment>
+      );
+    }
+  }
+
+  function renderClusterStatus() {
+    if (!clusterStatus) {
+      return null;
+    }
+    return (
+      <Fragment>
+        <EuiPanel>
+          <ClusterStatus stats={clusterStatus} />
+        </EuiPanel>
+        <EuiSpacer size="m" />
+      </Fragment>
+    );
   }
 
   return (
     <EuiPage>
       <EuiPageBody>
-        <EuiPanel>
-          <ClusterStatus stats={clusterStatus} />
-        </EuiPanel>
-        <EuiSpacer size="m" />
+        {renderClusterStatus()}
         {disableInternalCollectionForMigrationMessage}
+        {netNewUserMessage}
         <EuiPageContent>
           <EuiMonitoringTable
             className="elasticsearchNodesTable"
