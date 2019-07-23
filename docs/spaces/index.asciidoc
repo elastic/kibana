@@ -8,8 +8,8 @@ the dashboards and saved objects that belong to that space.
 
 {kib} creates a default space for you. 
 After you create your own 
-spaces, you're asked to choose a space when you enter Kibana. You can change your 
-current space at any time.
+spaces, you're asked to choose a space when you log in to Kibana. You can change your 
+current space at any time by using the menu in the upper left.
 
 [role="screenshot"]
 image::spaces/images/change-space.png["Change current space"]
@@ -19,8 +19,8 @@ Kibana supports spaces in several ways.  You can:
 [[spaces-getting-started]]
 
 * <<spaces-managing, View&comma; create&comma; and delete spaces>>
-* <<spaces-control-feature-visibility, Control feature access based on user need>>
-* <<spaces-control-user-access, Control feature access based on user privilege>>
+* <<spaces-control-feature-visibility, Control feature access based on user needs>>
+* <<spaces-control-user-access, Control feature access based on user privileges>>
 * <<spaces-moving-objects, Move objects between spaces>>
 * <<spaces-delete-started, Disable the Spaces feature>>
 
@@ -28,40 +28,47 @@ Kibana supports spaces in several ways.  You can:
 [[spaces-managing]]
 === View, create, and delete spaces
 
-The **Management > Spaces** overview lists your spaces and provides actions 
+Go to **Management > Spaces** for an overview of your spaces.  This view provides actions 
 for you to create, edit, and delete spaces.
 
 [role="screenshot"]
 image::spaces/images/space-management.png["Space management"]
 
 [float]
-==== Create a space 
+==== Create or edit a space 
 
-You can create as many spaces as you like. Each space must have a unique 
-space identifier. This short text string becomes part of the 
-{kib} URL when you are inside that space. {kib} suggests a space identifier based 
+You can create as many spaces as you like. Click *Create a space* and provide a name, 
+URL identifier, optional description. 
+
+The URL identifier is a short text string that becomes part of the 
+{kib} URL when you are inside that space. {kib} suggests a URL identifier based 
 on the name of your space, but you can customize the identifier to your liking.
 You cannot change the space identifier once you create the space.
 
-{kib} also has an <<spaces-api, experimental API>> if you prefer to create spaces programatically.
+{kib} also has an <<spaces-api, API>> 
+if you prefer to create spaces programatically.
+
+[role="screenshot"]
+image::spaces/images/edit-space.png["Space management"]
 
 [float]
 ==== Delete a space
 
 Deleting a space permanently removes the space and all of its contents. 
+Find the space on the *Spaces* overview page and click the trash icon in the Actions column.
 You can't delete the default space, but you can customize it to your liking.
 
 [float]
 [[spaces-control-feature-visibility]]
-=== Control feature access based on user need
+=== Control feature access based on user needs
 
 You have control over which features are visible in each space. 
 For example, you might hide Dev Tools 
 in your "Executive" space or show Stack Monitoring only in your "Admin" space.
-Controlling feature 
-visibility is part of the add and edit workflow.
+You can define which features to show or hide when you add or edit a space.
 
-Feature controls is not a security feature. To secure access 
+Controlling feature 
+visibility is not a security feature. To secure access 
 to specific features on a per-user basis, you must configure 
 <<xpack-security-authorization, Kibana Security>>.
 
@@ -70,7 +77,7 @@ image::spaces/images/edit-space-feature-visibility.png["Controlling features vis
 
 [float]
 [[spaces-control-user-access]]
-=== Control feature access based on user privilege
+=== Control feature access based on user privileges
 
 When using Kibana with security, you can configure applications and features 
 based on your users’ privileges. This means different roles can have access 
@@ -92,7 +99,7 @@ interface to copy objects from one space to another.
 . Export your saved objects via the import/export interface.
 . Navigate to the space where you want to import the objects.
 . Import your saved objects via the import/export interface.
-. (Optional) Delete the saved objects from the space you exported from, if you don't want to keep a copy there.
+. (Optional) Delete objects in the export space that you no longer need.
 
 {kib} also has experimental <<dashboard-import-api-import, import>> and 
 <<dashboard-import-api-export, export>> dashboard APIs if you want
