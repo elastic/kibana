@@ -46,7 +46,7 @@ export class TaskManager {
    * enabling the task manipulation methods, and beginning the background polling
    * mechanism.
    */
-  public constructor(kbnServer: any, server: any, config: any) {
+  constructor(kbnServer: any, server: any, config: any) {
     this.maxWorkers = config.get('xpack.task_manager.max_workers');
     this.overrideNumWorkers = config.get('xpack.task_manager.override_num_workers');
     this.definitions = {};
