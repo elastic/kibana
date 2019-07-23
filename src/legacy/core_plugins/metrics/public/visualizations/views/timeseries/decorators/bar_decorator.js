@@ -35,6 +35,7 @@ export function BarSeriesDecorator({
   stackAsPercentage,
   xScaleType,
   yScaleType,
+  timeZone,
 }) {
   const id = getSpecId(seriesId);
   const groupId = getGroupId(seriesGroupId);
@@ -54,6 +55,7 @@ export function BarSeriesDecorator({
     stackAsPercentage,
     xScaleType,
     yScaleType,
+    timeZone,
     ...barSeriesStyle,
   };
 

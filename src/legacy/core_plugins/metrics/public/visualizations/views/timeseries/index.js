@@ -33,6 +33,8 @@ import {
   LineAnnotation,
 } from '@elastic/charts';
 import { EuiIcon } from '@elastic/eui';
+import { timezoneProvider } from 'ui/vis/lib/timezone';
+import chrome from 'ui/chrome';
 import { GRID_LINE_CONFIG, ICON_TYPES_MAP, STACKED_OPTIONS } from '../../constants';
 import { AreaSeriesDecorator } from './decorators/area_decorator';
 import { BarSeriesDecorator } from './decorators/bar_decorator';
@@ -60,6 +62,8 @@ export const TimeSeries = ({
   annotations,
 }) => {
   const tooltipFormatter = decorateFormatter(xAxisFormatter);
+  const uiSettings = chrome.getUiSettingsClient();
+  const timeZone = timezoneProvider(uiSettings)();
 
   return (
     <Chart renderer="canvas" className="tvbVisTimeSeries">
@@ -123,6 +127,7 @@ export const TimeSeries = ({
                 stackAsPercentage={isPercentage}
                 xScaleType={xScaleType}
                 yScaleType={yScaleType}
+                timeZone={timeZone}
               />
             );
           }
@@ -143,6 +148,7 @@ export const TimeSeries = ({
                 points={points}
                 xScaleType={xScaleType}
                 yScaleType={yScaleType}
+                timeZone={timeZone}
               />
             );
           }

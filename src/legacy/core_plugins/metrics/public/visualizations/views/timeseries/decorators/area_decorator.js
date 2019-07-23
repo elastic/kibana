@@ -36,6 +36,7 @@ export function AreaSeriesDecorator({
   points,
   xScaleType,
   yScaleType,
+  timeZone,
 }) {
   const id = getSpecId(seriesId);
   const groupId = getGroupId(seriesGroupId);
@@ -55,6 +56,7 @@ export function AreaSeriesDecorator({
     stackAsPercentage,
     xScaleType,
     yScaleType,
+    timeZone,
     ...areaSeriesStyle,
   };
 

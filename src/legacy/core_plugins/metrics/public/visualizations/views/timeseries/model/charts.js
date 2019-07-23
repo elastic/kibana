@@ -34,6 +34,7 @@ const Chart = {
   stackAccessors: PropTypes.arrayOf(PropTypes.number),
   xScaleType: PropTypes.string,
   yScaleType: PropTypes.string,
+  timeZone: PropTypes.string.isRequired,
 };
 
 const BarChart = {
