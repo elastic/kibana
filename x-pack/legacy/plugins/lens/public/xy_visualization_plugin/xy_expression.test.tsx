@@ -34,13 +34,13 @@ function sampleArgs() {
       {
         layerId: 'first',
         seriesType: 'line',
-
         xAccessor: 'c',
         accessors: ['a', 'b'],
         position: Position.Left,
         showGridlines: false,
         title: 'A and B',
         splitAccessor: 'd',
+        columnToLabel: '{"a": "Label A", "b": "Label B", "d": "Label D"}',
       },
     ],
   };
@@ -181,6 +181,23 @@ describe('xy_expression', () => {
       expect(component.find(BarSeries)).toHaveLength(1);
       expect(component.find(BarSeries).prop('stackAccessors')).toHaveLength(1);
       expect(component.find(Settings).prop('rotation')).toEqual(90);
+    });
+
+    test('it rewrites the rows based on provided labels', () => {
+      const { data, args } = sampleArgs();
+
+      const component = shallow(<XYChart data={data} args={args} />);
+      expect(component.find(LineSeries).prop('data')).toEqual([
+        { 'Label A': 1, 'Label B': 2, c: 3 },
+        { 'Label A': 1, 'Label B': 5, c: 4 },
+      ]);
+    });
+
+    test('it uses labels as Y accessors', () => {
+      const { data, args } = sampleArgs();
+
+      const component = shallow(<XYChart data={data} args={args} />);
+      expect(component.find(LineSeries).prop('yAccessors')).toEqual(['Label A', 'Label B']);
     });
   });
 });

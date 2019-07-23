@@ -37,20 +37,31 @@ export const toExpression = (state: State, frame: FramePublicAPI): Ast | null =>
 
   const stateWithValidAccessors = {
     ...state,
-    layers: state.layers.map(layer => ({
-      ...layer,
-      accessors: layer.accessors.filter(accessor =>
-        Boolean(frame.datasourceLayers[layer.layerId].getOperationForColumnId(accessor))
-      ),
-    })),
+    layers: state.layers.map(layer => {
+      const datasource = frame.datasourceLayers[layer.layerId];
+
+      const newLayer = { ...layer };
+
+      if (!datasource.getOperationForColumnId(layer.splitAccessor)) {
+        delete newLayer.splitAccessor;
+      }
+
+      return {
+        ...newLayer,
+        accessors: layer.accessors.filter(accessor =>
+          Boolean(datasource.getOperationForColumnId(accessor))
+        ),
+      };
+    }),
   };
 
-  return buildExpression(stateWithValidAccessors, xyTitles(state.layers[0], frame));
+  return buildExpression(stateWithValidAccessors, xyTitles(state.layers[0], frame), frame);
 };
 
 export const buildExpression = (
   state: State,
-  { xTitle, yTitle }: { xTitle: string; yTitle: string }
+  { xTitle, yTitle }: { xTitle: string; yTitle: string },
+  frame?: FramePublicAPI
 ): Ast => ({
   type: 'expression',
   chain: [
@@ -75,28 +86,43 @@ export const buildExpression = (
             ],
           },
         ],
-        layers: state.layers.map(layer => ({
-          type: 'expression',
-          chain: [
-            {
-              type: 'function',
-              function: 'lens_xy_layer',
-              arguments: {
-                layerId: [layer.layerId],
+        layers: state.layers.map(layer => {
+          const columnToLabel: Record<string, string> = {};
 
-                title: [layer.title],
-                showGridlines: [layer.showGridlines],
-                position: [layer.position],
-                hide: [Boolean(layer.hide)],
+          if (frame) {
+            const datasource = frame.datasourceLayers[layer.layerId];
+            layer.accessors.concat([layer.splitAccessor]).forEach(accessor => {
+              const operation = datasource.getOperationForColumnId(accessor);
+              if (operation && operation.label) {
+                columnToLabel[accessor] = operation.label;
+              }
+            });
+          }
 
-                xAccessor: [layer.xAccessor],
-                splitAccessor: [layer.splitAccessor],
-                seriesType: [layer.seriesType],
-                accessors: layer.accessors,
+          return {
+            type: 'expression',
+            chain: [
+              {
+                type: 'function',
+                function: 'lens_xy_layer',
+                arguments: {
+                  layerId: [layer.layerId],
+
+                  title: [layer.title],
+                  showGridlines: [layer.showGridlines],
+                  position: [layer.position],
+                  hide: [Boolean(layer.hide)],
+
+                  xAccessor: [layer.xAccessor],
+                  splitAccessor: [layer.splitAccessor],
+                  seriesType: [layer.seriesType],
+                  accessors: layer.accessors,
+                  columnToLabel: [JSON.stringify(columnToLabel)],
+                },
               },
-            },
-          ],
-        })),
+            ],
+          };
+        }),
       },
     },
   ],
