@@ -5,7 +5,7 @@
  */
 
 import { setupEnvironment, pageHelpers } from './helpers';
-import _ from 'lodash';
+import { first } from 'lodash';
 import { JOBS } from './helpers/constants';
 
 jest.mock('ui/index_patterns', () => {
@@ -144,7 +144,7 @@ describe('Create Rollup Job, step 6: Review', () => {
 
     describe('without starting job after creation', () => {
       it('should call the "create" Api server endpoint', async () => {
-        httpRequestsMockHelpers.setCreateJobResponse(_.first(JOBS.jobs));
+        httpRequestsMockHelpers.setCreateJobResponse(first(JOBS.jobs));
 
         await goToStep(6);
 
@@ -163,13 +163,13 @@ describe('Create Rollup Job, step 6: Review', () => {
 
     describe('with starting job after creation', () => {
       it('should call the "create" and "start" Api server endpoints', async () => {
-        httpRequestsMockHelpers.setCreateJobResponse(_.first(JOBS.jobs));
+        httpRequestsMockHelpers.setCreateJobResponse(first(JOBS.jobs));
         httpRequestsMockHelpers.setStartJobResponse();
 
         await goToStep(6);
 
         find('rollupJobToggleJobStartAfterCreation').simulate('change', {
-          target: { isChecked: true },
+          target: { checked: true },
         });
 
         expect(server.requests.find(r => r.url === jobStartApiPath)).toBe(undefined); // make sure it hasn't been called
