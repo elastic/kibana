@@ -103,7 +103,6 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn> = {
     return currentColumn;
   },
   paramEditor: ({ state, setState, columnId: currentColumnId, layerId }) => {
-    // const currentColumn = state.columns[currentColumnId] as TermsIndexPatternColumn;
     const currentColumn = state.layers[layerId].columns[currentColumnId] as TermsIndexPatternColumn;
     const SEPARATOR = '$$$';
     function toValue(orderBy: TermsIndexPatternColumn['params']['orderBy']) {

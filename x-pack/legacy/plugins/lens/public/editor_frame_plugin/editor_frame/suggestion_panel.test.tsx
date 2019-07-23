@@ -59,7 +59,6 @@ describe('suggestion_panel', () => {
     ] as Suggestion[]);
 
     defaultProps = {
-      // activeDatasource: mockDatasource,
       activeDatasourceId: 'mock',
       datasourceMap: {
         mock: mockDatasource,

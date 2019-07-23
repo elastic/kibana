@@ -83,7 +83,6 @@ export const buildExpression = (
               function: 'lens_xy_layer',
               arguments: {
                 layerId: [layer.layerId],
-                datasourceId: [layer.datasourceId],
 
                 title: [layer.title],
                 showGridlines: [layer.showGridlines],

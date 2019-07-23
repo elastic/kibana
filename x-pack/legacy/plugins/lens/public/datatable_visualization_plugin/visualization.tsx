@@ -87,10 +87,6 @@ export const datatableVisualization: Visualization<
     );
   },
 
-  getLayerIds(state) {
-    return state.layers.map(l => l.layerId);
-  },
-
   getPersistableState: state => state,
 
   getSuggestions({

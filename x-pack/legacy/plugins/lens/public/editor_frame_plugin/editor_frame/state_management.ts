@@ -81,7 +81,6 @@ export const getInitialState = (props: EditorFrameProps): EditorFrameState => {
       state: null,
       activeId: props.initialVisualizationId,
     },
-    // layerIdToDatasource: {},
   };
 };
 

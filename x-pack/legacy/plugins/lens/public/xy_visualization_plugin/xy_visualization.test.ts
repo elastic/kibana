@@ -10,6 +10,7 @@ import { Operation } from '../types';
 import { State } from './types';
 import { createMockDatasource, createMockFramePublicAPI } from '../editor_frame_plugin/mocks';
 import { generateId } from '../id_generator';
+import { Ast } from '@kbn/interpreter/target/common';
 
 jest.mock('../id_generator');
 
@@ -19,7 +20,6 @@ function exampleState(): State {
     layers: [
       {
         layerId: 'first',
-        datasourceId: '',
         seriesType: 'area',
         splitAccessor: 'd',
         position: Position.Bottom,
@@ -107,7 +107,7 @@ describe('xy_visualization', () => {
         first: mockDatasource.publicAPIMock,
       };
 
-      const expression = xyVisualization.toExpression(exampleState(), frame)! as any;
+      const expression = xyVisualization.toExpression(exampleState(), frame)! as Ast;
 
       expect(mockDatasource.publicAPIMock.getOperationForColumnId).toHaveBeenCalledWith('b');
       expect(mockDatasource.publicAPIMock.getOperationForColumnId).toHaveBeenCalledWith('c');

@@ -30,7 +30,6 @@ describe('XYConfigPanel', () => {
         {
           seriesType: 'bar',
           layerId: 'first',
-          datasourceId: '',
           splitAccessor: 'baz',
           xAccessor: 'foo',
           position: Position.Bottom,

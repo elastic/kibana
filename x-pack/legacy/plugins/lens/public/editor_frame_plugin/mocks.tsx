@@ -16,7 +16,6 @@ export function createMockVisualization(): jest.Mocked<Visualization> {
     initialize: jest.fn((_frame, _state?) => ({})),
     renderConfigPanel: jest.fn(),
     toExpression: jest.fn((_state, _frame) => null),
-    getLayerIds: jest.fn(_state => []),
   };
 }
 
