@@ -17,27 +17,21 @@
  * under the License.
  */
 
-import { once } from 'lodash';
-import { SearchBar, setupDirective as setupSearchBarDirective } from './search_bar';
+import { UiStatsMetric, UiStatsMetricType } from './ui_stats';
 
-/**
- * Search Service
- * @internal
- */
-export class SearchService {
-  public setup() {
-    return {
-      ui: {
-        SearchBar,
-      },
-      loadLegacyDirectives: once(setupSearchBarDirective),
-    };
-  }
+export {
+  UiStatsMetric,
+  createUiStatsMetric,
+  UiStatsMetricReport,
+  UiStatsMetricType,
+} from './ui_stats';
+export { Stats } from './stats';
 
-  public stop() {
-    // nothing to do here yet
-  }
+export type Metric = UiStatsMetric<UiStatsMetricType>;
+export type MetricType = keyof typeof METRIC_TYPE;
+
+export enum METRIC_TYPE {
+  COUNT = 'count',
+  LOADED = 'loaded',
+  CLICK = 'click',
 }
-
-/** @public */
-export type SearchSetup = ReturnType<SearchService['setup']>;
