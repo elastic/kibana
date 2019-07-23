@@ -21,7 +21,7 @@ import { TypeOf } from '@kbn/config-schema';
 import { Url } from 'url';
 
 // @public (undocumented)
-export type APICaller = (endpoint: string, clientParams: Record<string, unknown>, options?: CallAPIOptions) => Promise<unknown>;
+export type APICaller = (endpoint: string, clientParams: Record<string, any>, options?: CallAPIOptions) => Promise<unknown>;
 
 // Warning: (ae-forgotten-export) The symbol "AuthResult" needs to be exported by the entry point index.d.ts
 // 
@@ -34,7 +34,7 @@ export type AuthHeaders = Record<string, string>;
 // @public
 export interface AuthResultData {
     headers: AuthHeaders;
-    state: Record<string, unknown>;
+    state: Record<string, any>;
 }
 
 // @public
@@ -61,7 +61,7 @@ export interface CallAPIOptions {
 export class ClusterClient {
     constructor(config: ElasticsearchClientConfig, log: Logger, getAuthHeaders?: GetAuthHeaders);
     asScoped(request?: KibanaRequest | LegacyRequest | FakeRequest): ScopedClusterClient;
-    callAsInternalUser: (endpoint: string, clientParams?: Record<string, unknown>, options?: CallAPIOptions | undefined) => Promise<any>;
+    callAsInternalUser: (endpoint: string, clientParams?: Record<string, any>, options?: CallAPIOptions | undefined) => Promise<any>;
     close(): void;
     }
 
@@ -331,7 +331,7 @@ export interface OnPreAuthToolkit {
 }
 
 // @public
-export interface Plugin<TSetup = void, TStart = void, TPluginsSetup extends {} = {}, TPluginsStart extends {} = {}> {
+export interface Plugin<TSetup = void, TStart = void, TPluginsSetup extends object = object, TPluginsStart extends object = object> {
     // (undocumented)
     setup(core: CoreSetup, plugins: TPluginsSetup): TSetup | Promise<TSetup>;
     // (undocumented)
@@ -341,7 +341,7 @@ export interface Plugin<TSetup = void, TStart = void, TPluginsSetup extends {} =
 }
 
 // @public
-export type PluginInitializer<TSetup, TStart, TPluginsSetup extends Record<PluginName, unknown> = {}, TPluginsStart extends Record<PluginName, unknown> = {}> = (core: PluginInitializerContext) => Plugin<TSetup, TStart, TPluginsSetup, TPluginsStart>;
+export type PluginInitializer<TSetup, TStart, TPluginsSetup extends object = object, TPluginsStart extends object = object> = (core: PluginInitializerContext) => Plugin<TSetup, TStart, TPluginsSetup, TPluginsStart>;
 
 // @public
 export interface PluginInitializerContext<ConfigSchema = unknown> {
@@ -670,8 +670,8 @@ export interface SavedObjectsUpdateResponse<T extends SavedObjectAttributes = an
 // @public
 export class ScopedClusterClient {
     constructor(internalAPICaller: APICaller, scopedAPICaller: APICaller, headers?: Record<string, string | string[] | undefined> | undefined);
-    callAsCurrentUser(endpoint: string, clientParams?: Record<string, unknown>, options?: CallAPIOptions): Promise<unknown>;
-    callAsInternalUser(endpoint: string, clientParams?: Record<string, unknown>, options?: CallAPIOptions): Promise<unknown>;
+    callAsCurrentUser(endpoint: string, clientParams?: Record<string, any>, options?: CallAPIOptions): Promise<unknown>;
+    callAsInternalUser(endpoint: string, clientParams?: Record<string, any>, options?: CallAPIOptions): Promise<unknown>;
     }
 
 // @public

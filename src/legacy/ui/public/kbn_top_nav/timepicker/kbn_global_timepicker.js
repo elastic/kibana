@@ -17,11 +17,34 @@
  * under the License.
  */
 
-import { uiModules } from '../modules';
+import { uiModules } from '../../modules';
 
 import toggleHtml from './kbn_global_timepicker.html';
 import { timefilter } from 'ui/timefilter';
 import { timeHistory } from 'ui/timefilter/time_history';
+
+import {
+  EuiSuperDatePicker,
+} from '@elastic/eui';
+
+uiModules
+  .get('kibana')
+  .directive('superDatePicker', reactDirective => reactDirective(EuiSuperDatePicker, [
+    'start',
+    'end',
+    'isPaused',
+    'refreshInterval',
+    'commonlyUsedRanges',
+    'dateFormat',
+    'recentlyUsedRanges',
+    'onTimeChange',
+    'onRefreshChange',
+    'isAutoRefreshOnly',
+    'commonlyUsedRanges',
+    'dateFormat',
+    'recentlyUsedRanges',
+  ]));
+
 
 uiModules
   .get('kibana')
