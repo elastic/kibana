@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { ObjectType, TypeOf } from '@kbn/config-schema';
+import { ObjectType, TypeOf, Type } from '@kbn/config-schema';
 import { Request, ResponseObject, ResponseToolkit } from 'hapi';
 
 import { KibanaRequest } from './request';
@@ -134,6 +134,16 @@ export class Router {
       throw new Error(
         `The [${routeMethod}] at [${route.path}] does not have a 'validate' specified. Use 'false' as the value if you want to bypass validation.`
       );
+    }
+
+    if (route.validate !== false) {
+      Object.entries(route.validate).forEach(([key, schema]) => {
+        if (!(schema instanceof Type)) {
+          throw new Error(
+            `Expected a valid schema declared with '@kbn/config-schema' package at key: [${key}].`
+          );
+        }
+      });
     }
 
     return route.validate ? route.validate : undefined;
