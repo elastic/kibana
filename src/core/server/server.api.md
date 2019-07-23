@@ -33,7 +33,7 @@ export type AuthHeaders = Record<string, string | string[]>;
 
 // @public
 export interface AuthResultData {
-    headers?: AuthHeaders;
+    requestHeaders?: AuthHeaders;
     responseHeaders?: AuthHeaders;
     state?: Record<string, any>;
 }
