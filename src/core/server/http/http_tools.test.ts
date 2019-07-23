@@ -67,7 +67,7 @@ describe('defaultValidationErrorHandler', () => {
 
 describe('timeouts', () => {
   const logger = loggingServiceMock.create();
-  const server = new HttpServer(logger.get());
+  const server = new HttpServer(logger, 'foo');
 
   test('returns 408 on timeout error', async () => {
     const router = new Router('');
@@ -75,18 +75,17 @@ describe('timeouts', () => {
       await new Promise(resolve => setTimeout(resolve, 2000));
       return res.ok({});
     });
-    router.get({ path: '/b', validate: false }, async (req, res) => res.ok({}));
+    router.get({ path: '/b', validate: false }, (req, res) => res.ok({}));
 
-    const config = {
+    const { registerRouter, server: innerServer } = await server.setup({
       socketTimeout: 1000,
       host: '127.0.0.1',
       maxPayload: new ByteSizeValue(1024),
       ssl: {},
-    } as HttpConfig;
-    const { registerRouter, server: innerServer } = await server.setup(config);
+    } as HttpConfig);
     registerRouter(router);
 
-    await server.start(config);
+    await server.start();
 
     await supertest(innerServer.listener)
       .get('/a')
