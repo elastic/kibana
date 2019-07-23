@@ -17,22 +17,24 @@
  * under the License.
  */
 
-import { ValidationFunc } from '../hook_form_lib';
-import { isEmptyString, isUrl } from '../../validators/string';
-import { formatError } from '../errors';
+import { Option } from '@elastic/eui/src/components/selectable/types';
 
-export const urlField = (allowEmpty = false) => (
+import { ValidationFunc } from '../../hook_form_lib';
+import { hasMinLengthArray } from '../../../validators/array';
+import { minSelectionError } from '../../errors';
+import { multiSelectOptionsToSelectedValue } from '../../lib';
+
+/**
+ * Validator to validate that a EuiSelectable has a minimum number
+ * of items selected.
+ * @param total Minimum number of items
+ */
+export const minSelectableSelectionField = (total = 0) => (
   ...args: Parameters<ValidationFunc>
 ): ReturnType<ValidationFunc> => {
   const [{ value }] = args;
 
-  if (typeof value !== 'string') {
-    return formatError('URL');
-  }
-
-  if (allowEmpty && isEmptyString(value)) {
-    return;
-  }
-
-  return isUrl(value) ? undefined : formatError('URL');
+  return hasMinLengthArray(total)(multiSelectOptionsToSelectedValue(value as Option[]))
+    ? undefined
+    : minSelectionError(total);
 };

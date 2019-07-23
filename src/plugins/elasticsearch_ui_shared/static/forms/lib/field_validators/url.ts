@@ -17,19 +17,22 @@
  * under the License.
  */
 
-import { ValidationFunc } from '../hook_form_lib';
-import { isEmptyString } from '../../validators/string';
-import { isEmptyArray } from '../../validators/array';
-import { fieldMissingError } from '../errors';
+import { ValidationFunc } from '../../hook_form_lib';
+import { isEmptyString, isUrl } from '../../../validators/string';
+import { formatError } from '../../errors';
 
-export const emptyField = (...args: Parameters<ValidationFunc>): ReturnType<ValidationFunc> => {
-  const [{ value, path }] = args;
+export const urlField = (allowEmpty = false) => (
+  ...args: Parameters<ValidationFunc>
+): ReturnType<ValidationFunc> => {
+  const [{ value }] = args;
 
-  if (typeof value === 'string') {
-    return isEmptyString(value) ? fieldMissingError(path) : undefined;
+  if (typeof value !== 'string') {
+    return formatError('URL');
   }
 
-  if (Array.isArray(value)) {
-    return isEmptyArray(value) ? fieldMissingError(path) : undefined;
+  if (allowEmpty && isEmptyString(value)) {
+    return;
   }
+
+  return isUrl(value) ? undefined : formatError('URL');
 };

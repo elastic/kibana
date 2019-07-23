@@ -17,7 +17,7 @@
  * under the License.
  */
 
-export * from './contains_string';
+export * from './contains_chars';
 export * from './ends_with';
 export * from './has_max_length';
 export * from './has_min_length';

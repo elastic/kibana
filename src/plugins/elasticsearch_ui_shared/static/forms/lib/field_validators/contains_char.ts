@@ -17,9 +17,9 @@
  * under the License.
  */
 
-import { ValidationFunc } from '../hook_form_lib';
-import { containsChars } from '../../validators/string';
-import { formatError } from '../errors';
+import { ValidationFunc } from '../../hook_form_lib';
+import { containsChars } from '../../../validators/string';
+import { formatError } from '../../errors';
 
 export const containsCharsField = (chars: string | string[]) => (
   ...args: Parameters<ValidationFunc>

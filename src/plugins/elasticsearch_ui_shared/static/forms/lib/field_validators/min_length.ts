@@ -17,10 +17,10 @@
  * under the License.
  */
 
-import { ValidationFunc } from '../hook_form_lib';
-import { hasMinLengthString } from '../../validators/string';
-import { hasMinLengthArray } from '../../validators/array';
-import { minLengthError } from '../errors';
+import { ValidationFunc } from '../../hook_form_lib';
+import { hasMinLengthString } from '../../../validators/string';
+import { hasMinLengthArray } from '../../../validators/array';
+import { minLengthError } from '../../errors';
 
 export const minLengthField = (length = 0) => (
   ...args: Parameters<ValidationFunc>

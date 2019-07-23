@@ -19,9 +19,9 @@
 
 // Note: we can't import from "ui/indices" as the TS Type definition don't exist
 // import { INDEX_ILLEGAL_CHARACTERS_VISIBLE } from 'ui/indices';
-import { ValidationFunc } from '../hook_form_lib';
-import { startsWith, containsChars } from '../../validators/string';
-import { formatError } from '../errors';
+import { ValidationFunc } from '../../hook_form_lib';
+import { startsWith, containsChars } from '../../../validators/string';
+import { formatError } from '../../errors';
 
 const INDEX_ILLEGAL_CHARACTERS = ['\\', '/', '?', '"', '<', '>', '|', '*'];
 

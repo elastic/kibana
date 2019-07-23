@@ -17,24 +17,19 @@
  * under the License.
  */
 
-import { Option } from '@elastic/eui/src/components/selectable/types';
+import { ValidationFunc } from '../../hook_form_lib';
+import { isEmptyString } from '../../../validators/string';
+import { isEmptyArray } from '../../../validators/array';
+import { fieldMissingError } from '../../errors';
 
-import { ValidationFunc } from '../hook_form_lib';
-import { hasMinLengthArray } from '../../validators/array';
-import { minSelectionError } from '../errors';
-import { multiSelectOptionsToSelectedValue } from '../lib';
+export const emptyField = (...args: Parameters<ValidationFunc>): ReturnType<ValidationFunc> => {
+  const [{ value, path }] = args;
 
-/**
- * Validator to validate that a EuiSelectable has a minimum number
- * of items selected.
- * @param total Minimum number of items
- */
-export const minSelectableSelectionField = (total = 0) => (
-  ...args: Parameters<ValidationFunc>
-): ReturnType<ValidationFunc> => {
-  const [{ value }] = args;
+  if (typeof value === 'string') {
+    return isEmptyString(value) ? fieldMissingError(path) : undefined;
+  }
 
-  return hasMinLengthArray(total)(multiSelectOptionsToSelectedValue(value as Option[]))
-    ? undefined
-    : minSelectionError(total);
+  if (Array.isArray(value)) {
+    return isEmptyArray(value) ? fieldMissingError(path) : undefined;
+  }
 };
