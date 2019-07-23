@@ -73,8 +73,9 @@ export class EmbeddableFactory extends AbstractEmbeddableFactory {
         try {
           return await this.indexPatternService.get(indexPatternId);
         } catch (error) {
-          // Unable to load index pattern, better to not throw error so map embeddable can render
-          // Error will be surfaced by map embeddable since it too will be unable to locate the index pattern
+          // Unable to load index pattern, ignore error as the index patterns are only used to
+          // configure the filter and query bar - there is still a good chance to get the visualization
+          // to show.
           return null;
         }
       }

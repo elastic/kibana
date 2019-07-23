@@ -65,6 +65,9 @@ export class Embeddable extends AbstractEmbeddable<LensEmbeddableInput, LensEmbe
         defaultTitle: savedVis.title,
         savedObjectId: savedVis.id!,
         editable,
+        // passing edit url and index patterns to the output of this embeddable for
+        // the container to pick them up and use them to configure filter bar and
+        // config dropdown correctly.
         editUrl,
         indexPatterns,
       },
@@ -127,13 +130,16 @@ export class Embeddable extends AbstractEmbeddable<LensEmbeddableInput, LensEmbe
   }
 
   reload() {
-    this.currentContext = {
-      ...this.currentContext,
-      lastReloadRequestTime: Date.now(),
-    };
+    const currentTime = Date.now();
+    if (this.currentContext.lastReloadRequestTime !== currentTime) {
+      this.currentContext = {
+        ...this.currentContext,
+        lastReloadRequestTime: currentTime,
+      };
 
-    if (this.domNode) {
-      this.render(this.domNode);
+      if (this.domNode) {
+        this.render(this.domNode);
+      }
     }
   }
 }
