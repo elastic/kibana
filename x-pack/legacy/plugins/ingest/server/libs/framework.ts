@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { BackendFrameworkAdapter, KibanaServerRequest } from './adapters/framework/adapter_types';
+import { KibanaServerRequest } from './adapters/framework/adapter_types';
+import { BackendFrameworkAdapter } from './adapters/framework/default';
 
 export class BackendFrameworkLib {
   /**

@@ -7,22 +7,26 @@
 import { camelCase } from 'lodash';
 import { PLUGIN } from '../../../common/constants';
 import { CONFIG_PREFIX } from '../../../common/constants/plugin';
-
-import { DatabaseKbnESPlugin } from '../adapters/database/adapter_types';
-import { KibanaDatabaseAdapter } from '../adapters/database/kibana_database_adapter';
+import { DatabaseKbnESPlugin } from '../adapters/es_database/adapter_types';
+import { ESDatabaseAdapter } from '../adapters/es_database/default';
 import { KibanaLegacyServer } from '../adapters/framework/adapter_types';
-import { KibanaBackendFrameworkAdapter } from '../adapters/framework/kibana_framework_adapter';
-
+import { BackendFrameworkAdapter } from '../adapters/framework/default';
 import { ServerLibs } from '../types';
 import { BackendFrameworkLib } from './../framework';
+import { ConfigurationLib } from '../configuration';
+import { ConfigAdapter } from '../adapters/configurations/default';
 
 export function compose(server: KibanaLegacyServer): ServerLibs {
   const framework = new BackendFrameworkLib(
-    new KibanaBackendFrameworkAdapter(camelCase(PLUGIN.ID), server, CONFIG_PREFIX)
+    new BackendFrameworkAdapter(camelCase(PLUGIN.ID), server, CONFIG_PREFIX)
   );
-  const database = new KibanaDatabaseAdapter(server.plugins.elasticsearch as DatabaseKbnESPlugin);
+  const database = new ESDatabaseAdapter(server.plugins.elasticsearch as DatabaseKbnESPlugin);
+
+  const configAdapter = new ConfigAdapter();
+  const configuration = new ConfigurationLib(configAdapter);
 
   const libs: ServerLibs = {
+    configuration,
     framework,
     database,
   };

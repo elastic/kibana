@@ -4,12 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { compose } from './libs/compose/kibana';
+
 export const initServerWithKibana = (hapiServer: any) => {
-  hapiServer.route({
-    method: 'GET',
-    path: '/api/fleet/load',
-    handler: (request: any, h: any) => {
-      return 'Hello World!';
-    },
-  });
+  const libs = compose(hapiServer);
+
+  libs.framework.exposeMethod('create');
 };

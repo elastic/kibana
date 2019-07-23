@@ -9,7 +9,6 @@ import { get } from 'lodash';
 // @ts-ignore
 import { mirrorPluginStatus } from '../../../../../../server/lib/mirror_plugin_status';
 import {
-  BackendFrameworkAdapter,
   FrameworkInfo,
   internalUser,
   KibanaLegacyServer,
@@ -20,7 +19,7 @@ import {
   XpackInfo,
 } from './adapter_types';
 
-export class KibanaBackendFrameworkAdapter implements BackendFrameworkAdapter {
+export class BackendFrameworkAdapter {
   public readonly internalUser = internalUser;
   public info: null | FrameworkInfo = null;
 

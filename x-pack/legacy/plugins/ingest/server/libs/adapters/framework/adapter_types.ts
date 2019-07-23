@@ -26,16 +26,6 @@ export interface XpackInfo {
   isAvailable: () => boolean;
 }
 
-export interface BackendFrameworkAdapter {
-  internalUser: FrameworkInternalUser;
-  info: null | FrameworkInfo;
-  log(text: string): void;
-  on(event: 'xpack.status.green' | 'elasticsearch.status.green', cb: () => void): void;
-  getSetting(settingPath: string): any;
-  getUser(request: KibanaServerRequest): Promise<KibanaUser | null>;
-  exposeMethod(name: string, method: () => any): void;
-}
-
 export interface KibanaLegacyServer {
   plugins: {
     xpack_main: {

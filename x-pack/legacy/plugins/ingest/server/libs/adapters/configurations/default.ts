@@ -11,7 +11,7 @@ import {
   BackupConfigurationFile,
 } from './adapter_types';
 
-export class DefaultConfigAdapter {
+export class ConfigAdapter {
   public async create(
     configuration: NewConfigurationFile
   ): Promise<{ id: string; shared_id: string; version: number }> {
