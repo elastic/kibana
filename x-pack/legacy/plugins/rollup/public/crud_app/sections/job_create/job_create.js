@@ -105,6 +105,7 @@ export class JobCreateUi extends Component {
       indexPatternTermsFields: [],
       indexPatternHistogramFields: [],
       indexPatternMetricsFields: [],
+      startJobAfterCreation: false,
     };
 
     this.lastIndexPatternValidationTime = 0;
@@ -422,10 +423,9 @@ export class JobCreateUi extends Component {
         [STEP_METRICS]: {
           metrics,
         },
-        [STEP_REVIEW]: {
-          startJobAfterCreation,
-        }
+        [STEP_REVIEW]: {}
       },
+      startJobAfterCreation,
     } = this.state;
 
     return {
@@ -629,12 +629,17 @@ export class JobCreateUi extends Component {
     }
   }
 
+  onToggleStartAfterCreate = (eve) => {
+    this.setState({ startJobAfterCreation: eve.target.checked });
+  };
+
   renderNavigation() {
     const {
       isValidatingIndexPattern,
       nextStepId,
       previousStepId,
       areStepErrorsVisible,
+      startJobAfterCreation
     } = this.state;
 
     const { isSaving } = this.props;
@@ -656,6 +661,8 @@ export class JobCreateUi extends Component {
         goToPreviousStep={this.goToPreviousStep}
         canGoToNextStep={canGoToNextStep}
         save={this.save}
+        onClickToggleStart={this.onToggleStartAfterCreate}
+        startJobAfterCreation={startJobAfterCreation}
       />
     );
   }

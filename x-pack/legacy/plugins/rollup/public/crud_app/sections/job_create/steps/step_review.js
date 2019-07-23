@@ -8,7 +8,7 @@ import React, { Component, Fragment } from 'react';
 import PropTypes from 'prop-types';
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 
-import { EuiErrorBoundary, EuiSpacer, EuiTab, EuiTabs, EuiTitle, EuiCheckbox } from '@elastic/eui';
+import { EuiErrorBoundary, EuiSpacer, EuiTab, EuiTabs, EuiTitle } from '@elastic/eui';
 
 import { serializeJob } from '../../../services';
 
@@ -96,16 +96,8 @@ export class StepReviewUi extends Component {
     );
   }
 
-  onClickStartAfterCreate = (eve) => {
-    const { onFieldsChange } = this.props;
-    onFieldsChange({ startJobAfterCreation: eve.target.checked });
-  };
-
   render() {
-    const {
-      job,
-      fields: { startJobAfterCreation },
-    } = this.props;
+    const { job } = this.props;
     const { selectedTab } = this.state;
     const json = serializeJob(job);
     return (
@@ -125,21 +117,6 @@ export class StepReviewUi extends Component {
         <EuiErrorBoundary>
           <JobDetails job={job} json={json} tab={selectedTab} />
         </EuiErrorBoundary>
-
-        <EuiSpacer size="m" />
-
-        <EuiCheckbox
-          id="rollupJobToggleJobStartAfterCreation"
-          data-test-subj="rollupJobToggleJobStartAfterCreation"
-          checked={startJobAfterCreation}
-          label={
-            <FormattedMessage
-              id="xpack.rollupJobs.create.startJobLabel"
-              defaultMessage="Start job now"
-            />
-          }
-          onChange={this.onClickStartAfterCreate}
-        />
       </Fragment>
     );
   }

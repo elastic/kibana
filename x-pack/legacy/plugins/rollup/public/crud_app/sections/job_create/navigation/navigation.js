@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { Fragment } from 'react';
 import PropTypes from 'prop-types';
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 
@@ -15,6 +15,7 @@ import {
   EuiFlexItem,
   EuiText,
   EuiLoadingSpinner,
+  EuiCheckbox
 } from '@elastic/eui';
 
 const NavigationUi = ({
@@ -25,7 +26,10 @@ const NavigationUi = ({
   goToPreviousStep,
   save,
   canGoToNextStep,
+  onClickToggleStart,
+  startJobAfterCreation,
 }) => {
+  console.log(startJobAfterCreation);
   if (isSaving) {
     return (
       <EuiFlexGroup justifyContent="flexStart" gutterSize="m">
@@ -95,11 +99,34 @@ const NavigationUi = ({
     </EuiFlexItem>
   );
 
+
+  const startAfterCreateCheckbox = (
+    <EuiFlexItem grow={false}>
+      <EuiCheckbox
+        id="rollupJobToggleJobStartAfterCreation"
+        data-test-subj="rollupJobToggleJobStartAfterCreation"
+        checked={startJobAfterCreation}
+        label={
+          <FormattedMessage
+            id="xpack.rollupJobs.create.startJobLabel"
+            defaultMessage="Start job now"
+          />
+        }
+        onChange={onClickToggleStart}
+      />
+    </EuiFlexItem>
+  );
+
   return (
     <EuiFlexGroup justifyContent="flexStart" gutterSize="m">
       {hasPreviousStep && previousStepButton}
       {hasNextStep && nextStepButton}
-      {!hasNextStep && saveButton}
+      {!hasNextStep && (
+        <Fragment>
+          {saveButton}
+          {startAfterCreateCheckbox}
+        </Fragment>
+      )}
     </EuiFlexGroup>
   );
 };
