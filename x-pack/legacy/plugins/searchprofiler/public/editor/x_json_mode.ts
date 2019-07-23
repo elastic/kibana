@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+// Copied and modified from src/legacy/core_plugins/console/public/src/sense_editor/mode/input.js
+
 import ace from 'brace';
 
 import * as xJsonRules from './x_json_highlight_rules';
