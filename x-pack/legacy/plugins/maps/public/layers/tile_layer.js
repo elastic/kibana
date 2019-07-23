@@ -7,7 +7,7 @@
 import { AbstractLayer } from './layer';
 import _ from 'lodash';
 import { TileStyle } from '../layers/styles/tile_style';
-import { SOURCE_DATA_ID_ORIGIN } from '../../common/constants';
+import { SOURCE_DATA_ID_ORIGIN, MB_SOURCE_ID_LAYER_ID_PREFIX_DELIMITER } from '../../common/constants';
 
 export class TileLayer extends AbstractLayer {
 
@@ -48,7 +48,7 @@ export class TileLayer extends AbstractLayer {
   }
 
   _getMbLayerId() {
-    return this.getId() + '_raster';
+    return `${this.getId()}${MB_SOURCE_ID_LAYER_ID_PREFIX_DELIMITER}raster`;
   }
 
   getMbLayerIds() {

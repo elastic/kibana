@@ -8,7 +8,7 @@ import _ from 'lodash';
 import { AbstractLayer } from './layer';
 import { VectorLayer } from './vector_layer';
 import { HeatmapStyle } from './styles/heatmap_style';
-import { EMPTY_FEATURE_COLLECTION } from '../../common/constants';
+import { EMPTY_FEATURE_COLLECTION, MB_SOURCE_ID_LAYER_ID_PREFIX_DELIMITER } from '../../common/constants';
 
 const SCALED_PROPERTY_NAME = '__kbn_heatmap_weight__';//unique name to store scaled value for weighting
 
@@ -37,7 +37,7 @@ export class HeatmapLayer extends VectorLayer {
   }
 
   _getHeatmapLayerId() {
-    return this.getId() + '_heatmap';
+    return `${this.getId()}${MB_SOURCE_ID_LAYER_ID_PREFIX_DELIMITER}heatmap`;
   }
 
   getMbLayerIds() {

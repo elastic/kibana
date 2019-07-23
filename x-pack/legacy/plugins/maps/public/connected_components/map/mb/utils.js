@@ -7,7 +7,7 @@
 import _ from 'lodash';
 import mapboxgl from 'mapbox-gl';
 import chrome from 'ui/chrome';
-import { MAKI_SPRITE_PATH } from '../../../../common/constants';
+import { MAKI_SPRITE_PATH, MB_SOURCE_ID_LAYER_ID_PREFIX_DELIMITER } from '../../../../common/constants';
 
 function relativeToAbsolute(url) {
   const a = document.createElement('a');
@@ -81,7 +81,7 @@ export function syncLayerOrder(mbMap, layerList) {
     //- a single source-id identifies a single kibana layer
     //- all layer-ids have a pattern that is sourceId_layerName, were sourceId cannot have any underscores
     const currentLayerOrder = _.uniq(
-      mbLayers.map(({ id }) => id.substring(0, id.indexOf('_'))));
+      mbLayers.map(({ id }) => id.substring(0, id.indexOf(MB_SOURCE_ID_LAYER_ID_PREFIX_DELIMITER))));
 
     const newLayerOrder = layerList.map(l => l.getId())
       .filter(layerId => currentLayerOrder.includes(layerId));
