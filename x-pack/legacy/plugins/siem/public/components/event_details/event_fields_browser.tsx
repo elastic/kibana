@@ -12,7 +12,7 @@ import * as React from 'react';
 import { pure } from 'recompose';
 
 import { sortBy } from 'lodash';
-import { BrowserFields, getAllFieldsByName, BrowserField } from '../../containers/source';
+import { BrowserFields, getAllFieldsByName } from '../../containers/source';
 import { DetailItem } from '../../graphql/types';
 import { OnUpdateColumns } from '../timeline/events';
 
@@ -27,8 +27,6 @@ interface Props {
   onUpdateColumns: OnUpdateColumns;
   timelineId: string;
 }
-
-export type EventFieldsData = BrowserField & DetailItem;
 
 /** Renders a table view or JSON view of the `ECS` `data` */
 export const EventFieldsBrowser = pure<Props>(

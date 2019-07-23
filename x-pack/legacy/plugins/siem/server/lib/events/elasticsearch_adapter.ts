@@ -31,7 +31,7 @@ import { baseCategoryFields } from '../../utils/beat_schema/8.0.0';
 import { reduceFields } from '../../utils/build_query/reduce_fields';
 import { mergeFieldsWithHit, inspectStringifyObject } from '../../utils/build_query';
 import { eventFieldsMap } from '../ecs_fields';
-import { FrameworkAdapter, FrameworkRequest, RequestOptions } from '../framework';
+import { FrameworkAdapter, FrameworkRequest, RequestOptionsPaginated } from '../framework';
 import { TermAggregation } from '../types';
 
 import { buildDetailsQuery, buildQuery, buildTimelineQuery } from './query.dsl';

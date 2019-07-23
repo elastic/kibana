@@ -28,7 +28,7 @@ import * as i18n from './translations';
 import { OverflowField } from '../tables/helpers';
 import { DATE_FIELD_TYPE, MESSAGE_FIELD_NAME } from '../timeline/body/renderers/constants';
 import { EVENT_DURATION_FIELD_NAME } from '../duration';
-import { EventFieldsData } from './event_fields_browser';
+import { EventFieldsData } from './types';
 
 const HoverActionsContainer = styled(EuiPanel)`
   align-items: center;
