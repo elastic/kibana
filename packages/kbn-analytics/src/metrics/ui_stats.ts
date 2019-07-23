@@ -17,6 +17,37 @@
  * under the License.
  */
 
-export { SearchService, SearchSetup } from './search_service';
+import { Stats } from './stats';
+import { METRIC_TYPE } from './';
 
-export * from './search_bar';
+export type UiStatsMetricType = METRIC_TYPE.CLICK | METRIC_TYPE.LOADED | METRIC_TYPE.COUNT;
+export interface UiStatsMetricConfig<T extends UiStatsMetricType> {
+  type: T;
+  appName: string;
+  eventName: string;
+  count?: number;
+}
+
+export interface UiStatsMetric<T extends UiStatsMetricType = UiStatsMetricType> {
+  type: T;
+  appName: string;
+  eventName: string;
+  count: number;
+}
+
+export function createUiStatsMetric<T extends UiStatsMetricType>({
+  type,
+  appName,
+  eventName,
+  count = 1,
+}: UiStatsMetricConfig<T>): UiStatsMetric<T> {
+  return { type, appName, eventName, count };
+}
+
+export interface UiStatsMetricReport {
+  key: string;
+  appName: string;
+  eventName: string;
+  type: UiStatsMetricType;
+  stats: Stats;
+}
