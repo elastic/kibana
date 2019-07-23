@@ -6,12 +6,72 @@
 
 import { SortField, TimerangeInput } from '../../graphql/types';
 import { createQueryFilterClauses } from '../../utils/build_query';
-import { RequestOptions } from '../framework';
+import { RequestOptions, RequestOptionsPaginated } from '../framework';
 import { SortRequest } from '../types';
 
 import { TimerangeFilter } from './types';
 
-export const buildQuery = (options: RequestOptions) => {
+export const buildQuery = (options: RequestOptionsPaginated) => {
+  const { querySize } = options.pagination;
+  const { fields, filterQuery } = options;
+  const filterClause = [...createQueryFilterClauses(filterQuery)];
+  const defaultIndex = options.defaultIndex;
+
+  const getTimerangeFilter = (timerange: TimerangeInput | undefined): TimerangeFilter[] => {
+    if (timerange) {
+      const { to, from } = timerange;
+      return [
+        {
+          range: {
+            [options.sourceConfiguration.fields.timestamp]: {
+              gte: from,
+              lte: to,
+            },
+          },
+        },
+      ];
+    }
+    return [];
+  };
+
+  const filter = [...filterClause, ...getTimerangeFilter(options.timerange), { match_all: {} }];
+
+  const getSortField = (sortField: SortField) => {
+    if (sortField.sortFieldId) {
+      const field: string =
+        sortField.sortFieldId === 'timestamp' ? '@timestamp' : sortField.sortFieldId;
+
+      return [
+        { [field]: sortField.direction },
+        { [options.sourceConfiguration.fields.tiebreaker]: sortField.direction },
+      ];
+    }
+    return [];
+  };
+
+  const sort: SortRequest = getSortField(options.sortField!);
+
+  const dslQuery = {
+    allowNoIndices: true,
+    index: defaultIndex,
+    ignoreUnavailable: true,
+    body: {
+      query: {
+        bool: {
+          filter,
+        },
+      },
+      size: querySize,
+      track_total_hits: true,
+      sort,
+      _source: fields,
+    },
+  };
+
+  return dslQuery;
+};
+
+export const buildTimelineQuery = (options: RequestOptions) => {
   const { limit, cursor, tiebreaker } = options.pagination;
   const { fields, filterQuery } = options;
   const filterClause = [...createQueryFilterClauses(filterQuery)];

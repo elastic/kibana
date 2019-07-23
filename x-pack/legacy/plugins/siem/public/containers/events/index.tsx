@@ -11,46 +11,49 @@ import { connect } from 'react-redux';
 
 import chrome from 'ui/chrome';
 import { DEFAULT_INDEX_KEY } from '../../../common/constants';
-import { Direction, Ecs, GetEventsQuery, PageInfo } from '../../graphql/types';
+import { Direction, Ecs, GetEventsQuery, PageInfoPaginated } from '../../graphql/types';
 import { hostsModel, hostsSelectors, inputsModel, State, inputsSelectors } from '../../store';
 import { createFilter, getDefaultFetchPolicy } from '../helpers';
-import { QueryTemplate, QueryTemplateProps } from '../query_template';
-
+import { QueryTemplatePaginated, QueryTemplatePaginatedProps } from '../query_template_paginated';
+import { generateTablePaginationOptions } from '../../components/paginated_table/helpers';
 import { eventsQuery } from './index.gql_query';
 
 const ID = 'eventsQuery';
 
 export interface EventsArgs {
+  events: Ecs[];
   id: string;
   inspect: inputsModel.InspectQuery;
-  events: Ecs[];
   loading: boolean;
-  loadMore: (cursor: string, tiebreaker: string) => void;
-  pageInfo: PageInfo;
+  loadPage: (newActivePage: number) => void;
+  pageInfo: PageInfoPaginated;
   refetch: inputsModel.Refetch;
   totalCount: number;
 }
 
-export interface OwnProps extends QueryTemplateProps {
+export interface OwnProps extends QueryTemplatePaginatedProps {
   children?: (args: EventsArgs) => React.ReactNode;
   type: hostsModel.HostsType;
 }
 
 export interface EventsComponentReduxProps {
+  activePage: number;
   isInspected: boolean;
   limit: number;
 }
 
 type EventsProps = OwnProps & EventsComponentReduxProps;
 
-class EventsComponentQuery extends QueryTemplate<
+class EventsComponentQuery extends QueryTemplatePaginated<
   EventsProps,
   GetEventsQuery.Query,
   GetEventsQuery.Variables
 > {
   public render() {
     const {
+      activePage,
       children,
+      endDate,
       filterQuery,
       id = ID,
       isInspected,
@@ -58,7 +61,6 @@ class EventsComponentQuery extends QueryTemplate<
       skip,
       sourceId,
       startDate,
-      endDate,
     } = this.props;
     return (
       <Query<GetEventsQuery.Query, GetEventsQuery.Variables>
@@ -67,36 +69,28 @@ class EventsComponentQuery extends QueryTemplate<
         notifyOnNetworkStatusChange
         skip={skip}
         variables={{
+          defaultIndex: chrome.getUiSettingsClient().get(DEFAULT_INDEX_KEY),
           filterQuery: createFilter(filterQuery),
-          sourceId,
-          pagination: {
-            limit,
-            cursor: null,
-            tiebreaker: null,
-          },
+          inspect: isInspected,
+          pagination: generateTablePaginationOptions(activePage, limit),
           sortField: {
             sortFieldId: 'timestamp',
             direction: Direction.desc,
           },
+          sourceId,
           timerange: {
             interval: '12h',
             from: startDate!,
             to: endDate!,
           },
-          defaultIndex: chrome.getUiSettingsClient().get(DEFAULT_INDEX_KEY),
-          inspect: isInspected,
         }}
       >
         {({ data, loading, fetchMore, refetch }) => {
           const events = getOr([], 'source.Events.edges', data);
           this.setFetchMore(fetchMore);
-          this.setFetchMoreOptions((newCursor: string, tiebreaker?: string) => ({
+          this.setFetchMoreOptions((newActivePage: number) => ({
             variables: {
-              pagination: {
-                cursor: newCursor,
-                tiebreaker,
-                limit,
-              },
+              pagination: generateTablePaginationOptions(newActivePage, limit),
             },
             updateQuery: (prev, { fetchMoreResult }) => {
               if (!fetchMoreResult) {
@@ -108,21 +102,21 @@ class EventsComponentQuery extends QueryTemplate<
                   ...fetchMoreResult.source,
                   Events: {
                     ...fetchMoreResult.source.Events,
-                    edges: [...prev.source.Events.edges, ...fetchMoreResult.source.Events.edges],
+                    edges: [...fetchMoreResult.source.Events.edges],
                   },
                 },
               };
             },
           }));
           return children!({
+            events,
             id,
             inspect: getOr(null, 'source.Events.inspect', data),
-            refetch,
             loading,
-            totalCount: getOr(0, 'source.Events.totalCount', data),
+            loadPage: this.wrappedLoadMore,
             pageInfo: getOr({}, 'source.Events.pageInfo', data),
-            events,
-            loadMore: this.wrappedLoadMore,
+            refetch,
+            totalCount: getOr(0, 'source.Events.totalCount', data),
           });
         }}
       </Query>
