@@ -16,8 +16,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { DataSetup } from '../../data/public';
-import { VisualizationsSetup } from '../../visualizations/public';
 import {
   CoreSetup,
   CoreStart,
@@ -25,6 +23,8 @@ import {
   PluginInitializerContext,
   UiSettingsClientContract,
 } from '../../../../core/public';
+import { Plugin as DataPublicPlugin } from '../../../../plugins/data/public';
+import { VisualizationsSetup } from '../../visualizations/public';
 
 import { LegacyDependenciesPlugin, LegacyDependenciesPluginSetup } from './shim';
 
@@ -40,8 +40,7 @@ interface TileMapVisualizationDependencies extends LegacyDependenciesPluginSetup
 
 /** @internal */
 export interface TileMapPluginSetupDependencies {
-  // TODO: Remove `any` as functionsRegistry will be added to the DataSetup.
-  data: DataSetup | any;
+  data: ReturnType<DataPublicPlugin['setup']>;
   visualizations: VisualizationsSetup;
   __LEGACY: LegacyDependenciesPlugin;
 }
