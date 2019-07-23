@@ -21,6 +21,7 @@ import { createExplorerLink } from '../links/create_explorer_link';
 import { LocalizedDateTooltip } from '../../localized_date_tooltip';
 import { PreferenceFormattedDate } from '../../formatted_date';
 import { NetworkType } from '../../../store/network/model';
+import { escapeDataProviderId } from '../../drag_and_drop/helpers';
 
 export const getAnomaliesNetworkTableColumns = (
   startDate: number,
@@ -66,7 +67,9 @@ export const getAnomaliesNetworkTableColumns = (
     sortable: true,
     render: (_, anomaliesByNetwork) => (
       <DraggableScore
-        id={`anomalies-network-table-severity-${createCompoundNetworkKey(anomaliesByNetwork)}`}
+        id={escapeDataProviderId(
+          `anomalies-network-table-severity-${createCompoundNetworkKey(anomaliesByNetwork)}`
+        )}
         score={anomaliesByNetwork.anomaly}
       />
     ),

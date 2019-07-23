@@ -22,6 +22,17 @@ export function clusterSetupStatusRoute(server) {
         params: Joi.object({
           clusterUuid: Joi.string().required()
         }),
+        query: Joi.object({
+          // This flag is not intended to be used in production. It was introduced
+          // as a way to ensure consistent API testing - the typical data source
+          // for API tests are archived data, where the cluster configuration and data
+          // are consistent from environment to environment. However, this endpoint
+          // also attempts to retrieve data from the running stack products (ES and Kibana)
+          // which will vary from environment to environment making it difficult
+          // to write tests against. Therefore, this flag exists and should only be used
+          // in our testing environment.
+          skipLiveData: Joi.boolean().default(false)
+        }),
         payload: Joi.object({
           timeRange: Joi.object({
             min: Joi.date().required(),
@@ -39,7 +50,7 @@ export function clusterSetupStatusRoute(server) {
       try {
         await verifyMonitoringAuth(req);
         const indexPatterns = getIndexPatterns(server);
-        status = await getCollectionStatus(req, indexPatterns, req.params.clusterUuid);
+        status = await getCollectionStatus(req, indexPatterns, req.params.clusterUuid, req.query.skipLiveData);
       } catch (err) {
         throw handleError(err, req);
       }
