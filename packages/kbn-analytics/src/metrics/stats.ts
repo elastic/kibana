@@ -17,4 +17,9 @@
  * under the License.
  */
 
-export { registerUiMetricUsageCollector } from './collector';
+export interface Stats {
+  min: number;
+  max: number;
+  sum: number;
+  avg: number;
+}

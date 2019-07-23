@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
 import 'ngreact';
 import React from 'react';
 import ReactDOM from 'react-dom';
@@ -17,27 +16,28 @@ import { checkGetJobsPrivilege, checkPermission } from '../../../privilege/check
 import { getMlNodeCount } from '../../../ml_nodes_check/check_ml_nodes';
 import { getCalendarManagementBreadcrumbs } from '../../breadcrumbs';
 
+import chrome from 'ui/chrome';
 import uiRoutes from 'ui/routes';
-
+import { timefilter } from 'ui/timefilter';
+import { timeHistory } from 'ui/timefilter/time_history';
 import { I18nContext } from 'ui/i18n';
+
+import { NavigationMenuContext } from '../../../util/context_utils';
 
 const template = `
   <div class="euiSpacer euiSpacer--s" />
-  <ml-nav-menu name="settings" />
   <ml-calendars-list />
 `;
 
-uiRoutes
-  .when('/settings/calendars_list', {
-    template,
-    k7Breadcrumbs: getCalendarManagementBreadcrumbs,
-    resolve: {
-      CheckLicense: checkFullLicense,
-      privileges: checkGetJobsPrivilege,
-      mlNodeCount: getMlNodeCount,
-    }
-  });
-
+uiRoutes.when('/settings/calendars_list', {
+  template,
+  k7Breadcrumbs: getCalendarManagementBreadcrumbs,
+  resolve: {
+    CheckLicense: checkFullLicense,
+    privileges: checkGetJobsPrivilege,
+    mlNodeCount: getMlNodeCount,
+  },
+});
 
 import { CalendarsList } from './calendars_list';
 
@@ -54,10 +54,12 @@ module.directive('mlCalendarsList', function () {
 
       ReactDOM.render(
         <I18nContext>
-          {React.createElement(CalendarsList, props)}
+          <NavigationMenuContext.Provider value={{ chrome, timefilter, timeHistory }}>
+            <CalendarsList {...props} />
+          </NavigationMenuContext.Provider>
         </I18nContext>,
         element[0]
       );
-    }
+    },
   };
 });

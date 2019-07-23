@@ -17,22 +17,18 @@
  * under the License.
  */
 
-import 'ngreact';
-import { wrapInI18nContext } from 'ui/i18n';
+// @ts-ignore
 import { uiModules } from 'ui/modules';
-import { QueryBar } from '../components';
+import chrome from 'ui/chrome';
+import { createAnalyticsReporter, setTelemetryReporter } from '../services/telemetry_analytics';
 
-const app = uiModules.get('app/data', ['react']);
-
-export function setupDirective() {
-  app.directive('queryBar', (reactDirective, localStorage) => {
-    return reactDirective(
-      wrapInI18nContext(QueryBar),
-      undefined,
-      {},
-      {
-        store: localStorage,
-      }
-    );
-  });
+function telemetryInit($injector: any) {
+  const localStorage = $injector.get('localStorage');
+  const debug = chrome.getInjected('debugUiMetric');
+  const $http = $injector.get('$http');
+  const basePath = chrome.getBasePath();
+  const uiReporter = createAnalyticsReporter({ localStorage, $http, basePath, debug });
+  setTelemetryReporter(uiReporter);
 }
+
+uiModules.get('kibana').run(telemetryInit);

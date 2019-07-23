@@ -17,7 +17,6 @@
  * under the License.
  */
 
-export * from './components';
-
-// @ts-ignore
-export { setupDirective } from './directive';
+export { createReporter, ReportHTTP, Reporter, ReporterConfig } from './reporter';
+export { UiStatsMetricType, METRIC_TYPE } from './metrics';
+export { Report, ReportManager } from './report';
