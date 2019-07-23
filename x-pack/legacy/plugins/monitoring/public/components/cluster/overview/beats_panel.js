@@ -47,7 +47,8 @@ export function BeatsPanel(props) {
           <EuiToolTip
             position="top"
             content={i18n.translate('xpack.monitoring.cluster.overview.beatsPanel.setupModeNodesTooltip', {
-              defaultMessage: `Some instances are not monitored by Metricbeat. Click the flag icon for more information.`
+              defaultMessage: `Some instances are not monitored by Metricbeat. Click the flag icon to visit the instances
+              listing page and find out more information about the status of each instance.`
             })}
           >
             <EuiLink onClick={goToInstances}>

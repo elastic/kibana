@@ -53,7 +53,8 @@ export function LogstashPanel(props) {
           <EuiToolTip
             position="top"
             content={i18n.translate('xpack.monitoring.cluster.overview.logstashPanel.setupModeNodesTooltip', {
-              defaultMessage: `Some nodes are not monitored by Metricbeat. Click the flag icon for more information.`
+              defaultMessage: `Some nodes are not monitored by Metricbeat. Click the flag icon to visit the nodes
+              listing page and find out more information about the status of each node.`
             })}
           >
             <EuiLink onClick={goToNodes}>
