@@ -49,7 +49,6 @@ import {
 import { refreshIntervalWatcher } from 'plugins/ml/util/refresh_interval_watcher';
 import { MlTimeBuckets, getBoundsRoundedToInterval } from 'plugins/ml/util/ml_time_buckets';
 import { mlResultsService } from 'plugins/ml/services/results_service';
-import template from './timeseriesexplorer.html';
 import { getMlNodeCount } from 'plugins/ml/ml_nodes_check/check_ml_nodes';
 import { ml } from 'plugins/ml/services/ml_api_service';
 import { mlJobService } from 'plugins/ml/services/job_service';
@@ -68,8 +67,14 @@ import { mlTimefilterRefresh$ } from '../services/timefilter_refresh_service';
 import chrome from 'ui/chrome';
 const mlAnnotationsEnabled = chrome.getInjected('mlAnnotationsEnabled', false);
 
+const template = `
+<ml-chart-tooltip />
+<ml-timeseriesexplorer-react-wrapper class="ml-time-series-explorer" data-test-subj="mlPageSingleMetricViewer"/>
+`;
+
 uiRoutes
   .when('/timeseriesexplorer/?', {
+    controller: 'MlTimeSeriesExplorerController',
     template,
     k7Breadcrumbs: getSingleMetricViewerBreadcrumbs,
     resolve: {

@@ -35,6 +35,7 @@ import { EntityControl } from './components/entity_control';
 import { ForecastingModal } from './components/forecasting_modal/forecasting_modal';
 import { JobSelector } from '../components/job_selector/job_selector';
 import { LoadingIndicator } from '../components/loading_indicator/loading_indicator';
+import { NavigationMenu } from '../components/navigation_menu/navigation_menu';
 import { SelectSeverity } from '../components/controls/select_severity/select_severity';
 import { SelectInterval } from '../components/controls/select_interval/select_interval';
 import { TimeseriesChart } from './components/timeseries_chart/timeseries_chart';
@@ -59,6 +60,7 @@ function getTimeseriesexplorerDefaultState() {
 
 const TimeSeriesExplorerPage = ({ children, jobSelectorProps }) => (
   <Fragment>
+    <NavigationMenu tabId="timeseriesexplorer" />
     <JobSelector {...jobSelectorProps} />
     {children}
   </Fragment>
