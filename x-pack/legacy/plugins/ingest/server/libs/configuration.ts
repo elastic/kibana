@@ -12,6 +12,7 @@ export class ConfigurationLib {
     sharedID: string,
     version?: number
   ): Promise<{ id: string; version: number }> {
+    this.adapter.get(sharedID, version);
     return {
       id: 'fsdfsdf',
       version: 0,
