@@ -134,8 +134,8 @@ export class StepReviewUi extends Component {
           checked={startJobAfterCreation}
           label={
             <FormattedMessage
-              id="xpack.rollupJobs.create.startJobImmediatelyLabel"
-              defaultMessage="Start job immediately"
+              id="xpack.rollupJobs.create.startJobLabel"
+              defaultMessage="Start job now"
             />
           }
           onChange={this.onClickStartAfterCreate}
