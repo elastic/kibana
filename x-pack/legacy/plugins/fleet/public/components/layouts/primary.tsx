@@ -5,9 +5,6 @@
  */
 
 import {
-  EuiHeader,
-  EuiHeaderBreadcrumbs,
-  EuiHeaderSection,
   EuiPage,
   EuiPageBody,
   EuiPageContent,
@@ -17,10 +14,9 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import React, { Component, ReactNode } from 'react';
-import styled from 'styled-components';
-import { BreadcrumbConsumer } from '../navigation/breadcrumb';
 
-type RenderCallback = ((component: () => JSX.Element) => void);
+type RenderCallback = (component: () => JSX.Element) => void;
+
 interface PrimaryLayoutProps {
   title: string | React.ReactNode;
   actionSection?: React.ReactNode;
@@ -36,17 +32,6 @@ export class PrimaryLayout extends Component<PrimaryLayoutProps> {
     const children: (callback: RenderCallback) => void | ReactNode = this.props.children as any;
     return (
       <React.Fragment>
-        {!this.props.hideBreadcrumbs && (
-          <BreadcrumbConsumer>
-            {({ breadcrumbs }) => (
-              <HeaderWrapper>
-                <EuiHeaderSection>
-                  <EuiHeaderBreadcrumbs breadcrumbs={breadcrumbs} />
-                </EuiHeaderSection>
-              </HeaderWrapper>
-            )}
-          </BreadcrumbConsumer>
-        )}
         <EuiPage>
           <EuiPageBody>
             <EuiPageHeader>
@@ -77,7 +62,3 @@ export class PrimaryLayout extends Component<PrimaryLayoutProps> {
     this.forceUpdate();
   };
 }
-
-const HeaderWrapper = styled(EuiHeader)`
-  height: 29px;
-`;
