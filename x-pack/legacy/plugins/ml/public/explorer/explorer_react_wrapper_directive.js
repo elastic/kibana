@@ -22,10 +22,17 @@ import { mapScopeToProps } from './explorer_utils';
 import { EXPLORER_ACTION } from './explorer_constants';
 import { explorer$ } from './explorer_dashboard_service';
 
-module.directive('mlExplorerReactWrapper', function () {
+module.directive('mlExplorerReactWrapper', function (config, globalState, mlJobSelectService) {
   function link(scope, element) {
     ReactDOM.render(
-      <I18nContext>{React.createElement(Explorer, mapScopeToProps(scope))}</I18nContext>,
+      <I18nContext>
+        {React.createElement(Explorer, mapScopeToProps(
+          scope,
+          config,
+          globalState,
+          mlJobSelectService,
+        ))}
+      </I18nContext>,
       element[0]
     );
 

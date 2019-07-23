@@ -10,7 +10,7 @@
 
 import _ from 'lodash';
 import PropTypes from 'prop-types';
-import React from 'react';
+import React, { Fragment } from 'react';
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 import DragSelect from 'dragselect/dist/ds.min.js';
 import { map } from 'rxjs/operators';
@@ -36,11 +36,13 @@ import { ExplorerSwimlane } from './explorer_swimlane';
 import { KqlFilterBar } from '../components/kql_filter_bar';
 import { formatHumanReadableDateTime } from '../util/date_utils';
 import { getBoundsRoundedToInterval } from 'plugins/ml/util/ml_time_buckets';
+import { getSelectedJobIds } from '../components/job_selector/job_select_service_utils';
 import { InfluencersList } from '../components/influencers_list';
 import { ALLOW_CELL_RANGE_SELECTION, dragSelect$, explorer$ } from './explorer_dashboard_service';
 import { mlResultsService } from 'plugins/ml/services/results_service';
 import { LoadingIndicator } from '../components/loading_indicator/loading_indicator';
 import { CheckboxShowCharts, showCharts$ } from '../components/controls/checkbox_showcharts/checkbox_showcharts';
+import { JobSelector } from '../components/job_selector/job_selector';
 import { SelectInterval, interval$ } from '../components/controls/select_interval/select_interval';
 import { SelectLimit, limit$ } from './select_limit/select_limit';
 import { SelectSeverity, severity$ } from '../components/controls/select_severity/select_severity';
@@ -130,6 +132,13 @@ function mapSwimlaneOptionsToEuiOptions(options) {
     text: option,
   }));
 }
+
+const ExplorerPage = ({ children, jobSelectorProps }) => (
+  <Fragment>
+    <JobSelector {...jobSelectorProps} />
+    {children}
+  </Fragment>
+);
 
 export const Explorer = injectI18n(injectObservablesAsProps(
   {
@@ -1034,7 +1043,10 @@ export const Explorer = injectI18n(injectObservablesAsProps(
 
     render() {
       const {
+        config,
+        globalState,
         intl,
+        jobSelectService,
         MlTimeBuckets,
       } = this.props;
 
@@ -1065,6 +1077,15 @@ export const Explorer = injectI18n(injectObservablesAsProps(
 
       const swimlaneWidth = getSwimlaneContainerWidth(noInfluencersConfigured);
 
+      const { jobIds: selectedJobIds, selectedGroups } = getSelectedJobIds(globalState);
+      const jobSelectorProps = {
+        config,
+        globalState,
+        jobSelectService,
+        selectedJobIds,
+        selectedGroups,
+      };
+
       if (loading === true) {
         return (
           <LoadingIndicator
@@ -1077,11 +1098,11 @@ export const Explorer = injectI18n(injectObservablesAsProps(
       }
 
       if (noJobsFound) {
-        return <ExplorerNoJobsFound />;
+        return <ExplorerPage jobSelectorProps={jobSelectorProps}><ExplorerNoJobsFound /></ExplorerPage>;
       }
 
       if (noJobsFound && hasResults === false) {
-        return <ExplorerNoResultsFound />;
+        return <ExplorerPage jobSelectorProps={jobSelectorProps}><ExplorerNoResultsFound /></ExplorerPage>;
       }
 
       const mainColumnWidthClassName = noInfluencersConfigured === true ? 'col-xs-12' : 'col-xs-10';
@@ -1094,9 +1115,10 @@ export const Explorer = injectI18n(injectObservablesAsProps(
       );
 
       return (
-        <div className="results-container">
+        <ExplorerPage jobSelectorProps={jobSelectorProps}>
+          <div className="results-container">
 
-          {noInfluencersConfigured === false &&
+            {noInfluencersConfigured === false &&
             influencers !== undefined &&
             <div className="mlAnomalyExplorer__filterBar">
               <KqlFilterBar
@@ -1108,222 +1130,223 @@ export const Explorer = injectI18n(injectObservablesAsProps(
               />
             </div>}
 
-          {noInfluencersConfigured && (
-            <div className="no-influencers-warning">
-              <EuiIconTip
-                content={intl.formatMessage({
-                  id: 'xpack.ml.explorer.noConfiguredInfluencersTooltip',
-                  defaultMessage:
+            {noInfluencersConfigured && (
+              <div className="no-influencers-warning">
+                <EuiIconTip
+                  content={intl.formatMessage({
+                    id: 'xpack.ml.explorer.noConfiguredInfluencersTooltip',
+                    defaultMessage:
                     'The Top Influencers list is hidden because no influencers have been configured for the selected jobs.',
-                })}
-                position="right"
-                type="iInCircle"
-              />
-            </div>
-          )}
+                  })}
+                  position="right"
+                  type="iInCircle"
+                />
+              </div>
+            )}
 
-          {noInfluencersConfigured === false && (
-            <div className="column col-xs-2 euiText" data-test-subj="mlAnomalyExplorerInfluencerList">
-              <span className="panel-title">
+            {noInfluencersConfigured === false && (
+              <div className="column col-xs-2 euiText" data-test-subj="mlAnomalyExplorerInfluencerList">
+                <span className="panel-title">
+                  <FormattedMessage
+                    id="xpack.ml.explorer.topInfuencersTitle"
+                    defaultMessage="Top Influencers"
+                  />
+                </span>
+                <InfluencersList
+                  influencers={influencers}
+                  influencerFilter={this.applyFilter}
+                />
+              </div>
+            )}
+
+            <div className={mainColumnClasses}>
+              <span className="panel-title euiText">
                 <FormattedMessage
-                  id="xpack.ml.explorer.topInfuencersTitle"
-                  defaultMessage="Top Influencers"
+                  id="xpack.ml.explorer.anomalyTimelineTitle"
+                  defaultMessage="Anomaly timeline"
                 />
               </span>
-              <InfluencersList
-                influencers={influencers}
+
+              <div
+                className="ml-explorer-swimlane euiText"
+                onMouseEnter={this.onSwimlaneEnterHandler}
+                onMouseLeave={this.onSwimlaneLeaveHandler}
+                data-test-subj="mlAnomalyExplorerSwimlaneOverall"
+              >
+                <ExplorerSwimlane
+                  chartWidth={swimlaneWidth}
+                  filterActive={filterActive}
+                  maskAll={maskAll}
+                  MlTimeBuckets={MlTimeBuckets}
+                  swimlaneCellClick={this.swimlaneCellClick}
+                  swimlaneData={overallSwimlaneData}
+                  swimlaneType={SWIMLANE_TYPE.OVERALL}
+                  selection={selectedCells}
+                  swimlaneRenderDoneListener={this.swimlaneRenderDoneListener}
+                />
+              </div>
+
+              {viewBySwimlaneOptions.length > 0 && (
+                <React.Fragment>
+                  <EuiFlexGroup direction="row" gutterSize="l" responsive={true}>
+                    <EuiFlexItem grow={false}>
+                      <EuiFormRow
+                        label={intl.formatMessage({
+                          id: 'xpack.ml.explorer.viewByLabel',
+                          defaultMessage: 'View by',
+                        })}
+                      >
+                        <EuiSelect
+                          id="selectViewBy"
+                          options={mapSwimlaneOptionsToEuiOptions(viewBySwimlaneOptions)}
+                          value={swimlaneViewByFieldName}
+                          onChange={this.viewByChangeHandler}
+                        />
+                      </EuiFormRow>
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <EuiFormRow
+                        label={intl.formatMessage({
+                          id: 'xpack.ml.explorer.limitLabel',
+                          defaultMessage: 'Limit',
+                        })}
+                      >
+                        <SelectLimit />
+                      </EuiFormRow>
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false} style={{ alignSelf: 'center' }}>
+                      <EuiFormRow label="&#8203;">
+                        <div className="panel-sub-title">
+                          {viewByLoadedForTimeFormatted && (
+                            <FormattedMessage
+                              id="xpack.ml.explorer.sortedByMaxAnomalyScoreForTimeFormattedLabel"
+                              defaultMessage="(Sorted by max anomaly score for {viewByLoadedForTimeFormatted})"
+                              values={{ viewByLoadedForTimeFormatted }}
+                            />
+                          )}
+                          {viewByLoadedForTimeFormatted === undefined && (
+                            <FormattedMessage
+                              id="xpack.ml.explorer.sortedByMaxAnomalyScoreLabel"
+                              defaultMessage="(Sorted by max anomaly score)"
+                            />
+                          )}
+                          {filterActive === true &&
+                          swimlaneViewByFieldName === 'job ID' && (
+                            <FormattedMessage
+                              id="xpack.ml.explorer.jobScoreAcrossAllInfluencersLabel"
+                              defaultMessage="(Job score across all influencers)"
+                            />
+                          )}
+                        </div>
+                      </EuiFormRow>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+
+                  {showViewBySwimlane && (
+                    <div
+                      className="ml-explorer-swimlane euiText"
+                      onMouseEnter={this.onSwimlaneEnterHandler}
+                      onMouseLeave={this.onSwimlaneLeaveHandler}
+                      data-test-subj="mlAnomalyExplorerSwimlaneViewBy"
+                    >
+                      <ExplorerSwimlane
+                        chartWidth={swimlaneWidth}
+                        filterActive={filterActive}
+                        maskAll={maskAll}
+                        MlTimeBuckets={MlTimeBuckets}
+                        swimlaneCellClick={this.swimlaneCellClick}
+                        swimlaneData={viewBySwimlaneData}
+                        swimlaneType={SWIMLANE_TYPE.VIEW_BY}
+                        selection={selectedCells}
+                        swimlaneRenderDoneListener={this.swimlaneRenderDoneListener}
+                      />
+                    </div>
+                  )}
+
+                  {viewBySwimlaneDataLoading && (
+                    <LoadingIndicator/>
+                  )}
+
+                  {!showViewBySwimlane && !viewBySwimlaneDataLoading && swimlaneViewByFieldName !== null && (
+                    <ExplorerNoInfluencersFound
+                      swimlaneViewByFieldName={swimlaneViewByFieldName}
+                      showFilterMessage={(filterActive === true)}
+                    />
+                  )}
+                </React.Fragment>
+              )}
+
+              {annotationsData.length > 0 && (
+                <React.Fragment>
+                  <span className="panel-title euiText">
+                    <FormattedMessage
+                      id="xpack.ml.explorer.annotationsTitle"
+                      defaultMessage="Annotations"
+                    />
+                  </span>
+                  <AnnotationsTable
+                    annotations={annotationsData}
+                    drillDown={true}
+                    numberBadge={false}
+                  />
+                  <AnnotationFlyout />
+                  <EuiSpacer size="l" />
+                </React.Fragment>
+              )}
+
+              <span className="panel-title euiText">
+                <FormattedMessage id="xpack.ml.explorer.anomaliesTitle" defaultMessage="Anomalies" />
+              </span>
+
+              <EuiFlexGroup
+                direction="row"
+                gutterSize="l"
+                responsive={true}
+                className="ml-anomalies-controls"
+              >
+                <EuiFlexItem grow={false} style={{ width: '170px' }}>
+                  <EuiFormRow
+                    label={intl.formatMessage({
+                      id: 'xpack.ml.explorer.severityThresholdLabel',
+                      defaultMessage: 'Severity threshold',
+                    })}
+                  >
+                    <SelectSeverity />
+                  </EuiFormRow>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false} style={{ width: '170px' }}>
+                  <EuiFormRow
+                    label={intl.formatMessage({
+                      id: 'xpack.ml.explorer.intervalLabel',
+                      defaultMessage: 'Interval',
+                    })}
+                  >
+                    <SelectInterval />
+                  </EuiFormRow>
+                </EuiFlexItem>
+                {(anomalyChartRecords.length > 0 && selectedCells !== null) && (
+                  <EuiFlexItem grow={false} style={{ alignSelf: 'center' }}>
+                    <EuiFormRow label="&#8203;">
+                      <CheckboxShowCharts />
+                    </EuiFormRow>
+                  </EuiFlexItem>
+                )}
+              </EuiFlexGroup>
+
+              <EuiSpacer size="m" />
+
+              <div className="euiText explorer-charts">
+                {this.props.showCharts && <ExplorerChartsContainer {...chartsData} />}
+              </div>
+
+              <AnomaliesTable
+                tableData={tableData}
+                timefilter={timefilter}
                 influencerFilter={this.applyFilter}
               />
             </div>
-          )}
-
-          <div className={mainColumnClasses}>
-            <span className="panel-title euiText">
-              <FormattedMessage
-                id="xpack.ml.explorer.anomalyTimelineTitle"
-                defaultMessage="Anomaly timeline"
-              />
-            </span>
-
-            <div
-              className="ml-explorer-swimlane euiText"
-              onMouseEnter={this.onSwimlaneEnterHandler}
-              onMouseLeave={this.onSwimlaneLeaveHandler}
-              data-test-subj="mlAnomalyExplorerSwimlaneOverall"
-            >
-              <ExplorerSwimlane
-                chartWidth={swimlaneWidth}
-                filterActive={filterActive}
-                maskAll={maskAll}
-                MlTimeBuckets={MlTimeBuckets}
-                swimlaneCellClick={this.swimlaneCellClick}
-                swimlaneData={overallSwimlaneData}
-                swimlaneType={SWIMLANE_TYPE.OVERALL}
-                selection={selectedCells}
-                swimlaneRenderDoneListener={this.swimlaneRenderDoneListener}
-              />
-            </div>
-
-            {viewBySwimlaneOptions.length > 0 && (
-              <React.Fragment>
-                <EuiFlexGroup direction="row" gutterSize="l" responsive={true}>
-                  <EuiFlexItem grow={false}>
-                    <EuiFormRow
-                      label={intl.formatMessage({
-                        id: 'xpack.ml.explorer.viewByLabel',
-                        defaultMessage: 'View by',
-                      })}
-                    >
-                      <EuiSelect
-                        id="selectViewBy"
-                        options={mapSwimlaneOptionsToEuiOptions(viewBySwimlaneOptions)}
-                        value={swimlaneViewByFieldName}
-                        onChange={this.viewByChangeHandler}
-                      />
-                    </EuiFormRow>
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <EuiFormRow
-                      label={intl.formatMessage({
-                        id: 'xpack.ml.explorer.limitLabel',
-                        defaultMessage: 'Limit',
-                      })}
-                    >
-                      <SelectLimit />
-                    </EuiFormRow>
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false} style={{ alignSelf: 'center' }}>
-                    <EuiFormRow label="&#8203;">
-                      <div className="panel-sub-title">
-                        {viewByLoadedForTimeFormatted && (
-                          <FormattedMessage
-                            id="xpack.ml.explorer.sortedByMaxAnomalyScoreForTimeFormattedLabel"
-                            defaultMessage="(Sorted by max anomaly score for {viewByLoadedForTimeFormatted})"
-                            values={{ viewByLoadedForTimeFormatted }}
-                          />
-                        )}
-                        {viewByLoadedForTimeFormatted === undefined && (
-                          <FormattedMessage
-                            id="xpack.ml.explorer.sortedByMaxAnomalyScoreLabel"
-                            defaultMessage="(Sorted by max anomaly score)"
-                          />
-                        )}
-                        {filterActive === true &&
-                          swimlaneViewByFieldName === 'job ID' && (
-                          <FormattedMessage
-                            id="xpack.ml.explorer.jobScoreAcrossAllInfluencersLabel"
-                            defaultMessage="(Job score across all influencers)"
-                          />
-                        )}
-                      </div>
-                    </EuiFormRow>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-
-                {showViewBySwimlane && (
-                  <div
-                    className="ml-explorer-swimlane euiText"
-                    onMouseEnter={this.onSwimlaneEnterHandler}
-                    onMouseLeave={this.onSwimlaneLeaveHandler}
-                    data-test-subj="mlAnomalyExplorerSwimlaneViewBy"
-                  >
-                    <ExplorerSwimlane
-                      chartWidth={swimlaneWidth}
-                      filterActive={filterActive}
-                      maskAll={maskAll}
-                      MlTimeBuckets={MlTimeBuckets}
-                      swimlaneCellClick={this.swimlaneCellClick}
-                      swimlaneData={viewBySwimlaneData}
-                      swimlaneType={SWIMLANE_TYPE.VIEW_BY}
-                      selection={selectedCells}
-                      swimlaneRenderDoneListener={this.swimlaneRenderDoneListener}
-                    />
-                  </div>
-                )}
-
-                {viewBySwimlaneDataLoading && (
-                  <LoadingIndicator/>
-                )}
-
-                {!showViewBySwimlane && !viewBySwimlaneDataLoading && swimlaneViewByFieldName !== null && (
-                  <ExplorerNoInfluencersFound
-                    swimlaneViewByFieldName={swimlaneViewByFieldName}
-                    showFilterMessage={(filterActive === true)}
-                  />
-                )}
-              </React.Fragment>
-            )}
-
-            {annotationsData.length > 0 && (
-              <React.Fragment>
-                <span className="panel-title euiText">
-                  <FormattedMessage
-                    id="xpack.ml.explorer.annotationsTitle"
-                    defaultMessage="Annotations"
-                  />
-                </span>
-                <AnnotationsTable
-                  annotations={annotationsData}
-                  drillDown={true}
-                  numberBadge={false}
-                />
-                <AnnotationFlyout />
-                <EuiSpacer size="l" />
-              </React.Fragment>
-            )}
-
-            <span className="panel-title euiText">
-              <FormattedMessage id="xpack.ml.explorer.anomaliesTitle" defaultMessage="Anomalies" />
-            </span>
-
-            <EuiFlexGroup
-              direction="row"
-              gutterSize="l"
-              responsive={true}
-              className="ml-anomalies-controls"
-            >
-              <EuiFlexItem grow={false} style={{ width: '170px' }}>
-                <EuiFormRow
-                  label={intl.formatMessage({
-                    id: 'xpack.ml.explorer.severityThresholdLabel',
-                    defaultMessage: 'Severity threshold',
-                  })}
-                >
-                  <SelectSeverity />
-                </EuiFormRow>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false} style={{ width: '170px' }}>
-                <EuiFormRow
-                  label={intl.formatMessage({
-                    id: 'xpack.ml.explorer.intervalLabel',
-                    defaultMessage: 'Interval',
-                  })}
-                >
-                  <SelectInterval />
-                </EuiFormRow>
-              </EuiFlexItem>
-              {(anomalyChartRecords.length > 0 && selectedCells !== null) && (
-                <EuiFlexItem grow={false} style={{ alignSelf: 'center' }}>
-                  <EuiFormRow label="&#8203;">
-                    <CheckboxShowCharts />
-                  </EuiFormRow>
-                </EuiFlexItem>
-              )}
-            </EuiFlexGroup>
-
-            <EuiSpacer size="m" />
-
-            <div className="euiText explorer-charts">
-              {this.props.showCharts && <ExplorerChartsContainer {...chartsData} />}
-            </div>
-
-            <AnomaliesTable
-              tableData={tableData}
-              timefilter={timefilter}
-              influencerFilter={this.applyFilter}
-            />
           </div>
-        </div>
+        </ExplorerPage>
       );
     }
   }

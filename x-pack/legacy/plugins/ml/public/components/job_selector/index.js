@@ -7,4 +7,4 @@
 
 
 
-import './job_selector_react_wrapper_directive';
+import './job_selector_service';
