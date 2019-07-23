@@ -36,9 +36,35 @@ const {
   SELECTED_PING_LIST_STATUS,
 } = CLIENT_DEFAULTS;
 
+/**
+ * Gets the current URL values for the application. If no item is present
+ * for the URL, a default value is supplied.
+ *
+ * @param params A set of key-value pairs where the value is either
+ * undefined or a string/string array. If a string array is passed,
+ * only the first item is chosen. Support for lists in the URL will
+ * require further development.
+ */
 export const getSupportedUrlParams = (params: {
-  [key: string]: string | undefined;
+  [key: string]: string | string[] | undefined;
 }): UptimeUrlParams => {
+  const filteredParams: { [key: string]: string | undefined } = {};
+  Object.keys(params).forEach(key => {
+    let value: string | undefined;
+    if (params[key] === undefined) {
+      value = undefined;
+    } else if (Array.isArray(params[key])) {
+      // @ts-ignore this must be an array, and it's ok if the
+      // 0th element is undefined
+      value = params[key][0];
+    } else {
+      // @ts-ignore this will not be an array because the preceding
+      // block tests for that
+      value = params[key];
+    }
+    filteredParams[key] = value;
+  });
+
   const {
     autorefreshInterval,
     autorefreshIsPaused,
@@ -51,7 +77,7 @@ export const getSupportedUrlParams = (params: {
     // monitorListSortField,
     search,
     selectedPingStatus,
-  } = params;
+  } = filteredParams;
 
   return {
     autorefreshInterval: parseUrlInt(autorefreshInterval, AUTOREFRESH_INTERVAL),
