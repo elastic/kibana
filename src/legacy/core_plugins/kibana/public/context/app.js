@@ -45,7 +45,6 @@ const module = uiModules.get('apps/context', [
   'elasticsearch',
   'kibana',
   'kibana/config',
-  'kibana/notify',
   'ngRoute',
 ]);
 

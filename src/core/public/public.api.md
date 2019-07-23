@@ -475,7 +475,7 @@ export interface OverlayStart {
 }
 
 // @public
-export interface Plugin<TSetup = void, TStart = void, TPluginsSetup extends {} = {}, TPluginsStart extends {} = {}> {
+export interface Plugin<TSetup = void, TStart = void, TPluginsSetup extends object = object, TPluginsStart extends object = object> {
     // (undocumented)
     setup(core: CoreSetup, plugins: TPluginsSetup): TSetup | Promise<TSetup>;
     // (undocumented)
@@ -485,7 +485,7 @@ export interface Plugin<TSetup = void, TStart = void, TPluginsSetup extends {} =
 }
 
 // @public
-export type PluginInitializer<TSetup, TStart, TPluginsSetup extends Record<string, any> = {}, TPluginsStart extends Record<string, any> = {}> = (core: PluginInitializerContext) => Plugin<TSetup, TStart, TPluginsSetup, TPluginsStart>;
+export type PluginInitializer<TSetup, TStart, TPluginsSetup extends object = object, TPluginsStart extends object = object> = (core: PluginInitializerContext) => Plugin<TSetup, TStart, TPluginsSetup, TPluginsStart>;
 
 // @public
 export interface PluginInitializerContext {
