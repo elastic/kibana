@@ -7,7 +7,13 @@
 import React, { Fragment } from 'react';
 import { get, capitalize } from 'lodash';
 import { formatNumber } from 'plugins/monitoring/lib/format_number';
-import { ClusterItemContainer, HealthStatusIndicator, BytesUsage, BytesPercentageUsage } from './helpers';
+import {
+  ClusterItemContainer,
+  HealthStatusIndicator,
+  BytesUsage,
+  BytesPercentageUsage,
+  DisabledIfNoDataAndInSetupModeLink
+} from './helpers';
 import {
   EuiFlexGrid,
   EuiFlexItem,
@@ -21,6 +27,7 @@ import {
   EuiBadge,
   EuiToolTip,
   EuiFlexGroup,
+  EuiIcon
 } from '@elastic/eui';
 import { LicenseText } from './license_text';
 import { i18n } from '@kbn/i18n';
@@ -151,6 +158,30 @@ export function ElasticsearchPanel(props) {
     <HealthStatusIndicator status={clusterStats.status} />
   );
 
+  const licenseText = <LicenseText license={props.license} showLicenseExpiration={props.showLicenseExpiration} />;
+
+  const setupModeElasticsearchData = get(setupMode.data, 'elasticsearch');
+  let setupModeNodesData = null;
+  if (setupMode.enabled && setupModeElasticsearchData) {
+    const showIcon = setupModeElasticsearchData.totalUniqueFullyMigratedCount !== setupModeElasticsearchData.totalUniqueInstanceCount;
+    if (showIcon) {
+      setupModeNodesData = (
+        <EuiFlexItem grow={false}>
+          <EuiToolTip
+            position="top"
+            content={i18n.translate('xpack.monitoring.cluster.overview.elasticsearchPanel.setupModeNodesTooltip', {
+              defaultMessage: `Some nodes are not monitored by Metricbeat. Click the flag icon for more information.`
+            })}
+          >
+            <EuiLink onClick={goToNodes}>
+              <EuiIcon type="flag" color="warning"/>
+            </EuiLink>
+          </EuiToolTip>
+        </EuiFlexItem>
+      );
+    }
+  }
+
   const showMlJobs = () => {
     // if license doesn't support ML, then `ml === null`
     if (props.ml) {
@@ -158,51 +189,31 @@ export function ElasticsearchPanel(props) {
       return (
         <>
           <EuiDescriptionListTitle>
-            <EuiLink href={gotoURL}>
+            <DisabledIfNoDataAndInSetupModeLink
+              setupModeEnabled={setupMode.enabled}
+              setupModeData={setupModeElasticsearchData}
+              href={gotoURL}
+            >
               <FormattedMessage
                 id="xpack.monitoring.cluster.overview.esPanel.jobsLabel"
                 defaultMessage="Jobs"
               />
-            </EuiLink>
+            </DisabledIfNoDataAndInSetupModeLink>
           </EuiDescriptionListTitle>
           <EuiDescriptionListDescription data-test-subj="esMlJobs">
-            <EuiLink href={gotoURL}>{props.ml.jobs}</EuiLink>
+            <DisabledIfNoDataAndInSetupModeLink
+              setupModeEnabled={setupMode.enabled}
+              setupModeData={setupModeElasticsearchData}
+              href={gotoURL}
+            >
+              {props.ml.jobs}
+            </DisabledIfNoDataAndInSetupModeLink>
           </EuiDescriptionListDescription>
         </>
       );
     }
     return null;
   };
-
-  const licenseText = <LicenseText license={props.license} showLicenseExpiration={props.showLicenseExpiration} />;
-
-  let setupModeNodesData = null;
-  if (setupMode.enabled && setupMode.data) {
-    const elasticsearchData = get(setupMode.data, 'elasticsearch.byUuid');
-    const migratedNodesCount = Object.values(elasticsearchData).filter(node => node.isFullyMigrated).length;
-    const totalNodesCount = Object.values(elasticsearchData).length;
-
-    const badgeColor = migratedNodesCount === totalNodesCount
-      ? 'secondary'
-      : 'danger';
-
-    setupModeNodesData = (
-      <EuiFlexItem grow={false}>
-        <EuiToolTip
-          position="top"
-          content={i18n.translate('xpack.monitoring.cluster.overview.esPanel.setupModeNodesTooltip', {
-            defaultMessage: `These numbers indicate how many detected monitored nodes versus how many
-            detected total nodes. If there are more detected nodes than monitored nodes, click the Nodes
-            link and you will be guided in how to setup monitoring for the missing node.`
-          })}
-        >
-          <EuiBadge color={badgeColor}>
-            {formatNumber(migratedNodesCount, 'int_commas')}/{formatNumber(totalNodesCount, 'int_commas')}
-          </EuiBadge>
-        </EuiToolTip>
-      </EuiFlexItem>
-    );
-  }
 
   return (
     <ClusterItemContainer
@@ -218,7 +229,9 @@ export function ElasticsearchPanel(props) {
           <EuiPanel paddingSize="m">
             <EuiTitle size="s">
               <h3>
-                <EuiLink
+                <DisabledIfNoDataAndInSetupModeLink
+                  setupModeEnabled={setupMode.enabled}
+                  setupModeData={setupModeElasticsearchData}
                   onClick={goToElasticsearch}
                   aria-label={i18n.translate('xpack.monitoring.cluster.overview.esPanel.overviewLinkAriaLabel', {
                     defaultMessage: 'Elasticsearch Overview'
@@ -229,7 +242,7 @@ export function ElasticsearchPanel(props) {
                     id="xpack.monitoring.cluster.overview.esPanel.overviewLinkLabel"
                     defaultMessage="Overview"
                   />
-                </EuiLink>
+                </DisabledIfNoDataAndInSetupModeLink>
               </h3>
             </EuiTitle>
             <EuiHorizontalRule margin="m" />
@@ -318,7 +331,9 @@ export function ElasticsearchPanel(props) {
           <EuiPanel paddingSize="m">
             <EuiTitle size="s">
               <h3>
-                <EuiLink
+                <DisabledIfNoDataAndInSetupModeLink
+                  setupModeEnabled={setupMode.enabled}
+                  setupModeData={setupModeElasticsearchData}
                   onClick={goToIndices}
                   data-test-subj="esNumberOfIndices"
                   aria-label={i18n.translate('xpack.monitoring.cluster.overview.esPanel.indicesCountLinkAriaLabel', {
@@ -331,7 +346,7 @@ export function ElasticsearchPanel(props) {
                     defaultMessage="Indices: {indicesCount}"
                     values={{ indicesCount: formatNumber(get(indices, 'count'), 'int_commas') }}
                   />
-                </EuiLink>
+                </DisabledIfNoDataAndInSetupModeLink>
               </h3>
             </EuiTitle>
             <EuiHorizontalRule margin="m" />
@@ -383,7 +398,9 @@ export function ElasticsearchPanel(props) {
           <EuiPanel paddingSize="m">
             <EuiTitle size="s">
               <h3>
-                <EuiLink
+                <DisabledIfNoDataAndInSetupModeLink
+                  setupModeEnabled={setupMode.enabled}
+                  setupModeData={setupModeElasticsearchData}
                   onClick={goToElasticsearch}
                   aria-label={i18n.translate('xpack.monitoring.cluster.overview.esPanel.logsLinkAriaLabel', {
                     defaultMessage: 'Elasticsearch Logs'
@@ -394,7 +411,7 @@ export function ElasticsearchPanel(props) {
                     id="xpack.monitoring.cluster.overview.esPanel.logsLinkLabel"
                     defaultMessage="Logs"
                   />
-                </EuiLink>
+                </DisabledIfNoDataAndInSetupModeLink>
               </h3>
             </EuiTitle>
             <EuiHorizontalRule margin="m" />

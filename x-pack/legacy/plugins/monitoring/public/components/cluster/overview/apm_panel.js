@@ -8,7 +8,7 @@ import React from 'react';
 import moment from 'moment';
 import { get } from 'lodash';
 import { formatMetric } from 'plugins/monitoring/lib/format_number';
-import { ClusterItemContainer, BytesPercentageUsage } from './helpers';
+import { ClusterItemContainer, BytesPercentageUsage, DisabledIfNoDataAndInSetupModeLink } from './helpers';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import {
@@ -23,7 +23,7 @@ import {
   EuiHorizontalRule,
   EuiFlexGroup,
   EuiToolTip,
-  EuiBadge
+  EuiIcon
 } from '@elastic/eui';
 import { formatTimestampToDuration } from '../../../../common';
 import { CALCULATE_DURATION_SINCE } from '../../../../common/constants';
@@ -36,39 +36,31 @@ export function ApmPanel(props) {
     return null;
   }
 
-  let setupModeInstancesData = null;
-  if (setupMode.enabled && setupMode.data) {
-    const apmData = get(setupMode.data, 'apm.byUuid');
-    const migratedNodesCount = Object.values(apmData).filter(node => node.isFullyMigrated).length;
-    let totalNodesCount = Object.values(apmData).length;
-    if (totalNodesCount === 0 && get(setupMode.data, 'apm.detected.mightExist', false)) {
-      totalNodesCount = 1;
-    }
-
-    const badgeColor = migratedNodesCount === totalNodesCount
-      ? 'secondary'
-      : 'danger';
-
-    setupModeInstancesData = (
-      <EuiFlexItem grow={false}>
-        <EuiToolTip
-          position="top"
-          content={i18n.translate('xpack.monitoring.cluster.overview.apmPanel.setupModeNodesTooltip', {
-            defaultMessage: `These numbers indicate how many detected monitored apm versus how many ` +
-            `detected total apm. If there are more detected apm than monitored apm, click the Nodes ` +
-            `link and you will be guided in how to setup monitoring for the missing node.`
-          })}
-        >
-          <EuiBadge color={badgeColor}>
-            {migratedNodesCount}/{totalNodesCount}
-          </EuiBadge>
-        </EuiToolTip>
-      </EuiFlexItem>
-    );
-  }
-
   const goToApm = () => props.changeUrl('apm');
   const goToInstances = () => props.changeUrl('apm/instances');
+
+  const setupModeApmData = get(setupMode.data, 'apm');
+  let setupModeInstancesData = null;
+  if (setupMode.enabled && setupMode.data) {
+    const showIcon = setupModeApmData.totalUniqueFullyMigratedCount !== setupModeApmData.totalUniqueInstanceCount
+      || (get(setupModeApmData, 'detected.mightExist') && setupModeApmData.totalUniqueInstanceCount === 0);
+    if (showIcon) {
+      setupModeInstancesData = (
+        <EuiFlexItem grow={false}>
+          <EuiToolTip
+            position="top"
+            content={i18n.translate('xpack.monitoring.cluster.overview.apmPanel.setupModeNodesTooltip', {
+              defaultMessage: `Some instances are not monitored by Metricbeat. Click the flag icon for more information.`
+            })}
+          >
+            <EuiLink onClick={goToInstances}>
+              <EuiIcon type="flag" color="warning"/>
+            </EuiLink>
+          </EuiToolTip>
+        </EuiFlexItem>
+      );
+    }
+  }
 
   return (
     <ClusterItemContainer
@@ -83,7 +75,9 @@ export function ApmPanel(props) {
           <EuiPanel paddingSize="m">
             <EuiTitle size="s">
               <h3>
-                <EuiLink
+                <DisabledIfNoDataAndInSetupModeLink
+                  setupModeEnabled={setupMode.enabled}
+                  setupModeData={setupModeApmData}
                   onClick={goToApm}
                   aria-label={i18n.translate('xpack.monitoring.cluster.overview.apmPanel.overviewLinkAriaLabel', {
                     defaultMessage: 'APM Overview'
@@ -94,7 +88,7 @@ export function ApmPanel(props) {
                     id="xpack.monitoring.cluster.overview.apmPanel.overviewLinkLabel"
                     defaultMessage="Overview"
                   />
-                </EuiLink>
+                </DisabledIfNoDataAndInSetupModeLink>
               </h3>
             </EuiTitle>
             <EuiHorizontalRule margin="m" />

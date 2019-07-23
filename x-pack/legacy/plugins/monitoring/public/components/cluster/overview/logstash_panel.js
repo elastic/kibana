@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { formatNumber } from 'plugins/monitoring/lib/format_number';
-import { ClusterItemContainer, BytesPercentageUsage } from './helpers';
+import { ClusterItemContainer, BytesPercentageUsage, DisabledIfNoDataAndInSetupModeLink } from './helpers';
 import { LOGSTASH } from '../../../../common/constants';
 
 import {
@@ -21,7 +21,7 @@ import {
   EuiDescriptionListDescription,
   EuiHorizontalRule,
   EuiIconTip,
-  EuiBadge,
+  EuiIcon,
   EuiToolTip
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -42,35 +42,27 @@ export function LogstashPanel(props) {
   const goToNodes = () => props.changeUrl('logstash/nodes');
   const goToPipelines = () => props.changeUrl('logstash/pipelines');
 
+  const setupModeLogstashData = get(setupMode.data, 'logstash');
   let setupModeInstancesData = null;
-  if (setupMode.enabled && setupMode.data) {
-    const logstashData = get(setupMode.data, 'logstash.byUuid');
-    const migratedNodesCount = Object.values(logstashData).filter(node => node.isFullyMigrated).length;
-    let totalNodesCount = Object.values(logstashData).length;
-    if (totalNodesCount === 0 && get(setupMode.data, 'logstash.detected.mightExist', false)) {
-      totalNodesCount = 1;
+  if (setupMode.enabled && setupModeLogstashData) {
+    const showIcon = setupModeLogstashData.totalUniqueFullyMigratedCount !== setupModeLogstashData.totalUniqueInstanceCount
+      || (get(setupModeLogstashData, 'detected.mightExist') && setupModeLogstashData.totalUniqueInstanceCount === 0);
+    if (showIcon) {
+      setupModeInstancesData = (
+        <EuiFlexItem grow={false}>
+          <EuiToolTip
+            position="top"
+            content={i18n.translate('xpack.monitoring.cluster.overview.logstashPanel.setupModeNodesTooltip', {
+              defaultMessage: `Some nodes are not monitored by Metricbeat. Click the flag icon for more information.`
+            })}
+          >
+            <EuiLink onClick={goToNodes}>
+              <EuiIcon type="flag" color="warning"/>
+            </EuiLink>
+          </EuiToolTip>
+        </EuiFlexItem>
+      );
     }
-
-    const badgeColor = migratedNodesCount === totalNodesCount
-      ? 'secondary'
-      : 'danger';
-
-    setupModeInstancesData = (
-      <EuiFlexItem grow={false}>
-        <EuiToolTip
-          position="top"
-          content={i18n.translate('xpack.monitoring.cluster.overview.logstashPanel.setupModeNodesTooltip', {
-            defaultMessage: `These numbers indicate how many detected monitored nodes versus how many ` +
-            `detected total nodes. If there are more detected nodes than monitored nodes, click the Nodes ` +
-            `link and you will be guided in how to setup monitoring for the missing node.`
-          })}
-        >
-          <EuiBadge color={badgeColor}>
-            {formatNumber(migratedNodesCount, 'int_commas')}/{formatNumber(totalNodesCount, 'int_commas')}
-          </EuiBadge>
-        </EuiToolTip>
-      </EuiFlexItem>
-    );
   }
 
   return (
@@ -86,7 +78,9 @@ export function LogstashPanel(props) {
           <EuiPanel paddingSize="m">
             <EuiTitle size="s">
               <h3>
-                <EuiLink
+                <DisabledIfNoDataAndInSetupModeLink
+                  setupModeEnabled={setupMode.enabled}
+                  setupModeData={setupModeLogstashData}
                   onClick={goToLogstash}
                   aria-label={i18n.translate('xpack.monitoring.cluster.overview.logstashPanel.overviewLinkAriaLabel', {
                     defaultMessage: 'Logstash Overview'
@@ -96,7 +90,7 @@ export function LogstashPanel(props) {
                     id="xpack.monitoring.cluster.overview.logstashPanel.overviewLinkLabel"
                     defaultMessage="Overview"
                   />
-                </EuiLink>
+                </DisabledIfNoDataAndInSetupModeLink>
               </h3>
             </EuiTitle>
             <EuiHorizontalRule margin="m" />
@@ -160,7 +154,7 @@ export function LogstashPanel(props) {
                 />
               </EuiDescriptionListTitle>
               <EuiDescriptionListDescription data-test-subj="lsUptime">
-                { formatNumber(props.max_uptime, 'time_since') }
+                { props.max_uptime ? formatNumber(props.max_uptime, 'time_since') : 0 }
               </EuiDescriptionListDescription>
               <EuiDescriptionListTitle>
                 <FormattedMessage
@@ -182,7 +176,9 @@ export function LogstashPanel(props) {
               <EuiFlexItem grow={false}>
                 <EuiTitle size="s">
                   <h3>
-                    <EuiLink
+                    <DisabledIfNoDataAndInSetupModeLink
+                      setupModeEnabled={setupMode.enabled}
+                      setupModeData={setupModeLogstashData}
                       onClick={goToPipelines}
                       data-test-subj="lsPipelines"
                       aria-label={i18n.translate(
@@ -198,7 +194,7 @@ export function LogstashPanel(props) {
                         defaultMessage="Pipelines: {pipelineCount}"
                         values={{ pipelineCount: (<span data-test-subj="number_of_logstash_pipelines">{ props.pipeline_count }</span>) }}
                       />
-                    </EuiLink>
+                    </DisabledIfNoDataAndInSetupModeLink>
                   </h3>
                 </EuiTitle>
               </EuiFlexItem>
@@ -221,14 +217,14 @@ export function LogstashPanel(props) {
                   defaultMessage="With Memory Queues"
                 />
               </EuiDescriptionListTitle>
-              <EuiDescriptionListDescription>{ queueTypes[LOGSTASH.QUEUE_TYPES.MEMORY] }</EuiDescriptionListDescription>
+              <EuiDescriptionListDescription>{ queueTypes[LOGSTASH.QUEUE_TYPES.MEMORY] || 0 }</EuiDescriptionListDescription>
               <EuiDescriptionListTitle>
                 <FormattedMessage
                   id="xpack.monitoring.cluster.overview.logstashPanel.withPersistentQueuesLabel"
                   defaultMessage="With Persistent Queues"
                 />
               </EuiDescriptionListTitle>
-              <EuiDescriptionListDescription>{ queueTypes[LOGSTASH.QUEUE_TYPES.PERSISTED] }</EuiDescriptionListDescription>
+              <EuiDescriptionListDescription>{ queueTypes[LOGSTASH.QUEUE_TYPES.PERSISTED] || 0 }</EuiDescriptionListDescription>
             </EuiDescriptionList>
           </EuiPanel>
         </EuiFlexItem>

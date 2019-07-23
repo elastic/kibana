@@ -17,11 +17,11 @@ import {
   EuiDescriptionListTitle,
   EuiDescriptionListDescription,
   EuiHorizontalRule,
-  EuiBadge,
+  EuiIcon,
   EuiFlexGroup,
   EuiToolTip
 } from '@elastic/eui';
-import { ClusterItemContainer } from './helpers';
+import { ClusterItemContainer, DisabledIfNoDataAndInSetupModeLink } from './helpers';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 
@@ -36,35 +36,27 @@ export function BeatsPanel(props) {
   const goToBeats = () => props.changeUrl('beats');
   const goToInstances = () => props.changeUrl('beats/beats');
 
+  const setupModeBeatsData = get(setupMode.data, 'beats');
   let setupModeInstancesData = null;
   if (setupMode.enabled && setupMode.data) {
-    const beatsData = get(setupMode.data, 'beats.byUuid');
-    const migratedNodesCount = Object.values(beatsData).filter(node => node.isFullyMigrated).length;
-    let totalNodesCount = Object.values(beatsData).length;
-    if (totalNodesCount === 0 && get(setupMode.data, 'beats.detected.mightExist', false)) {
-      totalNodesCount = 1;
+    const showIcon = setupModeBeatsData.totalUniqueFullyMigratedCount !== setupModeBeatsData.totalUniqueInstanceCount
+      || (get(setupModeBeatsData, 'detected.mightExist') && setupModeBeatsData.totalUniqueInstanceCount === 0);
+    if (showIcon) {
+      setupModeInstancesData = (
+        <EuiFlexItem grow={false}>
+          <EuiToolTip
+            position="top"
+            content={i18n.translate('xpack.monitoring.cluster.overview.beatsPanel.setupModeNodesTooltip', {
+              defaultMessage: `Some instances are not monitored by Metricbeat. Click the flag icon for more information.`
+            })}
+          >
+            <EuiLink onClick={goToInstances}>
+              <EuiIcon type="flag" color="warning"/>
+            </EuiLink>
+          </EuiToolTip>
+        </EuiFlexItem>
+      );
     }
-
-    const badgeColor = migratedNodesCount === totalNodesCount
-      ? 'secondary'
-      : 'danger';
-
-    setupModeInstancesData = (
-      <EuiFlexItem grow={false}>
-        <EuiToolTip
-          position="top"
-          content={i18n.translate('xpack.monitoring.cluster.overview.beatsPanel.setupModeNodesTooltip', {
-            defaultMessage: `These numbers indicate how many detected monitored beats versus how many ` +
-            `detected total beats. If there are more detected beats than monitored beats, click the Nodes ` +
-            `link and you will be guided in how to setup monitoring for the missing node.`
-          })}
-        >
-          <EuiBadge color={badgeColor}>
-            {migratedNodesCount}/{totalNodesCount}
-          </EuiBadge>
-        </EuiToolTip>
-      </EuiFlexItem>
-    );
   }
 
   const beatTypes = props.beats.types.map((beat, index) => {
@@ -97,7 +89,9 @@ export function BeatsPanel(props) {
           <EuiPanel paddingSize="m">
             <EuiTitle size="s">
               <h3>
-                <EuiLink
+                <DisabledIfNoDataAndInSetupModeLink
+                  setupModeEnabled={setupMode.enabled}
+                  setupModeData={setupModeBeatsData}
                   onClick={goToBeats}
                   aria-label={i18n.translate('xpack.monitoring.cluster.overview.beatsPanel.overviewLinkAriaLabel', {
                     defaultMessage: 'Beats Overview'
@@ -108,7 +102,7 @@ export function BeatsPanel(props) {
                     id="xpack.monitoring.cluster.overview.beatsPanel.overviewLinkLabel"
                     defaultMessage="Overview"
                   />
-                </EuiLink>
+                </DisabledIfNoDataAndInSetupModeLink>
               </h3>
             </EuiTitle>
             <EuiHorizontalRule margin="m" />
