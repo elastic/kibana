@@ -79,7 +79,7 @@ export function syncLayerOrder(mbMap, layerList) {
 
     //This assumes that:
     //- a single source-id identifies a single kibana layer
-    //- all layer-ids have a pattern that is sourceId_layerName, were sourceId cannot have any underscores
+    //- all layer-ids have a pattern that is sourceId_layerName, where sourceId cannot have any underscores
     const currentLayerOrder = _.uniq(
       mbLayers.map(({ id }) => id.substring(0, id.indexOf(MB_SOURCE_ID_LAYER_ID_PREFIX_DELIMITER))));
 
