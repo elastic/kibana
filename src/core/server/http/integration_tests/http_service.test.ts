@@ -101,7 +101,7 @@ describe('http service', () => {
             sessionStorage.set({ value: user, expires: Date.now() + sessionDurationMs });
             return t.authenticated({
               state: user,
-              headers: {
+              requestHeaders: {
                 authorization: token,
               },
             });
@@ -167,7 +167,7 @@ describe('http service', () => {
         const { registerAuth, registerRouter } = http;
 
         await registerAuth((req, t) => {
-          return t.authenticated({ headers: authHeaders });
+          return t.authenticated({ requestHeaders: authHeaders });
         });
 
         const router = new Router('/new-platform');

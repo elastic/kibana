@@ -90,12 +90,12 @@ export class HttpServer {
 
   private readonly log: Logger;
   private readonly authState: AuthStateStorage;
-  private readonly authHeaders: AuthHeadersStorage;
+  private readonly authRequestHeaders: AuthHeadersStorage;
   private readonly authResponseHeaders: AuthHeadersStorage;
 
   constructor(private readonly logger: LoggerFactory, private readonly name: string) {
     this.authState = new AuthStateStorage(() => this.authRegistered);
-    this.authHeaders = new AuthHeadersStorage();
+    this.authRequestHeaders = new AuthHeadersStorage();
     this.authResponseHeaders = new AuthHeadersStorage();
     this.log = logger.get('http', 'server', name);
   }
@@ -133,7 +133,7 @@ export class HttpServer {
       auth: {
         get: this.authState.get,
         isAuthenticated: this.authState.isAuthenticated,
-        getAuthHeaders: this.authHeaders.get,
+        getAuthHeaders: this.authRequestHeaders.get,
       },
       isTlsEnabled: config.ssl.enabled,
       // Return server instance with the connection options so that we can properly
@@ -249,16 +249,16 @@ export class HttpServer {
     this.authRegistered = true;
 
     this.server.auth.scheme('login', () => ({
-      authenticate: adoptToHapiAuthFormat(fn, (req, { state, headers, responseHeaders }) => {
+      authenticate: adoptToHapiAuthFormat(fn, (req, { state, requestHeaders, responseHeaders }) => {
         this.authState.set(req, state);
         if (responseHeaders) {
           this.authResponseHeaders.set(req, responseHeaders);
         }
-        if (headers) {
-          this.authHeaders.set(req, headers);
+        if (requestHeaders) {
+          this.authRequestHeaders.set(req, requestHeaders);
           // we mutate headers only for the backward compatibility with the legacy platform.
           // where some plugin read directly from headers to identify whether a user is authenticated.
-          Object.assign(req.headers, headers);
+          Object.assign(req.headers, requestHeaders);
         }
       }),
     }));

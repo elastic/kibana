@@ -49,7 +49,7 @@ const authResult = {
     return {
       type: ResultType.authenticated,
       state: data.state,
-      headers: data.headers,
+      requestHeaders: data.requestHeaders,
       responseHeaders: data.responseHeaders,
     };
   },
@@ -98,7 +98,7 @@ export interface AuthResultData {
    * Auth specific headers attach to a request object.
    * Used to perform a request to Elasticsearch on behalf of an authenticated user.
    */
-  headers?: AuthHeaders;
+  requestHeaders?: AuthHeaders;
   /**
    * Auth specific headers to attach to a response object.
    * Used to send back authentication mechanism related headers to a client to complete the security context.
@@ -150,7 +150,7 @@ export function adoptToHapiAuthFormat(
       if (authResult.isAuthenticated(result)) {
         onSuccess(req, {
           state: result.state,
-          headers: result.headers,
+          requestHeaders: result.requestHeaders,
           responseHeaders: result.responseHeaders,
         });
         return h.authenticated({ credentials: result.state || {} });
