@@ -72,7 +72,7 @@ pipeline {
      Checkout the code and stash it, to use it on other stages.
      */
     stage('Initializing') {
-      agent { label 'immutable' }
+      agent { label 'linux || immutable' }
 //      agent any
       environment {
         HOME = "${env.WORKSPACE}"
@@ -81,7 +81,7 @@ pipeline {
         stage('Checkout') {
           steps {
             checkoutES()
-            checkoutKibana()
+//            checkoutKibana()
           }
         }
         stage('Quick Test') {
