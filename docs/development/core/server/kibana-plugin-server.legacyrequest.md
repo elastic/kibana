@@ -2,12 +2,12 @@
 
 [Home](./index.md) &gt; [kibana-plugin-server](./kibana-plugin-server.md) &gt; [LegacyRequest](./kibana-plugin-server.legacyrequest.md)
 
-## LegacyRequest type
+## LegacyRequest interface
 
 Support Legacy platform request for the period of migration.
 
 <b>Signature:</b>
 
 ```typescript
-export declare type LegacyRequest = Request;
+export interface LegacyRequest extends Request 
 ```

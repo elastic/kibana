@@ -9,5 +9,5 @@ Calls specified `endpoint` with provided `clientParams` on behalf of the user in
 <b>Signature:</b>
 
 ```typescript
-callWithRequest: (request: Request | KibanaRequest<unknown, unknown, unknown> | FakeRequest, endpoint: string, clientParams?: Record<string, unknown>, options?: CallAPIOptions | undefined) => Promise<any>;
+callWithRequest: (request: KibanaRequest<unknown, unknown, unknown> | LegacyRequest | FakeRequest, endpoint: string, clientParams?: Record<string, unknown>, options?: CallAPIOptions | undefined) => Promise<any>;
 ```

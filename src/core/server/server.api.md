@@ -58,7 +58,7 @@ export interface CallAPIOptions {
 export class ClusterClient {
     constructor(config: ElasticsearchClientConfig, log: Logger, getAuthHeaders?: GetAuthHeaders);
     callWithInternalUser: (endpoint: string, clientParams?: Record<string, unknown>, options?: CallAPIOptions | undefined) => Promise<any>;
-    callWithRequest: (request: Request | KibanaRequest<unknown, unknown, unknown> | FakeRequest, endpoint: string, clientParams?: Record<string, unknown>, options?: CallAPIOptions | undefined) => Promise<any>;
+    callWithRequest: (request: KibanaRequest<unknown, unknown, unknown> | LegacyRequest | FakeRequest, endpoint: string, clientParams?: Record<string, unknown>, options?: CallAPIOptions | undefined) => Promise<any>;
     close(): void;
     }
 
@@ -226,7 +226,8 @@ export interface KibanaRequestRoute {
 }
 
 // @public
-export type LegacyRequest = Request;
+export interface LegacyRequest extends Request {
+}
 
 // @public
 export interface Logger {

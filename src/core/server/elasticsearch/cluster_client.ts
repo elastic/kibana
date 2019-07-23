@@ -34,8 +34,8 @@ import {
  *
  * @public
  */
-
-export type LegacyRequest = Request;
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface LegacyRequest extends Request {}
 
 const noop = () => undefined;
 /**

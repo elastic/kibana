@@ -23,7 +23,7 @@ export declare class ClusterClient
 |  Property | Modifiers | Type | Description |
 |  --- | --- | --- | --- |
 |  [callWithInternalUser](./kibana-plugin-server.clusterclient.callwithinternaluser.md) |  | <code>(endpoint: string, clientParams?: Record&lt;string, unknown&gt;, options?: CallAPIOptions &#124; undefined) =&gt; Promise&lt;any&gt;</code> | Calls specified endpoint with provided clientParams on behalf of the Kibana internal user. |
-|  [callWithRequest](./kibana-plugin-server.clusterclient.callwithrequest.md) |  | <code>(request: Request &#124; KibanaRequest&lt;unknown, unknown, unknown&gt; &#124; FakeRequest, endpoint: string, clientParams?: Record&lt;string, unknown&gt;, options?: CallAPIOptions &#124; undefined) =&gt; Promise&lt;any&gt;</code> | Calls specified <code>endpoint</code> with provided <code>clientParams</code> on behalf of the user initiated request to the Kibana server (via HTTP request headers). |
+|  [callWithRequest](./kibana-plugin-server.clusterclient.callwithrequest.md) |  | <code>(request: KibanaRequest&lt;unknown, unknown, unknown&gt; &#124; LegacyRequest &#124; FakeRequest, endpoint: string, clientParams?: Record&lt;string, unknown&gt;, options?: CallAPIOptions &#124; undefined) =&gt; Promise&lt;any&gt;</code> | Calls specified <code>endpoint</code> with provided <code>clientParams</code> on behalf of the user initiated request to the Kibana server (via HTTP request headers). |
 
 ## Methods
 
