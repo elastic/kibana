@@ -18,8 +18,14 @@
  */
 
 import { AggType } from 'ui/agg_types';
-import { AggConfig, VisState, AggParams } from '../../../';
+import { AggConfig, VisState, AggParams, VisParams } from '../../../';
 import { AggGroupNames } from '../agg_groups';
+
+export type OnAggParamsChange = (
+  params: AggParams | VisParams,
+  paramName: string,
+  value: unknown
+) => void;
 
 export interface DefaultEditorAggCommonProps {
   formIsTouched: boolean;
@@ -27,7 +33,7 @@ export interface DefaultEditorAggCommonProps {
   lastParentPipelineAggTitle?: string;
   metricAggs: AggConfig[];
   state: VisState;
-  onAggParamsChange: (agg: AggParams, paramName: string, value: unknown) => void;
+  onAggParamsChange: OnAggParamsChange;
   onAggTypeChange: (agg: AggConfig, aggType: AggType) => void;
   onToggleEnableAgg: (agg: AggConfig, isEnable: boolean) => void;
   removeAgg: (agg: AggConfig) => void;
