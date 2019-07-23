@@ -371,7 +371,7 @@ export const SnapshotTable: React.FunctionComponent<Props> = ({
       rowProps={() => ({
         'data-test-subj': 'row',
       })}
-      cellProps={(item: any, column: any) => ({
+      cellProps={() => ({
         'data-test-subj': 'cell',
       })}
       data-test-subj="snapshotTable"

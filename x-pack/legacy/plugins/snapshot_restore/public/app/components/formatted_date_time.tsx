@@ -20,14 +20,16 @@ export const FormattedDateTime: React.FunctionComponent<Props> = ({ epochMs, typ
   } = useAppDependencies();
 
   const date = new Date(epochMs);
+  const formattedDate = <FormattedDate value={date} year="numeric" month="short" day="2-digit" />;
+  const formattedTime = <FormattedTime value={date} timeZoneName="short" />;
+
+  if (type) {
+    return type === 'date' ? formattedDate : formattedTime;
+  }
 
   return (
     <Fragment>
-      {!type || type === 'date' ? (
-        <FormattedDate value={date} year="numeric" month="short" day="2-digit" />
-      ) : null}
-      {!type ? ' ' : null}
-      {!type || type === 'time' ? <FormattedTime value={date} timeZoneName="short" /> : null}
+      {formattedDate} {formattedTime}
     </Fragment>
   );
 };

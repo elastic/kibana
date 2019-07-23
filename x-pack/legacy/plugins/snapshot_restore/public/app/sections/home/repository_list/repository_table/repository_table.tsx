@@ -303,8 +303,8 @@ export const RepositoryTable: React.FunctionComponent<Props> = ({
       rowProps={() => ({
         'data-test-subj': 'row',
       })}
-      cellProps={(item: any, column: any) => ({
-        'data-test-subj': `cell`,
+      cellProps={() => ({
+        'data-test-subj': 'cell',
       })}
       data-test-subj="repositoryTable"
     />
