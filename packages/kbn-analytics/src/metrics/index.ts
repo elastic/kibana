@@ -17,4 +17,21 @@
  * under the License.
  */
 
-export { registerUiMetricUsageCollector } from './collector';
+import { UiStatsMetric, UiStatsMetricType } from './ui_stats';
+
+export {
+  UiStatsMetric,
+  createUiStatsMetric,
+  UiStatsMetricReport,
+  UiStatsMetricType,
+} from './ui_stats';
+export { Stats } from './stats';
+
+export type Metric = UiStatsMetric<UiStatsMetricType>;
+export type MetricType = keyof typeof METRIC_TYPE;
+
+export enum METRIC_TYPE {
+  COUNT = 'count',
+  LOADED = 'loaded',
+  CLICK = 'click',
+}
