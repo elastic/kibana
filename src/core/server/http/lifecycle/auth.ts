@@ -48,8 +48,9 @@ const authResult = {
   authenticated(data: Partial<AuthResultData> = {}): AuthResult {
     return {
       type: ResultType.authenticated,
-      state: data.state || {},
-      headers: data.headers || {},
+      state: data.state,
+      headers: data.headers,
+      responseHeaders: data.responseHeaders,
     };
   },
   redirected(url: string): AuthResult {
@@ -82,7 +83,7 @@ const authResult = {
  * @public
  * */
 
-export type AuthHeaders = Record<string, string>;
+export type AuthHeaders = Record<string, string | string[]>;
 
 /**
  * Result of an incoming request authentication.
@@ -92,11 +93,17 @@ export interface AuthResultData {
   /**
    * Data to associate with an incoming request. Any downstream plugin may get access to the data.
    */
-  state: Record<string, any>;
+  state?: Record<string, any>;
   /**
-   * Auth specific headers to authenticate a user against Elasticsearch.
+   * Auth specific headers attach to a request object.
+   * Used to perform a request to Elasticsearch on behalf of an authenticated user.
    */
-  headers: AuthHeaders;
+  headers?: AuthHeaders;
+  /**
+   * Auth specific headers to attach to a response object.
+   * Used to send back authentication mechanism related headers to a client to complete the security context.
+   */
+  responseHeaders?: AuthHeaders;
 }
 
 /**
@@ -105,7 +112,7 @@ export interface AuthResultData {
  */
 export interface AuthToolkit {
   /** Authentication is successful with given credentials, allow request to pass through */
-  authenticated: (data?: Partial<AuthResultData>) => AuthResult;
+  authenticated: (data?: AuthResultData) => AuthResult;
   /** Authentication requires to interrupt request handling and redirect to a configured url */
   redirected: (url: string) => AuthResult;
   /** Authentication is unsuccessful, fail the request with specified error. */
@@ -141,7 +148,11 @@ export function adoptToHapiAuthFormat(
         );
       }
       if (authResult.isAuthenticated(result)) {
-        onSuccess(req, { state: result.state, headers: result.headers });
+        onSuccess(req, {
+          state: result.state,
+          headers: result.headers,
+          responseHeaders: result.responseHeaders,
+        });
         return h.authenticated({ credentials: result.state || {} });
       }
       if (authResult.isRedirected(result)) {

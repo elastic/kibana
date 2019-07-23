@@ -25,7 +25,7 @@ import { createServer, getListenerOptions, getServerOptions } from './http_tools
 import { adoptToHapiAuthFormat, AuthenticationHandler } from './lifecycle/auth';
 import { adoptToHapiOnPostAuthFormat, OnPostAuthHandler } from './lifecycle/on_post_auth';
 import { adoptToHapiOnPreAuthFormat, OnPreAuthHandler } from './lifecycle/on_pre_auth';
-import { Router, KibanaRequest } from './router';
+import { Router, KibanaRequest, ResponseHeaders } from './router';
 import {
   SessionStorageCookieOptions,
   createCookieSessionStorageFactory,
@@ -91,10 +91,12 @@ export class HttpServer {
   private readonly log: Logger;
   private readonly authState: AuthStateStorage;
   private readonly authHeaders: AuthHeadersStorage;
+  private readonly authResponseHeaders: AuthHeadersStorage;
 
   constructor(private readonly logger: LoggerFactory, private readonly name: string) {
     this.authState = new AuthStateStorage(() => this.authRegistered);
     this.authHeaders = new AuthHeadersStorage();
+    this.authResponseHeaders = new AuthHeadersStorage();
     this.log = logger.get('http', 'server', name);
   }
 
@@ -247,12 +249,17 @@ export class HttpServer {
     this.authRegistered = true;
 
     this.server.auth.scheme('login', () => ({
-      authenticate: adoptToHapiAuthFormat(fn, (req, { state, headers }) => {
+      authenticate: adoptToHapiAuthFormat(fn, (req, { state, headers, responseHeaders }) => {
         this.authState.set(req, state);
-        this.authHeaders.set(req, headers);
-        // we mutate headers only for the backward compatibility with the legacy platform.
-        // where some plugin read directly from headers to identify whether a user is authenticated.
-        Object.assign(req.headers, headers);
+        if (responseHeaders) {
+          this.authResponseHeaders.set(req, responseHeaders);
+        }
+        if (headers) {
+          this.authHeaders.set(req, headers);
+          // we mutate headers only for the backward compatibility with the legacy platform.
+          // where some plugin read directly from headers to identify whether a user is authenticated.
+          Object.assign(req.headers, headers);
+        }
       }),
     }));
     this.server.auth.strategy('session', 'login');
@@ -262,5 +269,40 @@ export class HttpServer {
     // should be applied for all routes if they don't specify auth strategy in route declaration
     // https://github.com/hapijs/hapi/blob/master/API.md#-serverauthdefaultoptions
     this.server.auth.default('session');
+
+    this.server.ext('onPreResponse', (request, t) => {
+      const authResponseHeaders = this.authResponseHeaders.get(request);
+      this.extendResponseWithHeaders(request, authResponseHeaders);
+      return t.continue;
+    });
+  }
+
+  private extendResponseWithHeaders(request: Request, headers?: ResponseHeaders) {
+    const response = request.response;
+    if (!headers || !response) return;
+
+    if (response instanceof Error) {
+      this.findHeadersIntersection(response.output.headers, headers);
+      // hapi wraps all error response in Boom object internally
+      response.output.headers = {
+        ...response.output.headers,
+        ...(headers as any), // hapi types don't specify string[] as valid value
+      };
+    } else {
+      for (const [headerName, headerValue] of Object.entries(headers)) {
+        this.findHeadersIntersection(response.headers, headers);
+        response.header(headerName, headerValue as any); // hapi types don't specify string[] as valid value
+      }
+    }
+  }
+
+  private findHeadersIntersection(responseHeaders: ResponseHeaders, headers: ResponseHeaders) {
+    Object.keys(headers).forEach(headerName => {
+      if (responseHeaders[headerName] !== undefined) {
+        this.log.warn(
+          `Server rewrites a response header {[${headerName}]: ${responseHeaders[headerName]} }.`
+        );
+      }
+    });
   }
 }
