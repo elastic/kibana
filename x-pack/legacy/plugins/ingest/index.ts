@@ -5,7 +5,6 @@
  */
 import * as Joi from 'joi';
 import { resolve } from 'path';
-import { i18n } from '@kbn/i18n/src';
 import { PLUGIN } from './common/constants';
 import { CONFIG_PREFIX } from './common/constants/plugin';
 import { initServerWithKibana } from './server/kibana.index';
