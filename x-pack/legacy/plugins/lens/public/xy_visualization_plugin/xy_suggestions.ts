@@ -107,7 +107,6 @@ function getSuggestion(
       ...(currentState ? currentState.layers.filter(layer => layer.layerId !== layerId) : []),
       {
         layerId,
-        datasourceId: '',
         xAccessor: xValue.columnId,
         seriesType: splitBy && isDate ? 'line' : 'bar',
         splitAccessor: splitBy && isDate ? splitBy.columnId : generateId(),

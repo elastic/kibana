@@ -33,7 +33,6 @@ function sampleArgs() {
     layers: [
       {
         layerId: 'first',
-        datasourceId: 'indexpattern',
         seriesType: 'line',
 
         xAccessor: 'c',
@@ -66,7 +65,6 @@ describe('xy_expression', () => {
     test('layerConfig produces the correct arguments', () => {
       const args: LayerConfig = {
         layerId: 'first',
-        datasourceId: 'indexpattern',
         seriesType: 'line',
         xAccessor: 'c',
         accessors: ['a', 'b'],

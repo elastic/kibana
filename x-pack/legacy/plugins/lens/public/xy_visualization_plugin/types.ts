@@ -131,10 +131,6 @@ export const layerConfig: ExpressionFunction<
       types: ['string'],
       help: '',
     },
-    datasourceId: {
-      types: ['string'],
-      help: '',
-    },
     xAccessor: {
       types: ['string'],
       help: '',
@@ -182,7 +178,6 @@ export type SeriesType =
 
 export type LayerConfig = AxisConfig & {
   layerId: string;
-  datasourceId: string;
   xAccessor: string;
   accessors: string[];
   seriesType: SeriesType;

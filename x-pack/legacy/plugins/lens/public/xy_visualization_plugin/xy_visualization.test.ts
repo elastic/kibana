@@ -20,7 +20,6 @@ function exampleState(): State {
     layers: [
       {
         layerId: 'first',
-        datasourceId: '',
         seriesType: 'area',
         splitAccessor: 'd',
         position: Position.Bottom,
