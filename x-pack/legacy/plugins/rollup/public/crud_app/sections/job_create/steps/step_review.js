@@ -133,12 +133,10 @@ export class StepReviewUi extends Component {
           data-test-subj="rollupJobToggleJobStartAfterCreation"
           checked={startJobAfterCreation}
           label={
-            <span>
-              <FormattedMessage
-                id="xpack.rollupJobs.create.startJobImmediately"
-                defaultMessage="Start job immediately"
-              />
-            </span>
+            <FormattedMessage
+              id="xpack.rollupJobs.create.startJobImmediatelyLabel"
+              defaultMessage="Start job immediately"
+            />
           }
           onChange={this.onClickStartAfterCreate}
         />
