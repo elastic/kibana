@@ -421,53 +421,52 @@ export const StepDefineForm: SFC<Props> = React.memo(({ overrides = {}, onChange
     <EuiFlexGroup>
       <EuiFlexItem grow={false} style={{ minWidth: '420px' }}>
         <EuiForm>
-          {kibanaContext.currentSavedSearch.id === undefined &&
-            (typeof search === 'string' || typeof search === 'object') && (
-              <Fragment>
+          {kibanaContext.currentSavedSearch.id === undefined && typeof search === 'string' && (
+            <Fragment>
+              <EuiFormRow
+                label={i18n.translate('xpack.ml.dataframe.stepDefineForm.indexPatternLabel', {
+                  defaultMessage: 'Index pattern',
+                })}
+                helpText={
+                  disabledQuery
+                    ? i18n.translate('xpack.ml.dataframe.stepDefineForm.indexPatternHelpText', {
+                        defaultMessage:
+                          'An optional query for this index pattern is not supported. The number of supported index fields is {maxIndexFields} whereas this index has {numIndexFields} fields.',
+                        values: {
+                          maxIndexFields,
+                          numIndexFields,
+                        },
+                      })
+                    : ''
+                }
+              >
+                <span>{kibanaContext.currentIndexPattern.title}</span>
+              </EuiFormRow>
+              {!disabledQuery && (
                 <EuiFormRow
-                  label={i18n.translate('xpack.ml.dataframe.stepDefineForm.indexPatternLabel', {
-                    defaultMessage: 'Index pattern',
+                  label={i18n.translate('xpack.ml.dataframe.stepDefineForm.queryLabel', {
+                    defaultMessage: 'Query',
                   })}
-                  helpText={
-                    disabledQuery
-                      ? i18n.translate('xpack.ml.dataframe.stepDefineForm.indexPatternHelpText', {
-                          defaultMessage:
-                            'An optional query for this index pattern is not supported. The number of supported index fields is {maxIndexFields} whereas this index has {numIndexFields} fields.',
-                          values: {
-                            maxIndexFields,
-                            numIndexFields,
-                          },
-                        })
-                      : ''
-                  }
+                  helpText={i18n.translate('xpack.ml.dataframe.stepDefineForm.queryHelpText', {
+                    defaultMessage: 'Use a query string to filter the source data (optional).',
+                  })}
                 >
-                  <span>{kibanaContext.currentIndexPattern.title}</span>
+                  <KqlFilterBar
+                    indexPattern={indexPattern}
+                    onSubmit={searchHandler}
+                    initialValue={search === defaultSearch ? emptySearch : search}
+                    placeholder={i18n.translate(
+                      'xpack.ml.dataframe.stepDefineForm.queryPlaceholder',
+                      {
+                        defaultMessage: 'e.g. {example}',
+                        values: { example: 'method:GET -is:active' },
+                      }
+                    )}
+                  />
                 </EuiFormRow>
-                {!disabledQuery && (
-                  <EuiFormRow
-                    label={i18n.translate('xpack.ml.dataframe.stepDefineForm.queryLabel', {
-                      defaultMessage: 'Query',
-                    })}
-                    helpText={i18n.translate('xpack.ml.dataframe.stepDefineForm.queryHelpText', {
-                      defaultMessage: 'Use a query string to filter the source data (optional).',
-                    })}
-                  >
-                    <KqlFilterBar
-                      indexPattern={indexPattern}
-                      onSubmit={searchHandler}
-                      initialValue={search === defaultSearch ? emptySearch : search}
-                      placeholder={i18n.translate(
-                        'xpack.ml.dataframe.stepDefineForm.queryPlaceholder',
-                        {
-                          defaultMessage: 'e.g. {example}',
-                          values: { example: 'method:GET -is:active' },
-                        }
-                      )}
-                    />
-                  </EuiFormRow>
-                )}
-              </Fragment>
-            )}
+              )}
+            </Fragment>
+          )}
 
           {kibanaContext.currentSavedSearch.id !== undefined && (
             <EuiFormRow
