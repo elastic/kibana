@@ -95,7 +95,7 @@ export function DocTableProvider({ getService, getPageObjects }: FtrProviderCont
 
     public async getFields(
       options: { isAnchorRow: boolean } = { isAnchorRow: false }
-    ): Promise<WebElementWrapper[]> {
+    ): Promise<string[][]> {
       const table = await this.getTable();
       const $ = await table.parseDomContent();
       const rowLocator = options.isAnchorRow
@@ -111,9 +111,16 @@ export function DocTableProvider({ getService, getPageObjects }: FtrProviderCont
       return fields;
     }
 
-    public async getHeaderFields(): Promise<WebElementWrapper[]> {
+    public async getHeaderFields(): Promise<string[]> {
       const table = await this.getTable();
-      return await table.findAllByCssSelector('[data-test-subj~="docTableHeaderField"]');
+      const $ = await table.parseDomContent();
+      return $('[data-test-subj~="docTableHeaderField"]')
+        .toArray()
+        .map((field: any) =>
+          $(field)
+            .text()
+            .trim()
+        );
     }
 
     public async getTableDocViewRow(

@@ -60,16 +60,11 @@ export default function ({ getService, getPageObjects }) {
     });
 
     it('should open the context view with the same columns', async function () {
-      await retry.try(async () => {
-        const headerFields = await docTable.getHeaderFields();
-        const columnNames = await Promise.all(headerFields.map((headerField) => (
-          headerField.getVisibleText()
-        )));
-        expect(columnNames).to.eql([
-          'Time',
-          ...TEST_COLUMN_NAMES,
-        ]);
-      });
+      const columnNames = await docTable.getHeaderFields();
+      expect(columnNames).to.eql([
+        'Time',
+        ...TEST_COLUMN_NAMES,
+      ]);
     });
 
     it('should open the context view with the filters disabled', async function () {
