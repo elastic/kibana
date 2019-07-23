@@ -17,8 +17,7 @@
  * under the License.
  */
 
-import { isValidEsInterval } from '../../../core_plugins/data/common';
-import { leastCommonInterval } from '../vis/lib/least_common_interval';
+import { isValidEsInterval, leastCommonInterval } from '../../../common';
 
 /**
  * Check a string if it's a valid JSON.

@@ -27,3 +27,5 @@ export {
   parseEsInterval,
   ParsedInterval,
 } from './parse_es_interval';
+/** @public static code */
+export { leastCommonInterval } from './least_common_interval';

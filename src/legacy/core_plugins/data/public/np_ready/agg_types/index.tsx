@@ -19,40 +19,73 @@
 
 import './agg_params';
 import { IndexedArray } from '../indexed_array';
+// @ts-ignore
 import { countMetricAgg } from './metrics/count';
+// @ts-ignore
 import { avgMetricAgg } from './metrics/avg';
+// @ts-ignore
 import { sumMetricAgg } from './metrics/sum';
+// @ts-ignore
+// @ts-ignore
 import { medianMetricAgg } from './metrics/median';
+// @ts-ignore
 import { minMetricAgg } from './metrics/min';
+// @ts-ignore
 import { maxMetricAgg } from './metrics/max';
+// @ts-ignore
 import { topHitMetricAgg } from './metrics/top_hit';
+// @ts-ignore
 import { stdDeviationMetricAgg } from './metrics/std_deviation';
+// @ts-ignore
 import { cardinalityMetricAgg } from './metrics/cardinality';
+// @ts-ignore
 import { percentilesMetricAgg } from './metrics/percentiles';
+// @ts-ignore
 import { geoBoundsMetricAgg } from './metrics/geo_bounds';
+// @ts-ignore
 import { geoCentroidMetricAgg } from './metrics/geo_centroid';
+// @ts-ignore
 import { percentileRanksMetricAgg } from './metrics/percentile_ranks';
+// @ts-ignore
 import { derivativeMetricAgg } from './metrics/derivative';
+// @ts-ignore
 import { cumulativeSumMetricAgg } from './metrics/cumulative_sum';
+// @ts-ignore
 import { movingAvgMetricAgg } from './metrics/moving_avg';
+// @ts-ignore
 import { serialDiffMetricAgg } from './metrics/serial_diff';
+// @ts-ignore
 import { dateHistogramBucketAgg } from './buckets/date_histogram';
+// @ts-ignore
 import { histogramBucketAgg } from './buckets/histogram';
+// @ts-ignore
 import { rangeBucketAgg } from './buckets/range';
+// @ts-ignore
 import { dateRangeBucketAgg } from './buckets/date_range';
+// @ts-ignore
 import { ipRangeBucketAgg } from './buckets/ip_range';
+// @ts-ignore
 import { termsBucketAgg } from './buckets/terms';
+// @ts-ignore
 import { filterBucketAgg } from './buckets/filter';
+// @ts-ignore
 import { filtersBucketAgg } from './buckets/filters';
+// @ts-ignore
 import { significantTermsBucketAgg } from './buckets/significant_terms';
+// @ts-ignore
 import { geoHashBucketAgg } from './buckets/geo_hash';
+// @ts-ignore
 import { geoTileBucketAgg } from './buckets/geo_tile';
+// @ts-ignore
 import { bucketSumMetricAgg } from './metrics/bucket_sum';
+// @ts-ignore
 import { bucketAvgMetricAgg } from './metrics/bucket_avg';
+// @ts-ignore
 import { bucketMinMetricAgg } from './metrics/bucket_min';
+// @ts-ignore
 import { bucketMaxMetricAgg } from './metrics/bucket_max';
 
-const aggs = {
+export const aggTypes = {
   metrics: [
     countMetricAgg,
     avgMetricAgg,
@@ -91,32 +124,9 @@ const aggs = {
   ]
 };
 
-Object.keys(aggs).forEach(function (type) {
-  aggs[type].forEach(function (agg) {
-    agg.type = type;
-  });
-});
+export { AggParam, AggParamOption } from './agg_param';
+export { AggType } from './agg_type';
+export { FieldParamType } from './param_types';
 
+export { FilterService, FilterSetup } from './agg_types_service';
 
-/**
- * IndexedArray of Aggregation Types.
- *
- * These types form two groups, metric and buckets.
- *
- * @module agg_types
- * @type {IndexedArray}
- */
-export const aggTypes = new IndexedArray({
-
-  /**
-   * @type {Array}
-   */
-  index: ['name'],
-
-  /**
-   * [group description]
-   * @type {Array}
-   */
-  group: ['type'],
-  initialSet: aggs.metrics.concat(aggs.buckets)
-});

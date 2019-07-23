@@ -17,13 +17,38 @@
  * under the License.
  */
 
-import { IndexedArray } from '../indexed_array';
+// @ts-ignore
 import { FieldParamType } from './param_types/field';
+// @ts-ignore
 import { OptionedParamType } from './param_types/optioned';
+// @ts-ignore
 import { StringParamType } from './param_types/string';
+// @ts-ignore
 import { JsonParamType } from './param_types/json';
+// @ts-ignore
 import { BaseParamType } from './param_types/base';
-import { createLegacyClass } from '../utils/legacy_class';
+import { AggConfig } from '../agg_configs/agg_config';
+import { AggConfigs } from '../agg_configs/agg_configs';
+import { AggParamEditorProps } from 'ui/vis';
+
+interface AggParam {
+  editorComponent: React.ComponentType<AggParamEditorProps<unknown>>;
+  type: string;
+  name: string;
+  advanced?: boolean;
+  options?: AggParamOption[];
+  required?: boolean;
+  displayName?: string;
+  onChange?(agg: AggConfig): void;
+  shouldShow?(agg: AggConfig): boolean;
+  write?: any;
+}
+
+interface AggParamOption {
+  val: string;
+  display: string;
+  enabled?(agg: AggConfig): void;
+}
 
 const paramTypeMap = {
   field: FieldParamType,
@@ -31,31 +56,18 @@ const paramTypeMap = {
   string: (StringParamType),
   json: (JsonParamType),
   _default: (BaseParamType)
-};
+} as Record<string, any>;
 
-/**
- * Wraps a list of {{#crossLink "AggParam"}}{{/crossLink}} objects; owned by an {{#crossLink "AggType"}}{{/crossLink}}
- *
- * used to create:
- *   - `FieldAggParam` – When the config has `name: "field"`
- *   - `*AggParam` – When the type matches something in the map above
- *   - `BaseAggParam` – All other params
- *
- * @class AggParams
- * @constructor
- * @extends IndexedArray
- * @param {object[]} params - array of params that get new-ed up as AggParam objects as described above
- */
-createLegacyClass(AggParams).inherits(IndexedArray);
-function AggParams(params) {
-  AggParams.Super.call(this, {
-    index: ['name'],
-    initialSet: params.map(function (config) {
-      const Class = paramTypeMap[config.type] || paramTypeMap._default;
-      return new Class(config);
-    })
-  });
+interface AggParamConfig {
+  type: string;
 }
+
+export const initParams = (params: [AggParamConfig]): [AggParam] => {
+  return params.map((config: AggParamConfig) => {
+    const Class = paramTypeMap[config.type] || paramTypeMap._default;
+    return new Class(config);
+  }) as [AggParam];
+};
 
 /**
  * Reads an aggConfigs
@@ -71,11 +83,11 @@ function AggParams(params) {
  *         output object which is used to create the agg dsl for the search request. All other properties
  *         are dependent on the AggParam#write methods which should be studied for each AggType.
  */
-AggParams.prototype.write = function (aggConfig, aggs, locals) {
-  const output = { params: {} };
+export const writeParams = (params: [AggParam], aggConfig: AggConfig, aggs: AggConfigs, locals: Record<string, any>) => {
+  const output = { params: {} as Record<string, any> };
   locals = locals || {};
 
-  this.forEach(function (param) {
+  params.forEach(function (param) {
     if (param.write) {
       param.write(aggConfig, output, aggs, locals);
     } else {
@@ -85,5 +97,3 @@ AggParams.prototype.write = function (aggConfig, aggs, locals) {
 
   return output;
 };
-
-export { AggParams };
