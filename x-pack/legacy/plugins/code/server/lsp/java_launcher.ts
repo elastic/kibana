@@ -21,7 +21,7 @@ const JAVA_LANG_DETACH_PORT = 2090;
 
 export class JavaLauncher extends AbstractLauncher {
   private needModuleArguments: boolean = true;
-  public constructor(
+  constructor(
     readonly targetHost: string,
     readonly options: ServerOptions,
     readonly loggerFactory: LoggerFactory
