@@ -494,12 +494,6 @@ export class MBMapContainer extends React.Component {
 
   };
 
-  _getLayerById(layerId) {
-    return this.props.layerList.find((layer) => {
-      return layer.getId() === layerId;
-    });
-  }
-
   _getLayerByMbLayerId(mbLayerId) {
     return this.props.layerList.find((layer) => {
       const mbLayerIds = layer.getMbLayerIds();

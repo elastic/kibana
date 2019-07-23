@@ -7,7 +7,135 @@
 import { TileLayer } from './tile_layer';
 import _ from 'lodash';
 import { TileStyle } from '../layers/styles/tile_style';
-import { SOURCE_DATA_ID_ORIGIN } from '../../common/constants';
+import { styleTest } from './style_test';
+
+window._styleTest = styleTest;
+
+const layersToInclude = styleTest.layers.filter((layer, index) => {
+  const whiteList = [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    // 14,
+    15,
+    16,
+    17,
+    18,
+    19,
+    20,
+    21,
+    22,
+    23,
+    24,
+    25,
+    26,
+    27,
+    28,
+    29,
+    30,
+    31,
+    32,
+    33,
+    34,
+    34,
+    35,
+    36,
+    37,
+    38,
+    39,
+    40,
+    41,
+    42,
+    43,
+    44,
+    45,
+    46,
+    47,
+    48,
+    49,
+    50,
+    51,
+    51,
+    53,
+    54,
+    55,
+    56,
+    57,
+    58,
+    59,
+    60,
+    61,
+    62,
+    63,
+    64,
+    65,
+    66,
+    67,
+    68,
+    69,
+    70,
+    71,
+    72,
+    73,
+    74,
+    75,
+    76,
+    77,
+    78,
+    79,
+    80,
+    81,
+    82,
+    83,
+    84,
+    85,
+    86,
+    87,
+
+    88,
+    89,
+    90,
+
+    91,
+    // 92,
+    // 93,
+    94,
+    95,
+    96,
+
+    97,
+    98,
+    99,
+
+    100,
+    101,
+    102,
+    103,
+    104,
+
+    105,
+    106,
+    107,
+    108,
+    109,
+    110
+  ].includes(index);
+  return whiteList;
+});
+
+
+console.log('layers to include', layersToInclude);
 
 export class VectorTileLayer extends TileLayer {
 
@@ -15,9 +143,6 @@ export class VectorTileLayer extends TileLayer {
 
   constructor({ layerDescriptor, source, style }) {
     super({ layerDescriptor, source, style });
-    if (!style) {
-      this._style = new TileStyle();
-    }
   }
 
   static createDescriptor(options) {
@@ -28,5 +153,60 @@ export class VectorTileLayer extends TileLayer {
       TileStyle.createDescriptor(tileLayerDescriptor.style.properties);
     return tileLayerDescriptor;
   }
+
+
+  _getMbLayersToInclude() {
+
+  }
+
+  _generateMbLayerId(mbLayer) {
+    return this._getMbSourceId() + '_' + mbLayer.id;
+  }
+
+  getMbLayerIds() {
+    const layerIds = layersToInclude.map(layer => {
+      return this._generateMbLayerId(layer);
+    });
+    return layerIds;
+  }
+
+  _getMbSourceId() {
+    return this.getId();
+  }
+
+
+  syncLayerWithMB(mbMap) {
+    // console.log('synclyaer');
+    // this.super(mbMap);
+
+    const sourceId = this._getMbSourceId();
+    const source = mbMap.getSource(sourceId);
+
+    if (!source) {
+
+      mbMap.addSource(sourceId, {
+        type: 'vector',
+        url: 'https://tiles.maps.elastic.co/data/v3.json'
+      });
+
+      layersToInclude.forEach((layer, index) => {
+
+        const newLayerObject = {
+          ...layer,
+          source: this._getMbSourceId(),
+          id: this._generateMbLayerId(layer)
+        };
+        mbMap.addLayer(newLayerObject);
+      });
+
+      console.log('done syncing!');
+    }
+
+
+
+
+  }
+
+
 
 }

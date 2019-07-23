@@ -7,6 +7,7 @@
 import { createSelector } from 'reselect';
 import _ from 'lodash';
 import { TileLayer } from '../layers/tile_layer';
+import { VectorTileLayer } from '../layers/vector_tile_layer';
 import { VectorLayer } from '../layers/vector_layer';
 import { HeatmapLayer } from '../layers/heatmap_layer';
 import { ALL_SOURCES } from '../layers/sources/all_sources';
@@ -21,6 +22,8 @@ function createLayerInstance(layerDescriptor, inspectorAdapters) {
   const source = createSourceInstance(layerDescriptor.sourceDescriptor, inspectorAdapters);
   const style = createStyleInstance(layerDescriptor.style, source);
   switch (layerDescriptor.type) {
+    case VectorTileLayer.type:
+      return new VectorTileLayer({ layerDescriptor, source, style });
     case TileLayer.type:
       return new TileLayer({ layerDescriptor, source, style });
     case VectorLayer.type:
@@ -41,7 +44,6 @@ function createSourceInstance(sourceDescriptor, inspectorAdapters) {
   }
   return new Source(sourceDescriptor, inspectorAdapters);
 }
-
 
 function createStyleInstance(styleDescriptor, source) {
 

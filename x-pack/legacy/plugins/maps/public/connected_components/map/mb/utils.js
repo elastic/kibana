@@ -18,8 +18,6 @@ function relativeToAbsolute(url) {
 export async function createMbMapInstance({ node, initialView, scrollZoom }) {
   const makiUrl = relativeToAbsolute(chrome.addBasePath(MAKI_SPRITE_PATH));
 
-  console.log('makiUrl', makiUrl);
-
   return new Promise((resolve) => {
     const options = {
       attributionControl: false,
@@ -28,7 +26,9 @@ export async function createMbMapInstance({ node, initialView, scrollZoom }) {
         version: 8,
         sources: {},
         layers: [],
-        sprite: makiUrl
+        // sprite: makiUrl,
+        sprite: 'https://tiles.maps.elastic.co/styles/osm-bright/sprite',
+        glyphs: 'https://tiles.maps.elastic.co/fonts/{fontstack}/{range}.pbf'
       },
       scrollZoom,
       preserveDrawingBuffer: chrome.getInjected('preserveDrawingBuffer', false)
@@ -37,7 +37,7 @@ export async function createMbMapInstance({ node, initialView, scrollZoom }) {
       options.zoom = initialView.zoom;
       options.center = {
         lng: initialView.lon,
-        lat: initialView.lat
+        lat: <initialView className="lat">  </initialView>
       };
     }
     const mbMap = new mapboxgl.Map(options);
@@ -49,6 +49,7 @@ export async function createMbMapInstance({ node, initialView, scrollZoom }) {
     mbMap.on('load', () => {
       resolve(mbMap);
     });
+    window._mbMap = mbMap;
   });
 }
 

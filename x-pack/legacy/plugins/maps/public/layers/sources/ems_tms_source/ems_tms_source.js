@@ -91,7 +91,7 @@ export class EMSTMSSource extends AbstractTMSSource {
   }
 
   _createDefaultLayerDescriptor(options) {
-    return TileLayer.createDescriptor({
+    return VectorTileLayer.createDescriptor({
       sourceDescriptor: this._descriptor,
       ...options
     });
