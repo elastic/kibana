@@ -123,7 +123,7 @@ export function EditorFrame(props: EditorFrameProps) {
     }
   }, [props.doc]);
 
-  // Initialize visualization as soon as all datasource is ready
+  // Initialize visualization as soon as all datasources are ready
   useEffect(() => {
     if (allLoaded && state.visualization.state === null && state.visualization.activeId !== null) {
       const initialVisualizationState = props.visualizationMap[

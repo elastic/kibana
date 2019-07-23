@@ -86,7 +86,6 @@ export const IndexPatternDimensionPanel = memo(function IndexPatternDimensionPan
             changeColumn({
               state: props.state,
               layerId,
-              // layers: props.state.layers,
               columnId: props.columnId,
               newColumn: column,
             })
