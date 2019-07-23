@@ -69,7 +69,7 @@ export function VislibVisTypeProvider(Private, $rootScope, $compile) {
 
         this.vis.vislibVis = new vislib.Vis(this.chartEl, visParams);
         this.vis.vislibVis.on('brush', this.vis.API.events.brush);
-        if (this.vis.vislibVis.visConfigArgs.enableClicks) {
+        if (!this.vis.vislibVis.visConfigArgs.disableClicks) {
           this.vis.vislibVis.on('click', this.vis.API.events.filter);
         }
         this.vis.vislibVis.on('renderComplete', resolve);
@@ -109,7 +109,7 @@ export function VislibVisTypeProvider(Private, $rootScope, $compile) {
     destroy() {
       if (this.vis.vislibVis) {
         this.vis.vislibVis.off('brush', this.vis.API.events.brush);
-        if (this.vis.vislibVis.visConfigArgs.enableClicks) {
+        if (!this.vis.vislibVis.visConfigArgs.disableClicks) {
           this.vis.vislibVis.off('click', this.vis.API.events.filter);
         }
         this.vis.vislibVis.destroy();

@@ -76,7 +76,8 @@ export default function GaugeVisType(Private) {
             subText: '',
             fontSize: 60,
           }
-        }
+        },
+        disableClicks: false
       },
     },
     events: {

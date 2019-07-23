@@ -42,7 +42,8 @@ export default function HistogramVisType(Private) {
           values: true,
           last_level: true,
           truncate: 100
-        }
+        },
+        disableClicks: false
       },
     },
     events: {

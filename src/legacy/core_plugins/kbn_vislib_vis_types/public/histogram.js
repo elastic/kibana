@@ -101,8 +101,8 @@ export default function PointSeriesVisType(Private) {
         labels: {
           show: false,
         },
-        enableClicks: true
-      },
+        disableClicks: false
+      }
     },
     editorConfig: {
       collections: {

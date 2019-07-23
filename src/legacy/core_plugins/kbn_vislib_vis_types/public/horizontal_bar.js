@@ -99,6 +99,7 @@ export default function PointSeriesVisType(Private) {
         legendPosition: 'right',
         times: [],
         addTimeMarker: false,
+        disableClicks: false
       },
     },
     editorConfig: {

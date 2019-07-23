@@ -59,7 +59,8 @@ export default function HeatmapVisType(Private) {
             overwriteColor: false,
             color: 'black',
           }
-        }]
+        }],
+        disableClicks: false
       },
     },
     editorConfig: {
