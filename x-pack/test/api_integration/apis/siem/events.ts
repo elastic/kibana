@@ -173,6 +173,7 @@ const eventsTests: KbnTestProvider = ({ getService }) => {
               },
               defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
               inspect: false,
+              totalCount: true,
             },
           })
           .then(resp => {
