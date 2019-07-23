@@ -55,7 +55,7 @@ module
     // Subscribe to changes to globalState and trigger
     // a mlJobSelectService update if the job selection changed.
     globalState.on('save_with_changes', () => {
-      const { newJobIds, newSelectedGroups } = getSelectedJobIds(globalState);
+      const { jobIds: newJobIds, selectedGroups: newSelectedGroups } = getSelectedJobIds(globalState);
       const oldSelectedJobIds = mlJobSelectService.getValue().selection;
 
       if (newJobIds && !(_.isEqual(oldSelectedJobIds, newJobIds))) {
