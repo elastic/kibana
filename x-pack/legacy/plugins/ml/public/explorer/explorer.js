@@ -789,7 +789,8 @@ export const Explorer = injectI18n(injectObservablesAsProps(
       if (stateUpdate.influencers !== undefined && !noInfluencersConfigured) {
         for (const influencerName in stateUpdate.influencers) {
           if (stateUpdate.influencers[influencerName][0] && stateUpdate.influencers[influencerName][0].influencerFieldValue) {
-            stateUpdate.filterPlaceHolder = `${influencerName} : ${stateUpdate.influencers[influencerName][0].influencerFieldValue}`;
+            stateUpdate.filterPlaceHolder =
+            `Filter by influencer fields... (E.g. ${influencerName} : ${stateUpdate.influencers[influencerName][0].influencerFieldValue})`;
             break;
           }
         }
@@ -968,7 +969,7 @@ export const Explorer = injectI18n(injectObservablesAsProps(
     }
 
     applyInfluencersFilterQuery = ({
-      influencersFilterQuery,
+      filterQuery: influencersFilterQuery,
       isAndOperator,
       filteredFields,
       queryString,

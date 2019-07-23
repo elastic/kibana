@@ -169,7 +169,7 @@ export class FilterBar extends Component {
               'xpack.ml.explorer.kueryBar.filterPlaceholder',
               {
                 defaultMessage:
-                  'Filter by influencer fields… (E.g. {queryExample})',
+                  '{queryExample}',
                 values: {
                   queryExample:
                     `${this.props.placeholder}`

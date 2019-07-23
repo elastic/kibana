@@ -208,14 +208,14 @@ export const StepDefineForm: SFC<Props> = React.memo(({ overrides = {}, onChange
     const currentDisplaySearch = search === defaultSearch ? emptySearch : search;
     setSearch(`${currentDisplaySearch} ${newSearch}`.trim());
   };
-  // TODO: rename influencersFilterQuery and remove placeholder on kql component
+
   const searchHandler = (d: Record<string, any>) => {
-    const { influencersFilterQuery, queryString } = d;
+    const { filterQuery, queryString } = d;
     const newSearch = queryString === emptySearch ? defaultSearch : queryString;
     const newSearchQuery =
-      influencersFilterQuery.match_all && Object.keys(influencersFilterQuery.match_all).length === 0
+      filterQuery.match_all && Object.keys(filterQuery.match_all).length === 0
         ? defaultSearch
-        : influencersFilterQuery;
+        : filterQuery;
     setSearch(newSearch);
     setSearchQuery(newSearchQuery);
   };
