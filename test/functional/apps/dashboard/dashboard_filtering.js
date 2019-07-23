@@ -217,8 +217,7 @@ export default function ({ getService, getPageObjects }) {
         await dashboardExpect.tsvbMarkdownWithValuesExists(['7,209.286']);
       });
 
-      // FLAKY: https://github.com/elastic/kibana/issues/41087
-      it.skip('saved searches', async () => {
+      it('saved searches', async () => {
         await dashboardExpect.savedSearchRowCount(1);
       });
 
