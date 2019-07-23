@@ -137,6 +137,10 @@ export class FilterManager {
       filters = [filters];
     }
 
+    if (filters.length === 0) {
+      return;
+    }
+
     const { uiSettings } = npSetup.core;
     if (pinFilterStatus === undefined) {
       pinFilterStatus = uiSettings.get('filters:pinnedByDefault');
@@ -179,7 +183,9 @@ export class FilterManager {
   }
 
   public invertFilter(filter: Filter) {
-    filter.meta.negate = !filter.meta.negate;
+    const newFilter = _.cloneDeep(filter);
+    newFilter.meta.negate = !newFilter.meta.negate;
+    this.addFilters(newFilter);
   }
 
   public async removeAll() {
