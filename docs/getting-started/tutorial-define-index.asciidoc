@@ -1,5 +1,5 @@
 [[tutorial-define-index]]
-=== Defining your index patterns
+=== Define your index patterns
 
 Index patterns tell Kibana which Elasticsearch indices you want to explore.
 An index pattern can match the name of a single index, or include a wildcard
@@ -27,23 +27,21 @@ Otherwise, click *Create index pattern*.
 image::images/tutorial-pattern-1.png[]
 
 . Click *Next step*.
-. In *Configure settings*, click *Create index pattern*.  For this pattern,
-you don't need to configure any settings.
+. In *Configure settings*, click *Create index pattern*.
 +
 You’re presented a table of all fields and associated data types in the index.
 
 . Return to the *Index patterns* overview page and define a second index pattern named  `ba*`. 
-You don't need to configure any settings for this pattern.
 
 [float]
 ==== Create an index pattern for time-series data
 
-Now create an index pattern for the Logstash, which
+Now create an index pattern for the Logstash index, which
 contains time-series data.
 
 . Define an index pattern named `logstash*`.
 . Click *Next step*.
-. Open the *Time Filter field name* dropdown and ßselect *@timestamp*.
+. Open the *Time Filter field name* dropdown and select *@timestamp*.
 . Click *Create index pattern*.
 
 [float]

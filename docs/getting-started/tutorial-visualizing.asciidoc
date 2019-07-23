@@ -1,8 +1,8 @@
 [[tutorial-visualizing]]
-=== Visualizing your data
+=== Visualize your data
 
 In the Visualize application, you can shape your data using a variety
-of charts, tables, and maps, and more. You'll create four
+of charts, tables, and maps, and more. In this tutorial, you'll create four
 visualizations: 
 
 * <<tutorial-visualize-pie, Pie chart>>
@@ -11,10 +11,14 @@ visualizations:
 * <<tutorial-visualize-markdown, Markdown widget>>
 
 [float]
-=== Start Visualize
+[[tutorial-visualize-pie]]
+=== Pie chart
 
-. Open *Visualize.*
-. Click *Create a visualization*. You'll see all the visualization
+You'll use the pie chart to
+gain insight into the account balances in the bank account data.
+
+. Open *Visualize* to show the overview page.
+. Click *Create new visualization*. You'll see all the visualization
 types in Kibana.
 +
 [role="screenshot"]
@@ -22,29 +26,22 @@ image::images/tutorial-visualize-wizard-step-1.png[]
 . Click *Pie*.
 
 . In *Choose a source*, select the `ba*` index pattern. 
-
-[float]
-[[tutorial-visualize-pie]]
-=== Pie chart
-
-You'll use the pie chart to
-gain insight into the account balances in the bank account data.
++
 Initially, the pie contains a single "slice."
 That's because the default search matched all documents.
-
++
 To specify which slices to display in the pie, you use an Elasticsearch
 {ref}/search-aggregations.html[bucket aggregation]. This aggregation
 sorts the documents that match your search criteria into different
-categories, also known as _buckets_.
+categories. You'll use a bucket aggregation to establish
+multiple ranges of account balances and find out how many accounts fall into
+each range.
 
 . In the *Buckets* pane, click *Add > Split slices.*
 +
-You'll use a bucket aggregation to establish
-multiple ranges of account balances and find out how many accounts fall into
-each range.
 .. In the *Aggregation* dropdown, select *Range*.
 .. In the *Field* dropdown, select *balance*.
-.. Click *Add Range* four times to bring the total number of ranges to six.
+.. Click *Add range* four times to bring the total number of ranges to six.
 .. Define the following ranges:
 +
 [source,text]
@@ -68,8 +65,9 @@ holders.
 
 .. At the bottom of the *Buckets* pane, click *Add*.
 .. For *sub-bucket type,* select *Split slices*.
-.. In the *Sub Aggregation* dropdown, select *Terms*.
+.. In the *Sub aggregation* dropdown, select *Terms*.
 .. In the *Field* dropdown, select *age*.
+
 . Click  *Apply changes* image:images/apply-changes-button.png[].
 +
 Now you can see the break down of the ages of the account holders, displayed
@@ -77,8 +75,9 @@ in a ring around the balance ranges.
 +
 [role="screenshot"]
 image::images/tutorial-visualize-pie-3.png[]
+
 . To save this chart so you can use it later, click *Save* in 
-he top menu bar and enter `Pie Example`.
+the top menu bar and enter `Pie Example`.
 
 [float]
 [[tutorial-visualize-bar]]
@@ -93,25 +92,22 @@ Initially, the chart is a single bar that shows the total count
 of documents that match the default wildcard query.
 
 . Show the number of speaking parts per play along the Y-axis.
-This requires you to configure the Y-axis
-{ref}/search-aggregations.html[metric aggregation.]
-This aggregation computes metrics based on values from the search results.
 
 .. In the *Metrics* pane, expand *Y-axis*.
 .. Set *Aggregation* to *Unique Count*.
 .. Set *Field* to *speaker*.
 .. In the *Custom label* box, enter `Speaking Parts`.
-.. Click  *Apply changes* image:images/apply-changes-button.png[].
-+
-[role="screenshot"]
-image::images/tutorial-visualize-bar-2.png[]
+
+. Click  *Apply changes* image:images/apply-changes-button.png[].
 
 . Show the plays along the X-axis.
 
-.. In the *Buckets* pane, click *Add > x-Axis*.
-.. Set *Aggregation* to *Terms* and *Field* to *play_name*.
-.. To list plays alphabetically, in the *Order* dropdown menu, select *Ascending*.
+.. In the *Buckets* pane, click *Add > X-axis*.
+.. Set *Aggregation* to *Terms*.
+.. Set *Field* to *play_name*.
+.. To list plays alphabetically, in the *Order* dropdown, select *Ascending*.
 .. Give the axis a custom label, `Play Name`.
+
 . Click  *Apply changes* image:images/apply-changes-button.png[].
 +
 [role="screenshot"]
@@ -136,14 +132,19 @@ Using a coordinate map, you can visualize geographic information in the log file
 +
 You haven't defined any buckets yet, so the visualization is a map of the world.
 
-. Open the time filter.
-. Click *Show date*, then *~15 min ago*, then *Absolute*.
-. Set the *Start date* to May 18, 2015.
-. Click *now*, then *Absolute*, and set the *End date* to May 20, 2015.
-+
-Now map the geo coordinates from the log files.
-. In the *Buckets* pane, click *Add > Geo coordinates*.
-. Set *Aggregation* to *Geohash* and *Field* to *geo.coordinates*.
+. Set the time.
+.. In the time filter, click *Show dates*.
+.. Click the start date, then *Absolute*.
+.. Set the *Start date* to May 18, 2015.
+.. In the time filter, click *now*, then *Absolute*.
+.. Set the *End date* to May 20, 2015.
+
+. Map the geo coordinates from the log files.
+
+.. In the *Buckets* pane, click *Add > Geo coordinates*.
+.. Set *Aggregation* to *Geohash*.
+.. Set *Field* to *geo.coordinates*.
+
 . Click *Apply changes* image:images/apply-changes-button.png[].
 +
 The map now looks like this:
@@ -151,8 +152,8 @@ The map now looks like this:
 [role="screenshot"]
 image::images/tutorial-visualize-map-2.png[]
 
-. Navigate the map by clicking and dragging.  The controls
-on the top left of the map enable you to zoom the map and set filters.
+. Navigate the map by clicking and dragging.  Use the controls
+on the left to zoom the map and set filters.
 . *Save* this map with the name `Map Example`.
 
 [float]
@@ -171,7 +172,7 @@ The Markdown widget uses **markdown** syntax.
 
 . Click *Apply changes* image:images/apply-changes-button.png[].
 +
-The Markdown renders in the preview pane:
+The Markdown renders in the preview pane.
 +
 [role="screenshot"]
 image::images/tutorial-visualize-md-2.png[]

@@ -1,5 +1,5 @@
 [[tutorial-discovering]]
-=== Discovering your data
+=== Discover your data
 
 Using the Discover application, you can enter
 an {ref}/query-dsl-query-string-query.html#query-string-syntax[Elasticsearch
@@ -26,7 +26,7 @@ excess of 47,500. Results appear for account numbers 8, 32, 78, 85, and 97.
 image::images/tutorial-discover-2.png[]
 +
 . To choose which
-fields to display, hover the pointer over the list of *Available Fields*
+fields to display, hover the pointer over the list of *Available fields*
 and then click *add* next to each field you want include as a column in the table.
 +
 For example, if you add the `account_number` field, the display changes to a list of five

@@ -1,5 +1,5 @@
 [[tutorial-build-dashboard]]
-== Building your own dashboard
+== Build your own dashboard
 
 Want to load some data into Kibana and build a dashboard? This tutorial shows you how to:
 
