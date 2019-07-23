@@ -17,8 +17,6 @@
  * under the License.
  */
 
-import { StaticIndexPattern } from '../../../../../src/legacy/ui/public/index_patterns';
-
 /**
  * WARNING: these typings are incomplete
  */
@@ -46,6 +44,6 @@ export function fromKueryExpression(
   parseOptions?: KueryParseOptions
 ): KueryNode;
 
-export function toElasticsearchQuery(node: KueryNode, indexPattern: StaticIndexPattern): JsonObject;
+export function toElasticsearchQuery(node: KueryNode, indexPattern: any): JsonObject;
 
 export function doesKueryExpressionHaveLuceneSyntaxError(expression: string): boolean;
