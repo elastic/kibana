@@ -111,10 +111,9 @@ export const mockData: { UncommonProcess: UncommonProcessesData } = {
       },
     ],
     pageInfo: {
-      endCursor: {
-        value: 'aa7ca589f1b8220002f2fc61c64cfbf1',
-      },
-      hasNextPage: true,
+      activePage: 1,
+      fakeTotalCount: 50,
+      showMorePagesIndicator: true,
     },
   },
 };
