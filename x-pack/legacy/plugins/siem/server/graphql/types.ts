@@ -108,6 +108,10 @@ export interface ResponseNotes {
 }
 
 export interface PinnedEvent {
+  code?: number | null;
+
+  message?: string | null;
+
   pinnedEventId: string;
 
   eventId?: string | null;
@@ -1505,6 +1509,10 @@ export interface ResponseTimeline {
 }
 
 export interface ResponseFavoriteTimeline {
+  code?: number | null;
+
+  message?: string | null;
+
   savedObjectId: string;
 
   version: string;
@@ -2391,6 +2399,10 @@ export namespace ResponseNotesResolvers {
 
 export namespace PinnedEventResolvers {
   export interface Resolvers<Context = SiemContext, TypeParent = PinnedEvent> {
+    code?: CodeResolver<number | null, TypeParent, Context>;
+
+    message?: MessageResolver<string | null, TypeParent, Context>;
+
     pinnedEventId?: PinnedEventIdResolver<string, TypeParent, Context>;
 
     eventId?: EventIdResolver<string | null, TypeParent, Context>;
@@ -2410,6 +2422,16 @@ export namespace PinnedEventResolvers {
     version?: VersionResolver<string | null, TypeParent, Context>;
   }
 
+  export type CodeResolver<
+    R = number | null,
+    Parent = PinnedEvent,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type MessageResolver<
+    R = string | null,
+    Parent = PinnedEvent,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
   export type PinnedEventIdResolver<
     R = string,
     Parent = PinnedEvent,
@@ -7396,6 +7418,10 @@ export namespace ResponseTimelineResolvers {
 
 export namespace ResponseFavoriteTimelineResolvers {
   export interface Resolvers<Context = SiemContext, TypeParent = ResponseFavoriteTimeline> {
+    code?: CodeResolver<number | null, TypeParent, Context>;
+
+    message?: MessageResolver<string | null, TypeParent, Context>;
+
     savedObjectId?: SavedObjectIdResolver<string, TypeParent, Context>;
 
     version?: VersionResolver<string, TypeParent, Context>;
@@ -7403,6 +7429,16 @@ export namespace ResponseFavoriteTimelineResolvers {
     favorite?: FavoriteResolver<FavoriteTimelineResult[] | null, TypeParent, Context>;
   }
 
+  export type CodeResolver<
+    R = number | null,
+    Parent = ResponseFavoriteTimeline,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type MessageResolver<
+    R = string | null,
+    Parent = ResponseFavoriteTimeline,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
   export type SavedObjectIdResolver<
     R = string,
     Parent = ResponseFavoriteTimeline,
