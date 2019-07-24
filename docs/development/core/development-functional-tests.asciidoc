@@ -329,11 +329,14 @@ await testSubjects.click(‘containerButton’);
 ** Elasticsearch client
 ** Higher level options: `kibanaServer.uiSettings` or `esArchiver`
 * remote
-** Source: {blob}test/functional/services/remote/remote.js[test/functional/services/remote/remote.js]
-** Instance of https://theintern.github.io/leadfoot/module-leadfoot_Command.html[Leadfoot's `Command]` class
+** Source: https://github.com/elastic/kibana/blob/master/test/functional/services/remote/remote.ts[test/functional/services/remote/remote.ts]
+** Instance of https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/index_exports_WebDriver.html[WebDriver] class
 ** Responsible for all communication with the browser
-** Higher level options: `testSubjects`, `find`, and `PageObjects.common`
-** See the https://theintern.github.io/leadfoot/module-leadfoot_Command.html[leadfoot/Command API] for full API
+* browser
+** Source: https://github.com/elastic/kibana/blob/master/test/functional/services/browser.ts[test/functional/services/browser.ts]
+** Higher level wrapper for `remote` service, that exposes available browser actions
+** For searching and manipulating with DOM elements use `testSubjects` or `find` services
+** See the https://seleniumhq.github.io/selenium/docs/api/javascript/[selenium-webdriver docs] for full API
 
 [float]
 ===== Custom Services
