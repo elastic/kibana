@@ -105,7 +105,8 @@ export class JobCreateUi extends Component {
       nextStepId: stepIds[1],
       previousStepId: undefined,
       stepsFieldErrors: this.getStepsFieldsErrors(stepsFields),
-      areStepErrorsVisible: false,
+      // Show step errors immediately if we are cloning a job.
+      areStepErrorsVisible: !!overrides,
       stepsFields,
       isValidatingIndexPattern: false,
       indexPatternAsyncErrors: undefined,

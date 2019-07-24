@@ -7,7 +7,17 @@
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-export function validateId(id) {
+export function validateId(id, clonedId) {
+  if (clonedId && id === clonedId) {
+    return [(
+      <FormattedMessage
+        id="xpack.rollupJobs.create.errors.idSameAsCloned"
+        defaultMessage={`Name cannot be the same as cloned name: "{clonedId}"`}
+        values={{ clonedId }}
+      />
+    )];
+  }
+
   if (!id || !id.trim()) {
     return [(
       <FormattedMessage

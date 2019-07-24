@@ -54,6 +54,9 @@ export const stepIdToStepConfigMap = {
       // be accumulated at one time. 1000 is probably a safe size without being too small.
       const rollupPageSize = get(overrides, ['json', 'config', 'page_size'], 1000);
 
+      const clonedRollupIndex = overrides.rollupIndex || undefined;
+      const clonedRollupId = overrides.id || undefined;
+
       const defaults = {
         id: '',
         indexPattern: '',
@@ -75,15 +78,16 @@ export const stepIdToStepConfigMap = {
         ...pick(overrides, Object.keys(defaults)),
         isAdvancedCronVisible,
         rollupPageSize,
+        clonedRollupIndex,
+        clonedRollupId,
       };
     },
     fieldsValidator: fields => {
-      const { id, indexPattern, rollupIndex, rollupCron, rollupPageSize, rollupDelay } = fields;
-
+      const { id, indexPattern, rollupIndex, rollupCron, rollupPageSize, rollupDelay, clonedRollupIndex, clonedRollupId } = fields;
       return {
-        id: validateId(id),
+        id: validateId(id, clonedRollupId),
         indexPattern: validateIndexPattern(indexPattern, rollupIndex),
-        rollupIndex: validateRollupIndex(rollupIndex, indexPattern),
+        rollupIndex: validateRollupIndex(rollupIndex, indexPattern, clonedRollupIndex),
         rollupCron: validateRollupCron(rollupCron),
         rollupPageSize: validateRollupPageSize(rollupPageSize),
         rollupDelay: validateRollupDelay(rollupDelay),

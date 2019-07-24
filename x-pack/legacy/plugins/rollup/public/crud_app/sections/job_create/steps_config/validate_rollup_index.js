@@ -8,7 +8,17 @@ import React from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { findIllegalCharactersInIndexName } from 'ui/indices';
 
-export function validateRollupIndex(rollupIndex, indexPattern) {
+export function validateRollupIndex(rollupIndex, indexPattern, clonedRollupIndex) {
+  if (clonedRollupIndex && rollupIndex === clonedRollupIndex) {
+    return [(
+      <FormattedMessage
+        id="xpack.rollupJobs.create.errors.rollupIndexSameAsCloned"
+        defaultMessage={`Rollup index name cannot be the same as cloned rollup index name: "{clonedRollupIndex}".`}
+        values={{ clonedRollupIndex }}
+      />
+    )];
+  }
+
   if (!rollupIndex || !rollupIndex.trim()) {
     return [(
       <FormattedMessage
