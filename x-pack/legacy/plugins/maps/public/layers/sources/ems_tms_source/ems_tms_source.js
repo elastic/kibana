@@ -131,8 +131,15 @@ export class EMSTMSSource extends AbstractTMSSource {
     });
   }
 
+
+  async getVectorStyle() {
+    const emsTmsMeta = await this._getEmsTmsMeta();
+    return emsTmsMeta.vectorStyle;
+  }
+
   async getUrlTemplate() {
     const emsTmsMeta = await this._getEmsTmsMeta();
+    // console.log('emstmsmeta', emsTmsMeta);
     return emsTmsMeta.url;
   }
 

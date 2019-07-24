@@ -37,12 +37,14 @@ export  async function getEMSResources(emsClient, includeElasticMapsService, lic
       url: useRelativePathToProxy ?   `../${GIS_API_PATH}/${EMS_DATA_FILE_PATH}?id=${encodeURIComponent(fileLayer.getId())}` : fileLayer.getDefaultFormatUrl(),
       format: format, //legacy: format and meta are split up
       meta: meta, //legacy, format and meta are split up,
-      emsLink: fileLayer.getEMSHotLink()
+      emsLink: fileLayer.getEMSHotLink(),
+      fileLayer: fileLayer
     };
   });
 
   const tmsServices = await Promise.all(tmsServicesObjs.map(async tmsService => {
 
+    // eslint-disable-next-line max-len
     const rasterUrl = useRelativePathToProxy ?   `../${GIS_API_PATH}/${EMS_DATA_TMS_PATH}?id=${encodeURIComponent(tmsService.getId())}&x={x}&y={y}&z={z}` : await tmsService.getUrlTemplate();
 
     // const vectorUrl = useRelativePathToProxy ?
@@ -55,8 +57,9 @@ export  async function getEMSResources(emsClient, includeElasticMapsService, lic
       maxZoom: await tmsService.getMaxZoom(),
       attribution: tmsService.getHTMLAttribution(),
       attributionMarkdown: tmsService.getMarkdownAttribution(),
-      // eslint-disable-next-line max-len
-      url: rasterUrl
+      url: rasterUrl,
+      tmsService: tmsService,
+      vectorStyle: await tmsService.getVectorStyle()
     };
   }));
 

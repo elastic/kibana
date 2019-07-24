@@ -21,24 +21,26 @@ import _ from 'lodash';
 import { ORIGIN } from './origin';
 
 export class TMSService {
-  _getTileJson = _.once(
-    async url => this._emsClient.getManifest(this._emsClient.extendUrlWithParams(url)));
+
+  _getEmsJson = _.once(async url => {
+    return this._emsClient.getManifest(this._emsClient.extendUrlWithParams(url));
+  });
 
   constructor(config,  emsClient) {
     this._config = config;
     this._emsClient = emsClient;
   }
 
-  _getRasterFormats(locale) {
+  _getRasterFormats(locale, formatType) {
     return this._config.formats.filter(format => {
-      return format.locale === locale && format.format === 'raster';
+      return format.locale === locale && format.format === formatType;
     });
   }
 
   _getDefaultStyleUrl() {
-    let rasterFormats = this._getRasterFormats(this._emsClient.getLocale());
+    let rasterFormats = this._getRasterFormats(this._emsClient.getLocale(), 'raster');
     if (!rasterFormats.length) {//fallback to default locale
-      rasterFormats = this._getRasterFormats(this._emsClient.getDefaultLocale());
+      rasterFormats = this._getRasterFormats(this._emsClient.getDefaultLocale(), 'raster');
     }
     if (!rasterFormats.length) {
       throw new Error(`Cannot find raster tile layer for locale ${this._emsClient.getLocale()} or ${this._emsClient.getDefaultLocale()}`);
@@ -49,9 +51,41 @@ export class TMSService {
     }
   }
 
+  async _getVectorStyleFileUrl() {
+
+    let vectorFormats = this._getRasterFormats(this._emsClient.getLocale(), 'vector');
+    if (!vectorFormats.length) {//fallback to default locale
+      vectorFormats = this._getRasterFormats(this._emsClient.getDefaultLocale(), 'vector');
+    }
+    if (!vectorFormats.length) {
+      throw new Error(`Cannot find raster tile layer for locale ${this._emsClient.getLocale()} or ${this._emsClient.getDefaultLocale()}`);
+    }
+    const defaultStyle = vectorFormats[0];
+    if (defaultStyle && defaultStyle.hasOwnProperty('url')) {
+      return defaultStyle.url;
+    }
+
+
+  }
+
+  async getVectorStyle() {
+    const url = await this._getVectorStyleFileUrl();
+    console.log('vsu', url);
+
+    const extendedUrl = this._emsClient.extendUrlWithParams(url);
+    console.log('eu', extendedUrl);
+    // const json = await this._emsClient.getManifest(extendedUrl);
+    const response = await fetch(extendedUrl);
+    const json = response.json();
+    console.log('ejs', json);
+    return json;
+
+  }
+
   async getUrlTemplate() {
     const defaultStyle = this._getDefaultStyleUrl();
-    const tileJson = await this._getTileJson(defaultStyle);
+    //is this buggy (?)
+    const tileJson = await this._getEmsJson(defaultStyle);
     return this._emsClient.extendUrlWithParams(tileJson.tiles[0]);
   }
 
@@ -91,12 +125,12 @@ export class TMSService {
   }
 
   async getMinZoom() {
-    const tileJson = await this._getTileJson(this._getDefaultStyleUrl());
+    const tileJson = await this._getEmsJson(this._getDefaultStyleUrl());
     return tileJson.minzoom;
   }
 
   async getMaxZoom() {
-    const tileJson = await this._getTileJson(this._getDefaultStyleUrl());
+    const tileJson = await this._getEmsJson(this._getDefaultStyleUrl());
     return tileJson.maxzoom;
   }
 

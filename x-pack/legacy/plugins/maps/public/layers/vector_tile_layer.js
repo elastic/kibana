@@ -8,6 +8,7 @@ import { TileLayer } from './tile_layer';
 import _ from 'lodash';
 import { TileStyle } from '../layers/styles/tile_style';
 import { styleTest } from './style_test';
+import { SOURCE_DATA_ID_ORIGIN } from '../../common/constants';
 
 window._styleTest = styleTest;
 
@@ -135,7 +136,7 @@ const layersToInclude = styleTest.layers.filter((layer, index) => {
 });
 
 
-console.log('layers to include', layersToInclude);
+// console.log('layers to include', layersToInclude);
 
 export class VectorTileLayer extends TileLayer {
 
@@ -170,6 +171,24 @@ export class VectorTileLayer extends TileLayer {
     return this.getId();
   }
 
+  async syncData({ startLoading, stopLoading, onLoadError, dataFilters }) {
+    if (!this.isVisible() || !this.showAtZoomLevel(dataFilters.zoom)) {
+      return;
+    }
+    const sourceDataRequest = this.getSourceDataRequest();
+    if (sourceDataRequest) {//data is immmutable
+      return;
+    }
+    const requestToken = Symbol(`layer-source-refresh:${ this.getId()} - source`);
+    startLoading(SOURCE_DATA_ID_ORIGIN, requestToken, dataFilters);
+    try {
+      const vectorStyle = await this._source.getVectorStyle();
+      console.log('vsr', vectorStyle);
+      stopLoading(SOURCE_DATA_ID_ORIGIN, requestToken, vectorStyle, {});
+    } catch(error) {
+      onLoadError(SOURCE_DATA_ID_ORIGIN, requestToken, error.message);
+    }
+  }
 
   syncLayerWithMB(mbMap) {
     // console.log('synclyaer');
@@ -180,12 +199,36 @@ export class VectorTileLayer extends TileLayer {
 
     if (!source) {
 
+
+      const sourceDataRequest = this.getSourceDataRequest();
+      if (!sourceDataRequest) {
+        //this is possible if the layer was invisible at startup.
+        //the actions will not perform any data=syncing as an optimization when a layer is invisible
+        //when turning the layer back into visible, it's possible the url has not been resovled yet.
+        return;
+      }
+      const vectorStyle = sourceDataRequest.getData();
+      if (!vectorStyle) {
+        return;
+      }
+
+      console.log('vs', vectorStyle);
+      // debugger;
+
+      //assume single source
+      const sourceIds = Object.keys(vectorStyle.sources);
+      const firstSourceName = sourceIds[0];
+
       mbMap.addSource(sourceId, {
         type: 'vector',
-        url: 'https://tiles.maps.elastic.co/data/v3.json'
+        url: vectorStyle.sources[firstSourceName].url
       });
 
-      layersToInclude.forEach((layer, index) => {
+      vectorStyle.layers.forEach(layer => {
+
+        if (layer.source !== firstSourceName) {
+          return;
+        }
 
         const newLayerObject = {
           ...layer,

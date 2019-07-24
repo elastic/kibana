@@ -139,6 +139,7 @@ export class EMSClient {
       const url = extendUrl(manifestUrl, { query: this._queryParams });
       result = await this._fetchWithTimeout(url);
     } catch (e) {
+      console.log('e', manifestUrl);
       if (!e) {
         e = new Error('Unknown error');
       }
@@ -147,6 +148,7 @@ export class EMSClient {
       }
       throw new Error(`Unable to retrieve manifest from ${manifestUrl}: ${e.message}`);
     } finally {
+      console.log('re', result);
       return result ? await result.json() : null;
     }
   }
