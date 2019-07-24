@@ -16,23 +16,16 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import React from 'react';
-import { shallowWithIntl } from 'test_utils/enzyme_helpers';
-import { ShardFailureModal } from './shard_failure_modal';
-import shardFailureRequest from './__mocks__/shard_failure_request.json';
-import shardFailureResponse from './__mocks__/shard_failure_response.json';
+export const openModal = jest.fn();
 
-describe('ShardFailureModal', () => {
-  it('renders matching snapshot given valid properties', () => {
-    const component = shallowWithIntl(
-      <ShardFailureModal
-        title="test"
-        request={shardFailureRequest}
-        response={shardFailureResponse}
-        onClose={jest.fn()}
-      />
-    );
-
-    expect(component).toMatchSnapshot();
-  });
+jest.doMock('ui/new_platform', () => {
+  return {
+    npStart: {
+      core: {
+        overlays: {
+          openModal,
+        },
+      },
+    },
+  };
 });

@@ -18,21 +18,14 @@
  */
 import React from 'react';
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';
-import { ShardFailureModal } from './shard_failure_modal';
-import shardFailureRequest from './__mocks__/shard_failure_request.json';
+import { ShardFailureTable } from './shard_failure_table';
 import shardFailureResponse from './__mocks__/shard_failure_response.json';
+import { ShardFailure } from './shard_failure_types';
 
-describe('ShardFailureModal', () => {
+describe('ShardFailureTable', () => {
   it('renders matching snapshot given valid properties', () => {
-    const component = shallowWithIntl(
-      <ShardFailureModal
-        title="test"
-        request={shardFailureRequest}
-        response={shardFailureResponse}
-        onClose={jest.fn()}
-      />
-    );
-
+    const failures = shardFailureResponse._shards.failures as ShardFailure[];
+    const component = shallowWithIntl(<ShardFailureTable failures={failures} />);
     expect(component).toMatchSnapshot();
   });
 });

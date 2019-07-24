@@ -1,0 +1,108 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ShardFailureDescription renders matching snapshot given valid properties 1`] = `
+<div>
+  <EuiTitle
+    size="xs"
+  >
+    <h1>
+      Script exception
+       @
+       
+      <span
+        className="shardFailureModal__keyValueTitle"
+      >
+        shard 
+        <EuiCode>
+          0
+        </EuiCode>
+      </span>
+      <span
+        className="shardFailureModal__keyValueTitle"
+      >
+        index 
+        <EuiCode>
+          repro2
+        </EuiCode>
+      </span>
+      <span
+        className="shardFailureModal__keyValueTitle"
+      >
+        node 
+        <EuiCode>
+          itsmeyournode
+        </EuiCode>
+      </span>
+    </h1>
+  </EuiTitle>
+  <EuiDescriptionList
+    compressed={true}
+    descriptionProps={
+      Object {
+        "className": "shardFailureModal__descValue",
+      }
+    }
+    listItems={
+      Array [
+        Object {
+          "description": "script_exception",
+          "title": "Type",
+        },
+        Object {
+          "description": "runtime error",
+          "title": "Reason",
+        },
+        Object {
+          "description": <EuiCodeBlock
+            isCopyable={true}
+            language="java"
+            paddingSize="s"
+            style={
+              Object {
+                "width": "500px",
+              }
+            }
+          >
+            return doc['targetfield'].value;
+           ^---- HERE
+          </EuiCodeBlock>,
+          "title": "Script stack",
+        },
+        Object {
+          "description": <EuiCodeBlock
+            isCopyable={true}
+            language="java"
+            paddingSize="s"
+            style={
+              Object {
+                "width": "500px",
+              }
+            }
+          >
+            return doc['targetfield'].value;
+          </EuiCodeBlock>,
+          "title": "Script",
+        },
+        Object {
+          "description": "painless",
+          "title": "Lang",
+        },
+        Object {
+          "description": "illegal_argument_exception",
+          "title": "Caused by type",
+        },
+        Object {
+          "description": "Gimme reason",
+          "title": "Caused by reason",
+        },
+      ]
+    }
+    titleProps={
+      Object {
+        "className": "shardFailureModal__descTitle",
+      }
+    }
+    type="column"
+  />
+</div>
+`;

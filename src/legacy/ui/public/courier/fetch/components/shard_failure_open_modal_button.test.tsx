@@ -16,23 +16,25 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { openModal } from './shard_failure_open_modal_button.test.mocks';
 import React from 'react';
-import { shallowWithIntl } from 'test_utils/enzyme_helpers';
-import { ShardFailureModal } from './shard_failure_modal';
+import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { ShardFailureOpenModalButton } from './shard_failure_open_modal_button';
 import shardFailureRequest from './__mocks__/shard_failure_request.json';
 import shardFailureResponse from './__mocks__/shard_failure_response.json';
+// @ts-ignore
+import { findTestSubject } from '@elastic/eui/lib/test';
 
-describe('ShardFailureModal', () => {
-  it('renders matching snapshot given valid properties', () => {
-    const component = shallowWithIntl(
-      <ShardFailureModal
-        title="test"
+describe('ShardFailureOpenModalButton', () => {
+  it('triggers the openModal function when "Show Details" button is clicked', () => {
+    const component = mountWithIntl(
+      <ShardFailureOpenModalButton
         request={shardFailureRequest}
         response={shardFailureResponse}
-        onClose={jest.fn()}
+        title="test"
       />
     );
-
-    expect(component).toMatchSnapshot();
+    findTestSubject(component, 'openShardFailureModalBtn').simulate('click');
+    expect(openModal).toHaveBeenCalled();
   });
 });
