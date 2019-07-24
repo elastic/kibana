@@ -7,47 +7,28 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { NavigationMenu } from './navigation_menu';
-import { isFullLicense } from '../../license/check_license';
-import { timeHistory } from 'ui/timefilter/time_history';
+
 import { uiModules } from 'ui/modules';
-import { timefilter } from 'ui/timefilter';
 const module = uiModules.get('apps/ml');
-import { mlTimefilterRefresh$ } from '../../services/timefilter_refresh_service';
 
 import 'ui/directives/kbn_href';
+import chrome from 'ui/chrome';
+import { timefilter } from 'ui/timefilter';
+import { timeHistory } from 'ui/timefilter/time_history';
 
+import { NavigationMenuContext } from '../../util/context_utils';
 
-module.directive('mlNavMenu', function (config) {
+import { NavigationMenu } from './navigation_menu';
+
+module.directive('mlNavMenu', function () {
   return {
     restrict: 'E',
     transclude: true,
     link: function (scope, element, attrs) {
-      const { name } = attrs;
-      let showTabs = false;
-
-      if (name === 'jobs' ||
-        name === 'settings' ||
-        name === 'data_frames' ||
-        name === 'datavisualizer' ||
-        name === 'filedatavisualizer' ||
-        name === 'timeseriesexplorer' ||
-        name === 'access-denied' ||
-        name === 'explorer') {
-        showTabs = true;
-      }
-
-      const props = {
-        dateFormat: config.get('dateFormat'),
-        disableLinks: (isFullLicense() === false),
-        showTabs,
-        tabId: name,
-        timeHistory,
-        timefilter,
-        forceRefresh: () => mlTimefilterRefresh$.next()
-      };
-
-      ReactDOM.render(React.createElement(NavigationMenu, props),
+      ReactDOM.render(
+        <NavigationMenuContext.Provider value={{ chrome, timefilter, timeHistory }}>
+          <NavigationMenu tabId={attrs.name} />
+        </NavigationMenuContext.Provider>,
         element[0]
       );
 
