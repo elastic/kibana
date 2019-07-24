@@ -45,7 +45,9 @@ export function createIndexMap(
     }
     map[indexPattern].typeMappings[type] = indexMap[type];
     if (script && map[indexPattern].script) {
-      throw Error(`A script has been defined more than once for index pattern "${indexPattern}"`);
+      throw Error(
+        `convertToAliasScript has been defined more than once for index pattern "${indexPattern}"`
+      );
     } else if (script) {
       map[indexPattern].script = script;
     }

@@ -153,6 +153,6 @@ test('throws when two scripts are defined for an index pattern', () => {
   expect(() =>
     createIndexMap(defaultIndex, savedObjectSchemas, indexMap)
   ).toThrowErrorMatchingInlineSnapshot(
-    `"A script has been defined more than once for index pattern \\".kibana\\""`
+    `"convertToAliasScript has been defined more than once for index pattern \\".kibana\\""`
   );
 });
