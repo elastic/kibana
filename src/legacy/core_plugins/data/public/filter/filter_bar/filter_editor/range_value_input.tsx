@@ -41,7 +41,7 @@ interface Props {
 }
 
 class RangeValueInputUI extends Component<Props> {
-  public constructor(props: Props) {
+  constructor(props: Props) {
     super(props);
   }
 

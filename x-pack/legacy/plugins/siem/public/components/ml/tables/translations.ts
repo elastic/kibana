@@ -14,6 +14,10 @@ export const ANOMALIES = i18n.translate('xpack.siem.anomaliesTable.table.anomali
   defaultMessage: 'Anomalies',
 });
 
+export const TOOLTIP = i18n.translate('xpack.siem.anomaliesTable.table.anomaliesTooltip', {
+  defaultMessage: 'The anomalies table is not filterable via the SIEM global KQL search.',
+});
+
 export const LOADING = i18n.translate('xpack.siem.ml.table.loadingDescription', {
   defaultMessage: 'Loading…',
 });
