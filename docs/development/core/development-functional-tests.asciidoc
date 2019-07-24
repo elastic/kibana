@@ -156,6 +156,13 @@ describe('My Cross-browser Test Suite', function () {
 
 If the tests are not applicable for run in Firefox, `skipFirefox` tag must be assigned.
 
+To run tests on FIrefox locally, `config.firefox.js` should be provided:
+
+["source","shell"]
+-----------
+node scripts/functional_test_runner --config test/functional/config.firefox.js
+-----------
+
 [float]
 ===== Anatomy of a test file
 
