@@ -11,7 +11,7 @@ to add one of the sample data sets.
 === Before you begin
 
 Make sure you've <<install, installed Kibana>> and established
-a {kibana-ref}/connect-to-elasticsearch.html[connection to Elasticsearch].
+a <<connect-to-elasticsearch, connection to Elasticsearch>>.
 
 If you are running our https://cloud.elastic.co[hosted Elasticsearch Service] 
 on Elastic Cloud, you can access Kibana with a single click.
@@ -42,17 +42,15 @@ If you uninstall and reinstall a data set, the timestamps will change to reflect
 [float]
 === Next steps
 
-* Explore {kib} by following the {kibana-ref}/tutorial-sample-data.html[sample data tutorial].
+* Explore {kib} by following the <<tutorial-sample-data, sample data tutorial>>.
 
-* Learn how to load data, define index patterns, and build visualizations by {kibana-ref}/tutorial-build-dashboard.html[building your own dashboard].
+* Learn how to load data, define index patterns, and build visualizations by <<tutorial-build-dashboard, building your own dashboard>>.
 
 --
 
 include::getting-started/tutorial-sample-data.asciidoc[]
 
 include::getting-started/tutorial-full-experience.asciidoc[]
-
-include::getting-started/tutorial-load-dataset.asciidoc[]
 
 include::getting-started/tutorial-define-index.asciidoc[]
 

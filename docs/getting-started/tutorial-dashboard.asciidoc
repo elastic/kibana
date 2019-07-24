@@ -31,8 +31,7 @@ but sometimes you need to look at the actual data to
 understand what's really going on. You can inspect the data behind any visualization
 and view the {es} query used to retrieve it.
 
-. In the dashboard, hover the pointer over the pie chart.
-. Click the icon in the upper right. 
+. In the dashboard, hover the pointer over the pie chart, and then click the icon in the upper right. 
 . From the *Options* menu, select *Inspect*.
 +
 [role="screenshot"]
@@ -42,7 +41,7 @@ image::images/tutorial-full-inspect1.png[]
 in the upper right of the Inspect pane.
 
 [float]
-=== Wrapping up 
+=== Next steps
 
 Now that you have a handle on the basics, you're ready to start exploring
 your own data with Kibana.

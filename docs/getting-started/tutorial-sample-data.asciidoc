@@ -140,7 +140,7 @@ categories, or buckets.
 . In the *Buckets* pane, select *Add > Split group*.
 . In the *Aggregation* dropdown, select *Terms*.
 . In the *Field* dropdown, select *Carrier*.
-. Set *Descending* to 4.
+. Set *Descending* to *4*.
 . Click *Apply changes* image:images/apply-changes-button.png[].
 +
 You now see the average ticket price for all four airlines.
@@ -171,8 +171,7 @@ but sometimes you need to look at the actual data to
 understand what's really going on. You can inspect the data behind any visualization
 and view the {es} query used to retrieve it.
 
-. In the dashboard, hover the pointer over the pie chart.
-. Click the icon in the upper right. 
+. In the dashboard, hover the pointer over the pie chart, and then click the icon in the upper right. 
 . From the *Options* menu, select *Inspect*.
 +
 The initial view shows the document count. 
@@ -192,17 +191,16 @@ When you’re done experimenting with the sample data set, you can remove it.
 . On the *Sample flight data* card, click *Remove*.
 
 [float]
-=== Wrapping up
+=== Next steps
 
-Now that you have a handle on the {kib} basics, you might be interested in:
+Now that you have a handle on the {kib} basics, you might be interested in the 
+tutorial <<tutorial-build-dashboard, Build your own dashboard>>, where you'll learn to:
 
-* <<tutorial-build-dashboard, Building your own dashboard>>.  You’ll learn how to load your own 
-data, define an index pattern, and create visualizations and dashboards. 
-* <<discover>>. You'll learn more about searching data and filtering by field.
-* <<visualize>>. You’ll find information about all the visualization types 
-{kib} has to offer.
-* <<dashboard>>. You have the ability to share a dashboard, or embed the dashboard in a web page.
-
+* Load data
+* Define an index pattern
+* Discover and explore data
+* Create visualizations
+* Add visualizations to a dashboard
 
 
 

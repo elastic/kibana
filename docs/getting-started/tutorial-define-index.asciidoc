@@ -16,7 +16,7 @@ of the log data from May 2018, you could specify the index pattern
 
 First you'll create patterns for the Shakespeare data set, which has an
 index named `shakespeare,` and the accounts data set, which has an index named
-`bank.` These data sets don't contain time-series data.
+`bank`. These data sets don't contain time series data.
 
 . In Kibana, open *Management*, and then click *Index Patterns.*
 . If this is your first index pattern, the *Create index pattern* page opens automatically.
@@ -34,20 +34,17 @@ You’re presented a table of all fields and associated data types in the index.
 . Return to the *Index patterns* overview page and define a second index pattern named  `ba*`. 
 
 [float]
-==== Create an index pattern for time-series data
+==== Create an index pattern for time series data
 
 Now create an index pattern for the Logstash index, which
-contains time-series data.
+contains time series data.
 
 . Define an index pattern named `logstash*`.
 . Click *Next step*.
 . Open the *Time Filter field name* dropdown and select *@timestamp*.
 . Click *Create index pattern*.
 
-[float]
-==== A note about index patterns
-
-When you define an index pattern, the indices that match that pattern must
+NOTE: When you define an index pattern, the indices that match that pattern must
 exist in Elasticsearch and they must contain data. To check which indices are
 available, go to *Dev Tools > Console* and enter `GET _cat/indices`.  Alternately, use
 `curl -XGET "http://localhost:9200/_cat/indices"`.
