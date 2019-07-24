@@ -3,8 +3,6 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-export { flatten } from './flatten';
-export {
-  deserializeRestoreSettings,
-  serializeRestoreSettings,
-} from './restore_settings_serialization';
+
+export { TabSummary } from './tab_summary';
+export { TabHistory } from './tab_history';
