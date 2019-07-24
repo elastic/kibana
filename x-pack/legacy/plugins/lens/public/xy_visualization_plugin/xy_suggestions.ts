@@ -6,7 +6,12 @@
 
 import { partition } from 'lodash';
 import { Position } from '@elastic/charts';
-import { SuggestionRequest, VisualizationSuggestion, TableColumn, TableSuggestion } from '../types';
+import {
+  SuggestionRequest,
+  VisualizationSuggestion,
+  TableSuggestionColumn,
+  TableSuggestion,
+} from '../types';
 import { State } from './types';
 import { generateId } from '../id_generator';
 import { buildExpression } from './to_expression';
@@ -37,10 +42,13 @@ export function getSuggestions(
         columns.some(col => col.operation.dataType === 'number') &&
         !columns.some(col => !columnSortOrder.hasOwnProperty(col.operation.dataType))
     )
-    .map(table => getSuggestionForColumns(table));
+    .map(table => getSuggestionForColumns(table, opts.state));
 }
 
-function getSuggestionForColumns(table: TableSuggestion): VisualizationSuggestion<State> {
+function getSuggestionForColumns(
+  table: TableSuggestion,
+  currentState?: State
+): VisualizationSuggestion<State> {
   const [buckets, values] = partition(
     prioritizeColumns(table.columns),
     col => col.operation.isBucketed
@@ -48,17 +56,31 @@ function getSuggestionForColumns(table: TableSuggestion): VisualizationSuggestio
 
   if (buckets.length >= 1) {
     const [x, splitBy] = buckets;
-    return getSuggestion(table.datasourceSuggestionId, x, values, splitBy);
+    return getSuggestion(
+      table.datasourceSuggestionId,
+      table.layerId,
+      x,
+      values,
+      splitBy,
+      currentState
+    );
   } else {
     const [x, ...yValues] = values;
-    return getSuggestion(table.datasourceSuggestionId, x, yValues);
+    return getSuggestion(
+      table.datasourceSuggestionId,
+      table.layerId,
+      x,
+      yValues,
+      undefined,
+      currentState
+    );
   }
 }
 
 // This shuffles columns around so that the left-most column defualts to:
 // date, string, boolean, then number, in that priority. We then use this
 // order to pluck out the x column, and the split / stack column.
-function prioritizeColumns(columns: TableColumn[]) {
+function prioritizeColumns(columns: TableSuggestionColumn[]) {
   return [...columns].sort(
     (a, b) => columnSortOrder[a.operation.dataType] - columnSortOrder[b.operation.dataType]
   );
@@ -66,9 +88,11 @@ function prioritizeColumns(columns: TableColumn[]) {
 
 function getSuggestion(
   datasourceSuggestionId: number,
-  xValue: TableColumn,
-  yValues: TableColumn[],
-  splitBy?: TableColumn
+  layerId: string,
+  xValue: TableSuggestionColumn,
+  yValues: TableSuggestionColumn[],
+  splitBy?: TableSuggestionColumn,
+  currentState?: State
 ): VisualizationSuggestion<State> {
   const yTitle = yValues.map(col => col.operation.label).join(' & ');
   const xTitle = xValue.operation.label;
@@ -78,29 +102,21 @@ function getSuggestion(
   const preposition = isDate ? 'over' : 'of';
   const title = `${yTitle} ${preposition} ${xTitle}`;
   const state: State = {
-    legend: { isVisible: true, position: Position.Right },
-    seriesType: splitBy && isDate ? 'line' : 'bar',
-    splitSeriesAccessors: splitBy && isDate ? [splitBy.columnId] : [generateId()],
-    x: {
-      accessor: xValue.columnId,
-      position: Position.Bottom,
-      showGridlines: false,
-      title: xTitle,
-    },
-    y: {
-      accessors: yValues.map(col => col.columnId),
-      position: Position.Left,
-      showGridlines: false,
-      title: yTitle,
-    },
+    legend: currentState ? currentState.legend : { isVisible: true, position: Position.Right },
+    layers: [
+      ...(currentState ? currentState.layers.filter(layer => layer.layerId !== layerId) : []),
+      {
+        layerId,
+        xAccessor: xValue.columnId,
+        seriesType: splitBy && isDate ? 'line' : 'bar',
+        splitAccessor: splitBy && isDate ? splitBy.columnId : generateId(),
+        accessors: yValues.map(col => col.columnId),
+        position: Position.Left,
+        showGridlines: false,
+        title: yTitle,
+      },
+    ],
   };
-
-  const labels: Partial<Record<string, string>> = {};
-  yValues.forEach(({ columnId, operation: { label } }) => {
-    if (label) {
-      labels[columnId] = label;
-    }
-  });
 
   return {
     title,
@@ -111,20 +127,13 @@ function getSuggestion(
     previewExpression: buildExpression(
       {
         ...state,
-        x: {
-          ...state.x,
-          hide: true,
-        },
-        y: {
-          ...state.y,
-          hide: true,
-        },
+        layers: state.layers.map(layer => ({ ...layer, hide: true })),
         legend: {
           ...state.legend,
           isVisible: false,
         },
       },
-      labels
+      { xTitle, yTitle }
     ),
   };
 }

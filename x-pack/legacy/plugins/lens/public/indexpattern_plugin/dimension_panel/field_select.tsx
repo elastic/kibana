@@ -70,7 +70,7 @@ export function FieldSelect({
       label: i18n.translate('xpack.lens.indexPattern.documentField', {
         defaultMessage: 'Document',
       }),
-      value: fieldlessColumn.operationId,
+      value: { operationId: fieldlessColumn.operationId },
       className: classNames({
         'lnsConfigPanel__fieldOption--incompatible': !isCompatibleWithCurrentOperation(
           fieldlessColumn

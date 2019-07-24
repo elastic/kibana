@@ -59,8 +59,16 @@ describe('suggestion_panel', () => {
     ] as Suggestion[]);
 
     defaultProps = {
-      activeDatasource: mockDatasource,
-      datasourceState: {},
+      activeDatasourceId: 'mock',
+      datasourceMap: {
+        mock: mockDatasource,
+      },
+      datasourceStates: {
+        mock: {
+          isLoading: false,
+          state: {},
+        },
+      },
       activeVisualizationId: 'vis',
       visualizationMap: {
         vis: mockVisualization,
@@ -97,6 +105,7 @@ describe('suggestion_panel', () => {
   });
 
   it('should render preview expression if there is one', () => {
+    mockDatasource.getLayers.mockReturnValue(['first']);
     (getSuggestions as jest.Mock).mockReturnValue([
       {
         datasourceState: {},
@@ -126,30 +135,47 @@ describe('suggestion_panel', () => {
       (expressionRendererMock as jest.Mock).mock.calls[0][0].expression
     );
     expect(passedExpression).toMatchInlineSnapshot(`
-Object {
-  "chain": Array [
-    Object {
-      "arguments": Object {},
-      "function": "datasource_expression",
-      "type": "function",
-    },
-    Object {
-      "arguments": Object {},
-      "function": "test",
-      "type": "function",
-    },
-    Object {
-      "arguments": Object {},
-      "function": "expression",
-      "type": "function",
-    },
-  ],
-  "type": "expression",
-}
-`);
+      Object {
+        "chain": Array [
+          Object {
+            "arguments": Object {
+              "layerIds": Array [
+                "first",
+              ],
+              "tables": Array [
+                Object {
+                  "chain": Array [
+                    Object {
+                      "arguments": Object {},
+                      "function": "datasource_expression",
+                      "type": "function",
+                    },
+                  ],
+                  "type": "expression",
+                },
+              ],
+            },
+            "function": "lens_merge_tables",
+            "type": "function",
+          },
+          Object {
+            "arguments": Object {},
+            "function": "test",
+            "type": "function",
+          },
+          Object {
+            "arguments": Object {},
+            "function": "expression",
+            "type": "function",
+          },
+        ],
+        "type": "expression",
+      }
+    `);
   });
 
   it('should render render icon if there is no preview expression', () => {
+    mockDatasource.getLayers.mockReturnValue(['first']);
     (getSuggestions as jest.Mock).mockReturnValue([
       {
         datasourceState: {},

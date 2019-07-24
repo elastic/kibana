@@ -9,16 +9,36 @@ import { Action } from './state_management';
 import { createMockDatasource, createMockVisualization } from '../mocks';
 
 describe('save editor frame state', () => {
+  const mockVisualization = createMockVisualization();
+  mockVisualization.getPersistableState.mockImplementation(x => x);
+  const mockDatasource = createMockDatasource();
+  mockDatasource.getPersistableState.mockImplementation(x => x);
   const saveArgs: Props = {
     dispatch: jest.fn(),
     redirectTo: jest.fn(),
-    datasource: createMockDatasource(),
-    visualization: createMockVisualization(),
+    activeDatasources: {
+      indexpattern: mockDatasource,
+    },
+    visualization: mockVisualization,
     state: {
       title: 'aaa',
-      datasource: { activeId: '1', isLoading: false, state: {} },
+      datasourceStates: {
+        indexpattern: {
+          state: 'hello',
+          isLoading: false,
+        },
+      },
+      activeDatasourceId: 'indexpattern',
       saving: false,
       visualization: { activeId: '2', state: {} },
+    },
+    activeDatasourceId: 'indexpattern',
+    framePublicAPI: {
+      addNewLayer: jest.fn(),
+      removeLayer: jest.fn(),
+      datasourceLayers: {
+        first: mockDatasource.publicAPIMock
+      }
     },
     store: {
       async save() {
@@ -35,19 +55,13 @@ describe('save editor frame state', () => {
         (action.type === 'SAVING' && action.isSaving && saved) ||
         (action.type === 'SAVING' && !action.isSaving && !saved)
       ) {
-        throw new Error('Saving status was incorrectly set');
+        throw new Error('Saving status was incorrectly set' + action.isSaving + ' ' + saved);
       }
     });
 
     await save({
       ...saveArgs,
       dispatch,
-      state: {
-        title: 'aaa',
-        datasource: { activeId: '1', isLoading: false, state: {} },
-        saving: false,
-        visualization: { activeId: '2', state: {} },
-      },
       store: {
         async save() {
           saved = true;
@@ -67,12 +81,6 @@ describe('save editor frame state', () => {
       save({
         ...saveArgs,
         dispatch,
-        state: {
-          title: 'aaa',
-          datasource: { activeId: '1', isLoading: false, state: {} },
-          saving: false,
-          visualization: { activeId: '2', state: {} },
-        },
         store: {
           async save() {
             throw new Error('aw shnap!');
@@ -100,11 +108,19 @@ describe('save editor frame state', () => {
     }));
     await save({
       ...saveArgs,
+      activeDatasources: {
+        indexpattern: datasource,
+      },
       store,
-      datasource,
       state: {
         title: 'bbb',
-        datasource: { activeId: '1', isLoading: false, state: '2' },
+        datasourceStates: {
+          indexpattern: {
+            state: '2',
+            isLoading: false,
+          },
+        },
+        activeDatasourceId: 'indexpattern',
         saving: false,
         visualization: { activeId: '3', state: '4' },
       },
@@ -112,13 +128,17 @@ describe('save editor frame state', () => {
     });
 
     expect(store.save).toHaveBeenCalledWith({
-      datasourceType: '1',
+      activeDatasourceId: 'indexpattern',
       id: undefined,
       expression: '',
       state: {
-        datasource: { stuff: '2_datsource_persisted' },
         datasourceMetaData: {
           filterableIndexPatterns: [],
+        },
+        datasourceStates: {
+          indexpattern: {
+            stuff: '2_datasource_persisted',
+          },
         },
         visualization: { things: '4_vis_persisted' },
       },
@@ -137,7 +157,13 @@ describe('save editor frame state', () => {
       redirectTo,
       state: {
         title: 'ccc',
-        datasource: { activeId: '1', isLoading: false, state: {} },
+        datasourceStates: {
+          indexpattern: {
+            state: {},
+            isLoading: false,
+          },
+        },
+        activeDatasourceId: 'indexpattern',
         saving: false,
         visualization: { activeId: '2', state: {} },
       },
@@ -161,7 +187,13 @@ describe('save editor frame state', () => {
       redirectTo,
       state: {
         title: 'ddd',
-        datasource: { activeId: '1', isLoading: false, state: {} },
+        datasourceStates: {
+          indexpattern: {
+            state: {},
+            isLoading: false,
+          },
+        },
+        activeDatasourceId: 'indexpattern',
         persistedId: 'foo',
         saving: false,
         visualization: { activeId: '2', state: {} },

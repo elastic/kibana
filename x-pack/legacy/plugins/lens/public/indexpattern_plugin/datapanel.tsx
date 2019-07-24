@@ -32,7 +32,7 @@ import { FieldItem } from './field_item';
 import { FieldIcon } from './field_icon';
 
 // TODO the typings for EuiContextMenuPanel are incorrect - watchedItemProps is missing. This can be removed when the types are adjusted
-const FixedEuiContextMenuPanel = (EuiContextMenuPanel as any) as React.FunctionComponent<
+const FixedEuiContextMenuPanel = (EuiContextMenuPanel as unknown) as React.FunctionComponent<
   EuiContextMenuPanelProps & { watchedItemProps: string[] }
 >;
 

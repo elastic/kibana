@@ -4,50 +4,69 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import _ from 'lodash';
 import { toExpression } from '@kbn/interpreter/target/common';
 import { Action, EditorFrameState } from './state_management';
 import { Document } from '../../persistence/saved_object_store';
 import { buildExpression } from './expression_helpers';
-import { Datasource, Visualization } from '../../types';
+import { Datasource, Visualization, FramePublicAPI } from '../../types';
 
 export interface Props {
-  datasource: Datasource;
+  activeDatasources: Record<string, Datasource>;
   dispatch: (value: Action) => void;
   redirectTo: (path: string) => void;
   state: EditorFrameState;
   store: { save: (doc: Document) => Promise<{ id: string }> };
   visualization: Visualization;
+  framePublicAPI: FramePublicAPI;
+  activeDatasourceId: string;
 }
 
 export async function save({
-  datasource,
+  activeDatasources,
   dispatch,
   redirectTo,
   state,
   store,
   visualization,
+  framePublicAPI,
+  activeDatasourceId,
 }: Props) {
   try {
     dispatch({ type: 'SAVING', isSaving: true });
 
-    const expression = buildExpression(
+    const expression = buildExpression({
       visualization,
-      state.visualization.state,
-      datasource,
-      state.datasource.state,
-      datasource.getPublicAPI(state.datasource.state, () => {})
-    );
+      visualizationState: state.visualization.state,
+      datasourceMap: activeDatasources,
+      datasourceStates: state.datasourceStates,
+      framePublicAPI,
+    });
+
+    const datasourceStates: Record<string, unknown> = {};
+    Object.entries(activeDatasources).forEach(([id, datasource]) => {
+      datasourceStates[id] = datasource.getPersistableState(state.datasourceStates[id].state);
+    });
+
+    const filterableIndexPatterns: string[] = [];
+    Object.entries(activeDatasources).forEach(([id, datasource]) => {
+      filterableIndexPatterns.push(
+        ...datasource.getMetaData(state.datasourceStates[id].state).filterableIndexPatterns
+      );
+    });
 
     const doc = await store.save({
       id: state.persistedId,
       title: state.title,
       type: 'lens',
       visualizationType: state.visualization.activeId,
-      datasourceType: state.datasource.activeId,
       expression: expression ? toExpression(expression) : '',
+      activeDatasourceId,
       state: {
-        datasourceMetaData: datasource.getMetaData(state.datasource.state),
-        datasource: datasource.getPersistableState(state.datasource.state),
+        datasourceStates,
+        datasourceMetaData: {
+          filterableIndexPatterns: _.uniq(filterableIndexPatterns),
+        },
         visualization: visualization.getPersistableState(state.visualization.state),
       },
     });

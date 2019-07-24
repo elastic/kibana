@@ -13,7 +13,6 @@ import {
   AvgIndexPatternColumn,
   MaxIndexPatternColumn,
 } from '../indexpattern';
-import { DimensionPriority } from '../../types';
 import { OperationDefinition } from '../operations';
 
 function buildMetricOperation<T extends FieldBasedIndexPatternColumn>(
@@ -30,12 +29,7 @@ function buildMetricOperation<T extends FieldBasedIndexPatternColumn>(
         fieldType === 'number' && (!aggregationRestrictions || aggregationRestrictions[type])
       );
     },
-    buildColumn(
-      operationId: string,
-      columns: {},
-      suggestedOrder?: DimensionPriority,
-      field?: IndexPatternField
-    ): T {
+    buildColumn({ operationId, suggestedPriority, field, indexPatternId }): T {
       if (!field) {
         throw new Error(`Invariant: A ${type} operation can only be built with a field`);
       }
@@ -44,9 +38,10 @@ function buildMetricOperation<T extends FieldBasedIndexPatternColumn>(
         label: ofName(field ? field.name : ''),
         dataType: 'number',
         operationType: type,
-        suggestedOrder,
+        suggestedPriority,
         sourceField: field ? field.name : '',
         isBucketed: false,
+        indexPatternId,
       } as T;
     },
     toEsAggsConfig: (column, columnId) => ({

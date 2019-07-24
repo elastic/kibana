@@ -30,25 +30,31 @@ export type IndexPatternDimensionPanelProps = DatasourceDimensionPanelProps & {
   dragDropContext: DragContextState;
   dataPlugin: DataSetup;
   storage: Storage;
+  layerId: string;
 };
 
 export const IndexPatternDimensionPanel = memo(function IndexPatternDimensionPanel(
   props: IndexPatternDimensionPanelProps
 ) {
+  const layerId = props.layerId;
+  const indexPatternId = props.state.layers[layerId].indexPatternId;
   const columns = useMemo(
     () =>
-      getPotentialColumns(
-        props.state.indexPatterns[props.state.currentIndexPatternId].fields,
-        props.suggestedPriority
-      ),
-    [props.state.indexPatterns[props.state.currentIndexPatternId].fields, props.suggestedPriority]
+      getPotentialColumns({
+        fields: props.state.indexPatterns[indexPatternId].fields,
+        suggestedPriority: props.suggestedPriority,
+        layer: props.state.layers[layerId],
+        layerId,
+      }),
+    [indexPatternId, props.suggestedPriority, layerId]
   );
 
   const filteredColumns = columns.filter(col => {
     return props.filterOperations(columnToOperation(col));
   });
 
-  const selectedColumn: IndexPatternColumn | null = props.state.columns[props.columnId] || null;
+  const selectedColumn: IndexPatternColumn | null =
+    props.state.layers[layerId].columns[props.columnId] || null;
 
   function findColumnByField(field: IndexPatternField) {
     return filteredColumns.find(col => hasField(col) && col.sourceField === field.name);
@@ -75,7 +81,14 @@ export const IndexPatternDimensionPanel = memo(function IndexPatternDimensionPan
             return;
           }
 
-          props.setState(changeColumn(props.state, props.columnId, column));
+          props.setState(
+            changeColumn({
+              state: props.state,
+              layerId,
+              columnId: props.columnId,
+              newColumn: column,
+            })
+          );
         }}
       >
         <EuiFlexGroup alignItems="center">
@@ -98,7 +111,16 @@ export const IndexPatternDimensionPanel = memo(function IndexPatternDimensionPan
                     defaultMessage: 'Remove',
                   })}
                   onClick={() => {
-                    props.setState(deleteColumn(props.state, props.columnId));
+                    props.setState(
+                      deleteColumn({
+                        state: props.state,
+                        layerId,
+                        columnId: props.columnId,
+                      })
+                    );
+                    if (props.onRemove) {
+                      props.onRemove(props.columnId);
+                    }
                   }}
                 />
               </EuiFlexItem>

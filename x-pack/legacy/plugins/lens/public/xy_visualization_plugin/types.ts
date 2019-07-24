@@ -81,42 +81,6 @@ export interface YState extends AxisConfig {
   accessors: string[];
 }
 
-export type YConfig = AxisConfig &
-  YState & {
-    labels: string[];
-  };
-
-type YConfigResult = YConfig & { type: 'lens_xy_yConfig' };
-
-export const yConfig: ExpressionFunction<'lens_xy_yConfig', null, YConfig, YConfigResult> = {
-  name: 'lens_xy_yConfig',
-  aliases: [],
-  type: 'lens_xy_yConfig',
-  help: `Configure the xy chart's y axis`,
-  context: {
-    types: ['null'],
-  },
-  args: {
-    ...axisConfig,
-    accessors: {
-      types: ['string'],
-      help: 'The columns to display on the y axis.',
-      multi: true,
-    },
-    labels: {
-      types: ['string'],
-      help: '',
-      multi: true,
-    },
-  },
-  fn: function fn(_context: unknown, args: YConfig) {
-    return {
-      type: 'lens_xy_yConfig',
-      ...args,
-    };
-  },
-};
-
 export interface XConfig extends AxisConfig {
   accessor: string;
 }
@@ -146,6 +110,67 @@ export const xConfig: ExpressionFunction<'lens_xy_xConfig', null, XConfig, XConf
   },
 };
 
+type LayerConfigResult = LayerArgs & { type: 'lens_xy_layer' };
+
+export const layerConfig: ExpressionFunction<
+  'lens_xy_layer',
+  null,
+  LayerArgs,
+  LayerConfigResult
+> = {
+  name: 'lens_xy_layer',
+  aliases: [],
+  type: 'lens_xy_layer',
+  help: `Configure a layer in the xy chart`,
+  context: {
+    types: ['null'],
+  },
+  args: {
+    ...axisConfig,
+    layerId: {
+      types: ['string'],
+      help: '',
+    },
+    xAccessor: {
+      types: ['string'],
+      help: '',
+    },
+    seriesType: {
+      types: ['string'],
+      options: [
+        'bar',
+        'line',
+        'area',
+        'horizontal_bar',
+        'bar_stacked',
+        'area_stacked',
+        'horizontal_bar_stacked',
+      ],
+      help: 'The type of chart to display.',
+    },
+    splitAccessor: {
+      types: ['string'],
+      help: 'The column to split by',
+      multi: false,
+    },
+    accessors: {
+      types: ['string'],
+      help: 'The columns to display on the y axis.',
+      multi: true,
+    },
+    columnToLabel: {
+      types: ['string'],
+      help: 'JSON key-value pairs of column ID to label',
+    },
+  },
+  fn: function fn(_context: unknown, args: LayerArgs) {
+    return {
+      type: 'lens_xy_layer',
+      ...args,
+    };
+  },
+};
+
 export type SeriesType =
   | 'bar'
   | 'horizontal_bar'
@@ -155,20 +180,30 @@ export type SeriesType =
   | 'horizontal_bar_stacked'
   | 'area_stacked';
 
-export interface XYArgs {
+export type LayerConfig = AxisConfig & {
+  layerId: string;
+  xAccessor: string;
+  accessors: string[];
   seriesType: SeriesType;
+  splitAccessor: string;
+};
+
+export type LayerArgs = LayerConfig & {
+  columnToLabel?: string; // Actually a JSON key-value pair
+};
+
+// Arguments to XY chart expression, with computed properties
+export interface XYArgs {
+  xTitle: string;
+  yTitle: string;
   legend: LegendConfig;
-  y: YConfig;
-  x: XConfig;
-  splitSeriesAccessors: string[];
+  layers: LayerArgs[];
 }
 
+// Persisted parts of the state
 export interface XYState {
-  seriesType: SeriesType;
   legend: LegendConfig;
-  y: YState;
-  x: XConfig;
-  splitSeriesAccessors: string[];
+  layers: LayerConfig[];
 }
 
 export type State = XYState;

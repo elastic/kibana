@@ -11,12 +11,12 @@ export interface Document {
   id?: string;
   type?: string;
   visualizationType: string | null;
-  datasourceType: string | null;
   title: string;
+  activeDatasourceId: string;
   expression: string;
   state: {
     datasourceMetaData: DatasourceMetaData;
-    datasource: unknown;
+    datasourceStates: Record<string, unknown>;
     visualization: unknown;
   };
 }

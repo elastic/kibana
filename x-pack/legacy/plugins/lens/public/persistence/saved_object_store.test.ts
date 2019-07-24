@@ -26,11 +26,13 @@ describe('LensStore', () => {
       const doc = await store.save({
         title: 'Hello',
         visualizationType: 'bar',
-        datasourceType: 'indexpattern',
         expression: '',
+        activeDatasourceId: 'indexpattern',
         state: {
           datasourceMetaData: { filterableIndexPatterns: [] },
-          datasource: { type: 'index_pattern', indexPattern: '.kibana_test' },
+          datasourceStates: {
+            indexpattern: { type: 'index_pattern', indexPattern: '.kibana_test' },
+          },
           visualization: { x: 'foo', y: 'baz' },
         },
       });
@@ -39,24 +41,29 @@ describe('LensStore', () => {
         id: 'FOO',
         title: 'Hello',
         visualizationType: 'bar',
-        datasourceType: 'indexpattern',
         expression: '',
+        activeDatasourceId: 'indexpattern',
         state: {
           datasourceMetaData: { filterableIndexPatterns: [] },
-          datasource: { type: 'index_pattern', indexPattern: '.kibana_test' },
+          datasourceStates: {
+            indexpattern: { type: 'index_pattern', indexPattern: '.kibana_test' },
+          },
           visualization: { x: 'foo', y: 'baz' },
         },
       });
 
       expect(client.create).toHaveBeenCalledTimes(1);
       expect(client.create).toHaveBeenCalledWith('lens', {
-        datasourceType: 'indexpattern',
         title: 'Hello',
         visualizationType: 'bar',
+
         expression: '',
+        activeDatasourceId: 'indexpattern',
         state: JSON.stringify({
           datasourceMetaData: { filterableIndexPatterns: [] },
-          datasource: { type: 'index_pattern', indexPattern: '.kibana_test' },
+          datasourceStates: {
+            indexpattern: { type: 'index_pattern', indexPattern: '.kibana_test' },
+          },
           visualization: { x: 'foo', y: 'baz' },
         }),
       });
@@ -68,11 +75,13 @@ describe('LensStore', () => {
         id: 'Gandalf',
         title: 'Even the very wise cannot see all ends.',
         visualizationType: 'line',
-        datasourceType: 'indexpattern',
         expression: '',
+        activeDatasourceId: 'indexpattern',
         state: {
           datasourceMetaData: { filterableIndexPatterns: [] },
-          datasource: { type: 'index_pattern', indexPattern: 'lotr' },
+          datasourceStates: {
+            indexpattern: { type: 'index_pattern', indexPattern: 'lotr' },
+          },
           visualization: { gear: ['staff', 'pointy hat'] },
         },
       });
@@ -81,11 +90,13 @@ describe('LensStore', () => {
         id: 'Gandalf',
         title: 'Even the very wise cannot see all ends.',
         visualizationType: 'line',
-        datasourceType: 'indexpattern',
         expression: '',
+        activeDatasourceId: 'indexpattern',
         state: {
           datasourceMetaData: { filterableIndexPatterns: [] },
-          datasource: { type: 'index_pattern', indexPattern: 'lotr' },
+          datasourceStates: {
+            indexpattern: { type: 'index_pattern', indexPattern: 'lotr' },
+          },
           visualization: { gear: ['staff', 'pointy hat'] },
         },
       });
@@ -94,11 +105,13 @@ describe('LensStore', () => {
       expect(client.update).toHaveBeenCalledWith('lens', 'Gandalf', {
         title: 'Even the very wise cannot see all ends.',
         visualizationType: 'line',
-        datasourceType: 'indexpattern',
         expression: '',
+        activeDatasourceId: 'indexpattern',
         state: JSON.stringify({
           datasourceMetaData: { filterableIndexPatterns: [] },
-          datasource: { type: 'index_pattern', indexPattern: 'lotr' },
+          datasourceStates: {
+            indexpattern: { type: 'index_pattern', indexPattern: 'lotr' },
+          },
           visualization: { gear: ['staff', 'pointy hat'] },
         }),
       });

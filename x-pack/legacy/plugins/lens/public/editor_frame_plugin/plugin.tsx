@@ -6,6 +6,7 @@
 
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
+import { Registry } from '@kbn/interpreter/target/common';
 import { I18nProvider } from '@kbn/i18n/react';
 import { CoreSetup } from 'src/core/public';
 import { HashRouter, Switch, Route, RouteComponentProps } from 'react-router-dom';
@@ -19,6 +20,8 @@ import {
   ExpressionRenderer,
 } from '../../../../../../src/legacy/core_plugins/data/public';
 import { data } from '../../../../../../src/legacy/core_plugins/data/public/setup';
+import { ExpressionFunction } from '../../../../../../src/legacy/core_plugins/interpreter/public';
+import { functionsRegistry } from '../../../../../../src/legacy/core_plugins/interpreter/public/registries';
 import {
   Datasource,
   Visualization,
@@ -29,12 +32,21 @@ import {
 import { EditorFrame } from './editor_frame';
 import { SavedObjectIndexStore, SavedObjectStore, Document } from '../persistence';
 import { InitializableComponent } from './initializable_component';
+import { mergeTables } from './merge_tables';
 import { EmbeddableFactory } from './embeddable/embeddable_factory';
 
 export interface EditorFrameSetupPlugins {
   data: DataSetup;
   chrome: Chrome;
   embeddables: EmbeddablePlugin;
+  interpreter: InterpreterSetup;
+}
+
+export interface InterpreterSetup {
+  functionsRegistry: Registry<
+    ExpressionFunction<string, unknown, unknown, unknown>,
+    ExpressionFunction<string, unknown, unknown, unknown>
+  >;
 }
 
 interface InitializationResult {
@@ -121,6 +133,8 @@ export class EditorFramePlugin {
   }
 
   public setup(_core: CoreSetup | null, plugins: EditorFrameSetupPlugins): EditorFrameSetup {
+    plugins.interpreter.functionsRegistry.register(() => mergeTables);
+
     this.ExpressionRenderer = plugins.data.expressions.ExpressionRenderer;
     this.chrome = plugins.chrome;
     plugins.embeddables.addEmbeddableFactory(
@@ -150,6 +164,9 @@ export const editorFrameSetup = () =>
     data,
     chrome,
     embeddables: embeddablePlugin,
+    interpreter: {
+      functionsRegistry,
+    },
   });
 
 export const editorFrameStop = () => editorFrame.stop();
@@ -206,7 +223,7 @@ export function InitializedEditor({
       store={store}
       datasourceMap={datasources}
       visualizationMap={visualizations}
-      initialDatasourceId={(doc && doc.datasourceType) || firstDatasourceId || null}
+      initialDatasourceId={(doc && doc.activeDatasourceId) || firstDatasourceId || null}
       initialVisualizationId={(doc && doc.visualizationType) || firstVisualizationId || null}
       ExpressionRenderer={expressionRenderer}
       redirectTo={path => routeProps.history.push(path)}

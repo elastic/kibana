@@ -41,10 +41,7 @@ export const lens: LegacyPluginInitializer = kibana => {
           }),
         },
       },
-      // TODO: savedObjectsManagement is not in the uiExports type definition,
-      // so, we have to either fix the type signature and deal with merge
-      // conflicts, or simply cas to any here, and fix this later.
-    } as any,
+    },
 
     config: () => {
       return Joi.object({

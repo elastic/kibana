@@ -19,7 +19,8 @@ jest.mock('ui/chrome', () => ({
   getSavedObjectsClient: jest.fn(),
 }));
 
-// mock away actual data plugin to prevent all of it being loaded
+// mock away actual dependencies to prevent all of it being loaded
+jest.mock('../../../../../../src/legacy/core_plugins/interpreter/public/registries', () => {});
 jest.mock('../../../../../../src/legacy/core_plugins/data/public/setup', () => {});
 jest.mock('../../../../../../src/legacy/core_plugins/embeddable_api/public', () => {});
 jest.mock('./embeddable/embeddable_factory', () => ({ EmbeddableFactory: class Mock {} }));
@@ -78,11 +79,13 @@ describe('editor_frame plugin', () => {
 
     it('should load the document, if persistedId is defined', async () => {
       const doc: Document = {
-        datasourceType: 'indexpattern',
         id: 'hoi',
         expression: '',
+        activeDatasourceId: 'indexpattern',
         state: {
-          datasource: 'foo',
+          datasourceStates: {
+            indexpattern: 'foo',
+          },
           visualization: 'bar',
           datasourceMetaData: {
             filterableIndexPatterns: [],
@@ -193,15 +196,17 @@ describe('editor_frame plugin', () => {
       const component = mount(
         <InitializedEditor
           doc={{
-            datasourceType: 'b',
+            activeDatasourceId: 'b',
             visualizationType: 'd',
             expression: '',
             state: {
-              visualization: 'viz',
-              datasource: 'data',
               datasourceMetaData: {
                 filterableIndexPatterns: [],
               },
+              datasourceStates: {
+                b: 'data',
+              },
+              visualization: 'viz',
             },
             title: 'ttt',
           }}

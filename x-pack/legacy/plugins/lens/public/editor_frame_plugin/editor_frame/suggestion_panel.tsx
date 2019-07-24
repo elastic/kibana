@@ -17,8 +17,15 @@ import { prependDatasourceExpression } from './expression_helpers';
 import { debouncedComponent } from '../../debounced_component';
 
 export interface SuggestionPanelProps {
-  activeDatasource: Datasource;
-  datasourceState: unknown;
+  activeDatasourceId: string | null;
+  datasourceMap: Record<string, Datasource>;
+  datasourceStates: Record<
+    string,
+    {
+      isLoading: boolean;
+      state: unknown;
+    }
+  >;
   activeVisualizationId: string | null;
   visualizationMap: Record<string, Visualization>;
   visualizationState: unknown;
@@ -90,17 +97,21 @@ const SuggestionPreview = ({
 export const SuggestionPanel = debouncedComponent(InnerSuggestionPanel, 2000);
 
 function InnerSuggestionPanel({
-  activeDatasource,
-  datasourceState,
+  activeDatasourceId,
+  datasourceMap,
+  datasourceStates,
   activeVisualizationId,
   visualizationMap,
   visualizationState,
   dispatch,
   ExpressionRenderer: ExpressionRendererComponent,
 }: SuggestionPanelProps) {
-  const datasourceSuggestions = activeDatasource.getDatasourceSuggestionsFromCurrentState(
-    datasourceState
-  );
+  if (!activeDatasourceId) {
+    return null;
+  }
+  const datasourceSuggestions = datasourceMap[
+    activeDatasourceId
+  ].getDatasourceSuggestionsFromCurrentState(datasourceStates[activeDatasourceId].state);
 
   const suggestions = getSuggestions(
     datasourceSuggestions,
@@ -123,8 +134,8 @@ function InnerSuggestionPanel({
         const previewExpression = suggestion.previewExpression
           ? prependDatasourceExpression(
               suggestion.previewExpression,
-              activeDatasource,
-              suggestion.datasourceState
+              datasourceMap,
+              datasourceStates
             )
           : null;
         return (

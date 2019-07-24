@@ -17,6 +17,7 @@ import {
   EuiFormRow,
   EuiFieldText,
   EuiLink,
+  EuiButton,
 } from '@elastic/eui';
 import classNames from 'classnames';
 import { IndexPatternColumn, OperationType } from '../indexpattern';
@@ -59,7 +60,7 @@ export interface PopoverEditorProps extends IndexPatternDimensionPanelProps {
 }
 
 export function PopoverEditor(props: PopoverEditorProps) {
-  const { selectedColumn, filteredColumns, state, columnId, setState } = props;
+  const { selectedColumn, filteredColumns, state, columnId, setState, layerId } = props;
   const [isPopoverOpen, setPopoverOpen] = useState(false);
   const [
     incompatibleSelectedOperationType,
@@ -94,7 +95,14 @@ export function PopoverEditor(props: PopoverEditorProps) {
                 'sourceField'
               );
               if (possibleColumns.length === 1) {
-                setState(changeColumn(state, columnId, possibleColumns[0]));
+                setState(
+                  changeColumn({
+                    state,
+                    layerId,
+                    columnId,
+                    newColumn: possibleColumns[0],
+                  })
+                );
               } else {
                 setInvalidOperationType(operationType);
               }
@@ -117,7 +125,14 @@ export function PopoverEditor(props: PopoverEditorProps) {
                   !hasField(selectedColumn) ||
                   col.sourceField === selectedColumn.sourceField)
             )!;
-            setState(changeColumn(state, columnId, newColumn));
+            setState(
+              changeColumn({
+                state,
+                layerId,
+                columnId,
+                newColumn,
+              })
+            );
           },
         })
       ),
@@ -130,19 +145,24 @@ export function PopoverEditor(props: PopoverEditorProps) {
       className="lnsConfigPanel__summaryPopover"
       anchorClassName="lnsConfigPanel__summaryPopoverAnchor"
       button={
-        <EuiLink
-          className="lnsConfigPanel__summaryLink"
-          onClick={() => {
-            setPopoverOpen(true);
-          }}
-          data-test-subj="indexPattern-configure-dimension"
-        >
-          {selectedColumn
-            ? selectedColumn.label
-            : i18n.translate('xpack.lens.indexPattern.configureDimensionLabel', {
-                defaultMessage: 'Configure dimension',
-              })}
-        </EuiLink>
+        selectedColumn ? (
+          <EuiLink
+            className="lnsConfigPanel__summaryLink"
+            onClick={() => {
+              setPopoverOpen(true);
+            }}
+            data-test-subj="indexPattern-configure-dimension"
+          >
+            {selectedColumn.label}
+          </EuiLink>
+        ) : (
+          <EuiButton
+            className="lnsConfigPanel__summaryLink"
+            data-test-subj="indexPattern-configure-dimension"
+            onClick={() => setPopoverOpen(true)}
+            iconType="plusInCircle"
+          />
+        )
       }
       isOpen={isPopoverOpen}
       closePopover={() => {
@@ -160,10 +180,23 @@ export function PopoverEditor(props: PopoverEditorProps) {
             selectedColumn={selectedColumn}
             incompatibleSelectedOperationType={incompatibleSelectedOperationType}
             onDeleteColumn={() => {
-              setState(deleteColumn(state, columnId));
+              setState(
+                deleteColumn({
+                  state,
+                  layerId,
+                  columnId,
+                })
+              );
             }}
             onChangeColumn={column => {
-              setState(changeColumn(state, columnId, column));
+              setState(
+                changeColumn({
+                  state,
+                  layerId,
+                  columnId,
+                  newColumn: column,
+                })
+              );
               setInvalidOperationType(null);
             }}
           />
@@ -208,6 +241,7 @@ export function PopoverEditor(props: PopoverEditorProps) {
                   columnId={columnId}
                   storage={props.storage}
                   dataPlugin={props.dataPlugin}
+                  layerId={layerId}
                 />
               )}
               {!incompatibleSelectedOperationType && selectedColumn && (
@@ -217,9 +251,14 @@ export function PopoverEditor(props: PopoverEditorProps) {
                     value={selectedColumn.label}
                     onChange={e => {
                       setState(
-                        changeColumn(state, columnId, {
-                          ...selectedColumn,
-                          label: e.target.value,
+                        changeColumn({
+                          state,
+                          layerId,
+                          columnId,
+                          newColumn: {
+                            ...selectedColumn,
+                            label: e.target.value,
+                          },
                         })
                       );
                     }}

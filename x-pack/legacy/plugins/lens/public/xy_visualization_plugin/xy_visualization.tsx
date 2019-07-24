@@ -18,25 +18,23 @@ import { generateId } from '../id_generator';
 export const xyVisualization: Visualization<State, PersistableState> = {
   getSuggestions,
 
-  initialize(datasource, state) {
+  initialize(frame, state) {
     return (
       state || {
-        seriesType: 'bar',
         title: 'Empty XY Chart',
         legend: { isVisible: true, position: Position.Right },
-        x: {
-          accessor: generateId(),
-          position: Position.Bottom,
-          showGridlines: false,
-          title: 'X',
-        },
-        y: {
-          accessors: [generateId()],
-          position: Position.Left,
-          showGridlines: false,
-          title: 'Y',
-        },
-        splitSeriesAccessors: [generateId()],
+        layers: [
+          {
+            layerId: frame.addNewLayer(),
+            accessors: [generateId()],
+            position: Position.Top,
+            seriesType: 'bar',
+            showGridlines: false,
+            splitAccessor: generateId(),
+            title: '',
+            xAccessor: generateId(),
+          },
+        ],
       }
     );
   },

@@ -9,7 +9,7 @@ import ReactDOM from 'react-dom';
 import { i18n } from '@kbn/i18n';
 import { EuiBasicTable } from '@elastic/eui';
 import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/types';
-import { KibanaDatatable } from '../types';
+import { KibanaDatatable, LensMultiTable } from '../types';
 import { RenderFunction } from '../interpreter_types';
 
 export interface DatatableColumns {
@@ -22,7 +22,7 @@ interface Args {
 }
 
 export interface DatatableProps {
-  data: KibanaDatatable;
+  data: LensMultiTable;
   args: Args;
 }
 
@@ -56,7 +56,7 @@ export const datatable: ExpressionFunction<
     },
   },
   context: {
-    types: ['kibana_datatable'],
+    types: ['lens_multitable'],
   },
   fn(data: KibanaDatatable, args: Args) {
     return {
@@ -106,11 +106,6 @@ export const datatableColumns: ExpressionFunction<
   },
 };
 
-export interface DatatableProps {
-  data: KibanaDatatable;
-  args: Args;
-}
-
 export const datatableRenderer: RenderFunction<DatatableProps> = {
   name: 'lens_datatable_renderer',
   displayName: i18n.translate('xpack.lens.datatable.visualizationName', {
@@ -125,17 +120,20 @@ export const datatableRenderer: RenderFunction<DatatableProps> = {
 };
 
 function DatatableComponent(props: DatatableProps) {
+  const [firstTable] = Object.values(props.data.tables);
+
   return (
     <EuiBasicTable
+      className="lnsDataTable"
       columns={props.args.columns.columnIds
-        .map((id, index) => {
+        .map((field, index) => {
           return {
-            field: props.args.columns.columnIds[index],
+            field,
             name: props.args.columns.labels[index],
           };
         })
         .filter(({ field }) => !!field)}
-      items={props.data.rows}
+      items={firstTable ? firstTable.rows : []}
     />
   );
 }

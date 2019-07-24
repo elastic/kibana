@@ -13,8 +13,13 @@ import {
   OperationDefinition,
 } from './operations';
 
-export function toExpression(state: IndexPatternPrivateState) {
-  if (state.columnOrder.length === 0) {
+function getExpressionForLayer(
+  indexPatternId: string,
+  layerId: string,
+  columns: Record<string, IndexPatternColumn>,
+  columnOrder: string[]
+) {
+  if (columnOrder.length === 0) {
     return null;
   }
 
@@ -27,8 +32,8 @@ export function toExpression(state: IndexPatternPrivateState) {
     return operationDefinition.toEsAggsConfig(column, columnId);
   }
 
-  const columnEntries = state.columnOrder.map(
-    colId => [colId, state.columns[colId]] as [string, IndexPatternColumn]
+  const columnEntries = columnOrder.map(
+    colId => [colId, columns[colId]] as [string, IndexPatternColumn]
   );
 
   if (columnEntries.length) {
@@ -51,16 +56,18 @@ export function toExpression(state: IndexPatternPrivateState) {
     );
 
     if (filterRatios.length) {
-      const countColumn = buildColumnForOperationType(
-        columnEntries.length,
-        'count',
-        state.columns,
-        2
-      );
+      const countColumn = buildColumnForOperationType({
+        index: columnEntries.length,
+        op: 'count',
+        columns,
+        suggestedPriority: 2,
+        layerId,
+        indexPatternId,
+      });
       aggs.push(getEsAggsConfig(countColumn, 'filter-ratio'));
 
       return `esaggs
-        index="${state.currentIndexPatternId}"
+        index="${indexPatternId}"
         metricsAtAllLevels=false
         partialRows=false
         aggConfigs='${JSON.stringify(aggs)}' | lens_rename_columns idMap='${JSON.stringify(
@@ -69,10 +76,23 @@ export function toExpression(state: IndexPatternPrivateState) {
     }
 
     return `esaggs
-      index="${state.currentIndexPatternId}"
+      index="${indexPatternId}"
       metricsAtAllLevels=false
       partialRows=false
       aggConfigs='${JSON.stringify(aggs)}' | lens_rename_columns idMap='${JSON.stringify(idMap)}'`;
+  }
+
+  return null;
+}
+
+export function toExpression(state: IndexPatternPrivateState, layerId: string) {
+  if (state.layers[layerId]) {
+    return getExpressionForLayer(
+      state.layers[layerId].indexPatternId,
+      layerId,
+      state.layers[layerId].columns,
+      state.layers[layerId].columnOrder
+    );
   }
 
   return null;

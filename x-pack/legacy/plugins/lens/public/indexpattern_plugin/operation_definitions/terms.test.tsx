@@ -18,31 +18,38 @@ describe('terms', () => {
     state = {
       indexPatterns: {},
       currentIndexPatternId: '1',
-      columnOrder: ['col1', 'col2'],
-      columns: {
-        col1: {
-          operationId: 'op1',
-          label: 'Top value of category',
-          dataType: 'string',
-          isBucketed: true,
+      layers: {
+        first: {
+          indexPatternId: '1',
+          columnOrder: ['col1', 'col2'],
+          columns: {
+            col1: {
+              operationId: 'op1',
+              label: 'Top value of category',
+              dataType: 'string',
+              isBucketed: true,
 
-          // Private
-          operationType: 'terms',
-          params: {
-            orderBy: { type: 'alphabetical' },
-            size: 5,
-            orderDirection: 'asc',
+              // Private
+              operationType: 'terms',
+              params: {
+                orderBy: { type: 'alphabetical' },
+                size: 5,
+                orderDirection: 'asc',
+              },
+              sourceField: 'category',
+              indexPatternId: '1',
+            },
+            col2: {
+              operationId: 'op1',
+              label: 'Count',
+              dataType: 'number',
+              isBucketed: false,
+
+              // Private
+              operationType: 'count',
+              indexPatternId: '1',
+            },
           },
-          sourceField: 'category',
-        },
-        col2: {
-          operationId: 'op1',
-          label: 'Count',
-          dataType: 'number',
-          isBucketed: false,
-
-          // Private
-          operationType: 'count',
         },
       },
     };
@@ -51,7 +58,7 @@ describe('terms', () => {
   describe('toEsAggsConfig', () => {
     it('should reflect params correctly', () => {
       const esAggsConfig = termsOperation.toEsAggsConfig(
-        state.columns.col1 as TermsIndexPatternColumn,
+        state.layers.first.columns.col1 as TermsIndexPatternColumn,
         'col1'
       );
       expect(esAggsConfig).toEqual(
@@ -68,15 +75,22 @@ describe('terms', () => {
 
   describe('buildColumn', () => {
     it('should use existing metric column as order column', () => {
-      const termsColumn = termsOperation.buildColumn('abc', {
-        col1: {
-          operationId: 'op1',
-          label: 'Count',
-          dataType: 'number',
-          isBucketed: false,
+      const termsColumn = termsOperation.buildColumn({
+        operationId: 'abc',
+        layerId: 'first',
+        indexPatternId: '1',
+        suggestedPriority: undefined,
+        columns: {
+          col1: {
+            operationId: 'op1',
+            label: 'Count',
+            dataType: 'number',
+            isBucketed: false,
 
-          // Private
-          operationType: 'count',
+            // Private
+            operationType: 'count',
+            indexPatternId: '1',
+          },
         },
       });
       expect(termsColumn.params).toEqual(
@@ -103,6 +117,7 @@ describe('terms', () => {
           orderDirection: 'asc',
         },
         sourceField: 'category',
+        indexPatternId: '1',
       };
       const updatedColumn = termsOperation.onOtherColumnChanged!(initialColumn, {
         col1: {
@@ -113,6 +128,7 @@ describe('terms', () => {
 
           // Private
           operationType: 'count',
+          indexPatternId: '1',
         },
       });
       expect(updatedColumn).toBe(initialColumn);
@@ -134,6 +150,7 @@ describe('terms', () => {
             orderDirection: 'asc',
           },
           sourceField: 'category',
+          indexPatternId: '1',
         },
         {}
       );
@@ -160,6 +177,7 @@ describe('terms', () => {
             orderDirection: 'asc',
           },
           sourceField: 'category',
+          indexPatternId: '1',
         },
         {
           col1: {
@@ -174,6 +192,7 @@ describe('terms', () => {
               interval: 'w',
             },
             sourceField: 'timestamp',
+            indexPatternId: '1',
           },
         }
       );
@@ -189,7 +208,7 @@ describe('terms', () => {
     it('should render current order by value and options', () => {
       const setStateSpy = jest.fn();
       const instance = shallow(
-        <InlineOptions state={state} setState={setStateSpy} columnId="col1" />
+        <InlineOptions state={state} setState={setStateSpy} columnId="col1" layerId="first" />
       );
 
       const select = instance.find('[data-test-subj="indexPattern-terms-orderBy"]').find(EuiSelect);
@@ -208,25 +227,32 @@ describe('terms', () => {
         <InlineOptions
           state={{
             ...state,
-            columns: {
-              ...state.columns,
-              col2: {
-                operationId: 'op1',
-                label: 'Count',
-                dataType: 'number',
-                isBucketed: false,
+            layers: {
+              first: {
+                ...state.layers.first,
+                columns: {
+                  ...state.layers.first.columns,
+                  col2: {
+                    operationId: 'op1',
+                    label: 'Count',
+                    dataType: 'number',
+                    isBucketed: false,
 
-                // Private
-                operationType: 'filter_ratio',
-                params: {
-                  numerator: { query: '', language: 'kuery' },
-                  denominator: { query: '', language: 'kuery' },
+                    // Private
+                    operationType: 'filter_ratio',
+                    params: {
+                      numerator: { query: '', language: 'kuery' },
+                      denominator: { query: '', language: 'kuery' },
+                    },
+                    indexPatternId: '1',
+                  },
                 },
               },
             },
           }}
           setState={setStateSpy}
           columnId="col1"
+          layerId="first"
         />
       );
 
@@ -238,7 +264,7 @@ describe('terms', () => {
     it('should update state with the order by value', () => {
       const setStateSpy = jest.fn();
       const instance = shallow(
-        <InlineOptions state={state} setState={setStateSpy} columnId="col1" />
+        <InlineOptions state={state} setState={setStateSpy} columnId="col1" layerId="first" />
       );
 
       instance
@@ -252,15 +278,20 @@ describe('terms', () => {
 
       expect(setStateSpy).toHaveBeenCalledWith({
         ...state,
-        columns: {
-          ...state.columns,
-          col1: {
-            ...state.columns.col1,
-            params: {
-              ...(state.columns.col1 as TermsIndexPatternColumn).params,
-              orderBy: {
-                type: 'column',
-                columnId: 'col2',
+        layers: {
+          first: {
+            ...state.layers.first,
+            columns: {
+              ...state.layers.first.columns,
+              col1: {
+                ...state.layers.first.columns.col1,
+                params: {
+                  ...(state.layers.first.columns.col1 as TermsIndexPatternColumn).params,
+                  orderBy: {
+                    type: 'column',
+                    columnId: 'col2',
+                  },
+                },
               },
             },
           },
@@ -271,7 +302,7 @@ describe('terms', () => {
     it('should render current order direction value and options', () => {
       const setStateSpy = jest.fn();
       const instance = shallow(
-        <InlineOptions state={state} setState={setStateSpy} columnId="col1" />
+        <InlineOptions state={state} setState={setStateSpy} columnId="col1" layerId="first" />
       );
 
       const select = instance
@@ -285,7 +316,7 @@ describe('terms', () => {
     it('should update state with the order direction value', () => {
       const setStateSpy = jest.fn();
       const instance = shallow(
-        <InlineOptions state={state} setState={setStateSpy} columnId="col1" />
+        <InlineOptions state={state} setState={setStateSpy} columnId="col1" layerId="first" />
       );
 
       instance
@@ -299,13 +330,18 @@ describe('terms', () => {
 
       expect(setStateSpy).toHaveBeenCalledWith({
         ...state,
-        columns: {
-          ...state.columns,
-          col1: {
-            ...state.columns.col1,
-            params: {
-              ...(state.columns.col1 as TermsIndexPatternColumn).params,
-              orderDirection: 'desc',
+        layers: {
+          first: {
+            ...state.layers.first,
+            columns: {
+              ...state.layers.first.columns,
+              col1: {
+                ...state.layers.first.columns.col1,
+                params: {
+                  ...(state.layers.first.columns.col1 as TermsIndexPatternColumn).params,
+                  orderDirection: 'desc',
+                },
+              },
             },
           },
         },
@@ -315,7 +351,7 @@ describe('terms', () => {
     it('should render current size value', () => {
       const setStateSpy = jest.fn();
       const instance = shallow(
-        <InlineOptions state={state} setState={setStateSpy} columnId="col1" />
+        <InlineOptions state={state} setState={setStateSpy} columnId="col1" layerId="first" />
       );
 
       expect(instance.find(EuiRange).prop('value')).toEqual(5);
@@ -324,7 +360,7 @@ describe('terms', () => {
     it('should update state with the size value', () => {
       const setStateSpy = jest.fn();
       const instance = shallow(
-        <InlineOptions state={state} setState={setStateSpy} columnId="col1" />
+        <InlineOptions state={state} setState={setStateSpy} columnId="col1" layerId="first" />
       );
 
       instance.find(EuiRange).prop('onChange')!({
@@ -334,13 +370,18 @@ describe('terms', () => {
       } as React.ChangeEvent<HTMLInputElement>);
       expect(setStateSpy).toHaveBeenCalledWith({
         ...state,
-        columns: {
-          ...state.columns,
-          col1: {
-            ...state.columns.col1,
-            params: {
-              ...(state.columns.col1 as TermsIndexPatternColumn).params,
-              size: 7,
+        layers: {
+          first: {
+            ...state.layers.first,
+            columns: {
+              ...state.layers.first.columns,
+              col1: {
+                ...state.layers.first.columns.col1,
+                params: {
+                  ...(state.layers.first.columns.col1 as TermsIndexPatternColumn).params,
+                  size: 7,
+                },
+              },
             },
           },
         },
