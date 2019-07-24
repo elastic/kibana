@@ -23,8 +23,8 @@ describe('Router', () => {
     it('throws if validation for a route is not defined explicitly', () => {
       const router = new Router('/foo');
       expect(
-        // @ts-ignore validate is required field
-        () => router.get({ path: '/' }, (req, res) => res.ok({}))
+        // we use 'any' because validate is a required field
+        () => router.get({ path: '/' } as any, (req, res) => res.ok({}))
       ).toThrowErrorMatchingInlineSnapshot(
         `"The [get] at [/] does not have a 'validate' specified. Use 'false' as the value if you want to bypass validation."`
       );
@@ -32,9 +32,10 @@ describe('Router', () => {
     it('throws if validation for a route is declared wrong', () => {
       const router = new Router('/foo');
       expect(() =>
-        // @ts-ignore validate requires @kbn/config-schema usage
-        router.get({ path: '/', validate: { params: { validate: () => 'error' } } }, (req, res) =>
-          res.ok({})
+        router.get(
+          // we use 'any' because validate requires @kbn/config-schema usage
+          { path: '/', validate: { params: { validate: () => 'error' } } } as any,
+          (req, res) => res.ok({})
         )
       ).toThrowErrorMatchingInlineSnapshot(
         `"Expected a valid schema declared with '@kbn/config-schema' package at key: [params]."`
