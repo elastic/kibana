@@ -9,16 +9,19 @@ import { handleError } from '../../../../lib/errors';
 import { getCollectionStatus } from '../../../../lib/setup/collection';
 import { getIndexPatterns } from '../../../../lib/cluster/get_index_patterns';
 
-export function clustersSetupStatusRoute(server) {
+export function setupStatusRoute(server) {
   /*
    * Monitoring Home
    * Route Init (for checking license and compatibility for multi-cluster monitoring
    */
   server.route({
     method: 'POST',
-    path: '/api/monitoring/v1/setup/collection',
+    path: '/api/monitoring/v1/setup/collection/{clusterUuid?}',
     config: {
       validate: {
+        params: Joi.object({
+          clusterUuid: Joi.string().optional()
+        }),
         query: Joi.object({
           // This flag is not intended to be used in production. It was introduced
           // as a way to ensure consistent API testing - the typical data source
@@ -47,7 +50,7 @@ export function clustersSetupStatusRoute(server) {
       try {
         await verifyMonitoringAuth(req);
         const indexPatterns = getIndexPatterns(server);
-        status = await getCollectionStatus(req, indexPatterns, null, req.query.skipLiveData);
+        status = await getCollectionStatus(req, indexPatterns, req.params.clusterUuid, req.query.skipLiveData);
       } catch (err) {
         throw handleError(err, req);
       }
