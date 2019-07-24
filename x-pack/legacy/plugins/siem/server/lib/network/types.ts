@@ -4,7 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { NetworkDirectionEcs, NetworkDnsData, NetworkTopNFlowData } from '../../graphql/types';
+import {
+  FlowTarget,
+  NetworkDirectionEcs,
+  NetworkDnsData,
+  NetworkTopNFlowData,
+} from '../../graphql/types';
 import { FrameworkRequest, RequestOptionsPaginated } from '../framework';
 import { SearchHit } from '../types';
 
@@ -33,15 +38,15 @@ export interface NetworkTopNFlowBuckets {
   bytes_out: {
     value: number;
   };
-  location: {
-    value: string;
-  };
+  // location: {
+  //   value: string;
+  // };
   domain: {
     buckets: GenericBuckets[];
   };
-  autonomous_system: {
-    value: string;
-  };
+  // autonomous_system: {
+  //   value: string;
+  // };
 }
 
 export interface NetworkTopNFlowData extends SearchHit {
@@ -49,10 +54,10 @@ export interface NetworkTopNFlowData extends SearchHit {
     top_n_flow_count?: {
       value: number;
     };
-    top_uni_flow?: {
+    [FlowTarget.source]?: {
       buckets: NetworkTopNFlowBuckets[];
     };
-    top_bi_flow?: {
+    [FlowTarget.destination]?: {
       buckets: NetworkTopNFlowBuckets[];
     };
   };

@@ -11,7 +11,7 @@ import {
   NetworkTopNFlowFields,
   NetworkTopNFlowSortField,
 } from '../../graphql/types';
-import { createQueryFilterClauses, assertUnreachable } from '../../utils/build_query';
+import { assertUnreachable, createQueryFilterClauses } from '../../utils/build_query';
 
 import { NetworkTopNFlowRequestOptions } from './index';
 
@@ -87,7 +87,7 @@ export const buildTopNFlowQuery = ({
     body: {
       aggregations: {
         ...getCountAgg(flowTarget),
-        ...getAllDirectionAggs(networkTopNFlowSort, flowTarget, querySize),
+        ...getAllDirectionAggs(flowDirection, networkTopNFlowSort, flowTarget, querySize),
       },
       query: {
         bool: {
@@ -103,11 +103,12 @@ export const buildTopNFlowQuery = ({
 };
 
 const getAllDirectionAggs = (
+  flowDirection: FlowDirection,
   networkTopNFlowSortField: NetworkTopNFlowSortField,
   flowTarget: FlowTarget,
   querySize: number
 ) => {
-  if (flowTarget === FlowTarget.source) {
+  if (flowTarget === FlowTarget.source || flowDirection === FlowDirection.uniDirectional) {
     return {
       [FlowTarget.source]: {
         terms: {
@@ -126,6 +127,21 @@ const getAllDirectionAggs = (
           bytes_out: {
             sum: {
               field: 'source.bytes',
+            },
+          },
+          domain: {
+            terms: {
+              field: `${flowTarget}.domain`,
+              order: {
+                timestamp: 'desc',
+              },
+            },
+            aggs: {
+              timestamp: {
+                max: {
+                  field: '@timestamp',
+                },
+              },
             },
           },
         },
@@ -154,6 +170,21 @@ const getAllDirectionAggs = (
               field: 'destination.bytes',
             },
           },
+          domain: {
+            terms: {
+              field: `${flowTarget}.domain`,
+              order: {
+                timestamp: 'desc',
+              },
+            },
+            aggs: {
+              timestamp: {
+                max: {
+                  field: '@timestamp',
+                },
+              },
+            },
+          },
         },
       },
     };
@@ -179,6 +210,21 @@ const getAllDirectionAggs = (
               field: 'source.bytes',
             },
           },
+          domain: {
+            terms: {
+              field: `${flowTarget}.domain`,
+              order: {
+                timestamp: 'desc',
+              },
+            },
+            aggs: {
+              timestamp: {
+                max: {
+                  field: '@timestamp',
+                },
+              },
+            },
+          },
         },
       },
       [FlowTarget.destination]: {
@@ -198,6 +244,21 @@ const getAllDirectionAggs = (
           bytes_out: {
             sum: {
               field: 'destination.bytes',
+            },
+          },
+          domain: {
+            terms: {
+              field: `${flowTarget}.domain`,
+              order: {
+                timestamp: 'desc',
+              },
+            },
+            aggs: {
+              timestamp: {
+                max: {
+                  field: '@timestamp',
+                },
+              },
             },
           },
         },

@@ -51,7 +51,7 @@ export const initialNetworkState: NetworkState = {
         activePage: DEFAULT_TABLE_ACTIVE_PAGE,
         limit: DEFAULT_TABLE_LIMIT,
         topNFlowSort: {
-          field: NetworkTopNFlowFields.bytes,
+          field: NetworkTopNFlowFields.bytes_in,
           direction: Direction.desc,
         },
         flowTarget: FlowTarget.source,
@@ -222,7 +222,7 @@ export const networkReducer = reducerWithInitialState(initialNetworkState)
           ...state[NetworkType.page].queries.topNFlow,
           flowTarget,
           topNFlowSort: {
-            field: NetworkTopNFlowFields.bytes,
+            field: NetworkTopNFlowFields.bytes_in,
             direction: Direction.desc,
           },
         },

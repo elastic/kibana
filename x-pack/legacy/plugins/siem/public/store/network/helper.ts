@@ -17,7 +17,7 @@ export const helperUpdateTopNFlowDirection = (
   flowDirection: FlowDirection
 ) => {
   const topNFlowSort: NetworkTopNFlowSortField = {
-    field: NetworkTopNFlowFields.bytes,
+    field: NetworkTopNFlowFields.bytes_in,
     direction: Direction.desc,
   };
   if (
