@@ -176,7 +176,9 @@ export function XYChart({ data, args }: XYChartProps) {
             id: getSpecId(idForLegend),
             xAccessor,
             yAccessors,
-            xScaleType: (typeof rows[0][xAccessor] === 'string' ? ScaleType.Ordinal : ScaleType.Linear) as ScaleType.Linear | ScaleType.Ordinal | ScaleType.Time,
+            xScaleType: (typeof rows[0][xAccessor] === 'string'
+              ? ScaleType.Ordinal
+              : ScaleType.Linear) as ScaleType.Linear | ScaleType.Ordinal | ScaleType.Time,
             yScaleType: ScaleType.Linear as ScaleType.Linear,
             data: rows,
           };

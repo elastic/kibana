@@ -37,8 +37,8 @@ describe('save editor frame state', () => {
       addNewLayer: jest.fn(),
       removeLayer: jest.fn(),
       datasourceLayers: {
-        first: mockDatasource.publicAPIMock
-      }
+        first: mockDatasource.publicAPIMock,
+      },
     },
     store: {
       async save() {
