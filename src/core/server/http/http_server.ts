@@ -251,9 +251,11 @@ export class HttpServer {
     this.server.auth.scheme('login', () => ({
       authenticate: adoptToHapiAuthFormat(fn, (req, { state, requestHeaders, responseHeaders }) => {
         this.authState.set(req, state);
+
         if (responseHeaders) {
           this.authResponseHeaders.set(req, responseHeaders);
         }
+
         if (requestHeaders) {
           this.authRequestHeaders.set(req, requestHeaders);
           // we mutate headers only for the backward compatibility with the legacy platform.
@@ -296,12 +298,12 @@ export class HttpServer {
     }
   }
 
+  // NOTE: responseHeaders contains not a full list of response headers, but only explicitly set on a response object.
+  // any headers added by hapi internally, like `content-type`, `content-length`, etc. do not present here.
   private findHeadersIntersection(responseHeaders: ResponseHeaders, headers: ResponseHeaders) {
     Object.keys(headers).forEach(headerName => {
       if (responseHeaders[headerName] !== undefined) {
-        this.log.warn(
-          `Server rewrites a response header {[${headerName}]: ${responseHeaders[headerName]} }.`
-        );
+        this.log.warn(`Server rewrites a response header [${headerName}].`);
       }
     });
   }

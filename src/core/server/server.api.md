@@ -32,7 +32,7 @@ export type AuthenticationHandler = (request: KibanaRequest, t: AuthToolkit) => 
 export type AuthHeaders = Record<string, string | string[]>;
 
 // @public
-export interface AuthResultData {
+export interface AuthResultParams {
     requestHeaders?: AuthHeaders;
     responseHeaders?: AuthHeaders;
     state?: Record<string, any>;
@@ -40,7 +40,7 @@ export interface AuthResultData {
 
 // @public
 export interface AuthToolkit {
-    authenticated: (data?: AuthResultData) => AuthResult;
+    authenticated: (data?: AuthResultParams) => AuthResult;
     redirected: (url: string) => AuthResult;
     rejected: (error: Error, options?: {
         statusCode?: number;
