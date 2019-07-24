@@ -17,29 +17,10 @@
  * under the License.
  */
 
-import { randomBytes } from 'crypto';
-import { promisify } from 'util';
+import { Vis, VisParams } from 'ui/vis';
 
-const randomBytesAsync = promisify(randomBytes);
-
-export const DEFAULT_CSP_RULES = Object.freeze([
-  `script-src 'unsafe-eval' 'nonce-{nonce}'`,
-  'worker-src blob:',
-  'child-src blob:',
-]);
-
-export const DEFAULT_CSP_STRICT = true;
-
-export const DEFAULT_CSP_WARN_LEGACY_BROWSERS = true;
-
-export async function generateCSPNonce() {
-  return (await randomBytesAsync(12)).toString('base64');
-}
-
-export function createCSPRuleString(rules: string[], nonce?: string) {
-  let ruleString = rules.join('; ');
-  if (nonce) {
-    ruleString = ruleString.replace(/\{nonce\}/g, nonce);
-  }
-  return ruleString;
+export interface VisOptionsProps {
+  stateParams: VisParams;
+  vis: Vis;
+  setValue(paramName: string, value: unknown): void;
 }
