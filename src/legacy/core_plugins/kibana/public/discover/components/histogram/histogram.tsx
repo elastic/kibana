@@ -27,6 +27,7 @@ import {
   Axis,
   Chart,
   HistogramBarSeries,
+  GeometryValue,
   getAnnotationId,
   getAxisId,
   getSpecId,
@@ -67,7 +68,7 @@ export class DiscoverHistogram extends Component<DiscoverHistogramProps> {
     this.props.timefilterUpdateHandler(range);
   };
 
-  public onElementClick = (xInterval: number) => (elementData: any) => {
+  public onElementClick = (xInterval: number) => (elementData: GeometryValue[]) => {
     const startRange = elementData[0].x;
 
     const range = {
