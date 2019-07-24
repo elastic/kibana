@@ -16,6 +16,7 @@ import { loadServiceList } from '../../../services/rest/apm/services';
 import { NoServicesMessage } from './NoServicesMessage';
 import { ServiceList } from './ServiceList';
 import { useUrlParams } from '../../../hooks/useUrlParams';
+import { useTrackPageview } from '../../../../../infra/public';
 
 const initalData = {
   items: [],
@@ -30,7 +31,7 @@ export function ServiceOverview() {
     urlParams: { start, end },
     uiFilters
   } = useUrlParams();
-  const { data = initalData } = useFetcher(() => {
+  const { data = initalData, status } = useFetcher(() => {
     if (start && end) {
       return loadServiceList({ start, end, uiFilters });
     }
@@ -70,12 +71,18 @@ export function ServiceOverview() {
     }
   }, [data.hasLegacyData]);
 
+  useTrackPageview({ app: 'apm', path: 'services_overview' });
+  useTrackPageview({ app: 'apm', path: 'services_overview', delay: 15000 });
+
   return (
     <EuiPanel>
       <ServiceList
         items={data.items}
         noItemsMessage={
-          <NoServicesMessage historicalDataFound={data.hasHistoricalData} />
+          <NoServicesMessage
+            historicalDataFound={data.hasHistoricalData}
+            isLoading={status === 'loading'}
+          />
         }
       />
     </EuiPanel>

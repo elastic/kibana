@@ -6,7 +6,7 @@
 
 import { AggregationRequest } from '../types';
 
-export const buildFieldsTermAggregation = (esFields: ReadonlyArray<string>): AggregationRequest =>
+export const buildFieldsTermAggregation = (esFields: readonly string[]): AggregationRequest =>
   esFields.reduce<AggregationRequest>(
     (res, field) => ({
       ...res,

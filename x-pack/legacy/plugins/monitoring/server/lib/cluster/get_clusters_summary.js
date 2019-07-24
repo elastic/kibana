@@ -6,8 +6,10 @@
 
 import { pick, omit, get } from 'lodash';
 import { calculateOverallStatus } from '../calculate_overall_status';
+import { LOGGING_TAG } from '../../../common/constants';
+import { MonitoringLicenseError } from '../errors/custom_errors';
 
-export function getClustersSummary(clusters, kibanaUuid, isCcrEnabled) {
+export function getClustersSummary(server, clusters, kibanaUuid, isCcrEnabled) {
   return clusters.map(cluster => {
     const {
       isSupported,
@@ -27,6 +29,17 @@ export function getClustersSummary(clusters, kibanaUuid, isCcrEnabled) {
     } = cluster;
 
     const clusterName = get(clusterSettings, 'cluster.metadata.display_name', cluster.cluster_name);
+
+    // check for any missing licenses
+    if (!license) {
+      const clusterId = cluster.name || clusterName || clusterUuid;
+      server.log(
+        ['error', LOGGING_TAG],
+        'Could not find license information for cluster = \'' + clusterId + '\'. ' +
+        'Please check the cluster\'s master node server logs for errors or warnings.'
+      );
+      throw new MonitoringLicenseError(clusterId);
+    }
 
     const {
       status: licenseStatus,

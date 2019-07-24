@@ -32,10 +32,10 @@ exports[`Stat Items Component disable charts it renders the default widget 1`] =
   >
     <Styled(EuiFlexItem)>
       <EuiFlexItem
-        className="sc-ifAKCX cFdETZ"
+        className="sc-bZQynM kpuYFd"
       >
         <div
-          className="euiFlexItem sc-ifAKCX cFdETZ"
+          className="euiFlexItem sc-bZQynM kpuYFd"
         >
           <EuiPanel
             grow={true}
@@ -112,7 +112,7 @@ exports[`Stat Items Component disable charts it renders the default widget 1`] =
                               showInspect={false}
                             >
                               <div
-                                className="sc-bxivhb fGGQew"
+                                className="sc-EHOje dUUqHB"
                               >
                                 <EuiButtonIcon
                                   aria-label="Inspect"
@@ -184,10 +184,10 @@ exports[`Stat Items Component disable charts it renders the default widget 1`] =
                     key="stat-items-field-hosts"
                   >
                     <EuiFlexItem
-                      className="sc-ifAKCX cFdETZ"
+                      className="sc-bZQynM kpuYFd"
                     >
                       <div
-                        className="euiFlexItem sc-ifAKCX cFdETZ"
+                        className="euiFlexItem sc-bZQynM kpuYFd"
                       >
                         <EuiFlexGroup
                           alignItems="center"
@@ -199,17 +199,17 @@ exports[`Stat Items Component disable charts it renders the default widget 1`] =
                           >
                             <Styled(EuiFlexItem)>
                               <EuiFlexItem
-                                className="sc-ifAKCX cFdETZ"
+                                className="sc-bZQynM kpuYFd"
                               >
                                 <div
-                                  className="euiFlexItem sc-ifAKCX cFdETZ"
+                                  className="euiFlexItem sc-bZQynM kpuYFd"
                                 >
                                   <Styled(EuiTitle)>
                                     <EuiTitle
-                                      className="sc-EHOje koezUx"
+                                      className="sc-gzVnrw dJnFxB"
                                     >
                                       <p
-                                        className="euiTitle euiTitle--medium sc-EHOje koezUx"
+                                        className="euiTitle euiTitle--medium sc-gzVnrw dJnFxB"
                                         data-test-subj="stat-title"
                                       >
                                         --
@@ -275,10 +275,10 @@ exports[`Stat Items Component disable charts it renders the default widget 2`] =
   >
     <Styled(EuiFlexItem)>
       <EuiFlexItem
-        className="sc-ifAKCX cFdETZ"
+        className="sc-bZQynM kpuYFd"
       >
         <div
-          className="euiFlexItem sc-ifAKCX cFdETZ"
+          className="euiFlexItem sc-bZQynM kpuYFd"
         >
           <EuiPanel
             grow={true}
@@ -355,7 +355,7 @@ exports[`Stat Items Component disable charts it renders the default widget 2`] =
                               showInspect={false}
                             >
                               <div
-                                className="sc-bxivhb fGGQew"
+                                className="sc-EHOje dUUqHB"
                               >
                                 <EuiButtonIcon
                                   aria-label="Inspect"
@@ -427,10 +427,10 @@ exports[`Stat Items Component disable charts it renders the default widget 2`] =
                     key="stat-items-field-hosts"
                   >
                     <EuiFlexItem
-                      className="sc-ifAKCX cFdETZ"
+                      className="sc-bZQynM kpuYFd"
                     >
                       <div
-                        className="euiFlexItem sc-ifAKCX cFdETZ"
+                        className="euiFlexItem sc-bZQynM kpuYFd"
                       >
                         <EuiFlexGroup
                           alignItems="center"
@@ -443,17 +443,17 @@ exports[`Stat Items Component disable charts it renders the default widget 2`] =
                             0
                             <Styled(EuiFlexItem)>
                               <EuiFlexItem
-                                className="sc-ifAKCX cFdETZ"
+                                className="sc-bZQynM kpuYFd"
                               >
                                 <div
-                                  className="euiFlexItem sc-ifAKCX cFdETZ"
+                                  className="euiFlexItem sc-bZQynM kpuYFd"
                                 >
                                   <Styled(EuiTitle)>
                                     <EuiTitle
-                                      className="sc-EHOje koezUx"
+                                      className="sc-gzVnrw dJnFxB"
                                     >
                                       <p
-                                        className="euiTitle euiTitle--medium sc-EHOje koezUx"
+                                        className="euiTitle euiTitle--medium sc-gzVnrw dJnFxB"
                                         data-test-subj="stat-title"
                                       >
                                         --
@@ -591,10 +591,10 @@ exports[`Stat Items Component rendering kpis with charts it renders the default 
   >
     <Styled(EuiFlexItem)>
       <EuiFlexItem
-        className="sc-ifAKCX cFdETZ"
+        className="sc-bZQynM kpuYFd"
       >
         <div
-          className="euiFlexItem sc-ifAKCX cFdETZ"
+          className="euiFlexItem sc-bZQynM kpuYFd"
         >
           <EuiPanel
             grow={true}
@@ -671,7 +671,7 @@ exports[`Stat Items Component rendering kpis with charts it renders the default 
                               showInspect={false}
                             >
                               <div
-                                className="sc-bxivhb fGGQew"
+                                className="sc-EHOje dUUqHB"
                               >
                                 <EuiButtonIcon
                                   aria-label="Inspect"
@@ -743,10 +743,10 @@ exports[`Stat Items Component rendering kpis with charts it renders the default 
                     key="stat-items-field-uniqueSourceIps"
                   >
                     <EuiFlexItem
-                      className="sc-ifAKCX cFdETZ"
+                      className="sc-bZQynM kpuYFd"
                     >
                       <div
-                        className="euiFlexItem sc-ifAKCX cFdETZ"
+                        className="euiFlexItem sc-bZQynM kpuYFd"
                       >
                         <EuiFlexGroup
                           alignItems="center"
@@ -760,11 +760,11 @@ exports[`Stat Items Component rendering kpis with charts it renders the default 
                               grow={false}
                             >
                               <EuiFlexItem
-                                className="sc-ifAKCX cFdETZ"
+                                className="sc-bZQynM kpuYFd"
                                 grow={false}
                               >
                                 <div
-                                  className="euiFlexItem euiFlexItem--flexGrowZero sc-ifAKCX cFdETZ"
+                                  className="euiFlexItem euiFlexItem--flexGrowZero sc-bZQynM kpuYFd"
                                 >
                                   <EuiIcon
                                     color="#DB1374"
@@ -803,17 +803,17 @@ exports[`Stat Items Component rendering kpis with charts it renders the default 
                             </Styled(EuiFlexItem)>
                             <Styled(EuiFlexItem)>
                               <EuiFlexItem
-                                className="sc-ifAKCX cFdETZ"
+                                className="sc-bZQynM kpuYFd"
                               >
                                 <div
-                                  className="euiFlexItem sc-ifAKCX cFdETZ"
+                                  className="euiFlexItem sc-bZQynM kpuYFd"
                                 >
                                   <Styled(EuiTitle)>
                                     <EuiTitle
-                                      className="sc-EHOje koezUx"
+                                      className="sc-gzVnrw dJnFxB"
                                     >
                                       <p
-                                        className="euiTitle euiTitle--medium sc-EHOje koezUx"
+                                        className="euiTitle euiTitle--medium sc-gzVnrw dJnFxB"
                                         data-test-subj="stat-title"
                                       >
                                         1,714
@@ -834,10 +834,10 @@ exports[`Stat Items Component rendering kpis with charts it renders the default 
                     key="stat-items-field-uniqueDestinationIps"
                   >
                     <EuiFlexItem
-                      className="sc-ifAKCX cFdETZ"
+                      className="sc-bZQynM kpuYFd"
                     >
                       <div
-                        className="euiFlexItem sc-ifAKCX cFdETZ"
+                        className="euiFlexItem sc-bZQynM kpuYFd"
                       >
                         <EuiFlexGroup
                           alignItems="center"
@@ -851,11 +851,11 @@ exports[`Stat Items Component rendering kpis with charts it renders the default 
                               grow={false}
                             >
                               <EuiFlexItem
-                                className="sc-ifAKCX cFdETZ"
+                                className="sc-bZQynM kpuYFd"
                                 grow={false}
                               >
                                 <div
-                                  className="euiFlexItem euiFlexItem--flexGrowZero sc-ifAKCX cFdETZ"
+                                  className="euiFlexItem euiFlexItem--flexGrowZero sc-bZQynM kpuYFd"
                                 >
                                   <EuiIcon
                                     color="#490092"
@@ -894,17 +894,17 @@ exports[`Stat Items Component rendering kpis with charts it renders the default 
                             </Styled(EuiFlexItem)>
                             <Styled(EuiFlexItem)>
                               <EuiFlexItem
-                                className="sc-ifAKCX cFdETZ"
+                                className="sc-bZQynM kpuYFd"
                               >
                                 <div
-                                  className="euiFlexItem sc-ifAKCX cFdETZ"
+                                  className="euiFlexItem sc-bZQynM kpuYFd"
                                 >
                                   <Styled(EuiTitle)>
                                     <EuiTitle
-                                      className="sc-EHOje koezUx"
+                                      className="sc-gzVnrw dJnFxB"
                                     >
                                       <p
-                                        className="euiTitle euiTitle--medium sc-EHOje koezUx"
+                                        className="euiTitle euiTitle--medium sc-gzVnrw dJnFxB"
                                         data-test-subj="stat-title"
                                       >
                                         2,359
@@ -934,12 +934,12 @@ exports[`Stat Items Component rendering kpis with charts it renders the default 
                 >
                   <Styled(EuiFlexItem)>
                     <EuiFlexItem
-                      className="sc-ifAKCX cFdETZ"
+                      className="sc-bZQynM kpuYFd"
                     >
                       <div
-                        className="euiFlexItem sc-ifAKCX cFdETZ"
+                        className="euiFlexItem sc-bZQynM kpuYFd"
                       >
-                        <Memo(mockConstructor)
+                        <Memo()
                           barChart={
                             Array [
                               Object {
@@ -975,18 +975,107 @@ exports[`Stat Items Component rendering kpis with charts it renders the default 
                               },
                             }
                           }
-                        />
+                        >
+                          <AutoSizer
+                            content={true}
+                            detectAnyWindowResize={false}
+                          >
+                            <styled.div
+                              innerRef={[Function]}
+                            >
+                              <div
+                                className="sc-bwzfXH ffMqh"
+                              >
+                                <Memo()
+                                  configs={
+                                    Object {
+                                      "axis": Object {
+                                        "xTickFormatter": [Function],
+                                      },
+                                      "series": Object {
+                                        "xScaleType": "ordinal",
+                                        "yScaleType": "linear",
+                                      },
+                                    }
+                                  }
+                                  data={
+                                    Array [
+                                      Object {
+                                        "color": "#DB1374",
+                                        "key": "uniqueSourceIps",
+                                        "value": Array [
+                                          Object {
+                                            "x": "uniqueSourceIps",
+                                            "y": "1714",
+                                          },
+                                        ],
+                                      },
+                                      Object {
+                                        "color": "#490092",
+                                        "key": "uniqueDestinationIps",
+                                        "value": Array [
+                                          Object {
+                                            "x": "uniqueDestinationIps",
+                                            "y": 2354,
+                                          },
+                                        ],
+                                      },
+                                    ]
+                                  }
+                                >
+                                  <Memo()
+                                    configs={
+                                      Object {
+                                        "axis": Object {
+                                          "xTickFormatter": [Function],
+                                        },
+                                        "series": Object {
+                                          "xScaleType": "ordinal",
+                                          "yScaleType": "linear",
+                                        },
+                                      }
+                                    }
+                                    data={
+                                      Array [
+                                        Object {
+                                          "color": "#DB1374",
+                                          "key": "uniqueSourceIps",
+                                          "value": Array [
+                                            Object {
+                                              "x": "uniqueSourceIps",
+                                              "y": "1714",
+                                            },
+                                          ],
+                                        },
+                                        Object {
+                                          "color": "#490092",
+                                          "key": "uniqueDestinationIps",
+                                          "value": Array [
+                                            Object {
+                                              "x": "uniqueDestinationIps",
+                                              "y": 2354,
+                                            },
+                                          ],
+                                        },
+                                      ]
+                                    }
+                                  />
+                                </Memo()>
+                              </div>
+                            </styled.div>
+                          </AutoSizer>
+                        </Memo()>
                       </div>
                     </EuiFlexItem>
                   </Styled(EuiFlexItem)>
                   <Styled(EuiFlexItem)>
                     <EuiFlexItem
-                      className="sc-ifAKCX cFdETZ"
+                      className="sc-bZQynM kpuYFd"
                     >
                       <div
-                        className="euiFlexItem sc-ifAKCX cFdETZ"
+                        className="euiFlexItem sc-bZQynM kpuYFd"
                       >
-                        <Memo(mockConstructor)
+                        <Memo()
                           areaChart={
                             Array [
                               Object {
@@ -1039,7 +1128,130 @@ exports[`Stat Items Component rendering kpis with charts it renders the default 
                               },
                             }
                           }
-                        />
+                        >
+                          <AutoSizer
+                            content={true}
+                            detectAnyWindowResize={false}
+                          >
+                            <styled.div
+                              innerRef={[Function]}
+                            >
+                              <div
+                                className="sc-bwzfXH ffMqh"
+                              >
+                                <Memo()
+                                  configs={
+                                    Object {
+                                      "axis": Object {
+                                        "xTickFormatter": [Function],
+                                        "yTickFormatter": [Function],
+                                      },
+                                      "series": Object {
+                                        "xScaleType": "time",
+                                        "yScaleType": "linear",
+                                      },
+                                    }
+                                  }
+                                  data={
+                                    Array [
+                                      Object {
+                                        "color": "#DB1374",
+                                        "key": "uniqueSourceIpsHistogram",
+                                        "value": Array [
+                                          Object {
+                                            "x": 1556888400000,
+                                            "y": 565975,
+                                          },
+                                          Object {
+                                            "x": 1556931600000,
+                                            "y": 1084366,
+                                          },
+                                          Object {
+                                            "x": 1556974800000,
+                                            "y": 12280,
+                                          },
+                                        ],
+                                      },
+                                      Object {
+                                        "color": "#490092",
+                                        "key": "uniqueDestinationIpsHistogram",
+                                        "value": Array [
+                                          Object {
+                                            "x": 1556888400000,
+                                            "y": 565975,
+                                          },
+                                          Object {
+                                            "x": 1556931600000,
+                                            "y": 1084366,
+                                          },
+                                          Object {
+                                            "x": 1556974800000,
+                                            "y": 12280,
+                                          },
+                                        ],
+                                      },
+                                    ]
+                                  }
+                                >
+                                  <Memo()
+                                    configs={
+                                      Object {
+                                        "axis": Object {
+                                          "xTickFormatter": [Function],
+                                          "yTickFormatter": [Function],
+                                        },
+                                        "series": Object {
+                                          "xScaleType": "time",
+                                          "yScaleType": "linear",
+                                        },
+                                      }
+                                    }
+                                    data={
+                                      Array [
+                                        Object {
+                                          "color": "#DB1374",
+                                          "key": "uniqueSourceIpsHistogram",
+                                          "value": Array [
+                                            Object {
+                                              "x": 1556888400000,
+                                              "y": 565975,
+                                            },
+                                            Object {
+                                              "x": 1556931600000,
+                                              "y": 1084366,
+                                            },
+                                            Object {
+                                              "x": 1556974800000,
+                                              "y": 12280,
+                                            },
+                                          ],
+                                        },
+                                        Object {
+                                          "color": "#490092",
+                                          "key": "uniqueDestinationIpsHistogram",
+                                          "value": Array [
+                                            Object {
+                                              "x": 1556888400000,
+                                              "y": 565975,
+                                            },
+                                            Object {
+                                              "x": 1556931600000,
+                                              "y": 1084366,
+                                            },
+                                            Object {
+                                              "x": 1556974800000,
+                                              "y": 12280,
+                                            },
+                                          ],
+                                        },
+                                      ]
+                                    }
+                                  />
+                                </Memo()>
+                              </div>
+                            </styled.div>
+                          </AutoSizer>
+                        </Memo()>
                       </div>
                     </EuiFlexItem>
                   </Styled(EuiFlexItem)>

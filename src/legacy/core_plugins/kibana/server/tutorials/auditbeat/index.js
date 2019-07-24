@@ -17,9 +17,13 @@
  * under the License.
  */
 
-import { i18n }  from '@kbn/i18n';
+import { i18n } from '@kbn/i18n';
 import { TUTORIAL_CATEGORY } from '../../../common/tutorials/tutorial_category';
-import { onPremInstructions, cloudInstructions, onPremCloudInstructions } from '../../../common/tutorials/auditbeat_instructions';
+import {
+  onPremInstructions,
+  cloudInstructions,
+  onPremCloudInstructions,
+} from '../../../common/tutorials/auditbeat_instructions';
 
 export function auditbeatSpecProvider(server, context) {
   const platforms = ['OSX', 'DEB', 'RPM', 'WINDOWS'];
@@ -28,12 +32,13 @@ export function auditbeatSpecProvider(server, context) {
     name: i18n.translate('kbn.server.tutorials.auditbeat.nameTitle', {
       defaultMessage: 'Auditbeat',
     }),
-    category: TUTORIAL_CATEGORY.SECURITY,
+    category: TUTORIAL_CATEGORY.SIEM,
     shortDescription: i18n.translate('kbn.server.tutorials.auditbeat.shortDescription', {
       defaultMessage: 'Collect audit data from your hosts.',
     }),
     longDescription: i18n.translate('kbn.server.tutorials.auditbeat.longDescription', {
-      defaultMessage: 'Use Auditbeat to collect auditing data from your hosts. These include \
+      defaultMessage:
+        'Use Auditbeat to collect auditing data from your hosts. These include \
 processes, users, logins, sockets information, file accesses, and more. \
 [Learn more]({learnMoreLink}).',
       values: {
@@ -45,21 +50,18 @@ processes, users, logins, sockets information, file accesses, and more. \
       dashboards: [],
       application: {
         path: '/app/siem',
-        label: i18n.translate(
-          'kbn.server.tutorials.auditbeat.artifacts.dashboards.linkLabel',
-          {
-            defaultMessage: 'SIEM App',
-          }
-        ),
+        label: i18n.translate('kbn.server.tutorials.auditbeat.artifacts.dashboards.linkLabel', {
+          defaultMessage: 'SIEM App',
+        }),
       },
       exportedFields: {
-        documentationUrl: '{config.docs.beats.auditbeat}/exported-fields.html'
-      }
+        documentationUrl: '{config.docs.beats.auditbeat}/exported-fields.html',
+      },
     },
     completionTimeMinutes: 10,
     previewImagePath: '/plugins/kibana/home/tutorial_resources/auditbeat/screenshot.png',
     onPrem: onPremInstructions(platforms, context),
     elasticCloud: cloudInstructions(platforms),
-    onPremElasticCloud: onPremCloudInstructions(platforms)
+    onPremElasticCloud: onPremCloudInstructions(platforms),
   };
 }

@@ -9,5 +9,5 @@ Data to associate with an incoming request. Any downstream plugin may get access
 <b>Signature:</b>
 
 ```typescript
-state: Record<string, unknown>;
+state: Record<string, any>;
 ```

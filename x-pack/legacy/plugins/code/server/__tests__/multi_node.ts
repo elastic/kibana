@@ -6,6 +6,7 @@
 
 import getPort from 'get-port';
 import { resolve } from 'path';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { Root } from 'src/core/server/root';
 
 import {
@@ -62,7 +63,6 @@ const xpackOption = {
   },
 };
 
-// Skip because of issue: https://github.com/elastic/code/issues/1387
 describe('code in multiple nodes', () => {
   const codeNodeUuid = 'c4add484-0cba-4e05-86fe-4baa112d9e53';
   const nonodeNodeUuid = '22b75e04-0e50-4647-9643-6b1b1d88beaf';

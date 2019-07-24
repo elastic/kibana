@@ -19,14 +19,15 @@ import {
   EuiIcon,
 } from '@elastic/eui';
 
+import { SnapshotDetails } from '../../../../../../../common/types';
 import { SNAPSHOT_STATE } from '../../../../../constants';
 import { useAppDependencies } from '../../../../../index';
-import { formatDate } from '../../../../../services/text';
-import { DataPlaceholder } from '../../../../../components';
+import { DataPlaceholder, FormattedDateTime } from '../../../../../components';
+import { linkToPolicy } from '../../../../../services/navigation';
 import { SnapshotState } from './snapshot_state';
 
 interface Props {
-  snapshotDetails: any;
+  snapshotDetails: SnapshotDetails;
 }
 
 export const TabSummary: React.SFC<Props> = ({ snapshotDetails }) => {
@@ -48,6 +49,7 @@ export const TabSummary: React.SFC<Props> = ({ snapshotDetails }) => {
     endTimeInMillis,
     durationInMillis,
     uuid,
+    policyName,
   } = snapshotDetails;
 
   // Only show 10 indices initially
@@ -205,7 +207,7 @@ export const TabSummary: React.SFC<Props> = ({ snapshotDetails }) => {
 
           <EuiDescriptionListDescription className="eui-textBreakWord" data-test-subj="value">
             <DataPlaceholder data={startTimeInMillis}>
-              {formatDate(startTimeInMillis)}
+              <FormattedDateTime epochMs={startTimeInMillis} />
             </DataPlaceholder>
           </EuiDescriptionListDescription>
         </EuiFlexItem>
@@ -223,7 +225,7 @@ export const TabSummary: React.SFC<Props> = ({ snapshotDetails }) => {
               <EuiLoadingSpinner size="m" />
             ) : (
               <DataPlaceholder data={endTimeInMillis}>
-                {formatDate(endTimeInMillis)}
+                <FormattedDateTime epochMs={endTimeInMillis} />
               </DataPlaceholder>
             )}
           </EuiDescriptionListDescription>
@@ -254,6 +256,21 @@ export const TabSummary: React.SFC<Props> = ({ snapshotDetails }) => {
             )}
           </EuiDescriptionListDescription>
         </EuiFlexItem>
+
+        {policyName ? (
+          <EuiFlexItem data-test-subj="policy">
+            <EuiDescriptionListTitle data-test-subj="title">
+              <FormattedMessage
+                id="xpack.snapshotRestore.snapshotDetails.createdByLabel"
+                defaultMessage="Created by"
+              />
+            </EuiDescriptionListTitle>
+
+            <EuiDescriptionListDescription className="eui-textBreakWord" data-test-subj="value">
+              <EuiLink href={linkToPolicy(policyName)}>{policyName}</EuiLink>
+            </EuiDescriptionListDescription>
+          </EuiFlexItem>
+        ) : null}
       </EuiFlexGroup>
     </EuiDescriptionList>
   );
