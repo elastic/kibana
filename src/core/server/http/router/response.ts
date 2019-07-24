@@ -37,9 +37,11 @@ type KnownKeys<T> = {
 
 type KnownHeaders = KnownKeys<IncomingHttpHeaders>;
 /**
+ * HTTP response parameters
  * @public
  */
 export interface HttpResponseOptions {
+  /** HTTP Headers with additional information about response */
   headers?: { [header in KnownHeaders]?: string | string[] } & {
     [header: string]: string | string[];
   };
@@ -51,6 +53,7 @@ export interface HttpResponseOptions {
 export type HttpResponsePayload = undefined | string | Record<string, any> | Buffer | Stream;
 
 /**
+ * HTTP response parameters
  * @public
  */
 export interface CustomResponseOptions extends HttpResponseOptions {
@@ -59,12 +62,36 @@ export interface CustomResponseOptions extends HttpResponseOptions {
 
 export const responseFactory = {
   // Success
+  /**
+   * The request has succeeded.
+   * Status code: `200`.
+   * @param payload - {@link HttpResponsePayload} payload to send to the client
+   * @param options - {@link HttpResponseOptions} configures HTTP response parameters.
+   */
   ok: <T extends HttpResponsePayload>(payload: T, options: HttpResponseOptions = {}) =>
     new KibanaResponse(200, payload, options),
+
+  /**
+   * The request has been accepted for processing.
+   * Status code: `202`.
+   * @param payload - {@link HttpResponsePayload} payload to send to the client
+   * @param options - {@link HttpResponseOptions} configures HTTP response parameters.
+   */
   accepted: <T extends HttpResponsePayload>(payload?: T, options: HttpResponseOptions = {}) =>
     new KibanaResponse(202, payload, options),
+
+  /**
+   * The server has successfully fulfilled the request and that there is no additional content to send in the response payload body.
+   * Status code: `204`.
+   * @param options - {@link HttpResponseOptions} configures HTTP response parameters.
+   */
   noContent: (options: HttpResponseOptions = {}) => new KibanaResponse(204, undefined, options),
 
+  /**
+   * Creates a response with defined status code and payload.
+   * @param payload - {@link HttpResponsePayload} payload to send to the client
+   * @param options - {@link CustomResponseOptions} configures HTTP response parameters.
+   */
   custom: <T extends HttpResponsePayload | ResponseError>(
     payload: T,
     options: CustomResponseOptions
@@ -77,28 +104,74 @@ export const responseFactory = {
   },
 
   // Redirection
+  /**
+   * Redirect to a different URI.
+   * Status code: `302`.
+   * @param url - an absolute or relative URI used to redirect the client to another resource.
+   * @param options - {@link HttpResponseOptions} configures HTTP response parameters.
+   */
   redirected: (url: string, options: HttpResponseOptions = {}) =>
     new KibanaResponse(302, url, options),
 
   // Client error
-  badRequest: <T extends ResponseError>(err: T, options: HttpResponseOptions = {}) =>
-    new KibanaResponse(400, err, options),
-  unauthorized: <T extends ResponseError>(err: T, options: HttpResponseOptions = {}) =>
-    new KibanaResponse(401, err, options),
+  /**
+   * The server cannot process the request due to something that is perceived to be a client error.
+   * Status code: `400`.
+   * @param error - {@link ResponseError} Error object containing message and other error details to pass to the client
+   * @param options - {@link HttpResponseOptions} configures HTTP response parameters.
+   */
+  badRequest: <T extends ResponseError>(error: T, options: HttpResponseOptions = {}) =>
+    new KibanaResponse(400, error, options),
 
-  forbidden: <T extends ResponseError>(err: T, options: HttpResponseOptions = {}) =>
-    new KibanaResponse(403, err, options),
-  notFound: <T extends ResponseError>(err: T, options: HttpResponseOptions = {}) =>
-    new KibanaResponse(404, err, options),
-  conflict: <T extends ResponseError>(err: T, options: HttpResponseOptions = {}) =>
-    new KibanaResponse(409, err, options),
+  /**
+   * The request cannot be applied because it lacks valid authentication credentials for the target resource.
+   * Status code: `401`.
+   * @param error - {@link ResponseError} Error object containing message and other error details to pass to the client
+   * @param options - {@link HttpResponseOptions} configures HTTP response parameters.
+   */
+  unauthorized: <T extends ResponseError>(error: T, options: HttpResponseOptions = {}) =>
+    new KibanaResponse(401, error, options),
+
+  /**
+   * Server cannot grant access to a resource.
+   * Status code: `403`.
+   * @param error - {@link ResponseError} Error object containing message and other error details to pass to the client
+   * @param options - {@link HttpResponseOptions} configures HTTP response parameters.
+   */
+  forbidden: <T extends ResponseError>(error: T, options: HttpResponseOptions = {}) =>
+    new KibanaResponse(403, error, options),
+
+  /**
+   * Server cannot find a current representation for the target resource.
+   * Status code: `404`.
+   * @param error - {@link ResponseError} Error object containing message and other error details to pass to the client
+   * @param options - {@link HttpResponseOptions} configures HTTP response parameters.
+   */
+  notFound: <T extends ResponseError>(error: T, options: HttpResponseOptions = {}) =>
+    new KibanaResponse(404, error, options),
+
+  /**
+   * The request could not be completed due to a conflict with the current state of the target resource.
+   * Status code: `409`.
+   * @param error - {@link ResponseError} Error object containing message and other error details to pass to the client
+   * @param options - {@link HttpResponseOptions} configures HTTP response parameters.
+   */
+  conflict: <T extends ResponseError>(error: T, options: HttpResponseOptions = {}) =>
+    new KibanaResponse(409, error, options),
 
   // Server error
-  internal: <T extends ResponseError>(err: T, options: HttpResponseOptions = {}) =>
-    new KibanaResponse(500, err, options),
+  /**
+   * The server encountered an unexpected condition that prevented it from fulfilling the request.
+   * Status code: `500`.
+   * @param error - {@link ResponseError} Error object containing message and other error details to pass to the client
+   * @param options - {@link HttpResponseOptions} configures HTTP response parameters.
+   */
+  internal: <T extends ResponseError>(error: T, options: HttpResponseOptions = {}) =>
+    new KibanaResponse(500, error, options),
 };
 
 /**
+ * Creates an object containing request response payload, HTTP headers, error details, and other data transmitted to the client.
  * @public
  */
 export type ResponseFactory = typeof responseFactory;

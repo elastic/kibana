@@ -9,6 +9,7 @@ import { ByteSizeValue } from '@kbn/config-schema';
 import { CallCluster } from 'src/legacy/core_plugins/elasticsearch';
 import { ConfigOptions } from 'elasticsearch';
 import { Duration } from 'moment';
+import { IncomingHttpHeaders } from 'http';
 import { ObjectType } from '@kbn/config-schema';
 import { Observable } from 'rxjs';
 import { Request } from 'hapi';
@@ -16,6 +17,7 @@ import { ResponseObject } from 'hapi';
 import { ResponseToolkit } from 'hapi';
 import { Schema } from '@kbn/config-schema';
 import { Server } from 'hapi';
+import { Stream } from 'stream';
 import { Type } from '@kbn/config-schema';
 import { TypeOf } from '@kbn/config-schema';
 import { Url } from 'url';
@@ -97,6 +99,7 @@ export interface CoreSetup {
         registerOnPreAuth: HttpServiceSetup['registerOnPreAuth'];
         registerAuth: HttpServiceSetup['registerAuth'];
         registerOnPostAuth: HttpServiceSetup['registerOnPostAuth'];
+        registerRouter: HttpServiceSetup['registerRouter'];
         basePath: HttpServiceSetup['basePath'];
         createNewServer: HttpServiceSetup['createNewServer'];
         isTlsEnabled: HttpServiceSetup['isTlsEnabled'];
@@ -106,6 +109,9 @@ export interface CoreSetup {
 // @public
 export interface CoreStart {
 }
+
+// @public
+export const createResponseError: (error: string | Error, meta?: ResponseErrorMeta | undefined) => ResponseError;
 
 // @public
 export interface DiscoveredPlugin {
@@ -384,6 +390,23 @@ export interface PluginsServiceStart {
 export type RecursiveReadonly<T> = T extends (...args: any[]) => any ? T : T extends any[] ? RecursiveReadonlyArray<T[number]> : T extends object ? Readonly<{
     [K in keyof T]: RecursiveReadonly<T[K]>;
 }> : T;
+
+// @public
+export class ResponseError extends Error {
+    constructor(error: Error | string, meta?: ResponseErrorMeta | undefined);
+    // (undocumented)
+    readonly meta?: ResponseErrorMeta | undefined;
+}
+
+// @public
+export interface ResponseErrorMeta {
+    // (undocumented)
+    data?: Record<string, any>;
+    // (undocumented)
+    docLink?: string;
+    // (undocumented)
+    errorCode?: string;
+}
 
 // @public
 export interface RouteConfigOptions {

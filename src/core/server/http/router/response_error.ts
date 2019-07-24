@@ -18,18 +18,20 @@
  */
 
 /**
+ * Additional meta-data to enhance error output or provide error details.
  * @public
  */
 export interface ResponseErrorMeta {
   data?: Record<string, any>;
-  errorCode?: string; // error code to simplify search, translations in i18n, etc.
-  docLink?: string; // link to the docs
+  errorCode?: string;
+  docLink?: string;
 }
 
 /**
+ * Kibana ResponseError object to store error details
  * @public
  */
-export class ResponseError extends Error implements ResponseError {
+export class ResponseError extends Error {
   constructor(error: Error | string, public readonly meta?: ResponseErrorMeta) {
     super(typeof error === 'string' ? error : error.message);
     Object.setPrototypeOf(this, ResponseError.prototype);
@@ -37,6 +39,9 @@ export class ResponseError extends Error implements ResponseError {
 }
 
 /**
+ * Creates Kibana ResponseError instance
+ * @param error - Error object or message to wrap
+ * @param meta - additional meta-data to pass to the client
  * @public
  */
 export const createResponseError = (error: Error | string, meta?: ResponseErrorMeta) =>
