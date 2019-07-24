@@ -80,6 +80,13 @@ export function getCreateTaskRunnerFunction({
               return;
             }
 
+            if (
+              alertSavedObject.attributes.throttle &&
+              alertInstance.isThrottled(alertSavedObject.attributes.throttle)
+            ) {
+              return;
+            }
+
             const { actionGroup, context, state } = alertInstance.getFireOptions()!;
             alertInstance.replaceMeta({ lastFired: Date.now() });
             alertInstance.resetFire();

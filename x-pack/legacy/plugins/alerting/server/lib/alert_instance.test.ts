@@ -13,6 +13,23 @@ describe('shouldFire()', () => {
   });
 });
 
+describe('isThrottled', () => {
+  test('defaults to false', () => {
+    const alertInstance = new AlertInstance();
+    expect(alertInstance.isThrottled('1m')).toEqual(false);
+  });
+
+  test('returns true when throttle expiry greater than now', () => {
+    const alertInstance = new AlertInstance({ meta: { lastFired: Date.now() - 59999 } });
+    expect(alertInstance.isThrottled('1m')).toEqual(true);
+  });
+
+  test('returns false when throttle expiry less than now', () => {
+    const alertInstance = new AlertInstance({ meta: { lastFired: Date.now() - 60000 } });
+    expect(alertInstance.isThrottled('1m')).toEqual(false);
+  });
+});
+
 describe('getFireOptions()', () => {
   test('defaults to undefined', () => {
     const alertInstance = new AlertInstance();

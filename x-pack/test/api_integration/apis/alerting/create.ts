@@ -62,6 +62,7 @@ export default function createAlertTests({ getService }: KibanaFunctionalTestDef
             alertTypeId: 'test.noop',
             alertTypeParams: {},
             interval: '10s',
+            throttle: '1m',
             scheduledTaskId: resp.body.scheduledTaskId,
           });
           expect(typeof resp.body.scheduledTaskId).to.be('string');
@@ -157,6 +158,24 @@ export default function createAlertTests({ getService }: KibanaFunctionalTestDef
         validation: {
           source: 'payload',
           keys: ['interval', 'interval', 'interval', 'interval'],
+        },
+      });
+    });
+
+    it('should return 400 when throttle is wrong syntax', async () => {
+      const { body: error } = await supertest
+        .post('/api/alert')
+        .set('kbn-xsrf', 'foo')
+        .send(getTestAlertData({ throttle: '10x' }))
+        .expect(400);
+      expect(error).to.eql({
+        statusCode: 400,
+        error: 'Bad Request',
+        message:
+          'child "throttle" fails because ["throttle" with value "10x" fails to match the seconds (5s) pattern, "throttle" with value "10x" fails to match the minutes (5m) pattern, "throttle" with value "10x" fails to match the hours (5h) pattern, "throttle" with value "10x" fails to match the days (5d) pattern]',
+        validation: {
+          source: 'payload',
+          keys: ['throttle', 'throttle', 'throttle', 'throttle'],
         },
       });
     });

@@ -31,6 +31,9 @@
       },
       "scheduledTaskId": {
         "type": "keyword"
+      },
+      "throttle": {
+        "type": "keyword"
       }
     }
   }

@@ -18,6 +18,7 @@ interface UpdateRequest extends Hapi.Request {
     interval: string;
     actions: AlertAction[];
     alertTypeParams: Record<string, any>;
+    throttle?: string;
   };
 }
 
@@ -32,6 +33,14 @@ export function updateAlertRoute(server: Hapi.Server) {
         },
         payload: Joi.object()
           .keys({
+            throttle: Joi.alternatives()
+              .try(
+                Joi.string().regex(SECONDS_REGEX, 'seconds'),
+                Joi.string().regex(MINUTES_REGEX, 'minutes'),
+                Joi.string().regex(HOURS_REGEX, 'hours'),
+                Joi.string().regex(DAYS_REGEX, 'days')
+              )
+              .default(null),
             interval: Joi.alternatives()
               .try(
                 Joi.string()

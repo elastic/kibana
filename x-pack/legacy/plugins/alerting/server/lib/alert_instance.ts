@@ -5,6 +5,7 @@
  */
 
 import { State, Context } from '../types';
+import { parseDuration } from './parse_duration';
 
 interface ConstructorOptions {
   state?: Record<string, any>;
@@ -23,6 +24,14 @@ export class AlertInstance {
 
   shouldFire() {
     return this.fireOptions !== undefined;
+  }
+
+  isThrottled(duration: string) {
+    const throttle = parseDuration(duration);
+    if (!this.meta.lastFired) {
+      return false;
+    }
+    return this.meta.lastFired + throttle > Date.now();
   }
 
   getFireOptions() {

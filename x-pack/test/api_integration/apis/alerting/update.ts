@@ -45,6 +45,7 @@ export default function createUpdateTests({ getService }: KibanaFunctionalTestDe
             foo: true,
           },
           interval: '12s',
+          throttle: '2m',
           actions: [
             {
               group: 'default',
@@ -64,6 +65,7 @@ export default function createUpdateTests({ getService }: KibanaFunctionalTestDe
               foo: true,
             },
             interval: '12s',
+            throttle: '2m',
             actions: [
               {
                 group: 'default',
@@ -179,6 +181,24 @@ export default function createUpdateTests({ getService }: KibanaFunctionalTestDe
         validation: {
           source: 'payload',
           keys: ['interval', 'interval', 'interval', 'interval', 'alertTypeId'],
+        },
+      });
+    });
+
+    it('should return 400 when throttle is wrong syntax', async () => {
+      const { body: error } = await supertest
+        .put(`/api/alert/${createdAlert.id}`)
+        .set('kbn-xsrf', 'foo')
+        .send(getTestAlertData({ throttle: '10x', enabled: undefined }))
+        .expect(400);
+      expect(error).to.eql({
+        statusCode: 400,
+        error: 'Bad Request',
+        message:
+          'child "throttle" fails because ["throttle" with value "10x" fails to match the seconds pattern, "throttle" with value "10x" fails to match the minutes pattern, "throttle" with value "10x" fails to match the hours pattern, "throttle" with value "10x" fails to match the days pattern]. "alertTypeId" is not allowed',
+        validation: {
+          source: 'payload',
+          keys: ['throttle', 'throttle', 'throttle', 'throttle', 'alertTypeId'],
         },
       });
     });

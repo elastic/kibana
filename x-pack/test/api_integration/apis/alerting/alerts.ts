@@ -141,5 +141,86 @@ export default function alertTests({ getService }: KibanaFunctionalTestDefaultPr
         source: 'action:test.index-record',
       });
     });
+
+    it('should throttle alerts', async () => {
+      const { body: createdAlert } = await supertest
+        .post('/api/alert')
+        .set('kbn-xsrf', 'foo')
+        .send(
+          getTestAlertData({
+            interval: '1s',
+            throttle: '1m',
+            alertTypeId: 'test.always-firing',
+            alertTypeParams: {
+              index: esTestIndexName,
+              reference: 'create-test-2',
+            },
+            actions: [
+              {
+                group: 'default',
+                id: ES_ARCHIVER_ACTION_ID,
+                params: {
+                  index: esTestIndexName,
+                  reference: 'create-test-2',
+                  message:
+                    'instanceContextValue: {{context.instanceContextValue}}, instanceStateValue: {{state.instanceStateValue}}',
+                },
+              },
+            ],
+          })
+        )
+        .expect(200);
+      createdAlertIds.push(createdAlert.id);
+
+      // Wait until alerts fired 3 times to ensure actions had chance to fire twice
+      await retry.tryForTime(20000, async () => {
+        const firedAlertsResult = await es.search({
+          index: esTestIndexName,
+          body: {
+            query: {
+              bool: {
+                must: [
+                  {
+                    term: {
+                      source: 'alert:test.always-firing',
+                    },
+                  },
+                  {
+                    term: {
+                      reference: 'create-test-2',
+                    },
+                  },
+                ],
+              },
+            },
+          },
+        });
+        expect(firedAlertsResult.hits.total.value).to.eql(3);
+      });
+
+      const firedActionsResult = await es.search({
+        index: esTestIndexName,
+        body: {
+          query: {
+            bool: {
+              must: [
+                {
+                  term: {
+                    source: 'action:test.index-record',
+                  },
+                },
+                {
+                  term: {
+                    reference: 'create-test-2',
+                  },
+                },
+              ],
+            },
+          },
+        },
+      });
+
+      expect(firedActionsResult.hits.total.value).to.eql(1);
+    });
   });
 }

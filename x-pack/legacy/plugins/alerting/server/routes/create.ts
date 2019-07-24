@@ -16,6 +16,7 @@ interface ScheduleRequest extends Hapi.Request {
     interval: string;
     actions: AlertAction[];
     alertTypeParams: Record<string, any>;
+    throttle?: string;
   };
 }
 
@@ -32,6 +33,14 @@ export function createAlertRoute(server: Hapi.Server) {
           .keys({
             enabled: Joi.boolean().default(true),
             alertTypeId: Joi.string().required(),
+            throttle: Joi.alternatives()
+              .try(
+                Joi.string().regex(SECONDS_REGEX, 'seconds (5s)'),
+                Joi.string().regex(MINUTES_REGEX, 'minutes (5m)'),
+                Joi.string().regex(HOURS_REGEX, 'hours (5h)'),
+                Joi.string().regex(DAYS_REGEX, 'days (5d)')
+              )
+              .default(null),
             interval: Joi.alternatives()
               .try(
                 Joi.string()
