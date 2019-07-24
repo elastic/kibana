@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Joi from 'joi';
+import { schema } from '@kbn/config-schema';
 import { AlertExecutorOptions } from '../types';
 import { SavedObjectsClientMock } from '../../../../../../src/core/server/mocks';
 import { getCreateTaskRunnerFunction } from './get_create_task_runner_function';
@@ -173,17 +173,15 @@ test('validates params before executing the alert type', async () => {
     alertType: {
       ...getCreateTaskRunnerFunctionParams.alertType,
       validate: {
-        params: Joi.object()
-          .keys({
-            param1: Joi.string().required(),
-          })
-          .required(),
+        params: schema.object({
+          param1: schema.string(),
+        }),
       },
     },
   });
   savedObjectsClient.get.mockResolvedValueOnce(mockedAlertTypeSavedObject);
   const runner = createTaskRunner({ taskInstance: mockedTaskInstance });
   await expect(runner.run()).rejects.toThrowErrorMatchingInlineSnapshot(
-    `"alertTypeParams invalid: child \\"param1\\" fails because [\\"param1\\" is required]"`
+    `"alertTypeParams invalid: [param1]: expected value of type [string] but got [undefined]"`
   );
 });
