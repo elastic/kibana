@@ -63,6 +63,7 @@ export const useLogHighlightsState = ({
   );
 
   const {
+    currentHighlightKey,
     hasPreviousHighlight,
     hasNextHighlight,
     goToPreviousHighlight,
@@ -86,6 +87,7 @@ export const useLogHighlightsState = ({
     loadLogEntryHighlightsRequest,
     loadLogSummaryHighlightsRequest,
     setVisibleMidpoint,
+    currentHighlightKey,
     hasPreviousHighlight,
     hasNextHighlight,
     goToPreviousHighlight,

@@ -7,17 +7,17 @@
 import React, { Fragment } from 'react';
 import {
   EuiButtonIcon,
-  EuiText,
   EuiPagination,
   EuiSelect,
   EuiIconTip,
   EuiHorizontalRule,
   EuiFlexGroup,
-  EuiFlexItem
+  EuiFlexItem,
+  EuiTextColor
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FeatureProperties } from './feature_properties';
-
+import { FormattedMessage } from '@kbn/i18n/react';
 
 const ALL_LAYERS = '_ALL_LAYERS_';
 const DEFAULT_PAGE_NUMBER = 0;
@@ -48,7 +48,6 @@ export class FeatureTooltip extends React.Component {
   }
 
   _onLayerChange = (e) => {
-
     const layerId = e.target.value;
     if (this.state.layerIdFilter === layerId) {
       return;
@@ -70,13 +69,11 @@ export class FeatureTooltip extends React.Component {
   };
 
   _loadUniqueLayers = async () => {
-
     if (this._prevFeatures === this.props.features) {
       return;
     }
 
     this._prevFeatures = this.props.features;
-
 
     const countByLayerId = new Map();
     for (let i = 0; i < this.props.features.length; i++) {
@@ -115,7 +112,6 @@ export class FeatureTooltip extends React.Component {
     }
   };
 
-
   _renderProperties(features) {
     const feature = features[this.state.pageNumber];
     if (!feature) {
@@ -128,6 +124,7 @@ export class FeatureTooltip extends React.Component {
         loadFeatureProperties={this.props.loadFeatureProperties}
         showFilterButtons={this.props.showFilterButtons}
         onCloseTooltip={this._onCloseTooltip}
+        addFilters={this.props.addFilters}
       />
     );
   }
@@ -159,6 +156,7 @@ export class FeatureTooltip extends React.Component {
         onChange={this._onLayerChange}
         valueOfSelected={this.state.layerIdFilter}
         compressed
+        fullWidth
         aria-label={i18n.translate('xpack.maps.tooltip.layerFilterLabel', {
           defaultMessage: 'Filter results by layer'
         })}
@@ -167,7 +165,6 @@ export class FeatureTooltip extends React.Component {
   }
 
   _renderHeader() {
-
     if (!this.props.isLocked) {
       return null;
     }
@@ -176,8 +173,8 @@ export class FeatureTooltip extends React.Component {
       <EuiHorizontalRule margin="xs"/> : null;
     return (
       <Fragment>
-        <EuiFlexGroup justifyContent="spaceBetween">
-          <EuiFlexItem grow={false}>
+        <EuiFlexGroup alignItems="center" gutterSize="s">
+          <EuiFlexItem>
             {this._renderLayerFilterBox()}
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
@@ -190,7 +187,6 @@ export class FeatureTooltip extends React.Component {
   }
 
   _renderFooter(filteredFeatures) {
-
     if (filteredFeatures.length === 1) {
       return null;
     }
@@ -216,7 +212,6 @@ export class FeatureTooltip extends React.Component {
     );
   }
 
-
   _onPageChange = (pageNumber) => {
     this.setState({
       pageNumber: pageNumber,
@@ -234,9 +229,17 @@ export class FeatureTooltip extends React.Component {
   }
 
   _renderPagination(filteredFeatures) {
-
     const pageNumberReadout = (
-      <EuiText size="s"><b>{(this.state.pageNumber + 1)}</b> of <b>{filteredFeatures.length}</b></EuiText>
+      <EuiTextColor color="subdued">
+        <FormattedMessage
+          id="xpack.maps.tooltip.pageNumerText"
+          defaultMessage="{pageNumber} of {total} features"
+          values={{
+            pageNumber: this.state.pageNumber + 1,
+            total: filteredFeatures.length
+          }}
+        />
+      </EuiTextColor>
     );
 
     const cycleArrows = (this.props.isLocked) ? (<EuiPagination
@@ -270,7 +273,6 @@ export class FeatureTooltip extends React.Component {
         </EuiFlexGroup>
       </Fragment>
     );
-
   }
 
   render() {
@@ -284,4 +286,3 @@ export class FeatureTooltip extends React.Component {
     );
   }
 }
-

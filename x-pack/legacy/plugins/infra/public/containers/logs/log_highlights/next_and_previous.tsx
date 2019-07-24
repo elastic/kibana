@@ -7,8 +7,12 @@
 import { isNumber } from 'lodash';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
-import { TimeKey } from '../../../../common/time';
-import { getLogEntryIndexAtTime, getLogEntryIndexBeforeTime } from '../../../utils/log_entry';
+import { TimeKey, UniqueTimeKey } from '../../../../common/time';
+import {
+  getLogEntryIndexAtTime,
+  getLogEntryIndexBeforeTime,
+  getUniqueLogEntryKey,
+} from '../../../utils/log_entry';
 import { LogEntryHighlights } from './log_entry_highlights';
 
 export const useNextAndPrevious = ({
@@ -22,7 +26,7 @@ export const useNextAndPrevious = ({
   logEntryHighlights: LogEntryHighlights | undefined;
   visibleMidpoint: TimeKey | null;
 }) => {
-  const [currentTimeKey, setCurrentTimeKey] = useState<TimeKey | null>(null);
+  const [currentTimeKey, setCurrentTimeKey] = useState<UniqueTimeKey | null>(null);
 
   const entries = useMemo(
     // simplification, because we only support one highlight phrase for now
@@ -46,7 +50,7 @@ export const useNextAndPrevious = ({
       const initialIndex = visibleMidpoint
         ? clampValue(getLogEntryIndexBeforeTime(entries, visibleMidpoint), 0, entries.length - 1)
         : 0;
-      const initialTimeKey = entries[initialIndex].key;
+      const initialTimeKey = getUniqueLogEntryKey(entries[initialIndex]);
       setCurrentTimeKey(initialTimeKey);
     }
   }, [currentTimeKey, entries, setCurrentTimeKey]);
@@ -75,7 +79,7 @@ export const useNextAndPrevious = ({
   const goToPreviousHighlight = useCallback(() => {
     if (entries.length && isNumber(indexOfCurrentTimeKey)) {
       const previousIndex = indexOfCurrentTimeKey - 1;
-      const entryTimeKey = entries[previousIndex].key;
+      const entryTimeKey = getUniqueLogEntryKey(entries[previousIndex]);
       setCurrentTimeKey(entryTimeKey);
     }
   }, [indexOfCurrentTimeKey, entries]);
@@ -83,12 +87,13 @@ export const useNextAndPrevious = ({
   const goToNextHighlight = useCallback(() => {
     if (entries.length > 0 && isNumber(indexOfCurrentTimeKey)) {
       const nextIndex = indexOfCurrentTimeKey + 1;
-      const entryTimeKey = entries[nextIndex].key;
+      const entryTimeKey = getUniqueLogEntryKey(entries[nextIndex]);
       setCurrentTimeKey(entryTimeKey);
     }
   }, [indexOfCurrentTimeKey, entries]);
 
   return {
+    currentHighlightKey: currentTimeKey,
     hasPreviousHighlight,
     hasNextHighlight,
     goToPreviousHighlight,

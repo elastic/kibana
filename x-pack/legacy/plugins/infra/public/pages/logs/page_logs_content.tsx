@@ -82,6 +82,7 @@ export const LogsPageLogsContent: React.FunctionComponent = () => {
           {({ isAutoReloading, jumpToTargetPosition, reportVisiblePositions, targetPosition }) => (
             <WithStreamItems initializeOnMount={!isAutoReloading}>
               {({
+                currentHighlightKey,
                 hasMoreAfterEnd,
                 hasMoreBeforeStart,
                 isLoadingMore,
@@ -109,6 +110,7 @@ export const LogsPageLogsContent: React.FunctionComponent = () => {
                   setFlyoutItem={setFlyoutId}
                   setFlyoutVisibility={setFlyoutVisibility}
                   highlightedItem={surroundingLogsId ? surroundingLogsId : null}
+                  currentHighlightKey={currentHighlightKey}
                 />
               )}
             </WithStreamItems>
