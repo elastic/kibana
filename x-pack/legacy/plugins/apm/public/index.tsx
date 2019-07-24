@@ -22,7 +22,6 @@ import template from './templates/index.html';
 import { CoreProvider } from './context/CoreContext';
 
 const { core } = npStart;
-// console.log(npStart);
 
 // render APM feedback link in global help menu
 core.chrome.setHelpExtension(domElement => {
