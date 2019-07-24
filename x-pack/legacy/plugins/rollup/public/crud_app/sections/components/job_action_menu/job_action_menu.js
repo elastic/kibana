@@ -101,9 +101,7 @@ class JobActionMenuUi extends Component {
       items.push({
         name: intl.formatMessage({
           id: 'xpack.rollupJobs.jobActionMenu.cloneJobLabel',
-          defaultMessage: 'Clone {isSingleSelection, plural, one {job} other {jobs}}',
-        }, {
-          isSingleSelection
+          defaultMessage: 'Clone job',
         }),
         icon: <EuiIcon type="copy" />,
         onClick: () => {
