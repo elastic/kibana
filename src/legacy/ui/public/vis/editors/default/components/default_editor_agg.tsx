@@ -121,6 +121,18 @@ function DefaultEditorAgg({
   const renderAggButtons = () => {
     const actionIcons = [];
 
+    if (showError) {
+      actionIcons.push({
+        id: 'hasErrors',
+        color: 'danger',
+        type: 'alert',
+        tooltip: i18n.translate('common.ui.vis.editors.agg.errorsAriaLabel', {
+          defaultMessage: 'Aggregation has errors',
+        }),
+        dataTestSubj: 'hasErrorsAggregationIcon',
+      });
+    }
+
     if (agg.enabled && isRemovable) {
       actionIcons.push({
         id: 'disableAggregation',
@@ -202,28 +214,9 @@ function DefaultEditorAgg({
   };
 
   const buttonContent = (
-    <EuiFlexGroup gutterSize="xs" alignItems="baseline" responsive={false}>
-      <EuiFlexItem grow={false}>{agg.schema.title}</EuiFlexItem>
-      <EuiFlexItem className="eui-textTruncate">
-        {showDescription && (
-          <EuiText size="s" color="subdued">
-            <p className="eui-textTruncate">{aggDescription}</p>
-          </EuiText>
-        )}
-        {showError && (
-          <EuiTextColor
-            color="danger"
-            aria-label={i18n.translate('common.ui.vis.editors.agg.errorsAriaLabel', {
-              defaultMessage: 'Aggregation has errors',
-            })}
-          >
-            <h6>
-              <FormattedMessage id="common.ui.vis.editors.agg.errorsText" defaultMessage="Errors" />
-            </h6>
-          </EuiTextColor>
-        )}
-      </EuiFlexItem>
-    </EuiFlexGroup>
+    <>
+      {agg.schema.title} {showDescription && <span>{aggDescription}</span>}
+    </>
   );
 
   return (
@@ -231,6 +224,8 @@ function DefaultEditorAgg({
       id={`visEditorAggAccordion${agg.id}`}
       initialIsOpen={isEditorOpen}
       buttonContent={buttonContent}
+      buttonClassName="eui-textTruncate"
+      buttonContentClassName="visEditorSidebar__aggGroupAccordionButtonContent eui-textTruncate"
       className="visEditorSidebar__section visEditorSidebar__collapsible visEditorSidebar__collapsible--marginBottom"
       aria-label={i18n.translate('common.ui.vis.editors.agg.toggleEditorButtonAriaLabel', {
         defaultMessage: 'Toggle {schema} editor',

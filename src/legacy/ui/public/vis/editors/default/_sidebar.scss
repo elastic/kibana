@@ -219,7 +219,11 @@
   margin-top: $euiSizeS;
   margin-bottom: $euiSizeS;
 }
-// prevent hiding a part of the border of accordion caret icon on focus
-.visEditorSidebar__aggGroup .euiAccordion__button {
-  padding-left: 2px;
+
+.visEditorSidebar__aggGroupAccordionButtonContent {
+  font-size: $euiFontSizeS;
+
+   span {
+    color: $euiColorDarkShade;
+  }
 }
