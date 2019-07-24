@@ -17,29 +17,16 @@
  * under the License.
  */
 
-import { Readable } from 'stream';
-import { SavedObjectsClientContract } from '../';
 import { collectSavedObjects } from './collect_saved_objects';
 import { createObjectsFilter } from './create_objects_filter';
 import { extractErrors } from './extract_errors';
 import { splitOverwrites } from './split_overwrites';
-import { SavedObjectsImportError, Retry } from './types';
+import {
+  SavedObjectsImportError,
+  SavedObjectsImportResponse,
+  SavedObjectsResolveImportErrorsOptions,
+} from './types';
 import { validateReferences } from './validate_references';
-
-interface ResolveImportErrorsOptions {
-  readStream: Readable;
-  objectLimit: number;
-  savedObjectsClient: SavedObjectsClientContract;
-  retries: Retry[];
-  supportedTypes: string[];
-  namespace?: string;
-}
-
-interface ImportResponse {
-  success: boolean;
-  successCount: number;
-  errors?: SavedObjectsImportError[];
-}
 
 export async function resolveImportErrors({
   readStream,
@@ -48,7 +35,7 @@ export async function resolveImportErrors({
   savedObjectsClient,
   supportedTypes,
   namespace,
-}: ResolveImportErrorsOptions): Promise<ImportResponse> {
+}: SavedObjectsResolveImportErrorsOptions): Promise<SavedObjectsImportResponse> {
   let successCount = 0;
   let errorAccumulator: SavedObjectsImportError[] = [];
   const filter = createObjectsFilter(retries);

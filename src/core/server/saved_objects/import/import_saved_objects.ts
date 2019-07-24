@@ -17,27 +17,14 @@
  * under the License.
  */
 
-import { Readable } from 'stream';
 import { collectSavedObjects } from './collect_saved_objects';
 import { extractErrors } from './extract_errors';
-import { SavedObjectsImportError } from './types';
+import {
+  SavedObjectsImportError,
+  SavedObjectsImportResponse,
+  SavedObjectsImportOptions,
+} from './types';
 import { validateReferences } from './validate_references';
-import { SavedObjectsClientContract } from '../';
-
-export interface ImportSavedObjectsOptions {
-  readStream: Readable;
-  objectLimit: number;
-  overwrite: boolean;
-  savedObjectsClient: SavedObjectsClientContract;
-  supportedTypes: string[];
-  namespace?: string;
-}
-
-export interface ImportResponse {
-  success: boolean;
-  successCount: number;
-  errors?: SavedObjectsImportError[];
-}
 
 export async function importSavedObjects({
   readStream,
@@ -46,7 +33,7 @@ export async function importSavedObjects({
   savedObjectsClient,
   supportedTypes,
   namespace,
-}: ImportSavedObjectsOptions): Promise<ImportResponse> {
+}: SavedObjectsImportOptions): Promise<SavedObjectsImportResponse> {
   let errorAccumulator: SavedObjectsImportError[] = [];
 
   // Get the objects to import

@@ -29,6 +29,7 @@ import {
   ScopedSavedObjectsClientProvider,
   getSortedObjectsForExport,
   importSavedObjects,
+  resolveImportErrors,
 } from '../../../core/server/saved_objects';
 import { getRootPropertiesObjects } from '../../../core/server/saved_objects/mappings';
 import { SavedObjectsManagement } from '../../../core/server/saved_objects/management';
@@ -148,6 +149,7 @@ export function savedObjectsMixin(kbnServer, server) {
       provider.addClientWrapperFactory(...args),
     importExport: {
       importSavedObjects,
+      resolveImportErrors,
       getSortedObjectsForExport,
     },
     schema,

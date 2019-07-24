@@ -21,8 +21,9 @@ import { Readable } from 'stream';
 import { ScopedSavedObjectsClientProvider } from './lib';
 import { SavedObjectsClient } from './saved_objects_client';
 import { ExportObjectsOptions } from '../export';
-import { ImportSavedObjectsOptions, ImportResponse } from '../import';
+import { SavedObjectsImportOptions, SavedObjectsImportResponse } from '../import';
 import { SavedObjectsSchema } from '../schema';
+import { SavedObjectsResolveImportErrorsOptions } from '../import/types';
 
 /**
  * @public
@@ -38,7 +39,10 @@ export interface SavedObjectsService<Request = any> {
   schema: SavedObjectsSchema;
   getSavedObjectsRepository(...rest: any[]): any;
   importExport: {
-    importSavedObjects(options: ImportSavedObjectsOptions): Promise<ImportResponse>;
+    importSavedObjects(options: SavedObjectsImportOptions): Promise<SavedObjectsImportResponse>;
+    resolveImportErrors(
+      options: SavedObjectsResolveImportErrorsOptions
+    ): Promise<SavedObjectsImportResponse>;
     getSortedObjectsForExport(options: ExportObjectsOptions): Promise<Readable>;
   };
 }

@@ -17,6 +17,9 @@
  * under the License.
  */
 
+import { Readable } from 'stream';
+import { SavedObjectsClientContract } from '../service';
+
 export interface Retry {
   type: string;
   id: string;
@@ -59,4 +62,28 @@ export interface SavedObjectsImportError {
   type: string;
   title?: string;
   error: ConflictError | UnsupportedTypeError | MissingReferencesError | UnknownError;
+}
+
+export interface SavedObjectsImportResponse {
+  success: boolean;
+  successCount: number;
+  errors?: SavedObjectsImportError[];
+}
+
+export interface SavedObjectsImportOptions {
+  readStream: Readable;
+  objectLimit: number;
+  overwrite: boolean;
+  savedObjectsClient: SavedObjectsClientContract;
+  supportedTypes: string[];
+  namespace?: string;
+}
+
+export interface SavedObjectsResolveImportErrorsOptions {
+  readStream: Readable;
+  objectLimit: number;
+  savedObjectsClient: SavedObjectsClientContract;
+  retries: Retry[];
+  supportedTypes: string[];
+  namespace?: string;
 }

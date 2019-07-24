@@ -673,7 +673,8 @@ export interface SavedObjectsService<Request = any> {
     getScopedSavedObjectsClient: ScopedSavedObjectsClientProvider<Request>['getClient'];
     // (undocumented)
     importExport: {
-        importSavedObjects(options: ImportSavedObjectsOptions): Promise<ImportResponse>;
+        importSavedObjects(options: SavedObjectsImportOptions): Promise<SavedObjectsImportResponse>;
+        resolveImportErrors(options: SavedObjectsResolveImportErrorsOptions): Promise<SavedObjectsImportResponse>;
         getSortedObjectsForExport(options: ExportObjectsOptions): Promise<Readable>;
     };
     // Warning: (ae-incompatible-release-tags) The symbol "SavedObjectsClient" is marked as @public, but its signature references "SavedObjectsClient" which is marked as @internal
@@ -728,8 +729,9 @@ export interface SessionStorageFactory<T> {
 // 
 // src/core/server/plugins/plugin_context.ts:34:10 - (ae-forgotten-export) The symbol "EnvironmentMode" needs to be exported by the entry point index.d.ts
 // src/core/server/plugins/plugins_service.ts:37:5 - (ae-forgotten-export) The symbol "DiscoveredPluginInternal" needs to be exported by the entry point index.d.ts
-// src/core/server/saved_objects/service/index.ts:41:5 - (ae-forgotten-export) The symbol "ImportSavedObjectsOptions" needs to be exported by the entry point index.d.ts
-// src/core/server/saved_objects/service/index.ts:41:5 - (ae-forgotten-export) The symbol "ImportResponse" needs to be exported by the entry point index.d.ts
-// src/core/server/saved_objects/service/index.ts:42:5 - (ae-forgotten-export) The symbol "ExportObjectsOptions" needs to be exported by the entry point index.d.ts
+// src/core/server/saved_objects/service/index.ts:42:5 - (ae-forgotten-export) The symbol "SavedObjectsImportOptions" needs to be exported by the entry point index.d.ts
+// src/core/server/saved_objects/service/index.ts:42:5 - (ae-forgotten-export) The symbol "SavedObjectsImportResponse" needs to be exported by the entry point index.d.ts
+// src/core/server/saved_objects/service/index.ts:43:5 - (ae-forgotten-export) The symbol "SavedObjectsResolveImportErrorsOptions" needs to be exported by the entry point index.d.ts
+// src/core/server/saved_objects/service/index.ts:46:5 - (ae-forgotten-export) The symbol "ExportObjectsOptions" needs to be exported by the entry point index.d.ts
 
 ```

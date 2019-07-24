@@ -23,6 +23,6 @@ export { SavedObjectsSchema } from './schema';
 
 export { SavedObjectsManagement } from './management';
 
-export { importSavedObjects, SavedObjectsImportError } from './import';
+export { importSavedObjects, SavedObjectsImportError, resolveImportErrors } from './import';
 
 export { getSortedObjectsForExport } from './export';
