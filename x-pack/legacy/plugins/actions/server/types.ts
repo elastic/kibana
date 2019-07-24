@@ -5,6 +5,7 @@
  */
 
 import { SavedObjectsClientContract } from 'src/core/server';
+import { TaskDefinition } from '../../task_manager';
 import { ActionTypeRegistry } from './action_type_registry';
 
 export type WithoutQueryAndParams<T> = Pick<T, Exclude<keyof T, 'query' | 'params'>>;
@@ -54,6 +55,8 @@ export interface ActionType {
   id: string;
   name: string;
   unencryptedAttributes: string[];
+  maxAttempts?: number;
+  getRetryDelay?: TaskDefinition['getRetryDelay'];
   validate?: {
     params?: { validate: (object: any) => any };
     config?: { validate: (object: any) => any };

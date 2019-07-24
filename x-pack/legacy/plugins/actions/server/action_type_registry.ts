@@ -61,6 +61,8 @@ export class ActionTypeRegistry {
       [`actions:${actionType.id}`]: {
         title: actionType.name,
         type: `actions:${actionType.id}`,
+        maxAttempts: actionType.maxAttempts || 1,
+        getRetryDelay: actionType.getRetryDelay,
         createTaskRunner: this.taskRunCreatorFunction,
       },
     });

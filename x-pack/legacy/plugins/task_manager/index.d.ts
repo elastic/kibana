@@ -5,4 +5,4 @@
  */
 
 export { TaskManager } from './types';
-export { TaskInstance, ConcreteTaskInstance, TaskRunCreatorFunction } from './task';
+export { TaskDefinition, TaskInstance, ConcreteTaskInstance, TaskRunCreatorFunction } from './task';

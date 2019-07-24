@@ -58,6 +58,7 @@ export class AlertTypeRegistry {
       [`alerting:${alertType.id}`]: {
         title: alertType.name,
         type: `alerting:${alertType.id}`,
+        getRetryDelay: alertType.getRetryDelay,
         createTaskRunner: getCreateTaskRunnerFunction({
           alertType,
           getServices: this.getServices,
