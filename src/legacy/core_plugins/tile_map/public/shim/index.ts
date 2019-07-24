@@ -17,11 +17,4 @@
  * under the License.
  */
 
-import tileMapTemplate from './tile_map_vis_params.html';
-
-export function TileMapVisParams() {
-  return {
-    restrict: 'E',
-    template: tileMapTemplate,
-  };
-}
+export * from './legacy_dependencies_plugin';

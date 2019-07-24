@@ -17,21 +17,22 @@
  * under the License.
  */
 
-import { resolve } from 'path';
-import  * as emsClient  from './common/ems_client';
+import { once } from 'lodash';
+// @ts-ignore
+import { uiModules } from 'ui/modules';
 
-export default function (kibana) {
+import 'ui/vis/map/service_settings';
+import 'plugins/kbn_vislib_vis_types/controls/vislib_basic_options';
 
-  return new kibana.Plugin({
-    uiExports: {
-      visTypes: ['plugins/tile_map/tile_map_vis'],
-      interpreter: ['plugins/tile_map/tilemap_fn'],
-      styleSheetPaths: resolve(__dirname, 'public/index.scss'),
-    },
-    init(server) {
-      server.expose({
-        ems_client: emsClient
-      });
-    }
-  });
-}
+// @ts-ignore
+import { TileMapVisParams } from '../editors/tile_map_vis_params';
+// @ts-ignore
+import { WmsOptions } from '../editors/wms_options';
+
+/** @internal */
+export const initTileMapLegacyModule = once((): void => {
+  uiModules
+    .get('kibana/tile_map', ['kibana'])
+    .directive('tileMapVisParams', TileMapVisParams)
+    .directive('wmsOptions', WmsOptions);
+});

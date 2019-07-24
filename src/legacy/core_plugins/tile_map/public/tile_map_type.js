@@ -18,23 +18,21 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import 'plugins/kbn_vislib_vis_types/controls/vislib_basic_options';
-import './editors/tile_map_vis_params';
+
 import { supports } from 'ui/utils/supports';
-import { VisFactoryProvider } from 'ui/vis/vis_factory';
-import { CoordinateMapsVisualizationProvider } from './coordinate_maps_visualization';
 import { Schemas } from 'ui/vis/editors/default/schemas';
-import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
 import { Status } from 'ui/vis/update_status';
 import { truncatedColorMaps } from 'ui/vislib/components/color/truncated_colormaps';
 import { convertToGeoJson } from 'ui/vis/map/convert_to_geojson';
 
-VisTypesRegistryProvider.register(function TileMapVisType(Private, config) {
+import { createTileMapVisualization } from './tile_map_visualization';
+import { visFactory } from '../../visualizations/public';
 
-  const VisFactory = Private(VisFactoryProvider);
-  const CoordinateMapsVisualization = Private(CoordinateMapsVisualizationProvider);
+export function createTileMapTypeDefinition(dependencies) {
+  const CoordinateMapsVisualization = createTileMapVisualization(dependencies);
+  const { uiSettings } = dependencies;
 
-  return VisFactory.createBaseVisualization({
+  return visFactory.createBaseVisualization({
     name: 'tile_map',
     title: i18n.translate('tileMap.vis.mapTitle', {
       defaultMessage: 'Coordinate Map',
@@ -54,8 +52,8 @@ VisTypesRegistryProvider.register(function TileMapVisType(Private, config) {
         legendPosition: 'bottomright',
         mapZoom: 2,
         mapCenter: [0, 0],
-        wms: config.get('visualization:tileMap:WMSdefaults')
-      }
+        wms: uiSettings.get('visualization:tileMap:WMSdefaults'),
+      },
     },
     requiresUpdateStatus: [Status.AGGS, Status.PARAMS, Status.RESIZE, Status.UI_STATE],
     requiresPartialRows: true,
@@ -89,7 +87,7 @@ VisTypesRegistryProvider.register(function TileMapVisType(Private, config) {
           'Scaled Circle Markers',
           'Shaded Circle Markers',
           'Shaded Geohash Grid',
-          'Heatmap'
+          'Heatmap',
         ],
         tmsLayers: [],
       },
@@ -105,8 +103,8 @@ VisTypesRegistryProvider.register(function TileMapVisType(Private, config) {
           max: 1,
           aggFilter: ['count', 'avg', 'sum', 'min', 'max', 'cardinality', 'top_hits'],
           defaults: [
-            { schema: 'metric', type: 'count' }
-          ]
+            { schema: 'metric', type: 'count' },
+          ],
         },
         {
           group: 'buckets',
@@ -116,10 +114,9 @@ VisTypesRegistryProvider.register(function TileMapVisType(Private, config) {
           }),
           aggFilter: 'geohash_grid',
           min: 1,
-          max: 1
-        }
-      ])
-    }
+          max: 1,
+        },
+      ]),
+    },
   });
-
-});
+}
