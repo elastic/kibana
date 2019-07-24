@@ -76,7 +76,7 @@ export class TMSService {
     console.log('eu', extendedUrl);
     // const json = await this._emsClient.getManifest(extendedUrl);
     const response = await fetch(extendedUrl);
-    const json = response.json();
+    const json = await response.json();
     console.log('ejs', json);
     return json;
 

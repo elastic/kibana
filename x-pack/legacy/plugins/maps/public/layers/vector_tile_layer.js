@@ -7,136 +7,19 @@
 import { TileLayer } from './tile_layer';
 import _ from 'lodash';
 import { TileStyle } from '../layers/styles/tile_style';
-import { styleTest } from './style_test';
-import { SOURCE_DATA_ID_ORIGIN } from '../../common/constants';
-
-window._styleTest = styleTest;
-
-const layersToInclude = styleTest.layers.filter((layer, index) => {
-  const whiteList = [
-    0,
-    1,
-    2,
-    3,
-    4,
-    5,
-    6,
-    7,
-    8,
-    9,
-    10,
-    11,
-    12,
-    13,
-    14,
-    15,
-    16,
-    17,
-    18,
-    19,
-    20,
-    21,
-    22,
-    23,
-    24,
-    25,
-    26,
-    27,
-    28,
-    29,
-    30,
-    31,
-    32,
-    33,
-    34,
-    34,
-    35,
-    36,
-    37,
-    38,
-    39,
-    40,
-    41,
-    42,
-    43,
-    44,
-    45,
-    46,
-    47,
-    48,
-    49,
-    50,
-    51,
-    51,
-    53,
-    54,
-    55,
-    56,
-    57,
-    58,
-    59,
-    60,
-    61,
-    62,
-    63,
-    64,
-    65,
-    66,
-    67,
-    68,
-    69,
-    70,
-    71,
-    72,
-    73,
-    74,
-    75,
-    76,
-    77,
-    78,
-    79,
-    80,
-    81,
-    82,
-    83,
-    84,
-    85,
-    86,
-    87,
-
-    88,
-    89,
-    90,
-
-    91,
-    92,
-    93,
-    94,
-    95,
-    96,
-
-    97,
-    98,
-    99,
-
-    100,
-    101,
-    102,
-    103,
-    104,
-
-    105,
-    106,
-    107,
-    108,
-    109,
-    110
-  ].includes(index);
-  return whiteList;
-});
+import { MB_SOURCE_ID_LAYER_ID_PREFIX_DELIMITER, SOURCE_DATA_ID_ORIGIN } from '../../common/constants';
 
 
-// console.log('layers to include', layersToInclude);
+
+const MB_STYLE_TYPE_TO_OPACITY = {
+  'fill': ['fill-opacity'],
+  'line': ['line-opacity'],
+  'circle': ['circle-opacity'],
+  'background': ['background-opacity'],
+  'symbol': ['icon-opacity', 'text-opacity']
+};
+
+
 
 export class VectorTileLayer extends TileLayer {
 
@@ -156,14 +39,21 @@ export class VectorTileLayer extends TileLayer {
   }
 
   _generateMbLayerId(mbLayer) {
-    const escaped = mbLayer.id.replace(/_/g, '');//work-around issue bug
-    return this._getMbSourceId() + '_' + escaped;
+    return this._getMbSourceId() + MB_SOURCE_ID_LAYER_ID_PREFIX_DELIMITER + mbLayer.id;
   }
 
   getMbLayerIds() {
-    const layerIds = layersToInclude.map(layer => {
+    console.log('get mb layer ids');
+    const sourceDataRequest = this.getSourceDataRequest();
+    if (!sourceDataRequest) {//data is immmutable
+      return [];
+    }
+
+    const vectorStyle = sourceDataRequest.getData();
+    const layerIds =  vectorStyle.layers.map(layer => {
       return this._generateMbLayerId(layer);
     });
+    console.log('lyids', layerIds);
     return layerIds;
   }
 
@@ -190,9 +80,18 @@ export class VectorTileLayer extends TileLayer {
     }
   }
 
+  _getStyleFle() {
+    const sourceDataRequest = this.getSourceDataRequest();
+    if (!sourceDataRequest) {
+      //this is possible if the layer was invisible at startup.
+      //the actions will not perform any data=syncing as an optimization when a layer is invisible
+      //when turning the layer back into visible, it's possible the url has not been resovled yet.
+      return;
+    }
+    return sourceDataRequest.getData();
+  }
+
   syncLayerWithMB(mbMap) {
-    // console.log('synclyaer');
-    // this.super(mbMap);
 
     const sourceId = this._getMbSourceId();
     const source = mbMap.getSource(sourceId);
@@ -200,24 +99,16 @@ export class VectorTileLayer extends TileLayer {
     if (!source) {
 
 
-      const sourceDataRequest = this.getSourceDataRequest();
-      if (!sourceDataRequest) {
-        //this is possible if the layer was invisible at startup.
-        //the actions will not perform any data=syncing as an optimization when a layer is invisible
-        //when turning the layer back into visible, it's possible the url has not been resovled yet.
-        return;
-      }
-      const vectorStyle = sourceDataRequest.getData();
+      const vectorStyle = this._getStyleFle();
       if (!vectorStyle) {
         return;
       }
 
-      console.log('vs', vectorStyle);
-      // debugger;
-
       //assume single source
       const sourceIds = Object.keys(vectorStyle.sources);
       const firstSourceName = sourceIds[0];
+
+      window._style = vectorStyle;
 
       mbMap.addSource(sourceId, {
         type: 'vector',
@@ -225,11 +116,6 @@ export class VectorTileLayer extends TileLayer {
       });
 
       vectorStyle.layers.forEach(layer => {
-
-        if (layer.source !== firstSourceName) {
-          return;
-        }
-
         const newLayerObject = {
           ...layer,
           source: this._getMbSourceId(),
@@ -237,13 +123,87 @@ export class VectorTileLayer extends TileLayer {
         };
         try {
           mbMap.addLayer(newLayerObject);
-        } catch(e){
+        } catch(e) {
           console.error(e);
         }
       });
 
       console.log('done syncing!');
     }
+
+    this._setTileLayerProperties(mbMap);
+
+  }
+
+
+  _setOpacityForType(mbMap, mbLayer, mbLayerId) {
+
+
+    const opacityProps = MB_STYLE_TYPE_TO_OPACITY[mbLayer.type];
+    if (!opacityProps) {
+      //don't know what to do
+      return;
+    }
+
+    opacityProps.forEach(opacityProp => {
+      if (mbLayer.paint && typeof mbLayer.paint[opacityProp] === 'number') {
+        const newOpacity = (mbLayer.paint[opacityProp] / 1) * this.getAlpha();
+        mbMap.setPaintProperty(mbLayerId, opacityProp, newOpacity);
+      } else {
+        mbMap.setPaintProperty(mbLayerId, opacityProp, this.getAlpha());
+      }
+    });
+
+  }
+
+
+  _setTileLayerProperties(mbMap) {
+
+    const vectorStyle = this._getStyleFle();
+    if (!vectorStyle) {
+      return;
+    }
+
+    const style = mbMap.getStyle();
+    if (!style || !style.layers) {
+      return;
+    }
+
+
+
+    vectorStyle.layers.forEach(mbLayer => {
+
+      const mbLayerId = this._generateMbLayerId(mbLayer);
+
+      console.log(this._descriptor);
+
+      try {
+        // console.log('set vis');
+        mbMap.setLayoutProperty(mbLayerId, 'visibility', this.isVisible() ? 'visible' : 'none');
+
+
+        let minZoom = this._descriptor.minZoom;
+        if (typeof mbLayer.minzoom === 'number') {
+          minZoom = Math.max(minZoom, mbLayer.minzoom);
+        }
+
+        let maxZoom = this._descriptor.maxZoom;
+        if (typeof mbLayer.maxzoom === 'number') {
+          maxZoom = Math.min(maxZoom, mbLayer.maxzoom);
+        }
+
+        mbMap.setLayerZoomRange(mbLayerId, minZoom, maxZoom);
+
+
+        this._setOpacityForType(mbMap, mbLayer, mbLayerId);
+
+
+      } catch(e) {
+        console.error(e);
+      }
+
+    });
+
 
   }
 
