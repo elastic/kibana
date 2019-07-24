@@ -17,29 +17,10 @@
  * under the License.
  */
 
-import React from 'react';
+import { Vis, VisParams } from 'ui/vis';
 
-import {
-  EuiFieldNumber,
-  EuiFormRow,
-} from '@elastic/eui';
-
-export class SelfChangingEditor extends React.Component {
-
-  onCounterChange = (ev) => {
-    this.props.setValue('counter', parseInt(ev.target.value));
-  }
-
-  render() {
-    return (
-      <EuiFormRow label="Counter">
-        <EuiFieldNumber
-          value={this.props.stateParams.counter}
-          onChange={this.onCounterChange}
-          step={1}
-          data-test-subj="counterEditor"
-        />
-      </EuiFormRow>
-    );
-  }
+export interface VisOptionsProps {
+  stateParams: VisParams;
+  vis: Vis;
+  setValue(paramName: string, value: unknown): void;
 }
