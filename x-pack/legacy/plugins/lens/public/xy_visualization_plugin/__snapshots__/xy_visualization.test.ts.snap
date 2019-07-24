@@ -5,6 +5,9 @@ Object {
   "chain": Array [
     Object {
       "arguments": Object {
+        "isHorizontal": Array [
+          undefined,
+        ],
         "layers": Array [
           Object {
             "chain": Array [
@@ -23,14 +26,8 @@ Object {
                   "layerId": Array [
                     "first",
                   ],
-                  "position": Array [
-                    "bottom",
-                  ],
                   "seriesType": Array [
                     "area",
-                  ],
-                  "showGridlines": Array [
-                    true,
                   ],
                   "splitAccessor": Array [
                     "d",
