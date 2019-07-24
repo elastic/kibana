@@ -355,8 +355,14 @@ export function GisPageProvider({ getService, getPageObjects }) {
       const queryBarInFilterEditor = await testSubjects.findDescendant('queryInput', filterEditorContainer);
       await queryBarInFilterEditor.click();
       const input = await find.activeElement();
-      await input.clearValue();
-      await input.type(query);
+      await retry.try(async () => {
+        await input.clearValue();
+        await input.type(query);
+        const value = await input.getAttribute('value');
+        if (value !== query) {
+          throw new Error(`Layer query set to ${value} instead of ${query}`);
+        }
+      });
       await testSubjects.click('mapFilterEditorSubmitButton');
       await this.waitForLayersToLoad();
     }
