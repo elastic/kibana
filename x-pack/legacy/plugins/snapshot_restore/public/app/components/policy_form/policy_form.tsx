@@ -266,46 +266,6 @@ export const PolicyForm: React.FunctionComponent<Props> = ({
     );
   };
 
-  const renderActions = () => {
-    const saveLabel = (
-      <FormattedMessage
-        id="xpack.snapshotRestore.policyForm.saveButtonLabel"
-        defaultMessage="Save"
-      />
-    );
-    const savingLabel = (
-      <FormattedMessage
-        id="xpack.snapshotRestore.policyForm.savingButtonLabel"
-        defaultMessage="Saving…"
-      />
-    );
-
-    return (
-      <EuiFlexGroup gutterSize="m" alignItems="center">
-        <EuiFlexItem grow={false}>
-          <EuiButton
-            color={'secondary'}
-            iconType="check"
-            onClick={() => onSave(policy)}
-            fill
-            data-test-subj="submitButton"
-            isLoading={isSaving}
-          >
-            {isSaving ? savingLabel : saveLabel}
-          </EuiButton>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiButtonEmpty color="primary" onClick={onCancel}>
-            <FormattedMessage
-              id="xpack.snapshotRestore.policyForm.cancelButtonLabel"
-              defaultMessage="Cancel"
-            />
-          </EuiButtonEmpty>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    );
-  };
-
   const renderSnapshotNameField = () => (
     <EuiDescribedFormGroup
       title={
@@ -380,11 +340,117 @@ export const PolicyForm: React.FunctionComponent<Props> = ({
       </EuiFormRow>
     </EuiDescribedFormGroup>
   );
+
+  const renderScheduleField = () => (
+    <EuiDescribedFormGroup
+      title={
+        <EuiTitle size="s">
+          <h3>
+            <FormattedMessage
+              id="xpack.snapshotRestore.policyForm.fields.scheduleDescriptionTitle"
+              defaultMessage="Schedule"
+            />
+          </h3>
+        </EuiTitle>
+      }
+      description={
+        <FormattedMessage
+          id="xpack.snapshotRestore.policyForm.fields.scheduleDescription"
+          defaultMessage="How often to run this policy."
+        />
+      }
+      idAria="policyScheduleDescription"
+      fullWidth
+    >
+      <EuiFormRow
+        label={
+          <FormattedMessage
+            id="xpack.snapshotRestore.policyForm.fields.policyScheduleLabel"
+            defaultMessage="Schedule"
+          />
+        }
+        describedByIds={['policyScheduleDescription']}
+        isInvalid={Boolean(errors.schedule)}
+        error={errors.schedule}
+        helpText={
+          <FormattedMessage
+            id="xpack.snapshotRestore.policyForm.fields.policyScheduleHelpText"
+            defaultMessage="Use cron expression. {docLink}"
+            values={{
+              docLink: (
+                <EuiLink href={documentationLinksService.getCronUrl()} target="_blank">
+                  <FormattedMessage
+                    id="xpack.snapshotRestore.policyForm.fields.policyScheduleHelpTextDocLink"
+                    defaultMessage="Learn more"
+                  />
+                </EuiLink>
+              ),
+            }}
+          />
+        }
+        fullWidth
+      >
+        <EuiFieldText
+          defaultValue={policy.schedule}
+          fullWidth
+          onChange={e => {
+            updatePolicy({
+              schedule: e.target.value,
+            });
+          }}
+          placeholder="0 30 1 * * ?"
+          data-test-subj="snapshotNameInput"
+        />
+      </EuiFormRow>
+    </EuiDescribedFormGroup>
+  );
+
+  const renderActions = () => {
+    const saveLabel = (
+      <FormattedMessage
+        id="xpack.snapshotRestore.policyForm.saveButtonLabel"
+        defaultMessage="Save"
+      />
+    );
+    const savingLabel = (
+      <FormattedMessage
+        id="xpack.snapshotRestore.policyForm.savingButtonLabel"
+        defaultMessage="Saving…"
+      />
+    );
+
+    return (
+      <EuiFlexGroup gutterSize="m" alignItems="center">
+        <EuiFlexItem grow={false}>
+          <EuiButton
+            color={'secondary'}
+            iconType="check"
+            onClick={() => onSave(policy)}
+            fill
+            data-test-subj="submitButton"
+            isLoading={isSaving}
+          >
+            {isSaving ? savingLabel : saveLabel}
+          </EuiButton>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButtonEmpty color="primary" onClick={onCancel}>
+            <FormattedMessage
+              id="xpack.snapshotRestore.policyForm.cancelButtonLabel"
+              defaultMessage="Cancel"
+            />
+          </EuiButtonEmpty>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
+  };
+
   return (
     <EuiForm>
       {renderNameField()}
       {renderSnapshotNameField()}
       {renderRepositoryField()}
+      {renderScheduleField()}
       {renderActions()}
     </EuiForm>
   );
