@@ -19,7 +19,10 @@ export function checkGetJobsPrivilege(kbnUrl: any): Promise<Privileges> {
     getPrivileges().then(({ capabilities, isPlatinumOrTrialLicense }) => {
       privileges = capabilities;
       // the minimum privilege for using ML with a platinum or trial license is being able to get the transforms list.
-      // all other functionality is controlled by the return privileges object
+      // all other functionality is controlled by the return privileges object.
+      // if the license is basic (isPlatinumOrTrialLicense === false) then do not redirect,
+      // allow the promise to resolve as the separate license check will redirect then user to
+      // a basic feature
       if (privileges.canGetJobs || isPlatinumOrTrialLicense === false) {
         return resolve(privileges);
       } else {
@@ -34,6 +37,9 @@ export function checkCreateJobsPrivilege(kbnUrl: any): Promise<Privileges> {
   return new Promise((resolve, reject) => {
     getPrivileges().then(({ capabilities, isPlatinumOrTrialLicense }) => {
       privileges = capabilities;
+      // if the license is basic (isPlatinumOrTrialLicense === false) then do not redirect,
+      // allow the promise to resolve as the separate license check will redirect then user to
+      // a basic feature
       if (privileges.canCreateJob || isPlatinumOrTrialLicense === false) {
         return resolve(privileges);
       } else {
