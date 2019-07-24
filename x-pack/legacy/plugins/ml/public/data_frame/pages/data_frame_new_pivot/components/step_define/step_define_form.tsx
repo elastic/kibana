@@ -315,14 +315,25 @@ export const StepDefineForm: SFC<Props> = React.memo(({ overrides = {}, onChange
     pivotGroupByArr,
     pivotAggsArr
   );
+  // pivot config
   const stringifiedPivotConfig = JSON.stringify(previewRequest.pivot, null, 2);
   const [advancedEditorConfigLastApplied, setAdvancedEditorConfigLastApplied] = useState(
     stringifiedPivotConfig
   );
   const [advancedEditorConfig, setAdvancedEditorConfig] = useState(stringifiedPivotConfig);
+  // source config
+  const stringifiedSourceConfig = JSON.stringify(previewRequest.source.query, null, 2);
+  const [
+    advancedEditorSourceConfigLastApplied,
+    setAdvancedEditorSourceConfigLastApplied,
+  ] = useState(stringifiedSourceConfig);
+  const [advancedEditorSourceConfig, setAdvancedEditorSourceConfig] = useState(
+    stringifiedSourceConfig
+  );
 
   const applyAdvancedEditorChanges = () => {
     const pivotConfig = JSON.parse(advancedEditorConfig);
+    const sourceConfig = JSON.parse(advancedEditorSourceConfig);
 
     const newGroupByList: PivotGroupByConfigDict = {};
     if (pivotConfig !== undefined && pivotConfig.group_by !== undefined) {
@@ -357,19 +368,24 @@ export const StepDefineForm: SFC<Props> = React.memo(({ overrides = {}, onChange
       });
     }
     setAggList(newAggList);
-
     const prettyPivotConfig = JSON.stringify(pivotConfig, null, 2);
+    const prettySourceConfig = JSON.stringify(sourceConfig, null, 2);
+    setSearchQuery(sourceConfig);
     setAdvancedEditorConfig(prettyPivotConfig);
     setAdvancedEditorConfigLastApplied(prettyPivotConfig);
+    setAdvancedEditorSourceConfig(prettySourceConfig);
+    setAdvancedEditorSourceConfigLastApplied(prettySourceConfig);
     setAdvancedEditorApplyButtonEnabled(false);
   };
 
   const toggleAdvancedEditor = () => {
     setAdvancedEditorConfig(advancedEditorConfig);
+    setAdvancedEditorSourceConfig(advancedEditorSourceConfig);
     setAdvancedEditorEnabled(!isAdvancedEditorEnabled);
     setAdvancedEditorApplyButtonEnabled(false);
     if (isAdvancedEditorEnabled === false) {
       setAdvancedEditorConfigLastApplied(advancedEditorConfig);
+      setAdvancedEditorSourceConfigLastApplied(advancedEditorSourceConfig);
     }
   };
 
@@ -400,7 +416,13 @@ export const StepDefineForm: SFC<Props> = React.memo(({ overrides = {}, onChange
     );
 
     const stringifiedPivotConfigUpdate = JSON.stringify(previewRequestUpdate.pivot, null, 2);
+    const stringifiedSourceConfigUpdate = JSON.stringify(
+      previewRequestUpdate.source.query,
+      null,
+      2
+    );
     setAdvancedEditorConfig(stringifiedPivotConfigUpdate);
+    setAdvancedEditorSourceConfig(stringifiedSourceConfigUpdate);
 
     onChange({
       aggList,
@@ -541,6 +563,50 @@ export const StepDefineForm: SFC<Props> = React.memo(({ overrides = {}, onChange
 
           {isAdvancedEditorEnabled && (
             <Fragment>
+              <EuiFormRow
+                label={i18n.translate(
+                  'xpack.ml.dataframe.stepDefineForm.advancedSourceEditorLabel',
+                  {
+                    defaultMessage: 'Source configuration object',
+                  }
+                )}
+                helpText={advancedEditorHelpText} // TODO: update this
+              >
+                <EuiPanel grow={false} paddingSize="none">
+                  <EuiCodeEditor
+                    mode="json"
+                    width="100%"
+                    value={advancedEditorSourceConfig}
+                    onChange={(d: string) => {
+                      setAdvancedEditorSourceConfig(d);
+
+                      // Disable the "Apply"-Button if the config hasn't changed.
+                      if (advancedEditorSourceConfigLastApplied === d) {
+                        setAdvancedEditorApplyButtonEnabled(false);
+                        return;
+                      }
+
+                      // Try to parse the string passed on from the editor.
+                      // If parsing fails, the "Apply"-Button will be disabled
+                      try {
+                        JSON.parse(d);
+                        setAdvancedEditorApplyButtonEnabled(true);
+                      } catch (e) {
+                        setAdvancedEditorApplyButtonEnabled(false);
+                      }
+                    }}
+                    setOptions={{
+                      fontSize: '12px',
+                    }}
+                    aria-label={i18n.translate(
+                      'xpack.ml.dataframe.stepDefineForm.advancedSourceEditorAriaLabel',
+                      {
+                        defaultMessage: 'Advanced editor',
+                      }
+                    )}
+                  />
+                </EuiPanel>
+              </EuiFormRow>
               <EuiFormRow
                 label={i18n.translate('xpack.ml.dataframe.stepDefineForm.advancedEditorLabel', {
                   defaultMessage: 'Pivot configuration object',
