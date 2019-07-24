@@ -108,6 +108,10 @@ export interface ResponseNotes {
 }
 
 export interface PinnedEvent {
+  code?: number | null;
+
+  message?: string | null;
+
   pinnedEventId: string;
 
   eventId?: string | null;
@@ -877,15 +881,7 @@ export interface TimelineDetailsData {
 }
 
 export interface DetailItem {
-  category: string;
-
-  description?: string | null;
-
-  example?: string | null;
-
   field: string;
-
-  type: string;
 
   values?: ToStringArray | null;
 
@@ -1519,6 +1515,10 @@ export interface ResponseTimeline {
 }
 
 export interface ResponseFavoriteTimeline {
+  code?: number | null;
+
+  message?: string | null;
+
   savedObjectId: string;
 
   version: string;
@@ -2395,6 +2395,10 @@ export namespace ResponseNotesResolvers {
 
 export namespace PinnedEventResolvers {
   export interface Resolvers<Context = SiemContext, TypeParent = PinnedEvent> {
+    code?: CodeResolver<number | null, TypeParent, Context>;
+
+    message?: MessageResolver<string | null, TypeParent, Context>;
+
     pinnedEventId?: PinnedEventIdResolver<string, TypeParent, Context>;
 
     eventId?: EventIdResolver<string | null, TypeParent, Context>;
@@ -2414,6 +2418,16 @@ export namespace PinnedEventResolvers {
     version?: VersionResolver<string | null, TypeParent, Context>;
   }
 
+  export type CodeResolver<
+    R = number | null,
+    Parent = PinnedEvent,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type MessageResolver<
+    R = string | null,
+    Parent = PinnedEvent,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
   export type PinnedEventIdResolver<
     R = string,
     Parent = PinnedEvent,
@@ -5227,42 +5241,14 @@ export namespace TimelineDetailsDataResolvers {
 
 export namespace DetailItemResolvers {
   export interface Resolvers<Context = SiemContext, TypeParent = DetailItem> {
-    category?: CategoryResolver<string, TypeParent, Context>;
-
-    description?: DescriptionResolver<string | null, TypeParent, Context>;
-
-    example?: ExampleResolver<string | null, TypeParent, Context>;
-
     field?: FieldResolver<string, TypeParent, Context>;
-
-    type?: TypeResolver<string, TypeParent, Context>;
 
     values?: ValuesResolver<ToStringArray | null, TypeParent, Context>;
 
     originalValue?: OriginalValueResolver<EsValue | null, TypeParent, Context>;
   }
 
-  export type CategoryResolver<R = string, Parent = DetailItem, Context = SiemContext> = Resolver<
-    R,
-    Parent,
-    Context
-  >;
-  export type DescriptionResolver<
-    R = string | null,
-    Parent = DetailItem,
-    Context = SiemContext
-  > = Resolver<R, Parent, Context>;
-  export type ExampleResolver<
-    R = string | null,
-    Parent = DetailItem,
-    Context = SiemContext
-  > = Resolver<R, Parent, Context>;
   export type FieldResolver<R = string, Parent = DetailItem, Context = SiemContext> = Resolver<
-    R,
-    Parent,
-    Context
-  >;
-  export type TypeResolver<R = string, Parent = DetailItem, Context = SiemContext> = Resolver<
     R,
     Parent,
     Context
@@ -7459,6 +7445,10 @@ export namespace ResponseTimelineResolvers {
 
 export namespace ResponseFavoriteTimelineResolvers {
   export interface Resolvers<Context = SiemContext, TypeParent = ResponseFavoriteTimeline> {
+    code?: CodeResolver<number | null, TypeParent, Context>;
+
+    message?: MessageResolver<string | null, TypeParent, Context>;
+
     savedObjectId?: SavedObjectIdResolver<string, TypeParent, Context>;
 
     version?: VersionResolver<string, TypeParent, Context>;
@@ -7466,6 +7456,16 @@ export namespace ResponseFavoriteTimelineResolvers {
     favorite?: FavoriteResolver<FavoriteTimelineResult[] | null, TypeParent, Context>;
   }
 
+  export type CodeResolver<
+    R = number | null,
+    Parent = ResponseFavoriteTimeline,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type MessageResolver<
+    R = string | null,
+    Parent = ResponseFavoriteTimeline,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
   export type SavedObjectIdResolver<
     R = string,
     Parent = ResponseFavoriteTimeline,
