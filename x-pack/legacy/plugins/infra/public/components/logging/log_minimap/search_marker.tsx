@@ -110,6 +110,7 @@ const SearchMarkerBackgroundRect = euiStyled.rect`
   fill: ${props => props.theme.eui.euiColorAccent};
   opacity: 0;
   transition: opacity ${props => props.theme.eui.euiAnimSpeedNormal} ease-in;
+  cursor: pointer;
 
   ${SearchMarkerGroup}:hover & {
     opacity: 0.3;
