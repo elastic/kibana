@@ -619,30 +619,39 @@ This definition isn't going to do much for us just yet, but as we get further in
 import { CoreSetup, CoreStart, Plugin } from '../../../../core/public';
 import { FooSetup, FooStart } from '../../../../legacy/core_plugins/foo/public';
 
-/** @public */
-export type DemoSetup = {}
-/** @public */
-export type DemoStart = {}
-
-/** @internal */
-export interface DemoSetupPlugins {
+/**
+ * These are the private interfaces for the services your plugin depends on.
+ * @internal
+ */
+export interface DemoSetupDeps {
   foo: FooSetup;
 }
-/** @internal */
-export interface DemoStartPlugins {
+export interface DemoStartDeps {
   foo: FooStart;
 }
 
+/**
+ * These are the interfaces with your public contracts. You should export these
+ * for other plugins to use in _their_ `SetupDeps`/`StartDeps` interfaces.
+ * @public
+ */
+export type DemoSetup = {}
+export type DemoStart = {}
+
 /** @internal */
-export class DemoPublicPlugin implements Plugin<DemoSetup, DemoStart, DemoSetupPlugins, DemoStartPlugins> {
-  public setup(core: CoreSetup, plugins: DemoSetupPlugins): DemoSetup {
+export class DemoPlugin implements Plugin<DemoSetup, DemoStart, DemoSetupDeps, DemoStartDeps> {
+  public setup(core: CoreSetup, plugins: DemoSetupDeps): DemoSetup {
     // kick off your plugin here...
-    return {};
+    return {
+      fetchConfig: () => ({}),
+    };
   }
 
-  public start(core: CoreStart, plugins: DemoStartPlugins): DemoStart {
+  public start(core: CoreStart, plugins: DemoStartDeps): DemoStart {
     // ...or here
-    return {};
+    return {
+      initDemo: () => ({}),
+    };
   }
 
   public stop() {}
@@ -658,10 +667,14 @@ If your plugin needs to share static code with other plugins, this code must be 
 import { DemoSetup, DemoStart } from './plugin';
 
 const myPureFn = (x: number): number => x + 1;
+const MyReactComponent = (props) => {
+  return <h1>Hello, {props.name}</h1>;
+}
 
 // These are your public types & static code
 export {
   myPureFn,
+  MyReactComponent,
   DemoSetup,
   DemoStart,
 }
@@ -672,20 +685,24 @@ While you're at it, you can also add your plugin initializer to this file:
 ```ts
 // public/index.ts
 import { PluginInitializer, PluginInitializerContext } from '../../../../core/public';
-import { DemoSetup, DemoStart, DemoSetupPlugins, DemoStartPlugins, DemoPublicPlugin } from './plugin';
+import { DemoSetup, DemoStart, DemoSetupDeps, DemoStartDeps, DemoPlugin } from './plugin';
 
 // Core will be looking for this when loading our plugin in the new platform
-export const plugin: PluginInitializer<DemoSetup, DemoStart, DemoSetupPlugins, DemoStartPlugins> = (
+export const plugin: PluginInitializer<DemoSetup, DemoStart, DemoSetupDeps, DemoStartDeps> = (
   initializerContext: PluginInitializerContext
 ) => {
-  return new DemoPublicPlugin();
+  return new DemoPlugin();
 };
 
 const myPureFn = (x: number): number => x + 1;
+const MyReactComponent = (props) => {
+  return <h1>Hello, {props.name}</h1>;
+}
 
 /** @public */
 export {
   myPureFn,
+  MyReactComponent,
   DemoSetup,
   DemoStart,
 }
@@ -750,7 +767,7 @@ Concerns around ownership or duplication of a given module should be raised and 
 
 A great outcome is a module being deleted altogether because it isn't used or it was used so lightly that it was easy to refactor away.
 
-If it is determined that your plugin is going to own any UI modules that other plugins depend on, you'll want to migrate these quickly so that there's time for downstream plugins to update their imports. This will ultimately involve moving the module code into your plugin, and exposing it via your setup/start contracts, or as static code from your `plugin/index.ts`.
+If it is determined that your plugin is going to own any UI modules that other plugins depend on, you'll want to migrate these quickly so that there's time for downstream plugins to update their imports. This will ultimately involve moving the module code into your plugin, and exposing it via your setup/start contracts, or as static code from your `plugin/index.ts`. We have identified owners for most of the legacy UI modules; if you aren't sure where you should move something that you own, please consult with the platform team.
 
 Depending on the module's level of complexity and the number of other places in Kibana that rely on it, there are a number of strategies you could use for this:
 
@@ -785,7 +802,7 @@ With the legacy plugin system, extensions of core and other plugins are handled 
 
 Each uiExport path is an entry file into one specific set of functionality provided by a client-side plugin. All webpack alias-based imports should be moved to these entry files, where they are appropriate. Moving a deeply nested webpack alias-based import in a plugin to one of the uiExport entry files might require some refactoring to ensure the dependency is now passed down to the appropriate place as function arguments instead of via import statements.
 
-For the `plugins/` and `ui/` webpack aliases, you should be able to take advantage of the `legacy.ts` shim you created earlier. By placing these imports directly in your shim, you can pass the dependencies you need into your `Plugin.start` and `Plugin.setup` methods, from which point they can be passed down to the rest of your plugin's entry files.
+For stateful dependencies using the `plugins/` and `ui/` webpack aliases, you should be able to take advantage of the `legacy.ts` shim you created earlier. By placing these imports directly in your shim, you can pass the dependencies you need into your `Plugin.start` and `Plugin.setup` methods, from which point they can be passed down to the rest of your plugin's entry files.
 
 For items that don't yet have a clear "home" in the new platform, it may also be helpful to somehow indicate this in your shim to make it easier to remember that you'll need to change this later. One convention we've found helpful for this is simply using a namespace like `__LEGACY`:
 
