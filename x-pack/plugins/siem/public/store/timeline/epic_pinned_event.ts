@@ -14,13 +14,14 @@ import { filter, mergeMap, startWith, withLatestFrom, takeUntil } from 'rxjs/ope
 
 import { persistTimelinePinnedEventMutation } from '../../containers/timeline/pinned_event/persist.gql_query';
 import { PersistTimelinePinnedEventMutation, PinnedEvent } from '../../graphql/types';
-
+import { addError } from '../app/actions';
 import {
   pinEvent,
   endTimelineSaving,
   unPinEvent,
   updateTimeline,
   startTimelineSaving,
+  showCallOutUnauthorizedMsg,
 } from './actions';
 import { TimelineById } from './reducer';
 import { myEpicTimelineId } from './my_epic_timeline_id';
@@ -63,6 +64,7 @@ export const epicPersistPinnedEvent = (
     mergeMap(([result, recentTimeline]) => {
       const savedTimeline = recentTimeline[get('payload.id', action)];
       const response: PinnedEvent = get('data.persistPinnedEventOnTimeline', result);
+      const callOutMsg = response && response.code === 403 ? [showCallOutUnauthorizedMsg()] : [];
 
       return [
         response != null
@@ -94,6 +96,7 @@ export const epicPersistPinnedEvent = (
                 ),
               },
             }),
+        ...callOutMsg,
         endTimelineSaving({
           id: get('payload.id', action),
         }),
@@ -104,6 +107,9 @@ export const epicPersistPinnedEvent = (
       action$.pipe(
         withLatestFrom(timeline$),
         filter(([checkAction, updatedTimeline]) => {
+          if (checkAction.type === addError.type) {
+            return true;
+          }
           if (
             checkAction.type === endTimelineSaving.type &&
             updatedTimeline[get('payload.id', checkAction)].savedObjectId != null

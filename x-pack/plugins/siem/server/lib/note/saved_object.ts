@@ -8,11 +8,18 @@ import { failure } from 'io-ts/lib/PathReporter';
 import { RequestAuth } from 'hapi';
 import { Legacy } from 'kibana';
 import { getOr } from 'lodash/fp';
+import uuid from 'uuid';
 
 import { FindOptions } from 'src/legacy/server/saved_objects/service';
 
 import { Pick3 } from '../../../common/utility_types';
-import { PageInfoNote, ResponseNote, ResponseNotes, SortNote } from '../../graphql/types';
+import {
+  PageInfoNote,
+  ResponseNote,
+  ResponseNotes,
+  SortNote,
+  NoteResult,
+} from '../../graphql/types';
 import { FrameworkRequest, internalFrameworkRequest } from '../framework';
 import { SavedNote, NoteSavedObjectRuntimeType, NoteSavedObject } from './types';
 import { noteSavedObjectType } from './saved_object_mappings';
@@ -104,21 +111,24 @@ export class Note {
     version: string | null,
     note: SavedNote
   ): Promise<ResponseNote> {
-    let timelineVersionSavedObject = null;
     try {
-      if (note.timelineId == null) {
-        const timelineResult = convertSavedObjectToSavedTimeline(
-          await this.libs.savedObjects
-            .getScopedSavedObjectsClient(request[internalFrameworkRequest])
-            .create(
-              timelineSavedObjectType,
-              pickSavedTimeline(null, {}, request[internalFrameworkRequest].auth || null)
-            )
-        );
-        note.timelineId = timelineResult.savedObjectId;
-        timelineVersionSavedObject = timelineResult.version;
-      }
       if (noteId == null) {
+        const timelineVersionSavedObject =
+          note.timelineId == null
+            ? await (async () => {
+                const timelineResult = convertSavedObjectToSavedTimeline(
+                  await this.libs.savedObjects
+                    .getScopedSavedObjectsClient(request[internalFrameworkRequest])
+                    .create(
+                      timelineSavedObjectType,
+                      pickSavedTimeline(null, {}, request[internalFrameworkRequest].auth || null)
+                    )
+                );
+                note.timelineId = timelineResult.savedObjectId;
+                return timelineResult.version;
+              })()
+            : null;
+
         // Create new note
         return {
           code: 200,
@@ -134,6 +144,7 @@ export class Note {
           ),
         };
       }
+
       // Update new note
       return {
         code: 200,
@@ -152,6 +163,20 @@ export class Note {
         ),
       };
     } catch (err) {
+      if (getOr(null, 'output.statusCode', err) === 403) {
+        const noteToReturn: NoteResult = {
+          ...note,
+          noteId: uuid.v1(),
+          version: '',
+          timelineId: '',
+          timelineVersion: '',
+        };
+        return {
+          code: 403,
+          message: err.message,
+          note: noteToReturn,
+        };
+      }
       throw err;
     }
   }
