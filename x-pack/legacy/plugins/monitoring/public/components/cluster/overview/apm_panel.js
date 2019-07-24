@@ -23,7 +23,7 @@ import {
   EuiHorizontalRule,
   EuiFlexGroup,
   EuiToolTip,
-  EuiIcon
+  EuiBadge
 } from '@elastic/eui';
 import { formatTimestampToDuration } from '../../../../common';
 import { CALCULATE_DURATION_SINCE } from '../../../../common/constants';
@@ -42,25 +42,32 @@ export function ApmPanel(props) {
   const setupModeApmData = get(setupMode.data, 'apm');
   let setupModeInstancesData = null;
   if (setupMode.enabled && setupMode.data) {
-    const showIcon = setupModeApmData.totalUniqueFullyMigratedCount !== setupModeApmData.totalUniqueInstanceCount
-      || (get(setupModeApmData, 'detected.mightExist') && setupModeApmData.totalUniqueInstanceCount === 0);
-    if (showIcon) {
-      setupModeInstancesData = (
-        <EuiFlexItem grow={false}>
-          <EuiToolTip
-            position="top"
-            content={i18n.translate('xpack.monitoring.cluster.overview.apmPanel.setupModeNodesTooltip', {
-              defaultMessage: `Some instances are not monitored by Metricbeat. Click the flag icon to visit the instances
-              listing page and find out more information about the status of each instance.`
-            })}
-          >
-            <EuiLink onClick={goToInstances}>
-              <EuiIcon type="flag" color="warning"/>
-            </EuiLink>
-          </EuiToolTip>
-        </EuiFlexItem>
-      );
+    const migratedNodesCount = Object.values(setupModeApmData.byUuid).filter(node => node.isFullyMigrated).length;
+    let totalNodesCount = Object.values(setupModeApmData.byUuid).length;
+    if (totalNodesCount === 0 && get(setupMode.data, 'apm.detected.mightExist', false)) {
+      totalNodesCount = 1;
     }
+
+    const badgeColor = migratedNodesCount === totalNodesCount
+      ? 'secondary'
+      : 'danger';
+
+    setupModeInstancesData = (
+      <EuiFlexItem grow={false}>
+        <EuiToolTip
+          position="top"
+          content={i18n.translate('xpack.monitoring.cluster.overview.apmPanel.setupModeNodesTooltip', {
+            defaultMessage: `These numbers indicate how many detected monitored apm versus how many ` +
+            `detected total apm. If there are more detected apm than monitored apm, click the Nodes ` +
+            `link and you will be guided in how to setup monitoring for the missing node.`
+          })}
+        >
+          <EuiBadge color={badgeColor}>
+            {migratedNodesCount}/{totalNodesCount}
+          </EuiBadge>
+        </EuiToolTip>
+      </EuiFlexItem>
+    );
   }
 
   return (

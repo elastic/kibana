@@ -19,7 +19,7 @@ import {
   EuiDescriptionListTitle,
   EuiDescriptionListDescription,
   EuiHorizontalRule,
-  EuiIcon,
+  EuiBadge,
   EuiToolTip
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -42,25 +42,29 @@ export function KibanaPanel(props) {
   const setupModeKibanaData = get(setupMode.data, 'kibana');
   let setupModeInstancesData = null;
   if (setupMode.enabled && setupMode.data) {
-    const showIcon = setupModeKibanaData.totalUniqueFullyMigratedCount !== setupModeKibanaData.totalUniqueInstanceCount
-      || setupModeKibanaData.totalUniqueInstanceCount === 0;
-    if (showIcon) {
-      setupModeInstancesData = (
-        <EuiFlexItem grow={false}>
-          <EuiToolTip
-            position="top"
-            content={i18n.translate('xpack.monitoring.cluster.overview.kibanaPanel.setupModeNodesTooltip', {
-              defaultMessage: `Some instances are not monitored by Metricbeat. Click the flag icon to visit the instances
-              listing page and find out more information about the status of each instance.`
-            })}
-          >
-            <EuiLink onClick={goToInstances}>
-              <EuiIcon type="flag" color="warning"/>
-            </EuiLink>
-          </EuiToolTip>
-        </EuiFlexItem>
-      );
-    }
+    const migratedNodesCount = Object.values(setupModeKibanaData.byUuid).filter(node => node.isFullyMigrated).length;
+    const totalNodesCount = Object.values(setupModeKibanaData.byUuid).length;
+
+    const badgeColor = migratedNodesCount === totalNodesCount
+      ? 'secondary'
+      : 'danger';
+
+    setupModeInstancesData = (
+      <EuiFlexItem grow={false}>
+        <EuiToolTip
+          position="top"
+          content={i18n.translate('xpack.monitoring.cluster.overview.kibanaPanel.setupModeNodesTooltip', {
+            defaultMessage: `These numbers indicate how many detected monitored instances versus how many
+            detected total instances. If there are more detected instances than monitored instances, click
+            the instances link and you will be guided in how to setup monitoring for the missing node.`
+          })}
+        >
+          <EuiBadge color={badgeColor}>
+            {formatNumber(migratedNodesCount, 'int_commas')}/{formatNumber(totalNodesCount, 'int_commas')}
+          </EuiBadge>
+        </EuiToolTip>
+      </EuiFlexItem>
+    );
   }
 
   return (

@@ -17,9 +17,9 @@ import {
   EuiDescriptionListTitle,
   EuiDescriptionListDescription,
   EuiHorizontalRule,
-  EuiIcon,
   EuiFlexGroup,
-  EuiToolTip
+  EuiToolTip,
+  EuiBadge
 } from '@elastic/eui';
 import { ClusterItemContainer, DisabledIfNoDataAndInSetupModeLink } from './helpers';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -39,25 +39,32 @@ export function BeatsPanel(props) {
   const setupModeBeatsData = get(setupMode.data, 'beats');
   let setupModeInstancesData = null;
   if (setupMode.enabled && setupMode.data) {
-    const showIcon = setupModeBeatsData.totalUniqueFullyMigratedCount !== setupModeBeatsData.totalUniqueInstanceCount
-      || (get(setupModeBeatsData, 'detected.mightExist') && setupModeBeatsData.totalUniqueInstanceCount === 0);
-    if (showIcon) {
-      setupModeInstancesData = (
-        <EuiFlexItem grow={false}>
-          <EuiToolTip
-            position="top"
-            content={i18n.translate('xpack.monitoring.cluster.overview.beatsPanel.setupModeNodesTooltip', {
-              defaultMessage: `Some instances are not monitored by Metricbeat. Click the flag icon to visit the instances
-              listing page and find out more information about the status of each instance.`
-            })}
-          >
-            <EuiLink onClick={goToInstances}>
-              <EuiIcon type="flag" color="warning"/>
-            </EuiLink>
-          </EuiToolTip>
-        </EuiFlexItem>
-      );
+    const migratedNodesCount = Object.values(setupModeBeatsData.byUuid).filter(node => node.isFullyMigrated).length;
+    let totalNodesCount = Object.values(setupModeBeatsData.byUuid).length;
+    if (totalNodesCount === 0 && get(setupMode.data, 'beats.detected.mightExist', false)) {
+      totalNodesCount = 1;
     }
+
+    const badgeColor = migratedNodesCount === totalNodesCount
+      ? 'secondary'
+      : 'danger';
+
+    setupModeInstancesData = (
+      <EuiFlexItem grow={false}>
+        <EuiToolTip
+          position="top"
+          content={i18n.translate('xpack.monitoring.cluster.overview.beatsPanel.setupModeNodesTooltip', {
+            defaultMessage: `These numbers indicate how many detected monitored beats versus how many ` +
+            `detected total beats. If there are more detected beats than monitored beats, click the Nodes ` +
+            `link and you will be guided in how to setup monitoring for the missing node.`
+          })}
+        >
+          <EuiBadge color={badgeColor}>
+            {migratedNodesCount}/{totalNodesCount}
+          </EuiBadge>
+        </EuiToolTip>
+      </EuiFlexItem>
+    );
   }
 
   const beatTypes = props.beats.types.map((beat, index) => {

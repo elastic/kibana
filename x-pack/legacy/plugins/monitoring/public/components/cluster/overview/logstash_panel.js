@@ -21,8 +21,8 @@ import {
   EuiDescriptionListDescription,
   EuiHorizontalRule,
   EuiIconTip,
-  EuiIcon,
-  EuiToolTip
+  EuiToolTip,
+  EuiBadge
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
@@ -44,26 +44,33 @@ export function LogstashPanel(props) {
 
   const setupModeLogstashData = get(setupMode.data, 'logstash');
   let setupModeInstancesData = null;
-  if (setupMode.enabled && setupModeLogstashData) {
-    const showIcon = setupModeLogstashData.totalUniqueFullyMigratedCount !== setupModeLogstashData.totalUniqueInstanceCount
-      || (get(setupModeLogstashData, 'detected.mightExist') && setupModeLogstashData.totalUniqueInstanceCount === 0);
-    if (showIcon) {
-      setupModeInstancesData = (
-        <EuiFlexItem grow={false}>
-          <EuiToolTip
-            position="top"
-            content={i18n.translate('xpack.monitoring.cluster.overview.logstashPanel.setupModeNodesTooltip', {
-              defaultMessage: `Some nodes are not monitored by Metricbeat. Click the flag icon to visit the nodes
-              listing page and find out more information about the status of each node.`
-            })}
-          >
-            <EuiLink onClick={goToNodes}>
-              <EuiIcon type="flag" color="warning"/>
-            </EuiLink>
-          </EuiToolTip>
-        </EuiFlexItem>
-      );
+  if (setupMode.enabled && setupMode.data) {
+    const migratedNodesCount = Object.values(setupModeLogstashData.byUuid).filter(node => node.isFullyMigrated).length;
+    let totalNodesCount = Object.values(setupModeLogstashData.byUuid).length;
+    if (totalNodesCount === 0 && get(setupMode.data, 'logstash.detected.mightExist', false)) {
+      totalNodesCount = 1;
     }
+
+    const badgeColor = migratedNodesCount === totalNodesCount
+      ? 'secondary'
+      : 'danger';
+
+    setupModeInstancesData = (
+      <EuiFlexItem grow={false}>
+        <EuiToolTip
+          position="top"
+          content={i18n.translate('xpack.monitoring.cluster.overview.logstashPanel.setupModeNodesTooltip', {
+            defaultMessage: `These numbers indicate how many detected monitored nodes versus how many ` +
+            `detected total nodes. If there are more detected nodes than monitored nodes, click the Nodes ` +
+            `link and you will be guided in how to setup monitoring for the missing node.`
+          })}
+        >
+          <EuiBadge color={badgeColor}>
+            {formatNumber(migratedNodesCount, 'int_commas')}/{formatNumber(totalNodesCount, 'int_commas')}
+          </EuiBadge>
+        </EuiToolTip>
+      </EuiFlexItem>
+    );
   }
 
   return (

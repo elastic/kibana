@@ -27,7 +27,6 @@ import {
   EuiBadge,
   EuiToolTip,
   EuiFlexGroup,
-  EuiIcon
 } from '@elastic/eui';
 import { LicenseText } from './license_text';
 import { i18n } from '@kbn/i18n';
@@ -162,25 +161,30 @@ export function ElasticsearchPanel(props) {
 
   const setupModeElasticsearchData = get(setupMode.data, 'elasticsearch');
   let setupModeNodesData = null;
-  if (setupMode.enabled && setupModeElasticsearchData) {
-    const showIcon = setupModeElasticsearchData.totalUniqueFullyMigratedCount !== setupModeElasticsearchData.totalUniqueInstanceCount;
-    if (showIcon) {
-      setupModeNodesData = (
-        <EuiFlexItem grow={false}>
-          <EuiToolTip
-            position="top"
-            content={i18n.translate('xpack.monitoring.cluster.overview.elasticsearchPanel.setupModeNodesTooltip', {
-              defaultMessage: `Some nodes are not monitored by Metricbeat. Click the flag icon to visit the nodes
-              listing page and find out more information about the status of each node.`
-            })}
-          >
-            <EuiLink onClick={goToNodes}>
-              <EuiIcon type="flag" color="warning"/>
-            </EuiLink>
-          </EuiToolTip>
-        </EuiFlexItem>
-      );
-    }
+  if (setupMode.enabled && setupMode.data) {
+    const migratedNodesCount = Object.values(setupModeElasticsearchData.byUuid).filter(node => node.isFullyMigrated).length;
+    const totalNodesCount = Object.values(setupModeElasticsearchData.byUuid).length;
+
+    const badgeColor = migratedNodesCount === totalNodesCount
+      ? 'secondary'
+      : 'danger';
+
+    setupModeNodesData = (
+      <EuiFlexItem grow={false}>
+        <EuiToolTip
+          position="top"
+          content={i18n.translate('xpack.monitoring.cluster.overview.esPanel.setupModeNodesTooltip', {
+            defaultMessage: `These numbers indicate how many detected monitored nodes versus how many
+            detected total nodes. If there are more detected nodes than monitored nodes, click the Nodes
+            link and you will be guided in how to setup monitoring for the missing node.`
+          })}
+        >
+          <EuiBadge color={badgeColor}>
+            {formatNumber(migratedNodesCount, 'int_commas')}/{formatNumber(totalNodesCount, 'int_commas')}
+          </EuiBadge>
+        </EuiToolTip>
+      </EuiFlexItem>
+    );
   }
 
   const showMlJobs = () => {
