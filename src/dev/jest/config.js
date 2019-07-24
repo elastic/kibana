@@ -98,7 +98,7 @@ export default {
     `${RESERVED_DIR_JEST_INTEGRATION_TESTS}/`,
 
     // https://github.com/facebook/jest/issues/7267
-    '<rootDir>/x-pack/legacy/plugins/canvas/.storybook/storyshots.test.js'
+    '<rootDir>/x-pack/legacy/plugins/canvas/.storybook/'
   ],
   transform: {
     '^.+\\.(js|tsx?)$': '<rootDir>/src/dev/jest/babel_transform.js',
