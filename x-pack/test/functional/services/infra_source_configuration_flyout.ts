@@ -83,6 +83,8 @@ export function InfraSourceConfigurationFlyoutProvider({
       }
     },
     async moveLogColumn(sourceIndex: number, destinationIndex: number) {
+      const KEY_PRESS_DELAY_MS = 500; // This may need to be high for Jenkins; 100 works on desktop
+
       const logColumnPanel = (await this.getLogColumnPanels())[sourceIndex];
       const moveLogColumnHandle = await testSubjects.findDescendant(
         'moveLogColumnHandle',
@@ -90,16 +92,17 @@ export function InfraSourceConfigurationFlyoutProvider({
       );
       await moveLogColumnHandle.focus();
       const movementDifference = destinationIndex - sourceIndex;
-      const numberOfKeyPresses = Math.abs(movementDifference);
-      // Generate array of repeating ARROW_DOWN or ARROW_UP equal in length to numberOfKeyPresses
-      // e.g. if numberOfKeyPresses is 3 and movementDifference is -3, [ARROW_UP, ARROW_UP, ARROW_UP]
-      const movementKeySequence = Array.from(Array(numberOfKeyPresses), () =>
-        movementDifference > 0 ? browser.keys.ARROW_DOWN : browser.keys.ARROW_UP
-      );
-      await moveLogColumnHandle.pressKeys(
-        [browser.keys.SPACE, ...movementKeySequence, browser.keys.SPACE],
-        { charByChar: true }
-      );
+      await moveLogColumnHandle.pressKeys(browser.keys.SPACE);
+      for (let i = 0; i < Math.abs(movementDifference); i++) {
+        await new Promise(res => setTimeout(res, KEY_PRESS_DELAY_MS));
+        if (movementDifference > 0) {
+          await moveLogColumnHandle.pressKeys(browser.keys.ARROW_DOWN);
+        } else {
+          await moveLogColumnHandle.pressKeys(browser.keys.ARROW_UP);
+        }
+      }
+      await moveLogColumnHandle.pressKeys(browser.keys.SPACE);
+      await new Promise(res => setTimeout(res, KEY_PRESS_DELAY_MS));
     },
 
     /**
