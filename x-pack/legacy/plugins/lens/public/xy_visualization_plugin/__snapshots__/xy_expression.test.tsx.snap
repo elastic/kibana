@@ -15,13 +15,13 @@ exports[`xy_expression XYChart component it renders area 1`] = `
     id="x"
     position="bottom"
     showGridLines={false}
-    title="C"
+    title=""
   />
   <inject-AxisSpec-with-chartStore
     id="y"
     position="left"
     showGridLines={false}
-    title="A and B"
+    title=""
   />
   <inject-AreaSeriesSpecComponent-with-chartStore
     data={
@@ -38,8 +38,13 @@ exports[`xy_expression XYChart component it renders area 1`] = `
         },
       ]
     }
-    id="Label A,Label B"
-    splitSeriesAccessors={Array []}
+    id="Label D"
+    key="0"
+    splitSeriesAccessors={
+      Array [
+        "Label D",
+      ]
+    }
     stackAccessors={Array []}
     xAccessor="c"
     yAccessors={
@@ -67,13 +72,13 @@ exports[`xy_expression XYChart component it renders bar 1`] = `
     id="x"
     position="bottom"
     showGridLines={false}
-    title="C"
+    title=""
   />
   <inject-AxisSpec-with-chartStore
     id="y"
     position="left"
     showGridLines={false}
-    title="A and B"
+    title=""
   />
   <inject-BarSeriesSpecComponent-with-chartStore
     data={
@@ -90,8 +95,13 @@ exports[`xy_expression XYChart component it renders bar 1`] = `
         },
       ]
     }
-    id="Label A,Label B"
-    splitSeriesAccessors={Array []}
+    id="Label D"
+    key="0"
+    splitSeriesAccessors={
+      Array [
+        "Label D",
+      ]
+    }
     stackAccessors={Array []}
     xAccessor="c"
     yAccessors={
@@ -119,13 +129,13 @@ exports[`xy_expression XYChart component it renders horizontal bar 1`] = `
     id="x"
     position="bottom"
     showGridLines={false}
-    title="C"
+    title=""
   />
   <inject-AxisSpec-with-chartStore
     id="y"
     position="left"
     showGridLines={false}
-    title="A and B"
+    title=""
   />
   <inject-BarSeriesSpecComponent-with-chartStore
     data={
@@ -142,8 +152,13 @@ exports[`xy_expression XYChart component it renders horizontal bar 1`] = `
         },
       ]
     }
-    id="Label A,Label B"
-    splitSeriesAccessors={Array []}
+    id="Label D"
+    key="0"
+    splitSeriesAccessors={
+      Array [
+        "Label D",
+      ]
+    }
     stackAccessors={Array []}
     xAccessor="c"
     yAccessors={
@@ -171,13 +186,13 @@ exports[`xy_expression XYChart component it renders line 1`] = `
     id="x"
     position="bottom"
     showGridLines={false}
-    title="C"
+    title=""
   />
   <inject-AxisSpec-with-chartStore
     id="y"
     position="left"
     showGridLines={false}
-    title="A and B"
+    title=""
   />
   <inject-LineSeriesSpecComponent-with-chartStore
     data={
@@ -194,8 +209,13 @@ exports[`xy_expression XYChart component it renders line 1`] = `
         },
       ]
     }
-    id="Label A,Label B"
-    splitSeriesAccessors={Array []}
+    id="Label D"
+    key="0"
+    splitSeriesAccessors={
+      Array [
+        "Label D",
+      ]
+    }
     stackAccessors={Array []}
     xAccessor="c"
     yAccessors={
@@ -223,13 +243,13 @@ exports[`xy_expression XYChart component it renders stacked area 1`] = `
     id="x"
     position="bottom"
     showGridLines={false}
-    title="C"
+    title=""
   />
   <inject-AxisSpec-with-chartStore
     id="y"
     position="left"
     showGridLines={false}
-    title="A and B"
+    title=""
   />
   <inject-AreaSeriesSpecComponent-with-chartStore
     data={
@@ -246,8 +266,13 @@ exports[`xy_expression XYChart component it renders stacked area 1`] = `
         },
       ]
     }
-    id="Label A,Label B"
-    splitSeriesAccessors={Array []}
+    id="Label D"
+    key="0"
+    splitSeriesAccessors={
+      Array [
+        "Label D",
+      ]
+    }
     stackAccessors={
       Array [
         "c",
@@ -279,13 +304,13 @@ exports[`xy_expression XYChart component it renders stacked bar 1`] = `
     id="x"
     position="bottom"
     showGridLines={false}
-    title="C"
+    title=""
   />
   <inject-AxisSpec-with-chartStore
     id="y"
     position="left"
     showGridLines={false}
-    title="A and B"
+    title=""
   />
   <inject-BarSeriesSpecComponent-with-chartStore
     data={
@@ -302,8 +327,13 @@ exports[`xy_expression XYChart component it renders stacked bar 1`] = `
         },
       ]
     }
-    id="Label A,Label B"
-    splitSeriesAccessors={Array []}
+    id="Label D"
+    key="0"
+    splitSeriesAccessors={
+      Array [
+        "Label D",
+      ]
+    }
     stackAccessors={
       Array [
         "c",
@@ -335,13 +365,13 @@ exports[`xy_expression XYChart component it renders stacked horizontal bar 1`] =
     id="x"
     position="bottom"
     showGridLines={false}
-    title="C"
+    title=""
   />
   <inject-AxisSpec-with-chartStore
     id="y"
     position="left"
     showGridLines={false}
-    title="A and B"
+    title=""
   />
   <inject-BarSeriesSpecComponent-with-chartStore
     data={
@@ -358,8 +388,13 @@ exports[`xy_expression XYChart component it renders stacked horizontal bar 1`] =
         },
       ]
     }
-    id="Label A,Label B"
-    splitSeriesAccessors={Array []}
+    id="Label D"
+    key="0"
+    splitSeriesAccessors={
+      Array [
+        "Label D",
+      ]
+    }
     stackAccessors={
       Array [
         "c",

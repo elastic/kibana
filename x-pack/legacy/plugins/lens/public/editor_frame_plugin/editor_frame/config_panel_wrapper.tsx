@@ -8,7 +8,7 @@ import React, { useMemo, useContext, memo } from 'react';
 import { EuiSelect } from '@elastic/eui';
 import { NativeRenderer } from '../../native_renderer';
 import { Action } from './state_management';
-import { Visualization, DatasourcePublicAPI } from '../../types';
+import { Visualization, FramePublicAPI, VisualizationSuggestion } from '../../types';
 import { DragContext } from '../../drag_drop';
 
 interface ConfigPanelWrapperProps {
@@ -16,31 +16,37 @@ interface ConfigPanelWrapperProps {
   visualizationMap: Record<string, Visualization>;
   activeVisualizationId: string | null;
   dispatch: (action: Action) => void;
-  datasourcePublicAPI: DatasourcePublicAPI;
+  framePublicAPI: FramePublicAPI;
 }
 
-function getSuggestedVisualizationState(
-  visualization: Visualization,
-  datasource: DatasourcePublicAPI
-) {
-  const suggestions = visualization.getSuggestions({
-    tables: [
-      {
-        datasourceSuggestionId: 0,
-        isMultiRow: true,
-        columns: datasource.getTableSpec().map(col => ({
-          ...col,
-          operation: datasource.getOperationForColumnId(col.columnId)!,
-        })),
-      },
-    ],
+function getSuggestedVisualizationState(frame: FramePublicAPI, visualization: Visualization) {
+  const datasources = Object.entries(frame.datasourceLayers);
+
+  let results: VisualizationSuggestion[] = [];
+
+  datasources.forEach(([layerId, datasource]) => {
+    const suggestions = visualization.getSuggestions({
+      tables: [
+        {
+          datasourceSuggestionId: 0,
+          isMultiRow: true,
+          columns: datasource.getTableSpec().map(col => ({
+            ...col,
+            operation: datasource.getOperationForColumnId(col.columnId)!,
+          })),
+          layerId,
+        },
+      ],
+    });
+
+    results = results.concat(suggestions);
   });
 
-  if (!suggestions.length) {
-    return visualization.initialize(datasource);
+  if (!results.length) {
+    return visualization.initialize(frame);
   }
 
-  return visualization.initialize(datasource, suggestions[0].state);
+  return visualization.initialize(frame, results[0].state);
 }
 
 export const ConfigPanelWrapper = memo(function ConfigPanelWrapper(props: ConfigPanelWrapperProps) {
@@ -66,8 +72,8 @@ export const ConfigPanelWrapper = memo(function ConfigPanelWrapper(props: Config
         value={props.activeVisualizationId || undefined}
         onChange={e => {
           const newState = getSuggestedVisualizationState(
-            props.visualizationMap[e.target.value],
-            props.datasourcePublicAPI
+            props.framePublicAPI,
+            props.visualizationMap[e.target.value]
           );
           props.dispatch({
             type: 'SWITCH_VISUALIZATION',
@@ -83,7 +89,7 @@ export const ConfigPanelWrapper = memo(function ConfigPanelWrapper(props: Config
             dragDropContext: context,
             state: props.visualizationState,
             setState: setVisualizationState,
-            datasource: props.datasourcePublicAPI,
+            frame: props.framePublicAPI,
           }}
         />
       )}

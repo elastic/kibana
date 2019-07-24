@@ -5,7 +5,7 @@
  */
 
 import { Ast } from '@kbn/interpreter/common';
-import { Visualization, DatasourceSuggestion } from '../../types';
+import { Visualization, DatasourceSuggestion, TableSuggestion } from '../../types';
 import { Action } from './state_management';
 
 export interface Suggestion {
@@ -32,26 +32,26 @@ export function getSuggestions(
   activeVisualizationId: string | null,
   visualizationState: unknown
 ): Suggestion[] {
-  const datasourceTables = datasourceTableSuggestions.map(({ table }) => table);
+  const datasourceTables: TableSuggestion[] = datasourceTableSuggestions.map(({ table }) => table);
 
-  return (
-    Object.entries(visualizationMap)
-      .map(([visualizationId, visualization]) => {
-        return visualization
-          .getSuggestions({
-            tables: datasourceTables,
-            state: visualizationId === activeVisualizationId ? visualizationState : undefined,
-          })
-          .map(({ datasourceSuggestionId, ...suggestion }) => ({
-            ...suggestion,
-            visualizationId,
-            datasourceState: datasourceTableSuggestions[datasourceSuggestionId].state,
-          }));
-      })
-      // TODO why is flatMap not available here?
-      .reduce((globalList, currentList) => [...globalList, ...currentList], [])
-      .sort(({ score: scoreA }, { score: scoreB }) => scoreB - scoreA)
-  );
+  return Object.entries(visualizationMap)
+    .map(([visualizationId, visualization]) => {
+      return visualization
+        .getSuggestions({
+          tables: datasourceTables,
+          state: visualizationId === activeVisualizationId ? visualizationState : undefined,
+        })
+        .map(({ datasourceSuggestionId, ...suggestion }) => ({
+          ...suggestion,
+          visualizationId,
+          datasourceState: datasourceTableSuggestions.find(
+            datasourceSuggestion =>
+              datasourceSuggestion.table.datasourceSuggestionId === datasourceSuggestionId
+          )!.state,
+        }));
+    })
+    .reduce((globalList, currentList) => [...globalList, ...currentList], [])
+    .sort(({ score: scoreA }, { score: scoreB }) => scoreB - scoreA);
 }
 
 export function toSwitchAction(suggestion: Suggestion): Action {

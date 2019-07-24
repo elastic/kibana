@@ -38,19 +38,25 @@ describe('filter_ratio', () => {
         },
       },
       currentIndexPatternId: '1',
-      columnOrder: ['col1'],
-      columns: {
-        col1: {
-          operationId: 'op1',
-          label: 'Filter Ratio',
-          dataType: 'number',
-          isBucketed: false,
+      layers: {
+        first: {
+          indexPatternId: '1',
+          columnOrder: ['col1'],
+          columns: {
+            col1: {
+              operationId: 'op1',
+              label: 'Filter Ratio',
+              dataType: 'number',
+              isBucketed: false,
 
-          // Private
-          operationType: 'filter_ratio',
-          params: {
-            numerator: { query: '', language: 'kuery' },
-            denominator: { query: '', language: 'kuery' },
+              // Private
+              operationType: 'filter_ratio',
+              params: {
+                numerator: { query: '', language: 'kuery' },
+                denominator: { query: '', language: 'kuery' },
+              },
+              indexPatternId: '1',
+            },
           },
         },
       },
@@ -64,7 +70,13 @@ describe('filter_ratio', () => {
 
   describe('buildColumn', () => {
     it('should create column object with default params', () => {
-      const column = filterRatioOperation.buildColumn('op', {}, 0);
+      const column = filterRatioOperation.buildColumn({
+        operationId: 'op',
+        indexPatternId: '1',
+        layerId: 'first',
+        columns: {},
+        suggestedPriority: undefined,
+      });
       expect(column.params.numerator).toEqual({ query: '', language: 'kuery' });
       expect(column.params.denominator).toEqual({ query: '', language: 'kuery' });
     });
@@ -73,7 +85,7 @@ describe('filter_ratio', () => {
   describe('toEsAggsConfig', () => {
     it('should reflect params correctly', () => {
       const esAggsConfig = filterRatioOperation.toEsAggsConfig(
-        state.columns.col1 as FilterRatioIndexPatternColumn,
+        state.layers.first.columns.col1 as FilterRatioIndexPatternColumn,
         'col1'
       );
       expect(esAggsConfig).toEqual(
@@ -100,6 +112,7 @@ describe('filter_ratio', () => {
       expect(() => {
         shallowWithIntl(
           <InlineOptions
+            layerId="first"
             state={state}
             setState={jest.fn()}
             columnId="col1"
@@ -113,6 +126,7 @@ describe('filter_ratio', () => {
     it('should show only the numerator by default', () => {
       const wrapper = shallowWithIntl(
         <InlineOptions
+          layerId="first"
           state={state}
           setState={jest.fn()}
           columnId="col1"
@@ -129,6 +143,7 @@ describe('filter_ratio', () => {
       const setState = jest.fn();
       const wrapper = shallowWithIntl(
         <InlineOptions
+          layerId="first"
           state={state}
           setState={setState}
           columnId="col1"
@@ -144,12 +159,18 @@ describe('filter_ratio', () => {
 
       expect(setState).toHaveBeenCalledWith({
         ...state,
-        columns: {
-          col1: {
-            ...state.columns.col1,
-            params: {
-              numerator: { query: 'geo.src : "US"', language: 'kuery' },
-              denominator: { query: '', language: 'kuery' },
+        layers: {
+          ...state.layers,
+          first: {
+            ...state.layers.first,
+            columns: {
+              col1: {
+                ...state.layers.first.columns.col1,
+                params: {
+                  numerator: { query: 'geo.src : "US"', language: 'kuery' },
+                  denominator: { query: '', language: 'kuery' },
+                },
+              },
             },
           },
         },
@@ -160,6 +181,7 @@ describe('filter_ratio', () => {
       const setState = jest.fn();
       const wrapper = shallowWithIntl(
         <InlineOptions
+          layerId="first"
           state={state}
           setState={setState}
           columnId="col1"
@@ -187,12 +209,18 @@ describe('filter_ratio', () => {
 
       expect(setState).toHaveBeenCalledWith({
         ...state,
-        columns: {
-          col1: {
-            ...state.columns.col1,
-            params: {
-              numerator: { query: '', language: 'kuery' },
-              denominator: { query: 'geo.src : "US"', language: 'kuery' },
+        layers: {
+          ...state.layers,
+          first: {
+            ...state.layers.first,
+            columns: {
+              col1: {
+                ...state.layers.first.columns.col1,
+                params: {
+                  numerator: { query: '', language: 'kuery' },
+                  denominator: { query: 'geo.src : "US"', language: 'kuery' },
+                },
+              },
             },
           },
         },

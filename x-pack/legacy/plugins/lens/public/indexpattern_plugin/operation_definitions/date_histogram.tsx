@@ -43,16 +43,21 @@ export const dateHistogramOperation: OperationDefinition<DateHistogramIndexPatte
       type === 'date' && (!aggregationRestrictions || aggregationRestrictions.date_histogram)
     );
   },
-  buildColumn(
-    operationId: string,
-    columns: {},
-    suggestedOrder?: DimensionPriority,
-    field?: IndexPatternField
-  ): DateHistogramIndexPatternColumn {
+  buildColumn({
+    operationId,
+    suggestedPriority,
+    indexPatternId,
+    field,
+  }: {
+    operationId: string;
+    suggestedPriority: DimensionPriority | undefined;
+    indexPatternId: string;
+    field?: IndexPatternField;
+  }): DateHistogramIndexPatternColumn {
     if (!field) {
       throw new Error('Invariant error: date histogram operation requires field');
     }
-    let interval = 'h';
+    let interval = 'd';
     let timeZone: string | undefined;
     if (field.aggregationRestrictions && field.aggregationRestrictions.date_histogram) {
       interval = (field.aggregationRestrictions.date_histogram.calendar_interval ||
@@ -61,10 +66,11 @@ export const dateHistogramOperation: OperationDefinition<DateHistogramIndexPatte
     }
     return {
       operationId,
+      indexPatternId,
       label: ofName(field.name),
       dataType: 'date',
       operationType: 'date_histogram',
-      suggestedOrder,
+      suggestedPriority,
       sourceField: field.name,
       isBucketed: true,
       params: {
@@ -93,8 +99,8 @@ export const dateHistogramOperation: OperationDefinition<DateHistogramIndexPatte
       extended_bounds: {},
     },
   }),
-  paramEditor: ({ state, setState, columnId }) => {
-    const column = state.columns[columnId] as DateHistogramIndexPatternColumn;
+  paramEditor: ({ state, setState, columnId, layerId }) => {
+    const column = state.layers[layerId].columns[columnId] as DateHistogramIndexPatternColumn;
 
     const field =
       column &&
@@ -140,6 +146,7 @@ export const dateHistogramOperation: OperationDefinition<DateHistogramIndexPatte
                 setState(
                   updateColumnParam(
                     state,
+                    layerId,
                     column,
                     'interval',
                     numericToInterval(Number(e.target.value))

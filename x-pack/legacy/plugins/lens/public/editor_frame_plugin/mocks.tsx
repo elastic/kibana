@@ -6,16 +6,16 @@
 
 import React from 'react';
 import { DataSetup, ExpressionRendererProps } from 'src/legacy/core_plugins/data/public';
-import { DatasourcePublicAPI, Visualization, Datasource } from '../types';
+import { DatasourcePublicAPI, FramePublicAPI, Visualization, Datasource } from '../types';
 import { EditorFrameSetupPlugins } from './plugin';
 
 export function createMockVisualization(): jest.Mocked<Visualization> {
   return {
     getPersistableState: jest.fn(_state => ({})),
     getSuggestions: jest.fn(_options => []),
-    initialize: jest.fn((_datasource, _state?) => ({})),
+    initialize: jest.fn((_frame, _state?) => ({})),
     renderConfigPanel: jest.fn(),
-    toExpression: jest.fn((_state, _datasource) => null),
+    toExpression: jest.fn((_state, _frame) => null),
   };
 }
 
@@ -28,6 +28,7 @@ export function createMockDatasource(): DatasourceMock {
     getTableSpec: jest.fn(() => []),
     getOperationForColumnId: jest.fn(),
     renderDimensionPanel: jest.fn(),
+    renderLayerPanel: jest.fn(),
     removeColumnInTableSpec: jest.fn(),
     moveColumnTo: jest.fn(),
     duplicateColumn: jest.fn(),
@@ -37,14 +38,27 @@ export function createMockDatasource(): DatasourceMock {
     getDatasourceSuggestionsForField: jest.fn((_state, item) => []),
     getDatasourceSuggestionsFromCurrentState: jest.fn(_state => []),
     getPersistableState: jest.fn(),
-    getPublicAPI: jest.fn((_state, _setState) => publicAPIMock),
+    getPublicAPI: jest.fn((_state, _setState, _layerId) => publicAPIMock),
     initialize: jest.fn((_state?) => Promise.resolve()),
     renderDataPanel: jest.fn(),
-    toExpression: jest.fn(_state => null),
+    toExpression: jest.fn((_frame, _state) => null),
+    insertLayer: jest.fn((_state, _newLayerId) => {}),
+    removeLayer: jest.fn((_state, _layerId) => {}),
+    getLayers: jest.fn(_state => []),
 
     // this is an additional property which doesn't exist on real datasources
     // but can be used to validate whether specific API mock functions are called
     publicAPIMock,
+  };
+}
+
+export type FrameMock = jest.Mocked<FramePublicAPI>;
+
+export function createMockFramePublicAPI(): FrameMock {
+  return {
+    datasourceLayers: {},
+    addNewLayer: jest.fn(() => ''),
+    removeLayer: jest.fn(),
   };
 }
 
@@ -67,6 +81,11 @@ export function createMockDependencies() {
       expressions: {
         ExpressionRenderer: createExpressionRendererMock(),
         run: jest.fn(_ => Promise.resolve({ type: 'render', as: 'test', value: undefined })),
+      },
+    },
+    interpreter: {
+      functionsRegistry: {
+        register: jest.fn(),
       },
     },
   } as unknown) as MockedDependencies;

@@ -27,7 +27,7 @@ export interface EditorFrameSetup {
 // Hints the default nesting to the data source. 0 is the highest priority
 export type DimensionPriority = 0 | 1 | 2;
 
-export interface TableColumn {
+export interface TableSuggestionColumn {
   columnId: string;
   operation: Operation;
 }
@@ -35,7 +35,8 @@ export interface TableColumn {
 export interface TableSuggestion {
   datasourceSuggestionId: number;
   isMultiRow: boolean;
-  columns: TableColumn[];
+  columns: TableSuggestionColumn[];
+  layerId: string;
 }
 
 export interface DatasourceSuggestion<T = unknown> {
@@ -55,14 +56,18 @@ export interface Datasource<T = unknown, P = unknown> {
   // Given the current state, which parts should be saved?
   getPersistableState: (state: T) => P;
 
+  insertLayer: (state: T, newLayerId: string) => T;
+  removeLayer: (state: T, layerId: string) => T;
+  getLayers: (state: T) => string[];
+
   renderDataPanel: (domElement: Element, props: DatasourceDataPanelProps<T>) => void;
 
-  toExpression: (state: T) => Ast | string | null;
+  toExpression: (state: T, layerId: string) => Ast | string | null;
 
   getDatasourceSuggestionsForField: (state: T, field: unknown) => Array<DatasourceSuggestion<T>>;
   getDatasourceSuggestionsFromCurrentState: (state: T) => Array<DatasourceSuggestion<T>>;
 
-  getPublicAPI: (state: T, setState: (newState: T) => void) => DatasourcePublicAPI;
+  getPublicAPI: (state: T, setState: (newState: T) => void, layerId: string) => DatasourcePublicAPI;
 }
 
 /**
@@ -74,11 +79,20 @@ export interface DatasourcePublicAPI {
 
   // Render can be called many times
   renderDimensionPanel: (domElement: Element, props: DatasourceDimensionPanelProps) => void;
+  renderLayerPanel: (domElement: Element, props: DatasourceLayerPanelProps) => void;
 
   removeColumnInTableSpec: (columnId: string) => void;
   moveColumnTo: (columnId: string, targetIndex: number) => void;
   duplicateColumn: (columnId: string) => TableSpec;
 }
+
+export interface TableSpecColumn {
+  // Column IDs are the keys for internal state in data sources and visualizations
+  columnId: string;
+}
+
+// TableSpec is managed by visualizations
+export type TableSpec = TableSpecColumn[];
 
 export interface DatasourceDataPanelProps<T = unknown> {
   state: T;
@@ -88,7 +102,7 @@ export interface DatasourceDataPanelProps<T = unknown> {
 
 // The only way a visualization has to restrict the query building
 export interface DatasourceDimensionPanelProps {
-  // If no columnId is passed, it will render as empty
+  layerId: string;
   columnId: string;
 
   dragDropContext: DragContextState;
@@ -99,6 +113,11 @@ export interface DatasourceDimensionPanelProps {
   // Visualizations can hint at the role this dimension would play, which
   // affects the default ordering of the query
   suggestedPriority?: DimensionPriority;
+  onRemove?: (accessor: string) => void;
+}
+
+export interface DatasourceLayerPanelProps {
+  layerId: string;
 }
 
 export type DataType = 'string' | 'number' | 'date' | 'boolean';
@@ -121,13 +140,10 @@ export interface Operation {
   // Extra meta-information like cardinality, color
 }
 
-export interface TableSpecColumn {
-  // Column IDs are the keys for internal state in data sources and visualizations
-  columnId: string;
+export interface LensMultiTable {
+  type: 'lens_multitable';
+  tables: Record<string, KibanaDatatable>;
 }
-
-// TableSpec is managed by visualizations
-export type TableSpec = TableSpecColumn[];
 
 // This is a temporary type definition, to be replaced with
 // the official Kibana Datatable type definition.
@@ -139,7 +155,7 @@ export interface KibanaDatatable {
 
 export interface VisualizationProps<T = unknown> {
   dragDropContext: DragContextState;
-  datasource: DatasourcePublicAPI;
+  frame: FramePublicAPI;
   state: T;
   setState: (newState: T) => void;
 }
@@ -159,15 +175,22 @@ export interface VisualizationSuggestion<T = unknown> {
   previewIcon: string;
 }
 
+export interface FramePublicAPI {
+  datasourceLayers: Record<string, DatasourcePublicAPI>;
+  // Adds a new layer. This has a side effect of updating the datasource state
+  addNewLayer: () => string;
+  removeLayer: (layerId: string) => void;
+}
+
 export interface Visualization<T = unknown, P = unknown> {
   // For initializing from saved object
-  initialize: (datasource: DatasourcePublicAPI, state?: P) => T;
+  initialize: (frame: FramePublicAPI, state?: P) => T;
 
   getPersistableState: (state: T) => P;
 
   renderConfigPanel: (domElement: Element, props: VisualizationProps<T>) => void;
 
-  toExpression: (state: T, datasource: DatasourcePublicAPI) => Ast | string | null;
+  toExpression: (state: T, frame: FramePublicAPI) => Ast | string | null;
 
   // The frame will call this function on all visualizations when the table changes, or when
   // rendering additional ways of using the data

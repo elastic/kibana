@@ -148,19 +148,25 @@ describe('getOperationTypesForField', () => {
       state = {
         indexPatterns: expectedIndexPatterns,
         currentIndexPatternId: '1',
-        columnOrder: ['col1'],
-        columns: {
-          col1: {
-            operationId: 'op1',
-            label: 'Date Histogram of timestamp',
-            dataType: 'date',
-            isBucketed: true,
+        layers: {
+          first: {
+            indexPatternId: '1',
+            columnOrder: ['col1'],
+            columns: {
+              col1: {
+                operationId: 'op1',
+                label: 'Date Histogram of timestamp',
+                dataType: 'date',
+                isBucketed: true,
 
-            // Private
-            operationType: 'date_histogram',
-            sourceField: 'timestamp',
-            params: {
-              interval: 'h',
+                // Private
+                operationType: 'date_histogram',
+                sourceField: 'timestamp',
+                indexPatternId: '1',
+                params: {
+                  interval: 'h',
+                },
+              },
             },
           },
         },
@@ -168,16 +174,22 @@ describe('getOperationTypesForField', () => {
     });
 
     it('should include priority', () => {
-      const columns = getPotentialColumns(
-        state.indexPatterns[state.currentIndexPatternId].fields,
-        1
-      );
+      const columns = getPotentialColumns({
+        fields: state.indexPatterns[state.currentIndexPatternId].fields,
+        suggestedPriority: 1,
+        layerId: 'first',
+        layer: state.layers.first,
+      });
 
-      expect(columns.every(col => col.suggestedOrder === 1)).toEqual(true);
+      expect(columns.every(col => col.suggestedPriority === 1)).toEqual(true);
     });
 
     it('should list operations by field for a regular index pattern', () => {
-      const columns = getPotentialColumns(state.indexPatterns[state.currentIndexPatternId].fields);
+      const columns = getPotentialColumns({
+        fields: state.indexPatterns[state.currentIndexPatternId].fields,
+        layerId: 'first',
+        layer: state.layers.first,
+      });
 
       expect(
         columns.map(col => [hasField(col) ? col.sourceField : '_documents_', col.operationType])

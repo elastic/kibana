@@ -9,8 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiButton, EuiFormRow } from '@elastic/eui';
 import { Query } from '../../../../../../../src/legacy/core_plugins/data/public/query';
-import { FilterRatioIndexPatternColumn, IndexPatternColumn } from '../indexpattern';
-import { DimensionPriority } from '../../types';
+import { FilterRatioIndexPatternColumn } from '../indexpattern';
 import { OperationDefinition } from '../operations';
 import { updateColumnParam } from '../state_helpers';
 
@@ -21,11 +20,7 @@ export const filterRatioOperation: OperationDefinition<FilterRatioIndexPatternCo
   }),
   isApplicableWithoutField: true,
   isApplicableForField: () => false,
-  buildColumn(
-    operationId: string,
-    _columns: Partial<Record<string, IndexPatternColumn>>,
-    suggestedOrder?: DimensionPriority
-  ): FilterRatioIndexPatternColumn {
+  buildColumn({ operationId, suggestedPriority, indexPatternId }) {
     return {
       operationId,
       label: i18n.translate('xpack.lens.indexPattern.filterRatio', {
@@ -33,8 +28,9 @@ export const filterRatioOperation: OperationDefinition<FilterRatioIndexPatternCo
       }),
       dataType: 'number',
       operationType: 'filter_ratio',
-      suggestedOrder,
+      suggestedPriority,
       isBucketed: false,
+      indexPatternId,
       params: {
         numerator: { language: 'kuery', query: '' },
         denominator: { language: 'kuery', query: '' },
@@ -59,7 +55,7 @@ export const filterRatioOperation: OperationDefinition<FilterRatioIndexPatternCo
       ],
     },
   }),
-  paramEditor: ({ state, setState, columnId: currentColumnId, dataPlugin, storage }) => {
+  paramEditor: ({ state, setState, columnId: currentColumnId, dataPlugin, storage, layerId }) => {
     const [hasDenominator, setDenominator] = useState(false);
 
     const { QueryBarInput } = dataPlugin!.query.ui;
@@ -75,7 +71,8 @@ export const filterRatioOperation: OperationDefinition<FilterRatioIndexPatternCo
             appName={'lens'}
             indexPatterns={[state.currentIndexPatternId]}
             query={
-              (state.columns[currentColumnId] as FilterRatioIndexPatternColumn).params.numerator
+              (state.layers[layerId].columns[currentColumnId] as FilterRatioIndexPatternColumn)
+                .params.numerator
             }
             screenTitle={''}
             store={storage}
@@ -83,7 +80,8 @@ export const filterRatioOperation: OperationDefinition<FilterRatioIndexPatternCo
               setState(
                 updateColumnParam(
                   state,
-                  state.columns[currentColumnId] as FilterRatioIndexPatternColumn,
+                  layerId,
+                  state.layers[layerId].columns[currentColumnId] as FilterRatioIndexPatternColumn,
                   'numerator',
                   newQuery
                 )
@@ -102,7 +100,8 @@ export const filterRatioOperation: OperationDefinition<FilterRatioIndexPatternCo
               appName={'lens'}
               indexPatterns={[state.currentIndexPatternId]}
               query={
-                (state.columns[currentColumnId] as FilterRatioIndexPatternColumn).params.denominator
+                (state.layers[layerId].columns[currentColumnId] as FilterRatioIndexPatternColumn)
+                  .params.denominator
               }
               screenTitle={''}
               store={storage}
@@ -110,7 +109,8 @@ export const filterRatioOperation: OperationDefinition<FilterRatioIndexPatternCo
                 setState(
                   updateColumnParam(
                     state,
-                    state.columns[currentColumnId] as FilterRatioIndexPatternColumn,
+                    layerId,
+                    state.layers[layerId].columns[currentColumnId] as FilterRatioIndexPatternColumn,
                     'denominator',
                     newQuery
                   )

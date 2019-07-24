@@ -17,35 +17,42 @@ export function updateColumnParam<
   K extends keyof C['params']
 >(
   state: IndexPatternPrivateState,
+  layerId: string,
   currentColumn: C,
   paramName: K,
   value: C['params'][K]
 ): IndexPatternPrivateState {
-  const columnId = Object.entries(state.columns).find(
+  const columnId = Object.entries(state.layers[layerId].columns).find(
     ([_columnId, column]) => column === currentColumn
   )![0];
 
-  if (!('params' in state.columns[columnId])) {
+  if (!('params' in state.layers[layerId].columns[columnId])) {
     throw new Error('Invariant: no params in this column');
   }
 
   return {
     ...state,
-    columns: {
-      ...state.columns,
-      [columnId]: ({
-        ...currentColumn,
-        params: {
-          ...currentColumn.params,
-          [paramName]: value,
+    layers: {
+      ...state.layers,
+      [layerId]: {
+        ...state.layers[layerId],
+        columns: {
+          ...state.layers[layerId].columns,
+          [columnId]: ({
+            ...currentColumn,
+            params: {
+              ...currentColumn.params,
+              [paramName]: value,
+            },
+          } as unknown) as IndexPatternColumn,
         },
-      } as unknown) as IndexPatternColumn,
+      },
     },
   };
 }
 
 function adjustColumnReferencesForChangedColumn(
-  columns: IndexPatternPrivateState['columns'],
+  columns: Record<string, IndexPatternColumn>,
   columnId: string
 ) {
   const newColumns = { ...columns };
@@ -63,25 +70,32 @@ function adjustColumnReferencesForChangedColumn(
   return newColumns;
 }
 
-export function changeColumn(
-  state: IndexPatternPrivateState,
-  columnId: string,
-  newColumn: IndexPatternColumn,
-  { keepParams }: { keepParams: boolean } = { keepParams: true }
-) {
-  const oldColumn = state.columns[columnId];
+export function changeColumn({
+  state,
+  layerId,
+  columnId,
+  newColumn,
+  keepParams,
+}: {
+  state: IndexPatternPrivateState;
+  layerId: string;
+  columnId: string;
+  newColumn: IndexPatternColumn;
+  keepParams?: boolean;
+}): IndexPatternPrivateState {
+  const oldColumn = state.layers[layerId].columns[columnId];
 
   const updatedColumn =
-    keepParams &&
+    (typeof keepParams === 'boolean' ? keepParams : true) &&
     oldColumn &&
     oldColumn.operationType === newColumn.operationType &&
     'params' in oldColumn
       ? ({ ...newColumn, params: oldColumn.params } as IndexPatternColumn)
       : newColumn;
 
-  const newColumns: IndexPatternPrivateState['columns'] = adjustColumnReferencesForChangedColumn(
+  const newColumns = adjustColumnReferencesForChangedColumn(
     {
-      ...state.columns,
+      ...state.layers[layerId].columns,
       [columnId]: updatedColumn,
     },
     columnId
@@ -89,37 +103,56 @@ export function changeColumn(
 
   return {
     ...state,
-    columnOrder: getColumnOrder(newColumns),
-    columns: newColumns,
+    layers: {
+      ...state.layers,
+      [layerId]: {
+        ...state.layers[layerId],
+        columnOrder: getColumnOrder(newColumns),
+        columns: newColumns,
+      },
+    },
   };
 }
 
-export function deleteColumn(state: IndexPatternPrivateState, columnId: string) {
-  const columns: IndexPatternPrivateState['columns'] = {
-    ...state.columns,
-  };
-  delete columns[columnId];
-
-  const newColumns = adjustColumnReferencesForChangedColumn(columns, columnId);
+export function deleteColumn({
+  state,
+  layerId,
+  columnId,
+}: {
+  state: IndexPatternPrivateState;
+  layerId: string;
+  columnId: string;
+}): IndexPatternPrivateState {
+  const newColumns = adjustColumnReferencesForChangedColumn(
+    state.layers[layerId].columns,
+    columnId
+  );
+  delete newColumns[columnId];
 
   return {
     ...state,
-    columnOrder: getColumnOrder(newColumns),
-    columns: newColumns,
+    layers: {
+      ...state.layers,
+      [layerId]: {
+        ...state.layers[layerId],
+        columnOrder: getColumnOrder(newColumns),
+        columns: newColumns,
+      },
+    },
   };
 }
 
 export function getColumnOrder(columns: Record<string, IndexPatternColumn>): string[] {
   const entries = Object.entries(columns);
 
-  const [aggregations, metrics] = _.partition(entries, col => col[1].isBucketed);
+  const [aggregations, metrics] = _.partition(entries, ([id, col]) => col.isBucketed);
 
   return aggregations
     .sort(([id, col], [id2, col2]) => {
       return (
         // Sort undefined orders last
-        (col.suggestedOrder !== undefined ? col.suggestedOrder : Number.MAX_SAFE_INTEGER) -
-        (col2.suggestedOrder !== undefined ? col2.suggestedOrder : Number.MAX_SAFE_INTEGER)
+        (col.suggestedPriority !== undefined ? col.suggestedPriority : Number.MAX_SAFE_INTEGER) -
+        (col2.suggestedPriority !== undefined ? col2.suggestedPriority : Number.MAX_SAFE_INTEGER)
       );
     })
     .map(([id]) => id)

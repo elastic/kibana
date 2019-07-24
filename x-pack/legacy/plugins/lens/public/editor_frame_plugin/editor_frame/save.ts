@@ -8,7 +8,7 @@ import { Action, EditorFrameState } from './state_management';
 import { Document } from '../../persistence/saved_object_store';
 
 export interface Props {
-  datasource: { getPersistableState: (state: unknown) => unknown };
+  activeDatasources: Record<string, { getPersistableState: (state: unknown) => unknown }>;
   dispatch: (value: Action) => void;
   redirectTo: (path: string) => void;
   state: EditorFrameState;
@@ -17,7 +17,7 @@ export interface Props {
 }
 
 export async function save({
-  datasource,
+  activeDatasources,
   dispatch,
   redirectTo,
   state,
@@ -27,14 +27,19 @@ export async function save({
   try {
     dispatch({ type: 'SAVING', isSaving: true });
 
+    const datasourceStates: Record<string, unknown> = {};
+    Object.entries(activeDatasources).forEach(([id, datasource]) => {
+      datasourceStates[id] = datasource.getPersistableState(state.datasourceStates[id].state);
+    });
+
     const doc = await store.save({
       id: state.persistedId,
       title: state.title,
       type: 'lens',
       visualizationType: state.visualization.activeId,
-      datasourceType: state.datasource.activeId,
+      activeDatasourceId: state.activeDatasourceId!,
       state: {
-        datasource: datasource.getPersistableState(state.datasource.state),
+        datasourceStates,
         visualization: visualization.getPersistableState(state.visualization.state),
       },
     });

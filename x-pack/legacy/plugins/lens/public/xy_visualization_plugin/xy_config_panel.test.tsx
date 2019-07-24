@@ -9,45 +9,35 @@ import { ReactWrapper } from 'enzyme';
 import { mountWithIntl as mount } from 'test_utils/enzyme_helpers';
 import { EuiButtonGroupProps } from '@elastic/eui';
 import { XYConfigPanel } from './xy_config_panel';
-import { DatasourcePublicAPI, DatasourceDimensionPanelProps, Operation } from '../types';
-import { State, SeriesType } from './types';
+import { DatasourceDimensionPanelProps, Operation, FramePublicAPI } from '../types';
+import { State } from './types';
 import { Position } from '@elastic/charts';
 import { NativeRendererProps } from '../native_renderer';
 import { generateId } from '../id_generator';
+import { createMockFramePublicAPI, createMockDatasource } from '../editor_frame_plugin/mocks';
 
 jest.mock('../id_generator');
 
 describe('XYConfigPanel', () => {
   const dragDropContext = { dragging: undefined, setDragging: jest.fn() };
 
-  function mockDatasource(): DatasourcePublicAPI {
-    return {
-      duplicateColumn: () => [],
-      getOperationForColumnId: () => null,
-      getTableSpec: () => [],
-      moveColumnTo: () => {},
-      removeColumnInTableSpec: () => [],
-      renderDimensionPanel: () => {},
-    };
-  }
+  let frame: FramePublicAPI;
 
   function testState(): State {
     return {
       legend: { isVisible: true, position: Position.Right },
-      seriesType: 'bar',
-      splitSeriesAccessors: [],
-      x: {
-        accessor: 'foo',
-        position: Position.Bottom,
-        showGridlines: true,
-        title: 'X',
-      },
-      y: {
-        accessors: ['bar'],
-        position: Position.Left,
-        showGridlines: true,
-        title: 'Y',
-      },
+      layers: [
+        {
+          seriesType: 'bar',
+          layerId: 'first',
+          splitAccessor: 'baz',
+          xAccessor: 'foo',
+          position: Position.Bottom,
+          showGridlines: true,
+          title: 'X',
+          accessors: ['bar'],
+        },
+      ],
     };
   }
 
@@ -58,13 +48,27 @@ describe('XYConfigPanel', () => {
       .props();
   }
 
-  test('disables stacked chart types without a split series', () => {
+  beforeEach(() => {
+    frame = createMockFramePublicAPI();
+    frame.datasourceLayers = {
+      first: createMockDatasource().publicAPIMock,
+    };
+  });
+
+  test.skip('toggles axis position when going from horizontal bar to any other type', () => {});
+  test.skip('allows toggling of legend visibility', () => {});
+  test.skip('allows changing legend position', () => {});
+  test.skip('allows toggling the y axis gridlines', () => {});
+  test.skip('allows toggling the x axis gridlines', () => {});
+
+  test('enables stacked chart types even when there is no split series', () => {
+    const state = testState();
     const component = mount(
       <XYConfigPanel
         dragDropContext={dragDropContext}
-        datasource={mockDatasource()}
-        setState={() => {}}
-        state={testState()}
+        frame={frame}
+        setState={jest.fn()}
+        state={{ ...state, layers: [{ ...state.layers[0], xAccessor: 'shazm' }] }}
       />
     );
 
@@ -83,169 +87,18 @@ describe('XYConfigPanel', () => {
       'horizontal_bar_stacked',
     ]);
 
-    expect(options.filter(({ isDisabled }) => isDisabled).map(({ id }) => id)).toEqual([
-      'area_stacked',
-      'bar_stacked',
-      'horizontal_bar_stacked',
-    ]);
+    expect(options.filter(({ isDisabled }) => isDisabled).map(({ id }) => id)).toEqual([]);
   });
 
-  test('enables all stacked chart types when there is a split series', () => {
-    const component = mount(
-      <XYConfigPanel
-        dragDropContext={dragDropContext}
-        datasource={mockDatasource()}
-        setState={() => {}}
-        state={{ ...testState(), splitSeriesAccessors: ['c'] }}
-      />
-    );
-
-    const options = component
-      .find('[data-test-subj="lnsXY_seriesType"]')
-      .first()
-      .prop('options') as EuiButtonGroupProps['options'];
-
-    expect(options.every(({ isDisabled }) => !isDisabled)).toEqual(true);
-  });
-
-  test('toggles axis position when going from horizontal bar to any other type', () => {
-    const changeSeriesType = (fromSeriesType: SeriesType, toSeriesType: SeriesType) => {
-      const setState = jest.fn();
-      const state = testState();
-      const component = mount(
-        <XYConfigPanel
-          dragDropContext={dragDropContext}
-          datasource={mockDatasource()}
-          setState={setState}
-          state={{ ...state, seriesType: fromSeriesType }}
-        />
-      );
-
-      (testSubj(component, 'lnsXY_seriesType').onChange as Function)(toSeriesType);
-
-      expect(setState).toHaveBeenCalledTimes(1);
-      return setState.mock.calls[0][0];
-    };
-
-    expect(changeSeriesType('line', 'horizontal_bar')).toMatchObject({
-      seriesType: 'horizontal_bar',
-      x: { position: Position.Left },
-      y: { position: Position.Bottom },
-    });
-    expect(changeSeriesType('horizontal_bar', 'bar')).toMatchObject({
-      seriesType: 'bar',
-      x: { position: Position.Bottom },
-      y: { position: Position.Left },
-    });
-    expect(changeSeriesType('horizontal_bar', 'line')).toMatchObject({
-      seriesType: 'line',
-      x: { position: Position.Bottom },
-      y: { position: Position.Left },
-    });
-    expect(changeSeriesType('horizontal_bar', 'area')).toMatchObject({
-      seriesType: 'area',
-      x: { position: Position.Bottom },
-      y: { position: Position.Left },
-    });
-  });
-
-  test('allows toggling of legend visibility', () => {
-    const toggleIsVisible = (isVisible: boolean) => {
-      const setState = jest.fn();
-      const state = testState();
-      const component = mount(
-        <XYConfigPanel
-          dragDropContext={dragDropContext}
-          datasource={mockDatasource()}
-          setState={setState}
-          state={{ ...state, legend: { ...state.legend, isVisible } }}
-        />
-      );
-
-      (testSubj(component, 'lnsXY_legendIsVisible').onChange as Function)();
-
-      expect(setState).toHaveBeenCalledTimes(1);
-      return setState.mock.calls[0][0];
-    };
-
-    expect(toggleIsVisible(false)).toMatchObject({
-      legend: { isVisible: true },
-    });
-    expect(toggleIsVisible(true)).toMatchObject({
-      legend: { isVisible: false },
-    });
-  });
-
-  test('allows changing legend position', () => {
-    const testLegendPosition = (position: Position) => {
-      const setState = jest.fn();
-      const component = mount(
-        <XYConfigPanel
-          dragDropContext={dragDropContext}
-          datasource={mockDatasource()}
-          setState={setState}
-          state={testState()}
-        />
-      );
-
-      (testSubj(component, 'lnsXY_legendPosition').onChange as Function)(position);
-
-      expect(setState).toHaveBeenCalledTimes(1);
-      return setState.mock.calls[0][0];
-    };
-
-    expect(testLegendPosition(Position.Bottom)).toMatchObject({
-      legend: { position: Position.Bottom },
-    });
-    expect(testLegendPosition(Position.Top)).toMatchObject({
-      legend: { position: Position.Top },
-    });
-    expect(testLegendPosition(Position.Left)).toMatchObject({
-      legend: { position: Position.Left },
-    });
-    expect(testLegendPosition(Position.Right)).toMatchObject({
-      legend: { position: Position.Right },
-    });
-  });
-
-  test('allows editing the x axis title', () => {
-    const testSetTitle = (title: string) => {
-      const setState = jest.fn();
-      const component = mount(
-        <XYConfigPanel
-          dragDropContext={dragDropContext}
-          datasource={mockDatasource()}
-          setState={setState}
-          state={testState()}
-        />
-      );
-
-      (testSubj(component, 'lnsXY_xTitle').onChange as Function)({ target: { value: title } });
-
-      expect(setState).toHaveBeenCalledTimes(1);
-      return setState.mock.calls[0][0];
-    };
-
-    expect(testSetTitle('Hoi')).toMatchObject({
-      x: { title: 'Hoi' },
-    });
-    expect(testSetTitle('There!')).toMatchObject({
-      x: { title: 'There!' },
-    });
-  });
-
-  test('the x dimension panel accepts any operations', () => {
-    const datasource = {
-      ...mockDatasource(),
-      renderDimensionPanel: jest.fn(),
-    };
+  test('the x dimension panel accepts only bucketed operations', () => {
+    // TODO: this should eventually also accept raw operation
     const state = testState();
     const component = mount(
       <XYConfigPanel
         dragDropContext={dragDropContext}
-        datasource={datasource}
+        frame={frame}
         setState={jest.fn()}
-        state={{ ...state, x: { ...state.x, accessor: 'shazm' } }}
+        state={{ ...state, layers: [{ ...state.layers[0], xAccessor: 'shazm' }] }}
       />
     );
 
@@ -258,87 +111,39 @@ describe('XYConfigPanel', () => {
       isBucketed: false,
       label: 'bar',
     };
+    const bucketedOps: Operation[] = [
+      { ...exampleOperation, isBucketed: true, dataType: 'number' },
+      { ...exampleOperation, isBucketed: true, dataType: 'string' },
+      { ...exampleOperation, isBucketed: true, dataType: 'boolean' },
+      { ...exampleOperation, isBucketed: true, dataType: 'date' },
+    ];
     const ops: Operation[] = [
+      ...bucketedOps,
       { ...exampleOperation, dataType: 'number' },
       { ...exampleOperation, dataType: 'string' },
       { ...exampleOperation, dataType: 'boolean' },
       { ...exampleOperation, dataType: 'date' },
     ];
     expect(columnId).toEqual('shazm');
-    expect(ops.filter(filterOperations)).toEqual(ops);
-  });
-
-  test('allows toggling the x axis gridlines', () => {
-    const toggleXGridlines = (showGridlines: boolean) => {
-      const setState = jest.fn();
-      const state = testState();
-      const component = mount(
-        <XYConfigPanel
-          dragDropContext={dragDropContext}
-          datasource={mockDatasource()}
-          setState={setState}
-          state={{ ...state, x: { ...state.x, showGridlines } }}
-        />
-      );
-
-      (testSubj(component, 'lnsXY_xShowGridlines').onChange as Function)();
-
-      expect(setState).toHaveBeenCalledTimes(1);
-      return setState.mock.calls[0][0];
-    };
-
-    expect(toggleXGridlines(true)).toMatchObject({
-      x: { showGridlines: false },
-    });
-    expect(toggleXGridlines(false)).toMatchObject({
-      x: { showGridlines: true },
-    });
-  });
-
-  test('allows editing the y axis title', () => {
-    const testSetTitle = (title: string) => {
-      const setState = jest.fn();
-      const component = mount(
-        <XYConfigPanel
-          dragDropContext={dragDropContext}
-          datasource={mockDatasource()}
-          setState={setState}
-          state={testState()}
-        />
-      );
-
-      (testSubj(component, 'lnsXY_yTitle').onChange as Function)({ target: { value: title } });
-
-      expect(setState).toHaveBeenCalledTimes(1);
-      return setState.mock.calls[0][0];
-    };
-
-    expect(testSetTitle('Hoi')).toMatchObject({
-      y: { title: 'Hoi' },
-    });
-    expect(testSetTitle('There!')).toMatchObject({
-      y: { title: 'There!' },
-    });
+    expect(ops.filter(filterOperations)).toEqual(bucketedOps);
   });
 
   test('the y dimension panel accepts numeric operations', () => {
-    const datasource = {
-      ...mockDatasource(),
-      renderDimensionPanel: jest.fn(),
-    };
     const state = testState();
     const component = mount(
       <XYConfigPanel
         dragDropContext={dragDropContext}
-        datasource={datasource}
+        frame={frame}
         setState={jest.fn()}
-        state={{ ...state, y: { ...state.y, accessors: ['a', 'b', 'c'] } }}
+        state={{ ...state, layers: [{ ...state.layers[0], accessors: ['a', 'b', 'c'] }] }}
       />
     );
 
-    const panel = testSubj(component, 'lnsXY_yDimensionPanel_a');
-    const nativeProps = (panel as NativeRendererProps<DatasourceDimensionPanelProps>).nativeProps;
-    const { filterOperations } = nativeProps;
+    const filterOperations = component
+      .find('[data-test-subj="lensXY_yDimensionPanel"]')
+      .first()
+      .prop('filterOperations') as (op: Operation) => boolean;
+
     const exampleOperation: Operation = {
       dataType: 'number',
       id: 'foo',
@@ -355,98 +160,123 @@ describe('XYConfigPanel', () => {
   });
 
   test('allows removal of y dimensions', () => {
-    const removeColumnInTableSpec = jest.fn();
-    const datasource = {
-      ...mockDatasource(),
-      removeColumnInTableSpec,
-    };
     const setState = jest.fn();
     const state = testState();
     const component = mount(
       <XYConfigPanel
         dragDropContext={dragDropContext}
-        datasource={datasource}
+        frame={frame}
         setState={setState}
-        state={{ ...state, y: { ...state.y, accessors: ['a', 'b', 'c'] } }}
+        state={{ ...state, layers: [{ ...state.layers[0], accessors: ['a', 'b', 'c'] }] }}
       />
     );
 
-    (testSubj(component, 'lnsXY_yDimensionPanel_remove_b').onClick as Function)();
+    const onRemove = component
+      .find('[data-test-subj="lensXY_yDimensionPanel"]')
+      .first()
+      .prop('onRemove') as (accessor: string) => {};
+
+    onRemove('b');
 
     expect(setState).toHaveBeenCalledTimes(1);
     expect(setState.mock.calls[0][0]).toMatchObject({
-      y: { accessors: ['a', 'c'] },
+      layers: [
+        {
+          ...state.layers[0],
+          accessors: ['a', 'c'],
+        },
+      ],
     });
-    expect(removeColumnInTableSpec).toHaveBeenCalledTimes(1);
-    expect(removeColumnInTableSpec).toHaveBeenCalledWith('b');
   });
 
-  test('allows adding y dimensions', () => {
+  test('allows adding a y axis dimension', () => {
     (generateId as jest.Mock).mockReturnValueOnce('zed');
     const setState = jest.fn();
     const state = testState();
     const component = mount(
       <XYConfigPanel
         dragDropContext={dragDropContext}
-        datasource={mockDatasource()}
+        frame={frame}
         setState={setState}
-        state={{ ...state, y: { ...state.y, accessors: ['a', 'b', 'c'] } }}
+        state={{ ...state, layers: [{ ...state.layers[0], accessors: ['a', 'b', 'c'] }] }}
       />
     );
 
-    (testSubj(component, 'lnsXY_yDimensionPanel_add').onClick as Function)();
+    const onAdd = component
+      .find('[data-test-subj="lensXY_yDimensionPanel"]')
+      .first()
+      .prop('onAdd') as () => {};
+
+    onAdd();
 
     expect(setState).toHaveBeenCalledTimes(1);
     expect(setState.mock.calls[0][0]).toMatchObject({
-      y: { accessors: ['a', 'b', 'c', 'zed'] },
+      layers: [
+        {
+          ...state.layers[0],
+          accessors: ['a', 'b', 'c', 'zed'],
+        },
+      ],
     });
   });
 
-  test('allows adding split dimensions', () => {
-    (generateId as jest.Mock).mockReturnValueOnce('foo');
-    const setState = jest.fn();
-    const state = testState();
-    const component = mount(
-      <XYConfigPanel
-        dragDropContext={dragDropContext}
-        datasource={mockDatasource()}
-        setState={setState}
-        state={{ ...state, splitSeriesAccessors: ['a', 'b', 'c'] }}
-      />
-    );
-
-    (testSubj(component, 'lnsXY_splitSeriesDimensionPanel_add').onClick as Function)();
-
-    expect(setState).toHaveBeenCalledTimes(1);
-    expect(setState.mock.calls[0][0]).toMatchObject({
-      splitSeriesAccessors: ['a', 'b', 'c', 'foo'],
-    });
-  });
-
-  test('allows toggling the y axis gridlines', () => {
-    const toggleYGridlines = (showGridlines: boolean) => {
+  describe('layers', () => {
+    it('adds layers', () => {
+      frame.addNewLayer = jest.fn().mockReturnValue('newLayerId');
+      (generateId as jest.Mock).mockReturnValue('accessor');
       const setState = jest.fn();
       const state = testState();
       const component = mount(
         <XYConfigPanel
           dragDropContext={dragDropContext}
-          datasource={mockDatasource()}
+          frame={frame}
           setState={setState}
-          state={{ ...state, y: { ...state.y, showGridlines } }}
+          state={state}
         />
       );
 
-      (testSubj(component, 'lnsXY_yShowGridlines').onChange as Function)();
+      component
+        .find('[data-test-subj="lnsXY_layer_add"]')
+        .first()
+        .simulate('click');
 
+      expect(frame.addNewLayer).toHaveBeenCalled();
       expect(setState).toHaveBeenCalledTimes(1);
-      return setState.mock.calls[0][0];
-    };
-
-    expect(toggleYGridlines(true)).toMatchObject({
-      y: { showGridlines: false },
+      expect(generateId).toHaveBeenCalledTimes(4);
+      expect(setState.mock.calls[0][0]).toMatchObject({
+        layers: [
+          ...state.layers,
+          expect.objectContaining({
+            layerId: 'newLayerId',
+            xAccessor: 'accessor',
+            accessors: ['accessor'],
+            splitAccessor: 'accessor',
+          }),
+        ],
+      });
     });
-    expect(toggleYGridlines(false)).toMatchObject({
-      y: { showGridlines: true },
+    it('removes layers', () => {
+      const setState = jest.fn();
+      const state = testState();
+      const component = mount(
+        <XYConfigPanel
+          dragDropContext={dragDropContext}
+          frame={frame}
+          setState={setState}
+          state={state}
+        />
+      );
+
+      component
+        .find('[data-test-subj="lnsXY_layer_remove"]')
+        .first()
+        .simulate('click');
+
+      expect(frame.removeLayer).toHaveBeenCalled();
+      expect(setState).toHaveBeenCalledTimes(1);
+      expect(setState.mock.calls[0][0]).toMatchObject({
+        layers: [],
+      });
     });
   });
 });
