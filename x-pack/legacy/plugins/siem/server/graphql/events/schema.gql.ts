@@ -41,11 +41,7 @@ export const eventsSchema = gql`
   }
 
   type DetailItem {
-    category: String!
-    description: String
-    example: String
     field: String!
-    type: String!
     values: ToStringArray
     originalValue: EsValue
   }
