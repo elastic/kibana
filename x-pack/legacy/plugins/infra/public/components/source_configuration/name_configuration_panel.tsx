@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiFieldText, EuiForm, EuiFormRow, EuiSpacer, EuiTitle } from '@elastic/eui';
+import { EuiDescribedFormGroup, EuiFieldText, EuiForm, EuiFormRow } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
 
@@ -22,31 +22,42 @@ export const NameConfigurationPanel = ({
   nameFieldProps,
 }: NameConfigurationPanelProps) => (
   <EuiForm>
-    <EuiTitle size="s" data-test-subj="sourceConfigurationNameSectionTitle">
-      <h3>
+    <EuiDescribedFormGroup
+      idAria="Name"
+      title={
+        <h3>
+          <FormattedMessage
+            id="xpack.infra.sourceConfiguration.nameSectionTitle"
+            defaultMessage="Name"
+          />
+        </h3>
+      }
+      titleSize="s"
+      fullWidth={true}
+      description={
         <FormattedMessage
-          id="xpack.infra.sourceConfiguration.nameSectionTitle"
-          defaultMessage="Name"
+          id="xpack.infra.sourceConfiguration.nameDescription"
+          defaultMessage="Which name should be associated with this source configuration."
         />
-      </h3>
-    </EuiTitle>
-    <EuiSpacer size="m" />
-    <EuiFormRow
-      error={nameFieldProps.error}
-      fullWidth
-      isInvalid={nameFieldProps.isInvalid}
-      label={
-        <FormattedMessage id="xpack.infra.sourceConfiguration.nameLabel" defaultMessage="Name" />
       }
     >
-      <EuiFieldText
-        data-test-subj="nameInput"
+      <EuiFormRow
+        error={nameFieldProps.error}
         fullWidth
-        disabled={isLoading}
-        readOnly={readOnly}
-        isLoading={isLoading}
-        {...nameFieldProps}
-      />
-    </EuiFormRow>
+        isInvalid={nameFieldProps.isInvalid}
+        label={
+          <FormattedMessage id="xpack.infra.sourceConfiguration.nameLabel" defaultMessage="Name" />
+        }
+      >
+        <EuiFieldText
+          data-test-subj="nameInput"
+          fullWidth
+          disabled={isLoading}
+          readOnly={readOnly}
+          isLoading={isLoading}
+          {...nameFieldProps}
+        />
+      </EuiFormRow>
+    </EuiDescribedFormGroup>
   </EuiForm>
 );
