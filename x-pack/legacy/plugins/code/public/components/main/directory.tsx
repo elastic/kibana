@@ -51,7 +51,7 @@ const DirectoryNodes = (props: DirectoryNodesProps) => {
   ));
   return (
     <EuiFlexItem className="codeContainer__directoryList">
-      <EuiFlexGroup direction="column">
+      <EuiFlexGroup direction="column" gutterSize="none">
         <EuiFlexItem>
           <EuiTitle size="s">
             <h3>{props.title}</h3>
