@@ -17,13 +17,12 @@
  * under the License.
  */
 
-import { uiModules } from 'ui/modules';
-import { tabifyGetColumns } from 'ui/agg_response/tabify/_get_columns.js';
-import tableVisParamsTemplate from './table_vis_params.html';
 import _ from 'lodash';
+import { tabifyGetColumns } from 'ui/agg_response/tabify/_get_columns';
+import tableVisParamsTemplate from './table_vis_params.html';
 import { i18n } from '@kbn/i18n';
 
-uiModules.get('kibana/table_vis').directive('tableVisParams', function () {
+export function TableVisParams() {
   return {
     restrict: 'E',
     template: tableVisParamsTemplate,
@@ -65,7 +64,7 @@ uiModules.get('kibana/table_vis').directive('tableVisParams', function () {
       );
     },
   };
-});
+}
 
 /**
  * Determines if a aggConfig is numeric

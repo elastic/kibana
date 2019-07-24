@@ -19,10 +19,6 @@ class MockTooltipProperty {
     return this._isFilterable;
   }
 
-  getFilterAction() {
-    return () => {};
-  }
-
   getHtmlDisplayValue() {
     return this._value;
   }
