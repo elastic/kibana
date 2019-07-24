@@ -25,7 +25,7 @@ export const NameConfigurationPanel = ({
     <EuiDescribedFormGroup
       idAria="Name"
       title={
-        <h3>
+        <h3 data-test-subj="sourceConfigurationNameSectionTitle">
           <FormattedMessage
             id="xpack.infra.sourceConfiguration.nameSectionTitle"
             defaultMessage="Name"
