@@ -260,15 +260,15 @@ The `FunctionalTestRunner` comes with three built-in services:
 
 The Kibana functional tests define the vast majority of the actual functionality used by tests.
 
-**retry:**:::
-* Source: {blob}test/functional/services/retry.js[test/functional/services/retry.js]
-* Helpers for retrying operations
+**browser**:::
+* Source: https://github.com/elastic/kibana/blob/master/test/functional/services/browser.ts[test/functional/services/browser.ts]
+* Higher level wrapper for `remote` service, that exposes available browser actions
 * Popular methods:
-** `retry.try(fn)` - execute `fn` in a loop until it succeeds or the default try timeout elapses
-** `retry.tryForTime(ms, fn)` execute fn in a loop until it succeeds or `ms` milliseconds elapses
+** `browser.getWindowSize()`
+** `browser.refresh()`
 
 **testSubjects:**:::
-* Source: {blob}test/functional/services/test_subjects.js[test/functional/services/test_subjects.js]
+* Source: https://github.com/elastic/kibana/blob/master/test/functional/services/test_subjects.ts[test/functional/services/test_subjects.ts]
 * Test subjects are elements that are tagged specifically for selecting from tests
 * Use `testSubjects` over CSS selectors when possible
 * Usage:
@@ -293,14 +293,21 @@ await testSubjects.click(‘containerButton’);
 ** `testSubjects.click(testSubjectSelector)` - Click a test subject in the page; throw if it can't be found after some time
 
 **find:**:::
-* Source: {blob}test/functional/services/find.js[test/functional/services/find.js]
+* Source: https://github.com/elastic/kibana/blob/master/test/functional/services/find.ts[test/functional/services/find.ts]
 * Helpers for `remote.findBy*` methods that log and manage timeouts
 * Popular methods:
 ** `find.byCssSelector()`
 ** `find.allByCssSelector()`
 
+**retry:**:::
+* Source: https://github.com/elastic/kibana/blob/master/test/common/services/retry/retry.ts[test/common/services/retry/retry.ts]
+* Helpers for retrying operations
+* Popular methods:
+** `retry.try(fn, onFailureBlock)` - execute `fn` in a loop until it succeeds or the default try timeout elapses
+** `retry.tryForTime(ms, fn, onFailureBlock)` execute fn in a loop until it succeeds or `ms` milliseconds elapses
+
 **kibanaServer:**:::
-* Source: {blob}test/functional/services/kibana_server/kibana_server.js[test/functional/services/kibana_server/kibana_server.js]
+* Source: https://github.com/elastic/kibana/blob/master/test/common/services/kibana_server/kibana_server.js[test/common/services/kibana_server/kibana_server.js]
 * Helpers for interacting with Kibana's server
 * Commonly used methods:
 ** `kibanaServer.uiSettings.update()`
@@ -308,7 +315,7 @@ await testSubjects.click(‘containerButton’);
 ** `kibanaServer.status.getOverallState()`
 
 **esArchiver:**:::
-* Source: {blob}test/functional/services/es_archiver.js[test/functional/services/es_archiver.js]
+* Source: https://github.com/elastic/kibana/blob/master/test/common/services/es_archiver.ts[test/common/services/es_archiver.ts]
 * Load/unload archives created with the `esArchiver`
 * Popular methods:
 ** `esArchiver.load(name)`
@@ -325,17 +332,15 @@ await testSubjects.click(‘containerButton’);
 
 **Low-level utilities:**:::
 * es
-** Source: {blob}test/functional/services/es.js[test/functional/services/es.js]
+** Source: https://github.com/elastic/kibana/blob/master/test/common/services/es.ts[test/common/services/es.ts]
 ** Elasticsearch client
 ** Higher level options: `kibanaServer.uiSettings` or `esArchiver`
 * remote
 ** Source: https://github.com/elastic/kibana/blob/master/test/functional/services/remote/remote.ts[test/functional/services/remote/remote.ts]
 ** Instance of https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/index_exports_WebDriver.html[WebDriver] class
 ** Responsible for all communication with the browser
-* browser
-** Source: https://github.com/elastic/kibana/blob/master/test/functional/services/browser.ts[test/functional/services/browser.ts]
-** Higher level wrapper for `remote` service, that exposes available browser actions
-** For searching and manipulating with DOM elements use `testSubjects` or `find` services
+** To perform browser actions use `remote` service 
+** For searching and manipulating with DOM elements use `testSubjects` and `find` services
 ** See the https://seleniumhq.github.io/selenium/docs/api/javascript/[selenium-webdriver docs] for full API
 
 [float]
