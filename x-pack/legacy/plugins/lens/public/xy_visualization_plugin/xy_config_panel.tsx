@@ -11,6 +11,7 @@ import {
   EuiButton,
   EuiButtonGroup,
   EuiFlexGroup,
+  EuiFlexItem,
   EuiForm,
   EuiFormRow,
   EuiPanel,
@@ -152,21 +153,18 @@ export function XYConfigPanel(props: VisualizationProps<State>) {
       {state.layers.map((layer, index) => (
         <EuiFormRow key={layer.layerId} data-test-subj={`lnsXY_layer_${layer.layerId}`}>
           <EuiPanel>
-            {/* <EuiFormRow
-              label={i18n.translate('xpack.lens.xyChart.layerLabel', {
-                defaultMessage: 'Layer',
-              })}
-            > */}
-            <>
-              <EuiPopover
-                id="lnsXY_layer"
-                isOpen={localState.openLayerId === layer.layerId}
-                closePopover={() => {
-                  setLocalState({ ...localState, openLayerId: null });
-                }}
-                button={
-                  <EuiFormRow>
-                    <EuiFlexGroup>
+            <EuiPopover
+              id="lnsXY_layer"
+              isOpen={localState.openLayerId === layer.layerId}
+              closePopover={() => {
+                setLocalState({ ...localState, openLayerId: null });
+              }}
+              className="eui-fullWidth"
+              anchorClassName="eui-fullWidth"
+              button={
+                <EuiFormRow>
+                  <EuiFlexGroup>
+                    <EuiFlexItem>
                       <EuiButtonIcon
                         iconType="gear"
                         data-test-subj="lnsXY_layer_advanced"
@@ -177,67 +175,70 @@ export function XYConfigPanel(props: VisualizationProps<State>) {
                           setLocalState({ ...localState, openLayerId: layer.layerId });
                         }}
                       />
+                    </EuiFlexItem>
 
+                    <EuiFlexItem>
                       <EuiIcon
                         type={chartTypeIcons.find(icon => icon.id === layer.seriesType)!.iconType}
                       />
+                    </EuiFlexItem>
 
+                    <EuiFlexItem>
                       <NativeRenderer
                         data-test-subj="lnsXY_layerHeader"
                         render={props.frame.datasourceLayers[layer.layerId].renderLayerPanel}
                         nativeProps={{ layerId: layer.layerId }}
                       />
-                    </EuiFlexGroup>
-                  </EuiFormRow>
-                }
-              >
-                <>
-                  <EuiFormRow
-                    label={i18n.translate('xpack.lens.xyChart.chartTypeLabel', {
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                </EuiFormRow>
+              }
+            >
+              <>
+                <EuiFormRow
+                  label={i18n.translate('xpack.lens.xyChart.chartTypeLabel', {
+                    defaultMessage: 'Chart type',
+                  })}
+                >
+                  <EuiButtonGroup
+                    legend={i18n.translate('xpack.lens.xyChart.chartTypeLegend', {
                       defaultMessage: 'Chart type',
                     })}
-                  >
-                    <EuiButtonGroup
-                      legend={i18n.translate('xpack.lens.xyChart.chartTypeLegend', {
-                        defaultMessage: 'Chart type',
-                      })}
-                      name="chartType"
-                      className="eui-displayInlineBlock"
-                      data-test-subj="lnsXY_seriesType"
-                      options={chartTypeIcons}
-                      idSelected={layer.seriesType}
-                      onChange={seriesType => {
-                        setState(
-                          updateLayer(
-                            state,
-                            { ...layer, seriesType: seriesType as SeriesType },
-                            index
-                          )
-                        );
-                      }}
-                      isIconOnly
-                    />
-                  </EuiFormRow>
-
-                  <EuiButton
-                    iconType="trash"
-                    color="warning"
-                    size="s"
-                    data-test-subj="lnsXY_layer_remove"
-                    onClick={() => {
-                      frame.removeLayer(layer.layerId);
-                      setState({ ...state, layers: state.layers.filter(l => l !== layer) });
+                    name="chartType"
+                    className="eui-displayInlineBlock"
+                    data-test-subj="lnsXY_seriesType"
+                    options={chartTypeIcons}
+                    idSelected={layer.seriesType}
+                    onChange={seriesType => {
+                      setState(
+                        updateLayer(
+                          state,
+                          { ...layer, seriesType: seriesType as SeriesType },
+                          index
+                        )
+                      );
                     }}
-                  >
-                    <FormattedMessage
-                      id="xpack.lens.xyChart.removeLayer"
-                      defaultMessage="Remove Layer"
-                    />
-                  </EuiButton>
-                </>
-              </EuiPopover>
-            </>
-            {/* </EuiFormRow> */}
+                    isIconOnly
+                  />
+                </EuiFormRow>
+
+                <EuiButton
+                  iconType="trash"
+                  color="warning"
+                  size="s"
+                  data-test-subj="lnsXY_layer_remove"
+                  onClick={() => {
+                    frame.removeLayer(layer.layerId);
+                    setState({ ...state, layers: state.layers.filter(l => l !== layer) });
+                  }}
+                >
+                  <FormattedMessage
+                    id="xpack.lens.xyChart.removeLayer"
+                    defaultMessage="Remove Layer"
+                  />
+                </EuiButton>
+              </>
+            </EuiPopover>
 
             <EuiFormRow
               label={i18n.translate('xpack.lens.xyChart.xAxisLabel', {
