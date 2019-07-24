@@ -5,7 +5,7 @@
  */
 import { API_BASE_PATH } from '../../../../common/constants';
 import { SlmPolicy } from '../../../../common/types';
-import { UIM_POLICY_DELETE, UIM_POLICY_DELETE_MANY } from '../../constants';
+import { UIM_POLICY_EXECUTE, UIM_POLICY_DELETE, UIM_POLICY_DELETE_MANY } from '../../constants';
 import { httpService } from './http';
 import { useRequest, sendRequest } from './use_request';
 
@@ -20,6 +20,14 @@ export const useLoadPolicy = (name: SlmPolicy['name']) => {
   return useRequest({
     path: httpService.addBasePath(`${API_BASE_PATH}policy/${encodeURIComponent(name)}`),
     method: 'get',
+  });
+};
+
+export const executePolicy = async (name: SlmPolicy['name']) => {
+  return sendRequest({
+    path: httpService.addBasePath(`${API_BASE_PATH}policy/${encodeURIComponent(name)}/run`),
+    method: 'post',
+    uimActionType: UIM_POLICY_EXECUTE,
   });
 };
 

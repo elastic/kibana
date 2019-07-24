@@ -15,6 +15,7 @@ import {
   EuiTitle,
   EuiTabs,
   EuiTab,
+  EuiButton,
 } from '@elastic/eui';
 
 import { SlmPolicy } from '../../../../../../common/types';
@@ -26,13 +27,19 @@ import {
 import { useLoadPolicy } from '../../../../services/http';
 import { uiMetricService } from '../../../../services/ui_metric';
 
-import { SectionError, SectionLoading, PolicyDeleteProvider } from '../../../../components';
+import {
+  SectionError,
+  SectionLoading,
+  PolicyExecuteProvider,
+  PolicyDeleteProvider,
+} from '../../../../components';
 import { TabSummary, TabHistory } from './tabs';
 
 interface Props {
   policyName: SlmPolicy['name'];
   onClose: () => void;
   onPolicyDeleted: (policiesDeleted: Array<SlmPolicy['name']>) => void;
+  onPolicyExecuted: () => void;
 }
 
 const TAB_SUMMARY = 'summary';
@@ -47,6 +54,7 @@ export const PolicyDetails: React.FunctionComponent<Props> = ({
   policyName,
   onClose,
   onPolicyDeleted,
+  onPolicyExecuted,
 }) => {
   const {
     core: { i18n },
@@ -54,7 +62,7 @@ export const PolicyDetails: React.FunctionComponent<Props> = ({
 
   const { FormattedMessage } = i18n;
   const { trackUiMetric } = uiMetricService;
-  const { error, data: policyDetails } = useLoadPolicy(policyName);
+  const { error, data: policyDetails, request: reload } = useLoadPolicy(policyName);
   const [activeTab, setActiveTab] = useState<string>(TAB_SUMMARY);
 
   // Reset tab when we look at a different policy
@@ -196,6 +204,30 @@ export const PolicyDetails: React.FunctionComponent<Props> = ({
                     );
                   }}
                 </PolicyDeleteProvider>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <PolicyExecuteProvider>
+                  {executePolicyPrompt => {
+                    return (
+                      <EuiButton
+                        onClick={() =>
+                          executePolicyPrompt(policyName, () => {
+                            onPolicyExecuted();
+                            reload();
+                          })
+                        }
+                        fill
+                        color="primary"
+                        data-test-subj="srPoicyDetailsExecuteActionButton"
+                      >
+                        <FormattedMessage
+                          id="xpack.snapshotRestore.policyDetails.executeButtonLabel"
+                          defaultMessage="Run policy"
+                        />
+                      </EuiButton>
+                    );
+                  }}
+                </PolicyExecuteProvider>
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>

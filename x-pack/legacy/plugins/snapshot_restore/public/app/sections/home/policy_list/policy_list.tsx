@@ -62,6 +62,10 @@ export const PolicyList: React.FunctionComponent<RouteComponentProps<MatchParams
     }
   };
 
+  const onPolicyExecuted = () => {
+    reload();
+  };
+
   // Track component loaded
   const { trackUiMetric } = uiMetricService;
   useEffect(() => {
@@ -123,6 +127,7 @@ export const PolicyList: React.FunctionComponent<RouteComponentProps<MatchParams
         reload={reload}
         openPolicyDetailsUrl={openPolicyDetailsUrl}
         onPolicyDeleted={onPolicyDeleted}
+        onPolicyExecuted={onPolicyExecuted}
       />
     );
   }
@@ -134,6 +139,7 @@ export const PolicyList: React.FunctionComponent<RouteComponentProps<MatchParams
           policyName={policyName}
           onClose={closePolicyDetails}
           onPolicyDeleted={onPolicyDeleted}
+          onPolicyExecuted={onPolicyExecuted}
         />
       ) : null}
       {content}

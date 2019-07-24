@@ -18,7 +18,11 @@ import {
 import { SlmPolicy } from '../../../../../../common/types';
 import { UIM_POLICY_SHOW_DETAILS_CLICK } from '../../../../constants';
 import { useAppDependencies } from '../../../../index';
-import { FormattedDateTime, PolicyDeleteProvider } from '../../../../components';
+import {
+  FormattedDateTime,
+  PolicyExecuteProvider,
+  PolicyDeleteProvider,
+} from '../../../../components';
 import { uiMetricService } from '../../../../services/ui_metric';
 
 interface Props {
@@ -26,6 +30,7 @@ interface Props {
   reload: () => Promise<void>;
   openPolicyDetailsUrl: (name: SlmPolicy['name']) => string;
   onPolicyDeleted: (policiesDeleted: Array<SlmPolicy['name']>) => void;
+  onPolicyExecuted: () => void;
 }
 
 export const PolicyTable: React.FunctionComponent<Props> = ({
@@ -33,6 +38,7 @@ export const PolicyTable: React.FunctionComponent<Props> = ({
   reload,
   openPolicyDetailsUrl,
   onPolicyDeleted,
+  onPolicyExecuted,
 }) => {
   const {
     core: { i18n },
@@ -101,6 +107,37 @@ export const PolicyTable: React.FunctionComponent<Props> = ({
         defaultMessage: 'Actions',
       }),
       actions: [
+        {
+          render: ({ name }: SlmPolicy) => {
+            return (
+              <PolicyExecuteProvider>
+                {executePolicyPrompt => {
+                  const label = i18n.translate(
+                    'xpack.snapshotRestore.policyList.table.actionExecuteTooltip',
+                    { defaultMessage: 'Run policy' }
+                  );
+                  return (
+                    <EuiToolTip content={label}>
+                      <EuiButtonIcon
+                        aria-label={i18n.translate(
+                          'xpack.snapshotRestore.policyList.table.actionExecuteAriaLabel',
+                          {
+                            defaultMessage: 'Run policy `{name}`',
+                            values: { name },
+                          }
+                        )}
+                        iconType="play"
+                        color="primary"
+                        data-test-subj="executePolicyButton"
+                        onClick={() => executePolicyPrompt(name, onPolicyExecuted)}
+                      />
+                    </EuiToolTip>
+                  );
+                }}
+              </PolicyExecuteProvider>
+            );
+          },
+        },
         {
           render: ({ name }: SlmPolicy) => {
             return (

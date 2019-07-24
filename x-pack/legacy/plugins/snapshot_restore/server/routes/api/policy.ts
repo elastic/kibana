@@ -14,6 +14,7 @@ import { deserializePolicy } from '../../lib';
 export function registerPolicyRoutes(router: Router) {
   router.get('policies', getAllHandler);
   router.get('policy/{name}', getOneHandler);
+  router.post('policy/{name}/run', executeHandler);
   router.delete('policies/{names}', deleteHandler);
 }
 
@@ -62,6 +63,14 @@ export const getOneHandler: RouterRouteHandler = async (
   return {
     policy: deserializePolicy(name, policiesByName[name]),
   };
+};
+
+export const executeHandler: RouterRouteHandler = async (req, callWithRequest) => {
+  const { name } = req.params;
+  const { snapshot_name: snapshotName } = await callWithRequest('slm.executePolicy', {
+    name,
+  });
+  return { snapshotName };
 };
 
 export const deleteHandler: RouterRouteHandler = async (req, callWithRequest) => {
