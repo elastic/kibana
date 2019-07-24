@@ -19,7 +19,6 @@
 
 import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
-import { createTileMapVisualization } from '../tile_map_visualization';
 import LogstashIndexPatternStubProvider from 'fixtures/stubbed_logstash_index_pattern';
 import * as visModule from 'ui/vis';
 import { ImageComparator } from 'test_utils/image_comparator';
@@ -34,6 +33,10 @@ import EMS_TILES from '../../../../ui/public/vis/__tests__/map/ems_mocks/sample_
 import EMS_STYLE_ROAD_MAP_BRIGHT from '../../../../ui/public/vis/__tests__/map/ems_mocks/sample_style_bright';
 import EMS_STYLE_ROAD_MAP_DESATURATED from '../../../../ui/public/vis/__tests__/map/ems_mocks/sample_style_desaturated';
 import EMS_STYLE_DARK_MAP from '../../../../ui/public/vis/__tests__/map/ems_mocks/sample_style_dark';
+import { visualizations } from '../../../visualizations/public';
+
+import { createTileMapVisualization } from '../tile_map_visualization';
+import { createTileMapTypeDefinition } from '../tile_map_type';
 
 function mockRawData() {
   const stack = [dummyESResponse];
@@ -74,11 +77,17 @@ describe('CoordinateMapsVisualizationTest', function () {
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject((Private, $injector) => {
     const serviceSettings = $injector.get('serviceSettings');
+    const uiSettings = $injector.get('config');
 
     dependencies = {
       serviceSettings,
+      uiSettings,
       $injector
     };
+
+    visualizations.types.VisTypesRegistryProvider.register(() =>
+      createTileMapTypeDefinition(dependencies)
+    );
 
     Vis = Private(visModule.VisProvider);
     CoordinateMapsVisualization = createTileMapVisualization(dependencies);
@@ -115,7 +124,7 @@ describe('CoordinateMapsVisualizationTest', function () {
 
       imageComparator = new ImageComparator();
       vis = new Vis(indexPattern, {
-        type: 'region_map'
+        type: 'tile_map'
       });
       vis.params = {
         mapType: 'Scaled Circle Markers',
