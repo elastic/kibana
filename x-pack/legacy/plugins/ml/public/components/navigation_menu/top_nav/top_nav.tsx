@@ -4,42 +4,45 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FC, Fragment, useState, useEffect } from 'react';
+import React, { FC, Fragment, useContext, useState, useEffect } from 'react';
 import { EuiSuperDatePicker } from '@elastic/eui';
-import { TimeHistory, TimeRange } from 'src/legacy/ui/public/timefilter/time_history';
-import { Timefilter } from 'ui/timefilter';
+import { TimeHistory, TimeRange } from 'ui/timefilter/time_history';
 
-interface Props {
-  dateFormat: string;
-  forceRefresh: () => void;
-  timeHistory: TimeHistory;
-  timefilter: Timefilter;
-}
+import { mlTimefilterRefresh$ } from '../../../services/timefilter_refresh_service';
+import { NavigationMenuContext } from '../../../util/context_utils';
 
 interface Duration {
   start: string;
   end: string;
 }
 
-function getRecentlyUsedRanges(timeHistory: TimeHistory): Duration[] {
-  return timeHistory.get().map(({ from, to }: TimeRange) => {
-    return {
-      start: from,
-      end: to,
-    };
-  });
+function getRecentlyUsedRangesFactory(timeHistory: TimeHistory) {
+  return function(): Duration[] {
+    return timeHistory.get().map(({ from, to }: TimeRange) => {
+      return {
+        start: from,
+        end: to,
+      };
+    });
+  };
 }
 
-export const TopNav: FC<Props> = ({ dateFormat, forceRefresh, timeHistory, timefilter }) => {
+export const TopNav: FC = () => {
+  const navigationMenuContext = useContext(NavigationMenuContext);
+  const timefilter = navigationMenuContext.timefilter;
+  const getRecentlyUsedRanges = getRecentlyUsedRangesFactory(navigationMenuContext.timeHistory);
+
   const [refreshInterval, setRefreshInterval] = useState(timefilter.getRefreshInterval());
   const [time, setTime] = useState(timefilter.getTime());
-  const [recentlyUsedRanges, setRecentlyUsedRanges] = useState(getRecentlyUsedRanges(timeHistory));
+  const [recentlyUsedRanges, setRecentlyUsedRanges] = useState(getRecentlyUsedRanges());
   const [isAutoRefreshSelectorEnabled, setIsAutoRefreshSelectorEnabled] = useState(
     timefilter.isAutoRefreshSelectorEnabled
   );
   const [isTimeRangeSelectorEnabled, setIsTimeRangeSelectorEnabled] = useState(
     timefilter.isTimeRangeSelectorEnabled
   );
+
+  const dateFormat = navigationMenuContext.chrome.getUiSettingsClient().get('dateFormat');
 
   useEffect(() => {
     timefilter.on('refreshIntervalUpdate', timefilterUpdateListener);
@@ -70,7 +73,7 @@ export const TopNav: FC<Props> = ({ dateFormat, forceRefresh, timeHistory, timef
     // Update timefilter for controllers listening for changes
     timefilter.setTime(newTime);
     setTime(newTime);
-    setRecentlyUsedRanges(getRecentlyUsedRanges(timeHistory));
+    setRecentlyUsedRanges(getRecentlyUsedRanges());
   }
 
   function updateInterval({
@@ -101,7 +104,7 @@ export const TopNav: FC<Props> = ({ dateFormat, forceRefresh, timeHistory, timef
             isAutoRefreshOnly={!isTimeRangeSelectorEnabled}
             refreshInterval={refreshInterval.value}
             onTimeChange={updateFilter}
-            onRefresh={forceRefresh}
+            onRefresh={() => mlTimefilterRefresh$.next()}
             onRefreshChange={updateInterval}
             recentlyUsedRanges={recentlyUsedRanges}
             dateFormat={dateFormat}
