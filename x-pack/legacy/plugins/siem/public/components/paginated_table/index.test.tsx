@@ -84,7 +84,7 @@ describe('Paginated Table Component', () => {
       );
 
       expect(
-        wrapper.find('[data-test-subj="InitialLoadingPanelPaginatedTable"]').exists()
+        wrapper.find('[data-test-subj="initialLoadingPanelPaginatedTable"]').exists()
       ).toBeTruthy();
     });
 
@@ -111,7 +111,7 @@ describe('Paginated Table Component', () => {
         </ThemeProvider>
       );
 
-      expect(wrapper.find('[data-test-subj="LoadingPanelPaginatedTable"]').exists()).toBeTruthy();
+      expect(wrapper.find('[data-test-subj="loadingPanelPaginatedTable"]').exists()).toBeTruthy();
     });
 
     test('it renders the correct amount of pages and starts at activePage: 0', () => {

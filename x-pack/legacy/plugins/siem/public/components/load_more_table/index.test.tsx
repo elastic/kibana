@@ -66,7 +66,7 @@ describe('Load More Table Component', () => {
       );
 
       expect(
-        wrapper.find('[data-test-subj="InitialLoadingPanelLoadMoreTable"]').exists()
+        wrapper.find('[data-test-subj="initialLoadingPanelLoadMoreTable"]').exists()
       ).toBeTruthy();
     });
 
@@ -91,7 +91,7 @@ describe('Load More Table Component', () => {
         </ThemeProvider>
       );
 
-      expect(wrapper.find('[data-test-subj="LoadingPanelLoadMoreTable"]').exists()).toBeTruthy();
+      expect(wrapper.find('[data-test-subj="loadingPanelLoadMoreTable"]').exists()).toBeTruthy();
     });
 
     test('it renders the loadMore button if need to fetch more', () => {
@@ -145,7 +145,7 @@ describe('Load More Table Component', () => {
       );
 
       expect(
-        wrapper.find('[data-test-subj="InitialLoadingPanelLoadMoreTable"]').exists()
+        wrapper.find('[data-test-subj="initialLoadingPanelLoadMoreTable"]').exists()
       ).toBeFalsy();
       expect(
         wrapper

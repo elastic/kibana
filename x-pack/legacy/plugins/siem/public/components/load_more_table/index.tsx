@@ -204,7 +204,7 @@ export class LoadMoreTable<T, U, V, W, X, Y, Z, AA, AB> extends React.PureCompon
         </HeaderPanel>
 
         {loadingInitial ? (
-          <EuiLoadingContent data-test-subj="InitialLoadingPanelLoadMoreTable" lines={10} />
+          <EuiLoadingContent data-test-subj="initialLoadingPanelLoadMoreTable" lines={10} />
         ) : (
           <>
             <BasicTable
@@ -258,7 +258,7 @@ export class LoadMoreTable<T, U, V, W, X, Y, Z, AA, AB> extends React.PureCompon
               </FooterAction>
             )}
 
-            {loading && <Loader data-test-subj="LoadingPanelLoadMoreTable" overlay size="xl" />}
+            {loading && <Loader data-test-subj="loadingPanelLoadMoreTable" overlay size="xl" />}
           </>
         )}
       </Panel>
