@@ -79,7 +79,7 @@ export function ShardFailureModal({ request, response, title, onClose }: Props) 
     },
     {
       id: 'json-response',
-      name: i18n.translate('common.ui.courier.fetch.shardsFailedModal.tabHeaderRequest', {
+      name: i18n.translate('common.ui.courier.fetch.shardsFailedModal.tabHeaderResponse', {
         defaultMessage: 'Response',
         description: 'Name of the tab displaying the JSON response',
       }),
