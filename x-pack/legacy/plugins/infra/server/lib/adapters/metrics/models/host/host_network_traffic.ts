@@ -9,14 +9,13 @@ import {
   InfraMetricModelMetricType,
   InfraMetricModel,
 } from '../../adapter_types';
-import { InfraMetric } from '../../../../../graphql/types';
 
 export const hostNetworkTraffic: InfraMetricModelCreator = (
   timeField,
   indexPattern,
   interval
 ): InfraMetricModel => ({
-  id: InfraMetric.hostNetworkTraffic,
+  id: 'hostNetworkTraffic',
   requires: ['system.network'],
   index_pattern: indexPattern,
   interval,

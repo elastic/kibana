@@ -43,14 +43,14 @@ export default function ({ getService, getPageObjects }) {
     });
 
     it('hides the chrome', async () => {
-      const isChromeVisible = await PageObjects.common.isChromeVisible();
+      let isChromeVisible = await PageObjects.common.isChromeVisible();
       expect(isChromeVisible).to.be(true);
 
       await PageObjects.dashboard.clickFullScreenMode();
 
       await retry.try(async () => {
-        const isChromeHidden = await PageObjects.common.isChromeHidden();
-        expect(isChromeHidden).to.be(true);
+        isChromeVisible = await PageObjects.common.isChromeVisible();
+        expect(isChromeVisible).to.be(false);
       });
     });
 

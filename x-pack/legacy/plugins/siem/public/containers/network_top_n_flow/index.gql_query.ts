@@ -11,7 +11,7 @@ export const networkTopNFlowQuery = gql`
     $sourceId: ID!
     $flowDirection: FlowDirection!
     $filterQuery: String
-    $pagination: PaginationInputPaginated!
+    $pagination: PaginationInput!
     $sort: NetworkTopNFlowSortField!
     $flowTarget: FlowTarget!
     $timerange: TimerangeInput!
@@ -63,9 +63,10 @@ export const networkTopNFlowQuery = gql`
           }
         }
         pageInfo {
-          activePage
-          fakeTotalCount
-          showMorePagesIndicator
+          endCursor {
+            value
+          }
+          hasNextPage
         }
         inspect @include(if: $inspect) {
           dsl

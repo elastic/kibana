@@ -78,11 +78,11 @@ exports[`Tls Table Component Rendering it renders the default Domains table 1`] 
       },
     ]
   }
-  fakeTotalCount={50}
+  hasNextPage={false}
   id="tls"
-  loadPage={[MockFunction]}
+  loadMore={[MockFunction]}
   loading={false}
-  showMorePagesIndicator={true}
+  nextCursor="10"
   totalCount={1}
   type="details"
 />

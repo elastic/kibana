@@ -17,22 +17,6 @@ export type MetricsExplorerOptionsMetric = MetricsExplorerMetric & {
   label?: string;
 };
 
-export enum MetricsExplorerChartType {
-  line = 'line',
-  area = 'area',
-}
-
-export enum MetricsExplorerYAxisMode {
-  fromZero = 'fromZero',
-  auto = 'auto',
-}
-
-export interface MetricsExplorerChartOptions {
-  type: MetricsExplorerChartType;
-  yAxisMode: MetricsExplorerYAxisMode;
-  stack: boolean;
-}
-
 export interface MetricsExplorerOptions {
   metrics: MetricsExplorerOptionsMetric[];
   limit?: number;
@@ -51,12 +35,6 @@ export const DEFAULT_TIMERANGE: MetricsExplorerTimeOptions = {
   from: 'now-1h',
   to: 'now',
   interval: '>=10s',
-};
-
-export const DEFAULT_CHART_OPTIONS: MetricsExplorerChartOptions = {
-  type: MetricsExplorerChartType.line,
-  yAxisMode: MetricsExplorerYAxisMode.fromZero,
-  stack: false,
 };
 
 export const DEFAULT_METRICS: MetricsExplorerOptionsMetric[] = [
@@ -114,15 +92,9 @@ export const useMetricsExplorerOptions = () => {
     'MetricsExplorerTimeRange',
     DEFAULT_TIMERANGE
   );
-  const [chartOptions, setChartOptions] = useStateWithLocalStorage<MetricsExplorerChartOptions>(
-    'MetricsExplorerChartOptions',
-    DEFAULT_CHART_OPTIONS
-  );
   const [isAutoReloading, setAutoReloading] = useState<boolean>(false);
   return {
     options,
-    chartOptions,
-    setChartOptions,
     currentTimerange,
     isAutoReloading,
     setOptions,

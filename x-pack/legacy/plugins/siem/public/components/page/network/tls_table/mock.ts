@@ -50,8 +50,9 @@ export const mockTlsData: TlsData = {
     },
   ],
   pageInfo: {
-    activePage: 1,
-    fakeTotalCount: 50,
-    showMorePagesIndicator: true,
+    endCursor: {
+      value: '10',
+    },
+    hasNextPage: false,
   },
 };

@@ -15,7 +15,7 @@ import {
   UsersData,
   UsersSortField,
 } from '../../graphql/types';
-import { FrameworkRequest, RequestOptions, RequestOptionsPaginated } from '../framework';
+import { FrameworkRequest, RequestOptions } from '../framework';
 
 import { IpDetailsAdapter } from './types';
 
@@ -25,19 +25,19 @@ export interface IpOverviewRequestOptions extends RequestOptions {
   ip: string;
 }
 
-export interface DomainsRequestOptions extends RequestOptionsPaginated {
+export interface DomainsRequestOptions extends RequestOptions {
   ip: string;
   domainsSortField: DomainsSortField;
   flowTarget: FlowTarget;
   flowDirection: FlowDirection;
 }
 
-export interface TlsRequestOptions extends RequestOptionsPaginated {
+export interface TlsRequestOptions extends RequestOptions {
   ip: string;
   tlsSortField: TlsSortField;
   flowTarget: FlowTarget;
 }
-export interface UsersRequestOptions extends RequestOptionsPaginated {
+export interface UsersRequestOptions extends RequestOptions {
   ip: string;
   usersSortField: UsersSortField;
   flowTarget: FlowTarget;

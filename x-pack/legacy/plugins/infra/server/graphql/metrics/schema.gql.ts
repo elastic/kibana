@@ -35,7 +35,6 @@ export const metricsSchema: any = gql`
     nginxRequestRate
     nginxActiveConnections
     nginxRequestsPerConnection
-    custom
   }
 
   type InfraMetricData {

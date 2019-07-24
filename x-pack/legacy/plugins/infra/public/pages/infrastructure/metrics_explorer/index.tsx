@@ -33,8 +33,6 @@ export const MetricsExplorerPage = injectI18n(
       data,
       currentTimerange,
       options,
-      chartOptions,
-      setChartOptions,
       handleAggregationChange,
       handleMetricsChange,
       handleFilterQuerySubmit,
@@ -66,14 +64,12 @@ export const MetricsExplorerPage = injectI18n(
           derivedIndexPattern={derivedIndexPattern}
           timeRange={currentTimerange}
           options={options}
-          chartOptions={chartOptions}
           onRefresh={handleRefresh}
           onTimeChange={handleTimeChange}
           onGroupByChange={handleGroupByChange}
           onFilterQuerySubmit={handleFilterQuerySubmit}
           onMetricsChange={handleMetricsChange}
           onAggregationChange={handleAggregationChange}
-          onChartOptionsChange={setChartOptions}
         />
         {error ? (
           <NoData
@@ -95,7 +91,6 @@ export const MetricsExplorerPage = injectI18n(
             data={data}
             source={source}
             options={options}
-            chartOptions={chartOptions}
             onLoadMore={handleLoadMore}
             onFilter={handleFilterQuerySubmit}
             onRefetch={handleRefresh}

@@ -9,14 +9,13 @@ import {
   InfraMetricModelMetricType,
   InfraMetricModel,
 } from '../../adapter_types';
-import { InfraMetric } from '../../../../../graphql/types';
 
 export const hostMemoryUsage: InfraMetricModelCreator = (
   timeField,
   indexPattern,
   interval
 ): InfraMetricModel => ({
-  id: InfraMetric.hostMemoryUsage,
+  id: 'hostMemoryUsage',
   requires: ['system.memory'],
   index_pattern: indexPattern,
   interval,

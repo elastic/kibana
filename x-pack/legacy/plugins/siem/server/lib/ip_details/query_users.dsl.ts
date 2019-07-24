@@ -14,7 +14,7 @@ export const buildUsersQuery = ({
   usersSortField,
   filterQuery,
   flowTarget,
-  pagination: { querySize },
+  pagination: { limit },
   defaultIndex,
   sourceConfiguration: {
     fields: { timestamp },
@@ -41,7 +41,7 @@ export const buildUsersQuery = ({
         users: {
           terms: {
             field: 'user.name',
-            size: querySize,
+            size: limit + 1,
             order: {
               ...getQueryOrder(usersSortField),
             },

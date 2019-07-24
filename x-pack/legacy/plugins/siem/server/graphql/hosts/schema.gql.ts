@@ -57,7 +57,7 @@ export const hostsSchema = gql`
   type HostsData {
     edges: [HostsEdges!]!
     totalCount: Float!
-    pageInfo: PageInfoPaginated!
+    pageInfo: PageInfo!
     inspect: Inspect
   }
 
@@ -82,7 +82,7 @@ export const hostsSchema = gql`
     Hosts(
       id: String
       timerange: TimerangeInput!
-      pagination: PaginationInputPaginated!
+      pagination: PaginationInput!
       sort: HostsSortField!
       filterQuery: String
       defaultIndex: [String!]!

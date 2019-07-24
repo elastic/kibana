@@ -553,7 +553,7 @@ app.controller('graphuiPlugin', function (
 
   //== Drill-down functionality ==
   const defaultKibanaQuery = ',query:(query_string:(analyze_wildcard:!t,query:\'*\'))';
-  const drillDownRegex = /\{\{gquery\}\}/g;
+  const drillDownRegex = /\{\{gquery\}\}/;
 
   $scope.checkForKibanaUrl = function () {
     $scope.suggestTemplateFix = $scope.newUrlTemplate.url === $scope.lastPastedURL  &&

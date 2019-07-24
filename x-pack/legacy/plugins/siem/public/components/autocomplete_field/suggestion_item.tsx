@@ -8,7 +8,7 @@ import { EuiIcon } from '@elastic/eui';
 import { transparentize } from 'polished';
 import React from 'react';
 import { AutocompleteSuggestion } from 'ui/autocomplete_providers';
-import styled from 'styled-components';
+
 import euiStyled from '../../../../../common/eui_styled_components';
 
 interface SuggestionItemProps {
@@ -64,7 +64,7 @@ const SuggestionItemField = euiStyled.div`
   padding: ${props => props.theme.eui.euiSizeXS};
 `;
 
-const SuggestionItemIconField = styled(SuggestionItemField)<{ suggestionType: string }>`
+const SuggestionItemIconField = SuggestionItemField.extend<{ suggestionType: string }>`
   background-color: ${props =>
     transparentize(0.9, getEuiIconColor(props.theme, props.suggestionType))};
   color: ${props => getEuiIconColor(props.theme, props.suggestionType)};
@@ -73,12 +73,12 @@ const SuggestionItemIconField = styled(SuggestionItemField)<{ suggestionType: st
   width: ${props => props.theme.eui.euiSizeXL};
 `;
 
-const SuggestionItemTextField = styled(SuggestionItemField)`
+const SuggestionItemTextField = SuggestionItemField.extend`
   flex: 2 0 0;
   font-family: ${props => props.theme.eui.euiCodeFontFamily};
 `;
 
-const SuggestionItemDescriptionField = styled(SuggestionItemField)`
+const SuggestionItemDescriptionField = SuggestionItemField.extend`
   flex: 3 0 0;
 
   p {

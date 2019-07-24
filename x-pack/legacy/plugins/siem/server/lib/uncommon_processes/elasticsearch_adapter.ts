@@ -9,9 +9,9 @@ import { get, getOr } from 'lodash/fp';
 import { UncommonProcessesData, UncommonProcessesEdges } from '../../graphql/types';
 import { mergeFieldsWithHit, inspectStringifyObject } from '../../utils/build_query';
 import { processFieldsMap, userFieldsMap } from '../ecs_fields';
-import { FrameworkAdapter, FrameworkRequest, RequestOptionsPaginated } from '../framework';
+import { FrameworkAdapter, FrameworkRequest, RequestOptions } from '../framework';
 import { HostHits, TermAggregation } from '../types';
-import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../common/constants';
+
 import { buildQuery } from './query.dsl';
 import {
   UncommonProcessBucket,
@@ -25,18 +25,15 @@ export class ElasticsearchUncommonProcessesAdapter implements UncommonProcessesA
 
   public async getUncommonProcesses(
     request: FrameworkRequest,
-    options: RequestOptionsPaginated
+    options: RequestOptions
   ): Promise<UncommonProcessesData> {
-    if (options.pagination && options.pagination.querySize >= DEFAULT_MAX_TABLE_QUERY_SIZE) {
-      throw new Error(`No query size above ${DEFAULT_MAX_TABLE_QUERY_SIZE}`);
-    }
     const dsl = buildQuery(options);
     const response = await this.framework.callWithRequest<UncommonProcessData, TermAggregation>(
       request,
       'search',
       dsl
     );
-    const { activePage, cursorStart, fakePossibleCount, querySize } = options.pagination;
+    const { cursor, limit } = options.pagination;
     const totalCount = getOr(0, 'aggregations.process_count.value', response);
     const buckets = getOr([], 'aggregations.group_by_process.buckets', response);
     const hits = getHits(buckets);
@@ -44,22 +41,23 @@ export class ElasticsearchUncommonProcessesAdapter implements UncommonProcessesA
     const uncommonProcessesEdges = hits.map(hit =>
       formatUncommonProcessesData(options.fields, hit, { ...processFieldsMap, ...userFieldsMap })
     );
-
-    const fakeTotalCount = fakePossibleCount <= totalCount ? fakePossibleCount : totalCount;
-    const edges = uncommonProcessesEdges.splice(cursorStart, querySize - cursorStart);
+    const hasNextPage = uncommonProcessesEdges.length === limit + 1;
+    const beginning = cursor != null ? parseInt(cursor!, 10) : 0;
+    const edges = uncommonProcessesEdges.splice(beginning, limit - beginning);
     const inspect = {
       dsl: [inspectStringifyObject(dsl)],
       response: [inspectStringifyObject(response)],
     };
 
-    const showMorePagesIndicator = totalCount > fakeTotalCount;
     return {
       edges,
       inspect,
       pageInfo: {
-        activePage: activePage ? activePage : 0,
-        fakeTotalCount,
-        showMorePagesIndicator,
+        hasNextPage,
+        endCursor: {
+          value: String(limit),
+          tiebreaker: null,
+        },
       },
       totalCount,
     };

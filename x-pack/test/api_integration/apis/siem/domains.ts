@@ -43,10 +43,8 @@ export default function({ getService }: FtrProviderContext) {
               flowTarget: FlowTarget.source,
               sort: { field: DomainsFields.bytes, direction: Direction.desc },
               pagination: {
-                activePage: 0,
-                cursorStart: 0,
-                fakePossibleCount: 30,
-                querySize: 10,
+                limit: 10,
+                cursor: null,
               },
               defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
               inspect: false,
@@ -80,10 +78,8 @@ export default function({ getService }: FtrProviderContext) {
               flowTarget: FlowTarget.source,
               sort: { field: DomainsFields.bytes, direction: Direction.desc },
               pagination: {
-                activePage: 0,
-                cursorStart: 0,
-                fakePossibleCount: 30,
-                querySize: 10,
+                limit: 10,
+                cursor: null,
               },
               defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
               inspect: false,
@@ -117,10 +113,8 @@ export default function({ getService }: FtrProviderContext) {
               flowTarget: FlowTarget.destination,
               sort: { field: DomainsFields.bytes, direction: Direction.desc },
               pagination: {
-                activePage: 0,
-                cursorStart: 0,
-                fakePossibleCount: 30,
-                querySize: 10,
+                limit: 10,
+                cursor: null,
               },
               defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
               inspect: false,
@@ -133,7 +127,7 @@ export default function({ getService }: FtrProviderContext) {
             expect(domains.edges.map(i => i.node.destination!.domainName).join(',')).to.be(
               'samsungtv-kitchen.iot.sr.local.crowbird.com,12s3.lvlt.dash.row.aiv-cdn.net,151.205.0.17,151.205.0.19,151.205.0.21,151.205.0.23,15s3.lvlt.dash.row.aiv-cdn.net,api-global.netflix.com,d25xi40x97liuc.cloudfront.net,d2lkq7nlcrdi7q.cloudfront.net'
             );
-            expect(domains.pageInfo.fakeTotalCount).to.equal(12);
+            expect(domains.pageInfo.endCursor!.value).to.equal('10');
           });
       });
     });

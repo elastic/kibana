@@ -1,0 +1,96 @@
+// REDO Bootstrap alternatives to match EUI
+@import '@elastic/eui/src/components/call_out/variables';
+@import '@elastic/eui/src/components/call_out/mixins';
+
+.kbnToaster__container {
+  visibility: visible;
+  width: 100%;
+
+  .kbnToaster {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  /**
+   * 1. Shouldn't look like a button.
+   */
+  .kbnToaster__countdown {
+    appearance: none;
+    background: none;
+    border: none;
+  }
+
+  .kbnToast {
+    display: flex;
+    align-items: center;
+    padding: $euiSizeXS $euiSize;
+
+    > * {
+      flex: 0 0 auto;
+
+      &:not(:last-child) {
+        margin-right: $euiSizeXS;
+      }
+    }
+  }
+
+  .kbnToast__message {
+    @include euiFontSizeS;
+    text-overflow: ellipsis;
+    flex: 1 1 auto;
+    white-space: normal;
+  }
+
+  .kbnToast-isStack {
+    @include euiFontSizeS;
+    padding-bottom: $euiSizeS;
+
+    pre {
+      display: inline-block;
+      width: 100%;
+      margin: $euiSizeS 0;
+      word-break: normal;
+      word-wrap: normal;
+      white-space: pre-wrap;
+    }
+  }
+
+  .kbnToast__controls {
+    display: flex;
+  }
+}
+
+$kbnToastTypes: (
+  info: 'primary',
+  warning: 'warning',
+  danger: 'danger',
+  success: 'success',
+);
+
+@each $name, $color in $kbnToastTypes {
+  $foreground: euiCallOutColor($color, 'foreground');
+
+  .kbnToast--#{$name} {
+    background-color: euiCallOutColor($color, 'background');
+    color: $foreground;
+
+    // Fix dark mode contrast by forcing button colors to use the same foreground color
+    // Override hover/focus text color changes by using !important
+    @if ($name = 'danger') {
+      .kuiButton--danger,
+      .kuiButton--danger:hover {
+        color: $foreground !important;
+        border-color: $foreground;
+      }
+    }
+
+    @if ($name = 'info') {
+      .kuiButton--secondary,
+      .kuiButton--secondary:hover {
+        color: $foreground !important;
+        border-color: $foreground;
+      }
+    }
+  }
+}

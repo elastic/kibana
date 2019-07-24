@@ -74,16 +74,16 @@ const getCountAgg = (flowTarget: FlowTarget) => ({
 });
 
 export const buildTopNFlowQuery = ({
-  defaultIndex,
   filterQuery,
   flowDirection,
-  flowTarget,
   networkTopNFlowSort,
-  pagination: { querySize },
+  flowTarget,
+  timerange: { from, to },
+  pagination: { limit },
+  defaultIndex,
   sourceConfiguration: {
     fields: { timestamp },
   },
-  timerange: { from, to },
 }: NetworkTopNFlowRequestOptions) => {
   const filter = [
     ...createQueryFilterClauses(filterQuery),
@@ -98,8 +98,8 @@ export const buildTopNFlowQuery = ({
     body: {
       aggregations: {
         ...getCountAgg(flowTarget),
-        ...getUniDirectionAggs(flowDirection, networkTopNFlowSort, flowTarget, querySize),
-        ...getBiDirectionAggs(flowDirection, networkTopNFlowSort, flowTarget, querySize),
+        ...getUniDirectionAggs(flowDirection, networkTopNFlowSort, flowTarget, limit),
+        ...getBiDirectionAggs(flowDirection, networkTopNFlowSort, flowTarget, limit),
       },
       query: {
         bool: {
@@ -118,14 +118,14 @@ const getUniDirectionAggs = (
   flowDirection: FlowDirection,
   networkTopNFlowSortField: NetworkTopNFlowSortField,
   flowTarget: FlowTarget,
-  querySize: number
+  limit: number
 ) =>
   flowDirection === FlowDirection.uniDirectional
     ? {
         top_uni_flow: {
           terms: {
             field: `${flowTarget}.ip`,
-            size: querySize,
+            size: limit + 1,
             order: {
               ...getQueryOrder(networkTopNFlowSortField),
             },
@@ -177,14 +177,14 @@ const getBiDirectionAggs = (
   flowDirection: FlowDirection,
   networkTopNFlowSortField: NetworkTopNFlowSortField,
   flowTarget: FlowTarget,
-  querySize: number
+  limit: number
 ) =>
   flowDirection === FlowDirection.biDirectional
     ? {
         top_bi_flow: {
           terms: {
             field: `${flowTarget}.ip`,
-            size: querySize,
+            size: limit + 1,
             order: {
               ...getQueryOrder(networkTopNFlowSortField),
             },

@@ -342,7 +342,7 @@ export interface EventsData {
 
   totalCount: number;
 
-  pageInfo: PageInfoPaginated;
+  pageInfo: PageInfo;
 
   inspect?: Inspect | null;
 }
@@ -805,6 +805,12 @@ export interface SshEcsFields {
   signature?: ToStringArray | null;
 }
 
+export interface PageInfo {
+  endCursor?: CursorType | null;
+
+  hasNextPage?: boolean | null;
+}
+
 export interface TimelineData {
   edges: TimelineEdges[];
 
@@ -837,12 +843,6 @@ export interface TimelineNonEcsData {
   value?: ToStringArray | null;
 }
 
-export interface PageInfo {
-  endCursor?: CursorType | null;
-
-  hasNextPage?: boolean | null;
-}
-
 export interface TimelineDetailsData {
   data?: DetailItem[] | null;
 
@@ -868,7 +868,7 @@ export interface HostsData {
 
   totalCount: number;
 
-  pageInfo: PageInfoPaginated;
+  pageInfo: PageInfo;
 
   inspect?: Inspect | null;
 }
@@ -954,7 +954,7 @@ export interface DomainsData {
 
   totalCount: number;
 
-  pageInfo: PageInfoPaginated;
+  pageInfo: PageInfo;
 
   inspect?: Inspect | null;
 }
@@ -1006,7 +1006,7 @@ export interface TlsData {
 
   totalCount: number;
 
-  pageInfo: PageInfoPaginated;
+  pageInfo: PageInfo;
 
   inspect?: Inspect | null;
 }
@@ -1038,7 +1038,7 @@ export interface UsersData {
 
   totalCount: number;
 
-  pageInfo: PageInfoPaginated;
+  pageInfo: PageInfo;
 
   inspect?: Inspect | null;
 }
@@ -1150,7 +1150,7 @@ export interface NetworkTopNFlowData {
 
   totalCount: number;
 
-  pageInfo: PageInfoPaginated;
+  pageInfo: PageInfo;
 
   inspect?: Inspect | null;
 }
@@ -1198,7 +1198,7 @@ export interface NetworkDnsData {
 
   totalCount: number;
 
-  pageInfo: PageInfoPaginated;
+  pageInfo: PageInfo;
 
   inspect?: Inspect | null;
 }
@@ -1270,7 +1270,7 @@ export interface UncommonProcessesData {
 
   totalCount: number;
 
-  pageInfo: PageInfoPaginated;
+  pageInfo: PageInfo;
 
   inspect?: Inspect | null;
 }
@@ -1483,16 +1483,6 @@ export interface ResponseFavoriteTimeline {
   favorite?: FavoriteTimelineResult[] | null;
 }
 
-export interface EventsTimelineData {
-  edges: EcsEdges[];
-
-  totalCount: number;
-
-  pageInfo: PageInfo;
-
-  inspect?: Inspect | null;
-}
-
 export interface OsFields {
   platform?: string | null;
 
@@ -1559,12 +1549,6 @@ export interface PaginationInputPaginated {
   querySize: number;
 }
 
-export interface SortField {
-  sortFieldId: string;
-
-  direction: Direction;
-}
-
 export interface PaginationInput {
   /** The limit parameter allows you to configure the maximum amount of items to be returned */
   limit: number;
@@ -1572,6 +1556,12 @@ export interface PaginationInput {
   cursor?: string | null;
   /** The tiebreaker parameter allow to be more precise to fetch the next item */
   tiebreaker?: string | null;
+}
+
+export interface SortField {
+  sortFieldId: string;
+
+  direction: Direction;
 }
 
 export interface LastTimeDetails {
@@ -1791,7 +1781,7 @@ export interface AuthenticationsSourceArgs {
   defaultIndex: string[];
 }
 export interface EventsSourceArgs {
-  pagination: PaginationInputPaginated;
+  pagination: PaginationInput;
 
   sortField: SortField;
 
@@ -1835,7 +1825,7 @@ export interface HostsSourceArgs {
 
   timerange: TimerangeInput;
 
-  pagination: PaginationInputPaginated;
+  pagination: PaginationInput;
 
   sort: HostsSortField;
 
@@ -1875,7 +1865,7 @@ export interface DomainsSourceArgs {
 
   ip: string;
 
-  pagination: PaginationInputPaginated;
+  pagination: PaginationInput;
 
   sort: DomainsSortField;
 
@@ -1894,7 +1884,7 @@ export interface TlsSourceArgs {
 
   ip: string;
 
-  pagination: PaginationInputPaginated;
+  pagination: PaginationInput;
 
   sort: TlsSortField;
 
@@ -1911,7 +1901,7 @@ export interface UsersSourceArgs {
 
   ip: string;
 
-  pagination: PaginationInputPaginated;
+  pagination: PaginationInput;
 
   sort: UsersSortField;
 
@@ -1957,7 +1947,7 @@ export interface NetworkTopNFlowSourceArgs {
 
   flowTarget: FlowTarget;
 
-  pagination: PaginationInputPaginated;
+  pagination: PaginationInput;
 
   sort: NetworkTopNFlowSortField;
 
@@ -1972,7 +1962,7 @@ export interface NetworkDnsSourceArgs {
 
   isPtrIncluded: boolean;
 
-  pagination: PaginationInputPaginated;
+  pagination: PaginationInput;
 
   sort: NetworkDnsSortField;
 
@@ -2001,7 +1991,7 @@ export interface OverviewHostSourceArgs {
 export interface UncommonProcessesSourceArgs {
   timerange: TimerangeInput;
 
-  pagination: PaginationInputPaginated;
+  pagination: PaginationInput;
 
   filterQuery?: string | null;
 
@@ -2296,7 +2286,7 @@ export namespace GetDomainsQuery {
     flowDirection: FlowDirection;
     flowTarget: FlowTarget;
     ip: string;
-    pagination: PaginationInputPaginated;
+    pagination: PaginationInput;
     sort: DomainsSortField;
     timerange: TimerangeInput;
     defaultIndex: string[];
@@ -2388,13 +2378,17 @@ export namespace GetDomainsQuery {
   };
 
   export type PageInfo = {
-    __typename?: 'PageInfoPaginated';
+    __typename?: 'PageInfo';
 
-    activePage: number;
+    endCursor?: EndCursor | null;
 
-    fakeTotalCount: number;
+    hasNextPage?: boolean | null;
+  };
 
-    showMorePagesIndicator: boolean;
+  export type EndCursor = {
+    __typename?: 'CursorType';
+
+    value?: string | null;
   };
 
   export type Inspect = {
@@ -2410,7 +2404,7 @@ export namespace GetEventsQuery {
   export type Variables = {
     sourceId: string;
     timerange: TimerangeInput;
-    pagination: PaginationInputPaginated;
+    pagination: PaginationInput;
     sortField: SortField;
     filterQuery?: string | null;
     defaultIndex: string[];
@@ -2444,13 +2438,19 @@ export namespace GetEventsQuery {
   };
 
   export type PageInfo = {
-    __typename?: 'PageInfoPaginated';
+    __typename?: 'PageInfo';
 
-    activePage: number;
+    endCursor?: EndCursor | null;
 
-    fakeTotalCount: number;
+    hasNextPage?: boolean | null;
+  };
 
-    showMorePagesIndicator: boolean;
+  export type EndCursor = {
+    __typename?: 'CursorType';
+
+    value?: string | null;
+
+    tiebreaker?: string | null;
   };
 
   export type Inspect = {
@@ -2635,7 +2635,7 @@ export namespace GetHostsTableQuery {
   export type Variables = {
     sourceId: string;
     timerange: TimerangeInput;
-    pagination: PaginationInputPaginated;
+    pagination: PaginationInput;
     sort: HostsSortField;
     filterQuery?: string | null;
     defaultIndex: string[];
@@ -2711,13 +2711,17 @@ export namespace GetHostsTableQuery {
   };
 
   export type PageInfo = {
-    __typename?: 'PageInfoPaginated';
+    __typename?: 'PageInfo';
 
-    activePage: number;
+    endCursor?: EndCursor | null;
 
-    fakeTotalCount: number;
+    hasNextPage?: boolean | null;
+  };
 
-    showMorePagesIndicator: boolean;
+  export type EndCursor = {
+    __typename?: 'CursorType';
+
+    value?: string | null;
   };
 
   export type Inspect = {
@@ -3191,7 +3195,7 @@ export namespace GetNetworkDnsQuery {
     sort: NetworkDnsSortField;
     isPtrIncluded: boolean;
     timerange: TimerangeInput;
-    pagination: PaginationInputPaginated;
+    pagination: PaginationInput;
     filterQuery?: string | null;
     defaultIndex: string[];
     inspect: boolean;
@@ -3254,13 +3258,17 @@ export namespace GetNetworkDnsQuery {
   };
 
   export type PageInfo = {
-    __typename?: 'PageInfoPaginated';
+    __typename?: 'PageInfo';
 
-    activePage: number;
+    endCursor?: EndCursor | null;
 
-    fakeTotalCount: number;
+    hasNextPage?: boolean | null;
+  };
 
-    showMorePagesIndicator: boolean;
+  export type EndCursor = {
+    __typename?: 'CursorType';
+
+    value?: string | null;
   };
 
   export type Inspect = {
@@ -3277,7 +3285,7 @@ export namespace GetNetworkTopNFlowQuery {
     sourceId: string;
     flowDirection: FlowDirection;
     filterQuery?: string | null;
-    pagination: PaginationInputPaginated;
+    pagination: PaginationInput;
     sort: NetworkTopNFlowSortField;
     flowTarget: FlowTarget;
     timerange: TimerangeInput;
@@ -3390,13 +3398,17 @@ export namespace GetNetworkTopNFlowQuery {
   };
 
   export type PageInfo = {
-    __typename?: 'PageInfoPaginated';
+    __typename?: 'PageInfo';
 
-    activePage: number;
+    endCursor?: EndCursor | null;
 
-    fakeTotalCount: number;
+    hasNextPage?: boolean | null;
+  };
 
-    showMorePagesIndicator: boolean;
+  export type EndCursor = {
+    __typename?: 'CursorType';
+
+    value?: string | null;
   };
 
   export type Inspect = {
@@ -4989,7 +5001,7 @@ export namespace GetTlsQuery {
     filterQuery?: string | null;
     flowTarget: FlowTarget;
     ip: string;
-    pagination: PaginationInputPaginated;
+    pagination: PaginationInput;
     sort: TlsSortField;
     timerange: TimerangeInput;
     defaultIndex: string[];
@@ -5053,13 +5065,17 @@ export namespace GetTlsQuery {
   };
 
   export type PageInfo = {
-    __typename?: 'PageInfoPaginated';
+    __typename?: 'PageInfo';
 
-    activePage: number;
+    endCursor?: EndCursor | null;
 
-    fakeTotalCount: number;
+    hasNextPage?: boolean | null;
+  };
 
-    showMorePagesIndicator: boolean;
+  export type EndCursor = {
+    __typename?: 'CursorType';
+
+    value?: string | null;
   };
 
   export type Inspect = {
@@ -5075,7 +5091,7 @@ export namespace GetUncommonProcessesQuery {
   export type Variables = {
     sourceId: string;
     timerange: TimerangeInput;
-    pagination: PaginationInputPaginated;
+    pagination: PaginationInput;
     filterQuery?: string | null;
     defaultIndex: string[];
     inspect: boolean;
@@ -5158,13 +5174,17 @@ export namespace GetUncommonProcessesQuery {
   };
 
   export type PageInfo = {
-    __typename?: 'PageInfoPaginated';
+    __typename?: 'PageInfo';
 
-    activePage: number;
+    endCursor?: EndCursor | null;
 
-    fakeTotalCount: number;
+    hasNextPage?: boolean | null;
+  };
 
-    showMorePagesIndicator: boolean;
+  export type EndCursor = {
+    __typename?: 'CursorType';
+
+    value?: string | null;
   };
 
   export type Inspect = {
@@ -5182,7 +5202,7 @@ export namespace GetUsersQuery {
     filterQuery?: string | null;
     flowTarget: FlowTarget;
     ip: string;
-    pagination: PaginationInputPaginated;
+    pagination: PaginationInput;
     sort: UsersSortField;
     timerange: TimerangeInput;
     defaultIndex: string[];
@@ -5250,13 +5270,17 @@ export namespace GetUsersQuery {
   };
 
   export type PageInfo = {
-    __typename?: 'PageInfoPaginated';
+    __typename?: 'PageInfo';
 
-    activePage: number;
+    endCursor?: EndCursor | null;
 
-    fakeTotalCount: number;
+    hasNextPage?: boolean | null;
+  };
 
-    showMorePagesIndicator: boolean;
+  export type EndCursor = {
+    __typename?: 'CursorType';
+
+    value?: string | null;
   };
 
   export type Inspect = {

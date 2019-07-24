@@ -10,7 +10,7 @@ export const uncommonProcessesQuery = gql`
   query GetUncommonProcessesQuery(
     $sourceId: ID!
     $timerange: TimerangeInput!
-    $pagination: PaginationInputPaginated!
+    $pagination: PaginationInput!
     $filterQuery: String
     $defaultIndex: [String!]!
     $inspect: Boolean!
@@ -45,9 +45,10 @@ export const uncommonProcessesQuery = gql`
           }
         }
         pageInfo {
-          activePage
-          fakeTotalCount
-          showMorePagesIndicator
+          endCursor {
+            value
+          }
+          hasNextPage
         }
         inspect @include(if: $inspect) {
           dsl

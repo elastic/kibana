@@ -7,18 +7,18 @@
 import { createQueryFilterClauses } from '../../utils/build_query';
 import { reduceFields } from '../../utils/build_query/reduce_fields';
 import { hostFieldsMap, processFieldsMap, userFieldsMap } from '../ecs_fields';
-import { RequestOptionsPaginated } from '../framework';
+import { RequestOptions } from '../framework';
 
 export const buildQuery = ({
-  defaultIndex,
   fields,
   filterQuery,
-  pagination: { querySize },
+  timerange: { from, to },
+  defaultIndex,
+  pagination: { limit },
   sourceConfiguration: {
     fields: { timestamp },
   },
-  timerange: { from, to },
-}: RequestOptionsPaginated) => {
+}: RequestOptions) => {
   const processUserFields = reduceFields(fields, { ...processFieldsMap, ...userFieldsMap });
   const hostFields = reduceFields(fields, hostFieldsMap);
   const filter = [
@@ -50,7 +50,7 @@ export const buildQuery = ({
         ...agg,
         group_by_process: {
           terms: {
-            size: querySize,
+            size: limit + 1,
             field: 'process.name',
             order: [
               {

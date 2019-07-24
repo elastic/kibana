@@ -5,13 +5,13 @@
  */
 
 import { ProcessEcsFields, UncommonProcessesData } from '../../graphql/types';
-import { FrameworkRequest, RequestOptionsPaginated } from '../framework';
+import { FrameworkRequest, RequestOptions } from '../framework';
 import { Hit, Hits, HostHits, SearchHit, TotalHit } from '../types';
 
 export interface UncommonProcessesAdapter {
   getUncommonProcesses(
     req: FrameworkRequest,
-    options: RequestOptionsPaginated
+    options: RequestOptions
   ): Promise<UncommonProcessesData>;
 }
 

@@ -56,15 +56,15 @@ const createIncludePTRFilter = (isPtrIncluded: boolean) =>
       };
 
 export const buildDnsQuery = ({
-  defaultIndex,
   filterQuery,
   isPtrIncluded,
   networkDnsSortField,
-  pagination: { querySize },
+  timerange: { from, to },
+  pagination: { limit },
+  defaultIndex,
   sourceConfiguration: {
     fields: { timestamp },
   },
-  timerange: { from, to },
 }: NetworkDnsRequestOptions) => {
   const filter = [
     ...createQueryFilterClauses(filterQuery),
@@ -88,7 +88,7 @@ export const buildDnsQuery = ({
         dns_name_query_count: {
           terms: {
             field: 'dns.question.etld_plus_one',
-            size: querySize,
+            size: limit + 1,
             order: {
               ...getQueryOrder(networkDnsSortField),
             },

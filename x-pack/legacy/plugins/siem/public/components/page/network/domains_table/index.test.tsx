@@ -24,7 +24,7 @@ import { DomainsTable } from '.';
 import { mockDomainsData } from './mock';
 
 describe('Domains Table Component', () => {
-  const loadPage = jest.fn();
+  const loadMore = jest.fn();
   const ip = '10.10.10.10';
   const state: State = mockGlobalState;
 
@@ -40,18 +40,14 @@ describe('Domains Table Component', () => {
         <ReduxStoreProvider store={store}>
           <DomainsTable
             data={mockDomainsData.edges}
-            fakeTotalCount={getOr(50, 'fakeTotalCount', mockDomainsData.pageInfo)}
             flowTarget={FlowTarget.source}
+            hasNextPage={getOr(false, 'hasNextPage', mockDomainsData.pageInfo)!}
             id="domains"
             indexPattern={mockIndexPattern}
             ip={ip}
             loading={false}
-            loadPage={loadPage}
-            showMorePagesIndicator={getOr(
-              false,
-              'showMorePagesIndicator',
-              mockDomainsData.pageInfo
-            )}
+            loadMore={loadMore}
+            nextCursor={getOr(null, 'endCursor.value', mockDomainsData.pageInfo)}
             totalCount={1}
             type={networkModel.NetworkType.details}
           />
@@ -69,18 +65,14 @@ describe('Domains Table Component', () => {
           <TestProviders store={store}>
             <DomainsTable
               data={mockDomainsData.edges}
-              fakeTotalCount={getOr(50, 'fakeTotalCount', mockDomainsData.pageInfo)}
               flowTarget={FlowTarget.source}
-              id="domains"
               indexPattern={mockIndexPattern}
+              hasNextPage={getOr(false, 'hasNextPage', mockDomainsData.pageInfo)!}
+              id="domains"
               ip={ip}
               loading={false}
-              loadPage={loadPage}
-              showMorePagesIndicator={getOr(
-                false,
-                'showMorePagesIndicator',
-                mockDomainsData.pageInfo
-              )}
+              loadMore={loadMore}
+              nextCursor={getOr(null, 'endCursor.value', mockDomainsData.pageInfo)}
               totalCount={1}
               type={networkModel.NetworkType.details}
             />

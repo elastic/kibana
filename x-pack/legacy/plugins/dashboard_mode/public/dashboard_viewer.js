@@ -36,6 +36,7 @@ import 'plugins/kibana/dashboard';
 import 'ui/vislib';
 import 'ui/agg_response';
 import 'ui/agg_types';
+import 'ui/timepicker';
 import 'leaflet';
 import { npStart } from 'ui/new_platform';
 

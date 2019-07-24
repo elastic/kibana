@@ -14,26 +14,17 @@ import {
   MetricsExplorerOptions,
   MetricsExplorerOptionsContainer,
   MetricsExplorerTimeOptions,
-  MetricsExplorerYAxisMode,
-  MetricsExplorerChartType,
-  MetricsExplorerChartOptions,
 } from './use_metrics_explorer_options';
 
 interface MetricsExplorerUrlState {
   timerange?: MetricsExplorerTimeOptions;
   options?: MetricsExplorerOptions;
-  chartOptions?: MetricsExplorerChartOptions;
 }
 
 export const WithMetricsExplorerOptionsUrlState = () => {
-  const {
-    options,
-    chartOptions,
-    setChartOptions,
-    currentTimerange,
-    setOptions: setRawOptions,
-    setTimeRange,
-  } = useContext(MetricsExplorerOptionsContainer.Context);
+  const { options, currentTimerange, setOptions: setRawOptions, setTimeRange } = useContext(
+    MetricsExplorerOptionsContainer.Context
+  );
 
   const setOptions = (value: MetricsExplorerOptions) => {
     setRawOptions(value);
@@ -42,31 +33,32 @@ export const WithMetricsExplorerOptionsUrlState = () => {
   const urlState = useMemo(
     () => ({
       options,
-      chartOptions,
       timerange: currentTimerange,
     }),
-    [options, chartOptions, currentTimerange]
+    [options, currentTimerange]
   );
-
-  const handleChange = (newUrlState: MetricsExplorerUrlState | undefined) => {
-    if (newUrlState && newUrlState.options) {
-      setOptions(newUrlState.options);
-    }
-    if (newUrlState && newUrlState.timerange) {
-      setTimeRange(newUrlState.timerange);
-    }
-    if (newUrlState && newUrlState.chartOptions) {
-      setChartOptions(newUrlState.chartOptions);
-    }
-  };
 
   return (
     <UrlStateContainer
       urlState={urlState}
       urlStateKey="metricsExplorer"
       mapToUrlState={mapToUrlState}
-      onChange={handleChange}
-      onInitialize={handleChange}
+      onChange={newUrlState => {
+        if (newUrlState && newUrlState.options) {
+          setOptions(newUrlState.options);
+        }
+        if (newUrlState && newUrlState.timerange) {
+          setTimeRange(newUrlState.timerange);
+        }
+      }}
+      onInitialize={newUrlState => {
+        if (newUrlState && newUrlState.options) {
+          setOptions(newUrlState.options);
+        }
+        if (newUrlState && newUrlState.timerange) {
+          setTimeRange(newUrlState.timerange);
+        }
+      }}
     />
   );
 };
@@ -108,22 +100,6 @@ function isMetricExplorerOptions(subject: any): subject is MetricsExplorerOption
   }
 }
 
-function isMetricExplorerChartOptions(subject: any): subject is MetricsExplorerChartOptions {
-  const ChartOptions = t.type({
-    yAxisMode: t.union(values(MetricsExplorerYAxisMode).map(v => t.literal(v as string))),
-    type: t.union(values(MetricsExplorerChartType).map(v => t.literal(v as string))),
-    stack: t.boolean,
-  });
-  const result = ChartOptions.decode(subject);
-
-  try {
-    ThrowReporter.report(result);
-    return true;
-  } catch (e) {
-    return false;
-  }
-}
-
 function isMetricExplorerTimeOption(subject: any): subject is MetricsExplorerTimeOptions {
   const TimeRange = t.type({
     from: t.string,
@@ -147,9 +123,6 @@ const mapToUrlState = (value: any): MetricsExplorerUrlState | undefined => {
     }
     if (value.timerange && isMetricExplorerTimeOption(value.timerange)) {
       set(finalState, 'timerange', value.timerange);
-    }
-    if (value.chartOptions && isMetricExplorerChartOptions(value.chartOptions)) {
-      set(finalState, 'chartOptions', value.chartOptions);
     }
     return finalState;
   }

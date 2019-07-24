@@ -20,7 +20,7 @@
 import semver from 'semver';
 import chrome from 'ui/chrome';
 import { i18n } from '@kbn/i18n';
-import { createUiStatsReporter, METRIC_TYPE } from '../../../../ui_metric/public';
+import { trackUiMetric } from '../../../../ui_metric/public';
 import {
   DashboardAppState,
   SavedDashboardPanelTo60,
@@ -59,7 +59,7 @@ export function migrateAppState(appState: { [key: string]: unknown } | Dashboard
     const version = (panel as SavedDashboardPanel730ToLatest).version;
 
     // This will help us figure out when to remove support for older style URLs.
-    createUiStatsReporter('DashboardPanelVersionInUrl')(METRIC_TYPE.LOADED, `${version}`);
+    trackUiMetric('DashboardPanelVersionInUrl', `${version}`);
 
     return semver.satisfies(version, '<7.3');
   });

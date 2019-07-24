@@ -18,3 +18,6 @@
  */
 
 export * from './components';
+
+// @ts-ignore
+export { setupDirective } from './directive';

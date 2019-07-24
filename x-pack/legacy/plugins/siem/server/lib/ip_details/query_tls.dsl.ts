@@ -9,7 +9,7 @@ import { createQueryFilterClauses, assertUnreachable } from '../../utils/build_q
 import { TlsRequestOptions } from './index';
 import { TlsSortField, Direction, TlsFields } from '../../graphql/types';
 
-const getAggs = (querySize: number, tlsSortField: TlsSortField) => ({
+const getAggs = (limit: number, tlsSortField: TlsSortField) => ({
   count: {
     cardinality: {
       field: 'tls.server_certificate.fingerprint.sha1',
@@ -18,7 +18,7 @@ const getAggs = (querySize: number, tlsSortField: TlsSortField) => ({
   sha1: {
     terms: {
       field: 'tls.server_certificate.fingerprint.sha1',
-      size: querySize,
+      size: limit + 1,
       order: {
         ...getQueryOrder(tlsSortField),
       },
@@ -58,7 +58,7 @@ export const buildTlsQuery = ({
   tlsSortField,
   filterQuery,
   flowTarget,
-  pagination: { querySize },
+  pagination: { limit },
   defaultIndex,
   sourceConfiguration: {
     fields: { timestamp },
@@ -77,7 +77,7 @@ export const buildTlsQuery = ({
     ignoreUnavailable: true,
     body: {
       aggs: {
-        ...getAggs(querySize, tlsSortField),
+        ...getAggs(limit, tlsSortField),
       },
       query: {
         bool: {

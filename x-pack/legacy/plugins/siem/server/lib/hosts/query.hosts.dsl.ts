@@ -13,11 +13,11 @@ import { HostsRequestOptions } from '.';
 import { buildFieldsTermAggregation } from './helpers';
 
 export const buildHostsQuery = ({
-  defaultIndex,
   fields,
   filterQuery,
-  pagination: { querySize },
+  pagination: { limit, cursor },
   sort,
+  defaultIndex,
   sourceConfiguration: {
     fields: { timestamp },
   },
@@ -47,7 +47,7 @@ export const buildHostsQuery = ({
       aggregations: {
         ...agg,
         host_data: {
-          terms: { size: querySize, field: 'host.name', order: getQueryOrder(sort) },
+          terms: { size: limit + 1, field: 'host.name', order: getQueryOrder(sort) },
           aggs: {
             lastSeen: { max: { field: '@timestamp' } },
             ...buildFieldsTermAggregation(

@@ -6,10 +6,9 @@
 
 import { InfraMetricModel, InfraMetricModelMetricType } from '../../../lib/adapters/metrics';
 import { MetricsExplorerAggregation, MetricsExplorerRequest } from '../types';
-import { InfraMetric } from '../../../graphql/types';
 export const createMetricModel = (options: MetricsExplorerRequest): InfraMetricModel => {
   return {
-    id: InfraMetric.custom,
+    id: 'custom',
     requires: [],
     index_pattern: options.indexPattern,
     interval: options.timerange.interval,

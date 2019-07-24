@@ -105,7 +105,6 @@ export const useSourceConfigurationFormState = (configuration?: SourceConfigurat
 
   return {
     addLogColumn: logColumnsConfigurationFormState.addLogColumn,
-    moveLogColumn: logColumnsConfigurationFormState.moveLogColumn,
     errors,
     formState,
     formStateChanges,

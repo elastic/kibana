@@ -4,21 +4,22 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-jest.mock('../../../components/navigation_menu/navigation_menu', () => ({
-  NavigationMenu: () => <div id="mockNavigationMenu" />
-}));
+
+
 jest.mock('../../../privilege/check_privilege', () => ({
   checkPermission: () => true
 }));
 jest.mock('../../../license/check_license', () => ({
-  hasLicenseExpired: () => false,
-  isFullLicense: () => false
+  hasLicenseExpired: () => false
 }));
 jest.mock('../../../privilege/get_privileges', () => ({
   getPrivileges: () => {}
 }));
 jest.mock('../../../ml_nodes_check/check_ml_nodes', () => ({
   mlNodesAvailable: () => true
+}));
+jest.mock('ui/chrome', () => ({
+  getBasePath: jest.fn()
 }));
 jest.mock('../../../services/ml_api_service', () => ({
   ml: {

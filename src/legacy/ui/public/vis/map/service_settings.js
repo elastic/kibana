@@ -23,7 +23,6 @@ import MarkdownIt from 'markdown-it';
 import { ORIGIN } from '../../../../core_plugins/tile_map/common/origin';
 import { EMSClient } from '../../../../core_plugins/tile_map/common/ems_client';
 import { i18n } from '@kbn/i18n';
-import 'angular-sanitize';
 
 const markdownIt = new MarkdownIt({
   html: false,
@@ -32,7 +31,7 @@ const markdownIt = new MarkdownIt({
 
 const TMS_IN_YML_ID = 'TMS in config/kibana.yml';
 
-uiModules.get('kibana', ['ngSanitize'])
+uiModules.get('kibana')
   .service('serviceSettings', function ($sanitize, mapConfig, tilemapsConfig, kbnVersion) {
 
     const attributionFromConfig = $sanitize(markdownIt.render(tilemapsConfig.deprecated.config.options.attribution || ''));

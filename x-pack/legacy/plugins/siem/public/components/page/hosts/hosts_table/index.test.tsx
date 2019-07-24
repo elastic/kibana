@@ -24,8 +24,8 @@ import { HostsTable } from './index';
 import { mockData } from './mock';
 import { KibanaConfigContext } from '../../../../lib/adapters/framework/kibana_framework_adapter';
 
-describe('Hosts Table', () => {
-  const loadPage = jest.fn();
+describe('Load More Table Component', () => {
+  const loadMore = jest.fn();
   const state: State = mockGlobalState;
 
   let store = createStore(state, apolloClientObservable);
@@ -43,14 +43,10 @@ describe('Hosts Table', () => {
               data={mockData.Hosts.edges}
               id="hostsQuery"
               indexPattern={mockIndexPattern}
-              fakeTotalCount={getOr(50, 'fakeTotalCount', mockData.Hosts.pageInfo)}
+              hasNextPage={getOr(false, 'hasNextPage', mockData.Hosts.pageInfo)!}
               loading={false}
-              loadPage={loadPage}
-              showMorePagesIndicator={getOr(
-                false,
-                'showMorePagesIndicator',
-                mockData.Hosts.pageInfo
-              )}
+              loadMore={loadMore}
+              nextCursor={getOr(null, 'endCursor.value', mockData.Hosts.pageInfo)}
               totalCount={mockData.Hosts.totalCount}
               type={hostsModel.HostsType.page}
             />
@@ -71,13 +67,9 @@ describe('Hosts Table', () => {
               loading={false}
               data={mockData.Hosts.edges}
               totalCount={mockData.Hosts.totalCount}
-              fakeTotalCount={getOr(50, 'fakeTotalCount', mockData.Hosts.pageInfo)}
-              showMorePagesIndicator={getOr(
-                false,
-                'showMorePagesIndicator',
-                mockData.Hosts.pageInfo
-              )}
-              loadPage={loadPage}
+              hasNextPage={getOr(false, 'hasNextPage', mockData.Hosts.pageInfo)!}
+              nextCursor={getOr(null, 'endCursor.value', mockData.Hosts.pageInfo)}
+              loadMore={loadMore}
               type={hostsModel.HostsType.page}
             />
           </TestProviders>
@@ -94,13 +86,9 @@ describe('Hosts Table', () => {
                 loading={false}
                 data={mockData.Hosts.edges}
                 totalCount={mockData.Hosts.totalCount}
-                fakeTotalCount={getOr(50, 'fakeTotalCount', mockData.Hosts.pageInfo)}
-                showMorePagesIndicator={getOr(
-                  false,
-                  'showMorePagesIndicator',
-                  mockData.Hosts.pageInfo
-                )}
-                loadPage={loadPage}
+                hasNextPage={getOr(false, 'hasNextPage', mockData.Hosts.pageInfo)!}
+                nextCursor={getOr(null, 'endCursor.value', mockData.Hosts.pageInfo)}
+                loadMore={loadMore}
                 type={hostsModel.HostsType.page}
               />
             </TestProviders>
@@ -109,7 +97,6 @@ describe('Hosts Table', () => {
       });
       test('Initial value of the store', () => {
         expect(store.getState().hosts.page.queries.hosts).toEqual({
-          activePage: 0,
           direction: 'desc',
           sortField: 'lastSeen',
           limit: 10,
@@ -137,7 +124,6 @@ describe('Hosts Table', () => {
         wrapper.update();
 
         expect(store.getState().hosts.page.queries.hosts).toEqual({
-          activePage: 0,
           direction: 'asc',
           sortField: 'hostName',
           limit: 10,

@@ -27,7 +27,7 @@ export { Headers };
 /** @public */
 export type APICaller = (
   endpoint: string,
-  clientParams: Record<string, any>,
+  clientParams: Record<string, unknown>,
   options?: CallAPIOptions
 ) => Promise<unknown>;
 
@@ -58,7 +58,7 @@ export class ScopedClusterClient {
    */
   public callAsInternalUser(
     endpoint: string,
-    clientParams: Record<string, any> = {},
+    clientParams: Record<string, unknown> = {},
     options?: CallAPIOptions
   ) {
     return this.internalAPICaller(endpoint, clientParams, options);
@@ -73,7 +73,7 @@ export class ScopedClusterClient {
    */
   public callAsCurrentUser(
     endpoint: string,
-    clientParams: Record<string, any> = {},
+    clientParams: Record<string, unknown> = {},
     options?: CallAPIOptions
   ) {
     const defaultHeaders = this.headers;

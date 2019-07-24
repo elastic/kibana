@@ -5,14 +5,13 @@
  */
 
 import { InfraMetricModelCreator, InfraMetricModelMetricType } from '../../adapter_types';
-import { InfraMetric } from '../../../../../graphql/types';
 
 export const containerDiskIOBytes: InfraMetricModelCreator = (
   timeField,
   indexPattern,
   interval
 ) => ({
-  id: InfraMetric.containerDiskIOBytes,
+  id: 'containerDiskIOBytes',
   requires: ['docker.disk'],
   index_pattern: indexPattern,
   interval,

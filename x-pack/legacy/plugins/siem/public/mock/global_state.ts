@@ -33,13 +33,12 @@ export const mockGlobalState: State = {
       queries: {
         authentications: { activePage: 0, limit: 10 },
         hosts: {
-          activePage: 0,
           limit: 10,
           direction: Direction.desc,
           sortField: HostsFields.lastSeen,
         },
-        events: { activePage: 0, limit: 10 },
-        uncommonProcesses: { activePage: 0, limit: 10 },
+        events: { limit: 10 },
+        uncommonProcesses: { limit: 10 },
       },
       filterQuery: null,
       filterQueryDraft: null,
@@ -48,13 +47,12 @@ export const mockGlobalState: State = {
       queries: {
         authentications: { activePage: 0, limit: 10 },
         hosts: {
-          activePage: 0,
           limit: 10,
           direction: Direction.desc,
           sortField: HostsFields.lastSeen,
         },
-        events: { activePage: 0, limit: 10 },
-        uncommonProcesses: { activePage: 0, limit: 10 },
+        events: { limit: 10 },
+        uncommonProcesses: { limit: 10 },
       },
       filterQuery: null,
       filterQueryDraft: null,
@@ -64,14 +62,12 @@ export const mockGlobalState: State = {
     page: {
       queries: {
         topNFlow: {
-          activePage: 0,
           limit: 10,
           flowTarget: FlowTarget.source,
           flowDirection: FlowDirection.uniDirectional,
           topNFlowSort: { field: NetworkTopNFlowFields.bytes, direction: Direction.desc },
         },
         dns: {
-          activePage: 0,
           limit: 10,
           dnsSortField: { field: NetworkDnsFields.queryCount, direction: Direction.desc },
           isPtrIncluded: false,
@@ -86,18 +82,15 @@ export const mockGlobalState: State = {
       flowTarget: FlowTarget.source,
       queries: {
         domains: {
-          activePage: 0,
           limit: 10,
           flowDirection: FlowDirection.uniDirectional,
           domainsSortField: { field: DomainsFields.bytes, direction: Direction.desc },
         },
         tls: {
-          activePage: 0,
           limit: 10,
           tlsSortField: { field: TlsFields._id, direction: Direction.desc },
         },
         users: {
-          activePage: 0,
           limit: 10,
           usersSortField: { field: UsersFields.name, direction: Direction.asc },
         },

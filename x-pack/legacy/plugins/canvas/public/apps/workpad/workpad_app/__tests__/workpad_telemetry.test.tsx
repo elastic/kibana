@@ -11,7 +11,6 @@ import {
   WorkpadLoadedMetric,
   WorkpadLoadedWithErrorsMetric,
 } from '../workpad_telemetry';
-import { METRIC_TYPE } from '../../../../lib/ui_metric';
 
 const trackMetric = jest.fn();
 const Component = withUnconnectedElementsLoadedTelemetry(() => <div />, trackMetric);
@@ -84,7 +83,7 @@ describe('Elements Loaded Telemetry', () => {
       />
     );
 
-    expect(trackMetric).toBeCalledWith(METRIC_TYPE.LOADED, WorkpadLoadedMetric);
+    expect(trackMetric).toBeCalledWith(WorkpadLoadedMetric);
   });
 
   it('only tracks loaded once', () => {
@@ -155,10 +154,7 @@ describe('Elements Loaded Telemetry', () => {
       />
     );
 
-    expect(trackMetric).toBeCalledWith(METRIC_TYPE.LOADED, [
-      WorkpadLoadedMetric,
-      WorkpadLoadedWithErrorsMetric,
-    ]);
+    expect(trackMetric).toBeCalledWith([WorkpadLoadedMetric, WorkpadLoadedWithErrorsMetric]);
   });
 
   it('tracks when the workpad changes and is loaded', () => {
@@ -202,7 +198,7 @@ describe('Elements Loaded Telemetry', () => {
       />
     );
 
-    expect(trackMetric).toBeCalledWith(METRIC_TYPE.LOADED, WorkpadLoadedMetric);
+    expect(trackMetric).toBeCalledWith(WorkpadLoadedMetric);
   });
 
   it('does not track if workpad has no elements', () => {

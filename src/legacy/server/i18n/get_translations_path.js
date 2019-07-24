@@ -34,12 +34,10 @@ export async function getTranslationPaths({ cwd, glob }) {
     try {
       const content = await readFileAsync(entryFullPath, 'utf8');
       const { translations } = JSON.parse(content);
-      if (translations && translations.length) {
-        translations.forEach(translation => {
-          const translationFullPath = resolve(pluginBasePath, translation);
-          translationPaths.push(translationFullPath);
-        });
-      }
+      translations.forEach(translation => {
+        const translationFullPath = resolve(pluginBasePath, translation);
+        translationPaths.push(translationFullPath);
+      });
     } catch (err) {
       throw new Error(`Failed to parse .i18nrc.json file at ${entryFullPath}`);
     }

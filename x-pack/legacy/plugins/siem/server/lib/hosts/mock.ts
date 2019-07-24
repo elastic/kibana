@@ -26,12 +26,7 @@ export const mockGetHostsOptions: HostsRequestOptions = {
   },
   timerange: { interval: '12h', to: 1554824274610, from: 1554737874610 },
   sort: { field: HostsFields.lastSeen, direction: Direction.asc },
-  pagination: {
-    activePage: 0,
-    cursorStart: 0,
-    fakePossibleCount: 10,
-    querySize: 2,
-  },
+  pagination: { limit: 10, cursor: null, tiebreaker: null },
   filterQuery: {},
   fields: [
     'totalCount',
@@ -41,9 +36,8 @@ export const mockGetHostsOptions: HostsRequestOptions = {
     'host.os.name',
     'host.os.version',
     'edges.cursor.value',
-    'pageInfo.activePage',
-    'pageInfo.fakeTotalCount',
-    'pageInfo.showMorePagesIndicator',
+    'pageInfo.endCursor.value',
+    'pageInfo.hasNextPage',
   ],
 };
 
@@ -54,12 +48,7 @@ export const mockGetHostsRequest = {
     variables: {
       sourceId: 'default',
       timerange: { interval: '12h', from: 1554737729201, to: 1554824129202 },
-      pagination: {
-        activePage: 0,
-        cursorStart: 0,
-        fakePossibleCount: 10,
-        querySize: 2,
-      },
+      pagination: { limit: 10, cursor: null, tiebreaker: null },
       sort: { field: HostsFields.lastSeen, direction: Direction.asc },
       filterQuery: '',
     },
@@ -280,9 +269,10 @@ export const mockGetHostsResult = {
   ],
   totalCount: 1627,
   pageInfo: {
-    activePage: 0,
-    fakeTotalCount: 10,
-    showMorePagesIndicator: true,
+    hasNextPage: false,
+    endCursor: {
+      value: '10',
+    },
   },
 };
 

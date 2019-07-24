@@ -20,37 +20,25 @@ export enum NetworkType {
   details = 'details',
 }
 
-export enum NetworkTableType {
-  dns = 'dns',
-  topNFlow = 'topNFlow',
-}
-
-export enum IpDetailsTableType {
-  domains = 'domains',
-  tls = 'tls',
-  users = 'users',
-}
-
-export interface BasicQueryPaginated {
-  activePage: number;
+export interface BasicQuery {
   limit: number;
 }
 
 // Network Page Models
-export interface TopNFlowQuery extends BasicQueryPaginated {
+export interface TopNFlowQuery extends BasicQuery {
   flowTarget: FlowTarget;
   topNFlowSort: NetworkTopNFlowSortField;
   flowDirection: FlowDirection;
 }
 
-export interface DnsQuery extends BasicQueryPaginated {
+export interface DnsQuery extends BasicQuery {
   dnsSortField: NetworkDnsSortField;
   isPtrIncluded: boolean;
 }
 
 interface NetworkQueries {
-  [NetworkTableType.dns]: DnsQuery;
-  [NetworkTableType.topNFlow]: TopNFlowQuery;
+  topNFlow: TopNFlowQuery;
+  dns: DnsQuery;
 }
 
 export interface NetworkPageModel {
@@ -60,23 +48,23 @@ export interface NetworkPageModel {
 }
 
 // IP Details Models
-export interface DomainsQuery extends BasicQueryPaginated {
+export interface DomainsQuery extends BasicQuery {
   flowDirection: FlowDirection;
   domainsSortField: DomainsSortField;
 }
 
-export interface TlsQuery extends BasicQueryPaginated {
+export interface TlsQuery extends BasicQuery {
   tlsSortField: TlsSortField;
 }
 
-export interface UsersQuery extends BasicQueryPaginated {
+export interface UsersQuery extends BasicQuery {
   usersSortField: UsersSortField;
 }
 
 interface IpOverviewQueries {
-  [IpDetailsTableType.domains]: DomainsQuery;
-  [IpDetailsTableType.tls]: TlsQuery;
-  [IpDetailsTableType.users]: UsersQuery;
+  domains: DomainsQuery;
+  tls: TlsQuery;
+  users: UsersQuery;
 }
 
 export interface NetworkDetailsModel {

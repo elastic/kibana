@@ -19,7 +19,7 @@
 
 import { omit } from 'lodash';
 
-import { DiscoveredPlugin } from '../../server';
+import { DiscoveredPlugin, PluginName } from '../../server';
 import { CoreContext } from '../core_system';
 import { PluginWrapper, PluginOpaqueId } from './plugin';
 import { PluginsServiceSetupDeps, PluginsServiceStartDeps } from './plugins_service';
@@ -68,8 +68,8 @@ export function createPluginInitializerContext(
 export function createPluginSetupContext<
   TSetup,
   TStart,
-  TPluginsSetup extends object,
-  TPluginsStart extends object
+  TPluginsSetup extends Record<PluginName, unknown>,
+  TPluginsStart extends Record<PluginName, unknown>
 >(
   coreContext: CoreContext,
   deps: PluginsServiceSetupDeps,
@@ -97,8 +97,8 @@ export function createPluginSetupContext<
 export function createPluginStartContext<
   TSetup,
   TStart,
-  TPluginsSetup extends object,
-  TPluginsStart extends object
+  TPluginsSetup extends Record<PluginName, unknown>,
+  TPluginsStart extends Record<PluginName, unknown>
 >(
   coreContext: CoreContext,
   deps: PluginsServiceStartDeps,

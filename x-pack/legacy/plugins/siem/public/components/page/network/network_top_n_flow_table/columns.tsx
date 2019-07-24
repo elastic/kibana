@@ -32,22 +32,20 @@ import * as i18n from './translations';
 import { getRowItemDraggables } from '../../../tables/helpers';
 import { PreferenceFormattedBytes } from '../../../formatted_bytes';
 
-export type NetworkTopNFlowColumns = [
-  Columns<NetworkTopNFlowEdges>,
-  Columns<NetworkTopNFlowEdges>,
-  Columns<TopNFlowNetworkEcsField['direction']>,
-  Columns<TopNFlowNetworkEcsField['bytes']>,
-  Columns<TopNFlowNetworkEcsField['packets']>,
-  Columns<TopNFlowItem['count']>
-];
-
 export const getNetworkTopNFlowColumns = (
   indexPattern: StaticIndexPattern,
   flowDirection: FlowDirection,
   flowTarget: FlowTarget,
   type: networkModel.NetworkType,
   tableId: string
-): NetworkTopNFlowColumns => [
+): [
+  Columns<NetworkTopNFlowEdges>,
+  Columns<NetworkTopNFlowEdges>,
+  Columns<TopNFlowNetworkEcsField['direction']>,
+  Columns<TopNFlowNetworkEcsField['bytes']>,
+  Columns<TopNFlowNetworkEcsField['packets']>,
+  Columns<TopNFlowItem['count']>
+] => [
   {
     name: getIpTitle(flowTarget),
     truncateText: false,

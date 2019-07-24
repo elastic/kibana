@@ -136,11 +136,12 @@ exports[`Load More Events Table Component rendering it renders the events table 
       },
     ]
   }
-  fakeTotalCount={50}
+  hasNextPage={true}
   id="events"
-  loadPage={[MockFunction]}
+  loadMore={[MockFunction]}
   loading={false}
-  showMorePagesIndicator={true}
+  nextCursor="1546878704036"
+  tiebreaker="10624"
   totalCount={15546}
   type="page"
 />

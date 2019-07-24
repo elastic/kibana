@@ -7,7 +7,7 @@
 import React from 'react';
 import { MetricsExplorerChartContextMenu, createNodeDetailLink } from './chart_context_menu';
 import { mountWithIntl } from '../../utils/enzyme_helpers';
-import { options, source, timeRange, chartOptions } from '../../utils/fixtures/metrics_explorer';
+import { options, source, timeRange } from '../../utils/fixtures/metrics_explorer';
 import { UICapabilities } from 'ui/capabilities';
 import { InfraNodeType } from '../../graphql/types';
 import DateMath from '@elastic/datemath';
@@ -37,7 +37,6 @@ describe('MetricsExplorerChartContextMenu', () => {
           options={options}
           onFilter={onFilter}
           uiCapabilities={uiCapabilities}
-          chartOptions={chartOptions}
         />
       );
 
@@ -58,7 +57,6 @@ describe('MetricsExplorerChartContextMenu', () => {
           options={customOptions}
           onFilter={onFilter}
           uiCapabilities={uiCapabilities}
-          chartOptions={chartOptions}
         />
       );
       component.find('button').simulate('click');
@@ -73,7 +71,6 @@ describe('MetricsExplorerChartContextMenu', () => {
           series={series}
           options={options}
           uiCapabilities={uiCapabilities}
-          chartOptions={chartOptions}
         />
       );
 
@@ -92,7 +89,6 @@ describe('MetricsExplorerChartContextMenu', () => {
           options={customOptions}
           onFilter={onFilter}
           uiCapabilities={uiCapabilities}
-          chartOptions={chartOptions}
         />
       );
 
@@ -109,7 +105,6 @@ describe('MetricsExplorerChartContextMenu', () => {
           series={series}
           options={customOptions}
           uiCapabilities={uiCapabilities}
-          chartOptions={chartOptions}
         />
       );
 
@@ -130,7 +125,6 @@ describe('MetricsExplorerChartContextMenu', () => {
           options={options}
           onFilter={onFilter}
           uiCapabilities={customUICapabilities}
-          chartOptions={chartOptions}
         />
       );
 
@@ -150,7 +144,6 @@ describe('MetricsExplorerChartContextMenu', () => {
           options={customOptions}
           onFilter={onFilter}
           uiCapabilities={customUICapabilities}
-          chartOptions={chartOptions}
         />
       );
       expect(component.find('button').length).toBe(0);

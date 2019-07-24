@@ -27,9 +27,9 @@ import { KibanaRequest, RouteMethod } from './router';
 
 interface RequestFixtureOptions {
   headers?: Record<string, string>;
-  params?: Record<string, any>;
-  body?: Record<string, any>;
-  query?: Record<string, any>;
+  params?: Record<string, unknown>;
+  body?: Record<string, unknown>;
+  query?: Record<string, unknown>;
   path?: string;
   method?: RouteMethod;
 }

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { DiscoveredPlugin } from '../../server';
+import { DiscoveredPlugin, PluginName } from '../../server';
 import { PluginInitializerContext } from './plugin_context';
 import { loadPluginBundle } from './plugin_loader';
 import { CoreStart, CoreSetup } from '..';
@@ -33,8 +33,8 @@ export type PluginOpaqueId = symbol;
 export interface Plugin<
   TSetup = void,
   TStart = void,
-  TPluginsSetup extends object = object,
-  TPluginsStart extends object = object
+  TPluginsSetup extends {} = {},
+  TPluginsStart extends {} = {}
 > {
   setup(core: CoreSetup, plugins: TPluginsSetup): TSetup | Promise<TSetup>;
   start(core: CoreStart, plugins: TPluginsStart): TStart | Promise<TStart>;
@@ -50,8 +50,8 @@ export interface Plugin<
 export type PluginInitializer<
   TSetup,
   TStart,
-  TPluginsSetup extends object = object,
-  TPluginsStart extends object = object
+  TPluginsSetup extends Record<string, any> = {},
+  TPluginsStart extends Record<string, any> = {}
 > = (core: PluginInitializerContext) => Plugin<TSetup, TStart, TPluginsSetup, TPluginsStart>;
 
 /**
@@ -63,8 +63,8 @@ export type PluginInitializer<
 export class PluginWrapper<
   TSetup = unknown,
   TStart = unknown,
-  TPluginsSetup extends object = object,
-  TPluginsStart extends object = object
+  TPluginsSetup extends Record<PluginName, any> = Record<PluginName, unknown>,
+  TPluginsStart extends Record<PluginName, any> = Record<PluginName, unknown>
 > {
   public readonly name: DiscoveredPlugin['id'];
   public readonly configPath: DiscoveredPlugin['configPath'];

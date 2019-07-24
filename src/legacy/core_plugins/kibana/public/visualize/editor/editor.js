@@ -106,6 +106,7 @@ uiRoutes
 
 uiModules
   .get('app/visualize', [
+    'kibana/notify',
     'kibana/url'
   ])
   .directive('visualizeApp', function () {

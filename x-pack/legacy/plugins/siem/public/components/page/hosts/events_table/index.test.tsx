@@ -18,7 +18,7 @@ import { mockData } from './mock';
 import * as i18n from './translations';
 
 describe('Load More Events Table Component', () => {
-  const loadPage = jest.fn();
+  const loadMore = jest.fn();
   const state: State = mockGlobalState;
 
   let store = createStore(state, apolloClientObservable);
@@ -33,15 +33,12 @@ describe('Load More Events Table Component', () => {
         <ReduxStoreProvider store={store}>
           <EventsTable
             data={mockData.Events.edges.map(i => i.node)}
-            fakeTotalCount={getOr(50, 'fakeTotalCount', mockData.Events.pageInfo)}
+            hasNextPage={getOr(false, 'hasNextPage', mockData.Events.pageInfo)!}
             id="events"
             loading={false}
-            loadPage={loadPage}
-            showMorePagesIndicator={getOr(
-              false,
-              'showMorePagesIndicator',
-              mockData.Events.pageInfo
-            )}
+            loadMore={loadMore}
+            nextCursor={getOr(null, 'endCursor.value', mockData.Events.pageInfo)}
+            tiebreaker={getOr(null, 'endCursor.tiebreaker', mockData.Events.pageInfo)!}
             totalCount={mockData.Events.totalCount}
             type={hostsModel.HostsType.page}
           />

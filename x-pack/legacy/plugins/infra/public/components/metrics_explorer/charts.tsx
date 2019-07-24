@@ -11,7 +11,6 @@ import { MetricsExplorerResponse } from '../../../server/routes/metrics_explorer
 import {
   MetricsExplorerOptions,
   MetricsExplorerTimeOptions,
-  MetricsExplorerChartOptions,
 } from '../../containers/metrics_explorer/use_metrics_explorer_options';
 import { InfraLoadingPanel } from '../loading';
 import { NoData } from '../empty_states/no_data';
@@ -21,7 +20,6 @@ import { SourceQuery } from '../../graphql/types';
 interface Props {
   loading: boolean;
   options: MetricsExplorerOptions;
-  chartOptions: MetricsExplorerChartOptions;
   onLoadMore: (afterKey: string | null) => void;
   onRefetch: () => void;
   onFilter: (filter: string) => void;
@@ -37,7 +35,6 @@ export const MetricsExplorerCharts = injectI18n(
     data,
     onLoadMore,
     options,
-    chartOptions,
     onRefetch,
     intl,
     onFilter,
@@ -80,7 +77,7 @@ export const MetricsExplorerCharts = injectI18n(
     }
 
     return (
-      <div style={{ width: '100%' }}>
+      <React.Fragment>
         <EuiFlexGrid gutterSize="s" columns={data.series.length === 1 ? 1 : 3}>
           {data.series.map(series => (
             <EuiFlexItem key={series.id} style={{ minWidth: 0 }}>
@@ -88,7 +85,6 @@ export const MetricsExplorerCharts = injectI18n(
                 key={`chart-${series.id}`}
                 onFilter={onFilter}
                 options={options}
-                chartOptions={chartOptions}
                 title={options.groupBy ? series.id : null}
                 height={data.series.length > 1 ? 200 : 400}
                 series={series}
@@ -131,7 +127,7 @@ export const MetricsExplorerCharts = injectI18n(
             ) : null}
           </div>
         ) : null}
-      </div>
+      </React.Fragment>
     );
   }
 );
