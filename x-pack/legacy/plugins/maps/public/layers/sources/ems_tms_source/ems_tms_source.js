@@ -139,7 +139,6 @@ export class EMSTMSSource extends AbstractTMSSource {
 
   async getUrlTemplate() {
     const emsTmsMeta = await this._getEmsTmsMeta();
-    // console.log('emstmsmeta', emsTmsMeta);
     return emsTmsMeta.url;
   }
 

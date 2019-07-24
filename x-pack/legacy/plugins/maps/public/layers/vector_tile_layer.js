@@ -43,7 +43,6 @@ export class VectorTileLayer extends TileLayer {
   }
 
   getMbLayerIds() {
-    console.log('get mb layer ids');
     const sourceDataRequest = this.getSourceDataRequest();
     if (!sourceDataRequest) {//data is immmutable
       return [];
@@ -53,7 +52,6 @@ export class VectorTileLayer extends TileLayer {
     const layerIds =  vectorStyle.layers.map(layer => {
       return this._generateMbLayerId(layer);
     });
-    console.log('lyids', layerIds);
     return layerIds;
   }
 
@@ -73,7 +71,6 @@ export class VectorTileLayer extends TileLayer {
     startLoading(SOURCE_DATA_ID_ORIGIN, requestToken, dataFilters);
     try {
       const vectorStyle = await this._source.getVectorStyle();
-      console.log('vsr', vectorStyle);
       stopLoading(SOURCE_DATA_ID_ORIGIN, requestToken, vectorStyle, {});
     } catch(error) {
       onLoadError(SOURCE_DATA_ID_ORIGIN, requestToken, error.message);
@@ -128,7 +125,6 @@ export class VectorTileLayer extends TileLayer {
         }
       });
 
-      console.log('done syncing!');
     }
 
     this._setTileLayerProperties(mbMap);
@@ -175,10 +171,7 @@ export class VectorTileLayer extends TileLayer {
 
       const mbLayerId = this._generateMbLayerId(mbLayer);
 
-      console.log(this._descriptor);
-
       try {
-        // console.log('set vis');
         mbMap.setLayoutProperty(mbLayerId, 'visibility', this.isVisible() ? 'visible' : 'none');
 
 
