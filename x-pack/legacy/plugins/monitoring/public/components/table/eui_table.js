@@ -51,10 +51,31 @@ export class EuiMonitoringTable extends React.PureComponent {
         name: i18n.translate('xpack.monitoring.euiTable.setupStatusTitle', {
           defaultMessage: 'Setup Status'
         }),
-        field: uuidField,
-        render: (uuid) => {
+        sortable: product => {
           const list = get(setupMode, 'data.byUuid', {});
-          const status = list[uuid] || {};
+          const status = list[get(product, uuidField)] || {};
+
+          if (status.isInternalCollector) {
+            return 4;
+          }
+
+          if (status.isPartiallyMigrated) {
+            return 3;
+          }
+
+          if (status.isFullyMigrated) {
+            return 2;
+          }
+
+          if (status.isNetNewUser) {
+            return 1;
+          }
+
+          return 0;
+        },
+        render: (product) => {
+          const list = get(setupMode, 'data.byUuid', {});
+          const status = list[get(product, uuidField)] || {};
 
           let statusBadge = null;
           if (status.isInternalCollector) {
@@ -84,6 +105,15 @@ export class EuiMonitoringTable extends React.PureComponent {
               </EuiBadge>
             );
           }
+          else if (status.isNetNewUser) {
+            statusBadge = (
+              <EuiHealth color="danger">
+                {i18n.translate('xpack.monitoring.euiTable.isNetNewUserLabel', {
+                  defaultMessage: 'No monitoring detected'
+                })}
+              </EuiHealth>
+            );
+          }
           else {
             statusBadge = i18n.translate('xpack.monitoring.euiTable.migrationStatusUnknown', {
               defaultMessage: 'N/A'
@@ -98,8 +128,26 @@ export class EuiMonitoringTable extends React.PureComponent {
         name: i18n.translate('xpack.monitoring.euiTable.setupActionTitle', {
           defaultMessage: 'Setup Action'
         }),
-        field: uuidField,
-        render: (uuid, product) => {
+        sortable: product => {
+          const list = get(setupMode, 'data.byUuid', {});
+          const status = list[get(product, uuidField)] || {};
+
+          if (status.isInternalCollector || status.isNetNewUser) {
+            return 1;
+          }
+
+          if (status.isPartiallyMigrated) {
+            if (setupMode.productName === ELASTICSEARCH_CUSTOM_ID) {
+              // See comment for same conditional in render function
+              return 0;
+            }
+            return 1;
+          }
+
+          return 0;
+        },
+        render: (product) => {
+          const uuid = get(product, uuidField);
           const list = get(setupMode, 'data.byUuid', {});
           const status = list[uuid] || {};
           const instance = {
@@ -119,6 +167,16 @@ export class EuiMonitoringTable extends React.PureComponent {
               <EuiButtonEmpty flush="left" size="s" color="primary" onClick={() => setupMode.openFlyout(instance)}>
                 {i18n.translate('xpack.monitoring.euiTable.migrateButtonLabel', {
                   defaultMessage: 'Migrate'
+                })}
+              </EuiButtonEmpty>
+            );
+          }
+
+          if (status.isNetNewUser) {
+            return (
+              <EuiButtonEmpty flush="left" size="s" color="primary" onClick={() => setupMode.openFlyout(instance)}>
+                {i18n.translate('xpack.monitoring.euiTable.setupButtonLabel', {
+                  defaultMessage: 'Setup'
                 })}
               </EuiButtonEmpty>
             );

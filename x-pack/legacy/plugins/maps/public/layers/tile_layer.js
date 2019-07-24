@@ -48,7 +48,7 @@ export class TileLayer extends AbstractLayer {
   }
 
   _getMbLayerId() {
-    return this.getId() + '_raster';
+    return this.makeMbLayerId('raster');
   }
 
   getMbLayerIds() {

@@ -211,7 +211,7 @@ export class TaskStore {
     return templateResult;
   }
 
-  get isInitialized() {
+  public get isInitialized() {
     return this._isInitialized;
   }
 
