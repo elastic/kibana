@@ -1,6 +1,6 @@
 [role="xpack"]
 [[visualize-rollup-data]]
-== Creating a visualization using rolled up data
+== Using rolled up data in a visualization
 
 beta[]
 
