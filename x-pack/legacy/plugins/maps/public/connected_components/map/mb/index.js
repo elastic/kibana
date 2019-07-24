@@ -25,12 +25,10 @@ import {
   getDrawState,
   getScrollZoom
 } from '../../../selectors/map_selectors';
-import { getIsFilterable } from '../../../selectors/ui_selectors';
 import { getInspectorAdapters } from '../../../reducers/non_serializable_instances';
 
 function mapStateToProps(state = {}) {
   return {
-    isFilterable: getIsFilterable(state),
     isMapReady: getMapReady(state),
     layerList: getLayerList(state),
     goto: getGoto(state),
