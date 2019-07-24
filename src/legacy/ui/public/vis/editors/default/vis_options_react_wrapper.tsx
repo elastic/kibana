@@ -18,28 +18,14 @@
  */
 
 import React from 'react';
+import { VisOptionsProps } from './vis_options_props';
 
-import {
-  EuiFieldNumber,
-  EuiFormRow,
-} from '@elastic/eui';
-
-export class SelfChangingEditor extends React.Component {
-
-  onCounterChange = (ev) => {
-    this.props.setValue('counter', parseInt(ev.target.value));
-  }
-
-  render() {
-    return (
-      <EuiFormRow label="Counter">
-        <EuiFieldNumber
-          value={this.props.stateParams.counter}
-          onChange={this.onCounterChange}
-          step={1}
-          data-test-subj="counterEditor"
-        />
-      </EuiFormRow>
-    );
-  }
+interface VisOptionsReactWrapperProps extends VisOptionsProps {
+  component: React.ComponentType<VisOptionsProps>;
 }
+
+function VisOptionsReactWrapper({ component: Component, ...rest }: VisOptionsReactWrapperProps) {
+  return <Component {...rest} />;
+}
+
+export { VisOptionsReactWrapper };
