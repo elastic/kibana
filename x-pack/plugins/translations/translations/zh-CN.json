@@ -6183,6 +6183,7 @@
     "xpack.ml.explorer.invalidKuerySyntaxErrorMessageFromTable": "查询栏中的语法无效。输入必须是有效的 Kibana 查询语言 (KQL)",
     "xpack.ml.explorer.jobIdLabel": "作业 ID",
     "xpack.ml.explorer.jobScoreAcrossAllInfluencersLabel": "（所有影响因素的作业分数）",
+    "xpack.ml.explorer.kueryBar.filterPlaceholder": "按影响因素字段筛选……（如 {queryExample}）",
     "xpack.ml.explorer.limitLabel": "限制",
     "xpack.ml.explorer.loadingLabel": "正在加载",
     "xpack.ml.explorer.noConfiguredInfluencersTooltip": "“顶级影响因素”列表被隐藏，因为没有为所选作业配置影响因素。",

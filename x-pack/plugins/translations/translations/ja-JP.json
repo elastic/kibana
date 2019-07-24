@@ -6184,6 +6184,7 @@
     "xpack.ml.explorer.invalidKuerySyntaxErrorMessageFromTable": "クエリバーに無効な構文。インプットは有効な Kibana クエリ言語 (KQL) でなければなりません",
     "xpack.ml.explorer.jobIdLabel": "ジョブ ID",
     "xpack.ml.explorer.jobScoreAcrossAllInfluencersLabel": "(すべての影響因子のジョブスコア)",
+    "xpack.ml.explorer.kueryBar.filterPlaceholder": "影響因子フィールドでフィルタリング… (例:{queryExample})",
     "xpack.ml.explorer.limitLabel": "制限",
     "xpack.ml.explorer.loadingLabel": "読み込み中",
     "xpack.ml.explorer.noConfiguredInfluencersTooltip": "選択されたジョブに影響因子が構成されていないため、トップインフルエンスリストは非表示になっています。",
