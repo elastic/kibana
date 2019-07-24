@@ -134,7 +134,7 @@ describe('Data Frame: Common', () => {
       aggList: { 'the-agg-name': agg },
       groupByList: { 'the-group-by-name': groupBy },
       isAdvancedEditorEnabled: false,
-      search: 'the-query',
+      searchString: 'the-query',
       searchQuery: 'the-search-query',
       valid: true,
     };

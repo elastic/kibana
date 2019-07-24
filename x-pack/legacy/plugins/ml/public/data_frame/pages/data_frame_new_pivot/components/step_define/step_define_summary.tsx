@@ -21,7 +21,7 @@ const defaultSearch = '*';
 const emptySearch = '';
 
 export const StepDefineSummary: SFC<StepDefineExposedState> = ({
-  search,
+  searchString,
   searchQuery,
   groupByList,
   aggList,
@@ -34,13 +34,13 @@ export const StepDefineSummary: SFC<StepDefineExposedState> = ({
 
   const pivotQuery = getPivotQuery(searchQuery);
 
-  const displaySearch = search === defaultSearch ? emptySearch : search;
+  const displaySearch = searchString === defaultSearch ? emptySearch : searchString;
 
   return (
     <EuiFlexGroup>
       <EuiFlexItem grow={false} style={{ minWidth: '420px' }}>
         <EuiForm>
-          {kibanaContext.currentSavedSearch.id === undefined && typeof search === 'string' && (
+          {kibanaContext.currentSavedSearch.id === undefined && typeof searchString === 'string' && (
             <Fragment>
               <EuiFormRow
                 label={i18n.translate('xpack.ml.dataframe.stepDefineSummary.indexPatternLabel', {
