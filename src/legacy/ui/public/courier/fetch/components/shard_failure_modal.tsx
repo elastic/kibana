@@ -71,7 +71,7 @@ export function ShardFailureModal({ request, response, title, onClose }: Props) 
         description: 'Name of the tab displaying the JSON request',
       }),
       content: (
-        <EuiCodeBlock language="json" isCopyable style={{ width: '550px' }}>
+        <EuiCodeBlock language="json" isCopyable className="shardFailureModal__codeblock">
           {requestJSON}
         </EuiCodeBlock>
       ),
@@ -83,7 +83,7 @@ export function ShardFailureModal({ request, response, title, onClose }: Props) 
         description: 'Name of the tab displaying the JSON response',
       }),
       content: (
-        <EuiCodeBlock language="json" isCopyable style={{ width: '550px' }}>
+        <EuiCodeBlock language="json" isCopyable className="shardFailureModal__codeblock">
           {responseJSON}
         </EuiCodeBlock>
       ),

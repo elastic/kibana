@@ -1,0 +1,50 @@
+// set width and height to fixed values to prevent resizing when you switch tabs
+.shardFailureModal {
+     height: 75vh;
+     width: 768px;
+}
+
+// displaying a EuiCodeBlock inside a tab inside a modal, you've to set the width 
+// to prevent overlapping the modal when the content contains very long lines
+.shardFailureModal__codeblock {
+    width: 702px
+}
+
+// making EuiDescriptionList a bit more compact, there's not so much space inside a modal
+.euiDescriptionList.euiDescriptionList--column {
+    .shardFailureModal__descTitle {
+        width: 20%;
+        line-height: 1.1em;
+        margin-top: 0.8em;
+    }
+    
+    .shardFailureModal__descValue {
+        width: 80%; 
+        line-height: 1.1em;
+        margin-top: 0.8em;
+    }
+}
+
+@include euiBreakpoint('xs','s') {
+    .shardFailureModal__keyValueTitle{
+        display: block;
+        width: 100%;
+    }
+    .shardFailureModal__codeblock {
+        width: auto;
+    }
+    .euiDescriptionList.euiDescriptionList--column {
+        .shardFailureModal__descTitle {
+           display: block;
+           width: 100%;
+        }
+        
+        .shardFailureModal__descValue {
+            display: block;
+            width: 100%;
+        }
+    }
+    .euiTab {
+        padding: 5px 6px;
+    }
+}

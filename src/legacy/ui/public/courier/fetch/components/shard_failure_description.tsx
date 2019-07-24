@@ -66,17 +66,24 @@ export function ShardFailureDescription(props: ShardFailure) {
     <div>
       <EuiTitle size="xs">
         <h1>
-          {headerTxt} @ shard <EuiCode>{props.shard}</EuiCode> index{' '}
-          <EuiCode>{props.index}</EuiCode>
-          node <EuiCode>{props.node}</EuiCode>
+          {headerTxt} @{' '}
+          <span className="shardFailureModal__keyValueTitle">
+            shard <EuiCode>{props.shard}</EuiCode>
+          </span>
+          <span className="shardFailureModal__keyValueTitle">
+            index <EuiCode>{props.index}</EuiCode>
+          </span>
+          <span className="shardFailureModal__keyValueTitle">
+            node <EuiCode>{props.node}</EuiCode>
+          </span>
         </h1>
       </EuiTitle>
       <EuiDescriptionList
         listItems={listItems}
         type="column"
         compressed
-        titleProps={{ style: { width: '20%', lineHeight: '1.1em', marginTop: '0.7em' } }}
-        descriptionProps={{ style: { width: '80%', lineHeight: '1.1em', marginTop: '0.7em' } }}
+        titleProps={{ className: 'shardFailureModal__descTitle' }}
+        descriptionProps={{ className: 'shardFailureModal__descValue' }}
       />
     </div>
   );

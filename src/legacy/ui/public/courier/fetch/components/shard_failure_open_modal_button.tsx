@@ -41,7 +41,7 @@ export function ShardFailureOpenModalButton({ request, response, title }: Props)
         onClose={() => modal.close()}
       />,
       {
-        style: { minHeight: '75vh', minWidth: '768px' },
+        className: 'shardFailureModal',
       }
     );
   }

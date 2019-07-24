@@ -79,6 +79,7 @@ export interface OverlayStart {
     modalProps?: {
       closeButtonAriaLabel?: string;
       'data-test-subj'?: string;
+      className?: string;
     }
   ) => OverlayRef;
 }
