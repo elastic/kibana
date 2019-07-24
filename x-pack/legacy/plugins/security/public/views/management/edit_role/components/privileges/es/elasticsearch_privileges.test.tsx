@@ -30,6 +30,10 @@ test('it renders without crashing', () => {
     allowDocumentLevelSecurity: true,
     allowFieldLevelSecurity: true,
     validator: new RoleValidator(),
+    builtinESPrivileges: {
+      cluster: ['all', 'manage', 'monitor'],
+      index: ['all', 'read', 'write', 'index'],
+    },
   };
   const wrapper = shallowWithIntl(<ElasticsearchPrivileges {...props} />);
   expect(wrapper).toMatchSnapshot();
@@ -54,6 +58,10 @@ test('it renders ClusterPrivileges', () => {
     allowDocumentLevelSecurity: true,
     allowFieldLevelSecurity: true,
     validator: new RoleValidator(),
+    builtinESPrivileges: {
+      cluster: ['all', 'manage', 'monitor'],
+      index: ['all', 'read', 'write', 'index'],
+    },
   };
   const wrapper = mountWithIntl(<ElasticsearchPrivileges {...props} />);
   expect(wrapper.find(ClusterPrivileges)).toHaveLength(1);
@@ -78,6 +86,10 @@ test('it renders IndexPrivileges', () => {
     allowDocumentLevelSecurity: true,
     allowFieldLevelSecurity: true,
     validator: new RoleValidator(),
+    builtinESPrivileges: {
+      cluster: ['all', 'manage', 'monitor'],
+      index: ['all', 'read', 'write', 'index'],
+    },
   };
   const wrapper = mountWithIntl(<ElasticsearchPrivileges {...props} />);
   expect(wrapper.find(IndexPrivileges)).toHaveLength(1);

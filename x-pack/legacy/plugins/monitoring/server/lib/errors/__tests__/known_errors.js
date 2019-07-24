@@ -7,6 +7,7 @@
 import expect from '@kbn/expect';
 import { errors } from 'elasticsearch';
 import { isKnownError, handleKnownError } from '../known_errors';
+import { MonitoringLicenseError } from '../custom_errors';
 
 describe('Error handling for 503 errors', () => {
   it('ignores an unknown type', () => {
@@ -83,6 +84,31 @@ describe('Error handling for 503 errors', () => {
         statusCode: 503,
         error: 'Service Unavailable',
         message: 'Request Timeout: Check the Elasticsearch Monitoring cluster network connection or the load level of the nodes.'
+      },
+      headers: {}
+    });
+  });
+
+  it('handles the custom MonitoringLicenseError error', () => {
+    const clusterName = 'main';
+    const err = new MonitoringLicenseError(clusterName);
+    expect(isKnownError(err)).to.be(true);
+
+    const wrappedErr = handleKnownError(err);
+    expect(wrappedErr.message).to.be(
+      'Monitoring License Error: ' +
+      `Could not find license information for cluster = '${clusterName}'. ` +
+      `Please check the cluster's master node server logs for errors or warnings.`);
+    expect(wrappedErr.isBoom).to.be(true);
+    expect(wrappedErr.isServer).to.be(true);
+    expect(wrappedErr.data).to.be(null);
+    expect(wrappedErr.output).to.eql({
+      statusCode: 503,
+      payload: {
+        statusCode: 503,
+        error: 'Service Unavailable',
+        message: `Monitoring License Error: Could not find license information for cluster = '${clusterName}'. `
+        + `Please check the cluster's master node server logs for errors or warnings.`
       },
       headers: {}
     });

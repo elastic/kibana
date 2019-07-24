@@ -120,13 +120,3 @@ export const ROWS_10 = i18n.translate('xpack.siem.networkTopNFlowTable.rows', {
   values: { numRows: 10 },
   defaultMessage: '{numRows} {numRows, plural, =0 {rows} =1 {row} other {rows}}',
 });
-
-export const ROWS_20 = i18n.translate('xpack.siem.networkTopNFlowTable.rows', {
-  values: { numRows: 20 },
-  defaultMessage: '{numRows} {numRows, plural, =0 {rows} =1 {row} other {rows}}',
-});
-
-export const ROWS_50 = i18n.translate('xpack.siem.networkTopNFlowTable.rows', {
-  values: { numRows: 50 },
-  defaultMessage: '{numRows} {numRows, plural, =0 {rows} =1 {row} other {rows}}',
-});

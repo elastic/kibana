@@ -14,6 +14,7 @@ import { PropsOfContainer, RendererFunction } from '../../utils/typed_react';
 import { bindPlainActionCreators } from '../../utils/typed_redux';
 // deep inporting to avoid a circular import problem
 import { LogHighlightsState } from './log_highlights/log_highlights';
+import { UniqueTimeKey } from '../../../common/time';
 
 export const withStreamItems = connect(
   (state: State) => ({
@@ -45,12 +46,13 @@ export const WithStreamItems = withStreamItems(
   }: WithStreamItemsProps & {
     children: RendererFunction<
       WithStreamItemsProps & {
+        currentHighlightKey: UniqueTimeKey | null;
         items: StreamItem[];
       }
     >;
     initializeOnMount: boolean;
   }) => {
-    const { logEntryHighlightsById } = useContext(LogHighlightsState.Context);
+    const { currentHighlightKey, logEntryHighlightsById } = useContext(LogHighlightsState.Context);
     const items = useMemo(
       () =>
         props.isReloading && !props.isAutoReloading
@@ -69,6 +71,7 @@ export const WithStreamItems = withStreamItems(
 
     return children({
       ...props,
+      currentHighlightKey,
       items,
     });
   }
@@ -116,12 +119,9 @@ const createLogEntryStreamItem = (
  */
 export const ReduxSourceIdBridge = withStreamItems(
   ({ setSourceId, sourceId }: { setSourceId: (sourceId: string) => void; sourceId: string }) => {
-    useEffect(
-      () => {
-        setSourceId(sourceId);
-      },
-      [setSourceId, sourceId]
-    );
+    useEffect(() => {
+      setSourceId(sourceId);
+    }, [setSourceId, sourceId]);
 
     return null;
   }

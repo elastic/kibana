@@ -12,12 +12,36 @@ import { MonitoringTimeseries } from './monitoring_timeseries';
 import { InfoTooltip } from './info_tooltip';
 
 import {
-  EuiIconTip, EuiFlexGroup, EuiFlexItem, EuiTitle, EuiScreenReaderOnly
+  EuiIconTip, EuiFlexGroup, EuiFlexItem, EuiTitle, EuiScreenReaderOnly, EuiTextAlign, EuiButtonEmpty
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 
-export function MonitoringTimeseriesContainer({ series, onBrush }) {
+const zoomOutBtn = (zoomInfo) => {
+  if (!zoomInfo || !zoomInfo.showZoomOutBtn()) {
+    return null;
+  }
+
+  return (
+    <EuiFlexItem className="monRhythmChart__zoom">
+      <EuiTextAlign textAlign="right">
+        <EuiButtonEmpty
+          color="primary"
+          size="s"
+          onClick={zoomInfo.zoomOutHandler}
+        >
+          <i className="fa fa-search-minus" /> {' '}
+          <FormattedMessage
+            id="xpack.monitoring.chart.timeSeries.zoomOut"
+            defaultMessage="Zoom out"
+          />
+        </EuiButtonEmpty>
+      </EuiTextAlign>
+    </EuiFlexItem>
+  );
+};
+
+export function MonitoringTimeseriesContainer({ series, onBrush, zoomInfo }) {
   if (series === undefined) {
     return null; // still loading
   }
@@ -38,7 +62,7 @@ export function MonitoringTimeseriesContainer({ series, onBrush }) {
     .concat(series.map(item => `${item.metric.label}: ${item.metric.description}`));
 
   return (
-    <EuiFlexGroup direction="column" gutterSize="s">
+    <EuiFlexGroup direction="column" gutterSize="s" className="monRhythmChart__wrapper">
       <EuiFlexItem grow={false}>
         <EuiFlexGroup gutterSize="s" alignItems="center">
           <EuiFlexItem grow={false}>
@@ -71,6 +95,7 @@ export function MonitoringTimeseriesContainer({ series, onBrush }) {
               </EuiScreenReaderOnly>
             </Fragment>
           </EuiFlexItem>
+          { zoomOutBtn(zoomInfo) }
         </EuiFlexGroup>
       </EuiFlexItem>
       <EuiFlexItem style={{ minHeight: '200px' }}>

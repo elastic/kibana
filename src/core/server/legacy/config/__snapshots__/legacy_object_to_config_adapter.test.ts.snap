@@ -6,9 +6,11 @@ Object {
   "basePath": "/abc",
   "cors": false,
   "host": "host",
+  "keepaliveTimeout": 5000,
   "maxPayload": 1000,
   "port": 1234,
   "rewriteBasePath": false,
+  "socketTimeout": 2000,
   "ssl": Object {
     "enabled": true,
     "keyPassphrase": "some-phrase",
@@ -23,9 +25,11 @@ Object {
   "basePath": "/abc",
   "cors": false,
   "host": "host",
+  "keepaliveTimeout": 5000,
   "maxPayload": 1000,
   "port": 1234,
   "rewriteBasePath": false,
+  "socketTimeout": 2000,
   "ssl": Object {
     "certificate": "cert",
     "enabled": false,

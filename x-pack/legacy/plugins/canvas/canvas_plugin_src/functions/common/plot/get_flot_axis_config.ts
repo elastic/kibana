@@ -7,7 +7,7 @@
 import { get, map } from 'lodash';
 // @ts-ignore untyped Elastic library
 import { getType } from '@kbn/interpreter/common';
-import { Style, Ticks, AxisConfig, isAxisConfig, PointSeriesColumns } from '../../types';
+import { Style, Ticks, AxisConfig, isAxisConfig, PointSeriesColumns } from '../../../../types';
 
 type Position = 'bottom' | 'top' | 'left' | 'right';
 interface Config {

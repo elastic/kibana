@@ -15,6 +15,7 @@ import { EmptyMessage } from '../../shared/EmptyMessage';
 import { ImpactBar } from '../../shared/ImpactBar';
 import { TransactionLink } from '../../shared/Links/TransactionLink';
 import { ITableColumn, ManagedTable } from '../../shared/ManagedTable';
+import { LoadingStatePrompt } from '../../shared/LoadingStatePrompt';
 
 const StyledTransactionLink = styled(TransactionLink)`
   font-size: ${fontSizes.large};
@@ -97,12 +98,13 @@ const noItemsMessage = (
 );
 
 export function TraceList({ items = [], isLoading }: Props) {
-  const noItems = isLoading ? null : noItemsMessage;
+  const noItems = isLoading ? <LoadingStatePrompt /> : noItemsMessage;
   return (
     <ManagedTable
       columns={traceListColumns}
       items={items}
-      initialSort={{ field: 'impact', direction: 'desc' }}
+      initialSortField="impact"
+      initialSortDirection="desc"
       noItemsMessage={noItems}
       initialPageSize={25}
     />

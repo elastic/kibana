@@ -10,6 +10,10 @@ import { Group } from '.././types';
 import { KibanaConfigContext } from '../../../lib/adapters/framework/kibana_framework_adapter';
 import { hasMlUserPermissions } from '../../ml/permissions/has_ml_user_permissions';
 import { MlCapabilitiesContext } from '../../ml/permissions/ml_capabilities_provider';
+import { useStateToaster } from '../../toasters';
+import { errorToToaster } from '../../ml/api/error_to_toaster';
+
+import * as i18n from './translations';
 
 type Return = [boolean, string[]];
 
@@ -23,28 +27,30 @@ export const useSiemJobs = (refetchData: boolean): Return => {
   const [loading, setLoading] = useState(true);
   const config = useContext(KibanaConfigContext);
   const capabilities = useContext(MlCapabilitiesContext);
+  const userPermissions = hasMlUserPermissions(capabilities);
+  const [, dispatchToaster] = useStateToaster();
 
   const fetchFunc = async () => {
-    const userPermissions = hasMlUserPermissions(capabilities);
     if (userPermissions) {
-      const data = await groupsData({
-        'kbn-version': config.kbnVersion,
-      });
+      try {
+        const data = await groupsData({
+          'kbn-version': config.kbnVersion,
+        });
 
-      const siemJobIds = getSiemJobIdsFromGroupsData(data);
+        const siemJobIds = getSiemJobIdsFromGroupsData(data);
 
-      setSiemJobs(siemJobIds);
+        setSiemJobs(siemJobIds);
+      } catch (error) {
+        errorToToaster({ title: i18n.SIEM_JOB_FETCH_FAILURE, error, dispatchToaster });
+      }
     }
     setLoading(false);
   };
 
-  useEffect(
-    () => {
-      setLoading(true);
-      fetchFunc();
-    },
-    [refetchData]
-  );
+  useEffect(() => {
+    setLoading(true);
+    fetchFunc();
+  }, [refetchData, userPermissions]);
 
   return [loading, siemJobs];
 };

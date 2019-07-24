@@ -56,7 +56,7 @@ interface Server {
 }
 
 interface ElasticsearchPlugin {
-  getCluster: ((name: 'admin') => { callWithInternalUser: CallCluster });
+  getCluster: (name: 'admin') => { callWithInternalUser: CallCluster };
   waitUntilReady: () => Promise<any>;
 }
 
@@ -106,11 +106,12 @@ export class KibanaMigrator {
         documentMigrator: this.documentMigrator,
         index,
         log: this.log,
-        mappingProperties: indexMap[index],
+        mappingProperties: indexMap[index].typeMappings,
         pollInterval: config.get('migrations.pollInterval'),
         scrollDuration: config.get('migrations.scrollDuration'),
         serializer: this.serializer,
         obsoleteIndexTemplatePattern: 'kibana_index_template*',
+        convertToAliasScript: indexMap[index].script,
       });
     });
 

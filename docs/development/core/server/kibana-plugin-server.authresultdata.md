@@ -17,5 +17,5 @@ export interface AuthResultData
 |  Property | Type | Description |
 |  --- | --- | --- |
 |  [headers](./kibana-plugin-server.authresultdata.headers.md) | <code>AuthHeaders</code> | Auth specific headers to authenticate a user against Elasticsearch. |
-|  [state](./kibana-plugin-server.authresultdata.state.md) | <code>Record&lt;string, unknown&gt;</code> | Data to associate with an incoming request. Any downstream plugin may get access to the data. |
+|  [state](./kibana-plugin-server.authresultdata.state.md) | <code>Record&lt;string, any&gt;</code> | Data to associate with an incoming request. Any downstream plugin may get access to the data. |
 

@@ -24,9 +24,9 @@ import { UptimeSettingsContext } from '../contexts';
 import { useUrlParams } from '../hooks';
 import { stringifyUrlParams } from '../lib/helper/stringify_url_params';
 import { BaseLocationOptions } from '../components/functional/ping_list';
+import { useTrackPageview } from '../../../infra/public';
 
 interface MonitorPageProps {
-  history: { push: any };
   location: { pathname: string; search: string };
   logMonitorPageLoad: () => void;
   match: { params: { id: string } };
@@ -38,7 +38,6 @@ interface MonitorPageProps {
 }
 
 export const MonitorPage = ({
-  history,
   location,
   logMonitorPageLoad,
   query,
@@ -46,34 +45,33 @@ export const MonitorPage = ({
 }: MonitorPageProps) => {
   const parsedPath = location.pathname.replace(/^(\/monitor\/)/, '').split('/');
   const [monitorId] = useState<string>(decodeURI(parsedPath[0]));
+  const [pingListPageCount, setPingListPageCount] = useState<number>(10);
   const { colors, refreshApp, setHeadingText } = useContext(UptimeSettingsContext);
-  const [params, updateUrlParams] = useUrlParams(history, location);
+  const [getUrlParams, updateUrlParams] = useUrlParams();
+  const params = getUrlParams();
   const { dateRangeStart, dateRangeEnd, selectedPingStatus } = params;
 
-  useEffect(
-    () => {
-      query({
-        query: gql`
-          query MonitorPageTitle($monitorId: String!) {
-            monitorPageTitle: getMonitorPageTitle(monitorId: $monitorId) {
-              id
-              url
-              name
-            }
+  useEffect(() => {
+    query({
+      query: gql`
+        query MonitorPageTitle($monitorId: String!) {
+          monitorPageTitle: getMonitorPageTitle(monitorId: $monitorId) {
+            id
+            url
+            name
           }
-        `,
-        variables: { monitorId },
-      }).then((result: any) => {
-        const { name, url, id } = result.data.monitorPageTitle;
-        const heading: string = name || url || id;
-        setBreadcrumbs(getMonitorPageBreadcrumb(heading, stringifyUrlParams(params)));
-        if (setHeadingText) {
-          setHeadingText(heading);
         }
-      });
-    },
-    [params]
-  );
+      `,
+      variables: { monitorId },
+    }).then((result: any) => {
+      const { name, url, id } = result.data.monitorPageTitle;
+      const heading: string = name || url || id;
+      setBreadcrumbs(getMonitorPageBreadcrumb(heading, stringifyUrlParams(params)));
+      if (setHeadingText) {
+        setHeadingText(heading);
+      }
+    });
+  }, [params]);
 
   const [selectedLocation, setSelectedLocation] = useState<EuiComboBoxOptionProps[]>(
     BaseLocationOptions
@@ -92,6 +90,9 @@ export const MonitorPage = ({
     logMonitorPageLoad();
   }, []);
 
+  useTrackPageview({ app: 'uptime', path: 'monitor' });
+  useTrackPageview({ app: 'uptime', path: 'monitor', delay: 15000 });
+
   return (
     <Fragment>
       <MonitorPageTitle monitorId={monitorId} variables={{ monitorId }} />
@@ -107,15 +108,18 @@ export const MonitorPage = ({
       />
       <EuiSpacer size="s" />
       <PingList
-        onSelectedStatusUpdate={(selectedStatus: string | null) =>
+        onPageCountChange={setPingListPageCount}
+        onSelectedLocationChange={setSelectedLocation}
+        onSelectedStatusChange={(selectedStatus: string | null) =>
           updateUrlParams({ selectedPingStatus: selectedStatus || '' })
         }
         onUpdateApp={refreshApp}
+        pageSize={pingListPageCount}
         selectedOption={selectedPingStatus}
         selectedLocation={selectedLocation}
-        setSelectedLocation={setSelectedLocation}
         variables={{
           ...sharedVariables,
+          size: pingListPageCount,
           status: selectedPingStatus,
         }}
       />

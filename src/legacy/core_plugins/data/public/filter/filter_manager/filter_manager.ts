@@ -84,17 +84,12 @@ export class FilterManager {
 
   private handleStateUpdate(newFilters: Filter[]) {
     // global filters should always be first
-    newFilters.sort(
-      (a: Filter, b: Filter): number => {
-        if (a.$state && a.$state.store === FilterStateStore.GLOBAL_STATE) {
-          return -1;
-        } else if (b.$state && b.$state.store === FilterStateStore.GLOBAL_STATE) {
-          return 1;
-        } else {
-          return 0;
-        }
-      }
-    );
+    newFilters.sort(({ $state: a }: Filter, { $state: b }: Filter): number => {
+      return a!.store === FilterStateStore.GLOBAL_STATE &&
+        b!.store !== FilterStateStore.GLOBAL_STATE
+        ? -1
+        : 1;
+    });
 
     const filtersUpdated = !_.isEqual(this.filters, newFilters);
 
@@ -110,7 +105,7 @@ export class FilterManager {
   /* Getters */
 
   public getFilters() {
-    return this.filters;
+    return _.cloneDeep(this.filters);
   }
 
   public getAppFilters() {
@@ -124,7 +119,7 @@ export class FilterManager {
   }
 
   public getPartitionedFilters(): PartitionedFilters {
-    return FilterManager.partitionFilters(this.filters);
+    return FilterManager.partitionFilters(this.getFilters());
   }
 
   public getUpdates$() {
@@ -140,6 +135,10 @@ export class FilterManager {
   public async addFilters(filters: Filter[] | Filter, pinFilterStatus?: boolean) {
     if (!Array.isArray(filters)) {
       filters = [filters];
+    }
+
+    if (filters.length === 0) {
+      return;
     }
 
     const { uiSettings } = npSetup.core;
@@ -181,10 +180,6 @@ export class FilterManager {
       newFilters.splice(filterIndex, 1);
       this.handleStateUpdate(newFilters);
     }
-  }
-
-  public invertFilter(filter: Filter) {
-    filter.meta.negate = !filter.meta.negate;
   }
 
   public async removeAll() {

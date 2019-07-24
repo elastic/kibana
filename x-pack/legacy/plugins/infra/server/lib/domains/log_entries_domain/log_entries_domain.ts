@@ -134,6 +134,8 @@ export class InfraLogEntriesDomain {
     endKey: TimeKey,
     highlights: Array<{
       query: JsonObject;
+      countBefore: number;
+      countAfter: number;
     }>,
     filterQuery?: LogEntryQuery
   ): Promise<InfraLogEntry[][]> {
@@ -148,20 +150,42 @@ export class InfraLogEntriesDomain {
         const query = filterQuery
           ? {
               bool: {
-                must: [filterQuery, highlight.query],
+                filter: [filterQuery, highlight.query],
               },
             }
           : highlight.query;
-        const documents = await this.adapter.getContainedLogEntryDocuments(
-          request,
-          configuration,
-          requiredFields,
-          startKey,
-          endKey,
-          query,
-          highlight.query
-        );
-        const entries = documents.map(
+        const [documentsBefore, documents, documentsAfter] = await Promise.all([
+          this.adapter.getAdjacentLogEntryDocuments(
+            request,
+            configuration,
+            requiredFields,
+            startKey,
+            'desc',
+            highlight.countBefore,
+            query,
+            highlight.query
+          ),
+          this.adapter.getContainedLogEntryDocuments(
+            request,
+            configuration,
+            requiredFields,
+            startKey,
+            endKey,
+            query,
+            highlight.query
+          ),
+          this.adapter.getAdjacentLogEntryDocuments(
+            request,
+            configuration,
+            requiredFields,
+            endKey,
+            'asc',
+            highlight.countAfter,
+            query,
+            highlight.query
+          ),
+        ]);
+        const entries = [...documentsBefore, ...documents, ...documentsAfter].map(
           convertLogDocumentToEntry(
             sourceId,
             configuration.logColumns,

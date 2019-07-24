@@ -35,7 +35,7 @@ import { FieldFilter, Filter } from '@kbn/es-query';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import { get } from 'lodash';
 import React, { Component } from 'react';
-import { Field, IndexPattern } from 'ui/index_patterns';
+import { Field, IndexPattern } from '../../../index_patterns';
 import { GenericComboBox, GenericComboBoxProps } from './generic_combo_box';
 import {
   buildCustomFilter,
@@ -74,7 +74,7 @@ interface State {
 }
 
 class FilterEditorUI extends Component<Props, State> {
-  public constructor(props: Props) {
+  constructor(props: Props) {
     super(props);
     this.state = {
       selectedIndexPattern: this.getIndexPatternFromFilter(),

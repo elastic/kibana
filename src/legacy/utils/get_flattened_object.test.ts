@@ -21,12 +21,12 @@ import { getFlattenedObject } from './get_flattened_object';
 
 describe('getFlattenedObject()', () => {
   it('throws when rootValue is not an object or is an array', () => {
-    expect(() => getFlattenedObject(1)).toThrowError();
-    expect(() => getFlattenedObject(Infinity)).toThrowError();
-    expect(() => getFlattenedObject(NaN)).toThrowError();
-    expect(() => getFlattenedObject(false)).toThrowError();
-    expect(() => getFlattenedObject(null)).toThrowError();
-    expect(() => getFlattenedObject(undefined)).toThrowError();
+    expect(() => getFlattenedObject(1 as any)).toThrowError();
+    expect(() => getFlattenedObject(Infinity as any)).toThrowError();
+    expect(() => getFlattenedObject(NaN as any)).toThrowError();
+    expect(() => getFlattenedObject(false as any)).toThrowError();
+    expect(() => getFlattenedObject(null as any)).toThrowError();
+    expect(() => getFlattenedObject(undefined as any)).toThrowError();
     expect(() => getFlattenedObject([])).toThrowError();
   });
 

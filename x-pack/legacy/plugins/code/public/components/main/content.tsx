@@ -20,6 +20,7 @@ import {
   SearchOptions,
   SearchScope,
   WorkerReservedProgress,
+  Repository,
 } from '../../../model';
 import { CommitInfo, ReferenceInfo } from '../../../model/commit';
 import { changeSearchScope, FetchFileResponse, RepoState, RepoStatus } from '../../actions';
@@ -29,7 +30,7 @@ import {
   currentTreeSelector,
   hasMoreCommitsSelector,
   repoUriSelector,
-  statusSelector,
+  repoStatusSelector,
 } from '../../selectors';
 import { encodeRevisionString } from '../../../common/uri_util';
 import { history } from '../../utils/url';
@@ -46,7 +47,7 @@ interface Props extends RouteComponentProps<MainRouteParams> {
   repoStatus?: RepoStatus;
   tree: FileTree;
   file: FetchFileResponse | undefined;
-  currentTree: FileTree | undefined;
+  currentTree: FileTree | null;
   commits: CommitInfo[];
   branches: ReferenceInfo[];
   hasMoreCommits: boolean;
@@ -57,6 +58,7 @@ interface Props extends RouteComponentProps<MainRouteParams> {
   fileTreeLoadingPaths: string[];
   searchOptions: SearchOptions;
   query: string;
+  currentRepository: Repository;
 }
 const LANG_MD = 'markdown';
 
@@ -197,6 +199,8 @@ class CodeContent extends React.PureComponent<Props> {
           />
         </EuiFlexGroup>
       );
+    } else if (this.shouldRenderCloneProgress()) {
+      return null;
     } else {
       return (
         <EuiFlexGroup direction="row" alignItems="center" gutterSize="none">
@@ -232,6 +236,7 @@ class CodeContent extends React.PureComponent<Props> {
           searchOptions={this.props.searchOptions}
           branches={this.props.branches}
           query={this.props.query}
+          currentRepository={this.props.currentRepository}
         />
         {this.renderContent()}
       </div>
@@ -399,9 +404,10 @@ const mapStateToProps = (state: RootState) => ({
   branches: state.revision.branches,
   hasMoreCommits: hasMoreCommitsSelector(state),
   loadingCommits: state.revision.loadingCommits,
-  repoStatus: statusSelector(state, repoUriSelector(state)),
+  repoStatus: repoStatusSelector(state, repoUriSelector(state)),
   searchOptions: state.search.searchOptions,
   query: state.search.query,
+  currentRepository: state.repository.repository,
 });
 
 const mapDispatchToProps = {

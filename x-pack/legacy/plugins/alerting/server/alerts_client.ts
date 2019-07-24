@@ -8,7 +8,7 @@ import { omit } from 'lodash';
 import { SavedObjectsClientContract, SavedObjectReference } from 'src/core/server';
 import { Alert, RawAlert, AlertTypeRegistry, AlertAction, Log } from './types';
 import { TaskManager } from '../../task_manager';
-import { validateAlertTypeParams } from './lib';
+import { validateAlertTypeParams, parseDuration } from './lib';
 
 interface ConstructorOptions {
   log: Log;
@@ -44,7 +44,7 @@ interface CreateOptions {
 interface UpdateOptions {
   id: string;
   data: {
-    interval: number;
+    interval: string;
     actions: AlertAction[];
     alertTypeParams: Record<string, any>;
   };
@@ -84,33 +84,38 @@ export class AlertsClient {
       ...options,
       references,
     });
-    let scheduledTask;
-    try {
-      scheduledTask = await this.scheduleAlert(createdAlert.id, rawAlert, this.basePath);
-    } catch (e) {
-      // Cleanup data, something went wrong scheduling the task
+    if (data.enabled) {
+      let scheduledTask;
       try {
-        await this.savedObjectsClient.delete('alert', createdAlert.id);
-      } catch (err) {
-        // Skip the cleanup error and throw the task manager error to avoid confusion
-        this.log(
-          ['alerting', 'error'],
-          `Failed to cleanup alert "${createdAlert.id}" after scheduling task failed. Error: ${
-            err.message
-          }`
+        scheduledTask = await this.scheduleAlert(
+          createdAlert.id,
+          rawAlert.alertTypeId,
+          rawAlert.interval,
+          this.basePath
         );
+      } catch (e) {
+        // Cleanup data, something went wrong scheduling the task
+        try {
+          await this.savedObjectsClient.delete('alert', createdAlert.id);
+        } catch (err) {
+          // Skip the cleanup error and throw the task manager error to avoid confusion
+          this.log(
+            ['alerting', 'error'],
+            `Failed to cleanup alert "${createdAlert.id}" after scheduling task failed. Error: ${err.message}`
+          );
+        }
+        throw e;
       }
-      throw e;
+      await this.savedObjectsClient.update(
+        'alert',
+        createdAlert.id,
+        {
+          scheduledTaskId: scheduledTask.id,
+        },
+        { references }
+      );
+      createdAlert.attributes.scheduledTaskId = scheduledTask.id;
     }
-    await this.savedObjectsClient.update(
-      'alert',
-      createdAlert.id,
-      {
-        scheduledTaskId: scheduledTask.id,
-      },
-      { references }
-    );
-    createdAlert.attributes.scheduledTaskId = scheduledTask.id;
     return this.getAlertFromRaw(createdAlert.id, createdAlert.attributes, references);
   }
 
@@ -132,7 +137,9 @@ export class AlertsClient {
   public async delete({ id }: { id: string }) {
     const alertSavedObject = await this.savedObjectsClient.get('alert', id);
     const removeResult = await this.savedObjectsClient.delete('alert', id);
-    await this.taskManager.remove(alertSavedObject.attributes.scheduledTaskId);
+    if (alertSavedObject.attributes.scheduledTaskId) {
+      await this.taskManager.remove(alertSavedObject.attributes.scheduledTaskId);
+    }
     return removeResult;
   }
 
@@ -161,9 +168,46 @@ export class AlertsClient {
     return this.getAlertFromRaw(id, updatedObject.attributes, updatedObject.references);
   }
 
-  private async scheduleAlert(id: string, alert: RawAlert, basePath: string) {
+  public async enable({ id }: { id: string }) {
+    const existingObject = await this.savedObjectsClient.get('alert', id);
+    if (existingObject.attributes.enabled === false) {
+      const scheduledTask = await this.scheduleAlert(
+        id,
+        existingObject.attributes.alertTypeId,
+        existingObject.attributes.interval,
+        this.basePath
+      );
+      await this.savedObjectsClient.update(
+        'alert',
+        id,
+        {
+          enabled: true,
+          scheduledTaskId: scheduledTask.id,
+        },
+        { references: existingObject.references }
+      );
+    }
+  }
+
+  public async disable({ id }: { id: string }) {
+    const existingObject = await this.savedObjectsClient.get('alert', id);
+    if (existingObject.attributes.enabled === true) {
+      await this.taskManager.remove(existingObject.attributes.scheduledTaskId);
+      await this.savedObjectsClient.update(
+        'alert',
+        id,
+        {
+          enabled: false,
+          scheduledTaskId: null,
+        },
+        { references: existingObject.references }
+      );
+    }
+  }
+
+  private async scheduleAlert(id: string, alertTypeId: string, interval: string, basePath: string) {
     return await this.taskManager.schedule({
-      taskType: `alerting:${alert.alertTypeId}`,
+      taskType: `alerting:${alertTypeId}`,
       params: {
         alertId: id,
         basePath,
@@ -171,7 +215,7 @@ export class AlertsClient {
       state: {
         // This is here because we can't rely on the task manager's internal runAt.
         // It changes it for timeout, etc when a task is running.
-        scheduledRunAt: new Date(Date.now() + alert.interval),
+        scheduledRunAt: new Date(Date.now() + parseDuration(interval)),
         previousScheduledRunAt: null,
         alertTypeState: {},
         alertInstances: {},

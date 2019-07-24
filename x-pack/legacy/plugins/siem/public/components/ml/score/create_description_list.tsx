@@ -8,7 +8,7 @@ import { EuiText, EuiSpacer, EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic
 import React from 'react';
 import styled from 'styled-components';
 import { Anomaly, NarrowDateRange } from '../types';
-import { getScoreString } from './get_score_string';
+import { getScoreString } from './score_health';
 import { PreferenceFormattedDate } from '../../formatted_date';
 import { createInfluencers } from './../influencers/create_influencers';
 import { DescriptionList } from '../../../../common/utility_types';
@@ -77,10 +77,10 @@ export const createDescriptionList = (
       ),
     },
     {
-      title: i18n.TOP_ANOMALY_SUSPECT,
+      title: i18n.ANOMALOUS_ENTITY,
       description: (
         <EuiFlexGroup direction="column" gutterSize="none" responsive={false}>
-          <EuiFlexItem grow={false}>{`${score.entityName}: “${score.entityValue}”`}</EuiFlexItem>
+          <EuiFlexItem grow={false}>{`${score.entityName}: "${score.entityValue}"`}</EuiFlexItem>
         </EuiFlexGroup>
       ),
     },

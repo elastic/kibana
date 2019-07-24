@@ -46,48 +46,42 @@ function OrderByParamEditor({
   setValue,
   setValidity,
   setTouched,
-  responseValueAggs,
+  metricAggs,
 }: AggParamEditorProps<string>) {
   const label = i18n.translate('common.ui.aggTypes.orderAgg.orderByLabel', {
     defaultMessage: 'Order by',
   });
   const isValid = !!value;
 
-  useEffect(
-    () => {
-      setValidity(isValid);
-    },
-    [isValid]
-  );
+  useEffect(() => {
+    setValidity(isValid);
+  }, [isValid]);
 
   useEffect(() => {
     // setup the initial value of orderBy
     if (!value) {
       let respAgg = { id: '_key' };
 
-      if (responseValueAggs) {
-        respAgg = responseValueAggs.filter(isCompatibleAgg)[0] || respAgg;
+      if (metricAggs) {
+        respAgg = metricAggs.filter(isCompatibleAgg)[0] || respAgg;
       }
 
       setValue(respAgg.id);
     }
   }, []);
 
-  useEffect(
-    () => {
-      if (responseValueAggs && value && value !== 'custom') {
-        // ensure that orderBy is set to a valid agg
-        const respAgg = responseValueAggs
-          .filter(isCompatibleAgg)
-          .find(aggregation => aggregation.id === value);
+  useEffect(() => {
+    if (metricAggs && value && value !== 'custom') {
+      // ensure that orderBy is set to a valid agg
+      const respAgg = metricAggs
+        .filter(isCompatibleAgg)
+        .find(aggregation => aggregation.id === value);
 
-        if (!respAgg) {
-          setValue('_key');
-        }
+      if (!respAgg) {
+        setValue('_key');
       }
-    },
-    [responseValueAggs]
-  );
+    }
+  }, [metricAggs]);
 
   const defaultOptions = [
     {
@@ -104,8 +98,8 @@ function OrderByParamEditor({
     },
   ];
 
-  const options = responseValueAggs
-    ? responseValueAggs.map(respAgg => ({
+  const options = metricAggs
+    ? metricAggs.map(respAgg => ({
         text: i18n.translate('common.ui.aggTypes.orderAgg.metricLabel', {
           defaultMessage: 'Metric: {metric}',
           values: {
@@ -118,7 +112,12 @@ function OrderByParamEditor({
     : [];
 
   return (
-    <EuiFormRow label={label} fullWidth={true} isInvalid={showValidation ? !isValid : false}>
+    <EuiFormRow
+      label={label}
+      fullWidth={true}
+      isInvalid={showValidation ? !isValid : false}
+      compressed
+    >
       <EuiSelect
         options={[...options, ...defaultOptions]}
         value={value}
