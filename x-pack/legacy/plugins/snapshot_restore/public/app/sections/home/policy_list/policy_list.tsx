@@ -53,6 +53,15 @@ export const PolicyList: React.FunctionComponent<RouteComponentProps<MatchParams
     history.push(`${BASE_PATH}/policies`);
   };
 
+  const onPolicyDeleted = (policiesDeleted: Array<SlmPolicy['name']>): void => {
+    if (policyName && policiesDeleted.includes(policyName)) {
+      closePolicyDetails();
+    }
+    if (policiesDeleted.length) {
+      reload();
+    }
+  };
+
   // Track component loaded
   const { trackUiMetric } = uiMetricService;
   useEffect(() => {
@@ -113,13 +122,20 @@ export const PolicyList: React.FunctionComponent<RouteComponentProps<MatchParams
         policies={policies || []}
         reload={reload}
         openPolicyDetailsUrl={openPolicyDetailsUrl}
+        onPolicyDeleted={onPolicyDeleted}
       />
     );
   }
 
   return (
     <section data-test-subj="policyList">
-      {policyName ? <PolicyDetails policyName={policyName} onClose={closePolicyDetails} /> : null}
+      {policyName ? (
+        <PolicyDetails
+          policyName={policyName}
+          onClose={closePolicyDetails}
+          onPolicyDeleted={onPolicyDeleted}
+        />
+      ) : null}
       {content}
     </section>
   );

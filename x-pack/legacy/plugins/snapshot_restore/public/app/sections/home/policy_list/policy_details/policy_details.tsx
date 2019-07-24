@@ -26,12 +26,13 @@ import {
 import { useLoadPolicy } from '../../../../services/http';
 import { uiMetricService } from '../../../../services/ui_metric';
 
-import { SectionError, SectionLoading } from '../../../../components';
+import { SectionError, SectionLoading, PolicyDeleteProvider } from '../../../../components';
 import { TabSummary, TabHistory } from './tabs';
 
 interface Props {
   policyName: SlmPolicy['name'];
   onClose: () => void;
+  onPolicyDeleted: (policiesDeleted: Array<SlmPolicy['name']>) => void;
 }
 
 const TAB_SUMMARY = 'summary';
@@ -42,7 +43,11 @@ const tabToUiMetricMap: { [key: string]: string } = {
   [TAB_HISTORY]: UIM_POLICY_DETAIL_PANEL_HISTORY_TAB,
 };
 
-export const PolicyDetails: React.FunctionComponent<Props> = ({ policyName, onClose }) => {
+export const PolicyDetails: React.FunctionComponent<Props> = ({
+  policyName,
+  onClose,
+  onPolicyDeleted,
+}) => {
   const {
     core: { i18n },
   } = useAppDependencies();
@@ -170,6 +175,31 @@ export const PolicyDetails: React.FunctionComponent<Props> = ({ policyName, onCl
             />
           </EuiButtonEmpty>
         </EuiFlexItem>
+
+        {policyDetails ? (
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup alignItems="center">
+              <EuiFlexItem grow={false}>
+                <PolicyDeleteProvider>
+                  {deletePolicyPrompt => {
+                    return (
+                      <EuiButtonEmpty
+                        color="danger"
+                        data-test-subj="srPoicyDetailsDeleteActionButton"
+                        onClick={() => deletePolicyPrompt([policyName], onPolicyDeleted)}
+                      >
+                        <FormattedMessage
+                          id="xpack.snapshotRestore.policyDetails.deleteButtonLabel"
+                          defaultMessage="Delete"
+                        />
+                      </EuiButtonEmpty>
+                    );
+                  }}
+                </PolicyDeleteProvider>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        ) : null}
       </EuiFlexGroup>
     );
   };
@@ -180,7 +210,7 @@ export const PolicyDetails: React.FunctionComponent<Props> = ({ policyName, onCl
       data-test-subj="policyDetail"
       aria-labelledby="srPolicyDetailsFlyoutTitle"
       size="m"
-      maxWidth={400}
+      maxWidth={550}
     >
       <EuiFlyoutHeader>
         <EuiTitle size="m">

@@ -32,4 +32,18 @@ export const elasticsearchJsPlugin = (Client: any, config: any, components: any)
     ],
     method: 'GET',
   });
+
+  slm.deletePolicy = ca({
+    urls: [
+      {
+        fmt: '/_slm/policy/<%=name%>',
+        req: {
+          name: {
+            type: 'string',
+          },
+        },
+      },
+    ],
+    method: 'DELETE',
+  });
 };
