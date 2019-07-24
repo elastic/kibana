@@ -40,7 +40,8 @@ exports[`Data Frame: <DefinePivotSummary /> Minimal initialization 1`] = `
         }
       }
       isAdvancedEditorEnabled={false}
-      search="the-query"
+      searchQuery="the-search-query"
+      searchString="the-query"
       valid={true}
     />
   </ContextProvider>

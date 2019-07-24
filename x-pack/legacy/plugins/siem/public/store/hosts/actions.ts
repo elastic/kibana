@@ -24,26 +24,10 @@ export const updateTableLimit = actionCreator<{
   tableType: HostsTableType;
 }>('UPDATE_HOST_TABLE_LIMIT');
 
-export const updateAuthenticationsLimit = actionCreator<{ limit: number; hostsType: HostsType }>(
-  'UPDATE_AUTHENTICATIONS_LIMIT'
-);
-
-export const updateHostsLimit = actionCreator<{ limit: number; hostsType: HostsType }>(
-  'UPDATE_HOSTS_LIMIT'
-);
-
 export const updateHostsSort = actionCreator<{
   sort: HostsSortField;
   hostsType: HostsType;
 }>('UPDATE_HOSTS_SORT');
-
-export const updateEventsLimit = actionCreator<{ limit: number; hostsType: HostsType }>(
-  'UPDATE_EVENTS_LIMIT'
-);
-
-export const updateUncommonProcessesLimit = actionCreator<{ limit: number; hostsType: HostsType }>(
-  'UPDATE_UNCOMMONPROCESSES_LIMIT'
-);
 
 export const setHostsFilterQueryDraft = actionCreator<{
   filterQueryDraft: KueryFilterQuery;
