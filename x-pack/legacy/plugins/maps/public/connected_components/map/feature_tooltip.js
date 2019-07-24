@@ -124,6 +124,7 @@ export class FeatureTooltip extends React.Component {
         loadFeatureProperties={this.props.loadFeatureProperties}
         showFilterButtons={this.props.showFilterButtons}
         onCloseTooltip={this._onCloseTooltip}
+        addFilters={this.props.addFilters}
       />
     );
   }
