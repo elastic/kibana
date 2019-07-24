@@ -101,7 +101,7 @@ const NavigationUi = ({
 
 
   const startAfterCreateCheckbox = (
-    <EuiFlexItem grow={false}>
+    <EuiFlexItem grow={false} style={{ alignSelf: 'center' }}>
       <EuiCheckbox
         id="rollupJobToggleJobStartAfterCreation"
         data-test-subj="rollupJobToggleJobStartAfterCreation"
