@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { EditorFrameProps } from '../editor_frame';
 import { Document } from '../../persistence/saved_object_store';
@@ -63,19 +62,23 @@ export type Action =
     };
 
 export const getInitialState = (props: EditorFrameProps): EditorFrameState => {
+  const datasourceStates: EditorFrameState['datasourceStates'] = {};
+
+  if (props.doc) {
+    Object.entries(props.doc.state.datasourceStates).forEach(([datasourceId, state]) => {
+      datasourceStates[datasourceId] = { isLoading: true, state };
+    });
+  } else if (props.initialDatasourceId) {
+    datasourceStates[props.initialDatasourceId] = {
+      state: null,
+      isLoading: true,
+    };
+  }
+
   return {
     saving: false,
     title: i18n.translate('xpack.lens.chartTitle', { defaultMessage: 'New visualization' }),
-    datasourceStates: props.doc
-      ? _.mapValues(props.doc.state.datasourceStates, state => ({ isLoading: true, state }))
-      : props.initialDatasourceId
-      ? {
-          [props.initialDatasourceId]: {
-            state: null,
-            isLoading: true,
-          },
-        }
-      : {},
+    datasourceStates,
     activeDatasourceId: props.initialDatasourceId ? props.initialDatasourceId : null,
     visualization: {
       state: null,

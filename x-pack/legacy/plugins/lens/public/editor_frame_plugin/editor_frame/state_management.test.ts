@@ -43,6 +43,47 @@ describe('editor_frame state management', () => {
       expect(props.visualizationMap.testVis.initialize).not.toHaveBeenCalled();
     });
 
+    it('should prefill state if doc is passed in', () => {
+      const initialState = getInitialState({
+        ...props,
+        doc: {
+          activeDatasourceId: 'testDatasource',
+          state: {
+            datasourceStates: {
+              testDatasource: { internalState1: '' },
+              testDatasource2: { internalState2: '' },
+            },
+            visualization: {},
+          },
+          title: '',
+          visualizationType: 'testVis',
+        },
+      });
+
+      expect(initialState.datasourceStates).toMatchInlineSnapshot(`
+        Object {
+          "testDatasource": Object {
+            "isLoading": true,
+            "state": Object {
+              "internalState1": "",
+            },
+          },
+          "testDatasource2": Object {
+            "isLoading": true,
+            "state": Object {
+              "internalState2": "",
+            },
+          },
+        }
+      `);
+      expect(initialState.visualization).toMatchInlineSnapshot(`
+        Object {
+          "activeId": "testVis",
+          "state": null,
+        }
+      `);
+    });
+
     it('should not set active id if no initial visualization is passed in', () => {
       const initialState = getInitialState({ ...props, initialVisualizationId: null });
 
