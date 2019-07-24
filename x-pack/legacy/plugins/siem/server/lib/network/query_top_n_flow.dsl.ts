@@ -11,7 +11,7 @@ import {
   NetworkTopNFlowFields,
   NetworkTopNFlowSortField,
 } from '../../graphql/types';
-import { createQueryFilterClauses } from '../../utils/build_query';
+import { createQueryFilterClauses, assertUnreachable } from '../../utils/build_query';
 
 import { NetworkTopNFlowRequestOptions } from './index';
 
@@ -106,59 +106,115 @@ const getAllDirectionAggs = (
   networkTopNFlowSortField: NetworkTopNFlowSortField,
   flowTarget: FlowTarget,
   querySize: number
-) => ({
-  bytes_source: {
-    terms: {
-      field: 'source.ip',
-      size: querySize,
-      order: {
-        ...getQueryOrder(networkTopNFlowSortField),
-      },
-    },
-    aggs: {
-      bytes_in: {
-        sum: {
-          field: 'destination.bytes',
+) => {
+  if (flowTarget === FlowTarget.source) {
+    return {
+      [FlowTarget.source]: {
+        terms: {
+          field: 'source.ip',
+          size: querySize,
+          order: {
+            ...getQueryOrder(networkTopNFlowSortField),
+          },
+        },
+        aggs: {
+          bytes_in: {
+            sum: {
+              field: 'destination.bytes',
+            },
+          },
+          bytes_out: {
+            sum: {
+              field: 'source.bytes',
+            },
+          },
         },
       },
-      bytes_out: {
-        sum: {
-          field: 'source.bytes',
+    };
+  }
+
+  if (flowTarget === FlowTarget.destination) {
+    return {
+      [FlowTarget.destination]: {
+        terms: {
+          field: 'destination.ip',
+          size: querySize,
+          order: {
+            ...getQueryOrder(networkTopNFlowSortField),
+          },
+        },
+        aggs: {
+          bytes_in: {
+            sum: {
+              field: 'source.bytes',
+            },
+          },
+          bytes_out: {
+            sum: {
+              field: 'destination.bytes',
+            },
+          },
         },
       },
-    },
-  },
-  bytes_destination: {
-    terms: {
-      field: 'destination.ip',
-      size: querySize,
-      order: {
-        ...getQueryOrder(networkTopNFlowSortField),
-      },
-    },
-    aggs: {
-      bytes_in: {
-        sum: {
-          field: 'source.bytes',
+    };
+  }
+  if (flowTarget === FlowTarget.unified) {
+    return {
+      [FlowTarget.source]: {
+        terms: {
+          field: 'source.ip',
+          size: querySize / 2,
+          order: {
+            ...getQueryOrder(networkTopNFlowSortField),
+          },
+        },
+        aggs: {
+          bytes_in: {
+            sum: {
+              field: 'destination.bytes',
+            },
+          },
+          bytes_out: {
+            sum: {
+              field: 'source.bytes',
+            },
+          },
         },
       },
-      bytes_out: {
-        sum: {
-          field: 'destination.bytes',
+      [FlowTarget.destination]: {
+        terms: {
+          field: 'destination.ip',
+          size: querySize / 2,
+          order: {
+            ...getQueryOrder(networkTopNFlowSortField),
+          },
+        },
+        aggs: {
+          bytes_in: {
+            sum: {
+              field: 'source.bytes',
+            },
+          },
+          bytes_out: {
+            sum: {
+              field: 'destination.bytes',
+            },
+          },
         },
       },
-    },
-  },
-});
+    };
+  }
+};
 
 type QueryOrder = { bytes_in: Direction } | { bytes_out: Direction };
 
 const getQueryOrder = (networkTopNFlowSortField: NetworkTopNFlowSortField): QueryOrder => {
   switch (networkTopNFlowSortField.field) {
-    case NetworkTopNFlowFields.bytes:
+    case NetworkTopNFlowFields.bytes_in:
       return { bytes_in: networkTopNFlowSortField.direction };
-    case NetworkTopNFlowFields.packets:
+    case NetworkTopNFlowFields.bytes_out:
       return { bytes_out: networkTopNFlowSortField.direction };
   }
-};
 
+  assertUnreachable(networkTopNFlowSortField.field);
+};

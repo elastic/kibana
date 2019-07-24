@@ -32,7 +32,6 @@ export class ElasticsearchNetworkAdapter implements NetworkAdapter {
     options: NetworkTopNFlowRequestOptions
   ): Promise<NetworkTopNFlowData> {
     const dsl = buildTopNFlowQuery(options);
-    console.log('DLS', JSON.stringify(dsl));
     const response = await this.framework.callWithRequest<NetworkTopNFlowData, TermAggregation>(
       request,
       'search',
@@ -103,15 +102,29 @@ const getTopNFlowEdges = (
   if (options.pagination && options.pagination.querySize >= DEFAULT_MAX_TABLE_QUERY_SIZE) {
     throw new Error(`No query size above ${DEFAULT_MAX_TABLE_QUERY_SIZE}`);
   }
-  console.log('AHHH', JSON.stringify(response));
   if (options.flowDirection === FlowDirection.uniDirectional) {
     return formatTopNFlowEdges(
-      getOr([], 'aggregations.top_uni_flow.buckets', response),
+      getOr([], `aggregations.${FlowTarget.source}.buckets`, response),
+      options.flowTarget
+    );
+  }
+  if (options.flowTarget === FlowTarget.destination) {
+    return formatTopNFlowEdges(
+      getOr([], `aggregations.${FlowTarget.destination}.buckets`, response),
+      options.flowTarget
+    );
+  }
+  if (options.flowTarget === FlowTarget.source) {
+    return formatTopNFlowEdges(
+      getOr([], `aggregations.${FlowTarget.source}.buckets`, response),
       options.flowTarget
     );
   }
   return formatTopNFlowEdges(
-    getOr([], 'aggregations.top_bi_flow.buckets', response),
+    [
+      ...getOr([], `aggregations.${FlowTarget.source}.buckets`, response),
+      ...getOr([], `aggregations.${FlowTarget.destination}.buckets`, response),
+    ],
     options.flowTarget
   );
 };
@@ -124,14 +137,12 @@ const formatTopNFlowEdges = (
     node: {
       _id: bucket.key,
       [flowTarget]: {
-        count: getOrNumber('ip_count.value', bucket),
         domain: bucket.domain.buckets.map(bucketDomain => bucketDomain.key),
         ip: bucket.key,
       },
       network: {
-        bytes: getOrNumber('bytes.value', bucket),
-        packets: getOrNumber('packets.value', bucket),
-        direction: bucket.direction.buckets.map(bucketDir => bucketDir.key),
+        bytes_in: getOrNumber('bytes_in.value', bucket),
+        bytes_out: getOrNumber('bytes_out.value', bucket),
       },
     },
     cursor: {

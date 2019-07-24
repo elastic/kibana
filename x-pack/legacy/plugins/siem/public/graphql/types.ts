@@ -1172,29 +1172,21 @@ export interface NetworkTopNFlowItem {
 
   destination?: TopNFlowItem | null;
 
-  client?: TopNFlowItem | null;
-
-  server?: TopNFlowItem | null;
+  unified?: TopNFlowItem | null;
 
   network?: TopNFlowNetworkEcsField | null;
 }
 
 export interface TopNFlowItem {
-  count?: number | null;
-
   domain?: string[] | null;
 
   ip?: string | null;
 }
 
 export interface TopNFlowNetworkEcsField {
-  bytes?: number | null;
+  bytes_in?: number | null;
 
-  packets?: number | null;
-
-  transport?: string | null;
-
-  direction?: NetworkDirectionEcs[] | null;
+  bytes_out?: number | null;
 }
 
 export interface NetworkDnsData {
@@ -2122,9 +2114,8 @@ export enum UsersFields {
 }
 
 export enum NetworkTopNFlowFields {
-  bytes = 'bytes',
-  packets = 'packets',
-  ipCount = 'ipCount',
+  bytes_in = 'bytes_in',
+  bytes_out = 'bytes_out',
 }
 
 export enum NetworkDnsFields {
@@ -3326,17 +3317,13 @@ export namespace GetNetworkTopNFlowQuery {
 
     destination?: Destination | null;
 
-    client?: Client | null;
-
-    server?: Server | null;
+    unified?: Unified | null;
 
     network?: Network | null;
   };
 
   export type _Source = {
     __typename?: 'TopNFlowItem';
-
-    count?: number | null;
 
     ip?: string | null;
 
@@ -3346,27 +3333,13 @@ export namespace GetNetworkTopNFlowQuery {
   export type Destination = {
     __typename?: 'TopNFlowItem';
 
-    count?: number | null;
-
     ip?: string | null;
 
     domain?: string[] | null;
   };
 
-  export type Client = {
+  export type Unified = {
     __typename?: 'TopNFlowItem';
-
-    count?: number | null;
-
-    ip?: string | null;
-
-    domain?: string[] | null;
-  };
-
-  export type Server = {
-    __typename?: 'TopNFlowItem';
-
-    count?: number | null;
 
     ip?: string | null;
 
@@ -3376,11 +3349,9 @@ export namespace GetNetworkTopNFlowQuery {
   export type Network = {
     __typename?: 'TopNFlowNetworkEcsField';
 
-    bytes?: number | null;
+    bytes_in?: number | null;
 
-    direction?: NetworkDirectionEcs[] | null;
-
-    packets?: number | null;
+    bytes_out?: number | null;
   };
 
   export type Cursor = {

@@ -19,22 +19,18 @@ export const networkSchema = gql`
   }
 
   type TopNFlowNetworkEcsField {
-    bytes: Float
-    packets: Float
-    transport: String
-    direction: [NetworkDirectionEcs!]
+    bytes_in: Float
+    bytes_out: Float
   }
 
   type TopNFlowItem {
-    count: Float
     domain: [String!]
     ip: String
   }
 
   enum NetworkTopNFlowFields {
-    bytes
-    packets
-    ipCount
+    bytes_in
+    bytes_out
   }
 
   input NetworkTopNFlowSortField {
@@ -46,8 +42,7 @@ export const networkSchema = gql`
     _id: String
     source: TopNFlowItem
     destination: TopNFlowItem
-    client: TopNFlowItem
-    server: TopNFlowItem
+    unified: TopNFlowItem
     network: TopNFlowNetworkEcsField
   }
 

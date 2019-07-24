@@ -7481,14 +7481,18 @@
         "inputFields": null,
         "interfaces": null,
         "enumValues": [
-          { "name": "bytes", "description": "", "isDeprecated": false, "deprecationReason": null },
           {
-            "name": "packets",
+            "name": "bytes_in",
             "description": "",
             "isDeprecated": false,
             "deprecationReason": null
           },
-          { "name": "ipCount", "description": "", "isDeprecated": false, "deprecationReason": null }
+          {
+            "name": "bytes_out",
+            "description": "",
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
         ],
         "possibleTypes": null
       },
@@ -7620,15 +7624,7 @@
             "deprecationReason": null
           },
           {
-            "name": "client",
-            "description": "",
-            "args": [],
-            "type": { "kind": "OBJECT", "name": "TopNFlowItem", "ofType": null },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "server",
+            "name": "unified",
             "description": "",
             "args": [],
             "type": { "kind": "OBJECT", "name": "TopNFlowItem", "ofType": null },
@@ -7654,14 +7650,6 @@
         "name": "TopNFlowItem",
         "description": "",
         "fields": [
-          {
-            "name": "count",
-            "description": "",
-            "args": [],
-            "type": { "kind": "SCALAR", "name": "Float", "ofType": null },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
           {
             "name": "domain",
             "description": "",
@@ -7698,7 +7686,7 @@
         "description": "",
         "fields": [
           {
-            "name": "bytes",
+            "name": "bytes_in",
             "description": "",
             "args": [],
             "type": { "kind": "SCALAR", "name": "Float", "ofType": null },
@@ -7706,34 +7694,10 @@
             "deprecationReason": null
           },
           {
-            "name": "packets",
+            "name": "bytes_out",
             "description": "",
             "args": [],
             "type": { "kind": "SCALAR", "name": "Float", "ofType": null },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "transport",
-            "description": "",
-            "args": [],
-            "type": { "kind": "SCALAR", "name": "String", "ofType": null },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "direction",
-            "description": "",
-            "args": [],
-            "type": {
-              "kind": "LIST",
-              "name": null,
-              "ofType": {
-                "kind": "NON_NULL",
-                "name": null,
-                "ofType": { "kind": "ENUM", "name": "NetworkDirectionEcs", "ofType": null }
-              }
-            },
             "isDeprecated": false,
             "deprecationReason": null
           }

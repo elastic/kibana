@@ -108,10 +108,7 @@ class NetworkTopNFlowTableComponent extends React.PureComponent<NetworkTopNFlowT
       updateTableActivePage,
     } = this.props;
 
-    const field =
-      topNFlowSort.field === NetworkTopNFlowFields.ipCount
-        ? `node.${flowTarget}.count`
-        : `node.network.${topNFlowSort.field}`;
+    const field = `node.network.${topNFlowSort.field}`;
 
     return (
       <PaginatedTable
@@ -176,7 +173,7 @@ class NetworkTopNFlowTableComponent extends React.PureComponent<NetworkTopNFlowT
   private onChange = (criteria: Criteria) => {
     if (criteria.sort != null) {
       const splitField = criteria.sort.field.split('.');
-      const field = last(splitField) === 'count' ? NetworkTopNFlowFields.ipCount : last(splitField);
+      const field = last(splitField);
       const newTopNFlowSort: NetworkTopNFlowSortField = {
         field: field as NetworkTopNFlowFields,
         direction: criteria.sort.direction,

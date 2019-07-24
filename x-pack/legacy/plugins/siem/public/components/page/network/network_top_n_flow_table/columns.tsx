@@ -29,7 +29,8 @@ import { PreferenceFormattedBytes } from '../../../formatted_bytes';
 export type NetworkTopNFlowColumns = [
   Columns<NetworkTopNFlowEdges>,
   Columns<NetworkTopNFlowEdges>,
-  Columns<TopNFlowNetworkEcsField['bytes']>
+  Columns<TopNFlowNetworkEcsField['bytes_in']>,
+  Columns<TopNFlowNetworkEcsField['bytes_out']>
 ];
 
 export const getNetworkTopNFlowColumns = (
@@ -100,8 +101,22 @@ export const getNetworkTopNFlowColumns = (
     },
   },
   {
-    field: 'node.network.bytes',
-    name: i18n.BYTES,
+    field: 'node.network.bytes_in',
+    name: i18n.BYTES_IN,
+    truncateText: false,
+    hideForMobile: false,
+    sortable: true,
+    render: bytes => {
+      if (bytes != null) {
+        return <PreferenceFormattedBytes value={bytes} />;
+      } else {
+        return getEmptyTagValue();
+      }
+    },
+  },
+  {
+    field: 'node.network.bytes_out',
+    name: i18n.BYTES_OUT,
     truncateText: false,
     hideForMobile: false,
     sortable: true,

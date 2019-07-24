@@ -33,29 +33,20 @@ export const networkTopNFlowQuery = gql`
         edges {
           node {
             source {
-              count
               ip
               domain
             }
             destination {
-              count
               ip
               domain
             }
-            client {
-              count
-              ip
-              domain
-            }
-            server {
-              count
+            unified {
               ip
               domain
             }
             network {
-              bytes
-              direction
-              packets
+              bytes_in
+              bytes_out
             }
           }
           cursor {

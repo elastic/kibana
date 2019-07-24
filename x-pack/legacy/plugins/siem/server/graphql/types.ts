@@ -1201,29 +1201,21 @@ export interface NetworkTopNFlowItem {
 
   destination?: TopNFlowItem | null;
 
-  client?: TopNFlowItem | null;
-
-  server?: TopNFlowItem | null;
+  unified?: TopNFlowItem | null;
 
   network?: TopNFlowNetworkEcsField | null;
 }
 
 export interface TopNFlowItem {
-  count?: number | null;
-
   domain?: string[] | null;
 
   ip?: string | null;
 }
 
 export interface TopNFlowNetworkEcsField {
-  bytes?: number | null;
+  bytes_in?: number | null;
 
-  packets?: number | null;
-
-  transport?: string | null;
-
-  direction?: NetworkDirectionEcs[] | null;
+  bytes_out?: number | null;
 }
 
 export interface NetworkDnsData {
@@ -2151,9 +2143,8 @@ export enum UsersFields {
 }
 
 export enum NetworkTopNFlowFields {
-  bytes = 'bytes',
-  packets = 'packets',
-  ipCount = 'ipCount',
+  bytes_in = 'bytes_in',
+  bytes_out = 'bytes_out',
 }
 
 export enum NetworkDnsFields {
@@ -6312,9 +6303,7 @@ export namespace NetworkTopNFlowItemResolvers {
 
     destination?: DestinationResolver<TopNFlowItem | null, TypeParent, Context>;
 
-    client?: ClientResolver<TopNFlowItem | null, TypeParent, Context>;
-
-    server?: ServerResolver<TopNFlowItem | null, TypeParent, Context>;
+    unified?: UnifiedResolver<TopNFlowItem | null, TypeParent, Context>;
 
     network?: NetworkResolver<TopNFlowNetworkEcsField | null, TypeParent, Context>;
   }
@@ -6334,12 +6323,7 @@ export namespace NetworkTopNFlowItemResolvers {
     Parent = NetworkTopNFlowItem,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
-  export type ClientResolver<
-    R = TopNFlowItem | null,
-    Parent = NetworkTopNFlowItem,
-    Context = SiemContext
-  > = Resolver<R, Parent, Context>;
-  export type ServerResolver<
+  export type UnifiedResolver<
     R = TopNFlowItem | null,
     Parent = NetworkTopNFlowItem,
     Context = SiemContext
@@ -6353,18 +6337,11 @@ export namespace NetworkTopNFlowItemResolvers {
 
 export namespace TopNFlowItemResolvers {
   export interface Resolvers<Context = SiemContext, TypeParent = TopNFlowItem> {
-    count?: CountResolver<number | null, TypeParent, Context>;
-
     domain?: DomainResolver<string[] | null, TypeParent, Context>;
 
     ip?: IpResolver<string | null, TypeParent, Context>;
   }
 
-  export type CountResolver<
-    R = number | null,
-    Parent = TopNFlowItem,
-    Context = SiemContext
-  > = Resolver<R, Parent, Context>;
   export type DomainResolver<
     R = string[] | null,
     Parent = TopNFlowItem,
@@ -6379,32 +6356,18 @@ export namespace TopNFlowItemResolvers {
 
 export namespace TopNFlowNetworkEcsFieldResolvers {
   export interface Resolvers<Context = SiemContext, TypeParent = TopNFlowNetworkEcsField> {
-    bytes?: BytesResolver<number | null, TypeParent, Context>;
+    bytes_in?: BytesInResolver<number | null, TypeParent, Context>;
 
-    packets?: PacketsResolver<number | null, TypeParent, Context>;
-
-    transport?: TransportResolver<string | null, TypeParent, Context>;
-
-    direction?: DirectionResolver<NetworkDirectionEcs[] | null, TypeParent, Context>;
+    bytes_out?: BytesOutResolver<number | null, TypeParent, Context>;
   }
 
-  export type BytesResolver<
+  export type BytesInResolver<
     R = number | null,
     Parent = TopNFlowNetworkEcsField,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
-  export type PacketsResolver<
+  export type BytesOutResolver<
     R = number | null,
-    Parent = TopNFlowNetworkEcsField,
-    Context = SiemContext
-  > = Resolver<R, Parent, Context>;
-  export type TransportResolver<
-    R = string | null,
-    Parent = TopNFlowNetworkEcsField,
-    Context = SiemContext
-  > = Resolver<R, Parent, Context>;
-  export type DirectionResolver<
-    R = NetworkDirectionEcs[] | null,
     Parent = TopNFlowNetworkEcsField,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
