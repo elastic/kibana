@@ -68,3 +68,10 @@ export function getDefaultPrivileges(): Privileges {
     canStartStopDataFrameJob: false,
   };
 }
+
+export interface PrivilegesResponse {
+  capabilities: Privileges;
+  upgradeInProgress: boolean;
+  isPlatinumOrTrialLicense: boolean;
+  mlFeatureEnabledInSpace: boolean;
+}
