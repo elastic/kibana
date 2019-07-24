@@ -45,7 +45,9 @@ export const PolicyDeleteProvider: React.FunctionComponent<Props> = ({ children 
 
   const deletePolicy = () => {
     const policiesToDelete = [...policyNames];
-    deletePolicies(policiesToDelete).then(({ data: { itemsDeleted, errors }, error }) => {
+    deletePolicies(policiesToDelete).then(({ data, error }) => {
+      const { itemsDeleted, errors } = data || { itemsDeleted: undefined, errors: undefined };
+
       // Surface success notifications
       if (itemsDeleted && itemsDeleted.length) {
         const hasMultipleSuccesses = itemsDeleted.length > 1;

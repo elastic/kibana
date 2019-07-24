@@ -43,7 +43,9 @@ export const PolicyExecuteProvider: React.FunctionComponent<Props> = ({ children
     setPolicyName('');
   };
   const executePolicy = () => {
-    executePolicyRequest(policyName).then(({ data: { snapshotName }, error }) => {
+    executePolicyRequest(policyName).then(({ data, error }) => {
+      const { snapshotName } = data || { snapshotName: undefined };
+
       // Surface success notification
       if (snapshotName) {
         const successMessage = i18n.translate(
