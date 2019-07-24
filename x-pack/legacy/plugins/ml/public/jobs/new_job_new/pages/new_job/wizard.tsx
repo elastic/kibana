@@ -63,14 +63,6 @@ export const Wizard: FC<Props> = ({
     0
   );
 
-  useEffect(() => {
-    // IIFE to run the validation. the useEffect callback can't be async
-    (async () => {
-      await jobValidator.validate();
-      setJobValidatorUpdate(jobValidatorUpdated);
-    })();
-  }, [jobCreatorUpdated]);
-
   const jobCreatorContext: JobCreatorContextValue = {
     jobCreatorUpdated,
     jobCreatorUpdate,
@@ -85,6 +77,8 @@ export const Wizard: FC<Props> = ({
     existingJobsAndGroups,
   };
 
+  // store whether the advanced and additional sections have been expanded.
+  // has to be stored at this level to ensure it's remembered on wizard step change
   const [advancedExpanded, setAdvancedExpanded] = useState(false);
   const [additionalExpanded, setAdditionalExpanded] = useState(false);
 
@@ -94,13 +88,25 @@ export const Wizard: FC<Props> = ({
   const [progress, setProgress] = useState(resultsLoader.progress);
 
   useEffect(() => {
+    // IIFE to run the validation. the useEffect callback can't be async
+    (async () => {
+      await jobValidator.validate();
+      setJobValidatorUpdate(jobValidatorUpdated);
+    })();
+    // if the job config has changed, reset the highestStep
+    setHighestStep(currentStep);
+  }, [jobCreatorUpdated]);
+
+  useEffect(() => {
     jobCreator.subscribeToProgress(setProgress);
   }, []);
 
+  // disable the step links if the job is running
   useEffect(() => {
     setDisableSteps(progress > 0);
   }, [progress]);
 
+  // keep a record of the highest step reached in the wizard
   useEffect(() => {
     if (currentStep >= highestStep) {
       setHighestStep(currentStep);
