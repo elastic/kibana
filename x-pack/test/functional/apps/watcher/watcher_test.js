@@ -20,7 +20,7 @@ export default function ({ getService, getPageObjects }) {
 
   describe('watcher_test', function () {
     before('initialize tests', async () => {
-       // There may be system watches if monitoring was previously enabled
+      // There may be system watches if monitoring was previously enabled
       // These cannot be deleted via the UI, so we need to delete via the API
       const watches = await esSupertest.get('/.watches/_search');
 
@@ -35,7 +35,7 @@ export default function ({ getService, getPageObjects }) {
       } catch (e) {
         // silently swallow error
       }
-      
+
       await browser.setWindowSize(1600, 1000);
       await PageObjects.common.navigateToApp('watcher');
     });
