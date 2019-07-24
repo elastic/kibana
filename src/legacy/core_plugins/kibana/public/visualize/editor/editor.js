@@ -405,8 +405,14 @@ function VisEditor(
     // update the searchSource when filters update
     const filterUpdateSubscription = subscribeWithScope($scope, queryFilter.getUpdates$(), {
       next: () => {
-        $scope.filters = queryFilter.getFilters();
+        const filters = queryFilter.getFilters();
+        const isFetchRequired = !_.isEqual(
+          (filters || []).filter(filter => !filter.meta.disabled),
+          ($scope.filters || []).filter(filter => !filter.meta.disabled),
+        );
+        $scope.filters = filters;
         $scope.globalFilters = queryFilter.getGlobalFilters();
+        if (isFetchRequired) $scope.fetch();
       }
     });
 
