@@ -29,7 +29,7 @@ export {
   isErrorEmbeddable,
 } from './embeddables';
 
-export { ViewMode, Trigger, IRegistry } from './types';
+export { ViewMode, Trigger, EmbeddablePlugin } from './types';
 
 export { actionRegistry, Action, ActionContext, IncompatibleActionError } from './actions';
 
@@ -51,3 +51,5 @@ export {
 } from './containers';
 
 export { AddPanelAction, EmbeddablePanel, openAddPanelFlyout } from './panel';
+
+export { embeddablePlugin } from './plugin';

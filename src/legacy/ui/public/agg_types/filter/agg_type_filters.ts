@@ -16,9 +16,9 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { AggType } from '..';
 import { IndexPattern } from '../../index_patterns';
 import { AggConfig } from '../../vis';
+import { AggType } from '..';
 
 type AggTypeFilter = (
   aggType: AggType,

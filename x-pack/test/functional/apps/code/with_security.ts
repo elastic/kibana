@@ -142,7 +142,10 @@ export default function testWithSecurity({ getService, getPageObjects }: TestInv
               await testSubjects.click('confirmModalConfirmButton');
             }
           }
-          expect(repositoryItems).to.have.length(0);
+          await retry.try(async () => {
+            const repoItems = await testSubjects.findAll(repositoryListSelector);
+            expect(repoItems).to.have.length(0);
+          });
         });
       }
 

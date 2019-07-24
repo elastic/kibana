@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import '../../../np_core.test.mocks';
+import '../../../ui_capabilities.test.mocks';
 
 jest.mock('ui/inspector', () => ({
   Inspector: {
@@ -42,11 +42,12 @@ import {
 import { EmbeddableOutput, isErrorEmbeddable } from '../../..';
 import { InspectPanelAction } from './inspect_panel_action';
 import { Inspector, Adapters } from 'ui/inspector';
-import { createRegistry } from '../../../create_registry';
 import { EmbeddableFactory } from '../../../embeddables';
 import { Filter, FilterStateStore } from '@kbn/es-query';
 
-const embeddableFactories = createRegistry<EmbeddableFactory>();
+jest.mock('ui/new_platform');
+
+const embeddableFactories = new Map<string, EmbeddableFactory>();
 embeddableFactories.set(FILTERABLE_EMBEDDABLE, new FilterableEmbeddableFactory());
 
 let container: FilterableContainer;

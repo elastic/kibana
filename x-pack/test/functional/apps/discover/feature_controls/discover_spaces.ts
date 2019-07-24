@@ -117,7 +117,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
       });
     });
 
-    describe('space with Visualize disabled', async () => {
+    describe('space with Visualize disabled', () => {
       before(async () => {
         // we need to load the following in every situation as deleting
         // a space deletes all of the associated saved objects
@@ -141,6 +141,28 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
         await setDiscoverTimeRange();
         await PageObjects.discover.clickFieldListItem('bytes');
         await PageObjects.discover.expectMissingFieldListItemVisualize('bytes');
+      });
+    });
+
+    describe('space with index pattern management disabled', () => {
+      before(async () => {
+        await spacesService.create({
+          id: 'custom_space',
+          name: 'custom_space',
+          disabledFeatures: ['indexPatterns'],
+        });
+      });
+
+      after(async () => {
+        await spacesService.delete('custom_space');
+      });
+
+      it('Navigates to Kibana home rather than index pattern management when no index patterns exist', async () => {
+        await PageObjects.common.navigateToUrl('discover', '', {
+          basePath: '/s/custom_space',
+          ensureCurrentUrl: false,
+        });
+        await testSubjects.existOrFail('homeApp', 10000);
       });
     });
   });

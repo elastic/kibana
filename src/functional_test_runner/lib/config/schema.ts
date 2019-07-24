@@ -124,7 +124,7 @@ export const schema = Joi.object()
         grep: Joi.string(),
         invert: Joi.boolean().default(false),
         slow: Joi.number().default(30000),
-        timeout: Joi.number().default(INSPECTING ? Infinity : 360000),
+        timeout: Joi.number().default(INSPECTING ? 360000 * 100 : 360000),
         ui: Joi.string().default('bdd'),
       })
       .default(),
@@ -136,6 +136,8 @@ export const schema = Joi.object()
         type: Joi.string()
           .valid('chrome', 'firefox')
           .default('chrome'),
+
+        logPollingMs: Joi.number().default(100),
       })
       .default(),
 

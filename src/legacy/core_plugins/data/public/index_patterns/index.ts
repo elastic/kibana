@@ -19,10 +19,13 @@
 
 export {
   IndexPatternsService,
+  IndexPatterns,
   // types
   IndexPatternsSetup,
   IndexPattern,
   StaticIndexPattern,
   StaticIndexPatternField,
   Field,
+  fixtures,
+  utils,
 } from './index_patterns_service';

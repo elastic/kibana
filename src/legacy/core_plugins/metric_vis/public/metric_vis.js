@@ -97,13 +97,18 @@ function MetricVisProvider(Private) {
           aggFilter: [
             '!std_dev', '!geo_centroid',
             '!derivative', '!serial_diff', '!moving_avg', '!cumulative_sum', '!geo_bounds'],
+          aggSettings: {
+            top_hits: {
+              allowStrings: true
+            },
+          },
           defaults: [
             { type: 'count', schema: 'metric' }
           ]
         }, {
           group: 'buckets',
           name: 'group',
-          title: i18n.translate('metricVis.schemas.splitGroupTitle', { defaultMessage: 'Split Group' }),
+          title: i18n.translate('metricVis.schemas.splitGroupTitle', { defaultMessage: 'Split group' }),
           min: 0,
           max: 1,
           aggFilter: ['!geohash_grid', '!geotile_grid', '!filter']

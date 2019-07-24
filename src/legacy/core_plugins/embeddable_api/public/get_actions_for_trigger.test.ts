@@ -17,7 +17,8 @@
  * under the License.
  */
 
-import './np_core.test.mocks';
+import './ui_capabilities.test.mocks';
+jest.mock('ui/new_platform');
 
 import {
   HelloWorldAction,
@@ -33,13 +34,13 @@ import { getActionsForTrigger } from './get_actions_for_trigger';
 import { attachAction } from './triggers/attach_action';
 
 beforeEach(() => {
-  actionRegistry.reset();
-  triggerRegistry.reset();
+  actionRegistry.clear();
+  triggerRegistry.clear();
 });
 
 afterAll(() => {
-  actionRegistry.reset();
-  triggerRegistry.reset();
+  actionRegistry.clear();
+  triggerRegistry.clear();
 });
 
 test('ActionRegistry adding and getting an action', async () => {
@@ -49,8 +50,7 @@ test('ActionRegistry adding and getting an action', async () => {
   actionRegistry.set(sayHelloAction.id, sayHelloAction);
   actionRegistry.set(helloWorldAction.id, helloWorldAction);
 
-  expect(actionRegistry.length()).toBe(2);
-
+  expect(actionRegistry.size).toBe(2);
   expect(actionRegistry.get(sayHelloAction.id)).toBe(sayHelloAction);
   expect(actionRegistry.get(helloWorldAction.id)).toBe(helloWorldAction);
 });

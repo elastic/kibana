@@ -47,6 +47,12 @@ uiModules
             this.section = this.section || (this.showData ? 'data' : _.get(visType, 'editorConfig.optionTabs[0].name'));
           }
         });
+
+        $scope.onAggParamsChange = (params, paramName, value) => {
+          if (params[paramName] !== value) {
+            params[paramName] = value;
+          }
+        };
       }
     };
   });

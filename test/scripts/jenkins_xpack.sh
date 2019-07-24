@@ -19,7 +19,7 @@ echo ""
 
 echo " -> Running SIEM cyclic dependency test"
 cd "$XPACK_DIR"
-checks-reporter-with-killswitch "X-Pack SIEM cyclic dependency test" node plugins/siem/scripts/check_circular_deps
+checks-reporter-with-killswitch "X-Pack SIEM cyclic dependency test" node legacy/plugins/siem/scripts/check_circular_deps
 echo ""
 echo ""
 

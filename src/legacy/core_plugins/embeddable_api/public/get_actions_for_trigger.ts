@@ -19,14 +19,13 @@
 
 import { Action } from './actions';
 import { IEmbeddable } from './embeddables';
-import { IContainer } from './containers';
-import { IRegistry, Trigger } from './types';
+import { Trigger } from './types';
 
 export async function getActionsForTrigger(
-  actionRegistry: IRegistry<Action>,
-  triggerRegistry: IRegistry<Trigger>,
+  actionRegistry: Map<string, Action>,
+  triggerRegistry: Map<string, Trigger>,
   triggerId: string,
-  context: { embeddable: IEmbeddable; container?: IContainer }
+  context: { embeddable: IEmbeddable; triggerContext?: { [key: string]: unknown } }
 ) {
   const trigger = triggerRegistry.get(triggerId);
 

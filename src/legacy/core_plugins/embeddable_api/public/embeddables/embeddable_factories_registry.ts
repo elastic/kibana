@@ -18,6 +18,4 @@
  */
 
 import { EmbeddableFactory } from './embeddable_factory';
-import { createRegistry } from '../create_registry';
-
-export const embeddableFactories = createRegistry<EmbeddableFactory>();
+export const embeddableFactories = new Map<string, EmbeddableFactory>();

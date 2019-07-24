@@ -98,6 +98,9 @@ export default function PointSeriesVisType(Private) {
         legendPosition: 'right',
         times: [],
         addTimeMarker: false,
+        labels: {
+          show: false,
+        }
       },
     },
     editorConfig: {
@@ -140,7 +143,7 @@ export default function PointSeriesVisType(Private) {
         {
           group: 'metrics',
           name: 'metric',
-          title: i18n.translate('kbnVislibVisTypes.histogram.metricTitle', { defaultMessage: 'Y-Axis' }),
+          title: i18n.translate('kbnVislibVisTypes.histogram.metricTitle', { defaultMessage: 'Y-axis' }),
           min: 1,
           aggFilter: ['!geo_centroid', '!geo_bounds'],
           defaults: [
@@ -150,7 +153,7 @@ export default function PointSeriesVisType(Private) {
         {
           group: 'metrics',
           name: 'radius',
-          title: i18n.translate('kbnVislibVisTypes.histogram.radiusTitle', { defaultMessage: 'Dot Size' }),
+          title: i18n.translate('kbnVislibVisTypes.histogram.radiusTitle', { defaultMessage: 'Dot size' }),
           min: 0,
           max: 1,
           aggFilter: ['count', 'avg', 'sum', 'min', 'max', 'cardinality']
@@ -158,7 +161,7 @@ export default function PointSeriesVisType(Private) {
         {
           group: 'buckets',
           name: 'segment',
-          title: i18n.translate('kbnVislibVisTypes.histogram.segmentTitle', { defaultMessage: 'X-Axis' }),
+          title: i18n.translate('kbnVislibVisTypes.histogram.segmentTitle', { defaultMessage: 'X-axis' }),
           min: 0,
           max: 1,
           aggFilter: ['!geohash_grid', '!geotile_grid', '!filter']
@@ -166,7 +169,7 @@ export default function PointSeriesVisType(Private) {
         {
           group: 'buckets',
           name: 'group',
-          title: i18n.translate('kbnVislibVisTypes.histogram.groupTitle', { defaultMessage: 'Split Series' }),
+          title: i18n.translate('kbnVislibVisTypes.histogram.groupTitle', { defaultMessage: 'Split series' }),
           min: 0,
           max: 3,
           aggFilter: ['!geohash_grid', '!geotile_grid', '!filter']
@@ -174,7 +177,7 @@ export default function PointSeriesVisType(Private) {
         {
           group: 'buckets',
           name: 'split',
-          title: i18n.translate('kbnVislibVisTypes.histogram.splitTitle', { defaultMessage: 'Split Chart' }),
+          title: i18n.translate('kbnVislibVisTypes.histogram.splitTitle', { defaultMessage: 'Split chart' }),
           min: 0,
           max: 1,
           aggFilter: ['!geohash_grid', '!geotile_grid', '!filter']

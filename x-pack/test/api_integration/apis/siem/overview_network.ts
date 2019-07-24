@@ -5,8 +5,8 @@
  */
 
 import expect from '@kbn/expect';
-import { overviewNetworkQuery } from '../../../../plugins/siem/public/containers/overview/overview_network/index.gql_query';
-import { GetOverviewNetworkQuery } from '../../../../plugins/siem/public/graphql/types';
+import { overviewNetworkQuery } from '../../../../legacy/plugins/siem/public/containers/overview/overview_network/index.gql_query';
+import { GetOverviewNetworkQuery } from '../../../../legacy/plugins/siem/public/graphql/types';
 import { KbnTestProvider } from './types';
 
 const overviewNetworkTests: KbnTestProvider = ({ getService }) => {
@@ -45,6 +45,7 @@ const overviewNetworkTests: KbnTestProvider = ({ getService }) => {
                 from: FROM,
               },
               defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+              inspect: false,
             },
           })
           .then(resp => {
@@ -85,6 +86,7 @@ const overviewNetworkTests: KbnTestProvider = ({ getService }) => {
                 from: FROM,
               },
               defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+              inspect: false,
             },
           })
           .then(resp => {
@@ -125,6 +127,7 @@ const overviewNetworkTests: KbnTestProvider = ({ getService }) => {
                 from: FROM,
               },
               defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+              inspect: false,
             },
           })
           .then(resp => {

@@ -30,7 +30,7 @@ you don't need to configure any settings.
 Now create an index pattern for the Logstash data set. This data set
 contains time-series data.
 
-. Define an index pattern named `logstash*.`
+. Define an index pattern named `logstash*`.
 . Click *Next step*.
 . In *Configure settings*, select *@timestamp* in the *Time Filter field name* dropdown menu.
 . Click *Create index pattern*.

@@ -80,3 +80,29 @@
     }
   }
 }
+
+{
+  "type": "index",
+  "value": {
+    "index": "flights",
+    "mappings": {
+      "properties": {
+        "location": {
+          "type": "geo_point"
+        },
+        "heading": {
+          "type": "integer"
+        },
+        "altitude": {
+          "type": "integer"
+        }
+      }
+    },
+    "settings": {
+      "index": {
+        "number_of_replicas": "0",
+        "number_of_shards": "1"
+      }
+    }
+  }
+}

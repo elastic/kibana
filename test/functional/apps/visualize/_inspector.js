@@ -43,8 +43,7 @@ export default function ({ getService, getPageObjects }) {
         await inspector.expectTableHeaders(['Count']);
 
         log.debug('Add Average Metric on machine.ram field');
-        await PageObjects.visualize.clickAddMetric();
-        await PageObjects.visualize.clickBucket('Y-Axis', 'metric');
+        await PageObjects.visualize.clickBucket('Y-axis', 'metrics');
         await PageObjects.visualize.selectAggregation('Average', 'metrics');
         await PageObjects.visualize.selectField('machine.ram', 'metrics');
         await PageObjects.visualize.clickGo();
@@ -54,8 +53,8 @@ export default function ({ getService, getPageObjects }) {
 
       describe('filtering on inspector table values', function () {
         before(async function () {
-          log.debug('Add X-Axis terms agg on machine.os.raw');
-          await PageObjects.visualize.clickBucket('X-Axis');
+          log.debug('Add X-axis terms agg on machine.os.raw');
+          await PageObjects.visualize.clickBucket('X-axis');
           await PageObjects.visualize.selectAggregation('Terms');
           await PageObjects.visualize.selectField('machine.os.raw');
           await PageObjects.visualize.setSize(2);

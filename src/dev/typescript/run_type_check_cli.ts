@@ -87,5 +87,10 @@ export function runTypeCheckCli() {
     process.exit(1);
   }
 
-  execInProjects(log, projects, 'tsc', project => ['--project', project.tsConfigPath, ...tscArgs]);
+  execInProjects(log, projects, process.execPath, project => [
+    ...(project.name === 'x-pack' ? ['--max-old-space-size=2048'] : []),
+    require.resolve('typescript/bin/tsc'),
+    ...['--project', project.tsConfigPath],
+    ...tscArgs,
+  ]);
 }

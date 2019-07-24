@@ -1,0 +1,68 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`MonitorBarSeries component renders a series when there are down items 1`] = `
+<div
+  style={
+    Object {
+      "height": 50,
+      "width": "100%",
+    }
+  }
+>
+  <Chart
+    renderer="canvas"
+  >
+    <inject-SettingsComponent-with-chartStore
+      xDomain={
+        Object {
+          "max": 1548700920000,
+          "min": 1548697920000,
+        }
+      }
+    />
+    <inject-AxisSpec-with-chartStore
+      hide={true}
+      id="bottom"
+      position="bottom"
+      tickFormat={[Function]}
+    />
+    <inject-BarSeriesSpecComponent-with-chartStore
+      customSeriesColors={
+        Map {
+          Object {
+            "colorValues": Array [],
+            "specId": "downSeries",
+          } => "A danger color",
+        }
+      }
+      data={
+        Array [
+          Array [
+            124,
+            1,
+          ],
+          Array [
+            125,
+            1,
+          ],
+          Array [
+            126,
+            1,
+          ],
+        ]
+      }
+      id="downSeries"
+      name="Down checks"
+      timeZone="local"
+      xAccessor={0}
+      xScaleType="time"
+      yAccessors={
+        Array [
+          1,
+        ]
+      }
+      yScaleType="linear"
+    />
+  </Chart>
+</div>
+`;

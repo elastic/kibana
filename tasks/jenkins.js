@@ -33,7 +33,7 @@ module.exports = function (grunt) {
     'run:licenses',
     'run:verifyDependencyVersions',
     'run:verifyNotice',
-    'run:test_server',
+    'run:mocha',
     'run:test_jest',
     'run:test_jest_integration',
     'run:test_projects',

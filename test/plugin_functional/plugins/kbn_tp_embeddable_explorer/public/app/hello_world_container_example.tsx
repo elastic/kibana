@@ -18,14 +18,9 @@
  */
 
 import React from 'react';
-
-import {
-  EmbeddablePanel,
-  Container,
-  embeddableFactories,
-  IRegistry,
-  EmbeddableFactory,
-} from 'plugins/embeddable_api';
+import { EuiFieldText, EuiFormRow } from '@elastic/eui';
+import { EmbeddablePanel, embeddableFactories, EmbeddableFactory } from 'plugins/embeddable_api';
+import { Subscription } from 'rxjs';
 import {
   HelloWorldContainer,
   CONTACT_CARD_EMBEDDABLE,
@@ -33,13 +28,15 @@ import {
 } from '../../../../../../src/legacy/core_plugins/embeddable_api/public/test_samples';
 
 interface Props {
-  embeddableFactories: IRegistry<EmbeddableFactory>;
+  embeddableFactories: Map<string, EmbeddableFactory>;
 }
 
-export class HelloWorldContainerExample extends React.Component<Props> {
-  private container: Container;
+export class HelloWorldContainerExample extends React.Component<Props, { lastName?: string }> {
+  private container: HelloWorldContainer;
+  private mounted: boolean = false;
+  private subscription?: Subscription;
 
-  public constructor(props: Props) {
+  constructor(props: Props) {
     super(props);
 
     this.container = new HelloWorldContainer(
@@ -65,17 +62,43 @@ export class HelloWorldContainerExample extends React.Component<Props> {
       },
       embeddableFactories
     );
+    this.state = {
+      lastName: this.container.getInput().lastName,
+    };
+  }
+
+  public componentDidMount() {
+    this.mounted = true;
+    this.subscription = this.container.getInput$().subscribe(() => {
+      const { lastName } = this.container.getInput();
+      if (this.mounted) {
+        this.setState({
+          lastName,
+        });
+      }
+    });
   }
 
   public componentWillUnmount() {
-    if (this.container) {
-      this.container.destroy();
+    this.mounted = false;
+    if (this.subscription) {
+      this.subscription.unsubscribe();
     }
+    this.container.destroy();
   }
+
   public render() {
     return (
       <div className="app-container dshAppContainer">
         <h1>Hello World Container</h1>
+        <EuiFormRow label="Last name">
+          <EuiFieldText
+            name="popfirst"
+            value={this.state.lastName}
+            placeholder="optional"
+            onChange={e => this.container.updateInput({ lastName: e.target.value })}
+          />
+        </EuiFormRow>
         <EmbeddablePanel embeddable={this.container} />
       </div>
     );

@@ -23,7 +23,9 @@ export default function exploreRepositoryFunctionalTests({
 
   const FIND_TIME = config.get('timeouts.find');
 
-  describe('Explore Repository', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/41453
+  describe.skip('Explore Repository', function() {
+    this.tags('smoke');
     describe('Explore a repository', () => {
       const repositoryListSelector = 'codeRepositoryList codeRepositoryItem';
 
@@ -119,7 +121,8 @@ export default function exploreRepositoryFunctionalTests({
         });
       });
 
-      it('Click file/directory on the file tree', async () => {
+      // FLAKY: https://github.com/elastic/kibana/issues/41076
+      it.skip('Click file/directory on the file tree', async () => {
         log.debug('Click a file in the source tree');
         // Wait the file tree to be rendered and click the 'src' folder on the file tree.
         await retry.try(async () => {
@@ -172,9 +175,7 @@ export default function exploreRepositoryFunctionalTests({
           expect(await testSubjects.exists('codeFileTreeNode-Directory-Icon-src-doc-open')).ok();
         });
 
-        // click src again to focus on this folder
-        await testSubjects.click('codeFileTreeNode-Directory-src');
-        // then click again to close this folder.
+        // click src again to focus on this folder and close this folder.
         await testSubjects.click('codeFileTreeNode-Directory-src');
 
         await retry.tryForTime(5000, async () => {
@@ -217,7 +218,8 @@ export default function exploreRepositoryFunctionalTests({
         });
       });
 
-      it('click a breadcrumb should not affect the file tree', async () => {
+      // FLAKY: https://github.com/elastic/kibana/issues/41112
+      it.skip('click a breadcrumb should not affect the file tree', async () => {
         log.debug('it goes to a deep node of file tree');
         const url = `${PageObjects.common.getHostPort()}/app/code#/github.com/elastic/TypeScript-Node-Starter/blob/master/src/models/User.ts`;
         await browser.get(url);
@@ -311,6 +313,40 @@ export default function exploreRepositoryFunctionalTests({
         });
         await retry.tryForTime(5000, async () => {
           expect(await testSubjects.exists('codeNotFoundErrorPage')).ok();
+        });
+      });
+
+      it('goes to a branch of a project', async () => {
+        log.debug('it goes to a branch of the repo');
+        await retry.try(async () => {
+          expect(testSubjects.exists('codeBranchSelector'));
+        });
+        await testSubjects.click('codeBranchSelector');
+        const branch = 'addAzure';
+        const branchOptionSelector = `codeBranchSelectOption-${branch}`;
+        await retry.try(async () => {
+          expect(testSubjects.exists(branchOptionSelector));
+        });
+        await testSubjects.click(branchOptionSelector);
+        await retry.try(async () => {
+          const currentUrl: string = await browser.getCurrentUrl();
+          expect(currentUrl.indexOf(branch.replace(/\//g, ':'))).to.greaterThan(0);
+          expect(testSubjects.exists(`codeBranchSelectOption-${branch}Active`)).to.be.ok();
+        });
+        await retry.try(async () => {
+          expect(testSubjects.exists('codeBranchSelector'));
+        });
+        await testSubjects.click('codeBranchSelector');
+        const anotherBranch = 'noDatabase';
+        const anotherBranchOptionSelector = `codeBranchSelectOption-${anotherBranch}`;
+        await retry.try(async () => {
+          expect(testSubjects.exists(anotherBranchOptionSelector));
+        });
+        await testSubjects.click(anotherBranchOptionSelector);
+        await retry.try(async () => {
+          const currentUrl: string = await browser.getCurrentUrl();
+          expect(currentUrl.indexOf(anotherBranch.replace(/\//g, ':'))).to.greaterThan(0);
+          expect(testSubjects.exists(`codeBranchSelectOption-${anotherBranch}Active`)).to.be.ok();
         });
       });
     });

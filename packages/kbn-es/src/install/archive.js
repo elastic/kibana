@@ -44,6 +44,7 @@ exports.installArchive = async function installArchive(archive, options = {}) {
     basePath = BASE_PATH,
     installPath = path.resolve(basePath, path.basename(archive, '.tar.gz')),
     log = defaultLog,
+    bundledJDK = false,
   } = options;
 
   let dest = archive;
@@ -68,7 +69,7 @@ exports.installArchive = async function installArchive(archive, options = {}) {
     await appendToConfig(installPath, 'xpack.security.enabled', 'true');
 
     await appendToConfig(installPath, 'xpack.license.self_generated.type', license);
-    await configureKeystore(installPath, password, log);
+    await configureKeystore(installPath, password, log, bundledJDK);
   }
 
   return { installPath };
@@ -92,13 +93,18 @@ async function appendToConfig(installPath, key, value) {
  * @param {String} password
  * @param {ToolingLog} log
  */
-async function configureKeystore(installPath, password, log = defaultLog) {
+async function configureKeystore(installPath, password, log = defaultLog, bundledJDK = false) {
   log.info('setting bootstrap password to %s', chalk.bold(password));
 
-  await execa(ES_KEYSTORE_BIN, ['create'], { cwd: installPath });
+  const env = {};
+  if (bundledJDK) {
+    env.JAVA_HOME = '';
+  }
+  await execa(ES_KEYSTORE_BIN, ['create'], { cwd: installPath, env });
 
   await execa(ES_KEYSTORE_BIN, ['add', 'bootstrap.password', '-x'], {
     input: password,
     cwd: installPath,
+    env,
   });
 }

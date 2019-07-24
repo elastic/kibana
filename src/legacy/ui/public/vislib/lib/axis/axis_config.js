@@ -61,8 +61,12 @@ const defaults = {
   title: {
     text: '',
     elSelector: '.visAxis__column--{pos} .axis-div',
-  }
+  },
+  padForLabels: 0,
 };
+
+const padForLabelsX = 40;
+const padForLabelsY = 15;
 
 const categoryDefaults = {
   type: 'category',
@@ -132,11 +136,6 @@ export class AxisConfig {
         }
       }
 
-      // override axisFormatter (to replicate current behaviour)
-      if (this.isPercentage()) {
-        this._values.labels.axisFormatter = d3.format('%');
-      }
-
       if (this.isLogScale()) {
         this._values.labels.filter = true;
       }
@@ -157,6 +156,10 @@ export class AxisConfig {
 
     if (this.get('type') === 'category' && !this.isHorizontal()) {
       this._values.scale.inverted = _.get(axisConfigArgs, 'scale.inverted', true);
+    }
+
+    if (chartConfig.get('labels.show', false) && !isCategoryAxis) {
+      this._values.padForLabels = isHorizontal ? padForLabelsX : padForLabelsY;
     }
 
     let offset;

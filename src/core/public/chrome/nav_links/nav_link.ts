@@ -109,7 +109,8 @@ export interface ChromeNavLink {
   readonly url?: string;
 }
 
-export type NavLinkUpdateableFields = Partial<
+/** @public */
+export type ChromeNavLinkUpdateableFields = Partial<
   Pick<ChromeNavLink, 'active' | 'disabled' | 'hidden' | 'url' | 'subUrlBase'>
 >;
 
@@ -126,7 +127,7 @@ export class NavLinkWrapper {
     this.properties = Object.freeze(properties);
   }
 
-  public update(newProps: NavLinkUpdateableFields) {
+  public update(newProps: ChromeNavLinkUpdateableFields) {
     // Enforce limited properties at runtime for JS code
     newProps = pick(newProps, ['active', 'disabled', 'hidden', 'url', 'subUrlBase']);
     return new NavLinkWrapper({ ...this.properties, ...newProps });

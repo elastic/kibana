@@ -39,8 +39,8 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.visualize.clickRegionMap();
       await PageObjects.visualize.clickNewSearch();
       await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
-      log.debug('Bucket = shape field');
-      await PageObjects.visualize.clickBucket('shape field');
+      log.debug('Bucket = Shape field');
+      await PageObjects.visualize.clickBucket('Shape field');
       log.debug('Aggregation = Terms');
       await PageObjects.visualize.selectAggregation('Terms');
       log.debug('Field = geo.src');

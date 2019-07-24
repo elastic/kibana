@@ -148,7 +148,7 @@ module.exports = function (grunt) {
       ]
     }),
 
-    // used by the test:server task
+    // used by the test:mocha task
     //    runs all node.js/server mocha tests
     mocha: scriptWithGithubChecks({
       title: 'Mocha tests',
@@ -280,8 +280,6 @@ module.exports = function (grunt) {
 
     verifyDependencyVersions:
       gruntTaskWithGithubChecks('Verify dependency versions', 'verifyDependencyVersions'),
-    test_server:
-      gruntTaskWithGithubChecks('Server tests', 'test:server'),
     test_jest: gruntTaskWithGithubChecks('Jest tests', 'test:jest'),
     test_jest_integration:
       gruntTaskWithGithubChecks('Jest integration tests', 'test:jest_integration'),

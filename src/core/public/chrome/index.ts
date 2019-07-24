@@ -22,7 +22,10 @@ export {
   ChromeBreadcrumb,
   ChromeService,
   ChromeStart,
+  InternalChromeStart,
   ChromeBrand,
   ChromeHelpExtension,
 } from './chrome_service';
-export { ChromeNavLink } from './nav_links';
+export { ChromeNavLink, ChromeNavLinks, ChromeNavLinkUpdateableFields } from './nav_links';
+export { ChromeRecentlyAccessed, ChromeRecentlyAccessedHistoryItem } from './recently_accessed';
+export { ChromeNavControl, ChromeNavControls } from './nav_controls';

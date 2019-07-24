@@ -50,10 +50,10 @@ Array [
       expect(failures).toMatchInlineSnapshot(`
 Array [
   Object {
-    "classname": "X-Pack Jest Tests.x-pack/plugins/code/server/lsp",
+    "classname": "X-Pack Jest Tests.x-pack/legacy/plugins/code/server/lsp",
     "failure": "
         TypeError: Cannot read property '0' of undefined
-    at Object.<anonymous>.test (/var/lib/jenkins/workspace/elastic+kibana+master/JOB/x-pack-intake/node/immutable/kibana/x-pack/plugins/code/server/lsp/abstract_launcher.test.ts:166:10)
+    at Object.<anonymous>.test (/var/lib/jenkins/workspace/elastic+kibana+master/JOB/x-pack-intake/node/immutable/kibana/x-pack/legacy/plugins/code/server/lsp/abstract_launcher.test.ts:166:10)
       ",
     "name": "launcher can reconnect if process died",
     "time": "7.060",
@@ -120,7 +120,7 @@ Wait timed out after 10055ms
       expect(console.log.mock.calls).toMatchInlineSnapshot(`
 Array [
   Array [
-    "Ignoring likely irrelevant failure: X-Pack Mocha Tests.x-pack/plugins/code/server/__tests__/multi_node·ts - code in multiple nodes \\"before all\\" hook
+    "Ignoring likely irrelevant failure: X-Pack Mocha Tests.x-pack/legacy/plugins/code/server/__tests__/multi_node·ts - code in multiple nodes \\"before all\\" hook
     
           Error: Unable to read artifact info from https://artifacts-api.elastic.co/v1/versions/8.0.0-SNAPSHOT/builds/latest/projects/elasticsearch: Service Temporarily Unavailable
     <html>
@@ -136,7 +136,7 @@ Array [
         ",
   ],
   Array [
-    "Ignoring likely irrelevant failure: X-Pack Mocha Tests.x-pack/plugins/code/server/__tests__/multi_node·ts - code in multiple nodes \\"after all\\" hook
+    "Ignoring likely irrelevant failure: X-Pack Mocha Tests.x-pack/legacy/plugins/code/server/__tests__/multi_node·ts - code in multiple nodes \\"after all\\" hook
     
           TypeError: Cannot read property 'shutdown' of undefined
       at Context.shutdown (plugins/code/server/__tests__/multi_node.ts:125:23)
@@ -149,6 +149,45 @@ Array [
 ]
 `);
       expect(failures).toMatchInlineSnapshot(`Array []`);
+    });
+  });
+
+  describe('karma report', () => {
+    it('allows relevant tests', async () => {
+      const failures = await createPromiseFromStreams([
+        vfs.src([resolve(__dirname, '__fixtures__/karma_report.xml')]),
+        mapXml(),
+        filterFailures(),
+        createConcatStream(),
+      ]);
+
+      expect(console.log.mock.calls).toMatchInlineSnapshot(`
+Array [
+  Array [
+    "Found 1 test failures",
+  ],
+]
+`);
+      expect(failures).toMatchInlineSnapshot(`
+Array [
+  Object {
+    "classname": "Browser Unit Tests.CoordinateMapsVisualizationTest",
+    "failure": "Error: expected 7069 to be below 64
+    at Assertion.__kbnBundles__.tests../packages/kbn-expect/expect.js.Assertion.assert (http://localhost:5610/bundles/tests.bundle.js?shards=4&shard_num=1:13671:11)
+    at Assertion.__kbnBundles__.tests../packages/kbn-expect/expect.js.Assertion.lessThan.Assertion.below (http://localhost:5610/bundles/tests.bundle.js?shards=4&shard_num=1:13891:8)
+    at Function.lessThan (http://localhost:5610/bundles/tests.bundle.js?shards=4&shard_num=1:14078:15)
+    at _callee3$ (http://localhost:5610/bundles/tests.bundle.js?shards=4&shard_num=1:158985:60)
+    at tryCatch (webpack://%5Bname%5D/./node_modules/regenerator-runtime/runtime.js?:62:40)
+    at Generator.invoke [as _invoke] (webpack://%5Bname%5D/./node_modules/regenerator-runtime/runtime.js?:288:22)
+    at Generator.prototype.<computed> [as next] (webpack://%5Bname%5D/./node_modules/regenerator-runtime/runtime.js?:114:21)
+    at asyncGeneratorStep (http://localhost:5610/bundles/tests.bundle.js?shards=4&shard_num=1:158772:103)
+    at _next (http://localhost:5610/bundles/tests.bundle.js?shards=4&shard_num=1:158774:194)
+",
+    "name": "CoordinateMapsVisualizationTest CoordinateMapsVisualization - basics should initialize OK",
+    "time": "0.265",
+  },
+]
+`);
     });
   });
 });

@@ -21,7 +21,7 @@ import 'ngreact';
 import { uiModules } from 'ui/modules';
 import template from './directive.html';
 import { ApplyFiltersPopover } from './apply_filters_popover';
-import { mapAndFlattenFilters } from 'ui/filter_manager/lib/map_and_flatten_filters';
+import { mapAndFlattenFilters } from '../filter_manager/lib/map_and_flatten_filters';
 import { wrapInI18nContext } from 'ui/i18n';
 
 const app = uiModules.get('app/data', ['react']);

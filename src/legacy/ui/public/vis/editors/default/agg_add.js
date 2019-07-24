@@ -17,33 +17,18 @@
  * under the License.
  */
 
-import { AggConfig } from '../../agg_config';
 import { uiModules } from '../../../modules';
-import aggAddTemplate from './agg_add.html';
+import { DefaultEditorAggAdd } from './components/default_editor_agg_add';
+import { wrapInI18nContext } from 'ui/i18n';
 
 uiModules
   .get('kibana')
-  .directive('visEditorAggAdd', function () {
-
-    return {
-      restrict: 'E',
-      template: aggAddTemplate,
-      controllerAs: 'add',
-      controller: function ($scope) {
-        const self = this;
-
-        self.form = false;
-        self.submit = function (schema) {
-          self.form = false;
-
-          const aggConfig = new AggConfig($scope.state.aggs, {
-            schema: schema,
-            id: AggConfig.nextId($scope.state.aggs),
-          });
-          aggConfig.brandNew = true;
-
-          $scope.state.aggs.push(aggConfig);
-        };
-      }
-    };
-  });
+  .directive('visEditorAggAdd', reactDirective =>
+    reactDirective(wrapInI18nContext(DefaultEditorAggAdd), [
+      ['group', { watchDepth: 'collection' }],
+      ['schemas', { watchDepth: 'collection' }],
+      ['stats', { watchDepth: 'reference' }],
+      'groupName',
+      'addSchema'
+    ])
+  );

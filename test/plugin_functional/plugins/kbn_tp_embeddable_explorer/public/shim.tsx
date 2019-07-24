@@ -16,11 +16,11 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { embeddableFactories, IRegistry, EmbeddableFactory } from 'plugins/embeddable_api';
+import { embeddableFactories, EmbeddableFactory } from 'plugins/embeddable_api';
 
 import 'ui/autoload/all';
-import 'uiExports/embeddableActions';
 import 'uiExports/embeddableFactories';
+import 'uiExports/embeddableActions';
 
 import uiRoutes from 'ui/routes';
 
@@ -30,7 +30,7 @@ import template from './index.html';
 
 export interface PluginShim {
   embeddableAPI: {
-    embeddableFactories: IRegistry<EmbeddableFactory>;
+    embeddableFactories: Map<string, EmbeddableFactory>;
   };
 }
 

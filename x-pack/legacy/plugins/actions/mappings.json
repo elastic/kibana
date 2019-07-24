@@ -1,0 +1,19 @@
+{
+  "action": {
+    "properties": {
+      "description": {
+        "type": "text"
+      },
+      "actionTypeId": {
+        "type": "keyword"
+      },
+      "actionTypeConfig": {
+        "enabled": false,
+        "type": "object"
+      },
+      "actionTypeConfigSecrets": {
+        "type": "binary"
+      }
+    }
+  }
+}

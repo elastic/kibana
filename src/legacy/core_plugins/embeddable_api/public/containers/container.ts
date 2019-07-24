@@ -29,7 +29,6 @@ import {
 } from '../embeddables';
 import { IContainer, ContainerInput, ContainerOutput, PanelState } from './i_container';
 import { IEmbeddable } from '../embeddables/i_embeddable';
-import { IRegistry } from '../types';
 import { PanelNotFoundError } from './panel_not_found_error';
 
 const getKeys = <T extends {}>(o: T): Array<keyof T> => Object.keys(o) as Array<keyof T>;
@@ -44,14 +43,14 @@ export abstract class Container<
   protected readonly children: {
     [key: string]: IEmbeddable<any, any> | ErrorEmbeddable;
   } = {};
-  public readonly embeddableFactories: IRegistry<EmbeddableFactory>;
+  public readonly embeddableFactories: Map<string, EmbeddableFactory>;
 
   private subscription: Subscription;
 
   constructor(
     input: TContainerInput,
     output: TContainerOutput,
-    embeddableFactories: IRegistry<EmbeddableFactory>,
+    embeddableFactories: Map<string, EmbeddableFactory>,
     parent?: Container
   ) {
     super(input, output, parent);
@@ -323,14 +322,13 @@ export abstract class Container<
     // switch over to inline creation we can probably clean this up, and force EmbeddableFactory.create to always
     // return an embeddable, or throw an error.
     if (embeddable) {
-      // The factory creation process may ask the user for input to update or override any input coming
-      // from the container.
-      const input = embeddable.getInput();
-      const newOrChangedInput = getKeys(input)
-        .filter(key => input[key] !== inputForChild[key])
-        .reduce((res, key) => Object.assign(res, { [key]: input[key] }), {});
+      // make sure the panel wasn't removed in the mean time, since the embeddable creation is async
+      if (!this.input.panels[panel.explicitInput.id]) {
+        embeddable.destroy();
+        return;
+      }
 
-      if (embeddable.getOutput().savedObjectId || Object.keys(newOrChangedInput).length > 0) {
+      if (embeddable.getOutput().savedObjectId) {
         this.updateInput({
           panels: {
             ...this.input.panels,
@@ -341,7 +339,6 @@ export abstract class Container<
                 : undefined),
               explicitInput: {
                 ...this.input.panels[panel.explicitInput.id].explicitInput,
-                ...newOrChangedInput,
               },
             },
           },

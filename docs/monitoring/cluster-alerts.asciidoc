@@ -2,8 +2,8 @@
 [[cluster-alerts]]
 == Cluster Alerts
 
-The *Monitoring > Clusters* page in {kib} summarizes the status of your Elastic
-stack. You can drill down into the metrics to view more information about your
+The *Stack Monitoring > Clusters* page in {kib} summarizes the status of your
+{stack}. You can drill down into the metrics to view more information about your
 cluster and specific nodes, instances, and indices.
 
 The Top Cluster Alerts shown on the Clusters page notify you of
@@ -36,7 +36,7 @@ soon the expiration date is:
 The 60-day and 30-day thresholds are skipped for Trial licenses, which are only
 valid for 30 days.
 
-Monitoring checks the cluster alert conditions every minute. Cluster
+The {monitor-features} check the cluster alert conditions every minute. Cluster
 alerts are automatically dismissed when the condition is resolved.
 
 include::cluster-alerts-license.asciidoc[]
@@ -47,7 +47,7 @@ include::cluster-alerts-license.asciidoc[]
 To receive email notifications for the Cluster Alerts:
 
 1. Configure an email account as described in
-{xpack-ref}/actions-email.html#configuring-email[Configuring Email Accounts].
+{stack-ov}/actions-email.html#configuring-email[Configuring Email Accounts].
 2. Configure the `xpack.monitoring.cluster_alerts.email_notifications.email_address` setting in `kibana.yml` with your email address.
 
 Email notifications are sent only when Cluster Alerts are triggered and resolved.

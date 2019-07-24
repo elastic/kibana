@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import '../np_core.test.mocks';
+import '../ui_capabilities.test.mocks';
 
 import { EuiContextMenuPanelDescriptor } from '@elastic/eui';
 
@@ -31,6 +31,8 @@ import { triggerRegistry } from '../triggers';
 import { Action, ActionContext, actionRegistry } from '../actions';
 import { executeTriggerActions } from './execute_trigger_actions';
 import { ContactCardEmbeddable } from '../test_samples';
+
+jest.mock('ui/new_platform');
 
 class TestAction extends Action {
   public readonly type = 'testAction';
@@ -55,13 +57,13 @@ class TestAction extends Action {
 }
 
 beforeEach(() => {
-  triggerRegistry.reset();
-  actionRegistry.reset();
+  triggerRegistry.clear();
+  actionRegistry.clear();
   executeFn.mockReset();
 });
 
 afterAll(() => {
-  triggerRegistry.reset();
+  triggerRegistry.clear();
 });
 
 test('executeTriggerActions executes a single action mapped to a trigger', async () => {

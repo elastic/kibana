@@ -17,10 +17,10 @@
  * under the License.
  */
 
-import { IRegistry, Trigger } from '../types';
+import { Trigger } from '../types';
 
 export function detachAction(
-  triggerRegistry: IRegistry<Trigger>,
+  triggerRegistry: Map<string, Trigger>,
   { triggerId, actionId }: { triggerId: string; actionId: string }
 ) {
   const trigger = triggerRegistry.get(triggerId);
@@ -29,5 +29,4 @@ export function detachAction(
   }
 
   trigger.actionIds = trigger.actionIds.filter(id => id !== actionId);
-  triggerRegistry.set(trigger.id, trigger);
 }

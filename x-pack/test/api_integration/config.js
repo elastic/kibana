@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import path from 'path';
 import {
   EsProvider,
   EsSupertestWithoutAuthProvider,
@@ -20,6 +21,8 @@ import {
   SecurityServiceProvider,
   SpacesServiceProvider,
 } from '../common/services';
+
+import { SLACK_ACTION_SIMULATOR_URI } from './fixtures/plugins/actions';
 
 export async function getApiIntegrationConfig({ readConfigFile }) {
 
@@ -47,6 +50,7 @@ export async function getApiIntegrationConfig({ readConfigFile }) {
       chance: kibanaAPITestsConfig.get('services.chance'),
       security: SecurityServiceProvider,
       spaces: SpacesServiceProvider,
+      retry: xPackFunctionalTestsConfig.get('services.retry'),
     },
     esArchiver: xPackFunctionalTestsConfig.get('esArchiver'),
     junit: {
@@ -57,6 +61,9 @@ export async function getApiIntegrationConfig({ readConfigFile }) {
       serverArgs: [
         ...xPackFunctionalTestsConfig.get('kbnTestServer.serverArgs'),
         '--optimize.enabled=false',
+        `--plugin-path=${path.join(__dirname, 'fixtures', 'plugins', 'alerts')}`,
+        `--plugin-path=${path.join(__dirname, 'fixtures', 'plugins', 'actions')}`,
+        `--server.xsrf.whitelist=${JSON.stringify([SLACK_ACTION_SIMULATOR_URI])}`,
       ],
     },
     esTestCluster: {

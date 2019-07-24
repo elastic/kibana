@@ -18,7 +18,6 @@
  */
 import { Filter } from '@kbn/es-query';
 import { EmbeddableFactory } from '../../embeddables';
-import { IRegistry } from '../../types';
 import { Container, ContainerInput } from '../../containers';
 
 export const FILTERABLE_CONTAINER = 'FILTERABLE_CONTAINER';
@@ -27,10 +26,16 @@ export interface FilterableContainerInput extends ContainerInput {
   filters: Filter[];
 }
 
-export interface InheritedChildrenInput {
+/**
+ * interfaces are not allowed to specify a sub-set of the required types until
+ * https://github.com/microsoft/TypeScript/issues/15300 is fixed so we use a type
+ * here instead
+ */
+// eslint-disable-next-line @typescript-eslint/prefer-interface
+export type InheritedChildrenInput = {
   filters: Filter[];
   id?: string;
-}
+};
 
 export class FilterableContainer extends Container<
   InheritedChildrenInput,
@@ -40,7 +45,7 @@ export class FilterableContainer extends Container<
 
   constructor(
     initialInput: FilterableContainerInput,
-    embeddableFactories: IRegistry<EmbeddableFactory>,
+    embeddableFactories: Map<string, EmbeddableFactory>,
     parent?: Container
   ) {
     super(initialInput, { embeddableLoaded: {} }, embeddableFactories, parent);

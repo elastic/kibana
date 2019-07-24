@@ -7,14 +7,14 @@
 import expect from '@kbn/expect';
 import gql from 'graphql-tag';
 
-import { sourceQuery } from '../../../../plugins/infra/public/containers/source/query_source.gql_query';
+import { sourceQuery } from '../../../../legacy/plugins/infra/public/containers/source/query_source.gql_query';
 import {
   sourceConfigurationFieldsFragment,
   sourceStatusFieldsFragment,
-} from '../../../../plugins/infra/public/containers/source/source_fields_fragment.gql_query';
-import { SourceQuery } from '../../../../plugins/infra/public/graphql/types';
+} from '../../../../legacy/plugins/infra/public/containers/source/source_fields_fragment.gql_query';
+import { SourceQuery } from '../../../../legacy/plugins/infra/public/graphql/types';
 import { KbnTestProvider } from './types';
-import { sharedFragments } from '../../../../plugins/infra/common/graphql/shared';
+import { sharedFragments } from '../../../../legacy/plugins/infra/common/graphql/shared';
 
 const sourcesTests: KbnTestProvider = ({ getService }) => {
   const esArchiver = getService('esArchiver');

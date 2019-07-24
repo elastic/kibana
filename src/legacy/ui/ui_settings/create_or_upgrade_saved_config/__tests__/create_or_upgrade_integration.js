@@ -20,21 +20,23 @@
 import sinon from 'sinon';
 import expect from '@kbn/expect';
 
-import { startTestServers } from '../../../../../test_utils/kbn_server';
+import { createTestServers } from '../../../../../test_utils/kbn_server';
 import { createOrUpgradeSavedConfig } from '../create_or_upgrade_saved_config';
 
 describe('createOrUpgradeSavedConfig()', () => {
   let savedObjectsClient;
+  let kbn;
   let kbnServer;
+  let esServer;
   let servers;
 
   before(async function () {
-    servers = await startTestServers({
+    servers = createTestServers({
       adjustTimeout: (t) => this.timeout(t),
     });
-    kbnServer = servers.kbnServer;
-
-    await kbnServer.server.plugins.elasticsearch.waitUntilReady();
+    esServer = await servers.startES();
+    kbn = await servers.startKibana();
+    kbnServer = kbn.kbnServer;
 
     const savedObjects = kbnServer.server.savedObjects;
     savedObjectsClient = savedObjects.getScopedSavedObjectsClient({});
@@ -67,7 +69,10 @@ describe('createOrUpgradeSavedConfig()', () => {
     ]);
   });
 
-  after(() => servers.stop());
+  after(() => {
+    esServer.stop();
+    kbn.stop();
+  });
 
   it('upgrades the previous version on each increment', async function () {
     this.timeout(30000);

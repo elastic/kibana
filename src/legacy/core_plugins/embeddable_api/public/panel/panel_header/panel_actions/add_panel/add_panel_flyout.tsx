@@ -38,6 +38,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { SavedObjectAttributes } from 'src/core/server/saved_objects';
 import { EmbeddableFactoryNotFoundError } from '../../../../embeddables/embeddable_factory_not_found_error';
 import { IContainer } from '../../../../containers';
@@ -109,9 +110,7 @@ export class AddPanelFlyout extends React.Component<Props> {
           </EuiText>
         ),
       },
-
-      ...this.props.container.embeddableFactories
-        .getAll()
+      ...[...this.props.container.embeddableFactories.values()]
         .filter(
           factory => factory.isEditable() && !factory.isContainerType && factory.canCreateNew()
         )
@@ -147,8 +146,7 @@ export class AddPanelFlyout extends React.Component<Props> {
           <SavedObjectFinder
             onChoose={this.onAddPanel}
             savedObjectMetaData={
-              this.props.container.embeddableFactories
-                .getAll()
+              [...this.props.container.embeddableFactories.values()]
                 .filter(
                   embeddableFactory =>
                     Boolean(embeddableFactory.savedObjectMetaData) &&

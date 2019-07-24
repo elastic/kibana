@@ -9,8 +9,8 @@ import { ascending, pairs } from 'd3-array';
 import gql from 'graphql-tag';
 import { v4 as uuidv4 } from 'uuid';
 
-import { sharedFragments } from '../../../../plugins/infra/common/graphql/shared';
-import { InfraTimeKey } from '../../../../plugins/infra/public/graphql/types';
+import { sharedFragments } from '../../../../legacy/plugins/infra/common/graphql/shared';
+import { InfraTimeKey } from '../../../../legacy/plugins/infra/public/graphql/types';
 import { KbnTestProvider } from './types';
 
 const KEY_WITHIN_DATA_RANGE = {

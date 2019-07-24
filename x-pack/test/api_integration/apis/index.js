@@ -8,6 +8,8 @@ export default function ({ loadTestFile }) {
   describe('apis', function () {
     this.tags('ciGroup6');
 
+    loadTestFile(require.resolve('./actions'));
+    loadTestFile(require.resolve('./alerting'));
     loadTestFile(require.resolve('./es'));
     loadTestFile(require.resolve('./security'));
     loadTestFile(require.resolve('./monitoring'));

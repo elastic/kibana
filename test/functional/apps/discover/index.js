@@ -40,6 +40,7 @@ export default function ({ getService, loadTestFile }) {
     loadTestFile(require.resolve('./_source_filters'));
     loadTestFile(require.resolve('./_large_string'));
     loadTestFile(require.resolve('./_inspector'));
+    loadTestFile(require.resolve('./_doc_navigation'));
     loadTestFile(require.resolve('./_date_nanos'));
   });
 }

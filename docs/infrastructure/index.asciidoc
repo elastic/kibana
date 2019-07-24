@@ -83,3 +83,4 @@ configuration namespace `xpack.infra.sources.default`. See
 
 include::monitor.asciidoc[]
 include::infra-ui.asciidoc[]
+include::metrics-explorer.asciidoc[]

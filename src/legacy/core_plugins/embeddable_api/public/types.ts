@@ -17,20 +17,14 @@
  * under the License.
  */
 
+import { Action } from './actions';
+import { EmbeddableFactory } from './embeddables';
+
 export interface Trigger {
   id: string;
   title?: string;
   description?: string;
   actionIds: string[];
-}
-
-// TODO: use the official base Registry interface when available
-export interface IRegistry<T> {
-  get(id: string): T | undefined;
-  length(): number;
-  set(id: string, item: T): void;
-  reset(): void;
-  getAll(): T[];
 }
 
 export interface PropertySpec {
@@ -48,4 +42,10 @@ export interface OutputSpec {
 export enum ViewMode {
   EDIT = 'edit',
   VIEW = 'view',
+}
+
+export interface EmbeddablePlugin {
+  addAction: (action: Action) => void;
+  addEmbeddableFactory: (factory: EmbeddableFactory) => void;
+  attachAction: (data: { triggerId: string; actionId: string }) => void;
 }
