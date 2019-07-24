@@ -1,0 +1,86 @@
+[[visualize-area-chart]]
+== Area chart
+Short description.
+
+. Choose the aggregation for the y-axis.
+
+.. In the *Metrics* area, expand the *Y-axis* caret.
+
+.. From the *Aggregation* dropdown, select the aggregation for the y-axis:
+* {ref}/search-aggregations-metrics.html[Metric aggregations]
+* {ref}/search-aggregations-pipeline.html[Pipeline aggregations]
+
+. Choose a bucket aggregation for the x-axis.
+
+.. In the *Buckets* area, click *Add*, then select *X-axis*.
+
+.. Select the {ref}/search-aggregations-bucket.html[Bucket aggregation] for the x-axis.
++
+Buckets are analogous to SQL `GROUP BY` statements.
+
+. To further break down the data, specify sub aggregations.
+
+.. In the *Buckets* area, click *Add*, then select *Split series* or *Split chart*.
+
+.. Specify the sub aggregation settings.
++
+The first aggregation determines the data set for any subsequent aggregations. Sub aggregations are applied from top to bottom. To change the order, drag and drop the aggregations.
++
+For more information about working with sub aggregations, see https://www.elastic.co/blog/kibana-aggregation-execution-order-and-you[Kibana,
+Aggregation Execution Order, and You].
+
+. Click *Apply changes* image:images/apply-changes-button.png[].
+
+[float]
+[[area-chart-example]]
+== Create an area chart with Metricbeat data
+
+To view the real-time CPU system data collected by Metricbeat, create an area chart.
+
+[float]
+[[area-chart-before-you-begin]]
+=== Before you begin
+
+In this tutorial, you'll use the data from https://www.elastic.co/guide/en/beats/metricbeat/current/index.html[Metricbeat]. To ingest the data locally, link:https://www.elastic.co/downloads/beats/metricbeat[download Metricbeat].
+
+[float]
+[[area-chart-metricbeat-data]]
+=== Create the visualization
+
+To create the area chart visualization, use the visualization builder.
+
+. In the side navigation, click *Visualize*.
+
+. Click *Create new visualization*.
+
+. On the *New Visualization* window, click *Area*.
+
+. On the *New Area/Choose a source* window, select the metricbeat data.
+
+[float]
+[[area-chart-metricbeat-data-yaxis]]
+=== Choose the aggregation for the y-axis
+
+Specify the options for the y-axis. 
+
+. In the *Metrics* area, expand the *Y-axis* caret.
+
+. From the *Aggregation* dropdown, select *Average*.
+
+. From the *Field* dropdown, select *system.process.cpu.total.pct*.
+
+[float]
+[[area-chart-metricbeat-data-xaxis]]
+=== Choose the bucket aggregation for the x-axis
+
+Specify the options for the x-axis.
+
+. In the *Buckets* area, click *Add*, then select *X-axis*.
+
+. From the *Aggregation* dropdown, select *Date Histogram*.
+
+. From the *Field* dropdown, select *@timestamp*.
+
+. Click *Apply changes* image:images/apply-changes-button.png[].
+
+image:images/visualize-area-chart.png[Example area chart]

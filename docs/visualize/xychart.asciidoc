@@ -4,6 +4,49 @@ Line, Area, and Bar charts allow you to plot your data on X/Y axis.
 
 First you need to select your _metrics_ which define Value axis.
 
+. Choose the aggregation for the y-axis.
+
+.. In the *Metrics* area, expand the *Y-axis* caret.
+
+.. From the *Aggregation* dropdown, select the aggregation for the y-axis:
+* {ref}/search-aggregations-metrics.html[Metric aggregations]
+* {ref}/search-aggregations-pipeline.html[Pipeline aggregations]
+
+. Choose a bucket aggregation for the x-axis.
+
+.. In the *Buckets* area, click *Add*, then select *X-axis*.
+
+.. Select the {ref}/search-aggregations-bucket.html[Bucket aggregation] for the x-axis.
+
+For example, if you're indexing Apache server logs, you could build bar chart
+that shows the distribution of incoming requests by geographic location by
+specifying a terms aggregation on the `geo.src` field:
+
+image::images/bar-terms-agg.jpg[]
+
+The y-axis shows the number of requests received from each country, and the
+countries are displayed across the x-axis.
+
+Bar, line, or area chart visualizations use _metrics_ for the y-axis and
+_buckets_ for the x-axis. Buckets are analogous to SQL `GROUP BY`
+statements. Pie charts, use the metric for the slice size and the bucket
+for the number of slices.
+
+You can further break down the data by specifying sub aggregations. The first
+aggregation determines the data set for any subsequent aggregations. Sub
+aggregations are applied in order--you can drag the aggregations to change the
+order in which they're applied.
+
+For example, you could add a terms sub aggregation on the `geo.dest` field to
+the Country of Origin bar chart to see the locations those requests were
+targeting.
+
+image::images/bar-terms-subagg.jpg[]
+
+For more information about working with sub aggregations, see
+https://www.elastic.co/blog/kibana-aggregation-execution-order-and-you[Kibana,
+Aggregation Execution Order, and You].
+
 include::y-axis-aggs.asciidoc[]
 
 The _buckets_ aggregations determine what information is being retrieved from your data set.
