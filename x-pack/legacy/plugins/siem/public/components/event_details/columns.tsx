@@ -183,10 +183,9 @@ export const getColumns = ({
   },
   {
     field: 'valuesConcatenated',
-    name: i18n.BLANK,
-    render: () => null,
     sortable: false,
     truncateText: true,
+    render: () => null,
     width: '1px',
   },
 ];

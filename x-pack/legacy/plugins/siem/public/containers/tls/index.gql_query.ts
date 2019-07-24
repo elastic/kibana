@@ -12,7 +12,7 @@ export const tlsQuery = gql`
     $filterQuery: String
     $flowTarget: FlowTarget!
     $ip: String!
-    $pagination: PaginationInputPaginated!
+    $pagination: PaginationInput!
     $sort: TlsSortField!
     $timerange: TimerangeInput!
     $defaultIndex: [String!]!
@@ -44,9 +44,10 @@ export const tlsQuery = gql`
           }
         }
         pageInfo {
-          activePage
-          fakeTotalCount
-          showMorePagesIndicator
+          endCursor {
+            value
+          }
+          hasNextPage
         }
         inspect @include(if: $inspect) {
           dsl

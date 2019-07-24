@@ -7,7 +7,7 @@
 import { SourceResolvers } from '../../graphql/types';
 import { AppResolverOf, ChildResolverOf } from '../../lib/framework';
 import { Network } from '../../lib/network';
-import { createOptionsPaginated } from '../../utils/build_query/create_options';
+import { createOptions } from '../../utils/build_query/create_options';
 import { QuerySourceResolver } from '../sources/resolvers';
 
 type QueryNetworkTopNFlowResolver = ChildResolverOf<
@@ -35,7 +35,7 @@ export const createNetworkResolvers = (
   Source: {
     async NetworkTopNFlow(source, args, { req }, info) {
       const options = {
-        ...createOptionsPaginated(source, args, info),
+        ...createOptions(source, args, info),
         flowTarget: args.flowTarget,
         networkTopNFlowSort: args.sort,
         flowDirection: args.flowDirection,
@@ -44,7 +44,7 @@ export const createNetworkResolvers = (
     },
     async NetworkDns(source, args, { req }, info) {
       const options = {
-        ...createOptionsPaginated(source, args, info),
+        ...createOptions(source, args, info),
         networkDnsSortField: args.sort,
         isPtrIncluded: args.isPtrIncluded,
       };

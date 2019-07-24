@@ -13,12 +13,12 @@ import {
   TimelineData,
   TimelineDetailsData,
 } from '../../graphql/types';
-import { FrameworkRequest, RequestOptions, RequestOptionsPaginated } from '../framework';
+import { FrameworkRequest, RequestOptions } from '../framework';
 import { SearchHit } from '../types';
 
 export interface EventsAdapter {
-  getEvents(req: FrameworkRequest, options: RequestOptionsPaginated): Promise<EventsData>;
-  getTimelineData(req: FrameworkRequest, options: TimelineRequestOptions): Promise<TimelineData>;
+  getEvents(req: FrameworkRequest, options: RequestOptions): Promise<EventsData>;
+  getTimelineData(req: FrameworkRequest, options: EventsRequestOptions): Promise<TimelineData>;
   getTimelineDetails(
     req: FrameworkRequest,
     options: RequestDetailsOptions
@@ -29,11 +29,7 @@ export interface EventsAdapter {
   ): Promise<LastEventTimeData>;
 }
 
-export interface TimelineRequestOptions extends RequestOptions {
-  fieldRequested: string[];
-}
-
-export interface EventsRequestOptions extends RequestOptionsPaginated {
+export interface EventsRequestOptions extends RequestOptions {
   fieldRequested: string[];
 }
 

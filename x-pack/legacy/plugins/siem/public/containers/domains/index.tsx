@@ -17,28 +17,28 @@ import {
   GetDomainsQuery,
   FlowDirection,
   FlowTarget,
-  PageInfoPaginated,
+  PageInfo,
 } from '../../graphql/types';
 import { inputsModel, networkModel, networkSelectors, State, inputsSelectors } from '../../store';
 import { createFilter } from '../helpers';
-import { generateTablePaginationOptions } from '../../components/paginated_table/helpers';
-import { QueryTemplatePaginated, QueryTemplatePaginatedProps } from '../query_template_paginated';
+import { QueryTemplate, QueryTemplateProps } from '../query_template';
+
 import { domainsQuery } from './index.gql_query';
 
 const ID = 'domainsQuery';
 
 export interface DomainsArgs {
-  domains: DomainsEdges[];
   id: string;
   inspect: inputsModel.InspectQuery;
-  loading: boolean;
-  loadPage: (newActivePage: number) => void;
-  pageInfo: PageInfoPaginated;
-  refetch: inputsModel.Refetch;
+  domains: DomainsEdges[];
   totalCount: number;
+  pageInfo: PageInfo;
+  loading: boolean;
+  loadMore: (cursor: string) => void;
+  refetch: inputsModel.Refetch;
 }
 
-export interface OwnProps extends QueryTemplatePaginatedProps {
+export interface OwnProps extends QueryTemplateProps {
   children: (args: DomainsArgs) => React.ReactNode;
   flowTarget: FlowTarget;
   ip: string;
@@ -46,36 +46,34 @@ export interface OwnProps extends QueryTemplatePaginatedProps {
 }
 
 export interface DomainsComponentReduxProps {
-  activePage: number;
-  domainsSortField: DomainsSortField;
-  flowDirection: FlowDirection;
   isInspected: boolean;
   limit: number;
+  domainsSortField: DomainsSortField;
+  flowDirection: FlowDirection;
 }
 
 type DomainsProps = OwnProps & DomainsComponentReduxProps;
 
-class DomainsComponentQuery extends QueryTemplatePaginated<
+class DomainsComponentQuery extends QueryTemplate<
   DomainsProps,
   GetDomainsQuery.Query,
   GetDomainsQuery.Variables
 > {
   public render() {
     const {
-      activePage,
+      id = ID,
+      isInspected,
       children,
       domainsSortField,
-      endDate,
       filterQuery,
-      flowDirection,
-      flowTarget,
-      id = ID,
       ip,
-      isInspected,
-      limit,
       skip,
       sourceId,
       startDate,
+      endDate,
+      limit,
+      flowTarget,
+      flowDirection,
     } = this.props;
     return (
       <Query<GetDomainsQuery.Query, GetDomainsQuery.Variables>
@@ -84,28 +82,35 @@ class DomainsComponentQuery extends QueryTemplatePaginated<
         notifyOnNetworkStatusChange
         skip={skip}
         variables={{
-          defaultIndex: chrome.getUiSettingsClient().get(DEFAULT_INDEX_KEY),
-          filterQuery: createFilter(filterQuery),
-          flowDirection,
-          flowTarget,
-          inspect: isInspected,
-          ip,
-          pagination: generateTablePaginationOptions(activePage, limit),
-          sort: domainsSortField,
           sourceId,
           timerange: {
             interval: '12h',
             from: startDate!,
             to: endDate!,
           },
+          ip,
+          flowDirection,
+          flowTarget,
+          sort: domainsSortField,
+          pagination: {
+            limit,
+            cursor: null,
+            tiebreaker: null,
+          },
+          filterQuery: createFilter(filterQuery),
+          defaultIndex: chrome.getUiSettingsClient().get(DEFAULT_INDEX_KEY),
+          inspect: isInspected,
         }}
       >
         {({ data, loading, fetchMore, refetch }) => {
           const domains = getOr([], `source.Domains.edges`, data);
           this.setFetchMore(fetchMore);
-          this.setFetchMoreOptions((newActivePage: number) => ({
+          this.setFetchMoreOptions((newCursor: string) => ({
             variables: {
-              pagination: generateTablePaginationOptions(newActivePage, limit),
+              pagination: {
+                cursor: newCursor,
+                limit: limit + parseInt(newCursor, 10),
+              },
             },
             updateQuery: (prev, { fetchMoreResult }) => {
               if (!fetchMoreResult) {
@@ -117,21 +122,21 @@ class DomainsComponentQuery extends QueryTemplatePaginated<
                   ...fetchMoreResult.source,
                   Domains: {
                     ...fetchMoreResult.source.Domains,
-                    edges: [...fetchMoreResult.source.Domains.edges],
+                    edges: [...prev.source.Domains.edges, ...fetchMoreResult.source.Domains.edges],
                   },
                 },
               };
             },
           }));
           return children({
-            domains,
             id,
             inspect: getOr(null, 'source.Domains.inspect', data),
-            loading,
-            loadPage: this.wrappedLoadMore,
-            pageInfo: getOr({}, 'source.Domains.pageInfo', data),
             refetch,
+            loading,
             totalCount: getOr(0, 'source.Domains.totalCount', data),
+            domains,
+            pageInfo: getOr({}, 'source.Domains.pageInfo', data),
+            loadMore: this.wrappedLoadMore,
           });
         }}
       </Query>

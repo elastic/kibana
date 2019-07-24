@@ -41,6 +41,7 @@ export function fileRoute(server: CodeServerRouter, gitOps: GitOperations) {
         ? parseInt(queries.limit as string, 10)
         : DEFAULT_TREE_CHILDREN_LIMIT;
       const skip = queries.skip ? parseInt(queries.skip as string, 10) : 0;
+      const depth = queries.depth ? parseInt(queries.depth as string, 10) : 0;
       const withParents = 'parents' in queries;
       const flatten = 'flatten' in queries;
       const repoExist = await repoExists(req, uri);
@@ -49,7 +50,7 @@ export function fileRoute(server: CodeServerRouter, gitOps: GitOperations) {
       }
 
       try {
-        return await gitOps.fileTree(uri, path, revision, skip, limit, withParents, flatten);
+        return await gitOps.fileTree(uri, path, revision, skip, limit, withParents, depth, flatten);
       } catch (e) {
         if (e.isBoom) {
           return e;

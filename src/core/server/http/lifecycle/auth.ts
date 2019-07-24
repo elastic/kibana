@@ -92,7 +92,7 @@ export interface AuthResultData {
   /**
    * Data to associate with an incoming request. Any downstream plugin may get access to the data.
    */
-  state: Record<string, any>;
+  state: Record<string, unknown>;
   /**
    * Auth specific headers to authenticate a user against Elasticsearch.
    */

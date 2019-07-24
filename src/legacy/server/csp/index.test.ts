@@ -17,13 +17,7 @@
  * under the License.
  */
 
-import {
-  createCSPRuleString,
-  generateCSPNonce,
-  DEFAULT_CSP_RULES,
-  DEFAULT_CSP_STRICT,
-  DEFAULT_CSP_WARN_LEGACY_BROWSERS,
-} from './';
+import { createCSPRuleString, DEFAULT_CSP_RULES, generateCSPNonce } from './';
 
 // CSP rules aren't strictly additive, so any change can potentially expand or
 // restrict the policy in a way we consider a breaking change. For that reason,
@@ -45,14 +39,6 @@ Array [
   "child-src blob:",
 ]
 `);
-});
-
-test('CSP strict mode defaults to disabled', () => {
-  expect(DEFAULT_CSP_STRICT).toBe(false);
-});
-
-test('CSP legacy browser warning defaults to enabled', () => {
-  expect(DEFAULT_CSP_WARN_LEGACY_BROWSERS).toBe(true);
 });
 
 test('generateCSPNonce() creates a 16 character string', async () => {

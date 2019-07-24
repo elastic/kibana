@@ -42,10 +42,8 @@ const usersTests: KbnTestProvider = ({ getService }) => {
               flowTarget: FlowTarget.destination,
               sort: { field: UsersFields.name, direction: Direction.asc },
               pagination: {
-                activePage: 0,
-                cursorStart: 0,
-                fakePossibleCount: 30,
-                querySize: 10,
+                limit: 10,
+                cursor: null,
               },
               inspect: false,
             },

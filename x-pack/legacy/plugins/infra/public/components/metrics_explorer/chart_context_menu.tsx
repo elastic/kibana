@@ -17,7 +17,6 @@ import { MetricsExplorerSeries } from '../../../server/routes/metrics_explorer/t
 import {
   MetricsExplorerOptions,
   MetricsExplorerTimeOptions,
-  MetricsExplorerChartOptions,
 } from '../../containers/metrics_explorer/use_metrics_explorer_options';
 import { createTSVBLink } from './helpers/create_tsvb_link';
 import { InfraNodeType } from '../../graphql/types';
@@ -32,7 +31,6 @@ interface Props {
   source?: SourceConfiguration;
   timeRange: MetricsExplorerTimeOptions;
   uiCapabilities: UICapabilities;
-  chartOptions: MetricsExplorerChartOptions;
 }
 
 const fieldToNodeType = (source: SourceConfiguration, field: string): InfraNodeType | undefined => {
@@ -68,7 +66,7 @@ export const createNodeDetailLink = (
 };
 
 export const MetricsExplorerChartContextMenu = injectI18n(
-  ({ intl, onFilter, options, series, source, timeRange, uiCapabilities, chartOptions }: Props) => {
+  ({ intl, onFilter, options, series, source, timeRange, uiCapabilities }: Props) => {
     const [isPopoverOpen, setPopoverState] = useState(false);
     const supportFiltering = options.groupBy != null && onFilter != null;
     const handleFilter = useCallback(() => {
@@ -80,7 +78,7 @@ export const MetricsExplorerChartContextMenu = injectI18n(
       setPopoverState(false);
     }, [supportFiltering, options.groupBy, series.id, onFilter]);
 
-    const tsvbUrl = createTSVBLink(source, options, series, timeRange, chartOptions);
+    const tsvbUrl = createTSVBLink(source, options, series, timeRange);
 
     // Only display the "Add Filter" option if it's supported
     const filterByItem = supportFiltering

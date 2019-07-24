@@ -16,52 +16,32 @@ import { Ecs } from '../../../../graphql/types';
 import { hostsModel, hostsSelectors, State } from '../../../../store';
 import { getEmptyTagValue, getOrEmptyTag } from '../../../empty_value';
 import { HostDetailsLink, IPDetailsLink } from '../../../links';
-import { Columns, ItemsPerRow, PaginatedTable } from '../../../paginated_table';
+import { Columns, ItemsPerRow, LoadMoreTable } from '../../../load_more_table';
 import { getRowItemDraggable, getRowItemDraggables, OverflowField } from '../../../tables/helpers';
 import { PreferenceFormattedDate } from '../../../formatted_date';
 import { LocalizedDateTooltip } from '../../../localized_date_tooltip';
 
 import * as i18n from './translations';
-const tableType = hostsModel.HostsTableType.events;
+
 interface OwnProps {
   data: Ecs[];
-  fakeTotalCount: number;
-  id: string;
   loading: boolean;
-  loadPage: (newActivePage: number) => void;
-  showMorePagesIndicator: boolean;
+  hasNextPage: boolean;
+  id: string;
+  nextCursor: string;
+  tiebreaker: string;
   totalCount: number;
+  loadMore: (cursor: string, tiebreaker: string) => void;
   type: hostsModel.HostsType;
 }
 
 interface EventsTableReduxProps {
-  activePage: number;
   limit: number;
 }
 
 interface EventsTableDispatchProps {
-  updateTableActivePage: ActionCreator<{
-    activePage: number;
-    hostsType: hostsModel.HostsType;
-    tableType: hostsModel.HostsTableType;
-  }>;
-  updateTableLimit: ActionCreator<{
-    limit: number;
-    hostsType: hostsModel.HostsType;
-    tableType: hostsModel.HostsTableType;
-  }>;
+  updateLimitPagination: ActionCreator<{ limit: number; hostsType: hostsModel.HostsType }>;
 }
-
-export type EventsTableColumns = [
-  Columns<Ecs>,
-  Columns<Ecs>,
-  Columns<Ecs>,
-  Columns<Ecs>,
-  Columns<Ecs>,
-  Columns<Ecs>,
-  Columns<Ecs>,
-  Columns<Ecs>
-];
 
 type EventsTableProps = OwnProps & EventsTableReduxProps & EventsTableDispatchProps;
 
@@ -74,24 +54,33 @@ const rowItems: ItemsPerRow[] = [
     text: i18n.ROWS_10,
     numberOfRow: 10,
   },
+  {
+    text: i18n.ROWS_20,
+    numberOfRow: 20,
+  },
+  {
+    text: i18n.ROWS_50,
+    numberOfRow: 50,
+  },
 ];
 
 const EventsTableComponent = pure<EventsTableProps>(
   ({
-    fakeTotalCount,
-    showMorePagesIndicator,
     data,
+    hasNextPage,
     id,
     limit,
     loading,
-    loadPage,
+    loadMore,
+    tiebreaker,
     totalCount,
+    nextCursor,
+    updateLimitPagination,
     type,
-    updateTableActivePage,
-    updateTableLimit,
   }) => (
-    <PaginatedTable
+    <LoadMoreTable
       columns={getEventsColumnsCurated(type)}
+      hasNextPage={hasNextPage}
       headerCount={totalCount}
       headerTitle={i18n.EVENTS}
       headerUnit={i18n.UNIT(totalCount)}
@@ -100,25 +89,11 @@ const EventsTableComponent = pure<EventsTableProps>(
       limit={limit}
       loading={loading}
       loadingTitle={i18n.EVENTS}
-      loadPage={newActivePage => loadPage(newActivePage)}
+      loadMore={() => loadMore(nextCursor, tiebreaker)}
       pageOfItems={data}
-      showMorePagesIndicator={showMorePagesIndicator}
-      totalCount={fakeTotalCount}
       updateLimitPagination={newLimit =>
-        updateTableLimit({
-          hostsType: type,
-          limit: newLimit,
-          tableType,
-        })
+        updateLimitPagination({ limit: newLimit, hostsType: type })
       }
-      updateActivePage={newPage =>
-        updateTableActivePage({
-          activePage: newPage,
-          hostsType: type,
-          tableType,
-        })
-      }
-      updateProps={{ totalCount }}
     />
   )
 );
@@ -134,12 +109,22 @@ const makeMapStateToProps = () => {
 export const EventsTable = connect(
   makeMapStateToProps,
   {
-    updateTableActivePage: hostsActions.updateTableActivePage,
-    updateTableLimit: hostsActions.updateTableLimit,
+    updateLimitPagination: hostsActions.updateEventsLimit,
   }
 )(EventsTableComponent);
 
-const getEventsColumns = (pageType: hostsModel.HostsType): EventsTableColumns => [
+const getEventsColumns = (
+  pageType: hostsModel.HostsType
+): [
+  Columns<Ecs>,
+  Columns<Ecs>,
+  Columns<Ecs>,
+  Columns<Ecs>,
+  Columns<Ecs>,
+  Columns<Ecs>,
+  Columns<Ecs>,
+  Columns<Ecs>
+] => [
   {
     field: 'node',
     name: i18n.TIMESTAMP,

@@ -25,6 +25,7 @@ import { uiModules } from '../../modules';
 import template from './kbn_chrome.html';
 
 import {
+  notify,
   GlobalBannerList,
   banners,
 } from '../../notify';
@@ -57,6 +58,9 @@ export function kbnChromeProvider(chrome, internals) {
 
         controllerAs: 'chrome',
         controller($scope, $location, Private) {
+          // Notifications
+          $scope.notifList = notify._notifs;
+
           $scope.getFirstPathSegment = () => {
             return $location.path().split('/')[1];
           };

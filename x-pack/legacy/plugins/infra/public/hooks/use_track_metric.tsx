@@ -5,10 +5,7 @@
  */
 
 import { useEffect } from 'react';
-import {
-  createUiStatsReporter,
-  METRIC_TYPE,
-} from '../../../../../../src/legacy/core_plugins/ui_metric/public';
+import { trackUiMetric } from '../../../../../../src/legacy/core_plugins/ui_metric/public';
 
 /**
  * Note: The UI Metric plugin will take care of sending this data to the telemetry server.
@@ -20,32 +17,17 @@ import {
 
 type ObservabilityApp = 'infra_metrics' | 'infra_logs' | 'apm' | 'uptime';
 
-const trackerCache = new Map<string, ReturnType<typeof createUiStatsReporter>>();
-
-function getTrackerForApp(app: string) {
-  const cached = trackerCache.get(app);
-  if (cached) {
-    return cached;
-  }
-
-  const tracker = createUiStatsReporter(app);
-  trackerCache.set(app, tracker);
-
-  return tracker;
-}
-
 interface TrackOptions {
   app: ObservabilityApp;
-  metricType?: METRIC_TYPE;
   delay?: number; // in ms
 }
+
 type EffectDeps = unknown[];
 
 type TrackMetricOptions = TrackOptions & { metric: string };
 
-export { METRIC_TYPE };
 export function useTrackMetric(
-  { app, metric, metricType = METRIC_TYPE.COUNT, delay = 0 }: TrackMetricOptions,
+  { app, metric, delay = 0 }: TrackMetricOptions,
   effectDependencies: EffectDeps = []
 ) {
   useEffect(() => {
@@ -53,8 +35,7 @@ export function useTrackMetric(
     if (delay > 0) {
       decoratedMetric += `__delayed_${delay}ms`;
     }
-    const trackUiMetric = getTrackerForApp(app);
-    const id = setTimeout(() => trackUiMetric(metricType, decoratedMetric), Math.max(delay, 0));
+    const id = setTimeout(() => trackUiMetric(app, decoratedMetric), Math.max(delay, 0));
     return () => clearTimeout(id);
   }, effectDependencies);
 }

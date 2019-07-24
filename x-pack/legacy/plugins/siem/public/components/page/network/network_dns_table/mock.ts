@@ -122,9 +122,8 @@ export const mockData: { NetworkDns: NetworkDnsData } = {
       },
     ],
     pageInfo: {
-      activePage: 1,
-      fakeTotalCount: 50,
-      showMorePagesIndicator: true,
+      endCursor: { value: '10' },
+      hasNextPage: true,
     },
   },
 };

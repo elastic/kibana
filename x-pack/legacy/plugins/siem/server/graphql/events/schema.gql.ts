@@ -12,13 +12,6 @@ export const eventsSchema = gql`
   type EventsData {
     edges: [EcsEdges!]!
     totalCount: Float!
-    pageInfo: PageInfoPaginated!
-    inspect: Inspect
-  }
-
-  type EventsTimelineData {
-    edges: [EcsEdges!]!
-    totalCount: Float!
     pageInfo: PageInfo!
     inspect: Inspect
   }
@@ -82,7 +75,7 @@ export const eventsSchema = gql`
   extend type Source {
     "Gets events based on timerange and specified criteria, or all events in the timerange if no criteria is specified"
     Events(
-      pagination: PaginationInputPaginated!
+      pagination: PaginationInput!
       sortField: SortField!
       timerange: TimerangeInput
       filterQuery: String

@@ -23,7 +23,7 @@ export const uncommonProcessesSchema = gql`
   type UncommonProcessesData {
     edges: [UncommonProcessesEdges!]!
     totalCount: Float!
-    pageInfo: PageInfoPaginated!
+    pageInfo: PageInfo!
     inspect: Inspect
   }
 
@@ -31,7 +31,7 @@ export const uncommonProcessesSchema = gql`
     "Gets UncommonProcesses based on a timerange, or all UncommonProcesses if no criteria is specified"
     UncommonProcesses(
       timerange: TimerangeInput!
-      pagination: PaginationInputPaginated!
+      pagination: PaginationInput!
       filterQuery: String
       defaultIndex: [String!]!
     ): UncommonProcessesData!

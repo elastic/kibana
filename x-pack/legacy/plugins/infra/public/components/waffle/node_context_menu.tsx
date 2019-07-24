@@ -90,7 +90,7 @@ export const NodeContextMenu = injectUICapabilities(
           },
           { nodeType }
         ),
-        href: `../app/apm#/traces?_g=()&kuery=${APM_FIELDS[nodeType]}:"${node.id}"`,
+        href: `../app/apm#/traces?_g=()&kuery=${APM_FIELDS[nodeType]}~20~3A~20~22${node.id}~22`,
         'data-test-subj': 'viewApmTracesContextMenuItem',
       };
 

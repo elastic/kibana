@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Hosts Table rendering it renders the default Hosts table 1`] = `
+exports[`Load More Table Component rendering it renders the default Hosts table 1`] = `
 <ContextProvider
   value={
     Object {
@@ -76,7 +76,7 @@ exports[`Hosts Table rendering it renders the default Hosts table 1`] = `
         },
       ]
     }
-    fakeTotalCount={50}
+    hasNextPage={true}
     id="hostsQuery"
     indexPattern={
       Object {
@@ -163,9 +163,9 @@ exports[`Hosts Table rendering it renders the default Hosts table 1`] = `
         "title": "filebeat-*,auditbeat-*,packetbeat-*",
       }
     }
-    loadPage={[MockFunction]}
+    loadMore={[MockFunction]}
     loading={false}
-    showMorePagesIndicator={true}
+    nextCursor="aa7ca589f1b8220002f2fc61c64cfbf1"
     totalCount={4}
     type="page"
   />

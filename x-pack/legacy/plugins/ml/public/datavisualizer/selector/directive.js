@@ -18,6 +18,7 @@ import uiRoutes from 'ui/routes';
 
 const template = `
   <div class="euiSpacer euiSpacer--s" />
+  <ml-nav-menu name="datavisualizer" />
   <datavisualizer-selector data-test-subj="mlPageDataVisualizerSelector" />
 `;
 

@@ -36,32 +36,25 @@ import {
   FrameworkAdapter,
   FrameworkRequest,
   MappingProperties,
-  RequestOptionsPaginated,
+  RequestOptions,
 } from '../framework';
 import { TermAggregation } from '../types';
 
-import { buildDetailsQuery, buildQuery, buildTimelineQuery } from './query.dsl';
+import { buildDetailsQuery, buildQuery } from './query.dsl';
 import { buildLastEventTimeQuery } from './query.last_event_time.dsl';
 import {
   EventHit,
   EventsAdapter,
+  EventsRequestOptions,
   LastEventTimeHit,
   LastEventTimeRequestOptions,
   RequestDetailsOptions,
-  TimelineRequestOptions,
 } from './types';
-import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../common/constants';
 
 export class ElasticsearchEventsAdapter implements EventsAdapter {
   constructor(private readonly framework: FrameworkAdapter) {}
 
-  public async getEvents(
-    request: FrameworkRequest,
-    options: RequestOptionsPaginated
-  ): Promise<EventsData> {
-    if (options.pagination && options.pagination.querySize >= DEFAULT_MAX_TABLE_QUERY_SIZE) {
-      throw new Error(`No query size above ${DEFAULT_MAX_TABLE_QUERY_SIZE}`);
-    }
+  public async getEvents(request: FrameworkRequest, options: RequestOptions): Promise<EventsData> {
     const queryOptions = cloneDeep(options);
     queryOptions.fields = reduceFields(options.fields, eventFieldsMap);
 
@@ -72,34 +65,31 @@ export class ElasticsearchEventsAdapter implements EventsAdapter {
       dsl
     );
 
-    const { activePage, cursorStart, fakePossibleCount, querySize } = options.pagination;
+    const { limit } = options.pagination;
     const totalCount = getOr(0, 'hits.total.value', response);
     const hits = response.hits.hits;
     const eventsEdges: EcsEdges[] = hits.map(hit =>
       formatEventsData(options.fields, hit, eventFieldsMap)
     );
-    const fakeTotalCount = fakePossibleCount <= totalCount ? fakePossibleCount : totalCount;
-    const edges = eventsEdges.splice(cursorStart, querySize - cursorStart);
+    const hasNextPage = eventsEdges.length === limit + 1;
+    const edges = hasNextPage ? eventsEdges.splice(0, limit) : eventsEdges;
+    const lastCursor = get('cursor', last(edges));
     const inspect = {
       dsl: [inspectStringifyObject(dsl)],
       response: [inspectStringifyObject(response)],
     };
-    const showMorePagesIndicator = totalCount > fakeTotalCount;
+
     return {
       inspect,
       edges,
-      pageInfo: {
-        activePage: activePage ? activePage : 0,
-        fakeTotalCount,
-        showMorePagesIndicator,
-      },
+      pageInfo: { hasNextPage, endCursor: lastCursor },
       totalCount,
     };
   }
 
   public async getTimelineData(
     request: FrameworkRequest,
-    options: TimelineRequestOptions
+    options: EventsRequestOptions
   ): Promise<TimelineData> {
     const queryOptions = cloneDeep(options);
     queryOptions.fields = uniq([
@@ -108,7 +98,7 @@ export class ElasticsearchEventsAdapter implements EventsAdapter {
     ]);
     delete queryOptions.fieldRequested;
 
-    const dsl = buildTimelineQuery(queryOptions);
+    const dsl = buildQuery(queryOptions);
     const response = await this.framework.callWithRequest<EventHit, TermAggregation>(
       request,
       'search',

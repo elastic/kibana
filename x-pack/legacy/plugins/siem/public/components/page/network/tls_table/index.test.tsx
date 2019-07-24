@@ -18,7 +18,7 @@ import { TlsTable } from '.';
 import { mockTlsData } from './mock';
 
 describe('Tls Table Component', () => {
-  const loadPage = jest.fn();
+  const loadMore = jest.fn();
   const state: State = mockGlobalState;
 
   let store = createStore(state, apolloClientObservable);
@@ -33,11 +33,11 @@ describe('Tls Table Component', () => {
         <ReduxStoreProvider store={store}>
           <TlsTable
             data={mockTlsData.edges}
-            fakeTotalCount={getOr(50, 'fakeTotalCount', mockTlsData.pageInfo)}
+            hasNextPage={getOr(false, 'hasNextPage', mockTlsData.pageInfo)!}
             id="tls"
             loading={false}
-            loadPage={loadPage}
-            showMorePagesIndicator={getOr(false, 'showMorePagesIndicator', mockTlsData.pageInfo)}
+            loadMore={loadMore}
+            nextCursor={getOr(null, 'endCursor.value', mockTlsData.pageInfo)}
             totalCount={1}
             type={networkModel.NetworkType.details}
           />
@@ -55,11 +55,11 @@ describe('Tls Table Component', () => {
           <TestProviders store={store}>
             <TlsTable
               data={mockTlsData.edges}
-              fakeTotalCount={getOr(50, 'fakeTotalCount', mockTlsData.pageInfo)}
+              hasNextPage={getOr(false, 'hasNextPage', mockTlsData.pageInfo)!}
               id="tls"
               loading={false}
-              loadPage={loadPage}
-              showMorePagesIndicator={getOr(false, 'showMorePagesIndicator', mockTlsData.pageInfo)}
+              loadMore={loadMore}
+              nextCursor={getOr(null, 'endCursor.value', mockTlsData.pageInfo)}
               totalCount={1}
               type={networkModel.NetworkType.details}
             />

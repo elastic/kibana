@@ -25,24 +25,22 @@ import {
   Columns,
   Criteria,
   ItemsPerRow,
-  PaginatedTable,
+  LoadMoreTable,
   SortingBasicTable,
-} from '../../../paginated_table';
+} from '../../../load_more_table';
 
 import { getHostsColumns } from './columns';
 import * as i18n from './translations';
 
-const tableType = hostsModel.HostsTableType.hosts;
-
 interface OwnProps {
   data: HostsEdges[];
-  fakeTotalCount: number;
+  loading: boolean;
   id: string;
   indexPattern: StaticIndexPattern;
-  loading: boolean;
-  loadPage: (newActivePage: number) => void;
-  showMorePagesIndicator: boolean;
+  hasNextPage: boolean;
+  nextCursor: string;
   totalCount: number;
+  loadMore: (cursor: string) => void;
   type: hostsModel.HostsType;
 }
 
@@ -53,28 +51,12 @@ interface HostsTableReduxProps {
 }
 
 interface HostsTableDispatchProps {
+  updateLimitPagination: ActionCreator<{ limit: number; hostsType: hostsModel.HostsType }>;
   updateHostsSort: ActionCreator<{
     sort: HostsSortField;
     hostsType: hostsModel.HostsType;
   }>;
-  updateTableActivePage: ActionCreator<{
-    activePage: number;
-    hostsType: hostsModel.HostsType;
-    tableType: hostsModel.HostsTableType;
-  }>;
-  updateTableLimit: ActionCreator<{
-    limit: number;
-    hostsType: hostsModel.HostsType;
-    tableType: hostsModel.HostsTableType;
-  }>;
 }
-
-export type HostsTableColumns = [
-  Columns<HostFields['name']>,
-  Columns<HostItem['lastSeen']>,
-  Columns<OsFields['name']>,
-  Columns<OsFields['version']>
-];
 
 type HostsTableProps = OwnProps & HostsTableReduxProps & HostsTableDispatchProps;
 
@@ -87,13 +69,26 @@ const rowItems: ItemsPerRow[] = [
     text: i18n.ROWS_10,
     numberOfRow: 10,
   },
+  {
+    text: i18n.ROWS_20,
+    numberOfRow: 20,
+  },
+  {
+    text: i18n.ROWS_50,
+    numberOfRow: 50,
+  },
 ];
 
 class HostsTableComponent extends React.PureComponent<HostsTableProps> {
   private memoizedColumns: (
     type: hostsModel.HostsType,
     indexPattern: StaticIndexPattern
-  ) => HostsTableColumns;
+  ) => [
+    Columns<HostFields['name']>,
+    Columns<HostItem['lastSeen']>,
+    Columns<OsFields['name']>,
+    Columns<OsFields['version']>
+  ];
   private memoizedSorting: (
     trigger: string,
     sortField: HostsFields,
@@ -110,23 +105,20 @@ class HostsTableComponent extends React.PureComponent<HostsTableProps> {
     const {
       data,
       direction,
-      fakeTotalCount,
+      hasNextPage,
       id,
       indexPattern,
       limit,
       loading,
-      loadPage,
-      showMorePagesIndicator,
       totalCount,
       sortField,
       type,
-      updateTableActivePage,
-      updateTableLimit,
     } = this.props;
     return (
-      <PaginatedTable
+      <LoadMoreTable
         columns={this.memoizedColumns(type, indexPattern)}
         dataTestSubj="all-hosts"
+        hasNextPage={hasNextPage}
         headerCount={totalCount}
         headerTitle={i18n.HOSTS}
         headerUnit={i18n.UNIT(totalCount)}
@@ -135,27 +127,11 @@ class HostsTableComponent extends React.PureComponent<HostsTableProps> {
         limit={limit}
         loading={loading}
         loadingTitle={i18n.HOSTS}
-        loadPage={newActivePage => loadPage(newActivePage)}
+        loadMore={this.wrappedLoadMore}
         onChange={this.onChange}
         pageOfItems={data}
-        showMorePagesIndicator={showMorePagesIndicator}
         sorting={this.memoizedSorting(`${sortField}-${direction}`, sortField, direction)}
-        totalCount={fakeTotalCount}
-        updateLimitPagination={newLimit =>
-          updateTableLimit({
-            hostsType: type,
-            limit: newLimit,
-            tableType,
-          })
-        }
-        updateActivePage={newPage =>
-          updateTableActivePage({
-            activePage: newPage,
-            hostsType: type,
-            tableType,
-          })
-        }
-        updateProps={{ direction, sortField, totalCount }}
+        updateLimitPagination={this.wrappedUpdateLimitPagination}
       />
     );
   }
@@ -166,10 +142,20 @@ class HostsTableComponent extends React.PureComponent<HostsTableProps> {
     direction: Direction
   ): SortingBasicTable => ({ field: getNodeField(sortField), direction });
 
+  private wrappedUpdateLimitPagination = (newLimit: number) =>
+    this.props.updateLimitPagination({ limit: newLimit, hostsType: this.props.type });
+
+  private wrappedLoadMore = () => this.props.loadMore(this.props.nextCursor);
+
   private getMemoizeHostsColumns = (
     type: hostsModel.HostsType,
     indexPattern: StaticIndexPattern
-  ): HostsTableColumns => getHostsColumns(type, indexPattern);
+  ): [
+    Columns<HostFields['name']>,
+    Columns<HostItem['lastSeen']>,
+    Columns<OsFields['name']>,
+    Columns<OsFields['version']>
+  ] => getHostsColumns(type, indexPattern);
 
   private onChange = (criteria: Criteria) => {
     if (criteria.sort != null) {
@@ -219,8 +205,7 @@ const makeMapStateToProps = () => {
 export const HostsTable = connect(
   makeMapStateToProps,
   {
+    updateLimitPagination: hostsActions.updateHostsLimit,
     updateHostsSort: hostsActions.updateHostsSort,
-    updateTableActivePage: hostsActions.updateTableActivePage,
-    updateTableLimit: hostsActions.updateTableLimit,
   }
 )(HostsTableComponent);

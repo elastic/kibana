@@ -58,18 +58,11 @@ const TopBarContainer = styled.div`
   justify-content: space-between;
 `;
 
-// @types/styled-components@3.0.1 does not yet support `defaultProps`, which EuiAccordion uses
-// Ref: https://github.com/DefinitelyTyped/DefinitelyTyped/pull/31903
-// const Accordion = styled(EuiAccordion)`
-//   border: ${theme.euiBorderThick};
-//   border-radius: ${theme.euiSizeS};
-//   margin-bottom: ${theme.euiSize};
-// `;
-const accordionStyles = {
-  border: theme.euiBorderThick,
-  borderRadius: theme.euiSizeS,
-  marginBottom: theme.euiSize,
-};
+const Accordion = styled(EuiAccordion)`
+  border: ${theme.euiBorderThick};
+  border-radius: ${theme.euiSizeS};
+  margin-bottom: ${theme.euiSize};
+`;
 
 const Icon = styled(EuiIcon)`
   margin-right: ${theme.euiSizeS};
@@ -110,8 +103,7 @@ const onClick = (e: MouseEvent<HTMLDivElement>) => {
 };
 
 const Difference = (props: { fileDiff: FileDiff; repoUri: string; revision: string }) => (
-  <EuiAccordion
-    style={accordionStyles}
+  <Accordion
     initialIsOpen={true}
     id={props.fileDiff.path}
     buttonContent={
@@ -143,7 +135,7 @@ const Difference = (props: { fileDiff: FileDiff; repoUri: string; revision: stri
       language={props.fileDiff.language!}
       renderSideBySide={true}
     />
-  </EuiAccordion>
+  </Accordion>
 );
 
 export class DiffPage extends React.Component<Props> {

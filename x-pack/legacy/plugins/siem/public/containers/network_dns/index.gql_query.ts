@@ -12,7 +12,7 @@ export const networkDnsQuery = gql`
     $sort: NetworkDnsSortField!
     $isPtrIncluded: Boolean!
     $timerange: TimerangeInput!
-    $pagination: PaginationInputPaginated!
+    $pagination: PaginationInput!
     $filterQuery: String
     $defaultIndex: [String!]!
     $inspect: Boolean!
@@ -42,9 +42,10 @@ export const networkDnsQuery = gql`
           }
         }
         pageInfo {
-          activePage
-          fakeTotalCount
-          showMorePagesIndicator
+          endCursor {
+            value
+          }
+          hasNextPage
         }
         inspect @include(if: $inspect) {
           dsl

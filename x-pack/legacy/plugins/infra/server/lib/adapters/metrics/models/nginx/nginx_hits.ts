@@ -8,17 +8,14 @@ import {
   InfraMetricModelCreator,
   InfraMetricModelMetricType,
   InfraMetricModel,
-  InfraMetricModelQueryType,
 } from '../../adapter_types';
-
-import { InfraMetric } from '../../../../../graphql/types';
 
 export const nginxHits: InfraMetricModelCreator = (
   timeField,
   indexPattern,
   interval
 ): InfraMetricModel => ({
-  id: InfraMetric.nginxHits,
+  id: 'nginxHits',
   requires: ['nginx.access'],
   index_pattern: indexPattern,
   interval,
@@ -34,10 +31,7 @@ export const nginxHits: InfraMetricModelCreator = (
         },
       ],
       split_mode: 'filter',
-      filter: {
-        query: 'http.response.status_code:[200 TO 299]',
-        language: InfraMetricModelQueryType.lucene,
-      },
+      filter: 'http.response.status_code:[200 TO 299]',
     },
     {
       id: '300s',
@@ -48,10 +42,7 @@ export const nginxHits: InfraMetricModelCreator = (
         },
       ],
       split_mode: 'filter',
-      filter: {
-        query: 'http.response.status_code:[300 TO 399]',
-        language: InfraMetricModelQueryType.lucene,
-      },
+      filter: 'http.response.status_code:[300 TO 399]',
     },
     {
       id: '400s',
@@ -62,10 +53,7 @@ export const nginxHits: InfraMetricModelCreator = (
         },
       ],
       split_mode: 'filter',
-      filter: {
-        query: 'http.response.status_code:[400 TO 499]',
-        language: InfraMetricModelQueryType.lucene,
-      },
+      filter: 'http.response.status_code:[400 TO 499]',
     },
     {
       id: '500s',
@@ -76,10 +64,7 @@ export const nginxHits: InfraMetricModelCreator = (
         },
       ],
       split_mode: 'filter',
-      filter: {
-        query: 'http.response.status_code:[500 TO 599]',
-        language: InfraMetricModelQueryType.lucene,
-      },
+      filter: 'http.response.status_code:[500 TO 599]',
     },
   ],
 });

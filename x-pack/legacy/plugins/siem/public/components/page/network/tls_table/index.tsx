@@ -12,19 +12,18 @@ import { ActionCreator } from 'redux';
 import { networkActions } from '../../../../store/network';
 import { TlsEdges, TlsSortField, TlsFields } from '../../../../graphql/types';
 import { networkModel, networkSelectors, State } from '../../../../store';
-import { Criteria, ItemsPerRow, PaginatedTable, SortingBasicTable } from '../../../paginated_table';
+import { Criteria, ItemsPerRow, LoadMoreTable, SortingBasicTable } from '../../../load_more_table';
 import { getTlsColumns } from './columns';
 import * as i18n from './translations';
-const tableType = networkModel.IpDetailsTableType.tls;
 
 interface OwnProps {
   data: TlsEdges[];
-  fakeTotalCount: number;
-  id: string;
   loading: boolean;
-  loadPage: (newActivePage: number) => void;
-  showMorePagesIndicator: boolean;
+  hasNextPage: boolean;
+  id: string;
+  nextCursor: string;
   totalCount: number;
+  loadMore: (cursor: string) => void;
   type: networkModel.NetworkType;
 }
 
@@ -34,10 +33,6 @@ interface TlsTableReduxProps {
 }
 
 interface TlsTableDispatchProps {
-  updateTableActivePage: ActionCreator<{
-    activePage: number;
-    tableType: networkModel.IpDetailsTableType;
-  }>;
   updateTlsLimit: ActionCreator<{
     limit: number;
     networkType: networkModel.NetworkType;
@@ -59,6 +54,14 @@ const rowItems: ItemsPerRow[] = [
     text: i18n.ROWS_10,
     numberOfRow: 10,
   },
+  {
+    text: i18n.ROWS_20,
+    numberOfRow: 20,
+  },
+  {
+    text: i18n.ROWS_50,
+    numberOfRow: 50,
+  },
 ];
 
 export const tlsTableId = 'tls-table';
@@ -67,22 +70,21 @@ class TlsTableComponent extends React.PureComponent<TlsTableProps> {
   public render() {
     const {
       data,
-      fakeTotalCount,
-      id,
+      tlsSortField,
+      hasNextPage,
       limit,
       loading,
-      loadPage,
-      showMorePagesIndicator,
-      tlsSortField,
+      loadMore,
+      id,
       totalCount,
-      type,
-      updateTableActivePage,
+      nextCursor,
       updateTlsLimit,
+      type,
     } = this.props;
     return (
-      <PaginatedTable
+      <LoadMoreTable
         columns={getTlsColumns(tlsTableId)}
-        showMorePagesIndicator={showMorePagesIndicator}
+        hasNextPage={hasNextPage}
         headerCount={totalCount}
         headerTitle={i18n.TRANSPORT_LAYER_SECURITY}
         headerUnit={i18n.UNIT(totalCount)}
@@ -91,19 +93,11 @@ class TlsTableComponent extends React.PureComponent<TlsTableProps> {
         limit={limit}
         loading={loading}
         loadingTitle={i18n.TRANSPORT_LAYER_SECURITY}
-        loadPage={newActivePage => loadPage(newActivePage)}
+        loadMore={() => loadMore(nextCursor)}
         onChange={this.onChange}
         pageOfItems={data}
         sorting={getSortField(tlsSortField)}
-        totalCount={fakeTotalCount}
-        updateActivePage={newPage =>
-          updateTableActivePage({
-            activePage: newPage,
-            tableType,
-          })
-        }
         updateLimitPagination={newLimit => updateTlsLimit({ limit: newLimit, networkType: type })}
-        updateProps={{ tlsSortField, totalCount }}
       />
     );
   }
@@ -135,7 +129,6 @@ const makeMapStateToProps = () => {
 export const TlsTable = connect(
   makeMapStateToProps,
   {
-    updateTableActivePage: networkActions.updateIpDetailsTableActivePage,
     updateTlsLimit: networkActions.updateTlsLimit,
     updateTlsSort: networkActions.updateTlsSort,
   }

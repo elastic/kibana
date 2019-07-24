@@ -114,23 +114,23 @@ const HostsComponent = pure<HostsComponentProps>(({ filterQuery, setAbsoluteRang
                         totalCount,
                         loading,
                         pageInfo,
-                        loadPage,
+                        loadMore,
                         id,
                         inspect,
                         refetch,
                       }) => (
                         <HostsTableManage
-                          data={hosts}
-                          fakeTotalCount={getOr(50, 'fakeTotalCount', pageInfo)}
                           id={id}
-                          indexPattern={indexPattern}
                           inspect={inspect}
-                          loading={loading}
-                          loadPage={loadPage}
+                          indexPattern={indexPattern}
                           refetch={refetch}
                           setQuery={setQuery}
-                          showMorePagesIndicator={getOr(false, 'showMorePagesIndicator', pageInfo)}
+                          loading={loading}
+                          data={hosts}
                           totalCount={totalCount}
+                          hasNextPage={getOr(false, 'hasNextPage', pageInfo)!}
+                          nextCursor={getOr(null, 'endCursor.value', pageInfo)}
+                          loadMore={loadMore}
                           type={hostsModel.HostsType.page}
                         />
                       )}
@@ -187,22 +187,22 @@ const HostsComponent = pure<HostsComponentProps>(({ filterQuery, setAbsoluteRang
                         totalCount,
                         loading,
                         pageInfo,
-                        loadPage,
+                        loadMore,
                         id,
                         inspect,
                         refetch,
                       }) => (
                         <UncommonProcessTableManage
-                          data={uncommonProcesses}
-                          fakeTotalCount={getOr(50, 'fakeTotalCount', pageInfo)}
                           id={id}
                           inspect={inspect}
-                          loading={loading}
-                          loadPage={loadPage}
                           refetch={refetch}
                           setQuery={setQuery}
-                          showMorePagesIndicator={getOr(false, 'showMorePagesIndicator', pageInfo)}
+                          loading={loading}
+                          data={uncommonProcesses}
                           totalCount={totalCount}
+                          nextCursor={getOr(null, 'endCursor.value', pageInfo)}
+                          hasNextPage={getOr(false, 'hasNextPage', pageInfo)!}
+                          loadMore={loadMore}
                           type={hostsModel.HostsType.page}
                         />
                       )}
@@ -243,19 +243,20 @@ const HostsComponent = pure<HostsComponentProps>(({ filterQuery, setAbsoluteRang
                         refetch,
                         totalCount,
                         pageInfo,
-                        loadPage,
+                        loadMore,
                       }) => (
                         <EventsTableManage
-                          data={events}
-                          fakeTotalCount={getOr(50, 'fakeTotalCount', pageInfo)}
                           id={id}
                           inspect={inspect}
-                          loading={loading}
-                          loadPage={loadPage}
                           refetch={refetch}
                           setQuery={setQuery}
-                          showMorePagesIndicator={getOr(false, 'showMorePagesIndicator', pageInfo)}
+                          data={events!}
+                          loading={loading}
                           totalCount={totalCount}
+                          nextCursor={getOr(null, 'endCursor.value', pageInfo)}
+                          tiebreaker={getOr(null, 'endCursor.tiebreaker', pageInfo)!}
+                          hasNextPage={getOr(false, 'hasNextPage', pageInfo)!}
+                          loadMore={loadMore}
                           type={hostsModel.HostsType.page}
                         />
                       )}

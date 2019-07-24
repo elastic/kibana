@@ -15,12 +15,12 @@ import {
   GetNetworkDnsQuery,
   NetworkDnsEdges,
   NetworkDnsSortField,
-  PageInfoPaginated,
+  PageInfo,
 } from '../../graphql/types';
 import { inputsModel, networkModel, networkSelectors, State, inputsSelectors } from '../../store';
-import { generateTablePaginationOptions } from '../../components/paginated_table/helpers';
 import { createFilter } from '../helpers';
-import { QueryTemplatePaginated, QueryTemplatePaginatedProps } from '../query_template_paginated';
+import { QueryTemplate, QueryTemplateProps } from '../query_template';
+
 import { networkDnsQuery } from './index.gql_query';
 
 const ID = 'networkDnsQuery';
@@ -28,76 +28,81 @@ const ID = 'networkDnsQuery';
 export interface NetworkDnsArgs {
   id: string;
   inspect: inputsModel.InspectQuery;
-  loading: boolean;
-  loadPage: (newActivePage: number) => void;
   networkDns: NetworkDnsEdges[];
-  pageInfo: PageInfoPaginated;
-  refetch: inputsModel.Refetch;
   totalCount: number;
+  pageInfo: PageInfo;
+  loading: boolean;
+  loadMore: (cursor: string) => void;
+  refetch: inputsModel.Refetch;
 }
 
-export interface OwnProps extends QueryTemplatePaginatedProps {
+export interface OwnProps extends QueryTemplateProps {
   children: (args: NetworkDnsArgs) => React.ReactNode;
   type: networkModel.NetworkType;
 }
 
 export interface NetworkDnsComponentReduxProps {
-  activePage: number;
-  dnsSortField: NetworkDnsSortField;
   isInspected: boolean;
-  isPtrIncluded: boolean;
   limit: number;
+  dnsSortField: NetworkDnsSortField;
+  isPtrIncluded: boolean;
 }
 
 type NetworkDnsProps = OwnProps & NetworkDnsComponentReduxProps;
 
-class NetworkDnsComponentQuery extends QueryTemplatePaginated<
+class NetworkDnsComponentQuery extends QueryTemplate<
   NetworkDnsProps,
   GetNetworkDnsQuery.Query,
   GetNetworkDnsQuery.Variables
 > {
   public render() {
     const {
-      activePage,
-      children,
-      dnsSortField,
-      endDate,
-      filterQuery,
       id = ID,
       isInspected,
+      children,
+      dnsSortField,
+      filterQuery,
       isPtrIncluded,
-      limit,
       skip,
       sourceId,
       startDate,
+      endDate,
+      limit,
     } = this.props;
     return (
       <Query<GetNetworkDnsQuery.Query, GetNetworkDnsQuery.Variables>
+        query={networkDnsQuery}
         fetchPolicy="cache-and-network"
         notifyOnNetworkStatusChange
-        query={networkDnsQuery}
         skip={skip}
         variables={{
-          defaultIndex: chrome.getUiSettingsClient().get(DEFAULT_INDEX_KEY),
-          filterQuery: createFilter(filterQuery),
-          inspect: isInspected,
-          isPtrIncluded,
-          pagination: generateTablePaginationOptions(activePage, limit),
-          sort: dnsSortField,
           sourceId,
           timerange: {
             interval: '12h',
             from: startDate!,
             to: endDate!,
           },
+          sort: dnsSortField,
+          isPtrIncluded,
+          pagination: {
+            limit,
+            cursor: null,
+            tiebreaker: null,
+          },
+          filterQuery: createFilter(filterQuery),
+          defaultIndex: chrome.getUiSettingsClient().get(DEFAULT_INDEX_KEY),
+          inspect: isInspected,
         }}
       >
         {({ data, loading, fetchMore, refetch }) => {
           const networkDns = getOr([], `source.NetworkDns.edges`, data);
           this.setFetchMore(fetchMore);
-          this.setFetchMoreOptions((newActivePage: number) => ({
+          this.setFetchMoreOptions((newCursor: string) => ({
             variables: {
-              pagination: generateTablePaginationOptions(newActivePage, limit),
+              pagination: {
+                cursor: newCursor,
+                limit: limit + parseInt(newCursor, 10),
+              },
             },
             updateQuery: (prev, { fetchMoreResult }) => {
               if (!fetchMoreResult) {
@@ -109,7 +114,10 @@ class NetworkDnsComponentQuery extends QueryTemplatePaginated<
                   ...fetchMoreResult.source,
                   NetworkDns: {
                     ...fetchMoreResult.source.NetworkDns,
-                    edges: [...fetchMoreResult.source.NetworkDns.edges],
+                    edges: [
+                      ...prev.source.NetworkDns.edges,
+                      ...fetchMoreResult.source.NetworkDns.edges,
+                    ],
                   },
                 },
               };
@@ -118,12 +126,12 @@ class NetworkDnsComponentQuery extends QueryTemplatePaginated<
           return children({
             id,
             inspect: getOr(null, 'source.NetworkDns.inspect', data),
+            refetch,
             loading,
-            loadPage: this.wrappedLoadMore,
+            totalCount: getOr(0, 'source.NetworkDns.totalCount', data),
             networkDns,
             pageInfo: getOr({}, 'source.NetworkDns.pageInfo', data),
-            refetch,
-            totalCount: getOr(0, 'source.NetworkDns.totalCount', data),
+            loadMore: this.wrappedLoadMore,
           });
         }}
       </Query>

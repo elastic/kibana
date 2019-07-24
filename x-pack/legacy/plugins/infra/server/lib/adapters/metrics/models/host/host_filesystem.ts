@@ -9,14 +9,13 @@ import {
   InfraMetricModelMetricType,
   InfraMetricModel,
 } from '../../adapter_types';
-import { InfraMetric } from '../../../../../graphql/types';
 
 export const hostFilesystem: InfraMetricModelCreator = (
   timeField,
   indexPattern,
   interval
 ): InfraMetricModel => ({
-  id: InfraMetric.hostFilesystem,
+  id: 'hostFilesystem',
   requires: ['system.filesystem'],
   filter: 'system.filesystem.device_name:\\/*',
   index_pattern: indexPattern,

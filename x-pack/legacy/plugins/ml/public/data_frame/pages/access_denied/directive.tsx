@@ -14,12 +14,7 @@ import uiChrome from 'ui/chrome';
 const module = uiModules.get('apps/ml', ['react']);
 
 import { I18nContext } from 'ui/i18n';
-import chrome from 'ui/chrome';
-import { timefilter } from 'ui/timefilter';
-import { timeHistory } from 'ui/timefilter/time_history';
 import { InjectorService } from '../../../../common/types/angular';
-
-import { NavigationMenuContext } from '../../../util/context_utils';
 
 import { Page } from './page';
 
@@ -39,14 +34,9 @@ module.directive('mlDataFrameAccessDenied', ($injector: InjectorService) => {
         kbnUrl.redirect('/data_frames');
       };
 
-      ReactDOM.render(
-        <I18nContext>
-          <NavigationMenuContext.Provider value={{ chrome, timefilter, timeHistory }}>
-            <Page goToKibana={goToKibana} retry={retry} />
-          </NavigationMenuContext.Provider>
-        </I18nContext>,
-        element[0]
-      );
+      const props = { goToKibana, retry };
+
+      ReactDOM.render(<I18nContext>{React.createElement(Page, props)}</I18nContext>, element[0]);
 
       element.on('$destroy', () => {
         ReactDOM.unmountComponentAtNode(element[0]);

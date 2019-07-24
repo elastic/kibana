@@ -9,14 +9,13 @@ import {
   InfraMetricModelMetricType,
   InfraMetricModel,
 } from '../../adapter_types';
-import { InfraMetric } from '../../../../../graphql/types';
 
 export const hostK8sDiskCap: InfraMetricModelCreator = (
   timeField,
   indexPattern,
   interval
 ): InfraMetricModel => ({
-  id: InfraMetric.hostK8sDiskCap,
+  id: 'hostK8sDiskCap',
   map_field_to: 'kubernetes.node.name',
   requires: ['kubernetes.node'],
   index_pattern: indexPattern,

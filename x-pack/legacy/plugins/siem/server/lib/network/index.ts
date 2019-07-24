@@ -11,19 +11,19 @@ import {
   NetworkTopNFlowData,
   NetworkTopNFlowSortField,
 } from '../../graphql/types';
-import { FrameworkRequest, RequestOptionsPaginated } from '../framework';
+import { FrameworkRequest, RequestOptions } from '../framework';
 export * from './elasticsearch_adapter';
 import { NetworkAdapter } from './types';
 
 export * from './types';
 
-export interface NetworkTopNFlowRequestOptions extends RequestOptionsPaginated {
+export interface NetworkTopNFlowRequestOptions extends RequestOptions {
   networkTopNFlowSort: NetworkTopNFlowSortField;
   flowTarget: FlowTarget;
   flowDirection: FlowDirection;
 }
 
-export interface NetworkDnsRequestOptions extends RequestOptionsPaginated {
+export interface NetworkDnsRequestOptions extends RequestOptions {
   isPtrIncluded: boolean;
   networkDnsSortField: NetworkDnsSortField;
 }

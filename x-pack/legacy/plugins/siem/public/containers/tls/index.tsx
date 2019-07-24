@@ -11,17 +11,11 @@ import { connect } from 'react-redux';
 
 import chrome from 'ui/chrome';
 import { DEFAULT_INDEX_KEY } from '../../../common/constants';
-import {
-  FlowTarget,
-  PageInfoPaginated,
-  TlsEdges,
-  TlsSortField,
-  GetTlsQuery,
-} from '../../graphql/types';
+import { FlowTarget, PageInfo, TlsEdges, TlsSortField, GetTlsQuery } from '../../graphql/types';
 import { inputsModel, networkModel, networkSelectors, State, inputsSelectors } from '../../store';
 import { createFilter } from '../helpers';
-import { generateTablePaginationOptions } from '../../components/paginated_table/helpers';
-import { QueryTemplatePaginated, QueryTemplatePaginatedProps } from '../query_template_paginated';
+import { QueryTemplate, QueryTemplateProps } from '../query_template';
+
 import { tlsQuery } from './index.gql_query';
 
 const ID = 'tlsQuery';
@@ -29,15 +23,15 @@ const ID = 'tlsQuery';
 export interface TlsArgs {
   id: string;
   inspect: inputsModel.InspectQuery;
-  loading: boolean;
-  loadPage: (newActivePage: number) => void;
-  pageInfo: PageInfoPaginated;
-  refetch: inputsModel.Refetch;
   tls: TlsEdges[];
   totalCount: number;
+  pageInfo: PageInfo;
+  loading: boolean;
+  loadMore: (cursor: string) => void;
+  refetch: inputsModel.Refetch;
 }
 
-export interface OwnProps extends QueryTemplatePaginatedProps {
+export interface OwnProps extends QueryTemplateProps {
   children: (args: TlsArgs) => React.ReactNode;
   flowTarget: FlowTarget;
   ip: string;
@@ -45,7 +39,6 @@ export interface OwnProps extends QueryTemplatePaginatedProps {
 }
 
 export interface TlsComponentReduxProps {
-  activePage: number;
   isInspected: boolean;
   limit: number;
   tlsSortField: TlsSortField;
@@ -53,26 +46,21 @@ export interface TlsComponentReduxProps {
 
 type TlsProps = OwnProps & TlsComponentReduxProps;
 
-class TlsComponentQuery extends QueryTemplatePaginated<
-  TlsProps,
-  GetTlsQuery.Query,
-  GetTlsQuery.Variables
-> {
+class TlsComponentQuery extends QueryTemplate<TlsProps, GetTlsQuery.Query, GetTlsQuery.Variables> {
   public render() {
     const {
-      activePage,
-      children,
-      endDate,
-      filterQuery,
-      flowTarget,
       id = ID,
-      ip,
       isInspected,
-      limit,
+      children,
+      tlsSortField,
+      filterQuery,
+      ip,
       skip,
       sourceId,
       startDate,
-      tlsSortField,
+      endDate,
+      limit,
+      flowTarget,
     } = this.props;
     return (
       <Query<GetTlsQuery.Query, GetTlsQuery.Variables>
@@ -81,27 +69,34 @@ class TlsComponentQuery extends QueryTemplatePaginated<
         notifyOnNetworkStatusChange
         skip={skip}
         variables={{
-          defaultIndex: chrome.getUiSettingsClient().get(DEFAULT_INDEX_KEY),
-          filterQuery: createFilter(filterQuery),
-          flowTarget,
-          inspect: isInspected,
-          ip,
-          pagination: generateTablePaginationOptions(activePage, limit),
-          sort: tlsSortField,
           sourceId,
           timerange: {
             interval: '12h',
             from: startDate ? startDate : 0,
             to: endDate ? endDate : Date.now(),
           },
+          ip,
+          flowTarget,
+          sort: tlsSortField,
+          pagination: {
+            limit,
+            cursor: null,
+            tiebreaker: null,
+          },
+          filterQuery: createFilter(filterQuery),
+          defaultIndex: chrome.getUiSettingsClient().get(DEFAULT_INDEX_KEY),
+          inspect: isInspected,
         }}
       >
         {({ data, loading, fetchMore, refetch }) => {
           const tls = getOr([], 'source.Tls.edges', data);
           this.setFetchMore(fetchMore);
-          this.setFetchMoreOptions((newActivePage: number) => ({
+          this.setFetchMoreOptions((newCursor: string) => ({
             variables: {
-              pagination: generateTablePaginationOptions(newActivePage, limit),
+              pagination: {
+                cursor: newCursor,
+                limit: limit + parseInt(newCursor, 10),
+              },
             },
             updateQuery: (prev, { fetchMoreResult }) => {
               if (!fetchMoreResult) {
@@ -113,7 +108,7 @@ class TlsComponentQuery extends QueryTemplatePaginated<
                   ...fetchMoreResult.source,
                   Tls: {
                     ...fetchMoreResult.source.Tls,
-                    edges: [...fetchMoreResult.source.Tls.edges],
+                    edges: [...prev.source.Tls.edges, ...fetchMoreResult.source.Tls.edges],
                   },
                 },
               };
@@ -122,12 +117,12 @@ class TlsComponentQuery extends QueryTemplatePaginated<
           return children({
             id,
             inspect: getOr(null, 'source.Tls.inspect', data),
-            loading,
-            loadPage: this.wrappedLoadMore,
-            pageInfo: getOr({}, 'source.Tls.pageInfo', data),
             refetch,
-            tls,
+            loading,
             totalCount: getOr(0, 'source.Tls.totalCount', data),
+            tls,
+            pageInfo: getOr({}, 'source.Tls.pageInfo', data),
+            loadMore: this.wrappedLoadMore,
           });
         }}
       </Query>

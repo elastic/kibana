@@ -62,8 +62,8 @@ export const LOAD_TIMEOUT = 120 * 1000; // 2 minutes
 export const loadPluginBundle: LoadPluginBundle = <
   TSetup,
   TStart,
-  TPluginsSetup extends object,
-  TPluginsStart extends object
+  TPluginsSetup extends Record<string, unknown>,
+  TPluginsStart extends Record<string, unknown>
 >(
   addBasePath: (path: string) => string,
   pluginName: PluginName,
@@ -125,8 +125,8 @@ export const loadPluginBundle: LoadPluginBundle = <
 export type LoadPluginBundle = <
   TSetup,
   TStart,
-  TPluginsSetup extends object,
-  TPluginsStart extends object
+  TPluginsSetup extends Record<string, unknown>,
+  TPluginsStart extends Record<string, unknown>
 >(
   addBasePath: (path: string) => string,
   pluginName: PluginName,

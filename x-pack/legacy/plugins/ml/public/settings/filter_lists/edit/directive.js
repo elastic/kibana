@@ -9,6 +9,8 @@ import 'ngreact';
 import React from 'react';
 import ReactDOM from 'react-dom';
 
+import { I18nContext } from 'ui/i18n';
+
 import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml', ['react']);
 
@@ -18,16 +20,11 @@ import { checkGetJobsPrivilege, checkPermission } from 'plugins/ml/privilege/che
 import { getMlNodeCount } from 'plugins/ml/ml_nodes_check/check_ml_nodes';
 import { EditFilterList } from './edit_filter_list';
 
-import chrome from 'ui/chrome';
 import uiRoutes from 'ui/routes';
-import { timefilter } from 'ui/timefilter';
-import { timeHistory } from 'ui/timefilter/time_history';
-import { I18nContext } from 'ui/i18n';
-
-import { NavigationMenuContext } from '../../../util/context_utils';
 
 const template = `
   <div class="euiSpacer euiSpacer--s" />
+  <ml-nav-menu name="settings" />
   <ml-edit-filter-list />
 `;
 
@@ -65,9 +62,7 @@ module.directive('mlEditFilterList', function ($route) {
 
       ReactDOM.render(
         <I18nContext>
-          <NavigationMenuContext.Provider value={{ chrome, timefilter, timeHistory }}>
-            <EditFilterList {...props} />
-          </NavigationMenuContext.Provider>
+          {React.createElement(EditFilterList, props)}
         </I18nContext>,
         element[0]
       );

@@ -12,7 +12,7 @@ import {
   TlsRequestOptions,
   UsersRequestOptions,
 } from '../../lib/ip_details';
-import { createOptions, createOptionsPaginated } from '../../utils/build_query/create_options';
+import { createOptions } from '../../utils/build_query/create_options';
 import { QuerySourceResolver } from '../sources/resolvers';
 
 export type QueryIpOverviewResolver = ChildResolverOf<
@@ -56,7 +56,7 @@ export const createIpDetailsResolvers = (
     },
     async Domains(source, args, { req }, info) {
       const options: DomainsRequestOptions = {
-        ...createOptionsPaginated(source, args, info),
+        ...createOptions(source, args, info),
         ip: args.ip,
         domainsSortField: args.sort,
         flowTarget: args.flowTarget,
@@ -66,7 +66,7 @@ export const createIpDetailsResolvers = (
     },
     async Tls(source, args, { req }, info) {
       const options: TlsRequestOptions = {
-        ...createOptionsPaginated(source, args, info),
+        ...createOptions(source, args, info),
         ip: args.ip,
         tlsSortField: args.sort,
         flowTarget: args.flowTarget,
@@ -75,7 +75,7 @@ export const createIpDetailsResolvers = (
     },
     async Users(source, args, { req }, info) {
       const options: UsersRequestOptions = {
-        ...createOptionsPaginated(source, args, info),
+        ...createOptions(source, args, info),
         ip: args.ip,
         usersSortField: args.sort,
         flowTarget: args.flowTarget,

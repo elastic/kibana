@@ -13,6 +13,8 @@ import {
   Error as NodeGitError,
   Oid,
   Repository,
+  Tree,
+  TreeEntry,
 } from '@elastic/nodegit';
 import Boom from 'boom';
 import LruCache from 'lru-cache';
@@ -21,9 +23,10 @@ import * as fs from 'fs';
 import * as isogit from 'isomorphic-git';
 import { CommitDescription, TreeDescription } from 'isomorphic-git';
 import { isBinaryFileSync } from 'isbinaryfile';
+
 import { GitBlame } from '../common/git_blame';
 import { CommitDiff, Diff, DiffKind } from '../common/git_diff';
-import { FileTree, FileTreeItemType, RepositoryUri } from '../model';
+import { FileTree, FileTreeItemType, RepositoryUri, sortFileTree } from '../model';
 import { CommitInfo, ReferenceInfo, ReferenceType } from '../model/commit';
 import { detectLanguage } from './utils/detect_language';
 
@@ -56,22 +59,34 @@ async function checkExists<R>(func: () => Promise<R>, message: string): Promise<
   return result;
 }
 
-function entry2Tree(entry: isogit.TreeEntry, prefixPath: string = ''): FileTree {
-  const type: FileTreeItemType = GitOperations.mode2type(entry.mode);
-  const { path, oid } = entry;
+function entry2Tree(entry: TreeEntry): FileTree {
+  let type: FileTreeItemType;
+  switch (entry.filemode()) {
+    case TreeEntry.FILEMODE.LINK:
+      type = FileTreeItemType.Link;
+      break;
+    case TreeEntry.FILEMODE.COMMIT:
+      type = FileTreeItemType.Submodule;
+      break;
+    case TreeEntry.FILEMODE.TREE:
+      type = FileTreeItemType.Directory;
+      break;
+    case TreeEntry.FILEMODE.BLOB:
+    case TreeEntry.FILEMODE.EXECUTABLE:
+      type = FileTreeItemType.File;
+      break;
+    default:
+      // @ts-ignore
+      throw new Error('unreadable file');
+  }
   return {
-    name: path,
-    path: prefixPath ? prefixPath + '/' + path : path,
-    sha1: oid,
+    name: entry.name(),
+    path: entry.path(),
+    sha1: entry.sha(),
     type,
   };
 }
 
-interface Tree {
-  entries: isogit.TreeEntry[];
-  gitdir: string;
-  oid: string;
-}
 export class GitOperations {
   private REPO_LRU_CACHE_SIZE = 16;
   private REPO_MAX_AGE_MS = 60 * 60 * 1000; // 1 hour;
@@ -206,18 +221,6 @@ export class GitOperations {
       throw new Error('invalid path');
     }
   }
-
-  private static async isTextFile(gitdir: string, entry: isogit.TreeEntry) {
-    if (entry.type === 'blob') {
-      const type = GitOperations.mode2type(entry.mode);
-      if (type === FileTreeItemType.File) {
-        const blob = await isogit.readObject({ gitdir, oid: entry.oid, format: 'content' });
-        return !isBinaryFileSync(blob.object as Buffer);
-      }
-    }
-    return false;
-  }
-
   public async countRepoFiles(uri: RepositoryUri, revision: string): Promise<number> {
     let count = 0;
     const commit = await this.getCommitOr404(uri, revision);
@@ -226,12 +229,19 @@ export class GitOperations {
     const treeId = (commitObject.object as CommitDescription).tree;
 
     async function walk(oid: string) {
-      const tree = await GitOperations.readTree(gitdir, oid);
+      const { object } = await isogit.readObject({ gitdir, oid });
+      const tree = object as TreeDescription;
       for (const entry of tree.entries) {
         if (entry.type === 'tree') {
           await walk(entry.oid);
-        } else if (await GitOperations.isTextFile(gitdir, entry)) {
-          count++;
+        } else if (entry.type === 'blob') {
+          const type = GitOperations.mode2type(entry.mode);
+          if (type === FileTreeItemType.File) {
+            const blob = await isogit.readObject({ gitdir, oid: entry.oid, format: 'content' });
+            if (!isBinaryFileSync(blob.object as Buffer)) {
+              count++;
+            }
+          }
         }
       }
     }
@@ -244,46 +254,36 @@ export class GitOperations {
     uri: RepositoryUri,
     revision: string
   ): Promise<AsyncIterableIterator<FileTree>> {
-    const commit = await this.getCommitOr404(uri, revision);
-    const gitdir = this.repoDir(uri);
-    const commitObject = await isogit.readObject({ gitdir, oid: commit.id });
-    const treeId = (commitObject.object as CommitDescription).tree;
     async function* walk(oid: string, prefix: string = ''): AsyncIterableIterator<FileTree> {
-      const tree = await GitOperations.readTree(gitdir, oid);
+      const { object } = await isogit.readObject({ gitdir, oid });
+      const tree = object as TreeDescription;
       for (const entry of tree.entries) {
         const path = prefix ? `${prefix}/${entry.path}` : entry.path;
         if (entry.type === 'tree') {
           yield* walk(entry.oid, path);
-        } else if (await GitOperations.isTextFile(gitdir, entry)) {
+        } else if (entry.type === 'blob') {
           const type = GitOperations.mode2type(entry.mode);
-          yield {
-            name: entry.path,
-            type,
-            path,
-            repoUri: uri,
-            sha1: entry.oid,
-          } as FileTree;
+          if (type === FileTreeItemType.File) {
+            const blob = await isogit.readObject({ gitdir, oid: entry.oid, format: 'content' });
+            if (!isBinaryFileSync(blob.object as Buffer)) {
+              yield {
+                name: entry.path,
+                type,
+                path,
+                repoUri: uri,
+                sha1: entry.oid,
+              } as FileTree;
+            }
+          }
         }
       }
     }
 
+    const commit = await this.getCommitOr404(uri, revision);
+    const gitdir = this.repoDir(uri);
+    const commitObject = await isogit.readObject({ gitdir, oid: commit.id });
+    const treeId = (commitObject.object as CommitDescription).tree;
     return await walk(treeId);
-  }
-
-  private static async readTree(gitdir: string, oid: string): Promise<Tree> {
-    const { type, object } = await isogit.readObject({ gitdir, oid });
-    if (type === 'commit') {
-      return await this.readTree(gitdir, (object as CommitDescription).tree);
-    } else if (type === 'tree') {
-      const tree = object as TreeDescription;
-      return {
-        entries: tree.entries,
-        gitdir,
-        oid,
-      } as Tree;
-    } else {
-      throw new Error(`${oid} is not a tree`);
-    }
   }
 
   static mode2type(mode: string): FileTreeItemType {
@@ -311,6 +311,7 @@ export class GitOperations {
    * @param skip pagination parameter, skip how many nodes in each children.
    * @param limit pagination parameter, limit the number of node's children.
    * @param resolveParents whether the return value should always start from root
+   * @param childrenDepth how depth should the children walk.
    * @param flatten
    */
   public async fileTree(
@@ -320,111 +321,54 @@ export class GitOperations {
     skip: number = 0,
     limit: number = DEFAULT_TREE_CHILDREN_LIMIT,
     resolveParents: boolean = false,
+    childrenDepth: number = 1,
     flatten: boolean = false
   ): Promise<FileTree> {
-    const commit = await this.getCommitOr404(uri, revision);
-    const gitdir = this.repoDir(uri);
-    if (path.startsWith('/')) {
-      path = path.slice(1);
+    const commit = await this.getCommit(uri, revision);
+    const tree = await commit.getTree();
+    if (path === '/') {
+      path = '';
     }
-    if (path.endsWith('/')) {
-      path = path.slice(0, -1);
-    }
-
-    function type2item(type: string) {
-      switch (type) {
-        case 'blob':
-          return FileTreeItemType.File;
-        case 'tree':
-          return FileTreeItemType.Directory;
-        case 'commit':
-          return FileTreeItemType.Submodule;
-        default:
-          throw new Error(`unsupported file tree item type ${type}`);
-      }
-    }
-
-    if (resolveParents) {
-      const root: FileTree = {
-        name: '',
-        path: '',
-        type: FileTreeItemType.Directory,
-      };
-      const tree = await GitOperations.readTree(gitdir, commit.treeId);
-      await this.fillChildren(root, tree, { skip, limit, flatten });
-      if (path) {
-        await this.resolvePath(root, tree, path.split('/'), { skip, limit, flatten });
-      }
-      return root;
-    } else {
-      const obj = await isogit.readObject({ gitdir, oid: commit.id, filepath: path });
-      const result: FileTree = {
-        name: path.split('/').pop() || '',
-        path,
-        type: type2item(obj.type!),
-        sha1: obj.oid,
-      };
-      if (result.type === FileTreeItemType.Directory) {
-        await this.fillChildren(
-          result,
-          {
-            gitdir,
-            entries: (obj.object as TreeDescription).entries,
-            oid: obj.oid,
-          },
-          { skip, limit, flatten }
+    const getRoot = async () => {
+      return await this.walkTree(
+        {
+          name: '',
+          path: '',
+          type: FileTreeItemType.Directory,
+        },
+        tree,
+        [],
+        skip,
+        limit,
+        childrenDepth,
+        flatten
+      );
+    };
+    if (path) {
+      if (resolveParents) {
+        return this.walkTree(
+          await getRoot(),
+          tree,
+          path.split('/'),
+          skip,
+          limit,
+          childrenDepth,
+          flatten
         );
-      }
-      return result;
-    }
-  }
-
-  private async fillChildren(
-    result: FileTree,
-    { entries, gitdir }: Tree,
-    { skip, limit, flatten }: { skip: number; limit: number; flatten: boolean }
-  ) {
-    result.childrenCount = entries.length;
-    result.children = [];
-    for (const e of entries.slice(skip, Math.min(entries.length, skip + limit))) {
-      const child = entry2Tree(e, result.path);
-      result.children.push(child);
-      if (flatten && child.type === FileTreeItemType.Directory) {
-        const tree = await GitOperations.readTree(gitdir, e.oid);
-        if (tree.entries.length === 1) {
-          await this.fillChildren(child, tree, { skip, limit, flatten });
-        }
-      }
-    }
-  }
-
-  private async resolvePath(
-    result: FileTree,
-    tree: Tree,
-    paths: string[],
-    opt: { skip: number; limit: number; flatten: boolean }
-  ) {
-    const [path, ...rest] = paths;
-    for (const entry of tree.entries) {
-      if (entry.path === path) {
-        if (!result.children) {
-          result.children = [];
-        }
-        const child = entry2Tree(entry, result.path);
-        const idx = result.children.findIndex(i => i.sha1 === entry.oid);
-        if (idx < 0) {
-          result.children.push(child);
+      } else {
+        const entry = await checkExists(
+          () => Promise.resolve(tree.getEntry(path)),
+          `path ${path} does not exists.`
+        );
+        if (entry.isDirectory()) {
+          const tree1 = await entry.getTree();
+          return this.walkTree(entry2Tree(entry), tree1, [], skip, limit, childrenDepth, flatten);
         } else {
-          result.children[idx] = child;
-        }
-        if (entry.type === 'tree') {
-          const subTree = await GitOperations.readTree(tree.gitdir, entry.oid);
-          await this.fillChildren(child, subTree, opt);
-          if (rest.length > 0) {
-            await this.resolvePath(child, subTree, rest, opt);
-          }
+          return entry2Tree(entry);
         }
       }
+    } else {
+      return getRoot();
     }
   }
 
@@ -577,6 +521,68 @@ export class GitOperations {
     return (await entry.getBlob()).content().toString('utf8');
   }
 
+  private async walkTree(
+    fileTree: FileTree,
+    tree: Tree,
+    paths: string[],
+    skip: number,
+    limit: number,
+    childrenDepth: number = 1,
+    flatten: boolean = false
+  ): Promise<FileTree> {
+    const [path, ...rest] = paths;
+    fileTree.childrenCount = tree.entryCount();
+    if (!fileTree.children) {
+      fileTree.children = [];
+      for (const e of tree.entries().slice(skip, limit)) {
+        const child = entry2Tree(e);
+        fileTree.children.push(child);
+        if (e.isDirectory()) {
+          const childChildrenCount = (await e.getTree()).entryCount();
+          if ((childChildrenCount === 1 && flatten) || childrenDepth > 1) {
+            await this.walkTree(
+              child,
+              await e.getTree(),
+              [],
+              skip,
+              limit,
+              childrenDepth - 1,
+              flatten
+            );
+          }
+        }
+      }
+      fileTree.children.sort(sortFileTree);
+    }
+    if (path) {
+      const entry = await checkExists(
+        () => Promise.resolve(tree.getEntry(path)),
+        `path ${fileTree.path}/${path} does not exists.`
+      );
+      let child = entry2Tree(entry);
+      if (entry.isDirectory()) {
+        child = await this.walkTree(
+          child,
+          await entry.getTree(),
+          rest,
+          skip,
+          limit,
+          childrenDepth,
+          flatten
+        );
+      }
+      const idx = fileTree.children.findIndex(c => c.name === entry.name());
+      if (idx >= 0) {
+        // replace the entry in children if found
+        fileTree.children[idx] = child;
+      } else {
+        fileTree.children.push(child);
+      }
+    }
+
+    return fileTree;
+  }
+
   private async findCommit(repo: Repository, oid: string): Promise<Commit | null> {
     try {
       return repo.getCommit(Oid.fromString(oid));
@@ -669,7 +675,6 @@ export class GitOperations {
           message: commit.message,
           updated: new Date(commit.committer.timestamp * 1000),
           parents: commit.parent,
-          treeId: commit.tree,
         } as CommitInfo;
       } else if (obj.type === 'tag') {
         const tag = obj.object as isogit.TagDescription;
@@ -690,6 +695,5 @@ export function commitInfo(commit: Commit): CommitInfo {
     committer: commit.committer().name(),
     id: commit.sha().substr(0, 7),
     parents: commit.parents().map(oid => oid.toString().substring(0, 7)),
-    treeId: commit.treeId().tostrS(),
   };
 }

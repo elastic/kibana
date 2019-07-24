@@ -13,9 +13,6 @@ import {
 import {
   MetricsExplorerOptions,
   MetricsExplorerTimeOptions,
-  MetricsExplorerChartType,
-  MetricsExplorerYAxisMode,
-  MetricsExplorerChartOptions,
 } from '../../containers/metrics_explorer/use_metrics_explorer_options';
 
 export const options: MetricsExplorerOptions = {
@@ -39,12 +36,6 @@ export const source = {
     message: ['message'],
     tiebreaker: '@timestamp',
   },
-};
-
-export const chartOptions: MetricsExplorerChartOptions = {
-  type: MetricsExplorerChartType.line,
-  yAxisMode: MetricsExplorerYAxisMode.fromZero,
-  stack: false,
 };
 
 export const derivedIndexPattern = { title: 'metricbeat-*', fields: [] };

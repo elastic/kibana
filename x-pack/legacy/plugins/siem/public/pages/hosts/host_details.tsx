@@ -206,30 +206,26 @@ const HostDetailsComponent = pure<HostDetailsComponentProps>(
                         type={type}
                       >
                         {({
+                          uncommonProcesses,
+                          totalCount,
+                          loading,
+                          pageInfo,
+                          loadMore,
                           id,
                           inspect,
-                          loading,
-                          loadPage,
-                          pageInfo,
                           refetch,
-                          totalCount,
-                          uncommonProcesses,
                         }) => (
                           <UncommonProcessTableManage
-                            data={uncommonProcesses}
-                            fakeTotalCount={getOr(50, 'fakeTotalCount', pageInfo)}
                             id={id}
                             inspect={inspect}
-                            loading={loading}
-                            loadPage={loadPage}
                             refetch={refetch}
                             setQuery={setQuery}
-                            showMorePagesIndicator={getOr(
-                              false,
-                              'showMorePagesIndicator',
-                              pageInfo
-                            )}
+                            loading={loading}
+                            data={uncommonProcesses}
                             totalCount={totalCount}
+                            nextCursor={getOr(null, 'endCursor.value', pageInfo)}
+                            hasNextPage={getOr(false, 'hasNextPage', pageInfo)!}
+                            loadMore={loadMore}
                             type={type}
                           />
                         )}
@@ -265,29 +261,26 @@ const HostDetailsComponent = pure<HostDetailsComponentProps>(
                       >
                         {({
                           events,
+                          loading,
                           id,
                           inspect,
-                          loading,
-                          loadPage,
-                          pageInfo,
                           refetch,
                           totalCount,
+                          pageInfo,
+                          loadMore,
                         }) => (
                           <EventsTableManage
-                            data={events}
-                            fakeTotalCount={getOr(50, 'fakeTotalCount', pageInfo)}
                             id={id}
                             inspect={inspect}
-                            loading={loading}
-                            loadPage={loadPage}
                             refetch={refetch}
                             setQuery={setQuery}
-                            showMorePagesIndicator={getOr(
-                              false,
-                              'showMorePagesIndicator',
-                              pageInfo
-                            )}
+                            data={events!}
+                            loading={loading}
                             totalCount={totalCount}
+                            nextCursor={getOr(null, 'endCursor.value', pageInfo)}
+                            tiebreaker={getOr(null, 'endCursor.tiebreaker', pageInfo)}
+                            hasNextPage={getOr(false, 'hasNextPage', pageInfo)!}
+                            loadMore={loadMore}
                             type={type}
                           />
                         )}

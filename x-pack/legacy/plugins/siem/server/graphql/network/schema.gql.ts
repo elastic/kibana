@@ -59,7 +59,7 @@ export const networkSchema = gql`
   type NetworkTopNFlowData {
     edges: [NetworkTopNFlowEdges!]!
     totalCount: Float!
-    pageInfo: PageInfoPaginated!
+    pageInfo: PageInfo!
     inspect: Inspect
   }
 
@@ -93,7 +93,7 @@ export const networkSchema = gql`
   type NetworkDnsData {
     edges: [NetworkDnsEdges!]!
     totalCount: Float!
-    pageInfo: PageInfoPaginated!
+    pageInfo: PageInfo!
     inspect: Inspect
   }
 
@@ -104,7 +104,7 @@ export const networkSchema = gql`
       filterQuery: String
       flowDirection: FlowDirection!
       flowTarget: FlowTarget!
-      pagination: PaginationInputPaginated!
+      pagination: PaginationInput!
       sort: NetworkTopNFlowSortField!
       timerange: TimerangeInput!
       defaultIndex: [String!]!
@@ -113,7 +113,7 @@ export const networkSchema = gql`
       filterQuery: String
       id: String
       isPtrIncluded: Boolean!
-      pagination: PaginationInputPaginated!
+      pagination: PaginationInput!
       sort: NetworkDnsSortField!
       timerange: TimerangeInput!
       defaultIndex: [String!]!

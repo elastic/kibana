@@ -17,33 +17,32 @@ import {
   GetHostsTableQuery,
   HostsEdges,
   HostsFields,
-  PageInfoPaginated,
+  PageInfo,
 } from '../../graphql/types';
 import { hostsModel, hostsSelectors, inputsModel, State, inputsSelectors } from '../../store';
 import { createFilter } from '../helpers';
-import { QueryTemplatePaginated, QueryTemplatePaginatedProps } from '../query_template_paginated';
+import { QueryTemplate, QueryTemplateProps } from '../query_template';
 
 import { HostsTableQuery } from './hosts_table.gql_query';
-import { generateTablePaginationOptions } from '../../components/paginated_table/helpers';
 
 export { HostsFilter } from './filter';
 
 const ID = 'hostsQuery';
 
 export interface HostsArgs {
-  endDate: number;
-  hosts: HostsEdges[];
   id: string;
   inspect: inputsModel.InspectQuery;
+  hosts: HostsEdges[];
+  totalCount: number;
+  pageInfo: PageInfo;
   loading: boolean;
-  loadPage: (newActivePage: number) => void;
-  pageInfo: PageInfoPaginated;
+  loadMore: (cursor: string) => void;
   refetch: inputsModel.Refetch;
   startDate: number;
-  totalCount: number;
+  endDate: number;
 }
 
-export interface OwnProps extends QueryTemplatePaginatedProps {
+export interface OwnProps extends QueryTemplateProps {
   children: (args: HostsArgs) => React.ReactNode;
   type: hostsModel.HostsType;
   startDate: number;
@@ -51,7 +50,6 @@ export interface OwnProps extends QueryTemplatePaginatedProps {
 }
 
 export interface HostsComponentReduxProps {
-  activePage: number;
   isInspected: boolean;
   limit: number;
   sortField: HostsFields;
@@ -60,7 +58,7 @@ export interface HostsComponentReduxProps {
 
 type HostsProps = OwnProps & HostsComponentReduxProps;
 
-class HostsComponentQuery extends QueryTemplatePaginated<
+class HostsComponentQuery extends QueryTemplate<
   HostsProps,
   GetHostsTableQuery.Query,
   GetHostsTableQuery.Variables
@@ -77,7 +75,6 @@ class HostsComponentQuery extends QueryTemplatePaginated<
 
   public render() {
     const {
-      activePage,
       id = ID,
       isInspected,
       children,
@@ -102,7 +99,11 @@ class HostsComponentQuery extends QueryTemplatePaginated<
         direction,
         field: sortField,
       },
-      pagination: generateTablePaginationOptions(activePage, limit),
+      pagination: {
+        limit,
+        cursor: null,
+        tiebreaker: null,
+      },
       filterQuery: createFilter(filterQuery),
       defaultIndex: chrome.getUiSettingsClient().get(DEFAULT_INDEX_KEY),
       inspect: isInspected,
@@ -117,9 +118,12 @@ class HostsComponentQuery extends QueryTemplatePaginated<
       >
         {({ data, loading, fetchMore, refetch }) => {
           this.setFetchMore(fetchMore);
-          this.setFetchMoreOptions((newActivePage: number) => ({
+          this.setFetchMoreOptions((newCursor: string) => ({
             variables: {
-              pagination: generateTablePaginationOptions(newActivePage, limit),
+              pagination: {
+                cursor: newCursor,
+                limit: limit + parseInt(newCursor, 10),
+              },
             },
             updateQuery: (prev, { fetchMoreResult }) => {
               if (!fetchMoreResult) {
@@ -131,23 +135,23 @@ class HostsComponentQuery extends QueryTemplatePaginated<
                   ...fetchMoreResult.source,
                   Hosts: {
                     ...fetchMoreResult.source.Hosts,
-                    edges: [...fetchMoreResult.source.Hosts.edges],
+                    edges: [...prev.source.Hosts.edges, ...fetchMoreResult.source.Hosts.edges],
                   },
                 },
               };
             },
           }));
           return children({
-            endDate,
-            hosts: this.memoizedHosts(JSON.stringify(variables), get('source', data)),
             id,
             inspect: getOr(null, 'source.Hosts.inspect', data),
-            loading,
-            loadPage: this.wrappedLoadMore,
-            pageInfo: getOr({}, 'source.Hosts.pageInfo', data),
             refetch,
-            startDate,
+            loading,
             totalCount: getOr(0, 'source.Hosts.totalCount', data),
+            hosts: this.memoizedHosts(JSON.stringify(variables), get('source', data)),
+            startDate,
+            endDate,
+            pageInfo: getOr({}, 'source.Hosts.pageInfo', data),
+            loadMore: this.wrappedLoadMore,
           });
         }}
       </Query>

@@ -5,10 +5,9 @@
  */
 
 import { InfraMetricModelCreator, InfraMetricModelMetricType } from '../../adapter_types';
-import { InfraMetric } from '../../../../../graphql/types';
 
 export const containerCpuKernel: InfraMetricModelCreator = (timeField, indexPattern, interval) => ({
-  id: InfraMetric.containerCpuKernel,
+  id: 'containerCpuKernel',
   requires: ['docker.cpu'],
   index_pattern: indexPattern,
   interval,

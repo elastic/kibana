@@ -129,11 +129,7 @@ export class StatusIndicatorComponent extends React.Component<Props, State> {
         return <Link to="/admin?tab=LanguageServers">install it here</Link>;
       case CTA.SWITCH_TO_HEAD:
         const { uri, path } = this.props.currentStatusPath!;
-        const headUrl = path
-          ? `/${uri}/${this.props.pathType}/HEAD/${path}`
-          : `/${uri}/${this.props.pathType}/HEAD/`;
-
-        return <Link to={headUrl}>switch to HEAD</Link>;
+        return <Link to={`/${uri}/${this.props.pathType}/HEAD/${path}`}>switch to HEAD</Link>;
     }
   }
 }

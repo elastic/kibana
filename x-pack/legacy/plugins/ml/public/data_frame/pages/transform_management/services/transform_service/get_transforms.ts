@@ -16,7 +16,6 @@ import {
   DataFrameTransformListRow,
   DataFrameTransformState,
   DataFrameTransformStats,
-  DATA_FRAME_MODE,
 } from '../../components/transform_list/common';
 
 interface DataFrameTransformStateStats {
@@ -93,12 +92,6 @@ export const getTransformsFactory = (
             if (stats === undefined) {
               return reducedtableRows;
             }
-
-            config.mode =
-              typeof config.sync !== 'undefined'
-                ? DATA_FRAME_MODE.CONTINUOUS
-                : DATA_FRAME_MODE.BATCH;
-
             // Table with expandable rows requires `id` on the outer most level
             reducedtableRows.push({
               config,

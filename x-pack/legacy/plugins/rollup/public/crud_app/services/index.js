@@ -95,5 +95,4 @@ export {
 
 export {
   trackUiMetric,
-  METRIC_TYPE,
 } from './track_ui_metric';

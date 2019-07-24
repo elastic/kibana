@@ -14,14 +14,13 @@ import { DEFAULT_INDEX_KEY } from '../../../common/constants';
 import {
   GetUsersQuery,
   FlowTarget,
-  PageInfoPaginated,
+  PageInfo,
   UsersEdges,
   UsersSortField,
 } from '../../graphql/types';
 import { inputsModel, networkModel, networkSelectors, State, inputsSelectors } from '../../store';
 import { createFilter } from '../helpers';
-import { generateTablePaginationOptions } from '../../components/paginated_table/helpers';
-import { QueryTemplatePaginated, QueryTemplatePaginatedProps } from '../query_template_paginated';
+import { QueryTemplate, QueryTemplateProps } from '../query_template';
 
 import { usersQuery } from './index.gql_query';
 
@@ -30,15 +29,15 @@ const ID = 'usersQuery';
 export interface UsersArgs {
   id: string;
   inspect: inputsModel.InspectQuery;
-  loading: boolean;
-  loadPage: (newActivePage: number) => void;
-  pageInfo: PageInfoPaginated;
-  refetch: inputsModel.Refetch;
-  totalCount: number;
   users: UsersEdges[];
+  totalCount: number;
+  pageInfo: PageInfo;
+  loading: boolean;
+  loadMore: (cursor: string) => void;
+  refetch: inputsModel.Refetch;
 }
 
-export interface OwnProps extends QueryTemplatePaginatedProps {
+export interface OwnProps extends QueryTemplateProps {
   children: (args: UsersArgs) => React.ReactNode;
   flowTarget: FlowTarget;
   ip: string;
@@ -46,7 +45,6 @@ export interface OwnProps extends QueryTemplatePaginatedProps {
 }
 
 export interface UsersComponentReduxProps {
-  activePage: number;
   isInspected: boolean;
   limit: number;
   usersSortField: UsersSortField;
@@ -54,26 +52,25 @@ export interface UsersComponentReduxProps {
 
 type UsersProps = OwnProps & UsersComponentReduxProps;
 
-class UsersComponentQuery extends QueryTemplatePaginated<
+class UsersComponentQuery extends QueryTemplate<
   UsersProps,
   GetUsersQuery.Query,
   GetUsersQuery.Variables
 > {
   public render() {
     const {
-      activePage,
-      children,
-      endDate,
-      filterQuery,
-      flowTarget,
       id = ID,
-      ip,
       isInspected,
-      limit,
+      children,
+      usersSortField,
+      filterQuery,
+      ip,
       skip,
       sourceId,
       startDate,
-      usersSortField,
+      endDate,
+      limit,
+      flowTarget,
     } = this.props;
     return (
       <Query<GetUsersQuery.Query, GetUsersQuery.Variables>
@@ -82,27 +79,34 @@ class UsersComponentQuery extends QueryTemplatePaginated<
         notifyOnNetworkStatusChange
         skip={skip}
         variables={{
-          defaultIndex: chrome.getUiSettingsClient().get(DEFAULT_INDEX_KEY),
-          filterQuery: createFilter(filterQuery),
-          flowTarget,
-          inspect: isInspected,
-          ip,
-          pagination: generateTablePaginationOptions(activePage, limit),
-          sort: usersSortField,
           sourceId,
           timerange: {
             interval: '12h',
             from: startDate!,
             to: endDate!,
           },
+          ip,
+          flowTarget,
+          sort: usersSortField,
+          pagination: {
+            limit,
+            cursor: null,
+            tiebreaker: null,
+          },
+          filterQuery: createFilter(filterQuery),
+          defaultIndex: chrome.getUiSettingsClient().get(DEFAULT_INDEX_KEY),
+          inspect: isInspected,
         }}
       >
         {({ data, loading, fetchMore, refetch }) => {
           const users = getOr([], `source.Users.edges`, data);
           this.setFetchMore(fetchMore);
-          this.setFetchMoreOptions((newActivePage: number) => ({
+          this.setFetchMoreOptions((newCursor: string) => ({
             variables: {
-              pagination: generateTablePaginationOptions(newActivePage, limit),
+              pagination: {
+                cursor: newCursor,
+                limit: limit + parseInt(newCursor, 10),
+              },
             },
             updateQuery: (prev, { fetchMoreResult }) => {
               if (!fetchMoreResult) {
@@ -114,7 +118,7 @@ class UsersComponentQuery extends QueryTemplatePaginated<
                   ...fetchMoreResult.source,
                   Users: {
                     ...fetchMoreResult.source.Users,
-                    edges: [...fetchMoreResult.source.Users.edges],
+                    edges: [...prev.source.Users.edges, ...fetchMoreResult.source.Users.edges],
                   },
                 },
               };
@@ -123,12 +127,12 @@ class UsersComponentQuery extends QueryTemplatePaginated<
           return children({
             id,
             inspect: getOr(null, 'source.Users.inspect', data),
-            loading,
-            loadPage: this.wrappedLoadMore,
-            pageInfo: getOr({}, 'source.Users.pageInfo', data),
             refetch,
+            loading,
             totalCount: getOr(0, 'source.Users.totalCount', data),
             users,
+            pageInfo: getOr({}, 'source.Users.pageInfo', data),
+            loadMore: this.wrappedLoadMore,
           });
         }}
       </Query>

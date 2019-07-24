@@ -14,19 +14,19 @@ import { UncommonProcessesEdges, UncommonProcessItem } from '../../../../graphql
 import { hostsModel, hostsSelectors, State } from '../../../../store';
 import { defaultToEmptyTag, getEmptyValue } from '../../../empty_value';
 import { HostDetailsLink } from '../../../links';
-import { Columns, ItemsPerRow, PaginatedTable } from '../../../paginated_table';
+import { Columns, ItemsPerRow, LoadMoreTable } from '../../../load_more_table';
 
 import * as i18n from './translations';
 import { getRowItemDraggables } from '../../../tables/helpers';
-const tableType = hostsModel.HostsTableType.uncommonProcesses;
+
 interface OwnProps {
   data: UncommonProcessesEdges[];
-  fakeTotalCount: number;
-  id: string;
   loading: boolean;
-  loadPage: (newActivePage: number) => void;
-  showMorePagesIndicator: boolean;
+  hasNextPage: boolean;
+  id: string;
+  nextCursor: string;
   totalCount: number;
+  loadMore: (cursor: string) => void;
   type: hostsModel.HostsType;
 }
 
@@ -35,26 +35,8 @@ interface UncommonProcessTableReduxProps {
 }
 
 interface UncommonProcessTableDispatchProps {
-  updateTableActivePage: ActionCreator<{
-    activePage: number;
-    hostsType: hostsModel.HostsType;
-    tableType: hostsModel.HostsTableType;
-  }>;
-  updateTableLimit: ActionCreator<{
-    limit: number;
-    hostsType: hostsModel.HostsType;
-    tableType: hostsModel.HostsTableType;
-  }>;
+  updateLimitPagination: ActionCreator<{ limit: number; hostsType: hostsModel.HostsType }>;
 }
-
-export type UncommonProcessTableColumns = [
-  Columns<UncommonProcessesEdges>,
-  Columns<UncommonProcessesEdges>,
-  Columns<UncommonProcessesEdges>,
-  Columns<UncommonProcessesEdges>,
-  Columns<UncommonProcessesEdges>,
-  Columns<UncommonProcessesEdges>
-];
 
 type UncommonProcessTableProps = OwnProps &
   UncommonProcessTableReduxProps &
@@ -69,6 +51,14 @@ const rowItems: ItemsPerRow[] = [
     text: i18n.ROWS_10,
     numberOfRow: 10,
   },
+  {
+    text: i18n.ROWS_20,
+    numberOfRow: 20,
+  },
+  {
+    text: i18n.ROWS_50,
+    numberOfRow: 50,
+  },
 ];
 
 export const getArgs = (args: string[] | null | undefined): string | null => {
@@ -82,19 +72,19 @@ export const getArgs = (args: string[] | null | undefined): string | null => {
 const UncommonProcessTableComponent = pure<UncommonProcessTableProps>(
   ({
     data,
-    fakeTotalCount,
+    hasNextPage,
     id,
     limit,
     loading,
-    loadPage,
+    loadMore,
     totalCount,
-    showMorePagesIndicator,
-    updateTableActivePage,
-    updateTableLimit,
+    nextCursor,
+    updateLimitPagination,
     type,
   }) => (
-    <PaginatedTable
+    <LoadMoreTable
       columns={getUncommonColumns()}
+      hasNextPage={hasNextPage}
       headerCount={totalCount}
       headerTitle={i18n.UNCOMMON_PROCESSES}
       headerUnit={i18n.UNIT(totalCount)}
@@ -103,25 +93,11 @@ const UncommonProcessTableComponent = pure<UncommonProcessTableProps>(
       limit={limit}
       loading={loading}
       loadingTitle={i18n.UNCOMMON_PROCESSES}
-      loadPage={newActivePage => loadPage(newActivePage)}
+      loadMore={() => loadMore(nextCursor)}
       pageOfItems={data}
-      showMorePagesIndicator={showMorePagesIndicator}
-      totalCount={fakeTotalCount}
       updateLimitPagination={newLimit =>
-        updateTableLimit({
-          hostsType: type,
-          limit: newLimit,
-          tableType,
-        })
+        updateLimitPagination({ limit: newLimit, hostsType: type })
       }
-      updateActivePage={newPage =>
-        updateTableActivePage({
-          activePage: newPage,
-          hostsType: type,
-          tableType,
-        })
-      }
-      updateProps={{ totalCount }}
     />
   )
 );
@@ -134,12 +110,18 @@ const makeMapStateToProps = () => {
 export const UncommonProcessTable = connect(
   makeMapStateToProps,
   {
-    updateTableActivePage: hostsActions.updateTableActivePage,
-    updateTableLimit: hostsActions.updateTableLimit,
+    updateLimitPagination: hostsActions.updateUncommonProcessesLimit,
   }
 )(UncommonProcessTableComponent);
 
-const getUncommonColumns = (): UncommonProcessTableColumns => [
+const getUncommonColumns = (): [
+  Columns<UncommonProcessesEdges>,
+  Columns<UncommonProcessesEdges>,
+  Columns<UncommonProcessesEdges>,
+  Columns<UncommonProcessesEdges>,
+  Columns<UncommonProcessesEdges>,
+  Columns<UncommonProcessesEdges>
+] => [
   {
     name: i18n.NAME,
     truncateText: false,

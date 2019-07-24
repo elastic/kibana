@@ -40,6 +40,7 @@ import { uiModules } from 'ui/modules';
 import 'ui/capabilities/route_setup';
 
 import { data } from 'plugins/data/setup';
+data.search.loadLegacyDirectives();
 data.filter.loadLegacyDirectives();
 
 const app = uiModules.get('app/dashboard', [

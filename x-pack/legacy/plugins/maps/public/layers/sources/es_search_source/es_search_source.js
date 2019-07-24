@@ -303,9 +303,7 @@ export class ESSearchSource extends AbstractESSource {
 
     const properties = indexPattern.flattenHit(hit);
     indexPattern.metaFields.forEach(metaField => {
-      if (!this._descriptor.tooltipProperties.includes(metaField)) {
-        delete properties[metaField];
-      }
+      delete properties[metaField];
     });
     return properties;
   }

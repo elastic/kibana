@@ -10,7 +10,7 @@ export const HostsTableQuery = gql`
   query GetHostsTableQuery(
     $sourceId: ID!
     $timerange: TimerangeInput!
-    $pagination: PaginationInputPaginated!
+    $pagination: PaginationInput!
     $sort: HostsSortField!
     $filterQuery: String
     $defaultIndex: [String!]!
@@ -44,9 +44,10 @@ export const HostsTableQuery = gql`
           }
         }
         pageInfo {
-          activePage
-          fakeTotalCount
-          showMorePagesIndicator
+          endCursor {
+            value
+          }
+          hasNextPage
         }
         inspect @include(if: $inspect) {
           dsl

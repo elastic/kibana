@@ -12,59 +12,43 @@ import { DEFAULT_TABLE_ACTIVE_PAGE, DEFAULT_TABLE_LIMIT } from '../constants';
 import {
   applyHostsFilterQuery,
   setHostsFilterQueryDraft,
+  updateAuthenticationsLimit,
+  updateEventsLimit,
+  updateHostsLimit,
   updateHostsSort,
+  updateUncommonProcessesLimit,
   updateTableActivePage,
   updateTableLimit,
 } from './actions';
-import { HostsModel, HostsTableType } from './model';
+import { HostsModel } from './model';
 
 export type HostsState = HostsModel;
 
 export const initialHostsState: HostsState = {
   page: {
     queries: {
-      [HostsTableType.authentications]: {
-        activePage: DEFAULT_TABLE_ACTIVE_PAGE,
+      authentications: { limit: DEFAULT_TABLE_LIMIT, activePage: DEFAULT_TABLE_ACTIVE_PAGE },
+      hosts: {
         limit: DEFAULT_TABLE_LIMIT,
-      },
-      [HostsTableType.hosts]: {
-        activePage: DEFAULT_TABLE_ACTIVE_PAGE,
         direction: Direction.desc,
-        limit: DEFAULT_TABLE_LIMIT,
         sortField: HostsFields.lastSeen,
       },
-      [HostsTableType.events]: {
-        activePage: DEFAULT_TABLE_ACTIVE_PAGE,
-        limit: DEFAULT_TABLE_LIMIT,
-      },
-      [HostsTableType.uncommonProcesses]: {
-        activePage: DEFAULT_TABLE_ACTIVE_PAGE,
-        limit: DEFAULT_TABLE_LIMIT,
-      },
+      events: { limit: DEFAULT_TABLE_LIMIT },
+      uncommonProcesses: { limit: DEFAULT_TABLE_LIMIT },
     },
     filterQuery: null,
     filterQueryDraft: null,
   },
   details: {
     queries: {
-      [HostsTableType.authentications]: {
-        activePage: DEFAULT_TABLE_ACTIVE_PAGE,
+      authentications: { limit: DEFAULT_TABLE_LIMIT, activePage: DEFAULT_TABLE_ACTIVE_PAGE },
+      hosts: {
         limit: DEFAULT_TABLE_LIMIT,
-      },
-      [HostsTableType.hosts]: {
-        activePage: DEFAULT_TABLE_ACTIVE_PAGE,
         direction: Direction.desc,
-        limit: DEFAULT_TABLE_LIMIT,
         sortField: HostsFields.lastSeen,
       },
-      [HostsTableType.events]: {
-        activePage: DEFAULT_TABLE_ACTIVE_PAGE,
-        limit: DEFAULT_TABLE_LIMIT,
-      },
-      [HostsTableType.uncommonProcesses]: {
-        activePage: DEFAULT_TABLE_ACTIVE_PAGE,
-        limit: DEFAULT_TABLE_LIMIT,
-      },
+      events: { limit: DEFAULT_TABLE_LIMIT },
+      uncommonProcesses: { limit: DEFAULT_TABLE_LIMIT },
     },
     filterQuery: null,
     filterQueryDraft: null,
@@ -98,6 +82,31 @@ export const hostsReducer = reducerWithInitialState(initialHostsState)
       },
     },
   }))
+  .case(updateAuthenticationsLimit, (state, { limit, hostsType }) => ({
+    ...state,
+    [hostsType]: {
+      ...state[hostsType],
+      queries: {
+        ...state[hostsType].queries,
+        authentications: {
+          limit,
+        },
+      },
+    },
+  }))
+  .case(updateHostsLimit, (state, { limit, hostsType }) => ({
+    ...state,
+    [hostsType]: {
+      ...state[hostsType],
+      queries: {
+        ...state[hostsType].queries,
+        hosts: {
+          ...state[hostsType].queries.hosts,
+          limit,
+        },
+      },
+    },
+  }))
   .case(updateHostsSort, (state, { sort, hostsType }) => ({
     ...state,
     [hostsType]: {
@@ -108,6 +117,30 @@ export const hostsReducer = reducerWithInitialState(initialHostsState)
           ...state[hostsType].queries.hosts,
           direction: sort.direction,
           sortField: sort.field,
+        },
+      },
+    },
+  }))
+  .case(updateEventsLimit, (state, { limit, hostsType }) => ({
+    ...state,
+    [hostsType]: {
+      ...state[hostsType],
+      queries: {
+        ...state[hostsType].queries,
+        events: {
+          limit,
+        },
+      },
+    },
+  }))
+  .case(updateUncommonProcessesLimit, (state, { limit, hostsType }) => ({
+    ...state,
+    [hostsType]: {
+      ...state[hostsType],
+      queries: {
+        ...state[hostsType].queries,
+        uncommonProcesses: {
+          limit,
         },
       },
     },
