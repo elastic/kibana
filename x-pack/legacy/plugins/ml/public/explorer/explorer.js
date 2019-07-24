@@ -14,6 +14,7 @@ import React from 'react';
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 import DragSelect from 'dragselect/dist/ds.min.js';
 import { map } from 'rxjs/operators';
+import { i18n } from '@kbn/i18n';
 
 import {
   EuiFlexGroup,
@@ -790,7 +791,17 @@ export const Explorer = injectI18n(injectObservablesAsProps(
         for (const influencerName in stateUpdate.influencers) {
           if (stateUpdate.influencers[influencerName][0] && stateUpdate.influencers[influencerName][0].influencerFieldValue) {
             stateUpdate.filterPlaceHolder =
-            `Filter by influencer fields... (E.g. ${influencerName} : ${stateUpdate.influencers[influencerName][0].influencerFieldValue})`;
+                  (i18n.translate(
+                    'xpack.ml.explorer.kueryBar.filterPlaceholder',
+                    {
+                      defaultMessage:
+                  'Filter by influencer fields… ({queryExample})',
+                      values: {
+                        queryExample:
+                    `${influencerName} : ${stateUpdate.influencers[influencerName][0].influencerFieldValue}`
+                      }
+                    }
+                  ));
             break;
           }
         }
