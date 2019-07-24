@@ -17,11 +17,9 @@
  * under the License.
  */
 
-import tileMapTemplate from './tile_map_vis_params.html';
+import { PluginInitializerContext } from '../../../../core/public';
+import { TileMapPlugin as Plugin } from './plugin';
 
-export function TileMapVisParams() {
-  return {
-    restrict: 'E',
-    template: tileMapTemplate,
-  };
+export function plugin(initializerContext: PluginInitializerContext) {
+  return new Plugin(initializerContext);
 }

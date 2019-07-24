@@ -17,25 +17,23 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import { get } from 'lodash';
 import { GeohashLayer } from './geohash_layer';
 import { BaseMapsVisualizationProvider } from './base_maps_visualization';
 import { TileMapTooltipFormatterProvider } from './editors/_tooltip_formatter';
 
-export function CoordinateMapsVisualizationProvider(Private) {
-  const BaseMapsVisualization = Private(BaseMapsVisualizationProvider);
+export const createTileMapVisualization = ({ serviceSettings, $injector }) => {
+  const BaseMapsVisualization = new BaseMapsVisualizationProvider(serviceSettings);
+  const tooltipFormatter = new TileMapTooltipFormatterProvider($injector);
 
-  const tooltipFormatter = Private(TileMapTooltipFormatterProvider);
-
-  class CoordinateMapsVisualization extends BaseMapsVisualization {
-
+  return class CoordinateMapsVisualization extends BaseMapsVisualization {
     constructor(element, vis) {
       super(element, vis);
+
       this._geohashLayer = null;
     }
 
     async _makeKibanaMap() {
-
       await super._makeKibanaMap();
 
       const updateGeohashAgg = () => {
@@ -170,8 +168,8 @@ export function CoordinateMapsVisualizationProvider(Private) {
         fetchBounds: () => this.vis.API.getGeohashBounds(), // TODO: Remove this (elastic/kibana#30593)
         colorRamp: newParams.colorSchema,
         heatmap: {
-          heatClusterSize: newParams.heatClusterSize
-        }
+          heatClusterSize: newParams.heatClusterSize,
+        },
       };
     }
 
@@ -193,7 +191,7 @@ export function CoordinateMapsVisualizationProvider(Private) {
 
     _getGeoHashAgg() {
       return this.vis.getAggConfig().find((agg) => {
-        return _.get(agg, 'type.dslName') === 'geohash_grid';
+        return get(agg, 'type.dslName') === 'geohash_grid';
       });
     }
 
@@ -207,12 +205,10 @@ export function CoordinateMapsVisualizationProvider(Private) {
       const DEFAULT = false;
       const agg = this._getGeoHashAgg();
       if (agg) {
-        return _.get(agg, 'params.isFilteredByCollar', DEFAULT);
+        return get(agg, 'params.isFilteredByCollar', DEFAULT);
       } else {
         return DEFAULT;
       }
     }
-  }
-
-  return CoordinateMapsVisualization;
-}
+  };
+};

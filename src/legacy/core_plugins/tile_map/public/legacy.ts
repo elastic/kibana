@@ -17,11 +17,24 @@
  * under the License.
  */
 
-import tileMapTemplate from './tile_map_vis_params.html';
+import { PluginInitializerContext } from 'kibana/public';
+import { npSetup, npStart } from 'ui/new_platform';
 
-export function TileMapVisParams() {
-  return {
-    restrict: 'E',
-    template: tileMapTemplate,
-  };
-}
+import { visualizations } from '../../visualizations/public';
+import { TileMapPluginSetupDependencies } from './plugin';
+import { LegacyDependenciesPlugin } from './shim';
+import { plugin } from '.';
+
+const plugins: Readonly<TileMapPluginSetupDependencies> = {
+  visualizations,
+  data: npSetup.plugins.data,
+
+  // Temporary solution
+  // It will be removed when all dependent services are migrated to the new platform.
+  __LEGACY: new LegacyDependenciesPlugin(),
+};
+
+const pluginInstance = plugin({} as PluginInitializerContext);
+
+export const setup = pluginInstance.setup(npSetup.core, plugins);
+export const start = pluginInstance.start(npStart.core);
