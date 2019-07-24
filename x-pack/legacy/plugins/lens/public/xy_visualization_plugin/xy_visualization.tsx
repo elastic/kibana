@@ -22,6 +22,7 @@ export const xyVisualization: Visualization<State, PersistableState> = {
     return (
       state || {
         title: 'Empty XY Chart',
+        isHorizontal: false,
         legend: { isVisible: true, position: Position.Right },
         layers: [
           {

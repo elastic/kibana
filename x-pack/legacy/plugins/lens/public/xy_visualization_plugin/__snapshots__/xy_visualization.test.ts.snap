@@ -6,7 +6,7 @@ Object {
     Object {
       "arguments": Object {
         "isHorizontal": Array [
-          undefined,
+          false,
         ],
         "layers": Array [
           Object {
