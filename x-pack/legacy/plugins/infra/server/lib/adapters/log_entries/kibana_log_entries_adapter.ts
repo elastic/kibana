@@ -172,10 +172,6 @@ export class InfraKibanaLogEntriesAdapter implements LogEntriesAdapter {
         )
       )
       .getOrElse([]);
-
-    // return response.aggregations && response.aggregations.count_by_date
-    //   ? response.aggregations.count_by_date.buckets
-    //   : [];
   }
 
   public async getLogItem(
