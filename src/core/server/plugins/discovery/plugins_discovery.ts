@@ -27,10 +27,16 @@ import { PluginWrapper } from '../plugin';
 import { createPluginInitializerContext } from '../plugin_context';
 import { PluginsConfig } from '../plugins_config';
 import { PluginDiscoveryError } from './plugin_discovery_error';
-import { parseManifest } from './plugin_manifest_parser';
+import { parseManifest, ManifestOptions } from './plugin_manifest_parser';
 
 const fsReadDir$ = bindNodeCallback(readdir);
 const fsStat$ = bindNodeCallback(stat);
+
+interface DiscoveryConfig {
+  log: Logger;
+  coreContext: CoreContext;
+  manifestOptions: ManifestOptions;
+}
 
 /**
  * Tries to discover all possible plugins based on the provided plugin config.
@@ -52,17 +58,19 @@ export function discover(config: PluginsConfig, coreContext: CoreContext) {
     );
   }
 
-  const discoveryResults$ = merge(
-    from(config.additionalPluginPaths),
-    processPluginSearchPaths$(config.pluginSearchPaths, log)
-  ).pipe(
-    mergeMap(pluginPathOrError => {
-      return typeof pluginPathOrError === 'string'
-        ? createPlugin$(pluginPathOrError, log, coreContext)
-        : [pluginPathOrError];
-    }),
-    shareReplay()
-  );
+  const builtInDiscoveryResults$ = discoverPlugins$(config.builtInPluginSearchPaths, {
+    log,
+    coreContext,
+    manifestOptions: { validateVersion: false },
+  });
+
+  const externalDiscoveryResults$ = discoverPlugins$(config.externalPluginSearchPaths, {
+    log,
+    coreContext,
+    manifestOptions: { validateVersion: true },
+  });
+
+  const discoveryResults$ = merge(builtInDiscoveryResults$, externalDiscoveryResults$);
 
   return {
     plugin$: discoveryResults$.pipe(
@@ -72,6 +80,19 @@ export function discover(config: PluginsConfig, coreContext: CoreContext) {
       filter((entry): entry is PluginDiscoveryError => !(entry instanceof PluginWrapper))
     ),
   };
+}
+
+function discoverPlugins$(paths: readonly string[], discoveryConfig: DiscoveryConfig) {
+  const { log, coreContext, manifestOptions } = discoveryConfig;
+
+  return processPluginSearchPaths$(paths, log).pipe(
+    mergeMap(pluginPathOrError => {
+      return typeof pluginPathOrError === 'string'
+        ? createPlugin$(pluginPathOrError, log, coreContext, manifestOptions)
+        : [pluginPathOrError];
+    }),
+    shareReplay()
+  );
 }
 
 /**
@@ -111,8 +132,13 @@ function processPluginSearchPaths$(pluginDirs: readonly string[], log: Logger) {
  * @param log Plugin discovery logger instance.
  * @param coreContext Kibana core context.
  */
-function createPlugin$(path: string, log: Logger, coreContext: CoreContext) {
-  return from(parseManifest(path, coreContext.env.packageInfo)).pipe(
+function createPlugin$(
+  path: string,
+  log: Logger,
+  coreContext: CoreContext,
+  manifestOptions: ManifestOptions
+) {
+  return from(parseManifest(path, coreContext.env.packageInfo, manifestOptions)).pipe(
     map(manifest => {
       log.debug(`Successfully discovered plugin "${manifest.id}" at "${path}"`);
       return new PluginWrapper(

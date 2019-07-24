@@ -59,15 +59,24 @@ const KNOWN_MANIFEST_FIELDS = (() => {
   return new Set(Object.keys(manifestFields));
 })();
 
+export interface ManifestOptions {
+  validateVersion: boolean;
+}
+
 /**
  * Tries to load and parse the plugin manifest file located at the provided plugin
  * directory path and produces an error result if it fails to do so or plugin manifest
  * isn't valid.
  * @param pluginPath Path to the plugin directory where manifest should be loaded from.
  * @param packageInfo Kibana package info.
+ * @param manifestOptions Options for parsing plugin manifest.
  * @internal
  */
-export async function parseManifest(pluginPath: string, packageInfo: PackageInfo) {
+export async function parseManifest(
+  pluginPath: string,
+  packageInfo: PackageInfo,
+  manifestOptions: ManifestOptions
+) {
   const manifestPath = resolve(pluginPath, MANIFEST_FILE_NAME);
 
   let manifestContent;
@@ -107,13 +116,6 @@ export async function parseManifest(pluginPath: string, packageInfo: PackageInfo
     );
   }
 
-  if (!manifest.version || typeof manifest.version !== 'string') {
-    throw PluginDiscoveryError.invalidManifest(
-      manifestPath,
-      new Error(`Plugin manifest for "${manifest.id}" must contain a "version" property.`)
-    );
-  }
-
   if (manifest.configPath !== undefined && !isConfigPath(manifest.configPath)) {
     throw PluginDiscoveryError.invalidManifest(
       manifestPath,
@@ -123,17 +125,29 @@ export async function parseManifest(pluginPath: string, packageInfo: PackageInfo
     );
   }
 
-  const expectedKibanaVersion =
-    typeof manifest.kibanaVersion === 'string' && manifest.kibanaVersion
-      ? manifest.kibanaVersion
-      : manifest.version;
-  if (!isVersionCompatible(expectedKibanaVersion, packageInfo.version)) {
-    throw PluginDiscoveryError.incompatibleVersion(
-      manifestPath,
-      new Error(
-        `Plugin "${manifest.id}" is only compatible with Kibana version "${expectedKibanaVersion}", but used Kibana version is "${packageInfo.version}".`
-      )
-    );
+  let pluginKibanaVersion = packageInfo.version;
+  if (manifestOptions.validateVersion) {
+    if (!manifest.version || typeof manifest.version !== 'string') {
+      throw PluginDiscoveryError.invalidManifest(
+        manifestPath,
+        new Error(`Plugin manifest for "${manifest.id}" must contain a "version" property.`)
+      );
+    }
+
+    const expectedKibanaVersion =
+      typeof manifest.kibanaVersion === 'string' && manifest.kibanaVersion
+        ? manifest.kibanaVersion
+        : manifest.version;
+    if (!isVersionCompatible(expectedKibanaVersion, packageInfo.version)) {
+      throw PluginDiscoveryError.incompatibleVersion(
+        manifestPath,
+        new Error(
+          `Plugin "${manifest.id}" is only compatible with Kibana version "${expectedKibanaVersion}", but used Kibana version is "${packageInfo.version}".`
+        )
+      );
+    }
+
+    pluginKibanaVersion = expectedKibanaVersion;
   }
 
   const includesServerPlugin = typeof manifest.server === 'boolean' ? manifest.server : false;
@@ -159,8 +173,8 @@ export async function parseManifest(pluginPath: string, packageInfo: PackageInfo
 
   return {
     id: manifest.id,
-    version: manifest.version,
-    kibanaVersion: expectedKibanaVersion,
+    version: manifest.version || pluginKibanaVersion,
+    kibanaVersion: pluginKibanaVersion,
     configPath: manifest.configPath || manifest.id,
     requiredPlugins: Array.isArray(manifest.requiredPlugins) ? manifest.requiredPlugins : [],
     optionalPlugins: Array.isArray(manifest.optionalPlugins) ? manifest.optionalPlugins : [],

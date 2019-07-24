@@ -43,9 +43,16 @@ export class PluginsConfig {
   public readonly initialize: boolean;
 
   /**
-   * Defines directories that we should scan for the plugin subdirectories.
+   * Defines directories that we should scan for subdirectories of built-in
+   * plugins
    */
-  public readonly pluginSearchPaths: readonly string[];
+  public readonly builtInPluginSearchPaths: readonly string[];
+
+  /**
+   * Defines directories that we should scan for subdirectories for external
+   * plugins
+   */
+  public readonly externalPluginSearchPaths: readonly string[];
 
   /**
    * Defines directories where an additional plugin exists.
@@ -54,7 +61,8 @@ export class PluginsConfig {
 
   constructor(rawConfig: PluginsConfigType, env: Env) {
     this.initialize = rawConfig.initialize;
-    this.pluginSearchPaths = env.pluginSearchPaths;
+    this.builtInPluginSearchPaths = env.builtInPluginSearchPaths;
+    this.externalPluginSearchPaths = env.externalPluginSearchPaths;
     // Only allow custom plugin paths in dev.
     this.additionalPluginPaths = env.mode.dev ? rawConfig.paths : [];
   }

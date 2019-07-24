@@ -76,7 +76,9 @@ export class Env {
   /** @internal */
   public readonly staticFilesDir: string;
   /** @internal */
-  public readonly pluginSearchPaths: readonly string[];
+  public readonly builtInPluginSearchPaths: readonly string[];
+  /** @internal */
+  public readonly externalPluginSearchPaths: readonly string[];
 
   /**
    * Information about Kibana package (version, build number etc.).
@@ -115,12 +117,15 @@ export class Env {
     this.logDir = resolve(this.homeDir, 'log');
     this.staticFilesDir = resolve(this.homeDir, 'ui');
 
-    this.pluginSearchPaths = [
+    this.builtInPluginSearchPaths = [
       resolve(this.homeDir, 'src', 'plugins'),
       options.cliArgs.oss ? '' : resolve(this.homeDir, 'x-pack', 'plugins'),
+    ].filter(Boolean);
+
+    this.externalPluginSearchPaths = [
       resolve(this.homeDir, 'plugins'),
       resolve(this.homeDir, '..', 'kibana-extra'),
-    ].filter(Boolean);
+    ];
 
     this.cliArgs = Object.freeze(options.cliArgs);
     this.configs = Object.freeze(options.configs);
