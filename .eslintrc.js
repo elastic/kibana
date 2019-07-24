@@ -204,6 +204,7 @@ module.exports = {
         '**/webpackShims/**/*.js',
         'packages/kbn-ui-framework/doc_site/src/**/*.js',
         'src/fixtures/**/*.js', // TODO: this directory needs to be more obviously "public" (or go away)
+        '**/__jest__/**/*.js',
       ],
       settings: {
         // instructs import/no-extraneous-dependencies to treat modules
