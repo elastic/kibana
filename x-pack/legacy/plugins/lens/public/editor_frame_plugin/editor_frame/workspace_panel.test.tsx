@@ -138,38 +138,52 @@ describe('workspace_panel', () => {
     );
 
     expect(instance.find(expressionRendererMock).prop('expression')).toMatchInlineSnapshot(`
-            Object {
-              "chain": Array [
+      Object {
+        "chain": Array [
+          Object {
+            "arguments": Object {},
+            "function": "kibana",
+            "type": "function",
+          },
+          Object {
+            "arguments": Object {
+              "filters": Array [],
+              "query": Array [],
+              "timeRange": Array [],
+            },
+            "function": "kibana_context",
+            "type": "function",
+          },
+          Object {
+            "arguments": Object {
+              "layerIds": Array [
+                "first",
+              ],
+              "tables": Array [
                 Object {
-                  "arguments": Object {
-                    "layerIds": Array [
-                      "first",
-                    ],
-                    "tables": Array [
-                      Object {
-                        "chain": Array [
-                          Object {
-                            "arguments": Object {},
-                            "function": "datasource",
-                            "type": "function",
-                          },
-                        ],
-                        "type": "expression",
-                      },
-                    ],
-                  },
-                  "function": "lens_merge_tables",
-                  "type": "function",
-                },
-                Object {
-                  "arguments": Object {},
-                  "function": "vis",
-                  "type": "function",
+                  "chain": Array [
+                    Object {
+                      "arguments": Object {},
+                      "function": "datasource",
+                      "type": "function",
+                    },
+                  ],
+                  "type": "expression",
                 },
               ],
-              "type": "expression",
-            }
-        `);
+            },
+            "function": "lens_merge_tables",
+            "type": "function",
+          },
+          Object {
+            "arguments": Object {},
+            "function": "vis",
+            "type": "function",
+          },
+        ],
+        "type": "expression",
+      }
+    `);
   });
 
   it('should include data fetching for each layer in the expression', () => {
@@ -214,44 +228,44 @@ describe('workspace_panel', () => {
     );
 
     expect(
-      (instance.find(expressionRendererMock).prop('expression') as Ast).chain[0].arguments.layerIds
+      (instance.find(expressionRendererMock).prop('expression') as Ast).chain[2].arguments.layerIds
     ).toEqual(['first', 'second', 'third']);
     expect(
-      (instance.find(expressionRendererMock).prop('expression') as Ast).chain[0].arguments.tables
+      (instance.find(expressionRendererMock).prop('expression') as Ast).chain[2].arguments.tables
     ).toMatchInlineSnapshot(`
-      Array [
-        Object {
-          "chain": Array [
-            Object {
-              "arguments": Object {},
-              "function": "datasource",
-              "type": "function",
-            },
-          ],
-          "type": "expression",
-        },
-        Object {
-          "chain": Array [
-            Object {
-              "arguments": Object {},
-              "function": "datasource2",
-              "type": "function",
-            },
-          ],
-          "type": "expression",
-        },
-        Object {
-          "chain": Array [
-            Object {
-              "arguments": Object {},
-              "function": "datasource2",
-              "type": "function",
-            },
-          ],
-          "type": "expression",
-        },
-      ]
-    `);
+            Array [
+              Object {
+                "chain": Array [
+                  Object {
+                    "arguments": Object {},
+                    "function": "datasource",
+                    "type": "function",
+                  },
+                ],
+                "type": "expression",
+              },
+              Object {
+                "chain": Array [
+                  Object {
+                    "arguments": Object {},
+                    "function": "datasource2",
+                    "type": "function",
+                  },
+                ],
+                "type": "expression",
+              },
+              Object {
+                "chain": Array [
+                  Object {
+                    "arguments": Object {},
+                    "function": "datasource2",
+                    "type": "function",
+                  },
+                ],
+                "type": "expression",
+              },
+            ]
+        `);
   });
 
   describe('expression failures', () => {

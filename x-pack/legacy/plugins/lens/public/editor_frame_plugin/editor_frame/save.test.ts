@@ -99,7 +99,7 @@ describe('save editor frame state', () => {
     };
     const datasource = createMockDatasource();
     datasource.getPersistableState.mockImplementation(state => ({
-      stuff: `${state}_datsource_persisted`,
+      stuff: `${state}_datasource_persisted`,
     }));
 
     const visualization = createMockVisualization();
