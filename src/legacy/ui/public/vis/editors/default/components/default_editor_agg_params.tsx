@@ -18,7 +18,7 @@
  */
 
 import React, { useReducer, useEffect } from 'react';
-import { EuiForm, EuiAccordion, EuiSpacer } from '@elastic/eui';
+import { EuiForm, EuiAccordion, EuiSpacer, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { aggTypes, AggType, AggParam } from 'ui/agg_types';
@@ -228,7 +228,7 @@ function DefaultEditorAggParams({
       })}
 
       {params.advanced.length ? (
-        <>
+        <EuiFormRow>
           <EuiAccordion
             id="advancedAccordion"
             buttonContent={i18n.translate(
@@ -238,7 +238,7 @@ function DefaultEditorAggParams({
               }
             )}
           >
-            <EuiSpacer size="m" />
+            <EuiSpacer size="s" />
             {params.advanced.map((param: ParamInstance) => {
               const model = paramsState[param.aggParam.name] || {
                 touched: false,
@@ -247,8 +247,7 @@ function DefaultEditorAggParams({
               return renderParam(param, model);
             })}
           </EuiAccordion>
-          <EuiSpacer size="m" />
-        </>
+        </EuiFormRow>
       ) : null}
     </EuiForm>
   );

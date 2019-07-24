@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { Fragment, useState, useEffect } from 'react';
 import {
   htmlIdGenerator,
   EuiButtonIcon,
@@ -134,7 +134,7 @@ function DateRangesParamEditor({
           const areBothEmpty = !from && !to;
 
           return (
-            <div key={id} className="visEditorAgg__flexGroupWrapper">
+            <Fragment key={id}>
               <EuiFlexGroup responsive={false} gutterSize="s" alignItems="center">
                 <EuiFlexItem>
                   <EuiFieldText
@@ -180,7 +180,7 @@ function DateRangesParamEditor({
                 </EuiFlexItem>
               </EuiFlexGroup>
               <EuiSpacer size="xs" />
-            </div>
+            </Fragment>
           );
         })}
 

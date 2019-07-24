@@ -89,7 +89,7 @@ function RangesParamEditor({ agg, value = [], setValue }: AggParamEditorProps<Ra
     );
 
   return (
-    <EuiFormRow compressed className="visEditorAgg__flexGroupWrapper">
+    <EuiFormRow compressed>
       <>
         {ranges.map(({ from, to, id }) => {
           const deleteBtnTitle = i18n.translate(

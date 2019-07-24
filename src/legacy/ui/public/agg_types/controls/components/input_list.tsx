@@ -174,7 +174,7 @@ function InputList({ config, list, onChange, setValidity }: InputListProps) {
   }, [list]);
 
   return (
-    <div className="visEditorAgg__flexGroupWrapper">
+    <>
       {models.map((item, index) => (
         <Fragment key={item.id}>
           <EuiFlexGroup gutterSize="xs" alignItems="center">
@@ -202,7 +202,7 @@ function InputList({ config, list, onChange, setValidity }: InputListProps) {
           />
         </EuiButtonEmpty>
       </EuiFlexItem>
-    </div>
+    </>
   );
 }
 
