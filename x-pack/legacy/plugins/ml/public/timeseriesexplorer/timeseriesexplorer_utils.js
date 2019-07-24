@@ -13,6 +13,7 @@
  */
 
 import _ from 'lodash';
+import moment from 'moment-timezone';
 
 import { parseInterval } from 'ui/utils/parse_interval';
 
@@ -20,10 +21,14 @@ import {
   isTimeSeriesViewJob,
   mlFunctionToESAggregation,
 } from '../../common/util/job_utils';
-import { MlTimeBuckets } from 'plugins/ml/util/ml_time_buckets';
+
+
 import { ml } from '../services/ml_api_service';
 import { mlForecastService } from '../services/forecast_service';
 import { mlResultsService } from '../services/results_service';
+
+import { MlTimeBuckets, getBoundsRoundedToInterval } from '../util/ml_time_buckets';
+
 import { mlTimeSeriesSearchService } from './timeseries_search_service';
 
 import {
@@ -32,6 +37,7 @@ import {
 } from '../../common/constants/search';
 
 import {
+  CHARTS_POINT_TARGET,
   MAX_SCHEDULED_EVENTS,
   timeFieldName,
 } from './timeseriesexplorer_constants';
@@ -451,7 +457,8 @@ export const getFocusData = function (
 export function calculateAggregationInterval(
   bounds,
   bucketsTarget,
-  $scope,
+  jobs,
+  selectedJob,
 ) {
   // Aggregation interval used in queries should be a function of the time span of the chart
   // and the bucket span of the selected job(s).
@@ -466,7 +473,7 @@ export function calculateAggregationInterval(
 
   // Ensure the aggregation interval is always a multiple of the bucket span to avoid strange
   // behaviour such as adjacent chart buckets holding different numbers of job results.
-  const bucketSpanSeconds =  _.find($scope.jobs, { 'id': $scope.selectedJob.job_id }).bucketSpanSeconds;
+  const bucketSpanSeconds =  _.find(jobs, { 'id': selectedJob.job_id }).bucketSpanSeconds;
   let aggInterval = buckets.getIntervalToNearestMultiple(bucketSpanSeconds);
 
   // Set the interval back to the job bucket span if the auto interval is smaller.
@@ -480,4 +487,96 @@ export function calculateAggregationInterval(
     (bounds.max.diff(bounds.min)) / aggInterval.asMilliseconds());
 
   return aggInterval;
+}
+
+export function calculateDefaultFocusRange(
+  autoZoomDuration,
+  contextAggregationInterval,
+  contextChartData,
+  contextForecastData,
+) {
+  const isForecastData = contextForecastData !== undefined && contextForecastData.length > 0;
+
+  const combinedData = (isForecastData === false) ?
+    contextChartData : contextChartData.concat(contextForecastData);
+  const earliestDataDate = _.first(combinedData).date;
+  const latestDataDate = _.last(combinedData).date;
+
+  let rangeEarliestMs;
+  let rangeLatestMs;
+
+  if (isForecastData === true) {
+    // Return a range centred on the start of the forecast range, depending
+    // on the time range of the forecast and data.
+    const earliestForecastDataDate = _.first(contextForecastData).date;
+    const latestForecastDataDate = _.last(contextForecastData).date;
+
+    rangeLatestMs = Math.min(earliestForecastDataDate.getTime() + (autoZoomDuration / 2), latestForecastDataDate.getTime());
+    rangeEarliestMs = Math.max(rangeLatestMs - autoZoomDuration, earliestDataDate.getTime());
+  } else {
+    // Returns the range that shows the most recent data at bucket span granularity.
+    rangeLatestMs = latestDataDate.getTime() + contextAggregationInterval.asMilliseconds();
+    rangeEarliestMs = Math.max(earliestDataDate.getTime(), rangeLatestMs - autoZoomDuration);
+  }
+
+  return [new Date(rangeEarliestMs), new Date(rangeLatestMs)];
+}
+
+export function calculateInitialFocusRange(zoomState, contextAggregationInterval, timefilter) {
+  if (zoomState !== undefined) {
+    // Check that the zoom times are valid.
+    // zoomFrom must be at or after context chart search bounds earliest,
+    // zoomTo must be at or before context chart search bounds latest.
+    const zoomFrom = moment(zoomState.from, 'YYYY-MM-DDTHH:mm:ss.SSSZ', true);
+    const zoomTo = moment(zoomState.to, 'YYYY-MM-DDTHH:mm:ss.SSSZ', true);
+    const bounds = timefilter.getActiveBounds();
+    const searchBounds = getBoundsRoundedToInterval(bounds, contextAggregationInterval, true);
+    const earliest = searchBounds.min;
+    const latest = searchBounds.max;
+
+    if (zoomFrom.isValid() && zoomTo.isValid &&
+      zoomTo.isAfter(zoomFrom) &&
+      zoomFrom.isBetween(earliest, latest, null, '[]') &&
+      zoomTo.isBetween(earliest, latest, null, '[]')) {
+      return [zoomFrom.toDate(), zoomTo.toDate()];
+    }
+  }
+
+  return undefined;
+}
+
+export function getAutoZoomDuration(jobs, selectedJob) {
+  // Calculate the 'auto' zoom duration which shows data at bucket span granularity.
+  // Get the minimum bucket span of selected jobs.
+  // TODO - only look at jobs for which data has been returned?
+  const bucketSpanSeconds =  _.find(jobs, { 'id': selectedJob.job_id }).bucketSpanSeconds;
+
+  // In most cases the duration can be obtained by simply multiplying the points target
+  // Check that this duration returns the bucket span when run back through the
+  // TimeBucket interval calculation.
+  let autoZoomDuration = (bucketSpanSeconds * 1000) * (CHARTS_POINT_TARGET - 1);
+
+  // Use a maxBars of 10% greater than the target.
+  const maxBars = Math.floor(1.1 * CHARTS_POINT_TARGET);
+  const buckets = new MlTimeBuckets();
+  buckets.setInterval('auto');
+  buckets.setBarTarget(Math.floor(CHARTS_POINT_TARGET));
+  buckets.setMaxBars(maxBars);
+
+  // Set bounds from 'now' for testing the auto zoom duration.
+  const nowMs = new Date().getTime();
+  const max = moment(nowMs);
+  const min = moment(nowMs - autoZoomDuration);
+  buckets.setBounds({ min, max });
+
+  const calculatedInterval = buckets.getIntervalToNearestMultiple(bucketSpanSeconds);
+  const calculatedIntervalSecs = calculatedInterval.asSeconds();
+  if (calculatedIntervalSecs !== bucketSpanSeconds) {
+    // If we haven't got the span back, which may occur depending on the 'auto' ranges
+    // used in TimeBuckets and the bucket span of the job, then multiply by the ratio
+    // of the bucket span to the calculated interval.
+    autoZoomDuration = autoZoomDuration * (bucketSpanSeconds / calculatedIntervalSecs);
+  }
+
+  return autoZoomDuration;
 }
