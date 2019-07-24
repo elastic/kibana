@@ -37,6 +37,8 @@ export const ES_SIZE_LIMIT = 10000;
 export const FEATURE_ID_PROPERTY_NAME = '__kbn__feature_id__';
 export const FEATURE_VISIBLE_PROPERTY_NAME = '__kbn__isvisible__';
 
+export const MB_SOURCE_ID_LAYER_ID_PREFIX_DELIMITER = '_';
+
 export const ES_GEO_FIELD_TYPE = {
   GEO_POINT: 'geo_point',
   GEO_SHAPE: 'geo_shape'

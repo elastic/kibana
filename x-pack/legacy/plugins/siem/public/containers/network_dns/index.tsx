@@ -123,7 +123,7 @@ class NetworkDnsComponentQuery extends QueryTemplatePaginated<
             networkDns,
             pageInfo: getOr({}, 'source.NetworkDns.pageInfo', data),
             refetch,
-            totalCount: getOr(0, 'source.NetworkDns.totalCount', data),
+            totalCount: getOr(-1, 'source.NetworkDns.totalCount', data),
           });
         }}
       </Query>

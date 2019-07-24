@@ -48,7 +48,7 @@ Array [
 });
 
 test('CSP strict mode defaults to disabled', () => {
-  expect(DEFAULT_CSP_STRICT).toBe(false);
+  expect(DEFAULT_CSP_STRICT).toBe(true);
 });
 
 test('CSP legacy browser warning defaults to enabled', () => {
