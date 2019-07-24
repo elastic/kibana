@@ -174,28 +174,29 @@ describe('Doc Table', function () {
         $scope.sortOrder = [];
         $scope.cycleSortOrder(SORTABLE_FIELDS[0]);
         expect($scope.onChangeSortOrder.callCount).to.be(1);
-        expect($scope.onChangeSortOrder.firstCall.args).to.eql([SORTABLE_FIELDS[0], 'asc']);
+        expect($scope.onChangeSortOrder.firstCall.args).to.eql([[[SORTABLE_FIELDS[0], 'asc']]]);
       });
 
       it('should call onChangeSortOrder with ascending order for a sortable field already sorted by in descending order', function () {
-        $scope.sortOrder = [SORTABLE_FIELDS[0], 'desc'];
+        $scope.sortOrder = [[SORTABLE_FIELDS[0], 'desc']];
         $scope.cycleSortOrder(SORTABLE_FIELDS[0]);
         expect($scope.onChangeSortOrder.callCount).to.be(1);
-        expect($scope.onChangeSortOrder.firstCall.args).to.eql([SORTABLE_FIELDS[0], 'asc']);
+        expect($scope.onChangeSortOrder.firstCall.args).to.eql([[[SORTABLE_FIELDS[0], 'asc']]]);
       });
 
-      it('should call onChangeSortOrder with ascending order for a sortable field when already sorted by an different field', function () {
-        $scope.sortOrder = [SORTABLE_FIELDS[1], 'asc'];
+      it('should call onChangeSortOrder with ascending order for a sortable field in addition to an existing sort on a ' +
+        'different field', function () {
+        $scope.sortOrder = [[SORTABLE_FIELDS[1], 'asc']];
         $scope.cycleSortOrder(SORTABLE_FIELDS[0]);
         expect($scope.onChangeSortOrder.callCount).to.be(1);
-        expect($scope.onChangeSortOrder.firstCall.args).to.eql([SORTABLE_FIELDS[0], 'asc']);
+        expect($scope.onChangeSortOrder.firstCall.args).to.eql([[[SORTABLE_FIELDS[0], 'asc'], [SORTABLE_FIELDS[1], 'asc']]]);
       });
 
       it('should call onChangeSortOrder with descending order for a sortable field already sorted by in ascending order', function () {
-        $scope.sortOrder = [SORTABLE_FIELDS[0], 'asc'];
+        $scope.sortOrder = [[SORTABLE_FIELDS[0], 'asc']];
         $scope.cycleSortOrder(SORTABLE_FIELDS[0]);
         expect($scope.onChangeSortOrder.callCount).to.be(1);
-        expect($scope.onChangeSortOrder.firstCall.args).to.eql([SORTABLE_FIELDS[0], 'desc']);
+        expect($scope.onChangeSortOrder.firstCall.args).to.eql([[[SORTABLE_FIELDS[0], 'desc']]]);
       });
 
       it('should not call onChangeSortOrder for an unsortable field', function () {
@@ -223,17 +224,17 @@ describe('Doc Table', function () {
         expect($scope.headerClass(UNSORTABLE_FIELDS[0])).to.be(undefined);
       });
 
-      it('should return list including fa-sort-up for a sortable field not currently sorted by', function () {
-        expect($scope.headerClass(SORTABLE_FIELDS[0])).to.contain('fa-sort-up');
+      it('should return list including fa-sort for a sortable field not currently sorted by', function () {
+        expect($scope.headerClass(SORTABLE_FIELDS[0])).to.contain('fa-sort');
       });
 
       it('should return list including fa-sort-up for a sortable field currently sorted by in ascending order', function () {
-        $scope.sortOrder = [SORTABLE_FIELDS[0], 'asc'];
+        $scope.sortOrder = [[SORTABLE_FIELDS[0], 'asc']];
         expect($scope.headerClass(SORTABLE_FIELDS[0])).to.contain('fa-sort-up');
       });
 
       it('should return list including fa-sort-down for a sortable field currently sorted by in descending order', function () {
-        $scope.sortOrder = [SORTABLE_FIELDS[0], 'desc'];
+        $scope.sortOrder = [[SORTABLE_FIELDS[0], 'desc']];
         expect($scope.headerClass(SORTABLE_FIELDS[0])).to.contain('fa-sort-down');
       });
     });
