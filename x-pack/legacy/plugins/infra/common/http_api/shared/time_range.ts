@@ -4,4 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export * from './log_analysis';
+import * as runtimeTypes from 'io-ts';
+
+export const timeRangeRuntimeType = runtimeTypes.type({
+  startTime: runtimeTypes.number,
+  endTime: runtimeTypes.number,
+});
