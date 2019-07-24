@@ -468,7 +468,9 @@ export class CodeQueryBar extends Component<Props, State> {
                     />
                     <SearchOptions
                       defaultRepoOptions={this.props.defaultRepoOptions}
-                      defaultSearchScope={this.props.currentRepository}
+                      defaultSearchScope={
+                        this.props.currentRepository || this.props.searchOptions.defaultRepoScope
+                      }
                       repositorySearch={this.props.repositorySearch}
                       saveSearchOptions={this.props.saveSearchOptions}
                       repoSearchResults={this.props.repoSearchResults}
