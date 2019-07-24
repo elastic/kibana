@@ -196,7 +196,7 @@ export const reporting = (kibana) => {
       server.expose('queue', createQueueFactory(server));
 
       // Reporting routes
-      registerRoutes(server);
+      registerRoutes(server, logger);
     },
 
     deprecations: function ({ unused }) {

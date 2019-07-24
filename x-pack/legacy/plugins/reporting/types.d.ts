@@ -118,7 +118,7 @@ type PostPayloadState = Partial<{
 }>;
 
 // retain POST payload data, needed for async
-interface JobParamPostPayload extends PostPayloadState {
+export interface JobParamPostPayload extends PostPayloadState {
   timerange: TimeRangeParams;
 }
 
