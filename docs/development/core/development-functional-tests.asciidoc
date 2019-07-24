@@ -6,7 +6,7 @@ We use functional tests to make sure the Kibana UI works as expected. It replace
 [float]
 ==== Running functional tests
 
-The `FunctionalTestRunner` is very bare bones and gets most of its functionality from its config file, located at https://github.com/elastic/kibana/blob/master/test/functional/config.js[test/functional/config.js]. If you’re writing a plugin you will have your own config file. See <<development-plugin-functional-tests>> for more info.
+The `FunctionalTestRunner` is very bare bones and gets most of its functionality from its config file, located at https://github.com/elastic/kibana/blob/master/test/functional/config.js[test/functional/config.js]. If you’re writing a plugin you will have your own config file. See https://github.com/elastic/kibana/blob/master/docs/development/plugin/development-plugin-functional-tests.asciidoc[development-plugin-functional-tests] for more info.
 
 There are three ways to run the tests depending on your goals:
 
@@ -106,7 +106,7 @@ Use the `--help` flag for more options.
 
 The tests are written in https://mochajs.org[mocha] using https://github.com/elastic/kibana/tree/master/packages/kbn-expect[@kbn/expect] for assertions.
 
-We use https://www.w3.org/TR/webdriver1/[WebDriver Protocol] to run tests in both Chrome and Firefox with the help of https://sites.google.com/a/chromium.org/chromedriver/[chromedriver] and https://firefox-source-docs.mozilla.org/testing/geckodriver/[geckodriver]. When the `FunctionalTestRunner` launches, `remote` service creates new webdriver session, which starts driver and a stripped-down browser instance. We use `browser` and `webElementWrapper` services to wrap up https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/[Webdriver API].
+We use https://www.w3.org/TR/webdriver1/[WebDriver Protocol] to run tests in both Chrome and Firefox with the help of https://sites.google.com/a/chromium.org/chromedriver/[chromedriver] and https://firefox-source-docs.mozilla.org/testing/geckodriver/[geckodriver]. When the `FunctionalTestRunner` launches, `remote` service creates new webdriver session, which starts driver and a stripped-down browser instance. We use `browser` service and `webElementWrapper` class to wrap up https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/[Webdriver API].
 
 The `FunctionalTestRunner` automatically transpiles functional tests using babel, so that tests can use the same ECMAScript features that Kibana source code uses. See https://github.com/elastic/kibana/blob/master/style_guides/js_style_guide.md[style_guides/js_style_guide.md].
 
