@@ -44,22 +44,10 @@ export function safeChildProcess(
 
   // send termination signals
   const terminate$ = Rx.merge(
-    signalForChildProcess$.pipe(
-      tap(signal =>
-        logger.warning(
-          `The Reporting browser child process was sent a termination signal: ${signal}. Passing the signal to the child process.`
-        )
-      ),
-      tap(signal => childProcess.kill(signal))
-    ),
+    signalForChildProcess$.pipe(tap(signal => childProcess.kill(signal))),
 
     ownTerminateSignal$.pipe(
       delay(1),
-      tap(signal =>
-        logger.warning(
-          `The Kibana process was sent a termination signal: ${signal}. Closing the browser...`
-        )
-      ),
       tap(signal => process.kill(process.pid, signal))
     )
   );
