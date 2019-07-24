@@ -9,6 +9,8 @@ import PropTypes from 'prop-types';
 import mapValues from 'lodash/object/mapValues';
 import cloneDeep from 'lodash/lang/cloneDeep';
 import debounce from 'lodash/function/debounce';
+import first from 'lodash/array/first';
+
 import { i18n } from '@kbn/i18n';
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 import chrome from 'ui/chrome';
@@ -219,12 +221,17 @@ export class JobCreateUi extends Component {
         const formattedDateFields = formatFields(indexPatternDateFields, dateType);
 
         const { jobToClone, stepsFields } = this.state;
+        const {
+          [STEP_METRICS]: { metrics },
+        } = stepsFields;
 
-        if (jobToClone) {
+        // Only re-type metrics if they haven't been typed already
+        if (
+          jobToClone &&
+          metrics && metrics.length &&
+          !first(metrics).type
+        ) {
           // Re-type any pre-existing metrics entries for the job we are cloning.
-          const {
-            [STEP_METRICS]: { metrics },
-          } = stepsFields;
           const typeMaps = [
             { fields: formattedNumericFields, type: numericType },
             { fields: formattedKeywordFields, type: keywordType },
