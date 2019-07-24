@@ -17,9 +17,5 @@
  * under the License.
  */
 
-import * as formatters from './field_formatters';
-
 export { Subject, Subscription } from './subject';
 export * from './utils';
-
-export const fieldFormatters = formatters;
