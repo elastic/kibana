@@ -51,6 +51,7 @@ export function ShardFailureModal({ request, response, title, onClose }: Props) 
       </EuiCallOut>
     );
   }
+
   const requestJSON = JSON.stringify(request, null, 2);
   const responseJSON = JSON.stringify(response, null, 2);
   const failures = response._shards.failures;
@@ -110,7 +111,7 @@ export function ShardFailureModal({ request, response, title, onClose }: Props) 
             </EuiButtonEmpty>
           )}
         </EuiCopy>
-        <EuiButton onClick={() => onClose()} fill>
+        <EuiButton onClick={() => onClose()} fill data-test-sub="closeShardFailureModal">
           <FormattedMessage
             id="common.ui.courier.fetch.shardsFailedModal.close"
             defaultMessage="Close"

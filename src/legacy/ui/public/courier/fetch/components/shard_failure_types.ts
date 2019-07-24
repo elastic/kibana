@@ -35,7 +35,7 @@ export interface ResponseWithShardFailure {
 }
 
 export interface ShardFailure {
-  index: number;
+  index: string;
   node: string;
   reason: {
     caused_by: {
@@ -47,5 +47,5 @@ export interface ShardFailure {
     script_stack?: string[];
     type: string;
   };
-  shard: string;
+  shard: number;
 }

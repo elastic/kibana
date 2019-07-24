@@ -41,7 +41,7 @@ export function formatKey(key: string) {
  */
 export function formatValueByKey(value: any, key: string) {
   if (key === 'script' || key === 'script_stack') {
-    const valueScript = key === 'script_stack' && Array.isArray(value) ? value.join('\n') : value;
+    const valueScript = Array.isArray(value) ? value.join('\n') : String(value);
     return (
       <EuiCodeBlock language="java" paddingSize="s" isCopyable style={{ width: '500px' }}>
         {valueScript}
