@@ -20,7 +20,7 @@
 import React from 'react';
 import { EuiFieldText, EuiFlexItem, EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import Ipv4Address from '../../../utils/ipv4_address';
+import Ipv4Address from '../../../../../../utils/ipv4_address';
 import { InputList, InputListConfig, InputModel, InputObject, InputItem } from './input_list';
 
 const EMPTY_STRING = '';

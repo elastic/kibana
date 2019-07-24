@@ -36,7 +36,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { isEqual, omit } from 'lodash';
 import { AggParamEditorProps } from 'ui/vis/editors/default';
-import { getDocLink } from '../../documentation_links';
+import { getDocLink } from '../../../../../documentation_links';
 
 const FROM_PLACEHOLDER = '\u2212\u221E';
 const TO_PLACEHOLDER = '+\u221E';

@@ -17,11 +17,11 @@
  * under the License.
  */
 
-import { AggConfig } from '../../agg_configs';
+import { AggConfig } from '../../../../agg_config';
 import { VisState } from 'ui/vis';
 import { EditorConfig } from 'ui/vis/editors/config/types';
 import { SubAggParamsProp } from 'ui/vis/editors/default/components/default_editor_agg_params';
-import { AggParam } from '..';
+import { AggParam } from '../../../../../../../core_plugins/data/public/np_ready/agg_types';
 
 export const aggParamCommonPropsMock = {
   agg: {} as AggConfig,

@@ -22,11 +22,12 @@ import React, { useEffect } from 'react';
 
 import { EuiComboBox, EuiComboBoxOptionProps, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { AggConfig } from '../../agg_configs';
-import { formatListAsProse, parseCommaSeparatedList } from '../../../../utils';
-import { AggParamEditorProps } from '../../vis/editors/default';
-import { ComboBoxGroupedOption } from '../../vis/editors/default/default_editor_utils';
-import { FieldParamType } from '../param_types';
+import { AggConfig } from '../../../../agg_config';
+// @ts-ignore
+import { formatListAsProse, parseCommaSeparatedList } from '../../../../../utils';
+import { AggParamEditorProps } from '../..';
+import { ComboBoxGroupedOption } from '../../default_editor_utils';
+import { FieldParamType } from '../../../../../../../core_plugins/data/public/np_ready/agg_types/param_types';
 
 const label = i18n.translate('data.aggTypes.field.fieldLabel', { defaultMessage: 'Field' });
 

@@ -21,7 +21,7 @@ import React from 'react';
 
 import { EuiButtonGroup, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { AggParamEditorProps } from '../../vis/editors/default';
+import { AggParamEditorProps } from '../..';
 
 enum IpRangeTypes {
   MASK = 'mask',

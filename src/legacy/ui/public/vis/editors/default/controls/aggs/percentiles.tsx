@@ -21,8 +21,8 @@ import React, { useState } from 'react';
 
 import { EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { AggParamEditorProps } from '../../vis/editors/default';
-import { NumberList } from '../number_list';
+import { AggParamEditorProps } from '../..';
+import { NumberList } from '../../../../../../../core_plugins/data/public/np_ready/agg_types/number_list';
 
 function PercentilesEditor({
   agg,

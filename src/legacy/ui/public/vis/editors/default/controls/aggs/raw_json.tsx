@@ -22,8 +22,8 @@ import React, { useEffect } from 'react';
 import { EuiFormRow, EuiIconTip, EuiTextArea } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { AggParamEditorProps } from '../../vis/editors/default';
-import { isValidJson } from '../utils';
+import { AggParamEditorProps } from '../..';
+import { isValidJson } from '../../../../../../../core_plugins/data/public/np_ready/agg_types/utils';
 
 function RawJsonParamEditor({
   agg,

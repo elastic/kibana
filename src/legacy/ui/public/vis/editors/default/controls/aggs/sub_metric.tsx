@@ -20,9 +20,9 @@
 import React, { useEffect, useState } from 'react';
 import { EuiFormLabel } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { AggParamEditorProps, DefaultEditorAggParams } from '../../vis/editors/default';
-import { AggConfig } from '../../vis';
-import { AggGroupNames } from '../../vis/editors/default/agg_groups';
+import { AggParamEditorProps, DefaultEditorAggParams } from '../..';
+import { AggConfig } from '../../../../agg_config';
+import { AggGroupNames } from '../../agg_groups';
 
 function SubMetricParamEditor({
   agg,

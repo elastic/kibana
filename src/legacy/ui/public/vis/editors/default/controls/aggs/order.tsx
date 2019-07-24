@@ -21,7 +21,7 @@ import React, { useEffect } from 'react';
 import { EuiFormRow, EuiSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { AggParamEditorProps } from 'ui/vis/editors/default';
-import { OptionedValueProp, OptionedParamEditorProps } from '../param_types/optioned';
+import { OptionedValueProp, OptionedParamEditorProps } from '../../../../../../../core_plugins/data/public/np_ready/agg_types/param_types/optioned';
 
 function OrderParamEditor({
   aggParam,

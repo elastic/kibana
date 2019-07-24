@@ -27,7 +27,7 @@ import {
   EuiFormRow,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { AggConfig } from '../../agg_configs';
+import { AggConfig } from '../../../../agg_config';
 // @ts-ignore
 import { data } from 'plugins/data/setup';
 import { Query } from 'plugins/data';

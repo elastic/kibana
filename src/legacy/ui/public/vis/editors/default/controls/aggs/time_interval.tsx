@@ -23,9 +23,9 @@ import React, { useEffect } from 'react';
 import { EuiFormRow, EuiIconTip, EuiComboBox, EuiComboBoxOptionProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { AggParamEditorProps } from '../../vis/editors/default';
-import { AggParamOption } from '../agg_param';
-import { isValidInterval } from '../utils';
+import { AggParamEditorProps } from '../..';
+import { AggParamOption } from '../../../../../../../core_plugins/data/public/np_ready/agg_types/agg_params';
+import { isValidInterval } from '../../../../../../../core_plugins/data/public/np_ready/agg_types/utils';
 
 interface ComboBoxOption extends EuiComboBoxOptionProps {
   key: string;

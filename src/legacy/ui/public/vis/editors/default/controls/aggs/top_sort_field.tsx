@@ -19,8 +19,8 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { AggParamEditorProps } from '../../vis/editors/default';
-import { FieldParamType } from '../param_types';
+import { AggParamEditorProps } from '../..';
+import { FieldParamType } from '../../../../../../../core_plugins/data/public/np_ready/agg_types/param_types';
 import { FieldParamEditor } from './field';
 
 function TopSortFieldParamEditor(props: AggParamEditorProps<FieldParamType>) {

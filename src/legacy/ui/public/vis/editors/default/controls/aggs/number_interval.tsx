@@ -23,7 +23,7 @@ import React, { useEffect } from 'react';
 import { EuiFieldNumber, EuiFormRow, EuiIconTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { AggParamEditorProps } from '../../vis/editors/default';
+import { AggParamEditorProps } from '../..';
 
 const label = (
   <>

@@ -22,9 +22,9 @@ import { EuiFormRow, EuiIconTip, EuiSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { AggParamEditorProps } from 'ui/vis/editors/default';
-import { AggConfig } from '../../agg_configs';
-import { AggParam } from '../agg_params';
-import { OptionedValueProp, OptionedParamEditorProps } from '../param_types/optioned';
+import { AggConfig } from '../../../../agg_config';
+import { AggParam } from '../../../../../../../core_plugins/data/public/np_ready/agg_types/agg_params';
+import { OptionedValueProp, OptionedParamEditorProps } from '../../../../../../../core_plugins/data/public/np_ready/agg_types/param_types/optioned';
 
 export interface AggregateValueProp extends OptionedValueProp {
   isCompatible(aggConfig: AggConfig): boolean;

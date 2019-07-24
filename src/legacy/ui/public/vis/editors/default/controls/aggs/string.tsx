@@ -20,7 +20,7 @@
 import React, { useEffect } from 'react';
 
 import { EuiFieldText, EuiFormRow } from '@elastic/eui';
-import { AggParamEditorProps } from '../../vis/editors/default';
+import { AggParamEditorProps } from '../..';
 
 function StringParamEditor({
   agg,
