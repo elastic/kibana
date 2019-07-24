@@ -17,4 +17,4 @@
  * under the License.
  */
 
-import './agg_table';
+export * from './legacy_dependencies_plugin';
