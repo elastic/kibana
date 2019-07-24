@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Joi from 'joi';
+import { schema } from '@kbn/config-schema';
 import { AlertsClient } from './alerts_client';
 import { SavedObjectsClientMock } from '../../../../../src/core/server/mocks';
 import { taskManagerMock } from '../../task_manager/task_manager.mock';
@@ -282,16 +282,15 @@ describe('create()', () => {
       id: '123',
       name: 'Test',
       validate: {
-        params: Joi.object()
-          .keys({
-            param1: Joi.string().required(),
-          })
-          .required(),
+        params: schema.object({
+          param1: schema.string(),
+          threshold: schema.number({ min: 0, max: 1 }),
+        }),
       },
       async executor() {},
     });
     await expect(alertsClient.create({ data })).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"alertTypeParams invalid: child \\"param1\\" fails because [\\"param1\\" is required]"`
+      `"alertTypeParams invalid: [param1]: expected value of type [string] but got [undefined]"`
     );
   });
 
@@ -895,11 +894,9 @@ describe('update()', () => {
       id: '123',
       name: 'Test',
       validate: {
-        params: Joi.object()
-          .keys({
-            param1: Joi.string().required(),
-          })
-          .required(),
+        params: schema.object({
+          param1: schema.string(),
+        }),
       },
       async executor() {},
     });
@@ -934,7 +931,7 @@ describe('update()', () => {
         },
       })
     ).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"alertTypeParams invalid: child \\"param1\\" fails because [\\"param1\\" is required]"`
+      `"alertTypeParams invalid: [param1]: expected value of type [string] but got [undefined]"`
     );
   });
 });
