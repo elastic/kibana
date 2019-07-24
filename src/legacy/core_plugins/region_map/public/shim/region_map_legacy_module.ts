@@ -17,18 +17,21 @@
  * under the License.
  */
 
+import { once } from 'lodash';
 // @ts-ignore
-import { functionsRegistry } from 'plugins/interpreter/registries';
-import { CoreSetup } from 'src/core/public';
-import { visualizations } from '../../visualizations/public';
-import { MapSetupPlugins } from './plugin';
+import { uiModules } from 'ui/modules';
 
-export const core = {} as CoreSetup;
-export const plugins = {
-  data: {
-    expressions: {
-      functionsRegistry,
-    },
-  },
-  visualizations,
-} as MapSetupPlugins;
+import 'ui/vis/map/service_settings';
+import 'plugins/kbn_vislib_vis_types/controls/vislib_basic_options';
+
+// @ts-ignore
+import { RegionMapVisParams } from '../region_map_vis_params';
+
+/** @internal */
+export const initTileMapLegacyModule = once((): void => {
+  uiModules
+    // TODO: Region Map Plugin uses wmsOptions directive from the kibana/tile_map module.
+    // in future this reference should be removed
+    .get('kibana/region_map', ['kibana', 'kibana/tile_map'])
+    .directive('regionMapVisParams', RegionMapVisParams);
+});

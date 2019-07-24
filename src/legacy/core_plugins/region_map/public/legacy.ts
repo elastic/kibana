@@ -18,9 +18,23 @@
  */
 
 import { PluginInitializerContext } from 'kibana/public';
-import { core, plugins } from './setup';
+import { npSetup, npStart } from 'ui/new_platform';
+
+import { visualizations } from '../../visualizations/public';
+import { RegionMapPluginSetupDependencies } from './plugin';
+import { LegacyDependenciesPlugin } from './shim';
 import { plugin } from '.';
+
+const plugins: Readonly<RegionMapPluginSetupDependencies> = {
+  visualizations,
+  data: npSetup.plugins.data,
+
+  // Temporary solution
+  // It will be removed when all dependent services are migrated to the new platform.
+  __LEGACY: new LegacyDependenciesPlugin(),
+};
 
 const pluginInstance = plugin({} as PluginInitializerContext);
 
-export const setup = pluginInstance.setup(core, plugins);
+export const setup = pluginInstance.setup(npSetup.core, plugins);
+export const start = pluginInstance.start(npStart.core);

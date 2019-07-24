@@ -16,47 +16,60 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
-import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from 'kibana/public';
-import { DataSetup } from '../../data/public';
+import {
+  CoreSetup,
+  CoreStart,
+  Plugin,
+  PluginInitializerContext,
+  UiSettingsClientContract,
+} from '../../../../core/public';
+import { Plugin as DataPublicPlugin } from '../../../../plugins/data/public';
 import { VisualizationsSetup } from '../../visualizations/public';
-// @ts-ignore
-import { regionmap } from './region_map_fn';
-// @ts-ignore
-import { RegionMapProvider } from './region_map_vis';
 
-/** @public */
-export type MapSetup = void;
-/** @public */
-export type MapStart = void;
+import { LegacyDependenciesPlugin, LegacyDependenciesPluginSetup } from './shim';
+
+// @ts-ignore
+import { createRegionMapFn } from './region_map_fn';
+// @ts-ignore
+import { createRegionMapTypeDefinition } from './region_map_type';
+
+/** @private */
+interface RegionMapVisualizationDependencies extends LegacyDependenciesPluginSetup {
+  uiSettings: UiSettingsClientContract;
+}
 
 /** @internal */
-export interface MapSetupPlugins {
-  // TODO: Remove `any` as functionsRegistry is added to the DataSetup.
-  data: DataSetup | any;
+export interface RegionMapPluginSetupDependencies {
+  data: ReturnType<DataPublicPlugin['setup']>;
   visualizations: VisualizationsSetup;
+  __LEGACY: LegacyDependenciesPlugin;
 }
 
 /** @internal */
-export interface MapStartPlugins {
-  foo: any;
-}
-
-export class RegionMapPlugin
-  implements Plugin<MapSetup, MapStart, MapSetupPlugins, MapStartPlugins> {
+export class RegionMapPlugin implements Plugin<Promise<void>, void> {
   initializerContext: PluginInitializerContext;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.initializerContext = initializerContext;
   }
 
-  public setup(core: CoreSetup, plugins: MapSetupPlugins): MapSetup {
-    plugins.data.expressions.functionsRegistry.register(regionmap);
-    // register the provider with the visTypes registry so that other know it exists
-    plugins.visualizations.types.VisTypesRegistryProvider.register(RegionMapProvider);
+  public async setup(
+    core: CoreSetup,
+    { data, visualizations, __LEGACY }: RegionMapPluginSetupDependencies
+  ) {
+    const visualizationDependencies: Readonly<RegionMapVisualizationDependencies> = {
+      uiSettings: core.uiSettings,
+      ...(await __LEGACY.setup()),
+    };
+
+    data.expressions.registerFunction(() => createRegionMapFn(visualizationDependencies));
+
+    visualizations.types.VisTypesRegistryProvider.register(() =>
+      createRegionMapTypeDefinition(visualizationDependencies)
+    );
   }
 
-  public start(core: CoreStart, plugins: MapStartPlugins): MapStart {}
-
-  public stop() {}
+  public start(core: CoreStart) {
+    // nothing to do here yet
+  }
 }

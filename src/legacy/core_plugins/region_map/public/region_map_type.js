@@ -16,19 +16,21 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
-import './region_map_vis_params';
 import { i18n } from '@kbn/i18n';
 import { Schemas } from 'ui/vis/editors/default/schemas';
 import { truncatedColorMaps } from 'ui/vislib/components/color/truncated_colormaps';
 import { mapToLayerWithId } from './util';
-import { RegionMapsVisualizationProvider } from './region_map_visualization';
+import { createRegionMapVisualization } from './region_map_visualization';
 import { Status } from 'ui/vis/update_status';
-import { ORIGIN } from '../../../../legacy/core_plugins/tile_map/common/origin';
+
 import { visFactory } from '../../visualizations/public';
 
-export function RegionMapProvider(Private, regionmapsConfig, config) {
-  const RegionMapsVisualization = Private(RegionMapsVisualizationProvider);
+// TODO: reference to TILE_MAP plugin should be removed
+import { ORIGIN } from '../../../../legacy/core_plugins/tile_map/common/origin';
+
+export function createRegionMapTypeDefinition(dependencies) {
+  const { uiSettings, regionmapsConfig } = dependencies;
+  const RegionMapsVisualization = createRegionMapVisualization(dependencies);
   const vectorLayers = regionmapsConfig.layers.map(mapToLayerWithId.bind(null, ORIGIN.KIBANA_YML));
   const selectedLayer = vectorLayers[0];
   const selectedJoinField = selectedLayer ? vectorLayers[0].fields[0] : null;
@@ -48,7 +50,7 @@ provided base maps, or add your own. Darker colors represent higher values.' }),
         emsHotLink: '',
         selectedJoinField: selectedJoinField,
         isDisplayWarning: true,
-        wms: config.get('visualization:tileMap:WMSdefaults'),
+        wms: uiSettings.get('visualization:tileMap:WMSdefaults'),
         mapZoom: 2,
         mapCenter: [0, 0],
         outlineWeight: 1,

@@ -111,7 +111,6 @@ describe('CoordinateMapsVisualizationTest', function () {
   describe('CoordinateMapsVisualization - basics', function () {
 
     beforeEach(async function () {
-
       setupDOM('512px', '512px');
 
       imageComparator = new ImageComparator();
@@ -169,7 +168,6 @@ describe('CoordinateMapsVisualizationTest', function () {
       const mismatchedPixels = await compareImage(initial, 0);
       coordinateMapVisualization.destroy();
       expect(mismatchedPixels).to.be.lessThan(PIXEL_DIFF);
-
     });
 
 
