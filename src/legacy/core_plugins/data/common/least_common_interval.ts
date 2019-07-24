@@ -18,8 +18,8 @@
  */
 
 import dateMath from '@elastic/datemath';
-import { leastCommonMultiple } from '../../utils/math';
-import { parseEsInterval } from '../../utils/parse_es_interval';
+import { leastCommonMultiple } from './math';
+import { parseEsInterval } from './parse_es_interval';
 
 /**
  * Finds the lowest common interval between two given ES date histogram intervals

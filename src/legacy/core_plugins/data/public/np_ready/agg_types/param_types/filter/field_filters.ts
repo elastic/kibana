@@ -17,7 +17,7 @@
  * under the License.
  */
 import { FieldParamType } from '../';
-import { AggConfig } from '../../../vis';
+import { AggConfig } from '../../../agg_configs';
 
 type AggTypeFieldFilter = (
   field: any,

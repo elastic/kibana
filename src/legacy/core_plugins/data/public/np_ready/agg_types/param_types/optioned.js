@@ -17,19 +17,12 @@
  * under the License.
  */
 
-import { IndexedArray } from '../../indexed_array';
 import { BaseParamType } from './base';
 import { createLegacyClass } from '../../utils/legacy_class';
 
 createLegacyClass(OptionedParamType).inherits(BaseParamType);
 function OptionedParamType(config) {
   OptionedParamType.Super.call(this, config);
-
-  this.options = new IndexedArray({
-    index: ['value'],
-    immutable: true,
-    initialSet: this.options
-  });
 }
 
 /**

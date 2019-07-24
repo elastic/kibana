@@ -17,22 +17,16 @@
  * under the License.
  */
 
-import { IndexedArray } from '../../indexed_array';
-
 interface OptionedValueProp {
   value: string;
   text: string;
 }
 
-interface SelectOptions<T> extends IndexedArray<T> {
-  byValue: {
-    [key: string]: T;
-  };
-}
 
-interface OptionedParamEditorProps<T = OptionedValueProp> {
+
+interface OptionedParamEditorProps {
   aggParam: {
-    options: SelectOptions<T>;
+    options: OptionedValueProp[];
   };
 }
 

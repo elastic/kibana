@@ -55,7 +55,7 @@ export class AggConfigs {
 
   private aggs: Array<AggConfig>;
 
-  constructor(indexPattern: IndexPattern, configStates = [] as any, schemas: any) {
+  constructor(indexPattern: IndexPattern, configStates = [] as any, schemas?: any) {
     configStates = AggConfig.ensureIds(configStates);
 
     this.aggs = [];
