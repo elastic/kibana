@@ -23,6 +23,7 @@ export default function ({ getService, getPageObjects }) {
   const log = getService('log');
   const retry = getService('retry');
   const inspector = getService('inspector');
+  const find = getService('find');
   const PageObjects = getPageObjects(['common', 'visualize', 'timePicker']);
 
   describe('gauge chart', function indexPatternCreation() {
@@ -30,15 +31,16 @@ export default function ({ getService, getPageObjects }) {
     const fromTime = '2015-09-19 06:31:44.000';
     const toTime = '2015-09-23 18:31:44.000';
 
-    before(async function () {
+    async function initGaugeVis() {
       log.debug('navigateToApp visualize');
       await PageObjects.visualize.navigateToNewVisualization();
       log.debug('clickGauge');
       await PageObjects.visualize.clickGauge();
       await PageObjects.visualize.clickNewSearch();
       await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
-    });
+    }
 
+    before(initGaugeVis);
 
     it('should have inspector enabled', async function () {
       await inspector.expectIsEnabled();
@@ -92,5 +94,26 @@ export default function ({ getService, getPageObjects }) {
       });
     });
 
+    it('should format the metric correctly in percentage mode', async function () {
+      await initGaugeVis();
+      await PageObjects.visualize.clickMetricEditor();
+      await PageObjects.visualize.selectAggregation('Average', 'metrics');
+      await PageObjects.visualize.selectField('bytes', 'metrics');
+      await PageObjects.visualize.clickOptionsTab();
+      const table = await find.byClassName('visEditorAgg__rangesTable');
+      const lastRow = await table.findByCssSelector('tr:last-child');
+      const toCell = await lastRow.findByCssSelector('td:nth-child(2) input');
+      await toCell.clearValue();
+      await toCell.type('10000', { charByChar: true });
+      await find.clickByCssSelector('#percentageMode');
+      await PageObjects.visualize.waitForVisualizationRenderingStabilized();
+      await PageObjects.visualize.clickGo();
+
+      await retry.try(async function tryingForTime() {
+        const expectedTexts = [ '57.273%', 'Average bytes' ];
+        const metricValue = await PageObjects.visualize.getGaugeValue();
+        expect(expectedTexts).to.eql(metricValue);
+      });
+    });
   });
 }

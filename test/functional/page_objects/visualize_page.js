@@ -704,6 +704,11 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
       await selector.click();
     }
 
+    async selectYAxisMode(mode) {
+      const selector = await find.byCssSelector(`#valueAxisMode0 > option[label="${mode}"]`);
+      await selector.click();
+    }
+
     async clickData() {
       await testSubjects.click('visualizeEditDataLink');
     }
