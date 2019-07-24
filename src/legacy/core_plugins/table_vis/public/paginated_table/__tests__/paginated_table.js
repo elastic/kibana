@@ -21,10 +21,10 @@
 import _ from 'lodash';
 import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
-import '..';
+
 import $ from 'jquery';
 
-describe('paginated table', function () {
+describe('Table Vis - Paginated table', function () {
   let $el;
   let $rootScope;
   let $compile;
