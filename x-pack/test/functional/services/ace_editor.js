@@ -38,5 +38,13 @@ export function AceEditorProvider({ getService }) {
         return linesText.join('\n');
       });
     }
+
+    async hasParseErrors(testSubjectSelector) {
+      return await retry.try(async () => {
+        const editor = await testSubjects.find(testSubjectSelector);
+        const errors = await editor.findAllByClassName('ace_error');
+        return errors.length !== 0;
+      });
+    }
   };
 }

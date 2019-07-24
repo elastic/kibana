@@ -8,5 +8,5 @@
 <b>Signature:</b>
 
 ```typescript
-export declare type APICaller = (endpoint: string, clientParams: Record<string, unknown>, options?: CallAPIOptions) => Promise<unknown>;
+export declare type APICaller = (endpoint: string, clientParams: Record<string, any>, options?: CallAPIOptions) => Promise<unknown>;
 ```

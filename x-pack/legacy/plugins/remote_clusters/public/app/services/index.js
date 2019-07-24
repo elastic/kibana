@@ -40,4 +40,5 @@ export {
 
 export {
   trackUiMetric,
-} from './track_ui_metric';
+  METRIC_TYPE,
+} from './ui_metric';

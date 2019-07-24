@@ -7,6 +7,16 @@
 import { entityToKql, entitiesToKql, addEntitiesToKql } from './add_entities_to_kql';
 
 describe('add_entities_to_kql', () => {
+  // Suppress warnings about invalid RISON as this is what we are testing
+  /* eslint-disable no-console */
+  const originalError = console.log;
+  beforeAll(() => {
+    console.log = jest.fn();
+  });
+
+  afterAll(() => {
+    console.log = originalError;
+  });
   describe('#entityToKql', () => {
     test('returns empty string with no entity names defined and an empty entity string', () => {
       const entity = entityToKql([], '');

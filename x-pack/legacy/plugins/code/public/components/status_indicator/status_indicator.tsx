@@ -75,12 +75,12 @@ export class StatusIndicatorComponent extends React.Component<Props, State> {
         if (fix !== undefined) {
           const fixUrl = this.fixUrl(fix);
           children.push(
-            <p>
+            <p key={`${error}_key`}>
               {error} You can {fixUrl}.
             </p>
           );
         } else {
-          children.push(<p>{error}</p>);
+          children.push(<p key={`${error}_key`}>{error}</p>);
         }
       }
     };
@@ -99,7 +99,13 @@ export class StatusIndicatorComponent extends React.Component<Props, State> {
       }
     }
     const svg = svgs[severity];
-    const icon = <EuiButtonIcon iconType={svg} onClick={this.openPopover.bind(this)} />;
+    const icon = (
+      <EuiButtonIcon
+        aria-label="status_indicator"
+        iconType={svg}
+        onClick={this.openPopover.bind(this)}
+      />
+    );
     if (children.length === 0) {
       return <div />;
     }
@@ -123,7 +129,11 @@ export class StatusIndicatorComponent extends React.Component<Props, State> {
         return <Link to="/admin?tab=LanguageServers">install it here</Link>;
       case CTA.SWITCH_TO_HEAD:
         const { uri, path } = this.props.currentStatusPath!;
-        return <Link to={`/${uri}/${this.props.pathType}/HEAD/${path}`}>switch to HEAD</Link>;
+        const headUrl = path
+          ? `/${uri}/${this.props.pathType}/HEAD/${path}`
+          : `/${uri}/${this.props.pathType}/HEAD/`;
+
+        return <Link to={headUrl}>switch to HEAD</Link>;
     }
   }
 }

@@ -70,7 +70,8 @@
     "build:types": "tsc --p tsconfig.types.json",
     "core:acceptApiChanges": "node scripts/check_core_api_changes.js --accept",
     "kbn:bootstrap": "yarn build:types && node scripts/register_git_hook",
-    "spec_to_console": "node scripts/spec_to_console"
+    "spec_to_console": "node scripts/spec_to_console",
+    "backport-skip-ci": "backport --prDescription \"[skip-ci]\""
   },
   "repository": {
     "type": "git",
@@ -105,7 +106,7 @@
     "@babel/register": "7.4.4",
     "@elastic/charts": "^7.2.1",
     "@elastic/datemath": "5.0.2",
-    "@elastic/eui": "12.3.1",
+    "@elastic/eui": "13.0.0",
     "@elastic/filesaver": "1.1.2",
     "@elastic/good": "8.1.1-kibana2",
     "@elastic/numeral": "2.3.3",
@@ -346,7 +347,7 @@
     "babel-eslint": "10.0.2",
     "babel-jest": "^24.1.0",
     "babel-plugin-dynamic-import-node": "^2.2.0",
-    "backport": "4.5.5",
+    "backport": "4.6.1",
     "chai": "3.5.0",
     "chance": "1.0.18",
     "cheerio": "0.22.0",
