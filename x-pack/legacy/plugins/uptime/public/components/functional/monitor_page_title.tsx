@@ -25,7 +25,7 @@ export const MonitorPageTitleComponent = ({ data }: Props) =>
   data && data.monitorPageTitle ? (
     <EuiTitle size="xxs">
       <EuiTextColor color="subdued">
-        <h4 data-test-subj="monitor-page-title">{data.monitorPageTitle.id}</h4>
+        <h1 data-test-subj="monitor-page-title">{data.monitorPageTitle.id}</h1>
       </EuiTextColor>
     </EuiTitle>
   ) : (

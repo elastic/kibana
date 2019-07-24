@@ -289,7 +289,7 @@
                         "angle": 0,
                         "parent": null
                     },
-                    "expression": "timefilterControl compact=true column=\"@timestamp\"\n| render css=\".canvasTimePickerMini__button {\n border: none !important;\n}\"",
+                    "expression": "timefilterControl compact=true column=\"@timestamp\"\n| render css=\".canvasTimePickerPopover__button {\n border: none !important;\n}\"",
                     "filter": "timefilter from=\"now-14d\" to=now column=@timestamp"
                 },
                 {

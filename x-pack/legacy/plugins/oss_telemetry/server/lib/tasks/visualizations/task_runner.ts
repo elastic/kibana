@@ -36,7 +36,7 @@ async function getStats(callCluster: (method: string, params: any) => Promise<an
     },
   };
   const esResponse: ESQueryResponse = await callCluster('search', searchParams);
-  const size = _.get(esResponse, 'hits.hits.length');
+  const size = _.get<number>(esResponse, 'hits.hits.length');
   if (size < 1) {
     return;
   }

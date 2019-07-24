@@ -8,7 +8,7 @@ import * as React from 'react';
 import styled from 'styled-components';
 
 import { getHostsUrl, getNetworkUrl, getOverviewUrl, getTimelinesUrl } from '../../link_to';
-import { trackUiAction as track } from '../../../lib/track_usage';
+import { trackUiAction as track, METRIC_TYPE } from '../../../lib/track_usage';
 
 import * as i18n from '../translations';
 
@@ -93,16 +93,15 @@ export class TabNavigation extends React.PureComponent<TabNavigationProps, TabNa
 
   private renderTabs = () =>
     navTabs.map((tab: NavTab) => (
-      <TabContainer className="euiTab">
+      <TabContainer className="euiTab" key={`navigation-${tab.id}`}>
         <EuiLink data-test-subj={`navigation-link-${tab.id}`} href={tab.href + this.props.search}>
           <EuiTab
             data-href={tab.href}
             data-test-subj={`navigation-${tab.id}`}
             disabled={tab.disabled}
             isSelected={this.state.selectedTabId === tab.id}
-            key={`navigation-${tab.id}`}
             onClick={() => {
-              track(`tab_${tab.id}`);
+              track(METRIC_TYPE.CLICK, `tab_${tab.id}`);
             }}
           >
             {tab.name}

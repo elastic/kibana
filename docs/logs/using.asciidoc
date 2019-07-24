@@ -73,6 +73,19 @@ image::logs/images/logs-usage-streaming-indicator.png[Logs streaming indicator]
 Historical data offers infinite scrolling.
 
 [float]
+[[logs-highlight]]
+=== Highlight a phrase in the logs stream
+To find instances of a particular word or phrase in the logs stream, click the Highlights button in the toolbar and enter your search terms.
+
+[role="screenshot"]
+image::logs/images/logs-stream-highlight-box.png[Logs highlight dialog box]
+
+This will highlight any instances of your search terms that appear in the logs stream.
+
+[role="screenshot"]
+image::logs/images/logs-stream-highlight-entries.png[Logs stream with the search term 'safepoint' highlighted]
+
+[float]
 [[logs-event-inspector]]
 === Inspect a log event
 Click on a log event in the stream to inspect it.
