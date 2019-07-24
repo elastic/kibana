@@ -17,6 +17,7 @@ import {
   EuiSpacer,
   EuiSwitch,
   EuiTitle,
+  EuiComboBox,
 } from '@elastic/eui';
 import { Option } from '@elastic/eui/src/components/selectable/types';
 import { RestoreSettings } from '../../../../../common/types';
@@ -64,17 +65,19 @@ export const RestoreSnapshotStepLogistics: React.FunctionComponent<StepProps> = 
     )
   );
 
-  // State for using selectable indices list or custom pattern
+  // State for using selectable indices list or custom patterns
   const [selectIndicesMode, setSelectIndicesMode] = useState<'list' | 'custom'>(
     typeof restoreIndices === 'string' || snapshotIndices.length > 100 ? 'custom' : 'list'
+  );
+
+  // State for custom patterns
+  const [restoreIndexPatterns, setRestoreIndexPatterns] = useState<string[]>(
+    typeof restoreIndices === 'string' ? restoreIndices.split(',') : []
   );
 
   // State for setting renaming indices patterns
   const [isRenamingIndices, setIsRenamingIndices] = useState<boolean>(
     Boolean(renamePattern || renameReplacement)
-  );
-  const [restoreIndexPattern, setRestoreIndexPattern] = useState<string>(
-    typeof restoreIndices === 'string' ? restoreIndices : ''
   );
 
   // Caching state for togglable settings
@@ -161,7 +164,7 @@ export const RestoreSnapshotStepLogistics: React.FunctionComponent<StepProps> = 
                   updateRestoreSettings({
                     indices:
                       selectIndicesMode === 'custom'
-                        ? restoreIndexPattern
+                        ? restoreIndexPatterns.join(',')
                         : [...(cachedRestoreSettings.indices || [])],
                   });
                 }
@@ -185,12 +188,12 @@ export const RestoreSnapshotStepLogistics: React.FunctionComponent<StepProps> = 
                           <EuiLink
                             onClick={() => {
                               setSelectIndicesMode('custom');
-                              updateRestoreSettings({ indices: restoreIndexPattern });
+                              updateRestoreSettings({ indices: restoreIndexPatterns.join(',') });
                             }}
                           >
                             <FormattedMessage
                               id="xpack.snapshotRestore.restoreForm.stepLogistics.indicesToggleCustomLink"
-                              defaultMessage="Custom pattern"
+                              defaultMessage="Enter index patterns"
                             />
                           </EuiLink>
                         </EuiFlexItem>
@@ -200,7 +203,7 @@ export const RestoreSnapshotStepLogistics: React.FunctionComponent<StepProps> = 
                         <EuiFlexItem grow={false}>
                           <FormattedMessage
                             id="xpack.snapshotRestore.restoreForm.stepLogistics.indicesPatternLabel"
-                            defaultMessage="Index pattern"
+                            defaultMessage="Index patterns"
                           />
                         </EuiFlexItem>
                         <EuiFlexItem grow={false}>
@@ -212,7 +215,7 @@ export const RestoreSnapshotStepLogistics: React.FunctionComponent<StepProps> = 
                           >
                             <FormattedMessage
                               id="xpack.snapshotRestore.restoreForm.stepLogistics.indicesToggleListLink"
-                              defaultMessage="Select indices"
+                              defaultMessage="Select from indices list"
                             />
                           </EuiLink>
                         </EuiFlexItem>
@@ -300,13 +303,25 @@ export const RestoreSnapshotStepLogistics: React.FunctionComponent<StepProps> = 
                       )}
                     </EuiSelectable>
                   ) : (
-                    <EuiFieldText
-                      value={restoreIndexPattern}
-                      placeholder="logstash-*,index_name"
-                      onChange={e => {
-                        setRestoreIndexPattern(e.target.value);
+                    <EuiComboBox
+                      options={snapshotIndices.map(index => ({ label: index }))}
+                      placeholder="Enter index patterns or indices, i.e. logstash-*"
+                      selectedOptions={restoreIndexPatterns.map(pattern => ({ label: pattern }))}
+                      onCreateOption={(pattern: string) => {
+                        if (!pattern.trim().length) {
+                          return;
+                        }
+                        const newPatterns = [...restoreIndexPatterns, pattern];
+                        setRestoreIndexPatterns(newPatterns);
                         updateRestoreSettings({
-                          indices: e.target.value,
+                          indices: newPatterns.join(','),
+                        });
+                      }}
+                      onChange={(patterns: Array<{ label: string }>) => {
+                        const newPatterns = patterns.map(({ label }) => label);
+                        setRestoreIndexPatterns(newPatterns);
+                        updateRestoreSettings({
+                          indices: newPatterns.join(','),
                         });
                       }}
                     />
