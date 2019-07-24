@@ -19,7 +19,7 @@
 import React from 'react';
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 import { ShardFailureDescription } from './shard_failure_description';
-import shardFailureResponse from './__mocks__/shard_failure_response.json';
+import { shardFailureResponse } from './__mocks__/shard_failure_response';
 import { ShardFailure } from './shard_failure_types';
 
 describe('ShardFailureDescription', () => {

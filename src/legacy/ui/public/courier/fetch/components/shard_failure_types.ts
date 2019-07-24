@@ -43,6 +43,7 @@ export interface ShardFailure {
       type: string;
     };
     reason: string;
+    lang?: string;
     script?: string;
     script_stack?: string[];
     type: string;
