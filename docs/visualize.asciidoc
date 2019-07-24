@@ -138,6 +138,13 @@ For more information about working with sub aggregations, see
 https://www.elastic.co/blog/kibana-aggregation-execution-order-and-you[Kibana,
 Aggregation Execution Order, and You].
 
+<<<<<<< HEAD
+=======
+include::visualize/saving.asciidoc[]
+
+include::visualize/visualize_rollup_data.asciidoc[]
+
+>>>>>>> f1ca9b50e6... [DOCS] Updates images and adds example to rollup jobs doc (#41839)
 include::visualize/xychart.asciidoc[]
 
 include::visualize/controls.asciidoc[]
