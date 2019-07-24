@@ -24,7 +24,7 @@ import { NetworkTopNFlowTable, NetworkTopNFlowTableId } from '.';
 import { mockData } from './mock';
 
 describe('NetworkTopNFlow Table Component', () => {
-  const loadMore = jest.fn();
+  const loadPage = jest.fn();
   const state: State = mockGlobalState;
 
   let store = createStore(state, apolloClientObservable);
@@ -39,12 +39,16 @@ describe('NetworkTopNFlow Table Component', () => {
         <ReduxStoreProvider store={store}>
           <NetworkTopNFlowTable
             data={mockData.NetworkTopNFlow.edges}
-            hasNextPage={getOr(false, 'hasNextPage', mockData.NetworkTopNFlow.pageInfo)!}
+            fakeTotalCount={getOr(50, 'fakeTotalCount', mockData.NetworkTopNFlow.pageInfo)}
             id="topNFlow"
             indexPattern={mockIndexPattern}
             loading={false}
-            loadMore={loadMore}
-            nextCursor={getOr(null, 'endCursor.value', mockData.NetworkTopNFlow.pageInfo)}
+            loadPage={loadPage}
+            showMorePagesIndicator={getOr(
+              false,
+              'showMorePagesIndicator',
+              mockData.NetworkTopNFlow.pageInfo
+            )}
             totalCount={mockData.NetworkTopNFlow.totalCount}
             type={networkModel.NetworkType.page}
           />
@@ -66,12 +70,16 @@ describe('NetworkTopNFlow Table Component', () => {
           <TestProviders store={store}>
             <NetworkTopNFlowTable
               data={mockData.NetworkTopNFlow.edges}
-              hasNextPage={getOr(false, 'hasNextPage', mockData.NetworkTopNFlow.pageInfo)!}
+              fakeTotalCount={getOr(50, 'fakeTotalCount', mockData.NetworkTopNFlow.pageInfo)}
               id="topNFlow"
               indexPattern={mockIndexPattern}
               loading={false}
-              loadMore={loadMore}
-              nextCursor={getOr(null, 'endCursor.value', mockData.NetworkTopNFlow.pageInfo)}
+              loadPage={loadPage}
+              showMorePagesIndicator={getOr(
+                false,
+                'showMorePagesIndicator',
+                mockData.NetworkTopNFlow.pageInfo
+              )}
               totalCount={mockData.NetworkTopNFlow.totalCount}
               type={networkModel.NetworkType.page}
             />
@@ -103,12 +111,16 @@ describe('NetworkTopNFlow Table Component', () => {
           <TestProviders store={store}>
             <NetworkTopNFlowTable
               data={mockData.NetworkTopNFlow.edges}
-              hasNextPage={getOr(false, 'hasNextPage', mockData.NetworkTopNFlow.pageInfo)!}
+              fakeTotalCount={getOr(50, 'fakeTotalCount', mockData.NetworkTopNFlow.pageInfo)}
               id="topNFlow"
               indexPattern={mockIndexPattern}
               loading={false}
-              loadMore={loadMore}
-              nextCursor={getOr(null, 'endCursor.value', mockData.NetworkTopNFlow.pageInfo)}
+              loadPage={loadPage}
+              showMorePagesIndicator={getOr(
+                false,
+                'showMorePagesIndicator',
+                mockData.NetworkTopNFlow.pageInfo
+              )}
               totalCount={mockData.NetworkTopNFlow.totalCount}
               type={networkModel.NetworkType.page}
             />
@@ -145,12 +157,16 @@ describe('NetworkTopNFlow Table Component', () => {
           <TestProviders store={store}>
             <NetworkTopNFlowTable
               data={mockData.NetworkTopNFlow.edges}
-              hasNextPage={getOr(false, 'hasNextPage', mockData.NetworkTopNFlow.pageInfo)!}
+              fakeTotalCount={getOr(50, 'fakeTotalCount', mockData.NetworkTopNFlow.pageInfo)}
               id="topNFlow"
               indexPattern={mockIndexPattern}
               loading={false}
-              loadMore={loadMore}
-              nextCursor={getOr(null, 'endCursor.value', mockData.NetworkTopNFlow.pageInfo)}
+              loadPage={loadPage}
+              showMorePagesIndicator={getOr(
+                false,
+                'showMorePagesIndicator',
+                mockData.NetworkTopNFlow.pageInfo
+              )}
               totalCount={mockData.NetworkTopNFlow.totalCount}
               type={networkModel.NetworkType.page}
             />

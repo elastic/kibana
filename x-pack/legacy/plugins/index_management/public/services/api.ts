@@ -32,7 +32,7 @@ import {
 
 import { TAB_SETTINGS, TAB_MAPPING, TAB_STATS } from '../constants';
 
-import { trackUiMetric } from './track_ui_metric';
+import { trackUiMetric, METRIC_TYPE } from './track_ui_metric';
 import { useRequest, sendRequest } from './use_request';
 import { Template } from '../../common/types';
 
@@ -67,8 +67,8 @@ export async function closeIndices(indices: string[]) {
   };
   const response = await httpClient.post(`${apiPrefix}/indices/close`, body);
   // Only track successful requests.
-  const actionType = indices.length > 1 ? UIM_INDEX_CLOSE_MANY : UIM_INDEX_CLOSE;
-  trackUiMetric(actionType);
+  const eventName = indices.length > 1 ? UIM_INDEX_CLOSE_MANY : UIM_INDEX_CLOSE;
+  trackUiMetric(METRIC_TYPE.COUNT, eventName);
   return response.data;
 }
 
@@ -78,8 +78,8 @@ export async function deleteIndices(indices: string[]) {
   };
   const response = await httpClient.post(`${apiPrefix}/indices/delete`, body);
   // Only track successful requests.
-  const actionType = indices.length > 1 ? UIM_INDEX_DELETE_MANY : UIM_INDEX_DELETE;
-  trackUiMetric(actionType);
+  const eventName = indices.length > 1 ? UIM_INDEX_DELETE_MANY : UIM_INDEX_DELETE;
+  trackUiMetric(METRIC_TYPE.COUNT, eventName);
   return response.data;
 }
 
@@ -89,8 +89,8 @@ export async function openIndices(indices: string[]) {
   };
   const response = await httpClient.post(`${apiPrefix}/indices/open`, body);
   // Only track successful requests.
-  const actionType = indices.length > 1 ? UIM_INDEX_OPEN_MANY : UIM_INDEX_OPEN;
-  trackUiMetric(actionType);
+  const eventName = indices.length > 1 ? UIM_INDEX_OPEN_MANY : UIM_INDEX_OPEN;
+  trackUiMetric(METRIC_TYPE.COUNT, eventName);
   return response.data;
 }
 
@@ -100,8 +100,8 @@ export async function refreshIndices(indices: string[]) {
   };
   const response = await httpClient.post(`${apiPrefix}/indices/refresh`, body);
   // Only track successful requests.
-  const actionType = indices.length > 1 ? UIM_INDEX_REFRESH_MANY : UIM_INDEX_REFRESH;
-  trackUiMetric(actionType);
+  const eventName = indices.length > 1 ? UIM_INDEX_REFRESH_MANY : UIM_INDEX_REFRESH;
+  trackUiMetric(METRIC_TYPE.COUNT, eventName);
   return response.data;
 }
 
@@ -111,8 +111,8 @@ export async function flushIndices(indices: string[]) {
   };
   const response = await httpClient.post(`${apiPrefix}/indices/flush`, body);
   // Only track successful requests.
-  const actionType = indices.length > 1 ? UIM_INDEX_FLUSH_MANY : UIM_INDEX_FLUSH;
-  trackUiMetric(actionType);
+  const eventName = indices.length > 1 ? UIM_INDEX_FLUSH_MANY : UIM_INDEX_FLUSH;
+  trackUiMetric(METRIC_TYPE.COUNT, eventName);
   return response.data;
 }
 
@@ -123,8 +123,8 @@ export async function forcemergeIndices(indices: string[], maxNumSegments: strin
   };
   const response = await httpClient.post(`${apiPrefix}/indices/forcemerge`, body);
   // Only track successful requests.
-  const actionType = indices.length > 1 ? UIM_INDEX_FORCE_MERGE_MANY : UIM_INDEX_FORCE_MERGE;
-  trackUiMetric(actionType);
+  const eventName = indices.length > 1 ? UIM_INDEX_FORCE_MERGE_MANY : UIM_INDEX_FORCE_MERGE;
+  trackUiMetric(METRIC_TYPE.COUNT, eventName);
   return response.data;
 }
 
@@ -134,8 +134,8 @@ export async function clearCacheIndices(indices: string[]) {
   };
   const response = await httpClient.post(`${apiPrefix}/indices/clear_cache`, body);
   // Only track successful requests.
-  const actionType = indices.length > 1 ? UIM_INDEX_CLEAR_CACHE_MANY : UIM_INDEX_CLEAR_CACHE;
-  trackUiMetric(actionType);
+  const eventName = indices.length > 1 ? UIM_INDEX_CLEAR_CACHE_MANY : UIM_INDEX_CLEAR_CACHE;
+  trackUiMetric(METRIC_TYPE.COUNT, eventName);
   return response.data;
 }
 export async function freezeIndices(indices: string[]) {
@@ -144,8 +144,8 @@ export async function freezeIndices(indices: string[]) {
   };
   const response = await httpClient.post(`${apiPrefix}/indices/freeze`, body);
   // Only track successful requests.
-  const actionType = indices.length > 1 ? UIM_INDEX_FREEZE_MANY : UIM_INDEX_FREEZE;
-  trackUiMetric(actionType);
+  const eventName = indices.length > 1 ? UIM_INDEX_FREEZE_MANY : UIM_INDEX_FREEZE;
+  trackUiMetric(METRIC_TYPE.COUNT, eventName);
   return response.data;
 }
 export async function unfreezeIndices(indices: string[]) {
@@ -154,8 +154,8 @@ export async function unfreezeIndices(indices: string[]) {
   };
   const response = await httpClient.post(`${apiPrefix}/indices/unfreeze`, body);
   // Only track successful requests.
-  const actionType = indices.length > 1 ? UIM_INDEX_UNFREEZE_MANY : UIM_INDEX_UNFREEZE;
-  trackUiMetric(actionType);
+  const eventName = indices.length > 1 ? UIM_INDEX_UNFREEZE_MANY : UIM_INDEX_UNFREEZE;
+  trackUiMetric(METRIC_TYPE.COUNT, eventName);
   return response.data;
 }
 
@@ -167,7 +167,7 @@ export async function loadIndexSettings(indexName: string) {
 export async function updateIndexSettings(indexName: string, settings: object) {
   const response = await httpClient.put(`${apiPrefix}/settings/${indexName}`, settings);
   // Only track successful requests.
-  trackUiMetric(UIM_UPDATE_SETTINGS);
+  trackUiMetric(METRIC_TYPE.COUNT, UIM_UPDATE_SETTINGS);
   return response;
 }
 

@@ -5,7 +5,6 @@
  */
 
 import { buildPhraseFilter } from '@kbn/es-query';
-import { filterBarQueryFilter } from '../../kibana_services';
 import { TooltipProperty } from './tooltip_property';
 import _ from 'lodash';
 
@@ -35,17 +34,12 @@ export class ESTooltipProperty extends TooltipProperty {
     return field && (field.type === 'string' || field.type === 'date' || field.type === 'ip' || field.type === 'number');
   }
 
-  getESFilter() {
-    return buildPhraseFilter(
-      this._indexPattern.fields.byName[this._propertyName],
-      this._rawValue,
-      this._indexPattern);
-  }
-
-  getFilterAction() {
-    return () => {
-      const phraseFilter = this.getESFilter();
-      filterBarQueryFilter.addFilters([phraseFilter]);
-    };
+  async getESFilters() {
+    return [
+      buildPhraseFilter(
+        this._indexPattern.fields.byName[this._propertyName],
+        this._rawValue,
+        this._indexPattern)
+    ];
   }
 }
