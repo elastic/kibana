@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import './_table_vis_controller';
+import { legacyResponseHandlerProvider } from 'ui/vis/response_handlers/legacy';
 
-describe('Table Vis', function () {
-});
+export const createTableVisResponseHandler = () => legacyResponseHandlerProvider().handler;

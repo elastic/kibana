@@ -17,7 +17,24 @@
  * under the License.
  */
 
-import './_group';
-import './_table';
-describe('AggTable Component', function () {
-});
+import { PluginInitializerContext } from 'kibana/public';
+import { npSetup, npStart } from 'ui/new_platform';
+import { plugin } from '.';
+
+import { TablePluginSetupDependencies } from './plugin';
+import { visualizations } from '../../visualizations/public';
+import { LegacyDependenciesPlugin } from './shim';
+
+const plugins: Readonly<TablePluginSetupDependencies> = {
+  visualizations,
+  data: npSetup.plugins.data,
+
+  // Temporary solution
+  // It will be removed when all dependent services are migrated to the new platform.
+  __LEGACY: new LegacyDependenciesPlugin(),
+};
+
+const pluginInstance = plugin({} as PluginInitializerContext);
+
+export const setup = pluginInstance.setup(npSetup.core, plugins);
+export const start = pluginInstance.start(npStart.core);
