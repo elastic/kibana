@@ -32,6 +32,7 @@ import {
   formatFields,
   listBreadcrumb,
   createBreadcrumb,
+  retypeMetrics,
 } from '../../services';
 
 import { Navigation } from './navigation';
@@ -80,19 +81,23 @@ const stepIdToTitleMap = {
 export class JobCreateUi extends Component {
   static propTypes = {
     createJob: PropTypes.func,
+    clearCloneJob: PropTypes.func,
     isSaving: PropTypes.bool,
     createJobError: PropTypes.node,
-    jobToClone: PropTypes.object
+    jobToClone: PropTypes.object,
   };
 
   constructor(props) {
     super(props);
 
-    chrome.breadcrumbs.set([ MANAGEMENT_BREADCRUMB, listBreadcrumb, createBreadcrumb ]);
-
-    const stepsFields = mapValues(stepIdToStepConfigMap, step => cloneDeep(step.defaultFields || {}));
+    chrome.breadcrumbs.set([MANAGEMENT_BREADCRUMB, listBreadcrumb, createBreadcrumb]);
+    const { jobToClone: overrides } = props;
+    const stepsFields = mapValues(stepIdToStepConfigMap, step =>
+      cloneDeep(step.getDefaultFields(overrides))
+    );
 
     this.state = {
+      jobToClone: { ...overrides },
       checkpointStepId: stepIds[0],
       currentStepId: stepIds[0],
       nextStepId: stepIds[1],
@@ -113,6 +118,11 @@ export class JobCreateUi extends Component {
 
   componentDidMount() {
     this._isMounted = true;
+    const { clearCloneJob, jobToClone } = this.props;
+    if (jobToClone) {
+      clearCloneJob();
+      this.requestIndexPatternValidation();
+    }
   }
 
   componentDidUpdate(prevProps, prevState) {
@@ -148,145 +158,166 @@ export class JobCreateUi extends Component {
   requestIndexPatternValidation = debounce(() => {
     const indexPattern = this.getIndexPattern();
 
-    const lastIndexPatternValidationTime = this.lastIndexPatternValidationTime = Date.now();
-    validateIndexPattern(indexPattern).then(response => {
-      // We don't need to do anything if this component has been unmounted.
-      if (!this._isMounted) {
-        return;
-      }
-
-      // Ignore all responses except that to the most recent request.
-      if (lastIndexPatternValidationTime !== this.lastIndexPatternValidationTime) {
-        return;
-      }
-
-      const {
-        doesMatchIndices: doesIndexPatternMatchIndices,
-        doesMatchRollupIndices: doesIndexPatternMatchRollupIndices,
-        dateFields: indexPatternDateFields,
-        numericFields,
-        keywordFields,
-      } = response.data;
-
-      let indexPatternAsyncErrors;
-
-      if (doesIndexPatternMatchRollupIndices) {
-        indexPatternAsyncErrors = [(
-          <FormattedMessage
-            id="xpack.rollupJobs.create.errors.indexPatternMatchesRollupIndices"
-            defaultMessage="Index pattern must not match rollup indices."
-          />
-        )];
-      } else if (!doesIndexPatternMatchIndices) {
-        indexPatternAsyncErrors = [(
-          <FormattedMessage
-            id="xpack.rollupJobs.create.errors.indexPatternNoMatchingIndices"
-            defaultMessage="Index pattern doesn't match any indices."
-          />
-        )];
-      } else if (!indexPatternDateFields.length) {
-        indexPatternAsyncErrors = [(
-          <FormattedMessage
-            id="xpack.rollupJobs.create.errors.indexPatternNoTimeFields"
-            defaultMessage="Index pattern must match indices that contain time fields."
-          />
-        )];
-      }
-
-      const formattedNumericFields = formatFields(
-        numericFields,
-        i18n.translate('xpack.rollupJobs.create.numericTypeField', { defaultMessage: 'numeric' })
-      );
-      const formattedKeywordFields = formatFields(
-        keywordFields,
-        i18n.translate('xpack.rollupJobs.create.keywordTypeField', { defaultMessage: 'keyword' })
-      );
-      const formattedDateFields = formatFields(
-        indexPatternDateFields,
-        i18n.translate('xpack.rollupJobs.create.dateTypeField', { defaultMessage: 'date' })
-      );
-
-      function sortFields(a, b) {
-        const nameA = a.name.toUpperCase();
-        const nameB = b.name.toUpperCase();
-
-        if (nameA < nameB) {
-          return -1;
+    const lastIndexPatternValidationTime = (this.lastIndexPatternValidationTime = Date.now());
+    validateIndexPattern(indexPattern)
+      .then(response => {
+        // We don't need to do anything if this component has been unmounted.
+        if (!this._isMounted) {
+          return;
         }
 
-        if (nameA > nameB) {
-          return 1;
+        // Only re-request if the index pattern changed.
+        if (lastIndexPatternValidationTime !== this.lastIndexPatternValidationTime) {
+          return;
         }
 
-        return 0;
-      }
+        const {
+          doesMatchIndices: doesIndexPatternMatchIndices,
+          doesMatchRollupIndices: doesIndexPatternMatchRollupIndices,
+          dateFields: indexPatternDateFields,
+          numericFields,
+          keywordFields,
+        } = response.data;
 
-      const indexPatternTermsFields = [
-        ...formattedNumericFields,
-        ...formattedKeywordFields,
-      ].sort(sortFields);
+        let indexPatternAsyncErrors;
 
-      const indexPatternHistogramFields = [ ...formattedNumericFields ].sort(sortFields);
+        if (doesIndexPatternMatchRollupIndices) {
+          indexPatternAsyncErrors = [
+            <FormattedMessage
+              id="xpack.rollupJobs.create.errors.indexPatternMatchesRollupIndices"
+              defaultMessage="Index pattern must not match rollup indices."
+            />,
+          ];
+        } else if (!doesIndexPatternMatchIndices) {
+          indexPatternAsyncErrors = [
+            <FormattedMessage
+              id="xpack.rollupJobs.create.errors.indexPatternNoMatchingIndices"
+              defaultMessage="Index pattern doesn't match any indices."
+            />,
+          ];
+        } else if (!indexPatternDateFields.length) {
+          indexPatternAsyncErrors = [
+            <FormattedMessage
+              id="xpack.rollupJobs.create.errors.indexPatternNoTimeFields"
+              defaultMessage="Index pattern must match indices that contain time fields."
+            />,
+          ];
+        }
 
-      const indexPatternMetricsFields = [
-        ...formattedNumericFields,
-        ...formattedDateFields,
-      ].sort(sortFields);
+        const numericType = i18n.translate('xpack.rollupJobs.create.numericTypeField', {
+          defaultMessage: 'numeric',
+        });
+        const keywordType = i18n.translate('xpack.rollupJobs.create.keywordTypeField', {
+          defaultMessage: 'keyword',
+        });
+        const dateType = i18n.translate('xpack.rollupJobs.create.dateTypeField', {
+          defaultMessage: 'date',
+        });
 
-      this.setState({
-        indexPatternAsyncErrors,
-        indexPatternDateFields,
-        indexPatternTermsFields,
-        indexPatternHistogramFields,
-        indexPatternMetricsFields,
-        isValidatingIndexPattern: false,
-      });
+        const formattedNumericFields = formatFields(numericFields, numericType);
+        const formattedKeywordFields = formatFields(keywordFields, keywordType);
+        const formattedDateFields = formatFields(indexPatternDateFields, dateType);
 
-      // Select first time field by default.
-      this.onFieldsChange({
-        dateHistogramField: indexPatternDateFields.length ? indexPatternDateFields[0] : null,
-      }, STEP_DATE_HISTOGRAM);
-    }).catch((error) => {
-      // We don't need to do anything if this component has been unmounted.
-      if (!this._isMounted) {
-        return;
-      }
+        const { jobToClone, stepsFields } = this.state;
 
-      // Ignore all responses except that to the most recent request.
-      if (lastIndexPatternValidationTime !== this.lastIndexPatternValidationTime) {
-        return;
-      }
+        if (jobToClone) {
+          // Re-type any pre-existing metrics entries for the job we are cloning.
+          const {
+            [STEP_METRICS]: { metrics },
+          } = stepsFields;
+          const typeMaps = [
+            { fields: formattedNumericFields, type: numericType },
+            { fields: formattedKeywordFields, type: keywordType },
+            { fields: formattedDateFields, type: dateType },
+          ];
+          const retypedMetrics = retypeMetrics({ metrics, typeMaps });
+          this.onFieldsChange({ metrics: retypedMetrics }, STEP_METRICS);
+        }
 
-      // Expect an error in the shape provided by Angular's $http service.
-      if (error && error.data) {
-        const { error: errorString, statusCode } = error.data;
+        function sortFields(a, b) {
+          const nameA = a.name.toUpperCase();
+          const nameB = b.name.toUpperCase();
 
-        const indexPatternAsyncErrors = [(
-          <FormattedMessage
-            id="xpack.rollupJobs.create.errors.indexPatternValidationError"
-            defaultMessage="There was a problem validating this index pattern: {statusCode} {error}"
-            values={{ error: errorString, statusCode }}
-          />
-        )];
+          if (nameA < nameB) {
+            return -1;
+          }
+
+          if (nameA > nameB) {
+            return 1;
+          }
+
+          return 0;
+        }
+
+        const indexPatternTermsFields = [...formattedNumericFields, ...formattedKeywordFields].sort(
+          sortFields
+        );
+
+        const indexPatternHistogramFields = [...formattedNumericFields].sort(sortFields);
+
+        const indexPatternMetricsFields = [...formattedNumericFields, ...formattedDateFields].sort(
+          sortFields
+        );
 
         this.setState({
           indexPatternAsyncErrors,
-          indexPatternDateFields: [],
-          indexPatternTermsFields: [],
-          indexPatternHistogramFields: [],
-          indexPatternMetricsFields: [],
+          indexPatternDateFields,
+          indexPatternTermsFields,
+          indexPatternHistogramFields,
+          indexPatternMetricsFields,
           isValidatingIndexPattern: false,
         });
 
-        return;
-      }
+        // Select first time field by default.
+        this.onFieldsChange(
+          { dateHistogramField: indexPatternDateFields.length ? indexPatternDateFields[0] : null },
+          STEP_DATE_HISTOGRAM
+        );
+      })
+      .catch(error => {
+        // We don't need to do anything if this component has been unmounted.
+        if (!this._isMounted) {
+          return;
+        }
 
-      // This error isn't an HTTP error, so let the fatal error screen tell the user something
-      // unexpected happened.
-      fatalError(error, i18n.translate('xpack.rollupJobs.create.errors.indexPatternValidationFatalErrorTitle', {
-        defaultMessage: 'Rollup Job Wizard index pattern validation',
-      }));
-    });
+        // Ignore all responses except that to the most recent request.
+        if (lastIndexPatternValidationTime !== this.lastIndexPatternValidationTime) {
+          return;
+        }
+
+        // Expect an error in the shape provided by Angular's $http service.
+        if (error && error.data) {
+          const { error: errorString, statusCode } = error.data;
+
+          const indexPatternAsyncErrors = [
+            <FormattedMessage
+              id="xpack.rollupJobs.create.errors.indexPatternValidationError"
+              defaultMessage="There was a problem validating this index pattern: {statusCode} {error}"
+              values={{ error: errorString, statusCode }}
+            />,
+          ];
+
+          this.setState({
+            indexPatternAsyncErrors,
+            indexPatternDateFields: [],
+            indexPatternTermsFields: [],
+            indexPatternHistogramFields: [],
+            indexPatternMetricsFields: [],
+            isValidatingIndexPattern: false,
+          });
+
+          return;
+        }
+
+        // This error isn't an HTTP error, so let the fatal error screen tell the user something
+        // unexpected happened.
+        fatalError(
+          error,
+          i18n.translate('xpack.rollupJobs.create.errors.indexPatternValidationFatalErrorTitle', {
+            defaultMessage: 'Rollup Job Wizard index pattern validation',
+          })
+        );
+      });
   }, 300);
 
   getSteps() {
@@ -298,11 +329,12 @@ export class JobCreateUi extends Component {
       isComplete: index < indexOfCurrentStep,
       isSelected: index === indexOfCurrentStep,
       onClick: () => this.goToStep(stepId),
-      disabled: (
-        !this.canGoToStep(stepId)
-        || stepIds.indexOf(stepId) > stepIds.indexOf(checkpointStepId)
-      ),
-      'data-test-subj': index === indexOfCurrentStep ? `createRollupStep${index + 1}--active` : `createRollupStep${index + 1}`,
+      disabled:
+        !this.canGoToStep(stepId) || stepIds.indexOf(stepId) > stepIds.indexOf(checkpointStepId),
+      'data-test-subj':
+        index === indexOfCurrentStep
+          ? `createRollupStep${index + 1}--active`
+          : `createRollupStep${index + 1}`,
     }));
   }
 
@@ -351,10 +383,7 @@ export class JobCreateUi extends Component {
   }
 
   hasStepErrors(stepId) {
-    const {
-      indexPatternAsyncErrors,
-      stepsFieldErrors,
-    } = this.state;
+    const { indexPatternAsyncErrors, stepsFieldErrors } = this.state;
 
     if (stepId === STEP_LOGISTICS) {
       if (Boolean(indexPatternAsyncErrors)) {
@@ -370,7 +399,8 @@ export class JobCreateUi extends Component {
     return Object.keys(newStepsFields).reduce((stepsFieldErrors, stepId) => {
       const stepFields = newStepsFields[stepId];
       const fieldsValidator = stepIdToStepConfigMap[stepId].fieldsValidator;
-      stepsFieldErrors[stepId] = typeof fieldsValidator === `function` ? fieldsValidator(stepFields) : {};
+      stepsFieldErrors[stepId] =
+        typeof fieldsValidator === `function` ? fieldsValidator(stepFields) : {};
       return stepsFieldErrors;
     }, {});
   }
@@ -408,21 +438,10 @@ export class JobCreateUi extends Component {
           rollupDelay,
           rollupPageSize,
         },
-        [STEP_DATE_HISTOGRAM]: {
-          dateHistogramInterval,
-          dateHistogramTimeZone,
-          dateHistogramField,
-        },
-        [STEP_TERMS]: {
-          terms,
-        },
-        [STEP_HISTOGRAM]: {
-          histogram,
-          histogramInterval,
-        },
-        [STEP_METRICS]: {
-          metrics,
-        },
+        [STEP_DATE_HISTOGRAM]: { dateHistogramInterval, dateHistogramTimeZone, dateHistogramField },
+        [STEP_TERMS]: { terms },
+        [STEP_HISTOGRAM]: { histogram, histogramInterval },
+        [STEP_METRICS]: { metrics },
       },
     } = this.state;
 
@@ -476,13 +495,13 @@ export class JobCreateUi extends Component {
 
       if (cause) {
         if (cause.length === 1) {
-          errorBody = (
-            <p>{cause[0]}</p>
-          );
+          errorBody = <p>{cause[0]}</p>;
         } else {
           errorBody = (
             <ul>
-              {cause.map(causeValue => <li key={causeValue}>{causeValue}</li>)}
+              {cause.map(causeValue => (
+                <li key={causeValue}>{causeValue}</li>
+              ))}
             </ul>
           );
         }
@@ -490,11 +509,7 @@ export class JobCreateUi extends Component {
 
       saveErrorFeedback = (
         <Fragment>
-          <EuiCallOut
-            title={message}
-            icon="cross"
-            color="danger"
-          >
+          <EuiCallOut title={message} icon="cross" color="danger">
             {errorBody}
           </EuiCallOut>
 
@@ -528,7 +543,6 @@ export class JobCreateUi extends Component {
           <EuiSpacer size="l" />
 
           {this.renderNavigation()}
-
         </EuiPageContent>
         {savingFeedback}
       </Fragment>
@@ -613,11 +627,7 @@ export class JobCreateUi extends Component {
         );
 
       case STEP_REVIEW:
-        return (
-          <StepReview
-            job={this.getAllFields()}
-          />
-        );
+        return <StepReview job={this.getAllFields()} />;
 
       default:
         return null;
@@ -638,9 +648,9 @@ export class JobCreateUi extends Component {
     // Users can click the next step button as long as validation hasn't executed, and as long
     // as we're not waiting on async validation to complete.
     const canGoToNextStep =
-      !isValidatingIndexPattern
-      && hasNextStep
-      && (!areStepErrorsVisible || this.canGoToStep(nextStepId));
+      !isValidatingIndexPattern &&
+      hasNextStep &&
+      (!areStepErrorsVisible || this.canGoToStep(nextStepId));
 
     return (
       <Navigation

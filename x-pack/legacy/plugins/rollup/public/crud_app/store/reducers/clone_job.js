@@ -7,7 +7,7 @@
 import { CLONE_JOB_START, CLONE_JOB_CLEAR } from '../action_types';
 
 const initialState = {
-  job: null,
+  job: undefined,
 };
 
 export function cloneJob(state = initialState, action) {
@@ -18,7 +18,7 @@ export function cloneJob(state = initialState, action) {
   }
 
   if (type === CLONE_JOB_CLEAR) {
-    return { job: null };
+    return { job: undefined };
   }
 
   return state;
