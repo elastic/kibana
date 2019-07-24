@@ -5,10 +5,9 @@
  */
 import { Router, RouterRouteHandler } from '../../../../../server/lib/create_router';
 import { wrapEsError } from '../../../../../server/lib/create_router/error_wrappers';
-import { SnapshotDetails } from '../../../common/types';
+import { SnapshotDetails, SnapshotDetailsEs } from '../../../common/types';
 import { Plugins } from '../../../shim';
 import { deserializeSnapshotDetails, getManagedRepositoryName } from '../../lib';
-import { SnapshotDetailsEs } from '../../types';
 
 let callWithInternalUser: any;
 

@@ -12,6 +12,7 @@ export interface RestoreSettings {
   partial?: boolean;
   indexSettings?: string;
   ignoreIndexSettings?: string[];
+  ignoreUnavailable?: boolean;
 }
 
 export interface RestoreSettingsEs {
@@ -22,6 +23,7 @@ export interface RestoreSettingsEs {
   partial?: boolean;
   index_settings?: { [key: string]: any };
   ignore_index_settings?: string[];
+  ignore_unavailable?: boolean;
 }
 
 export interface SnapshotRestore {
