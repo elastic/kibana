@@ -27,17 +27,11 @@ import {
   TimelineDetailsData,
   TimelineEdges,
 } from '../../graphql/types';
-import { getDocumentation, getIndexAlias, hasDocumentation } from '../../utils/beat_schema';
 import { baseCategoryFields } from '../../utils/beat_schema/8.0.0';
 import { reduceFields } from '../../utils/build_query/reduce_fields';
 import { mergeFieldsWithHit, inspectStringifyObject } from '../../utils/build_query';
 import { eventFieldsMap } from '../ecs_fields';
-import {
-  FrameworkAdapter,
-  FrameworkRequest,
-  MappingProperties,
-  RequestOptions,
-} from '../framework';
+import { FrameworkAdapter, FrameworkRequest, RequestOptions } from '../framework';
 import { TermAggregation } from '../types';
 
 import { buildDetailsQuery, buildQuery } from './query.dsl';
@@ -126,14 +120,11 @@ export class ElasticsearchEventsAdapter implements EventsAdapter {
     options: RequestDetailsOptions
   ): Promise<TimelineDetailsData> {
     const dsl = buildDetailsQuery(options.indexName, options.eventId);
-    const [mapResponse, searchResponse] = await Promise.all([
-      this.framework.callWithRequest(request, 'indices.getMapping', {
-        allowNoIndices: true,
-        ignoreUnavailable: true,
-        index: options.indexName,
-      }),
-      this.framework.callWithRequest<EventHit, TermAggregation>(request, 'search', dsl),
-    ]);
+    const searchResponse = await this.framework.callWithRequest<EventHit, TermAggregation>(
+      request,
+      'search',
+      dsl
+    );
 
     const sourceData = getOr({}, 'hits.hits.0._source', searchResponse);
     const hitsData = getOr({}, 'hits.hits.0', searchResponse);
@@ -144,14 +135,7 @@ export class ElasticsearchEventsAdapter implements EventsAdapter {
     };
 
     return {
-      data: getSchemaFromData(
-        {
-          ...addBasicElasticSearchProperties(),
-          ...getOr({}, [options.indexName, 'mappings', 'properties'], mapResponse),
-        },
-        getDataFromHits(merge(sourceData, hitsData)),
-        getIndexAlias(options.defaultIndex, options.indexName)
-      ),
+      data: getDataFromHits(merge(sourceData, hitsData)),
       inspect,
     };
   }
@@ -307,50 +291,3 @@ const getDataFromHits = (sources: EventSource, category?: string, path?: string)
     }
     return accumulator;
   }, []);
-
-const getSchemaFromData = (
-  properties: MappingProperties,
-  data: DetailItem[],
-  index: string,
-  path?: string
-): DetailItem[] =>
-  !isEmpty(properties)
-    ? Object.keys(properties).reduce<DetailItem[]>((accumulator, property) => {
-        const item = get(property, properties);
-        const field = path ? `${path}.${property}` : property;
-        const dataFilterItem = data.filter(dataItem => dataItem.field === field);
-        if (item.properties == null && dataFilterItem.length === 1) {
-          const dataItem = dataFilterItem[0];
-          const dataFromMapping = {
-            type: get([property, 'type'], properties),
-          };
-          return [
-            ...accumulator,
-            {
-              ...dataItem,
-              ...(hasDocumentation(index, field)
-                ? merge(getDocumentation(index, field), dataFromMapping)
-                : dataFromMapping),
-            },
-          ];
-        } else if (item.properties != null) {
-          return [...accumulator, ...getSchemaFromData(item.properties, data, index, field)];
-        }
-        return accumulator;
-      }, [])
-    : data;
-
-const addBasicElasticSearchProperties = () => ({
-  _id: {
-    type: 'keyword',
-  },
-  _index: {
-    type: 'keyword',
-  },
-  _type: {
-    type: 'keyword',
-  },
-  _score: {
-    type: 'long',
-  },
-});
