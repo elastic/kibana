@@ -469,6 +469,7 @@ export interface OverlayStart {
     }) => OverlayRef;
     // (undocumented)
     openModal: (modalChildren: React.ReactNode, modalProps?: {
+        className?: string;
         closeButtonAriaLabel?: string;
         'data-test-subj'?: string;
     }) => OverlayRef;

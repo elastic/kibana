@@ -77,9 +77,9 @@ export interface OverlayStart {
   openModal: (
     modalChildren: React.ReactNode,
     modalProps?: {
+      className?: string;
       closeButtonAriaLabel?: string;
       'data-test-subj'?: string;
-      className?: string;
     }
   ) => OverlayRef;
 }
