@@ -240,7 +240,7 @@ function addPercentageCol(columns, title, rows, insertAtIndex) {
   const { id, sumTotal } = columns[insertAtIndex];
   const newId = `${id}-percents`;
   const formatter = getFormat({ id: 'percent' });
-  const i18nTitle = i18n.translate('tableVis.params.percentageTableColumnName', {
+  const i18nTitle = i18n.translate('visTypeTable.params.percentageTableColumnName', {
     defaultMessage: '{title} percentages',
     values: { title },
   });

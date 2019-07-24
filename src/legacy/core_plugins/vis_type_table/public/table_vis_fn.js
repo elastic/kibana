@@ -28,7 +28,7 @@ export const createTableVisFn  = (dependencies) => ({
       'kibana_datatable'
     ],
   },
-  help: i18n.translate('tableVis.function.help', {
+  help: i18n.translate('visTypeTable.function.help', {
     defaultMessage: 'Table visualization'
   }),
   args: {
