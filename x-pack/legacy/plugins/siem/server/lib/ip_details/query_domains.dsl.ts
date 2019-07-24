@@ -20,7 +20,7 @@ const getAggs = (
   flowTarget: FlowTarget,
   flowDirection: FlowDirection,
   domainsSortField: DomainsSortField,
-  limit: number
+  querySize: number
 ) => {
   return {
     domain_count: {
@@ -31,7 +31,7 @@ const getAggs = (
     [`${flowTarget}_domains`]: {
       terms: {
         field: `${flowTarget}.domain`,
-        size: limit + 1,
+        size: querySize,
         order: {
           ...getQueryOrder(domainsSortField),
         },
@@ -129,7 +129,7 @@ export const buildDomainsQuery = ({
   filterQuery,
   flowDirection,
   flowTarget,
-  pagination: { limit },
+  pagination: { querySize },
   defaultIndex,
   sourceConfiguration: {
     fields: { timestamp },
@@ -149,7 +149,7 @@ export const buildDomainsQuery = ({
     ignoreUnavailable: true,
     body: {
       aggs: {
-        ...getAggs(ip, flowTarget, flowDirection, domainsSortField, limit),
+        ...getAggs(ip, flowTarget, flowDirection, domainsSortField, querySize),
       },
       query: {
         bool: {
