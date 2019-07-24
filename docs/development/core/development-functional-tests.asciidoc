@@ -6,7 +6,7 @@ We use functional tests to make sure the Kibana UI works as expected. It replace
 [float]
 ==== Running functional tests
 
-The `FunctionalTestRunner` is very bare bones and gets most of its functionality from its config file, located at {blob}test/functional/config.js[test/functional/config.js]. If you’re writing a plugin you will have your own config file. See <<development-plugin-functional-tests>> for more info.
+The `FunctionalTestRunner` is very bare bones and gets most of its functionality from its config file, located at https://github.com/elastic/kibana/blob/master/test/functional/config.js[test/functional/config.js]. If you’re writing a plugin you will have your own config file. See <<development-plugin-functional-tests>> for more info.
 
 There are three ways to run the tests depending on your goals:
 
@@ -68,7 +68,14 @@ node scripts/functional_test_runner
 export TEST_BROWSER_HEADLESS=1
 ----------
 
-** When running against cloud deployment, some tests are not applicable use --exclude-tag to skip those tests.  An example shell file can be found at:  {blob}test/scripts/jenkins_kibana.sh[test/scripts/jenkins_kibana.sh]
+** To verify tests stability, you can slow down local network connection: (Chrome only)
++
+["source", "shell"]
+----------
+export TEST_THROTTLE_NETWORK=1
+----------
+
+** When running against cloud deployment, some tests are not applicable use --exclude-tag to skip those tests.  An example shell file can be found at:  https://github.com/elastic/kibana/tree/master/test/scripts/jenkins_cloud.sh[test/scripts/jenkins_cloud.sh]
 +
 ["source", "shell"]
 ----------
@@ -101,7 +108,7 @@ The tests are written in https://mochajs.org[mocha] using https://github.com/ela
 
 We use https://www.w3.org/TR/webdriver1/[WebDriver Protocol] to run tests in both Chrome and Firefox with the help of https://sites.google.com/a/chromium.org/chromedriver/[chromedriver] and https://firefox-source-docs.mozilla.org/testing/geckodriver/[geckodriver]. When the `FunctionalTestRunner` launches, `remote` service creates new webdriver session, which starts driver and a stripped-down browser instance. We use `browser` and `webElementWrapper` services to wrap up https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/[Webdriver API].
 
-The `FunctionalTestRunner` automatically transpiles functional tests using babel, so that tests can use the same ECMAScript features that Kibana source code uses. See {blob}style_guides/js_style_guide.md[style_guides/js_style_guide.md].
+The `FunctionalTestRunner` automatically transpiles functional tests using babel, so that tests can use the same ECMAScript features that Kibana source code uses. See https://github.com/elastic/kibana/blob/master/style_guides/js_style_guide.md[style_guides/js_style_guide.md].
 
 [float]
 ===== Definitions
@@ -217,7 +224,7 @@ The first and only argument to all providers is a Provider API Object. This obje
 Within config files the API has the following properties
 
 [horizontal]
-`log`::: An instance of the {blob}src/utils/tooling_log/tooling_log.js[`ToolingLog`] that is ready for use
+`log`::: An instance of the https://github.com/elastic/kibana/blob/master/packages/kbn-dev-utils/src/tooling_log/tooling_log.js[`ToolingLog`] that is ready for use
 `readConfigFile(path)`::: Returns a promise that will resolve to a Config instance that provides the values from the config file at `path`
 
 Within service and PageObject Providers the API is:
@@ -240,17 +247,17 @@ Within a test Provider the API is exactly the same as the service providers API 
 The `FunctionalTestRunner` comes with three built-in services:
 
 **config:**:::
-* Source: {blob}src/functional_test_runner/lib/config/config.js[src/functional_test_runner/lib/config/config.js]
-* Schema: {blob}src/functional_test_runner/lib/config/schema.js[src/functional_test_runner/lib/config/schema.js]
+* Source: https://github.com/elastic/kibana/blob/master/src/functional_test_runner/lib/config/config.ts[src/functional_test_runner/lib/config/config.ts]
+* Schema: https://github.com/elastic/kibana/blob/master/src/functional_test_runner/lib/config/schema.ts[src/functional_test_runner/lib/config/schema.ts]
 * Use `config.get(path)` to read any value from the config file
 
 **log:**:::
-* Source: {blob}src/utils/tooling_log/tooling_log.js[src/utils/tooling_log/tooling_log.js]
+* Source: https://github.com/elastic/kibana/blob/master/packages/kbn-dev-utils/src/tooling_log/tooling_log.js[packages/kbn-dev-utils/src/tooling_log/tooling_log.js]
 * `ToolingLog` instances are readable streams. The instance provided by this service is automatically piped to stdout by the `FunctionalTestRunner` CLI
 * `log.verbose()`, `log.debug()`, `log.info()`, `log.warning()` all work just like console.log but produce more organized output
 
 **lifecycle:**:::
-* Source: {blob}src/functional_test_runner/lib/lifecycle.js[src/functional_test_runner/lib/lifecycle.js]
+* Source: https://github.com/elastic/kibana/blob/master/src/functional_test_runner/lib/lifecycle.ts[src/functional_test_runner/lib/lifecycle.ts]
 * Designed primary for use in services
 * Exposes lifecycle events for basic coordination. Handlers can return a promise and resolve/fail asynchronously
 * Phases include: `beforeLoadTests`, `beforeTests`, `beforeEachTest`, `cleanup`, `phaseStart`, `phaseEnd`
