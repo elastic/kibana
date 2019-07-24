@@ -51,12 +51,12 @@ export interface DiscoverHistogramProps {
 }
 
 export class DiscoverHistogram extends Component<DiscoverHistogramProps> {
-  static propTypes = {
+  public static propTypes = {
     chartData: PropTypes.object,
     timefilterUpdateHandler: PropTypes.func,
   };
 
-  onBrushEnd = (min: number, max: number) => {
+  public onBrushEnd = (min: number, max: number) => {
     const range = {
       xaxis: {
         from: min,
@@ -67,7 +67,7 @@ export class DiscoverHistogram extends Component<DiscoverHistogramProps> {
     this.props.timefilterUpdateHandler(range);
   };
 
-  onElementClick = (xInterval: number) => (elementData: any) => {
+  public onElementClick = (xInterval: number) => (elementData: any) => {
     const startRange = elementData[0].x;
 
     const range = {
@@ -80,13 +80,13 @@ export class DiscoverHistogram extends Component<DiscoverHistogramProps> {
     this.props.timefilterUpdateHandler(range);
   };
 
-  formatXValue = (val: string) => {
+  public formatXValue = (val: string) => {
     const xAxisFormat = this.props.chartData.xAxisFormat.params.pattern;
 
     return moment(val).format(xAxisFormat);
   };
 
-  renderRectAnnotationTooltip = (details?: string) => (
+  public renderRectAnnotationTooltip = (details?: string) => (
     <div style={{ minWidth: 200 }}>
       <EuiFlexGroup alignItems="center">
         <EuiFlexItem grow={false}>
@@ -97,7 +97,7 @@ export class DiscoverHistogram extends Component<DiscoverHistogramProps> {
     </div>
   );
 
-  renderBarTooltip = (xInterval: number, domainStart: number, domainEnd: number) => (
+  public renderBarTooltip = (xInterval: number, domainStart: number, domainEnd: number) => (
     headerData: TooltipValue
   ): JSX.Element | string => {
     const headerDataValue = headerData.value;
@@ -126,7 +126,7 @@ export class DiscoverHistogram extends Component<DiscoverHistogramProps> {
     return formattedValue;
   };
 
-  render() {
+  public render() {
     const uiSettings = chrome.getUiSettingsClient();
     const timeZone = timezoneProvider(uiSettings)();
     const { chartData } = this.props;
