@@ -57,6 +57,7 @@ export const SourceConfigurationFlyout = injectI18n(
 
     const {
       addLogColumn,
+      moveLogColumn,
       indicesConfigurationProps,
       logColumnConfigurationProps,
       errors,
@@ -137,6 +138,7 @@ export const SourceConfigurationFlyout = injectI18n(
                     <EuiSpacer />
                     <LogColumnsConfigurationPanel
                       addLogColumn={addLogColumn}
+                      moveLogColumn={moveLogColumn}
                       availableFields={availableFields}
                       isLoading={isLoading}
                       logColumnConfiguration={logColumnConfigurationProps}
@@ -148,6 +150,7 @@ export const SourceConfigurationFlyout = injectI18n(
           : [],
       [
         addLogColumn,
+        moveLogColumn,
         availableFields,
         indicesConfigurationProps,
         intl.formatMessage,

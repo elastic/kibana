@@ -23,7 +23,7 @@ import { HelloWorldEmbeddable } from '../../../../../../src/legacy/core_plugins/
 export class ContactCardEmbeddableExample extends React.Component<{}> {
   private embeddable: HelloWorldEmbeddable;
 
-  public constructor() {
+  constructor() {
     super({});
     this.embeddable = new HelloWorldEmbeddable({ id: 'hello' });
   }
