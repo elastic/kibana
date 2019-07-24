@@ -16,12 +16,10 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
-import { functionsRegistry } from 'plugins/interpreter/registries';
 import { convertToGeoJson } from 'ui/vis/map/convert_to_geojson';
 import { i18n } from '@kbn/i18n';
 
-export const tilemap = () => ({
+export const createTileMapFn = () => ({
   name: 'tilemap',
   type: 'render',
   context: {
@@ -40,7 +38,6 @@ export const tilemap = () => ({
   },
   fn(context, args) {
     const visConfig = JSON.parse(args.visConfig);
-
     const { geohash, metric, geocentroid } = visConfig.dimensions;
     const convertedData = convertToGeoJson(context, {
       geohash,
@@ -63,4 +60,3 @@ export const tilemap = () => ({
   },
 });
 
-functionsRegistry.register(tilemap);
