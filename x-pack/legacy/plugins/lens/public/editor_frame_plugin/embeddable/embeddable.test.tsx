@@ -12,11 +12,11 @@ import { Document } from '../../persistence';
 import { act } from 'react-dom/test-utils';
 
 const savedVis: Document = {
-  datasourceType: '',
+  activeDatasourceId: '',
   expression: 'my | expression',
   state: {
     visualization: {},
-    datasource: {},
+    datasourceStates: {},
     datasourceMetaData: {
       filterableIndexPatterns: [],
     },
