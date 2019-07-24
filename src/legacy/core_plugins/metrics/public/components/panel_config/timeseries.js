@@ -144,7 +144,6 @@ class TimeseriesPanelConfigUi extends Component {
           fields={this.props.fields}
           model={this.props.model}
           name={this.props.name}
-          visData$={this.props.visData$}
           onChange={this.props.onChange}
         />
       );
@@ -400,7 +399,6 @@ TimeseriesPanelConfigUi.propTypes = {
   fields: PropTypes.object,
   model: PropTypes.object,
   onChange: PropTypes.func,
-  visData$: PropTypes.object,
 };
 
 export const TimeseriesPanelConfig = injectI18n(TimeseriesPanelConfigUi);

@@ -3,7 +3,10 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { serializeRestoreSettings } from './restore_settings_serialization';
+import {
+  deserializeRestoreSettings,
+  serializeRestoreSettings,
+} from './restore_settings_serialization';
 
 describe('restore_settings_serialization()', () => {
   it('should serialize blank restore settings', () => {
@@ -35,6 +38,7 @@ describe('restore_settings_serialization()', () => {
         partial: true,
         indexSettings: '{"modified_setting":123}',
         ignoreIndexSettings: ['setting1'],
+        ignoreUnavailable: true,
       })
     ).toEqual({
       indices: ['foo', 'bar'],
@@ -44,6 +48,7 @@ describe('restore_settings_serialization()', () => {
       partial: true,
       index_settings: { modified_setting: 123 },
       ignore_index_settings: ['setting1'],
+      ignore_unavailable: true,
     });
   });
 
@@ -53,5 +58,48 @@ describe('restore_settings_serialization()', () => {
         indexSettings: '{"invalid_setting:123,}',
       })
     ).toEqual({});
+  });
+
+  it('should deserialize blank restore settings', () => {
+    expect(deserializeRestoreSettings({})).toEqual({});
+  });
+
+  it('should deserialize partial restore settings', () => {
+    expect(deserializeRestoreSettings({})).toEqual({});
+    expect(
+      deserializeRestoreSettings({
+        indices: ['foo', 'bar'],
+        ignore_index_settings: ['setting1'],
+        partial: true,
+      })
+    ).toEqual({
+      indices: ['foo', 'bar'],
+      ignoreIndexSettings: ['setting1'],
+      partial: true,
+    });
+  });
+
+  it('should deserialize full restore settings', () => {
+    expect(
+      deserializeRestoreSettings({
+        indices: ['foo', 'bar'],
+        rename_pattern: 'capture_pattern',
+        rename_replacement: 'replacement_pattern',
+        include_global_state: true,
+        partial: true,
+        index_settings: { modified_setting: 123 },
+        ignore_index_settings: ['setting1'],
+        ignore_unavailable: true,
+      })
+    ).toEqual({
+      indices: ['foo', 'bar'],
+      renamePattern: 'capture_pattern',
+      renameReplacement: 'replacement_pattern',
+      includeGlobalState: true,
+      partial: true,
+      indexSettings: '{"modified_setting":123}',
+      ignoreIndexSettings: ['setting1'],
+      ignoreUnavailable: true,
+    });
   });
 });
