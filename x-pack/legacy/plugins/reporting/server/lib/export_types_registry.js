@@ -23,7 +23,7 @@ function scan(pattern) {
 
 const pattern = resolve(__dirname, '../../export_types/*/server/index.[jt]s');
 async function exportTypesRegistryFn(server) {
-  const logger = LevelLogger.createForServer(server, ['reporting', 'export_types_registry']);
+  const logger = LevelLogger.createForServer(server, ['reporting', 'exportTypes']);
   const exportTypesRegistry = new ExportTypesRegistry();
   const files = await scan(pattern);
 
