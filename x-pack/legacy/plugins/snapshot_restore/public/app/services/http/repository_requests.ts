@@ -12,7 +12,7 @@ import {
   UIM_REPOSITORY_DELETE_MANY,
   UIM_REPOSITORY_DETAIL_PANEL_VERIFY,
 } from '../../constants';
-import { trackUiMetric } from '../ui_metric';
+import { uiMetricService } from '../ui_metric';
 import { addBasePath } from './http';
 import { sendRequest, useRequest } from './use_request';
 
@@ -37,6 +37,7 @@ export const verifyRepository = async (name: Repository['name']) => {
     method: 'get',
   });
 
+  const { trackUiMetric } = uiMetricService;
   trackUiMetric(UIM_REPOSITORY_DETAIL_PANEL_VERIFY);
   return result;
 };
@@ -56,6 +57,7 @@ export const addRepository = async (newRepository: Repository | EmptyRepository)
     body: newRepository,
   });
 
+  const { trackUiMetric } = uiMetricService;
   trackUiMetric(UIM_REPOSITORY_CREATE);
   return result;
 };
@@ -67,6 +69,7 @@ export const editRepository = async (editedRepository: Repository | EmptyReposit
     body: editedRepository,
   });
 
+  const { trackUiMetric } = uiMetricService;
   trackUiMetric(UIM_REPOSITORY_UPDATE);
   return result;
 };
@@ -79,6 +82,7 @@ export const deleteRepositories = async (names: Array<Repository['name']>) => {
     method: 'delete',
   });
 
+  const { trackUiMetric } = uiMetricService;
   trackUiMetric(names.length > 1 ? UIM_REPOSITORY_DELETE_MANY : UIM_REPOSITORY_DELETE);
   return result;
 };

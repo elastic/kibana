@@ -22,7 +22,7 @@ import { UIM_RESTORE_LIST_LOAD, BASE_PATH } from '../../../constants';
 import { useAppDependencies } from '../../../index';
 import { useLoadRestores } from '../../../services/http';
 import { useAppState } from '../../../services/state';
-import { trackUiMetric } from '../../../services/ui_metric';
+import { uiMetricService } from '../../../services/ui_metric';
 import { RestoreTable } from './restore_table';
 
 const ONE_SECOND_MS = 1000;
@@ -88,6 +88,7 @@ export const RestoreList: React.FunctionComponent = () => {
   );
 
   // Track component loaded
+  const { trackUiMetric } = uiMetricService;
   useEffect(() => {
     trackUiMetric(UIM_RESTORE_LIST_LOAD);
   }, []);

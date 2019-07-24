@@ -5,7 +5,7 @@
  */
 import { API_BASE_PATH } from '../../../../common/constants';
 import { UIM_SNAPSHOT_DELETE, UIM_SNAPSHOT_DELETE_MANY } from '../../constants';
-import { trackUiMetric } from '../ui_metric';
+import { uiMetricService } from '../ui_metric';
 import { addBasePath } from './http';
 import { sendRequest, useRequest } from './use_request';
 
@@ -38,6 +38,7 @@ export const deleteSnapshots = async (
     method: 'delete',
   });
 
+  const { trackUiMetric } = uiMetricService;
   trackUiMetric(snapshotIds.length > 1 ? UIM_SNAPSHOT_DELETE_MANY : UIM_SNAPSHOT_DELETE);
   return result;
 };
