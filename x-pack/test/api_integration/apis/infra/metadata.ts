@@ -66,6 +66,174 @@ const metadataTests: KbnTestProvider = ({ getService }) => {
           });
       });
     });
+
+    describe('8.0.0', () => {
+      const archiveName = 'infra/8.0.0/logs_and_metrics';
+      before(() => esArchiver.load(archiveName));
+      after(() => esArchiver.unload(archiveName));
+
+      it('host', () => {
+        return client
+          .query<MetadataQuery.Query>({
+            query: metadataQuery,
+            variables: {
+              sourceId: 'default',
+              nodeId: 'gke-observability-8--observability-8--bc1afd95-f0zc',
+              nodeType: 'host',
+            },
+          })
+          .then(resp => {
+            const metadata = resp.data.source.metadataByNode;
+            if (metadata) {
+              expect(metadata.features.length).to.be(60);
+              expect(metadata.name).to.equal('gke-observability-8--observability-8--bc1afd95-f0zc');
+              expect(metadata.info).to.eql({
+                cloud: {
+                  instance: {
+                    id: '6200309808276807579',
+                    name: 'gke-observability-8--observability-8--bc1afd95-f0zc',
+                    __typename: 'InfraNodeCloudInstance',
+                  },
+                  provider: 'gcp',
+                  availability_zone: 'europe-west1-c',
+                  project: {
+                    id: 'elastic-observability',
+                    __typename: 'InfraNodeCloudProject',
+                  },
+                  __typename: 'InfraNodeCloud',
+                },
+                host: {
+                  name: 'gke-observability-8--observability-8--bc1afd95-f0zc',
+                  os: {
+                    codename: 'Core',
+                    family: 'redhat',
+                    kernel: '4.14.127+',
+                    name: 'CentOS Linux',
+                    platform: 'centos',
+                    version: '7 (Core)',
+                    __typename: 'InfraNodeHostOS',
+                  },
+                  architecture: 'x86_64',
+                  containerized: false,
+                  __typename: 'InfraNodeHost',
+                },
+                __typename: 'InfraNodeInfo',
+              });
+            } else {
+              throw new Error('Metadata should never be empty');
+            }
+          });
+      });
+
+      it('pod', () => {
+        return client
+          .query<MetadataQuery.Query>({
+            query: metadataQuery,
+            variables: {
+              sourceId: 'default',
+              nodeId: '14887487-99f8-11e9-9a96-42010a84004d',
+              nodeType: 'pod',
+            },
+          })
+          .then(resp => {
+            const metadata = resp.data.source.metadataByNode;
+            if (metadata) {
+              expect(metadata.features.length).to.be(27);
+              // With this data set the `kubernetes.pod.name` fields have been removed.
+              expect(metadata.name).to.equal('14887487-99f8-11e9-9a96-42010a84004d');
+              expect(metadata.info).to.eql({
+                cloud: {
+                  instance: {
+                    id: '6613144177892233360',
+                    name: 'gke-observability-8--observability-8--bc1afd95-ngmh',
+                    __typename: 'InfraNodeCloudInstance',
+                  },
+                  provider: 'gcp',
+                  availability_zone: 'europe-west1-c',
+                  project: {
+                    id: 'elastic-observability',
+                    __typename: 'InfraNodeCloudProject',
+                  },
+                  __typename: 'InfraNodeCloud',
+                },
+                host: {
+                  name: 'gke-observability-8--observability-8--bc1afd95-ngmh',
+                  os: {
+                    codename: 'Core',
+                    family: 'redhat',
+                    kernel: '4.14.127+',
+                    name: 'CentOS Linux',
+                    platform: 'centos',
+                    version: '7 (Core)',
+                    __typename: 'InfraNodeHostOS',
+                  },
+                  architecture: 'x86_64',
+                  containerized: false,
+                  __typename: 'InfraNodeHost',
+                },
+                __typename: 'InfraNodeInfo',
+              });
+            } else {
+              throw new Error('Metadata should never be empty');
+            }
+          });
+      });
+
+      it('container', () => {
+        return client
+          .query<MetadataQuery.Query>({
+            query: metadataQuery,
+            variables: {
+              sourceId: 'default',
+              nodeId: 'c74b04834c6d7cc1800c3afbe31d0c8c0c267f06e9eb45c2b0c2df3e6cee40c5',
+              nodeType: 'container',
+            },
+          })
+          .then(resp => {
+            const metadata = resp.data.source.metadataByNode;
+            if (metadata) {
+              expect(metadata.features.length).to.be(26);
+              expect(metadata.name).to.equal(
+                'k8s_prometheus-to-sd-exporter_fluentd-gcp-v3.2.0-w68r5_kube-system_26950cde-9aed-11e9-9a96-42010a84004d_0'
+              );
+              expect(metadata.info).to.eql({
+                cloud: {
+                  instance: {
+                    id: '4039094952262994102',
+                    name: 'gke-observability-8--observability-8--bc1afd95-nhhw',
+                    __typename: 'InfraNodeCloudInstance',
+                  },
+                  provider: 'gcp',
+                  availability_zone: 'europe-west1-c',
+                  project: {
+                    id: 'elastic-observability',
+                    __typename: 'InfraNodeCloudProject',
+                  },
+                  __typename: 'InfraNodeCloud',
+                },
+                host: {
+                  name: 'gke-observability-8--observability-8--bc1afd95-nhhw',
+                  os: {
+                    codename: 'Core',
+                    family: 'redhat',
+                    kernel: '4.14.127+',
+                    name: 'CentOS Linux',
+                    platform: 'centos',
+                    version: '7 (Core)',
+                    __typename: 'InfraNodeHostOS',
+                  },
+                  architecture: 'x86_64',
+                  containerized: false,
+                  __typename: 'InfraNodeHost',
+                },
+                __typename: 'InfraNodeInfo',
+              });
+            } else {
+              throw new Error('Metadata should never be empty');
+            }
+          });
+      });
+    });
   });
 };
 

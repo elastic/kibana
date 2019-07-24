@@ -1108,7 +1108,7 @@
       {
         "kind": "OBJECT",
         "name": "InfraNodeMetadata",
-        "description": "",
+        "description": "One metadata entry for a node.",
         "fields": [
           {
             "name": "id",
@@ -1171,7 +1171,7 @@
       {
         "kind": "OBJECT",
         "name": "InfraNodeInfo",
-        "description": "",
+        "description": "The info object for the node",
         "fields": [
           {
             "name": "host",
@@ -1198,7 +1198,7 @@
       {
         "kind": "OBJECT",
         "name": "InfraNodeHost",
-        "description": "",
+        "description": "The host object for the node",
         "fields": [
           {
             "name": "name",
@@ -1241,7 +1241,7 @@
       {
         "kind": "OBJECT",
         "name": "InfraNodeHostOS",
-        "description": "",
+        "description": "The operation system object for the node",
         "fields": [
           {
             "name": "codename",
@@ -1300,7 +1300,7 @@
       {
         "kind": "OBJECT",
         "name": "InfraNodeCloud",
-        "description": "",
+        "description": "The cloud object for the node",
         "fields": [
           {
             "name": "instance",
@@ -1333,6 +1333,14 @@
             "type": { "kind": "OBJECT", "name": "InfraNodeCloudProject", "ofType": null },
             "isDeprecated": false,
             "deprecationReason": null
+          },
+          {
+            "name": "machine",
+            "description": "",
+            "args": [],
+            "type": { "kind": "OBJECT", "name": "InfraNodeCloudMachine", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
           }
         ],
         "inputFields": null,
@@ -1343,7 +1351,7 @@
       {
         "kind": "OBJECT",
         "name": "InfraNodeCloudInstance",
-        "description": "One metadata entry for a node.",
+        "description": "The cloud instance object for the node",
         "fields": [
           {
             "name": "id",
@@ -1370,13 +1378,32 @@
       {
         "kind": "OBJECT",
         "name": "InfraNodeCloudProject",
-        "description": "",
+        "description": "The cloud project object for the node",
         "fields": [
           {
             "name": "id",
             "description": "",
             "args": [],
             "type": { "kind": "SCALAR", "name": "ID", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "OBJECT",
+        "name": "InfraNodeCloudMachine",
+        "description": "The Cloud machine object for the node",
+        "fields": [
+          {
+            "name": "type",
+            "description": "",
+            "args": [],
+            "type": { "kind": "SCALAR", "name": "String", "ofType": null },
             "isDeprecated": false,
             "deprecationReason": null
           }

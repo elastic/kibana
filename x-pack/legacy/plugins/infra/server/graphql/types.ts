@@ -160,7 +160,7 @@ export interface InfraIndexField {
   /** Whether the field's values can be aggregated */
   aggregatable: boolean;
 }
-
+/** One metadata entry for a node. */
 export interface InfraNodeMetadata {
   id: string;
 
@@ -170,13 +170,13 @@ export interface InfraNodeMetadata {
 
   features: InfraNodeFeature[];
 }
-
+/** The info object for the node */
 export interface InfraNodeInfo {
   host?: InfraNodeHost | null;
 
   cloud?: InfraNodeCloud | null;
 }
-
+/** The host object for the node */
 export interface InfraNodeHost {
   name?: string | null;
 
@@ -186,7 +186,7 @@ export interface InfraNodeHost {
 
   containerized?: boolean | null;
 }
-
+/** The operation system object for the node */
 export interface InfraNodeHostOs {
   codename?: string | null;
 
@@ -200,7 +200,7 @@ export interface InfraNodeHostOs {
 
   version?: string | null;
 }
-
+/** The cloud object for the node */
 export interface InfraNodeCloud {
   instance?: InfraNodeCloudInstance | null;
 
@@ -209,16 +209,22 @@ export interface InfraNodeCloud {
   availability_zone?: string | null;
 
   project?: InfraNodeCloudProject | null;
+
+  machine?: InfraNodeCloudMachine | null;
 }
-/** One metadata entry for a node. */
+/** The cloud instance object for the node */
 export interface InfraNodeCloudInstance {
   id?: string | null;
 
   name?: string | null;
 }
-
+/** The cloud project object for the node */
 export interface InfraNodeCloudProject {
   id?: string | null;
+}
+/** The Cloud machine object for the node */
+export interface InfraNodeCloudMachine {
+  type?: string | null;
 }
 
 export interface InfraNodeFeature {
@@ -1153,7 +1159,7 @@ export namespace InfraIndexFieldResolvers {
     Context = InfraContext
   > = Resolver<R, Parent, Context>;
 }
-
+/** One metadata entry for a node. */
 export namespace InfraNodeMetadataResolvers {
   export interface Resolvers<Context = InfraContext, TypeParent = InfraNodeMetadata> {
     id?: IdResolver<string, TypeParent, Context>;
@@ -1186,7 +1192,7 @@ export namespace InfraNodeMetadataResolvers {
     Context = InfraContext
   > = Resolver<R, Parent, Context>;
 }
-
+/** The info object for the node */
 export namespace InfraNodeInfoResolvers {
   export interface Resolvers<Context = InfraContext, TypeParent = InfraNodeInfo> {
     host?: HostResolver<InfraNodeHost | null, TypeParent, Context>;
@@ -1205,7 +1211,7 @@ export namespace InfraNodeInfoResolvers {
     Context = InfraContext
   > = Resolver<R, Parent, Context>;
 }
-
+/** The host object for the node */
 export namespace InfraNodeHostResolvers {
   export interface Resolvers<Context = InfraContext, TypeParent = InfraNodeHost> {
     name?: NameResolver<string | null, TypeParent, Context>;
@@ -1238,7 +1244,7 @@ export namespace InfraNodeHostResolvers {
     Context = InfraContext
   > = Resolver<R, Parent, Context>;
 }
-
+/** The operation system object for the node */
 export namespace InfraNodeHostOsResolvers {
   export interface Resolvers<Context = InfraContext, TypeParent = InfraNodeHostOs> {
     codename?: CodenameResolver<string | null, TypeParent, Context>;
@@ -1285,7 +1291,7 @@ export namespace InfraNodeHostOsResolvers {
     Context = InfraContext
   > = Resolver<R, Parent, Context>;
 }
-
+/** The cloud object for the node */
 export namespace InfraNodeCloudResolvers {
   export interface Resolvers<Context = InfraContext, TypeParent = InfraNodeCloud> {
     instance?: InstanceResolver<InfraNodeCloudInstance | null, TypeParent, Context>;
@@ -1295,6 +1301,8 @@ export namespace InfraNodeCloudResolvers {
     availability_zone?: AvailabilityZoneResolver<string | null, TypeParent, Context>;
 
     project?: ProjectResolver<InfraNodeCloudProject | null, TypeParent, Context>;
+
+    machine?: MachineResolver<InfraNodeCloudMachine | null, TypeParent, Context>;
   }
 
   export type InstanceResolver<
@@ -1317,8 +1325,13 @@ export namespace InfraNodeCloudResolvers {
     Parent = InfraNodeCloud,
     Context = InfraContext
   > = Resolver<R, Parent, Context>;
+  export type MachineResolver<
+    R = InfraNodeCloudMachine | null,
+    Parent = InfraNodeCloud,
+    Context = InfraContext
+  > = Resolver<R, Parent, Context>;
 }
-/** One metadata entry for a node. */
+/** The cloud instance object for the node */
 export namespace InfraNodeCloudInstanceResolvers {
   export interface Resolvers<Context = InfraContext, TypeParent = InfraNodeCloudInstance> {
     id?: IdResolver<string | null, TypeParent, Context>;
@@ -1337,7 +1350,7 @@ export namespace InfraNodeCloudInstanceResolvers {
     Context = InfraContext
   > = Resolver<R, Parent, Context>;
 }
-
+/** The cloud project object for the node */
 export namespace InfraNodeCloudProjectResolvers {
   export interface Resolvers<Context = InfraContext, TypeParent = InfraNodeCloudProject> {
     id?: IdResolver<string | null, TypeParent, Context>;
@@ -1346,6 +1359,18 @@ export namespace InfraNodeCloudProjectResolvers {
   export type IdResolver<
     R = string | null,
     Parent = InfraNodeCloudProject,
+    Context = InfraContext
+  > = Resolver<R, Parent, Context>;
+}
+/** The Cloud machine object for the node */
+export namespace InfraNodeCloudMachineResolvers {
+  export interface Resolvers<Context = InfraContext, TypeParent = InfraNodeCloudMachine> {
+    type?: TypeResolver<string | null, TypeParent, Context>;
+  }
+
+  export type TypeResolver<
+    R = string | null,
+    Parent = InfraNodeCloudMachine,
     Context = InfraContext
   > = Resolver<R, Parent, Context>;
 }

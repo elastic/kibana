@@ -18,12 +18,18 @@ export const metadataSchema = gql`
     id: ID
   }
 
+  "The Cloud machine object for the node"
+  type InfraNodeCloudMachine {
+    type: String
+  }
+
   "The cloud object for the node"
   type InfraNodeCloud {
     instance: InfraNodeCloudInstance
     provider: String
     availability_zone: String
     project: InfraNodeCloudProject
+    machine: InfraNodeCloudMachine
   }
 
   "The operation system object for the node"

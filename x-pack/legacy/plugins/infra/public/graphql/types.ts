@@ -132,7 +132,7 @@ export interface InfraIndexField {
   /** Whether the field's values can be aggregated */
   aggregatable: boolean;
 }
-
+/** One metadata entry for a node. */
 export interface InfraNodeMetadata {
   id: string;
 
@@ -142,13 +142,13 @@ export interface InfraNodeMetadata {
 
   features: InfraNodeFeature[];
 }
-
+/** The info object for the node */
 export interface InfraNodeInfo {
   host?: InfraNodeHost | null;
 
   cloud?: InfraNodeCloud | null;
 }
-
+/** The host object for the node */
 export interface InfraNodeHost {
   name?: string | null;
 
@@ -158,7 +158,7 @@ export interface InfraNodeHost {
 
   containerized?: boolean | null;
 }
-
+/** The operation system object for the node */
 export interface InfraNodeHostOs {
   codename?: string | null;
 
@@ -172,7 +172,7 @@ export interface InfraNodeHostOs {
 
   version?: string | null;
 }
-
+/** The cloud object for the node */
 export interface InfraNodeCloud {
   instance?: InfraNodeCloudInstance | null;
 
@@ -181,16 +181,22 @@ export interface InfraNodeCloud {
   availability_zone?: string | null;
 
   project?: InfraNodeCloudProject | null;
+
+  machine?: InfraNodeCloudMachine | null;
 }
-/** One metadata entry for a node. */
+/** The cloud instance object for the node */
 export interface InfraNodeCloudInstance {
   id?: string | null;
 
   name?: string | null;
 }
-
+/** The cloud project object for the node */
 export interface InfraNodeCloudProject {
   id?: string | null;
+}
+/** The Cloud machine object for the node */
+export interface InfraNodeCloudMachine {
+  type?: string | null;
 }
 
 export interface InfraNodeFeature {
@@ -826,6 +832,8 @@ export namespace MetadataQuery {
     availability_zone?: string | null;
 
     project?: Project | null;
+
+    machine?: Machine | null;
   };
 
   export type Instance = {
@@ -840,6 +848,12 @@ export namespace MetadataQuery {
     __typename?: 'InfraNodeCloudProject';
 
     id?: string | null;
+  };
+
+  export type Machine = {
+    __typename?: 'InfraNodeCloudMachine';
+
+    type?: string | null;
   };
 
   export type Host = {

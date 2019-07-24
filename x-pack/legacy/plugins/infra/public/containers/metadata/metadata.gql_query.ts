@@ -27,6 +27,9 @@ export const metadataQuery = gql`
             project {
               id
             }
+            machine {
+              type
+            }
           }
           host {
             name
