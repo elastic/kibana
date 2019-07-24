@@ -59,7 +59,10 @@ test('Custom time range action prevents embeddable from using container time', a
 
   const overlayMock = npStart.core.overlays;
   (overlayMock.openModal as any).mockClear();
-  new CustomTimeRangeBadge({ openModal: npStart.core.overlays.openModal }).execute({
+  new CustomTimeRangeBadge({
+    openModal: npStart.core.overlays.openModal,
+    dateFormat: 'MM YYYY',
+  }).execute({
     embeddable: child1,
   });
 
@@ -117,7 +120,10 @@ test('Removing custom time range action resets embeddable back to container time
 
   const overlayMock = npStart.core.overlays;
   (overlayMock.openModal as any).mockClear();
-  new CustomTimeRangeBadge({ openModal: npStart.core.overlays.openModal }).execute({
+  new CustomTimeRangeBadge({
+    openModal: npStart.core.overlays.openModal,
+    dateFormat: 'MM YYYY',
+  }).execute({
     embeddable: child1,
   });
 
@@ -163,6 +169,7 @@ test(`badge is not compatible with embeddable that inherits from parent`, async 
 
   const compatible = await new CustomTimeRangeBadge({
     openModal: npStart.core.overlays.openModal,
+    dateFormat: 'MM YYYY',
   }).isCompatible({
     embeddable: child,
   });
@@ -195,6 +202,7 @@ test(`badge is compatible with embeddable that has custom time range`, async () 
 
   const compatible = await new CustomTimeRangeBadge({
     openModal: npStart.core.overlays.openModal,
+    dateFormat: 'MM YYYY',
   }).isCompatible({
     embeddable: child,
   });

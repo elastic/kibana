@@ -43,9 +43,9 @@ function isVisualizeEmbeddable(
 export class CustomTimeRangeAction extends Action {
   public readonly type = CUSTOM_TIME_RANGE;
   private openModal: OpenModal;
-  private dateFormat: string;
+  private dateFormat?: string;
 
-  constructor({ openModal, dateFormat }: { openModal: OpenModal; dateFormat: string }) {
+  constructor({ openModal, dateFormat }: { openModal: OpenModal; dateFormat?: string }) {
     super(CUSTOM_TIME_RANGE);
     this.order = 7;
     this.openModal = openModal;
