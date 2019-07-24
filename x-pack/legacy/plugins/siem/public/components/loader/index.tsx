@@ -41,7 +41,7 @@ const FlexGroup = styled(EuiFlexGroup).attrs({
   direction: 'column',
   gutterSize: 's',
   justifyContent: 'center',
-})<{ overlay?: boolean }>`
+})<{ overlay: { overlay?: boolean } }>`
   ${({ overlay }) =>
     overlay &&
     `
@@ -57,7 +57,7 @@ export interface LoaderProps {
 
 export const Loader = pure<LoaderProps>(({ children, overlay, overlayBackground, size }) => (
   <Aside overlay={overlay} overlayBackground={overlayBackground}>
-    <FlexGroup overlay={overlay}>
+    <FlexGroup overlay={{ overlay }}>
       <EuiFlexItem grow={false}>
         <EuiLoadingSpinner size={size} />
       </EuiFlexItem>

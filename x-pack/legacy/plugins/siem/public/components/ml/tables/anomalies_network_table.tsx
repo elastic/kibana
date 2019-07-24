@@ -61,7 +61,7 @@ export const AnomaliesNetworkTable = React.memo<AnomaliesNetworkTableProps>(
       return null;
     } else {
       return (
-        <Panel loading={loading}>
+        <Panel loading={{ loading }}>
           <HeaderPanel
             subtitle={`${i18n.SHOWING}: ${pagination.totalItemCount.toLocaleString()} ${
               i18n.ANOMALIES
@@ -87,7 +87,7 @@ export const AnomaliesNetworkTable = React.memo<AnomaliesNetworkTableProps>(
   networkEquality
 );
 
-const Panel = styled(EuiPanel)<{ loading?: boolean }>`
+const Panel = styled(EuiPanel)<{ loading: { loading?: boolean } }>`
   position: relative;
 
   ${({ loading }) =>

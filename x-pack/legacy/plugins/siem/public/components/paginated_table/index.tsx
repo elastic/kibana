@@ -215,7 +215,7 @@ export const PaginatedTable = memo<SiemTables>(
     return (
       <Panel
         data-test-subj={dataTestSubj}
-        loading={loading}
+        loading={{ loading }}
         onMouseEnter={() => setShowInspect(true)}
         onMouseLeave={() => setShowInspect(false)}
       >
@@ -292,7 +292,7 @@ export const PaginatedTable = memo<SiemTables>(
   }
 );
 
-const Panel = styled(EuiPanel)<{ loading?: boolean }>`
+const Panel = styled(EuiPanel)<{ loading: { loading?: boolean } }>`
   position: relative;
 
   ${({ loading }) =>
