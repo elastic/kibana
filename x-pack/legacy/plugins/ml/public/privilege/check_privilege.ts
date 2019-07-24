@@ -48,11 +48,11 @@ export function checkCreateJobsPrivilege(kbnUrl: any): Promise<Privileges> {
 
 export function checkFindFileStructurePrivilege(kbnUrl: any): Promise<Privileges> {
   return new Promise((resolve, reject) => {
-    getPrivileges().then(({ capabilities, isPlatinumOrTrialLicense }) => {
+    getPrivileges().then(({ capabilities }) => {
       privileges = capabilities;
       // the minimum privilege for using ML with a basic license is being able to use the datavisualizer.
       // all other functionality is controlled by the return privileges object
-      if (privileges.canFindFileStructure || isPlatinumOrTrialLicense === false) {
+      if (privileges.canFindFileStructure) {
         return resolve(privileges);
       } else {
         kbnUrl.redirect('/access-denied');
@@ -64,11 +64,11 @@ export function checkFindFileStructurePrivilege(kbnUrl: any): Promise<Privileges
 
 export function checkGetDataFrameTransformsPrivilege(kbnUrl: any): Promise<Privileges> {
   return new Promise((resolve, reject) => {
-    getPrivileges().then(({ capabilities, isPlatinumOrTrialLicense }) => {
+    getPrivileges().then(({ capabilities }) => {
       privileges = capabilities;
       // the minimum privilege for using ML with a basic license is being able to use the data frames.
       // all other functionality is controlled by the return privileges object
-      if (privileges.canGetDataFrame || isPlatinumOrTrialLicense === true) {
+      if (privileges.canGetDataFrame) {
         return resolve(privileges);
       } else {
         kbnUrl.redirect('/data_frames/access-denied');
@@ -80,13 +80,12 @@ export function checkGetDataFrameTransformsPrivilege(kbnUrl: any): Promise<Privi
 
 export function checkCreateDataFrameTransformPrivilege(kbnUrl: any): Promise<Privileges> {
   return new Promise((resolve, reject) => {
-    getPrivileges().then(({ capabilities, isPlatinumOrTrialLicense }) => {
+    getPrivileges().then(({ capabilities }) => {
       privileges = capabilities;
       if (
-        (privileges.canCreateDataFrame &&
-          privileges.canPreviewDataFrame &&
-          privileges.canStartStopDataFrame) ||
-        isPlatinumOrTrialLicense === false
+        privileges.canCreateDataFrame &&
+        privileges.canPreviewDataFrame &&
+        privileges.canStartStopDataFrame
       ) {
         return resolve(privileges);
       } else {
