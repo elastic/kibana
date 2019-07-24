@@ -61,12 +61,6 @@ const createHttpSchema = schema.object(
     }),
     rewriteBasePath: schema.boolean({ defaultValue: false }),
     ssl: SslConfig.schema,
-    keepaliveTimeout: schema.number({
-      defaultValue: 120000,
-    }),
-    socketTimeout: schema.number({
-      defaultValue: 120000,
-    }),
   },
   {
     validate: config => {
@@ -99,8 +93,6 @@ export class HttpConfig {
 
   public autoListen: boolean;
   public host: string;
-  public keepaliveTimeout: number;
-  public socketTimeout: number;
   public port: number;
   public cors: boolean | { origin: string[] };
   public maxPayload: ByteSizeValue;
@@ -121,8 +113,6 @@ export class HttpConfig {
     this.basePath = config.basePath;
     this.rewriteBasePath = config.rewriteBasePath;
     this.publicDir = env.staticFilesDir;
-    this.keepaliveTimeout = config.keepaliveTimeout;
-    this.socketTimeout = config.socketTimeout;
     this.ssl = new SslConfig(config.ssl);
   }
 }
