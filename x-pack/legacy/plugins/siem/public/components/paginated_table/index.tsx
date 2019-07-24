@@ -223,7 +223,8 @@ export const PaginatedTable = memo<SiemTables>(
           id={id}
           showInspect={!loadingInitial && showInspect}
           subtitle={
-            !loadingInitial && `${i18n.SHOWING}: ${headerCount.toLocaleString()} ${headerUnit}`
+            !loadingInitial &&
+            `${i18n.SHOWING}: ${headerCount >= 0 ? headerCount.toLocaleString() : 0} ${headerUnit}`
           }
           title={headerTitle}
           tooltip={headerTooltip}

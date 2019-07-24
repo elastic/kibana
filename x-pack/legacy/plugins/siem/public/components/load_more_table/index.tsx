@@ -195,7 +195,8 @@ export class LoadMoreTable<T, U, V, W, X, Y, Z, AA, AB> extends React.PureCompon
           id={id}
           showInspect={!loadingInitial && this.state.showInspect}
           subtitle={
-            !loadingInitial && `${i18n.SHOWING}: ${headerCount.toLocaleString()} ${headerUnit}`
+            !loadingInitial &&
+            `${i18n.SHOWING}: ${headerCount >= 0 ? headerCount.toLocaleString() : 0} ${headerUnit}`
           }
           title={headerTitle}
           tooltip={headerTooltip}
