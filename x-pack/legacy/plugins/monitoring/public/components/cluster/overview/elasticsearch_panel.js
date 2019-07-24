@@ -164,14 +164,23 @@ export function ElasticsearchPanel(props) {
   if (setupMode.enabled && setupModeElasticsearchData) {
     const showIcon = setupModeElasticsearchData.totalUniqueFullyMigratedCount !== setupModeElasticsearchData.totalUniqueInstanceCount;
     if (showIcon) {
+
+      let tooltipText = i18n.translate('xpack.monitoring.cluster.overview.elasticsearchPanel.setupModeNodesTooltip.someByMetricbeat', {
+        defaultMessage: `Some nodes are not monitored exclusively by Metricbeat. Click the flag icon to visit the nodes
+        listing page and find out more information about the status of each node.`
+      });
+      if (setupModeElasticsearchData.totalUniquePartiallyMigratedCount === 0) {
+        tooltipText = i18n.translate('xpack.monitoring.cluster.overview.elasticsearchPanel.setupModeNodesTooltip.noneByMetricbeat', {
+          defaultMessage: `Some nodes are not monitored by Metricbeat. Click the flag icon to visit the nodes
+          listing page and find out more information about the status of each node.`
+        });
+      }
+
       setupModeNodesData = (
         <EuiFlexItem grow={false}>
           <EuiToolTip
             position="top"
-            content={i18n.translate('xpack.monitoring.cluster.overview.elasticsearchPanel.setupModeNodesTooltip', {
-              defaultMessage: `Some nodes are not monitored by Metricbeat. Click the flag icon to visit the nodes
-              listing page and find out more information about the status of each node.`
-            })}
+            content={tooltipText}
           >
             <EuiLink onClick={goToNodes}>
               <EuiIcon type="flag" color="warning"/>

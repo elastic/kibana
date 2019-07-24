@@ -45,14 +45,23 @@ export function KibanaPanel(props) {
     const showIcon = setupModeKibanaData.totalUniqueFullyMigratedCount !== setupModeKibanaData.totalUniqueInstanceCount
       || setupModeKibanaData.totalUniqueInstanceCount === 0;
     if (showIcon) {
+
+      let tooltipText = i18n.translate('xpack.monitoring.cluster.overview.kibanaPanel.setupModeNodesTooltip.someByMetricbeat', {
+        defaultMessage: `Some instances are not monitored exclusively by Metricbeat. Click the flag icon to visit the instances
+        listing page and find out more information about the status of each instance.`
+      });
+      if (setupModeKibanaData.totalUniquePartiallyMigratedCount === 0) {
+        tooltipText = i18n.translate('xpack.monitoring.cluster.overview.kibanaPanel.setupModeNodesTooltip.noneByMetricbeat', {
+          defaultMessage: `Some instances are not monitored by Metricbeat. Click the flag icon to visit the instances
+          listing page and find out more information about the status of each instance.`
+        });
+      }
+
       setupModeInstancesData = (
         <EuiFlexItem grow={false}>
           <EuiToolTip
             position="top"
-            content={i18n.translate('xpack.monitoring.cluster.overview.kibanaPanel.setupModeNodesTooltip', {
-              defaultMessage: `Some instances are not monitored by Metricbeat. Click the flag icon to visit the instances
-              listing page and find out more information about the status of each instance.`
-            })}
+            content={tooltipText}
           >
             <EuiLink onClick={goToInstances}>
               <EuiIcon type="flag" color="warning"/>
