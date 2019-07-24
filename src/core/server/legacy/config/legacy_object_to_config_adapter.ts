@@ -68,8 +68,6 @@ export class LegacyObjectToConfigAdapter extends ObjectToConfigAdapter {
       port: configValue.port,
       rewriteBasePath: configValue.rewriteBasePath,
       ssl: configValue.ssl,
-      keepaliveTimeout: configValue.keepaliveTimeout,
-      socketTimeout: configValue.socketTimeout,
     };
   }
 
