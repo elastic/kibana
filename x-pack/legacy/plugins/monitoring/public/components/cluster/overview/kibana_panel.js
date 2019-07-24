@@ -42,18 +42,28 @@ export function KibanaPanel(props) {
   const setupModeKibanaData = get(setupMode.data, 'kibana');
   let setupModeInstancesData = null;
   if (setupMode.enabled && setupMode.data) {
-    const showIcon = setupModeKibanaData.totalUniqueFullyMigratedCount !== setupModeKibanaData.totalUniqueInstanceCount
-      || setupModeKibanaData.totalUniqueInstanceCount === 0;
-    if (showIcon) {
+    const {
+      totalUniqueInstanceCount,
+      totalUniqueFullyMigratedCount,
+      totalUniquePartiallyMigratedCount
+    } = setupModeKibanaData;
+    const allMonitoredByMetricbeat = totalUniqueInstanceCount > 0 &&
+      (totalUniqueFullyMigratedCount === totalUniqueInstanceCount || totalUniquePartiallyMigratedCount === totalUniqueInstanceCount);
+    const internalCollectionOn = totalUniquePartiallyMigratedCount > 0;
+    if (!allMonitoredByMetricbeat || internalCollectionOn) {
+      let tooltipText = null;
 
-      let tooltipText = i18n.translate('xpack.monitoring.cluster.overview.kibanaPanel.setupModeNodesTooltip.someByMetricbeat', {
-        defaultMessage: `Some instances are not monitored exclusively by Metricbeat. Click the flag icon to visit the instances
-        listing page and find out more information about the status of each instance.`
-      });
-      if (setupModeKibanaData.totalUniquePartiallyMigratedCount === 0) {
-        tooltipText = i18n.translate('xpack.monitoring.cluster.overview.kibanaPanel.setupModeNodesTooltip.noneByMetricbeat', {
-          defaultMessage: `Some instances are not monitored by Metricbeat. Click the flag icon to visit the instances
-          listing page and find out more information about the status of each instance.`
+      if (!allMonitoredByMetricbeat) {
+        tooltipText = i18n.translate('xpack.monitoring.cluster.overview.kibanaPanel.setupModeNodesTooltip.oneInternal', {
+          defaultMessage: `There's at least one instance that isn't being monitored using Metricbeat. Click the flag
+          icon to visit the instances listing page and find out more information about the status of each instance.`
+        });
+      }
+      else if (internalCollectionOn) {
+        tooltipText = i18n.translate('xpack.monitoring.cluster.overview.kibanaPanel.setupModeNodesTooltip.disableInternal', {
+          defaultMessage: `All instances are being monitored using Metricbeat but internal collection still needs to be turned
+          off. Click the flag icon to visit the instances listing page and find out more information about the status of each
+          instance.`
         });
       }
 

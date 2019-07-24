@@ -162,17 +162,27 @@ export function ElasticsearchPanel(props) {
   const setupModeElasticsearchData = get(setupMode.data, 'elasticsearch');
   let setupModeNodesData = null;
   if (setupMode.enabled && setupModeElasticsearchData) {
-    const showIcon = setupModeElasticsearchData.totalUniqueFullyMigratedCount !== setupModeElasticsearchData.totalUniqueInstanceCount;
-    if (showIcon) {
+    const {
+      totalUniqueInstanceCount,
+      totalUniqueFullyMigratedCount,
+      totalUniquePartiallyMigratedCount
+    } = setupModeElasticsearchData;
+    const allMonitoredByMetricbeat = totalUniqueInstanceCount > 0 &&
+      (totalUniqueFullyMigratedCount === totalUniqueInstanceCount || totalUniquePartiallyMigratedCount === totalUniqueInstanceCount);
+    const internalCollectionOn = totalUniquePartiallyMigratedCount > 0;
+    if (!allMonitoredByMetricbeat || internalCollectionOn) {
+      let tooltipText = null;
 
-      let tooltipText = i18n.translate('xpack.monitoring.cluster.overview.elasticsearchPanel.setupModeNodesTooltip.someByMetricbeat', {
-        defaultMessage: `Some nodes are not monitored exclusively by Metricbeat. Click the flag icon to visit the nodes
-        listing page and find out more information about the status of each node.`
-      });
-      if (setupModeElasticsearchData.totalUniquePartiallyMigratedCount === 0) {
-        tooltipText = i18n.translate('xpack.monitoring.cluster.overview.elasticsearchPanel.setupModeNodesTooltip.noneByMetricbeat', {
-          defaultMessage: `Some nodes are not monitored by Metricbeat. Click the flag icon to visit the nodes
+      if (!allMonitoredByMetricbeat) {
+        tooltipText = i18n.translate('xpack.monitoring.cluster.overview.elasticsearchPanel.setupModeNodesTooltip.oneInternal', {
+          defaultMessage: `There's at least one node that isn't being monitored using Metricbeat. Click the flag icon to visit the nodes
           listing page and find out more information about the status of each node.`
+        });
+      }
+      else if (internalCollectionOn) {
+        tooltipText = i18n.translate('xpack.monitoring.cluster.overview.elasticsearchPanel.setupModeNodesTooltip.disableInternal', {
+          defaultMessage: `All nodes are being monitored using Metricbeat but internal collection still needs to be turned off. Click the
+          flag icon to visit the nodes listing page and find out more information about the status of each node.`
         });
       }
 
