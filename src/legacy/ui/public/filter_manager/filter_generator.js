@@ -54,8 +54,9 @@ export function getFilterGenerator(queryFilter) {
       if (existing) {
         existing.meta.disabled = false;
         if (existing.meta.negate !== negate) {
-          queryFilter.invertFilter(existing);
+          existing.meta.negate = !existing.meta.negate;
         }
+        newFilters.push(existing);
         return;
       }
 
