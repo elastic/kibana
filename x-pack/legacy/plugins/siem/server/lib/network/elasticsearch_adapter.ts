@@ -32,6 +32,7 @@ export class ElasticsearchNetworkAdapter implements NetworkAdapter {
     options: NetworkTopNFlowRequestOptions
   ): Promise<NetworkTopNFlowData> {
     const dsl = buildTopNFlowQuery(options);
+    console.log('DLS', JSON.stringify(dsl));
     const response = await this.framework.callWithRequest<NetworkTopNFlowData, TermAggregation>(
       request,
       'search',

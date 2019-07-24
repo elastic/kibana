@@ -11,13 +11,21 @@ import {
   NetworkTopNFlowFields,
   NetworkTopNFlowSortField,
 } from '../../graphql/types';
-import { assertUnreachable, createQueryFilterClauses } from '../../utils/build_query';
+import { createQueryFilterClauses } from '../../utils/build_query';
 
 import { NetworkTopNFlowRequestOptions } from './index';
 
-const getUniDirectionalFilter = (flowDirection: FlowDirection) =>
-  flowDirection === FlowDirection.uniDirectional
-    ? {
+const getDirectionalFilter = (flowDirection: FlowDirection) => {
+  switch (flowDirection) {
+    case FlowDirection.uniDirectional:
+      return {
+        must: [
+          {
+            exists: {
+              field: 'source.bytes',
+            },
+          },
+        ],
         must_not: [
           {
             exists: {
@@ -25,28 +33,26 @@ const getUniDirectionalFilter = (flowDirection: FlowDirection) =>
             },
           },
         ],
-      }
-    : {};
-
-const getBiDirectionalFilter = (flowDirection: FlowDirection, flowTarget: FlowTarget) => {
-  if (
-    flowDirection === FlowDirection.biDirectional &&
-    [FlowTarget.source, FlowTarget.destination].includes(flowTarget)
-  ) {
-    return [
-      {
-        exists: {
-          field: 'source.bytes',
-        },
-      },
-      {
-        exists: {
-          field: 'destination.bytes',
-        },
-      },
-    ];
+      };
+    case FlowDirection.biDirectional:
+      return {
+        must: [
+          {
+            exists: {
+              field: 'source.bytes',
+            },
+          },
+          {
+            exists: {
+              field: 'destination.bytes',
+            },
+          },
+        ],
+      };
+    case FlowDirection.unified:
+    default:
+      return {};
   }
-  return [];
 };
 
 const getCountAgg = (flowTarget: FlowTarget) => ({
@@ -72,7 +78,6 @@ export const buildTopNFlowQuery = ({
   const filter = [
     ...createQueryFilterClauses(filterQuery),
     { range: { [timestamp]: { gte: from, lte: to } } },
-    ...getBiDirectionalFilter(flowDirection, flowTarget),
   ];
 
   const dslQuery = {
@@ -82,14 +87,12 @@ export const buildTopNFlowQuery = ({
     body: {
       aggregations: {
         ...getCountAgg(flowTarget),
-        ...getUniDirectionAggs(flowDirection, networkTopNFlowSort, flowTarget, querySize),
-        ...getBiDirectionAggs(flowDirection, networkTopNFlowSort, flowTarget, querySize),
         ...getAllDirectionAggs(networkTopNFlowSort, flowTarget, querySize),
       },
       query: {
         bool: {
           filter,
-          ...getUniDirectionalFilter(flowDirection),
+          ...getDirectionalFilter(flowDirection),
         },
       },
     },
@@ -109,7 +112,7 @@ const getAllDirectionAggs = (
       field: 'source.ip',
       size: querySize,
       order: {
-        bytes_all: 'desc',
+        ...getQueryOrder(networkTopNFlowSortField),
       },
     },
     aggs: {
@@ -121,11 +124,6 @@ const getAllDirectionAggs = (
       bytes_out: {
         sum: {
           field: 'source.bytes',
-        },
-      },
-      bytes_all: {
-        sum: {
-          field: 'network.bytes',
         },
       },
     },
@@ -135,7 +133,7 @@ const getAllDirectionAggs = (
       field: 'destination.ip',
       size: querySize,
       order: {
-        bytes_all: 'desc',
+        ...getQueryOrder(networkTopNFlowSortField),
       },
     },
     aggs: {
@@ -149,182 +147,18 @@ const getAllDirectionAggs = (
           field: 'destination.bytes',
         },
       },
-      bytes_all: {
-        sum: {
-          field: 'network.bytes',
-        },
-      },
-    },
-  },
-  bytes_flow_target: {
-    terms: {
-      field: `${flowTarget}.ip`,
-      size: querySize,
-      order: {
-        bytes_all: 'desc',
-      },
-    },
-    aggs: {
-      bytes_in: {
-        sum: {
-          field: `${getOppositeField(flowTarget)}.bytes`,
-        },
-      },
-      bytes_out: {
-        sum: {
-          field: `${flowTarget}.bytes`,
-        },
-      },
-      bytes_all: {
-        sum: {
-          field: 'network.bytes',
-        },
-      },
     },
   },
 });
 
-const getUniDirectionAggs = (
-  flowDirection: FlowDirection,
-  networkTopNFlowSortField: NetworkTopNFlowSortField,
-  flowTarget: FlowTarget,
-  querySize: number
-) =>
-  flowDirection === FlowDirection.uniDirectional
-    ? {
-        top_uni_flow: {
-          terms: {
-            field: `${flowTarget}.ip`,
-            size: querySize,
-            order: {
-              ...getQueryOrder(networkTopNFlowSortField),
-            },
-          },
-          aggs: {
-            bytes: {
-              sum: {
-                field: 'network.bytes',
-              },
-            },
-            direction: {
-              terms: {
-                field: 'network.direction',
-              },
-            },
-            domain: {
-              terms: {
-                field: `${flowTarget}.domain`,
-                order: {
-                  timestamp: 'desc',
-                },
-              },
-              aggs: {
-                timestamp: {
-                  max: {
-                    field: '@timestamp',
-                  },
-                },
-              },
-            },
-            ip_count: {
-              cardinality: {
-                field: `${
-                  flowTarget === FlowTarget.source ? FlowTarget.destination : FlowTarget.source
-                }.ip`,
-              },
-            },
-            packets: {
-              sum: {
-                field: 'network.packets',
-              },
-            },
-          },
-        },
-      }
-    : {};
-
-const getBiDirectionAggs = (
-  flowDirection: FlowDirection,
-  networkTopNFlowSortField: NetworkTopNFlowSortField,
-  flowTarget: FlowTarget,
-  querySize: number
-) =>
-  flowDirection === FlowDirection.biDirectional
-    ? {
-        top_bi_flow: {
-          terms: {
-            field: `${flowTarget}.ip`,
-            size: querySize,
-            order: {
-              ...getQueryOrder(networkTopNFlowSortField),
-            },
-          },
-          aggs: {
-            bytes: {
-              sum: {
-                field: `${flowTarget}.bytes`,
-              },
-            },
-            direction: {
-              terms: {
-                field: 'network.direction',
-              },
-            },
-            domain: {
-              terms: {
-                field: `${flowTarget}.domain`,
-                order: {
-                  timestamp: 'desc',
-                },
-              },
-              aggs: {
-                timestamp: {
-                  max: {
-                    field: '@timestamp',
-                  },
-                },
-              },
-            },
-            ip_count: {
-              cardinality: {
-                field: `${getOppositeField(flowTarget)}.ip`,
-              },
-            },
-            packets: {
-              sum: {
-                field: `${flowTarget}.packets`,
-              },
-            },
-          },
-        },
-      }
-    : {};
-
-const getOppositeField = (flowTarget: FlowTarget): FlowTarget => {
-  switch (flowTarget) {
-    case FlowTarget.source:
-      return FlowTarget.destination;
-    case FlowTarget.destination:
-      return FlowTarget.source;
-    case FlowTarget.server:
-      return FlowTarget.client;
-    case FlowTarget.client:
-      return FlowTarget.server;
-  }
-  assertUnreachable(flowTarget);
-};
-
-type QueryOrder = { bytes: Direction } | { packets: Direction } | { ip_count: Direction };
+type QueryOrder = { bytes_in: Direction } | { bytes_out: Direction };
 
 const getQueryOrder = (networkTopNFlowSortField: NetworkTopNFlowSortField): QueryOrder => {
   switch (networkTopNFlowSortField.field) {
     case NetworkTopNFlowFields.bytes:
-      return { bytes: networkTopNFlowSortField.direction };
+      return { bytes_in: networkTopNFlowSortField.direction };
     case NetworkTopNFlowFields.packets:
-      return { packets: networkTopNFlowSortField.direction };
-    case NetworkTopNFlowFields.ipCount:
-      return { ip_count: networkTopNFlowSortField.direction };
+      return { bytes_out: networkTopNFlowSortField.direction };
   }
-  assertUnreachable(networkTopNFlowSortField.field);
 };
 
