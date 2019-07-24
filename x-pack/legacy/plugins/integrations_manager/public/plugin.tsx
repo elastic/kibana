@@ -40,7 +40,7 @@ function Root(props: RootProps) {
   return (
     <i18n.Context>
       <HashRouter>
-        <EuiPage style={{ flexWrap: 'wrap' }}>
+        <EuiPage restrictWidth>
           <Switch>{routes}</Switch>
         </EuiPage>
       </HashRouter>
