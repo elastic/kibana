@@ -35,6 +35,8 @@ import { AggListForm } from '../aggregation_list';
 import { GroupByListForm } from '../group_by_list';
 import { SourceIndexPreview } from '../source_index_preview';
 import { PivotPreview } from './pivot_preview';
+// @ts-ignore: could not find declaration file for module
+import { KqlFilterBar } from '../../../../../components/kql_filter_bar';
 
 import {
   AggName,
@@ -61,7 +63,8 @@ export interface StepDefineExposedState {
   aggList: PivotAggsConfigDict;
   groupByList: PivotGroupByConfigDict;
   isAdvancedEditorEnabled: boolean;
-  search: string | SavedSearchQuery;
+  searchString: string | SavedSearchQuery;
+  searchQuery: string | SavedSearchQuery;
   valid: boolean;
 }
 
@@ -75,7 +78,11 @@ export function getDefaultStepDefineState(
     aggList: {} as PivotAggsConfigDict,
     groupByList: {} as PivotGroupByConfigDict,
     isAdvancedEditorEnabled: false,
-    search:
+    searchString:
+      kibanaContext.currentSavedSearch.id !== undefined
+        ? kibanaContext.combinedQuery
+        : defaultSearch,
+    searchQuery:
       kibanaContext.currentSavedSearch.id !== undefined
         ? kibanaContext.combinedQuery
         : defaultSearch,
@@ -198,16 +205,24 @@ export const StepDefineForm: SFC<Props> = React.memo(({ overrides = {}, onChange
   const defaults = { ...getDefaultStepDefineState(kibanaContext), ...overrides };
 
   // The search filter
-  const [search, setSearch] = useState(defaults.search);
+  const [searchString, setSearchString] = useState(defaults.searchString);
+  const [searchQuery, setSearchQuery] = useState(defaults.searchQuery);
+  const [useKQL] = useState(true);
 
   const addToSearch = (newSearch: string) => {
-    const currentDisplaySearch = search === defaultSearch ? emptySearch : search;
-    setSearch(`${currentDisplaySearch} ${newSearch}`.trim());
+    const currentDisplaySearch = searchString === defaultSearch ? emptySearch : searchString;
+    setSearchString(`${currentDisplaySearch} ${newSearch}`.trim());
   };
 
   const searchHandler = (d: Record<string, any>) => {
-    const newSearch = d.queryText === emptySearch ? defaultSearch : d.queryText;
-    setSearch(newSearch);
+    const { filterQuery, queryString } = d;
+    const newSearch = queryString === emptySearch ? defaultSearch : queryString;
+    const newSearchQuery =
+      filterQuery.match_all && Object.keys(filterQuery.match_all).length === 0
+        ? defaultSearch
+        : filterQuery;
+    setSearchString(newSearch);
+    setSearchQuery(newSearchQuery);
   };
 
   // The list of selected group by fields
@@ -285,7 +300,7 @@ export const StepDefineForm: SFC<Props> = React.memo(({ overrides = {}, onChange
 
   const pivotAggsArr = dictionaryToArray(aggList);
   const pivotGroupByArr = dictionaryToArray(groupByList);
-  const pivotQuery = getPivotQuery(search);
+  const pivotQuery = useKQL ? getPivotQuery(searchQuery) : getPivotQuery(searchString);
 
   // Advanced editor state
   const [isAdvancedEditorSwitchModalVisible, setAdvancedEditorSwitchModalVisible] = useState(false);
@@ -391,14 +406,16 @@ export const StepDefineForm: SFC<Props> = React.memo(({ overrides = {}, onChange
       aggList,
       groupByList,
       isAdvancedEditorEnabled,
-      search,
+      searchString,
+      searchQuery,
       valid,
     });
   }, [
     JSON.stringify(pivotAggsArr),
     JSON.stringify(pivotGroupByArr),
     isAdvancedEditorEnabled,
-    search,
+    searchString,
+    searchQuery,
     valid,
   ]);
 
@@ -411,7 +428,7 @@ export const StepDefineForm: SFC<Props> = React.memo(({ overrides = {}, onChange
     <EuiFlexGroup>
       <EuiFlexItem grow={false} style={{ minWidth: '420px' }}>
         <EuiForm>
-          {kibanaContext.currentSavedSearch.id === undefined && typeof search === 'string' && (
+          {kibanaContext.currentSavedSearch.id === undefined && typeof searchString === 'string' && (
             <Fragment>
               <EuiFormRow
                 label={i18n.translate('xpack.ml.dataframe.stepDefineForm.indexPatternLabel', {
@@ -438,22 +455,20 @@ export const StepDefineForm: SFC<Props> = React.memo(({ overrides = {}, onChange
                     defaultMessage: 'Query',
                   })}
                   helpText={i18n.translate('xpack.ml.dataframe.stepDefineForm.queryHelpText', {
-                    defaultMessage: 'Use a query string to filter the source data (optional).',
+                    defaultMessage: 'Use a query to filter the source data (optional).',
                   })}
                 >
-                  <EuiSearchBar
-                    defaultQuery={search === defaultSearch ? emptySearch : search}
-                    box={{
-                      placeholder: i18n.translate(
-                        'xpack.ml.dataframe.stepDefineForm.queryPlaceholder',
-                        {
-                          defaultMessage: 'e.g. {example}',
-                          values: { example: 'method:GET -is:active' },
-                        }
-                      ),
-                      incremental: false,
-                    }}
-                    onChange={searchHandler}
+                  <KqlFilterBar
+                    indexPattern={indexPattern}
+                    onSubmit={searchHandler}
+                    initialValue={searchString === defaultSearch ? emptySearch : searchString}
+                    placeholder={i18n.translate(
+                      'xpack.ml.dataframe.stepDefineForm.queryPlaceholder',
+                      {
+                        defaultMessage: 'e.g. {example}',
+                        values: { example: 'method : "GET" or status : "404"' },
+                      }
+                    )}
                   />
                 </EuiFormRow>
               )}

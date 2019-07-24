@@ -18,17 +18,20 @@ exports[`FeatureTooltip (multi) should not show close button / should show count
     justifyContent="spaceBetween"
   >
     <EuiFlexItem>
-      <EuiText
-        size="s"
+      <EuiTextColor
+        color="subdued"
       >
-        <b>
-          1
-        </b>
-         of 
-        <b>
-          3
-        </b>
-      </EuiText>
+        <FormattedMessage
+          defaultMessage="{pageNumber} of {total} features"
+          id="xpack.maps.tooltip.pageNumerText"
+          values={
+            Object {
+              "pageNumber": 1,
+              "total": 3,
+            }
+          }
+        />
+      </EuiTextColor>
     </EuiFlexItem>
     <EuiFlexItem
       grow={false}
@@ -40,11 +43,10 @@ exports[`FeatureTooltip (multi) should not show close button / should show count
 exports[`FeatureTooltip (multi) should show close button / should show count / should show arrows / should show layer filter 1`] = `
 <Fragment>
   <EuiFlexGroup
-    justifyContent="spaceBetween"
+    alignItems="center"
+    gutterSize="s"
   >
-    <EuiFlexItem
-      grow={false}
-    />
+    <EuiFlexItem />
     <EuiFlexItem
       grow={false}
     >
@@ -75,17 +77,20 @@ exports[`FeatureTooltip (multi) should show close button / should show count / s
     justifyContent="spaceBetween"
   >
     <EuiFlexItem>
-      <EuiText
-        size="s"
+      <EuiTextColor
+        color="subdued"
       >
-        <b>
-          1
-        </b>
-         of 
-        <b>
-          3
-        </b>
-      </EuiText>
+        <FormattedMessage
+          defaultMessage="{pageNumber} of {total} features"
+          id="xpack.maps.tooltip.pageNumerText"
+          values={
+            Object {
+              "pageNumber": 1,
+              "total": 3,
+            }
+          }
+        />
+      </EuiTextColor>
     </EuiFlexItem>
     <EuiFlexItem
       grow={false}
@@ -104,11 +109,10 @@ exports[`FeatureTooltip (multi) should show close button / should show count / s
 exports[`FeatureTooltip (multi) should show close button / should show count 1`] = `
 <Fragment>
   <EuiFlexGroup
-    justifyContent="spaceBetween"
+    alignItems="center"
+    gutterSize="s"
   >
-    <EuiFlexItem
-      grow={false}
-    />
+    <EuiFlexItem />
     <EuiFlexItem
       grow={false}
     >
@@ -139,17 +143,20 @@ exports[`FeatureTooltip (multi) should show close button / should show count 1`]
     justifyContent="spaceBetween"
   >
     <EuiFlexItem>
-      <EuiText
-        size="s"
+      <EuiTextColor
+        color="subdued"
       >
-        <b>
-          1
-        </b>
-         of 
-        <b>
-          3
-        </b>
-      </EuiText>
+        <FormattedMessage
+          defaultMessage="{pageNumber} of {total} features"
+          id="xpack.maps.tooltip.pageNumerText"
+          values={
+            Object {
+              "pageNumber": 1,
+              "total": 3,
+            }
+          }
+        />
+      </EuiTextColor>
     </EuiFlexItem>
     <EuiFlexItem
       grow={false}
@@ -180,11 +187,10 @@ exports[`FeatureTooltip (single) should not show close button 1`] = `
 exports[`FeatureTooltip (single) should show close button 1`] = `
 <Fragment>
   <EuiFlexGroup
-    justifyContent="spaceBetween"
+    alignItems="center"
+    gutterSize="s"
   >
-    <EuiFlexItem
-      grow={false}
-    />
+    <EuiFlexItem />
     <EuiFlexItem
       grow={false}
     >

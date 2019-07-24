@@ -24,7 +24,6 @@
 // @ts-ignore
 import { renderersRegistry } from 'plugins/interpreter/registries';
 import { ExpressionsService, ExpressionsSetup } from './expressions';
-import { SearchService, SearchSetup } from './search';
 import { QueryService, QuerySetup } from './query';
 import { FilterService, FilterSetup } from './filter';
 import { IndexPatternsService, IndexPatternsSetup } from './index_patterns';
@@ -34,14 +33,12 @@ export class DataPlugin {
   private readonly expressions: ExpressionsService;
   private readonly filter: FilterService;
   private readonly indexPatterns: IndexPatternsService;
-  private readonly search: SearchService;
   private readonly query: QueryService;
 
   constructor() {
     this.indexPatterns = new IndexPatternsService();
     this.filter = new FilterService();
     this.query = new QueryService();
-    this.search = new SearchService();
     this.expressions = new ExpressionsService();
   }
 
@@ -61,7 +58,6 @@ export class DataPlugin {
       filter: this.filter.setup({
         indexPatterns: indexPatternsService.indexPatterns,
       }),
-      search: this.search.setup(),
       query: this.query.setup(),
     };
   }
@@ -70,7 +66,6 @@ export class DataPlugin {
     this.expressions.stop();
     this.indexPatterns.stop();
     this.filter.stop();
-    this.search.stop();
     this.query.stop();
   }
 }
@@ -80,7 +75,6 @@ export interface DataSetup {
   expressions: ExpressionsSetup;
   indexPatterns: IndexPatternsSetup;
   filter: FilterSetup;
-  search: SearchSetup;
   query: QuerySetup;
 }
 
@@ -89,8 +83,8 @@ export { ExpressionRenderer, ExpressionRendererProps, ExpressionRunner } from '.
 
 /** @public types */
 export { IndexPattern, StaticIndexPattern, StaticIndexPatternField, Field } from './index_patterns';
-export { Query } from './query';
-export { SearchBar, SearchBarProps } from './search';
+export { Query, QueryBar } from './query';
+export { FilterBar } from './filter';
 export { FilterManager, FilterStateManager, uniqFilters } from './filter/filter_manager';
 
 /** @public static code */
