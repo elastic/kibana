@@ -10,9 +10,12 @@ import {
   InfraBackendFrameworkAdapter,
   InfraFrameworkRequest,
   InfraMetadataAggregationResponse,
-  InfraCloudMetricsAdapterResponse,
 } from '../framework';
-import { InfraMetadataAdapter, InfraMetricsAdapterResponse } from './adapter_types';
+import {
+  InfraMetadataAdapter,
+  InfraMetricsAdapterResponse,
+  InfraCloudMetricsAdapterResponse,
+} from './adapter_types';
 import { NAME_FIELDS, CLOUD_METRICS_MODULES } from '../../constants';
 import { InfraNodeInfo, InfraNodeType } from '../../../graphql/types';
 
@@ -129,6 +132,23 @@ export class ElasticsearchMetadataAdapter implements InfraMetadataAdapter {
     nodeId: string,
     nodeType: InfraNodeType
   ): Promise<InfraNodeInfo> {
+    // If the nodeType is a Kubernetes pod then we need to get the node info
+    // from a host record instead of a pod. This is due to the fact that any host
+    // can report pod details and we can't rely on the host/cloud information associated
+    // with the kubernetes.pod.uid. We need to first lookup the `kubernetes.node.name`
+    // then use that to lookup the host's node information.
+    if (nodeType === InfraNodeType.pod) {
+      const kubernetesNodeName = await this.getPodNodeName(
+        req,
+        sourceConfiguration,
+        nodeId,
+        nodeType
+      );
+      if (kubernetesNodeName) {
+        return this.getNodeInfo(req, sourceConfiguration, kubernetesNodeName, InfraNodeType.host);
+      }
+      return {};
+    }
     const params = {
       allowNoIndices: true,
       ignoreUnavailable: true,
@@ -155,6 +175,38 @@ export class ElasticsearchMetadataAdapter implements InfraMetadataAdapter {
       return firstHit._source;
     }
     return {};
+  }
+
+  private async getPodNodeName(
+    req: InfraFrameworkRequest,
+    sourceConfiguration: InfraSourceConfiguration,
+    nodeId: string,
+    nodeType: InfraNodeType
+  ): Promise<string | undefined> {
+    const filters = [{ match: { [getIdFieldName(sourceConfiguration, nodeType)]: nodeId } }];
+    const params = {
+      allowNoIndices: true,
+      ignoreUnavailable: true,
+      terminateAfter: 1,
+      index: sourceConfiguration.metricAlias,
+      body: {
+        size: 1,
+        _source: ['kubernetes.node.name'],
+        query: {
+          bool: {
+            filter: filters,
+          },
+        },
+      },
+    };
+    const response = await this.framework.callWithRequest<
+      { _source: { kubernetes: { node: { name: string } } } },
+      {}
+    >(req, 'search', params);
+    const firstHit = first(response.hits.hits);
+    if (firstHit) {
+      return get(firstHit, '_source.kubernetes.node.name');
+    }
   }
 }
 
