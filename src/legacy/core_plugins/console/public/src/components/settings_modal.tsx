@@ -42,7 +42,7 @@ export type AutocompleteOptions = 'fields' | 'indices' | 'templates';
 interface Props {
   onSaveSettings: (newSettings: DevToolsSettings) => Promise<void>;
   onClose: () => void;
-  refreshAutocompleteSettings: () => void;
+  refreshAutocompleteSettings: (selectedSettings: any) => void;
   settings: DevToolsSettings;
 }
 
