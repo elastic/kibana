@@ -303,8 +303,8 @@ await testSubjects.click(‘containerButton’);
 * Source: https://github.com/elastic/kibana/blob/master/test/common/services/retry/retry.ts[test/common/services/retry/retry.ts]
 * Helpers for retrying operations
 * Popular methods:
-** `retry.try(fn, onFailureBlock)` - execute `fn` in a loop until it succeeds or the default try timeout elapses
-** `retry.tryForTime(ms, fn, onFailureBlock)` execute fn in a loop until it succeeds or `ms` milliseconds elapses
+** `retry.try(fn, onFailureBlock)` - execute `fn` in a loop until it succeeds or the default try timeout elapses, optional `onFailureBlock` is executed before each retry attempt 
+** `retry.tryForTime(ms, fn, onFailureBlock)` execute `fn` in a loop until it succeeds or `ms` milliseconds elapses, , optional `onFailureBlock` is executed before each retry attempt
 
 **kibanaServer:**:::
 * Source: https://github.com/elastic/kibana/blob/master/test/common/services/kibana_server/kibana_server.js[test/common/services/kibana_server/kibana_server.js]
@@ -322,13 +322,8 @@ await testSubjects.click(‘containerButton’);
 ** `esArchiver.loadIfNeeded(name)`
 ** `esArchiver.unload(name)`
 
-**docTable:**:::
-* Source: {blob}test/functional/services/doc_table.js[test/functional/services/doc_table.js]
-* Helpers for interacting with doc tables
+Full list of services that are used in functional tests can be found here: https://github.com/elastic/kibana/tree/master/test/functional/services[test/functional/services]
 
-**pointSeriesVis:**:::
-* Source: {blob}test/functional/services/point_series_vis.js[test/functional/services/point_series_vis.js]
-* Helpers for interacting with point series visualizations
 
 **Low-level utilities:**:::
 * es
