@@ -81,7 +81,6 @@ export class FeatureProperties extends React.Component {
     }
   };
 
-
   _renderFilterCell(tooltipProperty) {
     if (!this.props.showFilterButtons || !tooltipProperty.isFilterable()) {
       return null;
@@ -95,10 +94,10 @@ export class FeatureProperties extends React.Component {
           title={i18n.translate('xpack.maps.tooltip.filterOnPropertyTitle', {
             defaultMessage: 'Filter on property'
           })}
-          onClick={() => {
+          onClick={async () => {
             this.props.onCloseTooltip();
-            const filterAction = tooltipProperty.getFilterAction();
-            filterAction();
+            const filters = await tooltipProperty.getESFilters();
+            this.props.addFilters(filters);
           }}
           aria-label={i18n.translate('xpack.maps.tooltip.filterOnPropertyAriaLabel', {
             defaultMessage: 'Filter on property'
