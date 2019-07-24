@@ -14,6 +14,7 @@
 
 This section summarizes the changes in each release.
 
+* <<release-notes-6.8.2>>
 * <<release-notes-6.8.1>>
 * <<release-notes-6.8.0>>
 * <<release-notes-6.7.2>>
@@ -87,6 +88,21 @@ This section summarizes the changes in each release.
 //[float]
 //=== Known Issues
 ////
+
+
+[[release-notes-6.8.2]]
+== {kib} 6.8.2
+
+[float]
+[[bug-6.8.2]]
+=== Bug fixes
+Canvas::
+* Applies global CSS to export workpad view {pull}41298[#41298]
+Machine Learning::
+* Fixes the URL of the link to the detector function reference page in the docs {pull}35734[#35734]
+Operations::
+* Introduces two new configurable global socket timeouts {pull}31603[#31603]
+
  
 [[release-notes-6.8.1]]
 == {kib} 6.8.1
