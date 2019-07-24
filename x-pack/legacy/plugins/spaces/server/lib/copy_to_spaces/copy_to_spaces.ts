@@ -21,16 +21,30 @@ interface CopyOptions {
   includeReferences: boolean;
 }
 
+interface ResolveConflictsOptions {
+  objects: Array<{ type: string; id: string }>;
+  includeReferences: boolean;
+  retries: Array<{
+    spaceId: string;
+    retries: Array<{ type: string; id: string; overwrite: boolean }>;
+  }>;
+}
+
 interface SpaceNotFoundError {
   type: 'space_not_found';
   spaceId: string;
 }
 
-interface CopyToSpaceError {
-  error: SpaceNotFoundError;
+interface UnauthorizedToManageSavedObjectsError {
+  type: 'unauthorized_to_manage_saved_objects';
+  spaceId: string;
 }
 
-interface CopyResponse {
+interface CopyToSpaceError {
+  error: SpaceNotFoundError | UnauthorizedToManageSavedObjectsError;
+}
+
+export interface CopyResponse {
   [spaceId: string]: {
     success: boolean;
     successCount: number;
@@ -58,8 +72,12 @@ export function copySavedObjectsToSpacesFactory(
     errors,
   });
 
-  const exportRequestedObjects = async (options: CopyOptions) => {
+  const exportRequestedObjects = async (
+    sourceSpaceId: string,
+    options: Pick<CopyOptions, 'includeReferences' | 'objects'>
+  ) => {
     const objectStream = await importExport.getSortedObjectsForExport({
+      namespace: spaceIdToNamespace(sourceSpaceId),
       includeReferencesDeep: options.includeReferences,
       objects: options.objects,
       savedObjectsClient,
@@ -75,10 +93,14 @@ export function copySavedObjectsToSpacesFactory(
     options: CopyOptions
   ) => {
     try {
-      const canImport = await canImportIntoSpace(spaceId, spacesClient);
+      const { canImport, reason } = await canImportIntoSpace(
+        spaceId,
+        spacesClient,
+        savedObjectsClient
+      );
 
       if (!canImport) {
-        return createEmptyFailureResponse([{ error: { type: 'space_not_found', spaceId } }]);
+        return createEmptyFailureResponse([{ error: { type: reason!, spaceId } }]);
       }
 
       const importResponse = await importExport.importSavedObjects({
@@ -100,34 +122,86 @@ export function copySavedObjectsToSpacesFactory(
     }
   };
 
-  return async function copySavedObjectsToSpaces(
-    spaceIds: string[],
+  const copySavedObjectsToSpaces = async (
+    sourceSpaceId: string,
+    destinationSpaceIds: string[],
     options: CopyOptions
-  ): Promise<CopyResponse> {
+  ): Promise<CopyResponse> => {
     const response: CopyResponse = {};
 
-    const objectsStream = await exportRequestedObjects(options);
+    const objectsStream = await exportRequestedObjects(sourceSpaceId, options);
     const rereadableStream = objectsStream.pipe(new Rereadable());
 
     let readStream: Readable | null = null;
-    for (const spaceId of spaceIds) {
+    for (const spaceId of destinationSpaceIds) {
       readStream = readStream ? rereadableStream.reread() : rereadableStream;
       response[spaceId] = await importObjectsToSpace(spaceId, readStream, options);
     }
 
     return response;
   };
+
+  const resolveCopySavedObjectsToSpacesConflicts = async (
+    sourceSpaceId: string,
+    options: ResolveConflictsOptions
+  ): Promise<CopyResponse> => {
+    const response: CopyResponse = {};
+
+    const objectsStream = await exportRequestedObjects(sourceSpaceId, {
+      includeReferences: options.includeReferences,
+      objects: options.objects,
+    });
+
+    const rereadableStream = objectsStream.pipe(new Rereadable());
+
+    let readStream: Readable | null = null;
+
+    for (const entry of options.retries) {
+      readStream = readStream ? rereadableStream.reread() : rereadableStream;
+      const { spaceId, retries } = entry;
+      response[spaceId] = await importExport.resolveImportErrors({
+        readStream,
+        namespace: spaceIdToNamespace(spaceId),
+        objectLimit: 10000,
+        retries: retries.map(retry => ({ ...retry, replaceReferences: [] })),
+        savedObjectsClient,
+        supportedTypes: eligibleTypes,
+      });
+    }
+
+    return response;
+  };
+
+  return {
+    copySavedObjectsToSpaces,
+    resolveCopySavedObjectsToSpacesConflicts,
+  };
 }
 
-async function canImportIntoSpace(spaceId: string, spacesClient: SpacesClient): Promise<boolean> {
+async function canImportIntoSpace(
+  spaceId: string,
+  spacesClient: SpacesClient,
+  savedObjectsClient: SavedObjectsClientContract
+): Promise<{ canImport: boolean; reason: undefined | CopyToSpaceError['error']['type'] }> {
   try {
     const [, canManage] = await Promise.all([
       spacesClient.get(spaceId),
       spacesClient.canManageSavedObjects(spaceId),
     ]);
 
-    return canManage;
+    return {
+      canImport: canManage,
+      reason: canManage ? undefined : 'unauthorized_to_manage_saved_objects',
+    };
   } catch (error) {
-    return false;
+    const isNotFoundError = savedObjectsClient.errors.isNotFoundError(error);
+    const isUnauthorizedToAccessSpaceError = error.isBoom && error.output.statusCode === 403;
+    if (isNotFoundError || isUnauthorizedToAccessSpaceError) {
+      return {
+        canImport: false,
+        reason: 'space_not_found',
+      };
+    }
+    throw error;
   }
 }

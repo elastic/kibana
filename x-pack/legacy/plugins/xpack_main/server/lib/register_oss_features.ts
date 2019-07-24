@@ -202,6 +202,7 @@ const buildKibanaFeatures = (savedObjectTypes: string[]) => {
       },
       privileges: {
         all: {
+          api: ['exportSavedObjects'],
           savedObject: {
             all: [...savedObjectTypes],
             read: [],
@@ -209,6 +210,7 @@ const buildKibanaFeatures = (savedObjectTypes: string[]) => {
           ui: ['read', 'edit', 'delete'],
         },
         read: {
+          api: ['exportSavedObjects'],
           savedObject: {
             all: [],
             read: [...savedObjectTypes],

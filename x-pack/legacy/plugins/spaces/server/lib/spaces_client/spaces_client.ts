@@ -207,7 +207,7 @@ export class SpacesClient {
     const checkPrivileges = this.authorization!.checkPrivilegesWithRequest(this.request);
     const { hasAllRequested } = await checkPrivileges.atSpace(
       spaceId,
-      this.authorization!.actions.savedObject.manage
+      this.authorization!.actions.ui.get('savedObjectsManagement', 'edit')
     );
 
     return hasAllRequested;

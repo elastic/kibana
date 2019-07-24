@@ -17,6 +17,15 @@ interface CopyPayload {
   overwrite: boolean;
 }
 
+interface ResolveConflictsPayload {
+  objects: Array<{ type: string; id: string }>;
+  includeReferences: boolean;
+  retries: Array<{
+    spaceId: string;
+    retries: Array<{ type: string; id: string; overwrite: boolean }>;
+  }>;
+}
+
 export function initCopyToSpacesApi(deps: ExternalRouteDeps) {
   const { http, spacesService, savedObjects, routePreCheckLicenseFn } = deps;
 
@@ -31,15 +40,22 @@ export function initCopyToSpacesApi(deps: ExternalRouteDeps) {
         COPY_TO_SPACES_SAVED_OBJECTS_CLIENT_OPTS
       );
 
-      const copySavedObjectsToSpaces = copySavedObjectsToSpacesFactory(
+      const { copySavedObjectsToSpaces } = copySavedObjectsToSpacesFactory(
         spacesClient,
         savedObjectsClient,
         savedObjects
       );
 
-      const { spaces, objects, includeReferences, overwrite } = request.payload as CopyPayload;
+      const {
+        spaces: destinationSpaceIds,
+        objects,
+        includeReferences,
+        overwrite,
+      } = request.payload as CopyPayload;
 
-      const copyResponse = await copySavedObjectsToSpaces(spaces, {
+      const sourceSpaceId = spacesService.getSpaceId(request);
+
+      const copyResponse = await copySavedObjectsToSpaces(sourceSpaceId, destinationSpaceIds, {
         objects,
         includeReferences,
         overwrite,
@@ -48,6 +64,7 @@ export function initCopyToSpacesApi(deps: ExternalRouteDeps) {
       return h.response(copyResponse);
     },
     options: {
+      tags: ['access:exportSavedObjects'],
       validate: {
         payload: {
           spaces: Joi.array()
@@ -59,6 +76,65 @@ export function initCopyToSpacesApi(deps: ExternalRouteDeps) {
           includeReferences: Joi.bool().default(false),
           overwrite: Joi.bool().default(false),
         },
+      },
+      pre: [routePreCheckLicenseFn],
+    },
+  });
+
+  http.route({
+    method: 'POST',
+    path: '/api/spaces/copySavedObjects/_resolveConflicts',
+    async handler(request: Legacy.Request, h: Legacy.ResponseToolkit) {
+      const spacesClient = await spacesService.scopedClient(request);
+
+      const savedObjectsClient = savedObjects.getScopedSavedObjectsClient(
+        request,
+        COPY_TO_SPACES_SAVED_OBJECTS_CLIENT_OPTS
+      );
+
+      const { resolveCopySavedObjectsToSpacesConflicts } = copySavedObjectsToSpacesFactory(
+        spacesClient,
+        savedObjectsClient,
+        savedObjects
+      );
+
+      const { objects, includeReferences, retries } = request.payload as ResolveConflictsPayload;
+
+      const sourceSpaceId = spacesService.getSpaceId(request);
+
+      const resolveConflictsResponse = await resolveCopySavedObjectsToSpacesConflicts(
+        sourceSpaceId,
+        {
+          objects,
+          includeReferences,
+          retries,
+        }
+      );
+
+      return h.response(resolveConflictsResponse);
+    },
+    options: {
+      validate: {
+        payload: Joi.object({
+          objects: Joi.array()
+            .items(Joi.object({ type: Joi.string(), id: Joi.string() }))
+            .unique(),
+          includeReferences: Joi.bool().default(false),
+          retries: Joi.array()
+            .items(
+              Joi.object({
+                space: Joi.string().required(),
+                retries: Joi.array().items(
+                  Joi.object({
+                    type: Joi.string().required(),
+                    id: Joi.string().required(),
+                    overwrite: Joi.boolean().default(false),
+                  })
+                ),
+              })
+            )
+            .required(),
+        }).default(),
       },
       pre: [routePreCheckLicenseFn],
     },

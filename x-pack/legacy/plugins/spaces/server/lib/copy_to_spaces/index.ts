@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { copySavedObjectsToSpacesFactory } from './copy_to_spaces';
+export { copySavedObjectsToSpacesFactory, CopyResponse } from './copy_to_spaces';
