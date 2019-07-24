@@ -6,12 +6,11 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
+import { npStart } from 'ui/new_platform';
 import 'react-vis/dist/style.css';
-import { CoreStart } from 'src/core/public';
 import 'ui/autoload/all';
 import 'ui/autoload/styles';
 import chrome from 'ui/chrome';
-import { I18nContext } from 'ui/i18n';
 // @ts-ignore
 import { uiModules } from 'ui/modules';
 import 'uiExports/autocompleteProviders';
@@ -20,10 +19,19 @@ import { plugin } from './new-platform';
 import { REACT_APP_ROOT_ID } from './new-platform/plugin';
 import './style/global_overrides.css';
 import template from './templates/index.html';
+import { CoreProvider } from './context/CoreContext';
+
+const { core } = npStart;
+// console.log(npStart);
 
 // render APM feedback link in global help menu
-chrome.helpExtension.set(domElement => {
-  ReactDOM.render(<GlobalHelpExtension />, domElement);
+core.chrome.setHelpExtension(domElement => {
+  ReactDOM.render(
+    <CoreProvider core={core}>
+      <GlobalHelpExtension />
+    </CoreProvider>,
+    domElement
+  );
   return () => {
     ReactDOM.unmountComponentAtNode(domElement);
   };
@@ -42,12 +50,6 @@ const checkForRoot = () => {
     }
   });
 };
-
 checkForRoot().then(() => {
-  const core = {
-    i18n: {
-      Context: I18nContext
-    }
-  } as CoreStart;
   plugin().start(core);
 });
