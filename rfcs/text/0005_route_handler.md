@@ -84,11 +84,10 @@ interface HttpResponseOptions {
    // list of  known headers
    ...
    // for custom headers:
-   [header: string]: string;
+   [header: string]: string | string[];
   }
 }
 
-type StatusCode = 200 | 202 | 204 | 302 | 400 | 401 | 403 | 404 | 409 | 500;
 ```
 
 ##### Success
@@ -153,7 +152,7 @@ const kibanaResponseToolkit = {
 If a custom response is required
 ```typescript
 interface CustomOptions extends HttpResponseOptions {
-  statusCode: StatusCode;
+  statusCode: number;
 }
 export const kibanaResponseToolkit = {
   custom: <T extends HttpResponsePayload>(payload: T, {statusCode, ...options}: CustomOptions) =>
@@ -165,7 +164,6 @@ export const kibanaResponseToolkit = {
 - `KibanaResponseToolkit` may not cover all use cases and requires an extension for specific use-cases.
 - `KibanaResponseToolkit` operates low-level Http primitives, such as Headers e.g., and it is not always handy to work with them directly.
 - `KibanaResponse` cannot be extended with arbitrary data. 
-- `KibanaResponse` doesn't expose response details, for example, you cannot have access to Headers set before `Handler` function was run.
 
 # Alternatives
 
