@@ -289,7 +289,7 @@ app.controller('graphuiPlugin', function (
 
   $scope.hideAllConfigPanels = function () {
     $scope.selectedFieldConfig = null;
-    $scope.kbnTopNav.close();
+    $scope.closeMenus();
   };
 
   $scope.setAllFieldStatesToDefault = function () {
@@ -329,13 +329,14 @@ app.controller('graphuiPlugin', function (
     }
 
     // Check if user is toggling off an already-open config panel for the current field
-    if ($scope.kbnTopNav.currentKey === 'fieldConfig' && field === $scope.selectedFieldConfig) {
+    if ($scope.currentlyDisplayedKey === 'fieldConfig' && field === $scope.selectedFieldConfig) {
+      $scope.currentlyDisplayedKey = undefined;
       $scope.hideAllConfigPanels();
       return;
     }
     $scope.hideAllConfigPanels();
     $scope.selectedFieldConfig = field;
-    $scope.kbnTopNav.currentKey = 'fieldConfig';
+    $scope.currentlyDisplayedKey = 'fieldConfig';
   };
 
   function canWipeWorkspace(yesFn, noFn) {
@@ -498,15 +499,13 @@ app.controller('graphuiPlugin', function (
   $scope.clearWorkspace = function () {
     $scope.workspace = null;
     $scope.detail = null;
-    if ($scope.kbnTopNav) {
-      $scope.kbnTopNav.close();
-    }
+    if ($scope.closeMenus) $scope.closeMenus();
   };
 
   $scope.toggleShowAdvancedFieldsConfig = function () {
-    if ($scope.kbnTopNav.currentKey !== 'fields') {
-      $scope.kbnTopNav.close();
-      $scope.kbnTopNav.currentKey = 'fields';
+    if ($scope.currentlyDisplayedKey !== 'fields') {
+      $scope.closeMenus();
+      $scope.currentlyDisplayedKey = 'fields';
       //Default the selected field
       $scope.selectedField = null;
       $scope.filteredFields = $scope.allFields.filter(function (fieldDef) {
@@ -843,49 +842,48 @@ app.controller('graphuiPlugin', function (
     tooltip: i18n.translate('xpack.graph.topNavMenu.newWorkspaceTooltip', {
       defaultMessage: 'Create a new workspace',
     }),
-    run: function () {canWipeWorkspace(function () {kbnUrl.change('/home', {}); });  },
+    run: function () {
+      canWipeWorkspace(function () {
+        kbnUrl.change('/home', {});
+      });  },
   });
 
   // if saving is disabled using uiCapabilities, we don't want to render the save
   // button so it's consistent with all of the other applications
   if (capabilities.get().graph.save) {
     // allSavingDisabled is based on the xpack.graph.savePolicy, we'll maintain this functionality
-    if (!$scope.allSavingDisabled) {
-      $scope.topNavMenu.push({
-        key: 'save',
-        label: i18n.translate('xpack.graph.topNavMenu.saveWorkspace.enabledLabel', {
-          defaultMessage: 'Save',
-        }),
-        description: i18n.translate('xpack.graph.topNavMenu.saveWorkspace.enabledAriaLabel', {
-          defaultMessage: 'Save Workspace',
-        }),
-        tooltip: i18n.translate('xpack.graph.topNavMenu.saveWorkspace.enabledTooltip', {
-          defaultMessage: 'Save this workspace',
-        }),
-        disableButton: function () {return $scope.selectedFields.length === 0;},
-        run: () => {
+
+    $scope.topNavMenu.push({
+      key: 'save',
+      label: i18n.translate('xpack.graph.topNavMenu.saveWorkspace.enabledLabel', {
+        defaultMessage: 'Save',
+      }),
+      description: i18n.translate('xpack.graph.topNavMenu.saveWorkspace.enabledAriaLabel', {
+        defaultMessage: 'Save Workspace',
+      }),
+      tooltip: () => {
+        if ($scope.allSavingDisabled) {
+          return i18n.translate('xpack.graph.topNavMenu.saveWorkspace.disabledTooltip', {
+            defaultMessage: 'No changes to saved workspaces are permitted by the current save policy',
+          });
+        } else {
+          return i18n.translate('xpack.graph.topNavMenu.saveWorkspace.enabledTooltip', {
+            defaultMessage: 'Save this workspace',
+          });
+        }
+      },
+      disableButton: function () {
+        return $scope.allSavingDisabled || $scope.selectedFields.length === 0;
+      },
+      run: () => {
+        $scope.$evalAsync(() => {
           const curState = $scope.menus.showSave;
           $scope.closeMenus();
           $scope.menus.showSave = !curState;
-        },
-        testId: 'graphSaveButton',
-      });
-    } else {
-      $scope.topNavMenu.push({
-        key: 'save',
-        label: i18n.translate('xpack.graph.topNavMenu.saveWorkspace.disabledLabel', {
-          defaultMessage: 'Save',
-        }),
-        description: i18n.translate('xpack.graph.topNavMenu.saveWorkspace.disabledAriaLabel', {
-          defaultMessage: 'Save Workspace',
-        }),
-        tooltip: i18n.translate('xpack.graph.topNavMenu.saveWorkspace.disabledTooltip', {
-          defaultMessage: 'No changes to saved workspaces are permitted by the current save policy',
-        }),
-        disableButton: true,
-        testId: 'graphSaveButton',
-      });
-    }
+        });
+      },
+      testId: 'graphSaveButton',
+    });
   }
   $scope.topNavMenu.push({
     key: 'open',
@@ -899,9 +897,11 @@ app.controller('graphuiPlugin', function (
       defaultMessage: 'Load a saved workspace',
     }),
     run: () => {
-      const curState = $scope.menus.showLoad;
-      $scope.closeMenus();
-      $scope.menus.showLoad = !curState;
+      $scope.$evalAsync(() => {
+        const curState = $scope.menus.showLoad;
+        $scope.closeMenus();
+        $scope.menus.showLoad = !curState;
+      });
     },
     testId: 'graphOpenButton',
   });
@@ -981,9 +981,11 @@ app.controller('graphuiPlugin', function (
       defaultMessage: 'Settings',
     }),
     run: () => {
-      const curState = $scope.menus.showSettings;
-      $scope.closeMenus();
-      $scope.menus.showSettings = !curState;
+      $scope.$evalAsync(() => {
+        const curState = $scope.menus.showSettings;
+        $scope.closeMenus();
+        $scope.menus.showSettings = !curState;
+      });
     },
   });
 
@@ -993,10 +995,14 @@ app.controller('graphuiPlugin', function (
     showSettings: false,
   };
 
-  $scope.closeMenus = () => {
-    _.forOwn($scope.menus, function (value, key) {
-      $scope.menus[key] = false;
-    });
+  $scope.closeMenus = (closeKey) => {
+    if (closeKey) {
+      $scope.menus[closeKey] = false;
+    } else {
+      _.forOwn($scope.menus, function (_, key) {
+        $scope.menus[key] = false;
+      });
+    }
   };
 
   // Deal with situation of request to open saved workspace
@@ -1242,7 +1248,7 @@ app.controller('graphuiPlugin', function (
 
 
     $scope.savedWorkspace.save().then(function (id) {
-      $scope.kbnTopNav.close('save');
+      $scope.closeMenus('save');
       $scope.userHasConfirmedSaveWorkspaceData = false; //reset flag
       if (id) {
         const title = i18n.translate('xpack.graph.saveWorkspace.successNotificationTitle', {
