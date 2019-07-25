@@ -2,7 +2,7 @@
 .visualize {
   display: flex;
   flex: 1 1 100%;
-  overflow: hidden;
+  overflow: visible;
 }
 
 // SASSTODO: Too risky to change to BEM naming
@@ -25,7 +25,7 @@
     flex: 1 1 0; /* 1 */
     display: flex;
     flex-direction: row;
-    overflow: auto;
+    overflow: visible;
     transition: opacity 0.01s;
 
     // IE11 Hack
