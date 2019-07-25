@@ -17,7 +17,6 @@ import { LogMinimapScaleControls } from '../../../components/logging/log_minimap
 import { LogTextScaleControls } from '../../../components/logging/log_text_scale_controls';
 import { LogTextWrapControls } from '../../../components/logging/log_text_wrap_controls';
 import { LogTimeControls } from '../../../components/logging/log_time_controls';
-import { SourceConfigurationButton } from '../../../components/source_configuration';
 import { LogFlyout } from '../../../containers/logs/log_flyout';
 import { LogViewConfiguration } from '../../../containers/logs/log_view_configuration';
 import { WithLogFilter } from '../../../containers/logs/with_log_filter';
@@ -85,9 +84,6 @@ export const LogsToolbar = injectI18n(({ intl }) => {
               </WithLogFilter>
             )}
           </WithKueryAutocompletion>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <SourceConfigurationButton />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <LogCustomizationMenu>

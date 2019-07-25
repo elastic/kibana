@@ -14,6 +14,7 @@ import { RoutedTabs } from '../../components/navigation/routed_tabs';
 import { ColumnarPage } from '../../components/page';
 import { Source } from '../../containers/source';
 import { StreamPage } from './stream';
+import { SettingsPage } from '../shared/settings';
 
 interface LogsPageProps extends RouteComponentProps {
   intl: InjectedIntl;
@@ -46,18 +47,19 @@ export const LogsPage = injectI18n(({ match, intl }: LogsPageProps) => (
             }),
             path: `${match.path}/stream`,
           },
-          // {
-          //   title: intl.formatMessage({
-          //     id: 'xpack.logs.homePage.settingsTabTitle',
-          //     defaultMessage: 'Settings',
-          //   }),
-          //   path: `${match.path}/settings`,
-          // },
+          {
+            title: intl.formatMessage({
+              id: 'xpack.logs.homePage.settingsTabTitle',
+              defaultMessage: 'Settings',
+            }),
+            path: `${match.path}/settings`,
+          },
         ]}
       />
 
       <Switch>
         <Route path={`${match.path}/stream`} component={StreamPage} />
+        <Route path={`${match.path}/settings`} component={SettingsPage} />
       </Switch>
     </ColumnarPage>
   </Source.Provider>

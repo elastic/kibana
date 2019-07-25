@@ -6,7 +6,6 @@
 
 import React from 'react';
 
-import { SourceConfigurationFlyoutState } from '../../../components/source_configuration';
 import { LogFlyout } from '../../../containers/logs/log_flyout';
 import { LogViewConfiguration } from '../../../containers/logs/log_view_configuration';
 import { LogHighlightsState } from '../../../containers/logs/log_highlights/log_highlights';
@@ -19,15 +18,13 @@ export const LogsPageProviders: React.FunctionComponent = ({ children }) => {
 
   return (
     <Source.Context.Provider value={source}>
-      <SourceConfigurationFlyoutState.Provider>
-        <LogViewConfiguration.Provider>
-          <LogFlyout.Provider>
-            <LogHighlightsState.Provider sourceId={sourceId} sourceVersion={source.version}>
-              {children}
-            </LogHighlightsState.Provider>
-          </LogFlyout.Provider>
-        </LogViewConfiguration.Provider>
-      </SourceConfigurationFlyoutState.Provider>
+      <LogViewConfiguration.Provider>
+        <LogFlyout.Provider>
+          <LogHighlightsState.Provider sourceId={sourceId} sourceVersion={source.version}>
+            {children}
+          </LogHighlightsState.Provider>
+        </LogFlyout.Provider>
+      </LogViewConfiguration.Provider>
     </Source.Context.Provider>
   );
 };

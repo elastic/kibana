@@ -153,7 +153,6 @@ class ScrollableLogTextStreamViewClass extends React.PureComponent<
                 <LogColumnHeaders
                   columnConfigurations={columnConfigurations}
                   columnWidths={columnWidths}
-                  showColumnConfiguration={showColumnConfiguration}
                 />
                 <AutoSizer bounds content detectAnyWindowResize="height">
                   {({ measureRef, bounds: { height = 0 }, content: { width = 0 } }) => (

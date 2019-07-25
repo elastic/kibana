@@ -11,7 +11,6 @@ import { UICapabilities } from 'ui/capabilities';
 import { injectUICapabilities } from 'ui/capabilities/react';
 import { DocumentTitle } from '../../../components/document_title';
 import { Header } from '../../../components/header';
-import { SourceConfigurationFlyout } from '../../../components/source_configuration';
 
 interface StreamPageHeaderProps {
   intl: InjectedIntl;
@@ -46,9 +45,6 @@ export const StreamPageHeader = injectUICapabilities(
               }
             )
           }
-        />
-        <SourceConfigurationFlyout
-          shouldAllowEdit={uiCapabilities.logs.configureSource as boolean}
         />
       </>
     );

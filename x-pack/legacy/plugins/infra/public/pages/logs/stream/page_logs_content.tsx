@@ -28,7 +28,6 @@ import { ReduxSourceIdBridge, WithStreamItems } from '../../../containers/logs/w
 import { Source } from '../../../containers/source';
 
 import { LogsToolbar } from './page_toolbar';
-import { SourceConfigurationFlyoutState } from '../../../components/source_configuration';
 import { LogHighlightsBridge } from '../../../containers/logs/log_highlights';
 
 export const LogsPageLogsContent: React.FunctionComponent = () => {
@@ -43,7 +42,6 @@ export const LogsPageLogsContent: React.FunctionComponent = () => {
     flyoutItem,
     isLoading,
   } = useContext(LogFlyoutState.Context);
-  const { showLogsConfiguration } = useContext(SourceConfigurationFlyoutState.Context);
 
   return (
     <>
@@ -103,7 +101,6 @@ export const LogsPageLogsContent: React.FunctionComponent = () => {
                   loadNewerItems={loadNewerEntries}
                   reportVisibleInterval={reportVisiblePositions}
                   scale={textScale}
-                  showColumnConfiguration={showLogsConfiguration}
                   target={targetPosition}
                   wrap={textWrap}
                   setFlyoutItem={setFlyoutId}

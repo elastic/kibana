@@ -6,12 +6,11 @@
 
 import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { injectI18n, InjectedIntl } from '@kbn/i18n/react';
-import React, { useContext } from 'react';
+import React from 'react';
 
 import { UICapabilities } from 'ui/capabilities';
 import { injectUICapabilities } from 'ui/capabilities/react';
 import { NoIndices } from '../../../components/empty_states/no_indices';
-import { SourceConfigurationFlyoutState } from '../../../components/source_configuration';
 import { WithKibanaChrome } from '../../../containers/with_kibana_chrome';
 
 interface LogsPageNoIndicesContentProps {
@@ -22,7 +21,6 @@ interface LogsPageNoIndicesContentProps {
 export const LogsPageNoIndicesContent = injectUICapabilities(
   injectI18n((props: LogsPageNoIndicesContentProps) => {
     const { intl, uiCapabilities } = props;
-    const { showIndicesConfiguration } = useContext(SourceConfigurationFlyoutState.Context);
 
     return (
       <WithKibanaChrome>
@@ -57,7 +55,7 @@ export const LogsPageNoIndicesContent = injectUICapabilities(
                     <EuiButton
                       data-test-subj="configureSourceButton"
                       color="primary"
-                      onClick={showIndicesConfiguration}
+                      onClick={() => alert('todo: fix me')}
                     >
                       {intl.formatMessage({
                         id: 'xpack.infra.configureSourceActionLabel',
