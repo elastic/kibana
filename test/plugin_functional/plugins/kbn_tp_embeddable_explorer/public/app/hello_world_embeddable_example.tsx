@@ -37,8 +37,9 @@ interface Props {
 export class ContactCardEmbeddableExample extends React.Component<Props> {
   private embeddable: HelloWorldEmbeddable;
 
-  public constructor(props: Props) {
+  constructor(props: Props) {
     super(props);
+
     this.embeddable = new HelloWorldEmbeddable({ id: 'hello' });
   }
 

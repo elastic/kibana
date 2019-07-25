@@ -21,7 +21,7 @@ import {
 } from '@elastic/eui';
 
 import { CRUD_APP_BASE_PATH, UIM_SHOW_DETAILS_CLICK } from '../../../constants';
-import { getRouterLinkProps, trackUiMetric } from '../../../services';
+import { getRouterLinkProps, trackUiMetric, METRIC_TYPE } from '../../../services';
 import { ConnectionStatus, RemoveClusterButtonProvider } from '../components';
 
 export class RemoteClusterTable extends Component {
@@ -91,7 +91,7 @@ export class RemoteClusterTable extends Component {
           <EuiLink
             data-test-subj="remoteClustersTableListClusterLink"
             onClick={() => {
-              trackUiMetric(UIM_SHOW_DETAILS_CLICK);
+              trackUiMetric(METRIC_TYPE.CLICK, UIM_SHOW_DETAILS_CLICK);
               openDetailPanel(name);
             }}
           >

@@ -31,7 +31,7 @@ import {
   RawSavedDashboardPanel730ToLatest,
 } from './migrations/types';
 
-export type NavAction = (menuItem: any, navController: any, anchorElement: any) => void;
+export type NavAction = (anchorElement?: any) => void;
 
 export interface GridData {
   w: number;
