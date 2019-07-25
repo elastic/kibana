@@ -19,6 +19,8 @@ import _ from 'lodash';
 import d3 from 'd3';
 import moment from 'moment';
 
+import chrome from 'ui/chrome';
+
 import {
   getSeverityWithLow,
   getMultiBucketImpactLabel,
@@ -64,6 +66,7 @@ const contextChartLineTopMargin = 3;
 const chartSpacing = 25;
 const swimlaneHeight = 30;
 const margin = { top: 20, right: 10, bottom: 15, left: 40 };
+const mlAnnotationsEnabled = chrome.getInjected('mlAnnotationsEnabled', false);
 
 const ZOOM_INTERVAL_OPTIONS = [
   { duration: moment.duration(1, 'h'), label: '1h' },
@@ -89,7 +92,6 @@ function getSvgHeight() {
 
 const TimeseriesChartIntl = injectI18n(class TimeseriesChart extends React.Component {
   static propTypes = {
-    annotationsEnabled: PropTypes.bool,
     annotation: PropTypes.object,
     autoZoomDuration: PropTypes.number,
     contextAggregationInterval: PropTypes.object,
@@ -129,10 +131,7 @@ const TimeseriesChartIntl = injectI18n(class TimeseriesChart extends React.Compo
   }
 
   componentDidMount() {
-    const {
-      annotationsEnabled,
-      svgWidth
-    } = this.props;
+    const { svgWidth } = this.props;
 
     this.vizWidth = svgWidth - margin.left - margin.right;
     const vizWidth = this.vizWidth;
@@ -163,7 +162,7 @@ const TimeseriesChartIntl = injectI18n(class TimeseriesChart extends React.Compo
     this.fieldFormat = undefined;
 
     // Annotations Brush
-    if (annotationsEnabled) {
+    if (mlAnnotationsEnabled) {
       this.annotateBrush = getAnnotationBrush.call(this);
     }
 
@@ -210,7 +209,7 @@ const TimeseriesChartIntl = injectI18n(class TimeseriesChart extends React.Compo
 
     this.renderFocusChart();
 
-    if (this.props.annotationsEnabled && this.props.annotation === null) {
+    if (mlAnnotationsEnabled && this.props.annotation === null) {
       const chartElement = d3.select(this.rootNode);
       chartElement.select('g.mlAnnotationBrush').call(this.annotateBrush.extent([0, 0]));
     }
@@ -218,7 +217,6 @@ const TimeseriesChartIntl = injectI18n(class TimeseriesChart extends React.Compo
 
   renderChart() {
     const {
-      annotationsEnabled,
       contextChartData,
       contextForecastData,
       detectorIndex,
@@ -320,7 +318,7 @@ const TimeseriesChartIntl = injectI18n(class TimeseriesChart extends React.Compo
       .attr('transform', 'translate(' + margin.left + ',' + (focusHeight + margin.top + chartSpacing) + ')');
 
     // Mask to hide annotations overflow
-    if (annotationsEnabled) {
+    if (mlAnnotationsEnabled) {
       const annotationsMask = svg
         .append('defs')
         .append('mask')
@@ -393,10 +391,7 @@ const TimeseriesChartIntl = injectI18n(class TimeseriesChart extends React.Compo
     // Split out creation of the focus chart from the rendering,
     // as we want to re-render the paths and points when the zoom area changes.
 
-    const {
-      annotationsEnabled,
-      contextForecastData
-    } = this.props;
+    const { contextForecastData } = this.props;
 
     // Add a group at the top to display info on the chart aggregation interval
     // and links to set the brush span to 1h, 1d, 1w etc.
@@ -411,7 +406,7 @@ const TimeseriesChartIntl = injectI18n(class TimeseriesChart extends React.Compo
     this.createZoomInfoElements(zoomGroup, fcsWidth);
 
     // Create the elements for annotations
-    if (annotationsEnabled) {
+    if (mlAnnotationsEnabled) {
       const annotateBrush = this.annotateBrush.bind(this);
 
       let brushX = 0;
@@ -503,7 +498,6 @@ const TimeseriesChartIntl = injectI18n(class TimeseriesChart extends React.Compo
 
   renderFocusChart() {
     const {
-      annotationsEnabled,
       focusAggregationInterval,
       focusAnnotationData,
       focusChartData,
@@ -605,7 +599,7 @@ const TimeseriesChartIntl = injectI18n(class TimeseriesChart extends React.Compo
 
       // if annotations are present, we extend yMax to avoid overlap
       // between annotation labels, chart lines and anomalies.
-      if (annotationsEnabled && focusAnnotationData && focusAnnotationData.length > 0) {
+      if (mlAnnotationsEnabled && focusAnnotationData && focusAnnotationData.length > 0) {
         const levels = getAnnotationLevels(focusAnnotationData);
         const maxLevel = d3.max(Object.keys(levels).map(key => levels[key]));
         // TODO needs revisiting to be a more robust normalization
@@ -641,7 +635,7 @@ const TimeseriesChartIntl = injectI18n(class TimeseriesChart extends React.Compo
         .classed('hidden', !showModelBounds);
     }
 
-    if (annotationsEnabled) {
+    if (mlAnnotationsEnabled) {
       renderAnnotations(
         focusChart,
         focusAnnotationData,
@@ -1251,7 +1245,6 @@ const TimeseriesChartIntl = injectI18n(class TimeseriesChart extends React.Compo
 
   showFocusChartTooltip(marker, circle) {
     const {
-      annotationsEnabled,
       modelPlotEnabled,
       intl
     } = this.props;
@@ -1392,7 +1385,7 @@ const TimeseriesChartIntl = injectI18n(class TimeseriesChart extends React.Compo
       });
     }
 
-    if (annotationsEnabled && _.has(marker, 'annotation')) {
+    if (mlAnnotationsEnabled && _.has(marker, 'annotation')) {
       contents = mlEscape(marker.annotation);
       contents += `<br />${moment(marker.timestamp).format('MMMM Do YYYY, HH:mm')}`;
 
