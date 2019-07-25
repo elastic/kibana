@@ -62,7 +62,7 @@ export class RegionMapPlugin implements Plugin<Promise<void>, void> {
       ...(await __LEGACY.setup()),
     };
 
-    data.expressions.registerFunction(() => createRegionMapFn(visualizationDependencies));
+    data.expressions.registerFunction(createRegionMapFn);
 
     visualizations.types.VisTypesRegistryProvider.register(() =>
       createRegionMapTypeDefinition(visualizationDependencies)
