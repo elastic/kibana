@@ -17,6 +17,7 @@ server.basePath: '/analyze'
 # This setting was effectively always `false` before Kibana 6.3 and will
 # default to `true` starting in Kibana 7.0.
 #server.rewriteBasePath: false
+server.rewriteBasePath: true
 
 # The maximum payload size in bytes for incoming server requests.
 #server.maxPayloadBytes: 1048576
