@@ -530,6 +530,12 @@ function discoverController(
     indexPatternList: $route.current.locals.ip.list,
   };
 
+  const shouldSearchOnPageLoad = () => {
+    // A saved search is created on every page load, so we check the ID to see if we're loading a
+    // previously saved search or if it is just transient
+    return config.get('discover:searchOnPageLoad') || savedSearch.id !== undefined;
+  };
+
   const init = _.once(function () {
     stateMonitor = stateMonitorFactory.create($state, getStateDefaults());
     stateMonitor.onChange((status) => {
@@ -616,7 +622,7 @@ function discoverController(
           function pick(rows, oldRows, fetchStatus) {
             // initial state, pretend we're already loading if we're about to execute a search so
             // that the uninitilized message doesn't flash on screen
-            if (rows == null && oldRows == null && config.get('discover:searchOnPageLoad')) {
+            if (rows == null && oldRows == null && shouldSearchOnPageLoad()) {
               return status.LOADING;
             }
 
@@ -655,7 +661,7 @@ function discoverController(
         init.complete = true;
         $state.replace();
 
-        if (config.get('discover:searchOnPageLoad')) {
+        if (shouldSearchOnPageLoad()) {
           $scope.fetch();
         }
       });

@@ -306,7 +306,8 @@ export function getUiSettingDefaults() {
       type: 'boolean',
       description: i18n.translate('kbn.advancedSettings.discover.searchOnPageLoadText', {
         defaultMessage:
-          'Controls whether a search is executed when Discover first loads',
+          'Controls whether a search is executed when Discover first loads. This setting does not ' +
+          'have an effect when loading a saved search.',
       }),
       category: ['discover'],
     },
