@@ -26,11 +26,11 @@ export function deleteAlertRoute(server: Hapi.Server) {
           .required(),
       },
     },
-    async handler(request: DeleteRequest, h: any) {
+    async handler(request: DeleteRequest, h: Hapi.ResponseToolkit) {
       const { id } = request.params;
       const alertsClient = request.getAlertsClient!();
       await alertsClient.delete({ id });
-      return h.response(null).code(204);
+      return h.response().code(204);
     },
   });
 }
