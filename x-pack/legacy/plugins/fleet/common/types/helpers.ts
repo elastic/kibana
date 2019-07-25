@@ -5,3 +5,5 @@
  */
 
 export type FlatObject<T> = { [Key in keyof T]: string };
+export type RendererResult = React.ReactElement<any> | null;
+export type RendererFunction<RenderArgs, Result = RendererResult> = (args: RenderArgs) => Result;
