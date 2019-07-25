@@ -10,7 +10,7 @@ jest.spyOn(actual.operationDefinitionMap.date_histogram, 'paramEditor');
 jest.spyOn(actual.operationDefinitionMap.terms, 'onOtherColumnChanged');
 
 export const {
-  getPotentialOperations,
+  getAvailableOperationsByMetaData,
   buildColumn,
   getOperations,
   getOperationDisplay,

@@ -18,7 +18,7 @@ import {
   OperationType,
 } from '../indexpattern';
 
-import { getPotentialOperations, buildColumn } from '../operations';
+import { getAvailableOperationsByMetaData, buildColumn } from '../operations';
 import { PopoverEditor } from './popover_editor';
 import { DragContextState, ChildDragDropProvider, DragDrop } from '../../drag_drop';
 import { changeColumn, deleteColumn } from '../state_helpers';
@@ -45,33 +45,33 @@ export const IndexPatternDimensionPanel = memo(function IndexPatternDimensionPan
   const indexPatternId = props.state.layers[layerId].indexPatternId;
   const currentIndexPattern = props.state.indexPatterns[indexPatternId];
 
-  const operations = useMemo(() => {
-    return getPotentialOperations(props.state.indexPatterns[indexPatternId]);
+  const availableOperationsByMetaData = useMemo(() => {
+    return getAvailableOperationsByMetaData(props.state.indexPatterns[indexPatternId]);
   }, [props.state.indexPatterns[indexPatternId]]);
 
   const operationFieldSupportMatrix = useMemo(() => {
-    const filteredOperations = operations.filter(operation => {
+    const filteredOperationsByMetaData = availableOperationsByMetaData.filter(operation => {
       return props.filterOperations(operation.operationMetaData);
     });
     const supportedOperationsByField: Partial<Record<string, OperationType[]>> = {};
     const supportedFieldsByOperation: Partial<Record<OperationType, string[]>> = {};
     const supportedOperationsByDocument: OperationType[] = [];
-    filteredOperations.forEach(op => {
-      op.operations.forEach(o => {
-        if (o.type === 'field') {
-          if (supportedOperationsByField[o.field]) {
-            supportedOperationsByField[o.field]!.push(o.op);
+    filteredOperationsByMetaData.forEach(({ operations }) => {
+      operations.forEach(operation => {
+        if (operation.type === 'field') {
+          if (supportedOperationsByField[operation.field]) {
+            supportedOperationsByField[operation.field]!.push(operation.operationType);
           } else {
-            supportedOperationsByField[o.field] = [o.op];
+            supportedOperationsByField[operation.field] = [operation.operationType];
           }
 
-          if (supportedFieldsByOperation[o.op]) {
-            supportedFieldsByOperation[o.op]!.push(o.field);
+          if (supportedFieldsByOperation[operation.operationType]) {
+            supportedFieldsByOperation[operation.operationType]!.push(operation.field);
           } else {
-            supportedFieldsByOperation[o.op] = [o.field];
+            supportedFieldsByOperation[operation.operationType] = [operation.field];
           }
         } else {
-          supportedOperationsByDocument.push(o.op);
+          supportedOperationsByDocument.push(operation.operationType);
         }
       });
     });
@@ -80,7 +80,7 @@ export const IndexPatternDimensionPanel = memo(function IndexPatternDimensionPan
       fieldByOperation: _.mapValues(supportedFieldsByOperation, _.uniq),
       operationByDocument: _.uniq(supportedOperationsByDocument),
     };
-  }, [operations, props.filterOperations]);
+  }, [availableOperationsByMetaData, props.filterOperations]);
 
   const selectedColumn: IndexPatternColumn | null =
     props.state.layers[layerId].columns[props.columnId] || null;
@@ -103,8 +103,7 @@ export const IndexPatternDimensionPanel = memo(function IndexPatternDimensionPan
         data-test-subj="indexPattern-dropTarget"
         droppable={canHandleDrop()}
         onDrop={field => {
-          const operation = hasOperationForField(field as IndexPatternField);
-          if (!operation) {
+          if (!hasOperationForField(field as IndexPatternField)) {
             // TODO: What do we do if we couldn't find a column?
             return;
           }

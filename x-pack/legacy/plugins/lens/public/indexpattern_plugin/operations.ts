@@ -104,13 +104,6 @@ export function getOperationDisplay() {
   return display;
 }
 
-export interface OperationMapping {
-  operationMeta: OperationMetaInformation;
-  applicableFields: string[];
-  applicableWithoutField: boolean;
-  applicableOperationTypes: OperationType[];
-}
-
 export function getOperationTypesForField(field: IndexPatternField) {
   return operationDefinitions
     .filter(
@@ -120,30 +113,31 @@ export function getOperationTypesForField(field: IndexPatternField) {
 }
 
 type OperationFieldTuple =
-  | { type: 'field'; op: OperationType; field: string }
-  | { op: OperationType; type: 'document' };
+  | { type: 'field'; operationType: OperationType; field: string }
+  | { operationType: OperationType; type: 'document' };
 
-export function getPotentialOperations(indexPattern: IndexPattern) {
+export function getAvailableOperationsByMetaData(indexPattern: IndexPattern) {
   const operationByMetaData: Record<string, OperationFieldTuple[]> = {};
-  function addToMap(operationMeta: OperationMetaInformation, operation: OperationFieldTuple) {
+
+  const addToMap = (operation: OperationFieldTuple) => (
+    operationMeta: OperationMetaInformation
+  ) => {
     const key = `${operationMeta.dataType}-${operationMeta.isBucketed ? 'true' : ''}`;
     if (operationByMetaData[key]) {
       operationByMetaData[key].push(operation);
     } else {
       operationByMetaData[key] = [operation];
     }
-  }
+  };
   operationDefinitions.forEach(operationDefinition => {
     operationDefinition
       .getPossibleOperationsForDocument(indexPattern)
-      .forEach(operationMeta =>
-        addToMap(operationMeta, { type: 'document', op: operationDefinition.type })
-      );
+      .forEach(addToMap({ type: 'document', operationType: operationDefinition.type }));
     indexPattern.fields.forEach(field => {
-      operationDefinition.getPossibleOperationsForField(field).forEach(operationMeta =>
-        addToMap(operationMeta, {
+      operationDefinition.getPossibleOperationsForField(field).forEach(
+        addToMap({
           type: 'field',
-          op: operationDefinition.type,
+          operationType: operationDefinition.type,
           field: field.name,
         })
       );
@@ -158,7 +152,7 @@ export function getPotentialOperations(indexPattern: IndexPattern) {
   });
 }
 
-export function buildColumn<T extends OperationType>({
+export function buildColumn({
   op,
   columns,
   field,
@@ -167,7 +161,7 @@ export function buildColumn<T extends OperationType>({
   suggestedPriority,
   asDocumentOperation,
 }: {
-  op?: T;
+  op?: OperationType;
   columns: Partial<Record<string, IndexPatternColumn>>;
   suggestedPriority: DimensionPriority | undefined;
   layerId: string;
