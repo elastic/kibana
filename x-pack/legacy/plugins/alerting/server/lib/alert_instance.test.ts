@@ -4,7 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import sinon from 'sinon';
 import { AlertInstance } from './alert_instance';
+
+let clock: sinon.SinonFakeTimers;
+
+beforeAll(() => {
+  clock = sinon.useFakeTimers();
+});
+
+afterAll(() => clock.restore());
 
 describe('shouldFire()', () => {
   test('defaults to false', () => {
