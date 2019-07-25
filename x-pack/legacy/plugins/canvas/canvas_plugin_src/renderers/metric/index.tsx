@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { CSSProperties } from 'react';
 import ReactDOM from 'react-dom';
 import { RendererFactory, Style } from '../../../types';
 import { Metric } from './component/metric';
@@ -31,9 +31,9 @@ export const metric: RendererFactory<Config> = () => ({
     ReactDOM.render(
       <Metric
         label={config.label}
-        labelFont={config.labelFont ? config.labelFont.spec : {}}
+        labelFont={config.labelFont ? (config.labelFont.spec as CSSProperties) : {}}
         metric={config.metric}
-        metricFont={config.metricFont ? config.metricFont.spec : {}}
+        metricFont={config.metricFont ? (config.metricFont.spec as CSSProperties) : {}}
         metricFormat={config.metricFormat}
       />,
       domNode,

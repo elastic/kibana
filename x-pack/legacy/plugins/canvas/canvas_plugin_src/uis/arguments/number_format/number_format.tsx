@@ -6,7 +6,6 @@
 
 import React, { Fragment, ChangeEvent, FunctionComponent } from 'react';
 import PropTypes from 'prop-types';
-import numeral from '@elastic/numeral';
 import { EuiSelect, EuiFieldText, EuiSpacer } from '@elastic/eui';
 
 interface NumberFormatOption {
