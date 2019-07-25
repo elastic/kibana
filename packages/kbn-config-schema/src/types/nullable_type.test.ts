@@ -50,6 +50,12 @@ test('validates contained type', () => {
   expect(() => type.validate('foo')).toThrowErrorMatchingSnapshot();
 });
 
+test('validates basic type', () => {
+  const type = schema.nullable(schema.string());
+
+  expect(() => type.validate(666)).toThrowErrorMatchingSnapshot();
+});
+
 test('includes namespace in failure', () => {
   const type = schema.nullable(schema.string({ maxLength: 1 }));
 
