@@ -19,6 +19,7 @@
 
 jest.mock('../../../../core/server/saved_objects/export', () => ({
   getSortedObjectsForExport: jest.fn(),
+  objectsToNdJson: jest.fn(),
 }));
 
 import Hapi from 'hapi';
@@ -96,7 +97,6 @@ describe('POST /api/saved_objects/_export', () => {
 
     const { payload, statusCode, headers } = await server.inject(request);
     const objects = payload.split('\n').map(row => JSON.parse(row));
-
     expect(statusCode).toBe(200);
     expect(headers).toHaveProperty('content-disposition', 'attachment; filename="export.ndjson"');
     expect(headers).toHaveProperty('content-type', 'application/ndjson');

@@ -23,6 +23,14 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [SavedObjectsSerializer](./kibana-plugin-server.savedobjectsserializer.md) |  |
 |  [ScopedClusterClient](./kibana-plugin-server.scopedclusterclient.md) | Serves the same purpose as "normal" <code>ClusterClient</code> but exposes additional <code>callAsCurrentUser</code> method that doesn't use credentials of the Kibana internal user (as <code>callAsInternalUser</code> does) to request Elasticsearch API, but rather passes HTTP headers extracted from the current user request to the API |
 
+## Functions
+
+|  Function | Description |
+|  --- | --- |
+|  [getSortedObjectsForExport({ types, objects, savedObjectsClient, exportSizeLimit, includeReferencesDeep, namespace, })](./kibana-plugin-server.getsortedobjectsforexport.md) |  |
+|  [importSavedObjects({ readStream, objectLimit, overwrite, savedObjectsClient, supportedTypes, namespace, })](./kibana-plugin-server.importsavedobjects.md) |  |
+|  [resolveImportErrors({ readStream, objectLimit, retries, savedObjectsClient, supportedTypes, namespace, })](./kibana-plugin-server.resolveimporterrors.md) |  |
+
 ## Interfaces
 
 |  Interface | Description |
@@ -57,12 +65,22 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [SavedObjectsBulkCreateObject](./kibana-plugin-server.savedobjectsbulkcreateobject.md) |  |
 |  [SavedObjectsBulkGetObject](./kibana-plugin-server.savedobjectsbulkgetobject.md) |  |
 |  [SavedObjectsBulkResponse](./kibana-plugin-server.savedobjectsbulkresponse.md) |  |
+|  [SavedObjectsClientProviderOptions](./kibana-plugin-server.savedobjectsclientprovideroptions.md) |  |
 |  [SavedObjectsClientWrapperOptions](./kibana-plugin-server.savedobjectsclientwrapperoptions.md) |  |
 |  [SavedObjectsCreateOptions](./kibana-plugin-server.savedobjectscreateoptions.md) |  |
 |  [SavedObjectsFindOptions](./kibana-plugin-server.savedobjectsfindoptions.md) |  |
 |  [SavedObjectsFindResponse](./kibana-plugin-server.savedobjectsfindresponse.md) |  |
+|  [SavedObjectsImportConflictError](./kibana-plugin-server.savedobjectsimportconflicterror.md) |  |
+|  [SavedObjectsImportError](./kibana-plugin-server.savedobjectsimporterror.md) |  |
+|  [SavedObjectsImportMissingReferencesError](./kibana-plugin-server.savedobjectsimportmissingreferenceserror.md) |  |
+|  [SavedObjectsImportOptions](./kibana-plugin-server.savedobjectsimportoptions.md) |  |
+|  [SavedObjectsImportResponse](./kibana-plugin-server.savedobjectsimportresponse.md) |  |
+|  [SavedObjectsImportRetry](./kibana-plugin-server.savedobjectsimportretry.md) |  |
+|  [SavedObjectsImportUnknownError](./kibana-plugin-server.savedobjectsimportunknownerror.md) |  |
+|  [SavedObjectsImportUnsupportedTypeError](./kibana-plugin-server.savedobjectsimportunsupportedtypeerror.md) |  |
 |  [SavedObjectsMigrationVersion](./kibana-plugin-server.savedobjectsmigrationversion.md) | A dictionary of saved object type -<!-- -->&gt; version used to determine what migrations need to be applied to a saved object. |
 |  [SavedObjectsRawDoc](./kibana-plugin-server.savedobjectsrawdoc.md) | A raw document as represented directly in the saved object index. |
+|  [SavedObjectsResolveImportErrorsOptions](./kibana-plugin-server.savedobjectsresolveimporterrorsoptions.md) |  |
 |  [SavedObjectsService](./kibana-plugin-server.savedobjectsservice.md) |  |
 |  [SavedObjectsUpdateOptions](./kibana-plugin-server.savedobjectsupdateoptions.md) |  |
 |  [SavedObjectsUpdateResponse](./kibana-plugin-server.savedobjectsupdateresponse.md) |  |

@@ -27,7 +27,10 @@ import {
   SavedObjectsClient,
   SavedObjectsRepository,
   ScopedSavedObjectsClientProvider,
-} from '../../../core/server/saved_objects/service';
+  getSortedObjectsForExport,
+  importSavedObjects,
+  resolveImportErrors,
+} from '../../../core/server/saved_objects';
 import { getRootPropertiesObjects } from '../../../core/server/saved_objects/mappings';
 import { SavedObjectsManagement } from '../../../core/server/saved_objects/management';
 
@@ -144,6 +147,12 @@ export function savedObjectsMixin(kbnServer, server) {
     setScopedSavedObjectsClientFactory: (...args) => provider.setClientFactory(...args),
     addScopedSavedObjectsClientWrapperFactory: (...args) =>
       provider.addClientWrapperFactory(...args),
+    importExport: {
+      importSavedObjects,
+      resolveImportErrors,
+      getSortedObjectsForExport,
+    },
+    schema,
   };
   server.decorate('server', 'savedObjects', service);
 

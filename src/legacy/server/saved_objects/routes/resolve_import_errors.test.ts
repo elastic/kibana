@@ -349,6 +349,9 @@ describe('POST /api/saved_objects/_resolve_import_errors', () => {
           "type": "index-pattern",
         },
       ],
+      Object {
+        "namespace": undefined,
+      },
     ],
   ],
   "results": Array [

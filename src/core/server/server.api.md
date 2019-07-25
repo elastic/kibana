@@ -11,6 +11,7 @@ import { ConfigOptions } from 'elasticsearch';
 import { Duration } from 'moment';
 import { ObjectType } from '@kbn/config-schema';
 import { Observable } from 'rxjs';
+import { Readable } from 'stream';
 import { Request } from 'hapi';
 import { ResponseObject } from 'hapi';
 import { ResponseToolkit } from 'hapi';
@@ -162,6 +163,12 @@ export interface FakeRequest {
 // @public
 export type GetAuthHeaders = (request: KibanaRequest | Request) => AuthHeaders | undefined;
 
+// Warning: (ae-forgotten-export) The symbol "ExportObjectsOptions" needs to be exported by the entry point index.d.ts
+// Warning: (ae-missing-release-tag) "getSortedObjectsForExport" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+// 
+// @public (undocumented)
+export function getSortedObjectsForExport({ types, objects, savedObjectsClient, exportSizeLimit, includeReferencesDeep, namespace, }: ExportObjectsOptions): Promise<import("stream").Readable>;
+
 // @public (undocumented)
 export type Headers = Record<string, string | string[] | undefined>;
 
@@ -179,6 +186,11 @@ export interface HttpServiceSetup extends HttpServerSetup {
 export interface HttpServiceStart {
     isListening: (port: number) => boolean;
 }
+
+// Warning: (ae-missing-release-tag) "importSavedObjects" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+// 
+// @public (undocumented)
+export function importSavedObjects({ readStream, objectLimit, overwrite, savedObjectsClient, supportedTypes, namespace, }: SavedObjectsImportOptions): Promise<SavedObjectsImportResponse>;
 
 // @internal (undocumented)
 export interface InternalCoreSetup {
@@ -385,6 +397,11 @@ export type RecursiveReadonly<T> = T extends (...args: any[]) => any ? T : T ext
     [K in keyof T]: RecursiveReadonly<T[K]>;
 }> : T;
 
+// Warning: (ae-missing-release-tag) "resolveImportErrors" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+// 
+// @public (undocumented)
+export function resolveImportErrors({ readStream, objectLimit, retries, savedObjectsClient, supportedTypes, namespace, }: SavedObjectsResolveImportErrorsOptions): Promise<SavedObjectsImportResponse>;
+
 // @public
 export interface RouteConfigOptions {
     authRequired?: boolean;
@@ -515,6 +532,14 @@ export class SavedObjectsClient {
 // @public
 export type SavedObjectsClientContract = Pick<SavedObjectsClient, keyof SavedObjectsClient>;
 
+// Warning: (ae-missing-release-tag) "SavedObjectsClientProviderOptions" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+// 
+// @public (undocumented)
+export interface SavedObjectsClientProviderOptions {
+    // (undocumented)
+    excludedWrappers?: string[];
+}
+
 // Warning: (ae-missing-release-tag) "SavedObjectsClientWrapperFactory" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 // 
 // @public (undocumented)
@@ -628,6 +653,114 @@ export interface SavedObjectsFindResponse<T extends SavedObjectAttributes = any>
     total: number;
 }
 
+// Warning: (ae-missing-release-tag) "SavedObjectsImportConflictError" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+// 
+// @public (undocumented)
+export interface SavedObjectsImportConflictError {
+    // (undocumented)
+    type: 'conflict';
+}
+
+// Warning: (ae-missing-release-tag) "SavedObjectsImportError" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+// 
+// @public (undocumented)
+export interface SavedObjectsImportError {
+    // (undocumented)
+    error: SavedObjectsImportConflictError | SavedObjectsImportUnsupportedTypeError | SavedObjectsImportMissingReferencesError | SavedObjectsImportUnknownError;
+    // (undocumented)
+    id: string;
+    // (undocumented)
+    title?: string;
+    // (undocumented)
+    type: string;
+}
+
+// Warning: (ae-missing-release-tag) "SavedObjectsImportMissingReferencesError" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+// 
+// @public (undocumented)
+export interface SavedObjectsImportMissingReferencesError {
+    // (undocumented)
+    blocking: Array<{
+        type: string;
+        id: string;
+    }>;
+    // (undocumented)
+    references: Array<{
+        type: string;
+        id: string;
+    }>;
+    // (undocumented)
+    type: 'missing_references';
+}
+
+// Warning: (ae-missing-release-tag) "SavedObjectsImportOptions" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+// 
+// @public (undocumented)
+export interface SavedObjectsImportOptions {
+    // (undocumented)
+    namespace?: string;
+    // (undocumented)
+    objectLimit: number;
+    // (undocumented)
+    overwrite: boolean;
+    // (undocumented)
+    readStream: Readable;
+    // (undocumented)
+    savedObjectsClient: SavedObjectsClientContract;
+    // (undocumented)
+    supportedTypes: string[];
+}
+
+// Warning: (ae-missing-release-tag) "SavedObjectsImportResponse" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+// 
+// @public (undocumented)
+export interface SavedObjectsImportResponse {
+    // (undocumented)
+    errors?: SavedObjectsImportError[];
+    // (undocumented)
+    success: boolean;
+    // (undocumented)
+    successCount: number;
+}
+
+// Warning: (ae-missing-release-tag) "SavedObjectsImportRetry" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+// 
+// @public (undocumented)
+export interface SavedObjectsImportRetry {
+    // (undocumented)
+    id: string;
+    // (undocumented)
+    overwrite: boolean;
+    // (undocumented)
+    replaceReferences: Array<{
+        type: string;
+        from: string;
+        to: string;
+    }>;
+    // (undocumented)
+    type: string;
+}
+
+// Warning: (ae-missing-release-tag) "SavedObjectsImportUnknownError" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+// 
+// @public (undocumented)
+export interface SavedObjectsImportUnknownError {
+    // (undocumented)
+    message: string;
+    // (undocumented)
+    statusCode: number;
+    // (undocumented)
+    type: 'unknown';
+}
+
+// Warning: (ae-missing-release-tag) "SavedObjectsImportUnsupportedTypeError" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+// 
+// @public (undocumented)
+export interface SavedObjectsImportUnsupportedTypeError {
+    // (undocumented)
+    type: 'unsupported_type';
+}
+
 // @public
 export interface SavedObjectsMigrationVersion {
     // (undocumented)
@@ -648,6 +781,24 @@ export interface SavedObjectsRawDoc {
     _source: any;
     // (undocumented)
     _type?: string;
+}
+
+// Warning: (ae-missing-release-tag) "SavedObjectsResolveImportErrorsOptions" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+// 
+// @public (undocumented)
+export interface SavedObjectsResolveImportErrorsOptions {
+    // (undocumented)
+    namespace?: string;
+    // (undocumented)
+    objectLimit: number;
+    // (undocumented)
+    readStream: Readable;
+    // (undocumented)
+    retries: SavedObjectsImportRetry[];
+    // (undocumented)
+    savedObjectsClient: SavedObjectsClientContract;
+    // (undocumented)
+    supportedTypes: string[];
 }
 
 // Warning: (ae-missing-release-tag) "SavedObjectsSchema" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
@@ -686,10 +837,18 @@ export interface SavedObjectsService<Request = any> {
     getSavedObjectsRepository(...rest: any[]): any;
     // (undocumented)
     getScopedSavedObjectsClient: ScopedSavedObjectsClientProvider<Request>['getClient'];
+    // (undocumented)
+    importExport: {
+        importSavedObjects(options: SavedObjectsImportOptions): Promise<SavedObjectsImportResponse>;
+        resolveImportErrors(options: SavedObjectsResolveImportErrorsOptions): Promise<SavedObjectsImportResponse>;
+        getSortedObjectsForExport(options: ExportObjectsOptions): Promise<Readable>;
+    };
     // Warning: (ae-incompatible-release-tags) The symbol "SavedObjectsClient" is marked as @public, but its signature references "SavedObjectsClient" which is marked as @internal
     // 
     // (undocumented)
     SavedObjectsClient: typeof SavedObjectsClient;
+    // (undocumented)
+    schema: SavedObjectsSchema;
     // (undocumented)
     types: string[];
 }

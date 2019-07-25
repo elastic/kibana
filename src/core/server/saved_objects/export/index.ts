@@ -17,4 +17,4 @@
  * under the License.
  */
 
-export { getSortedObjectsForExport } from './get_sorted_objects_for_export';
+export { getSortedObjectsForExport, ExportObjectsOptions } from './get_sorted_objects_for_export';

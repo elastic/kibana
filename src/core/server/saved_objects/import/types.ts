@@ -17,7 +17,10 @@
  * under the License.
  */
 
-export interface Retry {
+import { Readable } from 'stream';
+import { SavedObjectsClientContract } from '../service';
+
+export interface SavedObjectsImportRetry {
   type: string;
   id: string;
   overwrite: boolean;
@@ -28,21 +31,21 @@ export interface Retry {
   }>;
 }
 
-export interface ConflictError {
+export interface SavedObjectsImportConflictError {
   type: 'conflict';
 }
 
-export interface UnsupportedTypeError {
+export interface SavedObjectsImportUnsupportedTypeError {
   type: 'unsupported_type';
 }
 
-export interface UnknownError {
+export interface SavedObjectsImportUnknownError {
   type: 'unknown';
   message: string;
   statusCode: number;
 }
 
-export interface MissingReferencesError {
+export interface SavedObjectsImportMissingReferencesError {
   type: 'missing_references';
   references: Array<{
     type: string;
@@ -54,9 +57,37 @@ export interface MissingReferencesError {
   }>;
 }
 
-export interface ImportError {
+export interface SavedObjectsImportError {
   id: string;
   type: string;
   title?: string;
-  error: ConflictError | UnsupportedTypeError | MissingReferencesError | UnknownError;
+  error:
+    | SavedObjectsImportConflictError
+    | SavedObjectsImportUnsupportedTypeError
+    | SavedObjectsImportMissingReferencesError
+    | SavedObjectsImportUnknownError;
+}
+
+export interface SavedObjectsImportResponse {
+  success: boolean;
+  successCount: number;
+  errors?: SavedObjectsImportError[];
+}
+
+export interface SavedObjectsImportOptions {
+  readStream: Readable;
+  objectLimit: number;
+  overwrite: boolean;
+  savedObjectsClient: SavedObjectsClientContract;
+  supportedTypes: string[];
+  namespace?: string;
+}
+
+export interface SavedObjectsResolveImportErrorsOptions {
+  readStream: Readable;
+  objectLimit: number;
+  savedObjectsClient: SavedObjectsClientContract;
+  retries: SavedObjectsImportRetry[];
+  supportedTypes: string[];
+  namespace?: string;
 }

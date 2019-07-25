@@ -161,6 +161,7 @@ Object {
         },
       ],
       Object {
+        "namespace": undefined,
         "overwrite": false,
       },
     ],
@@ -243,6 +244,7 @@ Object {
         },
       ],
       Object {
+        "namespace": undefined,
         "overwrite": true,
       },
     ],
@@ -420,6 +422,9 @@ Object {
           "type": "index-pattern",
         },
       ],
+      Object {
+        "namespace": undefined,
+      },
     ],
   ],
   "results": Array [
@@ -511,6 +516,7 @@ Object {
         },
       ],
       Object {
+        "namespace": undefined,
         "overwrite": false,
       },
     ],

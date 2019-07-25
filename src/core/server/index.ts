@@ -97,6 +97,7 @@ export {
   SavedObjectsClient,
   SavedObjectsClientContract,
   SavedObjectsCreateOptions,
+  SavedObjectsClientProviderOptions,
   SavedObjectsClientWrapperFactory,
   SavedObjectsClientWrapperOptions,
   SavedObjectsErrorHelpers,
@@ -109,6 +110,18 @@ export {
   SavedObjectsService,
   SavedObjectsUpdateOptions,
   SavedObjectsUpdateResponse,
+  SavedObjectsImportError,
+  SavedObjectsImportConflictError,
+  SavedObjectsImportMissingReferencesError,
+  SavedObjectsImportUnknownError,
+  SavedObjectsImportUnsupportedTypeError,
+  SavedObjectsImportOptions,
+  SavedObjectsImportResponse,
+  SavedObjectsImportRetry,
+  SavedObjectsResolveImportErrorsOptions,
+  getSortedObjectsForExport,
+  importSavedObjects,
+  resolveImportErrors,
 } from './saved_objects';
 
 export { RecursiveReadonly } from '../utils';
