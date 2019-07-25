@@ -106,7 +106,7 @@ export default function ({ getService }) {
         const [scheduledTask] = (await currentTasks()).docs;
         expect(scheduledTask.id).to.eql(task.id);
         expect(scheduledTask.attempts).to.be.greaterThan(0);
-        expect(Date.parse(scheduledTask.runAt)).to.be.greaterThan(Date.parse(task.runAt));
+        expect(Date.parse(scheduledTask.runAt)).to.be.greaterThan(Date.parse(task.runAt) + 5 * 60 * 1000);
       });
     });
 
