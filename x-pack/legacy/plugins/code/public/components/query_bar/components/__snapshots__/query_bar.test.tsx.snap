@@ -108,7 +108,6 @@ exports[`render correctly with empty query string 1`] = `
               valueOfSelected="default"
             >
               <EuiPopover
-                anchorClassName="euiSuperSelect__popoverAnchor"
                 anchorPosition="downCenter"
                 button={
                   <EuiSuperSelectControl
@@ -183,6 +182,7 @@ exports[`render correctly with empty query string 1`] = `
                 }
                 className="euiSuperSelect"
                 closePopover={[Function]}
+                display="block"
                 hasArrow={false}
                 isOpen={false}
                 ownFocus={false}
@@ -195,7 +195,7 @@ exports[`render correctly with empty query string 1`] = `
                   onOutsideClick={[Function]}
                 >
                   <div
-                    className="euiPopover euiPopover--anchorDownCenter euiSuperSelect"
+                    className="euiPopover euiPopover--anchorDownCenter euiPopover--displayBlock euiSuperSelect"
                     onKeyDown={[Function]}
                     onMouseDown={[Function]}
                     onMouseUp={[Function]}
@@ -203,7 +203,7 @@ exports[`render correctly with empty query string 1`] = `
                     onTouchStart={[Function]}
                   >
                     <div
-                      className="euiPopover__anchor euiSuperSelect__popoverAnchor"
+                      className="euiPopover__anchor"
                     >
                       <EuiSuperSelectControl
                         className=""
@@ -817,7 +817,6 @@ exports[`render correctly with input query string changed 1`] = `
                   valueOfSelected="default"
                 >
                   <EuiPopover
-                    anchorClassName="euiSuperSelect__popoverAnchor"
                     anchorPosition="downCenter"
                     button={
                       <EuiSuperSelectControl
@@ -892,6 +891,7 @@ exports[`render correctly with input query string changed 1`] = `
                     }
                     className="euiSuperSelect"
                     closePopover={[Function]}
+                    display="block"
                     hasArrow={false}
                     isOpen={false}
                     ownFocus={false}
@@ -904,7 +904,7 @@ exports[`render correctly with input query string changed 1`] = `
                       onOutsideClick={[Function]}
                     >
                       <div
-                        className="euiPopover euiPopover--anchorDownCenter euiSuperSelect"
+                        className="euiPopover euiPopover--anchorDownCenter euiPopover--displayBlock euiSuperSelect"
                         onKeyDown={[Function]}
                         onMouseDown={[Function]}
                         onMouseUp={[Function]}
@@ -912,7 +912,7 @@ exports[`render correctly with input query string changed 1`] = `
                         onTouchStart={[Function]}
                       >
                         <div
-                          className="euiPopover__anchor euiSuperSelect__popoverAnchor"
+                          className="euiPopover__anchor"
                         >
                           <EuiSuperSelectControl
                             className=""

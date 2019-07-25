@@ -461,6 +461,7 @@ export function onDataLoadError(layerId, dataId, requestToken, errorMessage) {
     dispatch(clearTooltipStateForLayer(layerId));
     dispatch({
       type: LAYER_DATA_LOAD_ERROR,
+      data: null,
       layerId,
       dataId,
       requestToken,

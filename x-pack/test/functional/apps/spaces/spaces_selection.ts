@@ -92,7 +92,7 @@ export default function spaceSelectorFunctonalTests({
         await esArchiver.unload('spaces/selector');
       });
 
-      describe('displays separate data for each space', async () => {
+      describe('displays separate data for each space', () => {
         it('in the default space', async () => {
           await PageObjects.common.navigateToApp('dashboard');
           await expectDashboardRenders('[Logs] Web Traffic');

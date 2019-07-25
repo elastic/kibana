@@ -4,10 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { InfraMetricModelCreator, InfraMetricModelMetricType } from '../../adapter_types';
+import {
+  InfraMetricModelCreator,
+  InfraMetricModelMetricType,
+  InfraMetricModel,
+} from '../../adapter_types';
+import { InfraMetric } from '../../../../../graphql/types';
 
-export const hostK8sOverview: InfraMetricModelCreator = (timeField, indexPattern, interval) => ({
-  id: 'hostK8sOverview',
+export const hostK8sOverview: InfraMetricModelCreator = (
+  timeField,
+  indexPattern,
+  interval
+): InfraMetricModel => ({
+  id: InfraMetric.hostK8sOverview,
   requires: ['kubernetes'],
   index_pattern: indexPattern,
   interval,
