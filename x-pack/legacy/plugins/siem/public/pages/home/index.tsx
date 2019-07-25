@@ -12,6 +12,7 @@ import { pure } from 'recompose';
 import styled from 'styled-components';
 import chrome from 'ui/chrome';
 
+import { i18n } from '@kbn/i18n';
 import { AutoSizer } from '../../components/auto_sizer';
 import { DragDropContextWrapper } from '../../components/drag_and_drop/drag_drop_context_wrapper';
 import { Flyout, flyoutHeaderHeight } from '../../components/flyout';
@@ -24,6 +25,7 @@ import { NotFoundPage } from '../404';
 import { HostsContainer } from '../hosts';
 import { NetworkContainer } from '../network';
 import { Overview } from '../overview';
+import { PageRoute } from '../../components/page_router/page';
 import { Timelines } from '../timelines';
 import { WithSource } from '../../containers/source';
 import { MlPopover } from '../../components/ml_popover/ml_popover';
@@ -133,10 +135,32 @@ export const HomePage = pure(() => (
 
                   <Switch>
                     <Redirect from="/" exact={true} to="/overview" />
-                    <Route path="/overview" component={Overview} />
+                    <Route
+                      path="/overview"
+                      render={props => (
+                        <PageRoute
+                          {...props}
+                          component={Overview}
+                          title={i18n.translate('xpack.siem.pages.home.OverviewTitle', {
+                            defaultMessage: 'Overview',
+                          })}
+                        />
+                      )}
+                    />
                     <Route path="/hosts" component={HostsContainer} />
                     <Route path="/network" component={NetworkContainer} />
-                    <Route path="/timelines" component={Timelines} />
+                    <Route
+                      path="/timelines"
+                      render={props => (
+                        <PageRoute
+                          {...props}
+                          component={Timelines}
+                          title={i18n.translate('xpack.siem.pages.home.TimelinesTitle', {
+                            defaultMessage: 'Timelines',
+                          })}
+                        />
+                      )}
+                    />
                     <Route path="/link-to" component={LinkToPage} />
                     <Route path="/ml-hosts" component={MlHostConditionalContainer} />
                     <Route path="/ml-network" component={MlNetworkConditionalContainer} />
