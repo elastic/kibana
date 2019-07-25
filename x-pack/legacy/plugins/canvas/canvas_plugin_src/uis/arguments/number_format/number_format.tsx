@@ -9,20 +9,20 @@ import PropTypes from 'prop-types';
 import { EuiSelect, EuiFieldText, EuiSpacer } from '@elastic/eui';
 
 interface NumberFormatOption {
-  /** a NumeralJS format string */
+  /** A NumeralJS format string */
   value: string;
-  /** the name to display for the format */
+  /** The name to display for the format */
   text: string;
 }
 
 export interface Props {
-  /** array of number formats options */
+  /** An array of number formats options */
   numberFormats: NumberFormatOption[];
-  /** handler to invoke when value changes */
+  /** The handler to invoke when value changes */
   onValueChange: (value: string) => void;
-  /** value of the argument */
+  /** The value of the argument */
   argValue: string;
-  /** the ID for the argument */
+  /** The ID for the argument */
   argId: string;
 }
 
