@@ -100,8 +100,7 @@ function PanelHeaderUi({
           }
         )}
       >
-        {showTitle ? title : ''}
-        &nbsp;
+        {showTitle ? `${title} ` : ''}
         {renderBadges(badges, embeddable)}
       </div>
 
