@@ -93,20 +93,14 @@ export class KibanaMigrator {
     await server.plugins.elasticsearch.waitUntilReady();
 
     const config = server.config();
-    const defaultIndex = config.get('kibana.index');
+    const kibanaIndexName = config.get('kibana.index');
     const indexMap = createIndexMap(
-      defaultIndex,
+      kibanaIndexName,
       this.kbnServer.uiExports.savedObjectSchemas,
       this.mappingProperties
     );
 
     const migrators = Object.keys(indexMap).map(index => {
-      let obsoleteIndexTemplatePattern;
-      // Only necessary for the migrator of the default index.
-      // This will cause race conditions between migrators otherwise.
-      if (index === defaultIndex) {
-        obsoleteIndexTemplatePattern = 'kibana_index_template*';
-      }
       return new IndexMigrator({
         batchSize: config.get('migrations.batchSize'),
         callCluster: server.plugins.elasticsearch!.getCluster('admin').callWithInternalUser,
@@ -117,7 +111,9 @@ export class KibanaMigrator {
         pollInterval: config.get('migrations.pollInterval'),
         scrollDuration: config.get('migrations.scrollDuration'),
         serializer: this.serializer,
-        obsoleteIndexTemplatePattern,
+        // Only necessary for the migrator of the kibana index.
+        obsoleteIndexTemplatePattern:
+          index === kibanaIndexName ? 'kibana_index_template*' : undefined,
         convertToAliasScript: indexMap[index].script,
       });
     });
