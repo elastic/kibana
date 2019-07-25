@@ -6,11 +6,11 @@
 
 import Slapshot from '@mattapperson/slapshot';
 
-import { SODatabaseAdapter } from '../../so_database/default';
-import { MockedSODatabaseAdapter } from '../../so_database/mocked_adapter';
-import { createKibanaServer } from '../../../../../../../../test_utils/jest/contract_tests/servers';
-import { ConfigAdapter } from '../default';
-import { Root } from '../../../../../../../../../src/core/server/root';
+import { SODatabaseAdapter } from '../so_database/default';
+import { MockedSODatabaseAdapter } from '../so_database/mocked_adapter';
+import { createKibanaServer } from '../../../../../../../test_utils/jest/contract_tests/servers';
+import { ConfigAdapter } from './default';
+import { Root } from '../../../../../../../../src/core/server/root';
 
 const { callWhenOnline } = Slapshot;
 

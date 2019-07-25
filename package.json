@@ -262,7 +262,7 @@
     "yauzl": "2.10.0"
   },
   "devDependencies": {
-    "@mattapperson/slapshot": "1.0.8",
+    "@mattapperson/slapshot": "1.0.9",
     "@babel/parser": "7.4.5",
     "@babel/plugin-syntax-dynamic-import": "^7.2.0",
     "@babel/types": "7.4.4",

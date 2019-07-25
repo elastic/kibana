@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { RESERVED_DIR_JEST_CONTRACT_TESTS } from '../../../src/dev/constants';
-
 export function createJestConfig({
   kibanaDirectory,
   xPackKibanaDirectory,
@@ -45,9 +43,6 @@ export function createJestConfig({
     ],
     testMatch: [
       '**/*.test.{js,ts,tsx}'
-    ],
-    testPathIgnorePatterns: [
-      `${RESERVED_DIR_JEST_CONTRACT_TESTS}/`,
     ],
     transform: {
       '^.+\\.(js|tsx?)$': `${kibanaDirectory}/src/dev/jest/babel_transform.js`,

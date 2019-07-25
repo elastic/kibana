@@ -1,0 +1,18 @@
+
+exports['create:configurations:{"agent_version":"1","description":"test configuration","data_sources":[],"monitoring_enabled":false,"name":"test_configuration","output":""}:{}'] = {
+  "results": {
+    "type": "configurations",
+    "id": "ff3db1e0-af18-11e9-98d7-fbca27da03aa",
+    "attributes": {
+      "agent_version": "1",
+      "description": "test configuration",
+      "data_sources": {},
+      "monitoring_enabled": false,
+      "name": "test_configuration",
+      "output": ""
+    },
+    "references": {},
+    "updated_at": "2019-07-25T20:15:50.782Z",
+    "version": "WzUsMV0="
+  }
+}

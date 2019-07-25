@@ -24,6 +24,3 @@ export const REPO_ROOT = dirname(require.resolve('../../package.json'));
 // Files in directories of this name will be treated as Jest integration tests with instances of
 // Elasticsearch and the Kibana server.
 export const RESERVED_DIR_JEST_INTEGRATION_TESTS = 'integration_tests';
-
-// Files in directories of this name will be treated as Jest contract tests
-export const RESERVED_DIR_JEST_CONTRACT_TESTS = 'contract_tests';
