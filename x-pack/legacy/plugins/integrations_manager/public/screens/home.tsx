@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React, { useState, useEffect } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiTitle } from '@elastic/eui';
-import { getIntegrationsGroupedByStatus } from '../data';
-import { IntegrationsGridByStatus } from '../components/integration_list_grid';
+import { EuiPage, EuiPageBody, EuiTitle } from '@elastic/eui';
 import { IntegrationsGroupedByStatus } from '../../common/types';
+import { IntegrationsGridByStatus } from '../components/integration_list_grid';
+import { getIntegrationsGroupedByStatus } from '../data';
 
 export function Home() {
   const [map, setMap] = useState<IntegrationsGroupedByStatus>({
@@ -20,15 +20,13 @@ export function Home() {
   }, []);
 
   return (
-    <EuiPanel paddingSize="l">
-      <EuiFlexGroup>
-        <EuiFlexItem>
-          <EuiTitle>
-            <h1>Elastic Integrations Manager</h1>
-          </EuiTitle>
-          {map ? <IntegrationsGridByStatus map={map} /> : null}
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </EuiPanel>
+    <EuiPage restrictWidth={1200}>
+      <EuiPageBody>
+        <EuiTitle size="l">
+          <h1>Add Your Data</h1>
+        </EuiTitle>
+        {map ? <IntegrationsGridByStatus map={map} /> : null}
+      </EuiPageBody>
+    </EuiPage>
   );
 }
