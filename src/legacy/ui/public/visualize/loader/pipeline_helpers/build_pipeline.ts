@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { cloneDeep } from 'lodash';
+import { cloneDeep, get } from 'lodash';
 // @ts-ignore
 import { setBounds } from 'ui/agg_types/buckets/date_histogram';
 import { SearchSource } from 'ui/courier';
@@ -34,14 +34,14 @@ interface SchemaConfigParams {
   useGeocentroid?: boolean;
 }
 
-interface SchemaConfig {
+export interface SchemaConfig {
   accessor: number;
   format: SchemaFormat | {};
   params: SchemaConfigParams;
   aggType: string;
 }
 
-interface Schemas {
+export interface Schemas {
   metric: SchemaConfig[];
   bucket?: any[];
   geo_centroid?: any[];
@@ -153,10 +153,6 @@ export const getSchemas = (vis: Vis, timeRange?: any): Schemas => {
   const isHierarchical = vis.isHierarchical();
   const metrics = responseAggs.filter((agg: AggConfig) => agg.type.type === 'metrics');
   responseAggs.forEach((agg: AggConfig) => {
-    if (!agg.enabled) {
-      cnt++;
-      return;
-    }
     let skipMetrics = false;
     let schemaName = agg.schema ? agg.schema.name || agg.schema : null;
     if (typeof schemaName === 'object') {
@@ -244,6 +240,30 @@ export const prepareDimension = (variable: string, data: any) => {
   return expr;
 };
 
+const adjustVislibDimensionFormmaters = (vis: Vis, dimensions: { y: any[] }): void => {
+  const visState = vis.getCurrentState();
+  const visConfig = visState.params;
+  const responseAggs = vis.aggs.getResponseAggs().filter((agg: AggConfig) => agg.enabled);
+
+  (dimensions.y || []).forEach(yDimension => {
+    const yAgg = responseAggs[yDimension.accessor];
+    const seriesParam = (visConfig.seriesParams || []).find(
+      (param: any) => param.data.id === yAgg.id
+    );
+    if (seriesParam) {
+      const usedValueAxis = (visConfig.valueAxes || []).find(
+        (valueAxis: any) => valueAxis.id === seriesParam.valueAxis
+      );
+      if (get(usedValueAxis, 'scale.mode') === 'percentage') {
+        yDimension.format = { id: 'percent' };
+      }
+    }
+    if (get(visConfig, 'gauge.percentageMode') === true) {
+      yDimension.format = { id: 'percent' };
+    }
+  });
+};
+
 export const buildPipelineVisFunction: BuildPipelineVisFunction = {
   vega: visState => {
     return `vega ${prepareString('spec', visState.params.spec)}`;
@@ -292,6 +312,13 @@ export const buildPipelineVisFunction: BuildPipelineVisFunction = {
       style,
     } = visState.params.metric;
     const { metrics, bucket } = buildVisConfig.metric(schemas).dimensions;
+
+    // fix formatter for percentage mode
+    if (get(visState.params, 'metric.percentageMode') === true) {
+      metrics.forEach((metric: SchemaConfig) => {
+        metric.format = { id: 'percent' };
+      });
+    }
 
     let expr = `metricvis `;
     expr += prepareValue('percentage', percentageMode);
@@ -452,6 +479,7 @@ export const buildVislibDimensions = async (
     }
   }
 
+  adjustVislibDimensionFormmaters(vis, dimensions);
   return dimensions;
 };
 

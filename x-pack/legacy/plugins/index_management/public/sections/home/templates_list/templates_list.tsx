@@ -19,7 +19,7 @@ import { SectionError, SectionLoading } from '../../../components';
 import { TemplatesTable } from './templates_table';
 import { loadIndexTemplates } from '../../../services/api';
 import { Template } from '../../../../common/types';
-import { trackUiMetric } from '../../../services/track_ui_metric';
+import { trackUiMetric, METRIC_TYPE } from '../../../services/track_ui_metric';
 import { UIM_TEMPLATE_LIST_LOAD } from '../../../../common/constants';
 
 export const TemplatesList: React.FunctionComponent = () => {
@@ -38,7 +38,7 @@ export const TemplatesList: React.FunctionComponent = () => {
 
   // Track component loaded
   useEffect(() => {
-    trackUiMetric(UIM_TEMPLATE_LIST_LOAD);
+    trackUiMetric(METRIC_TYPE.LOADED, UIM_TEMPLATE_LIST_LOAD);
   }, []);
 
   if (isLoading) {

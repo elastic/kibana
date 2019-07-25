@@ -53,6 +53,14 @@ interface Props {
   readonly transaction: Transaction;
 }
 
+interface InfraConfigItem {
+  icon: string;
+  label: string;
+  condition?: boolean;
+  path: string;
+  query: Record<string, any>;
+}
+
 export const TransactionActionMenu: FunctionComponent<Props> = (
   props: Props
 ) => {
@@ -69,14 +77,14 @@ export const TransactionActionMenu: FunctionComponent<Props> = (
   const time = Math.round(transaction.timestamp.us / 1000);
   const infraMetricsQuery = getInfraMetricsQuery(transaction);
 
-  const infraItems = [
+  const infraConfigItems: InfraConfigItem[] = [
     {
       icon: 'loggingApp',
       label: i18n.translate(
         'xpack.apm.transactionActionMenu.showPodLogsLinkLabel',
         { defaultMessage: 'Show pod logs' }
       ),
-      condition: podId,
+      condition: !!podId,
       path: `/link-to/pod-logs/${podId}`,
       query: { time }
     },
@@ -86,7 +94,7 @@ export const TransactionActionMenu: FunctionComponent<Props> = (
         'xpack.apm.transactionActionMenu.showContainerLogsLinkLabel',
         { defaultMessage: 'Show container logs' }
       ),
-      condition: containerId,
+      condition: !!containerId,
       path: `/link-to/container-logs/${containerId}`,
       query: { time }
     },
@@ -96,7 +104,7 @@ export const TransactionActionMenu: FunctionComponent<Props> = (
         'xpack.apm.transactionActionMenu.showHostLogsLinkLabel',
         { defaultMessage: 'Show host logs' }
       ),
-      condition: hostName,
+      condition: !!hostName,
       path: `/link-to/host-logs/${hostName}`,
       query: { time }
     },
@@ -107,7 +115,7 @@ export const TransactionActionMenu: FunctionComponent<Props> = (
         { defaultMessage: 'Show trace logs' }
       ),
       condition: true,
-      hash: `/link-to/logs`,
+      path: `/link-to/logs`,
       query: { time, filter: `trace.id:${transaction.trace.id}` }
     },
     {
@@ -116,7 +124,7 @@ export const TransactionActionMenu: FunctionComponent<Props> = (
         'xpack.apm.transactionActionMenu.showPodMetricsLinkLabel',
         { defaultMessage: 'Show pod metrics' }
       ),
-      condition: podId,
+      condition: !!podId,
       path: `/link-to/pod-detail/${podId}`,
       query: infraMetricsQuery
     },
@@ -126,7 +134,7 @@ export const TransactionActionMenu: FunctionComponent<Props> = (
         'xpack.apm.transactionActionMenu.showContainerMetricsLinkLabel',
         { defaultMessage: 'Show container metrics' }
       ),
-      condition: containerId,
+      condition: !!containerId,
       path: `/link-to/container-detail/${containerId}`,
       query: infraMetricsQuery
     },
@@ -136,20 +144,24 @@ export const TransactionActionMenu: FunctionComponent<Props> = (
         'xpack.apm.transactionActionMenu.showHostMetricsLinkLabel',
         { defaultMessage: 'Show host metrics' }
       ),
-      condition: hostName,
+      condition: !!hostName,
       path: `/link-to/host-detail/${hostName}`,
       query: infraMetricsQuery
     }
-  ].map(({ icon, label, condition, path, query }, index) => ({
-    icon,
-    key: `infra-link-${index}`,
-    child: (
-      <InfraLink path={path} query={query}>
-        {label}
-      </InfraLink>
-    ),
-    condition
-  }));
+  ];
+
+  const infraItems = infraConfigItems.map(
+    ({ icon, label, condition, path, query }, index) => ({
+      icon,
+      key: `infra-link-${index}`,
+      child: (
+        <InfraLink path={path} query={query}>
+          {label}
+        </InfraLink>
+      ),
+      condition
+    })
+  );
 
   const uptimeLink = url.format({
     pathname: chrome.addBasePath('/app/uptime'),
@@ -158,7 +170,7 @@ export const TransactionActionMenu: FunctionComponent<Props> = (
         {
           dateRangeStart: urlParams.rangeFrom,
           dateRangeEnd: urlParams.rangeTo,
-          search: `url.domain:${idx(transaction, t => t.url.domain)}`
+          search: `url.domain:"${idx(transaction, t => t.url.domain)}"`
         },
         (val: string) => !!val
       )
