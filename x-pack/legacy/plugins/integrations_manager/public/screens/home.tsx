@@ -8,8 +8,17 @@ import { EuiPage, EuiPageBody, EuiTitle } from '@elastic/eui';
 import { IntegrationsGroupedByStatus } from '../../common/types';
 import { IntegrationsGridByStatus } from '../components/integration_list_grid';
 import { getIntegrationsGroupedByStatus } from '../data';
+import { usePluginDependencies } from '../plugin';
+import { linkToListView } from '../routes';
 
 export function Home() {
+  // TODO: DRY out (or lift up, whatever) breadcrumbs
+  const {
+    core: { chrome },
+  } = usePluginDependencies();
+
+  chrome.setBreadcrumbs([{ text: 'Integrations Manager', href: linkToListView() }]);
+
   const [map, setMap] = useState<IntegrationsGroupedByStatus>({
     installed: [],
     not_installed: [],

@@ -7,6 +7,8 @@ import React, { useState, useEffect } from 'react';
 import { EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { IntegrationInfo } from '../../common/types';
 import { getIntegrationInfoByKey } from '../data';
+import { usePluginDependencies } from '../plugin';
+import { linkToListView, linkToDetailView } from '../routes';
 
 export function Detail(props: { package: string }) {
   const [info, setInfo] = useState<IntegrationInfo | null>(null);
@@ -24,6 +26,16 @@ function InfoPanel(info: IntegrationInfo) {
   const { description, name, version } = info;
   // TODO: Need title or something which uses correct capitalization (e.g. PostgreSQL)
   const title = description.split(' ')[0];
+
+  // TODO: DRY out (or lift up, whatever) breadcrumbs
+  const {
+    core: { chrome },
+  } = usePluginDependencies();
+
+  chrome.setBreadcrumbs([
+    { text: 'Integrations Manager', href: linkToListView() },
+    { text: title, href: linkToDetailView({ name, version }) },
+  ]);
 
   return (
     <EuiPanel>
