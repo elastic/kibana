@@ -127,7 +127,7 @@ class TlsComponentQuery extends QueryTemplatePaginated<
             pageInfo: getOr({}, 'source.Tls.pageInfo', data),
             refetch,
             tls,
-            totalCount: getOr(0, 'source.Tls.totalCount', data),
+            totalCount: getOr(-1, 'source.Tls.totalCount', data),
           });
         }}
       </Query>

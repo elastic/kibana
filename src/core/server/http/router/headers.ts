@@ -21,6 +21,7 @@ import { pick } from '../../../utils';
 
 /** @public */
 export type Headers = Record<string, string | string[] | undefined>;
+export type ResponseHeaders = Record<string, string | string[]>;
 
 const normalizeHeaderField = (field: string) => field.trim().toLowerCase();
 
