@@ -5,6 +5,7 @@
  */
 
 import { Legacy } from 'kibana';
+import { schema } from '@kbn/config-schema';
 import { initSpacesOnRequestInterceptor } from './on_request_interceptor';
 import { HttpServiceSetup, Router, KibanaRequest } from '../../../../../../../src/core/server';
 
@@ -70,14 +71,12 @@ describe('onRequestInterceptor', () => {
       router.get(
         {
           path: '/i/love/spaces',
-          validate: schema => {
-            return {
-              query: schema.object({
-                queryParam: schema.string({
-                  defaultValue: 'oh noes, this was not set on the request correctly',
-                }),
+          validate: {
+            query: schema.object({
+              queryParam: schema.string({
+                defaultValue: 'oh noes, this was not set on the request correctly',
               }),
-            };
+            }),
           },
         },
         (req: KibanaRequest, h: any) => {

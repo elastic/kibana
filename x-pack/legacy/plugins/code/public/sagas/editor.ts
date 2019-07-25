@@ -16,7 +16,6 @@ import {
   closeReferences,
   fetchFile,
   FetchFileResponse,
-  fetchRepoBranches,
   fetchRepoCommits,
   fetchRepoTree,
   fetchTreeCommits,
@@ -44,6 +43,7 @@ import {
   urlQueryStringSelector,
   createTreeSelector,
   getTreeRevision,
+  reposSelector,
 } from '../selectors';
 import { history } from '../utils/url';
 import { mainRoutePattern } from './patterns';
@@ -157,9 +157,11 @@ export function* watchLoadRepo() {
 }
 
 function* handleMainRouteChange(action: Action<Match>) {
-  // in source view page, we need repos as default repo scope options when no query input
-  yield put(fetchRepos());
-
+  const repos = yield select(reposSelector);
+  if (repos.length === 0) {
+    // in source view page, we need repos as default repo scope options when no query input
+    yield put(fetchRepos());
+  }
   const { location } = action.payload!;
   const search = location.search.startsWith('?') ? location.search.substring(1) : location.search;
   const queryParams = queryString.parse(search);
@@ -169,8 +171,6 @@ function* handleMainRouteChange(action: Action<Match>) {
   if (goto) {
     position = parseGoto(goto);
   }
-  yield put(loadRepo(repoUri));
-  yield put(fetchRepoBranches({ uri: repoUri }));
   if (file) {
     if ([PathTypes.blob, PathTypes.blame].includes(pathType as PathTypes)) {
       yield put(revealPosition(position));
