@@ -93,7 +93,6 @@ export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
       <EuiPage style={{ backgroundColor: '#FFF' }}>
         <EuiPageBody>
           <EuiPageContentBody>
-            <EuiSpacer size="l" />
             <Wizard
               jobCreator={jobCreator}
               chartLoader={chartLoader}

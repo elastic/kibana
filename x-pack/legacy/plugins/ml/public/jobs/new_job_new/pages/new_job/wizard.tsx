@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment, FC, useContext, useReducer, useState, useEffect } from 'react';
+import React, { Fragment, FC, useReducer, useState, useEffect } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
@@ -20,7 +20,6 @@ import { SummaryStep } from '../components/summary_step';
 import { MlTimeBuckets } from '../../../../util/ml_time_buckets';
 
 import { JobCreatorContext, JobCreatorContextValue } from '../components/job_creator_context';
-import { KibanaContext, isKibanaContext } from '../../../../data_frame/common/kibana_context';
 import { ExistingJobsAndGroups } from '../../../../services/job_service';
 
 import {
@@ -50,11 +49,6 @@ export const Wizard: FC<Props> = ({
   jobValidator,
   existingJobsAndGroups,
 }) => {
-  const kibanaContext = useContext(KibanaContext);
-  if (!isKibanaContext(kibanaContext)) {
-    return null;
-  }
-
   const [jobCreatorUpdated, setJobCreatorUpdate] = useReducer<(s: number) => number>(s => s + 1, 0);
   const jobCreatorUpdate = () => setJobCreatorUpdate(jobCreatorUpdated);
 
@@ -169,9 +163,7 @@ export const Wizard: FC<Props> = ({
 
   return (
     <JobCreatorContext.Provider value={jobCreatorContext}>
-      {currentStep !== WIZARD_STEPS.SUMMARY && (
-        <EuiStepsHorizontal steps={stepsConfig} style={{ backgroundColor: 'inherit' }} />
-      )}
+      <EuiStepsHorizontal steps={stepsConfig} style={{ backgroundColor: 'inherit' }} />
 
       {currentStep === WIZARD_STEPS.TIME_RANGE && (
         <Fragment>
