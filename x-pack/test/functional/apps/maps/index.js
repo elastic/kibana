@@ -35,6 +35,7 @@ export default function ({ loadTestFile, getService }) {
       loadTestFile(require.resolve('./sample_data'));
       loadTestFile(require.resolve('./feature_controls/maps_security'));
       loadTestFile(require.resolve('./feature_controls/maps_spaces'));
+      loadTestFile(require.resolve('./full_screen_mode'));
     });
 
     describe('', function () {

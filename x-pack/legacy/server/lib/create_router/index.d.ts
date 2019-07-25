@@ -29,7 +29,10 @@ export interface Router {
 export declare function createRouter(
   server: Legacy.Server,
   pluginId: string,
-  apiBasePath: string
+  apiBasePath: string,
+  config?: {
+    plugins: any[];
+  }
 ): Router;
 
 export declare function isEsErrorFactory(server: Legacy.Server): any;
