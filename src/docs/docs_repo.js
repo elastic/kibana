@@ -22,7 +22,7 @@ import { resolve } from 'path';
 const kibanaDir = resolve(__dirname, '..', '..');
 
 export function buildDocsScript(cmd) {
-  return resolve(process.cwd(), cmd.docrepo, 'build_docs.pl');
+  return resolve(process.cwd(), cmd.docrepo, 'build_docs');
 }
 
 export function buildDocsArgs(cmd) {
