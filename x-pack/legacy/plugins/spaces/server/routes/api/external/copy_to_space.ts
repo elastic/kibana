@@ -6,7 +6,10 @@
 
 import Joi from 'joi';
 import { Legacy } from 'kibana';
-import { copySavedObjectsToSpacesFactory } from '../../../lib/copy_to_spaces';
+import {
+  copySavedObjectsToSpacesFactory,
+  resolveCopySavedObjectsToSpacesConflictsFactory,
+} from '../../../lib/copy_to_spaces';
 import { ExternalRouteDeps } from '.';
 import { COPY_TO_SPACES_SAVED_OBJECTS_CLIENT_OPTS } from '../../../lib/copy_to_spaces/copy_to_spaces';
 
@@ -21,8 +24,13 @@ interface ResolveConflictsPayload {
   objects: Array<{ type: string; id: string }>;
   includeReferences: boolean;
   retries: Array<{
-    spaceId: string;
-    retries: Array<{ type: string; id: string; overwrite: boolean }>;
+    space: string;
+    retries: Array<{
+      type: string;
+      id: string;
+      overwrite: boolean;
+      replaceReferences: Array<{ type: string; from: string; to: string }>;
+    }>;
   }>;
 }
 
@@ -40,7 +48,7 @@ export function initCopyToSpacesApi(deps: ExternalRouteDeps) {
         COPY_TO_SPACES_SAVED_OBJECTS_CLIENT_OPTS
       );
 
-      const { copySavedObjectsToSpaces } = copySavedObjectsToSpacesFactory(
+      const copySavedObjectsToSpaces = copySavedObjectsToSpacesFactory(
         spacesClient,
         savedObjectsClient,
         savedObjects
@@ -92,7 +100,7 @@ export function initCopyToSpacesApi(deps: ExternalRouteDeps) {
         COPY_TO_SPACES_SAVED_OBJECTS_CLIENT_OPTS
       );
 
-      const { resolveCopySavedObjectsToSpacesConflicts } = copySavedObjectsToSpacesFactory(
+      const resolveCopySavedObjectsToSpacesConflicts = resolveCopySavedObjectsToSpacesConflictsFactory(
         spacesClient,
         savedObjectsClient,
         savedObjects
@@ -114,6 +122,7 @@ export function initCopyToSpacesApi(deps: ExternalRouteDeps) {
       return h.response(resolveConflictsResponse);
     },
     options: {
+      tags: ['access:exportSavedObjects'],
       validate: {
         payload: Joi.object({
           objects: Joi.array()
@@ -129,6 +138,15 @@ export function initCopyToSpacesApi(deps: ExternalRouteDeps) {
                     type: Joi.string().required(),
                     id: Joi.string().required(),
                     overwrite: Joi.boolean().default(false),
+                    replaceReferences: Joi.array()
+                      .items(
+                        Joi.object({
+                          to: Joi.string().required(),
+                          from: Joi.string().required(),
+                          type: Joi.string().required(),
+                        })
+                      )
+                      .default([]),
                   })
                 ),
               })

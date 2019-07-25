@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { copySavedObjectsToSpacesFactory } from './copy_to_spaces';
-export { resolveCopySavedObjectsToSpacesConflictsFactory } from './resolve_copy_conflicts';
-export { CopyResponse } from './types';
+import { SavedObjectsService } from 'src/core/server';
+
+export function getEligibleTypes({ types, schema }: Pick<SavedObjectsService, 'schema' | 'types'>) {
+  return types.filter(type => !schema.isNamespaceAgnostic(type));
+}

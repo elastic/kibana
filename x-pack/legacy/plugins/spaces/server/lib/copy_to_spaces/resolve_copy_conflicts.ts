@@ -10,34 +10,20 @@ import {
   SavedObjectsImportError,
 } from 'src/core/server';
 import { Readable } from 'stream';
-import { SavedObjectsClientProviderOptions } from 'src/core/server/saved_objects/service/lib/scoped_client_provider';
 import { SpacesClient } from '../spaces_client';
 import { Rereadable } from './lib/rereadable_stream';
 import { spaceIdToNamespace } from '../utils/namespace';
-import { CopyToSpaceError, CopyOptions } from './types';
+import { CopyOptions, CopyToSpaceError, ResolveConflictsOptions, CopyResponse } from './types';
 import { canImportIntoSpace } from './lib/can_import_into_space';
-import { CopyResponse } from './types';
 import { getEligibleTypes } from './lib/get_eligible_types';
 
-export const COPY_TO_SPACES_SAVED_OBJECTS_CLIENT_OPTS: SavedObjectsClientProviderOptions = {
-  excludedWrappers: ['spaces'],
-};
-
-export function copySavedObjectsToSpacesFactory(
+export function resolveCopySavedObjectsToSpacesConflictsFactory(
   spacesClient: SpacesClient,
   savedObjectsClient: SavedObjectsClientContract,
   savedObjectsService: SavedObjectsService
 ) {
   const { importExport, types, schema } = savedObjectsService;
   const eligibleTypes = getEligibleTypes({ types, schema });
-
-  const createEmptyFailureResponse = (
-    errors?: Array<SavedObjectsImportError | CopyToSpaceError>
-  ) => ({
-    success: false,
-    successCount: 0,
-    errors,
-  });
 
   const exportRequestedObjects = async (
     sourceSpaceId: string,
@@ -54,10 +40,23 @@ export function copySavedObjectsToSpacesFactory(
     return objectStream;
   };
 
-  const importObjectsToSpace = async (
+  const createEmptyFailureResponse = (
+    errors?: Array<SavedObjectsImportError | CopyToSpaceError>
+  ) => ({
+    success: false,
+    successCount: 0,
+    errors,
+  });
+
+  const resolveConflictsForSpace = async (
     spaceId: string,
     objectsStream: Readable,
-    options: CopyOptions
+    retries: Array<{
+      type: string;
+      id: string;
+      overwrite: boolean;
+      replaceReferences: Array<{ type: string; from: string; to: string }>;
+    }>
   ) => {
     try {
       const { canImport, reason } = await canImportIntoSpace(
@@ -70,13 +69,13 @@ export function copySavedObjectsToSpacesFactory(
         return createEmptyFailureResponse([{ error: { type: reason!, spaceId } }]);
       }
 
-      const importResponse = await importExport.importSavedObjects({
+      const importResponse = await importExport.resolveImportErrors({
         namespace: spaceIdToNamespace(spaceId),
         objectLimit: 10000,
-        overwrite: options.overwrite,
         savedObjectsClient,
         supportedTypes: eligibleTypes,
         readStream: objectsStream,
+        retries,
       });
 
       return {
@@ -89,24 +88,32 @@ export function copySavedObjectsToSpacesFactory(
     }
   };
 
-  const copySavedObjectsToSpaces = async (
+  const resolveCopySavedObjectsToSpacesConflicts = async (
     sourceSpaceId: string,
-    destinationSpaceIds: string[],
-    options: CopyOptions
+    options: ResolveConflictsOptions
   ): Promise<CopyResponse> => {
     const response: CopyResponse = {};
 
-    const objectsStream = await exportRequestedObjects(sourceSpaceId, options);
+    const objectsStream = await exportRequestedObjects(sourceSpaceId, {
+      includeReferences: options.includeReferences,
+      objects: options.objects,
+    });
+
     const rereadableStream = objectsStream.pipe(new Rereadable());
 
     let readStream: Readable | null = null;
-    for (const spaceId of destinationSpaceIds) {
+
+    for (const entry of options.retries) {
       readStream = readStream ? rereadableStream.reread() : rereadableStream;
-      response[spaceId] = await importObjectsToSpace(spaceId, readStream, options);
+      const { space, retries: entryRetries } = entry;
+
+      const retries = entryRetries.map(retry => ({ ...retry, replaceReferences: [] }));
+
+      response[space] = await resolveConflictsForSpace(space, readStream, retries);
     }
 
     return response;
   };
 
-  return copySavedObjectsToSpaces;
+  return resolveCopySavedObjectsToSpacesConflicts;
 }
