@@ -42,9 +42,8 @@ export default function ({ getService, getPageObjects }) {
     it('should default to the `context:defaultSize` setting', async function () {
       await PageObjects.context.navigateTo(TEST_INDEX_PATTERN, TEST_ANCHOR_TYPE, TEST_ANCHOR_ID);
 
-      const table = await docTable.getTable();
       await retry.try(async function () {
-        expect(await docTable.getBodyRows(table)).to.have.length(2 * TEST_DEFAULT_CONTEXT_SIZE + 1);
+        expect(await docTable.getRowsText()).to.have.length(2 * TEST_DEFAULT_CONTEXT_SIZE + 1);
       });
       await retry.try(async function () {
         const predecessorCountPicker = await PageObjects.context.getPredecessorCountPicker();
@@ -58,12 +57,10 @@ export default function ({ getService, getPageObjects }) {
 
     it('should increase according to the `context:step` setting when clicking the `load newer` button', async function () {
       await PageObjects.context.navigateTo(TEST_INDEX_PATTERN, TEST_ANCHOR_TYPE, TEST_ANCHOR_ID);
-
-      const table = await docTable.getTable();
       await PageObjects.context.clickPredecessorLoadMoreButton();
 
       await retry.try(async function () {
-        expect(await docTable.getBodyRows(table)).to.have.length(
+        expect(await docTable.getRowsText()).to.have.length(
           2 * TEST_DEFAULT_CONTEXT_SIZE + TEST_STEP_SIZE + 1
         );
       });
@@ -71,12 +68,10 @@ export default function ({ getService, getPageObjects }) {
 
     it('should increase according to the `context:step` setting when clicking the `load older` button', async function () {
       await PageObjects.context.navigateTo(TEST_INDEX_PATTERN, TEST_ANCHOR_TYPE, TEST_ANCHOR_ID);
-
-      const table = await docTable.getTable();
       await PageObjects.context.clickSuccessorLoadMoreButton();
 
       await retry.try(async function () {
-        expect(await docTable.getBodyRows(table)).to.have.length(
+        expect(await docTable.getRowsText()).to.have.length(
           2 * TEST_DEFAULT_CONTEXT_SIZE + TEST_STEP_SIZE + 1
         );
       });

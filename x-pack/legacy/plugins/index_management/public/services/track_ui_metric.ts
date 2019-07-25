@@ -4,9 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { trackUiMetric as track } from '../../../../../../src/legacy/core_plugins/ui_metric/public';
+import {
+  createUiStatsReporter,
+  METRIC_TYPE,
+} from '../../../../../../src/legacy/core_plugins/ui_metric/public';
 import { UIM_APP_NAME } from '../../common/constants';
 
-export function trackUiMetric(metricType: string) {
-  track(UIM_APP_NAME, metricType);
-}
+export { METRIC_TYPE };
+export const trackUiMetric = createUiStatsReporter(UIM_APP_NAME);

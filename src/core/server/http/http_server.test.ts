@@ -28,7 +28,7 @@ jest.mock('fs', () => ({
 import Chance from 'chance';
 import supertest from 'supertest';
 
-import { ByteSizeValue } from '@kbn/config-schema';
+import { ByteSizeValue, schema } from '@kbn/config-schema';
 import { HttpConfig, Router } from '.';
 import { loggingServiceMock } from '../logging/logging_service.mock';
 import { HttpServer } from './http_server';
@@ -189,11 +189,11 @@ test('valid params', async () => {
   router.get(
     {
       path: '/{test}',
-      validate: schema => ({
+      validate: {
         params: schema.object({
           test: schema.string(),
         }),
-      }),
+      },
     },
     (req, res) => {
       return res.ok({ key: req.params.test });
@@ -219,11 +219,11 @@ test('invalid params', async () => {
   router.get(
     {
       path: '/{test}',
-      validate: schema => ({
+      validate: {
         params: schema.object({
           test: schema.number(),
         }),
-      }),
+      },
     },
     (req, res) => {
       return res.ok({ key: req.params.test });
@@ -240,7 +240,7 @@ test('invalid params', async () => {
     .expect(400)
     .then(res => {
       expect(res.body).toEqual({
-        error: '[test]: expected value of type [number] but got [string]',
+        error: '[request params.test]: expected value of type [number] but got [string]',
       });
     });
 });
@@ -251,12 +251,12 @@ test('valid query', async () => {
   router.get(
     {
       path: '/',
-      validate: schema => ({
+      validate: {
         query: schema.object({
           bar: schema.string(),
           quux: schema.number(),
         }),
-      }),
+      },
     },
     (req, res) => {
       return res.ok(req.query);
@@ -282,11 +282,11 @@ test('invalid query', async () => {
   router.get(
     {
       path: '/',
-      validate: schema => ({
+      validate: {
         query: schema.object({
           bar: schema.number(),
         }),
-      }),
+      },
     },
     (req, res) => {
       return res.ok(req.query);
@@ -303,7 +303,7 @@ test('invalid query', async () => {
     .expect(400)
     .then(res => {
       expect(res.body).toEqual({
-        error: '[bar]: expected value of type [number] but got [string]',
+        error: '[request query.bar]: expected value of type [number] but got [string]',
       });
     });
 });
@@ -314,12 +314,12 @@ test('valid body', async () => {
   router.post(
     {
       path: '/',
-      validate: schema => ({
+      validate: {
         body: schema.object({
           bar: schema.string(),
           baz: schema.number(),
         }),
-      }),
+      },
     },
     (req, res) => {
       return res.ok(req.body);
@@ -349,11 +349,11 @@ test('invalid body', async () => {
   router.post(
     {
       path: '/',
-      validate: schema => ({
+      validate: {
         body: schema.object({
           bar: schema.number(),
         }),
-      }),
+      },
     },
     (req, res) => {
       return res.ok(req.body);
@@ -371,7 +371,7 @@ test('invalid body', async () => {
     .expect(400)
     .then(res => {
       expect(res.body).toEqual({
-        error: '[bar]: expected value of type [number] but got [string]',
+        error: '[request body.bar]: expected value of type [number] but got [string]',
       });
     });
 });
@@ -382,11 +382,11 @@ test('handles putting', async () => {
   router.put(
     {
       path: '/',
-      validate: schema => ({
+      validate: {
         body: schema.object({
           key: schema.string(),
         }),
-      }),
+      },
     },
     (req, res) => {
       return res.ok(req.body);
@@ -413,11 +413,11 @@ test('handles deleting', async () => {
   router.delete(
     {
       path: '/{id}',
-      validate: schema => ({
+      validate: {
         params: schema.object({
           id: schema.number(),
         }),
-      }),
+      },
     },
     (req, res) => {
       return res.ok({ key: req.params.id });
@@ -915,6 +915,99 @@ describe('setup contract', () => {
       expect(fromRegisterAuth).toEqual({ authorization: token });
       expect(fromRegisterOnPostAuth).toEqual({});
       expect(fromRouteHandler).toEqual({});
+    });
+
+    it('attach security header to a successful response', async () => {
+      const authResponseHeader = {
+        'www-authenticate': 'Negotiate ade0234568a4209af8bc0280289eca',
+      };
+      const { registerAuth, registerRouter, server: innerServer } = await server.setup(config);
+
+      await registerAuth((req, t) => {
+        return t.authenticated({ responseHeaders: authResponseHeader });
+      });
+
+      const router = new Router('/');
+      router.get({ path: '/', validate: false }, (req, res) => res.ok({ header: 'ok' }));
+      registerRouter(router);
+
+      await server.start();
+
+      const response = await supertest(innerServer.listener)
+        .get('/')
+        .expect(200);
+
+      expect(response.header['www-authenticate']).toBe(authResponseHeader['www-authenticate']);
+    });
+
+    it('attach security header to an error response', async () => {
+      const authResponseHeader = {
+        'www-authenticate': 'Negotiate ade0234568a4209af8bc0280289eca',
+      };
+      const { registerAuth, registerRouter, server: innerServer } = await server.setup(config);
+
+      await registerAuth((req, t) => {
+        return t.authenticated({ responseHeaders: authResponseHeader });
+      });
+
+      const router = new Router('/');
+      router.get({ path: '/', validate: false }, (req, res) => res.badRequest(new Error('reason')));
+      registerRouter(router);
+
+      await server.start();
+
+      const response = await supertest(innerServer.listener)
+        .get('/')
+        .expect(400);
+
+      expect(response.header['www-authenticate']).toBe(authResponseHeader['www-authenticate']);
+    });
+
+    // TODO un-skip when NP ResponseFactory supports configuring custom headers
+    it.skip('logs warning if Auth Security Header rewrites response header for success response', async () => {
+      const authResponseHeader = {
+        'www-authenticate': 'Negotiate ade0234568a4209af8bc0280289eca',
+      };
+      const { registerAuth, registerRouter, server: innerServer } = await server.setup(config);
+
+      await registerAuth((req, t) => {
+        return t.authenticated({ responseHeaders: authResponseHeader });
+      });
+
+      const router = new Router('/');
+      router.get({ path: '/', validate: false }, (req, res) => res.ok({}));
+      registerRouter(router);
+
+      await server.start();
+
+      await supertest(innerServer.listener)
+        .get('/')
+        .expect(200);
+
+      expect(loggingServiceMock.collect(logger).warn).toMatchInlineSnapshot();
+    });
+
+    it.skip('logs warning if Auth Security Header rewrites response header for error response', async () => {
+      const authResponseHeader = {
+        'www-authenticate': 'Negotiate ade0234568a4209af8bc0280289eca',
+      };
+      const { registerAuth, registerRouter, server: innerServer } = await server.setup(config);
+
+      await registerAuth((req, t) => {
+        return t.authenticated({ responseHeaders: authResponseHeader });
+      });
+
+      const router = new Router('/');
+      router.get({ path: '/', validate: false }, (req, res) => res.badRequest(new Error('reason')));
+      registerRouter(router);
+
+      await server.start();
+
+      await supertest(innerServer.listener)
+        .get('/')
+        .expect(400);
+
+      expect(loggingServiceMock.collect(logger).warn).toMatchInlineSnapshot();
     });
   });
 
