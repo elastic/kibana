@@ -5,6 +5,7 @@
  */
 import React, { useState, useEffect } from 'react';
 import { EuiPage, EuiPageBody, EuiTitle } from '@elastic/eui';
+import { PLUGIN } from '../../common/constants';
 import { IntegrationsGroupedByStatus } from '../../common/types';
 import { IntegrationsGridByStatus } from '../components/integration_list_grid';
 import { getIntegrationsGroupedByStatus } from '../data';
@@ -17,7 +18,7 @@ export function Home() {
     core: { chrome },
   } = usePluginDependencies();
 
-  chrome.setBreadcrumbs([{ text: 'Integrations Manager', href: linkToListView() }]);
+  chrome.setBreadcrumbs([{ text: PLUGIN.TITLE, href: linkToListView() }]);
 
   const [map, setMap] = useState<IntegrationsGroupedByStatus>({
     installed: [],

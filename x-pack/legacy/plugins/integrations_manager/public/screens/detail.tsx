@@ -5,6 +5,7 @@
  */
 import React, { useState, useEffect } from 'react';
 import { EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
+import { PLUGIN } from '../../common/constants';
 import { IntegrationInfo } from '../../common/types';
 import { getIntegrationInfoByKey } from '../data';
 import { usePluginDependencies } from '../plugin';
@@ -33,7 +34,7 @@ function InfoPanel(info: IntegrationInfo) {
   } = usePluginDependencies();
 
   chrome.setBreadcrumbs([
-    { text: 'Integrations Manager', href: linkToListView() },
+    { text: PLUGIN.TITLE, href: linkToListView() },
     { text: title, href: linkToDetailView({ name, version }) },
   ]);
 
