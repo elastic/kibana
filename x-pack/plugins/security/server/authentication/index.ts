@@ -92,8 +92,8 @@ export async function setupAuthentication({
 
     if (authenticationResult.succeeded()) {
       return t.authenticated({
-        state: (authenticationResult.user as unknown) as Record<string, unknown>,
-        headers: authenticationResult.authHeaders,
+        state: authenticationResult.user,
+        requestHeaders: authenticationResult.authHeaders,
       });
     }
 

@@ -18,7 +18,7 @@
  */
 
 import { functionWrapper } from '../../interpreter/test_helpers';
-import { kibanaTable } from './table_vis_fn';
+import { createTableVisFn } from './table_vis_fn';
 
 jest.mock('ui/new_platform');
 
@@ -30,7 +30,7 @@ jest.mock('ui/vis/response_handlers/legacy', () => ({
 }));
 
 describe('interpreter/functions#table', () => {
-  const fn = functionWrapper(kibanaTable);
+  const fn = functionWrapper(createTableVisFn);
   const context = {
     type: 'kibana_datatable',
     rows: [{ 'col-0-1': 0 }],

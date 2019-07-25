@@ -14,12 +14,13 @@ import {
   LogEntryColumn,
   LogEntryHighlightColumn,
 } from '../../../utils/log_entry';
-import { highlightFieldValue, HighlightMarker } from './highlighting';
+import { ActiveHighlightMarker, highlightFieldValue, HighlightMarker } from './highlighting';
 import { LogEntryColumnContent } from './log_entry_column';
 
 interface LogEntryFieldColumnProps {
   columnValue: LogEntryColumn;
   highlights: LogEntryHighlightColumn[];
+  isActiveHighlight: boolean;
   isHighlighted: boolean;
   isHovered: boolean;
   isWrapped: boolean;
@@ -28,6 +29,7 @@ interface LogEntryFieldColumnProps {
 export const LogEntryFieldColumn: React.FunctionComponent<LogEntryFieldColumnProps> = ({
   columnValue,
   highlights: [firstHighlight], // we only support one highlight for now
+  isActiveHighlight,
   isHighlighted,
   isHovered,
   isWrapped,
@@ -42,7 +44,7 @@ export const LogEntryFieldColumn: React.FunctionComponent<LogEntryFieldColumnPro
           {highlightFieldValue(
             entry,
             isHighlightFieldColumn(firstHighlight) ? firstHighlight.highlights : [],
-            HighlightMarker
+            isActiveHighlight ? ActiveHighlightMarker : HighlightMarker
           )}
         </CommaSeparatedLi>
       ))}
@@ -51,7 +53,7 @@ export const LogEntryFieldColumn: React.FunctionComponent<LogEntryFieldColumnPro
     highlightFieldValue(
       value,
       isHighlightFieldColumn(firstHighlight) ? firstHighlight.highlights : [],
-      HighlightMarker
+      isActiveHighlight ? ActiveHighlightMarker : HighlightMarker
     )
   );
 
