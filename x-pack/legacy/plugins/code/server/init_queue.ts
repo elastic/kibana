@@ -15,5 +15,5 @@ export function initQueue(server: Server, log: Logger, esClient: EsClient) {
     client: esClient,
     timeout: queueTimeoutMs,
   });
-  return { queue };
+  return queue;
 }

@@ -5,15 +5,9 @@
  */
 
 import Boom from 'boom';
+
+import { RequestFacade, RequestQueryFacade, ResponseToolkitFacade } from '../../';
 import { DEFAULT_TREE_CHILDREN_LIMIT } from '../git_operations';
-
-import { RequestFacade, RequestQueryFacade, ResponseToolkitFacade } from '../../';
-import fileType from 'file-type';
-
-import { RequestFacade, RequestQueryFacade, ResponseToolkitFacade } from '../../';
-import { commitInfo, DEFAULT_TREE_CHILDREN_LIMIT, GitOperations } from '../git_operations';
-import { extractLines } from '../utils/buffer';
-import { detectLanguage } from '../utils/detect_language';
 import { CodeServerRouter } from '../security';
 import { RepositoryObjectClient } from '../search';
 import { EsClientWithRequest } from '../utils/esclient_with_request';
@@ -38,7 +32,7 @@ export function fileRoute(router: CodeServerRouter, codeServices: CodeServices) 
     }
   }
 
-  server.route({
+  router.route({
     path: '/api/code/repo/{uri*3}/tree/{ref}/{path*}',
     method: 'GET',
     async handler(req: RequestFacade) {
@@ -91,7 +85,7 @@ export function fileRoute(router: CodeServerRouter, codeServices: CodeServices) 
         const blob = await gitService.blob(endpoint, {
           uri,
           path,
-          line: (req.query as RequestQuery).line as string,
+          line: (req.query as RequestQueryFacade).line as string,
           revision: decodeURIComponent(revision),
         });
 

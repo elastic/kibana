@@ -5,12 +5,12 @@
  */
 
 import { Request } from 'hapi';
-import { HandlerAdapter } from './handler_adpter';
+import { ServiceHandlerAdapter } from './service_handler_adapter';
 import { ServiceDefinition, ServiceHandlerFor, ServiceMethodMap } from './service_definition';
 import { Endpoint, ResourceLocator } from './resource_locator';
 import { LocalEndpoint } from './local_endpoint';
 
-export class LocalHandlerAdapter implements HandlerAdapter {
+export class LocalHandlerAdapter implements ServiceHandlerAdapter {
   handlers: Map<any, any> = new Map<any, any>();
 
   registerHandler<def extends ServiceDefinition>(

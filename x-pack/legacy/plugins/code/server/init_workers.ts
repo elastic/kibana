@@ -83,18 +83,9 @@ export function initWorkers(
   const updateScheduler = new UpdateScheduler(updateWorker, serverOptions, esClient, log);
   const indexScheduler = new IndexScheduler(indexWorker, serverOptions, esClient, log);
   updateScheduler.start();
-  if (!serverOptions.disableIndexScheduler) {
-    indexScheduler.start();
-  }
+  indexScheduler.start();
   // Check if the repository is local on the file system.
   // This should be executed once at the startup time of Kibana.
   cloneScheduler.schedule();
-  server.events.on('stop', async () => {
-    await gitOps.cleanAllRepo();
-    if (!serverOptions.disableIndexScheduler) {
-      indexScheduler.stop();
-    }
-    updateScheduler.stop();
-    queue.destroy();
-  });
+  return { indexScheduler, updateScheduler };
 }

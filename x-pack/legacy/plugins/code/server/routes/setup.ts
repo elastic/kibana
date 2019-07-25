@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { RequestFacade, ResponseToolkitFacade } from '../..';
+import { RequestFacade } from '../..';
 import { CodeServerRouter } from '../security';
 import { CodeServices } from '../distributed/code_services';
 import { SetupDefinition } from '../distributed/apis';

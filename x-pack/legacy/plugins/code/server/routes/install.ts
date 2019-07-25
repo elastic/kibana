@@ -32,7 +32,7 @@ export function installRoute(router: CodeServerRouter, codeServices: CodeService
     path: '/api/code/install',
     async handler(req: RequestFacade) {
       const endpoint = await codeServices.locate(req, '');
-      return enabledLanguageServers(server.server).map(def => status(endpoint, def));
+      return enabledLanguageServers(router.server).map(def => status(endpoint, def));
     },
     method: 'GET',
   });

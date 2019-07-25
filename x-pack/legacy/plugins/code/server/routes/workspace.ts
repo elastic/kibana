@@ -7,10 +7,6 @@
 import Boom from 'boom';
 
 import { RequestFacade, RequestQueryFacade } from '../../';
-import { GitOperations } from '../git_operations';
-import { Logger } from '../log';
-import { WorkspaceCommand } from '../lsp/workspace_command';
-import { WorkspaceHandler } from '../lsp/workspace_handler';
 import { ServerOptions } from '../server_options';
 import { CodeServerRouter } from '../security';
 import { CodeServices } from '../distributed/code_services';

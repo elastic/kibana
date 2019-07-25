@@ -9,7 +9,7 @@ import { LocalHandlerAdapter } from './local_handler_adapter';
 import { CodeServerRouter } from '../security';
 import { RequestContext, ServiceHandlerFor } from './service_definition';
 import { CodeNodeAdapter, RequestPayload } from './multinode/code_node_adapter';
-import { DEFAULT_SERVICE_OPTION } from './handler_adpter';
+import { DEFAULT_SERVICE_OPTION } from './service_handler_adapter';
 import { NonCodeNodeAdapter } from './multinode/non_code_node_adapter';
 import { CodeServices } from './code_services';
 import { Logger } from '../log';

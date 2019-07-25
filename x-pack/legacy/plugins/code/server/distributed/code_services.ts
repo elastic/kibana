@@ -4,13 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Request } from 'hapi';
 import { ServiceDefinition, ServiceHandlerFor, ServiceMethodMap } from './service_definition';
-import { DEFAULT_SERVICE_OPTION, HandlerAdapter, ServiceRegisterOptions } from './handler_adpter';
+import {
+  DEFAULT_SERVICE_OPTION,
+  ServiceHandlerAdapter,
+  ServiceRegisterOptions,
+} from './service_handler_adapter';
 import { Endpoint } from './resource_locator';
+import { RequestFacade } from '../../';
 
 export class CodeServices {
-  constructor(private readonly adapter: HandlerAdapter) {}
+  constructor(private readonly adapter: ServiceHandlerAdapter) {}
 
   public registerHandler<serviceDefinition extends ServiceDefinition>(
     serviceDefinition: serviceDefinition,
@@ -20,7 +24,7 @@ export class CodeServices {
     this.adapter.registerHandler(serviceDefinition, serviceHandler, options);
   }
 
-  public locate(req: Request, resource: string): Promise<Endpoint> {
+  public locate(req: RequestFacade, resource: string): Promise<Endpoint> {
     return this.adapter.locator.locate(req, resource);
   }
 
