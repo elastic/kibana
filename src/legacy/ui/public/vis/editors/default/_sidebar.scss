@@ -119,7 +119,7 @@
 // Collapsible section
 
 .visEditorSidebar__collapsible {
-  background-color: transparentize($euiColorLightShade, .85);
+  background-color: lightOrDarkTheme($euiPageBackgroundColor, $euiColorLightestShade);
 }
 
 .visEditorSidebar__collapsible--margin {

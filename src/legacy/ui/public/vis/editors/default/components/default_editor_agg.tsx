@@ -22,16 +22,11 @@ import {
   EuiAccordion,
   EuiToolTip,
   EuiButtonIcon,
-  EuiText,
-  EuiTextColor,
   EuiSpacer,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiIconTip,
   Color,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
 
 import { AggConfig } from '../../../';
 import { DefaultEditorAggParams } from './default_editor_agg_params';
