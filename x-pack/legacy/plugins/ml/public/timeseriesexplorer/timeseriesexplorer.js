@@ -768,7 +768,7 @@ export const TimeSeriesExplorer = injectI18n(
     }
 
     componentDidMount() {
-      const { globalState, mlJobSelectService } = this.props;
+      const { globalState, mlJobSelectService, timefilter } = this.props;
 
       this.setState({ jobs: [] });
 
@@ -888,10 +888,16 @@ export const TimeSeriesExplorer = injectI18n(
           this.loadForJobId(selection[0], jobs);
         }
       }));
+
+      timefilter.enableTimeRangeSelector();
+      timefilter.enableAutoRefreshSelector();
+      // Refresh the data when the time range is altered.
+      timefilter.on('timeUpdate', this.refresh);
     }
 
     componentWillUnmount() {
       this.subscriptions.unsubscribe();
+      this.props.timefilter.off('timeUpdate', this.refresh);
     }
 
     render() {

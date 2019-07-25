@@ -61,16 +61,12 @@ module.directive('mlTimeSeriesExplorer', function (
   $injector,
   globalState,
   AppState,
-  Private,
   config) {
 
   function link($scope, $element) {
     $injector.get('mlSelectIntervalService');
     $injector.get('mlSelectSeverityService');
     const mlJobSelectService = $injector.get('mlJobSelectService');
-
-    timefilter.enableTimeRangeSelector();
-    timefilter.enableAutoRefreshSelector();
 
     // Required to redraw the time series chart when the container is resized.
     const resizeChecker = new ResizeChecker(angular.element('.ml-time-series-explorer'));
@@ -111,15 +107,9 @@ module.directive('mlTimeSeriesExplorer', function (
       );
     }
 
-    // Refresh the data when the time range is altered.
-    $scope.$listenAndDigestAsync(timefilter, 'fetch', $scope.refresh);
-
-    $scope.$on('$destroy', () => {
-      resizeChecker.destroy();
-    });
-
     $element.on('$destroy', () => {
       ReactDOM.unmountComponentAtNode($element[0]);
+      resizeChecker.destroy();
       $scope.$destroy();
     });
 
