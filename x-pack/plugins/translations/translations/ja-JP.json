@@ -2566,7 +2566,6 @@
     "kbnVislibVisTypes.editors.heatmap.legendPositionLabel": "凡例の配置",
     "kbnVislibVisTypes.editors.heatmap.showTooltipsLabel": "ツールヒントを表示",
     "kbnVislibVisTypes.editors.pie.donutLabel": "ドーナッツ",
-    "kbnVislibVisTypes.editors.pie.truncateLabel": "切り捨て",
     "kbnVislibVisTypes.editors.pointSeries.currentTimeMarkerLabel": "現在時刻マーカー",
     "kbnVislibVisTypes.editors.pointSeries.legendPositionLabel": "凡例の配置",
     "kbnVislibVisTypes.editors.pointSeries.orderBucketsBySumLabel": "バケットを合計で並べ替え",
