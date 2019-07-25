@@ -153,7 +153,7 @@ export const RestoreList: React.FunctionComponent = () => {
                   defaultMessage="Go to {snapshotsLink} to start a restore."
                   values={{
                     snapshotsLink: (
-                      <EuiLink href={`#${BASE_PATH}/snapshots`}>
+                      <EuiLink href={linkToSnapshots()}>
                         <FormattedMessage
                           id="xpack.snapshotRestore.restoreList.emptyPromptDescriptionLink"
                           defaultMessage="Snapshots"
