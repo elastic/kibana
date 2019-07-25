@@ -103,3 +103,4 @@ export const urlQueryStringSelector = (state: RootState) => state.route.match.lo
 export const previousMatchSelector = (state: RootState) => state.route.previousMatch;
 
 export const statusSelector = (state: RootState) => state.status.repoFileStatus;
+export const reposSelector = (state: RootState) => state.repositoryManagement.repositories;

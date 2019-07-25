@@ -6,19 +6,25 @@
 
 import { put, takeEvery, select } from 'redux-saga/effects';
 import { Action } from 'redux-actions';
-import { routeChange, Match } from '../actions';
+import { routeChange, Match, loadRepo, fetchRepoBranches } from '../actions';
 import { previousMatchSelector } from '../selectors';
 import { routePathChange, repoChange, revisionChange, filePathChange } from '../actions/route';
 import * as ROUTES from '../components/routes';
 
 const getRepoFromMatch = (match: Match) =>
-  `${match.params.resources}/${match.params.org}/${match.params.repo}`;
+  `${match.params.resource}/${match.params.org}/${match.params.repo}`;
 
 function* handleRoute(action: Action<any>) {
   const currentMatch = action.payload;
   const previousMatch = yield select(previousMatchSelector);
   if (currentMatch.path !== previousMatch.path) {
     yield put(routePathChange());
+    if (currentMatch.path === ROUTES.MAIN) {
+      const currentRepo = getRepoFromMatch(currentMatch);
+      yield put(repoChange(currentRepo));
+      yield put(revisionChange());
+      yield put(filePathChange());
+    }
   } else if (currentMatch.path === ROUTES.MAIN) {
     const currentRepo = getRepoFromMatch(currentMatch);
     const previousRepo = getRepoFromMatch(previousMatch);
@@ -27,7 +33,7 @@ function* handleRoute(action: Action<any>) {
     const currentFilePath = currentMatch.params.path;
     const previousFilePath = previousMatch.params.path;
     if (currentRepo !== previousRepo) {
-      yield put(repoChange());
+      yield put(repoChange(currentRepo));
     }
     if (currentRevision !== previousRevision) {
       yield put(revisionChange());
@@ -40,4 +46,13 @@ function* handleRoute(action: Action<any>) {
 
 export function* watchRoute() {
   yield takeEvery(String(routeChange), handleRoute);
+}
+
+export function* handleRepoChange(action: Action<string>) {
+  yield put(loadRepo(action.payload!));
+  yield put(fetchRepoBranches({ uri: action.payload! }));
+}
+
+export function* watchRepoChange() {
+  yield takeEvery(String(repoChange), handleRepoChange);
 }
