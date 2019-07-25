@@ -100,7 +100,7 @@ module.directive('mlTimeSeriesExplorer', function (
               appState,
               dateFormatTz,
               globalState,
-              jobSelectService: mlJobSelectService,
+              mlJobSelectService,
               svgWidth: angular.element('.ml-time-series-explorer').width() - containerPadding,
               timefilter,
             }}

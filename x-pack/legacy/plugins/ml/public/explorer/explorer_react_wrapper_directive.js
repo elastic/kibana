@@ -41,8 +41,7 @@ module.directive('mlExplorerReactWrapper', function (config, globalState, mlJobS
             config,
             dateFormatTz,
             globalState,
-            jobSelectService: mlJobSelectService,
-            mlJobSelectService: scope.mlJobSelectService,
+            mlJobSelectService,
             MlTimeBuckets: scope.MlTimeBuckets,
           }}
           />

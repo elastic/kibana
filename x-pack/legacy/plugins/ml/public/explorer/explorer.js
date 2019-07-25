@@ -1048,7 +1048,7 @@ export const Explorer = injectI18n(injectObservablesAsProps(
         dateFormatTz,
         globalState,
         intl,
-        jobSelectService,
+        mlJobSelectService,
         MlTimeBuckets,
       } = this.props;
 
@@ -1083,7 +1083,7 @@ export const Explorer = injectI18n(injectObservablesAsProps(
       const jobSelectorProps = {
         dateFormatTz,
         globalState,
-        jobSelectService,
+        mlJobSelectService,
         selectedJobIds,
         selectedGroups,
       };

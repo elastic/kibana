@@ -141,7 +141,7 @@ export const TimeSeriesExplorer = injectI18n(
       appState: PropTypes.object.isRequired,
       dateFormatTz: PropTypes.string.isRequired,
       globalState: PropTypes.object.isRequired,
-      jobSelectService: PropTypes.object.isRequired,
+      mlJobSelectService: PropTypes.object.isRequired,
       svgWidth: PropTypes.number.isRequired,
       timefilter: PropTypes.object.isRequired,
     };
@@ -768,7 +768,7 @@ export const TimeSeriesExplorer = injectI18n(
     }
 
     componentDidMount() {
-      const { globalState, jobSelectService } = this.props;
+      const { globalState, mlJobSelectService } = this.props;
 
       this.setState({ jobs: [] });
 
@@ -813,7 +813,7 @@ export const TimeSeriesExplorer = injectI18n(
             );
 
             setGlobalState(globalState, { selectedIds: [selectedJobIds[0]] });
-            jobSelectService.next({ selection: [selectedJobIds[0]], resetSelection: true });
+            mlJobSelectService.next({ selection: [selectedJobIds[0]], resetSelection: true });
           } else {
           // if a group has been loaded
             if (selectedJobIds.length > 0) {
@@ -825,12 +825,12 @@ export const TimeSeriesExplorer = injectI18n(
               );
 
               setGlobalState(globalState, { selectedIds: [selectedJobIds[0]] });
-              jobSelectService.next({ selection: [selectedJobIds[0]], resetSelection: true });
+              mlJobSelectService.next({ selection: [selectedJobIds[0]], resetSelection: true });
             } else if (jobs.length > 0) {
             // if there are no valid jobs in the group but there are valid jobs
             // in the list of all jobs, select the first
               setGlobalState(globalState, { selectedIds: [jobs[0].id] });
-              jobSelectService.next({ selection: [jobs[0].id], resetSelection: true });
+              mlJobSelectService.next({ selection: [jobs[0].id], resetSelection: true });
             } else {
             // if there are no valid jobs left.
               this.setState({ loading: false });
@@ -840,7 +840,7 @@ export const TimeSeriesExplorer = injectI18n(
         // if some ids have been filtered out because they were invalid.
         // refresh the URL with the first valid id
           setGlobalState(globalState, { selectedIds: [selectedJobIds[0]] });
-          jobSelectService.next({ selection: [selectedJobIds[0]], resetSelection: true });
+          mlJobSelectService.next({ selection: [selectedJobIds[0]], resetSelection: true });
         } else if (selectedJobIds.length > 0) {
         // normal behavior. a job ID has been loaded from the URL
           this.loadForJobId(selectedJobIds[0], jobs);
@@ -849,7 +849,7 @@ export const TimeSeriesExplorer = injectI18n(
           // no jobs were loaded from the URL, so add the first job
           // from the full jobs list.
             setGlobalState(globalState, { selectedIds: [jobs[0].id] });
-            jobSelectService.next({ selection: [jobs[0].id], resetSelection: true });
+            mlJobSelectService.next({ selection: [jobs[0].id], resetSelection: true });
           } else {
           // Jobs exist, but no time series jobs.
             this.setState({ loading: false });
@@ -873,7 +873,7 @@ export const TimeSeriesExplorer = injectI18n(
       this.subscriptions.add(mlTimefilterRefresh$.subscribe(this.refresh));
 
       // Listen for changes to job selection.
-      this.subscriptions.add(jobSelectService.subscribe(({ selection }) => {
+      this.subscriptions.add(mlJobSelectService.subscribe(({ selection }) => {
         const { appState } = this.props;
         const { jobs } = this.state;
 
@@ -899,7 +899,7 @@ export const TimeSeriesExplorer = injectI18n(
         dateFormatTz,
         globalState,
         intl,
-        jobSelectService,
+        mlJobSelectService,
         svgWidth,
         timefilter,
       } = this.props;
@@ -957,7 +957,7 @@ export const TimeSeriesExplorer = injectI18n(
       const jobSelectorProps = {
         dateFormatTz,
         globalState,
-        jobSelectService,
+        mlJobSelectService,
         selectedJobIds,
         selectedGroups,
         singleSelection: true,
