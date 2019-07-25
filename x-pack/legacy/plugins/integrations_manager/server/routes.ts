@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { PLUGIN_ID } from '../common/constants';
+import { PLUGIN } from '../common/constants';
 import { ServerRoute } from '../common/types';
 import * as CommonRoutes from '../common/routes';
 import * as Integrations from './integrations/handlers';
@@ -13,25 +13,25 @@ export const routes: ServerRoute[] = [
   {
     method: 'GET',
     path: CommonRoutes.API_LIST_PATTERN,
-    options: { tags: [`access:${PLUGIN_ID}`], json: { space: 2 } },
+    options: { tags: [`access:${PLUGIN.ID}`], json: { space: 2 } },
     handler: Integrations.handleGetList,
   },
   {
     method: 'GET',
     path: CommonRoutes.API_INFO_PATTERN,
-    options: { tags: [`access:${PLUGIN_ID}`], json: { space: 2 } },
+    options: { tags: [`access:${PLUGIN.ID}`], json: { space: 2 } },
     handler: Integrations.handleGetInfo,
   },
   {
     method: 'GET',
     path: CommonRoutes.API_INSTALL_PATTERN,
-    options: { tags: [`access:${PLUGIN_ID}`], json: { space: 2 } },
+    options: { tags: [`access:${PLUGIN.ID}`], json: { space: 2 } },
     handler: Integrations.handleRequestInstall,
   },
   {
     method: 'GET',
     path: CommonRoutes.API_DELETE_PATTERN,
-    options: { tags: [`access:${PLUGIN_ID}`], json: { space: 2 } },
+    options: { tags: [`access:${PLUGIN.ID}`], json: { space: 2 } },
     handler: Integrations.handleRequestDelete,
   },
 ];

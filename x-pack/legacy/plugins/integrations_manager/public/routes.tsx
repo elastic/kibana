@@ -9,11 +9,11 @@ import { generatePath, Route } from 'react-router-dom';
 import { npStart } from 'ui/new_platform';
 import { Detail } from './screens/detail';
 import { Home } from './screens/home';
-import { PLUGIN_ID } from '../common/constants';
+import { PLUGIN } from '../common/constants';
 
 // patterns are used by React Router and are relative to `APP_ROOT`
 export const patterns = {
-  APP_ROOT: `/app/${PLUGIN_ID}`,
+  APP_ROOT: `/app/${PLUGIN.ID}`,
   LIST_VIEW: '/',
   DETAIL_VIEW: '/detail/:pkgkey',
 };
