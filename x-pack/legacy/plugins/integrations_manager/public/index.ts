@@ -10,6 +10,7 @@ import chrome from 'ui/chrome';
 import { npSetup, npStart } from 'ui/new_platform';
 import { PLUGIN_ID } from '../common/constants';
 import { Plugin, PluginInitializerContext, PluginStart } from './plugin';
+import { routes } from './routes';
 
 const REACT_APP_ROOT_ID = `react-${PLUGIN_ID}-root`;
 const template = `<div id="${REACT_APP_ROOT_ID}" class="integrationsManagerReactRoot"></div>`;
@@ -26,7 +27,10 @@ async function main(): Promise<void> {
   chrome.setRootTemplate(template);
 
   await waitFor(getRootEl);
-  const { root }: PluginStart = plugin.start(npStart.core);
+  const { root }: PluginStart = plugin.start({
+    ...npStart.core,
+    routes,
+  });
   const container = getRootEl();
 
   ReactDOM.render(root, container);
