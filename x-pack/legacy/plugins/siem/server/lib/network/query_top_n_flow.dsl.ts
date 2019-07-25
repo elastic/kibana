@@ -157,6 +157,21 @@ const getFlowTargetAggs = (
               },
             },
           },
+          location: {
+            terms: {
+              field: 'geo.country_iso_code',
+            },
+          },
+          as_org: {
+            terms: {
+              field: 'as.organization_name',
+            },
+          },
+          as_number: {
+            terms: {
+              field: 'as.number',
+            },
+          },
         },
       },
       [FlowTarget.destination]: {
