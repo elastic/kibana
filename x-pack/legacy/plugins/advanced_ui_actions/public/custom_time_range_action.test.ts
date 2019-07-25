@@ -59,7 +59,11 @@ test('Custom time range action prevents embeddable from using container time', a
 
   const overlayMock = npStart.core.overlays;
   (overlayMock.openModal as any).mockClear();
-  new CustomTimeRangeAction({ openModal: npStart.core.overlays.openModal }).execute({
+  new CustomTimeRangeAction({
+    openModal: npStart.core.overlays.openModal,
+    commonlyUsedRanges: [],
+    dateFormat: 'MM YYY',
+  }).execute({
     embeddable: child1,
   });
 
@@ -116,7 +120,11 @@ test('Removing custom time range action resets embeddable back to container time
 
   const overlayMock = npStart.core.overlays;
   (overlayMock.openModal as any).mockClear();
-  new CustomTimeRangeAction({ openModal: npStart.core.overlays.openModal }).execute({
+  new CustomTimeRangeAction({
+    openModal: npStart.core.overlays.openModal,
+    commonlyUsedRanges: [],
+    dateFormat: 'MM YYY',
+  }).execute({
     embeddable: child1,
   });
 
@@ -129,7 +137,11 @@ test('Removing custom time range action resets embeddable back to container time
 
   container.updateInput({ timeRange: { from: 'now-30m', to: 'now-1m' } });
 
-  new CustomTimeRangeAction({ openModal: npStart.core.overlays.openModal }).execute({
+  new CustomTimeRangeAction({
+    openModal: npStart.core.overlays.openModal,
+    commonlyUsedRanges: [],
+    dateFormat: 'MM YYY',
+  }).execute({
     embeddable: child1,
   });
 
@@ -185,7 +197,11 @@ test('Cancelling custom time range action leaves state alone', async done => {
 
   const overlayMock = npStart.core.overlays;
   (overlayMock.openModal as any).mockClear();
-  new CustomTimeRangeAction({ openModal: npStart.core.overlays.openModal }).execute({
+  new CustomTimeRangeAction({
+    openModal: npStart.core.overlays.openModal,
+    commonlyUsedRanges: [],
+    dateFormat: 'MM YYY',
+  }).execute({
     embeddable: child1,
   });
 
@@ -233,6 +249,8 @@ test(`badge is compatible with embeddable that inherits from parent`, async () =
 
   const compatible = await new CustomTimeRangeAction({
     openModal: npStart.core.overlays.openModal,
+    commonlyUsedRanges: [],
+    dateFormat: 'MM YYY',
   }).isCompatible({
     embeddable: child,
   });

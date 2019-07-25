@@ -13,12 +13,13 @@ import {
 import { CUSTOM_TIME_RANGE, CustomTimeRangeAction } from '../custom_time_range_action';
 
 import { CUSTOM_TIME_RANGE_BADGE, CustomTimeRangeBadge } from '../custom_time_range_badge';
+import { CommonlyUsedRange } from '../types';
 
 export class Plugin {
   constructor(initializerContext: PluginInitializerContext) {}
 
   public start(core: CoreStart, plugins: { embeddable: EmbeddablePlugin }) {
-    const dateFormat = core.uiSettings.get('dateFormat');
+    const dateFormat = core.uiSettings.get('dateFormat') as string;
     const commonlyUsedRanges = core.uiSettings.get('timepicker:quickRanges') as CommonlyUsedRange[];
     plugins.embeddable.addAction(
       new CustomTimeRangeAction({
