@@ -135,7 +135,7 @@ function DefaultEditorAggGroup({
   return (
     <EuiDragDropContext onDragEnd={onDragEnd}>
       <EuiPanel paddingSize="s">
-        <EuiTitle size="s">
+        <EuiTitle size="xs">
           <div>{groupNameLabel}</div>
         </EuiTitle>
         <EuiSpacer size="s" />
