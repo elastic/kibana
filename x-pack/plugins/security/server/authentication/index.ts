@@ -129,7 +129,7 @@ export async function setupAuthentication({
       const authResponseHeaders = authenticationResult.authResponseHeaders;
       for (const [headerName, headerValue] of Object.entries(authResponseHeaders || {})) {
         if (error.output.headers[headerName] !== undefined) {
-          authLogger.warn(`Server rewrites a error response header [${headerName}].`);
+          authLogger.warn(`Server rewrites an error response header [${headerName}].`);
         }
         // Hapi typings don't support headers that are `string[]`.
         error.output.headers[headerName] = headerValue as any;
