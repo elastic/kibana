@@ -18,23 +18,20 @@ import moment from 'moment-timezone';
 import { parseInterval } from 'ui/utils/parse_interval';
 
 import {
+  ANNOTATIONS_TABLE_DEFAULT_QUERY_SIZE,
+  ANOMALIES_TABLE_DEFAULT_QUERY_SIZE
+} from '../../common/constants/search';
+import {
   isTimeSeriesViewJob,
   mlFunctionToESAggregation,
 } from '../../common/util/job_utils';
 
-
 import { ml } from '../services/ml_api_service';
 import { mlForecastService } from '../services/forecast_service';
 import { mlResultsService } from '../services/results_service';
-
 import { MlTimeBuckets, getBoundsRoundedToInterval } from '../util/ml_time_buckets';
 
 import { mlTimeSeriesSearchService } from './timeseries_search_service';
-
-import {
-  ANNOTATIONS_TABLE_DEFAULT_QUERY_SIZE,
-  ANOMALIES_TABLE_DEFAULT_QUERY_SIZE
-} from '../../common/constants/search';
 
 import {
   CHARTS_POINT_TARGET,

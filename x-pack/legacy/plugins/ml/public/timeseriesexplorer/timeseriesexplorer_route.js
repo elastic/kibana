@@ -4,14 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-
-/*
- * Angular controller for the Machine Learning Single Metric Viewer dashboard, which
- * allows the user to explore a single time series. The controller makes multiple queries
- * to Elasticsearch to obtain the data to populate all the components in the view.
- */
-
 import uiRoutes from 'ui/routes';
 
 import '../components/controls';
