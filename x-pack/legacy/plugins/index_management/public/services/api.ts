@@ -213,7 +213,7 @@ export const deleteTemplates = async (names: Array<Template['name']>) => {
 
 export function loadIndexTemplate(name: Template['name']) {
   return useRequest({
-    path: `${apiPrefix}/templates/${name}`,
+    path: `${apiPrefix}/templates/${encodeURIComponent(name)}`,
     method: 'get',
   });
 }

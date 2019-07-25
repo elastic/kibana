@@ -28,7 +28,7 @@ import {
 import { Template } from '../../../../../common/types';
 import { DeleteTemplatesModal, SectionLoading, SectionError } from '../../../../components';
 import { loadIndexTemplate } from '../../../../services/api';
-import { trackUiMetric } from '../../../../services/track_ui_metric';
+import { trackUiMetric, METRIC_TYPE } from '../../../../services/track_ui_metric';
 import { SummaryTab, MappingsTab, SettingsTab, AliasesTab } from './tabs';
 
 interface Props {
@@ -149,7 +149,7 @@ export const TemplateDetails: React.FunctionComponent<Props> = ({
             {tabs.map(tab => (
               <EuiTab
                 onClick={() => {
-                  trackUiMetric(tabToUiMetricMap[tab.id]);
+                  trackUiMetric(METRIC_TYPE.CLICK, tabToUiMetricMap[tab.id]);
                   setActiveTab(tab.id);
                 }}
                 isSelected={tab.id === activeTab}
@@ -188,22 +188,25 @@ export const TemplateDetails: React.FunctionComponent<Props> = ({
 
   return (
     <Fragment>
-      <DeleteTemplatesModal
-        callback={data => {
-          if (data && data.hasDeletedTemplates) {
-            reload();
-          }
-          setTemplateToDelete([]);
-          onClose();
-        }}
-        templatesToDelete={templateToDelete}
-      />
+      {templateToDelete.length ? (
+        <DeleteTemplatesModal
+          callback={data => {
+            if (data && data.hasDeletedTemplates) {
+              reload();
+            }
+            setTemplateToDelete([]);
+            onClose();
+          }}
+          templatesToDelete={templateToDelete}
+        />
+      ) : null}
 
       <EuiFlyout
         onClose={onClose}
         data-test-subj="templateDetails"
         aria-labelledby="templateDetailsFlyoutTitle"
-        size="s"
+        size="m"
+        maxWidth={400}
       >
         <EuiFlyoutHeader>
           <EuiTitle size="m">
@@ -231,8 +234,8 @@ export const TemplateDetails: React.FunctionComponent<Props> = ({
               </EuiButtonEmpty>
             </EuiFlexItem>
 
-            <EuiFlexItem grow={false}>
-              {templateDetails && (
+            {templateDetails && (
+              <EuiFlexItem grow={false}>
                 <EuiButtonEmpty
                   color="danger"
                   onClick={setTemplateToDelete.bind(null, [templateName])}
@@ -243,8 +246,8 @@ export const TemplateDetails: React.FunctionComponent<Props> = ({
                     defaultMessage="Delete"
                   />
                 </EuiButtonEmpty>
-              )}
-            </EuiFlexItem>
+              </EuiFlexItem>
+            )}
           </EuiFlexGroup>
         </EuiFlyoutFooter>
       </EuiFlyout>

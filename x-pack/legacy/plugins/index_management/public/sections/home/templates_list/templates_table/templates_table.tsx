@@ -18,7 +18,7 @@ import {
 import { Template } from '../../../../../common/types';
 import { BASE_PATH, UIM_TEMPLATE_SHOW_DETAILS_CLICK } from '../../../../../common/constants';
 import { DeleteTemplatesModal } from '../../../../components';
-import { trackUiMetric } from '../../../../services/track_ui_metric';
+import { trackUiMetric, METRIC_TYPE } from '../../../../services/track_ui_metric';
 
 interface Props {
   templates: Template[];
@@ -46,9 +46,9 @@ export const TemplatesTable: React.FunctionComponent<Props> = ({ templates, relo
       render: (name: Template['name']) => {
         return (
           <EuiLink
-            href={`#${BASE_PATH}templates/${name}`}
+            href={encodeURI(`#${BASE_PATH}templates/${name}`)}
             data-test-subj="templateDetailsLink"
-            onClick={trackUiMetric.bind(null, UIM_TEMPLATE_SHOW_DETAILS_CLICK)}
+            onClick={() => trackUiMetric(METRIC_TYPE.CLICK, UIM_TEMPLATE_SHOW_DETAILS_CLICK)}
           >
             {name}
           </EuiLink>
@@ -226,15 +226,17 @@ export const TemplatesTable: React.FunctionComponent<Props> = ({ templates, relo
 
   return (
     <Fragment>
-      <DeleteTemplatesModal
-        callback={data => {
-          if (data && data.hasDeletedTemplates) {
-            reload();
-          }
-          setTemplatesToDelete([]);
-        }}
-        templatesToDelete={templatesToDelete}
-      />
+      {templatesToDelete.length ? (
+        <DeleteTemplatesModal
+          callback={data => {
+            if (data && data.hasDeletedTemplates) {
+              reload();
+            }
+            setTemplatesToDelete([]);
+          }}
+          templatesToDelete={templatesToDelete}
+        />
+      ) : null}
       <EuiInMemoryTable
         items={templates}
         itemId="name"

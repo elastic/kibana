@@ -37,24 +37,26 @@ const oneHandler: RouterRouteHandler = async (req, callWithRequest) => {
   const { name } = req.params;
   const indexTemplateByName = await callWithRequest('indices.getTemplate', { name });
 
-  const {
-    version,
-    order,
-    index_patterns: indexPatterns = [],
-    settings = {},
-    aliases = {},
-    mappings = {},
-  } = indexTemplateByName[name];
+  if (indexTemplateByName[name]) {
+    const {
+      version,
+      order,
+      index_patterns: indexPatterns = [],
+      settings = {},
+      aliases = {},
+      mappings = {},
+    } = indexTemplateByName[name];
 
-  return {
-    name,
-    version,
-    order,
-    indexPatterns: indexPatterns.sort(),
-    settings,
-    aliases,
-    mappings,
-  };
+    return {
+      name,
+      version,
+      order,
+      indexPatterns: indexPatterns.sort(),
+      settings,
+      aliases,
+      mappings,
+    };
+  }
 };
 
 export function registerGetAllRoute(router: Router) {
