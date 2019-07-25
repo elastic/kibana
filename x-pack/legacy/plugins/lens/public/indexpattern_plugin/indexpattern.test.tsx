@@ -738,7 +738,6 @@ describe('IndexPattern Data Source', () => {
               {
                 columnId: 'col1',
                 operation: {
-                  id: 'op1',
                   label: 'My Op',
                   dataType: 'string',
                   isBucketed: true,
@@ -912,7 +911,6 @@ describe('IndexPattern Data Source', () => {
     describe('getOperationForColumnId', () => {
       it('should get an operation for col1', () => {
         expect(publicAPI.getOperationForColumnId('col1')).toEqual({
-          id: 'op1',
           label: 'My Op',
           dataType: 'string',
           isBucketed: true,

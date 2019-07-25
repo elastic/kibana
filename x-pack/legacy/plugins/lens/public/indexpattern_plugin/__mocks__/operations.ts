@@ -11,9 +11,7 @@ jest.spyOn(actual.operationDefinitionMap.terms, 'onOtherColumnChanged');
 
 export const {
   getPotentialOperations,
-  buildColumnForField,
-  buildColumnForOperationType,
-  buildColumnForDocument,
+  buildColumn,
   getOperations,
   getOperationDisplay,
   getOperationTypesForField,
