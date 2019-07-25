@@ -408,7 +408,7 @@ describe('Response factory', () => {
       expect(result.header['set-cookie']).toEqual(['foo', 'bar']);
     });
 
-    it('throws if given invalid json object', async () => {
+    it('throws if given invalid json object as response payload', async () => {
       const router = new Router('/');
 
       router.get({ path: '/', validate: false }, (req, res) => {
@@ -512,8 +512,7 @@ describe('Response factory', () => {
       const router = new Router('/');
 
       router.get({ path: '/', validate: false }, (req, res) => {
-        // @ts-ignore url string is required parameter
-        return res.redirected();
+        return res.redirected(undefined as any); // url string is required parameter
       });
 
       const { registerRouter, server: innerServer } = await server.setup(config);
@@ -828,8 +827,7 @@ describe('Response factory', () => {
 
       router.get({ path: '/', validate: false }, (req, res) => {
         const error = new Error('error message');
-        // @ts-ignore options.statusCode is required
-        return res.custom(error);
+        return res.custom(error, undefined as any); // options.statusCode is required
       });
 
       const { registerRouter, server: innerServer } = await server.setup(config);
