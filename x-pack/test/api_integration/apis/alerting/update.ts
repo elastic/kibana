@@ -177,7 +177,7 @@ export default function createUpdateTests({ getService }: KibanaFunctionalTestDe
         statusCode: 400,
         error: 'Bad Request',
         message:
-          'child "interval" fails because ["interval" with value "10x" fails to match the seconds pattern, "interval" with value "10x" fails to match the minutes pattern, "interval" with value "10x" fails to match the hours pattern, "interval" with value "10x" fails to match the days pattern]. "alertTypeId" is not allowed',
+          'child "interval" fails because ["interval" with value "10x" fails to match the seconds (5s) pattern, "interval" with value "10x" fails to match the minutes (5m) pattern, "interval" with value "10x" fails to match the hours (5h) pattern, "interval" with value "10x" fails to match the days (5d) pattern]. "alertTypeId" is not allowed',
         validation: {
           source: 'payload',
           keys: ['interval', 'interval', 'interval', 'interval', 'alertTypeId'],
@@ -195,7 +195,7 @@ export default function createUpdateTests({ getService }: KibanaFunctionalTestDe
         statusCode: 400,
         error: 'Bad Request',
         message:
-          'child "throttle" fails because ["throttle" with value "10x" fails to match the seconds pattern, "throttle" with value "10x" fails to match the minutes pattern, "throttle" with value "10x" fails to match the hours pattern, "throttle" with value "10x" fails to match the days pattern]. "alertTypeId" is not allowed',
+          'child "throttle" fails because ["throttle" with value "10x" fails to match the seconds (5s) pattern, "throttle" with value "10x" fails to match the minutes (5m) pattern, "throttle" with value "10x" fails to match the hours (5h) pattern, "throttle" with value "10x" fails to match the days (5d) pattern]. "alertTypeId" is not allowed',
         validation: {
           source: 'payload',
           keys: ['throttle', 'throttle', 'throttle', 'throttle', 'alertTypeId'],

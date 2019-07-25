@@ -80,10 +80,7 @@ export function getCreateTaskRunnerFunction({
               return;
             }
 
-            if (
-              alertSavedObject.attributes.throttle &&
-              alertInstance.isThrottled(alertSavedObject.attributes.throttle)
-            ) {
+            if (alertInstance.isThrottled(alertSavedObject.attributes.throttle)) {
               return;
             }
 

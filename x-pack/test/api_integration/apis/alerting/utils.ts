@@ -13,6 +13,7 @@ export function getTestAlertData(attributeOverwrites = {}) {
     enabled: true,
     alertTypeId: 'test.noop',
     interval: '10s',
+    throttle: '1m',
     actions: [
       {
         group: 'default',

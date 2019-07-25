@@ -26,11 +26,11 @@ export class AlertInstance {
     return this.fireOptions !== undefined;
   }
 
-  isThrottled(duration: string) {
-    const throttle = parseDuration(duration);
-    if (!this.meta.lastFired) {
+  isThrottled(duration?: string) {
+    if (!duration || !this.meta.lastFired) {
       return false;
     }
+    const throttle = parseDuration(duration);
     return this.meta.lastFired + throttle > Date.now();
   }
 

@@ -20,7 +20,7 @@ describe('isThrottled', () => {
   });
 
   test('returns true when throttle expiry greater than now', () => {
-    const alertInstance = new AlertInstance({ meta: { lastFired: Date.now() - 59999 } });
+    const alertInstance = new AlertInstance({ meta: { lastFired: Date.now() - 50000 } });
     expect(alertInstance.isThrottled('1m')).toEqual(true);
   });
 
