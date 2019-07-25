@@ -12,14 +12,14 @@ import {
   EuiFlexItem
 } from '@elastic/eui';
 import { ValidatedDualRange } from 'ui/validated_range';
-import { DEFAULT_MIN_SIZE, DEFAULT_MAX_SIZE } from '../../../vector_style_defaults';
+import { ABSOLUTE_MIN_SIZE, DEFAULT_MAX_SIZE } from '../../../vector_style_defaults';
 
 
 export function SizeRangeSelector({ minSize, maxSize, onChange }) {
 
   const onSizeChange = ([min, max]) => {
     onChange({
-      minSize: Math.max(DEFAULT_MIN_SIZE, parseFloat(min, 10)),
+      minSize: Math.max(ABSOLUTE_MIN_SIZE, parseFloat(min, 10)),
       maxSize: Math.min(DEFAULT_MAX_SIZE, parseFloat(max, 10))
     });
   };
@@ -31,7 +31,7 @@ export function SizeRangeSelector({ minSize, maxSize, onChange }) {
           compressed
         >
           <ValidatedDualRange
-            min={0}
+            min={ABSOLUTE_MIN_SIZE}
             max={DEFAULT_MAX_SIZE}
             step={0.5}
             value={[minSize, maxSize]}
