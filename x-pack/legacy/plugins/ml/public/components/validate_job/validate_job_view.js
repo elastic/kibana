@@ -174,7 +174,6 @@ class ValidateJob extends Component {
   }
 
   componentDidMount() {
-    this.idFilterList = this.props.idFilterList || [];
     if(this.props.embedded === true) {
       this.validate();
     }
@@ -243,6 +242,7 @@ class ValidateJob extends Component {
     const isCurrentJobConfig = (this.props.isCurrentJobConfig !== true) ? false : true;
     const isDisabled = (this.props.isDisabled !== true) ? false : true;
     const embedded = (this.props.embedded === true);
+    const idFilterList = this.props.idFilterList || [];
 
     return (
       <Fragment>
@@ -274,7 +274,7 @@ class ValidateJob extends Component {
             >
               {
                 this.state.data.messages
-                  .filter(m => this.idFilterList.includes(m.id) === false)
+                  .filter(m => idFilterList.includes(m.id) === false)
                   .map((m, i) => <Callout key={`${m.id}_${i}`} message={m} />)
               }
               <EuiText>
@@ -308,7 +308,7 @@ class ValidateJob extends Component {
           <div>
             {
               this.state.data.messages
-                .filter(m => this.idFilterList.includes(m.id) === false)
+                .filter(m => idFilterList.includes(m.id) === false)
                 .map((m, i) => <Callout key={`${m.id}_${i}`} message={m} />)
             }
           </div>
