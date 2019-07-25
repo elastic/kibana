@@ -17,13 +17,13 @@
  * under the License.
  */
 
-import './tag_cloud_vis_params';
 import { i18n } from '@kbn/i18n';
 import { VisFactoryProvider } from 'ui/vis/vis_factory';
 import { Schemas } from 'ui/vis/editors/default/schemas';
 import { TagCloudVisualization } from './tag_cloud_visualization';
 import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
 import { Status } from 'ui/vis/update_status';
+import { TagCloudOptions } from './tag_cloud_vis_options';
 
 VisTypesRegistryProvider.register(function (Private) {
 
@@ -49,10 +49,48 @@ VisTypesRegistryProvider.register(function (Private) {
     visualization: TagCloudVisualization,
     editorConfig: {
       collections: {
-        scales: ['linear', 'log', 'square root'],
-        orientations: ['single', 'right angled', 'multiple'],
+        scales: [
+          {
+            text: i18n.translate('tagCloud.vis.editorConfig.collections.scales.linear', {
+              defaultMessage: 'Linear'
+            }),
+            value: 'linear'
+          },
+          {
+            text: i18n.translate('tagCloud.vis.editorConfig.collections.scales.log', {
+              defaultMessage: 'Log'
+            }),
+            value: 'log'
+          },
+          {
+            text: i18n.translate('tagCloud.vis.editorConfig.collections.scales.squareRoot', {
+              defaultMessage: 'Square root'
+            }),
+            value: 'square root'
+          },
+        ],
+        orientations: [
+          {
+            text: i18n.translate('tagCloud.vis.editorConfig.collections.orientations.single', {
+              defaultMessage: 'Single'
+            }),
+            value: 'single'
+          },
+          {
+            text: i18n.translate('tagCloud.vis.editorConfig.collections.orientations.rightAngled', {
+              defaultMessage: 'Right angled'
+            }),
+            value: 'right angled'
+          },
+          {
+            text: i18n.translate('tagCloud.vis.editorConfig.collections.orientations.multiple', {
+              defaultMessage: 'Multiple'
+            }),
+            value: 'multiple'
+          },
+        ],
       },
-      optionsTemplate: '<tagcloud-vis-params></tagcloud-vis-params>',
+      optionsTemplate: TagCloudOptions,
       schemas: new Schemas([
         {
           group: 'metrics',
