@@ -59,6 +59,9 @@
             "type": "beats_state",
             "cluster_uuid": "W7hppdX7R229Oy3KQbZrTw",
             "beats_state": {
+              "beat": {
+                 "type": "car"
+              },
               "state": {
                 "module": {
                   "count": 1,
@@ -11603,6 +11606,6 @@
       ]
     }
   },
-  
+
   {}
 ]
