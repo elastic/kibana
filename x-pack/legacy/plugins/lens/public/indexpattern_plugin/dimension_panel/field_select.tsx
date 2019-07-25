@@ -16,7 +16,7 @@ import {
 import { OperationType, IndexPattern, IndexPatternField } from '../indexpattern';
 import { FieldIcon } from '../field_icon';
 import { DataType } from '../../types';
-import { OperationMapping, operationDefinitionMap } from '../operations';
+import { OperationFieldSupportMatrix } from './dimension_panel';
 
 export type FieldChoice =
   | { type: 'field'; field: string; operationType?: OperationType }
@@ -28,7 +28,7 @@ export interface FieldSelectProps {
   incompatibleSelectedOperationType: OperationType | null;
   selectedColumnOperationType?: OperationType;
   selectedColumnSourceField?: string;
-  filteredOperations: OperationMapping[];
+  operationFieldSupportMatrix: OperationFieldSupportMatrix;
   onChoose: (choice: FieldChoice) => void;
   onDeleteColumn: () => void;
 }
@@ -37,44 +37,35 @@ export function FieldSelect({
   incompatibleSelectedOperationType,
   selectedColumnOperationType,
   selectedColumnSourceField,
-  filteredOperations,
+  operationFieldSupportMatrix,
   currentIndexPattern,
   fieldMap,
   onChoose,
   onDeleteColumn,
 }: FieldSelectProps) {
+  const { operationByDocument, operationByField } = operationFieldSupportMatrix;
   const memoizedFieldOptions = useMemo(() => {
-    const fields = _.uniq(
-      filteredOperations.reduce((list, op) => [...list, ...op.applicableFields], [] as string[])
-    ).sort();
+    const fields = Object.keys(operationByField).sort();
 
     function isCompatibleWithCurrentOperation(fieldName: string) {
       if (incompatibleSelectedOperationType) {
-        return (
-          operationDefinitionMap[incompatibleSelectedOperationType].getPossibleOperationsForField(
-            fieldMap[fieldName]
-          ).length > 0
-        );
+        return operationByField[fieldName]!.includes(incompatibleSelectedOperationType);
       }
       return (
         !selectedColumnOperationType ||
-        (selectedColumnSourceField &&
-          operationDefinitionMap[selectedColumnOperationType].getPossibleOperationsForField(
-            fieldMap[fieldName]
-          ).length > 0)
+        operationByField[fieldName]!.includes(selectedColumnOperationType)
       );
     }
 
     const isCurrentOperationApplicableWithoutField =
       (!selectedColumnOperationType && !incompatibleSelectedOperationType) ||
-      operationDefinitionMap[
-        (selectedColumnOperationType || incompatibleSelectedOperationType)!
-      ].getPossibleOperationsForDocument(currentIndexPattern).length > 0;
+      operationByDocument.includes(
+        selectedColumnOperationType || incompatibleSelectedOperationType!
+      );
 
     const fieldOptions = [];
-    const fieldlessColumn = filteredOperations.find(op => op.applicableWithoutField);
 
-    if (fieldlessColumn) {
+    if (operationByDocument.length > 0) {
       fieldOptions.push({
         label: i18n.translate('xpack.lens.indexPattern.documentField', {
           defaultMessage: 'Document',
@@ -126,7 +117,7 @@ export function FieldSelect({
     incompatibleSelectedOperationType,
     selectedColumnOperationType,
     selectedColumnSourceField,
-    filteredOperations,
+    operationFieldSupportMatrix,
     currentIndexPattern,
     fieldMap,
   ]);

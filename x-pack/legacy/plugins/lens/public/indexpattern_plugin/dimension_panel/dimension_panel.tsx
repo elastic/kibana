@@ -11,9 +11,14 @@ import { Storage } from 'ui/storage';
 import { i18n } from '@kbn/i18n';
 import { DataSetup } from '../../../../../../../src/legacy/core_plugins/data/public';
 import { DatasourceDimensionPanelProps } from '../../types';
-import { IndexPatternColumn, IndexPatternPrivateState, IndexPatternField } from '../indexpattern';
+import {
+  IndexPatternColumn,
+  IndexPatternPrivateState,
+  IndexPatternField,
+  OperationType,
+} from '../indexpattern';
 
-import { getPotentialOperations, buildColumnForField } from '../operations';
+import { getPotentialOperations, buildColumn } from '../operations';
 import { PopoverEditor } from './popover_editor';
 import { DragContextState, ChildDragDropProvider, DragDrop } from '../../drag_drop';
 import { changeColumn, deleteColumn } from '../state_helpers';
@@ -27,6 +32,12 @@ export type IndexPatternDimensionPanelProps = DatasourceDimensionPanelProps & {
   layerId: string;
 };
 
+export interface OperationFieldSupportMatrix {
+  operationByField: Partial<Record<string, OperationType[]>>;
+  fieldByOperation: Partial<Record<OperationType, string[]>>;
+  operationByDocument: OperationType[];
+}
+
 export const IndexPatternDimensionPanel = memo(function IndexPatternDimensionPanel(
   props: IndexPatternDimensionPanelProps
 ) {
@@ -38,21 +49,44 @@ export const IndexPatternDimensionPanel = memo(function IndexPatternDimensionPan
     return getPotentialOperations(props.state.indexPatterns[indexPatternId]);
   }, [props.state.indexPatterns[indexPatternId]]);
 
-  const filteredOperations = useMemo(
-    () =>
-      operations.filter(operation => {
-        return props.filterOperations(operation.operationMeta);
-      }),
-    [operations, props.filterOperations]
-  );
+  const operationFieldSupportMatrix = useMemo(() => {
+    const filteredOperations = operations.filter(operation => {
+      return props.filterOperations(operation.operationMetaData);
+    });
+    const supportedOperationsByField: Partial<Record<string, OperationType[]>> = {};
+    const supportedFieldsByOperation: Partial<Record<OperationType, string[]>> = {};
+    const supportedOperationsByDocument: OperationType[] = [];
+    filteredOperations.forEach(op => {
+      op.operations.forEach(o => {
+        if (o.type === 'field') {
+          if (supportedOperationsByField[o.field]) {
+            supportedOperationsByField[o.field]!.push(o.op);
+          } else {
+            supportedOperationsByField[o.field] = [o.op];
+          }
+
+          if (supportedFieldsByOperation[o.op]) {
+            supportedFieldsByOperation[o.op]!.push(o.field);
+          } else {
+            supportedFieldsByOperation[o.op] = [o.field];
+          }
+        } else {
+          supportedOperationsByDocument.push(o.op);
+        }
+      });
+    });
+    return {
+      operationByField: _.mapValues(supportedOperationsByField, _.uniq),
+      fieldByOperation: _.mapValues(supportedFieldsByOperation, _.uniq),
+      operationByDocument: _.uniq(supportedOperationsByDocument),
+    };
+  }, [operations, props.filterOperations]);
 
   const selectedColumn: IndexPatternColumn | null =
     props.state.layers[layerId].columns[props.columnId] || null;
 
   function hasOperationForField(field: IndexPatternField) {
-    return Boolean(
-      filteredOperations.find(operation => operation.applicableFields.includes(field.name))
-    );
+    return Boolean(operationFieldSupportMatrix.operationByField[field.name]);
   }
 
   function canHandleDrop() {
@@ -80,11 +114,9 @@ export const IndexPatternDimensionPanel = memo(function IndexPatternDimensionPan
               state: props.state,
               layerId,
               columnId: props.columnId,
-              newColumn: buildColumnForField({
-                // TODO think about this
-                index: 0,
+              newColumn: buildColumn({
                 columns: props.state.layers[props.layerId].columns,
-                indexPatternId,
+                indexPattern: currentIndexPattern,
                 layerId,
                 suggestedPriority: props.suggestedPriority,
                 field: field as IndexPatternField,
@@ -99,7 +131,7 @@ export const IndexPatternDimensionPanel = memo(function IndexPatternDimensionPan
               {...props}
               currentIndexPattern={currentIndexPattern}
               selectedColumn={selectedColumn}
-              filteredOperations={filteredOperations}
+              operationFieldSupportMatrix={operationFieldSupportMatrix}
             />
           </EuiFlexItem>
           <EuiFlexItem grow={null}>

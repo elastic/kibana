@@ -127,8 +127,6 @@ export type DataType = 'string' | 'number' | 'date' | 'boolean';
 // Visualizations are able to filter based on the output, not based on the
 // underlying data
 export interface Operation extends OperationMetaInformation {
-  // Operation ID is a reference to the operation
-  id: string;
   // User-facing label for the operation
   label: string;
 }

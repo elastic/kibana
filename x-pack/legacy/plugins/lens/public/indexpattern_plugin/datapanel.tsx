@@ -69,7 +69,7 @@ export function IndexPatternDataPanel({
   );
 
   return (
-    <InnerIndexPatternDataPanel
+    <MemoizedDataPanel
       showIndexPatternSwitcher={showIndexPatternSwitcher}
       setShowIndexPatternSwitcher={setShowIndexPatternSwitcher}
       currentIndexPatternId={currentIndexPatternId}
@@ -81,7 +81,7 @@ export function IndexPatternDataPanel({
   );
 }
 
-const InnerIndexPatternDataPanel = memo(function InnerIndexPatternDataPanel({
+export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
   currentIndexPatternId,
   indexPatterns,
   dragDropContext,
@@ -330,4 +330,6 @@ const InnerIndexPatternDataPanel = memo(function InnerIndexPatternDataPanel({
       </EuiFlexGroup>
     </ChildDragDropProvider>
   );
-});
+};
+
+const MemoizedDataPanel = memo(InnerIndexPatternDataPanel);

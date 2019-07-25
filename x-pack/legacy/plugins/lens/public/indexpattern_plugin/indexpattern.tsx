@@ -20,7 +20,7 @@ import { Query } from '../../../../../../src/legacy/core_plugins/data/public/que
 import { getIndexPatterns } from './loader';
 import { toExpression } from './to_expression';
 import { IndexPatternDimensionPanel } from './dimension_panel';
-import { buildColumnForOperationType, getOperationTypesForField } from './operations';
+import { getOperationTypesForField, buildColumn } from './operations';
 import { IndexPatternDatasourcePluginPlugins } from './plugin';
 import { IndexPatternDataPanel } from './datapanel';
 import { generateId } from '../id_generator';
@@ -140,9 +140,8 @@ export type IndexPatternPrivateState = IndexPatternPersistedState & {
 };
 
 export function columnToOperation(column: IndexPatternColumn): Operation {
-  const { dataType, label, isBucketed, operationId } = column;
+  const { dataType, label, isBucketed } = column;
   return {
-    id: operationId,
     label,
     dataType,
     isBucketed,
@@ -361,6 +360,8 @@ export function getIndexPatternDatasource({
       const layers = Object.keys(state.layers);
       const field: IndexPatternField = item as IndexPatternField;
 
+      const currentIndexPattern = state.indexPatterns[state.currentIndexPatternId];
+
       const indexPatternId = getIndexPatternIdFromField(state, field);
 
       let layerId;
@@ -393,21 +394,19 @@ export function getIndexPatternDatasource({
       const hasBucket = operations.find(op => op === 'date_histogram' || op === 'terms');
 
       if (hasBucket) {
-        const countColumn = buildColumnForOperationType({
-          index: 1,
+        const countColumn = buildColumn({
           op: 'count',
           columns: layer.columns,
-          indexPatternId: state.currentIndexPatternId,
+          indexPattern: currentIndexPattern,
           layerId,
           suggestedPriority: undefined,
         });
 
         // let column know about count column
-        const column = buildColumnForOperationType({
-          index: 0,
+        const column = buildColumn({
           layerId,
           op: hasBucket,
-          indexPatternId: state.currentIndexPatternId,
+          indexPattern: currentIndexPattern,
           columns: {
             col2: countColumn,
           },
@@ -450,28 +449,25 @@ export function getIndexPatternDatasource({
 
         return [suggestion];
       } else if (state.indexPatterns[state.currentIndexPatternId].timeFieldName) {
-        const currentIndexPattern = state.indexPatterns[state.currentIndexPatternId];
         const dateField = currentIndexPattern.fields.find(
           f => f.name === currentIndexPattern.timeFieldName
         )!;
 
-        const column = buildColumnForOperationType({
-          index: 0,
+        const column = buildColumn({
           op: operations[0],
           columns: layer.columns,
           suggestedPriority: undefined,
           field,
-          indexPatternId: state.currentIndexPatternId,
+          indexPattern: currentIndexPattern,
           layerId,
         });
 
-        const dateColumn = buildColumnForOperationType({
-          index: 1,
+        const dateColumn = buildColumn({
           op: 'date_histogram',
           columns: layer.columns,
           suggestedPriority: undefined,
           field: dateField,
-          indexPatternId: state.currentIndexPatternId,
+          indexPattern: currentIndexPattern,
           layerId,
         });
 

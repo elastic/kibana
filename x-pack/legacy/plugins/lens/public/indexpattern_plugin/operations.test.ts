@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getOperationTypesForField, getPotentialColumns } from './operations';
+import { getOperationTypesForField, getPotentialOperations } from './operations';
 import { IndexPatternPrivateState } from './indexpattern';
 import { hasField } from './utils';
 
@@ -141,7 +141,7 @@ describe('getOperationTypesForField', () => {
     });
   });
 
-  describe('getPotentialColumns', () => {
+  describe('getPotentialOperations', () => {
     let state: IndexPatternPrivateState;
 
     beforeEach(() => {
@@ -173,62 +173,6 @@ describe('getOperationTypesForField', () => {
       };
     });
 
-    it('should include priority', () => {
-      const columns = getPotentialColumns({
-        fields: state.indexPatterns[state.currentIndexPatternId].fields,
-        suggestedPriority: 1,
-        layerId: 'first',
-        layer: state.layers.first,
-      });
-
-      expect(columns.every(col => col.suggestedPriority === 1)).toEqual(true);
-    });
-
-    it('should list operations by field for a regular index pattern', () => {
-      const columns = getPotentialColumns({
-        fields: state.indexPatterns[state.currentIndexPatternId].fields,
-        layerId: 'first',
-        layer: state.layers.first,
-      });
-
-      expect(
-        columns.map(col => [hasField(col) ? col.sourceField : '_documents_', col.operationType])
-      ).toMatchInlineSnapshot(`
-Array [
-  Array [
-    "bytes",
-    "min",
-  ],
-  Array [
-    "bytes",
-    "max",
-  ],
-  Array [
-    "bytes",
-    "avg",
-  ],
-  Array [
-    "_documents_",
-    "count",
-  ],
-  Array [
-    "bytes",
-    "sum",
-  ],
-  Array [
-    "source",
-    "terms",
-  ],
-  Array [
-    "timestamp",
-    "date_histogram",
-  ],
-  Array [
-    "_documents_",
-    "filter_ratio",
-  ],
-]
-`);
-    });
+    // TODO add tests for potential operations
   });
 });
