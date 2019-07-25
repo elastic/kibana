@@ -71,7 +71,7 @@ export default class ChoroplethLayer extends KibanaMapLayer {
   constructor(name, attribution, format, showAllShapes, meta, layerConfig, serviceSettings) {
 
     super();
-    this.serviceSettings = serviceSettings;
+    this._serviceSettings = serviceSettings;
     this._metrics = null;
     this._joinField = null;
     this._colorRamp = truncatedColorMaps[Object.keys(truncatedColorMaps)[0]].value;
@@ -183,7 +183,7 @@ CORS configuration of the server permits requests from the Kibana application on
 
   //This method is stubbed in the tests to avoid network request during unit tests.
   async _makeJsonAjaxCall() {
-    return this.serviceSettings.getJsonForRegionLayer(this._layerConfig);
+    return this._serviceSettings.getJsonForRegionLayer(this._layerConfig);
   }
 
   _invalidateJoin() {
