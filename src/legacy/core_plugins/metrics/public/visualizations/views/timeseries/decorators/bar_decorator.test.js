@@ -35,6 +35,7 @@ describe('src/legacy/core_plugins/metrics/public/visualizations/views/timeseries
       seriesGroupId: 'yaxis_main_group',
       name: 'Rome',
       stack: false,
+      timeZone: 'local',
     };
   });
 

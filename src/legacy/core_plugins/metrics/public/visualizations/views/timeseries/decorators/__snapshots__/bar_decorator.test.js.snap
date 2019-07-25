@@ -37,6 +37,7 @@ exports[`src/legacy/core_plugins/metrics/public/visualizations/views/timeseries/
   id="id:61ca57f1-469d-11e7-af02-69e470af7417:Rome"
   name="Rome"
   stackAsPercentage={false}
+  timeZone="local"
   xAccessor={0}
   xScaleType="time"
   yAccessors={
