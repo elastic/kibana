@@ -67,7 +67,8 @@ class JobDetailsUI extends Component {
         dataDescription,
         datafeed,
         counts,
-        modelSizeStats
+        modelSizeStats,
+        datafeedTimingStats
       } = extractJobDetails(job);
 
       const { intl } = this.props;
@@ -93,7 +94,7 @@ class JobDetailsUI extends Component {
           id: 'xpack.ml.jobsList.jobDetails.tabs.datafeedLabel',
           defaultMessage: 'Datafeed'
         }),
-        content: <JobDetailsPane sections={[datafeed]} />,
+        content: <JobDetailsPane sections={[datafeed, datafeedTimingStats]} />,
       }, {
         id: 'counts',
         name: intl.formatMessage({
