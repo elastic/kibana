@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { SavedObjectsClientContract, SavedObjectsSerializer } from 'src/core/server';
 import { fillPool } from './lib/fill_pool';
 import { Logger, TaskManagerLogger } from './lib/logger';
 import { addMiddlewareToChain, BeforeSaveMiddlewareParams, Middleware } from './lib/middleware';
@@ -13,7 +14,14 @@ import { SanitizedTaskDefinition, TaskDefinition, TaskDictionary } from './task'
 import { TaskPoller } from './task_poller';
 import { TaskPool } from './task_pool';
 import { TaskManagerRunner } from './task_runner';
-import { FetchOpts, FetchResult, RemoveResult, TaskStore } from './task_store';
+import { FetchOpts, FetchResult, TaskStore } from './task_store';
+
+export interface TaskManagerOpts {
+  kbnServer: any;
+  config: any;
+  savedObjectsRepository: SavedObjectsClientContract;
+  serializer: SavedObjectsSerializer;
+}
 
 /*
  * The TaskManager is the public interface into the task manager system. This glues together
@@ -46,9 +54,10 @@ export class TaskManager {
    * enabling the task manipulation methods, and beginning the background polling
    * mechanism.
    */
-  constructor(kbnServer: any, server: any, config: any) {
-    this.maxWorkers = config.get('xpack.task_manager.max_workers');
-    this.overrideNumWorkers = config.get('xpack.task_manager.override_num_workers');
+  constructor(opts: TaskManagerOpts) {
+    const { server } = opts.kbnServer;
+    this.maxWorkers = opts.config.get('xpack.task_manager.max_workers');
+    this.overrideNumWorkers = opts.config.get('xpack.task_manager.override_num_workers');
     this.definitions = {};
 
     const logger = new TaskManagerLogger((...args: any[]) => server.log(...args));
@@ -56,12 +65,11 @@ export class TaskManager {
     /* Kibana UUID needs to be pulled live (not cached), as it takes a long time
      * to initialize, and can change after startup */
     const store = new TaskStore({
+      serializer: opts.serializer,
+      savedObjectsRepository: opts.savedObjectsRepository,
       callCluster: server.plugins.elasticsearch.getCluster('admin').callWithInternalUser,
-      index: config.get('xpack.task_manager.index'),
-      maxAttempts: config.get('xpack.task_manager.max_attempts'),
-      supportedTypes: Object.keys(this.definitions),
-      logger,
-      getKibanaUuid: () => config.get('server.uuid'),
+      maxAttempts: opts.config.get('xpack.task_manager.max_attempts'),
+      definitions: this.definitions,
     });
     const pool = new TaskPool({
       logger,
@@ -70,7 +78,7 @@ export class TaskManager {
     const createRunner = (instance: ConcreteTaskInstance) =>
       new TaskManagerRunner({
         logger,
-        kbnServer,
+        kbnServer: opts.kbnServer,
         instance,
         store,
         definitions: this.definitions,
@@ -78,8 +86,7 @@ export class TaskManager {
       });
     const poller = new TaskPoller({
       logger,
-      pollInterval: config.get('xpack.task_manager.poll_interval'),
-      store,
+      pollInterval: opts.config.get('xpack.task_manager.poll_interval'),
       work(): Promise<void> {
         return fillPool(pool.run, store.fetchAvailableTasks, createRunner);
       },
@@ -89,25 +96,25 @@ export class TaskManager {
     this.store = store;
     this.poller = poller;
 
-    kbnServer.afterPluginsInit(async () => {
-      store.addSupportedTypes(Object.keys(this.definitions));
-      const startPoller = () => {
-        return poller
-          .start()
-          .then(() => {
-            this.isInitialized = true;
-          })
-          .catch((err: Error) => {
-            // FIXME: check the type of error to make sure it's actually an ES error
-            logger.warning(`PollError ${err.message}`);
+    opts.kbnServer.afterPluginsInit(() => {
+      // By this point, the plugins had their chance to register task definitions
+      // and we're good to start doing CRUD actions
+      this.isInitialized = true;
+      const startPoller = async () => {
+        await server.kibanaMigrator.awaitMigration();
+        try {
+          await poller.start();
+        } catch (err) {
+          // FIXME: check the type of error to make sure it's actually an ES error
+          logger.warning(`PollError ${err.message}`);
 
-            // rety again to initialize store and poller, using the timing of
-            // task_manager's configurable poll interval
-            const retryInterval = config.get('xpack.task_manager.poll_interval');
-            setTimeout(() => startPoller(), retryInterval);
-          });
+          // rety again to initialize store and poller, using the timing of
+          // task_manager's configurable poll interval
+          const retryInterval = opts.config.get('xpack.task_manager.poll_interval');
+          setTimeout(() => startPoller(), retryInterval);
+        }
       };
-      return startPoller();
+      startPoller();
     });
   }
 
@@ -180,7 +187,7 @@ export class TaskManager {
    * @param {string} id
    * @returns {Promise<RemoveResult>}
    */
-  public async remove(id: string): Promise<RemoveResult> {
+  public async remove(id: string): Promise<void> {
     this.assertInitialized('Tasks cannot be removed before task manager is initialized!');
     return this.store.remove(id);
   }
