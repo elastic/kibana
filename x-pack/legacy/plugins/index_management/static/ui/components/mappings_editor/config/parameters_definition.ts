@@ -19,6 +19,7 @@ export type ParameterName =
   | 'type'
   | 'store'
   | 'index'
+  | 'fielddata'
   | 'doc_values'
   | 'coerce'
   | 'ignore_malformed'
@@ -74,6 +75,14 @@ export const parametersDefinition: { [key in ParameterName]: Parameter } = {
   doc_values: {
     fieldConfig: {
       label: 'Doc values',
+      type: FIELD_TYPES.CHECKBOX,
+      defaultValue: true,
+    },
+    docs: 'https://www.elastic.co/guide/en/elasticsearch/reference/current/doc-values.html',
+  },
+  fielddata: {
+    fieldConfig: {
+      label: 'Fielddata',
       type: FIELD_TYPES.CHECKBOX,
       defaultValue: true,
     },

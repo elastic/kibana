@@ -95,6 +95,29 @@ export const PropertyEditor = ({
                 />
               </EuiFlexItem>
 
+              {/* Field sub type (if any) */}
+              {typeDefinition && typeDefinition.subTypes && (
+                <EuiFlexItem grow={false}>
+                  <UseField
+                    path={`${fieldPathPrefix}subType`}
+                    form={form}
+                    config={{
+                      ...parametersDefinition.type.fieldConfig,
+                      label: typeDefinition.subTypes.label,
+                    }}
+                    component={Field}
+                    componentProps={{
+                      fieldProps: {
+                        options: typeDefinition.subTypes.types.map(type => ({
+                          value: type,
+                          text: type,
+                        })),
+                      },
+                    }}
+                  />
+                </EuiFlexItem>
+              )}
+
               {/* Field configuration (if any) */}
               {typeDefinition &&
                 typeDefinition.configuration &&

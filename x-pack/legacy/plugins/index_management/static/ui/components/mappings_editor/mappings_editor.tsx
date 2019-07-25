@@ -18,6 +18,7 @@ import {
 import { schema } from './form.schema';
 import { PropertiesManager } from './components';
 import { propertiesArrayToObject, propertiesObjectToArray } from './helpers';
+import { dataTypesDefinition, getTypeFromSubType } from './config';
 
 interface Props {
   setGetDataHandler: (handler: () => Promise<{ isValid: boolean; data: Mappings }>) => void;
@@ -30,14 +31,44 @@ export interface Mappings {
   [key: string]: any;
 }
 
+const serializeProperties = (properties: any[]) =>
+  properties.map(prop => {
+    // If a subType is present, use it as type for ES
+    if ({}.hasOwnProperty.call(prop, 'subType')) {
+      prop.type = prop.subType;
+      delete prop.subType;
+    }
+    return prop;
+  });
+
+const deSerializeProperties = (properties: { [key: string]: any }) => {
+  Object.entries(properties).forEach(([name, prop]: [string, any]) => {
+    // Check if the type provided is a subType (e.g: "float" is a subType of the "numeric" type in the UI)
+    if (!(dataTypesDefinition as any)[prop.type]) {
+      const type = getTypeFromSubType(prop.type);
+      if (!type) {
+        throw new Error(
+          `Property type "${prop.type}" not recognized and no subType was found for it.`
+        );
+      }
+      prop.subType = prop.type;
+      prop.type = type;
+    }
+  });
+
+  return properties;
+};
+
 const serializer = (data: Record<string, unknown>): Record<string, unknown> => ({
   ...data,
-  properties: propertiesArrayToObject(data.properties as any[]),
+  properties: propertiesArrayToObject(serializeProperties(data.properties as any[])),
 });
 
 const deSerializer = (data: Record<string, unknown>): Record<string, unknown> => ({
   ...data,
-  properties: propertiesObjectToArray(data.properties as { [key: string]: any }),
+  properties: propertiesObjectToArray(
+    deSerializeProperties(data.properties as { [key: string]: any })
+  ),
 });
 
 export const MappingsEditor = ({

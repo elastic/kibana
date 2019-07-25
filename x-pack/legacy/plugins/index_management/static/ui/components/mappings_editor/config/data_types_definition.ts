@@ -8,8 +8,21 @@ import { ParameterName } from './parameters_definition';
 
 export type DataType = 'text' | 'keyword' | 'numeric' | 'object' | 'nested' | 'array';
 
+export type SubType = NumericType;
+
+export type NumericType =
+  | 'long'
+  | 'integer'
+  | 'short'
+  | 'byte'
+  | 'double'
+  | 'float'
+  | 'half_float'
+  | 'scaled_float';
+
 export interface DataTypeDefinition {
   label: string;
+  subTypes?: { label: string; types: SubType[] };
   configuration?: ParameterName[];
   basicParameters?: ParameterName[] | ParameterName[][];
   hasAdvancedParameters?: boolean;
@@ -19,7 +32,7 @@ export interface DataTypeDefinition {
 export const dataTypesDefinition: { [key in DataType]: DataTypeDefinition } = {
   text: {
     label: 'Text',
-    basicParameters: ['store', 'index', 'doc_values'],
+    basicParameters: ['store', 'index', 'fielddata'],
   },
   keyword: {
     label: 'Keyword',
@@ -27,6 +40,10 @@ export const dataTypesDefinition: { [key in DataType]: DataTypeDefinition } = {
   },
   numeric: {
     label: 'Numeric',
+    subTypes: {
+      label: 'Numeric type',
+      types: ['long', 'integer', 'short', 'byte', 'double', 'float', 'half_float', 'scaled_float'],
+    },
     basicParameters: [
       ['store', 'index', 'coerce', 'doc_values', 'ignore_malformed'],
       ['null_value', 'boost'],
@@ -44,3 +61,18 @@ export const dataTypesDefinition: { [key in DataType]: DataTypeDefinition } = {
     label: 'Array',
   },
 };
+
+const subTypesMapToType = Object.entries(dataTypesDefinition).reduce(
+  (acc, [type, definition]) => {
+    if ({}.hasOwnProperty.call(definition, 'subTypes')) {
+      definition.subTypes!.types.forEach(subType => {
+        acc[subType] = type;
+      });
+    }
+    return acc;
+  },
+  {} as Record<SubType, string>
+);
+
+export const getTypeFromSubType = (subType: SubType): DataType =>
+  subTypesMapToType[subType] as DataType;
