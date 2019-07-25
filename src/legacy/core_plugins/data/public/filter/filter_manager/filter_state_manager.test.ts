@@ -57,8 +57,6 @@ describe('filter_state_manager', () => {
     filterManager = new FilterManager(indexPatterns);
   });
 
-  afterEach(() => {});
-
   describe('app_state_undefined', () => {
     beforeEach(() => {
       // FilterStateManager is tested indirectly.
