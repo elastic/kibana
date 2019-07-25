@@ -64,7 +64,7 @@ export const PropertyEditor = ({
 
         return (
           <Fragment>
-            <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
+            <EuiFlexGroup justifyContent="spaceBetween">
               {/* Field name */}
               {isAnonymous !== true && (
                 <EuiFlexItem grow={false}>
