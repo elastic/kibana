@@ -352,8 +352,6 @@ const TimeseriesChartIntl = injectI18n(class TimeseriesChart extends React.Compo
       return;
     }
 
-    const setContextBrushExtent = this.setContextBrushExtent.bind(this);
-
     // Make appropriate selection in the context chart to trigger loading of the focus chart.
     let focusLoadFrom;
     let focusLoadTo;
@@ -381,7 +379,7 @@ const TimeseriesChartIntl = injectI18n(class TimeseriesChart extends React.Compo
     focusLoadTo = Math.min(focusLoadTo, contextXMax);
 
     if ((focusLoadFrom !== contextXMin) || (focusLoadTo !== contextXMax)) {
-      setContextBrushExtent(new Date(focusLoadFrom), new Date(focusLoadTo), true);
+      this.setContextBrushExtent(new Date(focusLoadFrom), new Date(focusLoadTo), true);
     } else {
       // Don't set the brush if the selection is the full context chart domain.
       this.setBrushVisibility(false);
@@ -1211,9 +1209,19 @@ const TimeseriesChartIntl = injectI18n(class TimeseriesChart extends React.Compo
 
   // Sets the extent of the brush on the context chart to the
   // supplied from and to Date objects.
-  setContextBrushExtent(from, to, fireEvent) {
+  setContextBrushExtent = (from, to, fireEvent) => {
     const brush = this.brush;
-    brush.extent([from, to]);
+    const brushExtent = brush.extent();
+
+    const newExtent = [from, to];
+    if (
+      newExtent[0].getTime() === brushExtent[0].getTime() &&
+      newExtent[1].getTime() === brushExtent[1].getTime()
+    ) {
+      return;
+    }
+
+    brush.extent(newExtent);
     brush(d3.select('.brush'));
     if (fireEvent) {
       brush.event(d3.select('.brush'));
@@ -1225,8 +1233,6 @@ const TimeseriesChartIntl = injectI18n(class TimeseriesChart extends React.Compo
       timefilter,
       zoomTo
     } = this.props;
-
-    const setContextBrushExtent = this.setContextBrushExtent.bind(this);
 
     const bounds = timefilter.getActiveBounds();
     const minBoundsMs = bounds.min.valueOf();
@@ -1242,7 +1248,7 @@ const TimeseriesChartIntl = injectI18n(class TimeseriesChart extends React.Compo
       to = Math.min(minBoundsMs + millis, maxBoundsMs);
     }
 
-    setContextBrushExtent(new Date(from), new Date(to), true);
+    this.setContextBrushExtent(new Date(from), new Date(to), true);
   }
 
   showFocusChartTooltip(marker, circle) {

@@ -197,8 +197,6 @@ export const TimeSeriesExplorer = injectI18n(
     previousShowForecast = undefined;
     previousShowModelBounds = undefined;
 
-    focusChartDataLoading = false;
-
     tableFilter = (field, value, operator) => {
       const { entities } = this.state;
 
@@ -227,10 +225,6 @@ export const TimeSeriesExplorer = injectI18n(
         zoomFrom,
         zoomTo,
       } = this.state;
-
-      if (this.focusChartDataLoading === true) {
-        return;
-      }
 
       // Save state of zoom (adds to URL) if it is different to the default.
       if ((contextChartData === undefined || contextChartData.length === 0) &&
@@ -304,7 +298,6 @@ export const TimeSeriesExplorer = injectI18n(
             showModelBoundsCheckbox: (modelPlotEnabled === true) && (refreshFocusData.focusChartData.length > 0),
           });
           console.log('Time series explorer focus chart data set:', refreshFocusData.focusChartData);
-          this.focusChartDataLoading = false;
         });
 
         // Load the data for the anomalies table.
