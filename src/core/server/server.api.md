@@ -14,7 +14,6 @@ import { Observable } from 'rxjs';
 import { Request } from 'hapi';
 import { ResponseObject } from 'hapi';
 import { ResponseToolkit } from 'hapi';
-import { Schema } from '@kbn/config-schema';
 import { Server } from 'hapi';
 import { Type } from '@kbn/config-schema';
 import { TypeOf } from '@kbn/config-schema';
@@ -29,17 +28,18 @@ export type APICaller = (endpoint: string, clientParams: Record<string, any>, op
 export type AuthenticationHandler = (request: KibanaRequest, t: AuthToolkit) => AuthResult | Promise<AuthResult>;
 
 // @public
-export type AuthHeaders = Record<string, string>;
+export type AuthHeaders = Record<string, string | string[]>;
 
 // @public
-export interface AuthResultData {
-    headers: AuthHeaders;
-    state: Record<string, any>;
+export interface AuthResultParams {
+    requestHeaders?: AuthHeaders;
+    responseHeaders?: AuthHeaders;
+    state?: Record<string, any>;
 }
 
 // @public
 export interface AuthToolkit {
-    authenticated: (data?: Partial<AuthResultData>) => AuthResult;
+    authenticated: (data?: AuthResultParams) => AuthResult;
     redirected: (url: string) => AuthResult;
     rejected: (error: Error, options?: {
         statusCode?: number;
