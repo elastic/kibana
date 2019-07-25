@@ -194,6 +194,7 @@
     "mkdirp": "0.5.1",
     "moment": "^2.20.1",
     "moment-timezone": "^0.5.14",
+    "monaco-editor": "0.17.1",
     "mustache": "2.3.2",
     "ngreact": "0.5.1",
     "no-ui-slider": "1.2.0",
