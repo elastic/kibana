@@ -185,6 +185,15 @@ export function GisPageProvider({ getService, getPageObjects }) {
       await testSubjects.click(`mapListingTitleLink-${name.split(' ').join('-')}`);
     }
 
+    async getHits() {
+      await inspector.open();
+      await inspector.openInspectorRequestsView();
+      const requestStats = await inspector.getTableData();
+      const hits = this.getInspectorStatRowHit(requestStats, 'Hits');
+      await inspector.close();
+      return hits;
+    }
+
     async gotoMapListingPage() {
       log.debug('gotoMapListingPage');
       const onPage = await this.onMapListingPage();

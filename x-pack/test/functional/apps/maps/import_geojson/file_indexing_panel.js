@@ -59,7 +59,7 @@ export default function ({ getService, getPageObjects }) {
       expect(layerAddReady).to.be(true);
     });
 
-    it('GeoJson file layer removed, ES search layer added', async () => {
+    it('should load geojson file as ES document source layer', async () => {
       const indexName = await indexPoint();
       const layerAddReady = await PageObjects.maps.importLayerReadyForAdd();
       expect(layerAddReady).to.be(true);
@@ -70,6 +70,9 @@ export default function ({ getService, getPageObjects }) {
 
       const newIndexedLayerExists = await PageObjects.maps.doesLayerExist(indexName);
       expect(newIndexedLayerExists).to.be(true);
+
+      const hits = await PageObjects.maps.getHits();
+      expect(hits).to.equal('1');
     });
 
     it('should remove index layer on cancel', async () => {

@@ -41,10 +41,6 @@ export default function ({ getPageObjects }) {
       expect(filePickerLoadedFile).to.be(true);
     });
 
-    afterEach(async () => {
-      await PageObjects.maps.cancelLayerAdd();
-    });
-
     it('should close & remove preview layer on clicking "Cancel" after uploading file',
       async () => {
         await PageObjects.maps.cancelLayerAdd();
