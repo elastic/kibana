@@ -18,10 +18,13 @@ export class Plugin {
   constructor(initializerContext: PluginInitializerContext) {}
 
   public start(core: CoreStart, plugins: { embeddable: EmbeddablePlugin }) {
+    const dateFormat = core.uiSettings.get('dateFormat');
+    const commonlyUsedRanges = core.uiSettings.get('timepicker:quickRanges') as CommonlyUsedRange[];
     plugins.embeddable.addAction(
       new CustomTimeRangeAction({
         openModal: core.overlays.openModal,
-        dateFormat: core.uiSettings.get('dateFormat'),
+        dateFormat,
+        commonlyUsedRanges,
       })
     );
 
@@ -33,7 +36,8 @@ export class Plugin {
     plugins.embeddable.addAction(
       new CustomTimeRangeBadge({
         openModal: core.overlays.openModal,
-        dateFormat: core.uiSettings.get('dateFormat'),
+        dateFormat,
+        commonlyUsedRanges,
       })
     );
     plugins.embeddable.attachAction({

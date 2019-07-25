@@ -23,11 +23,13 @@ import { i18n } from '@kbn/i18n';
 import { Embeddable } from '../../../../../src/legacy/core_plugins/embeddable_api/public';
 import { TimeRangeInput } from './custom_time_range_action';
 import { doesInheritTimeRange } from './does_inherit_time_range';
+import { CommonlyUsedRange } from './types';
 
 interface CustomizeTimeRangeProps {
   embeddable: Embeddable<TimeRangeInput>;
   onClose: () => void;
   dateFormat?: string;
+  commonlyUsedRanges: CommonlyUsedRange[];
 }
 
 interface State {
@@ -116,6 +118,15 @@ export class CustomizeTimeRangeModal extends Component<CustomizeTimeRangeProps, 
               onTimeChange={this.onTimeChange}
               showUpdateButton={false}
               dateFormat={this.props.dateFormat}
+              commonlyUsedRanges={this.props.commonlyUsedRanges.map(
+                ({ from, to, display }: { from: string; to: string; display: string }) => {
+                  return {
+                    start: from,
+                    end: to,
+                    label: display,
+                  };
+                }
+              )}
             />
           </EuiFormRow>
         </EuiModalBody>

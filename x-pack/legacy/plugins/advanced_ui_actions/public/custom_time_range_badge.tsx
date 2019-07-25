@@ -23,6 +23,7 @@ import { VISUALIZE_EMBEDDABLE_TYPE } from '../../../../../src/legacy/core_plugin
 import { CustomizeTimeRangeModal } from './customize_time_range_modal';
 import { doesInheritTimeRange } from './does_inherit_time_range';
 import { OpenModal } from './shim/types';
+import { CommonlyUsedRange } from './types';
 
 export const CUSTOM_TIME_RANGE_BADGE = 'CUSTOM_TIME_RANGE_BADGE';
 
@@ -46,12 +47,22 @@ export class CustomTimeRangeBadge extends Action {
   public readonly type = CUSTOM_TIME_RANGE_BADGE;
   private openModal: OpenModal;
   private dateFormat: string;
+  private commonlyUsedRanges: CommonlyUsedRange[];
 
-  constructor({ openModal, dateFormat }: { openModal: OpenModal; dateFormat: string }) {
+  constructor({
+    openModal,
+    dateFormat,
+    commonlyUsedRanges,
+  }: {
+    openModal: OpenModal;
+    dateFormat: string;
+    commonlyUsedRanges: CommonlyUsedRange[];
+  }) {
     super(CUSTOM_TIME_RANGE_BADGE);
     this.order = 7;
     this.openModal = openModal;
     this.dateFormat = dateFormat;
+    this.commonlyUsedRanges = commonlyUsedRanges;
   }
 
   public getDisplayName({ embeddable }: ActionContext<Embeddable<TimeRangeInput>>) {
@@ -94,6 +105,7 @@ export class CustomTimeRangeBadge extends Action {
           onClose={() => modalSession.close()}
           embeddable={embeddable}
           dateFormat={this.dateFormat}
+          commonlyUsedRanges={this.commonlyUsedRanges}
         />
       );
     }

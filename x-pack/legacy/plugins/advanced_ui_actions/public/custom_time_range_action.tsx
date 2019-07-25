@@ -21,6 +21,7 @@ import { VISUALIZE_EMBEDDABLE_TYPE } from '../../../../../src/legacy/core_plugin
 
 import { CustomizeTimeRangeModal } from './customize_time_range_modal';
 import { OpenModal } from './shim/types';
+import { CommonlyUsedRange } from './types';
 
 export const CUSTOM_TIME_RANGE = 'CUSTOM_TIME_RANGE';
 
@@ -44,12 +45,22 @@ export class CustomTimeRangeAction extends Action {
   public readonly type = CUSTOM_TIME_RANGE;
   private openModal: OpenModal;
   private dateFormat?: string;
+  private commonlyUsedRanges: CommonlyUsedRange[];
 
-  constructor({ openModal, dateFormat }: { openModal: OpenModal; dateFormat?: string }) {
+  constructor({
+    openModal,
+    dateFormat,
+    commonlyUsedRanges,
+  }: {
+    openModal: OpenModal;
+    dateFormat: string;
+    commonlyUsedRanges: CommonlyUsedRange[];
+  }) {
     super(CUSTOM_TIME_RANGE);
     this.order = 7;
     this.openModal = openModal;
     this.dateFormat = dateFormat;
+    this.commonlyUsedRanges = commonlyUsedRanges;
   }
 
   public getDisplayName() {
@@ -88,6 +99,7 @@ export class CustomTimeRangeAction extends Action {
           onClose={() => modalSession.close()}
           embeddable={embeddable}
           dateFormat={this.dateFormat}
+          commonlyUsedRanges={this.commonlyUsedRanges}
         />
       );
     }
