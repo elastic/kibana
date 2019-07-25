@@ -1,8 +1,8 @@
 {
-    "name": "Dashboard",
+    "name": "Summary",
     "id": "workpad-6181471b-147d-4397-a0d3-1c0f1600fa12",
-    "displayName": "Dashboard",
-    "help": "Infographic-style dashboard with live charts",
+    "displayName": "Summary",
+    "help": "Infographic-style report with live charts",
     "tags": ["report"],
     "width": 1100,
     "height": 2570,
