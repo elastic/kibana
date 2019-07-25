@@ -19,6 +19,8 @@
 import { isEqual, cloneDeep } from 'lodash';
 import { Adapters } from 'ui/inspector';
 import * as Rx from 'rxjs';
+import { RenderCompleteHelper } from 'ui/render_complete';
+import { EventEmitter } from 'events';
 import { IContainer } from '../containers';
 import { IEmbeddable, EmbeddableInput, EmbeddableOutput } from './i_embeddable';
 import { ViewMode } from '../types';
@@ -26,6 +28,11 @@ import { ViewMode } from '../types';
 function getPanelTitle(input: EmbeddableInput, output: EmbeddableOutput) {
   return input.hidePanelTitles ? '' : input.title === undefined ? output.defaultTitle : input.title;
 }
+
+const RENDER_COMPLETE_EVENT = 'render_complete';
+const DATA_SHARED_ITEM = 'data-shared-item';
+const LOADING_ATTRIBUTE = 'data-loading';
+const RENDERING_COUNT_ATTRIBUTE = 'data-rendering-count';
 
 export abstract class Embeddable<
   TEmbeddableInput extends EmbeddableInput = EmbeddableInput,
@@ -41,6 +48,11 @@ export abstract class Embeddable<
 
   private readonly input$: Rx.BehaviorSubject<TEmbeddableInput>;
   private readonly output$: Rx.BehaviorSubject<TEmbeddableOutput>;
+
+  private firstRenderComplete: Promise<void>;
+  private renderCompleteHelper?: RenderCompleteHelper;
+  private listeners = new EventEmitter();
+  private element?: HTMLElement | Element;
 
   // Listener to parent changes, if this embeddable exists in a parent, in order
   // to update input when the parent changes.
@@ -72,6 +84,11 @@ export abstract class Embeddable<
         this.onResetInput(newInput);
       });
     }
+
+    // Listen to the first RENDER_COMPLETE_EVENT to resolve this promise
+    this.firstRenderComplete = new Promise(resolve => {
+      this.listeners.once(RENDER_COMPLETE_EVENT, resolve);
+    });
   }
 
   public getIsContainer(): this is IContainer {
@@ -132,7 +149,48 @@ export abstract class Embeddable<
     if (this.destoyed) {
       throw new Error('Embeddable has been destroyed');
     }
+
+    this.element = domNode;
+    this.element.setAttribute(LOADING_ATTRIBUTE, '');
+    this.element.setAttribute(DATA_SHARED_ITEM, '');
+    this.element.setAttribute(RENDERING_COUNT_ATTRIBUTE, '0');
+    this.element.addEventListener('renderComplete', this.onRenderCompleteListener);
+    this.renderCompleteHelper = new RenderCompleteHelper(this.element);
+
     return;
+  }
+
+  /**
+   * Returns a promise, that will resolve (without a value) once the first rendering of
+   * the visualization has finished. If you want to listen to consecutive rendering
+   * events, look into the `addRenderCompleteListener` method.
+   *
+   * @returns Promise, that resolves as soon as the visualization is done rendering
+   *    for the first time.
+   */
+  public whenFirstRenderComplete(): Promise<void> {
+    return this.firstRenderComplete;
+  }
+
+  /**
+   * Adds a listener to be called whenever the visualization finished rendering.
+   * This can be called multiple times, when the visualization rerenders, e.g. due
+   * to new data.
+   *
+   * @param {function} listener The listener to be notified about complete renders.
+   */
+  public addRenderCompleteListener(listener: () => void) {
+    this.listeners.addListener(RENDER_COMPLETE_EVENT, listener);
+  }
+
+  /**
+   * Removes a previously registered render complete listener from this handler.
+   * This listener will no longer be called when the visualization finished rendering.
+   *
+   * @param {function} listener The listener to remove from this handler.
+   */
+  public removeRenderCompleteListener(listener: () => void) {
+    this.listeners.removeListener(RENDER_COMPLETE_EVENT, listener);
   }
 
   /**
@@ -150,6 +208,12 @@ export abstract class Embeddable<
    */
   public destroy(): void {
     this.destoyed = true;
+    if (this.renderCompleteHelper) {
+      this.renderCompleteHelper.destroy();
+    }
+    if (this.element) {
+      this.element.removeEventListener('renderComplete', this.onRenderCompleteListener);
+    }
     if (this.parentSubscription) {
       this.parentSubscription.unsubscribe();
     }
@@ -188,4 +252,18 @@ export abstract class Embeddable<
 
     this.onResetInput(newInput);
   }
+
+  private incrementRenderingCount = () => {
+    if (!this.element) return;
+    const renderingCount = Number(this.element.getAttribute(RENDERING_COUNT_ATTRIBUTE) || 0);
+    this.element.setAttribute(RENDERING_COUNT_ATTRIBUTE, `${renderingCount + 1}`);
+  };
+
+  private onRenderCompleteListener = () => {
+    this.listeners.emit(RENDER_COMPLETE_EVENT);
+    if (this.element) {
+      this.element.removeAttribute(LOADING_ATTRIBUTE);
+      this.incrementRenderingCount();
+    }
+  };
 }

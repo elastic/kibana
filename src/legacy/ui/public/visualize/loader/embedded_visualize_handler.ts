@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import { EventEmitter } from 'events';
 import { debounce, forEach, get } from 'lodash';
 import * as Rx from 'rxjs';
 import { share } from 'rxjs/operators';
@@ -29,7 +28,6 @@ import { Inspector } from '../../inspector';
 import { Adapters } from '../../inspector/types';
 import { PersistedState } from '../../persisted_state';
 import { IPrivate } from '../../private';
-import { RenderCompleteHelper } from '../../render_complete';
 import { AppState } from '../../state_management/app_state';
 import { timefilter } from '../../timefilter';
 import { RequestHandlerParams, Vis } from '../../vis';
@@ -57,11 +55,6 @@ interface EmbeddedVisualizeHandlerParams extends VisualizeLoaderParams {
   pipelineDataLoader?: boolean;
 }
 
-const RENDER_COMPLETE_EVENT = 'render_complete';
-const DATA_SHARED_ITEM = 'data-shared-item';
-const LOADING_ATTRIBUTE = 'data-loading';
-const RENDERING_COUNT_ATTRIBUTE = 'data-rendering-count';
-
 /**
  * A handler to the embedded visualization. It offers several methods to interact
  * with the visualization.
@@ -82,9 +75,6 @@ export class EmbeddedVisualizeHandler {
   private destroyed: boolean = false;
   private pipelineDataLoader: boolean = false;
 
-  private listeners = new EventEmitter();
-  private firstRenderComplete: Promise<void>;
-  private renderCompleteHelper: RenderCompleteHelper;
   private shouldForceNextFetch: boolean = false;
   private debouncedFetchAndRender = debounce(() => {
     if (this.destroyed) {
@@ -136,18 +126,6 @@ export class EmbeddedVisualizeHandler {
     };
 
     this.pipelineDataLoader = pipelineDataLoader;
-
-    // Listen to the first RENDER_COMPLETE_EVENT to resolve this promise
-    this.firstRenderComplete = new Promise(resolve => {
-      this.listeners.once(RENDER_COMPLETE_EVENT, resolve);
-    });
-
-    element.setAttribute(LOADING_ATTRIBUTE, '');
-    element.setAttribute(DATA_SHARED_ITEM, '');
-    element.setAttribute(RENDERING_COUNT_ATTRIBUTE, '0');
-
-    element.addEventListener('renderComplete', this.onRenderCompleteListener);
-
     this.autoFetch = autoFetch;
     this.appState = appState;
     this.vis = vis;
@@ -183,7 +161,6 @@ export class EmbeddedVisualizeHandler {
       ? new PipelineDataLoader(vis)
       : new VisualizeDataLoader(vis, Private);
     const visFilters: any = Private(VisFiltersProvider);
-    this.renderCompleteHelper = new RenderCompleteHelper(element);
     this.inspectorAdapters = this.getActiveInspectorAdapters();
     this.vis.openInspector = this.openInspector;
     this.vis.hasInspector = this.hasInspector;
@@ -266,10 +243,8 @@ export class EmbeddedVisualizeHandler {
     }
     this.vis.removeListener('reload', this.reload);
     this.vis.removeListener('update', this.handleVisUpdate);
-    this.element.removeEventListener('renderComplete', this.onRenderCompleteListener);
     this.uiState.off('change', this.onUiStateChange);
     visualizationLoader.destroy(this.element);
-    this.renderCompleteHelper.destroy();
     if (this.handlers.destroyFn) {
       this.handlers.destroyFn();
     }
@@ -322,54 +297,10 @@ export class EmbeddedVisualizeHandler {
   };
 
   /**
-   * Returns a promise, that will resolve (without a value) once the first rendering of
-   * the visualization has finished. If you want to listen to consecutive rendering
-   * events, look into the `addRenderCompleteListener` method.
-   *
-   * @returns Promise, that resolves as soon as the visualization is done rendering
-   *    for the first time.
-   */
-  public whenFirstRenderComplete(): Promise<void> {
-    return this.firstRenderComplete;
-  }
-
-  /**
-   * Adds a listener to be called whenever the visualization finished rendering.
-   * This can be called multiple times, when the visualization rerenders, e.g. due
-   * to new data.
-   *
-   * @param {function} listener The listener to be notified about complete renders.
-   */
-  public addRenderCompleteListener(listener: () => void) {
-    this.listeners.addListener(RENDER_COMPLETE_EVENT, listener);
-  }
-
-  /**
-   * Removes a previously registered render complete listener from this handler.
-   * This listener will no longer be called when the visualization finished rendering.
-   *
-   * @param {function} listener The listener to remove from this handler.
-   */
-  public removeRenderCompleteListener(listener: () => void) {
-    this.listeners.removeListener(RENDER_COMPLETE_EVENT, listener);
-  }
-
-  /**
    * Force the fetch of new data and renders the chart again.
    */
   public reload = () => {
     this.fetchAndRender(true);
-  };
-
-  private incrementRenderingCount = () => {
-    const renderingCount = Number(this.element.getAttribute(RENDERING_COUNT_ATTRIBUTE) || 0);
-    this.element.setAttribute(RENDERING_COUNT_ATTRIBUTE, `${renderingCount + 1}`);
-  };
-
-  private onRenderCompleteListener = () => {
-    this.listeners.emit(RENDER_COMPLETE_EVENT);
-    this.element.removeAttribute(LOADING_ATTRIBUTE);
-    this.incrementRenderingCount();
   };
 
   private onUiStateChange = () => {
@@ -422,7 +353,6 @@ export class EmbeddedVisualizeHandler {
    */
   private fetchAndRender = (forceFetch = false): void => {
     this.shouldForceNextFetch = forceFetch || this.shouldForceNextFetch;
-    this.element.setAttribute(LOADING_ATTRIBUTE, '');
     this.debouncedFetchAndRender();
   };
 

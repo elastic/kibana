@@ -20,7 +20,7 @@
 const attributeName = 'data-render-complete';
 
 export class RenderCompleteHelper {
-  constructor(private readonly element: HTMLElement) {
+  constructor(private readonly element: HTMLElement | Element) {
     this.setup();
   }
 
