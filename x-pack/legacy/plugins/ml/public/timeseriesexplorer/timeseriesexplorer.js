@@ -1101,13 +1101,13 @@ export const TimeSeriesExplorer = injectI18n(
               {chartDetails.entityData.count !== 1 && (
                 <span className="entity-count-text">
                   {chartDetails.entityData.entities.map((countData, i) => {
-                    const msg =
-                      '{openBrace}{cardinalityValue} distinct {fieldName} {cardinality, plural, one {} other { values}}{closeBrace}';
                     return (
                       <FormattedMessage
                         key={countData.fieldName}
                         id="xpack.ml.timeSeriesExplorer.countDataInChartDetailsDescription"
-                        defaultMessage={msg}
+                        defaultMessage={
+                          '{openBrace}{cardinalityValue} distinct {fieldName} {cardinality, plural, one {} other { values}}{closeBrace}'
+                        }
                         values={{
                           openBrace: (i === 0) ? '(' : '',
                           closeBrace: (i === (chartDetails.entityData.entities.length - 1)) ? ')' : '',
