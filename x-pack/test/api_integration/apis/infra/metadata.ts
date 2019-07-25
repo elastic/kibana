@@ -96,6 +96,10 @@ const metadataTests: KbnTestProvider = ({ getService }) => {
                   },
                   provider: 'gcp',
                   availability_zone: 'europe-west1-c',
+                  machine: {
+                    __typename: 'InfraNodeCloudMachine',
+                    type: 'n1-standard-4',
+                  },
                   project: {
                     id: 'elastic-observability',
                     __typename: 'InfraNodeCloudProject',
@@ -150,6 +154,10 @@ const metadataTests: KbnTestProvider = ({ getService }) => {
                   },
                   provider: 'gcp',
                   availability_zone: 'europe-west1-c',
+                  machine: {
+                    __typename: 'InfraNodeCloudMachine',
+                    type: 'n1-standard-4',
+                  },
                   project: {
                     id: 'elastic-observability',
                     __typename: 'InfraNodeCloudProject',
@@ -205,6 +213,10 @@ const metadataTests: KbnTestProvider = ({ getService }) => {
                   },
                   provider: 'gcp',
                   availability_zone: 'europe-west1-c',
+                  machine: {
+                    __typename: 'InfraNodeCloudMachine',
+                    type: 'n1-standard-4',
+                  },
                   project: {
                     id: 'elastic-observability',
                     __typename: 'InfraNodeCloudProject',
