@@ -88,11 +88,11 @@ export const JobDetails: FC = () => {
   const advancedDetails: ListItems[] = [
     {
       title: 'Enable model plot',
-      description: <EuiSwitch disabled={true} checked={jobCreator.modelPlot} />,
+      description: jobCreator.modelPlot ? 'True' : 'False',
     },
     {
       title: 'Use dedicated index',
-      description: <EuiSwitch disabled={true} checked={jobCreator.useDedicatedIndex} />,
+      description: jobCreator.useDedicatedIndex ? 'True' : 'False',
     },
     {
       title: 'Model memory limit',
