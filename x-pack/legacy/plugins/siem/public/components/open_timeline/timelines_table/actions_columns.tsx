@@ -4,20 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiButtonIcon, EuiToolTip, EuiIcon } from '@elastic/eui';
+import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import * as React from 'react';
-import styled from 'styled-components';
 
 import { ACTION_COLUMN_WIDTH, PositionedIcon } from './common_styles';
 import { DeleteTimelines, OnOpenTimeline, OpenTimelineResult } from '../types';
 import { DeleteTimelineModalButton } from '../delete_timeline_modal';
 
 import * as i18n from '../translations';
-
-const HeaderIcon = styled(EuiIcon)`
-  position: relative;
-  left: 9px;
-`;
 
 /**
  * Returns the action columns (e.g. delete, open duplicate timeline)
@@ -32,12 +26,7 @@ export const getActionsColumns = ({
   showDeleteAction: boolean;
 }) => {
   const deleteTimelineColumn = {
-    align: 'right',
-    name: (
-      <EuiToolTip content={i18n.DELETE}>
-        <HeaderIcon data-test-subj="delete-header-icon" size="s" color="subdued" type="trash" />
-      </EuiToolTip>
-    ),
+    align: 'center',
     field: 'savedObjectId',
     render: (savedObjectId: string, { title }: OpenTimelineResult) => (
       <PositionedIcon>
@@ -53,12 +42,7 @@ export const getActionsColumns = ({
   };
 
   const openAsDuplicateColumn = {
-    align: 'right',
-    name: (
-      <EuiToolTip content={i18n.OPEN_AS_DUPLICATE}>
-        <HeaderIcon data-test-subj="duplicate-header-icon" size="s" color="subdued" type="copy" />
-      </EuiToolTip>
-    ),
+    align: 'center',
     field: 'savedObjectId',
     render: (savedObjectId: string, timelineResult: OpenTimelineResult) => (
       <PositionedIcon>
