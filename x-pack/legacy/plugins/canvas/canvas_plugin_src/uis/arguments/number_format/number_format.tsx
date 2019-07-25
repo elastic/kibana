@@ -33,16 +33,15 @@ export const NumberFormatArgInput: FunctionComponent<Props> = ({
   argValue,
   argId,
 }) => {
-  numberFormats.push({ value: '', text: 'Custom' });
+  const formatOptions = numberFormats.concat({ value: '', text: 'Custom' });
   const handleTextChange = (ev: ChangeEvent<HTMLInputElement>) => onValueChange(ev.target.value);
-
   const handleSelectChange = (ev: ChangeEvent<HTMLSelectElement>) => {
-    const { value } = numberFormats[ev.target.selectedIndex];
+    const { value } = formatOptions[ev.target.selectedIndex];
     return onValueChange(value);
   };
 
   // checks if the argValue is one of the preset formats
-  const isCustomFormat = !argValue || !numberFormats.map(({ value }) => value).includes(argValue);
+  const isCustomFormat = !argValue || !formatOptions.map(({ value }) => value).includes(argValue);
 
   return (
     <Fragment>
@@ -50,7 +49,7 @@ export const NumberFormatArgInput: FunctionComponent<Props> = ({
         compressed
         id={argId}
         value={isCustomFormat ? '' : argValue}
-        options={numberFormats}
+        options={formatOptions}
         onChange={handleSelectChange}
       />
       {isCustomFormat && (
