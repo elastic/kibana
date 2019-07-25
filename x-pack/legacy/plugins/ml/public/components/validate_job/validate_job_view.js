@@ -242,6 +242,7 @@ class ValidateJob extends Component {
     const isCurrentJobConfig = (this.props.isCurrentJobConfig !== true) ? false : true;
     const isDisabled = (this.props.isDisabled !== true) ? false : true;
     const embedded = (this.props.embedded === true);
+    const idFilterList = this.props.idFilterList || [];
 
     return (
       <Fragment>
@@ -271,9 +272,11 @@ class ValidateJob extends Component {
                 values={{ title: this.state.title }}
               />}
             >
-              {this.state.data.messages.map(
-                (m, i) => <Callout key={`${m.id}_${i}`} message={m} />
-              )}
+              {
+                this.state.data.messages
+                  .filter(m => idFilterList.includes(m.id) === false)
+                  .map((m, i) => <Callout key={`${m.id}_${i}`} message={m} />)
+              }
               <EuiText>
                 <FormattedMessage
                   id="xpack.ml.validateJob.modal.jobValidationDescriptionText"
@@ -303,9 +306,11 @@ class ValidateJob extends Component {
         }
         {embedded === true &&
           <div>
-            {this.state.data.messages.map(
-              (m, i) => <Callout key={`${m.id}_${i}`} message={m} />
-            )}
+            {
+              this.state.data.messages
+                .filter(m => idFilterList.includes(m.id) === false)
+                .map((m, i) => <Callout key={`${m.id}_${i}`} message={m} />)
+            }
           </div>
         }
       </Fragment>
@@ -322,6 +327,7 @@ ValidateJob.propTypes = {
   mlJobService: PropTypes.object.isRequired,
   embedded: PropTypes.bool,
   setIsValid: PropTypes.func,
+  idFilterList: PropTypes.array,
 };
 
 export { ValidateJob };

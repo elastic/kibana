@@ -16,7 +16,6 @@ import { AggSelect, DropDownLabel, DropDownProps, createLabel } from '../agg_sel
 import { newJobCapsService } from '../../../../../../../services/new_job_capabilities_service';
 import { AggFieldPair } from '../../../../../../../../common/types/fields';
 import { AnomalyChart, CHART_TYPE } from '../../../charts/anomaly_chart';
-import { JobProgress } from '../job_progress';
 
 interface Props {
   isActive: boolean;
@@ -50,7 +49,6 @@ export const SingleMetricDetectors: FC<Props> = ({ isActive, setIsValid }) => {
   const [anomalyData, setAnomalyData] = useState<Anomaly[]>([]);
   const [start, setStart] = useState(jobCreator.start);
   const [end, setEnd] = useState(jobCreator.end);
-  const [progress, setProgress] = useState(resultsLoader.progress);
 
   function detectorChangeHandler(selectedOptionsIn: DropDownLabel[]) {
     setSelectedOptions(selectedOptionsIn);
@@ -77,7 +75,6 @@ export const SingleMetricDetectors: FC<Props> = ({ isActive, setIsValid }) => {
 
   useEffect(() => {
     // subscribe to progress and results
-    jobCreator.subscribeToProgress(setProgress);
     const subscription = resultsLoader.subscribeToResults(setResultsWrapper);
     return () => {
       subscription.unsubscribe();
@@ -137,7 +134,6 @@ export const SingleMetricDetectors: FC<Props> = ({ isActive, setIsValid }) => {
             height="300px"
             width="100%"
           />
-          {isActive === false && <JobProgress progress={progress} />}
         </Fragment>
       )}
     </Fragment>

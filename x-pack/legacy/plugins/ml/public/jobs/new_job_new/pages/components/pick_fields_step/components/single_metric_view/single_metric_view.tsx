@@ -12,7 +12,7 @@ import { SingleMetricSettings } from './settings';
 
 interface Props {
   isActive: boolean;
-  setCanProceed: (proceed: boolean) => void;
+  setCanProceed?: (proceed: boolean) => void;
 }
 
 export const SingleMetricView: FC<Props> = ({ isActive, setCanProceed }) => {
@@ -20,7 +20,9 @@ export const SingleMetricView: FC<Props> = ({ isActive, setCanProceed }) => {
   const [settingsValid, setSettingsValid] = useState(false);
 
   useEffect(() => {
-    setCanProceed(metricsValid && settingsValid);
+    if (typeof setCanProceed === 'function') {
+      setCanProceed(metricsValid && settingsValid);
+    }
   }, [metricsValid, settingsValid]);
 
   return (

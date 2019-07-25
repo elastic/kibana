@@ -6,7 +6,7 @@
 
 import React, { FC, useContext, useEffect, Fragment } from 'react';
 
-import { EuiPage, EuiPageBody, EuiPageContentBody, EuiSpacer } from '@elastic/eui';
+import { EuiPage, EuiPageBody, EuiPageContentBody } from '@elastic/eui';
 import { Wizard } from './wizard';
 import {
   jobCreatorFactory,
@@ -93,7 +93,6 @@ export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
       <EuiPage style={{ backgroundColor: '#FFF' }}>
         <EuiPageBody>
           <EuiPageContentBody>
-            <EuiSpacer size="l" />
             <Wizard
               jobCreator={jobCreator}
               chartLoader={chartLoader}

@@ -5,32 +5,27 @@
  */
 
 import React, { Fragment, FC, useContext, useState, useEffect } from 'react';
-import { EuiButton, EuiButtonEmpty, EuiHorizontalRule } from '@elastic/eui';
+import { EuiButton, EuiButtonEmpty, EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
 import { WizardNav } from '../wizard_nav';
 import { WIZARD_STEPS, StepProps } from '../step_types';
 import { JobCreatorContext } from '../job_creator_context';
-import { KibanaContext, isKibanaContext } from '../../../../../data_frame/common/kibana_context';
 import { mlJobService } from '../../../../../services/job_service';
 import { JsonFlyout } from './json_flyout';
 import { isSingleMetricJobCreator } from '../../../common/job_creator';
+import { JobDetails } from './job_details';
+import { DetectorChart } from './detector_chart';
+import { JobProgress } from './components/job_progress';
 
 export const SummaryStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) => {
-  const kibanaContext = useContext(KibanaContext);
-  if (!isKibanaContext(kibanaContext)) {
-    return null;
-  }
-
-  const { jobCreator, jobValidator, jobValidatorUpdated } = useContext(JobCreatorContext);
-  const [progress, setProgress] = useState(0);
+  const { jobCreator, jobValidator, jobValidatorUpdated, resultsLoader } = useContext(
+    JobCreatorContext
+  );
+  const [progress, setProgress] = useState(resultsLoader.progress);
   const [showJsonFlyout, setShowJsonFlyout] = useState(false);
   const [isValid, setIsValid] = useState(jobValidator.validationSummary.basic);
 
-  function setProgressWrapper(p: number) {
-    setProgress(p);
-  }
-
   useEffect(() => {
-    jobCreator.subscribeToProgress(setProgressWrapper);
+    jobCreator.subscribeToProgress(setProgress);
   }, []);
 
   function start() {
@@ -60,15 +55,12 @@ export const SummaryStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) =>
     <Fragment>
       {isCurrentStep && (
         <Fragment>
-          <Fragment>
-            {jobCreator.jobId}
-            <br />
-            {jobCreator.start} : {jobCreator.end}
-            <br />
-            {JSON.stringify(jobCreator.detectors, null, 2)}
-            <br />
-            {jobCreator.bucketSpan}
-          </Fragment>
+          <DetectorChart />
+          <EuiSpacer size="m" />
+          <JobProgress progress={progress} />
+          <EuiSpacer size="m" />
+          <JobDetails />
+
           {progress === 0 && <WizardNav previous={() => setCurrentStep(WIZARD_STEPS.VALIDATION)} />}
           <EuiHorizontalRule />
           {progress < 100 && (
@@ -91,17 +83,6 @@ export const SummaryStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) =>
               <EuiButton onClick={viewResults}>View results</EuiButton>
             </Fragment>
           )}
-        </Fragment>
-      )}
-      {isCurrentStep === false && (
-        <Fragment>
-          {jobCreator.jobId}
-          <br />
-          {jobCreator.start} : {jobCreator.end}
-          <br />
-          {JSON.stringify(jobCreator.detectors, null, 2)}
-          <br />
-          {jobCreator.bucketSpan}
         </Fragment>
       )}
     </Fragment>

@@ -16,6 +16,7 @@ interface Props {
   numberOfDetectors: number;
   children: JSX.Element;
   jobType: JOB_TYPE;
+  animate?: boolean;
 }
 
 interface Panel {
@@ -24,11 +25,14 @@ interface Panel {
 }
 
 export const SplitCards: FC<Props> = memo(
-  ({ fieldValues, splitField, children, numberOfDetectors, jobType }) => {
+  ({ fieldValues, splitField, children, numberOfDetectors, jobType, animate = false }) => {
     const panels: Panel[] = [];
 
     function storePanels(panel: HTMLDivElement | null, marginBottom: number) {
       if (panel !== null) {
+        if (animate === false) {
+          panel.style.marginBottom = `${marginBottom}px`;
+        }
         panels.push({ panel, marginBottom });
       }
     }
@@ -42,9 +46,11 @@ export const SplitCards: FC<Props> = memo(
       let margin = 5;
       const sideMargins = fieldValuesCopy.map((f, i) => (margin += 10 - i)).reverse();
 
-      setTimeout(() => {
-        panels.forEach(p => (p.panel.style.marginBottom = `${p.marginBottom}px`));
-      }, 100);
+      if (animate === true) {
+        setTimeout(() => {
+          panels.forEach(p => (p.panel.style.marginBottom = `${p.marginBottom}px`));
+        }, 100);
+      }
 
       const SPACING = 100;
       const SPLIT_HEIGHT_MULTIPLIER = 1.6;
@@ -59,7 +65,7 @@ export const SplitCards: FC<Props> = memo(
           marginBottom: `-${SPACING}px`,
           marginLeft: `${sideMargin}px`,
           marginRight: `${sideMargin}px`,
-          transition: 'margin 0.2s',
+          ...(animate ? { transition: 'margin 0.2s' } : {}),
         };
         return (
           <div key={fieldName} ref={ref => storePanels(ref, marginBottom)} style={style}>
