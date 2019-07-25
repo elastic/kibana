@@ -153,7 +153,7 @@ image::images/tutorial-sample-edit1.png[]
 
 . In the menu bar, click *Save*.
 . Leave the visualization name as is and confirm the save.
-. Go to the *Global Flight* dashboard and scroll the metric to see the four prices.
+. Go to the *Global Flight* dashboard and scroll the *Average Ticket Price* visualization to see the four prices.
 . Optionally, edit the dashboard. Resize the panel 
 for the *Average Ticket Price* visualization by dragging the
 handle in the lower right. You can also rearrange the visualizations by clicking 

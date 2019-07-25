@@ -14,7 +14,7 @@ of the log data from May 2018, you could specify the index pattern
 [float]
 ==== Create your first index pattern
 
-First you'll create patterns for the Shakespeare data set, which has an
+First you'll create index patterns for the Shakespeare data set, which has an
 index named `shakespeare,` and the accounts data set, which has an index named
 `bank`. These data sets don't contain time series data.
 

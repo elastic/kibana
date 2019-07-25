@@ -18,7 +18,7 @@ image::images/tutorial-dashboard.png[]
 [[tutorial-load-dataset]]
 === Load sample data
 
-This tutorial requires that you download three data sets:
+This tutorial requires you to download three data sets:
 
 * The complete works of William Shakespeare, suitably parsed into fields
 * A set of fictitious accounts with randomly generated data

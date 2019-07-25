@@ -20,7 +20,7 @@ from the {kib} home page.
 [float]
 
 === Add data tutorials
-{kib} has built-in *Add Data* guides to help you set up
+{kib} has built-in *Add Data* tutorials to help you set up
 data flows in the Elastic Stack. These tutorials are available 
 from the Kibana home page. In *Add Data to Kibana*, find the data type 
 you’re interested in, and click its button to view a list of available tutorials. 
