@@ -14,9 +14,9 @@ import { patterns } from './routes';
 // This defines what shows up in the registry found at /app/kibana#/home and /app/kibana#/home/feature_directory
 FeatureCatalogueRegistryProvider.register(() => ({
   id: PLUGIN.ID,
-  title: 'Integrations Manager',
-  description: 'Install and manage your elastic data ingest integrations',
-  icon: 'merge',
+  title: PLUGIN.TITLE,
+  description: PLUGIN.DESCRIPTION,
+  icon: PLUGIN.ICON,
   path: patterns.APP_ROOT,
   showOnHomePage: true,
   category: FeatureCatalogueCategory.DATA,

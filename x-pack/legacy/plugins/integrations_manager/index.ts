@@ -14,16 +14,13 @@ import manifest from './kibana.json';
 import { CoreSetup, Plugin as ServerPlugin, PluginInitializerContext } from './server/plugin';
 import { mappings, savedObjectSchemas } from './server/saved_objects';
 
-const ICON = 'merge';
 const ROOT = `plugins/${PLUGIN.ID}`;
-const pluginTitle = i18n.translate('xpack.integrationsManager.pluginTitle', {
-  defaultMessage: 'Integrations Manager',
-});
+const pluginTitle = PLUGIN.getI18nName(i18n);
 
 const feature: Feature = {
   id: PLUGIN.ID,
   name: pluginTitle,
-  icon: ICON,
+  icon: PLUGIN.ICON,
   navLinkId: PLUGIN.ID,
   app: [PLUGIN.ID, 'kibana'],
   catalogue: [PLUGIN.ID],
@@ -59,7 +56,7 @@ const pluginOptions: LegacyPluginOptions = {
       title: pluginTitle,
       description: pluginTitle,
       main: `${ROOT}/index`,
-      euiIconType: ICON,
+      euiIconType: PLUGIN.ICON,
       order: 8100,
     },
     // This defines what shows up in the registry found at /app/kibana#/home and /app/kibana#/home/feature_directory
@@ -67,7 +64,7 @@ const pluginOptions: LegacyPluginOptions = {
     mappings,
     savedObjectSchemas,
   },
-  configPrefix: 'xpack.integrationsManager',
+  configPrefix: PLUGIN.CONFIG_PREFIX,
   publicDir: resolve(__dirname, 'public'),
   config: undefined,
   deprecations: undefined,

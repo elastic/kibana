@@ -3,9 +3,26 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+
+import { i18n as i18nCore } from '@kbn/i18n';
 import manifest from '../kibana.json';
 
-export const PLUGIN = { ID: manifest.id };
+type Kbn18n = typeof i18nCore;
+
+export const PLUGIN = {
+  ID: manifest.id,
+  TITLE: 'Integrations Manager',
+  DESCRIPTION: 'Install and manage your elastic data ingest integrations',
+  ICON: 'merge',
+  CONFIG_PREFIX: 'xpack.integrationsManager',
+  getI18nName(i18n: Kbn18n): string {
+    // can't use template literal or other variables for i18n translation
+    return i18n.translate('xpack.integrationsManager.pluginTitle', {
+      defaultMessage: this.TITLE,
+    });
+  },
+};
+
 export const SAVED_OBJECT_TYPE = 'integrations-manager';
 
 export const ASSET_TYPE_CONFIG = 'config';
