@@ -5,7 +5,7 @@
  */
 import manifest from '../kibana.json';
 
-export const PLUGIN_ID = manifest.id;
+export const PLUGIN = { ID: manifest.id };
 export const SAVED_OBJECT_TYPE = 'integrations-manager';
 
 export const ASSET_TYPE_CONFIG = 'config';
