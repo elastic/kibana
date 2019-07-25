@@ -20,6 +20,69 @@ export function ingest(kibana: any) {
     publicDir: resolve(__dirname, 'public'),
     config: () => config,
     configPrefix: CONFIG_PREFIX,
+    uiExports: {
+      mappings: {
+        configurations: {
+          properties: {
+            name: {
+              type: 'text',
+            },
+            description: {
+              type: 'text',
+            },
+            output: {
+              type: 'keyword',
+            },
+            monitoring_enabled: {
+              type: 'boolean',
+            },
+            agent_version: {
+              type: 'keyword',
+            },
+            data_sources: {
+              properties: {
+                uuid: {
+                  type: 'keyword',
+                },
+                ref_source: {
+                  type: 'keyword',
+                },
+                ref: {
+                  type: 'keyword',
+                },
+                config: {
+                  type: 'keyword',
+                },
+                inputs: {
+                  type: 'keyword',
+                },
+              },
+            },
+            shared_id: {
+              type: 'keyword',
+            },
+            version: {
+              type: 'integer',
+            },
+            active: {
+              type: 'boolean',
+            },
+            updated_at: {
+              type: 'date',
+            },
+            created_by: {
+              type: 'text',
+            },
+            updated_on: {
+              type: 'date',
+            },
+            updated_by: {
+              type: 'text',
+            },
+          },
+        },
+      },
+    },
     init(server: any) {
       initServerWithKibana(server);
     },

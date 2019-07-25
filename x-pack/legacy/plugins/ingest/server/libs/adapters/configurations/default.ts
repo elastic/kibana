@@ -19,7 +19,6 @@ export class ConfigAdapter {
       'configurations',
       (configuration as any) as ConfigurationFile
     );
-
     return {
       id: newSo.id,
       shared_id: newSo.attributes.shared_id,

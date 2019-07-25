@@ -4,8 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { compose } from './libs/compose/kibana';
+import { _createSharedServer } from './servers';
 
-export const initServerWithKibana = (hapiServer: any) => {
-  compose(hapiServer);
-};
+// eslint-disable-next-line import/no-default-export
+export default async function globalSetup() {
+  if (process.env.CONTRACT_ONLINE === 'true') {
+    await _createSharedServer();
+  }
+}
