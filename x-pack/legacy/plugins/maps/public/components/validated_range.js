@@ -69,7 +69,7 @@ export class ValidatedRange extends React.Component {
       <EuiRange
         min={min}
         max={max}
-        step={0.1}
+        step={0.5}
         value={this.state.value.toString()}
         onChange={this._onRangeChange}
         {...rest}

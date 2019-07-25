@@ -19,8 +19,8 @@ export function SizeRangeSelector({ minSize, maxSize, onChange }) {
 
   const onSizeChange = ([min, max]) => {
     onChange({
-      minSize: Math.max(DEFAULT_MIN_SIZE, parseInt(min, 10)),
-      maxSize: Math.min(DEFAULT_MAX_SIZE, parseInt(max, 10))
+      minSize: Math.max(DEFAULT_MIN_SIZE, parseFloat(min, 10)),
+      maxSize: Math.min(DEFAULT_MAX_SIZE, parseFloat(max, 10))
     });
   };
 
@@ -33,7 +33,7 @@ export function SizeRangeSelector({ minSize, maxSize, onChange }) {
           <ValidatedDualRange
             min={DEFAULT_MIN_SIZE}
             max={DEFAULT_MAX_SIZE}
-            step={1}
+            step={0.5}
             value={[minSize, maxSize]}
             showInput
             showRange
