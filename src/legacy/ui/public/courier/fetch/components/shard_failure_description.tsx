@@ -18,7 +18,14 @@
  */
 import React from 'react';
 // @ts-ignore
-import { EuiCodeEditor, EuiCode, EuiCodeBlock, EuiDescriptionList, EuiTitle } from '@elastic/eui';
+import {
+  EuiCodeEditor,
+  EuiCode,
+  EuiCodeBlock,
+  EuiDescriptionList,
+  EuiTitle,
+  EuiSpacer,
+} from '@elastic/eui';
 // @ts-ignore
 import { RIGHT_ALIGNMENT } from '@elastic/eui/lib/services';
 import { ShardFailure } from './shard_failure_types';
@@ -64,7 +71,7 @@ export function ShardFailureDescription(props: ShardFailure) {
 
   return (
     <div>
-      <EuiTitle size="xs" className="shardFailure_descHeader">
+      <EuiTitle size="xs">
         <h2>
           {headerTxt} @{' '}
           <span className="shardFailureModal__keyValueTitle">
@@ -78,6 +85,7 @@ export function ShardFailureDescription(props: ShardFailure) {
           </span>
         </h2>
       </EuiTitle>
+      <EuiSpacer size="m" />
       <EuiDescriptionList
         listItems={listItems}
         type="column"
