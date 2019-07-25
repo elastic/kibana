@@ -26,7 +26,7 @@ import { shardFailureResponse } from './__mocks__/shard_failure_response';
 import { findTestSubject } from '@elastic/eui/lib/test';
 
 describe('ShardFailureOpenModalButton', () => {
-  it('triggers the openModal function when "Show Details" button is clicked', () => {
+  it('triggers the openModal function when "Show details" button is clicked', () => {
     const component = mountWithIntl(
       <ShardFailureOpenModalButton
         request={shardFailureRequest}

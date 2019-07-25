@@ -3,9 +3,10 @@
 exports[`ShardFailureDescription renders matching snapshot given valid properties 1`] = `
 <div>
   <EuiTitle
+    className="shardFailure_descHeader"
     size="xs"
   >
-    <h1>
+    <h2>
       Script exception
        @
        
@@ -33,9 +34,10 @@ exports[`ShardFailureDescription renders matching snapshot given valid propertie
           itsmeyournode
         </EuiCode>
       </span>
-    </h1>
+    </h2>
   </EuiTitle>
   <EuiDescriptionList
+    className="shardFailureModal__desc"
     compressed={true}
     descriptionProps={
       Object {
