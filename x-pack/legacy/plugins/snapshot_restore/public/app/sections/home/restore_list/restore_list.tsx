@@ -114,7 +114,7 @@ export const RestoreList: React.FunctionComponent = () => {
         <SectionError
           title={
             <FormattedMessage
-              id="xpack.snapshotRestore.restoreList.LoadingRestoresErrorMessage"
+              id="xpack.snapshotRestore.restoreList.loadingRestoresErrorMessage"
               defaultMessage="Error loading restores"
             />
           }
@@ -130,18 +130,8 @@ export const RestoreList: React.FunctionComponent = () => {
           title={
             <h1>
               <FormattedMessage
-                id="xpack.snapshotRestore.restoreList.emptyPromptDescription"
-                defaultMessage="Go to {snapshotsLink} to start a restore."
-                values={{
-                  snapshotsLink: (
-                    <EuiLink href={linkToSnapshots()}>
-                      <FormattedMessage
-                        id="xpack.snapshotRestore.restoreList.emptyPromptDescriptionLink"
-                        defaultMessage="Snapshots"
-                      />
-                    </EuiLink>
-                  ),
-                }}
+                id="xpack.snapshotRestore.restoreList.emptyPromptTitle"
+                defaultMessage="You don't have any restored snapshots"
               />
             </h1>
           }
