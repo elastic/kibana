@@ -34,7 +34,7 @@ import { checkFullLicense } from '../license/check_license';
 
 import { getMlNodeCount } from '../ml_nodes_check/check_ml_nodes';
 
-import { checkGetJobsPrivilege, checkPermission } from '../privilege/check_privilege';
+import { checkGetJobsPrivilege } from '../privilege/check_privilege';
 
 import { mlJobService } from '../services/job_service';
 
@@ -71,10 +71,6 @@ module.directive('mlTimeSeriesExplorer', function (
     // Required to redraw the time series chart when the container is resized.
     const resizeChecker = new ResizeChecker(angular.element('.ml-time-series-explorer'));
     resizeChecker.on('resize', updateComponent);
-
-    $scope.permissions = {
-      canForecastJob: checkPermission('canForecastJob')
-    };
 
     // Initialize the AppState in which to store the zoom range.
     const stateDefaults = {
