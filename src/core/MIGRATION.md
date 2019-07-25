@@ -269,7 +269,7 @@ While not exactly the same, legacy plugin `init` functions behave similarly toda
 
 Despite their similarities, server-side plugins pose a formidable challenge: legacy core and plugin functionality is retrieved from either the hapi.js `server` or `request` god objects. Worse, these objects are often passed deeply throughout entire plugins, which directly couples business logic with hapi. And the worst of it all is, these objects are mutable at any time.
 
-The key challenge to overcome with legacy server-side plugins will decoupling from hapi.
+The key challenge to overcome with legacy server-side plugins will be decoupling from hapi.
 
 #### Challenges in the browser
 
