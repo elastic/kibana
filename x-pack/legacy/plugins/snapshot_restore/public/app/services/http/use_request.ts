@@ -11,12 +11,12 @@ import {
   sendRequest as _sendRequest,
   useRequest as _useRequest,
 } from '../../../shared_imports';
-import { httpClient } from './index';
+import { httpService } from './index';
 
 export const sendRequest = (config: SendRequest): Promise<Partial<SendRequestResponse>> => {
-  return _sendRequest(httpClient, config);
+  return _sendRequest(httpService.httpClient, config);
 };
 
 export const useRequest = (config: UseRequest) => {
-  return _useRequest(httpClient, config);
+  return _useRequest(httpService.httpClient, config);
 };

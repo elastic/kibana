@@ -6,19 +6,19 @@
 import { API_BASE_PATH } from '../../../../common/constants';
 import { UIM_SNAPSHOT_DELETE, UIM_SNAPSHOT_DELETE_MANY } from '../../constants';
 import { uiMetricService } from '../ui_metric';
-import { addBasePath } from './http';
+import { httpService } from './http';
 import { sendRequest, useRequest } from './use_request';
 
 export const useLoadSnapshots = () =>
   useRequest({
-    path: addBasePath(`${API_BASE_PATH}snapshots`),
+    path: httpService.addBasePath(`${API_BASE_PATH}snapshots`),
     method: 'get',
     initialData: [],
   });
 
 export const useLoadSnapshot = (repositoryName: string, snapshotId: string) =>
   useRequest({
-    path: addBasePath(
+    path: httpService.addBasePath(
       `${API_BASE_PATH}snapshots/${encodeURIComponent(repositoryName)}/${encodeURIComponent(
         snapshotId
       )}`
@@ -30,7 +30,7 @@ export const deleteSnapshots = async (
   snapshotIds: Array<{ snapshot: string; repository: string }>
 ) => {
   const result = await sendRequest({
-    path: addBasePath(
+    path: httpService.addBasePath(
       `${API_BASE_PATH}snapshots/${snapshotIds
         .map(({ snapshot, repository }) => encodeURIComponent(`${repository}/${snapshot}`))
         .join(',')}`

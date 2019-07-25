@@ -13,12 +13,12 @@ import {
   UIM_REPOSITORY_DETAIL_PANEL_VERIFY,
 } from '../../constants';
 import { uiMetricService } from '../ui_metric';
-import { addBasePath } from './http';
+import { httpService } from './http';
 import { sendRequest, useRequest } from './use_request';
 
 export const useLoadRepositories = () => {
   return useRequest({
-    path: addBasePath(`${API_BASE_PATH}repositories`),
+    path: httpService.addBasePath(`${API_BASE_PATH}repositories`),
     method: 'get',
     initialData: [],
   });
@@ -26,14 +26,16 @@ export const useLoadRepositories = () => {
 
 export const useLoadRepository = (name: Repository['name']) => {
   return useRequest({
-    path: addBasePath(`${API_BASE_PATH}repositories/${encodeURIComponent(name)}`),
+    path: httpService.addBasePath(`${API_BASE_PATH}repositories/${encodeURIComponent(name)}`),
     method: 'get',
   });
 };
 
 export const verifyRepository = async (name: Repository['name']) => {
   const result = await sendRequest({
-    path: addBasePath(`${API_BASE_PATH}repositories/${encodeURIComponent(name)}/verify`),
+    path: httpService.addBasePath(
+      `${API_BASE_PATH}repositories/${encodeURIComponent(name)}/verify`
+    ),
     method: 'get',
   });
 
@@ -44,7 +46,7 @@ export const verifyRepository = async (name: Repository['name']) => {
 
 export const useLoadRepositoryTypes = () => {
   return useRequest({
-    path: addBasePath(`${API_BASE_PATH}repository_types`),
+    path: httpService.addBasePath(`${API_BASE_PATH}repository_types`),
     method: 'get',
     initialData: [],
   });
@@ -52,7 +54,7 @@ export const useLoadRepositoryTypes = () => {
 
 export const addRepository = async (newRepository: Repository | EmptyRepository) => {
   const result = await sendRequest({
-    path: addBasePath(`${API_BASE_PATH}repositories`),
+    path: httpService.addBasePath(`${API_BASE_PATH}repositories`),
     method: 'put',
     body: newRepository,
   });
@@ -64,7 +66,9 @@ export const addRepository = async (newRepository: Repository | EmptyRepository)
 
 export const editRepository = async (editedRepository: Repository | EmptyRepository) => {
   const result = await sendRequest({
-    path: addBasePath(`${API_BASE_PATH}repositories/${encodeURIComponent(editedRepository.name)}`),
+    path: httpService.addBasePath(
+      `${API_BASE_PATH}repositories/${encodeURIComponent(editedRepository.name)}`
+    ),
     method: 'put',
     body: editedRepository,
   });
@@ -76,7 +80,7 @@ export const editRepository = async (editedRepository: Repository | EmptyReposit
 
 export const deleteRepositories = async (names: Array<Repository['name']>) => {
   const result = await sendRequest({
-    path: addBasePath(
+    path: httpService.addBasePath(
       `${API_BASE_PATH}repositories/${names.map(name => encodeURIComponent(name)).join(',')}`
     ),
     method: 'delete',
