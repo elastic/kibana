@@ -22,11 +22,13 @@ export function Detail(props: { package: string }) {
 
 function InfoPanel(info: IntegrationInfo) {
   const { description, name, version } = info;
+  // TODO: Need title or something which uses correct capitalization (e.g. PostgreSQL)
+  const title = description.split(' ')[0];
 
   return (
     <EuiPanel>
       <EuiTitle>
-        <h1>{`${name} (v${version})`}</h1>
+        <h1>{`${title} (v${version})`}</h1>
       </EuiTitle>
       <EuiSpacer />
       <p>{description}</p>

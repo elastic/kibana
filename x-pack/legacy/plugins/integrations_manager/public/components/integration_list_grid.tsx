@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React from 'react';
-import { EuiFlexGrid, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiFlexGrid, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
 import { STATUS_INSTALLED, STATUS_NOT_INSTALLED } from '../../common/constants';
 import {
   InstallationStatus,
@@ -47,15 +47,21 @@ export function IntegrationListGrid({ status, list }: ListProps) {
   return (
     <>
       <EuiSpacer />
-      <EuiText>
-        <h2>{titles[status]}</h2>
-      </EuiText>
+      <EuiFlexGroup>
+        <EuiFlexItem grow={1}>
+          <EuiText>
+            <h2>{titles[status]}</h2>
+          </EuiText>
+        </EuiFlexItem>
+        <EuiFlexItem grow={3}>
+          <EuiFlexGrid gutterSize="l" columns={3}>
+            {list.map(item => (
+              <GridItem key={`${item.name}-${item.version}`} {...item} />
+            ))}
+          </EuiFlexGrid>
+        </EuiFlexItem>
+      </EuiFlexGroup>
       <EuiSpacer />
-      <EuiFlexGrid gutterSize="l" columns={4}>
-        {list.map(item => (
-          <GridItem key={`${item.name}-${item.version}`} {...item} />
-        ))}
-      </EuiFlexGrid>
     </>
   );
 }
