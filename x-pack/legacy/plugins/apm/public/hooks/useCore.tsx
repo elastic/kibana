@@ -4,11 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { npStart } from 'ui/new_platform';
+import { useContext } from 'react';
+import { CoreContext } from '../context/CoreContext';
 
-const { core } = npStart;
-const apmUiEnabled = core.injectedMetadata.getInjectedVar('apmUiEnabled');
-
-if (apmUiEnabled === false) {
-  core.chrome.navLinks.update('apm', { hidden: true });
+export function useCore() {
+  return useContext(CoreContext);
 }
