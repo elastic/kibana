@@ -11,4 +11,5 @@ declare const ValidateJob: FC<{
   mlJobService: any;
   embedded?: boolean;
   setIsValid?: (valid: boolean) => void;
+  idFilterList?: string[];
 }>;

@@ -8,16 +8,17 @@ import React, { Fragment, FC, useContext, useState } from 'react';
 import { WizardNav } from '../wizard_nav';
 import { WIZARD_STEPS, StepProps } from '../step_types';
 import { JobCreatorContext } from '../job_creator_context';
-import { KibanaContext, isKibanaContext } from '../../../../../data_frame/common/kibana_context';
 import { mlJobService } from '../../../../../services/job_service';
 import { ValidateJob } from '../../../../../components/validate_job/validate_job_view';
 
-export const ValidationStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) => {
-  const kibanaContext = useContext(KibanaContext);
-  if (!isKibanaContext(kibanaContext)) {
-    return null;
-  }
+const idFilterList = [
+  'job_id_valid',
+  'job_group_id_valid',
+  'detectors_function_not_empty',
+  'success_bucket_span',
+];
 
+export const ValidationStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) => {
   const { jobCreator, jobValidator } = useContext(JobCreatorContext);
   const [nextActive, setNextActive] = useState(false);
 
@@ -55,6 +56,7 @@ export const ValidationStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep })
             mlJobService={mlJobService}
             embedded={true}
             setIsValid={setIsValid}
+            idFilterList={idFilterList}
           />
           <WizardNav
             previous={() => setCurrentStep(WIZARD_STEPS.JOB_DETAILS)}
