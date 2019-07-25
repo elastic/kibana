@@ -11,11 +11,12 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiGlobalToastListToast as Toast,
+  EuiLoadingContent,
   EuiPagination,
   EuiPanel,
   EuiPopover,
 } from '@elastic/eui';
-import { isEmpty, noop, getOr } from 'lodash/fp';
+import { noop } from 'lodash/fp';
 import React, { memo, useState, useEffect } from 'react';
 import styled from 'styled-components';
 
@@ -30,7 +31,7 @@ import { TlsColumns } from '../page/network/tls_table/columns';
 import { UncommonProcessTableColumns } from '../page/hosts/uncommon_process_table';
 import { UsersColumns } from '../page/network/users_table/columns';
 import { HeaderPanel } from '../header_panel';
-import { LoadingPanel } from '../loading';
+import { Loader } from '../loader';
 import { useStateToaster } from '../toasters';
 import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../common/constants';
 
@@ -89,7 +90,6 @@ export interface BasicTableProps<T> {
   itemsPerRow?: ItemsPerRow[];
   limit: number;
   loading: boolean;
-  loadingTitle?: string;
   loadPage: (activePage: number) => void;
   onChange?: (criteria: Criteria) => void;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -127,7 +127,6 @@ export const PaginatedTable = memo<SiemTables>(
     itemsPerRow,
     limit,
     loading,
-    loadingTitle,
     loadPage,
     onChange = noop,
     pageOfItems,
@@ -140,7 +139,7 @@ export const PaginatedTable = memo<SiemTables>(
   }) => {
     const [activePage, setActivePage] = useState(0);
     const [showInspect, setShowInspect] = useState(false);
-    const [isEmptyTable, setEmptyTable] = useState(pageOfItems.length === 0);
+    const [loadingInitial, setLoadingInitial] = useState(headerCount === -1);
     const [isPopoverOpen, setPopoverOpen] = useState(false);
     const pageCount = Math.ceil(totalCount / limit);
     const dispatchToaster = useStateToaster()[1];
@@ -150,13 +149,11 @@ export const PaginatedTable = memo<SiemTables>(
         setActivePage(0);
         updateActivePage(0);
       }
-    }, effectDeps);
 
-    useEffect(() => {
-      if (!isEmpty(pageOfItems) && isEmptyTable) {
-        setEmptyTable(false);
+      if (headerCount >= 0 && loadingInitial) {
+        setLoadingInitial(false);
       }
-    }, [pageOfItems]);
+    }, effectDeps);
 
     const onButtonClick = () => {
       setPopoverOpen(!isPopoverOpen);
@@ -186,22 +183,9 @@ export const PaginatedTable = memo<SiemTables>(
       updateActivePage(newActivePage);
     };
 
-    if (loading && isEmptyTable) {
-      return (
-        <EuiPanel>
-          <LoadingPanel
-            height="auto"
-            width="100%"
-            text={`${i18n.LOADING} ${loadingTitle ? loadingTitle : headerTitle}`}
-            data-test-subj="InitialLoadingPanelPaginatedTable"
-          />
-        </EuiPanel>
-      );
-    }
-
     const button = (
       <EuiButtonEmpty
-        size="s"
+        size="xs"
         color="text"
         iconType="arrowDown"
         iconSide="right"
@@ -227,106 +211,96 @@ export const PaginatedTable = memo<SiemTables>(
         </EuiContextMenuItem>
       ));
     const PaginationWrapper = showMorePagesIndicator ? PaginationEuiFlexItem : EuiFlexItem;
+
     return (
-      <EuiPanel
+      <Panel
         data-test-subj={dataTestSubj}
+        loading={{ loading }}
         onMouseEnter={() => setShowInspect(true)}
         onMouseLeave={() => setShowInspect(false)}
       >
-        <BasicTableContainer>
-          {loading && (
-            <>
-              <BackgroundRefetch />
-              <LoadingPanel
-                height="100%"
-                width="100%"
-                text={`${i18n.LOADING} ${loadingTitle ? loadingTitle : headerTitle}`}
-                position="absolute"
-                zIndex={3}
-                data-test-subj="LoadingPanelPaginatedTable"
-              />
-            </>
-          )}
+        <HeaderPanel
+          id={id}
+          showInspect={!loadingInitial && showInspect}
+          subtitle={
+            !loadingInitial &&
+            `${i18n.SHOWING}: ${headerCount >= 0 ? headerCount.toLocaleString() : 0} ${headerUnit}`
+          }
+          title={headerTitle}
+          tooltip={headerTooltip}
+        >
+          {!loadingInitial && headerSupplement}
+        </HeaderPanel>
 
-          <HeaderPanel
-            id={id}
-            showInspect={showInspect}
-            subtitle={`${i18n.SHOWING}: ${headerCount.toLocaleString()} ${headerUnit}`}
-            title={headerTitle}
-            tooltip={headerTooltip}
-          >
-            {headerSupplement}
-          </HeaderPanel>
+        {loadingInitial ? (
+          <EuiLoadingContent data-test-subj="initialLoadingPanelPaginatedTable" lines={10} />
+        ) : (
+          <>
+            <BasicTable
+              items={pageOfItems}
+              columns={columns}
+              onChange={onChange}
+              sorting={
+                sorting
+                  ? {
+                      sort: {
+                        field: sorting.field,
+                        direction: sorting.direction,
+                      },
+                    }
+                  : null
+              }
+            />
 
-          <BasicTable
-            items={pageOfItems}
-            columns={columns}
-            onChange={onChange}
-            sorting={
-              sorting
-                ? {
-                    sort: {
-                      field: sorting.field,
-                      direction: sorting.direction,
-                    },
-                  }
-                : null
-            }
-          />
-          <FooterAction>
-            <EuiFlexGroup alignItems="center">
-              <EuiFlexItem>
-                {itemsPerRow && itemsPerRow.length > 0 && totalCount >= itemsPerRow[0].numberOfRow && (
-                  <EuiPopover
-                    id="customizablePagination"
-                    data-test-subj="loadingMoreSizeRowPopover"
-                    button={button}
-                    isOpen={isPopoverOpen}
-                    closePopover={closePopover}
-                    panelPaddingSize="none"
-                  >
-                    <EuiContextMenuPanel items={rowItems} data-test-subj="loadingMorePickSizeRow" />
-                  </EuiPopover>
-                )}
-              </EuiFlexItem>
-              <PaginationWrapper grow={false}>
-                <EuiPagination
-                  data-test-subj="numberedPagination"
-                  pageCount={pageCount}
-                  activePage={activePage}
-                  onPageClick={goToPage}
-                />
-              </PaginationWrapper>
-            </EuiFlexGroup>
-          </FooterAction>
-        </BasicTableContainer>
-      </EuiPanel>
+            <FooterAction>
+              <EuiFlexGroup alignItems="center">
+                <EuiFlexItem>
+                  {itemsPerRow &&
+                    itemsPerRow.length > 0 &&
+                    totalCount >= itemsPerRow[0].numberOfRow && (
+                      <EuiPopover
+                        id="customizablePagination"
+                        data-test-subj="loadingMoreSizeRowPopover"
+                        button={button}
+                        isOpen={isPopoverOpen}
+                        closePopover={closePopover}
+                        panelPaddingSize="none"
+                      >
+                        <EuiContextMenuPanel
+                          items={rowItems}
+                          data-test-subj="loadingMorePickSizeRow"
+                        />
+                      </EuiPopover>
+                    )}
+                </EuiFlexItem>
+
+                <PaginationWrapper grow={false}>
+                  <EuiPagination
+                    data-test-subj="numberedPagination"
+                    pageCount={pageCount}
+                    activePage={activePage}
+                    onPageClick={goToPage}
+                  />
+                </PaginationWrapper>
+              </EuiFlexGroup>
+            </FooterAction>
+
+            {loading && <Loader data-test-subj="loadingPanelPaginatedTable" overlay size="xl" />}
+          </>
+        )}
+      </Panel>
     );
   }
 );
 
-export const BasicTableContainer = styled.div`
+const Panel = styled(EuiPanel)<{ loading: { loading?: boolean } }>`
   position: relative;
-`;
 
-const FooterAction = styled.div`
-  margin-top: 0.5rem;
-  width: 100%;
-`;
-
-/*
- *   The getOr is just there to simplify the test
- *   So we do NOT need to wrap it around TestProvider
- */
-const BackgroundRefetch = styled.div`
-  background-color: ${props => getOr('#ffffff', 'theme.eui.euiColorLightShade', props)};
-  margin: -5px;
-  height: calc(100% + 10px);
-  opacity: 0.7;
-  width: calc(100% + 10px);
-  position: absolute;
-  z-index: 3;
-  border-radius: 5px;
+  ${({ loading }) =>
+    loading &&
+    `
+    overflow: hidden;
+  `}
 `;
 
 const BasicTable = styled(EuiBasicTable)`
@@ -336,6 +310,10 @@ const BasicTable = styled(EuiBasicTable)`
       vertical-align: top;
     }
   }
+`;
+
+const FooterAction = styled.div`
+  margin-top: ${props => props.theme.eui.euiSize};
 `;
 
 const PaginationEuiFlexItem = styled(EuiFlexItem)`
