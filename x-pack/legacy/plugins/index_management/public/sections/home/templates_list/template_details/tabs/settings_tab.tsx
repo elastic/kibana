@@ -23,11 +23,10 @@ export const SettingsTab: React.FunctionComponent<Props> = ({ templateDetails })
         mode="json"
         theme="textmate"
         width="100%"
-        height="300px"
         isReadOnly
         value={settingsJsonString}
         aria-label={i18n.translate(
-          'xpack.idxMgmt.templateDetails.settingsTab.settingsCodeEditAriaLabel',
+          'xpack.idxMgmt.templateDetails.settingsTab.settingsEditorAriaLabel',
           {
             defaultMessage: 'Settings code editor',
           }

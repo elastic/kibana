@@ -23,11 +23,10 @@ export const AliasesTab: React.FunctionComponent<Props> = ({ templateDetails }) 
         mode="json"
         theme="textmate"
         width="100%"
-        height="300px"
         isReadOnly
         value={aliasesJsonString}
         aria-label={i18n.translate(
-          'xpack.idxMgmt.templateDetails.aliasesTab.aliasesCodeEditAriaLabel',
+          'xpack.idxMgmt.templateDetails.aliasesTab.aliasesEditorAriaLabel',
           {
             defaultMessage: 'Aliases code editor',
           }

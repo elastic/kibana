@@ -26,7 +26,7 @@ export const MappingsTab: React.FunctionComponent<Props> = ({ templateDetails })
         isReadOnly
         value={mappingsJsonString}
         aria-label={i18n.translate(
-          'xpack.idxMgmt.templateDetails.mappingsTab.mappingsCodeEditAriaLabel',
+          'xpack.idxMgmt.templateDetails.mappingsTab.mappingsEditorAriaLabel',
           {
             defaultMessage: 'Mappings code editor',
           }
