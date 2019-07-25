@@ -14,14 +14,12 @@ import { toastNotifications } from 'ui/notify';
 import {
   EuiButton,
   EuiCodeEditor,
-  EuiConfirmModal,
   EuiFlexGroup,
   EuiFlexItem,
   EuiForm,
   EuiFormHelpText,
   EuiFormRow,
   EuiLink,
-  EuiOverlayMask,
   EuiPanel,
   // @ts-ignore
   EuiSearchBar,
@@ -37,6 +35,7 @@ import { SourceIndexPreview } from '../source_index_preview';
 import { PivotPreview } from './pivot_preview';
 // @ts-ignore: could not find declaration file for module
 import { KqlFilterBar } from '../../../../../components/kql_filter_bar';
+import { SwitchModal } from './switch_modal';
 
 import {
   AggName,
@@ -314,8 +313,13 @@ export const StepDefineForm: SFC<Props> = React.memo(({ overrides = {}, onChange
     defaults.isAdvancedPivotEditorEnabled
   );
   // Advanced editor for source config state
+  const [sourceConfigUpdated, setSourceConfigUpdated] = useState(false);
+  const [
+    isAdvancedSourceEditorSwitchModalVisible,
+    setAdvancedSourceEditorSwitchModalVisible,
+  ] = useState(false);
   const [isAdvancedSourceEditorEnabled, setAdvancedSourceEditorEnabled] = useState(
-    defaults.isAdvancedPivotEditorEnabled
+    defaults.isAdvancedSourceEditorEnabled
   );
   const [
     isAdvancedSourceEditorApplyButtonEnabled,
@@ -344,9 +348,18 @@ export const StepDefineForm: SFC<Props> = React.memo(({ overrides = {}, onChange
     stringifiedSourceConfig
   );
 
-  const applyAdvancedEditorChanges = () => {
-    const pivotConfig = JSON.parse(advancedEditorConfig);
+  const applyAdvancedSourceEditorChanges = () => {
     const sourceConfig = JSON.parse(advancedEditorSourceConfig);
+    const prettySourceConfig = JSON.stringify(sourceConfig, null, 2);
+    setSearchQuery(sourceConfig);
+    setSourceConfigUpdated(true);
+    setAdvancedEditorSourceConfig(prettySourceConfig);
+    setAdvancedEditorSourceConfigLastApplied(prettySourceConfig);
+    setAdvancedSourceEditorApplyButtonEnabled(false);
+  };
+
+  const applyAdvancedPivotEditorChanges = () => {
+    const pivotConfig = JSON.parse(advancedEditorConfig);
 
     const newGroupByList: PivotGroupByConfigDict = {};
     if (pivotConfig !== undefined && pivotConfig.group_by !== undefined) {
@@ -382,12 +395,9 @@ export const StepDefineForm: SFC<Props> = React.memo(({ overrides = {}, onChange
     }
     setAggList(newAggList);
     const prettyPivotConfig = JSON.stringify(pivotConfig, null, 2);
-    const prettySourceConfig = JSON.stringify(sourceConfig, null, 2);
-    setSearchQuery(sourceConfig);
+
     setAdvancedEditorConfig(prettyPivotConfig);
     setAdvancedEditorConfigLastApplied(prettyPivotConfig);
-    setAdvancedEditorSourceConfig(prettySourceConfig);
-    setAdvancedEditorSourceConfigLastApplied(prettySourceConfig);
     setAdvancedPivotEditorApplyButtonEnabled(false);
   };
 
@@ -399,14 +409,16 @@ export const StepDefineForm: SFC<Props> = React.memo(({ overrides = {}, onChange
       setAdvancedEditorConfigLastApplied(advancedEditorConfig);
     }
   };
+  // If switching to KQL after updating via editor - reset search
+  const toggleAdvancedSourceEditor = (reset = false) => {
+    if (reset === true) {
+      setSearchQuery(defaultSearch);
+      setSearchString(defaultSearch);
+      setSourceConfigUpdated(false);
+    }
 
-  const toggleAdvancedSourceEditor = () => {
-    setAdvancedEditorSourceConfig(advancedEditorSourceConfig);
     setAdvancedSourceEditorEnabled(!isAdvancedSourceEditorEnabled);
     setAdvancedSourceEditorApplyButtonEnabled(false);
-    if (isAdvancedSourceEditorEnabled === false) {
-      setAdvancedEditorSourceConfigLastApplied(advancedEditorSourceConfig);
-    }
   };
 
   // metadata.branch corresponds to the version used in documentation links.
@@ -583,24 +595,30 @@ export const StepDefineForm: SFC<Props> = React.memo(({ overrides = {}, onChange
                   )}
                   checked={isAdvancedSourceEditorEnabled}
                   onChange={() => {
-                    // if (
-                    //   isAdvancedSourceEditorEnabled &&
-                    //   (isAdvancedPivotEditorApplyButtonEnabled ||
-                    //     advancedEditorSourceConfig !== advancedEditorSourceConfigLastApplied)
-                    // ) {
-                    //   setAdvancedEditorSwitchModalVisible(true);
-                    //   return;
-                    // }
+                    if (isAdvancedSourceEditorEnabled && sourceConfigUpdated) {
+                      setAdvancedSourceEditorSwitchModalVisible(true);
+                      return;
+                    }
 
                     toggleAdvancedSourceEditor();
                   }}
                 />
+                {isAdvancedSourceEditorSwitchModalVisible && (
+                  <SwitchModal
+                    onCancel={() => setAdvancedSourceEditorSwitchModalVisible(false)}
+                    onConfirm={() => {
+                      setAdvancedSourceEditorSwitchModalVisible(false);
+                      toggleAdvancedSourceEditor(true);
+                    }}
+                    type={'source'}
+                  />
+                )}
               </EuiFlexItem>
               {isAdvancedSourceEditorEnabled && (
                 <EuiButton
                   size="s"
                   fill
-                  onClick={applyAdvancedEditorChanges}
+                  onClick={applyAdvancedSourceEditorChanges}
                   disabled={!isAdvancedSourceEditorApplyButtonEnabled}
                 >
                   {i18n.translate(
@@ -747,51 +765,21 @@ export const StepDefineForm: SFC<Props> = React.memo(({ overrides = {}, onChange
                   }}
                 />
                 {isAdvancedEditorSwitchModalVisible && (
-                  <EuiOverlayMask>
-                    <EuiConfirmModal
-                      title={i18n.translate(
-                        'xpack.ml.dataframe.stepDefineForm.advancedEditorSwitchModalTitle',
-                        {
-                          defaultMessage: 'Unapplied changes',
-                        }
-                      )}
-                      onCancel={() => setAdvancedEditorSwitchModalVisible(false)}
-                      onConfirm={() => {
-                        setAdvancedEditorSwitchModalVisible(false);
-                        toggleAdvancedEditor();
-                      }}
-                      cancelButtonText={i18n.translate(
-                        'xpack.ml.dataframe.stepDefineForm.advancedEditorSwitchModalCancelButtonText',
-                        {
-                          defaultMessage: 'Cancel',
-                        }
-                      )}
-                      confirmButtonText={i18n.translate(
-                        'xpack.ml.dataframe.stepDefineForm.advancedEditorSwitchModalConfirmButtonText',
-                        {
-                          defaultMessage: 'Disable advanced editor',
-                        }
-                      )}
-                      buttonColor="danger"
-                      defaultFocusedButton="confirm"
-                    >
-                      <p>
-                        {i18n.translate(
-                          'xpack.ml.dataframe.stepDefineForm.advancedEditorSwitchModalBodyText',
-                          {
-                            defaultMessage: `The changes in the advanced editor haven't been applied yet. By disabling the advanced editor you will lose your edits.`,
-                          }
-                        )}
-                      </p>
-                    </EuiConfirmModal>
-                  </EuiOverlayMask>
+                  <SwitchModal
+                    onCancel={() => setAdvancedEditorSwitchModalVisible(false)}
+                    onConfirm={() => {
+                      setAdvancedEditorSwitchModalVisible(false);
+                      toggleAdvancedEditor();
+                    }}
+                    type={'pivot'}
+                  />
                 )}
               </EuiFlexItem>
               {isAdvancedPivotEditorEnabled && (
                 <EuiButton
                   size="s"
                   fill
-                  onClick={applyAdvancedEditorChanges}
+                  onClick={applyAdvancedPivotEditorChanges}
                   disabled={!isAdvancedPivotEditorApplyButtonEnabled}
                 >
                   {i18n.translate(
