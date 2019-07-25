@@ -61,7 +61,7 @@ export {
 export {
   AuthenticationHandler,
   AuthHeaders,
-  AuthResultData,
+  AuthResultParams,
   AuthToolkit,
   GetAuthHeaders,
   createResponseError,
