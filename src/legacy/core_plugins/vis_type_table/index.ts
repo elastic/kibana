@@ -24,7 +24,7 @@ import { LegacyPluginApi, LegacyPluginInitializer } from '../../../../src/legacy
 
 const tableVisPluginInitializer: LegacyPluginInitializer = ({ Plugin }: LegacyPluginApi) =>
   new Plugin({
-    id: 'vis_type_table',
+    id: 'table_vis',
     require: ['kibana', 'elasticsearch', 'visualizations', 'interpreter', 'data'],
     publicDir: resolve(__dirname, 'public'),
     uiExports: {
