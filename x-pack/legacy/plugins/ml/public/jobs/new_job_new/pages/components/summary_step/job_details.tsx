@@ -5,7 +5,7 @@
  */
 
 import React, { FC, useContext } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiDescriptionList, EuiSwitch } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiDescriptionList } from '@elastic/eui';
 import { JobCreatorContext } from '../job_creator_context';
 import { isMultiMetricJobCreator, isPopulationJobCreator } from '../../../common/job_creator';
 
