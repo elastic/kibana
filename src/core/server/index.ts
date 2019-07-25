@@ -61,7 +61,7 @@ export {
 export {
   AuthenticationHandler,
   AuthHeaders,
-  AuthResultData,
+  AuthResultParams,
   AuthToolkit,
   GetAuthHeaders,
   KibanaRequest,
@@ -103,6 +103,9 @@ export {
   SavedObjectsFindOptions,
   SavedObjectsFindResponse,
   SavedObjectsMigrationVersion,
+  SavedObjectsRawDoc,
+  SavedObjectsSchema,
+  SavedObjectsSerializer,
   SavedObjectsService,
   SavedObjectsUpdateOptions,
   SavedObjectsUpdateResponse,

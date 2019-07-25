@@ -4,15 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { BASE_PATH } from '../../common/constants';
-let urlService;
-export const setUrlService = (aUrlService) => {
+
+let urlService: any;
+
+export const setUrlService = (aUrlService: any) => {
   urlService = aUrlService;
 };
+
 export const getUrlService = () => {
   return urlService;
 };
-export const getIndexListUri = (filter) => {
-  if(filter) {
+
+export const getIndexListUri = (filter: any) => {
+  if (filter) {
     // React router tries to decode url params but it can't because the browser partially
     // decodes them. So we have to encode both the URL and the filter to get it all to
     // work correctly for filters with URL unsafe characters in them.
@@ -21,4 +25,12 @@ export const getIndexListUri = (filter) => {
 
   // If no filter, URI is already safe so no need to encode.
   return `#${BASE_PATH}indices`;
+};
+
+export const getILMPolicyPath = (policyName: string) => {
+  return encodeURI(
+    `#/management/elasticsearch/index_lifecycle_management/policies/edit/${encodeURIComponent(
+      policyName
+    )}`
+  );
 };
