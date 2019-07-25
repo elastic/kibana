@@ -22,6 +22,7 @@ interface Props {
 // Component for rendering a button which automatically sets the range of the time filter
 // to the time range of data in the index(es) mapped to the supplied Kibana index pattern or query.
 export const FullTimeRangeSelector: FC<Props> = ({ indexPattern, query, disabled, callback }) => {
+  // wrapper around setFullTimeRange to allow for the calling of the optional callBack prop
   async function setRange(i: IndexPattern, q: Query) {
     const fullTimeRange = await setFullTimeRange(i, q);
     if (typeof callback === 'function') {

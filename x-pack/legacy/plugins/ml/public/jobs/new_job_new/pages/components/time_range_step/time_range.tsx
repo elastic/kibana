@@ -52,6 +52,7 @@ export const TimeRangeStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) 
       min: moment(start),
       max: moment(end),
     });
+    // update the timefilter, to keep the URL in sync
     timefilter.setTime({
       from: moment(start).toISOString(),
       to: moment(end).toISOString(),
@@ -66,9 +67,9 @@ export const TimeRangeStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) 
     setEnd(jobCreator.end);
   }, [jobCreatorUpdated]);
 
-  function fullTimeRangeCallback(a: GetTimeFieldRangeResponse) {
-    setStart(a.start.epoch);
-    setEnd(a.end.epoch);
+  function fullTimeRangeCallback(range: GetTimeFieldRangeResponse) {
+    setStart(range.start.epoch);
+    setEnd(range.end.epoch);
   }
 
   return (
