@@ -29,7 +29,7 @@ export default function({ getService }: TestInvoker) {
           statusCode: 200,
           response: createExpectVisualizationResults(SPACES.SPACE_1.spaceId),
         },
-        spaceType: {
+        hiddenType: {
           description: 'exporting space not allowed',
           statusCode: 400,
           response: expectInvalidTypeSpecified,
@@ -50,7 +50,7 @@ export default function({ getService }: TestInvoker) {
           statusCode: 200,
           response: createExpectVisualizationResults(SPACES.DEFAULT.spaceId),
         },
-        spaceType: {
+        hiddenType: {
           description: 'exporting space not allowed',
           statusCode: 400,
           response: expectInvalidTypeSpecified,

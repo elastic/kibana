@@ -17,8 +17,8 @@ export default function({ getService }: TestInvoker) {
   const {
     resolveImportErrorsTest,
     createExpectResults,
-    expectUnknownType,
-    expectSpaceType,
+    expectUnknownTypeUnsupported,
+    expectHiddenTypeUnsupported,
   } = resolveImportErrorsTestSuiteFactory(es, esArchiver, supertest);
 
   describe('_resolve_import_errors', () => {
@@ -29,13 +29,13 @@ export default function({ getService }: TestInvoker) {
           statusCode: 200,
           response: createExpectResults(SPACES.SPACE_1.spaceId),
         },
-        spaceType: {
+        hiddenType: {
           statusCode: 200,
-          response: expectSpaceType,
+          response: expectHiddenTypeUnsupported,
         },
         unknownType: {
           statusCode: 200,
-          response: expectUnknownType,
+          response: expectUnknownTypeUnsupported,
         },
       },
     });
@@ -47,13 +47,13 @@ export default function({ getService }: TestInvoker) {
           statusCode: 200,
           response: createExpectResults(SPACES.DEFAULT.spaceId),
         },
-        spaceType: {
+        hiddenType: {
           statusCode: 200,
-          response: expectSpaceType,
+          response: expectHiddenTypeUnsupported,
         },
         unknownType: {
           statusCode: 200,
-          response: expectUnknownType,
+          response: expectUnknownTypeUnsupported,
         },
       },
     });

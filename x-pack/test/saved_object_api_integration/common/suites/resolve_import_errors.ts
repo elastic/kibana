@@ -17,7 +17,7 @@ interface ResolveImportErrorsTest {
 
 interface ResolveImportErrorsTests {
   default: ResolveImportErrorsTest;
-  spaceType: ResolveImportErrorsTest;
+  hiddenType: ResolveImportErrorsTest;
   unknownType: ResolveImportErrorsTest;
 }
 
@@ -58,7 +58,7 @@ export function resolveImportErrorsTestSuiteFactory(
     });
   };
 
-  const expectUnknownType = (resp: { [key: string]: any }) => {
+  const expectUnknownTypeUnsupported = (resp: { [key: string]: any }) => {
     expect(resp.body).to.eql({
       success: false,
       successCount: 1,
@@ -75,14 +75,14 @@ export function resolveImportErrorsTestSuiteFactory(
     });
   };
 
-  const expectSpaceType = (resp: { [key: string]: any }) => {
+  const expectHiddenTypeUnsupported = (resp: { [key: string]: any }) => {
     expect(resp.body).to.eql({
       success: false,
       successCount: 1,
       errors: [
         {
           id: '1',
-          type: 'space',
+          type: 'hiddentype',
           error: {
             type: 'unsupported_type',
           },
@@ -170,14 +170,14 @@ export function resolveImportErrorsTestSuiteFactory(
             .then(tests.unknownType.response);
         });
       });
-      describe('space type', () => {
-        it(`should return ${tests.spaceType.statusCode}`, async () => {
+      describe('hidden type', () => {
+        it(`should return ${tests.hiddenType.statusCode}`, async () => {
           const data = createImportData(spaceId);
           data.push({
-            type: 'space',
+            type: 'hiddentype',
             id: '1',
             attributes: {
-              name: 'My Space',
+              name: 'My Hidden Type',
             },
           });
           await supertest
@@ -187,7 +187,7 @@ export function resolveImportErrorsTestSuiteFactory(
               'retries',
               JSON.stringify([
                 {
-                  type: 'space',
+                  type: 'hiddentype',
                   id: '1',
                   overwrite: true,
                 },
@@ -203,8 +203,8 @@ export function resolveImportErrorsTestSuiteFactory(
               Buffer.from(data.map(obj => JSON.stringify(obj)).join('\n'), 'utf8'),
               'export.ndjson'
             )
-            .expect(tests.spaceType.statusCode)
-            .then(tests.spaceType.response);
+            .expect(tests.hiddenType.statusCode)
+            .then(tests.hiddenType.response);
         });
       });
     });
@@ -218,7 +218,7 @@ export function resolveImportErrorsTestSuiteFactory(
     resolveImportErrorsTest,
     createExpectResults,
     expectRbacForbidden,
-    expectUnknownType,
-    expectSpaceType,
+    expectUnknownTypeUnsupported,
+    expectHiddenTypeUnsupported,
   };
 }

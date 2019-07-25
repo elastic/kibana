@@ -31,7 +31,7 @@ export default function({ getService }: TestInvoker) {
   const {
     bulkCreateTest,
     createExpectResults,
-    expectBadRequestForSpace,
+    expectBadRequestForHiddenType,
   } = bulkCreateTestSuiteFactory(es, esArchiver, supertest);
 
   describe('_bulk_create', () => {
@@ -44,7 +44,7 @@ export default function({ getService }: TestInvoker) {
         },
         includingSpace: {
           statusCode: 200,
-          response: expectBadRequestForSpace,
+          response: expectBadRequestForHiddenType,
         },
         custom: {
           description: 'when a namespace is specified on the saved object',
@@ -72,7 +72,7 @@ export default function({ getService }: TestInvoker) {
         },
         includingSpace: {
           statusCode: 200,
-          response: expectBadRequestForSpace,
+          response: expectBadRequestForHiddenType,
         },
         custom: {
           description: 'when a namespace is specified on the saved object',

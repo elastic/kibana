@@ -17,7 +17,7 @@ export default function({ getService }: TestInvoker) {
     bulkGetTest,
     createExpectResults,
     createExpectNotFoundResults,
-    expectBadRequestForSpace,
+    expectBadRequestForHiddenType,
   } = bulkGetTestSuiteFactory(esArchiver, supertest);
 
   describe('_bulk_get', () => {
@@ -28,9 +28,9 @@ export default function({ getService }: TestInvoker) {
           statusCode: 200,
           response: createExpectResults(SPACES.SPACE_1.spaceId),
         },
-        includingSpace: {
+        includingHiddenType: {
           statusCode: 200,
-          response: expectBadRequestForSpace,
+          response: expectBadRequestForHiddenType,
         },
       },
     });
@@ -43,9 +43,9 @@ export default function({ getService }: TestInvoker) {
           statusCode: 200,
           response: createExpectNotFoundResults(SPACES.SPACE_2.spaceId),
         },
-        includingSpace: {
+        includingHiddenType: {
           statusCode: 200,
-          response: expectBadRequestForSpace,
+          response: expectBadRequestForHiddenType,
         },
       },
     });

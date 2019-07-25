@@ -23,7 +23,7 @@ interface CreateCustomTest extends CreateTest {
 interface CreateTests {
   spaceAware: CreateTest;
   notSpaceAware: CreateTest;
-  spaceType: CreateTest;
+  hiddenType: CreateTest;
   custom?: CreateCustomTest;
 }
 
@@ -45,9 +45,9 @@ export function createTestSuiteFactory(es: any, esArchiver: any, supertest: Supe
     });
   };
 
-  const expectBadRequestForSpace = (resp: { [key: string]: any }) => {
+  const expectBadRequestForHiddenType = (resp: { [key: string]: any }) => {
     expect(resp.body).to.eql({
-      message: "Unsupported saved object type: 'space': Bad Request",
+      message: "Unsupported saved object type: 'hiddentype': Bad Request",
       statusCode: 400,
       error: 'Bad Request',
     });
@@ -132,7 +132,7 @@ export function createTestSuiteFactory(es: any, esArchiver: any, supertest: Supe
 
   const expectSpaceAwareRbacForbidden = createExpectRbacForbidden(spaceAwareType);
 
-  const expectSpaceTypeRbacForbidden = createExpectRbacForbidden('space');
+  const expectHiddenTypeRbacForbidden = createExpectRbacForbidden('hiddentype');
 
   const makeCreateTest = (describeFn: DescribeFn) => (
     description: string,
@@ -168,17 +168,17 @@ export function createTestSuiteFactory(es: any, esArchiver: any, supertest: Supe
           .then(tests.notSpaceAware.response);
       });
 
-      it(`should return ${tests.spaceType.statusCode} for the 'space' type`, async () => {
+      it(`should return ${tests.hiddenType.statusCode} for the hiddentype`, async () => {
         await supertest
-          .post(`${getUrlPrefix(spaceId)}/api/saved_objects/space`)
+          .post(`${getUrlPrefix(spaceId)}/api/saved_objects/hiddentype`)
           .auth(user.username, user.password)
           .send({
             attributes: {
               name: `Can't be created via the Saved Objects API`,
             },
           })
-          .expect(tests.spaceType.statusCode)
-          .then(tests.spaceType.response);
+          .expect(tests.hiddenType.statusCode)
+          .then(tests.hiddenType.response);
       });
 
       if (tests.custom) {
@@ -204,7 +204,7 @@ export function createTestSuiteFactory(es: any, esArchiver: any, supertest: Supe
     expectNotSpaceAwareRbacForbidden,
     expectNotSpaceAwareResults,
     expectSpaceAwareRbacForbidden,
-    expectBadRequestForSpace,
-    expectSpaceTypeRbacForbidden,
+    expectBadRequestForHiddenType,
+    expectHiddenTypeRbacForbidden,
   };
 }

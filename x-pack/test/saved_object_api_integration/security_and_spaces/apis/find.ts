@@ -70,10 +70,10 @@ export default function({ getService }: TestInvoker) {
             statusCode: 403,
             response: createExpectRbacForbidden('globaltype'),
           },
-          spaceType: {
-            description: 'forbidden find space message',
+          hiddenType: {
+            description: 'forbidden find hiddentype message',
             statusCode: 403,
-            response: createExpectRbacForbidden('space'),
+            response: createExpectRbacForbidden('hiddentype'),
           },
           unknownType: {
             description: 'forbidden find wigwags message',
@@ -112,7 +112,7 @@ export default function({ getService }: TestInvoker) {
             statusCode: 200,
             response: expectNotSpaceAwareResults,
           },
-          spaceType: {
+          hiddenType: {
             description: 'empty result',
             statusCode: 200,
             response: createExpectEmpty(1, 20, 0),
@@ -154,10 +154,10 @@ export default function({ getService }: TestInvoker) {
             statusCode: 403,
             response: createExpectRbacForbidden('globaltype'),
           },
-          spaceType: {
-            description: 'forbidden find space message',
+          hiddenType: {
+            description: 'forbidden find hiddentype message',
             statusCode: 403,
-            response: createExpectRbacForbidden('space'),
+            response: createExpectRbacForbidden('hiddentype'),
           },
           unknownType: {
             description: 'forbidden find wigwags message',
@@ -196,10 +196,10 @@ export default function({ getService }: TestInvoker) {
             statusCode: 200,
             response: expectNotSpaceAwareResults,
           },
-          spaceType: {
-            description: 'forbidden find space message',
+          hiddenType: {
+            description: 'forbidden find hiddentype message',
             statusCode: 403,
-            response: createExpectRbacForbidden('space'),
+            response: createExpectRbacForbidden('hiddentype'),
           },
           unknownType: {
             description: 'forbidden find wigwags message',
@@ -238,10 +238,10 @@ export default function({ getService }: TestInvoker) {
             statusCode: 200,
             response: expectNotSpaceAwareResults,
           },
-          spaceType: {
-            description: 'forbidden find space message',
+          hiddenType: {
+            description: 'forbidden find hiddentype message',
             statusCode: 403,
-            response: createExpectRbacForbidden('space'),
+            response: createExpectRbacForbidden('hiddentype'),
           },
           unknownType: {
             description: 'forbidden find wigwags message',
@@ -280,10 +280,10 @@ export default function({ getService }: TestInvoker) {
             statusCode: 200,
             response: expectNotSpaceAwareResults,
           },
-          spaceType: {
-            description: 'forbidden find space message',
+          hiddenType: {
+            description: 'forbidden find hiddentype message',
             statusCode: 403,
-            response: createExpectRbacForbidden('space'),
+            response: createExpectRbacForbidden('hiddentype'),
           },
           unknownType: {
             description: 'forbidden find wigwags message',
@@ -322,10 +322,10 @@ export default function({ getService }: TestInvoker) {
             statusCode: 200,
             response: expectNotSpaceAwareResults,
           },
-          spaceType: {
-            description: 'forbidden find space message',
+          hiddenType: {
+            description: 'forbidden find hiddentype message',
             statusCode: 403,
-            response: createExpectRbacForbidden('space'),
+            response: createExpectRbacForbidden('hiddentype'),
           },
           unknownType: {
             description: 'forbidden find wigwags message',
@@ -364,10 +364,10 @@ export default function({ getService }: TestInvoker) {
             statusCode: 200,
             response: expectNotSpaceAwareResults,
           },
-          spaceType: {
-            description: 'forbidden find space message',
+          hiddenType: {
+            description: 'forbidden find hiddentype message',
             statusCode: 403,
-            response: createExpectRbacForbidden('space'),
+            response: createExpectRbacForbidden('hiddentype'),
           },
           unknownType: {
             description: 'forbidden find wigwags message',
@@ -406,10 +406,10 @@ export default function({ getService }: TestInvoker) {
             statusCode: 200,
             response: expectNotSpaceAwareResults,
           },
-          spaceType: {
-            description: 'forbidden find space message',
+          hiddenType: {
+            description: 'forbidden find hiddentype message',
             statusCode: 403,
-            response: createExpectRbacForbidden('space'),
+            response: createExpectRbacForbidden('hiddentype'),
           },
           unknownType: {
             description: 'forbidden find wigwags message',
@@ -448,10 +448,10 @@ export default function({ getService }: TestInvoker) {
             statusCode: 403,
             response: createExpectRbacForbidden('globaltype'),
           },
-          spaceType: {
-            description: 'forbidden find space message',
+          hiddenType: {
+            description: 'forbidden find hiddentype message',
             statusCode: 403,
-            response: createExpectRbacForbidden('space'),
+            response: createExpectRbacForbidden('hiddentype'),
           },
           unknownType: {
             description: 'forbidden find wigwags message',
