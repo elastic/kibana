@@ -18,14 +18,7 @@
  */
 import React from 'react';
 // @ts-ignore
-import {
-  EuiCodeEditor,
-  EuiCode,
-  EuiCodeBlock,
-  EuiDescriptionList,
-  EuiTitle,
-  EuiSpacer,
-} from '@elastic/eui';
+import { EuiCode, EuiCodeBlock, EuiDescriptionList, EuiTitle, EuiSpacer } from '@elastic/eui';
 // @ts-ignore
 import { RIGHT_ALIGNMENT } from '@elastic/eui/lib/services';
 import { ShardFailure } from './shard_failure_types';
