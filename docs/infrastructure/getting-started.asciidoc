@@ -1,0 +1,12 @@
+[role="xpack"]
+[[xpack-metrics-getting-started]]
+== Getting started with infrastructure monitoring
+
+// **** to do
+
+Kibana provides step-by-step instructions to help you add log data. The
+{infra-guide}[Infrastructure Monitoring Guide] is a good source for more
+detailed information and instructions.
+
+[role="screenshot"]
+image::logs/images/logs-add-data.png[Included data ingestion tutorials in Kibana]

@@ -1,0 +1,12 @@
+[role="xpack"]
+[[xpack-view-metrics]]
+== Viewing metrics
+
+// ***** To do
+
+here's some dummy content for now. this describes the detailed metrics screen.
+
+We will have a quick screenshot, a description of the (kind of) things you can see/click, what happens when you do, and, non-intuitively, how to get back to the infrastructure screen.
+
+Why do I sometimes get a Hosts AND Kubernetes view, and sometimes just one? see for example snagit screenshot of 2019-07-25_19_18_25 has both. but sometimes there is only one?
+

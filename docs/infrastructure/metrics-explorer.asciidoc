@@ -1,5 +1,6 @@
 [role="xpack"]
 [[metrics-explorer]]
+== Metrics Explorer
 
 == Metrics Explorer
 

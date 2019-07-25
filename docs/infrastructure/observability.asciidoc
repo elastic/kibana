@@ -1,0 +1,64 @@
+[role="xpack"]
+[[xpack-observability]]
+//= Observability
+== About Observability
+
+// I'd like to make this a separate section in the Kibana docs?
+// At present, I've removed the level 1 heading and tagged this at the end of Infrastructure.
+// Should this be a container for the other observability functions, or separate at the same level? I think the latter.
+// When I separate this out, reinstate the book title (the + line above)
+
+
+Observability is a system attribute. An _observable_ system allows the operators responsible for it to:
+
+* detect undesirable behaviors (for example, service downtime, errors, slow responses)
+* view actionable information to pin down the root causes in an effective manner (for example, detailed event logs, granular resource usage information, and application traces)
+
+The Elastic stack is a natural home for Observability.
+Elasticsearch can collect and store logs, system metrics, application traces and uptime information.
+Kibana then provides a unified view of all this information in real-time, so you can easily see how the system is performing currently, or how it has performed in the past.
+You can see where the hot spots are, and whether you are meeting your Service Level Objectives (SLOs).
+If there are problems, you can drill down to individual components and inspect the logs, metrics, traces and uptime information in a highly integrated and customisable manner to identify the root causes.
+
+[float]
+== Observability in Kibana
+
+In Kibana, the *Infrastructure* tab is a convenient way into Observability. Here you can view your infrastructure diagrammatically, showing your hosts, Kubernetes pods or Docker containers. You can view basic metrics for each component, and also drill down to view metrics in more detail. Alternatively, you can select a single component, then view the logs, application traces or uptime information for that component.
+
+You can also use the *Logs*, *APM* or *Uptime* tabs to view logs, application traces or uptime information respectively. Once you have identified an area of interest, you can switch seamlessly between the various tabs to see all related information.
+
+If you have specific graphs and charts that you want to refer to regularly, you can add them to a Kibana dashboard, so you can view interesting information about your system in one place.
+
+// XXXXXX Either a single graphic, or an example, as below, with several graphics
+
+// Example
+Before you start setting up Observability for your data, take a look at this simple example showing Observability in action to pin down a system performance problem. <link to example>
+
+// XXXX This may be better as a "getting started with observability" topic.
+[float]
+== More about Observability
+
+To use the Observability features in Kibana, firstly you need to `<install Elasticsearch and Kibana>` if you have not already done so. Then you need to add some data from your system to observe.
+
+// **** Check what the standard wording is for this, and find some good places to link to.
+// Do we recommend that you don't install ELK on the system you are monitoring, or doesn't it matter?
+// This section is becoming a bit to detailed to use as intro signposting. Needs work.
+
+// Something like
+
+// To collect system metrics, you need to <install and configure> Metricbeat. To collect logs, you need to . . .
+
+Metrics, logs or uptime information are collected using the appropriate Elastic Beats (lightweight data shippers, link etc xxxx). Use <Metricbeat to collect metrics>, <Filebeat to collect logs> and <Heartbeat to collect uptime information>.
+// ??? could make links a bit more specific, to make sure these are installs for observability, not general installation.
+
+To collect application traces, you need to <install and configure Elastic APM>.
+
+Once you have started collecting data from your system, you can:
+
+* use the *Infrastructure* tab to see an overview of your infrastructure, drill down to system metrics, or view logs, traces or uptime information for individual components <Add link>
+* use the *Logs* tab to view logs
+* use the *APM* tab to xxxx
+* use the *Uptime* tab to xxxx
+
+
+
