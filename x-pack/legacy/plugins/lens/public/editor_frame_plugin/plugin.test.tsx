@@ -13,7 +13,7 @@ import {
   createMockVisualization,
 } from './mocks';
 import { SavedObjectStore, Document } from '../persistence';
-import { shallow, mount } from 'enzyme';
+import { mountWithIntl as mount, shallowWithIntl as shallow } from 'test_utils/enzyme_helpers';
 
 jest.mock('ui/chrome', () => ({
   getSavedObjectsClient: jest.fn(),
@@ -22,6 +22,8 @@ jest.mock('ui/chrome', () => ({
 // mock away actual dependencies to prevent all of it being loaded
 jest.mock('../../../../../../src/legacy/core_plugins/interpreter/public/registries', () => {});
 jest.mock('../../../../../../src/legacy/core_plugins/data/public/setup', () => {});
+jest.mock('../../../../../../src/legacy/core_plugins/embeddable_api/public', () => {});
+jest.mock('./embeddable/embeddable_factory', () => ({ EmbeddableFactory: class Mock {} }));
 
 function mockStore(): SavedObjectStore {
   return {
@@ -78,12 +80,16 @@ describe('editor_frame plugin', () => {
     it('should load the document, if persistedId is defined', async () => {
       const doc: Document = {
         id: 'hoi',
+        expression: '',
         activeDatasourceId: 'indexpattern',
         state: {
           datasourceStates: {
             indexpattern: 'foo',
           },
           visualization: 'bar',
+          datasourceMetaData: {
+            filterableIndexPatterns: [],
+          },
         },
         title: 'shazm',
         visualizationType: 'fanci',
@@ -192,11 +198,15 @@ describe('editor_frame plugin', () => {
           doc={{
             activeDatasourceId: 'b',
             visualizationType: 'd',
+            expression: '',
             state: {
-              visualization: 'viz',
+              datasourceMetaData: {
+                filterableIndexPatterns: [],
+              },
               datasourceStates: {
                 b: 'data',
               },
+              visualization: 'viz',
             },
             title: 'ttt',
           }}

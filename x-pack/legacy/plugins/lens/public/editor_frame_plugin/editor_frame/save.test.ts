@@ -6,18 +6,20 @@
 
 import { save, Props } from './save';
 import { Action } from './state_management';
-import { createMockDatasource } from '../mocks';
+import { createMockDatasource, createMockVisualization } from '../mocks';
 
 describe('save editor frame state', () => {
+  const mockVisualization = createMockVisualization();
+  mockVisualization.getPersistableState.mockImplementation(x => x);
+  const mockDatasource = createMockDatasource();
+  mockDatasource.getPersistableState.mockImplementation(x => x);
   const saveArgs: Props = {
     dispatch: jest.fn(),
     redirectTo: jest.fn(),
     activeDatasources: {
-      indexpattern: {
-        getPersistableState: x => x,
-      },
+      indexpattern: mockDatasource,
     },
-    visualization: { getPersistableState: x => x },
+    visualization: mockVisualization,
     state: {
       title: 'aaa',
       datasourceStates: {
@@ -29,6 +31,14 @@ describe('save editor frame state', () => {
       activeDatasourceId: 'indexpattern',
       saving: false,
       visualization: { activeId: '2', state: {} },
+    },
+    activeDatasourceId: 'indexpattern',
+    framePublicAPI: {
+      addNewLayer: jest.fn(),
+      removeLayer: jest.fn(),
+      datasourceLayers: {
+        first: mockDatasource.publicAPIMock,
+      },
     },
     store: {
       async save() {
@@ -92,6 +102,10 @@ describe('save editor frame state', () => {
       stuff: `${state}_datasource_persisted`,
     }));
 
+    const visualization = createMockVisualization();
+    visualization.getPersistableState.mockImplementation(state => ({
+      things: `${state}_vis_persisted`,
+    }));
     await save({
       ...saveArgs,
       activeDatasources: {
@@ -110,20 +124,17 @@ describe('save editor frame state', () => {
         saving: false,
         visualization: { activeId: '3', state: '4' },
       },
-
-      visualization: {
-        getPersistableState(state) {
-          return {
-            things: `${state}_vis_persisted`,
-          };
-        },
-      },
+      visualization,
     });
 
     expect(store.save).toHaveBeenCalledWith({
       activeDatasourceId: 'indexpattern',
       id: undefined,
+      expression: '',
       state: {
+        datasourceMetaData: {
+          filterableIndexPatterns: [],
+        },
         datasourceStates: {
           indexpattern: {
             stuff: '2_datasource_persisted',
