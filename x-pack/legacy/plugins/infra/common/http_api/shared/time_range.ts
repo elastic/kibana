@@ -6,7 +6,7 @@
 
 import * as runtimeTypes from 'io-ts';
 
-export const timeRangeRuntimeType = runtimeTypes.type({
+export const timeRangeRT = runtimeTypes.type({
   startTime: runtimeTypes.number,
   endTime: runtimeTypes.number,
 });

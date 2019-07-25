@@ -8,7 +8,7 @@ import Boom from 'boom';
 
 import { InfraBackendLibs } from '../../../lib/infra_types';
 import {
-  createJobsRequestPayloadRuntimeType,
+  createJobsRequestPayloadRT,
   createJobsSuccessReponsePayloadRuntimeType,
   LOG_ANALYSIS_CREATE_JOBS_PATH,
 } from '../../../../common/http_api';
@@ -19,7 +19,7 @@ export const initLogAnalysisCreateJobRoute = ({ framework }: InfraBackendLibs) =
     method: 'POST',
     path: LOG_ANALYSIS_CREATE_JOBS_PATH,
     handler: (req, res) => {
-      const payload = createJobsRequestPayloadRuntimeType
+      const payload = createJobsRequestPayloadRT
         .decode(req.payload)
         .getOrElseL(throwErrors(Boom.badRequest));
 

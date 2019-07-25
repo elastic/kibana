@@ -4,49 +4,56 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import * as runtimeTypes from 'io-ts';
+import * as rt from 'io-ts';
 
-import { timeRangeRuntimeType } from '../../shared';
+import { badRequestErrorRT, conflictErrorRT, forbiddenErrorRT, timeRangeRT } from '../../shared';
 
 export const LOG_ANALYSIS_CREATE_JOBS_PATH = '/api/infra/log_analysis/jobs/create';
 
-export const createJobsRequestPayloadRuntimeType = runtimeTypes.type({
-  data: runtimeTypes.type({
-    sourceId: runtimeTypes.string,
-    categorizationFieldName: runtimeTypes.string,
-    timeRange: timeRangeRuntimeType,
+/**
+ * request
+ */
+
+export const createJobsRequestPayloadRT = rt.type({
+  data: rt.type({
+    sourceId: rt.string,
+    categorizationFieldName: rt.string,
+    timeRange: timeRangeRT,
   }),
 });
 
-export type CreateJobsRequestPayload = runtimeTypes.TypeOf<
-  typeof createJobsRequestPayloadRuntimeType
->;
+export type CreateJobsRequestPayload = rt.TypeOf<typeof createJobsRequestPayloadRT>;
 
-export const JobTypesRuntimeType = runtimeTypes.keyof({
+export const JobTypesRT = rt.keyof({
   entry_rate: null,
   rare_categories: null,
   high_categories: null,
 });
 
-export const createJobsSuccessReponsePayloadRuntimeType = runtimeTypes.type({
-  data: runtimeTypes.type({
-    jobs: runtimeTypes.array(
-      runtimeTypes.type({
-        jobId: runtimeTypes.string,
-        jobType: JobTypesRuntimeType,
+/**
+ * response
+ */
+
+export const createJobsSuccessReponsePayloadRuntimeType = rt.type({
+  data: rt.type({
+    jobs: rt.array(
+      rt.type({
+        jobId: rt.string,
+        jobType: JobTypesRT,
       })
     ),
   }),
 });
 
-export type CreateJobsSuccessResponsePayload = runtimeTypes.TypeOf<
+export type CreateJobsSuccessResponsePayload = rt.TypeOf<
   typeof createJobsSuccessReponsePayloadRuntimeType
 >;
 
-export const createJobsResponsePayloadRuntimeType = runtimeTypes.union([
+export const createJobsResponsePayloadRT = rt.union([
   createJobsSuccessReponsePayloadRuntimeType,
+  badRequestErrorRT,
+  conflictErrorRT,
+  forbiddenErrorRT,
 ]);
 
-export type CreateJobsReponsePayload = runtimeTypes.TypeOf<
-  typeof createJobsResponsePayloadRuntimeType
->;
+export type CreateJobsReponsePayload = rt.TypeOf<typeof createJobsResponsePayloadRT>;
