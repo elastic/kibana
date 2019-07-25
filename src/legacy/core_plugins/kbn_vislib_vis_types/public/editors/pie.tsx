@@ -19,6 +19,7 @@
 import React from 'react';
 import { EuiPanel, EuiTitle, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 import { VisOptionsProps, VisOptionsSetValue } from 'ui/vis/editors/default';
 import { BasicOptions } from '../controls/basic_options';
@@ -35,9 +36,10 @@ function PieOptions(props: VisOptionsProps) {
       <EuiPanel paddingSize="s">
         <EuiTitle size="xs">
           <div>
-            {i18n.translate('kbnVislibVisTypes.editors.pie.pieSettingsTitle', {
-              defaultMessage: 'Pie settings',
-            })}
+            <FormattedMessage
+              id="kbnVislibVisTypes.editors.pie.pieSettingsTitle"
+              defaultMessage="Pie settings"
+            />
           </div>
         </EuiTitle>
         <EuiSpacer size="s" />
@@ -57,9 +59,10 @@ function PieOptions(props: VisOptionsProps) {
       <EuiPanel paddingSize="s">
         <EuiTitle size="xs">
           <div>
-            {i18n.translate('kbnVislibVisTypes.editors.pie.labelsSettingsTitle', {
-              defaultMessage: 'Labels settings',
-            })}
+            <FormattedMessage
+              id="kbnVislibVisTypes.editors.pie.labelsSettingsTitle"
+              defaultMessage="Labels settings"
+            />
           </div>
         </EuiTitle>
         <EuiSpacer size="s" />
