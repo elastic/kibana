@@ -5,13 +5,14 @@
  */
 
 import {
-  FIELD_TYPES,
   FieldConfig,
+  FIELD_TYPES,
 } from '../../../../../../../../../src/plugins/elasticsearch_ui_shared/static/forms/hook_form_lib';
+
 import {
   emptyField,
   containsCharsField,
-} from '../../../../../../../../../src/plugins/elasticsearch_ui_shared/static/forms/field_validators';
+} from '../../../../../../../../../src/plugins/elasticsearch_ui_shared/static/forms/lib/field_validators';
 
 export type ParameterName =
   | 'name'
@@ -37,12 +38,13 @@ export const parametersDefinition: { [key in ParameterName]: Parameter } = {
       label: 'Name',
       validations: [
         {
-          validator: emptyField,
-          message: 'Please give a name to the property',
+          validator: emptyField('Please give a name to the property'),
         },
         {
-          validator: containsCharsField(' '),
-          message: 'Spaces are not allowed in the name.',
+          validator: containsCharsField({
+            chars: ' ',
+            message: 'Spaces are not allowed in the name.',
+          }),
         },
       ],
     },
@@ -57,7 +59,7 @@ export const parametersDefinition: { [key in ParameterName]: Parameter } = {
   store: {
     fieldConfig: {
       label: 'Store',
-      type: FIELD_TYPES.TOGGLE,
+      type: FIELD_TYPES.CHECKBOX,
       defaultValue: true,
     },
     docs: 'https://www.elastic.co/guide/en/elasticsearch/reference/current/mapping-store.html',
@@ -65,14 +67,14 @@ export const parametersDefinition: { [key in ParameterName]: Parameter } = {
   index: {
     fieldConfig: {
       label: 'Index',
-      type: FIELD_TYPES.TOGGLE,
+      type: FIELD_TYPES.CHECKBOX,
       defaultValue: true,
     },
   },
   doc_values: {
     fieldConfig: {
       label: 'Doc values',
-      type: FIELD_TYPES.TOGGLE,
+      type: FIELD_TYPES.CHECKBOX,
       defaultValue: true,
     },
     docs: 'https://www.elastic.co/guide/en/elasticsearch/reference/current/doc-values.html',
@@ -80,14 +82,14 @@ export const parametersDefinition: { [key in ParameterName]: Parameter } = {
   coerce: {
     fieldConfig: {
       label: 'Coerce',
-      type: FIELD_TYPES.TOGGLE,
+      type: FIELD_TYPES.CHECKBOX,
       defaultValue: true,
     },
   },
   ignore_malformed: {
     fieldConfig: {
       label: 'Ignore malformed',
-      type: FIELD_TYPES.TOGGLE,
+      type: FIELD_TYPES.CHECKBOX,
       defaultValue: true,
     },
   },
@@ -106,14 +108,14 @@ export const parametersDefinition: { [key in ParameterName]: Parameter } = {
   dynamic: {
     fieldConfig: {
       label: 'Dynamic',
-      type: FIELD_TYPES.TOGGLE,
+      type: FIELD_TYPES.CHECKBOX,
       defaultValue: true,
     },
   },
   enabled: {
     fieldConfig: {
       label: 'Enabled',
-      type: FIELD_TYPES.TOGGLE,
+      type: FIELD_TYPES.CHECKBOX,
       defaultValue: true,
     },
   },
