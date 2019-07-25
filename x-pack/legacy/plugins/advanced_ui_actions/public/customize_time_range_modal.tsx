@@ -121,8 +121,8 @@ export class CustomizeTimeRangeModal extends Component<CustomizeTimeRangeProps, 
         </EuiModalBody>
         <EuiModalFooter>
           <EuiFlexGroup justifyContent="spaceBetween">
-            <EuiFlexItem>
-              <EuiFlexGroup gutterSize="s">
+            <EuiFlexGroup gutterSize="s">
+              <EuiFlexItem>
                 <EuiButtonEmpty
                   onClick={this.inheritFromParent}
                   color="danger"
@@ -137,10 +137,10 @@ export class CustomizeTimeRangeModal extends Component<CustomizeTimeRangeProps, 
                     }
                   )}
                 </EuiButtonEmpty>
-              </EuiFlexGroup>
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiFlexGroup gutterSize="s">
+              </EuiFlexItem>
+            </EuiFlexGroup>
+            <EuiFlexGroup gutterSize="s" responsive={false}>
+              <EuiFlexItem>
                 <EuiButtonEmpty
                   onClick={this.cancel}
                   data-test-subj="cancelPerPanelTimeRangeButton"
@@ -153,21 +153,29 @@ export class CustomizeTimeRangeModal extends Component<CustomizeTimeRangeProps, 
                     }
                   )}
                 </EuiButtonEmpty>
-
+              </EuiFlexItem>
+              <EuiFlexItem>
                 <EuiButton
                   data-test-subj="addPerPanelTimeRangeButton"
                   onClick={this.addToPanel}
                   fill
                 >
-                  {i18n.translate(
-                    'xpack.advancedUiActions.customizePanelTimeRange.modal.addToPanelButtonTitle',
-                    {
-                      defaultMessage: 'Add to panel',
-                    }
-                  )}
+                  {this.state.inheritTimeRange
+                    ? i18n.translate(
+                        'xpack.advancedUiActions.customizePanelTimeRange.modal.addToPanelButtonTitle',
+                        {
+                          defaultMessage: 'Add to panel',
+                        }
+                      )
+                    : i18n.translate(
+                        'xpack.advancedUiActions.customizePanelTimeRange.modal.updatePanelTimeRangeButtonTitle',
+                        {
+                          defaultMessage: 'Update',
+                        }
+                      )}
                 </EuiButton>
-              </EuiFlexGroup>
-            </EuiFlexItem>
+              </EuiFlexItem>
+            </EuiFlexGroup>
           </EuiFlexGroup>
         </EuiModalFooter>
       </React.Fragment>
