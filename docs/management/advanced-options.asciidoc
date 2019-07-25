@@ -132,6 +132,7 @@ The default is `_source`.
 the Visualize button in the field drop down. The default is `20`.
 `discover:sampleSize`:: The number of rows to show in the Discover table.
 `discover:sort:defaultOrder`:: The default sort direction for time-based index patterns.
+`discover:searchOnPageLoad`:: Controls whether a search is executed when Discover first loads.
 `doc_table:hideTimeColumn`:: Hides the "Time" column in Discover and in all saved searches on dashboards.
 `doc_table:highlight`:: Highlights results in Discover and saved searches on dashboards. 
 Highlighting slows requests when

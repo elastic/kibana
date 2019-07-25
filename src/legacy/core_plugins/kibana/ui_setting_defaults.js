@@ -298,6 +298,18 @@ export function getUiSettingDefaults() {
       }),
       category: ['discover'],
     },
+    'discover:searchOnPageLoad': {
+      name: i18n.translate('kbn.advancedSettings.discover.searchOnPageLoadTitle', {
+        defaultMessage: 'Search on page load',
+      }),
+      value: true,
+      type: 'boolean',
+      description: i18n.translate('kbn.advancedSettings.discover.searchOnPageLoadText', {
+        defaultMessage:
+          'Controls whether a search is executed when Discover first loads',
+      }),
+      category: ['discover'],
+    },
     'doc_table:highlight': {
       name: i18n.translate('kbn.advancedSettings.docTableHighlightTitle', {
         defaultMessage: 'Highlight results',
