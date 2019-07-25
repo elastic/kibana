@@ -334,9 +334,14 @@ export interface InfraTimeKeyInput {
 
   tiebreaker: number;
 }
-
+/** A highlighting definition */
 export interface InfraLogEntryHighlightInput {
+  /** The query to highlight by */
   query: string;
+  /** The number of highlighted documents to include beyond the beginning of the interval */
+  countBefore: number;
+  /** The number of highlighted documents to include beyond the end of the interval */
+  countAfter: number;
 }
 
 export interface InfraTimerangeInput {

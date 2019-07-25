@@ -189,7 +189,7 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('goal and guages', async () => {
-        await dashboardExpect.goalAndGuageLabelsExist(['40%', '7,544']);
+        await dashboardExpect.goalAndGuageLabelsExist(['39.958%', '7,544']);
       });
 
       it('tsvb time series', async () => {

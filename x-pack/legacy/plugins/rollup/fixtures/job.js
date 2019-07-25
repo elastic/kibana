@@ -44,6 +44,11 @@ const initialValues = {
   triggerCount: 7,
 };
 
-export const getJob = (values = { id: getRandomString() }) => ({ ...initialValues, ...values });
+const statuses = ['stopped', 'stopping', 'started', 'indexing', 'abort', 'abc' /* unknown status */];
 
-export const getJobs = (total = 5) => new Array(total).fill().map(() => getJob());
+export const getJob = (values = { id: getRandomString() }) => ({ ...initialValues, ...values });
+export const jobCount = statuses.length;
+export const getJobs = () =>
+  statuses.map(status =>
+    getJob({ status, id: getRandomString() })
+  );

@@ -175,6 +175,7 @@ Kibana ships with a set of built-in action types:
 - server log: logs messages to the Kibana log using `server.log()`
 - email: send an email
 - slack: post a message to a slack channel
+- index: index document(s) into elasticsearch
 
 ## server log, action id: `.log`
 
@@ -246,6 +247,27 @@ This action type interfaces with the [Slack Incoming Webhooks feature](https://a
 |Property|Description|Type|
 |---|---|---|
 |message|the message text|string|
+
+
+## index, action id: `.index`
+
+The config and params properties are modelled after the [Watcher Index Action](https://www.elastic.co/guide/en/elastic-stack-overview/master/actions-index.html).  The index can be set in the config or params, and if set in config, then the index set in the params will be ignored.
+
+#### config properties
+
+|Property|Description|Type|
+|---|---|---|
+|index|The Elasticsearch index to index into.|string _(optional)_|
+
+#### params properties
+
+|Property|Description|Type|
+|---|---|---|
+|index|The Elasticsearch index to index into.|string _(optional)_|
+|doc_id|The optional _id of the document.|string _(optional)_|
+|execution_time_field|The field that will store/index the action execution time.|string _(optional)_|
+|refresh|Setting of the refresh policy for the write request|boolean _(optional)_|
+|body|The documument body/bodies to index.|object or object[]|
 
 # Command Line Utility
 

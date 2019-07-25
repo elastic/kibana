@@ -5,9 +5,9 @@
  */
 
 import { Annotation } from '../../../common/types/annotations';
-import { Privileges } from '../../../common/types/privileges';
 import { DslName, AggFieldNamePair } from '../../../common/types/fields';
 import { ExistingJobsAndGroups } from '../job_service';
+import { PrivilegesResponse } from '../../../common/types/privileges';
 
 // TODO This is not a complete representation of all methods of `ml.*`.
 // It just satisfies needs for other parts of the code area which use
@@ -40,7 +40,7 @@ declare interface Ml {
 
   hasPrivileges(obj: object): Promise<any>;
 
-  checkMlPrivileges(): Promise<{ capabilities: Privileges; upgradeInProgress: boolean }>;
+  checkMlPrivileges(): Promise<PrivilegesResponse>;
   getJobStats(obj: object): Promise<any>;
   getDatafeedStats(obj: object): Promise<any>;
   esSearch(obj: object): any;
