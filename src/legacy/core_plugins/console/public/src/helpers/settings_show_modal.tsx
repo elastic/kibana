@@ -75,7 +75,7 @@ export function showSettingsModal() {
           {}
         );
         mappings.retrieveAutoCompleteInfo(changedSettings);
-      } else if (isPollingChanged && newSettings.polling) {
+      } else if (isPollingChanged) {
         // If the user has turned polling on, then we'll fetch all selected autocomplete settings.
         mappings.retrieveAutoCompleteInfo();
       }
