@@ -7,6 +7,7 @@
 import * as rt from 'io-ts';
 
 import { badRequestErrorRT, conflictErrorRT, forbiddenErrorRT, timeRangeRT } from '../../shared';
+import { jobDescriptorRT } from './shared';
 
 export const LOG_ANALYSIS_CREATE_JOBS_PATH = '/api/infra/log_analysis/jobs/create';
 
@@ -24,33 +25,20 @@ export const createJobsRequestPayloadRT = rt.type({
 
 export type CreateJobsRequestPayload = rt.TypeOf<typeof createJobsRequestPayloadRT>;
 
-export const JobTypesRT = rt.keyof({
-  entry_rate: null,
-  rare_categories: null,
-  high_categories: null,
-});
-
 /**
  * response
  */
 
-export const createJobsSuccessReponsePayloadRuntimeType = rt.type({
+export const createJobsSuccessReponsePayloadRT = rt.type({
   data: rt.type({
-    jobs: rt.array(
-      rt.type({
-        jobId: rt.string,
-        jobType: JobTypesRT,
-      })
-    ),
+    jobs: rt.array(jobDescriptorRT),
   }),
 });
 
-export type CreateJobsSuccessResponsePayload = rt.TypeOf<
-  typeof createJobsSuccessReponsePayloadRuntimeType
->;
+export type CreateJobsSuccessResponsePayload = rt.TypeOf<typeof createJobsSuccessReponsePayloadRT>;
 
 export const createJobsResponsePayloadRT = rt.union([
-  createJobsSuccessReponsePayloadRuntimeType,
+  createJobsSuccessReponsePayloadRT,
   badRequestErrorRT,
   conflictErrorRT,
   forbiddenErrorRT,

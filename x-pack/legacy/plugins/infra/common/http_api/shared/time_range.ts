@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import * as runtimeTypes from 'io-ts';
+import * as rt from 'io-ts';
 
-export const timeRangeRT = runtimeTypes.type({
-  startTime: runtimeTypes.number,
-  endTime: runtimeTypes.number,
+export const timeRangeRT = rt.type({
+  startTime: rt.number,
+  endTime: rt.number,
 });

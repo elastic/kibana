@@ -9,9 +9,9 @@ import Boom from 'boom';
 import { InfraBackendLibs } from '../../../lib/infra_types';
 import {
   createJobsRequestPayloadRT,
-  createJobsSuccessReponsePayloadRuntimeType,
+  createJobsSuccessReponsePayloadRT,
   LOG_ANALYSIS_CREATE_JOBS_PATH,
-} from '../../../../common/http_api';
+} from '../../../../common/http_api/log_analysis';
 import { throwErrors } from '../../../../common/runtime_types';
 
 export const initLogAnalysisCreateJobRoute = ({ framework }: InfraBackendLibs) => {
@@ -23,9 +23,7 @@ export const initLogAnalysisCreateJobRoute = ({ framework }: InfraBackendLibs) =
         .decode(req.payload)
         .getOrElseL(throwErrors(Boom.badRequest));
 
-      return res.response(
-        createJobsSuccessReponsePayloadRuntimeType.encode({ data: { jobs: [] } })
-      );
+      return res.response(createJobsSuccessReponsePayloadRT.encode({ data: { jobs: [] } }));
     },
   });
 };
