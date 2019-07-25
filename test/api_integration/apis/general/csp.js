@@ -32,8 +32,16 @@ export default function ({ getService }) {
     it('csp header does not allow all inline scripts', async () => {
       const response = await supertest.get('/app/kibana');
 
-      expect(response.headers['content-security-policy']).to.contain('script-src');
-      expect(response.headers['content-security-policy']).not.to.contain('unsafe-inline');
+      const header = response.headers['content-security-policy'];
+      const parsed = new Map(header.split(';').map(rule => {
+        const parts = rule.trim().split(' ');
+        const key = parts.splice(0, 1)[0];
+        return [key, parts];
+      }));
+
+      const scriptSrc = parsed.get('script-src');
+      expect(scriptSrc).to.be.an(Array);
+      expect(scriptSrc).not.to.contain('unsafe-inline');
     });
   });
 }
