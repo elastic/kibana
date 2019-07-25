@@ -72,6 +72,7 @@ export const MappingsEditor = ({
         />
         <UseField path="date_detection" form={form} component={Field} />
         <UseField path="numeric_detection" form={form} component={Field} />
+        <UseField path="dynamic_date_formats" form={form} component={Field} />
       </FormRow>
 
       {/* Document fields */}
