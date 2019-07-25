@@ -25,7 +25,7 @@ describe('telemetryTaskRunner', () => {
       moment()
         .add(1, 'days')
         .startOf('day')
-        .toISOString();
+        .toDate();
 
     const getRunner = telemetryTaskRunner();
     const runResult = await getRunner(

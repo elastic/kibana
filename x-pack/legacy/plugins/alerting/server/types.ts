@@ -40,7 +40,7 @@ export interface AlertType {
   id: string;
   name: string;
   validate?: {
-    params?: any;
+    params?: { validate: (object: any) => any };
   };
   executor: ({ services, params, state }: AlertExecutorOptions) => Promise<State | void>;
 }
