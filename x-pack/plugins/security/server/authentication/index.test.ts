@@ -157,7 +157,7 @@ describe('setupAuthentication()', () => {
       expect(mockAuthToolkit.authenticated).toHaveBeenCalledTimes(1);
       expect(mockAuthToolkit.authenticated).toHaveBeenCalledWith({
         state: mockUser,
-        headers: mockAuthHeaders,
+        requestHeaders: mockAuthHeaders,
       });
       expect(mockAuthToolkit.redirected).not.toHaveBeenCalled();
       expect(mockAuthToolkit.rejected).not.toHaveBeenCalled();
