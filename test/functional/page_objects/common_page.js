@@ -336,6 +336,12 @@ export function CommonPageProvider({ getService, getPageObjects }) {
       return globalNavShown && topNavShown;
     }
 
+    async isChromeHidden() {
+      const globalNavShown = await globalNav.exists();
+      const topNavShown = await testSubjects.exists('top-nav');
+      return !globalNavShown && !topNavShown;
+    }
+
     async waitForTopNavToBeVisible() {
       await retry.try(async () => {
         const isNavVisible = await testSubjects.exists('top-nav');

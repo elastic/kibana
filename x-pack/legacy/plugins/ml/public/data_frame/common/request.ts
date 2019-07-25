@@ -123,7 +123,7 @@ export function getCreateRequestBody(
   const request: CreateRequestBody = {
     ...getPreviewRequestBody(
       indexPatternTitle,
-      getPivotQuery(pivotState.search),
+      getPivotQuery(pivotState.searchQuery),
       dictionaryToArray(pivotState.groupByList),
       dictionaryToArray(pivotState.aggList)
     ),
