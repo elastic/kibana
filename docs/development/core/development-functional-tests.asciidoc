@@ -61,7 +61,7 @@ export TEST_ES_PASS=<password>
 node scripts/functional_test_runner
 ----------
 
-** Functional tests are run in headless mode on CI. You can activate headless mode locally by setting the environment variable below:
+** Selenium tests are run in headless mode on CI. Locally the same tests will be executed in a real browser. You can activate headless mode by setting the environment variable below:
 +
 ["source", "shell"]
 ----------
@@ -141,12 +141,19 @@ The `FunctionalTestRunner`'s primary purpose is to execute test files. These fil
 **Test Suite**:::
 A test suite is a collection of tests defined by calling `describe()`, and then populated with tests and setup/teardown hooks by calling `it()`, `before()`, `beforeEach()`, etc. Every test file must define only one top level test suite, and test suites can have as many nested test suites as they like.
 
+**Tags**:::
+We use tags to group functional tests:
+* `ciGroup{id}` tag to assign test suite to specific CI worker
+* `skipCloud` and `skipFirefox` to exclude test suite from running on Cloud or Firefox browser
+* `smoke` to group tests that we run both on Chrome and Firefox
+Tags are supported for `describe()` function only.
+
 **Cross-browser testing**:::
-All the functional tests are executed in Chrome by default. To run specific tests in both Chrome and Firefox, `smoke` tag should be assigned:
+On CI all the functional tests are executed in Chrome by default. To run tests also on Firefox `smoke` tag should be assigned:
 
 ["source","js"]
 -----------
-// tags must be defined in `describe` function
+// on CI test suite will be run twice: in Chrome and Firefox
 describe('My Cross-browser Test Suite', function () {
   this.tags('smoke');
 
