@@ -38,8 +38,10 @@ const networkDnsTests: KbnTestProvider = ({ getService }) => {
               isPtrIncluded: false,
               sort: { field: NetworkDnsFields.uniqueDomains, direction: Direction.asc },
               pagination: {
-                limit: 10,
-                cursor: null,
+                activePage: 0,
+                cursorStart: 0,
+                fakePossibleCount: 30,
+                querySize: 10,
               },
               defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
               inspect: false,
@@ -50,9 +52,9 @@ const networkDnsTests: KbnTestProvider = ({ getService }) => {
             expect(networkDns.edges.length).to.be(10);
             expect(networkDns.totalCount).to.be(44);
             expect(networkDns.edges.map(i => i.node.dnsName).join(',')).to.be(
-              'aaplimg.com,adgrx.com,akadns.net,akamaiedge.net,amazonaws.com,cbsistatic.com,cdn-apple.com,connman.net,d1oxlq5h9kq8q5.cloudfront.net,d3epxf4t8a32oh.cloudfront.net'
+              'aaplimg.com,adgrx.com,akadns.net,akamaiedge.net,amazonaws.com,cbsistatic.com,cdn-apple.com,connman.net,crowbird.com,d1oxlq5h9kq8q5.cloudfront.net'
             );
-            expect(networkDns.pageInfo.endCursor!.value).to.equal('10');
+            expect(networkDns.pageInfo.fakeTotalCount).to.equal(30);
           });
       });
 
@@ -70,8 +72,10 @@ const networkDnsTests: KbnTestProvider = ({ getService }) => {
               isPtrIncluded: false,
               sort: { field: NetworkDnsFields.uniqueDomains, direction: Direction.desc },
               pagination: {
-                limit: 10,
-                cursor: null,
+                activePage: 0,
+                cursorStart: 0,
+                fakePossibleCount: 30,
+                querySize: 10,
               },
               defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
               inspect: false,
@@ -84,7 +88,7 @@ const networkDnsTests: KbnTestProvider = ({ getService }) => {
             expect(networkDns.edges.map(i => i.node.dnsName).join(',')).to.be(
               'nflxvideo.net,apple.com,netflix.com,samsungcloudsolution.com,samsungqbe.com,samsungelectronics.com,internetat.tv,samsungcloudsolution.net,samsungosp.com,cbsnews.com'
             );
-            expect(networkDns.pageInfo.endCursor!.value).to.equal('10');
+            expect(networkDns.pageInfo.fakeTotalCount).to.equal(30);
           });
       });
     });

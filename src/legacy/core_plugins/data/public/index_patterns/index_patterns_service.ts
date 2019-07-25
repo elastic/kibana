@@ -31,6 +31,8 @@ import { IndexPatterns } from 'ui/index_patterns/index';
 // @ts-ignore
 import { validateIndexPattern } from 'ui/index_patterns/index';
 
+import { isFilterable, getFromSavedObject } from 'ui/index_patterns/static_utils';
+
 // IndexPattern, StaticIndexPattern, StaticIndexPatternField, Field
 import * as types from 'ui/index_patterns';
 
@@ -75,7 +77,12 @@ const ui = {
   IndexPatternSelect,
 };
 
-export { validateIndexPattern, constants, fixtures, ui, IndexPatterns };
+const utils = {
+  getFromSavedObject,
+  isFilterable,
+};
+
+export { validateIndexPattern, constants, fixtures, ui, IndexPatterns, utils };
 
 /** @public */
 export type IndexPatternsSetup = ReturnType<IndexPatternsService['setup']>;

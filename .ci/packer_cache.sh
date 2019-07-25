@@ -25,6 +25,16 @@ mkdir -p .chromedriver
 curl "https://chromedriver.storage.googleapis.com/$chromedriverDistVersion/chromedriver_linux64.zip" > .chromedriver/chromedriver.zip
 echo "$chromedriverPkgVersion" > .chromedriver/pkgVersion
 
+# cache the geckodriver archive
+geckodriverPkgVersion="$(node -e "console.log(require('./package.json').devDependencies.geckodriver)")"
+if [ -z "$geckodriverPkgVersion" ]; then
+  echo "UNABLE TO DETERMINE geckodriver VERSIONS"
+  exit 1
+fi
+mkdir -p ".geckodriver"
+cp "node_modules/geckodriver/geckodriver.tar.gz" .geckodriver/geckodriver.tar.gz
+echo "$geckodriverPkgVersion" > .geckodriver/pkgVersion
+
 # archive cacheable directories
 mkdir -p "$HOME/.kibana/bootstrap_cache"
 tar -cf "$HOME/.kibana/bootstrap_cache/$branch.tar" \
@@ -35,7 +45,8 @@ tar -cf "$HOME/.kibana/bootstrap_cache/$branch.tar" \
   x-pack/legacy/plugins/reporting/.chromium \
   test/plugin_functional/plugins/*/node_modules \
   .es \
-  .chromedriver;
+  .chromedriver \
+  .geckodriver;
 
 echo "created $HOME/.kibana/bootstrap_cache/$branch.tar"
 
