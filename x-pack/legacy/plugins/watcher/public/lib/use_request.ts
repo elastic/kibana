@@ -5,18 +5,18 @@
  */
 
 import {
-  SendRequest,
+  SendRequestConfig,
   SendRequestResponse,
-  UseRequest,
+  UseRequestConfig,
   sendRequest as _sendRequest,
   useRequest as _useRequest,
 } from '../shared_imports';
 import { getHttpClient } from './api';
 
-export const sendRequest = (config: SendRequest): Promise<Partial<SendRequestResponse>> => {
+export const sendRequest = (config: SendRequestConfig): Promise<Partial<SendRequestResponse>> => {
   return _sendRequest(getHttpClient(), config);
 };
 
-export const useRequest = (config: UseRequest) => {
+export const useRequest = (config: UseRequestConfig) => {
   return _useRequest(getHttpClient(), config);
 };

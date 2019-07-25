@@ -108,7 +108,7 @@ export const RestoreList: React.FunctionComponent = () => {
       );
     } else if (error) {
       // If we get an error while polling we don't need to show it to the user because they can still
-      // work wit the table.
+      // work with the table.
       content = (
         <SectionError
           title={

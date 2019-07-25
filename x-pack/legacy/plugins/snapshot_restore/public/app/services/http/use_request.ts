@@ -5,18 +5,18 @@
  */
 
 import {
-  SendRequest,
+  SendRequestConfig,
   SendRequestResponse,
-  UseRequest,
+  UseRequestConfig,
   sendRequest as _sendRequest,
   useRequest as _useRequest,
 } from '../../../shared_imports';
 import { httpService } from './index';
 
-export const sendRequest = (config: SendRequest): Promise<Partial<SendRequestResponse>> => {
+export const sendRequest = (config: SendRequestConfig): Promise<Partial<SendRequestResponse>> => {
   return _sendRequest(httpService.httpClient, config);
 };
 
-export const useRequest = (config: UseRequest) => {
+export const useRequest = (config: UseRequestConfig) => {
   return _useRequest(httpService.httpClient, config);
 };

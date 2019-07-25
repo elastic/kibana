@@ -19,11 +19,10 @@
 
 import { useEffect, useState, useRef } from 'react';
 
-export interface SendRequest {
+export interface SendRequestConfig {
   path: string;
   method: string;
   body?: any;
-  uimActionType?: string;
 }
 
 export interface SendRequestResponse {
@@ -31,19 +30,18 @@ export interface SendRequestResponse {
   error: Error;
 }
 
-export interface UseRequest extends SendRequest {
-  interval?: number;
+export interface UseRequestConfig extends SendRequestConfig {
+  pollIntervalMs?: number;
   initialData?: any;
-  processData?: any;
+  deserializer?: any;
 }
 
 export const sendRequest = async (
-  httpClient: any,
-  { path, method, body }: SendRequest
+  httpClient: ng.IHttpService,
+  { path, method, body }: SendRequestConfig
 ): Promise<Partial<SendRequestResponse>> => {
   try {
-    // NOTE: This is tightly coupled to Angular's $http service.
-    const response = await httpClient[method](path, body);
+    const response = await (httpClient as any)[method](path, body);
 
     if (typeof response.data === 'undefined') {
       throw new Error(response.statusText);
@@ -58,8 +56,15 @@ export const sendRequest = async (
 };
 
 export const useRequest = (
-  httpClient: any,
-  { path, method, body, interval, initialData, processData }: UseRequest
+  httpClient: ng.IHttpService,
+  {
+    path,
+    method,
+    body,
+    pollIntervalMs,
+    initialData,
+    deserializer = (data: any): any => data,
+  }: UseRequestConfig
 ) => {
   // Main states for tracking request status and data
   const [error, setError] = useState<null | any>(null);
@@ -68,24 +73,24 @@ export const useRequest = (
 
   // Consumers can use isInitialRequest to implement a polling UX.
   const [isInitialRequest, setIsInitialRequest] = useState<boolean>(true);
-  const requestInterval = useRef<any>(null);
-  const requestIntervalId = useRef<any>(null);
+  const pollInterval = useRef<any>(null);
+  const pollIntervalId = useRef<any>(null);
 
-  // We always want to use the most recently-set interval in updateInterval.
-  requestInterval.current = interval;
+  // We always want to use the most recently-set interval in scheduleRequest.
+  pollInterval.current = pollIntervalMs;
 
   // Tied to every render and bound to each request.
   let isOutdatedRequest = false;
 
-  const updateInterval = () => {
+  const scheduleRequest = () => {
     // Clear current interval
-    if (requestIntervalId.current) {
-      clearTimeout(requestIntervalId.current);
+    if (pollIntervalId.current) {
+      clearTimeout(pollIntervalId.current);
     }
 
     // Set new interval
-    if (requestInterval.current) {
-      requestIntervalId.current = setTimeout(_sendRequest, requestInterval.current);
+    if (pollInterval.current) {
+      pollIntervalId.current = setTimeout(_sendRequest, pollInterval.current);
     }
   };
 
@@ -101,12 +106,8 @@ export const useRequest = (
     };
 
     const response = await sendRequest(httpClient, requestBody);
-    let { data: responseData } = response;
-    const { error: responseError } = response;
-
-    if (processData) {
-      responseData = processData(responseData);
-    }
+    const { data: serializedResponseData, error: responseError } = response;
+    const responseData = deserializer(serializedResponseData);
 
     // If an outdated request has resolved, DON'T update state, but DO allow the processData handler
     // to execute side effects like update telemetry.
@@ -121,25 +122,27 @@ export const useRequest = (
 
     // If we're on an interval, we need to schedule the next request. This also allows us to reset
     // the interval if the user has manually requested the data, to avoid doubled-up requests.
-    updateInterval();
+    scheduleRequest();
   };
 
   useEffect(() => {
     _sendRequest();
-    // Don't watch body because it's likely to be a new object even if its shape hasn't changed.
-  }, [path, method]);
+    // To be functionally correct we'd send a new request if the method, path, or body changes.
+    // But it doesn't seem likely that the method will change and body is likely to be a new
+    // object even if its shape hasn't changed, so for now we're just watching the path.
+  }, [path]);
 
   useEffect(() => {
-    updateInterval();
+    scheduleRequest();
 
     // Clean up intervals and inflight requests and corresponding state changes
     return () => {
       isOutdatedRequest = true;
-      if (requestIntervalId.current) {
-        clearTimeout(requestIntervalId.current);
+      if (pollIntervalId.current) {
+        clearTimeout(pollIntervalId.current);
       }
     };
-  }, [interval]);
+  }, [pollIntervalMs]);
 
   return {
     isInitialRequest,

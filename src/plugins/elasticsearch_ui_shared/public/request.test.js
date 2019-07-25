@@ -103,9 +103,9 @@ describe('request lib', () => {
         });
       });
 
-      describe('interval', () => {
+      describe('pollIntervalMs', () => {
         it('sends another request after the specified time has elapsed', async () => {
-          initUseRequest({ ...successRequest, interval: 30 });
+          initUseRequest({ ...successRequest, pollIntervalMs: 30 });
           await wait(5);
           sinon.assert.calledOnce(sendPost);
 
@@ -222,8 +222,8 @@ describe('request lib', () => {
           sinon.assert.calledTwice(sendPost);
         });
 
-        it('resets the interval', async () => {
-          initUseRequest({ ...successRequest, interval: 30 });
+        it('resets the pollIntervalMs', async () => {
+          initUseRequest({ ...successRequest, pollIntervalMs: 30 });
           await wait(5);
           sinon.assert.calledOnce(sendPost);
 

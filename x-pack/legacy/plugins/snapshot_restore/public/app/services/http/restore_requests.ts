@@ -28,11 +28,11 @@ export const executeRestore = async (
   return result;
 };
 
-export const useLoadRestores = (interval?: number) => {
+export const useLoadRestores = (pollIntervalMs?: number) => {
   return useRequest({
     path: httpService.addBasePath(`${API_BASE_PATH}restores`),
     method: 'get',
     initialData: [],
-    interval,
+    pollIntervalMs,
   });
 };

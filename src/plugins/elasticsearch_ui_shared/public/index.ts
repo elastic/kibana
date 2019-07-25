@@ -17,7 +17,13 @@
  * under the License.
  */
 
-export { SendRequest, SendRequestResponse, UseRequest, sendRequest, useRequest } from './request';
+export {
+  SendRequestConfig,
+  SendRequestResponse,
+  UseRequestConfig,
+  sendRequest,
+  useRequest,
+} from './request';
 
 // New Platform requires this as the default export.
 export const plugin = () => ({
