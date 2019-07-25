@@ -4,10 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { DatabaseAdapter } from './adapters/database/adapter_types';
-import { FrameworkUser } from './adapters/framework/adapter_types';
 import { BackendFrameworkLib } from './framework';
+import { ConfigurationLib } from './configuration';
+import { ESDatabaseAdapter } from './adapters/es_database/default';
 export interface ServerLibs {
+  configuration: ConfigurationLib;
   framework: BackendFrameworkLib;
-  database?: DatabaseAdapter;
+  database?: ESDatabaseAdapter;
 }

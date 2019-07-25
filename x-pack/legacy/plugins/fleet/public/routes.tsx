@@ -7,7 +7,6 @@
 import { get } from 'lodash';
 import React, { Component } from 'react';
 import { Redirect, Route, Switch } from 'react-router-dom';
-import { REQUIRED_ROLES } from '../common/constants/security';
 import { Loading } from './components/loading';
 import { ChildRoutes } from './components/navigation/child_routes';
 import { URLStateProps, WithURLState } from './hooks/with_url_state';
@@ -59,19 +58,6 @@ export class AppRoutes extends Component<RouterProps, RouterState> {
             />
           )}
 
-          {/* Make sure the user has correct permissions */}
-          {!this.props.libs.framework.currentUserHasOneOfRoles(
-            REQUIRED_ROLES.concat(this.props.libs.framework.info.settings.defaultUserRoles)
-          ) && (
-            <Route
-              render={props =>
-                !props.location.pathname.includes('/error') ? (
-                  <Redirect to="/error/no_access" />
-                ) : null
-              }
-            />
-          )}
-
           {/* This app does not make use of a homepage. The mainpage is overview/enrolled_agents */}
           <Route path="/" exact={true} render={() => <Redirect to="/overview/enrolled_agents" />} />
         </Switch>
@@ -80,7 +66,7 @@ export class AppRoutes extends Component<RouterProps, RouterState> {
         <WithURLState>
           {(URLProps: URLStateProps) => (
             <ChildRoutes
-              routes={routeMap}
+              routes={[]}
               {...URLProps}
               {...{
                 libs: this.props.libs,

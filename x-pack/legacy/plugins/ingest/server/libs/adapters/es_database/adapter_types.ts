@@ -3,41 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { FrameworkRequest, FrameworkUser } from '../framework/adapter_types';
-
-export interface DatabaseAdapter {
-  get<Source>(
-    user: FrameworkUser,
-    params: DatabaseGetParams
-  ): Promise<DatabaseGetDocumentResponse<Source>>;
-  create(
-    user: FrameworkUser,
-    params: DatabaseCreateDocumentParams
-  ): Promise<DatabaseCreateDocumentResponse>;
-  index<T>(
-    user: FrameworkUser,
-    params: DatabaseIndexDocumentParams<T>
-  ): Promise<DatabaseIndexDocumentResponse>;
-  delete(
-    user: FrameworkUser,
-    params: DatabaseDeleteDocumentParams
-  ): Promise<DatabaseDeleteDocumentResponse>;
-  deleteByQuery(
-    user: FrameworkUser,
-    params: DatabaseSearchParams
-  ): Promise<DatabaseDeleteDocumentResponse>;
-  mget<T>(user: FrameworkUser, params: DatabaseMGetParams): Promise<DatabaseMGetResponse<T>>;
-  bulk(
-    user: FrameworkUser,
-    params: DatabaseBulkIndexDocumentsParams
-  ): Promise<DatabaseBulkResponse>;
-  search<T>(user: FrameworkUser, params: DatabaseSearchParams): Promise<DatabaseSearchResponse<T>>;
-  searchAll<T>(
-    user: FrameworkUser,
-    params: DatabaseSearchParams
-  ): Promise<DatabaseSearchResponse<T>>;
-  putTemplate(name: string, template: any): Promise<any>;
-}
+import { FrameworkRequest } from '../framework/adapter_types';
 
 export interface DatabaseKbnESCluster {
   callWithInternalUser(esMethod: string, options: {}): Promise<any>;
