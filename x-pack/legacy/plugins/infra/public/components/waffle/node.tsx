@@ -4,12 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiToolTip } from '@elastic/eui';
 import moment from 'moment';
 import { darken, readableColor } from 'polished';
 import React from 'react';
 
 import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
+import { ConditionalToolTip } from './conditional_tooltip';
 import euiStyled from '../../../../../common/eui_styled_components';
 import { InfraTimerangeInput, InfraNodeType } from '../../graphql/types';
 import { InfraWaffleMapBounds, InfraWaffleMapNode, InfraWaffleMapOptions } from '../../lib/lib';
@@ -77,7 +77,12 @@ export const Node = injectI18n(
           timeRange={newTimerange}
           popoverPosition="downCenter"
         >
-          <EuiToolTip position="top" content={`${node.name} | ${value}`}>
+          <ConditionalToolTip
+            delay="regular"
+            hidden={isPopoverOpen}
+            position="top"
+            content={`${node.name} | ${value}`}
+          >
             <NodeContainer
               data-test-subj="nodeContainer"
               style={{ width: squareSize || 0, height: squareSize || 0 }}
@@ -100,7 +105,7 @@ export const Node = injectI18n(
                 </SquareInner>
               </SquareOuter>
             </NodeContainer>
-          </EuiToolTip>
+          </ConditionalToolTip>
         </NodeContextMenu>
       );
     }
