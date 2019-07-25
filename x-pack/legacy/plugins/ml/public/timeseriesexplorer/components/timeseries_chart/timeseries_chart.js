@@ -851,12 +851,9 @@ const TimeseriesChartIntl = injectI18n(class TimeseriesChart extends React.Compo
 
     const data = contextChartData;
 
-    const calculateContextXAxisDomain = this.calculateContextXAxisDomain.bind(this);
-    const drawContextBrush = this.drawContextBrush.bind(this);
-    const drawSwimlane = this.drawSwimlane.bind(this);
 
     this.contextXScale = d3.time.scale().range([0, cxtWidth])
-      .domain(calculateContextXAxisDomain());
+      .domain(this.calculateContextXAxisDomain());
 
     const combinedData = contextForecastData === undefined ? data : data.concat(contextForecastData);
     const valuesRange = { min: Number.MAX_VALUE, max: Number.MIN_VALUE };
@@ -967,7 +964,7 @@ const TimeseriesChartIntl = injectI18n(class TimeseriesChart extends React.Compo
       .attr('class', 'swimlane')
       .attr('transform', 'translate(0,' + cxtChartHeight + ')');
 
-    drawSwimlane(swimlane, cxtWidth, swlHeight);
+    this.drawSwimlane(swimlane, cxtWidth, swlHeight);
 
     // Draw a mask over the sections of the context chart and swimlane
     // which fall outside of the zoom brush selection area.
@@ -986,17 +983,16 @@ const TimeseriesChartIntl = injectI18n(class TimeseriesChart extends React.Compo
 
     filterAxisLabels(cxtGroup.selectAll('.x.context-chart-axis'), cxtWidth);
 
-    drawContextBrush(cxtGroup);
+    this.drawContextBrush(cxtGroup);
   }
 
-  drawContextBrush(contextGroup) {
+  drawContextBrush = (contextGroup) => {
     const {
       contextChartSelected
     } = this.props;
 
     const brush = this.brush;
     const contextXScale = this.contextXScale;
-    const setBrushVisibility = this.setBrushVisibility.bind(this);
     const mask = this.mask;
 
     // Create the brush for zooming in to the focus area of interest.
@@ -1021,6 +1017,8 @@ const TimeseriesChartIntl = injectI18n(class TimeseriesChart extends React.Compo
       .attr('x', 0)
       .attr('width', 10);
 
+    const handleBrushExtent = brush.extent();
+
     const topBorder = contextGroup.append('rect')
       .attr('class', 'top-border')
       .attr('y', -2)
@@ -1032,16 +1030,18 @@ const TimeseriesChartIntl = injectI18n(class TimeseriesChart extends React.Compo
       .attr('width', 10)
       .attr('height', 90)
       .attr('class', 'brush-handle')
+      .attr('x', contextXScale(handleBrushExtent[0]) - 10)
       .html('<div class="brush-handle-inner brush-handle-inner-left"><i class="fa fa-caret-left"></i></div>');
     const rightHandle = contextGroup.append('foreignObject')
       .attr('width', 10)
       .attr('height', 90)
       .attr('class', 'brush-handle')
+      .attr('x', contextXScale(handleBrushExtent[1]) + 0)
       .html('<div class="brush-handle-inner brush-handle-inner-right"><i class="fa fa-caret-right"></i></div>');
 
-    setBrushVisibility(!brush.empty());
+    this.setBrushVisibility(!brush.empty());
 
-    function showBrush(show) {
+    const showBrush = (show) => {
       if (show === true) {
         const brushExtent = brush.extent();
         mask.reveal(brushExtent);
@@ -1052,8 +1052,8 @@ const TimeseriesChartIntl = injectI18n(class TimeseriesChart extends React.Compo
         topBorder.attr('width', contextXScale(brushExtent[1]) - contextXScale(brushExtent[0]) - 2);
       }
 
-      setBrushVisibility(show);
-    }
+      this.setBrushVisibility(show);
+    };
 
     function brushing() {
       const isEmpty = brush.empty();
@@ -1085,7 +1085,7 @@ const TimeseriesChartIntl = injectI18n(class TimeseriesChart extends React.Compo
     }
   }
 
-  setBrushVisibility(show) {
+  setBrushVisibility = (show) => {
     const mask = this.mask;
 
     if (mask !== undefined) {
@@ -1105,13 +1105,11 @@ const TimeseriesChartIntl = injectI18n(class TimeseriesChart extends React.Compo
     }
   }
 
-  drawSwimlane(swlGroup, swlWidth, swlHeight) {
+  drawSwimlane = (swlGroup, swlWidth, swlHeight) => {
     const {
       contextAggregationInterval,
       swimlaneData
     } = this.props;
-
-    const calculateContextXAxisDomain = this.calculateContextXAxisDomain.bind(this);
 
     const data = swimlaneData;
 
@@ -1124,7 +1122,7 @@ const TimeseriesChartIntl = injectI18n(class TimeseriesChart extends React.Compo
     // x-axis min to the start of the aggregation interval.
     // Need to use the min(earliest) and max(earliest) of the context chart
     // aggregation to align the axes of the chart and swimlane elements.
-    const xAxisDomain = calculateContextXAxisDomain();
+    const xAxisDomain = this.calculateContextXAxisDomain();
     const x = d3.time.scale().range([0, swlWidth])
       .domain(xAxisDomain);
 
@@ -1180,7 +1178,7 @@ const TimeseriesChartIntl = injectI18n(class TimeseriesChart extends React.Compo
 
   }
 
-  calculateContextXAxisDomain() {
+  calculateContextXAxisDomain = () => {
     const {
       contextAggregationInterval,
       swimlaneData,
@@ -1218,7 +1216,7 @@ const TimeseriesChartIntl = injectI18n(class TimeseriesChart extends React.Compo
       newExtent[0].getTime() === brushExtent[0].getTime() &&
       newExtent[1].getTime() === brushExtent[1].getTime()
     ) {
-      return;
+      fireEvent = false;
     }
 
     brush.extent(newExtent);
