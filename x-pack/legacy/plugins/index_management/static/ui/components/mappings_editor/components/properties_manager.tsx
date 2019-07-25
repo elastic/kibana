@@ -16,15 +16,16 @@ import { PropertyEditor } from './property_editor';
 
 interface Props {
   form: Form;
+  depthLevel?: string;
   path?: string;
 }
 
-export const PropertiesManager = ({ form, path = 'properties' }: Props) => {
+export const PropertiesManager = ({ form, depthLevel, path = 'properties' }: Props) => {
   return (
     <Fragment>
       <UseArray path={path} form={form}>
         {({ rows, addRow, removeRow }) => (
-          <ul className="tree">
+          <ul className="tree" style={depthLevel === '0' ? { marginLeft: 0 } : {}}>
             {rows.map(({ id, rowPath, isNew }) => (
               <li key={id}>
                 <PropertyEditor
