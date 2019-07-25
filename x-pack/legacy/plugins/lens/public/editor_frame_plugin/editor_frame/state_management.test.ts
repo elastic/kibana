@@ -48,12 +48,16 @@ describe('editor_frame state management', () => {
         ...props,
         doc: {
           activeDatasourceId: 'testDatasource',
+          expression: '',
           state: {
             datasourceStates: {
               testDatasource: { internalState1: '' },
               testDatasource2: { internalState2: '' },
             },
             visualization: {},
+            datasourceMetaData: {
+              filterableIndexPatterns: [],
+            },
           },
           title: '',
           visualizationType: 'testVis',
@@ -423,8 +427,10 @@ describe('editor_frame state management', () => {
           type: 'VISUALIZATION_LOADED',
           doc: {
             id: 'b',
+            expression: '',
             activeDatasourceId: 'a',
             state: {
+              datasourceMetaData: { filterableIndexPatterns: [] },
               datasourceStates: { a: { foo: 'c' } },
               visualization: { bar: 'd' },
             },

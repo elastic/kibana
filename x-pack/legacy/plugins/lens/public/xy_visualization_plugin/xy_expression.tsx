@@ -103,7 +103,7 @@ function getIconForSeriesType(seriesType: SeriesType): IconType {
 export function XYChart({ data, args }: XYChartProps) {
   const { legend, layers, isHorizontal } = args;
 
-  if (Object.values(data.tables).some(table => table.rows.length === 0)) {
+  if (Object.values(data.tables).every(table => table.rows.length === 0)) {
     const icon: IconType = layers.length > 0 ? getIconForSeriesType(layers[0].seriesType) : 'bar';
     return (
       <EuiFlexGroup gutterSize="s" direction="column" alignItems="center" justifyContent="center">
@@ -149,7 +149,7 @@ export function XYChart({ data, args }: XYChartProps) {
 
       {layers.map(
         ({ splitAccessor, seriesType, accessors, xAccessor, layerId, columnToLabel }, index) => {
-          if (!data.tables[layerId]) {
+          if (!data.tables[layerId] || data.tables[layerId].rows.length === 0) {
             return;
           }
 

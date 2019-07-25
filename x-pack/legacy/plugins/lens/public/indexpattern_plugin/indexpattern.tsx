@@ -285,6 +285,14 @@ export function getIndexPatternDatasource({
 
     toExpression,
 
+    getMetaData(state: IndexPatternPrivateState) {
+      return {
+        filterableIndexPatterns: _.uniq(
+          Object.values(state.layers).map(layer => layer.indexPatternId)
+        ),
+      };
+    },
+
     renderDataPanel(
       domElement: Element,
       props: DatasourceDataPanelProps<IndexPatternPrivateState>
