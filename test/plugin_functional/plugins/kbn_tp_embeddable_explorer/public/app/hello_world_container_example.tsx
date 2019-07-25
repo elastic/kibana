@@ -36,7 +36,7 @@ export class HelloWorldContainerExample extends React.Component<Props, { lastNam
   private mounted: boolean = false;
   private subscription?: Subscription;
 
-  public constructor(props: Props) {
+  constructor(props: Props) {
     super(props);
 
     this.container = new HelloWorldContainer(

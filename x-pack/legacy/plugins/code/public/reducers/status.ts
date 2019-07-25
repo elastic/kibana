@@ -27,6 +27,7 @@ import {
   StatusSuccessPayload,
   RepoStatus,
   RepoState,
+  FetchRepoFileStatus,
 } from '../actions';
 import { StatusReport } from '../../common/repo_file_status';
 
@@ -222,6 +223,10 @@ export const status = handleActions<StatusState, StatusPayload>(
         const { path, statusReport } = action.payload;
         draft.repoFileStatus = statusReport;
         draft.currentStatusPath = path;
+      }),
+    [String(FetchRepoFileStatus)]: (state: StatusState, action: Action<any>) =>
+      produce<StatusState>(state, (draft: StatusState) => {
+        draft.currentStatusPath = action.payload;
       }),
   },
   initialState

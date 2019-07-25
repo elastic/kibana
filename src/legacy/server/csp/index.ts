@@ -29,6 +29,10 @@ export const DEFAULT_CSP_RULES = Object.freeze([
   `style-src 'unsafe-inline' 'self'`,
 ]);
 
+export const DEFAULT_CSP_STRICT = true;
+
+export const DEFAULT_CSP_WARN_LEGACY_BROWSERS = true;
+
 export async function generateCSPNonce() {
   return (await randomBytesAsync(12)).toString('base64');
 }
