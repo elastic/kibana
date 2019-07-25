@@ -1575,8 +1575,6 @@
     "kbn.docTable.tableHeader.sortByColumnAscendingAriaLabel": "升序排序 {columnName}",
     "kbn.docTable.tableHeader.sortByColumnDescendingAriaLabel": "降序排序 {columnName}",
     "kbn.docTable.tableHeader.sortByColumnTooltip": "按“{columnName}”排序",
-    "kbn.docTable.tableHeader.sortByTimeTooltip": "按时间排序",
-    "kbn.docTable.tableHeader.timeHeaderCellTitle": "时间",
     "kbn.docTable.tableRow.detailHeading": "已展开文档",
     "kbn.docTable.tableRow.filterForValueButtonAriaLabel": "筛留值",
     "kbn.docTable.tableRow.filterForValueButtonTooltip": "筛留值",
