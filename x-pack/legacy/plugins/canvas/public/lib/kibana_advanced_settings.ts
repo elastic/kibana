@@ -6,4 +6,4 @@
 
 import chrome from 'ui/chrome';
 
-export const getAdvancedSettings = () => chrome.getUiSettingsClient();
+export const AdvancedSettings = chrome.getUiSettingsClient();

@@ -47,7 +47,7 @@ export function metric(): ExpressionFunction<'metric', Context, Arguments, Rende
         default: `{font size=48 family="${openSans.value}" color="#000000" align=center lHeight=48}`,
       },
       metricFormat: {
-        types: ['string', 'null'],
+        types: ['string'],
         help: argHelp.metricFormat,
       },
     },
