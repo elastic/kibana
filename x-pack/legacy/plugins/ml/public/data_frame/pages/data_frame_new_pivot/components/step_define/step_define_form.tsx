@@ -444,6 +444,21 @@ export const StepDefineForm: SFC<Props> = React.memo(({ overrides = {}, onChange
     </Fragment>
   );
 
+  const sourceDocsUrl = `https://www.elastic.co/guide/en/elasticsearch/reference/${metadata.branch}/query-dsl.html`;
+  const advancedSourceEditorHelpText = (
+    <Fragment>
+      {i18n.translate('xpack.ml.dataframe.stepDefineForm.advancedSourceEditorHelpText', {
+        defaultMessage:
+          'The advanced editor allows you to edit the source configuration of the data frame transform.',
+      })}{' '}
+      <EuiLink href={sourceDocsUrl} target="_blank">
+        {i18n.translate('xpack.ml.dataframe.stepDefineForm.advancedEditorHelpTextLink', {
+          defaultMessage: 'Learn more about available options.',
+        })}
+      </EuiLink>
+    </Fragment>
+  );
+
   const valid = pivotGroupByArr.length > 0 && pivotAggsArr.length > 0;
 
   useEffect(() => {
@@ -552,7 +567,7 @@ export const StepDefineForm: SFC<Props> = React.memo(({ overrides = {}, onChange
                     defaultMessage: 'Source configuration object',
                   }
                 )}
-                helpText={advancedEditorHelpText} // TODO: update this
+                helpText={advancedSourceEditorHelpText}
               >
                 <EuiPanel grow={false} paddingSize="none">
                   <EuiCodeEditor
