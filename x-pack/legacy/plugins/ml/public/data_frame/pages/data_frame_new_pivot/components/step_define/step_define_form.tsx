@@ -65,6 +65,7 @@ export interface StepDefineExposedState {
   isAdvancedSourceEditorEnabled: boolean;
   searchString: string | SavedSearchQuery;
   searchQuery: string | SavedSearchQuery;
+  sourceConfigUpdated: boolean;
   valid: boolean;
 }
 
@@ -87,6 +88,7 @@ export function getDefaultStepDefineState(
       kibanaContext.currentSavedSearch.id !== undefined
         ? kibanaContext.combinedQuery
         : defaultSearch,
+    sourceConfigUpdated: false,
     valid: false,
   };
 }
@@ -313,7 +315,7 @@ export const StepDefineForm: SFC<Props> = React.memo(({ overrides = {}, onChange
     defaults.isAdvancedPivotEditorEnabled
   );
   // Advanced editor for source config state
-  const [sourceConfigUpdated, setSourceConfigUpdated] = useState(false);
+  const [sourceConfigUpdated, setSourceConfigUpdated] = useState(defaults.sourceConfigUpdated);
   const [
     isAdvancedSourceEditorSwitchModalVisible,
     setAdvancedSourceEditorSwitchModalVisible,
@@ -351,6 +353,8 @@ export const StepDefineForm: SFC<Props> = React.memo(({ overrides = {}, onChange
   const applyAdvancedSourceEditorChanges = () => {
     const sourceConfig = JSON.parse(advancedEditorSourceConfig);
     const prettySourceConfig = JSON.stringify(sourceConfig, null, 2);
+    // Switched to editor so we clear out the search string as the bar won't be visible
+    setSearchString(emptySearch);
     setSearchQuery(sourceConfig);
     setSourceConfigUpdated(true);
     setAdvancedEditorSourceConfig(prettySourceConfig);
@@ -463,6 +467,7 @@ export const StepDefineForm: SFC<Props> = React.memo(({ overrides = {}, onChange
       isAdvancedSourceEditorEnabled,
       searchString,
       searchQuery,
+      sourceConfigUpdated,
       valid,
     });
   }, [
