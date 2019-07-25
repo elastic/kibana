@@ -11,12 +11,12 @@ import { Detail } from './screens/detail';
 import { Home } from './screens/home';
 import { PLUGIN_ID } from '../common/constants';
 
-export const APP_ROOT = `/app/${PLUGIN_ID}`;
-
-// the `*_VIEW` routes are relative to `APP_ROOT`
-export const LIST_VIEW = '/';
-
-export const DETAIL_VIEW = '/detail/:pkgkey';
+// patterns are used by React Router and are relative to `APP_ROOT`
+export const patterns = {
+  APP_ROOT: `/app/${PLUGIN_ID}`,
+  LIST_VIEW: '/',
+  DETAIL_VIEW: '/detail/:pkgkey',
+};
 
 interface DetailMatch {
   match: {
@@ -28,7 +28,7 @@ interface DetailMatch {
 
 const { prepend } = npStart.core.http.basePath;
 // include '#' because we're using HashRouter
-const prependRoot = (path: string) => prepend(APP_ROOT + '#' + path);
+const prependRoot = (path: string) => prepend(patterns.APP_ROOT + '#' + path);
 
 // TODO: get this from server/integrations/handlers.ts (move elsewhere?)
 // seems like part of the name@version change
@@ -37,15 +37,18 @@ interface DetailParams {
   version: string;
 }
 
-export const linkToDetailView = ({ name, version }: DetailParams) =>
-  prependRoot(generatePath(DETAIL_VIEW, { pkgkey: `${name}-${version}` }));
-
 export const routes = [
-  <Route key="home" path={LIST_VIEW} exact={true} component={Home} />,
+  <Route key="home" path={patterns.LIST_VIEW} exact={true} component={Home} />,
   <Route
     key="detail"
-    path={DETAIL_VIEW}
+    path={patterns.DETAIL_VIEW}
     exact={true}
     render={(props: DetailMatch) => <Detail package={props.match.params.pkgkey} />}
   />,
 ];
+
+// linkTo* are for EUILink and other places which need a full path
+export const linkToListView = () => prependRoot(patterns.LIST_VIEW);
+
+export const linkToDetailView = ({ name, version }: DetailParams) =>
+  prependRoot(generatePath(patterns.DETAIL_VIEW, { pkgkey: `${name}-${version}` }));
