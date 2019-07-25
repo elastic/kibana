@@ -18,7 +18,7 @@ import {
   EuiButtonIcon,
 } from '@elastic/eui';
 import { State, SeriesType, LayerConfig } from './types';
-import { VisualizationProps, OperationMetaInformation } from '../types';
+import { VisualizationProps } from '../types';
 import { NativeRenderer } from '../native_renderer';
 import { MultiColumnEditor } from '../multi_column_editor';
 import { generateId } from '../id_generator';
@@ -75,10 +75,6 @@ export const chartTypeIcons: Array<{ id: SeriesType; label: string; iconType: Ic
   },
 ];
 
-const isBucketed = (operation: OperationMetaInformation) => operation.isBucketed;
-const isNumericMetric = (operation: OperationMetaInformation) =>
-  !operation.isBucketed && operation.dataType === 'number';
-
 type UnwrapArray<T> = T extends Array<infer P> ? P : T;
 
 function updateLayer(state: State, layer: UnwrapArray<State['layers']>, index: number): State {
@@ -94,7 +90,6 @@ function updateLayer(state: State, layer: UnwrapArray<State['layers']>, index: n
 function newLayerState(layerId: string): LayerConfig {
   return {
     layerId,
-    datasourceId: 'indexpattern', // TODO: Don't hard code
     xAccessor: generateId(),
     seriesType: 'bar_stacked',
     accessors: [generateId()],
@@ -121,7 +116,9 @@ export function XYConfigPanel(props: VisualizationProps<State>) {
               <>
                 <EuiButtonIcon
                   iconType="trash"
+                  data-test-subj="lnsXY_layer_remove"
                   onClick={() => {
+                    frame.removeLayer(layer.layerId);
                     setState({ ...state, layers: state.layers.filter(l => l !== layer) });
                   }}
                   aria-label={i18n.translate('xpack.lens.xyChart.removeLayer', {
@@ -170,7 +167,7 @@ export function XYConfigPanel(props: VisualizationProps<State>) {
                 nativeProps={{
                   columnId: layer.xAccessor,
                   dragDropContext: props.dragDropContext,
-                  filterOperations: isBucketed,
+                  filterOperations: operation => operation.isBucketed,
                   suggestedPriority: 1,
                   layerId: layer.layerId,
                 }}
@@ -188,7 +185,7 @@ export function XYConfigPanel(props: VisualizationProps<State>) {
                 nativeProps={{
                   columnId: layer.splitAccessor,
                   dragDropContext: props.dragDropContext,
-                  filterOperations: isBucketed,
+                  filterOperations: operation => operation.isBucketed,
                   suggestedPriority: 0,
                   layerId: layer.layerId,
                 }}
@@ -228,7 +225,7 @@ export function XYConfigPanel(props: VisualizationProps<State>) {
                     )
                   )
                 }
-                filterOperations={isNumericMetric}
+                filterOperations={op => !op.isBucketed && op.dataType === 'number'}
                 data-test-subj="lensXY_yDimensionPanel"
                 testSubj="lensXY_yDimensionPanel"
                 layerId={layer.layerId}
@@ -250,15 +247,6 @@ export function XYConfigPanel(props: VisualizationProps<State>) {
           iconType="plusInCircle"
         >
           <FormattedMessage id="xpack.lens.xyChart.addLayerButton" defaultMessage="Add layer" />
-        </EuiButton>
-      </EuiFormRow>
-
-      <EuiFormRow>
-        <EuiButton>
-          <FormattedMessage
-            id="xpack.lens.xyChart.explainQueryButton"
-            defaultMessage="Explain query"
-          />
         </EuiButton>
       </EuiFormRow>
     </EuiForm>

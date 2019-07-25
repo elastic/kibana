@@ -5,10 +5,10 @@
  */
 
 import { getSuggestions } from './xy_suggestions';
-import { TableSuggestionColumn, VisualizationSuggestion } from '../types';
+import { TableSuggestionColumn, VisualizationSuggestion, DataType } from '../types';
 import { State } from './types';
 import { generateId } from '../id_generator';
-import { Ast } from '@kbn/interpreter/common';
+import { Ast } from '@kbn/interpreter/target/common';
 
 jest.mock('../id_generator');
 
@@ -63,8 +63,7 @@ describe('xy_suggestions', () => {
   test('ignores invalid combinations', () => {
     const unknownCol = () => {
       const str = strCol('foo');
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      return { ...str, operation: { ...str.operation, dataType: 'wonkies' } } as any;
+      return { ...str, operation: { ...str.operation, dataType: 'wonkies' as DataType } };
     };
 
     expect(

@@ -6,7 +6,7 @@
 
 import React, { useEffect } from 'react';
 import { NativeRenderer } from '../native_renderer';
-import { DatasourcePublicAPI, Operation } from '../types';
+import { DatasourcePublicAPI, OperationMetaInformation } from '../types';
 import { DragContextState } from '../drag_drop';
 
 interface Props {
@@ -15,10 +15,9 @@ interface Props {
   dragDropContext: DragContextState;
   onRemove: (accessor: string) => void;
   onAdd: () => void;
-  filterOperations: (op: Operation) => boolean;
+  filterOperations: (op: OperationMetaInformation) => boolean;
   suggestedPriority?: 0 | 1 | 2 | undefined;
   testSubj: string;
-  // layer: number;
   layerId: string;
 }
 
@@ -36,7 +35,7 @@ export function MultiColumnEditor({
   const lastOperation = datasource.getOperationForColumnId(accessors[accessors.length - 1]);
 
   useEffect(() => {
-    if (lastOperation !== null) {
+    if (accessors.length === 0 || lastOperation !== null) {
       setTimeout(onAdd);
     }
   }, [lastOperation]);

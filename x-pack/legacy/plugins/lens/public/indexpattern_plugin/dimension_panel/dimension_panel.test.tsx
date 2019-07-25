@@ -793,26 +793,7 @@ describe('IndexPatternDimensionPanel', () => {
 
   describe('drag and drop', () => {
     function dragDropState(): IndexPatternPrivateState {
-      // return {0
-      //   ...state,
-      //   // currentIndexPatternId: 'foo',
-      //   // indexPatterns: {
-      //   //   foo: {
-      //   //     id: 'foo',
-      //   //     title: 'Foo pattern',
-      //   //     fields: [
-      //   //       {
-      //   //         aggregatable: true,
-      //   //         name: 'bar',
-      //   //         searchable: true,
-      //   //         type: 'number',
-      //   //       },
-      //   //     ],
-      //   //   },
-      //   // },
-      // };
       return {
-        // indexPatterns: expectedIndexPatterns,
         indexPatterns: {
           foo: {
             id: 'foo',
@@ -851,21 +832,6 @@ describe('IndexPatternDimensionPanel', () => {
           },
         },
       };
-
-      // setState = jest.fn();
-
-      // dragDropContext = createMockedDragDropContext();
-
-      // defaultProps = {
-      //   dragDropContext,
-      //   state,
-      //   setState,
-      //   columnId: 'col1',
-      //   layerId: 'first',
-      //   filterOperations: () => true,
-      //   dataPlugin: data,
-      //   storage: localStorage,
-      // };
     }
 
     it('is not droppable if no drag is happening', () => {

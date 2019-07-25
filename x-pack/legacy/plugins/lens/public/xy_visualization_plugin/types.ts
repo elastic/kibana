@@ -110,12 +110,12 @@ export const xConfig: ExpressionFunction<'lens_xy_xConfig', null, XConfig, XConf
   },
 };
 
-type LayerConfigResult = LayerConfig & { type: 'lens_xy_layer' };
+type LayerConfigResult = LayerArgs & { type: 'lens_xy_layer' };
 
 export const layerConfig: ExpressionFunction<
   'lens_xy_layer',
   null,
-  LayerConfig,
+  LayerArgs,
   LayerConfigResult
 > = {
   name: 'lens_xy_layer',
@@ -128,10 +128,6 @@ export const layerConfig: ExpressionFunction<
   args: {
     ...axisConfig,
     layerId: {
-      types: ['string'],
-      help: '',
-    },
-    datasourceId: {
       types: ['string'],
       help: '',
     },
@@ -162,8 +158,12 @@ export const layerConfig: ExpressionFunction<
       help: 'The columns to display on the y axis.',
       multi: true,
     },
+    columnToLabel: {
+      types: ['string'],
+      help: 'JSON key-value pairs of column ID to label',
+    },
   },
-  fn: function fn(_context: unknown, args: LayerConfig) {
+  fn: function fn(_context: unknown, args: LayerArgs) {
     return {
       type: 'lens_xy_layer',
       ...args,
@@ -182,20 +182,25 @@ export type SeriesType =
 
 export type LayerConfig = AxisConfig & {
   layerId: string;
-  datasourceId: string;
   xAccessor: string;
   accessors: string[];
   seriesType: SeriesType;
   splitAccessor: string;
 };
 
+export type LayerArgs = LayerConfig & {
+  columnToLabel?: string; // Actually a JSON key-value pair
+};
+
+// Arguments to XY chart expression, with computed properties
 export interface XYArgs {
   xTitle: string;
   yTitle: string;
   legend: LegendConfig;
-  layers: LayerConfig[];
+  layers: LayerArgs[];
 }
 
+// Persisted parts of the state
 export interface XYState {
   legend: LegendConfig;
   layers: LayerConfig[];

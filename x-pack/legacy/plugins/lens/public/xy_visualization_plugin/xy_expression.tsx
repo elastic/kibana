@@ -142,34 +142,54 @@ export function XYChart({ data, args }: XYChartProps) {
         hide={layers[0].hide}
       />
 
-      {layers.map(({ splitAccessor, seriesType, accessors, xAccessor, layerId }, index) => {
-        if (!data.tables[layerId]) {
-          return;
+      {layers.map(
+        ({ splitAccessor, seriesType, accessors, xAccessor, layerId, columnToLabel }, index) => {
+          if (!data.tables[layerId]) {
+            return;
+          }
+
+          const columnToLabelMap = columnToLabel ? JSON.parse(columnToLabel) : {};
+
+          const rows = data.tables[layerId].rows.map(row => {
+            const newRow: typeof row = {};
+
+            // Remap data to { 'Count of documents': 5 }
+            Object.keys(row).forEach(key => {
+              if (columnToLabelMap[key]) {
+                newRow[columnToLabelMap[key]] = row[key];
+              } else {
+                newRow[key] = row[key];
+              }
+            });
+            return newRow;
+          });
+
+          const splitAccessorLabel = columnToLabelMap[splitAccessor];
+          const yAccessors = accessors.map(accessor => columnToLabelMap[accessor] || accessor);
+          const idForLegend = splitAccessorLabel || yAccessors;
+
+          const seriesProps = {
+            key: index,
+            splitSeriesAccessors: [splitAccessorLabel || splitAccessor],
+            stackAccessors: seriesType.includes('stacked') ? [xAccessor] : [],
+            id: getSpecId(idForLegend),
+            xAccessor,
+            yAccessors,
+            data: rows,
+          };
+
+          return seriesType === 'line' ? (
+            <LineSeries {...seriesProps} />
+          ) : seriesType === 'bar' ||
+            seriesType === 'bar_stacked' ||
+            seriesType === 'horizontal_bar' ||
+            seriesType === 'horizontal_bar_stacked' ? (
+            <BarSeries {...seriesProps} />
+          ) : (
+            <AreaSeries {...seriesProps} />
+          );
         }
-
-        const idForCaching = accessors.concat([xAccessor, splitAccessor]).join(',');
-
-        const seriesProps = {
-          key: index,
-          splitSeriesAccessors: [splitAccessor],
-          stackAccessors: seriesType.includes('stacked') ? [xAccessor] : [],
-          id: getSpecId(idForCaching),
-          xAccessor,
-          yAccessors: accessors,
-          data: data.tables[layerId].rows,
-        };
-
-        return seriesType === 'line' ? (
-          <LineSeries {...seriesProps} />
-        ) : seriesType === 'bar' ||
-          seriesType === 'bar_stacked' ||
-          seriesType === 'horizontal_bar' ||
-          seriesType === 'horizontal_bar_stacked' ? (
-          <BarSeries {...seriesProps} />
-        ) : (
-          <AreaSeries {...seriesProps} />
-        );
-      })}
+      )}
     </Chart>
   );
 }

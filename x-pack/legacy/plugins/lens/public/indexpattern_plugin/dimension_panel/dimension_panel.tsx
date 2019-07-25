@@ -24,7 +24,6 @@ export type IndexPatternDimensionPanelProps = DatasourceDimensionPanelProps & {
   dragDropContext: DragContextState;
   dataPlugin: DataSetup;
   storage: Storage;
-  // layer: DimensionLayer;
   layerId: string;
 };
 

@@ -16,7 +16,6 @@ export function createMockVisualization(): jest.Mocked<Visualization> {
     initialize: jest.fn((_frame, _state?) => ({})),
     renderConfigPanel: jest.fn(),
     toExpression: jest.fn((_state, _frame) => null),
-    getLayerIds: jest.fn(_state => []),
   };
 }
 
@@ -44,6 +43,7 @@ export function createMockDatasource(): DatasourceMock {
     renderDataPanel: jest.fn(),
     toExpression: jest.fn((_frame, _state) => null),
     insertLayer: jest.fn((_state, _newLayerId) => {}),
+    removeLayer: jest.fn((_state, _layerId) => {}),
     getLayers: jest.fn(_state => []),
 
     // this is an additional property which doesn't exist on real datasources
@@ -58,6 +58,7 @@ export function createMockFramePublicAPI(): FrameMock {
   return {
     datasourceLayers: {},
     addNewLayer: jest.fn(() => ''),
+    removeLayer: jest.fn(),
   };
 }
 

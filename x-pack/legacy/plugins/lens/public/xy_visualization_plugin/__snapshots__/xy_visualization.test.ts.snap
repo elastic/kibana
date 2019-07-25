@@ -10,9 +10,12 @@ Object {
             "chain": Array [
               Object {
                 "arguments": Object {
-                  "accessors": Array [],
-                  "datasourceId": Array [
-                    "",
+                  "accessors": Array [
+                    "b",
+                    "c",
+                  ],
+                  "columnToLabel": Array [
+                    "{\\"b\\":\\"col_b\\",\\"c\\":\\"col_c\\",\\"d\\":\\"col_d\\"}",
                   ],
                   "hide": Array [
                     false,
@@ -66,10 +69,10 @@ Object {
           },
         ],
         "xTitle": Array [
-          "x",
+          "col_a",
         ],
         "yTitle": Array [
-          "y",
+          "col_b",
         ],
       },
       "function": "lens_xy_chart",

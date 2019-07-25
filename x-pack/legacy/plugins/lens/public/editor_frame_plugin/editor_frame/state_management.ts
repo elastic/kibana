@@ -63,19 +63,23 @@ export type Action =
     };
 
 export const getInitialState = (props: EditorFrameProps): EditorFrameState => {
+  const datasourceStates: EditorFrameState['datasourceStates'] = {};
+
+  if (props.doc) {
+    Object.entries(props.doc.state.datasourceStates).forEach(([datasourceId, state]) => {
+      datasourceStates[datasourceId] = { isLoading: true, state };
+    });
+  } else if (props.initialDatasourceId) {
+    datasourceStates[props.initialDatasourceId] = {
+      state: null,
+      isLoading: true,
+    };
+  }
+
   return {
     saving: false,
     title: i18n.translate('xpack.lens.chartTitle', { defaultMessage: 'New visualization' }),
-    datasourceStates: props.doc
-      ? _.mapValues(props.doc.state.datasourceStates, state => ({ isLoading: true, state }))
-      : props.initialDatasourceId
-      ? {
-          [props.initialDatasourceId]: {
-            state: null,
-            isLoading: true,
-          },
-        }
-      : {},
+    datasourceStates,
     activeDatasourceId: props.initialDatasourceId ? props.initialDatasourceId : null,
     visualization: {
       state: null,

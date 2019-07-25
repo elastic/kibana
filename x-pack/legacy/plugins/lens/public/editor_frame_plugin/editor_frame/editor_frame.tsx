@@ -64,30 +64,29 @@ export function EditorFrame(props: EditorFrameProps) {
   }, [allLoaded]);
 
   const datasourceLayers: Record<string, DatasourcePublicAPI> = {};
-  Object.keys(props.datasourceMap).forEach(id => {
-    const stateWrapper = state.datasourceStates[id];
-    if (!stateWrapper || stateWrapper.isLoading) {
-      return;
-    }
-    const dsState = stateWrapper.state;
-    const layers = props.datasourceMap[id].getLayers(dsState);
+  Object.keys(props.datasourceMap)
+    .filter(id => state.datasourceStates[id] && !state.datasourceStates[id].isLoading)
+    .forEach(id => {
+      const datasourceState = state.datasourceStates[id].state;
+      const datasource = props.datasourceMap[id];
 
-    layers.forEach(layer => {
-      const publicAPI = props.datasourceMap[id].getPublicAPI(
-        dsState,
-        (newState: unknown) => {
-          dispatch({
-            type: 'UPDATE_DATASOURCE_STATE',
-            datasourceId: id,
-            newState,
-          });
-        },
-        layer
-      );
+      const layers = datasource.getLayers(datasourceState);
+      layers.forEach(layer => {
+        const publicAPI = props.datasourceMap[id].getPublicAPI(
+          datasourceState,
+          (newState: unknown) => {
+            dispatch({
+              type: 'UPDATE_DATASOURCE_STATE',
+              datasourceId: id,
+              newState,
+            });
+          },
+          layer
+        );
 
-      datasourceLayers[layer] = publicAPI;
+        datasourceLayers[layer] = publicAPI;
+      });
     });
-  });
 
   const framePublicAPI: FramePublicAPI = {
     datasourceLayers,
@@ -107,6 +106,18 @@ export function EditorFrame(props: EditorFrameProps) {
 
       return newLayerId;
     },
+    removeLayer: (layerId: string) => {
+      const newState = props.datasourceMap[state.activeDatasourceId!].removeLayer(
+        state.datasourceStates[state.activeDatasourceId!].state,
+        layerId
+      );
+
+      dispatch({
+        type: 'UPDATE_DATASOURCE_STATE',
+        datasourceId: state.activeDatasourceId!,
+        newState,
+      });
+    },
   };
 
   useEffect(() => {
@@ -123,7 +134,7 @@ export function EditorFrame(props: EditorFrameProps) {
     }
   }, [props.doc]);
 
-  // Initialize visualization as soon as all datasource is ready
+  // Initialize visualization as soon as all datasources are ready
   useEffect(() => {
     if (allLoaded && state.visualization.state === null && state.visualization.activeId !== null) {
       const initialVisualizationState = props.visualizationMap[
@@ -145,56 +156,54 @@ export function EditorFrame(props: EditorFrameProps) {
     ? props.visualizationMap[state.visualization.activeId]
     : undefined;
 
-  if (allLoaded) {
-    return (
-      <FrameLayout
-        navPanel={
-          <nav>
-            <EuiLink
-              onClick={() => {
-                if (activeDatasource && visualization) {
-                  save({
-                    activeDatasources: Object.keys(state.datasourceStates).reduce(
-                      (datasourceMap, datasourceId) => ({
-                        ...datasourceMap,
-                        [datasourceId]: props.datasourceMap[datasourceId],
-                      }),
-                      {}
-                    ),
-                    dispatch,
-                    visualization,
-                    state,
-                    redirectTo: props.redirectTo,
-                    store: props.store,
-                  }).catch(onError);
-                }
-              }}
-              disabled={state.saving || !state.activeDatasourceId || !state.visualization.activeId}
-            >
-              {i18n.translate('xpack.lens.editorFrame.Save', {
-                defaultMessage: 'Save',
-              })}
-            </EuiLink>
-          </nav>
-        }
-        dataPanel={
-          <DataPanelWrapper
-            datasourceMap={props.datasourceMap}
-            activeDatasource={state.activeDatasourceId}
-            datasourceState={
-              state.activeDatasourceId
-                ? state.datasourceStates[state.activeDatasourceId].state
-                : null
-            }
-            datasourceIsLoading={
-              state.activeDatasourceId
-                ? state.datasourceStates[state.activeDatasourceId].isLoading
-                : true
-            }
-            dispatch={dispatch}
-          />
-        }
-        configPanel={
+  return (
+    <FrameLayout
+      navPanel={
+        <nav>
+          <EuiLink
+            onClick={() => {
+              if (activeDatasource && visualization) {
+                save({
+                  activeDatasources: Object.keys(state.datasourceStates).reduce(
+                    (datasourceMap, datasourceId) => ({
+                      ...datasourceMap,
+                      [datasourceId]: props.datasourceMap[datasourceId],
+                    }),
+                    {}
+                  ),
+                  dispatch,
+                  visualization,
+                  state,
+                  redirectTo: props.redirectTo,
+                  store: props.store,
+                }).catch(onError);
+              }
+            }}
+            disabled={state.saving || !state.activeDatasourceId || !state.visualization.activeId}
+          >
+            {i18n.translate('xpack.lens.editorFrame.Save', {
+              defaultMessage: 'Save',
+            })}
+          </EuiLink>
+        </nav>
+      }
+      dataPanel={
+        <DataPanelWrapper
+          datasourceMap={props.datasourceMap}
+          activeDatasource={state.activeDatasourceId}
+          datasourceState={
+            state.activeDatasourceId ? state.datasourceStates[state.activeDatasourceId].state : null
+          }
+          datasourceIsLoading={
+            state.activeDatasourceId
+              ? state.datasourceStates[state.activeDatasourceId].isLoading
+              : true
+          }
+          dispatch={dispatch}
+        />
+      }
+      configPanel={
+        allLoaded && (
           <ConfigPanelWrapper
             visualizationMap={props.visualizationMap}
             activeVisualizationId={state.visualization.activeId}
@@ -202,8 +211,10 @@ export function EditorFrame(props: EditorFrameProps) {
             visualizationState={state.visualization.state}
             framePublicAPI={framePublicAPI}
           />
-        }
-        workspacePanel={
+        )
+      }
+      workspacePanel={
+        allLoaded && (
           <WorkspacePanelWrapper title={state.title} dispatch={dispatch}>
             <WorkspacePanel
               activeDatasourceId={state.activeDatasourceId}
@@ -217,8 +228,10 @@ export function EditorFrame(props: EditorFrameProps) {
               ExpressionRenderer={props.ExpressionRenderer}
             />
           </WorkspacePanelWrapper>
-        }
-        suggestionsPanel={
+        )
+      }
+      suggestionsPanel={
+        allLoaded && (
           <SuggestionPanel
             activeDatasourceId={state.activeDatasourceId}
             activeVisualizationId={state.visualization.activeId}
@@ -229,27 +242,7 @@ export function EditorFrame(props: EditorFrameProps) {
             dispatch={dispatch}
             ExpressionRenderer={props.ExpressionRenderer}
           />
-        }
-      />
-    );
-  }
-
-  return (
-    <FrameLayout
-      dataPanel={
-        <DataPanelWrapper
-          activeDatasource={state.activeDatasourceId}
-          datasourceIsLoading={
-            state.activeDatasourceId
-              ? state.datasourceStates[state.activeDatasourceId].isLoading
-              : true
-          }
-          datasourceState={
-            state.activeDatasourceId ? state.datasourceStates[state.activeDatasourceId].state : null
-          }
-          datasourceMap={props.datasourceMap}
-          dispatch={dispatch}
-        />
+        )
       }
     />
   );

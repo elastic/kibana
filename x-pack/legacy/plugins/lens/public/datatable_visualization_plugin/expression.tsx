@@ -120,8 +120,6 @@ export const datatableRenderer: RenderFunction<DatatableProps> = {
 };
 
 function DatatableComponent(props: DatatableProps) {
-  // TODO: We should probalby change data.rows to be data.layers, since
-  // each row is actually an array of layer objects
   const [firstTable] = Object.values(props.data.tables);
 
   return (

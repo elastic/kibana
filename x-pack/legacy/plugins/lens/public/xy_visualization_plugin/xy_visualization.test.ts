@@ -10,7 +10,7 @@ import { Operation } from '../types';
 import { State } from './types';
 import { createMockDatasource, createMockFramePublicAPI } from '../editor_frame_plugin/mocks';
 import { generateId } from '../id_generator';
-import { Ast } from '@kbn/interpreter/common';
+import { Ast } from '@kbn/interpreter/target/common';
 
 jest.mock('../id_generator');
 
@@ -20,7 +20,6 @@ function exampleState(): State {
     layers: [
       {
         layerId: 'first',
-        datasourceId: '',
         seriesType: 'area',
         splitAccessor: 'd',
         position: Position.Bottom,
@@ -49,29 +48,28 @@ describe('xy_visualization', () => {
       expect(initialState.layers[0].xAccessor).not.toEqual(initialState.layers[0].accessors[0]);
 
       expect(initialState).toMatchInlineSnapshot(`
-                Object {
-                  "layers": Array [
-                    Object {
-                      "accessors": Array [
-                        "test-id1",
-                      ],
-                      "datasourceId": "",
-                      "layerId": "",
-                      "position": "top",
-                      "seriesType": "bar",
-                      "showGridlines": false,
-                      "splitAccessor": "test-id2",
-                      "title": "",
-                      "xAccessor": "test-id3",
-                    },
-                  ],
-                  "legend": Object {
-                    "isVisible": true,
-                    "position": "right",
-                  },
-                  "title": "Empty XY Chart",
-                }
-            `);
+        Object {
+          "layers": Array [
+            Object {
+              "accessors": Array [
+                "test-id1",
+              ],
+              "layerId": "",
+              "position": "top",
+              "seriesType": "bar",
+              "showGridlines": false,
+              "splitAccessor": "test-id2",
+              "title": "",
+              "xAccessor": "test-id3",
+            },
+          ],
+          "legend": Object {
+            "isVisible": true,
+            "position": "right",
+          },
+          "title": "Empty XY Chart",
+        }
+      `);
     });
 
     it('loads from persisted state', () => {
@@ -88,32 +86,43 @@ describe('xy_visualization', () => {
   });
 
   describe('#toExpression', () => {
-    it('should map to a valid AST', () => {
-      const frame = createMockFramePublicAPI();
-      frame.datasourceLayers = {
-        first: createMockDatasource().publicAPIMock,
-      };
-      expect(xyVisualization.toExpression(exampleState(), frame)).toMatchSnapshot();
-    });
+    let mockDatasource: ReturnType<typeof createMockDatasource>;
+    let frame: ReturnType<typeof createMockFramePublicAPI>;
 
-    it('should default to labeling all columns with their column label', () => {
-      const mockDatasource = createMockDatasource();
+    beforeEach(() => {
+      frame = createMockFramePublicAPI();
+      mockDatasource = createMockDatasource();
 
       mockDatasource.publicAPIMock.getOperationForColumnId.mockImplementation(col => {
         return { label: `col_${col}` } as Operation;
       });
 
-      const frame = createMockFramePublicAPI();
       frame.datasourceLayers = {
         first: mockDatasource.publicAPIMock,
       };
+    });
 
+    it('should map to a valid AST', () => {
+      expect(xyVisualization.toExpression(exampleState(), frame)).toMatchSnapshot();
+    });
+
+    it('should default to labeling all columns with their column label', () => {
       const expression = xyVisualization.toExpression(exampleState(), frame)! as Ast;
 
       expect(mockDatasource.publicAPIMock.getOperationForColumnId).toHaveBeenCalledWith('b');
       expect(mockDatasource.publicAPIMock.getOperationForColumnId).toHaveBeenCalledWith('c');
+      expect(mockDatasource.publicAPIMock.getOperationForColumnId).toHaveBeenCalledWith('d');
       expect(expression.chain[0].arguments.xTitle).toEqual(['col_a']);
       expect(expression.chain[0].arguments.yTitle).toEqual(['col_b']);
+      expect(
+        (expression.chain[0].arguments.layers[0] as Ast).chain[0].arguments.columnToLabel
+      ).toEqual([
+        JSON.stringify({
+          b: 'col_b',
+          c: 'col_c',
+          d: 'col_d',
+        }),
+      ]);
     });
   });
 });
