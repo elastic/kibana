@@ -36,6 +36,7 @@ export default function () {
     this.isTimeBased = () => Boolean(this.timeFieldName);
     this.getNonScriptedFields = sinon.spy(IndexPattern.prototype.getNonScriptedFields);
     this.getScriptedFields = sinon.spy(IndexPattern.prototype.getScriptedFields);
+    this.getFieldByName = sinon.spy(IndexPattern.prototype.getFieldByName);
     this.getSourceFiltering = sinon.stub();
     this.metaFields = ['_id', '_type', '_source'];
     this.fieldFormatMap = {};
