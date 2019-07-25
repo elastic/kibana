@@ -5,7 +5,6 @@
  */
 
 import * as t from 'io-ts';
-import { DateFromString } from '../../../../common/types/io_ts';
 
 export const RuntimeDatasourceInput = t.interface(
   {
@@ -48,13 +47,14 @@ export const NewRuntimeBackupConfigurationFile = t.interface(
   'BackupConfigurationFile'
 );
 
-const ExistingDocument = t.partial({
+const ExistingDocument = t.interface({
   id: t.string,
   shared_id: t.string,
   version: t.number,
-  updated_at: DateFromString,
+  active: t.boolean,
+  updated_at: t.string,
   created_by: t.union([t.undefined, t.string]),
-  updated_on: DateFromString,
+  updated_on: t.string,
   updated_by: t.union([t.undefined, t.string]),
 });
 

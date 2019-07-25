@@ -6,7 +6,6 @@
 import { FrameworkUser } from '../framework/adapter_types';
 import { internalAuthData } from '../framework/adapter_types';
 import {
-  DatabaseAdapter,
   DatabaseBulkIndexDocumentsParams,
   DatabaseCreateDocumentParams,
   DatabaseCreateDocumentResponse,
@@ -23,7 +22,7 @@ import {
   DatabaseSearchResponse,
 } from './adapter_types';
 
-export class KibanaDatabaseAdapter implements DatabaseAdapter {
+export class ESDatabaseAdapter {
   private es: DatabaseKbnESCluster;
 
   constructor(kbnElasticSearch: DatabaseKbnESPlugin) {

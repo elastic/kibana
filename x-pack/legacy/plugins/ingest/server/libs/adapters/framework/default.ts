@@ -6,21 +6,20 @@
 
 import { PathReporter } from 'io-ts/lib/PathReporter';
 import { get } from 'lodash';
+import { Request } from 'src/legacy/server/kbn_server';
+import { XPackInfo } from '../../../../../xpack_main/server/lib/xpack_info';
 // @ts-ignore
 import { mirrorPluginStatus } from '../../../../../../server/lib/mirror_plugin_status';
 import {
-  BackendFrameworkAdapter,
   FrameworkInfo,
   internalUser,
   KibanaLegacyServer,
-  KibanaServerRequest,
   KibanaUser,
   RuntimeFrameworkInfo,
   RuntimeKibanaUser,
-  XpackInfo,
 } from './adapter_types';
 
-export class KibanaBackendFrameworkAdapter implements BackendFrameworkAdapter {
+export class BackendFrameworkAdapter {
   public readonly internalUser = internalUser;
   public info: null | FrameworkInfo = null;
 
@@ -65,7 +64,7 @@ export class KibanaBackendFrameworkAdapter implements BackendFrameworkAdapter {
     this.server.expose(name, method);
   }
 
-  public async getUser(request: KibanaServerRequest): Promise<KibanaUser | null> {
+  public async getUser(request: Request): Promise<KibanaUser | null> {
     let user;
     try {
       user = await this.server.plugins.security.getUser(request);
@@ -87,7 +86,7 @@ export class KibanaBackendFrameworkAdapter implements BackendFrameworkAdapter {
     return user;
   }
 
-  private xpackInfoWasUpdatedHandler = (xpackInfo: XpackInfo) => {
+  private xpackInfoWasUpdatedHandler = (xpackInfo: XPackInfo) => {
     let xpackInfoUnpacked: FrameworkInfo;
 
     // If, for some reason, we cannot get the license information
@@ -103,12 +102,11 @@ export class KibanaBackendFrameworkAdapter implements BackendFrameworkAdapter {
           version: get(this.server, 'plugins.kibana.status.plugin.version', 'unknown'),
         },
         license: {
-          type: xpackInfo.license.getType(),
+          type: xpackInfo.license.getType() || 'oss',
           expired: !xpackInfo.license.isActive(),
-          expiry_date_in_millis:
-            xpackInfo.license.getExpiryDateInMillis() !== undefined
-              ? xpackInfo.license.getExpiryDateInMillis()
-              : -1,
+          expiry_date_in_millis: (xpackInfo.license.getExpiryDateInMillis() !== undefined
+            ? xpackInfo.license.getExpiryDateInMillis()
+            : -1) as number,
         },
         security: {
           enabled: !!xpackInfo.feature('security') && xpackInfo.feature('security').isEnabled(),

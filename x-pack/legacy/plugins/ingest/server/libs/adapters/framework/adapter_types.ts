@@ -8,41 +8,32 @@
 
 import { Lifecycle, ResponseToolkit } from 'hapi';
 import * as t from 'io-ts';
-import { LICENSES } from '../../../../common/constants/security';
+import { Legacy } from 'kibana';
+import { Cluster, ClusterConfig } from 'src/legacy/core_plugins/elasticsearch';
+import { ApmOssPlugin } from 'src/legacy/core_plugins/apm_oss';
+import { Request } from 'src/legacy/server/kbn_server';
+import { XPackInfo } from '../../../../../xpack_main/server/lib/xpack_info';
+import {
+  Feature,
+  FeatureWithAllOrReadPrivileges,
+} from '../../../../../xpack_main/server/lib/feature_registry/feature_registry';
+import { SecurityPlugin } from '../../../../../security';
 
 export const internalAuthData = Symbol('internalAuthData');
 export const internalUser: FrameworkInternalUser = {
   kind: 'internal',
 };
 
-export interface XpackInfo {
-  license: {
-    getType: () => typeof LICENSES[number];
-    /** Is the license expired */
-    isActive: () => boolean;
-    getExpiryDateInMillis: () => number;
-  };
-  feature: (pluginId: string) => any;
-  isAvailable: () => boolean;
-}
-
-export interface BackendFrameworkAdapter {
-  internalUser: FrameworkInternalUser;
-  info: null | FrameworkInfo;
-  log(text: string): void;
-  on(event: 'xpack.status.green' | 'elasticsearch.status.green', cb: () => void): void;
-  getSetting(settingPath: string): any;
-  getUser(request: KibanaServerRequest): Promise<KibanaUser | null>;
-  exposeMethod(name: string, method: () => any): void;
-}
-
-export interface KibanaLegacyServer {
+export interface KibanaLegacyServer extends Legacy.Server {
   plugins: {
     xpack_main: {
       status: {
         on: (status: 'green' | 'yellow' | 'red', callback: () => void) => void;
       };
-      info: XpackInfo;
+      info: XPackInfo;
+      createXPackInfo(options: any): any;
+      getFeatures(): Feature[];
+      registerFeature(feature: FeatureWithAllOrReadPrivileges): void;
     };
     kibana: {
       status: {
@@ -51,18 +42,20 @@ export interface KibanaLegacyServer {
         };
       };
     };
-    security: {
-      getUser: (request: KibanaServerRequest) => any;
-    };
+    security: SecurityPlugin;
     elasticsearch: {
       status: {
         on: (status: 'green' | 'yellow' | 'red', callback: () => void) => void;
       };
-      getCluster: () => any;
+      getCluster(name: string): Cluster;
+      createCluster(name: string, config: ClusterConfig): Cluster;
+      waitUntilReady(): Promise<void>;
     };
-    ingest: {};
+    spaces: any;
+    apm_oss: ApmOssPlugin;
+    ingest: any;
   };
-  expose: (name: string, value: any) => void;
+  expose: { (key: string, value: any): void; (obj: object): void };
   config: () => any;
   route: (routeConfig: any) => void;
   log: (message: string) => void;
@@ -107,7 +100,6 @@ export const RuntimeKibanaServerRequest = t.interface(
   },
   'KibanaServerRequest'
 );
-export interface KibanaServerRequest extends t.TypeOf<typeof RuntimeKibanaServerRequest> {}
 
 export const RuntimeKibanaUser = t.interface(
   {
@@ -143,32 +135,27 @@ export type FrameworkUser<AuthDataType = any> =
   | FrameworkAuthenticatedUser<AuthDataType>
   | FrameworkUnAuthenticatedUser
   | FrameworkInternalUser;
-export interface FrameworkRequest<
-  KibanaServerRequestGenaric extends Partial<KibanaServerRequest> = any
-> {
+export interface FrameworkRequest<KibanaServerRequestGenaric extends Partial<Request> = Request> {
   user: FrameworkUser<KibanaServerRequestGenaric['headers']>;
   headers: KibanaServerRequestGenaric['headers'];
-  info: KibanaServerRequest['info'];
+  info: Request['info'];
   payload: KibanaServerRequestGenaric['payload'];
   params: KibanaServerRequestGenaric['params'];
   query: KibanaServerRequestGenaric['query'];
 }
 
-export interface FrameworkRouteOptions<
-  RouteRequest extends FrameworkRequest = FrameworkRequest,
-  RouteResponse extends FrameworkResponse = any
-> {
+export interface FrameworkRouteOptions<RouteResponse extends FrameworkResponse = any> {
   path: string;
   method: string | string[];
   vhost?: string;
   licenseRequired?: string[];
   requiredRoles?: string[];
-  handler: FrameworkRouteHandler<RouteRequest, RouteResponse>;
+  handler: FrameworkRouteHandler<Request, RouteResponse>;
   config?: {};
 }
 
 export type FrameworkRouteHandler<
-  RouteRequest extends KibanaServerRequest,
+  RouteRequest extends Request,
   RouteResponse extends FrameworkResponse
 > = (request: FrameworkRequest<RouteRequest>, h: ResponseToolkit) => Promise<RouteResponse>;
 
