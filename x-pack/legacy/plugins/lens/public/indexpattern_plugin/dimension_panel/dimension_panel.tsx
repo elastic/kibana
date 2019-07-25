@@ -42,17 +42,13 @@ export const IndexPatternDimensionPanel = memo(function IndexPatternDimensionPan
   props: IndexPatternDimensionPanelProps
 ) {
   const layerId = props.layerId;
-  const indexPatternId = props.state.layers[layerId].indexPatternId;
-  const currentIndexPattern = props.state.indexPatterns[indexPatternId];
-
-  const availableOperationsByMetaData = useMemo(() => {
-    return getAvailableOperationsByMetaData(props.state.indexPatterns[indexPatternId]);
-  }, [props.state.indexPatterns[indexPatternId]]);
+  const currentIndexPattern = props.state.indexPatterns[props.state.layers[layerId].indexPatternId];
 
   const operationFieldSupportMatrix = useMemo(() => {
-    const filteredOperationsByMetaData = availableOperationsByMetaData.filter(operation => {
-      return props.filterOperations(operation.operationMetaData);
-    });
+    const filteredOperationsByMetaData = getAvailableOperationsByMetaData(
+      currentIndexPattern
+    ).filter(operation => props.filterOperations(operation.operationMetaData));
+
     const supportedOperationsByField: Partial<Record<string, OperationType[]>> = {};
     const supportedFieldsByOperation: Partial<Record<OperationType, string[]>> = {};
     const supportedOperationsByDocument: OperationType[] = [];
@@ -80,7 +76,7 @@ export const IndexPatternDimensionPanel = memo(function IndexPatternDimensionPan
       fieldByOperation: _.mapValues(supportedFieldsByOperation, _.uniq),
       operationByDocument: _.uniq(supportedOperationsByDocument),
     };
-  }, [availableOperationsByMetaData, props.filterOperations]);
+  }, [currentIndexPattern, props.filterOperations]);
 
   const selectedColumn: IndexPatternColumn | null =
     props.state.layers[layerId].columns[props.columnId] || null;
