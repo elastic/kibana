@@ -10,7 +10,11 @@ import { Provider } from 'react-redux';
 import { render, unmountComponentAtNode } from 'react-dom';
 import 'mapbox-gl/dist/mapbox-gl.css';
 
-import { Embeddable } from '../../../../../../src/legacy/core_plugins/embeddable_api/public/index';
+import {
+  APPLY_FILTER_TRIGGER,
+  Embeddable,
+  executeTriggerActions
+} from '../../../../../../src/legacy/core_plugins/embeddable_api/public/index';
 import { I18nContext } from 'ui/i18n';
 
 import { GisMap } from '../connected_components/gis_map';
@@ -26,7 +30,6 @@ import {
 import { DEFAULT_IS_LAYER_TOC_OPEN } from '../reducers/ui';
 import {
   setReadOnly,
-  setFilterable,
   setIsLayerTOCOpen,
   setOpenTOCDetails,
 } from '../actions/ui_actions';
@@ -97,7 +100,6 @@ export class MapEmbeddable extends Embeddable {
    */
   render(domNode) {
     this._store.dispatch(setReadOnly(true));
-    this._store.dispatch(setFilterable(true));
     this._store.dispatch(disableScrollZoom());
 
     if (_.has(this.input, 'isLayerTOCOpen')) {
@@ -136,7 +138,7 @@ export class MapEmbeddable extends Embeddable {
     render(
       <Provider store={this._store}>
         <I18nContext>
-          <GisMap/>
+          <GisMap addFilters={this.addFilters}/>
         </I18nContext>
       </Provider>,
       domNode
@@ -144,6 +146,15 @@ export class MapEmbeddable extends Embeddable {
 
     this._unsubscribeFromStore = this._store.subscribe(() => {
       this._handleStoreChanges();
+    });
+  }
+
+  addFilters = filters => {
+    executeTriggerActions(APPLY_FILTER_TRIGGER, {
+      embeddable: this,
+      triggerContext: {
+        filters,
+      },
     });
   }
 

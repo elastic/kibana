@@ -8,3 +8,4 @@ export * from './app_requests';
 export * from './repository_requests';
 export * from './snapshot_requests';
 export * from './restore_requests';
+export * from './policy_requests';
