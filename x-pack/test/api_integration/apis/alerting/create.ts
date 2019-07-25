@@ -33,7 +33,7 @@ export default function createAlertTests({ getService }: KibanaFunctionalTestDef
 
     async function getScheduledTask(id: string) {
       return await es.get({
-        id,
+        id: `task:${id}`,
         index: '.kibana_task_manager',
       });
     }
