@@ -83,15 +83,17 @@ export const ConfigPanelWrapper = memo(function ConfigPanelWrapper(props: Config
         }}
       />
       {props.activeVisualizationId && props.visualizationState !== null && (
-        <NativeRenderer
-          render={props.visualizationMap[props.activeVisualizationId].renderConfigPanel}
-          nativeProps={{
-            dragDropContext: context,
-            state: props.visualizationState,
-            setState: setVisualizationState,
-            frame: props.framePublicAPI,
-          }}
-        />
+        <div className="lnsConfigPanelWrapper">
+          <NativeRenderer
+            render={props.visualizationMap[props.activeVisualizationId].renderConfigPanel}
+            nativeProps={{
+              dragDropContext: context,
+              state: props.visualizationState,
+              setState: setVisualizationState,
+              frame: props.framePublicAPI,
+            }}
+          />
+        </div>
       )}
     </>
   );

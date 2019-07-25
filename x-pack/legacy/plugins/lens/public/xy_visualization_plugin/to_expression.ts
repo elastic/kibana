@@ -71,6 +71,7 @@ export const buildExpression = (
       arguments: {
         xTitle: [xTitle],
         yTitle: [yTitle],
+        isHorizontal: [state.isHorizontal],
         legend: [
           {
             type: 'expression',
@@ -109,8 +110,6 @@ export const buildExpression = (
                   layerId: [layer.layerId],
 
                   title: [layer.title],
-                  showGridlines: [layer.showGridlines],
-                  position: [layer.position],
                   hide: [Boolean(layer.hide)],
 
                   xAccessor: [layer.xAccessor],

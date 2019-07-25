@@ -16,14 +16,13 @@ jest.mock('../id_generator');
 
 function exampleState(): State {
   return {
+    isHorizontal: false,
     legend: { position: Position.Bottom, isVisible: true },
     layers: [
       {
         layerId: 'first',
         seriesType: 'area',
         splitAccessor: 'd',
-        position: Position.Bottom,
-        showGridlines: true,
         title: 'Baz',
         xAccessor: 'a',
         accessors: ['b', 'c'],
@@ -49,6 +48,7 @@ describe('xy_visualization', () => {
 
       expect(initialState).toMatchInlineSnapshot(`
         Object {
+          "isHorizontal": false,
           "layers": Array [
             Object {
               "accessors": Array [

@@ -102,6 +102,7 @@ function getSuggestion(
   const preposition = isDate ? 'over' : 'of';
   const title = `${yTitle} ${preposition} ${xTitle}`;
   const state: State = {
+    isHorizontal: false,
     legend: currentState ? currentState.legend : { isVisible: true, position: Position.Right },
     layers: [
       ...(currentState ? currentState.layers.filter(layer => layer.layerId !== layerId) : []),
@@ -111,8 +112,6 @@ function getSuggestion(
         seriesType: splitBy && isDate ? 'line' : 'bar',
         splitAccessor: splitBy && isDate ? splitBy.columnId : generateId(),
         accessors: yValues.map(col => col.columnId),
-        position: Position.Left,
-        showGridlines: false,
         title: yTitle,
       },
     ],
