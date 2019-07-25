@@ -6,12 +6,12 @@
 
 import React from 'react';
 
-import { SourceConfigurationFlyoutState } from '../../components/source_configuration';
-import { LogFlyout } from '../../containers/logs/log_flyout';
-import { LogViewConfiguration } from '../../containers/logs/log_view_configuration';
-import { LogHighlightsState } from '../../containers/logs/log_highlights/log_highlights';
-import { Source, useSource } from '../../containers/source';
-import { useSourceId } from '../../containers/source_id';
+import { SourceConfigurationFlyoutState } from '../../../components/source_configuration';
+import { LogFlyout } from '../../../containers/logs/log_flyout';
+import { LogViewConfiguration } from '../../../containers/logs/log_view_configuration';
+import { LogHighlightsState } from '../../../containers/logs/log_highlights/log_highlights';
+import { Source, useSource } from '../../../containers/source';
+import { useSourceId } from '../../../containers/source_id';
 
 export const LogsPageProviders: React.FunctionComponent = ({ children }) => {
   const [sourceId] = useSourceId();

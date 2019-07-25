@@ -6,30 +6,30 @@
 
 import React, { useContext } from 'react';
 
-import euiStyled from '../../../../../common/eui_styled_components';
-import { AutoSizer } from '../../components/auto_sizer';
-import { LogEntryFlyout } from '../../components/logging/log_entry_flyout';
-import { LogMinimap } from '../../components/logging/log_minimap';
-import { ScrollableLogTextStreamView } from '../../components/logging/log_text_stream';
-import { PageContent } from '../../components/page';
+import euiStyled from '../../../../../../common/eui_styled_components';
+import { AutoSizer } from '../../../components/auto_sizer';
+import { LogEntryFlyout } from '../../../components/logging/log_entry_flyout';
+import { LogMinimap } from '../../../components/logging/log_minimap';
+import { ScrollableLogTextStreamView } from '../../../components/logging/log_text_stream';
+import { PageContent } from '../../../components/page';
 
-import { WithSummary } from '../../containers/logs/log_summary';
-import { LogViewConfiguration } from '../../containers/logs/log_view_configuration';
-import { WithLogFilter, WithLogFilterUrlState } from '../../containers/logs/with_log_filter';
+import { WithSummary } from '../../../containers/logs/log_summary';
+import { LogViewConfiguration } from '../../../containers/logs/log_view_configuration';
+import { WithLogFilter, WithLogFilterUrlState } from '../../../containers/logs/with_log_filter';
 import {
   LogFlyout as LogFlyoutState,
   WithFlyoutOptionsUrlState,
-} from '../../containers/logs/log_flyout';
-import { WithLogMinimapUrlState } from '../../containers/logs/with_log_minimap';
-import { WithLogPositionUrlState } from '../../containers/logs/with_log_position';
-import { WithLogPosition } from '../../containers/logs/with_log_position';
-import { WithLogTextviewUrlState } from '../../containers/logs/with_log_textview';
-import { ReduxSourceIdBridge, WithStreamItems } from '../../containers/logs/with_stream_items';
-import { Source } from '../../containers/source';
+} from '../../../containers/logs/log_flyout';
+import { WithLogMinimapUrlState } from '../../../containers/logs/with_log_minimap';
+import { WithLogPositionUrlState } from '../../../containers/logs/with_log_position';
+import { WithLogPosition } from '../../../containers/logs/with_log_position';
+import { WithLogTextviewUrlState } from '../../../containers/logs/with_log_textview';
+import { ReduxSourceIdBridge, WithStreamItems } from '../../../containers/logs/with_stream_items';
+import { Source } from '../../../containers/source';
 
 import { LogsToolbar } from './page_toolbar';
-import { SourceConfigurationFlyoutState } from '../../components/source_configuration';
-import { LogHighlightsBridge } from '../../containers/logs/log_highlights';
+import { SourceConfigurationFlyoutState } from '../../../components/source_configuration';
+import { LogHighlightsBridge } from '../../../containers/logs/log_highlights';
 
 export const LogsPageLogsContent: React.FunctionComponent = () => {
   const { derivedIndexPattern, source, sourceId, version } = useContext(Source.Context);

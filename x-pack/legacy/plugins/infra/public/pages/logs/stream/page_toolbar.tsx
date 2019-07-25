@@ -8,22 +8,22 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { injectI18n } from '@kbn/i18n/react';
 import React, { useContext } from 'react';
 
-import { AutocompleteField } from '../../components/autocomplete_field';
-import { Toolbar } from '../../components/eui';
-import { LogCustomizationMenu } from '../../components/logging/log_customization_menu';
-import { LogHighlightsMenu } from '../../components/logging/log_highlights_menu';
-import { LogHighlightsState } from '../../containers/logs/log_highlights/log_highlights';
-import { LogMinimapScaleControls } from '../../components/logging/log_minimap_scale_controls';
-import { LogTextScaleControls } from '../../components/logging/log_text_scale_controls';
-import { LogTextWrapControls } from '../../components/logging/log_text_wrap_controls';
-import { LogTimeControls } from '../../components/logging/log_time_controls';
-import { SourceConfigurationButton } from '../../components/source_configuration';
-import { LogFlyout } from '../../containers/logs/log_flyout';
-import { LogViewConfiguration } from '../../containers/logs/log_view_configuration';
-import { WithLogFilter } from '../../containers/logs/with_log_filter';
-import { WithLogPosition } from '../../containers/logs/with_log_position';
-import { Source } from '../../containers/source';
-import { WithKueryAutocompletion } from '../../containers/with_kuery_autocompletion';
+import { AutocompleteField } from '../../../components/autocomplete_field';
+import { Toolbar } from '../../../components/eui';
+import { LogCustomizationMenu } from '../../../components/logging/log_customization_menu';
+import { LogHighlightsMenu } from '../../../components/logging/log_highlights_menu';
+import { LogHighlightsState } from '../../../containers/logs/log_highlights/log_highlights';
+import { LogMinimapScaleControls } from '../../../components/logging/log_minimap_scale_controls';
+import { LogTextScaleControls } from '../../../components/logging/log_text_scale_controls';
+import { LogTextWrapControls } from '../../../components/logging/log_text_wrap_controls';
+import { LogTimeControls } from '../../../components/logging/log_time_controls';
+import { SourceConfigurationButton } from '../../../components/source_configuration';
+import { LogFlyout } from '../../../containers/logs/log_flyout';
+import { LogViewConfiguration } from '../../../containers/logs/log_view_configuration';
+import { WithLogFilter } from '../../../containers/logs/with_log_filter';
+import { WithLogPosition } from '../../../containers/logs/with_log_position';
+import { Source } from '../../../containers/source';
+import { WithKueryAutocompletion } from '../../../containers/with_kuery_autocompletion';
 
 export const LogsToolbar = injectI18n(({ intl }) => {
   const { derivedIndexPattern } = useContext(Source.Context);

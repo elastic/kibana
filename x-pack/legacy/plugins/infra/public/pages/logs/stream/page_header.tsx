@@ -9,18 +9,17 @@ import React from 'react';
 
 import { UICapabilities } from 'ui/capabilities';
 import { injectUICapabilities } from 'ui/capabilities/react';
-import { DocumentTitle } from '../../components/document_title';
-import { Header } from '../../components/header';
-import { HelpCenterContent } from '../../components/help_center_content';
-import { SourceConfigurationFlyout } from '../../components/source_configuration';
+import { DocumentTitle } from '../../../components/document_title';
+import { Header } from '../../../components/header';
+import { SourceConfigurationFlyout } from '../../../components/source_configuration';
 
-interface LogsPageHeaderProps {
+interface StreamPageHeaderProps {
   intl: InjectedIntl;
   uiCapabilities: UICapabilities;
 }
 
-export const LogsPageHeader = injectUICapabilities(
-  injectI18n((props: LogsPageHeaderProps) => {
+export const StreamPageHeader = injectUICapabilities(
+  injectI18n((props: StreamPageHeaderProps) => {
     const { intl, uiCapabilities } = props;
     return (
       <>
@@ -36,17 +35,17 @@ export const LogsPageHeader = injectUICapabilities(
           readOnlyBadge={!uiCapabilities.logs.save}
         />
         <DocumentTitle
-          title={intl.formatMessage({
-            id: 'xpack.infra.logsPage.documentTitle',
-            defaultMessage: 'Logs',
-          })}
-        />
-        <HelpCenterContent
-          feedbackLink="https://discuss.elastic.co/c/logs"
-          feedbackLinkText={intl.formatMessage({
-            id: 'xpack.infra.logsPage.logsHelpContent.feedbackLinkText',
-            defaultMessage: 'Provide feedback for Logs',
-          })}
+          title={(previousTitle: string) =>
+            intl.formatMessage(
+              {
+                id: 'xpack.logs.streamPage.documentTitle',
+                defaultMessage: '{previousTitle} | Stream',
+              },
+              {
+                previousTitle,
+              }
+            )
+          }
         />
         <SourceConfigurationFlyout
           shouldAllowEdit={uiCapabilities.logs.configureSource as boolean}

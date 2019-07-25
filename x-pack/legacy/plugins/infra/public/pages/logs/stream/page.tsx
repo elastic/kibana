@@ -6,20 +6,20 @@
 
 import React from 'react';
 
-import { ColumnarPage } from '../../components/page';
-import { LogsPageContent } from './page_content';
-import { LogsPageHeader } from './page_header';
+import { ColumnarPage } from '../../../components/page';
+import { StreamPageContent } from './page_content';
+import { StreamPageHeader } from './page_header';
 import { LogsPageProviders } from './page_providers';
-import { useTrackPageview } from '../../hooks/use_track_metric';
+import { useTrackPageview } from '../../../hooks/use_track_metric';
 
-export const LogsPage = () => {
+export const StreamPage = () => {
   useTrackPageview({ app: 'infra_logs', path: 'stream' });
   useTrackPageview({ app: 'infra_logs', path: 'stream', delay: 15000 });
   return (
     <LogsPageProviders>
       <ColumnarPage data-test-subj="infraLogsPage">
-        <LogsPageHeader />
-        <LogsPageContent />
+        <StreamPageHeader />
+        <StreamPageContent />
       </ColumnarPage>
     </LogsPageProviders>
   );

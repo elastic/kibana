@@ -10,9 +10,9 @@ import React, { useContext } from 'react';
 
 import { UICapabilities } from 'ui/capabilities';
 import { injectUICapabilities } from 'ui/capabilities/react';
-import { NoIndices } from '../../components/empty_states/no_indices';
-import { SourceConfigurationFlyoutState } from '../../components/source_configuration';
-import { WithKibanaChrome } from '../../containers/with_kibana_chrome';
+import { NoIndices } from '../../../components/empty_states/no_indices';
+import { SourceConfigurationFlyoutState } from '../../../components/source_configuration';
+import { WithKibanaChrome } from '../../../containers/with_kibana_chrome';
 
 interface LogsPageNoIndicesContentProps {
   intl: InjectedIntl;
