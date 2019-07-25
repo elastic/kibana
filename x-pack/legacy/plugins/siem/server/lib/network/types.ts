@@ -4,11 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  NetworkDirectionEcs,
-  NetworkDnsData,
-  NetworkTopNFlowData,
-} from '../../graphql/types';
+import { NetworkDirectionEcs, NetworkDnsData, NetworkTopNFlowData } from '../../graphql/types';
 import { FrameworkRequest, RequestOptionsPaginated } from '../framework';
 import { SearchHit } from '../types';
 

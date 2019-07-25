@@ -61,21 +61,4 @@ export const FlowTargetFilterGroup = pure<FlowTargetFilterGroupProps>(
       </EuiFilterButton>
     </EuiFilterGroup>
   )
-
-  //   (
-  //   <EuiSuperSelect
-  //     options={
-  //       selectedDirection
-  //         ? toggleTargetOptions(id, displayTextOverride).filter(option =>
-  //             option.directions.includes(selectedDirection)
-  //           )
-  //         : toggleTargetOptions(id, displayTextOverride)
-  //     }
-  //     valueOfSelected={selectedTarget}
-  //     onChange={(newFlowTarget: FlowTarget) =>
-  //       onChangeTarget(newFlowTarget, updateFlowTarget)
-  //     }
-  //     isLoading={isLoading}
-  //   />
-  // )
 );

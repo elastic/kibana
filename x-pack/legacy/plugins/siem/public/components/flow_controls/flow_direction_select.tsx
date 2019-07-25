@@ -22,7 +22,11 @@ export const FlowDirectionSelect = pure<Props>(({ onChangeDirection, selectedDir
     <EuiFilterButton
       withNext
       hasActiveFilters={selectedDirection === FlowDirection.uniDirectional}
-      onClick={() => onChangeDirection(FlowDirection.uniDirectional)}
+      onClick={() =>
+        selectedDirection === FlowDirection.uniDirectional
+          ? onChangeDirection(FlowDirection.unified)
+          : onChangeDirection(FlowDirection.uniDirectional)
+      }
       data-test-subj={FlowDirection.uniDirectional}
     >
       {i18n.UNIDIRECTIONAL}
@@ -30,7 +34,11 @@ export const FlowDirectionSelect = pure<Props>(({ onChangeDirection, selectedDir
 
     <EuiFilterButton
       hasActiveFilters={selectedDirection === FlowDirection.biDirectional}
-      onClick={() => onChangeDirection(FlowDirection.biDirectional)}
+      onClick={() =>
+        selectedDirection === FlowDirection.biDirectional
+          ? onChangeDirection(FlowDirection.unified)
+          : onChangeDirection(FlowDirection.biDirectional)
+      }
       data-test-subj={FlowDirection.biDirectional}
     >
       {i18n.BIDIRECTIONAL}

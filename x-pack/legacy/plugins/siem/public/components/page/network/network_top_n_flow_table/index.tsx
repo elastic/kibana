@@ -108,8 +108,7 @@ class NetworkTopNFlowTableComponent extends React.PureComponent<NetworkTopNFlowT
       updateTableActivePage,
     } = this.props;
 
-    const field = topNFlowSort.field;
-
+    const field = `node.network.${topNFlowSort.field}`;
     return (
       <PaginatedTable
         columns={getNetworkTopNFlowColumns(
