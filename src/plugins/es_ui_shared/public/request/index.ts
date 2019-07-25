@@ -24,10 +24,3 @@ export {
   sendRequest,
   useRequest,
 } from './request';
-
-// New Platform requires this as the default export.
-export const plugin = () => ({
-  setup: () => {},
-  start: () => {},
-  stop: () => {},
-});
