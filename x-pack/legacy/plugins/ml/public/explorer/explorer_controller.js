@@ -29,7 +29,6 @@ import { explorer$ } from './explorer_dashboard_service';
 import { mlTimefilterRefresh$ } from '../services/timefilter_refresh_service';
 import { mlFieldFormatService } from 'plugins/ml/services/field_format_service';
 import { mlJobService } from '../services/job_service';
-import { refreshIntervalWatcher } from '../util/refresh_interval_watcher';
 import { getSelectedJobIds } from '../components/job_selector/job_select_service_utils';
 import { timefilter } from 'ui/timefilter';
 
@@ -219,12 +218,11 @@ module.controller('MlExplorerController', function (
   });
 
   // Add a watcher for auto-refresh of the time filter to refresh all the data.
-  const refreshWatcher = Private(refreshIntervalWatcher);
-  refreshWatcher.init(async () => {
+  subscriptions.add(mlTimefilterRefresh$.subscribe(() => {
     if ($scope.jobSelectionUpdateInProgress === false) {
       explorer$.next({ action: EXPLORER_ACTION.RELOAD });
     }
-  });
+  }));
 
   // Redraw the swimlane when the window resizes or the global nav is toggled.
   function jqueryRedrawOnResize() {
@@ -294,7 +292,6 @@ module.controller('MlExplorerController', function (
 
   $scope.$on('$destroy', () => {
     subscriptions.unsubscribe();
-    refreshWatcher.cancel();
     $(window).off('resize', jqueryRedrawOnResize);
     // Cancel listening for updates to the global nav state.
     navListener();

@@ -39,7 +39,6 @@ import { checkGetJobsPrivilege, checkPermission } from '../privilege/check_privi
 import { mlJobService } from '../services/job_service';
 
 import { loadIndexPatterns } from '../util/index_utils';
-import { refreshIntervalWatcher } from '../util/refresh_interval_watcher';
 import { NavigationMenuContext } from '../util/context_utils';
 
 import { getSingleMetricViewerBreadcrumbs } from './breadcrumbs';
@@ -115,15 +114,8 @@ module.directive('mlTimeSeriesExplorer', function (
     // Refresh the data when the time range is altered.
     $scope.$listenAndDigestAsync(timefilter, 'fetch', $scope.refresh);
 
-    // Add a watcher for auto-refresh of the time filter to refresh all the data.
-    const refreshWatcher = Private(refreshIntervalWatcher);
-    refreshWatcher.init(() => {
-      $scope.refresh();
-    });
-
     $scope.$on('$destroy', () => {
       resizeChecker.destroy();
-      refreshWatcher.cancel();
     });
 
     $element.on('$destroy', () => {

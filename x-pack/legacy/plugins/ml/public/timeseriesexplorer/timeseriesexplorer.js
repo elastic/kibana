@@ -10,6 +10,7 @@
 
 import { chain, difference, each, find, filter, first, get, has, isEqual, without } from 'lodash';
 import moment from 'moment-timezone';
+import { Subscription } from 'rxjs';
 
 import PropTypes from 'prop-types';
 import React, { Fragment } from 'react';
@@ -147,9 +148,10 @@ export const TimeSeriesExplorer = injectI18n(
 
     state = getTimeseriesexplorerDefaultState();
 
-    detectorIndexChangeHandler = (e) => this.detectorIndexChanged(e.target.value);
+    subscriptions = new Subscription();
 
-    detectorIndexChanged = (id) => {
+    detectorIndexChangeHandler = (e) => {
+      const id = e.target.value;
       if (id !== undefined) {
         this.setState({ detectorrId: id });
       }
@@ -316,7 +318,7 @@ export const TimeSeriesExplorer = injectI18n(
       }));
     };
 
-    loadAnomaliesTableData(earliestMs, latestMs) {
+    loadAnomaliesTableData = (earliestMs, latestMs) => {
       const { dateFormatTz } = this.props;
       const { criteriaFields, selectedJob } = this.state;
 
@@ -369,7 +371,7 @@ export const TimeSeriesExplorer = injectI18n(
       });
     }
 
-    loadEntityValues() {
+    loadEntityValues = () => {
       const { timefilter } = this.props;
       const { detectorId, entities, selectedJob } = this.state;
 
@@ -407,7 +409,7 @@ export const TimeSeriesExplorer = injectI18n(
         });
     }
 
-    loadForForecastId(forecastId) {
+    loadForForecastId = (forecastId) => {
       const { appState, timefilter } = this.props;
       const { autoZoomDuration, contextChartData, selectedJob } = this.state;
 
@@ -456,7 +458,8 @@ export const TimeSeriesExplorer = injectI18n(
       });
     }
 
-    refresh() {
+    refresh = () => {
+      console.warn('refresh', this.props);
       const { appState, timefilter } = this.props;
       const {
         detectorId: currentDetectorId,
@@ -649,7 +652,7 @@ export const TimeSeriesExplorer = injectI18n(
       });
     }
 
-    updateControlsForDetector() {
+    updateControlsForDetector = () => {
       const { appState } = this.props;
       const { detectorId, selectedJob } = this.state;
       // Update the entity dropdown control(s) according to the partitioning fields for the selected detector.
@@ -864,13 +867,13 @@ export const TimeSeriesExplorer = injectI18n(
         }
       };
 
-      this.annotationsRefreshSub = annotationsRefresh$.subscribe(this.refresh);
-      this.intervalSub = interval$.subscribe(tableControlsListener);
-      this.severitySub = severity$.subscribe(tableControlsListener);
-      this.timefilterRefreshServiceSub = mlTimefilterRefresh$.subscribe(this.refresh);
+      this.subscriptions.add(annotationsRefresh$.subscribe(this.refresh));
+      this.subscriptions.add(interval$.subscribe(tableControlsListener));
+      this.subscriptions.add(severity$.subscribe(tableControlsListener));
+      this.subscriptions.add(mlTimefilterRefresh$.subscribe(this.refresh));
 
       // Listen for changes to job selection.
-      this.jobSelectServiceSub = jobSelectService.subscribe(({ selection }) => {
+      this.subscriptions.add(jobSelectService.subscribe(({ selection }) => {
         const { appState } = this.props;
         const { jobs } = this.state;
 
@@ -884,15 +887,11 @@ export const TimeSeriesExplorer = injectI18n(
           this.setState({ showForecastCheckbox: false });
           this.loadForJobId(selection[0], jobs);
         }
-      });
+      }));
     }
 
     componentWillUnmount() {
-      this.annotationsRefreshSub.unsubscribe();
-      this.intervalSub.unsubscribe();
-      this.jobSelectServiceSub.unsubscribe();
-      this.severitySub.unsubscribe();
-      this.timefilterRefreshServiceSub.unsubscribe();
+      this.subscriptions.unsubscribe();
     }
 
     render() {
