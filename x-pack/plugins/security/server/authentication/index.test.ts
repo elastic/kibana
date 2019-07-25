@@ -167,6 +167,34 @@ describe('setupAuthentication()', () => {
       expect(authenticate).toHaveBeenCalledWith(mockRequest);
     });
 
+    it('returns authentication response headers on success if any', async () => {
+      const mockRequest = httpServerMock.createKibanaRequest();
+      const mockUser = mockAuthenticatedUser();
+      const mockAuthHeaders = { authorization: 'Basic xxx' };
+      const mockAuthResponseHeaders = { 'WWW-Authenticate': 'Negotiate' };
+
+      authenticate.mockResolvedValue(
+        AuthenticationResult.succeeded(mockUser, {
+          authHeaders: mockAuthHeaders,
+          authResponseHeaders: mockAuthResponseHeaders,
+        })
+      );
+
+      await authHandler(mockRequest, mockAuthToolkit);
+
+      expect(mockAuthToolkit.authenticated).toHaveBeenCalledTimes(1);
+      expect(mockAuthToolkit.authenticated).toHaveBeenCalledWith({
+        state: mockUser,
+        requestHeaders: mockAuthHeaders,
+        responseHeaders: mockAuthResponseHeaders,
+      });
+      expect(mockAuthToolkit.redirected).not.toHaveBeenCalled();
+      expect(mockAuthToolkit.rejected).not.toHaveBeenCalled();
+
+      expect(authenticate).toHaveBeenCalledTimes(1);
+      expect(authenticate).toHaveBeenCalledWith(mockRequest);
+    });
+
     it('redirects user if redirection is requested by the authenticator', async () => {
       authenticate.mockResolvedValue(AuthenticationResult.redirectTo('/some/url'));
 
@@ -213,14 +241,18 @@ describe('setupAuthentication()', () => {
         'Basic',
         'Negotiate',
       ] as any;
-      authenticate.mockResolvedValue(AuthenticationResult.failed(originalError, ['Negotiate']));
+      authenticate.mockResolvedValue(
+        AuthenticationResult.failed(originalError, {
+          authResponseHeaders: { 'WWW-Authenticate': 'Negotiate' },
+        })
+      );
 
       await authHandler(httpServerMock.createKibanaRequest(), mockAuthToolkit);
 
       expect(mockAuthToolkit.rejected).toHaveBeenCalledTimes(1);
       const [[error]] = mockAuthToolkit.rejected.mock.calls;
       expect(error.message).toBe(originalError.message);
-      expect((error as Boom).output.headers).toEqual({ 'WWW-Authenticate': ['Negotiate'] });
+      expect((error as Boom).output.headers).toEqual({ 'WWW-Authenticate': 'Negotiate' });
 
       expect(mockAuthToolkit.authenticated).not.toHaveBeenCalled();
       expect(mockAuthToolkit.redirected).not.toHaveBeenCalled();
