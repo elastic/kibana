@@ -11,7 +11,7 @@ import { COLOR_GRADIENTS } from './color_utils';
 const DEFAULT_COLORS = ['#e6194b', '#3cb44b', '#ffe119', '#f58231', '#911eb4'];
 const DEFAULT_ICON = 'airfield';
 
-export const DEFAULT_MIN_SIZE = 1;
+export const DEFAULT_MIN_SIZE = 0;
 export const DEFAULT_MAX_SIZE = 64;
 
 export function getDefaultProperties(mapColors = []) {

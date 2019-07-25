@@ -31,7 +31,7 @@ export function SizeRangeSelector({ minSize, maxSize, onChange }) {
           compressed
         >
           <ValidatedDualRange
-            min={DEFAULT_MIN_SIZE}
+            min={0}
             max={DEFAULT_MAX_SIZE}
             step={0.5}
             value={[minSize, maxSize]}
