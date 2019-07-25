@@ -328,6 +328,11 @@ export class IndexPattern {
     return this.fields.byName[this.timeFieldName];
   }
 
+  getFieldByName(name) {
+    if (!this.fields || !this.fields.byName) return;
+    return this.fields.byName[name];
+  }
+
   isWildcard() {
     return _.includes(this.title, '*');
   }
