@@ -78,13 +78,19 @@ export const SnapshotList: React.FunctionComponent<RouteComponentProps<MatchPara
     }
   };
 
-  // Allow deeplinking to list pre-filtered by repository name
+  // Allow deeplinking to list pre-filtered by repository name or by policy name
   const [filteredRepository, setFilteredRepository] = useState<string | undefined>(undefined);
+  const [filteredPolicy, setFilteredPolicy] = useState<string | undefined>(undefined);
   useEffect(() => {
     if (search) {
       const parsedParams = parse(search.replace(/^\?/, ''));
-      if (parsedParams.repository && parsedParams.repository !== filteredRepository) {
-        setFilteredRepository(String(parsedParams.repository));
+      const { repository, policy } = parsedParams;
+
+      if (policy && policy !== filteredPolicy) {
+        setFilteredPolicy(String(policy));
+        history.replace(`${BASE_PATH}/snapshots`);
+      } else if (repository && repository !== filteredRepository) {
+        setFilteredRepository(String(repository));
         history.replace(`${BASE_PATH}/snapshots`);
       }
     }
@@ -287,6 +293,7 @@ export const SnapshotList: React.FunctionComponent<RouteComponentProps<MatchPara
           openSnapshotDetailsUrl={openSnapshotDetailsUrl}
           onSnapshotDeleted={onSnapshotDeleted}
           repositoryFilter={filteredRepository}
+          policyFilter={filteredPolicy}
         />
       </Fragment>
     );

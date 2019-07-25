@@ -6,7 +6,7 @@
 
 import { schema, TypeOf } from '@kbn/config-schema';
 
-import { ActionType, ActionTypeExecutorOptions } from '../types';
+import { ActionType, ActionTypeExecutorOptions, ActionTypeExecutorResult } from '../types';
 
 const DEFAULT_TAGS = ['info', 'alerting'];
 
@@ -40,9 +40,19 @@ export const actionType: ActionType = {
 
 // action executor
 
-async function executor(execOptions: ActionTypeExecutorOptions): Promise<any> {
+async function executor(execOptions: ActionTypeExecutorOptions): Promise<ActionTypeExecutorResult> {
+  const id = execOptions.id;
   const params = execOptions.params as ActionParamsType;
   const services = execOptions.services;
 
-  services.log(params.tags, params.message);
+  try {
+    services.log(params.tags, params.message);
+  } catch (err) {
+    return {
+      status: 'error',
+      message: `error in action ${id} logging message: ${err.message}`,
+    };
+  }
+
+  return { status: 'ok' };
 }

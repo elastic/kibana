@@ -19,10 +19,6 @@ class MockTooltipProperty {
     return this._isFilterable;
   }
 
-  getFilterAction() {
-    return () => {};
-  }
-
   getHtmlDisplayValue() {
     return this._value;
   }
@@ -45,7 +41,7 @@ const mockTooltipProperties = [
   new MockTooltipProperty('prop2', 'foobar2', false)
 ];
 
-describe('FeatureProperties', async () => {
+describe('FeatureProperties', () => {
 
   test('should not show filter button', async () => {
     const component = shallow(

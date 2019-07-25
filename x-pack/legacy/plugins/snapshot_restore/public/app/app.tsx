@@ -106,7 +106,7 @@ export const App: React.FunctionComponent = () => {
     );
   }
 
-  const sections: Section[] = ['repositories', 'snapshots', 'restore_status'];
+  const sections: Section[] = ['repositories', 'snapshots', 'restore_status', 'policies'];
   const sectionsRegex = sections.join('|');
 
   return (
