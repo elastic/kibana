@@ -27,7 +27,7 @@ module.directive('mlNewJobPage', ($injector: InjectorService) => {
     scope: {},
     restrict: 'E',
     link: async (scope: ng.IScope, element: ng.IAugmentedJQuery) => {
-      timefilter.enableTimeRangeSelector();
+      timefilter.disableTimeRangeSelector();
       timefilter.disableAutoRefreshSelector();
 
       const indexPatterns = $injector.get('indexPatterns');

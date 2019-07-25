@@ -5,18 +5,19 @@
  */
 
 import React, { Fragment, FC, useContext, useState, useEffect } from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+
 import { timefilter } from 'ui/timefilter';
 import moment from 'moment';
 import { WizardNav } from '../wizard_nav';
 import { WIZARD_STEPS, StepProps } from '../step_types';
 import { JobCreatorContext } from '../job_creator_context';
 import { KibanaContext, isKibanaContext } from '../../../../../data_frame/common/kibana_context';
-import {
-  FullTimeRangeSelector,
-  getTimeFilterRange,
-} from '../../../../../components/full_time_range_selector';
+import { FullTimeRangeSelector } from '../../../../../components/full_time_range_selector';
 import { EventRateChart } from '../charts/event_rate_chart';
 import { LineChartPoint } from '../../../common/chart_loader';
+import { TimeRangePicker } from './time_range_picker';
+import { GetTimeFieldRangeResponse } from '../../../../../services/ml_api_service';
 
 export const TimeRangeStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) => {
   const kibanaContext = useContext(KibanaContext);
@@ -51,6 +52,11 @@ export const TimeRangeStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) 
       min: moment(start),
       max: moment(end),
     });
+    timefilter.setTime({
+      from: moment(start).toISOString(),
+      to: moment(end).toISOString(),
+    });
+
     jobCreatorUpdate();
     loadChart();
   }, [start, end]);
@@ -60,36 +66,37 @@ export const TimeRangeStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) 
     setEnd(jobCreator.end);
   }, [jobCreatorUpdated]);
 
-  const timefilterChange = () => {
-    const { to, from } = getTimeFilterRange();
-    if (to >= from) {
-      setStart(from);
-      setEnd(to);
-    }
-  };
-
-  useEffect(() => {
-    timefilter.on('timeUpdate', timefilterChange);
-    return () => {
-      timefilter.off('timeUpdate', timefilterChange);
-    };
-  }, []);
+  function fullTimeRangeCallback(a: GetTimeFieldRangeResponse) {
+    setStart(a.start.epoch);
+    setEnd(a.end.epoch);
+  }
 
   return (
     <Fragment>
       {isCurrentStep && (
         <Fragment>
+          <EuiFlexGroup>
+            <EuiFlexItem grow={false}>
+              <TimeRangePicker setStart={setStart} setEnd={setEnd} start={start} end={end} />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <FullTimeRangeSelector
+                indexPattern={kibanaContext.currentIndexPattern}
+                query={kibanaContext.combinedQuery}
+                disabled={false}
+                callback={fullTimeRangeCallback}
+              />
+            </EuiFlexItem>
+            <EuiFlexItem />
+          </EuiFlexGroup>
+          <EuiSpacer />
           <EventRateChart
             eventRateChartData={eventRateChartData}
             height="300px"
             width="100%"
             showAxis={true}
           />
-          <FullTimeRangeSelector
-            indexPattern={kibanaContext.currentIndexPattern}
-            query={kibanaContext.combinedQuery}
-            disabled={false}
-          />
+
           <WizardNav next={() => setCurrentStep(WIZARD_STEPS.PICK_FIELDS)} nextActive={true} />
         </Fragment>
       )}
