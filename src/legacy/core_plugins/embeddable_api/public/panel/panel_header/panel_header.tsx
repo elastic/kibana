@@ -44,8 +44,6 @@ function renderBadges(badges: Action[], embeddable: IEmbeddable) {
     <EuiBadge
       key={badge.id}
       iconType={badge.getIconType({ embeddable })}
-      iconOnClick={() => badge.execute({ embeddable })}
-      iconOnClickAriaLabel={badge.getDisplayName({ embeddable })}
       onClick={() => badge.execute({ embeddable })}
       onClickAriaLabel={badge.getDisplayName({ embeddable })}
     >
