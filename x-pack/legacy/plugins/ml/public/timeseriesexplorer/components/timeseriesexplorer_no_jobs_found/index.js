@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export * from './timeseriesexplorer_no_jobs_found';
+export { TimeseriesexplorerNoJobsFound } from './timeseriesexplorer_no_jobs_found';

@@ -5,4 +5,4 @@
  */
 
 
-export * from './anomalies_table';
+export { AnomaliesTable } from './anomalies_table';

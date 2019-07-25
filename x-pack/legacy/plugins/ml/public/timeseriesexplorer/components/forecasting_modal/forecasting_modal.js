@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-
 /*
  * React modal dialog which allows the user to run and view time series forecasts.
  */
@@ -46,7 +44,6 @@ const WARN_NUM_PARTITIONS = 100;    // Warn about running a forecast with this n
 const FORECAST_STATS_POLL_FREQUENCY = 250;  // Frequency in ms at which to poll for forecast request stats.
 const WARN_NO_PROGRESS_MS = 120000; // If no progress in forecast request, abort check and warn.
 
-
 function getDefaultState() {
   return {
     isModalVisible: false,
@@ -61,7 +58,6 @@ function getDefaultState() {
     messages: []
   };
 }
-
 
 export const ForecastingModal = injectI18n(class ForecastingModal extends Component {
   static propTypes = {

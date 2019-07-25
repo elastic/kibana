@@ -6,4 +6,7 @@
 
 
 
-export * from './forecasting_modal';
+export {
+  ForecastingModal,
+  FORECAST_DURATION_MAX_DAYS,
+}from './forecasting_modal';
