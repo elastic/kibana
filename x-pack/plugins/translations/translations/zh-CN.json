@@ -4739,8 +4739,6 @@
     "xpack.graph.topNavMenu.save.saveConfigurationOnlyWarning": "将清除此工作空间的数据，仅保存配置",
     "xpack.graph.topNavMenu.save.saveGraphContentCheckboxLabel": "保存 Graph 内容",
     "xpack.graph.topNavMenu.save.saveWorkspaceTitle": "保存工作空间",
-    "xpack.graph.topNavMenu.saveWorkspace.disabledAriaLabel": "保存工作空间",
-    "xpack.graph.topNavMenu.saveWorkspace.disabledLabel": "保存",
     "xpack.graph.topNavMenu.saveWorkspace.disabledTooltip": "当前保存策略不允许对已保存的工作空间做任何更改",
     "xpack.graph.topNavMenu.saveWorkspace.enabledAriaLabel": "保存工作空间",
     "xpack.graph.topNavMenu.saveWorkspace.enabledLabel": "保存",

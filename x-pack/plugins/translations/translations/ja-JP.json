@@ -4739,8 +4739,6 @@
     "xpack.graph.topNavMenu.save.saveConfigurationOnlyWarning": "このワークスペースのデータは消去され、構成のみが保存されます",
     "xpack.graph.topNavMenu.save.saveGraphContentCheckboxLabel": "Graph コンテンツを保存",
     "xpack.graph.topNavMenu.save.saveWorkspaceTitle": "ワークスペースの保存",
-    "xpack.graph.topNavMenu.saveWorkspace.disabledAriaLabel": "ワークスペースを保存",
-    "xpack.graph.topNavMenu.saveWorkspace.disabledLabel": "保存",
     "xpack.graph.topNavMenu.saveWorkspace.disabledTooltip": "現在の保存ポリシーでは、保存されたワークスペースへの変更が許可されていません",
     "xpack.graph.topNavMenu.saveWorkspace.enabledAriaLabel": "ワークスペースを保存",
     "xpack.graph.topNavMenu.saveWorkspace.enabledLabel": "保存",
