@@ -26,10 +26,13 @@ export type ParameterName =
   | 'null_value'
   | 'dynamic'
   | 'enabled'
-  | 'boost';
+  | 'boost'
+  | 'locale'
+  | 'format';
 
 export interface Parameter {
-  fieldConfig: FieldConfig;
+  fieldConfig?: FieldConfig;
+  paramName?: string;
   docs?: string;
 }
 
@@ -126,6 +129,22 @@ export const parametersDefinition: { [key in ParameterName]: Parameter } = {
       label: 'Enabled',
       type: FIELD_TYPES.CHECKBOX,
       defaultValue: true,
+    },
+  },
+  locale: {
+    fieldConfig: {
+      label: 'Locale',
+    },
+  },
+  format: {
+    fieldConfig: {
+      label: 'Formats',
+      type: FIELD_TYPES.COMBO_BOX,
+      defaultValue: [],
+      serializer: (options: any[]): string | undefined =>
+        options.length ? options.join('||') : undefined,
+      deSerializer: (formats?: string | any[]): any[] =>
+        Array.isArray(formats) ? formats : (formats as string).split('||'),
     },
   },
 };

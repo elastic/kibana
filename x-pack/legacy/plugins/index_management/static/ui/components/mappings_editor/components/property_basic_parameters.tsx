@@ -30,13 +30,20 @@ export const PropertyBasicParameters = ({ form, typeDefinition, fieldPathPrefix 
 
   const rows = parametersToRows(typeDefinition.basicParameters);
 
+  const getMaxWidth = (rowIndex: number, totalItems: number) => {
+    if (rowIndex === 0 || totalItems >= 3) {
+      return 'initial';
+    }
+    return totalItems <= 1 ? '300px' : '600px';
+  };
+
   return (
     <Fragment>
       {rows.map((parameters, i) => (
         <div key={i}>
-          <EuiFlexGroup>
+          <EuiFlexGroup style={{ maxWidth: getMaxWidth(i, parameters.length) }}>
             {parameters.map(parameter => (
-              <EuiFlexItem key={parameter} grow={false}>
+              <EuiFlexItem key={parameter} grow={i !== 0}>
                 <UseField
                   form={form}
                   path={fieldPathPrefix + parameter}

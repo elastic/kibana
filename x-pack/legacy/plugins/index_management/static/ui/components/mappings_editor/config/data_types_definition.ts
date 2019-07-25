@@ -6,9 +6,19 @@
 
 import { ParameterName } from './parameters_definition';
 
-export type DataType = 'text' | 'keyword' | 'numeric' | 'object' | 'nested' | 'array';
+export type DataType =
+  | 'text'
+  | 'keyword'
+  | 'numeric'
+  | 'date'
+  | 'binary'
+  | 'boolean'
+  | 'range'
+  | 'object'
+  | 'nested'
+  | 'array';
 
-export type SubType = NumericType;
+export type SubType = NumericType | DateType | RangeType;
 
 export type NumericType =
   | 'long'
@@ -19,6 +29,15 @@ export type NumericType =
   | 'float'
   | 'half_float'
   | 'scaled_float';
+
+export type DateType = 'date' | 'date_nanos';
+
+export type RangeType =
+  | 'integer_range'
+  | 'float_range'
+  | 'long_range'
+  | 'double_range'
+  | 'date_range';
 
 export interface DataTypeDefinition {
   label: string;
@@ -49,13 +68,40 @@ export const dataTypesDefinition: { [key in DataType]: DataTypeDefinition } = {
       ['null_value', 'boost'],
     ],
   },
+  date: {
+    label: 'Date',
+    subTypes: {
+      label: 'Date type',
+      types: ['date', 'date_nanos'],
+    },
+    basicParameters: [
+      ['store', 'index', 'doc_values', 'ignore_malformed'],
+      ['null_value', 'boost', 'locale', 'format'],
+    ],
+  },
+  binary: {
+    label: 'Binary',
+    basicParameters: ['doc_values', 'store'],
+  },
+  boolean: {
+    label: 'Boolean',
+    basicParameters: [['store', 'index', 'doc_values'], ['null_value', 'boost']],
+  },
+  range: {
+    label: 'Range',
+    subTypes: {
+      label: 'Range type',
+      types: ['integer_range', 'float_range', 'long_range', 'double_range', 'date_range'],
+    },
+    basicParameters: [['store', 'index', 'coerce', 'doc_values'], ['boost']],
+  },
   object: {
     label: 'Object',
-    configuration: ['dynamic', 'enabled'],
+    basicParameters: ['dynamic', 'enabled'],
   },
   nested: {
     label: 'Nested',
-    configuration: ['dynamic'],
+    basicParameters: ['dynamic'],
   },
   array: {
     label: 'Array',
