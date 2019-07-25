@@ -9,7 +9,12 @@ import {
   getAvailableOperationsByMetaData,
   buildColumn,
 } from './operations';
-import { IndexPatternPrivateState, AvgIndexPatternColumn } from './indexpattern';
+import {
+  IndexPatternPrivateState,
+  AvgIndexPatternColumn,
+  MinIndexPatternColumn,
+  CountIndexPatternColumn,
+} from './indexpattern';
 
 jest.mock('./loader');
 
@@ -205,7 +210,7 @@ describe('getOperationTypesForField', () => {
         columns: state.layers.first.columns,
         suggestedPriority: 0,
         field,
-      }) as AvgIndexPatternColumn;
+      }) as MinIndexPatternColumn;
       expect(column.operationType).toEqual('min');
       expect(column.sourceField).toEqual(field.name);
     });
@@ -217,7 +222,7 @@ describe('getOperationTypesForField', () => {
         columns: state.layers.first.columns,
         suggestedPriority: 0,
         asDocumentOperation: true,
-      }) as AvgIndexPatternColumn;
+      }) as CountIndexPatternColumn;
       expect(column.operationType).toEqual('count');
     });
   });
