@@ -38,7 +38,7 @@ and the source data cannot be plotted for this detector.`,
       )
       : (
         <p>
-          {i18n.translate('xpack.ml.timeSeriesExplorer.tryWideningTimeSelectionLabel', {
+          {i18n.translate('xpack.ml.timeSeriesExplorer.tryWideningTheTimeSelectionDescription', {
             defaultMessage: 'Try widening the time selection or moving further back in time.'
           })}
         </p>
