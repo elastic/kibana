@@ -31,7 +31,7 @@ export class ToolbarOverlay extends React.Component {
   }
 
   componentDidUpdate() {
-    if (this.props.isFilterable) {
+    if (!!this.props.addFilters) {
       const nextUniqueIndexPatternIds = _.get(this.props, 'uniqueIndexPatternIds', []);
       this._loadUniqueIndexPatternAndFieldCombos(nextUniqueIndexPatternIds);
     }
@@ -77,7 +77,7 @@ export class ToolbarOverlay extends React.Component {
   _renderToolsControl() {
     const { uniqueIndexPatternsAndGeoFields } = this.state;
     if (
-      !this.props.isFilterable ||
+      !this.props.addFilters ||
       !uniqueIndexPatternsAndGeoFields.length
     ) {
       return null;
