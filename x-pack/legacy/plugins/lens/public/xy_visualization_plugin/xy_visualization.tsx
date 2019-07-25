@@ -41,8 +41,6 @@ export const xyVisualization: Visualization<State, PersistableState> = {
 
   getPersistableState: state => state,
 
-  getLayerIds: state => state.layers.map(({ layerId }) => layerId),
-
   renderConfigPanel: (domElement, props) =>
     render(
       <I18nProvider>
