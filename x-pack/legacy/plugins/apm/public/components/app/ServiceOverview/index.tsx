@@ -8,7 +8,6 @@ import { EuiPanel } from '@elastic/eui';
 import { EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect } from 'react';
-import chrome from 'ui/chrome';
 import { toastNotifications } from 'ui/notify';
 import url from 'url';
 import { useFetcher } from '../../../hooks/useFetcher';
@@ -16,6 +15,7 @@ import { loadServiceList } from '../../../services/rest/apm/services';
 import { NoServicesMessage } from './NoServicesMessage';
 import { ServiceList } from './ServiceList';
 import { useUrlParams } from '../../../hooks/useUrlParams';
+import { useCore } from '../../../hooks/useCore';
 
 const initalData = {
   items: [],
@@ -26,6 +26,7 @@ const initalData = {
 let hasDisplayedToast = false;
 
 export function ServiceOverview() {
+  const core = useCore();
   const {
     urlParams: { start, end },
     uiFilters
@@ -53,7 +54,7 @@ export function ServiceOverview() {
 
             <EuiLink
               href={url.format({
-                pathname: chrome.addBasePath('/app/kibana'),
+                pathname: core.http.basePath.prepend('/app/kibana'),
                 hash: '/management/elasticsearch/upgrade_assistant'
               })}
             >
