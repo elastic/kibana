@@ -62,8 +62,7 @@ export function KibanaPanel(props) {
       else if (internalCollectionOn) {
         tooltipText = i18n.translate('xpack.monitoring.cluster.overview.kibanaPanel.setupModeNodesTooltip.disableInternal', {
           defaultMessage: `All instances are being monitored using Metricbeat but internal collection still needs to be turned
-          off. Click the flag icon to visit the instances listing page and find out more information about the status of each
-          instance.`
+          off. Click the flag icon to visit the instances listing page and disable internal collection.`
         });
       }
 

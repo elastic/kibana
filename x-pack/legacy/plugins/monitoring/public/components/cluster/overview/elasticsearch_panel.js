@@ -182,7 +182,7 @@ export function ElasticsearchPanel(props) {
       else if (internalCollectionOn) {
         tooltipText = i18n.translate('xpack.monitoring.cluster.overview.elasticsearchPanel.setupModeNodesTooltip.disableInternal', {
           defaultMessage: `All nodes are being monitored using Metricbeat but internal collection still needs to be turned off. Click the
-          flag icon to visit the nodes listing page and find out more information about the status of each node.`
+          flag icon to visit the nodes listing page and disable internal collection.`
         });
       }
 
