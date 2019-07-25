@@ -16,7 +16,6 @@ import {
   AreaSeries,
   BarSeries,
   Position,
-  ScaleType,
 } from '@elastic/charts';
 import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/types';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText, IconType } from '@elastic/eui';
