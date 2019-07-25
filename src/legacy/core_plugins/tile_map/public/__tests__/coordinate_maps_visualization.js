@@ -19,7 +19,7 @@
 
 import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
-import { CoordinateMapsVisualizationProvider } from '../coordinate_maps_visualization';
+import { createTileMapVisualization } from '../tile_map_visualization';
 import LogstashIndexPatternStubProvider from 'fixtures/stubbed_logstash_index_pattern';
 import * as visModule from 'ui/vis';
 import { ImageComparator } from 'test_utils/image_comparator';
@@ -65,6 +65,7 @@ describe('CoordinateMapsVisualizationTest', function () {
   let Vis;
   let indexPattern;
   let vis;
+  let dependencies;
 
   let imageComparator;
 
@@ -72,13 +73,17 @@ describe('CoordinateMapsVisualizationTest', function () {
   let getManifestStub;
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject((Private, $injector) => {
+    const serviceSettings = $injector.get('serviceSettings');
+
+    dependencies = {
+      serviceSettings,
+      $injector
+    };
 
     Vis = Private(visModule.VisProvider);
-    CoordinateMapsVisualization = Private(CoordinateMapsVisualizationProvider);
+    CoordinateMapsVisualization = createTileMapVisualization(dependencies);
     indexPattern = Private(LogstashIndexPatternStubProvider);
 
-
-    const serviceSettings = $injector.get('serviceSettings');
     getManifestStub = serviceSettings.__debugStubManifestCalls(async (url) => {
       //simulate network calls
       if (url.startsWith('https://foobar')) {

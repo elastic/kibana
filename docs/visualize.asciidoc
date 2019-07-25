@@ -42,7 +42,7 @@ To create a visualization:
 locations.
 * *Time Series*
 [horizontal]
-<<time-series-intro,Timelion>>:: Compute and combine data from multiple time series
+<<timelion,Timelion>>:: Compute and combine data from multiple time series
 data sets.
 <<TSVB,TSVB>>:: Visualize time series data using pipeline aggregations.
 * *Other*
@@ -140,6 +140,8 @@ Aggregation Execution Order, and You].
 
 include::visualize/saving.asciidoc[]
 
+include::visualize/visualize_rollup_data.asciidoc[]
+
 include::visualize/xychart.asciidoc[]
 
 include::visualize/controls.asciidoc[]
@@ -157,6 +159,8 @@ include::visualize/pie.asciidoc[]
 include::visualize/tilemap.asciidoc[]
 
 include::visualize/regionmap.asciidoc[]
+
+include::visualize/timelion.asciidoc[]
 
 include::visualize/tsvb.asciidoc[]
 

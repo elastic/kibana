@@ -76,7 +76,7 @@ export class CreateIndexPatternWizard extends Component {
       this.setState(prevState => ({
         toasts: prevState.toasts.concat([{
           title: errorMsg,
-          id: errorMsg,
+          id: errorMsg.props.id,
           color: 'warning',
           iconType: 'alert',
         }])
