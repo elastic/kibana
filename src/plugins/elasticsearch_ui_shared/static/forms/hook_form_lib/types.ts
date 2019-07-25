@@ -68,7 +68,6 @@ export interface Field {
   readonly path: string;
   readonly label?: string;
   readonly helpText?: string;
-  readonly type: string;
   readonly value: unknown;
   readonly errors: ValidationError[];
   readonly isPristine: boolean;
@@ -92,10 +91,8 @@ export interface FieldConfig<T = FormData> {
   readonly path?: string;
   readonly label?: string;
   readonly helpText?: string;
-  readonly type?: HTMLInputElement['type'];
   readonly defaultValue?: unknown;
   readonly validations?: Array<ValidationConfig<T>>;
-  readonly validationsArrayItems?: Array<ValidationConfig<T>>;
   readonly formatters?: FormatterFunc[];
   readonly deSerializer?: SerializerFunc;
   readonly serializer?: SerializerFunc;
@@ -141,7 +138,6 @@ type FieldValue = unknown;
 
 export interface ValidationConfig<T = any> {
   validator: ValidationFunc<T>;
-  message?: string | ((error: ValidationError) => string);
   type?: string;
   exitOnFail?: boolean;
 }

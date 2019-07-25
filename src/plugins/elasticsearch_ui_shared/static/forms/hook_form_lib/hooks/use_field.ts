@@ -27,48 +27,18 @@ import {
   ValidationConfig,
   ValidationError,
 } from '../types';
-import { fieldFormatters } from '../lib';
-import { FIELD_TYPES, VALIDATION_TYPES } from '../constants';
-
-const { toInt } = fieldFormatters;
-
-/**
- * Helpers to decide which message to output from a validation.
- *
- * A default message can be declared on our validators, but this message can be overriden
- * in the configuration of the field "validations".
- * A message can _also_ be a function that receives the error being thrown.
- *
- * @param validation The validation being executed
- * @param validationResult The validation result
- */
-const getValidationErrorWithMessage = (
-  validation: Partial<ValidationConfig>,
-  validationResult: ValidationError
-) => {
-  const message =
-    typeof validation.message !== 'undefined' ? validation.message : validationResult.message;
-
-  return {
-    ...validationResult,
-    message: typeof message === 'function' ? message(validationResult) : message,
-  };
-};
+import { VALIDATION_TYPES } from '../constants';
 
 export const useField = (form: Form, path: string, config: FieldConfig = {}) => {
   const {
     defaultValue = '',
     label = '',
     helpText = '',
-    type = FIELD_TYPES.TEXT,
     validations = [],
     formatters = [],
     fieldsToValidateOnChange = [path],
     isValidationAsync = false,
     errorDisplayDelay = form.options.errorDisplayDelay,
-  } = config;
-
-  const {
     serializer = (value: unknown) => value,
     deSerializer = (value: unknown) => value,
   } = config;
@@ -82,20 +52,6 @@ export const useField = (form: Form, path: string, config: FieldConfig = {}) => 
   const [isUpdating, setIsUpdating] = useState(false);
   const validateCounter = useRef(0);
   const debounceTimeout = useRef<NodeJS.Timeout | null>(null);
-
-  const setDefaultFormatter = () => {
-    if (formatters.length > 0) {
-      return;
-    }
-
-    if (type === FIELD_TYPES.NUMBER) {
-      formatters.push(toInt);
-    }
-  };
-
-  // -- INIT
-  // ----------------------------------
-  setDefaultFormatter();
 
   // -- HELPERS
   // ----------------------------------
@@ -194,9 +150,8 @@ export const useField = (form: Form, path: string, config: FieldConfig = {}) => 
       const validationResult = runValidation(validation);
 
       if (validationResult) {
-        const error = getValidationErrorWithMessage(validation, validationResult);
         validationErrors.push({
-          ...error,
+          ...validationResult,
           validationType: validation.type || VALIDATION_TYPES.FIELD,
         });
       }
@@ -256,21 +211,16 @@ export const useField = (form: Form, path: string, config: FieldConfig = {}) => 
     };
 
     // Sequencially execute all the validations for the field
-    await validations.reduce(
-      (promise, validation) =>
-        promise.then(async () => {
-          const validationResult = await runValidation(validation);
+    for (const validation of validations) {
+      const validationResult = await runValidation(validation);
 
-          if (validationResult) {
-            const error = getValidationErrorWithMessage(validation, validationResult);
-            validationErrors.push({
-              ...error,
-              validationType: validation.type || VALIDATION_TYPES.FIELD,
-            });
-          }
-        }),
-      Promise.resolve()
-    );
+      if (validationResult) {
+        validationErrors.push({
+          ...validationResult,
+          validationType: validation.type || VALIDATION_TYPES.FIELD,
+        });
+      }
+    }
 
     return validationErrors;
   };
@@ -362,8 +312,6 @@ export const useField = (form: Form, path: string, config: FieldConfig = {}) => 
     setValue(newValue);
   };
 
-  const getOutputValue: Field['__getOutputValue'] = (rawValue = value) => serializer(rawValue);
-
   /**
    * As we can have multiple validation types (FIELD, ASYNC, ARRAY_ITEM), this
    * method allows us to retrieve error messages for certain types of validation.
@@ -391,6 +339,8 @@ export const useField = (form: Form, path: string, config: FieldConfig = {}) => 
     return errorMessages ? errorMessages : null;
   };
 
+  const getOutputValue: Field['__getOutputValue'] = (rawValue = value) => serializer(rawValue);
+
   // -- EFFECTS
   // ----------------------------------
   useEffect(() => {
@@ -407,7 +357,6 @@ export const useField = (form: Form, path: string, config: FieldConfig = {}) => 
     helpText,
     value,
     errors,
-    type,
     form,
     isPristine,
     isValidating,
