@@ -68,7 +68,7 @@ const metadataTests: KbnTestProvider = ({ getService }) => {
     });
 
     describe('8.0.0', () => {
-      const archiveName = 'infra/8.0.0/logs_and_metrics';
+      const archiveName = 'infra/8.0.0/logs_and_metrics_with_aws';
       before(() => esArchiver.load(archiveName));
       after(() => esArchiver.unload(archiveName));
 
@@ -85,7 +85,7 @@ const metadataTests: KbnTestProvider = ({ getService }) => {
           .then(resp => {
             const metadata = resp.data.source.metadataByNode;
             if (metadata) {
-              expect(metadata.features.length).to.be(60);
+              expect(metadata.features.length).to.be(58);
               expect(metadata.name).to.equal('gke-observability-8--observability-8--bc1afd95-f0zc');
               expect(metadata.info).to.eql({
                 cloud: {
@@ -129,6 +129,58 @@ const metadataTests: KbnTestProvider = ({ getService }) => {
           });
       });
 
+      it('host with aws', () => {
+        return client
+          .query<MetadataQuery.Query>({
+            query: metadataQuery,
+            variables: {
+              sourceId: 'default',
+              nodeId: 'ip-172-31-47-9.us-east-2.compute.internal',
+              nodeType: 'host',
+            },
+          })
+          .then(resp => {
+            const metadata = resp.data.source.metadataByNode;
+            if (metadata) {
+              expect(metadata.features.length).to.be(19);
+              expect(metadata.features.some(f => f.name === 'aws.ec2')).to.be(true);
+              expect(metadata.name).to.equal('ip-172-31-47-9.us-east-2.compute.internal');
+              expect(metadata.info).to.eql({
+                cloud: {
+                  instance: {
+                    id: 'i-011454f72559c510b',
+                    name: null,
+                    __typename: 'InfraNodeCloudInstance',
+                  },
+                  provider: 'aws',
+                  availability_zone: 'us-east-2c',
+                  project: null,
+                  machine: { type: 't2.micro', __typename: 'InfraNodeCloudMachine' },
+                  __typename: 'InfraNodeCloud',
+                },
+                host: {
+                  name: 'ip-172-31-47-9.us-east-2.compute.internal',
+                  os: {
+                    codename: 'Karoo',
+                    family: 'redhat',
+                    kernel: '4.14.123-111.109.amzn2.x86_64',
+                    name: 'Amazon Linux',
+                    platform: 'amzn',
+                    version: '2',
+                    __typename: 'InfraNodeHostOS',
+                  },
+                  architecture: 'x86_64',
+                  containerized: false,
+                  __typename: 'InfraNodeHost',
+                },
+                __typename: 'InfraNodeInfo',
+              });
+            } else {
+              throw new Error('Metadata should never be empty');
+            }
+          });
+      });
+
       it('pod', () => {
         return client
           .query<MetadataQuery.Query>({
@@ -142,9 +194,9 @@ const metadataTests: KbnTestProvider = ({ getService }) => {
           .then(resp => {
             const metadata = resp.data.source.metadataByNode;
             if (metadata) {
-              expect(metadata.features.length).to.be(27);
+              expect(metadata.features.length).to.be(29);
               // With this data set the `kubernetes.pod.name` fields have been removed.
-              expect(metadata.name).to.equal('14887487-99f8-11e9-9a96-42010a84004d');
+              expect(metadata.name).to.equal('fluentd-gcp-v3.2.0-np7vw');
               expect(metadata.info).to.eql({
                 cloud: {
                   instance: {

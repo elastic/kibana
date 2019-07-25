@@ -183,7 +183,6 @@ export class ElasticsearchMetadataAdapter implements InfraMetadataAdapter {
     nodeId: string,
     nodeType: InfraNodeType
   ): Promise<string | undefined> {
-    const filters = [{ match: { [getIdFieldName(sourceConfiguration, nodeType)]: nodeId } }];
     const params = {
       allowNoIndices: true,
       ignoreUnavailable: true,
@@ -194,7 +193,10 @@ export class ElasticsearchMetadataAdapter implements InfraMetadataAdapter {
         _source: ['kubernetes.node.name'],
         query: {
           bool: {
-            filter: filters,
+            filter: [
+              { match: { [getIdFieldName(sourceConfiguration, nodeType)]: nodeId } },
+              { exists: { field: `kubernetes.node.name` } },
+            ],
           },
         },
       },
