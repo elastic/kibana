@@ -128,7 +128,7 @@ class NetworkTopNFlowComponentQuery extends QueryTemplatePaginated<
             networkTopNFlow,
             pageInfo: getOr({}, 'source.NetworkTopNFlow.pageInfo', data),
             refetch,
-            totalCount: getOr(0, 'source.NetworkTopNFlow.totalCount', data),
+            totalCount: getOr(-1, 'source.NetworkTopNFlow.totalCount', data),
           });
         }}
       </Query>
