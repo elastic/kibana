@@ -125,19 +125,19 @@ describe('request lib', () => {
         });
       });
 
-      describe('processData', () => {
+      describe('deserializer', () => {
         it('is called once the request resolves', async () => {
-          const processData = sinon.stub();
-          initUseRequest({ ...successRequest, processData });
-          sinon.assert.notCalled(processData);
+          const deserializer = sinon.stub();
+          initUseRequest({ ...successRequest, deserializer });
+          sinon.assert.notCalled(deserializer);
 
           await wait(5);
-          sinon.assert.calledOnce(processData);
-          sinon.assert.calledWith(processData, successResponse.data);
+          sinon.assert.calledOnce(deserializer);
+          sinon.assert.calledWith(deserializer, successResponse.data);
         });
 
         it('processes data', async () => {
-          initUseRequest({ ...successRequest, processData: () => 'intercepted' });
+          initUseRequest({ ...successRequest, deserializer: () => 'intercepted' });
           await wait(5);
           expect(hook.data).toBe('intercepted');
         });
