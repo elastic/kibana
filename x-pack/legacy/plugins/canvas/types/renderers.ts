@@ -19,7 +19,8 @@ export interface RendererSpec<RendererConfig = {}> {
   displayName: string;
   help: string;
   reuseDomNode: boolean;
-  height: number;
+  height?: number;
+  width?: number;
   render: (domNode: HTMLElement, config: RendererConfig, handlers: RendererHandlers) => void;
 }
 

@@ -8,7 +8,7 @@ import chrome from 'ui/chrome';
 
 export const getBaseBreadcrumb = () => ({
   text: 'Canvas',
-  href: '#/',
+  href: '/',
 });
 
 export const getWorkpadBreadcrumb = ({ name = 'Workpad', id } = {}) => {

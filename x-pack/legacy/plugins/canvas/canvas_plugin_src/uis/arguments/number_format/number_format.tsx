@@ -6,8 +6,8 @@
 
 import React, { Fragment, ChangeEvent, FunctionComponent } from 'react';
 import PropTypes from 'prop-types';
+import numeral from '@elastic/numeral';
 import { EuiSelect, EuiFieldText, EuiSpacer } from '@elastic/eui';
-import { number } from 'hapi/node_modules/@types/joi';
 
 interface NumberFormatOption {
   /** a NumeralJS format string */
