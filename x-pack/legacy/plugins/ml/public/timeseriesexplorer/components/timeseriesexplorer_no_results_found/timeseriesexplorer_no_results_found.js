@@ -13,6 +13,10 @@ import { FormattedMessage } from '@kbn/i18n/react';
 
 import { EuiEmptyPrompt } from '@elastic/eui';
 
+const dataNotChartableDescriptionDefaultMessage =
+  'Model plot is not collected for the selected {entityCount, plural, one {entity} ' +
+  'other {entities}} and the source data cannot be plotted for this detector';
+
 export const TimeseriesexplorerNoResultsFound = ({ dataNotChartable, entities }) => (
   <EuiEmptyPrompt
     iconType="iInCircle"
@@ -30,7 +34,7 @@ export const TimeseriesexplorerNoResultsFound = ({ dataNotChartable, entities })
           <p>
             <FormattedMessage
               id="xpack.ml.timeSeriesExplorer.dataNotChartableDescription"
-              defaultMessage="Model plot is not collected for the selected {entityCount, plural, one {entity} other {entities}} and the source data cannot be plotted for this detector"
+              defaultMessage={dataNotChartableDescriptionDefaultMessage}
               values={{
                 entityCount: entities.length
               }}

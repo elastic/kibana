@@ -21,39 +21,15 @@ import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml');
 
 import chrome from 'ui/chrome';
-import uiRoutes from 'ui/routes';
 import { timefilter } from 'ui/timefilter';
 import { timeHistory } from 'ui/timefilter/time_history';
 import { I18nContext } from 'ui/i18n';
 
 import '../components/controls';
 
-import { checkFullLicense } from '../license/check_license';
-
-import { getMlNodeCount } from '../ml_nodes_check/check_ml_nodes';
-
-import { checkGetJobsPrivilege } from '../privilege/check_privilege';
-
-import { mlJobService } from '../services/job_service';
-
-import { loadIndexPatterns } from '../util/index_utils';
 import { NavigationMenuContext } from '../util/context_utils';
 
-import { getSingleMetricViewerBreadcrumbs } from './breadcrumbs';
 import { TimeSeriesExplorer } from './timeseriesexplorer';
-
-uiRoutes
-  .when('/timeseriesexplorer/?', {
-    template: '<ml-chart-tooltip /><ml-time-series-explorer data-test-subj="mlPageSingleMetricViewer" />',
-    k7Breadcrumbs: getSingleMetricViewerBreadcrumbs,
-    resolve: {
-      CheckLicense: checkFullLicense,
-      privileges: checkGetJobsPrivilege,
-      indexPatterns: loadIndexPatterns,
-      mlNodeCount: getMlNodeCount,
-      jobs: mlJobService.loadJobsWrapper
-    }
-  });
 
 module.directive('mlTimeSeriesExplorer', function (
   $injector,
