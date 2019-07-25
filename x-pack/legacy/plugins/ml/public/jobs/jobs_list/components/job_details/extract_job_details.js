@@ -153,7 +153,9 @@ export function extractJobDetails(job) {
     }),
     position: 'right',
     items: (job.datafeed_config && job.datafeed_config.timing_stats) ?
-      filterObjects(job.datafeed_config.timing_stats).map(formatValues) : []
+      filterObjects(job.datafeed_config.timing_stats)
+        .filter(o => o[0] !== 'total_search_time_ms') // remove total_search_time_ms as average_search_time_per_bucket_ms is better
+        .map(formatValues) : []
   };
 
   return {
