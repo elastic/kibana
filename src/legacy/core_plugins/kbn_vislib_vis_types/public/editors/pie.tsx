@@ -33,7 +33,7 @@ function PieOptions(props: VisOptionsProps) {
   return (
     <>
       <EuiPanel paddingSize="s">
-        <EuiTitle size="s">
+        <EuiTitle size="xs">
           <div>
             {i18n.translate('kbnVislibVisTypes.editors.pie.pieSettingsTitle', {
               defaultMessage: 'Pie settings',
@@ -55,7 +55,7 @@ function PieOptions(props: VisOptionsProps) {
       <EuiSpacer size="s" />
 
       <EuiPanel paddingSize="s">
-        <EuiTitle size="s">
+        <EuiTitle size="xs">
           <div>
             {i18n.translate('kbnVislibVisTypes.editors.pie.labelsSettingsTitle', {
               defaultMessage: 'Labels settings',
