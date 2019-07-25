@@ -7,7 +7,6 @@
 import { get, getOr } from 'lodash/fp';
 
 import {
-  FlowDirection,
   FlowTarget,
   NetworkDnsData,
   NetworkDnsEdges,
@@ -31,6 +30,9 @@ export class ElasticsearchNetworkAdapter implements NetworkAdapter {
     request: FrameworkRequest,
     options: NetworkTopNFlowRequestOptions
   ): Promise<NetworkTopNFlowData> {
+    if (options.pagination && options.pagination.querySize >= DEFAULT_MAX_TABLE_QUERY_SIZE) {
+      throw new Error(`No query size above ${DEFAULT_MAX_TABLE_QUERY_SIZE}`);
+    }
     const dsl = buildTopNFlowQuery(options);
     const response = await this.framework.callWithRequest<NetworkTopNFlowData, TermAggregation>(
       request,
@@ -38,7 +40,10 @@ export class ElasticsearchNetworkAdapter implements NetworkAdapter {
       dsl
     );
     const { activePage, cursorStart, fakePossibleCount, querySize } = options.pagination;
-    const totalCount = getOr(0, 'aggregations.top_n_flow_count.value', response);
+    const totalCount =
+      options.flowTarget === FlowTarget.unified
+        ? getOr(0, 'aggregations.top_n_flow_unified_count.value', response)
+        : getOr(0, 'aggregations.top_n_flow_count.value', response);
     const networkTopNFlowEdges: NetworkTopNFlowEdges[] = getTopNFlowEdges(response, options);
     const fakeTotalCount = fakePossibleCount <= totalCount ? fakePossibleCount : totalCount;
     const edges = networkTopNFlowEdges.splice(cursorStart, querySize - cursorStart);
@@ -64,6 +69,9 @@ export class ElasticsearchNetworkAdapter implements NetworkAdapter {
     request: FrameworkRequest,
     options: NetworkDnsRequestOptions
   ): Promise<NetworkDnsData> {
+    if (options.pagination && options.pagination.querySize >= DEFAULT_MAX_TABLE_QUERY_SIZE) {
+      throw new Error(`No query size above ${DEFAULT_MAX_TABLE_QUERY_SIZE}`);
+    }
     const dsl = buildDnsQuery(options);
     const response = await this.framework.callWithRequest<NetworkDnsData, TermAggregation>(
       request,
@@ -99,24 +107,9 @@ const getTopNFlowEdges = (
   response: DatabaseSearchResponse<NetworkTopNFlowData, TermAggregation>,
   options: NetworkTopNFlowRequestOptions
 ): NetworkTopNFlowEdges[] => {
-  if (options.pagination && options.pagination.querySize >= DEFAULT_MAX_TABLE_QUERY_SIZE) {
-    throw new Error(`No query size above ${DEFAULT_MAX_TABLE_QUERY_SIZE}`);
-  }
-  if (options.flowDirection === FlowDirection.uniDirectional) {
+  if (options.flowTarget === FlowTarget.destination || options.flowTarget === FlowTarget.source) {
     return formatTopNFlowEdges(
-      getOr([], `aggregations.${FlowTarget.source}.buckets`, response),
-      options.flowTarget
-    );
-  }
-  if (options.flowTarget === FlowTarget.destination) {
-    return formatTopNFlowEdges(
-      getOr([], `aggregations.${FlowTarget.destination}.buckets`, response),
-      options.flowTarget
-    );
-  }
-  if (options.flowTarget === FlowTarget.source) {
-    return formatTopNFlowEdges(
-      getOr([], `aggregations.${FlowTarget.source}.buckets`, response),
+      getOr([], `aggregations.${options.flowTarget}.buckets`, response),
       options.flowTarget
     );
   }

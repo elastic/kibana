@@ -15,7 +15,7 @@ import { assertUnreachable, createQueryFilterClauses } from '../../utils/build_q
 
 import { NetworkTopNFlowRequestOptions } from './index';
 
-const getDirectionalFilter = (flowDirection: FlowDirection) => {
+const getFlowDirectionFilter = (flowDirection: FlowDirection) => {
   switch (flowDirection) {
     case FlowDirection.uniDirectional:
       return {
@@ -55,13 +55,27 @@ const getDirectionalFilter = (flowDirection: FlowDirection) => {
   }
 };
 
-const getCountAgg = (flowTarget: FlowTarget) => ({
-  top_n_flow_count: {
-    cardinality: {
-      field: `${flowTarget}.ip`,
+const getCountAgg = (flowTarget: FlowTarget) => {
+  if (flowTarget === FlowTarget.unified) {
+    return {
+      top_n_flow_unified_count: {
+        cardinality: {
+          script: {
+            lang: 'painless',
+            source: `[doc['${FlowTarget.source}.ip'], doc['${FlowTarget.destination}.ip']]`,
+          },
+        },
+      },
+    };
+  }
+  return {
+    top_n_flow_count: {
+      cardinality: {
+        field: `${flowTarget}.ip`,
+      },
     },
-  },
-});
+  };
+};
 
 export const buildTopNFlowQuery = ({
   defaultIndex,
@@ -87,12 +101,12 @@ export const buildTopNFlowQuery = ({
     body: {
       aggregations: {
         ...getCountAgg(flowTarget),
-        ...getAllDirectionAggs(flowDirection, networkTopNFlowSort, flowTarget, querySize),
+        ...getFlowTargetAggs(networkTopNFlowSort, flowTarget, querySize),
       },
       query: {
         bool: {
           filter,
-          ...getDirectionalFilter(flowDirection),
+          ...getFlowDirectionFilter(flowDirection),
         },
       },
     },
@@ -102,93 +116,11 @@ export const buildTopNFlowQuery = ({
   return dslQuery;
 };
 
-const getAllDirectionAggs = (
-  flowDirection: FlowDirection,
+const getFlowTargetAggs = (
   networkTopNFlowSortField: NetworkTopNFlowSortField,
   flowTarget: FlowTarget,
   querySize: number
 ) => {
-  if (flowTarget === FlowTarget.source || flowDirection === FlowDirection.uniDirectional) {
-    return {
-      [FlowTarget.source]: {
-        terms: {
-          field: 'source.ip',
-          size: querySize,
-          order: {
-            ...getQueryOrder(networkTopNFlowSortField),
-          },
-        },
-        aggs: {
-          bytes_in: {
-            sum: {
-              field: 'destination.bytes',
-            },
-          },
-          bytes_out: {
-            sum: {
-              field: 'source.bytes',
-            },
-          },
-          domain: {
-            terms: {
-              field: `${flowTarget}.domain`,
-              order: {
-                timestamp: 'desc',
-              },
-            },
-            aggs: {
-              timestamp: {
-                max: {
-                  field: '@timestamp',
-                },
-              },
-            },
-          },
-        },
-      },
-    };
-  }
-
-  if (flowTarget === FlowTarget.destination) {
-    return {
-      [FlowTarget.destination]: {
-        terms: {
-          field: 'destination.ip',
-          size: querySize,
-          order: {
-            ...getQueryOrder(networkTopNFlowSortField),
-          },
-        },
-        aggs: {
-          bytes_in: {
-            sum: {
-              field: 'source.bytes',
-            },
-          },
-          bytes_out: {
-            sum: {
-              field: 'destination.bytes',
-            },
-          },
-          domain: {
-            terms: {
-              field: `${flowTarget}.domain`,
-              order: {
-                timestamp: 'desc',
-              },
-            },
-            aggs: {
-              timestamp: {
-                max: {
-                  field: '@timestamp',
-                },
-              },
-            },
-          },
-        },
-      },
-    };
-  }
   if (flowTarget === FlowTarget.unified) {
     return {
       [FlowTarget.source]: {
@@ -265,6 +197,54 @@ const getAllDirectionAggs = (
       },
     };
   }
+  return {
+    [flowTarget]: {
+      terms: {
+        field: `${flowTarget}.ip`,
+        size: querySize,
+        order: {
+          ...getQueryOrder(networkTopNFlowSortField),
+        },
+      },
+      aggs: {
+        bytes_in: {
+          sum: {
+            field: `${getOppositeField(flowTarget)}.bytes`,
+          },
+        },
+        bytes_out: {
+          sum: {
+            field: `${flowTarget}.bytes`,
+          },
+        },
+        domain: {
+          terms: {
+            field: `${flowTarget}.domain`,
+            order: {
+              timestamp: 'desc',
+            },
+          },
+          aggs: {
+            timestamp: {
+              max: {
+                field: '@timestamp',
+              },
+            },
+          },
+        },
+      },
+    },
+  };
+};
+
+const getOppositeField = (flowTarget: FlowTarget.source | FlowTarget.destination): FlowTarget => {
+  switch (flowTarget) {
+    case FlowTarget.source:
+      return FlowTarget.destination;
+    case FlowTarget.destination:
+      return FlowTarget.source;
+  }
+  assertUnreachable(flowTarget);
 };
 
 type QueryOrder = { bytes_in: Direction } | { bytes_out: Direction };
@@ -276,6 +256,5 @@ const getQueryOrder = (networkTopNFlowSortField: NetworkTopNFlowSortField): Quer
     case NetworkTopNFlowFields.bytes_out:
       return { bytes_out: networkTopNFlowSortField.direction };
   }
-
   assertUnreachable(networkTopNFlowSortField.field);
 };

@@ -5,7 +5,6 @@
  */
 
 import {
-  FlowTarget,
   NetworkDirectionEcs,
   NetworkDnsData,
   NetworkTopNFlowData,
@@ -54,10 +53,7 @@ export interface NetworkTopNFlowData extends SearchHit {
     top_n_flow_count?: {
       value: number;
     };
-    [FlowTarget.source]?: {
-      buckets: NetworkTopNFlowBuckets[];
-    };
-    [FlowTarget.destination]?: {
+    top_n_flow_unified_count?: {
       buckets: NetworkTopNFlowBuckets[];
     };
   };
