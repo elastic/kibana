@@ -107,7 +107,7 @@ export async function setupAuthentication({
     if (authenticationResult.succeeded()) {
       return t.authenticated({
         state: authenticationResult.user,
-        headers: authenticationResult.authHeaders,
+        requestHeaders: authenticationResult.authHeaders,
       });
     }
 
