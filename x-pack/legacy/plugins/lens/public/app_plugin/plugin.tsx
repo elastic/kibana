@@ -5,6 +5,8 @@
  */
 
 import React from 'react';
+import { localStorage } from 'ui/storage/storage_service';
+import { data as dataSetup } from '../../../../../../src/legacy/core_plugins/data/public/setup';
 import { editorFrameSetup, editorFrameStop } from '../editor_frame_plugin';
 import { indexPatternDatasourceSetup, indexPatternDatasourceStop } from '../indexpattern_plugin';
 import { xyVisualizationSetup, xyVisualizationStop } from '../xy_visualization_plugin';
@@ -34,7 +36,13 @@ export class AppPlugin {
 
     this.instance = editorFrame.createInstance({});
 
-    return <App editorFrame={this.instance} />;
+    return (
+      <App
+        editorFrame={this.instance}
+        QueryBar={dataSetup.query.ui.QueryBar}
+        store={localStorage}
+      />
+    );
   }
 
   stop() {
