@@ -20,7 +20,7 @@ import { Stream } from 'stream';
 import Boom from 'boom';
 
 import supertest from 'supertest';
-import { ByteSizeValue } from '@kbn/config-schema';
+import { ByteSizeValue, schema } from '@kbn/config-schema';
 
 import { HttpConfig, Router } from '..';
 import { createResponseError } from './response_error';
@@ -127,11 +127,11 @@ describe('Handler', () => {
     router.get(
       {
         path: '/',
-        validate: schema => ({
+        validate: {
           query: schema.object({
             page: schema.number(),
           }),
-        }),
+        },
       },
       (req, res) => res.noContent()
     );
@@ -146,7 +146,7 @@ describe('Handler', () => {
       .expect(400);
 
     expect(result.body).toEqual({
-      error: '[page]: expected value of type [number] but got [string]',
+      error: '[request query.page]: expected value of type [number] but got [string]',
     });
   });
 });
@@ -232,7 +232,7 @@ describe('Response factory', () => {
         .expect(200);
 
       expect(result.text).toBe('abc');
-      expect(result.header['content-type']).toBe(undefined); // ?
+      expect(result.header['content-type']).toBe(undefined);
     });
 
     it('supports answering with chunked Stream', async () => {
