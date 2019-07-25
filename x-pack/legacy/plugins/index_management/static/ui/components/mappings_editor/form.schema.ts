@@ -28,4 +28,10 @@ export const schema: FormSchema = {
     type: FIELD_TYPES.TOGGLE,
     defaultValue: true,
   },
+  dynamic_date_formats: {
+    label: 'Dynamic dates format',
+    helpText: 'The dynamic_date_formats can be customised to support your own date formats.',
+    type: FIELD_TYPES.COMBO_BOX,
+    defaultValue: [],
+  },
 };
