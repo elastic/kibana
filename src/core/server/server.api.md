@@ -724,8 +724,6 @@ export interface SavedObjectsService<Request = any> {
     // 
     // (undocumented)
     SavedObjectsClient: typeof SavedObjectsClient;
-    // Warning: (ae-forgotten-export) The symbol "SavedObjectsSchema" needs to be exported by the entry point index.d.ts
-    // 
     // (undocumented)
     schema: SavedObjectsSchema;
     // (undocumented)
