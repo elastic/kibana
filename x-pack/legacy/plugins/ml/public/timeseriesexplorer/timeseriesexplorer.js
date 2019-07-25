@@ -13,7 +13,7 @@ import moment from 'moment-timezone';
 import { Subscription } from 'rxjs';
 
 import PropTypes from 'prop-types';
-import React, { Fragment } from 'react';
+import React, { createRef, Fragment } from 'react';
 
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
@@ -32,6 +32,7 @@ import {
 import chrome from 'ui/chrome';
 import { parseInterval } from 'ui/utils/parse_interval';
 import { toastNotifications } from 'ui/notify';
+import { ResizeChecker } from 'ui/resize_checker';
 
 import { ANOMALIES_TABLE_DEFAULT_QUERY_SIZE } from '../../common/constants/search';
 import {
@@ -118,6 +119,7 @@ function getTimeseriesexplorerDefaultState() {
     showForecast: true,
     showForecastCheckbox: false,
     showModelBoundsCheckbox: false,
+    svgWidth: 0,
     tableData: undefined,
     zoomFrom: undefined,
     zoomTo: undefined,
@@ -127,13 +129,17 @@ function getTimeseriesexplorerDefaultState() {
   };
 }
 
-const TimeSeriesExplorerPage = ({ children, jobSelectorProps }) => (
+const TimeSeriesExplorerPage = ({ children, jobSelectorProps, resizeRef }) => (
   <Fragment>
     <NavigationMenu tabId="timeseriesexplorer" />
     <JobSelector {...jobSelectorProps} />
-    {children}
+    <div className="ml-time-series-explorer" ref={resizeRef} >
+      {children}
+    </div>
   </Fragment>
 );
+
+const containerPadding = 24;
 
 export const TimeSeriesExplorer = injectI18n(
   class TimeSeriesExplorer extends React.Component {
@@ -142,13 +148,20 @@ export const TimeSeriesExplorer = injectI18n(
       dateFormatTz: PropTypes.string.isRequired,
       globalState: PropTypes.object.isRequired,
       mlJobSelectService: PropTypes.object.isRequired,
-      svgWidth: PropTypes.number.isRequired,
       timefilter: PropTypes.object.isRequired,
     };
 
     state = getTimeseriesexplorerDefaultState();
 
     subscriptions = new Subscription();
+
+    resizeRef = createRef();
+    resizeChecker = undefined;
+    resizeHandler = () => {
+      this.setState({
+        svgWidth: (this.resizeRef.current !== null) ? this.resizeRef.current.offsetWidth - containerPadding : 0,
+      });
+    }
 
     detectorIndexChangeHandler = (e) => {
       const id = e.target.value;
@@ -215,12 +228,9 @@ export const TimeSeriesExplorer = injectI18n(
         zoomTo,
       } = this.state;
 
-      console.warn('contextChartSelected', focusChartData, this.focusChartDataLoading);
       if (this.focusChartDataLoading === true) {
         return;
       }
-
-      console.warn('----UPDATE');
 
       // Save state of zoom (adds to URL) if it is different to the default.
       if ((contextChartData === undefined || contextChartData.length === 0) &&
@@ -459,7 +469,6 @@ export const TimeSeriesExplorer = injectI18n(
     }
 
     refresh = () => {
-      console.warn('refresh', this.props);
       const { appState, timefilter } = this.props;
       const {
         detectorId: currentDetectorId,
@@ -891,13 +900,20 @@ export const TimeSeriesExplorer = injectI18n(
 
       timefilter.enableTimeRangeSelector();
       timefilter.enableAutoRefreshSelector();
-      // Refresh the data when the time range is altered.
       timefilter.on('timeUpdate', this.refresh);
+
+      // Required to redraw the time series chart when the container is resized.
+      this.resizeChecker = new ResizeChecker(this.resizeRef.current);
+      this.resizeChecker.on('resize', () => {
+        this.resizeHandler();
+      });
+      this.resizeHandler();
     }
 
     componentWillUnmount() {
       this.subscriptions.unsubscribe();
       this.props.timefilter.off('timeUpdate', this.refresh);
+      this.resizeChecker.destroy();
     }
 
     render() {
@@ -906,7 +922,6 @@ export const TimeSeriesExplorer = injectI18n(
         globalState,
         intl,
         mlJobSelectService,
-        svgWidth,
         timefilter,
       } = this.props;
 
@@ -926,6 +941,7 @@ export const TimeSeriesExplorer = injectI18n(
         focusForecastData,
         hasResults,
         jobs,
+        loading,
         modelPlotEnabled,
         selectedJob,
         showAnnotations,
@@ -934,6 +950,7 @@ export const TimeSeriesExplorer = injectI18n(
         showForecastCheckbox,
         showModelBounds,
         showModelBoundsCheckbox,
+        svgWidth,
         swimlaneData,
         tableData,
         zoomFrom,
@@ -943,7 +960,7 @@ export const TimeSeriesExplorer = injectI18n(
       const tsc = {
         modelPlotEnabled,
         contextChartData,
-        contextChartSelected: (selection) => this.contextChartSelected(selection),
+        contextChartSelected: this.contextChartSelected,
         contextForecastData,
         contextAggregationInterval,
         swimlaneData,
@@ -951,13 +968,11 @@ export const TimeSeriesExplorer = injectI18n(
         focusChartData,
         focusForecastData,
         focusAggregationInterval,
+        svgWidth,
         zoomFrom,
         zoomTo,
         autoZoomDuration,
-        svgWidth,
       };
-
-      const loading = this.props.loading || this.state.loading;
 
       const { jobIds: selectedJobIds, selectedGroups } = getSelectedJobIds(globalState);
       const jobSelectorProps = {
@@ -971,7 +986,11 @@ export const TimeSeriesExplorer = injectI18n(
       };
 
       if (jobs.length === 0) {
-        return <TimeSeriesExplorerPage jobSelectorProps={jobSelectorProps}><TimeseriesexplorerNoJobsFound /></TimeSeriesExplorerPage>;
+        return (
+          <TimeSeriesExplorerPage jobSelectorProps={jobSelectorProps} resizeRef={this.resizeRef}>
+            <TimeseriesexplorerNoJobsFound />
+          </TimeSeriesExplorerPage>
+        );
       }
 
       const detectorSelectOptions = detectors.map(d => ({
@@ -998,7 +1017,7 @@ export const TimeSeriesExplorer = injectI18n(
       this.previousShowModelBounds = showModelBounds;
 
       return (
-        <TimeSeriesExplorerPage jobSelectorProps={jobSelectorProps}>
+        <TimeSeriesExplorerPage jobSelectorProps={jobSelectorProps} resizeRef={this.resizeRef}>
           <div className="series-controls" data-test-subj="mlSingleMetricViewerSeriesControls">
             <EuiFlexGroup>
               <EuiFlexItem grow={false}>

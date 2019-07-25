@@ -17,7 +17,6 @@ import moment from 'moment-timezone';
 import React from 'react';
 import ReactDOM from 'react-dom';
 
-import angular from 'angular';
 import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml');
 
@@ -26,7 +25,6 @@ import uiRoutes from 'ui/routes';
 import { timefilter } from 'ui/timefilter';
 import { timeHistory } from 'ui/timefilter/time_history';
 import { I18nContext } from 'ui/i18n';
-import { ResizeChecker } from 'ui/resize_checker';
 
 import '../components/controls';
 
@@ -46,7 +44,7 @@ import { TimeSeriesExplorer } from './timeseriesexplorer';
 
 uiRoutes
   .when('/timeseriesexplorer/?', {
-    template: '<ml-chart-tooltip /><ml-time-series-explorer class="ml-time-series-explorer" data-test-subj="mlPageSingleMetricViewer" />',
+    template: '<ml-chart-tooltip /><ml-time-series-explorer data-test-subj="mlPageSingleMetricViewer" />',
     k7Breadcrumbs: getSingleMetricViewerBreadcrumbs,
     resolve: {
       CheckLicense: checkFullLicense,
@@ -68,19 +66,10 @@ module.directive('mlTimeSeriesExplorer', function (
     $injector.get('mlSelectSeverityService');
     const mlJobSelectService = $injector.get('mlJobSelectService');
 
-    // Required to redraw the time series chart when the container is resized.
-    const resizeChecker = new ResizeChecker(angular.element('.ml-time-series-explorer'));
-    resizeChecker.on('resize', updateComponent);
-
     // Initialize the AppState in which to store the zoom range.
-    const stateDefaults = {
-      mlTimeSeriesExplorer: {}
-    };
-    const appState = new AppState(stateDefaults);
+    const appState = new AppState({ mlTimeSeriesExplorer: {} });
 
     function updateComponent() {
-      const containerPadding = 24;
-
       // Pass the timezone to the server for use when aggregating anomalies (by day / hour) for the table.
       const tzConfig = config.get('dateFormat:tz');
       const dateFormatTz = (tzConfig !== 'Browser') ? tzConfig : moment.tz.guess();
@@ -93,7 +82,6 @@ module.directive('mlTimeSeriesExplorer', function (
               dateFormatTz,
               globalState,
               mlJobSelectService,
-              svgWidth: angular.element('.ml-time-series-explorer').width() - containerPadding,
               timefilter,
             }}
             />
@@ -105,15 +93,13 @@ module.directive('mlTimeSeriesExplorer', function (
 
     $element.on('$destroy', () => {
       ReactDOM.unmountComponentAtNode($element[0]);
-      resizeChecker.destroy();
-      $scope.$destroy();
     });
 
     updateComponent();
   }
 
   return {
-    scope: true,
+    scope: false,
     link,
   };
 });
