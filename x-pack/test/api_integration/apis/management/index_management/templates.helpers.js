@@ -7,7 +7,9 @@
 import { API_BASE_PATH, INDEX_PATTERNS } from './constants';
 
 export const registerHelpers = ({ supertest }) => {
-  const list = () => supertest.get(`${API_BASE_PATH}/templates`);
+  const getAllTemplates = () => supertest.get(`${API_BASE_PATH}/templates`);
+
+  const getOneTemplate = name => supertest.get(`${API_BASE_PATH}/templates/${name}`);
 
   const getTemplatePayload = name => ({
     name,
@@ -48,7 +50,8 @@ export const registerHelpers = ({ supertest }) => {
       .set('kbn-xsrf', 'xxx');
 
   return {
-    list,
+    getAllTemplates,
+    getOneTemplate,
     getTemplatePayload,
     createTemplate,
     deleteTemplates,
