@@ -420,6 +420,9 @@ export const StepDefineForm: SFC<Props> = React.memo(({ overrides = {}, onChange
       setSearchString(defaultSearch);
       setSourceConfigUpdated(false);
     }
+    if (isAdvancedSourceEditorEnabled === false) {
+      setAdvancedEditorSourceConfigLastApplied(advancedEditorSourceConfig);
+    }
 
     setAdvancedSourceEditorEnabled(!isAdvancedSourceEditorEnabled);
     setAdvancedSourceEditorApplyButtonEnabled(false);
