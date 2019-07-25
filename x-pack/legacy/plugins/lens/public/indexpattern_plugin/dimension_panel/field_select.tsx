@@ -60,7 +60,7 @@ export function FieldSelect({
     const isCurrentOperationApplicableWithoutField =
       (!selectedColumnOperationType && !incompatibleSelectedOperationType) ||
       operationByDocument.includes(
-        selectedColumnOperationType || incompatibleSelectedOperationType!
+        incompatibleSelectedOperationType || selectedColumnOperationType!
       );
 
     const fieldOptions = [];
