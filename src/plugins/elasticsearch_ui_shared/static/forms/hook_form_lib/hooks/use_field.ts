@@ -27,10 +27,11 @@ import {
   ValidationConfig,
   ValidationError,
 } from '../types';
-import { VALIDATION_TYPES } from '../constants';
+import { FIELD_TYPES, VALIDATION_TYPES } from '../constants';
 
 export const useField = (form: Form, path: string, config: FieldConfig = {}) => {
   const {
+    type = FIELD_TYPES.TEXT,
     defaultValue = '',
     label = '',
     helpText = '',
@@ -353,6 +354,7 @@ export const useField = (form: Form, path: string, config: FieldConfig = {}) => 
 
   const field: Field = {
     path,
+    type,
     label,
     helpText,
     value,

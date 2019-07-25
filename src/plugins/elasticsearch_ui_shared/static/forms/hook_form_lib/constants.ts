@@ -17,6 +17,17 @@
  * under the License.
  */
 
+// Field types
+export const FIELD_TYPES = {
+  TEXT: 'text',
+  NUMBER: 'number',
+  TOGGLE: 'toggle',
+  CHECKBOX: 'checkbox',
+  COMBO_BOX: 'comboBox',
+  SELECT: 'select',
+  MULTI_SELECT: 'multiSelect',
+};
+
 // Validation types
 export const VALIDATION_TYPES = {
   FIELD: 'field', // Default validation error (on the field value)
