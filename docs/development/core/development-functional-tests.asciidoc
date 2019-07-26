@@ -68,14 +68,14 @@ node scripts/functional_test_runner
 export TEST_BROWSER_HEADLESS=1
 ----------
 
-** To verify tests stability, you can slow down local network connection: (Chrome only)
+** If you are using Google Chrome, you can slow down the local network connection to verify test stability:
 +
 ["source", "shell"]
 ----------
 export TEST_THROTTLE_NETWORK=1
 ----------
 
-** When running against cloud deployment, some tests are not applicable use --exclude-tag to skip those tests.  An example shell file can be found at: {blob}test/scripts/jenkins_cloud.sh[test/scripts/jenkins_cloud.sh]
+** When running against a Cloud deployment, some tests are not applicable. To skip tests that do not apply, use --exclude-tag.  An example shell file can be found at: {blob}test/scripts/jenkins_cloud.sh[test/scripts/jenkins_cloud.sh]
 +
 ["source", "shell"]
 ----------
@@ -87,8 +87,8 @@ node scripts/functional_test_runner --exclude-tag skipCloud
 
 When run without any arguments the `FunctionalTestRunner` automatically loads the configuration in the standard location, but you can override that behavior with the `--config` flag. List configs with multiple --config arguments.
 
-* `--config test/functional/config.js` starts Elasticsearch and Kibana servers with the WebDriver tests configured to run in Chrome
-* `--config test/functional/config.firefox.js` starts Elasticsearch and Kibana servers with the WebDriver tests configured to run in Firefox
+* `--config test/functional/config.js` starts Elasticsearch and Kibana servers with the WebDriver tests configured to run in Chrome.
+* `--config test/functional/config.firefox.js` starts Elasticsearch and Kibana servers with the WebDriver tests configured to run in Firefox.
 * `--config test/api_integration/config.js` starts Elasticsearch and Kibana servers with the api integration tests configuration.
 
 There are also command line flags for `--bail` and `--grep`, which behave just like their mocha counterparts. For instance, use `--grep=foo` to run only tests that match a regular expression.
@@ -106,7 +106,7 @@ Use the `--help` flag for more options.
 
 The tests are written in https://mochajs.org[mocha] using https://github.com/elastic/kibana/tree/master/packages/kbn-expect[@kbn/expect] for assertions.
 
-We use https://www.w3.org/TR/webdriver1/[WebDriver Protocol] to run tests in both Chrome and Firefox with the help of https://sites.google.com/a/chromium.org/chromedriver/[chromedriver] and https://firefox-source-docs.mozilla.org/testing/geckodriver/[geckodriver]. When the `FunctionalTestRunner` launches, `remote` service creates new webdriver session, which starts driver and a stripped-down browser instance. We use `browser` service and `webElementWrapper` class to wrap up https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/[Webdriver API].
+We use https://www.w3.org/TR/webdriver1/[WebDriver Protocol] to run tests in both Chrome and Firefox with the help of https://sites.google.com/a/chromium.org/chromedriver/[chromedriver] and https://firefox-source-docs.mozilla.org/testing/geckodriver/[geckodriver]. When the `FunctionalTestRunner` launches, remote service creates a new webdriver session, which starts the driver and a stripped-down browser instance. We use `browser` service and `webElementWrapper` class to wrap up https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/[Webdriver API].
 
 The `FunctionalTestRunner` automatically transpiles functional tests using babel, so that tests can use the same ECMAScript features that Kibana source code uses. See {blob}style_guides/js_style_guide.md[style_guides/js_style_guide.md].
 
@@ -142,14 +142,13 @@ The `FunctionalTestRunner`'s primary purpose is to execute test files. These fil
 A test suite is a collection of tests defined by calling `describe()`, and then populated with tests and setup/teardown hooks by calling `it()`, `before()`, `beforeEach()`, etc. Every test file must define only one top level test suite, and test suites can have as many nested test suites as they like.
 
 **Tags**:::
-We use tags to group functional tests:
-* `ciGroup{id}` tag to assign test suite to specific CI worker
+Use tags in `describe()` function to group functional tests. Tags include:
+* `ciGroup{id}` to assign test suite to specific CI worker
 * `skipCloud` and `skipFirefox` to exclude test suite from running on Cloud or Firefox browser
 * `smoke` to group tests that we run both on Chrome and Firefox
-Tags are supported for `describe()` function only.
 
 **Cross-browser testing**:::
-On CI all the functional tests are executed in Chrome by default. To run tests also on Firefox `smoke` tag should be assigned:
+On CI, all the functional tests are executed in Chrome by default. To run tests on Firefox, assign the `smoke` tag:
 
 ["source","js"]
 -----------
@@ -161,9 +160,9 @@ describe('My Cross-browser Test Suite', function () {
 }
 -----------
 
-If the tests are not applicable for run in Firefox, `skipFirefox` tag must be assigned.
+If the tests do not apply to Firefox, assign the `skipFirefox` tag.
 
-To run tests on FIrefox locally, `config.firefox.js` should be provided:
+To run tests on Firefox locally, use `config.firefox.js`:
 
 ["source","shell"]
 -----------
@@ -283,7 +282,7 @@ The Kibana functional tests define the vast majority of the actual functionality
 
 **browser**:::
 * Source: {blob}test/functional/services/browser.ts[test/functional/services/browser.ts]
-* Higher level wrapper for `remote` service, that exposes available browser actions
+* Higher level wrapper for `remote` service, which exposes available browser actions
 * Popular methods:
 ** `browser.getWindowSize()`
 ** `browser.refresh()`
@@ -324,8 +323,8 @@ await testSubjects.click(‘containerButton’);
 * Source: {blob}test/common/services/retry/retry.ts[test/common/services/retry/retry.ts]
 * Helpers for retrying operations
 * Popular methods:
-** `retry.try(fn, onFailureBlock)` - execute `fn` in a loop until it succeeds or the default try timeout elapses, optional `onFailureBlock` is executed before each retry attempt 
-** `retry.tryForTime(ms, fn, onFailureBlock)` execute `fn` in a loop until it succeeds or `ms` milliseconds elapses, , optional `onFailureBlock` is executed before each retry attempt
+** `retry.try(fn, onFailureBlock)` - Execute `fn` in a loop until it succeeds or the default timeout elapses. The optional `onFailureBlock` is executed before each retry attempt.
+** `retry.tryForTime(ms, fn, onFailureBlock)` - Execute `fn` in a loop until it succeeds or `ms` milliseconds elapses. The optional `onFailureBlock` is executed before each retry attempt.
 
 **kibanaServer:**:::
 * Source: {blob}test/common/services/kibana_server/kibana_server.js[test/common/services/kibana_server/kibana_server.js]
@@ -355,9 +354,9 @@ Full list of services that are used in functional tests can be found here: {blob
 ** Source: {blob}test/functional/services/remote/remote.ts[test/functional/services/remote/remote.ts]
 ** Instance of https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/index_exports_WebDriver.html[WebDriver] class
 ** Responsible for all communication with the browser
-** To perform browser actions use `remote` service 
-** For searching and manipulating with DOM elements use `testSubjects` and `find` services
-** See the https://seleniumhq.github.io/selenium/docs/api/javascript/[selenium-webdriver docs] for full API
+** To perform browser actions, use `remote` service 
+** For searching and manipulating with DOM elements, use `testSubjects` and `find` services
+** See the https://seleniumhq.github.io/selenium/docs/api/javascript/[selenium-webdriver docs] for the full API.
 
 [float]
 ===== Custom Services
