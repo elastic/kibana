@@ -36,7 +36,7 @@ import { mlTimeSeriesSearchService } from './timeseries_search_service';
 import {
   CHARTS_POINT_TARGET,
   MAX_SCHEDULED_EVENTS,
-  timeFieldName,
+  TIME_FIELD_NAME,
 } from './timeseriesexplorer_constants';
 
 import chrome from 'ui/chrome';
@@ -134,7 +134,7 @@ export function processDataForFocusAnomalies(
     lastChartDataPointTime = chartData[chartData.length - 1].date.getTime();
   }
   anomalyRecords.forEach((record) => {
-    const recordTime = record[timeFieldName];
+    const recordTime = record[TIME_FIELD_NAME];
     const chartPoint = findChartPointForAnomalyTime(chartData, recordTime, aggregationInterval);
     if (chartPoint === undefined) {
       const timeToAdd = (Math.floor(recordTime / intervalMs)) * intervalMs;
@@ -165,7 +165,7 @@ export function processDataForFocusAnomalies(
 
     // Look for a chart point with the same time as the record.
     // If none found, find closest time in chartData set.
-    const recordTime = record[timeFieldName];
+    const recordTime = record[TIME_FIELD_NAME];
     const chartPoint = findChartPointForAnomalyTime(chartData, recordTime, aggregationInterval);
     if (chartPoint !== undefined) {
       // If chart aggregation interval > bucket span, there may be more than
@@ -370,7 +370,7 @@ export const getFocusData = function (
     ).then((resp) => {
       // Sort in descending time order before storing in scope.
       refreshFocusData.anomalyRecords = _.chain(resp.records)
-        .sortBy(record => record[timeFieldName])
+        .sortBy(record => record[TIME_FIELD_NAME])
         .reverse()
         .value();
       console.log('Time series explorer anomalies:', refreshFocusData.anomalyRecords);

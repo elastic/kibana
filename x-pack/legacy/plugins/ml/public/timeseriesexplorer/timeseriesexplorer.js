@@ -69,7 +69,7 @@ import { getIndexPatterns } from '../util/index_utils';
 import { getBoundsRoundedToInterval } from '../util/ml_time_buckets';
 import { initializeAppState, subscribeAppStateToObservable } from '../util/app_state_utils';
 
-import { CHARTS_POINT_TARGET, timeFieldName } from './timeseriesexplorer_constants';
+import { CHARTS_POINT_TARGET, TIME_FIELD_NAME } from './timeseriesexplorer_constants';
 import { mlTimeSeriesSearchService } from './timeseries_search_service';
 import {
   calculateAggregationInterval,
@@ -294,7 +294,7 @@ export class TimeSeriesExplorer extends React.Component {
         filter(entities, entity => entity.fieldValue.length > 0),
         searchBounds,
         selectedJob,
-        timeFieldName,
+        TIME_FIELD_NAME,
       ).then((refreshFocusData) => {
         // All the data is ready now for a state update.
         this.setState({

@@ -13,4 +13,4 @@ export const CHARTS_POINT_TARGET = 500;
 // Max number of scheduled events displayed per bucket.
 export const MAX_SCHEDULED_EVENTS = 10;
 
-export const timeFieldName = 'timestamp';
+export const TIME_FIELD_NAME = 'timestamp';
