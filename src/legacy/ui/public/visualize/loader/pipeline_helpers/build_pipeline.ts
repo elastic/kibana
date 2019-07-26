@@ -192,13 +192,19 @@ export const getSchemas = (vis: Vis, timeRange?: any): Schemas => {
   return schemas;
 };
 
-export const prepareJson = (variable: string, data: object): string => {
+export const prepareJson = (variable: string, data?: object): string => {
+  if (data === undefined) {
+    return '';
+  }
   return `${variable}='${JSON.stringify(data)
     .replace(/\\/g, `\\\\`)
     .replace(/'/g, `\\'`)}' `;
 };
 
-export const prepareString = (variable: string, data: string): string => {
+export const prepareString = (variable: string, data?: string): string => {
+  if (data === undefined) {
+    return '';
+  }
   return `${variable}='${escapeString(data)}' `;
 };
 
