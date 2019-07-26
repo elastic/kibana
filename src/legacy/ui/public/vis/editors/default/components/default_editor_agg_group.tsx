@@ -79,7 +79,7 @@ function DefaultEditorAggGroup({
 
   const [aggsState, setAggsState] = useReducer(aggGroupReducer, group, initAggsState);
 
-  const isGroupValid = Object.entries(aggsState).every(([, item]) => item.valid);
+  const isGroupValid = Object.values(aggsState).every(item => item.valid);
   const isAllAggsTouched = isInvalidAggsTouched(aggsState);
 
   useEffect(() => {
@@ -106,7 +106,13 @@ function DefaultEditorAggGroup({
     setValidity(isGroupValid);
   }, [isGroupValid]);
 
-  const onDragEnd = ({ source, destination }: any) => {
+  const onDragEnd = ({
+    source,
+    destination,
+  }: {
+    source: { index: number };
+    destination: { index: number };
+  }) => {
     if (source && destination) {
       const orderedGroup = Array.from(group);
       const [removed] = orderedGroup.splice(source.index, 1);

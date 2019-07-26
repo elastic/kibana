@@ -77,8 +77,7 @@ uiModules
           },
           value => {
             $scope.formIsTouched = value;
-          },
-          true
+          }
         );
 
         $scope.setValidity = isValid => {
