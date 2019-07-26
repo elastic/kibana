@@ -5,7 +5,7 @@
  */
 
 /*
- * React component for rendering Explorer dashboard swimlanes.
+ * React component for rendering Single Metric Viewer.
  */
 
 import { chain, difference, each, find, filter, first, get, has, isEqual, without } from 'lodash';
@@ -198,7 +198,7 @@ export class TimeSeriesExplorer extends React.Component {
     });
   }
 
-  previousTsc = {};
+  previousChartProps = {};
   previousShowAnnotations = undefined;
   previousShowForecast = undefined;
   previousShowModelBounds = undefined;
@@ -959,7 +959,7 @@ export class TimeSeriesExplorer extends React.Component {
       zoomTo,
     } = this.state;
 
-    const tsc = {
+    const chartProps = {
       modelPlotEnabled,
       contextChartData,
       contextChartSelected: this.contextChartSelected,
@@ -1003,9 +1003,9 @@ export class TimeSeriesExplorer extends React.Component {
     let renderFocusChartOnly = true;
 
     if (
-      isEqual(this.previousTsc.focusForecastData, tsc.focusForecastData) &&
-      isEqual(this.previousTsc.focusChartData, tsc.focusChartData) &&
-      isEqual(this.previousTsc.focusAnnotationData, tsc.focusAnnotationData) &&
+      isEqual(this.previousChartProps.focusForecastData, chartProps.focusForecastData) &&
+      isEqual(this.previousChartProps.focusChartData, chartProps.focusChartData) &&
+      isEqual(this.previousChartProps.focusAnnotationData, chartProps.focusAnnotationData) &&
       this.previousShowAnnotations === showAnnotations &&
       this.previousShowForecast === showForecast &&
       this.previousShowModelBounds === showModelBounds
@@ -1013,7 +1013,7 @@ export class TimeSeriesExplorer extends React.Component {
       renderFocusChartOnly = false;
     }
 
-    this.previousTsc = tsc;
+    this.previousChartProps = chartProps;
     this.previousShowAnnotations = showAnnotations;
     this.previousShowForecast = showForecast;
     this.previousShowModelBounds = showModelBounds;
@@ -1168,7 +1168,7 @@ export class TimeSeriesExplorer extends React.Component {
 
             <div className="ml-timeseries-chart" data-test-subj="mlSingleMetricViewerChart">
               <TimeseriesChart
-                {...tsc}
+                {...chartProps}
                 detectorIndex={detectorId}
                 renderFocusChartOnly={renderFocusChartOnly}
                 selectedJob={selectedJob}
@@ -1179,7 +1179,7 @@ export class TimeSeriesExplorer extends React.Component {
               />
             </div>
 
-            {showAnnotations && tsc.focusAnnotationData.length > 0 && (
+            {showAnnotations && focusAnnotationData.length > 0 && (
               <div>
                 <span className="panel-title">
                   {i18n.translate('xpack.ml.timeSeriesExplorer.annotationsTitle', {
@@ -1187,7 +1187,7 @@ export class TimeSeriesExplorer extends React.Component {
                   })}
                 </span>
                 <AnnotationsTable
-                  annotations={tsc.focusAnnotationData}
+                  annotations={focusAnnotationData}
                   drillDown={false}
                   numberBadge={true}
                 />
