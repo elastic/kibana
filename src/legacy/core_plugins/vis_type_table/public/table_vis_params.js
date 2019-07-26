@@ -29,7 +29,7 @@ export function TableVisParams() {
     link: function ($scope) {
       const noCol = {
         value: '',
-        name: i18n.translate('tableVis.params.defaultPercetangeCol', {
+        name: i18n.translate('visTypeTable.params.defaultPercetangeCol', {
           defaultMessage: 'Don’t show',
         })
       };

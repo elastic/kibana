@@ -29,11 +29,11 @@ export const createTableVisTypeDefinition = (dependencies) => {
   return dependencies.createAngularVisualization({
     type: 'table',
     name: 'table',
-    title: i18n.translate('tableVis.tableVisTitle', {
+    title: i18n.translate('visTypeTable.tableVisTitle', {
       defaultMessage: 'Data Table',
     }),
     icon: 'visTable',
-    description: i18n.translate('tableVis.tableVisDescription', {
+    description: i18n.translate('visTypeTable.tableVisDescription', {
       defaultMessage: 'Display values in a table',
     }),
     visConfig: {
@@ -57,7 +57,7 @@ export const createTableVisTypeDefinition = (dependencies) => {
         {
           group: 'metrics',
           name: 'metric',
-          title: i18n.translate('tableVis.tableVisEditorConfig.schemas.metricTitle', {
+          title: i18n.translate('visTypeTable.tableVisEditorConfig.schemas.metricTitle', {
             defaultMessage: 'Metric',
           }),
           aggFilter: ['!geo_centroid', '!geo_bounds'],
@@ -74,7 +74,7 @@ export const createTableVisTypeDefinition = (dependencies) => {
         {
           group: 'buckets',
           name: 'bucket',
-          title: i18n.translate('tableVis.tableVisEditorConfig.schemas.bucketTitle', {
+          title: i18n.translate('visTypeTable.tableVisEditorConfig.schemas.bucketTitle', {
             defaultMessage: 'Split rows',
           }),
           aggFilter: ['!filter']
@@ -82,7 +82,7 @@ export const createTableVisTypeDefinition = (dependencies) => {
         {
           group: 'buckets',
           name: 'split',
-          title: i18n.translate('tableVis.tableVisEditorConfig.schemas.splitTitle', {
+          title: i18n.translate('visTypeTable.tableVisEditorConfig.schemas.splitTitle', {
             defaultMessage: 'Split table',
           }),
           min: 0,
