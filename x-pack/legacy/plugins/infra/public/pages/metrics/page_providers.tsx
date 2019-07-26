@@ -6,14 +6,11 @@
 
 import React from 'react';
 
-import { SourceConfigurationFlyoutState } from '../../components/source_configuration';
 import { MetricsTimeContainer } from '../../containers/metrics/with_metrics_time';
 import { Source } from '../../containers/source';
 
 export const MetricDetailPageProviders: React.FunctionComponent = ({ children }) => (
   <Source.Provider sourceId="default">
-    <SourceConfigurationFlyoutState.Provider>
-      <MetricsTimeContainer.Provider>{children}</MetricsTimeContainer.Provider>
-    </SourceConfigurationFlyoutState.Provider>
+    <MetricsTimeContainer.Provider>{children}</MetricsTimeContainer.Provider>
   </Source.Provider>
 );

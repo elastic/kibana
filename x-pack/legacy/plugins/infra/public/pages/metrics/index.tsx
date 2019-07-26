@@ -28,7 +28,6 @@ import { InvalidNodeError } from '../../components/metrics/invalid_node';
 import { MetricsSideNav } from '../../components/metrics/side_nav';
 import { MetricsTimeControls } from '../../components/metrics/time_controls';
 import { ColumnarPage, PageContent } from '../../components/page';
-import { SourceConfigurationFlyout } from '../../components/source_configuration';
 import { WithMetadata } from '../../containers/metadata/with_metadata';
 import { WithMetrics } from '../../containers/metrics/with_metrics';
 import {
@@ -126,11 +125,6 @@ export const MetricDetail = injectUICapabilities(
                               <Header
                                 breadcrumbs={breadcrumbs}
                                 readOnlyBadge={!uiCapabilities.infrastructure.save}
-                              />
-                              <SourceConfigurationFlyout
-                                shouldAllowEdit={
-                                  uiCapabilities.infrastructure.configureSource as boolean
-                                }
                               />
                               <WithMetricsTimeUrlState />
                               <DocumentTitle

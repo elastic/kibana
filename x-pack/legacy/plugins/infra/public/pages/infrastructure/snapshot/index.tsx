@@ -17,8 +17,6 @@ import { NoIndices } from '../../../components/empty_states/no_indices';
 import { Header } from '../../../components/header';
 import { ColumnarPage } from '../../../components/page';
 
-import { SourceConfigurationFlyout } from '../../../components/source_configuration';
-import { SourceConfigurationFlyoutState } from '../../../components/source_configuration';
 import { SourceErrorPage } from '../../../components/source_error_page';
 import { SourceLoadingPage } from '../../../components/source_loading_page';
 import { Source } from '../../../containers/source';
@@ -36,7 +34,6 @@ interface SnapshotPageProps {
 export const SnapshotPage = injectUICapabilities(
   injectI18n((props: SnapshotPageProps) => {
     const { intl, uiCapabilities } = props;
-    const { showIndicesConfiguration } = useContext(SourceConfigurationFlyoutState.Context);
     const {
       derivedIndexPattern,
       hasFailedLoadingSource,
@@ -75,9 +72,6 @@ export const SnapshotPage = injectUICapabilities(
             },
           ]}
           readOnlyBadge={!uiCapabilities.infrastructure.save}
-        />
-        <SourceConfigurationFlyout
-          shouldAllowEdit={uiCapabilities.infrastructure.configureSource as boolean}
         />
         {isLoading ? (
           <SourceLoadingPage />
@@ -123,7 +117,7 @@ export const SnapshotPage = injectUICapabilities(
                         <EuiButton
                           data-test-subj="configureSourceButton"
                           color="primary"
-                          onClick={showIndicesConfiguration}
+                          onClick={() => alert('todo fix me')}
                         >
                           {intl.formatMessage({
                             id: 'xpack.infra.configureSourceActionLabel',

@@ -10,7 +10,6 @@ import React from 'react';
 
 import { AutocompleteField } from '../../../components/autocomplete_field';
 import { Toolbar } from '../../../components/eui/toolbar';
-import { SourceConfigurationButton } from '../../../components/source_configuration';
 import { WaffleGroupByControls } from '../../../components/waffle/waffle_group_by_controls';
 import { WaffleMetricControls } from '../../../components/waffle/waffle_metric_controls';
 import { WaffleNodeTypeSwitcher } from '../../../components/waffle/waffle_node_type_switcher';
@@ -110,9 +109,6 @@ export const SnapshotToolbar = injectI18n(({ intl }) => (
                     onChangeCustomOptions={changeCustomOptions}
                     customOptions={customOptions}
                   />
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <SourceConfigurationButton />
                 </EuiFlexItem>
               </React.Fragment>
             )}
