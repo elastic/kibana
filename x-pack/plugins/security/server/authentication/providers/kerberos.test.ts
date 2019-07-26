@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import Boom from 'boom';
 import { errors } from 'elasticsearch';
 import sinon from 'sinon';
 
@@ -87,7 +88,7 @@ describe('KerberosAuthenticationProvider', () => {
       const authenticationResult = await provider.authenticate(request, tokenPair);
       expect(authenticationResult.failed()).toBe(true);
       expect(authenticationResult.error).toHaveProperty('output.statusCode', 401);
-      expect(authenticationResult.challenges).toBeUndefined();
+      expect(authenticationResult.authResponseHeaders).toBeUndefined();
     });
 
     it('fails with `Negotiate` challenge if backend supports Kerberos.', async () => {
@@ -111,7 +112,7 @@ describe('KerberosAuthenticationProvider', () => {
 
       expect(authenticationResult.failed()).toBe(true);
       expect(authenticationResult.error).toHaveProperty('output.statusCode', 401);
-      expect(authenticationResult.challenges).toEqual(['Negotiate']);
+      expect(authenticationResult.authResponseHeaders).toEqual({ 'WWW-Authenticate': 'Negotiate' });
     });
 
     it('fails if request authentication is failed with non-401 error.', async () => {
@@ -124,10 +125,10 @@ describe('KerberosAuthenticationProvider', () => {
 
       expect(authenticationResult.failed()).toBe(true);
       expect(authenticationResult.error).toHaveProperty('status', 503);
-      expect(authenticationResult.challenges).toBeUndefined();
+      expect(authenticationResult.authResponseHeaders).toBeUndefined();
     });
 
-    it('gets an token pair in exchange to SPNEGO one and stores it in the state.', async () => {
+    it('gets a token pair in exchange to SPNEGO one and stores it in the state.', async () => {
       const user = mockAuthenticatedUser();
       const request = httpServerMock.createKibanaRequest({
         headers: { authorization: 'negotiate spnego' },
@@ -156,9 +157,110 @@ describe('KerberosAuthenticationProvider', () => {
       expect(authenticationResult.succeeded()).toBe(true);
       expect(authenticationResult.user).toBe(user);
       expect(authenticationResult.authHeaders).toEqual({ authorization: 'Bearer some-token' });
+      expect(authenticationResult.authResponseHeaders).toBeUndefined();
       expect(authenticationResult.state).toEqual({
         accessToken: 'some-token',
         refreshToken: 'some-refresh-token',
+      });
+    });
+
+    it('requests auth response header if token pair is complemented with Kerberos response token.', async () => {
+      const user = mockAuthenticatedUser();
+      const request = httpServerMock.createKibanaRequest({
+        headers: { authorization: 'negotiate spnego' },
+      });
+
+      mockScopedClusterClient(
+        mockOptions.client,
+        sinon.match({ headers: { authorization: 'Bearer some-token' } })
+      )
+        .callAsCurrentUser.withArgs('shield.authenticate')
+        .resolves(user);
+
+      mockOptions.client.callAsInternalUser.withArgs('shield.getAccessToken').resolves({
+        access_token: 'some-token',
+        refresh_token: 'some-refresh-token',
+        kerberos_authentication_response_token: 'response-token',
+      });
+
+      const authenticationResult = await provider.authenticate(request);
+
+      sinon.assert.calledWithExactly(
+        mockOptions.client.callAsInternalUser,
+        'shield.getAccessToken',
+        { body: { grant_type: '_kerberos', kerberos_ticket: 'spnego' } }
+      );
+
+      expect(request.headers.authorization).toBe('negotiate spnego');
+      expect(authenticationResult.succeeded()).toBe(true);
+      expect(authenticationResult.user).toBe(user);
+      expect(authenticationResult.authHeaders).toEqual({ authorization: 'Bearer some-token' });
+      expect(authenticationResult.authResponseHeaders).toEqual({
+        'WWW-Authenticate': 'Negotiate response-token',
+      });
+      expect(authenticationResult.state).toEqual({
+        accessToken: 'some-token',
+        refreshToken: 'some-refresh-token',
+      });
+    });
+
+    it('fails with `Negotiate response-token` if cannot complete context with a response token.', async () => {
+      const request = httpServerMock.createKibanaRequest({
+        headers: { authorization: 'negotiate spnego' },
+      });
+
+      const failureReason = ElasticsearchErrorHelpers.decorateNotAuthorizedError(
+        new (errors.AuthenticationException as any)('Unauthorized', {
+          body: { error: { header: { 'WWW-Authenticate': 'Negotiate response-token' } } },
+        })
+      );
+      mockOptions.client.callAsInternalUser
+        .withArgs('shield.getAccessToken')
+        .rejects(failureReason);
+
+      const authenticationResult = await provider.authenticate(request);
+
+      sinon.assert.calledWithExactly(
+        mockOptions.client.callAsInternalUser,
+        'shield.getAccessToken',
+        { body: { grant_type: '_kerberos', kerberos_ticket: 'spnego' } }
+      );
+
+      expect(request.headers.authorization).toBe('negotiate spnego');
+      expect(authenticationResult.failed()).toBe(true);
+      expect(authenticationResult.error).toEqual(Boom.unauthorized());
+      expect(authenticationResult.authResponseHeaders).toEqual({
+        'WWW-Authenticate': 'Negotiate response-token',
+      });
+    });
+
+    it('fails with `Negotiate` if cannot create context using provided SPNEGO token.', async () => {
+      const request = httpServerMock.createKibanaRequest({
+        headers: { authorization: 'negotiate spnego' },
+      });
+
+      const failureReason = ElasticsearchErrorHelpers.decorateNotAuthorizedError(
+        new (errors.AuthenticationException as any)('Unauthorized', {
+          body: { error: { header: { 'WWW-Authenticate': 'Negotiate' } } },
+        })
+      );
+      mockOptions.client.callAsInternalUser
+        .withArgs('shield.getAccessToken')
+        .rejects(failureReason);
+
+      const authenticationResult = await provider.authenticate(request);
+
+      sinon.assert.calledWithExactly(
+        mockOptions.client.callAsInternalUser,
+        'shield.getAccessToken',
+        { body: { grant_type: '_kerberos', kerberos_ticket: 'spnego' } }
+      );
+
+      expect(request.headers.authorization).toBe('negotiate spnego');
+      expect(authenticationResult.failed()).toBe(true);
+      expect(authenticationResult.error).toEqual(Boom.unauthorized());
+      expect(authenticationResult.authResponseHeaders).toEqual({
+        'WWW-Authenticate': 'Negotiate',
       });
     });
 
@@ -183,7 +285,7 @@ describe('KerberosAuthenticationProvider', () => {
       expect(request.headers.authorization).toBe('negotiate spnego');
       expect(authenticationResult.failed()).toBe(true);
       expect(authenticationResult.error).toBe(failureReason);
-      expect(authenticationResult.challenges).toBeUndefined();
+      expect(authenticationResult.authResponseHeaders).toBeUndefined();
     });
 
     it('fails if could not retrieve user using the new access token.', async () => {
@@ -214,7 +316,7 @@ describe('KerberosAuthenticationProvider', () => {
       expect(request.headers.authorization).toBe('negotiate spnego');
       expect(authenticationResult.failed()).toBe(true);
       expect(authenticationResult.error).toBe(failureReason);
-      expect(authenticationResult.challenges).toBeUndefined();
+      expect(authenticationResult.authResponseHeaders).toBeUndefined();
     });
 
     it('succeeds if state contains a valid token.', async () => {
@@ -314,7 +416,7 @@ describe('KerberosAuthenticationProvider', () => {
 
       expect(authenticationResult.failed()).toBe(true);
       expect(authenticationResult.error).toHaveProperty('output.statusCode', 401);
-      expect(authenticationResult.challenges).toEqual(['Negotiate']);
+      expect(authenticationResult.authResponseHeaders).toEqual({ 'WWW-Authenticate': 'Negotiate' });
     });
 
     it('fails with `Negotiate` challenge if both access and refresh token documents are missing and backend supports Kerberos.', async () => {
@@ -352,7 +454,7 @@ describe('KerberosAuthenticationProvider', () => {
 
       expect(authenticationResult.failed()).toBe(true);
       expect(authenticationResult.error).toHaveProperty('output.statusCode', 401);
-      expect(authenticationResult.challenges).toEqual(['Negotiate']);
+      expect(authenticationResult.authResponseHeaders).toEqual({ 'WWW-Authenticate': 'Negotiate' });
     });
 
     it('succeeds if `authorization` contains a valid token.', async () => {

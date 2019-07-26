@@ -3757,6 +3757,8 @@
     "xpack.apm.formatters.millisTimeUnitLabel": "ms",
     "xpack.apm.formatters.requestsPerMinLabel": "rpm",
     "xpack.apm.formatters.secondsTimeUnitLabel": "s",
+    "xpack.apm.formatters.minutesTimeUnitLabel": "m",
+    "xpack.apm.formatters.hoursTimeUnitLabel": "h",
     "xpack.apm.formatters.transactionsPerMinLabel": "tpm",
     "xpack.apm.header.badge.readOnly.text": "只读",
     "xpack.apm.header.badge.readOnly.tooltip": "无法保存",
