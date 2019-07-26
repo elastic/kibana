@@ -7,7 +7,6 @@
 import React, { useState, useEffect } from 'react';
 import { uniqueId, startsWith } from 'lodash';
 import { EuiCallOut } from '@elastic/eui';
-import chrome from 'ui/chrome';
 import styled from 'styled-components';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
@@ -29,6 +28,7 @@ import { useUrlParams } from '../../../hooks/useUrlParams';
 import { history } from '../../../utils/history';
 import { useMatchedRoutes } from '../../../hooks/useMatchedRoutes';
 import { RouteName } from '../../app/Main/route_config/route_names';
+import { useCore } from '../../../hooks/useCore';
 
 const Container = styled.div`
   margin-bottom: 10px;
@@ -42,6 +42,7 @@ interface State {
 }
 
 export function KueryBar() {
+  const core = useCore();
   const [state, setState] = useState<State>({
     indexPattern: null,
     suggestions: [],
@@ -52,7 +53,9 @@ export function KueryBar() {
   const location = useLocation();
   const matchedRoutes = useMatchedRoutes();
 
-  const apmIndexPatternTitle = chrome.getInjected('apmIndexPatternTitle');
+  const apmIndexPatternTitle = core.injectedMetadata.getInjectedVar(
+    'apmIndexPatternTitle'
+  );
   const indexPatternMissing =
     !state.isLoadingIndexPattern && !state.indexPattern;
   let currentRequestCheck;

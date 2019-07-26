@@ -19,14 +19,10 @@
 
 import React from 'react';
 import { MarkdownSimple } from 'ui/markdown';
-import { uiModules } from '../modules';
-import { metadata } from '../metadata';
+import chrome from '../chrome';
 import { fatalError } from './fatal_error';
 import { banners } from './banners';
-import { Notifier } from './notifier';
-import template from './partials/toaster.html';
 import './filters/markdown';
-import './directives/truncated';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import {
@@ -34,60 +30,16 @@ import {
   EuiButton,
 } from '@elastic/eui';
 
-const module = uiModules.get('kibana/notify');
+const config = chrome.getUiSettingsClient();
 
-module.directive('kbnNotifications', function () {
-  return {
-    restrict: 'E',
-    scope: {
-      list: '=list'
-    },
-    replace: true,
-    template
-  };
-});
-
-export const notify = new Notifier();
-
-module.factory('createNotifier', function () {
-  return function (opts) {
-    return new Notifier(opts);
-  };
-});
-
-module.factory('Notifier', function () {
-  return Notifier;
-});
-
-// teach Notifier how to use angular interval services
-module.run(function (config, $interval, $compile) {
-  Notifier.applyConfig({
-    setInterval: $interval,
-    clearInterval: $interval.cancel
-  });
+config.getUpdate$().subscribe(() => {
   applyConfig(config);
-  Notifier.$compile = $compile;
 });
-
-// if kibana is not included then the notify service can't
-// expect access to config (since it's dependent on kibana)
-if (!!metadata.kbnIndex) {
-  require('ui/config');
-  module.run(function (config) {
-    config.watchAll(() => applyConfig(config));
-  });
-}
 
 let bannerId;
 let bannerTimeoutId;
 
 function applyConfig(config) {
-  Notifier.applyConfig({
-    errorLifetime: config.get('notifications:lifetime:error'),
-    warningLifetime: config.get('notifications:lifetime:warning'),
-    infoLifetime: config.get('notifications:lifetime:info')
-  });
-
   // Show user-defined banner.
   const bannerContent = config.get('notifications:banner');
   const bannerLifetime = config.get('notifications:lifetime:banner');
