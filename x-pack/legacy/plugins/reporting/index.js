@@ -169,7 +169,7 @@ export const reporting = (kibana) => {
       // Register a function with server to manage the collection of usage stats
       server.usage.collectorSet.register(getReportingUsageCollector(server, isReady));
 
-      const logger = LevelLogger.createForServer(server, ['reporting'], true);
+      const logger = LevelLogger.createForServer(server, [PLUGIN_ID], true);
       const [exportTypesRegistry, browserFactory] = await Promise.all([
         exportTypesRegistryFactory(server),
         createBrowserDriverFactory(server),

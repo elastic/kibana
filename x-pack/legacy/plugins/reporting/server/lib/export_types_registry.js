@@ -6,6 +6,7 @@
 
 import { resolve } from 'path';
 import glob from 'glob';
+import { PLUGIN_ID } from '../../common/constants';
 import { ExportTypesRegistry } from '../../common/export_types_registry';
 import { oncePerServer, LevelLogger } from './';
 
@@ -23,7 +24,7 @@ function scan(pattern) {
 
 const pattern = resolve(__dirname, '../../export_types/*/server/index.[jt]s');
 async function exportTypesRegistryFn(server) {
-  const logger = LevelLogger.createForServer(server, ['reporting', 'exportTypes']);
+  const logger = LevelLogger.createForServer(server, [PLUGIN_ID, 'exportTypes']);
   const exportTypesRegistry = new ExportTypesRegistry();
   const files = await scan(pattern);
 

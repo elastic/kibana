@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { CSV_JOB_TYPE, PLUGIN_ID } from '../../../common/constants';
 import { cryptoFactory } from '../../../server/lib/crypto';
 import { oncePerServer } from '../../../server/lib/once_per_server';
 import { LevelLogger } from '../../../server/lib/level_logger';
@@ -15,7 +16,7 @@ function executeJobFn(server) {
   const { callWithRequest } = server.plugins.elasticsearch.getCluster('data');
   const crypto = cryptoFactory(server);
   const config = server.config();
-  const logger = LevelLogger.createForServer(server, ['reporting', 'csv']);
+  const logger = LevelLogger.createForServer(server, [PLUGIN_ID, CSV_JOB_TYPE]);
   const generateCsv = createGenerateCsv(logger);
   const serverBasePath = config.get('server.basePath');
 

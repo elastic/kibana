@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { PLUGIN_ID } from '../../common/constants';
 import { Esqueue } from './esqueue';
 import { createWorkerFactory } from './create_worker';
 import { oncePerServer } from './once_per_server';
@@ -19,7 +20,7 @@ function createQueueFn(server) {
     timeout: queueConfig.timeout,
     dateSeparator: '.',
     client: server.plugins.elasticsearch.getCluster('admin'),
-    logger: createTaggedLogger(server, ['reporting', 'esqueue']),
+    logger: createTaggedLogger(server, [PLUGIN_ID, 'esqueue']),
   };
 
   const queue = new Esqueue(index, queueOptions);
@@ -29,7 +30,7 @@ function createQueueFn(server) {
     const createWorker = createWorkerFactory(server);
     createWorker(queue);
   } else {
-    const logger = LevelLogger.createForServer(server, ['reporting', 'create_queue']);
+    const logger = LevelLogger.createForServer(server, [PLUGIN_ID, 'create_queue']);
     logger.info(
       'xpack.reporting.queue.pollEnabled is set to false. This Kibana instance ' +
       'will not poll for idle jobs to claim and execute. Make sure another ' +
