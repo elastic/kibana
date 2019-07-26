@@ -104,7 +104,7 @@ export const dateHistogramOperation: OperationDefinition<DateHistogramIndexPatte
 
     const field =
       column &&
-      state.indexPatterns[state.currentIndexPatternId].fields.find(
+      state.indexPatterns[state.layers[layerId].indexPatternId].fields.find(
         currentField => currentField.name === column.sourceField
       );
     const intervalIsRestricted =
