@@ -21,7 +21,7 @@ export function createMockVisualization(): jest.Mocked<Visualization> {
     ],
     renderDescription: jest.fn(),
     switchVisualizationType: jest.fn((_, x) => x),
-    getPersistableState: jest.fn(_state => ({})),
+    getPersistableState: jest.fn(_state => _state),
     getSuggestions: jest.fn(_options => []),
     initialize: jest.fn((_frame, _state?) => ({})),
     renderConfigPanel: jest.fn(),
@@ -55,6 +55,7 @@ export function createMockDatasource(): DatasourceMock {
     insertLayer: jest.fn((_state, _newLayerId) => {}),
     removeLayer: jest.fn((_state, _layerId) => {}),
     getLayers: jest.fn(_state => []),
+    getMetaData: jest.fn(_state => ({ filterableIndexPatterns: [] })),
 
     // this is an additional property which doesn't exist on real datasources
     // but can be used to validate whether specific API mock functions are called
@@ -92,6 +93,12 @@ export function createMockDependencies() {
         ExpressionRenderer: createExpressionRendererMock(),
         run: jest.fn(_ => Promise.resolve({ type: 'render', as: 'test', value: undefined })),
       },
+    },
+    embeddables: {
+      addEmbeddableFactory: jest.fn(),
+    },
+    chrome: {
+      getSavedObjectsClient: () => {},
     },
     interpreter: {
       functionsRegistry: {

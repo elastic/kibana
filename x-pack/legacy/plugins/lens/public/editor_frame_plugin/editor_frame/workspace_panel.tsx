@@ -6,7 +6,7 @@
 
 import React, { useState, useEffect, useMemo, useContext } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiCodeBlock, EuiSpacer } from '@elastic/eui';
+import { EuiCodeBlock, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { toExpression } from '@kbn/interpreter/common';
 import { ExpressionRenderer } from '../../../../../../../src/legacy/core_plugins/data/public';
 import { Action } from './state_management';
@@ -119,22 +119,23 @@ export function InnerWorkspacePanel({
 
     if (expressionError) {
       return (
-        <>
-          <p data-test-subj="expression-failure">
+        <EuiFlexGroup direction="column">
+          <EuiFlexItem data-test-subj="expression-failure">
             {/* TODO word this differently because expressions should not be exposed at this level */}
             <FormattedMessage
               id="xpack.lens.editorFrame.expressionFailure"
               defaultMessage="Expression could not be executed successfully"
             />
-          </p>
+          </EuiFlexItem>
           {expression && (
-            <>
+            <EuiFlexItem>
               <EuiCodeBlock>{toExpression(expression)}</EuiCodeBlock>
-              <EuiSpacer />
-            </>
+            </EuiFlexItem>
           )}
-          <EuiCodeBlock>{JSON.stringify(expressionError, null, 2)}</EuiCodeBlock>
-        </>
+          <EuiFlexItem>
+            <EuiCodeBlock>{JSON.stringify(expressionError, null, 2)}</EuiCodeBlock>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       );
     } else {
       return (

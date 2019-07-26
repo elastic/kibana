@@ -163,7 +163,7 @@ export function EditorFrame(props: EditorFrameProps) {
         <nav>
           <EuiLink
             onClick={() => {
-              if (activeDatasource && visualization) {
+              if (state.activeDatasourceId && activeDatasource && visualization) {
                 save({
                   activeDatasources: Object.keys(state.datasourceStates).reduce(
                     (datasourceMap, datasourceId) => ({
@@ -177,6 +177,8 @@ export function EditorFrame(props: EditorFrameProps) {
                   state,
                   redirectTo: props.redirectTo,
                   store: props.store,
+                  activeDatasourceId: state.activeDatasourceId,
+                  framePublicAPI,
                 }).catch(onError);
               }
             }}

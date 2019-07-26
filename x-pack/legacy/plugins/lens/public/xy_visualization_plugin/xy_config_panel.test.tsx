@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { FormEvent } from 'react';
 import { ReactWrapper } from 'enzyme';
 import { mountWithIntl as mount } from 'test_utils/enzyme_helpers';
 import { EuiButtonGroupProps } from '@elastic/eui';
@@ -15,6 +15,7 @@ import { Position } from '@elastic/charts';
 import { NativeRendererProps } from '../native_renderer';
 import { generateId } from '../id_generator';
 import { createMockFramePublicAPI, createMockDatasource } from '../editor_frame_plugin/mocks';
+import { act } from 'react-test-renderer';
 
 jest.mock('../id_generator');
 
@@ -27,14 +28,13 @@ describe('XYConfigPanel', () => {
     return {
       legend: { isVisible: true, position: Position.Right },
       preferredSeriesType: 'bar',
+      isHorizontal: false,
       layers: [
         {
           seriesType: 'bar',
           layerId: 'first',
           splitAccessor: 'baz',
           xAccessor: 'foo',
-          position: Position.Bottom,
-          showGridlines: true,
           title: 'X',
           accessors: ['bar'],
         },
@@ -47,6 +47,15 @@ describe('XYConfigPanel', () => {
       .find(`[data-test-subj="${subj}"]`)
       .first()
       .props();
+  }
+
+  function openComponentPopover(component: ReactWrapper<unknown>, layerId: string) {
+    component
+      .find(`[data-test-subj="lnsXY_layer_${layerId}"]`)
+      .first()
+      .find(`[data-test-subj="lnsXY_layer_advanced"]`)
+      .first()
+      .simulate('click');
   }
 
   beforeEach(() => {
@@ -62,6 +71,36 @@ describe('XYConfigPanel', () => {
   test.skip('allows toggling the y axis gridlines', () => {});
   test.skip('allows toggling the x axis gridlines', () => {});
 
+  test('puts the horizontal toggle in a popover', () => {
+    const state = testState();
+    const setState = jest.fn();
+    const component = mount(
+      <XYConfigPanel
+        dragDropContext={dragDropContext}
+        frame={frame}
+        setState={setState}
+        state={state}
+      />
+    );
+
+    component
+      .find(`[data-test-subj="lnsXY_chart_settings"]`)
+      .first()
+      .simulate('click');
+
+    act(() => {
+      component
+        .find('[data-test-subj="lnsXY_chart_horizontal"]')
+        .first()
+        .prop('onChange')!({} as FormEvent);
+    });
+
+    expect(setState).toHaveBeenCalledWith({
+      ...state,
+      isHorizontal: true,
+    });
+  });
+
   test('enables stacked chart types even when there is no split series', () => {
     const state = testState();
     const component = mount(
@@ -73,10 +112,7 @@ describe('XYConfigPanel', () => {
       />
     );
 
-    component
-      .find('[data-test-subj="lnsXYSeriesTypePopover"]')
-      .first()
-      .simulate('click');
+    openComponentPopover(component, 'first');
 
     const options = component
       .find('[data-test-subj="lnsXY_seriesType"]')
@@ -177,6 +213,8 @@ describe('XYConfigPanel', () => {
       />
     );
 
+    openComponentPopover(component, 'first');
+
     const onRemove = component
       .find('[data-test-subj="lensXY_yDimensionPanel"]')
       .first()
@@ -273,6 +311,8 @@ describe('XYConfigPanel', () => {
           state={state}
         />
       );
+
+      openComponentPopover(component, 'first');
 
       component
         .find('[data-test-subj="lnsXYSeriesTypePopover"]')

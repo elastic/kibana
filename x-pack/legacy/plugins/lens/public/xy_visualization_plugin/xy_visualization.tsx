@@ -5,6 +5,7 @@
  */
 
 import React from 'react';
+import _ from 'lodash';
 import { render } from 'react-dom';
 import { Position } from '@elastic/charts';
 import { I18nProvider } from '@kbn/i18n/react';
@@ -79,6 +80,7 @@ export const xyVisualization: Visualization<State, PersistableState> = {
     return (
       state || {
         title: 'Empty XY Chart',
+        isHorizontal: false,
         legend: { isVisible: true, position: Position.Right },
         preferredSeriesType: defaultSeriesType,
         layers: [

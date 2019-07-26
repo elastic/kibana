@@ -5,6 +5,7 @@
  */
 
 import { SavedObjectAttributes } from 'target/types/server';
+import { DatasourceMetaData } from '../types';
 
 export interface Document {
   id?: string;
@@ -12,14 +13,15 @@ export interface Document {
   visualizationType: string | null;
   title: string;
   activeDatasourceId: string;
-  // The state is saved as a JSON string for now
+  expression: string;
   state: {
+    datasourceMetaData: DatasourceMetaData;
     datasourceStates: Record<string, unknown>;
     visualization: unknown;
   };
 }
 
-const DOC_TYPE = 'lens';
+export const DOC_TYPE = 'lens';
 
 interface SavedObjectClient {
   create: (type: string, object: SavedObjectAttributes) => Promise<{ id: string }>;

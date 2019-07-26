@@ -150,12 +150,16 @@ describe('editor_frame', () => {
               activeDatasourceId: 'testDatasource',
               visualizationType: 'testVis',
               title: '',
+              expression: '',
               state: {
                 datasourceStates: {
                   testDatasource: datasource1State,
                   testDatasource2: datasource2State,
                 },
                 visualization: {},
+                datasourceMetaData: {
+                  filterableIndexPatterns: [],
+                },
               },
             }}
           />
@@ -361,38 +365,52 @@ describe('editor_frame', () => {
       instance.update();
 
       expect(instance.find(expressionRendererMock).prop('expression')).toMatchInlineSnapshot(`
-                Object {
-                  "chain": Array [
-                    Object {
-                      "arguments": Object {
-                        "layerIds": Array [
-                          "first",
-                        ],
-                        "tables": Array [
-                          Object {
-                            "chain": Array [
-                              Object {
-                                "arguments": Object {},
-                                "function": "datasource",
-                                "type": "function",
-                              },
-                            ],
-                            "type": "expression",
-                          },
-                        ],
+        Object {
+          "chain": Array [
+            Object {
+              "arguments": Object {},
+              "function": "kibana",
+              "type": "function",
+            },
+            Object {
+              "arguments": Object {
+                "filters": Array [],
+                "query": Array [],
+                "timeRange": Array [],
+              },
+              "function": "kibana_context",
+              "type": "function",
+            },
+            Object {
+              "arguments": Object {
+                "layerIds": Array [
+                  "first",
+                ],
+                "tables": Array [
+                  Object {
+                    "chain": Array [
+                      Object {
+                        "arguments": Object {},
+                        "function": "datasource",
+                        "type": "function",
                       },
-                      "function": "lens_merge_tables",
-                      "type": "function",
-                    },
-                    Object {
-                      "arguments": Object {},
-                      "function": "vis",
-                      "type": "function",
-                    },
-                  ],
-                  "type": "expression",
-                }
-            `);
+                    ],
+                    "type": "expression",
+                  },
+                ],
+              },
+              "function": "lens_merge_tables",
+              "type": "function",
+            },
+            Object {
+              "arguments": Object {},
+              "function": "vis",
+              "type": "function",
+            },
+          ],
+          "type": "expression",
+        }
+      `);
     });
 
     it('should render individual expression for each given layer', async () => {
@@ -418,12 +436,16 @@ describe('editor_frame', () => {
             activeDatasourceId: 'testDatasource',
             visualizationType: 'testVis',
             title: '',
+            expression: '',
             state: {
               datasourceStates: {
                 testDatasource: {},
                 testDatasource2: {},
               },
               visualization: {},
+              datasourceMetaData: {
+                filterableIndexPatterns: [],
+              },
             },
           }}
         />
@@ -436,6 +458,20 @@ describe('editor_frame', () => {
       expect(instance.find(expressionRendererMock).prop('expression')).toMatchInlineSnapshot(`
         Object {
           "chain": Array [
+            Object {
+              "arguments": Object {},
+              "function": "kibana",
+              "type": "function",
+            },
+            Object {
+              "arguments": Object {
+                "filters": Array [],
+                "query": Array [],
+                "timeRange": Array [],
+              },
+              "function": "kibana_context",
+              "type": "function",
+            },
             Object {
               "arguments": Object {
                 "layerIds": Array [
@@ -628,12 +664,16 @@ describe('editor_frame', () => {
             activeDatasourceId: 'testDatasource',
             visualizationType: 'testVis',
             title: '',
+            expression: '',
             state: {
               datasourceStates: {
                 testDatasource: {},
                 testDatasource2: {},
               },
               visualization: {},
+              datasourceMetaData: {
+                filterableIndexPatterns: [],
+              },
             },
           }}
         />
@@ -676,12 +716,16 @@ describe('editor_frame', () => {
             activeDatasourceId: 'testDatasource',
             visualizationType: 'testVis',
             title: '',
+            expression: '',
             state: {
               datasourceStates: {
                 testDatasource: datasource1State,
                 testDatasource2: datasource2State,
               },
               visualization: {},
+              datasourceMetaData: {
+                filterableIndexPatterns: [],
+              },
             },
           }}
         />

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { ObjectType, schema, TypeOf } from '@kbn/config-schema';
+import { ObjectType, TypeOf, Type } from '@kbn/config-schema';
 import { Request, ResponseObject, ResponseToolkit } from 'hapi';
 
 import { KibanaRequest } from './request';
@@ -136,7 +136,17 @@ export class Router {
       );
     }
 
-    return route.validate ? route.validate(schema) : undefined;
+    if (route.validate !== false) {
+      Object.entries(route.validate).forEach(([key, schema]) => {
+        if (!(schema instanceof Type)) {
+          throw new Error(
+            `Expected a valid schema declared with '@kbn/config-schema' package at key: [${key}].`
+          );
+        }
+      });
+    }
+
+    return route.validate ? route.validate : undefined;
   }
 
   private async handle<P extends ObjectType, Q extends ObjectType, B extends ObjectType>(

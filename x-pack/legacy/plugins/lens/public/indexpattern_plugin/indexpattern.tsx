@@ -8,6 +8,7 @@ import _ from 'lodash';
 import React from 'react';
 import { render } from 'react-dom';
 import { I18nProvider } from '@kbn/i18n/react';
+import { EuiText } from '@elastic/eui';
 import {
   DatasourceDimensionPanelProps,
   DatasourceDataPanelProps,
@@ -284,6 +285,14 @@ export function getIndexPatternDatasource({
 
     toExpression,
 
+    getMetaData(state: IndexPatternPrivateState) {
+      return {
+        filterableIndexPatterns: _.uniq(
+          Object.values(state.layers).map(layer => layer.indexPatternId)
+        ),
+      };
+    },
+
     renderDataPanel(
       domElement: Element,
       props: DatasourceDataPanelProps<IndexPatternPrivateState>
@@ -330,7 +339,9 @@ export function getIndexPatternDatasource({
         renderLayerPanel: (domElement: Element, props: DatasourceLayerPanelProps) => {
           render(
             <I18nProvider>
-              <span>{state.indexPatterns[state.layers[props.layerId].indexPatternId].title}</span>
+              <EuiText size="s">
+                {state.indexPatterns[state.layers[props.layerId].indexPatternId].title}
+              </EuiText>
             </I18nProvider>,
             domElement
           );

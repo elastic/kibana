@@ -16,6 +16,7 @@ import {
   AreaSeries,
   BarSeries,
   Position,
+  ScaleType,
 } from '@elastic/charts';
 import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/types';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText, IconType } from '@elastic/eui';
@@ -57,6 +58,10 @@ export const xyChart: ExpressionFunction<'lens_xy_chart', LensMultiTable, XYArgs
       help: 'Layers of visual series',
       multi: true,
     },
+    isHorizontal: {
+      types: ['boolean'],
+      help: 'Render horizontally',
+    },
   },
   context: {
     types: ['lens_multitable'],
@@ -95,9 +100,9 @@ function getIconForSeriesType(seriesType: SeriesType): IconType {
 }
 
 export function XYChart({ data, args }: XYChartProps) {
-  const { legend, layers } = args;
+  const { legend, layers, isHorizontal } = args;
 
-  if (Object.values(data.tables).some(table => table.rows.length === 0)) {
+  if (Object.values(data.tables).every(table => table.rows.length === 0)) {
     const icon: IconType = layers.length > 0 ? getIconForSeriesType(layers[0].seriesType) : 'bar';
     return (
       <EuiFlexGroup gutterSize="s" direction="column" alignItems="center" justifyContent="center">
@@ -122,7 +127,7 @@ export function XYChart({ data, args }: XYChartProps) {
         showLegend={legend.isVisible}
         legendPosition={legend.position}
         showLegendDisplayValue={false}
-        rotation={layers.some(({ seriesType }) => seriesType.includes('horizontal')) ? 90 : 0}
+        rotation={isHorizontal ? 90 : 0}
       />
 
       <Axis
@@ -137,13 +142,13 @@ export function XYChart({ data, args }: XYChartProps) {
         id={getAxisId('y')}
         position={Position.Left}
         title={args.yTitle}
-        showGridLines={layers[0].showGridlines}
+        showGridLines={false}
         hide={layers[0].hide}
       />
 
       {layers.map(
         ({ splitAccessor, seriesType, accessors, xAccessor, layerId, columnToLabel }, index) => {
-          if (!data.tables[layerId]) {
+          if (!data.tables[layerId] || data.tables[layerId].rows.length === 0) {
             return;
           }
 
@@ -175,14 +180,14 @@ export function XYChart({ data, args }: XYChartProps) {
             xAccessor,
             yAccessors,
             data: rows,
+            xScaleType:
+              typeof rows[0][xAccessor] === 'number' ? ScaleType.Linear : ScaleType.Ordinal,
+            yScaleType: ScaleType.Linear,
           };
 
           return seriesType === 'line' ? (
             <LineSeries {...seriesProps} />
-          ) : seriesType === 'bar' ||
-            seriesType === 'bar_stacked' ||
-            seriesType === 'horizontal_bar' ||
-            seriesType === 'horizontal_bar_stacked' ? (
+          ) : seriesType === 'bar' || seriesType === 'bar_stacked' ? (
             <BarSeries {...seriesProps} />
           ) : (
             <AreaSeries {...seriesProps} />

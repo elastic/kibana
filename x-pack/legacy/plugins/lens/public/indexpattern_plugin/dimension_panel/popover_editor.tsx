@@ -161,6 +161,7 @@ export function PopoverEditor(props: PopoverEditorProps) {
             data-test-subj="indexPattern-configure-dimension"
             onClick={() => setPopoverOpen(true)}
             iconType="plusInCircle"
+            size="s"
           />
         )
       }

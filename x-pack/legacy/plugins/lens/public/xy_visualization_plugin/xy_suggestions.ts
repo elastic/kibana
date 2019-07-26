@@ -104,6 +104,7 @@ function getSuggestion(
   const seriesType: SeriesType =
     (currentState && currentState.preferredSeriesType) || (splitBy && isDate ? 'line' : 'bar');
   const state: State = {
+    isHorizontal: false,
     legend: currentState ? currentState.legend : { isVisible: true, position: Position.Right },
     preferredSeriesType: seriesType,
     layers: [
@@ -114,8 +115,6 @@ function getSuggestion(
         xAccessor: xValue.columnId,
         splitAccessor: splitBy && isDate ? splitBy.columnId : generateId(),
         accessors: yValues.map(col => col.columnId),
-        position: Position.Left,
-        showGridlines: false,
         title: yTitle,
       },
     ],
