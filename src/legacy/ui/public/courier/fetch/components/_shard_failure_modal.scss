@@ -4,12 +4,6 @@
      width: 768px;
 }
 
-// displaying a EuiCodeBlock inside a tab inside a modal, you've to set the width 
-// to prevent overlapping the modal when the content contains very long lines
-.shardFailureModal__codeblock {
-    width: 700px;
-}
-
 .shardFailureModal__descTitle {
     width: 20% !important;
     margin-top: $euiSizeS;
@@ -39,5 +33,4 @@
         display: block;
         width: 100% !important;
     }
-    
 }
