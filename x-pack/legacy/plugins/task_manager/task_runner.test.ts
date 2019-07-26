@@ -315,8 +315,8 @@ describe('TaskManagerRunner', () => {
     sinon.assert.calledWith(getRetryStub, initialAttempts, error);
     const instance = store.update.args[0][0];
 
-    const nextDefaultRetryAt = new Date(Date.now() + initialAttempts * 5 * 60 * 1000);
-    expect(instance.runAt.getTime()).toEqual(nextDefaultRetryAt.getTime());
+    const expectedRunAt = new Date(Date.now() + initialAttempts * 5 * 60 * 1000);
+    expect(instance.runAt.getTime()).toEqual(expectedRunAt.getTime());
   });
 
   test('uses getRetry function (returning false) on error when defined', async () => {
@@ -381,8 +381,8 @@ describe('TaskManagerRunner', () => {
     const instance = store.update.args[0][0];
 
     const nextIntervalDelay = 60000; // 1m
-    const nextDefaultRetryAt = new Date(Date.now() + nextIntervalDelay);
-    expect(instance.runAt.getTime()).toEqual(nextDefaultRetryAt.getTime());
+    const expectedRunAt = new Date(Date.now() + nextIntervalDelay);
+    expect(instance.runAt.getTime()).toEqual(expectedRunAt.getTime());
   });
 
   test('uses getRetry (returning date) to set retryAt when defined', async () => {
