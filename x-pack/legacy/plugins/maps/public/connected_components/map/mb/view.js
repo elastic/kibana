@@ -19,7 +19,6 @@ import MapboxDraw from '@mapbox/mapbox-gl-draw/dist/mapbox-gl-draw-unminified';
 import DrawRectangle from 'mapbox-gl-draw-rectangle-mode';
 import { FeatureTooltip } from '../feature_tooltip';
 import { DRAW_TYPE } from '../../../actions/map_actions';
-import { filterBarQueryFilter } from '../../../kibana_services';
 import { createShapeFilterWithMeta, createExtentFilterWithMeta } from '../../../elasticsearch_geo_utils';
 
 const mbDrawModes = MapboxDraw.modes;
@@ -109,7 +108,7 @@ export class MBMapContainer extends React.Component {
       return;
     }
 
-    filterBarQueryFilter.addFilters([filter]);
+    this.props.addFilters([filter]);
   };
 
   _debouncedSync = _.debounce(() => {
@@ -415,8 +414,9 @@ export class MBMapContainer extends React.Component {
         loadFeatureProperties={this._loadFeatureProperties}
         findLayerById={this._findLayerById}
         closeTooltip={this._onTooltipClose}
-        showFilterButtons={this.props.isFilterable && isLocked}
+        showFilterButtons={!!this.props.addFilters && isLocked}
         isLocked={isLocked}
+        addFilters={this.props.addFilters}
       />
     ), this._tooltipContainer);
 

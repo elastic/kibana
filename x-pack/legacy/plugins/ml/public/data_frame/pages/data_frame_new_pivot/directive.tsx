@@ -7,6 +7,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 
+import chrome from 'ui/chrome';
 // @ts-ignore
 import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml', ['react']);
@@ -15,6 +16,7 @@ import { IndexPattern } from 'ui/index_patterns';
 import { I18nContext } from 'ui/i18n';
 import { IPrivate } from 'ui/private';
 import { timefilter } from 'ui/timefilter';
+import { timeHistory } from 'ui/timefilter/time_history';
 import { InjectorService } from '../../../../common/types/angular';
 
 // @ts-ignore
@@ -26,6 +28,7 @@ type CreateSearchItems = () => {
   combinedQuery: any;
 };
 
+import { NavigationMenuContext } from '../../../util/context_utils';
 import { KibanaContext } from '../../common';
 import { Page } from './page';
 
@@ -56,9 +59,11 @@ module.directive('mlNewDataFrame', ($injector: InjectorService) => {
 
       ReactDOM.render(
         <I18nContext>
-          <KibanaContext.Provider value={kibanaContext}>
-            {React.createElement(Page)}
-          </KibanaContext.Provider>
+          <NavigationMenuContext.Provider value={{ chrome, timefilter, timeHistory }}>
+            <KibanaContext.Provider value={kibanaContext}>
+              <Page />
+            </KibanaContext.Provider>
+          </NavigationMenuContext.Provider>
         </I18nContext>,
         element[0]
       );

@@ -8,7 +8,7 @@ import { GraphQLScalarType, Kind } from 'graphql';
 
 import { Events } from '../../lib/events';
 import { AppResolverOf, ChildResolverOf } from '../../lib/framework';
-import { createOptions } from '../../utils/build_query/create_options';
+import { createOptions, createOptionsPaginated } from '../../utils/build_query/create_options';
 import { QuerySourceResolver } from '../sources/resolvers';
 import { SourceResolvers } from '../types';
 import { LastEventTimeRequestOptions } from '../../lib/events/types';
@@ -49,7 +49,7 @@ export const createEventsResolvers = (
 } => ({
   Source: {
     async Events(source, args, { req }, info) {
-      const options = createOptions(source, args, info);
+      const options = createOptionsPaginated(source, args, info);
       return libs.events.getEvents(req, options);
     },
     async Timeline(source, args, { req }, info) {
