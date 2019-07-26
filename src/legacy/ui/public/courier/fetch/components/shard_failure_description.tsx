@@ -44,7 +44,7 @@ export function formatValueByKey(value: any, key: string): string | any {
   if (key === 'script' || key === 'script_stack') {
     const valueScript = Array.isArray(value) ? value.join('\n') : String(value);
     return (
-      <EuiCodeBlock language="java" paddingSize="s" isCopyable style={{ width: '500px' }}>
+      <EuiCodeBlock language="java" paddingSize="s" isCopyable>
         {valueScript}
       </EuiCodeBlock>
     );
@@ -64,9 +64,7 @@ export function ShardFailureDescription(props: ShardFailure) {
   return (
     <div>
       <EuiTitle size="xs">
-        <h2>
-          <ShardFailureDescriptionHeader {...props} />
-        </h2>
+        <ShardFailureDescriptionHeader {...props} />
       </EuiTitle>
       <EuiSpacer size="m" />
       <EuiDescriptionList
