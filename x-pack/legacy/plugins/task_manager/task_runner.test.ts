@@ -553,11 +553,12 @@ describe('TaskManagerRunner', () => {
   test(`Doesn't fail recurring tasks when maxAttempts reached`, async () => {
     const id = _.random(1, 20).toString();
     const initialAttempts = 3;
+    const intervalSeconds = 10;
     const { runner, store } = testOpts({
       instance: {
         id,
         attempts: initialAttempts,
-        interval: '10s',
+        interval: `${intervalSeconds}s`,
         startedAt: new Date(),
       },
       definitions: {
@@ -578,7 +579,9 @@ describe('TaskManagerRunner', () => {
     const instance = store.update.args[0][0];
     expect(instance.attempts).toEqual(3);
     expect(instance.status).toEqual('idle');
-    expect(instance.runAt.getTime()).toEqual(new Date(Date.now() + 10000).getTime());
+    expect(instance.runAt.getTime()).toEqual(
+      new Date(Date.now() + intervalSeconds * 1000).getTime()
+    );
   });
 
   interface TestOpts {
