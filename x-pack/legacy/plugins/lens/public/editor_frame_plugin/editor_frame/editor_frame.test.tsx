@@ -936,7 +936,8 @@ describe('editor_frame', () => {
       expect(mockDatasource.publicAPIMock.getTableSpec).toHaveBeenCalled();
       expect(mockVisualization2.getSuggestions).toHaveBeenCalled();
       expect(mockVisualization2.initialize).toHaveBeenCalledWith(
-        expect.objectContaining({ datasourceLayers: { first: mockDatasource.publicAPIMock } })
+        expect.objectContaining({ datasourceLayers: { first: mockDatasource.publicAPIMock } }),
+        undefined
       );
       expect(mockVisualization2.renderConfigPanel).toHaveBeenCalledWith(
         expect.any(Element),
