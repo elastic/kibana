@@ -46,6 +46,7 @@ describe('src/legacy/core_plugins/metrics/public/visualizations/views/timeseries
       name: 'Rome',
       stack: false,
       timeZone: 'local',
+      enableHistogramMode: true,
     };
   });
 

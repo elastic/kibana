@@ -37,6 +37,7 @@ export function AreaSeriesDecorator({
   xScaleType,
   yScaleType,
   timeZone,
+  enableHistogramMode,
 }) {
   const id = getSpecId(seriesId);
   const groupId = getGroupId(seriesGroupId);
@@ -57,8 +58,13 @@ export function AreaSeriesDecorator({
     xScaleType,
     yScaleType,
     timeZone,
+    enableHistogramMode,
     ...areaSeriesStyle,
   };
+
+  if (enableHistogramMode) {
+    seriesSettings.histogramModeAlignment = 'center';
+  }
 
   return <AreaSeries {...seriesSettings} />;
 }

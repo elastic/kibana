@@ -5,6 +5,7 @@ Object {
   "AreaChart": Object {
     "color": [Function],
     "data": [Function],
+    "enableHistogramMode": [Function],
     "hideInLegend": [Function],
     "lines": [Function],
     "name": [Function],
@@ -21,6 +22,7 @@ Object {
     "bars": [Function],
     "color": [Function],
     "data": [Function],
+    "enableHistogramMode": [Function],
     "hideInLegend": [Function],
     "name": [Function],
     "seriesGroupId": [Function],

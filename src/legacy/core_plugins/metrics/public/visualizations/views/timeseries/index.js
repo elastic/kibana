@@ -60,6 +60,7 @@ export const TimeSeries = ({
   onBrush,
   xAxisFormatter,
   annotations,
+  enableHistogramMode,
 }) => {
   const tooltipFormatter = decorateFormatter(xAxisFormatter);
   const uiSettings = chrome.getUiSettingsClient();
@@ -128,6 +129,7 @@ export const TimeSeries = ({
                 xScaleType={xScaleType}
                 yScaleType={yScaleType}
                 timeZone={timeZone}
+                enableHistogramMode={enableHistogramMode}
               />
             );
           }
@@ -149,6 +151,7 @@ export const TimeSeries = ({
                 xScaleType={xScaleType}
                 yScaleType={yScaleType}
                 timeZone={timeZone}
+                enableHistogramMode={enableHistogramMode}
               />
             );
           }
@@ -199,4 +202,5 @@ TimeSeries.propTypes = {
   onBrush: PropTypes.func,
   xAxisFormatter: PropTypes.func,
   annotations: PropTypes.array,
+  enableHistogramMode: PropTypes.bool.isRequired,
 };

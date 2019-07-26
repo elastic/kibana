@@ -36,6 +36,7 @@ export function BarSeriesDecorator({
   xScaleType,
   yScaleType,
   timeZone,
+  enableHistogramMode,
 }) {
   const id = getSpecId(seriesId);
   const groupId = getGroupId(seriesGroupId);
@@ -56,8 +57,13 @@ export function BarSeriesDecorator({
     xScaleType,
     yScaleType,
     timeZone,
+    enableHistogramMode,
     ...barSeriesStyle,
   };
+
+  if (enableHistogramMode) {
+    seriesSettings.histogramModeAlignment = 'center';
+  }
 
   return <BarSeries {...seriesSettings} />;
 }

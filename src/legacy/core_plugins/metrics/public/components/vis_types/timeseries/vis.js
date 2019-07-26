@@ -30,6 +30,7 @@ import { TimeSeries } from '../../../visualizations/views/timeseries';
 import { replaceVars } from '../../lib/replace_vars';
 import { getAxisLabelString } from '../../lib/get_axis_label_string';
 import { getInterval } from '../../lib/get_interval';
+import { areChartTypesDifferent } from '../../lib/charts';
 import { createXaxisFormatter } from '../../lib/create_xaxis_formatter';
 import { isBackgroundDark } from '../../../../common/set_is_reversed';
 
@@ -104,6 +105,7 @@ export class TimeseriesVisualization extends Component {
     });
 
     const seriesModel = model.series.map(s => cloneDeep(s)).filter(s => !s.hidden);
+    const enableHistogramMode = areChartTypesDifferent(seriesModel);
     const firstSeries = seriesModel.find(s => s.formatter && !s.separate_axis);
     const tickFormatter = createTickFormatter(
       get(firstSeries, 'formatter'),
@@ -176,6 +178,7 @@ export class TimeseriesVisualization extends Component {
       annotations,
       onBrush,
       xAxisFormatter: this.xAxisFormatter(interval),
+      enableHistogramMode,
     };
 
     return (
