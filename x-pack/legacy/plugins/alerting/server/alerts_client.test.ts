@@ -94,12 +94,12 @@ describe('create()', () => {
     taskManager.schedule.mockResolvedValueOnce({
       id: 'task-123',
       taskType: 'alerting:123',
-      sequenceNumber: 1,
-      primaryTerm: 1,
       scheduledAt: new Date(),
       attempts: 1,
       status: 'idle',
       runAt: new Date(),
+      startedAt: null,
+      retryAt: null,
       state: {},
       params: {},
     });
@@ -437,8 +437,6 @@ describe('enable()', () => {
     });
     taskManager.schedule.mockResolvedValueOnce({
       id: 'task-123',
-      sequenceNumber: 1,
-      primaryTerm: 1,
       scheduledAt: new Date(),
       attempts: 0,
       status: 'idle',
@@ -446,6 +444,8 @@ describe('enable()', () => {
       state: {},
       params: {},
       taskType: '',
+      startedAt: null,
+      retryAt: null,
     });
 
     await alertsClient.enable({ id: '1' });
@@ -737,19 +737,8 @@ describe('delete()', () => {
     savedObjectsClient.delete.mockResolvedValueOnce({
       success: true,
     });
-    taskManager.remove.mockResolvedValueOnce({
-      index: '.task_manager',
-      id: 'task-123',
-      sequenceNumber: 1,
-      primaryTerm: 1,
-      result: '',
-    });
     const result = await alertsClient.delete({ id: '1' });
-    expect(result).toMatchInlineSnapshot(`
-                              Object {
-                                "success": true,
-                              }
-                    `);
+    expect(result).toEqual({ success: true });
     expect(savedObjectsClient.delete).toHaveBeenCalledTimes(1);
     expect(savedObjectsClient.delete.mock.calls[0]).toMatchInlineSnapshot(`
                               Array [
