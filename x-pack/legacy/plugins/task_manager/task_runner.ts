@@ -311,7 +311,7 @@ export class TaskManagerRunner implements TaskRunner {
   }): Date | null {
     let result = null;
 
-    // Use custom retry logic, if any, otherwise we'll go by default
+    // Use custom retry logic, if any, otherwise we'll use the default logic
     const retry: boolean | Date = this.definition.getRetry
       ? this.definition.getRetry(attempts, error)
       : true;
