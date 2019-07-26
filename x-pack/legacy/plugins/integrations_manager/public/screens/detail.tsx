@@ -8,8 +8,8 @@ import { EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { PLUGIN } from '../../common/constants';
 import { IntegrationInfo } from '../../common/types';
 import { getIntegrationInfoByKey } from '../data';
-import { useCore } from '../hooks';
-import { linkToListView, linkToDetailView } from '../routes';
+import { useBreadcrumbs } from '../hooks';
+import { linkToListView } from '../routes';
 
 export function Detail(props: { package: string }) {
   const [info, setInfo] = useState<IntegrationInfo | null>(null);
@@ -24,17 +24,11 @@ export function Detail(props: { package: string }) {
 }
 
 function InfoPanel(info: IntegrationInfo) {
-  const { description, name, version } = info;
+  const { description, version } = info;
   // TODO: Need title or something which uses correct capitalization (e.g. PostgreSQL)
   const title = description.split(' ')[0];
 
-  // TODO: DRY out (or lift up, whatever) breadcrumbs
-  const { chrome } = useCore();
-
-  chrome.setBreadcrumbs([
-    { text: PLUGIN.TITLE, href: linkToListView() },
-    { text: title, href: linkToDetailView({ name, version }) },
-  ]);
+  useBreadcrumbs([{ text: PLUGIN.TITLE, href: linkToListView() }, { text: title }]);
 
   return (
     <EuiPanel>
