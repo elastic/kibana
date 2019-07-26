@@ -7,7 +7,6 @@
 import { SavedObjectAttributes, SavedObjectsClientContract } from 'src/core/server';
 import { AlertInstance } from './lib';
 import { AlertTypeRegistry } from './alert_type_registry';
-import { TaskDefinition } from '../../task_manager';
 
 export type State = Record<string, any>;
 export type Context = Record<string, any>;
@@ -40,7 +39,6 @@ export interface AlertExecutorOptions {
 export interface AlertType {
   id: string;
   name: string;
-  getRetryDelay?: TaskDefinition['getRetryDelay'];
   validate?: {
     params?: { validate: (object: any) => any };
   };

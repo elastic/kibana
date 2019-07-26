@@ -62,7 +62,8 @@ export class ActionTypeRegistry {
         title: actionType.name,
         type: `actions:${actionType.id}`,
         maxAttempts: actionType.maxAttempts || 1,
-        getRetryDelay: actionType.getRetryDelay,
+        // TODO: Use generic
+        // getRetry: actionType.getRetry,
         createTaskRunner: this.taskRunCreatorFunction,
       },
     });
