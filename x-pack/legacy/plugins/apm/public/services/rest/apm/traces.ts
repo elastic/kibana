@@ -4,11 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { TraceListAPIResponse } from '../../../../server/lib/traces/get_top_traces';
 import { TraceAPIResponse } from '../../../../server/lib/traces/get_trace';
 import { callApi } from '../callApi';
 import { getUiFiltersES } from '../../ui_filters/get_ui_filters_es';
 import { UIFilters } from '../../../../typings/ui-filters';
+import { TransactionGroupListAPIResponse } from '../../../../server/lib/transaction_groups';
 
 export async function loadTrace({
   traceId,
@@ -37,7 +37,7 @@ export async function loadTraceList({
   end: string;
   uiFilters: UIFilters;
 }) {
-  return callApi<TraceListAPIResponse>({
+  return callApi<TransactionGroupListAPIResponse>({
     pathname: '/api/apm/traces',
     query: {
       start,
