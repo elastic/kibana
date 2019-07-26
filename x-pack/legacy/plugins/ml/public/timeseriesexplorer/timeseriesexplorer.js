@@ -218,6 +218,7 @@ export class TimeSeriesExplorer extends React.Component {
     }
   }
 
+  contextChartSelectedInitCallDone = false;
   contextChartSelected = (selection) => {
     const appState = this.appState;
     const {
@@ -232,7 +233,7 @@ export class TimeSeriesExplorer extends React.Component {
       zoomTo,
     } = this.state;
 
-    // Save state of zoom (adds to URL) if it is different to the default.
+
     if ((contextChartData === undefined || contextChartData.length === 0) &&
       (contextForecastData === undefined || contextForecastData.length === 0)) {
       return;
@@ -256,13 +257,14 @@ export class TimeSeriesExplorer extends React.Component {
     }
     appState.save();
 
-    this.focusChartDataLoading = true;
-
     if (
+      this.contextChartSelectedInitCallDone === false ||
       focusChartData === undefined ||
       (zoomFrom.getTime() !== selection.from.getTime()) ||
       (zoomTo.getTime() !== selection.to.getTime())
     ) {
+      this.contextChartSelectedInitCallDone = true;
+
       // Calculate the aggregation interval for the focus chart.
       const bounds = { min: moment(selection.from), max: moment(selection.to) };
       const focusAggregationInterval = calculateAggregationInterval(
@@ -774,6 +776,7 @@ export class TimeSeriesExplorer extends React.Component {
     });
     appState.save();
 
+    this.contextChartSelectedInitCallDone = false;
     this.refresh();
   }
 
@@ -896,6 +899,7 @@ export class TimeSeriesExplorer extends React.Component {
         delete appState.mlTimeSeriesExplorer.forecastId;
         appState.save();
 
+        this.contextChartSelectedInitCallDone = false;
         this.setState({ showForecastCheckbox: false });
         this.loadForJobId(selection[0], jobs);
       }
