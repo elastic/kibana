@@ -39,11 +39,11 @@ export default function createDeleteTests({ getService }: KibanaFunctionalTestDe
       });
     }
 
-    it('should return 200 when deleting an alert and removing scheduled task', async () => {
+    it('should return 204 when deleting an alert and removing scheduled task', async () => {
       await supertest
         .delete(`/api/alert/${alertId}`)
         .set('kbn-xsrf', 'foo')
-        .expect(200);
+        .expect(204, '');
       let hasThrownError = false;
       try {
         await getScheduledTask(scheduledTaskId);
