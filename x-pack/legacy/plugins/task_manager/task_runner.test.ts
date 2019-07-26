@@ -6,7 +6,7 @@
 
 import _ from 'lodash';
 import sinon from 'sinon';
-import { minutesFromNow, secondsFromNow } from './lib/intervals';
+import { minutesFromNow } from './lib/intervals';
 import { ConcreteTaskInstance } from './task';
 import { TaskManagerRunner } from './task_runner';
 
