@@ -17,25 +17,40 @@ import { parametersDefinition, ParameterName, DataTypeDefinition } from '../conf
 interface Props {
   form: Form;
   typeDefinition: DataTypeDefinition | null;
+  isEditMode?: boolean;
   fieldPathPrefix?: string;
 }
 
 const parametersToRows = (params: ParameterName[] | ParameterName[][]): ParameterName[][] =>
   Array.isArray(params[0]) ? (params as ParameterName[][]) : ([params] as ParameterName[][]);
 
-export const PropertyBasicParameters = ({ form, typeDefinition, fieldPathPrefix = '' }: Props) => {
+export const PropertyBasicParameters = ({
+  form,
+  typeDefinition,
+  isEditMode = false,
+  fieldPathPrefix = '',
+}: Props) => {
   if (!typeDefinition || !typeDefinition.basicParameters) {
     return null;
   }
 
   const rows = parametersToRows(typeDefinition.basicParameters);
 
+  // If we have 2 or less items to display, we limit the width
+  // of the container to limit the size of the <input />.
   const getMaxWidth = (rowIndex: number, totalItems: number) => {
     if (rowIndex === 0 || totalItems >= 3) {
       return 'initial';
     }
     return totalItems <= 1 ? '300px' : '600px';
   };
+
+  const getDefaultValue = (parameter: ParameterName): unknown | undefined =>
+    isEditMode
+      ? undefined
+      : parametersDefinition[parameter] &&
+        parametersDefinition[parameter].fieldConfig &&
+        parametersDefinition[parameter].fieldConfig!.defaultValue;
 
   return (
     <Fragment>
@@ -47,6 +62,7 @@ export const PropertyBasicParameters = ({ form, typeDefinition, fieldPathPrefix 
                 <UseField
                   form={form}
                   path={fieldPathPrefix + parameter}
+                  defaultValue={getDefaultValue(parameter)}
                   config={
                     parametersDefinition[parameter] && parametersDefinition[parameter].fieldConfig
                   }
