@@ -17,39 +17,24 @@
  * under the License.
  */
 
-import { i18n } from '@kbn/i18n';
+import { PluginInitializerContext } from 'kibana/public';
+import { npSetup, npStart } from 'ui/new_platform';
 
-export const createRegionMapFn = () => ({
-  name: 'regionmap',
-  type: 'render',
-  context: {
-    types: [
-      'kibana_datatable'
-    ],
-  },
-  help: i18n.translate('regionMap.function.help', {
-    defaultMessage: 'Regionmap visualization'
-  }),
-  args: {
-    visConfig: {
-      types: ['string', 'null'],
-      default: '"{}"',
-    },
-  },
-  fn(context, args) {
-    const visConfig = JSON.parse(args.visConfig);
+import { visualizations } from '../../visualizations/public';
+import { RegionMapPluginSetupDependencies } from './plugin';
+import { LegacyDependenciesPlugin } from './shim';
+import { plugin } from '.';
 
-    return {
-      type: 'render',
-      as: 'visualization',
-      value: {
-        visData: context,
-        visType: 'region_map',
-        visConfig,
-        params: {
-          listenOnChange: true,
-        }
-      },
-    };
-  },
-});
+const plugins: Readonly<RegionMapPluginSetupDependencies> = {
+  visualizations,
+  data: npSetup.plugins.data,
+
+  // Temporary solution
+  // It will be removed when all dependent services are migrated to the new platform.
+  __LEGACY: new LegacyDependenciesPlugin(),
+};
+
+const pluginInstance = plugin({} as PluginInitializerContext);
+
+export const setup = pluginInstance.setup(npSetup.core, plugins);
+export const start = pluginInstance.start(npStart.core);
