@@ -17,39 +17,4 @@
  * under the License.
  */
 
-import { i18n } from '@kbn/i18n';
-
-export const createRegionMapFn = () => ({
-  name: 'regionmap',
-  type: 'render',
-  context: {
-    types: [
-      'kibana_datatable'
-    ],
-  },
-  help: i18n.translate('regionMap.function.help', {
-    defaultMessage: 'Regionmap visualization'
-  }),
-  args: {
-    visConfig: {
-      types: ['string', 'null'],
-      default: '"{}"',
-    },
-  },
-  fn(context, args) {
-    const visConfig = JSON.parse(args.visConfig);
-
-    return {
-      type: 'render',
-      as: 'visualization',
-      value: {
-        visData: context,
-        visType: 'region_map',
-        visConfig,
-        params: {
-          listenOnChange: true,
-        }
-      },
-    };
-  },
-});
+export * from './legacy_dependencies_plugin';

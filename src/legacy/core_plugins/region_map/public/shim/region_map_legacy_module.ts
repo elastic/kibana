@@ -17,16 +17,21 @@
  * under the License.
  */
 
-import { resolve } from 'path';
+import { once } from 'lodash';
+// @ts-ignore
+import { uiModules } from 'ui/modules';
 
-export default function (kibana) {
+import 'ui/vis/map/service_settings';
+import 'plugins/kbn_vislib_vis_types/controls/vislib_basic_options';
 
-  return new kibana.Plugin({
-    uiExports: {
-      visTypes: ['plugins/region_map/region_map_vis'],
-      interpreter: ['plugins/region_map/region_map_fn'],
-      styleSheetPaths: resolve(__dirname, 'public/index.scss'),
-    }
-  });
+// @ts-ignore
+import { RegionMapVisParams } from '../region_map_vis_params';
 
-}
+/** @internal */
+export const initTileMapLegacyModule = once((): void => {
+  uiModules
+    // TODO: Region Map Plugin uses wmsOptions directive from the kibana/tile_map module.
+    // in future this reference should be removed
+    .get('kibana/region_map', ['kibana', 'kibana/tile_map'])
+    .directive('regionMapVisParams', RegionMapVisParams);
+});
