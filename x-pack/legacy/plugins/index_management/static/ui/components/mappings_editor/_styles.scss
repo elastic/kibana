@@ -1,4 +1,8 @@
 .mappings-editor {
+  .euiAccordion__childWrapper {
+    transition: none;
+  }
+
   .tree,
   .tree ul {
     margin:0 0 0 1em; /* indentation */

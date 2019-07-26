@@ -11,6 +11,7 @@ import uuid from 'uuid';
 import {
   UseArray,
   Form,
+  ArrayItem,
 } from '../../../../../../../../../src/plugins/elasticsearch_ui_shared/static/forms/hook_form_lib';
 
 import { PropertyEditor } from './property_editor';
@@ -28,21 +29,29 @@ export const PropertiesManager = ({
   path = 'properties',
   fieldName = '',
 }: Props) => {
-  const renderPropertiesTree = ({ rows, addRow, removeRow }) => (
+  const renderPropertiesTree = ({
+    items,
+    addItem,
+    removeItem,
+  }: {
+    items: ArrayItem[];
+    addItem: () => void;
+    removeItem: (id: number) => void;
+  }) => (
     <ul className="tree" style={depthLevel === '0' ? { marginLeft: 0 } : {}}>
-      {rows.map(({ id, rowPath, isNew }) => {
+      {items.map(({ id, path: itemPath, isNew }) => {
         return (
           <li key={id}>
             <PropertyEditor
-              fieldPathPrefix={`${rowPath}.`}
+              fieldPathPrefix={`${itemPath}.`}
               form={form}
-              onRemove={() => removeRow(id)}
+              onRemove={() => removeItem(id)}
               isEditMode={!isNew}
             />
           </li>
         );
       })}
-      <EuiButton color="primary" onClick={addRow}>
+      <EuiButton color="primary" onClick={addItem}>
         Add property
       </EuiButton>
     </ul>
@@ -51,9 +60,9 @@ export const PropertiesManager = ({
   return (
     <Fragment>
       <UseArray path={path} form={form}>
-        {({ rows, addRow, removeRow }) => {
+        {({ items, addItem, removeItem }) => {
           if (depthLevel === '0') {
-            return renderPropertiesTree({ rows, addRow, removeRow });
+            return renderPropertiesTree({ items, addItem, removeItem });
           }
           return (
             <EuiAccordion
@@ -62,7 +71,7 @@ export const PropertiesManager = ({
               paddingSize="l"
               initialIsOpen={true}
             >
-              {renderPropertiesTree({ rows, addRow, removeRow })}
+              {renderPropertiesTree({ items, addItem, removeItem })}
             </EuiAccordion>
           );
         }}

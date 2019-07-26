@@ -57,19 +57,21 @@ export const PropertyBasicParameters = ({
       {rows.map((parameters, i) => (
         <div key={i}>
           <EuiFlexGroup style={{ maxWidth: getMaxWidth(i, parameters.length) }}>
-            {parameters.map(parameter => (
-              <EuiFlexItem key={parameter} grow={i !== 0}>
-                <UseField
-                  form={form}
-                  path={fieldPathPrefix + parameter}
-                  defaultValue={getDefaultValue(parameter)}
-                  config={
-                    parametersDefinition[parameter] && parametersDefinition[parameter].fieldConfig
-                  }
-                  component={Field}
-                />
-              </EuiFlexItem>
-            ))}
+            {parameters.map(parameter => {
+              return (
+                <EuiFlexItem key={parameter} grow={i !== 0}>
+                  <UseField
+                    form={form}
+                    path={fieldPathPrefix + parameter}
+                    defaultValue={getDefaultValue(parameter)}
+                    config={
+                      parametersDefinition[parameter] && parametersDefinition[parameter].fieldConfig
+                    }
+                    component={Field}
+                  />
+                </EuiFlexItem>
+              );
+            })}
           </EuiFlexGroup>
         </div>
       ))}
