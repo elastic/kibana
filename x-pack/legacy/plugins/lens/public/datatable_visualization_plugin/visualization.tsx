@@ -155,7 +155,7 @@ export const datatableVisualization: Visualization<
       <I18nProvider>
         <EuiForm className="lnsConfigPanel">
           {props.state.layers.map(layer => (
-            <DataTableLayer layer={layer} {...props} />
+            <DataTableLayer key={layer.layerId} layer={layer} {...props} />
           ))}
         </EuiForm>
       </I18nProvider>,

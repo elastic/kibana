@@ -35,11 +35,18 @@ function getSuggestedVisualizationState(frame: FramePublicAPI, visualization: Vi
     ],
   });
 
-  if (!suggestions.length) {
-    return visualization.initialize(frame);
-  }
+  const suggestion = suggestions.length ? suggestions[0] : undefined;
 
-  return visualization.initialize(frame, suggestions[0].state);
+  // Remove any layers that are not used by the new visualization. If we don't do this,
+  // we get orphaned objects, and weird edge cases such as prompting the user that
+  // layers are going to be dropped, when the user is unaware of any extraneous layers.
+  Object.keys(frame.datasourceLayers).forEach(id => {
+    if (!suggestion || id !== layerId) {
+      frame.removeLayer(id);
+    }
+  });
+
+  return visualization.initialize(frame, suggestion && suggestion.state);
 }
 
 export const ConfigPanelWrapper = memo(function ConfigPanelWrapper(props: ConfigPanelWrapperProps) {
@@ -60,7 +67,11 @@ export const ConfigPanelWrapper = memo(function ConfigPanelWrapper(props: Config
         visualizations={Object.values(props.visualizationMap)}
         visualizationId={props.activeVisualizationId}
         visualizationState={props.visualizationState}
-        onChange={(visualizationId, subVisualizationId) => {
+        requireConfirmation={visualizationId =>
+          props.activeVisualizationId !== visualizationId &&
+          Object.keys(props.framePublicAPI.datasourceLayers).length > 1
+        }
+        onChange={({ visualizationId, subVisualizationId }) => {
           const visualization = props.visualizationMap[visualizationId];
           const switchVisualizationType = visualization.switchVisualizationType;
 
