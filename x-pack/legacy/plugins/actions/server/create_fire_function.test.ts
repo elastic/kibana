@@ -37,34 +37,33 @@ describe('fire()', () => {
     });
     expect(mockTaskManager.schedule).toHaveBeenCalledTimes(1);
     expect(mockTaskManager.schedule.mock.calls[0]).toMatchInlineSnapshot(`
-Array [
-  Object {
-    "params": Object {
-      "actionTypeParams": Object {
-        "baz": false,
-      },
-      "basePath": "/s/default",
-      "id": "123",
-      "namespace": "abc",
-    },
-    "scope": Array [
-      "actions",
-    ],
-    "state": Object {},
-    "taskType": "actions:mock-action",
-  },
-]
-`);
+      Array [
+        Object {
+          "params": Object {
+            "actionTypeParams": Object {
+              "baz": false,
+            },
+            "id": "123",
+            "spaceId": "default",
+          },
+          "scope": Array [
+            "actions",
+          ],
+          "state": Object {},
+          "taskType": "actions:mock-action",
+        },
+      ]
+    `);
     expect(savedObjectsClient.get).toHaveBeenCalledTimes(1);
     expect(savedObjectsClient.get.mock.calls[0]).toMatchInlineSnapshot(`
-Array [
-  "action",
-  "123",
-  Object {
-    "namespace": "abc",
-  },
-]
-`);
+      Array [
+        "action",
+        "123",
+        Object {
+          "namespace": "namespace1",
+        },
+      ]
+    `);
     expect(spaceIdToNamespace).toHaveBeenCalledWith('default');
   });
 });

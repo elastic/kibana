@@ -86,23 +86,23 @@ test('successfully executes the task', async () => {
   const runner = createTaskRunner({ taskInstance: mockedTaskInstance });
   const runnerResult = await runner.run();
   expect(runnerResult).toMatchInlineSnapshot(`
-    Object {
-      "runAt": 2019-06-03T18:55:30.982Z,
-      "state": Object {
-        "alertInstances": Object {},
-        "alertTypeState": undefined,
-        "previousScheduledRunAt": 2019-06-03T18:55:20.982Z,
-        "scheduledRunAt": 2019-06-03T18:55:30.982Z,
-      },
-    }
-  `);
+        Object {
+          "runAt": 2019-06-03T18:55:30.982Z,
+          "state": Object {
+            "alertInstances": Object {},
+            "alertTypeState": undefined,
+            "previousScheduledRunAt": 2019-06-03T18:55:20.982Z,
+            "scheduledRunAt": 2019-06-03T18:55:30.982Z,
+          },
+        }
+    `);
   expect(getCreateTaskRunnerFunctionParams.alertType.executor).toHaveBeenCalledTimes(1);
   const call = getCreateTaskRunnerFunctionParams.alertType.executor.mock.calls[0][0];
   expect(call.params).toMatchInlineSnapshot(`
-    Object {
-      "bar": true,
-    }
-  `);
+        Object {
+          "bar": true,
+        }
+    `);
   expect(call.scheduledRunAt).toMatchInlineSnapshot(`2019-06-03T18:55:20.982Z`);
   expect(call.state).toMatchInlineSnapshot(`Object {}`);
   expect(call.services.alertInstanceFactory).toBeTruthy();
@@ -124,11 +124,11 @@ test('fireAction is called per alert instance that fired', async () => {
   expect(getCreateTaskRunnerFunctionParams.fireAction.mock.calls[0]).toMatchInlineSnapshot(`
     Array [
       Object {
-        "basePath": undefined,
         "id": "1",
         "params": Object {
           "foo": true,
         },
+        "spaceId": undefined,
       },
     ]
   `);
@@ -156,17 +156,17 @@ test('persists alertInstances passed in from state, only if they fire', async ()
   });
   const runnerResult = await runner.run();
   expect(runnerResult.state.alertInstances).toMatchInlineSnapshot(`
-    Object {
-      "1": Object {
-        "meta": Object {
-          "lastFired": 1559588125982,
-        },
-        "state": Object {
-          "bar": false,
-        },
-      },
-    }
-  `);
+        Object {
+          "1": Object {
+            "meta": Object {
+              "lastFired": 1559588125982,
+            },
+            "state": Object {
+              "bar": false,
+            },
+          },
+        }
+    `);
 });
 
 test('validates params before executing the alert type', async () => {

@@ -49,18 +49,18 @@ test('calls fireAction per selected action', async () => {
   await fireHandler('default', {}, {});
   expect(createFireHandlerParams.fireAction).toHaveBeenCalledTimes(1);
   expect(createFireHandlerParams.fireAction.mock.calls[0]).toMatchInlineSnapshot(`
-Array [
-  Object {
-    "basePath": "/s/default",
-    "id": "1",
-    "params": Object {
-      "contextVal": "My  goes here",
-      "foo": true,
-      "stateVal": "My  goes here",
-    },
-  },
-]
-`);
+    Array [
+      Object {
+        "id": "1",
+        "params": Object {
+          "contextVal": "My  goes here",
+          "foo": true,
+          "stateVal": "My  goes here",
+        },
+        "spaceId": "default",
+      },
+    ]
+  `);
 });
 
 test('limits fireAction per action group', async () => {
@@ -74,18 +74,18 @@ test('context attribute gets parameterized', async () => {
   await fireHandler('default', { value: 'context-val' }, {});
   expect(createFireHandlerParams.fireAction).toHaveBeenCalledTimes(1);
   expect(createFireHandlerParams.fireAction.mock.calls[0]).toMatchInlineSnapshot(`
-Array [
-  Object {
-    "basePath": "/s/default",
-    "id": "1",
-    "params": Object {
-      "contextVal": "My context-val goes here",
-      "foo": true,
-      "stateVal": "My  goes here",
-    },
-  },
-]
-`);
+    Array [
+      Object {
+        "id": "1",
+        "params": Object {
+          "contextVal": "My context-val goes here",
+          "foo": true,
+          "stateVal": "My  goes here",
+        },
+        "spaceId": "default",
+      },
+    ]
+  `);
 });
 
 test('state attribute gets parameterized', async () => {
@@ -93,18 +93,18 @@ test('state attribute gets parameterized', async () => {
   await fireHandler('default', {}, { value: 'state-val' });
   expect(createFireHandlerParams.fireAction).toHaveBeenCalledTimes(1);
   expect(createFireHandlerParams.fireAction.mock.calls[0]).toMatchInlineSnapshot(`
-Array [
-  Object {
-    "basePath": "/s/default",
-    "id": "1",
-    "params": Object {
-      "contextVal": "My  goes here",
-      "foo": true,
-      "stateVal": "My state-val goes here",
-    },
-  },
-]
-`);
+    Array [
+      Object {
+        "id": "1",
+        "params": Object {
+          "contextVal": "My  goes here",
+          "foo": true,
+          "stateVal": "My state-val goes here",
+        },
+        "spaceId": "default",
+      },
+    ]
+  `);
 });
 
 test('throws error if reference not found', async () => {
