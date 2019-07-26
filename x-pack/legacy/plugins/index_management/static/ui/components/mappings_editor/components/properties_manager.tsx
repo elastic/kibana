@@ -38,23 +38,25 @@ export const PropertiesManager = ({
     addItem: () => void;
     removeItem: (id: number) => void;
   }) => (
-    <ul className="tree" style={depthLevel === '0' ? { marginLeft: 0 } : {}}>
-      {items.map(({ id, path: itemPath, isNew }) => {
-        return (
-          <li key={id}>
-            <PropertyEditor
-              fieldPathPrefix={`${itemPath}.`}
-              form={form}
-              onRemove={() => removeItem(id)}
-              isEditMode={!isNew}
-            />
-          </li>
-        );
-      })}
+    <Fragment>
+      <ul className="tree" style={depthLevel === '0' ? { marginLeft: 0 } : {}}>
+        {items.map(({ id, path: itemPath, isNew }) => {
+          return (
+            <li key={id}>
+              <PropertyEditor
+                fieldPathPrefix={`${itemPath}.`}
+                form={form}
+                onRemove={() => removeItem(id)}
+                isEditMode={!isNew}
+              />
+            </li>
+          );
+        })}
+      </ul>
       <EuiButton color="primary" onClick={addItem}>
         Add property
       </EuiButton>
-    </ul>
+    </Fragment>
   );
 
   return (
@@ -68,7 +70,7 @@ export const PropertiesManager = ({
             <EuiAccordion
               id={uuid()}
               buttonContent={`${fieldName} properties`}
-              paddingSize="l"
+              paddingSize="s"
               initialIsOpen={true}
             >
               {renderPropertiesTree({ items, addItem, removeItem })}

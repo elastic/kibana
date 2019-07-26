@@ -73,7 +73,7 @@ export const PropertyEditor = ({
         const typeDefinition = dataTypesDefinition[selectedDatatype];
 
         return (
-          <Fragment>
+          <div className="property-editor ">
             <EuiFlexGroup justifyContent="spaceBetween">
               {/* Field name */}
               {isAnonymous !== true && (
@@ -162,7 +162,7 @@ export const PropertyEditor = ({
             {renderNestedProperties(selectedDatatype, fieldName)}
 
             <EuiSpacer size="l" />
-          </Fragment>
+          </div>
         );
       }}
     </FormDataProvider>
