@@ -11,7 +11,6 @@
  */
 
 import Joi from 'joi';
-import Boom from 'boom';
 import { intervalFromDate, intervalFromNow } from './lib/intervals';
 import { Logger } from './lib/logger';
 import { BeforeRunFunction } from './lib/middleware';
