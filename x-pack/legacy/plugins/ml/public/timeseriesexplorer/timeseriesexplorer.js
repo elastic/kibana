@@ -483,6 +483,8 @@ export class TimeSeriesExplorer extends React.Component {
       return;
     }
 
+    this.contextChartSelectedInitCallDone = false;
+
     this.setState({
       chartDetails: undefined,
       contextChartData: undefined,
@@ -775,7 +777,6 @@ export class TimeSeriesExplorer extends React.Component {
     });
     appState.save();
 
-    this.contextChartSelectedInitCallDone = false;
     this.refresh();
   }
 
