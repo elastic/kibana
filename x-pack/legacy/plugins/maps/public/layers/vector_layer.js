@@ -196,7 +196,12 @@ export class VectorLayer extends AbstractLayer {
     if (!featureCollection) {
       return null;
     }
-    const bbox = turf.bbox(featureCollection);
+
+    const visibleFeatures = featureCollection.features.filter(feature => feature.properties[FEATURE_VISIBLE_PROPERTY_NAME]);
+    const bbox = turf.bbox({
+      type: 'FeatureCollection',
+      features: visibleFeatures
+    });
     return {
       min_lon: bbox[0],
       min_lat: bbox[1],
@@ -206,11 +211,14 @@ export class VectorLayer extends AbstractLayer {
   }
 
   async getBounds(dataFilters) {
-    if (this._source.isBoundsAware()) {
-      const searchFilters = this._getSearchFilters(dataFilters);
-      return await this._source.getBoundsForFilters(searchFilters);
+
+    const isStaticLayer = !this._source.isBoundsAware() || !this._source.isFilterByMapBounds();
+    if (isStaticLayer) {
+      return this._getBoundsBasedOnData();
     }
-    return this._getBoundsBasedOnData();
+
+    const searchFilters = this._getSearchFilters(dataFilters);
+    return await this._source.getBoundsForFilters(searchFilters);
   }
 
   async getLeftJoinFields() {
@@ -676,19 +684,19 @@ export class VectorLayer extends AbstractLayer {
   }
 
   _getMbPointLayerId() {
-    return this.getId() + '_circle';
+    return this.makeMbLayerId('circle');
   }
 
   _getMbSymbolLayerId() {
-    return this.getId() + '_symbol';
+    return this.makeMbLayerId('symbol');
   }
 
   _getMbLineLayerId() {
-    return this.getId() + '_line';
+    return this.makeMbLayerId('line');
   }
 
   _getMbPolygonLayerId() {
-    return this.getId() + '_fill';
+    return this.makeMbLayerId('fill');
   }
 
   getMbLayerIds() {
