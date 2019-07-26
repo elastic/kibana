@@ -25,6 +25,7 @@ import { buildColumnForOperationType, getOperationTypesForField } from './operat
 import { IndexPatternDatasourcePluginPlugins } from './plugin';
 import { IndexPatternDataPanel } from './datapanel';
 import { generateId } from '../id_generator';
+import { hasField } from './utils';
 import { Datasource, DataType } from '..';
 
 export type OperationType = IndexPatternColumn['operationType'];
@@ -381,6 +382,9 @@ export function getIndexPatternDatasource({
         layerId = layers.find(id => state.layers[id].indexPatternId === indexPatternId);
       }
 
+      const operations = getOperationTypesForField(field);
+      const hasBucket = operations.find(op => op === 'date_histogram' || op === 'terms');
+
       if (!layerId) {
         // The field we're suggesting on might not match any existing layer. This will always add
         // a new layer if possible, but that might not be desirable if the layers are too complicated
@@ -394,14 +398,134 @@ export function getIndexPatternDatasource({
       } else {
         layer = state.layers[layerId];
         if (layer.columnOrder.length) {
-          // We aren't suggesting ways of using the field to replace the existing user configuration
-          // This is a good place for future extension
+          const fieldInUse = Object.values(layer.columns).some(
+            column => hasField(column) && column.sourceField === field.name
+          );
+          if (hasBucket && !fieldInUse) {
+            const newColumn = buildColumnForOperationType({
+              index: 1,
+              op: hasBucket,
+              columns: layer.columns,
+              layerId,
+              indexPatternId: state.currentIndexPatternId,
+              suggestedPriority: undefined,
+              field,
+            });
+            const newColumnId = generateId();
+            const updatedColumns = {
+              ...state.layers[layerId].columns,
+              [newColumnId]: newColumn,
+            };
+
+            let updatedColumnOrder: string[] = [];
+            if (hasBucket === 'terms') {
+              // prepend terms field
+              updatedColumnOrder = [newColumnId, ...layer.columnOrder];
+            } else {
+              const oldDateHistogramColumn = layer.columnOrder.find(
+                columnId => layer.columns[columnId].operationType === 'date_histogram'
+              );
+              if (oldDateHistogramColumn) {
+                // replace existing date histogram
+                delete updatedColumns[oldDateHistogramColumn];
+                updatedColumnOrder = layer.columnOrder.map(columnId =>
+                  columnId !== oldDateHistogramColumn ? columnId : newColumnId
+                );
+              } else {
+                // put date histogram as last bucket column
+                const bucketedColumns = layer.columnOrder.filter(
+                  columnId => layer.columns[columnId].isBucketed
+                );
+                const metricColumns = layer.columnOrder.filter(
+                  columnId => !layer.columns[columnId].isBucketed
+                );
+                updatedColumnOrder = [...bucketedColumns, newColumnId, ...metricColumns];
+              }
+            }
+
+            return [
+              {
+                state: {
+                  ...state,
+                  layers: {
+                    ...state.layers,
+                    [layerId]: {
+                      indexPatternId: state.currentIndexPatternId,
+                      columns: updatedColumns,
+                      columnOrder: updatedColumnOrder,
+                    },
+                  },
+                },
+
+                table: {
+                  columns: updatedColumnOrder.map(columnId => ({
+                    columnId,
+                    operation: columnToOperation(updatedColumns[columnId]),
+                  })),
+                  isMultiRow: true,
+                  datasourceSuggestionId: 0,
+                  layerId,
+                },
+              },
+            ];
+          } else if (!hasBucket && operations.length > 0) {
+            const operationsAlreadyAppliedToThisField = Object.values(layer.columns)
+              .filter(column => hasField(column) && column.sourceField === field.name)
+              .map(column => column.operationType);
+            const operationCandidate = operations.find(
+              operation => !operationsAlreadyAppliedToThisField.includes(operation)
+            );
+
+            if (!operationCandidate) {
+              return [];
+            }
+
+            // add metric aggregation to the end of the table
+            const newColumn = buildColumnForOperationType({
+              index: 1,
+              op: operationCandidate,
+              columns: layer.columns,
+              layerId,
+              indexPatternId: state.currentIndexPatternId,
+              suggestedPriority: undefined,
+              field,
+            });
+            const newColumnId = generateId();
+            const updatedColumns = {
+              ...state.layers[layerId].columns,
+              [newColumnId]: newColumn,
+            };
+            const updatedColumnOrder = [...state.layers[layerId].columnOrder, newColumnId];
+
+            return [
+              {
+                state: {
+                  ...state,
+                  layers: {
+                    ...state.layers,
+                    [layerId]: {
+                      indexPatternId: state.currentIndexPatternId,
+                      columns: updatedColumns,
+                      columnOrder: updatedColumnOrder,
+                    },
+                  },
+                },
+
+                table: {
+                  columns: updatedColumnOrder.map(columnId => ({
+                    columnId,
+                    operation: columnToOperation(updatedColumns[columnId]),
+                  })),
+                  isMultiRow: true,
+                  datasourceSuggestionId: 0,
+                  layerId,
+                },
+              },
+            ];
+          }
           return [];
         }
       }
-
-      const operations = getOperationTypesForField(field);
-      const hasBucket = operations.find(op => op === 'date_histogram' || op === 'terms');
 
       if (hasBucket) {
         const countColumn = buildColumnForOperationType({
