@@ -47,7 +47,7 @@ describe('tooltipFormatter', function () {
       series: [
         {
           rawId: '1',
-          label: 'middle',
+          label: 'series-middle-label',
           zLabel: 'top',
           yAxisFormatter: _.identity,
           zAxisFormatter: _.identity
