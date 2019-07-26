@@ -1168,8 +1168,8 @@ export class TimeSeriesExplorer extends React.Component {
                 </span>
                 <AnnotationsTable
                   annotations={focusAnnotationData}
-                  drillDown={false}
-                  numberBadge={true}
+                  isSingleMetricViewerLinkVisible={false}
+                  isNumberBadgeVisible={true}
                 />
                 <EuiSpacer size="l" />
               </div>
