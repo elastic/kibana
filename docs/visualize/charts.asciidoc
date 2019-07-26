@@ -1,0 +1,129 @@
+[[visualize-chart]]
+== Area, bar, and line charts
+{kib} includes area, bar, and line charts for you to visualize your data. With charts, you can plot your data on an x- and y-axis. 
+
+[float]
+[[chart-choose-data]]
+=== Choose the data you want to display
+
+To choose the data that you want to display in the chart, specify the aggregations. 
+
+. Choose the aggregation for the y-axis.
+
+.. In the *Metrics* area, expand the *Y-axis* caret.
+
+.. From the *Aggregation* dropdown, select the aggregation for the y-axis.
+
+. Choose a bucket aggregation for the x-axis.
+
+.. In the *Buckets* area, click *Add*, then select *X-axis*.
+
+.. Select the Bucket aggregation for the x-axis.
+
+. To further break down the data, specify sub aggregations.
+
+.. In the *Buckets* area, click *Add*, then select *Split series* or *Split chart*.
+
+.. Specify the sub aggregation settings.
+
+.. To change the order, drag and drop the aggregations.
+
+. Click *Apply changes* image:images/apply-changes-button.png[].
+
+[float]
+[[customize-format-chart]]
+=== Customize and format the chart
+
+To make the chart look the way you want, customize and format it using the options.
+
+. Select *Metrics & Axes*.
+
+.. Expand the *System* options, then choose how you want your data to appear in the visualization.
+
+.. Expand the y-axis and x-axis options, then choose how you want to display the y- and x-axis.
+
+.. To change the colors of the y- and x-axis, click the data set in the legend, then choose a color from the color picker. 
+
+. Select *Panel Settings*.
+
+. Specify the settings, then click *Apply changes* image:images/apply-changes-button.png[].
+
+[float]
+[[chart-example]]
+== Example: Create an area chart with Metricbeat data
+
+To view the real-time CPU system data collected by Metricbeat, create an area chart.
+
+[float]
+[[chart-before-you-begin]]
+=== Before you begin
+
+In this tutorial, you'll use the data from https://www.elastic.co/guide/en/beats/metricbeat/current/index.html[Metricbeat]. To ingest the data locally, link:https://www.elastic.co/downloads/beats/metricbeat[download Metricbeat].
+
+[float]
+[[chart-metricbeat-data]]
+=== Create the visualization
+
+To create the area chart visualization, use the visualization builder.
+
+. In the side navigation, click *Visualize*.
+
+. Click *Create new visualization*.
+
+. On the *New Visualization* window, click *Area*.
+
+. On the *New Area/Choose a source* window, select the metricbeat data.
+
+[float]
+[[chart-metricbeat-data-yaxis]]
+=== Choose the aggregation for the y-axis
+
+Specify the options for the y-axis. 
+
+. In the *Metrics* area, expand the *Y-axis* options.
+
+. From the *Aggregation* dropdown, select *Average*.
+
+. From the *Field* dropdown, select *system.process.cpu.total.pct*.
+
+. In the *Custom label* field, enter a name for the y-axis. For example, `Average`.
+
+[float]
+[[chart-metricbeat-data-xaxis]]
+=== Choose the bucket aggregation for the x-axis
+
+Specify the options for the x-axis.
+
+. In the *Buckets* area, click *Add*, then select *X-axis*.
+
+. From the *Aggregation* dropdown, select *Date Histogram*.
+
+. From the *Field* dropdown, select *@timestamp*.
+
+. In the *Custom label* field, enter a name for the x-axis. For example, `CPU`.
+
+. Click *Apply changes* image:images/apply-changes-button.png[].
+
+image:images/visualize-area-chart01.png[Example area chart]
+
+[float]
+[[chart-metricbeat-data-personalize]]
+=== Personalize the area chart
+
+To personalize the area chart, change the line style and position the legend. 
+
+. Select *Metrics & Axes*.
+
+.. To soften the area chart lines, select *smoothed* from the *Line Mode* dropdown.
+
+.. Use the default settings for the remaining options. 
+
+. Select *Panel Settings*.
+
+.. To move the legend to the bottom of the area chart, select *bottom* from the *Legend Position* dropdown.
+
+.. To make the area chart easier to read, select *X-Axis Lines*, then select *LeftAxis-1* from the *Y-Axis Lines* dropdown.
+
+. Click *Apply changes* image:images/apply-changes-button.png[].
+
+image:images/visualize-area-chart02.png[Example area chart]

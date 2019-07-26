@@ -37,6 +37,104 @@ Create visualizations from a search saved in <<discover, Discover>>, or start wi
 <<xy-chart,Vertical Bar>>:: 
 
 [float]
+[[aggregation-types]]
+== Aggregating your data
+
+Short description.
+
+[float]
+[[metric-aggregations]]
+=== Metric aggregations
+
+Short description. 
+
+Count:: Returns a raw count of the elements in the selected index pattern.
+
+Average:: Returns the average. 
+
+Sum:: Returns the total sum.
+
+Min:: Returns the minimum value.
+
+Max:: Returns the maximum value.
+
+Unique Count:: Returns the number of unique values.
+
+Standard Deviation:: Returns the standard deviation of the data.
+
+Top Hit:: Returns one or more of the top values from a specified field in your documents.
+
+Percentiles:: Divides the values in a numeric field into specified percentile bands.
+
+Percentile Rank:: Returns the percentile rankings for the values in the specified numeric field.
+
+For more information about Elasticsearch metric aggregrations, refer to {ref}/search-aggregations-metrics.html[Metric aggregations].
+
+[float]
+[[parent-pipeline-aggregations]]
+=== Parent pipeline aggregations
+
+For each parent pipeline aggregation, you define the metric for the calculated aggregation.
+
+Derivative:: Calculates the derivative of the specified metrics.
+
+Culumlative Sum:: Calculates the cumulative sum of the specified metric in a parent histogram.
+
+Moving Average:: Slides a window across the data and displays the average value of the window.
+
+Serial Diff:: Subtracts the values in a time series at various time periods.
+
+For more information about Elasticsearch parent pipeline aggregations, refer to {ref}/search-aggregations-pipeline.html[Pipeline aggregations].
+
+[float]
+[[sibling-pipeline-aggregations]]
+=== Sibling pipeline aggregations
+
+Sibling pipeline aggregations require a bucket aggregation that defines the buckets that run the sibling aggregation.
+
+Average Bucket:: Calculates the average value of the specified metric.
+
+Sum Bucket:: Calculates the sum of the specified metric values.
+
+Min Bucket:: Calculates the minimum value of the specified metric.
+
+Max Bucket:: Calculates the maximum value of the specified metric.
+
+For more information about Elasticsearch sibling pipeline aggregations, refer to {ref}/search-aggregations-pipeline.html[Pipeline aggregations].
+
+[float]
+[[buckets-aggregations]]
+=== Buckets aggregations
+
+Buckets aggregations determine the information that is retrieved from your data set.
+
+TIP: Buckets are analogous to SQL `GROUP BY` statements.
+
+Date Histogram:: Builds from a numeric field and organized by date.
+
+Histogram:: Builds from a numeric field.
+
+IPv4 Range:: Specifies a range of IPv4 ranges.
+
+Terms:: Specifies the top or bottom _n_ elements of a field to display.
+
+Filters:: Specifies a set of filters that you can apply to the data.
+
+Significant filters:: Displays the results of the experimental _significant terms_ aggregation.
+
+For more information about Elasticsearch bucket aggregations, refer to * {ref}/search-aggregations-bucket.html[Bucket aggregation].
+
+[float]
+[[sub-aggregations]]
+=== Sub aggregations
+
+Short description.
+
+The first aggregation determines the data set for any subsequent aggregations. Sub aggregations are applied from top to bottom. 
+
+For more information about working with sub aggregations, see https://www.elastic.co/blog/kibana-aggregation-execution-order-and-you[Kibana, Aggregation Execution Order, and You].
+
+[float]
 [[createvis]]
 == Create a visualization
 
