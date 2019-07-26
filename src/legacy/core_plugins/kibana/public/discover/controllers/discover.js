@@ -533,7 +533,9 @@ function discoverController(
   const shouldSearchOnPageLoad = () => {
     // A saved search is created on every page load, so we check the ID to see if we're loading a
     // previously saved search or if it is just transient
-    return config.get('discover:searchOnPageLoad') || savedSearch.id !== undefined;
+    return config.get('discover:searchOnPageLoad')
+      || savedSearch.id !== undefined
+      || _.get($scope, 'refreshInterval.pause') === false;
   };
 
   const init = _.once(function () {
@@ -827,7 +829,14 @@ function discoverController(
   };
 
   $scope.updateRefreshInterval = function () {
-    $scope.refreshInterval = timefilter.getRefreshInterval();
+    const newInterval = timefilter.getRefreshInterval();
+    const shouldFetch = _.get($scope, 'refreshInterval.pause') === true && newInterval.pause === false;
+
+    $scope.refreshInterval = newInterval;
+
+    if (shouldFetch) {
+      $scope.fetch();
+    }
   };
 
   $scope.onRefreshChange = function ({ isPaused, refreshInterval }) {
