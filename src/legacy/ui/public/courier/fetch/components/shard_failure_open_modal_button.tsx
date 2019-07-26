@@ -46,7 +46,7 @@ export function ShardFailureOpenModalButton({ request, response, title }: Props)
     );
   }
   return (
-    <EuiButton color="warning" onClick={onClick} data-test-subj="openShardFailureModalBtn">
+    <EuiButton color="warning" size="s" onClick={onClick} data-test-subj="openShardFailureModalBtn">
       <FormattedMessage
         id="common.ui.courier.fetch.shardsFailedModal.showDetails"
         defaultMessage="Show details"
