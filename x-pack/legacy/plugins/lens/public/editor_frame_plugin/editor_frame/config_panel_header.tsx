@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
   EuiIcon,
   EuiPopover,
@@ -18,7 +18,8 @@ import {
 import { flatten } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { NativeRenderer } from '../../native_renderer';
-import { Visualization } from '../../types';
+import { Visualization, FramePublicAPI } from '../../types';
+import { Action } from './state_management';
 
 interface VisualizationSelection {
   visualizationId: string;
@@ -31,15 +32,67 @@ interface State {
 }
 
 interface Props {
-  visualizations: Visualization[];
-  requireConfirmation: (visualizationId: string) => boolean;
+  dispatch: (action: Action) => void;
+  visualizationMap: Record<string, Visualization>;
   visualizationId: string | null;
   visualizationState: unknown;
-  onChange: (selection: VisualizationSelection) => void;
+  framePublicAPI: FramePublicAPI;
+}
+
+function getSuggestion(frame: FramePublicAPI, visualization: Visualization) {
+  const layers = Object.entries(frame.datasourceLayers);
+
+  if (!layers.length) {
+    return {
+      suggestion: undefined,
+      layerId: undefined,
+    };
+  }
+
+  const [[layerId, datasource]] = layers;
+  const suggestions = visualization.getSuggestions({
+    tables: [
+      {
+        datasourceSuggestionId: 0,
+        isMultiRow: true,
+        columns: datasource.getTableSpec().map(col => ({
+          ...col,
+          operation: datasource.getOperationForColumnId(col.columnId)!,
+        })),
+        layerId,
+      },
+    ],
+  });
+
+  const suggestion = suggestions.length ? suggestions[0] : undefined;
+  return { layerId, suggestion };
+}
+
+function dropUnusedLayers(frame: FramePublicAPI, suggestion: unknown, layerId?: string) {
+  // Remove any layers that are not used by the new visualization. If we don't do this,
+  // we get orphaned objects, and weird edge cases such as prompting the user that
+  // layers are going to be dropped, when the user is unaware of any extraneous layers.
+  Object.keys(frame.datasourceLayers).forEach(id => {
+    if (!suggestion || id !== layerId) {
+      frame.removeLayer(id);
+    }
+  });
+}
+
+function willLoseAllLayers(frame: FramePublicAPI, visualization: Visualization) {
+  return !getSuggestion(frame, visualization).layerId;
+}
+
+function getNewVisualizationState(frame: FramePublicAPI, visualization: Visualization) {
+  const { suggestion, layerId } = getSuggestion(frame, visualization);
+
+  dropUnusedLayers(frame, suggestion, layerId);
+
+  return visualization.initialize(frame, suggestion && suggestion.state);
 }
 
 function VisualizationSummary(props: Props) {
-  const visualization = props.visualizations.find(v => v.id === props.visualizationId);
+  const visualization = props.visualizationMap[props.visualizationId || ''];
 
   if (!visualization) {
     return (
@@ -62,12 +115,22 @@ function VisualizationSummary(props: Props) {
 function ConfirmationModal({
   onCancel,
   onConfirm,
-  visualizationLabel,
+  selection,
+  visualizationMap,
+  frame,
 }: {
-  visualizationLabel: string;
+  frame: FramePublicAPI;
+  selection: VisualizationSelection;
+  visualizationMap: Record<string, Visualization>;
   onCancel: () => void;
   onConfirm: () => void;
 }) {
+  const visualization = visualizationMap[selection.visualizationId];
+  const dropAll = willLoseAllLayers(frame, visualization);
+  const { label: visualizationLabel } = visualization.visualizationTypes.find(
+    v => v.id === selection.subVisualizationId
+  )!;
+
   return (
     <EuiOverlayMask>
       <EuiConfirmModal
@@ -83,12 +146,19 @@ function ConfirmationModal({
           defaultMessage: `Yes, drop layers`,
         })}
         defaultFocusedButton="cancel"
+        data-test-subj="lnsConfirmDropLayer"
       >
         <p>
-          {i18n.translate('xpack.lens.configPanel.dropLayersDescription', {
-            defaultMessage: 'Switching to {visualizationLabel} will drop all but the first layers.',
-            values: { visualizationLabel },
-          })}
+          {dropAll
+            ? i18n.translate('xpack.lens.configPanel.dropAllLayersDescription', {
+                defaultMessage: 'Switching to {visualizationLabel} will drop all layers.',
+                values: { visualizationLabel },
+              })
+            : i18n.translate('xpack.lens.configPanel.dropAllButLAstLayersDescription', {
+                defaultMessage:
+                  'Switching to {visualizationLabel} will drop all but the last layers.',
+                values: { visualizationLabel },
+              })}
         </p>
         <p>
           {i18n.translate('xpack.lens.configPanel.dropLayersPrompt', {
@@ -98,11 +168,6 @@ function ConfirmationModal({
       </EuiConfirmModal>
     </EuiOverlayMask>
   );
-}
-
-function selectedVisualizationType(selection: VisualizationSelection, props: Props) {
-  const visualization = props.visualizations.find(v => v.id === selection.visualizationId);
-  return visualization!.visualizationTypes.find(v => v.id === selection.subVisualizationId)!;
 }
 
 export function ConfigPanelHeader(props: Props) {
@@ -121,33 +186,61 @@ export function ConfigPanelHeader(props: Props) {
     });
   };
 
-  const commitSelection = (selection: VisualizationSelection) => {
+  const commitSelection = ({ visualizationId, subVisualizationId }: VisualizationSelection) => {
     hideFlyout(true);
-    props.onChange(selection);
+
+    const visualization = props.visualizationMap[visualizationId];
+    const switchVisualizationType = visualization.switchVisualizationType;
+
+    if (visualizationId !== props.visualizationId) {
+      const newState = getNewVisualizationState(props.framePublicAPI, visualization);
+      props.dispatch({
+        type: 'SWITCH_VISUALIZATION',
+        newVisualizationId: visualizationId,
+        initialState: switchVisualizationType
+          ? switchVisualizationType(subVisualizationId, newState)
+          : newState,
+      });
+    } else if (switchVisualizationType) {
+      props.dispatch({
+        type: 'UPDATE_VISUALIZATION_STATE',
+        newState: switchVisualizationType(subVisualizationId, props.visualizationState),
+      });
+    }
   };
 
   const onSelect = (selection: VisualizationSelection) => {
-    if (props.requireConfirmation(selection.visualizationId)) {
+    const numLayers = Object.keys(props.framePublicAPI.datasourceLayers).length;
+    const shouldRequestConfirmation =
+      props.visualizationId !== selection.visualizationId && numLayers > 1;
+
+    if (shouldRequestConfirmation) {
       requestConfirmation(selection);
     } else {
       commitSelection(selection);
     }
   };
 
-  const visualizationTypes = flatten(
-    props.visualizations.map(v =>
-      v.visualizationTypes.map(t => ({
-        visualizationId: v.id,
-        ...t,
-      }))
-    )
+  const visualizationTypes = useMemo(
+    () =>
+      flatten(
+        Object.values(props.visualizationMap).map(v =>
+          v.visualizationTypes.map(t => ({
+            visualizationId: v.id,
+            ...t,
+          }))
+        )
+      ),
+    [props.visualizationMap]
   );
 
   return (
     <>
       {state.confirmVisualization && (
         <ConfirmationModal
-          visualizationLabel={selectedVisualizationType(state.confirmVisualization, props).label}
+          frame={props.framePublicAPI}
+          selection={state.confirmVisualization}
+          visualizationMap={props.visualizationMap}
           onCancel={() => setState({ ...state, confirmVisualization: undefined })}
           onConfirm={() => commitSelection(state.confirmVisualization!)}
         />
