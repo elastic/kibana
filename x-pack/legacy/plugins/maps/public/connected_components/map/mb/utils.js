@@ -5,49 +5,8 @@
  */
 
 import _ from 'lodash';
-import mapboxgl from 'mapbox-gl';
-import chrome from 'ui/chrome';
-import { MAKI_SPRITE_PATH, MB_SOURCE_ID_LAYER_ID_PREFIX_DELIMITER } from '../../../../common/constants';
 
-function relativeToAbsolute(url) {
-  const a = document.createElement('a');
-  a.setAttribute('href', url);
-  return a.href;
-}
-
-export async function createMbMapInstance({ node, initialView, scrollZoom }) {
-  const makiUrl = relativeToAbsolute(chrome.addBasePath(MAKI_SPRITE_PATH));
-  return new Promise((resolve) => {
-    const options = {
-      attributionControl: false,
-      container: node,
-      style: {
-        version: 8,
-        sources: {},
-        layers: [],
-        sprite: makiUrl
-      },
-      scrollZoom,
-      preserveDrawingBuffer: chrome.getInjected('preserveDrawingBuffer', false)
-    };
-    if (initialView) {
-      options.zoom = initialView.zoom;
-      options.center = {
-        lng: initialView.lon,
-        lat: initialView.lat
-      };
-    }
-    const mbMap = new mapboxgl.Map(options);
-    mbMap.dragRotate.disable();
-    mbMap.touchZoomRotate.disableRotation();
-    mbMap.addControl(
-      new mapboxgl.NavigationControl({ showCompass: false }), 'top-left'
-    );
-    mbMap.on('load', () => {
-      resolve(mbMap);
-    });
-  });
-}
+import { MB_SOURCE_ID_LAYER_ID_PREFIX_DELIMITER } from '../../../../common/constants';
 
 export function removeOrphanedSourcesAndLayers(mbMap, layerList) {
   const layerIds = layerList.map((layer) => layer.getId());
