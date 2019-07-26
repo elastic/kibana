@@ -122,8 +122,6 @@ describe('XYConfigPanel', () => {
     expect(options.map(({ id }) => id)).toEqual([
       'bar',
       'bar_stacked',
-      'horizontal_bar',
-      'horizontal_bar_stacked',
       'line',
       'area',
       'area_stacked',
@@ -313,11 +311,6 @@ describe('XYConfigPanel', () => {
       );
 
       openComponentPopover(component, 'first');
-
-      component
-        .find('[data-test-subj="lnsXYSeriesTypePopover"]')
-        .first()
-        .simulate('click');
 
       component
         .find('[data-test-subj="lnsXY_layer_remove"]')

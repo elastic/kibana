@@ -71,7 +71,7 @@ function LayerSeriesTypeConfig({
             defaultMessage: 'Edit layer settings',
           })}
           onClick={() => setIsOpen(!isOpen)}
-          data-test-subj="lnsXYSeriesTypePopover"
+          data-test-subj="lnsXY_layer_advanced"
         />
       }
       isOpen={isOpen}
@@ -117,20 +117,15 @@ function LayerSeriesTypeConfig({
 
 export function XYConfigPanel(props: VisualizationProps<State>) {
   const { state, setState, frame } = props;
-  const [localState, setLocalState] = useState({
-    isChartOptionsOpen: false,
-    openLayerId: null,
-  });
+  const [isChartOptionsOpen, setIsChartOptionsOpen] = useState(false);
 
   return (
     <EuiForm className="lnsConfigPanel">
       <EuiFormRow>
         <EuiPopover
           id="lnsXY_chartConfig"
-          isOpen={localState.isChartOptionsOpen}
-          closePopover={() => {
-            setLocalState({ ...localState, isChartOptionsOpen: false });
-          }}
+          isOpen={isChartOptionsOpen}
+          closePopover={() => setIsChartOptionsOpen(false)}
           button={
             <EuiFormRow>
               <>
@@ -138,9 +133,7 @@ export function XYConfigPanel(props: VisualizationProps<State>) {
                   iconType="gear"
                   size="s"
                   data-test-subj="lnsXY_chart_settings"
-                  onClick={() => {
-                    setLocalState({ ...localState, isChartOptionsOpen: true });
-                  }}
+                  onClick={() => setIsChartOptionsOpen(true)}
                 >
                   <FormattedMessage
                     id="xpack.lens.xyChart.chartSettings"
