@@ -5,6 +5,7 @@
  */
 
 import { Ast } from '@kbn/interpreter/common';
+import { EuiIconType } from '@elastic/eui/src/components/icon/icon';
 import { DragContextState } from './drag_drop';
 
 // eslint-disable-next-line
@@ -21,7 +22,7 @@ export interface EditorFrameSetup {
   createInstance: (options: EditorFrameOptions) => EditorFrameInstance;
   // generic type on the API functions to pull the "unknown vs. specific type" error into the implementation
   registerDatasource: <T, P>(name: string, datasource: Datasource<T, P>) => void;
-  registerVisualization: <T, P>(name: string, visualization: Visualization<T, P>) => void;
+  registerVisualization: <T, P>(visualization: Visualization<T, P>) => void;
 }
 
 // Hints the default nesting to the data source. 0 is the highest priority
@@ -182,7 +183,20 @@ export interface FramePublicAPI {
   removeLayer: (layerId: string) => void;
 }
 
+export interface VisualizationType {
+  id: string;
+  icon?: EuiIconType | string;
+  label: string;
+}
+
 export interface Visualization<T = unknown, P = unknown> {
+  id: string;
+
+  visualizationTypes: VisualizationType[];
+
+  renderDescription: (domElement: Element, state: T) => void;
+  switchVisualizationType?: (visualizationTypeId: string, state: T) => T;
+
   // For initializing from saved object
   initialize: (frame: FramePublicAPI, state?: P) => T;
 

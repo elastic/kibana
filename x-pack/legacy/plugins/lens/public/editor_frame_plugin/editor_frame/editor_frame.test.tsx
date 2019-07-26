@@ -53,8 +53,28 @@ describe('editor_frame', () => {
   };
 
   beforeEach(() => {
-    mockVisualization = createMockVisualization();
-    mockVisualization2 = createMockVisualization();
+    mockVisualization = {
+      ...createMockVisualization(),
+      id: 'testVis',
+      visualizationTypes: [
+        {
+          icon: 'empty',
+          id: 'testVis',
+          label: 'TEST1',
+        },
+      ],
+    };
+    mockVisualization2 = {
+      ...createMockVisualization(),
+      id: 'testVis2',
+      visualizationTypes: [
+        {
+          icon: 'empty',
+          id: 'testVis2',
+          label: 'TEST2',
+        },
+      ],
+    };
 
     mockDatasource = createMockDatasource();
     mockDatasource2 = createMockDatasource();
@@ -751,8 +771,27 @@ describe('editor_frame', () => {
   describe('switching', () => {
     let instance: ReactWrapper;
 
+    function switchTo(subType: string) {
+      act(() => {
+        instance
+          .find('[data-test-subj="lnsConfigPanelHeaderPopover"]')
+          .last()
+          .simulate('click');
+      });
+
+      instance.update();
+
+      act(() => {
+        instance
+          .find(`[data-test-subj="lnsConfigPanelHeaderPopover_${subType}"]`)
+          .last()
+          .simulate('click');
+      });
+    }
+
     beforeEach(async () => {
       mockDatasource.getLayers.mockReturnValue(['first']);
+
       instance = mount(
         <EditorFrame
           {...defaultProps}
@@ -818,11 +857,7 @@ describe('editor_frame', () => {
     });
 
     it('should initialize other visualization on switch', async () => {
-      act(() => {
-        instance
-          .find('select[data-test-subj="visualization-switch"]')
-          .simulate('change', { target: { value: 'testVis2' } });
-      });
+      switchTo('testVis2');
       expect(mockVisualization2.initialize).toHaveBeenCalled();
     });
 
@@ -839,11 +874,7 @@ describe('editor_frame', () => {
         },
       ]);
 
-      act(() => {
-        instance
-          .find('select[data-test-subj="visualization-switch"]')
-          .simulate('change', { target: { value: 'testVis2' } });
-      });
+      switchTo('testVis2');
 
       expect(mockVisualization2.getSuggestions).toHaveBeenCalled();
       expect(mockVisualization2.initialize).toHaveBeenCalledWith(expect.anything(), initialState);
@@ -856,11 +887,7 @@ describe('editor_frame', () => {
     it('should fall back when switching visualizations if the visualization has no suggested use', async () => {
       mockVisualization2.initialize.mockReturnValueOnce({ initial: true });
 
-      act(() => {
-        instance
-          .find('select[data-test-subj="visualization-switch"]')
-          .simulate('change', { target: { value: 'testVis2' } });
-      });
+      switchTo('testVis2');
 
       expect(mockDatasource.publicAPIMock.getTableSpec).toHaveBeenCalled();
       expect(mockVisualization2.getSuggestions).toHaveBeenCalled();

@@ -11,6 +11,16 @@ import { EditorFrameSetupPlugins } from './plugin';
 
 export function createMockVisualization(): jest.Mocked<Visualization> {
   return {
+    id: 'TEST_VIS',
+    visualizationTypes: [
+      {
+        icon: 'empty',
+        id: 'TEST_VIS',
+        label: 'TEST',
+      },
+    ],
+    renderDescription: jest.fn(),
+    switchVisualizationType: jest.fn((_, x) => x),
     getPersistableState: jest.fn(_state => ({})),
     getSuggestions: jest.fn(_options => []),
     initialize: jest.fn((_frame, _state?) => ({})),

@@ -89,6 +89,26 @@ export const datatableVisualization: Visualization<
   DatatableVisualizationState,
   DatatableVisualizationState
 > = {
+  id: 'lnsDatatable',
+
+  visualizationTypes: [
+    {
+      id: 'lnsDatatable',
+      icon: 'visTable',
+      label: i18n.translate('xpack.lens.datatable.label', {
+        defaultMessage: 'Datatable',
+      }),
+    },
+  ],
+
+  renderDescription(el) {
+    render(<h1>Datatable</h1>, el);
+  },
+
+  switchVisualizationType(_: string, state: DatatableVisualizationState) {
+    return state;
+  },
+
   initialize(frame, state) {
     const layerId = Object.keys(frame.datasourceLayers)[0] || frame.addNewLayer();
     return (

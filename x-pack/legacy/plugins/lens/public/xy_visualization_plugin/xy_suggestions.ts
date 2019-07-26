@@ -12,7 +12,7 @@ import {
   TableSuggestionColumn,
   TableSuggestion,
 } from '../types';
-import { State } from './types';
+import { State, SeriesType } from './types';
 import { generateId } from '../id_generator';
 import { buildExpression } from './to_expression';
 
@@ -101,14 +101,17 @@ function getSuggestion(
   // TODO: Localize the title, label, etc
   const preposition = isDate ? 'over' : 'of';
   const title = `${yTitle} ${preposition} ${xTitle}`;
+  const seriesType: SeriesType =
+    (currentState && currentState.preferredSeriesType) || (splitBy && isDate ? 'line' : 'bar');
   const state: State = {
     legend: currentState ? currentState.legend : { isVisible: true, position: Position.Right },
+    preferredSeriesType: seriesType,
     layers: [
       ...(currentState ? currentState.layers.filter(layer => layer.layerId !== layerId) : []),
       {
         layerId,
+        seriesType,
         xAccessor: xValue.columnId,
-        seriesType: splitBy && isDate ? 'line' : 'bar',
         splitAccessor: splitBy && isDate ? splitBy.columnId : generateId(),
         accessors: yValues.map(col => col.columnId),
         position: Position.Left,

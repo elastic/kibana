@@ -5,11 +5,11 @@
  */
 
 import React, { useMemo, useContext, memo } from 'react';
-import { EuiSelect } from '@elastic/eui';
 import { NativeRenderer } from '../../native_renderer';
 import { Action } from './state_management';
-import { Visualization, FramePublicAPI, VisualizationSuggestion } from '../../types';
+import { Visualization, FramePublicAPI } from '../../types';
 import { DragContext } from '../../drag_drop';
+import { ConfigPanelHeader } from './config_panel_header';
 
 interface ConfigPanelWrapperProps {
   visualizationState: unknown;
@@ -20,33 +20,26 @@ interface ConfigPanelWrapperProps {
 }
 
 function getSuggestedVisualizationState(frame: FramePublicAPI, visualization: Visualization) {
-  const datasources = Object.entries(frame.datasourceLayers);
-
-  let results: VisualizationSuggestion[] = [];
-
-  datasources.forEach(([layerId, datasource]) => {
-    const suggestions = visualization.getSuggestions({
-      tables: [
-        {
-          datasourceSuggestionId: 0,
-          isMultiRow: true,
-          columns: datasource.getTableSpec().map(col => ({
-            ...col,
-            operation: datasource.getOperationForColumnId(col.columnId)!,
-          })),
-          layerId,
-        },
-      ],
-    });
-
-    results = results.concat(suggestions);
+  const [[layerId, datasource]] = Object.entries(frame.datasourceLayers);
+  const suggestions = visualization.getSuggestions({
+    tables: [
+      {
+        datasourceSuggestionId: 0,
+        isMultiRow: true,
+        columns: datasource.getTableSpec().map(col => ({
+          ...col,
+          operation: datasource.getOperationForColumnId(col.columnId)!,
+        })),
+        layerId,
+      },
+    ],
   });
 
-  if (!results.length) {
+  if (!suggestions.length) {
     return visualization.initialize(frame);
   }
 
-  return visualization.initialize(frame, results[0].state);
+  return visualization.initialize(frame, suggestions[0].state);
 }
 
 export const ConfigPanelWrapper = memo(function ConfigPanelWrapper(props: ConfigPanelWrapperProps) {
@@ -63,23 +56,28 @@ export const ConfigPanelWrapper = memo(function ConfigPanelWrapper(props: Config
 
   return (
     <>
-      <EuiSelect
-        data-test-subj="visualization-switch"
-        options={Object.keys(props.visualizationMap).map(visualizationId => ({
-          value: visualizationId,
-          text: visualizationId,
-        }))}
-        value={props.activeVisualizationId || undefined}
-        onChange={e => {
-          const newState = getSuggestedVisualizationState(
-            props.framePublicAPI,
-            props.visualizationMap[e.target.value]
-          );
-          props.dispatch({
-            type: 'SWITCH_VISUALIZATION',
-            newVisualizationId: e.target.value,
-            initialState: newState,
-          });
+      <ConfigPanelHeader
+        visualizations={Object.values(props.visualizationMap)}
+        visualizationId={props.activeVisualizationId}
+        visualizationState={props.visualizationState}
+        onChange={(visualizationId, subVisualizationId) => {
+          const visualization = props.visualizationMap[visualizationId];
+          const switchVisualizationType = visualization.switchVisualizationType;
+
+          if (visualizationId !== props.activeVisualizationId) {
+            const newState = getSuggestedVisualizationState(props.framePublicAPI, visualization);
+            props.dispatch({
+              type: 'SWITCH_VISUALIZATION',
+              newVisualizationId: visualizationId,
+              initialState: switchVisualizationType
+                ? switchVisualizationType(subVisualizationId, newState)
+                : newState,
+            });
+          } else if (switchVisualizationType) {
+            setVisualizationState(
+              switchVisualizationType(subVisualizationId, props.visualizationState)
+            );
+          }
         }}
       />
       {props.activeVisualizationId && props.visualizationState !== null && (

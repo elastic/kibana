@@ -26,6 +26,7 @@ describe('XYConfigPanel', () => {
   function testState(): State {
     return {
       legend: { isVisible: true, position: Position.Right },
+      preferredSeriesType: 'bar',
       layers: [
         {
           seriesType: 'bar',
@@ -72,19 +73,24 @@ describe('XYConfigPanel', () => {
       />
     );
 
+    component
+      .find('[data-test-subj="lnsXYSeriesTypePopover"]')
+      .first()
+      .simulate('click');
+
     const options = component
       .find('[data-test-subj="lnsXY_seriesType"]')
       .first()
       .prop('options') as EuiButtonGroupProps['options'];
 
     expect(options.map(({ id }) => id)).toEqual([
+      'bar',
+      'bar_stacked',
+      'horizontal_bar',
+      'horizontal_bar_stacked',
       'line',
       'area',
-      'bar',
-      'horizontal_bar',
       'area_stacked',
-      'bar_stacked',
-      'horizontal_bar_stacked',
     ]);
 
     expect(options.filter(({ isDisabled }) => isDisabled).map(({ id }) => id)).toEqual([]);
@@ -255,6 +261,7 @@ describe('XYConfigPanel', () => {
         ],
       });
     });
+
     it('removes layers', () => {
       const setState = jest.fn();
       const state = testState();
@@ -266,6 +273,11 @@ describe('XYConfigPanel', () => {
           state={state}
         />
       );
+
+      component
+        .find('[data-test-subj="lnsXYSeriesTypePopover"]')
+        .first()
+        .simulate('click');
 
       component
         .find('[data-test-subj="lnsXY_layer_remove"]')

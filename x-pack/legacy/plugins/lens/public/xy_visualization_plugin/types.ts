@@ -5,10 +5,12 @@
  */
 
 import { Position } from '@elastic/charts';
+import { i18n } from '@kbn/i18n';
 import {
   ExpressionFunction,
   ArgumentType,
 } from '../../../../../../src/legacy/core_plugins/interpreter/public';
+import { VisualizationType } from '..';
 
 export interface LegendConfig {
   isVisible: boolean;
@@ -202,9 +204,62 @@ export interface XYArgs {
 
 // Persisted parts of the state
 export interface XYState {
+  preferredSeriesType: SeriesType;
   legend: LegendConfig;
   layers: LayerConfig[];
 }
 
 export type State = XYState;
 export type PersistableState = XYState;
+
+export const visualizationTypes: VisualizationType[] = [
+  {
+    id: 'bar',
+    icon: 'visBarVertical',
+    label: i18n.translate('xpack.lens.xyVisualization.verticalBarLabel', {
+      defaultMessage: 'Vertical Bar',
+    }),
+  },
+  {
+    id: 'bar_stacked',
+    icon: 'visBarVertical',
+    label: i18n.translate('xpack.lens.xyVisualization.stackedVerticalBarLabel', {
+      defaultMessage: 'Stacked Vertical Bar',
+    }),
+  },
+  {
+    id: 'horizontal_bar',
+    icon: 'visBarHorizontal',
+    label: i18n.translate('xpack.lens.xyVisualization.horizontalBarLabel', {
+      defaultMessage: 'Horizontal Bar',
+    }),
+  },
+  {
+    id: 'horizontal_bar_stacked',
+    icon: 'visBarHorizontal',
+    label: i18n.translate('xpack.lens.xyVisualization.stackedHorizontalBarLabel', {
+      defaultMessage: 'Stacked Horizontal Bar',
+    }),
+  },
+  {
+    id: 'line',
+    icon: 'visLine',
+    label: i18n.translate('xpack.lens.xyVisualization.lineLabel', {
+      defaultMessage: 'Line',
+    }),
+  },
+  {
+    id: 'area',
+    icon: 'visArea',
+    label: i18n.translate('xpack.lens.xyVisualization.areaLabel', {
+      defaultMessage: 'Area',
+    }),
+  },
+  {
+    id: 'area_stacked',
+    icon: 'visArea',
+    label: i18n.translate('xpack.lens.xyVisualization.stackedAreaLabel', {
+      defaultMessage: 'Stacked Area',
+    }),
+  },
+];

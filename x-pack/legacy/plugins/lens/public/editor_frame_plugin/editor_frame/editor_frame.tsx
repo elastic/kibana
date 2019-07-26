@@ -90,7 +90,8 @@ export function EditorFrame(props: EditorFrameProps) {
 
   const framePublicAPI: FramePublicAPI = {
     datasourceLayers,
-    addNewLayer: () => {
+
+    addNewLayer() {
       const newLayerId = generateId();
 
       const newState = props.datasourceMap[state.activeDatasourceId!].insertLayer(
