@@ -21,7 +21,7 @@ import { Request, Server } from 'hapi';
 
 import { Logger, LoggerFactory } from '../logging';
 import { HttpConfig } from './http_config';
-import { createServer, getListenerOptions, getServerOptions } from './http_tools';
+import { createServer, getServerOptions } from './http_tools';
 import { adoptToHapiAuthFormat, AuthenticationHandler } from './lifecycle/auth';
 import { adoptToHapiOnPostAuthFormat, OnPostAuthHandler } from './lifecycle/on_post_auth';
 import { adoptToHapiOnPreAuthFormat, OnPreAuthHandler } from './lifecycle/on_pre_auth';
@@ -108,8 +108,7 @@ export class HttpServer {
 
   public setup(config: HttpConfig): HttpServerSetup {
     const serverOptions = getServerOptions(config);
-    const listenerOptions = getListenerOptions(config);
-    this.server = createServer(serverOptions, listenerOptions);
+    this.server = createServer(serverOptions);
     this.config = config;
 
     const basePathService = new BasePath(config.basePath);

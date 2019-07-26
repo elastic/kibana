@@ -1,16 +1,16 @@
 [role="xpack"]
 [[visualize-rollup-data]]
-=== Create a visualization using rolled up data
+== Using rolled up data in a visualization
 
 beta[]
 
 You can visualize your rolled up data in a variety of charts, tables, maps, and 
 more. Most visualizations support rolled up data, with the exception of 
-Timelion, Visual Builder, and Vega visualizations. 
+Timelion, TSVB, and Vega visualizations. 
 
-You create an index pattern for rolled up data the same way you do for any data, 
-in *Management > Kibana > Index patterns*. Clicking *Create index pattern* includes 
-an item for creating a rollup index pattern, if a rollup index is detected in the cluster.
+To get started, go to *Management > Kibana > Index patterns.* 
+If a rollup index is detected in the cluster, *Create index pattern* 
+includes an item for creating a rollup index pattern. 
 
 [role="screenshot"]
 image::images/management_create_rollup_menu.png[Create index pattern menu]
@@ -18,17 +18,8 @@ image::images/management_create_rollup_menu.png[Create index pattern menu]
 You can match an index pattern to only rolled up data, or mix both rolled up 
 and raw data to visualize all data together.  An index pattern can match only one 
 rolled up index, not multiple. There is no restriction on the number of standard 
-indices that an index pattern can match. 
-
-Combination index patterns use the same 
-notation as other multiple indices in {es}. To match multiple indices to create a 
-combination index pattern, use a comma to separate the names, with no space after the comma. 
-The notation for wildcards (`*`) and the ability to "exclude" (`-`) also apply 
-(for example, `test*,-test3`).
-
-When creating an index pattern, you’re asked to set a time field for filtering.  
-With a rollup index, the time filter field is the same field used for 
-the rolled up date histogram aggregation.
+indices that an index pattern can match. When matching multiple indices, 
+use a comma to separate the names, with no space after the comma. 
 
 Keep the following in mind when creating a visualization from rolled up data:
 
@@ -39,15 +30,14 @@ numeric field values or terms. You can ask for a time aggregation that takes
 several time buckets and combines them to lower granularity. For example, 
 if the rollup job was aggregated by hours, you can ask for buckets of days.
 
-The data represented in this visualization comes from a rollup index and 
-standard indices.
+The following visualization of rolled up data shows the date histogram 
+interval multiple and the limited metrics aggregations.
 
 [role="screenshot"]
 image::images/management_rollups_visualization.png[][Rollups in visualizations]
 
-You can mix rollup visualizations and regular visualizations in a dashboard. 
-The following dashboard shows this mix, along with a field filter. Note
-that not all queries and filters are supported by rollups.
+Dashboards can have a mixture of rollup visualizations and regular visualizations, 
+as shown in the following figure. Note that not all queries and filters support rollups.
 
 [role="screenshot"]
 image::images/management_rolled_dashboard.png[][Rollups in dashboards]

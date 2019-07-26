@@ -32,6 +32,12 @@ function getRequestAuthenticationScheme(request: RequestWithLoginAttempt) {
 }
 
 /**
+ * Name of the `WWW-Authenticate` we parse out of Elasticsearch responses or/and return to the
+ * client to initiate or continue negotiation.
+ */
+const WWWAuthenticateHeaderName = 'WWW-Authenticate';
+
+/**
  * Provider that supports Kerberos request authentication.
  */
 export class KerberosAuthenticationProvider extends BaseAuthenticationProvider {
@@ -117,17 +123,58 @@ export class KerberosAuthenticationProvider extends BaseAuthenticationProvider {
     const [, kerberosTicket] = request.headers.authorization.split(/\s+/);
 
     // First attempt to exchange SPNEGO token for an access token.
-    let tokens: { access_token: string; refresh_token: string };
+    let tokens: {
+      access_token: string;
+      refresh_token: string;
+      kerberos_authentication_response_token?: string;
+    };
     try {
       tokens = await this.options.client.callWithInternalUser('shield.getAccessToken', {
         body: { grant_type: '_kerberos', kerberos_ticket: kerberosTicket },
       });
     } catch (err) {
       this.debug(`Failed to exchange SPNEGO token for an access token: ${err.message}`);
-      return AuthenticationResult.failed(err);
+
+      // Check if SPNEGO context wasn't established and we have a response token to return to the client.
+      const challenge =
+        getErrorStatusCode(err) === 401 ? this.getNegotiateChallenge(err) : undefined;
+      if (!challenge) {
+        return AuthenticationResult.failed(err);
+      }
+
+      const challengeParts = challenge.split(/\s+/);
+      if (challengeParts.length > 2) {
+        this.debug('Challenge consists of more than two parts and may be malformed.');
+      }
+
+      let responseChallenge;
+      const [, responseToken] = challengeParts;
+      if (responseToken) {
+        this.debug('Returning response token to the client and continuing SPNEGO handshake.');
+        responseChallenge = `Negotiate ${responseToken}`;
+      } else {
+        this.debug('Re-initiating SPNEGO handshake.');
+        responseChallenge = 'Negotiate';
+      }
+
+      return AuthenticationResult.failed(Boom.unauthorized(), {
+        authResponseHeaders: { [WWWAuthenticateHeaderName]: responseChallenge },
+      });
     }
 
     this.debug('Get token API request to Elasticsearch successful');
+
+    // There is a chance we may need to provide an output token for the client (usually for mutual
+    // authentication), it should be attached to the response within `WWW-Authenticate` header with
+    // the requested payload, no matter what status code it may have.
+    let authResponseHeaders: AuthenticationResult['authResponseHeaders'] | undefined;
+    if (tokens.kerberos_authentication_response_token) {
+      this.debug('There is an output token provided that will be included into response headers');
+
+      authResponseHeaders = {
+        [WWWAuthenticateHeaderName]: `Negotiate ${tokens.kerberos_authentication_response_token}`,
+      };
+    }
 
     // Then attempt to query for the user details using the new token
     const originalAuthorizationHeader = request.headers.authorization;
@@ -139,8 +186,8 @@ export class KerberosAuthenticationProvider extends BaseAuthenticationProvider {
       this.debug('User has been authenticated with new access token');
 
       return AuthenticationResult.succeeded(user, {
-        accessToken: tokens.access_token,
-        refreshToken: tokens.refresh_token,
+        authResponseHeaders,
+        state: { accessToken: tokens.access_token, refreshToken: tokens.refresh_token },
       });
     } catch (err) {
       this.debug(`Failed to authenticate request via access token: ${err.message}`);
@@ -247,7 +294,7 @@ export class KerberosAuthenticationProvider extends BaseAuthenticationProvider {
       const user = await this.options.client.callWithRequest(request, 'shield.authenticate');
 
       this.debug('Request has been authenticated via refreshed token.');
-      return AuthenticationResult.succeeded(user, refreshedTokenPair);
+      return AuthenticationResult.succeeded(user, { state: refreshedTokenPair });
     } catch (err) {
       this.debug(`Failed to authenticate user using newly refreshed access token: ${err.message}`);
 
@@ -301,16 +348,11 @@ export class KerberosAuthenticationProvider extends BaseAuthenticationProvider {
       authenticationError = err;
     }
 
-    const challenges = ([] as string[]).concat(
-      get<string | string[]>(authenticationError, 'output.headers[WWW-Authenticate]') || ''
-    );
-
-    if (challenges.some(challenge => challenge.toLowerCase() === 'negotiate')) {
-      this.debug(`SPNEGO is supported by the backend, challenges are: [${challenges}].`);
-      return AuthenticationResult.failed(Boom.unauthorized(), ['Negotiate']);
+    if (this.getNegotiateChallenge(authenticationError)) {
+      return AuthenticationResult.failed(Boom.unauthorized(), {
+        authResponseHeaders: { [WWWAuthenticateHeaderName]: 'Negotiate' },
+      });
     }
-
-    this.debug(`SPNEGO is not supported by the backend, challenges are: [${challenges}].`);
 
     // If we failed to do SPNEGO and have a session with expired token that belongs to Kerberos
     // authentication provider then it means Elasticsearch isn't configured to use Kerberos anymore.
@@ -327,5 +369,26 @@ export class KerberosAuthenticationProvider extends BaseAuthenticationProvider {
    */
   private debug(message: string) {
     this.options.log(['debug', 'security', 'kerberos'], message);
+  }
+
+  /**
+   * Extracts `Negotiate` challenge from the list of challenges returned with Elasticsearch error if any.
+   * @param error Error to extract challenges from.
+   */
+  private getNegotiateChallenge(error: Error) {
+    const challenges = ([] as string[]).concat(
+      get<string | string[]>(error, `output.headers[${WWWAuthenticateHeaderName}]`) || ''
+    );
+
+    const negotiateChallenge = challenges.find(challenge =>
+      challenge.toLowerCase().startsWith('negotiate')
+    );
+    if (negotiateChallenge) {
+      this.debug(`SPNEGO is supported by the backend, challenges are: [${challenges}].`);
+    } else {
+      this.debug(`SPNEGO is not supported by the backend, challenges are: [${challenges}].`);
+    }
+
+    return negotiateChallenge;
   }
 }
