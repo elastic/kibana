@@ -18,18 +18,19 @@
  */
 import React from 'react';
 // @ts-ignore
-import { EuiCode, EuiCodeBlock, EuiDescriptionList, EuiTitle, EuiSpacer } from '@elastic/eui';
+import { EuiCodeBlock, EuiDescriptionList, EuiTitle, EuiSpacer } from '@elastic/eui';
 // @ts-ignore
 import { RIGHT_ALIGNMENT } from '@elastic/eui/lib/services';
 import { ShardFailure } from './shard_failure_types';
 import { getFlattenedObject } from '../../../../../../legacy/utils/get_flattened_object';
+import { ShardFailureDescriptionHeader } from './shard_failure_description_header';
 
 /**
  * Provides pretty formatting of a given key string
  * e.g. formats "this_key.is_nice" to "This key is nice"
  * @param key
  */
-export function formatKey(key: string) {
+export function formatKey(key: string): string {
   const nameCapitalized = key.charAt(0).toUpperCase() + key.slice(1);
   return nameCapitalized.replace(/[\._]/g, ' ');
 }
@@ -39,7 +40,7 @@ export function formatKey(key: string) {
  * @param value
  * @param key
  */
-export function formatValueByKey(value: any, key: string) {
+export function formatValueByKey(value: any, key: string): string | any {
   if (key === 'script' || key === 'script_stack') {
     const valueScript = Array.isArray(value) ? value.join('\n') : String(value);
     return (
@@ -60,22 +61,11 @@ export function ShardFailureDescription(props: ShardFailure) {
     description: formatValueByKey(value, key),
   }));
 
-  const headerTxt = formatKey(props.reason.type);
-
   return (
     <div>
       <EuiTitle size="xs">
         <h2>
-          {headerTxt} @{' '}
-          <span className="shardFailureModal__keyValueTitle">
-            shard <EuiCode>{props.shard}</EuiCode>
-          </span>
-          <span className="shardFailureModal__keyValueTitle">
-            index <EuiCode>{props.index}</EuiCode>
-          </span>
-          <span className="shardFailureModal__keyValueTitle">
-            node <EuiCode>{props.node}</EuiCode>
-          </span>
+          <ShardFailureDescriptionHeader {...props} />
         </h2>
       </EuiTitle>
       <EuiSpacer size="m" />

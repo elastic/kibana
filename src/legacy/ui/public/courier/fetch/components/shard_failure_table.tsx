@@ -24,6 +24,7 @@ import { RIGHT_ALIGNMENT } from '@elastic/eui/lib/services';
 import { i18n } from '@kbn/i18n';
 import { ShardFailureDescription } from './shard_failure_description';
 import { ShardFailure } from './shard_failure_types';
+import { getFailureSummaryText } from './shard_failure_description_header';
 
 export interface ListItem extends ShardFailure {
   id: string;
@@ -35,40 +36,48 @@ export function ShardFailureTable({ failures }: { failures: ShardFailure[] }) {
 
   const [expandMap, setExpandMap] = useState(initalMap);
 
-  const collapseLabel = i18n.translate(
-    'common.ui.courier.fetch.shardsFailedModal.tableRowCollapse',
-    {
-      defaultMessage: 'Collapse',
-      description: 'Collapse a row of a table with failures',
-    }
-  );
-
-  const expandLabel = i18n.translate('common.ui.courier.fetch.shardsFailedModal.tableRowExpand', {
-    defaultMessage: 'Expand',
-    description: 'Expand a row of a table with failures',
-  });
-
   const columns = [
     {
       align: RIGHT_ALIGNMENT,
       width: '40px',
       isExpander: true,
-      render: (item: ListItem) => (
-        <EuiButtonIcon
-          onClick={() => {
-            // toggle displaying the expanded view of the given list item
-            const map = Object.assign({}, expandMap);
-            if (map[item.id]) {
-              delete map[item.id];
-            } else {
-              map[item.id] = <ShardFailureDescription {...item} />;
-            }
-            setExpandMap(map);
-          }}
-          aria-label={expandMap[item.id] ? collapseLabel : expandLabel}
-          iconType={expandMap[item.id] ? 'arrowUp' : 'arrowDown'}
-        />
-      ),
+      render: (item: ListItem) => {
+        const failureSummeryText = getFailureSummaryText(item);
+        const collapseLabel = i18n.translate(
+          'common.ui.courier.fetch.shardsFailedModal.tableRowCollapse',
+          {
+            defaultMessage: 'Collapse {rowDescription}',
+            description: 'Collapse a row of a table with failures',
+            values: { rowDescription: failureSummeryText },
+          }
+        );
+
+        const expandLabel = i18n.translate(
+          'common.ui.courier.fetch.shardsFailedModal.tableRowExpand',
+          {
+            defaultMessage: 'Expand {rowDescription}',
+            description: 'Expand a row of a table with failures',
+            values: { rowDescription: failureSummeryText },
+          }
+        );
+
+        return (
+          <EuiButtonIcon
+            onClick={() => {
+              // toggle displaying the expanded view of the given list item
+              const map = Object.assign({}, expandMap);
+              if (map[item.id]) {
+                delete map[item.id];
+              } else {
+                map[item.id] = <ShardFailureDescription {...item} />;
+              }
+              setExpandMap(map);
+            }}
+            aria-label={expandMap[item.id] ? collapseLabel : expandLabel}
+            iconType={expandMap[item.id] ? 'arrowUp' : 'arrowDown'}
+          />
+        );
+      },
     },
     {
       field: 'shard',
