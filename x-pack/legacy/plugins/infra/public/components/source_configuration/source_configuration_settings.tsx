@@ -6,7 +6,6 @@
 
 import {
   EuiButton,
-  EuiButtonEmpty,
   EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
@@ -33,7 +32,7 @@ interface SourceConfigurationSettingsProps {
 }
 
 export const SourceConfigurationSettings = injectI18n(
-  ({ intl, shouldAllowEdit }: SourceConfigurationSettingsProps) => {
+  ({ shouldAllowEdit }: SourceConfigurationSettingsProps) => {
     const {
       createSourceConfiguration,
       source,
@@ -144,39 +143,49 @@ export const SourceConfigurationSettings = injectI18n(
                 <EuiSpacer size="m" />
                 <EuiFlexGroup>
                   {isWriteable && (
-                    <EuiFlexItem grow={false}>
+                    <EuiFlexItem>
                       {isLoading ? (
-                        <EuiButton color="primary" isLoading fill>
-                          Loading
-                        </EuiButton>
+                        <EuiFlexGroup justifyContent="flexEnd">
+                          <EuiFlexItem grow={false}>
+                            <EuiButton color="primary" isLoading fill>
+                              Loading
+                            </EuiButton>
+                          </EuiFlexItem>
+                        </EuiFlexGroup>
                       ) : (
                         <>
-                          <EuiButton
-                            data-test-subj="discardSettingsButton"
-                            color="danger"
-                            iconType="cross"
-                            isDisabled={isLoading || !isFormDirty}
-                            onClick={() => {
-                              resetForm();
-                            }}
-                          >
-                            <FormattedMessage
-                              id="xpack.infra.sourceConfiguration.discardSettingsButtonLabel"
-                              defaultMessage="Discard"
-                            />
-                          </EuiButton>
-                          <EuiButton
-                            data-test-subj="applySettingsButton"
-                            color="primary"
-                            isDisabled={!isFormDirty || !isFormValid}
-                            fill
-                            onClick={persistUpdates}
-                          >
-                            <FormattedMessage
-                              id="xpack.infra.sourceConfiguration.applySettingsButtonLabel"
-                              defaultMessage="Apply"
-                            />
-                          </EuiButton>
+                          <EuiFlexGroup justifyContent="flexEnd">
+                            <EuiFlexItem grow={false}>
+                              <EuiButton
+                                data-test-subj="discardSettingsButton"
+                                color="danger"
+                                iconType="cross"
+                                isDisabled={isLoading || !isFormDirty}
+                                onClick={() => {
+                                  resetForm();
+                                }}
+                              >
+                                <FormattedMessage
+                                  id="xpack.infra.sourceConfiguration.discardSettingsButtonLabel"
+                                  defaultMessage="Discard"
+                                />
+                              </EuiButton>
+                            </EuiFlexItem>
+                            <EuiFlexItem grow={false}>
+                              <EuiButton
+                                data-test-subj="applySettingsButton"
+                                color="primary"
+                                isDisabled={!isFormDirty || !isFormValid}
+                                fill
+                                onClick={persistUpdates}
+                              >
+                                <FormattedMessage
+                                  id="xpack.infra.sourceConfiguration.applySettingsButtonLabel"
+                                  defaultMessage="Apply"
+                                />
+                              </EuiButton>
+                            </EuiFlexItem>
+                          </EuiFlexGroup>
                         </>
                       )}
                     </EuiFlexItem>
