@@ -9,14 +9,12 @@ import { PLUGIN } from '../../common/constants';
 import { IntegrationsGroupedByStatus } from '../../common/types';
 import { IntegrationsGridByStatus } from '../components/integration_list_grid';
 import { getIntegrationsGroupedByStatus } from '../data';
-import { usePluginDependencies } from '../plugin';
+import { useCore } from '../hooks';
 import { linkToListView } from '../routes';
 
 export function Home() {
   // TODO: DRY out (or lift up, whatever) breadcrumbs
-  const {
-    core: { chrome },
-  } = usePluginDependencies();
+  const { chrome } = useCore();
 
   chrome.setBreadcrumbs([{ text: PLUGIN.TITLE, href: linkToListView() }]);
 

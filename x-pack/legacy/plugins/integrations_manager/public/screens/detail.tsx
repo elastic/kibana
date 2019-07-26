@@ -8,7 +8,7 @@ import { EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { PLUGIN } from '../../common/constants';
 import { IntegrationInfo } from '../../common/types';
 import { getIntegrationInfoByKey } from '../data';
-import { usePluginDependencies } from '../plugin';
+import { useCore } from '../hooks';
 import { linkToListView, linkToDetailView } from '../routes';
 
 export function Detail(props: { package: string }) {
@@ -29,9 +29,7 @@ function InfoPanel(info: IntegrationInfo) {
   const title = description.split(' ')[0];
 
   // TODO: DRY out (or lift up, whatever) breadcrumbs
-  const {
-    core: { chrome },
-  } = usePluginDependencies();
+  const { chrome } = useCore();
 
   chrome.setBreadcrumbs([
     { text: PLUGIN.TITLE, href: linkToListView() },

@@ -4,9 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { createContext, useContext, ReactNode } from 'react';
-import { ChromeStart, CoreSetup, I18nStart } from 'src/core/public';
+import React from 'react';
 import { HashRouter, Switch } from 'react-router-dom';
+import { ChromeStart, CoreSetup, I18nStart } from 'src/core/public';
+import { CoreProvider } from './contexts/core';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface PluginInitializerContext {}
@@ -18,10 +19,6 @@ export interface PluginCore {
   i18n: I18nStart;
   chrome: ChromeStart;
   routes: JSX.Element[];
-}
-export interface PluginDependencies {
-  core: PluginCore;
-  plugins?: [];
 }
 
 export class Plugin {
@@ -36,39 +33,16 @@ export class Plugin {
   }
 }
 
-export function usePluginDependencies() {
-  if (!DependenciesContext) {
-    throw new Error(`No plugin dependencies Context. Call the "setPluginDependencies()" method`);
-  }
-  return useContext<PluginDependencies>(DependenciesContext);
-}
-
 function Root(props: { core: PluginCore }) {
-  const { routes } = props.core;
-  const Providers = getPluginProviders({ core: props.core });
+  const { i18n, routes } = props.core;
 
   return (
-    <Providers>
-      <HashRouter>
-        <Switch>{routes}</Switch>
-      </HashRouter>
-    </Providers>
-  );
-}
-
-let DependenciesContext: React.Context<PluginDependencies>;
-function setPluginDependencies(deps: PluginDependencies) {
-  DependenciesContext = createContext<PluginDependencies>(deps);
-  return DependenciesContext.Provider;
-}
-
-function getPluginProviders(deps: PluginDependencies) {
-  const { i18n } = deps.core;
-  const PluginDependenciesProvider = setPluginDependencies(deps);
-
-  return ({ children }: { children: ReactNode }) => (
-    <i18n.Context>
-      <PluginDependenciesProvider value={deps}>{children}</PluginDependenciesProvider>
-    </i18n.Context>
+    <CoreProvider core={props.core}>
+      <i18n.Context>
+        <HashRouter>
+          <Switch>{routes}</Switch>
+        </HashRouter>
+      </i18n.Context>
+    </CoreProvider>
   );
 }
