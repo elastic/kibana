@@ -14,7 +14,7 @@ type Context = number | string | null;
 interface Arguments {
   label: string;
   metricFont: Style;
-  metricFormat: string | null;
+  metricFormat: string;
   labelFont: Style;
 }
 

@@ -40,12 +40,4 @@ storiesOf('arguments/NumberFormat', module)
       argValue="0.0[000]a"
       argId="NumberFormatExample3"
     />
-  ))
-  .add('with invalid format', () => (
-    <NumberFormatArgInput
-      numberFormats={numberFormats}
-      onValueChange={action('onValueChange')}
-      argValue="foo"
-      argId="NumberFormatExample4"
-    />
   ));

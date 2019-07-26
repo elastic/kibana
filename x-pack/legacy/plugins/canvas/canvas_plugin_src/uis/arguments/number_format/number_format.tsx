@@ -36,7 +36,7 @@ export const NumberFormatArgInput: FunctionComponent<Props> = ({
   const handleTextChange = (ev: ChangeEvent<HTMLInputElement>) => onValueChange(ev.target.value);
   const handleSelectChange = (ev: ChangeEvent<HTMLSelectElement>) => {
     const { value } = formatOptions[ev.target.selectedIndex];
-    return onValueChange(value);
+    return onValueChange(value || '0.0a');
   };
 
   // checks if the argValue is one of the preset formats
