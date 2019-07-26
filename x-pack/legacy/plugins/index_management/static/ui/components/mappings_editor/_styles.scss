@@ -3,6 +3,15 @@
     transition: none;
   }
 
+  .euiAccordion__padding--l {
+    padding-right: 0;
+  }
+
+  .property-editor {
+    border-bottom: 1px solid #eee;
+    padding-top: 24px;
+  }
+
   .tree,
   .tree ul {
     margin:0 0 0 1em; /* indentation */
@@ -30,6 +39,13 @@
     padding-left: 1.5em; /* indentation + .5em */
     line-height:2em; /* default list item's `line-height` */
     position:relative;
+
+
+    &:last-child {
+      .property-editor {
+          border-bottom: none;
+      }
+    }
   }
 
   .tree li:before {
