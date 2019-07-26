@@ -90,6 +90,10 @@ export interface ReindexOpts {
   body: {
     dest: IndexOpts;
     source: IndexOpts & { size: number };
+    script?: {
+      source: string;
+      lang: 'painless';
+    };
   };
   refresh: boolean;
   waitForCompletion: boolean;
