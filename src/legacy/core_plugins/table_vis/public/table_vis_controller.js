@@ -16,17 +16,9 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
-import { uiModules } from 'ui/modules';
 import { assign } from 'lodash';
 
-// get the kibana/table_vis module, and make sure that it requires the "kibana" module if it
-// didn't already
-const module = uiModules.get('kibana/table_vis', ['kibana']);
-
-// add a controller to tha module, which will transform the esResponse into a
-// tabular format that we can pass to the table directive
-module.controller('KbnTableVisController', function ($scope) {
+export function TableVisController($scope) {
   const uiStateSort = ($scope.uiState) ? $scope.uiState.get('vis.params.sort') : {};
   assign($scope.visParams.sort, uiStateSort);
 
@@ -61,5 +53,6 @@ module.controller('KbnTableVisController', function ($scope) {
     }
     $scope.renderComplete();
   });
-});
+}
+
 
