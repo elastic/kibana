@@ -55,7 +55,7 @@ import { severity$, SelectSeverity } from '../components/controls/select_severit
 import { interval$, SelectInterval } from '../components/controls/select_interval/select_interval';
 import { TimeseriesChart } from './components/timeseries_chart/timeseries_chart';
 import { TimeseriesexplorerNoJobsFound } from './components/timeseriesexplorer_no_jobs_found';
-import { TimeseriesexplorerNoResultsFound } from './components/timeseriesexplorer_no_results_found';
+import { TimeseriesexplorerNoChartData } from './components/timeseriesexplorer_no_chart_data';
 
 import { annotationsRefresh$ } from '../services/annotations_service';
 import { ml } from '../services/ml_api_service';
@@ -1081,7 +1081,7 @@ export class TimeSeriesExplorer extends React.Component {
         )}
 
         {(jobs.length > 0 && loading === false && hasResults === false) && (
-          <TimeseriesexplorerNoResultsFound dataNotChartable={dataNotChartable} entities={entities} />
+          <TimeseriesexplorerNoChartData dataNotChartable={dataNotChartable} entities={entities} />
         )}
 
         {(jobs.length > 0 && loading === false && hasResults === true) && (

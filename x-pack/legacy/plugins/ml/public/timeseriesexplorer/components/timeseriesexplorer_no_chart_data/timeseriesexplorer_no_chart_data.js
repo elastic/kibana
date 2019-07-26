@@ -14,7 +14,7 @@ import { EuiEmptyPrompt } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
-export const TimeseriesexplorerNoResultsFound = ({ dataNotChartable, entities }) => (
+export const TimeseriesexplorerNoChartData = ({ dataNotChartable, entities }) => (
   <EuiEmptyPrompt
     iconType="iInCircle"
     title={
