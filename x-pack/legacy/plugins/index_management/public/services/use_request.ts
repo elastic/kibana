@@ -6,7 +6,7 @@
 
 import { useEffect, useState } from 'react';
 import { getHttpClient } from './api';
-import { trackUiMetric } from './track_ui_metric';
+import { trackUiMetric, METRIC_TYPE } from './track_ui_metric';
 
 interface SendRequest {
   path?: string;
@@ -35,7 +35,7 @@ export const sendRequest = async ({
 
     // Track successful request
     if (uimActionType) {
-      trackUiMetric(uimActionType);
+      trackUiMetric(METRIC_TYPE.COUNT, uimActionType);
     }
 
     return {
