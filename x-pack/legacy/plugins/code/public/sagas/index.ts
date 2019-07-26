@@ -49,10 +49,11 @@ import {
 import { watchRootRoute } from './setup';
 import { watchRepoCloneSuccess, watchRepoDeleteFinished, watchStatusChange } from './status';
 import { watchLoadStructure } from './structure';
-import { watchRoute, watchRepoChange } from './route';
+import { watchRoute, watchRepoChange, watchRepoOrRevisionChange } from './route';
 
 export function* rootSaga() {
   yield fork(watchRepoChange);
+  yield fork(watchRepoOrRevisionChange);
   yield fork(watchRoute);
   yield fork(watchRootRoute);
   yield fork(watchLoadCommit);
