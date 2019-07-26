@@ -30,7 +30,7 @@ This section summarizes the changes in each release.
 
 coming[7.3.0]
 
-See also <<breaking-changes-7.3>>, breaking changes in 7.3>>.
+See also <<breaking-changes-7.3, breaking changes in 7.3>>.
 
 [float]
 [[enhancement-7.3.0]]
@@ -125,6 +125,7 @@ Visualize::
 APM::
 * [Fixes #34697]  Distinguish between loading state and empty state {pull}40651[#40651]
 * [Fixes elastic/kibana#40477] [APM Tutorial] Fix APM Server link on Cloud {pull}40711[#40711]
+* [Fixes #40351] Make sure stacked area charts handle no data points incorrectly {pull}40353[#40353]
 Canvas::
 * [Fixes #41296]  Apply global CSS to export workpad view {pull}41298[#41298]
 * [Fixes #39852]  Fix: native HTML5 drag&amp;drop shouldn't kick in {pull}39861[#39861]
@@ -194,6 +195,7 @@ Machine Learning::
 Management::
 * [Fixes #40254] Fix aggs autocompletion in Console. {pull}40816[#40816]
 * [Fixes #39087] Remove config from IndexPattern instance {pull}40146[#40146]
+* Fix `Rollup` tag not showing on rollup index patterns in list {pull}40297[#40297]
 Monitoring::
 * Add log message for error scenario around missing licensing {pull}40660[#40660]
 * [Fixes #36738] Issue 36738: Added zoomout functionality to all charts {pull}39072[#39072]
@@ -207,19 +209,6 @@ Observability::
 * [Uptime] Fix duration chart for Safari {pull}41619[#41619]
 Operations::
 * [Fixes #31549] configurable global socket timeouts {pull}31603[#31603]
-Other::
-* VisualBuilder Metric: Zero values ends in a changed behavior of the color rules {pull}39583[#39583]
-* Wrap long text inside of TSVB chart tooltip. {pull}39630[#39630]
-* [Fixes #39580] Corrects index pattern for fields in split_by_terms {pull}39723[#39723]
-* [Fixes #40351] [APM] Make sure stacked area charts handle no data points incorrectly {pull}40353[#40353]
-* Fix `Rollup` tag not showing on rollup index patterns in list {pull}40297[#40297]
-* [Fixes #39788, #39655] Fix tooltip label name rendering in pie charts. {pull}40105[#40105]
-* [Fixes #41357] Bugfix displaying date_nanos formated min/max aggs {pull}41472[#41472]
-* [Fixes #39083] Fix visualization migration when savedSearchId is empty string {pull}40172[#40172]
-* Change help URL in timelion to point to current docs {pull}39885[#39885]
-* Check whether vis type exists {pull}39803[#39803]
-* [Fixes #28842] Fix issue with long values in TSVB static metric {pull}40256[#40256]
-* [Fixes #36295] Fix visualizations for rollups using fixed_interval or calendar_interval {pull}39537[#39537]
 Platform::
 * [Fixes #14544] Cancel Discover fetch requests if a new one is submitted {pull}39963[#39963]
 * fixing custom vis types buildPipeline {pull}39874[#39874]
@@ -231,6 +220,17 @@ SIEM::
 Security::
 * [Fixes #40014] Spaces API - default disabledFeatures to empty array {pull}40017[#40017]
 * [Fixes #39837] Feature Controls - only navigate to index pattern management if available {pull}40067[#40067]
+Visualize::
+* VisualBuilder Metric: Zero values ends in a changed behavior of the color rules {pull}39583[#39583]
+* Wrap long text inside of TSVB chart tooltip. {pull}39630[#39630]
+* [Fixes #39580] Corrects index pattern for fields in split_by_terms {pull}39723[#39723
+* [Fixes #39788, #39655] Fix tooltip label name rendering in pie charts. {pull}40105[#40105]
+* [Fixes #41357] Bugfix displaying date_nanos formated min/max aggs {pull}41472[#41472]
+* [Fixes #39083] Fix visualization migration when savedSearchId is empty string {pull}40172[#40172]
+* Change help URL in timelion to point to current docs {pull}39885[#39885]
+* [Fixes #28842] Fix issue with long values in TSVB static metric {pull}40256[#40256]
+* [Fixes #36295] Fix visualizations for rollups using fixed_interval or calendar_interval {pull}39537[#39537]
+
 
 [float]
 [[roadmap-7.3.0]]
@@ -287,7 +287,7 @@ Monitoring::
 Security::
 * Feature Controls: Only navigates to index pattern management if available {pull}40067[#40067]
 * Spaces: Fixes scenario where a Space is created via the API without specifying any `disabledFeatures` {pull}40017[#40017]
-Visualizations::
+Visualize::
 * Fixes problem with `Rollup` tag not showing on rollup index patterns in list {pull}40297[#40297]
 * Fixes show listing limit so it no longer shows a false warning {pull}38246[#38246]
 * Fixes tooltip label name rendering in pie charts {pull}40105[#40105]
