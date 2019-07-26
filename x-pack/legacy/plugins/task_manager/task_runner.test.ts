@@ -350,6 +350,39 @@ describe('TaskManagerRunner', () => {
     expect(instance.status).toBe('failed');
   });
 
+  test('bypasses getRetry function (returning false) on error of a recurring task', async () => {
+    const initialAttempts = _.random(1, 3);
+    const id = Date.now().toString();
+    const getRetryStub = sinon.stub().returns(false);
+    const error = new Error('Dangit!');
+    const { runner, store } = testOpts({
+      instance: {
+        id,
+        attempts: initialAttempts,
+        interval: '1m',
+      },
+      definitions: {
+        bar: {
+          getRetry: getRetryStub,
+          createTaskRunner: () => ({
+            async run() {
+              throw error;
+            },
+          }),
+        },
+      },
+    });
+
+    await runner.run();
+
+    sinon.assert.calledOnce(store.update);
+    sinon.assert.calledWith(getRetryStub, initialAttempts, error);
+    const instance = store.update.args[0][0];
+
+    const nextDefaultRetryAt = new Date(Date.now() + initialAttempts * 5 * 60 * 1000);
+    expect(instance.runAt.getTime()).toEqual(nextDefaultRetryAt.getTime());
+  });
+
   test('uses getRetry (returning date) to set retryAt when defined', async () => {
     const id = _.random(1, 20).toString();
     const initialAttempts = _.random(1, 3);
@@ -449,6 +482,41 @@ describe('TaskManagerRunner', () => {
 
     expect(instance.retryAt).toBeNull();
     expect(instance.status).toBe('running');
+  });
+
+  test('bypasses getRetry (returning false) of a recurring task to set retryAt when defined', async () => {
+    const id = _.random(1, 20).toString();
+    const initialAttempts = _.random(1, 3);
+    const timeoutMinutes = 1;
+    const getRetryStub = sinon.stub().returns(false);
+    const { runner, store } = testOpts({
+      instance: {
+        id,
+        attempts: initialAttempts,
+        interval: '1m',
+      },
+      definitions: {
+        bar: {
+          timeout: `${timeoutMinutes}m`,
+          getRetry: getRetryStub,
+          createTaskRunner: () => ({
+            run: async () => undefined,
+          }),
+        },
+      },
+    });
+
+    await runner.claimOwnership();
+
+    sinon.assert.calledOnce(store.update);
+    sinon.assert.calledWith(getRetryStub, initialAttempts + 1);
+    const instance = store.update.args[0][0];
+
+    const attemptDelay = (initialAttempts + 1) * 5 * 60 * 1000;
+    const timeoutDelay = timeoutMinutes * 60 * 1000;
+    expect(instance.retryAt.getTime()).toEqual(
+      new Date(Date.now() + attemptDelay + timeoutDelay).getTime()
+    );
   });
 
   test('Fails non-recurring task when maxAttempts reached', async () => {

@@ -182,6 +182,7 @@ export class TaskManagerRunner implements TaskRunner {
           attempts,
           error: Boom.clientTimeout(),
           addDuration: this.definition.timeout,
+          mustRetry: !!this.instance.interval,
         }),
       });
 
@@ -234,7 +235,11 @@ export class TaskManagerRunner implements TaskRunner {
       runAt = result.runAt;
     } else if (result.error) {
       // when result.error is truthy, then we're retrying because it failed
-      const retryAt = this.getRetryDelay({ attempts: this.instance.attempts, error: result.error });
+      const retryAt = this.getRetryDelay({
+        attempts: this.instance.attempts,
+        error: result.error,
+        mustRetry: !!this.instance.interval,
+      });
       if (!retryAt) {
         status = 'failed';
         runAt = this.instance.runAt;
@@ -297,10 +302,12 @@ export class TaskManagerRunner implements TaskRunner {
     error,
     attempts,
     addDuration,
+    mustRetry,
   }: {
     error: any;
     attempts: number;
     addDuration?: string;
+    mustRetry?: boolean;
   }): Date | null {
     let result = null;
 
@@ -311,7 +318,7 @@ export class TaskManagerRunner implements TaskRunner {
 
     if (retry instanceof Date) {
       result = retry;
-    } else if (retry === true) {
+    } else if (retry === true || mustRetry) {
       result = new Date(Date.now() + attempts * defaultBackoffPerFailure);
     }
 
