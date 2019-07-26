@@ -64,9 +64,11 @@ function getMockStyle(orderedMockLayerList) {
 
   orderedMockLayerList.forEach(mockLayer => {
     mockLayer.getMbSourceIds((mbSourceId) => {
+      console.log('add mbs', mbSourceId);
       mockStyle.sources[mbSourceId] = {};
     });
     mockLayer.getMbLayersIdsToSource(({ id, source }) => {
+      console.log('add', id, source);
       mockStyle.layers.push({
         id: id,
         source: source
@@ -74,6 +76,7 @@ function getMockStyle(orderedMockLayerList) {
     });
   });
 
+  console.log(mockStyle);
   return mockStyle;
 
 
@@ -85,19 +88,19 @@ describe('mb/utils', () => {
   //   expect(true).toBe(false);
   // });
 
-  test('should move bar layer in front of foo layer' +
-    '', async () => {
+  test('should move bar layer in front of foo layer', async () => {
 
-    const barLayer = new MockLayer(
-      'bar',
-      ['bar'],
-      [{ id: 'bar_fill', source: 'bar' }, { id: 'bar_line', source: 'bar' }]
-    );
 
     const fooLayer = new MockLayer(
       'foo',
       ['foo'],
       [{ id: 'foo_fill', source: 'foo' }, { id: 'foo_line', source: 'foo' }]
+    );
+
+    const barLayer = new MockLayer(
+      'bar',
+      ['bar'],
+      [{ id: 'bar_fill', source: 'bar' }, { id: 'bar_line', source: 'bar' }]
     );
 
     const currentLayerOrder = [fooLayer, barLayer];
@@ -114,7 +117,42 @@ describe('mb/utils', () => {
     const nextStyle = getMockStyle(nextLayerListOrder);
     expect(orderedStyle).toEqual(nextStyle);
 
+  });
 
+  test('should move bar layer in front of foo layer, but after baz layer', async () => {
+
+    const bazLayer = new MockLayer(
+      'baz',
+      ['baz'],
+      [{ id: 'baz_fill', source: 'bar' }, { id: 'baz_line', source: 'baz' }]
+    );
+
+    const fooLayer = new MockLayer(
+      'foo',
+      ['foo'],
+      [{ id: 'foo_fill', source: 'foo' }, { id: 'foo_line', source: 'foo' }]
+    );
+
+    const barLayer = new MockLayer(
+      'bar',
+      ['bar'],
+      [{ id: 'bar_fill', source: 'bar' }, { id: 'bar_line', source: 'bar' }]
+    );
+
+    const currentLayerOrder = [bazLayer, fooLayer, barLayer];
+    const nextLayerListOrder = [bazLayer, barLayer, fooLayer];
+
+
+    const currentStyle = getMockStyle(currentLayerOrder);
+    const mockMbMap = new MockMbMap(currentStyle);
+
+    syncLayerOrder(mockMbMap, nextLayerListOrder);
+
+    const orderedStyle = mockMbMap.getStyle();
+
+    const nextStyle = getMockStyle(nextLayerListOrder);
+
+    expect(orderedStyle).toEqual(nextStyle);
 
   });
 
