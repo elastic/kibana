@@ -258,8 +258,7 @@ export class TimeSeriesExplorer extends React.Component {
     appState.save();
 
     if (
-      this.contextChartSelectedInitCallDone === false ||
-      focusChartData === undefined ||
+      (this.contextChartSelectedInitCallDone === false && focusChartData === undefined) ||
       (zoomFrom.getTime() !== selection.from.getTime()) ||
       (zoomTo.getTime() !== selection.to.getTime())
     ) {
