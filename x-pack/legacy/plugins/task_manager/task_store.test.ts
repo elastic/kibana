@@ -6,104 +6,73 @@
 
 import _ from 'lodash';
 import sinon from 'sinon';
-import {
-  TASK_MANAGER_API_VERSION as API_VERSION,
-  TASK_MANAGER_TEMPLATE_VERSION as TEMPLATE_VERSION,
-} from './constants';
-import { TaskInstance, TaskStatus } from './task';
+import { TaskDictionary, SanitizedTaskDefinition, TaskInstance, TaskStatus } from './task';
 import { FetchOpts, TaskStore } from './task_store';
 import { mockLogger } from './test_utils';
+import { SavedObjectsClientMock } from 'src/core/server/mocks';
+import { SavedObjectsSerializer, SavedObjectsSchema, SavedObjectAttributes } from 'src/core/server';
 
-const getKibanaUuid = sinon.stub().returns('kibana-uuid-123-test');
+const taskDefinitions: TaskDictionary<SanitizedTaskDefinition> = {
+  report: {
+    type: 'report',
+    title: '',
+    numWorkers: 1,
+    createTaskRunner: jest.fn(),
+  },
+  dernstraight: {
+    type: 'dernstraight',
+    title: '',
+    numWorkers: 1,
+    createTaskRunner: jest.fn(),
+  },
+  yawn: {
+    type: 'yawn',
+    title: '',
+    numWorkers: 1,
+    createTaskRunner: jest.fn(),
+  },
+};
+
+const savedObjectsClient = SavedObjectsClientMock.create();
+const serializer = new SavedObjectsSerializer(new SavedObjectsSchema());
+
+beforeEach(() => jest.resetAllMocks());
+
+const mockedDate = new Date('2019-02-12T21:01:22.479Z');
+(global as any).Date = class Date {
+  constructor() {
+    return mockedDate;
+  }
+  static now() {
+    return mockedDate.getTime();
+  }
+};
 
 describe('TaskStore', () => {
-  describe('init', () => {
-    test('creates the task manager index', async () => {
-      const callCluster = sinon.stub();
-      callCluster.withArgs('indices.getTemplate').returns(Promise.resolve({ tasky: {} }));
-      const store = new TaskStore({
-        callCluster,
-        getKibanaUuid,
-        logger: mockLogger(),
-        index: 'tasky',
-        maxAttempts: 2,
-        supportedTypes: ['a', 'b', 'c'],
-      });
-
-      await store.init();
-
-      sinon.assert.calledTwice(callCluster); // store.init calls twice: once to check for existing template, once to put the template (if needed)
-
-      sinon.assert.calledWithMatch(callCluster, 'indices.putTemplate', {
-        body: {
-          index_patterns: ['tasky'],
-          settings: {
-            number_of_shards: 1,
-            auto_expand_replicas: '0-1',
-          },
-        },
-        name: 'tasky',
-      });
-    });
-
-    test('logs a warning if newer index template exists', async () => {
-      const callCluster = sinon.stub();
-      callCluster
-        .withArgs('indices.getTemplate')
-        .returns(Promise.resolve({ tasky: { version: Infinity } }));
-
-      const logger = {
-        info: sinon.spy(),
-        debug: sinon.spy(),
-        warning: sinon.spy(),
-        error: sinon.spy(),
-      };
-
-      const store = new TaskStore({
-        callCluster,
-        getKibanaUuid,
-        logger,
-        index: 'tasky',
-        maxAttempts: 2,
-        supportedTypes: ['a', 'b', 'c'],
-      });
-
-      await store.init();
-      const loggingCall = logger.warning.getCall(0);
-      expect(loggingCall.args[0]).toBe(
-        `This Kibana instance defines an older template version (${TEMPLATE_VERSION}) than is currently in Elasticsearch (Infinity). ` +
-          `Because of the potential for non-backwards compatible changes, this Kibana instance will only be able to claim scheduled tasks with ` +
-          `"kibana.apiVersion" <= ${API_VERSION} in the task metadata.`
-      );
-      expect(logger.warning.calledOnce).toBe(true);
-    });
-  });
-
   describe('schedule', () => {
     async function testSchedule(task: TaskInstance) {
-      const callCluster = sinon.stub();
-      callCluster.withArgs('index').returns(
-        Promise.resolve({
-          _id: 'testid',
-          _seq_no: 3344,
-          _primary_term: 3344,
+      const callCluster = jest.fn();
+      savedObjectsClient.create.mockImplementation(
+        async (type: string, attributes: SavedObjectAttributes) => ({
+          id: 'testid',
+          type,
+          attributes,
+          references: [],
+          version: '123',
         })
       );
-      callCluster.withArgs('indices.getTemplate').returns(Promise.resolve({ tasky: {} }));
       const store = new TaskStore({
+        serializer,
         callCluster,
-        getKibanaUuid,
-        logger: mockLogger(),
-        index: 'tasky',
         maxAttempts: 2,
-        supportedTypes: ['report', 'dernstraight', 'yawn'],
+        definitions: taskDefinitions,
+        savedObjectsRepository: savedObjectsClient,
       });
-      await store.init();
       const result = await store.schedule(task);
 
-      sinon.assert.calledThrice(callCluster);
+      expect(savedObjectsClient.create).toHaveBeenCalledTimes(1);
 
-      return { result, callCluster, arg: callCluster.args[2][1] };
+      return result;
     }
 
     test('serializes the params and state', async () => {
@@ -112,18 +81,42 @@ describe('TaskStore', () => {
         state: { foo: 'bar' },
         taskType: 'report',
       };
-      const { callCluster, arg } = await testSchedule(task);
+      const result = await testSchedule(task);
 
-      sinon.assert.calledWith(callCluster, 'index');
-
-      expect(arg).toMatchObject({
-        index: 'tasky',
-        body: {
-          task: {
-            params: JSON.stringify(task.params),
-            state: JSON.stringify(task.state),
-          },
+      expect(savedObjectsClient.create).toHaveBeenCalledWith(
+        'task',
+        {
+          attempts: 0,
+          interval: undefined,
+          params: '{"hello":"world"}',
+          retryAt: null,
+          runAt: '2019-02-12T21:01:22.479Z',
+          scheduledAt: '2019-02-12T21:01:22.479Z',
+          scope: undefined,
+          startedAt: null,
+          state: '{"foo":"bar"}',
+          status: 'idle',
+          taskType: 'report',
+          user: undefined,
         },
+        {}
+      );
+
+      expect(result).toEqual({
+        id: 'testid',
+        attempts: 0,
+        interval: undefined,
+        params: { hello: 'world' },
+        retryAt: null,
+        runAt: mockedDate,
+        scheduledAt: mockedDate,
+        scope: undefined,
+        startedAt: null,
+        state: { foo: 'bar' },
+        status: 'idle',
+        taskType: 'report',
+        user: undefined,
+        version: '123',
       });
     });
 
@@ -133,26 +126,27 @@ describe('TaskStore', () => {
         state: { foo: 'bar' },
         taskType: 'report',
       };
-      const { result } = await testSchedule(task);
+      const result = await testSchedule(task);
 
       expect(result).toMatchObject({
         ...task,
-        sequenceNumber: 3344,
-        primaryTerm: 3344,
         id: 'testid',
       });
     });
 
     test('sets runAt to now if not specified', async () => {
-      const now = Date.now();
-      const { arg } = await testSchedule({ taskType: 'dernstraight', params: {}, state: {} });
-      expect(arg.body.task.runAt.getTime()).toBeGreaterThanOrEqual(now);
+      await testSchedule({ taskType: 'dernstraight', params: {}, state: {} });
+      expect(savedObjectsClient.create).toHaveBeenCalledTimes(1);
+      const attributes = savedObjectsClient.create.mock.calls[0][1];
+      expect(new Date(attributes.runAt as string).getTime()).toEqual(mockedDate.getTime());
     });
 
     test('ensures params and state are not null', async () => {
-      const { arg } = await testSchedule({ taskType: 'yawn' } as any);
-      expect(arg.body.task.params).toEqual('{}');
-      expect(arg.body.task.state).toEqual('{}');
+      await testSchedule({ taskType: 'yawn' } as any);
+      expect(savedObjectsClient.create).toHaveBeenCalledTimes(1);
+      const attributes = savedObjectsClient.create.mock.calls[0][1];
+      expect(attributes.params).toEqual('{}');
+      expect(attributes.state).toEqual('{}');
     });
 
     test('errors if the task type is unknown', async () => {
@@ -166,12 +160,11 @@ describe('TaskStore', () => {
     async function testFetch(opts?: FetchOpts, hits: any[] = []) {
       const callCluster = sinon.spy(async () => ({ hits: { hits } }));
       const store = new TaskStore({
+        serializer,
         callCluster,
-        getKibanaUuid,
-        logger: mockLogger(),
-        index: 'tasky',
         maxAttempts: 2,
-        supportedTypes: ['a', 'b', 'c'],
+        definitions: taskDefinitions,
+        savedObjectsRepository: savedObjectsClient,
       });
 
       const result = await store.fetch(opts);
@@ -188,7 +181,7 @@ describe('TaskStore', () => {
     test('empty call filters by type, sorts by runAt and id', async () => {
       const { args } = await testFetch();
       expect(args).toMatchObject({
-        index: 'tasky',
+        index: '.kibana_task_manager',
         body: {
           sort: [{ 'task.runAt': 'asc' }, { _id: 'desc' }],
           query: { term: { type: 'task' } },
@@ -301,13 +294,14 @@ describe('TaskStore', () => {
             interval: undefined,
             params: { hello: 'world' },
             runAt,
+            scheduledAt: mockedDate,
             scope: ['reporting'],
             state: { baby: 'Henhen' },
             status: 'idle',
             taskType: 'foo',
             user: 'jimbo',
-            sequenceNumber: undefined,
-            primaryTerm: undefined,
+            retryAt: undefined,
+            startedAt: undefined,
           },
           {
             attempts: 2,
@@ -315,13 +309,14 @@ describe('TaskStore', () => {
             interval: '5m',
             params: { shazm: 1 },
             runAt,
+            scheduledAt: mockedDate,
             scope: ['reporting', 'ceo'],
             state: { henry: 'The 8th' },
             status: 'running',
             taskType: 'bar',
             user: 'dabo',
-            sequenceNumber: undefined,
-            primaryTerm: undefined,
+            retryAt: undefined,
+            startedAt: undefined,
           },
         ],
         searchAfter: ['b', 2],
@@ -335,9 +330,9 @@ describe('TaskStore', () => {
       const store = new TaskStore({
         callCluster,
         logger: mockLogger(),
-        supportedTypes: ['a', 'b', 'c'],
-        index: 'tasky',
+        definitions: taskDefinitions,
         maxAttempts: 2,
+        serializer,
         ...opts,
       });
 
@@ -355,12 +350,11 @@ describe('TaskStore', () => {
     test('it returns normally with no tasks when the index does not exist.', async () => {
       const callCluster = sinon.spy(async () => ({ hits: { hits: [] } }));
       const store = new TaskStore({
+        serializer,
         callCluster,
-        getKibanaUuid,
-        logger: mockLogger(),
-        supportedTypes: ['a', 'b', 'c'],
-        index: 'tasky',
+        definitions: taskDefinitions,
         maxAttempts: 2,
+        savedObjectsRepository: savedObjectsClient,
       });
 
       const result = await store.fetchAvailableTasks();
@@ -373,12 +367,25 @@ describe('TaskStore', () => {
 
     test('it filters tasks by supported types, maxAttempts, and runAt', async () => {
       const maxAttempts = _.random(2, 43);
-      const index = `index_${_.random(1, 234)}`;
+      const customMaxAttempts = _.random(44, 100);
       const { args } = await testFetchAvailableTasks({
         opts: {
-          index,
           maxAttempts,
-          supportedTypes: ['foo', 'bar'],
+          definitions: {
+            foo: {
+              type: 'foo',
+              title: '',
+              numWorkers: 1,
+              createTaskRunner: jest.fn(),
+            },
+            bar: {
+              type: 'bar',
+              title: '',
+              numWorkers: 1,
+              maxAttempts: customMaxAttempts,
+              createTaskRunner: jest.fn(),
+            },
+          },
         },
       });
       expect(args).toMatchObject({
@@ -390,10 +397,63 @@ describe('TaskStore', () => {
                 {
                   bool: {
                     must: [
-                      { terms: { 'task.taskType': ['foo', 'bar'] } },
-                      { range: { 'task.attempts': { lte: maxAttempts } } },
-                      { range: { 'task.runAt': { lte: 'now' } } },
-                      { range: { 'kibana.apiVersion': { lte: 1 } } },
+                      {
+                        bool: {
+                          should: [
+                            {
+                              bool: {
+                                must: [
+                                  { term: { 'task.status': 'idle' } },
+                                  { range: { 'task.runAt': { lte: 'now' } } },
+                                ],
+                              },
+                            },
+                            {
+                              bool: {
+                                must: [
+                                  { term: { 'task.status': 'running' } },
+                                  { range: { 'task.retryAt': { lte: 'now' } } },
+                                ],
+                              },
+                            },
+                          ],
+                        },
+                      },
+                      {
+                        bool: {
+                          should: [
+                            { exists: { field: 'task.interval' } },
+                            {
+                              bool: {
+                                must: [
+                                  { term: { 'task.taskType': 'foo' } },
+                                  {
+                                    range: {
+                                      'task.attempts': {
+                                        lt: maxAttempts,
+                                      },
+                                    },
+                                  },
+                                ],
+                              },
+                            },
+                            {
+                              bool: {
+                                must: [
+                                  { term: { 'task.taskType': 'bar' } },
+                                  {
+                                    range: {
+                                      'task.attempts': {
+                                        lt: customMaxAttempts,
+                                      },
+                                    },
+                                  },
+                                ],
+                              },
+                            },
+                          ],
+                        },
+                      },
                     ],
                   },
                 },
@@ -401,10 +461,18 @@ describe('TaskStore', () => {
             },
           },
           size: 10,
-          sort: { 'task.runAt': { order: 'asc' } },
+          sort: {
+            _script: {
+              type: 'number',
+              order: 'asc',
+              script: {
+                lang: 'expression',
+                source: `doc['task.retryAt'].value || doc['task.runAt'].value`,
+              },
+            },
+          },
           seq_no_primary_term: true,
         },
-        index,
       });
     });
 
@@ -428,6 +496,8 @@ describe('TaskStore', () => {
                 scope: ['reporting'],
               },
             },
+            _seq_no: 1,
+            _primary_term: 2,
             sort: ['a', 1],
           },
           {
@@ -446,6 +516,8 @@ describe('TaskStore', () => {
                 scope: ['reporting', 'ceo'],
               },
             },
+            _seq_no: 3,
+            _primary_term: 4,
             sort: ['b', 2],
           },
         ],
@@ -462,8 +534,6 @@ describe('TaskStore', () => {
           status: 'idle',
           taskType: 'foo',
           user: 'jimbo',
-          sequenceNumber: undefined,
-          primaryTerm: undefined,
         },
         {
           attempts: 2,
@@ -476,8 +546,6 @@ describe('TaskStore', () => {
           status: 'running',
           taskType: 'bar',
           user: 'dabo',
-          sequenceNumber: undefined,
-          primaryTerm: undefined,
         },
       ]);
     });
@@ -485,60 +553,70 @@ describe('TaskStore', () => {
 
   describe('update', () => {
     test('refreshes the index, handles versioning', async () => {
-      const runAt = new Date();
       const task = {
-        runAt,
-        scheduledAt: runAt,
+        runAt: mockedDate,
+        scheduledAt: mockedDate,
+        startedAt: null,
+        retryAt: null,
         id: 'task:324242',
         params: { hello: 'world' },
         state: { foo: 'bar' },
         taskType: 'report',
-        sequenceNumber: 2,
-        primaryTerm: 2,
         attempts: 3,
         status: 'idle' as TaskStatus,
+        version: '123',
       };
 
-      const callCluster = sinon.spy(async () => ({
-        _seq_no: task.sequenceNumber + 1,
-        _primary_term: task.primaryTerm + 1,
-      }));
+      savedObjectsClient.update.mockImplementation(
+        async (type: string, id: string, attributes: SavedObjectAttributes) => {
+          return {
+            id,
+            type,
+            attributes,
+            references: [],
+            version: '123',
+          };
+        }
+      );
 
       const store = new TaskStore({
-        callCluster,
-        getKibanaUuid,
-        logger: mockLogger(),
-        index: 'tasky',
+        serializer,
+        callCluster: jest.fn(),
         maxAttempts: 2,
-        supportedTypes: ['a', 'b', 'c'],
+        definitions: taskDefinitions,
+        savedObjectsRepository: savedObjectsClient,
       });
 
       const result = await store.update(task);
 
-      sinon.assert.calledOnce(callCluster);
-      sinon.assert.calledWith(callCluster, 'update');
-
-      expect(callCluster.args[0][1]).toMatchObject({
-        id: task.id,
-        index: 'tasky',
-        if_seq_no: 2,
-        if_primary_term: 2,
-        refresh: true,
-        body: {
-          doc: {
-            task: {
-              ..._.omit(task, ['id', 'sequenceNumber', 'primaryTerm']),
-              params: JSON.stringify(task.params),
-              state: JSON.stringify(task.state),
-            },
-          },
+      expect(savedObjectsClient.update).toHaveBeenCalledWith(
+        'task',
+        task.id,
+        {
+          attempts: task.attempts,
+          interval: undefined,
+          params: JSON.stringify(task.params),
+          retryAt: null,
+          runAt: task.runAt.toISOString(),
+          scheduledAt: mockedDate.toISOString(),
+          scope: undefined,
+          startedAt: null,
+          state: JSON.stringify(task.state),
+          status: task.status,
+          taskType: task.taskType,
+          user: undefined,
         },
-      });
+        { version: '123' }
+      );
 
       expect(result).toEqual({
         ...task,
-        sequenceNumber: 3,
-        primaryTerm: 3,
+        interval: undefined,
+        retryAt: null,
+        scope: undefined,
+        startedAt: null,
+        user: undefined,
+        version: '123',
       });
     });
   });
@@ -546,41 +624,17 @@ describe('TaskStore', () => {
   describe('remove', () => {
     test('removes the task with the specified id', async () => {
       const id = `id-${_.random(1, 20)}`;
-      const callCluster = sinon.spy(() =>
-        Promise.resolve({
-          _index: 'myindex',
-          _id: id,
-          _seq_no: 32,
-          _primary_term: 32,
-          result: 'deleted',
-        })
-      );
+      const callCluster = jest.fn();
       const store = new TaskStore({
+        serializer,
         callCluster,
-        getKibanaUuid,
-        logger: mockLogger(),
-        index: 'myindex',
         maxAttempts: 2,
-        supportedTypes: ['a'],
+        definitions: taskDefinitions,
+        savedObjectsRepository: savedObjectsClient,
       });
       const result = await store.remove(id);
-
-      sinon.assert.calledOnce(callCluster);
-      sinon.assert.calledWith(callCluster, 'delete');
-
-      expect(result).toEqual({
-        id,
-        index: 'myindex',
-        sequenceNumber: 32,
-        primaryTerm: 32,
-        result: 'deleted',
-      });
-
-      expect(callCluster.args[0][1]).toMatchObject({
-        id,
-        index: 'myindex',
-        refresh: true,
-      });
+      expect(result).toBeUndefined();
+      expect(savedObjectsClient.delete).toHaveBeenCalledWith('task', id);
     });
   });
 });
