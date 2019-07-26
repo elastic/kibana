@@ -49,6 +49,7 @@ describe('Data Frame: <DefinePivotSummary />', () => {
       groupByList: { 'the-group-by-name': groupBy },
       isAdvancedPivotEditorEnabled: false,
       isAdvancedSourceEditorEnabled: false,
+      sourceConfigUpdated: false,
       searchString: 'the-query',
       searchQuery: 'the-search-query',
       valid: true,
