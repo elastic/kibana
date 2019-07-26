@@ -5,11 +5,12 @@
  */
 
 import { removeOrphanedSourcesAndLayers, syncLayerOrder } from './utils';
+import _ from 'lodash';
 
 class MockMbMap {
 
   constructor(style) {
-    this._style = style;
+    this._style = _.cloneDeep(style);
   }
 
   getStyle() {
@@ -63,12 +64,10 @@ function getMockStyle(orderedMockLayerList) {
   };
 
   orderedMockLayerList.forEach(mockLayer => {
-    mockLayer.getMbSourceIds((mbSourceId) => {
-      console.log('add mbs', mbSourceId);
+    mockLayer.getMbSourceIds().forEach((mbSourceId) => {
       mockStyle.sources[mbSourceId] = {};
     });
-    mockLayer.getMbLayersIdsToSource(({ id, source }) => {
-      console.log('add', id, source);
+    mockLayer.getMbLayersIdsToSource().forEach(({ id, source }) => {
       mockStyle.layers.push({
         id: id,
         source: source
@@ -76,10 +75,7 @@ function getMockStyle(orderedMockLayerList) {
     });
   });
 
-  console.log(mockStyle);
   return mockStyle;
-
-
 }
 
 describe('mb/utils', () => {
@@ -108,6 +104,8 @@ describe('mb/utils', () => {
 
 
     const currentStyle = getMockStyle(currentLayerOrder);
+
+
     const mockMbMap = new MockMbMap(currentStyle);
 
     syncLayerOrder(mockMbMap, nextLayerListOrder);
@@ -115,6 +113,7 @@ describe('mb/utils', () => {
     const orderedStyle = mockMbMap.getStyle();
 
     const nextStyle = getMockStyle(nextLayerListOrder);
+
     expect(orderedStyle).toEqual(nextStyle);
 
   });
