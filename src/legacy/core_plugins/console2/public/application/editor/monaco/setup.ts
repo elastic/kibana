@@ -17,9 +17,20 @@
  * under the License.
  */
 
-import { PluginInitializerContext } from '../../../core/server';
-import { ConsoleServerPlugin } from './plugin';
+import * as monaco from 'monaco-editor/esm/vs/editor/editor.api';
+import { getThemeConfig } from './theme';
 
-export function plugin(ctx: PluginInitializerContext) {
-  return new ConsoleServerPlugin(ctx);
+export function setup({ theme, element }: { theme: 'light' | 'dark'; element: HTMLElement }) {
+  monaco.editor.defineTheme('euiColors', getThemeConfig(theme));
+  monaco.editor.setTheme('euiColors');
+  return monaco.editor.create(element, {
+    // readOnly: false,
+    minimap: { enabled: false },
+    language: '',
+    value: `{ "here": "is" }`,
+    scrollbar: {
+      vertical: 'auto',
+      horizontal: 'hidden',
+    },
+  });
 }

@@ -29,11 +29,31 @@
  * The fact that we use Monaco should, in as far as possible, be an implementation detail.
  */
 
-import 'monaco-editor/esm/vs/editor/browser/controller/coreCommands.js';
-import 'monaco-editor/esm/vs/editor/browser/widget/codeEditorWidget.js';
-import 'monaco-editor/esm/vs/editor/browser/widget/diffEditorWidget.js';
-// import 'monaco-editor/esm/vs/editor/browser/widget/diffNavigator.js';
-// import 'monaco-editor/esm/vs/editor/contrib/bracketMatching/bracketMatching.js';
-// import 'monaco-editor/esm/vs/editor/contrib/caretOperations/caretOperations.js';
-// import 'monaco-editor/esm/vs/editor/contrib/caretOperations/transpose.js';
-import 'monaco-editor/esm/vs/editor/contrib/clipboard/clipboard.js';
+import * as monaco from 'monaco-editor/esm/vs/editor/editor.api';
+
+import './monaco/components';
+
+import { setup } from './monaco/setup';
+import { Theme } from '../../types';
+
+export class Editor {
+  private readonly editor: monaco.editor.IStandaloneCodeEditor;
+
+  constructor(private readonly mountElement: HTMLElement, readonly themeName: Theme) {
+    this.editor = setup({ element: this.mountElement, theme: this.themeName });
+  }
+
+  recalculateLayout() {
+    this.editor.layout();
+  }
+}
+
+export const createEditor = ({
+  mountElement,
+  themeName,
+}: {
+  mountElement: HTMLElement;
+  themeName: Theme;
+}) => {
+  return new Editor(mountElement, themeName);
+};

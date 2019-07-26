@@ -40,7 +40,12 @@ export const setupNgForReact = (App: () => JSX.Element) => {
     consoleRootDiv.setAttribute('id', ROOT_ELEMENT_ID);
     targetElement.appendChild(consoleRootDiv);
 
-    render(<App />, targetElement);
+    render(
+      <context.AppContextProvider>
+        <App />
+      </context.AppContextProvider>,
+      targetElement
+    );
 
     $scope.$on('destroy', () => {
       unmountComponentAtNode(targetElement);
@@ -48,7 +53,7 @@ export const setupNgForReact = (App: () => JSX.Element) => {
     });
   });
 
-  uiRoutes.when('/dev_tools/console2', {
+  uiRoutes.when('/poc/console2', {
     requireUICapability: 'dev_tools.show',
   });
 };

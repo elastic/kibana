@@ -17,15 +17,17 @@
  * under the License.
  */
 
-import { Plugin, PluginInitializerContext, CoreSetup, CoreStart } from '../../../core/server';
+import { PluginInitializerContext } from '../../../../core/public';
+import { ConsolePlugin } from './plugin';
 
-export class ConsoleServerPlugin implements Plugin {
-  // @ts-ignore
-  constructor(private readonly initCtx: PluginInitializerContext) {}
+const anyObject: any = {};
 
-  setup(core: CoreSetup) {}
-
-  start(core: CoreStart) {}
-
-  stop() {}
+export function plugin(ctx: PluginInitializerContext) {
+  return new ConsolePlugin(ctx);
 }
+
+(function simulateSetup() {
+  const consolePlugin = plugin(anyObject);
+  consolePlugin.setup(anyObject);
+  consolePlugin.start(anyObject);
+})();

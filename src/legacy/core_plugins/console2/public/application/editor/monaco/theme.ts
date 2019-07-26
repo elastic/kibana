@@ -17,13 +17,36 @@
  * under the License.
  */
 
-import { IStandaloneThemeData } from 'monaco-editor';
-
 import darkTheme from '@elastic/eui/dist/eui_theme_dark.json';
 import lightTheme from '@elastic/eui/dist/eui_theme_light.json';
+import monaco from 'monaco-editor/esm/vs/editor/editor.api';
 
-export const getThemeConfig = (themeName: 'dark' | 'light'): IStandaloneThemeData => {
-  const theme = themeName === 'light' ? lightTheme : darkTheme;
+export const getThemeConfig = (themeName: 'dark' | 'light'): monaco.editor.IStandaloneThemeData => {
+  const isLight = themeName === 'light';
+  const theme = isLight ? lightTheme : darkTheme;
+
+  const syntaxTheme = {
+    keyword: theme.euiColorAccent,
+    comment: theme.euiColorDarkShade,
+    delimiter: theme.euiColorSecondary,
+    string: theme.euiColorPrimary,
+    number: theme.euiColorWarning,
+    regexp: theme.euiColorPrimary,
+    types: `${isLight ? theme.euiColorVis9 : theme.euiColorVis5}`,
+    annotation: theme.euiColorLightShade,
+    tag: theme.euiColorAccent,
+    symbol: theme.euiColorDanger,
+    foreground: theme.euiColorDarkestShade,
+    editorBackground: theme.euiColorEmptyShade,
+    lineNumbers: theme.euiColorDarkShade,
+    editorIndentGuide: theme.euiColorLightShade,
+    selectionBackground: `${isLight ? '#E3E4ED' : '#343551'}`,
+    editorWidgetBackground: theme.euiColorLightestShade,
+    editorWidgetBorder: theme.euiColorLightShade,
+    findMatchBackground: theme.euiColorWarning,
+    findMatchHighlightBackground: theme.euiColorWarning,
+  };
+
   return {
     base: 'vs',
     inherit: true,

@@ -17,22 +17,9 @@
  * under the License.
  */
 
-import React, { useRef, useEffect } from 'react';
-import { createEditor } from './editor';
+import { PluginInitializerContext } from '../../../../core/server';
+import { ConsoleServerPlugin } from './plugin';
 
-export const App = () => {
-  const editorElement = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    (async () => {
-      const editor = createEditor(editorElement.current as HTMLDivElement);
-      await editor.setup();
-    })();
-  }, []);
-
-  return (
-    <div id="console2RootElement">
-      <div ref={editorElement} />
-    </div>
-  );
-};
+export function plugin(ctx: PluginInitializerContext) {
+  return new ConsoleServerPlugin(ctx);
+}

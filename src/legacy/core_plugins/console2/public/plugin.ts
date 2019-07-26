@@ -17,9 +17,19 @@
  * under the License.
  */
 
-import { PluginInitializerContext } from '../../../core/public';
-import { ConsolePlugin } from './plugin';
+import { Plugin, PluginInitializerContext, CoreSetup, CoreStart } from '../../../../core/public';
+import { setupNgForReact } from './application/setup_ng_for_react';
+import { App } from './application';
 
-export function plugin(ctx: PluginInitializerContext) {
-  return new ConsolePlugin(ctx);
+export class ConsolePlugin implements Plugin {
+  // @ts-ignore
+  constructor(private readonly initCtx: PluginInitializerContext) {}
+
+  setup(core: CoreSetup) {
+    setupNgForReact(App);
+  }
+
+  start(core: CoreStart) {}
+
+  stop() {}
 }

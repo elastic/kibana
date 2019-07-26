@@ -17,13 +17,15 @@
  * under the License.
  */
 
-import * as monaco from 'monaco-editor/esm/vs/editor/editor.api';
-import { getThemeConfig } from './theme';
+import { Plugin, PluginInitializerContext, CoreSetup, CoreStart } from '../../../../core/server';
 
-export function setup({ theme, element }: { theme: 'light' | 'dark'; element: HTMLElement }) {
-  monaco.editor.defineTheme('euiColors', getThemeConfig(theme));
-  monaco.editor.setTheme('euiColors');
-  monaco.editor.create(element, {
-    readOnly: false,
-  });
+export class ConsoleServerPlugin implements Plugin {
+  // @ts-ignore
+  constructor(private readonly initCtx: PluginInitializerContext) {}
+
+  setup(core: CoreSetup) {}
+
+  start(core: CoreStart) {}
+
+  stop() {}
 }

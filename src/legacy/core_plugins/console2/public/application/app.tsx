@@ -17,19 +17,27 @@
  * under the License.
  */
 
-import { Plugin, PluginInitializerContext, CoreSetup, CoreStart } from '../../../core/public';
-// import { setupNgForReact } from './application/setup_ng_for_react';
-import { App } from './application';
+import React, { useRef, useEffect } from 'react';
 
-export class ConsolePlugin implements Plugin {
-  // @ts-ignore
-  constructor(private readonly initCtx: PluginInitializerContext) {}
+import { createEditor } from './editor';
+import { useAppContext } from './context';
 
-  setup(core: CoreSetup) {
-    // setupNgForReact(App);
-  }
+export const App = () => {
+  const editorElement = useRef<HTMLDivElement>(null);
+  const [{ themeName }] = useAppContext();
 
-  start(core: CoreStart) {}
+  useEffect(() => {
+    (async () => {
+      createEditor({
+        mountElement: editorElement.current as HTMLDivElement,
+        themeName,
+      });
+    })();
+  }, []);
 
-  stop() {}
-}
+  return (
+    <div style={{ height: '100%', marginTop: '5px' }} id="console2RootElement">
+      <div style={{ height: '100%' }} ref={editorElement} />
+    </div>
+  );
+};
