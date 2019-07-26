@@ -204,20 +204,6 @@ export const visualizationTypes: VisualizationType[] = [
     }),
   },
   {
-    id: 'horizontal_bar',
-    icon: 'visBarHorizontal',
-    label: i18n.translate('xpack.lens.xyVisualization.horizontalBarLabel', {
-      defaultMessage: 'Horizontal Bar',
-    }),
-  },
-  {
-    id: 'horizontal_bar_stacked',
-    icon: 'visBarHorizontal',
-    label: i18n.translate('xpack.lens.xyVisualization.stackedHorizontalBarLabel', {
-      defaultMessage: 'Stacked Horizontal Bar',
-    }),
-  },
-  {
     id: 'line',
     icon: 'visLine',
     label: i18n.translate('xpack.lens.xyVisualization.lineLabel', {
