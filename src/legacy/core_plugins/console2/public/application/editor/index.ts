@@ -46,6 +46,8 @@ export class Editor {
   recalculateLayout() {
     this.editor.layout();
   }
+
+  async startWorker() {}
 }
 
 export const createEditor = ({

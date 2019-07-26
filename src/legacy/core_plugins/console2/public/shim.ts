@@ -17,17 +17,32 @@
  * under the License.
  */
 
-import { PluginInitializerContext } from '../../../../core/public';
-import { ConsolePlugin } from './plugin';
+import routes from 'ui/routes';
+import chrome from 'ui/chrome';
 
-const anyObject: any = {};
+import { CoreSetup } from '../../../../core/public';
+import { plugin } from './';
 
-export function plugin(ctx: PluginInitializerContext) {
-  return new ConsolePlugin(ctx);
+export interface XCoreSetup extends CoreSetup {
+  chrome: typeof chrome;
+  routes: {
+    registerNgRoutes: typeof routes;
+  };
 }
 
+export function createShim(): XCoreSetup {
+  return {
+    chrome,
+    routes: {
+      registerNgRoutes: routes,
+    },
+  } as XCoreSetup;
+}
+
+const shimCore = createShim();
+
 (function simulateSetup() {
-  const consolePlugin = plugin(anyObject);
-  consolePlugin.setup(anyObject);
-  consolePlugin.start(anyObject);
+  const consolePlugin = plugin(shimCore);
+  consolePlugin.setup(shimCore as any);
+  consolePlugin.start(shimCore as any);
 })();

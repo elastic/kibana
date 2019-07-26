@@ -17,11 +17,4 @@
  * under the License.
  */
 
-require('ui/capabilities/route_setup');
-
 export { App } from './app';
-
-// Just for now, eventually we will want to fall in line with new platform (NP) patterns.
-// export function renderApp() {
-//   return <App />;
-// }

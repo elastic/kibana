@@ -16,17 +16,36 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { unmountComponentAtNode } from 'react-dom';
 
-import { Plugin, PluginInitializerContext, CoreSetup, CoreStart } from '../../../../core/public';
-import { setupNgForReact } from './application/setup_ng_for_react';
-import { App } from './application';
+import { Plugin, PluginInitializerContext, CoreStart } from '../../../../core/public';
+
+import { Theme } from './types';
+import { XCoreSetup } from './shim';
+import * as context from './application/context';
+import indexHtml from './index.html';
+import { renderApp } from './index';
+
+const CONSOLE_EL_ROOT_ID = 'console2Root';
 
 export class ConsolePlugin implements Plugin {
   // @ts-ignore
   constructor(private readonly initCtx: PluginInitializerContext) {}
 
-  setup(core: CoreSetup) {
-    setupNgForReact(App);
+  setup(core: XCoreSetup) {
+    const { chrome, routes } = core;
+    const themeName: Theme = chrome.getUiSettingsClient().get('theme:darkMode') ? 'dark' : 'light';
+    context.setInitialState({ themeName });
+    routes.registerNgRoutes.when('/dev_tools/console2', {
+      controller: ($scope: any) => {
+        const targetElement = document.querySelector(`#${CONSOLE_EL_ROOT_ID}`) as HTMLElement;
+        renderApp(targetElement);
+        $scope.$on('destroy', () => {
+          unmountComponentAtNode(targetElement);
+        });
+      },
+      template: indexHtml,
+    });
   }
 
   start(core: CoreStart) {}

@@ -17,24 +17,23 @@
  * under the License.
  */
 
-import React, { useRef, useEffect } from 'react';
+import React from 'react';
+import { render } from 'react-dom';
+import { PluginInitializerContext } from 'kibana/public';
 
-import { createEditor } from './editor';
-import { useAppContext } from './context';
-import { Editor } from './containers/editor';
+import { App } from './application';
+import { ConsolePlugin } from './plugin';
+import { AppContextProvider } from './application/context';
 
-export const App = () => {
-  const editorElementRef = useRef<HTMLDivElement>(null);
-  const [{ themeName }] = useAppContext();
+export function renderApp(el: HTMLElement) {
+  render(
+    <AppContextProvider>
+      <App />
+    </AppContextProvider>,
+    el
+  );
+}
 
-  useEffect(() => {
-    (async () => {
-      createEditor({
-        mountElement: editorElementRef.current as HTMLDivElement,
-        themeName,
-      });
-    })();
-  }, []);
-
-  return <Editor ref={editorElementRef} />;
-};
+export function plugin(ctx: PluginInitializerContext) {
+  return new ConsolePlugin(ctx);
+}

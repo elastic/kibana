@@ -16,25 +16,42 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import React, { Ref } from 'react';
 
-import React, { useRef, useEffect } from 'react';
+interface Props {
+  forwardedRef: Ref<HTMLDivElement>;
+}
 
-import { createEditor } from './editor';
-import { useAppContext } from './context';
-import { Editor } from './containers/editor';
+function _Editor(props: Props) {
+  const { forwardedRef } = props;
 
-export const App = () => {
-  const editorElementRef = useRef<HTMLDivElement>(null);
-  const [{ themeName }] = useAppContext();
+  return (
+    <div style={{ height: '100%' }}>
+      <style>
+        {`
+  /*
+    This is a hack for now to get around the style set up by the code x-pack plugin :c
+  */
+  .monaco-editor .cursors-layer > .cursor {
+    display: inherit !important;
+  }
 
-  useEffect(() => {
-    (async () => {
-      createEditor({
-        mountElement: editorElementRef.current as HTMLDivElement,
-        themeName,
-      });
-    })();
-  }, []);
+  textarea.inputarea {
+    display: inherit !important;
+  }
 
-  return <Editor ref={editorElementRef} />;
-};
+
+  .code-line-decoration + .cldr.folding {
+    left: inherit !important;
+  }
+
+        `}
+      </style>
+      <div style={{ height: '100%' }} ref={forwardedRef} />
+    </div>
+  );
+}
+
+export const Editor = React.forwardRef<HTMLDivElement>((props, ref) => {
+  return <_Editor {...props} forwardedRef={ref} />;
+});
