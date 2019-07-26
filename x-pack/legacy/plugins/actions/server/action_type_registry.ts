@@ -15,23 +15,29 @@ interface ConstructorOptions {
   taskManager: TaskManager;
   getServices: GetServicesFunction;
   encryptedSavedObjectsPlugin: EncryptedSavedObjectsPlugin;
+  spaceIdToNamespace: (spaceId: string) => string;
+  getBasePath: (spaceId: string) => string;
 }
 
 export class ActionTypeRegistry {
   private readonly taskRunCreatorFunction: TaskRunCreatorFunction;
-  private readonly getServices: GetServicesFunction;
   private readonly taskManager: TaskManager;
   private readonly actionTypes: Map<string, ActionType> = new Map();
-  private readonly encryptedSavedObjectsPlugin: EncryptedSavedObjectsPlugin;
 
-  constructor({ getServices, taskManager, encryptedSavedObjectsPlugin }: ConstructorOptions) {
-    this.getServices = getServices;
+  constructor({
+    getServices,
+    taskManager,
+    encryptedSavedObjectsPlugin,
+    spaceIdToNamespace,
+    getBasePath,
+  }: ConstructorOptions) {
     this.taskManager = taskManager;
-    this.encryptedSavedObjectsPlugin = encryptedSavedObjectsPlugin;
     this.taskRunCreatorFunction = getCreateTaskRunnerFunction({
+      getServices,
       actionTypeRegistry: this,
-      getServices: this.getServices,
-      encryptedSavedObjectsPlugin: this.encryptedSavedObjectsPlugin,
+      encryptedSavedObjectsPlugin,
+      spaceIdToNamespace,
+      getBasePath,
     });
   }
 

@@ -19,7 +19,7 @@ const alertsClientParams = {
   taskManager,
   alertTypeRegistry,
   savedObjectsClient,
-  basePath: '/s/default',
+  spaceId: 'default',
 };
 
 beforeEach(() => jest.resetAllMocks());

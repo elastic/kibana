@@ -7,8 +7,10 @@
 import { createFireHandler } from './create_fire_handler';
 
 const createFireHandlerParams = {
-  basePath: '/s/default',
   fireAction: jest.fn(),
+  spaceId: 'default',
+  spaceIdToNamespace: jest.fn().mockReturnValue(undefined),
+  getBasePath: jest.fn().mockReturnValue(undefined),
   alertSavedObject: {
     id: '1',
     type: 'alert',
@@ -107,7 +109,7 @@ Array [
 
 test('throws error if reference not found', async () => {
   const params = {
-    basePath: '/s/default',
+    spaceId: 'default',
     fireAction: jest.fn(),
     alertSavedObject: {
       id: '1',

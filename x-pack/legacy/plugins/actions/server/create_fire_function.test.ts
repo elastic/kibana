@@ -10,6 +10,7 @@ import { SavedObjectsClientMock } from '../../../../../src/core/server/mocks';
 
 const mockTaskManager = taskManagerMock.create();
 const savedObjectsClient = SavedObjectsClientMock.create();
+const spaceIdToNamespace = jest.fn();
 
 beforeEach(() => jest.resetAllMocks());
 
@@ -18,6 +19,7 @@ describe('fire()', () => {
     const fireFn = createFireFunction({
       taskManager: mockTaskManager,
       internalSavedObjectsRepository: savedObjectsClient,
+      spaceIdToNamespace,
     });
     savedObjectsClient.get.mockResolvedValueOnce({
       id: '123',
@@ -27,11 +29,11 @@ describe('fire()', () => {
       },
       references: [],
     });
+    spaceIdToNamespace.mockReturnValueOnce('namespace1');
     await fireFn({
       id: '123',
       params: { baz: false },
-      namespace: 'abc',
-      basePath: '/s/default',
+      spaceId: 'default',
     });
     expect(mockTaskManager.schedule).toHaveBeenCalledTimes(1);
     expect(mockTaskManager.schedule.mock.calls[0]).toMatchInlineSnapshot(`
@@ -63,5 +65,6 @@ Array [
   },
 ]
 `);
+    expect(spaceIdToNamespace).toHaveBeenCalledWith('default');
   });
 });

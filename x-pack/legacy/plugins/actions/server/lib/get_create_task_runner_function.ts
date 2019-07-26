@@ -13,6 +13,8 @@ interface CreateTaskRunnerFunctionOptions {
   getServices: GetServicesFunction;
   actionTypeRegistry: ActionTypeRegistryContract;
   encryptedSavedObjectsPlugin: EncryptedSavedObjectsPlugin;
+  spaceIdToNamespace: (spaceId: string) => string;
+  getBasePath: (spaceId: string) => string;
 }
 
 interface TaskRunnerOptions {
@@ -23,11 +25,14 @@ export function getCreateTaskRunnerFunction({
   getServices,
   actionTypeRegistry,
   encryptedSavedObjectsPlugin,
+  spaceIdToNamespace,
+  getBasePath,
 }: CreateTaskRunnerFunctionOptions) {
   return ({ taskInstance }: TaskRunnerOptions) => {
     return {
       run: async () => {
-        const { namespace, id, actionTypeParams } = taskInstance.params;
+        const { spaceId, id, actionTypeParams } = taskInstance.params;
+        const namespace = spaceIdToNamespace(spaceId);
         await execute({
           namespace,
           actionTypeRegistry,

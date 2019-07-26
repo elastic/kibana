@@ -19,6 +19,8 @@ interface CreateTaskRunnerFunctionOptions {
   alertType: AlertType;
   fireAction: ActionsPlugin['fire'];
   internalSavedObjectsRepository: SavedObjectsClientContract;
+  spaceIdToNamespace: (spaceId: string) => string;
+  getBasePath: (spaceId: string) => string;
 }
 
 interface TaskRunnerOptions {
@@ -30,6 +32,8 @@ export function getCreateTaskRunnerFunction({
   alertType,
   fireAction,
   internalSavedObjectsRepository,
+  spaceIdToNamespace,
+  getBasePath,
 }: CreateTaskRunnerFunctionOptions) {
   return ({ taskInstance }: TaskRunnerOptions) => {
     return {
@@ -48,7 +52,7 @@ export function getCreateTaskRunnerFunction({
         const fireHandler = createFireHandler({
           alertSavedObject,
           fireAction,
-          basePath: taskInstance.params.basePath,
+          spaceId: taskInstance.params.spaceId,
         });
         const alertInstances: Record<string, AlertInstance> = {};
         const alertInstancesData = taskInstance.state.alertInstances || {};

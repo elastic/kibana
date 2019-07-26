@@ -15,7 +15,7 @@ interface ConstructorOptions {
   taskManager: TaskManager;
   savedObjectsClient: SavedObjectsClientContract;
   alertTypeRegistry: AlertTypeRegistry;
-  basePath: string;
+  spaceId: string;
 }
 
 interface FindOptions {
@@ -53,7 +53,7 @@ interface UpdateOptions {
 
 export class AlertsClient {
   private readonly log: Log;
-  private readonly basePath: string;
+  private readonly spaceId: string;
   private readonly taskManager: TaskManager;
   private readonly savedObjectsClient: SavedObjectsClientContract;
   private readonly alertTypeRegistry: AlertTypeRegistry;
@@ -63,10 +63,10 @@ export class AlertsClient {
     savedObjectsClient,
     taskManager,
     log,
-    basePath,
+    spaceId,
   }: ConstructorOptions) {
     this.log = log;
-    this.basePath = basePath;
+    this.spaceId = spaceId;
     this.taskManager = taskManager;
     this.alertTypeRegistry = alertTypeRegistry;
     this.savedObjectsClient = savedObjectsClient;
@@ -90,8 +90,7 @@ export class AlertsClient {
         scheduledTask = await this.scheduleAlert(
           createdAlert.id,
           rawAlert.alertTypeId,
-          rawAlert.interval,
-          this.basePath
+          rawAlert.interval
         );
       } catch (e) {
         // Cleanup data, something went wrong scheduling the task
@@ -174,8 +173,7 @@ export class AlertsClient {
       const scheduledTask = await this.scheduleAlert(
         id,
         existingObject.attributes.alertTypeId,
-        existingObject.attributes.interval,
-        this.basePath
+        existingObject.attributes.interval
       );
       await this.savedObjectsClient.update(
         'alert',
@@ -205,12 +203,12 @@ export class AlertsClient {
     }
   }
 
-  private async scheduleAlert(id: string, alertTypeId: string, interval: string, basePath: string) {
+  private async scheduleAlert(id: string, alertTypeId: string, interval: string) {
     return await this.taskManager.schedule({
       taskType: `alerting:${alertTypeId}`,
       params: {
         alertId: id,
-        basePath,
+        spaceId: this.spaceId,
       },
       state: {
         // This is here because we can't rely on the task manager's internal runAt.

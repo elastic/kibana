@@ -34,6 +34,8 @@ const getCreateTaskRunnerFunctionParams = {
   },
   fireAction: jest.fn(),
   internalSavedObjectsRepository: savedObjectsClient,
+  spaceIdToNamespace: jest.fn().mockReturnValue(undefined),
+  getBasePath: jest.fn().mockReturnValue(undefined),
 };
 
 const mockedTaskInstance = {
