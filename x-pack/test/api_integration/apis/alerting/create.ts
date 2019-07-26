@@ -25,7 +25,7 @@ export default function createAlertTests({ getService }: KibanaFunctionalTestDef
           return supertest
             .delete(`/api/alert/${id}`)
             .set('kbn-xsrf', 'foo')
-            .expect(200);
+            .expect(204, '');
         })
       );
       await esArchiver.unload('actions/basic');
@@ -33,7 +33,7 @@ export default function createAlertTests({ getService }: KibanaFunctionalTestDef
 
     async function getScheduledTask(id: string) {
       return await es.get({
-        id,
+        id: `task:${id}`,
         index: '.kibana_task_manager',
       });
     }
@@ -137,7 +137,8 @@ export default function createAlertTests({ getService }: KibanaFunctionalTestDef
           expect(resp.body).to.eql({
             statusCode: 400,
             error: 'Bad Request',
-            message: 'alertTypeParams invalid: child "param1" fails because ["param1" is required]',
+            message:
+              'alertTypeParams invalid: [param1]: expected value of type [string] but got [undefined]',
           });
         });
     });
