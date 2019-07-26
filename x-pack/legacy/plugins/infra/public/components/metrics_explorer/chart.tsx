@@ -7,7 +7,15 @@
 import React, { useCallback, useMemo } from 'react';
 import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import { EuiTitle, EuiToolTip, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { Axis, Chart, getAxisId, niceTimeFormatter, Position, Settings } from '@elastic/charts';
+import {
+  Axis,
+  Chart,
+  getAxisId,
+  niceTimeFormatter,
+  Position,
+  Settings,
+  TooltipValue,
+} from '@elastic/charts';
 import { first, last } from 'lodash';
 import moment from 'moment';
 import { UICapabilities } from 'ui/capabilities';
@@ -27,6 +35,7 @@ import { SourceQuery } from '../../graphql/types';
 import { MetricsExplorerEmptyChart } from './empty_chart';
 import { MetricsExplorerNoMetrics } from './no_metrics';
 import { getChartTheme } from './helpers/get_chart_theme';
+import { useKibanaUiSetting } from '../../utils/use_kibana_ui_setting';
 import { calculateDomain } from './helpers/calculate_domain';
 
 interface Props {
@@ -60,6 +69,7 @@ export const MetricsExplorerChart = injectUICapabilities(
       uiCapabilities,
     }: Props) => {
       const { metrics } = options;
+      const [dateFormat] = useKibanaUiSetting('dateFormat');
       const handleTimeChange = (from: number, to: number) => {
         onTimeChange(moment(from).toISOString(), moment(to).toISOString());
       };
@@ -70,6 +80,12 @@ export const MetricsExplorerChart = injectUICapabilities(
             : (value: number) => `${value}`,
         [series.rows]
       );
+      const tooltipProps = {
+        headerFormatter: useCallback(
+          (data: TooltipValue) => moment(data.value).format(dateFormat || 'Y-MM-DD HH:mm:ss.SSS'),
+          [dateFormat]
+        ),
+      };
       const yAxisFormater = useCallback(createFormatterForMetric(first(metrics)), [options]);
       const dataDomain = calculateDomain(series, metrics, chartOptions.stack);
       const domain =
@@ -138,7 +154,11 @@ export const MetricsExplorerChart = injectUICapabilities(
                   tickFormat={yAxisFormater}
                   domain={domain}
                 />
-                <Settings onBrushEnd={handleTimeChange} theme={getChartTheme()} />
+                <Settings
+                  tooltip={tooltipProps}
+                  onBrushEnd={handleTimeChange}
+                  theme={getChartTheme()}
+                />
               </Chart>
             ) : options.metrics.length > 0 ? (
               <MetricsExplorerEmptyChart />
