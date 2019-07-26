@@ -70,7 +70,7 @@ export default function createAlertTests({ getService }: KibanaFunctionalTestDef
           expect(taskRecord.task.taskType).to.eql('alerting:test.noop');
           expect(JSON.parse(taskRecord.task.params)).to.eql({
             alertId: resp.body.id,
-            basePath: '',
+            spaceId: 'default',
           });
         });
     });
