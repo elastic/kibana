@@ -19,6 +19,7 @@ import { Source } from '../../containers/source';
 import { MetricsExplorerPage } from './metrics_explorer';
 import { SnapshotPage } from './snapshot';
 import { SettingsPage } from '../shared/settings';
+import { AppNavigation } from '../../components/navigation/app_navigation';
 
 interface InfrastructurePageProps extends RouteComponentProps {
   intl: InjectedIntl;
@@ -42,31 +43,33 @@ export const InfrastructurePage = injectI18n(({ match, intl }: InfrastructurePag
         })}
       />
 
-      <RoutedTabs
-        tabs={[
-          {
-            title: intl.formatMessage({
-              id: 'xpack.infra.homePage.inventoryTabTitle',
-              defaultMessage: 'Inventory',
-            }),
-            path: `${match.path}/inventory`,
-          },
-          {
-            title: intl.formatMessage({
-              id: 'xpack.infra.homePage.metricsExplorerTabTitle',
-              defaultMessage: 'Metrics Explorer',
-            }),
-            path: `${match.path}/metrics-explorer`,
-          },
-          {
-            title: intl.formatMessage({
-              id: 'xpack.infrastructure.homePage.settingsTabTitle',
-              defaultMessage: 'Settings',
-            }),
-            path: `${match.path}/settings`,
-          },
-        ]}
-      />
+      <AppNavigation>
+        <RoutedTabs
+          tabs={[
+            {
+              title: intl.formatMessage({
+                id: 'xpack.infra.homePage.inventoryTabTitle',
+                defaultMessage: 'Inventory',
+              }),
+              path: `${match.path}/inventory`,
+            },
+            {
+              title: intl.formatMessage({
+                id: 'xpack.infra.homePage.metricsExplorerTabTitle',
+                defaultMessage: 'Metrics Explorer',
+              }),
+              path: `${match.path}/metrics-explorer`,
+            },
+            {
+              title: intl.formatMessage({
+                id: 'xpack.infrastructure.homePage.settingsTabTitle',
+                defaultMessage: 'Settings',
+              }),
+              path: `${match.path}/settings`,
+            },
+          ]}
+        />
+      </AppNavigation>
 
       <Switch>
         <Route path={`${match.path}/inventory`} component={SnapshotPage} />

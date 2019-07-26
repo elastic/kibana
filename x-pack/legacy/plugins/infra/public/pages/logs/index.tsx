@@ -15,6 +15,7 @@ import { ColumnarPage } from '../../components/page';
 import { Source } from '../../containers/source';
 import { StreamPage } from './stream';
 import { SettingsPage } from '../shared/settings';
+import { AppNavigation } from '../../components/navigation/app_navigation';
 
 interface LogsPageProps extends RouteComponentProps {
   intl: InjectedIntl;
@@ -38,24 +39,26 @@ export const LogsPage = injectI18n(({ match, intl }: LogsPageProps) => (
         })}
       />
 
-      <RoutedTabs
-        tabs={[
-          {
-            title: intl.formatMessage({
-              id: 'xpack.logs.homePage.streamTabTitle',
-              defaultMessage: 'Stream',
-            }),
-            path: `${match.path}/stream`,
-          },
-          {
-            title: intl.formatMessage({
-              id: 'xpack.logs.homePage.settingsTabTitle',
-              defaultMessage: 'Settings',
-            }),
-            path: `${match.path}/settings`,
-          },
-        ]}
-      />
+      <AppNavigation>
+        <RoutedTabs
+          tabs={[
+            {
+              title: intl.formatMessage({
+                id: 'xpack.logs.homePage.streamTabTitle',
+                defaultMessage: 'Stream',
+              }),
+              path: `${match.path}/stream`,
+            },
+            {
+              title: intl.formatMessage({
+                id: 'xpack.logs.homePage.settingsTabTitle',
+                defaultMessage: 'Settings',
+              }),
+              path: `${match.path}/settings`,
+            },
+          ]}
+        />
+      </AppNavigation>
 
       <Switch>
         <Route path={`${match.path}/stream`} component={StreamPage} />
