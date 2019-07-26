@@ -676,19 +676,19 @@ export class VectorLayer extends AbstractLayer {
   }
 
   _getMbPointLayerId() {
-    return this.getId() + '_circle';
+    return this.makeMbLayerId('circle');
   }
 
   _getMbSymbolLayerId() {
-    return this.getId() + '_symbol';
+    return this.makeMbLayerId('symbol');
   }
 
   _getMbLineLayerId() {
-    return this.getId() + '_line';
+    return this.makeMbLayerId('line');
   }
 
   _getMbPolygonLayerId() {
-    return this.getId() + '_fill';
+    return this.makeMbLayerId('fill');
   }
 
   getMbLayerIds() {
