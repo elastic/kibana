@@ -3,7 +3,7 @@
 
 Want to load some data into Kibana and build a dashboard? This tutorial shows you how to:
 
-* <<tutorial-load-dataset, Load a data set into Elasticsearch>>
+* <<tutorial-load-sample-data, Load a data set into Elasticsearch>>
 * <<tutorial-define-index, Define an index pattern to connect to Elasticsearch>>
 * <<tutorial-discovering, Discover and explore the data>>
 * <<tutorial-visualizing, Visualize the data>>
@@ -15,7 +15,7 @@ When you complete this tutorial, you'll have a dashboard that looks like this.
 image::images/tutorial-dashboard.png[]
 
 [float]
-[[tutorial-load-dataset]]
+[[tutorial-load-sample-data]]
 === Load sample data
 
 This tutorial requires you to download three data sets:
