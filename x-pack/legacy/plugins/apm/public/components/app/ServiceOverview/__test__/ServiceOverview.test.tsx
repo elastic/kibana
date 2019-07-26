@@ -10,7 +10,9 @@ import 'react-testing-library/cleanup-after-each';
 import { toastNotifications } from 'ui/notify';
 import * as apmRestServices from '../../../../services/rest/apm/services';
 import { ServiceOverview } from '..';
-import * as hooks from '../../../../hooks/useUrlParams';
+import * as urlParamsHooks from '../../../../hooks/useUrlParams';
+import * as coreHooks from '../../../../hooks/useCore';
+import { InternalCoreStart } from 'src/core/public';
 
 jest.mock('ui/kfetch');
 
@@ -20,13 +22,22 @@ function renderServiceOverview() {
 
 describe('Service Overview -> View', () => {
   beforeEach(() => {
+    const coreMock = ({
+      http: {
+        basePath: {
+          prepend: (path: string) => `/basepath${path}`
+        }
+      }
+    } as unknown) as InternalCoreStart;
+
     // mock urlParams
-    spyOn(hooks, 'useUrlParams').and.returnValue({
+    spyOn(urlParamsHooks, 'useUrlParams').and.returnValue({
       urlParams: {
         start: 'myStart',
         end: 'myEnd'
       }
     });
+    spyOn(coreHooks, 'useCore').and.returnValue(coreMock);
   });
 
   afterEach(() => {
