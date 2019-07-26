@@ -65,7 +65,7 @@ describe('TransactionOverview', () => {
       });
       expect(history.replace).toHaveBeenCalledWith(
         expect.objectContaining({
-          pathname: '/MyServiceName/transactions/firstType'
+          search: 'transactionType=firstType'
         })
       );
     });
