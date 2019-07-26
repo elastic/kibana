@@ -6,6 +6,7 @@
 
 import {
   EuiButton,
+  EuiButtonEmpty,
   EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
@@ -142,7 +143,6 @@ export const SourceConfigurationSettings = injectI18n(
                 ) : null}
                 <EuiSpacer size="m" />
                 <EuiFlexGroup>
-                  <EuiFlexItem />
                   {isWriteable && (
                     <EuiFlexItem grow={false}>
                       {isLoading ? (
@@ -150,18 +150,34 @@ export const SourceConfigurationSettings = injectI18n(
                           Loading
                         </EuiButton>
                       ) : (
-                        <EuiButton
-                          data-test-subj="updateSourceConfigurationButton"
-                          color="primary"
-                          isDisabled={!isFormDirty || !isFormValid}
-                          fill
-                          onClick={persistUpdates}
-                        >
-                          <FormattedMessage
-                            id="xpack.infra.sourceConfiguration.updateSourceConfigurationButtonLabel"
-                            defaultMessage="Update Source"
-                          />
-                        </EuiButton>
+                        <>
+                          <EuiButton
+                            data-test-subj="discardSettingsButton"
+                            color="danger"
+                            iconType="cross"
+                            isDisabled={isLoading || !isFormDirty}
+                            onClick={() => {
+                              resetForm();
+                            }}
+                          >
+                            <FormattedMessage
+                              id="xpack.infra.sourceConfiguration.discardSettingsButtonLabel"
+                              defaultMessage="Discard"
+                            />
+                          </EuiButton>
+                          <EuiButton
+                            data-test-subj="applySettingsButton"
+                            color="primary"
+                            isDisabled={!isFormDirty || !isFormValid}
+                            fill
+                            onClick={persistUpdates}
+                          >
+                            <FormattedMessage
+                              id="xpack.infra.sourceConfiguration.applySettingsButtonLabel"
+                              defaultMessage="Apply"
+                            />
+                          </EuiButton>
+                        </>
                       )}
                     </EuiFlexItem>
                   )}
