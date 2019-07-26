@@ -4,7 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiCode, EuiFieldText, EuiForm, EuiFormRow, EuiSpacer, EuiTitle } from '@elastic/eui';
+import {
+  EuiCode,
+  EuiDescribedFormGroup,
+  EuiFieldText,
+  EuiForm,
+  EuiFormRow,
+  EuiSpacer,
+  EuiTitle,
+} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
 
@@ -33,63 +41,97 @@ export const IndicesConfigurationPanel = ({
       </h3>
     </EuiTitle>
     <EuiSpacer size="m" />
-    <EuiFormRow
-      error={metricAliasFieldProps.error}
-      fullWidth
-      helpText={
-        <FormattedMessage
-          id="xpack.infra.sourceConfiguration.metricIndicesDescription"
-          defaultMessage="Index pattern for matching indices that contain Metricbeat data. The recommended value is {defaultValue}."
-          values={{
-            defaultValue: <EuiCode>metricbeat-*</EuiCode>,
-          }}
-        />
-      }
-      isInvalid={metricAliasFieldProps.isInvalid}
-      label={
+    <EuiDescribedFormGroup
+      idAria="matricIndices"
+      title={
         <FormattedMessage
           id="xpack.infra.sourceConfiguration.metricIndicesLabel"
-          defaultMessage="Metric indices"
+          defaultMessage="Metric Indices"
+        />
+      }
+      description={
+        <FormattedMessage
+          id="xpack.infra.sourceConfiguration.metricIndicesDescription"
+          defaultMessage="Index pattern for matching indices that contain Metricbeat data"
         />
       }
     >
-      <EuiFieldText
-        data-test-subj="metricIndicesInput"
+      <EuiFormRow
+        describedByIds={['metricIndices']}
+        error={metricAliasFieldProps.error}
         fullWidth
-        disabled={isLoading}
-        readOnly={readOnly}
-        isLoading={isLoading}
-        {...metricAliasFieldProps}
-      />
-    </EuiFormRow>
-    <EuiFormRow
-      error={logAliasFieldProps.error}
-      fullWidth
-      helpText={
-        <FormattedMessage
-          id="xpack.infra.sourceConfiguration.logIndicesDescription"
-          defaultMessage="Index pattern for matching indices that contain log data. The recommended value is {defaultValue}."
-          values={{
-            defaultValue: <EuiCode>filebeat-*</EuiCode>,
-          }}
+        helpText={
+          <FormattedMessage
+            id="xpack.infra.sourceConfiguration.metricIndicesDescription"
+            defaultMessage="The recommended value is {defaultValue}"
+            values={{
+              defaultValue: <EuiCode>metricbeat-*</EuiCode>,
+            }}
+          />
+        }
+        isInvalid={metricAliasFieldProps.isInvalid}
+        label={
+          <FormattedMessage
+            id="xpack.infra.sourceConfiguration.metricIndicesLabel"
+            defaultMessage="Metric indices"
+          />
+        }
+      >
+        <EuiFieldText
+          data-test-subj="metricIndicesInput"
+          fullWidth
+          disabled={isLoading}
+          readOnly={readOnly}
+          isLoading={isLoading}
+          {...metricAliasFieldProps}
         />
-      }
-      isInvalid={logAliasFieldProps.isInvalid}
-      label={
+      </EuiFormRow>
+    </EuiDescribedFormGroup>
+    <EuiDescribedFormGroup
+      idAria="logIndices"
+      title={
         <FormattedMessage
           id="xpack.infra.sourceConfiguration.logIndicesLabel"
-          defaultMessage="Log indices"
+          defaultMessage="Log Indices"
+        />
+      }
+      description={
+        <FormattedMessage
+          id="xpack.infra.sourceConfiguration.logIndicesDescription"
+          defaultMessage="Index pattern for matching indices that contain log data"
         />
       }
     >
-      <EuiFieldText
-        data-test-subj="logIndicesInput"
+      <EuiFormRow
+        describedByIds={['logIndices']}
+        error={logAliasFieldProps.error}
         fullWidth
-        disabled={isLoading}
-        isLoading={isLoading}
-        readOnly={readOnly}
-        {...logAliasFieldProps}
-      />
-    </EuiFormRow>
+        helpText={
+          <FormattedMessage
+            id="xpack.infra.sourceConfiguration.logIndicesDescription"
+            defaultMessage="The recommended value is {defaultValue}"
+            values={{
+              defaultValue: <EuiCode>filebeat-*</EuiCode>,
+            }}
+          />
+        }
+        isInvalid={logAliasFieldProps.isInvalid}
+        label={
+          <FormattedMessage
+            id="xpack.infra.sourceConfiguration.logIndicesLabel"
+            defaultMessage="Log indices"
+          />
+        }
+      >
+        <EuiFieldText
+          data-test-subj="logIndicesInput"
+          fullWidth
+          disabled={isLoading}
+          isLoading={isLoading}
+          readOnly={readOnly}
+          {...logAliasFieldProps}
+        />
+      </EuiFormRow>
+    </EuiDescribedFormGroup>
   </EuiForm>
 );

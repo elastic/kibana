@@ -55,7 +55,7 @@ export const LogColumnsConfigurationPanel: React.FunctionComponent<
             <h3>
               <FormattedMessage
                 id="xpack.infra.sourceConfiguration.logColumnsSectionTitle"
-                defaultMessage="Columns"
+                defaultMessage="Log Columns"
               />
             </h3>
           </EuiTitle>
