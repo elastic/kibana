@@ -52,7 +52,7 @@ export function asMinutes(
   const minutesLabel =
     SPACE +
     i18n.translate('xpack.apm.formatters.minutesTimeUnitLabel', {
-      defaultMessage: 'm'
+      defaultMessage: 'min'
     });
   const formatted = asDecimal(value / 60000000);
   return `${formatted}${withUnit ? minutesLabel : ''}`;
