@@ -182,6 +182,8 @@ export class TaskManagerRunner implements TaskRunner {
           ? intervalFromNow(this.definition.timeout)!
           : this.getRetryDelay({
               attempts,
+              // Fake an error. This allows retry logic when tasks keep timing out
+              // and lets us set a proper "retryAt" value each time.
               error: new Error('Task timeout'),
               addDuration: this.definition.timeout,
             }),
