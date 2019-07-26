@@ -104,25 +104,19 @@ Canvas improves the user experience with new templates, experiences, and documen
 
 Canvas is all about creating content and telling a story with your data. The 
 content templates, or Canvases for short, help you facilitate this vision. 
-In 7.3, Canvas releases three new templates: Summary, Pitch, and Status.
+In 7.3, Canvas releases three new templates:
 
-The Summary template can help you create a report with live representations 
-of your data.
-
-[role="screenshot"]
-image::release-notes/images/7.3-canvas-summary.png[Canvas summary template]
-
-Pitch is a 14-page template that you can brand and customize for your 
+* Pitch is a 14-page template that you can brand and customize for your 
 next board-level presentation.
 
-[role="screenshot"]
-image::release-notes/images/7.3-canvas-pitch.png[Canvas summary template]
-
-The Status template gives you a solid, professional, and clean template 
+* The Status template gives you a solid, professional, and clean template 
 for status reports and other updates. 
 
+* The Summary template, shown below, can help you create a report with live representations 
+of your data.
++
 [role="screenshot"]
-image::release-notes/images/7.3-canvas-status.png[Canvas summary template]
+image::release-notes/images/7.3-canvas-summary.png[Canvas summary template]
 
 [float]
 ==== Experiences
