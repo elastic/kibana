@@ -4,13 +4,32 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { FunctionComponent } from 'react';
 import PropTypes from 'prop-types';
 import { EuiSpacer, EuiTitle } from '@elastic/eui';
 import { BorderForm } from './border_form';
 import { AppearanceForm } from './appearance_form';
+import { CanvasWorkpad } from '../.../../../../../types';
+import { Arguments as AppearanceArguments } from './appearance_form';
+import { Arguments as BorderArguments } from './border_form';
 
-export const ExtendedTemplate = ({ getArgValue, setArgValue, workpad }) => (
+export { BorderStyle } from './border_form';
+
+export interface Arguments extends BorderArguments, AppearanceArguments {}
+export type ArgumentTypes = Partial<BorderArguments & AppearanceArguments>;
+export type Argument = keyof ArgumentTypes;
+
+interface Props {
+  getArgValue: <T extends Argument>(arg: T) => Arguments[T];
+  setArgValue: <T extends Argument>(arg: T, val: ArgumentTypes[T]) => void;
+  workpad: CanvasWorkpad;
+}
+
+export const ExtendedTemplate: FunctionComponent<Props> = ({
+  getArgValue,
+  setArgValue,
+  workpad,
+}) => (
   <div>
     <EuiTitle size="xxxs" textTransform="uppercase">
       <h6>Appearance</h6>
@@ -18,25 +37,22 @@ export const ExtendedTemplate = ({ getArgValue, setArgValue, workpad }) => (
     <EuiSpacer size="xs" />
     <EuiSpacer size="xs" />
     <AppearanceForm
-      padding={getArgValue('padding')}
-      backgroundColor={getArgValue('backgroundColor')}
+      onChange={setArgValue}
       opacity={getArgValue('opacity')}
       overflow={getArgValue('overflow')}
-      onChange={setArgValue}
+      padding={getArgValue('padding')}
     />
-
     <EuiSpacer size="m" />
-
     <EuiTitle size="xxxs" textTransform="uppercase">
       <h6>Border</h6>
     </EuiTitle>
     <EuiSpacer size="xs" />
     <EuiSpacer size="xs" />
     <BorderForm
-      value={getArgValue('border', '')}
-      radius={getArgValue('borderRadius')}
-      onChange={setArgValue}
       colors={workpad.colors}
+      onChange={setArgValue}
+      radius={getArgValue('borderRadius')}
+      value={getArgValue('border')}
     />
   </div>
 );
@@ -44,8 +60,6 @@ export const ExtendedTemplate = ({ getArgValue, setArgValue, workpad }) => (
 ExtendedTemplate.displayName = 'ContainerStyleArgExtendedInput';
 
 ExtendedTemplate.propTypes = {
-  onValueChange: PropTypes.func.isRequired,
-  argValue: PropTypes.any.isRequired,
   getArgValue: PropTypes.func.isRequired,
   setArgValue: PropTypes.func.isRequired,
   workpad: PropTypes.shape({
