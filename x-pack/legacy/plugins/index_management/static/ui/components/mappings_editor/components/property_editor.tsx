@@ -23,6 +23,7 @@ interface Props {
   fieldPathPrefix?: string;
   isDeletable?: boolean;
   isAnonymous?: boolean;
+  isEditMode?: boolean;
 }
 
 export const PropertyEditor = ({
@@ -31,8 +32,9 @@ export const PropertyEditor = ({
   onRemove = () => undefined,
   isAnonymous = false,
   isDeletable = true,
+  isEditMode = false,
 }: Props) => {
-  const renderNestedProperties = (selectedType: DataType) => {
+  const renderNestedProperties = (selectedType: DataType, fieldName: string) => {
     if (selectedType === 'array') {
       return (
         <ul className="tree">
@@ -51,14 +53,22 @@ export const PropertyEditor = ({
     return hasNestedProperties(selectedType) ? (
       <Fragment>
         <EuiSpacer size="l" />
-        <PropertiesManager form={form} path={`${fieldPathPrefix}properties`} />
+        <PropertiesManager
+          form={form}
+          path={`${fieldPathPrefix}properties`}
+          fieldName={fieldName}
+        />
       </Fragment>
     ) : null;
   };
 
   return (
-    <FormDataProvider form={form} pathsToWatch={`${fieldPathPrefix}type`}>
+    <FormDataProvider
+      form={form}
+      pathsToWatch={[`${fieldPathPrefix}type`, `${fieldPathPrefix}name`]}
+    >
       {formData => {
+        const fieldName = formData[`${fieldPathPrefix}name`] as string;
         const selectedDatatype = formData[`${fieldPathPrefix}type`] as DataType;
         const typeDefinition = dataTypesDefinition[selectedDatatype];
 
@@ -71,18 +81,19 @@ export const PropertyEditor = ({
                   <UseField
                     path={`${fieldPathPrefix}name`}
                     form={form}
+                    defaultValue={isEditMode ? undefined : ''} // "undefined" will  into the "defaultValue" object passed to the form
                     config={parametersDefinition.name.fieldConfig}
                     component={Field}
                   />
                 </EuiFlexItem>
               )}
-
               {/* Field type */}
               <EuiFlexItem grow={false}>
                 <UseField
                   path={`${fieldPathPrefix}type`}
                   form={form}
                   config={parametersDefinition.type.fieldConfig}
+                  defaultValue={isEditMode ? undefined : 'text'}
                   component={Field}
                   componentProps={{
                     fieldProps: {
@@ -94,13 +105,13 @@ export const PropertyEditor = ({
                   }}
                 />
               </EuiFlexItem>
-
               {/* Field sub type (if any) */}
               {typeDefinition && typeDefinition.subTypes && (
                 <EuiFlexItem grow={false}>
                   <UseField
                     path={`${fieldPathPrefix}subType`}
                     form={form}
+                    defaultValue={isEditMode ? undefined : typeDefinition.subTypes.types[0]}
                     config={{
                       ...parametersDefinition.type.fieldConfig,
                       label: typeDefinition.subTypes.label,
@@ -112,28 +123,13 @@ export const PropertyEditor = ({
                           value: type,
                           text: type,
                         })),
+                        hasNoInitialSelection: false,
                       },
                     }}
                   />
                 </EuiFlexItem>
               )}
-
-              {/* Field configuration (if any) */}
-              {typeDefinition &&
-                typeDefinition.configuration &&
-                typeDefinition.configuration.map((parameter, i) => (
-                  <EuiFlexItem key={i} grow={false}>
-                    <UseField
-                      form={form}
-                      path={fieldPathPrefix + parameter}
-                      config={
-                        parametersDefinition[parameter] &&
-                        parametersDefinition[parameter].fieldConfig
-                      }
-                      component={Field}
-                    />
-                  </EuiFlexItem>
-                ))}
+              {/* Empty flex item to fill the space in between */}
               <EuiFlexItem />
 
               {/* Delete field button */}
@@ -158,11 +154,12 @@ export const PropertyEditor = ({
                   form={form}
                   typeDefinition={typeDefinition}
                   fieldPathPrefix={fieldPathPrefix}
+                  isEditMode={isEditMode}
                 />
               </Fragment>
             )}
 
-            {renderNestedProperties(selectedDatatype)}
+            {renderNestedProperties(selectedDatatype, fieldName)}
 
             <EuiSpacer size="l" />
           </Fragment>
