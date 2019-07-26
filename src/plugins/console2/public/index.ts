@@ -17,11 +17,9 @@
  * under the License.
  */
 
-require('ui/capabilities/route_setup');
+import { PluginInitializerContext } from '../../../core/public';
+import { ConsolePlugin } from './plugin';
 
-import { setupNgForReact } from './setup_ng_for_react';
-import { App } from './app';
-
-(function setupConsolePlugin() {
-  setupNgForReact(App);
-})();
+export function plugin(ctx: PluginInitializerContext) {
+  return new ConsolePlugin(ctx);
+}

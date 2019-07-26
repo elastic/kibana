@@ -17,21 +17,15 @@
  * under the License.
  */
 
-import React, { useRef, useEffect } from 'react';
-import { createEditor } from './editor';
+import { Plugin, PluginInitializerContext, CoreSetup, CoreStart } from '../../../core/server';
 
-export const App = () => {
-  const editorElement = useRef<HTMLDivElement>(null);
+export class ConsoleServerPlugin implements Plugin {
+  // @ts-ignore
+  constructor(private readonly initCtx: PluginInitializerContext) {}
 
-  useEffect(() => {
-    (async () => {
-      const editor = createEditor(editorElement.current as HTMLDivElement);
-      await editor.setup();
-    })();
-  }, []);
-  return (
-    <div>
-      <div ref={editorElement} />
-    </div>
-  );
-};
+  setup(core: CoreSetup) {}
+
+  start(core: CoreStart) {}
+
+  stop() {}
+}

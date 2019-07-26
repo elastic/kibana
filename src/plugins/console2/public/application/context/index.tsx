@@ -16,3 +16,30 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
+import React, { Dispatch } from 'react';
+import { createContext, useContext, useState } from 'react';
+import { Theme } from '../../types';
+
+interface AppContext {
+  themeName: Theme;
+}
+
+let initialState: AppContext = {
+  themeName: 'light',
+};
+
+export const setInitialState = (overrides: Partial<AppContext>) => {
+  initialState = {
+    ...initialState,
+    ...overrides,
+  };
+};
+
+const context = createContext<[AppContext, Dispatch<AppContext>]>(null as any);
+
+export const AppContextProvider = ({ children }: any) => {
+  return <context.Provider value={useState(initialState)}>{children}</context.Provider>;
+};
+
+export const useAppContext = () => useContext(context);

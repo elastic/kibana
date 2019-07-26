@@ -23,8 +23,14 @@ import { first } from 'lodash';
 import uiRoutes from 'ui/routes';
 import chrome from 'ui/chrome';
 
+import { Theme } from '../types';
+import * as context from './context';
+
 export const setupNgForReact = (App: () => JSX.Element) => {
   const ROOT_ELEMENT_ID = 'poc_console2';
+  const themeName: Theme = chrome.getUiSettingsClient().get('theme:darkMode') ? 'dark' : 'light';
+
+  context.setInitialState({ themeName });
 
   chrome.setRootController('console2', function RootController($scope: any, $element: any) {
     const commentElement: Comment = first($element);

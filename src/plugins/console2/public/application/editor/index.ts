@@ -29,18 +29,23 @@
  * The fact that we use Monaco should, in as far as possible, be an implementation detail.
  */
 import './monaco/components';
-import * as monaco from 'monaco-editor/esm/vs/editor/editor.api';
+import { setup } from './monaco/setup';
+import { Theme } from '../../types';
 
 export class Editor {
-  constructor(private readonly mountElement: HTMLElement) {}
+  constructor(private readonly mountElement: HTMLElement, readonly themeName: Theme) {}
 
   async setup() {
-    monaco.editor.create(this.mountElement, {
-      readOnly: false,
-    });
+    setup({ element: this.mountElement, theme: this.themeName });
   }
 }
 
-export const createEditor = (mountElement: HTMLElement) => {
-  return new Editor(mountElement);
+export const createEditor = ({
+  mountElement,
+  themeName,
+}: {
+  mountElement: HTMLElement;
+  themeName: Theme;
+}) => {
+  return new Editor(mountElement, themeName);
 };
