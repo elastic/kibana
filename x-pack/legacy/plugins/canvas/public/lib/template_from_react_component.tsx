@@ -4,15 +4,24 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
-import ReactDom from 'react-dom';
+import React, { ComponentType, FunctionComponent } from 'react';
+import { unmountComponentAtNode, render } from 'react-dom';
 import PropTypes from 'prop-types';
 import { ErrorBoundary } from '../components/enhance/error_boundary';
 
-export const templateFromReactComponent = Component => {
-  const WrappedComponent = props => (
+interface Props {
+  renderError: Function;
+}
+
+interface Handlers {
+  done: () => void;
+  onDestroy: (fn: () => void) => void;
+}
+
+export const templateFromReactComponent = (Component: ComponentType<any>) => {
+  const WrappedComponent: FunctionComponent<Props> = props => (
     <ErrorBoundary>
-      {({ error }) => {
+      {({ error }: { error: Error }) => {
         if (error) {
           props.renderError();
           return null;
@@ -27,15 +36,15 @@ export const templateFromReactComponent = Component => {
     renderError: PropTypes.func,
   };
 
-  return (domNode, config, handlers) => {
+  return (domNode: Element, config: Props, handlers: Handlers) => {
     try {
       const el = React.createElement(WrappedComponent, config);
-      ReactDom.render(el, domNode, () => {
+      render(el, domNode, () => {
         handlers.done();
       });
 
       handlers.onDestroy(() => {
-        ReactDom.unmountComponentAtNode(domNode);
+        unmountComponentAtNode(domNode);
       });
     } catch (err) {
       handlers.done();
