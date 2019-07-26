@@ -1033,8 +1033,6 @@ const TimeseriesChartIntl = injectI18n(class TimeseriesChart extends React.Compo
       .attr('x', contextXScale(handleBrushExtent[1]) + 0)
       .html('<div class="brush-handle-inner brush-handle-inner-right"><i class="fa fa-caret-right"></i></div>');
 
-    this.setBrushVisibility(!brush.empty());
-
     const showBrush = (show) => {
       if (show === true) {
         const brushExtent = brush.extent();
@@ -1048,6 +1046,8 @@ const TimeseriesChartIntl = injectI18n(class TimeseriesChart extends React.Compo
 
       this.setBrushVisibility(show);
     };
+
+    showBrush(!brush.empty());
 
     function brushing() {
       const isEmpty = brush.empty();
