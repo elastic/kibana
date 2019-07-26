@@ -10,6 +10,10 @@ import React, { useContext } from 'react';
 
 import euiStyled from '../../../../../common/eui_styled_components';
 import { WithKibanaChrome } from '../../containers/with_kibana_chrome';
+import {
+  ViewSourceConfigurationButton,
+  ViewSourceConfigurationButtonHrefBase,
+} from '../../components/source_configuration';
 
 interface InvalidNodeErrorProps {
   nodeName: string;
@@ -54,12 +58,15 @@ export const InvalidNodeError: React.FunctionComponent<InvalidNodeErrorProps> = 
                 </EuiButton>
               </EuiFlexItem>
               <EuiFlexItem>
-                <EuiButton color="primary" onClick={() => alert('todo fix me')}>
+                <ViewSourceConfigurationButton
+                  data-test-subj="configureSourceButton"
+                  hrefBase={ViewSourceConfigurationButtonHrefBase.infrastructure}
+                >
                   <FormattedMessage
                     id="xpack.infra.configureSourceActionLabel"
                     defaultMessage="Change source configuration"
                   />
-                </EuiButton>
+                </ViewSourceConfigurationButton>
               </EuiFlexItem>
             </EuiFlexGroup>
           }

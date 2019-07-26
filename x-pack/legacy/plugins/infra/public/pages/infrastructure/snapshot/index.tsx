@@ -19,6 +19,10 @@ import { ColumnarPage } from '../../../components/page';
 
 import { SourceErrorPage } from '../../../components/source_error_page';
 import { SourceLoadingPage } from '../../../components/source_loading_page';
+import {
+  ViewSourceConfigurationButton,
+  ViewSourceConfigurationButtonHrefBase,
+} from '../../../components/source_configuration';
 import { Source } from '../../../containers/source';
 import { WithWaffleFilterUrlState } from '../../../containers/waffle/with_waffle_filters';
 import { WithWaffleOptionsUrlState } from '../../../containers/waffle/with_waffle_options';
@@ -114,16 +118,15 @@ export const SnapshotPage = injectUICapabilities(
                     </EuiFlexItem>
                     {uiCapabilities.infrastructure.configureSource ? (
                       <EuiFlexItem>
-                        <EuiButton
+                        <ViewSourceConfigurationButton
                           data-test-subj="configureSourceButton"
-                          color="primary"
-                          onClick={() => alert('todo fix me')}
+                          hrefBase={ViewSourceConfigurationButtonHrefBase.infrastructure}
                         >
                           {intl.formatMessage({
                             id: 'xpack.infra.configureSourceActionLabel',
                             defaultMessage: 'Change source configuration',
                           })}
-                        </EuiButton>
+                        </ViewSourceConfigurationButton>
                       </EuiFlexItem>
                     ) : null}
                   </EuiFlexGroup>

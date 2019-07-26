@@ -12,6 +12,10 @@ import { UICapabilities } from 'ui/capabilities';
 import { injectUICapabilities } from 'ui/capabilities/react';
 import { NoIndices } from '../../../components/empty_states/no_indices';
 import { WithKibanaChrome } from '../../../containers/with_kibana_chrome';
+import {
+  ViewSourceConfigurationButton,
+  ViewSourceConfigurationButtonHrefBase,
+} from '../../../components/source_configuration';
 
 interface LogsPageNoIndicesContentProps {
   intl: InjectedIntl;
@@ -52,16 +56,15 @@ export const LogsPageNoIndicesContent = injectUICapabilities(
                 </EuiFlexItem>
                 {uiCapabilities.logs.configureSource ? (
                   <EuiFlexItem>
-                    <EuiButton
+                    <ViewSourceConfigurationButton
                       data-test-subj="configureSourceButton"
-                      color="primary"
-                      onClick={() => alert('todo: fix me')}
+                      hrefBase={ViewSourceConfigurationButtonHrefBase.logs}
                     >
                       {intl.formatMessage({
                         id: 'xpack.infra.configureSourceActionLabel',
                         defaultMessage: 'Change source configuration',
                       })}
-                    </EuiButton>
+                    </ViewSourceConfigurationButton>
                   </EuiFlexItem>
                 ) : null}
               </EuiFlexGroup>
