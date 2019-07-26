@@ -105,7 +105,7 @@ export function getBeatsInstructionsForEnablingMetricbeat(product, _meta, {
           <p>
             <FormattedMessage
               id="xpack.monitoring.metricbeatMigration.beatsInstructions.enableMetricbeatModuleDescription"
-              defaultMessage="By default the module will collect {beatType} monitoring metrics from http://localhost:5066. If the local {beatType} instance has a different address, you must specify it via the {hosts} setting in the {file} file."
+              defaultMessage="By default the module will collect {beatType} monitoring metrics from http://localhost:5066. If the {beatType} instance being monitored has a different address, you must specify it via the {hosts} setting in the {file} file."
               values={{
                 hosts: (
                   <Monospace>hosts</Monospace>
@@ -132,10 +132,14 @@ export function getBeatsInstructionsForEnablingMetricbeat(product, _meta, {
                     link: (
                       <EuiLink
                         href={httpEndpointUrl}
+                        target="_blank"
                       >
                         <FormattedMessage
                           id="xpack.monitoring.metricbeatMigration.beatsInstructions.enableMetricbeatModuleHttpEnabledDirectionsLinkText"
-                          defaultMessage="enable an HTTP endpoint"
+                          defaultMessage="enable an HTTP endpoint for the {beatType} instance being monitored"
+                          values={{
+                            beatType
+                          }}
                         />
                       </EuiLink>
                     ),
