@@ -116,6 +116,79 @@ export const buildTopNFlowQuery = ({
   return dslQuery;
 };
 
+const generateFlowTargetAggs = (
+  networkTopNFlowSortField: NetworkTopNFlowSortField,
+  flowTarget: FlowTarget.source | FlowTarget.destination,
+  querySize: number
+) => ({
+  [flowTarget]: {
+    terms: {
+      field: `${flowTarget}.ip`,
+      size: querySize,
+      order: {
+        ...getQueryOrder(networkTopNFlowSortField),
+      },
+    },
+    aggs: {
+      bytes_in: {
+        sum: {
+          field: `${getOppositeField(flowTarget)}.bytes`,
+        },
+      },
+      bytes_out: {
+        sum: {
+          field: `${flowTarget}.bytes`,
+        },
+      },
+      domain: {
+        terms: {
+          field: `${flowTarget}.domain`,
+          order: {
+            timestamp: 'desc',
+          },
+        },
+        aggs: {
+          timestamp: {
+            max: {
+              field: '@timestamp',
+            },
+          },
+        },
+      },
+      location: {
+        filter: {
+          exists: {
+            field: `${flowTarget}.geo`,
+          },
+        },
+        aggs: {
+          top_geo: {
+            top_hits: {
+              _source: `${flowTarget}.geo.*`,
+              size: 1,
+            },
+          },
+        },
+      },
+      autonomous_system: {
+        filter: {
+          exists: {
+            field: `${flowTarget}.as`,
+          },
+        },
+        aggs: {
+          top_as: {
+            top_hits: {
+              _source: `${flowTarget}.as.*`,
+              size: 1,
+            },
+          },
+        },
+      },
+    },
+  },
+});
+
 const getFlowTargetAggs = (
   networkTopNFlowSortField: NetworkTopNFlowSortField,
   flowTarget: FlowTarget,
@@ -123,133 +196,11 @@ const getFlowTargetAggs = (
 ) => {
   if (flowTarget === FlowTarget.unified) {
     return {
-      [FlowTarget.source]: {
-        terms: {
-          field: 'source.ip',
-          size: querySize / 2,
-          order: {
-            ...getQueryOrder(networkTopNFlowSortField),
-          },
-        },
-        aggs: {
-          bytes_in: {
-            sum: {
-              field: 'destination.bytes',
-            },
-          },
-          bytes_out: {
-            sum: {
-              field: 'source.bytes',
-            },
-          },
-          domain: {
-            terms: {
-              field: `${flowTarget}.domain`,
-              order: {
-                timestamp: 'desc',
-              },
-            },
-            aggs: {
-              timestamp: {
-                max: {
-                  field: '@timestamp',
-                },
-              },
-            },
-          },
-          location: {
-            terms: {
-              field: 'geo.country_iso_code',
-            },
-          },
-          as_org: {
-            terms: {
-              field: 'as.organization_name',
-            },
-          },
-          as_number: {
-            terms: {
-              field: 'as.number',
-            },
-          },
-        },
-      },
-      [FlowTarget.destination]: {
-        terms: {
-          field: 'destination.ip',
-          size: querySize / 2,
-          order: {
-            ...getQueryOrder(networkTopNFlowSortField),
-          },
-        },
-        aggs: {
-          bytes_in: {
-            sum: {
-              field: 'source.bytes',
-            },
-          },
-          bytes_out: {
-            sum: {
-              field: 'destination.bytes',
-            },
-          },
-          domain: {
-            terms: {
-              field: `${flowTarget}.domain`,
-              order: {
-                timestamp: 'desc',
-              },
-            },
-            aggs: {
-              timestamp: {
-                max: {
-                  field: '@timestamp',
-                },
-              },
-            },
-          },
-        },
-      },
+      ...generateFlowTargetAggs(networkTopNFlowSortField, FlowTarget.source, querySize),
+      ...generateFlowTargetAggs(networkTopNFlowSortField, FlowTarget.destination, querySize),
     };
   }
-  return {
-    [flowTarget]: {
-      terms: {
-        field: `${flowTarget}.ip`,
-        size: querySize,
-        order: {
-          ...getQueryOrder(networkTopNFlowSortField),
-        },
-      },
-      aggs: {
-        bytes_in: {
-          sum: {
-            field: `${getOppositeField(flowTarget)}.bytes`,
-          },
-        },
-        bytes_out: {
-          sum: {
-            field: `${flowTarget}.bytes`,
-          },
-        },
-        domain: {
-          terms: {
-            field: `${flowTarget}.domain`,
-            order: {
-              timestamp: 'desc',
-            },
-          },
-          aggs: {
-            timestamp: {
-              max: {
-                field: '@timestamp',
-              },
-            },
-          },
-        },
-      },
-    },
-  };
+  return generateFlowTargetAggs(networkTopNFlowSortField, flowTarget, querySize);
 };
 
 const getOppositeField = (flowTarget: FlowTarget.source | FlowTarget.destination): FlowTarget => {

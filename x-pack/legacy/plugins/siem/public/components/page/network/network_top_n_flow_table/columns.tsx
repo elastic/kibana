@@ -11,8 +11,9 @@ import { StaticIndexPattern } from 'ui/index_patterns';
 import {
   FlowDirection,
   FlowTarget,
-  TopNFlowNetworkEcsField,
   NetworkTopNFlowEdges,
+  TopNFlowItem,
+  TopNFlowNetworkEcsField,
 } from '../../../../graphql/types';
 import { networkModel } from '../../../../store';
 import { DragEffects, DraggableWrapper } from '../../../drag_and_drop/draggable_wrapper';
@@ -30,7 +31,9 @@ export type NetworkTopNFlowColumns = [
   Columns<NetworkTopNFlowEdges>,
   Columns<NetworkTopNFlowEdges>,
   Columns<TopNFlowNetworkEcsField['bytes_in']>,
-  Columns<TopNFlowNetworkEcsField['bytes_out']>
+  Columns<TopNFlowNetworkEcsField['bytes_out']>,
+  Columns<TopNFlowItem['location']>,
+  Columns<TopNFlowItem['autonomous_system']>
 ];
 
 export const getNetworkTopNFlowColumns = (
@@ -123,6 +126,34 @@ export const getNetworkTopNFlowColumns = (
     render: bytes => {
       if (bytes != null) {
         return <PreferenceFormattedBytes value={bytes} />;
+      } else {
+        return getEmptyTagValue();
+      }
+    },
+  },
+  {
+    field: `node.${flowTarget}.location`,
+    name: i18n.LOCATION,
+    truncateText: false,
+    hideForMobile: false,
+    sortable: true,
+    render: location => {
+      if (location != null) {
+        return location;
+      } else {
+        return getEmptyTagValue();
+      }
+    },
+  },
+  {
+    field: `node.${flowTarget}.autonomous_system`,
+    name: i18n.AUTONOMOUS_SYSTEM,
+    truncateText: false,
+    hideForMobile: false,
+    sortable: true,
+    render: as => {
+      if (as != null) {
+        return as;
       } else {
         return getEmptyTagValue();
       }

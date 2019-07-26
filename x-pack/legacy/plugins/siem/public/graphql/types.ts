@@ -1178,9 +1178,13 @@ export interface NetworkTopNFlowItem {
 }
 
 export interface TopNFlowItem {
+  autonomous_system?: string | null;
+
   domain?: string[] | null;
 
   ip?: string | null;
+
+  location?: string | null;
 }
 
 export interface TopNFlowNetworkEcsField {
@@ -3325,25 +3329,37 @@ export namespace GetNetworkTopNFlowQuery {
   export type _Source = {
     __typename?: 'TopNFlowItem';
 
-    ip?: string | null;
+    autonomous_system?: string | null;
 
     domain?: string[] | null;
+
+    ip?: string | null;
+
+    location?: string | null;
   };
 
   export type Destination = {
     __typename?: 'TopNFlowItem';
 
-    ip?: string | null;
+    autonomous_system?: string | null;
 
     domain?: string[] | null;
+
+    ip?: string | null;
+
+    location?: string | null;
   };
 
   export type Unified = {
     __typename?: 'TopNFlowItem';
 
-    ip?: string | null;
+    autonomous_system?: string | null;
 
     domain?: string[] | null;
+
+    ip?: string | null;
+
+    location?: string | null;
   };
 
   export type Network = {

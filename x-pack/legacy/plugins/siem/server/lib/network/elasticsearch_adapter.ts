@@ -132,6 +132,16 @@ const formatTopNFlowEdges = (
       [flowTarget]: {
         domain: bucket.domain.buckets.map(bucketDomain => bucketDomain.key),
         ip: bucket.key,
+        location: getOr(
+          '',
+          `location.top_geo.hits.hits[0]._source.${flowTarget}.geo.country_iso_code`,
+          bucket
+        ),
+        autonomous_system: getOr(
+          '',
+          `autonomous_system.top_as.hits.hits[0]._source.${flowTarget}.as.organization.name`,
+          bucket
+        ),
       },
       network: {
         bytes_in: getOrNumber('bytes_in.value', bucket),

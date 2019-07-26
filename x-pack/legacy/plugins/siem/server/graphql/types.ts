@@ -1207,9 +1207,13 @@ export interface NetworkTopNFlowItem {
 }
 
 export interface TopNFlowItem {
+  autonomous_system?: string | null;
+
   domain?: string[] | null;
 
   ip?: string | null;
+
+  location?: string | null;
 }
 
 export interface TopNFlowNetworkEcsField {
@@ -6337,17 +6341,31 @@ export namespace NetworkTopNFlowItemResolvers {
 
 export namespace TopNFlowItemResolvers {
   export interface Resolvers<Context = SiemContext, TypeParent = TopNFlowItem> {
+    autonomous_system?: AutonomousSystemResolver<string | null, TypeParent, Context>;
+
     domain?: DomainResolver<string[] | null, TypeParent, Context>;
 
     ip?: IpResolver<string | null, TypeParent, Context>;
+
+    location?: LocationResolver<string | null, TypeParent, Context>;
   }
 
+  export type AutonomousSystemResolver<
+    R = string | null,
+    Parent = TopNFlowItem,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
   export type DomainResolver<
     R = string[] | null,
     Parent = TopNFlowItem,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type IpResolver<
+    R = string | null,
+    Parent = TopNFlowItem,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type LocationResolver<
     R = string | null,
     Parent = TopNFlowItem,
     Context = SiemContext

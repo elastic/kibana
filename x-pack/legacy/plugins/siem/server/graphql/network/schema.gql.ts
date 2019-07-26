@@ -24,8 +24,10 @@ export const networkSchema = gql`
   }
 
   type TopNFlowItem {
+    autonomous_system: String
     domain: [String!]
     ip: String
+    location: String
   }
 
   enum NetworkTopNFlowFields {

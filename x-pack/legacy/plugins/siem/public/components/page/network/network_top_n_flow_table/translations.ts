@@ -43,12 +43,12 @@ export const BYTES_OUT = i18n.translate('xpack.siem.networkTopNFlowTable.column.
   defaultMessage: 'Bytes Out',
 });
 
-export const PACKETS = i18n.translate('xpack.siem.networkTopNFlowTable.column.packetsTitle', {
-  defaultMessage: 'Packets',
+export const LOCATION = i18n.translate('xpack.siem.networkTopNFlowTable.column.locationTitle', {
+  defaultMessage: 'Location',
 });
 
-export const DIRECTION = i18n.translate('xpack.siem.networkTopNFlowTable.column.directionTitle', {
-  defaultMessage: 'Direction',
+export const AUTONOMOUS_SYSTEM = i18n.translate('xpack.siem.networkTopNFlowTable.column.asTitle', {
+  defaultMessage: 'Autonomous System',
 });
 
 export const UNIQUE_SOURCE_IP = i18n.translate(

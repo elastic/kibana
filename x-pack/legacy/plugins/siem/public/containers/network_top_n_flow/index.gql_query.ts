@@ -33,16 +33,22 @@ export const networkTopNFlowQuery = gql`
         edges {
           node {
             source {
-              ip
+              autonomous_system
               domain
+              ip
+              location
             }
             destination {
-              ip
+              autonomous_system
               domain
+              ip
+              location
             }
             unified {
-              ip
+              autonomous_system
               domain
+              ip
+              location
             }
             network {
               bytes_in
