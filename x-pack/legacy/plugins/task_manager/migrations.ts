@@ -4,4 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const TASK_MANAGER_INDEX = '.kibana_task_manager';
+import { SavedObject } from 'src/core/server';
+
+export const migrations = {
+  task: {
+    '7.4.0': (doc: SavedObject) => ({
+      ...doc,
+      updated_at: new Date().toISOString(),
+    }),
+  },
+};
