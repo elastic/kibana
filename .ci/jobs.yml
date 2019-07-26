@@ -1,33 +1,73 @@
 JOB:
-  - kibana-intake
-  - x-pack-intake
-  - kibana-firefoxSmoke
-  - kibana-ciGroup1
-  - kibana-ciGroup2
-  - kibana-ciGroup3
-  - kibana-ciGroup4
-  - kibana-ciGroup5
-  - kibana-ciGroup6
-  - kibana-ciGroup7
-  - kibana-ciGroup8
-  - kibana-ciGroup9
-  - kibana-ciGroup10
-  - kibana-ciGroup11
-  - kibana-ciGroup12
+  # - kibana-intake
+  # - x-pack-intake
+  # - kibana-firefoxSmoke
+  # - kibana-ciGroup1
+  # - kibana-ciGroup2
+  # - kibana-ciGroup3
+  # - kibana-ciGroup4
+  - kibana-ciGroup5-1
+  - kibana-ciGroup5-2
+  - kibana-ciGroup5-3
+  - kibana-ciGroup5-4
+  - kibana-ciGroup5-5
+  - kibana-ciGroup5-6
+  - kibana-ciGroup5-7
+  - kibana-ciGroup5-8
+  - kibana-ciGroup5-9
+  - kibana-ciGroup5-10
+  - kibana-ciGroup5-11
+  - kibana-ciGroup5-12
+  - kibana-ciGroup5-13
+  - kibana-ciGroup5-14
+  - kibana-ciGroup5-15
+  - kibana-ciGroup5-16
+  - kibana-ciGroup5-17
+  - kibana-ciGroup5-18
+  - kibana-ciGroup5-19
+  - kibana-ciGroup5-20
+  - kibana-ciGroup5-21
+  - kibana-ciGroup5-22
+  - kibana-ciGroup5-23
+  - kibana-ciGroup5-24
+  - kibana-ciGroup5-25
+  - kibana-ciGroup5-26
+  - kibana-ciGroup5-27
+  - kibana-ciGroup5-28
+  - kibana-ciGroup5-29
+  - kibana-ciGroup5-30
+  - kibana-ciGroup5-31
+  - kibana-ciGroup5-32
+  - kibana-ciGroup5-33
+  - kibana-ciGroup5-34
+  - kibana-ciGroup5-35
+  - kibana-ciGroup5-36
+  - kibana-ciGroup5-37
+  - kibana-ciGroup5-38
+  - kibana-ciGroup5-39
+  - kibana-ciGroup5-40
+
+  # - kibana-ciGroup6
+  # - kibana-ciGroup7
+  # - kibana-ciGroup8
+  # - kibana-ciGroup9
+  # - kibana-ciGroup10
+  # - kibana-ciGroup11
+  # - kibana-ciGroup12
   # - kibana-visualRegression
 
   # make sure all x-pack-ciGroups are listed in test/scripts/jenkins_xpack_ci_group.sh
-  - x-pack-firefoxSmoke
-  - x-pack-ciGroup1
-  - x-pack-ciGroup2
-  - x-pack-ciGroup3
-  - x-pack-ciGroup4
-  - x-pack-ciGroup5
-  - x-pack-ciGroup6
-  - x-pack-ciGroup7
-  - x-pack-ciGroup8
-  - x-pack-ciGroup9
-  - x-pack-ciGroup10
+  # - x-pack-firefoxSmoke
+  # - x-pack-ciGroup1
+  # - x-pack-ciGroup2
+  # - x-pack-ciGroup3
+  # - x-pack-ciGroup4
+  # - x-pack-ciGroup5
+  # - x-pack-ciGroup6
+  # - x-pack-ciGroup7
+  # - x-pack-ciGroup8
+  # - x-pack-ciGroup9
+  # - x-pack-ciGroup10
   # - x-pack-visualRegression
 
 # `~` is yaml for `null`
