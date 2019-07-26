@@ -5,7 +5,7 @@
  */
 
 import { uriEncode } from '../lib/uri_encode';
-import { PLUGIN_ID } from '../../../common/constants';
+import { PLUGIN_ID } from '../../../../common/constants';
 
 export function compatibilityShimFactory(server) {
 
