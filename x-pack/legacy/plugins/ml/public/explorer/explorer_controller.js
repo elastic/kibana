@@ -29,7 +29,7 @@ import { explorer$ } from './explorer_dashboard_service';
 import { mlTimefilterRefresh$ } from '../services/timefilter_refresh_service';
 import { mlFieldFormatService } from 'plugins/ml/services/field_format_service';
 import { mlJobService } from '../services/job_service';
-import { getSelectedJobIds } from '../components/job_selector/job_select_service_utils';
+import { getSelectedJobIds, jobSelectServiceFactory } from '../components/job_selector/job_select_service_utils';
 import { timefilter } from 'ui/timefilter';
 
 import { interval$ } from '../components/controls/select_interval';
@@ -59,14 +59,13 @@ import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml');
 
 module.controller('MlExplorerController', function (
-  $injector,
   $scope,
   $timeout,
   $rootScope,
   AppState,
   globalState,
 ) {
-  const mlJobSelectService = $injector.get('mlJobSelectService');
+  const { jobSelectService, unsubscribeFromGlobalState } = jobSelectServiceFactory(globalState);
   const subscriptions = new Subscription();
 
   // $scope should only contain what's actually still necessary for the angular part.
@@ -173,7 +172,7 @@ module.controller('MlExplorerController', function (
           swimlaneViewByFieldName: $scope.appState.mlExplorerSwimlane.viewByFieldName,
         });
 
-        subscriptions.add(mlJobSelectService.subscribe(({ selection }) => {
+        subscriptions.add(jobSelectService.subscribe(({ selection }) => {
           if (selection !== undefined) {
             $scope.jobSelectionUpdateInProgress = true;
             jobSelectionUpdate(EXPLORER_ACTION.JOB_SELECTION_CHANGE, { fullJobs: mlJobService.jobs, selectedJobIds: selection });
@@ -292,5 +291,6 @@ module.controller('MlExplorerController', function (
     $(window).off('resize', jqueryRedrawOnResize);
     // Cancel listening for updates to the global nav state.
     navListener();
+    unsubscribeFromGlobalState();
   });
 });

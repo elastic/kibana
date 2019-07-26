@@ -25,7 +25,6 @@ import { TimeSeriesExplorer } from './timeseriesexplorer';
 
 module.directive('mlTimeSeriesExplorer', function ($injector) {
   function link($scope, $element) {
-    const mlJobSelectService = $injector.get('mlJobSelectService');
     const globalState = $injector.get('globalState');
     const AppState = $injector.get('AppState');
     const config = $injector.get('config');
@@ -42,7 +41,6 @@ module.directive('mlTimeSeriesExplorer', function ($injector) {
               AppState,
               dateFormatTz,
               globalState,
-              mlJobSelectService,
               timefilter,
             }}
             />

@@ -42,13 +42,13 @@ import {
   mlFunctionToESAggregation,
 } from '../../common/util/job_utils';
 
-import { setGlobalState, getSelectedJobIds } from '../components/job_selector/job_select_service_utils';
+import { jobSelectServiceFactory, setGlobalState, getSelectedJobIds } from '../components/job_selector/job_select_service_utils';
 import { AnnotationFlyout } from '../components/annotations/annotation_flyout';
 import { AnnotationsTable } from '../components/annotations/annotations_table';
 import { AnomaliesTable } from '../components/anomalies_table/anomalies_table';
 import { EntityControl } from './components/entity_control';
 import { ForecastingModal } from './components/forecasting_modal/forecasting_modal';
-import { JobSelector } from '../components/job_selector/job_selector';
+import { JobSelector } from '../components/job_selector';
 import { LoadingIndicator } from '../components/loading_indicator/loading_indicator';
 import { NavigationMenu } from '../components/navigation_menu/navigation_menu';
 import { severity$, SelectSeverity } from '../components/controls/select_severity/select_severity';
@@ -146,7 +146,6 @@ export class TimeSeriesExplorer extends React.Component {
     AppState: PropTypes.func.isRequired,
     dateFormatTz: PropTypes.string.isRequired,
     globalState: PropTypes.object.isRequired,
-    mlJobSelectService: PropTypes.object.isRequired,
     timefilter: PropTypes.object.isRequired,
   };
 
@@ -157,6 +156,9 @@ export class TimeSeriesExplorer extends React.Component {
   constructor(props) {
     super(props);
     this.appState = initializeAppState(props.AppState, 'mlTimeSeriesExplorer', {});
+    const { jobSelectService, unsubscribeFromGlobalState } = jobSelectServiceFactory(props.globalState);
+    this.jobSelectService = jobSelectService;
+    this.unsubscribeFromGlobalState = unsubscribeFromGlobalState;
   }
 
   resizeRef = createRef();
@@ -776,7 +778,7 @@ export class TimeSeriesExplorer extends React.Component {
   }
 
   componentDidMount() {
-    const { AppState, globalState, mlJobSelectService, timefilter } = this.props;
+    const { AppState, globalState, timefilter } = this.props;
 
     this.setState({ jobs: [] });
 
@@ -821,7 +823,7 @@ export class TimeSeriesExplorer extends React.Component {
           );
 
           setGlobalState(globalState, { selectedIds: [selectedJobIds[0]] });
-          mlJobSelectService.next({ selection: [selectedJobIds[0]], resetSelection: true });
+          this.jobSelectService.next({ selection: [selectedJobIds[0]], resetSelection: true });
         } else {
         // if a group has been loaded
           if (selectedJobIds.length > 0) {
@@ -833,12 +835,12 @@ export class TimeSeriesExplorer extends React.Component {
             );
 
             setGlobalState(globalState, { selectedIds: [selectedJobIds[0]] });
-            mlJobSelectService.next({ selection: [selectedJobIds[0]], resetSelection: true });
+            this.jobSelectService.next({ selection: [selectedJobIds[0]], resetSelection: true });
           } else if (jobs.length > 0) {
           // if there are no valid jobs in the group but there are valid jobs
           // in the list of all jobs, select the first
             setGlobalState(globalState, { selectedIds: [jobs[0].id] });
-            mlJobSelectService.next({ selection: [jobs[0].id], resetSelection: true });
+            this.jobSelectService.next({ selection: [jobs[0].id], resetSelection: true });
           } else {
           // if there are no valid jobs left.
             this.setState({ loading: false });
@@ -848,7 +850,7 @@ export class TimeSeriesExplorer extends React.Component {
       // if some ids have been filtered out because they were invalid.
       // refresh the URL with the first valid id
         setGlobalState(globalState, { selectedIds: [selectedJobIds[0]] });
-        mlJobSelectService.next({ selection: [selectedJobIds[0]], resetSelection: true });
+        this.jobSelectService.next({ selection: [selectedJobIds[0]], resetSelection: true });
       } else if (selectedJobIds.length > 0) {
       // normal behavior. a job ID has been loaded from the URL
         this.loadForJobId(selectedJobIds[0], jobs);
@@ -857,7 +859,7 @@ export class TimeSeriesExplorer extends React.Component {
         // no jobs were loaded from the URL, so add the first job
         // from the full jobs list.
           setGlobalState(globalState, { selectedIds: [jobs[0].id] });
-          mlJobSelectService.next({ selection: [jobs[0].id], resetSelection: true });
+          this.jobSelectService.next({ selection: [jobs[0].id], resetSelection: true });
         } else {
         // Jobs exist, but no time series jobs.
           this.setState({ loading: false });
@@ -883,7 +885,7 @@ export class TimeSeriesExplorer extends React.Component {
     this.subscriptions.add(subscribeAppStateToObservable(AppState, 'mlSelectSeverity', severity$));
 
     // Listen for changes to job selection.
-    this.subscriptions.add(mlJobSelectService.subscribe(({ selection }) => {
+    this.subscriptions.add(this.jobSelectService.subscribe(({ selection }) => {
       const appState = this.appState;
       const { jobs } = this.state;
 
@@ -915,13 +917,13 @@ export class TimeSeriesExplorer extends React.Component {
     this.subscriptions.unsubscribe();
     this.props.timefilter.off('timeUpdate', this.refresh);
     this.resizeChecker.destroy();
+    this.unsubscribeFromGlobalState();
   }
 
   render() {
     const {
       dateFormatTz,
       globalState,
-      mlJobSelectService,
       timefilter,
     } = this.props;
 
@@ -978,7 +980,7 @@ export class TimeSeriesExplorer extends React.Component {
     const jobSelectorProps = {
       dateFormatTz,
       globalState,
-      mlJobSelectService,
+      jobSelectService: this.jobSelectService,
       selectedJobIds,
       selectedGroups,
       singleSelection: true,

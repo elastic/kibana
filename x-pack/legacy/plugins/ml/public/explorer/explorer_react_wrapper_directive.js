@@ -21,14 +21,16 @@ import chrome from 'ui/chrome';
 import { timefilter } from 'ui/timefilter';
 import { timeHistory } from 'ui/timefilter/time_history';
 
+import { jobSelectServiceFactory } from '../components/job_selector/job_select_service_utils';
 import { NavigationMenuContext } from '../util/context_utils';
 
 import { Explorer } from './explorer';
 import { EXPLORER_ACTION } from './explorer_constants';
 import { explorer$ } from './explorer_dashboard_service';
 
-module.directive('mlExplorerReactWrapper', function (config, globalState, mlJobSelectService) {
+module.directive('mlExplorerReactWrapper', function (config, globalState) {
   function link(scope, element) {
+    const { jobSelectService, unsubscribeFromGlobalState } = jobSelectServiceFactory(globalState);
     // Pass the timezone to the server for use when aggregating anomalies (by day / hour) for the table.
     const tzConfig = config.get('dateFormat:tz');
     const dateFormatTz = (tzConfig !== 'Browser') ? tzConfig : moment.tz.guess();
@@ -41,7 +43,7 @@ module.directive('mlExplorerReactWrapper', function (config, globalState, mlJobS
             config,
             dateFormatTz,
             globalState,
-            mlJobSelectService,
+            jobSelectService,
             MlTimeBuckets: scope.MlTimeBuckets,
           }}
           />
@@ -55,6 +57,7 @@ module.directive('mlExplorerReactWrapper', function (config, globalState, mlJobS
     element.on('$destroy', () => {
       ReactDOM.unmountComponentAtNode(element[0]);
       scope.$destroy();
+      unsubscribeFromGlobalState();
     });
   }
 

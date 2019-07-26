@@ -4,7 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-
-
-import './job_selector_service';
+export { JobSelector } from './job_selector';

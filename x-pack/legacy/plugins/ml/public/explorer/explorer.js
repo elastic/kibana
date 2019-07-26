@@ -43,7 +43,7 @@ import { mlResultsService } from 'plugins/ml/services/results_service';
 import { LoadingIndicator } from '../components/loading_indicator/loading_indicator';
 import { NavigationMenu } from '../components/navigation_menu/navigation_menu';
 import { CheckboxShowCharts, showCharts$ } from '../components/controls/checkbox_showcharts';
-import { JobSelector } from '../components/job_selector/job_selector';
+import { JobSelector } from '../components/job_selector';
 import { SelectInterval, interval$ } from '../components/controls/select_interval/select_interval';
 import { SelectLimit, limit$ } from './select_limit/select_limit';
 import { SelectSeverity, severity$ } from '../components/controls/select_severity/select_severity';
@@ -154,7 +154,10 @@ export const Explorer = injectI18n(injectObservablesAsProps(
   class Explorer extends React.Component {
     static propTypes = {
       appStateHandler: PropTypes.func.isRequired,
+      config: PropTypes.object.isRequired,
       dateFormatTz: PropTypes.string.isRequired,
+      globalState: PropTypes.object.isRequired,
+      jobSelectService: PropTypes.object.isRequired,
       MlTimeBuckets: PropTypes.func.isRequired,
     };
 
@@ -1048,7 +1051,7 @@ export const Explorer = injectI18n(injectObservablesAsProps(
         dateFormatTz,
         globalState,
         intl,
-        mlJobSelectService,
+        jobSelectService,
         MlTimeBuckets,
       } = this.props;
 
@@ -1083,7 +1086,7 @@ export const Explorer = injectI18n(injectObservablesAsProps(
       const jobSelectorProps = {
         dateFormatTz,
         globalState,
-        mlJobSelectService,
+        jobSelectService,
         selectedJobIds,
         selectedGroups,
       };
