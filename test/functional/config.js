@@ -44,17 +44,14 @@ export default async function ({ readConfigFile }) {
 
     kbnTestServer: {
       ...commonConfig.get('kbnTestServer'),
-      serverArgs: [
-        ...commonConfig.get('kbnTestServer.serverArgs'),
-        '--oss',
-      ],
+      serverArgs: [...commonConfig.get('kbnTestServer.serverArgs'), '--oss'],
     },
 
     uiSettings: {
       defaults: {
         'accessibility:disableAnimations': true,
         'dateFormat:tz': 'UTC',
-        'telemetry:optIn': false
+        'telemetry:optIn': false,
       },
     },
 
@@ -102,10 +99,10 @@ export default async function ({ readConfigFile }) {
       },
     },
     junit: {
-      reportName: 'Chrome UI Functional Tests'
+      reportName: 'Chrome UI Functional Tests',
     },
     browser: {
-      type: 'chrome'
-    }
+      type: 'chrome',
+    },
   };
 }

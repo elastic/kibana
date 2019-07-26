@@ -34,7 +34,7 @@ export const IGNORE_FILE_GLOBS = [
   '**/*.txt',
   '**/Gruntfile.js',
   'tasks/config/**/*',
-  '**/{Dockerfile,docker-compose.yml}',
+  '**/{Dockerfile,docker-compose.yml,Dockerfile_*}',
   'x-pack/legacy/plugins/apm/**/*',
   'x-pack/legacy/plugins/canvas/tasks/**/*',
   'x-pack/legacy/plugins/canvas/canvas_plugin_src/**/*',
@@ -42,6 +42,7 @@ export const IGNORE_FILE_GLOBS = [
   '**/{webpackShims,__mocks__}/**/*',
   'x-pack/docs/**/*',
   'src/legacy/ui/public/assets/fonts/**/*',
+  'Jenkinsfile',
 
   // Files in this directory must match a pre-determined name in some cases.
   'x-pack/legacy/plugins/canvas/.storybook/*',

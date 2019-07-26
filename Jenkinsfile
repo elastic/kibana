@@ -78,12 +78,12 @@ pipeline {
         HOME = "${env.WORKSPACE}"
       }
       stages {
-        stage('Checkout') {
-          steps {
-            checkoutES()
-//            checkoutKibana()
-          }
-        }
+        // stage('Checkout') {
+        //   steps {
+        //     checkoutES()
+        //    checkoutKibana()
+        //   }
+        // }
         stage('Quick Test') {
           steps {
             quickTest()

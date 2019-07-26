@@ -1,0 +1,2 @@
+jenkins:
+  numExecutors: 10
