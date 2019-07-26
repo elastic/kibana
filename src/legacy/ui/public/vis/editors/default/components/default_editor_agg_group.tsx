@@ -106,17 +106,15 @@ function DefaultEditorAggGroup({
     setValidity(isGroupValid);
   }, [isGroupValid]);
 
-  const onDragEnd = ({
-    source,
-    destination,
-  }: {
-    source: { index: number };
-    destination: { index: number };
-  }) => {
-    if (source && destination) {
+  interface DragDropProps {
+    result: { index: number };
+    provided: { index: number };
+  }
+  const onDragEnd = ({ result, provided }: DragDropProps) => {
+    if (result && provided) {
       const orderedGroup = Array.from(group);
-      const [removed] = orderedGroup.splice(source.index, 1);
-      orderedGroup.splice(destination.index, 0, removed);
+      const [removed] = orderedGroup.splice(result.index, 1);
+      orderedGroup.splice(provided.index, 0, removed);
 
       reorderAggs(orderedGroup);
     }
@@ -139,6 +137,7 @@ function DefaultEditorAggGroup({
   };
 
   return (
+    // @ts-ignore due to https://github.com/elastic/eui/issues/2172
     <EuiDragDropContext onDragEnd={onDragEnd}>
       <EuiPanel paddingSize="s">
         <EuiTitle size="xs">
