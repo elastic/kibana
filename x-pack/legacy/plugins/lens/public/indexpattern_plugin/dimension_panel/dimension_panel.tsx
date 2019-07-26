@@ -136,6 +136,7 @@ export const IndexPatternDimensionPanel = memo(function IndexPatternDimensionPan
                   data-test-subj="indexPattern-dimensionPopover-remove"
                   iconType="cross"
                   iconSize="s"
+                  size="s"
                   color="danger"
                   aria-label={i18n.translate('xpack.lens.indexPattern.removeColumnLabel', {
                     defaultMessage: 'Remove',

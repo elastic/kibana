@@ -51,8 +51,6 @@ export const legendConfig: ExpressionFunction<
 
 interface AxisConfig {
   title: string;
-  showGridlines: boolean;
-  position: Position;
   hide?: boolean;
 }
 
@@ -60,15 +58,6 @@ const axisConfig: { [key in keyof AxisConfig]: ArgumentType<AxisConfig[key]> } =
   title: {
     types: ['string'],
     help: 'The axis title',
-  },
-  showGridlines: {
-    types: ['boolean'],
-    help: 'Show / hide axis grid lines.',
-  },
-  position: {
-    types: ['string'],
-    options: [Position.Top, Position.Right, Position.Bottom, Position.Left],
-    help: 'The position of the axis',
   },
   hide: {
     types: ['boolean'],
@@ -137,15 +126,7 @@ export const layerConfig: ExpressionFunction<
     },
     seriesType: {
       types: ['string'],
-      options: [
-        'bar',
-        'line',
-        'area',
-        'horizontal_bar',
-        'bar_stacked',
-        'area_stacked',
-        'horizontal_bar_stacked',
-      ],
+      options: ['bar', 'line', 'area', 'bar_stacked', 'area_stacked'],
       help: 'The type of chart to display.',
     },
     splitAccessor: {
@@ -171,14 +152,7 @@ export const layerConfig: ExpressionFunction<
   },
 };
 
-export type SeriesType =
-  | 'bar'
-  | 'horizontal_bar'
-  | 'line'
-  | 'area'
-  | 'bar_stacked'
-  | 'horizontal_bar_stacked'
-  | 'area_stacked';
+export type SeriesType = 'bar' | 'line' | 'area' | 'bar_stacked' | 'area_stacked';
 
 export type LayerConfig = AxisConfig & {
   layerId: string;
@@ -198,12 +172,14 @@ export interface XYArgs {
   yTitle: string;
   legend: LegendConfig;
   layers: LayerArgs[];
+  isHorizontal: boolean;
 }
 
 // Persisted parts of the state
 export interface XYState {
   legend: LegendConfig;
   layers: LayerConfig[];
+  isHorizontal: boolean;
 }
 
 export type State = XYState;

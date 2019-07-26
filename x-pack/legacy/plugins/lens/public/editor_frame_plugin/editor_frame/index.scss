@@ -106,4 +106,8 @@
   font-size: 1.2em;
 }
 
+.lnsConfigPanelWrapper {
+  padding: $euiSize 0;
+}
+
 @import './suggestion_panel.scss';

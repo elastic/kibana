@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { AreaSeries, BarSeries, Position, LineSeries, Settings } from '@elastic/charts';
+import { AreaSeries, BarSeries, Position, LineSeries, Settings, ScaleType } from '@elastic/charts';
 import { xyChart, XYChart } from './xy_expression';
 import { LensMultiTable } from '../types';
 import React from 'react';
@@ -26,6 +26,7 @@ function sampleArgs() {
   const args: XYArgs = {
     xTitle: '',
     yTitle: '',
+    isHorizontal: false,
     legend: {
       isVisible: false,
       position: Position.Top,
@@ -36,8 +37,6 @@ function sampleArgs() {
         seriesType: 'line',
         xAccessor: 'c',
         accessors: ['a', 'b'],
-        position: Position.Left,
-        showGridlines: false,
         title: 'A and B',
         splitAccessor: 'd',
         columnToLabel: '{"a": "Label A", "b": "Label B", "d": "Label D"}',
@@ -68,8 +67,6 @@ describe('xy_expression', () => {
         seriesType: 'line',
         xAccessor: 'c',
         accessors: ['a', 'b'],
-        position: Position.Left,
-        showGridlines: false,
         title: 'A and B',
         splitAccessor: 'd',
       };
@@ -136,11 +133,12 @@ describe('xy_expression', () => {
       const component = shallow(
         <XYChart
           data={data}
-          args={{ ...args, layers: [{ ...args.layers[0], seriesType: 'horizontal_bar' }] }}
+          args={{ ...args, isHorizontal: true, layers: [{ ...args.layers[0], seriesType: 'bar' }] }}
         />
       );
       expect(component).toMatchSnapshot();
       expect(component.find(BarSeries)).toHaveLength(1);
+      expect(component.find(Settings).prop('rotation')).toEqual(90);
     });
 
     test('it renders stacked bar', () => {
@@ -174,7 +172,11 @@ describe('xy_expression', () => {
       const component = shallow(
         <XYChart
           data={data}
-          args={{ ...args, layers: [{ ...args.layers[0], seriesType: 'horizontal_bar_stacked' }] }}
+          args={{
+            ...args,
+            isHorizontal: true,
+            layers: [{ ...args.layers[0], seriesType: 'bar_stacked' }],
+          }}
         />
       );
       expect(component).toMatchSnapshot();
@@ -198,6 +200,31 @@ describe('xy_expression', () => {
 
       const component = shallow(<XYChart data={data} args={args} />);
       expect(component.find(LineSeries).prop('yAccessors')).toEqual(['Label A', 'Label B']);
+    });
+
+    test('it indicates a linear scale for a numeric X axis', () => {
+      const { data, args } = sampleArgs();
+
+      const component = shallow(<XYChart data={data} args={args} />);
+      expect(component.find(LineSeries).prop('xScaleType')).toEqual(ScaleType.Linear);
+    });
+
+    test('it indicates an ordinal scale for a string X axis', () => {
+      const { args } = sampleArgs();
+
+      const data: LensMultiTable = {
+        type: 'lens_multitable',
+        tables: {
+          first: {
+            type: 'kibana_datatable',
+            columns: [{ id: 'a', name: 'a' }, { id: 'b', name: 'b' }, { id: 'c', name: 'c' }],
+            rows: [{ a: 1, b: 2, c: 'Hello' }, { a: 6, b: 5, c: 'World' }],
+          },
+        },
+      };
+
+      const component = shallow(<XYChart data={data} args={args} />);
+      expect(component.find(LineSeries).prop('xScaleType')).toEqual(ScaleType.Ordinal);
     });
   });
 });
