@@ -11,7 +11,8 @@
  */
 
 import Joi from 'joi';
-import { intervalFromNow, minutesFromNow } from './lib/intervals';
+import Boom from 'boom';
+import { intervalFromDate, intervalFromNow } from './lib/intervals';
 import { Logger } from './lib/logger';
 import { BeforeRunFunction } from './lib/middleware';
 import {
@@ -23,7 +24,8 @@ import {
   TaskDictionary,
   validateRunResult,
 } from './task';
-import { RemoveResult } from './task_store';
+
+const defaultBackoffPerFailure = 5 * 60 * 1000;
 
 export interface TaskRunner {
   numWorkers: number;
@@ -37,7 +39,7 @@ export interface TaskRunner {
 interface Updatable {
   readonly maxAttempts: number;
   update(doc: ConcreteTaskInstance): Promise<ConcreteTaskInstance>;
-  remove(id: string): Promise<RemoveResult>;
+  remove(id: string): Promise<void>;
 }
 
 interface Opts {
@@ -119,7 +121,7 @@ export class TaskManagerRunner implements TaskRunner {
    * Gets whether or not this task has run longer than its expiration setting allows.
    */
   public get isExpired() {
-    return this.instance.runAt < new Date();
+    return intervalFromDate(this.instance.startedAt!, this.definition.timeout)! < new Date();
   }
 
   /**
@@ -166,12 +168,20 @@ export class TaskManagerRunner implements TaskRunner {
    */
   public async claimOwnership(): Promise<boolean> {
     const VERSION_CONFLICT_STATUS = 409;
+    const attempts = this.instance.attempts + 1;
+    const now = new Date();
+
+    const timeoutDate = intervalFromNow(this.definition.timeout!)!;
 
     try {
       this.instance = await this.store.update({
         ...this.instance,
         status: 'running',
-        runAt: intervalFromNow(this.definition.timeout)!,
+        startedAt: now,
+        attempts,
+        retryAt: new Date(
+          timeoutDate.getTime() + this.getRetryDelay(attempts, Boom.clientTimeout())
+        ),
       });
 
       return true;
@@ -211,19 +221,21 @@ export class TaskManagerRunner implements TaskRunner {
 
   private async processResultForRecurringTask(result: RunResult): Promise<RunResult> {
     // recurring task: update the task instance
+    const startedAt = this.instance.startedAt!;
     const state = result.state || this.instance.state || {};
-    const status = this.instance.attempts < this.store.maxAttempts ? 'idle' : 'failed';
+    const status = this.getInstanceStatus();
 
     let runAt;
     if (status === 'failed') {
       // task run errored, keep the same runAt
       runAt = this.instance.runAt;
+    } else if (result.runAt) {
+      runAt = result.runAt;
+    } else if (result.error) {
+      // when result.error is truthy, then we're retrying because it failed
+      runAt = new Date(Date.now() + this.getRetryDelay(this.instance.attempts, result.error));
     } else {
-      runAt =
-        result.runAt ||
-        intervalFromNow(this.instance.interval) ||
-        // when result.error is truthy, then we're retrying because it failed
-        minutesFromNow((this.instance.attempts + 1) * 5); // incrementally backs off an extra 5m per failure
+      runAt = intervalFromDate(startedAt, this.instance.interval)!;
     }
 
     await this.store.update({
@@ -231,7 +243,9 @@ export class TaskManagerRunner implements TaskRunner {
       runAt,
       state,
       status,
-      attempts: result.error ? this.instance.attempts + 1 : 0,
+      startedAt: null,
+      retryAt: null,
+      attempts: result.error ? this.instance.attempts : 0,
     });
 
     return result;
@@ -261,6 +275,22 @@ export class TaskManagerRunner implements TaskRunner {
       await this.processResultWhenDone(result);
     }
     return result;
+  }
+
+  private getInstanceStatus() {
+    if (this.instance.interval) {
+      return 'idle';
+    }
+
+    const maxAttempts = this.definition.maxAttempts || this.store.maxAttempts;
+    return this.instance.attempts < maxAttempts ? 'idle' : 'failed';
+  }
+
+  private getRetryDelay(attempts: number, error: any) {
+    if (this.definition.getRetryDelay) {
+      return this.definition.getRetryDelay(attempts, error) * 1000;
+    }
+    return attempts * defaultBackoffPerFailure;
   }
 }
 
