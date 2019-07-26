@@ -14,7 +14,7 @@ class MockMbMap {
   }
 
   getStyle() {
-    return this._style;
+    return _.cloneDeep(this._style);
   }
 
   moveLayer(layerId, nextLayerId) {
@@ -34,6 +34,16 @@ class MockMbMap {
 
   }
 
+  removeSource(sourceId) {
+    delete this._style.sources[sourceId];
+  }
+
+  removeLayer(layerId) {
+    const layerToRemove = this._style.layers.findIndex(layer => {
+      return layer.id === layerId;
+    });
+    this._style.layers.splice(layerToRemove, 1);
+  }
 }
 
 
@@ -78,65 +88,82 @@ function getMockStyle(orderedMockLayerList) {
   return mockStyle;
 }
 
+
+function makeSingleSourceMockLayer(layerId) {
+  return new MockLayer(
+    layerId,
+    [layerId],
+    [{ id: layerId + '_fill', source: layerId }, { id: layerId + '_line', source: layerId }]
+  );
+}
+
 describe('mb/utils', () => {
 
-  // test('should remove orphaned sources and layers', async () => {
-  //   expect(true).toBe(false);
-  // });
+  test('should remove foo and bar layer', async () => {
+
+    const bazLayer = makeSingleSourceMockLayer('baz');
+    const fooLayer = makeSingleSourceMockLayer('foo');
+    const barLayer = makeSingleSourceMockLayer('bar');
+
+    const currentLayerList = [bazLayer, fooLayer, barLayer];
+    const nextLayerList = [bazLayer];
+
+    const currentStyle = getMockStyle(currentLayerList);
+    const mockMbMap = new MockMbMap(currentStyle);
+
+    removeOrphanedSourcesAndLayers(mockMbMap, nextLayerList);
+    const removedStyle = mockMbMap.getStyle();
+
+
+    const nextStyle = getMockStyle(nextLayerList);
+    expect(removedStyle).toEqual(nextStyle);
+
+  });
+
+  test('should not remove anything', async () => {
+
+    const bazLayer = makeSingleSourceMockLayer('baz');
+    const fooLayer = makeSingleSourceMockLayer('foo');
+    const barLayer = makeSingleSourceMockLayer('bar');
+
+    const currentLayerList = [bazLayer, fooLayer, barLayer];
+    const nextLayerList = [bazLayer, fooLayer, barLayer];
+
+    const currentStyle = getMockStyle(currentLayerList);
+    const mockMbMap = new MockMbMap(currentStyle);
+
+    removeOrphanedSourcesAndLayers(mockMbMap, nextLayerList);
+    const removedStyle = mockMbMap.getStyle();
+
+    const nextStyle = getMockStyle(nextLayerList);
+    expect(removedStyle).toEqual(nextStyle);
+
+  });
 
   test('should move bar layer in front of foo layer', async () => {
 
-
-    const fooLayer = new MockLayer(
-      'foo',
-      ['foo'],
-      [{ id: 'foo_fill', source: 'foo' }, { id: 'foo_line', source: 'foo' }]
-    );
-
-    const barLayer = new MockLayer(
-      'bar',
-      ['bar'],
-      [{ id: 'bar_fill', source: 'bar' }, { id: 'bar_line', source: 'bar' }]
-    );
+    const fooLayer = makeSingleSourceMockLayer('foo');
+    const barLayer = makeSingleSourceMockLayer('bar');
 
     const currentLayerOrder = [fooLayer, barLayer];
     const nextLayerListOrder = [barLayer, fooLayer];
 
-
     const currentStyle = getMockStyle(currentLayerOrder);
-
-
     const mockMbMap = new MockMbMap(currentStyle);
-
     syncLayerOrder(mockMbMap, nextLayerListOrder);
-
     const orderedStyle = mockMbMap.getStyle();
 
     const nextStyle = getMockStyle(nextLayerListOrder);
-
     expect(orderedStyle).toEqual(nextStyle);
 
   });
 
   test('should move bar layer in front of foo layer, but after baz layer', async () => {
 
-    const bazLayer = new MockLayer(
-      'baz',
-      ['baz'],
-      [{ id: 'baz_fill', source: 'bar' }, { id: 'baz_line', source: 'baz' }]
-    );
 
-    const fooLayer = new MockLayer(
-      'foo',
-      ['foo'],
-      [{ id: 'foo_fill', source: 'foo' }, { id: 'foo_line', source: 'foo' }]
-    );
-
-    const barLayer = new MockLayer(
-      'bar',
-      ['bar'],
-      [{ id: 'bar_fill', source: 'bar' }, { id: 'bar_line', source: 'bar' }]
-    );
+    const bazLayer = makeSingleSourceMockLayer('baz');
+    const fooLayer = makeSingleSourceMockLayer('foo');
+    const barLayer = makeSingleSourceMockLayer('bar');
 
     const currentLayerOrder = [bazLayer, fooLayer, barLayer];
     const nextLayerListOrder = [bazLayer, barLayer, fooLayer];
@@ -144,13 +171,32 @@ describe('mb/utils', () => {
 
     const currentStyle = getMockStyle(currentLayerOrder);
     const mockMbMap = new MockMbMap(currentStyle);
-
     syncLayerOrder(mockMbMap, nextLayerListOrder);
-
     const orderedStyle = mockMbMap.getStyle();
 
     const nextStyle = getMockStyle(nextLayerListOrder);
+    expect(orderedStyle).toEqual(nextStyle);
 
+  });
+
+  test('should reorder foo and bar and remove baz', async () => {
+
+
+    const bazLayer = makeSingleSourceMockLayer('baz');
+    const fooLayer = makeSingleSourceMockLayer('foo');
+    const barLayer = makeSingleSourceMockLayer('bar');
+
+    const currentLayerOrder = [bazLayer, fooLayer, barLayer];
+    const nextLayerListOrder = [barLayer, fooLayer];
+
+
+    const currentStyle = getMockStyle(currentLayerOrder);
+    const mockMbMap = new MockMbMap(currentStyle);
+    removeOrphanedSourcesAndLayers(mockMbMap, nextLayerListOrder);
+    syncLayerOrder(mockMbMap, nextLayerListOrder);
+    const orderedStyle = mockMbMap.getStyle();
+
+    const nextStyle = getMockStyle(nextLayerListOrder);
     expect(orderedStyle).toEqual(nextStyle);
 
   });
