@@ -304,7 +304,6 @@ export class TimeSeriesExplorer extends React.Component {
           loading: false,
           showModelBoundsCheckbox: (modelPlotEnabled === true) && (refreshFocusData.focusChartData.length > 0),
         });
-        console.log('Time series explorer focus chart data set:', refreshFocusData.focusChartData);
       });
 
       // Load the data for the anomalies table.
@@ -573,7 +572,6 @@ export class TimeSeriesExplorer extends React.Component {
         jobs,
         selectedJob,
       );
-      console.log('aggregationInterval for context data (s):', stateUpdate.contextAggregationInterval.asSeconds());
 
       // Ensure the search bounds align to the bucketing interval so that the first and last buckets are complete.
       // For sum or count detectors, short buckets would hold smaller values, and model bounds would also be affected
@@ -595,8 +593,6 @@ export class TimeSeriesExplorer extends React.Component {
       ).then((resp) => {
         const fullRangeChartData = processMetricPlotResults(resp.results, modelPlotEnabled);
         stateUpdate.contextChartData = fullRangeChartData;
-        console.log('Time series explorer context chart data set:', stateUpdate.contextChartData);
-
         finish(counter);
       }).catch((resp) => {
         console.log('Time series explorer - error getting metric data from elasticsearch:', resp);
@@ -613,8 +609,6 @@ export class TimeSeriesExplorer extends React.Component {
       ).then((resp) => {
         const fullRangeRecordScoreData = processRecordScoreResults(resp.results);
         stateUpdate.swimlaneData = fullRangeRecordScoreData;
-        console.log('Time series explorer swimlane anomalies data set:', stateUpdate.swimlaneData);
-
         finish(counter);
       }).catch((resp) => {
         console.log('Time series explorer - error getting bucket anomaly scores from elasticsearch:', resp);

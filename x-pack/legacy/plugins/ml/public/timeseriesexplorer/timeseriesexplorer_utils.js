@@ -373,7 +373,6 @@ export const getFocusData = function (
         .sortBy(record => record[TIME_FIELD_NAME])
         .reverse()
         .value();
-      console.log('Time series explorer anomalies:', refreshFocusData.anomalyRecords);
       finish();
     });
 
@@ -479,9 +478,6 @@ export function calculateAggregationInterval(
     buckets.setInterval(bucketSpanSeconds + 's');
     aggInterval = buckets.getInterval();
   }
-
-  console.log('calculateAggregationInterval() barTarget,maxBars,returning:', bucketsTarget, maxBars,
-    (bounds.max.diff(bounds.min)) / aggInterval.asMilliseconds());
 
   return aggInterval;
 }
