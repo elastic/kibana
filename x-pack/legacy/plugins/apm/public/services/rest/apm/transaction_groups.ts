@@ -7,10 +7,10 @@
 import { TransactionBreakdownAPIResponse } from '../../../../server/lib/transactions/breakdown';
 import { TimeSeriesAPIResponse } from '../../../../server/lib/transactions/charts';
 import { ITransactionDistributionAPIResponse } from '../../../../server/lib/transactions/distribution';
-import { TransactionListAPIResponse } from '../../../../server/lib/transactions/get_top_transactions';
 import { callApi } from '../callApi';
 import { getUiFiltersES } from '../../ui_filters/get_ui_filters_es';
 import { UIFilters } from '../../../../typings/ui-filters';
+import { TransactionGroupListAPIResponse } from '../../../../server/lib/transaction_groups';
 
 export async function loadTransactionList({
   serviceName,
@@ -25,7 +25,7 @@ export async function loadTransactionList({
   transactionType: string;
   uiFilters: UIFilters;
 }) {
-  return await callApi<TransactionListAPIResponse>({
+  return await callApi<TransactionGroupListAPIResponse>({
     pathname: `/api/apm/services/${serviceName}/transaction_groups`,
     query: {
       start,
@@ -101,12 +101,14 @@ export async function loadTransactionBreakdown({
   start,
   end,
   transactionName,
+  transactionType,
   uiFilters
 }: {
   serviceName: string;
   start: string;
   end: string;
   transactionName?: string;
+  transactionType: string;
   uiFilters: UIFilters;
 }) {
   return callApi<TransactionBreakdownAPIResponse>({
@@ -115,6 +117,7 @@ export async function loadTransactionBreakdown({
       start,
       end,
       transactionName,
+      transactionType,
       uiFiltersES: await getUiFiltersES(uiFilters)
     }
   });

@@ -43,7 +43,7 @@ export class DashboardContainerExample extends React.Component<{}, State> {
   private mounted = false;
   private container: DashboardContainer | ErrorEmbeddable | undefined;
 
-  public constructor() {
+  constructor() {
     super({});
     this.state = {
       viewMode: ViewMode.VIEW,
