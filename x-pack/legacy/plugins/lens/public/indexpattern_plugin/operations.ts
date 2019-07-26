@@ -7,7 +7,7 @@
 import _ from 'lodash';
 import { Storage } from 'ui/storage';
 import { DataSetup } from '../../../../../../src/legacy/core_plugins/data/public';
-import { DimensionPriority, OperationMetaInformation } from '../types';
+import { DimensionPriority, OperationMetadata } from '../types';
 import {
   IndexPatternColumn,
   IndexPatternField,
@@ -70,8 +70,8 @@ export interface ParamEditorProps {
 export interface OperationDefinition<C extends BaseIndexPatternColumn> {
   type: C['operationType'];
   displayName: string;
-  getPossibleOperationsForDocument: (indexPattern: IndexPattern) => OperationMetaInformation[];
-  getPossibleOperationsForField: (field: IndexPatternField) => OperationMetaInformation[];
+  getPossibleOperationsForDocument: (indexPattern: IndexPattern) => OperationMetadata[];
+  getPossibleOperationsForField: (field: IndexPatternField) => OperationMetadata[];
   buildColumn: (arg: {
     suggestedPriority: DimensionPriority | undefined;
     layerId: string;
@@ -116,23 +116,30 @@ type OperationFieldTuple =
   | { type: 'field'; operationType: OperationType; field: string }
   | { operationType: OperationType; type: 'document' };
 
-export function getAvailableOperationsByMetaData(indexPattern: IndexPattern) {
-  const operationByMetaData: Record<string, OperationFieldTuple[]> = {};
+export function getAvailableOperationsByMetadata(indexPattern: IndexPattern) {
+  const operationByMetadata: Record<
+    string,
+    { operationMetaData: OperationMetadata; operations: OperationFieldTuple[] }
+  > = {};
 
-  const addToMap = (operation: OperationFieldTuple) => (
-    operationMeta: OperationMetaInformation
-  ) => {
-    const key = `${operationMeta.dataType}-${operationMeta.isBucketed ? 'true' : ''}`;
-    if (operationByMetaData[key]) {
-      operationByMetaData[key].push(operation);
+  const addToMap = (operation: OperationFieldTuple) => (operationMetadata: OperationMetadata) => {
+    const key = `${operationMetadata.dataType}-${operationMetadata.isBucketed ? 'true' : ''}`;
+
+    if (operationByMetadata[key]) {
+      operationByMetadata[key].operations.push(operation);
     } else {
-      operationByMetaData[key] = [operation];
+      operationByMetadata[key] = {
+        operationMetaData: operationMetadata,
+        operations: [operation],
+      };
     }
   };
+
   operationDefinitions.forEach(operationDefinition => {
     operationDefinition
       .getPossibleOperationsForDocument(indexPattern)
       .forEach(addToMap({ type: 'document', operationType: operationDefinition.type }));
+
     indexPattern.fields.forEach(field => {
       operationDefinition.getPossibleOperationsForField(field).forEach(
         addToMap({
@@ -143,13 +150,8 @@ export function getAvailableOperationsByMetaData(indexPattern: IndexPattern) {
       );
     });
   });
-  return Object.entries(operationByMetaData).map(([key, operations]) => {
-    const [dataType, isBucketed] = key.split('-');
-    return {
-      operationMetaData: { dataType, isBucketed: Boolean(isBucketed) } as OperationMetaInformation,
-      operations,
-    };
-  });
+
+  return Object.values(operationByMetadata);
 }
 
 export function buildColumn({

@@ -44,7 +44,6 @@ describe('filter_ratio', () => {
           columnOrder: ['col1'],
           columns: {
             col1: {
-              operationId: 'op1',
               label: 'Filter Ratio',
               dataType: 'number',
               isBucketed: false,
@@ -71,7 +70,6 @@ describe('filter_ratio', () => {
   describe('buildColumn', () => {
     it('should create column object with default params', () => {
       const column = filterRatioOperation.buildColumn({
-        operationId: 'op',
         indexPatternId: '1',
         layerId: 'first',
         columns: {},

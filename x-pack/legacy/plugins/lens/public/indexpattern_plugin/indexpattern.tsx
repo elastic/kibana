@@ -39,8 +39,6 @@ export type IndexPatternColumn =
   | FilterRatioIndexPatternColumn;
 
 export interface BaseIndexPatternColumn {
-  // Public
-  operationId: string;
   label: string;
   dataType: DataType;
   isBucketed: boolean;

@@ -86,7 +86,6 @@ describe('IndexPatternDimensionPanel', () => {
           columnOrder: ['col1'],
           columns: {
             col1: {
-              operationId: 'op1',
               label: 'Date Histogram of timestamp',
               dataType: 'date',
               isBucketed: true,
@@ -201,7 +200,6 @@ describe('IndexPatternDimensionPanel', () => {
               columns: {
                 ...state.layers.first.columns,
                 col1: {
-                  operationId: 'op1',
                   label: 'Max of bytes',
                   dataType: 'number',
                   isBucketed: false,
@@ -244,7 +242,6 @@ describe('IndexPatternDimensionPanel', () => {
               columns: {
                 ...state.layers.first.columns,
                 col1: {
-                  operationId: 'op1',
                   label: 'Max of bytes',
                   dataType: 'number',
                   isBucketed: false,
@@ -284,7 +281,6 @@ describe('IndexPatternDimensionPanel', () => {
           columns: {
             ...state.layers.first.columns,
             col1: {
-              operationId: 'op1',
               label: 'Max of bytes',
               dataType: 'number',
               isBucketed: false,
@@ -370,7 +366,6 @@ describe('IndexPatternDimensionPanel', () => {
               columns: {
                 ...state.layers.first.columns,
                 col1: {
-                  operationId: 'op1',
                   label: 'Max of bytes',
                   dataType: 'number',
                   isBucketed: false,
@@ -711,7 +706,6 @@ describe('IndexPatternDimensionPanel', () => {
           columns: {
             ...state.layers.first.columns,
             col1: {
-              operationId: 'op1',
               label: 'Max of bytes',
               dataType: 'number',
               isBucketed: false,
@@ -815,7 +809,6 @@ describe('IndexPatternDimensionPanel', () => {
             columnOrder: ['col1'],
             columns: {
               col1: {
-                operationId: 'op1',
                 label: 'Date Histogram of timestamp',
                 dataType: 'date',
                 isBucketed: true,

@@ -38,7 +38,6 @@ describe('date_histogram', () => {
           columnOrder: ['col1'],
           columns: {
             col1: {
-              operationId: 'op1',
               label: 'Value of timestamp',
               dataType: 'date',
               isBucketed: true,
@@ -60,7 +59,6 @@ describe('date_histogram', () => {
   describe('buildColumn', () => {
     it('should create column object with default params', () => {
       const column = dateHistogramOperation.buildColumn({
-        operationId: 'op',
         columns: {},
         suggestedPriority: 0,
         layerId: 'first',
@@ -78,7 +76,6 @@ describe('date_histogram', () => {
 
     it('should create column object with restrictions', () => {
       const column = dateHistogramOperation.buildColumn({
-        operationId: 'op',
         columns: {},
         suggestedPriority: 0,
         layerId: 'first',

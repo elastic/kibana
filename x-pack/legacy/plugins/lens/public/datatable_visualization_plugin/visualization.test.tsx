@@ -95,7 +95,6 @@ describe('Datatable Visualization', () => {
         dataType: 'string',
         isBucketed: true,
         label: '',
-        id: '',
       };
       expect(filterOperations({ ...baseOperation })).toEqual(true);
       expect(filterOperations({ ...baseOperation, dataType: 'number' })).toEqual(true);

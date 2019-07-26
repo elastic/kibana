@@ -18,7 +18,7 @@ import {
   EuiButtonIcon,
 } from '@elastic/eui';
 import { State, SeriesType, LayerConfig } from './types';
-import { VisualizationProps, OperationMetaInformation } from '../types';
+import { VisualizationProps, OperationMetadata } from '../types';
 import { NativeRenderer } from '../native_renderer';
 import { MultiColumnEditor } from '../multi_column_editor';
 import { generateId } from '../id_generator';
@@ -75,9 +75,8 @@ export const chartTypeIcons: Array<{ id: SeriesType; label: string; iconType: Ic
   },
 ];
 
-const isNumericMetric = (op: OperationMetaInformation) =>
-  !op.isBucketed && op.dataType === 'number';
-const isBucketed = (op: OperationMetaInformation) => op.isBucketed;
+const isNumericMetric = (op: OperationMetadata) => !op.isBucketed && op.dataType === 'number';
+const isBucketed = (op: OperationMetadata) => op.isBucketed;
 
 type UnwrapArray<T> = T extends Array<infer P> ? P : T;
 

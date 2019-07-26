@@ -51,13 +51,12 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn> = {
     }
     return [];
   },
-  buildColumn({ operationId, suggestedPriority, columns, field, indexPatternId }) {
+  buildColumn({ suggestedPriority, columns, field, indexPatternId }) {
     const existingMetricColumn = Object.entries(columns)
       .filter(([_columnId, column]) => column && isSortableByColumn(column))
       .map(([id]) => id)[0];
 
     return {
-      operationId,
       label: ofName(field ? field.name : ''),
       dataType: 'string',
       operationType: 'terms',

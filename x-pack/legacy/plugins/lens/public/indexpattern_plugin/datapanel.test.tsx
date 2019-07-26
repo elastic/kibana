@@ -23,7 +23,6 @@ const initialState: IndexPatternPrivateState = {
       columnOrder: ['col1'],
       columns: {
         col1: {
-          operationId: 'op1',
           label: 'My Op',
           dataType: 'string',
           isBucketed: true,

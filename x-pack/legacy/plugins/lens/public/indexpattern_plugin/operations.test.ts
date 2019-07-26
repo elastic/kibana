@@ -6,7 +6,7 @@
 
 import {
   getOperationTypesForField,
-  getAvailableOperationsByMetaData,
+  getAvailableOperationsByMetadata,
   buildColumn,
 } from './operations';
 import {
@@ -159,7 +159,6 @@ describe('getOperationTypesForField', () => {
           columnOrder: ['col1'],
           columns: {
             col1: {
-              operationId: 'op1',
               label: 'Date Histogram of timestamp',
               dataType: 'date',
               isBucketed: true,
@@ -229,7 +228,7 @@ describe('getOperationTypesForField', () => {
 
   describe('getAvailableOperationsByMetaData', () => {
     it('should list out all field-operation tuples for different operation meta data', () => {
-      expect(getAvailableOperationsByMetaData(expectedIndexPatterns[1])).toMatchInlineSnapshot(`
+      expect(getAvailableOperationsByMetadata(expectedIndexPatterns[1])).toMatchInlineSnapshot(`
         Array [
           Object {
             "operationMetaData": Object {

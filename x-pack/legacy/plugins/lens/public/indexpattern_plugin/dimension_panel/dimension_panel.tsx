@@ -18,7 +18,7 @@ import {
   OperationType,
 } from '../indexpattern';
 
-import { getAvailableOperationsByMetaData, buildColumn } from '../operations';
+import { getAvailableOperationsByMetadata, buildColumn } from '../operations';
 import { PopoverEditor } from './popover_editor';
 import { DragContextState, ChildDragDropProvider, DragDrop } from '../../drag_drop';
 import { changeColumn, deleteColumn } from '../state_helpers';
@@ -45,14 +45,14 @@ export const IndexPatternDimensionPanel = memo(function IndexPatternDimensionPan
   const currentIndexPattern = props.state.indexPatterns[props.state.layers[layerId].indexPatternId];
 
   const operationFieldSupportMatrix = useMemo(() => {
-    const filteredOperationsByMetaData = getAvailableOperationsByMetaData(
+    const filteredOperationsByMetadata = getAvailableOperationsByMetadata(
       currentIndexPattern
     ).filter(operation => props.filterOperations(operation.operationMetaData));
 
     const supportedOperationsByField: Partial<Record<string, OperationType[]>> = {};
     const supportedFieldsByOperation: Partial<Record<OperationType, string[]>> = {};
     const supportedOperationsByDocument: OperationType[] = [];
-    filteredOperationsByMetaData.forEach(({ operations }) => {
+    filteredOperationsByMetadata.forEach(({ operations }) => {
       operations.forEach(operation => {
         if (operation.type === 'field') {
           if (supportedOperationsByField[operation.field]) {

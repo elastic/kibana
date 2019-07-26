@@ -134,7 +134,6 @@ describe('IndexPattern Data Source', () => {
           columnOrder: ['col1'],
           columns: {
             col1: {
-              operationId: 'op1',
               label: 'My Op',
               dataType: 'string',
               isBucketed: true,
@@ -197,7 +196,6 @@ describe('IndexPattern Data Source', () => {
             columnOrder: ['col1', 'col2'],
             columns: {
               col1: {
-                operationId: 'op1',
                 label: 'Count of Documents',
                 dataType: 'number',
                 isBucketed: false,
@@ -207,7 +205,6 @@ describe('IndexPattern Data Source', () => {
                 indexPatternId: '1',
               },
               col2: {
-                operationId: 'op2',
                 label: 'Date',
                 dataType: 'date',
                 isBucketed: true,
@@ -863,7 +860,6 @@ describe('IndexPattern Data Source', () => {
           dataType: 'number',
           isBucketed: false,
           label: 'foo',
-          operationId: 'bar',
           operationType: 'max',
           sourceField: 'baz',
           suggestedPriority: 0,

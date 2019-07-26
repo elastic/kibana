@@ -34,12 +34,11 @@ function buildMetricOperation<T extends FieldBasedIndexPatternColumn>(
       }
       return [];
     },
-    buildColumn({ operationId, suggestedPriority, field, indexPatternId }): T {
+    buildColumn({ suggestedPriority, field, indexPatternId }): T {
       if (!field) {
         throw new Error(`Invariant: A ${type} operation can only be built with a field`);
       }
       return {
-        operationId,
         label: ofName(field ? field.name : ''),
         dataType: 'number',
         operationType: type,

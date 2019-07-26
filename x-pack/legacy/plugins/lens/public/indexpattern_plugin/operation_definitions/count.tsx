@@ -22,9 +22,8 @@ export const countOperation: OperationDefinition<CountIndexPatternColumn> = {
       },
     ];
   },
-  buildColumn({ operationId, suggestedPriority, indexPatternId }) {
+  buildColumn({ suggestedPriority, indexPatternId }) {
     return {
-      operationId,
       label: i18n.translate('xpack.lens.indexPattern.countOf', {
         defaultMessage: 'Count of documents',
       }),

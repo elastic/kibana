@@ -27,9 +27,8 @@ export const filterRatioOperation: OperationDefinition<FilterRatioIndexPatternCo
       },
     ];
   },
-  buildColumn({ operationId, suggestedPriority, indexPatternId }) {
+  buildColumn({ suggestedPriority, indexPatternId }) {
     return {
-      operationId,
       label: i18n.translate('xpack.lens.indexPattern.filterRatio', {
         defaultMessage: 'Filter Ratio',
       }),
