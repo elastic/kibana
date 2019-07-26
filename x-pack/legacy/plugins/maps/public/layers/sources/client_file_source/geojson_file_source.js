@@ -107,13 +107,13 @@ export class GeojsonFileSource extends AbstractVectorSource {
   }
 
   async getGeoJsonWithMeta() {
-    const { features, type } = this._descriptor.featureCollection;
-    const featuresWithoutProps = features.map(({ type, geometry }) =>
-      ({ type, geometry, properties: {} }));
+    const trimmedFeatures = this._descriptor.featureCollection.features
+      .map(({ type, geometry, properties }) =>
+        ({ type, geometry, ...(properties ? properties : {}) }));
     return {
       data: {
-        type,
-        features: featuresWithoutProps
+        type: 'FeatureCollection',
+        features: trimmedFeatures
       },
       meta: {}
     };
