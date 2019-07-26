@@ -9,14 +9,11 @@ import { PLUGIN } from '../../common/constants';
 import { IntegrationsGroupedByStatus } from '../../common/types';
 import { IntegrationsGridByStatus } from '../components/integration_list_grid';
 import { getIntegrationsGroupedByStatus } from '../data';
-import { useCore } from '../hooks';
+import { useBreadcrumbs } from '../hooks';
 import { linkToListView } from '../routes';
 
 export function Home() {
-  // TODO: DRY out (or lift up, whatever) breadcrumbs
-  const { chrome } = useCore();
-
-  chrome.setBreadcrumbs([{ text: PLUGIN.TITLE, href: linkToListView() }]);
+  useBreadcrumbs([{ text: PLUGIN.TITLE, href: linkToListView() }]);
 
   const [map, setMap] = useState<IntegrationsGroupedByStatus>({
     installed: [],
