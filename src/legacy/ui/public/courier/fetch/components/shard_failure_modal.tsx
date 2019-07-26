@@ -45,9 +45,21 @@ export interface Props {
 export function ShardFailureModal({ request, response, title, onClose }: Props) {
   if (!response || !response._shards || !Array.isArray(response._shards.failures) || !request) {
     // this should never ever happen, but just in case
+    const errorTitle = i18n.translate(
+      'common.ui.courier.fetch.shardsFailedModal.componentErrorTitle',
+      {
+        defaultMessage: 'Sorry, there was an error',
+      }
+    );
+    const errorDesc = i18n.translate(
+      'common.ui.courier.fetch.shardsFailedModal.componentErrorDesc',
+      {
+        defaultMessage: 'The ShardFailureModal component received invalid properties',
+      }
+    );
     return (
-      <EuiCallOut title="Sorry, there was an error" color="danger" iconType="alert">
-        The ShardFailureModal component received invalid properties
+      <EuiCallOut title={errorTitle} color="danger" iconType="alert">
+        {errorDesc}
       </EuiCallOut>
     );
   }
