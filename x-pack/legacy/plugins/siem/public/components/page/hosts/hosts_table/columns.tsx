@@ -9,7 +9,6 @@ import moment from 'moment';
 import React from 'react';
 import { StaticIndexPattern } from 'ui/index_patterns';
 
-import { HostItem, HostFields, OsFields } from '../../../../graphql/types';
 import { escapeQueryValue } from '../../../../lib/keury';
 import { hostsModel } from '../../../../store';
 import { DragEffects, DraggableWrapper } from '../../../drag_and_drop/draggable_wrapper';
@@ -17,23 +16,18 @@ import { escapeDataProviderId } from '../../../drag_and_drop/helpers';
 import { getEmptyTagValue } from '../../../empty_value';
 import { PreferenceFormattedDate } from '../../../formatted_date';
 import { HostDetailsLink } from '../../../links';
-import { Columns } from '../../../load_more_table';
 import { LocalizedDateTooltip } from '../../../localized_date_tooltip';
 import { IS_OPERATOR } from '../../../timeline/data_providers/data_provider';
 import { Provider } from '../../../timeline/data_providers/provider';
 import { AddToKql } from '../../add_to_kql';
+import { HostsTableColumns } from './';
 
 import * as i18n from './translations';
 
 export const getHostsColumns = (
   type: hostsModel.HostsType,
   indexPattern: StaticIndexPattern
-): [
-  Columns<HostFields['name']>,
-  Columns<HostItem['lastSeen']>,
-  Columns<OsFields['name']>,
-  Columns<OsFields['version']>
-] => [
+): HostsTableColumns => [
   {
     field: 'node.host.name',
     name: i18n.NAME,

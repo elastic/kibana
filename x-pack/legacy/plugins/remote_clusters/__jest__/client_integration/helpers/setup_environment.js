@@ -13,7 +13,9 @@ import { fatalError, toastNotifications } from 'ui/notify'; // eslint-disable-li
 import { init as initBreadcrumb } from '../../../public/app/services/breadcrumb';
 import { init as initHttp } from '../../../public/app/services/http';
 import { init as initNotification } from '../../../public/app/services/notification';
+import { init as initUiMetric } from '../../../public/app/services/ui_metric';
 import { init as initHttpRequests } from './http_requests';
+import { createUiStatsReporter } from '../../../../../../../src/legacy/core_plugins/ui_metric/public';
 
 export const setupEnvironment = () => {
   chrome.breadcrumbs = {
@@ -23,6 +25,7 @@ export const setupEnvironment = () => {
   initHttp(axios.create({ adapter: axiosXhrAdapter }), (path) => path);
   initBreadcrumb(() => {}, MANAGEMENT_BREADCRUMB);
   initNotification(toastNotifications, fatalError);
+  initUiMetric(createUiStatsReporter);
 
   const { server, httpRequestsMockHelpers } = initHttpRequests();
 

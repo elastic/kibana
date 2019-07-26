@@ -1678,16 +1678,36 @@
       {
         "kind": "INPUT_OBJECT",
         "name": "InfraLogEntryHighlightInput",
-        "description": "",
+        "description": "A highlighting definition",
         "fields": null,
         "inputFields": [
           {
             "name": "query",
-            "description": "",
+            "description": "The query to highlight by",
             "type": {
               "kind": "NON_NULL",
               "name": null,
               "ofType": { "kind": "SCALAR", "name": "String", "ofType": null }
+            },
+            "defaultValue": null
+          },
+          {
+            "name": "countBefore",
+            "description": "The number of highlighted documents to include beyond the beginning of the interval",
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": { "kind": "SCALAR", "name": "Int", "ofType": null }
+            },
+            "defaultValue": null
+          },
+          {
+            "name": "countAfter",
+            "description": "The number of highlighted documents to include beyond the end of the interval",
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": { "kind": "SCALAR", "name": "Int", "ofType": null }
             },
             "defaultValue": null
           }
