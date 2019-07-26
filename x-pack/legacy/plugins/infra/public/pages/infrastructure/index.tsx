@@ -18,6 +18,7 @@ import { WithSource } from '../../containers/with_source';
 import { Source } from '../../containers/source';
 import { MetricsExplorerPage } from './metrics_explorer';
 import { SnapshotPage } from './snapshot';
+import { SettingsPage } from '../shared/settings';
 
 interface InfrastructurePageProps extends RouteComponentProps {
   intl: InjectedIntl;
@@ -57,6 +58,13 @@ export const InfrastructurePage = injectI18n(({ match, intl }: InfrastructurePag
             }),
             path: `${match.path}/metrics-explorer`,
           },
+          {
+            title: intl.formatMessage({
+              id: 'xpack.infrastructure.homePage.settingsTabTitle',
+              defaultMessage: 'Settings',
+            }),
+            path: `${match.path}/settings`,
+          },
         ]}
       />
 
@@ -79,6 +87,7 @@ export const InfrastructurePage = injectI18n(({ match, intl }: InfrastructurePag
             </WithSource>
           )}
         />
+        <Route path={`${match.path}/settings`} component={SettingsPage} />
       </Switch>
     </ColumnarPage>
   </Source.Provider>
