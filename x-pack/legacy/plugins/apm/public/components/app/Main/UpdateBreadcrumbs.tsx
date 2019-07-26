@@ -7,7 +7,8 @@
 import { Location } from 'history';
 import { last } from 'lodash';
 import React from 'react';
-import chrome from 'ui/chrome';
+import { InternalCoreStart } from 'src/core/public';
+import { useCore } from '../../../hooks/useCore';
 import { getAPMHref } from '../../shared/Links/APMLink';
 import { Breadcrumb, ProvideBreadcrumbs } from './ProvideBreadcrumbs';
 import { routes } from './route_config';
@@ -15,6 +16,7 @@ import { routes } from './route_config';
 interface Props {
   location: Location;
   breadcrumbs: Breadcrumb[];
+  core: InternalCoreStart;
 }
 
 class UpdateBreadcrumbsComponent extends React.Component<Props> {
@@ -26,7 +28,7 @@ class UpdateBreadcrumbsComponent extends React.Component<Props> {
 
     const current = last(breadcrumbs) || { text: '' };
     document.title = current.text;
-    chrome.breadcrumbs.set(breadcrumbs);
+    this.props.core.chrome.setBreadcrumbs(breadcrumbs);
   }
 
   public componentDidMount() {
@@ -43,6 +45,7 @@ class UpdateBreadcrumbsComponent extends React.Component<Props> {
 }
 
 export function UpdateBreadcrumbs() {
+  const core = useCore();
   return (
     <ProvideBreadcrumbs
       routes={routes}
@@ -50,6 +53,7 @@ export function UpdateBreadcrumbs() {
         <UpdateBreadcrumbsComponent
           breadcrumbs={breadcrumbs}
           location={location}
+          core={core}
         />
       )}
     />
