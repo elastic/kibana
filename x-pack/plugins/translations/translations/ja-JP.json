@@ -3757,6 +3757,8 @@
     "xpack.apm.formatters.millisTimeUnitLabel": "ミリ秒",
     "xpack.apm.formatters.requestsPerMinLabel": "1分あたりリクエスト数",
     "xpack.apm.formatters.secondsTimeUnitLabel": "秒",
+    "xpack.apm.formatters.minutesTimeUnitLabel": "分",
+    "xpack.apm.formatters.hoursTimeUnitLabel": "時",
     "xpack.apm.formatters.transactionsPerMinLabel": "1分あたりトランザクション数",
     "xpack.apm.header.badge.readOnly.text": "読み込み専用",
     "xpack.apm.header.badge.readOnly.tooltip": "を保存できませんでした",

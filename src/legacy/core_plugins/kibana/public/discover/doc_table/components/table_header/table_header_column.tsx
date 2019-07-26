@@ -117,7 +117,7 @@ export function TableHeaderColumn({
   const buttons = [
     // Sort Button
     {
-      active: isSortable,
+      active: isSortable && typeof onChangeSortOrder === 'function',
       ariaLabel: getAriaLabel(),
       className: btnSortClassName,
       onClick: handleChangeSortOrder,
@@ -129,7 +129,7 @@ export function TableHeaderColumn({
     },
     // Remove Button
     {
-      active: isRemoveable,
+      active: isRemoveable && typeof onRemoveColumn === 'function',
       ariaLabel: i18n.translate('kbn.docTable.tableHeader.removeColumnButtonAriaLabel', {
         defaultMessage: 'Remove {columnName} column',
         values: { columnName: name },
@@ -143,7 +143,7 @@ export function TableHeaderColumn({
     },
     // Move Left Button
     {
-      active: colLeftIdx >= 0,
+      active: colLeftIdx >= 0 && typeof onMoveColumn === 'function',
       ariaLabel: i18n.translate('kbn.docTable.tableHeader.moveColumnLeftButtonAriaLabel', {
         defaultMessage: 'Move {columnName} column to the left',
         values: { columnName: name },
@@ -157,7 +157,7 @@ export function TableHeaderColumn({
     },
     // Move Right Button
     {
-      active: colRightIdx >= 0,
+      active: colRightIdx >= 0 && typeof onMoveColumn === 'function',
       ariaLabel: i18n.translate('kbn.docTable.tableHeader.moveColumnRightButtonAriaLabel', {
         defaultMessage: 'Move {columnName} column to the right',
         values: { columnName: name },

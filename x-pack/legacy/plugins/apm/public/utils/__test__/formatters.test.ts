@@ -22,6 +22,8 @@ describe('formatters', () => {
       expect(asTime(1000 * 1000)).toEqual('1,000 ms');
       expect(asTime(1000 * 1000 * 10)).toEqual('10,000 ms');
       expect(asTime(1000 * 1000 * 20)).toEqual('20.0 s');
+      expect(asTime(60000000 * 10)).toEqual('10.0 min');
+      expect(asTime(3600000000 * 1.5)).toEqual('1.5 h');
     });
 
     it('formats without unit', () => {

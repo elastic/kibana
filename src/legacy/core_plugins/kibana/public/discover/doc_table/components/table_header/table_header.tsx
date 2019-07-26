@@ -28,9 +28,9 @@ interface Props {
   hideTimeColumn: boolean;
   indexPattern: IndexPatternEnhanced;
   isShortDots: boolean;
-  onChangeSortOrder: (sortOrder: SortOrder[]) => void;
-  onMoveColumn: (name: string, index: number) => void;
-  onRemoveColumn: (name: string) => void;
+  onChangeSortOrder?: (sortOrder: SortOrder[]) => void;
+  onMoveColumn?: (name: string, index: number) => void;
+  onRemoveColumn?: (name: string) => void;
   sortOrder: SortOrder[];
 }
 
