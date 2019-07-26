@@ -102,12 +102,17 @@ export const datatableVisualization: Visualization<
   ],
 
   renderDescription(el) {
-    render(<h1>Datatable</h1>, el);
+    render(
+      <>
+        {i18n.translate('xpack.lens.datatable.label', {
+          defaultMessage: 'Datatable',
+        })}
+      </>,
+      el
+    );
   },
 
-  switchVisualizationType(_: string, state: DatatableVisualizationState) {
-    return state;
-  },
+  switchVisualizationType: (_, state) => state,
 
   initialize(frame, state) {
     const layerId = Object.keys(frame.datasourceLayers)[0] || frame.addNewLayer();

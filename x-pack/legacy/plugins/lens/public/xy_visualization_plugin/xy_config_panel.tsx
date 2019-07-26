@@ -48,7 +48,7 @@ function newLayerState(seriesType: SeriesType, layerId: string): LayerConfig {
   };
 }
 
-function LayerSeriesTypeConfig({
+function LayerSettings({
   layer,
   setSeriesType,
   removeLayer,
@@ -170,7 +170,7 @@ export function XYConfigPanel(props: VisualizationProps<State>) {
             <EuiFlexGroup>
               <EuiFlexItem>
                 <EuiFormRow>
-                  <LayerSeriesTypeConfig
+                  <LayerSettings
                     layer={layer}
                     setSeriesType={seriesType =>
                       setState(updateLayer(state, { ...layer, seriesType }, index))
