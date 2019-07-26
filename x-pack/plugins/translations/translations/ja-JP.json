@@ -1571,8 +1571,6 @@
     "kbn.docTable.tableHeader.sortByColumnAscendingAriaLabel": "{columnName} を昇順に並べ替える",
     "kbn.docTable.tableHeader.sortByColumnDescendingAriaLabel": "{columnName} を降順に並べ替える",
     "kbn.docTable.tableHeader.sortByColumnTooltip": "{columnName} で並べ替えます",
-    "kbn.docTable.tableHeader.sortByTimeTooltip": "時間で並べ替えます",
-    "kbn.docTable.tableHeader.timeHeaderCellTitle": "時間",
     "kbn.docTable.tableRow.detailHeading": "拡張ドキュメント",
     "kbn.docTable.tableRow.filterForValueButtonAriaLabel": "値でフィルタリング",
     "kbn.docTable.tableRow.filterForValueButtonTooltip": "値でフィルタリング",
