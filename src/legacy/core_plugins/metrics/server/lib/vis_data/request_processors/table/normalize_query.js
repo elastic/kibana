@@ -19,6 +19,7 @@
 const { set, get, isEmpty, forEach } = require('lodash');
 
 const isEmptyFilter = (filter = {}) => Boolean(filter.match_all) && isEmpty(filter.match_all);
+const hasPiplineAggregation = (aggs = {}) => Object.keys(aggs).length > 1;
 
 /* Last query handler in the chain. You can use this handler
  * as the last place where you can modify the "doc" (request body) object before sending it to ES.
@@ -31,7 +32,7 @@ export function normalizeQuery() {
     forEach(series, (value, seriesId) => {
       const filter = get(value, `filter`);
 
-      if (isEmptyFilter(filter)) {
+      if (isEmptyFilter(filter) && !hasPiplineAggregation(value.aggs)) {
         const agg = get(value, 'aggs.timeseries');
         const meta = {
           ...get(value, 'meta'),

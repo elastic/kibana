@@ -19,6 +19,7 @@
 const { set, get, isEmpty } = require('lodash');
 
 const isEmptyFilter = (filter = {}) => Boolean(filter.match_all) && isEmpty(filter.match_all);
+const hasPiplineAggregation = (aggs = {}) => Object.keys(aggs).length > 1;
 
 /* For grouping by the 'Everything', the splitByEverything request processor
  * creates fake .filter.match_all filter (see split_by_everything.js) to simplify the request processors code.
@@ -28,7 +29,7 @@ const isEmptyFilter = (filter = {}) => Boolean(filter.match_all) && isEmpty(filt
 function removeEmptyTopLevelAggregation(doc, series) {
   const filter = get(doc, `aggs.${series.id}.filter`);
 
-  if (isEmptyFilter(filter)) {
+  if (isEmptyFilter(filter) && !hasPiplineAggregation(doc.aggs[series.id].aggs)) {
     const meta = get(doc, `aggs.${series.id}.meta`);
     set(doc, `aggs`, doc.aggs[series.id].aggs);
     set(doc, `aggs.timeseries.meta`, meta);
