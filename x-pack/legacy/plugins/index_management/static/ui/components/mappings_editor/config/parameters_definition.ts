@@ -40,6 +40,7 @@ export const parametersDefinition: { [key in ParameterName]: Parameter } = {
   name: {
     fieldConfig: {
       label: 'Name',
+      defaultValue: '',
       validations: [
         {
           validator: emptyField('Please give a name to the property'),
@@ -108,12 +109,14 @@ export const parametersDefinition: { [key in ParameterName]: Parameter } = {
   null_value: {
     fieldConfig: {
       label: 'Null value',
+      defaultValue: '',
       type: FIELD_TYPES.TEXT,
     },
   },
   boost: {
     fieldConfig: {
       label: 'Boost',
+      defaultValue: '',
       type: FIELD_TYPES.TEXT,
     },
   },
@@ -134,6 +137,7 @@ export const parametersDefinition: { [key in ParameterName]: Parameter } = {
   locale: {
     fieldConfig: {
       label: 'Locale',
+      defaultValue: '',
     },
   },
   format: {
