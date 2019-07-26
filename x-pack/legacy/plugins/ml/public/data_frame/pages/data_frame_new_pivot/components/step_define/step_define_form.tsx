@@ -449,7 +449,7 @@ export const StepDefineForm: SFC<Props> = React.memo(({ overrides = {}, onChange
     <Fragment>
       {i18n.translate('xpack.ml.dataframe.stepDefineForm.advancedSourceEditorHelpText', {
         defaultMessage:
-          'The advanced editor allows you to edit the source configuration of the data frame transform.',
+          'The advanced editor allows you to edit the source query clause of the data frame transform.',
       })}{' '}
       <EuiLink href={sourceDocsUrl} target="_blank">
         {i18n.translate('xpack.ml.dataframe.stepDefineForm.advancedEditorHelpTextLink', {
@@ -564,7 +564,7 @@ export const StepDefineForm: SFC<Props> = React.memo(({ overrides = {}, onChange
                 label={i18n.translate(
                   'xpack.ml.dataframe.stepDefineForm.advancedSourceEditorLabel',
                   {
-                    defaultMessage: 'Source configuration object',
+                    defaultMessage: 'Source query clause',
                   }
                 )}
                 helpText={advancedSourceEditorHelpText}
@@ -598,7 +598,7 @@ export const StepDefineForm: SFC<Props> = React.memo(({ overrides = {}, onChange
                     aria-label={i18n.translate(
                       'xpack.ml.dataframe.stepDefineForm.advancedSourceEditorAriaLabel',
                       {
-                        defaultMessage: 'Advanced editor',
+                        defaultMessage: 'Advanced query editor',
                       }
                     )}
                   />
@@ -606,54 +606,56 @@ export const StepDefineForm: SFC<Props> = React.memo(({ overrides = {}, onChange
               </EuiFormRow>
             </Fragment>
           )}
-          <EuiFormRow>
-            <EuiFlexGroup gutterSize="none">
-              <EuiFlexItem>
-                <EuiSwitch
-                  label={i18n.translate(
-                    'xpack.ml.dataframe.stepDefineForm.advancedEditorSourceConfigSwitchLabel',
-                    {
-                      defaultMessage: 'Advanced editor',
-                    }
-                  )}
-                  checked={isAdvancedSourceEditorEnabled}
-                  onChange={() => {
-                    if (isAdvancedSourceEditorEnabled && sourceConfigUpdated) {
-                      setAdvancedSourceEditorSwitchModalVisible(true);
-                      return;
-                    }
+          {kibanaContext.currentSavedSearch.id === undefined && (
+            <EuiFormRow>
+              <EuiFlexGroup gutterSize="none">
+                <EuiFlexItem>
+                  <EuiSwitch
+                    label={i18n.translate(
+                      'xpack.ml.dataframe.stepDefineForm.advancedEditorSourceConfigSwitchLabel',
+                      {
+                        defaultMessage: 'Advanced query editor',
+                      }
+                    )}
+                    checked={isAdvancedSourceEditorEnabled}
+                    onChange={() => {
+                      if (isAdvancedSourceEditorEnabled && sourceConfigUpdated) {
+                        setAdvancedSourceEditorSwitchModalVisible(true);
+                        return;
+                      }
 
-                    toggleAdvancedSourceEditor();
-                  }}
-                />
-                {isAdvancedSourceEditorSwitchModalVisible && (
-                  <SwitchModal
-                    onCancel={() => setAdvancedSourceEditorSwitchModalVisible(false)}
-                    onConfirm={() => {
-                      setAdvancedSourceEditorSwitchModalVisible(false);
-                      toggleAdvancedSourceEditor(true);
+                      toggleAdvancedSourceEditor();
                     }}
-                    type={'source'}
                   />
-                )}
-              </EuiFlexItem>
-              {isAdvancedSourceEditorEnabled && (
-                <EuiButton
-                  size="s"
-                  fill
-                  onClick={applyAdvancedSourceEditorChanges}
-                  disabled={!isAdvancedSourceEditorApplyButtonEnabled}
-                >
-                  {i18n.translate(
-                    'xpack.ml.dataframe.stepDefineForm.advancedSourceEditorApplyButtonText',
-                    {
-                      defaultMessage: 'Apply changes',
-                    }
+                  {isAdvancedSourceEditorSwitchModalVisible && (
+                    <SwitchModal
+                      onCancel={() => setAdvancedSourceEditorSwitchModalVisible(false)}
+                      onConfirm={() => {
+                        setAdvancedSourceEditorSwitchModalVisible(false);
+                        toggleAdvancedSourceEditor(true);
+                      }}
+                      type={'source'}
+                    />
                   )}
-                </EuiButton>
-              )}
-            </EuiFlexGroup>
-          </EuiFormRow>
+                </EuiFlexItem>
+                {isAdvancedSourceEditorEnabled && (
+                  <EuiButton
+                    size="s"
+                    fill
+                    onClick={applyAdvancedSourceEditorChanges}
+                    disabled={!isAdvancedSourceEditorApplyButtonEnabled}
+                  >
+                    {i18n.translate(
+                      'xpack.ml.dataframe.stepDefineForm.advancedSourceEditorApplyButtonText',
+                      {
+                        defaultMessage: 'Apply changes',
+                      }
+                    )}
+                  </EuiButton>
+                )}
+              </EuiFlexGroup>
+            </EuiFormRow>
+          )}
           {kibanaContext.currentSavedSearch.id !== undefined && (
             <EuiFormRow
               label={i18n.translate('xpack.ml.dataframe.stepDefineForm.savedSearchLabel', {
@@ -755,7 +757,7 @@ export const StepDefineForm: SFC<Props> = React.memo(({ overrides = {}, onChange
                     aria-label={i18n.translate(
                       'xpack.ml.dataframe.stepDefineForm.advancedEditorAriaLabel',
                       {
-                        defaultMessage: 'Advanced editor',
+                        defaultMessage: 'Advanced pivot editor',
                       }
                     )}
                   />
@@ -770,7 +772,7 @@ export const StepDefineForm: SFC<Props> = React.memo(({ overrides = {}, onChange
                   label={i18n.translate(
                     'xpack.ml.dataframe.stepDefineForm.advancedEditorSwitchLabel',
                     {
-                      defaultMessage: 'Advanced editor',
+                      defaultMessage: 'Advanced pivot editor',
                     }
                   )}
                   checked={isAdvancedPivotEditorEnabled}
