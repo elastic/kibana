@@ -16,11 +16,11 @@ export function setupStatusRoute(server) {
    */
   server.route({
     method: 'POST',
-    path: '/api/monitoring/v1/setup/collection/{clusterUuid?}',
+    path: '/api/monitoring/v1/setup/collection/cluster/{clusterUuid}',
     config: {
       validate: {
         params: Joi.object({
-          clusterUuid: Joi.string().optional()
+          clusterUuid: Joi.string().required(),
         }),
         query: Joi.object({
           // This flag is not intended to be used in production. It was introduced
@@ -50,7 +50,7 @@ export function setupStatusRoute(server) {
       try {
         await verifyMonitoringAuth(req);
         const indexPatterns = getIndexPatterns(server);
-        status = await getCollectionStatus(req, indexPatterns, req.params.clusterUuid, req.query.skipLiveData);
+        status = await getCollectionStatus(req, indexPatterns, req.params.clusterUuid, null, req.query.skipLiveData);
       } catch (err) {
         throw handleError(err, req);
       }

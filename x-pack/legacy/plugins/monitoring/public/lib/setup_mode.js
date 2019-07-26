@@ -37,7 +37,7 @@ export const setNewlyDiscoveredClusterUuid = clusterUuid => {
   executor.run();
 };
 
-export const fetchCollectionData = async () => {
+export const fetchCollectionData = async (uuid, fetchWithoutClusterUuid = false) => {
   checkAngularState();
 
   const http = angularState.injector.get('$http');
@@ -46,8 +46,11 @@ export const fetchCollectionData = async () => {
   const ccs = globalState.ccs;
 
   let url = '../api/monitoring/v1/setup/collection';
-  if (clusterUuid) {
-    url += `/${clusterUuid}`;
+  if (uuid) {
+    url += `/node/${uuid}`;
+  }
+  else if (!fetchWithoutClusterUuid && clusterUuid) {
+    url += `/cluster/${clusterUuid}`;
   }
 
   try {
@@ -65,9 +68,9 @@ const notifySetupModeDataChange = (oldData) => {
   setupModeState.callbacks.forEach(cb => cb(oldData));
 };
 
-export const updateSetupModeData = async () => {
+export const updateSetupModeData = async (uuid, fetchWithoutClusterUuid = false) => {
   const oldData = setupModeState.data;
-  setupModeState.data = await fetchCollectionData();
+  setupModeState.data = await fetchCollectionData(uuid, fetchWithoutClusterUuid);
   if (get(setupModeState.data, '_meta.isOnCloud', false)) {
     return toggleSetupMode(false); // eslint-disable-line no-use-before-define
   }

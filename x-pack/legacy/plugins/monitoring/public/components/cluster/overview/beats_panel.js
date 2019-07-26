@@ -17,11 +17,11 @@ import {
   EuiDescriptionListTitle,
   EuiDescriptionListDescription,
   EuiHorizontalRule,
-  EuiBadge,
   EuiFlexGroup,
-  EuiToolTip
+  EuiToolTip,
+  EuiBadge
 } from '@elastic/eui';
-import { ClusterItemContainer } from './helpers';
+import { ClusterItemContainer, DisabledIfNoDataAndInSetupModeLink } from './helpers';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 
@@ -36,11 +36,11 @@ export function BeatsPanel(props) {
   const goToBeats = () => props.changeUrl('beats');
   const goToInstances = () => props.changeUrl('beats/beats');
 
+  const setupModeBeatsData = get(setupMode.data, 'beats');
   let setupModeInstancesData = null;
   if (setupMode.enabled && setupMode.data) {
-    const beatsData = get(setupMode.data, 'beats.byUuid');
-    const migratedNodesCount = Object.values(beatsData).filter(node => node.isFullyMigrated).length;
-    let totalNodesCount = Object.values(beatsData).length;
+    const migratedNodesCount = Object.values(setupModeBeatsData.byUuid).filter(node => node.isFullyMigrated).length;
+    let totalNodesCount = Object.values(setupModeBeatsData.byUuid).length;
     if (totalNodesCount === 0 && get(setupMode.data, 'beats.detected.mightExist', false)) {
       totalNodesCount = 1;
     }
@@ -97,7 +97,9 @@ export function BeatsPanel(props) {
           <EuiPanel paddingSize="m">
             <EuiTitle size="s">
               <h3>
-                <EuiLink
+                <DisabledIfNoDataAndInSetupModeLink
+                  setupModeEnabled={setupMode.enabled}
+                  setupModeData={setupModeBeatsData}
                   onClick={goToBeats}
                   aria-label={i18n.translate('xpack.monitoring.cluster.overview.beatsPanel.overviewLinkAriaLabel', {
                     defaultMessage: 'Beats Overview'
@@ -108,7 +110,7 @@ export function BeatsPanel(props) {
                     id="xpack.monitoring.cluster.overview.beatsPanel.overviewLinkLabel"
                     defaultMessage="Overview"
                   />
-                </EuiLink>
+                </DisabledIfNoDataAndInSetupModeLink>
               </h3>
             </EuiTitle>
             <EuiHorizontalRule margin="m" />

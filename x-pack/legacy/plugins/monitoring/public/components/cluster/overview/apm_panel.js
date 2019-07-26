@@ -8,7 +8,7 @@ import React from 'react';
 import moment from 'moment';
 import { get } from 'lodash';
 import { formatMetric } from 'plugins/monitoring/lib/format_number';
-import { ClusterItemContainer, BytesPercentageUsage } from './helpers';
+import { ClusterItemContainer, BytesPercentageUsage, DisabledIfNoDataAndInSetupModeLink } from './helpers';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import {
@@ -36,11 +36,14 @@ export function ApmPanel(props) {
     return null;
   }
 
+  const goToApm = () => props.changeUrl('apm');
+  const goToInstances = () => props.changeUrl('apm/instances');
+
+  const setupModeApmData = get(setupMode.data, 'apm');
   let setupModeInstancesData = null;
   if (setupMode.enabled && setupMode.data) {
-    const apmData = get(setupMode.data, 'apm.byUuid');
-    const migratedNodesCount = Object.values(apmData).filter(node => node.isFullyMigrated).length;
-    let totalNodesCount = Object.values(apmData).length;
+    const migratedNodesCount = Object.values(setupModeApmData.byUuid).filter(node => node.isFullyMigrated).length;
+    let totalNodesCount = Object.values(setupModeApmData.byUuid).length;
     if (totalNodesCount === 0 && get(setupMode.data, 'apm.detected.mightExist', false)) {
       totalNodesCount = 1;
     }
@@ -67,9 +70,6 @@ export function ApmPanel(props) {
     );
   }
 
-  const goToApm = () => props.changeUrl('apm');
-  const goToInstances = () => props.changeUrl('apm/instances');
-
   return (
     <ClusterItemContainer
       {...props}
@@ -83,7 +83,9 @@ export function ApmPanel(props) {
           <EuiPanel paddingSize="m">
             <EuiTitle size="s">
               <h3>
-                <EuiLink
+                <DisabledIfNoDataAndInSetupModeLink
+                  setupModeEnabled={setupMode.enabled}
+                  setupModeData={setupModeApmData}
                   onClick={goToApm}
                   aria-label={i18n.translate('xpack.monitoring.cluster.overview.apmPanel.overviewLinkAriaLabel', {
                     defaultMessage: 'APM Overview'
@@ -94,7 +96,7 @@ export function ApmPanel(props) {
                     id="xpack.monitoring.cluster.overview.apmPanel.overviewLinkLabel"
                     defaultMessage="Overview"
                   />
-                </EuiLink>
+                </DisabledIfNoDataAndInSetupModeLink>
               </h3>
             </EuiTitle>
             <EuiHorizontalRule margin="m" />

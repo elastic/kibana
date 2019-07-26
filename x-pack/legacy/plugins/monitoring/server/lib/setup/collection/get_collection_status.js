@@ -12,7 +12,7 @@ import { KIBANA_STATS_TYPE } from '../../../../../../../../src/legacy/server/sta
 
 const NUMBER_OF_SECONDS_AGO_TO_LOOK = 30;
 
-const getRecentMonitoringDocuments = async (req, indexPatterns, clusterUuid) => {
+const getRecentMonitoringDocuments = async (req, indexPatterns, clusterUuid, nodeUuid) => {
   const start = get(req.payload, 'timeRange.min', `now-${NUMBER_OF_SECONDS_AGO_TO_LOOK}s`);
   const end = get(req.payload, 'timeRange.max', 'now');
 
@@ -31,6 +31,20 @@ const getRecentMonitoringDocuments = async (req, indexPatterns, clusterUuid) => 
     filters.push({ term: { 'cluster_uuid': clusterUuid } });
   }
 
+  const nodesClause = [];
+  if (nodeUuid) {
+    nodesClause.push({
+      bool: {
+        should: [
+          { term: { 'node_stats.node_id': nodeUuid } },
+          { term: { 'kibana_stats.kibana.uuid': nodeUuid } },
+          { term: { 'beats_stats.beat.uuid': nodeUuid } },
+          { term: { 'logstash_stats.logstash.uuid': nodeUuid } }
+        ]
+      }
+    });
+  }
+
   const params = {
     index: Object.values(indexPatterns),
     size: 0,
@@ -42,6 +56,7 @@ const getRecentMonitoringDocuments = async (req, indexPatterns, clusterUuid) => 
       query: {
         bool: {
           filter: filters,
+          must: nodesClause,
         }
       },
       aggs: {
@@ -89,6 +104,11 @@ const getRecentMonitoringDocuments = async (req, indexPatterns, clusterUuid) => 
                   terms: {
                     field: 'beats_stats.beat.type'
                   }
+                },
+                cluster_uuid: {
+                  terms: {
+                    field: 'cluster_uuid'
+                  }
                 }
               }
             },
@@ -100,6 +120,11 @@ const getRecentMonitoringDocuments = async (req, indexPatterns, clusterUuid) => 
                 by_timestamp: {
                   max: {
                     field: 'timestamp'
+                  }
+                },
+                cluster_uuid: {
+                  terms: {
+                    field: 'cluster_uuid'
                   }
                 }
               }
@@ -288,8 +313,10 @@ async function getLiveElasticsearchCollectionEnabled(req) {
  * @param {*} req Standard request object. Can contain a timeRange to use for the query
  * @param {*} indexPatterns Map of index patterns to search against (will be all .monitoring-* indices)
  * @param {*} clusterUuid Optional and will be used to filter down the query if used
+ * @param {*} nodeUuid Optional and will be used to filter down the query if used
+ * @param {*} skipLiveData Optional and will not make any live api calls if set to true
  */
-export const getCollectionStatus = async (req, indexPatterns, clusterUuid, skipLiveData) => {
+export const getCollectionStatus = async (req, indexPatterns, clusterUuid, nodeUuid, skipLiveData) => {
   const config = req.server.config();
   const kibanaUuid = config.get('server.uuid');
 
@@ -305,7 +332,7 @@ export const getCollectionStatus = async (req, indexPatterns, clusterUuid, skipL
     recentDocuments,
     detectedProducts
   ] = await Promise.all([
-    await getRecentMonitoringDocuments(req, indexPatterns, clusterUuid),
+    await getRecentMonitoringDocuments(req, indexPatterns, clusterUuid, nodeUuid),
     await detectProducts(req)
   ]);
 
@@ -379,6 +406,9 @@ export const getCollectionStatus = async (req, indexPatterns, clusterUuid, skipL
           if (product.name === BEATS_SYSTEM_ID) {
             map[key].beatType = get(bucket.beat_type, 'buckets[0].key');
           }
+          if (bucket.cluster_uuid) {
+            map[key].clusterUuid = get(bucket.cluster_uuid, 'buckets[0].key', '') || null;
+          }
         }
       }
       productStatus.totalUniqueInstanceCount = Object.keys(map).length;
@@ -444,6 +474,9 @@ export const getCollectionStatus = async (req, indexPatterns, clusterUuid, skipL
               }
               if (product.name === BEATS_SYSTEM_ID) {
                 map[key].beatType = get(bucket.beat_type, 'buckets[0].key');
+              }
+              if (bucket.cluster_uuid) {
+                map[key].clusterUuid = get(bucket.cluster_uuid, 'buckets[0].key', '') || null;
               }
             }
           }
