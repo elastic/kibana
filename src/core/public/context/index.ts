@@ -18,4 +18,4 @@
  */
 
 export { ContextService, ContextSetup } from './context_service';
-export { ContextContainer, ContextProvider, Handler } from './context';
+export { IContextContainer, IContextProvider, IContextHandler } from './context';

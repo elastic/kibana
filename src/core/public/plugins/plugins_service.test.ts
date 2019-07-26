@@ -82,7 +82,6 @@ beforeEach(() => {
   };
   mockSetupContext = {
     ...omit(mockSetupDeps, 'application', 'injectedMetadata'),
-    context: omit(mockSetupDeps.context, 'setCurrentPlugin'),
   };
   mockStartDeps = {
     application: applicationServiceMock.createStartContract(),

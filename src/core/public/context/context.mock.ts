@@ -17,11 +17,9 @@
  * under the License.
  */
 
-import { ContextContainerImplementation } from './context';
+import { IContextContainer } from './context';
 
-export type ContextContainerMock = jest.Mocked<
-  PublicMethodsOf<ContextContainerImplementation<any, any, any>>
->;
+export type ContextContainerMock = jest.Mocked<IContextContainer<any, any, any>>;
 
 const createContextMock = () => {
   const contextMock: ContextContainerMock = {

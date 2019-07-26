@@ -4,14 +4,14 @@
 
 ## ContextSetup.createContextContainer() method
 
-Creates a new [ContextContainer](./kibana-plugin-public.contextcontainer.md) for a service owner.
+Creates a new [IContextContainer](./kibana-plugin-public.icontextcontainer.md) for a service owner.
 
 <b>Signature:</b>
 
 ```typescript
-createContextContainer<TContext extends {}, THandlerReturn, THandlerParmaters extends any[] = []>(): ContextContainer<TContext, THandlerReturn, THandlerParmaters>;
+createContextContainer<TContext extends {}, THandlerReturn, THandlerParmaters extends any[] = []>(): IContextContainer<TContext, THandlerReturn, THandlerParmaters>;
 ```
 <b>Returns:</b>
 
-`ContextContainer<TContext, THandlerReturn, THandlerParmaters>`
+`IContextContainer<TContext, THandlerReturn, THandlerParmaters>`
 

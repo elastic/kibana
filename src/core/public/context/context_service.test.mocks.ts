@@ -21,5 +21,5 @@ import { contextMock } from './context.mock';
 
 export const MockContextConstructor = jest.fn(contextMock.create);
 jest.doMock('./context', () => ({
-  ContextContainerImplementation: MockContextConstructor,
+  ContextContainer: MockContextConstructor,
 }));

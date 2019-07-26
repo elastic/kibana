@@ -168,23 +168,14 @@ export interface ChromeStart {
 }
 
 // @public
-export interface ContextContainer<TContext extends {}, THandlerReturn, THandlerParameters extends any[] = []> {
-    // Warning: (ae-forgotten-export) The symbol "Promisify" needs to be exported by the entry point index.d.ts
-    createHandler(plugin: string | CoreId, handler: Handler<TContext, THandlerReturn, THandlerParameters>): (...rest: THandlerParameters) => Promisify<THandlerReturn>;
-    // Warning: (ae-forgotten-export) The symbol "CoreId" needs to be exported by the entry point index.d.ts
-    registerContext<TContextName extends keyof TContext>(plugin: string | CoreId, contextName: TContextName, provider: ContextProvider<TContext, TContextName, THandlerParameters>): this;
-}
-
-// @public
-export type ContextProvider<TContext extends {}, TContextName extends keyof TContext, TProviderParameters extends any[] = []> = (context: Partial<TContext>, ...rest: TProviderParameters) => Promise<TContext[TContextName]> | TContext[TContextName];
-
-// @public
 export interface ContextSetup {
-    createContextContainer<TContext extends {}, THandlerReturn, THandlerParmaters extends any[] = []>(): ContextContainer<TContext, THandlerReturn, THandlerParmaters>;
+    createContextContainer<TContext extends {}, THandlerReturn, THandlerParmaters extends any[] = []>(): IContextContainer<TContext, THandlerReturn, THandlerParmaters>;
 }
 
 // @internal (undocumented)
 export interface CoreContext {
+    // Warning: (ae-forgotten-export) The symbol "CoreId" needs to be exported by the entry point index.d.ts
+    // 
     // (undocumented)
     coreId: CoreId;
 }
@@ -350,9 +341,6 @@ export interface FatalErrorsSetup {
     get$: () => Rx.Observable<FatalErrorInfo>;
 }
 
-// @public
-export type Handler<TContext extends {}, TReturn, THandlerParameters extends any[] = []> = (context: TContext, ...rest: THandlerParameters) => TReturn;
-
 // @public (undocumented)
 export type HttpBody = BodyInit | null | any;
 
@@ -499,6 +487,19 @@ export interface I18nStart {
         children: React.ReactNode;
     }) => JSX.Element;
 }
+
+// @public
+export interface IContextContainer<TContext extends {}, THandlerReturn, THandlerParameters extends any[] = []> {
+    // Warning: (ae-forgotten-export) The symbol "Promisify" needs to be exported by the entry point index.d.ts
+    createHandler(pluginId: string, handler: IContextHandler<TContext, THandlerReturn, THandlerParameters>): (...rest: THandlerParameters) => Promisify<THandlerReturn>;
+    registerContext<TContextName extends keyof TContext>(pluginId: string, contextName: TContextName, provider: IContextProvider<TContext, TContextName, THandlerParameters>): this;
+}
+
+// @public
+export type IContextHandler<TContext extends {}, TReturn, THandlerParameters extends any[] = []> = (context: TContext, ...rest: THandlerParameters) => TReturn;
+
+// @public
+export type IContextProvider<TContext extends Record<string, any>, TContextName extends keyof TContext, TProviderParameters extends any[] = []> = (context: Partial<TContext>, ...rest: TProviderParameters) => Promise<TContext[TContextName]> | TContext[TContextName];
 
 // @internal (undocumented)
 export interface InternalCoreSetup extends CoreSetup {

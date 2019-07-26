@@ -66,7 +66,7 @@ import { Plugin, PluginInitializer, PluginInitializerContext } from './plugins';
 import { UiSettingsClient, UiSettingsState, UiSettingsClientContract } from './ui_settings';
 import { ApplicationSetup, Capabilities, ApplicationStart } from './application';
 import { DocLinksStart } from './doc_links';
-import { ContextContainer, ContextProvider, ContextSetup, Handler } from './context';
+import { IContextContainer, IContextProvider, ContextSetup, IContextHandler } from './context';
 
 export { CoreContext, CoreSystem } from './core_system';
 export { RecursiveReadonly } from '../utils';
@@ -162,14 +162,14 @@ export {
   ChromeRecentlyAccessed,
   ChromeRecentlyAccessedHistoryItem,
   ChromeStart,
-  ContextContainer,
-  ContextProvider,
+  IContextContainer,
+  IContextHandler,
+  IContextProvider,
   ContextSetup,
   DocLinksStart,
   ErrorToastOptions,
   FatalErrorInfo,
   FatalErrorsSetup,
-  Handler,
   HttpSetup,
   HttpStart,
   I18nStart,

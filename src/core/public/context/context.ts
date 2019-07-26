@@ -30,12 +30,13 @@ import { CoreId } from '../core_system';
  *
  * @param context - A partial context object containing only the keys for values provided by plugin dependencies
  * @param rest - Additional parameters provided by the service owner of this context
- * @returns The context value associated with this key. May also return a Promise.
+ * @returns The context value associated with this key. May also return a Promise which will be resolved before
+ *          attaching to the context object.
  *
  * @public
  */
-export type ContextProvider<
-  TContext extends {},
+export type IContextProvider<
+  TContext extends Record<string, any>,
   TContextName extends keyof TContext,
   TProviderParameters extends any[] = []
 > = (
@@ -51,7 +52,7 @@ export type ContextProvider<
  *
  * @public
  */
-export type Handler<TContext extends {}, TReturn, THandlerParameters extends any[] = []> = (
+export type IContextHandler<TContext extends {}, TReturn, THandlerParameters extends any[] = []> = (
   context: TContext,
   ...rest: THandlerParameters
 ) => TReturn;
@@ -62,7 +63,7 @@ type Promisify<T> = T extends Promise<infer U> ? Promise<U> : Promise<T>;
  * An object that handles registration of context providers and configuring handlers with context.
  *
  * @remarks
- * A {@link ContextContainer} can be used by any Core service or plugin (known as the "service owner") which wishes to
+ * A {@link IContextContainer} can be used by any Core service or plugin (known as the "service owner") which wishes to
  * expose APIs in a handler function. The container object will manage registering context providers and configuring a
  * handler with all of the contexts that should be exposed to the handler's plugin. This is dependent on the
  * dependencies that the handler's plugin declares.
@@ -70,7 +71,7 @@ type Promisify<T> = T extends Promise<infer U> ? Promise<U> : Promise<T>;
  * Contexts providers are executed in the order they were registered. Each provider gets access to context values
  * provided by any plugins that it depends on.
  *
- * In order to configure a handler with context, you must call the {@link ContextContainer.createHandler} function and
+ * In order to configure a handler with context, you must call the {@link IContextContainer.createHandler} function and
  * use the returned handler which will automatically build a context object when called.
  *
  * When registering context or creating handlers, the _calling plugin's id_ must be provided. Note this should NOT be
@@ -84,13 +85,13 @@ type Promisify<T> = T extends Promise<infer U> ? Promise<U> : Promise<T>;
  *   setup(core) {
  *     this.contextContainer = core.context.createContextContainer();
  *     return {
- *       registerContext(plugin, contextName, provider) {
- *         this.contextContainer.registerContext(plugin, contextName, provider);
+ *       registerContext(pluginId, contextName, provider) {
+ *         this.contextContainer.registerContext(pluginId, contextName, provider);
  *       },
- *       registerRoute(plugin, path, handler) {
+ *       registerRoute(pluginId, path, handler) {
  *         this.handlers.set(
  *           path,
- *           this.contextContainer.createHandler(plugin, handler)
+ *           this.contextContainer.createHandler(pluginId, handler)
  *         );
  *       }
  *     }
@@ -104,14 +105,14 @@ type Promisify<T> = T extends Promise<infer U> ? Promise<U> : Promise<T>;
  *   setup(core) {
  *     this.contextContainer = core.context.createContextContainer();
  *     return {
- *       registerContext(plugin, contextName, provider) {
- *         // This would leak this context to all handlers rather tha only plugins that depend on the calling plugin.
+ *       registerContext(pluginId, contextName, provider) {
+ *         // This would leak this context to all handlers rather that only plugins that depend on the calling plugin.
  *         this.contextContainer.registerContext('my_plugin', contextName, provider);
  *       },
- *       registerRoute(plugin, path, handler) {
+ *       registerRoute(pluginId, path, handler) {
  *         this.handlers.set(
  *           path,
- *           // the handler will not receive any contexts provided by other dependencies of the calling plugin.
+ *           // This handler will not receive any contexts provided by other dependencies of the calling plugin.
  *           this.contextContainer.createHandler('my_plugin', handler)
  *         );
  *       }
@@ -122,48 +123,53 @@ type Promisify<T> = T extends Promise<infer U> ? Promise<U> : Promise<T>;
  *
  * @public
  */
-export interface ContextContainer<
+export interface IContextContainer<
   TContext extends {},
   THandlerReturn,
   THandlerParameters extends any[] = []
 > {
   /**
-   * Register a new context provider. Throws an exception if more than one provider is registered for the same
-   * `contextName`.
+   * Register a new context provider.
    *
-   * @param plugin - The plugin ID for the plugin that registers this context.
+   * @remarks
+   * The value (or resolved Promise value) returned by the `provider` function will be attached to the context object
+   * on the key specified by `contextName`.
+   *
+   * Throws an exception if more than one provider is registered for the same `contextName`.
+   *
+   * @param pluginId - The plugin ID for the plugin that registers this context.
    * @param contextName - The key of the `TContext` object this provider supplies the value for.
-   * @param provider - A {@link ContextProvider} to be called each time a new context is created.
-   * @returns The `ContextContainer` for method chaining.
+   * @param provider - A {@link IContextProvider} to be called each time a new context is created.
+   * @returns The {@link IContextContainer} for method chaining.
    */
   registerContext<TContextName extends keyof TContext>(
-    plugin: string | CoreId,
+    pluginId: string,
     contextName: TContextName,
-    provider: ContextProvider<TContext, TContextName, THandlerParameters>
+    provider: IContextProvider<TContext, TContextName, THandlerParameters>
   ): this;
 
   /**
    * Create a new handler function pre-wired to context for the plugin.
    *
-   * @param plugin - The plugin ID for the plugin that registers this context.
-   * @param handler
+   * @param pluginId - The plugin ID for the plugin that registers this handler.
+   * @param handler - Handler function to pass context object to.
    * @returns A function that takes `THandlerParameters`, calls `handler` with a new context, and returns a Promise of
    * the `handler` return value.
    */
   createHandler(
-    plugin: string | CoreId,
-    handler: Handler<TContext, THandlerReturn, THandlerParameters>
+    pluginId: string,
+    handler: IContextHandler<TContext, THandlerReturn, THandlerParameters>
   ): (...rest: THandlerParameters) => Promisify<THandlerReturn>;
 }
 
 type ContextSource = PluginName | CoreId;
 
 /** @internal */
-export class ContextContainerImplementation<
-  TContext extends {},
+export class ContextContainer<
+  TContext extends Record<string, any>,
   THandlerReturn,
   THandlerParameters extends any[] = []
-> implements ContextContainer<TContext, THandlerReturn, THandlerParameters> {
+> implements IContextContainer<TContext, THandlerReturn, THandlerParameters> {
   /**
    * Used to map contexts to their providers and associated plugin. In registration order which is tightly coupled to
    * plugin load order.
@@ -171,7 +177,7 @@ export class ContextContainerImplementation<
   private readonly contextProviders = new Map<
     keyof TContext,
     {
-      provider: ContextProvider<TContext, keyof TContext, THandlerParameters>;
+      provider: IContextProvider<TContext, keyof TContext, THandlerParameters>;
       source: ContextSource;
     }
   >();
@@ -191,7 +197,7 @@ export class ContextContainerImplementation<
   public registerContext = <TContextName extends keyof TContext>(
     source: ContextSource,
     contextName: TContextName,
-    provider: ContextProvider<TContext, TContextName, THandlerParameters>
+    provider: IContextProvider<TContext, TContextName, THandlerParameters>
   ): this => {
     if (this.contextProviders.has(contextName)) {
       throw new Error(`Context provider for ${contextName} has already been registered.`);
@@ -212,7 +218,7 @@ export class ContextContainerImplementation<
 
   public createHandler = (
     source: ContextSource,
-    handler: Handler<TContext, THandlerReturn, THandlerParameters>
+    handler: IContextHandler<TContext, THandlerReturn, THandlerParameters>
   ) => {
     if (typeof source === 'symbol' && source !== this.coreId) {
       throw new Error(`Symbol only allowed for core services`);
@@ -221,17 +227,18 @@ export class ContextContainerImplementation<
     }
 
     return (async (...args: THandlerParameters) => {
-      const context = await this.buildContext(source, {}, ...args);
+      const context = await this.buildContext(source, ...args);
       return handler(context, ...args);
     }) as (...args: THandlerParameters) => Promisify<THandlerReturn>;
   };
 
   private async buildContext(
     source: ContextSource,
-    baseContext: Partial<TContext> = {},
     ...contextArgs: THandlerParameters
   ): Promise<TContext> {
-    const contextsToBuild = new Set(this.contextNamesForSource(source));
+    const contextsToBuild: ReadonlySet<keyof TContext> = new Set(
+      this.getContextNamesForSource(source)
+    );
 
     return [...this.contextProviders]
       .filter(([contextName]) => contextsToBuild.has(contextName))
@@ -240,18 +247,20 @@ export class ContextContainerImplementation<
           const resolvedContext = await contextPromise;
 
           // For the next provider, only expose the context available based on the dependencies.
-          const exposedContext = pick(resolvedContext, this.contextNamesForSource(providerSource));
+          const exposedContext = pick(resolvedContext, [
+            ...this.getContextNamesForSource(providerSource),
+          ]);
 
           return {
             ...resolvedContext,
             [contextName]: await provider(exposedContext as Partial<TContext>, ...contextArgs),
           };
         },
-        Promise.resolve(baseContext) as Promise<TContext>
+        Promise.resolve({}) as Promise<TContext>
       );
   }
 
-  private contextNamesForSource(source: ContextSource): Array<keyof TContext> {
+  private getContextNamesForSource(source: ContextSource): ReadonlySet<keyof TContext> {
     // If the source is core...
     if (typeof source === 'symbol') {
       if (source !== this.coreId) {
@@ -259,23 +268,31 @@ export class ContextContainerImplementation<
         throw new Error(`Cannot build context for symbol`);
       }
 
-      return this.contextNamesBySource.get(this.coreId)!;
+      return this.getContextNamesForCore();
+    } else {
+      return this.getContextNamesForPluginId(source);
     }
+  }
 
+  private getContextNamesForCore() {
+    return new Set(this.contextNamesBySource.get(this.coreId)!);
+  }
+
+  private getContextNamesForPluginId(pluginId: string) {
     // If the source is a plugin...
-    const pluginDeps = this.pluginDependencies.get(source);
+    const pluginDeps = this.pluginDependencies.get(pluginId);
     if (!pluginDeps) {
       // This case should never be hit.
-      throw new Error(`Cannot create context for unknown plugin: ${source}`);
+      throw new Error(`Cannot create context for unknown plugin: ${pluginId}`);
     }
 
-    return [
+    return new Set([
       // Core contexts
       ...this.contextNamesBySource.get(this.coreId)!,
       // Contexts source created
-      ...(this.contextNamesBySource.get(source) || []),
+      ...(this.contextNamesBySource.get(pluginId) || []),
       // Contexts sources's dependencies created
       ...flatten(pluginDeps.map(p => this.contextNamesBySource.get(p) || [])),
-    ];
+    ]);
   }
 }

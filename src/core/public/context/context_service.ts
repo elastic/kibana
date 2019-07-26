@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { ContextContainer, ContextContainerImplementation } from './context';
+import { IContextContainer, ContextContainer } from './context';
 import { CoreContext } from '../core_system';
 
 interface StartDeps {
@@ -35,7 +35,7 @@ export class ContextService {
         THandlerReturn,
         THandlerParameters extends any[] = []
       >() =>
-        new ContextContainerImplementation<TContext, THandlerReturn, THandlerParameters>(
+        new ContextContainer<TContext, THandlerReturn, THandlerParameters>(
           pluginDependencies,
           this.core.coreId
         ),
@@ -44,7 +44,7 @@ export class ContextService {
 }
 
 /**
- * {@inheritdoc ContextContainer}
+ * {@inheritdoc IContextContainer}
  *
  * @example
  * Say we're creating a plugin for rendering visualizations that allows new rendering methods to be registered. If we
@@ -87,14 +87,15 @@ export class ContextService {
  *     return {
  *       registerContext: this.contextContainer.registerContext,
  *
- *       // The handler can now be called directly with only an `HTMLElement` and will automaticallly
- *       // have the `context` argument supplied.
  *       renderVizualization: (renderMethod: string, domElement: HTMLElement) => {
  *         if (!this.vizRenderer.has(renderMethod)) {
  *           throw new Error(`Render method '${renderMethod}' has not been registered`);
  *         }
  *
- *         return this.vizRenderers.get(renderMethod)(domElement);
+ *         // The handler can now be called directly with only an `HTMLElement` and will automatically
+ *         // have a new `context` object created and populated by the context container.
+ *         const handler = this.vizRenderers.get(renderMethod)
+ *         return handler(domElement);
  *       }
  *     };
  *   }
@@ -105,11 +106,11 @@ export class ContextService {
  */
 export interface ContextSetup {
   /**
-   * Creates a new {@link ContextContainer} for a service owner.
+   * Creates a new {@link IContextContainer} for a service owner.
    */
   createContextContainer<
     TContext extends {},
     THandlerReturn,
     THandlerParmaters extends any[] = []
-  >(): ContextContainer<TContext, THandlerReturn, THandlerParmaters>;
+  >(): IContextContainer<TContext, THandlerReturn, THandlerParmaters>;
 }

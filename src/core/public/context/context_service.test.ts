@@ -17,8 +17,6 @@
  * under the License.
  */
 
-// import { ContextContainerImplementation } from './context';
-
 import { MockContextConstructor } from './context_service.test.mocks';
 import { ContextService } from './context_service';
 
