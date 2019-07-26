@@ -31,7 +31,7 @@ interface Props {
   isRemoveable: boolean;
   isSortable: boolean;
   name: string;
-  onChangeSortOrder: (sortOrder: SortOrder[]) => void;
+  onChangeSortOrder?: (sortOrder: SortOrder[]) => void;
   onMoveColumn?: (name: string, idx: number) => void;
   onRemoveColumn?: (name: string) => void;
   sortOrder: SortOrder[];
@@ -65,6 +65,8 @@ export function TableHeaderColumn({
     sortDirection !== '' ? btnSortIcon : `kbnDocTableHeader__sortChange ${btnSortIcon}`;
 
   const handleChangeSortOrder = () => {
+    if (!onChangeSortOrder) return;
+
     // Cycle goes Unsorted -> Asc -> Desc -> Unsorted
     if (currentColumnSort === undefined) {
       onChangeSortOrder([[name, 'asc'], ...currentSortWithoutColumn]);
