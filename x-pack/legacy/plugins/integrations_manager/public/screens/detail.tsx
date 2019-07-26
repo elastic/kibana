@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React, { useState, useEffect } from 'react';
-import { EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
+import { EuiPage, EuiPageBody, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { PLUGIN } from '../../common/constants';
 import { IntegrationInfo } from '../../common/types';
 import { getIntegrationInfoByKey } from '../data';
@@ -31,12 +31,14 @@ function InfoPanel(info: IntegrationInfo) {
   useBreadcrumbs([{ text: PLUGIN.TITLE, href: linkToListView() }, { text: title }]);
 
   return (
-    <EuiPanel>
-      <EuiTitle>
-        <h1>{`${title} (v${version})`}</h1>
-      </EuiTitle>
-      <EuiSpacer />
-      <p>{description}</p>
-    </EuiPanel>
+    <EuiPage restrictWidth={1200}>
+      <EuiPageBody>
+        <EuiTitle>
+          <h1>{`${title} (v${version})`}</h1>
+        </EuiTitle>
+        <EuiSpacer />
+        <p>{description}</p>
+      </EuiPageBody>
+    </EuiPage>
   );
 }
