@@ -35,8 +35,16 @@ export async function execute({
     ...(action.attributes.actionTypeConfig || {}),
     ...(action.attributes.actionTypeConfigSecrets || {}),
   };
-  const validatedConfig = validateActionTypeConfig(actionType, mergedActionTypeConfig);
-  const validatedParams = validateActionTypeParams(actionType, params);
+
+  let validatedConfig;
+  let validatedParams;
+
+  try {
+    validatedConfig = validateActionTypeConfig(actionType, mergedActionTypeConfig);
+    validatedParams = validateActionTypeParams(actionType, params);
+  } catch (err) {
+    return { status: 'error', message: err.message };
+  }
 
   let result: ActionTypeExecutorResult | null = null;
 
@@ -45,6 +53,7 @@ export async function execute({
 
   try {
     result = await actionType.executor({
+      id: actionId,
       services,
       config: validatedConfig,
       params: validatedParams,

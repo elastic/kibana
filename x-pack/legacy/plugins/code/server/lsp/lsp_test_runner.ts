@@ -20,7 +20,6 @@ import { TypescriptServerLauncher } from './ts_launcher';
 import { GitOperations } from '../git_operations';
 import { createTestServerOption } from '../test_utils';
 import { ConsoleLoggerFactory } from '../utils/console_logger_factory';
-import { RepositoryUtils } from '../../common/repository_utils';
 import { LspRequest } from '../../model';
 import { Repo, RequestType } from '../../model/test_config';
 
@@ -191,18 +190,15 @@ export class LspTestRunner {
   private async getAllFile() {
     const gitOperator: GitOperations = new GitOperations(this.repo.path);
     try {
-      const fileTree = await gitOperator.fileTree(
-        '',
-        '',
-        'HEAD',
-        0,
-        Number.MAX_SAFE_INTEGER,
-        false,
-        Number.MAX_SAFE_INTEGER
-      );
-      return RepositoryUtils.getAllFiles(fileTree).filter((filePath: string) => {
-        return filePath.endsWith(this.repo.language);
-      });
+      const result: string[] = [];
+      const fileIterator = await gitOperator.iterateRepo('', 'HEAD');
+      for await (const file of fileIterator) {
+        const filePath = file.path!;
+        if (filePath.endsWith(this.repo.language)) {
+          result.push(filePath);
+        }
+      }
+      return result;
     } catch (e) {
       console.error(`get files error: ${e}`);
       throw e;

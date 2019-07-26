@@ -12,6 +12,10 @@ import { I18nProvider } from '@kbn/i18n/react';
 
 import { Page } from './page';
 
+jest.mock('../../../components/navigation_menu/navigation_menu', () => ({
+  NavigationMenu: () => <div id="mockNavigationMenu" />,
+}));
+
 afterEach(cleanup);
 
 describe('Data Frame: Access denied <Page />', () => {
