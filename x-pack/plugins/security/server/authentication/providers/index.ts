@@ -13,4 +13,4 @@ export { BasicAuthenticationProvider, BasicCredentials } from './basic';
 export { KerberosAuthenticationProvider } from './kerberos';
 export { SAMLAuthenticationProvider, isSAMLRequestQuery } from './saml';
 export { TokenAuthenticationProvider } from './token';
-export { OIDCAuthenticationProvider } from './oidc';
+export { OIDCAuthenticationProvider, OIDCAuthenticationFlow } from './oidc';

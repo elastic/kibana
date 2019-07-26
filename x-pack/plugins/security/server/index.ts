@@ -18,6 +18,7 @@ export {
   AuthenticationResult,
   BasicCredentials,
   DeauthenticationResult,
+  OIDCAuthenticationFlow,
 } from './authentication';
 
 export { PluginSetupContract } from './plugin';

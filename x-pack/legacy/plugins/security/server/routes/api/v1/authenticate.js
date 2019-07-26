@@ -7,8 +7,9 @@
 import Boom from 'boom';
 import Joi from 'joi';
 import { schema } from '@kbn/config-schema';
-import { canRedirectRequest, wrapError } from '../../../../../../../plugins/security/server';
+import { canRedirectRequest, wrapError, OIDCAuthenticationFlow } from '../../../../../../../plugins/security/server';
 import { KibanaRequest } from '../../../../../../../../src/core/server';
+import { createCSPRuleString, generateCSPNonce } from '../../../../../../../../src/legacy/server/csp';
 
 export function initAuthenticateApi({ authc: { login, logout }, config }, server) {
 
@@ -82,6 +83,36 @@ export function initAuthenticateApi({ authc: { login, logout }, config }, server
     }
   });
 
+  /**
+   * The route should be configured as a redirect URI in OP when OpenID Connect implicit flow
+   * is used, so that we can extract authentication response from URL fragment and send it to
+   * the `/api/security/v1/oidc` route.
+   */
+  server.route({
+    method: 'GET',
+    path: '/api/security/v1/oidc/implicit',
+    config: { auth: false },
+    async handler(request, h) {
+      const legacyConfig = server.config();
+      const basePath = legacyConfig.get('server.basePath');
+
+      const nonce = await generateCSPNonce();
+      const cspRulesHeader = createCSPRuleString(legacyConfig.get('csp.rules'), nonce);
+      return h.response(`
+        <!DOCTYPE html>
+        <title>Kibana OpenID Connect Login</title>
+        <script nonce="${nonce}">
+          window.location.replace(
+            '${basePath}/api/security/v1/oidc?authenticationResponseURI=' + encodeURIComponent(window.location.href)
+          );
+        </script>
+      `)
+        .header('cache-control', 'private, no-cache, no-store')
+        .header('content-security-policy', cspRulesHeader)
+        .type('text/html');
+    }
+  });
+
   server.route({
     // POST is only allowed for Third Party initiated authentication
     method: ['GET', 'POST'],
@@ -103,25 +134,48 @@ export function initAuthenticateApi({ authc: { login, logout }, config }, server
     },
     async handler(request, h) {
       try {
+        const query = request.query || {};
+        const payload = request.payload || {};
+
+        // An HTTP GET request with a query parameter named `authenticationResponseURI` that includes URL fragment OpenID
+        // Connect Provider sent during implicit authentication flow to the Kibana own proxy page that extracted that URL
+        // fragment and put it into `authenticationResponseURI` query string parameter for this endpoint. See more details
+        // at https://openid.net/specs/openid-connect-core-1_0.html#ImplicitFlowAuth
+        let loginAttempt;
+        if (query.authenticationResponseURI) {
+          loginAttempt = {
+            flow: OIDCAuthenticationFlow.Implicit,
+            authenticationResponseURI: query.authenticationResponseURI,
+          };
+        } else if (query.code || query.error) {
+          // An HTTP GET request with a query parameter named `code` (or `error`) as the response to a successful (or
+          // failed) authentication from an OpenID Connect Provider during authorization code authentication flow.
+          // See more details at https://openid.net/specs/openid-connect-core-1_0.html#CodeFlowAuth.
+          loginAttempt = {
+            flow: OIDCAuthenticationFlow.AuthorizationCode,
+            //  We pass the path only as we can't be sure of the full URL and Elasticsearch doesn't need it anyway.
+            authenticationResponseURI: request.url.path,
+          };
+        } else if (query.iss || payload.iss) {
+          // An HTTP GET request with a query parameter named `iss` or an HTTP POST request with the same parameter in the
+          // payload as part of a 3rd party initiated authentication. See more details at
+          // https://openid.net/specs/openid-connect-core-1_0.html#ThirdPartyInitiatedLogin
+          loginAttempt = {
+            flow: OIDCAuthenticationFlow.InitiatedBy3rdParty,
+            iss: query.iss || payload.iss,
+            loginHint: query.login_hint || payload.login_hint,
+          };
+        }
+
+        if (!loginAttempt) {
+          throw Boom.badRequest('Unrecognized login attempt.');
+        }
+
         // We handle the fact that the user might get redirected to Kibana while already having an session
         // Return an error notifying the user they are already logged in.
         const authenticationResult = await login(KibanaRequest.from(request), {
           provider: 'oidc',
-          // Checks if the request object represents an HTTP request regarding authentication with OpenID Connect.
-          // This can be
-          //  - An HTTP GET request with a query parameter named `iss` as part of a 3rd party initiated authentication
-          //  - An HTTP POST request with a parameter named `iss` as part of a 3rd party initiated authentication
-          //  - An HTTP GET request with a query parameter named `code` as the response to a successful authentication from
-          //    an OpenID Connect Provider
-          //  - An HTTP GET request with a query parameter named `error` as the response to a failed authentication from
-          //    an OpenID Connect Provider
-          value: {
-            code: request.query && request.query.code,
-            iss: (request.query && request.query.iss) || (request.payload && request.payload.iss),
-            loginHint:
-              (request.query && request.query.login_hint) ||
-              (request.payload && request.payload.login_hint),
-          },
+          value: loginAttempt
         });
         if (authenticationResult.succeeded()) {
           return Boom.forbidden(

@@ -218,8 +218,8 @@ export class Authenticator {
 
     const sessionStorage = this.options.sessionStorageFactory.asScoped(request);
 
-    // If we detect an existing session that belongs to a different provider than the one request to
-    // perform a login we should clear such session.
+    // If we detect an existing session that belongs to a different provider than the one requested
+    // to perform a login we should clear such session.
     let existingSession = await this.getSessionValue(sessionStorage);
     if (existingSession && existingSession.provider !== attempt.provider) {
       this.logger.debug(

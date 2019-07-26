@@ -5,7 +5,8 @@
  */
 
 export default function ({ loadTestFile }) {
-  describe('security', () => {
-    loadTestFile(require.resolve('./oidc_initiate_auth'));
+  describe('apis', function () {
+    this.tags('ciGroup6');
+    loadTestFile(require.resolve('./oidc_auth'));
   });
 }
