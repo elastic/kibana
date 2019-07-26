@@ -50,16 +50,18 @@ describe('register()', () => {
     expect(actionTypeRegistry.has('my-action-type')).toEqual(true);
     expect(mockTaskManager.registerTaskDefinitions).toHaveBeenCalledTimes(1);
     expect(mockTaskManager.registerTaskDefinitions.mock.calls[0]).toMatchInlineSnapshot(`
-Array [
-  Object {
-    "actions:my-action-type": Object {
-      "createTaskRunner": [MockFunction],
-      "title": "My action type",
-      "type": "actions:my-action-type",
-    },
-  },
-]
-`);
+      Array [
+        Object {
+          "actions:my-action-type": Object {
+            "createTaskRunner": [MockFunction],
+            "getRetry": [Function],
+            "maxAttempts": 1,
+            "title": "My action type",
+            "type": "actions:my-action-type",
+          },
+        },
+      ]
+    `);
     expect(getCreateTaskRunnerFunction).toHaveBeenCalledTimes(1);
     const call = getCreateTaskRunnerFunction.mock.calls[0][0];
     expect(call.actionTypeRegistry).toBeTruthy();
@@ -99,13 +101,13 @@ describe('get()', () => {
     });
     const actionType = actionTypeRegistry.get('my-action-type');
     expect(actionType).toMatchInlineSnapshot(`
-Object {
-  "executor": [Function],
-  "id": "my-action-type",
-  "name": "My action type",
-  "unencryptedAttributes": Array [],
-}
-`);
+      Object {
+        "executor": [Function],
+        "id": "my-action-type",
+        "name": "My action type",
+        "unencryptedAttributes": Array [],
+      }
+    `);
   });
 
   test(`throws an error when action type doesn't exist`, () => {

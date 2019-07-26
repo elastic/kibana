@@ -54,6 +54,9 @@ test('executes the task by calling the executor with proper parameters', async (
   const { execute: mockExecute } = jest.requireMock('./execute');
   const createTaskRunner = getCreateTaskRunnerFunction(getCreateTaskRunnerFunctionParams);
   const runner = createTaskRunner({ taskInstance: taskInstanceMock });
+
+  mockExecute.mockResolvedValueOnce({ status: 'ok' });
+
   const runnerResult = await runner.run();
 
   expect(runnerResult).toBeUndefined();
