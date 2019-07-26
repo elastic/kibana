@@ -12,33 +12,36 @@ import { toastNotifications } from 'ui/notify';
 import { timefilter } from 'ui/timefilter';
 import { Query } from 'src/legacy/core_plugins/data/public';
 import dateMath from '@elastic/datemath';
-import { ml } from '../../services/ml_api_service';
+import { ml, GetTimeFieldRangeResponse } from '../../services/ml_api_service';
 
 export interface TimeRange {
   from: number;
   to: number;
 }
 
-export function setFullTimeRange(indexPattern: IndexPattern, query: Query) {
-  return ml
-    .getTimeFieldRange({
+export async function setFullTimeRange(
+  indexPattern: IndexPattern,
+  query: Query
+): Promise<GetTimeFieldRangeResponse> {
+  try {
+    const resp = await ml.getTimeFieldRange({
       index: indexPattern.title,
       timeFieldName: indexPattern.timeFieldName,
       query,
-    })
-    .then(resp => {
-      timefilter.setTime({
-        from: moment(resp.start.epoch).toISOString(),
-        to: moment(resp.end.epoch).toISOString(),
-      });
-    })
-    .catch(resp => {
-      toastNotifications.addDanger(
-        i18n.translate('xpack.ml.fullTimeRangeSelector.errorSettingTimeRangeNotification', {
-          defaultMessage: 'An error occurred setting the time range.',
-        })
-      );
     });
+    timefilter.setTime({
+      from: moment(resp.start.epoch).toISOString(),
+      to: moment(resp.end.epoch).toISOString(),
+    });
+    return resp;
+  } catch (resp) {
+    toastNotifications.addDanger(
+      i18n.translate('xpack.ml.fullTimeRangeSelector.errorSettingTimeRangeNotification', {
+        defaultMessage: 'An error occurred setting the time range.',
+      })
+    );
+    return resp;
+  }
 }
 
 export function getTimeFilterRange(): TimeRange {

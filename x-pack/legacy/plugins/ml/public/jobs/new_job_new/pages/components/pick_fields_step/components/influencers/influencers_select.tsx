@@ -20,7 +20,9 @@ export const InfluencersSelect: FC<Props> = ({ fields, changeHandler, selectedIn
     .filter(f => f.id !== EVENT_RATE_FIELD_ID)
     .map(f => ({
       label: f.name,
-    }));
+    }))
+    .sort((a, b) => a.label.localeCompare(b.label));
+
   const selection: EuiComboBoxOptionProps[] = selectedInfluencers.map(i => ({ label: i }));
 
   function onChange(selectedOptions: EuiComboBoxOptionProps[]) {

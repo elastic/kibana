@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 export { FullTimeRangeSelector } from './full_time_range_selector';
-export { getTimeFilterRange } from './full_time_range_selector_service';
+export { getTimeFilterRange, TimeRange } from './full_time_range_selector_service';

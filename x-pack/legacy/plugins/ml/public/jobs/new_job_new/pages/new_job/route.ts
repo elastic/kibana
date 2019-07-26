@@ -8,7 +8,6 @@ import uiRoutes from 'ui/routes';
 
 // @ts-ignore
 import { checkFullLicense } from '../../../../license/check_license';
-// @ts-ignore
 import { checkGetJobsPrivilege } from '../../../../privilege/check_privilege';
 // @ts-ignore
 import { loadCurrentIndexPattern, loadCurrentSavedSearch } from '../../../../util/index_utils';
@@ -29,7 +28,7 @@ import { loadNewJobDefaults } from '../../../new_job/utils/new_job_defaults';
 import { mlJobService } from '../../../../services/job_service';
 import { JOB_TYPE } from '../../common/job_creator/util/constants';
 
-const template = `<ml-nav-menu name="new_job_single_metric" /><ml-new-job-page />`;
+const template = `<ml-new-job-page />`;
 
 const routes: Route[] = [
   {

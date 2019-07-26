@@ -17,6 +17,12 @@ interface EsIndex {
   name: string;
 }
 
+export interface GetTimeFieldRangeResponse {
+  success: boolean;
+  start: { epoch: number; string: string };
+  end: { epoch: number; string: string };
+}
+
 declare interface Ml {
   annotations: {
     deleteAnnotation(id: string | undefined): Promise<any>;
@@ -46,7 +52,7 @@ declare interface Ml {
   esSearch(obj: object): any;
   getIndices(): Promise<EsIndex[]>;
 
-  getTimeFieldRange(obj: object): Promise<any>;
+  getTimeFieldRange(obj: object): Promise<GetTimeFieldRangeResponse>;
   calculateModelMemoryLimit(obj: object): Promise<{ modelMemoryLimit: string }>;
   calendars(): Promise<
     Array<{
