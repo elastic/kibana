@@ -14,6 +14,7 @@ export default {
   testEnvironment: 'node',
   globalSetup: '<rootDir>/test_utils/jest/contract_tests/global_setup.ts',
   globalTeardown: '<rootDir>/test_utils/jest/contract_tests/global_teardown.ts',
+  forceExit: true,
   reporters: [
     'default',
     ['<rootDir>/../src/dev/jest/junit_reporter.js', { reportName: 'Jest Integration Tests' }],

@@ -23,6 +23,12 @@ checks-reporter-with-killswitch "X-Pack SIEM cyclic dependency test" node legacy
 echo ""
 echo ""
 
+echo " -> Running jest contracts tests"
+cd "$XPACK_DIR"
+SLAPSHOT_ONLINE=true CONTRACT_ONLINE=true node scripts/jest_contract.js --ci --verbose
+echo ""
+echo ""
+
 # echo " -> Running jest integration tests"
 # cd "$XPACK_DIR"
 # node scripts/jest_integration --ci --verbose
