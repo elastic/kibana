@@ -32,6 +32,11 @@ import { mlJobService } from '../services/job_service';
 import { getSelectedJobIds } from '../components/job_selector/job_select_service_utils';
 import { timefilter } from 'ui/timefilter';
 
+import { interval$ } from '../components/controls/select_interval';
+import { severity$ } from '../components/controls/select_severity';
+import { showCharts$ } from '../components/controls/checkbox_showcharts';
+import { subscribeAppStateToObservable } from '../util/app_state_utils';
+
 import { APP_STATE_ACTION, EXPLORER_ACTION } from './explorer_constants';
 
 const template = `<ml-chart-tooltip /><ml-explorer-react-wrapper class="ml-explorer" data-test-subj="mlPageAnomalyExplorer" />`;
@@ -57,19 +62,10 @@ module.controller('MlExplorerController', function (
   $injector,
   $scope,
   $timeout,
+  $rootScope,
   AppState,
-  Private,
   globalState,
 ) {
-
-  // Even if they are not used directly anymore in this controller but via imports
-  // in React components, because of the use of AppState and its dependency on angularjs
-  // these services still need to be required here to properly initialize.
-  $injector.get('mlCheckboxShowChartsService');
-  $injector.get('mlSelectIntervalService');
-  $injector.get('mlSelectLimitService');
-  $injector.get('mlSelectSeverityService');
-
   const mlJobSelectService = $injector.get('mlJobSelectService');
   const subscriptions = new Subscription();
 
@@ -220,6 +216,10 @@ module.controller('MlExplorerController', function (
       explorer$.next({ action: EXPLORER_ACTION.RELOAD });
     }
   }));
+
+  subscriptions.add(subscribeAppStateToObservable(AppState, 'mlShowCharts', showCharts$, () => $rootScope.$applyAsync()));
+  subscriptions.add(subscribeAppStateToObservable(AppState, 'mlSelectInterval', interval$, () => $rootScope.$applyAsync()));
+  subscriptions.add(subscribeAppStateToObservable(AppState, 'mlSelectSeverity', severity$, () => $rootScope.$applyAsync()));
 
   // Redraw the swimlane when the window resizes or the global nav is toggled.
   function jqueryRedrawOnResize() {

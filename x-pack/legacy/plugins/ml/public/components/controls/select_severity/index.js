@@ -5,4 +5,4 @@
  */
 
 
-import './select_severity_service';
+export { SelectSeverity, severity$, SEVERITY_OPTIONS } from './select_severity';

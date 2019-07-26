@@ -55,7 +55,7 @@ export function subscribeAppStateToObservable(AppState, appStateName, o$, callba
 
   o$.next(appState[appStateName]);
 
-  o$.pipe(distinctUntilChanged()).subscribe(payload => {
+  const subscription = o$.pipe(distinctUntilChanged()).subscribe(payload => {
     appState.fetch();
     appState[appStateName] = payload;
     appState.save();
@@ -63,4 +63,6 @@ export function subscribeAppStateToObservable(AppState, appStateName, o$, callba
       callback(payload);
     }
   });
+
+  return subscription;
 }

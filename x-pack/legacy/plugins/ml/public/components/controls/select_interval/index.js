@@ -5,4 +5,4 @@
  */
 
 
-import './select_interval_service';
+export { interval$, SelectInterval } from './select_interval';

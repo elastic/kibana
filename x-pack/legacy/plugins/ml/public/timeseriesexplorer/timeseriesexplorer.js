@@ -67,6 +67,7 @@ import { mlTimefilterRefresh$ } from '../services/timefilter_refresh_service';
 
 import { getIndexPatterns } from '../util/index_utils';
 import { getBoundsRoundedToInterval } from '../util/ml_time_buckets';
+import { initializeAppState, subscribeAppStateToObservable } from '../util/app_state_utils';
 
 import { CHARTS_POINT_TARGET, timeFieldName } from './timeseriesexplorer_constants';
 import { mlTimeSeriesSearchService } from './timeseries_search_service';
@@ -142,7 +143,7 @@ const containerPadding = 24;
 
 export class TimeSeriesExplorer extends React.Component {
   static propTypes = {
-    appState: PropTypes.object.isRequired,
+    AppState: PropTypes.func.isRequired,
     dateFormatTz: PropTypes.string.isRequired,
     globalState: PropTypes.object.isRequired,
     mlJobSelectService: PropTypes.object.isRequired,
@@ -152,6 +153,11 @@ export class TimeSeriesExplorer extends React.Component {
   state = getTimeseriesexplorerDefaultState();
 
   subscriptions = new Subscription();
+
+  constructor(props) {
+    super(props);
+    this.appState = initializeAppState(props.AppState, 'mlTimeSeriesExplorer', {});
+  }
 
   resizeRef = createRef();
   resizeChecker = undefined;
@@ -211,7 +217,7 @@ export class TimeSeriesExplorer extends React.Component {
   }
 
   contextChartSelected = (selection) => {
-    const { appState } = this.props;
+    const appState = this.appState;
     const {
       autoZoomDuration,
       contextAggregationInterval,
@@ -411,7 +417,8 @@ export class TimeSeriesExplorer extends React.Component {
   }
 
   loadForForecastId = (forecastId) => {
-    const { appState, timefilter } = this.props;
+    const appState = this.appState;
+    const { timefilter } = this.props;
     const { autoZoomDuration, contextChartData, selectedJob } = this.state;
 
     mlForecastService.getForecastDateRange(
@@ -460,7 +467,8 @@ export class TimeSeriesExplorer extends React.Component {
   }
 
   refresh = () => {
-    const { appState, timefilter } = this.props;
+    const appState = this.appState;
+    const { timefilter } = this.props;
     const {
       detectorId: currentDetectorId,
       entities: currentEntities,
@@ -653,7 +661,7 @@ export class TimeSeriesExplorer extends React.Component {
   }
 
   updateControlsForDetector = () => {
-    const { appState } = this.props;
+    const appState = this.appState;
     const { detectorId, selectedJob } = this.state;
     // Update the entity dropdown control(s) according to the partitioning fields for the selected detector.
     const detectorIndex = +detectorId;
@@ -687,7 +695,7 @@ export class TimeSeriesExplorer extends React.Component {
   }
 
   loadForJobId(jobId, jobs) {
-    const { appState } = this.props;
+    const appState = this.appState;
 
     // Validation that the ID is for a time series job must already have been performed.
     // Check if the job was created since the page was first loaded.
@@ -754,7 +762,7 @@ export class TimeSeriesExplorer extends React.Component {
   }
 
   saveSeriesPropertiesAndRefresh = () => {
-    const { appState } = this.props;
+    const appState = this.appState;
     const { detectorId, entities } = this.state;
 
     appState.mlTimeSeriesExplorer.detectorIndex = +detectorId;
@@ -768,7 +776,7 @@ export class TimeSeriesExplorer extends React.Component {
   }
 
   componentDidMount() {
-    const { globalState, mlJobSelectService, timefilter } = this.props;
+    const { AppState, globalState, mlJobSelectService, timefilter } = this.props;
 
     this.setState({ jobs: [] });
 
@@ -871,10 +879,12 @@ export class TimeSeriesExplorer extends React.Component {
     this.subscriptions.add(interval$.subscribe(tableControlsListener));
     this.subscriptions.add(severity$.subscribe(tableControlsListener));
     this.subscriptions.add(mlTimefilterRefresh$.subscribe(this.refresh));
+    this.subscriptions.add(subscribeAppStateToObservable(AppState, 'mlSelectInterval', interval$));
+    this.subscriptions.add(subscribeAppStateToObservable(AppState, 'mlSelectSeverity', severity$));
 
     // Listen for changes to job selection.
     this.subscriptions.add(mlJobSelectService.subscribe(({ selection }) => {
-      const { appState } = this.props;
+      const appState = this.appState;
       const { jobs } = this.state;
 
       // Clear the detectorIndex, entities and forecast info.

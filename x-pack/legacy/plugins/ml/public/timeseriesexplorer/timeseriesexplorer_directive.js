@@ -25,15 +25,10 @@ import { TimeSeriesExplorer } from './timeseriesexplorer';
 
 module.directive('mlTimeSeriesExplorer', function ($injector) {
   function link($scope, $element) {
-    $injector.get('mlSelectIntervalService');
-    $injector.get('mlSelectSeverityService');
     const mlJobSelectService = $injector.get('mlJobSelectService');
     const globalState = $injector.get('globalState');
     const AppState = $injector.get('AppState');
     const config = $injector.get('config');
-
-    // Initialize the AppState in which to store the zoom range.
-    const appState = new AppState({ mlTimeSeriesExplorer: {} });
 
     function updateComponent() {
       // Pass the timezone to the server for use when aggregating anomalies (by day / hour) for the table.
@@ -44,7 +39,7 @@ module.directive('mlTimeSeriesExplorer', function ($injector) {
         <I18nContext>
           <NavigationMenuContext.Provider value={{ chrome, timefilter, timeHistory }}>
             <TimeSeriesExplorer {...{
-              appState,
+              AppState,
               dateFormatTz,
               globalState,
               mlJobSelectService,
