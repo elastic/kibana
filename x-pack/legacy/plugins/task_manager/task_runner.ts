@@ -12,7 +12,7 @@
 
 import Joi from 'joi';
 import Boom from 'boom';
-import { intervalFromDate } from './lib/intervals';
+import { intervalFromDate, intervalFromNow } from './lib/intervals';
 import { Logger } from './lib/logger';
 import { BeforeRunFunction } from './lib/middleware';
 import {
@@ -178,12 +178,13 @@ export class TaskManagerRunner implements TaskRunner {
         status: 'running',
         startedAt: now,
         attempts,
-        retryAt: this.getRetryDelay({
-          attempts,
-          error: Boom.clientTimeout(),
-          addDuration: this.definition.timeout,
-          mustRetry: !!this.instance.interval,
-        }),
+        retryAt: this.instance.interval
+          ? intervalFromNow(this.definition.timeout)!
+          : this.getRetryDelay({
+              attempts,
+              error: Boom.clientTimeout(),
+              addDuration: this.definition.timeout,
+            }),
       });
 
       return true;
@@ -235,16 +236,17 @@ export class TaskManagerRunner implements TaskRunner {
       runAt = result.runAt;
     } else if (result.error) {
       // when result.error is truthy, then we're retrying because it failed
-      const retryAt = this.getRetryDelay({
-        attempts: this.instance.attempts,
-        error: result.error,
-        mustRetry: !!this.instance.interval,
-      });
-      if (!retryAt) {
+      const newRunAt = this.instance.interval
+        ? intervalFromDate(startedAt, this.instance.interval)!
+        : this.getRetryDelay({
+            attempts: this.instance.attempts,
+            error: result.error,
+          });
+      if (!newRunAt) {
         status = 'failed';
         runAt = this.instance.runAt;
       } else {
-        runAt = retryAt;
+        runAt = newRunAt;
       }
     } else {
       runAt = intervalFromDate(startedAt, this.instance.interval)!;
@@ -302,12 +304,10 @@ export class TaskManagerRunner implements TaskRunner {
     error,
     attempts,
     addDuration,
-    mustRetry,
   }: {
     error: any;
     attempts: number;
     addDuration?: string;
-    mustRetry?: boolean;
   }): Date | null {
     let result = null;
 
@@ -318,7 +318,7 @@ export class TaskManagerRunner implements TaskRunner {
 
     if (retry instanceof Date) {
       result = retry;
-    } else if (retry === true || mustRetry) {
+    } else if (retry === true) {
       result = new Date(Date.now() + attempts * defaultBackoffPerFailure);
     }
 

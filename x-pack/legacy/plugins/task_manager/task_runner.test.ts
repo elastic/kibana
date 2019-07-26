@@ -360,6 +360,7 @@ describe('TaskManagerRunner', () => {
         id,
         attempts: initialAttempts,
         interval: '1m',
+        startedAt: new Date(),
       },
       definitions: {
         bar: {
@@ -376,10 +377,11 @@ describe('TaskManagerRunner', () => {
     await runner.run();
 
     sinon.assert.calledOnce(store.update);
-    sinon.assert.calledWith(getRetryStub, initialAttempts, error);
+    sinon.assert.notCalled(getRetryStub);
     const instance = store.update.args[0][0];
 
-    const nextDefaultRetryAt = new Date(Date.now() + initialAttempts * 5 * 60 * 1000);
+    const nextIntervalDelay = 60000; // 1m
+    const nextDefaultRetryAt = new Date(Date.now() + nextIntervalDelay);
     expect(instance.runAt.getTime()).toEqual(nextDefaultRetryAt.getTime());
   });
 
@@ -494,6 +496,7 @@ describe('TaskManagerRunner', () => {
         id,
         attempts: initialAttempts,
         interval: '1m',
+        startedAt: new Date(),
       },
       definitions: {
         bar: {
@@ -509,14 +512,11 @@ describe('TaskManagerRunner', () => {
     await runner.claimOwnership();
 
     sinon.assert.calledOnce(store.update);
-    sinon.assert.calledWith(getRetryStub, initialAttempts + 1);
+    sinon.assert.notCalled(getRetryStub);
     const instance = store.update.args[0][0];
 
-    const attemptDelay = (initialAttempts + 1) * 5 * 60 * 1000;
     const timeoutDelay = timeoutMinutes * 60 * 1000;
-    expect(instance.retryAt.getTime()).toEqual(
-      new Date(Date.now() + attemptDelay + timeoutDelay).getTime()
-    );
+    expect(instance.retryAt.getTime()).toEqual(new Date(Date.now() + timeoutDelay).getTime());
   });
 
   test('Fails non-recurring task when maxAttempts reached', async () => {
@@ -558,6 +558,7 @@ describe('TaskManagerRunner', () => {
         id,
         attempts: initialAttempts,
         interval: '10s',
+        startedAt: new Date(),
       },
       definitions: {
         bar: {
@@ -577,7 +578,7 @@ describe('TaskManagerRunner', () => {
     const instance = store.update.args[0][0];
     expect(instance.attempts).toEqual(3);
     expect(instance.status).toEqual('idle');
-    expect(instance.runAt.getTime()).toEqual(minutesFromNow(15).getTime());
+    expect(instance.runAt.getTime()).toEqual(new Date(Date.now() + 10000).getTime());
   });
 
   interface TestOpts {
