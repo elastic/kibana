@@ -20,6 +20,7 @@
 import React from 'react';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { SearchBar } from './search_bar';
+import { IndexPattern } from 'ui/index_patterns';
 
 jest.mock('../../../../data/public', () => {
   return {

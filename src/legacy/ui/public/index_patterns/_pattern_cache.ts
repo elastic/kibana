@@ -17,9 +17,11 @@
  * under the License.
  */
 
+import { IndexPattern } from './index';
+
 export interface PatternCache {
-  get: (id: string) => any;
-  set: (id: string, value: any) => any;
+  get: (id: string) => IndexPattern;
+  set: (id: string, value: Promise<IndexPattern>) => Promise<IndexPattern>;
   clear: (id: string) => void;
   clearAll: () => void;
 }

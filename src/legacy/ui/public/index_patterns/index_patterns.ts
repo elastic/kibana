@@ -41,7 +41,7 @@ export class IndexPatterns {
     this.savedObjectsClient = savedObjectsClient;
   }
 
-  private async loadSavedObjects() {
+  private async refreshSavedObjectsCache() {
     this.savedObjectsCache = (await this.savedObjectsClient.find({
       type: 'index-pattern',
       fields: [],
@@ -51,7 +51,7 @@ export class IndexPatterns {
 
   getIds = async (refresh: boolean) => {
     if (!this.savedObjectsCache || refresh) {
-      await this.loadSavedObjects();
+      await this.refreshSavedObjectsCache();
     }
     if (this.savedObjectsCache) {
       return this.savedObjectsCache.map(obj => _.get(obj, 'id'));
@@ -60,7 +60,7 @@ export class IndexPatterns {
 
   getTitles = async (refresh: boolean) => {
     if (!this.savedObjectsCache || refresh) {
-      await this.loadSavedObjects();
+      await this.refreshSavedObjectsCache();
     }
     if (this.savedObjectsCache) {
       return this.savedObjectsCache.map(obj => _.get(obj, 'attributes.title'));
@@ -69,7 +69,7 @@ export class IndexPatterns {
 
   getFields = async (fields: string[], refresh: boolean) => {
     if (!this.savedObjectsCache || refresh) {
-      await this.loadSavedObjects();
+      await this.refreshSavedObjectsCache();
     }
     if (this.savedObjectsCache) {
       return this.savedObjectsCache.map(obj => {
@@ -105,7 +105,7 @@ export class IndexPatterns {
     return cache || indexPatternCache.set(id, this.make(id));
   };
 
-  make = (id?: string) => {
+  make = (id?: string): Promise<IndexPattern> => {
     return new IndexPattern(
       id,
       (cfg: any) => this.config.get(cfg),

@@ -59,16 +59,6 @@ export interface StaticIndexPattern {
   timeFieldName?: string;
 }
 
-export const createIndexPatternMock = (params: Record<string, any>): StaticIndexPattern => {
-  return {
-    ...params,
-    id: params.id || 'testIndexPattern',
-    title: params.title || 'testIndexPattern',
-    type: params.type,
-    fields: params.fields || [],
-  };
-};
-
 export class IndexPattern implements StaticIndexPattern {
   [key: string]: any;
 
@@ -354,7 +344,7 @@ export class IndexPattern implements StaticIndexPattern {
     return this.fields.byName[this.timeFieldName];
   }
 
-  getFieldByName(name: string) {
+  getFieldByName(name: string): Field | void {
     if (!this.fields || !this.fields.byName) return;
     return this.fields.byName[name];
   }

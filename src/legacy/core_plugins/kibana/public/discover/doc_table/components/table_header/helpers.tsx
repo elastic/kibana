@@ -16,6 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 import { IndexPattern } from 'ui/index_patterns';
 // @ts-ignore
 import { shortenDottedString } from '../../../../../common/utils/shorten_dotted_string';

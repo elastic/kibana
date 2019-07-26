@@ -44,6 +44,8 @@ export interface FieldType {
   aggregatable?: boolean;
   filterable?: boolean;
   searchable?: boolean;
+  sortable?: boolean;
+  visualizable?: boolean;
   readFromDocValues?: boolean;
   scripted?: boolean;
   parent?: string;
@@ -64,6 +66,8 @@ export class Field implements FieldType {
   aggregatable?: boolean;
   filterable?: boolean;
   searchable?: boolean;
+  sortable?: boolean;
+  visualizable?: boolean;
   scripted?: boolean;
   parent?: string;
   subType?: string;

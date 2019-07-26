@@ -22,7 +22,7 @@ import { IndexPattern } from 'ui/index_patterns/_index_pattern';
 import { Field, FieldSpec } from './_field';
 
 export class FieldList extends IndexedArray<Field> {
-  constructor(indexPattern: IndexPattern, specs: FieldSpec[], shortDotsEnable: boolean = false) {
+  constructor(indexPattern: IndexPattern, specs: FieldSpec[], shortDotsEnable = false) {
     super({
       index: ['name'],
       group: ['type'],
