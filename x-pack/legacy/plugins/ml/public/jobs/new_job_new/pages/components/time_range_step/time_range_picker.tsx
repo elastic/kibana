@@ -8,12 +8,9 @@ import moment from 'moment';
 import React, { Fragment, FC, useContext, useState, useEffect } from 'react';
 import { EuiDatePickerRange, EuiDatePicker } from '@elastic/eui';
 
-import theme from '@elastic/eui/dist/eui_theme_light.json';
-
 import { KibanaContext, isKibanaContext } from '../../../../../data_frame/common/kibana_context';
 
-const euiSize = +theme.euiSize.replace('px', '');
-const WIDTH = `${euiSize * 32}px`;
+const WIDTH = '512px';
 
 interface Props {
   setStart: (s: number) => void;
