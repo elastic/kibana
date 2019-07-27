@@ -27,12 +27,12 @@ import 'monaco-editor/esm/vs/editor/browser/widget/diffEditorWidget.js';
 import 'monaco-editor/esm/vs/editor/contrib/bracketMatching/bracketMatching.js';
 import 'monaco-editor/esm/vs/editor/contrib/clipboard/clipboard.js';
 
+import 'monaco-editor/esm/vs/language/json/monaco.contribution';
+
 // import 'monaco-editor/esm/vs/language/json/workerManager';
 // import 'monaco-editor/esm/vs/language/json/json.worker';
 // import 'monaco-editor/esm/vs/language/json/jsonWorker';
 
-import 'monaco-editor/esm/vs/language/json/jsonMode';
-import 'monaco-editor/esm/vs/language/json/languageFeatures';
-import 'monaco-editor/esm/vs/language/json/tokenization';
-
-// import 'monaco-editor/esm/vs/language/json/monaco.contribution';
+// import 'monaco-editor/esm/vs/language/json/jsonMode';
+// import 'monaco-editor/esm/vs/language/json/languageFeatures';
+// import 'monaco-editor/esm/vs/language/json/tokenization';

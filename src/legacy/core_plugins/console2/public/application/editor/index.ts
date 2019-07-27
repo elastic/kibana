@@ -33,18 +33,26 @@ import * as monaco from 'monaco-editor/esm/vs/editor/editor.api';
 
 import './monaco/components';
 
-import { setup } from './monaco/setup';
+import * as consoleEditor from './monaco/lifecycle';
 import { Theme } from '../../types';
 
 export class Editor {
-  private readonly editor: monaco.editor.IStandaloneCodeEditor;
+  private editor: monaco.editor.IStandaloneCodeEditor | null = null;
 
-  constructor(private readonly mountElement: HTMLElement, readonly themeName: Theme) {
-    this.editor = setup({ element: this.mountElement, theme: this.themeName });
+  constructor(private readonly mountElement: HTMLElement, readonly themeName: Theme) {}
+
+  async setup() {
+    this.editor = consoleEditor.setup({ element: this.mountElement, theme: this.themeName });
+  }
+
+  teardown() {
+    consoleEditor.teardown();
   }
 
   recalculateLayout() {
-    this.editor.layout();
+    if (this.editor) {
+      this.editor.layout();
+    }
   }
 
   async startWorker() {}

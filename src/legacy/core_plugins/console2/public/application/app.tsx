@@ -25,15 +25,24 @@ import { Editor } from './containers/editor';
 
 export const App = () => {
   const editorElementRef = useRef<HTMLDivElement>(null);
-  const [{ themeName }] = useAppContext();
+  const [ctx, setContext] = useAppContext();
+  const { themeName } = ctx;
 
   useEffect(() => {
     (async () => {
-      createEditor({
+      const editor = createEditor({
         mountElement: editorElementRef.current as HTMLDivElement,
         themeName,
       });
+      await editor.setup();
+
+      setContext({
+        ...ctx,
+        editor,
+      });
     })();
+
+    return () => (ctx.editor ? ctx.editor.teardown() : undefined);
   }, []);
 
   return <Editor ref={editorElementRef} />;
