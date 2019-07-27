@@ -17,8 +17,10 @@
  * under the License.
  */
 
-import { renderTelemetryOptInCheckbox } from './telemetry_opt_in_checkbox';
+// import { renderTelemetryOptInCheckbox } from './telemetry_opt_in_checkbox';
+import { renderTelemetryOptInCard, Props } from './telemetry_opt_in_card';
 
-export const TelemetryOptIn = () => {
-  return renderTelemetryOptInCheckbox();
+export const TelemetryOptInCard = (props: Props) => {
+  return renderTelemetryOptInCard(props);
+  // return renderTelemetryOptInCheckbox();
 }

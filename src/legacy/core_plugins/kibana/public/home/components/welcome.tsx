@@ -24,7 +24,6 @@
  */
 
 import React from 'react';
-import PropTypes from 'prop-types';
 import {
   EuiCard,
   EuiTitle,
@@ -39,16 +38,54 @@ import {
 } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n/react';
-import { TelemetryOptIn } from './telemetry_opt_in';
+import { SampleDataCard } from './sample_data';
+import { TelemetryOptInCard } from './telemetry_opt_in';
+import chrome from 'ui/chrome';
+
+interface Props {
+  urlBasePath: string;
+  onSkip: () => {};
+}
+interface State {
+  step: number;
+  trySampleData: boolean;
+}
+
 /**
  * Shows a full-screen welcome page that gives helpful quick links to beginners.
  */
-export class Welcome extends React.Component {
-  hideOnEsc = e => {
+export class Welcome extends React.PureComponent<Props, State> {
+  public readonly state: State = {
+    step: 0,
+    trySampleData: false,
+  };
+
+  hideOnEsc = (e: KeyboardEvent) => {
     if (e.key === 'Escape') {
+
       this.props.onSkip();
     }
   };
+
+  onTelemetryOptInDecline = () => {
+    const { trySampleData } = this.state;
+    if (trySampleData) {
+      chrome.addBasePath()
+      // getRouteHref: (obj, route) => $scope.kbnUrl.getRouteHref(obj, route),
+    } else {
+      this.props.onSkip();
+    }
+  }
+  onTelemetryOptInConfirm = () => {
+
+  }
+
+  onSampleDataDecline = () => {
+    this.setState(() => ({ step: 1, trySampleData: false }))
+  }
+  onSampleDataConfirm = () => {
+    this.setState(() => ({ step: 1, trySampleData: true }))
+  }
 
   componentDidMount() {
     document.addEventListener('keydown', this.hideOnEsc);
@@ -59,7 +96,8 @@ export class Welcome extends React.Component {
   }
 
   render() {
-    const { urlBasePath, onSkip } = this.props;
+    const { urlBasePath } = this.props;
+    const { step } = this.state;
 
     return (
       <EuiPortal>
@@ -85,39 +123,20 @@ export class Welcome extends React.Component {
           </header>
           <div className="homWelcome__content homWelcome-body">
             <EuiFlexGroup gutterSize="l">
-              <EuiFlexItem>
-                <EuiCard
-                  image={`${urlBasePath}/plugins/kibana/assets/illo_dashboard.png`}
-                  textAlign="left"
-                  title={<FormattedMessage id="kbn.home.letsStartTitle" defaultMessage="Let's get started"/>}
-                  description={
-                    <FormattedMessage
-                      id="kbn.home.letsStartDescription"
-                      defaultMessage="We noticed that you don't have any data in your cluster.
-  You can try our sample data and dashboards or jump in with your own data."
-                    />}
-                  footer={
-                    <footer>
-                      <EuiButton
-                        fill
-                        className="homWelcome__footerAction"
-                        href="#/home/tutorial_directory/sampleData"
-                      >
-                        <FormattedMessage id="kbn.home.tryButtonLabel" defaultMessage="Try our sample data"/>
-                      </EuiButton>
-                      <EuiButtonEmpty
-                        className="homWelcome__footerAction"
-                        onClick={onSkip}
-                        data-test-subj="skipWelcomeScreen"
-                      >
-                        <FormattedMessage id="kbn.home.exploreButtonLabel" defaultMessage="Explore on my own"/>
-                      </EuiButtonEmpty>
-                    </footer>
-                  }
+              {step === 0 && <EuiFlexItem>
+                <SampleDataCard
+                  urlBasePath={urlBasePath}
+                  onConfirm={this.onSampleDataConfirm}
+                  onDecline={this.onSampleDataDecline}
                 />
-                <EuiSpacer size="m" />
-                <TelemetryOptIn />
-              </EuiFlexItem>
+              </EuiFlexItem>}
+              {step === 1 && <EuiFlexItem>
+                <TelemetryOptInCard
+                  urlBasePath={urlBasePath}
+                  onConfirm={this.onTelemetryOptInConfirm}
+                  onDecline={this.onTelemetryOptInDecline}
+                />
+              </EuiFlexItem>}
             </EuiFlexGroup>
           </div>
         </div>
@@ -125,8 +144,3 @@ export class Welcome extends React.Component {
     );
   }
 }
-
-Welcome.propTypes = {
-  urlBasePath: PropTypes.string.isRequired,
-  onSkip: PropTypes.func.isRequired,
-};
