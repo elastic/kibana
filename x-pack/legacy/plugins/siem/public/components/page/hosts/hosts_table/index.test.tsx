@@ -119,7 +119,7 @@ describe('Hosts Table', () => {
             .find('.euiTable thead tr th button')
             .at(1)
             .text()
-        ).toEqual('Last SeenClick to sort in ascending order');
+        ).toEqual('Last Seen Click to sort in ascending order');
         expect(
           wrapper
             .find('.euiTable thead tr th button')

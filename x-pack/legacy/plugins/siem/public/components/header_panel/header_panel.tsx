@@ -39,10 +39,13 @@ export const HeaderPanel = pure<HeaderPanelProps>(
       <EuiFlexGroup alignItems="center" gutterSize="m">
         <EuiFlexItem>
           <EuiTitle>
-            <h2 data-test-subj="page_headline_title">
-              {title}{' '}
+            <h2 data-test-subj="panel_headline_title">
+              {title}
               {tooltip && (
-                <EuiIconTip color="subdued" content={tooltip} size="l" type="iInCircle" />
+                <>
+                  {' '}
+                  <EuiIconTip color="subdued" content={tooltip} size="l" type="iInCircle" />
+                </>
               )}
             </h2>
           </EuiTitle>

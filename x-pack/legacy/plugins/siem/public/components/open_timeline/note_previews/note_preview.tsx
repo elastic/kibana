@@ -43,7 +43,7 @@ export const NotePreview = pure<Pick<TimelineResultNote, 'note' | 'updated' | 'u
               <h6>{defaultToEmptyTag(updatedBy)}</h6>
             </EuiTitle>
 
-            <EuiText color="subdued" size="xs">
+            <EuiText color="subdued" data-test-subj="posted" size="xs">
               <p>
                 {i18n.POSTED}{' '}
                 {updated != null ? (

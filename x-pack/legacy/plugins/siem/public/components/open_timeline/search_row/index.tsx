@@ -75,17 +75,13 @@ export const SearchRow = pure<Props>(
             defaultMessage="Showing: {totalSearchResultsCount} {totalSearchResultsCount, plural, one {timeline} other {timelines}} {with}"
             values={{
               totalSearchResultsCount,
-              with: query.trim().length ? i18n.WITH : '',
+              with: (
+                <span data-test-subj="selectable-query-text">
+                  {query.trim().length ? `${i18n.WITH} "${query.trim()}"` : ''}
+                </span>
+              ),
             }}
           />
-
-          {!!query.trim().length && (
-            <>
-              {' "'}
-              {query.trim()}
-              {'"'}
-            </>
-          )}
         </p>
       </EuiText>
     </SearchRowContainer>
