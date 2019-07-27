@@ -50,7 +50,6 @@ export interface StaticIndexPatternField {
 }
 
 export interface StaticIndexPattern {
-  id: string;
   fields: StaticIndexPatternField[];
   title: string;
 }
