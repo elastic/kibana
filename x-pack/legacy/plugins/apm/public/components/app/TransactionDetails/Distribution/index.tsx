@@ -7,8 +7,7 @@
 import { EuiIconTip, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import d3 from 'd3';
-import React, { FunctionComponent, useEffect, useCallback } from 'react';
-import { omit } from 'lodash';
+import React, { FunctionComponent, useCallback } from 'react';
 import { ITransactionDistributionAPIResponse } from '../../../../../server/lib/transactions/distribution';
 import { IBucket } from '../../../../../server/lib/transactions/distribution/get_buckets/transform';
 import { IUrlParams } from '../../../../context/UrlParamsContext/types';
@@ -111,54 +110,13 @@ export const TransactionDistribution: FunctionComponent<Props> = (
     transactionType
   ]);
 
-  const redirectToDefaultSample = useCallback(() => {
-    const defaultSample =
-      distribution && distribution.defaultSample
-        ? distribution.defaultSample
-        : {};
-
-    const parsedQueryParams = toQuery(history.location.search);
-
-    history.replace({
-      ...history.location,
-      search: fromQuery({
-        ...omit(parsedQueryParams, 'transactionId', 'traceId'),
-        ...defaultSample
-      })
-    });
-  }, [distribution, isLoading]);
-
-  useEffect(() => {
+  // no data in response
+  if (!distribution || !distribution.totalHits) {
+    // only show loading state if there is no data - else show stale data until new data has loaded
     if (isLoading) {
-      return;
+      return <LoadingStatePrompt />;
     }
-    const selectedSampleIsAvailable = distribution
-      ? !!distribution.buckets.find(
-          bucket =>
-            !!(
-              bucket.sample &&
-              bucket.sample.transactionId === transactionId &&
-              bucket.sample.traceId === traceId
-            )
-        )
-      : false;
 
-    if (!selectedSampleIsAvailable && !!distribution) {
-      redirectToDefaultSample();
-    }
-  }, [
-    distribution,
-    transactionId,
-    traceId,
-    redirectToDefaultSample,
-    isLoading
-  ]);
-
-  if (isLoading) {
-    return <LoadingStatePrompt />;
-  }
-
-  if (!distribution || !distribution.totalHits || !traceId || !transactionId) {
     return (
       <EmptyMessage
         heading={i18n.translate('xpack.apm.transactionDetails.notFoundLabel', {
