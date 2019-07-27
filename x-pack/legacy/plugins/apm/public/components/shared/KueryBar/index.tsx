@@ -29,6 +29,7 @@ import { history } from '../../../utils/history';
 import { useMatchedRoutes } from '../../../hooks/useMatchedRoutes';
 import { RouteName } from '../../app/Main/route_config/route_names';
 import { useCore } from '../../../hooks/useCore';
+import { getAPMIndexPattern } from '../../../services/rest/savedObjects';
 
 const Container = styled.div`
   margin-bottom: 10px;
