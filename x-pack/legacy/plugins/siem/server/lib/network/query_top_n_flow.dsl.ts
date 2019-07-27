@@ -196,8 +196,12 @@ const getFlowTargetAggs = (
 ) => {
   if (flowTarget === FlowTarget.unified) {
     return {
-      ...generateFlowTargetAggs(networkTopNFlowSortField, FlowTarget.source, querySize),
-      ...generateFlowTargetAggs(networkTopNFlowSortField, FlowTarget.destination, querySize),
+      ...generateFlowTargetAggs(networkTopNFlowSortField, FlowTarget.source, 1.5 * querySize + 10),
+      ...generateFlowTargetAggs(
+        networkTopNFlowSortField,
+        FlowTarget.destination,
+        1.5 * querySize + 10
+      ),
     };
   }
   return generateFlowTargetAggs(networkTopNFlowSortField, flowTarget, querySize);

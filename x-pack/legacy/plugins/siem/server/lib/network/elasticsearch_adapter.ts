@@ -12,6 +12,7 @@ import {
   NetworkDnsEdges,
   NetworkTopNFlowData,
   NetworkTopNFlowEdges,
+  NetworkTopNFlowSortField,
 } from '../../graphql/types';
 import { inspectStringifyObject } from '../../utils/build_query';
 import { DatabaseSearchResponse, FrameworkAdapter, FrameworkRequest } from '../framework';
@@ -22,6 +23,7 @@ import { NetworkDnsRequestOptions, NetworkTopNFlowRequestOptions } from './index
 import { buildDnsQuery } from './query_dns.dsl';
 import { buildTopNFlowQuery } from './query_top_n_flow.dsl';
 import { NetworkAdapter, NetworkDnsBuckets, NetworkTopNFlowBuckets } from './types';
+import { Direction } from '../../../public/graphql/types';
 
 export class ElasticsearchNetworkAdapter implements NetworkAdapter {
   constructor(private readonly framework: FrameworkAdapter) {}
@@ -113,14 +115,115 @@ const getTopNFlowEdges = (
       options.flowTarget
     );
   }
-  return formatTopNFlowEdges(
+  return formatTopNFlowEdgesUnified(
     [
       ...getOr([], `aggregations.${FlowTarget.source}.buckets`, response),
       ...getOr([], `aggregations.${FlowTarget.destination}.buckets`, response),
     ],
-    options.flowTarget
+    options.networkTopNFlowSort
   );
 };
+
+const getGeo = (result: NetworkTopNFlowBuckets) =>
+  result.location.top_geo.hits.hits.length > 0
+    ? getOr(
+        '',
+        `location.top_geo.hits.hits[0]._source.${
+          Object.keys(result.location.top_geo.hits.hits[0]._source)[0]
+        }.geo.country_iso_code`,
+        result
+      )
+    : '';
+
+const getAs = (result: NetworkTopNFlowBuckets) =>
+  result.autonomous_system.top_as.hits.hits.length > 0
+    ? getOr(
+        '',
+        `autonomous_system.top_as.hits.hits[0]._source.${
+          Object.keys(result.autonomous_system.top_as.hits.hits[0]._source)[0]
+        }.as.organization.name`,
+        result
+      )
+    : '';
+
+const unifiedSorter = (networkTopNFlowSortField: NetworkTopNFlowSortField) => {
+  if (networkTopNFlowSortField.direction === Direction.asc) {
+    return (a: NetworkTopNFlowEdges, b: NetworkTopNFlowEdges) =>
+      getOrNumber(`node.network[${networkTopNFlowSortField.field}]`, a) -
+      getOrNumber(`node.network[${networkTopNFlowSortField.field}]`, b);
+  }
+  return (a: NetworkTopNFlowEdges, b: NetworkTopNFlowEdges) =>
+    getOrNumber(`node.network[${networkTopNFlowSortField.field}]`, b) -
+    getOrNumber(`node.network[${networkTopNFlowSortField.field}]`, a);
+};
+
+const formatTopNFlowEdgesUnified = (
+  buckets: NetworkTopNFlowBuckets[],
+  networkTopNFlowSortField: NetworkTopNFlowSortField
+): NetworkTopNFlowEdges[] =>
+  Object.values(
+    buckets.reduce(
+      (acc, bucket) => {
+        if (!acc[bucket.key]) {
+          return {
+            ...acc,
+            [bucket.key]: {
+              node: {
+                _id: bucket.key,
+                unified: {
+                  domain: bucket.domain.buckets.map(bucketDomain => bucketDomain.key),
+                  ip: bucket.key,
+                  location: getGeo(bucket),
+                  autonomous_system: getAs(bucket),
+                },
+                network: {
+                  bytes_in: getOrNumber('bytes_in.value', bucket),
+                  bytes_out: getOrNumber('bytes_out.value', bucket),
+                },
+              },
+              cursor: {
+                value: bucket.key,
+                tiebreaker: null,
+              },
+            },
+          };
+        }
+        return {
+          ...acc,
+          [bucket.key]: {
+            node: {
+              _id: bucket.key,
+              unified: {
+                domain: bucket.domain.buckets.map(bucketDomain => bucketDomain.key),
+                ip: bucket.key,
+                location:
+                  getOr('', 'node.unified.location', acc[bucket.key]).length === 0
+                    ? getGeo(bucket)
+                    : getOr('', 'node.unified.location', acc[bucket.key]),
+                autonomous_system:
+                  getOr('', 'node.unified.autonomous_system', acc[bucket.key]).length === 0
+                    ? getAs(bucket)
+                    : getOr('', 'node.unified.autonomous_system', acc[bucket.key]),
+              },
+              network: {
+                bytes_in:
+                  getOrNumber('bytes_in.value', bucket) +
+                  getOrNumber('node.unified.bytes_in', acc[bucket.key]),
+                bytes_out:
+                  getOrNumber('bytes_out.value', bucket) +
+                  getOrNumber('node.unified.bytes_out', acc[bucket.key]),
+              },
+            },
+            cursor: {
+              value: bucket.key,
+              tiebreaker: null,
+            },
+          },
+        };
+      },
+      {} as { [key: string]: NetworkTopNFlowEdges }
+    )
+  ).sort(unifiedSorter(networkTopNFlowSortField));
 
 const formatTopNFlowEdges = (
   buckets: NetworkTopNFlowBuckets[],
@@ -170,7 +273,10 @@ const formatDnsEdges = (buckets: NetworkDnsBuckets[]): NetworkDnsEdges[] =>
     },
   }));
 
-const getOrNumber = (path: string, bucket: NetworkTopNFlowBuckets | NetworkDnsBuckets) => {
+const getOrNumber = (
+  path: string,
+  bucket: NetworkTopNFlowBuckets | NetworkDnsBuckets | NetworkTopNFlowEdges
+) => {
   const numb = get(path, bucket);
   if (numb == null) {
     return null;

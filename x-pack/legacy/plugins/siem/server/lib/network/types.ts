@@ -6,7 +6,7 @@
 
 import { NetworkDnsData, NetworkTopNFlowData } from '../../graphql/types';
 import { FrameworkRequest, RequestOptionsPaginated } from '../framework';
-import { SearchHit } from '../types';
+import { SearchHit, TotalValue } from '../types';
 
 export interface NetworkAdapter {
   getNetworkTopNFlow(
@@ -21,11 +21,45 @@ export interface GenericBuckets {
   doc_count: number;
 }
 
+interface LocationHit<T> {
+  doc_count: number;
+  top_geo: {
+    hits: {
+      total: TotalValue | number;
+      max_score: number | null;
+      hits: Array<{
+        _source: T;
+        sort?: [number];
+        _index?: string;
+        _type?: string;
+        _id?: string;
+        _score?: number | null;
+      }>;
+    };
+  };
+}
+
+interface AutonomousSystemHit<T> {
+  doc_count: number;
+  top_as: {
+    hits: {
+      total: TotalValue | number;
+      max_score: number | null;
+      hits: Array<{
+        _source: T;
+        sort?: [number];
+        _index?: string;
+        _type?: string;
+        _id?: string;
+        _score?: number | null;
+      }>;
+    };
+  };
+}
+
 export interface NetworkTopNFlowBuckets {
   key: string;
-  autonomous_system: {
-    value: string;
-  };
+  autonomous_system: AutonomousSystemHit<object>;
   bytes_in: {
     value: number;
   };
@@ -35,9 +69,7 @@ export interface NetworkTopNFlowBuckets {
   domain: {
     buckets: GenericBuckets[];
   };
-  location: {
-    value: string;
-  };
+  location: LocationHit<object>;
 }
 
 export interface NetworkTopNFlowData extends SearchHit {
