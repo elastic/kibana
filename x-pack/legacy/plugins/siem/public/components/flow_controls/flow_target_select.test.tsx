@@ -6,7 +6,6 @@
 
 import { mount, shallow } from 'enzyme';
 import toJson from 'enzyme-to-json';
-import { clone } from 'lodash/fp';
 import * as React from 'react';
 import { ActionCreator } from 'typescript-fsa';
 
@@ -56,56 +55,5 @@ describe('FlowTargetSelect Component', () => {
     expect(mockProps.updateFlowTargetAction.mock.calls[0][0]).toEqual({
       flowTarget: 'destination',
     });
-  });
-
-  test('when selectedDirection=unidirectional only source/destination are options', () => {
-    const wrapper = mount(<FlowTargetSelect {...mockProps} />);
-
-    wrapper
-      .find('button')
-      .first()
-      .simulate('click');
-
-    wrapper.update();
-
-    expect(
-      wrapper.find(`button#${TestFlowTargetId}-select-flow-target-source`).exists()
-    ).toBeTruthy();
-    expect(
-      wrapper.find(`button#${TestFlowTargetId}-select-flow-target-destination`).exists()
-    ).toBeTruthy();
-    expect(
-      wrapper.find(`button#${TestFlowTargetId}-select-flow-target-client`).exists()
-    ).toBeFalsy();
-    expect(
-      wrapper.find(`button#${TestFlowTargetId}-select-flow-target-server`).exists()
-    ).toBeFalsy();
-  });
-
-  test('when selectedDirection=bidirectional source/destination/client/server are options', () => {
-    const bidirectionalMock = clone(mockProps);
-    bidirectionalMock.selectedDirection = FlowDirection.biDirectional;
-
-    const wrapper = mount(<FlowTargetSelect {...bidirectionalMock} />);
-
-    wrapper
-      .find('button')
-      .first()
-      .simulate('click');
-
-    wrapper.update();
-
-    expect(
-      wrapper.find(`button#${TestFlowTargetId}-select-flow-target-source`).exists()
-    ).toBeTruthy();
-    expect(
-      wrapper.find(`button#${TestFlowTargetId}-select-flow-target-destination`).exists()
-    ).toBeTruthy();
-    expect(
-      wrapper.find(`button#${TestFlowTargetId}-select-flow-target-client`).exists()
-    ).toBeTruthy();
-    expect(
-      wrapper.find(`button#${TestFlowTargetId}-select-flow-target-server`).exists()
-    ).toBeTruthy();
   });
 });

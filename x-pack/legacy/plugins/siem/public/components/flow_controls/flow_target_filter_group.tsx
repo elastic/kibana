@@ -34,7 +34,7 @@ export type FlowTargetFilterGroupProps = OwnProps;
 
 export const FlowTargetFilterGroup = pure<FlowTargetFilterGroupProps>(
   ({ selectedTarget, displayTextOverride = [], updateFlowTarget }) => (
-    <EuiFilterGroup>
+    <EuiFilterGroup data-test-subj={`flow-target-filter-group`}>
       <EuiFilterButton
         withNext
         hasActiveFilters={selectedTarget === FlowTarget.source}
@@ -43,7 +43,7 @@ export const FlowTargetFilterGroup = pure<FlowTargetFilterGroupProps>(
             ? onClearTarget(updateFlowTarget)
             : onChangeTarget(FlowTarget.source, updateFlowTarget)
         }
-        data-test-subj={FlowTarget.source}
+        data-test-subj={`flow-target-filter-button-${FlowTarget.source}`}
       >
         {displayTextOverride[0] || i18n.SOURCE}
       </EuiFilterButton>
@@ -55,7 +55,7 @@ export const FlowTargetFilterGroup = pure<FlowTargetFilterGroupProps>(
             ? onClearTarget(updateFlowTarget)
             : onChangeTarget(FlowTarget.destination, updateFlowTarget)
         }
-        data-test-subj={FlowTarget.destination}
+        data-test-subj={`flow-target-filter-button-${FlowTarget.destination}`}
       >
         {displayTextOverride[1] || i18n.DESTINATION}
       </EuiFilterButton>

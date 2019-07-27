@@ -11,7 +11,7 @@ import * as React from 'react';
 import { MockedProvider } from 'react-apollo/test-utils';
 import { Provider as ReduxStoreProvider } from 'react-redux';
 
-import { FlowDirection } from '../../../../graphql/types';
+import { FlowDirection, FlowTarget } from '../../../../graphql/types';
 import {
   apolloClientObservable,
   mockIndexPattern,
@@ -128,25 +128,22 @@ describe('NetworkTopNFlow Table Component', () => {
         </MockedProvider>
       );
 
-      wrapper
-        .find(`[data-test-subj="${NetworkTopNFlowTableId}-select-flow-target"] button`)
-        .first()
-        .simulate('click');
-
-      wrapper.update();
-
-      wrapper
-        .find(`button#${NetworkTopNFlowTableId}-select-flow-target-destination`)
-        .first()
-        .simulate('click');
-
       expect(
         wrapper
-          .find(`[data-test-subj="${NetworkTopNFlowTableId}-select-flow-target"] button`)
+          .find(`[data-test-subj="flow-target-filter-button-${FlowTarget.destination}"]`)
           .first()
-          .text()
-          .toLocaleLowerCase()
-      ).toEqual('by destination ip');
+          .prop('hasActiveFilters')
+      ).toBeFalsy();
+      wrapper
+        .find(`[data-test-subj="flow-target-filter-button-${FlowTarget.destination}"]`)
+        .first()
+        .simulate('click');
+      expect(
+        wrapper
+          .find(`[data-test-subj="flow-target-filter-button-${FlowTarget.destination}"]`)
+          .first()
+          .prop('hasActiveFilters')
+      ).toBeTruthy();
     });
   });
 
@@ -175,7 +172,7 @@ describe('NetworkTopNFlow Table Component', () => {
       );
       expect(store.getState().network.page.queries!.topNFlow.topNFlowSort).toEqual({
         direction: 'desc',
-        field: 'bytes',
+        field: 'bytes_in',
       });
 
       wrapper
@@ -187,20 +184,20 @@ describe('NetworkTopNFlow Table Component', () => {
 
       expect(store.getState().network.page.queries!.topNFlow.topNFlowSort).toEqual({
         direction: 'asc',
-        field: 'packets',
+        field: 'bytes_out',
       });
       expect(
         wrapper
           .find('.euiTable thead tr th button')
           .first()
           .text()
-      ).toEqual('BytesClick to sort in ascending order');
+      ).toEqual('Bytes InClick to sort in ascending order');
       expect(
         wrapper
           .find('.euiTable thead tr th button')
           .at(1)
           .text()
-      ).toEqual('PacketsClick to sort in descending order');
+      ).toEqual('Bytes OutClick to sort in descending order');
       expect(
         wrapper
           .find('.euiTable thead tr th button')

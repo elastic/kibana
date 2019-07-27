@@ -7,7 +7,6 @@
 import { Direction, FlowDirection, FlowTarget, NetworkTopNFlowFields } from '../../graphql/types';
 
 import { NetworkTopNFlowRequestOptions } from '.';
-import { DatabaseSearchResponse } from '../framework';
 
 export const getMockOptions = (flowTarget: FlowTarget, flowDirection: FlowDirection) => ({
   defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],

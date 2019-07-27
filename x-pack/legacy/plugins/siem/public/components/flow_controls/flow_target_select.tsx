@@ -26,18 +26,6 @@ const toggleTargetOptions = (id: string, displayText: string[]) => [
     inputDisplay: displayText[1] || i18n.DESTINATION,
     directions: [FlowDirection.uniDirectional, FlowDirection.biDirectional],
   },
-  {
-    id: `${id}-select-flow-target-${FlowTarget.client}`,
-    value: FlowTarget.client,
-    inputDisplay: displayText[2] || i18n.CLIENT,
-    directions: [FlowDirection.biDirectional],
-  },
-  {
-    id: `${id}-select-flow-target-${FlowTarget.server}`,
-    value: FlowTarget.server,
-    inputDisplay: displayText[3] || i18n.SERVER,
-    directions: [FlowDirection.biDirectional],
-  },
 ];
 
 interface OwnProps {
