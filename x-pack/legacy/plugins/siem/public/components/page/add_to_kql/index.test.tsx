@@ -149,7 +149,7 @@ describe('AddToKql Component', () => {
           flowDirection: 'uniDirectional',
           flowTarget: 'source',
           topNFlowSort: {
-            field: 'bytes',
+            field: 'bytes_in',
             direction: 'desc',
           },
         },

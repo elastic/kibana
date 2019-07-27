@@ -6,11 +6,19 @@
 
 import { cloneDeep } from 'lodash/fp';
 
-import { NetworkTopNFlowData } from '../../graphql/types';
+import { FlowDirection, FlowTarget, NetworkTopNFlowData } from '../../graphql/types';
 import { FrameworkAdapter, FrameworkRequest } from '../framework';
 
 import { ElasticsearchNetworkAdapter } from './elasticsearch_adapter';
-import { mockOptions, mockRequest, mockResponse, mockResult, mockTopNFlowQueryDsl } from './mock';
+import {
+  getMockOptions,
+  mockOptions,
+  mockRequest,
+  mockResponse,
+  mockResponses,
+  mockTopNFlowQueryDsl,
+} from './mock';
+import { NetworkTopNFlowRequestOptions } from './index';
 
 jest.mock('./query_top_n_flow.dsl', () => {
   return {
@@ -18,30 +26,44 @@ jest.mock('./query_top_n_flow.dsl', () => {
   };
 });
 
-describe('Network Top N flow elasticsearch_adapter with FlowTarget=source and FlowDirection=uniDirectional', () => {
+describe('Network Top N flow elasticsearch_adapter', () => {
   describe('Happy Path - get Data', () => {
-    const mockCallWithRequest = jest.fn();
-    mockCallWithRequest.mockResolvedValue(mockResponse);
-    const mockFramework: FrameworkAdapter = {
-      version: 'mock',
-      callWithRequest: mockCallWithRequest,
-      exposeStaticDir: jest.fn(),
-      getIndexPatternsService: jest.fn(),
-      getSavedObjectsService: jest.fn(),
-      registerGraphQLEndpoint: jest.fn(),
-    };
-    jest.doMock('../framework', () => ({
-      callWithRequest: mockCallWithRequest,
-    }));
+    const testCases = [
+      ['source-uni', getMockOptions(FlowTarget.source, FlowDirection.uniDirectional)],
+      ['source-bi', getMockOptions(FlowTarget.source, FlowDirection.biDirectional)],
+      ['source-unified', getMockOptions(FlowTarget.source, FlowDirection.unified)],
+      ['destination-uni', getMockOptions(FlowTarget.destination, FlowDirection.uniDirectional)],
+      ['destination-bi', getMockOptions(FlowTarget.destination, FlowDirection.biDirectional)],
+      ['destination-unified', getMockOptions(FlowTarget.destination, FlowDirection.unified)],
+      ['unified-uni', getMockOptions(FlowTarget.unified, FlowDirection.uniDirectional)],
+      ['unified-bi', getMockOptions(FlowTarget.unified, FlowDirection.biDirectional)],
+      ['unified-unified', getMockOptions(FlowTarget.unified, FlowDirection.unified)],
+    ];
+    test.each(testCases)(
+      '%o',
+      async (mockResponseKey: string, mockedOptions: NetworkTopNFlowRequestOptions) => {
+        const mockCallWithRequest = jest.fn();
+        mockCallWithRequest.mockResolvedValue(mockResponses[mockResponseKey]);
+        const mockFramework: FrameworkAdapter = {
+          version: 'mock',
+          callWithRequest: mockCallWithRequest,
+          exposeStaticDir: jest.fn(),
+          getIndexPatternsService: jest.fn(),
+          getSavedObjectsService: jest.fn(),
+          registerGraphQLEndpoint: jest.fn(),
+        };
+        jest.doMock('../framework', () => ({
+          callWithRequest: mockCallWithRequest,
+        }));
 
-    test('getNetworkTopNFlow', async () => {
-      const EsNetworkTopNFlow = new ElasticsearchNetworkAdapter(mockFramework);
-      const data: NetworkTopNFlowData = await EsNetworkTopNFlow.getNetworkTopNFlow(
-        mockRequest as FrameworkRequest,
-        mockOptions
-      );
-      expect(data).toEqual(mockResult);
-    });
+        const EsNetworkTopNFlow = new ElasticsearchNetworkAdapter(mockFramework);
+        const data: NetworkTopNFlowData = await EsNetworkTopNFlow.getNetworkTopNFlow(
+          mockRequest as FrameworkRequest,
+          mockedOptions
+        );
+        expect(data).toMatchSnapshot();
+      }
+    );
   });
 
   describe('Unhappy Path - No data', () => {

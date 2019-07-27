@@ -7,6 +7,66 @@
 import { Direction, FlowDirection, FlowTarget, NetworkTopNFlowFields } from '../../graphql/types';
 
 import { NetworkTopNFlowRequestOptions } from '.';
+import { DatabaseSearchResponse } from '../framework';
+
+export const getMockOptions = (flowTarget: FlowTarget, flowDirection: FlowDirection) => ({
+  defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+  sourceConfiguration: {
+    fields: {
+      container: 'docker.container.name',
+      host: 'beat.hostname',
+      message: ['message', '@message'],
+      pod: 'kubernetes.pod.name',
+      tiebreaker: '_doc',
+      timestamp: '@timestamp',
+    },
+  },
+  timerange: { interval: '12h', to: 1549852006071, from: 1549765606071 },
+  pagination: {
+    activePage: 0,
+    cursorStart: 0,
+    fakePossibleCount: 50,
+    querySize: 10,
+  },
+  filterQuery: {},
+  fields: [
+    'totalCount',
+    'source.autonomous_system',
+    'source.domain',
+    'source.ip',
+    'source.location',
+    'source.__typename',
+    'destination.autonomous_system',
+    'destination.domain',
+    'destination.ip',
+    'destination.location',
+    'destination.__typename',
+    'unified.autonomous_system',
+    'unified.domain',
+    'unified.ip',
+    'unified.location',
+    'unified.__typename',
+    'event.duration',
+    'event.__typename',
+    'network.bytes_in',
+    'network.bytes_out',
+    'network.__typename',
+    '__typename',
+    'edges.cursor.value',
+    'edges.cursor.__typename',
+    'edges.__typename',
+    'pageInfo.activePage',
+    'pageInfo.__typename',
+    'pageInfo.fakeTotalCount',
+    'pageInfo.__typename',
+    'pageInfo.showMorePagesIndicator',
+    'pageInfo.__typename',
+    '__typename',
+  ],
+  networkTopNFlowSort: { field: NetworkTopNFlowFields.bytes_in, direction: Direction.desc },
+  flowTarget,
+  flowDirection,
+});
 
 export const mockOptions: NetworkTopNFlowRequestOptions = {
   defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
@@ -30,16 +90,25 @@ export const mockOptions: NetworkTopNFlowRequestOptions = {
   filterQuery: {},
   fields: [
     'totalCount',
-    'source.ip',
+    'source.autonomous_system',
     'source.domain',
+    'source.ip',
+    'source.location',
     'source.__typename',
-    'destination.ip',
+    'destination.autonomous_system',
     'destination.domain',
+    'destination.ip',
+    'destination.location',
     'destination.__typename',
+    'unified.autonomous_system',
+    'unified.domain',
+    'unified.ip',
+    'unified.location',
+    'unified.__typename',
     'event.duration',
     'event.__typename',
-    'network.bytes',
-    'network.packets',
+    'network.bytes_in',
+    'network.bytes_out',
     'network.__typename',
     '__typename',
     'edges.cursor.value',
@@ -53,7 +122,7 @@ export const mockOptions: NetworkTopNFlowRequestOptions = {
     'pageInfo.__typename',
     '__typename',
   ],
-  networkTopNFlowSort: { field: NetworkTopNFlowFields.bytes, direction: Direction.desc },
+  networkTopNFlowSort: { field: NetworkTopNFlowFields.bytes_in, direction: Direction.desc },
   flowTarget: FlowTarget.source,
   flowDirection: FlowDirection.uniDirectional,
 };
@@ -83,21 +152,29 @@ export const mockRequest = {
             edges {
               node {
               source {
-                ip
+                autonomous_system
                 domain
-                count
+                ip
+                location
                 __typename
               }
               destination {
-                ip
+                autonomous_system
                 domain
-                count
+                ip
+                location
+                __typename
+              }
+              unified {
+                autonomous_system
+                domain
+                ip
+                location
                 __typename
               }
               network {
-                bytes
-                packets
-                direction
+                bytes_in
+                bytes_out
                 __typename
               }
             __typename
@@ -110,9 +187,7 @@ export const mockRequest = {
           }
           pageInfo {
             activePage
-            __typename
             fakeTotalCount
-            __typename
             showMorePagesIndicator
             __typename
           }
@@ -393,6 +468,16125 @@ export const mockResponse = {
           },
         },
       ],
+    },
+  },
+};
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const mockResponses: { [key: string]: any } = {
+  'source-uni': {
+    took: 87,
+    timed_out: false,
+    _shards: {
+      total: 28,
+      successful: 28,
+      skipped: 0,
+      failed: 0,
+    },
+    hits: {
+      max_score: null,
+      hits: [],
+    },
+    aggregations: {
+      source: {
+        doc_count_error_upper_bound: -1,
+        sum_other_doc_count: 100885,
+        buckets: [
+          {
+            key: '1.179.154.108',
+            doc_count: 122,
+            bytes_out: {
+              value: 139182,
+            },
+            bytes_in: {
+              value: 0,
+            },
+            domain: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 0,
+              buckets: [],
+            },
+            autonomous_system: {
+              doc_count: 122,
+              top_as: {
+                hits: {
+                  total: {
+                    value: 122,
+                    relation: 'eq',
+                  },
+                  max_score: 1,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'dd4fa2d4bd-692325757348790',
+                      _score: 1,
+                      _source: {
+                        source: {
+                          as: {
+                            number: 131293,
+                            organization: {
+                              name: 'TOT Public Company Limited',
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+            location: {
+              doc_count: 122,
+              top_geo: {
+                hits: {
+                  total: {
+                    value: 122,
+                    relation: 'eq',
+                  },
+                  max_score: 1,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'dd4fa2d4bd-692325757348790',
+                      _score: 1,
+                      _source: {
+                        source: {
+                          geo: {
+                            continent_name: 'Asia',
+                            country_iso_code: 'TH',
+                            location: {
+                              lon: 100.4667,
+                              lat: 13.75,
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          },
+          {
+            key: '2.135.221.237',
+            doc_count: 2,
+            bytes_out: {
+              value: 2164,
+            },
+            bytes_in: {
+              value: 0,
+            },
+            domain: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 0,
+              buckets: [],
+            },
+            autonomous_system: {
+              doc_count: 2,
+              top_as: {
+                hits: {
+                  total: {
+                    value: 2,
+                    relation: 'eq',
+                  },
+                  max_score: 1,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'dd4fa2d4bd-692203923818969',
+                      _score: 1,
+                      _source: {
+                        source: {
+                          as: {
+                            number: 9198,
+                            organization: {
+                              name: 'JSC Kazakhtelecom',
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+            location: {
+              doc_count: 2,
+              top_geo: {
+                hits: {
+                  total: {
+                    value: 2,
+                    relation: 'eq',
+                  },
+                  max_score: 1,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'dd4fa2d4bd-692203923818969',
+                      _score: 1,
+                      _source: {
+                        source: {
+                          geo: {
+                            continent_name: 'Asia',
+                            country_iso_code: 'KZ',
+                            location: {
+                              lon: 68,
+                              lat: 48,
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          },
+          {
+            key: '2.180.34.2',
+            doc_count: 4,
+            bytes_out: {
+              value: 0,
+            },
+            bytes_in: {
+              value: 0,
+            },
+            domain: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 0,
+              buckets: [],
+            },
+            autonomous_system: {
+              doc_count: 4,
+              top_as: {
+                hits: {
+                  total: {
+                    value: 4,
+                    relation: 'eq',
+                  },
+                  max_score: 1,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'dd4fa2d4bd-692058005131302',
+                      _score: 1,
+                      _source: {
+                        source: {
+                          as: {
+                            number: 58224,
+                            organization: {
+                              name: 'Iran Telecommunication Company PJS',
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+            location: {
+              doc_count: 4,
+              top_geo: {
+                hits: {
+                  total: {
+                    value: 4,
+                    relation: 'eq',
+                  },
+                  max_score: 1,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'dd4fa2d4bd-692058005131302',
+                      _score: 1,
+                      _source: {
+                        source: {
+                          geo: {
+                            continent_name: 'Asia',
+                            country_iso_code: 'IR',
+                            location: {
+                              lon: 51.4231,
+                              lat: 35.6961,
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          },
+          {
+            key: '3.105.198.132',
+            doc_count: 6,
+            bytes_out: {
+              value: 5910,
+            },
+            bytes_in: {
+              value: 0,
+            },
+            domain: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 0,
+              buckets: [],
+            },
+            autonomous_system: {
+              doc_count: 6,
+              top_as: {
+                hits: {
+                  total: {
+                    value: 6,
+                    relation: 'eq',
+                  },
+                  max_score: 1,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'dd4fa2d4bd-692193750112325',
+                      _score: 1,
+                      _source: {
+                        source: {
+                          as: {
+                            number: 16509,
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+            location: {
+              doc_count: 6,
+              top_geo: {
+                hits: {
+                  total: {
+                    value: 6,
+                    relation: 'eq',
+                  },
+                  max_score: 1,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'dd4fa2d4bd-692193750112325',
+                      _score: 1,
+                      _source: {
+                        source: {
+                          geo: {
+                            continent_name: 'North America',
+                            region_iso_code: 'US-WA',
+                            city_name: 'Seattle',
+                            country_iso_code: 'US',
+                            region_name: 'Washington',
+                            location: {
+                              lon: -122.3422,
+                              lat: 47.6344,
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          },
+          {
+            key: '3.208.42.117',
+            doc_count: 74,
+            bytes_out: {
+              value: 82233,
+            },
+            bytes_in: {
+              value: 0,
+            },
+            domain: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 0,
+              buckets: [],
+            },
+            autonomous_system: {
+              doc_count: 74,
+              top_as: {
+                hits: {
+                  total: {
+                    value: 74,
+                    relation: 'eq',
+                  },
+                  max_score: 1,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'dd4fa2d4bd-692336249610460',
+                      _score: 1,
+                      _source: {
+                        source: {
+                          as: {
+                            number: 14618,
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+            location: {
+              doc_count: 74,
+              top_geo: {
+                hits: {
+                  total: {
+                    value: 74,
+                    relation: 'eq',
+                  },
+                  max_score: 1,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'dd4fa2d4bd-692336249610460',
+                      _score: 1,
+                      _source: {
+                        source: {
+                          geo: {
+                            continent_name: 'North America',
+                            country_iso_code: 'US',
+                            location: {
+                              lon: -97.822,
+                              lat: 37.751,
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          },
+          {
+            key: '4.34.195.30',
+            doc_count: 14,
+            bytes_out: {
+              value: 14868,
+            },
+            bytes_in: {
+              value: 0,
+            },
+            domain: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 0,
+              buckets: [],
+            },
+            autonomous_system: {
+              doc_count: 14,
+              top_as: {
+                hits: {
+                  total: {
+                    value: 14,
+                    relation: 'eq',
+                  },
+                  max_score: 1,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'dd4fa2d4bd-692279846149410',
+                      _score: 1,
+                      _source: {
+                        source: {
+                          as: {
+                            number: 3356,
+                            organization: {
+                              name: 'Level 3 Parent, LLC',
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+            location: {
+              doc_count: 14,
+              top_geo: {
+                hits: {
+                  total: {
+                    value: 14,
+                    relation: 'eq',
+                  },
+                  max_score: 1,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'dd4fa2d4bd-692279846149410',
+                      _score: 1,
+                      _source: {
+                        source: {
+                          geo: {
+                            continent_name: 'North America',
+                            region_iso_code: 'US-PA',
+                            city_name: 'Philadelphia',
+                            country_iso_code: 'US',
+                            region_name: 'Pennsylvania',
+                            location: {
+                              lon: -75.1534,
+                              lat: 39.9359,
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          },
+          {
+            key: '5.196.72.58',
+            doc_count: 2,
+            bytes_out: {
+              value: 2670,
+            },
+            bytes_in: {
+              value: 0,
+            },
+            domain: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 0,
+              buckets: [],
+            },
+            autonomous_system: {
+              doc_count: 2,
+              top_as: {
+                hits: {
+                  total: {
+                    value: 2,
+                    relation: 'eq',
+                  },
+                  max_score: 1,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'dd4fa2d4bd-692062025806516',
+                      _score: 1,
+                      _source: {
+                        source: {
+                          as: {
+                            number: 16276,
+                            organization: {
+                              name: 'OVH SAS',
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+            location: {
+              doc_count: 2,
+              top_geo: {
+                hits: {
+                  total: {
+                    value: 2,
+                    relation: 'eq',
+                  },
+                  max_score: 1,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'dd4fa2d4bd-692062025806516',
+                      _score: 1,
+                      _source: {
+                        source: {
+                          geo: {
+                            continent_name: 'Europe',
+                            country_iso_code: 'FR',
+                            location: {
+                              lon: 2.3387000000000002,
+                              lat: 48.8582,
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          },
+          {
+            key: '8.42.77.171',
+            doc_count: 1244,
+            bytes_out: {
+              value: 35846810,
+            },
+            bytes_in: {
+              value: 0,
+            },
+            domain: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 0,
+              buckets: [],
+            },
+            autonomous_system: {
+              doc_count: 1244,
+              top_as: {
+                hits: {
+                  total: {
+                    value: 1244,
+                    relation: 'eq',
+                  },
+                  max_score: 1,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'dd4fa2d4bd-692268628367533',
+                      _score: 1,
+                      _source: {
+                        source: {
+                          as: {
+                            number: 393552,
+                            organization: {
+                              name: 'Longmont Power & Communications',
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+            location: {
+              doc_count: 1244,
+              top_geo: {
+                hits: {
+                  total: {
+                    value: 1244,
+                    relation: 'eq',
+                  },
+                  max_score: 1,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'dd4fa2d4bd-692268628367533',
+                      _score: 1,
+                      _source: {
+                        source: {
+                          geo: {
+                            continent_name: 'North America',
+                            region_iso_code: 'US-CO',
+                            city_name: 'Longmont',
+                            country_iso_code: 'US',
+                            region_name: 'Colorado',
+                            location: {
+                              lon: -105.1986,
+                              lat: 40.1791,
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          },
+          {
+            key: '8.249.225.254',
+            doc_count: 1,
+            bytes_out: {
+              value: 384580,
+            },
+            bytes_in: {
+              value: 0,
+            },
+            domain: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 0,
+              buckets: [],
+            },
+            autonomous_system: {
+              doc_count: 1,
+              top_as: {
+                hits: {
+                  total: {
+                    value: 1,
+                    relation: 'eq',
+                  },
+                  max_score: 1,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'dd4fa2d4bd-692200425198640',
+                      _score: 1,
+                      _source: {
+                        source: {
+                          as: {
+                            number: 3356,
+                            organization: {
+                              name: 'Level 3 Parent, LLC',
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+            location: {
+              doc_count: 1,
+              top_geo: {
+                hits: {
+                  total: {
+                    value: 1,
+                    relation: 'eq',
+                  },
+                  max_score: 1,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'dd4fa2d4bd-692200425198640',
+                      _score: 1,
+                      _source: {
+                        source: {
+                          geo: {
+                            continent_name: 'North America',
+                            country_iso_code: 'US',
+                            location: {
+                              lon: -97.822,
+                              lat: 37.751,
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          },
+          {
+            key: '8.249.227.254',
+            doc_count: 1,
+            bytes_out: {
+              value: 600,
+            },
+            bytes_in: {
+              value: 0,
+            },
+            domain: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 0,
+              buckets: [],
+            },
+            autonomous_system: {
+              doc_count: 1,
+              top_as: {
+                hits: {
+                  total: {
+                    value: 1,
+                    relation: 'eq',
+                  },
+                  max_score: 1,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'dd4fa2d4bd-692068132502940',
+                      _score: 1,
+                      _source: {
+                        source: {
+                          as: {
+                            number: 3356,
+                            organization: {
+                              name: 'Level 3 Parent, LLC',
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+            location: {
+              doc_count: 1,
+              top_geo: {
+                hits: {
+                  total: {
+                    value: 1,
+                    relation: 'eq',
+                  },
+                  max_score: 1,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'dd4fa2d4bd-692068132502940',
+                      _score: 1,
+                      _source: {
+                        source: {
+                          geo: {
+                            continent_name: 'North America',
+                            country_iso_code: 'US',
+                            location: {
+                              lon: -97.822,
+                              lat: 37.751,
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          },
+        ],
+      },
+      top_n_flow_count: {
+        value: 1474,
+      },
+    },
+  },
+  'source-bi': {
+    took: 10,
+    timed_out: false,
+    _shards: {
+      total: 28,
+      successful: 28,
+      skipped: 0,
+      failed: 0,
+    },
+    hits: {
+      max_score: null,
+      hits: [],
+    },
+    aggregations: {
+      source: {
+        doc_count_error_upper_bound: -1,
+        sum_other_doc_count: 81,
+        buckets: [
+          {
+            key: '10.100.7.196',
+            doc_count: 2665,
+            bytes_out: {
+              value: 159579030,
+            },
+            bytes_in: {
+              value: 9432666117,
+            },
+            domain: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 0,
+              buckets: [
+                {
+                  key: 'samsungtv-kitchen.iot.sr.local.crowbird.com',
+                  doc_count: 2665,
+                  timestamp: {
+                    value: 1563844810000,
+                    value_as_string: '2019-07-23T01:20:10.000Z',
+                  },
+                },
+              ],
+            },
+            autonomous_system: {
+              doc_count: 0,
+              top_as: {
+                hits: {
+                  total: {
+                    value: 0,
+                    relation: 'eq',
+                  },
+                  max_score: null,
+                  hits: [],
+                },
+              },
+            },
+            location: {
+              doc_count: 0,
+              top_geo: {
+                hits: {
+                  total: {
+                    value: 0,
+                    relation: 'eq',
+                  },
+                  max_score: null,
+                  hits: [],
+                },
+              },
+            },
+          },
+          {
+            key: '10.100.7.197',
+            doc_count: 1684,
+            bytes_out: {
+              value: 173650940,
+            },
+            bytes_in: {
+              value: 5385981031,
+            },
+            domain: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 0,
+              buckets: [
+                {
+                  key: 'appletv-livingroom.iot.sr.local.crowbird.com',
+                  doc_count: 1684,
+                  timestamp: {
+                    value: 1563895670002,
+                    value_as_string: '2019-07-23T15:27:50.002Z',
+                  },
+                },
+              ],
+            },
+            autonomous_system: {
+              doc_count: 0,
+              top_as: {
+                hits: {
+                  total: {
+                    value: 0,
+                    relation: 'eq',
+                  },
+                  max_score: null,
+                  hits: [],
+                },
+              },
+            },
+            location: {
+              doc_count: 0,
+              top_geo: {
+                hits: {
+                  total: {
+                    value: 0,
+                    relation: 'eq',
+                  },
+                  max_score: null,
+                  hits: [],
+                },
+              },
+            },
+          },
+          {
+            key: '10.0.2.15',
+            doc_count: 34,
+            bytes_out: {
+              value: 3388667,
+            },
+            bytes_in: {
+              value: 168814467,
+            },
+            domain: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 0,
+              buckets: [],
+            },
+            autonomous_system: {
+              doc_count: 0,
+              top_as: {
+                hits: {
+                  total: {
+                    value: 0,
+                    relation: 'eq',
+                  },
+                  max_score: null,
+                  hits: [],
+                },
+              },
+            },
+            location: {
+              doc_count: 0,
+              top_geo: {
+                hits: {
+                  total: {
+                    value: 0,
+                    relation: 'eq',
+                  },
+                  max_score: null,
+                  hits: [],
+                },
+              },
+            },
+          },
+          {
+            key: '10.100.7.195',
+            doc_count: 1152,
+            bytes_out: {
+              value: 1436532,
+            },
+            bytes_in: {
+              value: 12623680,
+            },
+            domain: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 0,
+              buckets: [
+                {
+                  key: 'samsungtv-livingroom.iot.sr.local.crowbird.com',
+                  doc_count: 1152,
+                  timestamp: {
+                    value: 1563857222000,
+                    value_as_string: '2019-07-23T04:47:02.000Z',
+                  },
+                },
+              ],
+            },
+            autonomous_system: {
+              doc_count: 0,
+              top_as: {
+                hits: {
+                  total: {
+                    value: 0,
+                    relation: 'eq',
+                  },
+                  max_score: null,
+                  hits: [],
+                },
+              },
+            },
+            location: {
+              doc_count: 0,
+              top_geo: {
+                hits: {
+                  total: {
+                    value: 0,
+                    relation: 'eq',
+                  },
+                  max_score: null,
+                  hits: [],
+                },
+              },
+            },
+          },
+          {
+            key: '63.88.73.13',
+            doc_count: 2,
+            bytes_out: {
+              value: 371918013,
+            },
+            bytes_in: {
+              value: 10957783,
+            },
+            domain: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 0,
+              buckets: [
+                {
+                  key: '13.73.88.63.ashburn.google-ggc.verizon.com',
+                  doc_count: 2,
+                  timestamp: {
+                    value: 1563849411000,
+                    value_as_string: '2019-07-23T02:36:51.000Z',
+                  },
+                },
+              ],
+            },
+            autonomous_system: {
+              doc_count: 2,
+              top_as: {
+                hits: {
+                  total: {
+                    value: 2,
+                    relation: 'eq',
+                  },
+                  max_score: 2,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: '1g2SHGwBQrvXogooCGa0',
+                      _score: 2,
+                      _source: {
+                        source: {
+                          as: {
+                            org: 'MCI Communications Services, Inc. d/b/a Verizon Business',
+                            num: 701,
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+            location: {
+              doc_count: 2,
+              top_geo: {
+                hits: {
+                  total: {
+                    value: 2,
+                    relation: 'eq',
+                  },
+                  max_score: 2,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: '1g2SHGwBQrvXogooCGa0',
+                      _score: 2,
+                      _source: {
+                        source: {
+                          geo: {
+                            continent_name: 'North America',
+                            city_name: '',
+                            country_iso_code: 'US',
+                            location: {
+                              lon: -97.822,
+                              lat: 37.751,
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          },
+          {
+            key: '10.100.7.199',
+            doc_count: 5375,
+            bytes_out: {
+              value: 7769689,
+            },
+            bytes_in: {
+              value: 10516829,
+            },
+            domain: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 0,
+              buckets: [
+                {
+                  key: 'smartthings-hub.iot.sr.local.crowbird.com',
+                  doc_count: 5375,
+                  timestamp: {
+                    value: 1563895788000,
+                    value_as_string: '2019-07-23T15:29:48.000Z',
+                  },
+                },
+              ],
+            },
+            autonomous_system: {
+              doc_count: 0,
+              top_as: {
+                hits: {
+                  total: {
+                    value: 0,
+                    relation: 'eq',
+                  },
+                  max_score: null,
+                  hits: [],
+                },
+              },
+            },
+            location: {
+              doc_count: 0,
+              top_geo: {
+                hits: {
+                  total: {
+                    value: 0,
+                    relation: 'eq',
+                  },
+                  max_score: null,
+                  hits: [],
+                },
+              },
+            },
+          },
+          {
+            key: '63.88.73.76',
+            doc_count: 1,
+            bytes_out: {
+              value: 3779257,
+            },
+            bytes_in: {
+              value: 137920,
+            },
+            domain: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 0,
+              buckets: [
+                {
+                  key: '76.73.88.63.ashburn.google-ggc.verizon.com',
+                  doc_count: 1,
+                  timestamp: {
+                    value: 1563840984000,
+                    value_as_string: '2019-07-23T00:16:24.000Z',
+                  },
+                },
+                {
+                  key: 'r1---sn-8xgp1vo-p5ql.googlevideo.com',
+                  doc_count: 1,
+                  timestamp: {
+                    value: 1563840984000,
+                    value_as_string: '2019-07-23T00:16:24.000Z',
+                  },
+                },
+              ],
+            },
+            autonomous_system: {
+              doc_count: 1,
+              top_as: {
+                hits: {
+                  total: {
+                    value: 1,
+                    relation: 'eq',
+                  },
+                  max_score: 2,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'rQkvHGwBQrvXogoowmNW',
+                      _score: 2,
+                      _source: {
+                        source: {
+                          as: {
+                            org: 'MCI Communications Services, Inc. d/b/a Verizon Business',
+                            num: 701,
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+            location: {
+              doc_count: 1,
+              top_geo: {
+                hits: {
+                  total: {
+                    value: 1,
+                    relation: 'eq',
+                  },
+                  max_score: 2,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'rQkvHGwBQrvXogoowmNW',
+                      _score: 2,
+                      _source: {
+                        source: {
+                          geo: {
+                            continent_name: 'North America',
+                            city_name: '',
+                            country_iso_code: 'US',
+                            location: {
+                              lon: -97.822,
+                              lat: 37.751,
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          },
+          {
+            key: '10.100.7.254',
+            doc_count: 55,
+            bytes_out: {
+              value: 29444,
+            },
+            bytes_in: {
+              value: 25535,
+            },
+            domain: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 0,
+              buckets: [],
+            },
+            autonomous_system: {
+              doc_count: 0,
+              top_as: {
+                hits: {
+                  total: {
+                    value: 0,
+                    relation: 'eq',
+                  },
+                  max_score: null,
+                  hits: [],
+                },
+              },
+            },
+            location: {
+              doc_count: 0,
+              top_geo: {
+                hits: {
+                  total: {
+                    value: 0,
+                    relation: 'eq',
+                  },
+                  max_score: null,
+                  hits: [],
+                },
+              },
+            },
+          },
+          {
+            key: '10.100.7.198',
+            doc_count: 66,
+            bytes_out: {
+              value: 29940,
+            },
+            bytes_in: {
+              value: 19188,
+            },
+            domain: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 0,
+              buckets: [
+                {
+                  key: 'nest-frontdoor.iot.sr.local.crowbird.com',
+                  doc_count: 66,
+                  timestamp: {
+                    value: 1563894885000,
+                    value_as_string: '2019-07-23T15:14:45.000Z',
+                  },
+                },
+              ],
+            },
+            autonomous_system: {
+              doc_count: 0,
+              top_as: {
+                hits: {
+                  total: {
+                    value: 0,
+                    relation: 'eq',
+                  },
+                  max_score: null,
+                  hits: [],
+                },
+              },
+            },
+            location: {
+              doc_count: 0,
+              top_geo: {
+                hits: {
+                  total: {
+                    value: 0,
+                    relation: 'eq',
+                  },
+                  max_score: null,
+                  hits: [],
+                },
+              },
+            },
+          },
+          {
+            key: '17.249.108.26',
+            doc_count: 47,
+            bytes_out: {
+              value: 11806,
+            },
+            bytes_in: {
+              value: 12861,
+            },
+            domain: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 0,
+              buckets: [],
+            },
+            autonomous_system: {
+              doc_count: 47,
+              top_as: {
+                hits: {
+                  total: {
+                    value: 47,
+                    relation: 'eq',
+                  },
+                  max_score: 2,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'lSDhHmwBQrvXogootVJ6',
+                      _score: 2,
+                      _source: {
+                        source: {
+                          as: {
+                            org: 'Apple Inc.',
+                            num: 714,
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+            location: {
+              doc_count: 47,
+              top_geo: {
+                hits: {
+                  total: {
+                    value: 47,
+                    relation: 'eq',
+                  },
+                  max_score: 2,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'lSDhHmwBQrvXogootVJ6',
+                      _score: 2,
+                      _source: {
+                        source: {
+                          geo: {
+                            continent_name: 'North America',
+                            city_name: '',
+                            country_iso_code: 'US',
+                            location: {
+                              lon: -97.822,
+                              lat: 37.751,
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          },
+        ],
+      },
+      top_n_flow_count: {
+        value: 26,
+      },
+    },
+  },
+  'source-unified': {
+    took: 25,
+    timed_out: false,
+    _shards: {
+      total: 28,
+      successful: 28,
+      skipped: 0,
+      failed: 0,
+    },
+    hits: {
+      max_score: null,
+      hits: [],
+    },
+    aggregations: {
+      source: {
+        doc_count_error_upper_bound: -1,
+        sum_other_doc_count: 412950,
+        buckets: [
+          {
+            key: '10.100.7.196',
+            doc_count: 14286,
+            bytes_out: {
+              value: 159695109,
+            },
+            bytes_in: {
+              value: 9432675526,
+            },
+            domain: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 0,
+              buckets: [
+                {
+                  key: 'samsungtv-kitchen.iot.sr.local.crowbird.com',
+                  doc_count: 14286,
+                  timestamp: {
+                    value: 1563844810000,
+                    value_as_string: '2019-07-23T01:20:10.000Z',
+                  },
+                },
+              ],
+            },
+            autonomous_system: {
+              doc_count: 0,
+              top_as: {
+                hits: {
+                  total: {
+                    value: 0,
+                    relation: 'eq',
+                  },
+                  max_score: null,
+                  hits: [],
+                },
+              },
+            },
+            location: {
+              doc_count: 0,
+              top_geo: {
+                hits: {
+                  total: {
+                    value: 0,
+                    relation: 'eq',
+                  },
+                  max_score: null,
+                  hits: [],
+                },
+              },
+            },
+          },
+          {
+            key: '10.100.7.197',
+            doc_count: 5223,
+            bytes_out: {
+              value: 173651576,
+            },
+            bytes_in: {
+              value: 5385981151,
+            },
+            domain: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 0,
+              buckets: [
+                {
+                  key: 'appletv-livingroom.iot.sr.local.crowbird.com',
+                  doc_count: 5223,
+                  timestamp: {
+                    value: 1563895670002,
+                    value_as_string: '2019-07-23T15:27:50.002Z',
+                  },
+                },
+              ],
+            },
+            autonomous_system: {
+              doc_count: 0,
+              top_as: {
+                hits: {
+                  total: {
+                    value: 0,
+                    relation: 'eq',
+                  },
+                  max_score: null,
+                  hits: [],
+                },
+              },
+            },
+            location: {
+              doc_count: 0,
+              top_geo: {
+                hits: {
+                  total: {
+                    value: 0,
+                    relation: 'eq',
+                  },
+                  max_score: null,
+                  hits: [],
+                },
+              },
+            },
+          },
+          {
+            key: '10.0.2.15',
+            doc_count: 37,
+            bytes_out: {
+              value: 3388667,
+            },
+            bytes_in: {
+              value: 168814467,
+            },
+            domain: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 0,
+              buckets: [],
+            },
+            autonomous_system: {
+              doc_count: 0,
+              top_as: {
+                hits: {
+                  total: {
+                    value: 0,
+                    relation: 'eq',
+                  },
+                  max_score: null,
+                  hits: [],
+                },
+              },
+            },
+            location: {
+              doc_count: 0,
+              top_geo: {
+                hits: {
+                  total: {
+                    value: 0,
+                    relation: 'eq',
+                  },
+                  max_score: null,
+                  hits: [],
+                },
+              },
+            },
+          },
+          {
+            key: '10.100.7.195',
+            doc_count: 5502,
+            bytes_out: {
+              value: 1453152,
+            },
+            bytes_in: {
+              value: 12624784,
+            },
+            domain: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 0,
+              buckets: [
+                {
+                  key: 'samsungtv-livingroom.iot.sr.local.crowbird.com',
+                  doc_count: 5502,
+                  timestamp: {
+                    value: 1563857222000,
+                    value_as_string: '2019-07-23T04:47:02.000Z',
+                  },
+                },
+              ],
+            },
+            autonomous_system: {
+              doc_count: 0,
+              top_as: {
+                hits: {
+                  total: {
+                    value: 0,
+                    relation: 'eq',
+                  },
+                  max_score: null,
+                  hits: [],
+                },
+              },
+            },
+            location: {
+              doc_count: 0,
+              top_geo: {
+                hits: {
+                  total: {
+                    value: 0,
+                    relation: 'eq',
+                  },
+                  max_score: null,
+                  hits: [],
+                },
+              },
+            },
+          },
+          {
+            key: '63.88.73.13',
+            doc_count: 73,
+            bytes_out: {
+              value: 371918013,
+            },
+            bytes_in: {
+              value: 10957783,
+            },
+            domain: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 0,
+              buckets: [
+                {
+                  key: '13.73.88.63.ashburn.google-ggc.verizon.com',
+                  doc_count: 73,
+                  timestamp: {
+                    value: 1563849411000,
+                    value_as_string: '2019-07-23T02:36:51.000Z',
+                  },
+                },
+                {
+                  key: 'r2---sn-8xgp1vo-p5qe.googlevideo.com',
+                  doc_count: 8,
+                  timestamp: {
+                    value: 1563848936000,
+                    value_as_string: '2019-07-23T02:28:56.000Z',
+                  },
+                },
+                {
+                  key: 'r2.sn-8xgp1vo-p5qe.googlevideo.com',
+                  doc_count: 4,
+                  timestamp: {
+                    value: 1563848653000,
+                    value_as_string: '2019-07-23T02:24:13.000Z',
+                  },
+                },
+              ],
+            },
+            autonomous_system: {
+              doc_count: 73,
+              top_as: {
+                hits: {
+                  total: {
+                    value: 73,
+                    relation: 'eq',
+                  },
+                  max_score: 0,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'TQyGHGwBQrvXogooU_32',
+                      _score: 0,
+                      _source: {
+                        source: {
+                          as: {
+                            number: 701,
+                            organization: {
+                              name: 'MCI Communications Services, Inc. d/b/a Verizon Business',
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+            location: {
+              doc_count: 73,
+              top_geo: {
+                hits: {
+                  total: {
+                    value: 73,
+                    relation: 'eq',
+                  },
+                  max_score: 0,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'TQyGHGwBQrvXogooU_32',
+                      _score: 0,
+                      _source: {
+                        source: {
+                          geo: {
+                            continent_name: 'North America',
+                            city_name: '',
+                            country_iso_code: 'US',
+                            location: {
+                              lon: -97.822,
+                              lat: 37.751,
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          },
+          {
+            key: '10.100.7.199',
+            doc_count: 13469,
+            bytes_out: {
+              value: 7796905,
+            },
+            bytes_in: {
+              value: 10518816,
+            },
+            domain: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 0,
+              buckets: [
+                {
+                  key: 'smartthings-hub.iot.sr.local.crowbird.com',
+                  doc_count: 13469,
+                  timestamp: {
+                    value: 1563895788000,
+                    value_as_string: '2019-07-23T15:29:48.000Z',
+                  },
+                },
+              ],
+            },
+            autonomous_system: {
+              doc_count: 0,
+              top_as: {
+                hits: {
+                  total: {
+                    value: 0,
+                    relation: 'eq',
+                  },
+                  max_score: null,
+                  hits: [],
+                },
+              },
+            },
+            location: {
+              doc_count: 0,
+              top_geo: {
+                hits: {
+                  total: {
+                    value: 0,
+                    relation: 'eq',
+                  },
+                  max_score: null,
+                  hits: [],
+                },
+              },
+            },
+          },
+          {
+            key: '63.88.73.76',
+            doc_count: 106,
+            bytes_out: {
+              value: 3779257,
+            },
+            bytes_in: {
+              value: 137920,
+            },
+            domain: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 0,
+              buckets: [
+                {
+                  key: '76.73.88.63.ashburn.google-ggc.verizon.com',
+                  doc_count: 106,
+                  timestamp: {
+                    value: 1563855851000,
+                    value_as_string: '2019-07-23T04:24:11.000Z',
+                  },
+                },
+                {
+                  key: 'r1---sn-8xgp1vo-p5ql.googlevideo.com',
+                  doc_count: 44,
+                  timestamp: {
+                    value: 1563855531000,
+                    value_as_string: '2019-07-23T04:18:51.000Z',
+                  },
+                },
+                {
+                  key: 'r1.sn-8xgp1vo-p5ql.googlevideo.com',
+                  doc_count: 12,
+                  timestamp: {
+                    value: 1563855248000,
+                    value_as_string: '2019-07-23T04:14:08.000Z',
+                  },
+                },
+              ],
+            },
+            autonomous_system: {
+              doc_count: 106,
+              top_as: {
+                hits: {
+                  total: {
+                    value: 106,
+                    relation: 'eq',
+                  },
+                  max_score: 0,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: '8xEOHWwBQrvXogootLGE',
+                      _score: 0,
+                      _source: {
+                        source: {
+                          as: {
+                            number: 701,
+                            organization: {
+                              name: 'MCI Communications Services, Inc. d/b/a Verizon Business',
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+            location: {
+              doc_count: 106,
+              top_geo: {
+                hits: {
+                  total: {
+                    value: 106,
+                    relation: 'eq',
+                  },
+                  max_score: 0,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: '8xEOHWwBQrvXogootLGE',
+                      _score: 0,
+                      _source: {
+                        source: {
+                          geo: {
+                            continent_name: 'North America',
+                            city_name: '',
+                            country_iso_code: 'US',
+                            location: {
+                              lon: -97.822,
+                              lat: 37.751,
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          },
+          {
+            key: '10.100.7.254',
+            doc_count: 1560,
+            bytes_out: {
+              value: 55200,
+            },
+            bytes_in: {
+              value: 25535,
+            },
+            domain: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 0,
+              buckets: [],
+            },
+            autonomous_system: {
+              doc_count: 0,
+              top_as: {
+                hits: {
+                  total: {
+                    value: 0,
+                    relation: 'eq',
+                  },
+                  max_score: null,
+                  hits: [],
+                },
+              },
+            },
+            location: {
+              doc_count: 0,
+              top_geo: {
+                hits: {
+                  total: {
+                    value: 0,
+                    relation: 'eq',
+                  },
+                  max_score: null,
+                  hits: [],
+                },
+              },
+            },
+          },
+          {
+            key: '10.100.7.198',
+            doc_count: 1566,
+            bytes_out: {
+              value: 56244,
+            },
+            bytes_in: {
+              value: 19188,
+            },
+            domain: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 0,
+              buckets: [
+                {
+                  key: 'nest-frontdoor.iot.sr.local.crowbird.com',
+                  doc_count: 1566,
+                  timestamp: {
+                    value: 1563895792000,
+                    value_as_string: '2019-07-23T15:29:52.000Z',
+                  },
+                },
+              ],
+            },
+            autonomous_system: {
+              doc_count: 0,
+              top_as: {
+                hits: {
+                  total: {
+                    value: 0,
+                    relation: 'eq',
+                  },
+                  max_score: null,
+                  hits: [],
+                },
+              },
+            },
+            location: {
+              doc_count: 0,
+              top_geo: {
+                hits: {
+                  total: {
+                    value: 0,
+                    relation: 'eq',
+                  },
+                  max_score: null,
+                  hits: [],
+                },
+              },
+            },
+          },
+          {
+            key: '52.44.137.93',
+            doc_count: 1,
+            bytes_out: {
+              value: 0,
+            },
+            bytes_in: {
+              value: 17476,
+            },
+            domain: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 0,
+              buckets: [
+                {
+                  key: 'appboot.netflix.com',
+                  doc_count: 1,
+                  timestamp: {
+                    value: 1563840681249,
+                    value_as_string: '2019-07-23T00:11:21.249Z',
+                  },
+                },
+                {
+                  key: 'ec2-52-44-137-93.compute-1.amazonaws.com',
+                  doc_count: 1,
+                  timestamp: {
+                    value: 1563840681249,
+                    value_as_string: '2019-07-23T00:11:21.249Z',
+                  },
+                },
+              ],
+            },
+            autonomous_system: {
+              doc_count: 1,
+              top_as: {
+                hits: {
+                  total: {
+                    value: 1,
+                    relation: 'eq',
+                  },
+                  max_score: 0,
+                  hits: [
+                    {
+                      _index: 'packetbeat-8.0.0-2019.06.25-000009',
+                      _type: '_doc',
+                      _id: 'vQkrHGwBQrvXogooHCqH',
+                      _score: 0,
+                      _source: {
+                        source: {
+                          as: {
+                            org: 'Amazon.com, Inc.',
+                            num: 14618,
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+            location: {
+              doc_count: 1,
+              top_geo: {
+                hits: {
+                  total: {
+                    value: 1,
+                    relation: 'eq',
+                  },
+                  max_score: 0,
+                  hits: [
+                    {
+                      _index: 'packetbeat-8.0.0-2019.06.25-000009',
+                      _type: '_doc',
+                      _id: 'vQkrHGwBQrvXogooHCqH',
+                      _score: 0,
+                      _source: {
+                        source: {
+                          geo: {
+                            continent_name: 'North America',
+                            city_name: 'Ashburn',
+                            country_iso_code: 'US',
+                            region_name: 'Virginia',
+                            location: {
+                              lon: -77.4728,
+                              lat: 39.0481,
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          },
+        ],
+      },
+      top_n_flow_count: {
+        value: 2319,
+      },
+    },
+  },
+  'destination-uni': {
+    took: 10,
+    timed_out: false,
+    _shards: {
+      total: 28,
+      successful: 28,
+      skipped: 0,
+      failed: 0,
+    },
+    hits: {
+      max_score: null,
+      hits: [],
+    },
+    aggregations: {
+      destination: {
+        doc_count_error_upper_bound: -1,
+        sum_other_doc_count: 33672,
+        buckets: [
+          {
+            key: '10.142.0.9',
+            doc_count: 501,
+            bytes_out: {
+              value: 0,
+            },
+            bytes_in: {
+              value: 36321426479,
+            },
+            domain: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 0,
+              buckets: [
+                {
+                  key: 'simianhacker-demo',
+                  doc_count: 501,
+                  timestamp: {
+                    value: 1563895220351,
+                    value_as_string: '2019-07-23T15:20:20.351Z',
+                  },
+                },
+              ],
+            },
+            autonomous_system: {
+              doc_count: 0,
+              top_as: {
+                hits: {
+                  total: {
+                    value: 0,
+                    relation: 'eq',
+                  },
+                  max_score: null,
+                  hits: [],
+                },
+              },
+            },
+            location: {
+              doc_count: 0,
+              top_geo: {
+                hits: {
+                  total: {
+                    value: 0,
+                    relation: 'eq',
+                  },
+                  max_score: null,
+                  hits: [],
+                },
+              },
+            },
+          },
+          {
+            key: '104.198.38.169',
+            doc_count: 145,
+            bytes_out: {
+              value: 0,
+            },
+            bytes_in: {
+              value: 29402384765,
+            },
+            domain: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 0,
+              buckets: [],
+            },
+            autonomous_system: {
+              doc_count: 145,
+              top_as: {
+                hits: {
+                  total: {
+                    value: 145,
+                    relation: 'eq',
+                  },
+                  max_score: 1,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'dd4fa2d4bd-692282652449767',
+                      _score: 1,
+                      _source: {
+                        destination: {
+                          as: {
+                            number: 15169,
+                            organization: {
+                              name: 'Google LLC',
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+            location: {
+              doc_count: 145,
+              top_geo: {
+                hits: {
+                  total: {
+                    value: 145,
+                    relation: 'eq',
+                  },
+                  max_score: 1,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'dd4fa2d4bd-692282652449767',
+                      _score: 1,
+                      _source: {
+                        destination: {
+                          geo: {
+                            continent_name: 'North America',
+                            region_iso_code: 'US-VA',
+                            country_iso_code: 'US',
+                            region_name: 'Virginia',
+                            location: {
+                              lon: -77.2497,
+                              lat: 38.6582,
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          },
+          {
+            key: '10.142.0.10',
+            doc_count: 26468,
+            bytes_out: {
+              value: 0,
+            },
+            bytes_in: {
+              value: 7034783187,
+            },
+            domain: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 0,
+              buckets: [
+                {
+                  key: 'siem-es',
+                  doc_count: 26468,
+                  timestamp: {
+                    value: 1563895220357,
+                    value_as_string: '2019-07-23T15:20:20.357Z',
+                  },
+                },
+              ],
+            },
+            autonomous_system: {
+              doc_count: 0,
+              top_as: {
+                hits: {
+                  total: {
+                    value: 0,
+                    relation: 'eq',
+                  },
+                  max_score: null,
+                  hits: [],
+                },
+              },
+            },
+            location: {
+              doc_count: 0,
+              top_geo: {
+                hits: {
+                  total: {
+                    value: 0,
+                    relation: 'eq',
+                  },
+                  max_score: null,
+                  hits: [],
+                },
+              },
+            },
+          },
+          {
+            key: '10.142.0.7',
+            doc_count: 16550,
+            bytes_out: {
+              value: 0,
+            },
+            bytes_in: {
+              value: 2361869470,
+            },
+            domain: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 0,
+              buckets: [
+                {
+                  key: 'siem-kibana',
+                  doc_count: 16550,
+                  timestamp: {
+                    value: 1563895220357,
+                    value_as_string: '2019-07-23T15:20:20.357Z',
+                  },
+                },
+              ],
+            },
+            autonomous_system: {
+              doc_count: 0,
+              top_as: {
+                hits: {
+                  total: {
+                    value: 0,
+                    relation: 'eq',
+                  },
+                  max_score: null,
+                  hits: [],
+                },
+              },
+            },
+            location: {
+              doc_count: 0,
+              top_geo: {
+                hits: {
+                  total: {
+                    value: 0,
+                    relation: 'eq',
+                  },
+                  max_score: null,
+                  hits: [],
+                },
+              },
+            },
+          },
+          {
+            key: '35.196.73.82',
+            doc_count: 6484,
+            bytes_out: {
+              value: 0,
+            },
+            bytes_in: {
+              value: 1231689482,
+            },
+            domain: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 0,
+              buckets: [
+                {
+                  key: 'siem-kibana',
+                  doc_count: 6484,
+                  timestamp: {
+                    value: 1563895220357,
+                    value_as_string: '2019-07-23T15:20:20.357Z',
+                  },
+                },
+              ],
+            },
+            autonomous_system: {
+              doc_count: 6484,
+              top_as: {
+                hits: {
+                  total: {
+                    value: 6484,
+                    relation: 'eq',
+                  },
+                  max_score: 1,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'dd4fa2d4bd-692282652449754',
+                      _score: 1,
+                      _source: {
+                        destination: {
+                          as: {
+                            number: 15169,
+                            organization: {
+                              name: 'Google LLC',
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+            location: {
+              doc_count: 6484,
+              top_geo: {
+                hits: {
+                  total: {
+                    value: 6484,
+                    relation: 'eq',
+                  },
+                  max_score: 1,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'dd4fa2d4bd-692282652449754',
+                      _score: 1,
+                      _source: {
+                        destination: {
+                          geo: {
+                            continent_name: 'North America',
+                            region_iso_code: 'US-VA',
+                            country_iso_code: 'US',
+                            region_name: 'Virginia',
+                            location: {
+                              lon: -77.2497,
+                              lat: 38.6582,
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          },
+          {
+            key: '35.227.125.33',
+            doc_count: 6640,
+            bytes_out: {
+              value: 0,
+            },
+            bytes_in: {
+              value: 802811843,
+            },
+            domain: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 0,
+              buckets: [
+                {
+                  key: 'siem-es',
+                  doc_count: 6640,
+                  timestamp: {
+                    value: 1563895220357,
+                    value_as_string: '2019-07-23T15:20:20.357Z',
+                  },
+                },
+              ],
+            },
+            autonomous_system: {
+              doc_count: 6640,
+              top_as: {
+                hits: {
+                  total: {
+                    value: 6640,
+                    relation: 'eq',
+                  },
+                  max_score: 1,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'dd4fa2d4bd-692282652449752',
+                      _score: 1,
+                      _source: {
+                        destination: {
+                          as: {
+                            number: 15169,
+                            organization: {
+                              name: 'Google LLC',
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+            location: {
+              doc_count: 6640,
+              top_geo: {
+                hits: {
+                  total: {
+                    value: 6640,
+                    relation: 'eq',
+                  },
+                  max_score: 1,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'dd4fa2d4bd-692282652449752',
+                      _score: 1,
+                      _source: {
+                        destination: {
+                          geo: {
+                            continent_name: 'North America',
+                            region_iso_code: 'US-VA',
+                            country_iso_code: 'US',
+                            region_name: 'Virginia',
+                            location: {
+                              lon: -77.2497,
+                              lat: 38.6582,
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          },
+          {
+            key: '34.213.68.235',
+            doc_count: 144,
+            bytes_out: {
+              value: 0,
+            },
+            bytes_in: {
+              value: 311637700,
+            },
+            domain: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 0,
+              buckets: [],
+            },
+            autonomous_system: {
+              doc_count: 144,
+              top_as: {
+                hits: {
+                  total: {
+                    value: 144,
+                    relation: 'eq',
+                  },
+                  max_score: 1,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'dd4fa2d4bd-692274036894083',
+                      _score: 1,
+                      _source: {
+                        destination: {
+                          as: {
+                            number: 16509,
+                            organization: {
+                              name: 'Amazon.com, Inc.',
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+            location: {
+              doc_count: 144,
+              top_geo: {
+                hits: {
+                  total: {
+                    value: 144,
+                    relation: 'eq',
+                  },
+                  max_score: 1,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'dd4fa2d4bd-692274036894083',
+                      _score: 1,
+                      _source: {
+                        destination: {
+                          geo: {
+                            continent_name: 'North America',
+                            region_iso_code: 'US-OR',
+                            city_name: 'Boardman',
+                            country_iso_code: 'US',
+                            region_name: 'Oregon',
+                            location: {
+                              lon: -119.688,
+                              lat: 45.8696,
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          },
+          {
+            key: '67.173.227.94',
+            doc_count: 6145,
+            bytes_out: {
+              value: 0,
+            },
+            bytes_in: {
+              value: 210521475,
+            },
+            domain: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 0,
+              buckets: [],
+            },
+            autonomous_system: {
+              doc_count: 6145,
+              top_as: {
+                hits: {
+                  total: {
+                    value: 6145,
+                    relation: 'eq',
+                  },
+                  max_score: 1,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'dd4fa2d4bd-692282652449758',
+                      _score: 1,
+                      _source: {
+                        destination: {
+                          as: {
+                            number: 7922,
+                            organization: {
+                              name: 'Comcast Cable Communications, LLC',
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+            location: {
+              doc_count: 6145,
+              top_geo: {
+                hits: {
+                  total: {
+                    value: 6145,
+                    relation: 'eq',
+                  },
+                  max_score: 1,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'dd4fa2d4bd-692282652449758',
+                      _score: 1,
+                      _source: {
+                        destination: {
+                          geo: {
+                            continent_name: 'North America',
+                            region_iso_code: 'US-CO',
+                            city_name: 'Lafayette',
+                            country_iso_code: 'US',
+                            region_name: 'Colorado',
+                            location: {
+                              lon: -105.1076,
+                              lat: 40.0153,
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          },
+          {
+            key: '104.197.128.48',
+            doc_count: 2485,
+            bytes_out: {
+              value: 0,
+            },
+            bytes_in: {
+              value: 121938054,
+            },
+            domain: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 0,
+              buckets: [],
+            },
+            autonomous_system: {
+              doc_count: 2485,
+              top_as: {
+                hits: {
+                  total: {
+                    value: 2485,
+                    relation: 'eq',
+                  },
+                  max_score: 1,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'dd4fa2d4bd-692282652449749',
+                      _score: 1,
+                      _source: {
+                        destination: {
+                          as: {
+                            number: 15169,
+                            organization: {
+                              name: 'Google LLC',
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+            location: {
+              doc_count: 2485,
+              top_geo: {
+                hits: {
+                  total: {
+                    value: 2485,
+                    relation: 'eq',
+                  },
+                  max_score: 1,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'dd4fa2d4bd-692282652449749',
+                      _score: 1,
+                      _source: {
+                        destination: {
+                          geo: {
+                            continent_name: 'North America',
+                            region_iso_code: 'US-VA',
+                            country_iso_code: 'US',
+                            region_name: 'Virginia',
+                            location: {
+                              lon: -77.2497,
+                              lat: 38.6582,
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          },
+          {
+            key: '72.86.47.26',
+            doc_count: 3121,
+            bytes_out: {
+              value: 0,
+            },
+            bytes_in: {
+              value: 121213928,
+            },
+            domain: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 0,
+              buckets: [],
+            },
+            autonomous_system: {
+              doc_count: 3121,
+              top_as: {
+                hits: {
+                  total: {
+                    value: 3121,
+                    relation: 'eq',
+                  },
+                  max_score: 1,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'dd4fa2d4bd-692302114930502',
+                      _score: 1,
+                      _source: {
+                        destination: {
+                          as: {
+                            number: 701,
+                            organization: {
+                              name: 'MCI Communications Services, Inc. d/b/a Verizon Business',
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+            location: {
+              doc_count: 3121,
+              top_geo: {
+                hits: {
+                  total: {
+                    value: 3121,
+                    relation: 'eq',
+                  },
+                  max_score: 1,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'dd4fa2d4bd-692302114930502',
+                      _score: 1,
+                      _source: {
+                        destination: {
+                          geo: {
+                            continent_name: 'North America',
+                            region_iso_code: 'US-VA',
+                            city_name: 'Leesburg',
+                            country_iso_code: 'US',
+                            region_name: 'Virginia',
+                            location: {
+                              lon: -77.5326,
+                              lat: 39.1748,
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          },
+        ],
+      },
+      top_n_flow_count: {
+        value: 1477,
+      },
+    },
+  },
+  'destination-bi': {
+    took: 13,
+    timed_out: false,
+    _shards: {
+      total: 28,
+      successful: 28,
+      skipped: 0,
+      failed: 0,
+    },
+    hits: {
+      max_score: null,
+      hits: [],
+    },
+    aggregations: {
+      destination: {
+        doc_count_error_upper_bound: -1,
+        sum_other_doc_count: 10077,
+        buckets: [
+          {
+            key: '10.100.7.197',
+            doc_count: 54,
+            bytes_out: {
+              value: 10977897,
+            },
+            bytes_in: {
+              value: 372031697,
+            },
+            domain: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 0,
+              buckets: [
+                {
+                  key: 'appletv-livingroom.iot.sr.local.crowbird.com',
+                  doc_count: 54,
+                  timestamp: {
+                    value: 1563895208003,
+                    value_as_string: '2019-07-23T15:20:08.003Z',
+                  },
+                },
+              ],
+            },
+            autonomous_system: {
+              doc_count: 0,
+              top_as: {
+                hits: {
+                  total: {
+                    value: 0,
+                    relation: 'eq',
+                  },
+                  max_score: null,
+                  hits: [],
+                },
+              },
+            },
+            location: {
+              doc_count: 0,
+              top_geo: {
+                hits: {
+                  total: {
+                    value: 0,
+                    relation: 'eq',
+                  },
+                  max_score: null,
+                  hits: [],
+                },
+              },
+            },
+          },
+          {
+            key: '63.88.73.76',
+            doc_count: 34,
+            bytes_out: {
+              value: 1841364423,
+            },
+            bytes_in: {
+              value: 61391425,
+            },
+            domain: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 0,
+              buckets: [
+                {
+                  key: '76.73.88.63.ashburn.google-ggc.verizon.com',
+                  doc_count: 34,
+                  timestamp: {
+                    value: 1563855852000,
+                    value_as_string: '2019-07-23T04:24:12.000Z',
+                  },
+                },
+                {
+                  key: 'r1---sn-8xgp1vo-p5ql.googlevideo.com',
+                  doc_count: 17,
+                  timestamp: {
+                    value: 1563855505000,
+                    value_as_string: '2019-07-23T04:18:25.000Z',
+                  },
+                },
+                {
+                  key: 'r1.sn-8xgp1vo-p5ql.googlevideo.com',
+                  doc_count: 5,
+                  timestamp: {
+                    value: 1563855141000,
+                    value_as_string: '2019-07-23T04:12:21.000Z',
+                  },
+                },
+              ],
+            },
+            autonomous_system: {
+              doc_count: 34,
+              top_as: {
+                hits: {
+                  total: {
+                    value: 34,
+                    relation: 'eq',
+                  },
+                  max_score: 2,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: '2xEOHWwBQrvXogoowLJh',
+                      _score: 2,
+                      _source: {
+                        destination: {
+                          as: {
+                            org: 'MCI Communications Services, Inc. d/b/a Verizon Business',
+                            num: 701,
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+            location: {
+              doc_count: 34,
+              top_geo: {
+                hits: {
+                  total: {
+                    value: 34,
+                    relation: 'eq',
+                  },
+                  max_score: 2,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: '2xEOHWwBQrvXogoowLJh',
+                      _score: 2,
+                      _source: {
+                        destination: {
+                          geo: {
+                            continent_name: 'North America',
+                            city_name: '',
+                            country_iso_code: 'US',
+                            location: {
+                              lon: -97.822,
+                              lat: 37.751,
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          },
+          {
+            key: '63.88.73.17',
+            doc_count: 18,
+            bytes_out: {
+              value: 1881475715,
+            },
+            bytes_in: {
+              value: 54057925,
+            },
+            domain: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 0,
+              buckets: [
+                {
+                  key: '17.73.88.63.ashburn.google-ggc.verizon.com',
+                  doc_count: 18,
+                  timestamp: {
+                    value: 1563853477000,
+                    value_as_string: '2019-07-23T03:44:37.000Z',
+                  },
+                },
+                {
+                  key: 'r6---sn-8xgp1vo-p5qe.googlevideo.com',
+                  doc_count: 3,
+                  timestamp: {
+                    value: 1563852138000,
+                    value_as_string: '2019-07-23T03:22:18.000Z',
+                  },
+                },
+              ],
+            },
+            autonomous_system: {
+              doc_count: 18,
+              top_as: {
+                hits: {
+                  total: {
+                    value: 18,
+                    relation: 'eq',
+                  },
+                  max_score: 2,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'uxDuHGwBQrvXogooY5tK',
+                      _score: 2,
+                      _source: {
+                        destination: {
+                          as: {
+                            org: 'MCI Communications Services, Inc. d/b/a Verizon Business',
+                            num: 701,
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+            location: {
+              doc_count: 18,
+              top_geo: {
+                hits: {
+                  total: {
+                    value: 18,
+                    relation: 'eq',
+                  },
+                  max_score: 2,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'uxDuHGwBQrvXogooY5tK',
+                      _score: 2,
+                      _source: {
+                        destination: {
+                          geo: {
+                            continent_name: 'North America',
+                            city_name: '',
+                            country_iso_code: 'US',
+                            location: {
+                              lon: -97.822,
+                              lat: 37.751,
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          },
+          {
+            key: '45.57.63.168',
+            doc_count: 5,
+            bytes_out: {
+              value: 2495262552,
+            },
+            bytes_in: {
+              value: 39482002,
+            },
+            domain: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 0,
+              buckets: [
+                {
+                  key: 'ipv4_1.mce0.c102.was001.ix.nflxvideo.net',
+                  doc_count: 5,
+                  timestamp: {
+                    value: 1563836193000,
+                    value_as_string: '2019-07-22T22:56:33.000Z',
+                  },
+                },
+                {
+                  key: 'ipv4-c102-was001-ix.1.oca.nflxvideo.net',
+                  doc_count: 1,
+                  timestamp: {
+                    value: 1563832955000,
+                    value_as_string: '2019-07-22T22:02:35.000Z',
+                  },
+                },
+              ],
+            },
+            autonomous_system: {
+              doc_count: 5,
+              top_as: {
+                hits: {
+                  total: {
+                    value: 5,
+                    relation: 'eq',
+                  },
+                  max_score: 2,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'jQbkG2wBQrvXogoorXVG',
+                      _score: 2,
+                      _source: {
+                        destination: {
+                          as: {
+                            org: 'Netflix Streaming Services Inc.',
+                            num: 2906,
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+            location: {
+              doc_count: 5,
+              top_geo: {
+                hits: {
+                  total: {
+                    value: 5,
+                    relation: 'eq',
+                  },
+                  max_score: 2,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'jQbkG2wBQrvXogoorXVG',
+                      _score: 2,
+                      _source: {
+                        destination: {
+                          geo: {
+                            continent_name: 'North America',
+                            city_name: '',
+                            country_iso_code: 'US',
+                            location: {
+                              lon: -97.822,
+                              lat: 37.751,
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          },
+          {
+            key: '45.57.62.188',
+            doc_count: 9,
+            bytes_out: {
+              value: 2617096335,
+            },
+            bytes_in: {
+              value: 37344825,
+            },
+            domain: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 0,
+              buckets: [
+                {
+                  key: 'ipv4_1.mce0.c086.was001.ix.nflxvideo.net',
+                  doc_count: 9,
+                  timestamp: {
+                    value: 1563839425001,
+                    value_as_string: '2019-07-22T23:50:25.001Z',
+                  },
+                },
+                {
+                  key: 'ipv4-c086-was001-ix.1.oca.nflxvideo.net',
+                  doc_count: 2,
+                  timestamp: {
+                    value: 1563835899000,
+                    value_as_string: '2019-07-22T22:51:39.000Z',
+                  },
+                },
+              ],
+            },
+            autonomous_system: {
+              doc_count: 9,
+              top_as: {
+                hits: {
+                  total: {
+                    value: 9,
+                    relation: 'eq',
+                  },
+                  max_score: 2,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: '6wboG2wBQrvXogoozZ7P',
+                      _score: 2,
+                      _source: {
+                        destination: {
+                          as: {
+                            org: 'Netflix Streaming Services Inc.',
+                            num: 2906,
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+            location: {
+              doc_count: 9,
+              top_geo: {
+                hits: {
+                  total: {
+                    value: 9,
+                    relation: 'eq',
+                  },
+                  max_score: 2,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: '6wboG2wBQrvXogoozZ7P',
+                      _score: 2,
+                      _source: {
+                        destination: {
+                          geo: {
+                            continent_name: 'North America',
+                            city_name: '',
+                            country_iso_code: 'US',
+                            location: {
+                              lon: -97.822,
+                              lat: 37.751,
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          },
+          {
+            key: '63.88.73.13',
+            doc_count: 24,
+            bytes_out: {
+              value: 1135948050,
+            },
+            bytes_in: {
+              value: 33714266,
+            },
+            domain: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 0,
+              buckets: [
+                {
+                  key: '13.73.88.63.ashburn.google-ggc.verizon.com',
+                  doc_count: 24,
+                  timestamp: {
+                    value: 1563849342000,
+                    value_as_string: '2019-07-23T02:35:42.000Z',
+                  },
+                },
+                {
+                  key: 'r2.sn-8xgp1vo-p5qe.googlevideo.com',
+                  doc_count: 2,
+                  timestamp: {
+                    value: 1563848655000,
+                    value_as_string: '2019-07-23T02:24:15.000Z',
+                  },
+                },
+                {
+                  key: 'r2---sn-8xgp1vo-p5qe.googlevideo.com',
+                  doc_count: 3,
+                  timestamp: {
+                    value: 1563846818000,
+                    value_as_string: '2019-07-23T01:53:38.000Z',
+                  },
+                },
+              ],
+            },
+            autonomous_system: {
+              doc_count: 24,
+              top_as: {
+                hits: {
+                  total: {
+                    value: 24,
+                    relation: 'eq',
+                  },
+                  max_score: 2,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'uw2GHGwBQrvXogoo1gI7',
+                      _score: 2,
+                      _source: {
+                        destination: {
+                          as: {
+                            org: 'MCI Communications Services, Inc. d/b/a Verizon Business',
+                            num: 701,
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+            location: {
+              doc_count: 24,
+              top_geo: {
+                hits: {
+                  total: {
+                    value: 24,
+                    relation: 'eq',
+                  },
+                  max_score: 2,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'uw2GHGwBQrvXogoo1gI7',
+                      _score: 2,
+                      _source: {
+                        destination: {
+                          geo: {
+                            continent_name: 'North America',
+                            city_name: '',
+                            country_iso_code: 'US',
+                            location: {
+                              lon: -97.822,
+                              lat: 37.751,
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          },
+          {
+            key: '45.57.63.172',
+            doc_count: 16,
+            bytes_out: {
+              value: 2185412187,
+            },
+            bytes_in: {
+              value: 30971586,
+            },
+            domain: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 0,
+              buckets: [
+                {
+                  key: 'ipv4_1.mce0.c106.was001.ix.nflxvideo.net',
+                  doc_count: 16,
+                  timestamp: {
+                    value: 1563833785000,
+                    value_as_string: '2019-07-22T22:16:25.000Z',
+                  },
+                },
+                {
+                  key: 'ipv4-c106-was001-ix.1.oca.nflxvideo.net',
+                  doc_count: 14,
+                  timestamp: {
+                    value: 1563831109000,
+                    value_as_string: '2019-07-22T21:31:49.000Z',
+                  },
+                },
+              ],
+            },
+            autonomous_system: {
+              doc_count: 16,
+              top_as: {
+                hits: {
+                  total: {
+                    value: 16,
+                    relation: 'eq',
+                  },
+                  max_score: 2,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'HwTBG2wBQrvXogoo3d6J',
+                      _score: 2,
+                      _source: {
+                        destination: {
+                          as: {
+                            org: 'Netflix Streaming Services Inc.',
+                            num: 2906,
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+            location: {
+              doc_count: 16,
+              top_geo: {
+                hits: {
+                  total: {
+                    value: 16,
+                    relation: 'eq',
+                  },
+                  max_score: 2,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'HwTBG2wBQrvXogoo3d6J',
+                      _score: 2,
+                      _source: {
+                        destination: {
+                          geo: {
+                            continent_name: 'North America',
+                            city_name: '',
+                            country_iso_code: 'US',
+                            location: {
+                              lon: -97.822,
+                              lat: 37.751,
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          },
+          {
+            key: '63.88.73.140',
+            doc_count: 907,
+            bytes_out: {
+              value: 692399561,
+            },
+            bytes_in: {
+              value: 29750376,
+            },
+            domain: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 0,
+              buckets: [
+                {
+                  key: '140.73.88.63.ashburn.google-ggc.verizon.com',
+                  doc_count: 907,
+                  timestamp: {
+                    value: 1563847154000,
+                    value_as_string: '2019-07-23T01:59:14.000Z',
+                  },
+                },
+                {
+                  key: 'r1.sn-8xgp1vo-p5qs.googlevideo.com',
+                  doc_count: 96,
+                  timestamp: {
+                    value: 1563846554000,
+                    value_as_string: '2019-07-23T01:49:14.000Z',
+                  },
+                },
+                {
+                  key: 'r1---sn-8xgp1vo-p5qs.googlevideo.com',
+                  doc_count: 23,
+                  timestamp: {
+                    value: 1563844453000,
+                    value_as_string: '2019-07-23T01:14:13.000Z',
+                  },
+                },
+              ],
+            },
+            autonomous_system: {
+              doc_count: 907,
+              top_as: {
+                hits: {
+                  total: {
+                    value: 907,
+                    relation: 'eq',
+                  },
+                  max_score: 2,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'Tgx-HGwBQrvXogooi6vk',
+                      _score: 2,
+                      _source: {
+                        destination: {
+                          as: {
+                            org: 'MCI Communications Services, Inc. d/b/a Verizon Business',
+                            num: 701,
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+            location: {
+              doc_count: 907,
+              top_geo: {
+                hits: {
+                  total: {
+                    value: 907,
+                    relation: 'eq',
+                  },
+                  max_score: 2,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'Tgx-HGwBQrvXogooi6vk',
+                      _score: 2,
+                      _source: {
+                        destination: {
+                          geo: {
+                            continent_name: 'North America',
+                            city_name: '',
+                            country_iso_code: 'US',
+                            location: {
+                              lon: -97.822,
+                              lat: 37.751,
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          },
+          {
+            key: '45.57.63.187',
+            doc_count: 6,
+            bytes_out: {
+              value: 1031544713,
+            },
+            bytes_in: {
+              value: 15244446,
+            },
+            domain: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 0,
+              buckets: [
+                {
+                  key: 'ipv4_1.mce0.c121.was001.ix.nflxvideo.net',
+                  doc_count: 6,
+                  timestamp: {
+                    value: 1563840373000,
+                    value_as_string: '2019-07-23T00:06:13.000Z',
+                  },
+                },
+                {
+                  key: 'ipv4-c121-was001-ix.1.oca.nflxvideo.net',
+                  doc_count: 2,
+                  timestamp: {
+                    value: 1563838598000,
+                    value_as_string: '2019-07-22T23:36:38.000Z',
+                  },
+                },
+              ],
+            },
+            autonomous_system: {
+              doc_count: 6,
+              top_as: {
+                hits: {
+                  total: {
+                    value: 6,
+                    relation: 'eq',
+                  },
+                  max_score: 2,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'NggQHGwBQrvXogooLybq',
+                      _score: 2,
+                      _source: {
+                        destination: {
+                          as: {
+                            org: 'Netflix Streaming Services Inc.',
+                            num: 2906,
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+            location: {
+              doc_count: 6,
+              top_geo: {
+                hits: {
+                  total: {
+                    value: 6,
+                    relation: 'eq',
+                  },
+                  max_score: 2,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'NggQHGwBQrvXogooLybq',
+                      _score: 2,
+                      _source: {
+                        destination: {
+                          geo: {
+                            continent_name: 'North America',
+                            city_name: '',
+                            country_iso_code: 'US',
+                            location: {
+                              lon: -97.822,
+                              lat: 37.751,
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          },
+          {
+            key: '63.88.73.19',
+            doc_count: 12,
+            bytes_out: {
+              value: 481783258,
+            },
+            bytes_in: {
+              value: 11528129,
+            },
+            domain: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 0,
+              buckets: [
+                {
+                  key: '19.73.88.63.ashburn.google-ggc.verizon.com',
+                  doc_count: 12,
+                  timestamp: {
+                    value: 1563842631000,
+                    value_as_string: '2019-07-23T00:43:51.000Z',
+                  },
+                },
+                {
+                  key: 'r8---sn-8xgp1vo-p5qe.googlevideo.com',
+                  doc_count: 10,
+                  timestamp: {
+                    value: 1563842631000,
+                    value_as_string: '2019-07-23T00:43:51.000Z',
+                  },
+                },
+              ],
+            },
+            autonomous_system: {
+              doc_count: 12,
+              top_as: {
+                hits: {
+                  total: {
+                    value: 12,
+                    relation: 'eq',
+                  },
+                  max_score: 2,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: '6wk9HGwBQrvXogooU-V9',
+                      _score: 2,
+                      _source: {
+                        destination: {
+                          as: {
+                            org: 'MCI Communications Services, Inc. d/b/a Verizon Business',
+                            num: 701,
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+            location: {
+              doc_count: 12,
+              top_geo: {
+                hits: {
+                  total: {
+                    value: 12,
+                    relation: 'eq',
+                  },
+                  max_score: 2,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: '6wk9HGwBQrvXogooU-V9',
+                      _score: 2,
+                      _source: {
+                        destination: {
+                          geo: {
+                            continent_name: 'North America',
+                            city_name: '',
+                            country_iso_code: 'US',
+                            location: {
+                              lon: -97.822,
+                              lat: 37.751,
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          },
+        ],
+      },
+      top_n_flow_count: {
+        value: 350,
+      },
+    },
+  },
+  'destination-unified': {
+    took: 28,
+    timed_out: false,
+    _shards: {
+      total: 28,
+      successful: 28,
+      skipped: 0,
+      failed: 0,
+    },
+    hits: {
+      max_score: null,
+      hits: [],
+    },
+    aggregations: {
+      destination: {
+        doc_count_error_upper_bound: -1,
+        sum_other_doc_count: 319109,
+        buckets: [
+          {
+            key: '10.142.0.9',
+            doc_count: 501,
+            bytes_out: {
+              value: 0,
+            },
+            bytes_in: {
+              value: 36321426479,
+            },
+            domain: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 0,
+              buckets: [
+                {
+                  key: 'simianhacker-demo',
+                  doc_count: 501,
+                  timestamp: {
+                    value: 1563895220351,
+                    value_as_string: '2019-07-23T15:20:20.351Z',
+                  },
+                },
+              ],
+            },
+            autonomous_system: {
+              doc_count: 0,
+              top_as: {
+                hits: {
+                  total: {
+                    value: 0,
+                    relation: 'eq',
+                  },
+                  max_score: null,
+                  hits: [],
+                },
+              },
+            },
+            location: {
+              doc_count: 0,
+              top_geo: {
+                hits: {
+                  total: {
+                    value: 0,
+                    relation: 'eq',
+                  },
+                  max_score: null,
+                  hits: [],
+                },
+              },
+            },
+          },
+          {
+            key: '104.198.38.169',
+            doc_count: 145,
+            bytes_out: {
+              value: 0,
+            },
+            bytes_in: {
+              value: 29402384765,
+            },
+            domain: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 0,
+              buckets: [],
+            },
+            autonomous_system: {
+              doc_count: 145,
+              top_as: {
+                hits: {
+                  total: {
+                    value: 145,
+                    relation: 'eq',
+                  },
+                  max_score: 0,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'dd4fa2d4bd-692282652449767',
+                      _score: 0,
+                      _source: {
+                        destination: {
+                          as: {
+                            number: 15169,
+                            organization: {
+                              name: 'Google LLC',
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+            location: {
+              doc_count: 145,
+              top_geo: {
+                hits: {
+                  total: {
+                    value: 145,
+                    relation: 'eq',
+                  },
+                  max_score: 0,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'dd4fa2d4bd-692282652449767',
+                      _score: 0,
+                      _source: {
+                        destination: {
+                          geo: {
+                            continent_name: 'North America',
+                            region_iso_code: 'US-VA',
+                            country_iso_code: 'US',
+                            region_name: 'Virginia',
+                            location: {
+                              lon: -77.2497,
+                              lat: 38.6582,
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          },
+          {
+            key: '10.142.0.10',
+            doc_count: 26468,
+            bytes_out: {
+              value: 0,
+            },
+            bytes_in: {
+              value: 7034783187,
+            },
+            domain: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 0,
+              buckets: [
+                {
+                  key: 'siem-es',
+                  doc_count: 26468,
+                  timestamp: {
+                    value: 1563895220357,
+                    value_as_string: '2019-07-23T15:20:20.357Z',
+                  },
+                },
+              ],
+            },
+            autonomous_system: {
+              doc_count: 0,
+              top_as: {
+                hits: {
+                  total: {
+                    value: 0,
+                    relation: 'eq',
+                  },
+                  max_score: null,
+                  hits: [],
+                },
+              },
+            },
+            location: {
+              doc_count: 0,
+              top_geo: {
+                hits: {
+                  total: {
+                    value: 0,
+                    relation: 'eq',
+                  },
+                  max_score: null,
+                  hits: [],
+                },
+              },
+            },
+          },
+          {
+            key: '10.142.0.7',
+            doc_count: 36490,
+            bytes_out: {
+              value: 0,
+            },
+            bytes_in: {
+              value: 2361869470,
+            },
+            domain: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 0,
+              buckets: [
+                {
+                  key: 'siem-kibana',
+                  doc_count: 16550,
+                  timestamp: {
+                    value: 1563895220357,
+                    value_as_string: '2019-07-23T15:20:20.357Z',
+                  },
+                },
+              ],
+            },
+            autonomous_system: {
+              doc_count: 0,
+              top_as: {
+                hits: {
+                  total: {
+                    value: 0,
+                    relation: 'eq',
+                  },
+                  max_score: null,
+                  hits: [],
+                },
+              },
+            },
+            location: {
+              doc_count: 0,
+              top_geo: {
+                hits: {
+                  total: {
+                    value: 0,
+                    relation: 'eq',
+                  },
+                  max_score: null,
+                  hits: [],
+                },
+              },
+            },
+          },
+          {
+            key: '35.196.73.82',
+            doc_count: 6484,
+            bytes_out: {
+              value: 0,
+            },
+            bytes_in: {
+              value: 1231689482,
+            },
+            domain: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 0,
+              buckets: [
+                {
+                  key: 'siem-kibana',
+                  doc_count: 6484,
+                  timestamp: {
+                    value: 1563895220357,
+                    value_as_string: '2019-07-23T15:20:20.357Z',
+                  },
+                },
+              ],
+            },
+            autonomous_system: {
+              doc_count: 6484,
+              top_as: {
+                hits: {
+                  total: {
+                    value: 6484,
+                    relation: 'eq',
+                  },
+                  max_score: 0,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'dd4fa2d4bd-692282652449754',
+                      _score: 0,
+                      _source: {
+                        destination: {
+                          as: {
+                            number: 15169,
+                            organization: {
+                              name: 'Google LLC',
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+            location: {
+              doc_count: 6484,
+              top_geo: {
+                hits: {
+                  total: {
+                    value: 6484,
+                    relation: 'eq',
+                  },
+                  max_score: 0,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'dd4fa2d4bd-692282652449754',
+                      _score: 0,
+                      _source: {
+                        destination: {
+                          geo: {
+                            continent_name: 'North America',
+                            region_iso_code: 'US-VA',
+                            country_iso_code: 'US',
+                            region_name: 'Virginia',
+                            location: {
+                              lon: -77.2497,
+                              lat: 38.6582,
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          },
+          {
+            key: '35.227.125.33',
+            doc_count: 14240,
+            bytes_out: {
+              value: 0,
+            },
+            bytes_in: {
+              value: 802811843,
+            },
+            domain: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 0,
+              buckets: [
+                {
+                  key: 'siem-es',
+                  doc_count: 6640,
+                  timestamp: {
+                    value: 1563895220357,
+                    value_as_string: '2019-07-23T15:20:20.357Z',
+                  },
+                },
+              ],
+            },
+            autonomous_system: {
+              doc_count: 6640,
+              top_as: {
+                hits: {
+                  total: {
+                    value: 6640,
+                    relation: 'eq',
+                  },
+                  max_score: 0,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'dd4fa2d4bd-692282652449752',
+                      _score: 0,
+                      _source: {
+                        destination: {
+                          as: {
+                            number: 15169,
+                            organization: {
+                              name: 'Google LLC',
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+            location: {
+              doc_count: 6640,
+              top_geo: {
+                hits: {
+                  total: {
+                    value: 6640,
+                    relation: 'eq',
+                  },
+                  max_score: 0,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'dd4fa2d4bd-692282652449752',
+                      _score: 0,
+                      _source: {
+                        destination: {
+                          geo: {
+                            continent_name: 'North America',
+                            region_iso_code: 'US-VA',
+                            country_iso_code: 'US',
+                            region_name: 'Virginia',
+                            location: {
+                              lon: -77.2497,
+                              lat: 38.6582,
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          },
+          {
+            key: '10.100.7.197',
+            doc_count: 4722,
+            bytes_out: {
+              value: 10977897,
+            },
+            bytes_in: {
+              value: 372032297,
+            },
+            domain: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 0,
+              buckets: [
+                {
+                  key: 'appletv-livingroom.iot.sr.local.crowbird.com',
+                  doc_count: 4722,
+                  timestamp: {
+                    value: 1563895431000,
+                    value_as_string: '2019-07-23T15:23:51.000Z',
+                  },
+                },
+                {
+                  key: 'ocsp.digicert.com',
+                  doc_count: 1,
+                  timestamp: {
+                    value: 1563844197442,
+                    value_as_string: '2019-07-23T01:09:57.442Z',
+                  },
+                },
+                {
+                  key: 'www.hulu.com',
+                  doc_count: 1,
+                  timestamp: {
+                    value: 1563824391211,
+                    value_as_string: '2019-07-22T19:39:51.211Z',
+                  },
+                },
+                {
+                  key: 'ocsp.int-x3.letsencrypt.org',
+                  doc_count: 2,
+                  timestamp: {
+                    value: 1563824389842,
+                    value_as_string: '2019-07-22T19:39:49.842Z',
+                  },
+                },
+                {
+                  key: 'ocsp.entrust.net',
+                  doc_count: 2,
+                  timestamp: {
+                    value: 1563824376459,
+                    value_as_string: '2019-07-22T19:39:36.459Z',
+                  },
+                },
+                {
+                  key: 'isrg.trustid.ocsp.identrust.com',
+                  doc_count: 1,
+                  timestamp: {
+                    value: 1563824371705,
+                    value_as_string: '2019-07-22T19:39:31.705Z',
+                  },
+                },
+              ],
+            },
+            autonomous_system: {
+              doc_count: 0,
+              top_as: {
+                hits: {
+                  total: {
+                    value: 0,
+                    relation: 'eq',
+                  },
+                  max_score: null,
+                  hits: [],
+                },
+              },
+            },
+            location: {
+              doc_count: 0,
+              top_geo: {
+                hits: {
+                  total: {
+                    value: 0,
+                    relation: 'eq',
+                  },
+                  max_score: null,
+                  hits: [],
+                },
+              },
+            },
+          },
+          {
+            key: '34.213.68.235',
+            doc_count: 144,
+            bytes_out: {
+              value: 0,
+            },
+            bytes_in: {
+              value: 311637700,
+            },
+            domain: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 0,
+              buckets: [],
+            },
+            autonomous_system: {
+              doc_count: 144,
+              top_as: {
+                hits: {
+                  total: {
+                    value: 144,
+                    relation: 'eq',
+                  },
+                  max_score: 0,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'dd4fa2d4bd-692274036894083',
+                      _score: 0,
+                      _source: {
+                        destination: {
+                          as: {
+                            number: 16509,
+                            organization: {
+                              name: 'Amazon.com, Inc.',
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+            location: {
+              doc_count: 144,
+              top_geo: {
+                hits: {
+                  total: {
+                    value: 144,
+                    relation: 'eq',
+                  },
+                  max_score: 0,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'dd4fa2d4bd-692274036894083',
+                      _score: 0,
+                      _source: {
+                        destination: {
+                          geo: {
+                            continent_name: 'North America',
+                            region_iso_code: 'US-OR',
+                            city_name: 'Boardman',
+                            country_iso_code: 'US',
+                            region_name: 'Oregon',
+                            location: {
+                              lon: -119.688,
+                              lat: 45.8696,
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          },
+          {
+            key: '67.173.227.94',
+            doc_count: 6145,
+            bytes_out: {
+              value: 0,
+            },
+            bytes_in: {
+              value: 210521475,
+            },
+            domain: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 0,
+              buckets: [],
+            },
+            autonomous_system: {
+              doc_count: 6145,
+              top_as: {
+                hits: {
+                  total: {
+                    value: 6145,
+                    relation: 'eq',
+                  },
+                  max_score: 0,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'dd4fa2d4bd-692282652449758',
+                      _score: 0,
+                      _source: {
+                        destination: {
+                          as: {
+                            number: 7922,
+                            organization: {
+                              name: 'Comcast Cable Communications, LLC',
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+            location: {
+              doc_count: 6145,
+              top_geo: {
+                hits: {
+                  total: {
+                    value: 6145,
+                    relation: 'eq',
+                  },
+                  max_score: 0,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'dd4fa2d4bd-692282652449758',
+                      _score: 0,
+                      _source: {
+                        destination: {
+                          geo: {
+                            continent_name: 'North America',
+                            region_iso_code: 'US-CO',
+                            city_name: 'Lafayette',
+                            country_iso_code: 'US',
+                            region_name: 'Colorado',
+                            location: {
+                              lon: -105.1076,
+                              lat: 40.0153,
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          },
+          {
+            key: '104.197.128.48',
+            doc_count: 2485,
+            bytes_out: {
+              value: 0,
+            },
+            bytes_in: {
+              value: 121938054,
+            },
+            domain: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 0,
+              buckets: [],
+            },
+            autonomous_system: {
+              doc_count: 2485,
+              top_as: {
+                hits: {
+                  total: {
+                    value: 2485,
+                    relation: 'eq',
+                  },
+                  max_score: 0,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'dd4fa2d4bd-692282652449749',
+                      _score: 0,
+                      _source: {
+                        destination: {
+                          as: {
+                            number: 15169,
+                            organization: {
+                              name: 'Google LLC',
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+            location: {
+              doc_count: 2485,
+              top_geo: {
+                hits: {
+                  total: {
+                    value: 2485,
+                    relation: 'eq',
+                  },
+                  max_score: 0,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'dd4fa2d4bd-692282652449749',
+                      _score: 0,
+                      _source: {
+                        destination: {
+                          geo: {
+                            continent_name: 'North America',
+                            region_iso_code: 'US-VA',
+                            country_iso_code: 'US',
+                            region_name: 'Virginia',
+                            location: {
+                              lon: -77.2497,
+                              lat: 38.6582,
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          },
+        ],
+      },
+      top_n_flow_count: {
+        value: 2050,
+      },
+    },
+  },
+  'unified-uni': {
+    took: 516,
+    timed_out: false,
+    _shards: {
+      total: 28,
+      successful: 28,
+      skipped: 0,
+      failed: 0,
+    },
+    hits: {
+      max_score: null,
+      hits: [],
+    },
+    aggregations: {
+      destination: {
+        doc_count_error_upper_bound: -1,
+        sum_other_doc_count: 12750,
+        buckets: [
+          {
+            key: '10.142.0.9',
+            doc_count: 501,
+            bytes_out: {
+              value: 0,
+            },
+            bytes_in: {
+              value: 36321426479,
+            },
+            domain: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 0,
+              buckets: [
+                {
+                  key: 'simianhacker-demo',
+                  doc_count: 501,
+                  timestamp: {
+                    value: 1563895220351,
+                    value_as_string: '2019-07-23T15:20:20.351Z',
+                  },
+                },
+              ],
+            },
+            autonomous_system: {
+              doc_count: 0,
+              top_as: {
+                hits: {
+                  total: {
+                    value: 0,
+                    relation: 'eq',
+                  },
+                  max_score: null,
+                  hits: [],
+                },
+              },
+            },
+            location: {
+              doc_count: 0,
+              top_geo: {
+                hits: {
+                  total: {
+                    value: 0,
+                    relation: 'eq',
+                  },
+                  max_score: null,
+                  hits: [],
+                },
+              },
+            },
+          },
+          {
+            key: '104.198.38.169',
+            doc_count: 145,
+            bytes_out: {
+              value: 0,
+            },
+            bytes_in: {
+              value: 29402384765,
+            },
+            domain: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 0,
+              buckets: [],
+            },
+            autonomous_system: {
+              doc_count: 145,
+              top_as: {
+                hits: {
+                  total: {
+                    value: 145,
+                    relation: 'eq',
+                  },
+                  max_score: 1,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'dd4fa2d4bd-692282652449767',
+                      _score: 1,
+                      _source: {
+                        destination: {
+                          as: {
+                            number: 15169,
+                            organization: {
+                              name: 'Google LLC',
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+            location: {
+              doc_count: 145,
+              top_geo: {
+                hits: {
+                  total: {
+                    value: 145,
+                    relation: 'eq',
+                  },
+                  max_score: 1,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'dd4fa2d4bd-692282652449767',
+                      _score: 1,
+                      _source: {
+                        destination: {
+                          geo: {
+                            continent_name: 'North America',
+                            region_iso_code: 'US-VA',
+                            country_iso_code: 'US',
+                            region_name: 'Virginia',
+                            location: {
+                              lon: -77.2497,
+                              lat: 38.6582,
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          },
+          {
+            key: '10.142.0.10',
+            doc_count: 26468,
+            bytes_out: {
+              value: 0,
+            },
+            bytes_in: {
+              value: 7034783187,
+            },
+            domain: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 0,
+              buckets: [
+                {
+                  key: 'siem-es',
+                  doc_count: 26468,
+                  timestamp: {
+                    value: 1563895220357,
+                    value_as_string: '2019-07-23T15:20:20.357Z',
+                  },
+                },
+              ],
+            },
+            autonomous_system: {
+              doc_count: 0,
+              top_as: {
+                hits: {
+                  total: {
+                    value: 0,
+                    relation: 'eq',
+                  },
+                  max_score: null,
+                  hits: [],
+                },
+              },
+            },
+            location: {
+              doc_count: 0,
+              top_geo: {
+                hits: {
+                  total: {
+                    value: 0,
+                    relation: 'eq',
+                  },
+                  max_score: null,
+                  hits: [],
+                },
+              },
+            },
+          },
+          {
+            key: '10.142.0.7',
+            doc_count: 16550,
+            bytes_out: {
+              value: 0,
+            },
+            bytes_in: {
+              value: 2361869470,
+            },
+            domain: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 0,
+              buckets: [
+                {
+                  key: 'siem-kibana',
+                  doc_count: 16550,
+                  timestamp: {
+                    value: 1563895220357,
+                    value_as_string: '2019-07-23T15:20:20.357Z',
+                  },
+                },
+              ],
+            },
+            autonomous_system: {
+              doc_count: 0,
+              top_as: {
+                hits: {
+                  total: {
+                    value: 0,
+                    relation: 'eq',
+                  },
+                  max_score: null,
+                  hits: [],
+                },
+              },
+            },
+            location: {
+              doc_count: 0,
+              top_geo: {
+                hits: {
+                  total: {
+                    value: 0,
+                    relation: 'eq',
+                  },
+                  max_score: null,
+                  hits: [],
+                },
+              },
+            },
+          },
+          {
+            key: '35.196.73.82',
+            doc_count: 6484,
+            bytes_out: {
+              value: 0,
+            },
+            bytes_in: {
+              value: 1231689482,
+            },
+            domain: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 0,
+              buckets: [
+                {
+                  key: 'siem-kibana',
+                  doc_count: 6484,
+                  timestamp: {
+                    value: 1563895220357,
+                    value_as_string: '2019-07-23T15:20:20.357Z',
+                  },
+                },
+              ],
+            },
+            autonomous_system: {
+              doc_count: 6484,
+              top_as: {
+                hits: {
+                  total: {
+                    value: 6484,
+                    relation: 'eq',
+                  },
+                  max_score: 1,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'dd4fa2d4bd-692282652449754',
+                      _score: 1,
+                      _source: {
+                        destination: {
+                          as: {
+                            number: 15169,
+                            organization: {
+                              name: 'Google LLC',
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+            location: {
+              doc_count: 6484,
+              top_geo: {
+                hits: {
+                  total: {
+                    value: 6484,
+                    relation: 'eq',
+                  },
+                  max_score: 1,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'dd4fa2d4bd-692282652449754',
+                      _score: 1,
+                      _source: {
+                        destination: {
+                          geo: {
+                            continent_name: 'North America',
+                            region_iso_code: 'US-VA',
+                            country_iso_code: 'US',
+                            region_name: 'Virginia',
+                            location: {
+                              lon: -77.2497,
+                              lat: 38.6582,
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          },
+          {
+            key: '35.227.125.33',
+            doc_count: 6640,
+            bytes_out: {
+              value: 0,
+            },
+            bytes_in: {
+              value: 802811843,
+            },
+            domain: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 0,
+              buckets: [
+                {
+                  key: 'siem-es',
+                  doc_count: 6640,
+                  timestamp: {
+                    value: 1563895220357,
+                    value_as_string: '2019-07-23T15:20:20.357Z',
+                  },
+                },
+              ],
+            },
+            autonomous_system: {
+              doc_count: 6640,
+              top_as: {
+                hits: {
+                  total: {
+                    value: 6640,
+                    relation: 'eq',
+                  },
+                  max_score: 1,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'dd4fa2d4bd-692282652449752',
+                      _score: 1,
+                      _source: {
+                        destination: {
+                          as: {
+                            number: 15169,
+                            organization: {
+                              name: 'Google LLC',
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+            location: {
+              doc_count: 6640,
+              top_geo: {
+                hits: {
+                  total: {
+                    value: 6640,
+                    relation: 'eq',
+                  },
+                  max_score: 1,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'dd4fa2d4bd-692282652449752',
+                      _score: 1,
+                      _source: {
+                        destination: {
+                          geo: {
+                            continent_name: 'North America',
+                            region_iso_code: 'US-VA',
+                            country_iso_code: 'US',
+                            region_name: 'Virginia',
+                            location: {
+                              lon: -77.2497,
+                              lat: 38.6582,
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          },
+          {
+            key: '34.213.68.235',
+            doc_count: 144,
+            bytes_out: {
+              value: 0,
+            },
+            bytes_in: {
+              value: 311637700,
+            },
+            domain: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 0,
+              buckets: [],
+            },
+            autonomous_system: {
+              doc_count: 144,
+              top_as: {
+                hits: {
+                  total: {
+                    value: 144,
+                    relation: 'eq',
+                  },
+                  max_score: 1,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'dd4fa2d4bd-692274036894083',
+                      _score: 1,
+                      _source: {
+                        destination: {
+                          as: {
+                            number: 16509,
+                            organization: {
+                              name: 'Amazon.com, Inc.',
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+            location: {
+              doc_count: 144,
+              top_geo: {
+                hits: {
+                  total: {
+                    value: 144,
+                    relation: 'eq',
+                  },
+                  max_score: 1,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'dd4fa2d4bd-692274036894083',
+                      _score: 1,
+                      _source: {
+                        destination: {
+                          geo: {
+                            continent_name: 'North America',
+                            region_iso_code: 'US-OR',
+                            city_name: 'Boardman',
+                            country_iso_code: 'US',
+                            region_name: 'Oregon',
+                            location: {
+                              lon: -119.688,
+                              lat: 45.8696,
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          },
+          {
+            key: '67.173.227.94',
+            doc_count: 6145,
+            bytes_out: {
+              value: 0,
+            },
+            bytes_in: {
+              value: 210521475,
+            },
+            domain: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 0,
+              buckets: [],
+            },
+            autonomous_system: {
+              doc_count: 6145,
+              top_as: {
+                hits: {
+                  total: {
+                    value: 6145,
+                    relation: 'eq',
+                  },
+                  max_score: 1,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'dd4fa2d4bd-692282652449758',
+                      _score: 1,
+                      _source: {
+                        destination: {
+                          as: {
+                            number: 7922,
+                            organization: {
+                              name: 'Comcast Cable Communications, LLC',
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+            location: {
+              doc_count: 6145,
+              top_geo: {
+                hits: {
+                  total: {
+                    value: 6145,
+                    relation: 'eq',
+                  },
+                  max_score: 1,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'dd4fa2d4bd-692282652449758',
+                      _score: 1,
+                      _source: {
+                        destination: {
+                          geo: {
+                            continent_name: 'North America',
+                            region_iso_code: 'US-CO',
+                            city_name: 'Lafayette',
+                            country_iso_code: 'US',
+                            region_name: 'Colorado',
+                            location: {
+                              lon: -105.1076,
+                              lat: 40.0153,
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          },
+          {
+            key: '104.197.128.48',
+            doc_count: 2485,
+            bytes_out: {
+              value: 0,
+            },
+            bytes_in: {
+              value: 121938054,
+            },
+            domain: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 0,
+              buckets: [],
+            },
+            autonomous_system: {
+              doc_count: 2485,
+              top_as: {
+                hits: {
+                  total: {
+                    value: 2485,
+                    relation: 'eq',
+                  },
+                  max_score: 1,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'dd4fa2d4bd-692282652449749',
+                      _score: 1,
+                      _source: {
+                        destination: {
+                          as: {
+                            number: 15169,
+                            organization: {
+                              name: 'Google LLC',
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+            location: {
+              doc_count: 2485,
+              top_geo: {
+                hits: {
+                  total: {
+                    value: 2485,
+                    relation: 'eq',
+                  },
+                  max_score: 1,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'dd4fa2d4bd-692282652449749',
+                      _score: 1,
+                      _source: {
+                        destination: {
+                          geo: {
+                            continent_name: 'North America',
+                            region_iso_code: 'US-VA',
+                            country_iso_code: 'US',
+                            region_name: 'Virginia',
+                            location: {
+                              lon: -77.2497,
+                              lat: 38.6582,
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          },
+          {
+            key: '72.86.47.26',
+            doc_count: 3121,
+            bytes_out: {
+              value: 0,
+            },
+            bytes_in: {
+              value: 121213928,
+            },
+            domain: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 0,
+              buckets: [],
+            },
+            autonomous_system: {
+              doc_count: 3121,
+              top_as: {
+                hits: {
+                  total: {
+                    value: 3121,
+                    relation: 'eq',
+                  },
+                  max_score: 1,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'dd4fa2d4bd-692302114930502',
+                      _score: 1,
+                      _source: {
+                        destination: {
+                          as: {
+                            number: 701,
+                            organization: {
+                              name: 'MCI Communications Services, Inc. d/b/a Verizon Business',
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+            location: {
+              doc_count: 3121,
+              top_geo: {
+                hits: {
+                  total: {
+                    value: 3121,
+                    relation: 'eq',
+                  },
+                  max_score: 1,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'dd4fa2d4bd-692302114930502',
+                      _score: 1,
+                      _source: {
+                        destination: {
+                          geo: {
+                            continent_name: 'North America',
+                            region_iso_code: 'US-VA',
+                            city_name: 'Leesburg',
+                            country_iso_code: 'US',
+                            region_name: 'Virginia',
+                            location: {
+                              lon: -77.5326,
+                              lat: 39.1748,
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          },
+          {
+            key: '35.245.245.245',
+            doc_count: 144,
+            bytes_out: {
+              value: 0,
+            },
+            bytes_in: {
+              value: 120242185,
+            },
+            domain: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 0,
+              buckets: [],
+            },
+            autonomous_system: {
+              doc_count: 144,
+              top_as: {
+                hits: {
+                  total: {
+                    value: 144,
+                    relation: 'eq',
+                  },
+                  max_score: 1,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'dd4fa2d4bd-692282307610611',
+                      _score: 1,
+                      _source: {
+                        destination: {
+                          as: {
+                            number: 15169,
+                            organization: {
+                              name: 'Google LLC',
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+            location: {
+              doc_count: 144,
+              top_geo: {
+                hits: {
+                  total: {
+                    value: 144,
+                    relation: 'eq',
+                  },
+                  max_score: 1,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'dd4fa2d4bd-692282307610611',
+                      _score: 1,
+                      _source: {
+                        destination: {
+                          geo: {
+                            continent_name: 'North America',
+                            region_iso_code: 'US-CA',
+                            city_name: 'Mountain View',
+                            country_iso_code: 'US',
+                            region_name: 'California',
+                            location: {
+                              lon: -122.0574,
+                              lat: 37.419200000000004,
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          },
+          {
+            key: '104.198.45.40',
+            doc_count: 2473,
+            bytes_out: {
+              value: 0,
+            },
+            bytes_in: {
+              value: 110527674,
+            },
+            domain: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 0,
+              buckets: [],
+            },
+            autonomous_system: {
+              doc_count: 2473,
+              top_as: {
+                hits: {
+                  total: {
+                    value: 2473,
+                    relation: 'eq',
+                  },
+                  max_score: 1,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'dd4fa2d4bd-692282652449742',
+                      _score: 1,
+                      _source: {
+                        destination: {
+                          as: {
+                            number: 15169,
+                            organization: {
+                              name: 'Google LLC',
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+            location: {
+              doc_count: 2473,
+              top_geo: {
+                hits: {
+                  total: {
+                    value: 2473,
+                    relation: 'eq',
+                  },
+                  max_score: 1,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'dd4fa2d4bd-692282652449742',
+                      _score: 1,
+                      _source: {
+                        destination: {
+                          geo: {
+                            continent_name: 'North America',
+                            region_iso_code: 'US-VA',
+                            country_iso_code: 'US',
+                            region_name: 'Virginia',
+                            location: {
+                              lon: -77.2497,
+                              lat: 38.6582,
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          },
+          {
+            key: '8.42.77.171',
+            doc_count: 1272,
+            bytes_out: {
+              value: 0,
+            },
+            bytes_in: {
+              value: 101378790,
+            },
+            domain: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 0,
+              buckets: [],
+            },
+            autonomous_system: {
+              doc_count: 1272,
+              top_as: {
+                hits: {
+                  total: {
+                    value: 1272,
+                    relation: 'eq',
+                  },
+                  max_score: 1,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'dd4fa2d4bd-692268628367503',
+                      _score: 1,
+                      _source: {
+                        destination: {
+                          as: {
+                            number: 393552,
+                            organization: {
+                              name: 'Longmont Power & Communications',
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+            location: {
+              doc_count: 1272,
+              top_geo: {
+                hits: {
+                  total: {
+                    value: 1272,
+                    relation: 'eq',
+                  },
+                  max_score: 1,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'dd4fa2d4bd-692268628367503',
+                      _score: 1,
+                      _source: {
+                        destination: {
+                          geo: {
+                            continent_name: 'North America',
+                            region_iso_code: 'US-CO',
+                            city_name: 'Longmont',
+                            country_iso_code: 'US',
+                            region_name: 'Colorado',
+                            location: {
+                              lon: -105.1986,
+                              lat: 40.1791,
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          },
+          {
+            key: '144.76.73.184',
+            doc_count: 144,
+            bytes_out: {
+              value: 0,
+            },
+            bytes_in: {
+              value: 101126253,
+            },
+            domain: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 0,
+              buckets: [],
+            },
+            autonomous_system: {
+              doc_count: 144,
+              top_as: {
+                hits: {
+                  total: {
+                    value: 144,
+                    relation: 'eq',
+                  },
+                  max_score: 1,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'dd4fa2d4bd-692274036894137',
+                      _score: 1,
+                      _source: {
+                        destination: {
+                          as: {
+                            number: 24940,
+                            organization: {
+                              name: 'Hetzner Online GmbH',
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+            location: {
+              doc_count: 144,
+              top_geo: {
+                hits: {
+                  total: {
+                    value: 144,
+                    relation: 'eq',
+                  },
+                  max_score: 1,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'dd4fa2d4bd-692274036894137',
+                      _score: 1,
+                      _source: {
+                        destination: {
+                          geo: {
+                            continent_name: 'Europe',
+                            country_iso_code: 'DE',
+                            location: {
+                              lon: 9.491,
+                              lat: 51.2993,
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          },
+          {
+            key: '35.224.28.11',
+            doc_count: 2430,
+            bytes_out: {
+              value: 0,
+            },
+            bytes_in: {
+              value: 76397691,
+            },
+            domain: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 0,
+              buckets: [],
+            },
+            autonomous_system: {
+              doc_count: 2430,
+              top_as: {
+                hits: {
+                  total: {
+                    value: 2430,
+                    relation: 'eq',
+                  },
+                  max_score: 1,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'dd4fa2d4bd-692282652449764',
+                      _score: 1,
+                      _source: {
+                        destination: {
+                          as: {
+                            number: 15169,
+                            organization: {
+                              name: 'Google LLC',
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+            location: {
+              doc_count: 2430,
+              top_geo: {
+                hits: {
+                  total: {
+                    value: 2430,
+                    relation: 'eq',
+                  },
+                  max_score: 1,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'dd4fa2d4bd-692282652449764',
+                      _score: 1,
+                      _source: {
+                        destination: {
+                          geo: {
+                            continent_name: 'North America',
+                            region_iso_code: 'US-VA',
+                            country_iso_code: 'US',
+                            region_name: 'Virginia',
+                            location: {
+                              lon: -77.2497,
+                              lat: 38.6582,
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          },
+          {
+            key: '35.224.108.130',
+            doc_count: 2410,
+            bytes_out: {
+              value: 0,
+            },
+            bytes_in: {
+              value: 76101362,
+            },
+            domain: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 0,
+              buckets: [],
+            },
+            autonomous_system: {
+              doc_count: 2410,
+              top_as: {
+                hits: {
+                  total: {
+                    value: 2410,
+                    relation: 'eq',
+                  },
+                  max_score: 1,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'dd4fa2d4bd-692282652449745',
+                      _score: 1,
+                      _source: {
+                        destination: {
+                          as: {
+                            number: 15169,
+                            organization: {
+                              name: 'Google LLC',
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+            location: {
+              doc_count: 2410,
+              top_geo: {
+                hits: {
+                  total: {
+                    value: 2410,
+                    relation: 'eq',
+                  },
+                  max_score: 1,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'dd4fa2d4bd-692282652449745',
+                      _score: 1,
+                      _source: {
+                        destination: {
+                          geo: {
+                            continent_name: 'North America',
+                            region_iso_code: 'US-VA',
+                            country_iso_code: 'US',
+                            region_name: 'Virginia',
+                            location: {
+                              lon: -77.2497,
+                              lat: 38.6582,
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          },
+          {
+            key: '90.50.188.16',
+            doc_count: 1572,
+            bytes_out: {
+              value: 0,
+            },
+            bytes_in: {
+              value: 62481406,
+            },
+            domain: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 0,
+              buckets: [],
+            },
+            autonomous_system: {
+              doc_count: 1572,
+              top_as: {
+                hits: {
+                  total: {
+                    value: 1572,
+                    relation: 'eq',
+                  },
+                  max_score: 1,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'dd4fa2d4bd-692232098527853',
+                      _score: 1,
+                      _source: {
+                        destination: {
+                          as: {
+                            number: 3215,
+                            organization: {
+                              name: 'Orange',
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+            location: {
+              doc_count: 1572,
+              top_geo: {
+                hits: {
+                  total: {
+                    value: 1572,
+                    relation: 'eq',
+                  },
+                  max_score: 1,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'dd4fa2d4bd-692232098527853',
+                      _score: 1,
+                      _source: {
+                        destination: {
+                          geo: {
+                            continent_name: 'Europe',
+                            region_iso_code: 'FR-33',
+                            city_name: 'Ordonnac',
+                            country_iso_code: 'FR',
+                            region_name: 'Gironde',
+                            location: {
+                              lon: -0.8349,
+                              lat: 45.3066,
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          },
+          {
+            key: '71.205.104.76',
+            doc_count: 1398,
+            bytes_out: {
+              value: 0,
+            },
+            bytes_in: {
+              value: 58349609,
+            },
+            domain: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 0,
+              buckets: [],
+            },
+            autonomous_system: {
+              doc_count: 1398,
+              top_as: {
+                hits: {
+                  total: {
+                    value: 1398,
+                    relation: 'eq',
+                  },
+                  max_score: 1,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'dd4fa2d4bd-692302114930504',
+                      _score: 1,
+                      _source: {
+                        destination: {
+                          as: {
+                            number: 7922,
+                            organization: {
+                              name: 'Comcast Cable Communications, LLC',
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+            location: {
+              doc_count: 1398,
+              top_geo: {
+                hits: {
+                  total: {
+                    value: 1398,
+                    relation: 'eq',
+                  },
+                  max_score: 1,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'dd4fa2d4bd-692302114930504',
+                      _score: 1,
+                      _source: {
+                        destination: {
+                          geo: {
+                            continent_name: 'North America',
+                            region_iso_code: 'US-CO',
+                            city_name: 'Littleton',
+                            country_iso_code: 'US',
+                            region_name: 'Colorado',
+                            location: {
+                              lon: -104.9559,
+                              lat: 39.6148,
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          },
+          {
+            key: '59.127.79.118',
+            doc_count: 1028,
+            bytes_out: {
+              value: 0,
+            },
+            bytes_in: {
+              value: 55248229,
+            },
+            domain: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 0,
+              buckets: [],
+            },
+            autonomous_system: {
+              doc_count: 1028,
+              top_as: {
+                hits: {
+                  total: {
+                    value: 1028,
+                    relation: 'eq',
+                  },
+                  max_score: 1,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'dd4fa2d4bd-692312538266175',
+                      _score: 1,
+                      _source: {
+                        destination: {
+                          as: {
+                            number: 3462,
+                            organization: {
+                              name: 'Data Communication Business Group',
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+            location: {
+              doc_count: 1028,
+              top_geo: {
+                hits: {
+                  total: {
+                    value: 1028,
+                    relation: 'eq',
+                  },
+                  max_score: 1,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'dd4fa2d4bd-692312538266175',
+                      _score: 1,
+                      _source: {
+                        destination: {
+                          geo: {
+                            continent_name: 'Asia',
+                            region_iso_code: 'TW-KHH',
+                            city_name: 'Kaohsiung City',
+                            country_iso_code: 'TW',
+                            region_name: 'Kaohsiung',
+                            location: {
+                              lon: 120.3133,
+                              lat: 22.6163,
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          },
+          {
+            key: '74.125.141.95',
+            doc_count: 1101,
+            bytes_out: {
+              value: 0,
+            },
+            bytes_in: {
+              value: 38578936,
+            },
+            domain: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 0,
+              buckets: [],
+            },
+            autonomous_system: {
+              doc_count: 1101,
+              top_as: {
+                hits: {
+                  total: {
+                    value: 1101,
+                    relation: 'eq',
+                  },
+                  max_score: 1,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'dd4fa2d4bd-692282652449741',
+                      _score: 1,
+                      _source: {
+                        destination: {
+                          as: {
+                            number: 15169,
+                            organization: {
+                              name: 'Google LLC',
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+            location: {
+              doc_count: 1101,
+              top_geo: {
+                hits: {
+                  total: {
+                    value: 1101,
+                    relation: 'eq',
+                  },
+                  max_score: 1,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'dd4fa2d4bd-692282652449741',
+                      _score: 1,
+                      _source: {
+                        destination: {
+                          geo: {
+                            continent_name: 'North America',
+                            country_iso_code: 'US',
+                            location: {
+                              lon: -97.822,
+                              lat: 37.751,
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          },
+          {
+            key: '10.142.0.2',
+            doc_count: 5634,
+            bytes_out: {
+              value: 0,
+            },
+            bytes_in: {
+              value: 32611199,
+            },
+            domain: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 0,
+              buckets: [
+                {
+                  key: 'siem-windows',
+                  doc_count: 5634,
+                  timestamp: {
+                    value: 1563895220357,
+                    value_as_string: '2019-07-23T15:20:20.357Z',
+                  },
+                },
+              ],
+            },
+            autonomous_system: {
+              doc_count: 0,
+              top_as: {
+                hits: {
+                  total: {
+                    value: 0,
+                    relation: 'eq',
+                  },
+                  max_score: null,
+                  hits: [],
+                },
+              },
+            },
+            location: {
+              doc_count: 0,
+              top_geo: {
+                hits: {
+                  total: {
+                    value: 0,
+                    relation: 'eq',
+                  },
+                  max_score: null,
+                  hits: [],
+                },
+              },
+            },
+          },
+          {
+            key: '35.237.35.46',
+            doc_count: 144,
+            bytes_out: {
+              value: 0,
+            },
+            bytes_in: {
+              value: 23978412,
+            },
+            domain: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 0,
+              buckets: [
+                {
+                  key: 'siem-windows',
+                  doc_count: 144,
+                  timestamp: {
+                    value: 1563895220332,
+                    value_as_string: '2019-07-23T15:20:20.332Z',
+                  },
+                },
+              ],
+            },
+            autonomous_system: {
+              doc_count: 144,
+              top_as: {
+                hits: {
+                  total: {
+                    value: 144,
+                    relation: 'eq',
+                  },
+                  max_score: 1,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'dd4fa2d4bd-692275291465090',
+                      _score: 1,
+                      _source: {
+                        destination: {
+                          as: {
+                            number: 15169,
+                            organization: {
+                              name: 'Google LLC',
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+            location: {
+              doc_count: 144,
+              top_geo: {
+                hits: {
+                  total: {
+                    value: 144,
+                    relation: 'eq',
+                  },
+                  max_score: 1,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'dd4fa2d4bd-692275291465090',
+                      _score: 1,
+                      _source: {
+                        destination: {
+                          geo: {
+                            continent_name: 'North America',
+                            region_iso_code: 'US-CA',
+                            city_name: 'Mountain View',
+                            country_iso_code: 'US',
+                            region_name: 'California',
+                            location: {
+                              lon: -122.0574,
+                              lat: 37.419200000000004,
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          },
+          {
+            key: '35.193.30.121',
+            doc_count: 576,
+            bytes_out: {
+              value: 0,
+            },
+            bytes_in: {
+              value: 5958720,
+            },
+            domain: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 0,
+              buckets: [
+                {
+                  key: 'suricata-iowa',
+                  doc_count: 576,
+                  timestamp: {
+                    value: 1563895220357,
+                    value_as_string: '2019-07-23T15:20:20.357Z',
+                  },
+                },
+              ],
+            },
+            autonomous_system: {
+              doc_count: 576,
+              top_as: {
+                hits: {
+                  total: {
+                    value: 576,
+                    relation: 'eq',
+                  },
+                  max_score: 1,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'dd4fa2d4bd-692282652449811',
+                      _score: 1,
+                      _source: {
+                        destination: {
+                          as: {
+                            number: 15169,
+                            organization: {
+                              name: 'Google LLC',
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+            location: {
+              doc_count: 576,
+              top_geo: {
+                hits: {
+                  total: {
+                    value: 576,
+                    relation: 'eq',
+                  },
+                  max_score: 1,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'dd4fa2d4bd-692282652449811',
+                      _score: 1,
+                      _source: {
+                        destination: {
+                          geo: {
+                            continent_name: 'North America',
+                            region_iso_code: 'US-VA',
+                            country_iso_code: 'US',
+                            region_name: 'Virginia',
+                            location: {
+                              lon: -77.2497,
+                              lat: 38.6582,
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          },
+          {
+            key: '35.232.117.227',
+            doc_count: 576,
+            bytes_out: {
+              value: 0,
+            },
+            bytes_in: {
+              value: 5954875,
+            },
+            domain: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 0,
+              buckets: [
+                {
+                  key: 'zeek-iowa',
+                  doc_count: 576,
+                  timestamp: {
+                    value: 1563895220357,
+                    value_as_string: '2019-07-23T15:20:20.357Z',
+                  },
+                },
+              ],
+            },
+            autonomous_system: {
+              doc_count: 576,
+              top_as: {
+                hits: {
+                  total: {
+                    value: 576,
+                    relation: 'eq',
+                  },
+                  max_score: 1,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'dd4fa2d4bd-692282652449769',
+                      _score: 1,
+                      _source: {
+                        destination: {
+                          as: {
+                            number: 15169,
+                            organization: {
+                              name: 'Google LLC',
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+            location: {
+              doc_count: 576,
+              top_geo: {
+                hits: {
+                  total: {
+                    value: 576,
+                    relation: 'eq',
+                  },
+                  max_score: 1,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'dd4fa2d4bd-692282652449769',
+                      _score: 1,
+                      _source: {
+                        destination: {
+                          geo: {
+                            continent_name: 'North America',
+                            region_iso_code: 'US-CA',
+                            city_name: 'Mountain View',
+                            country_iso_code: 'US',
+                            region_name: 'California',
+                            location: {
+                              lon: -122.0574,
+                              lat: 37.419200000000004,
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          },
+          {
+            key: '34.68.189.41',
+            doc_count: 20,
+            bytes_out: {
+              value: 0,
+            },
+            bytes_in: {
+              value: 4454628,
+            },
+            domain: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 0,
+              buckets: [],
+            },
+            autonomous_system: {
+              doc_count: 20,
+              top_as: {
+                hits: {
+                  total: {
+                    value: 20,
+                    relation: 'eq',
+                  },
+                  max_score: 1,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'dd4fa2d4bd-692301926397879',
+                      _score: 1,
+                      _source: {
+                        destination: {
+                          as: {
+                            number: 15169,
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+            location: {
+              doc_count: 20,
+              top_geo: {
+                hits: {
+                  total: {
+                    value: 20,
+                    relation: 'eq',
+                  },
+                  max_score: 1,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'dd4fa2d4bd-692301926397879',
+                      _score: 1,
+                      _source: {
+                        destination: {
+                          geo: {
+                            continent_name: 'North America',
+                            country_iso_code: 'US',
+                            location: {
+                              lon: -97.822,
+                              lat: 37.751,
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          },
+        ],
+      },
+      top_n_flow_unified_count: {
+        value: 1482,
+      },
+      source: {
+        doc_count_error_upper_bound: -1,
+        sum_other_doc_count: 74565,
+        buckets: [
+          {
+            key: '1.179.154.108',
+            doc_count: 122,
+            bytes_out: {
+              value: 139182,
+            },
+            bytes_in: {
+              value: 0,
+            },
+            domain: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 0,
+              buckets: [],
+            },
+            autonomous_system: {
+              doc_count: 122,
+              top_as: {
+                hits: {
+                  total: {
+                    value: 122,
+                    relation: 'eq',
+                  },
+                  max_score: 1,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'dd4fa2d4bd-692325757348790',
+                      _score: 1,
+                      _source: {
+                        source: {
+                          as: {
+                            number: 131293,
+                            organization: {
+                              name: 'TOT Public Company Limited',
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+            location: {
+              doc_count: 122,
+              top_geo: {
+                hits: {
+                  total: {
+                    value: 122,
+                    relation: 'eq',
+                  },
+                  max_score: 1,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'dd4fa2d4bd-692325757348790',
+                      _score: 1,
+                      _source: {
+                        source: {
+                          geo: {
+                            continent_name: 'Asia',
+                            country_iso_code: 'TH',
+                            location: {
+                              lon: 100.4667,
+                              lat: 13.75,
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          },
+          {
+            key: '2.135.221.237',
+            doc_count: 2,
+            bytes_out: {
+              value: 2164,
+            },
+            bytes_in: {
+              value: 0,
+            },
+            domain: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 0,
+              buckets: [],
+            },
+            autonomous_system: {
+              doc_count: 2,
+              top_as: {
+                hits: {
+                  total: {
+                    value: 2,
+                    relation: 'eq',
+                  },
+                  max_score: 1,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'dd4fa2d4bd-692203923818969',
+                      _score: 1,
+                      _source: {
+                        source: {
+                          as: {
+                            number: 9198,
+                            organization: {
+                              name: 'JSC Kazakhtelecom',
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+            location: {
+              doc_count: 2,
+              top_geo: {
+                hits: {
+                  total: {
+                    value: 2,
+                    relation: 'eq',
+                  },
+                  max_score: 1,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'dd4fa2d4bd-692203923818969',
+                      _score: 1,
+                      _source: {
+                        source: {
+                          geo: {
+                            continent_name: 'Asia',
+                            country_iso_code: 'KZ',
+                            location: {
+                              lon: 68,
+                              lat: 48,
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          },
+          {
+            key: '2.180.34.2',
+            doc_count: 4,
+            bytes_out: {
+              value: 0,
+            },
+            bytes_in: {
+              value: 0,
+            },
+            domain: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 0,
+              buckets: [],
+            },
+            autonomous_system: {
+              doc_count: 4,
+              top_as: {
+                hits: {
+                  total: {
+                    value: 4,
+                    relation: 'eq',
+                  },
+                  max_score: 1,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'dd4fa2d4bd-692058005131302',
+                      _score: 1,
+                      _source: {
+                        source: {
+                          as: {
+                            number: 58224,
+                            organization: {
+                              name: 'Iran Telecommunication Company PJS',
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+            location: {
+              doc_count: 4,
+              top_geo: {
+                hits: {
+                  total: {
+                    value: 4,
+                    relation: 'eq',
+                  },
+                  max_score: 1,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'dd4fa2d4bd-692058005131302',
+                      _score: 1,
+                      _source: {
+                        source: {
+                          geo: {
+                            continent_name: 'Asia',
+                            country_iso_code: 'IR',
+                            location: {
+                              lon: 51.4231,
+                              lat: 35.6961,
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          },
+          {
+            key: '3.105.198.132',
+            doc_count: 6,
+            bytes_out: {
+              value: 5910,
+            },
+            bytes_in: {
+              value: 0,
+            },
+            domain: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 0,
+              buckets: [],
+            },
+            autonomous_system: {
+              doc_count: 6,
+              top_as: {
+                hits: {
+                  total: {
+                    value: 6,
+                    relation: 'eq',
+                  },
+                  max_score: 1,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'dd4fa2d4bd-692193750112325',
+                      _score: 1,
+                      _source: {
+                        source: {
+                          as: {
+                            number: 16509,
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+            location: {
+              doc_count: 6,
+              top_geo: {
+                hits: {
+                  total: {
+                    value: 6,
+                    relation: 'eq',
+                  },
+                  max_score: 1,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'dd4fa2d4bd-692193750112325',
+                      _score: 1,
+                      _source: {
+                        source: {
+                          geo: {
+                            continent_name: 'North America',
+                            region_iso_code: 'US-WA',
+                            city_name: 'Seattle',
+                            country_iso_code: 'US',
+                            region_name: 'Washington',
+                            location: {
+                              lon: -122.3422,
+                              lat: 47.6344,
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          },
+          {
+            key: '3.208.42.117',
+            doc_count: 74,
+            bytes_out: {
+              value: 82233,
+            },
+            bytes_in: {
+              value: 0,
+            },
+            domain: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 0,
+              buckets: [],
+            },
+            autonomous_system: {
+              doc_count: 74,
+              top_as: {
+                hits: {
+                  total: {
+                    value: 74,
+                    relation: 'eq',
+                  },
+                  max_score: 1,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'dd4fa2d4bd-692336249610460',
+                      _score: 1,
+                      _source: {
+                        source: {
+                          as: {
+                            number: 14618,
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+            location: {
+              doc_count: 74,
+              top_geo: {
+                hits: {
+                  total: {
+                    value: 74,
+                    relation: 'eq',
+                  },
+                  max_score: 1,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'dd4fa2d4bd-692336249610460',
+                      _score: 1,
+                      _source: {
+                        source: {
+                          geo: {
+                            continent_name: 'North America',
+                            country_iso_code: 'US',
+                            location: {
+                              lon: -97.822,
+                              lat: 37.751,
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          },
+          {
+            key: '4.34.195.30',
+            doc_count: 14,
+            bytes_out: {
+              value: 14868,
+            },
+            bytes_in: {
+              value: 0,
+            },
+            domain: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 0,
+              buckets: [],
+            },
+            autonomous_system: {
+              doc_count: 14,
+              top_as: {
+                hits: {
+                  total: {
+                    value: 14,
+                    relation: 'eq',
+                  },
+                  max_score: 1,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'dd4fa2d4bd-692279846149410',
+                      _score: 1,
+                      _source: {
+                        source: {
+                          as: {
+                            number: 3356,
+                            organization: {
+                              name: 'Level 3 Parent, LLC',
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+            location: {
+              doc_count: 14,
+              top_geo: {
+                hits: {
+                  total: {
+                    value: 14,
+                    relation: 'eq',
+                  },
+                  max_score: 1,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'dd4fa2d4bd-692279846149410',
+                      _score: 1,
+                      _source: {
+                        source: {
+                          geo: {
+                            continent_name: 'North America',
+                            region_iso_code: 'US-PA',
+                            city_name: 'Philadelphia',
+                            country_iso_code: 'US',
+                            region_name: 'Pennsylvania',
+                            location: {
+                              lon: -75.1534,
+                              lat: 39.9359,
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          },
+          {
+            key: '5.196.72.58',
+            doc_count: 2,
+            bytes_out: {
+              value: 2670,
+            },
+            bytes_in: {
+              value: 0,
+            },
+            domain: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 0,
+              buckets: [],
+            },
+            autonomous_system: {
+              doc_count: 2,
+              top_as: {
+                hits: {
+                  total: {
+                    value: 2,
+                    relation: 'eq',
+                  },
+                  max_score: 1,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'dd4fa2d4bd-692062025806516',
+                      _score: 1,
+                      _source: {
+                        source: {
+                          as: {
+                            number: 16276,
+                            organization: {
+                              name: 'OVH SAS',
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+            location: {
+              doc_count: 2,
+              top_geo: {
+                hits: {
+                  total: {
+                    value: 2,
+                    relation: 'eq',
+                  },
+                  max_score: 1,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'dd4fa2d4bd-692062025806516',
+                      _score: 1,
+                      _source: {
+                        source: {
+                          geo: {
+                            continent_name: 'Europe',
+                            country_iso_code: 'FR',
+                            location: {
+                              lon: 2.3387000000000002,
+                              lat: 48.8582,
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          },
+          {
+            key: '8.42.77.171',
+            doc_count: 1244,
+            bytes_out: {
+              value: 35846810,
+            },
+            bytes_in: {
+              value: 0,
+            },
+            domain: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 0,
+              buckets: [],
+            },
+            autonomous_system: {
+              doc_count: 1244,
+              top_as: {
+                hits: {
+                  total: {
+                    value: 1244,
+                    relation: 'eq',
+                  },
+                  max_score: 1,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'dd4fa2d4bd-692268628367533',
+                      _score: 1,
+                      _source: {
+                        source: {
+                          as: {
+                            number: 393552,
+                            organization: {
+                              name: 'Longmont Power & Communications',
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+            location: {
+              doc_count: 1244,
+              top_geo: {
+                hits: {
+                  total: {
+                    value: 1244,
+                    relation: 'eq',
+                  },
+                  max_score: 1,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'dd4fa2d4bd-692268628367533',
+                      _score: 1,
+                      _source: {
+                        source: {
+                          geo: {
+                            continent_name: 'North America',
+                            region_iso_code: 'US-CO',
+                            city_name: 'Longmont',
+                            country_iso_code: 'US',
+                            region_name: 'Colorado',
+                            location: {
+                              lon: -105.1986,
+                              lat: 40.1791,
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          },
+          {
+            key: '8.249.225.254',
+            doc_count: 1,
+            bytes_out: {
+              value: 384580,
+            },
+            bytes_in: {
+              value: 0,
+            },
+            domain: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 0,
+              buckets: [],
+            },
+            autonomous_system: {
+              doc_count: 1,
+              top_as: {
+                hits: {
+                  total: {
+                    value: 1,
+                    relation: 'eq',
+                  },
+                  max_score: 1,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'dd4fa2d4bd-692200425198640',
+                      _score: 1,
+                      _source: {
+                        source: {
+                          as: {
+                            number: 3356,
+                            organization: {
+                              name: 'Level 3 Parent, LLC',
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+            location: {
+              doc_count: 1,
+              top_geo: {
+                hits: {
+                  total: {
+                    value: 1,
+                    relation: 'eq',
+                  },
+                  max_score: 1,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'dd4fa2d4bd-692200425198640',
+                      _score: 1,
+                      _source: {
+                        source: {
+                          geo: {
+                            continent_name: 'North America',
+                            country_iso_code: 'US',
+                            location: {
+                              lon: -97.822,
+                              lat: 37.751,
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          },
+          {
+            key: '8.249.227.254',
+            doc_count: 1,
+            bytes_out: {
+              value: 600,
+            },
+            bytes_in: {
+              value: 0,
+            },
+            domain: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 0,
+              buckets: [],
+            },
+            autonomous_system: {
+              doc_count: 1,
+              top_as: {
+                hits: {
+                  total: {
+                    value: 1,
+                    relation: 'eq',
+                  },
+                  max_score: 1,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'dd4fa2d4bd-692068132502940',
+                      _score: 1,
+                      _source: {
+                        source: {
+                          as: {
+                            number: 3356,
+                            organization: {
+                              name: 'Level 3 Parent, LLC',
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+            location: {
+              doc_count: 1,
+              top_geo: {
+                hits: {
+                  total: {
+                    value: 1,
+                    relation: 'eq',
+                  },
+                  max_score: 1,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'dd4fa2d4bd-692068132502940',
+                      _score: 1,
+                      _source: {
+                        source: {
+                          geo: {
+                            continent_name: 'North America',
+                            country_iso_code: 'US',
+                            location: {
+                              lon: -97.822,
+                              lat: 37.751,
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          },
+          {
+            key: '8.252.70.126',
+            doc_count: 2,
+            bytes_out: {
+              value: 13160,
+            },
+            bytes_in: {
+              value: 0,
+            },
+            domain: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 0,
+              buckets: [],
+            },
+            autonomous_system: {
+              doc_count: 2,
+              top_as: {
+                hits: {
+                  total: {
+                    value: 2,
+                    relation: 'eq',
+                  },
+                  max_score: 1,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'dd4fa2d4bd-692088253819415',
+                      _score: 1,
+                      _source: {
+                        source: {
+                          as: {
+                            number: 3356,
+                            organization: {
+                              name: 'Level 3 Parent, LLC',
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+            location: {
+              doc_count: 2,
+              top_geo: {
+                hits: {
+                  total: {
+                    value: 2,
+                    relation: 'eq',
+                  },
+                  max_score: 1,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'dd4fa2d4bd-692088253819415',
+                      _score: 1,
+                      _source: {
+                        source: {
+                          geo: {
+                            continent_name: 'North America',
+                            country_iso_code: 'US',
+                            location: {
+                              lon: -97.822,
+                              lat: 37.751,
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          },
+          {
+            key: '8.253.45.249',
+            doc_count: 1,
+            bytes_out: {
+              value: 0,
+            },
+            bytes_in: {
+              value: 0,
+            },
+            domain: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 0,
+              buckets: [],
+            },
+            autonomous_system: {
+              doc_count: 1,
+              top_as: {
+                hits: {
+                  total: {
+                    value: 1,
+                    relation: 'eq',
+                  },
+                  max_score: 1,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'dd4fa2d4bd-692071252320857',
+                      _score: 1,
+                      _source: {
+                        source: {
+                          as: {
+                            number: 3356,
+                            organization: {
+                              name: 'Level 3 Parent, LLC',
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+            location: {
+              doc_count: 1,
+              top_geo: {
+                hits: {
+                  total: {
+                    value: 1,
+                    relation: 'eq',
+                  },
+                  max_score: 1,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'dd4fa2d4bd-692071252320857',
+                      _score: 1,
+                      _source: {
+                        source: {
+                          geo: {
+                            continent_name: 'North America',
+                            country_iso_code: 'US',
+                            location: {
+                              lon: -97.822,
+                              lat: 37.751,
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          },
+          {
+            key: '8.253.254.254',
+            doc_count: 1,
+            bytes_out: {
+              value: 442,
+            },
+            bytes_in: {
+              value: 0,
+            },
+            domain: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 0,
+              buckets: [],
+            },
+            autonomous_system: {
+              doc_count: 1,
+              top_as: {
+                hits: {
+                  total: {
+                    value: 1,
+                    relation: 'eq',
+                  },
+                  max_score: 1,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'dd4fa2d4bd-692200965121580',
+                      _score: 1,
+                      _source: {
+                        source: {
+                          as: {
+                            number: 3356,
+                            organization: {
+                              name: 'Level 3 Parent, LLC',
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+            location: {
+              doc_count: 1,
+              top_geo: {
+                hits: {
+                  total: {
+                    value: 1,
+                    relation: 'eq',
+                  },
+                  max_score: 1,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'dd4fa2d4bd-692200965121580',
+                      _score: 1,
+                      _source: {
+                        source: {
+                          geo: {
+                            continent_name: 'North America',
+                            country_iso_code: 'US',
+                            location: {
+                              lon: -97.822,
+                              lat: 37.751,
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          },
+          {
+            key: '10.100.0.1',
+            doc_count: 183,
+            bytes_out: {
+              value: 57686,
+            },
+            bytes_in: {
+              value: 0,
+            },
+            domain: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 0,
+              buckets: [
+                {
+                  key: 'cloud01-nyc2-ip.local.crowbird.com',
+                  doc_count: 183,
+                  timestamp: {
+                    value: 1563895699089,
+                    value_as_string: '2019-07-23T15:28:19.089Z',
+                  },
+                },
+              ],
+            },
+            autonomous_system: {
+              doc_count: 0,
+              top_as: {
+                hits: {
+                  total: {
+                    value: 0,
+                    relation: 'eq',
+                  },
+                  max_score: null,
+                  hits: [],
+                },
+              },
+            },
+            location: {
+              doc_count: 0,
+              top_geo: {
+                hits: {
+                  total: {
+                    value: 0,
+                    relation: 'eq',
+                  },
+                  max_score: null,
+                  hits: [],
+                },
+              },
+            },
+          },
+          {
+            key: '10.100.7.193',
+            doc_count: 32,
+            bytes_out: {
+              value: 11336,
+            },
+            bytes_in: {
+              value: 0,
+            },
+            domain: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 0,
+              buckets: [
+                {
+                  key: 'router.iot.sr.local.crowbird.com',
+                  doc_count: 32,
+                  timestamp: {
+                    value: 1563894153159,
+                    value_as_string: '2019-07-23T15:02:33.159Z',
+                  },
+                },
+              ],
+            },
+            autonomous_system: {
+              doc_count: 0,
+              top_as: {
+                hits: {
+                  total: {
+                    value: 0,
+                    relation: 'eq',
+                  },
+                  max_score: null,
+                  hits: [],
+                },
+              },
+            },
+            location: {
+              doc_count: 0,
+              top_geo: {
+                hits: {
+                  total: {
+                    value: 0,
+                    relation: 'eq',
+                  },
+                  max_score: null,
+                  hits: [],
+                },
+              },
+            },
+          },
+          {
+            key: '10.100.7.195',
+            doc_count: 424,
+            bytes_out: {
+              value: 16620,
+            },
+            bytes_in: {
+              value: 0,
+            },
+            domain: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 0,
+              buckets: [
+                {
+                  key: 'samsungtv-livingroom.iot.sr.local.crowbird.com',
+                  doc_count: 424,
+                  timestamp: {
+                    value: 1563855860977,
+                    value_as_string: '2019-07-23T04:24:20.977Z',
+                  },
+                },
+              ],
+            },
+            autonomous_system: {
+              doc_count: 0,
+              top_as: {
+                hits: {
+                  total: {
+                    value: 0,
+                    relation: 'eq',
+                  },
+                  max_score: null,
+                  hits: [],
+                },
+              },
+            },
+            location: {
+              doc_count: 0,
+              top_geo: {
+                hits: {
+                  total: {
+                    value: 0,
+                    relation: 'eq',
+                  },
+                  max_score: null,
+                  hits: [],
+                },
+              },
+            },
+          },
+          {
+            key: '10.100.7.196',
+            doc_count: 2561,
+            bytes_out: {
+              value: 116079,
+            },
+            bytes_in: {
+              value: 0,
+            },
+            domain: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 0,
+              buckets: [
+                {
+                  key: 'samsungtv-kitchen.iot.sr.local.crowbird.com',
+                  doc_count: 2561,
+                  timestamp: {
+                    value: 1563843109817,
+                    value_as_string: '2019-07-23T00:51:49.817Z',
+                  },
+                },
+              ],
+            },
+            autonomous_system: {
+              doc_count: 0,
+              top_as: {
+                hits: {
+                  total: {
+                    value: 0,
+                    relation: 'eq',
+                  },
+                  max_score: null,
+                  hits: [],
+                },
+              },
+            },
+            location: {
+              doc_count: 0,
+              top_geo: {
+                hits: {
+                  total: {
+                    value: 0,
+                    relation: 'eq',
+                  },
+                  max_score: null,
+                  hits: [],
+                },
+              },
+            },
+          },
+          {
+            key: '10.100.7.197',
+            doc_count: 3,
+            bytes_out: {
+              value: 636,
+            },
+            bytes_in: {
+              value: 0,
+            },
+            domain: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 0,
+              buckets: [
+                {
+                  key: 'appletv-livingroom.iot.sr.local.crowbird.com',
+                  doc_count: 3,
+                  timestamp: {
+                    value: 1563886951069,
+                    value_as_string: '2019-07-23T13:02:31.069Z',
+                  },
+                },
+              ],
+            },
+            autonomous_system: {
+              doc_count: 0,
+              top_as: {
+                hits: {
+                  total: {
+                    value: 0,
+                    relation: 'eq',
+                  },
+                  max_score: null,
+                  hits: [],
+                },
+              },
+            },
+            location: {
+              doc_count: 0,
+              top_geo: {
+                hits: {
+                  total: {
+                    value: 0,
+                    relation: 'eq',
+                  },
+                  max_score: null,
+                  hits: [],
+                },
+              },
+            },
+          },
+          {
+            key: '10.100.7.198',
+            doc_count: 48,
+            bytes_out: {
+              value: 26304,
+            },
+            bytes_in: {
+              value: 0,
+            },
+            domain: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 0,
+              buckets: [
+                {
+                  key: 'nest-frontdoor.iot.sr.local.crowbird.com',
+                  doc_count: 48,
+                  timestamp: {
+                    value: 1563894192704,
+                    value_as_string: '2019-07-23T15:03:12.704Z',
+                  },
+                },
+              ],
+            },
+            autonomous_system: {
+              doc_count: 0,
+              top_as: {
+                hits: {
+                  total: {
+                    value: 0,
+                    relation: 'eq',
+                  },
+                  max_score: null,
+                  hits: [],
+                },
+              },
+            },
+            location: {
+              doc_count: 0,
+              top_geo: {
+                hits: {
+                  total: {
+                    value: 0,
+                    relation: 'eq',
+                  },
+                  max_score: null,
+                  hits: [],
+                },
+              },
+            },
+          },
+          {
+            key: '10.100.7.199',
+            doc_count: 70,
+            bytes_out: {
+              value: 27216,
+            },
+            bytes_in: {
+              value: 0,
+            },
+            domain: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 0,
+              buckets: [
+                {
+                  key: 'smartthings-hub.iot.sr.local.crowbird.com',
+                  doc_count: 70,
+                  timestamp: {
+                    value: 1563895756415,
+                    value_as_string: '2019-07-23T15:29:16.415Z',
+                  },
+                },
+              ],
+            },
+            autonomous_system: {
+              doc_count: 0,
+              top_as: {
+                hits: {
+                  total: {
+                    value: 0,
+                    relation: 'eq',
+                  },
+                  max_score: null,
+                  hits: [],
+                },
+              },
+            },
+            location: {
+              doc_count: 0,
+              top_geo: {
+                hits: {
+                  total: {
+                    value: 0,
+                    relation: 'eq',
+                  },
+                  max_score: null,
+                  hits: [],
+                },
+              },
+            },
+          },
+          {
+            key: '10.100.7.254',
+            doc_count: 47,
+            bytes_out: {
+              value: 25756,
+            },
+            bytes_in: {
+              value: 0,
+            },
+            domain: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 0,
+              buckets: [],
+            },
+            autonomous_system: {
+              doc_count: 0,
+              top_as: {
+                hits: {
+                  total: {
+                    value: 0,
+                    relation: 'eq',
+                  },
+                  max_score: null,
+                  hits: [],
+                },
+              },
+            },
+            location: {
+              doc_count: 0,
+              top_geo: {
+                hits: {
+                  total: {
+                    value: 0,
+                    relation: 'eq',
+                  },
+                  max_score: null,
+                  hits: [],
+                },
+              },
+            },
+          },
+          {
+            key: '10.142.0.1',
+            doc_count: 453,
+            bytes_out: {
+              value: 81538,
+            },
+            bytes_in: {
+              value: 0,
+            },
+            domain: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 0,
+              buckets: [],
+            },
+            autonomous_system: {
+              doc_count: 0,
+              top_as: {
+                hits: {
+                  total: {
+                    value: 0,
+                    relation: 'eq',
+                  },
+                  max_score: null,
+                  hits: [],
+                },
+              },
+            },
+            location: {
+              doc_count: 0,
+              top_geo: {
+                hits: {
+                  total: {
+                    value: 0,
+                    relation: 'eq',
+                  },
+                  max_score: null,
+                  hits: [],
+                },
+              },
+            },
+          },
+          {
+            key: '10.142.0.2',
+            doc_count: 5741,
+            bytes_out: {
+              value: 144622385,
+            },
+            bytes_in: {
+              value: 0,
+            },
+            domain: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 0,
+              buckets: [
+                {
+                  key: 'siem-windows',
+                  doc_count: 5741,
+                  timestamp: {
+                    value: 1563895220357,
+                    value_as_string: '2019-07-23T15:20:20.357Z',
+                  },
+                },
+              ],
+            },
+            autonomous_system: {
+              doc_count: 0,
+              top_as: {
+                hits: {
+                  total: {
+                    value: 0,
+                    relation: 'eq',
+                  },
+                  max_score: null,
+                  hits: [],
+                },
+              },
+            },
+            location: {
+              doc_count: 0,
+              top_geo: {
+                hits: {
+                  total: {
+                    value: 0,
+                    relation: 'eq',
+                  },
+                  max_score: null,
+                  hits: [],
+                },
+              },
+            },
+          },
+          {
+            key: '10.142.0.5',
+            doc_count: 208,
+            bytes_out: {
+              value: 260581,
+            },
+            bytes_in: {
+              value: 0,
+            },
+            domain: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 0,
+              buckets: [
+                {
+                  key: 'infraops-docker-data',
+                  doc_count: 208,
+                  timestamp: {
+                    value: 1563895220339,
+                    value_as_string: '2019-07-23T15:20:20.339Z',
+                  },
+                },
+              ],
+            },
+            autonomous_system: {
+              doc_count: 0,
+              top_as: {
+                hits: {
+                  total: {
+                    value: 0,
+                    relation: 'eq',
+                  },
+                  max_score: null,
+                  hits: [],
+                },
+              },
+            },
+            location: {
+              doc_count: 0,
+              top_geo: {
+                hits: {
+                  total: {
+                    value: 0,
+                    relation: 'eq',
+                  },
+                  max_score: null,
+                  hits: [],
+                },
+              },
+            },
+          },
+          {
+            key: '10.142.0.7',
+            doc_count: 16546,
+            bytes_out: {
+              value: 1053237260,
+            },
+            bytes_in: {
+              value: 0,
+            },
+            domain: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 0,
+              buckets: [
+                {
+                  key: 'siem-kibana',
+                  doc_count: 16546,
+                  timestamp: {
+                    value: 1563895220357,
+                    value_as_string: '2019-07-23T15:20:20.357Z',
+                  },
+                },
+              ],
+            },
+            autonomous_system: {
+              doc_count: 0,
+              top_as: {
+                hits: {
+                  total: {
+                    value: 0,
+                    relation: 'eq',
+                  },
+                  max_score: null,
+                  hits: [],
+                },
+              },
+            },
+            location: {
+              doc_count: 0,
+              top_geo: {
+                hits: {
+                  total: {
+                    value: 0,
+                    relation: 'eq',
+                  },
+                  max_score: null,
+                  hits: [],
+                },
+              },
+            },
+          },
+        ],
+      },
+    },
+  },
+  'unified-bi': {
+    took: 153,
+    timed_out: false,
+    _shards: {
+      total: 28,
+      successful: 28,
+      skipped: 0,
+      failed: 0,
+    },
+    hits: {
+      max_score: null,
+      hits: [],
+    },
+    aggregations: {
+      destination: {
+        doc_count_error_upper_bound: -1,
+        sum_other_doc_count: 1924,
+        buckets: [
+          {
+            key: '10.100.7.197',
+            doc_count: 54,
+            bytes_out: {
+              value: 10977897,
+            },
+            bytes_in: {
+              value: 372031697,
+            },
+            domain: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 0,
+              buckets: [
+                {
+                  key: 'appletv-livingroom.iot.sr.local.crowbird.com',
+                  doc_count: 54,
+                  timestamp: {
+                    value: 1563895208003,
+                    value_as_string: '2019-07-23T15:20:08.003Z',
+                  },
+                },
+              ],
+            },
+            autonomous_system: {
+              doc_count: 0,
+              top_as: {
+                hits: {
+                  total: {
+                    value: 0,
+                    relation: 'eq',
+                  },
+                  max_score: null,
+                  hits: [],
+                },
+              },
+            },
+            location: {
+              doc_count: 0,
+              top_geo: {
+                hits: {
+                  total: {
+                    value: 0,
+                    relation: 'eq',
+                  },
+                  max_score: null,
+                  hits: [],
+                },
+              },
+            },
+          },
+          {
+            key: '63.88.73.76',
+            doc_count: 34,
+            bytes_out: {
+              value: 1841364423,
+            },
+            bytes_in: {
+              value: 61391425,
+            },
+            domain: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 0,
+              buckets: [
+                {
+                  key: '76.73.88.63.ashburn.google-ggc.verizon.com',
+                  doc_count: 34,
+                  timestamp: {
+                    value: 1563855852000,
+                    value_as_string: '2019-07-23T04:24:12.000Z',
+                  },
+                },
+                {
+                  key: 'r1---sn-8xgp1vo-p5ql.googlevideo.com',
+                  doc_count: 17,
+                  timestamp: {
+                    value: 1563855505000,
+                    value_as_string: '2019-07-23T04:18:25.000Z',
+                  },
+                },
+                {
+                  key: 'r1.sn-8xgp1vo-p5ql.googlevideo.com',
+                  doc_count: 5,
+                  timestamp: {
+                    value: 1563855141000,
+                    value_as_string: '2019-07-23T04:12:21.000Z',
+                  },
+                },
+              ],
+            },
+            autonomous_system: {
+              doc_count: 34,
+              top_as: {
+                hits: {
+                  total: {
+                    value: 34,
+                    relation: 'eq',
+                  },
+                  max_score: 2,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: '2xEOHWwBQrvXogoowLJh',
+                      _score: 2,
+                      _source: {
+                        destination: {
+                          as: {
+                            org: 'MCI Communications Services, Inc. d/b/a Verizon Business',
+                            num: 701,
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+            location: {
+              doc_count: 34,
+              top_geo: {
+                hits: {
+                  total: {
+                    value: 34,
+                    relation: 'eq',
+                  },
+                  max_score: 2,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: '2xEOHWwBQrvXogoowLJh',
+                      _score: 2,
+                      _source: {
+                        destination: {
+                          geo: {
+                            continent_name: 'North America',
+                            city_name: '',
+                            country_iso_code: 'US',
+                            location: {
+                              lon: -97.822,
+                              lat: 37.751,
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          },
+          {
+            key: '63.88.73.17',
+            doc_count: 18,
+            bytes_out: {
+              value: 1881475715,
+            },
+            bytes_in: {
+              value: 54057925,
+            },
+            domain: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 0,
+              buckets: [
+                {
+                  key: '17.73.88.63.ashburn.google-ggc.verizon.com',
+                  doc_count: 18,
+                  timestamp: {
+                    value: 1563853477000,
+                    value_as_string: '2019-07-23T03:44:37.000Z',
+                  },
+                },
+                {
+                  key: 'r6---sn-8xgp1vo-p5qe.googlevideo.com',
+                  doc_count: 3,
+                  timestamp: {
+                    value: 1563852138000,
+                    value_as_string: '2019-07-23T03:22:18.000Z',
+                  },
+                },
+              ],
+            },
+            autonomous_system: {
+              doc_count: 18,
+              top_as: {
+                hits: {
+                  total: {
+                    value: 18,
+                    relation: 'eq',
+                  },
+                  max_score: 2,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'uxDuHGwBQrvXogooY5tK',
+                      _score: 2,
+                      _source: {
+                        destination: {
+                          as: {
+                            org: 'MCI Communications Services, Inc. d/b/a Verizon Business',
+                            num: 701,
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+            location: {
+              doc_count: 18,
+              top_geo: {
+                hits: {
+                  total: {
+                    value: 18,
+                    relation: 'eq',
+                  },
+                  max_score: 2,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'uxDuHGwBQrvXogooY5tK',
+                      _score: 2,
+                      _source: {
+                        destination: {
+                          geo: {
+                            continent_name: 'North America',
+                            city_name: '',
+                            country_iso_code: 'US',
+                            location: {
+                              lon: -97.822,
+                              lat: 37.751,
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          },
+          {
+            key: '45.57.63.168',
+            doc_count: 5,
+            bytes_out: {
+              value: 2495262552,
+            },
+            bytes_in: {
+              value: 39482002,
+            },
+            domain: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 0,
+              buckets: [
+                {
+                  key: 'ipv4_1.mce0.c102.was001.ix.nflxvideo.net',
+                  doc_count: 5,
+                  timestamp: {
+                    value: 1563836193000,
+                    value_as_string: '2019-07-22T22:56:33.000Z',
+                  },
+                },
+                {
+                  key: 'ipv4-c102-was001-ix.1.oca.nflxvideo.net',
+                  doc_count: 1,
+                  timestamp: {
+                    value: 1563832955000,
+                    value_as_string: '2019-07-22T22:02:35.000Z',
+                  },
+                },
+              ],
+            },
+            autonomous_system: {
+              doc_count: 5,
+              top_as: {
+                hits: {
+                  total: {
+                    value: 5,
+                    relation: 'eq',
+                  },
+                  max_score: 2,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'jQbkG2wBQrvXogoorXVG',
+                      _score: 2,
+                      _source: {
+                        destination: {
+                          as: {
+                            org: 'Netflix Streaming Services Inc.',
+                            num: 2906,
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+            location: {
+              doc_count: 5,
+              top_geo: {
+                hits: {
+                  total: {
+                    value: 5,
+                    relation: 'eq',
+                  },
+                  max_score: 2,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'jQbkG2wBQrvXogoorXVG',
+                      _score: 2,
+                      _source: {
+                        destination: {
+                          geo: {
+                            continent_name: 'North America',
+                            city_name: '',
+                            country_iso_code: 'US',
+                            location: {
+                              lon: -97.822,
+                              lat: 37.751,
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          },
+          {
+            key: '45.57.62.188',
+            doc_count: 9,
+            bytes_out: {
+              value: 2617096335,
+            },
+            bytes_in: {
+              value: 37344825,
+            },
+            domain: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 0,
+              buckets: [
+                {
+                  key: 'ipv4_1.mce0.c086.was001.ix.nflxvideo.net',
+                  doc_count: 9,
+                  timestamp: {
+                    value: 1563839425001,
+                    value_as_string: '2019-07-22T23:50:25.001Z',
+                  },
+                },
+                {
+                  key: 'ipv4-c086-was001-ix.1.oca.nflxvideo.net',
+                  doc_count: 2,
+                  timestamp: {
+                    value: 1563835899000,
+                    value_as_string: '2019-07-22T22:51:39.000Z',
+                  },
+                },
+              ],
+            },
+            autonomous_system: {
+              doc_count: 9,
+              top_as: {
+                hits: {
+                  total: {
+                    value: 9,
+                    relation: 'eq',
+                  },
+                  max_score: 2,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: '6wboG2wBQrvXogoozZ7P',
+                      _score: 2,
+                      _source: {
+                        destination: {
+                          as: {
+                            org: 'Netflix Streaming Services Inc.',
+                            num: 2906,
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+            location: {
+              doc_count: 9,
+              top_geo: {
+                hits: {
+                  total: {
+                    value: 9,
+                    relation: 'eq',
+                  },
+                  max_score: 2,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: '6wboG2wBQrvXogoozZ7P',
+                      _score: 2,
+                      _source: {
+                        destination: {
+                          geo: {
+                            continent_name: 'North America',
+                            city_name: '',
+                            country_iso_code: 'US',
+                            location: {
+                              lon: -97.822,
+                              lat: 37.751,
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          },
+          {
+            key: '63.88.73.13',
+            doc_count: 24,
+            bytes_out: {
+              value: 1135948050,
+            },
+            bytes_in: {
+              value: 33714266,
+            },
+            domain: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 0,
+              buckets: [
+                {
+                  key: '13.73.88.63.ashburn.google-ggc.verizon.com',
+                  doc_count: 24,
+                  timestamp: {
+                    value: 1563849342000,
+                    value_as_string: '2019-07-23T02:35:42.000Z',
+                  },
+                },
+                {
+                  key: 'r2.sn-8xgp1vo-p5qe.googlevideo.com',
+                  doc_count: 2,
+                  timestamp: {
+                    value: 1563848655000,
+                    value_as_string: '2019-07-23T02:24:15.000Z',
+                  },
+                },
+                {
+                  key: 'r2---sn-8xgp1vo-p5qe.googlevideo.com',
+                  doc_count: 3,
+                  timestamp: {
+                    value: 1563846818000,
+                    value_as_string: '2019-07-23T01:53:38.000Z',
+                  },
+                },
+              ],
+            },
+            autonomous_system: {
+              doc_count: 24,
+              top_as: {
+                hits: {
+                  total: {
+                    value: 24,
+                    relation: 'eq',
+                  },
+                  max_score: 2,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'uw2GHGwBQrvXogoo1gI7',
+                      _score: 2,
+                      _source: {
+                        destination: {
+                          as: {
+                            org: 'MCI Communications Services, Inc. d/b/a Verizon Business',
+                            num: 701,
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+            location: {
+              doc_count: 24,
+              top_geo: {
+                hits: {
+                  total: {
+                    value: 24,
+                    relation: 'eq',
+                  },
+                  max_score: 2,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'uw2GHGwBQrvXogoo1gI7',
+                      _score: 2,
+                      _source: {
+                        destination: {
+                          geo: {
+                            continent_name: 'North America',
+                            city_name: '',
+                            country_iso_code: 'US',
+                            location: {
+                              lon: -97.822,
+                              lat: 37.751,
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          },
+          {
+            key: '45.57.63.172',
+            doc_count: 16,
+            bytes_out: {
+              value: 2185412187,
+            },
+            bytes_in: {
+              value: 30971586,
+            },
+            domain: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 0,
+              buckets: [
+                {
+                  key: 'ipv4_1.mce0.c106.was001.ix.nflxvideo.net',
+                  doc_count: 16,
+                  timestamp: {
+                    value: 1563833785000,
+                    value_as_string: '2019-07-22T22:16:25.000Z',
+                  },
+                },
+                {
+                  key: 'ipv4-c106-was001-ix.1.oca.nflxvideo.net',
+                  doc_count: 14,
+                  timestamp: {
+                    value: 1563831109000,
+                    value_as_string: '2019-07-22T21:31:49.000Z',
+                  },
+                },
+              ],
+            },
+            autonomous_system: {
+              doc_count: 16,
+              top_as: {
+                hits: {
+                  total: {
+                    value: 16,
+                    relation: 'eq',
+                  },
+                  max_score: 2,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'HwTBG2wBQrvXogoo3d6J',
+                      _score: 2,
+                      _source: {
+                        destination: {
+                          as: {
+                            org: 'Netflix Streaming Services Inc.',
+                            num: 2906,
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+            location: {
+              doc_count: 16,
+              top_geo: {
+                hits: {
+                  total: {
+                    value: 16,
+                    relation: 'eq',
+                  },
+                  max_score: 2,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'HwTBG2wBQrvXogoo3d6J',
+                      _score: 2,
+                      _source: {
+                        destination: {
+                          geo: {
+                            continent_name: 'North America',
+                            city_name: '',
+                            country_iso_code: 'US',
+                            location: {
+                              lon: -97.822,
+                              lat: 37.751,
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          },
+          {
+            key: '63.88.73.140',
+            doc_count: 907,
+            bytes_out: {
+              value: 692399561,
+            },
+            bytes_in: {
+              value: 29750376,
+            },
+            domain: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 0,
+              buckets: [
+                {
+                  key: '140.73.88.63.ashburn.google-ggc.verizon.com',
+                  doc_count: 907,
+                  timestamp: {
+                    value: 1563847154000,
+                    value_as_string: '2019-07-23T01:59:14.000Z',
+                  },
+                },
+                {
+                  key: 'r1.sn-8xgp1vo-p5qs.googlevideo.com',
+                  doc_count: 96,
+                  timestamp: {
+                    value: 1563846554000,
+                    value_as_string: '2019-07-23T01:49:14.000Z',
+                  },
+                },
+                {
+                  key: 'r1---sn-8xgp1vo-p5qs.googlevideo.com',
+                  doc_count: 23,
+                  timestamp: {
+                    value: 1563844453000,
+                    value_as_string: '2019-07-23T01:14:13.000Z',
+                  },
+                },
+              ],
+            },
+            autonomous_system: {
+              doc_count: 907,
+              top_as: {
+                hits: {
+                  total: {
+                    value: 907,
+                    relation: 'eq',
+                  },
+                  max_score: 2,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'Tgx-HGwBQrvXogooi6vk',
+                      _score: 2,
+                      _source: {
+                        destination: {
+                          as: {
+                            org: 'MCI Communications Services, Inc. d/b/a Verizon Business',
+                            num: 701,
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+            location: {
+              doc_count: 907,
+              top_geo: {
+                hits: {
+                  total: {
+                    value: 907,
+                    relation: 'eq',
+                  },
+                  max_score: 2,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'Tgx-HGwBQrvXogooi6vk',
+                      _score: 2,
+                      _source: {
+                        destination: {
+                          geo: {
+                            continent_name: 'North America',
+                            city_name: '',
+                            country_iso_code: 'US',
+                            location: {
+                              lon: -97.822,
+                              lat: 37.751,
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          },
+          {
+            key: '45.57.63.187',
+            doc_count: 6,
+            bytes_out: {
+              value: 1031544713,
+            },
+            bytes_in: {
+              value: 15244446,
+            },
+            domain: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 0,
+              buckets: [
+                {
+                  key: 'ipv4_1.mce0.c121.was001.ix.nflxvideo.net',
+                  doc_count: 6,
+                  timestamp: {
+                    value: 1563840373000,
+                    value_as_string: '2019-07-23T00:06:13.000Z',
+                  },
+                },
+                {
+                  key: 'ipv4-c121-was001-ix.1.oca.nflxvideo.net',
+                  doc_count: 2,
+                  timestamp: {
+                    value: 1563838598000,
+                    value_as_string: '2019-07-22T23:36:38.000Z',
+                  },
+                },
+              ],
+            },
+            autonomous_system: {
+              doc_count: 6,
+              top_as: {
+                hits: {
+                  total: {
+                    value: 6,
+                    relation: 'eq',
+                  },
+                  max_score: 2,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'NggQHGwBQrvXogooLybq',
+                      _score: 2,
+                      _source: {
+                        destination: {
+                          as: {
+                            org: 'Netflix Streaming Services Inc.',
+                            num: 2906,
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+            location: {
+              doc_count: 6,
+              top_geo: {
+                hits: {
+                  total: {
+                    value: 6,
+                    relation: 'eq',
+                  },
+                  max_score: 2,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'NggQHGwBQrvXogooLybq',
+                      _score: 2,
+                      _source: {
+                        destination: {
+                          geo: {
+                            continent_name: 'North America',
+                            city_name: '',
+                            country_iso_code: 'US',
+                            location: {
+                              lon: -97.822,
+                              lat: 37.751,
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          },
+          {
+            key: '63.88.73.19',
+            doc_count: 12,
+            bytes_out: {
+              value: 481783258,
+            },
+            bytes_in: {
+              value: 11528129,
+            },
+            domain: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 0,
+              buckets: [
+                {
+                  key: '19.73.88.63.ashburn.google-ggc.verizon.com',
+                  doc_count: 12,
+                  timestamp: {
+                    value: 1563842631000,
+                    value_as_string: '2019-07-23T00:43:51.000Z',
+                  },
+                },
+                {
+                  key: 'r8---sn-8xgp1vo-p5qe.googlevideo.com',
+                  doc_count: 10,
+                  timestamp: {
+                    value: 1563842631000,
+                    value_as_string: '2019-07-23T00:43:51.000Z',
+                  },
+                },
+              ],
+            },
+            autonomous_system: {
+              doc_count: 12,
+              top_as: {
+                hits: {
+                  total: {
+                    value: 12,
+                    relation: 'eq',
+                  },
+                  max_score: 2,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: '6wk9HGwBQrvXogooU-V9',
+                      _score: 2,
+                      _source: {
+                        destination: {
+                          as: {
+                            org: 'MCI Communications Services, Inc. d/b/a Verizon Business',
+                            num: 701,
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+            location: {
+              doc_count: 12,
+              top_geo: {
+                hits: {
+                  total: {
+                    value: 12,
+                    relation: 'eq',
+                  },
+                  max_score: 2,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: '6wk9HGwBQrvXogooU-V9',
+                      _score: 2,
+                      _source: {
+                        destination: {
+                          geo: {
+                            continent_name: 'North America',
+                            city_name: '',
+                            country_iso_code: 'US',
+                            location: {
+                              lon: -97.822,
+                              lat: 37.751,
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          },
+          {
+            key: '63.88.73.82',
+            doc_count: 7,
+            bytes_out: {
+              value: 322200234,
+            },
+            bytes_in: {
+              value: 10068333,
+            },
+            domain: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 0,
+              buckets: [
+                {
+                  key: '82.73.88.63.ashburn.google-ggc.verizon.com',
+                  doc_count: 7,
+                  timestamp: {
+                    value: 1563856809002,
+                    value_as_string: '2019-07-23T04:40:09.002Z',
+                  },
+                },
+              ],
+            },
+            autonomous_system: {
+              doc_count: 7,
+              top_as: {
+                hits: {
+                  total: {
+                    value: 7,
+                    relation: 'eq',
+                  },
+                  max_score: 2,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'kxIeHWwBQrvXogoomzsA',
+                      _score: 2,
+                      _source: {
+                        destination: {
+                          as: {
+                            org: 'MCI Communications Services, Inc. d/b/a Verizon Business',
+                            num: 701,
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+            location: {
+              doc_count: 7,
+              top_geo: {
+                hits: {
+                  total: {
+                    value: 7,
+                    relation: 'eq',
+                  },
+                  max_score: 2,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'kxIeHWwBQrvXogoomzsA',
+                      _score: 2,
+                      _source: {
+                        destination: {
+                          geo: {
+                            continent_name: 'North America',
+                            city_name: '',
+                            country_iso_code: 'US',
+                            location: {
+                              lon: -97.822,
+                              lat: 37.751,
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          },
+          {
+            key: '34.195.26.49',
+            doc_count: 1,
+            bytes_out: {
+              value: 1882295,
+            },
+            bytes_in: {
+              value: 5030207,
+            },
+            domain: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 0,
+              buckets: [
+                {
+                  key: 'ec2-34-195-26-49.compute-1.amazonaws.com',
+                  doc_count: 1,
+                  timestamp: {
+                    value: 1563844439003,
+                    value_as_string: '2019-07-23T01:13:59.003Z',
+                  },
+                },
+              ],
+            },
+            autonomous_system: {
+              doc_count: 1,
+              top_as: {
+                hits: {
+                  total: {
+                    value: 1,
+                    relation: 'eq',
+                  },
+                  max_score: 2,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'ewtkHGwBQrvXogood32I',
+                      _score: 2,
+                      _source: {
+                        destination: {
+                          as: {
+                            org: 'Amazon.com, Inc.',
+                            num: 14618,
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+            location: {
+              doc_count: 1,
+              top_geo: {
+                hits: {
+                  total: {
+                    value: 1,
+                    relation: 'eq',
+                  },
+                  max_score: 2,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'ewtkHGwBQrvXogood32I',
+                      _score: 2,
+                      _source: {
+                        destination: {
+                          geo: {
+                            continent_name: 'North America',
+                            city_name: 'Ashburn',
+                            country_iso_code: 'US',
+                            region_name: 'Virginia',
+                            location: {
+                              lon: -77.4728,
+                              lat: 39.0481,
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          },
+          {
+            key: '10.100.7.196',
+            doc_count: 32,
+            bytes_out: {
+              value: 159466,
+            },
+            bytes_in: {
+              value: 3928524,
+            },
+            domain: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 0,
+              buckets: [
+                {
+                  key: 'samsungtv-kitchen.iot.sr.local.crowbird.com',
+                  doc_count: 32,
+                  timestamp: {
+                    value: 1563847176000,
+                    value_as_string: '2019-07-23T01:59:36.000Z',
+                  },
+                },
+              ],
+            },
+            autonomous_system: {
+              doc_count: 0,
+              top_as: {
+                hits: {
+                  total: {
+                    value: 0,
+                    relation: 'eq',
+                  },
+                  max_score: null,
+                  hits: [],
+                },
+              },
+            },
+            location: {
+              doc_count: 0,
+              top_geo: {
+                hits: {
+                  total: {
+                    value: 0,
+                    relation: 'eq',
+                  },
+                  max_score: null,
+                  hits: [],
+                },
+              },
+            },
+          },
+          {
+            key: '213.205.38.32',
+            doc_count: 23,
+            bytes_out: {
+              value: 168639264,
+            },
+            bytes_in: {
+              value: 3376882,
+            },
+            domain: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 0,
+              buckets: [
+                {
+                  key: 'www.oxid.it',
+                  doc_count: 3,
+                  timestamp: {
+                    value: 1563861467409,
+                    value_as_string: '2019-07-23T05:57:47.409Z',
+                  },
+                },
+              ],
+            },
+            autonomous_system: {
+              doc_count: 0,
+              top_as: {
+                hits: {
+                  total: {
+                    value: 0,
+                    relation: 'eq',
+                  },
+                  max_score: null,
+                  hits: [],
+                },
+              },
+            },
+            location: {
+              doc_count: 0,
+              top_geo: {
+                hits: {
+                  total: {
+                    value: 0,
+                    relation: 'eq',
+                  },
+                  max_score: null,
+                  hits: [],
+                },
+              },
+            },
+          },
+          {
+            key: '52.0.212.188',
+            doc_count: 3,
+            bytes_out: {
+              value: 1726744,
+            },
+            bytes_in: {
+              value: 1554311,
+            },
+            domain: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 0,
+              buckets: [
+                {
+                  key: 'api-global.netflix.com',
+                  doc_count: 3,
+                  timestamp: {
+                    value: 1563839905000,
+                    value_as_string: '2019-07-22T23:58:25.000Z',
+                  },
+                },
+                {
+                  key: 'ec2-52-0-212-188.compute-1.amazonaws.com',
+                  doc_count: 3,
+                  timestamp: {
+                    value: 1563839905000,
+                    value_as_string: '2019-07-22T23:58:25.000Z',
+                  },
+                },
+              ],
+            },
+            autonomous_system: {
+              doc_count: 3,
+              top_as: {
+                hits: {
+                  total: {
+                    value: 3,
+                    relation: 'eq',
+                  },
+                  max_score: 2,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'JgOZG2wBQrvXogoocgDm',
+                      _score: 2,
+                      _source: {
+                        destination: {
+                          as: {
+                            org: 'Amazon.com, Inc.',
+                            num: 14618,
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+            location: {
+              doc_count: 3,
+              top_geo: {
+                hits: {
+                  total: {
+                    value: 3,
+                    relation: 'eq',
+                  },
+                  max_score: 2,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'JgOZG2wBQrvXogoocgDm',
+                      _score: 2,
+                      _source: {
+                        destination: {
+                          geo: {
+                            continent_name: 'North America',
+                            city_name: 'Ashburn',
+                            country_iso_code: 'US',
+                            region_name: 'Virginia',
+                            location: {
+                              lon: -77.4728,
+                              lat: 39.0481,
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          },
+          {
+            key: '172.217.3.110',
+            doc_count: 10,
+            bytes_out: {
+              value: 2953847,
+            },
+            bytes_in: {
+              value: 908295,
+            },
+            domain: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 0,
+              buckets: [
+                {
+                  key: 'lga34s18-in-f14.1e100.net',
+                  doc_count: 10,
+                  timestamp: {
+                    value: 1563847870000,
+                    value_as_string: '2019-07-23T02:11:10.000Z',
+                  },
+                },
+                {
+                  key: 'youtube-ui.l.google.com',
+                  doc_count: 2,
+                  timestamp: {
+                    value: 1563847870000,
+                    value_as_string: '2019-07-23T02:11:10.000Z',
+                  },
+                },
+                {
+                  key: 'www.youtube.com',
+                  doc_count: 1,
+                  timestamp: {
+                    value: 1563844410001,
+                    value_as_string: '2019-07-23T01:13:30.001Z',
+                  },
+                },
+                {
+                  key: 'i9.ytimg.com',
+                  doc_count: 1,
+                  timestamp: {
+                    value: 1563840248002,
+                    value_as_string: '2019-07-23T00:04:08.002Z',
+                  },
+                },
+              ],
+            },
+            autonomous_system: {
+              doc_count: 10,
+              top_as: {
+                hits: {
+                  total: {
+                    value: 10,
+                    relation: 'eq',
+                  },
+                  max_score: 2,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'aQ2KHGwBQrvXogooGSGQ',
+                      _score: 2,
+                      _source: {
+                        destination: {
+                          as: {
+                            org: 'Google LLC',
+                            num: 15169,
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+            location: {
+              doc_count: 10,
+              top_geo: {
+                hits: {
+                  total: {
+                    value: 10,
+                    relation: 'eq',
+                  },
+                  max_score: 2,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'aQ2KHGwBQrvXogooGSGQ',
+                      _score: 2,
+                      _source: {
+                        destination: {
+                          geo: {
+                            continent_name: 'North America',
+                            city_name: '',
+                            country_iso_code: 'US',
+                            location: {
+                              lon: -97.822,
+                              lat: 37.751,
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          },
+          {
+            key: '52.203.91.94',
+            doc_count: 499,
+            bytes_out: {
+              value: 2125521,
+            },
+            bytes_in: {
+              value: 678068,
+            },
+            domain: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 0,
+              buckets: [
+                {
+                  key: 'api.smartthings.com',
+                  doc_count: 493,
+                  timestamp: {
+                    value: 1563895758000,
+                    value_as_string: '2019-07-23T15:29:18.000Z',
+                  },
+                },
+                {
+                  key: 'ec2-52-203-91-94.compute-1.amazonaws.com',
+                  doc_count: 499,
+                  timestamp: {
+                    value: 1563895758000,
+                    value_as_string: '2019-07-23T15:29:18.000Z',
+                  },
+                },
+              ],
+            },
+            autonomous_system: {
+              doc_count: 499,
+              top_as: {
+                hits: {
+                  total: {
+                    value: 499,
+                    relation: 'eq',
+                  },
+                  max_score: 2,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'Qx6eHmwBQrvXogooJRuV',
+                      _score: 2,
+                      _source: {
+                        destination: {
+                          as: {
+                            org: 'Amazon.com, Inc.',
+                            num: 14618,
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+            location: {
+              doc_count: 499,
+              top_geo: {
+                hits: {
+                  total: {
+                    value: 499,
+                    relation: 'eq',
+                  },
+                  max_score: 2,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'Qx6eHmwBQrvXogooJRuV',
+                      _score: 2,
+                      _source: {
+                        destination: {
+                          geo: {
+                            continent_name: 'North America',
+                            city_name: 'Ashburn',
+                            country_iso_code: 'US',
+                            region_name: 'Virginia',
+                            location: {
+                              lon: -77.4728,
+                              lat: 39.0481,
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          },
+          {
+            key: '34.192.161.213',
+            doc_count: 489,
+            bytes_out: {
+              value: 2082462,
+            },
+            bytes_in: {
+              value: 663914,
+            },
+            domain: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 0,
+              buckets: [
+                {
+                  key: 'api.smartthings.com',
+                  doc_count: 486,
+                  timestamp: {
+                    value: 1563895698000,
+                    value_as_string: '2019-07-23T15:28:18.000Z',
+                  },
+                },
+                {
+                  key: 'ec2-34-192-161-213.compute-1.amazonaws.com',
+                  doc_count: 489,
+                  timestamp: {
+                    value: 1563895698000,
+                    value_as_string: '2019-07-23T15:28:18.000Z',
+                  },
+                },
+              ],
+            },
+            autonomous_system: {
+              doc_count: 489,
+              top_as: {
+                hits: {
+                  total: {
+                    value: 489,
+                    relation: 'eq',
+                  },
+                  max_score: 2,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'gh6cHmwBQrvXogooRg2H',
+                      _score: 2,
+                      _source: {
+                        destination: {
+                          as: {
+                            org: 'Amazon.com, Inc.',
+                            num: 14618,
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+            location: {
+              doc_count: 489,
+              top_geo: {
+                hits: {
+                  total: {
+                    value: 489,
+                    relation: 'eq',
+                  },
+                  max_score: 2,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'gh6cHmwBQrvXogooRg2H',
+                      _score: 2,
+                      _source: {
+                        destination: {
+                          geo: {
+                            continent_name: 'North America',
+                            city_name: 'Ashburn',
+                            country_iso_code: 'US',
+                            region_name: 'Virginia',
+                            location: {
+                              lon: -77.4728,
+                              lat: 39.0481,
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          },
+          {
+            key: '45.57.63.180',
+            doc_count: 4,
+            bytes_out: {
+              value: 33345425,
+            },
+            bytes_in: {
+              value: 640885,
+            },
+            domain: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 0,
+              buckets: [
+                {
+                  key: 'ipv4_1.mce0.c114.was001.ix.nflxvideo.net',
+                  doc_count: 4,
+                  timestamp: {
+                    value: 1563836193000,
+                    value_as_string: '2019-07-22T22:56:33.000Z',
+                  },
+                },
+                {
+                  key: 'ipv4-c114-was001-ix.1.oca.nflxvideo.net',
+                  doc_count: 2,
+                  timestamp: {
+                    value: 1563832950000,
+                    value_as_string: '2019-07-22T22:02:30.000Z',
+                  },
+                },
+              ],
+            },
+            autonomous_system: {
+              doc_count: 4,
+              top_as: {
+                hits: {
+                  total: {
+                    value: 4,
+                    relation: 'eq',
+                  },
+                  max_score: 2,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'tQbkG2wBQrvXogoouXV4',
+                      _score: 2,
+                      _source: {
+                        destination: {
+                          as: {
+                            org: 'Netflix Streaming Services Inc.',
+                            num: 2906,
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+            location: {
+              doc_count: 4,
+              top_geo: {
+                hits: {
+                  total: {
+                    value: 4,
+                    relation: 'eq',
+                  },
+                  max_score: 2,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'tQbkG2wBQrvXogoouXV4',
+                      _score: 2,
+                      _source: {
+                        destination: {
+                          geo: {
+                            continent_name: 'North America',
+                            city_name: '',
+                            country_iso_code: 'US',
+                            location: {
+                              lon: -97.822,
+                              lat: 37.751,
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          },
+          {
+            key: '23.60.96.146',
+            doc_count: 2,
+            bytes_out: {
+              value: 45423733,
+            },
+            bytes_in: {
+              value: 639948,
+            },
+            domain: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 0,
+              buckets: [
+                {
+                  key: 'a23-60-96-146.deploy.static.akamaitechnologies.com',
+                  doc_count: 2,
+                  timestamp: {
+                    value: 1563831040000,
+                    value_as_string: '2019-07-22T21:30:40.000Z',
+                  },
+                },
+                {
+                  key: 'apps.samsungcloudcdn.com',
+                  doc_count: 2,
+                  timestamp: {
+                    value: 1563831040000,
+                    value_as_string: '2019-07-22T21:30:40.000Z',
+                  },
+                },
+              ],
+            },
+            autonomous_system: {
+              doc_count: 2,
+              top_as: {
+                hits: {
+                  total: {
+                    value: 2,
+                    relation: 'eq',
+                  },
+                  max_score: 2,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'lwKYG2wBQrvXogooBesc',
+                      _score: 2,
+                      _source: {
+                        destination: {
+                          as: {
+                            org: 'Akamai International B.V.',
+                            num: 20940,
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+            location: {
+              doc_count: 2,
+              top_geo: {
+                hits: {
+                  total: {
+                    value: 2,
+                    relation: 'eq',
+                  },
+                  max_score: 2,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'lwKYG2wBQrvXogooBesc',
+                      _score: 2,
+                      _source: {
+                        destination: {
+                          geo: {
+                            continent_name: 'North America',
+                            city_name: '',
+                            country_iso_code: 'US',
+                            location: {
+                              lon: -97.822,
+                              lat: 37.751,
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          },
+          {
+            key: '172.217.10.65',
+            doc_count: 75,
+            bytes_out: {
+              value: 15917425,
+            },
+            bytes_in: {
+              value: 628500,
+            },
+            domain: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 0,
+              buckets: [
+                {
+                  key: 'lga34s14-in-f1.1e100.net',
+                  doc_count: 75,
+                  timestamp: {
+                    value: 1563880199003,
+                    value_as_string: '2019-07-23T11:09:59.003Z',
+                  },
+                },
+                {
+                  key: 'yt3.ggpht.com',
+                  doc_count: 3,
+                  timestamp: {
+                    value: 1563842630001,
+                    value_as_string: '2019-07-23T00:43:50.001Z',
+                  },
+                },
+              ],
+            },
+            autonomous_system: {
+              doc_count: 75,
+              top_as: {
+                hits: {
+                  total: {
+                    value: 75,
+                    relation: 'eq',
+                  },
+                  max_score: 2,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'GBxvHmwBQrvXogoo4MVy',
+                      _score: 2,
+                      _source: {
+                        destination: {
+                          as: {
+                            org: 'Google LLC',
+                            num: 15169,
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+            location: {
+              doc_count: 75,
+              top_geo: {
+                hits: {
+                  total: {
+                    value: 75,
+                    relation: 'eq',
+                  },
+                  max_score: 2,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'GBxvHmwBQrvXogoo4MVy',
+                      _score: 2,
+                      _source: {
+                        destination: {
+                          geo: {
+                            continent_name: 'North America',
+                            city_name: '',
+                            country_iso_code: 'US',
+                            location: {
+                              lon: -97.822,
+                              lat: 37.751,
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          },
+          {
+            key: '34.194.52.159',
+            doc_count: 448,
+            bytes_out: {
+              value: 1908273,
+            },
+            bytes_in: {
+              value: 607862,
+            },
+            domain: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 0,
+              buckets: [
+                {
+                  key: 'api.smartthings.com',
+                  doc_count: 443,
+                  timestamp: {
+                    value: 1563895518000,
+                    value_as_string: '2019-07-23T15:25:18.000Z',
+                  },
+                },
+                {
+                  key: 'ec2-34-194-52-159.compute-1.amazonaws.com',
+                  doc_count: 448,
+                  timestamp: {
+                    value: 1563895518000,
+                    value_as_string: '2019-07-23T15:25:18.000Z',
+                  },
+                },
+              ],
+            },
+            autonomous_system: {
+              doc_count: 448,
+              top_as: {
+                hits: {
+                  total: {
+                    value: 448,
+                    relation: 'eq',
+                  },
+                  max_score: 2,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'CB6bHmwBQrvXogooXwd0',
+                      _score: 2,
+                      _source: {
+                        destination: {
+                          as: {
+                            org: 'Amazon.com, Inc.',
+                            num: 14618,
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+            location: {
+              doc_count: 448,
+              top_geo: {
+                hits: {
+                  total: {
+                    value: 448,
+                    relation: 'eq',
+                  },
+                  max_score: 2,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'CB6bHmwBQrvXogooXwd0',
+                      _score: 2,
+                      _source: {
+                        destination: {
+                          geo: {
+                            continent_name: 'North America',
+                            city_name: 'Ashburn',
+                            country_iso_code: 'US',
+                            region_name: 'Virginia',
+                            location: {
+                              lon: -77.4728,
+                              lat: 39.0481,
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          },
+          {
+            key: '172.217.6.238',
+            doc_count: 1,
+            bytes_out: {
+              value: 2512225,
+            },
+            bytes_in: {
+              value: 603857,
+            },
+            domain: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 0,
+              buckets: [
+                {
+                  key: 'lga25s55-in-f14.1e100.net',
+                  doc_count: 1,
+                  timestamp: {
+                    value: 1563846908000,
+                    value_as_string: '2019-07-23T01:55:08.000Z',
+                  },
+                },
+              ],
+            },
+            autonomous_system: {
+              doc_count: 1,
+              top_as: {
+                hits: {
+                  total: {
+                    value: 1,
+                    relation: 'eq',
+                  },
+                  max_score: 2,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'eA2KHGwBQrvXogooICFz',
+                      _score: 2,
+                      _source: {
+                        destination: {
+                          as: {
+                            org: 'Google LLC',
+                            num: 15169,
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+            location: {
+              doc_count: 1,
+              top_geo: {
+                hits: {
+                  total: {
+                    value: 1,
+                    relation: 'eq',
+                  },
+                  max_score: 2,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'eA2KHGwBQrvXogooICFz',
+                      _score: 2,
+                      _source: {
+                        destination: {
+                          geo: {
+                            continent_name: 'North America',
+                            city_name: '',
+                            country_iso_code: 'US',
+                            location: {
+                              lon: -97.822,
+                              lat: 37.751,
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          },
+          {
+            key: '172.217.12.174',
+            doc_count: 2,
+            bytes_out: {
+              value: 2216721,
+            },
+            bytes_in: {
+              value: 578380,
+            },
+            domain: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 0,
+              buckets: [
+                {
+                  key: 'lga25s62-in-f14.1e100.net',
+                  doc_count: 2,
+                  timestamp: {
+                    value: 1563849201000,
+                    value_as_string: '2019-07-23T02:33:21.000Z',
+                  },
+                },
+                {
+                  key: 'www.youtube.com',
+                  doc_count: 1,
+                  timestamp: {
+                    value: 1563849201000,
+                    value_as_string: '2019-07-23T02:33:21.000Z',
+                  },
+                },
+                {
+                  key: 'i9.ytimg.com',
+                  doc_count: 1,
+                  timestamp: {
+                    value: 1563842630000,
+                    value_as_string: '2019-07-23T00:43:50.000Z',
+                  },
+                },
+              ],
+            },
+            autonomous_system: {
+              doc_count: 2,
+              top_as: {
+                hits: {
+                  total: {
+                    value: 2,
+                    relation: 'eq',
+                  },
+                  max_score: 2,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'zQpIHGwBQrvXogoo41RG',
+                      _score: 2,
+                      _source: {
+                        destination: {
+                          as: {
+                            org: 'Google LLC',
+                            num: 15169,
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+            location: {
+              doc_count: 2,
+              top_geo: {
+                hits: {
+                  total: {
+                    value: 2,
+                    relation: 'eq',
+                  },
+                  max_score: 2,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'zQpIHGwBQrvXogoo41RG',
+                      _score: 2,
+                      _source: {
+                        destination: {
+                          geo: {
+                            continent_name: 'North America',
+                            city_name: '',
+                            country_iso_code: 'US',
+                            location: {
+                              lon: -97.822,
+                              lat: 37.751,
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          },
+          {
+            key: '10.100.4.1',
+            doc_count: 6557,
+            bytes_out: {
+              value: 3357704,
+            },
+            bytes_in: {
+              value: 503920,
+            },
+            domain: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 0,
+              buckets: [
+                {
+                  key: 'router.sr.local.crowbird.com',
+                  doc_count: 6557,
+                  timestamp: {
+                    value: 1563895788000,
+                    value_as_string: '2019-07-23T15:29:48.000Z',
+                  },
+                },
+              ],
+            },
+            autonomous_system: {
+              doc_count: 0,
+              top_as: {
+                hits: {
+                  total: {
+                    value: 0,
+                    relation: 'eq',
+                  },
+                  max_score: null,
+                  hits: [],
+                },
+              },
+            },
+            location: {
+              doc_count: 0,
+              top_geo: {
+                hits: {
+                  total: {
+                    value: 0,
+                    relation: 'eq',
+                  },
+                  max_score: null,
+                  hits: [],
+                },
+              },
+            },
+          },
+        ],
+      },
+      top_n_flow_unified_count: {
+        value: 354,
+      },
+      source: {
+        doc_count_error_upper_bound: 0,
+        sum_other_doc_count: 1,
+        buckets: [
+          {
+            key: '10.100.7.196',
+            doc_count: 2665,
+            bytes_out: {
+              value: 159579030,
+            },
+            bytes_in: {
+              value: 9432666117,
+            },
+            domain: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 0,
+              buckets: [
+                {
+                  key: 'samsungtv-kitchen.iot.sr.local.crowbird.com',
+                  doc_count: 2665,
+                  timestamp: {
+                    value: 1563844810000,
+                    value_as_string: '2019-07-23T01:20:10.000Z',
+                  },
+                },
+              ],
+            },
+            autonomous_system: {
+              doc_count: 0,
+              top_as: {
+                hits: {
+                  total: {
+                    value: 0,
+                    relation: 'eq',
+                  },
+                  max_score: null,
+                  hits: [],
+                },
+              },
+            },
+            location: {
+              doc_count: 0,
+              top_geo: {
+                hits: {
+                  total: {
+                    value: 0,
+                    relation: 'eq',
+                  },
+                  max_score: null,
+                  hits: [],
+                },
+              },
+            },
+          },
+          {
+            key: '10.100.7.197',
+            doc_count: 1684,
+            bytes_out: {
+              value: 173650940,
+            },
+            bytes_in: {
+              value: 5385981031,
+            },
+            domain: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 0,
+              buckets: [
+                {
+                  key: 'appletv-livingroom.iot.sr.local.crowbird.com',
+                  doc_count: 1684,
+                  timestamp: {
+                    value: 1563895670002,
+                    value_as_string: '2019-07-23T15:27:50.002Z',
+                  },
+                },
+              ],
+            },
+            autonomous_system: {
+              doc_count: 0,
+              top_as: {
+                hits: {
+                  total: {
+                    value: 0,
+                    relation: 'eq',
+                  },
+                  max_score: null,
+                  hits: [],
+                },
+              },
+            },
+            location: {
+              doc_count: 0,
+              top_geo: {
+                hits: {
+                  total: {
+                    value: 0,
+                    relation: 'eq',
+                  },
+                  max_score: null,
+                  hits: [],
+                },
+              },
+            },
+          },
+          {
+            key: '10.0.2.15',
+            doc_count: 34,
+            bytes_out: {
+              value: 3388667,
+            },
+            bytes_in: {
+              value: 168814467,
+            },
+            domain: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 0,
+              buckets: [],
+            },
+            autonomous_system: {
+              doc_count: 0,
+              top_as: {
+                hits: {
+                  total: {
+                    value: 0,
+                    relation: 'eq',
+                  },
+                  max_score: null,
+                  hits: [],
+                },
+              },
+            },
+            location: {
+              doc_count: 0,
+              top_geo: {
+                hits: {
+                  total: {
+                    value: 0,
+                    relation: 'eq',
+                  },
+                  max_score: null,
+                  hits: [],
+                },
+              },
+            },
+          },
+          {
+            key: '10.100.7.195',
+            doc_count: 1152,
+            bytes_out: {
+              value: 1436532,
+            },
+            bytes_in: {
+              value: 12623680,
+            },
+            domain: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 0,
+              buckets: [
+                {
+                  key: 'samsungtv-livingroom.iot.sr.local.crowbird.com',
+                  doc_count: 1152,
+                  timestamp: {
+                    value: 1563857222000,
+                    value_as_string: '2019-07-23T04:47:02.000Z',
+                  },
+                },
+              ],
+            },
+            autonomous_system: {
+              doc_count: 0,
+              top_as: {
+                hits: {
+                  total: {
+                    value: 0,
+                    relation: 'eq',
+                  },
+                  max_score: null,
+                  hits: [],
+                },
+              },
+            },
+            location: {
+              doc_count: 0,
+              top_geo: {
+                hits: {
+                  total: {
+                    value: 0,
+                    relation: 'eq',
+                  },
+                  max_score: null,
+                  hits: [],
+                },
+              },
+            },
+          },
+          {
+            key: '63.88.73.13',
+            doc_count: 2,
+            bytes_out: {
+              value: 371918013,
+            },
+            bytes_in: {
+              value: 10957783,
+            },
+            domain: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 0,
+              buckets: [
+                {
+                  key: '13.73.88.63.ashburn.google-ggc.verizon.com',
+                  doc_count: 2,
+                  timestamp: {
+                    value: 1563849411000,
+                    value_as_string: '2019-07-23T02:36:51.000Z',
+                  },
+                },
+              ],
+            },
+            autonomous_system: {
+              doc_count: 2,
+              top_as: {
+                hits: {
+                  total: {
+                    value: 2,
+                    relation: 'eq',
+                  },
+                  max_score: 2,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: '1g2SHGwBQrvXogooCGa0',
+                      _score: 2,
+                      _source: {
+                        source: {
+                          as: {
+                            org: 'MCI Communications Services, Inc. d/b/a Verizon Business',
+                            num: 701,
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+            location: {
+              doc_count: 2,
+              top_geo: {
+                hits: {
+                  total: {
+                    value: 2,
+                    relation: 'eq',
+                  },
+                  max_score: 2,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: '1g2SHGwBQrvXogooCGa0',
+                      _score: 2,
+                      _source: {
+                        source: {
+                          geo: {
+                            continent_name: 'North America',
+                            city_name: '',
+                            country_iso_code: 'US',
+                            location: {
+                              lon: -97.822,
+                              lat: 37.751,
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          },
+          {
+            key: '10.100.7.199',
+            doc_count: 5375,
+            bytes_out: {
+              value: 7769689,
+            },
+            bytes_in: {
+              value: 10516829,
+            },
+            domain: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 0,
+              buckets: [
+                {
+                  key: 'smartthings-hub.iot.sr.local.crowbird.com',
+                  doc_count: 5375,
+                  timestamp: {
+                    value: 1563895788000,
+                    value_as_string: '2019-07-23T15:29:48.000Z',
+                  },
+                },
+              ],
+            },
+            autonomous_system: {
+              doc_count: 0,
+              top_as: {
+                hits: {
+                  total: {
+                    value: 0,
+                    relation: 'eq',
+                  },
+                  max_score: null,
+                  hits: [],
+                },
+              },
+            },
+            location: {
+              doc_count: 0,
+              top_geo: {
+                hits: {
+                  total: {
+                    value: 0,
+                    relation: 'eq',
+                  },
+                  max_score: null,
+                  hits: [],
+                },
+              },
+            },
+          },
+          {
+            key: '63.88.73.76',
+            doc_count: 1,
+            bytes_out: {
+              value: 3779257,
+            },
+            bytes_in: {
+              value: 137920,
+            },
+            domain: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 0,
+              buckets: [
+                {
+                  key: '76.73.88.63.ashburn.google-ggc.verizon.com',
+                  doc_count: 1,
+                  timestamp: {
+                    value: 1563840984000,
+                    value_as_string: '2019-07-23T00:16:24.000Z',
+                  },
+                },
+                {
+                  key: 'r1---sn-8xgp1vo-p5ql.googlevideo.com',
+                  doc_count: 1,
+                  timestamp: {
+                    value: 1563840984000,
+                    value_as_string: '2019-07-23T00:16:24.000Z',
+                  },
+                },
+              ],
+            },
+            autonomous_system: {
+              doc_count: 1,
+              top_as: {
+                hits: {
+                  total: {
+                    value: 1,
+                    relation: 'eq',
+                  },
+                  max_score: 2,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'rQkvHGwBQrvXogoowmNW',
+                      _score: 2,
+                      _source: {
+                        source: {
+                          as: {
+                            org: 'MCI Communications Services, Inc. d/b/a Verizon Business',
+                            num: 701,
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+            location: {
+              doc_count: 1,
+              top_geo: {
+                hits: {
+                  total: {
+                    value: 1,
+                    relation: 'eq',
+                  },
+                  max_score: 2,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'rQkvHGwBQrvXogoowmNW',
+                      _score: 2,
+                      _source: {
+                        source: {
+                          geo: {
+                            continent_name: 'North America',
+                            city_name: '',
+                            country_iso_code: 'US',
+                            location: {
+                              lon: -97.822,
+                              lat: 37.751,
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          },
+          {
+            key: '10.100.7.254',
+            doc_count: 55,
+            bytes_out: {
+              value: 29444,
+            },
+            bytes_in: {
+              value: 25535,
+            },
+            domain: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 0,
+              buckets: [],
+            },
+            autonomous_system: {
+              doc_count: 0,
+              top_as: {
+                hits: {
+                  total: {
+                    value: 0,
+                    relation: 'eq',
+                  },
+                  max_score: null,
+                  hits: [],
+                },
+              },
+            },
+            location: {
+              doc_count: 0,
+              top_geo: {
+                hits: {
+                  total: {
+                    value: 0,
+                    relation: 'eq',
+                  },
+                  max_score: null,
+                  hits: [],
+                },
+              },
+            },
+          },
+          {
+            key: '10.100.7.198',
+            doc_count: 66,
+            bytes_out: {
+              value: 29940,
+            },
+            bytes_in: {
+              value: 19188,
+            },
+            domain: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 0,
+              buckets: [
+                {
+                  key: 'nest-frontdoor.iot.sr.local.crowbird.com',
+                  doc_count: 66,
+                  timestamp: {
+                    value: 1563894885000,
+                    value_as_string: '2019-07-23T15:14:45.000Z',
+                  },
+                },
+              ],
+            },
+            autonomous_system: {
+              doc_count: 0,
+              top_as: {
+                hits: {
+                  total: {
+                    value: 0,
+                    relation: 'eq',
+                  },
+                  max_score: null,
+                  hits: [],
+                },
+              },
+            },
+            location: {
+              doc_count: 0,
+              top_geo: {
+                hits: {
+                  total: {
+                    value: 0,
+                    relation: 'eq',
+                  },
+                  max_score: null,
+                  hits: [],
+                },
+              },
+            },
+          },
+          {
+            key: '17.249.108.26',
+            doc_count: 47,
+            bytes_out: {
+              value: 11806,
+            },
+            bytes_in: {
+              value: 12861,
+            },
+            domain: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 0,
+              buckets: [],
+            },
+            autonomous_system: {
+              doc_count: 47,
+              top_as: {
+                hits: {
+                  total: {
+                    value: 47,
+                    relation: 'eq',
+                  },
+                  max_score: 2,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'lSDhHmwBQrvXogootVJ6',
+                      _score: 2,
+                      _source: {
+                        source: {
+                          as: {
+                            org: 'Apple Inc.',
+                            num: 714,
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+            location: {
+              doc_count: 47,
+              top_geo: {
+                hits: {
+                  total: {
+                    value: 47,
+                    relation: 'eq',
+                  },
+                  max_score: 2,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'lSDhHmwBQrvXogootVJ6',
+                      _score: 2,
+                      _source: {
+                        source: {
+                          geo: {
+                            continent_name: 'North America',
+                            city_name: '',
+                            country_iso_code: 'US',
+                            location: {
+                              lon: -97.822,
+                              lat: 37.751,
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          },
+          {
+            key: '10.100.7.193',
+            doc_count: 30,
+            bytes_out: {
+              value: 12680,
+            },
+            bytes_in: {
+              value: 11008,
+            },
+            domain: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 0,
+              buckets: [
+                {
+                  key: 'router.iot.sr.local.crowbird.com',
+                  doc_count: 30,
+                  timestamp: {
+                    value: 1563894455001,
+                    value_as_string: '2019-07-23T15:07:35.001Z',
+                  },
+                },
+              ],
+            },
+            autonomous_system: {
+              doc_count: 0,
+              top_as: {
+                hits: {
+                  total: {
+                    value: 0,
+                    relation: 'eq',
+                  },
+                  max_score: null,
+                  hits: [],
+                },
+              },
+            },
+            location: {
+              doc_count: 0,
+              top_geo: {
+                hits: {
+                  total: {
+                    value: 0,
+                    relation: 'eq',
+                  },
+                  max_score: null,
+                  hits: [],
+                },
+              },
+            },
+          },
+          {
+            key: '52.205.198.186',
+            doc_count: 1,
+            bytes_out: {
+              value: 9653,
+            },
+            bytes_in: {
+              value: 6328,
+            },
+            domain: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 0,
+              buckets: [
+                {
+                  key: 'api-global.netflix.com',
+                  doc_count: 1,
+                  timestamp: {
+                    value: 1563833307000,
+                    value_as_string: '2019-07-22T22:08:27.000Z',
+                  },
+                },
+                {
+                  key: 'ec2-52-205-198-186.compute-1.amazonaws.com',
+                  doc_count: 1,
+                  timestamp: {
+                    value: 1563833307000,
+                    value_as_string: '2019-07-22T22:08:27.000Z',
+                  },
+                },
+              ],
+            },
+            autonomous_system: {
+              doc_count: 1,
+              top_as: {
+                hits: {
+                  total: {
+                    value: 1,
+                    relation: 'eq',
+                  },
+                  max_score: 2,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'DgS6G2wBQrvXogool4bL',
+                      _score: 2,
+                      _source: {
+                        source: {
+                          as: {
+                            org: 'Amazon.com, Inc.',
+                            num: 14618,
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+            location: {
+              doc_count: 1,
+              top_geo: {
+                hits: {
+                  total: {
+                    value: 1,
+                    relation: 'eq',
+                  },
+                  max_score: 2,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'DgS6G2wBQrvXogool4bL',
+                      _score: 2,
+                      _source: {
+                        source: {
+                          geo: {
+                            continent_name: 'North America',
+                            city_name: 'Ashburn',
+                            country_iso_code: 'US',
+                            region_name: 'Virginia',
+                            location: {
+                              lon: -77.4728,
+                              lat: 39.0481,
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          },
+          {
+            key: '52.45.118.37',
+            doc_count: 1,
+            bytes_out: {
+              value: 8617,
+            },
+            bytes_in: {
+              value: 5559,
+            },
+            domain: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 0,
+              buckets: [
+                {
+                  key: 'ec2-52-45-118-37.compute-1.amazonaws.com',
+                  doc_count: 1,
+                  timestamp: {
+                    value: 1563839970000,
+                    value_as_string: '2019-07-22T23:59:30.000Z',
+                  },
+                },
+              ],
+            },
+            autonomous_system: {
+              doc_count: 1,
+              top_as: {
+                hits: {
+                  total: {
+                    value: 1,
+                    relation: 'eq',
+                  },
+                  max_score: 2,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'ZwggHGwBQrvXogooPckk',
+                      _score: 2,
+                      _source: {
+                        source: {
+                          as: {
+                            org: 'Amazon.com, Inc.',
+                            num: 14618,
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+            location: {
+              doc_count: 1,
+              top_geo: {
+                hits: {
+                  total: {
+                    value: 1,
+                    relation: 'eq',
+                  },
+                  max_score: 2,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'ZwggHGwBQrvXogooPckk',
+                      _score: 2,
+                      _source: {
+                        source: {
+                          geo: {
+                            continent_name: 'North America',
+                            city_name: 'Ashburn',
+                            country_iso_code: 'US',
+                            region_name: 'Virginia',
+                            location: {
+                              lon: -77.4728,
+                              lat: 39.0481,
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          },
+          {
+            key: '10.100.4.1',
+            doc_count: 36,
+            bytes_out: {
+              value: 9519,
+            },
+            bytes_in: {
+              value: 4066,
+            },
+            domain: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 0,
+              buckets: [
+                {
+                  key: 'router.sr.local.crowbird.com',
+                  doc_count: 36,
+                  timestamp: {
+                    value: 1563886693000,
+                    value_as_string: '2019-07-23T12:58:13.000Z',
+                  },
+                },
+              ],
+            },
+            autonomous_system: {
+              doc_count: 0,
+              top_as: {
+                hits: {
+                  total: {
+                    value: 0,
+                    relation: 'eq',
+                  },
+                  max_score: null,
+                  hits: [],
+                },
+              },
+            },
+            location: {
+              doc_count: 0,
+              top_geo: {
+                hits: {
+                  total: {
+                    value: 0,
+                    relation: 'eq',
+                  },
+                  max_score: null,
+                  hits: [],
+                },
+              },
+            },
+          },
+          {
+            key: '63.88.73.140',
+            doc_count: 1,
+            bytes_out: {
+              value: 89941,
+            },
+            bytes_in: {
+              value: 4000,
+            },
+            domain: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 0,
+              buckets: [
+                {
+                  key: '140.73.88.63.ashburn.google-ggc.verizon.com',
+                  doc_count: 1,
+                  timestamp: {
+                    value: 1563846222000,
+                    value_as_string: '2019-07-23T01:43:42.000Z',
+                  },
+                },
+              ],
+            },
+            autonomous_system: {
+              doc_count: 1,
+              top_as: {
+                hits: {
+                  total: {
+                    value: 1,
+                    relation: 'eq',
+                  },
+                  max_score: 2,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'qAx_HGwBQrvXogoop7ep',
+                      _score: 2,
+                      _source: {
+                        source: {
+                          as: {
+                            org: 'MCI Communications Services, Inc. d/b/a Verizon Business',
+                            num: 701,
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+            location: {
+              doc_count: 1,
+              top_geo: {
+                hits: {
+                  total: {
+                    value: 1,
+                    relation: 'eq',
+                  },
+                  max_score: 2,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'qAx_HGwBQrvXogoop7ep',
+                      _score: 2,
+                      _source: {
+                        source: {
+                          geo: {
+                            continent_name: 'North America',
+                            city_name: '',
+                            country_iso_code: 'US',
+                            location: {
+                              lon: -97.822,
+                              lat: 37.751,
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          },
+          {
+            key: '45.57.62.142',
+            doc_count: 1,
+            bytes_out: {
+              value: 119945,
+            },
+            bytes_in: {
+              value: 3441,
+            },
+            domain: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 0,
+              buckets: [
+                {
+                  key: 'ipv4_1.lagg0.c013.was001.ix.nflxvideo.net',
+                  doc_count: 1,
+                  timestamp: {
+                    value: 1563840677000,
+                    value_as_string: '2019-07-23T00:11:17.000Z',
+                  },
+                },
+                {
+                  key: 'occ-0-2430-2433.1.nflxso.net',
+                  doc_count: 1,
+                  timestamp: {
+                    value: 1563840677000,
+                    value_as_string: '2019-07-23T00:11:17.000Z',
+                  },
+                },
+              ],
+            },
+            autonomous_system: {
+              doc_count: 1,
+              top_as: {
+                hits: {
+                  total: {
+                    value: 1,
+                    relation: 'eq',
+                  },
+                  max_score: 2,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'XwkrHGwBQrvXogooDipM',
+                      _score: 2,
+                      _source: {
+                        source: {
+                          as: {
+                            org: 'Netflix Streaming Services Inc.',
+                            num: 2906,
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+            location: {
+              doc_count: 1,
+              top_geo: {
+                hits: {
+                  total: {
+                    value: 1,
+                    relation: 'eq',
+                  },
+                  max_score: 2,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'XwkrHGwBQrvXogooDipM',
+                      _score: 2,
+                      _source: {
+                        source: {
+                          geo: {
+                            continent_name: 'North America',
+                            city_name: '',
+                            country_iso_code: 'US',
+                            location: {
+                              lon: -97.822,
+                              lat: 37.751,
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          },
+          {
+            key: '63.88.73.19',
+            doc_count: 2,
+            bytes_out: {
+              value: 978,
+            },
+            bytes_in: {
+              value: 2258,
+            },
+            domain: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 0,
+              buckets: [
+                {
+                  key: '19.73.88.63.ashburn.google-ggc.verizon.com',
+                  doc_count: 2,
+                  timestamp: {
+                    value: 1563842038000,
+                    value_as_string: '2019-07-23T00:33:58.000Z',
+                  },
+                },
+                {
+                  key: 'r8---sn-8xgp1vo-p5qe.googlevideo.com',
+                  doc_count: 2,
+                  timestamp: {
+                    value: 1563842038000,
+                    value_as_string: '2019-07-23T00:33:58.000Z',
+                  },
+                },
+              ],
+            },
+            autonomous_system: {
+              doc_count: 2,
+              top_as: {
+                hits: {
+                  total: {
+                    value: 2,
+                    relation: 'eq',
+                  },
+                  max_score: 2,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'XQk_HGwBQrvXogoo0P8a',
+                      _score: 2,
+                      _source: {
+                        source: {
+                          as: {
+                            org: 'MCI Communications Services, Inc. d/b/a Verizon Business',
+                            num: 701,
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+            location: {
+              doc_count: 2,
+              top_geo: {
+                hits: {
+                  total: {
+                    value: 2,
+                    relation: 'eq',
+                  },
+                  max_score: 2,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'XQk_HGwBQrvXogoo0P8a',
+                      _score: 2,
+                      _source: {
+                        source: {
+                          geo: {
+                            continent_name: 'North America',
+                            city_name: '',
+                            country_iso_code: 'US',
+                            location: {
+                              lon: -97.822,
+                              lat: 37.751,
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          },
+          {
+            key: '172.217.12.206',
+            doc_count: 1,
+            bytes_out: {
+              value: 10795,
+            },
+            bytes_in: {
+              value: 1875,
+            },
+            domain: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 0,
+              buckets: [
+                {
+                  key: 'lga25s63-in-f14.1e100.net',
+                  doc_count: 1,
+                  timestamp: {
+                    value: 1563844638000,
+                    value_as_string: '2019-07-23T01:17:18.000Z',
+                  },
+                },
+              ],
+            },
+            autonomous_system: {
+              doc_count: 1,
+              top_as: {
+                hits: {
+                  total: {
+                    value: 1,
+                    relation: 'eq',
+                  },
+                  max_score: 2,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'LgtnHGwBQrvXogoogp87',
+                      _score: 2,
+                      _source: {
+                        source: {
+                          as: {
+                            org: 'Google LLC',
+                            num: 15169,
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+            location: {
+              doc_count: 1,
+              top_geo: {
+                hits: {
+                  total: {
+                    value: 1,
+                    relation: 'eq',
+                  },
+                  max_score: 2,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'LgtnHGwBQrvXogoogp87',
+                      _score: 2,
+                      _source: {
+                        source: {
+                          geo: {
+                            continent_name: 'North America',
+                            city_name: '',
+                            country_iso_code: 'US',
+                            location: {
+                              lon: -97.822,
+                              lat: 37.751,
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          },
+          {
+            key: '172.217.10.110',
+            doc_count: 1,
+            bytes_out: {
+              value: 906,
+            },
+            bytes_in: {
+              value: 1300,
+            },
+            domain: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 0,
+              buckets: [
+                {
+                  key: 'lga34s15-in-f14.1e100.net',
+                  doc_count: 1,
+                  timestamp: {
+                    value: 1563849674000,
+                    value_as_string: '2019-07-23T02:41:14.000Z',
+                  },
+                },
+              ],
+            },
+            autonomous_system: {
+              doc_count: 1,
+              top_as: {
+                hits: {
+                  total: {
+                    value: 1,
+                    relation: 'eq',
+                  },
+                  max_score: 2,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'Gg60HGwBQrvXogooVpzT',
+                      _score: 2,
+                      _source: {
+                        source: {
+                          as: {
+                            org: 'Google LLC',
+                            num: 15169,
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+            location: {
+              doc_count: 1,
+              top_geo: {
+                hits: {
+                  total: {
+                    value: 1,
+                    relation: 'eq',
+                  },
+                  max_score: 2,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'Gg60HGwBQrvXogooVpzT',
+                      _score: 2,
+                      _source: {
+                        source: {
+                          geo: {
+                            continent_name: 'North America',
+                            city_name: '',
+                            country_iso_code: 'US',
+                            location: {
+                              lon: -97.822,
+                              lat: 37.751,
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          },
+          {
+            key: '34.194.52.159',
+            doc_count: 1,
+            bytes_out: {
+              value: 4258,
+            },
+            bytes_in: {
+              value: 1291,
+            },
+            domain: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 0,
+              buckets: [
+                {
+                  key: 'api.smartthings.com',
+                  doc_count: 1,
+                  timestamp: {
+                    value: 1563851041000,
+                    value_as_string: '2019-07-23T03:04:01.000Z',
+                  },
+                },
+                {
+                  key: 'ec2-34-194-52-159.compute-1.amazonaws.com',
+                  doc_count: 1,
+                  timestamp: {
+                    value: 1563851041000,
+                    value_as_string: '2019-07-23T03:04:01.000Z',
+                  },
+                },
+              ],
+            },
+            autonomous_system: {
+              doc_count: 1,
+              top_as: {
+                hits: {
+                  total: {
+                    value: 1,
+                    relation: 'eq',
+                  },
+                  max_score: 2,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'OA_JHGwBQrvXogooMFSQ',
+                      _score: 2,
+                      _source: {
+                        source: {
+                          as: {
+                            org: 'Amazon.com, Inc.',
+                            num: 14618,
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+            location: {
+              doc_count: 1,
+              top_geo: {
+                hits: {
+                  total: {
+                    value: 1,
+                    relation: 'eq',
+                  },
+                  max_score: 2,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'OA_JHGwBQrvXogooMFSQ',
+                      _score: 2,
+                      _source: {
+                        source: {
+                          geo: {
+                            continent_name: 'North America',
+                            city_name: 'Ashburn',
+                            country_iso_code: 'US',
+                            region_name: 'Virginia',
+                            location: {
+                              lon: -77.4728,
+                              lat: 39.0481,
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          },
+          {
+            key: '52.218.96.124',
+            doc_count: 1,
+            bytes_out: {
+              value: 1720,
+            },
+            bytes_in: {
+              value: 592,
+            },
+            domain: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 0,
+              buckets: [
+                {
+                  key: 'crl.tivuon.tv',
+                  doc_count: 1,
+                  timestamp: {
+                    value: 1563831067000,
+                    value_as_string: '2019-07-22T21:31:07.000Z',
+                  },
+                },
+                {
+                  key: 's3-website-eu-west-1.amazonaws.com',
+                  doc_count: 1,
+                  timestamp: {
+                    value: 1563831067000,
+                    value_as_string: '2019-07-22T21:31:07.000Z',
+                  },
+                },
+              ],
+            },
+            autonomous_system: {
+              doc_count: 1,
+              top_as: {
+                hits: {
+                  total: {
+                    value: 1,
+                    relation: 'eq',
+                  },
+                  max_score: 2,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'qgKYG2wBQrvXogoobPFj',
+                      _score: 2,
+                      _source: {
+                        source: {
+                          as: {
+                            org: 'Amazon.com, Inc.',
+                            num: 16509,
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+            location: {
+              doc_count: 1,
+              top_geo: {
+                hits: {
+                  total: {
+                    value: 1,
+                    relation: 'eq',
+                  },
+                  max_score: 2,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'qgKYG2wBQrvXogoobPFj',
+                      _score: 2,
+                      _source: {
+                        source: {
+                          geo: {
+                            continent_name: 'Europe',
+                            city_name: 'Dublin',
+                            country_iso_code: 'IE',
+                            region_name: 'Leinster',
+                            location: {
+                              lon: -6.2489,
+                              lat: 53.3331,
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          },
+          {
+            key: '52.22.35.183',
+            doc_count: 1,
+            bytes_out: {
+              value: 163,
+            },
+            bytes_in: {
+              value: 132,
+            },
+            domain: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 0,
+              buckets: [
+                {
+                  key: 'api-global.netflix.com',
+                  doc_count: 1,
+                  timestamp: {
+                    value: 1563840812000,
+                    value_as_string: '2019-07-23T00:13:32.000Z',
+                  },
+                },
+                {
+                  key: 'ec2-52-22-35-183.compute-1.amazonaws.com',
+                  doc_count: 1,
+                  timestamp: {
+                    value: 1563840812000,
+                    value_as_string: '2019-07-23T00:13:32.000Z',
+                  },
+                },
+              ],
+            },
+            autonomous_system: {
+              doc_count: 1,
+              top_as: {
+                hits: {
+                  total: {
+                    value: 1,
+                    relation: 'eq',
+                  },
+                  max_score: 2,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'MAktHGwBQrvXogooHUOC',
+                      _score: 2,
+                      _source: {
+                        source: {
+                          as: {
+                            org: 'Amazon.com, Inc.',
+                            num: 14618,
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+            location: {
+              doc_count: 1,
+              top_geo: {
+                hits: {
+                  total: {
+                    value: 1,
+                    relation: 'eq',
+                  },
+                  max_score: 2,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'MAktHGwBQrvXogooHUOC',
+                      _score: 2,
+                      _source: {
+                        source: {
+                          geo: {
+                            continent_name: 'North America',
+                            city_name: 'Ashburn',
+                            country_iso_code: 'US',
+                            region_name: 'Virginia',
+                            location: {
+                              lon: -77.4728,
+                              lat: 39.0481,
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          },
+          {
+            key: '172.217.10.65',
+            doc_count: 1,
+            bytes_out: {
+              value: 261,
+            },
+            bytes_in: {
+              value: 132,
+            },
+            domain: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 0,
+              buckets: [
+                {
+                  key: 'lga34s14-in-f1.1e100.net',
+                  doc_count: 1,
+                  timestamp: {
+                    value: 1563841658000,
+                    value_as_string: '2019-07-23T00:27:38.000Z',
+                  },
+                },
+              ],
+            },
+            autonomous_system: {
+              doc_count: 1,
+              top_as: {
+                hits: {
+                  total: {
+                    value: 1,
+                    relation: 'eq',
+                  },
+                  max_score: 2,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'ywk6HGwBQrvXogooAshZ',
+                      _score: 2,
+                      _source: {
+                        source: {
+                          as: {
+                            org: 'Google LLC',
+                            num: 15169,
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+            location: {
+              doc_count: 1,
+              top_geo: {
+                hits: {
+                  total: {
+                    value: 1,
+                    relation: 'eq',
+                  },
+                  max_score: 2,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'ywk6HGwBQrvXogooAshZ',
+                      _score: 2,
+                      _source: {
+                        source: {
+                          geo: {
+                            continent_name: 'North America',
+                            city_name: '',
+                            country_iso_code: 'US',
+                            location: {
+                              lon: -97.822,
+                              lat: 37.751,
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          },
+          {
+            key: '52.201.123.52',
+            doc_count: 1,
+            bytes_out: {
+              value: 1036,
+            },
+            bytes_in: {
+              value: 0,
+            },
+            domain: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 0,
+              buckets: [
+                {
+                  key: 'ec2-52-201-123-52.compute-1.amazonaws.com',
+                  doc_count: 1,
+                  timestamp: {
+                    value: 1563857458000,
+                    value_as_string: '2019-07-23T04:50:58.000Z',
+                  },
+                },
+                {
+                  key: 'log-ingestion.samsungacr.com',
+                  doc_count: 1,
+                  timestamp: {
+                    value: 1563857458000,
+                    value_as_string: '2019-07-23T04:50:58.000Z',
+                  },
+                },
+              ],
+            },
+            autonomous_system: {
+              doc_count: 1,
+              top_as: {
+                hits: {
+                  total: {
+                    value: 1,
+                    relation: 'eq',
+                  },
+                  max_score: 2,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'wxIrHWwBQrvXogooGaQl',
+                      _score: 2,
+                      _source: {
+                        source: {
+                          as: {
+                            org: 'Amazon.com, Inc.',
+                            num: 14618,
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+            location: {
+              doc_count: 1,
+              top_geo: {
+                hits: {
+                  total: {
+                    value: 1,
+                    relation: 'eq',
+                  },
+                  max_score: 2,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'wxIrHWwBQrvXogooGaQl',
+                      _score: 2,
+                      _source: {
+                        source: {
+                          geo: {
+                            continent_name: 'North America',
+                            city_name: 'Ashburn',
+                            country_iso_code: 'US',
+                            region_name: 'Virginia',
+                            location: {
+                              lon: -77.4728,
+                              lat: 39.0481,
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          },
+          {
+            key: '52.206.158.91',
+            doc_count: 1,
+            bytes_out: {
+              value: 1036,
+            },
+            bytes_in: {
+              value: 0,
+            },
+            domain: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 0,
+              buckets: [
+                {
+                  key: 'ec2-52-206-158-91.compute-1.amazonaws.com',
+                  doc_count: 1,
+                  timestamp: {
+                    value: 1563843845000,
+                    value_as_string: '2019-07-23T01:04:05.000Z',
+                  },
+                },
+                {
+                  key: 'log-ingestion.samsungacr.com',
+                  doc_count: 1,
+                  timestamp: {
+                    value: 1563843845000,
+                    value_as_string: '2019-07-23T01:04:05.000Z',
+                  },
+                },
+              ],
+            },
+            autonomous_system: {
+              doc_count: 1,
+              top_as: {
+                hits: {
+                  total: {
+                    value: 1,
+                    relation: 'eq',
+                  },
+                  max_score: 2,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'CwtbHGwBQrvXogooXyBa',
+                      _score: 2,
+                      _source: {
+                        source: {
+                          as: {
+                            org: 'Amazon.com, Inc.',
+                            num: 14618,
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+            location: {
+              doc_count: 1,
+              top_geo: {
+                hits: {
+                  total: {
+                    value: 1,
+                    relation: 'eq',
+                  },
+                  max_score: 2,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'CwtbHGwBQrvXogooXyBa',
+                      _score: 2,
+                      _source: {
+                        source: {
+                          geo: {
+                            continent_name: 'North America',
+                            city_name: 'Ashburn',
+                            country_iso_code: 'US',
+                            region_name: 'Virginia',
+                            location: {
+                              lon: -77.4728,
+                              lat: 39.0481,
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          },
+        ],
+      },
+    },
+  },
+  'unified-unified': {
+    took: 3481,
+    timed_out: false,
+    _shards: {
+      total: 28,
+      successful: 28,
+      skipped: 0,
+      failed: 0,
+    },
+    hits: {
+      max_score: null,
+      hits: [],
+    },
+    aggregations: {
+      destination: {
+        doc_count_error_upper_bound: -1,
+        sum_other_doc_count: 301629,
+        buckets: [
+          {
+            key: '10.142.0.9',
+            doc_count: 501,
+            bytes_out: {
+              value: 0,
+            },
+            bytes_in: {
+              value: 36321426479,
+            },
+            domain: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 0,
+              buckets: [
+                {
+                  key: 'simianhacker-demo',
+                  doc_count: 501,
+                  timestamp: {
+                    value: 1563895220351,
+                    value_as_string: '2019-07-23T15:20:20.351Z',
+                  },
+                },
+              ],
+            },
+            autonomous_system: {
+              doc_count: 0,
+              top_as: {
+                hits: {
+                  total: {
+                    value: 0,
+                    relation: 'eq',
+                  },
+                  max_score: null,
+                  hits: [],
+                },
+              },
+            },
+            location: {
+              doc_count: 0,
+              top_geo: {
+                hits: {
+                  total: {
+                    value: 0,
+                    relation: 'eq',
+                  },
+                  max_score: null,
+                  hits: [],
+                },
+              },
+            },
+          },
+          {
+            key: '104.198.38.169',
+            doc_count: 145,
+            bytes_out: {
+              value: 0,
+            },
+            bytes_in: {
+              value: 29402384765,
+            },
+            domain: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 0,
+              buckets: [],
+            },
+            autonomous_system: {
+              doc_count: 145,
+              top_as: {
+                hits: {
+                  total: {
+                    value: 145,
+                    relation: 'eq',
+                  },
+                  max_score: 0,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'dd4fa2d4bd-692282652449767',
+                      _score: 0,
+                      _source: {
+                        destination: {
+                          as: {
+                            number: 15169,
+                            organization: {
+                              name: 'Google LLC',
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+            location: {
+              doc_count: 145,
+              top_geo: {
+                hits: {
+                  total: {
+                    value: 145,
+                    relation: 'eq',
+                  },
+                  max_score: 0,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'dd4fa2d4bd-692282652449767',
+                      _score: 0,
+                      _source: {
+                        destination: {
+                          geo: {
+                            continent_name: 'North America',
+                            region_iso_code: 'US-VA',
+                            country_iso_code: 'US',
+                            region_name: 'Virginia',
+                            location: {
+                              lon: -77.2497,
+                              lat: 38.6582,
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          },
+          {
+            key: '10.142.0.10',
+            doc_count: 26468,
+            bytes_out: {
+              value: 0,
+            },
+            bytes_in: {
+              value: 7034783187,
+            },
+            domain: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 0,
+              buckets: [
+                {
+                  key: 'siem-es',
+                  doc_count: 26468,
+                  timestamp: {
+                    value: 1563895220357,
+                    value_as_string: '2019-07-23T15:20:20.357Z',
+                  },
+                },
+              ],
+            },
+            autonomous_system: {
+              doc_count: 0,
+              top_as: {
+                hits: {
+                  total: {
+                    value: 0,
+                    relation: 'eq',
+                  },
+                  max_score: null,
+                  hits: [],
+                },
+              },
+            },
+            location: {
+              doc_count: 0,
+              top_geo: {
+                hits: {
+                  total: {
+                    value: 0,
+                    relation: 'eq',
+                  },
+                  max_score: null,
+                  hits: [],
+                },
+              },
+            },
+          },
+          {
+            key: '10.142.0.7',
+            doc_count: 36490,
+            bytes_out: {
+              value: 0,
+            },
+            bytes_in: {
+              value: 2361869470,
+            },
+            domain: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 0,
+              buckets: [
+                {
+                  key: 'siem-kibana',
+                  doc_count: 16550,
+                  timestamp: {
+                    value: 1563895220357,
+                    value_as_string: '2019-07-23T15:20:20.357Z',
+                  },
+                },
+              ],
+            },
+            autonomous_system: {
+              doc_count: 0,
+              top_as: {
+                hits: {
+                  total: {
+                    value: 0,
+                    relation: 'eq',
+                  },
+                  max_score: null,
+                  hits: [],
+                },
+              },
+            },
+            location: {
+              doc_count: 0,
+              top_geo: {
+                hits: {
+                  total: {
+                    value: 0,
+                    relation: 'eq',
+                  },
+                  max_score: null,
+                  hits: [],
+                },
+              },
+            },
+          },
+          {
+            key: '35.196.73.82',
+            doc_count: 6484,
+            bytes_out: {
+              value: 0,
+            },
+            bytes_in: {
+              value: 1231689482,
+            },
+            domain: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 0,
+              buckets: [
+                {
+                  key: 'siem-kibana',
+                  doc_count: 6484,
+                  timestamp: {
+                    value: 1563895220357,
+                    value_as_string: '2019-07-23T15:20:20.357Z',
+                  },
+                },
+              ],
+            },
+            autonomous_system: {
+              doc_count: 6484,
+              top_as: {
+                hits: {
+                  total: {
+                    value: 6484,
+                    relation: 'eq',
+                  },
+                  max_score: 0,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'dd4fa2d4bd-692282652449754',
+                      _score: 0,
+                      _source: {
+                        destination: {
+                          as: {
+                            number: 15169,
+                            organization: {
+                              name: 'Google LLC',
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+            location: {
+              doc_count: 6484,
+              top_geo: {
+                hits: {
+                  total: {
+                    value: 6484,
+                    relation: 'eq',
+                  },
+                  max_score: 0,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'dd4fa2d4bd-692282652449754',
+                      _score: 0,
+                      _source: {
+                        destination: {
+                          geo: {
+                            continent_name: 'North America',
+                            region_iso_code: 'US-VA',
+                            country_iso_code: 'US',
+                            region_name: 'Virginia',
+                            location: {
+                              lon: -77.2497,
+                              lat: 38.6582,
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          },
+          {
+            key: '35.227.125.33',
+            doc_count: 14240,
+            bytes_out: {
+              value: 0,
+            },
+            bytes_in: {
+              value: 802811843,
+            },
+            domain: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 0,
+              buckets: [
+                {
+                  key: 'siem-es',
+                  doc_count: 6640,
+                  timestamp: {
+                    value: 1563895220357,
+                    value_as_string: '2019-07-23T15:20:20.357Z',
+                  },
+                },
+              ],
+            },
+            autonomous_system: {
+              doc_count: 6640,
+              top_as: {
+                hits: {
+                  total: {
+                    value: 6640,
+                    relation: 'eq',
+                  },
+                  max_score: 0,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'dd4fa2d4bd-692282652449752',
+                      _score: 0,
+                      _source: {
+                        destination: {
+                          as: {
+                            number: 15169,
+                            organization: {
+                              name: 'Google LLC',
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+            location: {
+              doc_count: 6640,
+              top_geo: {
+                hits: {
+                  total: {
+                    value: 6640,
+                    relation: 'eq',
+                  },
+                  max_score: 0,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'dd4fa2d4bd-692282652449752',
+                      _score: 0,
+                      _source: {
+                        destination: {
+                          geo: {
+                            continent_name: 'North America',
+                            region_iso_code: 'US-VA',
+                            country_iso_code: 'US',
+                            region_name: 'Virginia',
+                            location: {
+                              lon: -77.2497,
+                              lat: 38.6582,
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          },
+          {
+            key: '10.100.7.197',
+            doc_count: 4722,
+            bytes_out: {
+              value: 10977897,
+            },
+            bytes_in: {
+              value: 372032297,
+            },
+            domain: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 0,
+              buckets: [
+                {
+                  key: 'appletv-livingroom.iot.sr.local.crowbird.com',
+                  doc_count: 4722,
+                  timestamp: {
+                    value: 1563895431000,
+                    value_as_string: '2019-07-23T15:23:51.000Z',
+                  },
+                },
+                {
+                  key: 'ocsp.digicert.com',
+                  doc_count: 1,
+                  timestamp: {
+                    value: 1563844197442,
+                    value_as_string: '2019-07-23T01:09:57.442Z',
+                  },
+                },
+                {
+                  key: 'www.hulu.com',
+                  doc_count: 1,
+                  timestamp: {
+                    value: 1563824391211,
+                    value_as_string: '2019-07-22T19:39:51.211Z',
+                  },
+                },
+                {
+                  key: 'ocsp.int-x3.letsencrypt.org',
+                  doc_count: 2,
+                  timestamp: {
+                    value: 1563824389842,
+                    value_as_string: '2019-07-22T19:39:49.842Z',
+                  },
+                },
+                {
+                  key: 'ocsp.entrust.net',
+                  doc_count: 2,
+                  timestamp: {
+                    value: 1563824376459,
+                    value_as_string: '2019-07-22T19:39:36.459Z',
+                  },
+                },
+                {
+                  key: 'isrg.trustid.ocsp.identrust.com',
+                  doc_count: 1,
+                  timestamp: {
+                    value: 1563824371705,
+                    value_as_string: '2019-07-22T19:39:31.705Z',
+                  },
+                },
+              ],
+            },
+            autonomous_system: {
+              doc_count: 0,
+              top_as: {
+                hits: {
+                  total: {
+                    value: 0,
+                    relation: 'eq',
+                  },
+                  max_score: null,
+                  hits: [],
+                },
+              },
+            },
+            location: {
+              doc_count: 0,
+              top_geo: {
+                hits: {
+                  total: {
+                    value: 0,
+                    relation: 'eq',
+                  },
+                  max_score: null,
+                  hits: [],
+                },
+              },
+            },
+          },
+          {
+            key: '34.213.68.235',
+            doc_count: 144,
+            bytes_out: {
+              value: 0,
+            },
+            bytes_in: {
+              value: 311637700,
+            },
+            domain: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 0,
+              buckets: [],
+            },
+            autonomous_system: {
+              doc_count: 144,
+              top_as: {
+                hits: {
+                  total: {
+                    value: 144,
+                    relation: 'eq',
+                  },
+                  max_score: 0,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'dd4fa2d4bd-692274036894083',
+                      _score: 0,
+                      _source: {
+                        destination: {
+                          as: {
+                            number: 16509,
+                            organization: {
+                              name: 'Amazon.com, Inc.',
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+            location: {
+              doc_count: 144,
+              top_geo: {
+                hits: {
+                  total: {
+                    value: 144,
+                    relation: 'eq',
+                  },
+                  max_score: 0,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'dd4fa2d4bd-692274036894083',
+                      _score: 0,
+                      _source: {
+                        destination: {
+                          geo: {
+                            continent_name: 'North America',
+                            region_iso_code: 'US-OR',
+                            city_name: 'Boardman',
+                            country_iso_code: 'US',
+                            region_name: 'Oregon',
+                            location: {
+                              lon: -119.688,
+                              lat: 45.8696,
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          },
+          {
+            key: '67.173.227.94',
+            doc_count: 6145,
+            bytes_out: {
+              value: 0,
+            },
+            bytes_in: {
+              value: 210521475,
+            },
+            domain: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 0,
+              buckets: [],
+            },
+            autonomous_system: {
+              doc_count: 6145,
+              top_as: {
+                hits: {
+                  total: {
+                    value: 6145,
+                    relation: 'eq',
+                  },
+                  max_score: 0,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'dd4fa2d4bd-692282652449758',
+                      _score: 0,
+                      _source: {
+                        destination: {
+                          as: {
+                            number: 7922,
+                            organization: {
+                              name: 'Comcast Cable Communications, LLC',
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+            location: {
+              doc_count: 6145,
+              top_geo: {
+                hits: {
+                  total: {
+                    value: 6145,
+                    relation: 'eq',
+                  },
+                  max_score: 0,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'dd4fa2d4bd-692282652449758',
+                      _score: 0,
+                      _source: {
+                        destination: {
+                          geo: {
+                            continent_name: 'North America',
+                            region_iso_code: 'US-CO',
+                            city_name: 'Lafayette',
+                            country_iso_code: 'US',
+                            region_name: 'Colorado',
+                            location: {
+                              lon: -105.1076,
+                              lat: 40.0153,
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          },
+          {
+            key: '104.197.128.48',
+            doc_count: 2485,
+            bytes_out: {
+              value: 0,
+            },
+            bytes_in: {
+              value: 121938054,
+            },
+            domain: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 0,
+              buckets: [],
+            },
+            autonomous_system: {
+              doc_count: 2485,
+              top_as: {
+                hits: {
+                  total: {
+                    value: 2485,
+                    relation: 'eq',
+                  },
+                  max_score: 0,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'dd4fa2d4bd-692282652449749',
+                      _score: 0,
+                      _source: {
+                        destination: {
+                          as: {
+                            number: 15169,
+                            organization: {
+                              name: 'Google LLC',
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+            location: {
+              doc_count: 2485,
+              top_geo: {
+                hits: {
+                  total: {
+                    value: 2485,
+                    relation: 'eq',
+                  },
+                  max_score: 0,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'dd4fa2d4bd-692282652449749',
+                      _score: 0,
+                      _source: {
+                        destination: {
+                          geo: {
+                            continent_name: 'North America',
+                            region_iso_code: 'US-VA',
+                            country_iso_code: 'US',
+                            region_name: 'Virginia',
+                            location: {
+                              lon: -77.2497,
+                              lat: 38.6582,
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          },
+          {
+            key: '72.86.47.26',
+            doc_count: 3121,
+            bytes_out: {
+              value: 0,
+            },
+            bytes_in: {
+              value: 121213928,
+            },
+            domain: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 0,
+              buckets: [],
+            },
+            autonomous_system: {
+              doc_count: 3121,
+              top_as: {
+                hits: {
+                  total: {
+                    value: 3121,
+                    relation: 'eq',
+                  },
+                  max_score: 0,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'dd4fa2d4bd-692302114930502',
+                      _score: 0,
+                      _source: {
+                        destination: {
+                          as: {
+                            number: 701,
+                            organization: {
+                              name: 'MCI Communications Services, Inc. d/b/a Verizon Business',
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+            location: {
+              doc_count: 3121,
+              top_geo: {
+                hits: {
+                  total: {
+                    value: 3121,
+                    relation: 'eq',
+                  },
+                  max_score: 0,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'dd4fa2d4bd-692302114930502',
+                      _score: 0,
+                      _source: {
+                        destination: {
+                          geo: {
+                            continent_name: 'North America',
+                            region_iso_code: 'US-VA',
+                            city_name: 'Leesburg',
+                            country_iso_code: 'US',
+                            region_name: 'Virginia',
+                            location: {
+                              lon: -77.5326,
+                              lat: 39.1748,
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          },
+          {
+            key: '35.245.245.245',
+            doc_count: 144,
+            bytes_out: {
+              value: 0,
+            },
+            bytes_in: {
+              value: 120242185,
+            },
+            domain: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 0,
+              buckets: [],
+            },
+            autonomous_system: {
+              doc_count: 144,
+              top_as: {
+                hits: {
+                  total: {
+                    value: 144,
+                    relation: 'eq',
+                  },
+                  max_score: 0,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'dd4fa2d4bd-692282307610611',
+                      _score: 0,
+                      _source: {
+                        destination: {
+                          as: {
+                            number: 15169,
+                            organization: {
+                              name: 'Google LLC',
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+            location: {
+              doc_count: 144,
+              top_geo: {
+                hits: {
+                  total: {
+                    value: 144,
+                    relation: 'eq',
+                  },
+                  max_score: 0,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'dd4fa2d4bd-692282307610611',
+                      _score: 0,
+                      _source: {
+                        destination: {
+                          geo: {
+                            continent_name: 'North America',
+                            region_iso_code: 'US-CA',
+                            city_name: 'Mountain View',
+                            country_iso_code: 'US',
+                            region_name: 'California',
+                            location: {
+                              lon: -122.0574,
+                              lat: 37.419200000000004,
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          },
+          {
+            key: '104.198.45.40',
+            doc_count: 2473,
+            bytes_out: {
+              value: 0,
+            },
+            bytes_in: {
+              value: 110527674,
+            },
+            domain: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 0,
+              buckets: [],
+            },
+            autonomous_system: {
+              doc_count: 2473,
+              top_as: {
+                hits: {
+                  total: {
+                    value: 2473,
+                    relation: 'eq',
+                  },
+                  max_score: 0,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'dd4fa2d4bd-692282652449742',
+                      _score: 0,
+                      _source: {
+                        destination: {
+                          as: {
+                            number: 15169,
+                            organization: {
+                              name: 'Google LLC',
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+            location: {
+              doc_count: 2473,
+              top_geo: {
+                hits: {
+                  total: {
+                    value: 2473,
+                    relation: 'eq',
+                  },
+                  max_score: 0,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'dd4fa2d4bd-692282652449742',
+                      _score: 0,
+                      _source: {
+                        destination: {
+                          geo: {
+                            continent_name: 'North America',
+                            region_iso_code: 'US-VA',
+                            country_iso_code: 'US',
+                            region_name: 'Virginia',
+                            location: {
+                              lon: -77.2497,
+                              lat: 38.6582,
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          },
+          {
+            key: '8.42.77.171',
+            doc_count: 1272,
+            bytes_out: {
+              value: 0,
+            },
+            bytes_in: {
+              value: 101378790,
+            },
+            domain: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 0,
+              buckets: [],
+            },
+            autonomous_system: {
+              doc_count: 1272,
+              top_as: {
+                hits: {
+                  total: {
+                    value: 1272,
+                    relation: 'eq',
+                  },
+                  max_score: 0,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'dd4fa2d4bd-692268628367503',
+                      _score: 0,
+                      _source: {
+                        destination: {
+                          as: {
+                            number: 393552,
+                            organization: {
+                              name: 'Longmont Power & Communications',
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+            location: {
+              doc_count: 1272,
+              top_geo: {
+                hits: {
+                  total: {
+                    value: 1272,
+                    relation: 'eq',
+                  },
+                  max_score: 0,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'dd4fa2d4bd-692268628367503',
+                      _score: 0,
+                      _source: {
+                        destination: {
+                          geo: {
+                            continent_name: 'North America',
+                            region_iso_code: 'US-CO',
+                            city_name: 'Longmont',
+                            country_iso_code: 'US',
+                            region_name: 'Colorado',
+                            location: {
+                              lon: -105.1986,
+                              lat: 40.1791,
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          },
+          {
+            key: '144.76.73.184',
+            doc_count: 144,
+            bytes_out: {
+              value: 0,
+            },
+            bytes_in: {
+              value: 101126253,
+            },
+            domain: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 0,
+              buckets: [],
+            },
+            autonomous_system: {
+              doc_count: 144,
+              top_as: {
+                hits: {
+                  total: {
+                    value: 144,
+                    relation: 'eq',
+                  },
+                  max_score: 0,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'dd4fa2d4bd-692274036894137',
+                      _score: 0,
+                      _source: {
+                        destination: {
+                          as: {
+                            number: 24940,
+                            organization: {
+                              name: 'Hetzner Online GmbH',
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+            location: {
+              doc_count: 144,
+              top_geo: {
+                hits: {
+                  total: {
+                    value: 144,
+                    relation: 'eq',
+                  },
+                  max_score: 0,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'dd4fa2d4bd-692274036894137',
+                      _score: 0,
+                      _source: {
+                        destination: {
+                          geo: {
+                            continent_name: 'Europe',
+                            country_iso_code: 'DE',
+                            location: {
+                              lon: 9.491,
+                              lat: 51.2993,
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          },
+          {
+            key: '35.224.28.11',
+            doc_count: 2430,
+            bytes_out: {
+              value: 0,
+            },
+            bytes_in: {
+              value: 76397691,
+            },
+            domain: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 0,
+              buckets: [],
+            },
+            autonomous_system: {
+              doc_count: 2430,
+              top_as: {
+                hits: {
+                  total: {
+                    value: 2430,
+                    relation: 'eq',
+                  },
+                  max_score: 0,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'dd4fa2d4bd-692282652449764',
+                      _score: 0,
+                      _source: {
+                        destination: {
+                          as: {
+                            number: 15169,
+                            organization: {
+                              name: 'Google LLC',
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+            location: {
+              doc_count: 2430,
+              top_geo: {
+                hits: {
+                  total: {
+                    value: 2430,
+                    relation: 'eq',
+                  },
+                  max_score: 0,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'dd4fa2d4bd-692282652449764',
+                      _score: 0,
+                      _source: {
+                        destination: {
+                          geo: {
+                            continent_name: 'North America',
+                            region_iso_code: 'US-VA',
+                            country_iso_code: 'US',
+                            region_name: 'Virginia',
+                            location: {
+                              lon: -77.2497,
+                              lat: 38.6582,
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          },
+          {
+            key: '35.224.108.130',
+            doc_count: 2410,
+            bytes_out: {
+              value: 0,
+            },
+            bytes_in: {
+              value: 76101362,
+            },
+            domain: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 0,
+              buckets: [],
+            },
+            autonomous_system: {
+              doc_count: 2410,
+              top_as: {
+                hits: {
+                  total: {
+                    value: 2410,
+                    relation: 'eq',
+                  },
+                  max_score: 0,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'dd4fa2d4bd-692282652449745',
+                      _score: 0,
+                      _source: {
+                        destination: {
+                          as: {
+                            number: 15169,
+                            organization: {
+                              name: 'Google LLC',
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+            location: {
+              doc_count: 2410,
+              top_geo: {
+                hits: {
+                  total: {
+                    value: 2410,
+                    relation: 'eq',
+                  },
+                  max_score: 0,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'dd4fa2d4bd-692282652449745',
+                      _score: 0,
+                      _source: {
+                        destination: {
+                          geo: {
+                            continent_name: 'North America',
+                            region_iso_code: 'US-VA',
+                            country_iso_code: 'US',
+                            region_name: 'Virginia',
+                            location: {
+                              lon: -77.2497,
+                              lat: 38.6582,
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          },
+          {
+            key: '90.50.188.16',
+            doc_count: 1572,
+            bytes_out: {
+              value: 0,
+            },
+            bytes_in: {
+              value: 62481406,
+            },
+            domain: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 0,
+              buckets: [],
+            },
+            autonomous_system: {
+              doc_count: 1572,
+              top_as: {
+                hits: {
+                  total: {
+                    value: 1572,
+                    relation: 'eq',
+                  },
+                  max_score: 0,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'dd4fa2d4bd-692232098527853',
+                      _score: 0,
+                      _source: {
+                        destination: {
+                          as: {
+                            number: 3215,
+                            organization: {
+                              name: 'Orange',
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+            location: {
+              doc_count: 1572,
+              top_geo: {
+                hits: {
+                  total: {
+                    value: 1572,
+                    relation: 'eq',
+                  },
+                  max_score: 0,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'dd4fa2d4bd-692232098527853',
+                      _score: 0,
+                      _source: {
+                        destination: {
+                          geo: {
+                            continent_name: 'Europe',
+                            region_iso_code: 'FR-33',
+                            city_name: 'Ordonnac',
+                            country_iso_code: 'FR',
+                            region_name: 'Gironde',
+                            location: {
+                              lon: -0.8349,
+                              lat: 45.3066,
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          },
+          {
+            key: '63.88.73.76',
+            doc_count: 144,
+            bytes_out: {
+              value: 1841364423,
+            },
+            bytes_in: {
+              value: 61391425,
+            },
+            domain: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 0,
+              buckets: [
+                {
+                  key: '76.73.88.63.ashburn.google-ggc.verizon.com',
+                  doc_count: 144,
+                  timestamp: {
+                    value: 1563855852000,
+                    value_as_string: '2019-07-23T04:24:12.000Z',
+                  },
+                },
+                {
+                  key: 'r1---sn-8xgp1vo-p5ql.googlevideo.com',
+                  doc_count: 64,
+                  timestamp: {
+                    value: 1563855531000,
+                    value_as_string: '2019-07-23T04:18:51.000Z',
+                  },
+                },
+                {
+                  key: 'r1.sn-8xgp1vo-p5ql.googlevideo.com',
+                  doc_count: 17,
+                  timestamp: {
+                    value: 1563855248000,
+                    value_as_string: '2019-07-23T04:14:08.000Z',
+                  },
+                },
+              ],
+            },
+            autonomous_system: {
+              doc_count: 144,
+              top_as: {
+                hits: {
+                  total: {
+                    value: 144,
+                    relation: 'eq',
+                  },
+                  max_score: 0,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: '8BEOHWwBQrvXogootLGE',
+                      _score: 0,
+                      _source: {
+                        destination: {
+                          as: {
+                            number: 701,
+                            organization: {
+                              name: 'MCI Communications Services, Inc. d/b/a Verizon Business',
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+            location: {
+              doc_count: 144,
+              top_geo: {
+                hits: {
+                  total: {
+                    value: 144,
+                    relation: 'eq',
+                  },
+                  max_score: 0,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: '8BEOHWwBQrvXogootLGE',
+                      _score: 0,
+                      _source: {
+                        destination: {
+                          geo: {
+                            continent_name: 'North America',
+                            city_name: '',
+                            country_iso_code: 'US',
+                            location: {
+                              lon: -97.822,
+                              lat: 37.751,
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          },
+          {
+            key: '71.205.104.76',
+            doc_count: 1398,
+            bytes_out: {
+              value: 0,
+            },
+            bytes_in: {
+              value: 58349609,
+            },
+            domain: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 0,
+              buckets: [],
+            },
+            autonomous_system: {
+              doc_count: 1398,
+              top_as: {
+                hits: {
+                  total: {
+                    value: 1398,
+                    relation: 'eq',
+                  },
+                  max_score: 0,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'dd4fa2d4bd-692302114930504',
+                      _score: 0,
+                      _source: {
+                        destination: {
+                          as: {
+                            number: 7922,
+                            organization: {
+                              name: 'Comcast Cable Communications, LLC',
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+            location: {
+              doc_count: 1398,
+              top_geo: {
+                hits: {
+                  total: {
+                    value: 1398,
+                    relation: 'eq',
+                  },
+                  max_score: 0,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'dd4fa2d4bd-692302114930504',
+                      _score: 0,
+                      _source: {
+                        destination: {
+                          geo: {
+                            continent_name: 'North America',
+                            region_iso_code: 'US-CO',
+                            city_name: 'Littleton',
+                            country_iso_code: 'US',
+                            region_name: 'Colorado',
+                            location: {
+                              lon: -104.9559,
+                              lat: 39.6148,
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          },
+          {
+            key: '59.127.79.118',
+            doc_count: 1028,
+            bytes_out: {
+              value: 0,
+            },
+            bytes_in: {
+              value: 55248229,
+            },
+            domain: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 0,
+              buckets: [],
+            },
+            autonomous_system: {
+              doc_count: 1028,
+              top_as: {
+                hits: {
+                  total: {
+                    value: 1028,
+                    relation: 'eq',
+                  },
+                  max_score: 0,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'dd4fa2d4bd-692312538266175',
+                      _score: 0,
+                      _source: {
+                        destination: {
+                          as: {
+                            number: 3462,
+                            organization: {
+                              name: 'Data Communication Business Group',
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+            location: {
+              doc_count: 1028,
+              top_geo: {
+                hits: {
+                  total: {
+                    value: 1028,
+                    relation: 'eq',
+                  },
+                  max_score: 0,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'dd4fa2d4bd-692312538266175',
+                      _score: 0,
+                      _source: {
+                        destination: {
+                          geo: {
+                            continent_name: 'Asia',
+                            region_iso_code: 'TW-KHH',
+                            city_name: 'Kaohsiung City',
+                            country_iso_code: 'TW',
+                            region_name: 'Kaohsiung',
+                            location: {
+                              lon: 120.3133,
+                              lat: 22.6163,
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          },
+          {
+            key: '63.88.73.17',
+            doc_count: 93,
+            bytes_out: {
+              value: 1881475715,
+            },
+            bytes_in: {
+              value: 54057925,
+            },
+            domain: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 0,
+              buckets: [
+                {
+                  key: '17.73.88.63.ashburn.google-ggc.verizon.com',
+                  doc_count: 93,
+                  timestamp: {
+                    value: 1563853477000,
+                    value_as_string: '2019-07-23T03:44:37.000Z',
+                  },
+                },
+                {
+                  key: 'r6---sn-8xgp1vo-p5qe.googlevideo.com',
+                  doc_count: 13,
+                  timestamp: {
+                    value: 1563852217000,
+                    value_as_string: '2019-07-23T03:23:37.000Z',
+                  },
+                },
+              ],
+            },
+            autonomous_system: {
+              doc_count: 93,
+              top_as: {
+                hits: {
+                  total: {
+                    value: 93,
+                    relation: 'eq',
+                  },
+                  max_score: 0,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'mw_WHGwBQrvXogoovsli',
+                      _score: 0,
+                      _source: {
+                        destination: {
+                          as: {
+                            number: 701,
+                            organization: {
+                              name: 'MCI Communications Services, Inc. d/b/a Verizon Business',
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+            location: {
+              doc_count: 93,
+              top_geo: {
+                hits: {
+                  total: {
+                    value: 93,
+                    relation: 'eq',
+                  },
+                  max_score: 0,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'mw_WHGwBQrvXogoovsli',
+                      _score: 0,
+                      _source: {
+                        destination: {
+                          geo: {
+                            continent_name: 'North America',
+                            city_name: '',
+                            country_iso_code: 'US',
+                            location: {
+                              lon: -97.822,
+                              lat: 37.751,
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          },
+          {
+            key: '45.57.63.168',
+            doc_count: 51,
+            bytes_out: {
+              value: 2495262552,
+            },
+            bytes_in: {
+              value: 39482002,
+            },
+            domain: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 0,
+              buckets: [
+                {
+                  key: 'ipv4_1.mce0.c102.was001.ix.nflxvideo.net',
+                  doc_count: 51,
+                  timestamp: {
+                    value: 1563836193000,
+                    value_as_string: '2019-07-22T22:56:33.000Z',
+                  },
+                },
+                {
+                  key: 'ipv4-c102-was001-ix.1.oca.nflxvideo.net',
+                  doc_count: 8,
+                  timestamp: {
+                    value: 1563835995000,
+                    value_as_string: '2019-07-22T22:53:15.000Z',
+                  },
+                },
+              ],
+            },
+            autonomous_system: {
+              doc_count: 51,
+              top_as: {
+                hits: {
+                  total: {
+                    value: 51,
+                    relation: 'eq',
+                  },
+                  max_score: 0,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'rwbaG2wBQrvXogooqgQf',
+                      _score: 0,
+                      _source: {
+                        destination: {
+                          as: {
+                            number: 2906,
+                            organization: {
+                              name: 'Netflix Streaming Services Inc.',
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+            location: {
+              doc_count: 51,
+              top_geo: {
+                hits: {
+                  total: {
+                    value: 51,
+                    relation: 'eq',
+                  },
+                  max_score: 0,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'rwbaG2wBQrvXogooqgQf',
+                      _score: 0,
+                      _source: {
+                        destination: {
+                          geo: {
+                            continent_name: 'North America',
+                            city_name: '',
+                            country_iso_code: 'US',
+                            location: {
+                              lon: -97.822,
+                              lat: 37.751,
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          },
+          {
+            key: '74.125.141.95',
+            doc_count: 1101,
+            bytes_out: {
+              value: 0,
+            },
+            bytes_in: {
+              value: 38578936,
+            },
+            domain: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 0,
+              buckets: [],
+            },
+            autonomous_system: {
+              doc_count: 1101,
+              top_as: {
+                hits: {
+                  total: {
+                    value: 1101,
+                    relation: 'eq',
+                  },
+                  max_score: 0,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'dd4fa2d4bd-692282652449741',
+                      _score: 0,
+                      _source: {
+                        destination: {
+                          as: {
+                            number: 15169,
+                            organization: {
+                              name: 'Google LLC',
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+            location: {
+              doc_count: 1101,
+              top_geo: {
+                hits: {
+                  total: {
+                    value: 1101,
+                    relation: 'eq',
+                  },
+                  max_score: 0,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'dd4fa2d4bd-692282652449741',
+                      _score: 0,
+                      _source: {
+                        destination: {
+                          geo: {
+                            continent_name: 'North America',
+                            country_iso_code: 'US',
+                            location: {
+                              lon: -97.822,
+                              lat: 37.751,
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          },
+          {
+            key: '45.57.62.188',
+            doc_count: 99,
+            bytes_out: {
+              value: 2617096335,
+            },
+            bytes_in: {
+              value: 37344825,
+            },
+            domain: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 0,
+              buckets: [
+                {
+                  key: 'ipv4_1.mce0.c086.was001.ix.nflxvideo.net',
+                  doc_count: 99,
+                  timestamp: {
+                    value: 1563839425001,
+                    value_as_string: '2019-07-22T23:50:25.001Z',
+                  },
+                },
+                {
+                  key: 'ipv4-c086-was001-ix.1.oca.nflxvideo.net',
+                  doc_count: 6,
+                  timestamp: {
+                    value: 1563835899000,
+                    value_as_string: '2019-07-22T22:51:39.000Z',
+                  },
+                },
+              ],
+            },
+            autonomous_system: {
+              doc_count: 99,
+              top_as: {
+                hits: {
+                  total: {
+                    value: 99,
+                    relation: 'eq',
+                  },
+                  max_score: 0,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'Qgf2G2wBQrvXogoomiwY',
+                      _score: 0,
+                      _source: {
+                        destination: {
+                          as: {
+                            number: 2906,
+                            organization: {
+                              name: 'Netflix Streaming Services Inc.',
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+            location: {
+              doc_count: 99,
+              top_geo: {
+                hits: {
+                  total: {
+                    value: 99,
+                    relation: 'eq',
+                  },
+                  max_score: 0,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'Qgf2G2wBQrvXogoomiwY',
+                      _score: 0,
+                      _source: {
+                        destination: {
+                          geo: {
+                            continent_name: 'North America',
+                            city_name: '',
+                            country_iso_code: 'US',
+                            location: {
+                              lon: -97.822,
+                              lat: 37.751,
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          },
+        ],
+      },
+      top_n_flow_unified_count: {
+        value: 2560,
+      },
+      source: {
+        doc_count_error_upper_bound: -1,
+        sum_other_doc_count: 356855,
+        buckets: [
+          {
+            key: '10.100.7.196',
+            doc_count: 14286,
+            bytes_out: {
+              value: 159695109,
+            },
+            bytes_in: {
+              value: 9432675526,
+            },
+            domain: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 0,
+              buckets: [
+                {
+                  key: 'samsungtv-kitchen.iot.sr.local.crowbird.com',
+                  doc_count: 14286,
+                  timestamp: {
+                    value: 1563844810000,
+                    value_as_string: '2019-07-23T01:20:10.000Z',
+                  },
+                },
+              ],
+            },
+            autonomous_system: {
+              doc_count: 0,
+              top_as: {
+                hits: {
+                  total: {
+                    value: 0,
+                    relation: 'eq',
+                  },
+                  max_score: null,
+                  hits: [],
+                },
+              },
+            },
+            location: {
+              doc_count: 0,
+              top_geo: {
+                hits: {
+                  total: {
+                    value: 0,
+                    relation: 'eq',
+                  },
+                  max_score: null,
+                  hits: [],
+                },
+              },
+            },
+          },
+          {
+            key: '10.100.7.197',
+            doc_count: 5223,
+            bytes_out: {
+              value: 173651576,
+            },
+            bytes_in: {
+              value: 5385981151,
+            },
+            domain: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 0,
+              buckets: [
+                {
+                  key: 'appletv-livingroom.iot.sr.local.crowbird.com',
+                  doc_count: 5223,
+                  timestamp: {
+                    value: 1563895670002,
+                    value_as_string: '2019-07-23T15:27:50.002Z',
+                  },
+                },
+              ],
+            },
+            autonomous_system: {
+              doc_count: 0,
+              top_as: {
+                hits: {
+                  total: {
+                    value: 0,
+                    relation: 'eq',
+                  },
+                  max_score: null,
+                  hits: [],
+                },
+              },
+            },
+            location: {
+              doc_count: 0,
+              top_geo: {
+                hits: {
+                  total: {
+                    value: 0,
+                    relation: 'eq',
+                  },
+                  max_score: null,
+                  hits: [],
+                },
+              },
+            },
+          },
+          {
+            key: '10.0.2.15',
+            doc_count: 37,
+            bytes_out: {
+              value: 3388667,
+            },
+            bytes_in: {
+              value: 168814467,
+            },
+            domain: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 0,
+              buckets: [],
+            },
+            autonomous_system: {
+              doc_count: 0,
+              top_as: {
+                hits: {
+                  total: {
+                    value: 0,
+                    relation: 'eq',
+                  },
+                  max_score: null,
+                  hits: [],
+                },
+              },
+            },
+            location: {
+              doc_count: 0,
+              top_geo: {
+                hits: {
+                  total: {
+                    value: 0,
+                    relation: 'eq',
+                  },
+                  max_score: null,
+                  hits: [],
+                },
+              },
+            },
+          },
+          {
+            key: '10.100.7.195',
+            doc_count: 5502,
+            bytes_out: {
+              value: 1453152,
+            },
+            bytes_in: {
+              value: 12624784,
+            },
+            domain: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 0,
+              buckets: [
+                {
+                  key: 'samsungtv-livingroom.iot.sr.local.crowbird.com',
+                  doc_count: 5502,
+                  timestamp: {
+                    value: 1563857222000,
+                    value_as_string: '2019-07-23T04:47:02.000Z',
+                  },
+                },
+              ],
+            },
+            autonomous_system: {
+              doc_count: 0,
+              top_as: {
+                hits: {
+                  total: {
+                    value: 0,
+                    relation: 'eq',
+                  },
+                  max_score: null,
+                  hits: [],
+                },
+              },
+            },
+            location: {
+              doc_count: 0,
+              top_geo: {
+                hits: {
+                  total: {
+                    value: 0,
+                    relation: 'eq',
+                  },
+                  max_score: null,
+                  hits: [],
+                },
+              },
+            },
+          },
+          {
+            key: '63.88.73.13',
+            doc_count: 73,
+            bytes_out: {
+              value: 371918013,
+            },
+            bytes_in: {
+              value: 10957783,
+            },
+            domain: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 0,
+              buckets: [
+                {
+                  key: '13.73.88.63.ashburn.google-ggc.verizon.com',
+                  doc_count: 73,
+                  timestamp: {
+                    value: 1563849411000,
+                    value_as_string: '2019-07-23T02:36:51.000Z',
+                  },
+                },
+                {
+                  key: 'r2---sn-8xgp1vo-p5qe.googlevideo.com',
+                  doc_count: 8,
+                  timestamp: {
+                    value: 1563848936000,
+                    value_as_string: '2019-07-23T02:28:56.000Z',
+                  },
+                },
+                {
+                  key: 'r2.sn-8xgp1vo-p5qe.googlevideo.com',
+                  doc_count: 4,
+                  timestamp: {
+                    value: 1563848653000,
+                    value_as_string: '2019-07-23T02:24:13.000Z',
+                  },
+                },
+              ],
+            },
+            autonomous_system: {
+              doc_count: 73,
+              top_as: {
+                hits: {
+                  total: {
+                    value: 73,
+                    relation: 'eq',
+                  },
+                  max_score: 0,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'TQyGHGwBQrvXogooU_32',
+                      _score: 0,
+                      _source: {
+                        source: {
+                          as: {
+                            number: 701,
+                            organization: {
+                              name: 'MCI Communications Services, Inc. d/b/a Verizon Business',
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+            location: {
+              doc_count: 73,
+              top_geo: {
+                hits: {
+                  total: {
+                    value: 73,
+                    relation: 'eq',
+                  },
+                  max_score: 0,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'TQyGHGwBQrvXogooU_32',
+                      _score: 0,
+                      _source: {
+                        source: {
+                          geo: {
+                            continent_name: 'North America',
+                            city_name: '',
+                            country_iso_code: 'US',
+                            location: {
+                              lon: -97.822,
+                              lat: 37.751,
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          },
+          {
+            key: '10.100.7.199',
+            doc_count: 13469,
+            bytes_out: {
+              value: 7796905,
+            },
+            bytes_in: {
+              value: 10518816,
+            },
+            domain: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 0,
+              buckets: [
+                {
+                  key: 'smartthings-hub.iot.sr.local.crowbird.com',
+                  doc_count: 13469,
+                  timestamp: {
+                    value: 1563895788000,
+                    value_as_string: '2019-07-23T15:29:48.000Z',
+                  },
+                },
+              ],
+            },
+            autonomous_system: {
+              doc_count: 0,
+              top_as: {
+                hits: {
+                  total: {
+                    value: 0,
+                    relation: 'eq',
+                  },
+                  max_score: null,
+                  hits: [],
+                },
+              },
+            },
+            location: {
+              doc_count: 0,
+              top_geo: {
+                hits: {
+                  total: {
+                    value: 0,
+                    relation: 'eq',
+                  },
+                  max_score: null,
+                  hits: [],
+                },
+              },
+            },
+          },
+          {
+            key: '63.88.73.76',
+            doc_count: 107,
+            bytes_out: {
+              value: 3779257,
+            },
+            bytes_in: {
+              value: 137920,
+            },
+            domain: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 0,
+              buckets: [
+                {
+                  key: '76.73.88.63.ashburn.google-ggc.verizon.com',
+                  doc_count: 107,
+                  timestamp: {
+                    value: 1563855851000,
+                    value_as_string: '2019-07-23T04:24:11.000Z',
+                  },
+                },
+                {
+                  key: 'r1---sn-8xgp1vo-p5ql.googlevideo.com',
+                  doc_count: 45,
+                  timestamp: {
+                    value: 1563855531000,
+                    value_as_string: '2019-07-23T04:18:51.000Z',
+                  },
+                },
+                {
+                  key: 'r1.sn-8xgp1vo-p5ql.googlevideo.com',
+                  doc_count: 12,
+                  timestamp: {
+                    value: 1563855248000,
+                    value_as_string: '2019-07-23T04:14:08.000Z',
+                  },
+                },
+              ],
+            },
+            autonomous_system: {
+              doc_count: 107,
+              top_as: {
+                hits: {
+                  total: {
+                    value: 107,
+                    relation: 'eq',
+                  },
+                  max_score: 0,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: '8xEOHWwBQrvXogootLGE',
+                      _score: 0,
+                      _source: {
+                        source: {
+                          as: {
+                            number: 701,
+                            organization: {
+                              name: 'MCI Communications Services, Inc. d/b/a Verizon Business',
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+            location: {
+              doc_count: 107,
+              top_geo: {
+                hits: {
+                  total: {
+                    value: 107,
+                    relation: 'eq',
+                  },
+                  max_score: 0,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: '8xEOHWwBQrvXogootLGE',
+                      _score: 0,
+                      _source: {
+                        source: {
+                          geo: {
+                            continent_name: 'North America',
+                            city_name: '',
+                            country_iso_code: 'US',
+                            location: {
+                              lon: -97.822,
+                              lat: 37.751,
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          },
+          {
+            key: '10.100.7.254',
+            doc_count: 1560,
+            bytes_out: {
+              value: 55200,
+            },
+            bytes_in: {
+              value: 25535,
+            },
+            domain: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 0,
+              buckets: [],
+            },
+            autonomous_system: {
+              doc_count: 0,
+              top_as: {
+                hits: {
+                  total: {
+                    value: 0,
+                    relation: 'eq',
+                  },
+                  max_score: null,
+                  hits: [],
+                },
+              },
+            },
+            location: {
+              doc_count: 0,
+              top_geo: {
+                hits: {
+                  total: {
+                    value: 0,
+                    relation: 'eq',
+                  },
+                  max_score: null,
+                  hits: [],
+                },
+              },
+            },
+          },
+          {
+            key: '10.100.7.198',
+            doc_count: 1566,
+            bytes_out: {
+              value: 56244,
+            },
+            bytes_in: {
+              value: 19188,
+            },
+            domain: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 0,
+              buckets: [
+                {
+                  key: 'nest-frontdoor.iot.sr.local.crowbird.com',
+                  doc_count: 1566,
+                  timestamp: {
+                    value: 1563895792000,
+                    value_as_string: '2019-07-23T15:29:52.000Z',
+                  },
+                },
+              ],
+            },
+            autonomous_system: {
+              doc_count: 0,
+              top_as: {
+                hits: {
+                  total: {
+                    value: 0,
+                    relation: 'eq',
+                  },
+                  max_score: null,
+                  hits: [],
+                },
+              },
+            },
+            location: {
+              doc_count: 0,
+              top_geo: {
+                hits: {
+                  total: {
+                    value: 0,
+                    relation: 'eq',
+                  },
+                  max_score: null,
+                  hits: [],
+                },
+              },
+            },
+          },
+          {
+            key: '52.44.137.93',
+            doc_count: 1,
+            bytes_out: {
+              value: 0,
+            },
+            bytes_in: {
+              value: 17476,
+            },
+            domain: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 0,
+              buckets: [
+                {
+                  key: 'appboot.netflix.com',
+                  doc_count: 1,
+                  timestamp: {
+                    value: 1563840681249,
+                    value_as_string: '2019-07-23T00:11:21.249Z',
+                  },
+                },
+                {
+                  key: 'ec2-52-44-137-93.compute-1.amazonaws.com',
+                  doc_count: 1,
+                  timestamp: {
+                    value: 1563840681249,
+                    value_as_string: '2019-07-23T00:11:21.249Z',
+                  },
+                },
+              ],
+            },
+            autonomous_system: {
+              doc_count: 1,
+              top_as: {
+                hits: {
+                  total: {
+                    value: 1,
+                    relation: 'eq',
+                  },
+                  max_score: 0,
+                  hits: [
+                    {
+                      _index: 'packetbeat-8.0.0-2019.06.25-000009',
+                      _type: '_doc',
+                      _id: 'vQkrHGwBQrvXogooHCqH',
+                      _score: 0,
+                      _source: {
+                        source: {
+                          as: {
+                            org: 'Amazon.com, Inc.',
+                            num: 14618,
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+            location: {
+              doc_count: 1,
+              top_geo: {
+                hits: {
+                  total: {
+                    value: 1,
+                    relation: 'eq',
+                  },
+                  max_score: 0,
+                  hits: [
+                    {
+                      _index: 'packetbeat-8.0.0-2019.06.25-000009',
+                      _type: '_doc',
+                      _id: 'vQkrHGwBQrvXogooHCqH',
+                      _score: 0,
+                      _source: {
+                        source: {
+                          geo: {
+                            continent_name: 'North America',
+                            city_name: 'Ashburn',
+                            country_iso_code: 'US',
+                            region_name: 'Virginia',
+                            location: {
+                              lon: -77.4728,
+                              lat: 39.0481,
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          },
+          {
+            key: '17.249.108.26',
+            doc_count: 95,
+            bytes_out: {
+              value: 11806,
+            },
+            bytes_in: {
+              value: 12861,
+            },
+            domain: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 0,
+              buckets: [],
+            },
+            autonomous_system: {
+              doc_count: 95,
+              top_as: {
+                hits: {
+                  total: {
+                    value: 95,
+                    relation: 'eq',
+                  },
+                  max_score: 0,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'cCDhHmwBQrvXogoorVKR',
+                      _score: 0,
+                      _source: {
+                        source: {
+                          as: {
+                            number: 714,
+                            organization: {
+                              name: 'Apple Inc.',
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+            location: {
+              doc_count: 95,
+              top_geo: {
+                hits: {
+                  total: {
+                    value: 95,
+                    relation: 'eq',
+                  },
+                  max_score: 0,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'cCDhHmwBQrvXogoorVKR',
+                      _score: 0,
+                      _source: {
+                        source: {
+                          geo: {
+                            continent_name: 'North America',
+                            city_name: '',
+                            country_iso_code: 'US',
+                            location: {
+                              lon: -97.822,
+                              lat: 37.751,
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          },
+          {
+            key: '10.100.7.193',
+            doc_count: 92,
+            bytes_out: {
+              value: 24016,
+            },
+            bytes_in: {
+              value: 11008,
+            },
+            domain: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 0,
+              buckets: [
+                {
+                  key: 'router.iot.sr.local.crowbird.com',
+                  doc_count: 92,
+                  timestamp: {
+                    value: 1563894455001,
+                    value_as_string: '2019-07-23T15:07:35.001Z',
+                  },
+                },
+              ],
+            },
+            autonomous_system: {
+              doc_count: 0,
+              top_as: {
+                hits: {
+                  total: {
+                    value: 0,
+                    relation: 'eq',
+                  },
+                  max_score: null,
+                  hits: [],
+                },
+              },
+            },
+            location: {
+              doc_count: 0,
+              top_geo: {
+                hits: {
+                  total: {
+                    value: 0,
+                    relation: 'eq',
+                  },
+                  max_score: null,
+                  hits: [],
+                },
+              },
+            },
+          },
+          {
+            key: '52.205.198.186',
+            doc_count: 2,
+            bytes_out: {
+              value: 9653,
+            },
+            bytes_in: {
+              value: 6328,
+            },
+            domain: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 0,
+              buckets: [
+                {
+                  key: 'api-global.netflix.com',
+                  doc_count: 2,
+                  timestamp: {
+                    value: 1563833307000,
+                    value_as_string: '2019-07-22T22:08:27.000Z',
+                  },
+                },
+                {
+                  key: 'ec2-52-205-198-186.compute-1.amazonaws.com',
+                  doc_count: 2,
+                  timestamp: {
+                    value: 1563833307000,
+                    value_as_string: '2019-07-22T22:08:27.000Z',
+                  },
+                },
+              ],
+            },
+            autonomous_system: {
+              doc_count: 2,
+              top_as: {
+                hits: {
+                  total: {
+                    value: 2,
+                    relation: 'eq',
+                  },
+                  max_score: 0,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'EQS6G2wBQrvXogoojYWI',
+                      _score: 0,
+                      _source: {
+                        source: {
+                          as: {
+                            number: 14618,
+                            organization: {
+                              name: 'Amazon.com, Inc.',
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+            location: {
+              doc_count: 2,
+              top_geo: {
+                hits: {
+                  total: {
+                    value: 2,
+                    relation: 'eq',
+                  },
+                  max_score: 0,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'EQS6G2wBQrvXogoojYWI',
+                      _score: 0,
+                      _source: {
+                        source: {
+                          geo: {
+                            continent_name: 'North America',
+                            city_name: 'Ashburn',
+                            country_iso_code: 'US',
+                            region_name: 'Virginia',
+                            location: {
+                              lon: -77.4728,
+                              lat: 39.0481,
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          },
+          {
+            key: '52.45.118.37',
+            doc_count: 3,
+            bytes_out: {
+              value: 8617,
+            },
+            bytes_in: {
+              value: 5559,
+            },
+            domain: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 0,
+              buckets: [
+                {
+                  key: 'ec2-52-45-118-37.compute-1.amazonaws.com',
+                  doc_count: 3,
+                  timestamp: {
+                    value: 1563839970000,
+                    value_as_string: '2019-07-22T23:59:30.000Z',
+                  },
+                },
+                {
+                  key: 'api-global.netflix.com',
+                  doc_count: 1,
+                  timestamp: {
+                    value: 1563839903000,
+                    value_as_string: '2019-07-22T23:58:23.000Z',
+                  },
+                },
+              ],
+            },
+            autonomous_system: {
+              doc_count: 3,
+              top_as: {
+                hits: {
+                  total: {
+                    value: 3,
+                    relation: 'eq',
+                  },
+                  max_score: 0,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: '5QgfHGwBQrvXogooPbuZ',
+                      _score: 0,
+                      _source: {
+                        source: {
+                          as: {
+                            number: 14618,
+                            organization: {
+                              name: 'Amazon.com, Inc.',
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+            location: {
+              doc_count: 3,
+              top_geo: {
+                hits: {
+                  total: {
+                    value: 3,
+                    relation: 'eq',
+                  },
+                  max_score: 0,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: '5QgfHGwBQrvXogooPbuZ',
+                      _score: 0,
+                      _source: {
+                        source: {
+                          geo: {
+                            continent_name: 'North America',
+                            city_name: 'Ashburn',
+                            country_iso_code: 'US',
+                            region_name: 'Virginia',
+                            location: {
+                              lon: -77.4728,
+                              lat: 39.0481,
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          },
+          {
+            key: '10.100.4.1',
+            doc_count: 54069,
+            bytes_out: {
+              value: 9519,
+            },
+            bytes_in: {
+              value: 4066,
+            },
+            domain: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 0,
+              buckets: [
+                {
+                  key: 'router.sr.local.crowbird.com',
+                  doc_count: 54069,
+                  timestamp: {
+                    value: 1563895696417,
+                    value_as_string: '2019-07-23T15:28:16.417Z',
+                  },
+                },
+              ],
+            },
+            autonomous_system: {
+              doc_count: 0,
+              top_as: {
+                hits: {
+                  total: {
+                    value: 0,
+                    relation: 'eq',
+                  },
+                  max_score: null,
+                  hits: [],
+                },
+              },
+            },
+            location: {
+              doc_count: 0,
+              top_geo: {
+                hits: {
+                  total: {
+                    value: 0,
+                    relation: 'eq',
+                  },
+                  max_score: null,
+                  hits: [],
+                },
+              },
+            },
+          },
+          {
+            key: '63.88.73.140',
+            doc_count: 911,
+            bytes_out: {
+              value: 89941,
+            },
+            bytes_in: {
+              value: 4000,
+            },
+            domain: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 0,
+              buckets: [
+                {
+                  key: '140.73.88.63.ashburn.google-ggc.verizon.com',
+                  doc_count: 911,
+                  timestamp: {
+                    value: 1563846659000,
+                    value_as_string: '2019-07-23T01:50:59.000Z',
+                  },
+                },
+                {
+                  key: 'r1.sn-8xgp1vo-p5qs.googlevideo.com',
+                  doc_count: 93,
+                  timestamp: {
+                    value: 1563846554000,
+                    value_as_string: '2019-07-23T01:49:14.000Z',
+                  },
+                },
+                {
+                  key: 'r1---sn-8xgp1vo-p5qs.googlevideo.com',
+                  doc_count: 21,
+                  timestamp: {
+                    value: 1563844441000,
+                    value_as_string: '2019-07-23T01:14:01.000Z',
+                  },
+                },
+              ],
+            },
+            autonomous_system: {
+              doc_count: 911,
+              top_as: {
+                hits: {
+                  total: {
+                    value: 911,
+                    relation: 'eq',
+                  },
+                  max_score: 0,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'qgx-HGwBQrvXogoof6rh',
+                      _score: 0,
+                      _source: {
+                        source: {
+                          as: {
+                            number: 701,
+                            organization: {
+                              name: 'MCI Communications Services, Inc. d/b/a Verizon Business',
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+            location: {
+              doc_count: 911,
+              top_geo: {
+                hits: {
+                  total: {
+                    value: 911,
+                    relation: 'eq',
+                  },
+                  max_score: 0,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'qgx-HGwBQrvXogoof6rh',
+                      _score: 0,
+                      _source: {
+                        source: {
+                          geo: {
+                            continent_name: 'North America',
+                            city_name: '',
+                            country_iso_code: 'US',
+                            location: {
+                              lon: -97.822,
+                              lat: 37.751,
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          },
+          {
+            key: '45.57.62.142',
+            doc_count: 8,
+            bytes_out: {
+              value: 119945,
+            },
+            bytes_in: {
+              value: 3441,
+            },
+            domain: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 0,
+              buckets: [
+                {
+                  key: 'ipv4_1.lagg0.c013.was001.ix.nflxvideo.net',
+                  doc_count: 8,
+                  timestamp: {
+                    value: 1563840678000,
+                    value_as_string: '2019-07-23T00:11:18.000Z',
+                  },
+                },
+                {
+                  key: 'occ-0-2430-2433.1.nflxso.net',
+                  doc_count: 8,
+                  timestamp: {
+                    value: 1563840678000,
+                    value_as_string: '2019-07-23T00:11:18.000Z',
+                  },
+                },
+              ],
+            },
+            autonomous_system: {
+              doc_count: 8,
+              top_as: {
+                hits: {
+                  total: {
+                    value: 8,
+                    relation: 'eq',
+                  },
+                  max_score: 0,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'YggPHGwBQrvXogoorCG4',
+                      _score: 0,
+                      _source: {
+                        source: {
+                          as: {
+                            number: 2906,
+                            organization: {
+                              name: 'Netflix Streaming Services Inc.',
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+            location: {
+              doc_count: 8,
+              top_geo: {
+                hits: {
+                  total: {
+                    value: 8,
+                    relation: 'eq',
+                  },
+                  max_score: 0,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'YggPHGwBQrvXogoorCG4',
+                      _score: 0,
+                      _source: {
+                        source: {
+                          geo: {
+                            continent_name: 'North America',
+                            city_name: '',
+                            country_iso_code: 'US',
+                            location: {
+                              lon: -97.822,
+                              lat: 37.751,
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          },
+          {
+            key: '63.88.73.19',
+            doc_count: 38,
+            bytes_out: {
+              value: 978,
+            },
+            bytes_in: {
+              value: 2258,
+            },
+            domain: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 0,
+              buckets: [
+                {
+                  key: '19.73.88.63.ashburn.google-ggc.verizon.com',
+                  doc_count: 38,
+                  timestamp: {
+                    value: 1563842629000,
+                    value_as_string: '2019-07-23T00:43:49.000Z',
+                  },
+                },
+                {
+                  key: 'r8---sn-8xgp1vo-p5qe.googlevideo.com',
+                  doc_count: 34,
+                  timestamp: {
+                    value: 1563842629000,
+                    value_as_string: '2019-07-23T00:43:49.000Z',
+                  },
+                },
+              ],
+            },
+            autonomous_system: {
+              doc_count: 38,
+              top_as: {
+                hits: {
+                  total: {
+                    value: 38,
+                    relation: 'eq',
+                  },
+                  max_score: 0,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: '6Ak9HGwBQrvXogooH-NF',
+                      _score: 0,
+                      _source: {
+                        source: {
+                          as: {
+                            number: 701,
+                            organization: {
+                              name: 'MCI Communications Services, Inc. d/b/a Verizon Business',
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+            location: {
+              doc_count: 38,
+              top_geo: {
+                hits: {
+                  total: {
+                    value: 38,
+                    relation: 'eq',
+                  },
+                  max_score: 0,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: '6Ak9HGwBQrvXogooH-NF',
+                      _score: 0,
+                      _source: {
+                        source: {
+                          geo: {
+                            continent_name: 'North America',
+                            city_name: '',
+                            country_iso_code: 'US',
+                            location: {
+                              lon: -97.822,
+                              lat: 37.751,
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          },
+          {
+            key: '172.217.12.206',
+            doc_count: 44,
+            bytes_out: {
+              value: 10795,
+            },
+            bytes_in: {
+              value: 1875,
+            },
+            domain: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 0,
+              buckets: [
+                {
+                  key: 'lga25s63-in-f14.1e100.net',
+                  doc_count: 44,
+                  timestamp: {
+                    value: 1563856127000,
+                    value_as_string: '2019-07-23T04:28:47.000Z',
+                  },
+                },
+                {
+                  key: 'youtube-ui.l.google.com',
+                  doc_count: 9,
+                  timestamp: {
+                    value: 1563848906000,
+                    value_as_string: '2019-07-23T02:28:26.000Z',
+                  },
+                },
+                {
+                  key: 'i9.ytimg.com',
+                  doc_count: 10,
+                  timestamp: {
+                    value: 1563846848000,
+                    value_as_string: '2019-07-23T01:54:08.000Z',
+                  },
+                },
+                {
+                  key: 's.ytimg.com',
+                  doc_count: 1,
+                  timestamp: {
+                    value: 1563844418000,
+                    value_as_string: '2019-07-23T01:13:38.000Z',
+                  },
+                },
+              ],
+            },
+            autonomous_system: {
+              doc_count: 44,
+              top_as: {
+                hits: {
+                  total: {
+                    value: 44,
+                    relation: 'eq',
+                  },
+                  max_score: 0,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'ewyGHGwBQrvXogooHfu_',
+                      _score: 0,
+                      _source: {
+                        source: {
+                          as: {
+                            number: 15169,
+                            organization: {
+                              name: 'Google LLC',
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+            location: {
+              doc_count: 44,
+              top_geo: {
+                hits: {
+                  total: {
+                    value: 44,
+                    relation: 'eq',
+                  },
+                  max_score: 0,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'ewyGHGwBQrvXogooHfu_',
+                      _score: 0,
+                      _source: {
+                        source: {
+                          geo: {
+                            continent_name: 'North America',
+                            city_name: '',
+                            country_iso_code: 'US',
+                            location: {
+                              lon: -97.822,
+                              lat: 37.751,
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          },
+          {
+            key: '172.217.10.110',
+            doc_count: 34,
+            bytes_out: {
+              value: 906,
+            },
+            bytes_in: {
+              value: 1300,
+            },
+            domain: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 0,
+              buckets: [
+                {
+                  key: 'lga34s15-in-f14.1e100.net',
+                  doc_count: 34,
+                  timestamp: {
+                    value: 1563856929000,
+                    value_as_string: '2019-07-23T04:42:09.000Z',
+                  },
+                },
+                {
+                  key: 'youtube-ui.l.google.com',
+                  doc_count: 2,
+                  timestamp: {
+                    value: 1563856416000,
+                    value_as_string: '2019-07-23T04:33:36.000Z',
+                  },
+                },
+                {
+                  key: 'i9.ytimg.com',
+                  doc_count: 6,
+                  timestamp: {
+                    value: 1563849557000,
+                    value_as_string: '2019-07-23T02:39:17.000Z',
+                  },
+                },
+              ],
+            },
+            autonomous_system: {
+              doc_count: 34,
+              top_as: {
+                hits: {
+                  total: {
+                    value: 34,
+                    relation: 'eq',
+                  },
+                  max_score: 0,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'Vw63HGwBQrvXogoolLjd',
+                      _score: 0,
+                      _source: {
+                        source: {
+                          as: {
+                            number: 15169,
+                            organization: {
+                              name: 'Google LLC',
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+            location: {
+              doc_count: 34,
+              top_geo: {
+                hits: {
+                  total: {
+                    value: 34,
+                    relation: 'eq',
+                  },
+                  max_score: 0,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'Vw63HGwBQrvXogoolLjd',
+                      _score: 0,
+                      _source: {
+                        source: {
+                          geo: {
+                            continent_name: 'North America',
+                            city_name: '',
+                            country_iso_code: 'US',
+                            location: {
+                              lon: -97.822,
+                              lat: 37.751,
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          },
+          {
+            key: '34.194.52.159',
+            doc_count: 443,
+            bytes_out: {
+              value: 4258,
+            },
+            bytes_in: {
+              value: 1291,
+            },
+            domain: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 0,
+              buckets: [
+                {
+                  key: 'api.smartthings.com',
+                  doc_count: 441,
+                  timestamp: {
+                    value: 1563895518000,
+                    value_as_string: '2019-07-23T15:25:18.000Z',
+                  },
+                },
+                {
+                  key: 'ec2-34-194-52-159.compute-1.amazonaws.com',
+                  doc_count: 443,
+                  timestamp: {
+                    value: 1563895518000,
+                    value_as_string: '2019-07-23T15:25:18.000Z',
+                  },
+                },
+              ],
+            },
+            autonomous_system: {
+              doc_count: 443,
+              top_as: {
+                hits: {
+                  total: {
+                    value: 443,
+                    relation: 'eq',
+                  },
+                  max_score: 0,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'Fx6bHmwBQrvXogooYwdF',
+                      _score: 0,
+                      _source: {
+                        source: {
+                          as: {
+                            number: 14618,
+                            organization: {
+                              name: 'Amazon.com, Inc.',
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+            location: {
+              doc_count: 443,
+              top_geo: {
+                hits: {
+                  total: {
+                    value: 443,
+                    relation: 'eq',
+                  },
+                  max_score: 0,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'Fx6bHmwBQrvXogooYwdF',
+                      _score: 0,
+                      _source: {
+                        source: {
+                          geo: {
+                            continent_name: 'North America',
+                            city_name: 'Ashburn',
+                            country_iso_code: 'US',
+                            region_name: 'Virginia',
+                            location: {
+                              lon: -77.4728,
+                              lat: 39.0481,
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          },
+          {
+            key: '52.218.96.124',
+            doc_count: 2,
+            bytes_out: {
+              value: 1720,
+            },
+            bytes_in: {
+              value: 592,
+            },
+            domain: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 0,
+              buckets: [
+                {
+                  key: 'crl.tivuon.tv',
+                  doc_count: 2,
+                  timestamp: {
+                    value: 1563831067000,
+                    value_as_string: '2019-07-22T21:31:07.000Z',
+                  },
+                },
+                {
+                  key: 's3-website-eu-west-1.amazonaws.com',
+                  doc_count: 2,
+                  timestamp: {
+                    value: 1563831067000,
+                    value_as_string: '2019-07-22T21:31:07.000Z',
+                  },
+                },
+              ],
+            },
+            autonomous_system: {
+              doc_count: 2,
+              top_as: {
+                hits: {
+                  total: {
+                    value: 2,
+                    relation: 'eq',
+                  },
+                  max_score: 0,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'kwKYG2wBQrvXogooZ_Gc',
+                      _score: 0,
+                      _source: {
+                        source: {
+                          as: {
+                            number: 16509,
+                            organization: {
+                              name: 'Amazon.com, Inc.',
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+            location: {
+              doc_count: 2,
+              top_geo: {
+                hits: {
+                  total: {
+                    value: 2,
+                    relation: 'eq',
+                  },
+                  max_score: 0,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'kwKYG2wBQrvXogooZ_Gc',
+                      _score: 0,
+                      _source: {
+                        source: {
+                          geo: {
+                            continent_name: 'Europe',
+                            city_name: 'Dublin',
+                            country_iso_code: 'IE',
+                            region_name: 'Leinster',
+                            location: {
+                              lon: -6.2489,
+                              lat: 53.3331,
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          },
+          {
+            key: '52.22.35.183',
+            doc_count: 7,
+            bytes_out: {
+              value: 163,
+            },
+            bytes_in: {
+              value: 132,
+            },
+            domain: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 0,
+              buckets: [
+                {
+                  key: 'api-global.netflix.com',
+                  doc_count: 7,
+                  timestamp: {
+                    value: 1563840869000,
+                    value_as_string: '2019-07-23T00:14:29.000Z',
+                  },
+                },
+                {
+                  key: 'ec2-52-22-35-183.compute-1.amazonaws.com',
+                  doc_count: 7,
+                  timestamp: {
+                    value: 1563840869000,
+                    value_as_string: '2019-07-23T00:14:29.000Z',
+                  },
+                },
+              ],
+            },
+            autonomous_system: {
+              doc_count: 7,
+              top_as: {
+                hits: {
+                  total: {
+                    value: 7,
+                    relation: 'eq',
+                  },
+                  max_score: 0,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'MAktHGwBQrvXogooHUOC',
+                      _score: 0,
+                      _source: {
+                        source: {
+                          as: {
+                            org: 'Amazon.com, Inc.',
+                            num: 14618,
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+            location: {
+              doc_count: 7,
+              top_geo: {
+                hits: {
+                  total: {
+                    value: 7,
+                    relation: 'eq',
+                  },
+                  max_score: 0,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'MAktHGwBQrvXogooHUOC',
+                      _score: 0,
+                      _source: {
+                        source: {
+                          geo: {
+                            continent_name: 'North America',
+                            city_name: 'Ashburn',
+                            country_iso_code: 'US',
+                            region_name: 'Virginia',
+                            location: {
+                              lon: -77.4728,
+                              lat: 39.0481,
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          },
+          {
+            key: '172.217.10.65',
+            doc_count: 101,
+            bytes_out: {
+              value: 261,
+            },
+            bytes_in: {
+              value: 132,
+            },
+            domain: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 0,
+              buckets: [
+                {
+                  key: 'lga34s14-in-f1.1e100.net',
+                  doc_count: 101,
+                  timestamp: {
+                    value: 1563856914000,
+                    value_as_string: '2019-07-23T04:41:54.000Z',
+                  },
+                },
+                {
+                  key: 'photos-ugc.l.googleusercontent.com',
+                  doc_count: 10,
+                  timestamp: {
+                    value: 1563856728000,
+                    value_as_string: '2019-07-23T04:38:48.000Z',
+                  },
+                },
+                {
+                  key: 'yt3.ggpht.com',
+                  doc_count: 18,
+                  timestamp: {
+                    value: 1563853119000,
+                    value_as_string: '2019-07-23T03:38:39.000Z',
+                  },
+                },
+              ],
+            },
+            autonomous_system: {
+              doc_count: 101,
+              top_as: {
+                hits: {
+                  total: {
+                    value: 101,
+                    relation: 'eq',
+                  },
+                  max_score: 0,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'vQyGHGwBQrvXogooGfro',
+                      _score: 0,
+                      _source: {
+                        source: {
+                          as: {
+                            number: 15169,
+                            organization: {
+                              name: 'Google LLC',
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+            location: {
+              doc_count: 101,
+              top_geo: {
+                hits: {
+                  total: {
+                    value: 101,
+                    relation: 'eq',
+                  },
+                  max_score: 0,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'vQyGHGwBQrvXogooGfro',
+                      _score: 0,
+                      _source: {
+                        source: {
+                          geo: {
+                            continent_name: 'North America',
+                            city_name: '',
+                            country_iso_code: 'US',
+                            location: {
+                              lon: -97.822,
+                              lat: 37.751,
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          },
+          {
+            key: '1.179.154.108',
+            doc_count: 245,
+            bytes_out: {
+              value: 139182,
+            },
+            bytes_in: {
+              value: 0,
+            },
+            domain: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 0,
+              buckets: [
+                {
+                  key: '-',
+                  doc_count: 123,
+                  timestamp: {
+                    value: 1563895611605,
+                    value_as_string: '2019-07-23T15:26:51.605Z',
+                  },
+                },
+              ],
+            },
+            autonomous_system: {
+              doc_count: 122,
+              top_as: {
+                hits: {
+                  total: {
+                    value: 122,
+                    relation: 'eq',
+                  },
+                  max_score: 0,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'dd4fa2d4bd-692325757348790',
+                      _score: 0,
+                      _source: {
+                        source: {
+                          as: {
+                            number: 131293,
+                            organization: {
+                              name: 'TOT Public Company Limited',
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+            location: {
+              doc_count: 122,
+              top_geo: {
+                hits: {
+                  total: {
+                    value: 122,
+                    relation: 'eq',
+                  },
+                  max_score: 0,
+                  hits: [
+                    {
+                      _index: 'filebeat-8.0.0-2019.06.19-000005',
+                      _type: '_doc',
+                      _id: 'dd4fa2d4bd-692325757348790',
+                      _score: 0,
+                      _source: {
+                        source: {
+                          geo: {
+                            continent_name: 'Asia',
+                            country_iso_code: 'TH',
+                            location: {
+                              lon: 100.4667,
+                              lat: 13.75,
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          },
+        ],
+      },
     },
   },
 };

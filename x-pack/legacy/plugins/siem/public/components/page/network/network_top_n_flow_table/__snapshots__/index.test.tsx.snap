@@ -11,18 +11,16 @@ exports[`NetworkTopNFlow Table Component rendering it renders the default Networ
         "node": Object {
           "destination": null,
           "network": Object {
-            "bytes": 3826633497,
-            "direction": Array [
-              "inbound",
-            ],
-            "packets": 4185805,
+            "bytes_in": 3826633497,
+            "bytes_out": 1083495734,
           },
           "source": Object {
-            "count": 1,
+            "autonomous_system": "Google, Inc",
             "domain": Array [
               "test.domain.com",
             ],
             "ip": "8.8.8.8",
+            "location": "US",
           },
         },
       },
@@ -33,19 +31,17 @@ exports[`NetworkTopNFlow Table Component rendering it renders the default Networ
         "node": Object {
           "destination": null,
           "network": Object {
-            "bytes": 325909849,
-            "direction": Array [
-              "inbound",
-              "outbound",
-            ],
-            "packets": 221494,
+            "bytes_in": 3826633497,
+            "bytes_out": 1083495734,
           },
           "source": Object {
+            "autonomous_system": "Google, Inc",
             "domain": Array [
               "test.domain.net",
               "test.old.domain.net",
             ],
             "ip": "9.9.9.9",
+            "location": "DE",
           },
         },
       },
