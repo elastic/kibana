@@ -15,6 +15,7 @@
     "xpack.idxMgmt": "legacy/plugins/index_management",
     "xpack.indexLifecycleMgmt": "legacy/plugins/index_lifecycle_management",
     "xpack.infra": "legacy/plugins/infra",
+    "xpack.integrationsManager":"legacy/plugins/integrations_manager",
     "xpack.kueryAutocomplete": "legacy/plugins/kuery_autocomplete",
     "xpack.licenseMgmt": "legacy/plugins/license_management",
     "xpack.maps": "legacy/plugins/maps",
