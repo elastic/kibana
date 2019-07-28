@@ -19,10 +19,13 @@
 
 import { uiModules } from 'ui/modules';
 import { npStart } from 'ui/new_platform';
-import { TelemetryOptInProvider } from '../../../../../../x-pack/legacy/plugins/telemetry/public/services/telemetry_opt_in'
-
+import { TelemetryOptInProvider } from '../../../../../../x-pack/legacy/plugins/telemetry/public/services/telemetry_opt_in';
+import { createUiStatsReporter, METRIC_TYPE } from '../../../ui_metric/public';
 export let indexPatternService;
 export const telemetryService = {};
+
+export const trackUiMetric = createUiStatsReporter('Kibana_home');
+export { METRIC_TYPE };
 
 uiModules.get('kibana').run(($injector) => {
   indexPatternService = $injector.get('indexPatterns');

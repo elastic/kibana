@@ -19,5 +19,5 @@
 import { renderTelemetryOptInCard, Props } from './telemetry_opt_in_card';
 
 export const TelemetryOptInCard = (props: Props) => {
-  return renderTelemetryOptInCheckbox(props);
+  return renderTelemetryOptInCard(props);
 };

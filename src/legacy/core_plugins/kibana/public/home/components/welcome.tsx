@@ -39,11 +39,14 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import chrome from 'ui/chrome';
 import { SampleDataCard } from './sample_data';
 import { TelemetryOptInCard } from './telemetry_opt_in';
+// @ts-ignore
+import { trackUiMetric, METRIC_TYPE } from '../kibana_services';
 
 interface Props {
   urlBasePath: string;
   onSkip: () => {};
   fetchTelemetry: () => Promise<any[]>;
+  showTelemetryOptIn: boolean;
 }
 interface State {
   step: number;
@@ -66,6 +69,7 @@ export class Welcome extends React.PureComponent<Props, State> {
   };
 
   goToStep = (step: number) => () => {
+    trackUiMetric(METRIC_TYPE.CLICK, `welcomeScreenNavigate_${step}`);
     this.setState(() => ({ step }));
   };
 
@@ -75,6 +79,7 @@ export class Welcome extends React.PureComponent<Props, State> {
   }
   onTelemetryOptInDecline = () => {
     const { trySampleData } = this.state;
+    trackUiMetric(METRIC_TYPE.CLICK, 'telemetryOptInDecline');
     if (trySampleData) {
       return this.redirecToSampleData();
     }
@@ -82,16 +87,20 @@ export class Welcome extends React.PureComponent<Props, State> {
   };
   onTelemetryOptInConfirm = () => {
     const { trySampleData } = this.state;
+    trackUiMetric(METRIC_TYPE.CLICK, 'telemetryOptInConfirm');
     if (trySampleData) {
       return this.redirecToSampleData();
     }
+
     this.props.onSkip();
   };
 
   onSampleDataDecline = () => {
+    trackUiMetric(METRIC_TYPE.CLICK, 'sampleDataDecline');
     this.setState(() => ({ step: 1, trySampleData: false }));
   };
   onSampleDataConfirm = () => {
+    trackUiMetric(METRIC_TYPE.CLICK, 'sampleDataConfirm');
     this.setState(() => ({ step: 1, trySampleData: true }));
   };
 
@@ -104,7 +113,7 @@ export class Welcome extends React.PureComponent<Props, State> {
   }
 
   render() {
-    const { urlBasePath, fetchTelemetry } = this.props;
+    const { urlBasePath, fetchTelemetry, showTelemetryOptIn } = this.props;
     const { step } = this.state;
 
     return (
@@ -142,7 +151,7 @@ export class Welcome extends React.PureComponent<Props, State> {
                     onDecline={this.onSampleDataDecline}
                   />
                 )}
-                {step === 1 && (
+                {showTelemetryOptIn && step === 1 && (
                   <TelemetryOptInCard
                     fetchTelemetry={fetchTelemetry}
                     urlBasePath={urlBasePath}
@@ -153,18 +162,20 @@ export class Welcome extends React.PureComponent<Props, State> {
                 <EuiSpacer size="xs" />
               </EuiFlexItem>
             </EuiFlexGroup>
-            <EuiFlexGroup gutterSize="s" justifyContent="center">
-              {[0, 1].map(stepOpt => (
-                <EuiFlexItem grow={false}>
-                  <EuiButtonIcon
-                    iconType="dot"
-                    onClick={this.goToStep(stepOpt)}
-                    size="s"
-                    disabled={step === stepOpt}
-                  />
-                </EuiFlexItem>
-              ))}
-            </EuiFlexGroup>
+            {showTelemetryOptIn && (
+              <EuiFlexGroup gutterSize="s" justifyContent="center">
+                {[0, 1].map(stepOpt => (
+                  <EuiFlexItem grow={false}>
+                    <EuiButtonIcon
+                      iconType="dot"
+                      onClick={this.goToStep(stepOpt)}
+                      size="s"
+                      disabled={step === stepOpt}
+                    />
+                  </EuiFlexItem>
+                ))}
+              </EuiFlexGroup>
+            )}
           </div>
         </div>
       </EuiPortal>

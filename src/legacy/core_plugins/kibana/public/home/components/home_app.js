@@ -37,8 +37,15 @@ export function HomeApp({ directories }) {
   const isCloudEnabled = chrome.getInjected('isCloudEnabled', false);
   const apmUiEnabled = chrome.getInjected('apmUiEnabled', true);
   const mlEnabled = chrome.getInjected('mlEnabled', false);
+  const {
+    telemetryBanner,
+    telemetryEnabled,
+    telemetryOptInProvide,
+  } = telemetryService;
+
+  const showTelemetryOptIn = telemetryEnabled && telemetryBanner && telemetryOptInProvide.getOptIn() !== true;
   const savedObjectsClient = chrome.getSavedObjectsClient();
-  const fetchTelemetry = telemetryService.telemetryOptInProvider.fetchExample;
+  const fetchTelemetry = telemetryOptInProvide.fetchExample;
 
   const renderTutorialDirectory = (props) => {
     return (
@@ -94,6 +101,7 @@ export function HomeApp({ directories }) {
             localStorage={localStorage}
             urlBasePath={chrome.getBasePath()}
             fetchTelemetry={fetchTelemetry}
+            showTelemetryOptIn={showTelemetryOptIn}
           />
         </Route>
       </Switch>

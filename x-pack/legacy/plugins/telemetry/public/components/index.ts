@@ -8,5 +8,4 @@
 export { TelemetryForm } from './telemetry_form';
 export { OptInExampleFlyout } from './opt_in_details_component';
 export { OptInBanner } from './opt_in_banner_component';
-export { OptInCheckbox } from './opt_in_checkbox_component';
 export { OptInMessage } from './opt_in_message';
