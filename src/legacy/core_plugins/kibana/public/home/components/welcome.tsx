@@ -160,7 +160,7 @@ export class Welcome extends React.PureComponent<Props, State> {
                     iconType="dot"
                     onClick={this.goToStep(stepOpt)}
                     size="s"
-                    fill-opacity={step === stepOpt ? 1 : 0.5}
+                    disabled={step === stepOpt}
                   />
                 </EuiFlexItem>
               ))}
