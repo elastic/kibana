@@ -35,7 +35,7 @@ export function Home() {
 
   return (
     <>
-      <EuiPage style={{ backgroundColor: 'white', paddingBottom: '8px' }}>
+      <EuiPage style={{ borderBottom: '1px solid #D3DAE6', paddingBottom: '7px' }}>
         <EuiPageBody restrictWidth={1200}>
           <Header />
         </EuiPageBody>
