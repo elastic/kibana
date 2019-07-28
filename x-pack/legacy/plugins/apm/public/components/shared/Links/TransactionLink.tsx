@@ -24,11 +24,12 @@ export const TransactionLink: React.SFC<TransactionLinkProps> = ({
   const traceId = transaction.trace.id;
   const transactionId = transaction.transaction.id;
   const transactionName = transaction.transaction.name;
+  const transactionType = transaction.transaction.type;
 
   return (
     <APMLink
       path={`/services/${serviceName}/transactions/view`}
-      query={{ traceId, transactionId, transactionName }}
+      query={{ traceId, transactionId, transactionName, transactionType }}
     >
       {children}
     </APMLink>
