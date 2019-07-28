@@ -5,20 +5,11 @@
  */
 
 import * as React from 'react';
-
-import {
-  EuiButton,
-  EuiCallOut,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSpacer,
-  EuiCheckbox,
-  makeId,
-} from '@elastic/eui';
+import { EuiCheckbox } from '@elastic/eui';
 import { OptInMessage } from './opt_in_message';
 
 interface Props {
-  fetchTelemetry: () => {};
+  fetchTelemetry: () => Promise<any[]>;
   optInClick: () => {};
 }
 interface State {
@@ -26,32 +17,24 @@ interface State {
 }
 
 export class OptInCheckbox extends React.PureComponent<Props, State> {
-  constructor(props: Props) {
-    super(props);
-    this.state = {
-      checked: false,
-    }
-  }
-  onChange = (e: any) => {
-    this.setState({
-      checked: e.target.checked,
-    });
+  public readonly state: State = {
+    checked: false,
+  };
+
+  onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    this.setState({ checked: e.target.checked });
   };
 
   render() {
-
-    const label = <OptInMessage
-      fetchTelemetry={this.props.fetchTelemetry}
-    />;
     return (
       <React.Fragment>
         <EuiCheckbox
           id="telemetry__opt_in_checkbox"
-          label={label}
+          label={<OptInMessage fetchTelemetry={this.props.fetchTelemetry} />}
           checked={this.state.checked}
           onChange={this.onChange}
         />
       </React.Fragment>
-    )
+    );
   }
 }

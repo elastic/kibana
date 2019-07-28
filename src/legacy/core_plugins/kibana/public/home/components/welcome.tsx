@@ -25,26 +25,24 @@
 
 import React from 'react';
 import {
-  EuiCard,
   EuiTitle,
   EuiSpacer,
   EuiFlexGroup,
   EuiFlexItem,
   EuiText,
   EuiIcon,
-  EuiButton,
-  EuiButtonEmpty,
   EuiPortal,
 } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n/react';
+import chrome from 'ui/chrome';
 import { SampleDataCard } from './sample_data';
 import { TelemetryOptInCard } from './telemetry_opt_in';
-import chrome from 'ui/chrome';
 
 interface Props {
   urlBasePath: string;
   onSkip: () => {};
+  fetchTelemetry: () => Promise<any[]>;
 }
 interface State {
   step: number;
@@ -62,30 +60,35 @@ export class Welcome extends React.PureComponent<Props, State> {
 
   hideOnEsc = (e: KeyboardEvent) => {
     if (e.key === 'Escape') {
-
       this.props.onSkip();
     }
   };
 
+  private redirecToSampleData() {
+    const path = chrome.addBasePath('#/home/tutorial_directory/sampleData');
+    window.location.href = path;
+  }
   onTelemetryOptInDecline = () => {
     const { trySampleData } = this.state;
     if (trySampleData) {
-      chrome.addBasePath()
-      // getRouteHref: (obj, route) => $scope.kbnUrl.getRouteHref(obj, route),
-    } else {
-      this.props.onSkip();
+      return this.redirecToSampleData();
     }
-  }
+    this.props.onSkip();
+  };
   onTelemetryOptInConfirm = () => {
-
-  }
+    const { trySampleData } = this.state;
+    if (trySampleData) {
+      return this.redirecToSampleData();
+    }
+    this.props.onSkip();
+  };
 
   onSampleDataDecline = () => {
-    this.setState(() => ({ step: 1, trySampleData: false }))
-  }
+    this.setState(() => ({ step: 1, trySampleData: false }));
+  };
   onSampleDataConfirm = () => {
-    this.setState(() => ({ step: 1, trySampleData: true }))
-  }
+    this.setState(() => ({ step: 1, trySampleData: true }));
+  };
 
   componentDidMount() {
     document.addEventListener('keydown', this.hideOnEsc);
@@ -96,7 +99,7 @@ export class Welcome extends React.PureComponent<Props, State> {
   }
 
   render() {
-    const { urlBasePath } = this.props;
+    const { urlBasePath, fetchTelemetry } = this.props;
     const { step } = this.state;
 
     return (
@@ -110,12 +113,15 @@ export class Welcome extends React.PureComponent<Props, State> {
               </span>
               <EuiTitle size="l" className="homWelcome__title">
                 <h1>
-                  <FormattedMessage id="kbn.home.welcomeTitle" defaultMessage="Welcome to Kibana"/>
+                  <FormattedMessage id="kbn.home.welcomeTitle" defaultMessage="Welcome to Kibana" />
                 </h1>
               </EuiTitle>
               <EuiText size="s" color="subdued" className="homWelcome__subtitle">
                 <p>
-                  <FormattedMessage id="kbn.home.welcomeDescription" defaultMessage="Your window into the Elastic Stack"/>
+                  <FormattedMessage
+                    id="kbn.home.welcomeDescription"
+                    defaultMessage="Your window into the Elastic Stack"
+                  />
                 </p>
               </EuiText>
               <EuiSpacer size="m" />
@@ -123,20 +129,25 @@ export class Welcome extends React.PureComponent<Props, State> {
           </header>
           <div className="homWelcome__content homWelcome-body">
             <EuiFlexGroup gutterSize="l">
-              {step === 0 && <EuiFlexItem>
-                <SampleDataCard
-                  urlBasePath={urlBasePath}
-                  onConfirm={this.onSampleDataConfirm}
-                  onDecline={this.onSampleDataDecline}
-                />
-              </EuiFlexItem>}
-              {step === 1 && <EuiFlexItem>
-                <TelemetryOptInCard
-                  urlBasePath={urlBasePath}
-                  onConfirm={this.onTelemetryOptInConfirm}
-                  onDecline={this.onTelemetryOptInDecline}
-                />
-              </EuiFlexItem>}
+              {step === 0 && (
+                <EuiFlexItem>
+                  <SampleDataCard
+                    urlBasePath={urlBasePath}
+                    onConfirm={this.onSampleDataConfirm}
+                    onDecline={this.onSampleDataDecline}
+                  />
+                </EuiFlexItem>
+              )}
+              {step === 1 && (
+                <EuiFlexItem>
+                  <TelemetryOptInCard
+                    fetchTelemetry={fetchTelemetry}
+                    urlBasePath={urlBasePath}
+                    onConfirm={this.onTelemetryOptInConfirm}
+                    onDecline={this.onTelemetryOptInDecline}
+                  />
+                </EuiFlexItem>
+              )}
             </EuiFlexGroup>
           </div>
         </div>

@@ -225,6 +225,7 @@ export class Home extends Component {
       <Welcome
         onSkip={this.skipWelcome}
         urlBasePath={this.props.urlBasePath}
+        fetchTelemetry={this.props.fetchTelemetry}
       />
     );
   }

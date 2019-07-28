@@ -9,8 +9,13 @@ import { OptInExampleFlyout } from './opt_in_details_component';
 
 describe('OptInDetailsComponent', () => {
   it('renders as expected', () => {
-    expect(shallowWithIntl(
-      <OptInExampleFlyout fetchTelemetry={jest.fn(async () => ({ data: [] }))} onClose={jest.fn()} />)
+    expect(
+      shallowWithIntl(
+        <OptInExampleFlyout
+          fetchTelemetry={jest.fn(async () => ({ data: [] }))}
+          onClose={jest.fn()}
+        />
+      )
     ).toMatchSnapshot();
   });
 });

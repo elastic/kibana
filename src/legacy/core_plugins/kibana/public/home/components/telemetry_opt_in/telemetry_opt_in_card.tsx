@@ -20,35 +20,33 @@
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import {
-  EuiCard,
-  EuiTitle,
-  EuiSpacer,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiText,
-  EuiIcon,
-  EuiButton,
-  EuiButtonEmpty,
-  EuiPortal,
-} from '@elastic/eui';
+import { EuiCard, EuiButton, EuiButtonEmpty } from '@elastic/eui';
 
-import { OptInMessage } from '../../../../../../../../x-pack/legacy/plugins/telemetry/public/components'
+import { OptInMessage } from '../../../../../../../../x-pack/legacy/plugins/telemetry/public/components';
 export interface Props {
   urlBasePath: string;
-  onConfirm: () => {};
-  onDecline: () => {};
+  fetchTelemetry: () => Promise<any[]>;
+  onConfirm: () => void;
+  onDecline: () => void;
 }
 
-export function renderTelemetryOptInCard({ urlBasePath, onConfirm, onDecline }: Props) {
-  const fetchTelemetry = () => {};
-
+export function renderTelemetryOptInCard({
+  urlBasePath,
+  onConfirm,
+  onDecline,
+  fetchTelemetry,
+}: Props) {
   return (
     <EuiCard
-      image={`${urlBasePath}/plugins/kibana/assets/illo_dashboard.png`}
+      image={`${urlBasePath}/plugins/kibana/assets/illo_telemetry.png`}
       textAlign="left"
-      title={<FormattedMessage id="kbn.home.telemteryOptInTitle" defaultMessage="Help us improve the Elastic Stack"/>}
-      description={ <OptInMessage fetchTelemetry={fetchTelemetry} /> }
+      title={
+        <FormattedMessage
+          id="kbn.home.telemteryOptInTitle"
+          defaultMessage="Help us improve the Elastic Stack"
+        />
+      }
+      description={<OptInMessage fetchTelemetry={fetchTelemetry} />}
       footer={
         <footer>
           <EuiButton
@@ -57,17 +55,21 @@ export function renderTelemetryOptInCard({ urlBasePath, onConfirm, onDecline }: 
             data-test-subj="WelcomeScreenOptInConfirm"
             fill
           >
-            <FormattedMessage id="kbn.home.telemteryOptInConfirmButtonLabel" defaultMessage="Yes"/>
+            <FormattedMessage id="kbn.home.telemteryOptInConfirmButtonLabel" defaultMessage="Yes" />
           </EuiButton>
           <EuiButtonEmpty
             className="homWelcome__footerAction"
             onClick={onDecline}
             data-test-subj="WelcomeScreenOptInCancel"
+            fill
           >
-            <FormattedMessage id="kbn.home.telemteryOptInDeclineButtonLabel" defaultMessage="No"/>
+            <FormattedMessage
+              id="kbn.home.telemteryOptInDeclineButtonLabel"
+              defaultMessage="Skip"
+            />
           </EuiButtonEmpty>
         </footer>
       }
     />
-  )
+  );
 }

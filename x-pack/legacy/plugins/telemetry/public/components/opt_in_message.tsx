@@ -5,9 +5,14 @@
  */
 
 import * as React from 'react';
+import { EuiLink, EuiText } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 
-type Props = {
-  fetchTelemetry: () => {},
+import { getConfigTelemetryDesc, PRIVACY_STATEMENT_URL } from '../../common/constants';
+import { OptInExampleFlyout } from './opt_in_details_component';
+
+interface Props {
+  fetchTelemetry: () => Promise<any[]>;
 }
 
 interface State {
@@ -15,39 +20,20 @@ interface State {
   showExample: boolean;
 }
 
-import {
-  EuiLink,
-  EuiText,
-} from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
-
-import { getConfigTelemetryDesc, PRIVACY_STATEMENT_URL } from '../../common/constants';
-
-//@ts-ignore
-import { OptInExampleFlyout } from './opt_in_details_component';
-
-
 export class OptInMessage extends React.PureComponent<Props, State> {
-  constructor(props: Props) {
-    super(props);
-
-    this.state = {
-      showDetails: false,
-      showExample: false,
-    };
-  }
+  public readonly state: State = {
+    showDetails: false,
+    showExample: false,
+  };
 
   toggleShowExample = () => {
-    this.setState((prevState) => ({
-      showExample: !prevState.showExample
+    this.setState(prevState => ({
+      showExample: !prevState.showExample,
     }));
-  }
+  };
 
   render() {
-    const {
-      showDetails,
-      showExample,
-    } = this.state;
+    const { showDetails, showExample } = this.state;
 
     const getDetails = () => (
       <EuiText size="s">
@@ -67,13 +53,13 @@ export class OptInMessage extends React.PureComponent<Props, State> {
                 </EuiLink>
               ),
               telemetryPrivacyStatementLink: (
-                <EuiLink href={PRIVACY_STATEMENT_URL} target="_blank" >
+                <EuiLink href={PRIVACY_STATEMENT_URL} target="_blank">
                   <FormattedMessage
                     id="xpack.telemetry.welcomeBanner.telemetryConfigDetailsDescription.telemetryPrivacyStatementLinkText"
                     defaultMessage="telemetry privacy statement"
                   />
                 </EuiLink>
-              )
+              ),
             }}
           />
         </p>
@@ -99,10 +85,12 @@ export class OptInMessage extends React.PureComponent<Props, State> {
     return (
       <React.Fragment>
         <EuiText>
-          <p tab-index="0">{ getConfigTelemetryDesc() } { !showDetails && getReadMore() }</p>
+          <p tab-index="0">
+            {getConfigTelemetryDesc()} {!showDetails && getReadMore()}
+          </p>
         </EuiText>
-        { showDetails && getDetails() }
-        { showDetails && showExample && getFlyoutDetails() }
+        {showDetails && getDetails()}
+        {showDetails && showExample && getFlyoutDetails()}
       </React.Fragment>
     );
   }

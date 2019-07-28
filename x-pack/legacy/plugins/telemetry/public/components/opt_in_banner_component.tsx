@@ -4,37 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Component } from 'react';
-import PropTypes from 'prop-types';
-
-import {
-  EuiButton,
-  EuiCallOut,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSpacer,
-} from '@elastic/eui';
+import * as React from 'react';
+import { EuiButton, EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { OptInMessage } from './opt_in_message';
 
+interface Props {
+  fetchTelemetry: () => Promise<any[]>;
+  optInClick: (optIn: boolean) => void;
+}
+
 /**
  * React component for displaying the Telemetry opt-in banner.
- *
- * TODO: When Jest tests become available in X-Pack, we should add one for this component.
  */
-export class OptInBanner extends Component {
-  static propTypes = {
-    /**
-     * Callback function with no parameters that returns a {@code Promise} containing the
-     * telemetry data (expected to be an array).
-     */
-    fetchTelemetry: PropTypes.func.isRequired,
-    /**
-     * Callback function passed a boolean to opt in ({@code true}) or out ({@code false}).
-     */
-    optInClick: PropTypes.func.isRequired,
-  };
-
+export class OptInBanner extends React.PureComponent<Props> {
   render() {
     const title = (
       <FormattedMessage
@@ -48,10 +31,7 @@ export class OptInBanner extends Component {
         <EuiSpacer size="s" />
         <EuiFlexGroup gutterSize="s" alignItems="center">
           <EuiFlexItem grow={false}>
-            <EuiButton
-              size="s"
-              onClick={() => this.props.optInClick(true)}
-            >
+            <EuiButton size="s" onClick={() => this.props.optInClick(true)}>
               <FormattedMessage
                 id="xpack.telemetry.welcomeBanner.yesButtonLabel"
                 defaultMessage="Yes"
@@ -59,10 +39,7 @@ export class OptInBanner extends Component {
             </EuiButton>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButton
-              size="s"
-              onClick={() => this.props.optInClick(false)}
-            >
+            <EuiButton size="s" onClick={() => this.props.optInClick(false)}>
               <FormattedMessage
                 id="xpack.telemetry.welcomeBanner.noButtonLabel"
                 defaultMessage="No"
