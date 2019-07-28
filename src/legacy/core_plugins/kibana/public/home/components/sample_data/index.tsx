@@ -24,7 +24,12 @@
  */
 
 import React from 'react';
-import { EuiCard, EuiButton, EuiButtonEmpty } from '@elastic/eui';
+import {
+  // @ts-ignore
+  EuiCard,
+  EuiButton,
+  EuiButtonEmpty,
+} from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n/react';
 
