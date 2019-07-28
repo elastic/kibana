@@ -13,13 +13,12 @@ import { ITransactionGroup } from '../../../../../server/lib/transaction_groups/
 import { fontFamilyCode, truncate } from '../../../../style/variables';
 import { asDecimal, asMillis } from '../../../../utils/formatters';
 import { ImpactBar } from '../../../shared/ImpactBar';
-import { APMLink } from '../../../shared/Links/APMLink';
-import { legacyEncodeURIComponent } from '../../../shared/Links/url_helpers';
 import { ITableColumn, ManagedTable } from '../../../shared/ManagedTable';
 import { LoadingStatePrompt } from '../../../shared/LoadingStatePrompt';
 import { EmptyMessage } from '../../../shared/EmptyMessage';
+import { TransactionLink } from '../../../shared/Links/TransactionLink';
 
-const TransactionNameLink = styled(APMLink)`
+const TransactionNameLink = styled(TransactionLink)`
   ${truncate('100%')};
   font-family: ${fontFamilyCode};
 `;
@@ -39,19 +38,13 @@ export function TransactionList({ items, serviceName, isLoading }: Props) {
       }),
       width: '50%',
       sortable: true,
-      render: (transactionName: string, data) => {
-        const encodedType = legacyEncodeURIComponent(
-          data.sample.transaction.type
-        );
-        const encodedName = legacyEncodeURIComponent(transactionName);
-        const transactionPath = `/${serviceName}/transactions/${encodedType}/${encodedName}`;
-
+      render: (transactionName: string, item: typeof items[0]) => {
         return (
           <EuiToolTip
             id="transaction-name-link-tooltip"
             content={transactionName || NOT_AVAILABLE_LABEL}
           >
-            <TransactionNameLink path={transactionPath}>
+            <TransactionNameLink transaction={item.sample}>
               {transactionName || NOT_AVAILABLE_LABEL}
             </TransactionNameLink>
           </EuiToolTip>
