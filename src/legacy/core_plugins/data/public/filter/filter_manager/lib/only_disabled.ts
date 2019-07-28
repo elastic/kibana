@@ -18,18 +18,19 @@
  */
 
 import _ from 'lodash';
-import { compareFilters } from './compare_filters';
-const compareOptions = { disabled: true, negate: true };
+import { Filter } from '@kbn/es-query';
 
+const isEnabled = function(filter: Filter) {
+  return filter && filter.meta && !filter.meta.disabled;
+};
 /**
  * Checks to see if only disabled filters have been changed
  * @returns {bool} Only disabled filters
  */
-export function onlyStateChanged(newFilters, oldFilters) {
-  return _.every(newFilters, function (newFilter) {
-    const match = _.find(oldFilters, function (oldFilter) {
-      return compareFilters(newFilter, oldFilter, compareOptions);
-    });
-    return !!match;
-  });
+export function onlyDisabledFiltersChanged(newFilters: Filter[], oldFilters: Filter[]) {
+  // If it's the same - compare only enabled filters
+  const newEnabledFilters = _.filter(newFilters, isEnabled);
+  const oldEnabledFilters = _.filter(oldFilters, isEnabled);
+
+  return _.isEqual(oldEnabledFilters, newEnabledFilters);
 }
