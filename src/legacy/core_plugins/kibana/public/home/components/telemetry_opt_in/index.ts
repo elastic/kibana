@@ -16,11 +16,8 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
-// import { renderTelemetryOptInCheckbox } from './telemetry_opt_in_checkbox';
 import { renderTelemetryOptInCard, Props } from './telemetry_opt_in_card';
 
 export const TelemetryOptInCard = (props: Props) => {
-  return renderTelemetryOptInCard(props);
-  // return renderTelemetryOptInCheckbox();
-}
+  return renderTelemetryOptInCheckbox(props);
+};
