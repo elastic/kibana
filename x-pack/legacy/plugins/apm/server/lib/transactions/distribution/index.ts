@@ -9,7 +9,7 @@ import { Setup } from '../../helpers/setup_request';
 import { calculateBucketSize } from './calculate_bucket_size';
 import { getBuckets } from './get_buckets';
 
-export type ITransactionDistributionAPIResponse = PromiseReturnType<
+export type TransactionDistributionAPIResponse = PromiseReturnType<
   typeof getTransactionDistribution
 >;
 export async function getTransactionDistribution({

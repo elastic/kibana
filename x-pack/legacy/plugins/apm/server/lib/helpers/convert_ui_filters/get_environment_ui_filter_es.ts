@@ -5,8 +5,8 @@
  */
 
 import { ESFilter } from 'elasticsearch';
-import { ENVIRONMENT_NOT_DEFINED } from '../../../common/environment_filter_values';
-import { SERVICE_ENVIRONMENT } from '../../../common/elasticsearch_fieldnames';
+import { ENVIRONMENT_NOT_DEFINED } from '../../../../common/environment_filter_values';
+import { SERVICE_ENVIRONMENT } from '../../../../common/elasticsearch_fieldnames';
 
 export function getEnvironmentUiFilterES(
   environment?: string
