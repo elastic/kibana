@@ -6,7 +6,6 @@
 
 import { TraceAPIResponse } from '../../../../server/lib/traces/get_trace';
 import { callApi } from '../callApi';
-import { getUiFiltersES } from '../../ui_filters/get_ui_filters_es';
 import { UIFilters } from '../../../../typings/ui-filters';
 import { TransactionGroupListAPIResponse } from '../../../../server/lib/transaction_groups';
 
@@ -42,7 +41,7 @@ export async function loadTraceList({
     query: {
       start,
       end,
-      uiFiltersES: await getUiFiltersES(uiFilters)
+      uiFilters: JSON.stringify(uiFilters)
     }
   });
 }
