@@ -31,6 +31,7 @@ import {
   EuiFlexItem,
   EuiText,
   EuiIcon,
+  EuiButtonIcon,
   EuiPortal,
 } from '@elastic/eui';
 
@@ -62,6 +63,10 @@ export class Welcome extends React.PureComponent<Props, State> {
     if (e.key === 'Escape') {
       this.props.onSkip();
     }
+  };
+
+  goToStep = (step: number) => () => {
+    this.setState(() => ({ step }));
   };
 
   private redirecToSampleData() {
@@ -129,25 +134,36 @@ export class Welcome extends React.PureComponent<Props, State> {
           </header>
           <div className="homWelcome__content homWelcome-body">
             <EuiFlexGroup gutterSize="l">
-              {step === 0 && (
-                <EuiFlexItem>
+              <EuiFlexItem>
+                {step === 0 && (
                   <SampleDataCard
                     urlBasePath={urlBasePath}
                     onConfirm={this.onSampleDataConfirm}
                     onDecline={this.onSampleDataDecline}
                   />
-                </EuiFlexItem>
-              )}
-              {step === 1 && (
-                <EuiFlexItem>
+                )}
+                {step === 1 && (
                   <TelemetryOptInCard
                     fetchTelemetry={fetchTelemetry}
                     urlBasePath={urlBasePath}
                     onConfirm={this.onTelemetryOptInConfirm}
                     onDecline={this.onTelemetryOptInDecline}
                   />
+                )}
+                <EuiSpacer size="xs" />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+            <EuiFlexGroup gutterSize="s" justifyContent="center">
+              {[0, 1].map(stepOpt => (
+                <EuiFlexItem grow={false}>
+                  <EuiButtonIcon
+                    iconType="dot"
+                    onClick={this.goToStep(stepOpt)}
+                    size="s"
+                    fill-opacity={step === stepOpt ? 1 : 0.5}
+                  />
                 </EuiFlexItem>
-              )}
+              ))}
             </EuiFlexGroup>
           </div>
         </div>

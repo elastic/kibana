@@ -20,7 +20,7 @@
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { EuiCard, EuiButton, EuiButtonEmpty } from '@elastic/eui';
+import { EuiCard, EuiButton } from '@elastic/eui';
 
 import { OptInMessage } from '../../../../../../../../x-pack/legacy/plugins/telemetry/public/components';
 export interface Props {
@@ -53,21 +53,23 @@ export function renderTelemetryOptInCard({
             onClick={onConfirm}
             className="homWelcome__footerAction"
             data-test-subj="WelcomeScreenOptInConfirm"
+            size="s"
             fill
           >
             <FormattedMessage id="kbn.home.telemteryOptInConfirmButtonLabel" defaultMessage="Yes" />
           </EuiButton>
-          <EuiButtonEmpty
+          <EuiButton
             className="homWelcome__footerAction"
             onClick={onDecline}
             data-test-subj="WelcomeScreenOptInCancel"
+            size="s"
             fill
           >
             <FormattedMessage
               id="kbn.home.telemteryOptInDeclineButtonLabel"
               defaultMessage="Skip"
             />
-          </EuiButtonEmpty>
+          </EuiButton>
         </footer>
       }
     />
