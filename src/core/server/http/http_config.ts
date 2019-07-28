@@ -39,17 +39,36 @@ export const config = {
       cors: schema.conditional(
         schema.contextRef('dev'),
         true,
-        schema.object(
-          {
-            origin: schema.arrayOf(schema.string()),
-          },
+        schema.oneOf(
+          [
+            schema.object({
+              origin: schema.arrayOf(schema.string()),
+              additionalHeaders: schema.arrayOf(schema.string()),
+              credentials: schema.boolean(),
+            }),
+            schema.boolean(),
+          ],
           {
             defaultValue: {
               origin: ['*://localhost:9876'], // karma test server
+              additionalHeaders: [],
+              credentials: false,
             },
           }
         ),
-        schema.boolean({ defaultValue: false })
+        schema.oneOf(
+          [
+            schema.object({
+              origin: schema.arrayOf(schema.string()),
+              additionalHeaders: schema.arrayOf(schema.string()),
+              credentials: schema.boolean(),
+            }),
+            schema.boolean(),
+          ],
+          {
+            defaultValue: false,
+          }
+        )
       ),
       host: schema.string({
         defaultValue: 'localhost',
