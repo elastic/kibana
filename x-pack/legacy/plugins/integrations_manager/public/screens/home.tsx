@@ -7,14 +7,14 @@ import React, { useState, useEffect } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
-  EuiPage,
-  EuiPageBody,
   // @ts-ignore (elastic/eui#1557) & (elastic/eui#1262) EuiImage is not exported yet
   EuiImage,
+  EuiPage,
+  EuiPageBody,
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import { PLUGIN } from '../../common/constants';
+import { PLUGIN, STATUS_INSTALLED, STATUS_NOT_INSTALLED } from '../../common/constants';
 import { IntegrationsGroupedByStatus } from '../../common/types';
 import { IntegrationsGridByStatus } from '../components/integration_list_grid';
 import { getIntegrationsGroupedByStatus } from '../data';
@@ -25,8 +25,8 @@ export function Home() {
   useBreadcrumbs([{ text: PLUGIN.TITLE, href: linkToListView() }]);
 
   const [map, setMap] = useState<IntegrationsGroupedByStatus>({
-    installed: [],
-    not_installed: [],
+    [STATUS_INSTALLED]: [],
+    [STATUS_NOT_INSTALLED]: [],
   });
 
   useEffect(() => {
@@ -42,7 +42,7 @@ export function Home() {
       </EuiPage>
       <EuiPage>
         <EuiPageBody restrictWidth={1200}>
-          {map ? <IntegrationsGridByStatus map={map} /> : null}
+          <IntegrationsGridByStatus map={map} />
         </EuiPageBody>
       </EuiPage>
     </>
@@ -53,31 +53,42 @@ function Header() {
   return (
     <EuiFlexGroup>
       <EuiFlexItem grow={1}>
-        <EuiFlexGroup alignItems="center">
-          <EuiFlexItem>
-            <EuiTitle size="l">
-              <h1>Add Your Data</h1>
-            </EuiTitle>
-            <EuiText
-              style={{
-                color: '#69707D', // euiColorDarkShade
-              }}
-            >
-              Some creative copy about integrations goes here.
-            </EuiText>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        <HeroCopy />
       </EuiFlexItem>
       <EuiFlexItem grow={1}>
-        <EuiFlexGroup justifyContent="flexEnd">
-          <EuiImage
-            size="l"
-            alt="Illustration of computer"
-            url="/plugins/integrations_manager/assets/illustration-kibana-getting-started@2x.png"
-            style={{ width: '475px', height: '273px' }}
-          />
-        </EuiFlexGroup>
+        <HeroImage />
       </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+}
+
+function HeroCopy() {
+  return (
+    <EuiFlexGroup alignItems="center">
+      <EuiFlexItem>
+        <EuiTitle size="l">
+          <h1>Add Your Data</h1>
+        </EuiTitle>
+        <EuiText
+          style={{
+            color: '#69707D', // euiColorDarkShade
+          }}
+        >
+          Some creative copy about integrations goes here.
+        </EuiText>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+}
+
+function HeroImage() {
+  return (
+    <EuiFlexGroup justifyContent="flexEnd">
+      <EuiImage
+        alt="Illustration of computer"
+        url="/plugins/integrations_manager/assets/illustration-kibana-getting-started@2x.png"
+        style={{ width: '475px', height: '273px' }}
+      />
     </EuiFlexGroup>
   );
 }

@@ -30,6 +30,7 @@ interface ListProps {
 const entries = Object.entries as <T>(o: T) => Array<[Extract<keyof T, string>, T[keyof T]]>;
 
 export function IntegrationsGridByStatus({ map }: GridProps) {
+  if (!map) return null;
   return (
     <>
       {entries(map).map(([status, list]) => (
