@@ -22,6 +22,17 @@ export interface SecurityOptions {
   enableGitCertCheck: boolean;
 }
 
+export interface DiskWatermarkOptions {
+  lowMb: number;
+  highMb: number;
+  floodStageMb: number;
+}
+
+export interface DiskOptions {
+  thresholdEnabled: boolean;
+  watermark: DiskWatermarkOptions;
+}
+
 export class ServerOptions {
   public readonly workspacePath = resolve(this.config.get('path.data'), 'code/workspace');
 
@@ -48,6 +59,8 @@ export class ServerOptions {
   public readonly lsp: LspOptions = this.options.lsp;
 
   public readonly security: SecurityOptions = this.options.security;
+
+  public readonly disk: DiskOptions = this.options.disk;
 
   public readonly repoConfigs: RepoConfigs = (this.options.repos as RepoConfig[]).reduce(
     (previous, current) => {

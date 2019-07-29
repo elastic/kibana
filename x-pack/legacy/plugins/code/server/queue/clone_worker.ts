@@ -41,6 +41,8 @@ export class CloneWorker extends AbstractGitWorker {
   }
 
   public async executeJob(job: Job) {
+    await super.executeJob(job);
+
     const { payload, cancellationToken } = job;
     const { url } = payload;
     try {

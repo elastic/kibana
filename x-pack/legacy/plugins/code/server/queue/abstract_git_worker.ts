@@ -9,7 +9,9 @@ import {
   CloneWorkerProgress,
   CloneWorkerResult,
   WorkerReservedProgress,
+  WorkerResult,
 } from '../../model';
+import { DiskWatermarkLevel, DiskWatermarkService } from '../disk_watermark';
 import { GitOperations } from '../git_operations';
 import { EsClient, Esqueue } from '../lib/esqueue';
 import { Logger } from '../log';
@@ -31,6 +33,26 @@ export abstract class AbstractGitWorker extends AbstractWorker {
   ) {
     super(queue, log);
     this.objectClient = new RepositoryObjectClient(client);
+  }
+
+  public async executeJob(_: Job): Promise<WorkerResult> {
+    if (this.serverOptions.disk.thresholdEnabled) {
+      const watermarkService = new DiskWatermarkService(
+        this.serverOptions.disk.watermark,
+        this.serverOptions.repoPath
+      );
+      const diskWatermarkLevel = await watermarkService.detect();
+
+      if (diskWatermarkLevel !== DiskWatermarkLevel.NORMAL) {
+        const msg = `Disk watermark level ${diskWatermarkLevel}.`;
+        this.log.error(msg);
+        throw new Error(msg);
+      }
+    }
+
+    return new Promise<WorkerResult>((resolve, reject) => {
+      resolve();
+    });
   }
 
   public async onJobCompleted(job: Job, res: CloneWorkerResult) {

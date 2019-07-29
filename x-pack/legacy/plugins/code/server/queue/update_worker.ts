@@ -30,6 +30,8 @@ export class UpdateWorker extends AbstractGitWorker {
   }
 
   public async executeJob(job: Job) {
+    await super.executeJob(job);
+
     const { payload, cancellationToken } = job;
     const repo: Repository = payload;
     this.log.info(`Execute update job for ${repo.uri}`);
