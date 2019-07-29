@@ -30,20 +30,31 @@ This section summarizes the changes in each release.
 
 coming[7.3.0]
 
+[float]
+[[breaking-7.3.0]]
+=== Breaking Changes
+
 See also <<breaking-changes-7.3, breaking changes in 7.3>>.
+
+Maps::
+* [Fixes #34662] Hide feature when it has no corresponding term join {pull}36617[#36617]
+Machine Learning::
+* Data Frame: Remove format from date_histogram configs. {pull}39811[#39811]
 
 [float]
 [[enhancement-7.3.0]]
 === Enhancements
 Canvas::
-* Feat: Keyboard shortcuts for nudging elements {pull}39208[#39208]
-* [Fixes #27123]  Feat: Zoom In/Out {pull}38832[#38832]
+* Keyboard shortcuts for nudging elements {pull}39208[#39208]
+* [Fixes #27123] Zoom In/Out {pull}38832[#38832]
 * Add joinRows Canvas expression function {pull}38680[#38680]
-* [Fixes #27124]  Feat: Fit Workpad to Window {pull}39864[#39864]
+* [Fixes #27124] Fit Workpad to Window {pull}39864[#39864]
 * [Fixes #23061, #23144, #29526] Enable Canvas URL Parameters {pull}40061[#40061]
 * Alignment and distribution {pull}39132[#39132]
-* [Fixes #30841]  Feat: Box select {pull}32995[#32995]
+* [Fixes #30841] Box select {pull}32995[#32995]
 Code::
+NOTE: In default installations, Code it turned off.
+
 * Change index name generation rules for code {pull}40959[#40959]
 * Always read file content from the original bare repo in indexer {pull}40176[#40176]
 * Add ctags langserver as a dependency and launch it {pull}39763[#39763]
@@ -54,34 +65,36 @@ Code::
 * Adjust oom score, make linux OOM killer kill subprocesses first  {pull}39499[#39499]
 * Parse and register language file extension from monaco-editor {pull}40578[#40578]
 * Use status api to decide whether a lsp request should be sent {pull}41310[#41310]
-Geo::
-* [Fixes #34399] [Maps] add Where clause to terms joins {pull}39593[#39593]
-* [Maps] increase document limit from 2048 to 10000 {pull}39697[#39697]
-* [Maps] remove beta labeling from application and docs {pull}39871[#39871]
-* [Fixes #31697] [Maps] Custom labels for metric aggregations {pull}39914[#39914]
-* [Maps] replace legacy map visualizations with maps in sample data dashboards {pull}35997[#35997]
-* [Fixes #34026] [Maps] make EMS tooltips configurable {pull}34325[#34325]
-* [Fixes #29005] [Maps] add multiple feature selection in tooltips {pull}39629[#39629]
-Infra Logs UI::
-* [Logs UI] Add single phrase highlighting {pull}39569[#39569]
-* [InfraUI] Improve accuracy of system network metrics {pull}39513[#39513]
-* [Infra UI] Add default metrics to metrics explorer. {pull}39787[#39787]
-* [Infra UI] Use max instead of avg for correct derivative in network metrics {pull}41009[#41009]
-* [Fixes #38167] [Logs UI] Add &quot;View in APM&quot; link to log flyout actions menu  {pull}39540[#39540]
+* Add an api to show status of repo file and language servers {pull}39566[#39566]
+Maps::
+* [Fixes #34399] Add Where clause to terms joins {pull}39593[#39593]
+* Increase document limit from 2048 to 10000 {pull}39697[#39697]
+* Remove beta labeling from application and docs {pull}39871[#39871]
+* [Fixes #31697] Custom labels for metric aggregations {pull}39914[#39914]
+* Replace legacy map visualizations with maps in sample data dashboards {pull}35997[#35997]
+* [Fixes #34026] Make EMS tooltips configurable {pull}34325[#34325]
+* [Fixes #29005] Add multiple feature selection in tooltips {pull}39629[#39629]
+Infrastructure::
+* Improve accuracy of system network metrics {pull}39513[#39513]
+* Add default metrics to metrics explorer. {pull}39787[#39787]
+* Use max instead of avg for correct derivative in network metrics {pull}41009[#41009]
+Logs UI::
+* Add single phrase highlighting {pull}39569[#39569]
+* [Fixes #38167] Add &quot;View in APM&quot; link to log flyout actions menu  {pull}39540[#39540]
 Machine Learning::
-* [Fixes #39240] [ML] When importing CSV through file data viz, omit empty values {pull}39524[#39524]
-* [Fixes #39242] [ML] Don't quote numbers when importing CSV in file data viz {pull}39579[#39579]
-* [ML] Adds data frame messages to data frames list {pull}39609[#39609]
-* [ML] Adds icon to data frame messages expanded row tab {pull}39817[#39817]
-* [ML] Adds Preview table tab to Data Frames list expanded row {pull}39983[#39983]
-* [ML] Data Frames list expanded row preview: Fixes transform list paging and sorting. {pull}40163[#40163]
-* [ML] Adds SIEM auditbeat and metricbeat data recognizer modules {pull}39678[#39678]
-* [Fixes #28390] [ML] [Accessibility] Add job ID to select row checkbox aria-label in Jobs List {pull}40149[#40149]
-* [ML] Data frames: Advanced editor {pull}39659[#39659]
-* [ML] Data Frames: Continuous mode support for wizard {pull}39804[#39804]
-* [ML] Data frames: Updated progress reporting. {pull}39920[#39920]
-* [ML] Data Frames: Transform list refresh button. {pull}40129[#40129]
-* [Fixes #38776] [ML] Data Frames: Adds support for transform description {pull}40153[#40153]
+* [Fixes #39240] When importing CSV through file data viz, omit empty values {pull}39524[#39524]
+* [Fixes #39242] Don't quote numbers when importing CSV in file data viz {pull}39579[#39579]
+* Adds data frame messages to data frames list {pull}39609[#39609]
+* Adds icon to data frame messages expanded row tab {pull}39817[#39817]
+* Adds Preview table tab to Data Frames list expanded row {pull}39983[#39983]
+* Data Frames list expanded row preview: Fixes transform list paging and sorting. {pull}40163[#40163]
+* Adds SIEM Auditbeat and metricbeat data recognizer modules {pull}39678[#39678]
+* [Fixes #28390] [Accessibility] Add job ID to select row checkbox aria-label in Jobs List {pull}40149[#40149]
+* Data frames: Advanced editor {pull}39659[#39659]
+* Data Frames: Continuous mode support for wizard {pull}39804[#39804]
+* Data frames: Updated progress reporting. {pull}39920[#39920]
+* Data Frames: Transform list refresh button. {pull}40129[#40129]
+* [Fixes #38776] Data Frames: Adds support for transform description {pull}40153[#40153]
 Management::
 * [Fixes #13804, #17894, #17956, #17969, #17978, #18008, #18008, #18031, #18047, #18052, #18151, #18191, #18245, #18246, #18256, #18268, #18271, #18296, #18353, #18506, #18508, #18532, #18536, #18794, #22615, #29167, #33207, #33917, #34932, #39828] EUIfy Watcher {pull}35301[#35301]
 * Separate Console History panel from editor with a drop-shadow, and add a Close button {pull}39972[#39972]
@@ -92,13 +105,13 @@ Management::
 Monitoring::
 * Removed dead code {pull}39545[#39545]
 * Issue 5429: Added a shortcut to ML jobs {pull}39147[#39147]
-Observability::
-* [Uptime] Summary based monitors Page {pull}39751[#39751]
-* [Fixes #38786, #57711] [Uptime] Add monitor summaries {pull}38895[#38895]
-* [Fixes #46] [Uptime] [Bug] Add error callout for uptime filter bar {pull}38140[#38140]
-* [Uptime] Add telemetry collector {pull}34437[#34437]
-* [Uptime] Add link for logs host integration {pull}38010[#38010]
-* [Fixes #40589] [Uptime] Add link to Uptime documentation from header help menu {pull}40645[#40645]
+Uptime::
+* Summary based monitors Page {pull}39751[#39751]
+* [Fixes #38786, #57711] Add monitor summaries {pull}38895[#38895]
+* [Fixes #46] [Bug] Add error callout for uptime filter bar {pull}38140[#38140]
+* Add telemetry collector {pull}34437[#34437]
+* Add link for logs host integration {pull}38010[#38010]
+* [Fixes #40589] Add link to Uptime documentation from header help menu {pull}40645[#40645]
 Platform::
 * Query Filter \ Filter Manager: de-angularize and move to data plugin {pull}37311[#37311]
 * Introduce setting to disable batching in courier {pull}39470[#39470]
@@ -118,7 +131,6 @@ Security::
 Visualize::
 * Add dateHistogramInterval utility {pull}39091[#39091]
 
-
 [float]
 [[bug-7.3.0]]
 === Bug fixes
@@ -129,69 +141,47 @@ APM::
 Canvas::
 * [Fixes #41296]  Apply global CSS to export workpad view {pull}41298[#41298]
 * [Fixes #39852]  Fix: native HTML5 drag&amp;drop shouldn't kick in {pull}39861[#39861]
-Code::
-* [Fixes #1442] : upgrade typescript langserver version {pull}40833[#40833]
-* Issue a new index job if there were an update happened during index {pull}39638[#39638]
-* Enable index scheduler by default {pull}39696[#39696]
-* Use match query instead of term query {pull}39717[#39717]
-* [Fixes #1388]  replace illegal characters for creating indices {pull}40054[#40054]
-* Reenable code mocha tests {pull}40189[#40189]
-* [Fixes #1424]  fallback with symbolInformation.name for typeahead {pull}40654[#40654]
-* [Fixes #1441]  Add a clone scheduler to reclone job if necessary {pull}40922[#40922]
-* [Fixes #1433]  avoid duplicate search result keys {pull}40786[#40786]
-* Use seq_no and primary_term to do ES concurrency control for EsQueue and reenable code tests {pull}41377[#41377]
-* Register definition handler for languages supported by ctags {pull}40472[#40472]
-* Update ctags lsp version and remove unsupported langs {pull}40572[#40572]
-* Fix style of ctags icon in dark mode {pull}41095[#41095]
-* Bump nodegit version, lower the glibc requirement {pull}40159[#40159]
-* Cleanup repo object  {pull}40356[#40356]
-* Enable multinode test {pull}40563[#40563]
-* Don't crash frontend if language server returns a empty value. {pull}40570[#40570]
-* Fix indexing hang when proxy is marked unusable {pull}40485[#40485]
-* Don't try write oom_adj if oom_score_adj is successfully written {pull}40835[#40835]
-* Remove dependency on vscode-jsonrpc from frontend code {pull}40940[#40940]
-* Use isomorphic-git to handle git references {pull}40951[#40951]
-* Don't register providerDefinition multiple times {pull}41094[#41094]
-* Test colorize before actually loading file, trying to catch a … {pull}41093[#41093]
 Discover::
 * [Fixes #41348] Bugfix for exception at discover context view using date_nanos  {pull}41353[#41353]
-Geo::
-* [Fixes #37369] [Maps] do not allow save when map has unsaved layer changes {pull}39529[#39529]
-* [Fixes #38962] [Maps] documents source - top hits - support script fields {pull}39371[#39371]
-* [Fixes #40307] [Maps] fix react typing for style property type {pull}40518[#40518]
-* [Maps] use custom labels in legend details {pull}40308[#40308]
-* [maps] fix symbol anchor position {pull}40524[#40524]
-* [Fixes #40337] [Maps] Use default locale as fallback for EMS tile layers {pull}40433[#40433]
-* [Fixes #40085] [Maps] show dialog to save map when leaving app {pull}40215[#40215]
-* [Maps] Shuffle feature ids to avoid mapbox-gl crashes {pull}40803[#40803]
-* [Fixes #40646] [Maps] Remove data on error {pull}41358[#41358]
-* [Fixes #41491] [Maps] Coerce term join values to string {pull}41503[#41503]
-Infra Logs UI::
-* [Fixes #39809] [Infra UI] Sync state with localStorage for Metrics Explorer {pull}40099[#40099]
-* [Fixes #40138] [Infra UI] Convert bytes to bits before formatting for bits {pull}40523[#40523]
-* [Fixes #38130, #37694] [Infra UI] Fix CSS to improve IE11 experience {pull}40309[#40309]
-* [Fixes #40251] [Infra UI] Change GraphQL fetchPolicy for Inventory View {pull}40814[#40814]
-* [Fixes #40914] [Infra UI] Fix Metric Explorer title truncation {pull}40913[#40913]
-* [Fixes #40493] [Infra UI] Inventory should display nodes without names {pull}40804[#40804]
-* [Fixes #39991] [Infra and Logs UI] Fixes &quot;sticky filter&quot; problem {pull}40226[#40226]
-* [Infra UI] Add temporary workaround for too small max-width. {pull}39890[#39890]
-* [Fixes #39892] [Infra UI] Remove queries for log-related metadata {pull}40130[#40130]
-* [Fixes #39944] [Logs UI] Fix inaccuracy when jumping to a faraway time target {pull}40303[#40303]
-* [Fixes #39913] [Infra UI] Widen Group By dropdown and add tooltips to custom metrics {pull}40692[#40692]
+Maps::
+* [Fixes #37369] Do not allow save when map has unsaved layer changes {pull}39529[#39529]
+* [Fixes #38962] Documents source - top hits - support script fields {pull}39371[#39371]
+* [Fixes #40307] Fix react typing for style property type {pull}40518[#40518]
+* Use custom labels in legend details {pull}40308[#40308]
+* Fix symbol anchor position {pull}40524[#40524]
+* [Fixes #40337] Use default locale as fallback for EMS tile layers {pull}40433[#40433]
+* [Fixes #40085] Show dialog to save map when leaving app {pull}40215[#40215]
+* Shuffle feature ids to avoid mapbox-gl crashes {pull}40803[#40803]
+* [Fixes #40646] Remove data on error {pull}41358[#41358]
+* [Fixes #41491] Coerce term join values to string {pull}41503[#41503]
+Infrastructure::
+* [Fixes #39809] Sync state with localStorage for Metrics Explorer {pull}40099[#40099]
+* [Fixes #40138] Convert bytes to bits before formatting for bits {pull}40523[#40523]
+* [Fixes #38130, #37694] Fix CSS to improve IE11 experience {pull}40309[#40309]
+* [Fixes #40251] Change GraphQL fetchPolicy for Inventory View {pull}40814[#40814]
+* [Fixes #40914] Fix Metric Explorer title truncation {pull}40913[#40913]
+* [Fixes #40493] Inventory should display nodes without names {pull}40804[#40804]
+* [Fixes #39991] Fixes &quot;sticky filter&quot; problem {pull}40226[#40226]
+* Add temporary workaround for too small max-width. {pull}39890[#39890]
+* [Fixes #39892] Remove queries for log-related metadata {pull}40130[#40130]
+* [Fixes #39913] Widen Group By dropdown and add tooltips to custom metrics {pull}40692[#40692]
+Logs UI::
+* [Fixes #39991] Fixes &quot;sticky filter&quot; problem {pull}40226[#40226]
+* [Fixes #39944] Fix inaccuracy when jumping to a faraway time target {pull}40303[#40303]
 Machine Learning::
-* [ML] Data Frame - Disable link to create new data frame job when no permissions {pull}40268[#40268]
-* [ML] Data frame - ensure pivot preview works with comma-separated index patterns  {pull}40282[#40282]
-* [Fixes #40562] [ML] Single Metric View: ensure charts loaded correctly when using scripted fields {pull}40682[#40682]
-* [Fixes #39770] [ML] Fixes results time range if anomalies occur after data stops {pull}40503[#40503]
-* [Fixes #32304] [ML] Fixes positioning of annotations brush after window resize {pull}40780[#40780]
-* [Fixes #33416] [ML] Fixes position of Single Metric zoom when at start of range {pull}40854[#40854]
-* [Fixes #41135] [ML] Fixes model memory limit for metricbeat system module jobs {pull}41747[#41747]
-* [Fixes #38872] [ML] Data Frames: Fixes crash of the source table for complex field values. {pull}39878[#39878]
-* [ML] Data Frames: Fixes transform list paging and sorting. {pull}40009[#40009]
-* [Fixes #38654] [ML] Data Frames: Fix form validation {pull}40427[#40427]
-* [Fixes #38395] [ML] Data Frames: Fixes search triggering onChange on every keystroke. {pull}40607[#40607]
-* [Fixes #40960] [ML] Fix loading forecasts from anomaly job list. {pull}41034[#41034]
-* [ML] Data frames: Fix source table for cells of type object. {pull}41234[#41234]
+* Data Frame - Disable link to create new data frame job when no permissions {pull}40268[#40268]
+* Data frame - ensure pivot preview works with comma-separated index patterns  {pull}40282[#40282]
+* [Fixes #40562] Single Metric View: ensure charts loaded correctly when using scripted fields {pull}40682[#40682]
+* [Fixes #39770] Fixes results time range if anomalies occur after data stops {pull}40503[#40503]
+* [Fixes #32304] Fixes positioning of annotations brush after window resize {pull}40780[#40780]
+* [Fixes #33416] Fixes position of Single Metric zoom when at start of range {pull}40854[#40854]
+* [Fixes #41135] Fixes model memory limit for metricbeat system module jobs {pull}41747[#41747]
+* [Fixes #38872] Data Frames: Fixes crash of the source table for complex field values. {pull}39878[#39878]
+* Data Frames: Fixes transform list paging and sorting. {pull}40009[#40009]
+* [Fixes #38654] Data Frames: Fix form validation {pull}40427[#40427]
+* [Fixes #38395] Data Frames: Fixes search triggering onChange on every keystroke. {pull}40607[#40607]
+* [Fixes #40960] Fix loading forecasts from anomaly job list. {pull}41034[#41034]
+* Data frames: Fix source table for cells of type object. {pull}41234[#41234]
 Management::
 * [Fixes #40254] Fix aggs autocompletion in Console. {pull}40816[#40816]
 * [Fixes #39087] Remove config from IndexPattern instance {pull}40146[#40146]
@@ -200,18 +190,18 @@ Monitoring::
 * Add log message for error scenario around missing licensing {pull}40660[#40660]
 * [Fixes #36738] Issue 36738: Added zoomout functionality to all charts {pull}39072[#39072]
 * [Fixes #28471] Issue 28471: Added strict id checking {pull}40673[#40673]
-Observability::
-* [Fixes #39679] [Uptime] Fix filter status bar location selection {pull}41382[#41382]
-* [Fixes #40171] [Uptime] [Bug] Handle all supported empty states {pull}40194[#40194]
-* [Uptime] Fix unsigned integer parsing error and add tests {pull}40526[#40526]
-* [Fixes #40582] [Uptime] Change page headlines to use h1 element {pull}40637[#40637]
-* [Fixes #40583] [Uptime] Add explicit alignments to table columns {pull}40680[#40680]
-* [Uptime] Fix duration chart for Safari {pull}41619[#41619]
+Uptime::
+* [Fixes #39679] Fix filter status bar location selection {pull}41382[#41382]
+* [Fixes #40171] [Bug] Handle all supported empty states {pull}40194[#40194]
+* Fix unsigned integer parsing error and add tests {pull}40526[#40526]
+* [Fixes #40582] Change page headlines to use h1 element {pull}40637[#40637]
+* [Fixes #40583] Add explicit alignments to table columns {pull}40680[#40680]
+* Fix duration chart for Safari {pull}41619[#41619]
 Operations::
-* [Fixes #31549] configurable global socket timeouts {pull}31603[#31603]
+* [Fixes #31549] Configurable global socket timeouts {pull}31603[#31603]
 Platform::
 * [Fixes #14544] Cancel Discover fetch requests if a new one is submitted {pull}39963[#39963]
-* fixing custom vis types buildPipeline {pull}39874[#39874]
+* Fixing custom vis types buildPipeline {pull}39874[#39874]
 Reporting::
 * Addresses an issue where Chromium user-data-dirs aren't removed {pull}40284[#40284]
 SIEM::
@@ -230,22 +220,6 @@ Visualize::
 * Change help URL in timelion to point to current docs {pull}39885[#39885]
 * [Fixes #28842] Fix issue with long values in TSVB static metric {pull}40256[#40256]
 * [Fixes #36295] Fix visualizations for rollups using fixed_interval or calendar_interval {pull}39537[#39537]
-
-
-[float]
-[[roadmap-7.3.0]]
-=== Roadmap
-Code::
-* Add an api to show status of repo file and language servers {pull}39566[#39566]
-
-[float]
-[[breaking-7.3.0]]
-=== Breaking Changes
-Geo::
-* [Fixes #34662] [Maps] Hide feature when it has no corresponding term join {pull}36617[#36617]
-Machine Learning::
-* [ML] Data Frame: Remove format from date_histogram configs. {pull}39811[#39811]
-
 
 [[release-notes-7.2.1]]
 == {kib} 7.2.1
