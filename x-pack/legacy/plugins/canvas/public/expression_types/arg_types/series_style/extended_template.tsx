@@ -4,25 +4,55 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { FunctionComponent, ChangeEvent } from 'react';
 import PropTypes from 'prop-types';
 import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSelect } from '@elastic/eui';
-import { set, del } from 'object-path-immutable';
+import immutable from 'object-path-immutable';
 import { get } from 'lodash';
+import { ExpressionAST } from '../../../../types';
 
-export const ExtendedTemplate = props => {
+const { set, del } = immutable;
+
+export interface Arguments {
+  label: string;
+  lines: number;
+  bars: number;
+  points: number;
+}
+export type Argument = keyof Arguments;
+
+export interface Props {
+  argValue: ExpressionAST;
+  labels: string[];
+  onValueChange: (argValue: ExpressionAST) => void;
+  typeInstance?: {
+    name: string;
+    options: {
+      include: string[];
+    };
+  };
+}
+
+export const ExtendedTemplate: FunctionComponent<Props> = props => {
   const { typeInstance, onValueChange, labels, argValue } = props;
   const chain = get(argValue, 'chain.0', {});
   const chainArgs = get(chain, 'arguments', {});
   const selectedSeries = get(chainArgs, 'label.0', '');
-  const { name } = typeInstance;
-  const fields = get(typeInstance, 'options.include', []);
+
+  let name = '';
+  if (typeInstance) {
+    name = typeInstance.name;
+  }
+
+  const fields = get<string[]>(typeInstance, 'options.include', []);
   const hasPropFields = fields.some(field => ['lines', 'bars', 'points'].indexOf(field) !== -1);
 
-  const handleChange = (argName, ev) => {
+  const handleChange: <T extends Argument>(key: T, val: ChangeEvent<HTMLSelectElement>) => void = (
+    argName,
+    ev
+  ) => {
     const fn = ev.target.value === '' ? del : set;
-
-    const newValue = fn(argValue, ['chain', 0, 'arguments', argName], [ev.target.value]);
+    const newValue = fn(argValue, `chain.0.arguments.${argName}`, [ev.target.value]);
     return onValueChange(newValue);
   };
 
@@ -99,5 +129,4 @@ ExtendedTemplate.propTypes = {
   argValue: PropTypes.any.isRequired,
   typeInstance: PropTypes.object,
   labels: PropTypes.array.isRequired,
-  renderError: PropTypes.func,
 };

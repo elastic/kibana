@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { FunctionComponent } from 'react';
 import PropTypes from 'prop-types';
 import {
   EuiFlexGroup,
@@ -14,26 +14,39 @@ import {
   EuiSuperSelect,
 } from '@elastic/eui';
 import { ColorPickerPopover } from '../../../components/color_picker_popover';
+import { BorderStyle, isBorderStyle } from '../../../../types';
 
-const styles = [
-  'none',
-  'solid',
-  'dotted',
-  'dashed',
-  'double',
-  'groove',
-  'ridge',
-  'inset',
-  'outset',
-];
+export { BorderStyle } from '../../../../types';
 
-export const BorderForm = ({ value, radius, onChange, colors }) => {
-  const border = value || '';
-  const [borderWidth = '', borderStyle = '', borderColor = ''] = border.split(' ');
+export interface Arguments {
+  borderRadius: string | number;
+  borderStyle: BorderStyle;
+  borderWidth: number;
+  border: string;
+}
+export type ArgumentTypes = Arguments;
+export type Argument = keyof Arguments;
+
+interface Props {
+  onChange: <T extends Argument>(arg: T, val: ArgumentTypes[T]) => void;
+  value: string;
+  radius: string | number;
+  colors: string[];
+}
+
+export const BorderForm: FunctionComponent<Props> = ({
+  value = '',
+  radius = '',
+  onChange,
+  colors,
+}) => {
+  const [borderWidth = '', borderStyle = '', borderColor = ''] = value.split(' ');
+
+  const borderStyleVal = isBorderStyle(borderStyle) ? borderStyle : BorderStyle.NONE;
   const borderWidthVal = borderWidth ? borderWidth.replace('px', '') : '';
-  const radiusVal = radius ? radius.replace('px', '') : '';
+  const radiusVal = typeof radius === 'string' ? radius.replace('px', '') : radius;
 
-  const namedChange = name => val => {
+  const namedChange = <T extends keyof Arguments>(name: T) => (val: Arguments[T]) => {
     if (name === 'borderWidth') {
       return onChange('border', `${val}px ${borderStyle} ${borderColor}`);
     }
@@ -44,13 +57,17 @@ export const BorderForm = ({ value, radius, onChange, colors }) => {
       return onChange('border', `${borderWidth} ${val} ${borderColor}`);
     }
     if (name === 'borderRadius') {
+      if (val === '') {
+        return onChange('borderRadius', `0px`);
+      }
       return onChange('borderRadius', `${val}px`);
     }
 
     onChange(name, val);
   };
 
-  const borderColorChange = color => onChange('border', `${borderWidth} ${borderStyle} ${color}`);
+  const borderColorChange = (color: string) =>
+    onChange('border', `${borderWidth} ${borderStyle} ${color}`);
 
   return (
     <EuiFlexGroup gutterSize="s">
@@ -58,7 +75,7 @@ export const BorderForm = ({ value, radius, onChange, colors }) => {
         <EuiFormRow label="Thickness" compressed>
           <EuiFieldNumber
             value={Number(borderWidthVal)}
-            onChange={e => namedChange('borderWidth')(e.target.value)}
+            onChange={e => namedChange('borderWidth')(Number(e.target.value))}
           />
         </EuiFormRow>
       </EuiFlexItem>
@@ -66,8 +83,8 @@ export const BorderForm = ({ value, radius, onChange, colors }) => {
       <EuiFlexItem grow={3}>
         <EuiFormRow label="Style" compressed>
           <EuiSuperSelect
-            valueOfSelected={borderStyle || 'none'}
-            options={styles.map(style => ({
+            valueOfSelected={borderStyleVal || 'none'}
+            options={Object.values(BorderStyle).map(style => ({
               value: style,
               inputDisplay: <div style={{ height: 16, border: `4px ${style}` }} />,
             }))}
@@ -101,7 +118,7 @@ export const BorderForm = ({ value, radius, onChange, colors }) => {
 
 BorderForm.propTypes = {
   value: PropTypes.string,
-  radius: PropTypes.string,
+  radius: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
   onChange: PropTypes.func.isRequired,
   colors: PropTypes.array.isRequired,
 };
