@@ -52,6 +52,10 @@ export const EntityControl = injectI18n(
         this.setState({
           selectedOptions: [{ label: fieldValue }]
         });
+      } else if (Array.isArray(selectedOptions) && fieldValue.length === 0) {
+        this.setState({
+          selectedOptions: undefined
+        });
       }
     }
 

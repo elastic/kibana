@@ -863,7 +863,6 @@ export class TimeSeriesExplorer extends React.Component {
       } else if (selectedJobIds.length > 0) {
         // normal behavior. a job ID has been loaded from the URL
         if (this.state.selectedJob !== undefined && selectedJobIds[0] !== this.state.selectedJob.job_id) {
-          console.warn('check', selectedJobIds[0], this.state.selectedJob.job_id);
           // Clear the detectorIndex, entities and forecast info.
           appStateHandler(APP_STATE_ACTION.CLEAR);
         }
