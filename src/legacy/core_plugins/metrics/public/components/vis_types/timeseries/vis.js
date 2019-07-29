@@ -33,6 +33,7 @@ import { getInterval } from '../../lib/get_interval';
 import { areChartTypesDifferent } from '../../lib/charts';
 import { createXaxisFormatter } from '../../lib/create_xaxis_formatter';
 import { isBackgroundDark } from '../../../../common/set_is_reversed';
+import { STACKED_OPTIONS } from '../../../visualizations/constants';
 
 export class TimeseriesVisualization extends Component {
   xAxisFormatter = interval => val => {
@@ -138,6 +139,14 @@ export class TimeseriesVisualization extends Component {
         this.props.getConfig
       );
 
+      if (seriesGroup.stacked === STACKED_OPTIONS.PERCENT) {
+        seriesGroup.separate_axis = true;
+        seriesGroup.axisFormatter = 'percent';
+        seriesGroup.axis_min = 0;
+        seriesGroup.axis_max = 1;
+        seriesGroup.axis_position = model.axis_position;
+      }
+
       seriesData.forEach(seriesDataRow => {
         seriesDataRow.tickFormatter = seriesGroupTickFormatter;
         seriesDataRow.groupId = seriesGroup.separate_axis ? seriesGroupId : mainAxisGroupId;
@@ -150,7 +159,10 @@ export class TimeseriesVisualization extends Component {
           id: yAxisIdGenerator(),
           groupId: seriesGroupId,
           position: seriesGroup.axis_position,
-          tickFormatter: seriesGroupTickFormatter,
+          tickFormatter:
+            seriesGroup.stacked === STACKED_OPTIONS.PERCENT
+              ? d => `${Number(d * 100).toFixed(0)} %`
+              : seriesGroupTickFormatter,
         };
 
         if (seriesGroup.axis_min != null) yaxis.min = Number(seriesGroup.axis_min);
